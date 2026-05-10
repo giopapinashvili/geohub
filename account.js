@@ -34,6 +34,7 @@
 
   function doLogout() {
     try { localStorage.removeItem(AUTH_KEY); } catch (e) {}
+    try { localStorage.setItem('geohub_signed_out', '1'); } catch (e) {}
     if (window.GeoFirebaseAuth) {
       window.GeoFirebaseAuth.logout().finally(function () {
         window.location.href = 'index.html';

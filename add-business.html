@@ -370,6 +370,8 @@
 
       <div class="form-card">
         <div class="form-section-title"><i class="fas fa-user" style="color:var(--green);margin-right:8px"></i>Create Account</div>
+        <p id="accountAlreadyIn" style="display:none;color:var(--green);font-size:0.85rem;margin-bottom:12px"><i class="fas fa-check-circle"></i> You're already logged in — no account needed.</p>
+        <div id="accountFormFields">
         <div class="form-row">
           <div class="form-group">
             <label class="form-label required">Full Name</label>
@@ -386,7 +388,8 @@
         </div>
         <div style="display:flex;align-items:flex-start;gap:10px;margin-top:8px;font-size:0.8rem;color:var(--text-secondary)">
           <input type="checkbox" style="margin-top:2px;accent-color:var(--green)">
-          <span>I agree to GeoHub's <a href="#" style="color:var(--green)">Terms of Service</a> and <a href="#" style="color:var(--green)">Privacy Policy</a></span>
+          <span>I agree to GeoHub's <a href="javascript:void(0)" style="color:var(--green)">Terms of Service</a> and <a href="javascript:void(0)" style="color:var(--green)">Privacy Policy</a></span>
+        </div>
         </div>
       </div>
 
@@ -512,15 +515,52 @@
     container.appendChild(row);
   }
 
+  // Step validation helpers
+  function clearFieldErrors() {
+    document.querySelectorAll('.biz-field-err').forEach(function(e) { e.remove(); });
+  }
+  function markFieldError(el, msg) {
+    el.style.outline = '2px solid #ef4444';
+    var err = document.createElement('div');
+    err.className = 'biz-field-err';
+    err.style.cssText = 'color:#ef4444;font-size:0.77rem;margin-top:5px;font-weight:500';
+    err.textContent = msg;
+    el.parentNode.appendChild(err);
+    el.addEventListener('input', clearFieldErrors, { once: true });
+    el.addEventListener('change', function() { el.style.outline = ''; clearFieldErrors(); }, { once: true });
+  }
+  function validateStep1() {
+    clearFieldErrors();
+    var name = document.getElementById('bizNameInput').value.trim();
+    var city = document.getElementById('citySelect').value;
+    var cat  = document.querySelector('.cat-option.selected');
+    var ok = true;
+    if (!name) { markFieldError(document.getElementById('bizNameInput'), 'Business name is required.'); ok = false; }
+    if (!cat)  {
+      var catErr = document.createElement('div');
+      catErr.className = 'biz-field-err';
+      catErr.style.cssText = 'color:#ef4444;font-size:0.77rem;margin-top:5px;font-weight:500';
+      catErr.textContent = 'Please select a category.';
+      document.getElementById('catSelector').parentNode.appendChild(catErr);
+      ok = false;
+    }
+    if (!city) { markFieldError(document.getElementById('citySelect'), 'Please select a city.'); ok = false; }
+    return ok;
+  }
+
   // Step navigation
   function nextStep(n) {
+    if (currentStep === 1 && n === 2 && !validateStep1()) return;
     document.getElementById(`step${currentStep}`).classList.remove('active');
     currentStep = n;
     document.getElementById(`step${n}`).classList.add('active');
     updateStepUI();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
-  function prevStep(n) { nextStep(n); }
+  function prevStep(n) {
+    clearFieldErrors();
+    nextStep(n);
+  }
 
   function updateStepUI() {
     const pct = (currentStep / 4) * 100;
@@ -554,35 +594,60 @@
     } catch (e) {}
   }
 
-  // Upload zone effects
+  // Hide account creation section if already logged in
+  (function() {
+    try {
+      var authRaw = localStorage.getItem('geohub_auth_user');
+      if (authRaw && JSON.parse(authRaw)) {
+        var fields = document.getElementById('accountFormFields');
+        var notice = document.getElementById('accountAlreadyIn');
+        if (fields) fields.style.display = 'none';
+        if (notice) notice.style.display = 'block';
+      }
+    } catch(e) {}
+  })();
+
+  // Upload zone — file picker + preview
   ['coverUpload','galleryUpload'].forEach(id => {
     const zone = document.getElementById(id);
     zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
     zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
-    zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); });
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); zone.classList.remove('dragover');
+      const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+      handleFiles(id, zone, files);
+    });
     zone.addEventListener('click', () => {
       const inp = document.createElement('input');
       inp.type = 'file'; inp.accept = 'image/*'; if (id === 'galleryUpload') inp.multiple = true;
-      inp.click();
+      inp.style.display = 'none';
+      document.body.appendChild(inp);
       inp.onchange = () => {
-        Array.from(inp.files).slice(0,10).forEach(file => {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            if (id === 'coverUpload') {
-              zone.innerHTML = `<img src="${e.target.result}" style="width:100%;height:120px;object-fit:cover;border-radius:var(--radius-sm)">`;
-              document.querySelector('.preview-img-ph').innerHTML = `<img src="${e.target.result}" style="width:100%;height:160px;object-fit:cover">`;
-            } else {
-              const img = document.createElement('img');
-              img.src = e.target.result;
-              img.style.cssText = 'width:80px;height:64px;object-fit:cover;border-radius:6px';
-              document.getElementById('uploadedPhotos').appendChild(img);
-            }
-          };
-          reader.readAsDataURL(file);
-        });
+        handleFiles(id, zone, Array.from(inp.files));
+        document.body.removeChild(inp);
       };
+      inp.click();
     });
   });
+
+  function handleFiles(id, zone, files) {
+    files.slice(0, 10).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        if (id === 'coverUpload') {
+          zone.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:120px;object-fit:cover;border-radius:var(--radius-sm);display:block">`;
+          const ph = document.querySelector('.preview-img-ph');
+          if (ph) ph.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:160px;object-fit:cover;display:block">`;
+        } else {
+          const img = document.createElement('img');
+          img.src = ev.target.result;
+          img.style.cssText = 'width:80px;height:64px;object-fit:cover;border-radius:6px';
+          document.getElementById('uploadedPhotos').appendChild(img);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
 </script>
 <script src="mode.js"></script>
 <script src="nav-cleanup.js"></script>

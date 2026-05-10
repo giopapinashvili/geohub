@@ -785,9 +785,9 @@ function animateBars() {
 // Real user mode: use actual XP, empty history
 if (window.GeoMode && window.GeoMode.isRealUser()) {
   const _u = window.GeoMode.getCurrentUser();
-  XP_BAL = _u.xp || 0;
+  XP_BAL = (_u.xp != null) ? _u.xp : 250;
   XP_LOG_DATA = [
-    { action: 'Created GeoHub account', icon: 'user-plus', xp: +250, time: 'Today', type: 'social' }
+    { action: 'Created GeoHub account', icon: 'user-plus', xp: +XP_BAL, time: 'Today', type: 'social' }
   ];
   // Update the hardcoded balance-sub text
   const balSub = document.querySelector('.balance-sub');

@@ -314,7 +314,8 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting…';
         window.GeoFirebaseAuth.googleLogin().then(function () {
           btn.innerHTML = '<i class="fas fa-check"></i> Signed in!';
-          setTimeout(function () { window.location.href = 'feed.html'; }, 700);
+          var hasOB = localStorage.getItem('geohub_onboarding');
+          setTimeout(function () { window.location.href = hasOB ? 'feed.html' : 'onboarding.html'; }, 700);
         }).catch(function (err) {
           btn.disabled = false;
           btn.innerHTML = GSVG + ' ' + label;
@@ -381,11 +382,23 @@
       window.GeoFirebaseAuth.onAuthChange(function (user) {
         if (settled) return;
         settled = true;
-        if (user) { window.location.href = 'feed.html'; } else { startForms(); }
+        if (user) {
+          var explicitLogout = localStorage.getItem('geohub_signed_out');
+          if (explicitLogout) {
+            localStorage.removeItem('geohub_signed_out');
+            window.GeoFirebaseAuth.logout().then(startForms).catch(startForms);
+          } else {
+            window.location.href = 'feed.html';
+          }
+        } else {
+          localStorage.removeItem('geohub_signed_out');
+          startForms();
+        }
       });
       // Safety fallback: if Firebase doesn't respond within 800ms, show forms
       setTimeout(function () { if (!settled) { settled = true; startForms(); } }, 800);
     } else {
+      try { localStorage.removeItem('geohub_signed_out'); } catch (e) {}
       startForms();
     }
   });

@@ -1340,11 +1340,20 @@
 
   function resolveProfileUser() {
     const urlParam = new URLSearchParams(location.search).get('user');
+
+    // Own profile for Firebase users: always use Firebase data, never match MOCK_USERS by email prefix
+    if (!urlParam) {
+      try {
+        const authUser = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
+        if (authUser && authUser.isFirebaseUser) return buildFirebaseProfile(authUser);
+      } catch (e) {}
+    }
+
     let param;
     if (urlParam) {
       param = urlParam;
     } else {
-      // Own profile: prefer logged-in auth user, then mock switcher fallback
+      // Demo / mock mode own profile
       try {
         const authUser = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
         if (authUser && authUser.username) param = authUser.username;
@@ -1359,13 +1368,6 @@
       user.id === decoded
     );
     if (mockMatch) return mockMatch;
-    // No mock user matched — if viewing own profile and auth user is a Firebase user, build from auth data
-    if (!urlParam) {
-      try {
-        const authUser = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
-        if (authUser && authUser.isFirebaseUser) return buildFirebaseProfile(authUser);
-      } catch (e) {}
-    }
     return MOCK_USERS[0];
   }
 
@@ -1450,7 +1452,7 @@
       <div class="place-card">
         <div class="place-card-img-wrap">
           <img class="place-card-img" src="${place.image}" alt="${place.name}">
-          <div class="checkin-badge"><i class="fas fa-check"></i> Visited</div>
+          ${!isNewUser ? '<div class="checkin-badge"><i class="fas fa-check"></i> Visited</div>' : ''}
         </div>
         <div class="place-card-body">
           <div class="place-card-name">${place.name}</div>
@@ -1587,7 +1589,7 @@
     const coverActions = document.querySelector('.cover-actions');
     if (coverActions) {
       if (ownProfile) {
-        coverActions.innerHTML = `<button class="cover-btn"><i class="fas fa-share-alt"></i> Share</button><a href="auth.html" class="cover-btn primary"><i class="fas fa-pen"></i> Edit Profile</a>`;
+        coverActions.innerHTML = `<button class="cover-btn"><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary" onclick="window.GeoAuth&&window.GeoAuth.showAccountSettings()"><i class="fas fa-pen"></i> Edit Profile</button>`;
       } else {
         coverActions.innerHTML = `<button class="cover-btn"><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary"><i class="fas fa-user-plus"></i> Follow</button>`;
       }
@@ -1596,7 +1598,7 @@
     const profileActions = document.querySelector('.profile-actions');
     if (profileActions) {
       if (ownProfile) {
-        profileActions.innerHTML = `<a href="auth.html" class="btn btn-ghost btn-sm"><i class="fas fa-pen"></i></a><a href="lifegraph.html" class="btn btn-primary btn-sm" style="text-decoration:none"><i class="fas fa-chart-line"></i> Life Graph</a>`;
+        profileActions.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="window.GeoAuth&&window.GeoAuth.showAccountSettings()"><i class="fas fa-pen"></i></button><a href="lifegraph.html" class="btn btn-primary btn-sm" style="text-decoration:none"><i class="fas fa-chart-line"></i> Life Graph</a>`;
       } else {
         profileActions.innerHTML = `<button class="btn btn-ghost btn-sm"><i class="fas fa-envelope"></i></button><button class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Follow</button><a href="lifegraph.html" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none"><i class="fas fa-chart-line"></i> Life Graph</a>`;
       }

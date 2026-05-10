@@ -1672,7 +1672,7 @@
   var user = window.GeoMode.getCurrentUser();
   var bizKey = 'geohub_business_' + (user.uid || user.id || 'anon');
   var biz = null;
-  try { biz = JSON.parse(localStorage.getItem(bizKey) || localStorage.getItem('geohub_user_business') || 'null'); } catch (e) {}
+  try { biz = JSON.parse(localStorage.getItem(bizKey) || 'null'); } catch (e) {}
 
   var nav   = document.querySelector('.dashboard-nav');
   var main  = document.querySelector('.dashboard-content');
@@ -1697,11 +1697,15 @@
   var sidebarName = document.querySelector('.dashboard-nav [style*="font-size:0.875rem;font-weight:700"]');
   if (sidebarName) sidebarName.textContent = bizName;
 
-  // Zero out the overview stats for new business
+  // Zero stats and clear mock chart/review data for new business with no activity
   if (!biz.hasActivity) {
     document.querySelectorAll('.kpi-value, .stat-value').forEach(function (el) {
       if (!isNaN(parseInt(el.textContent))) el.textContent = '0';
     });
+    var chart = document.getElementById('viewsChart');
+    if (chart) chart.innerHTML = '<div style="width:100%;text-align:center;padding:32px 0;color:var(--text-muted);font-size:0.85rem"><i class="fas fa-chart-bar" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>No views yet — activity will appear here</div>';
+    var rev = document.getElementById('dashReviews');
+    if (rev) rev.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--text-muted);font-size:0.85rem"><i class="fas fa-star" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>No reviews yet</div>';
   }
 })();
 </script>

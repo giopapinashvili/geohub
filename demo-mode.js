@@ -161,9 +161,17 @@
   };
 
   window.ghDemoClearStorage = function () {
-    try { localStorage.clear(); sessionStorage.clear(); } catch (e) {}
-    showDemoToast('Storage cleared ✓');
-    setTimeout(function () { window.location.reload(); }, 800);
+    try { localStorage.setItem('geohub_signed_out', '1'); } catch (e) {}
+    function clearAndReload() {
+      try { localStorage.clear(); sessionStorage.clear(); } catch (e) {}
+      showDemoToast('Storage cleared ✓');
+      setTimeout(function () { window.location.reload(); }, 800);
+    }
+    if (window.GeoFirebaseAuth) {
+      window.GeoFirebaseAuth.logout().then(clearAndReload).catch(clearAndReload);
+    } else {
+      clearAndReload();
+    }
   };
 
   window.ghDemoRestartOnboarding = function () {
