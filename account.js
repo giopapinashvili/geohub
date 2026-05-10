@@ -300,6 +300,17 @@
     setTimeout(function () { if (m.parentNode) m.parentNode.removeChild(m); }, 300);
   }
 
+  /* ── Clear stale mock keys for real Firebase users ──────── */
+  (function clearMockStorage() {
+    try {
+      var u = readLS(AUTH_KEY);
+      if (u && u.isFirebaseUser === true) {
+        localStorage.removeItem('geohub_mock_user');
+        localStorage.removeItem('geohub_mock_profile_user');
+      }
+    } catch (e) {}
+  })();
+
   /* ── Init ───────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
     initAuthNav();

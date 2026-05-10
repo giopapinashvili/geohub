@@ -49,7 +49,8 @@
   }
 
   function profileHref(user) {
-    return `profile.html?user=${encodeURIComponent(user?.username || 'nino.explorer')}`;
+    if (!user?.username) return 'profile.html';
+    return `profile.html?user=${encodeURIComponent(user.username)}`;
   }
 
   function itemId(el) {
