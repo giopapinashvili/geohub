@@ -1341,34 +1341,26 @@
   function resolveProfileUser() {
     const urlParam = new URLSearchParams(location.search).get('user');
 
-    // Own profile for Firebase users: always use Firebase data, never match MOCK_USERS by email prefix
+    // Own profile: real Firebase user
     if (!urlParam) {
       try {
         const authUser = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
         if (authUser && authUser.isFirebaseUser) return buildFirebaseProfile(authUser);
       } catch (e) {}
+      // Not logged in and no ?user= param → redirect to auth
+      window.location.href = 'auth.html';
+      return null;
     }
 
-    let param;
-    if (urlParam) {
-      param = urlParam;
-    } else {
-      // Demo / mock mode own profile
-      try {
-        const authUser = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
-        if (authUser && authUser.username) param = authUser.username;
-      } catch (e) {}
-      if (!param) param = localStorage.getItem('geohub_mock_profile_user') || localStorage.getItem('geohub_mock_user') || 'nino.explorer';
-    }
-    const decoded = decodeURIComponent(param);
+    // Public profile lookup via ?user= param
+    const decoded = decodeURIComponent(urlParam);
     const mockMatch = MOCK_USERS.find(user =>
       user.username === decoded ||
       slugifyProfile(user.username) === slugifyProfile(decoded) ||
       slugifyProfile(user.fullName) === slugifyProfile(decoded) ||
       user.id === decoded
     );
-    if (mockMatch) return mockMatch;
-    return MOCK_USERS[0];
+    return mockMatch || null;
   }
 
   function scoreInterestProfile(item, user) {
@@ -1517,25 +1509,9 @@
 
   function renderProfileSidebar(user) {
     const sidebar = document.querySelector('.profile-sidebar');
-    if (user.isFirebaseUser) {
-      // Hide mock switcher for real Firebase users
-      const existing = document.getElementById('profileUserSwitcherCard');
-      if (existing) existing.remove();
-    } else {
-      if (!document.getElementById('profileUserSwitcherCard')) {
-        sidebar.insertAdjacentHTML('afterbegin', `
-          <div class="profile-switcher-card" id="profileUserSwitcherCard">
-            <div class="profile-switcher-title">Mock User Switcher</div>
-            <select class="profile-switcher" id="profileUserSelect"></select>
-          </div>`);
-      }
-      document.getElementById('profileUserSelect').innerHTML = MOCK_USERS.map(candidate => `<option value="${candidate.username}" ${candidate.id === user.id ? 'selected' : ''}>${candidate.fullName} · ${candidate.accountType}</option>`).join('');
-      document.getElementById('profileUserSelect').onchange = event => {
-        localStorage.setItem('geohub_mock_profile_user', event.target.value);
-        history.replaceState(null, '', `profile.html?user=${encodeURIComponent(event.target.value)}`);
-        renderDynamicProfile(resolveProfileUser());
-      };
-    }
+    // Remove any legacy mock switcher
+    const existing = document.getElementById('profileUserSwitcherCard');
+    if (existing) existing.remove();
 
     document.querySelector('.geo-map-widget-title span').textContent = `${Math.max(1, Math.round(user.visitedPlaces / 12))} cities`;
     document.querySelector('.mini-wallet-pts').textContent = `${compactProfile(Math.round(user.xp / 10))} pts`;
@@ -1576,7 +1552,6 @@
 
   function renderDynamicProfile(user) {
     const ownProfile = isOwnProfile(user);
-    if (!ownProfile && !user.isFirebaseUser) localStorage.setItem('geohub_mock_profile_user', user.username);
     document.title = `${user.fullName} - GeoHub Profile`;
     document.querySelector('.profile-cover').classList.add('dynamic-cover');
     document.querySelector('.profile-cover').style.backgroundImage = `linear-gradient(180deg, rgba(4,5,13,0.1), rgba(4,5,13,0.72)), url('${user.coverImage}')`;
@@ -1621,7 +1596,8 @@
     setTimeout(() => window.GeoHubSocial?.refresh?.(), 0);
   }
 
-  renderDynamicProfile(resolveProfileUser());
+  const _profileUser = resolveProfileUser();
+  if (_profileUser) renderDynamicProfile(_profileUser);
 
   // Tab switching
   function switchTab(tabId) {

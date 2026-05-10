@@ -1419,7 +1419,15 @@
     return currentUser.interests.reduce((score, interest) => text.includes(interest.toLowerCase().split(' ')[0]) ? score + 1 : score, 0);
   }
 
-  function renderStories(currentUser) {
+  function renderStories(currentUser, isReal) {
+    const mySlot = isReal && currentUser
+      ? `<div class="story-item">
+          <div class="story-ring place">
+            <img class="story-avatar" src="${currentUser.avatar || ''}" alt="${currentUser.fullName || 'You'}" onerror="this.style.display='none'">
+          </div>
+          <div class="story-name">@${currentUser.username || 'you'}</div>
+        </div>`
+      : '';
     document.querySelector('.stories-inner').innerHTML = `
       <div class="story-add-wrap">
         <div class="story-add"><i class="fas fa-plus"></i></div>
@@ -1436,12 +1444,7 @@
             <div class="story-name">${user.username}</div>
           </div>`;
       }).join('')}
-      <div class="story-item">
-        <div class="story-ring place">
-          <img class="story-avatar" src="${currentUser.avatar}" alt="${currentUser.fullName}">
-        </div>
-        <div class="story-name">${currentUser.username}</div>
-      </div>`;
+      ${mySlot}`;
   }
 
   function renderComments(comments = []) {
@@ -1518,31 +1521,13 @@
       return;
     }
 
-    // Demo / mock mode: standard mock user switcher
+    // Not logged in → show Join GeoHub CTA
     sidebar.insertAdjacentHTML('afterbegin', `
-      <div class="sidebar-widget mock-switcher-card" id="mockUserSwitcherWidget">
-        <div class="sw-title">Mock User Switcher <a href="#">dev only</a></div>
-        <div class="mock-current-user">
-          <img src="${currentUser.avatar}" alt="${currentUser.fullName}">
-          <div>
-            <div class="mock-user-name">${currentUser.fullName} ${accountBadge(currentUser.accountType)}</div>
-            <div class="mock-user-meta">@${currentUser.username} · ${currentUser.city}</div>
-          </div>
-        </div>
-        <select class="mock-switcher" id="mockUserSelect">
-          ${MOCK_USERS.map(user => `<option value="${user.id}" ${user.id === currentUser.id ? 'selected' : ''}>${user.fullName} · ${user.accountType}</option>`).join('')}
-        </select>
-        <div class="mock-stats">
-          <div class="mock-stat"><strong>${compact(currentUser.xp)}</strong><span>XP</span></div>
-          <div class="mock-stat"><strong>#${currentUser.rank}</strong><span>Rank</span></div>
-          <div class="mock-stat"><strong>${currentUser.trustScore}</strong><span>Trust</span></div>
-        </div>
-        <div class="mock-user-meta" style="margin-top:10px">Interests: ${currentUser.interests.slice(0, 3).join(', ')}</div>
+      <div class="sidebar-widget" id="mockUserSwitcherWidget">
+        <div class="sw-title">Join GeoHub</div>
+        <div class="mock-user-meta" style="margin-bottom:12px;line-height:1.6">Create an account to personalize your feed, check in to places, and connect with explorers across Georgia.</div>
+        <a href="auth.html" style="display:block;text-align:center;padding:9px 0;border-radius:8px;font-size:0.875rem;text-decoration:none;font-weight:700;background:var(--gradient-brand);color:#fff"><i class="fas fa-sign-in-alt"></i> Login or Sign Up</a>
       </div>`);
-    document.getElementById('mockUserSelect').addEventListener('change', e => {
-      localStorage.setItem('geohub_mock_user', e.target.value);
-      renderMockFeed();
-    });
   }
 
   function renderTrendingExplorers() {
@@ -1600,10 +1585,15 @@
   }
 
   function renderMockFeed() {
-    const currentUser = getCurrentMockUser();
+    const mockUser = getCurrentMockUser();
+    const isReal = window.GeoMode && window.GeoMode.isRealUser();
+    const realUser = isReal ? window.GeoMode.getCurrentUser() : null;
+    const currentUser = mockUser; // feed personalization still uses mock scores
     const sortedPosts = [...MOCK_FEED_POSTS].sort((a, b) => postScoreForUser(b, currentUser) - postScoreForUser(a, currentUser));
-    document.querySelector('.feed-header-sub').textContent = `${currentUser.city} area · personalized for ${currentUser.interests.slice(0, 2).join(' + ')}`;
-    renderStories(currentUser);
+    document.querySelector('.feed-header-sub').textContent = isReal
+      ? 'Georgia · personalized for you'
+      : 'Georgia · community highlights';
+    renderStories(realUser || currentUser, isReal);
     document.getElementById('feedCards').innerHTML = sortedPosts.map(renderPostCard).join('') + `
       <div style="text-align:center;padding:10px 0 30px">
         <button class="btn btn-ghost" id="loadMoreBtn"><i class="fas fa-sync-alt"></i> Load More</button>
