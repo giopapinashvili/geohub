@@ -34,7 +34,13 @@
 
   function doLogout() {
     try { localStorage.removeItem(AUTH_KEY); } catch (e) {}
-    window.location.href = 'index.html';
+    if (window.GeoFirebaseAuth) {
+      window.GeoFirebaseAuth.logout().finally(function () {
+        window.location.href = 'index.html';
+      });
+    } else {
+      window.location.href = 'index.html';
+    }
   }
 
   // Expose globally so other scripts can call GeoAuth.*

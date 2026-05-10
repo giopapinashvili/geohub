@@ -30,6 +30,22 @@
     return users;
   }
 
+  /* ── Firebase error → friendly message ──────────────── */
+  function fbErrMsg(err) {
+    var map = {
+      'auth/email-already-in-use': 'Email already registered. Try logging in.',
+      'auth/invalid-email': 'Please enter a valid email address.',
+      'auth/wrong-password': 'Incorrect password.',
+      'auth/invalid-credential': 'Incorrect email or password.',
+      'auth/user-not-found': 'No account found with this email.',
+      'auth/weak-password': 'Password must be at least 6 characters.',
+      'auth/popup-closed-by-user': 'Google sign-in cancelled.',
+      'auth/network-request-failed': 'Network error. Check your connection.',
+      'auth/too-many-requests': 'Too many attempts. Please try again later.'
+    };
+    return map[err.code] || err.message || 'Authentication failed. Please try again.';
+  }
+
   /* ── Login ───────────────────────────────────────────── */
   function doLogin(identifier, password) {
     var id  = identifier.trim().toLowerCase();
@@ -177,25 +193,38 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       errEl.textContent = '';
-      var id  = document.getElementById('loginIdentifier').value;
+      var id  = document.getElementById('loginIdentifier').value.trim();
       var pwd = document.getElementById('loginPassword').value;
       if (!id || !pwd) { errEl.textContent = 'Please fill in both fields.'; return; }
 
       btn.disabled = true;
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in…';
 
-      setTimeout(function () {
-        var result = doLogin(id, pwd);
+      function onSuccess() {
+        btn.innerHTML = '<i class="fas fa-check"></i> Welcome back!';
+        btn.style.background = '#10b981';
+        setTimeout(function () { window.location.href = 'feed.html'; }, 700);
+      }
+      function onFail(msg) {
         btn.disabled = false;
-        if (result.ok) {
-          btn.innerHTML = '<i class="fas fa-check"></i> Welcome back!';
-          btn.style.background = '#10b981';
-          setTimeout(function () { window.location.href = 'feed.html'; }, 700);
-        } else {
-          btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
-          errEl.textContent = result.error;
-        }
-      }, 800);
+        btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+        errEl.textContent = msg;
+      }
+
+      var isEmail = id.indexOf('@') !== -1;
+      if (isEmail && window.GeoFirebaseAuth) {
+        window.GeoFirebaseAuth.signIn(id, pwd).then(function () {
+          onSuccess();
+        }).catch(function (err) {
+          var result = doLogin(id, pwd);
+          if (result.ok) { onSuccess(); } else { onFail(fbErrMsg(err)); }
+        });
+      } else {
+        setTimeout(function () {
+          var result = doLogin(id, pwd);
+          if (result.ok) { onSuccess(); } else { onFail(result.error); }
+        }, 800);
+      }
     });
   }
 
@@ -234,23 +263,63 @@
       btn.disabled = true;
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account…';
 
-      setTimeout(function () {
-        var result = doSignup({ fullName: fullName, username: username, email: email,
-                                 password: password, accountType: acctType, city: city,
-                                 interests: interests });
+      function onSignupSuccess() {
+        btn.innerHTML = '<i class="fas fa-check"></i> Account created!';
+        btn.style.background = '#10b981';
+        var hasOB = localStorage.getItem('geohub_onboarding');
+        setTimeout(function () {
+          window.location.href = hasOB ? 'feed.html' : 'onboarding.html';
+        }, 700);
+      }
+      function onSignupFail(msg) {
         btn.disabled = false;
-        if (result.ok) {
-          btn.innerHTML = '<i class="fas fa-check"></i> Account created!';
-          btn.style.background = '#10b981';
-          var hasOB = localStorage.getItem('geohub_onboarding');
-          setTimeout(function () {
-            window.location.href = hasOB ? 'feed.html' : 'onboarding.html';
-          }, 700);
-        } else {
-          btn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
-          errEl.textContent = result.error;
-        }
-      }, 900);
+        btn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+        errEl.textContent = msg;
+      }
+
+      if (window.GeoFirebaseAuth) {
+        window.GeoFirebaseAuth.signUp(email, password, fullName).then(function () {
+          onSignupSuccess();
+        }).catch(function (err) {
+          if (err.code === 'auth/email-already-in-use') {
+            onSignupFail(fbErrMsg(err)); return;
+          }
+          var result = doSignup({ fullName: fullName, username: username, email: email,
+                                   password: password, accountType: acctType, city: city,
+                                   interests: interests });
+          if (result.ok) { onSignupSuccess(); } else { onSignupFail(fbErrMsg(err)); }
+        });
+      } else {
+        setTimeout(function () {
+          var result = doSignup({ fullName: fullName, username: username, email: email,
+                                   password: password, accountType: acctType, city: city,
+                                   interests: interests });
+          if (result.ok) { onSignupSuccess(); } else { onSignupFail(result.error); }
+        }, 900);
+      }
+    });
+  }
+
+  /* ── Google login buttons ───────────────────────────── */
+  function initGoogleButtons() {
+    ['googleLoginBtn', 'googleSignupBtn'].forEach(function (id) {
+      var btn = document.getElementById(id);
+      if (!btn) return;
+      if (!window.GeoFirebaseAuth) { btn.style.display = 'none'; return; }
+      btn.addEventListener('click', function () {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting…';
+        window.GeoFirebaseAuth.googleLogin().then(function () {
+          btn.innerHTML = '<i class="fas fa-check"></i> Signed in!';
+          setTimeout(function () { window.location.href = 'feed.html'; }, 700);
+        }).catch(function (err) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fab fa-google"></i> Continue with Google';
+          var errId = (id === 'googleLoginBtn') ? 'loginError' : 'signupError';
+          var errEl = document.getElementById(errId);
+          if (errEl) errEl.textContent = fbErrMsg(err);
+        });
+      });
     });
   }
 
@@ -284,20 +353,38 @@
 
   /* ── Init ────────────────────────────────────────────── */
   document.addEventListener('DOMContentLoaded', function () {
-    // Already logged in → go to feed
+    // Already logged in via localStorage → redirect immediately
     try {
       var cur = localStorage.getItem(AUTH_KEY);
       if (cur && JSON.parse(cur)) { window.location.href = 'feed.html'; return; }
     } catch (e) {}
 
-    getUsers(); // seed mock users if first visit
-    initTabs();
-    renderDemoPicks();
-    renderSignupInterests();
-    initEyeToggles();
-    initLoginForm();
-    initSignupForm();
-    initForgotModal();
+    function startForms() {
+      getUsers();
+      initTabs();
+      renderDemoPicks();
+      renderSignupInterests();
+      initEyeToggles();
+      initLoginForm();
+      initSignupForm();
+      initForgotModal();
+      initGoogleButtons();
+    }
+
+    // If Firebase is loaded, check for existing Firebase session
+    // (covers case where localStorage was cleared but Firebase session persists)
+    if (window.GeoFirebaseAuth) {
+      var settled = false;
+      window.GeoFirebaseAuth.onAuthChange(function (user) {
+        if (settled) return;
+        settled = true;
+        if (user) { window.location.href = 'feed.html'; } else { startForms(); }
+      });
+      // Safety fallback: if Firebase doesn't respond within 800ms, show forms
+      setTimeout(function () { if (!settled) { settled = true; startForms(); } }, 800);
+    } else {
+      startForms();
+    }
   });
 
 })();
