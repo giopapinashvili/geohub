@@ -195,10 +195,10 @@ const profileUsersByUsername = Object.fromEntries(MOCK_USERS.map(user => [user.u
         ]
       : [
           ['green', '📸', `Checked in at <strong>${profilePlaces[0].name}</strong> and earned XP`, '2 hours ago'],
-          ['gold', '⭐', `Left a review based on <strong>${user.interests[0]}</strong> interests`, 'Yesterday'],
-          ['purple', '🏆', `Joined the <strong>${MOCK_CHALLENGES[0].name}</strong> challenge`, '3 days ago'],
-          ['blue', '👥', `Followed <strong>${MOCK_USERS[(user.rank + 3) % MOCK_USERS.length].fullName}</strong>`, '5 days ago']
-        ];
+          ['gold', '⭐', `Left a review based on <strong>${user.interests[0] || 'travel'}</strong> interests`, 'Yesterday'],
+          MOCK_CHALLENGES.length ? ['purple', '🏆', `Joined the <strong>${MOCK_CHALLENGES[0].name}</strong> challenge`, '3 days ago'] : null,
+          MOCK_USERS.length ? ['blue', '👥', `Followed <strong>${MOCK_USERS[(user.rank + 3) % MOCK_USERS.length].fullName}</strong>`, '5 days ago'] : null
+        ].filter(Boolean);
     document.querySelector('.activity-feed').innerHTML = `<div class="activity-feed-title">Recent Activity</div>` + activity.map(item => `
       <div class="activity-item"><div class="activity-dot ${item[0]}">${item[1]}</div><div><div class="activity-text">${item[2]}</div><div class="activity-time">${item[3]}</div></div></div>
     `).join('');

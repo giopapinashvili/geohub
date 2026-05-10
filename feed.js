@@ -149,7 +149,7 @@ const mockUserById = Object.fromEntries(MOCK_USERS.map(user => [user.id, user]))
 
     const suggestedWidget = sidebar.querySelector('.sidebar-widget:last-of-type');
     const suggested = MOCK_USERS
-      .filter(user => user.id !== currentUser.id)
+      .filter(user => user.id !== (currentUser && currentUser.id))
       .sort((a, b) => {
         const overlap = user => user.interests.filter(i => currentUser.interests.includes(i)).length;
         return overlap(b) - overlap(a) || b.trustScore - a.trustScore;
@@ -184,7 +184,7 @@ const mockUserById = Object.fromEntries(MOCK_USERS.map(user => [user.id, user]))
     const mockUser = getCurrentMockUser();
     const isReal = window.GeoMode && window.GeoMode.isRealUser();
     const realUser = isReal ? window.GeoMode.getCurrentUser() : null;
-    const currentUser = mockUser; // feed personalization still uses mock scores
+    const currentUser = mockUser || { id: null, interests: [], rank: 9999, accountType: 'Explorer' };
     const sortedPosts = [...MOCK_FEED_POSTS].sort((a, b) => postScoreForUser(b, currentUser) - postScoreForUser(a, currentUser));
     document.querySelector('.feed-header-sub').textContent = isReal
       ? 'Georgia · personalized for you'
@@ -353,10 +353,13 @@ const mockUserById = Object.fromEntries(MOCK_USERS.map(user => [user.id, user]))
   });
 
   // Load more (visual feedback)
-  document.getElementById('loadMoreBtn').addEventListener('click', function() {
-    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-    setTimeout(() => {
-      this.innerHTML = '<i class="fas fa-sync-alt"></i> Load More';
-    }, 1500);
-  });
+  const loadMoreFinal = document.getElementById('loadMoreBtn');
+  if (loadMoreFinal) {
+    loadMoreFinal.addEventListener('click', function() {
+      this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+      setTimeout(() => {
+        this.innerHTML = '<i class="fas fa-sync-alt"></i> Load More';
+      }, 1500);
+    });
+  }
   window.GeoHubSocial?.refresh?.();
