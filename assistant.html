@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Assistant — GeoHub</title>
+    <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#10b981">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GeoHub">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="mobile-nav.css">
+    <link rel="stylesheet" href="social-layer.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <nav class="navbar" id="navbar">
+      <a href="index.html" class="navbar-brand">
+        <div class="logo-icon"><i class="fas fa-location-dot"></i></div>
+        <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
+      </a>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="feed.html">Discover</a></li>
+        <li><a href="places.html">Places</a></li>
+        <li><a href="rewards.html">Rewards</a></li>
+        <li><a href="challenges.html">Challenges</a></li>
+        <li><a href="map.html">Map</a></li>
+        <li><a href="add-business.html">Add Business</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="assistant.html" class="active">Assistant</a></li>
+      </ul>
+      <div class="navbar-actions">
+        <a href="profile.html" class="btn-ghost-nav"
+          ><i class="fas fa-user-circle"></i> Profile</a
+        >
+      </div>
+      <div class="hamburger"><span></span><span></span><span></span></div>
+    </nav>
+
+    <div class="mobile-menu">
+      <a href="index.html">Home</a>
+      <a href="feed.html">Discover</a>
+      <a href="places.html">Places</a>
+      <a href="rewards.html">Rewards</a>
+      <a href="challenges.html">Challenges</a>
+      <a href="map.html">Map</a>
+      <a href="add-business.html">Add Business</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="assistant.html">Assistant</a>
+    </div>
+
+    <main class="assistant-page">
+      <section class="assistant-hero">
+        <div class="assistant-hero-card">
+          <div>
+            <span class="badge badge-gold">GeoHub AI</span>
+            <h1>AI Lifestyle Assistant</h1>
+            <p>
+              Build a smarter plan, manage budget, and optimize XP with a
+              premium GeoHub assistant experience — all in the browser with mock
+              AI and saved local plans.
+            </p>
+          </div>
+          <div class="assistant-user-preview">
+            <img
+              src="https://picsum.photos/seed/gh-ai/200/200"
+              alt="GeoHub Assistant"
+            />
+            <div class="user-details">
+              <strong>Personalized recommendations</strong>
+              <span
+                >Select any mock user to tailor suggestions, goals, and rewards.
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="assistant-panel">
+          <div class="assistant-panel-header">
+            <div>
+              <h3 class="assistant-panel-title">Selected Explorer</h3>
+              <p class="assistant-card-description">
+                Choose a profile to personalize the assistant recommendations.
+              </p>
+            </div>
+          </div>
+          <select
+            id="userSelect"
+            class="search-select"
+            style="width: 100%; margin-top: 12px"
+          >
+            <option value="">Loading explorers...</option>
+          </select>
+          <div
+            id="selectedUserBox"
+            class="assistant-note"
+            style="margin-top: 18px"
+          >
+            The assistant will refresh recommendations when you choose a mock
+            user.
+          </div>
+        </div>
+      </section>
+
+      <div class="assistant-grid">
+        <div>
+          <div class="assistant-card">
+            <div class="assistant-card-header">
+              <div>
+                <h2 class="assistant-card-title">Chat-style Planner</h2>
+                <p class="assistant-card-description">
+                  Use prompt chips, mood and interest selectors, and generate a
+                  smart plan instantly.
+                </p>
+              </div>
+              <span class="badge badge-green">No backend</span>
+            </div>
+
+            <div class="assistant-messages" id="assistantMessages"></div>
+
+            <div class="assistant-chip-row" id="promptChips"></div>
+
+            <textarea
+              id="assistantInput"
+              placeholder="Ask GeoHub Assistant for a plan..."
+              aria-label="Assistant prompt"
+            ></textarea>
+            <div class="assistant-input-row">
+              <button id="assistantSend" class="btn btn-primary">
+                <i class="fas fa-robot"></i> Generate plan
+              </button>
+              <button
+                id="savePlanBtn"
+                class="btn btn-secondary"
+                style="
+                  background: var(--bg-elevated);
+                  color: var(--text-primary);
+                  border: 1px solid var(--border);
+                "
+              >
+                Save plan
+              </button>
+            </div>
+          </div>
+
+          <div class="assistant-card">
+            <div class="assistant-card-header">
+              <div>
+                <h2 class="assistant-card-title">Mood & Interest Selector</h2>
+                <p class="assistant-card-description">
+                  Choose the assistant tone that fits your mood and interests.
+                </p>
+              </div>
+            </div>
+            <div class="assistant-card-description" style="margin-bottom: 10px">
+              Mood
+            </div>
+            <div class="assistant-selector-row" id="moodChips"></div>
+            <div
+              class="assistant-card-description"
+              style="margin-top: 16px; margin-bottom: 10px"
+            >
+              Interests
+            </div>
+            <div class="assistant-selector-row" id="interestChips"></div>
+          </div>
+        </div>
+
+        <aside class="assistant-sidebar">
+          <div class="assistant-panel">
+            <div class="assistant-panel-header">
+              <div>
+                <h3 class="assistant-panel-title">Budget Planner</h3>
+                <p class="assistant-card-description">
+                  Set a spend target and get a preview of what the assistant
+                  will plan.
+                </p>
+              </div>
+            </div>
+            <div class="assistant-summary-list">
+              <div class="assistant-summary-item">
+                <span>Budget target</span>
+                <strong id="budgetDisplay">110 GEL</strong>
+              </div>
+              <div class="assistant-summary-item">
+                <span>Suggested activity</span>
+                <strong id="budgetSuggestion">City café crawl</strong>
+              </div>
+            </div>
+            <input
+              id="budgetRange"
+              type="range"
+              min="30"
+              max="350"
+              step="10"
+              value="110"
+              style="width: 100%; margin-top: 18px"
+            />
+          </div>
+
+          <div class="assistant-panel">
+            <div class="assistant-panel-header">
+              <div>
+                <h3 class="assistant-panel-title">XP Optimization</h3>
+                <p class="assistant-card-description">
+                  Recommendations to boost GeoHub XP and rank for the selected
+                  explorer.
+                </p>
+              </div>
+            </div>
+            <div id="xpPanel"></div>
+            <div class="assistant-note" id="xpHint">
+              Select a user to see an XP plan.
+            </div>
+          </div>
+
+          <div class="assistant-panel">
+            <div class="assistant-panel-header">
+              <div>
+                <h3 class="assistant-panel-title">Saved Plans</h3>
+                <p class="assistant-card-description">
+                  Plans are stored in localStorage for this browser.
+                </p>
+              </div>
+            </div>
+            <div class="assistant-plan-list" id="savedPlans"></div>
+          </div>
+
+          <div class="assistant-panel">
+            <div class="assistant-panel-header">
+              <div>
+                <h3 class="assistant-panel-title">Recommendations</h3>
+                <p class="assistant-card-description">
+                  Based on mock user interests and activity type.
+                </p>
+              </div>
+            </div>
+            <div
+              class="assistant-recommendation-list"
+              id="recommendationCards"
+            ></div>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <script src="mock-users.js"></script>
+    <script src="config.js"></script>
+  <script src="api-client.js"></script>
+  <script src="main.js"></script>
+  <script src="account.js"></script>
+    <script src="assistant.js"></script>
+  <script src="nav-cleanup.js"></script>
+<script src="mobile-nav.js"></script>
+<script src="demo-mode.js"></script>
+</body>
+</html>

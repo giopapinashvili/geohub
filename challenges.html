@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Challenges — GeoHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#10b981">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GeoHub">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="mobile-nav.css">
+  <link rel="stylesheet" href="social-layer.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    .chal-page { max-width: 1200px; margin: 0 auto; padding: 28px 20px 80px; }
+
+    /* HERO */
+    .chal-hero {
+      background: linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(168,85,247,0.07) 50%, rgba(16,185,129,0.06) 100%);
+      border: 1px solid rgba(59,130,246,0.18);
+      border-radius: 20px; padding: 32px; margin-bottom: 22px;
+      position: relative; overflow: hidden;
+    }
+    .chal-hero::before {
+      content: ''; position: absolute; top: -80px; right: -80px;
+      width: 260px; height: 260px;
+      background: radial-gradient(circle, rgba(168,85,247,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .chal-hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 24px; position: relative; z-index: 1; }
+    .chal-hero-left {}
+    .chal-hero-greeting { font-size: 0.72rem; font-weight: 700; color: var(--blue); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+    .chal-hero-title { font-size: 1.6rem; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: 8px; }
+    .chal-hero-sub { font-size: 0.82rem; color: var(--text-muted); }
+    .chal-hero-sub strong { color: rgba(255,255,255,0.7); }
+    .weekly-ring-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; flex-shrink: 0; }
+    .weekly-ring {
+      width: 96px; height: 96px; border-radius: 50%;
+      background: conic-gradient(var(--blue) 0% 60%, rgba(255,255,255,0.06) 60% 100%);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .weekly-ring-inner {
+      width: 72px; height: 72px; border-radius: 50%; background: #0a0b15;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .weekly-ring-val { font-size: 1.3rem; font-weight: 800; color: var(--blue); line-height: 1; }
+    .weekly-ring-lbl { font-size: 0.55rem; color: var(--text-muted); text-transform: uppercase; }
+    .weekly-ring-text { font-size: 0.7rem; color: var(--text-muted); text-align: center; }
+    .chal-hero-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; position: relative; z-index: 1; }
+    .chstat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 14px; }
+    .chstat-val { font-size: 1.3rem; font-weight: 800; color: #fff; line-height: 1; }
+    .chstat-label { font-size: 0.67rem; color: var(--text-muted); margin-top: 3px; }
+
+    /* TABS */
+    .chal-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 22px; }
+    .ctab {
+      padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border);
+      background: var(--bg-card); color: var(--text-muted); font-size: 0.77rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 5px;
+    }
+    .ctab:hover { border-color: var(--blue); color: var(--blue); }
+    .ctab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .ctab .tab-count { font-size: 0.65rem; background: rgba(255,255,255,0.18); border-radius: 8px; padding: 1px 5px; }
+
+    /* FEATURED */
+    .featured-challenge {
+      background: linear-gradient(135deg, rgba(245,158,11,0.1) 0%, rgba(168,85,247,0.08) 60%, rgba(59,130,246,0.06) 100%);
+      border: 1px solid rgba(245,158,11,0.25); border-radius: 18px; padding: 28px;
+      margin-bottom: 24px; position: relative; overflow: hidden; display: grid;
+      grid-template-columns: 1fr auto; gap: 24px; align-items: center;
+    }
+    .featured-challenge::before {
+      content: 'FEATURED'; position: absolute; top: 14px; right: 14px;
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
+      background: rgba(245,158,11,0.18); color: var(--gold); padding: 3px 8px; border-radius: 8px;
+    }
+    .featured-badge { font-size: 0.7rem; font-weight: 700; color: var(--gold); margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+    .featured-title { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 8px; }
+    .featured-desc { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
+    .featured-rewards { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+    .feat-reward-pill {
+      display: flex; align-items: center; gap: 5px; padding: 5px 12px;
+      border-radius: 10px; font-size: 0.75rem; font-weight: 700;
+    }
+    .feat-reward-pill.xp { background: rgba(16,185,129,0.14); color: var(--green); }
+    .feat-reward-pill.badge { background: rgba(245,158,11,0.14); color: var(--gold); }
+    .feat-reward-pill.discount { background: rgba(168,85,247,0.14); color: #a855f7; }
+    .featured-prog-wrap { margin-bottom: 18px; }
+    .featured-prog-label { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 6px; }
+    .featured-prog-bar { height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+    .featured-prog-fill { height: 100%; background: linear-gradient(90deg, var(--gold), #fbbf24); border-radius: 4px; width: 0; transition: width 1.2s ease; }
+    .featured-tasks { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+    .feat-task { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--text-muted); }
+    .feat-task.done { color: var(--green); text-decoration: line-through; }
+    .feat-task i { font-size: 0.7rem; }
+    .feat-task.done i { color: var(--green); }
+    .feat-task:not(.done) i { color: rgba(255,255,255,0.15); }
+    .featured-action { display: flex; align-items: center; gap: 12px; }
+    .featured-participants { font-size: 0.72rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+    .btn-featured {
+      padding: 10px 22px; border-radius: 10px; border: none;
+      background: linear-gradient(135deg, var(--gold), #d97706); color: #fff;
+      font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-featured:hover { opacity: 0.88; transform: scale(1.03); }
+    .featured-visual {
+      font-size: 5rem; line-height: 1; text-align: center; filter: drop-shadow(0 0 24px rgba(245,158,11,0.3));
+    }
+
+    /* CHALLENGE CARDS */
+    .section-label { font-size: 0.92rem; font-weight: 700; color: #fff; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .section-label i { color: var(--blue); }
+    .section-count { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; margin-left: auto; }
+    .challenges-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .ccard {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 18px;
+      display: flex; flex-direction: column; gap: 10px; transition: border-color 0.2s, transform 0.18s;
+      animation: fadeUp 0.35s ease both;
+    }
+    .ccard:hover { border-color: rgba(59,130,246,0.3); transform: translateY(-2px); }
+    .ccard.completed-card { opacity: 0.72; border-color: rgba(16,185,129,0.2); }
+    .ccard.completed-card:hover { opacity: 1; }
+    .ccard.inprogress-card { border-color: rgba(59,130,246,0.2); }
+    .ccard-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    .ccard-badges { display: flex; gap: 5px; flex-wrap: wrap; }
+    .type-badge { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 7px; border-radius: 6px; }
+    .type-badge.daily    { background: rgba(245,158,11,0.15); color: var(--gold); }
+    .type-badge.weekly   { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .type-badge.city     { background: rgba(16,185,129,0.15); color: var(--green); }
+    .type-badge.business { background: rgba(168,85,247,0.15); color: #a855f7; }
+    .type-badge.group    { background: rgba(239,68,68,0.13); color: #ef4444; }
+    .type-badge.patriot  { background: rgba(249,115,22,0.15); color: #f97316; }
+    .type-badge.completed{ background: rgba(16,185,129,0.13); color: var(--green); }
+    .diff-badge { font-size: 0.58rem; font-weight: 700; padding: 2px 6px; border-radius: 5px; }
+    .diff-badge.easy   { background: rgba(16,185,129,0.12); color: var(--green); }
+    .diff-badge.medium { background: rgba(245,158,11,0.12); color: var(--gold); }
+    .diff-badge.hard   { background: rgba(239,68,68,0.12); color: #ef4444; }
+    .ccard-title { font-size: 0.92rem; font-weight: 700; color: #fff; line-height: 1.3; }
+    .ccard-desc { font-size: 0.75rem; color: var(--text-muted); line-height: 1.45; }
+    .ccard-xp { display: flex; align-items: center; gap: 5px; font-size: 0.78rem; font-weight: 700; color: var(--green); }
+    .ccard-deadline { font-size: 0.68rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+    .deadline-urgent { color: #ef4444; }
+    .ccard-tasks { display: flex; flex-direction: column; gap: 4px; }
+    .ctask { font-size: 0.72rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+    .ctask.done { color: var(--green); }
+    .ctask i { font-size: 0.62rem; }
+    .ctask.done i { color: var(--green); }
+    .ctask:not(.done) i { color: rgba(255,255,255,0.12); }
+    .tasks-more { font-size: 0.68rem; color: var(--text-muted); font-style: italic; }
+    .ccard-prog-bar { height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+    .ccard-prog-fill { height: 100%; border-radius: 3px; width: 0; transition: width 1s ease; }
+    .ccard-prog-fill.daily   { background: linear-gradient(90deg, var(--gold), #fbbf24); }
+    .ccard-prog-fill.weekly  { background: linear-gradient(90deg, var(--blue), #60a5fa); }
+    .ccard-prog-fill.city    { background: linear-gradient(90deg, var(--green), #34d399); }
+    .ccard-prog-fill.business{ background: linear-gradient(90deg, #a855f7, #c084fc); }
+    .ccard-prog-fill.group   { background: linear-gradient(90deg, #ef4444, #f87171); }
+    .ccard-prog-fill.patriot { background: linear-gradient(90deg, #f97316, #fb923c); }
+    .ccard-prog-fill.completed{ background: linear-gradient(90deg, var(--green), #34d399); }
+    .ccard-prog-text { font-size: 0.67rem; color: var(--text-muted); margin-top: 3px; display: flex; justify-content: space-between; }
+    .ccard-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 2px; }
+    .ccard-participants { font-size: 0.67rem; color: var(--text-muted); display: flex; align-items: center; gap: 3px; }
+    .ccard-btn {
+      padding: 7px 14px; border-radius: 9px; border: none; font-size: 0.73rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 5px; white-space: nowrap;
+    }
+    .ccard-btn.start { background: rgba(59,130,246,0.14); color: var(--blue); border: 1px solid rgba(59,130,246,0.25); }
+    .ccard-btn.start:hover { background: var(--blue); color: #fff; }
+    .ccard-btn.inprog { background: rgba(16,185,129,0.14); color: var(--green); border: 1px solid rgba(16,185,129,0.25); }
+    .ccard-btn.inprog:hover { background: var(--green); color: #fff; }
+    .ccard-btn.claim { background: linear-gradient(135deg, var(--gold), #d97706); color: #fff; }
+    .ccard-btn.claim:hover { opacity: 0.85; }
+    .ccard-btn.claimed { background: rgba(255,255,255,0.04); color: var(--text-muted); border: 1px solid var(--border); cursor: default; }
+    .completed-stamp {
+      position: absolute; top: 12px; right: 12px; font-size: 0.6rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 7px;
+      border-radius: 6px; background: rgba(16,185,129,0.15); color: var(--green);
+    }
+
+    /* PATRIOT */
+    .patriot-section { margin: 32px 0; }
+    .patriot-header {
+      background: linear-gradient(135deg, rgba(249,115,22,0.1) 0%, rgba(239,68,68,0.06) 100%);
+      border: 1px solid rgba(249,115,22,0.2); border-radius: 16px; padding: 18px 22px;
+      display: flex; align-items: center; gap: 16px; margin-bottom: 16px;
+    }
+    .patriot-icon { font-size: 2rem; }
+    .patriot-title { font-size: 1rem; font-weight: 700; color: #fff; }
+    .patriot-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+    .verify-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+    .vbadge { font-size: 0.65rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; display: flex; align-items: center; gap: 3px; }
+    .vbadge.gps    { background: rgba(59,130,246,0.15); color: var(--blue); }
+    .vbadge.camera { background: rgba(168,85,247,0.15); color: #a855f7; }
+    .vbadge.ai     { background: rgba(16,185,129,0.15); color: var(--green); }
+
+    /* GROUP */
+    .group-section { margin: 32px 0; }
+    .group-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .group-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .group-card-top { display: flex; align-items: center; justify-content: space-between; }
+    .group-card-title { font-size: 0.97rem; font-weight: 700; color: #fff; }
+    .group-card-desc { font-size: 0.75rem; color: var(--text-muted); line-height: 1.45; }
+    .group-avatars { display: flex; align-items: center; gap: -6px; }
+    .gavatar {
+      width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--bg-card);
+      background: var(--bg-elevated); display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; font-weight: 700; color: #fff; margin-left: -6px;
+    }
+    .gavatar:first-child { margin-left: 0; }
+    .gavatar.g1 { background: linear-gradient(135deg, #10b981, #059669); }
+    .gavatar.g2 { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .gavatar.g3 { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+    .gavatar.g4 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .gavatar-more { background: rgba(255,255,255,0.1); color: var(--text-muted); font-size: 0.58rem; }
+    .group-bonus { font-size: 0.72rem; color: var(--green); font-weight: 600; }
+    .group-actions { display: flex; gap: 8px; }
+    .btn-invite {
+      padding: 7px 14px; border-radius: 9px; border: 1px solid var(--border);
+      background: transparent; color: var(--text-muted); font-size: 0.72rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .btn-invite:hover { border-color: var(--blue); color: var(--blue); }
+    .btn-join-group {
+      padding: 7px 14px; border-radius: 9px; border: none;
+      background: rgba(59,130,246,0.14); color: var(--blue); font-size: 0.72rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
+      border: 1px solid rgba(59,130,246,0.25);
+    }
+    .btn-join-group:hover { background: var(--blue); color: #fff; }
+
+    /* COMPLETED */
+    .completed-section { margin: 32px 0; }
+    .badges-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+    .badge-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 14px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
+      transition: border-color 0.2s;
+    }
+    .badge-card:hover { border-color: rgba(16,185,129,0.3); }
+    .badge-emoji { font-size: 2rem; }
+    .badge-name { font-size: 0.7rem; font-weight: 700; color: #fff; }
+    .badge-date { font-size: 0.62rem; color: var(--text-muted); }
+    .badge-xp { font-size: 0.65rem; color: var(--green); font-weight: 600; }
+
+    /* MODALS */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .chal-modal {
+      background: var(--bg-elevated); border: 1px solid rgba(59,130,246,0.2); border-radius: 20px;
+      padding: 28px; max-width: 400px; width: 100%;
+      transform: translateY(16px) scale(0.97); transition: transform 0.28s ease;
+    }
+    .modal-overlay.open .chal-modal { transform: translateY(0) scale(1); }
+    .modal-hd { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; }
+    .modal-close-btn {
+      width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border);
+      background: transparent; color: var(--text-muted); cursor: pointer; font-size: 0.8rem;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .modal-big-icon { font-size: 3rem; text-align: center; margin-bottom: 12px; }
+    .modal-title { font-size: 1.15rem; font-weight: 700; color: #fff; }
+    .modal-sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+    .modal-rewards { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+    .modal-reward-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; background: rgba(255,255,255,0.04); border-radius: 10px;
+    }
+    .modal-reward-label { font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+    .modal-reward-val { font-size: 0.85rem; font-weight: 700; color: var(--green); }
+    .modal-cta {
+      width: 100%; padding: 12px; border-radius: 12px; border: none;
+      background: linear-gradient(135deg, var(--green), #059669); color: #fff;
+      font-size: 0.88rem; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 6px;
+    }
+    .modal-cta:hover { opacity: 0.88; }
+    .invite-form { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
+    .invite-input {
+      width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04); color: #fff; font-size: 0.82rem; outline: none;
+    }
+    .invite-input::placeholder { color: var(--text-muted); }
+    .invite-input:focus { border-color: var(--blue); }
+    .invite-friends-list { display: flex; flex-direction: column; gap: 8px; }
+    .invite-friend-row {
+      display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+      background: rgba(255,255,255,0.04); border-radius: 10px;
+    }
+    .invite-friend-avatar {
+      width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .invite-friend-name { font-size: 0.8rem; font-weight: 600; color: #fff; flex: 1; }
+    .invite-btn-small {
+      padding: 4px 10px; border-radius: 7px; border: 1px solid rgba(59,130,246,0.3);
+      background: rgba(59,130,246,0.1); color: var(--blue); font-size: 0.68rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .invite-btn-small:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .invite-btn-small.invited { background: rgba(16,185,129,0.1); color: var(--green); border-color: rgba(16,185,129,0.3); cursor: default; }
+
+    /* NO RESULTS */
+    .no-chal { text-align: center; padding: 48px 20px; color: var(--text-muted); font-size: 0.85rem; grid-column: 1/-1; }
+
+    /* RESPONSIVE */
+    @media (max-width: 1060px) { .challenges-grid { grid-template-columns: repeat(2, 1fr); } .badges-grid { grid-template-columns: repeat(4, 1fr); } }
+    @media (max-width: 800px) {
+      .chal-hero-stats { grid-template-columns: repeat(2, 1fr); }
+      .chal-hero-top { flex-direction: column; }
+      .weekly-ring-wrap { flex-direction: row; }
+      .challenges-grid { grid-template-columns: 1fr; }
+      .group-grid { grid-template-columns: 1fr; }
+      .badges-grid { grid-template-columns: repeat(3, 1fr); }
+      .featured-challenge { grid-template-columns: 1fr; }
+      .featured-visual { display: none; }
+    }
+    @media (max-width: 520px) { .badges-grid { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body style="margin-top:68px">
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="navbar-brand">
+    <div class="logo-icon">🌍</div>
+    <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
+  </a>
+  <ul class="navbar-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="feed.html">Discover</a></li>
+    <li><a href="places.html">Places</a></li>
+    <li><a href="rewards.html">Rewards</a></li>
+    <li><a href="challenges.html" class="active">Challenges</a></li>
+    <li><a href="map.html">Map</a></li>
+    <li><a href="add-business.html">Add Business</a></li>
+    <li><a href="creators.html">Creators</a></li>
+    <li><a href="dashboard.html">Dashboard</a></li>
+  </ul>
+  <div class="navbar-actions">
+    <a href="profile.html" class="btn-ghost-nav"><i class="fas fa-user-circle"></i> Profile</a>
+    <a href="#" class="btn btn-primary btn-sm">Sign Up</a>
+  </div>
+  <button class="hamburger"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html">Home</a><a href="feed.html">Discover</a><a href="places.html">Places</a>
+  <a href="rewards.html">Rewards</a><a href="challenges.html">Challenges</a>
+  <a href="map.html">Map</a><a href="add-business.html">Add Business</a><a href="creators.html">Creators</a><a href="dashboard.html">Dashboard</a>
+</div>
+
+<div class="chal-page">
+
+  <!-- HERO -->
+  <div class="chal-hero">
+    <div class="chal-hero-top">
+      <div class="chal-hero-left">
+        <div class="chal-hero-greeting"><i class="fas fa-bolt"></i> Mission Control</div>
+        <div class="chal-hero-title">Your Challenges,<br>Nino.</div>
+        <div class="chal-hero-sub"><strong>3 active</strong> missions · complete them to earn XP &amp; unlock rewards</div>
+      </div>
+      <div class="weekly-ring-wrap">
+        <div class="weekly-ring">
+          <div class="weekly-ring-inner">
+            <div class="weekly-ring-val">3</div>
+            <div class="weekly-ring-lbl">of 5</div>
+          </div>
+        </div>
+        <div class="weekly-ring-text">Weekly<br>Progress</div>
+      </div>
+    </div>
+    <div class="chal-hero-stats">
+      <div class="chstat">
+        <div class="chstat-val" style="color:var(--blue)">3</div>
+        <div class="chstat-label">Active Missions</div>
+      </div>
+      <div class="chstat">
+        <div class="chstat-val">29</div>
+        <div class="chstat-label">Total Completed</div>
+      </div>
+      <div class="chstat">
+        <div class="chstat-val" style="color:var(--green)">2,840</div>
+        <div class="chstat-label">XP from Challenges</div>
+      </div>
+      <div class="chstat">
+        <div class="chstat-val"><i class="fas fa-fire" style="color:#ef4444"></i> 12</div>
+        <div class="chstat-label">Day Streak</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="chal-tabs">
+    <button class="ctab active" data-tab="all" onclick="switchTab('all')">All <span class="tab-count">14</span></button>
+    <button class="ctab" data-tab="daily" onclick="switchTab('daily')"><i class="fas fa-sun"></i> Daily <span class="tab-count">2</span></button>
+    <button class="ctab" data-tab="weekly" onclick="switchTab('weekly')"><i class="fas fa-calendar-week"></i> Weekly <span class="tab-count">3</span></button>
+    <button class="ctab" data-tab="city" onclick="switchTab('city')"><i class="fas fa-city"></i> City <span class="tab-count">2</span></button>
+    <button class="ctab" data-tab="business" onclick="switchTab('business')"><i class="fas fa-store"></i> Business <span class="tab-count">2</span></button>
+    <button class="ctab" data-tab="group" onclick="switchTab('group')"><i class="fas fa-users"></i> Group <span class="tab-count">2</span></button>
+    <button class="ctab" data-tab="patriot" onclick="switchTab('patriot')"><i class="fas fa-flag"></i> Patriot <span class="tab-count">3</span></button>
+    <button class="ctab" data-tab="completed" onclick="switchTab('completed')"><i class="fas fa-check-circle"></i> Completed <span class="tab-count">3</span></button>
+  </div>
+
+  <!-- FEATURED CHALLENGE -->
+  <div class="featured-challenge" id="featuredSection">
+    <div>
+      <div class="featured-badge"><i class="fas fa-star"></i> Featured This Week</div>
+      <div class="featured-title">Weekend Explorer Challenge</div>
+      <div class="featured-desc">Explore the hidden corners of Tbilisi — visit 5 iconic districts, check in with camera proof, and earn the ultimate Georgian Explorer badge.</div>
+      <div class="featured-rewards">
+        <span class="feat-reward-pill xp"><i class="fas fa-coins"></i> +500 XP</span>
+        <span class="feat-reward-pill badge"><i class="fas fa-award"></i> Gold Explorer Badge</span>
+        <span class="feat-reward-pill discount"><i class="fas fa-tag"></i> 20% Partner Discount</span>
+      </div>
+      <div class="featured-prog-wrap">
+        <div class="featured-prog-label">
+          <span>Progress — 3 of 5 districts</span>
+          <span style="color:#fff">60%</span>
+        </div>
+        <div class="featured-prog-bar"><div class="featured-prog-fill" data-pct="60" id="featFill"></div></div>
+      </div>
+      <div class="featured-tasks">
+        <div class="feat-task done"><i class="fas fa-check-circle"></i> Checked in: Old Town Tbilisi</div>
+        <div class="feat-task done"><i class="fas fa-check-circle"></i> Checked in: Vera District</div>
+        <div class="feat-task done"><i class="fas fa-check-circle"></i> Checked in: Vake Park</div>
+        <div class="feat-task"><i class="fas fa-circle"></i> Check in: Saburtalo District</div>
+        <div class="feat-task"><i class="fas fa-circle"></i> Check in: Isani / Samgori</div>
+      </div>
+      <div class="featured-action">
+        <button class="btn-featured" onclick="goCheckin()"><i class="fas fa-map-marker-alt"></i> Continue Challenge</button>
+        <div class="featured-participants"><i class="fas fa-users"></i> 4,218 explorers active</div>
+      </div>
+    </div>
+    <div class="featured-visual">🏆</div>
+  </div>
+
+  <!-- CHALLENGES GRID -->
+  <div id="mainSection">
+    <div class="section-label" id="gridLabel"><i class="fas fa-bolt"></i> All Challenges <span class="section-count" id="gridCount"></span></div>
+    <div class="challenges-grid" id="challengesGrid"></div>
+  </div>
+
+  <!-- PATRIOT MISSIONS -->
+  <div class="patriot-section" id="patriotSection">
+    <div class="patriot-header">
+      <div class="patriot-icon">🇬🇪</div>
+      <div style="flex:1">
+        <div class="patriot-title">Patriot Missions</div>
+        <div class="patriot-sub">Help improve Georgia — report, clean, and contribute. Verified by GPS + camera + AI.</div>
+      </div>
+      <a href="patriot.html" style="padding:8px 16px;border-radius:9999px;background:linear-gradient(135deg,#10b981,#3b82f6);color:#fff;font-size:0.75rem;font-weight:800;text-decoration:none;display:flex;align-items:center;gap:5px;flex-shrink:0"><i class="fas fa-map"></i> Mission Board</a>
+    </div>
+    <div class="challenges-grid" id="patriotGrid"></div>
+  </div>
+
+  <!-- GROUP CHALLENGES -->
+  <div class="group-section" id="groupSection">
+    <div class="section-label"><i class="fas fa-users"></i> Group Challenges</div>
+    <div class="group-grid" id="groupGrid"></div>
+  </div>
+
+  <!-- COMPLETED BADGES -->
+  <div class="completed-section" id="completedSection">
+    <div class="section-label"><i class="fas fa-award"></i> Earned Badges</div>
+    <div class="badges-grid" id="badgesGrid"></div>
+  </div>
+
+</div><!-- /chal-page -->
+
+<!-- CLAIM MODAL -->
+<div class="modal-overlay" id="claimModal" onclick="handleOverlay(event,'claimModal')">
+  <div class="chal-modal">
+    <div class="modal-hd">
+      <div>
+        <div class="modal-title" id="claimModalTitle">Challenge Complete!</div>
+        <div class="modal-sub" id="claimModalSub">Claim your earned rewards</div>
+      </div>
+      <button class="modal-close-btn" onclick="closeModal('claimModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-big-icon" id="claimModalIcon">🎉</div>
+    <div class="modal-rewards" id="claimModalRewards"></div>
+    <button class="modal-cta" onclick="confirmClaim()"><i class="fas fa-gift"></i> Claim Rewards</button>
+  </div>
+</div>
+
+<!-- INVITE MODAL -->
+<div class="modal-overlay" id="inviteModal" onclick="handleOverlay(event,'inviteModal')">
+  <div class="chal-modal">
+    <div class="modal-hd">
+      <div>
+        <div class="modal-title">Invite Friends</div>
+        <div class="modal-sub">Earn +50 XP bonus for each friend who joins</div>
+      </div>
+      <button class="modal-close-btn" onclick="closeModal('inviteModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="invite-form">
+      <input class="invite-input" type="text" placeholder="Search friends by name or @handle…">
+    </div>
+    <div class="invite-friends-list">
+      <div class="invite-friend-row">
+        <div class="invite-friend-avatar g1">AN</div>
+        <div class="invite-friend-name">Ana Beridze</div>
+        <button class="invite-btn-small" onclick="inviteFriend(this)">Invite</button>
+      </div>
+      <div class="invite-friend-row">
+        <div class="invite-friend-avatar g2">GI</div>
+        <div class="invite-friend-name">Giorgi Kapanadze</div>
+        <button class="invite-btn-small" onclick="inviteFriend(this)">Invite</button>
+      </div>
+      <div class="invite-friend-row">
+        <div class="invite-friend-avatar g3">MA</div>
+        <div class="invite-friend-name">Mariam Tsiklauri</div>
+        <button class="invite-btn-small invited" disabled>Invited ✓</button>
+      </div>
+      <div class="invite-friend-row">
+        <div class="invite-friend-avatar g4">TE</div>
+        <div class="invite-friend-name">Temo Kvachantiradze</div>
+        <button class="invite-btn-small" onclick="inviteFriend(this)">Invite</button>
+      </div>
+    </div>
+    <button class="modal-cta" style="margin-top:16px;background:linear-gradient(135deg,var(--blue),#2563eb)" onclick="closeModal('inviteModal')">
+      <i class="fas fa-share"></i> Share Challenge Link
+    </button>
+  </div>
+</div>
+
+<script src="mock-users.js"></script>
+<script src="mock-interactions.js"></script>
+<script src="mock-notifications.js"></script>
+<script src="config.js"></script>
+  <script src="api-client.js"></script>
+  <script src="main.js"></script>
+  <script src="account.js"></script>
+<script>
+const CHALLENGES = [
+  // DAILY
+  { id:1, type:'daily', title:'Morning Explorer', desc:'Check in to any place before noon today', diff:'easy', xp:50, deadline:'Today', tasks:['Check in to 1 place before 12:00'], progress:0, total:1, participants:234, status:'available' },
+  { id:2, type:'daily', title:'Photo Journalist', desc:'Upload 3 camera-proof check-ins today', diff:'medium', xp:80, deadline:'Today', tasks:['Camera check-in 1','Camera check-in 2','Camera check-in 3'], progress:1, total:3, participants:156, status:'inprogress' },
+
+  // WEEKLY
+  { id:3, type:'weekly', title:'Café Circuit', desc:'Visit 5 different cafés this week', diff:'medium', xp:200, deadline:'5 days', tasks:['Entree Coffee','Fabrika Café','Lolita Coffee','Coffee Lab','Fifth Café'], progress:3, total:5, participants:891, status:'inprogress' },
+  { id:4, type:'weekly', title:'Review Master', desc:'Write 3 detailed business reviews', diff:'easy', xp:120, deadline:'5 days', tasks:['Review business 1','Review business 2','Review business 3'], progress:0, total:3, participants:445, status:'available' },
+  { id:5, type:'weekly', title:'Weekend Warrior', desc:'Check in to 3 places over the weekend', diff:'easy', xp:200, deadline:'2 days', tasks:['Place 1','Place 2','Place 3'], progress:2, total:3, participants:1203, status:'inprogress' },
+
+  // CITY
+  { id:6, type:'city', title:'Old Tbilisi Quest', desc:'Visit 7 iconic spots in Old Town Tbilisi', diff:'hard', xp:500, deadline:'30 days', tasks:['Narikala Fortress','Anchiskhati Basilica','Abanotubani Baths','Metekhi Church','Shardeni Street','Dry Bridge Market','Freedom Square'], progress:3, total:7, participants:2341, status:'inprogress' },
+  { id:7, type:'city', title:'Batumi Explorer', desc:'Discover 5 hidden gems in Batumi', diff:'medium', xp:300, deadline:'14 days', tasks:['Piazza Square','Alphabet Tower','Europa Square','Batumi Boulevard','Gonio Fortress'], progress:0, total:5, participants:678, status:'available' },
+
+  // BUSINESS
+  { id:8, type:'business', title:'Coffee Connoisseur', desc:'Try coffee at 4 partner cafés and rate each', diff:'easy', xp:150, deadline:'7 days', tasks:['Entree Coffee ★★★★★','Fabrika Café ★★★★★','Lolita Coffee ★★★★★','Coffee Lab ★★★★★'], progress:2, total:4, participants:1567, status:'inprogress' },
+  { id:9, type:'business', title:'Foodie Circuit', desc:'Dine at 3 partner restaurants', diff:'medium', xp:250, deadline:'10 days', tasks:['Shavi Lomi','Barbarestan','Azarphesha'], progress:0, total:3, participants:892, status:'available' },
+
+  // PATRIOT
+  { id:10, type:'patriot', title:'Park Guardian', desc:'Visit a public park and report its condition with photos', diff:'medium', xp:200, deadline:'Ongoing', tasks:['Arrive at public park','Take 3 condition photos','Submit GPS-verified report'], progress:0, total:3, participants:1089, status:'available', requires:['GPS','Camera','AI'] },
+  { id:11, type:'patriot', title:'Street Hero', desc:'Find and document broken infrastructure in your area', diff:'easy', xp:150, deadline:'Ongoing', tasks:['Locate infrastructure issue','Photo document the problem','Submit location report'], progress:1, total:3, participants:789, status:'inprogress', requires:['GPS','Camera'] },
+  { id:12, type:'patriot', title:'Community Builder', desc:'Help organize a neighborhood clean-up activity', diff:'hard', xp:500, deadline:'Monthly', tasks:['Register clean-up event','Recruit 5 participants','Complete the clean-up','Submit AI-verified photos'], progress:0, total:4, participants:234, status:'available', requires:['GPS','Camera','AI'] },
+
+  // GROUP
+  { id:13, type:'group', title:'Squad Goals', desc:'Check in to the same place simultaneously with 3 friends', diff:'medium', xp:300, deadline:'7 days', tasks:['Invite 3 friends','Arrive together','Simultaneous check-in','Tag all in post'], progress:1, total:4, participants:456, status:'inprogress' },
+  { id:14, type:'group', title:'City Rangers', desc:'Form a team of 5 and explore 5 different districts together', diff:'hard', xp:600, deadline:'14 days', tasks:['Form group of 5','District 1 check-in','District 2 check-in','District 3 check-in','Complete all 5'], progress:0, total:5, participants:234, status:'available' },
+
+  // COMPLETED
+  { id:15, type:'completed', title:'First Explorer', desc:'Complete your very first check-in', diff:'easy', xp:50, deadline:'Completed', tasks:['First check-in ever'], progress:1, total:1, participants:18400, status:'completed', emoji:'🗺️', completedDate:'Apr 10' },
+  { id:16, type:'completed', title:'Social Butterfly', desc:'Tag 3 friends in check-ins', diff:'easy', xp:120, deadline:'Completed', tasks:['Tag friend 1','Tag friend 2','Tag friend 3'], progress:3, total:3, participants:8900, status:'completed', emoji:'🦋', completedDate:'Apr 22' },
+  { id:17, type:'completed', title:'Coffee Lover', desc:'Visit 3 different cafés', diff:'easy', xp:100, deadline:'Completed', tasks:['Café 1','Café 2','Café 3'], progress:3, total:3, participants:12300, status:'completed', emoji:'☕', completedDate:'May 1' },
+];
+
+let currentTab = 'all';
+let cardStates = {}; // track started/claimed per card
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.ctab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  renderAll();
+}
+
+function renderAll() {
+  const tab = currentTab;
+  const showFeatured = (tab === 'all' || tab === 'weekly');
+  const showPatriot  = (tab === 'all' || tab === 'patriot');
+  const showGroup    = (tab === 'all' || tab === 'group');
+  const showCompleted= (tab === 'all' || tab === 'completed');
+
+  document.getElementById('featuredSection').style.display = showFeatured ? '' : 'none';
+  document.getElementById('patriotSection').style.display  = showPatriot  ? '' : 'none';
+  document.getElementById('groupSection').style.display    = showGroup    ? '' : 'none';
+  document.getElementById('completedSection').style.display= showCompleted ? '' : 'none';
+
+  let list;
+  if (tab === 'all') list = CHALLENGES.filter(c => c.type !== 'completed' && c.type !== 'patriot' && c.type !== 'group');
+  else if (tab === 'completed') list = CHALLENGES.filter(c => c.type === 'completed');
+  else list = CHALLENGES.filter(c => c.type === tab);
+
+  document.getElementById('gridLabel').innerHTML = `<i class="fas fa-bolt"></i> ${tabLabel(tab)} <span class="section-count" id="gridCount">(${list.length})</span>`;
+  document.getElementById('challengesGrid').innerHTML = list.length
+    ? list.map(renderCard).join('')
+    : `<div class="no-chal"><i class="fas fa-check-circle" style="font-size:2rem;opacity:.3;display:block;margin-bottom:12px"></i>No challenges in this category yet</div>`;
+
+  if (showPatriot) {
+    const patriot = CHALLENGES.filter(c => c.type === 'patriot');
+    document.getElementById('patriotGrid').innerHTML = patriot.map(renderCard).join('');
+  }
+  if (showGroup) renderGroupCards();
+  if (showCompleted) renderBadges();
+
+  setTimeout(animateBars, 80);
+}
+
+function tabLabel(tab) {
+  const labels = { all:'All Challenges', daily:'Daily Missions', weekly:'Weekly Challenges', city:'City Quests', business:'Business Missions', group:'Group Challenges', patriot:'Patriot Missions', completed:'Completed' };
+  return labels[tab] || tab;
+}
+
+function renderCard(c) {
+  const state = cardStates[c.id] || c.status;
+  const prog = c.progress;
+  const pct = Math.round((prog / c.total) * 100);
+  const tasks = c.tasks.slice(0, 3).map((t, i) =>
+    `<div class="ctask${i < prog ? ' done' : ''}"><i class="fas fa-${i < prog ? 'check-circle' : 'circle'}"></i>${t}</div>`
+  ).join('');
+  const moreCount = c.tasks.length - 3;
+
+  const verifyBadges = c.requires
+    ? c.requires.map(r => `<span class="vbadge ${r.toLowerCase()}"><i class="fas fa-${r==='GPS'?'map-marker-alt':r==='Camera'?'camera':'robot'}"></i>${r}</span>`).join('')
+    : '';
+
+  let btnHtml;
+  if (c.type === 'completed') {
+    btnHtml = state === 'claimed'
+      ? `<button class="ccard-btn claimed" disabled><i class="fas fa-check"></i> Claimed</button>`
+      : `<button class="ccard-btn claim" onclick="openClaim(${c.id})"><i class="fas fa-gift"></i> Claim Badge</button>`;
+  } else if (state === 'inprogress') {
+    btnHtml = `<button class="ccard-btn inprog" onclick="continueChallenge(${c.id})"><i class="fas fa-play"></i> Continue</button>`;
+  } else if (state === 'started') {
+    btnHtml = `<button class="ccard-btn inprog" onclick="continueChallenge(${c.id})"><i class="fas fa-play"></i> In Progress</button>`;
+  } else {
+    btnHtml = `<button class="ccard-btn start" onclick="startChallenge(${c.id})"><i class="fas fa-bolt"></i> Start</button>`;
+  }
+
+  const deadlineClass = c.deadline === 'Today' || c.deadline === '2 days' ? ' deadline-urgent' : '';
+
+  return `<div class="ccard ${state==='inprogress'||state==='started'?'inprogress-card':state==='completed'?'completed-card':''}" id="ccard-${c.id}" style="position:relative">
+    <div class="ccard-top">
+      <div class="ccard-badges">
+        <span class="type-badge ${c.type}">${c.type}</span>
+        <span class="diff-badge ${c.diff}">${c.diff}</span>
+      </div>
+    </div>
+    <div class="ccard-title">${c.title}</div>
+    <div class="ccard-desc">${c.desc}</div>
+    ${verifyBadges ? `<div class="verify-badges">${verifyBadges}</div>` : ''}
+    <div class="ccard-xp"><i class="fas fa-coins"></i> +${c.xp} XP</div>
+    <div class="ccard-tasks">${tasks}${moreCount > 0 ? `<div class="tasks-more">+${moreCount} more tasks</div>` : ''}</div>
+    <div class="ccard-prog-bar"><div class="ccard-prog-fill ${c.type}" data-pct="${pct}" style="width:0"></div></div>
+    <div class="ccard-prog-text"><span>${prog} of ${c.total} complete</span><span>${pct}%</span></div>
+    <div class="ccard-bottom">
+      <div class="ccard-participants"><i class="fas fa-users"></i> ${c.participants.toLocaleString()}</div>
+      <div class="ccard-deadline${deadlineClass}"><i class="fas fa-clock"></i> ${c.deadline}</div>
+      ${btnHtml}
+    </div>
+  </div>`;
+}
+
+function renderGroupCards() {
+  const groups = CHALLENGES.filter(c => c.type === 'group');
+  document.getElementById('groupGrid').innerHTML = groups.map(c => {
+    const state = cardStates[c.id] || c.status;
+    const pct = Math.round((c.progress / c.total) * 100);
+    return `<div class="group-card">
+      <div class="group-card-top">
+        <div>
+          <div class="group-card-title">${c.title}</div>
+          <span class="diff-badge ${c.diff}" style="margin-top:4px;display:inline-block">${c.diff}</span>
+        </div>
+        <div class="ccard-xp"><i class="fas fa-coins"></i> +${c.xp} XP</div>
+      </div>
+      <div class="group-card-desc">${c.desc}</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="group-avatars">
+          <div class="gavatar g1">AN</div>
+          <div class="gavatar g2">GI</div>
+          <div class="gavatar g3">MA</div>
+          ${c.status==='inprogress' ? '<div class="gavatar g4">TE</div>' : '<div class="gavatar gavatar-more">+?</div>'}
+        </div>
+        <div class="group-bonus"><i class="fas fa-star"></i> +50 XP bonus per friend</div>
+      </div>
+      <div class="ccard-prog-bar"><div class="ccard-prog-fill group" data-pct="${pct}" style="width:0"></div></div>
+      <div class="ccard-prog-text"><span>${c.progress} of ${c.total} tasks</span><span>${pct}%</span></div>
+      <div class="group-actions">
+        <button class="btn-invite" onclick="openInvite()"><i class="fas fa-user-plus"></i> Invite Friends</button>
+        <button class="btn-join-group" onclick="startChallenge(${c.id})">
+          ${state==='inprogress'||state==='started' ? '<i class="fas fa-play"></i> Continue' : '<i class="fas fa-bolt"></i> Join Group'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderBadges() {
+  const completed = CHALLENGES.filter(c => c.type === 'completed');
+  const extra = [
+    { emoji:'⭐', name:'Rising Star', date:'Mar 15', xp:'+80 XP' },
+    { emoji:'📸', name:'Photo Pro', date:'Mar 28', xp:'+60 XP' },
+    { emoji:'🏙️', name:'City Scout', date:'Apr 2', xp:'+150 XP' },
+  ];
+  const all = [...completed.map(c => ({ emoji: c.emoji, name: c.title, date: c.completedDate, xp: `+${c.xp} XP` })), ...extra];
+  document.getElementById('badgesGrid').innerHTML = all.map(b => `
+    <div class="badge-card">
+      <div class="badge-emoji">${b.emoji}</div>
+      <div class="badge-name">${b.name}</div>
+      <div class="badge-date">${b.date}</div>
+      <div class="badge-xp">${b.xp}</div>
+    </div>`).join('');
+}
+
+function startChallenge(id) {
+  const ch = CHALLENGES.find(c => c.id === id);
+  if (ch && ch.type === 'patriot') {
+    location.href = 'camera.html?mode=patriot';
+    return;
+  }
+  cardStates[id] = 'started';
+  renderAll();
+}
+
+function continueChallenge(id) {
+  const c = CHALLENGES.find(x => x.id === id);
+  if (!c) return;
+  if (c.type === 'patriot' || c.type === 'city') {
+    window.location.href = 'places.html';
+  } else {
+    window.location.href = 'checkin.html';
+  }
+}
+
+let currentClaimId = null;
+function openClaim(id) {
+  const c = CHALLENGES.find(x => x.id === id);
+  if (!c) return;
+  currentClaimId = id;
+  document.getElementById('claimModalTitle').textContent = `${c.title} — Complete!`;
+  document.getElementById('claimModalSub').textContent = c.desc;
+  document.getElementById('claimModalIcon').textContent = c.emoji || '🎉';
+  document.getElementById('claimModalRewards').innerHTML = `
+    <div class="modal-reward-row"><div class="modal-reward-label"><i class="fas fa-coins"></i> XP Reward</div><div class="modal-reward-val">+${c.xp} XP</div></div>
+    <div class="modal-reward-row"><div class="modal-reward-label"><i class="fas fa-award"></i> Badge</div><div class="modal-reward-val">${c.emoji || '🏅'} ${c.title}</div></div>
+    <div class="modal-reward-row"><div class="modal-reward-label"><i class="fas fa-star"></i> Completed</div><div class="modal-reward-val">${c.completedDate || 'Today'}</div></div>`;
+  document.getElementById('claimModal').classList.add('open');
+}
+
+function confirmClaim() {
+  if (currentClaimId) cardStates[currentClaimId] = 'claimed';
+  closeModal('claimModal');
+  renderAll();
+}
+
+function openInvite() { document.getElementById('inviteModal').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function handleOverlay(e, id) { if (e.target === e.currentTarget) closeModal(id); }
+
+function inviteFriend(btn) {
+  btn.textContent = 'Invited ✓';
+  btn.classList.add('invited');
+  btn.disabled = true;
+}
+
+function goCheckin() { window.location.href = 'checkin.html'; }
+
+function animateBars() {
+  document.querySelectorAll('.ccard-prog-fill[data-pct], .featured-prog-fill[data-pct]').forEach(bar => {
+    const pct = parseFloat(bar.dataset.pct);
+    if (bar.style.width !== pct + '%') {
+      bar.style.width = '0';
+      requestAnimationFrame(() => { setTimeout(() => { bar.style.width = pct + '%'; }, 50); });
+    }
+  });
+}
+
+renderAll();
+setTimeout(() => { document.getElementById('featFill').style.width = '60%'; }, 200);
+setTimeout(() => window.GeoHubSocial?.refresh?.(), 0);
+</script>
+<script src="social-layer.js"></script>
+<script src="nav-cleanup.js"></script>
+<script src="mobile-nav.js"></script>
+<script src="demo-mode.js"></script>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Map — GeoHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#10b981">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GeoHub">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="mobile-nav.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    body, html { height: 100%; overflow: hidden; }
+    .map-info-panel {
+      position: absolute; bottom: 24px; right: 24px; z-index: 1000;
+      width: 300px; background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-xl); padding: 0; overflow: hidden;
+      box-shadow: var(--shadow-xl); display: none;
+    }
+    .map-info-panel.open { display: block; }
+    .panel-img { width: 100%; height: 140px; object-fit: cover; }
+    .panel-body { padding: 16px; }
+    .panel-title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+    .panel-meta { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px; }
+    .panel-close { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; background: rgba(4,5,13,0.7); border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; font-size: 0.75rem; backdrop-filter: blur(8px); z-index: 1; }
+    .map-legend {
+      position: absolute; top: 88px; left: 24px; z-index: 1000;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 12px 14px;
+      box-shadow: var(--shadow-md); display: none;
+    }
+    .map-legend.open { display: block; }
+    .legend-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; margin-bottom: 6px; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .map-toggle-btn {
+      position: absolute; top: 88px; left: 24px; z-index: 1001;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 8px 12px;
+      color: var(--text-primary); font-size: 0.8rem; font-weight: 600;
+      box-shadow: var(--shadow-md); cursor: pointer; display: flex; align-items: center; gap: 6px;
+    }
+    .map-toggle-btn:hover { background: var(--bg-elevated); }
+    .marker-pin {
+      width: 36px; height: 36px;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid rgba(255,255,255,0.3);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      cursor: pointer;
+    }
+    .marker-pin-inner { transform: rotate(45deg); font-size: 0.9rem; }
+    .search-count-badge {
+      position: absolute; top: 88px; right: 24px; z-index: 1000;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-full); padding: 6px 14px;
+      font-size: 0.8rem; color: var(--text-secondary); box-shadow: var(--shadow-md);
+    }
+    .search-count-badge strong { color: var(--green); }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar" style="position:fixed;top:0;left:0;right:0;z-index:1100">
+  <a href="index.html" class="navbar-brand">
+    <div class="logo-icon">🌍</div>
+    <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
+  </a>
+  <ul class="navbar-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="feed.html">Discover</a></li>
+    <li><a href="places.html">Places</a></li>
+    <li><a href="rewards.html">Rewards</a></li>
+    <li><a href="challenges.html">Challenges</a></li>
+    <li><a href="map.html" class="active">Map</a></li>
+    <li><a href="add-business.html">Add Business</a></li>
+    <li><a href="creators.html">Creators</a></li>
+    <li><a href="dashboard.html">Dashboard</a></li>
+  </ul>
+  <div class="navbar-actions">
+    <a href="profile.html" class="btn-ghost-nav"><i class="fas fa-user-circle"></i> Profile</a>
+    <a href="#" class="btn btn-primary btn-sm">Sign Up</a>
+  </div>
+  <button class="hamburger"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html">Home</a><a href="feed.html">Discover</a><a href="places.html">Places</a><a href="rewards.html">Rewards</a><a href="challenges.html">Challenges</a><a href="map.html">Map</a><a href="add-business.html">Add Business</a><a href="creators.html">Creators</a><a href="dashboard.html">Dashboard</a>
+</div>
+
+<div class="map-page-layout" style="padding-top:68px">
+
+  <!-- Sidebar -->
+  <div class="map-sidebar">
+    <div class="map-sidebar-header">
+      <h3>🗺️ Explore on Map</h3>
+      <div class="map-search">
+        <input type="text" id="mapSearchInput" placeholder="Search places...">
+        <button><i class="fas fa-search"></i></button>
+      </div>
+    </div>
+
+    <!-- Category filter chips -->
+    <div class="map-filter-chips" id="mapChips">
+      <div class="map-chip active" data-cat="">All</div>
+      <div class="map-chip" data-cat="tours">🗺️ Tours</div>
+      <div class="map-chip" data-cat="restaurants">🍽️ Food</div>
+      <div class="map-chip" data-cat="hotels">🏨 Hotels</div>
+      <div class="map-chip" data-cat="cafes">☕ Cafés</div>
+      <div class="map-chip" data-cat="guesthouses">🏡 Guesthouses</div>
+      <div class="map-chip" data-cat="attractions">🏛️ Sights</div>
+    </div>
+
+    <!-- Results list -->
+    <div class="map-results" id="mapResults"></div>
+  </div>
+
+  <!-- Map Container -->
+  <div class="map-container" style="position:relative">
+    <div id="map"></div>
+
+    <!-- Floating buttons -->
+    <button class="map-toggle-btn" id="legendBtn" onclick="document.getElementById('legend').classList.toggle('open')">
+      <i class="fas fa-layer-group"></i> Legend
+    </button>
+
+    <!-- Legend -->
+    <div class="map-legend" id="legend">
+      <div class="legend-title">Map Legend</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Tours & Activities</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Hotels & Stays</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Restaurants & Cafés</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#a855f7"></div>Attractions & Sights</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Other Services</div>
+    </div>
+
+    <!-- Count badge -->
+    <div class="search-count-badge" id="countBadge">
+      Showing <strong id="mapCount">12</strong> places
+    </div>
+
+    <!-- Place Info Panel -->
+    <div class="map-info-panel" id="infoPanel">
+      <div class="panel-close" onclick="closePanel()"><i class="fas fa-times"></i></div>
+      <img class="panel-img" id="panelImg" src="" alt="">
+      <div class="panel-body">
+        <div class="panel-title" id="panelTitle"></div>
+        <div class="panel-meta">
+          <span id="panelCat"></span>
+          <span id="panelLoc"></span>
+          <span id="panelRating"></span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <a id="panelDetailBtn" href="#" class="btn btn-primary btn-sm" style="flex:1;justify-content:center">
+            <i class="fas fa-info-circle"></i> Details
+          </a>
+          <a id="panelMapBtn" href="#" class="btn btn-ghost btn-sm" target="_blank">
+            <i class="fas fa-directions"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="data.js"></script>
+<script src="config.js"></script>
+  <script src="api-client.js"></script>
+  <script src="main.js"></script>
+  <script src="account.js"></script>
+<script>
+  // Category colors
+  const CAT_COLORS = {
+    tours: '#10b981', hotels: '#3b82f6', guesthouses: '#3b82f6',
+    restaurants: '#f59e0b', cafes: '#f59e0b',
+    attractions: '#a855f7', hiking: '#10b981',
+    default: '#ef4444'
+  };
+
+  // Custom marker icon
+  function createIcon(category) {
+    const color = CAT_COLORS[category] || CAT_COLORS.default;
+    const icons = { tours: '🗺️', hotels: '🏨', guesthouses: '🏡', restaurants: '🍽️', cafes: '☕', attractions: '🏛️', hiking: '🥾', camping: '⛺', default: '📍' };
+    const icon = icons[category] || icons.default;
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 52" width="40" height="52">
+        <path d="M20 0C9 0 0 9 0 20c0 15 20 32 20 32S40 35 40 20C40 9 31 0 20 0z" fill="${color}" opacity="0.9"/>
+        <circle cx="20" cy="20" r="14" fill="rgba(0,0,0,0.3)"/>
+        <text x="20" y="26" text-anchor="middle" font-size="16">${icon}</text>
+      </svg>`;
+    return L.divIcon({
+      html: svg,
+      iconSize: [40, 52],
+      iconAnchor: [20, 52],
+      popupAnchor: [0, -52],
+      className: ''
+    });
+  }
+
+  // Init map — centered on Georgia
+  const map = L.map('map', {
+    center: [42.0, 43.5],
+    zoom: 7,
+    zoomControl: true
+  });
+
+  // Dark tile layer (CartoDB Dark Matter)
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '©OpenStreetMap ©CartoDB',
+    subdomains: 'abcd',
+    maxZoom: 20
+  }).addTo(map);
+
+  let markers = [];
+  let currentFilter = '';
+  let currentSearch = '';
+  let activeMarker = null;
+
+  function getFiltered() {
+    return BUSINESSES.filter(b => {
+      if (currentFilter && b.category !== currentFilter) return false;
+      if (currentSearch) {
+        const q = currentSearch.toLowerCase();
+        if (!b.name.toLowerCase().includes(q) && !b.city.toLowerCase().includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderMap() {
+    // Remove old markers
+    markers.forEach(m => map.removeLayer(m));
+    markers = [];
+
+    const filtered = getFiltered();
+    document.getElementById('mapCount').textContent = filtered.length;
+
+    // Render results list
+    document.getElementById('mapResults').innerHTML = filtered.map(b => `
+      <div class="map-result-card" data-id="${b.id}" onclick="focusPlace(${b.id})">
+        <img class="map-result-img" src="${b.image}" alt="${b.name}" loading="lazy">
+        <div class="map-result-info">
+          <div class="map-result-name">${b.name}</div>
+          <div class="map-result-cat">${b.categoryLabel} · ${b.city}</div>
+          <div class="map-result-footer">
+            <div class="rating-display">${renderStars(b.rating)}<span class="score" style="font-size:0.8rem">${b.rating}</span></div>
+            <span style="font-size:0.78rem;color:var(--green);font-weight:600">${b.priceFrom} ${b.currency}</span>
+          </div>
+        </div>
+      </div>`).join('');
+
+    // Add markers
+    filtered.forEach(biz => {
+      const marker = L.marker([biz.lat, biz.lng], { icon: createIcon(biz.category) });
+      marker.on('click', () => focusPlace(biz.id));
+      marker.addTo(map);
+      markers.push(marker);
+    });
+  }
+
+  function focusPlace(id) {
+    const biz = BUSINESSES.find(b => b.id === id);
+    if (!biz) return;
+
+    // Pan map
+    map.setView([biz.lat, biz.lng], 13, { animate: true });
+
+    // Update info panel
+    document.getElementById('panelImg').src = biz.image;
+    document.getElementById('panelTitle').textContent = biz.name;
+    document.getElementById('panelCat').innerHTML = `<span class="badge ${getCategoryBadgeClass(biz.category)}">${biz.categoryLabel}</span>`;
+    document.getElementById('panelLoc').innerHTML = `<i class="fas fa-map-marker-alt" style="color:var(--green)"></i> ${biz.city}, Georgia`;
+    document.getElementById('panelRating').innerHTML = renderStars(biz.rating) + ` <span style="font-size:0.8rem;font-weight:700">${biz.rating}</span> <span style="font-size:0.75rem;color:var(--text-muted)">(${formatNumber(biz.reviewCount)})</span>`;
+    document.getElementById('panelDetailBtn').href = `business.html?id=${biz.id}`;
+    document.getElementById('panelMapBtn').href = `https://www.google.com/maps/search/${encodeURIComponent(biz.name + ' ' + biz.city + ' Georgia')}`;
+    document.getElementById('infoPanel').classList.add('open');
+
+    // Highlight result card
+    document.querySelectorAll('.map-result-card').forEach(c => c.classList.toggle('active', parseInt(c.dataset.id) === id));
+  }
+
+  function closePanel() {
+    document.getElementById('infoPanel').classList.remove('open');
+    document.querySelectorAll('.map-result-card').forEach(c => c.classList.remove('active'));
+  }
+
+  // Category filter chips
+  document.querySelectorAll('.map-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.map-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentFilter = chip.dataset.cat;
+      closePanel();
+      renderMap();
+    });
+  });
+
+  // Search
+  document.getElementById('mapSearchInput').addEventListener('input', debounce(e => {
+    currentSearch = e.target.value;
+    renderMap();
+  }));
+
+  // Add Georgia boundary outline (approximate bounding box markers)
+  const georgiaBounds = [[41.0, 40.0], [43.5, 46.7]];
+  map.fitBounds(georgiaBounds, { padding: [40, 40] });
+
+  // Add major city markers
+  const cities = [
+    { name: 'Tbilisi', lat: 41.6938, lng: 44.8015 },
+    { name: 'Batumi', lat: 41.6405, lng: 41.6372 },
+    { name: 'Kutaisi', lat: 42.2679, lng: 42.6979 },
+    { name: 'Kazbegi', lat: 42.6587, lng: 44.6406 },
+    { name: 'Mestia', lat: 43.0490, lng: 42.7216 },
+    { name: 'Gudauri', lat: 42.4793, lng: 44.4773 },
+    { name: 'Sighnaghi', lat: 41.6167, lng: 45.9333 },
+    { name: 'Borjomi', lat: 41.8397, lng: 43.3878 },
+  ];
+
+  cities.forEach(city => {
+    L.circleMarker([city.lat, city.lng], {
+      radius: 5, color: '#ffffff', fillColor: '#94a3b8', fillOpacity: 0.7, weight: 1
+    }).bindTooltip(city.name, { permanent: false, direction: 'top', className: '' }).addTo(map);
+  });
+
+  // Initial render
+  renderMap();
+</script>
+<script src="nav-cleanup.js"></script>
+<script src="mobile-nav.js"></script>
+<script src="demo-mode.js"></script>
+</body>
+</html>

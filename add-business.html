@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Your Business — GeoHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#10b981">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GeoHub">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="mobile-nav.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    .form-step-panel { display: none; }
+    .form-step-panel.active { display: block; }
+    .social-input-row { display: flex; align-items: center; gap: 10px; }
+    .social-prefix {
+      padding: 12px 14px; background: var(--bg-elevated); border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm) 0 0 var(--radius-sm); border-right: none;
+      font-size: 0.85rem; color: var(--text-muted); white-space: nowrap;
+    }
+    .social-input-row .form-input { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+    .hours-grid { display: grid; grid-template-columns: 100px 1fr 1fr 80px; gap: 8px; align-items: center; font-size: 0.85rem; }
+    .hours-grid .day-label { font-weight: 600; color: var(--text-secondary); font-size: 0.82rem; }
+    .hours-grid input[type="time"] {
+      background: var(--bg-elevated); border: 1.5px solid var(--border); border-radius: var(--radius-xs);
+      padding: 8px 10px; color: var(--text-primary); font-size: 0.82rem; outline: none; width: 100%;
+    }
+    .hours-grid input[type="time"]:focus { border-color: var(--green); }
+    .hours-grid .closed-toggle { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted); cursor: pointer; }
+    .preview-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); overflow: hidden; max-width: 300px; margin: 0 auto;
+    }
+    .preview-img-ph {
+      height: 160px; background: var(--gradient-brand); opacity: 0.3;
+      display: flex; align-items: center; justify-content: center; font-size: 3rem;
+    }
+    .preview-content { padding: 16px; }
+    .success-screen { text-align: center; padding: 60px 20px; }
+    .success-icon { font-size: 4rem; margin-bottom: 20px; }
+    .progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 32px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--gradient-brand); border-radius: 2px; transition: width 0.5s ease; }
+    .plan-selector { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .plan-option {
+      padding: 16px; background: var(--bg-elevated); border: 1.5px solid var(--border);
+      border-radius: var(--radius-md); cursor: pointer; transition: var(--transition);
+    }
+    .plan-option:hover, .plan-option.selected { border-color: var(--green); background: var(--green-muted); }
+    .plan-option .plan-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
+    .plan-option .plan-price { font-size: 1.1rem; font-weight: 800; color: var(--green); margin-bottom: 6px; }
+    .plan-option .plan-desc { font-size: 0.75rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="navbar-brand">
+    <div class="logo-icon">🌍</div>
+    <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
+  </a>
+  <ul class="navbar-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="feed.html">Discover</a></li>
+    <li><a href="places.html">Places</a></li>
+    <li><a href="rewards.html">Rewards</a></li>
+    <li><a href="challenges.html">Challenges</a></li>
+    <li><a href="map.html">Map</a></li>
+    <li><a href="add-business.html" class="active">Add Business</a></li>
+    <li><a href="creators.html">Creators</a></li>
+    <li><a href="dashboard.html">Dashboard</a></li>
+  </ul>
+  <div class="navbar-actions">
+    <a href="profile.html" class="btn-ghost-nav"><i class="fas fa-user-circle"></i> Profile</a>
+    <a href="#" class="btn btn-primary btn-sm">Sign Up</a>
+  </div>
+  <button class="hamburger"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html">Home</a><a href="feed.html">Discover</a>
+  <a href="places.html">Places</a><a href="rewards.html">Rewards</a><a href="challenges.html">Challenges</a><a href="map.html">Map</a><a href="add-business.html">Add Business</a><a href="creators.html">Creators</a><a href="dashboard.html">Dashboard</a>
+</div>
+
+<div class="form-page">
+  <div class="form-container">
+
+    <!-- Header -->
+    <div class="form-header">
+      <div class="hero-badge" style="margin:0 auto 16px;">
+        <i class="fas fa-store"></i> For Business Owners
+      </div>
+      <h1>List Your <span class="gradient-text">Business</span></h1>
+      <p>Join 1,800+ Georgian businesses on GeoHub. Free to start — takes 5 minutes.</p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:25%"></div></div>
+
+    <!-- Step Indicator -->
+    <div class="step-indicator" id="stepIndicator">
+      <div class="step-item">
+        <div class="step-dot active" id="dot1">1</div>
+        <span class="step-label">Basic Info</span>
+      </div>
+      <div class="step-line" id="line1"></div>
+      <div class="step-item">
+        <div class="step-dot" id="dot2">2</div>
+        <span class="step-label">Details</span>
+      </div>
+      <div class="step-line" id="line2"></div>
+      <div class="step-item">
+        <div class="step-dot" id="dot3">3</div>
+        <span class="step-label">Photos</span>
+      </div>
+      <div class="step-line" id="line3"></div>
+      <div class="step-item">
+        <div class="step-dot" id="dot4">4</div>
+        <span class="step-label">Plan</span>
+      </div>
+    </div>
+
+    <!-- ===== STEP 1: Basic Info ===== -->
+    <div class="form-step-panel active" id="step1">
+      <div class="form-card">
+        <div class="form-section-title"><i class="fas fa-info-circle" style="color:var(--green);margin-right:8px"></i>Basic Information</div>
+
+        <div class="form-group">
+          <label class="form-label required">Business / Place Name</label>
+          <input type="text" class="form-input" placeholder="e.g. Green Café Tbilisi" id="bizNameInput">
+          <div class="form-hint">This will be your public name on GeoHub</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required">Category</label>
+          <div class="category-selector" id="catSelector">
+            <div class="cat-option" data-cat="tours"><span class="cat-icon">🗺️</span>Tours</div>
+            <div class="cat-option" data-cat="cafes"><span class="cat-icon">☕</span>Café</div>
+            <div class="cat-option" data-cat="restaurants"><span class="cat-icon">🍽️</span>Restaurant</div>
+            <div class="cat-option" data-cat="hotels"><span class="cat-icon">🏨</span>Hotel</div>
+            <div class="cat-option" data-cat="guesthouses"><span class="cat-icon">🏡</span>Guesthouse</div>
+            <div class="cat-option" data-cat="hiking"><span class="cat-icon">🥾</span>Hiking</div>
+            <div class="cat-option" data-cat="attractions"><span class="cat-icon">🏛️</span>Attraction</div>
+            <div class="cat-option" data-cat="beauty"><span class="cat-icon">💆</span>Beauty</div>
+            <div class="cat-option" data-cat="dental"><span class="cat-icon">🦷</span>Dental</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label required">City</label>
+            <select class="form-select" id="citySelect">
+              <option value="">Select city...</option>
+              <option>Tbilisi</option>
+              <option>Batumi</option>
+              <option>Kazbegi</option>
+              <option>Kutaisi</option>
+              <option>Gudauri</option>
+              <option>Sighnaghi</option>
+              <option>Mestia</option>
+              <option>Borjomi</option>
+              <option>Telavi</option>
+              <option>Gori</option>
+              <option>Mtskheta</option>
+              <option>Zugdidi</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Address</label>
+            <input type="text" class="form-input" placeholder="Street address or area">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required">Short Description</label>
+          <textarea class="form-textarea" placeholder="Describe your business in a few sentences... What makes it special?" id="descInput"></textarea>
+          <div class="form-hint">Minimum 50 characters. This helps customers find you.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tags</label>
+          <div class="tag-input-container" id="tagContainer">
+            <input type="text" class="tag-input" placeholder="Type tag and press Enter (e.g. mountain, wine, luxury)" id="tagInput">
+          </div>
+          <div class="form-hint">Add up to 8 tags to improve searchability</div>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <div></div>
+        <button class="btn btn-primary btn-lg" onclick="nextStep(2)">
+          Continue <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 2: Contact & Hours ===== -->
+    <div class="form-step-panel" id="step2">
+      <div class="form-card">
+        <div class="form-section-title"><i class="fas fa-phone" style="color:var(--green);margin-right:8px"></i>Contact Information</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label required">Phone Number</label>
+            <input type="tel" class="form-input" placeholder="+995 555 123 456">
+          </div>
+          <div class="form-group">
+            <label class="form-label">WhatsApp</label>
+            <input type="tel" class="form-input" placeholder="+995 555 123 456">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" placeholder="contact@yourbusiness.com">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Website (if any)</label>
+          <input type="url" class="form-input" placeholder="https://yourwebsite.com">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Instagram</label>
+            <div class="social-input-row">
+              <div class="social-prefix">@</div>
+              <input type="text" class="form-input" placeholder="username" style="border-radius:0 var(--radius-sm) var(--radius-sm) 0">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Facebook Page</label>
+            <input type="text" class="form-input" placeholder="facebook.com/yourpage">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-section-title"><i class="fas fa-clock" style="color:var(--green);margin-right:8px"></i>Working Hours</div>
+
+        <div style="display:flex;flex-direction:column;gap:10px" id="hoursInputs">
+          <!-- Dynamically rendered -->
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-section-title"><i class="fas fa-tag" style="color:var(--green);margin-right:8px"></i>Pricing</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Starting Price (GEL)</label>
+            <input type="number" class="form-input" placeholder="e.g. 50">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Price Range</label>
+            <select class="form-select">
+              <option value="$">$ — Budget friendly</option>
+              <option value="$$">$$ — Mid-range</option>
+              <option value="$$$">$$$ — Upscale</option>
+              <option value="$$$$">$$$$ — Luxury</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Services / Menu Items</label>
+          <div id="servicesInputs" style="display:flex;flex-direction:column;gap:8px">
+            <div class="form-row" style="align-items:flex-end">
+              <input type="text" class="form-input" placeholder="Service name (e.g. Guided Hike)">
+              <input type="text" class="form-input" placeholder="Price (e.g. 80 GEL)">
+              <button class="btn btn-ghost btn-sm" onclick="addServiceRow()" style="white-space:nowrap"><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="addServiceRow()"><i class="fas fa-plus"></i> Add Service</button>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <button class="btn btn-ghost btn-lg" onclick="prevStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
+        <button class="btn btn-primary btn-lg" onclick="nextStep(3)">Continue <i class="fas fa-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 3: Photos ===== -->
+    <div class="form-step-panel" id="step3">
+      <div class="form-card">
+        <div class="form-section-title"><i class="fas fa-images" style="color:var(--green);margin-right:8px"></i>Photos & Media</div>
+
+        <div class="form-group">
+          <label class="form-label">Cover Photo <span style="color:var(--text-muted);font-size:0.7rem">(shown in listings)</span></label>
+          <div class="upload-zone" id="coverUpload">
+            <div class="upload-zone-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+            <p><span>Click to upload</span> or drag & drop</p>
+            <p style="font-size:0.75rem;margin-top:6px;color:var(--text-muted)">JPG, PNG up to 10MB. Recommended: 16:9 ratio</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Gallery Photos <span style="color:var(--text-muted);font-size:0.7rem">(up to 10)</span></label>
+          <div class="upload-zone" id="galleryUpload">
+            <div class="upload-zone-icon"><i class="fas fa-images"></i></div>
+            <p><span>Upload multiple photos</span> of your business</p>
+            <p style="font-size:0.75rem;margin-top:6px;color:var(--text-muted)">Show your interior, products, team, and atmosphere</p>
+          </div>
+          <div id="uploadedPhotos" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Google Maps Link <span style="color:var(--text-muted);font-size:0.7rem">(optional)</span></label>
+          <input type="url" class="form-input" placeholder="https://maps.google.com/..." id="mapsLink">
+          <div class="form-hint">Paste your Google Maps location link for accurate placement on our map</div>
+        </div>
+      </div>
+
+      <!-- Preview Card -->
+      <div class="form-card">
+        <div class="form-section-title"><i class="fas fa-eye" style="color:var(--green);margin-right:8px"></i>Preview</div>
+        <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:16px">How your listing will appear in search results:</p>
+        <div class="preview-card">
+          <div class="preview-img-ph">📍</div>
+          <div class="preview-content">
+            <div style="font-size:1rem;font-weight:700;margin-bottom:6px" id="previewName">Your Business Name</div>
+            <div style="font-size:0.8rem;color:var(--text-secondary)" id="previewCity">City, Georgia</div>
+            <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+              <span class="badge badge-green" id="previewCat">Category</span>
+              <span style="font-size:0.8rem;color:var(--text-secondary)">★ New Listing</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <button class="btn btn-ghost btn-lg" onclick="prevStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
+        <button class="btn btn-primary btn-lg" onclick="nextStep(4)">Continue <i class="fas fa-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 4: Choose Plan ===== -->
+    <div class="form-step-panel" id="step4">
+      <div class="form-card">
+        <div class="form-section-title"><i class="fas fa-rocket" style="color:var(--green);margin-right:8px"></i>Choose Your Plan</div>
+        <p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:24px">Start free and upgrade anytime. No contracts.</p>
+
+        <div class="plan-selector">
+          <div class="plan-option selected" data-plan="free">
+            <div class="plan-name">Free</div>
+            <div class="plan-price">0 GEL</div>
+            <div class="plan-desc">Basic listing with contact info and map location</div>
+          </div>
+          <div class="plan-option" data-plan="premium">
+            <div class="plan-name">Premium ✨</div>
+            <div class="plan-price">40 GEL/mo</div>
+            <div class="plan-desc">Priority placement, analytics, featured badge</div>
+          </div>
+          <div class="plan-option" data-plan="mini">
+            <div class="plan-name">Mini Website 🌐</div>
+            <div class="plan-price">199 GEL</div>
+            <div class="plan-desc">Custom URL: geohub.ge/your-name</div>
+          </div>
+          <div class="plan-option" data-plan="featured">
+            <div class="plan-name">Featured ⭐</div>
+            <div class="plan-price">70 GEL/mo</div>
+            <div class="plan-desc">Homepage & category top placement</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-section-title"><i class="fas fa-user" style="color:var(--green);margin-right:8px"></i>Create Account</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label required">Full Name</label>
+            <input type="text" class="form-input" placeholder="Your name">
+          </div>
+          <div class="form-group">
+            <label class="form-label required">Email</label>
+            <input type="email" class="form-input" placeholder="your@email.com">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Password</label>
+          <input type="password" class="form-input" placeholder="Create a password">
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-top:8px;font-size:0.8rem;color:var(--text-secondary)">
+          <input type="checkbox" style="margin-top:2px;accent-color:var(--green)">
+          <span>I agree to GeoHub's <a href="#" style="color:var(--green)">Terms of Service</a> and <a href="#" style="color:var(--green)">Privacy Policy</a></span>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <button class="btn btn-ghost btn-lg" onclick="prevStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
+        <button class="btn btn-primary btn-lg" onclick="submitForm()">
+          <i class="fas fa-check-circle"></i> Submit Listing
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== SUCCESS ===== -->
+    <div class="form-step-panel" id="stepSuccess">
+      <div class="success-screen">
+        <div class="success-icon">🎉</div>
+        <h2 class="gradient-text" style="font-size:2rem;font-weight:800;margin-bottom:12px">You're on GeoHub!</h2>
+        <p style="color:var(--text-secondary);max-width:400px;margin:0 auto 32px;font-size:0.95rem">Your listing has been submitted and is under review. We'll activate it within 24 hours and notify you by email.</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <a href="dashboard.html" class="btn btn-primary btn-lg"><i class="fas fa-tachometer-alt"></i> Go to Dashboard</a>
+          <a href="index.html" class="btn btn-ghost btn-lg"><i class="fas fa-home"></i> Back to Home</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="config.js"></script>
+  <script src="api-client.js"></script>
+  <script src="main.js"></script>
+  <script src="account.js"></script>
+<script>
+  let currentStep = 1;
+  let tags = [];
+  let selectedCategory = '';
+  let selectedPlan = 'free';
+
+  // Hours inputs
+  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  document.getElementById('hoursInputs').innerHTML = days.map(d => `
+    <div class="hours-grid">
+      <div class="day-label">${d}</div>
+      <input type="time" value="09:00" id="open_${d}">
+      <input type="time" value="18:00" id="close_${d}">
+      <label class="closed-toggle">
+        <input type="checkbox" style="accent-color:var(--red)" id="closed_${d}"> Closed
+      </label>
+    </div>`).join('');
+
+  days.forEach(d => {
+    document.getElementById(`closed_${d}`).addEventListener('change', (e) => {
+      document.getElementById(`open_${d}`).disabled = e.target.checked;
+      document.getElementById(`close_${d}`).disabled = e.target.checked;
+      document.getElementById(`open_${d}`).style.opacity = e.target.checked ? '0.4' : '1';
+      document.getElementById(`close_${d}`).style.opacity = e.target.checked ? '0.4' : '1';
+    });
+  });
+
+  // Category selector
+  document.querySelectorAll('.cat-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.cat-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      selectedCategory = opt.dataset.cat;
+      document.getElementById('previewCat').textContent = opt.querySelector('.cat-icon').textContent + ' ' + opt.textContent.replace(/[^\w\s]/g,'').trim();
+    });
+  });
+
+  // Tag input
+  document.getElementById('tagInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const val = e.target.value.trim().replace(/,/g,'');
+      if (val && tags.length < 8 && !tags.includes(val)) {
+        tags.push(val);
+        renderTags();
+        e.target.value = '';
+      }
+    }
+  });
+  function renderTags() {
+    const container = document.getElementById('tagContainer');
+    const input = document.getElementById('tagInput');
+    const chips = container.querySelectorAll('.tag-chip');
+    chips.forEach(c => c.remove());
+    tags.forEach((tag, i) => {
+      const chip = document.createElement('div');
+      chip.className = 'tag-chip';
+      chip.innerHTML = `${tag} <button onclick="removeTag(${i})">×</button>`;
+      container.insertBefore(chip, input);
+    });
+  }
+  function removeTag(i) { tags.splice(i, 1); renderTags(); }
+
+  // Preview sync
+  document.getElementById('bizNameInput').addEventListener('input', e => {
+    document.getElementById('previewName').textContent = e.target.value || 'Your Business Name';
+  });
+  document.getElementById('citySelect').addEventListener('change', e => {
+    document.getElementById('previewCity').textContent = e.target.value ? `${e.target.value}, Georgia` : 'City, Georgia';
+  });
+
+  // Plan selector
+  document.querySelectorAll('.plan-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.plan-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      selectedPlan = opt.dataset.plan;
+    });
+  });
+
+  // Service rows
+  function addServiceRow() {
+    const container = document.getElementById('servicesInputs');
+    const row = document.createElement('div');
+    row.className = 'form-row';
+    row.style.alignItems = 'flex-end';
+    row.innerHTML = `
+      <input type="text" class="form-input" placeholder="Service name">
+      <input type="text" class="form-input" placeholder="Price (e.g. 80 GEL)">
+      <button class="btn btn-ghost btn-sm" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></button>`;
+    container.appendChild(row);
+  }
+
+  // Step navigation
+  function nextStep(n) {
+    document.getElementById(`step${currentStep}`).classList.remove('active');
+    currentStep = n;
+    document.getElementById(`step${n}`).classList.add('active');
+    updateStepUI();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function prevStep(n) { nextStep(n); }
+
+  function updateStepUI() {
+    const pct = (currentStep / 4) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+    [1,2,3,4].forEach(i => {
+      document.getElementById(`dot${i}`).className = 'step-dot' + (i < currentStep ? ' done' : '') + (i === currentStep ? ' active' : '');
+      if (i < 4) document.getElementById(`line${i}`).className = 'step-line' + (i < currentStep ? ' active' : '');
+    });
+  }
+
+  function submitForm() {
+    document.getElementById(`step4`).classList.remove('active');
+    document.getElementById('stepSuccess').classList.add('active');
+    document.getElementById('progressFill').style.width = '100%';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Upload zone effects
+  ['coverUpload','galleryUpload'].forEach(id => {
+    const zone = document.getElementById(id);
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); });
+    zone.addEventListener('click', () => {
+      const inp = document.createElement('input');
+      inp.type = 'file'; inp.accept = 'image/*'; if (id === 'galleryUpload') inp.multiple = true;
+      inp.click();
+      inp.onchange = () => {
+        Array.from(inp.files).slice(0,10).forEach(file => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            if (id === 'coverUpload') {
+              zone.innerHTML = `<img src="${e.target.result}" style="width:100%;height:120px;object-fit:cover;border-radius:var(--radius-sm)">`;
+              document.querySelector('.preview-img-ph').innerHTML = `<img src="${e.target.result}" style="width:100%;height:160px;object-fit:cover">`;
+            } else {
+              const img = document.createElement('img');
+              img.src = e.target.result;
+              img.style.cssText = 'width:80px;height:64px;object-fit:cover;border-radius:6px';
+              document.getElementById('uploadedPhotos').appendChild(img);
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+      };
+    });
+  });
+</script>
+<script src="nav-cleanup.js"></script>
+<script src="mobile-nav.js"></script>
+<script src="demo-mode.js"></script>
+</body>
+</html>

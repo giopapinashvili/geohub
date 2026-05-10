@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creator Marketplace — GeoHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#10b981">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GeoHub">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="mobile-nav.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* ===== PAGE LAYOUT ===== */
+    .marketplace-page { padding-top: 68px; min-height: 100vh; }
+
+    .marketplace-hero {
+      background: radial-gradient(ellipse at 60% 0%, rgba(16,185,129,0.09) 0%, transparent 60%),
+                  radial-gradient(ellipse at 10% 80%, rgba(59,130,246,0.07) 0%, transparent 60%),
+                  linear-gradient(180deg, #04050d 0%, #080a16 100%);
+      padding: 48px 0 40px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: var(--radius-full);
+      background: var(--green-muted); border: 1px solid rgba(16,185,129,0.25);
+      font-size: 0.72rem; font-weight: 700; color: var(--green-light);
+      letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 16px;
+    }
+    .marketplace-hero h1 { font-size: clamp(1.8rem,4vw,2.8rem); font-weight: 800; line-height: 1.2; margin-bottom: 12px; }
+    .marketplace-hero p { color: var(--text-secondary); font-size: 1rem; max-width: 540px; margin-bottom: 28px; }
+
+    .hero-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+    .hero-stat { display: flex; flex-direction: column; }
+    .hero-stat-val { font-size: 1.4rem; font-weight: 800; line-height: 1; }
+    .hero-stat-lbl { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* ===== SEARCH + FILTERS BAR ===== */
+    .filters-bar {
+      position: sticky; top: 68px; z-index: 500;
+      background: rgba(8,10,22,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 14px 0;
+    }
+    .filters-inner { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 320px; }
+    .search-wrap i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem; }
+    .search-input {
+      width: 100%; padding: 9px 12px 9px 34px;
+      background: var(--bg-elevated); border: 1px solid var(--border);
+      border-radius: var(--radius-full); color: var(--text-primary);
+      font-size: 0.85rem; transition: var(--transition);
+    }
+    .search-input:focus { outline: none; border-color: var(--green); box-shadow: 0 0 0 3px rgba(16,185,129,0.08); }
+    .filter-select {
+      padding: 8px 12px; background: var(--bg-elevated); border: 1px solid var(--border);
+      border-radius: var(--radius-full); color: var(--text-secondary); font-size: 0.8rem;
+      cursor: pointer; transition: var(--transition); white-space: nowrap;
+    }
+    .filter-select:focus { outline: none; border-color: var(--green); color: var(--text-primary); }
+    .sort-wrap { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .sort-label { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; }
+    .filter-count {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 20px; height: 20px; padding: 0 5px;
+      background: var(--green); border-radius: var(--radius-full);
+      font-size: 0.65rem; font-weight: 800; color: #000; margin-left: 4px;
+    }
+
+    /* ===== MAIN GRID ===== */
+    .marketplace-body { padding: 32px 0 64px; }
+    .marketplace-layout { display: grid; grid-template-columns: 240px 1fr; gap: 24px; align-items: start; }
+
+    /* ===== SIDEBAR ===== */
+    .filter-sidebar {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl); padding: 20px;
+      position: sticky; top: 132px;
+    }
+    .filter-sidebar-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); margin-bottom: 16px; }
+    .filter-group { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle); }
+    .filter-group:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    .filter-group-label { font-size: 0.78rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 10px; }
+    .filter-chips { display: flex; flex-direction: column; gap: 4px; }
+    .filter-chip {
+      padding: 7px 10px; border-radius: var(--radius-sm); font-size: 0.78rem;
+      color: var(--text-secondary); cursor: pointer; transition: var(--transition);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .filter-chip:hover { background: var(--bg-elevated); color: var(--text-primary); }
+    .filter-chip.active { background: var(--green-muted); color: var(--green-light); font-weight: 600; }
+    .filter-chip-count { font-size: 0.68rem; color: var(--text-muted); }
+    .filter-chip.active .filter-chip-count { color: var(--green); }
+    .clear-filters { width: 100%; padding: 8px; border-radius: var(--radius-sm); font-size: 0.78rem; color: var(--text-muted); transition: var(--transition); text-align: center; }
+    .clear-filters:hover { color: var(--text-primary); background: var(--bg-elevated); }
+
+    /* ===== CREATOR CARDS ===== */
+    .creator-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .creator-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl); overflow: hidden; transition: var(--transition-slow);
+      position: relative; cursor: pointer;
+    }
+    .creator-card:hover { border-color: var(--border-emphasis); transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+    .creator-card-top { position: relative; height: 80px; background: linear-gradient(135deg, #0d1525, #111827); }
+    .creator-card-cover { width: 100%; height: 100%; object-fit: cover; opacity: 0.4; }
+    .creator-level-ring {
+      position: absolute; bottom: -22px; left: 16px;
+      width: 52px; height: 52px; border-radius: var(--radius-full);
+      padding: 2px; display: flex; align-items: center; justify-content: center;
+    }
+    .creator-level-ring.bronze { background: linear-gradient(135deg, #cd7f32, #a0522d); }
+    .creator-level-ring.silver { background: linear-gradient(135deg, #94a3b8, #64748b); }
+    .creator-level-ring.gold { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .creator-level-ring.platinum { background: linear-gradient(135deg, #a78bfa, #7c3aed); box-shadow: 0 0 16px rgba(167,139,250,0.4); }
+    .creator-avatar-inner { width: 46px; height: 46px; border-radius: var(--radius-full); overflow: hidden; border: 2px solid var(--bg-card); }
+    .creator-avatar-inner img { width: 100%; height: 100%; object-fit: cover; }
+    .creator-match-badge {
+      position: absolute; top: 10px; right: 10px;
+      padding: 3px 8px; border-radius: var(--radius-full);
+      font-size: 0.65rem; font-weight: 800; letter-spacing: 0.3px;
+      background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: var(--green-light);
+    }
+    .creator-card-body { padding: 28px 16px 16px; }
+    .creator-name { font-size: 0.95rem; font-weight: 800; margin-bottom: 1px; }
+    .creator-username { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 6px; }
+    .creator-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .creator-city { font-size: 0.72rem; color: var(--text-secondary); display: flex; align-items: center; gap: 3px; }
+    .creator-niche { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: var(--bg-elevated); border-radius: var(--radius-full); font-size: 0.7rem; color: var(--text-secondary); border: 1px solid var(--border); }
+    .creator-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
+    .creator-stat { text-align: center; }
+    .creator-stat-val { font-size: 0.875rem; font-weight: 800; line-height: 1; }
+    .creator-stat-lbl { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
+    .creator-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
+    .creator-badge { padding: 3px 8px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-full); font-size: 0.65rem; color: var(--text-secondary); }
+    .creator-places { display: flex; gap: 4px; margin-bottom: 12px; }
+    .creator-place-thumb { flex: 1; height: 40px; border-radius: var(--radius-xs); overflow: hidden; background: var(--bg-elevated); }
+    .creator-place-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+    .match-bar-wrap { margin-bottom: 12px; }
+    .match-bar-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .match-bar-text { font-size: 0.7rem; color: var(--text-muted); }
+    .match-bar-pct { font-size: 0.72rem; font-weight: 800; color: var(--green-light); }
+    .match-bar-track { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .match-bar-fill { height: 100%; background: var(--gradient-brand); border-radius: 2px; transition: width 1s ease; }
+    .creator-price { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 12px; }
+    .creator-price strong { color: var(--green-light); }
+    .creator-actions { display: flex; gap: 6px; }
+
+    /* ===== RESULTS BAR ===== */
+    .results-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+    .results-count { font-size: 0.8rem; color: var(--text-muted); }
+    .results-count strong { color: var(--text-primary); }
+
+    /* ===== LEADERBOARD ===== */
+    .leaderboard-section { padding: 48px 0; border-top: 1px solid var(--border-subtle); background: radial-gradient(ellipse at 50% 0%, rgba(16,185,129,0.04) 0%, transparent 60%); }
+    .lb-tabs { display: flex; gap: 2px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); padding: 4px; margin-bottom: 24px; max-width: 600px; }
+    .lb-tab { flex: 1; padding: 9px 12px; border-radius: var(--radius-lg); font-size: 0.78rem; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: var(--transition); text-align: center; }
+    .lb-tab.active { background: var(--bg-elevated); color: var(--green); }
+    .lb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+    .lb-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 14px;
+      display: flex; align-items: center; gap: 12px; transition: var(--transition);
+    }
+    .lb-card:hover { border-color: var(--border-emphasis); }
+    .lb-rank { width: 28px; height: 28px; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 800; flex-shrink: 0; }
+    .lb-rank.r1 { background: linear-gradient(135deg,#f59e0b,#d97706); color: #000; }
+    .lb-rank.r2 { background: linear-gradient(135deg,#94a3b8,#64748b); color: #000; }
+    .lb-rank.r3 { background: linear-gradient(135deg,#cd7f32,#a0522d); color: #fff; }
+    .lb-rank.rn { background: var(--bg-elevated); color: var(--text-muted); }
+    .lb-avatar { width: 38px; height: 38px; border-radius: var(--radius-full); overflow: hidden; flex-shrink: 0; }
+    .lb-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .lb-info { flex: 1; min-width: 0; }
+    .lb-name { font-size: 0.82rem; font-weight: 700; }
+    .lb-sub { font-size: 0.7rem; color: var(--text-muted); }
+    .lb-val { font-size: 1rem; font-weight: 800; color: var(--green-light); white-space: nowrap; }
+
+    /* ===== CREATOR PROFILE MODAL ===== */
+    .cm-overlay {
+      position: fixed; inset: 0; background: rgba(4,5,13,0.88);
+      backdrop-filter: blur(8px); z-index: 9000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .cm-overlay.open { opacity: 1; pointer-events: all; }
+    .cm-modal {
+      background: var(--bg-card); border: 1px solid var(--border-emphasis);
+      border-radius: var(--radius-2xl); width: 100%; max-width: 680px;
+      max-height: 90vh; overflow-y: auto;
+      transform: translateY(28px) scale(0.96); transition: transform 0.3s;
+    }
+    .cm-overlay.open .cm-modal { transform: translateY(0) scale(1); }
+    .cm-cover { height: 120px; object-fit: cover; width: 100%; display: block; border-radius: var(--radius-2xl) var(--radius-2xl) 0 0; }
+    .cm-header { padding: 0 24px 0; margin-top: -36px; display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 16px; }
+    .cm-avatar-wrap { position: relative; }
+    .cm-avatar { width: 72px; height: 72px; border-radius: var(--radius-full); border: 3px solid var(--bg-card); overflow: hidden; }
+    .cm-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .cm-level-badge { position: absolute; bottom: 0; right: -2px; padding: 2px 6px; border-radius: var(--radius-full); font-size: 0.6rem; font-weight: 800; }
+    .cm-close { width: 36px; height: 36px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; color: var(--text-muted); cursor: pointer; transition: var(--transition); align-self: flex-start; margin-top: 8px; }
+    .cm-close:hover { color: var(--text-primary); border-color: var(--border-emphasis); }
+    .cm-body { padding: 0 24px 24px; }
+    .cm-name { font-size: 1.25rem; font-weight: 800; margin-bottom: 2px; }
+    .cm-handle { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 10px; }
+    .cm-bio { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 16px; }
+    .cm-stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 20px; }
+    .cm-stat { background: var(--bg-elevated); border-radius: var(--radius-md); padding: 10px 8px; text-align: center; }
+    .cm-stat-val { font-size: 1rem; font-weight: 800; line-height: 1; margin-bottom: 3px; }
+    .cm-stat-lbl { font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .cm-section { margin-bottom: 20px; }
+    .cm-section-title { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); margin-bottom: 10px; }
+    .cm-packages { display: flex; flex-direction: column; gap: 8px; }
+    .cm-package { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .cm-pkg-name { font-size: 0.82rem; font-weight: 700; margin-bottom: 2px; }
+    .cm-pkg-desc { font-size: 0.72rem; color: var(--text-muted); }
+    .cm-pkg-price { font-size: 1rem; font-weight: 800; color: var(--green-light); white-space: nowrap; }
+    .cm-collab-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .cm-collab-tag { padding: 4px 10px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-full); font-size: 0.72rem; color: var(--text-secondary); }
+    .cm-trust { display: flex; gap: 8px; flex-wrap: wrap; }
+    .cm-trust-item { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--bg-elevated); border-radius: var(--radius-sm); font-size: 0.72rem; color: var(--text-secondary); }
+    .cm-trust-item i { color: var(--green); }
+    .cm-post-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .cm-post-thumb { aspect-ratio: 1; border-radius: var(--radius-sm); overflow: hidden; background: var(--bg-elevated); }
+    .cm-post-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; transition: var(--transition); }
+    .cm-post-thumb:hover img { opacity: 1; }
+    .cm-best-post { background: var(--bg-elevated); border: 1px solid rgba(16,185,129,0.2); border-radius: var(--radius-md); padding: 12px; display: flex; gap: 12px; align-items: flex-start; }
+    .cm-best-post-img { width: 64px; height: 64px; border-radius: var(--radius-sm); overflow: hidden; flex-shrink: 0; }
+    .cm-best-post-img img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ===== OFFER MODAL ===== */
+    .offer-type-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 16px; }
+    .offer-type-card {
+      padding: 12px; background: var(--bg-elevated); border: 2px solid var(--border);
+      border-radius: var(--radius-md); cursor: pointer; transition: var(--transition); text-align: center;
+    }
+    .offer-type-card:hover, .offer-type-card.selected { border-color: var(--green); background: var(--green-muted); }
+    .offer-type-icon { font-size: 1.4rem; margin-bottom: 4px; }
+    .offer-type-name { font-size: 0.75rem; font-weight: 700; }
+
+    .offer-success {
+      display: none; text-align: center; padding: 32px;
+    }
+    .offer-success.show { display: block; }
+    .offer-form-body.hidden { display: none; }
+    .offer-success-icon { font-size: 3rem; margin-bottom: 12px; }
+
+    /* ===== NO RESULTS ===== */
+    .no-results { grid-column: 1/-1; text-align: center; padding: 64px 20px; color: var(--text-muted); }
+    .no-results i { font-size: 2.5rem; display: block; margin-bottom: 12px; opacity: 0.3; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      .marketplace-layout { grid-template-columns: 1fr; }
+      .filter-sidebar { position: static; }
+    }
+    @media (max-width: 640px) {
+      .filters-inner { gap: 6px; }
+      .creator-grid { grid-template-columns: 1fr; }
+      .cm-stats-row { grid-template-columns: repeat(3, 1fr); }
+      .offer-type-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="navbar-brand">
+    <div class="logo-icon">🌍</div>
+    <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
+  </a>
+  <ul class="navbar-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="feed.html">Discover</a></li>
+    <li><a href="places.html">Places</a></li>
+    <li><a href="rewards.html">Rewards</a></li>
+    <li><a href="challenges.html">Challenges</a></li>
+    <li><a href="map.html">Map</a></li>
+    <li><a href="creators.html" class="active" style="color:var(--green)">Creators</a></li>
+    <li><a href="dashboard.html">Dashboard</a></li>
+  </ul>
+  <div class="navbar-actions">
+    <a href="profile.html" class="btn-ghost-nav"><i class="fas fa-user-circle"></i> Profile</a>
+    <a href="#" class="btn btn-primary btn-sm">Sign Up</a>
+  </div>
+  <button class="hamburger"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html">Home</a><a href="feed.html">Discover</a>
+  <a href="places.html">Places</a><a href="rewards.html">Rewards</a>
+  <a href="challenges.html">Challenges</a><a href="map.html">Map</a>
+  <a href="creators.html">Creators</a><a href="dashboard.html">Dashboard</a>
+</div>
+
+<div class="marketplace-page">
+
+  <!-- ===== HERO ===== -->
+  <section class="marketplace-hero">
+    <div class="container">
+      <div class="hero-badge"><i class="fas fa-star"></i> Creator Economy</div>
+      <h1>Creator <span class="gradient-text">Marketplace</span></h1>
+      <p>Connect with Georgia's most active local creators. Send collaboration offers, track engagement, and grow your business through authentic storytelling.</p>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-val gradient-text">240+</div>
+          <div class="hero-stat-lbl">Active Creators</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val" style="color:var(--blue-light)">4.8M</div>
+          <div class="hero-stat-lbl">Combined Reach</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val" style="color:var(--gold-light)">6.2%</div>
+          <div class="hero-stat-lbl">Avg. Engagement</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-val" style="color:var(--green-light)">380</div>
+          <div class="hero-stat-lbl">Collabs Completed</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FILTERS BAR ===== -->
+  <div class="filters-bar">
+    <div class="container">
+      <div class="filters-inner">
+        <div class="search-wrap">
+          <i class="fas fa-search"></i>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search creators…" oninput="applyFilters()">
+        </div>
+        <select class="filter-select" id="filterCity" onchange="applyFilters()">
+          <option value="">All Cities</option>
+          <option>Tbilisi</option>
+          <option>Batumi</option>
+          <option>Kutaisi</option>
+          <option>Kazbegi</option>
+          <option>Borjomi</option>
+          <option>Telavi</option>
+          <option>Mestia</option>
+        </select>
+        <select class="filter-select" id="filterNiche" onchange="applyFilters()">
+          <option value="">All Niches</option>
+          <option>Cafés</option>
+          <option>Food & Wine</option>
+          <option>Photography</option>
+          <option>Hiking</option>
+          <option>Nightlife</option>
+          <option>Travel</option>
+          <option>Luxury</option>
+          <option>Events</option>
+          <option>Fitness</option>
+        </select>
+        <select class="filter-select" id="filterFollowers" onchange="applyFilters()">
+          <option value="">Any Reach</option>
+          <option value="lt1k">&lt; 1K followers</option>
+          <option value="1k5k">1K – 5K</option>
+          <option value="gt5k">5K+</option>
+        </select>
+        <select class="filter-select" id="filterEngagement" onchange="applyFilters()">
+          <option value="">Any Engagement</option>
+          <option value="lt3">Under 3%</option>
+          <option value="3to6">3% – 6%</option>
+          <option value="gt6">6%+</option>
+        </select>
+        <select class="filter-select" id="filterLevel" onchange="applyFilters()">
+          <option value="">All Levels</option>
+          <option>Bronze Explorer</option>
+          <option>Silver Explorer</option>
+          <option>Gold Explorer</option>
+          <option>Platinum Explorer</option>
+        </select>
+        <div class="sort-wrap">
+          <span class="sort-label">Sort:</span>
+          <select class="filter-select" id="sortBy" onchange="applyFilters()">
+            <option value="match">Best Match</option>
+            <option value="xp">Highest XP</option>
+            <option value="engagement">Engagement</option>
+            <option value="price_asc">Price ↑</option>
+            <option value="price_desc">Price ↓</option>
+            <option value="followers">Followers</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <section class="marketplace-body">
+    <div class="container">
+      <div class="marketplace-layout">
+
+        <!-- Sidebar -->
+        <aside class="filter-sidebar">
+          <div class="filter-sidebar-title">Refine Creators</div>
+
+          <div class="filter-group">
+            <div class="filter-group-label">Niche</div>
+            <div class="filter-chips" id="sidebarNiche">
+              <div class="filter-chip active" data-niche="" onclick="setSidebarFilter('niche','',this)"><span>All Niches</span><span class="filter-chip-count">15</span></div>
+              <div class="filter-chip" data-niche="Cafés" onclick="setSidebarFilter('niche','Cafés',this)"><span>☕ Cafés</span><span class="filter-chip-count">4</span></div>
+              <div class="filter-chip" data-niche="Food & Wine" onclick="setSidebarFilter('niche','Food & Wine',this)"><span>🍷 Food & Wine</span><span class="filter-chip-count">3</span></div>
+              <div class="filter-chip" data-niche="Photography" onclick="setSidebarFilter('niche','Photography',this)"><span>📸 Photography</span><span class="filter-chip-count">3</span></div>
+              <div class="filter-chip" data-niche="Hiking" onclick="setSidebarFilter('niche','Hiking',this)"><span>🏔️ Hiking</span><span class="filter-chip-count">3</span></div>
+              <div class="filter-chip" data-niche="Nightlife" onclick="setSidebarFilter('niche','Nightlife',this)"><span>🎵 Nightlife</span><span class="filter-chip-count">2</span></div>
+              <div class="filter-chip" data-niche="Travel" onclick="setSidebarFilter('niche','Travel',this)"><span>✈️ Travel</span><span class="filter-chip-count">3</span></div>
+              <div class="filter-chip" data-niche="Luxury" onclick="setSidebarFilter('niche','Luxury',this)"><span>💎 Luxury</span><span class="filter-chip-count">1</span></div>
+              <div class="filter-chip" data-niche="Events" onclick="setSidebarFilter('niche','Events',this)"><span>🎉 Events</span><span class="filter-chip-count">2</span></div>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-group-label">Explorer Level</div>
+            <div class="filter-chips">
+              <div class="filter-chip active" onclick="setSidebarFilter('level','',this)"><span>All Levels</span></div>
+              <div class="filter-chip" onclick="setSidebarFilter('level','Platinum Explorer',this)"><span style="color:#a78bfa">◆ Platinum</span></div>
+              <div class="filter-chip" onclick="setSidebarFilter('level','Gold Explorer',this)"><span style="color:var(--gold-light)">◆ Gold</span></div>
+              <div class="filter-chip" onclick="setSidebarFilter('level','Silver Explorer',this)"><span style="color:#94a3b8">◆ Silver</span></div>
+              <div class="filter-chip" onclick="setSidebarFilter('level','Bronze Explorer',this)"><span style="color:#cd7f32">◆ Bronze</span></div>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-group-label">Availability</div>
+            <div class="filter-chips">
+              <div class="filter-chip active" onclick="setSidebarFilter('availability','',this)"><span>All</span></div>
+              <div class="filter-chip" onclick="setSidebarFilter('availability','Available',this)"><span style="color:var(--green)">● Available</span></div>
+              <div class="filter-chip" onclick="setSidebarFilter('availability','Busy',this)"><span style="color:var(--gold)">● Busy</span></div>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="filter-group-label">Trust Score</div>
+            <div class="filter-chips">
+              <div class="filter-chip active" onclick="setSidebarFilter('trust','',this)"><span>Any</span></div>
+              <div class="filter-chip" onclick="setSidebarFilter('trust','90',this)"><span>90+ Trust</span></div>
+              <div class="filter-chip" onclick="setSidebarFilter('trust','80',this)"><span>80+ Trust</span></div>
+            </div>
+          </div>
+
+          <button class="clear-filters" onclick="clearAllFilters()"><i class="fas fa-times"></i> Clear All Filters</button>
+        </aside>
+
+        <!-- Creator Grid -->
+        <div>
+          <div class="results-bar">
+            <div class="results-count"><strong id="resultCount">15</strong> creators found</div>
+            <div style="font-size:0.75rem;color:var(--text-muted)"><i class="fas fa-robot" style="color:var(--green);margin-right:4px"></i>Match scores based on your business niche</div>
+          </div>
+          <div class="creator-grid" id="creatorGrid"></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== LEADERBOARD ===== -->
+  <section class="leaderboard-section">
+    <div class="container">
+      <div class="section-header" style="margin-bottom:24px">
+        <div>
+          <h2>Creator <span class="gradient-text">Leaderboard</span></h2>
+          <p style="color:var(--text-secondary);font-size:0.9rem;margin-top:6px">Top GeoHub creators ranked by performance</p>
+        </div>
+      </div>
+      <div class="lb-tabs">
+        <div class="lb-tab active" onclick="switchLbTab('xp',this)"><i class="fas fa-bolt"></i> XP</div>
+        <div class="lb-tab" onclick="switchLbTab('engagement',this)"><i class="fas fa-fire"></i> Engagement</div>
+        <div class="lb-tab" onclick="switchLbTab('collabs',this)"><i class="fas fa-handshake"></i> Collabs</div>
+        <div class="lb-tab" onclick="switchLbTab('trust',this)"><i class="fas fa-shield-alt"></i> Trust</div>
+      </div>
+      <div class="lb-grid" id="lbGrid"></div>
+    </div>
+  </section>
+
+</div><!-- marketplace-page -->
+
+<!-- ===== CREATOR PROFILE MODAL ===== -->
+<div class="cm-overlay" id="profileModal">
+  <div class="cm-modal">
+    <img id="cmCover" class="cm-cover" src="" alt="">
+    <div class="cm-header">
+      <div class="cm-avatar-wrap">
+        <div class="cm-avatar" id="cmAvatarWrap">
+          <img id="cmAvatar" src="" alt="">
+        </div>
+        <span class="cm-level-badge" id="cmLevelBadge"></span>
+      </div>
+      <button class="cm-close" onclick="closeProfileModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="cm-body">
+      <div id="cmName" class="cm-name"></div>
+      <div id="cmHandle" class="cm-handle"></div>
+      <div id="cmBio" class="cm-bio"></div>
+
+      <div class="cm-stats-row">
+        <div class="cm-stat"><div class="cm-stat-val gradient-text" id="cmFollowers"></div><div class="cm-stat-lbl">Followers</div></div>
+        <div class="cm-stat"><div class="cm-stat-val" style="color:var(--gold-light)" id="cmXP"></div><div class="cm-stat-lbl">XP</div></div>
+        <div class="cm-stat"><div class="cm-stat-val" style="color:var(--green-light)" id="cmEng"></div><div class="cm-stat-lbl">Eng. Rate</div></div>
+        <div class="cm-stat"><div class="cm-stat-val" style="color:var(--blue-light)" id="cmPlaces"></div><div class="cm-stat-lbl">Places</div></div>
+        <div class="cm-stat"><div class="cm-stat-val" style="color:#a78bfa" id="cmTrust"></div><div class="cm-stat-lbl">Trust</div></div>
+      </div>
+
+      <div class="cm-section">
+        <div class="cm-section-title">Audience</div>
+        <div id="cmAudience" style="font-size:0.82rem;color:var(--text-secondary)"></div>
+      </div>
+
+      <div class="cm-section">
+        <div class="cm-section-title">Top Content Categories</div>
+        <div id="cmCategories" class="creator-badges"></div>
+      </div>
+
+      <div class="cm-section">
+        <div class="cm-section-title">Recent Posts</div>
+        <div class="cm-post-grid" id="cmPostGrid"></div>
+      </div>
+
+      <div class="cm-section">
+        <div class="cm-section-title">Best Performing Post</div>
+        <div class="cm-best-post" id="cmBestPost"></div>
+      </div>
+
+      <div class="cm-section">
+        <div class="cm-section-title">Collaboration Packages</div>
+        <div class="cm-packages" id="cmPackages"></div>
+      </div>
+
+      <div class="cm-section">
+        <div class="cm-section-title">Previous Business Collaborations</div>
+        <div class="cm-collab-tags" id="cmPrevCollabs"></div>
+      </div>
+
+      <div class="cm-section">
+        <div class="cm-section-title">Trust Indicators</div>
+        <div class="cm-trust" id="cmTrustIndicators"></div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button class="btn btn-primary btn-full" id="cmSendOffer" onclick="openOfferFromProfile()"><i class="fas fa-paper-plane"></i> Send Collaboration Offer</button>
+        <button class="btn btn-ghost" onclick="closeProfileModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SEND OFFER MODAL ===== -->
+<div class="cm-overlay" id="offerModal">
+  <div class="cm-modal" style="max-width:520px">
+    <div style="padding:20px 24px 0;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div>
+        <div style="font-size:1rem;font-weight:800">Send Collaboration Offer</div>
+        <div id="offerTargetName" style="font-size:0.78rem;color:var(--text-muted);margin-top:2px"></div>
+      </div>
+      <button class="cm-close" onclick="closeOfferModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="cm-body">
+
+      <!-- Success state -->
+      <div class="offer-success" id="offerSuccess">
+        <div class="offer-success-icon">🎉</div>
+        <div style="font-size:1.1rem;font-weight:800;margin-bottom:8px">Offer Sent!</div>
+        <div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:20px">Your collaboration offer has been delivered. The creator will respond within 48 hours.</div>
+        <div style="background:var(--bg-elevated);border-radius:var(--radius-md);padding:14px;text-align:left;margin-bottom:20px">
+          <div id="offerSummary" style="font-size:0.8rem;color:var(--text-secondary)"></div>
+        </div>
+        <button class="btn btn-primary" onclick="closeOfferModal()">Done</button>
+      </div>
+
+      <!-- Form body -->
+      <div id="offerFormBody" class="offer-form-body">
+        <div style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-muted);margin-bottom:10px">Offer Type</div>
+        <div class="offer-type-grid" id="offerTypeGrid">
+          <div class="offer-type-card selected" data-type="free_product" onclick="selectOfferType(this)"><div class="offer-type-icon">🎁</div><div class="offer-type-name">Free Product</div></div>
+          <div class="offer-type-card" data-type="paid" onclick="selectOfferType(this)"><div class="offer-type-icon">💰</div><div class="offer-type-name">Paid Collab</div></div>
+          <div class="offer-type-card" data-type="discount" onclick="selectOfferType(this)"><div class="offer-type-icon">🏷️</div><div class="offer-type-name">Discount Code</div></div>
+          <div class="offer-type-card" data-type="event" onclick="selectOfferType(this)"><div class="offer-type-icon">🎉</div><div class="offer-type-name">Event Invite</div></div>
+          <div class="offer-type-card" data-type="checkin" onclick="selectOfferType(this)"><div class="offer-type-icon">📍</div><div class="offer-type-name">Sponsored Check-in</div></div>
+          <div class="offer-type-card" data-type="story" onclick="selectOfferType(this)"><div class="offer-type-icon">📱</div><div class="offer-type-name">Story Promo</div></div>
+          <div class="offer-type-card" data-type="feed" onclick="selectOfferType(this)"><div class="offer-type-icon">🖼️</div><div class="offer-type-name">Feed Post</div></div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Campaign Title</label>
+          <input type="text" class="form-input" id="offerTitle" placeholder="e.g. Summer Café Partnership">
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Offer Details</label>
+          <textarea class="form-textarea" id="offerDetails" style="min-height:80px" placeholder="Describe what you're offering and what you expect…"></textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div class="form-group">
+            <label class="form-label">Budget (GEL)</label>
+            <input type="number" class="form-input" id="offerBudget" placeholder="e.g. 150">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Deadline</label>
+            <input type="date" class="form-input" id="offerDeadline">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:16px">
+          <label class="form-label">Expected Deliverables</label>
+          <input type="text" class="form-input" id="offerDeliverables" placeholder="e.g. 1 feed post + 3 stories within 2 weeks">
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary btn-full" onclick="submitOffer()"><i class="fas fa-paper-plane"></i> Send Offer</button>
+          <button class="btn btn-ghost" onclick="closeOfferModal()">Cancel</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="config.js"></script>
+  <script src="api-client.js"></script>
+  <script src="main.js"></script>
+  <script src="account.js"></script>
+<script src="mock-users.js"></script>
+<script>
+
+/* =========================================================
+   CREATOR EXTRA DATA
+   ========================================================= */
+const CREATOR_EXTRA = {
+  u01: {
+    engagementRate: 7.5, niche: 'Cafés', nicheIcon: '☕', avgPrice: 80, completedCollabs: 12,
+    audienceType: 'Young professionals, students & café enthusiasts in Tbilisi',
+    topCategories: ['Café Reviews', 'Event Guides', 'Morning Routines', 'Hidden Spots'],
+    packages: [
+      { name: 'Story Mention', price: 40, desc: '3 stories, 24h live, geo-tag' },
+      { name: 'Feed Post', price: 80, desc: '1 post + caption + location tags' },
+      { name: 'Full Campaign', price: 180, desc: '1 post + 5 stories + save-worthy format' }
+    ],
+    previousCollabs: ['Fabrika Tbilisi', 'Roasters Lab', 'Stamba Hotel', 'Biltmore Tbilisi'],
+    recentPlaces: ['Fabrika Tbilisi', 'Vake Park', 'Betsy Hotel'],
+    matchScore: 96, availability: 'Available',
+    bestPost: { caption: 'Morning coffee turned into a 2-hour coworking session.', likes: 128, img: 'feed-fabrika-real' }
+  },
+  u02: {
+    engagementRate: 8.3, niche: 'Hiking', nicheIcon: '🏔️', avgPrice: 120, completedCollabs: 8,
+    audienceType: 'Hikers, trail runners & outdoor adventure seekers across Georgia',
+    topCategories: ['Trail Notes', 'Mountain Reviews', 'Route Maps', 'Gear Tips'],
+    packages: [
+      { name: 'Mention Post', price: 60, desc: '1 post with trail/adventure context' },
+      { name: 'Guide Feature', price: 120, desc: 'Detailed route guide + post + story' },
+      { name: 'Sponsored Trek', price: 300, desc: 'Full trek coverage + reel + 5 stories' }
+    ],
+    previousCollabs: ['Kazbegi Adventures', 'Mestia Svan Guesthouse', 'Trek Georgia'],
+    recentPlaces: ['Juta Valley', 'Gergeti Glacier', 'Kazbegi'],
+    matchScore: 72, availability: 'Available',
+    bestPost: { caption: 'Trail is dry until the last section. The view after the ridge is unreal.', likes: 284, img: 'feed-juta-trail' }
+  },
+  u04: {
+    engagementRate: 6.1, niche: 'Food & Wine', nicheIcon: '🍷', avgPrice: 100, completedCollabs: 15,
+    audienceType: 'Food lovers, wine enthusiasts & restaurant-goers in Georgia',
+    topCategories: ['Restaurant Reviews', 'Wine Pairing', 'Khinkali Guides', 'Menu Deep-dives'],
+    packages: [
+      { name: 'Dish Feature', price: 60, desc: '1 post featuring a specific dish' },
+      { name: 'Restaurant Review', price: 100, desc: 'Full review post + stories + menu callout' },
+      { name: 'Monthly Partner', price: 280, desc: '4 posts + 8 stories + story highlight' }
+    ],
+    previousCollabs: ['Shavi Lomi', 'Barbarestan', 'Wine Factory N1', 'Café Littera'],
+    recentPlaces: ['Shavi Lomi', 'Keto & Kote', 'Vinotel Tbilisi'],
+    matchScore: 89, availability: 'Available',
+    bestPost: { caption: 'Seasonal menu is stronger this month. Try the mushroom khinkali.', likes: 176, img: 'feed-shavi-review' }
+  },
+  u06: {
+    engagementRate: 5.8, niche: 'Nightlife', nicheIcon: '🎵', avgPrice: 90, completedCollabs: 7,
+    audienceType: 'Young Tbilisi locals, night market crowd & event-goers',
+    topCategories: ['Event Coverage', 'Night Market Guides', 'DJ Set Recaps', 'Group Plans'],
+    packages: [
+      { name: 'Event Story', price: 45, desc: 'Live stories from your event (2h)' },
+      { name: 'Event Post', price: 90, desc: '1 post + pre/during/after stories' },
+      { name: 'Full Event Promo', price: 200, desc: 'Pre-hype + live + recap reel' }
+    ],
+    previousCollabs: ['Fabrika Night Market', 'Bassiani', 'Khidi Club'],
+    recentPlaces: ['Fabrika Courtyard', 'Rike Park', 'Chardin St.'],
+    matchScore: 78, availability: 'Busy',
+    bestPost: { caption: 'Group plan open for tonight. Food trucks + DJ after 21:00.', likes: 201, img: 'feed-night-market' }
+  },
+  u07: {
+    engagementRate: 7.2, niche: 'Photography', nicheIcon: '📸', avgPrice: 110, completedCollabs: 10,
+    audienceType: 'Aesthetics enthusiasts, design-lovers & Tbilisi architecture fans',
+    topCategories: ['Urban Photography', 'Hidden Spots', 'Golden Hour Walks', 'Architecture'],
+    packages: [
+      { name: 'Location Feature', price: 55, desc: '1 aesthetics post tagging your location' },
+      { name: 'Mini-shoot', price: 110, desc: '3 posts from your venue, curated lighting' },
+      { name: 'Portfolio Series', price: 250, desc: '6-post series of your space over 2 weeks' }
+    ],
+    previousCollabs: ['Rooms Hotel Tbilisi', 'Fabrika', 'Old Town Gallery'],
+    recentPlaces: ['Sololaki', 'Mtatsminda', 'Vera District'],
+    matchScore: 82, availability: 'Available',
+    bestPost: { caption: 'Tiny courtyard, blue stairs, warm light. Keep it respectful if you visit.', likes: 421, img: 'feed-sololaki-yard' }
+  },
+  u10: {
+    engagementRate: 4.2, niche: 'Luxury', nicheIcon: '💎', avgPrice: 220, completedCollabs: 18,
+    audienceType: 'Luxury travelers, spa-goers & premium experience seekers',
+    topCategories: ['Boutique Hotels', 'Fine Dining', 'Spa Reviews', 'Premium Rewards'],
+    packages: [
+      { name: 'Hotel Story', price: 100, desc: '5 premium stories from your property' },
+      { name: 'Luxury Feature', price: 220, desc: '1 post + 8 stories + highlight save' },
+      { name: 'Brand Partnership', price: 550, desc: 'Monthly ambassador (4 posts + stories)' }
+    ],
+    previousCollabs: ['Biltmore Tbilisi', 'Stamba Hotel', 'Adjara Group Hotels', 'Château Mukhrani'],
+    recentPlaces: ['Batumi Sheraton', 'Vinotel', 'Rixos Shekvetili'],
+    matchScore: 68, availability: 'Available',
+    bestPost: { caption: 'Boutique spa weekend done right. The amber wine pairing at dinner was the highlight.', likes: 389, img: 'gh-salome' }
+  },
+  u14: {
+    engagementRate: 5.9, niche: 'Travel', nicheIcon: '✈️', avgPrice: 95, completedCollabs: 11,
+    audienceType: 'International travelers, expats & slow-travel enthusiasts in Georgia',
+    topCategories: ['Region Guides', 'Wine Routes', 'Travel Tips', 'Off-the-beaten-path'],
+    packages: [
+      { name: 'Destination Post', price: 50, desc: '1 travel-narrative post with location tag' },
+      { name: 'Region Guide', price: 95, desc: 'Detailed post + 5 stories covering your area' },
+      { name: 'Series Feature', price: 220, desc: '3-post mini-series across one week' }
+    ],
+    previousCollabs: ['Georgian Travel House', 'Wine Factory N1', 'Kaheti Lodge'],
+    recentPlaces: ['Sighnaghi', 'Mtskheta', 'Borjomi'],
+    matchScore: 74, availability: 'Available',
+    bestPost: { caption: 'Documenting Georgia slowly, one region at a time.', likes: 214, img: 'gh-sofia' }
+  },
+  u27: {
+    engagementRate: 9.1, niche: 'Hiking', nicheIcon: '🏔️', avgPrice: 80, completedCollabs: 6,
+    audienceType: 'Trail runners, ultra athletes & fitness hikers in Georgia',
+    topCategories: ['Trail Running', 'Elevation Maps', 'Weather Updates', 'Gear Reviews'],
+    packages: [
+      { name: 'Trail Mention', price: 40, desc: '1 post mentioning your tour/service' },
+      { name: 'Route Feature', price: 80, desc: 'Full route post with your brand visible' },
+      { name: 'Race Sponsorship', price: 180, desc: 'Race-day coverage + recap reel' }
+    ],
+    previousCollabs: ['Kazbegi Adventures', 'Borjomi Park Authority'],
+    recentPlaces: ['Borjomi', 'Bakuriani Trail', 'Likani Park'],
+    matchScore: 65, availability: 'Available',
+    bestPost: { caption: 'Trail running reality check: wind after 2pm is no joke at this elevation.', likes: 198, img: 'feed-juta-trail' }
+  },
+  u30: {
+    engagementRate: 6.4, niche: 'Photography', nicheIcon: '📸', avgPrice: 95, completedCollabs: 9,
+    audienceType: 'Design enthusiasts, architecture lovers & gallery visitors',
+    topCategories: ['Architecture', 'Gallery Coverage', 'City Walks', 'Light & Shadow'],
+    packages: [
+      { name: 'Space Feature', price: 50, desc: '1 aesthetic post from your venue' },
+      { name: 'Atmosphere Series', price: 95, desc: '3 posts capturing your space\'s mood' },
+      { name: 'Full Shoot', price: 210, desc: '6-post curated series across 2 sessions' }
+    ],
+    previousCollabs: ['Tbilisi Art House', 'Galleria Tbilisi', 'Rooms Hotel'],
+    recentPlaces: ['Sololaki', 'Saburtalo Gallery', 'Mtatsminda'],
+    matchScore: 80, availability: 'Busy',
+    bestPost: { caption: 'Architecture, balconies, and slow city walks. This city never runs out of frames.', likes: 312, img: 'feed-sololaki-yard' }
+  },
+  u12: {
+    engagementRate: 5.4, niche: 'Travel', nicheIcon: '🗺️', avgPrice: 70, completedCollabs: 5,
+    audienceType: 'History lovers, museum-goers & hidden gem seekers in Tbilisi',
+    topCategories: ['Hidden Courtyards', 'Museums', 'City History', 'Walking Routes'],
+    packages: [
+      { name: 'Discovery Post', price: 35, desc: '1 hidden-spot feature with your location' },
+      { name: 'Guide Post', price: 70, desc: 'Narrative guide post + stories + map' },
+      { name: 'Series', price: 160, desc: '3-part hidden Tbilisi series' }
+    ],
+    previousCollabs: ['National Museum of Georgia', 'Fabrika', 'Old City Tour'],
+    recentPlaces: ['Narikala', 'Abanotubani', 'Sololaki'],
+    matchScore: 71, availability: 'Available',
+    bestPost: { caption: 'Old Sololaki still has magic. Places people walk past too fast.', likes: 287, img: 'feed-sololaki-yard' }
+  },
+  u21: {
+    engagementRate: 4.8, niche: 'Events', nicheIcon: '🎉', avgPrice: 65, completedCollabs: 8,
+    audienceType: 'Event-goers, workshop attendees & market visitors in Tbilisi',
+    topCategories: ['Market Coverage', 'Workshop Reviews', 'Concert Recaps', 'Meetup Guides'],
+    packages: [
+      { name: 'Event Mention', price: 30, desc: '2 stories on event day' },
+      { name: 'Event Feature', price: 65, desc: '1 post + before/after stories' },
+      { name: 'Monthly Events', price: 150, desc: '4 event posts per month' }
+    ],
+    previousCollabs: ['Fabrika Night Market', 'Lisi Weekend Market', 'Open Air Tbilisi'],
+    recentPlaces: ['Fabrika', 'Rike Park', 'Mziuri Park'],
+    matchScore: 83, availability: 'Available',
+    bestPost: { caption: 'I am bringing two friends. This market has the best lineup this season.', likes: 156, img: 'feed-night-market' }
+  },
+  u13: {
+    engagementRate: 4.1, niche: 'Nightlife', nicheIcon: '🎵', avgPrice: 55, completedCollabs: 4,
+    audienceType: 'Late-night Tbilisi crowd, bar-hoppers & music scene followers',
+    topCategories: ['Bar Reviews', 'Music Nights', 'Late Dinner Maps', 'Nightlife Guides'],
+    packages: [
+      { name: 'Bar Story', price: 28, desc: '3 stories from your venue at night' },
+      { name: 'Night Review', price: 55, desc: '1 review post + night stories' },
+      { name: 'Weekly Feature', price: 120, desc: '4 nightlife posts per month' }
+    ],
+    previousCollabs: ['Mtkvarze Bar', 'Bassiani', 'Sharden Street Bars'],
+    recentPlaces: ['Chardin St.', 'Wine Bar Tbilisi', 'Argo'],
+    matchScore: 61, availability: 'Available',
+    bestPost: { caption: 'Honest nightlife review: the new bar on Chardin is worth the line.', likes: 143, img: 'feed-night-market' }
+  },
+  u23: {
+    engagementRate: 6.8, niche: 'Food & Wine', nicheIcon: '🍽️', avgPrice: 70, completedCollabs: 9,
+    audienceType: 'Food bloggers, restaurant regulars & dessert hunters in Kutaisi & Tbilisi',
+    topCategories: ['Detailed Reviews', 'Menu Photos', 'Dessert Features', 'No-drama Recs'],
+    packages: [
+      { name: 'Dish Review', price: 35, desc: '1 honest dish review with photos' },
+      { name: 'Restaurant Feature', price: 70, desc: 'Full review post + menu photos + stories' },
+      { name: 'Monthly Column', price: 190, desc: '4 reviews + ongoing story coverage' }
+    ],
+    previousCollabs: ['Palaty Restaurant', 'Kutaisi Pub', 'Wine Cellar Kutaisi'],
+    recentPlaces: ['Palaty', 'Kutaisi Central Market', 'Bagrati Cathedral area'],
+    matchScore: 87, availability: 'Available',
+    bestPost: { caption: 'Detailed food notes and no-drama recommendations. Kutaisi has a food scene now.', likes: 167, img: 'feed-shavi-review' }
+  },
+  u18: {
+    engagementRate: 5.2, niche: 'Travel', nicheIcon: '🎒', avgPrice: 50, completedCollabs: 6,
+    audienceType: 'Budget backpackers, hostel travelers & route planners visiting Georgia',
+    topCategories: ['Budget Routes', 'Hostel Reviews', 'Transport Maps', 'Cheap Eats'],
+    packages: [
+      { name: 'Route Feature', price: 25, desc: '1 route post tagging your service' },
+      { name: 'Budget Guide', price: 50, desc: 'Budget travel post + hostel/tour mention' },
+      { name: 'Backpacker Series', price: 110, desc: '3 budget travel posts over 2 weeks' }
+    ],
+    previousCollabs: ['Fabrika Hostel', 'Kutaisi Hostel Hub', 'Georgia Bus Tours'],
+    recentPlaces: ['Kutaisi', 'Sighnaghi', 'Batumi'],
+    matchScore: 58, availability: 'Available',
+    bestPost: { caption: 'Backpacking Georgia: Kutaisi to Batumi in 48 hours under 40 GEL.', likes: 119, img: 'feed-kakheti-group' }
+  },
+};
+
+/* =========================================================
+   BUILD CREATOR LIST  (MOCK_USERS + EXTRA)
+   ========================================================= */
+const CREATOR_IDS = ['u01','u02','u04','u06','u07','u10','u14','u27','u30','u12','u21','u13','u23','u18'];
+const CREATORS = CREATOR_IDS.map(id => {
+  const u = MOCK_USERS.find(x => x.id === id);
+  const e = CREATOR_EXTRA[id] || {};
+  return { ...u, ...e };
+}).filter(Boolean);
+
+/* =========================================================
+   LEADERBOARD DATA
+   ========================================================= */
+const LB_DATA = {
+  xp: [
+    { id:'u02', val:'15,680 XP' }, { id:'u12', val:'12,140 XP' }, { id:'u27', val:'9,300 XP' },
+    { id:'u01', val:'8,420 XP' }, { id:'u14', val:'8,350 XP' }
+  ],
+  engagement: [
+    { id:'u27', val:'9.1%' }, { id:'u02', val:'8.3%' }, { id:'u01', val:'7.5%' },
+    { id:'u07', val:'7.2%' }, { id:'u23', val:'6.8%' }
+  ],
+  collabs: [
+    { id:'u10', val:'18 collabs' }, { id:'u04', val:'15 collabs' }, { id:'u01', val:'12 collabs' },
+    { id:'u14', val:'11 collabs' }, { id:'u07', val:'10 collabs' }
+  ],
+  trust: [
+    { id:'u12', val:'99 / 100' }, { id:'u02', val:'98 / 100' }, { id:'u04', val:'96 / 100' },
+    { id:'u27', val:'96 / 100' }, { id:'u01', val:'94 / 100' }
+  ]
+};
+
+/* =========================================================
+   FILTER STATE
+   ========================================================= */
+let state = { niche:'', level:'', availability:'', trust:'', city:'', followers:'', engagement:'', sort:'match' };
+let activeCreator = null;
+let activeOfferType = 'free_product';
+
+/* =========================================================
+   RENDER CREATORS
+   ========================================================= */
+function levelClass(lvl) {
+  if (lvl.includes('Platinum')) return 'platinum';
+  if (lvl.includes('Gold')) return 'gold';
+  if (lvl.includes('Silver')) return 'silver';
+  return 'bronze';
+}
+function fmtNum(n) { return n >= 1000 ? (n/1000).toFixed(1) + 'K' : n; }
+
+function renderCreatorCard(c) {
+  const lvl = levelClass(c.explorerLevel);
+  const seeds = ['cafe-1','feed-fabrika-real','feed-night-market','feed-sololaki-yard','feed-juta-trail'];
+  const placeThumbs = (c.recentPlaces || ['Tbilisi','Batumi','Kutaisi']).slice(0,3).map((p,i)=>
+    `<div class="creator-place-thumb"><img src="https://picsum.photos/seed/${seeds[i%seeds.length]}/200/80" alt="${p}" loading="lazy"></div>`).join('');
+  const badges = (c.badges || []).slice(0,2).map(b => `<span class="creator-badge">${b}</span>`).join('');
+
+  return `
+  <div class="creator-card animate-fade-up" onclick="openProfile('${c.id}')">
+    <div class="creator-card-top">
+      <img src="https://picsum.photos/seed/gh-${c.id}-cover/600/200" alt="" class="creator-card-cover" loading="lazy">
+      <div class="creator-match-badge"><i class="fas fa-robot" style="margin-right:3px"></i>${c.matchScore}% match</div>
+      <div class="creator-level-ring ${lvl}">
+        <div class="creator-avatar-inner">
+          <img src="${c.avatar}" alt="${c.fullName}" loading="lazy">
+        </div>
+      </div>
+    </div>
+    <div class="creator-card-body">
+      <div class="creator-name">${c.fullName}</div>
+      <div class="creator-username">@${c.username}</div>
+      <div class="creator-meta">
+        <span class="creator-city"><i class="fas fa-map-marker-alt" style="color:var(--green);font-size:0.65rem"></i>${c.city}</span>
+        <span class="creator-niche">${c.nicheIcon || '🌍'} ${c.niche || 'Creator'}</span>
+        ${c.availability === 'Available'
+          ? '<span style="font-size:0.68rem;color:var(--green-light);font-weight:700">● Available</span>'
+          : '<span style="font-size:0.68rem;color:var(--gold-light);font-weight:700">● Busy</span>'}
+      </div>
+      <div class="creator-stats">
+        <div class="creator-stat">
+          <div class="creator-stat-val gradient-text">${fmtNum(c.followers)}</div>
+          <div class="creator-stat-lbl">Followers</div>
+        </div>
+        <div class="creator-stat">
+          <div class="creator-stat-val" style="color:var(--green-light)">${c.engagementRate}%</div>
+          <div class="creator-stat-lbl">Eng.</div>
+        </div>
+        <div class="creator-stat">
+          <div class="creator-stat-val" style="color:var(--gold-light)">${fmtNum(c.xp)}</div>
+          <div class="creator-stat-lbl">XP</div>
+        </div>
+        <div class="creator-stat">
+          <div class="creator-stat-val" style="color:#a78bfa">${c.trustScore}</div>
+          <div class="creator-stat-lbl">Trust</div>
+        </div>
+      </div>
+      <div class="creator-badges">${badges}</div>
+      <div class="creator-places">${placeThumbs}</div>
+      <div class="match-bar-wrap">
+        <div class="match-bar-label">
+          <span class="match-bar-text"><i class="fas fa-robot"></i> Business match score</span>
+          <span class="match-bar-pct">${c.matchScore}%</span>
+        </div>
+        <div class="match-bar-track"><div class="match-bar-fill" style="width:${c.matchScore}%"></div></div>
+      </div>
+      <div class="creator-price">Avg. collab from <strong>${c.avgPrice} GEL</strong> · ${c.completedCollabs} collabs done</div>
+      <div class="creator-actions" onclick="event.stopPropagation()">
+        <button class="btn btn-primary btn-sm btn-full" onclick="openOffer('${c.id}')"><i class="fas fa-paper-plane"></i> Send Offer</button>
+        <button class="btn btn-ghost btn-sm" onclick="openProfile('${c.id}')"><i class="fas fa-eye"></i> View</button>
+        <button class="btn btn-ghost btn-sm" title="Report" onclick="window.location.href='trust.html?report=bad_behavior&target='+encodeURIComponent('${c.username||c.name}')" style="padding:0 10px;color:var(--text-muted)"><i class="fas fa-flag"></i></button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  state.city = document.getElementById('filterCity').value;
+  const nicheTop = document.getElementById('filterNiche').value;
+  const followersF = document.getElementById('filterFollowers').value;
+  const engF = document.getElementById('filterEngagement').value;
+  const levelF = document.getElementById('filterLevel').value;
+  state.sort = document.getElementById('sortBy').value;
+
+  let list = CREATORS.filter(c => {
+    if (search && !c.fullName.toLowerCase().includes(search) && !c.username.toLowerCase().includes(search)) return false;
+    if (state.city && c.city !== state.city) return false;
+    const niche = state.niche || nicheTop;
+    if (niche && !c.niche.includes(niche)) return false;
+    if (levelF && c.explorerLevel !== levelF) return false;
+    if (state.level && c.explorerLevel !== state.level) return false;
+    if (state.availability && c.availability !== state.availability) return false;
+    if (state.trust && c.trustScore < parseInt(state.trust)) return false;
+    if (followersF === 'lt1k' && c.followers >= 1000) return false;
+    if (followersF === '1k5k' && (c.followers < 1000 || c.followers >= 5000)) return false;
+    if (followersF === 'gt5k' && c.followers < 5000) return false;
+    if (engF === 'lt3' && c.engagementRate >= 3) return false;
+    if (engF === '3to6' && (c.engagementRate < 3 || c.engagementRate > 6)) return false;
+    if (engF === 'gt6' && c.engagementRate <= 6) return false;
+    return true;
+  });
+
+  list.sort((a,b) => {
+    if (state.sort === 'xp') return b.xp - a.xp;
+    if (state.sort === 'engagement') return b.engagementRate - a.engagementRate;
+    if (state.sort === 'price_asc') return a.avgPrice - b.avgPrice;
+    if (state.sort === 'price_desc') return b.avgPrice - a.avgPrice;
+    if (state.sort === 'followers') return b.followers - a.followers;
+    return b.matchScore - a.matchScore;
+  });
+
+  const grid = document.getElementById('creatorGrid');
+  document.getElementById('resultCount').textContent = list.length;
+  if (list.length === 0) {
+    grid.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><div style="font-size:1rem;font-weight:700;margin-bottom:6px">No creators found</div><div style="font-size:0.85rem">Try adjusting your filters</div></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(c => renderCreatorCard(c)).join('');
+}
+
+function setSidebarFilter(type, val, el) {
+  state[type] = val;
+  const parent = el.parentElement;
+  parent.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  applyFilters();
+}
+
+function clearAllFilters() {
+  state = { niche:'', level:'', availability:'', trust:'', city:'', followers:'', engagement:'', sort:'match' };
+  document.getElementById('searchInput').value = '';
+  document.getElementById('filterCity').value = '';
+  document.getElementById('filterNiche').value = '';
+  document.getElementById('filterFollowers').value = '';
+  document.getElementById('filterEngagement').value = '';
+  document.getElementById('filterLevel').value = '';
+  document.getElementById('sortBy').value = 'match';
+  document.querySelectorAll('.filter-chips .filter-chip').forEach((c,i) => {
+    c.classList.toggle('active', i === 0 && c.parentElement.children[0] === c);
+  });
+  // Reset all first chips to active
+  document.querySelectorAll('.filter-chips').forEach(fc => {
+    fc.querySelectorAll('.filter-chip').forEach((c,i) => c.classList.toggle('active', i === 0));
+  });
+  applyFilters();
+}
+
+/* =========================================================
+   PROFILE MODAL
+   ========================================================= */
+function openProfile(id) {
+  const c = CREATORS.find(x => x.id === id);
+  if (!c) return;
+  activeCreator = c;
+
+  document.getElementById('cmCover').src = c.coverImage || `https://picsum.photos/seed/gh-${id}-cover/800/300`;
+  document.getElementById('cmAvatar').src = c.avatar;
+  document.getElementById('cmName').textContent = c.fullName;
+  document.getElementById('cmHandle').textContent = `@${c.username} · ${c.city} · ${c.explorerLevel}`;
+  document.getElementById('cmBio').textContent = c.bio;
+  document.getElementById('cmFollowers').textContent = fmtNum(c.followers);
+  document.getElementById('cmXP').textContent = fmtNum(c.xp);
+  document.getElementById('cmEng').textContent = c.engagementRate + '%';
+  document.getElementById('cmPlaces').textContent = c.visitedPlaces;
+  document.getElementById('cmTrust').textContent = c.trustScore;
+  document.getElementById('cmAudience').textContent = c.audienceType || 'General GeoHub audience';
+
+  const lvl = levelClass(c.explorerLevel);
+  const lvlColors = { bronze:'#cd7f32', silver:'#94a3b8', gold:'#f59e0b', platinum:'#a78bfa' };
+  document.getElementById('cmLevelBadge').textContent = c.explorerLevel.replace(' Explorer','');
+  document.getElementById('cmLevelBadge').style.cssText = `background:${lvlColors[lvl]};color:${lvl==='silver'?'#000':'#fff'};`;
+
+  document.getElementById('cmCategories').innerHTML = (c.topCategories || []).map(cat =>
+    `<span class="creator-badge" style="font-size:0.72rem">${cat}</span>`).join('');
+
+  const imgSeeds = ['feed-fabrika-real','feed-juta-trail','feed-night-market','feed-sololaki-yard','feed-shavi-review','feed-cleanup'];
+  document.getElementById('cmPostGrid').innerHTML = imgSeeds.slice(0,6).map(s =>
+    `<div class="cm-post-thumb"><img src="https://picsum.photos/seed/${s}/300/300" alt="" loading="lazy"></div>`).join('');
+
+  const bp = c.bestPost || {};
+  document.getElementById('cmBestPost').innerHTML = `
+    <div class="cm-best-post-img"><img src="https://picsum.photos/seed/${bp.img||'feed-fabrika-real'}/200/200" alt="" loading="lazy"></div>
+    <div>
+      <div style="font-size:0.8rem;font-weight:700;margin-bottom:4px;color:var(--green-light)">Best Performing Post</div>
+      <div style="font-size:0.78rem;color:var(--text-secondary);margin-bottom:6px">"${bp.caption||c.bio}"</div>
+      <div style="font-size:0.72rem;color:var(--text-muted)"><i class="fas fa-heart" style="color:#ef4444"></i> ${bp.likes||'--'} likes · Top post this month</div>
+    </div>`;
+
+  document.getElementById('cmPackages').innerHTML = (c.packages || []).map(pkg => `
+    <div class="cm-package">
+      <div>
+        <div class="cm-pkg-name">${pkg.name}</div>
+        <div class="cm-pkg-desc">${pkg.desc}</div>
+      </div>
+      <div class="cm-pkg-price">${pkg.price} GEL</div>
+    </div>`).join('');
+
+  document.getElementById('cmPrevCollabs').innerHTML = (c.previousCollabs || []).map(b =>
+    `<span class="cm-collab-tag"><i class="fas fa-store" style="color:var(--green);margin-right:4px;font-size:0.65rem"></i>${b}</span>`).join('');
+
+  const indicators = [
+    { icon:'fa-check-circle', label:`Trust Score: ${c.trustScore}/100` },
+    { icon:'fa-bolt', label:`XP Rank #${c.rank}` },
+    { icon:'fa-handshake', label:`${c.completedCollabs} completed collabs` },
+    { icon:'fa-map-marker-alt', label:`${c.visitedPlaces} places verified` },
+    ...(c.availability === 'Available' ? [{ icon:'fa-calendar-check', label:'Available now' }] : [])
+  ];
+  document.getElementById('cmTrustIndicators').innerHTML = indicators.map(i =>
+    `<div class="cm-trust-item"><i class="fas ${i.icon}"></i>${i.label}</div>`).join('');
+
+  document.getElementById('profileModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeProfileModal() {
+  document.getElementById('profileModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function openOfferFromProfile() {
+  closeProfileModal();
+  if (activeCreator) openOffer(activeCreator.id);
+}
+
+/* =========================================================
+   OFFER MODAL
+   ========================================================= */
+function openOffer(id) {
+  const c = CREATORS.find(x => x.id === id);
+  if (!c) return;
+  activeCreator = c;
+  document.getElementById('offerTargetName').textContent = `To: ${c.fullName} (@${c.username})`;
+  document.getElementById('offerSuccess').classList.remove('show');
+  document.getElementById('offerFormBody').classList.remove('hidden');
+  document.getElementById('offerTitle').value = '';
+  document.getElementById('offerDetails').value = '';
+  document.getElementById('offerBudget').value = '';
+  document.getElementById('offerDeliverables').value = '';
+  document.querySelector('.offer-type-card.selected')?.classList.remove('selected');
+  document.querySelector('[data-type="free_product"]').classList.add('selected');
+  activeOfferType = 'free_product';
+  document.getElementById('offerModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeOfferModal() {
+  document.getElementById('offerModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function selectOfferType(el) {
+  document.querySelectorAll('.offer-type-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  activeOfferType = el.dataset.type;
+}
+
+const offerTypeLabels = {
+  free_product: 'Free Product', paid: 'Paid Collaboration', discount: 'Discount Code',
+  event: 'Event Invite', checkin: 'Sponsored Check-in', story: 'Story Promotion', feed: 'Feed Post'
+};
+
+function submitOffer() {
+  const title = document.getElementById('offerTitle').value.trim();
+  const budget = document.getElementById('offerBudget').value;
+  const deliverables = document.getElementById('offerDeliverables').value.trim();
+  const c = activeCreator;
+
+  document.getElementById('offerSummary').innerHTML = `
+    <div style="margin-bottom:6px"><strong>Creator:</strong> ${c.fullName} (@${c.username})</div>
+    <div style="margin-bottom:6px"><strong>Offer Type:</strong> ${offerTypeLabels[activeOfferType]}</div>
+    <div style="margin-bottom:6px"><strong>Campaign:</strong> ${title || 'Untitled'}</div>
+    ${budget ? `<div style="margin-bottom:6px"><strong>Budget:</strong> ${budget} GEL</div>` : ''}
+    ${deliverables ? `<div><strong>Expected:</strong> ${deliverables}</div>` : ''}
+  `;
+  document.getElementById('offerFormBody').classList.add('hidden');
+  document.getElementById('offerSuccess').classList.add('show');
+}
+
+/* =========================================================
+   LEADERBOARD
+   ========================================================= */
+let currentLbTab = 'xp';
+function switchLbTab(tab, el) {
+  currentLbTab = tab;
+  document.querySelectorAll('.lb-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderLeaderboard();
+}
+
+function renderLeaderboard() {
+  const data = LB_DATA[currentLbTab] || [];
+  const rankClasses = ['r1','r2','r3','rn','rn'];
+  document.getElementById('lbGrid').innerHTML = data.map((item, i) => {
+    const u = MOCK_USERS.find(x => x.id === item.id);
+    if (!u) return '';
+    return `
+    <div class="lb-card animate-fade-up">
+      <div class="lb-rank ${rankClasses[i]}">${i+1}</div>
+      <div class="lb-avatar"><img src="${u.avatar}" alt="${u.fullName}" loading="lazy"></div>
+      <div class="lb-info">
+        <div class="lb-name">${u.fullName}</div>
+        <div class="lb-sub">@${u.username} · ${u.city}</div>
+      </div>
+      <div class="lb-val">${item.val}</div>
+    </div>`;
+  }).join('');
+}
+
+/* =========================================================
+   CLOSE MODALS
+   ========================================================= */
+document.getElementById('profileModal').addEventListener('click', e => { if (e.target.id === 'profileModal') closeProfileModal(); });
+document.getElementById('offerModal').addEventListener('click', e => { if (e.target.id === 'offerModal') closeOfferModal(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeProfileModal(); closeOfferModal(); }
+});
+
+/* =========================================================
+   INIT
+   ========================================================= */
+applyFilters();
+renderLeaderboard();
+initScrollAnimations?.();
+
+// Scroll animation for match bars
+setTimeout(() => {
+  document.querySelectorAll('.match-bar-fill').forEach(bar => {
+    const w = bar.style.width;
+    bar.style.width = '0';
+    setTimeout(() => { bar.style.width = w; }, 100);
+  });
+}, 200);
+</script>
+<script src="nav-cleanup.js"></script>
+<script src="mobile-nav.js"></script>
+<script src="demo-mode.js"></script>
+</body>
+</html>

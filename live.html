@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live City — GeoHub</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#10b981">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GeoHub">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="stylesheet" href="mobile-nav.css">
+    <link rel="stylesheet" href="social-layer.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <nav class="navbar" id="navbar">
+      <a href="index.html" class="navbar-brand">
+        <div class="logo-icon"><i class="fas fa-location-dot"></i></div>
+        <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
+      </a>
+      <ul class="navbar-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="feed.html">Discover</a></li>
+        <li><a href="places.html">Places</a></li>
+        <li><a href="rewards.html">Rewards</a></li>
+        <li><a href="challenges.html">Challenges</a></li>
+        <li><a href="map.html">Map</a></li>
+        <li><a href="add-business.html">Add Business</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="live.html" class="active">Live</a></li>
+        <li><a href="assistant.html">Assistant</a></li>
+      </ul>
+      <div class="navbar-actions">
+        <a href="profile.html" class="btn-ghost-nav"
+          ><i class="fas fa-user-circle"></i> Profile</a
+        >
+      </div>
+      <div class="hamburger"><span></span><span></span><span></span></div>
+    </nav>
+
+    <div class="mobile-menu">
+      <a href="index.html">Home</a>
+      <a href="feed.html">Discover</a>
+      <a href="places.html">Places</a>
+      <a href="rewards.html">Rewards</a>
+      <a href="challenges.html">Challenges</a>
+      <a href="map.html">Map</a>
+      <a href="add-business.html">Add Business</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="live.html">Live</a>
+      <a href="assistant.html">Assistant</a>
+    </div>
+
+    <main class="live-page">
+      <section class="live-hero">
+        <div class="live-hero-card">
+          <span class="badge badge-gold">Live City</span>
+          <h1>GeoHub Live — The City Is Moving Now</h1>
+          <p>
+            See what is happening in real time across the city: events, busy
+            places, trending crowds, rewards, and live social moments. This mock
+            simulation updates automatically, no backend required.
+          </p>
+          <div class="live-stat-grid">
+            <div class="live-stat">
+              <strong id="livePulseCount">18</strong
+              ><small>active hotspots</small>
+            </div>
+            <div class="live-stat">
+              <strong id="liveEventCount">7</strong><small>events live</small>
+            </div>
+            <div class="live-stat">
+              <strong id="liveGroupCount">12</strong
+              ><small>groups nearby</small>
+            </div>
+            <div class="live-stat">
+              <strong id="liveNotifCount">5</strong><small>new alerts</small>
+            </div>
+          </div>
+          <div class="live-status-banner">
+            <span
+              ><strong id="livePhaseLabel">Evening</strong> pulse — currently
+              showing nightlife, social rides, and reward streaks.</span
+            >
+            <span class="badge badge-green">City mode active</span>
+          </div>
+        </div>
+
+        <div class="live-panel">
+          <div class="live-panel-header">
+            <h3>AI Live Suggestions</h3>
+            <span class="badge badge-blue">Smart</span>
+          </div>
+          <div class="live-suggest-list" id="liveSuggestions"></div>
+          <p class="live-footer-note">
+            Suggestions adapt to time-of-day and your city pulse.
+          </p>
+        </div>
+      </section>
+
+      <div class="live-grid">
+        <div class="live-column">
+          <div class="live-card">
+            <div class="live-card-header">
+              <h2>Live Activity Feed</h2>
+              <span class="badge">LIVE</span>
+            </div>
+            <div class="live-feed" id="liveFeed"></div>
+          </div>
+
+          <div class="live-card">
+            <div class="live-card-header">
+              <h2>Ongoing Events Radar</h2>
+              <span class="badge badge-gold">Events</span>
+            </div>
+            <div class="live-event-radar" id="eventRadar"></div>
+          </div>
+
+          <div class="live-card">
+            <div class="live-card-header">
+              <h2>Nearby Groups</h2>
+              <span class="badge badge-green">Join</span>
+            </div>
+            <div class="live-group-list" id="groupDiscovery"></div>
+          </div>
+        </div>
+
+        <div class="live-column">
+          <div class="live-map-panel">
+            <div class="live-card">
+              <div class="live-card-header">
+                <h2>Live City Map</h2>
+                <span class="badge badge-purple">Radar</span>
+              </div>
+              <div class="live-map" id="liveMap"></div>
+            </div>
+
+            <div class="live-card">
+              <div class="live-card-header">
+                <h2>Trending Now</h2>
+                <span class="badge badge-red">Hot</span>
+              </div>
+              <div class="live-event-radar" id="trendingNow"></div>
+            </div>
+
+            <div class="live-card">
+              <div class="live-card-header">
+                <h2>Busy Places</h2>
+                <span class="badge badge-blue">Crowd</span>
+              </div>
+              <div class="live-place-list" id="busyPlaces"></div>
+            </div>
+
+            <div class="live-card">
+              <div class="live-card-header">
+                <h2>Live Stories</h2>
+                <span class="badge badge-gold">Stories</span>
+              </div>
+              <div class="live-story-strip" id="liveStories"></div>
+            </div>
+
+            <div class="live-card">
+              <div class="live-card-header">
+                <h2>City Alerts</h2>
+                <span class="badge badge-green">Now</span>
+              </div>
+              <div class="live-notification-list" id="liveNotifications"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="mock-users.js"></script>
+    <script src="config.js"></script>
+  <script src="api-client.js"></script>
+  <script src="main.js"></script>
+  <script src="account.js"></script>
+    <script src="live.js"></script>
+  <script src="nav-cleanup.js"></script>
+  <script src="mobile-nav.js"></script>
+<script src="demo-mode.js"></script>
+</body>
+</html>

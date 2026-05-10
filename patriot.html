@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patriot Missions — GeoHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#10b981">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GeoHub">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="mobile-nav.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ── RESET & ROOT ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg-0); color: var(--text-primary); font-family: 'Inter', system-ui, sans-serif; overflow-x: hidden; }
+
+    /* ── LAYOUT ── */
+    .pt-page { padding-top: 66px; min-height: 100vh; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+    /* ── TOP BAR ── */
+    .pt-topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      height: 66px; background: rgba(4,5,13,0.97); border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(20px); display: flex; align-items: center; padding: 0 18px; gap: 14px;
+    }
+    .pt-back {
+      width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-secondary);
+      text-decoration: none; font-size: 0.85rem; transition: all 0.2s; flex-shrink: 0;
+    }
+    .pt-back:hover { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.3); color: var(--green); }
+    .pt-topbar-logo { display: flex; align-items: center; gap: 8px; flex: 1; }
+    .pt-logo-icon { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, #10b981, #3b82f6); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 900; color: white; }
+    .pt-logo-text { font-size: 0.88rem; font-weight: 800; color: var(--text-primary); }
+    .pt-logo-text span { color: var(--green); }
+    .pt-topbar-actions { display: flex; gap: 8px; }
+    .pt-icon-btn {
+      width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border); color: var(--text-secondary); font-size: 0.82rem;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
+    }
+    .pt-icon-btn:hover { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: var(--green); }
+    .pt-report-btn {
+      padding: 7px 14px; border-radius: 9999px; background: linear-gradient(135deg, #ef4444, #f97316);
+      border: none; color: #fff; font-size: 0.75rem; font-weight: 800; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; transition: opacity 0.2s; white-space: nowrap;
+    }
+    .pt-report-btn:hover { opacity: 0.85; }
+
+    /* ── HERO ── */
+    .pt-hero {
+      background:
+        radial-gradient(ellipse at 15% 20%, rgba(16,185,129,0.18) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 75%, rgba(59,130,246,0.13) 0%, transparent 45%),
+        radial-gradient(ellipse at 55% 50%, rgba(249,115,22,0.06) 0%, transparent 35%),
+        linear-gradient(180deg, #04050d 0%, #06080f 100%);
+      padding: 40px 0 36px; border-bottom: 1px solid rgba(255,255,255,0.06); position: relative; overflow: hidden;
+    }
+    .pt-hero-orb { position: absolute; border-radius: 50%; filter: blur(90px); pointer-events: none; }
+    .pt-hero-orb.o1 { width: 480px; height: 480px; left: -120px; top: -100px; background: rgba(16,185,129,0.09); animation: ptOrb 14s ease-in-out infinite alternate; }
+    .pt-hero-orb.o2 { width: 400px; height: 400px; right: -80px; bottom: -80px; background: rgba(59,130,246,0.08); animation: ptOrb 17s ease-in-out infinite alternate-reverse; }
+    @keyframes ptOrb { from{transform:translate(0,0) scale(1)} to{transform:translate(20px,14px) scale(1.08)} }
+
+    .pt-hero-inner { display: grid; grid-template-columns: 1fr auto; gap: 36px; align-items: center; position: relative; z-index: 1; }
+    @media(max-width:640px) { .pt-hero-inner { grid-template-columns: 1fr; } }
+
+    .pt-hero-badge {
+      display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
+      border-radius: 9999px; background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.3);
+      color: #fb923c; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;
+    }
+    .pt-hero-title { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 900; line-height: 1.1; margin-bottom: 10px; }
+    .pt-hero-title .hl { background: linear-gradient(135deg, #10b981 0%, #3b82f6 70%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .pt-hero-sub { font-size: 0.9rem; color: var(--text-secondary); max-width: 480px; line-height: 1.6; margin-bottom: 22px; }
+
+    .pt-hero-stats { display: flex; gap: 20px; flex-wrap: wrap; }
+    .pt-hstat { display: flex; flex-direction: column; }
+    .pt-hstat-val { font-size: 1.5rem; font-weight: 900; color: var(--text-primary); line-height: 1; }
+    .pt-hstat-val.green { color: var(--green); }
+    .pt-hstat-val.orange { color: #f97316; }
+    .pt-hstat-val.blue { color: var(--blue); }
+    .pt-hstat-label { font-size: 0.67rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 3px; }
+
+    /* Patriot Score Ring */
+    .pt-score-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; flex-shrink: 0; }
+    .pt-ring { position: relative; width: 110px; height: 110px; }
+    .pt-ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .pt-ring-svg circle { fill: none; stroke-width: 7; }
+    .pt-ring-track { stroke: rgba(255,255,255,0.06); }
+    .pt-ring-fill { stroke: url(#ptGrad); stroke-linecap: round; stroke-dasharray: 290; stroke-dashoffset: 87; transition: stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1); }
+    .pt-ring-inner {
+      position: absolute; inset: 12px; border-radius: 50%;
+      background: linear-gradient(135deg, #0a0d18, #06080f);
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+    }
+    .pt-ring-score { font-size: 1.5rem; font-weight: 900; color: var(--green); line-height: 1; }
+    .pt-ring-lbl { font-size: 0.52rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .pt-score-tag { font-size: 0.72rem; font-weight: 700; color: #f97316; display: flex; align-items: center; gap: 4px; }
+    .pt-score-tag i { font-size: 0.65rem; }
+
+    .pt-hero-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+    .pt-btn-primary {
+      padding: 10px 20px; border-radius: 9999px; background: linear-gradient(135deg, #10b981, #3b82f6);
+      border: none; color: #fff; font-size: 0.85rem; font-weight: 800; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 7px; transition: opacity 0.2s; text-decoration: none;
+    }
+    .pt-btn-primary:hover { opacity: 0.88; }
+    .pt-btn-ghost {
+      padding: 10px 20px; border-radius: 9999px; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12); color: var(--text-secondary); font-size: 0.85rem;
+      font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+      transition: all 0.2s; text-decoration: none;
+    }
+    .pt-btn-ghost:hover { border-color: rgba(16,185,129,0.4); color: var(--green); }
+
+    /* ── AI SUGGESTIONS STRIP ── */
+    .ai-strip {
+      background: linear-gradient(135deg, rgba(59,130,246,0.07), rgba(168,85,247,0.05));
+      border: 1px solid rgba(59,130,246,0.15); border-radius: 16px; padding: 14px 18px;
+      display: flex; align-items: center; gap: 14px; margin: 24px 0 0; overflow: hidden; position: relative; cursor: pointer;
+    }
+    .ai-strip-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .ai-strip-content { flex: 1; min-width: 0; }
+    .ai-strip-label { font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--blue); margin-bottom: 3px; }
+    .ai-strip-msg { font-size: 0.82rem; color: var(--text-primary); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ai-strip-nav { display: flex; gap: 4px; flex-shrink: 0; }
+    .ai-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(59,130,246,0.3); transition: background 0.3s; cursor: pointer; }
+    .ai-dot.active { background: var(--blue); }
+
+    /* ── MAP MOCK ── */
+    .pt-map-section { padding: 28px 0 0; }
+    .pt-section-title { font-size: 0.82rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .pt-section-title i { color: var(--green); }
+    .pt-map-wrap {
+      border-radius: 20px; overflow: hidden; position: relative; height: 220px;
+      background:
+        radial-gradient(ellipse at 30% 40%, rgba(16,185,129,0.1) 0%, transparent 40%),
+        radial-gradient(ellipse at 70% 65%, rgba(59,130,246,0.08) 0%, transparent 35%),
+        linear-gradient(135deg, #060810 0%, #0a0f1e 50%, #060810 100%);
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+    .pt-map-grid {
+      position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .pt-map-road-h { position: absolute; left: 0; right: 0; height: 2px; background: rgba(255,255,255,0.06); }
+    .pt-map-road-v { position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,0.06); }
+    .pt-map-pin {
+      position: absolute; transform: translate(-50%, -100%); cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      transition: transform 0.2s; z-index: 2;
+    }
+    .pt-map-pin:hover { transform: translate(-50%, -100%) scale(1.15); }
+    .pt-map-pin-dot {
+      width: 28px; height: 28px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg);
+      display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+      font-size: 0.7rem;
+    }
+    .pt-map-pin-dot.green { background: linear-gradient(135deg, #10b981, #059669); border: 2px solid rgba(52,211,153,0.6); }
+    .pt-map-pin-dot.orange { background: linear-gradient(135deg, #f97316, #ea580c); border: 2px solid rgba(251,146,60,0.6); }
+    .pt-map-pin-dot.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); border: 2px solid rgba(96,165,250,0.6); }
+    .pt-map-pin-dot.red { background: linear-gradient(135deg, #ef4444, #dc2626); border: 2px solid rgba(248,113,113,0.6); }
+    .pt-map-pin-icon { transform: rotate(45deg); color: #fff; }
+    .pt-map-pin-label { font-size: 0.58rem; font-weight: 700; color: rgba(255,255,255,0.7); background: rgba(4,5,13,0.85); padding: 2px 5px; border-radius: 4px; white-space: nowrap; backdrop-filter: blur(4px); }
+    .pt-map-user {
+      position: absolute; width: 14px; height: 14px; border-radius: 50%; background: var(--blue);
+      border: 2px solid #fff; box-shadow: 0 0 0 4px rgba(59,130,246,0.25); left: 48%; top: 52%;
+      animation: ptPulse 2s ease-in-out infinite;
+    }
+    @keyframes ptPulse { 0%,100%{box-shadow:0 0 0 4px rgba(59,130,246,0.25)} 50%{box-shadow:0 0 0 8px rgba(59,130,246,0.1)} }
+    .pt-map-legend {
+      position: absolute; bottom: 10px; left: 12px; display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .pt-map-leg-item { display: flex; align-items: center; gap: 4px; background: rgba(4,5,13,0.8); padding: 3px 8px; border-radius: 6px; font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.6); backdrop-filter: blur(6px); }
+    .pt-map-leg-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* ── TABS ── */
+    .pt-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 24px 0 20px; }
+    .pt-tab {
+      padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border);
+      background: var(--bg-card); color: var(--text-muted); font-size: 0.77rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 5px;
+      white-space: nowrap;
+    }
+    .pt-tab:hover { border-color: var(--green); color: var(--green); }
+    .pt-tab.active { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.4); color: var(--green); }
+    .pt-tab .tc { font-size: 0.62rem; background: rgba(255,255,255,0.12); border-radius: 6px; padding: 1px 5px; }
+
+    /* ── SECTION WRAPPER ── */
+    .pt-section { margin-bottom: 32px; }
+
+    /* ── MISSION GRID ── */
+    .pt-mission-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    @media(max-width:900px) { .pt-mission-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media(max-width:560px) { .pt-mission-grid { grid-template-columns: 1fr; } }
+
+    .pm-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px;
+      padding: 18px; transition: all 0.25s; position: relative; overflow: hidden;
+    }
+    .pm-card:hover { border-color: rgba(16,185,129,0.3); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(16,185,129,0.08); }
+    .pm-card.urgent { border-color: rgba(239,68,68,0.3); }
+    .pm-card.urgent:hover { border-color: rgba(239,68,68,0.5); box-shadow: 0 8px 32px rgba(239,68,68,0.08); }
+    .pm-card.inprogress { border-color: rgba(59,130,246,0.3); }
+    .pm-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+    .pm-card.cleanup::before { background: linear-gradient(90deg, #10b981, #34d399); }
+    .pm-card.infra::before { background: linear-gradient(90deg, #f97316, #fb923c); }
+    .pm-card.park::before { background: linear-gradient(90deg, #22c55e, #86efac); }
+    .pm-card.community::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    .pm-card.animal::before { background: linear-gradient(90deg, #a855f7, #c084fc); }
+    .pm-card.safety::before { background: linear-gradient(90deg, #ef4444, #f87171); }
+    .pm-card.eco::before { background: linear-gradient(90deg, #06b6d4, #67e8f9); }
+    .pm-card.volunteer::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+
+    .pm-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+    .pm-emoji { font-size: 1.8rem; line-height: 1; }
+    .pm-badges { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .pm-type-badge {
+      padding: 2px 8px; border-radius: 6px; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .pm-type-badge.cleanup { background: rgba(16,185,129,0.12); color: var(--green); }
+    .pm-type-badge.infra   { background: rgba(249,115,22,0.12); color: #f97316; }
+    .pm-type-badge.park    { background: rgba(34,197,94,0.12);  color: #22c55e; }
+    .pm-type-badge.community{ background: rgba(59,130,246,0.12); color: var(--blue); }
+    .pm-type-badge.animal  { background: rgba(168,85,247,0.12); color: #a855f7; }
+    .pm-type-badge.safety  { background: rgba(239,68,68,0.12);  color: var(--red); }
+    .pm-type-badge.eco     { background: rgba(6,182,212,0.12);  color: #06b6d4; }
+    .pm-type-badge.volunteer{ background: rgba(245,158,11,0.12); color: var(--gold); }
+    .pm-diff-badge { padding: 2px 8px; border-radius: 6px; font-size: 0.6rem; font-weight: 700; }
+    .pm-diff-badge.easy   { background: rgba(16,185,129,0.1); color: var(--green); }
+    .pm-diff-badge.medium { background: rgba(245,158,11,0.1); color: var(--gold); }
+    .pm-diff-badge.hard   { background: rgba(239,68,68,0.1);  color: var(--red); }
+
+    .pm-title { font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; line-height: 1.3; }
+    .pm-location { font-size: 0.72rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; margin-bottom: 6px; }
+    .pm-location i { color: var(--green); font-size: 0.65rem; }
+    .pm-desc { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px; }
+
+    .pm-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .pm-meta-pill {
+      display: flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px;
+      font-size: 0.65rem; font-weight: 700; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+    }
+    .pm-meta-pill.xp { color: var(--gold); }
+    .pm-meta-pill.trust { color: var(--green); }
+    .pm-meta-pill.people { color: var(--blue); }
+    .pm-meta-pill.deadline { color: var(--text-muted); }
+    .pm-meta-pill.urgent-pill { color: var(--red); border-color: rgba(239,68,68,0.2); background: rgba(239,68,68,0.06); }
+
+    .pm-verify-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 14px; }
+    .pm-vbadge {
+      display: flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 5px;
+      font-size: 0.58rem; font-weight: 700; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: var(--text-muted);
+    }
+    .pm-vbadge.gps { color: var(--green); border-color: rgba(16,185,129,0.2); background: rgba(16,185,129,0.06); }
+    .pm-vbadge.camera { color: var(--blue); border-color: rgba(59,130,246,0.2); background: rgba(59,130,246,0.06); }
+    .pm-vbadge.ai { color: #a855f7; border-color: rgba(168,85,247,0.2); background: rgba(168,85,247,0.06); }
+
+    .pm-actions { display: flex; gap: 6px; }
+    .pm-btn-start {
+      flex: 1; padding: 9px; border-radius: 10px; border: none;
+      background: linear-gradient(135deg, #10b981, #059669); color: #fff;
+      font-size: 0.78rem; font-weight: 800; cursor: pointer; transition: opacity 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .pm-btn-start:hover { opacity: 0.85; }
+    .pm-btn-start.inprog { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .pm-btn-start.urgent-start { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .pm-btn-icon {
+      width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); font-size: 0.78rem;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+    }
+    .pm-btn-icon:hover { background: rgba(255,255,255,0.1); color: var(--text-primary); }
+
+    .pm-prog-wrap { margin-bottom: 10px; }
+    .pm-prog-bar { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+    .pm-prog-fill { height: 100%; border-radius: 2px; transition: width 1s ease; }
+    .pm-prog-fill.cleanup { background: linear-gradient(90deg, #10b981, #34d399); }
+    .pm-prog-fill.infra   { background: linear-gradient(90deg, #f97316, #fb923c); }
+    .pm-prog-fill.park    { background: linear-gradient(90deg, #22c55e, #86efac); }
+    .pm-prog-fill.community{ background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    .pm-prog-fill.animal  { background: linear-gradient(90deg, #a855f7, #c084fc); }
+    .pm-prog-fill.safety  { background: linear-gradient(90deg, #ef4444, #f87171); }
+    .pm-prog-fill.eco     { background: linear-gradient(90deg, #06b6d4, #67e8f9); }
+    .pm-prog-fill.volunteer{ background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .pm-prog-text { display: flex; justify-content: space-between; font-size: 0.62rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── NEARBY PROBLEMS ── */
+    .pt-prob-list { display: flex; flex-direction: column; gap: 10px; }
+    .prob-card {
+      display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+      transition: border-color 0.2s;
+    }
+    .prob-card:hover { border-color: rgba(239,68,68,0.25); }
+    .prob-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+    .prob-info { flex: 1; min-width: 0; }
+    .prob-title { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+    .prob-loc { font-size: 0.7rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+    .prob-loc i { font-size: 0.62rem; }
+    .prob-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+    .prob-urgency { font-size: 0.62rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .prob-urgency.high { background: rgba(239,68,68,0.12); color: var(--red); }
+    .prob-urgency.medium { background: rgba(245,158,11,0.12); color: var(--gold); }
+    .prob-urgency.low { background: rgba(16,185,129,0.12); color: var(--green); }
+    .prob-join-btn {
+      padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(16,185,129,0.3);
+      background: rgba(16,185,129,0.1); color: var(--green); font-size: 0.7rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .prob-join-btn:hover { background: rgba(16,185,129,0.2); }
+
+    /* ── LEADERBOARD ── */
+    .pt-lb-list { display: flex; flex-direction: column; gap: 8px; }
+    .lb-card {
+      display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+      transition: all 0.2s; position: relative;
+    }
+    .lb-card.top { border-color: rgba(245,158,11,0.3); background: linear-gradient(135deg, rgba(245,158,11,0.04), var(--bg-card)); }
+    .lb-rank { width: 28px; font-size: 0.9rem; font-weight: 900; color: var(--text-muted); flex-shrink: 0; text-align: center; }
+    .lb-rank.gold { color: var(--gold); }
+    .lb-rank.silver { color: #94a3b8; }
+    .lb-rank.bronze { color: #cd7f32; }
+    .lb-av { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 900; color: #fff; flex-shrink: 0; }
+    .lb-info { flex: 1; min-width: 0; }
+    .lb-name { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+    .lb-badges-row { display: flex; gap: 4px; flex-wrap: wrap; }
+    .lb-badge { font-size: 0.58rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; background: rgba(16,185,129,0.1); color: var(--green); }
+    .lb-score-col { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; flex-shrink: 0; }
+    .lb-xp { font-size: 0.85rem; font-weight: 800; color: var(--green); }
+    .lb-trust { font-size: 0.67rem; color: var(--text-muted); }
+    .lb-impact { font-size: 0.67rem; color: var(--blue); }
+
+    /* ── COMPLETED ACTIONS ── */
+    .pt-done-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    @media(max-width:480px) { .pt-done-grid { grid-template-columns: 1fr; } }
+    .done-card {
+      display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+      background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.15); border-radius: 12px;
+    }
+    .done-icon { font-size: 1.5rem; flex-shrink: 0; }
+    .done-info { flex: 1; min-width: 0; }
+    .done-title { font-size: 0.78rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1px; }
+    .done-date { font-size: 0.65rem; color: var(--text-muted); }
+    .done-xp { font-size: 0.72rem; font-weight: 800; color: var(--green); }
+
+    /* ── CIVIC REWARDS ── */
+    .pt-rewards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    @media(max-width:480px) { .pt-rewards-grid { grid-template-columns: 1fr; } }
+    .civic-reward {
+      border-radius: 16px; padding: 18px; border: 1px solid rgba(255,255,255,0.08);
+      background: var(--bg-card); transition: all 0.2s; cursor: pointer;
+    }
+    .civic-reward:hover { border-color: rgba(16,185,129,0.3); transform: translateY(-1px); }
+    .cr-icon { font-size: 2rem; margin-bottom: 10px; }
+    .cr-title { font-size: 0.88rem; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; }
+    .cr-desc { font-size: 0.72rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px; }
+    .cr-cost { font-size: 0.72rem; font-weight: 800; color: var(--gold); display: flex; align-items: center; gap: 4px; }
+    .cr-locked { font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+
+    /* ── REPORT MODAL ── */
+    .pt-modal-overlay {
+      position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+      display: none; align-items: flex-end; justify-content: center;
+    }
+    .pt-modal-overlay.open { display: flex; }
+    .pt-modal {
+      width: 100%; max-width: 560px; background: #0d0f1e; border-radius: 24px 24px 0 0;
+      border: 1px solid rgba(255,255,255,0.1); border-bottom: none;
+      padding: 0 0 env(safe-area-inset-bottom, 20px); max-height: 90dvh; overflow-y: auto;
+      animation: slideUp 0.35s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+    .pt-modal-handle { width: 40px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.15); margin: 12px auto 0; }
+    .pt-modal-header { padding: 16px 20px 12px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .pt-modal-title { font-size: 1rem; font-weight: 800; flex: 1; }
+    .pt-modal-close { width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; }
+    .pt-modal-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 16px; }
+    .pt-field-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px; }
+    .pt-input {
+      width: 100%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 11px 14px; color: var(--text-primary); font-size: 0.9rem;
+      font-family: inherit; outline: none; resize: none; transition: border-color 0.2s;
+    }
+    .pt-input:focus { border-color: rgba(16,185,129,0.4); }
+    .pt-input::placeholder { color: var(--text-muted); }
+    .pt-type-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .pt-type-btn {
+      padding: 8px 6px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text-muted); font-size: 0.7rem; font-weight: 700; cursor: pointer; text-align: center;
+      transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .pt-type-btn span { font-size: 1.2rem; }
+    .pt-type-btn:hover { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.25); color: rgba(255,255,255,0.8); }
+    .pt-type-btn.selected { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.4); color: var(--red); }
+    .pt-urgency-row { display: flex; gap: 8px; }
+    .pt-urg-btn {
+      flex: 1; padding: 8px; border-radius: 8px; font-size: 0.72rem; font-weight: 700; cursor: pointer;
+      text-align: center; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04);
+      color: var(--text-muted); transition: all 0.2s;
+    }
+    .pt-urg-btn.low.selected    { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.35); color: var(--green); }
+    .pt-urg-btn.medium.selected { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.35); color: var(--gold); }
+    .pt-urg-btn.high.selected   { background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.35); color: var(--red); }
+    .pt-photo-mock {
+      width: 100%; height: 90px; border-radius: 10px; border: 2px dashed rgba(16,185,129,0.25);
+      background: rgba(16,185,129,0.03); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .pt-photo-mock:hover { border-color: rgba(16,185,129,0.5); background: rgba(16,185,129,0.07); }
+    .pt-photo-mock i { color: rgba(16,185,129,0.4); font-size: 1.3rem; }
+    .pt-photo-mock span { font-size: 0.72rem; color: var(--text-muted); }
+    .pt-submit-btn {
+      width: 100%; padding: 13px; border-radius: 12px; border: none;
+      background: linear-gradient(135deg, #ef4444, #f97316); color: #fff;
+      font-size: 0.9rem; font-weight: 800; cursor: pointer; transition: opacity 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .pt-submit-btn:hover { opacity: 0.88; }
+
+    /* ── TOAST ── */
+    #ptToast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(60px);
+      z-index: 9999; background: rgba(16,185,129,0.95); color: #000;
+      padding: 10px 22px; border-radius: 9999px; font-size: 0.82rem; font-weight: 800;
+      display: flex; align-items: center; gap: 8px; white-space: nowrap;
+      opacity: 0; pointer-events: none; transition: transform 0.4s cubic-bezier(.34,1.56,.64,1), opacity 0.3s;
+    }
+    #ptToast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* ── DIVIDER ── */
+    .pt-divider { height: 1px; background: rgba(255,255,255,0.05); margin: 8px 0 24px; }
+
+    /* ── LINK CARDS ── */
+    .pt-link-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 32px; }
+    @media(max-width:480px) { .pt-link-grid { grid-template-columns: 1fr; } }
+    .pt-link-card {
+      display: flex; align-items: center; gap: 12px; padding: 14px;
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+      text-decoration: none; color: var(--text-primary); transition: all 0.2s;
+    }
+    .pt-link-card:hover { border-color: rgba(16,185,129,0.3); transform: translateY(-1px); }
+    .pt-link-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+    .pt-link-label { font-size: 0.78rem; font-weight: 700; margin-bottom: 1px; }
+    .pt-link-sub { font-size: 0.65rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<div id="ptToast"><i class="fas fa-check-circle"></i> <span id="ptToastMsg">Done!</span></div>
+
+<!-- ── REPORT PROBLEM MODAL ── -->
+<div class="pt-modal-overlay" id="reportModal">
+  <div class="pt-modal">
+    <div class="pt-modal-handle"></div>
+    <div class="pt-modal-header">
+      <div style="font-size:1.3rem">🚨</div>
+      <div class="pt-modal-title">Report a Problem</div>
+      <button class="pt-modal-close" onclick="closeReport()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="pt-modal-body">
+      <div>
+        <div class="pt-field-label">Problem Type</div>
+        <div class="pt-type-grid" id="reportTypeGrid">
+          <button class="pt-type-btn" data-type="trash" onclick="selectType(this)"><span>🗑️</span>Trash</button>
+          <button class="pt-type-btn" data-type="bench" onclick="selectType(this)"><span>🪑</span>Broken Bench</button>
+          <button class="pt-type-btn" data-type="light" onclick="selectType(this)"><span>💡</span>Broken Light</button>
+          <button class="pt-type-btn" data-type="unsafe" onclick="selectType(this)"><span>⚠️</span>Unsafe Area</button>
+          <button class="pt-type-btn" data-type="road" onclick="selectType(this)"><span>🛣️</span>Road Issue</button>
+          <button class="pt-type-btn" data-type="other" onclick="selectType(this)"><span>📌</span>Other</button>
+        </div>
+      </div>
+      <div>
+        <div class="pt-field-label">Title</div>
+        <input type="text" class="pt-input" id="reportTitle" placeholder="Brief description of the problem">
+      </div>
+      <div>
+        <div class="pt-field-label">Location</div>
+        <input type="text" class="pt-input" id="reportLocation" placeholder="Street or neighborhood">
+      </div>
+      <div>
+        <div class="pt-field-label">Description</div>
+        <textarea class="pt-input" id="reportDesc" rows="3" placeholder="Describe the issue in detail..."></textarea>
+      </div>
+      <div>
+        <div class="pt-field-label">Urgency</div>
+        <div class="pt-urgency-row">
+          <button class="pt-urg-btn low" onclick="selectUrgency(this,'low')">Low</button>
+          <button class="pt-urg-btn medium selected" onclick="selectUrgency(this,'medium')">Medium</button>
+          <button class="pt-urg-btn high" onclick="selectUrgency(this,'high')">High</button>
+        </div>
+      </div>
+      <div>
+        <div class="pt-field-label">Photo Proof</div>
+        <div class="pt-photo-mock" onclick="mockPhotoAttach(this)">
+          <i class="fas fa-camera"></i>
+          <span id="photoMockLabel">Tap to attach photo</span>
+        </div>
+      </div>
+      <button class="pt-submit-btn" onclick="submitReport()"><i class="fas fa-exclamation-triangle"></i> Submit Report</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOP BAR ── -->
+<div class="pt-topbar">
+  <a href="challenges.html" class="pt-back"><i class="fas fa-arrow-left"></i></a>
+  <div class="pt-topbar-logo">
+    <div class="pt-logo-icon">🇬🇪</div>
+    <div class="pt-logo-text">Geo<span>Hub</span> Patriot</div>
+  </div>
+  <div class="pt-topbar-actions">
+    <button class="pt-icon-btn" title="Filter" onclick="toggleFilter()"><i class="fas fa-filter"></i></button>
+    <button class="pt-icon-btn" title="Share" onclick="ptToast('Link copied!')"><i class="fas fa-share-alt"></i></button>
+    <button class="pt-report-btn" onclick="openReport()"><i class="fas fa-plus"></i> Report</button>
+  </div>
+</div>
+
+<div class="pt-page">
+
+  <!-- ── HERO ── -->
+  <section class="pt-hero">
+    <div class="pt-hero-orb o1"></div>
+    <div class="pt-hero-orb o2"></div>
+    <div class="container">
+      <div class="pt-hero-inner">
+        <div>
+          <div class="pt-hero-badge"><i class="fas fa-shield-alt"></i> Civic Mission System</div>
+          <h1 class="pt-hero-title">Make <span class="hl">Georgia</span> Better,<br>One Mission at a Time</h1>
+          <p class="pt-hero-sub">Earn Patriot XP by cleaning parks, reporting problems, helping communities. Your actions improve the city — and your GeoHub Trust Score.</p>
+          <div class="pt-hero-stats">
+            <div class="pt-hstat"><span class="pt-hstat-val green">2,840</span><span class="pt-hstat-label">Patriot XP</span></div>
+            <div class="pt-hstat"><span class="pt-hstat-val orange">23</span><span class="pt-hstat-label">Missions Done</span></div>
+            <div class="pt-hstat"><span class="pt-hstat-val blue">+14</span><span class="pt-hstat-label">Trust from Civic</span></div>
+          </div>
+          <div class="pt-hero-actions" style="margin-top:18px">
+            <a href="camera.html?mode=patriot" class="pt-btn-primary"><i class="fas fa-camera"></i> Start Mission</a>
+            <button class="pt-btn-ghost" onclick="openReport()"><i class="fas fa-exclamation-triangle"></i> Report Problem</button>
+          </div>
+
+          <!-- AI Suggestions -->
+          <div class="ai-strip" id="aiStrip" onclick="cycleAI()">
+            <div class="ai-strip-icon">🤖</div>
+            <div class="ai-strip-content">
+              <div class="ai-strip-label">AI City Insight</div>
+              <div class="ai-strip-msg" id="aiMsg">Vake Park has 3 reports this week — clean-up mission active nearby</div>
+            </div>
+            <div class="ai-strip-nav" id="aiDots"></div>
+          </div>
+        </div>
+        <div class="pt-score-wrap">
+          <div class="pt-ring">
+            <svg class="pt-ring-svg" viewBox="0 0 110 110">
+              <defs>
+                <linearGradient id="ptGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#10b981"/>
+                  <stop offset="100%" stop-color="#3b82f6"/>
+                </linearGradient>
+              </defs>
+              <circle class="pt-ring-track" cx="55" cy="55" r="46"/>
+              <circle class="pt-ring-fill" cx="55" cy="55" r="46" id="ptRingFill"/>
+            </svg>
+            <div class="pt-ring-inner">
+              <div class="pt-ring-score">74</div>
+              <div class="pt-ring-lbl">Patriot</div>
+            </div>
+          </div>
+          <div class="pt-score-tag"><i class="fas fa-arrow-up"></i> +6 this week</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container" style="padding-top: 0;">
+
+    <!-- ── CITY MAP ── -->
+    <div class="pt-map-section">
+      <div class="pt-section-title"><i class="fas fa-map"></i> City Mission Map</div>
+      <div class="pt-map-wrap">
+        <div class="pt-map-grid"></div>
+        <!-- Roads -->
+        <div class="pt-map-road-h" style="top:33%"></div>
+        <div class="pt-map-road-h" style="top:65%"></div>
+        <div class="pt-map-road-v" style="left:28%"></div>
+        <div class="pt-map-road-v" style="left:62%"></div>
+        <!-- User position -->
+        <div class="pt-map-user"></div>
+        <!-- Mission pins -->
+        <div class="pt-map-pin" style="left:22%;top:45%" onclick="ptToast('🌿 Vake Park Clean-up')">
+          <div class="pt-map-pin-dot green"><span class="pt-map-pin-icon">🌿</span></div>
+          <div class="pt-map-pin-label">Clean-up</div>
+        </div>
+        <div class="pt-map-pin" style="left:55%;top:28%" onclick="ptToast('💡 Broken Street Light')">
+          <div class="pt-map-pin-dot orange"><span class="pt-map-pin-icon">💡</span></div>
+          <div class="pt-map-pin-label">Infra</div>
+        </div>
+        <div class="pt-map-pin" style="left:74%;top:58%" onclick="ptToast('🐾 Animal Care Mission')">
+          <div class="pt-map-pin-dot blue"><span class="pt-map-pin-icon">🐾</span></div>
+          <div class="pt-map-pin-label">Animal</div>
+        </div>
+        <div class="pt-map-pin" style="left:38%;top:72%" onclick="ptToast('🚨 Unsafe Alley Reported')">
+          <div class="pt-map-pin-dot red"><span class="pt-map-pin-icon">⚠️</span></div>
+          <div class="pt-map-pin-label">Safety</div>
+        </div>
+        <div class="pt-map-pin" style="left:82%;top:35%" onclick="ptToast('♻️ Eco Recycling Drive')">
+          <div class="pt-map-pin-dot green"><span class="pt-map-pin-icon">♻️</span></div>
+          <div class="pt-map-pin-label">Eco</div>
+        </div>
+        <div class="pt-map-pin" style="left:14%;top:70%" onclick="ptToast('🤝 Community Helper')">
+          <div class="pt-map-pin-dot blue"><span class="pt-map-pin-icon">🤝</span></div>
+          <div class="pt-map-pin-label">Community</div>
+        </div>
+        <!-- Legend -->
+        <div class="pt-map-legend">
+          <div class="pt-map-leg-item"><div class="pt-map-leg-dot" style="background:#10b981"></div>Clean-up</div>
+          <div class="pt-map-leg-item"><div class="pt-map-leg-dot" style="background:#f97316"></div>Infra</div>
+          <div class="pt-map-leg-item"><div class="pt-map-leg-dot" style="background:#3b82f6"></div>Civic</div>
+          <div class="pt-map-leg-item"><div class="pt-map-leg-dot" style="background:#ef4444"></div>Alert</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TABS ── -->
+    <div class="pt-tabs" id="ptTabs">
+      <button class="pt-tab active" data-tab="active" onclick="switchTab(this,'active')"><i class="fas fa-bolt"></i> Active <span class="tc" id="tcActive">8</span></button>
+      <button class="pt-tab" data-tab="nearby" onclick="switchTab(this,'nearby')"><i class="fas fa-map-marker-alt"></i> Nearby <span class="tc">5</span></button>
+      <button class="pt-tab" data-tab="done" onclick="switchTab(this,'done')"><i class="fas fa-check-circle"></i> Completed <span class="tc">23</span></button>
+      <button class="pt-tab" data-tab="leaderboard" onclick="switchTab(this,'leaderboard')"><i class="fas fa-trophy"></i> Leaderboard</button>
+      <button class="pt-tab" data-tab="rewards" onclick="switchTab(this,'rewards')"><i class="fas fa-gift"></i> Rewards</button>
+    </div>
+
+    <!-- ── ACTIVE MISSIONS PANEL ── -->
+    <div id="panel-active" class="pt-section">
+      <div class="pt-section-title"><i class="fas fa-fire"></i> Active Missions</div>
+      <div class="pt-mission-grid" id="missionGrid"></div>
+    </div>
+
+    <!-- ── NEARBY PROBLEMS PANEL ── -->
+    <div id="panel-nearby" class="pt-section" style="display:none">
+      <div class="pt-section-title"><i class="fas fa-exclamation-triangle"></i> Nearby Problems</div>
+      <div class="pt-prob-list" id="probList"></div>
+    </div>
+
+    <!-- ── COMPLETED PANEL ── -->
+    <div id="panel-done" class="pt-section" style="display:none">
+      <div class="pt-section-title"><i class="fas fa-check-double"></i> Your Completed Actions</div>
+      <div class="pt-done-grid" id="doneGrid"></div>
+    </div>
+
+    <!-- ── LEADERBOARD PANEL ── -->
+    <div id="panel-leaderboard" class="pt-section" style="display:none">
+      <div class="pt-section-title"><i class="fas fa-crown"></i> Patriot Leaderboard — Georgia</div>
+      <div class="pt-lb-list" id="lbList"></div>
+    </div>
+
+    <!-- ── REWARDS PANEL ── -->
+    <div id="panel-rewards" class="pt-section" style="display:none">
+      <div class="pt-section-title"><i class="fas fa-gift"></i> Civic Rewards</div>
+      <div class="pt-rewards-grid" id="rewardsGrid"></div>
+    </div>
+
+    <!-- ── QUICK LINKS ── -->
+    <div class="pt-divider"></div>
+    <div class="pt-section-title"><i class="fas fa-link"></i> Connected Systems</div>
+    <div class="pt-link-grid">
+      <a href="challenges.html" class="pt-link-card">
+        <div class="pt-link-icon" style="background:rgba(59,130,246,0.12);color:var(--blue)"><i class="fas fa-bolt"></i></div>
+        <div><div class="pt-link-label">Challenges</div><div class="pt-link-sub">View all missions</div></div>
+      </a>
+      <a href="trust.html" class="pt-link-card">
+        <div class="pt-link-icon" style="background:rgba(16,185,129,0.12);color:var(--green)"><i class="fas fa-shield-alt"></i></div>
+        <div><div class="pt-link-label">Trust Score</div><div class="pt-link-sub">Patriot boosts trust</div></div>
+      </a>
+      <a href="camera.html?mode=patriot" class="pt-link-card">
+        <div class="pt-link-icon" style="background:rgba(249,115,22,0.12);color:#f97316"><i class="fas fa-camera"></i></div>
+        <div><div class="pt-link-label">Camera Proof</div><div class="pt-link-sub">Before/after capture</div></div>
+      </a>
+    </div>
+    <div style="height:20px"></div>
+
+  </div><!-- /container -->
+</div><!-- /pt-page -->
+
+<!-- Mobile Nav (same as other pages) -->
+<nav class="app-bottom-nav">
+  <a href="feed.html" class="app-nav-item"><i class="fas fa-home"></i><span>Feed</span></a>
+  <a href="explore.html" class="app-nav-item"><i class="fas fa-compass"></i><span>Explore</span></a>
+  <a href="checkin.html" class="app-nav-item app-nav-fab"><i class="fas fa-plus"></i></a>
+  <a href="challenges.html" class="app-nav-item active"><i class="fas fa-bolt"></i><span>Missions</span></a>
+  <a href="profile.html" class="app-nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+</nav>
+
+<script src="patriot.js"></script>
+</body>
+</html>

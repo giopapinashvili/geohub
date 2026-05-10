@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rewards Wallet — GeoHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#10b981">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GeoHub">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="mobile-nav.css">
+  <link rel="stylesheet" href="social-layer.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    .wallet-page { max-width: 1200px; margin: 0 auto; padding: 28px 20px 80px; }
+
+    /* HERO */
+    .wallet-hero {
+      background: linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(245,158,11,0.06) 50%, rgba(59,130,246,0.05) 100%);
+      border: 1px solid rgba(16,185,129,0.18);
+      border-radius: 20px;
+      padding: 32px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 32px;
+      align-items: center;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .wallet-hero::before {
+      content: '';
+      position: absolute; top: -60px; right: -60px;
+      width: 220px; height: 220px;
+      background: radial-gradient(circle, rgba(245,158,11,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .wallet-hero::after {
+      content: '';
+      position: absolute; bottom: -50px; left: 120px;
+      width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(16,185,129,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .wallet-balance { position: relative; z-index: 1; }
+    .balance-label { font-size: 0.72rem; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+    .balance-amount { font-size: 4.5rem; font-weight: 800; line-height: 1; color: #fff; letter-spacing: -3px; margin-bottom: 2px; }
+    .balance-unit { font-size: 1rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
+    .balance-sub { font-size: 0.78rem; color: var(--text-muted); }
+    .balance-sub strong { color: rgba(255,255,255,0.65); }
+    .wallet-stats-row { display: flex; gap: 28px; margin-top: 22px; flex-wrap: wrap; }
+    .wstat-val { font-size: 1.15rem; font-weight: 700; color: #fff; }
+    .wstat-label { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+    .wstat-val .fire-icon { color: #ef4444; }
+    .wstat-val .gold-text { color: var(--gold); }
+
+    /* LEVEL RING */
+    .level-ring-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; position: relative; z-index: 1; }
+    .level-ring {
+      width: 128px; height: 128px; border-radius: 50%;
+      background: conic-gradient(var(--gold) 0% 73.5%, rgba(255,255,255,0.07) 73.5% 100%);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .level-ring-inner {
+      width: 96px; height: 96px; border-radius: 50%;
+      background: #0a0b15;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0;
+    }
+    .level-num { font-size: 1.8rem; font-weight: 800; color: var(--gold); line-height: 1; }
+    .level-lbl { font-size: 0.58rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .level-name-tag { font-size: 0.82rem; font-weight: 700; color: var(--gold); }
+    .level-progress-hint { font-size: 0.68rem; color: var(--text-muted); text-align: center; }
+
+    /* QUICK STATS */
+    .wallet-quick-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+    .qstat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+    .qstat-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 0.88rem; margin-bottom: 10px; }
+    .qstat-val { font-size: 1.4rem; font-weight: 800; color: #fff; line-height: 1; }
+    .qstat-label { font-size: 0.68rem; color: var(--text-muted); margin-top: 3px; }
+
+    /* FILTER */
+    .rewards-filter { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .rfilt {
+      padding: 7px 15px; border-radius: 20px; border: 1px solid var(--border);
+      background: var(--bg-card); color: var(--text-muted); font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 5px;
+    }
+    .rfilt:hover { border-color: var(--green); color: var(--green); }
+    .rfilt.active { background: var(--green); border-color: var(--green); color: #fff; }
+
+    /* LAYOUT */
+    .rewards-layout { display: grid; grid-template-columns: 1fr 300px; gap: 24px; margin-bottom: 36px; }
+    .section-title { font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .section-title i { color: var(--green); }
+
+    /* REWARD CARDS */
+    .rewards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 13px; }
+    .reward-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 18px;
+      display: flex; flex-direction: column; gap: 9px; transition: border-color 0.2s, transform 0.18s;
+      position: relative; animation: fadeUp 0.35s ease both;
+    }
+    .reward-card:hover { border-color: rgba(16,185,129,0.3); transform: translateY(-2px); }
+    .reward-card.is-saved { border-color: rgba(245,158,11,0.3); }
+    .reward-card-top { display: flex; align-items: center; justify-content: space-between; }
+    .cat-badge { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; padding: 3px 8px; border-radius: 6px; }
+    .cat-badge.coffee { background: rgba(146,64,14,0.22); color: #f97316; }
+    .cat-badge.food   { background: rgba(16,185,129,0.14); color: var(--green); }
+    .cat-badge.hotel  { background: rgba(59,130,246,0.14); color: var(--blue); }
+    .cat-badge.event  { background: rgba(168,85,247,0.14); color: #a855f7; }
+    .cat-badge.activity { background: rgba(245,158,11,0.14); color: var(--gold); }
+    .cat-badge.shop   { background: rgba(239,68,68,0.14); color: #ef4444; }
+    .save-btn {
+      width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border);
+      background: transparent; color: var(--text-muted); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 0.72rem; transition: all 0.2s;
+    }
+    .save-btn:hover, .save-btn.saved { border-color: var(--gold); color: var(--gold); background: rgba(245,158,11,0.1); }
+    .reward-biz { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; }
+    .reward-title { font-size: 0.92rem; font-weight: 700; color: #fff; line-height: 1.3; }
+    .reward-discount {
+      font-size: 1.7rem; font-weight: 800; line-height: 1;
+      background: linear-gradient(135deg, var(--gold) 0%, #fbbf24 100%);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .reward-cost { display: flex; align-items: center; gap: 6px; }
+    .cost-pill { padding: 3px 9px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; display: flex; align-items: center; gap: 3px; }
+    .cost-pill.affordable { background: rgba(16,185,129,0.13); color: var(--green); }
+    .cost-pill.locked { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+    .need-more { font-size: 0.67rem; color: var(--text-muted); }
+    .reward-expiry { font-size: 0.68rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+    .reward-claim-btn {
+      width: 100%; padding: 9px; border-radius: 10px; border: none;
+      font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .reward-claim-btn.can-claim { background: linear-gradient(135deg, var(--green), #059669); color: #fff; }
+    .reward-claim-btn.can-claim:hover { opacity: 0.85; transform: scale(1.02); }
+    .reward-claim-btn.locked-btn { background: rgba(255,255,255,0.04); color: var(--text-muted); cursor: not-allowed; }
+    .no-results { grid-column: 1/-1; text-align: center; padding: 48px 20px; color: var(--text-muted); font-size: 0.85rem; }
+
+    /* COUPONS SIDEBAR */
+    .coupons-col { display: flex; flex-direction: column; gap: 12px; }
+    .coupon-card {
+      background: var(--bg-card); border: 1px dashed var(--border); border-radius: 14px;
+      padding: 16px 18px; position: relative; overflow: hidden;
+    }
+    .coupon-card.expiring { border-color: rgba(245,158,11,0.45); background: rgba(245,158,11,0.03); }
+    .coupon-card.used { opacity: 0.48; }
+    .coupon-notch-l, .coupon-notch-r {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 14px; height: 14px; background: var(--bg-0); border-radius: 50%;
+    }
+    .coupon-notch-l { left: -7px; } .coupon-notch-r { right: -7px; }
+    .coupon-biz { font-size: 0.68rem; color: var(--text-muted); margin-bottom: 2px; }
+    .coupon-discount { font-size: 0.97rem; font-weight: 700; color: #fff; margin-bottom: 10px; }
+    .coupon-code-row { display: flex; align-items: center; gap: 7px; }
+    .coupon-code {
+      font-family: monospace; font-size: 0.73rem; background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; color: var(--green); flex: 1;
+    }
+    .coupon-copy {
+      padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border);
+      background: transparent; color: var(--text-muted); font-size: 0.68rem; cursor: pointer; transition: all 0.2s;
+    }
+    .coupon-copy:hover { border-color: var(--green); color: var(--green); }
+    .coupon-copy:disabled { opacity: 0.4; cursor: not-allowed; }
+    .coupon-status { font-size: 0.67rem; margin-top: 7px; display: flex; align-items: center; gap: 4px; }
+    .coupon-status.expiring { color: var(--gold); }
+    .coupon-status.active { color: var(--green); }
+    .coupon-status.used { color: var(--text-muted); }
+
+    /* XP HISTORY */
+    .xp-history-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .xp-item {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 13px 14px; display: flex; align-items: center; gap: 11px;
+    }
+    .xp-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 0.82rem; flex-shrink: 0;
+    }
+    .xp-icon.checkin  { background: rgba(16,185,129,0.13); color: var(--green); }
+    .xp-icon.review   { background: rgba(245,158,11,0.13); color: var(--gold); }
+    .xp-icon.challenge{ background: rgba(168,85,247,0.13); color: #a855f7; }
+    .xp-icon.social   { background: rgba(59,130,246,0.13); color: var(--blue); }
+    .xp-icon.claim    { background: rgba(239,68,68,0.1);   color: #ef4444; }
+    .xp-icon.photo    { background: rgba(16,185,129,0.1);  color: var(--green); }
+    .xp-icon.streak   { background: rgba(239,68,68,0.1);   color: #ef4444; }
+    .xp-icon.discover { background: rgba(59,130,246,0.1);  color: var(--blue); }
+    .xp-info { flex: 1; min-width: 0; }
+    .xp-action { font-size: 0.78rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .xp-time { font-size: 0.66rem; color: var(--text-muted); margin-top: 2px; }
+    .xp-amount { font-size: 0.88rem; font-weight: 800; flex-shrink: 0; }
+    .xp-amount.gain  { color: var(--green); }
+    .xp-amount.spend { color: #ef4444; }
+
+    /* LEVEL TIERS */
+    .levels-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 32px; }
+    .level-tier {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 20px; display: flex; flex-direction: column; gap: 10px; position: relative;
+    }
+    .level-tier.current { border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.035); }
+    .level-tier.completed { opacity: 0.6; }
+    .level-tier.locked-tier { opacity: 0.52; }
+    .tier-badge { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; }
+    .tier-name { font-size: 0.9rem; font-weight: 700; color: #fff; }
+    .tier-range { font-size: 0.67rem; color: var(--text-muted); margin-top: -5px; }
+    .tier-perks { display: flex; flex-direction: column; gap: 5px; margin-top: 4px; }
+    .tier-perk { font-size: 0.7rem; color: var(--text-muted); display: flex; align-items: flex-start; gap: 5px; line-height: 1.4; }
+    .tier-perk i { color: var(--green); margin-top: 2px; font-size: 0.58rem; flex-shrink: 0; }
+    .current-tag {
+      position: absolute; top: 10px; right: 10px;
+      font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 2px 7px; border-radius: 6px; background: rgba(245,158,11,0.18); color: var(--gold);
+    }
+    .lock-hint { font-size: 0.68rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; margin-top: 4px; }
+
+    /* CHALLENGES */
+    .challenges-scroll { display: flex; gap: 13px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; }
+    .challenges-scroll::-webkit-scrollbar { display: none; }
+    .chal-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 18px; min-width: 230px; flex-shrink: 0; display: flex; flex-direction: column; gap: 8px;
+    }
+    .chal-reward { font-size: 0.77rem; font-weight: 700; color: var(--gold); display: flex; align-items: center; gap: 5px; }
+    .chal-title { font-size: 0.92rem; font-weight: 700; color: #fff; }
+    .chal-desc { font-size: 0.72rem; color: var(--text-muted); line-height: 1.4; }
+    .chal-bar { height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; margin-top: 2px; }
+    .chal-fill { height: 100%; background: linear-gradient(90deg, var(--green), #34d399); border-radius: 3px; width: 0; transition: width 1.2s ease; }
+    .chal-prog-text { font-size: 0.68rem; color: var(--text-muted); }
+    .chal-action { margin-top: 2px; }
+    .btn-go-checkin {
+      display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px;
+      border-radius: 9px; border: 1px solid rgba(16,185,129,0.3); background: rgba(16,185,129,0.08);
+      color: var(--green); font-size: 0.72rem; font-weight: 600; text-decoration: none; transition: all 0.2s;
+    }
+    .btn-go-checkin:hover { background: rgba(16,185,129,0.16); border-color: var(--green); }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity 0.22s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .claim-modal {
+      background: var(--bg-elevated); border: 1px solid rgba(16,185,129,0.18); border-radius: 20px;
+      padding: 28px; max-width: 360px; width: 100%;
+      transform: translateY(16px) scale(0.97); transition: transform 0.28s ease;
+    }
+    .modal-overlay.open .claim-modal { transform: translateY(0) scale(1); }
+    .modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
+    .modal-biz-name { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 2px; }
+    .modal-reward-title { font-size: 1.1rem; font-weight: 700; color: #fff; }
+    .modal-close {
+      width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border);
+      background: transparent; color: var(--text-muted); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 0.8rem; flex-shrink: 0;
+    }
+    .modal-cost-pill {
+      display: inline-flex; align-items: center; gap: 4px; font-size: 0.73rem; font-weight: 700;
+      color: var(--green); background: rgba(16,185,129,0.1); border-radius: 8px;
+      padding: 3px 9px; margin-bottom: 18px;
+    }
+    .qr-block {
+      background: #fff; border-radius: 12px; padding: 14px;
+      display: flex; align-items: center; justify-content: center;
+      width: 152px; height: 152px; margin: 0 auto 16px;
+    }
+    .code-reveal {
+      background: rgba(16,185,129,0.07); border: 1px solid rgba(16,185,129,0.22);
+      border-radius: 12px; padding: 14px; text-align: center; margin-bottom: 12px;
+    }
+    .code-lbl { font-size: 0.67rem; color: var(--text-muted); margin-bottom: 4px; }
+    .code-val { font-family: monospace; font-size: 1.4rem; font-weight: 800; color: var(--green); letter-spacing: 0.12em; }
+    .code-copy-btn {
+      width: 100%; padding: 10px; border-radius: 10px; border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04); color: var(--text-muted); font-size: 0.8rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s; margin-bottom: 12px;
+    }
+    .code-copy-btn:hover { border-color: var(--green); color: var(--green); }
+    .code-copy-btn.copied { border-color: var(--green); color: var(--green); background: rgba(16,185,129,0.08); }
+    .modal-note { font-size: 0.7rem; color: var(--text-muted); text-align: center; line-height: 1.55; }
+
+    /* RESPONSIVE */
+    @media (max-width: 1060px) {
+      .rewards-layout { grid-template-columns: 1fr; }
+      .coupons-col { display: grid; grid-template-columns: repeat(3, 1fr); }
+      .levels-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 800px) {
+      .wallet-quick-stats { grid-template-columns: repeat(2, 1fr); }
+      .xp-history-grid { grid-template-columns: 1fr; }
+      .rewards-grid { grid-template-columns: 1fr; }
+      .coupons-col { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .wallet-hero { grid-template-columns: 1fr; }
+      .level-ring-wrap { flex-direction: row; justify-content: flex-start; }
+      .balance-amount { font-size: 3rem; letter-spacing: -2px; }
+      .levels-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body style="margin-top:68px">
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="navbar-brand">
+    <div class="logo-icon">🌍</div>
+    <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
+  </a>
+  <ul class="navbar-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="feed.html">Discover</a></li>
+    <li><a href="places.html">Places</a></li>
+    <li><a href="rewards.html" class="active">Rewards</a></li>
+    <li><a href="challenges.html">Challenges</a></li>
+    <li><a href="map.html">Map</a></li>
+    <li><a href="add-business.html">Add Business</a></li>
+    <li><a href="creators.html">Creators</a></li>
+    <li><a href="dashboard.html">Dashboard</a></li>
+  </ul>
+  <div class="navbar-actions">
+    <a href="profile.html" class="btn-ghost-nav"><i class="fas fa-user-circle"></i> Profile</a>
+    <a href="#" class="btn btn-primary btn-sm">Sign Up</a>
+  </div>
+  <button class="hamburger"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html">Home</a><a href="feed.html">Discover</a><a href="places.html">Places</a>
+  <a href="rewards.html">Rewards</a><a href="challenges.html">Challenges</a><a href="map.html">Map</a>
+  <a href="add-business.html">Add Business</a><a href="dashboard.html">Dashboard</a>
+</div>
+
+<div class="wallet-page">
+
+  <!-- WALLET HERO -->
+  <div class="wallet-hero">
+    <div class="wallet-balance">
+      <div class="balance-label"><i class="fas fa-coins"></i> Available Balance</div>
+      <div class="balance-amount" id="balanceDisplay">0</div>
+      <div class="balance-unit">XP Points</div>
+      <div class="balance-sub">of <strong>3,240</strong> total earned &nbsp;·&nbsp; <strong>2,393</strong> spent on rewards</div>
+      <div class="wallet-stats-row">
+        <div>
+          <div class="wstat-val"><i class="fas fa-fire fire-icon"></i> 12</div>
+          <div class="wstat-label">Day Streak</div>
+        </div>
+        <div>
+          <div class="wstat-val"><span class="gold-text">#247</span></div>
+          <div class="wstat-label">Georgia Rank</div>
+        </div>
+        <div>
+          <div class="wstat-val">47</div>
+          <div class="wstat-label">Total Claims</div>
+        </div>
+        <div>
+          <div class="wstat-val" style="color:var(--gold)">Gold</div>
+          <div class="wstat-label">Tier Status</div>
+        </div>
+      </div>
+    </div>
+    <div class="level-ring-wrap">
+      <div class="level-ring">
+        <div class="level-ring-inner">
+          <div class="level-num">8</div>
+          <div class="level-lbl">Level</div>
+        </div>
+      </div>
+      <div class="level-name-tag"><i class="fas fa-crown"></i> Gold Explorer</div>
+      <div class="level-progress-hint">653 XP to Level 9</div>
+    </div>
+  </div>
+
+  <!-- QR SCAN CTA -->
+  <div style="margin-bottom:20px">
+    <a href="camera.html?mode=qr" style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:16px;background:linear-gradient(135deg,rgba(59,130,246,0.1),rgba(168,85,247,0.07));border:1px solid rgba(59,130,246,0.22);text-decoration:none;transition:border-color 0.2s" onmouseover="this.style.borderColor='rgba(59,130,246,0.45)'" onmouseout="this.style.borderColor='rgba(59,130,246,0.22)'">
+      <div style="width:44px;height:44px;border-radius:12px;background:rgba(59,130,246,0.15);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0">📲</div>
+      <div style="flex:1">
+        <div style="font-size:0.88rem;font-weight:700;color:#f1f5f9;margin-bottom:2px">Scan Business QR Code</div>
+        <div style="font-size:0.72rem;color:#64748b">Claim exclusive in-store rewards instantly</div>
+      </div>
+      <div style="font-size:0.75rem;font-weight:700;color:#3b82f6"><i class="fas fa-chevron-right"></i></div>
+    </a>
+  </div>
+
+  <!-- QUICK STATS -->
+  <div class="wallet-quick-stats">
+    <div class="qstat-card">
+      <div class="qstat-icon" style="background:rgba(16,185,129,0.12);color:var(--green)"><i class="fas fa-gift"></i></div>
+      <div class="qstat-val">8</div>
+      <div class="qstat-label">Available Rewards</div>
+    </div>
+    <div class="qstat-card">
+      <div class="qstat-icon" style="background:rgba(245,158,11,0.12);color:var(--gold)"><i class="fas fa-ticket-alt"></i></div>
+      <div class="qstat-val">3</div>
+      <div class="qstat-label">Active Coupons</div>
+    </div>
+    <div class="qstat-card">
+      <div class="qstat-icon" style="background:rgba(168,85,247,0.12);color:#a855f7"><i class="fas fa-trophy"></i></div>
+      <div class="qstat-val">47</div>
+      <div class="qstat-label">Lifetime Claims</div>
+    </div>
+    <div class="qstat-card">
+      <div class="qstat-icon" style="background:rgba(239,68,68,0.12);color:#ef4444"><i class="fas fa-bookmark"></i></div>
+      <div class="qstat-val" id="savedCountDisplay">2</div>
+      <div class="qstat-label">Saved Rewards</div>
+    </div>
+  </div>
+
+  <!-- FILTER TABS -->
+  <div class="rewards-filter">
+    <button class="rfilt active" data-filter="all" onclick="filterRewards('all')">All Rewards</button>
+    <button class="rfilt" data-filter="coffee" onclick="filterRewards('coffee')"><i class="fas fa-coffee"></i> Coffee</button>
+    <button class="rfilt" data-filter="food" onclick="filterRewards('food')"><i class="fas fa-utensils"></i> Food</button>
+    <button class="rfilt" data-filter="hotel" onclick="filterRewards('hotel')"><i class="fas fa-hotel"></i> Hotels</button>
+    <button class="rfilt" data-filter="event" onclick="filterRewards('event')"><i class="fas fa-music"></i> Events</button>
+    <button class="rfilt" data-filter="activity" onclick="filterRewards('activity')"><i class="fas fa-hiking"></i> Activities</button>
+    <button class="rfilt" data-filter="saved" onclick="filterRewards('saved')"><i class="fas fa-bookmark"></i> Saved</button>
+  </div>
+
+  <!-- REWARDS + COUPONS LAYOUT -->
+  <div class="rewards-layout">
+    <div>
+      <div class="section-title"><i class="fas fa-gift"></i> Available Rewards</div>
+      <div class="rewards-grid" id="rewardsGrid"></div>
+    </div>
+    <div class="coupons-col">
+      <div class="section-title"><i class="fas fa-ticket-alt"></i> My Coupons</div>
+      <div class="coupon-card expiring">
+        <div class="coupon-notch-l"></div><div class="coupon-notch-r"></div>
+        <div class="coupon-biz">Old Town Café · Tbilisi</div>
+        <div class="coupon-discount">15% off any order</div>
+        <div class="coupon-code-row">
+          <div class="coupon-code">GEO-CAFE-15</div>
+          <button class="coupon-copy" onclick="copyCode(this,'GEO-CAFE-15')">Copy</button>
+        </div>
+        <div class="coupon-status expiring"><i class="fas fa-exclamation-circle"></i> Expires May 20 · 13 days left</div>
+      </div>
+      <div class="coupon-card">
+        <div class="coupon-notch-l"></div><div class="coupon-notch-r"></div>
+        <div class="coupon-biz">Royal Baths Tbilisi</div>
+        <div class="coupon-discount">10% off entrance fee</div>
+        <div class="coupon-code-row">
+          <div class="coupon-code">BATH-ROYAL-10</div>
+          <button class="coupon-copy" onclick="copyCode(this,'BATH-ROYAL-10')">Copy</button>
+        </div>
+        <div class="coupon-status active"><i class="fas fa-check-circle"></i> Active · expires Jun 1</div>
+      </div>
+      <div class="coupon-card used">
+        <div class="coupon-notch-l"></div><div class="coupon-notch-r"></div>
+        <div class="coupon-biz">Signagi Wine House</div>
+        <div class="coupon-discount">25 GEL off wine tour</div>
+        <div class="coupon-code-row">
+          <div class="coupon-code">WINE-TOUR-25</div>
+          <button class="coupon-copy" disabled>Used</button>
+        </div>
+        <div class="coupon-status used"><i class="fas fa-times-circle"></i> Used on Apr 28</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- XP HISTORY -->
+  <div style="margin-bottom:36px">
+    <div class="section-title"><i class="fas fa-history"></i> XP Activity Log</div>
+    <div class="xp-history-grid" id="xpGrid"></div>
+  </div>
+
+  <!-- LEVEL BENEFITS -->
+  <div style="margin-bottom:36px">
+    <div class="section-title"><i class="fas fa-layer-group"></i> Explorer Levels</div>
+    <div class="levels-grid">
+      <div class="level-tier completed">
+        <div class="tier-badge" style="background:rgba(205,127,50,0.15);color:#cd7f32"><i class="fas fa-medal"></i></div>
+        <div class="tier-name">Bronze Explorer</div>
+        <div class="tier-range">0 – 299 XP</div>
+        <div class="tier-perks">
+          <div class="tier-perk"><i class="fas fa-check"></i> Basic rewards access</div>
+          <div class="tier-perk"><i class="fas fa-check"></i> Standard check-ins</div>
+          <div class="tier-perk"><i class="fas fa-check"></i> Community feed</div>
+        </div>
+      </div>
+      <div class="level-tier completed">
+        <div class="tier-badge" style="background:rgba(192,192,192,0.12);color:#c0c0c0"><i class="fas fa-medal"></i></div>
+        <div class="tier-name">Silver Explorer</div>
+        <div class="tier-range">300 – 699 XP</div>
+        <div class="tier-perks">
+          <div class="tier-perk"><i class="fas fa-check"></i> 5% better discounts</div>
+          <div class="tier-perk"><i class="fas fa-check"></i> Early event access</div>
+          <div class="tier-perk"><i class="fas fa-check"></i> Hidden gem suggestions</div>
+          <div class="tier-perk"><i class="fas fa-check"></i> Priority support</div>
+        </div>
+      </div>
+      <div class="level-tier current">
+        <div class="current-tag">You Are Here</div>
+        <div class="tier-badge" style="background:rgba(245,158,11,0.15);color:var(--gold)"><i class="fas fa-crown"></i></div>
+        <div class="tier-name" style="color:var(--gold)">Gold Explorer</div>
+        <div class="tier-range">700 – 1,499 XP</div>
+        <div class="tier-perks">
+          <div class="tier-perk"><i class="fas fa-check"></i> 20% better discounts</div>
+          <div class="tier-perk"><i class="fas fa-check"></i> Priority event access</div>
+          <div class="tier-perk"><i class="fas fa-check"></i> Influencer offers</div>
+          <div class="tier-perk"><i class="fas fa-check"></i> Exclusive challenges</div>
+          <div class="tier-perk"><i class="fas fa-check"></i> Business partner deals</div>
+        </div>
+      </div>
+      <div class="level-tier locked-tier">
+        <div class="tier-badge" style="background:rgba(168,85,247,0.15);color:#a855f7"><i class="fas fa-gem"></i></div>
+        <div class="tier-name" style="color:#a855f7">Platinum Explorer</div>
+        <div class="tier-range">1,500+ XP</div>
+        <div class="tier-perks">
+          <div class="tier-perk"><i class="fas fa-check"></i> VIP exclusive offers</div>
+          <div class="tier-perk"><i class="fas fa-check"></i> Free event tickets</div>
+          <div class="tier-perk"><i class="fas fa-check"></i> Featured on Discover feed</div>
+          <div class="tier-perk"><i class="fas fa-check"></i> Dedicated concierge</div>
+          <div class="tier-perk"><i class="fas fa-check"></i> Unlimited reward claims</div>
+          <div class="tier-perk"><i class="fas fa-check"></i> Partner revenue share</div>
+        </div>
+        <div class="lock-hint"><i class="fas fa-lock"></i> Need 653 more XP to unlock</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVE CHALLENGES -->
+  <div style="margin-bottom:48px">
+    <div class="section-title"><i class="fas fa-bolt"></i> Earn More XP — Active Challenges</div>
+    <div class="challenges-scroll" id="chalScroll">
+      <div class="chal-card">
+        <div class="chal-reward"><i class="fas fa-coins"></i> +200 XP Reward</div>
+        <div class="chal-title">Weekend Warrior</div>
+        <div class="chal-desc">Check in to 3 different places this weekend</div>
+        <div class="chal-bar"><div class="chal-fill" data-pct="66.6"></div></div>
+        <div class="chal-prog-text">2 of 3 complete</div>
+        <div class="chal-action"><a href="checkin.html" class="btn-go-checkin"><i class="fas fa-map-marker-alt"></i> Check In Now</a></div>
+      </div>
+      <div class="chal-card">
+        <div class="chal-reward"><i class="fas fa-coins"></i> +350 XP Reward</div>
+        <div class="chal-title">Coffee Circuit</div>
+        <div class="chal-desc">Visit 5 different cafés in Tbilisi this month</div>
+        <div class="chal-bar"><div class="chal-fill" data-pct="60"></div></div>
+        <div class="chal-prog-text">3 of 5 complete</div>
+        <div class="chal-action"><a href="places.html" class="btn-go-checkin"><i class="fas fa-search"></i> Find Cafés</a></div>
+      </div>
+      <div class="chal-card">
+        <div class="chal-reward"><i class="fas fa-coins"></i> +500 XP Reward</div>
+        <div class="chal-title">Hidden Georgia</div>
+        <div class="chal-desc">Discover 10 places off the beaten tourist trail</div>
+        <div class="chal-bar"><div class="chal-fill" data-pct="40"></div></div>
+        <div class="chal-prog-text">4 of 10 complete</div>
+        <div class="chal-action"><a href="places.html" class="btn-go-checkin"><i class="fas fa-map"></i> Explore Places</a></div>
+      </div>
+      <div class="chal-card">
+        <div class="chal-reward"><i class="fas fa-coins"></i> +250 XP Reward</div>
+        <div class="chal-title">Social Butterfly</div>
+        <div class="chal-desc">Tag 3 friends in check-ins this week</div>
+        <div class="chal-bar"><div class="chal-fill" data-pct="33.3"></div></div>
+        <div class="chal-prog-text">1 of 3 complete</div>
+        <div class="chal-action"><a href="checkin.html" class="btn-go-checkin"><i class="fas fa-user-friends"></i> Tag Friends</a></div>
+      </div>
+      <div class="chal-card">
+        <div class="chal-reward"><i class="fas fa-coins"></i> +400 XP Reward</div>
+        <div class="chal-title">Mountain Conqueror</div>
+        <div class="chal-desc">Check in at 4 hiking or nature destinations</div>
+        <div class="chal-bar"><div class="chal-fill" data-pct="25"></div></div>
+        <div class="chal-prog-text">1 of 4 complete</div>
+        <div class="chal-action"><a href="places.html" class="btn-go-checkin"><i class="fas fa-mountain"></i> Find Trails</a></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wallet-page -->
+
+<!-- CLAIM MODAL -->
+<div class="modal-overlay" id="claimModal" onclick="handleModalClick(event)">
+  <div class="claim-modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-biz-name" id="mBiz">Entree Coffee</div>
+        <div class="modal-reward-title" id="mTitle">20% off any order</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-cost-pill" id="mCost"><i class="fas fa-coins"></i> -300 XP</div>
+    <div class="qr-block">
+      <svg width="124" height="124" viewBox="0 0 124 124" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="4" width="36" height="36" rx="4" fill="#111"/>
+        <rect x="8" y="8" width="28" height="28" rx="2" fill="#fff"/>
+        <rect x="13" y="13" width="18" height="18" rx="1" fill="#111"/>
+        <rect x="84" y="4" width="36" height="36" rx="4" fill="#111"/>
+        <rect x="88" y="8" width="28" height="28" rx="2" fill="#fff"/>
+        <rect x="93" y="13" width="18" height="18" rx="1" fill="#111"/>
+        <rect x="4" y="84" width="36" height="36" rx="4" fill="#111"/>
+        <rect x="8" y="88" width="28" height="28" rx="2" fill="#fff"/>
+        <rect x="13" y="93" width="18" height="18" rx="1" fill="#111"/>
+        <rect x="48" y="4"  width="8" height="8" fill="#111"/> <rect x="60" y="4"  width="8" height="8" fill="#111"/>
+        <rect x="72" y="4"  width="8" height="8" fill="#111"/> <rect x="48" y="16" width="8" height="8" fill="#111"/>
+        <rect x="72" y="16" width="8" height="8" fill="#111"/> <rect x="60" y="28" width="8" height="8" fill="#111"/>
+        <rect x="4"  y="48" width="8" height="8" fill="#111"/> <rect x="16" y="48" width="8" height="8" fill="#111"/>
+        <rect x="28" y="48" width="8" height="8" fill="#111"/> <rect x="44" y="48" width="8" height="8" fill="#111"/>
+        <rect x="56" y="48" width="8" height="8" fill="#111"/> <rect x="68" y="48" width="8" height="8" fill="#111"/>
+        <rect x="80" y="48" width="8" height="8" fill="#111"/> <rect x="92" y="48" width="8" height="8" fill="#111"/>
+        <rect x="108" y="48" width="8" height="8" fill="#111"/><rect x="4"  y="60" width="8" height="8" fill="#111"/>
+        <rect x="20" y="60" width="8" height="8" fill="#111"/> <rect x="48" y="60" width="8" height="8" fill="#111"/>
+        <rect x="68" y="60" width="8" height="8" fill="#111"/> <rect x="84" y="60" width="8" height="8" fill="#111"/>
+        <rect x="108" y="60" width="8" height="8" fill="#111"/><rect x="4"  y="72" width="8" height="8" fill="#111"/>
+        <rect x="16" y="72" width="8" height="8" fill="#111"/> <rect x="32" y="72" width="8" height="8" fill="#111"/>
+        <rect x="56" y="72" width="8" height="8" fill="#111"/> <rect x="80" y="72" width="8" height="8" fill="#111"/>
+        <rect x="96" y="72" width="8" height="8" fill="#111"/> <rect x="48" y="84" width="8" height="8" fill="#111"/>
+        <rect x="60" y="84" width="8" height="8" fill="#111"/> <rect x="80" y="84" width="8" height="8" fill="#111"/>
+        <rect x="108" y="84" width="8" height="8" fill="#111"/><rect x="48" y="96" width="8" height="8" fill="#111"/>
+        <rect x="68" y="96" width="8" height="8" fill="#111"/> <rect x="92" y="96" width="8" height="8" fill="#111"/>
+        <rect x="56" y="108" width="8" height="8" fill="#111"/><rect x="80" y="108" width="8" height="8" fill="#111"/>
+        <rect x="104" y="108" width="8" height="8" fill="#111"/>
+      </svg>
+    </div>
+    <div class="code-reveal">
+      <div class="code-lbl">Your discount code</div>
+      <div class="code-val" id="mCode">ENTREE20</div>
+    </div>
+    <button class="code-copy-btn" id="copyBtn" onclick="copyModalCode()"><i class="fas fa-copy"></i> Copy Code</button>
+    <div class="modal-note" id="mNote">Show this QR code or enter the discount code at <strong>Entree Coffee</strong>.<br>Valid until Jun 30, 2026. Single use only.</div>
+  </div>
+</div>
+
+<script src="mock-users.js"></script>
+<script src="mock-interactions.js"></script>
+<script src="mock-notifications.js"></script>
+<script src="config.js"></script>
+  <script src="api-client.js"></script>
+  <script src="main.js"></script>
+  <script src="account.js"></script>
+<script>
+const XP_BAL = 847;
+
+const REWARDS = [
+  { id:1, biz:'Entree Coffee',       cat:'coffee',   cost:300,  discount:'20% Off', title:'Any Order Discount',       expires:'Jun 30, 2026', code:'ENTREE20',  saved:false },
+  { id:2, biz:'Rooms Hotel Kazbegi', cat:'hotel',    cost:900,  discount:'15% Off', title:'Room Booking Discount',    expires:'Jul 15, 2026', code:'ROOMS15K',  saved:true  },
+  { id:3, biz:'Tbilisi Jazz Festival',cat:'event',   cost:1200, discount:'Free',    title:'Ticket Draw Entry',        expires:'May 25, 2026', code:'JAZZ2026',  saved:false },
+  { id:4, biz:'Mountain Gear Georgia',cat:'activity', cost:700,  discount:'25 GEL',  title:'Off Any Purchase',         expires:'Aug 1, 2026',  code:'MGG25GEL',  saved:false },
+  { id:5, biz:'Shavi Lomi Restaurant',cat:'food',    cost:500,  discount:'10% Off', title:'Dinner for Two',           expires:'Jun 15, 2026', code:'SHAVI10',   saved:false },
+  { id:6, biz:'Kakheti Wine Tour',   cat:'activity', cost:1500, discount:'Free',    title:'Wine Tasting Session',     expires:'Sep 1, 2026',  code:'WINE-FREE', saved:true  },
+  { id:7, biz:'Narikala Yoga Studio',cat:'activity', cost:400,  discount:'3 Classes','title':'Free Trial Pass',       expires:'Jul 1, 2026',  code:'YOGA3FREE', saved:false },
+  { id:8, biz:'Fabrika Hostel',      cat:'hotel',    cost:600,  discount:'1 Night', title:'Free Weekday Stay',        expires:'Aug 15, 2026', code:'FABRIKA1N', saved:false },
+];
+
+const XP_LOG = [
+  { action:'Check-in at Fabrika Tbilisi', icon:'map-marker-alt', xp:+85,  time:'2h ago',  type:'checkin'  },
+  { action:'Review: Rooms Hotel Kazbegi',  icon:'star',           xp:+30,  time:'1d ago',  type:'review'   },
+  { action:'Challenge: 5 New Places',      icon:'trophy',         xp:+150, time:'2d ago',  type:'challenge'},
+  { action:'Friend invited: Ana Beridze',  icon:'user-plus',      xp:+50,  time:'3d ago',  type:'social'   },
+  { action:'Claimed: Entree Coffee 20%',   icon:'ticket-alt',     xp:-300, time:'5d ago',  type:'claim'    },
+  { action:'Photo upload at Mtatsminda',   icon:'camera',         xp:+15,  time:'5d ago',  type:'photo'    },
+  { action:'Daily streak bonus ×12',       icon:'fire',           xp:+20,  time:'6d ago',  type:'streak'   },
+  { action:'Discovered: Signagi Old Town', icon:'compass',        xp:+40,  time:'1w ago',  type:'discover' },
+];
+
+let currentFilter = 'all';
+let saved = new Set(REWARDS.filter(r => r.saved).map(r => r.id));
+
+function filterRewards(cat) {
+  currentFilter = cat;
+  document.querySelectorAll('.rfilt').forEach(b => b.classList.toggle('active', b.dataset.filter === cat));
+  renderRewards();
+}
+
+function renderRewards() {
+  const grid = document.getElementById('rewardsGrid');
+  let list = REWARDS;
+  if (currentFilter === 'saved') list = REWARDS.filter(r => saved.has(r.id));
+  else if (currentFilter !== 'all') list = REWARDS.filter(r => r.cat === currentFilter);
+
+  if (!list.length) {
+    grid.innerHTML = '<div class="no-results"><i class="fas fa-search" style="font-size:1.5rem;margin-bottom:10px;display:block;opacity:0.3"></i>No rewards in this category yet</div>';
+    return;
+  }
+
+  grid.innerHTML = list.map(r => {
+    const can = XP_BAL >= r.cost;
+    const isSaved = saved.has(r.id);
+    return `<div class="reward-card${isSaved ? ' is-saved' : ''}">
+      <div class="reward-card-top">
+        <span class="cat-badge ${r.cat}">${r.cat}</span>
+        <button class="save-btn${isSaved ? ' saved' : ''}" onclick="toggleSave(${r.id})" title="${isSaved ? 'Unsave' : 'Save'}">
+          <i class="fas fa-bookmark"></i>
+        </button>
+      </div>
+      <div class="reward-biz">${r.biz}</div>
+      <div class="reward-title">${r.title}</div>
+      <div class="reward-discount">${r.discount}</div>
+      <div class="reward-cost">
+        <span class="cost-pill ${can ? 'affordable' : 'locked'}"><i class="fas fa-coins"></i> ${r.cost.toLocaleString()} XP</span>
+        ${!can ? `<span class="need-more">need ${(r.cost - XP_BAL).toLocaleString()} more</span>` : ''}
+      </div>
+      <div class="reward-expiry"><i class="fas fa-clock"></i> Expires ${r.expires}</div>
+      <button class="reward-claim-btn ${can ? 'can-claim' : 'locked-btn'}"
+        ${can ? `onclick="openClaim(${r.id})"` : 'disabled'}>
+        ${can ? '<i class="fas fa-qrcode"></i> Claim Reward' : '<i class="fas fa-lock"></i> Not Enough XP'}
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function toggleSave(id) {
+  saved.has(id) ? saved.delete(id) : saved.add(id);
+  document.getElementById('savedCountDisplay').textContent = saved.size;
+  renderRewards();
+}
+
+function openClaim(id) {
+  const r = REWARDS.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('mBiz').textContent = r.biz;
+  document.getElementById('mTitle').textContent = r.title;
+  document.getElementById('mCost').innerHTML = `<i class="fas fa-coins"></i> -${r.cost} XP`;
+  document.getElementById('mCode').textContent = r.code;
+  document.getElementById('mNote').innerHTML = `Show this QR or enter code at <strong>${r.biz}</strong>.<br>Valid until ${r.expires}. Single use only.`;
+  const btn = document.getElementById('copyBtn');
+  btn.innerHTML = '<i class="fas fa-copy"></i> Copy Code';
+  btn.className = 'code-copy-btn';
+  document.getElementById('claimModal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('claimModal').classList.remove('open'); }
+function handleModalClick(e) { if (e.target === e.currentTarget) closeModal(); }
+
+function copyModalCode() {
+  const code = document.getElementById('mCode').textContent;
+  navigator.clipboard.writeText(code).catch(() => {});
+  const btn = document.getElementById('copyBtn');
+  btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i> Copy Code'; btn.classList.remove('copied'); }, 2000);
+}
+
+function copyCode(btn, code) {
+  navigator.clipboard.writeText(code).catch(() => {});
+  const orig = btn.textContent;
+  btn.textContent = 'Copied!';
+  btn.style.cssText = 'border-color:var(--green);color:var(--green)';
+  setTimeout(() => { btn.textContent = orig; btn.style.cssText = ''; }, 2000);
+}
+
+function renderXP() {
+  document.getElementById('xpGrid').innerHTML = XP_LOG.map(h => `
+    <div class="xp-item">
+      <div class="xp-icon ${h.type}"><i class="fas fa-${h.icon}"></i></div>
+      <div class="xp-info">
+        <div class="xp-action">${h.action}</div>
+        <div class="xp-time">${h.time}</div>
+      </div>
+      <div class="xp-amount ${h.xp > 0 ? 'gain' : 'spend'}">${h.xp > 0 ? '+' : ''}${h.xp} XP</div>
+    </div>`).join('');
+}
+
+function animateBalance() {
+  const el = document.getElementById('balanceDisplay');
+  const target = XP_BAL;
+  let current = 0;
+  const step = Math.ceil(target / 50);
+  const timer = setInterval(() => {
+    current = Math.min(current + step, target);
+    el.textContent = current.toLocaleString();
+    if (current >= target) clearInterval(timer);
+  }, 18);
+}
+
+function animateBars() {
+  document.querySelectorAll('.chal-fill').forEach(bar => {
+    const pct = bar.dataset.pct;
+    bar.style.width = '0';
+    setTimeout(() => { bar.style.width = pct + '%'; }, 200);
+  });
+}
+
+renderRewards();
+renderXP();
+animateBalance();
+setTimeout(animateBars, 150);
+  window.GeoHubSocial?.refresh?.();
+</script>
+<script src="social-layer.js"></script>
+<script src="nav-cleanup.js"></script>
+<script src="mobile-nav.js"></script>
+<script src="demo-mode.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+{
+  "name": "GeoHub — Discover Georgia",
+  "short_name": "GeoHub",
+  "description": "Discover Georgia, Earn XP, Connect with people, Grow your business.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#04050d",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "categories": ["lifestyle", "social", "travel"],
+  "icons": [
+    { "src": "icons/icon-72.png",   "sizes": "72x72",   "type": "image/png" },
+    { "src": "icons/icon-96.png",   "sizes": "96x96",   "type": "image/png" },
+    { "src": "icons/icon-128.png",  "sizes": "128x128", "type": "image/png" },
+    { "src": "icons/icon-192.png",  "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png",  "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png",  "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Explore",
+      "short_name": "Explore",
+      "description": "Discover places, events, and creators",
+      "url": "/feed.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Live City",
+      "short_name": "Live",
+      "description": "See what is happening around you right now",
+      "url": "/live.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Rewards",
+      "short_name": "Rewards",
+      "description": "Check your XP and unlock rewards",
+      "url": "/rewards.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "AI Assistant",
+      "short_name": "GeoAI",
+      "description": "Plan your day with GeoHub AI",
+      "url": "/assistant.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [
+    { "src": "icons/screenshot-mobile.png", "sizes": "390x844", "type": "image/png", "form_factor": "narrow" }
+  ]
+}
