@@ -532,10 +532,26 @@
   }
 
   function submitForm() {
-    document.getElementById(`step4`).classList.remove('active');
+    document.getElementById('step4').classList.remove('active');
     document.getElementById('stepSuccess').classList.add('active');
     document.getElementById('progressFill').style.width = '100%';
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Save business under the current user so dashboard shows it
+    try {
+      var name = (document.getElementById('bizNameInput') || {}).value || 'My Business';
+      var desc = (document.getElementById('descInput') || {}).value || '';
+      var city = (document.getElementById('citySelect') || {}).value || 'Tbilisi';
+      var cat  = (document.querySelector('.cat-option.selected') || {}).dataset?.cat || '';
+      var biz  = { name: name, desc: desc, city: city, category: cat, createdAt: Date.now(), hasActivity: false };
+      var authRaw = localStorage.getItem('geohub_auth_user');
+      var authUser = authRaw ? JSON.parse(authRaw) : null;
+      if (authUser) {
+        var key = 'geohub_business_' + (authUser.uid || authUser.id || 'anon');
+        localStorage.setItem(key, JSON.stringify(biz));
+      }
+      localStorage.setItem('geohub_user_business', JSON.stringify(biz));
+    } catch (e) {}
   }
 
   // Upload zone effects
@@ -568,6 +584,7 @@
     });
   });
 </script>
+<script src="mode.js"></script>
 <script src="nav-cleanup.js"></script>
 <script src="mobile-nav.js"></script>
 <script src="demo-mode.js"></script>

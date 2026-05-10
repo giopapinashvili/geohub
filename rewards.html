@@ -632,12 +632,14 @@
 <script src="mock-users.js"></script>
 <script src="mock-interactions.js"></script>
 <script src="mock-notifications.js"></script>
+<script src="mode.js"></script>
 <script src="config.js"></script>
   <script src="api-client.js"></script>
   <script src="main.js"></script>
   <script src="account.js"></script>
 <script>
-const XP_BAL = 847;
+let XP_BAL = 847;
+let XP_LOG_DATA = null; // null = use default below
 
 const REWARDS = [
   { id:1, biz:'Entree Coffee',       cat:'coffee',   cost:300,  discount:'20% Off', title:'Any Order Discount',       expires:'Jun 30, 2026', code:'ENTREE20',  saved:false },
@@ -748,7 +750,8 @@ function copyCode(btn, code) {
 }
 
 function renderXP() {
-  document.getElementById('xpGrid').innerHTML = XP_LOG.map(h => `
+  const log = XP_LOG_DATA || XP_LOG;
+  document.getElementById('xpGrid').innerHTML = log.map(h => `
     <div class="xp-item">
       <div class="xp-icon ${h.type}"><i class="fas fa-${h.icon}"></i></div>
       <div class="xp-info">
@@ -777,6 +780,18 @@ function animateBars() {
     bar.style.width = '0';
     setTimeout(() => { bar.style.width = pct + '%'; }, 200);
   });
+}
+
+// Real user mode: use actual XP, empty history
+if (window.GeoMode && window.GeoMode.isRealUser()) {
+  const _u = window.GeoMode.getCurrentUser();
+  XP_BAL = _u.xp || 0;
+  XP_LOG_DATA = [
+    { action: 'Created GeoHub account', icon: 'user-plus', xp: +250, time: 'Today', type: 'social' }
+  ];
+  // Update the hardcoded balance-sub text
+  const balSub = document.querySelector('.balance-sub');
+  if (balSub) balSub.innerHTML = `of <strong>${XP_BAL}</strong> total earned &nbsp;·&nbsp; <strong>0</strong> spent on rewards`;
 }
 
 renderRewards();

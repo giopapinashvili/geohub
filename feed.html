@@ -1396,6 +1396,7 @@
 
 <script src="data.js"></script>
 <script src="mock-users.js"></script>
+<script src="mode.js"></script>
 <script src="config.js"></script>
   <script src="api-client.js"></script>
   <script src="main.js"></script>
@@ -1491,6 +1492,33 @@
     const sidebar = document.querySelector('.feed-sidebar');
     const existing = document.getElementById('mockUserSwitcherWidget');
     if (existing) existing.remove();
+
+    // Real Firebase users see their own account card — no mock switcher
+    if (window.GeoMode && window.GeoMode.isRealUser()) {
+      const real = window.GeoMode.getCurrentUser();
+      sidebar.insertAdjacentHTML('afterbegin', `
+        <div class="sidebar-widget" id="mockUserSwitcherWidget">
+          <div class="sw-title">Your Account</div>
+          <div class="mock-current-user">
+            <img src="${real.avatar || ''}" alt="${real.fullName}" onerror="this.style.display='none'">
+            <div>
+              <div class="mock-user-name">${real.fullName} ${accountBadge(real.accountType || 'Explorer')}</div>
+              <div class="mock-user-meta">@${real.username} · ${real.city || 'Tbilisi'}</div>
+            </div>
+          </div>
+          <div class="mock-stats">
+            <div class="mock-stat"><strong>${compact(real.xp || 250)}</strong><span>XP</span></div>
+            <div class="mock-stat"><strong>${real.explorerLevel ? real.explorerLevel.split(' ')[0] : 'New'}</strong><span>Level</span></div>
+            <div class="mock-stat"><strong>${real.trustScore || 70}</strong><span>Trust</span></div>
+          </div>
+          <div class="mock-user-meta" style="margin-top:10px">
+            <a href="profile.html" style="color:var(--green)"><i class="fas fa-user"></i> View your profile</a>
+          </div>
+        </div>`);
+      return;
+    }
+
+    // Demo / mock mode: standard mock user switcher
     sidebar.insertAdjacentHTML('afterbegin', `
       <div class="sidebar-widget mock-switcher-card" id="mockUserSwitcherWidget">
         <div class="sw-title">Mock User Switcher <a href="#">dev only</a></div>

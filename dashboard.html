@@ -226,6 +226,18 @@
 
 <div class="dashboard-page">
 
+  <!-- Real user: no business registered yet -->
+  <div id="realNoBizState" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:80vh;text-align:center;padding:40px 24px;gap:0">
+    <div style="font-size:3.5rem;margin-bottom:20px">🏪</div>
+    <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:10px;color:var(--text-primary)">Create your first business page</h2>
+    <p style="color:var(--text-muted);max-width:460px;line-height:1.65;margin-bottom:32px">You don't have a business listed on GeoHub yet. Add your business to start getting discovered by local customers, manage bookings, and run campaigns.</p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+      <a href="add-business.html" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;background:var(--gradient-brand);color:#fff;border-radius:var(--radius-md);font-weight:700;text-decoration:none;font-size:0.95rem"><i class="fas fa-plus"></i> Add Business</a>
+      <button onclick="alert('Instagram import — coming soon!')" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;background:none;color:var(--text-secondary);border:1px solid var(--border);border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:0.95rem;font-family:inherit"><i class="fab fa-instagram" style="color:#e1306c"></i> Import from Instagram</button>
+      <a href="pricing.html" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;background:none;color:var(--text-secondary);border:1px solid var(--border);border-radius:var(--radius-md);font-weight:600;text-decoration:none;font-size:0.95rem"><i class="fas fa-gem" style="color:var(--gold)"></i> View Plans</a>
+    </div>
+  </div>
+
   <!-- ======================== SIDEBAR NAV ======================== -->
   <aside class="dashboard-nav">
     <div class="dash-nav-section">
@@ -1651,6 +1663,47 @@
     btn.style.color = 'var(--green)';
     setTimeout(() => { btn.innerHTML = '<i class="fas fa-save"></i> Save Draft'; btn.style.color = ''; }, 2000);
   }
+</script>
+<script src="mode.js"></script>
+<script>
+(function () {
+  if (!window.GeoMode || !window.GeoMode.isRealUser()) return;
+
+  var user = window.GeoMode.getCurrentUser();
+  var bizKey = 'geohub_business_' + (user.uid || user.id || 'anon');
+  var biz = null;
+  try { biz = JSON.parse(localStorage.getItem(bizKey) || localStorage.getItem('geohub_user_business') || 'null'); } catch (e) {}
+
+  var nav   = document.querySelector('.dashboard-nav');
+  var main  = document.querySelector('.dashboard-content');
+  var state = document.getElementById('realNoBizState');
+
+  if (!biz) {
+    // No business yet — show empty state
+    if (nav)   nav.style.display   = 'none';
+    if (main)  main.style.display  = 'none';
+    if (state) state.style.display = 'flex';
+    return;
+  }
+
+  // Business exists — personalise the sidebar header
+  var bizName = biz.name || user.fullName + "'s Business";
+  var nameEls = document.querySelectorAll('.dash-nav-biz-name');
+  nameEls.forEach(function (el) { el.textContent = bizName; });
+
+  // Replace hardcoded "Kazbegi Adventures" in the sidebar profile mini
+  var sidebarLetter = document.querySelector('.dashboard-nav [style*="font-weight:700;font-size:1.1rem"]');
+  if (sidebarLetter) sidebarLetter.textContent = (bizName[0] || 'B').toUpperCase();
+  var sidebarName = document.querySelector('.dashboard-nav [style*="font-size:0.875rem;font-weight:700"]');
+  if (sidebarName) sidebarName.textContent = bizName;
+
+  // Zero out the overview stats for new business
+  if (!biz.hasActivity) {
+    document.querySelectorAll('.kpi-value, .stat-value').forEach(function (el) {
+      if (!isNaN(parseInt(el.textContent))) el.textContent = '0';
+    });
+  }
+})();
 </script>
 <script src="nav-cleanup.js"></script>
 <script src="mobile-nav.js"></script>
