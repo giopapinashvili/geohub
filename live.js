@@ -6,109 +6,12 @@ const LIVE_EVENT_TYPES = [
   { type: "Hiking", icon: "mountain" },
   { type: "Pop-up", icon: "sparkles" },
 ];
-const LIVE_PLACES = [
-  { name: "Fabrika", tag: "Cafe", status: "gold" },
-  { name: "Turtle Lake", tag: "Outdoor", status: "green" },
-  { name: "Rooms Kazbegi", tag: "Lodge", status: "purple" },
-  { name: "Entree Coffee", tag: "Cafe", status: "blue" },
-  { name: "Silk Route Club", tag: "Nightlife", status: "red" },
-  { name: "Auchan Rooftop", tag: "Event", status: "gold" },
-];
-const LIVE_STORIES = [
-  {
-    title: "Cafés in Rustaveli",
-    people: 42,
-    location: "Tbilisi",
-    badge: "LIVE",
-  },
-  { title: "Night explorers", people: 58, location: "Vake", badge: "LIVE" },
-  { title: "Sunrise hike", people: 24, location: "Jvari", badge: "Active" },
-  { title: "Jazz circle", people: 16, location: "Fabrika", badge: "LIVE" },
-  { title: "Photo walk", people: 33, location: "Old Town", badge: "Now" },
-];
-const LIVE_GROUPS = [
-  { name: "Hikers Gathering", people: 14, interest: "Hiking", status: "gold" },
-  { name: "Café Meetup", people: 27, interest: "Cafes", status: "blue" },
-  {
-    name: "Photographers Walk",
-    people: 18,
-    interest: "Photography",
-    status: "purple",
-  },
-  { name: "Startup Circle", people: 12, interest: "Startup", status: "green" },
-  { name: "Nightlife Crew", people: 34, interest: "Nightlife", status: "red" },
-];
-const LIVE_NOTIFICATIONS = [
-  {
-    text: "Nearby event started: Jazz Night at Fabrika.",
-    icon: "music",
-    type: "alert",
-  },
-  {
-    text: "Reward expiring: 15% off coffee at Entree Coffee.",
-    icon: "gift",
-    type: "reward",
-  },
-  {
-    text: "3 friends are 200m from Turtle Lake.",
-    icon: "map-marker-alt",
-    type: "friend",
-  },
-  {
-    text: "Trending place: Rooms Kazbegi is hot tonight.",
-    icon: "fire",
-    type: "trend",
-  },
-  {
-    text: "Group invite: join Startup Circle in 12 minutes.",
-    icon: "hands-helping",
-    type: "group",
-  },
-];
-const LIVE_MAP_PINS = [
-  {
-    title: "Fabrika",
-    desc: "Live crowd in the cafe district",
-    left: "23%",
-    top: "28%",
-    status: "gold",
-  },
-  {
-    title: "Turtle Lake",
-    desc: "Sunset gathering active",
-    left: "58%",
-    top: "18%",
-    status: "green",
-  },
-  {
-    title: "Rooms Kazbegi",
-    desc: "Trending lodging tonight",
-    left: "72%",
-    top: "62%",
-    status: "purple",
-  },
-  {
-    title: "Entree Coffee",
-    desc: "Rewards close to sold out",
-    left: "45%",
-    top: "42%",
-    status: "blue",
-  },
-  {
-    title: "Silk Route Club",
-    desc: "DJ set started 5 min ago",
-    left: "31%",
-    top: "68%",
-    status: "red",
-  },
-];
-const LIVE_SUGGESTIONS = [
-  "You may like Fabrika right now — 4 friends nearby.",
-  "Low crowd café nearby with +40 XP.",
-  "Jazz event starts in 18 minutes.",
-  "Reward streak: double points at Entree Coffee.",
-  "Hiking group leaving for Juta in 30 minutes.",
-];
+const LIVE_PLACES = [];
+const LIVE_STORIES = [];
+const LIVE_GROUPS = [];
+const LIVE_NOTIFICATIONS = [];
+const LIVE_MAP_PINS = [];
+const LIVE_SUGGESTIONS = [];
 
 function randomBetween(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;

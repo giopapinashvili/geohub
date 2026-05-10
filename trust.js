@@ -3,24 +3,26 @@
    ================================================================ */
 
 // ======================== DATA ========================
+(function () {
+  var _u = null;
+  try { var v = localStorage.getItem('geohub_auth_user'); _u = v ? JSON.parse(v) : null; } catch (e) {}
+  var _score = (_u && _u.trustScore) ? _u.trustScore : 0;
+  window._MY_TRUST_SCORE = _score;
+})();
+
 const MY_TRUST = {
-  score: 847, maxScore: 1000,
-  level: 'Trusted Explorer', levelIndex: 3,
-  nextLevel: 'Community Trusted', nextLevelMin: 501, nextLevelMax: 900,
+  score: window._MY_TRUST_SCORE || 0, maxScore: 1000,
+  level: 'Unverified', levelIndex: 0,
+  nextLevel: 'Basic Verified', nextLevelMin: 0, nextLevelMax: 300,
   breakdown: [
-    { label: 'Real Check-ins',  icon: 'fas fa-map-marker-alt', color: '#10b981', score: 230, max: 300, desc: '46 GPS-verified locations' },
-    { label: 'Review Quality',  icon: 'fas fa-star',           color: '#f59e0b', score: 180, max: 250, desc: '23 high-credibility reviews' },
-    { label: 'Camera Proofs',   icon: 'fas fa-camera',         color: '#3b82f6', score: 200, max: 250, desc: '24 AI-validated visit proofs' },
-    { label: 'Community Trust', icon: 'fas fa-users',          color: '#a78bfa', score: 150, max: 150, desc: 'Vouched by 18 members' },
-    { label: 'Safety Record',   icon: 'fas fa-shield-alt',     color: '#22c55e', score: 87,  max: 50,  desc: '7 accurate reports filed' },
+    { label: 'Real Check-ins',  icon: 'fas fa-map-marker-alt', color: '#10b981', score: 0, max: 300, desc: 'No check-ins yet' },
+    { label: 'Review Quality',  icon: 'fas fa-star',           color: '#f59e0b', score: 0, max: 250, desc: 'No reviews yet' },
+    { label: 'Camera Proofs',   icon: 'fas fa-camera',         color: '#3b82f6', score: 0, max: 250, desc: 'No camera proofs yet' },
+    { label: 'Community Trust', icon: 'fas fa-users',          color: '#a78bfa', score: 0, max: 150, desc: 'No community votes yet' },
+    { label: 'Safety Record',   icon: 'fas fa-shield-alt',     color: '#22c55e', score: 0, max: 50,  desc: 'Clean record' },
   ],
   badges: [
-    { label: 'Email Verified',    icon: 'fas fa-envelope',       color: '#3b82f6' },
-    { label: 'Phone Confirmed',   icon: 'fas fa-phone',          color: '#3b82f6' },
-    { label: 'Camera Proof ×24',  icon: 'fas fa-camera',         color: '#10b981' },
-    { label: 'Real Explorer',     icon: 'fas fa-map-marked-alt', color: '#10b981' },
-    { label: 'Top Reviewer',      icon: 'fas fa-star',           color: '#f59e0b' },
-    { label: 'Trusted Member',    icon: 'fas fa-shield-alt',     color: '#a78bfa' },
+    { label: 'Email Verified', icon: 'fas fa-envelope', color: '#3b82f6' },
   ],
 };
 
@@ -77,13 +79,7 @@ const SAFETY_STATS = {
   trusted: 4821, resolution: '94%', avgTime: '4.2h',
 };
 
-const MOCK_REPORT_FEED = [
-  { id: 'rf1', type: 'fake_review',  target: 'Fabrika Night Market',  status: 'resolved',     ts: Date.now() - 86400000 * 2 },
-  { id: 'rf2', type: 'scam_biz',     target: 'Unknown Tour Agency',   status: 'under_review', ts: Date.now() - 86400000 },
-  { id: 'rf3', type: 'fake_checkin', target: 'Biltmore Tbilisi',      status: 'dismissed',    ts: Date.now() - 86400000 * 5 },
-  { id: 'rf4', type: 'bad_behavior', target: 'Anonymous User #4421',  status: 'resolved',     ts: Date.now() - 86400000 * 3 },
-  { id: 'rf5', type: 'fake_offer',   target: 'Fake Brand X',          status: 'resolved',     ts: Date.now() - 86400000 * 7 },
-];
+const MOCK_REPORT_FEED = [];
 
 const CREDIBILITY_INDICATORS = [
   { icon: 'fas fa-camera',       color: '#3b82f6', label: 'Camera Proof',      desc: 'Photo taken in-app with GPS + timestamp during visit' },

@@ -1352,15 +1352,9 @@
       return null;
     }
 
-    // Public profile lookup via ?user= param
-    const decoded = decodeURIComponent(urlParam);
-    const mockMatch = MOCK_USERS.find(user =>
-      user.username === decoded ||
-      slugifyProfile(user.username) === slugifyProfile(decoded) ||
-      slugifyProfile(user.fullName) === slugifyProfile(decoded) ||
-      user.id === decoded
-    );
-    return mockMatch || null;
+    // Public profile lookup via ?user= param — no mock users exist
+    window.location.href = 'index.html';
+    return null;
   }
 
   function scoreInterestProfile(item, user) {

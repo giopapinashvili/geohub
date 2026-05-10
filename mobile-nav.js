@@ -19,12 +19,17 @@
   function getActiveTab() {
     var p = currentPage;
     if (!p || p === 'index.html') return 'home';
-    if (['feed.html','places.html','map.html','events.html','groups.html','explore.html'].includes(p)) return 'explore';
+    if (['feed.html','places.html','events.html','groups.html','explore.html'].includes(p)) return 'explore';
     if (['live.html'].includes(p)) return 'live';
+    if (['map.html'].includes(p)) return 'map';
     if (['rewards.html','challenges.html'].includes(p)) return 'rewards';
     if (['messages.html'].includes(p)) return 'messages';
-    if (['profile.html'].includes(p)) return 'profile';
+    if (['profile.html','auth.html'].includes(p)) return 'profile';
     return '';
+  }
+
+  function getAuthUser() {
+    try { var v = localStorage.getItem('geohub_auth_user'); return v ? JSON.parse(v) : null; } catch (e) { return null; }
   }
 
   // ── INJECT BOTTOM NAV ─────────────────────────────────────────
@@ -39,16 +44,21 @@
     nav.setAttribute('role', 'navigation');
     nav.setAttribute('aria-label', 'Main navigation');
 
+    var authUser = getAuthUser();
+    var profileHref  = authUser ? 'profile.html' : 'auth.html';
+    var profileLabel = authUser ? 'Profile' : 'Login';
+    var profileIcon  = authUser ? 'fas fa-user-circle' : 'fas fa-sign-in-alt';
+
     nav.innerHTML =
-      navItem('index.html',   'fas fa-home',    'Home',     active === 'home',    '') +
-      navItem('feed.html',    'fas fa-compass',  'Explore',  active === 'explore', '') +
+      navItem('index.html',  'fas fa-home',    'Home',    active === 'home',    '') +
+      navItem('feed.html',   'fas fa-compass', 'Explore', active === 'explore', '') +
       '<div class="app-fab-wrap">' +
         '<button class="app-fab" id="app-fab" aria-label="Quick actions" aria-expanded="false">' +
           '<i class="fas fa-plus" aria-hidden="true"></i>' +
         '</button>' +
       '</div>' +
-      navItem('live.html',    'fas fa-signal',   'Live',     active === 'live',    'live-item') +
-      navItem('rewards.html', 'fas fa-gift',      'Rewards',  active === 'rewards', '');
+      navItem('map.html',       'fas fa-map',        'Map',     active === 'map' || active === 'live', '') +
+      navItem(profileHref,      profileIcon,          profileLabel, active === 'profile', '');
 
     document.body.appendChild(nav);
     document.getElementById('app-fab').addEventListener('click', toggleActionSheet);
@@ -200,13 +210,7 @@
 
   // ── NOTIFICATION TOASTS ───────────────────────────────────────
 
-  var NOTIFS = [
-    { emoji: '📍', bg: 'rgba(16,185,129,0.15)',  color: '#34d399', title: 'Giorgi is nearby!',       text: '200m · Near Fabrika · 2 min ago',          link: 'map.html'      },
-    { emoji: '🎪', bg: 'rgba(239,68,68,0.15)',   color: '#f87171', title: 'Night Market started!',    text: 'Tbilisi · 1.2km · 14 people going',        link: 'live.html'     },
-    { emoji: '☕', bg: 'rgba(245,158,11,0.15)',  color: '#fbbf24', title: 'Reward unlocked!',         text: 'Free coffee at Rooms Café · 50 XP',        link: 'rewards.html'  },
-    { emoji: '💬', bg: 'rgba(59,130,246,0.15)',  color: '#60a5fa', title: 'New message from Mariam', text: 'Check out this hidden spot… 📍',            link: 'messages.html' },
-    { emoji: '⚡', bg: 'rgba(168,85,247,0.15)',  color: '#c084fc', title: '+35 XP earned!',           text: 'Rustaveli check-in verified · Level up!',  link: 'rewards.html'  },
-  ];
+  var NOTIFS = [];
 
   var notifIdx = 0;
   var notifShown = 0;

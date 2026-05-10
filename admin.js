@@ -3,73 +3,15 @@
 
   /* ── MOCK DATA ─────────────────────────────────────────────── */
 
-  var USERS = [
-    { id:1,  name:'Nino Kiknadze',    handle:'@nino_k',    trust:98, status:'verified', checkins:218, reviews:42, joined:'Jan 2024', av:'linear-gradient(135deg,#10b981,#3b82f6)', init:'N' },
-    { id:2,  name:'Giorgi Beridze',   handle:'@giorgi_b',  trust:95, status:'verified', checkins:184, reviews:38, joined:'Feb 2024', av:'linear-gradient(135deg,#3b82f6,#a855f7)', init:'G' },
-    { id:3,  name:'Salome Tsiklauri', handle:'@salome_t',  trust:93, status:'verified', checkins:156, reviews:31, joined:'Feb 2024', av:'linear-gradient(135deg,#f59e0b,#ef4444)', init:'S' },
-    { id:4,  name:'Tamara Gabunia',   handle:'@tamara_g',  trust:91, status:'verified', checkins:143, reviews:27, joined:'Mar 2024', av:'linear-gradient(135deg,#a855f7,#3b82f6)', init:'T' },
-    { id:5,  name:'Davit Kvaratskhelia', handle:'@davit_k', trust:87, status:'verified', checkins:112, reviews:19, joined:'Mar 2024', av:'linear-gradient(135deg,#10b981,#f59e0b)', init:'D' },
-    { id:6,  name:'Ana Lomidze',      handle:'@ana_l',     trust:82, status:'verified', checkins:98,  reviews:14, joined:'Apr 2024', av:'linear-gradient(135deg,#ef4444,#a855f7)', init:'A' },
-    { id:7,  name:'Luka Chikhelidze', handle:'@luka_c',    trust:76, status:'active',   checkins:74,  reviews:11, joined:'Apr 2024', av:'linear-gradient(135deg,#3b82f6,#10b981)', init:'L' },
-    { id:8,  name:'Mariam Jikia',     handle:'@mariam_j',  trust:71, status:'active',   checkins:62,  reviews:8,  joined:'May 2024', av:'linear-gradient(135deg,#f97316,#f59e0b)', init:'M' },
-    { id:9,  name:'Irakli Tavauri',   handle:'@irakli_t',  trust:65, status:'active',   checkins:48,  reviews:6,  joined:'May 2024', av:'linear-gradient(135deg,#10b981,#a855f7)', init:'I' },
-    { id:10, name:'Ketevan Abashidze',handle:'@ketevan_a', trust:58, status:'active',   checkins:34,  reviews:4,  joined:'Jun 2024', av:'linear-gradient(135deg,#ef4444,#3b82f6)', init:'K' },
-    { id:11, name:'Zaza Mchedlishvili',handle:'@zaza_m',   trust:34, status:'flagged',  checkins:12,  reviews:18, joined:'Jun 2024', av:'linear-gradient(135deg,#ef4444,#f97316)', init:'Z' },
-    { id:12, name:'Beka Gugushvili',  handle:'@beka_g',    trust:22, status:'suspended', checkins:3,  reviews:0,  joined:'Jul 2024', av:'linear-gradient(135deg,#475569,#334155)', init:'B' },
-    { id:13, name:'Nata Svanidze',    handle:'@nata_s',    trust:88, status:'verified', checkins:91,  reviews:16, joined:'Feb 2024', av:'linear-gradient(135deg,#a855f7,#ef4444)', init:'N' },
-    { id:14, name:'Giorgi Kapanadze', handle:'@giorgi_kap',trust:44, status:'flagged',  checkins:18,  reviews:22, joined:'May 2024', av:'linear-gradient(135deg,#f59e0b,#ef4444)', init:'G' },
-    { id:15, name:'Tiko Maisuradze',  handle:'@tiko_m',    trust:79, status:'active',   checkins:55,  reviews:9,  joined:'Mar 2024', av:'linear-gradient(135deg,#10b981,#3b82f6)', init:'T' }
-  ];
+  var USERS = [];
 
-  var BUSINESSES = [
-    { id:1, name:'Fabrika',         cat:'Café & Co-working', city:'Tbilisi', status:'verified', featured:true,  rating:4.8, reviews:284, checkins:1240, icon:'☕', iconBg:'rgba(16,185,129,0.15)',  campaigns:3 },
-    { id:2, name:'Rooms Hotel',     cat:'Luxury Hotel',      city:'Tbilisi', status:'verified', featured:true,  rating:4.9, reviews:198, checkins:840,  icon:'🏨', iconBg:'rgba(59,130,246,0.15)',  campaigns:2 },
-    { id:3, name:'Lolita Bar',      cat:'Bar & Nightlife',   city:'Tbilisi', status:'verified', featured:false, rating:4.7, reviews:142, checkins:620,  icon:'🍸', iconBg:'rgba(239,68,68,0.15)',   campaigns:1 },
-    { id:4, name:'Stamba Hotel',    cat:'Boutique Hotel',    city:'Tbilisi', status:'pending',  featured:false, rating:4.6, reviews:89,  checkins:380,  icon:'🏩', iconBg:'rgba(245,158,11,0.15)',  campaigns:0 },
-    { id:5, name:'Batumi Spa',      cat:'Wellness & Spa',    city:'Batumi',  status:'verified', featured:true,  rating:4.5, reviews:64,  checkins:210,  icon:'💆', iconBg:'rgba(168,85,247,0.15)',  campaigns:2 },
-    { id:6, name:'Wine House GE',   cat:'Wine Bar',          city:'Kakheti', status:'verified', featured:false, rating:4.8, reviews:112, checkins:290,  icon:'🍷', iconBg:'rgba(249,115,22,0.15)',  campaigns:1 },
-    { id:7, name:'GeoTech Office',  cat:'Tech & Coworking',  city:'Tbilisi', status:'rejected', featured:false, rating:3.2, reviews:8,   checkins:12,   icon:'💻', iconBg:'rgba(100,116,139,0.15)', campaigns:0 },
-    { id:8, name:'Kazbegi Resort',  cat:'Mountain Resort',   city:'Kazbegi', status:'pending',  featured:false, rating:4.7, reviews:44,  checkins:180,  icon:'🏔️', iconBg:'rgba(59,130,246,0.15)',  campaigns:0 }
-  ];
+  var BUSINESSES = [];
 
-  var CREATORS = [
-    { id:1, name:'Nino Kiknadze',    handle:'@nino_k',    followers:28400, posts:142, trust:98, verified:true,  collabs:8,  av:'linear-gradient(135deg,#10b981,#3b82f6)', init:'N' },
-    { id:2, name:'Giorgi Beridze',   handle:'@giorgi_b',  followers:19200, posts:98,  trust:95, verified:true,  collabs:6,  av:'linear-gradient(135deg,#3b82f6,#a855f7)', init:'G' },
-    { id:3, name:'Salome Travel',    handle:'@salome_tr', followers:14800, posts:76,  trust:89, verified:true,  collabs:4,  av:'linear-gradient(135deg,#f59e0b,#ef4444)', init:'S' },
-    { id:4, name:'TbilisiVibes',     handle:'@tbvibe',    followers:32100, posts:204, trust:84, verified:true,  collabs:12, av:'linear-gradient(135deg,#a855f7,#ef4444)', init:'T' },
-    { id:5, name:'GeoFood Blog',     handle:'@geofood',   followers:8900,  posts:58,  trust:76, verified:false, collabs:2,  av:'linear-gradient(135deg,#10b981,#f59e0b)', init:'G' },
-    { id:6, name:'Batumi Days',      handle:'@batumiday', followers:6200,  posts:44,  trust:71, verified:false, collabs:1,  av:'linear-gradient(135deg,#3b82f6,#10b981)', init:'B' }
-  ];
+  var CREATORS = [];
 
-  var MOD_QUEUE = [
-    { id:1,  type:'review',   title:'Coordinated Fake Reviews',   sub:'Stamba Hotel · 14 reviews',          body:'14 reviews posted from accounts created on the same day. Identical writing patterns detected by AI. Confidence: 91%.',                           priority:'high',   icon:'⭐', bg:'rgba(245,158,11,0.15)' },
-    { id:2,  type:'checkin',  title:'Automated Check-in Cluster',  sub:'Old Town Tbilisi · 7 check-ins',     body:'7 check-ins from identical device fingerprints within a 2-minute window. GPS variance only ±3m — likely bot activity.',                          priority:'high',   icon:'📍', bg:'rgba(16,185,129,0.15)' },
-    { id:3,  type:'user',     title:'Trust Score Manipulation',    sub:'@giorgi_k · +28 trust in 48h',       body:'User trust score jumped 28 points in 48 hours via self-referral loop and mass-follow pattern. AI flag: 74% confidence.',                         priority:'high',   icon:'👤', bg:'rgba(59,130,246,0.15)' },
-    { id:4,  type:'review',   title:'Offensive Review Content',    sub:'Fabrika · 1 review',                 body:'Review contains offensive language targeting staff by name. User has 2 prior warnings. Escalation recommended.',                                  priority:'medium', icon:'⭐', bg:'rgba(239,68,68,0.15)'  },
-    { id:5,  type:'content',  title:'Spam Creator Account',        sub:'@promo_bot_ge · 22 posts',           body:'Account posting identical promotional content across 22 places with no organic engagement. Follower count purchased.',                             priority:'medium', icon:'📢', bg:'rgba(168,85,247,0.15)' },
-    { id:6,  type:'checkin',  title:'Suspicious Reward Farming',   sub:'@beka_g · 48 check-ins today',       body:'User checked in 48 times in a single day across 30 different venues — physically impossible. Reward farming pattern.',                            priority:'medium', icon:'📍', bg:'rgba(16,185,129,0.15)' },
-    { id:7,  type:'review',   title:'Competitor Sabotage',         sub:'Rooms Hotel · 3 reviews',            body:'3 suspiciously negative reviews from brand-new accounts. IP addresses trace to same network as a competing hotel.',                                priority:'medium', icon:'⭐', bg:'rgba(245,158,11,0.15)' },
-    { id:8,  type:'user',     title:'Underage Account Suspected',  sub:'@anon_user_2891',                    body:'Profile content and activity patterns suggest user may be under platform minimum age. Photo verification required.',                               priority:'low',    icon:'👤', bg:'rgba(59,130,246,0.15)' },
-    { id:9,  type:'content',  title:'Copyright Infringement',      sub:'@geofood · 4 posts',                 body:'4 story posts contain watermarked photos from commercial photography sites. DMCA claim pending.',                                                  priority:'low',    icon:'🖼️', bg:'rgba(249,115,22,0.15)' },
-    { id:10, type:'checkin',  title:'GPS Spoofing Detected',       sub:'@zaza_m · Kazbegi',                  body:'Check-in location data shows Kazbegi while cellular tower data places device in Tbilisi. GPS spoofing library signature detected.',               priority:'low',    icon:'📍', bg:'rgba(16,185,129,0.15)' },
-    { id:11, type:'review',   title:'Unverified Medical Claim',    sub:'Batumi Spa · 1 review',              body:'Review claims spa caused a medical condition. Cannot be verified. May expose platform to legal liability.',                                        priority:'low',    icon:'⭐', bg:'rgba(239,68,68,0.15)'  },
-    { id:12, type:'user',     title:'Multiple Account Suspicion',  sub:'@nata_alt',                          body:'Account shares device fingerprint with banned user @beka_g. Profile avatar and bio closely match suspended account.',                             priority:'low',    icon:'👤', bg:'rgba(59,130,246,0.15)' }
-  ];
+  var MOD_QUEUE = [];
 
-  var LIVE_EVENTS = [
-    { icon:'📍', bg:'rgba(16,185,129,0.15)',  text:'<strong>nino_k</strong> checked in at <strong>Fabrika Café</strong>',            type:'check-in' },
-    { icon:'⭐', bg:'rgba(245,158,11,0.15)',  text:'<strong>giorgi_b</strong> left a 5-star review for <strong>Rooms Hotel</strong>', type:'review'   },
-    { icon:'🎁', bg:'rgba(59,130,246,0.15)',  text:'<strong>salome_t</strong> claimed reward at <strong>Lolita Bar</strong>',         type:'reward'   },
-    { icon:'🛡️', bg:'rgba(249,115,22,0.15)', text:'<strong>davit_k</strong> completed Patriot Mission in <strong>Vake Park</strong>', type:'patriot'  },
-    { icon:'🎬', bg:'rgba(168,85,247,0.15)',  text:'<strong>tbvibe</strong> posted a new Story from <strong>Old Town</strong>',        type:'story'    },
-    { icon:'📍', bg:'rgba(16,185,129,0.15)',  text:'<strong>tamara_g</strong> checked in at <strong>Mtatsminda Park</strong>',         type:'check-in' },
-    { icon:'⭐', bg:'rgba(245,158,11,0.15)',  text:'<strong>ana_l</strong> reviewed <strong>Wine House GE</strong> — 4 stars',         type:'review'   },
-    { icon:'🎁', bg:'rgba(59,130,246,0.15)',  text:'<strong>luka_c</strong> claimed Kazbegi hiking reward — <strong>+80 XP</strong>', type:'reward'   },
-    { icon:'🏆', bg:'rgba(168,85,247,0.15)',  text:'<strong>nata_s</strong> reached <strong>Explorer Level 5</strong>',               type:'milestone'},
-    { icon:'📍', bg:'rgba(16,185,129,0.15)',  text:'<strong>mariam_j</strong> checked in at <strong>Batumi Boulevard</strong>',        type:'check-in' },
-    { icon:'🛡️', bg:'rgba(249,115,22,0.15)', text:'<strong>irakli_t</strong> reported infrastructure issue in <strong>Saburtalo</strong>', type:'patriot' },
-    { icon:'🎬', bg:'rgba(168,85,247,0.15)',  text:'<strong>geofood</strong> posted a Story — <strong>Old Town street food</strong>',  type:'story'    }
-  ];
+  var LIVE_EVENTS = [];
 
   /* ── STATE ───────────────────────────────────────────────── */
   var currentSection = 'overview';
