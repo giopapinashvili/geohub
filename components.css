@@ -1,0 +1,153 @@
+/* ================================================================
+   GeoHub — Components
+   ================================================================ */
+
+/* ======================== BUTTONS ======================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: var(--transition);
+  white-space: nowrap;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+}
+.btn-primary {
+  background: var(--gradient-brand);
+  color: white;
+  box-shadow: var(--shadow-green);
+}
+.btn-primary:hover {
+  background: var(--gradient-brand-r);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(16, 185, 129, 0.35);
+}
+.btn-secondary {
+  background: transparent;
+  color: var(--green);
+  border: 1.5px solid var(--green);
+}
+.btn-secondary:hover {
+  background: var(--green-muted);
+  transform: translateY(-1px);
+}
+.btn-ghost {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+.btn-gold {
+  background: var(--gradient-gold);
+  color: white;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+}
+.btn-gold:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(245, 158, 11, 0.4);
+}
+.btn-white {
+  background: white;
+  color: var(--text-inverse);
+  font-weight: 700;
+}
+.btn-white:hover {
+  background: #f1f5f9;
+  transform: translateY(-1px);
+}
+.btn-sm {
+  padding: 7px 14px;
+  font-size: 0.8rem;
+}
+.btn-lg {
+  padding: 14px 28px;
+  font-size: 1rem;
+  border-radius: var(--radius-md);
+}
+.btn-xl {
+  padding: 16px 36px;
+  font-size: 1.05rem;
+  border-radius: var(--radius-md);
+}
+.btn-icon {
+  padding: 10px;
+  border-radius: var(--radius-sm);
+}
+.btn-full {
+  width: 100%;
+}
+
+/* ======================== BADGES ======================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.badge-green {
+  background: var(--green-muted);
+  color: var(--green-light);
+}
+.badge-blue {
+  background: var(--blue-muted);
+  color: var(--blue-light);
+}
+.badge-gold {
+  background: var(--gold-muted);
+  color: var(--gold-light);
+}
+.badge-red {
+  background: var(--red-muted);
+  color: #fca5a5;
+}
+.badge-gray {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+}
+.badge-verified {
+  background: var(--blue-muted);
+  color: var(--blue-light);
+  font-size: 0.7rem;
+}
+
+/* ======================== STARS ======================== */
+.stars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.stars i {
+  color: var(--gold);
+  font-size: 0.8rem;
+}
+.stars i.empty {
+  color: var(--text-muted);
+}
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rating-display .score {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+.rating-display .count {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}

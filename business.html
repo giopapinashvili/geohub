@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Business Profile — GeoHub</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="navbar.css">
   <link rel="stylesheet" href="social-layer.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#10b981">
@@ -14,55 +16,7 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="mobile-nav.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    .profile-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-    .profile-tag { padding: 4px 12px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-full); font-size: 0.75rem; color: var(--text-secondary); }
-    .map-preview {
-      height: 160px; border-radius: var(--radius-md); overflow: hidden;
-      background: var(--bg-elevated); position: relative; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      border: 1px solid var(--border-subtle);
-    }
-    .map-preview-overlay {
-      position: absolute; inset: 0; background: rgba(4,5,13,0.4);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .contact-actions { display: flex; flex-direction: column; gap: 10px; }
-    .contact-btn {
-      display: flex; align-items: center; gap: 12px;
-      padding: 14px 16px;
-      border-radius: var(--radius-md); border: 1px solid var(--border);
-      background: var(--bg-elevated); color: var(--text-primary);
-      font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: var(--transition);
-      text-decoration: none;
-    }
-    .contact-btn:hover { border-color: var(--border-emphasis); background: var(--bg-hover); transform: translateX(3px); }
-    .contact-btn .cb-icon { width: 36px; height: 36px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
-    .contact-btn .cb-info { flex: 1; }
-    .contact-btn .cb-label { font-size: 0.7rem; color: var(--text-muted); display: block; }
-    .contact-btn .cb-value { font-size: 0.875rem; font-weight: 600; }
-    .contact-btn.green .cb-icon { background: var(--green-muted); color: var(--green); }
-    .contact-btn.whatsapp .cb-icon { background: rgba(37,211,102,0.15); color: #25d366; }
-    .contact-btn.instagram .cb-icon { background: rgba(228,64,95,0.15); color: #e4405f; }
-    .contact-btn.map-btn .cb-icon { background: var(--blue-muted); color: var(--blue); }
-    .photo-nav { display: flex; gap: 8px; margin-top: 8px; }
-    .photo-nav-thumb {
-      width: 60px; height: 45px; border-radius: var(--radius-xs); overflow: hidden;
-      cursor: pointer; opacity: 0.6; transition: var(--transition); flex-shrink: 0;
-      border: 2px solid transparent;
-    }
-    .photo-nav-thumb.active { opacity: 1; border-color: var(--green); }
-    .photo-nav-thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
-    .write-review-form { background: var(--bg-elevated); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px; }
-    .star-rating-input { display: flex; gap: 6px; margin-bottom: 12px; }
-    .star-btn { font-size: 1.5rem; cursor: pointer; color: var(--text-muted); transition: var(--transition); }
-    .star-btn.active, .star-btn:hover { color: var(--gold); }
-    .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px; flex-wrap: wrap; }
-    .breadcrumb a { color: var(--text-secondary); transition: var(--transition); }
-    .breadcrumb a:hover { color: var(--green); }
-    .breadcrumb i { font-size: 0.6rem; }
-  </style>
+  <link rel="stylesheet" href="business.css">
 </head>
 <body>
 
@@ -279,144 +233,11 @@
   <script src="api-client.js"></script>
   <script src="main.js"></script>
   <script src="account.js"></script>
-<script>
-  const urlParams = new URLSearchParams(window.location.search);
-  const bizId = parseInt(urlParams.get('id')) || 1;
-  const biz = BUSINESSES.find(b => b.id === bizId) || BUSINESSES[0];
-
-  // Update title
-  document.title = `${biz.name} — GeoHub`;
-
-  // Breadcrumb
-  document.getElementById('breadcrumbCat').textContent = biz.categoryLabel;
-  document.getElementById('breadcrumbName').textContent = biz.name;
-
-  // Gallery
-  document.getElementById('mainImage').src = biz.images[0];
-  document.getElementById('mainImage').alt = biz.name;
-  if (biz.images[1]) { document.querySelector('#thumb1 img').src = biz.images[1]; }
-  if (biz.images[2]) { document.querySelector('#thumb2 img').src = biz.images[2]; }
-  if (biz.images.length > 2) document.getElementById('morePhotos').textContent = `+${biz.images.length - 2} More`;
-
-  // Photo nav
-  document.getElementById('photoNav').innerHTML = biz.images.map((img, i) => `
-    <div class="photo-nav-thumb ${i === 0 ? 'active' : ''}" data-idx="${i}">
-      <img src="${img}" alt="">
-    </div>`).join('');
-  document.querySelectorAll('.photo-nav-thumb').forEach(thumb => {
-    thumb.addEventListener('click', () => {
-      document.querySelectorAll('.photo-nav-thumb').forEach(t => t.classList.remove('active'));
-      thumb.classList.add('active');
-      document.getElementById('mainImage').src = biz.images[parseInt(thumb.dataset.idx)];
-    });
-  });
-
-  // Basic info
-  document.getElementById('bizName').textContent = biz.name;
-  document.getElementById('bizCategory').textContent = biz.categoryLabel;
-  document.getElementById('bizCategory').className = `badge ${getCategoryBadgeClass(biz.category)}`;
-  if (biz.verified) document.getElementById('bizVerified').innerHTML = '<span class="badge badge-verified"><i class="fas fa-check-circle"></i> Verified</span><span class="badge" style="background:rgba(16,185,129,0.12);color:#6ee7b7;border:1px solid rgba(16,185,129,0.2);margin-left:4px"><i class="fas fa-shield-alt"></i> Trust Score 94</span>';
-  if (biz.premium) document.getElementById('bizPremium').innerHTML = '<span class="badge badge-gold"><i class="fas fa-star"></i> Premium</span>';
-  document.getElementById('bizLocation').textContent = `${biz.city}, Georgia`;
-  document.getElementById('bizRating').innerHTML = renderStars(biz.rating) + `<span class="score">${biz.rating}</span><span class="count">(${formatNumber(biz.reviewCount)} reviews)</span>`;
-  document.getElementById('bizDescription').textContent = biz.description;
-
-  // Tags
-  document.getElementById('bizTags').innerHTML = (biz.tags || []).map(t => `<span class="profile-tag">${t}</span>`).join('');
-
-  // Services
-  if (biz.services) {
-    document.getElementById('servicesGrid').innerHTML = biz.services.map(s => `
-      <div class="service-item">
-        <div class="service-item-name">${s.name}</div>
-        <div class="service-item-price">${s.price}</div>
-      </div>`).join('');
-  }
-
-  // Sidebar price
-  document.getElementById('sidebarPrice').textContent = `${biz.priceFrom} ${biz.currency}`;
-
-  // Map
-  document.getElementById('mapPreviewImg').src = `https://picsum.photos/seed/map-${biz.id}/800/300`;
-  document.getElementById('openMapBtn').href = `https://www.google.com/maps/search/${encodeURIComponent(biz.name + ' ' + biz.city + ' Georgia')}`;
-
-  // Contact actions
-  const contacts = [];
-  if (biz.phone) contacts.push({ cls: 'green', icon: 'fas fa-phone', label: 'Phone', value: biz.phone, href: `tel:${biz.phone}` });
-  if (biz.whatsapp) contacts.push({ cls: 'whatsapp', icon: 'fab fa-whatsapp', label: 'WhatsApp', value: 'Send Message', href: `https://wa.me/${biz.whatsapp.replace(/[^0-9]/g,'')}` });
-  if (biz.instagram) contacts.push({ cls: 'instagram', icon: 'fab fa-instagram', label: 'Instagram', value: biz.instagram, href: '#' });
-  if (biz.website) contacts.push({ cls: 'map-btn', icon: 'fas fa-globe', label: 'Website', value: biz.website, href: `https://${biz.website}` });
-  contacts.push({ cls: 'map-btn', icon: 'fas fa-map-marked-alt', label: 'Location', value: `${biz.city}, Georgia`, href: `https://www.google.com/maps/search/${encodeURIComponent(biz.name + ' ' + biz.city)}` });
-
-  document.getElementById('contactActions').innerHTML = contacts.map(c => `
-    <a href="${c.href}" class="contact-btn ${c.cls}" target="_blank" rel="noopener">
-      <div class="cb-icon"><i class="${c.icon}"></i></div>
-      <div class="cb-info">
-        <span class="cb-label">${c.label}</span>
-        <span class="cb-value">${c.value}</span>
-      </div>
-      <i class="fas fa-arrow-right" style="color:var(--text-muted);font-size:0.75rem"></i>
-    </a>`).join('');
-
-  // Hours
-  if (biz.hours) {
-    const today = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date().getDay()];
-    document.getElementById('hoursList').innerHTML = Object.entries(biz.hours).map(([day, time]) => `
-      <div class="hour-row ${day === today ? 'today' : ''}">
-        <span class="day">${day}</span>
-        <span class="${time === 'Closed' ? 'closed' : 'time'}">${time}</span>
-      </div>`).join('');
-  } else { document.getElementById('hoursCard').style.display = 'none'; }
-
-  // Reviews
-  const bizReviews = REVIEWS.filter(r => r.businessId === biz.id);
-  document.getElementById('ratingScore').textContent = biz.rating;
-  document.getElementById('ratingStars').innerHTML = renderStars(biz.rating);
-  document.getElementById('ratingOutOf').textContent = `out of 5 · ${formatNumber(biz.reviewCount)} reviews`;
-
-  document.getElementById('reviewsList').innerHTML = bizReviews.length
-    ? bizReviews.map(r => `
-        <div class="review-card animate-fade-up">
-          <div class="review-header">
-            <div class="reviewer-info">
-              <div class="reviewer-avatar">${r.avatar}</div>
-              <div>
-                <div class="reviewer-name">${r.author}</div>
-                <div class="review-date">${r.date}</div>
-              </div>
-            </div>
-            ${renderStars(r.rating)}
-          </div>
-          <p class="review-text">${r.text}</p>
-        </div>`).join('')
-    : `<div class="review-card" style="text-align:center;padding:32px;color:var(--text-secondary)"><i class="far fa-comment-dots" style="font-size:2rem;margin-bottom:12px;display:block"></i>No reviews yet. Be the first to review!</div>`;
-
-  // Star input
-  let selectedRating = 0;
-  document.querySelectorAll('.star-btn').forEach(star => {
-    star.addEventListener('mouseenter', () => document.querySelectorAll('.star-btn').forEach((s, i) => s.classList.toggle('active', i < parseInt(star.dataset.val))));
-    star.addEventListener('mouseleave', () => document.querySelectorAll('.star-btn').forEach((s, i) => s.classList.toggle('active', i < selectedRating)));
-    star.addEventListener('click', () => { selectedRating = parseInt(star.dataset.val); document.querySelectorAll('.star-btn').forEach((s, i) => s.classList.toggle('active', i < selectedRating)); });
-  });
-
-  // Wishlist
-  document.getElementById('wishlistBtn').addEventListener('click', function() {
-    toggleWishlist(biz.id);
-    const saved = JSON.parse(localStorage.getItem('geohub_wishlist') || '[]').includes(biz.id);
-    this.innerHTML = saved ? '<i class="fas fa-heart" style="color:var(--red)"></i> Saved' : '<i class="far fa-heart"></i> Save';
-  });
-
-  // Related
-  const related = BUSINESSES.filter(b => b.id !== biz.id && (b.category === biz.category || b.city === biz.city)).slice(0, 4);
-  document.getElementById('relatedGrid').innerHTML = related.map(b => renderListingCard(b)).join('');
-
-  initScrollAnimations();
-  window.GeoHubSocial?.refresh?.();
-</script>
 <script src="mock-users.js"></script>
 <script src="mock-interactions.js"></script>
 <script src="mock-notifications.js"></script>
 <script src="social-layer.js"></script>
+  <script src="business.js"></script>
 <script src="nav-cleanup.js"></script>
 <script src="mobile-nav.js"></script>
 <script src="demo-mode.js"></script>

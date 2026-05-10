@@ -1,0 +1,39 @@
+.form-step-panel { display: none; }
+    .form-step-panel.active { display: block; }
+    .social-input-row { display: flex; align-items: center; gap: 10px; }
+    .social-prefix {
+      padding: 12px 14px; background: var(--bg-elevated); border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm) 0 0 var(--radius-sm); border-right: none;
+      font-size: 0.85rem; color: var(--text-muted); white-space: nowrap;
+    }
+    .social-input-row .form-input { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+    .hours-grid { display: grid; grid-template-columns: 100px 1fr 1fr 80px; gap: 8px; align-items: center; font-size: 0.85rem; }
+    .hours-grid .day-label { font-weight: 600; color: var(--text-secondary); font-size: 0.82rem; }
+    .hours-grid input[type="time"] {
+      background: var(--bg-elevated); border: 1.5px solid var(--border); border-radius: var(--radius-xs);
+      padding: 8px 10px; color: var(--text-primary); font-size: 0.82rem; outline: none; width: 100%;
+    }
+    .hours-grid input[type="time"]:focus { border-color: var(--green); }
+    .hours-grid .closed-toggle { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-muted); cursor: pointer; }
+    .preview-card {
+      background: var(--bg-card); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg); overflow: hidden; max-width: 300px; margin: 0 auto;
+    }
+    .preview-img-ph {
+      height: 160px; background: var(--gradient-brand); opacity: 0.3;
+      display: flex; align-items: center; justify-content: center; font-size: 3rem;
+    }
+    .preview-content { padding: 16px; }
+    .success-screen { text-align: center; padding: 60px 20px; }
+    .success-icon { font-size: 4rem; margin-bottom: 20px; }
+    .progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 32px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--gradient-brand); border-radius: 2px; transition: width 0.5s ease; }
+    .plan-selector { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .plan-option {
+      padding: 16px; background: var(--bg-elevated); border: 1.5px solid var(--border);
+      border-radius: var(--radius-md); cursor: pointer; transition: var(--transition);
+    }
+    .plan-option:hover, .plan-option.selected { border-color: var(--green); background: var(--green-muted); }
+    .plan-option .plan-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
+    .plan-option .plan-price { font-size: 1.1rem; font-weight: 800; color: var(--green); margin-bottom: 6px; }
+    .plan-option .plan-desc { font-size: 0.75rem; color: var(--text-muted); }
