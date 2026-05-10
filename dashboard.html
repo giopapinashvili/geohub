@@ -311,33 +311,44 @@
             <div class="form-section-title">Basic Information</div>
             <div class="form-group">
               <label class="form-label">Business Name</label>
-              <input type="text" class="form-input" value="Kazbegi Adventures">
+              <input type="text" id="profBizName" class="form-input" placeholder="Your business name">
             </div>
             <div class="form-group">
               <label class="form-label">Category</label>
-              <select class="form-select">
-                <option selected>🗺️ Tours</option>
-                <option>☕ Café</option>
-                <option>🏨 Hotel</option>
+              <select id="profBizCat" class="form-select">
+                <option value="">Select category...</option>
+                <option value="Tours">🗺️ Tours</option>
+                <option value="Café">☕ Café</option>
+                <option value="Hotel">🏨 Hotel</option>
+                <option value="Restaurant">🍽️ Restaurant</option>
+                <option value="Retail">🛍️ Retail</option>
+                <option value="Services">💼 Services</option>
+                <option value="Entertainment">🎭 Entertainment</option>
+                <option value="Health">🏥 Health</option>
               </select>
             </div>
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">City</label>
-                <select class="form-select">
-                  <option selected>Kazbegi</option>
-                  <option>Tbilisi</option>
-                  <option>Batumi</option>
+                <select id="profBizCity" class="form-select">
+                  <option value="">Select city...</option>
+                  <option value="Tbilisi">Tbilisi</option>
+                  <option value="Batumi">Batumi</option>
+                  <option value="Kutaisi">Kutaisi</option>
+                  <option value="Kazbegi">Kazbegi</option>
+                  <option value="Sighnaghi">Sighnaghi</option>
+                  <option value="Mestia">Mestia</option>
+                  <option value="Borjomi">Borjomi</option>
                 </select>
               </div>
               <div class="form-group">
                 <label class="form-label">Address</label>
-                <input type="text" class="form-input" value="Stepantsminda Village">
+                <input type="text" id="profBizAddr" class="form-input" placeholder="Street address">
               </div>
             </div>
             <div class="form-group">
               <label class="form-label">Description</label>
-              <textarea class="form-textarea" style="min-height:120px">Leading mountain tour operator in the Greater Caucasus. We offer unforgettable hiking, trekking, 4x4 off-road adventures, and horse riding experiences.</textarea>
+              <textarea id="profBizDesc" class="form-textarea" style="min-height:120px" placeholder="Describe your business..."></textarea>
             </div>
           </div>
           <div class="dash-card" style="margin-bottom:16px">
@@ -345,53 +356,48 @@
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Phone</label>
-                <input type="tel" class="form-input" value="+995 555 234 567">
+                <input type="tel" id="profBizPhone" class="form-input" placeholder="+995 5XX XXX XXX">
               </div>
               <div class="form-group">
                 <label class="form-label">WhatsApp</label>
-                <input type="tel" class="form-input" value="+995 555 234 567">
+                <input type="tel" id="profBizWhatsapp" class="form-input" placeholder="+995 5XX XXX XXX">
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">Instagram</label>
-                <input type="text" class="form-input" value="@kazbegi_adventures">
+                <input type="text" id="profBizInstagram" class="form-input" placeholder="@yourbusiness">
               </div>
               <div class="form-group">
                 <label class="form-label">Email</label>
-                <input type="email" class="form-input" value="info@kazbegiadventures.ge">
+                <input type="email" id="profBizEmail" class="form-input" placeholder="info@yourbusiness.ge">
               </div>
             </div>
           </div>
-          <button class="btn btn-primary btn-lg"><i class="fas fa-save"></i> Save Changes</button>
+          <button class="btn btn-primary btn-lg" id="profSaveBtn" onclick="saveDashProfile()"><i class="fas fa-save"></i> Save Changes</button>
         </div>
         <div style="display:flex;flex-direction:column;gap:16px">
           <div class="dash-card">
             <div class="form-section-title">Profile Preview</div>
-            <a href="business.html?id=2" target="_blank" class="listing-card" style="text-decoration:none">
-              <div class="listing-card-image" style="aspect-ratio:16/9">
-                <img src="https://picsum.photos/seed/tours-1/800/600" alt="">
-                <div class="listing-card-badge"><span class="badge badge-green">Tour Agency</span></div>
+            <div class="listing-card" style="text-decoration:none">
+              <div class="listing-card-image" style="aspect-ratio:16/9;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center">
+                <i class="fas fa-store" style="font-size:2rem;opacity:0.3"></i>
               </div>
               <div class="listing-card-content">
-                <div class="listing-card-name">Kazbegi Adventures</div>
-                <div class="listing-card-location"><i class="fas fa-map-marker-alt"></i> Kazbegi, Georgia</div>
-                <div class="rating-display" style="margin-top:4px">
-                  <div class="stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                  <span class="score">4.8</span><span class="count">(248)</span>
+                <div class="listing-card-name" id="prevBizName">Your Business Name</div>
+                <div class="listing-card-location" id="prevBizLocation"><i class="fas fa-map-marker-alt"></i> City, Georgia</div>
+                <div class="rating-display" style="margin-top:4px;color:var(--text-muted);font-size:0.8rem">
+                  No reviews yet
                 </div>
               </div>
-            </a>
-            <a href="business.html?id=2" class="btn btn-ghost btn-full btn-sm" style="margin-top:12px;justify-content:center;text-decoration:none" target="_blank">
-              <i class="fas fa-external-link-alt"></i> View Live Profile
-            </a>
+            </div>
           </div>
           <div class="dash-card">
             <div class="form-section-title">Your GeoHub URL</div>
-            <div style="background:var(--bg-elevated);padding:12px 14px;border-radius:var(--radius-sm);font-family:monospace;font-size:0.8rem;color:var(--green);margin-bottom:12px;word-break:break-all">
-              geohub.ge/kazbegi-adventures
+            <div id="profBizUrl" style="background:var(--bg-elevated);padding:12px 14px;border-radius:var(--radius-sm);font-family:monospace;font-size:0.8rem;color:var(--green);margin-bottom:12px;word-break:break-all">
+              geohub.ge/your-business
             </div>
-            <button class="btn btn-ghost btn-sm btn-full" style="justify-content:center"><i class="fas fa-copy"></i> Copy Link</button>
+            <button class="btn btn-ghost btn-sm btn-full" style="justify-content:center" onclick="navigator.clipboard.writeText(document.getElementById('profBizUrl').textContent.trim()).catch(()=>{});this.innerHTML='<i class=\"fas fa-check\"></i> Copied!'"><i class="fas fa-copy"></i> Copy Link</button>
           </div>
         </div>
       </div>
@@ -870,7 +876,7 @@
                   <div style="font-size:0.65rem;font-weight:800;letter-spacing:1px;color:var(--text-muted)">GEOHUB</div>
                   <div style="font-size:0.65rem;color:var(--text-muted)">Exp: Aug 15</div>
                 </div>
-                <div style="font-size:0.75rem;font-weight:700;margin-bottom:2px">Kazbegi Adventures</div>
+                <div id="dashQrCardName" style="font-size:0.75rem;font-weight:700;margin-bottom:2px">Your Business</div>
                 <div class="qr-code-box"><div id="qrPixels"></div></div>
                 <div class="qr-card-reward">Free Espresso</div>
                 <div class="qr-card-title">Scan to claim your reward</div>
@@ -1145,9 +1151,9 @@
             <div class="form-section-title">Live Preview</div>
             <div class="post-preview-box">
               <div class="post-preview-header">
-                <div class="post-preview-avatar">K</div>
+                <div id="dashPostPreviewAvatar" class="post-preview-avatar">B</div>
                 <div>
-                  <div style="font-size:0.8rem;font-weight:700">Kazbegi Adventures</div>
+                  <div id="dashPostPreviewName" style="font-size:0.8rem;font-weight:700">Your Business</div>
                   <div id="previewType" style="font-size:0.68rem;color:var(--text-muted)">🏷️ Offer · just now</div>
                 </div>
               </div>
@@ -1155,7 +1161,7 @@
               <div id="previewContent" style="font-size:0.8rem;color:var(--text-secondary);line-height:1.6">Don't miss our summer adventure deals! Book any tour this month and get 20% off. Limited spots available — reserve your spot today! 🏔️</div>
               <div style="margin-top:12px;padding:10px;background:var(--bg-card);border-radius:var(--radius-sm);border:1px solid var(--border-subtle)">
                 <div style="font-size:0.68rem;color:var(--green-light);font-weight:700;margin-bottom:2px">CALL TO ACTION</div>
-                <div style="font-size:0.75rem;color:var(--text-secondary)">Book Now → geohub.ge/kazbegi-adventures</div>
+                <div id="dashPreviewCtaUrl" style="font-size:0.75rem;color:var(--text-secondary)">Book Now → geohub.ge/your-business</div>
               </div>
             </div>
             <div style="margin-top:12px;padding:10px 0;border-top:1px solid var(--border-subtle)">
@@ -1234,7 +1240,7 @@
           <div style="font-size:0.65rem;font-weight:800;letter-spacing:1px;color:var(--text-muted)">GEOHUB</div>
           <div style="font-size:0.65rem;color:var(--text-muted)">Exp: Aug 15, 2026</div>
         </div>
-        <div style="font-size:0.875rem;font-weight:700;margin-bottom:2px">Kazbegi Adventures</div>
+        <div id="dashQrModalName" style="font-size:0.875rem;font-weight:700;margin-bottom:2px">Your Business</div>
         <div class="qr-code-box"><div id="qrPixelsModal"></div></div>
         <div class="qr-card-reward" style="font-size:1.6rem">☕ Free Espresso</div>
         <div class="qr-card-title">Scan to claim your reward</div>

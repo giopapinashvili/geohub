@@ -203,9 +203,9 @@
     item.className = 'post-preview-box';
     item.innerHTML = `
       <div class="post-preview-header">
-        <div class="post-preview-avatar">K</div>
+        <div class="post-preview-avatar">${(document.getElementById('dashPostPreviewAvatar') || {textContent:'B'}).textContent}</div>
         <div>
-          <div style="font-size:0.8rem;font-weight:700">Kazbegi Adventures</div>
+          <div style="font-size:0.8rem;font-weight:700">${(document.getElementById('dashPostPreviewName') || {textContent:'Your Business'}).textContent}</div>
           <div style="font-size:0.68rem;color:var(--text-muted)">${typeLabel} · just now</div>
         </div>
       </div>
@@ -226,6 +226,67 @@
     btn.style.color = 'var(--green)';
     setTimeout(() => { btn.innerHTML = '<i class="fas fa-save"></i> Save Draft'; btn.style.color = ''; }, 2000);
   }
+
+function saveDashProfile() {
+  if (!window.GeoMode || !window.GeoMode.isRealUser()) return;
+  var user = window.GeoMode.getCurrentUser();
+  if (!user) return;
+
+  var bizKey = 'geohub_business_' + (user.uid || user.id || 'anon');
+  var existing = null;
+  try { existing = JSON.parse(localStorage.getItem(bizKey) || 'null'); } catch (e) {}
+  existing = existing || {};
+
+  var name = document.getElementById('profBizName').value.trim();
+  existing.name     = name || existing.name || '';
+  existing.category = document.getElementById('profBizCat').value || existing.category || '';
+  existing.city     = document.getElementById('profBizCity').value || existing.city || '';
+  existing.address  = document.getElementById('profBizAddr').value.trim() || existing.address || '';
+  existing.desc     = document.getElementById('profBizDesc').value.trim() || existing.desc || '';
+  existing.phone    = document.getElementById('profBizPhone').value.trim() || existing.phone || '';
+  existing.whatsapp = document.getElementById('profBizWhatsapp').value.trim() || existing.whatsapp || '';
+  existing.instagram = document.getElementById('profBizInstagram').value.trim() || existing.instagram || '';
+  existing.email    = document.getElementById('profBizEmail').value.trim() || existing.email || '';
+
+  localStorage.setItem(bizKey, JSON.stringify(existing));
+
+  // Update live preview elements
+  var bizName = existing.name || 'Your Business';
+  var bizSlug = bizName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'your-business';
+  var bizLetter = (bizName[0] || 'B').toUpperCase();
+
+  var prevName = document.getElementById('prevBizName');
+  if (prevName) prevName.textContent = bizName;
+  var prevLoc = document.getElementById('prevBizLocation');
+  if (prevLoc) prevLoc.innerHTML = '<i class="fas fa-map-marker-alt"></i> ' + (existing.city || 'Georgia');
+  var urlEl = document.getElementById('profBizUrl');
+  if (urlEl) urlEl.textContent = 'geohub.ge/' + bizSlug;
+  var qrCardName = document.getElementById('dashQrCardName');
+  if (qrCardName) qrCardName.textContent = bizName;
+  var qrModalName = document.getElementById('dashQrModalName');
+  if (qrModalName) qrModalName.textContent = bizName;
+  var postPreviewName = document.getElementById('dashPostPreviewName');
+  if (postPreviewName) postPreviewName.textContent = bizName;
+  var postPreviewAvatar = document.getElementById('dashPostPreviewAvatar');
+  if (postPreviewAvatar) postPreviewAvatar.textContent = bizLetter;
+  var previewCtaUrl = document.getElementById('dashPreviewCtaUrl');
+  if (previewCtaUrl) previewCtaUrl.textContent = 'Book Now → geohub.ge/' + bizSlug;
+  var sidebarName = document.getElementById('dashSidebarName');
+  if (sidebarName) sidebarName.textContent = bizName;
+  var sidebarLetter = document.getElementById('dashSidebarLetter');
+  if (sidebarLetter) sidebarLetter.textContent = bizLetter;
+  document.querySelectorAll('.dash-nav-biz-name').forEach(function (el) { el.textContent = bizName; });
+
+  var btn = document.getElementById('profSaveBtn');
+  if (btn) {
+    btn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+    btn.style.background = 'var(--green)';
+    setTimeout(function () {
+      btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+      btn.style.background = '';
+    }, 2500);
+  }
+}
 
 (function () {
   if (!window.GeoMode) return;
@@ -256,14 +317,64 @@
 
   // Business exists — personalise the sidebar header
   var bizName = biz.name || user.fullName + "'s Business";
+  var bizLetter = (bizName[0] || 'B').toUpperCase();
+  var bizSlug = bizName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'your-business';
+
   var nameEls = document.querySelectorAll('.dash-nav-biz-name');
   nameEls.forEach(function (el) { el.textContent = bizName; });
 
-  // Replace hardcoded "Kazbegi Adventures" in the sidebar profile mini
+  // Replace hardcoded names in sidebar, QR cards, and post composer preview
   var sidebarLetter = document.getElementById('dashSidebarLetter');
-  if (sidebarLetter) sidebarLetter.textContent = (bizName[0] || 'B').toUpperCase();
+  if (sidebarLetter) sidebarLetter.textContent = bizLetter;
   var sidebarName = document.getElementById('dashSidebarName');
   if (sidebarName) sidebarName.textContent = bizName;
+
+  var qrCardName = document.getElementById('dashQrCardName');
+  if (qrCardName) qrCardName.textContent = bizName;
+  var qrModalName = document.getElementById('dashQrModalName');
+  if (qrModalName) qrModalName.textContent = bizName;
+
+  var postPreviewName = document.getElementById('dashPostPreviewName');
+  if (postPreviewName) postPreviewName.textContent = bizName;
+  var postPreviewAvatar = document.getElementById('dashPostPreviewAvatar');
+  if (postPreviewAvatar) postPreviewAvatar.textContent = bizLetter;
+  var previewCtaUrl = document.getElementById('dashPreviewCtaUrl');
+  if (previewCtaUrl) previewCtaUrl.textContent = 'Book Now → geohub.ge/' + bizSlug;
+
+  // Populate My Profile form fields
+  var fields = {
+    profBizName: biz.name || '',
+    profBizAddr: biz.address || '',
+    profBizPhone: biz.phone || '',
+    profBizWhatsapp: biz.whatsapp || '',
+    profBizInstagram: biz.instagram || '',
+    profBizEmail: biz.email || ''
+  };
+  Object.keys(fields).forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.value = fields[id];
+  });
+  // Select dropdowns
+  var catSel = document.getElementById('profBizCat');
+  if (catSel && biz.category) catSel.value = biz.category;
+  var citySel = document.getElementById('profBizCity');
+  if (citySel && biz.city) citySel.value = biz.city;
+  var descEl = document.getElementById('profBizDesc');
+  if (descEl) descEl.value = biz.desc || '';
+
+  // Profile preview card
+  var prevName = document.getElementById('prevBizName');
+  if (prevName) prevName.textContent = bizName;
+  var prevLoc = document.getElementById('prevBizLocation');
+  if (prevLoc) prevLoc.innerHTML = '<i class="fas fa-map-marker-alt"></i> ' + (biz.city || 'Georgia');
+
+  // GeoHub URL
+  var urlEl = document.getElementById('profBizUrl');
+  if (urlEl) urlEl.textContent = 'geohub.ge/' + bizSlug;
+
+  // Clear demo Published Posts for real users
+  var pubList = document.getElementById('publishedPostsList');
+  if (pubList) pubList.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--text-muted);font-size:0.85rem"><i class="fas fa-edit" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>No posts yet — compose your first post above</div>';
 
   // Zero stats and clear mock data for new business with no activity
   if (!biz.hasActivity) {
