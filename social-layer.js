@@ -35,8 +35,8 @@
       const real = window.GeoMode.getCurrentUser();
       return real ? { id: real.uid || real.id || 'real', fullName: real.fullName || 'GeoHub User', username: real.username || 'user', avatar: real.avatar || '' } : null;
     }
-    // Demo/mock mode: use selected mock user
-    const key = localStorage.getItem('geohub_mock_user') || 'nino.explorer';
+    // Demo/mock mode: use selected mock user (no hardcoded fallback to Nino)
+    const key = localStorage.getItem('geohub_mock_user') || '';
     return byId[key] || byUsername[key] || users[0] || null;
   }
 

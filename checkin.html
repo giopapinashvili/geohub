@@ -967,5 +967,20 @@
 <script src="nav-cleanup.js"></script>
 <script src="mobile-nav.js"></script>
 <script src="demo-mode.js"></script>
+<script>
+(function () {
+  try {
+    var u = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
+    if (!u) return;
+    var name = u.fullName || (u.email || '').split('@')[0] || 'Explorer';
+    var avatar = u.avatar || '';
+    var nameEl = document.querySelector('.pc-name');
+    var avatarEl = document.querySelector('.pc-avatar');
+    if (nameEl) nameEl.textContent = name;
+    if (avatarEl && avatar) { avatarEl.src = avatar; avatarEl.alt = name; }
+    else if (avatarEl) avatarEl.style.display = 'none';
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>

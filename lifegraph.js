@@ -41,7 +41,10 @@
     friendsCount:   _fbUser ? 0 : 47,
     photosShared:   _fbUser ? 0 : 312,
 
-    radar: [
+    radar: _fbUser ? [
+      { label:'Social', value:0 }, { label:'Discovery', value:0 }, { label:'Reviews', value:0 },
+      { label:'Challenges', value:0 }, { label:'Events', value:0 }, { label:'Community', value:0 },
+    ] : [
       { label:'Social',     value:82 },
       { label:'Discovery',  value:91 },
       { label:'Reviews',    value:88 },
@@ -50,7 +53,14 @@
       { label:'Community',  value:79 },
     ],
 
-    categories: [
+    categories: _fbUser ? [
+      { label:'Cafés & Coffee',    icon:'☕', pct:0, color:'#f59e0b' },
+      { label:'Photography Spots', icon:'📸', pct:0, color:'#3b82f6' },
+      { label:'Events & Markets',  icon:'🎪', pct:0, color:'#8b5cf6' },
+      { label:'Restaurants',       icon:'🍽️', pct:0, color:'#ef4444' },
+      { label:'Parks & Nature',    icon:'🌿', pct:0, color:'#10b981' },
+      { label:'Art & Culture',     icon:'🎨', pct:0, color:'#ec4899' },
+    ] : [
       { label:'Cafés & Coffee',     icon:'☕', pct:88, color:'#f59e0b' },
       { label:'Photography Spots',  icon:'📸', pct:79, color:'#3b82f6' },
       { label:'Events & Markets',   icon:'🎪', pct:71, color:'#8b5cf6' },
@@ -59,20 +69,29 @@
       { label:'Art & Culture',      icon:'🎨', pct:48, color:'#ec4899' },
     ],
 
-    weeklyPattern: [
+    weeklyPattern: _fbUser ? [
+      { day:'Mo', level:0 }, { day:'Tu', level:0 }, { day:'We', level:0 },
+      { day:'Th', level:0 }, { day:'Fr', level:0 }, { day:'Sa', level:0 },
+      { day:'Su', level:0 },
+    ] : [
       { day:'Mo', level:2 }, { day:'Tu', level:1 }, { day:'We', level:2 },
       { day:'Th', level:1 }, { day:'Fr', level:3 }, { day:'Sa', level:4 },
       { day:'Su', level:4 },
     ],
 
-    xpMonthly: [
+    xpMonthly: _fbUser ? [
+      { m:'Jan', xp:0 }, { m:'Feb', xp:0 }, { m:'Mar', xp:0 },
+      { m:'Apr', xp:0 }, { m:'May', xp: BASE.xp || 250 }, { m:'Jun', xp:0 },
+      { m:'Jul', xp:0 }, { m:'Aug', xp:0 }, { m:'Sep', xp:0 },
+      { m:'Oct', xp:0 }, { m:'Nov', xp:0 }, { m:'Dec', xp:0 },
+    ] : [
       { m:'Jan', xp:420  }, { m:'Feb', xp:380  }, { m:'Mar', xp:520  },
       { m:'Apr', xp:640  }, { m:'May', xp:710  }, { m:'Jun', xp:890  },
       { m:'Jul', xp:960  }, { m:'Aug', xp:1080 }, { m:'Sep', xp:780  },
       { m:'Oct', xp:820  }, { m:'Nov', xp:650  }, { m:'Dec', xp:570  },
     ],
 
-    districts: [
+    districts: _fbUser ? [] : [
       { name:'Fabrika',    visits:48, color:'#10b981', pct:95 },
       { name:'Vake',       visits:34, color:'#3b82f6', pct:68 },
       { name:'Rustaveli',  visits:29, color:'#8b5cf6', pct:58 },
@@ -83,7 +102,7 @@
       { name:'Didube',     visits:2,  color:'#334155', pct: 4 },
     ],
 
-    timeline: [
+    timeline: _fbUser ? [] : [
       { type:'place',     icon:'📍', color:'#10b981', date:'May 3, 2026',  title:'Checked in at Fabrika Tbilisi',         sub:'Café · Tbilisi · ⭐ 4.8',                              xp:35  },
       { type:'review',    icon:'✍️', color:'#3b82f6', date:'Apr 28, 2026', title:'Wrote a review for Roasters Lab',       sub:'"Best specialty coffee in the city."',                 xp:55  },
       { type:'challenge', icon:'🏆', color:'#f59e0b', date:'Apr 20, 2026', title:'Completed "Café Hopper" Challenge',     sub:'Visited 10 unique cafés in 30 days',                   xp:120 },
@@ -96,7 +115,7 @@
       { type:'place',     icon:'📍', color:'#10b981', date:'Feb 14, 2026', title:'Valentine\'s Day — Rooms Hotel',        sub:'Special event badge unlocked',                        xp:50  },
     ],
 
-    friends: [
+    friends: _fbUser ? [] : [
       { name:'Sandro Maisuradze',   ini:'SM', color:'#3b82f6', city:'Tbilisi', overlap:87, tag:'Photography'  },
       { name:'Tamo Jikia',          ini:'TJ', color:'#8b5cf6', city:'Tbilisi', overlap:74, tag:'Events'       },
       { name:'Mariam Chikovanidze', ini:'MC', color:'#10b981', city:'Tbilisi', overlap:91, tag:'Cafés'        },
@@ -104,9 +123,9 @@
       { name:'Ana Kvaratskhelia',   ini:'AK', color:'#22c55e', city:'Kutaisi', overlap:55, tag:'Community'    },
     ],
 
-    influenceScore: 78,
+    influenceScore: _fbUser ? 0 : 78,
 
-    sharedInterests: [
+    sharedInterests: _fbUser ? [] : [
       { label:'Cafés',       count:12, color:'#f59e0b' },
       { label:'Photography', count:8,  color:'#3b82f6' },
       { label:'Events',      count:15, color:'#8b5cf6' },
@@ -298,6 +317,12 @@
       var el = qs('lgRadar');
       if (!el) return;
       var dims = P.radar, n = dims.length;
+      var allZero = dims.every(function(d){ return !d.value; });
+      if (allZero) {
+        el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-muted);font-size:0.83rem"><i class="fas fa-chart-pie" style="font-size:2rem;display:block;margin-bottom:10px;opacity:0.2"></i>Activity graph will appear as you explore</div>';
+        var leg = qs('lgRadarLeg'); if (leg) leg.innerHTML = '';
+        return;
+      }
       var cx = 110, cy = 110, R = 88;
       var step = (2 * Math.PI) / n;
 
@@ -345,6 +370,11 @@
     try {
       var el = qs('lgCBars');
       if (!el) return;
+      var allZero = P.categories.every(function(c){ return !c.pct; });
+      if (allZero) {
+        el.innerHTML = '<div style="text-align:center;padding:32px 20px;color:var(--text-muted);font-size:0.83rem"><i class="fas fa-compass" style="font-size:1.8rem;display:block;margin-bottom:10px;opacity:0.2"></i>Categories will fill in as you check in to places</div>';
+        return;
+      }
       el.innerHTML = P.categories.map(function(c){
         return '<div>' +
           '<div class="lg-cbar-hd"><span class="lg-cbar-lbl">' + c.icon + ' ' + c.label + '</span><span class="lg-cbar-v">' + c.pct + '%</span></div>' +
@@ -393,6 +423,10 @@
     try {
       var el = qs('lgTimeline');
       if (!el) return;
+      if (!P.timeline.length) {
+        el.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--text-muted);font-size:0.85rem"><i class="fas fa-clock-rotate-left" style="font-size:2rem;display:block;margin-bottom:12px;opacity:0.2"></i>Your journey timeline will appear here as you explore, review, and connect.</div>';
+        return;
+      }
       el.innerHTML = P.timeline.map(function(item, i){
         return '<div class="lg-tl-item lg-fade" style="animation-delay:' + (i*0.06) + 's">' +
           '<div class="lg-tl-dot" style="border-color:' + item.color + ';color:' + item.color + '">' + item.icon + '</div>' +
@@ -424,14 +458,17 @@
       for (var w = 0; w < 52; w++) {
         html += '<div class="lg-cal-col">';
         for (var day = 0; day < 7; day++) {
-          var isWe = d.getDay() === 0 || d.getDay() === 6;
-          var r = Math.random();
           var lv = 0;
-          if (r > 0.48) lv = 1;
-          if (r > 0.68) lv = 2;
-          if (r > 0.83) lv = 3;
-          if (r > 0.93) lv = 4;
-          if (isWe) lv = Math.min(4, lv + 1);
+          if (!_fbUser) {
+            // Demo mode: use random mock data
+            var isWe = d.getDay() === 0 || d.getDay() === 6;
+            var r = Math.random();
+            if (r > 0.48) lv = 1;
+            if (r > 0.68) lv = 2;
+            if (r > 0.83) lv = 3;
+            if (r > 0.93) lv = 4;
+            if (isWe) lv = Math.min(4, lv + 1);
+          }
           if (lv > 0) active++;
           var ds = d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
           html += '<div class="lg-hm lg-hm-' + lv + '" title="' + ds + '"></div>';
@@ -471,42 +508,58 @@
   function renderSocial() {
     try {
       var fl = qs('lgFriends');
-      if (fl) fl.innerHTML = P.friends.map(function(f, i){
-        return '<div class="lg-friend lg-fade" style="animation-delay:' + (i*0.07) + 's">' +
-          '<div class="lg-fav" style="background:' + f.color + '">' + f.ini + '</div>' +
-          '<div style="flex:1"><div class="lg-fn">' + f.name + '</div><div class="lg-fm">' + f.city + ' · ' + f.tag + '</div></div>' +
-          '<div class="lg-fov">' + f.overlap + '% match</div>' +
-          '</div>';
-      }).join('');
+      if (fl) {
+        if (!P.friends.length) {
+          fl.innerHTML = '<div style="text-align:center;padding:32px 20px;color:var(--text-muted);font-size:0.83rem"><i class="fas fa-user-group" style="font-size:1.8rem;display:block;margin-bottom:10px;opacity:0.2"></i>Connections will appear as you follow and interact with people</div>';
+        } else {
+          fl.innerHTML = P.friends.map(function(f, i){
+            return '<div class="lg-friend lg-fade" style="animation-delay:' + (i*0.07) + 's">' +
+              '<div class="lg-fav" style="background:' + f.color + '">' + f.ini + '</div>' +
+              '<div style="flex:1"><div class="lg-fn">' + f.name + '</div><div class="lg-fm">' + f.city + ' · ' + f.tag + '</div></div>' +
+              '<div class="lg-fov">' + f.overlap + '% match</div>' +
+              '</div>';
+          }).join('');
+        }
+      }
 
       var inf = qs('lgInfluence');
       if (inf) {
-        var circ = 2 * Math.PI * 46;
-        var off  = circ - (P.influenceScore / 100) * circ;
-        inf.innerHTML =
-          '<svg viewBox="0 0 104 104" style="width:104px;height:104px;transform:rotate(-90deg)">' +
-            '<circle cx="52" cy="52" r="46" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>' +
-            '<circle id="lgInflFill" cx="52" cy="52" r="46" fill="none" stroke="#a855f7" stroke-width="8" stroke-linecap="round"' +
-            ' stroke-dasharray="' + circ.toFixed(1) + '" stroke-dashoffset="' + circ.toFixed(1) + '"/>' +
-          '</svg>' +
-          '<div style="margin-top:-52px;position:relative;z-index:1;padding:16px 0">' +
-            '<div style="font-size:2rem;font-weight:900;color:var(--text-primary)">' + P.influenceScore + '</div>' +
-            '<div style="font-size:0.63rem;color:#a855f7;font-weight:700">INFLUENCE SCORE</div>' +
-          '</div>' +
-          '<div style="font-size:0.77rem;color:var(--text-secondary);padding-bottom:4px">Your content reaches an estimated <strong style="color:var(--text-primary)">2,100+ people</strong>/month on GeoHub.</div>';
-        setTimeout(function(){
-          var f2 = qs('lgInflFill');
-          if (f2) { f2.style.transition = 'stroke-dashoffset 1.5s ease'; f2.style.strokeDashoffset = off.toFixed(1); }
-        }, 350);
+        if (!P.influenceScore) {
+          inf.innerHTML = '<div style="text-align:center;padding:32px 20px;color:var(--text-muted);font-size:0.83rem"><i class="fas fa-signal" style="font-size:1.8rem;display:block;margin-bottom:10px;opacity:0.2"></i>Influence score builds as you create content and connect with others</div>';
+        } else {
+          var circ = 2 * Math.PI * 46;
+          var off  = circ - (P.influenceScore / 100) * circ;
+          inf.innerHTML =
+            '<svg viewBox="0 0 104 104" style="width:104px;height:104px;transform:rotate(-90deg)">' +
+              '<circle cx="52" cy="52" r="46" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>' +
+              '<circle id="lgInflFill" cx="52" cy="52" r="46" fill="none" stroke="#a855f7" stroke-width="8" stroke-linecap="round"' +
+              ' stroke-dasharray="' + circ.toFixed(1) + '" stroke-dashoffset="' + circ.toFixed(1) + '"/>' +
+            '</svg>' +
+            '<div style="margin-top:-52px;position:relative;z-index:1;padding:16px 0">' +
+              '<div style="font-size:2rem;font-weight:900;color:var(--text-primary)">' + P.influenceScore + '</div>' +
+              '<div style="font-size:0.63rem;color:#a855f7;font-weight:700">INFLUENCE SCORE</div>' +
+            '</div>' +
+            '<div style="font-size:0.77rem;color:var(--text-secondary);padding-bottom:4px">Your content reaches an estimated <strong style="color:var(--text-primary)">2,100+ people</strong>/month on GeoHub.</div>';
+          setTimeout(function(){
+            var f2 = qs('lgInflFill');
+            if (f2) { f2.style.transition = 'stroke-dashoffset 1.5s ease'; f2.style.strokeDashoffset = off.toFixed(1); }
+          }, 350);
+        }
       }
 
       var sh = qs('lgShared');
-      if (sh) sh.innerHTML = P.sharedInterests.map(function(item){
-        return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05)">' +
-          '<span style="font-size:0.81rem;color:var(--text-secondary)">' + item.label + '</span>' +
-          '<span style="font-size:0.81rem;font-weight:700;color:' + item.color + '">' + item.count + ' friends</span>' +
-          '</div>';
-      }).join('');
+      if (sh) {
+        if (!P.sharedInterests.length) {
+          sh.innerHTML = '<div style="color:var(--text-muted);font-size:0.82rem;padding:12px 0">No shared interests yet — start following people to discover overlaps.</div>';
+        } else {
+          sh.innerHTML = P.sharedInterests.map(function(item){
+            return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05)">' +
+              '<span style="font-size:0.81rem;color:var(--text-secondary)">' + item.label + '</span>' +
+              '<span style="font-size:0.81rem;font-weight:700;color:' + item.color + '">' + item.count + ' friends</span>' +
+              '</div>';
+          }).join('');
+        }
+      }
     } catch(e) {}
   }
 
@@ -523,6 +576,7 @@
       var xpEl = qs('lgXpChart');
       if (xpEl) {
         var maxXp = Math.max.apply(null, P.xpMonthly.map(function(m){ return m.xp; }));
+        if (!maxXp) maxXp = 1; // guard division by zero
         xpEl.innerHTML = P.xpMonthly.map(function(m){
           var h = Math.round(m.xp / maxXp * 100);
           var hi = m.xp === maxXp ? ' hi' : '';
