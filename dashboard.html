@@ -235,6 +235,7 @@
       <a href="add-business.html" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;background:var(--gradient-brand);color:#fff;border-radius:var(--radius-md);font-weight:700;text-decoration:none;font-size:0.95rem"><i class="fas fa-plus"></i> Add Business</a>
       <button onclick="alert('Instagram import — coming soon!')" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;background:none;color:var(--text-secondary);border:1px solid var(--border);border-radius:var(--radius-md);font-weight:600;cursor:pointer;font-size:0.95rem;font-family:inherit"><i class="fab fa-instagram" style="color:#e1306c"></i> Import from Instagram</button>
       <a href="pricing.html" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;background:none;color:var(--text-secondary);border:1px solid var(--border);border-radius:var(--radius-md);font-weight:600;text-decoration:none;font-size:0.95rem"><i class="fas fa-gem" style="color:var(--gold)"></i> View Plans</a>
+      <a href="demo.html" style="display:inline-flex;align-items:center;gap:8px;padding:13px 26px;background:none;color:var(--text-secondary);border:1px solid var(--border);border-radius:var(--radius-md);font-weight:600;text-decoration:none;font-size:0.95rem"><i class="fas fa-play-circle" style="color:var(--blue)"></i> Explore Demo</a>
     </div>
   </div>
 
@@ -244,9 +245,9 @@
       <!-- Profile mini -->
       <div style="padding:0 12px 16px;border-bottom:1px solid var(--border-subtle);margin-bottom:16px">
         <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:40px;height:40px;border-radius:var(--radius-full);background:var(--gradient-brand);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;color:white;flex-shrink:0">K</div>
+          <div id="dashSidebarLetter" style="width:40px;height:40px;border-radius:var(--radius-full);background:var(--gradient-brand);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;color:white;flex-shrink:0">K</div>
           <div>
-            <div style="font-size:0.875rem;font-weight:700">Kazbegi Adventures</div>
+            <div id="dashSidebarName" style="font-size:0.875rem;font-weight:700">Kazbegi Adventures</div>
             <div style="font-size:0.72rem;color:var(--text-muted)">Free Plan</div>
           </div>
         </div>
@@ -1699,20 +1700,26 @@
   nameEls.forEach(function (el) { el.textContent = bizName; });
 
   // Replace hardcoded "Kazbegi Adventures" in the sidebar profile mini
-  var sidebarLetter = document.querySelector('.dashboard-nav [style*="font-weight:700;font-size:1.1rem"]');
+  var sidebarLetter = document.getElementById('dashSidebarLetter');
   if (sidebarLetter) sidebarLetter.textContent = (bizName[0] || 'B').toUpperCase();
-  var sidebarName = document.querySelector('.dashboard-nav [style*="font-size:0.875rem;font-weight:700"]');
+  var sidebarName = document.getElementById('dashSidebarName');
   if (sidebarName) sidebarName.textContent = bizName;
 
-  // Zero stats and clear mock chart/review data for new business with no activity
+  // Zero stats and clear mock data for new business with no activity
   if (!biz.hasActivity) {
     document.querySelectorAll('.kpi-value, .stat-value').forEach(function (el) {
       if (!isNaN(parseInt(el.textContent))) el.textContent = '0';
     });
+    document.querySelectorAll('.dash-nav-badge').forEach(function (el) { el.style.display = 'none'; });
     var chart = document.getElementById('viewsChart');
     if (chart) chart.innerHTML = '<div style="width:100%;text-align:center;padding:32px 0;color:var(--text-muted);font-size:0.85rem"><i class="fas fa-chart-bar" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>No views yet — activity will appear here</div>';
     var rev = document.getElementById('dashReviews');
     if (rev) rev.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--text-muted);font-size:0.85rem"><i class="fas fa-star" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>No reviews yet</div>';
+    var bookTab = document.getElementById('tab-bookings');
+    if (bookTab) {
+      var bookTable = bookTab.querySelector('.booking-table');
+      if (bookTable) bookTable.innerHTML = '<tbody><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted);font-size:0.85rem"><i class="fas fa-calendar" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>No bookings yet</td></tr></tbody>';
+    }
   }
 })();
 </script>

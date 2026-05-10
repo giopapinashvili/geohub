@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nino Gelashvili — GeoHub Profile</title>
+  <title>Profile — GeoHub</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#10b981">
@@ -1514,6 +1514,19 @@
     if (existing) existing.remove();
 
     document.querySelector('.geo-map-widget-title span').textContent = `${Math.max(1, Math.round(user.visitedPlaces / 12))} cities`;
+
+    // Update rewards tab wallet card
+    const geoPoints = Math.round(user.xp / 10);
+    const tierName = user.explorerLevel.replace(' Explorer', '');
+    const walletPts = document.querySelector('.wallet-points');
+    if (walletPts) walletPts.textContent = geoPoints;
+    const walletTier = document.querySelector('.wallet-tier');
+    if (walletTier) walletTier.innerHTML = `<i class="fas fa-gem"></i> ${tierName} Tier`;
+    const walletProgLabel = document.querySelector('.wallet-progress-label span:last-child');
+    if (walletProgLabel) walletProgLabel.textContent = `${geoPoints} / 1,000 pts`;
+    const walletStatEls = document.querySelectorAll('.wallet-card .wstat-value');
+    if (walletStatEls.length >= 2) { walletStatEls[0].textContent = geoPoints; walletStatEls[1].textContent = '0'; }
+
     document.querySelector('.mini-wallet-pts').textContent = `${compactProfile(Math.round(user.xp / 10))} pts`;
     document.querySelector('.mini-wallet-label').textContent = `GeoPoints · ${user.explorerLevel.replace(' Explorer', '')} Tier`;
     document.querySelector('.mini-wallet-sub').innerHTML = `<strong>${Math.max(20, 1000 - Math.round(user.xp / 10))} pts</strong> to next tier · ${user.accountType === 'New User' ? 0 : 3} active coupons`;

@@ -638,8 +638,8 @@
   <script src="main.js"></script>
   <script src="account.js"></script>
 <script>
-let XP_BAL = 0;
-let XP_LOG_DATA = null; // null = empty; real user branch below sets this
+let XP_BAL = 847; // demo default (Nino); overridden per-user below
+let XP_LOG_DATA = null; // null = demo/XP_LOG; real user branch sets this
 
 const REWARDS = [
   { id:1, biz:'Entree Coffee',       cat:'coffee',   cost:300,  discount:'20% Off', title:'Any Order Discount',       expires:'Jun 30, 2026', code:'ENTREE20',  saved:false },
@@ -750,7 +750,7 @@ function copyCode(btn, code) {
 }
 
 function renderXP() {
-  const log = XP_LOG_DATA || [];
+  const log = XP_LOG_DATA !== null ? XP_LOG_DATA : XP_LOG;
   document.getElementById('xpGrid').innerHTML = log.map(h => `
     <div class="xp-item">
       <div class="xp-icon ${h.type}"><i class="fas fa-${h.icon}"></i></div>

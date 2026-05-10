@@ -365,7 +365,7 @@
     <div class="chal-hero-top">
       <div class="chal-hero-left">
         <div class="chal-hero-greeting"><i class="fas fa-bolt"></i> Mission Control</div>
-        <div class="chal-hero-title">Your Challenges,<br>Nino.</div>
+        <div class="chal-hero-title" id="chalHeroTitle">Your Challenges,<br>Explorer.</div>
         <div class="chal-hero-sub"><strong>3 active</strong> missions · complete them to earn XP &amp; unlock rewards</div>
       </div>
       <div class="weekly-ring-wrap">
@@ -788,6 +788,18 @@ function animateBars() {
 renderAll();
 setTimeout(() => { document.getElementById('featFill').style.width = '60%'; }, 200);
 setTimeout(() => window.GeoHubSocial?.refresh?.(), 0);
+</script>
+<script>
+(function () {
+  try {
+    var u = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
+    var name = (u && u.fullName) ? u.fullName.split(' ')[0] : (u && u.email ? u.email.split('@')[0] : null);
+    if (name) {
+      var el = document.getElementById('chalHeroTitle');
+      if (el) el.innerHTML = 'Your Challenges,<br>' + name + '.';
+    }
+  } catch (e) {}
+})();
 </script>
 <script src="social-layer.js"></script>
 <script src="nav-cleanup.js"></script>

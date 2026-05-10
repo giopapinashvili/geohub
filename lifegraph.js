@@ -3,9 +3,24 @@
   'use strict';
 
   /* ══════════════════════════════════════════════════════════════
-     MOCK USER — falls back to standalone data if MOCK_USERS absent
+     CURRENT USER — real Firebase user takes priority over mock data
   ══════════════════════════════════════════════════════════════ */
-  var BASE = (typeof MOCK_USERS !== 'undefined' && Array.isArray(MOCK_USERS) && MOCK_USERS[0]) ? MOCK_USERS[0] : {
+  var _fbUser = (function () {
+    try { var u = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null'); return (u && u.isFirebaseUser) ? u : null; } catch (e) { return null; }
+  })();
+
+  var BASE = _fbUser ? {
+    fullName: _fbUser.fullName || _fbUser.email || 'GeoHub User',
+    username: _fbUser.username || (_fbUser.email || '').split('@')[0] || 'user',
+    city: _fbUser.city || 'Georgia',
+    explorerLevel: 'New Explorer',
+    xp: _fbUser.xp || 250,
+    rank: null,
+    badges: _fbUser.badges || [],
+    interests: _fbUser.interests || [],
+    followers: 0, following: 0, postsCount: 0,
+    visitedPlaces: 0, trustScore: 0, accountType: _fbUser.accountType || 'Explorer',
+  } : (typeof MOCK_USERS !== 'undefined' && Array.isArray(MOCK_USERS) && MOCK_USERS[0]) ? MOCK_USERS[0] : {
     fullName: 'Nino Gelashvili', username: 'nino.explorer',
     city: 'Tbilisi', explorerLevel: 'Gold Explorer', xp: 8420, rank: 14,
     badges: ['Café Hunter', 'Weekend Explorer', 'Top Reviewer'],
@@ -17,14 +32,14 @@
   var P = {
     user:           BASE,
     initials:       (BASE.fullName || 'GH').split(' ').map(function(n){ return n[0] || ''; }).join('').slice(0, 2).toUpperCase(),
-    memberSince:    'Jan 2025',
-    visitedPlaces:  BASE.visitedPlaces || 148,
-    challengesDone: 18,
-    eventsAttended: 31,
-    reviewsWritten: 74,
-    rewardsUnlocked:23,
-    friendsCount:   47,
-    photosShared:   312,
+    memberSince:    _fbUser ? 'Jan 2026' : 'Jan 2025',
+    visitedPlaces:  BASE.visitedPlaces || (_fbUser ? 0 : 148),
+    challengesDone: _fbUser ? 0 : 18,
+    eventsAttended: _fbUser ? 0 : 31,
+    reviewsWritten: _fbUser ? 0 : 74,
+    rewardsUnlocked: _fbUser ? 0 : 23,
+    friendsCount:   _fbUser ? 0 : 47,
+    photosShared:   _fbUser ? 0 : 312,
 
     radar: [
       { label:'Social',     value:82 },
@@ -108,7 +123,16 @@
       { icon:'⚡', type:'Challenge',     title:'"District Master" Challenge',     reason:'You\'ve visited 5/8 required districts. 2 more visits = 320 XP waiting.',                              conf:95, cc:'#f59e0b' },
     ],
 
-    reflStats: [
+    reflStats: _fbUser ? [
+      { icon:'⚡', v: String(BASE.xp || 250),  l:'XP Earned',       color:'#10b981' },
+      { icon:'📍', v: '0',   l:'Places Visited',   color:'#3b82f6' },
+      { icon:'✍️', v: '0',   l:'Reviews Written',  color:'#8b5cf6' },
+      { icon:'🏆', v: '0',   l:'Challenges Done',  color:'#f59e0b' },
+      { icon:'🎪', v: '0',   l:'Events Attended',  color:'#ec4899' },
+      { icon:'🎁', v: '0',   l:'Rewards Claimed',  color:'#06b6d4' },
+      { icon:'🤝', v: '0',   l:'Connections Made', color:'#22c55e' },
+      { icon:'📸', v: '0',   l:'Photos Shared',    color:'#a855f7' },
+    ] : [
       { icon:'⚡', v:'8,420', l:'XP Earned',       color:'#10b981' },
       { icon:'📍', v:'148',   l:'Places Visited',   color:'#3b82f6' },
       { icon:'✍️', v:'74',    l:'Reviews Written',  color:'#8b5cf6' },
@@ -491,6 +515,10 @@
   ══════════════════════════════════════════════════════════════ */
   function renderGrowth() {
     try {
+      /* XP total label */
+      var xpTotalEl = document.getElementById('lgXpTotal');
+      if (xpTotalEl) xpTotalEl.innerHTML = 'Total: <strong style="color:#10b981">' + (BASE.xp || 250).toLocaleString() + ' XP</strong>';
+
       /* XP chart */
       var xpEl = qs('lgXpChart');
       if (xpEl) {
