@@ -1667,9 +1667,16 @@
 <script src="mode.js"></script>
 <script>
 (function () {
-  if (!window.GeoMode || !window.GeoMode.isRealUser()) return;
+  if (!window.GeoMode) return;
 
   var user = window.GeoMode.getCurrentUser();
+
+  // Not logged in at all → redirect to auth
+  if (!user) { window.location.href = 'auth.html'; return; }
+
+  // Demo/mock user → show Kazbegi Adventures as-is
+  if (!window.GeoMode.isRealUser()) return;
+
   var bizKey = 'geohub_business_' + (user.uid || user.id || 'anon');
   var biz = null;
   try { biz = JSON.parse(localStorage.getItem(bizKey) || 'null'); } catch (e) {}

@@ -586,8 +586,23 @@ function searchConvs(q) {
 
 // ======================== INIT ========================
 document.addEventListener('DOMContentLoaded', () => {
-  renderConvList();
-  openConv(activeConvId);
+  const isReal = window.GeoMode && window.GeoMode.isRealUser();
+
+  if (!isReal) {
+    renderConvList();
+    openConv(activeConvId);
+
+    const unreadTotal = MOCK_CONVS.reduce((s, c) => s + getUnread(c), 0);
+    const badge = document.querySelector('.msg-nav-badge');
+    if (badge && unreadTotal) { badge.textContent = unreadTotal; badge.style.display = 'inline-flex'; }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const userParam = urlParams.get('user');
+    if (userParam) {
+      const conv = MOCK_CONVS.find(c => c.withId === userParam || getUser(c.withId)?.username === userParam);
+      if (conv) openConv(conv.id);
+    }
+  }
 
   const input = document.getElementById('msgInput');
   if (input) {
@@ -607,15 +622,4 @@ document.addEventListener('DOMContentLoaded', () => {
       picker.style.display = 'none';
     }
   });
-
-  const unreadTotal = MOCK_CONVS.reduce((s, c) => s + getUnread(c), 0);
-  const badge = document.querySelector('.msg-nav-badge');
-  if (badge && unreadTotal) { badge.textContent = unreadTotal; badge.style.display = 'inline-flex'; }
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const userParam = urlParams.get('user');
-  if (userParam) {
-    const conv = MOCK_CONVS.find(c => c.withId === userParam || getUser(c.withId)?.username === userParam);
-    if (conv) openConv(conv.id);
-  }
 });

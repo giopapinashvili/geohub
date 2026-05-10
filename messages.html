@@ -390,7 +390,10 @@ document.addEventListener('DOMContentLoaded', function () {
   if (quickReplies) quickReplies.style.display = 'none';
 
   var infoPanel = document.getElementById('infoPanel');
-  if (infoPanel) infoPanel.innerHTML = '';
+  if (infoPanel) { infoPanel.innerHTML = ''; infoPanel.style.display = 'none'; }
+
+  var layout = document.querySelector('.messages-layout');
+  if (layout) layout.style.gridTemplateColumns = '288px 1fr';
 
   var badge = document.querySelector('.msg-nav-badge');
   if (badge) badge.style.display = 'none';

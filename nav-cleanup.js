@@ -109,6 +109,8 @@
   function cleanupActions() {
     const actions = document.querySelector('.navbar-actions');
     if (!actions) return;
+    // If account.js has already rendered the auth dropdown, don't touch it
+    if (actions.querySelector('.auth-nav-user')) return;
     actions.querySelectorAll('a').forEach(link => {
       const href = (link.getAttribute('href') || '').toLowerCase();
       if (href === '#' && /sign up|register|sign in/i.test(link.textContent)) link.remove();
