@@ -1311,6 +1311,33 @@
     { name: 'Mestia Svan Guesthouse', cat: 'Guesthouse', city: 'Mestia', image: 'https://picsum.photos/seed/profile-mestia-place/400/300', tags: ['guesthouses', 'hiking', 'business'] }
   ];
 
+  function buildFirebaseProfile(authUser) {
+    const seed = (authUser.username || authUser.email || 'fbuser').replace(/\W/g, '') || 'fbuser';
+    return {
+      id:            authUser.uid || authUser.id || 'firebase_user',
+      uid:           authUser.uid || authUser.id,
+      fullName:      authUser.fullName || (authUser.email || 'Explorer').split('@')[0],
+      username:      authUser.username || (authUser.email || 'explorer').split('@')[0],
+      email:         authUser.email || '',
+      avatar:        authUser.avatar || ('https://picsum.photos/seed/' + seed + '_fb/200/200'),
+      coverImage:    authUser.coverImage || ('https://picsum.photos/seed/' + seed + '_fbcv/1200/500'),
+      bio:           authUser.bio || '',
+      city:          authUser.city || 'Tbilisi',
+      explorerLevel: authUser.explorerLevel || 'New Explorer',
+      xp:            authUser.xp != null ? authUser.xp : 250,
+      rank:          authUser.rank || 9999,
+      badges:        (authUser.badges && authUser.badges.length) ? authUser.badges : ['New Member'],
+      interests:     (authUser.interests && authUser.interests.length) ? authUser.interests : ['travel', 'cafes'],
+      followers:     authUser.followers || 0,
+      following:     authUser.following || 0,
+      postsCount:    authUser.postsCount || 0,
+      visitedPlaces: authUser.visitedPlaces || 0,
+      trustScore:    authUser.trustScore || 70,
+      accountType:   authUser.accountType || 'Explorer',
+      isFirebaseUser: true
+    };
+  }
+
   function resolveProfileUser() {
     const urlParam = new URLSearchParams(location.search).get('user');
     let param;
@@ -1325,12 +1352,21 @@
       if (!param) param = localStorage.getItem('geohub_mock_profile_user') || localStorage.getItem('geohub_mock_user') || 'nino.explorer';
     }
     const decoded = decodeURIComponent(param);
-    return MOCK_USERS.find(user =>
+    const mockMatch = MOCK_USERS.find(user =>
       user.username === decoded ||
       slugifyProfile(user.username) === slugifyProfile(decoded) ||
       slugifyProfile(user.fullName) === slugifyProfile(decoded) ||
       user.id === decoded
-    ) || MOCK_USERS[0];
+    );
+    if (mockMatch) return mockMatch;
+    // No mock user matched — if viewing own profile and auth user is a Firebase user, build from auth data
+    if (!urlParam) {
+      try {
+        const authUser = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
+        if (authUser && authUser.isFirebaseUser) return buildFirebaseProfile(authUser);
+      } catch (e) {}
+    }
+    return MOCK_USERS[0];
   }
 
   function scoreInterestProfile(item, user) {
@@ -1407,7 +1443,8 @@
   }
 
   function renderPlaces(user) {
-    const places = [...profilePlaces].sort((a, b) => scoreInterestProfile(b, user) - scoreInterestProfile(a, user)).slice(0, user.accountType === 'New User' ? 2 : 6);
+    const isNewUser = user.accountType === 'New User' || (user.isFirebaseUser && !user.visitedPlaces);
+    const places = [...profilePlaces].sort((a, b) => scoreInterestProfile(b, user) - scoreInterestProfile(a, user)).slice(0, isNewUser ? 2 : 6);
     document.querySelector('.places-filter-chips').innerHTML = `<div class="places-chip active">All (${user.visitedPlaces})</div>` + user.interests.slice(0, 5).map(i => `<div class="places-chip">${i}</div>`).join('');
     document.querySelector('#tab-places .places-grid').innerHTML = places.map(place => `
       <div class="place-card">
@@ -1444,7 +1481,8 @@
   }
 
   function renderReviews(user) {
-    const reviews = [...profilePlaces].sort((a, b) => scoreInterestProfile(b, user) - scoreInterestProfile(a, user)).slice(0, user.accountType === 'New User' ? 1 : 4);
+    const isNewUser = user.accountType === 'New User' || (user.isFirebaseUser && !user.visitedPlaces);
+    const reviews = [...profilePlaces].sort((a, b) => scoreInterestProfile(b, user) - scoreInterestProfile(a, user)).slice(0, isNewUser ? 1 : 4);
     document.getElementById('tab-reviews').innerHTML = reviews.map((place, index) => `
       <div class="profile-review-card">
         <div class="prv-place-row">
@@ -1458,7 +1496,8 @@
   }
 
   function renderActivity(user) {
-    const activity = user.accountType === 'New User'
+    const isNew = user.accountType === 'New User' || (user.isFirebaseUser && !user.postsCount && !user.visitedPlaces);
+    const activity = isNew
       ? [
           ['green', '🌱', `Created a GeoHub profile and picked <strong>${user.interests[0]}</strong> as a first interest`, 'Today'],
           ['blue', '📍', 'Saved the first nearby place to wishlist', 'Today']
@@ -1476,19 +1515,25 @@
 
   function renderProfileSidebar(user) {
     const sidebar = document.querySelector('.profile-sidebar');
-    if (!document.getElementById('profileUserSwitcherCard')) {
-      sidebar.insertAdjacentHTML('afterbegin', `
-        <div class="profile-switcher-card" id="profileUserSwitcherCard">
-          <div class="profile-switcher-title">Mock User Switcher</div>
-          <select class="profile-switcher" id="profileUserSelect"></select>
-        </div>`);
+    if (user.isFirebaseUser) {
+      // Hide mock switcher for real Firebase users
+      const existing = document.getElementById('profileUserSwitcherCard');
+      if (existing) existing.remove();
+    } else {
+      if (!document.getElementById('profileUserSwitcherCard')) {
+        sidebar.insertAdjacentHTML('afterbegin', `
+          <div class="profile-switcher-card" id="profileUserSwitcherCard">
+            <div class="profile-switcher-title">Mock User Switcher</div>
+            <select class="profile-switcher" id="profileUserSelect"></select>
+          </div>`);
+      }
+      document.getElementById('profileUserSelect').innerHTML = MOCK_USERS.map(candidate => `<option value="${candidate.username}" ${candidate.id === user.id ? 'selected' : ''}>${candidate.fullName} · ${candidate.accountType}</option>`).join('');
+      document.getElementById('profileUserSelect').onchange = event => {
+        localStorage.setItem('geohub_mock_profile_user', event.target.value);
+        history.replaceState(null, '', `profile.html?user=${encodeURIComponent(event.target.value)}`);
+        renderDynamicProfile(resolveProfileUser());
+      };
     }
-    document.getElementById('profileUserSelect').innerHTML = MOCK_USERS.map(candidate => `<option value="${candidate.username}" ${candidate.id === user.id ? 'selected' : ''}>${candidate.fullName} · ${candidate.accountType}</option>`).join('');
-    document.getElementById('profileUserSelect').onchange = event => {
-      localStorage.setItem('geohub_mock_profile_user', event.target.value);
-      history.replaceState(null, '', `profile.html?user=${encodeURIComponent(event.target.value)}`);
-      renderDynamicProfile(resolveProfileUser());
-    };
 
     document.querySelector('.geo-map-widget-title span').textContent = `${Math.max(1, Math.round(user.visitedPlaces / 12))} cities`;
     document.querySelector('.mini-wallet-pts').textContent = `${compactProfile(Math.round(user.xp / 10))} pts`;
@@ -1496,12 +1541,14 @@
     document.querySelector('.mini-wallet-sub').innerHTML = `<strong>${Math.max(20, 1000 - Math.round(user.xp / 10))} pts</strong> to next tier · ${user.accountType === 'New User' ? 0 : 3} active coupons`;
     document.querySelector('.trust-number').textContent = user.trustScore;
     document.querySelector('.trust-info-label').textContent = user.trustScore > 92 ? 'Highly Trusted' : user.trustScore > 80 ? 'Trusted Explorer' : 'Building Trust';
-    document.querySelector('.trust-info-sub').textContent = user.accountType === 'New User' ? 'New profile under review' : `Rank #${user.rank} in GeoHub`;
+    const isNewUserCtx = user.accountType === 'New User' || (user.isFirebaseUser && !user.visitedPlaces);
+    document.querySelector('.trust-info-sub').textContent = isNewUserCtx ? 'New profile under review' : `Rank #${user.rank} in GeoHub`;
+    const isNewUser = user.accountType === 'New User' || (user.isFirebaseUser && !user.visitedPlaces);
     document.querySelector('.trust-items').innerHTML = `
-      <div class="trust-item ok"><i class="fas fa-check-circle"></i> Profile mock verified</div>
+      <div class="trust-item ok"><i class="fas fa-check-circle"></i> ${user.isFirebaseUser ? 'Firebase account verified' : 'Profile mock verified'}</div>
       <div class="trust-item ok"><i class="fas fa-map-marker-alt"></i> ${user.visitedPlaces} visited places</div>
       <div class="trust-item ok"><i class="fas fa-star"></i> ${user.badges.length} badges earned</div>
-      <div class="trust-item ${user.accountType === 'New User' ? 'warn' : 'ok'}"><i class="fas fa-camera"></i> ${user.accountType === 'New User' ? 'Needs more camera proofs' : 'Camera proof active'}</div>`;
+      <div class="trust-item ${isNewUser ? 'warn' : 'ok'}"><i class="fas fa-camera"></i> ${isNewUser ? 'Needs more camera proofs' : 'Camera proof active'}</div>`;
 
     const suggested = MOCK_USERS.filter(candidate => candidate.id !== user.id).sort((a, b) => b.trustScore - a.trustScore).slice(0, 4);
     document.querySelector('.following-card').innerHTML = `<div class="following-header">People You May Know</div>` + suggested.map(candidate => `
@@ -1517,14 +1564,17 @@
     if (urlParam) return false;
     try {
       const authUser = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
-      if (authUser && authUser.username === user.username) return true;
+      if (!authUser) return false;
+      if (authUser.username && user.username && authUser.username === user.username) return true;
+      if (authUser.uid && user.uid && authUser.uid === user.uid) return true;
+      if (authUser.id && user.id && authUser.id === user.id) return true;
     } catch (e) {}
     return false;
   }
 
   function renderDynamicProfile(user) {
     const ownProfile = isOwnProfile(user);
-    if (!ownProfile) localStorage.setItem('geohub_mock_profile_user', user.username);
+    if (!ownProfile && !user.isFirebaseUser) localStorage.setItem('geohub_mock_profile_user', user.username);
     document.title = `${user.fullName} - GeoHub Profile`;
     document.querySelector('.profile-cover').classList.add('dynamic-cover');
     document.querySelector('.profile-cover').style.backgroundImage = `linear-gradient(180deg, rgba(4,5,13,0.1), rgba(4,5,13,0.72)), url('${user.coverImage}')`;
@@ -1555,7 +1605,7 @@
     document.querySelector('.trust-badges').innerHTML = `
       <span class="trust-badge green"><i class="fas fa-check-circle"></i> ${user.explorerLevel}</span>
       <span class="trust-badge gold"><i class="fas fa-star"></i> ${compactProfile(user.xp)} XP</span>
-      <span class="trust-badge blue"><i class="fas fa-ranking-star"></i> Rank #${user.rank}</span>
+      <span class="trust-badge blue"><i class="fas fa-ranking-star"></i> ${user.rank >= 9000 ? 'New Explorer' : 'Rank #' + user.rank}</span>
       <span class="trust-badge purple"><i class="fas fa-id-badge"></i> ${user.accountType}</span>
       <span class="trust-badge green"><i class="fas fa-map-marker-alt"></i> Real Check-ins: ${user.visitedPlaces}</span>`;
     updateStats(user);
