@@ -156,6 +156,10 @@ const profileUsersByUsername = Object.fromEntries(MOCK_USERS.map(user => [user.u
       const joinedB = b.participants.includes(user.id) ? 2 : 0;
       return joinedB - joinedA || b.progress - a.progress;
     });
+    if (!matched.length) {
+      document.querySelector('#tab-challenges .challenges-grid').innerHTML = '<div class="empty-profile-state"><i class="fas fa-trophy"></i><h3>No challenges yet</h3><p>Challenges will appear as you explore GeoHub.</p><a href="challenges.html" class="btn btn-primary btn-sm" style="margin-top:12px">Browse Challenges</a></div>';
+      return;
+    }
     document.querySelector('#tab-challenges .challenges-grid').innerHTML = matched.map((challenge, index) => {
       const joined = challenge.participants.includes(user.id);
       const done = joined && challenge.progress >= 100;
@@ -239,12 +243,19 @@ const profileUsersByUsername = Object.fromEntries(MOCK_USERS.map(user => [user.u
       <div class="trust-item ${isNewUser ? 'warn' : 'ok'}"><i class="fas fa-camera"></i> ${isNewUser ? 'Needs more camera proofs' : 'Camera proof active'}</div>`;
 
     const suggested = MOCK_USERS.filter(candidate => candidate.id !== user.id).sort((a, b) => b.trustScore - a.trustScore).slice(0, 4);
-    document.querySelector('.following-card').innerHTML = `<div class="following-header">People You May Know</div>` + suggested.map(candidate => `
-      <div class="following-row">
-        <a href="profile.html?user=${encodeURIComponent(candidate.username)}"><img class="following-avatar" src="${candidate.avatar}" alt="${candidate.fullName}"></a>
-        <div><div class="following-name"><a href="profile.html?user=${encodeURIComponent(candidate.username)}">${candidate.fullName}</a></div><div class="following-type">${candidate.accountType}</div></div>
-        <button class="follow-btn">Follow</button>
-      </div>`).join('');
+    const followingCard = document.querySelector('.following-card');
+    if (followingCard) {
+      if (!suggested.length) {
+        followingCard.innerHTML = '<div class="following-header">People You May Know</div><div style="padding:16px 0;text-align:center;color:var(--text-muted);font-size:0.85rem">No suggestions yet</div>';
+      } else {
+        followingCard.innerHTML = `<div class="following-header">People You May Know</div>` + suggested.map(candidate => `
+          <div class="following-row">
+            <img class="following-avatar" src="${candidate.avatar}" alt="${candidate.fullName}">
+            <div><div class="following-name">${candidate.fullName}</div><div class="following-type">${candidate.accountType}</div></div>
+            <button class="follow-btn">Follow</button>
+          </div>`).join('');
+      }
+    }
   }
 
   function isOwnProfile(user) {

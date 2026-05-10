@@ -7,7 +7,7 @@ const mockUserById = Object.fromEntries(MOCK_USERS.map(user => [user.id, user]))
 
   function getCurrentMockUser() {
     const saved = localStorage.getItem('geohub_mock_user') || 'u01';
-    return mockUserById[saved] || MOCK_USERS[0];
+    return mockUserById[saved] || MOCK_USERS[0] || null;
   }
 
   function postScoreForUser(post, currentUser) {
@@ -157,7 +157,7 @@ const mockUserById = Object.fromEntries(MOCK_USERS.map(user => [user.id, user]))
       .slice(0, 5);
     suggestedWidget.innerHTML = `
       <div class="sw-title">👥 Suggested to Follow</div>
-      ${suggested.map(user => `
+      ${suggested.length ? suggested.map(user => `
         <div class="su-row">
           <a href="profile.html?user=${encodeURIComponent(user.username)}"><img class="su-avatar" src="${user.avatar}" alt="${user.fullName}"></a>
           <div class="su-info">
@@ -165,18 +165,17 @@ const mockUserById = Object.fromEntries(MOCK_USERS.map(user => [user.id, user]))
             <div class="su-type">${user.accountType} · ${compact(user.followers)} followers</div>
           </div>
           <button class="su-follow follow-btn">Follow</button>
-        </div>`).join('')}`;
+        </div>`).join('') : '<div style="padding:12px 0;text-align:center;font-size:0.85rem;color:var(--text-muted)">Sign up and connect with explorers across Georgia.<br><a href="auth.html?tab=signup" style="color:var(--green);font-weight:700;text-decoration:none">Create account →</a></div>'}`;
 
     const challengeWidget = [...sidebar.querySelectorAll('.sidebar-widget')].find(w => w.textContent.includes('Top Challenges') || w.textContent.includes('Active Challenges'));
     if (challengeWidget) {
       challengeWidget.innerHTML = `
-        <div class="sw-title">🏆 Active Challenges</div>
-        ${MOCK_CHALLENGES.map(challenge => `
+        <div class="sw-title">🏆 Challenges <a href="challenges.html">See all</a></div>
+        ${MOCK_CHALLENGES.length ? MOCK_CHALLENGES.map(challenge => `
           <div class="sc-item">
             <div class="sc-row"><div class="sc-icon">${challenge.icon}</div><div class="sc-name">${challenge.name}</div><div class="sc-xp">+${challenge.xp}</div></div>
             <div class="sc-bar"><div class="sc-fill" style="width:${challenge.progress}%"></div></div>
-            <div class="mock-user-meta">${challenge.participants.map(userName).slice(0, 3).join(', ')} joined</div>
-          </div>`).join('')}`;
+          </div>`).join('') : '<div style="padding:12px 0;text-align:center"><a href="challenges.html" class="btn btn-primary btn-sm" style="font-size:0.78rem">Browse Challenges</a></div>'}`;
     }
   }
 
@@ -352,14 +351,5 @@ const mockUserById = Object.fromEntries(MOCK_USERS.map(user => [user.id, user]))
     });
   });
 
-  // Load more (visual feedback)
-  const loadMoreFinal = document.getElementById('loadMoreBtn');
-  if (loadMoreFinal) {
-    loadMoreFinal.addEventListener('click', function() {
-      this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-      setTimeout(() => {
-        this.innerHTML = '<i class="fas fa-sync-alt"></i> Load More';
-      }, 1500);
-    });
-  }
+  // loadMoreBtn is handled inside bindMockInteractions() above
   window.GeoHubSocial?.refresh?.();

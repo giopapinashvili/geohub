@@ -38,7 +38,7 @@
   </ul>
   <div class="navbar-actions">
     <a href="profile.html" class="btn-ghost-nav"><i class="fas fa-user-circle"></i> Profile</a>
-    <a href="#" class="btn btn-primary btn-sm">Sign Up</a>
+    <a href="auth.html?tab=signup" class="btn btn-primary btn-sm">Sign Up</a>
   </div>
   <button class="hamburger"><span></span><span></span><span></span></button>
 </nav>
@@ -104,9 +104,9 @@
 
     <div class="dash-nav-section">
       <div class="dash-nav-label">Account</div>
-      <a class="dash-nav-item" href="#"><i class="fas fa-user"></i> Account Settings</a>
-      <a class="dash-nav-item" href="#"><i class="fas fa-bell"></i> Notifications <span class="dash-nav-badge">2</span></a>
-      <a class="dash-nav-item" href="#"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+      <a class="dash-nav-item" href="#" onclick="window.GeoAuth&&window.GeoAuth.showAccountSettings();return false"><i class="fas fa-user"></i> Account Settings</a>
+      <a class="dash-nav-item" href="profile.html"><i class="fas fa-bell"></i> Notifications</a>
+      <a class="dash-nav-item" href="#" onclick="window.GeoAuth&&window.GeoAuth.logout();return false"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
     </div>
 
     <!-- Upgrade Banner -->

@@ -1,6 +1,19 @@
 (function () {
   'use strict';
 
+  /* ── AUTH GUARD ────────────────────────────────────────────── */
+  (function adminGuard() {
+    var ADMIN_EMAILS = ['gio.papinashvili26@gmail.com'];
+    try {
+      var stored = localStorage.getItem('geohub_auth_user');
+      var u = stored ? JSON.parse(stored) : null;
+      if (!u || !u.isFirebaseUser) { window.location.href = 'auth.html'; return; }
+      if (!ADMIN_EMAILS.includes((u.email || '').toLowerCase())) { window.location.href = 'index.html'; return; }
+    } catch (e) {
+      window.location.href = 'auth.html';
+    }
+  })();
+
   /* ── MOCK DATA ─────────────────────────────────────────────── */
 
   var USERS = [];

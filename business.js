@@ -1,6 +1,12 @@
 const urlParams = new URLSearchParams(window.location.search);
   const bizId = parseInt(urlParams.get('id')) || 1;
-  const biz = BUSINESSES.find(b => b.id === bizId) || BUSINESSES[0];
+  const biz = BUSINESSES.find(b => b.id === bizId) || BUSINESSES[0] || null;
+
+  if (!biz) {
+    document.title = 'Business — GeoHub';
+    document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:40px 20px;color:#94a3b8"><i class="fas fa-store" style="font-size:2.5rem;margin-bottom:16px;opacity:0.4"></i><h2 style="font-size:1.2rem;font-weight:700;color:#e2e8f0;margin-bottom:8px">Business not found</h2><p style="font-size:0.9rem;margin-bottom:24px">This listing may have been removed or is not yet available.</p><a href="map.html" style="padding:10px 24px;background:#10b981;color:#000;border-radius:8px;text-decoration:none;font-weight:700">Explore Places</a></div>';
+    throw new Error('No business data');
+  }
 
   // Update title
   document.title = `${biz.name} — GeoHub`;

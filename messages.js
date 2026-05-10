@@ -480,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!isReal) {
     renderConvList();
-    openConv(activeConvId);
+    if (activeConvId) openConv(activeConvId);
 
     const unreadTotal = MOCK_CONVS.reduce((s, c) => s + getUnread(c), 0);
     const badge = document.querySelector('.msg-nav-badge');
