@@ -1,11 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Discover — GeoHub</title>
+  <title>Feed — GeoHub</title>
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="components.css">
   <link rel="stylesheet" href="navbar.css">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#10b981">
@@ -14,216 +13,553 @@
   <meta name="apple-mobile-web-app-title" content="GeoHub">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="mobile-nav.css">
-  <link rel="stylesheet" href="social-layer.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="feed.css">
 </head>
-<body>
+<body class="page-feed">
 
-<!-- NAVBAR -->
+<!-- Standard navbar (hidden on desktop, shown on mobile for hamburger) -->
 <nav class="navbar" id="navbar">
   <a href="index.html" class="navbar-brand">
     <div class="logo-icon">🌍</div>
     <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
   </a>
-  <ul class="navbar-links">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="feed.html" class="active">Discover</a></li>
-    <li><a href="places.html">Places</a></li>
-    <li><a href="rewards.html">Rewards</a></li>
-    <li><a href="challenges.html">Challenges</a></li>
-    <li><a href="map.html">Map</a></li>
-    <li><a href="add-business.html">Add Business</a></li>
-    <li><a href="creators.html">Creators</a></li>
-    <li><a href="dashboard.html">Dashboard</a></li>
-  </ul>
-  <div class="navbar-actions">
-    <a href="profile.html" class="btn-ghost-nav"><i class="fas fa-user-circle"></i> Profile</a>
-    <a href="auth.html?tab=signup" class="btn btn-primary btn-sm">Sign Up</a>
-  </div>
-  <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  <ul class="navbar-links"></ul>
+  <div class="navbar-actions"></div>
+  <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
-<div class="mobile-menu">
-  <a href="index.html">Home</a>
-  <a href="feed.html">Discover</a>
-  <a href="places.html">Places</a>
-  <a href="rewards.html">Rewards</a>
-  <a href="challenges.html">Challenges</a>
-  <a href="map.html">Map</a>
-  <a href="add-business.html">Add Business</a>
-  <a href="creators.html">Creators</a>
-  <a href="dashboard.html">Dashboard</a>
-</div>
+<div class="mobile-menu"></div>
 
-<!-- STORIES STRIP -->
-<div class="stories-strip" style="margin-top:68px">
-  <div class="stories-inner">
-    <div class="story-add-wrap">
-      <div class="story-add"><i class="fas fa-plus"></i></div>
-      <div class="story-name">Your Story</div>
-    </div>
+<!-- FEED TOPBAR (desktop only) -->
+<header class="feed-topbar">
+  <div class="ftb-left">
+    <a href="index.html" class="ftb-brand">
+      <div class="ftb-logo">GH</div>
+      <span class="ftb-wordmark">Geo<span>Hub</span></span>
+    </a>
+    <button class="ftb-search" onclick="typeof openCmdPalette!=='undefined'?openCmdPalette():location.href='search.html'">
+      <i class="fas fa-search"></i><span>Search GeoHub</span>
+    </button>
   </div>
-</div>
+  <nav class="ftb-center">
+    <a href="feed.html"    class="ftb-nav-btn active" title="Home"><i class="fas fa-home"></i></a>
+    <a href="groups.html"  class="ftb-nav-btn" title="Groups"><i class="fas fa-users"></i></a>
+    <a href="live.html"    class="ftb-nav-btn" title="Live"><i class="fas fa-play-circle"></i></a>
+    <a href="services.html" class="ftb-nav-btn" title="Marketplace"><i class="fas fa-store"></i></a>
+    <a href="checkin.html" class="ftb-nav-btn" title="Check In"><i class="fas fa-plus-circle"></i></a>
+    <a href="messages.html" class="ftb-nav-btn" title="Messages"><i class="fas fa-comment-dots"></i></a>
+  </nav>
+  <div class="ftb-right">
+    <button class="ftb-icon-btn"><i class="fas fa-bell"></i><span class="ftb-badge">5</span></button>
+    <a href="profile.html" class="ftb-profile-link">
+      <img src="https://picsum.photos/seed/gio_user/40/40" alt="Profile" class="ftb-profile-avatar" id="ftbAvatar">
+      <div class="ftb-online-dot"></div>
+    </a>
+  </div>
+</header>
 
-<!-- MAIN LAYOUT -->
-<div class="discover-wrap">
-  <div class="discover-layout">
+<!-- 3-COLUMN LAYOUT -->
+<div class="feed-layout">
 
-    <!-- ══ FEED ══ -->
-    <div class="feed-main">
+  <!-- ═══ LEFT SIDEBAR ═══ -->
+  <aside class="feed-left-sidebar">
 
-      <!-- Feed Header & Tabs -->
-      <div class="feed-header">
-        <div>
-          <div class="feed-header-title">Discover</div>
-          <div class="feed-header-sub">Georgia · community highlights</div>
+    <a href="profile.html" class="fls-profile-row" id="feedSidebarUser">
+      <img src="https://picsum.photos/seed/gio_user/38/38" alt="You" class="fls-profile-avatar" id="feedSidebarAvatar">
+      <span class="fls-profile-name" id="feedSidebarName">Gio Papinashvili</span>
+    </a>
+
+    <nav class="fls-nav">
+      <a href="feed.html"        class="fls-link active"><i class="fas fa-home"></i><span>Home</span></a>
+      <a href="explore.html"     class="fls-link"><i class="fas fa-compass"></i><span>Explore</span></a>
+      <a href="map.html"         class="fls-link"><i class="fas fa-map-marked-alt"></i><span>Map</span></a>
+      <a href="events.html"      class="fls-link"><i class="fas fa-calendar-alt"></i><span>Events</span></a>
+      <a href="groups.html"      class="fls-link"><i class="fas fa-users"></i><span>Groups</span></a>
+      <a href="add-business.html" class="fls-link"><i class="fas fa-briefcase"></i><span>Business</span></a>
+      <a href="services.html"    class="fls-link"><i class="fas fa-store"></i><span>Market</span></a>
+      <a href="rewards.html"     class="fls-link"><i class="fas fa-bookmark"></i><span>Saved</span></a>
+      <a href="messages.html"    class="fls-link"><i class="fas fa-comment-dots"></i><span>Messages</span><span class="fls-badge">3</span></a>
+      <a href="#"                class="fls-link"><i class="fas fa-bell"></i><span>Notifications</span><span class="fls-badge">5</span></a>
+    </nav>
+
+    <div class="fls-divider"></div>
+    <div class="fls-section-label">SHORTCUTS</div>
+
+    <nav class="fls-shortcuts">
+      <a href="groups.html" class="fls-shortcut-item">
+        <img src="https://picsum.photos/seed/tbilisi_exp/32/32" alt="" class="fls-sc-img">
+        <span>Tbilisi Explorers</span>
+      </a>
+      <a href="groups.html" class="fls-shortcut-item">
+        <img src="https://picsum.photos/seed/geo_drone/32/32" alt="" class="fls-sc-img">
+        <span>Georgia Drone</span>
+      </a>
+      <a href="groups.html" class="fls-shortcut-item">
+        <img src="https://picsum.photos/seed/caucasus_h/32/32" alt="" class="fls-sc-img">
+        <span>Caucasus Hikers</span>
+      </a>
+      <a href="index.html" class="fls-shortcut-item">
+        <div class="fls-sc-logo">GH</div>
+        <span>GeoHub Official</span>
+      </a>
+    </nav>
+    <button class="fls-see-more"><i class="fas fa-chevron-down"></i> See more</button>
+
+    <div class="fls-divider"></div>
+    <button class="fls-create-btn" onclick="document.getElementById('composerInput').focus()">
+      <i class="fas fa-plus"></i> Create Post
+    </button>
+  </aside>
+
+  <!-- ═══ FEED + RIGHT SIDEBAR ═══ -->
+  <div class="feed-scroll-area">
+
+    <!-- CENTER FEED -->
+    <div class="feed-center">
+
+      <!-- STORIES -->
+      <div class="fd-card fd-stories-wrap">
+        <div class="fd-stories-scroll">
+
+          <div class="fd-story-card fd-story-add-card">
+            <div class="fd-story-visual">
+              <img src="https://picsum.photos/seed/gio_story/100/130" alt="" class="fd-story-bg">
+              <div class="fd-story-add-icon"><i class="fas fa-plus"></i></div>
+            </div>
+            <span class="fd-story-label">Your Story</span>
+          </div>
+
+          <div class="fd-story-card">
+            <div class="fd-story-visual">
+              <img src="https://picsum.photos/seed/nino_story/100/130" alt="" class="fd-story-bg">
+              <img src="https://picsum.photos/seed/nino_av/30/30" alt="" class="fd-story-avatar">
+            </div>
+            <span class="fd-story-label">Nino L.</span>
+            <span class="fd-story-time">2h ago</span>
+          </div>
+
+          <div class="fd-story-card fd-story-card--active">
+            <div class="fd-story-visual">
+              <img src="https://picsum.photos/seed/kazbegi_story/100/130" alt="" class="fd-story-bg">
+              <img src="https://picsum.photos/seed/lasha_av/30/30" alt="" class="fd-story-avatar">
+            </div>
+            <span class="fd-story-label">Lasha G.</span>
+            <span class="fd-story-time">4h ago</span>
+          </div>
+
+          <div class="fd-story-card">
+            <div class="fd-story-visual">
+              <img src="https://picsum.photos/seed/batumi_story/100/130" alt="" class="fd-story-bg">
+              <img src="https://picsum.photos/seed/mariam_av/30/30" alt="" class="fd-story-avatar">
+            </div>
+            <span class="fd-story-label">Mariam K.</span>
+            <span class="fd-story-time">1h ago</span>
+          </div>
+
+          <div class="fd-story-card">
+            <div class="fd-story-visual">
+              <img src="https://picsum.photos/seed/tbilisi_story/100/130" alt="" class="fd-story-bg">
+              <div class="fd-story-gh-logo">GH</div>
+            </div>
+            <span class="fd-story-label">GeoHub</span>
+            <span class="fd-story-time">3h ago</span>
+          </div>
+
+          <div class="fd-story-card">
+            <div class="fd-story-visual">
+              <img src="https://picsum.photos/seed/explore_story/100/130" alt="" class="fd-story-bg">
+              <img src="https://picsum.photos/seed/giorgi_av/30/30" alt="" class="fd-story-avatar">
+            </div>
+            <span class="fd-story-label">Explore Georgia</span>
+            <span class="fd-story-time">5h ago</span>
+          </div>
+
         </div>
-        <a href="checkin.html" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Check In</a>
       </div>
 
-      <div class="feed-filter-tabs" id="feedTabs">
-        <div class="feed-tab active" data-tab="foryou">✨ For You</div>
-        <div class="feed-tab" data-tab="following">Following</div>
-        <div class="feed-tab" data-tab="nearby">📍 Nearby</div>
-        <div class="feed-tab" data-tab="events">🎉 Events</div>
-        <div class="feed-tab" data-tab="challenges">🏆 Challenges</div>
-        <div class="feed-tab" data-tab="deals">🎁 Deals</div>
-      </div>
-
-      <!-- ═════════ FEED CARDS ═════════ -->
-      <div id="feedCards">
-        <!-- populated by feed.js -->
-      </div><!-- /feedCards -->
-    </div><!-- /feed-main -->
-
-    <!-- ══ SIDEBAR ══ -->
-    <div class="feed-sidebar">
-
-      <!-- Trending Explorers — populated by feed.js -->
-      <div class="sidebar-widget">
-        <div class="sw-title">🔥 Trending Explorers <a href="explore.html">See all</a></div>
-      </div>
-
-      <!-- Nearby Events -->
-      <div class="sidebar-widget">
-        <div class="sw-title">
-          📅 Nearby Events
-          <a href="#">View all</a>
+      <!-- POST COMPOSER -->
+      <div class="fd-card fd-composer">
+        <div class="fd-composer-row">
+          <img src="https://picsum.photos/seed/gio_user/42/42" alt="You" class="fd-composer-avatar" id="composerAvatar">
+          <input type="text" id="composerInput" class="fd-composer-input" placeholder="What's on your mind?">
         </div>
-        <div class="ne-item">
-          <div class="ne-date"><div class="ne-day">10</div><div class="ne-mon">May</div></div>
-          <div class="ne-info">
-            <div class="ne-name">Fabrika Night Market</div>
-            <div class="ne-loc"><i class="fas fa-map-marker-alt"></i> Fabrika, Tbilisi</div>
-          </div>
-          <div class="ne-join join-btn">Join</div>
-        </div>
-        <div class="ne-item">
-          <div class="ne-date"><div class="ne-day">15</div><div class="ne-mon">May</div></div>
-          <div class="ne-info">
-            <div class="ne-name">Tbilisi Jazz Festival</div>
-            <div class="ne-loc"><i class="fas fa-map-marker-alt"></i> Rike Park</div>
-          </div>
-          <div class="ne-join join-btn">Join</div>
-        </div>
-        <div class="ne-item">
-          <div class="ne-date"><div class="ne-day">20</div><div class="ne-mon">May</div></div>
-          <div class="ne-info">
-            <div class="ne-name">Signaghi Wine Festival</div>
-            <div class="ne-loc"><i class="fas fa-map-marker-alt"></i> Signaghi</div>
-          </div>
-          <div class="ne-join join-btn">Join</div>
-        </div>
-        <div class="ne-item">
-          <div class="ne-date"><div class="ne-day">01</div><div class="ne-mon">Jun</div></div>
-          <div class="ne-info">
-            <div class="ne-name">Kazbegi Mountain Run</div>
-            <div class="ne-loc"><i class="fas fa-map-marker-alt"></i> Kazbegi NP</div>
-          </div>
-          <div class="ne-join join-btn">Join</div>
+        <div class="fd-composer-sep"></div>
+        <div class="fd-composer-btns">
+          <button class="fd-composer-btn"><i class="fas fa-photo-film" style="color:#45bd62"></i> Photo/Video</button>
+          <button class="fd-composer-btn"><i class="fas fa-user-tag" style="color:#1877f2"></i> Tag People</button>
+          <button class="fd-composer-btn"><i class="fas fa-face-smile" style="color:#f7b928"></i> Feeling/Activity</button>
         </div>
       </div>
 
-      <!-- Top Challenges -->
-      <div class="sidebar-widget">
-        <div class="sw-title">🏆 Top Challenges</div>
-        <div class="sc-item">
-          <div class="sc-row"><div class="sc-icon">🏔️</div><div class="sc-name">Mountain Conqueror</div><div class="sc-xp">+300</div></div>
-          <div class="sc-bar"><div class="sc-fill" style="width:80%"></div></div>
+      <!-- POST 1 — Lasha Gabrichidze -->
+      <article class="fd-card fd-post">
+        <div class="fd-post-head">
+          <img src="https://picsum.photos/seed/lasha_av/46/46" alt="Lasha" class="fd-post-avatar">
+          <div class="fd-post-meta">
+            <div class="fd-post-name">Lasha Gabrichidze <i class="fas fa-circle-check fd-verified"></i></div>
+            <div class="fd-post-sub">2h ago · <i class="fas fa-location-dot"></i> Kazbegi, Georgia <i class="fas fa-earth-europe fd-globe"></i></div>
+          </div>
+          <button class="fd-post-dots"><i class="fas fa-ellipsis-h"></i></button>
         </div>
-        <div class="sc-item">
-          <div class="sc-row"><div class="sc-icon">☕</div><div class="sc-name">Café Crawler</div><div class="sc-xp">+150</div></div>
-          <div class="sc-bar"><div class="sc-fill" style="width:70%"></div></div>
+        <p class="fd-post-body">Sunset in Kazbegi never gets old! ⛰️<br>
+          <a class="fd-tag">#Kazbegi</a> <a class="fd-tag">#Georgia</a> <a class="fd-tag">#Mountains</a> <a class="fd-tag">#Travel</a>
+        </p>
+        <img src="https://picsum.photos/seed/kazbegi_sunset_hd/560/340" alt="Kazbegi Sunset" class="fd-post-img">
+        <div class="fd-post-stats-row">
+          <div class="fd-reactions"><span class="fd-emojis">❤️😍🌄</span> <span>1.2K</span></div>
+          <div class="fd-counts">86 Comments &nbsp;·&nbsp; 34 Shares</div>
         </div>
-        <div class="sc-item">
-          <div class="sc-row"><div class="sc-icon">🌊</div><div class="sc-name">Coastal Explorer</div><div class="sc-xp">+250</div></div>
-          <div class="sc-bar"><div class="sc-fill" style="width:33%;background:linear-gradient(90deg,var(--blue),#60a5fa)"></div></div>
+        <div class="fd-post-sep"></div>
+        <div class="fd-post-actions">
+          <button class="fd-act-btn"><i class="far fa-thumbs-up"></i> Like</button>
+          <button class="fd-act-btn"><i class="far fa-comment"></i> Comment</button>
+          <button class="fd-act-btn"><i class="fas fa-share-nodes"></i> Share</button>
         </div>
-        <div class="sc-item">
-          <div class="sc-row"><div class="sc-icon">🗺️</div><div class="sc-name">District Explorer</div><div class="sc-xp">+300</div></div>
-          <div class="sc-bar"><div class="sc-fill" style="width:20%;background:linear-gradient(90deg,var(--gold),#fbbf24)"></div></div>
+      </article>
+
+      <!-- POST 2 — Nina Beridze -->
+      <article class="fd-card fd-post">
+        <div class="fd-post-head">
+          <img src="https://picsum.photos/seed/nina_av/46/46" alt="Nina" class="fd-post-avatar">
+          <div class="fd-post-meta">
+            <div class="fd-post-name">Nina Beridze</div>
+            <div class="fd-post-sub">3h ago · <i class="fas fa-location-dot"></i> Tbilisi, Georgia <i class="fas fa-earth-europe fd-globe"></i></div>
+          </div>
+          <button class="fd-post-dots"><i class="fas fa-ellipsis-h"></i></button>
+        </div>
+        <p class="fd-post-body">Love this city lights ✨</p>
+        <img src="https://picsum.photos/seed/tbilisi_night_hd/560/340" alt="Tbilisi Night" class="fd-post-img">
+        <div class="fd-post-stats-row">
+          <div class="fd-reactions"><span class="fd-emojis">❤️✨😍</span> <span>847</span></div>
+          <div class="fd-counts">42 Comments &nbsp;·&nbsp; 18 Shares</div>
+        </div>
+        <div class="fd-post-sep"></div>
+        <div class="fd-post-actions">
+          <button class="fd-act-btn"><i class="far fa-thumbs-up"></i> Like</button>
+          <button class="fd-act-btn"><i class="far fa-comment"></i> Comment</button>
+          <button class="fd-act-btn"><i class="fas fa-share-nodes"></i> Share</button>
+        </div>
+      </article>
+
+      <!-- POST 3 — Giorgi (XP earned) -->
+      <article class="fd-card fd-post">
+        <div class="fd-post-head">
+          <img src="https://picsum.photos/seed/giorgi_av/46/46" alt="Giorgi" class="fd-post-avatar">
+          <div class="fd-post-meta">
+            <div class="fd-post-name">Giorgi Tavadze <i class="fas fa-circle-check fd-verified"></i></div>
+            <div class="fd-post-sub">5h ago · <i class="fas fa-location-dot"></i> Mestia, Svaneti <i class="fas fa-earth-europe fd-globe"></i></div>
+          </div>
+          <button class="fd-post-dots"><i class="fas fa-ellipsis-h"></i></button>
+        </div>
+        <p class="fd-post-body">Just summited Ushba! 🏔️ 4710m above sea level. Hardest hike of my life but 100% worth it.<br>
+          <a class="fd-tag">#Ushba</a> <a class="fd-tag">#Svaneti</a> <a class="fd-tag">#Mountaineering</a>
+        </p>
+        <img src="https://picsum.photos/seed/svaneti_summit/560/340" alt="Summit" class="fd-post-img">
+        <div class="fd-post-xp">
+          <i class="fas fa-bolt"></i> +150 XP earned &nbsp;·&nbsp; <span>Mountain Conqueror</span> unlocked
+        </div>
+        <div class="fd-post-stats-row">
+          <div class="fd-reactions"><span class="fd-emojis">🔥💪❤️</span> <span>2.1K</span></div>
+          <div class="fd-counts">134 Comments &nbsp;·&nbsp; 89 Shares</div>
+        </div>
+        <div class="fd-post-sep"></div>
+        <div class="fd-post-actions">
+          <button class="fd-act-btn"><i class="far fa-thumbs-up"></i> Like</button>
+          <button class="fd-act-btn"><i class="far fa-comment"></i> Comment</button>
+          <button class="fd-act-btn"><i class="fas fa-share-nodes"></i> Share</button>
+        </div>
+      </article>
+
+    </div><!-- /feed-center -->
+
+    <!-- RIGHT SIDEBAR -->
+    <aside class="feed-right-sidebar">
+
+      <!-- Events Near You -->
+      <div class="frs-widget">
+        <div class="frs-head">
+          <span>Events Near You</span>
+          <a href="events.html" class="frs-see-all">See All</a>
+        </div>
+        <div class="frs-event">
+          <div class="frs-ev-img" style="background:linear-gradient(135deg,#7c3aed,#4f46e5)">
+            <i class="fas fa-music"></i>
+          </div>
+          <div class="frs-ev-info">
+            <div class="frs-ev-name">TBILISI OPEN AIR</div>
+            <div class="frs-ev-sub">Music Festival · May 25 · Tbilisi</div>
+          </div>
+          <button class="frs-star-btn"><i class="far fa-star"></i></button>
+        </div>
+        <div class="frs-event">
+          <div class="frs-ev-img" style="background:linear-gradient(135deg,#10b981,#3b82f6)">
+            <i class="fas fa-mountain"></i>
+          </div>
+          <div class="frs-ev-info">
+            <div class="frs-ev-name">Mountain Hike</div>
+            <div class="frs-ev-sub">May 26 · Stepantsminda</div>
+          </div>
+          <button class="frs-star-btn"><i class="far fa-star"></i></button>
+        </div>
+        <div class="frs-event">
+          <div class="frs-ev-img" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">
+            <i class="fas fa-laptop-code"></i>
+          </div>
+          <div class="frs-ev-info">
+            <div class="frs-ev-name">Tbilisi Tech Meetup</div>
+            <div class="frs-ev-sub">Community · May 28 · Tbilisi</div>
+          </div>
+          <button class="frs-star-btn"><i class="far fa-star"></i></button>
         </div>
       </div>
 
-      <!-- Active Rewards -->
-      <div class="sidebar-widget">
-        <div class="sw-title">🎁 Active Rewards <a href="profile.html#rewards">My wallet</a></div>
-        <div class="reward-item">
-          <div class="reward-icon green">🏨</div>
-          <div class="reward-info">
-            <div class="reward-name">15% off Hotels</div>
-            <div class="reward-desc">Any partner hotel</div>
-          </div>
-          <div class="reward-expiry">31 May</div>
+      <!-- Suggested Groups -->
+      <div class="frs-widget">
+        <div class="frs-head">
+          <span>Suggested Groups</span>
+          <a href="groups.html" class="frs-see-all">See All</a>
         </div>
-        <div class="reward-item">
-          <div class="reward-icon gold">☕</div>
-          <div class="reward-info">
-            <div class="reward-name">Free Coffee</div>
-            <div class="reward-desc">Partner cafés · 1× use</div>
+        <div class="frs-group">
+          <img src="https://picsum.photos/seed/geotravel_g/48/48" alt="" class="frs-group-img">
+          <div class="frs-group-info">
+            <div class="frs-group-name">Georgia Travel</div>
+            <div class="frs-group-meta">12.4K members</div>
           </div>
-          <div class="reward-expiry">15 May</div>
+          <button class="frs-join-btn">Join</button>
         </div>
-        <div class="reward-item">
-          <div class="reward-icon blue">🗺️</div>
-          <div class="reward-info">
-            <div class="reward-name">20% off Tours</div>
-            <div class="reward-desc">Any guided tour</div>
+        <div class="frs-group">
+          <img src="https://picsum.photos/seed/hikege_g/48/48" alt="" class="frs-group-img">
+          <div class="frs-group-info">
+            <div class="frs-group-name">Hiking in Georgia</div>
+            <div class="frs-group-meta">8.7K members</div>
           </div>
-          <div class="reward-expiry">30 Jun</div>
+          <button class="frs-join-btn">Join</button>
+        </div>
+        <div class="frs-group">
+          <img src="https://picsum.photos/seed/dronege_g/48/48" alt="" class="frs-group-img">
+          <div class="frs-group-info">
+            <div class="frs-group-name">Drone Georgia</div>
+            <div class="frs-group-meta">5.3K members</div>
+          </div>
+          <button class="frs-join-btn">Join</button>
         </div>
       </div>
 
-      <!-- Suggested to Follow — populated by feed.js -->
-      <div class="sidebar-widget">
-        <div class="sw-title">👥 Suggested to Follow</div>
+      <!-- People You May Know -->
+      <div class="frs-widget">
+        <div class="frs-head">
+          <span>People You May Know</span>
+          <a href="explore.html" class="frs-see-all">See All</a>
+        </div>
+        <div class="frs-person">
+          <img src="https://picsum.photos/seed/mariam_av/44/44" alt="" class="frs-person-avatar">
+          <div class="frs-person-info">
+            <div class="frs-person-name">Mariam Kapanadze</div>
+            <div class="frs-person-meta">23 mutual friends</div>
+          </div>
+          <button class="frs-add-btn">Add Friend</button>
+        </div>
+        <div class="frs-person">
+          <img src="https://picsum.photos/seed/giorgi_av/44/44" alt="" class="frs-person-avatar">
+          <div class="frs-person-info">
+            <div class="frs-person-name">Giorgi Tavadze</div>
+            <div class="frs-person-meta">15 mutual friends</div>
+          </div>
+          <button class="frs-add-btn">Add Friend</button>
+        </div>
+        <div class="frs-person">
+          <img src="https://picsum.photos/seed/ana_av/44/44" alt="" class="frs-person-avatar">
+          <div class="frs-person-info">
+            <div class="frs-person-name">Ana Japaridze</div>
+            <div class="frs-person-meta">9 mutual friends</div>
+          </div>
+          <button class="frs-add-btn">Add Friend</button>
+        </div>
       </div>
 
-    </div><!-- /feed-sidebar -->
+    </aside>
 
-  </div><!-- /discover-layout -->
-</div><!-- /discover-wrap -->
+  </div><!-- /feed-scroll-area -->
+</div><!-- /feed-layout -->
 
-<!-- Floating Check-in Button -->
-<a href="checkin.html" class="fab-checkin" title="Create Check-in">
-  <i class="fas fa-plus"></i>
-  <span>Check In</span>
-</a>
+<!-- ═══ BOTTOM SECTIONS ═══ -->
+<section class="feed-bottom">
+  <div class="fdb-inner">
 
-<script src="data.js"></script>
-<script src="mock-users.js"></script>
-<script src="mode.js"></script>
+    <!-- Marketplace -->
+    <div class="fdb-block">
+      <div class="fdb-block-head">
+        <span class="fdb-block-title">Marketplace</span>
+        <a href="services.html" class="fdb-see-all">See All</a>
+      </div>
+      <div class="fdb-items-row">
+        <a href="services.html" class="fdb-market-card">
+          <img src="https://picsum.photos/seed/camera_p/200/150" alt="" class="fdb-market-img">
+          <div class="fdb-market-price">GEL 1,200</div>
+          <div class="fdb-market-name">Camera Sony A7III</div>
+        </a>
+        <a href="services.html" class="fdb-market-card">
+          <img src="https://picsum.photos/seed/bike_p/200/150" alt="" class="fdb-market-img">
+          <div class="fdb-market-price">GEL 850</div>
+          <div class="fdb-market-name">Trek Mountain Bike</div>
+        </a>
+        <a href="services.html" class="fdb-market-card">
+          <img src="https://picsum.photos/seed/drone_p/200/150" alt="" class="fdb-market-img">
+          <div class="fdb-market-price">GEL 2,500</div>
+          <div class="fdb-market-name">DJI Mavic Air 2</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Popular in Your Area -->
+    <div class="fdb-block">
+      <div class="fdb-block-head">
+        <span class="fdb-block-title">Popular in Your Area</span>
+        <a href="places.html" class="fdb-see-all">See All</a>
+      </div>
+      <div class="fdb-items-row">
+        <a href="places.html" class="fdb-place-card">
+          <img src="https://picsum.photos/seed/views_p/200/140" alt="" class="fdb-place-img">
+          <div class="fdb-place-name">Great Views</div>
+          <div class="fdb-place-meta">12 places</div>
+        </a>
+        <a href="places.html" class="fdb-place-card">
+          <img src="https://picsum.photos/seed/coffee_p/200/140" alt="" class="fdb-place-img">
+          <div class="fdb-place-name">Best Coffee</div>
+          <div class="fdb-place-meta">8 places</div>
+        </a>
+        <a href="places.html" class="fdb-place-card">
+          <img src="https://picsum.photos/seed/gems_p/200/140" alt="" class="fdb-place-img">
+          <div class="fdb-place-name">Hidden Gems</div>
+          <div class="fdb-place-meta">15 places</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Activity Map -->
+    <div class="fdb-block">
+      <div class="fdb-block-head">
+        <span class="fdb-block-title">Activity Map</span>
+        <a href="map.html" class="fdb-see-all">See Full Map</a>
+      </div>
+      <a href="map.html" class="fdb-map-wrap">
+        <img src="https://picsum.photos/seed/map_bg/400/200" alt="Map" class="fdb-map-bg">
+        <div class="fdb-map-overlay"></div>
+        <div class="fdb-map-pin" style="top:38%;left:50%"><i class="fas fa-location-dot" style="color:#10b981"></i></div>
+        <div class="fdb-map-pin" style="top:55%;left:32%"><i class="fas fa-location-dot" style="color:#3b82f6"></i></div>
+        <div class="fdb-map-pin" style="top:62%;left:62%"><i class="fas fa-location-dot" style="color:#f59e0b"></i></div>
+        <div class="fdb-map-pin" style="top:42%;left:22%"><i class="fas fa-location-dot" style="color:#ef4444"></i></div>
+        <div class="fdb-map-cta">Open Map <i class="fas fa-arrow-right"></i></div>
+      </a>
+    </div>
+
+    <!-- Live Activity + Chats (side by side) -->
+    <div class="fdb-duo">
+
+      <div class="fdb-block fdb-flex-block">
+        <div class="fdb-block-head">
+          <span class="fdb-block-title"><span class="fdb-live-dot-pulse"></span> Live Activity</span>
+        </div>
+        <div class="fdb-live-list">
+          <div class="fdb-live-item">
+            <div class="fdb-live-bullet green"></div>
+            <p><strong>Nino L.</strong> checked in at <a href="places.html">Narikala Fortress</a></p>
+          </div>
+          <div class="fdb-live-item">
+            <div class="fdb-live-bullet teal"></div>
+            <p><strong>Giorgi</strong> hiked to <a href="places.html">Gergeti Trinity Church</a></p>
+          </div>
+          <div class="fdb-live-item">
+            <div class="fdb-live-bullet blue"></div>
+            <p><strong>Mariam K.</strong> joined <a href="groups.html">Georgia Travel</a> group</p>
+          </div>
+          <div class="fdb-live-item">
+            <div class="fdb-live-bullet gold"></div>
+            <p><strong>Lasha G.</strong> added photos to <a href="#">Kazbegi trip</a></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="fdb-block fdb-flex-block">
+        <div class="fdb-block-head">
+          <span class="fdb-block-title">Chats</span>
+          <a href="messages.html" class="fdb-see-all"><i class="fas fa-edit"></i></a>
+        </div>
+        <input type="text" class="fdb-chat-search" placeholder="🔍 Search">
+        <div class="fdb-chat-list">
+          <a href="messages.html" class="fdb-chat-item">
+            <div class="fdb-chat-av-wrap">
+              <img src="https://picsum.photos/seed/nino_av/40/40" alt="Nino" class="fdb-chat-avatar">
+              <div class="fdb-chat-online"></div>
+            </div>
+            <div class="fdb-chat-info">
+              <div class="fdb-chat-name">Nino L.</div>
+              <div class="fdb-chat-last">Sounds good! · 2m</div>
+            </div>
+            <div class="fdb-chat-badge">2</div>
+          </a>
+          <a href="messages.html" class="fdb-chat-item">
+            <div class="fdb-chat-av-wrap">
+              <img src="https://picsum.photos/seed/lasha_av/40/40" alt="Lasha" class="fdb-chat-avatar">
+              <div class="fdb-chat-online"></div>
+            </div>
+            <div class="fdb-chat-info">
+              <div class="fdb-chat-name">Lasha G.</div>
+              <div class="fdb-chat-last">See you there! · 10m</div>
+            </div>
+          </a>
+          <a href="messages.html" class="fdb-chat-item">
+            <div class="fdb-chat-av-wrap">
+              <img src="https://picsum.photos/seed/mariam_av/40/40" alt="Mariam" class="fdb-chat-avatar">
+            </div>
+            <div class="fdb-chat-info">
+              <div class="fdb-chat-name">Mariam K.</div>
+              <div class="fdb-chat-last">Thanks! · 1h</div>
+            </div>
+          </a>
+          <a href="messages.html" class="fdb-chat-item">
+            <div class="fdb-chat-av-wrap">
+              <img src="https://picsum.photos/seed/giorgi_av/40/40" alt="Giorgi" class="fdb-chat-avatar">
+            </div>
+            <div class="fdb-chat-info">
+              <div class="fdb-chat-name">Giorgi T.</div>
+              <div class="fdb-chat-last">Photo · 2h</div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+    </div><!-- /fdb-duo -->
+
+  </div>
+</section>
+
+<script>
+  // Update feed topbar and sidebar with real user data
+  document.addEventListener('DOMContentLoaded', function() {
+    try {
+      var u = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
+      if (u) {
+        var av = u.avatar || '';
+        ['ftbAvatar','composerAvatar','feedSidebarAvatar'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el && av) el.src = av;
+        });
+        var nameEl = document.getElementById('feedSidebarName');
+        if (nameEl) nameEl.textContent = u.fullName || u.username || 'You';
+      }
+    } catch(e) {}
+  });
+</script>
+
 <script type="module" src="firebase-config.js"></script>
 <script src="config.js"></script>
-  <script src="api-client.js"></script>
-  <script src="main.js"></script>
-  <script src="account.js"></script>
-<script src="mock-interactions.js"></script>
-<script src="mock-notifications.js"></script>
-<script src="social-layer.js"></script>
-  <script src="feed.js"></script>
+<script src="api-client.js"></script>
+<script src="main.js"></script>
+<script src="account.js"></script>
 <script src="nav-cleanup.js"></script>
 <script src="mobile-nav.js"></script>
-<script src="demo-mode.js"></script>
 </body>
 </html>
