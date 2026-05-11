@@ -50,13 +50,13 @@ const profileUsersByUsername = Object.fromEntries(MOCK_USERS.map(user => [user.u
         const authUser = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
         if (authUser && authUser.isFirebaseUser) return buildFirebaseProfile(authUser);
       } catch (e) {}
-      // Not logged in and no ?user= param → redirect to auth
-      window.location.href = 'auth.html';
+      // Not logged in — let page finish loading first, then redirect
+      setTimeout(function() { window.location.replace('auth.html'); }, 0);
       return null;
     }
 
     // Public profile lookup via ?user= param — no mock users exist
-    window.location.href = 'index.html';
+    setTimeout(function() { window.location.replace('index.html'); }, 0);
     return null;
   }
 

@@ -30,7 +30,7 @@ function fbUserToGeoUser(fbUser) {
     bio: '',
     city: 'Tbilisi',
     explorerLevel: 'New Explorer',
-    xp: 250,
+    xp: 0,
     rank: 9999,
     badges: [],
     interests: [],
@@ -38,7 +38,7 @@ function fbUserToGeoUser(fbUser) {
     following: 0,
     postsCount: 0,
     visitedPlaces: 0,
-    trustScore: 70,
+    trustScore: 0,
     accountType: 'Explorer',
     isFirebaseUser: true,
     createdAt: Date.now()

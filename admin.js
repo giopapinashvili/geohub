@@ -74,17 +74,31 @@
 
   /* ── REAL STATS FROM LOCALSTORAGE ───────────────────────── */
   function loadRealStats() {
-    // Count businesses registered via the dashboard form
     var bizCount = 0;
+    var userCount = 0;
+    var registeredUsers = [];
     try {
       Object.keys(localStorage).forEach(function(k) {
         if (k.startsWith('geohub_business_')) bizCount++;
       });
+      var stored = localStorage.getItem('geohub_registered_users');
+      registeredUsers = stored ? JSON.parse(stored) : [];
+      if (!Array.isArray(registeredUsers)) registeredUsers = [];
+      // Also include current logged-in user if not already in pool
+      var currentUser = localStorage.getItem('geohub_auth_user');
+      if (currentUser) {
+        var cu = JSON.parse(currentUser);
+        if (cu && cu.uid && !registeredUsers.some(function(u) { return u.uid === cu.uid || u.id === cu.uid; })) {
+          registeredUsers.push(cu);
+        }
+      }
+      userCount = registeredUsers.length;
     } catch(_) {}
 
     // Update overview KPI cards
     var el;
-    el = document.getElementById('stat-biz');   if (el) el.textContent = bizCount;
+    el = document.getElementById('stat-users');  if (el) el.textContent = userCount || '—';
+    el = document.getElementById('stat-biz');    if (el) el.textContent = bizCount;
     el = document.getElementById('stat-events'); if (el) el.textContent = '0';
     el = document.getElementById('stat-rev');    if (el) el.textContent = '₾0';
     el = document.getElementById('stat-checkins'); if (el) el.textContent = '0';
@@ -95,26 +109,46 @@
     el = document.getElementById('stat-trust');    if (el) el.textContent = '—';
 
     // Sidebar badges
+    el = document.getElementById('sb-users');     if (el) el.textContent = userCount || '—';
     el = document.getElementById('sb-biz-side'); if (el) el.textContent = bizCount;
     el = document.getElementById('sb-creators');  if (el) el.textContent = '0';
     el = document.getElementById('sb-notif');     if (el) el.textContent = '0';
     el = document.getElementById('sb-live');      if (el) el.textContent = '0';
-    el = document.getElementById('sb-users');     if (el) el.textContent = '—';
 
     // Subtitles
     el = document.getElementById('bizSubtitle');
     if (el) el.textContent = bizCount + ' registered · Verify, feature, approve';
     el = document.getElementById('usersSubtitle');
-    if (el) el.textContent = 'Firebase-authenticated accounts';
+    if (el) el.textContent = userCount + ' registered on this device · Firebase Auth';
 
-    // Users table: show empty state
+    // Users table
     var tbody = document.getElementById('usersBody');
-    if (tbody && !USERS.length) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ts);font-size:0.85rem">' +
-        '<i class="fas fa-users" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>' +
-        'User list requires Firebase Admin SDK — not available in static mode.<br>' +
-        '<span style="font-size:0.75rem;opacity:0.6;margin-top:4px;display:block">Connect a backend to list all registered users.</span>' +
-        '</td></tr>';
+    if (tbody) {
+      if (registeredUsers.length) {
+        tbody.innerHTML = registeredUsers.map(function(u) {
+          var name = u.fullName || u.username || u.email || 'Unknown';
+          var email = u.email || '—';
+          var type = u.accountType || 'Explorer';
+          var city = u.city || '—';
+          var letter = (name[0] || '?').toUpperCase();
+          var created = u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—';
+          return '<tr>' +
+            '<td><div class="uinfo"><div class="uav" style="background:linear-gradient(135deg,#10b981,#3b82f6)">' + letter + '</div>' +
+            '<div><div class="uname">' + name + '</div><div class="uhandle">@' + (u.username || '—') + '</div></div></div></td>' +
+            '<td>' + email + '</td>' +
+            '<td><span class="badge bg-blue">' + type + '</span></td>' +
+            '<td>' + city + '</td>' +
+            '<td>0</td><td>0</td>' +
+            '<td><span class="badge bg-green">Active</span></td>' +
+            '</tr>';
+        }).join('');
+      } else {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ts);font-size:0.85rem">' +
+          '<i class="fas fa-users" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>' +
+          'No registered users found on this device.<br>' +
+          '<span style="font-size:0.75rem;opacity:0.6;margin-top:4px;display:block">Users register on their own devices — full list requires Firebase Admin SDK.</span>' +
+          '</td></tr>';
+      }
     }
   }
 
