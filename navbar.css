@@ -272,14 +272,20 @@
 .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 .hamburger span { transition: transform 0.25s ease, opacity 0.2s ease; }
 
-/* Mobile breakpoint — must come AFTER all flex declarations above */
+/* Mobile breakpoint — top navbar simplified to logo only */
 @media (max-width: 768px) {
   .navbar-links,
-  .navbar-actions {
+  .navbar-actions,
+  .hamburger {
     display: none !important;
   }
-  .hamburger {
-    display: flex !important;
+  .mobile-menu {
+    max-height: 0 !important;
+    overflow: hidden !important;
+  }
+  .navbar {
+    padding: 0 16px;
+    justify-content: center;
   }
 }
 
