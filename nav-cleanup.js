@@ -350,27 +350,27 @@
     var mobileMenu = document.querySelector('.mobile-menu');
     if (!hamburger || !mobileMenu) return;
 
-    hamburger.addEventListener('click', function(e) {
-      e.stopPropagation();
+    hamburger.addEventListener('click', function() {
       var isOpen = mobileMenu.classList.toggle('open');
       hamburger.classList.toggle('open', isOpen);
       hamburger.setAttribute('aria-expanded', String(isOpen));
     });
 
-    document.addEventListener('click', function() {
+    // Close when clicking outside — use contains() instead of stopPropagation
+    // so iOS Safari doesn't swallow the open/close toggle
+    document.addEventListener('click', function(e) {
+      if (!mobileMenu.classList.contains('open')) return;
+      if (hamburger.contains(e.target) || mobileMenu.contains(e.target)) return;
       mobileMenu.classList.remove('open');
       hamburger.classList.remove('open');
       hamburger.setAttribute('aria-expanded', 'false');
-    });
-
-    mobileMenu.addEventListener('click', function(e) {
-      e.stopPropagation();
     });
 
     mobileMenu.querySelectorAll('a').forEach(function(link) {
       link.addEventListener('click', function() {
         mobileMenu.classList.remove('open');
         hamburger.classList.remove('open');
+        hamburger.setAttribute('aria-expanded', 'false');
       });
     });
   }
