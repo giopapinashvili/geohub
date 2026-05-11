@@ -4,33 +4,38 @@ service cloud.firestore {
 
     // ── helpers ──────────────────────────────────────────────────────
     function isAuth() { return request.auth != null; }
+    function isAdmin() { return isAuth() && request.auth.token.email == 'gio.papinashvili26@gmail.com'; }
     function isOwner(field) { return isAuth() && request.auth.uid == resource.data[field]; }
     function isOwnerNew(field) { return isAuth() && request.auth.uid == request.resource.data[field]; }
+
+    // ── users ────────────────────────────────────────────────────────
+    match /users/{uid} {
+      allow read: if true;
+      allow create, update, delete: if isAuth() && request.auth.uid == uid;
+    }
 
     // ── posts ────────────────────────────────────────────────────────
     match /posts/{postId} {
       allow read: if true;
-      allow create: if isAuth() && isOwnerNew('authorId');
+      allow create: if isAuth()
+        && isOwnerNew('authorId')
+        && request.resource.data.keys().hasAll(['authorId', 'text', 'createdAt'])
+        && request.resource.data.text is string;
       allow update: if isAuth() && (
         isOwner('authorId') ||
-        // any authed user may increment/decrement counters only
-        (request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['likeCount', 'commentCount', 'shareCount']))
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'commentCount', 'shareCount'])
       );
-      allow delete: if isOwner('authorId');
+      allow delete: if isOwner('authorId') || isAdmin();
 
-      // likes subcollection
       match /likes/{uid} {
         allow read: if true;
-        allow write: if isAuth() && request.auth.uid == uid;
+        allow create, update, delete: if isAuth() && request.auth.uid == uid;
       }
 
-      // comments subcollection
       match /comments/{commentId} {
         allow read: if true;
-        allow create: if isAuth() && isOwnerNew('authorId');
-        allow update: if isOwner('authorId');
-        allow delete: if isOwner('authorId');
+        allow create: if isAuth() && isOwnerNew('authorId') && request.resource.data.text is string;
+        allow update, delete: if isOwner('authorId') || isAdmin();
       }
     }
 
@@ -38,36 +43,35 @@ service cloud.firestore {
     match /stories/{storyId} {
       allow read: if true;
       allow create: if isAuth() && isOwnerNew('authorId');
-      allow delete: if isOwner('authorId');
+      allow update, delete: if isOwner('authorId') || isAdmin();
     }
 
     // ── follows ──────────────────────────────────────────────────────
     match /follows/{followId} {
       allow read: if true;
       allow create: if isAuth() && request.auth.uid == request.resource.data.followerId;
-      allow delete: if isAuth() && request.auth.uid == resource.data.followerId;
+      allow update, delete: if isAuth() && request.auth.uid == resource.data.followerId;
     }
 
     // ── savedPosts ───────────────────────────────────────────────────
     match /savedPosts/{docId} {
       allow read: if isAuth() && request.auth.uid == resource.data.uid;
       allow create: if isAuth() && request.auth.uid == request.resource.data.uid;
-      allow delete: if isAuth() && request.auth.uid == resource.data.uid;
+      allow update, delete: if isAuth() && request.auth.uid == resource.data.uid;
     }
 
     // ── groupMembers ─────────────────────────────────────────────────
     match /groupMembers/{docId} {
       allow read: if true;
       allow create: if isAuth() && request.auth.uid == request.resource.data.uid;
-      allow delete: if isAuth() && request.auth.uid == resource.data.uid;
+      allow update, delete: if isAuth() && request.auth.uid == resource.data.uid;
     }
 
     // ── eventParticipants ────────────────────────────────────────────
     match /eventParticipants/{docId} {
       allow read: if true;
       allow create: if isAuth() && request.auth.uid == request.resource.data.uid;
-      allow update: if isAuth() && request.auth.uid == resource.data.uid;
-      allow delete: if isAuth() && request.auth.uid == resource.data.uid;
+      allow update, delete: if isAuth() && request.auth.uid == resource.data.uid;
     }
 
     // ── friendRequests ───────────────────────────────────────────────
@@ -88,40 +92,25 @@ service cloud.firestore {
     match /checkins/{checkinId} {
       allow read: if true;
       allow create: if isAuth() && request.auth.uid == request.resource.data.authorId;
+      allow update, delete: if isOwner('authorId') || isAdmin();
     }
 
-    // ── users ────────────────────────────────────────────────────────
-    match /users/{uid} {
-      allow read: if true;
-      allow write: if isAuth() && request.auth.uid == uid;
-    }
-
-    // ── userNotifications (sent by admin, read by recipient) ─────────
+    // ── notifications ────────────────────────────────────────────────
+    // Only admin can create removal notices. Users can read/update only their own notices.
     match /userNotifications/{notifId} {
       allow read: if isAuth() && request.auth.uid == resource.data.toUserId;
-      allow create: if true;  // admin writes via service account / trusted client
-      allow update: if isAuth() && request.auth.uid == resource.data.toUserId; // mark read
+      allow create: if isAdmin()
+        && request.resource.data.toUserId is string
+        && request.resource.data.type is string;
+      allow update: if isAuth()
+        && request.auth.uid == resource.data.toUserId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      allow delete: if isAdmin();
     }
 
-    // ── admin: allow full delete on any content collection ───────────
-    match /posts/{postId} {
-      allow delete: if isAuth() && (
-        isOwner('authorId') ||
-        request.auth.token.email == 'gio.papinashvili26@gmail.com'
-      );
+    // Default deny for anything not explicitly handled.
+    match /{document=**} {
+      allow read, write: if false;
     }
-    match /stories/{storyId} {
-      allow delete: if isAuth() && (
-        isOwner('authorId') ||
-        request.auth.token.email == 'gio.papinashvili26@gmail.com'
-      );
-    }
-    match /checkins/{checkinId} {
-      allow delete: if isAuth() && (
-        request.auth.uid == resource.data.authorId ||
-        request.auth.token.email == 'gio.papinashvili26@gmail.com'
-      );
-    }
-
   }
 }

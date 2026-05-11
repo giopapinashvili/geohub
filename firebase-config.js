@@ -5,7 +5,7 @@ import {
   doc, setDoc, getDoc, getDocs, updateDoc, addDoc,
   collection, query, orderBy, where, limit,
   onSnapshot, deleteDoc, serverTimestamp, increment,
-  writeBatch
+  writeBatch, runTransaction
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { getAnalytics, isSupported } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js';
 
@@ -25,12 +25,12 @@ try {
   const db = getFirestore(app);
   window.GeoFirebase = {
     app, auth, db,
-    fs: { doc, setDoc, getDoc, getDocs, updateDoc, addDoc, collection, query, orderBy, where, limit, onSnapshot, deleteDoc, serverTimestamp, increment, writeBatch }
+    fs: { doc, setDoc, getDoc, getDocs, updateDoc, addDoc, collection, query, orderBy, where, limit, onSnapshot, deleteDoc, serverTimestamp, increment, writeBatch, runTransaction }
   };
   isSupported().then(ok => { if (ok) getAnalytics(app); }).catch(() => {});
   window.dispatchEvent(new Event('GeoFirebaseReady'));
 } catch (err) {
-  console.warn('[GeoHub] Firebase init failed — running in localStorage-only mode.', err.message);
+  console.warn('[GeoHub] Firebase init failed — online features disabled.', err.message);
   window.GeoFirebase = null;
   window.dispatchEvent(new Event('GeoFirebaseReady'));
 }

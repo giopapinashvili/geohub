@@ -656,28 +656,32 @@
   });
 
   // ── Auth state → populate UI ──────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', function () {
-    try {
-      var u = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
-      if (u) {
-        var av = u.avatar || '';
-        ['ftbAvatar', 'composerAvatar', 'feedSidebarAvatar'].forEach(function (id) {
-          var el = document.getElementById(id);
-          if (el && av) el.src = av;
-        });
-        var nameEl = document.getElementById('feedSidebarName');
-        if (nameEl) nameEl.textContent = u.fullName || u.username || 'You';
-      } else {
-        var inp = document.getElementById('composerInput');
-        if (inp) {
-          inp.placeholder = 'Sign in to post on GeoHub…';
-          inp.addEventListener('focus', function () {
-            if (window.GeoSocial) window.GeoSocial.requireAuth(function () {});
-            else location.href = 'auth.html';
-          });
-        }
+  function updateFeedAuthUI() {
+    var user = window.GeoFirebase && window.GeoFirebase.auth ? window.GeoFirebase.auth.currentUser : null;
+    if (user) {
+      var av = user.photoURL || '';
+      ['ftbAvatar', 'composerAvatar', 'feedSidebarAvatar'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el && av) el.src = av;
+      });
+      var nameEl = document.getElementById('feedSidebarName');
+      if (nameEl) nameEl.textContent = user.displayName || (user.email ? user.email.split('@')[0] : 'You');
+      startNotifListener();
+    } else {
+      var inp = document.getElementById('composerInput');
+      if (inp) {
+        inp.placeholder = 'Sign in to post on GeoHub…';
+        inp.addEventListener('focus', function () {
+          if (window.GeoSocial) window.GeoSocial.requireAuth(function () {});
+          else location.href = 'auth.html';
+        }, { once: true });
       }
-    } catch (err) {}
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', updateFeedAuthUI);
+  window.addEventListener('GeoFirebaseReady', function () {
+    setTimeout(updateFeedAuthUI, 200);
   });
 
   // ── Render real stories from Firestore ───────────────────────────────
@@ -706,11 +710,13 @@
   var _notifUnsubscribe = null;
 
   function startNotifListener() {
-    var u = null;
-    try { u = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null'); } catch (e) {}
-    if (!u || !u.uid || !window.GeoSocial) return;
+    var uid = null;
+    if (window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser) {
+      uid = window.GeoFirebase.auth.currentUser.uid;
+    }
+    if (!uid || !window.GeoSocial) return;
     if (_notifUnsubscribe) _notifUnsubscribe();
-    _notifUnsubscribe = window.GeoSocial.listenUserNotifications(u.uid, function (notifs) {
+    _notifUnsubscribe = window.GeoSocial.listenUserNotifications(uid, function (notifs) {
       var unread = notifs.filter(function (n) { return !n.read; });
       var badge = document.querySelector('.ftb-badge');
       if (badge) badge.textContent = unread.length || '';

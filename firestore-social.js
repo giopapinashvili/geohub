@@ -92,35 +92,27 @@
     var getDocs        = fs.getDocs;
     var serverTimestamp = fs.serverTimestamp;
     var increment      = fs.increment;
+    var runTransaction = fs.runTransaction;
 
     // ── Auth helpers ────────────────────────────────────────────────────
     function requireAuth(cb) {
       var user = auth.currentUser;
       if (user) return cb(user);
-      try {
-        var u = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
-        if (u && u.uid) return cb({ uid: u.uid, displayName: u.fullName || u.username || 'GeoHub User', photoURL: u.avatar || '' });
-      } catch (e) {}
       showLoginPrompt();
     }
 
     function currentUid() {
-      var user = auth.currentUser;
-      if (user) return user.uid;
-      try {
-        var u = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
-        return (u && u.uid) ? u.uid : null;
-      } catch (e) { return null; }
+      return auth.currentUser ? auth.currentUser.uid : null;
     }
 
     function meData() {
       var user = auth.currentUser;
-      if (user) return { uid: user.uid, name: user.displayName || 'GeoHub User', avatar: user.photoURL || '' };
-      try {
-        var u = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
-        if (u && u.uid) return { uid: u.uid, name: u.fullName || u.username || 'GeoHub User', avatar: u.avatar || '' };
-      } catch (e) {}
-      return null;
+      if (!user) return null;
+      return {
+        uid: user.uid,
+        name: user.displayName || (user.email ? user.email.split('@')[0] : 'GeoHub User'),
+        avatar: user.photoURL || ''
+      };
     }
 
     // ── POSTS ────────────────────────────────────────────────────────────
@@ -165,17 +157,31 @@
         var uid = user.uid;
         var likeRef = doc(db, 'posts', postId, 'likes', uid);
         var postRef = doc(db, 'posts', postId);
-        if (currentlyLiked) {
-          deleteDoc(likeRef)
-            .then(function () { return updateDoc(postRef, { likeCount: increment(-1) }); })
-            .then(function () { if (callback) callback(false); })
-            .catch(function (err) { console.error('[GeoSocial] unlike', err); });
-        } else {
-          setDoc(likeRef, { uid: uid, createdAt: serverTimestamp() })
-            .then(function () { return updateDoc(postRef, { likeCount: increment(1) }); })
-            .then(function () { if (callback) callback(true); })
-            .catch(function (err) { console.error('[GeoSocial] like', err); });
-        }
+        var nextLiked = false;
+
+        var work = runTransaction ? runTransaction(db, function (tx) {
+          return tx.get(likeRef).then(function (likeSnap) {
+            if (likeSnap.exists()) {
+              tx.delete(likeRef);
+              tx.update(postRef, { likeCount: increment(-1) });
+              nextLiked = false;
+            } else {
+              tx.set(likeRef, { uid: uid, createdAt: serverTimestamp() });
+              tx.update(postRef, { likeCount: increment(1) });
+              nextLiked = true;
+            }
+          });
+        }) : (currentlyLiked
+          ? deleteDoc(likeRef).then(function () { nextLiked = false; return updateDoc(postRef, { likeCount: increment(-1) }); })
+          : setDoc(likeRef, { uid: uid, createdAt: serverTimestamp() }).then(function () { nextLiked = true; return updateDoc(postRef, { likeCount: increment(1) }); })
+        );
+
+        work.then(function () {
+          if (callback) callback(nextLiked);
+        }).catch(function (err) {
+          console.error('[GeoSocial] toggleLike', err);
+          toast('Like failed. Try again.', 'error');
+        });
       });
     }
 
@@ -436,15 +442,28 @@
       });
     }
 
+    function tsToMillis(value) {
+      if (!value) return 0;
+      if (typeof value.toMillis === 'function') return value.toMillis();
+      if (value instanceof Date) return value.getTime();
+      if (typeof value === 'number') return value;
+      if (value.seconds) return value.seconds * 1000;
+      return Date.parse(value) || 0;
+    }
+
     function listenStories(callback) {
-      var cutoff = new Date(Date.now() - 86400000);
-      var q = query(collection(db, 'stories'), orderBy('createdAt', 'desc'), limit(20));
+      var q = query(collection(db, 'stories'), orderBy('createdAt', 'desc'), limit(50));
       return onSnapshot(q, function (snap) {
+        var now = Date.now();
         var stories = [];
-        snap.forEach(function (d) { stories.push(Object.assign({ id: d.id }, d.data())); });
-        callback(stories);
+        snap.forEach(function (d) {
+          var data = Object.assign({ id: d.id }, d.data());
+          if (!data.expiresAt || tsToMillis(data.expiresAt) > now) stories.push(data);
+        });
+        callback(stories.slice(0, 20));
       }, function (err) {
         console.warn('[GeoSocial] listenStories', err.message);
+        callback([]);
       });
     }
 

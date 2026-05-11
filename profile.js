@@ -131,10 +131,60 @@ const profileUsersByUsername = Object.fromEntries(MOCK_USERS.map(user => [user.u
     stats.forEach((stat, index) => stat.textContent = values[index]);
     document.querySelectorAll('.ptab .tab-count').forEach(count => {
       const tab = count.closest('.ptab')?.dataset.tab;
-      if (tab === 'posts') count.textContent = user.postsCount;
-      if (tab === 'places') count.textContent = user.visitedPlaces;
-      if (tab === 'reviews') count.textContent = reviewCount;
+      if (tab === 'posts')    count.textContent = user.postsCount;
+      if (tab === 'places')   count.textContent = user.visitedPlaces;
+      if (tab === 'checkins') count.textContent = 0;
+      if (tab === 'reviews')  count.textContent = reviewCount;
     });
+  }
+
+  function updateXpBar(user) {
+    const lvl    = profileLevelNumber(user);
+    const xpInLvl = user.xp % 1000;
+    const pct    = Math.min(100, Math.round(xpInLvl / 10));
+    const xpNext = 1000 - xpInLvl;
+    const el = s => document.querySelector(s);
+    const lvlPill = el('.xp-level-pill');
+    if (lvlPill) lvlPill.innerHTML = `<i class="fas fa-bolt"></i> Level ${lvl}`;
+    const xpTitle = el('.xp-title-text');
+    if (xpTitle) xpTitle.textContent = user.explorerLevel || 'New Explorer';
+    const fill = el('.xp-bar-fill');
+    if (fill) fill.style.width = pct + '%';
+    const nums = el('.xp-bar-numbers');
+    if (nums) nums.textContent = `${user.xp} / ${lvl * 1000} XP`;
+    const toNext = el('.xp-to-next');
+    if (toNext) toNext.textContent = `${xpNext} XP to Level ${lvl + 1}`;
+  }
+
+  function updateIntroCard(user) {
+    const introItems = document.querySelectorAll('.intro-item');
+    const cityEl  = introItems[0];
+    const typeEl  = introItems[1];
+    const joinEl  = introItems[2];
+    const linkEl  = introItems[3];
+    if (cityEl) cityEl.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${user.city || 'Georgia'}`;
+    if (typeEl) typeEl.innerHTML = `<i class="fas fa-hiking"></i> ${profileActivityType(user)}`;
+    if (joinEl) joinEl.innerHTML = user.joinedAt
+      ? `<i class="fas fa-calendar-alt"></i> Joined ${user.joinedAt}`
+      : `<i class="fas fa-calendar-alt"></i> GeoHub Explorer`;
+    if (linkEl) linkEl.innerHTML = `<i class="fas fa-globe"></i> geohub.ge/@${user.username || 'user'}`;
+    // followers preview
+    const fwText = document.querySelector('.followers-preview-text');
+    if (fwText) fwText.innerHTML = `<strong>${compactProfile(user.followers)} followers</strong>`;
+    // hide follower thumbs if none
+    const fwThumbs = document.querySelector('.followers-thumbs');
+    if (fwThumbs) fwThumbs.style.display = user.followers ? '' : 'none';
+  }
+
+  function updateHighlights(user) {
+    const strip = document.querySelector('.profile-highlights');
+    if (!strip) return;
+    // Keep only the "New" add button; real highlights come from Firestore later
+    strip.innerHTML = `
+      <div class="highlight-item highlight-add">
+        <div class="highlight-ring add-ring"><i class="fas fa-plus"></i></div>
+        <div class="highlight-label">New</div>
+      </div>`;
   }
 
   function renderIdentity(user) {
