@@ -265,6 +265,23 @@
   font-size: 0.8rem;
 }
 
+/* Hamburger animation when open */
+.hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.hamburger span { transition: transform 0.25s ease, opacity 0.2s ease; }
+
+/* Mobile breakpoint — must come AFTER all flex declarations above */
+@media (max-width: 768px) {
+  .navbar-links,
+  .navbar-actions {
+    display: none !important;
+  }
+  .hamburger {
+    display: flex !important;
+  }
+}
+
 /* ================================================================
    AUTH SYSTEM — Shared styles (nav dropdown, modals, settings)
    ================================================================ */
