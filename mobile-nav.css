@@ -9,6 +9,15 @@
   body {
     padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
   }
+  /* Footer clears bottom nav */
+  .footer {
+    padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)) !important;
+    margin-bottom: 0 !important;
+  }
+  /* Main content min-height so footer stays at bottom on short pages */
+  main, .main-content, #main {
+    min-height: calc(100vh - 68px - 68px);
+  }
   /* Reduce desktop heaviness */
   .section { padding: 36px 0 !important; }
   .section-header { margin-bottom: 20px !important; }
