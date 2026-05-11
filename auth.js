@@ -348,10 +348,16 @@
       if (!email) return;
       sendBtn.disabled = true;
       sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
-      setTimeout(function () {
-        sendBtn.style.display = 'none';
-        success.style.display = 'block';
-      }, 1000);
+      (window.GeoFirebaseAuth && window.GeoFirebaseAuth.resetPassword ? window.GeoFirebaseAuth.resetPassword(email) : Promise.reject(new Error('Firebase Auth not ready')))
+        .then(function () {
+          sendBtn.style.display = 'none';
+          success.style.display = 'block';
+        })
+        .catch(function (err) {
+          sendBtn.disabled = false;
+          sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reset Link';
+          alert(err && err.message ? err.message : 'Could not send password reset email.');
+        });
     });
   }
 

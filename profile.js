@@ -1,557 +1,314 @@
-const profileUsersByUsername = Object.fromEntries(MOCK_USERS.map(user => [user.username, user]));
-  const slugifyProfile = value => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const accountClassProfile = type => type.toLowerCase().replace(/\s+/g, '-');
-  const accountBadgeProfile = type => `<span class="account-label ${accountClassProfile(type)}">${type}</span>`;
-  const compactProfile = value => value >= 1000 ? `${(value / 1000).toFixed(value >= 10000 ? 0 : 1)}k` : value;
-  const profilePlaces = [
-    { name: 'Fabrika Tbilisi', cat: 'Cafe', city: 'Tbilisi', image: 'https://picsum.photos/seed/profile-fabrika-place/400/300', tags: ['cafes', 'events', 'student deals', 'coworking'] },
-    { name: 'Juta Valley Trail', cat: 'Hiking', city: 'Kazbegi', image: 'https://picsum.photos/seed/profile-juta-place/400/300', tags: ['hiking', 'routes', 'trail running'] },
-    { name: 'Shavi Lomi', cat: 'Restaurant', city: 'Tbilisi', image: 'https://picsum.photos/seed/profile-shavi-place/400/300', tags: ['restaurants', 'reviews', 'fine dining'] },
-    { name: 'Dedaena Park', cat: 'Events', city: 'Tbilisi', image: 'https://picsum.photos/seed/profile-dedaena-place/400/300', tags: ['events', 'workshops', 'free events'] },
-    { name: 'Batumi Boulevard', cat: 'Patriot Task', city: 'Batumi', image: 'https://picsum.photos/seed/profile-boulevard-place/400/300', tags: ['patriot tasks', 'cleanup', 'fitness'] },
-    { name: 'Sololaki Courtyard', cat: 'Hidden Spot', city: 'Tbilisi', image: 'https://picsum.photos/seed/profile-sololaki-place/400/300', tags: ['hidden spots', 'photography', 'architecture'] },
-    { name: 'Sighnaghi Wine Route', cat: 'Wine', city: 'Sighnaghi', image: 'https://picsum.photos/seed/profile-sighnaghi-place/400/300', tags: ['wine', 'travel', 'routes'] },
-    { name: 'Mestia Svan Guesthouse', cat: 'Guesthouse', city: 'Mestia', image: 'https://picsum.photos/seed/profile-mestia-place/400/300', tags: ['guesthouses', 'hiking', 'business'] }
-  ];
+(function () {
+  'use strict';
 
-  function buildFirebaseProfile(authUser) {
-    const seed = (authUser.username || authUser.email || 'fbuser').replace(/\W/g, '') || 'fbuser';
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => Array.from(document.querySelectorAll(s));
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const compact = (v) => Number(v || 0) >= 1000 ? (Number(v) / 1000).toFixed(Number(v) >= 10000 ? 0 : 1) + 'k' : String(Number(v || 0));
+  const tsToDate = (v) => {
+    if (!v) return '';
+    if (typeof v.toDate === 'function') return v.toDate();
+    if (typeof v.toMillis === 'function') return new Date(v.toMillis());
+    if (v.seconds) return new Date(v.seconds * 1000);
+    if (typeof v === 'number') return new Date(v);
+    const d = new Date(v); return isNaN(d) ? '' : d;
+  };
+  const fmtDate = (v) => {
+    const d = tsToDate(v); if (!d) return '';
+    return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  };
+
+  function toast(msg, type) {
+    if (window.GeoSocial && window.GeoSocial.toast) return window.GeoSocial.toast(msg, type);
+    alert(msg);
+  }
+
+  function currentFbUser() {
+    return window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser;
+  }
+
+  function defaultProfile(fbUser, data) {
+    data = data || {};
+    const email = data.email || (fbUser && fbUser.email) || '';
+    const seed = ((data.username || email || (fbUser && fbUser.uid) || 'geohub-user') + '').replace(/\W/g, '') || 'geohubuser';
     return {
-      id:            authUser.uid || authUser.id || 'firebase_user',
-      uid:           authUser.uid || authUser.id,
-      fullName:      authUser.fullName || (authUser.email || 'Explorer').split('@')[0],
-      username:      authUser.username || (authUser.email || 'explorer').split('@')[0],
-      email:         authUser.email || '',
-      avatar:        authUser.avatar || ('https://picsum.photos/seed/' + seed + '_fb/200/200'),
-      coverImage:    authUser.coverImage || ('https://picsum.photos/seed/' + seed + '_fbcv/1200/500'),
-      bio:           authUser.bio || '',
-      city:          authUser.city || 'Tbilisi',
-      explorerLevel: authUser.explorerLevel || 'New Explorer',
-      xp:            authUser.xp != null ? authUser.xp : 0,
-      rank:          authUser.rank || 9999,
-      badges:        (authUser.badges && authUser.badges.length) ? authUser.badges : [],
-      interests:     (authUser.interests && authUser.interests.length) ? authUser.interests : [],
-      followers:     authUser.followers || 0,
-      following:     authUser.following || 0,
-      postsCount:    authUser.postsCount || 0,
-      visitedPlaces: authUser.visitedPlaces || 0,
-      trustScore:    authUser.trustScore || 0,
-      accountType:   authUser.accountType || 'Explorer',
-      isFirebaseUser: true
+      id: data.uid || (fbUser && fbUser.uid) || data.id || '',
+      uid: data.uid || (fbUser && fbUser.uid) || data.id || '',
+      fullName: data.fullName || data.displayName || (fbUser && fbUser.displayName) || (email ? email.split('@')[0] : 'GeoHub User'),
+      username: data.username || (email ? email.split('@')[0].replace(/[^a-z0-9_.]/gi, '.').toLowerCase() : ''),
+      email,
+      avatar: data.avatar || data.photoURL || (fbUser && fbUser.photoURL) || ('https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(seed)),
+      coverImage: data.coverImage || '',
+      bio: data.bio || '',
+      city: data.city || '',
+      accountType: data.accountType || 'Explorer',
+      explorerLevel: data.explorerLevel || 'New Explorer',
+      xp: Number(data.xp || 0),
+      rank: Number(data.rank || 0),
+      badges: Array.isArray(data.badges) ? data.badges : [],
+      interests: Array.isArray(data.interests) ? data.interests : [],
+      followers: Number(data.followers || 0),
+      following: Number(data.following || 0),
+      postsCount: Number(data.postsCount || 0),
+      visitedPlaces: Number(data.visitedPlaces || 0),
+      trustScore: Number(data.trustScore || 0),
+      createdAt: data.createdAt || data.joinedAt || null,
+      isReal: true
     };
   }
 
-  function resolveProfileUser() {
-    const params  = new URLSearchParams(location.search);
-    const uidParam  = params.get('uid');
-    const userParam = params.get('user');
+  function setLoading() {
+    const n = $('.profile-name'); if (n) n.textContent = 'Loading profile…';
+    const h = $('.profile-handle'); if (h) h.textContent = '';
+    const b = $('.profile-bio'); if (b) b.textContent = '';
+  }
 
-    // ── Own profile (no URL param) ────────────────────────────────────
-    if (!uidParam && !userParam) {
-      try {
-        const authUser = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
-        if (authUser && authUser.isFirebaseUser) return buildFirebaseProfile(authUser);
-      } catch (e) {}
-      setTimeout(function () { window.location.replace('auth.html'); }, 0);
-      return null;
-    }
+  function userNotFound() {
+    document.title = 'User not found — GeoHub';
+    const main = $('.profile-layout') || document.body;
+    main.innerHTML = '<div class="empty-profile-state" style="max-width:720px;margin:120px auto;text-align:center"><i class="fas fa-user-slash"></i><h2>User not found</h2><p>This profile does not exist or was removed.</p><a class="btn btn-primary btn-sm" href="feed.html">Back to Feed</a></div>';
+  }
 
-    // ── Public profile by uid (?uid=…) — load from Firestore ─────────
-    const targetUid = uidParam || userParam;
-
-    // Check if it's actually the logged-in user's own profile
-    try {
-      const me = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
-      if (me && me.uid && me.uid === targetUid) {
-        return buildFirebaseProfile(me);
+  function ensureUserDoc(fbUser) {
+    const GF = window.GeoFirebase;
+    if (!GF || !GF.db || !GF.fs || !fbUser) return Promise.resolve(defaultProfile(fbUser, {}));
+    const ref = GF.fs.doc(GF.db, 'users', fbUser.uid);
+    return GF.fs.getDoc(ref).then(snap => {
+      const base = defaultProfile(fbUser, snap.exists() ? snap.data() : {});
+      if (!snap.exists()) {
+        return GF.fs.setDoc(ref, {
+          uid: fbUser.uid,
+          fullName: base.fullName,
+          username: base.username,
+          email: base.email,
+          avatar: base.avatar,
+          bio: '', city: '', accountType: 'Explorer', interests: [],
+          xp: 0, followers: 0, following: 0, postsCount: 0, visitedPlaces: 0, trustScore: 0,
+          createdAt: GF.fs.serverTimestamp()
+        }, { merge: true }).then(() => base).catch(() => base);
       }
-    } catch (e) {}
-
-    // Load from Firestore asynchronously then re-render
-    function tryLoadFromFirestore() {
-      const fb = window.GeoFirebase;
-      if (!fb || !fb.db || !fb.fs) return false;
-      fb.fs.getDoc(fb.fs.doc(fb.db, 'users', targetUid))
-        .then(function (snap) {
-          if (snap.exists()) {
-            const data = snap.data();
-            const u = buildFirebaseProfile(Object.assign({ uid: targetUid }, data));
-            renderDynamicProfile(u);
-          } else {
-            // User doc doesn't exist — build minimal placeholder
-            const u = buildFirebaseProfile({ uid: targetUid, fullName: 'GeoHub User', isFirebaseUser: true });
-            renderDynamicProfile(u);
-          }
-        })
-        .catch(function () {
-          const u = buildFirebaseProfile({ uid: targetUid, fullName: 'GeoHub User', isFirebaseUser: true });
-          renderDynamicProfile(u);
-        });
-      return true;
-    }
-
-    // Show loading state immediately
-    document.querySelector('.profile-name') && (document.querySelector('.profile-name').textContent = 'Loading…');
-
-    if (!tryLoadFromFirestore()) {
-      window.addEventListener('GeoFirebaseReady', function () { tryLoadFromFirestore(); }, { once: true });
-    }
-
-    return null; // renderDynamicProfile called async
-  }
-
-  function scoreInterestProfile(item, user) {
-    const haystack = [item.type, item.category, item.place, item.title, item.caption, item.cat, item.name, ...(item.tags || [])].filter(Boolean).join(' ').toLowerCase();
-    return user.interests.reduce((score, interest) => haystack.includes(interest.toLowerCase().split(' ')[0]) ? score + 1 : score, 0);
-  }
-
-  function profileLevelNumber(user) {
-    return Math.max(1, Math.min(99, Math.floor(user.xp / 1000) + 1));
-  }
-
-  function profileActivityType(user) {
-    const joined = user.interests.join(' ').toLowerCase();
-    if (user.accountType === 'Patriot') return 'Community Helper';
-    if (user.accountType === 'Business Owner') return 'Local Business Builder';
-    if (user.accountType === 'Teacher') return 'Course Creator';
-    if (user.accountType === 'Student') return 'Student Explorer';
-    if (joined.includes('hiking') || joined.includes('trail')) return 'Nature Explorer';
-    if (joined.includes('nightlife') || joined.includes('events')) return 'Social Explorer';
-    if (joined.includes('photography') || joined.includes('architecture')) return 'Visual Storyteller';
-    if (joined.includes('food') || joined.includes('restaurant')) return 'Food Reviewer';
-    if (joined.includes('real estate')) return 'District Scout';
-    return 'City Explorer';
-  }
-
-  function updateStats(user) {
-    const stats = document.querySelectorAll('.profile-stats-bar .pstat-value');
-    const reviewCount = Math.max(0, Math.round(user.postsCount * 0.36));
-    const geoPoints = Math.round(user.xp / 10);
-    const values = [user.visitedPlaces, reviewCount, compactProfile(user.followers), compactProfile(user.following), compactProfile(geoPoints), user.trustScore];
-    stats.forEach((stat, index) => stat.textContent = values[index]);
-    document.querySelectorAll('.ptab .tab-count').forEach(count => {
-      const tab = count.closest('.ptab')?.dataset.tab;
-      if (tab === 'posts')    count.textContent = user.postsCount;
-      if (tab === 'places')   count.textContent = user.visitedPlaces;
-      if (tab === 'checkins') count.textContent = 0;
-      if (tab === 'reviews')  count.textContent = reviewCount;
+      return base;
     });
   }
 
-  function updateXpBar(user) {
-    const lvl    = profileLevelNumber(user);
-    const xpInLvl = user.xp % 1000;
-    const pct    = Math.min(100, Math.round(xpInLvl / 10));
-    const xpNext = 1000 - xpInLvl;
-    const el = s => document.querySelector(s);
-    const lvlPill = el('.xp-level-pill');
-    if (lvlPill) lvlPill.innerHTML = `<i class="fas fa-bolt"></i> Level ${lvl}`;
-    const xpTitle = el('.xp-title-text');
-    if (xpTitle) xpTitle.textContent = user.explorerLevel || 'New Explorer';
-    const fill = el('.xp-bar-fill');
-    if (fill) fill.style.width = pct + '%';
-    const nums = el('.xp-bar-numbers');
-    if (nums) nums.textContent = `${user.xp} / ${lvl * 1000} XP`;
-    const toNext = el('.xp-to-next');
-    if (toNext) toNext.textContent = `${xpNext} XP to Level ${lvl + 1}`;
-  }
+  function loadProfile() {
+    setLoading();
+    const params = new URLSearchParams(location.search);
+    const uidParam = params.get('uid');
+    const usernameParam = params.get('user') || (location.pathname.match(/@([^/?#]+)/) || [])[1];
+    const GF = window.GeoFirebase;
+    const fbUser = currentFbUser();
 
-  function updateIntroCard(user) {
-    const introItems = document.querySelectorAll('.intro-item');
-    const cityEl  = introItems[0];
-    const typeEl  = introItems[1];
-    const joinEl  = introItems[2];
-    const linkEl  = introItems[3];
-    if (cityEl) cityEl.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${user.city || 'Georgia'}`;
-    if (typeEl) typeEl.innerHTML = `<i class="fas fa-hiking"></i> ${profileActivityType(user)}`;
-    if (joinEl) joinEl.innerHTML = user.joinedAt
-      ? `<i class="fas fa-calendar-alt"></i> Joined ${user.joinedAt}`
-      : `<i class="fas fa-calendar-alt"></i> GeoHub Explorer`;
-    if (linkEl) linkEl.innerHTML = `<i class="fas fa-globe"></i> geohub.ge/@${user.username || 'user'}`;
-    // followers preview
-    const fwText = document.querySelector('.followers-preview-text');
-    if (fwText) fwText.innerHTML = `<strong>${compactProfile(user.followers)} followers</strong>`;
-    // hide follower thumbs if none
-    const fwThumbs = document.querySelector('.followers-thumbs');
-    if (fwThumbs) fwThumbs.style.display = user.followers ? '' : 'none';
-  }
-
-  function updateHighlights(user) {
-    const strip = document.querySelector('.profile-highlights');
-    if (!strip) return;
-    // Keep only the "New" add button; real highlights come from Firestore later
-    strip.innerHTML = `
-      <div class="highlight-item highlight-add">
-        <div class="highlight-ring add-ring"><i class="fas fa-plus"></i></div>
-        <div class="highlight-label">New</div>
-      </div>`;
-  }
-
-  function renderIdentity(user) {
-    const fav = user.interests.slice(0, 5);
-    document.querySelector('.explorer-type').innerHTML = `${accountBadgeProfile(user.accountType)} ${profileActivityType(user)}`;
-    document.querySelector('.fav-cats').innerHTML = fav.length
-      ? fav.map((interest, index) => `<div class="fav-cat-chip">${interest} <span class="fav-cat-rank">#${index + 1}</span></div>`).join('')
-      : '<div style="color:var(--text-muted);font-size:0.82rem">No interests set yet</div>';
-
-    const isBlank = user.isFirebaseUser && !user.xp && !user.interests.length;
-    const scores = [
-      ['Adventure', isBlank ? 0 : user.interests.some(i => /hiking|travel|route|camping|trail/i.test(i)) ? 92 : 42, '#10b981'],
-      ['Cafe Life', isBlank ? 0 : user.interests.some(i => /cafe|coffee|coworking/i.test(i)) ? 88 : 35, '#f59e0b'],
-      ['Foodie',   isBlank ? 0 : user.interests.some(i => /restaurant|food|wine|dessert|brunch/i.test(i)) ? 86 : 38, '#ef4444'],
-      ['Culture',  isBlank ? 0 : user.interests.some(i => /course|museum|workshop|architecture|history|gallery/i.test(i)) ? 82 : 45, '#a855f7'],
-      ['Social',   isBlank ? 0 : user.interests.some(i => /event|nightlife|group|meetup/i.test(i)) ? 90 : 40, '#3b82f6']
-    ];
-    document.querySelector('.lifestyle-scores').innerHTML = scores.map(([label, score, color]) => `
-      <div class="ls-row">
-        <div class="ls-label">${label}</div>
-        <div class="ls-bar-wrap"><div class="ls-bar" style="width:${score}%;background:linear-gradient(90deg,${color},#60a5fa)"></div></div>
-        <div class="ls-score" style="color:${color}">${score}</div>
-      </div>`).join('');
-  }
-
-  function renderProfilePosts(user) {
-    const postsTab = document.getElementById('tab-posts');
-    postsTab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-spinner fa-spin"></i><p>Loading posts…</p></div>';
-    if (!user.uid) return;
-    function onPosts(posts) {
-      if (!posts.length) {
-        postsTab.innerHTML = `<div class="empty-profile-state"><i class="fas fa-seedling"></i><h3>No posts yet</h3><p>Create your first post on GeoHub!</p></div>`;
-        return;
-      }
-      postsTab.innerHTML = '<div class="posts-grid">' + posts.map(function (post) {
-        return '<div class="post-thumb">' +
-          (post.mediaUrl ? '<img src="' + post.mediaUrl + '" alt="">' : '<div style="background:var(--bg-elevated);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;padding:16px;box-sizing:border-box;text-align:center;color:var(--text-secondary)">' + (post.text || '') + '</div>') +
-          '<div class="post-overlay"><span><i class="fas fa-heart"></i> ' + (post.likeCount || 0) + '</span><span><i class="fas fa-comment"></i> ' + (post.commentCount || 0) + '</span></div>' +
-          '</div>';
-      }).join('') + '</div>';
+    if (!GF || !GF.db || !GF.fs) {
+      if (fbUser) return Promise.resolve(defaultProfile(fbUser, {}));
+      location.replace('auth.html');
+      return Promise.resolve(null);
     }
-    if (window.GeoSocial && window.GeoSocial.listenUserPosts) {
-      window.GeoSocial.listenUserPosts(user.uid, onPosts);
-    } else {
-      window.addEventListener('GeoSocialReady', function () {
-        if (window.GeoSocial) window.GeoSocial.listenUserPosts(user.uid, onPosts);
-      }, { once: true });
-    }
-  }
 
-  function renderPlaces(user) {
-    const isNewUser = user.isFirebaseUser && !user.visitedPlaces && !user.postsCount;
-    document.querySelector('.places-filter-chips').innerHTML = `<div class="places-chip active">All (${user.visitedPlaces})</div>` + user.interests.slice(0, 5).map(i => `<div class="places-chip">${i}</div>`).join('');
-    if (isNewUser) {
-      document.querySelector('#tab-places .places-grid').innerHTML = '<div class="empty-profile-state"><i class="fas fa-map-marker-alt"></i><h3>No visited places yet</h3><p>Check in to places as you explore Georgia — they\'ll appear here.</p><a href="map.html" class="btn btn-primary btn-sm" style="margin-top:12px">Explore Map</a></div>';
-      return;
+    if (!uidParam && !usernameParam) {
+      if (!fbUser) { location.replace('auth.html'); return Promise.resolve(null); }
+      return ensureUserDoc(fbUser);
     }
-    const places = [...profilePlaces].sort((a, b) => scoreInterestProfile(b, user) - scoreInterestProfile(a, user)).slice(0, 6);
-    document.querySelector('#tab-places .places-grid').innerHTML = places.map(place => `
-      <div class="place-card">
-        <div class="place-card-img-wrap">
-          <img class="place-card-img" src="${place.image}" alt="${place.name}">
-          <div class="checkin-badge"><i class="fas fa-check"></i> Visited</div>
-        </div>
-        <div class="place-card-body">
-          <div class="place-card-name">${place.name}</div>
-          <div class="place-card-meta">${place.cat} · ${place.city} · ★ ${(4.5 + Math.random() * 0.4).toFixed(1)}</div>
-        </div>
-      </div>`).join('');
-  }
 
-  function renderCheckins(user) {
-    const tab = document.getElementById('tab-checkins');
-    if (!tab) return;
-    tab.innerHTML = '<div class="checkins-header"><div class="checkins-total"><i class="fas fa-spinner fa-spin"></i> Loading check-ins…</div></div>';
-    if (!user.uid) return;
-    function onCheckins(checkins) {
-      if (!checkins.length) {
-        tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-map-marker-alt"></i><h3>No check-ins yet</h3><p>Check in to places as you explore Georgia.</p><a href="checkin.html" class="btn btn-primary btn-sm" style="margin-top:12px">Check In Now</a></div>';
-        return;
-      }
-      function timeAgoP(ts) {
-        if (!ts) return '';
-        var ms = ts.toMillis ? ts.toMillis() : (ts.seconds ? ts.seconds * 1000 : Number(ts));
-        var d = Math.floor((Date.now() - ms) / 1000);
-        if (d < 60) return d + 's ago';
-        if (d < 3600) return Math.floor(d / 60) + 'm ago';
-        if (d < 86400) return Math.floor(d / 3600) + 'h ago';
-        var date = new Date(ms);
-        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-      }
-      tab.innerHTML = '<div class="checkins-header"><div class="checkins-total"><i class="fas fa-map-marker-alt"></i> ' + checkins.length + ' check-in' + (checkins.length !== 1 ? 's' : '') + '</div></div>' +
-        '<div class="checkins-timeline">' + checkins.map(function (c) {
-          return '<div class="checkin-entry">' +
-            '<div class="checkin-date-col"><div class="checkin-date-badge">' + timeAgoP(c.createdAt) + '</div><div class="checkin-line"></div></div>' +
-            '<div class="checkin-card">' +
-              '<div class="checkin-body">' +
-                '<div class="checkin-name">' + (c.placeName || 'Unknown Place') + '</div>' +
-                '<div class="checkin-meta"><i class="fas fa-map-marker-alt"></i> ' + (c.placeName || '—') + '</div>' +
-                '<div class="checkin-foot"><span class="checkin-pts">+' + (c.xpAwarded || 50) + ' pts</span><span class="checkin-verified"><i class="fas fa-check-circle"></i> Verified</span></div>' +
-              '</div>' +
-            '</div>' +
-          '</div>';
-        }).join('') + '</div>';
+    if (uidParam) {
+      return GF.fs.getDoc(GF.fs.doc(GF.db, 'users', uidParam)).then(snap => {
+        if (!snap.exists()) return null;
+        return defaultProfile(null, Object.assign({ uid: uidParam }, snap.data()));
+      });
     }
-    if (window.GeoSocial && window.GeoSocial.listenUserCheckins) {
-      window.GeoSocial.listenUserCheckins(user.uid, onCheckins);
-    } else {
-      window.addEventListener('GeoSocialReady', function () {
-        if (window.GeoSocial) window.GeoSocial.listenUserCheckins(user.uid, onCheckins);
-      }, { once: true });
-    }
-  }
 
-  function renderChallenges(user) {
-    const matched = [...MOCK_CHALLENGES].sort((a, b) => {
-      const joinedA = a.participants.includes(user.id) ? 2 : 0;
-      const joinedB = b.participants.includes(user.id) ? 2 : 0;
-      return joinedB - joinedA || b.progress - a.progress;
+    const q = GF.fs.query(GF.fs.collection(GF.db, 'users'), GF.fs.where('username', '==', usernameParam), GF.fs.limit(1));
+    return GF.fs.getDocs(q).then(snap => {
+      if (snap.empty) return null;
+      const d = snap.docs[0];
+      return defaultProfile(null, Object.assign({ uid: d.id }, d.data()));
     });
-    if (!matched.length) {
-      document.querySelector('#tab-challenges .challenges-grid').innerHTML = '<div class="empty-profile-state"><i class="fas fa-trophy"></i><h3>No challenges yet</h3><p>Challenges will appear as you explore GeoHub.</p><a href="challenges.html" class="btn btn-primary btn-sm" style="margin-top:12px">Browse Challenges</a></div>';
-      return;
-    }
-    document.querySelector('#tab-challenges .challenges-grid').innerHTML = matched.map((challenge, index) => {
-      const joined = challenge.participants.includes(user.id);
-      const done = joined && challenge.progress >= 100;
-      const progress = joined ? challenge.progress : Math.max(8, challenge.progress - 35);
-      return `
-        <div class="challenge-card ${done ? 'complete' : ''}">
-          <div class="ch-header"><div class="ch-icon">${challenge.icon}</div><div class="ch-badge ${done ? 'done' : joined ? 'active' : 'locked'}">${done ? 'Completed' : joined ? 'In Progress' : 'Suggested'}</div></div>
-          <div class="ch-name">${challenge.name}</div>
-          <div class="ch-desc">${joined ? `${user.fullName.split(' ')[0]} is participating` : 'Recommended from interests'}</div>
-          <div class="ch-progress"><div class="ch-progress-fill ${done ? 'done' : joined ? 'active' : 'locked'}" style="width:${progress}%"></div></div>
-          <div class="ch-foot"><span>${progress}% progress</span><span class="ch-reward">+${challenge.xp} pts</span></div>
-        </div>`;
-    }).join('');
-  }
-
-  function renderReviews(user) {
-    const isNewUser = user.isFirebaseUser && !user.visitedPlaces && !user.postsCount;
-    if (isNewUser) {
-      document.getElementById('tab-reviews').innerHTML = '<div class="empty-profile-state"><i class="fas fa-star"></i><h3>No reviews yet</h3><p>Visit a place and leave your first review — it will appear here.</p><a href="places.html" class="btn btn-primary btn-sm" style="margin-top:12px">Find Places</a></div>';
-      return;
-    }
-    const reviews = [...profilePlaces].sort((a, b) => scoreInterestProfile(b, user) - scoreInterestProfile(a, user)).slice(0, 4);
-    document.getElementById('tab-reviews').innerHTML = reviews.map((place, index) => `
-      <div class="profile-review-card">
-        <div class="prv-place-row">
-          <img class="prv-place-img" src="${place.image}" alt="${place.name}">
-          <div><div class="prv-place-name">${place.name}</div><div class="prv-place-cat">${place.cat} · ${place.city}</div></div>
-          <div style="margin-left:auto;font-size:0.85rem">★★★★★</div>
-        </div>
-        <div class="prv-text">"A ${place.cat.toLowerCase()} spot worth visiting in ${place.city}."</div>
-        <div class="prv-foot"><button class="prv-like-btn"><i class="fas fa-heart"></i> ${Math.max(3, Math.round(user.trustScore / 2) - index * 8)} Helpful</button><div class="prv-date">May 2026</div></div>
-      </div>`).join('');
-  }
-
-  function renderActivity(user) {
-    const isNew = user.isFirebaseUser && !user.postsCount && !user.visitedPlaces;
-    const activity = isNew
-      ? [
-          ['green', '🌱', 'Created a GeoHub profile — welcome to the community!', 'Today'],
-          ['blue', '📍', 'Explore places and check in to start building your story', 'Today']
-        ]
-      : [
-          ['green', '📸', `Checked in at <strong>${profilePlaces[0].name}</strong> and earned XP`, '2 hours ago'],
-          ['gold', '⭐', `Left a review based on <strong>${user.interests[0] || 'travel'}</strong> interests`, 'Yesterday'],
-          MOCK_CHALLENGES.length ? ['purple', '🏆', `Joined the <strong>${MOCK_CHALLENGES[0].name}</strong> challenge`, '3 days ago'] : null,
-          MOCK_USERS.length ? ['blue', '👥', `Followed <strong>${MOCK_USERS[(user.rank + 3) % MOCK_USERS.length].fullName}</strong>`, '5 days ago'] : null
-        ].filter(Boolean);
-    document.querySelector('.activity-feed').innerHTML = `<div class="activity-feed-title">Recent Activity</div>` + activity.map(item => `
-      <div class="activity-item"><div class="activity-dot ${item[0]}">${item[1]}</div><div><div class="activity-text">${item[2]}</div><div class="activity-time">${item[3]}</div></div></div>
-    `).join('');
-  }
-
-  function renderProfileSidebar(user) {
-    const sidebar = document.querySelector('.profile-sidebar');
-    // Remove any legacy mock switcher
-    const existing = document.getElementById('profileUserSwitcherCard');
-    if (existing) existing.remove();
-
-    document.querySelector('.geo-map-widget-title span').textContent = `${Math.max(0, Math.round(user.visitedPlaces / 12))} cities`;
-
-    // Update rewards tab wallet card
-    const geoPoints = Math.round(user.xp / 10);
-    const tierName = user.explorerLevel.replace(' Explorer', '');
-    const walletPts = document.querySelector('.wallet-points');
-    if (walletPts) walletPts.textContent = geoPoints;
-    const walletTier = document.querySelector('.wallet-tier');
-    if (walletTier) walletTier.innerHTML = `<i class="fas fa-gem"></i> ${tierName} Tier`;
-    const walletProgLabel = document.querySelector('.wallet-progress-label span:last-child');
-    if (walletProgLabel) walletProgLabel.textContent = `${geoPoints} / 1,000 pts`;
-    const walletStatEls = document.querySelectorAll('.wallet-card .wstat-value');
-    if (walletStatEls.length >= 2) { walletStatEls[0].textContent = geoPoints; walletStatEls[1].textContent = '0'; }
-
-    document.querySelector('.mini-wallet-pts').textContent = `${compactProfile(Math.round(user.xp / 10))} pts`;
-    document.querySelector('.mini-wallet-label').textContent = `GeoPoints · ${user.explorerLevel.replace(' Explorer', '')} Tier`;
-    const activeCoupons = (user.isFirebaseUser && !user.postsCount && !user.visitedPlaces) ? 0 : 3;
-    document.querySelector('.mini-wallet-sub').innerHTML = `<strong>${Math.max(0, 1000 - Math.round(user.xp / 10))} pts</strong> to next tier · ${activeCoupons} active coupons`;
-    document.querySelector('.trust-number').textContent = user.trustScore;
-    document.querySelector('.trust-info-label').textContent = user.trustScore > 92 ? 'Highly Trusted' : user.trustScore > 80 ? 'Trusted Explorer' : 'Building Trust';
-    const isNewUserCtx = user.accountType === 'New User' || (user.isFirebaseUser && !user.visitedPlaces);
-    document.querySelector('.trust-info-sub').textContent = isNewUserCtx ? 'New profile under review' : `Rank #${user.rank} in GeoHub`;
-    const isNewUser = user.accountType === 'New User' || (user.isFirebaseUser && !user.visitedPlaces);
-    document.querySelector('.trust-items').innerHTML = `
-      <div class="trust-item ok"><i class="fas fa-check-circle"></i> ${user.isFirebaseUser ? 'Firebase account verified' : 'Profile mock verified'}</div>
-      <div class="trust-item ok"><i class="fas fa-map-marker-alt"></i> ${user.visitedPlaces} visited places</div>
-      <div class="trust-item ok"><i class="fas fa-star"></i> ${user.badges.length} badge${user.badges.length !== 1 ? 's' : ''} earned</div>
-      <div class="trust-item ${isNewUser ? 'warn' : 'ok'}"><i class="fas fa-camera"></i> ${isNewUser ? 'Needs more camera proofs' : 'Camera proof active'}</div>`;
-
-    // Social proof stats
-    const isNewReal = user.isFirebaseUser && !user.postsCount && !user.visitedPlaces;
-    const spCities  = document.getElementById('spCitiesVal');  if (spCities)  spCities.textContent  = isNewReal ? 0 : Math.max(1, Math.round(user.visitedPlaces / 3));
-    const spFriends = document.getElementById('spFriendsVal'); if (spFriends) spFriends.textContent = isNewReal ? 0 : Math.max(0, user.following);
-    const spLikes   = document.getElementById('spLikesVal');   if (spLikes)   spLikes.textContent   = isNewReal ? 0 : Math.round(user.xp * 1.2);
-    const spGroups  = document.getElementById('spGroupsVal');  if (spGroups)  spGroups.textContent  = isNewReal ? 0 : Math.max(0, user.badges.length);
-
-    // Most Liked Review
-    const mlrCard = document.getElementById('mostLikedReviewCard');
-    if (mlrCard) {
-      if (isNewReal) {
-        mlrCard.style.display = 'none';
-      } else {
-        mlrCard.style.display = '';
-        const topPlace = profilePlaces[0];
-        mlrCard.innerHTML = `
-          <div style="font-size:0.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">
-            <i class="fas fa-fire" style="color:#ef4444;margin-right:4px"></i> Most Liked Review
-          </div>
-          <div class="review-place-row">
-            <img class="review-place-img" src="${topPlace.image}" alt="${topPlace.name}">
-            <div>
-              <div class="review-place-name">${topPlace.name}</div>
-              <div class="review-place-cat">${topPlace.cat} · ${topPlace.city}</div>
-            </div>
-            <div style="margin-left:auto"><div class="rating-display" style="font-size:0.85rem">⭐⭐⭐⭐⭐ <span style="font-weight:700">5.0</span></div></div>
-          </div>
-          <div class="review-quote">"A great spot worth visiting in ${topPlace.city}."</div>
-          <div class="review-meta-row">
-            <div class="review-likes"><i class="fas fa-heart"></i> ${Math.max(3, Math.round(user.trustScore / 2))} people found this helpful</div>
-            <div style="font-size:0.72rem;color:var(--text-muted)">May 2026</div>
-          </div>`;
-      }
-    }
-
-    const suggested = MOCK_USERS.filter(candidate => candidate.id !== user.id).sort((a, b) => b.trustScore - a.trustScore).slice(0, 4);
-    const followingCard = document.querySelector('.following-card');
-    if (followingCard) {
-      if (!suggested.length) {
-        followingCard.innerHTML = '<div class="following-header">People You May Know</div><div style="padding:16px 0;text-align:center;color:var(--text-muted);font-size:0.85rem">No suggestions yet</div>';
-      } else {
-        followingCard.innerHTML = `<div class="following-header">People You May Know</div>` + suggested.map(candidate => `
-          <div class="following-row">
-            <img class="following-avatar" src="${candidate.avatar}" alt="${candidate.fullName}">
-            <div><div class="following-name">${candidate.fullName}</div><div class="following-type">${candidate.accountType}</div></div>
-            <button class="follow-btn">Follow</button>
-          </div>`).join('');
-      }
-    }
   }
 
   function isOwnProfile(user) {
-    const urlParam = new URLSearchParams(location.search).get('user');
-    if (urlParam) return false;
-    try {
-      const authUser = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
-      if (!authUser) return false;
-      if (authUser.username && user.username && authUser.username === user.username) return true;
-      if (authUser.uid && user.uid && authUser.uid === user.uid) return true;
-      if (authUser.id && user.id && authUser.id === user.id) return true;
-    } catch (e) {}
-    return false;
+    const fb = currentFbUser();
+    return !!(fb && user && user.uid && fb.uid === user.uid);
   }
 
-  function renderDynamicProfile(user) {
-    const ownProfile = isOwnProfile(user);
-    document.title = `${user.fullName} - GeoHub Profile`;
-    document.querySelector('.profile-cover').classList.add('dynamic-cover');
-    document.querySelector('.profile-cover').style.backgroundImage = `linear-gradient(180deg, rgba(4,5,13,0.1), rgba(4,5,13,0.72)), url('${user.coverImage}')`;
-    document.querySelector('.profile-avatar').src = user.avatar;
-    document.querySelector('.profile-avatar').alt = user.fullName;
-    document.querySelector('.avatar-level').textContent = profileLevelNumber(user);
-    document.querySelector('.profile-name').textContent = user.fullName;
-    document.querySelector('.profile-handle').innerHTML = `@${user.username} · ${user.city} · ${accountBadgeProfile(user.accountType)}`;
-    // Cover action buttons: own profile vs public
-    const coverActions = document.querySelector('.cover-actions');
-    if (coverActions) {
-      if (ownProfile) {
-        coverActions.innerHTML = `<button class="cover-btn"><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary" onclick="window.GeoAuth&&window.GeoAuth.showAccountSettings()"><i class="fas fa-pen"></i> Edit Profile</button>`;
-      } else {
-        coverActions.innerHTML = `<button class="cover-btn"><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary"><i class="fas fa-user-plus"></i> Follow</button>`;
-      }
+  function level(user) { return Math.max(1, Math.floor(Number(user.xp || 0) / 1000) + 1); }
+
+  function renderStats(user) {
+    const values = [user.visitedPlaces, 0, compact(user.followers), compact(user.following), compact(Math.floor(user.xp / 10)), user.trustScore];
+    $$('.profile-stats-bar .pstat-value').forEach((el, i) => el.textContent = values[i] || '0');
+    $$('.ptab .tab-count').forEach(c => {
+      const t = c.closest('.ptab') && c.closest('.ptab').dataset.tab;
+      if (t === 'posts') c.textContent = '0';
+      if (t === 'places') c.textContent = user.visitedPlaces || 0;
+      if (t === 'checkins') c.textContent = '0';
+      if (t === 'reviews') c.textContent = '0';
+    });
+  }
+
+  function renderIdentity(user) {
+    document.title = user.fullName + ' — GeoHub';
+    const cover = $('.profile-cover');
+    if (cover) {
+      cover.classList.add('dynamic-cover');
+      cover.style.backgroundImage = user.coverImage
+        ? "linear-gradient(180deg, rgba(4,5,13,0.08), rgba(4,5,13,0.72)), url('" + user.coverImage + "')"
+        : 'linear-gradient(135deg, rgba(16,185,129,0.20), rgba(77,166,255,0.12), rgba(123,97,255,0.12))';
     }
-    // Profile action buttons
-    const profileActions = document.querySelector('.profile-actions');
-    if (profileActions) {
-      if (ownProfile) {
-        profileActions.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="window.GeoAuth&&window.GeoAuth.showAccountSettings()"><i class="fas fa-pen"></i></button><a href="lifegraph.html" class="btn btn-primary btn-sm" style="text-decoration:none"><i class="fas fa-chart-line"></i> Life Graph</a>`;
-      } else {
-        profileActions.innerHTML = `<button class="btn btn-ghost btn-sm"><i class="fas fa-envelope"></i></button><button class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Follow</button><a href="lifegraph.html" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none"><i class="fas fa-chart-line"></i> Life Graph</a>`;
+    const av = $('.profile-avatar'); if (av) { av.src = user.avatar; av.alt = user.fullName; }
+    const lvl = $('.avatar-level'); if (lvl) lvl.textContent = level(user);
+    const name = $('.profile-name'); if (name) name.textContent = user.fullName;
+    const handle = $('.profile-handle'); if (handle) handle.textContent = '@' + (user.username || 'user') + (user.city ? ' · ' + user.city : '');
+    const bio = $('.profile-bio'); if (bio) bio.textContent = user.bio || 'No bio yet.';
+    const badges = $('.trust-badges');
+    if (badges) badges.innerHTML = [
+      '<span class="trust-badge green"><i class="fas fa-check-circle"></i> Real account</span>',
+      '<span class="trust-badge gold"><i class="fas fa-bolt"></i> ' + compact(user.xp) + ' XP</span>',
+      '<span class="trust-badge purple"><i class="fas fa-id-badge"></i> ' + esc(user.accountType) + '</span>'
+    ].join('');
+
+    const own = isOwnProfile(user);
+    const coverActions = $('.cover-actions');
+    if (coverActions) coverActions.innerHTML = own
+      ? '<button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button>'
+      : '<button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> Follow</button>';
+    const actions = $('.profile-actions');
+    if (actions) actions.innerHTML = own
+      ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i></button><a href="lifegraph.html" class="btn btn-ghost btn-sm" style="text-decoration:none"><i class="fas fa-chart-line"></i> Life Graph</a>'
+      : '<button class="btn btn-ghost btn-sm"><i class="fas fa-envelope"></i></button><button class="btn btn-primary btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> Follow</button>';
+
+    renderStats(user);
+    renderXp(user);
+    renderIntro(user);
+    renderSidebar(user);
+    renderHighlights();
+  }
+
+  function renderXp(user) {
+    const l = level(user), xp = Number(user.xp || 0), inLvl = xp % 1000;
+    const pill = $('.xp-level-pill'); if (pill) pill.innerHTML = '<i class="fas fa-bolt"></i> Level ' + l;
+    const title = $('.xp-title-text'); if (title) title.textContent = user.explorerLevel || 'New Explorer';
+    const fill = $('.xp-bar-fill'); if (fill) fill.style.width = Math.min(100, inLvl / 10) + '%';
+    const nums = $('.xp-bar-numbers'); if (nums) nums.textContent = xp + ' / ' + (l * 1000) + ' XP';
+    const next = $('.xp-to-next'); if (next) next.textContent = (1000 - inLvl) + ' XP to Level ' + (l + 1);
+  }
+
+  function renderIntro(user) {
+    const items = $$('.intro-item');
+    if (items[0]) items[0].innerHTML = '<i class="fas fa-map-marker-alt"></i> ' + (user.city ? esc(user.city) : 'No location set');
+    if (items[1]) items[1].innerHTML = '<i class="fas fa-hiking"></i> ' + esc(user.accountType || 'Explorer');
+    if (items[2]) items[2].innerHTML = '<i class="fas fa-calendar-alt"></i> ' + (user.createdAt ? 'Joined ' + fmtDate(user.createdAt) : 'Join date not set');
+    if (items[3]) items[3].innerHTML = '<i class="fas fa-globe"></i> ' + (user.username ? 'geohub.ge/@' + esc(user.username) : 'No public username set');
+    const fw = $('.followers-preview-text'); if (fw) fw.innerHTML = user.followers ? '<strong>' + compact(user.followers) + ' followers</strong>' : 'No followers yet';
+    const thumbs = $('.followers-thumbs'); if (thumbs) thumbs.innerHTML = '';
+  }
+
+  function renderSidebar(user) {
+    const explorer = $('.explorer-type'); if (explorer) explorer.textContent = user.accountType || 'Explorer';
+    const scores = $('.lifestyle-scores');
+    if (scores) scores.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;padding:8px 0">Activity scores will appear after real check-ins and posts.</div>';
+    const fav = $('.fav-cats');
+    if (fav) fav.innerHTML = user.interests.length ? user.interests.map(i => '<div class="fav-cat-chip">' + esc(i) + '</div>').join('') : '<div style="color:var(--text-muted);font-size:0.85rem">No interests set yet</div>';
+    const mostLiked = $('#mostLikedReviewCard');
+    if (mostLiked) mostLiked.innerHTML = '<div class="sidebar-card-title">Most Helpful Review</div><div style="color:var(--text-muted);font-size:0.85rem">No reviews yet</div>';
+    const activity = $('.activity-feed .activity-feed-list');
+    if (activity) activity.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;padding:12px 0">No real activity yet</div>';
+    const mapPins = $$('.geo-map-widget .city-pin'); mapPins.forEach(p => p.remove());
+    const followingCard = $('.following-card');
+    if (followingCard) followingCard.innerHTML = '<div class="following-header">People You May Know</div><div style="padding:16px 0;text-align:center;color:var(--text-muted);font-size:0.85rem">No suggestions yet</div>';
+  }
+
+  function renderHighlights() {
+    const strip = $('.profile-highlights');
+    if (!strip) return;
+    strip.innerHTML = '<div class="highlight-item highlight-add" data-add-highlight><div class="highlight-ring add-ring"><i class="fas fa-plus"></i></div><div class="highlight-label">New</div></div>';
+  }
+
+  function renderPosts(user) {
+    const tab = $('#tab-posts'); if (!tab) return;
+    tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-spinner fa-spin"></i><p>Loading posts…</p></div>';
+    const cb = (posts) => {
+      const count = $('.ptab[data-tab="posts"] .tab-count'); if (count) count.textContent = posts.length;
+      if (!posts.length) {
+        tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-seedling"></i><h3>No posts yet</h3><p>Real posts from Firestore will appear here.</p><a href="feed.html" class="btn btn-primary btn-sm" style="margin-top:12px">Create Post</a></div>';
+        return;
       }
-    }
-    document.querySelector('.profile-bio').textContent = user.bio;
-    document.querySelector('.trust-badges').innerHTML = `
-      <span class="trust-badge green"><i class="fas fa-check-circle"></i> ${user.explorerLevel}</span>
-      <span class="trust-badge gold"><i class="fas fa-star"></i> ${compactProfile(user.xp)} XP</span>
-      <span class="trust-badge blue"><i class="fas fa-ranking-star"></i> ${user.rank >= 9000 ? 'New Explorer' : 'Rank #' + user.rank}</span>
-      <span class="trust-badge purple"><i class="fas fa-id-badge"></i> ${user.accountType}</span>
-      <span class="trust-badge green"><i class="fas fa-map-marker-alt"></i> Real Check-ins: ${user.visitedPlaces}</span>`;
-    updateStats(user);
+      tab.innerHTML = '<div class="posts-grid">' + posts.map(post => '<div class="post-thumb">' +
+        (post.mediaUrl ? '<img src="' + esc(post.mediaUrl) + '" alt="Post">' : '<div style="background:var(--bg-elevated);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1rem;padding:16px;box-sizing:border-box;text-align:center;color:var(--text-secondary)">' + esc(post.text || '') + '</div>') +
+        '<div class="post-overlay"><span><i class="fas fa-heart"></i> ' + (post.likeCount || 0) + '</span><span><i class="fas fa-comment"></i> ' + (post.commentCount || 0) + '</span></div></div>').join('') + '</div>';
+    };
+    if (window.GeoSocial && window.GeoSocial.listenUserPosts) window.GeoSocial.listenUserPosts(user.uid, cb);
+    else window.addEventListener('GeoSocialReady', () => window.GeoSocial && window.GeoSocial.listenUserPosts(user.uid, cb), { once: true });
+  }
+
+  function emptyTab(id, icon, title, text, ctaHref, ctaText) {
+    const el = $(id); if (!el) return;
+    el.innerHTML = '<div class="empty-profile-state"><i class="fas ' + icon + '"></i><h3>' + title + '</h3><p>' + text + '</p>' + (ctaHref ? '<a href="' + ctaHref + '" class="btn btn-primary btn-sm" style="margin-top:12px">' + ctaText + '</a>' : '') + '</div>';
+  }
+
+  function renderPlaces() { emptyTab('#tab-places', 'fa-map-marker-alt', 'No visited places yet', 'Check in to real places and they will appear here.', 'map.html', 'Explore Map'); }
+  function renderRewards() { emptyTab('#tab-rewards', 'fa-gift', 'No rewards yet', 'Rewards will appear after real XP and business offers are connected.', 'rewards.html', 'Open Rewards'); }
+  function renderChallenges() { emptyTab('#tab-challenges', 'fa-trophy', 'No challenges yet', 'Real challenges will appear here when added by GeoHub.', null, ''); }
+  function renderReviews() { emptyTab('#tab-reviews', 'fa-star', 'No reviews yet', 'Real reviews will appear here after you write them.', 'reviews.html', 'Write Review'); }
+
+  function renderCheckins(user) {
+    const tab = $('#tab-checkins'); if (!tab) return;
+    tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-spinner fa-spin"></i><p>Loading check-ins…</p></div>';
+    const cb = (items) => {
+      const count = $('.ptab[data-tab="checkins"] .tab-count'); if (count) count.textContent = items.length;
+      const places = $('.ptab[data-tab="places"] .tab-count'); if (places) places.textContent = items.length;
+      if (!items.length) {
+        tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-location-dot"></i><h3>No check-ins yet</h3><p>Only real Firestore check-ins will appear here.</p><a href="checkin.html" class="btn btn-primary btn-sm" style="margin-top:12px">Create Check-in</a></div>';
+        return;
+      }
+      tab.innerHTML = '<div class="checkin-timeline">' + items.map(c => '<div class="checkin-item"><div class="checkin-date-badge"><div class="checkin-day">' + (tsToDate(c.createdAt) ? tsToDate(c.createdAt).getDate() : '—') + '</div><div class="checkin-month">' + (tsToDate(c.createdAt) ? tsToDate(c.createdAt).toLocaleDateString('en-US', {month:'short'}) : '') + '</div></div><div class="checkin-card"><div class="checkin-card-body"><div class="checkin-name">' + esc(c.placeName || 'GeoHub place') + '</div><div class="checkin-meta"><i class="fas fa-map-marker-alt"></i> Real check-in</div><div class="checkin-actions"><span><i class="fas fa-bolt"></i> +' + (c.xpAwarded || 0) + ' XP</span></div></div></div></div>').join('') + '</div>';
+    };
+    if (window.GeoSocial && window.GeoSocial.listenUserCheckins) window.GeoSocial.listenUserCheckins(user.uid, cb);
+    else window.addEventListener('GeoSocialReady', () => window.GeoSocial && window.GeoSocial.listenUserCheckins(user.uid, cb), { once: true });
+  }
+
+  function wireActions(user) {
+    document.addEventListener('click', function (e) {
+      const edit = e.target.closest('[data-edit-profile]');
+      if (edit) { e.preventDefault(); window.GeoAuth && window.GeoAuth.showAccountSettings && window.GeoAuth.showAccountSettings(); return; }
+      const share = e.target.closest('[data-share-profile]');
+      if (share) { e.preventDefault(); navigator.clipboard && navigator.clipboard.writeText(location.href).catch(()=>{}); toast('Profile link copied'); return; }
+      const follow = e.target.closest('[data-follow-user]');
+      if (follow) { e.preventDefault(); const uid = follow.getAttribute('data-follow-user'); if (window.GeoSocial) window.GeoSocial.toggleFollow(uid, (ok) => { follow.innerHTML = ok ? '<i class="fas fa-check"></i> Following' : '<i class="fas fa-user-plus"></i> Follow'; }); return; }
+      const add = e.target.closest('[data-add-highlight]');
+      if (add) { e.preventDefault(); toast('Highlights will appear after real stories are added.'); }
+    });
+  }
+
+  function renderAll(user) {
     renderIdentity(user);
-    renderProfilePosts(user);
-    renderPlaces(user);
+    renderPosts(user);
     renderCheckins(user);
+    renderPlaces(user);
+    renderRewards(user);
     renderChallenges(user);
     renderReviews(user);
-    renderActivity(user);
-    renderProfileSidebar(user);
-    setTimeout(() => window.GeoHubSocial?.refresh?.(), 0);
+    wireActions(user);
   }
 
-  const _profileUser = resolveProfileUser();
-  if (_profileUser) renderDynamicProfile(_profileUser);
-
-  // Tab switching
-  function switchTab(tabId) {
-    document.querySelectorAll('.ptab').forEach(t => {
-      t.classList.toggle('active', t.dataset.tab === tabId);
-    });
-    document.querySelectorAll('.tab-panel').forEach(p => {
-      p.classList.toggle('active', p.id === 'tab-' + tabId);
-    });
+  function initTabs() {
+    $$('.ptab').forEach(tab => tab.addEventListener('click', () => {
+      if (tab.dataset.tab === 'reviews' && tab.getAttribute('onclick')) return;
+      $$('.ptab').forEach(t => t.classList.toggle('active', t === tab));
+      $$('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab.dataset.tab));
+    }));
   }
 
-  document.querySelectorAll('.ptab').forEach(tab => {
-    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
-  });
+  function start() {
+    initTabs();
+    function loadNow() {
+      loadProfile().then(user => {
+        if (!user) return userNotFound();
+        renderAll(user);
+      }).catch(err => { console.error('[Profile]', err); userNotFound(); });
+    }
+    if (window.GeoFirebase) loadNow();
+    else window.addEventListener('GeoFirebaseReady', loadNow, { once: true });
+  }
 
-  // Places filter chips
-  document.querySelectorAll('.places-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('.places-chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-    });
-  });
-
-  // Copy coupon code on click
-  document.querySelectorAll('.coupon-code').forEach(el => {
-    el.addEventListener('click', () => {
-      navigator.clipboard.writeText(el.textContent.trim()).catch(() => {});
-      const orig = el.textContent;
-      el.textContent = 'Copied!';
-      setTimeout(() => el.textContent = orig, 1500);
-    });
-  });
-
-  // Follow buttons
-  document.querySelectorAll('.follow-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      if (this.textContent === 'Follow') {
-        this.textContent = 'Following';
-        this.style.background = 'rgba(16,185,129,0.2)';
-      } else {
-        this.textContent = 'Follow';
-        this.style.background = '';
-      }
-    });
-  });
-  window.GeoHubSocial?.refresh?.();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();

@@ -5,7 +5,8 @@ import {
   signInWithPopup,
   signOut,
   onAuthStateChanged,
-  updateProfile
+  updateProfile,
+  sendPasswordResetEmail
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 
 const AUTH_KEY = 'geohub_auth_user';
@@ -122,6 +123,14 @@ async function fbLogout() {
   try { localStorage.removeItem(AUTH_KEY); } catch (e) {}
 }
 
+
+async function fbResetPassword(email) {
+  var auth = window.GeoFirebase && window.GeoFirebase.auth;
+  if (!auth) throw new Error('Firebase not available');
+  if (!email) throw new Error('Email is required');
+  await sendPasswordResetEmail(auth, email);
+}
+
 function onAuthChange(callback) {
   var auth = window.GeoFirebase && window.GeoFirebase.auth;
   if (!auth) return;
@@ -142,5 +151,6 @@ window.GeoFirebaseAuth = {
   googleLogin: fbGoogleLogin,
   logout: fbLogout,
   onAuthChange: onAuthChange,
-  saveUserToFirestore: saveUserToFirestore
+  saveUserToFirestore: saveUserToFirestore,
+  resetPassword: fbResetPassword
 };

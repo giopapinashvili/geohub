@@ -55,7 +55,7 @@
   <div class="ftb-right">
     <button class="ftb-icon-btn"><i class="fas fa-bell"></i><span class="ftb-badge">5</span></button>
     <a href="profile.html" class="ftb-profile-link">
-      <img src="https://picsum.photos/seed/gio_user/40/40" alt="Profile" class="ftb-profile-avatar" id="ftbAvatar">
+      <img src="https://api.dicebear.com/7.x/initials/svg?seed=GeoHub" alt="Profile" class="ftb-profile-avatar" id="ftbAvatar">
       <div class="ftb-online-dot"></div>
     </a>
   </div>
@@ -68,7 +68,7 @@
   <aside class="feed-left-sidebar">
 
     <a href="profile.html" class="fls-profile-row" id="feedSidebarUser">
-      <img src="https://picsum.photos/seed/gio_user/38/38" alt="You" class="fls-profile-avatar" id="feedSidebarAvatar">
+      <img src="https://api.dicebear.com/7.x/initials/svg?seed=GeoHub" alt="You" class="fls-profile-avatar" id="feedSidebarAvatar">
       <span class="fls-profile-name" id="feedSidebarName">Gio Papinashvili</span>
     </a>
 
@@ -89,22 +89,10 @@
     <div class="fls-section-label">SHORTCUTS</div>
 
     <nav class="fls-shortcuts">
-      <a href="groups.html" class="fls-shortcut-item">
-        <img src="https://picsum.photos/seed/tbilisi_exp/32/32" alt="" class="fls-sc-img">
-        <span>Tbilisi Explorers</span>
-      </a>
-      <a href="groups.html" class="fls-shortcut-item">
-        <img src="https://picsum.photos/seed/geo_drone/32/32" alt="" class="fls-sc-img">
-        <span>Georgia Drone</span>
-      </a>
-      <a href="groups.html" class="fls-shortcut-item">
-        <img src="https://picsum.photos/seed/caucasus_h/32/32" alt="" class="fls-sc-img">
-        <span>Caucasus Hikers</span>
-      </a>
-      <a href="index.html" class="fls-shortcut-item">
-        <div class="fls-sc-logo">GH</div>
-        <span>GeoHub Official</span>
-      </a>
+      <a href="groups.html" class="fls-shortcut-item"><div class="fls-sc-logo">GR</div><span>Groups</span></a>
+      <a href="events.html" class="fls-shortcut-item"><div class="fls-sc-logo">EV</div><span>Events</span></a>
+      <a href="map.html" class="fls-shortcut-item"><div class="fls-sc-logo">MP</div><span>Map</span></a>
+      <a href="index.html" class="fls-shortcut-item"><div class="fls-sc-logo">GH</div><span>GeoHub Official</span></a>
     </nav>
     <button class="fls-see-more"><i class="fas fa-chevron-down"></i> See more</button>
 
@@ -126,7 +114,7 @@
 
           <div class="fd-story-card fd-story-add-card">
             <div class="fd-story-visual">
-              <img src="https://picsum.photos/seed/gio_story/100/130" alt="" class="fd-story-bg" id="composerStoryBg">
+              <div class="fd-story-bg" id="composerStoryBg" style="background:linear-gradient(135deg,#0f172a,#10b981)"></div>
               <div class="fd-story-add-icon"><i class="fas fa-plus"></i></div>
             </div>
             <span class="fd-story-label">Your Story</span>
@@ -140,7 +128,7 @@
       <!-- POST COMPOSER -->
       <div class="fd-card fd-composer">
         <div class="fd-composer-row">
-          <img src="https://picsum.photos/seed/gio_user/42/42" alt="You" class="fd-composer-avatar" id="composerAvatar">
+          <img src="https://api.dicebear.com/7.x/initials/svg?seed=GeoHub" alt="You" class="fd-composer-avatar" id="composerAvatar">
           <input type="text" id="composerInput" class="fd-composer-input" placeholder="What's on your mind?">
           <button id="composerPostBtn" class="fd-composer-post-btn" title="Post"><i class="fas fa-paper-plane"></i></button>
         </div>
@@ -167,36 +155,7 @@
           <span>Events Near You</span>
           <a href="events.html" class="frs-see-all">See All</a>
         </div>
-        <div class="frs-event">
-          <div class="frs-ev-img" style="background:linear-gradient(135deg,#7c3aed,#4f46e5)">
-            <i class="fas fa-music"></i>
-          </div>
-          <div class="frs-ev-info">
-            <div class="frs-ev-name">TBILISI OPEN AIR</div>
-            <div class="frs-ev-sub">Music Festival · May 25 · Tbilisi</div>
-          </div>
-          <button class="frs-star-btn" data-event-id="tbilisi-open-air-2026" data-event-name="TBILISI OPEN AIR"><i class="far fa-star"></i></button>
-        </div>
-        <div class="frs-event">
-          <div class="frs-ev-img" style="background:linear-gradient(135deg,#10b981,#3b82f6)">
-            <i class="fas fa-mountain"></i>
-          </div>
-          <div class="frs-ev-info">
-            <div class="frs-ev-name">Mountain Hike</div>
-            <div class="frs-ev-sub">May 26 · Stepantsminda</div>
-          </div>
-          <button class="frs-star-btn" data-event-id="mountain-hike-kazbegi-2026" data-event-name="Mountain Hike"><i class="far fa-star"></i></button>
-        </div>
-        <div class="frs-event">
-          <div class="frs-ev-img" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">
-            <i class="fas fa-laptop-code"></i>
-          </div>
-          <div class="frs-ev-info">
-            <div class="frs-ev-name">Tbilisi Tech Meetup</div>
-            <div class="frs-ev-sub">Community · May 28 · Tbilisi</div>
-          </div>
-          <button class="frs-star-btn" data-event-id="tbilisi-tech-meetup-2026" data-event-name="Tbilisi Tech Meetup"><i class="far fa-star"></i></button>
-        </div>
+        <div style="padding:16px 0;text-align:center;color:var(--text-muted);font-size:0.82rem">No real events yet</div>
       </div>
 
       <!-- Suggested Groups -->
@@ -205,30 +164,7 @@
           <span>Suggested Groups</span>
           <a href="groups.html" class="frs-see-all">See All</a>
         </div>
-        <div class="frs-group">
-          <img src="https://picsum.photos/seed/geotravel_g/48/48" alt="" class="frs-group-img">
-          <div class="frs-group-info">
-            <div class="frs-group-name">Georgia Travel</div>
-            <div class="frs-group-meta">12.4K members</div>
-          </div>
-          <button class="frs-join-btn" data-group-id="georgia-travel" data-group-name="Georgia Travel">Join</button>
-        </div>
-        <div class="frs-group">
-          <img src="https://picsum.photos/seed/hikege_g/48/48" alt="" class="frs-group-img">
-          <div class="frs-group-info">
-            <div class="frs-group-name">Hiking in Georgia</div>
-            <div class="frs-group-meta">8.7K members</div>
-          </div>
-          <button class="frs-join-btn" data-group-id="hiking-in-georgia" data-group-name="Hiking in Georgia">Join</button>
-        </div>
-        <div class="frs-group">
-          <img src="https://picsum.photos/seed/dronege_g/48/48" alt="" class="frs-group-img">
-          <div class="frs-group-info">
-            <div class="frs-group-name">Drone Georgia</div>
-            <div class="frs-group-meta">5.3K members</div>
-          </div>
-          <button class="frs-join-btn" data-group-id="drone-georgia" data-group-name="Drone Georgia">Join</button>
-        </div>
+        <div style="padding:16px 0;text-align:center;color:var(--text-muted);font-size:0.82rem">No real groups yet</div>
       </div>
 
       <!-- People You May Know -->
@@ -280,7 +216,7 @@
         <a href="map.html" class="fdb-see-all">See Full Map</a>
       </div>
       <a href="map.html" class="fdb-map-wrap">
-        <img src="https://picsum.photos/seed/map_bg/400/200" alt="Map" class="fdb-map-bg">
+        <div class="fdb-map-bg" style="background:linear-gradient(135deg,#0f172a,#1e293b);width:100%;height:100%;position:absolute;inset:0"></div>
         <div class="fdb-map-overlay"></div>
         <div class="fdb-map-cta">Open Map <i class="fas fa-arrow-right"></i></div>
       </a>

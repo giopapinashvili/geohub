@@ -124,6 +124,7 @@
           text: text.trim(),
           mediaUrl: mediaUrl || null,
           authorId: user.uid,
+          userId: user.uid,
           authorName: me.name || user.displayName || 'GeoHub User',
           authorAvatar: me.avatar || user.photoURL || '',
           likeCount: 0,
@@ -166,14 +167,14 @@
               tx.update(postRef, { likeCount: increment(-1) });
               nextLiked = false;
             } else {
-              tx.set(likeRef, { uid: uid, createdAt: serverTimestamp() });
+              tx.set(likeRef, { uid: uid, userId: uid, createdAt: serverTimestamp() });
               tx.update(postRef, { likeCount: increment(1) });
               nextLiked = true;
             }
           });
         }) : (currentlyLiked
           ? deleteDoc(likeRef).then(function () { nextLiked = false; return updateDoc(postRef, { likeCount: increment(-1) }); })
-          : setDoc(likeRef, { uid: uid, createdAt: serverTimestamp() }).then(function () { nextLiked = true; return updateDoc(postRef, { likeCount: increment(1) }); })
+          : setDoc(likeRef, { uid: uid, userId: uid, createdAt: serverTimestamp() }).then(function () { nextLiked = true; return updateDoc(postRef, { likeCount: increment(1) }); })
         );
 
         work.then(function () {
@@ -201,6 +202,7 @@
         addDoc(collection(db, 'posts', postId, 'comments'), {
           text: text.trim(),
           authorId: user.uid,
+          userId: user.uid,
           authorName: me.name || user.displayName || 'GeoHub User',
           authorAvatar: me.avatar || user.photoURL || '',
           likes: 0,
@@ -241,7 +243,7 @@
               if (callback) callback(false);
             });
           } else {
-            return setDoc(ref, { followerId: uid, targetId: targetUserId, createdAt: serverTimestamp() })
+            return setDoc(ref, { followerId: uid, followingId: targetUserId, targetId: targetUserId, createdAt: serverTimestamp() })
               .then(function () {
                 toast('Following');
                 if (callback) callback(true);
@@ -274,7 +276,7 @@
               if (callback) callback(false);
             });
           } else {
-            return setDoc(ref, { uid: uid, postId: postId, createdAt: serverTimestamp() })
+            return setDoc(ref, { uid: uid, userId: uid, postId: postId, createdAt: serverTimestamp() })
               .then(function () {
                 toast('Post saved');
                 if (callback) callback(true);
@@ -299,7 +301,7 @@
               if (callback) callback(false);
             });
           } else {
-            return setDoc(ref, { groupId: groupId, groupName: groupName || '', uid: uid, joinedAt: serverTimestamp() })
+            return setDoc(ref, { groupId: groupId, groupName: groupName || '', uid: uid, userId: uid, status: 'joined', joinedAt: serverTimestamp(), createdAt: serverTimestamp() })
               .then(function () {
                 toast('Joined ' + (groupName || 'group') + '!');
                 if (callback) callback(true);
@@ -324,7 +326,7 @@
               if (callback) callback(false);
             });
           } else {
-            return setDoc(ref, { eventId: eventId, eventName: eventName || '', uid: uid, status: status || 'going', joinedAt: serverTimestamp() })
+            return setDoc(ref, { eventId: eventId, eventName: eventName || '', uid: uid, userId: uid, status: status || 'going', joinedAt: serverTimestamp(), createdAt: serverTimestamp() })
               .then(function () {
                 toast((status === 'interested' ? 'Interested in ' : 'Going to ') + (eventName || 'event') + '!');
                 if (callback) callback(true);
@@ -343,7 +345,7 @@
         var uid = user.uid;
         if (uid === toUserId) return;
         var ref = doc(db, 'friendRequests', uid + '_' + toUserId);
-        setDoc(ref, { fromId: uid, toId: toUserId, status: 'pending', createdAt: serverTimestamp() }, { merge: false })
+        setDoc(ref, { fromId: uid, fromUserId: uid, toId: toUserId, toUserId: toUserId, status: 'pending', createdAt: serverTimestamp() }, { merge: false })
           .then(function () {
             toast('Friend request sent!');
             if (callback) callback();
@@ -363,6 +365,7 @@
           placeName: placeName || '',
           xpAwarded: xpAwarded || 50,
           authorId: user.uid,
+          userId: user.uid,
           authorName: me.name || user.displayName || 'GeoHub User',
           authorAvatar: me.avatar || user.photoURL || '',
           createdAt: serverTimestamp()
@@ -384,6 +387,7 @@
           text: text || '',
           mediaUrl: mediaUrl || null,
           authorId: user.uid,
+          userId: user.uid,
           authorName: me.name || user.displayName || 'GeoHub User',
           authorAvatar: me.avatar || user.photoURL || '',
           createdAt: serverTimestamp(),

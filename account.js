@@ -272,6 +272,7 @@
           '</div>' +
           '<div class="settings-save-row">' +
             '<button type="submit" class="auth-submit" style="width:auto;padding:11px 28px;">Save Changes</button>' +
+            '<button type="button" id="changePasswordBtn" class="btn btn-ghost btn-sm" style="margin-left:8px"><i class="fas fa-key"></i> Change password</button>' +
             '<div class="settings-success" id="settingsSaved" style="display:none;">' +
               '<i class="fas fa-check-circle"></i> Saved!' +
             '</div>' +
@@ -287,6 +288,23 @@
     });
     m.querySelector('#settingsClose').addEventListener('click', function () { closeModal(m); });
     m.addEventListener('click', function (e) { if (e.target === m) closeModal(m); });
+    var cpBtn = m.querySelector('#changePasswordBtn');
+    if (cpBtn) cpBtn.addEventListener('click', function () {
+      var email = (window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser && window.GeoFirebase.auth.currentUser.email) || user.email;
+      if (!email) return alert('No email found for this account.');
+      cpBtn.disabled = true;
+      cpBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
+      (window.GeoFirebaseAuth && window.GeoFirebaseAuth.resetPassword ? window.GeoFirebaseAuth.resetPassword(email) : Promise.reject(new Error('Firebase Auth not ready')))
+        .then(function () {
+          cpBtn.innerHTML = '<i class="fas fa-check"></i> Password reset email sent';
+          setTimeout(function(){ cpBtn.disabled = false; cpBtn.innerHTML = '<i class="fas fa-key"></i> Change password'; }, 3500);
+        })
+        .catch(function (err) {
+          cpBtn.disabled = false;
+          cpBtn.innerHTML = '<i class="fas fa-key"></i> Change password';
+          alert(err && err.message ? err.message : 'Could not send password reset email.');
+        });
+    });
 
     m.querySelector('#settingsForm').addEventListener('submit', function (e) {
       e.preventDefault();
