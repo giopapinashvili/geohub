@@ -31,10 +31,10 @@
   var liveRunning    = true;
   var liveFeedCount  = 0;
   var liveTimer      = null;
-  var liveActiveCount = 47;
+  var liveActiveCount = 0;
   var selectedUser   = null;
   var modItems       = MOD_QUEUE.slice();
-  var notifCount     = 3;
+  var notifCount     = 0;
 
   /* ── NAVIGATION ──────────────────────────────────────────── */
   window.adminNav = function (section) {
@@ -72,26 +72,73 @@
     }, 2500);
   }
 
+  /* ── REAL STATS FROM LOCALSTORAGE ───────────────────────── */
+  function loadRealStats() {
+    // Count businesses registered via the dashboard form
+    var bizCount = 0;
+    try {
+      Object.keys(localStorage).forEach(function(k) {
+        if (k.startsWith('geohub_business_')) bizCount++;
+      });
+    } catch(_) {}
+
+    // Update overview KPI cards
+    var el;
+    el = document.getElementById('stat-biz');   if (el) el.textContent = bizCount;
+    el = document.getElementById('stat-events'); if (el) el.textContent = '0';
+    el = document.getElementById('stat-rev');    if (el) el.textContent = '₾0';
+    el = document.getElementById('stat-checkins'); if (el) el.textContent = '0';
+    el = document.getElementById('stat-reviews');  if (el) el.textContent = '0';
+    el = document.getElementById('stat-rewards');  if (el) el.textContent = '0';
+    el = document.getElementById('stat-missions'); if (el) el.textContent = '0';
+    el = document.getElementById('stat-reports');  if (el) el.textContent = '0';
+    el = document.getElementById('stat-trust');    if (el) el.textContent = '—';
+
+    // Sidebar badges
+    el = document.getElementById('sb-biz-side'); if (el) el.textContent = bizCount;
+    el = document.getElementById('sb-creators');  if (el) el.textContent = '0';
+    el = document.getElementById('sb-notif');     if (el) el.textContent = '0';
+    el = document.getElementById('sb-live');      if (el) el.textContent = '0';
+    el = document.getElementById('sb-users');     if (el) el.textContent = '—';
+
+    // Subtitles
+    el = document.getElementById('bizSubtitle');
+    if (el) el.textContent = bizCount + ' registered · Verify, feature, approve';
+    el = document.getElementById('usersSubtitle');
+    if (el) el.textContent = 'Firebase-authenticated accounts';
+
+    // Users table: show empty state
+    var tbody = document.getElementById('usersBody');
+    if (tbody && !USERS.length) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ts);font-size:0.85rem">' +
+        '<i class="fas fa-users" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>' +
+        'User list requires Firebase Admin SDK — not available in static mode.<br>' +
+        '<span style="font-size:0.75rem;opacity:0.6;margin-top:4px;display:block">Connect a backend to list all registered users.</span>' +
+        '</td></tr>';
+    }
+  }
+
   /* ── SPARKLINES ──────────────────────────────────────────── */
   function buildSparklines() {
+    // Flat sparklines — no fake growth data
     var configs = [
-      { id:'sp-users', color:'#10b981', data:[22,31,28,35,40,38,44,51,48,58,62,55,70,78] },
-      { id:'sp-biz',   color:'#3b82f6', data:[10,12,11,14,13,16,15,17,16,18,17,19,18,18] },
-      { id:'sp-ev',    color:'#f59e0b', data:[8,9,11,10,12,14,13,15,14,16,15,18,17,14]   },
-      { id:'sp-rev',   color:'#a855f7', data:[18,22,20,25,28,26,30,32,29,34,38,35,40,43] }
+      { id:'sp-users', color:'#10b981' },
+      { id:'sp-biz',   color:'#3b82f6' },
+      { id:'sp-ev',    color:'#f59e0b' },
+      { id:'sp-rev',   color:'#a855f7' }
     ];
     configs.forEach(function (cfg) {
       var wrap = document.getElementById(cfg.id);
       if (!wrap) return;
-      var max = Math.max.apply(null, cfg.data);
       wrap.innerHTML = '';
-      cfg.data.forEach(function (v) {
+      for (var i = 0; i < 14; i++) {
         var b = document.createElement('div');
         b.className = 'sp';
         b.style.background = cfg.color;
-        b.style.height = Math.max(3, Math.round((v / max) * 24)) + 'px';
+        b.style.height = '3px';
+        b.style.opacity = '0.3';
         wrap.appendChild(b);
-      });
+      }
     });
   }
 
@@ -133,8 +180,8 @@
   }
 
   function drawOverviewCharts() {
-    var growthData  = [120,145,132,160,178,165,192,210,198,224,241,228,260,278,265,290,312,298,324,310,340,328,356,342,368,354,380,398,384,412];
-    var dauData     = [42,48,44,52,58,54,61,68,64,72,78,74,82,88];
+    var growthData  = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1];
+    var dauData     = [0,0,0,0,0,0,0,0,0,0,0,0,0,1];
 
     var gc = document.getElementById('growthChart');
     var dc = document.getElementById('dauChart');
@@ -191,7 +238,7 @@
     if (!canvas) return;
     canvas.width = canvas.offsetWidth || 700;
     var ctx = canvas.getContext('2d');
-    var data = [28000,30200,29800,31500,33000,32400,34800,36200,35400,37800,39100,38400,40200,41800,40600,42840];
+    var data = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
     drawLine(ctx, data, '#a855f7', 'rgba(168,85,247,0.08)', canvas.width, canvas.height);
   }
 
@@ -540,6 +587,7 @@
 
   /* ── INIT ────────────────────────────────────────────────── */
   function init() {
+    loadRealStats();
     buildSparklines();
     buildHourBars();
     renderUsers();

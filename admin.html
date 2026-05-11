@@ -48,12 +48,12 @@
   <aside class="sidebar">
     <div class="sb-lbl">Platform</div>
     <div class="sb-item active" onclick="adminNav('overview')"><span class="sb-ic"><i class="fas fa-th-large"></i></span> Overview</div>
-    <div class="sb-item" onclick="adminNav('live')"><span class="sb-ic"><i class="fas fa-circle" style="color:var(--green);font-size:0.55rem"></i></span> Live Monitor <span class="sb-cnt" id="sb-live">47</span></div>
-    <div class="sb-item" onclick="adminNav('notifications')"><span class="sb-ic"><i class="fas fa-bell"></i></span> Notifications <span class="sb-cnt danger" id="sb-notif">3</span></div>
+    <div class="sb-item" onclick="adminNav('live')"><span class="sb-ic"><i class="fas fa-circle" style="color:var(--green);font-size:0.55rem"></i></span> Live Monitor <span class="sb-cnt" id="sb-live">0</span></div>
+    <div class="sb-item" onclick="adminNav('notifications')"><span class="sb-ic"><i class="fas fa-bell"></i></span> Notifications <span class="sb-cnt danger" id="sb-notif">0</span></div>
     <div class="sb-lbl">Management</div>
-    <div class="sb-item" onclick="adminNav('users')"><span class="sb-ic"><i class="fas fa-users"></i></span> Users <span class="sb-cnt">3.2k</span></div>
-    <div class="sb-item" onclick="adminNav('businesses')"><span class="sb-ic"><i class="fas fa-store"></i></span> Businesses <span class="sb-cnt">284</span></div>
-    <div class="sb-item" onclick="adminNav('creators')"><span class="sb-ic"><i class="fas fa-star"></i></span> Creators <span class="sb-cnt">89</span></div>
+    <div class="sb-item" onclick="adminNav('users')"><span class="sb-ic"><i class="fas fa-users"></i></span> Users <span class="sb-cnt" id="sb-users">—</span></div>
+    <div class="sb-item" onclick="adminNav('businesses')"><span class="sb-ic"><i class="fas fa-store"></i></span> Businesses <span class="sb-cnt" id="sb-biz-side">0</span></div>
+    <div class="sb-item" onclick="adminNav('creators')"><span class="sb-ic"><i class="fas fa-star"></i></span> Creators <span class="sb-cnt" id="sb-creators">0</span></div>
     <div class="sb-lbl">Safety</div>
     <div class="sb-item" onclick="adminNav('moderation')"><span class="sb-ic"><i class="fas fa-flag"></i></span> Moderation <span class="sb-cnt danger" id="sb-mod">12</span></div>
     <div class="sb-item" onclick="adminNav('trust')"><span class="sb-ic"><i class="fas fa-check-circle"></i></span> Trust & Safety</div>
@@ -81,38 +81,38 @@
 
       <div class="g4 mb12">
         <div class="sc green">
-          <div class="sc-ico">👥</div><div class="sc-val">3,241</div><div class="sc-lbl">Total Users</div>
-          <div class="sc-delta du"><i class="fas fa-arrow-up"></i> +127 this week</div>
+          <div class="sc-ico">👥</div><div class="sc-val" id="stat-users">—</div><div class="sc-lbl">Total Users</div>
+          <div class="sc-delta" id="delta-users" style="color:var(--ts);font-size:0.72rem">Firebase · live count</div>
           <div class="sparkrow" id="sp-users"></div>
           <div class="sc-glow" style="background:radial-gradient(#10b981,transparent)"></div>
         </div>
         <div class="sc blue">
-          <div class="sc-ico">🏢</div><div class="sc-val">284</div><div class="sc-lbl">Businesses</div>
-          <div class="sc-delta du"><i class="fas fa-arrow-up"></i> +18 this month</div>
+          <div class="sc-ico">🏢</div><div class="sc-val" id="stat-biz">0</div><div class="sc-lbl">Businesses</div>
+          <div class="sc-delta" id="delta-biz" style="color:var(--ts);font-size:0.72rem">registered via dashboard</div>
           <div class="sparkrow" id="sp-biz"></div>
           <div class="sc-glow" style="background:radial-gradient(#3b82f6,transparent)"></div>
         </div>
         <div class="sc gold">
-          <div class="sc-ico">📅</div><div class="sc-val">142</div><div class="sc-lbl">Active Events</div>
-          <div class="sc-delta du"><i class="fas fa-arrow-up"></i> +23 this week</div>
+          <div class="sc-ico">📅</div><div class="sc-val" id="stat-events">0</div><div class="sc-lbl">Active Events</div>
+          <div class="sc-delta" style="color:var(--ts);font-size:0.72rem">coming soon</div>
           <div class="sparkrow" id="sp-ev"></div>
           <div class="sc-glow" style="background:radial-gradient(#f59e0b,transparent)"></div>
         </div>
         <div class="sc purple">
-          <div class="sc-ico">💰</div><div class="sc-val">₾42.8k</div><div class="sc-lbl">Monthly Revenue</div>
-          <div class="sc-delta du"><i class="fas fa-arrow-up"></i> +31% MoM</div>
+          <div class="sc-ico">💰</div><div class="sc-val" id="stat-rev">₾0</div><div class="sc-lbl">Monthly Revenue</div>
+          <div class="sc-delta" style="color:var(--ts);font-size:0.72rem">Beta — no payments yet</div>
           <div class="sparkrow" id="sp-rev"></div>
           <div class="sc-glow" style="background:radial-gradient(#a855f7,transparent)"></div>
         </div>
       </div>
 
       <div class="g6 mb20">
-        <div class="sc"><div class="sc-ico" style="font-size:1rem">📍</div><div class="sc-val" style="font-size:1.1rem;color:var(--green)">18,420</div><div class="sc-lbl">Check-ins</div></div>
-        <div class="sc"><div class="sc-ico" style="font-size:1rem">⭐</div><div class="sc-val" style="font-size:1.1rem;color:var(--gold)">6,841</div><div class="sc-lbl">Reviews</div></div>
-        <div class="sc"><div class="sc-ico" style="font-size:1rem">🎁</div><div class="sc-val" style="font-size:1.1rem;color:var(--blue)">3,127</div><div class="sc-lbl">Rewards Claimed</div></div>
-        <div class="sc"><div class="sc-ico" style="font-size:1rem">🛡️</div><div class="sc-val" style="font-size:1.1rem;color:var(--orange)">891</div><div class="sc-lbl">Patriot Missions</div></div>
-        <div class="sc"><div class="sc-ico" style="font-size:1rem">🚩</div><div class="sc-val" style="font-size:1.1rem;color:var(--red)">47</div><div class="sc-lbl">Open Reports</div></div>
-        <div class="sc"><div class="sc-ico" style="font-size:1rem">🏆</div><div class="sc-val" style="font-size:1.1rem;color:var(--purple)">72.4</div><div class="sc-lbl">Avg Trust Score</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">📍</div><div class="sc-val" id="stat-checkins" style="font-size:1.1rem;color:var(--green)">0</div><div class="sc-lbl">Check-ins</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">⭐</div><div class="sc-val" id="stat-reviews" style="font-size:1.1rem;color:var(--gold)">0</div><div class="sc-lbl">Reviews</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">🎁</div><div class="sc-val" id="stat-rewards" style="font-size:1.1rem;color:var(--blue)">0</div><div class="sc-lbl">Rewards Claimed</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">🛡️</div><div class="sc-val" id="stat-missions" style="font-size:1.1rem;color:var(--orange)">0</div><div class="sc-lbl">Patriot Missions</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">🚩</div><div class="sc-val" id="stat-reports" style="font-size:1.1rem;color:var(--red)">0</div><div class="sc-lbl">Open Reports</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">🏆</div><div class="sc-val" id="stat-trust" style="font-size:1.1rem;color:var(--purple)">—</div><div class="sc-lbl">Avg Trust Score</div></div>
       </div>
 
       <div class="g2 mb12">
@@ -129,12 +129,8 @@
       <div class="g2">
         <div class="panel">
           <div class="panel-hdr"><div class="panel-title">Top Active Districts</div></div>
-          <div class="bl">
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">Rustaveli / Center</span><span class="bi-val" style="color:var(--green)">3,241</span></div><div class="bt"><div class="bf green" style="width:92%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">Old Town (Kala)</span><span class="bi-val" style="color:var(--green)">2,788</span></div><div class="bt"><div class="bf green" style="width:79%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">Vake / Saburtalo</span><span class="bi-val" style="color:var(--blue)">2,102</span></div><div class="bt"><div class="bf blue" style="width:60%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">Batumi Boulevard</span><span class="bi-val" style="color:var(--gold)">1,540</span></div><div class="bt"><div class="bf gold" style="width:44%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">Mtatsminda Park</span><span class="bi-val" style="color:var(--blue)">982</span></div><div class="bt"><div class="bf blue" style="width:28%"></div></div></div>
+          <div class="bl" id="districtsPanel">
+            <div style="text-align:center;padding:24px;color:var(--ts);font-size:0.82rem">No check-in data yet — districts will populate as users check in</div>
           </div>
         </div>
         <div class="panel">
@@ -153,13 +149,13 @@
     <!-- ─── LIVE MONITOR ─── -->
     <section class="sec" id="sec-live">
       <div class="ph">
-        <div><div class="ph-title">Live Monitor</div><div class="ph-sub"><span id="liveCountLabel">47</span> users active now · Updates every 3s</div></div>
+        <div><div class="ph-title">Live Monitor</div><div class="ph-sub"><span id="liveCountLabel">0</span> users active now · Updates every 3s</div></div>
         <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="toggleLive()" id="livePauseBtn"><i class="fas fa-pause"></i> Pause</button></div>
       </div>
       <div class="g3 mb16">
-        <div class="sc green" style="padding:13px"><div style="font-size:0.65rem;color:var(--ts);font-weight:700;margin-bottom:3px">ACTIVE NOW</div><div style="font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--green)" id="liveActiveNow">47</div><div style="font-size:0.68rem;color:var(--ts)">users online</div></div>
-        <div class="sc blue" style="padding:13px"><div style="font-size:0.65rem;color:var(--ts);font-weight:700;margin-bottom:3px">LIVE EVENTS</div><div style="font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--blue)">8</div><div style="font-size:0.68rem;color:var(--ts)">events running</div></div>
-        <div class="sc gold" style="padding:13px"><div style="font-size:0.65rem;color:var(--ts);font-weight:700;margin-bottom:3px">CHECK-INS TODAY</div><div style="font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--gold)" id="liveTodayCI">312</div><div style="font-size:0.68rem;color:var(--ts)">+47 in last hour</div></div>
+        <div class="sc green" style="padding:13px"><div style="font-size:0.65rem;color:var(--ts);font-weight:700;margin-bottom:3px">ACTIVE NOW</div><div style="font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--green)" id="liveActiveNow">0</div><div style="font-size:0.68rem;color:var(--ts)">users online</div></div>
+        <div class="sc blue" style="padding:13px"><div style="font-size:0.65rem;color:var(--ts);font-weight:700;margin-bottom:3px">LIVE EVENTS</div><div style="font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--blue)">0</div><div style="font-size:0.68rem;color:var(--ts)">events running</div></div>
+        <div class="sc gold" style="padding:13px"><div style="font-size:0.65rem;color:var(--ts);font-weight:700;margin-bottom:3px">CHECK-INS TODAY</div><div style="font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--gold)" id="liveTodayCI">0</div><div style="font-size:0.68rem;color:var(--ts)">no data yet</div></div>
       </div>
       <div class="g2">
         <div class="live-wrap">
@@ -190,7 +186,7 @@
     <!-- ─── USERS ─── -->
     <section class="sec" id="sec-users">
       <div class="ph">
-        <div><div class="ph-title">User Management</div><div class="ph-sub">3,241 total registered users</div></div>
+        <div><div class="ph-title">User Management</div><div class="ph-sub" id="usersSubtitle">Registered users</div></div>
       </div>
       <div class="asearch">
         <input class="asearch-inp" id="userSearch" placeholder="Search by name, handle, email…" oninput="filterUsers(this.value)">
@@ -217,7 +213,7 @@
     <!-- ─── BUSINESSES ─── -->
     <section class="sec" id="sec-businesses">
       <div class="ph">
-        <div><div class="ph-title">Business Management</div><div class="ph-sub">284 registered businesses · Verify, feature, approve</div></div>
+        <div><div class="ph-title">Business Management</div><div class="ph-sub" id="bizSubtitle">Verify, feature, approve</div></div>
         <div class="ph-actions"><button class="btn btn-ghost btn-sm"><i class="fas fa-filter"></i> Filter</button></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px" id="bizList"></div>
