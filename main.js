@@ -206,26 +206,7 @@
     }
   }
 
-  if (hamburger && mobileMenu) {
-    hamburger.addEventListener("click", () => {
-      mobileMenu.classList.toggle("open");
-      const spans = hamburger.querySelectorAll("span");
-      spans[0].style.transform = mobileMenu.classList.contains("open")
-        ? "rotate(45deg) translate(5px, 5px)"
-        : "";
-      spans[1].style.opacity = mobileMenu.classList.contains("open")
-        ? "0"
-        : "1";
-      spans[2].style.transform = mobileMenu.classList.contains("open")
-        ? "rotate(-45deg) translate(5px, -5px)"
-        : "";
-    });
-    document.addEventListener("click", (e) => {
-      if (!navbar.contains(e.target) && !mobileMenu.contains(e.target)) {
-        mobileMenu.classList.remove("open");
-      }
-    });
-  }
+  // Hamburger is handled by nav-cleanup.js via geoToggleMenu()
 
   // Set active nav link
   const currentPage = window.location.pathname.split("/").pop() || "index.html";

@@ -369,8 +369,7 @@
     var mobileMenu = document.querySelector('.mobile-menu');
     if (!hamburger || !mobileMenu) return;
 
-    hamburger.setAttribute('onclick', 'geoToggleMenu()');
-
+    // onclick="geoToggleMenu()" is already set in HTML — just wire close-on-outside-click
     document.addEventListener('click', function(e) {
       if (!mobileMenu.classList.contains('open')) return;
       if (hamburger.contains(e.target) || mobileMenu.contains(e.target)) return;
