@@ -1,6 +1,11 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
-import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+import {
+  getFirestore,
+  doc, setDoc, getDoc, getDocs, updateDoc,
+  collection, query, orderBy, where, limit,
+  onSnapshot, deleteDoc
+} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { getAnalytics, isSupported } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js';
 
 const firebaseConfig = {
@@ -17,9 +22,14 @@ try {
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
-  window.GeoFirebase = { app, auth, db };
+  window.GeoFirebase = {
+    app, auth, db,
+    fs: { doc, setDoc, getDoc, getDocs, updateDoc, collection, query, orderBy, where, limit, onSnapshot, deleteDoc }
+  };
   isSupported().then(ok => { if (ok) getAnalytics(app); }).catch(() => {});
+  window.dispatchEvent(new Event('GeoFirebaseReady'));
 } catch (err) {
-  console.warn('[GeoHub] Firebase init failed — running in mock-only mode.', err.message);
+  console.warn('[GeoHub] Firebase init failed — running in localStorage-only mode.', err.message);
   window.GeoFirebase = null;
+  window.dispatchEvent(new Event('GeoFirebaseReady'));
 }

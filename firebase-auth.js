@@ -45,9 +45,33 @@ function fbUserToGeoUser(fbUser) {
   };
 }
 
-function mergeWithStored(geoUser) {
-  var stored = readLS(AUTH_KEY);
-  if (stored && stored.uid === geoUser.uid) {
+/* Write user profile to Firestore users/{uid} */
+async function saveUserToFirestore(geoUser) {
+  try {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) return;
+    await fb.fs.setDoc(fb.fs.doc(fb.db, 'users', geoUser.uid), geoUser, { merge: true });
+  } catch (e) {
+    console.warn('[GeoHub] Firestore write failed:', e.message);
+  }
+}
+
+/* Read user profile from Firestore — returns null if not found */
+async function loadUserFromFirestore(uid) {
+  try {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) return null;
+    var snap = await fb.fs.getDoc(fb.fs.doc(fb.db, 'users', uid));
+    return snap.exists() ? snap.data() : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+/* Merge Firestore profile (authoritative) onto fresh fbUser data */
+async function mergeWithFirestore(geoUser) {
+  var stored = await loadUserFromFirestore(geoUser.uid);
+  if (stored) {
     var keep = ['fullName', 'username', 'bio', 'city', 'accountType', 'interests',
                 'coverImage', 'explorerLevel', 'xp', 'rank', 'badges',
                 'followers', 'following', 'postsCount', 'visitedPlaces', 'trustScore'];
@@ -63,6 +87,7 @@ async function fbSignUp(email, password, fullName) {
   if (fullName) await updateProfile(cred.user, { displayName: fullName });
   var geoUser = fbUserToGeoUser(cred.user);
   if (fullName) geoUser.fullName = fullName;
+  await saveUserToFirestore(geoUser);
   writeLS(AUTH_KEY, geoUser);
   return geoUser;
 }
@@ -71,7 +96,10 @@ async function fbSignIn(email, password) {
   var auth = window.GeoFirebase && window.GeoFirebase.auth;
   if (!auth) throw new Error('Firebase not available');
   var cred = await signInWithEmailAndPassword(auth, email, password);
-  var geoUser = mergeWithStored(fbUserToGeoUser(cred.user));
+  var geoUser = await mergeWithFirestore(fbUserToGeoUser(cred.user));
+  // Update last-seen timestamp in Firestore
+  geoUser.lastSeen = Date.now();
+  await saveUserToFirestore(geoUser);
   writeLS(AUTH_KEY, geoUser);
   return geoUser;
 }
@@ -81,7 +109,9 @@ async function fbGoogleLogin() {
   if (!auth) throw new Error('Firebase not available');
   var provider = new GoogleAuthProvider();
   var cred = await signInWithPopup(auth, provider);
-  var geoUser = mergeWithStored(fbUserToGeoUser(cred.user));
+  var geoUser = await mergeWithFirestore(fbUserToGeoUser(cred.user));
+  geoUser.lastSeen = Date.now();
+  await saveUserToFirestore(geoUser);
   writeLS(AUTH_KEY, geoUser);
   return geoUser;
 }
@@ -95,9 +125,9 @@ async function fbLogout() {
 function onAuthChange(callback) {
   var auth = window.GeoFirebase && window.GeoFirebase.auth;
   if (!auth) return;
-  onAuthStateChanged(auth, function (fbUser) {
+  onAuthStateChanged(auth, async function (fbUser) {
     if (fbUser) {
-      var geoUser = mergeWithStored(fbUserToGeoUser(fbUser));
+      var geoUser = await mergeWithFirestore(fbUserToGeoUser(fbUser));
       writeLS(AUTH_KEY, geoUser);
       callback(geoUser);
     } else {
@@ -111,5 +141,6 @@ window.GeoFirebaseAuth = {
   signIn: fbSignIn,
   googleLogin: fbGoogleLogin,
   logout: fbLogout,
-  onAuthChange: onAuthChange
+  onAuthChange: onAuthChange,
+  saveUserToFirestore: saveUserToFirestore
 };

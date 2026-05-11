@@ -72,31 +72,12 @@
     }, 2500);
   }
 
-  /* ── REAL STATS FROM LOCALSTORAGE ───────────────────────── */
-  function loadRealStats() {
-    var bizCount = 0;
-    var userCount = 0;
-    var registeredUsers = [];
-    try {
-      Object.keys(localStorage).forEach(function(k) {
-        if (k.startsWith('geohub_business_')) bizCount++;
-      });
-      var stored = localStorage.getItem('geohub_registered_users');
-      registeredUsers = stored ? JSON.parse(stored) : [];
-      if (!Array.isArray(registeredUsers)) registeredUsers = [];
-      // Also include current logged-in user if not already in pool
-      var currentUser = localStorage.getItem('geohub_auth_user');
-      if (currentUser) {
-        var cu = JSON.parse(currentUser);
-        if (cu && cu.uid && !registeredUsers.some(function(u) { return u.uid === cu.uid || u.id === cu.uid; })) {
-          registeredUsers.push(cu);
-        }
-      }
-      userCount = registeredUsers.length;
-    } catch(_) {}
-
-    // Update overview KPI cards
+  /* ── RENDER STATS (called after data is loaded) ─────────── */
+  function renderStats(registeredUsers, bizCount) {
+    bizCount = bizCount || 0;
+    var userCount = registeredUsers.length;
     var el;
+
     el = document.getElementById('stat-users');  if (el) el.textContent = userCount || '—';
     el = document.getElementById('stat-biz');    if (el) el.textContent = bizCount;
     el = document.getElementById('stat-events'); if (el) el.textContent = '0';
@@ -108,20 +89,17 @@
     el = document.getElementById('stat-reports');  if (el) el.textContent = '0';
     el = document.getElementById('stat-trust');    if (el) el.textContent = '—';
 
-    // Sidebar badges
     el = document.getElementById('sb-users');     if (el) el.textContent = userCount || '—';
     el = document.getElementById('sb-biz-side'); if (el) el.textContent = bizCount;
     el = document.getElementById('sb-creators');  if (el) el.textContent = '0';
     el = document.getElementById('sb-notif');     if (el) el.textContent = '0';
     el = document.getElementById('sb-live');      if (el) el.textContent = '0';
 
-    // Subtitles
     el = document.getElementById('bizSubtitle');
     if (el) el.textContent = bizCount + ' registered · Verify, feature, approve';
     el = document.getElementById('usersSubtitle');
-    if (el) el.textContent = userCount + ' registered on this device · Firebase Auth';
+    if (el) el.textContent = userCount + ' registered · Firebase Auth';
 
-    // Users table
     var tbody = document.getElementById('usersBody');
     if (tbody) {
       if (registeredUsers.length) {
@@ -145,11 +123,49 @@
       } else {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--ts);font-size:0.85rem">' +
           '<i class="fas fa-users" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>' +
-          'No registered users found on this device.<br>' +
-          '<span style="font-size:0.75rem;opacity:0.6;margin-top:4px;display:block">Users register on their own devices — full list requires Firebase Admin SDK.</span>' +
+          'No registered users yet.' +
           '</td></tr>';
       }
     }
+  }
+
+  /* ── LOAD REAL STATS FROM FIRESTORE ─────────────────────── */
+  function loadRealStats() {
+    var fb = window.GeoFirebase;
+    if (fb && fb.db && fb.fs) {
+      // Load users from Firestore
+      fb.fs.getDocs(fb.fs.collection(fb.db, 'users')).then(function(snap) {
+        var users = [];
+        snap.forEach(function(d) { users.push(d.data()); });
+        // Also count businesses from Firestore
+        fb.fs.getDocs(fb.fs.collection(fb.db, 'businesses')).then(function(bizSnap) {
+          renderStats(users, bizSnap.size);
+        }).catch(function() { renderStats(users, 0); });
+      }).catch(function(err) {
+        console.warn('[Admin] Firestore query failed, falling back to localStorage:', err.message);
+        loadRealStatsFromLS();
+      });
+    } else {
+      // Firebase not ready yet — wait for it
+      window.addEventListener('GeoFirebaseReady', function() { loadRealStats(); }, { once: true });
+    }
+  }
+
+  /* ── LOCALSTORAGE FALLBACK ───────────────────────────────── */
+  function loadRealStatsFromLS() {
+    var bizCount = 0;
+    var registeredUsers = [];
+    try {
+      var currentUser = localStorage.getItem('geohub_auth_user');
+      if (currentUser) {
+        var cu = JSON.parse(currentUser);
+        if (cu && cu.uid) registeredUsers.push(cu);
+      }
+    } catch(_) {}
+    renderStats(registeredUsers, bizCount);
+
+    var el = document.getElementById('usersSubtitle');
+    if (el) el.textContent = registeredUsers.length + ' registered (Firestore unavailable) · Firebase Auth';
   }
 
   /* ── SPARKLINES ──────────────────────────────────────────── */

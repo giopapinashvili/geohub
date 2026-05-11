@@ -25,10 +25,12 @@
     if (!user) return;
     var merged = Object.assign({}, user, updates);
     writeLS(AUTH_KEY, merged);
-    // Sync in registered users pool
-    var users = readLS(USERS_KEY) || [];
-    var idx = users.findIndex(function (u) { return u.id === user.id; });
-    if (idx !== -1) { users[idx] = merged; writeLS(USERS_KEY, users); }
+    // Write to Firestore if available
+    var fb = window.GeoFirebase;
+    if (fb && fb.db && fb.fs && merged.uid) {
+      fb.fs.setDoc(fb.fs.doc(fb.db, 'users', merged.uid), merged, { merge: true })
+        .catch(function(e) { console.warn('[GeoHub] profile sync failed:', e.message); });
+    }
     return merged;
   }
 
