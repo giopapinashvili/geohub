@@ -221,7 +221,7 @@ service cloud.firestore {
       allow read: if signedIn() && (
         resource.data.get('userId', '') == uid() || resource.data.get('toUserId', '') == uid() || isAdmin()
       );
-      allow create: if isAdmin();
+      allow create: if isAdmin() || (signedIn() && request.resource.data.get('fromUserId', '') == uid() && (request.resource.data.get('userId', '') != uid() || request.resource.data.get('toUserId', '') != uid()));
       allow update: if isAdmin() || (signedIn() && (
         resource.data.get('userId', '') == uid() || resource.data.get('toUserId', '') == uid()
       ) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'seen', 'updatedAt']));

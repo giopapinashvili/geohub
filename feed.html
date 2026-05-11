@@ -130,14 +130,16 @@
         <div class="fd-composer-row">
           <img src="https://api.dicebear.com/7.x/initials/svg?seed=GeoHub" alt="You" class="fd-composer-avatar" id="composerAvatar">
           <input type="text" id="composerInput" class="fd-composer-input" placeholder="What's on your mind?">
+          <input type="file" id="composerMediaInput" accept="image/*,video/*" style="display:none">
           <button id="composerPostBtn" class="fd-composer-post-btn" title="Post"><i class="fas fa-paper-plane"></i></button>
         </div>
         <div class="fd-composer-sep"></div>
         <div class="fd-composer-btns">
-          <button class="fd-composer-btn"><i class="fas fa-photo-film" style="color:#45bd62"></i> Photo/Video</button>
-          <button class="fd-composer-btn"><i class="fas fa-user-tag" style="color:#1877f2"></i> Tag People</button>
-          <button class="fd-composer-btn"><i class="fas fa-face-smile" style="color:#f7b928"></i> Feeling/Activity</button>
+          <button class="fd-composer-btn" id="composerMediaBtn" type="button"><i class="fas fa-photo-film" style="color:#45bd62"></i> Photo/Video</button>
+          <button class="fd-composer-btn" id="composerTagBtn" type="button"><i class="fas fa-user-tag" style="color:#1877f2"></i> Tag People</button>
+          <button class="fd-composer-btn" id="composerFeelingBtn" type="button"><i class="fas fa-face-smile" style="color:#f7b928"></i> Feeling/Activity</button>
         </div>
+        <div id="composerPreview" style="display:none;margin-top:12px;border:1px solid var(--border,#2a3050);border-radius:14px;padding:10px;color:var(--text-secondary,#94a3b8);font-size:.9rem"></div>
       </div>
 
       <!-- REAL-TIME FIRESTORE POSTS (injected by GeoSocial) -->
@@ -463,22 +465,67 @@
   function wireComposer() {
     var input = document.getElementById('composerInput');
     var btn   = document.getElementById('composerPostBtn');
+    var mediaInput = document.getElementById('composerMediaInput');
+    var mediaBtn = document.getElementById('composerMediaBtn');
+    var tagBtn = document.getElementById('composerTagBtn');
+    var feelingBtn = document.getElementById('composerFeelingBtn');
+    var preview = document.getElementById('composerPreview');
     if (!input || input._wired) return;
     input._wired = true;
-    function doPost() {
-      var text = input.value.trim();
-      if (!text) return;
-      btn.disabled = true;
-      window.GeoSocial.createPost(text, null, function () {
-        input.value = '';
-        btn.disabled = false;
-        input.focus();
+    var mediaData = null, mediaType = null, feeling = '', taggedUsers = [], taggedUserIds = [];
+    function renderPreview(){
+      if(!preview) return;
+      var html = '';
+      if(mediaData){ html += mediaType === 'video' ? '<video src="'+mediaData+'" controls style="max-width:100%;max-height:240px;border-radius:10px"></video>' : '<img src="'+mediaData+'" style="max-width:100%;max-height:240px;border-radius:10px">'; }
+      if(feeling) html += '<div style="margin-top:8px">Feeling: <b>'+escHtml(feeling)+'</b></div>';
+      if(taggedUsers.length) html += '<div style="margin-top:8px">Tagged: '+taggedUsers.map(function(u){return escHtml(u.name||u.fullName||u.displayName||'User')}).join(', ')+'</div>';
+      preview.innerHTML = html;
+      preview.style.display = html ? 'block' : 'none';
+    }
+    function readFileCompressed(file){
+      return new Promise(function(resolve,reject){
+        if(!file) return resolve(null);
+        if(file.type.indexOf('video/') === 0){
+          if(file.size > 700000){ alert('Video is too large for this temporary uploader. Use a small clip.'); return resolve(null); }
+          var vr = new FileReader(); vr.onload = function(){ resolve({data:vr.result, type:'video'}); }; vr.onerror=reject; vr.readAsDataURL(file); return;
+        }
+        var reader = new FileReader();
+        reader.onload = function(){
+          var img = new Image();
+          img.onload = function(){
+            var max = 1100, w = img.width, h = img.height;
+            if(w > h && w > max){ h = Math.round(h * max / w); w = max; }
+            else if(h > max){ w = Math.round(w * max / h); h = max; }
+            var canvas = document.createElement('canvas'); canvas.width=w; canvas.height=h;
+            canvas.getContext('2d').drawImage(img,0,0,w,h);
+            resolve({data:canvas.toDataURL('image/jpeg',0.78), type:'image'});
+          };
+          img.onerror = reject; img.src = reader.result;
+        };
+        reader.onerror = reject; reader.readAsDataURL(file);
       });
+    }
+    async function doPost() {
+      var text = input.value.trim();
+      if (!text && !mediaData) return;
+      if(btn.disabled) return;
+      btn.disabled = true;
+      window.GeoSocial.createPost(text, mediaData, function () {
+        input.value = ''; mediaData=null; mediaType=null; feeling=''; taggedUsers=[]; taggedUserIds=[]; if(mediaInput) mediaInput.value=''; renderPreview();
+        btn.disabled = false; input.focus();
+      }, { mediaType: mediaType, feeling: feeling, taggedUsers: taggedUsers, taggedUserIds: taggedUserIds });
     }
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doPost(); }
     });
     btn.addEventListener('click', doPost);
+    if(mediaBtn && mediaInput){ mediaBtn.addEventListener('click', function(){ mediaInput.click(); }); mediaInput.addEventListener('change', async function(){ var res = await readFileCompressed(mediaInput.files[0]); if(res){ mediaData=res.data; mediaType=res.type; renderPreview(); }}); }
+    if(feelingBtn){ feelingBtn.addEventListener('click', function(){ var v = prompt('Feeling / Activity: Happy, Excited, Traveling, Working, Relaxing'); if(v){ feeling=v.trim(); renderPreview(); }}); }
+    if(tagBtn){ tagBtn.addEventListener('click', async function(){
+      var q = prompt('Type user name/email to tag:'); if(!q) return;
+      try{ var GF=window.GeoFirebase; var snap=await GF.fs.getDocs(GF.fs.query(GF.fs.collection(GF.db,'users'), GF.fs.limit(25))); var found=null; snap.forEach(function(d){ var u=Object.assign({uid:d.id}, d.data()); var hay=((u.fullName||u.displayName||u.email||u.username||'')+'').toLowerCase(); if(!found && hay.indexOf(q.toLowerCase())>-1) found=u; }); if(found){ taggedUsers=[{uid:found.uid,name:found.fullName||found.displayName||found.email||'User'}]; taggedUserIds=[found.uid]; renderPreview(); } else alert('User not found'); }catch(e){ alert('Could not search users'); }
+    }); }
+    if(new URLSearchParams(location.search).get('compose')==='1') setTimeout(function(){ input.focus(); },300);
   }
 
   // ── Event delegation (all social actions) ────────────────────────────
@@ -621,17 +668,30 @@
 
   document.addEventListener('DOMContentLoaded', updateFeedAuthUI);
   window.addEventListener('GeoFirebaseReady', function () {
-    setTimeout(updateFeedAuthUI, 200);
+    if (window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.onAuthStateChanged) {
+      window.GeoFirebase.auth.onAuthStateChanged(function(){ updateFeedAuthUI(); startNotifListener(); });
+    } else {
+      setTimeout(updateFeedAuthUI, 200);
+    }
   });
 
   // ── Render real stories from Firestore ───────────────────────────────
   var _currentStories = [];
+  var _storyGroups = [];
   function renderRealStories(stories) {
     var container = document.getElementById('fd-real-stories');
     if (!container) return;
-    _currentStories = stories || [];
-    if (!_currentStories.length) { container.innerHTML = ''; return; }
-    container.innerHTML = _currentStories.map(function (s, idx) {
+    var groupsByUser = {};
+    (stories || []).forEach(function (s) {
+      var key = s.authorId || s.userId || s.authorName || s.id;
+      if (!groupsByUser[key]) groupsByUser[key] = [];
+      groupsByUser[key].push(s);
+    });
+    _storyGroups = Object.keys(groupsByUser).map(function (key) { return groupsByUser[key]; });
+    _currentStories = _storyGroups.flat();
+    if (!_storyGroups.length) { container.innerHTML = ''; return; }
+    container.innerHTML = _storyGroups.map(function (group, idx) {
+      var s = group[0] || {};
       var av = s.authorAvatar
         ? '<img src="' + escHtml(s.authorAvatar) + '" alt="" class="fd-story-avatar">'
         : '<div class="fd-story-avatar fd-story-avatar--init">' + escHtml((s.authorName||'U').charAt(0).toUpperCase()) + '</div>';
@@ -642,13 +702,20 @@
           '</div>' + av +
         '</div>' +
         '<span class="fd-story-label">' + escHtml(s.authorName || 'User') + '</span>' +
-        '<span class="fd-story-time">' + timeAgo(s.createdAt) + '</span>' +
+        '<span class="fd-story-time">' + group.length + ' story' + (group.length > 1 ? 's' : '') + '</span>' +
         '</button>';
     }).join('');
   }
 
+  function flattenedStoryIndex(groupIndex, itemIndex) {
+    var n = 0;
+    for (var i = 0; i < groupIndex; i++) n += (_storyGroups[i] || []).length;
+    return n + (itemIndex || 0);
+  }
+
   function openStoryViewer(index) {
     index = Number(index) || 0;
+    if (_storyGroups.length) index = flattenedStoryIndex(index, 0);
     if (!_currentStories.length) return;
     var existing = document.getElementById('ghStoryViewer');
     if (existing) existing.remove();
@@ -789,5 +856,7 @@
 <script src="account.js"></script>
 <script src="nav-cleanup.js"></script>
 <script src="mobile-nav.js"></script>
+<script src="geohub-fixes.js"></script>
+<script src="geohub-production-v6.js"></script>
 </body>
 </html>

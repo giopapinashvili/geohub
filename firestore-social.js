@@ -115,14 +115,54 @@
       };
     }
 
+
+    function createNotification(toUserId, type, title, body, href, extra) {
+      var me = meData() || {};
+      if (!toUserId || !me.uid || toUserId === me.uid) return Promise.resolve();
+      var payload = Object.assign({
+        userId: toUserId,
+        toUserId: toUserId,
+        fromUserId: me.uid,
+        fromName: me.name || 'GeoHub User',
+        fromAvatar: me.avatar || '',
+        type: type || 'notification',
+        title: title || 'GeoHub',
+        body: body || '',
+        message: body || '',
+        href: href || 'feed.html',
+        read: false,
+        createdAt: serverTimestamp()
+      }, extra || {});
+      return addDoc(collection(db, 'userNotifications'), payload).catch(function (err) {
+        console.warn('[GeoSocial] createNotification', err.message);
+      });
+    }
+
+    function getPostOwner(postId) {
+      return getDoc(doc(db, 'posts', postId)).then(function (snap) {
+        if (!snap.exists()) return null;
+        var data = snap.data() || {};
+        return data.authorId || data.userId || null;
+      });
+    }
+
+    function conversationIdFor(a, b) {
+      return [a, b].sort().join('_');
+    }
+
     // ── POSTS ────────────────────────────────────────────────────────────
-    function createPost(text, mediaUrl, callback) {
-      if (!text || !text.trim()) return toast('Write something first!', 'error');
+    function createPost(text, mediaUrl, callback, extra) {
+      text = (text || '').trim();
+      if (!text && !mediaUrl) return toast('Write something or choose a photo first!', 'error');
       requireAuth(function (user) {
         var me = meData() || {};
         addDoc(collection(db, 'posts'), {
-          text: text.trim(),
+          text: text,
           mediaUrl: mediaUrl || null,
+          mediaType: extra && extra.mediaType ? extra.mediaType : null,
+          taggedUserIds: extra && extra.taggedUserIds ? extra.taggedUserIds : [],
+          taggedUsers: extra && extra.taggedUsers ? extra.taggedUsers : [],
+          feeling: extra && extra.feeling ? extra.feeling : '',
           authorId: user.uid,
           userId: user.uid,
           authorName: me.name || user.displayName || 'GeoHub User',
@@ -178,6 +218,11 @@
         );
 
         work.then(function () {
+          if (nextLiked) {
+            getPostOwner(postId).then(function (ownerId) {
+              return createNotification(ownerId, 'like', (meData() || {}).name + ' liked your post', 'Someone liked your post.', 'feed.html#post-' + postId, { postId: postId });
+            });
+          }
           if (callback) callback(nextLiked);
         }).catch(function (err) {
           console.error('[GeoSocial] toggleLike', err);
@@ -210,6 +255,10 @@
         }).then(function () {
           return updateDoc(doc(db, 'posts', postId), { commentCount: increment(1) });
         }).then(function () {
+          return getPostOwner(postId).then(function (ownerId) {
+            return createNotification(ownerId, 'comment', (meData() || {}).name + ' commented on your post', text.trim(), 'feed.html#post-' + postId, { postId: postId });
+          });
+        }).then(function () {
           toast('Comment posted');
           if (callback) callback();
         }).catch(function (err) {
@@ -240,11 +289,19 @@
         getDoc(ref).then(function (d) {
           if (d.exists()) {
             return deleteDoc(ref).then(function () {
+              return updateDoc(doc(db, 'users', targetUserId), { followers: increment(-1) }).catch(function(){})
+                .then(function(){ return updateDoc(doc(db, 'users', uid), { following: increment(-1) }).catch(function(){}); });
+            }).then(function () {
               toast('Unfollowed');
               if (callback) callback(false);
             });
           } else {
             return setDoc(ref, { followerId: uid, followingId: targetUserId, targetId: targetUserId, createdAt: serverTimestamp() })
+              .then(function () {
+                return updateDoc(doc(db, 'users', targetUserId), { followers: increment(1) }).catch(function(){})
+                  .then(function(){ return updateDoc(doc(db, 'users', uid), { following: increment(1) }).catch(function(){}); })
+                  .then(function(){ return createNotification(targetUserId, 'follow', (meData() || {}).name + ' followed you', 'You have a new follower.', 'profile.html?uid=' + uid, { followerId: uid }); });
+              })
               .then(function () {
                 toast('Following');
                 if (callback) callback(true);
@@ -407,7 +464,7 @@
     function listenUserNotifications(uid, callback) {
       if (!uid) return function () {};
       var q = query(collection(db, 'userNotifications'),
-        where('toUserId', '==', uid),
+        where('userId', '==', uid),
         orderBy('createdAt', 'desc'),
         limit(30));
       return onSnapshot(q, function (snap) {
@@ -425,15 +482,25 @@
     }
 
     function listenUserPosts(uid, callback) {
-      var q = query(collection(db, 'posts'), where('authorId', '==', uid), orderBy('createdAt', 'desc'), limit(20));
-      return onSnapshot(q, function (snap) {
-        var posts = [];
-        snap.forEach(function (d) { posts.push(Object.assign({ id: d.id }, d.data())); });
+      var postsById = {};
+      var ready = { a:false, u:false };
+      function emit(){
+        if(!ready.a || !ready.u) return;
+        var posts = Object.keys(postsById).map(function(id){ return postsById[id]; });
+        posts.sort(function(a,b){ return tsToMillis(b.createdAt) - tsToMillis(a.createdAt); });
         callback(posts);
-      }, function (err) {
-        console.warn('[GeoSocial] listenUserPosts', err.message);
-        callback([]);
-      });
+      }
+      var qa = query(collection(db, 'posts'), where('authorId', '==', uid), limit(50));
+      var qu = query(collection(db, 'posts'), where('userId', '==', uid), limit(50));
+      var unsubA = onSnapshot(qa, function(snap){
+        snap.forEach(function(d){ postsById[d.id] = Object.assign({id:d.id}, d.data()); });
+        ready.a = true; emit();
+      }, function(err){ console.warn('[GeoSocial] listenUserPosts authorId', err.message); ready.a=true; emit(); });
+      var unsubU = onSnapshot(qu, function(snap){
+        snap.forEach(function(d){ postsById[d.id] = Object.assign({id:d.id}, d.data()); });
+        ready.u = true; emit();
+      }, function(err){ console.warn('[GeoSocial] listenUserPosts userId', err.message); ready.u=true; emit(); });
+      return function(){ try{unsubA();}catch(e){} try{unsubU();}catch(e){} };
     }
 
     function listenUserCheckins(uid, callback) {
@@ -504,6 +571,81 @@
         .catch(function (err) { console.warn('[GeoSocial] trackShare', err.message); });
     }
 
+
+    // ── REAL MESSAGES ───────────────────────────────────────────────────
+    function startConversation(targetUserId, callback) {
+      requireAuth(function (user) {
+        if (!targetUserId || targetUserId === user.uid) return;
+        var cid = conversationIdFor(user.uid, targetUserId);
+        setDoc(doc(db, 'conversations', cid), {
+          participants: [user.uid, targetUserId],
+          updatedAt: serverTimestamp(),
+          createdAt: serverTimestamp(),
+          lastMessage: ''
+        }, { merge: true }).then(function () {
+          if (callback) callback(cid);
+        }).catch(function (err) {
+          console.error('[GeoSocial] startConversation', err);
+          toast('Could not open messages.', 'error');
+        });
+      });
+    }
+
+    function sendMessage(conversationId, text, callback) {
+      if (!text || !text.trim()) return;
+      requireAuth(function (user) {
+        var me = meData() || {};
+        var convRef = doc(db, 'conversations', conversationId);
+        getDoc(convRef).then(function (snap) {
+          if (!snap.exists()) throw new Error('Conversation not found');
+          var conv = snap.data() || {};
+          var otherId = (conv.participants || []).find(function (id) { return id !== user.uid; });
+          return addDoc(collection(db, 'conversations', conversationId, 'messages'), {
+            conversationId: conversationId,
+            senderId: user.uid,
+            authorId: user.uid,
+            text: text.trim(),
+            createdAt: serverTimestamp()
+          }).then(function () {
+            return updateDoc(convRef, { lastMessage: text.trim(), lastSenderId: user.uid, updatedAt: serverTimestamp() });
+          }).then(function () {
+            return createNotification(otherId, 'message', (me.name || 'GeoHub User') + ' sent you a message', text.trim(), 'messages.html?with=' + user.uid, { conversationId: conversationId });
+          });
+        }).then(function () {
+          if (callback) callback();
+        }).catch(function (err) {
+          console.error('[GeoSocial] sendMessage', err);
+          toast('Message failed.', 'error');
+        });
+      });
+    }
+
+    function listenConversations(callback) {
+      var uid = currentUid();
+      if (!uid) { callback([]); return function () {}; }
+      function sortConvs(items){
+        return items.sort(function(a,b){
+          function t(v){ return v && v.toMillis ? v.toMillis() : (v && v.seconds ? v.seconds*1000 : 0); }
+          return t(b.updatedAt || b.createdAt) - t(a.updatedAt || a.createdAt);
+        });
+      }
+      var q = query(collection(db, 'conversations'), where('participants', 'array-contains', uid));
+      return onSnapshot(q, function (snap) {
+        var items = [];
+        snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        callback(sortConvs(items));
+      }, function (err) { console.warn('[GeoSocial] listenConversations', err.message); callback([]); });
+    }
+
+    function listenMessages(conversationId, callback) {
+      var q = query(collection(db, 'conversations', conversationId, 'messages'), orderBy('createdAt', 'asc'), limit(100));
+      return onSnapshot(q, function (snap) {
+        var items = [];
+        snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        callback(items);
+      }, function (err) { console.warn('[GeoSocial] listenMessages', err.message); callback([]); });
+    }
+
     // ── Public API ───────────────────────────────────────────────────────
     window.GeoSocial = {
       createPost:              createPost,
@@ -525,6 +667,10 @@
       markNotificationRead:    markNotificationRead,
       listenUserPosts:         listenUserPosts,
       listenUserCheckins:      listenUserCheckins,
+      startConversation:       startConversation,
+      sendMessage:             sendMessage,
+      listenConversations:     listenConversations,
+      listenMessages:          listenMessages,
       trackShare:              trackShare,
       checkSaved:              checkSaved,
       checkGroupMember:        checkGroupMember,

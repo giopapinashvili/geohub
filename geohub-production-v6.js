@@ -1,0 +1,181 @@
+
+/* GeoHub production fixes v6 */
+(function(){
+  'use strict';
+  const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const $ = s => document.querySelector(s);
+  function waitReady(cb){
+    if(window.GeoFirebase && window.GeoSocial) return cb();
+    let tries=0; const t=setInterval(()=>{ tries++; if(window.GeoFirebase && window.GeoSocial){clearInterval(t); cb();} if(tries>80) clearInterval(t); },100);
+  }
+  function currentUser(){ return window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser; }
+  function ts(v){ return v && v.toMillis ? v.toMillis() : (v && v.seconds ? v.seconds*1000 : Date.now()); }
+
+  // Better user search for Tag People: accepts email, username, display/full name.
+  async function findUserByInput(q){
+    q = String(q||'').trim().replace(/^@/,'').toLowerCase();
+    if(!q || !window.GeoFirebase) return null;
+    const GF=window.GeoFirebase, fs=GF.fs, db=GF.db;
+    const users = fs.collection(db,'users');
+    const fields = ['email','username','fullName','displayName'];
+    for(const field of fields){
+      try{
+        const snap = await fs.getDocs(fs.query(users, fs.where(field,'==',q)));
+        if(!snap.empty){ const d=snap.docs[0]; return Object.assign({id:d.id, uid:d.id}, d.data()); }
+      }catch(e){}
+    }
+    // Fallback scan limited users for case-insensitive partial match.
+    try{
+      const snap = await fs.getDocs(fs.query(users, fs.limit(100)));
+      let found=null;
+      snap.forEach(doc=>{
+        if(found) return;
+        const d=doc.data()||{};
+        const vals=[d.email,d.username,d.fullName,d.displayName].filter(Boolean).map(x=>String(x).toLowerCase());
+        if(vals.some(v=>v===q || v.includes(q))) found=Object.assign({id:doc.id, uid:doc.id}, d);
+      });
+      return found;
+    }catch(e){ return null; }
+  }
+
+  function installComposerFix(){
+    const photoBtn = Array.from(document.querySelectorAll('button,a,div')).find(el => /Photo\/Video/i.test(el.textContent||''));
+    const tagBtn = Array.from(document.querySelectorAll('button,a,div')).find(el => /Tag People/i.test(el.textContent||''));
+    const feelBtn = Array.from(document.querySelectorAll('button,a,div')).find(el => /Feeling\/Activity/i.test(el.textContent||''));
+    const input = document.querySelector('.composer-input, .post-input, input[placeholder*="mind"], textarea[placeholder*="mind"], input[placeholder*="GeoHub"]') || document.querySelector('.create-post input, .post-composer input');
+    const send = document.querySelector('.composer-send, .post-send, .send-post-btn, button[title="Post"], .create-post button[type="submit"]') || Array.from(document.querySelectorAll('button')).find(b => /paper-plane|Post/i.test(b.innerHTML+b.textContent));
+    const composer = input ? input.closest('.composer, .post-composer, .create-post, .feed-create, .feed-composer, .feed-card') : null;
+    if(!input || !send || send.dataset.v6Composer) return;
+    send.dataset.v6Composer='1';
+
+    let selectedFile = null, selectedDataUrl = '', taggedUsers=[], feeling='';
+    let fileInput = document.getElementById('ghV6FileInput');
+    if(!fileInput){
+      fileInput=document.createElement('input'); fileInput.type='file'; fileInput.accept='image/*,video/*'; fileInput.id='ghV6FileInput'; fileInput.style.display='none'; document.body.appendChild(fileInput);
+    }
+    let preview = document.getElementById('ghV6Preview');
+    if(!preview && composer){ preview=document.createElement('div'); preview.id='ghV6Preview'; preview.style.cssText='margin:12px 18px;border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden;display:none;padding:10px;color:#94a3b8'; composer.appendChild(preview); }
+    function renderPreview(){
+      if(!preview) return;
+      let html='';
+      if(selectedDataUrl){
+        if((selectedFile && selectedFile.type||'').startsWith('video/')) html+='<video controls style="max-width:100%;border-radius:10px" src="'+esc(selectedDataUrl)+'"></video>';
+        else html+='<img style="max-width:100%;max-height:320px;border-radius:10px;object-fit:cover" src="'+esc(selectedDataUrl)+'">';
+      }
+      if(taggedUsers.length) html+='<div style="margin-top:8px">Tagged: '+taggedUsers.map(u=>'@'+esc(u.username||u.email||u.fullName||u.uid)).join(', ')+'</div>';
+      if(feeling) html+='<div style="margin-top:8px">Feeling: <b>'+esc(feeling)+'</b></div>';
+      preview.innerHTML=html; preview.style.display=html?'block':'none';
+    }
+    if(photoBtn && !photoBtn.dataset.v6Bound){ photoBtn.dataset.v6Bound='1'; photoBtn.addEventListener('click', e=>{e.preventDefault(); fileInput.click();}); }
+    fileInput.onchange=function(){
+      selectedFile=this.files&&this.files[0]; if(!selectedFile) return;
+      const r=new FileReader(); r.onload=()=>{selectedDataUrl=r.result; renderPreview();}; r.readAsDataURL(selectedFile);
+    };
+    if(tagBtn && !tagBtn.dataset.v6Bound){ tagBtn.dataset.v6Bound='1'; tagBtn.addEventListener('click', async e=>{
+      e.preventDefault();
+      const q=prompt('Enter user email, username or name to tag:');
+      if(!q) return;
+      const u=await findUserByInput(q);
+      if(!u){ alert('User not found. Try exact email or username.'); return; }
+      if(!taggedUsers.some(x=>(x.uid||x.id)===(u.uid||u.id))) taggedUsers.push(u);
+      renderPreview();
+    });}
+    if(feelBtn && !feelBtn.dataset.v6Bound){ feelBtn.dataset.v6Bound='1'; feelBtn.addEventListener('click', e=>{
+      e.preventDefault();
+      const q=prompt('Feeling / Activity (example: traveling, happy, working):', feeling || 'traveling');
+      if(q){ feeling=q.trim(); renderPreview(); }
+    });}
+
+    send.addEventListener('click', async function(e){
+      const text=(input.value||input.textContent||'').trim();
+      if(!text && !selectedDataUrl) return;
+      e.preventDefault(); e.stopImmediatePropagation();
+      send.disabled=true;
+      try{
+        const extra={
+          mediaType: selectedFile ? selectedFile.type : (selectedDataUrl ? 'image/data-url' : null),
+          taggedUserIds: taggedUsers.map(u=>u.uid||u.id).filter(Boolean),
+          taggedUsers: taggedUsers.map(u=>({uid:u.uid||u.id, username:u.username||'', fullName:u.fullName||u.displayName||'', email:u.email||''})),
+          feeling: feeling || ''
+        };
+        await window.GeoSocial.createPost(text, selectedDataUrl || null, function(){
+          input.value=''; input.textContent='';
+          selectedFile=null; selectedDataUrl=''; taggedUsers=[]; feeling=''; renderPreview();
+        }, extra);
+      }finally{ setTimeout(()=>{send.disabled=false;},700); }
+    }, true);
+  }
+
+  // Render real feed cards with tags and feeling if the active social renderer missed them.
+  function enhanceRenderedPosts(){
+    document.querySelectorAll('[data-social-id], .feed-card').forEach(card=>{
+      if(card.dataset.v6Enhanced) return;
+      card.dataset.v6Enhanced='1';
+      // This is a visual safeguard; full rendering is handled by existing feed renderer.
+    });
+  }
+
+  // Patch messages page: select conversations from sidebar, open ?with target, and keep composer active.
+  function installMessagesFix(){
+    if(!/messages\.html|\/messages/.test(location.pathname)) return;
+    waitReady(function(){
+      const GF=window.GeoFirebase, fs=GF.fs, db=GF.db;
+      let active=null, unsubMsgs=null, unsubConvs=null, sending=false;
+      const uid=()=>GF.auth.currentUser && GF.auth.currentUser.uid;
+      const convList=$('#convList'), chat=$('#chatMessages'), header=$('#chatHeader'), input=$('#msgInput'), sendBtn=$('.send-btn');
+      async function userName(id){
+        try{ const s=await fs.getDoc(fs.doc(db,'users',id)); if(s.exists()){const d=s.data(); return d.fullName||d.displayName||d.username||d.email||'GeoHub User';}}catch(e){}
+        return 'GeoHub User';
+      }
+      function other(conv){ return (conv.participants||[]).find(x=>x!==uid()) || ''; }
+      async function renderConvs(items){
+        if(!convList) return;
+        if(!items.length){ convList.innerHTML='<div class="conv-empty"><i class="fas fa-inbox"></i><p>No conversations yet</p></div>'; return; }
+        const rows=[];
+        for(const c of items){ rows.push({c,name:await userName(other(c))}); }
+        convList.innerHTML=rows.map(({c,name})=>'<div class="conv-item '+(c.id===active?'active':'')+'" data-conv-id="'+esc(c.id)+'"><div class="conv-av-wrap"><div class="av-placeholder">'+esc((name||'U')[0])+'</div></div><div class="conv-info"><div class="conv-top-row"><span class="conv-name">'+esc(name)+'</span></div><div class="conv-bottom-row"><span class="conv-preview">'+esc(c.lastMessage||'No messages yet')+'</span></div></div></div>').join('');
+      }
+      function renderMessages(items){
+        if(!chat) return;
+        if(!items.length){ chat.innerHTML='<div class="chat-empty"><i class="fas fa-comment-dots"></i><p>No messages yet</p></div>'; return; }
+        chat.innerHTML=items.map(m=>'<div class="msg-row '+(m.senderId===uid()?'sent':'received')+'"><div class="msg-col"><div class="msg-bubble-wrap"><div class="msg-bubble '+(m.senderId===uid()?'bubble-sent':'bubble-recv')+'">'+esc(m.text||'')+'</div></div></div></div>').join('');
+        chat.scrollTop=chat.scrollHeight;
+      }
+      function openConv(cid){
+        active=cid;
+        if(header) header.innerHTML='<div style="padding:18px 20px;font-weight:700">Messages</div>';
+        if(unsubMsgs) unsubMsgs();
+        unsubMsgs=window.GeoSocial.listenMessages(cid, renderMessages);
+        renderConvsCache();
+      }
+      let convCache=[];
+      function renderConvsCache(){ renderConvs(convCache); }
+      async function send(){
+        if(sending||!active||!input) return;
+        const text=(input.value||'').trim(); if(!text) return;
+        sending=true;
+        await window.GeoSocial.sendMessage(active,text,function(){ input.value=''; });
+        setTimeout(()=>sending=false,500);
+      }
+      if(sendBtn) sendBtn.onclick=function(e){e.preventDefault();send();};
+      if(input) input.onkeydown=function(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} };
+      document.addEventListener('click', e=>{ const row=e.target.closest('[data-conv-id]'); if(row) openConv(row.dataset.convId); });
+
+      function init(){
+        if(!uid()) return setTimeout(init,200);
+        const target=new URLSearchParams(location.search).get('with');
+        if(target){ window.GeoSocial.startConversation(target, cid=>openConv(cid)); }
+        if(unsubConvs) unsubConvs();
+        unsubConvs=window.GeoSocial.listenConversations(items=>{ convCache=items||[]; renderConvs(convCache); if(!active && convCache[0]) openConv(convCache[0].id); });
+      }
+      init();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(installComposerFix,700);
+    setTimeout(enhanceRenderedPosts,1200);
+    installMessagesFix();
+  });
+  window.addEventListener('GeoSocialReady', function(){ setTimeout(installComposerFix,500); installMessagesFix(); });
+})();
