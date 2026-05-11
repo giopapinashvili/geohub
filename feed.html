@@ -184,6 +184,7 @@
         <div class="fd-composer-row">
           <img src="https://picsum.photos/seed/gio_user/42/42" alt="You" class="fd-composer-avatar" id="composerAvatar">
           <input type="text" id="composerInput" class="fd-composer-input" placeholder="What's on your mind?">
+          <button id="composerPostBtn" class="fd-composer-post-btn" title="Post"><i class="fas fa-paper-plane"></i></button>
         </div>
         <div class="fd-composer-sep"></div>
         <div class="fd-composer-btns">
@@ -192,6 +193,9 @@
           <button class="fd-composer-btn"><i class="fas fa-face-smile" style="color:#f7b928"></i> Feeling/Activity</button>
         </div>
       </div>
+
+      <!-- REAL-TIME FIRESTORE POSTS (injected by GeoSocial) -->
+      <div id="fd-real-posts"></div>
 
       <!-- POST 1 — Lasha Gabrichidze -->
       <article class="fd-card fd-post">
@@ -537,24 +541,199 @@
 </section>
 
 <script>
-  // Update feed topbar and sidebar with real user data
-  document.addEventListener('DOMContentLoaded', function() {
+  // Populate UI with authenticated user data
+  document.addEventListener('DOMContentLoaded', function () {
     try {
       var u = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
       if (u) {
         var av = u.avatar || '';
-        ['ftbAvatar','composerAvatar','feedSidebarAvatar'].forEach(function(id) {
+        ['ftbAvatar', 'composerAvatar', 'feedSidebarAvatar'].forEach(function (id) {
           var el = document.getElementById(id);
           if (el && av) el.src = av;
         });
         var nameEl = document.getElementById('feedSidebarName');
         if (nameEl) nameEl.textContent = u.fullName || u.username || 'You';
+      } else {
+        // Not logged in — dim the composer as a login CTA
+        var inp = document.getElementById('composerInput');
+        if (inp) {
+          inp.placeholder = 'Sign in to post on GeoHub…';
+          inp.addEventListener('focus', function () {
+            if (window.GeoSocial) window.GeoSocial.requireAuth(function () {});
+            else location.href = 'auth.html';
+          });
+        }
       }
-    } catch(e) {}
+    } catch (e) {}
   });
+
+  // ── Real-time feed + composer wiring (runs after GeoSocial is ready) ──
+  (function () {
+    var unsubFeed = null;
+
+    function timeAgo(ts) {
+      if (!ts) return '';
+      var ms = ts.toMillis ? ts.toMillis() : (ts.seconds ? ts.seconds * 1000 : ts);
+      var diff = Math.floor((Date.now() - ms) / 1000);
+      if (diff < 60)  return diff + 's ago';
+      if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+      if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+      return Math.floor(diff / 86400) + 'd ago';
+    }
+
+    function renderRealPost(post) {
+      var av = post.authorAvatar
+        ? '<img src="' + post.authorAvatar + '" alt="" class="fd-post-avatar" onerror="this.style.display=\'none\'">'
+        : '<div class="fd-post-avatar fd-post-avatar--init">' + (post.authorName || 'G').charAt(0).toUpperCase() + '</div>';
+      return '<article class="fd-card fd-post fd-post--real" data-post-id="' + post.id + '">' +
+        '<div class="fd-post-head">' +
+          av +
+          '<div class="fd-post-meta">' +
+            '<div class="fd-post-name">' + (post.authorName || 'GeoHub User') + '</div>' +
+            '<div class="fd-post-sub">' + timeAgo(post.createdAt) + ' · <i class="fas fa-earth-europe fd-globe"></i></div>' +
+          '</div>' +
+        '</div>' +
+        (post.text ? '<p class="fd-post-body">' + escHtml(post.text) + '</p>' : '') +
+        (post.mediaUrl ? '<img src="' + escHtml(post.mediaUrl) + '" alt="" class="fd-post-img">' : '') +
+        '<div class="fd-post-stats-row">' +
+          '<div class="fd-reactions"><span class="fd-emojis">❤️</span> <span class="fd-like-count">' + (post.likeCount || 0) + '</span></div>' +
+          '<div class="fd-counts fd-comment-count">' + (post.commentCount || 0) + ' Comments</div>' +
+        '</div>' +
+        '<div class="fd-post-sep"></div>' +
+        '<div class="fd-post-actions">' +
+          '<button class="fd-act-btn fd-real-like" data-post-id="' + post.id + '" data-liked="0">' +
+            '<i class="far fa-thumbs-up"></i> Like' +
+          '</button>' +
+          '<button class="fd-act-btn fd-real-comment" data-post-id="' + post.id + '">' +
+            '<i class="far fa-comment"></i> Comment' +
+          '</button>' +
+          '<button class="fd-act-btn fd-real-save" data-post-id="' + post.id + '" data-saved="0">' +
+            '<i class="far fa-bookmark"></i> Save' +
+          '</button>' +
+          '<button class="fd-act-btn fd-real-share" data-post-id="' + post.id + '">' +
+            '<i class="fas fa-share-nodes"></i> Share' +
+          '</button>' +
+        '</div>' +
+      '</article>';
+    }
+
+    function escHtml(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function renderFeed(posts) {
+      var container = document.getElementById('fd-real-posts');
+      if (!container) return;
+      if (!posts.length) {
+        container.innerHTML = '';
+        return;
+      }
+      container.innerHTML = posts.map(renderRealPost).join('');
+      // Check which posts the current user already liked
+      posts.forEach(function (post) {
+        if (window.GeoSocial) {
+          window.GeoSocial.checkLiked(post.id, function (liked) {
+            var btn = container.querySelector('.fd-real-like[data-post-id="' + post.id + '"]');
+            if (btn) {
+              btn.dataset.liked = liked ? '1' : '0';
+              btn.classList.toggle('liked', liked);
+              btn.querySelector('i').className = liked ? 'fas fa-thumbs-up' : 'far fa-thumbs-up';
+            }
+          });
+        }
+      });
+    }
+
+    function startFeedListener() {
+      if (unsubFeed) unsubFeed();
+      unsubFeed = window.GeoSocial.listenFeed(renderFeed);
+    }
+
+    function wireComposer() {
+      var input = document.getElementById('composerInput');
+      var btn   = document.getElementById('composerPostBtn');
+      if (!input) return;
+
+      function doPost() {
+        var text = input.value.trim();
+        if (!text) return;
+        window.GeoSocial.createPost(text, null, function () {
+          input.value = '';
+          btn && (btn.disabled = false);
+        });
+        if (btn) btn.disabled = true;
+      }
+
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doPost(); }
+      });
+      if (btn) btn.addEventListener('click', doPost);
+    }
+
+    // Delegate clicks on real-post action buttons
+    document.addEventListener('click', function (e) {
+      if (!window.GeoSocial) return;
+
+      // Like
+      var likeBtn = e.target.closest('.fd-real-like');
+      if (likeBtn) {
+        var pid    = likeBtn.dataset.postId;
+        var liked  = likeBtn.dataset.liked === '1';
+        var countEl = likeBtn.closest('.fd-post').querySelector('.fd-like-count');
+        window.GeoSocial.toggleLike(pid, liked, function (isNow) {
+          likeBtn.dataset.liked = isNow ? '1' : '0';
+          likeBtn.classList.toggle('liked', isNow);
+          likeBtn.querySelector('i').className = isNow ? 'fas fa-thumbs-up' : 'far fa-thumbs-up';
+          if (countEl) countEl.textContent = Math.max(0, parseInt(countEl.textContent || '0', 10) + (isNow ? 1 : -1));
+        });
+        return;
+      }
+
+      // Comment
+      var commentBtn = e.target.closest('.fd-real-comment');
+      if (commentBtn) {
+        var pid2 = commentBtn.dataset.postId;
+        var text = window.prompt('Add a comment:');
+        if (text && text.trim()) window.GeoSocial.addComment(pid2, text.trim());
+        return;
+      }
+
+      // Save
+      var saveBtn = e.target.closest('.fd-real-save');
+      if (saveBtn) {
+        var pid3  = saveBtn.dataset.postId;
+        var saved = saveBtn.dataset.saved === '1';
+        window.GeoSocial.toggleSavePost(pid3, function (isNow) {
+          saveBtn.dataset.saved = isNow ? '1' : '0';
+          saveBtn.querySelector('i').className = isNow ? 'fas fa-bookmark' : 'far fa-bookmark';
+        });
+        return;
+      }
+
+      // Share
+      var shareBtn = e.target.closest('.fd-real-share');
+      if (shareBtn) {
+        var pid4 = shareBtn.dataset.postId;
+        navigator.clipboard && navigator.clipboard.writeText(location.origin + '/feed.html#' + pid4).catch(function () {});
+        window.GeoSocial.trackShare(pid4);
+        window.GeoSocial.toast('Link copied!');
+        return;
+      }
+    });
+
+    // Init once GeoSocial is ready
+    function onReady() {
+      wireComposer();
+      startFeedListener();
+    }
+
+    if (window.GeoSocial) onReady();
+    else window.addEventListener('GeoSocialReady', onReady, { once: true });
+  })();
 </script>
 
 <script type="module" src="firebase-config.js"></script>
+<script src="firestore-social.js"></script>
 <script src="config.js"></script>
 <script src="api-client.js"></script>
 <script src="main.js"></script>

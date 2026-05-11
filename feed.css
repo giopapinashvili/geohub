@@ -478,6 +478,31 @@
   white-space: nowrap;
 }
 .fd-composer-btn:hover { background: rgba(255,255,255,0.07); color: #9ca3af; }
+.fd-composer-post-btn {
+  flex-shrink: 0;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--gradient-brand, linear-gradient(135deg,#10b981,#3b82f6));
+  color: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.fd-composer-post-btn:hover { opacity: 0.88; transform: scale(1.07); }
+.fd-composer-post-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.fd-post-avatar--init {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: var(--gradient-brand, linear-gradient(135deg,#10b981,#3b82f6));
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.1rem;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.fd-act-btn.liked { color: #10b981; }
 
 /* ── POSTS ────────────────────────────────────────────────────── */
 .fd-post { padding: 14px 16px 0; }

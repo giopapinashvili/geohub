@@ -1,0 +1,100 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── helpers ──────────────────────────────────────────────────────
+    function isAuth() { return request.auth != null; }
+    function isOwner(field) { return isAuth() && request.auth.uid == resource.data[field]; }
+    function isOwnerNew(field) { return isAuth() && request.auth.uid == request.resource.data[field]; }
+
+    // ── posts ────────────────────────────────────────────────────────
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if isAuth() && isOwnerNew('authorId');
+      allow update: if isAuth() && (
+        isOwner('authorId') ||
+        // any authed user may increment/decrement counters only
+        (request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['likeCount', 'commentCount', 'shareCount']))
+      );
+      allow delete: if isOwner('authorId');
+
+      // likes subcollection
+      match /likes/{uid} {
+        allow read: if true;
+        allow write: if isAuth() && request.auth.uid == uid;
+      }
+
+      // comments subcollection
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isAuth() && isOwnerNew('authorId');
+        allow update: if isOwner('authorId');
+        allow delete: if isOwner('authorId');
+      }
+    }
+
+    // ── stories ──────────────────────────────────────────────────────
+    match /stories/{storyId} {
+      allow read: if true;
+      allow create: if isAuth() && isOwnerNew('authorId');
+      allow delete: if isOwner('authorId');
+    }
+
+    // ── follows ──────────────────────────────────────────────────────
+    match /follows/{followId} {
+      allow read: if true;
+      allow create: if isAuth() && request.auth.uid == request.resource.data.followerId;
+      allow delete: if isAuth() && request.auth.uid == resource.data.followerId;
+    }
+
+    // ── savedPosts ───────────────────────────────────────────────────
+    match /savedPosts/{docId} {
+      allow read: if isAuth() && request.auth.uid == resource.data.uid;
+      allow create: if isAuth() && request.auth.uid == request.resource.data.uid;
+      allow delete: if isAuth() && request.auth.uid == resource.data.uid;
+    }
+
+    // ── groupMembers ─────────────────────────────────────────────────
+    match /groupMembers/{docId} {
+      allow read: if true;
+      allow create: if isAuth() && request.auth.uid == request.resource.data.uid;
+      allow delete: if isAuth() && request.auth.uid == resource.data.uid;
+    }
+
+    // ── eventParticipants ────────────────────────────────────────────
+    match /eventParticipants/{docId} {
+      allow read: if true;
+      allow create: if isAuth() && request.auth.uid == request.resource.data.uid;
+      allow update: if isAuth() && request.auth.uid == resource.data.uid;
+      allow delete: if isAuth() && request.auth.uid == resource.data.uid;
+    }
+
+    // ── friendRequests ───────────────────────────────────────────────
+    match /friendRequests/{docId} {
+      allow read: if isAuth() && (
+        request.auth.uid == resource.data.fromId ||
+        request.auth.uid == resource.data.toId
+      );
+      allow create: if isAuth() && request.auth.uid == request.resource.data.fromId;
+      allow update: if isAuth() && request.auth.uid == resource.data.toId;
+      allow delete: if isAuth() && (
+        request.auth.uid == resource.data.fromId ||
+        request.auth.uid == resource.data.toId
+      );
+    }
+
+    // ── checkins ─────────────────────────────────────────────────────
+    match /checkins/{checkinId} {
+      allow read: if true;
+      allow create: if isAuth() && request.auth.uid == request.resource.data.authorId;
+    }
+
+    // ── users ────────────────────────────────────────────────────────
+    match /users/{uid} {
+      allow read: if true;
+      allow write: if isAuth() && request.auth.uid == uid;
+    }
+
+  }
+}

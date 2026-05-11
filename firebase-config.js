@@ -2,9 +2,10 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/fireba
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
   getFirestore,
-  doc, setDoc, getDoc, getDocs, updateDoc,
+  doc, setDoc, getDoc, getDocs, updateDoc, addDoc,
   collection, query, orderBy, where, limit,
-  onSnapshot, deleteDoc
+  onSnapshot, deleteDoc, serverTimestamp, increment,
+  writeBatch
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { getAnalytics, isSupported } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js';
 
@@ -24,7 +25,7 @@ try {
   const db = getFirestore(app);
   window.GeoFirebase = {
     app, auth, db,
-    fs: { doc, setDoc, getDoc, getDocs, updateDoc, collection, query, orderBy, where, limit, onSnapshot, deleteDoc }
+    fs: { doc, setDoc, getDoc, getDocs, updateDoc, addDoc, collection, query, orderBy, where, limit, onSnapshot, deleteDoc, serverTimestamp, increment, writeBatch }
   };
   isSupported().then(ok => { if (ok) getAnalytics(app); }).catch(() => {});
   window.dispatchEvent(new Event('GeoFirebaseReady'));

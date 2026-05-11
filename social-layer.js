@@ -22,11 +22,11 @@
   };
 
   const state = {
-    reactions: storage.get('geohub_social_reactions', {}),
-    comments: storage.get('geohub_social_comments', {}),
-    follows: storage.get('geohub_social_follows', {}),
+    reactions: {},
+    comments: {},
+    follows: {},
     readNotifications: storage.get('geohub_notifications_read', {}),
-    shared: storage.get('geohub_social_shares', [])
+    shared: []
   };
 
   function currentUser() {
@@ -41,11 +41,7 @@
   }
 
   function saveState() {
-    storage.set('geohub_social_reactions', state.reactions);
-    storage.set('geohub_social_comments', state.comments);
-    storage.set('geohub_social_follows', state.follows);
     storage.set('geohub_notifications_read', state.readNotifications);
-    storage.set('geohub_social_shares', state.shared);
   }
 
   function profileHref(user) {
@@ -268,8 +264,17 @@
 
   function toggleFollow(username) {
     if (!username) return;
+    // If a real uid-like target and GeoSocial is ready, persist to Firestore
+    if (window.GeoSocial && username.length > 10 && !/^[a-z_]+$/.test(username)) {
+      window.GeoSocial.toggleFollow(username, function (isNow) {
+        state.follows[username] = isNow;
+        refreshFollows();
+        updateFollowerStats(username, isNow ? 1 : -1);
+      });
+      return;
+    }
+    // In-memory only for mock usernames (no localStorage)
     state.follows[username] = !state.follows[username];
-    saveState();
     refreshFollows();
     updateFollowerStats(username, state.follows[username] ? 1 : -1);
     toast(state.follows[username] ? 'Following' : 'Unfollowed');
