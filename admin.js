@@ -129,43 +129,78 @@
     }
   }
 
+  /* ── COLLECT LOCAL USERS (for migration) ────────────────── */
+  function collectLocalUsers() {
+    var map = {};
+    try {
+      var stored = localStorage.getItem('geohub_registered_users');
+      var pool = stored ? JSON.parse(stored) : [];
+      if (Array.isArray(pool)) {
+        pool.forEach(function(u) { if (u && u.uid) map[u.uid] = u; });
+      }
+    } catch(_) {}
+    try {
+      var cur = localStorage.getItem('geohub_auth_user');
+      if (cur) {
+        var u = JSON.parse(cur);
+        if (u && u.uid) map[u.uid] = u;
+      }
+    } catch(_) {}
+    return Object.values(map);
+  }
+
+  /* ── MIGRATE MISSING LOCAL USERS → FIRESTORE ─────────────── */
+  function migrateLocalUsersToFirestore(localUsers, firestoreUids) {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) return;
+    localUsers.forEach(function(u) {
+      if (!u.uid || firestoreUids[u.uid]) return; // already in Firestore
+      fb.fs.setDoc(fb.fs.doc(fb.db, 'users', u.uid), u, { merge: true })
+        .catch(function(e) { console.warn('[Admin] migrate failed for', u.uid, e.message); });
+    });
+  }
+
   /* ── LOAD REAL STATS FROM FIRESTORE ─────────────────────── */
   function loadRealStats() {
     var fb = window.GeoFirebase;
     if (fb && fb.db && fb.fs) {
-      // Load users from Firestore
       fb.fs.getDocs(fb.fs.collection(fb.db, 'users')).then(function(snap) {
         var users = [];
-        snap.forEach(function(d) { users.push(d.data()); });
-        // Also count businesses from Firestore
+        var firestoreUids = {};
+        snap.forEach(function(d) {
+          var data = d.data();
+          users.push(data);
+          firestoreUids[d.id] = true;
+        });
+
+        // Migrate any local users not yet in Firestore
+        var localUsers = collectLocalUsers();
+        migrateLocalUsersToFirestore(localUsers, firestoreUids);
+
+        // Merge local users into display list immediately (before next reload)
+        localUsers.forEach(function(u) {
+          if (!firestoreUids[u.uid]) users.push(u);
+        });
+
         fb.fs.getDocs(fb.fs.collection(fb.db, 'businesses')).then(function(bizSnap) {
           renderStats(users, bizSnap.size);
         }).catch(function() { renderStats(users, 0); });
       }).catch(function(err) {
-        console.warn('[Admin] Firestore query failed, falling back to localStorage:', err.message);
-        loadRealStatsFromLS();
+        console.warn('[Admin] Firestore query failed, using localStorage:', err.message);
+        var localUsers = collectLocalUsers();
+        renderStats(localUsers, 0);
       });
     } else {
-      // Firebase not ready yet — wait for it
       window.addEventListener('GeoFirebaseReady', function() { loadRealStats(); }, { once: true });
     }
   }
 
   /* ── LOCALSTORAGE FALLBACK ───────────────────────────────── */
   function loadRealStatsFromLS() {
-    var bizCount = 0;
-    var registeredUsers = [];
-    try {
-      var currentUser = localStorage.getItem('geohub_auth_user');
-      if (currentUser) {
-        var cu = JSON.parse(currentUser);
-        if (cu && cu.uid) registeredUsers.push(cu);
-      }
-    } catch(_) {}
-    renderStats(registeredUsers, bizCount);
-
+    var localUsers = collectLocalUsers();
+    renderStats(localUsers, 0);
     var el = document.getElementById('usersSubtitle');
-    if (el) el.textContent = registeredUsers.length + ' registered (Firestore unavailable) · Firebase Auth';
+    if (el) el.textContent = localUsers.length + ' registered (Firestore unavailable) · Firebase Auth';
   }
 
   /* ── SPARKLINES ──────────────────────────────────────────── */
