@@ -345,33 +345,40 @@
     addLangToggle();
   }
 
+  // Global toggle so inline onclick="geoToggleMenu()" always works
+  window.geoToggleMenu = function() {
+    var hamburger  = document.getElementById('geoHamburger');
+    var mobileMenu = document.querySelector('.mobile-menu');
+    if (!mobileMenu) return;
+    var isOpen = mobileMenu.classList.toggle('open');
+    if (hamburger) {
+      hamburger.classList.toggle('open', isOpen);
+      hamburger.setAttribute('aria-expanded', String(isOpen));
+    }
+  };
+
+  window.geoCloseMenu = function() {
+    var hamburger  = document.getElementById('geoHamburger');
+    var mobileMenu = document.querySelector('.mobile-menu');
+    if (mobileMenu) mobileMenu.classList.remove('open');
+    if (hamburger)  { hamburger.classList.remove('open'); hamburger.setAttribute('aria-expanded','false'); }
+  };
+
   function wireHamburger() {
-    var hamburger  = document.querySelector('.hamburger');
+    var hamburger  = document.getElementById('geoHamburger');
     var mobileMenu = document.querySelector('.mobile-menu');
     if (!hamburger || !mobileMenu) return;
 
-    hamburger.addEventListener('click', function() {
-      var isOpen = mobileMenu.classList.toggle('open');
-      hamburger.classList.toggle('open', isOpen);
-      hamburger.setAttribute('aria-expanded', String(isOpen));
-    });
+    hamburger.setAttribute('onclick', 'geoToggleMenu()');
 
-    // Close when clicking outside — use contains() instead of stopPropagation
-    // so iOS Safari doesn't swallow the open/close toggle
     document.addEventListener('click', function(e) {
       if (!mobileMenu.classList.contains('open')) return;
       if (hamburger.contains(e.target) || mobileMenu.contains(e.target)) return;
-      mobileMenu.classList.remove('open');
-      hamburger.classList.remove('open');
-      hamburger.setAttribute('aria-expanded', 'false');
+      window.geoCloseMenu();
     });
 
     mobileMenu.querySelectorAll('a').forEach(function(link) {
-      link.addEventListener('click', function() {
-        mobileMenu.classList.remove('open');
-        hamburger.classList.remove('open');
-        hamburger.setAttribute('aria-expanded', 'false');
-      });
+      link.addEventListener('click', window.geoCloseMenu);
     });
   }
 
