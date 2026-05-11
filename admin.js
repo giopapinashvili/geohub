@@ -210,7 +210,7 @@
     ctx.clearRect(0, 0, w, h);
 
     var cats = ['Premium', 'Campaigns', 'Tickets', 'QR', 'Market'];
-    var vals = [18420, 12800, 6240, 3180, 2200];
+    var vals = [0, 0, 0, 0, 0];
     var colors = ['#a855f7', '#3b82f6', '#10b981', '#f59e0b', '#f97316'];
     var max = Math.max.apply(null, vals);
     var bw = (w - 40) / cats.length;
@@ -247,7 +247,7 @@
     var barsEl = document.getElementById('hourBars');
     var lblsEl = document.getElementById('hourLabels');
     if (!barsEl || !lblsEl) return;
-    var vals = [2,1,1,2,3,8,18,34,42,48,52,55,58,54,50,46,52,60,72,68,62,54,42,28];
+    var vals = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
     var max = Math.max.apply(null, vals);
     var now = new Date().getHours();
     barsEl.innerHTML = '';

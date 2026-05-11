@@ -55,7 +55,7 @@
     <div class="sb-item" onclick="adminNav('businesses')"><span class="sb-ic"><i class="fas fa-store"></i></span> Businesses <span class="sb-cnt" id="sb-biz-side">0</span></div>
     <div class="sb-item" onclick="adminNav('creators')"><span class="sb-ic"><i class="fas fa-star"></i></span> Creators <span class="sb-cnt" id="sb-creators">0</span></div>
     <div class="sb-lbl">Safety</div>
-    <div class="sb-item" onclick="adminNav('moderation')"><span class="sb-ic"><i class="fas fa-flag"></i></span> Moderation <span class="sb-cnt danger" id="sb-mod">12</span></div>
+    <div class="sb-item" onclick="adminNav('moderation')"><span class="sb-ic"><i class="fas fa-flag"></i></span> Moderation <span class="sb-cnt danger" id="sb-mod">0</span></div>
     <div class="sb-item" onclick="adminNav('trust')"><span class="sb-ic"><i class="fas fa-check-circle"></i></span> Trust & Safety</div>
     <div class="sb-lbl">Analytics</div>
     <div class="sb-item" onclick="adminNav('revenue')"><span class="sb-ic"><i class="fas fa-chart-line"></i></span> Revenue</div>
@@ -117,11 +117,11 @@
 
       <div class="g2 mb12">
         <div class="panel">
-          <div class="panel-hdr"><div><div class="panel-title">Platform Growth</div><div class="panel-sub">Users &amp; check-ins — 30 days</div></div><span class="badge bg-green">↑ +18%</span></div>
+          <div class="panel-hdr"><div><div class="panel-title">Platform Growth</div><div class="panel-sub">Users &amp; check-ins — 30 days</div></div></div>
           <canvas id="growthChart" height="130" style="width:100%"></canvas>
         </div>
         <div class="panel">
-          <div class="panel-hdr"><div><div class="panel-title">Daily Active Users</div><div class="panel-sub">Last 14 days</div></div><span class="badge bg-blue">↑ +24%</span></div>
+          <div class="panel-hdr"><div><div class="panel-title">Daily Active Users</div><div class="panel-sub">Last 14 days</div></div></div>
           <canvas id="dauChart" height="130" style="width:100%"></canvas>
         </div>
       </div>
@@ -166,10 +166,7 @@
           <div class="panel">
             <div class="panel-hdr"><div class="panel-title">Trending Places Now</div></div>
             <div class="bl">
-              <div class="bi"><div class="bi-hdr"><span class="bi-lbl">☕ Fabrika</span><span class="bi-val" style="color:var(--green)">12 active</span></div><div class="bt"><div class="bf green" style="width:85%"></div></div></div>
-              <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🏛 Rustaveli Ave</span><span class="bi-val" style="color:var(--green)">9 active</span></div><div class="bt"><div class="bf green" style="width:64%"></div></div></div>
-              <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🍷 Mukhranbatoni</span><span class="bi-val" style="color:var(--gold)">7 active</span></div><div class="bt"><div class="bf gold" style="width:50%"></div></div></div>
-              <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🌿 Mtatsminda</span><span class="bi-val" style="color:var(--blue)">5 active</span></div><div class="bt"><div class="bf blue" style="width:36%"></div></div></div>
+              <div style="text-align:center;padding:24px;color:var(--ts);font-size:0.8rem;opacity:0.6">No active places yet</div>
             </div>
           </div>
           <div class="panel">
@@ -222,13 +219,13 @@
     <!-- ─── CREATORS ─── -->
     <section class="sec" id="sec-creators">
       <div class="ph">
-        <div><div class="ph-title">Creator Management</div><div class="ph-sub">89 active creators · Feature, verify, track performance</div></div>
+        <div><div class="ph-title">Creator Management</div><div class="ph-sub">0 creators · Feature, verify, track performance</div></div>
       </div>
       <div class="g4 mb20">
-        <div class="sc purple"><div class="sc-ico" style="font-size:1rem">🌟</div><div class="sc-val" style="font-size:1.1rem">89</div><div class="sc-lbl">Total Creators</div></div>
-        <div class="sc green"><div class="sc-ico" style="font-size:1rem">✅</div><div class="sc-val" style="font-size:1.1rem">34</div><div class="sc-lbl">Verified</div></div>
-        <div class="sc gold"><div class="sc-ico" style="font-size:1rem">📈</div><div class="sc-val" style="font-size:1.1rem">127k</div><div class="sc-lbl">Total Followers</div></div>
-        <div class="sc blue"><div class="sc-ico" style="font-size:1rem">🤝</div><div class="sc-val" style="font-size:1.1rem">42</div><div class="sc-lbl">Active Collabs</div></div>
+        <div class="sc purple"><div class="sc-ico" style="font-size:1rem">🌟</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl">Total Creators</div></div>
+        <div class="sc green"><div class="sc-ico" style="font-size:1rem">✅</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl">Verified</div></div>
+        <div class="sc gold"><div class="sc-ico" style="font-size:1rem">📈</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl">Total Followers</div></div>
+        <div class="sc blue"><div class="sc-ico" style="font-size:1rem">🤝</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl">Active Collabs</div></div>
       </div>
       <div class="g3" id="creatorGrid"></div>
     </section>
@@ -236,7 +233,7 @@
     <!-- ─── MODERATION ─── -->
     <section class="sec" id="sec-moderation">
       <div class="ph">
-        <div><div class="ph-title">Content Moderation</div><div class="ph-sub" id="modSub">12 items in queue</div></div>
+        <div><div class="ph-title">Content Moderation</div><div class="ph-sub" id="modSub">0 items in queue</div></div>
         <div class="ph-actions">
           <button class="btn btn-ghost btn-sm" onclick="filterMod('all')">All</button>
           <button class="btn btn-ghost btn-sm" onclick="filterMod('review')">Reviews</button>
@@ -245,7 +242,6 @@
           <button class="btn btn-ghost btn-sm" onclick="filterMod('content')">Content</button>
         </div>
       </div>
-      <div class="alert warn mb12"><i class="fas fa-exclamation-triangle"></i> 3 high-priority items require immediate review</div>
       <div style="display:flex;flex-direction:column;gap:9px" id="modQueue"></div>
     </section>
 
@@ -253,20 +249,20 @@
     <section class="sec" id="sec-trust">
       <div class="ph"><div><div class="ph-title">Trust &amp; Safety Center</div><div class="ph-sub">Platform integrity monitoring and AI moderation</div></div></div>
       <div class="g4 mb20">
-        <div class="sc green"><div class="sc-ico" style="font-size:1rem">🏆</div><div class="sc-val" style="font-size:1.1rem">72.4</div><div class="sc-lbl">Avg Trust Score</div><div class="sc-delta du"><i class="fas fa-arrow-up"></i> +2.1 this month</div></div>
-        <div class="sc blue"><div class="sc-ico" style="font-size:1rem">📸</div><div class="sc-val" style="font-size:1.1rem">68%</div><div class="sc-lbl">Camera Proof Rate</div></div>
-        <div class="sc red"><div class="sc-ico" style="font-size:1rem">🚨</div><div class="sc-val" style="font-size:1.1rem">23</div><div class="sc-lbl">Suspicious Accounts</div></div>
-        <div class="sc gold"><div class="sc-ico" style="font-size:1rem">✅</div><div class="sc-val" style="font-size:1.1rem">1,842</div><div class="sc-lbl">Verified Users</div></div>
+        <div class="sc green"><div class="sc-ico" style="font-size:1rem">🏆</div><div class="sc-val" style="font-size:1.1rem">—</div><div class="sc-lbl">Avg Trust Score</div><div class="sc-delta" style="color:var(--ts);font-size:0.72rem">no data yet</div></div>
+        <div class="sc blue"><div class="sc-ico" style="font-size:1rem">📸</div><div class="sc-val" style="font-size:1.1rem">—</div><div class="sc-lbl">Camera Proof Rate</div></div>
+        <div class="sc red"><div class="sc-ico" style="font-size:1rem">🚨</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl">Suspicious Accounts</div></div>
+        <div class="sc gold"><div class="sc-ico" style="font-size:1rem">✅</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl">Verified Users</div></div>
       </div>
       <div class="g2 mb16">
         <div class="panel">
           <div class="panel-hdr"><div class="panel-title">Trust Score Distribution</div></div>
           <div class="bl">
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">90–100 Elite</span><span class="bi-val" style="color:var(--green)">287 users</span></div><div class="bt"><div class="bf green" style="width:42%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">70–89 High</span><span class="bi-val" style="color:var(--blue)">912 users</span></div><div class="bt"><div class="bf blue" style="width:78%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">50–69 Medium</span><span class="bi-val" style="color:var(--gold)">1,240 users</span></div><div class="bt"><div class="bf gold" style="width:92%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">30–49 Low</span><span class="bi-val" style="color:var(--orange)">604 users</span></div><div class="bt"><div class="bf orange" style="width:45%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">0–29 Risk</span><span class="bi-val" style="color:var(--red)">198 users</span></div><div class="bt"><div class="bf red" style="width:15%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">90–100 Elite</span><span class="bi-val" style="color:var(--green)">0 users</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">70–89 High</span><span class="bi-val" style="color:var(--blue)">0 users</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">50–69 Medium</span><span class="bi-val" style="color:var(--gold)">0 users</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">30–49 Low</span><span class="bi-val" style="color:var(--orange)">0 users</span></div><div class="bt"><div class="bf orange" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">0–29 Risk</span><span class="bi-val" style="color:var(--red)">0 users</span></div><div class="bt"><div class="bf red" style="width:0%"></div></div></div>
           </div>
         </div>
         <div>
@@ -280,10 +276,7 @@
         <table class="tbl" style="background:transparent">
           <thead><tr><th>User</th><th>Trust</th><th>Reviews</th><th>Check-ins</th><th>Camera%</th><th>Verified</th></tr></thead>
           <tbody>
-            <tr><td><div class="uinfo"><div class="uav" style="background:linear-gradient(135deg,#10b981,#3b82f6)">N</div><div><div class="uname">Nino Kiknadze</div><div class="uhandle">@nino_k</div></div></div></td><td><span style="font-family:var(--mono);color:var(--green);font-weight:700">98</span></td><td>42</td><td>218</td><td><span class="badge bg-green">96%</span></td><td><span class="badge bg-blue">✓</span></td></tr>
-            <tr><td><div class="uinfo"><div class="uav" style="background:linear-gradient(135deg,#3b82f6,#a855f7)">G</div><div><div class="uname">Giorgi Beridze</div><div class="uhandle">@giorgi_b</div></div></div></td><td><span style="font-family:var(--mono);color:var(--green);font-weight:700">95</span></td><td>38</td><td>184</td><td><span class="badge bg-green">92%</span></td><td><span class="badge bg-blue">✓</span></td></tr>
-            <tr><td><div class="uinfo"><div class="uav" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">S</div><div><div class="uname">Salome Tsiklauri</div><div class="uhandle">@salome_t</div></div></div></td><td><span style="font-family:var(--mono);color:var(--green);font-weight:700">93</span></td><td>31</td><td>156</td><td><span class="badge bg-green">88%</span></td><td><span class="badge bg-blue">✓</span></td></tr>
-            <tr><td><div class="uinfo"><div class="uav" style="background:linear-gradient(135deg,#a855f7,#3b82f6)">T</div><div><div class="uname">Tamara Gabunia</div><div class="uhandle">@tamara_g</div></div></div></td><td><span style="font-family:var(--mono);color:var(--green);font-weight:700">91</span></td><td>27</td><td>143</td><td><span class="badge bg-green">84%</span></td><td><span class="badge bg-blue">✓</span></td></tr>
+            <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--ts);font-size:0.82rem"><i class="fas fa-shield-alt" style="font-size:1.3rem;display:block;margin-bottom:8px;opacity:0.3"></i>No verified users yet</td></tr>
           </tbody>
         </table>
       </div>
@@ -291,12 +284,12 @@
 
     <!-- ─── REVENUE ─── -->
     <section class="sec" id="sec-revenue">
-      <div class="ph"><div><div class="ph-title">Revenue Dashboard</div><div class="ph-sub">Platform monetization · Mock analytics</div></div></div>
+      <div class="ph"><div><div class="ph-title">Revenue Dashboard</div><div class="ph-sub">Platform monetization · Beta — no payments yet</div></div></div>
       <div class="g4 mb20">
-        <div class="rev-card"><div class="rev-lbl">Monthly Revenue</div><div class="rev-val" style="color:var(--green)">₾42,840</div><div class="rev-delta du">↑ +31% vs last month</div></div>
-        <div class="rev-card"><div class="rev-lbl">ARR Projection</div><div class="rev-val" style="color:var(--blue)">₾514k</div><div class="rev-delta du">↑ Based on 30-day trend</div></div>
-        <div class="rev-card"><div class="rev-lbl">Premium Subscribers</div><div class="rev-val" style="color:var(--purple)">847</div><div class="rev-delta du">↑ +124 this month</div></div>
-        <div class="rev-card"><div class="rev-lbl">Avg Revenue / User</div><div class="rev-val" style="color:var(--gold)">₾13.2</div><div class="rev-delta du">↑ +8% MoM</div></div>
+        <div class="rev-card"><div class="rev-lbl">Monthly Revenue</div><div class="rev-val" style="color:var(--green)">₾0</div><div class="rev-delta" style="color:var(--ts);font-size:0.72rem">Beta — no payments yet</div></div>
+        <div class="rev-card"><div class="rev-lbl">ARR Projection</div><div class="rev-val" style="color:var(--blue)">—</div><div class="rev-delta" style="color:var(--ts);font-size:0.72rem">no data</div></div>
+        <div class="rev-card"><div class="rev-lbl">Premium Subscribers</div><div class="rev-val" style="color:var(--purple)">0</div><div class="rev-delta" style="color:var(--ts);font-size:0.72rem">coming soon</div></div>
+        <div class="rev-card"><div class="rev-lbl">Avg Revenue / User</div><div class="rev-val" style="color:var(--gold)">—</div><div class="rev-delta" style="color:var(--ts);font-size:0.72rem">no data</div></div>
       </div>
       <div class="g2 mb16">
         <div class="panel">
@@ -306,11 +299,11 @@
         <div class="panel">
           <div class="panel-hdr"><div class="panel-title">Revenue Breakdown</div></div>
           <div class="bl">
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">💎 Premium Subs</span><span class="bi-val" style="color:var(--purple)">₾18,420</span></div><div class="bt"><div class="bf purple" style="width:86%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🏢 Biz Campaigns</span><span class="bi-val" style="color:var(--blue)">₾12,800</span></div><div class="bt"><div class="bf blue" style="width:60%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🎟 Ticket Sales</span><span class="bi-val" style="color:var(--green)">₾6,240</span></div><div class="bt"><div class="bf green" style="width:29%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🎁 QR Campaigns</span><span class="bi-val" style="color:var(--gold)">₾3,180</span></div><div class="bt"><div class="bf gold" style="width:15%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🛍 Marketplace</span><span class="bi-val" style="color:var(--orange)">₾2,200</span></div><div class="bt"><div class="bf orange" style="width:10%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">💎 Premium Subs</span><span class="bi-val" style="color:var(--purple)">₾0</span></div><div class="bt"><div class="bf purple" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🏢 Biz Campaigns</span><span class="bi-val" style="color:var(--blue)">₾0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🎟 Ticket Sales</span><span class="bi-val" style="color:var(--green)">₾0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🎁 QR Campaigns</span><span class="bi-val" style="color:var(--gold)">₾0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🛍 Marketplace</span><span class="bi-val" style="color:var(--orange)">₾0</span></div><div class="bt"><div class="bf orange" style="width:0%"></div></div></div>
           </div>
         </div>
       </div>
@@ -324,9 +317,9 @@
     <section class="sec" id="sec-city">
       <div class="ph"><div><div class="ph-title">City Analytics</div><div class="ph-sub">Geographic activity, density, and engagement by city</div></div></div>
       <div class="g3 mb16">
-        <div class="zone"><div class="zone-name">🏙 Tbilisi</div><span class="zone-badge" style="background:var(--gd);color:var(--green);border:1px solid rgba(16,185,129,0.25)">🟢 Most Active</span><div class="bl"><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Check-ins</span><span class="bi-val">14,820</span></div><div class="bt"><div class="bf green" style="width:92%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Reviews</span><span class="bi-val">4,200</span></div><div class="bt"><div class="bf blue" style="width:78%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Events</span><span class="bi-val">98</span></div><div class="bt"><div class="bf gold" style="width:70%"></div></div></div></div></div>
-        <div class="zone"><div class="zone-name">🌊 Batumi</div><span class="zone-badge" style="background:var(--bd);color:var(--blue);border:1px solid rgba(59,130,246,0.25)">🔵 Growing</span><div class="bl"><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Check-ins</span><span class="bi-val">2,840</span></div><div class="bt"><div class="bf blue" style="width:54%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Reviews</span><span class="bi-val">1,420</span></div><div class="bt"><div class="bf blue" style="width:34%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Events</span><span class="bi-val">24</span></div><div class="bt"><div class="bf blue" style="width:20%"></div></div></div></div></div>
-        <div class="zone"><div class="zone-name">🍇 Kakheti</div><span class="zone-badge" style="background:var(--yd);color:var(--gold);border:1px solid rgba(245,158,11,0.25)">🟡 Seasonal</span><div class="bl"><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Check-ins</span><span class="bi-val">760</span></div><div class="bt"><div class="bf gold" style="width:30%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Reviews</span><span class="bi-val">420</span></div><div class="bt"><div class="bf gold" style="width:20%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Events</span><span class="bi-val">20</span></div><div class="bt"><div class="bf gold" style="width:17%"></div></div></div></div></div>
+        <div class="zone"><div class="zone-name">🏙 Tbilisi</div><span class="zone-badge" style="background:var(--gd);color:var(--green);border:1px solid rgba(16,185,129,0.25)">🟢 Active</span><div class="bl"><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Check-ins</span><span class="bi-val">0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Reviews</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Events</span><span class="bi-val">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div></div></div>
+        <div class="zone"><div class="zone-name">🌊 Batumi</div><span class="zone-badge" style="background:var(--bd);color:var(--blue);border:1px solid rgba(59,130,246,0.25)">🔵 Coming Soon</span><div class="bl"><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Check-ins</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Reviews</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Events</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div></div></div>
+        <div class="zone"><div class="zone-name">🍇 Kakheti</div><span class="zone-badge" style="background:var(--yd);color:var(--gold);border:1px solid rgba(245,158,11,0.25)">🟡 Coming Soon</span><div class="bl"><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Check-ins</span><span class="bi-val">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Reviews</span><span class="bi-val">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Events</span><span class="bi-val">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div></div></div>
       </div>
       <div class="g2">
         <div class="panel">
@@ -337,11 +330,11 @@
         <div class="panel">
           <div class="panel-hdr"><div class="panel-title">Patriot Mission Activity</div></div>
           <div class="bl">
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🧹 Cleanup</span><span class="bi-val" style="color:var(--green)">342</span></div><div class="bt"><div class="bf green" style="width:85%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🌳 Park Improvement</span><span class="bi-val" style="color:var(--green)">218</span></div><div class="bt"><div class="bf green" style="width:54%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🛣 Infrastructure</span><span class="bi-val" style="color:var(--blue)">124</span></div><div class="bt"><div class="bf blue" style="width:31%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🐾 Animal Safety</span><span class="bi-val" style="color:var(--gold)">87</span></div><div class="bt"><div class="bf gold" style="width:22%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🌿 Eco Actions</span><span class="bi-val" style="color:var(--green)">120</span></div><div class="bt"><div class="bf green" style="width:30%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🧹 Cleanup</span><span class="bi-val" style="color:var(--green)">0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🌳 Park Improvement</span><span class="bi-val" style="color:var(--green)">0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🛣 Infrastructure</span><span class="bi-val" style="color:var(--blue)">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🐾 Animal Safety</span><span class="bi-val" style="color:var(--gold)">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🌿 Eco Actions</span><span class="bi-val" style="color:var(--green)">0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
           </div>
         </div>
       </div>
@@ -393,16 +386,14 @@
     <!-- ─── NOTIFICATIONS ─── -->
     <section class="sec" id="sec-notifications">
       <div class="ph">
-        <div><div class="ph-title">Admin Notifications</div><div class="ph-sub" id="notifSub">3 unread alerts</div></div>
+        <div><div class="ph-title">Admin Notifications</div><div class="ph-sub" id="notifSub">0 alerts</div></div>
         <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark all read</button></div>
       </div>
       <div id="notifList">
-        <div class="ni unread"><div class="ni-ico" style="background:var(--rd)">🚨</div><div class="ni-body"><div class="ni-title">Moderation Spike Detected</div><div class="ni-sub">12 new reports in the last hour — 4× above average. Moderation queue review needed immediately.</div></div><div class="ni-time">2m ago</div></div>
-        <div class="ni unread"><div class="ni-ico" style="background:var(--gd)">🎉</div><div class="ni-body"><div class="ni-title">Growth Milestone: 3,000 Users!</div><div class="ni-sub">GeoHub crossed 3,000 registered users. Monthly growth: +18%. Trajectory: 5,000 users by Aug 2026.</div></div><div class="ni-time">1h ago</div></div>
-        <div class="ni unread"><div class="ni-ico" style="background:var(--pd)">🤖</div><div class="ni-body"><div class="ni-title">AI Alert: Coordinated Review Pattern</div><div class="ni-sub">AI Trust Engine flagged suspicious review cluster on "Stamba Hotel". 14 accounts, same creation date. Auto-queued for review.</div></div><div class="ni-time">3h ago</div></div>
-        <div class="ni"><div class="ni-ico" style="background:var(--yd)">📈</div><div class="ni-body"><div class="ni-title">Revenue Milestone: ₾40k MRR</div><div class="ni-sub">Monthly recurring revenue exceeded ₾40k for the first time. Premium subscriptions drove 43% of total.</div></div><div class="ni-time">6h ago</div></div>
-        <div class="ni"><div class="ni-ico" style="background:var(--bd)">🌊</div><div class="ni-body"><div class="ni-title">Batumi Zone Activation</div><div class="ni-sub">Batumi hit 100+ daily active users for the first time. Live city features now fully available.</div></div><div class="ni-time">Yesterday</div></div>
-        <div class="ni"><div class="ni-ico" style="background:var(--od)">🛡️</div><div class="ni-body"><div class="ni-title">Patriot Mission Milestone</div><div class="ni-sub">891 civic missions completed platform-wide. Vake Park cleanup campaign: 94% satisfaction from local users.</div></div><div class="ni-time">2 days ago</div></div>
+        <div style="text-align:center;padding:48px 24px;color:var(--ts);font-size:0.85rem">
+          <i class="fas fa-bell" style="font-size:1.8rem;display:block;margin-bottom:12px;opacity:0.2"></i>
+          No notifications yet
+        </div>
       </div>
     </section>
 
