@@ -42,22 +42,62 @@ const profileUsersByUsername = Object.fromEntries(MOCK_USERS.map(user => [user.u
   }
 
   function resolveProfileUser() {
-    const urlParam = new URLSearchParams(location.search).get('user');
+    const params  = new URLSearchParams(location.search);
+    const uidParam  = params.get('uid');
+    const userParam = params.get('user');
 
-    // Own profile: real Firebase user
-    if (!urlParam) {
+    // ── Own profile (no URL param) ────────────────────────────────────
+    if (!uidParam && !userParam) {
       try {
         const authUser = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
         if (authUser && authUser.isFirebaseUser) return buildFirebaseProfile(authUser);
       } catch (e) {}
-      // Not logged in — let page finish loading first, then redirect
-      setTimeout(function() { window.location.replace('auth.html'); }, 0);
+      setTimeout(function () { window.location.replace('auth.html'); }, 0);
       return null;
     }
 
-    // Public profile lookup via ?user= param — no mock users exist
-    setTimeout(function() { window.location.replace('index.html'); }, 0);
-    return null;
+    // ── Public profile by uid (?uid=…) — load from Firestore ─────────
+    const targetUid = uidParam || userParam;
+
+    // Check if it's actually the logged-in user's own profile
+    try {
+      const me = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
+      if (me && me.uid && me.uid === targetUid) {
+        return buildFirebaseProfile(me);
+      }
+    } catch (e) {}
+
+    // Load from Firestore asynchronously then re-render
+    function tryLoadFromFirestore() {
+      const fb = window.GeoFirebase;
+      if (!fb || !fb.db || !fb.fs) return false;
+      fb.fs.getDoc(fb.fs.doc(fb.db, 'users', targetUid))
+        .then(function (snap) {
+          if (snap.exists()) {
+            const data = snap.data();
+            const u = buildFirebaseProfile(Object.assign({ uid: targetUid }, data));
+            renderDynamicProfile(u);
+          } else {
+            // User doc doesn't exist — build minimal placeholder
+            const u = buildFirebaseProfile({ uid: targetUid, fullName: 'GeoHub User', isFirebaseUser: true });
+            renderDynamicProfile(u);
+          }
+        })
+        .catch(function () {
+          const u = buildFirebaseProfile({ uid: targetUid, fullName: 'GeoHub User', isFirebaseUser: true });
+          renderDynamicProfile(u);
+        });
+      return true;
+    }
+
+    // Show loading state immediately
+    document.querySelector('.profile-name') && (document.querySelector('.profile-name').textContent = 'Loading…');
+
+    if (!tryLoadFromFirestore()) {
+      window.addEventListener('GeoFirebaseReady', function () { tryLoadFromFirestore(); }, { once: true });
+    }
+
+    return null; // renderDynamicProfile called async
   }
 
   function scoreInterestProfile(item, user) {

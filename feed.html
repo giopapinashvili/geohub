@@ -257,22 +257,8 @@
         <span class="fdb-block-title">Marketplace</span>
         <a href="services.html" class="fdb-see-all">See All</a>
       </div>
-      <div class="fdb-items-row">
-        <a href="services.html" class="fdb-market-card">
-          <img src="https://picsum.photos/seed/camera_p/200/150" alt="" class="fdb-market-img">
-          <div class="fdb-market-price">GEL 1,200</div>
-          <div class="fdb-market-name">Camera Sony A7III</div>
-        </a>
-        <a href="services.html" class="fdb-market-card">
-          <img src="https://picsum.photos/seed/bike_p/200/150" alt="" class="fdb-market-img">
-          <div class="fdb-market-price">GEL 850</div>
-          <div class="fdb-market-name">Trek Mountain Bike</div>
-        </a>
-        <a href="services.html" class="fdb-market-card">
-          <img src="https://picsum.photos/seed/drone_p/200/150" alt="" class="fdb-market-img">
-          <div class="fdb-market-price">GEL 2,500</div>
-          <div class="fdb-market-name">DJI Mavic Air 2</div>
-        </a>
+      <div class="fdb-items-row" id="fdb-market-items" style="color:var(--text-muted,#6b7280);font-size:0.82rem;padding:16px 0">
+        No listings yet — <a href="services.html" style="color:var(--green,#10b981);font-weight:700">Add one</a>
       </div>
     </div>
 
@@ -282,22 +268,8 @@
         <span class="fdb-block-title">Popular in Your Area</span>
         <a href="places.html" class="fdb-see-all">See All</a>
       </div>
-      <div class="fdb-items-row">
-        <a href="places.html" class="fdb-place-card">
-          <img src="https://picsum.photos/seed/views_p/200/140" alt="" class="fdb-place-img">
-          <div class="fdb-place-name">Great Views</div>
-          <div class="fdb-place-meta">12 places</div>
-        </a>
-        <a href="places.html" class="fdb-place-card">
-          <img src="https://picsum.photos/seed/coffee_p/200/140" alt="" class="fdb-place-img">
-          <div class="fdb-place-name">Best Coffee</div>
-          <div class="fdb-place-meta">8 places</div>
-        </a>
-        <a href="places.html" class="fdb-place-card">
-          <img src="https://picsum.photos/seed/gems_p/200/140" alt="" class="fdb-place-img">
-          <div class="fdb-place-name">Hidden Gems</div>
-          <div class="fdb-place-meta">15 places</div>
-        </a>
+      <div class="fdb-items-row" id="fdb-places-items" style="color:var(--text-muted,#6b7280);font-size:0.82rem;padding:16px 0">
+        Explore places on the <a href="map.html" style="color:var(--green,#10b981);font-weight:700">Map</a>
       </div>
     </div>
 
@@ -476,14 +448,16 @@
 
   // ── Render a real Firestore post ──────────────────────────────────────
   function renderRealPost(post) {
+    var profileUrl = post.authorId ? 'profile.html?uid=' + encodeURIComponent(post.authorId) : 'profile.html';
     var av = post.authorAvatar
-      ? '<img src="' + escHtml(post.authorAvatar) + '" alt="" class="fd-post-avatar" onerror="this.style.display=\'none\'">'
-      : '<div class="fd-post-avatar fd-post-avatar--init">' + escHtml((post.authorName || 'G').charAt(0).toUpperCase()) + '</div>';
+      ? '<img src="' + escHtml(post.authorAvatar) + '" alt="" class="fd-post-avatar" style="cursor:pointer" onerror="this.style.display=\'none\'">'
+      : '<div class="fd-post-avatar fd-post-avatar--init" style="cursor:pointer">' + escHtml((post.authorName || 'G').charAt(0).toUpperCase()) + '</div>';
     var pid = escHtml(post.id);
     return '<article class="fd-card fd-post fd-post--real" data-post-id="' + pid + '">' +
-      '<div class="fd-post-head">' + av +
+      '<div class="fd-post-head">' +
+        '<a href="' + escHtml(profileUrl) + '" style="text-decoration:none;display:contents">' + av + '</a>' +
         '<div class="fd-post-meta">' +
-          '<div class="fd-post-name">' + escHtml(post.authorName || 'GeoHub User') + '</div>' +
+          '<a href="' + escHtml(profileUrl) + '" class="fd-post-name" style="text-decoration:none;color:inherit">' + escHtml(post.authorName || 'GeoHub User') + '</a>' +
           '<div class="fd-post-sub">' + timeAgo(post.createdAt) + ' · <i class="fas fa-earth-europe fd-globe"></i></div>' +
         '</div>' +
       '</div>' +
