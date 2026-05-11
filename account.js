@@ -51,6 +51,39 @@
     logout: doLogout
   };
 
+  /* ── Lang toggle (always injected after navbar renders) ─── */
+  function ensureLangToggle(actionsEl) {
+    if (document.getElementById('geoLangToggle')) return;
+    var lang = 'en';
+    try { lang = localStorage.getItem('geohub_lang') || 'en'; } catch(e) {}
+    var b = document.createElement('button');
+    b.id = 'geoLangToggle';
+    b.setAttribute('aria-label', 'Switch language');
+    b.textContent = lang === 'ka' ? 'EN' : 'ქარ';
+    b.style.cssText = [
+      'background:transparent',
+      'border:1px solid rgba(255,255,255,.18)',
+      'color:#aaa',
+      'border-radius:6px',
+      'padding:3px 9px',
+      'font-size:.75rem',
+      'font-weight:700',
+      'letter-spacing:.5px',
+      'cursor:pointer',
+      'white-space:nowrap',
+      'flex-shrink:0',
+      'font-family:inherit',
+      'transition:border-color .2s,color .2s'
+    ].join(';');
+    b.onmouseenter = function() { b.style.borderColor = '#10b981'; b.style.color = '#10b981'; };
+    b.onmouseleave = function() { b.style.borderColor = 'rgba(255,255,255,.18)'; b.style.color = '#aaa'; };
+    b.onclick = function() {
+      try { localStorage.setItem('geohub_lang', lang === 'ka' ? 'en' : 'ka'); } catch(e) {}
+      window.location.reload();
+    };
+    if (actionsEl) actionsEl.insertBefore(b, actionsEl.firstChild);
+  }
+
   /* ── Navbar injection ──────────────────────────────────── */
   function initAuthNav() {
     var actionsEl = document.querySelector('.navbar-actions');
@@ -100,6 +133,8 @@
           'display:inline-flex;align-items:center;gap:6px;font-weight:600;">' +
           '<i class="fas fa-user-plus"></i> Sign Up</a>';
     }
+
+    ensureLangToggle(actionsEl);
   }
 
   /* ── Mobile menu auth entry ────────────────────────────── */

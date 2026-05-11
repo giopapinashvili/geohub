@@ -313,16 +313,16 @@
     if (actions) actions.insertBefore(btn, actions.firstChild);
   }
 
-  // Re-add the toggle whenever account.js rewrites navbar-actions (async Firebase auth)
+  // Backup: observe .navbar (not just .navbar-actions) to catch any rewrite
   function watchNavActions() {
-    var actions = document.querySelector('.navbar-actions');
-    if (!actions) return;
+    var nav = document.querySelector('.navbar');
+    if (!nav) return;
     var observer = new MutationObserver(function() {
       if (!document.getElementById('geoLangToggle')) {
         addLangToggle();
       }
     });
-    observer.observe(actions, { childList: true, subtree: false });
+    observer.observe(nav, { childList: true, subtree: true });
   }
 
   function cleanupActions() {
