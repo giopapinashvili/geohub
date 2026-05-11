@@ -27,15 +27,15 @@ const profileUsersByUsername = Object.fromEntries(MOCK_USERS.map(user => [user.u
       bio:           authUser.bio || '',
       city:          authUser.city || 'Tbilisi',
       explorerLevel: authUser.explorerLevel || 'New Explorer',
-      xp:            authUser.xp != null ? authUser.xp : 250,
+      xp:            authUser.xp != null ? authUser.xp : 0,
       rank:          authUser.rank || 9999,
-      badges:        (authUser.badges && authUser.badges.length) ? authUser.badges : ['New Member'],
-      interests:     (authUser.interests && authUser.interests.length) ? authUser.interests : ['travel', 'cafes'],
+      badges:        (authUser.badges && authUser.badges.length) ? authUser.badges : [],
+      interests:     (authUser.interests && authUser.interests.length) ? authUser.interests : [],
       followers:     authUser.followers || 0,
       following:     authUser.following || 0,
       postsCount:    authUser.postsCount || 0,
       visitedPlaces: authUser.visitedPlaces || 0,
-      trustScore:    authUser.trustScore || 70,
+      trustScore:    authUser.trustScore || 0,
       accountType:   authUser.accountType || 'Explorer',
       isFirebaseUser: true
     };
@@ -100,16 +100,17 @@ const profileUsersByUsername = Object.fromEntries(MOCK_USERS.map(user => [user.u
   function renderIdentity(user) {
     const fav = user.interests.slice(0, 5);
     document.querySelector('.explorer-type').innerHTML = `${accountBadgeProfile(user.accountType)} ${profileActivityType(user)}`;
-    document.querySelector('.fav-cats').innerHTML = fav.map((interest, index) =>
-      `<div class="fav-cat-chip">${interest} <span class="fav-cat-rank">#${index + 1}</span></div>`
-    ).join('');
+    document.querySelector('.fav-cats').innerHTML = fav.length
+      ? fav.map((interest, index) => `<div class="fav-cat-chip">${interest} <span class="fav-cat-rank">#${index + 1}</span></div>`).join('')
+      : '<div style="color:var(--text-muted);font-size:0.82rem">No interests set yet</div>';
 
+    const isBlank = user.isFirebaseUser && !user.xp && !user.interests.length;
     const scores = [
-      ['Adventure', user.interests.some(i => /hiking|travel|route|camping|trail/i.test(i)) ? 92 : 42, '#10b981'],
-      ['Cafe Life', user.interests.some(i => /cafe|coffee|coworking/i.test(i)) ? 88 : 35, '#f59e0b'],
-      ['Foodie', user.interests.some(i => /restaurant|food|wine|dessert|brunch/i.test(i)) ? 86 : 38, '#ef4444'],
-      ['Culture', user.interests.some(i => /course|museum|workshop|architecture|history|gallery/i.test(i)) ? 82 : 45, '#a855f7'],
-      ['Social', user.interests.some(i => /event|nightlife|group|meetup/i.test(i)) ? 90 : 40, '#3b82f6']
+      ['Adventure', isBlank ? 0 : user.interests.some(i => /hiking|travel|route|camping|trail/i.test(i)) ? 92 : 42, '#10b981'],
+      ['Cafe Life', isBlank ? 0 : user.interests.some(i => /cafe|coffee|coworking/i.test(i)) ? 88 : 35, '#f59e0b'],
+      ['Foodie',   isBlank ? 0 : user.interests.some(i => /restaurant|food|wine|dessert|brunch/i.test(i)) ? 86 : 38, '#ef4444'],
+      ['Culture',  isBlank ? 0 : user.interests.some(i => /course|museum|workshop|architecture|history|gallery/i.test(i)) ? 82 : 45, '#a855f7'],
+      ['Social',   isBlank ? 0 : user.interests.some(i => /event|nightlife|group|meetup/i.test(i)) ? 90 : 40, '#3b82f6']
     ];
     document.querySelector('.lifestyle-scores').innerHTML = scores.map(([label, score, color]) => `
       <div class="ls-row">
@@ -134,14 +135,18 @@ const profileUsersByUsername = Object.fromEntries(MOCK_USERS.map(user => [user.u
   }
 
   function renderPlaces(user) {
-    const isNewUser = user.accountType === 'New User' || (user.isFirebaseUser && !user.visitedPlaces);
-    const places = [...profilePlaces].sort((a, b) => scoreInterestProfile(b, user) - scoreInterestProfile(a, user)).slice(0, isNewUser ? 2 : 6);
+    const isNewUser = user.isFirebaseUser && !user.visitedPlaces && !user.postsCount;
     document.querySelector('.places-filter-chips').innerHTML = `<div class="places-chip active">All (${user.visitedPlaces})</div>` + user.interests.slice(0, 5).map(i => `<div class="places-chip">${i}</div>`).join('');
+    if (isNewUser) {
+      document.querySelector('#tab-places .places-grid').innerHTML = '<div class="empty-profile-state"><i class="fas fa-map-marker-alt"></i><h3>No visited places yet</h3><p>Check in to places as you explore Georgia — they\'ll appear here.</p><a href="map.html" class="btn btn-primary btn-sm" style="margin-top:12px">Explore Map</a></div>';
+      return;
+    }
+    const places = [...profilePlaces].sort((a, b) => scoreInterestProfile(b, user) - scoreInterestProfile(a, user)).slice(0, 6);
     document.querySelector('#tab-places .places-grid').innerHTML = places.map(place => `
       <div class="place-card">
         <div class="place-card-img-wrap">
           <img class="place-card-img" src="${place.image}" alt="${place.name}">
-          ${!isNewUser ? '<div class="checkin-badge"><i class="fas fa-check"></i> Visited</div>' : ''}
+          <div class="checkin-badge"><i class="fas fa-check"></i> Visited</div>
         </div>
         <div class="place-card-body">
           <div class="place-card-name">${place.name}</div>
@@ -176,8 +181,12 @@ const profileUsersByUsername = Object.fromEntries(MOCK_USERS.map(user => [user.u
   }
 
   function renderReviews(user) {
-    const isNewUser = user.accountType === 'New User' || (user.isFirebaseUser && !user.visitedPlaces);
-    const reviews = [...profilePlaces].sort((a, b) => scoreInterestProfile(b, user) - scoreInterestProfile(a, user)).slice(0, isNewUser ? 1 : 4);
+    const isNewUser = user.isFirebaseUser && !user.visitedPlaces && !user.postsCount;
+    if (isNewUser) {
+      document.getElementById('tab-reviews').innerHTML = '<div class="empty-profile-state"><i class="fas fa-star"></i><h3>No reviews yet</h3><p>Visit a place and leave your first review — it will appear here.</p><a href="places.html" class="btn btn-primary btn-sm" style="margin-top:12px">Find Places</a></div>';
+      return;
+    }
+    const reviews = [...profilePlaces].sort((a, b) => scoreInterestProfile(b, user) - scoreInterestProfile(a, user)).slice(0, 4);
     document.getElementById('tab-reviews').innerHTML = reviews.map((place, index) => `
       <div class="profile-review-card">
         <div class="prv-place-row">
@@ -185,17 +194,17 @@ const profileUsersByUsername = Object.fromEntries(MOCK_USERS.map(user => [user.u
           <div><div class="prv-place-name">${place.name}</div><div class="prv-place-cat">${place.cat} · ${place.city}</div></div>
           <div style="margin-left:auto;font-size:0.85rem">★★★★★</div>
         </div>
-        <div class="prv-text">"${user.accountType === 'New User' ? 'First short review: good place to start exploring.' : `A ${place.cat.toLowerCase()} spot that matches my ${user.interests[0]} side. Worth saving if you are building a real GeoHub map.`}"</div>
+        <div class="prv-text">"A ${place.cat.toLowerCase()} spot worth visiting in ${place.city}."</div>
         <div class="prv-foot"><button class="prv-like-btn"><i class="fas fa-heart"></i> ${Math.max(3, Math.round(user.trustScore / 2) - index * 8)} Helpful</button><div class="prv-date">May 2026</div></div>
       </div>`).join('');
   }
 
   function renderActivity(user) {
-    const isNew = user.accountType === 'New User' || (user.isFirebaseUser && !user.postsCount && !user.visitedPlaces);
+    const isNew = user.isFirebaseUser && !user.postsCount && !user.visitedPlaces;
     const activity = isNew
       ? [
-          ['green', '🌱', `Created a GeoHub profile and picked <strong>${user.interests[0]}</strong> as a first interest`, 'Today'],
-          ['blue', '📍', 'Saved the first nearby place to wishlist', 'Today']
+          ['green', '🌱', 'Created a GeoHub profile — welcome to the community!', 'Today'],
+          ['blue', '📍', 'Explore places and check in to start building your story', 'Today']
         ]
       : [
           ['green', '📸', `Checked in at <strong>${profilePlaces[0].name}</strong> and earned XP`, '2 hours ago'],
@@ -214,7 +223,7 @@ const profileUsersByUsername = Object.fromEntries(MOCK_USERS.map(user => [user.u
     const existing = document.getElementById('profileUserSwitcherCard');
     if (existing) existing.remove();
 
-    document.querySelector('.geo-map-widget-title span').textContent = `${Math.max(1, Math.round(user.visitedPlaces / 12))} cities`;
+    document.querySelector('.geo-map-widget-title span').textContent = `${Math.max(0, Math.round(user.visitedPlaces / 12))} cities`;
 
     // Update rewards tab wallet card
     const geoPoints = Math.round(user.xp / 10);
@@ -230,7 +239,8 @@ const profileUsersByUsername = Object.fromEntries(MOCK_USERS.map(user => [user.u
 
     document.querySelector('.mini-wallet-pts').textContent = `${compactProfile(Math.round(user.xp / 10))} pts`;
     document.querySelector('.mini-wallet-label').textContent = `GeoPoints · ${user.explorerLevel.replace(' Explorer', '')} Tier`;
-    document.querySelector('.mini-wallet-sub').innerHTML = `<strong>${Math.max(20, 1000 - Math.round(user.xp / 10))} pts</strong> to next tier · ${user.accountType === 'New User' ? 0 : 3} active coupons`;
+    const activeCoupons = (user.isFirebaseUser && !user.postsCount && !user.visitedPlaces) ? 0 : 3;
+    document.querySelector('.mini-wallet-sub').innerHTML = `<strong>${Math.max(0, 1000 - Math.round(user.xp / 10))} pts</strong> to next tier · ${activeCoupons} active coupons`;
     document.querySelector('.trust-number').textContent = user.trustScore;
     document.querySelector('.trust-info-label').textContent = user.trustScore > 92 ? 'Highly Trusted' : user.trustScore > 80 ? 'Trusted Explorer' : 'Building Trust';
     const isNewUserCtx = user.accountType === 'New User' || (user.isFirebaseUser && !user.visitedPlaces);
@@ -239,8 +249,43 @@ const profileUsersByUsername = Object.fromEntries(MOCK_USERS.map(user => [user.u
     document.querySelector('.trust-items').innerHTML = `
       <div class="trust-item ok"><i class="fas fa-check-circle"></i> ${user.isFirebaseUser ? 'Firebase account verified' : 'Profile mock verified'}</div>
       <div class="trust-item ok"><i class="fas fa-map-marker-alt"></i> ${user.visitedPlaces} visited places</div>
-      <div class="trust-item ok"><i class="fas fa-star"></i> ${user.badges.length} badges earned</div>
+      <div class="trust-item ok"><i class="fas fa-star"></i> ${user.badges.length} badge${user.badges.length !== 1 ? 's' : ''} earned</div>
       <div class="trust-item ${isNewUser ? 'warn' : 'ok'}"><i class="fas fa-camera"></i> ${isNewUser ? 'Needs more camera proofs' : 'Camera proof active'}</div>`;
+
+    // Social proof stats
+    const isNewReal = user.isFirebaseUser && !user.postsCount && !user.visitedPlaces;
+    const spCities  = document.getElementById('spCitiesVal');  if (spCities)  spCities.textContent  = isNewReal ? 0 : Math.max(1, Math.round(user.visitedPlaces / 3));
+    const spFriends = document.getElementById('spFriendsVal'); if (spFriends) spFriends.textContent = isNewReal ? 0 : Math.max(0, user.following);
+    const spLikes   = document.getElementById('spLikesVal');   if (spLikes)   spLikes.textContent   = isNewReal ? 0 : Math.round(user.xp * 1.2);
+    const spGroups  = document.getElementById('spGroupsVal');  if (spGroups)  spGroups.textContent  = isNewReal ? 0 : Math.max(0, user.badges.length);
+
+    // Most Liked Review
+    const mlrCard = document.getElementById('mostLikedReviewCard');
+    if (mlrCard) {
+      if (isNewReal) {
+        mlrCard.style.display = 'none';
+      } else {
+        mlrCard.style.display = '';
+        const topPlace = profilePlaces[0];
+        mlrCard.innerHTML = `
+          <div style="font-size:0.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">
+            <i class="fas fa-fire" style="color:#ef4444;margin-right:4px"></i> Most Liked Review
+          </div>
+          <div class="review-place-row">
+            <img class="review-place-img" src="${topPlace.image}" alt="${topPlace.name}">
+            <div>
+              <div class="review-place-name">${topPlace.name}</div>
+              <div class="review-place-cat">${topPlace.cat} · ${topPlace.city}</div>
+            </div>
+            <div style="margin-left:auto"><div class="rating-display" style="font-size:0.85rem">⭐⭐⭐⭐⭐ <span style="font-weight:700">5.0</span></div></div>
+          </div>
+          <div class="review-quote">"A great spot worth visiting in ${topPlace.city}."</div>
+          <div class="review-meta-row">
+            <div class="review-likes"><i class="fas fa-heart"></i> ${Math.max(3, Math.round(user.trustScore / 2))} people found this helpful</div>
+            <div style="font-size:0.72rem;color:var(--text-muted)">May 2026</div>
+          </div>`;
+      }
+    }
 
     const suggested = MOCK_USERS.filter(candidate => candidate.id !== user.id).sort((a, b) => b.trustScore - a.trustScore).slice(0, 4);
     const followingCard = document.querySelector('.following-card');

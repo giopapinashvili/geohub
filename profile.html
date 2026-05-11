@@ -164,47 +164,24 @@
       <div class="social-proof-grid">
         <div class="sp-card">
           <div class="sp-icon green">🏙️</div>
-          <div><div class="sp-value">12</div><div class="sp-label">Cities Explored</div></div>
+          <div><div id="spCitiesVal" class="sp-value">0</div><div class="sp-label">Cities Explored</div></div>
         </div>
         <div class="sp-card">
           <div class="sp-icon blue">👥</div>
-          <div><div class="sp-value">7</div><div class="sp-label">Friends Invited</div></div>
+          <div><div id="spFriendsVal" class="sp-value">0</div><div class="sp-label">Friends Invited</div></div>
         </div>
         <div class="sp-card">
           <div class="sp-icon gold">👍</div>
-          <div><div class="sp-value">342</div><div class="sp-label">Review Likes</div></div>
+          <div><div id="spLikesVal" class="sp-value">0</div><div class="sp-label">Review Likes</div></div>
         </div>
         <div class="sp-card">
           <div class="sp-icon purple">🎉</div>
-          <div><div class="sp-value">4</div><div class="sp-label">Group Activities</div></div>
+          <div><div id="spGroupsVal" class="sp-value">0</div><div class="sp-label">Group Activities</div></div>
         </div>
       </div>
 
       <!-- Most Liked Review -->
-      <div class="liked-review-card">
-        <div style="font-size:0.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">
-          <i class="fas fa-fire" style="color:#ef4444;margin-right:4px"></i> Most Liked Review
-        </div>
-        <div class="review-place-row">
-          <img class="review-place-img" src="https://picsum.photos/seed/kazbegi-hotel/200/200" alt="">
-          <div>
-            <div class="review-place-name">Rooms Hotel Kazbegi</div>
-            <div class="review-place-cat">Hotel · Kazbegi</div>
-          </div>
-          <div style="margin-left:auto">
-            <div class="rating-display" style="font-size:0.85rem">
-              ⭐⭐⭐⭐⭐ <span style="font-weight:700">5.0</span>
-            </div>
-          </div>
-        </div>
-        <div class="review-quote">
-          "Absolutely magical place. Woke up at 6am to Gergeti Trinity Church glowing in the morning light right outside our window. The staff remembered our names from day one. Worth every tetri."
-        </div>
-        <div class="review-meta-row">
-          <div class="review-likes"><i class="fas fa-heart"></i> 89 people found this helpful</div>
-          <div style="font-size:0.72rem;color:var(--text-muted)">March 2024</div>
-        </div>
-      </div>
+      <div id="mostLikedReviewCard" class="liked-review-card" style="display:none"></div>
 
       <!-- Activity Feed -->
       <div class="activity-feed">
