@@ -8,21 +8,21 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
-  padding: 0 24px;
-  height: 68px;
+  z-index: var(--z-navbar);
+  padding: 0 var(--sp-6);
+  height: var(--navbar-height);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(4, 5, 13, 0.85);
-  backdrop-filter: blur(20px) saturate(1.8);
-  -webkit-backdrop-filter: blur(20px) saturate(1.8);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(4,5,13,0.88);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--border-subtle);
   transition: var(--transition);
 }
 .navbar.scrolled {
-  background: rgba(4, 5, 13, 0.96);
-  border-bottom-color: var(--border-subtle);
+  background: rgba(4,5,13,0.97);
+  border-bottom-color: var(--border);
 }
 .navbar-brand {
   display: flex;
