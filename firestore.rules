@@ -96,5 +96,32 @@ service cloud.firestore {
       allow write: if isAuth() && request.auth.uid == uid;
     }
 
+    // ── userNotifications (sent by admin, read by recipient) ─────────
+    match /userNotifications/{notifId} {
+      allow read: if isAuth() && request.auth.uid == resource.data.toUserId;
+      allow create: if true;  // admin writes via service account / trusted client
+      allow update: if isAuth() && request.auth.uid == resource.data.toUserId; // mark read
+    }
+
+    // ── admin: allow full delete on any content collection ───────────
+    match /posts/{postId} {
+      allow delete: if isAuth() && (
+        isOwner('authorId') ||
+        request.auth.token.email == 'gio.papinashvili26@gmail.com'
+      );
+    }
+    match /stories/{storyId} {
+      allow delete: if isAuth() && (
+        isOwner('authorId') ||
+        request.auth.token.email == 'gio.papinashvili26@gmail.com'
+      );
+    }
+    match /checkins/{checkinId} {
+      allow delete: if isAuth() && (
+        request.auth.uid == resource.data.authorId ||
+        request.auth.token.email == 'gio.papinashvili26@gmail.com'
+      );
+    }
+
   }
 }

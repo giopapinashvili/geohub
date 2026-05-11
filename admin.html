@@ -52,6 +52,7 @@
     <div class="sb-item" onclick="adminNav('notifications')"><span class="sb-ic"><i class="fas fa-bell"></i></span> Notifications <span class="sb-cnt danger" id="sb-notif">0</span></div>
     <div class="sb-lbl">Management</div>
     <div class="sb-item" onclick="adminNav('users')"><span class="sb-ic"><i class="fas fa-users"></i></span> Users <span class="sb-cnt" id="sb-users">—</span></div>
+    <div class="sb-item" onclick="adminNav('activity')"><span class="sb-ic"><i class="fas fa-stream"></i></span> Activity <span class="sb-cnt" id="sb-activity">0</span></div>
     <div class="sb-item" onclick="adminNav('businesses')"><span class="sb-ic"><i class="fas fa-store"></i></span> Businesses <span class="sb-cnt" id="sb-biz-side">0</span></div>
     <div class="sb-item" onclick="adminNav('creators')"><span class="sb-ic"><i class="fas fa-star"></i></span> Creators <span class="sb-cnt" id="sb-creators">0</span></div>
     <div class="sb-lbl">Safety</div>
@@ -383,6 +384,29 @@
       </div>
     </section>
 
+    <!-- ─── ACTIVITY ─── -->
+    <section class="sec" id="sec-activity">
+      <div class="ph">
+        <div>
+          <div class="ph-title">Platform Activity</div>
+          <div class="ph-sub" id="activitySub">Loading…</div>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-ghost btn-sm" id="act-tab-all"    onclick="loadActivity('all')">All</button>
+          <button class="btn btn-ghost btn-sm" id="act-tab-posts"   onclick="loadActivity('posts')"><i class="fas fa-file-alt"></i> Posts</button>
+          <button class="btn btn-ghost btn-sm" id="act-tab-stories" onclick="loadActivity('stories')"><i class="fas fa-book-open"></i> Stories</button>
+          <button class="btn btn-ghost btn-sm" id="act-tab-checkins" onclick="loadActivity('checkins')"><i class="fas fa-map-marker-alt"></i> Check-ins</button>
+          <button class="btn btn-ghost btn-sm" onclick="loadActivity(_activityFilter)"><i class="fas fa-sync-alt"></i></button>
+        </div>
+      </div>
+      <div id="activityList" style="display:flex;flex-direction:column;gap:10px">
+        <div style="text-align:center;padding:48px;color:var(--ts);font-size:0.85rem">
+          <i class="fas fa-stream" style="font-size:1.8rem;display:block;margin-bottom:12px;opacity:0.2"></i>
+          Click a filter tab to load content
+        </div>
+      </div>
+    </section>
+
     <!-- ─── NOTIFICATIONS ─── -->
     <section class="sec" id="sec-notifications">
       <div class="ph">
@@ -423,6 +447,27 @@
       </div>
       <div style="font-size:0.64rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--td);margin-bottom:7px">Admin Actions</div>
       <div class="udp-acts" id="udpActs"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Content Modal -->
+<div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9997;align-items:center;justify-content:center">
+  <div style="background:#0d111e;border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:28px 24px;max-width:460px;width:90%;position:relative">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div style="width:34px;height:34px;border-radius:8px;background:rgba(239,68,68,0.15);display:flex;align-items:center;justify-content:center;color:#ef4444;font-size:1rem"><i class="fas fa-trash"></i></div>
+      <div>
+        <div style="font-weight:800;font-size:0.98rem">Delete Content</div>
+        <div style="color:var(--ts);font-size:0.76rem" id="deleteModalDesc">Remove this content from GeoHub</div>
+      </div>
+      <button onclick="closeDeleteModal()" style="margin-left:auto;background:none;border:none;color:var(--ts);cursor:pointer;font-size:1rem;padding:4px"><i class="fas fa-times"></i></button>
+    </div>
+    <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--td);margin-bottom:6px">Message to user</div>
+    <textarea id="deleteModalMsg" rows="4" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:#f0f4ff;padding:10px 12px;font-size:0.85rem;resize:vertical;outline:none;font-family:inherit;line-height:1.5"></textarea>
+    <div style="font-size:0.74rem;color:var(--ts);margin-top:6px;margin-bottom:16px"><i class="fas fa-info-circle" style="margin-right:4px"></i>This message will be sent to the user as a notification.</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost btn-sm" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn btn-red btn-sm" onclick="executeDelete()" id="deleteConfirmBtn"><i class="fas fa-trash"></i> Delete &amp; Notify User</button>
     </div>
   </div>
 </div>

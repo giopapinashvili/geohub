@@ -52,9 +52,10 @@
 
     currentSection = section;
 
-    if (section === 'live')    startLiveFeed();
-    if (section === 'revenue') { setTimeout(drawRevChart, 80); setTimeout(drawRevTrendChart, 80); }
+    if (section === 'live')     startLiveFeed();
+    if (section === 'revenue')  { setTimeout(drawRevChart, 80); setTimeout(drawRevTrendChart, 80); }
     if (section === 'overview') { setTimeout(drawOverviewCharts, 80); }
+    if (section === 'activity') { setTimeout(function () { window.loadActivity(_activityFilter || 'all'); }, 60); }
   };
 
   /* ── TOAST ───────────────────────────────────────────────── */
@@ -571,6 +572,208 @@
     toast(msgs[action] || 'Done', colors[action]);
     document.getElementById('sb-mod').textContent = modItems.length;
     renderModQueue();
+  };
+
+  /* ── ACTIVITY ────────────────────────────────────────────── */
+  var _activityFilter = 'all';
+  var _deleteTarget = null;
+
+  window._activityFilter = _activityFilter; // expose for inline onclick refresh button
+
+  function timeAgoAdmin(ts) {
+    if (!ts) return '';
+    var ms = ts.toMillis ? ts.toMillis() : (ts.seconds ? ts.seconds * 1000 : Number(ts));
+    var d = Math.floor((Date.now() - ms) / 1000);
+    if (d < 60) return d + 's ago';
+    if (d < 3600) return Math.floor(d / 60) + 'm ago';
+    if (d < 86400) return Math.floor(d / 3600) + 'h ago';
+    return Math.floor(d / 86400) + 'd ago';
+  }
+
+  function escHtmlAdmin(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function escAttr(s) {
+    return String(s || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  }
+
+  window.loadActivity = function (filter) {
+    _activityFilter = filter || 'all';
+    window._activityFilter = _activityFilter;
+
+    ['all','posts','stories','checkins'].forEach(function (t) {
+      var el = document.getElementById('act-tab-' + t);
+      if (el) el.className = 'btn btn-' + (t === _activityFilter ? 'primary' : 'ghost') + ' btn-sm';
+    });
+
+    var listEl = document.getElementById('activityList');
+    var subEl  = document.getElementById('activitySub');
+    if (listEl) listEl.innerHTML = '<div style="text-align:center;padding:32px;color:var(--ts)"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
+
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) {
+      window.addEventListener('GeoFirebaseReady', function () { window.loadActivity(filter); }, { once: true });
+      return;
+    }
+
+    var db = fb.db, fs = fb.fs;
+    var cols = _activityFilter === 'all'     ? ['posts','stories','checkins'] :
+               _activityFilter === 'posts'   ? ['posts']   :
+               _activityFilter === 'stories' ? ['stories'] :
+               _activityFilter === 'checkins'? ['checkins']: ['posts'];
+
+    var allItems = [];
+    var pending  = cols.length;
+
+    cols.forEach(function (col) {
+      fs.getDocs(fs.query(fs.collection(db, col), fs.orderBy('createdAt', 'desc'), fs.limit(50)))
+        .then(function (snap) {
+          snap.forEach(function (d) {
+            allItems.push(Object.assign({ _id: d.id, _col: col }, d.data()));
+          });
+          pending--;
+          if (pending === 0) renderActivityItems(allItems);
+        })
+        .catch(function () {
+          pending--;
+          if (pending === 0) renderActivityItems(allItems);
+        });
+    });
+  };
+
+  function renderActivityItems(items) {
+    items.sort(function (a, b) {
+      var ta = a.createdAt ? (a.createdAt.toMillis ? a.createdAt.toMillis() : (a.createdAt.seconds || 0) * 1000) : 0;
+      var tb = b.createdAt ? (b.createdAt.toMillis ? b.createdAt.toMillis() : (b.createdAt.seconds || 0) * 1000) : 0;
+      return tb - ta;
+    });
+
+    var listEl = document.getElementById('activityList');
+    var subEl  = document.getElementById('activitySub');
+    var sbEl   = document.getElementById('sb-activity');
+
+    if (subEl) subEl.textContent = items.length + ' item' + (items.length !== 1 ? 's' : '');
+    if (sbEl)  sbEl.textContent  = items.length;
+
+    if (!items.length) {
+      listEl.innerHTML = '<div style="text-align:center;padding:48px;color:var(--ts);font-size:0.85rem"><i class="fas fa-stream" style="font-size:1.8rem;display:block;margin-bottom:12px;opacity:0.2"></i>No content found</div>';
+      return;
+    }
+
+    listEl.innerHTML = items.map(function (item) {
+      var typeLabel = item._col === 'posts' ? 'Post' : item._col === 'stories' ? 'Story' : 'Check-in';
+      var typeColor = item._col === 'posts' ? 'bg-blue' : item._col === 'stories' ? 'bg-purple' : 'bg-green';
+      var typeIcon  = item._col === 'posts' ? '📝' : item._col === 'stories' ? '📖' : '📍';
+
+      var initLetter = (item.authorName || '?').charAt(0).toUpperCase();
+      var preview = item._col === 'checkins'
+        ? 'Checked in at ' + (item.placeName || '—')
+        : (item.text || (item.mediaUrl ? '[media attachment]' : '—'));
+      if (preview.length > 140) preview = preview.substring(0, 140) + '…';
+
+      var avatarHtml = item.authorAvatar
+        ? '<img src="' + escHtmlAdmin(item.authorAvatar) + '" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.outerHTML=\'<div class=uav style=width:38px;height:38px;font-size:.9rem;background:linear-gradient(135deg,#10b981,#3b82f6);flex-shrink:0>' + initLetter + '</div>\'">'
+        : '<div class="uav" style="width:38px;height:38px;font-size:0.9rem;background:linear-gradient(135deg,#10b981,#3b82f6);flex-shrink:0">' + initLetter + '</div>';
+
+      var mediaHtml = (item.mediaUrl && item._col !== 'checkins')
+        ? '<img src="' + escHtmlAdmin(item.mediaUrl) + '" style="max-height:130px;border-radius:8px;margin-top:8px;object-fit:cover;max-width:100%">'
+        : '';
+
+      var authorId   = escAttr(item.authorId   || '');
+      var authorName = escAttr(item.authorName  || 'Unknown');
+      var docId      = escAttr(item._id);
+      var col        = escAttr(item._col);
+
+      return '<div class="panel" style="padding:14px 16px" id="ai-' + item._id + '">' +
+        '<div style="display:flex;align-items:flex-start;gap:12px">' +
+          avatarHtml +
+          '<div style="flex:1;min-width:0">' +
+            '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px">' +
+              '<span style="font-weight:800;font-size:0.88rem">' + escHtmlAdmin(item.authorName || 'Unknown') + '</span>' +
+              '<span class="badge ' + typeColor + '">' + typeIcon + ' ' + typeLabel + '</span>' +
+              '<span style="font-size:0.7rem;color:var(--ts);margin-left:auto">' + timeAgoAdmin(item.createdAt) + '</span>' +
+            '</div>' +
+            '<div style="font-size:0.83rem;color:var(--ts);line-height:1.5;word-break:break-word">' + escHtmlAdmin(preview) + '</div>' +
+            mediaHtml +
+            '<div style="display:flex;align-items:center;gap:16px;margin-top:10px">' +
+              '<span style="font-size:0.74rem;color:var(--ts)"><i class="fas fa-heart" style="color:#ef4444;margin-right:3px"></i>' + (item.likeCount || 0) + ' likes</span>' +
+              '<span style="font-size:0.74rem;color:var(--ts)"><i class="fas fa-comment" style="color:#3b82f6;margin-right:3px"></i>' + (item.commentCount || 0) + ' comments</span>' +
+              (item._col === 'checkins' ? '<span style="font-size:0.74rem;color:var(--green)"><i class="fas fa-bolt" style="margin-right:3px"></i>+' + (item.xpAwarded || 50) + ' XP</span>' : '') +
+              '<div style="margin-left:auto">' +
+                '<button class="btn btn-red btn-xs" onclick="openDeleteModal(\'' + col + '\',\'' + docId + '\',\'' + authorId + '\',\'' + typeLabel + '\',\'' + escAttr(item.authorName || 'User') + '\')">' +
+                  '<i class="fas fa-trash"></i> Delete' +
+                '</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  window.openDeleteModal = function (col, docId, authorId, contentType, authorName) {
+    _deleteTarget = { col: col, docId: docId, authorId: authorId, contentType: contentType, authorName: authorName };
+    var descEl = document.getElementById('deleteModalDesc');
+    if (descEl) descEl.textContent = 'Remove ' + (authorName || 'user') + '\'s ' + (contentType || 'content').toLowerCase() + ' from GeoHub';
+    var msgEl = document.getElementById('deleteModalMsg');
+    if (msgEl) msgEl.value = 'Your ' + (contentType || 'content').toLowerCase() + ' was removed by an administrator for violating GeoHub community guidelines.';
+    var modal = document.getElementById('deleteModal');
+    if (modal) modal.style.display = 'flex';
+    setTimeout(function () { if (msgEl) msgEl.focus(); }, 60);
+  };
+
+  window.closeDeleteModal = function () {
+    var modal = document.getElementById('deleteModal');
+    if (modal) modal.style.display = 'none';
+    _deleteTarget = null;
+    var btn = document.getElementById('deleteConfirmBtn');
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash"></i> Delete &amp; Notify User'; }
+  };
+
+  window.executeDelete = function () {
+    if (!_deleteTarget) return;
+    var target = _deleteTarget;
+    var msgEl = document.getElementById('deleteModalMsg');
+    var msg = msgEl ? msgEl.value.trim() : '';
+
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) { toast('Firebase not ready', 'rgba(239,68,68,0.95)'); return; }
+
+    var db = fb.db, fs = fb.fs;
+    var btn = document.getElementById('deleteConfirmBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting…'; }
+
+    fs.deleteDoc(fs.doc(db, target.col, target.docId))
+      .then(function () {
+        if (target.authorId) {
+          return fs.addDoc(fs.collection(db, 'userNotifications'), {
+            toUserId:    target.authorId,
+            type:        'content_removed',
+            contentType: (target.contentType || 'content').toLowerCase(),
+            message:     msg || ('Your ' + (target.contentType || 'content').toLowerCase() + ' was removed by an administrator.'),
+            read:        false,
+            createdAt:   fs.serverTimestamp()
+          });
+        }
+      })
+      .then(function () {
+        toast('Deleted · User notified');
+        closeDeleteModal();
+        var el = document.getElementById('ai-' + target.docId);
+        if (el) {
+          el.style.opacity = '0';
+          el.style.transition = 'opacity 0.3s';
+          setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 320);
+        }
+        var sbEl = document.getElementById('sb-activity');
+        if (sbEl) sbEl.textContent = Math.max(0, parseInt(sbEl.textContent, 10) - 1);
+      })
+      .catch(function (err) {
+        console.error('[Admin] executeDelete', err);
+        toast('Delete failed: ' + err.message, 'rgba(239,68,68,0.95)');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash"></i> Delete &amp; Notify User'; }
+      });
   };
 
   /* ── LIVE FEED ────────────────────────────────────────────── */

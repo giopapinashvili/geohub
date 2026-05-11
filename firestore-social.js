@@ -61,6 +61,8 @@
       createCheckin: noop,
       createStory: noop,
       listenStories: function () { return function () {}; },
+      listenUserNotifications: function (uid, cb) { cb([]); return function () {}; },
+      markNotificationRead: function () {},
       listenUserPosts: function (uid, cb) { cb([]); return function () {}; },
       listenUserCheckins: function (uid, cb) { cb([]); return function () {}; },
       trackShare: noop,
@@ -390,6 +392,26 @@
       });
     }
 
+    function listenUserNotifications(uid, callback) {
+      if (!uid) return function () {};
+      var q = query(collection(db, 'userNotifications'),
+        where('toUserId', '==', uid),
+        orderBy('createdAt', 'desc'),
+        limit(30));
+      return onSnapshot(q, function (snap) {
+        var notifs = [];
+        snap.forEach(function (d) { notifs.push(Object.assign({ id: d.id }, d.data())); });
+        callback(notifs);
+      }, function (err) {
+        console.warn('[GeoSocial] listenUserNotifications', err.message);
+      });
+    }
+
+    function markNotificationRead(notifId) {
+      updateDoc(doc(db, 'userNotifications', notifId), { read: true })
+        .catch(function (err) { console.warn('[GeoSocial] markNotifRead', err.message); });
+    }
+
     function listenUserPosts(uid, callback) {
       var q = query(collection(db, 'posts'), where('authorId', '==', uid), orderBy('createdAt', 'desc'), limit(20));
       return onSnapshot(q, function (snap) {
@@ -474,6 +496,8 @@
       createCheckin:           createCheckin,
       createStory:             createStory,
       listenStories:           listenStories,
+      listenUserNotifications: listenUserNotifications,
+      markNotificationRead:    markNotificationRead,
       listenUserPosts:         listenUserPosts,
       listenUserCheckins:      listenUserCheckins,
       trackShare:              trackShare,
