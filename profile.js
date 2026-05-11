@@ -122,16 +122,27 @@ const profileUsersByUsername = Object.fromEntries(MOCK_USERS.map(user => [user.u
 
   function renderProfilePosts(user) {
     const postsTab = document.getElementById('tab-posts');
-    if (user.accountType === 'New User' || user.postsCount < 4) {
-      postsTab.innerHTML = `<div class="empty-profile-state"><i class="fas fa-seedling"></i><h3>New profile, first map loading</h3><p>${user.fullName} has only started exploring. First check-ins, reviews, and badges will appear here.</p></div>`;
-      return;
+    postsTab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-spinner fa-spin"></i><p>Loading posts…</p></div>';
+    if (!user.uid) return;
+    function onPosts(posts) {
+      if (!posts.length) {
+        postsTab.innerHTML = `<div class="empty-profile-state"><i class="fas fa-seedling"></i><h3>No posts yet</h3><p>Create your first post on GeoHub!</p></div>`;
+        return;
+      }
+      postsTab.innerHTML = '<div class="posts-grid">' + posts.map(function (post) {
+        return '<div class="post-thumb">' +
+          (post.mediaUrl ? '<img src="' + post.mediaUrl + '" alt="">' : '<div style="background:var(--bg-elevated);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;padding:16px;box-sizing:border-box;text-align:center;color:var(--text-secondary)">' + (post.text || '') + '</div>') +
+          '<div class="post-overlay"><span><i class="fas fa-heart"></i> ' + (post.likeCount || 0) + '</span><span><i class="fas fa-comment"></i> ' + (post.commentCount || 0) + '</span></div>' +
+          '</div>';
+      }).join('') + '</div>';
     }
-    const posts = [...MOCK_FEED_POSTS].sort((a, b) => scoreInterestProfile(b, user) - scoreInterestProfile(a, user)).slice(0, 9);
-    postsTab.innerHTML = `<div class="posts-grid">${posts.map((post, index) => `
-      <div class="post-thumb">
-        <img src="${post.image || `https://picsum.photos/seed/profile-${user.id}-${index}/400/400`}" alt="${post.place || post.title || 'Profile post'}">
-        <div class="post-overlay"><span><i class="fas fa-heart"></i> ${post.likes || 20 + index * 7}</span><span><i class="fas fa-comment"></i> ${post.comments?.length || index + 1}</span></div>
-      </div>`).join('')}</div>`;
+    if (window.GeoSocial && window.GeoSocial.listenUserPosts) {
+      window.GeoSocial.listenUserPosts(user.uid, onPosts);
+    } else {
+      window.addEventListener('GeoSocialReady', function () {
+        if (window.GeoSocial) window.GeoSocial.listenUserPosts(user.uid, onPosts);
+      }, { once: true });
+    }
   }
 
   function renderPlaces(user) {
@@ -153,6 +164,49 @@ const profileUsersByUsername = Object.fromEntries(MOCK_USERS.map(user => [user.u
           <div class="place-card-meta">${place.cat} · ${place.city} · ★ ${(4.5 + Math.random() * 0.4).toFixed(1)}</div>
         </div>
       </div>`).join('');
+  }
+
+  function renderCheckins(user) {
+    const tab = document.getElementById('tab-checkins');
+    if (!tab) return;
+    tab.innerHTML = '<div class="checkins-header"><div class="checkins-total"><i class="fas fa-spinner fa-spin"></i> Loading check-ins…</div></div>';
+    if (!user.uid) return;
+    function onCheckins(checkins) {
+      if (!checkins.length) {
+        tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-map-marker-alt"></i><h3>No check-ins yet</h3><p>Check in to places as you explore Georgia.</p><a href="checkin.html" class="btn btn-primary btn-sm" style="margin-top:12px">Check In Now</a></div>';
+        return;
+      }
+      function timeAgoP(ts) {
+        if (!ts) return '';
+        var ms = ts.toMillis ? ts.toMillis() : (ts.seconds ? ts.seconds * 1000 : Number(ts));
+        var d = Math.floor((Date.now() - ms) / 1000);
+        if (d < 60) return d + 's ago';
+        if (d < 3600) return Math.floor(d / 60) + 'm ago';
+        if (d < 86400) return Math.floor(d / 3600) + 'h ago';
+        var date = new Date(ms);
+        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      }
+      tab.innerHTML = '<div class="checkins-header"><div class="checkins-total"><i class="fas fa-map-marker-alt"></i> ' + checkins.length + ' check-in' + (checkins.length !== 1 ? 's' : '') + '</div></div>' +
+        '<div class="checkins-timeline">' + checkins.map(function (c) {
+          return '<div class="checkin-entry">' +
+            '<div class="checkin-date-col"><div class="checkin-date-badge">' + timeAgoP(c.createdAt) + '</div><div class="checkin-line"></div></div>' +
+            '<div class="checkin-card">' +
+              '<div class="checkin-body">' +
+                '<div class="checkin-name">' + (c.placeName || 'Unknown Place') + '</div>' +
+                '<div class="checkin-meta"><i class="fas fa-map-marker-alt"></i> ' + (c.placeName || '—') + '</div>' +
+                '<div class="checkin-foot"><span class="checkin-pts">+' + (c.xpAwarded || 50) + ' pts</span><span class="checkin-verified"><i class="fas fa-check-circle"></i> Verified</span></div>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('') + '</div>';
+    }
+    if (window.GeoSocial && window.GeoSocial.listenUserCheckins) {
+      window.GeoSocial.listenUserCheckins(user.uid, onCheckins);
+    } else {
+      window.addEventListener('GeoSocialReady', function () {
+        if (window.GeoSocial) window.GeoSocial.listenUserCheckins(user.uid, onCheckins);
+      }, { once: true });
+    }
   }
 
   function renderChallenges(user) {
@@ -355,6 +409,7 @@ const profileUsersByUsername = Object.fromEntries(MOCK_USERS.map(user => [user.u
     renderIdentity(user);
     renderProfilePosts(user);
     renderPlaces(user);
+    renderCheckins(user);
     renderChallenges(user);
     renderReviews(user);
     renderActivity(user);

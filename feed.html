@@ -126,56 +126,13 @@
 
           <div class="fd-story-card fd-story-add-card">
             <div class="fd-story-visual">
-              <img src="https://picsum.photos/seed/gio_story/100/130" alt="" class="fd-story-bg">
+              <img src="https://picsum.photos/seed/gio_story/100/130" alt="" class="fd-story-bg" id="composerStoryBg">
               <div class="fd-story-add-icon"><i class="fas fa-plus"></i></div>
             </div>
             <span class="fd-story-label">Your Story</span>
           </div>
 
-          <div class="fd-story-card">
-            <div class="fd-story-visual">
-              <img src="https://picsum.photos/seed/nino_story/100/130" alt="" class="fd-story-bg">
-              <img src="https://picsum.photos/seed/nino_av/30/30" alt="" class="fd-story-avatar">
-            </div>
-            <span class="fd-story-label">Nino L.</span>
-            <span class="fd-story-time">2h ago</span>
-          </div>
-
-          <div class="fd-story-card fd-story-card--active">
-            <div class="fd-story-visual">
-              <img src="https://picsum.photos/seed/kazbegi_story/100/130" alt="" class="fd-story-bg">
-              <img src="https://picsum.photos/seed/lasha_av/30/30" alt="" class="fd-story-avatar">
-            </div>
-            <span class="fd-story-label">Lasha G.</span>
-            <span class="fd-story-time">4h ago</span>
-          </div>
-
-          <div class="fd-story-card">
-            <div class="fd-story-visual">
-              <img src="https://picsum.photos/seed/batumi_story/100/130" alt="" class="fd-story-bg">
-              <img src="https://picsum.photos/seed/mariam_av/30/30" alt="" class="fd-story-avatar">
-            </div>
-            <span class="fd-story-label">Mariam K.</span>
-            <span class="fd-story-time">1h ago</span>
-          </div>
-
-          <div class="fd-story-card">
-            <div class="fd-story-visual">
-              <img src="https://picsum.photos/seed/tbilisi_story/100/130" alt="" class="fd-story-bg">
-              <div class="fd-story-gh-logo">GH</div>
-            </div>
-            <span class="fd-story-label">GeoHub</span>
-            <span class="fd-story-time">3h ago</span>
-          </div>
-
-          <div class="fd-story-card">
-            <div class="fd-story-visual">
-              <img src="https://picsum.photos/seed/explore_story/100/130" alt="" class="fd-story-bg">
-              <img src="https://picsum.photos/seed/giorgi_av/30/30" alt="" class="fd-story-avatar">
-            </div>
-            <span class="fd-story-label">Explore Georgia</span>
-            <span class="fd-story-time">5h ago</span>
-          </div>
+          <div id="fd-real-stories"></div>
 
         </div>
       </div>
@@ -198,84 +155,6 @@
       <!-- REAL-TIME FIRESTORE POSTS (injected by GeoSocial) -->
       <div id="fd-real-posts"></div>
 
-      <!-- POST 1 — Lasha Gabrichidze -->
-      <article class="fd-card fd-post">
-        <div class="fd-post-head">
-          <img src="https://picsum.photos/seed/lasha_av/46/46" alt="Lasha" class="fd-post-avatar">
-          <div class="fd-post-meta">
-            <div class="fd-post-name">Lasha Gabrichidze <i class="fas fa-circle-check fd-verified"></i></div>
-            <div class="fd-post-sub">2h ago · <i class="fas fa-location-dot"></i> Kazbegi, Georgia <i class="fas fa-earth-europe fd-globe"></i></div>
-          </div>
-          <button class="fd-post-dots"><i class="fas fa-ellipsis-h"></i></button>
-        </div>
-        <p class="fd-post-body">Sunset in Kazbegi never gets old! ⛰️<br>
-          <a class="fd-tag">#Kazbegi</a> <a class="fd-tag">#Georgia</a> <a class="fd-tag">#Mountains</a> <a class="fd-tag">#Travel</a>
-        </p>
-        <img src="https://picsum.photos/seed/kazbegi_sunset_hd/560/340" alt="Kazbegi Sunset" class="fd-post-img">
-        <div class="fd-post-stats-row">
-          <div class="fd-reactions"><span class="fd-emojis">❤️😍🌄</span> <span>1.2K</span></div>
-          <div class="fd-counts">86 Comments &nbsp;·&nbsp; 34 Shares</div>
-        </div>
-        <div class="fd-post-sep"></div>
-        <div class="fd-post-actions">
-          <button class="fd-act-btn"><i class="far fa-thumbs-up"></i> Like</button>
-          <button class="fd-act-btn"><i class="far fa-comment"></i> Comment</button>
-          <button class="fd-act-btn"><i class="fas fa-share-nodes"></i> Share</button>
-        </div>
-      </article>
-
-      <!-- POST 2 — Nina Beridze -->
-      <article class="fd-card fd-post">
-        <div class="fd-post-head">
-          <img src="https://picsum.photos/seed/nina_av/46/46" alt="Nina" class="fd-post-avatar">
-          <div class="fd-post-meta">
-            <div class="fd-post-name">Nina Beridze</div>
-            <div class="fd-post-sub">3h ago · <i class="fas fa-location-dot"></i> Tbilisi, Georgia <i class="fas fa-earth-europe fd-globe"></i></div>
-          </div>
-          <button class="fd-post-dots"><i class="fas fa-ellipsis-h"></i></button>
-        </div>
-        <p class="fd-post-body">Love this city lights ✨</p>
-        <img src="https://picsum.photos/seed/tbilisi_night_hd/560/340" alt="Tbilisi Night" class="fd-post-img">
-        <div class="fd-post-stats-row">
-          <div class="fd-reactions"><span class="fd-emojis">❤️✨😍</span> <span>847</span></div>
-          <div class="fd-counts">42 Comments &nbsp;·&nbsp; 18 Shares</div>
-        </div>
-        <div class="fd-post-sep"></div>
-        <div class="fd-post-actions">
-          <button class="fd-act-btn"><i class="far fa-thumbs-up"></i> Like</button>
-          <button class="fd-act-btn"><i class="far fa-comment"></i> Comment</button>
-          <button class="fd-act-btn"><i class="fas fa-share-nodes"></i> Share</button>
-        </div>
-      </article>
-
-      <!-- POST 3 — Giorgi (XP earned) -->
-      <article class="fd-card fd-post">
-        <div class="fd-post-head">
-          <img src="https://picsum.photos/seed/giorgi_av/46/46" alt="Giorgi" class="fd-post-avatar">
-          <div class="fd-post-meta">
-            <div class="fd-post-name">Giorgi Tavadze <i class="fas fa-circle-check fd-verified"></i></div>
-            <div class="fd-post-sub">5h ago · <i class="fas fa-location-dot"></i> Mestia, Svaneti <i class="fas fa-earth-europe fd-globe"></i></div>
-          </div>
-          <button class="fd-post-dots"><i class="fas fa-ellipsis-h"></i></button>
-        </div>
-        <p class="fd-post-body">Just summited Ushba! 🏔️ 4710m above sea level. Hardest hike of my life but 100% worth it.<br>
-          <a class="fd-tag">#Ushba</a> <a class="fd-tag">#Svaneti</a> <a class="fd-tag">#Mountaineering</a>
-        </p>
-        <img src="https://picsum.photos/seed/svaneti_summit/560/340" alt="Summit" class="fd-post-img">
-        <div class="fd-post-xp">
-          <i class="fas fa-bolt"></i> +150 XP earned &nbsp;·&nbsp; <span>Mountain Conqueror</span> unlocked
-        </div>
-        <div class="fd-post-stats-row">
-          <div class="fd-reactions"><span class="fd-emojis">🔥💪❤️</span> <span>2.1K</span></div>
-          <div class="fd-counts">134 Comments &nbsp;·&nbsp; 89 Shares</div>
-        </div>
-        <div class="fd-post-sep"></div>
-        <div class="fd-post-actions">
-          <button class="fd-act-btn"><i class="far fa-thumbs-up"></i> Like</button>
-          <button class="fd-act-btn"><i class="far fa-comment"></i> Comment</button>
-          <button class="fd-act-btn"><i class="fas fa-share-nodes"></i> Share</button>
-        </div>
-      </article>
 
     </div><!-- /feed-center -->
 
@@ -353,34 +232,13 @@
       </div>
 
       <!-- People You May Know -->
-      <div class="frs-widget">
+      <div class="frs-widget" id="frs-people-widget">
         <div class="frs-head">
           <span>People You May Know</span>
           <a href="explore.html" class="frs-see-all">See All</a>
         </div>
-        <div class="frs-person">
-          <img src="https://picsum.photos/seed/mariam_av/44/44" alt="" class="frs-person-avatar">
-          <div class="frs-person-info">
-            <div class="frs-person-name">Mariam Kapanadze</div>
-            <div class="frs-person-meta">23 mutual friends</div>
-          </div>
-          <button class="frs-add-btn" data-user-id="mock-mariam-kapanadze">Add Friend</button>
-        </div>
-        <div class="frs-person">
-          <img src="https://picsum.photos/seed/giorgi_av/44/44" alt="" class="frs-person-avatar">
-          <div class="frs-person-info">
-            <div class="frs-person-name">Giorgi Tavadze</div>
-            <div class="frs-person-meta">15 mutual friends</div>
-          </div>
-          <button class="frs-add-btn" data-user-id="mock-giorgi-tavadze">Add Friend</button>
-        </div>
-        <div class="frs-person">
-          <img src="https://picsum.photos/seed/ana_av/44/44" alt="" class="frs-person-avatar">
-          <div class="frs-person-info">
-            <div class="frs-person-name">Ana Japaridze</div>
-            <div class="frs-person-meta">9 mutual friends</div>
-          </div>
-          <button class="frs-add-btn" data-user-id="mock-ana-japaridze">Add Friend</button>
+        <div id="frs-people-list" style="padding:12px 0;font-size:0.8rem;color:var(--text-muted);text-align:center">
+          Invite friends to join GeoHub
         </div>
       </div>
 
@@ -452,10 +310,6 @@
       <a href="map.html" class="fdb-map-wrap">
         <img src="https://picsum.photos/seed/map_bg/400/200" alt="Map" class="fdb-map-bg">
         <div class="fdb-map-overlay"></div>
-        <div class="fdb-map-pin" style="top:38%;left:50%"><i class="fas fa-location-dot" style="color:#10b981"></i></div>
-        <div class="fdb-map-pin" style="top:55%;left:32%"><i class="fas fa-location-dot" style="color:#3b82f6"></i></div>
-        <div class="fdb-map-pin" style="top:62%;left:62%"><i class="fas fa-location-dot" style="color:#f59e0b"></i></div>
-        <div class="fdb-map-pin" style="top:42%;left:22%"><i class="fas fa-location-dot" style="color:#ef4444"></i></div>
         <div class="fdb-map-cta">Open Map <i class="fas fa-arrow-right"></i></div>
       </a>
     </div>
@@ -467,23 +321,8 @@
         <div class="fdb-block-head">
           <span class="fdb-block-title"><span class="fdb-live-dot-pulse"></span> Live Activity</span>
         </div>
-        <div class="fdb-live-list">
-          <div class="fdb-live-item">
-            <div class="fdb-live-bullet green"></div>
-            <p><strong>Nino L.</strong> checked in at <a href="places.html">Narikala Fortress</a></p>
-          </div>
-          <div class="fdb-live-item">
-            <div class="fdb-live-bullet teal"></div>
-            <p><strong>Giorgi</strong> hiked to <a href="places.html">Gergeti Trinity Church</a></p>
-          </div>
-          <div class="fdb-live-item">
-            <div class="fdb-live-bullet blue"></div>
-            <p><strong>Mariam K.</strong> joined <a href="groups.html">Georgia Travel</a> group</p>
-          </div>
-          <div class="fdb-live-item">
-            <div class="fdb-live-bullet gold"></div>
-            <p><strong>Lasha G.</strong> added photos to <a href="#">Kazbegi trip</a></p>
-          </div>
+        <div class="fdb-live-list" id="fdb-live-list">
+          <div style="padding:12px 0;font-size:0.8rem;color:var(--text-muted);text-align:center">No recent activity</div>
         </div>
       </div>
 
@@ -493,46 +332,8 @@
           <a href="messages.html" class="fdb-see-all"><i class="fas fa-edit"></i></a>
         </div>
         <input type="text" class="fdb-chat-search" placeholder="🔍 Search">
-        <div class="fdb-chat-list">
-          <a href="messages.html" class="fdb-chat-item">
-            <div class="fdb-chat-av-wrap">
-              <img src="https://picsum.photos/seed/nino_av/40/40" alt="Nino" class="fdb-chat-avatar">
-              <div class="fdb-chat-online"></div>
-            </div>
-            <div class="fdb-chat-info">
-              <div class="fdb-chat-name">Nino L.</div>
-              <div class="fdb-chat-last">Sounds good! · 2m</div>
-            </div>
-            <div class="fdb-chat-badge">2</div>
-          </a>
-          <a href="messages.html" class="fdb-chat-item">
-            <div class="fdb-chat-av-wrap">
-              <img src="https://picsum.photos/seed/lasha_av/40/40" alt="Lasha" class="fdb-chat-avatar">
-              <div class="fdb-chat-online"></div>
-            </div>
-            <div class="fdb-chat-info">
-              <div class="fdb-chat-name">Lasha G.</div>
-              <div class="fdb-chat-last">See you there! · 10m</div>
-            </div>
-          </a>
-          <a href="messages.html" class="fdb-chat-item">
-            <div class="fdb-chat-av-wrap">
-              <img src="https://picsum.photos/seed/mariam_av/40/40" alt="Mariam" class="fdb-chat-avatar">
-            </div>
-            <div class="fdb-chat-info">
-              <div class="fdb-chat-name">Mariam K.</div>
-              <div class="fdb-chat-last">Thanks! · 1h</div>
-            </div>
-          </a>
-          <a href="messages.html" class="fdb-chat-item">
-            <div class="fdb-chat-av-wrap">
-              <img src="https://picsum.photos/seed/giorgi_av/40/40" alt="Giorgi" class="fdb-chat-avatar">
-            </div>
-            <div class="fdb-chat-info">
-              <div class="fdb-chat-name">Giorgi T.</div>
-              <div class="fdb-chat-last">Photo · 2h</div>
-            </div>
-          </a>
+        <div class="fdb-chat-list" id="fdb-chat-list">
+          <div style="padding:16px 0;font-size:0.8rem;color:var(--text-muted);text-align:center">No conversations yet<br><a href="messages.html" style="color:var(--green);font-weight:700">Open Messages</a></div>
         </div>
       </div>
 
@@ -905,11 +706,35 @@
     } catch (err) {}
   });
 
+  // ── Render real stories from Firestore ───────────────────────────────
+  function renderRealStories(stories) {
+    var container = document.getElementById('fd-real-stories');
+    if (!container) return;
+    if (!stories || !stories.length) { container.innerHTML = ''; return; }
+    container.innerHTML = stories.map(function (s) {
+      var av = s.authorAvatar
+        ? '<img src="' + escHtml(s.authorAvatar) + '" alt="" class="fd-story-avatar">'
+        : '<div class="fd-story-avatar fd-story-avatar--init">' + escHtml((s.authorName||'U').charAt(0).toUpperCase()) + '</div>';
+      return '<div class="fd-story-card">' +
+        '<div class="fd-story-visual">' +
+          '<div class="fd-story-bg" style="background:linear-gradient(135deg,#10b981,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:1.8rem">' +
+            (s.mediaUrl ? '<img src="' + escHtml(s.mediaUrl) + '" style="width:100%;height:100%;object-fit:cover">' : '📖') +
+          '</div>' + av +
+        '</div>' +
+        '<span class="fd-story-label">' + escHtml(s.authorName || 'User') + '</span>' +
+        '<span class="fd-story-time">' + timeAgo(s.createdAt) + '</span>' +
+        '</div>';
+    }).join('');
+  }
+
   // ── Init once GeoSocial is ready ──────────────────────────────────────
   function onGeoSocialReady() {
     wireComposer();
     window.GeoSocial.listenFeed(renderFeed);
     restoreSidebarStates();
+    if (window.GeoSocial.listenStories) {
+      window.GeoSocial.listenStories(renderRealStories);
+    }
   }
 
   if (window.GeoSocial) onGeoSocialReady();

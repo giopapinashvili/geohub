@@ -60,6 +60,9 @@
       sendFriendRequest: noop,
       createCheckin: noop,
       createStory: noop,
+      listenStories: function () { return function () {}; },
+      listenUserPosts: function (uid, cb) { cb([]); return function () {}; },
+      listenUserCheckins: function (uid, cb) { cb([]); return function () {}; },
       trackShare: noop,
       requireAuth: showLoginPrompt,
       toast: toast
@@ -387,6 +390,42 @@
       });
     }
 
+    function listenUserPosts(uid, callback) {
+      var q = query(collection(db, 'posts'), where('authorId', '==', uid), orderBy('createdAt', 'desc'), limit(20));
+      return onSnapshot(q, function (snap) {
+        var posts = [];
+        snap.forEach(function (d) { posts.push(Object.assign({ id: d.id }, d.data())); });
+        callback(posts);
+      }, function (err) {
+        console.warn('[GeoSocial] listenUserPosts', err.message);
+        callback([]);
+      });
+    }
+
+    function listenUserCheckins(uid, callback) {
+      var q = query(collection(db, 'checkins'), where('authorId', '==', uid), orderBy('createdAt', 'desc'), limit(30));
+      return onSnapshot(q, function (snap) {
+        var items = [];
+        snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        callback(items);
+      }, function (err) {
+        console.warn('[GeoSocial] listenUserCheckins', err.message);
+        callback([]);
+      });
+    }
+
+    function listenStories(callback) {
+      var cutoff = new Date(Date.now() - 86400000);
+      var q = query(collection(db, 'stories'), orderBy('createdAt', 'desc'), limit(20));
+      return onSnapshot(q, function (snap) {
+        var stories = [];
+        snap.forEach(function (d) { stories.push(Object.assign({ id: d.id }, d.data())); });
+        callback(stories);
+      }, function (err) {
+        console.warn('[GeoSocial] listenStories', err.message);
+      });
+    }
+
     // ── CHECK STATE HELPERS ──────────────────────────────────────────────
     function checkSaved(postId, callback) {
       var uid = currentUid();
@@ -434,6 +473,9 @@
       sendFriendRequest:       sendFriendRequest,
       createCheckin:           createCheckin,
       createStory:             createStory,
+      listenStories:           listenStories,
+      listenUserPosts:         listenUserPosts,
+      listenUserCheckins:      listenUserCheckins,
       trackShare:              trackShare,
       checkSaved:              checkSaved,
       checkGroupMember:        checkGroupMember,
