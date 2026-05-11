@@ -14,6 +14,7 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="mobile-nav.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="social-layer.css">
   <link rel="stylesheet" href="feed.css">
 </head>
 <body class="page-feed">
@@ -295,7 +296,7 @@
             <div class="frs-ev-name">TBILISI OPEN AIR</div>
             <div class="frs-ev-sub">Music Festival · May 25 · Tbilisi</div>
           </div>
-          <button class="frs-star-btn"><i class="far fa-star"></i></button>
+          <button class="frs-star-btn" data-event-id="tbilisi-open-air-2026" data-event-name="TBILISI OPEN AIR"><i class="far fa-star"></i></button>
         </div>
         <div class="frs-event">
           <div class="frs-ev-img" style="background:linear-gradient(135deg,#10b981,#3b82f6)">
@@ -305,7 +306,7 @@
             <div class="frs-ev-name">Mountain Hike</div>
             <div class="frs-ev-sub">May 26 · Stepantsminda</div>
           </div>
-          <button class="frs-star-btn"><i class="far fa-star"></i></button>
+          <button class="frs-star-btn" data-event-id="mountain-hike-kazbegi-2026" data-event-name="Mountain Hike"><i class="far fa-star"></i></button>
         </div>
         <div class="frs-event">
           <div class="frs-ev-img" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">
@@ -315,7 +316,7 @@
             <div class="frs-ev-name">Tbilisi Tech Meetup</div>
             <div class="frs-ev-sub">Community · May 28 · Tbilisi</div>
           </div>
-          <button class="frs-star-btn"><i class="far fa-star"></i></button>
+          <button class="frs-star-btn" data-event-id="tbilisi-tech-meetup-2026" data-event-name="Tbilisi Tech Meetup"><i class="far fa-star"></i></button>
         </div>
       </div>
 
@@ -331,7 +332,7 @@
             <div class="frs-group-name">Georgia Travel</div>
             <div class="frs-group-meta">12.4K members</div>
           </div>
-          <button class="frs-join-btn">Join</button>
+          <button class="frs-join-btn" data-group-id="georgia-travel" data-group-name="Georgia Travel">Join</button>
         </div>
         <div class="frs-group">
           <img src="https://picsum.photos/seed/hikege_g/48/48" alt="" class="frs-group-img">
@@ -339,7 +340,7 @@
             <div class="frs-group-name">Hiking in Georgia</div>
             <div class="frs-group-meta">8.7K members</div>
           </div>
-          <button class="frs-join-btn">Join</button>
+          <button class="frs-join-btn" data-group-id="hiking-in-georgia" data-group-name="Hiking in Georgia">Join</button>
         </div>
         <div class="frs-group">
           <img src="https://picsum.photos/seed/dronege_g/48/48" alt="" class="frs-group-img">
@@ -347,7 +348,7 @@
             <div class="frs-group-name">Drone Georgia</div>
             <div class="frs-group-meta">5.3K members</div>
           </div>
-          <button class="frs-join-btn">Join</button>
+          <button class="frs-join-btn" data-group-id="drone-georgia" data-group-name="Drone Georgia">Join</button>
         </div>
       </div>
 
@@ -363,7 +364,7 @@
             <div class="frs-person-name">Mariam Kapanadze</div>
             <div class="frs-person-meta">23 mutual friends</div>
           </div>
-          <button class="frs-add-btn">Add Friend</button>
+          <button class="frs-add-btn" data-user-id="mock-mariam-kapanadze">Add Friend</button>
         </div>
         <div class="frs-person">
           <img src="https://picsum.photos/seed/giorgi_av/44/44" alt="" class="frs-person-avatar">
@@ -371,7 +372,7 @@
             <div class="frs-person-name">Giorgi Tavadze</div>
             <div class="frs-person-meta">15 mutual friends</div>
           </div>
-          <button class="frs-add-btn">Add Friend</button>
+          <button class="frs-add-btn" data-user-id="mock-giorgi-tavadze">Add Friend</button>
         </div>
         <div class="frs-person">
           <img src="https://picsum.photos/seed/ana_av/44/44" alt="" class="frs-person-avatar">
@@ -379,7 +380,7 @@
             <div class="frs-person-name">Ana Japaridze</div>
             <div class="frs-person-meta">9 mutual friends</div>
           </div>
-          <button class="frs-add-btn">Add Friend</button>
+          <button class="frs-add-btn" data-user-id="mock-ana-japaridze">Add Friend</button>
         </div>
       </div>
 
@@ -540,8 +541,346 @@
   </div>
 </section>
 
+<!-- Comment Modal (bottom sheet) -->
+<div id="ghCommentModal">
+  <div class="ghcm-panel">
+    <div class="ghcm-head">
+      <span class="ghcm-title">Comments</span>
+      <button id="ghCommentClose" class="ghcm-close" type="button" aria-label="Close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="ghcm-list" id="ghCommentList"></div>
+    <form class="ghcm-form" id="ghCommentForm" autocomplete="off">
+      <input type="text" id="ghCommentInput" class="ghcm-input" placeholder="Write a comment…">
+      <button type="submit" class="ghcm-submit">Post</button>
+    </form>
+  </div>
+</div>
+
 <script>
-  // Populate UI with authenticated user data
+  /* =====================================================================
+     GeoHub Feed — social wiring (posts, likes, comments, save, story,
+     groups, events, friend requests)
+     ===================================================================== */
+
+  // ── Helpers ──────────────────────────────────────────────────────────
+  function timeAgo(ts) {
+    if (!ts) return '';
+    var ms = ts.toMillis ? ts.toMillis() : (ts.seconds ? ts.seconds * 1000 : Number(ts));
+    var d = Math.floor((Date.now() - ms) / 1000);
+    if (d < 60) return d + 's ago';
+    if (d < 3600) return Math.floor(d / 60) + 'm ago';
+    if (d < 86400) return Math.floor(d / 3600) + 'h ago';
+    return Math.floor(d / 86400) + 'd ago';
+  }
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Comment modal ─────────────────────────────────────────────────────
+  var _cmUnsub = null, _cmPostId = null;
+
+  function openCommentModal(postId) {
+    if (!window.GeoSocial) return;
+    _cmPostId = postId;
+    var modal = document.getElementById('ghCommentModal');
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    var list = document.getElementById('ghCommentList');
+    list.innerHTML = '<div class="ghcm-loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
+    if (_cmUnsub) _cmUnsub();
+    _cmUnsub = window.GeoSocial.listenComments(postId, function (comments) {
+      if (!comments.length) {
+        list.innerHTML = '<div class="ghcm-empty">No comments yet. Be the first!</div>';
+        return;
+      }
+      list.innerHTML = comments.map(function (c) {
+        var avHtml = c.authorAvatar
+          ? '<img src="' + escHtml(c.authorAvatar) + '" class="ghcm-av" onerror="this.outerHTML=\'<div class=ghcm-av ghcm-av-init>' + escHtml((c.authorName||'U').charAt(0).toUpperCase()) + '</div>\'">'
+          : '<div class="ghcm-av ghcm-av-init">' + escHtml((c.authorName || 'U').charAt(0).toUpperCase()) + '</div>';
+        return '<div class="ghcm-item">' + avHtml +
+          '<div class="ghcm-content">' +
+            '<div class="ghcm-name">' + escHtml(c.authorName || 'User') + '</div>' +
+            '<div class="ghcm-text">' + escHtml(c.text) + '</div>' +
+            '<div class="ghcm-time">' + timeAgo(c.createdAt) + '</div>' +
+          '</div></div>';
+      }).join('');
+      list.scrollTop = list.scrollHeight;
+    });
+  }
+
+  function closeCommentModal() {
+    document.getElementById('ghCommentModal').classList.remove('open');
+    document.body.style.overflow = '';
+    if (_cmUnsub) { _cmUnsub(); _cmUnsub = null; }
+    _cmPostId = null;
+    document.getElementById('ghCommentInput').value = '';
+  }
+
+  document.getElementById('ghCommentModal').addEventListener('click', function (e) {
+    if (e.target === this) closeCommentModal();
+  });
+  document.getElementById('ghCommentClose').addEventListener('click', closeCommentModal);
+  document.getElementById('ghCommentForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!_cmPostId || !window.GeoSocial) return;
+    var inp = document.getElementById('ghCommentInput');
+    var text = inp.value.trim();
+    if (!text) return;
+    var submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    window.GeoSocial.addComment(_cmPostId, text, function () {
+      inp.value = '';
+      submitBtn.disabled = false;
+      inp.focus();
+    });
+  });
+
+  // ── Story modal ───────────────────────────────────────────────────────
+  function openStoryModal() {
+    if (!window.GeoSocial) return;
+    window.GeoSocial.requireAuth(function () {
+      var m = document.getElementById('ghStoryModal');
+      if (m) { m.classList.add('open'); return; }
+      m = document.createElement('div');
+      m.id = 'ghStoryModal';
+      m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:99990;display:flex;align-items:center;justify-content:center';
+      m.innerHTML =
+        '<div style="background:var(--bg-card,#1a1f35);border:1px solid var(--border,#2a3050);border-radius:16px;padding:24px;max-width:420px;width:90%">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
+        '<h3 style="font-size:1rem;font-weight:800;color:var(--text-primary,#f0f4ff);margin:0">Add to Your Story</h3>' +
+        '<button id="ghStoryClose" style="background:none;border:none;color:var(--text-muted,#6b7280);cursor:pointer;font-size:1.1rem;padding:4px">✕</button>' +
+        '</div>' +
+        '<textarea id="ghStoryText" placeholder="Share your moment…" rows="4" style="width:100%;padding:12px;background:var(--bg-elevated,rgba(255,255,255,0.07));border:1px solid var(--border,#2a3050);border-radius:10px;color:var(--text-primary,#f0f4ff);font-size:0.9rem;resize:vertical;box-sizing:border-box;outline:none;font-family:inherit"></textarea>' +
+        '<button id="ghStorySubmit" style="margin-top:12px;width:100%;padding:12px;border-radius:10px;background:linear-gradient(135deg,#10b981,#3b82f6);border:none;color:#fff;font-weight:700;cursor:pointer;font-size:0.9rem">Post Story</button>' +
+        '</div>';
+      document.body.appendChild(m);
+      m.addEventListener('click', function (ev) { if (ev.target === m) m.classList.remove('open'); });
+      document.getElementById('ghStoryClose').addEventListener('click', function () { m.classList.remove('open'); });
+      document.getElementById('ghStorySubmit').addEventListener('click', function () {
+        var text = document.getElementById('ghStoryText').value.trim();
+        if (!text) return;
+        this.textContent = 'Posting…';
+        this.disabled = true;
+        var btn = this;
+        window.GeoSocial.createStory(text, null, function () {
+          document.getElementById('ghStoryText').value = '';
+          btn.textContent = 'Post Story';
+          btn.disabled = false;
+          m.classList.remove('open');
+        });
+      });
+      m.classList.add('open');
+    });
+  }
+
+  // ── Render a real Firestore post ──────────────────────────────────────
+  function renderRealPost(post) {
+    var av = post.authorAvatar
+      ? '<img src="' + escHtml(post.authorAvatar) + '" alt="" class="fd-post-avatar" onerror="this.style.display=\'none\'">'
+      : '<div class="fd-post-avatar fd-post-avatar--init">' + escHtml((post.authorName || 'G').charAt(0).toUpperCase()) + '</div>';
+    var pid = escHtml(post.id);
+    return '<article class="fd-card fd-post fd-post--real" data-post-id="' + pid + '">' +
+      '<div class="fd-post-head">' + av +
+        '<div class="fd-post-meta">' +
+          '<div class="fd-post-name">' + escHtml(post.authorName || 'GeoHub User') + '</div>' +
+          '<div class="fd-post-sub">' + timeAgo(post.createdAt) + ' · <i class="fas fa-earth-europe fd-globe"></i></div>' +
+        '</div>' +
+      '</div>' +
+      (post.text ? '<p class="fd-post-body">' + escHtml(post.text) + '</p>' : '') +
+      (post.mediaUrl ? '<img src="' + escHtml(post.mediaUrl) + '" alt="" class="fd-post-img">' : '') +
+      '<div class="fd-post-stats-row">' +
+        '<div class="fd-reactions"><span class="fd-emojis">❤️</span> <span class="fd-like-count">' + (post.likeCount || 0) + '</span></div>' +
+        '<div class="fd-counts fd-comment-count" style="cursor:pointer">' + (post.commentCount || 0) + ' Comments</div>' +
+      '</div>' +
+      '<div class="fd-post-sep"></div>' +
+      '<div class="fd-post-actions">' +
+        '<button class="fd-act-btn fd-real-like" data-post-id="' + pid + '" data-liked="0"><i class="far fa-thumbs-up"></i> Like</button>' +
+        '<button class="fd-act-btn fd-real-comment" data-post-id="' + pid + '"><i class="far fa-comment"></i> Comment</button>' +
+        '<button class="fd-act-btn fd-real-save" data-post-id="' + pid + '" data-saved="0"><i class="far fa-bookmark"></i> Save</button>' +
+        '<button class="fd-act-btn fd-real-share" data-post-id="' + pid + '"><i class="fas fa-share-nodes"></i> Share</button>' +
+      '</div>' +
+    '</article>';
+  }
+
+  // ── Render feed (called by onSnapshot) ───────────────────────────────
+  function renderFeed(posts) {
+    var container = document.getElementById('fd-real-posts');
+    if (!container) return;
+    if (!posts.length) { container.innerHTML = ''; return; }
+    container.innerHTML = posts.map(renderRealPost).join('');
+    posts.forEach(function (post) {
+      if (!window.GeoSocial) return;
+      window.GeoSocial.checkLiked(post.id, function (liked) {
+        var btn = container.querySelector('.fd-real-like[data-post-id="' + post.id + '"]');
+        if (!btn) return;
+        btn.dataset.liked = liked ? '1' : '0';
+        btn.classList.toggle('liked', liked);
+        btn.innerHTML = '<i class="' + (liked ? 'fas' : 'far') + ' fa-thumbs-up"></i> ' + (liked ? 'Liked' : 'Like');
+      });
+      window.GeoSocial.checkSaved(post.id, function (saved) {
+        var btn = container.querySelector('.fd-real-save[data-post-id="' + post.id + '"]');
+        if (!btn) return;
+        btn.dataset.saved = saved ? '1' : '0';
+        btn.querySelector('i').className = saved ? 'fas fa-bookmark' : 'far fa-bookmark';
+      });
+    });
+  }
+
+  // ── Sidebar state restore ─────────────────────────────────────────────
+  function restoreSidebarStates() {
+    if (!window.GeoSocial) return;
+    document.querySelectorAll('.frs-join-btn[data-group-id]').forEach(function (btn) {
+      window.GeoSocial.checkGroupMember(btn.dataset.groupId, function (joined) {
+        if (!joined) return;
+        btn.dataset.joined = '1';
+        btn.textContent = 'Joined ✓';
+        btn.classList.add('joined');
+      });
+    });
+    document.querySelectorAll('.frs-star-btn[data-event-id]').forEach(function (btn) {
+      window.GeoSocial.checkEventParticipant(btn.dataset.eventId, function (interested) {
+        if (!interested) return;
+        btn.dataset.interested = '1';
+        btn.classList.add('interested');
+        var icon = btn.querySelector('i');
+        if (icon) icon.className = 'fas fa-star';
+      });
+    });
+  }
+
+  // ── Composer wiring ───────────────────────────────────────────────────
+  function wireComposer() {
+    var input = document.getElementById('composerInput');
+    var btn   = document.getElementById('composerPostBtn');
+    if (!input || input._wired) return;
+    input._wired = true;
+    function doPost() {
+      var text = input.value.trim();
+      if (!text) return;
+      btn.disabled = true;
+      window.GeoSocial.createPost(text, null, function () {
+        input.value = '';
+        btn.disabled = false;
+        input.focus();
+      });
+    }
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doPost(); }
+    });
+    btn.addEventListener('click', doPost);
+  }
+
+  // ── Event delegation (all social actions) ────────────────────────────
+  document.addEventListener('click', function (e) {
+    var GS = window.GeoSocial;
+
+    // Like (real post) — debounced via _pending flag
+    var likeBtn = e.target.closest('.fd-real-like');
+    if (likeBtn) {
+      if (!GS || likeBtn._pending) return;
+      likeBtn._pending = true;
+      var pid = likeBtn.dataset.postId;
+      var liked = likeBtn.dataset.liked === '1';
+      GS.toggleLike(pid, liked, function (isNow) {
+        likeBtn._pending = false;
+        likeBtn.dataset.liked = isNow ? '1' : '0';
+        likeBtn.classList.toggle('liked', isNow);
+        likeBtn.innerHTML = '<i class="' + (isNow ? 'fas' : 'far') + ' fa-thumbs-up"></i> ' + (isNow ? 'Liked' : 'Like');
+        var countEl = likeBtn.closest('.fd-post').querySelector('.fd-like-count');
+        if (countEl) countEl.textContent = Math.max(0, parseInt(countEl.textContent || '0', 10) + (isNow ? 1 : -1));
+      });
+      return;
+    }
+
+    // Comment (real post)
+    var commentBtn = e.target.closest('.fd-real-comment');
+    if (commentBtn) {
+      if (!GS) return;
+      GS.requireAuth(function () { openCommentModal(commentBtn.dataset.postId); });
+      return;
+    }
+
+    // Comment count click
+    var commentCount = e.target.closest('.fd-comment-count');
+    if (commentCount) {
+      var realPost = commentCount.closest('.fd-post--real');
+      if (realPost && GS) GS.requireAuth(function () { openCommentModal(realPost.dataset.postId); });
+      return;
+    }
+
+    // Save (real post)
+    var saveBtn = e.target.closest('.fd-real-save');
+    if (saveBtn) {
+      if (!GS) return;
+      GS.toggleSavePost(saveBtn.dataset.postId, function (isNow) {
+        saveBtn.dataset.saved = isNow ? '1' : '0';
+        saveBtn.querySelector('i').className = isNow ? 'fas fa-bookmark' : 'far fa-bookmark';
+      });
+      return;
+    }
+
+    // Share (real post)
+    var shareBtn = e.target.closest('.fd-real-share');
+    if (shareBtn) {
+      if (!GS) return;
+      var url = location.origin + location.pathname + '#post-' + shareBtn.dataset.postId;
+      if (navigator.clipboard) navigator.clipboard.writeText(url).catch(function () {});
+      GS.trackShare(shareBtn.dataset.postId);
+      GS.toast('Link copied!');
+      return;
+    }
+
+    // Static mock post buttons → auth guard for guests
+    var mockBtn = e.target.closest('.fd-post:not(.fd-post--real) .fd-act-btn');
+    if (mockBtn) {
+      if (GS) GS.requireAuth(function () { GS.toast('Create your own post to interact!'); });
+      return;
+    }
+
+    // "Your Story" card
+    var storyAdd = e.target.closest('.fd-story-add-card');
+    if (storyAdd) { openStoryModal(); return; }
+
+    // Group Join/Leave
+    var joinBtn = e.target.closest('.frs-join-btn[data-group-id]');
+    if (joinBtn) {
+      if (!GS) return;
+      GS.toggleGroupMember(joinBtn.dataset.groupId, joinBtn.dataset.groupName, function (isNow) {
+        joinBtn.dataset.joined = isNow ? '1' : '0';
+        joinBtn.textContent = isNow ? 'Joined ✓' : 'Join';
+        joinBtn.classList.toggle('joined', isNow);
+      });
+      return;
+    }
+
+    // Event Interested
+    var starBtn = e.target.closest('.frs-star-btn[data-event-id]');
+    if (starBtn) {
+      if (!GS) return;
+      var wasInterested = starBtn.dataset.interested === '1';
+      GS.toggleEventParticipant(starBtn.dataset.eventId, starBtn.dataset.eventName, 'interested', function (isNow) {
+        starBtn.dataset.interested = isNow ? '1' : '0';
+        starBtn.classList.toggle('interested', isNow);
+        var icon = starBtn.querySelector('i');
+        if (icon) icon.className = isNow ? 'fas fa-star' : 'far fa-star';
+      });
+      return;
+    }
+
+    // Add Friend
+    var addFriendBtn = e.target.closest('.frs-add-btn[data-user-id]');
+    if (addFriendBtn && !addFriendBtn.disabled) {
+      if (!GS) return;
+      GS.sendFriendRequest(addFriendBtn.dataset.userId, function () {
+        addFriendBtn.textContent = 'Sent ✓';
+        addFriendBtn.disabled = true;
+        addFriendBtn.classList.add('sent');
+      });
+      return;
+    }
+  });
+
+  // ── Auth state → populate UI ──────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', function () {
     try {
       var u = JSON.parse(localStorage.getItem('geohub_auth_user') || 'null');
@@ -554,7 +893,6 @@
         var nameEl = document.getElementById('feedSidebarName');
         if (nameEl) nameEl.textContent = u.fullName || u.username || 'You';
       } else {
-        // Not logged in — dim the composer as a login CTA
         var inp = document.getElementById('composerInput');
         if (inp) {
           inp.placeholder = 'Sign in to post on GeoHub…';
@@ -564,172 +902,18 @@
           });
         }
       }
-    } catch (e) {}
+    } catch (err) {}
   });
 
-  // ── Real-time feed + composer wiring (runs after GeoSocial is ready) ──
-  (function () {
-    var unsubFeed = null;
+  // ── Init once GeoSocial is ready ──────────────────────────────────────
+  function onGeoSocialReady() {
+    wireComposer();
+    window.GeoSocial.listenFeed(renderFeed);
+    restoreSidebarStates();
+  }
 
-    function timeAgo(ts) {
-      if (!ts) return '';
-      var ms = ts.toMillis ? ts.toMillis() : (ts.seconds ? ts.seconds * 1000 : ts);
-      var diff = Math.floor((Date.now() - ms) / 1000);
-      if (diff < 60)  return diff + 's ago';
-      if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
-      if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
-      return Math.floor(diff / 86400) + 'd ago';
-    }
-
-    function renderRealPost(post) {
-      var av = post.authorAvatar
-        ? '<img src="' + post.authorAvatar + '" alt="" class="fd-post-avatar" onerror="this.style.display=\'none\'">'
-        : '<div class="fd-post-avatar fd-post-avatar--init">' + (post.authorName || 'G').charAt(0).toUpperCase() + '</div>';
-      return '<article class="fd-card fd-post fd-post--real" data-post-id="' + post.id + '">' +
-        '<div class="fd-post-head">' +
-          av +
-          '<div class="fd-post-meta">' +
-            '<div class="fd-post-name">' + (post.authorName || 'GeoHub User') + '</div>' +
-            '<div class="fd-post-sub">' + timeAgo(post.createdAt) + ' · <i class="fas fa-earth-europe fd-globe"></i></div>' +
-          '</div>' +
-        '</div>' +
-        (post.text ? '<p class="fd-post-body">' + escHtml(post.text) + '</p>' : '') +
-        (post.mediaUrl ? '<img src="' + escHtml(post.mediaUrl) + '" alt="" class="fd-post-img">' : '') +
-        '<div class="fd-post-stats-row">' +
-          '<div class="fd-reactions"><span class="fd-emojis">❤️</span> <span class="fd-like-count">' + (post.likeCount || 0) + '</span></div>' +
-          '<div class="fd-counts fd-comment-count">' + (post.commentCount || 0) + ' Comments</div>' +
-        '</div>' +
-        '<div class="fd-post-sep"></div>' +
-        '<div class="fd-post-actions">' +
-          '<button class="fd-act-btn fd-real-like" data-post-id="' + post.id + '" data-liked="0">' +
-            '<i class="far fa-thumbs-up"></i> Like' +
-          '</button>' +
-          '<button class="fd-act-btn fd-real-comment" data-post-id="' + post.id + '">' +
-            '<i class="far fa-comment"></i> Comment' +
-          '</button>' +
-          '<button class="fd-act-btn fd-real-save" data-post-id="' + post.id + '" data-saved="0">' +
-            '<i class="far fa-bookmark"></i> Save' +
-          '</button>' +
-          '<button class="fd-act-btn fd-real-share" data-post-id="' + post.id + '">' +
-            '<i class="fas fa-share-nodes"></i> Share' +
-          '</button>' +
-        '</div>' +
-      '</article>';
-    }
-
-    function escHtml(s) {
-      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-
-    function renderFeed(posts) {
-      var container = document.getElementById('fd-real-posts');
-      if (!container) return;
-      if (!posts.length) {
-        container.innerHTML = '';
-        return;
-      }
-      container.innerHTML = posts.map(renderRealPost).join('');
-      // Check which posts the current user already liked
-      posts.forEach(function (post) {
-        if (window.GeoSocial) {
-          window.GeoSocial.checkLiked(post.id, function (liked) {
-            var btn = container.querySelector('.fd-real-like[data-post-id="' + post.id + '"]');
-            if (btn) {
-              btn.dataset.liked = liked ? '1' : '0';
-              btn.classList.toggle('liked', liked);
-              btn.querySelector('i').className = liked ? 'fas fa-thumbs-up' : 'far fa-thumbs-up';
-            }
-          });
-        }
-      });
-    }
-
-    function startFeedListener() {
-      if (unsubFeed) unsubFeed();
-      unsubFeed = window.GeoSocial.listenFeed(renderFeed);
-    }
-
-    function wireComposer() {
-      var input = document.getElementById('composerInput');
-      var btn   = document.getElementById('composerPostBtn');
-      if (!input) return;
-
-      function doPost() {
-        var text = input.value.trim();
-        if (!text) return;
-        window.GeoSocial.createPost(text, null, function () {
-          input.value = '';
-          btn && (btn.disabled = false);
-        });
-        if (btn) btn.disabled = true;
-      }
-
-      input.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doPost(); }
-      });
-      if (btn) btn.addEventListener('click', doPost);
-    }
-
-    // Delegate clicks on real-post action buttons
-    document.addEventListener('click', function (e) {
-      if (!window.GeoSocial) return;
-
-      // Like
-      var likeBtn = e.target.closest('.fd-real-like');
-      if (likeBtn) {
-        var pid    = likeBtn.dataset.postId;
-        var liked  = likeBtn.dataset.liked === '1';
-        var countEl = likeBtn.closest('.fd-post').querySelector('.fd-like-count');
-        window.GeoSocial.toggleLike(pid, liked, function (isNow) {
-          likeBtn.dataset.liked = isNow ? '1' : '0';
-          likeBtn.classList.toggle('liked', isNow);
-          likeBtn.querySelector('i').className = isNow ? 'fas fa-thumbs-up' : 'far fa-thumbs-up';
-          if (countEl) countEl.textContent = Math.max(0, parseInt(countEl.textContent || '0', 10) + (isNow ? 1 : -1));
-        });
-        return;
-      }
-
-      // Comment
-      var commentBtn = e.target.closest('.fd-real-comment');
-      if (commentBtn) {
-        var pid2 = commentBtn.dataset.postId;
-        var text = window.prompt('Add a comment:');
-        if (text && text.trim()) window.GeoSocial.addComment(pid2, text.trim());
-        return;
-      }
-
-      // Save
-      var saveBtn = e.target.closest('.fd-real-save');
-      if (saveBtn) {
-        var pid3  = saveBtn.dataset.postId;
-        var saved = saveBtn.dataset.saved === '1';
-        window.GeoSocial.toggleSavePost(pid3, function (isNow) {
-          saveBtn.dataset.saved = isNow ? '1' : '0';
-          saveBtn.querySelector('i').className = isNow ? 'fas fa-bookmark' : 'far fa-bookmark';
-        });
-        return;
-      }
-
-      // Share
-      var shareBtn = e.target.closest('.fd-real-share');
-      if (shareBtn) {
-        var pid4 = shareBtn.dataset.postId;
-        navigator.clipboard && navigator.clipboard.writeText(location.origin + '/feed.html#' + pid4).catch(function () {});
-        window.GeoSocial.trackShare(pid4);
-        window.GeoSocial.toast('Link copied!');
-        return;
-      }
-    });
-
-    // Init once GeoSocial is ready
-    function onReady() {
-      wireComposer();
-      startFeedListener();
-    }
-
-    if (window.GeoSocial) onReady();
-    else window.addEventListener('GeoSocialReady', onReady, { once: true });
-  })();
+  if (window.GeoSocial) onGeoSocialReady();
+  else window.addEventListener('GeoSocialReady', onGeoSocialReady, { once: true });
 </script>
 
 <script type="module" src="firebase-config.js"></script>

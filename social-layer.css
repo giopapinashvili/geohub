@@ -125,6 +125,7 @@
   font-size: 0.82rem; font-weight: 700;
 }
 .gh-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.gh-toast-error { border-color: rgba(239,68,68,0.5); background: rgba(30,10,10,0.98); color: #fca5a5; }
 
 @keyframes gh-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes gh-pop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }

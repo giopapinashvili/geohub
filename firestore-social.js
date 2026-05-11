@@ -52,6 +52,9 @@
       toggleFollow: noop,
       checkFollowing: function (id, cb) { cb(false); },
       toggleSavePost: noop,
+      checkSaved: function (id, cb) { cb(false); },
+      checkGroupMember: function (id, cb) { cb(false); },
+      checkEventParticipant: function (id, cb) { cb(false); },
       toggleGroupMember: noop,
       toggleEventParticipant: noop,
       sendFriendRequest: noop,
@@ -78,8 +81,10 @@
     var collection     = fs.collection;
     var query          = fs.query;
     var orderBy        = fs.orderBy;
+    var where          = fs.where;
     var limit          = fs.limit;
     var onSnapshot     = fs.onSnapshot;
+    var getDocs        = fs.getDocs;
     var serverTimestamp = fs.serverTimestamp;
     var increment      = fs.increment;
 
@@ -382,6 +387,31 @@
       });
     }
 
+    // ── CHECK STATE HELPERS ──────────────────────────────────────────────
+    function checkSaved(postId, callback) {
+      var uid = currentUid();
+      if (!uid) return callback(false);
+      getDoc(doc(db, 'savedPosts', uid + '_' + postId))
+        .then(function (d) { callback(d.exists()); })
+        .catch(function () { callback(false); });
+    }
+
+    function checkGroupMember(groupId, callback) {
+      var uid = currentUid();
+      if (!uid) return callback(false);
+      getDoc(doc(db, 'groupMembers', groupId + '_' + uid))
+        .then(function (d) { callback(d.exists()); })
+        .catch(function () { callback(false); });
+    }
+
+    function checkEventParticipant(eventId, callback) {
+      var uid = currentUid();
+      if (!uid) return callback(false);
+      getDoc(doc(db, 'eventParticipants', eventId + '_' + uid))
+        .then(function (d) { callback(d.exists()); })
+        .catch(function () { callback(false); });
+    }
+
     // ── SHARES ──────────────────────────────────────────────────────────
     function trackShare(postId) {
       updateDoc(doc(db, 'posts', postId), { shareCount: increment(1) })
@@ -405,6 +435,9 @@
       createCheckin:           createCheckin,
       createStory:             createStory,
       trackShare:              trackShare,
+      checkSaved:              checkSaved,
+      checkGroupMember:        checkGroupMember,
+      checkEventParticipant:   checkEventParticipant,
       requireAuth:             requireAuth,
       toast:                   toast
     };
