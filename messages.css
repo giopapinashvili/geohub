@@ -1,6 +1,11 @@
 /* ===== PAGE ===== */
-    body { overflow: hidden; }
-    .messages-page { padding-top: 68px; height: 100vh; display: flex; flex-direction: column; }
+    body.page-messages { overflow: hidden; }
+    .messages-page {
+      padding-top: var(--navbar-height, 68px);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
     .messages-layout {
       display: grid;
       grid-template-columns: 288px 1fr 264px;
@@ -202,13 +207,31 @@
     /* ===== RESPONSIVE ===== */
     @media (max-width: 1100px) {
       .messages-layout { grid-template-columns: 272px 1fr; }
-      .info-panel { display: none; position: fixed; top: 68px; right: 0; width: 264px; height: calc(100vh - 68px); z-index: 300; box-shadow: var(--shadow-lg); }
+      .info-panel {
+        display: none;
+        position: fixed;
+        top: var(--navbar-height, 68px);
+        right: 0;
+        width: 264px;
+        height: calc(100vh - var(--navbar-height, 68px));
+        z-index: 300;
+        box-shadow: var(--shadow-lg);
+      }
       .info-panel.panel-visible { display: flex; }
+    }
+    @media (max-width: 768px) {
+      .messages-page { padding-top: var(--navbar-height, 68px); }
     }
     @media (max-width: 680px) {
       .messages-layout { grid-template-columns: 1fr; }
       .msg-sidebar { display: flex; }
-      .chat-window { display: none; position: fixed; inset: 68px 0 0 0; z-index: 200; }
+      .chat-window {
+        display: none;
+        position: fixed;
+        top: var(--navbar-height, 68px);
+        left: 0; right: 0; bottom: 0;
+        z-index: 200;
+      }
       .messages-layout.chat-open .msg-sidebar { display: none; }
       .messages-layout.chat-open .chat-window { display: flex; }
       .back-btn { display: flex; }
