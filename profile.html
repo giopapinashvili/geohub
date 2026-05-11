@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="profile.css">
 </head>
-<body>
+<body class="page-profile">
 
 <!-- NAVBAR -->
 <nav class="navbar" id="navbar">
@@ -46,11 +46,11 @@
 <div class="mobile-menu">
   <a href="index.html">Home</a><a href="feed.html">Discover</a>
   <a href="places.html">Places</a><a href="rewards.html">Rewards</a><a href="challenges.html">Challenges</a><a href="map.html">Map</a>
-  <a href="add-business.html">Add Business</a><a href="creators.html">Creators</a><a href="dashboard.html">Dashboard</a><a href="profile.html">Profile</a>
+  <a href="add-business.html">Add Business</a><a href="creators.html">Creators</a><a href="dashboard.html">Dashboard</a><a href="profile.html" class="active">Profile</a>
 </div>
 
 <!-- COVER -->
-<div class="profile-cover" style="margin-top:68px">
+<div class="profile-cover" style="margin-top:var(--navbar-height,68px)">
   <div class="cover-grid"></div>
   <div class="cover-actions">
     <button class="cover-btn"><i class="fas fa-share-alt"></i> Share</button>
@@ -58,174 +58,349 @@
   </div>
 </div>
 
-<!-- IDENTITY -->
-<div class="profile-identity">
+<!-- IDENTITY HEADER -->
+<div class="profile-identity-section">
   <div class="profile-identity-inner">
-    <div class="profile-avatar-wrap">
-      <img class="profile-avatar" src="" alt="">
-      <div class="avatar-level">1</div>
+
+    <!-- Avatar + Name Block -->
+    <div class="profile-hero-left">
+      <div class="profile-avatar-wrap">
+        <img class="profile-avatar" src="https://picsum.photos/seed/nino-profile/200/200" alt="Profile">
+        <div class="avatar-level">8</div>
+      </div>
+      <div class="profile-name-block">
+        <div class="profile-name">Nino Gelashvili</div>
+        <div class="profile-handle">@nino.geo · Tbilisi</div>
+        <div class="profile-bio">Hiking Georgia's trails since 2019. 43 places explored, 28 reviews written.</div>
+        <div class="trust-badges">
+          <span class="trust-badge green"><i class="fas fa-check-circle"></i> Verified Explorer</span>
+          <span class="trust-badge gold"><i class="fas fa-bolt"></i> Georgian Trailblazer</span>
+          <span class="trust-badge blue"><i class="fas fa-camera"></i> Camera Pro</span>
+          <span class="trust-badge purple"><i class="fas fa-trophy"></i> Top Reviewer</span>
+          <span class="trust-badge green"><i class="fas fa-map-marker-alt"></i> Check-ins: 43</span>
+        </div>
+      </div>
     </div>
-    <div class="profile-info">
-      <div class="profile-name"></div>
-      <div class="profile-handle"></div>
-      <div class="profile-bio"></div>
-    </div>
-    <div class="profile-actions">
-      <button class="btn btn-ghost btn-sm"><i class="fas fa-envelope"></i></button>
-      <button class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Follow</button>
-      <a href="lifegraph.html" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none"><i class="fas fa-chart-line"></i> Life Graph</a>
+
+    <!-- Stats + Actions -->
+    <div class="profile-hero-right">
+      <div class="profile-stats-bar">
+        <div class="pstat"><div class="pstat-value">43</div><div class="pstat-label">Places</div></div>
+        <div class="pstat" style="cursor:pointer" onclick="location.href='reviews.html'"><div class="pstat-value">28</div><div class="pstat-label" style="color:var(--green)">Reviews ↗</div></div>
+        <div class="pstat"><div class="pstat-value">156</div><div class="pstat-label">Followers</div></div>
+        <div class="pstat"><div class="pstat-value">89</div><div class="pstat-label">Following</div></div>
+        <div class="pstat"><div class="pstat-value" style="color:var(--green)">847</div><div class="pstat-label">GeoPoints</div></div>
+        <div class="pstat"><div class="pstat-value" style="color:var(--gold)">92</div><div class="pstat-label">Trust Score</div></div>
+      </div>
+      <div class="profile-actions">
+        <button class="btn btn-ghost btn-sm"><i class="fas fa-envelope"></i></button>
+        <button class="btn btn-ghost btn-sm"><i class="fas fa-share-alt"></i></button>
+        <button class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Follow</button>
+        <a href="lifegraph.html" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none"><i class="fas fa-chart-line"></i> Life Graph</a>
+      </div>
     </div>
   </div>
 
-  <!-- Trust Badges -->
-  <div class="trust-badges">
-    <span class="trust-badge green"><i class="fas fa-check-circle"></i> Verified Explorer</span>
-    <span class="trust-badge gold"><i class="fas fa-star"></i> Level 8 — Georgian Trailblazer</span>
-    <span class="trust-badge blue"><i class="fas fa-camera"></i> Camera Pro</span>
-    <span class="trust-badge purple"><i class="fas fa-trophy"></i> Top Reviewer</span>
-    <span class="trust-badge green"><i class="fas fa-map-marker-alt"></i> Real Check-ins: 43</span>
+  <!-- XP Progress -->
+  <div class="xp-progress-section">
+    <div class="xp-left">
+      <div class="xp-level-pill"><i class="fas fa-bolt"></i> Level 8</div>
+      <span class="xp-title-text">Georgian Trailblazer</span>
+    </div>
+    <div class="xp-bar-wrap">
+      <div class="xp-bar-track">
+        <div class="xp-bar-fill" style="width:67%"></div>
+      </div>
+      <div class="xp-bar-numbers">2,340 / 3,500 XP</div>
+    </div>
+    <div class="xp-right">
+      <span class="xp-to-next">1,160 XP to Level 9</span>
+    </div>
   </div>
 
-  <!-- Stats Bar -->
-  <div class="profile-stats-bar">
-    <div class="pstat"><div class="pstat-value">43</div><div class="pstat-label">Places Visited</div></div>
-    <div class="pstat" style="cursor:pointer" onclick="location.href='reviews.html'"><div class="pstat-value">28</div><div class="pstat-label" style="color:var(--green)">Reviews ↗</div></div>
-    <div class="pstat"><div class="pstat-value">156</div><div class="pstat-label">Followers</div></div>
-    <div class="pstat"><div class="pstat-value">89</div><div class="pstat-label">Following</div></div>
-    <div class="pstat"><div class="pstat-value green">847</div><div class="pstat-label">GeoPoints</div></div>
-    <div class="pstat"><div class="pstat-value gold">92</div><div class="pstat-label">Trust Score</div></div>
+  <!-- Profile Tabs -->
+  <div class="profile-tabs" id="profileTabs">
+    <div class="ptab active" data-tab="posts">Posts <span class="tab-count">31</span></div>
+    <div class="ptab" data-tab="places">Places <span class="tab-count">43</span></div>
+    <div class="ptab" data-tab="checkins">Check-ins <span class="tab-count">43</span></div>
+    <div class="ptab" data-tab="rewards">Rewards</div>
+    <div class="ptab" data-tab="challenges">Challenges</div>
+    <div class="ptab" data-tab="reviews" onclick="location.href='reviews.html'">Reviews <span class="tab-count">28</span> <i class="fas fa-external-link-alt" style="font-size:0.55rem;opacity:0.5;margin-left:2px"></i></div>
   </div>
 </div>
 
-<!-- MAIN LAYOUT -->
+<!-- MAIN LAYOUT: sidebar-left + main-right -->
 <div class="profile-layout">
 
-  <!-- ── LEFT COLUMN ── -->
-  <div class="profile-main">
+  <!-- ── LEFT SIDEBAR ── -->
+  <div class="profile-sidebar">
 
-    <!-- Tabs -->
-    <div class="profile-tabs" id="profileTabs">
-      <div class="ptab active" data-tab="overview">Overview</div>
-      <div class="ptab" data-tab="posts">Posts <span class="tab-count">31</span></div>
-      <div class="ptab" data-tab="places">Places <span class="tab-count">43</span></div>
-      <div class="ptab" data-tab="rewards">Rewards</div>
-      <div class="ptab" data-tab="challenges">Challenges</div>
-      <div class="ptab" data-tab="reviews" onclick="location.href='reviews.html'">Reviews <span class="tab-count">28</span> <i class="fas fa-external-link-alt" style="font-size:0.55rem;opacity:0.5;margin-left:2px"></i></div>
+    <!-- Intro Card -->
+    <div class="sidebar-card">
+      <div class="sidebar-card-title">Intro</div>
+      <div class="intro-item"><i class="fas fa-map-marker-alt"></i> Tbilisi, Georgia</div>
+      <div class="intro-item"><i class="fas fa-hiking"></i> Nature Explorer</div>
+      <div class="intro-item"><i class="fas fa-calendar-alt"></i> Joined March 2022</div>
+      <div class="intro-item"><i class="fas fa-globe"></i> geohub.ge/@nino</div>
+      <div class="intro-divider"></div>
+      <div class="followers-preview-row">
+        <div class="followers-thumbs">
+          <img src="https://picsum.photos/seed/u1/32/32" class="follower-thumb" alt="">
+          <img src="https://picsum.photos/seed/u2/32/32" class="follower-thumb" alt="">
+          <img src="https://picsum.photos/seed/u3/32/32" class="follower-thumb" alt="">
+          <img src="https://picsum.photos/seed/u4/32/32" class="follower-thumb" alt="">
+          <img src="https://picsum.photos/seed/u5/32/32" class="follower-thumb" alt="">
+        </div>
+        <div class="followers-preview-text"><strong>156 followers</strong> · Ana, Giorgi +154</div>
+      </div>
     </div>
 
-    <!-- ── OVERVIEW TAB ── -->
-    <div class="tab-panel active" id="tab-overview">
-
-      <!-- Activity Identity -->
-      <div class="identity-card">
-        <div class="identity-card-header">
-          <div class="identity-card-title">Activity Identity</div>
-          <div class="explorer-type">🏔️ Nature Explorer</div>
+    <!-- Activity Identity -->
+    <div class="sidebar-card">
+      <div class="sidebar-card-title">Activity Identity</div>
+      <div class="explorer-type">🏔️ Nature Explorer</div>
+      <div class="lifestyle-scores">
+        <div class="ls-row">
+          <div class="ls-label">Adventure</div>
+          <div class="ls-bar-wrap"><div class="ls-bar" style="width:92%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div>
+          <div class="ls-score" style="color:var(--green)">92</div>
         </div>
-
-        <div class="lifestyle-scores">
-          <div class="ls-row">
-            <div class="ls-label">Adventure</div>
-            <div class="ls-bar-wrap"><div class="ls-bar" style="width:92%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div>
-            <div class="ls-score" style="color:var(--green)">92</div>
-          </div>
-          <div class="ls-row">
-            <div class="ls-label">Café Life</div>
-            <div class="ls-bar-wrap"><div class="ls-bar" style="width:75%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div>
-            <div class="ls-score" style="color:var(--gold)">75</div>
-          </div>
-          <div class="ls-row">
-            <div class="ls-label">Foodie</div>
-            <div class="ls-bar-wrap"><div class="ls-bar" style="width:68%;background:linear-gradient(90deg,#ef4444,#f97316)"></div></div>
-            <div class="ls-score" style="color:#f97316">68</div>
-          </div>
-          <div class="ls-row">
-            <div class="ls-label">Culture</div>
-            <div class="ls-bar-wrap"><div class="ls-bar" style="width:54%;background:linear-gradient(90deg,#a855f7,#8b5cf6)"></div></div>
-            <div class="ls-score" style="color:#a855f7">54</div>
-          </div>
-          <div class="ls-row">
-            <div class="ls-label">Social</div>
-            <div class="ls-bar-wrap"><div class="ls-bar" style="width:48%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div>
-            <div class="ls-score" style="color:var(--blue)">48</div>
-          </div>
+        <div class="ls-row">
+          <div class="ls-label">Café Life</div>
+          <div class="ls-bar-wrap"><div class="ls-bar" style="width:75%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div>
+          <div class="ls-score" style="color:var(--gold)">75</div>
         </div>
-
-        <div class="fav-cats">
-          <div class="fav-cat-chip">🏔️ Hiking <span class="fav-cat-rank">#1</span></div>
-          <div class="fav-cat-chip">☕ Cafés <span class="fav-cat-rank">#2</span></div>
-          <div class="fav-cat-chip">🗺️ Tours <span class="fav-cat-rank">#3</span></div>
-          <div class="fav-cat-chip">🏛️ Attractions <span class="fav-cat-rank">#4</span></div>
-          <div class="fav-cat-chip">🍽️ Restaurants <span class="fav-cat-rank">#5</span></div>
+        <div class="ls-row">
+          <div class="ls-label">Foodie</div>
+          <div class="ls-bar-wrap"><div class="ls-bar" style="width:68%;background:linear-gradient(90deg,#ef4444,#f97316)"></div></div>
+          <div class="ls-score" style="color:#f97316">68</div>
+        </div>
+        <div class="ls-row">
+          <div class="ls-label">Culture</div>
+          <div class="ls-bar-wrap"><div class="ls-bar" style="width:54%;background:linear-gradient(90deg,#a855f7,#8b5cf6)"></div></div>
+          <div class="ls-score" style="color:#a855f7">54</div>
+        </div>
+        <div class="ls-row">
+          <div class="ls-label">Social</div>
+          <div class="ls-bar-wrap"><div class="ls-bar" style="width:48%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div>
+          <div class="ls-score" style="color:var(--blue)">48</div>
         </div>
       </div>
+      <div class="fav-cats">
+        <div class="fav-cat-chip">🏔️ Hiking <span class="fav-cat-rank">#1</span></div>
+        <div class="fav-cat-chip">☕ Cafés <span class="fav-cat-rank">#2</span></div>
+        <div class="fav-cat-chip">🗺️ Tours <span class="fav-cat-rank">#3</span></div>
+        <div class="fav-cat-chip">🏛️ Sights <span class="fav-cat-rank">#4</span></div>
+        <div class="fav-cat-chip">🍽️ Food <span class="fav-cat-rank">#5</span></div>
+      </div>
+    </div>
 
-      <!-- Social Proof -->
+    <!-- Social Proof Mini Stats -->
+    <div class="sidebar-card">
+      <div class="sidebar-card-title">Social Proof</div>
       <div class="social-proof-grid">
         <div class="sp-card">
           <div class="sp-icon green">🏙️</div>
-          <div><div id="spCitiesVal" class="sp-value">0</div><div class="sp-label">Cities Explored</div></div>
+          <div><div id="spCitiesVal" class="sp-value">12</div><div class="sp-label">Cities</div></div>
         </div>
         <div class="sp-card">
           <div class="sp-icon blue">👥</div>
-          <div><div id="spFriendsVal" class="sp-value">0</div><div class="sp-label">Friends Invited</div></div>
+          <div><div id="spFriendsVal" class="sp-value">7</div><div class="sp-label">Invited</div></div>
         </div>
         <div class="sp-card">
           <div class="sp-icon gold">👍</div>
-          <div><div id="spLikesVal" class="sp-value">0</div><div class="sp-label">Review Likes</div></div>
+          <div><div id="spLikesVal" class="sp-value">212</div><div class="sp-label">Likes</div></div>
         </div>
         <div class="sp-card">
           <div class="sp-icon purple">🎉</div>
-          <div><div id="spGroupsVal" class="sp-value">0</div><div class="sp-label">Group Activities</div></div>
+          <div><div id="spGroupsVal" class="sp-value">4</div><div class="sp-label">Groups</div></div>
         </div>
       </div>
+    </div>
 
-      <!-- Most Liked Review -->
-      <div id="mostLikedReviewCard" class="liked-review-card" style="display:none"></div>
+    <!-- Most Liked Review -->
+    <div id="mostLikedReviewCard" class="sidebar-card liked-review-card"></div>
 
-      <!-- Activity Feed -->
-      <div class="activity-feed">
-        <div class="activity-feed-title">Recent Activity</div>
-        <div class="activity-item">
-          <div class="activity-dot green">📸</div>
-          <div>
-            <div class="activity-text">Checked in at <strong>Fabrika Tbilisi</strong> and posted 3 photos</div>
-            <div class="activity-time">2 hours ago</div>
+    <!-- Mini Wallet -->
+    <div class="sidebar-card">
+      <div class="mini-wallet-header">
+        <div>
+          <div class="mini-wallet-pts">847 pts</div>
+          <div class="mini-wallet-label">GeoPoints · Gold Tier</div>
+        </div>
+        <a href="#" class="btn btn-primary btn-xs" onclick="switchTab('rewards');return false">Wallet</a>
+      </div>
+      <div class="mini-wallet-progress"><div class="mini-wallet-fill"></div></div>
+      <div class="mini-wallet-sub"><strong>153 pts</strong> to Platinum · 3 active coupons</div>
+    </div>
+
+    <!-- Trust Score -->
+    <div class="sidebar-card">
+      <div class="sidebar-card-title">Trust &amp; Verification</div>
+      <div class="trust-circle-wrap">
+        <div class="trust-circle">
+          <div class="trust-circle-inner">
+            <div class="trust-number">92</div>
+            <div class="trust-max">/100</div>
           </div>
         </div>
-        <div class="activity-item">
-          <div class="activity-dot gold">⭐</div>
-          <div>
-            <div class="activity-text">Left a 5-star review for <strong>Old Tbilisi Wine House</strong></div>
-            <div class="activity-time">Yesterday</div>
-          </div>
+        <div>
+          <div class="trust-info-label">Trusted Reviewer</div>
+          <div class="trust-info-sub">Top 8% of GeoHub users</div>
         </div>
-        <div class="activity-item">
-          <div class="activity-dot purple">🏆</div>
-          <div>
-            <div class="activity-text">Completed the <strong>Weekend Warrior</strong> challenge — earned 200 pts!</div>
-            <div class="activity-time">3 days ago</div>
-          </div>
-        </div>
-        <div class="activity-item">
-          <div class="activity-dot blue">👥</div>
-          <div>
-            <div class="activity-text">Invited <strong>Ana Kvaratskhelia</strong> to GeoHub</div>
-            <div class="activity-time">5 days ago</div>
-          </div>
-        </div>
-        <div class="activity-item">
-          <div class="activity-dot green">🗺️</div>
-          <div>
-            <div class="activity-text">Saved <strong>Mestia</strong> hiking trail to wishlist</div>
-            <div class="activity-time">1 week ago</div>
-          </div>
-        </div>
+      </div>
+      <div class="trust-items">
+        <div class="trust-item ok"><i class="fas fa-check-circle"></i> Profile verified</div>
+        <div class="trust-item ok"><i class="fas fa-camera"></i> 27 camera proofs</div>
+        <div class="trust-item ok"><i class="fas fa-map-marker-alt"></i> 43 real check-ins</div>
+        <div class="trust-item ok"><i class="fas fa-phone"></i> Phone verified</div>
+        <div class="trust-item warn"><i class="fas fa-id-card"></i> ID not verified yet</div>
+      </div>
+    </div>
+
+    <!-- Georgia Discovery Map -->
+    <div class="sidebar-card geo-map-widget">
+      <div class="geo-map-widget-title">Discovery Map <span style="color:var(--green);font-weight:700">12 cities</span></div>
+      <div class="geo-map-container">
+        <div class="geo-shape"></div>
+        <div class="city-pin highlight" style="left:55%;top:62%"><div class="city-pin-dot"></div><div class="city-pin-label">Tbilisi</div></div>
+        <div class="city-pin visited" style="left:22%;top:68%"><div class="city-pin-dot"></div><div class="city-pin-label">Batumi</div></div>
+        <div class="city-pin visited" style="left:32%;top:48%"><div class="city-pin-dot"></div><div class="city-pin-label">Kutaisi</div></div>
+        <div class="city-pin visited" style="left:58%;top:28%"><div class="city-pin-dot"></div><div class="city-pin-label">Kazbegi</div></div>
+        <div class="city-pin visited" style="left:24%;top:14%"><div class="city-pin-dot"></div><div class="city-pin-label">Mestia</div></div>
+        <div class="city-pin visited" style="left:54%;top:38%"><div class="city-pin-dot"></div><div class="city-pin-label">Gudauri</div></div>
+        <div class="city-pin visited" style="left:79%;top:70%"><div class="city-pin-dot"></div><div class="city-pin-label">Sighnaghi</div></div>
+        <div class="city-pin" style="left:43%;top:74%"><div class="city-pin-dot"></div><div class="city-pin-label">Borjomi</div></div>
+        <div class="city-pin visited" style="left:68%;top:78%"><div class="city-pin-dot"></div><div class="city-pin-label">Telavi</div></div>
+      </div>
+      <div class="geo-map-legend">
+        <span class="leg-visited">Visited</span>
+        <span class="leg-current">Current</span>
+        <span class="leg-notvisited">Not yet</span>
+      </div>
+    </div>
+
+    <!-- Activity Feed (mini) -->
+    <div class="sidebar-card activity-feed">
+      <div class="activity-feed-title">Recent Activity</div>
+      <div class="activity-item">
+        <div class="activity-dot green">📸</div>
+        <div><div class="activity-text">Checked in at <strong>Fabrika Tbilisi</strong></div><div class="activity-time">2 hours ago</div></div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-dot gold">⭐</div>
+        <div><div class="activity-text">Reviewed <strong>Old Tbilisi Wine House</strong></div><div class="activity-time">Yesterday</div></div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-dot purple">🏆</div>
+        <div><div class="activity-text">Completed <strong>Weekend Warrior</strong> challenge</div><div class="activity-time">3 days ago</div></div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-dot blue">👥</div>
+        <div><div class="activity-text">Invited <strong>Ana Kvaratskhelia</strong></div><div class="activity-time">5 days ago</div></div>
+      </div>
+    </div>
+
+    <!-- Suggested People -->
+    <div class="following-card sidebar-card">
+      <div class="following-header">People You May Know</div>
+      <div class="following-row">
+        <img class="following-avatar" src="https://picsum.photos/seed/user-ana/100/100" alt="">
+        <div><div class="following-name">Ana Kvaratskhelia</div><div class="following-type">Nature Explorer</div></div>
+        <button class="follow-btn">Follow</button>
+      </div>
+      <div class="following-row">
+        <img class="following-avatar" src="https://picsum.photos/seed/user-giorgi/100/100" alt="">
+        <div><div class="following-name">Giorgi Beridze</div><div class="following-type">Food &amp; Wine</div></div>
+        <button class="follow-btn">Follow</button>
+      </div>
+      <div class="following-row">
+        <img class="following-avatar" src="https://picsum.photos/seed/user-mari/100/100" alt="">
+        <div><div class="following-name">Mari Chikovanidze</div><div class="following-type">Café Hunter</div></div>
+        <button class="follow-btn">Follow</button>
+      </div>
+      <div class="following-row">
+        <img class="following-avatar" src="https://picsum.photos/seed/user-luka/100/100" alt="">
+        <div><div class="following-name">Luka Abashidze</div><div class="following-type">Mountain Guide</div></div>
+        <button class="follow-btn">Follow</button>
+      </div>
+    </div>
+
+  </div><!-- /profile-sidebar -->
+
+  <!-- ── MAIN CONTENT ── -->
+  <div class="profile-main">
+
+    <!-- Highlights / Stories Row -->
+    <div class="profile-highlights">
+      <div class="highlight-item">
+        <div class="highlight-ring"><img src="https://picsum.photos/seed/kazbegi-hotel/200/200" alt=""></div>
+        <div class="highlight-label">Kazbegi</div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-ring"><img src="https://picsum.photos/seed/batumi-beach/200/200" alt=""></div>
+        <div class="highlight-label">Batumi</div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-ring"><img src="https://picsum.photos/seed/fabrika/200/200" alt=""></div>
+        <div class="highlight-label">Tbilisi</div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-ring"><img src="https://picsum.photos/seed/mestia-tour/200/200" alt=""></div>
+        <div class="highlight-label">Mestia</div>
+      </div>
+      <div class="highlight-item">
+        <div class="highlight-ring"><img src="https://picsum.photos/seed/sighnaghi/200/200" alt=""></div>
+        <div class="highlight-label">Sighnaghi</div>
+      </div>
+      <div class="highlight-item highlight-add">
+        <div class="highlight-ring add-ring"><i class="fas fa-plus"></i></div>
+        <div class="highlight-label">New</div>
       </div>
     </div>
 
     <!-- ── POSTS TAB ── -->
-    <div class="tab-panel" id="tab-posts">
+    <div class="tab-panel active" id="tab-posts">
+      <!-- Earned Badges -->
+      <div class="earned-badges-card">
+        <div class="earned-badges-title"><i class="fas fa-award"></i> Earned Badges</div>
+        <div class="earned-badges-row">
+          <div class="eb-item">
+            <div class="eb-icon green"><i class="fas fa-check-circle"></i></div>
+            <div class="eb-label">Verified</div>
+          </div>
+          <div class="eb-item">
+            <div class="eb-icon gold"><i class="fas fa-mountain"></i></div>
+            <div class="eb-label">Trailblazer</div>
+          </div>
+          <div class="eb-item">
+            <div class="eb-icon blue"><i class="fas fa-camera"></i></div>
+            <div class="eb-label">Camera Pro</div>
+          </div>
+          <div class="eb-item">
+            <div class="eb-icon purple"><i class="fas fa-trophy"></i></div>
+            <div class="eb-label">Top Reviewer</div>
+          </div>
+          <div class="eb-item">
+            <div class="eb-icon gold"><i class="fas fa-gem"></i></div>
+            <div class="eb-label">Gold Tier</div>
+          </div>
+          <div class="eb-item">
+            <div class="eb-icon green"><i class="fas fa-bolt"></i></div>
+            <div class="eb-label">Level 8</div>
+          </div>
+          <div class="eb-item">
+            <div class="eb-icon blue"><i class="fas fa-star"></i></div>
+            <div class="eb-label">First Review</div>
+          </div>
+          <div class="eb-item">
+            <div class="eb-icon purple"><i class="fas fa-fire"></i></div>
+            <div class="eb-label">Warrior</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Posts Grid -->
       <div class="posts-grid">
         <div class="post-thumb">
           <img src="https://picsum.photos/seed/geo-post-1/400/400" alt="">
@@ -340,9 +515,115 @@
       </div>
     </div>
 
+    <!-- ── CHECK-INS TAB ── -->
+    <div class="tab-panel" id="tab-checkins">
+      <div class="checkins-header">
+        <div class="checkins-total"><i class="fas fa-map-marker-alt"></i> 43 verified check-ins across 12 cities</div>
+      </div>
+      <div class="checkins-timeline">
+
+        <div class="checkin-entry">
+          <div class="checkin-date-col">
+            <div class="checkin-date-badge">May 11</div>
+            <div class="checkin-line"></div>
+          </div>
+          <div class="checkin-card">
+            <img class="checkin-thumb" src="https://picsum.photos/seed/fabrika/400/200" alt="">
+            <div class="checkin-body">
+              <div class="checkin-name">Fabrika Tbilisi</div>
+              <div class="checkin-meta"><i class="fas fa-map-marker-alt"></i> Tbilisi · ☕ Café</div>
+              <div class="checkin-note">"Best flat white in town, amazing courtyard vibes ✨"</div>
+              <div class="checkin-foot">
+                <span class="checkin-pts">+25 pts</span>
+                <span class="checkin-verified"><i class="fas fa-check-circle"></i> GPS Verified</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="checkin-entry">
+          <div class="checkin-date-col">
+            <div class="checkin-date-badge">May 10</div>
+            <div class="checkin-line"></div>
+          </div>
+          <div class="checkin-card">
+            <img class="checkin-thumb" src="https://picsum.photos/seed/tbilisi-wine/400/200" alt="">
+            <div class="checkin-body">
+              <div class="checkin-name">Old Tbilisi Wine House</div>
+              <div class="checkin-meta"><i class="fas fa-map-marker-alt"></i> Tbilisi · 🍽️ Restaurant</div>
+              <div class="checkin-note">"The amber wine selection here is extraordinary. Best dining in Tbilisi."</div>
+              <div class="checkin-foot">
+                <span class="checkin-pts">+25 pts</span>
+                <span class="checkin-verified"><i class="fas fa-check-circle"></i> GPS Verified</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="checkin-entry">
+          <div class="checkin-date-col">
+            <div class="checkin-date-badge">Apr 28</div>
+            <div class="checkin-line"></div>
+          </div>
+          <div class="checkin-card checkin-card-highlight">
+            <img class="checkin-thumb" src="https://picsum.photos/seed/kazbegi-hotel/400/200" alt="">
+            <div class="checkin-body">
+              <div class="checkin-name">Rooms Hotel Kazbegi</div>
+              <div class="checkin-meta"><i class="fas fa-map-marker-alt"></i> Kazbegi · 🏨 Hotel</div>
+              <div class="checkin-note">"Woke up to Gergeti Trinity Church glowing in the morning light. Worth every tetri."</div>
+              <div class="checkin-foot">
+                <span class="checkin-pts">+50 pts</span>
+                <span class="checkin-verified"><i class="fas fa-check-circle"></i> GPS Verified</span>
+                <span class="checkin-photo-count"><i class="fas fa-camera"></i> 8 photos</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="checkin-entry">
+          <div class="checkin-date-col">
+            <div class="checkin-date-badge">Mar 15</div>
+            <div class="checkin-line"></div>
+          </div>
+          <div class="checkin-card">
+            <img class="checkin-thumb" src="https://picsum.photos/seed/mestia-tour/400/200" alt="">
+            <div class="checkin-body">
+              <div class="checkin-name">Mestia Hiking Trail</div>
+              <div class="checkin-meta"><i class="fas fa-map-marker-alt"></i> Mestia · 🏔️ Hiking</div>
+              <div class="checkin-note">"Chalaadi Glacier trail took my breath away. One of the top 3 experiences of my life."</div>
+              <div class="checkin-foot">
+                <span class="checkin-pts">+75 pts</span>
+                <span class="checkin-verified"><i class="fas fa-check-circle"></i> GPS Verified</span>
+                <span class="checkin-photo-count"><i class="fas fa-camera"></i> 12 photos</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="checkin-entry">
+          <div class="checkin-date-col">
+            <div class="checkin-date-badge">Feb 20</div>
+            <div class="checkin-line"></div>
+          </div>
+          <div class="checkin-card">
+            <img class="checkin-thumb" src="https://picsum.photos/seed/sighnaghi/400/200" alt="">
+            <div class="checkin-body">
+              <div class="checkin-name">Sighnaghi Wine Route</div>
+              <div class="checkin-meta"><i class="fas fa-map-marker-alt"></i> Sighnaghi · 🍷 Wine</div>
+              <div class="checkin-note">"The walled city of love. Stunning sunset over Alazani valley."</div>
+              <div class="checkin-foot">
+                <span class="checkin-pts">+30 pts</span>
+                <span class="checkin-verified"><i class="fas fa-check-circle"></i> GPS Verified</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <!-- ── REWARDS TAB ── -->
     <div class="tab-panel" id="tab-rewards">
-      <!-- Wallet Card -->
       <div class="wallet-card">
         <div class="wallet-header">
           <div>
@@ -364,37 +645,24 @@
           <div class="wstat"><div class="wstat-value">15%</div><div class="wstat-label">Discount Active</div></div>
         </div>
       </div>
-
-      <!-- Active Coupons -->
       <div class="coupons-section">
         <div class="section-title-sm">Active Coupons</div>
         <div class="coupon-card">
           <div class="coupon-icon">🏨</div>
-          <div>
-            <div class="coupon-name">15% off Hotels</div>
-            <div class="coupon-meta">Valid until 31 May 2026 · Min. 100 GEL</div>
-          </div>
+          <div><div class="coupon-name">15% off Hotels</div><div class="coupon-meta">Valid until 31 May 2026 · Min. 100 GEL</div></div>
           <div class="coupon-code">NINOGOLD15</div>
         </div>
         <div class="coupon-card">
           <div class="coupon-icon">☕</div>
-          <div>
-            <div class="coupon-name">Free Coffee at Partner Cafés</div>
-            <div class="coupon-meta">Valid until 15 May 2026 · One-time use</div>
-          </div>
+          <div><div class="coupon-name">Free Coffee at Partner Cafés</div><div class="coupon-meta">Valid until 15 May 2026 · One-time use</div></div>
           <div class="coupon-code">CAFE-FREE</div>
         </div>
         <div class="coupon-card">
           <div class="coupon-icon">🗺️</div>
-          <div>
-            <div class="coupon-name">20% off Guided Tours</div>
-            <div class="coupon-meta">Valid until 30 June 2026 · Any tour</div>
-          </div>
+          <div><div class="coupon-name">20% off Guided Tours</div><div class="coupon-meta">Valid until 30 June 2026 · Any tour</div></div>
           <div class="coupon-code">TOUR20GEO</div>
         </div>
       </div>
-
-      <!-- Points History -->
       <div class="points-history">
         <div class="section-title-sm" style="margin-bottom:10px">Points History</div>
         <div class="ph-row">
@@ -434,84 +702,60 @@
     <div class="tab-panel" id="tab-challenges">
       <div class="challenges-grid">
         <div class="challenge-card complete">
-          <div class="ch-header">
-            <div class="ch-icon">🏆</div>
-            <div class="ch-badge done">Completed</div>
-          </div>
+          <div class="ch-header"><div class="ch-icon">🏆</div><div class="ch-badge done">Completed</div></div>
           <div class="ch-name">Weekend Warrior</div>
           <div class="ch-desc">Visit 5 different places in a single weekend</div>
           <div class="ch-progress"><div class="ch-progress-fill done" style="width:100%"></div></div>
           <div class="ch-foot"><span>5/5 visits</span><span class="ch-reward">+200 pts</span></div>
         </div>
         <div class="challenge-card">
-          <div class="ch-header">
-            <div class="ch-icon">🏔️</div>
-            <div class="ch-badge active">In Progress</div>
-          </div>
+          <div class="ch-header"><div class="ch-icon">🏔️</div><div class="ch-badge active">In Progress</div></div>
           <div class="ch-name">Mountain Conqueror</div>
           <div class="ch-desc">Check in at 5 mountain destinations</div>
           <div class="ch-progress"><div class="ch-progress-fill active" style="width:80%"></div></div>
           <div class="ch-foot"><span>4/5 peaks</span><span class="ch-reward">+300 pts</span></div>
         </div>
         <div class="challenge-card">
-          <div class="ch-header">
-            <div class="ch-icon">☕</div>
-            <div class="ch-badge active">In Progress</div>
-          </div>
+          <div class="ch-header"><div class="ch-icon">☕</div><div class="ch-badge active">In Progress</div></div>
           <div class="ch-name">Café Crawler</div>
           <div class="ch-desc">Visit 10 different cafés across Georgia</div>
           <div class="ch-progress"><div class="ch-progress-fill active" style="width:70%"></div></div>
           <div class="ch-foot"><span>7/10 cafés</span><span class="ch-reward">+150 pts</span></div>
         </div>
         <div class="challenge-card">
-          <div class="ch-header">
-            <div class="ch-icon">🌊</div>
-            <div class="ch-badge active">In Progress</div>
-          </div>
+          <div class="ch-header"><div class="ch-icon">🌊</div><div class="ch-badge active">In Progress</div></div>
           <div class="ch-name">Coastal Explorer</div>
           <div class="ch-desc">Visit 3 Black Sea destinations in one trip</div>
           <div class="ch-progress"><div class="ch-progress-fill active" style="width:33%"></div></div>
           <div class="ch-foot"><span>1/3 coasts</span><span class="ch-reward">+250 pts</span></div>
         </div>
         <div class="challenge-card">
-          <div class="ch-header">
-            <div class="ch-icon">🍷</div>
-            <div class="ch-badge locked">Locked</div>
-          </div>
+          <div class="ch-header"><div class="ch-icon">🍷</div><div class="ch-badge locked">Locked</div></div>
           <div class="ch-name">Wine Country VIP</div>
           <div class="ch-desc">Visit 5 wineries in Kakheti region</div>
           <div class="ch-progress"><div class="ch-progress-fill locked" style="width:20%"></div></div>
           <div class="ch-foot"><span>1/5 wineries</span><span class="ch-reward">+350 pts</span></div>
         </div>
         <div class="challenge-card">
-          <div class="ch-header">
-            <div class="ch-icon">📸</div>
-            <div class="ch-badge locked">Locked</div>
-          </div>
-          <div class="ch-name">Photographer's Eye</div>
-          <div class="ch-desc">Upload 50 verified place photos</div>
-          <div class="ch-progress"><div class="ch-progress-fill locked" style="width:54%"></div></div>
-          <div class="ch-foot"><span>27/50 photos</span><span class="ch-reward">+200 pts</span></div>
-        </div>
-        <div class="challenge-card">
-          <div class="ch-header">
-            <div class="ch-icon">🤝</div>
-            <div class="ch-badge active">In Progress</div>
-          </div>
+          <div class="ch-header"><div class="ch-icon">🤝</div><div class="ch-badge active">In Progress</div></div>
           <div class="ch-name">Community Builder</div>
           <div class="ch-desc">Invite 10 friends who complete sign-up</div>
           <div class="ch-progress"><div class="ch-progress-fill active" style="width:70%"></div></div>
           <div class="ch-foot"><span>7/10 invites</span><span class="ch-reward">+400 pts</span></div>
         </div>
         <div class="challenge-card complete">
-          <div class="ch-header">
-            <div class="ch-icon">⭐</div>
-            <div class="ch-badge done">Completed</div>
-          </div>
+          <div class="ch-header"><div class="ch-icon">⭐</div><div class="ch-badge done">Completed</div></div>
           <div class="ch-name">First Reviewer</div>
           <div class="ch-desc">Write your first 5 reviews on GeoHub</div>
           <div class="ch-progress"><div class="ch-progress-fill done" style="width:100%"></div></div>
           <div class="ch-foot"><span>5/5 reviews</span><span class="ch-reward">+100 pts</span></div>
+        </div>
+        <div class="challenge-card">
+          <div class="ch-header"><div class="ch-icon">📸</div><div class="ch-badge locked">Locked</div></div>
+          <div class="ch-name">Photographer's Eye</div>
+          <div class="ch-desc">Upload 50 verified place photos</div>
+          <div class="ch-progress"><div class="ch-progress-fill locked" style="width:54%"></div></div>
+          <div class="ch-foot"><span>27/50 photos</span><span class="ch-reward">+200 pts</span></div>
         </div>
       </div>
     </div>
@@ -521,201 +765,42 @@
       <div class="profile-review-card">
         <div class="prv-place-row">
           <img class="prv-place-img" src="https://picsum.photos/seed/kazbegi-hotel/200/200" alt="">
-          <div>
-            <div class="prv-place-name">Rooms Hotel Kazbegi</div>
-            <div class="prv-place-cat">Hotel · Kazbegi</div>
-          </div>
+          <div><div class="prv-place-name">Rooms Hotel Kazbegi</div><div class="prv-place-cat">Hotel · Kazbegi</div></div>
           <div style="margin-left:auto;font-size:0.85rem">⭐⭐⭐⭐⭐</div>
         </div>
-        <div class="prv-text">"Absolutely magical place. Woke up at 6am to Gergeti Trinity Church glowing in the morning light right outside our window. The staff remembered our names from day one. Worth every tetri."</div>
+        <div class="prv-text">"Absolutely magical place. Woke up at 6am to Gergeti Trinity Church glowing in the morning light right outside our window. Worth every tetri."</div>
         <div class="prv-foot">
           <button class="prv-like-btn"><i class="fas fa-heart"></i> 89 Helpful</button>
           <div class="prv-date">March 2024</div>
         </div>
       </div>
-
       <div class="profile-review-card">
         <div class="prv-place-row">
           <img class="prv-place-img" src="https://picsum.photos/seed/tbilisi-wine/200/200" alt="">
-          <div>
-            <div class="prv-place-name">Old Tbilisi Wine House</div>
-            <div class="prv-place-cat">Restaurant · Tbilisi</div>
-          </div>
+          <div><div class="prv-place-name">Old Tbilisi Wine House</div><div class="prv-place-cat">Restaurant · Tbilisi</div></div>
           <div style="margin-left:auto;font-size:0.85rem">⭐⭐⭐⭐⭐</div>
         </div>
-        <div class="prv-text">"The amber wine selection here is extraordinary. The owner walked us through every bottle personally. The churchkhela was made fresh. Genuinely the best dining experience in Tbilisi."</div>
+        <div class="prv-text">"The amber wine selection here is extraordinary. The owner walked us through every bottle personally. Genuinely the best dining experience in Tbilisi."</div>
         <div class="prv-foot">
           <button class="prv-like-btn"><i class="fas fa-heart"></i> 54 Helpful</button>
           <div class="prv-date">January 2024</div>
         </div>
       </div>
-
       <div class="profile-review-card">
         <div class="prv-place-row">
           <img class="prv-place-img" src="https://picsum.photos/seed/mestia-tour/200/200" alt="">
-          <div>
-            <div class="prv-place-name">Mestia Hiking Trail</div>
-            <div class="prv-place-cat">Hiking · Mestia</div>
-          </div>
+          <div><div class="prv-place-name">Mestia Hiking Trail</div><div class="prv-place-cat">Hiking · Mestia</div></div>
           <div style="margin-left:auto;font-size:0.85rem">⭐⭐⭐⭐⭐</div>
         </div>
-        <div class="prv-text">"The Chalaadi Glacier trail took my breath away — literally. The guide was fantastic, knew every wildflower by name. Bring warm layers, it gets cold fast. One of the top 3 experiences of my life."</div>
+        <div class="prv-text">"The Chalaadi Glacier trail took my breath away. One of the top 3 experiences of my life."</div>
         <div class="prv-foot">
           <button class="prv-like-btn"><i class="fas fa-heart"></i> 41 Helpful</button>
           <div class="prv-date">August 2023</div>
         </div>
       </div>
-
-      <div class="profile-review-card">
-        <div class="prv-place-row">
-          <img class="prv-place-img" src="https://picsum.photos/seed/fabrika/200/200" alt="">
-          <div>
-            <div class="prv-place-name">Fabrika Tbilisi</div>
-            <div class="prv-place-cat">Café · Tbilisi</div>
-          </div>
-          <div style="margin-left:auto;font-size:0.85rem">⭐⭐⭐⭐⭐</div>
-        </div>
-        <div class="prv-text">"The coolest spot in Tbilisi, hands down. Creative community, great flat white, and the courtyard energy is unmatched. Spent 4 hours here and didn't notice the time passing."</div>
-        <div class="prv-foot">
-          <button class="prv-like-btn"><i class="fas fa-heart"></i> 28 Helpful</button>
-          <div class="prv-date">June 2023</div>
-        </div>
-      </div>
     </div>
 
   </div><!-- /profile-main -->
-
-  <!-- ── SIDEBAR ── -->
-  <div class="profile-sidebar">
-
-    <!-- Discovery Map -->
-    <div class="geo-map-widget">
-      <div class="geo-map-widget-title">
-        My Discovery Map
-        <span style="font-size:0.75rem;color:var(--green);font-weight:700">12 cities</span>
-      </div>
-      <div class="geo-map-container">
-        <div class="geo-shape"></div>
-        <!-- City pins positioned to approximate Georgia geography -->
-        <div class="city-pin highlight" style="left:55%;top:62%" title="Tbilisi">
-          <div class="city-pin-dot"></div>
-          <div class="city-pin-label">Tbilisi</div>
-        </div>
-        <div class="city-pin visited" style="left:22%;top:68%" title="Batumi">
-          <div class="city-pin-dot"></div>
-          <div class="city-pin-label">Batumi</div>
-        </div>
-        <div class="city-pin visited" style="left:32%;top:48%" title="Kutaisi">
-          <div class="city-pin-dot"></div>
-          <div class="city-pin-label">Kutaisi</div>
-        </div>
-        <div class="city-pin visited" style="left:58%;top:28%" title="Kazbegi">
-          <div class="city-pin-dot"></div>
-          <div class="city-pin-label">Kazbegi</div>
-        </div>
-        <div class="city-pin visited" style="left:24%;top:14%" title="Mestia">
-          <div class="city-pin-dot"></div>
-          <div class="city-pin-label">Mestia</div>
-        </div>
-        <div class="city-pin visited" style="left:54%;top:38%" title="Gudauri">
-          <div class="city-pin-dot"></div>
-          <div class="city-pin-label">Gudauri</div>
-        </div>
-        <div class="city-pin visited" style="left:79%;top:70%" title="Sighnaghi">
-          <div class="city-pin-dot"></div>
-          <div class="city-pin-label">Sighnaghi</div>
-        </div>
-        <div class="city-pin" style="left:43%;top:74%" title="Borjomi">
-          <div class="city-pin-dot"></div>
-          <div class="city-pin-label">Borjomi</div>
-        </div>
-        <div class="city-pin visited" style="left:68%;top:78%" title="Telavi">
-          <div class="city-pin-dot"></div>
-          <div class="city-pin-label">Telavi</div>
-        </div>
-      </div>
-      <div class="geo-map-legend">
-        <span class="leg-visited">Visited</span>
-        <span class="leg-current">Current</span>
-        <span class="leg-notvisited">Not yet</span>
-      </div>
-    </div>
-
-    <!-- Mini Wallet -->
-    <div class="mini-wallet">
-      <div class="mini-wallet-header">
-        <div>
-          <div class="mini-wallet-pts">847 pts</div>
-          <div class="mini-wallet-label">GeoPoints · Gold Tier</div>
-        </div>
-        <a href="#" class="btn btn-primary btn-sm" onclick="switchTab('rewards');return false">View Wallet</a>
-      </div>
-      <div class="mini-wallet-progress"><div class="mini-wallet-fill"></div></div>
-      <div class="mini-wallet-sub"><strong>153 pts</strong> to Platinum · 3 active coupons</div>
-    </div>
-
-    <!-- Trust Score -->
-    <div class="trust-score-card">
-      <div class="trust-score-header">Verification & Trust</div>
-      <div class="trust-circle-wrap">
-        <div class="trust-circle">
-          <div class="trust-circle-inner">
-            <div class="trust-number">92</div>
-            <div class="trust-max">/100</div>
-          </div>
-        </div>
-        <div>
-          <div class="trust-info-label">Trusted Reviewer</div>
-          <div class="trust-info-sub">Top 8% of GeoHub users</div>
-        </div>
-      </div>
-      <div class="trust-items">
-        <div class="trust-item ok"><i class="fas fa-check-circle"></i> Profile verified</div>
-        <div class="trust-item ok"><i class="fas fa-camera"></i> 27 camera proofs</div>
-        <div class="trust-item ok"><i class="fas fa-map-marker-alt"></i> 43 real check-ins</div>
-        <div class="trust-item ok"><i class="fas fa-phone"></i> Phone verified</div>
-        <div class="trust-item warn"><i class="fas fa-id-card"></i> ID not verified yet</div>
-      </div>
-    </div>
-
-    <!-- Following -->
-    <div class="following-card">
-      <div class="following-header">People You May Know</div>
-      <div class="following-row">
-        <img class="following-avatar" src="https://picsum.photos/seed/user-ana/100/100" alt="">
-        <div>
-          <div class="following-name">Ana Kvaratskhelia</div>
-          <div class="following-type">Nature Explorer</div>
-        </div>
-        <button class="follow-btn">Follow</button>
-      </div>
-      <div class="following-row">
-        <img class="following-avatar" src="https://picsum.photos/seed/user-giorgi/100/100" alt="">
-        <div>
-          <div class="following-name">Giorgi Beridze</div>
-          <div class="following-type">Food & Wine</div>
-        </div>
-        <button class="follow-btn">Follow</button>
-      </div>
-      <div class="following-row">
-        <img class="following-avatar" src="https://picsum.photos/seed/user-mari/100/100" alt="">
-        <div>
-          <div class="following-name">Mari Chikovanidze</div>
-          <div class="following-type">Café Hunter</div>
-        </div>
-        <button class="follow-btn">Follow</button>
-      </div>
-      <div class="following-row">
-        <img class="following-avatar" src="https://picsum.photos/seed/user-luka/100/100" alt="">
-        <div>
-          <div class="following-name">Luka Abashidze</div>
-          <div class="following-type">Mountain Guide</div>
-        </div>
-        <button class="follow-btn">Follow</button>
-      </div>
-    </div>
-
-  </div><!-- /profile-sidebar -->
 
 </div><!-- /profile-layout -->
 
@@ -723,13 +808,13 @@
 <script src="mock-users.js"></script>
 <script type="module" src="firebase-config.js"></script>
 <script src="config.js"></script>
-  <script src="api-client.js"></script>
-  <script src="main.js"></script>
-  <script src="account.js"></script>
+<script src="api-client.js"></script>
+<script src="main.js"></script>
+<script src="account.js"></script>
 <script src="mock-interactions.js"></script>
 <script src="mock-notifications.js"></script>
 <script src="social-layer.js"></script>
-  <script src="profile.js"></script>
+<script src="profile.js"></script>
 <script src="nav-cleanup.js"></script>
 <script src="mobile-nav.js"></script>
 <script src="demo-mode.js"></script>
