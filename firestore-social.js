@@ -215,6 +215,7 @@
         }).catch(function (err) {
           console.error('[GeoSocial] addComment', err);
           toast('Failed to comment.', 'error');
+          if (callback) callback(null, err);
         });
       });
     }
@@ -398,6 +399,7 @@
         }).catch(function (err) {
           console.error('[GeoSocial] createStory', err);
           toast('Failed to post story.', 'error');
+          if (callback) callback(null, err);
         });
       });
     }

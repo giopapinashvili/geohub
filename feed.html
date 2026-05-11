@@ -53,7 +53,7 @@
     <a href="messages.html" class="ftb-nav-btn" title="Messages"><i class="fas fa-comment-dots"></i></a>
   </nav>
   <div class="ftb-right">
-    <button class="ftb-icon-btn"><i class="fas fa-bell"></i><span class="ftb-badge">5</span></button>
+    <button class="ftb-icon-btn" id="feedNotifBtn" type="button"><i class="fas fa-bell"></i><span class="ftb-badge"></span></button><div id="feedNotifPanel" class="feed-notif-panel"></div>
     <a href="profile.html" class="ftb-profile-link">
       <img src="https://api.dicebear.com/7.x/initials/svg?seed=GeoHub" alt="Profile" class="ftb-profile-avatar" id="ftbAvatar">
       <div class="ftb-online-dot"></div>
@@ -82,7 +82,7 @@
       <a href="services.html"    class="fls-link"><i class="fas fa-store"></i><span>Market</span></a>
       <a href="rewards.html"     class="fls-link"><i class="fas fa-bookmark"></i><span>Saved</span></a>
       <a href="messages.html"    class="fls-link"><i class="fas fa-comment-dots"></i><span>Messages</span><span class="fls-badge">3</span></a>
-      <a href="#"                class="fls-link"><i class="fas fa-bell"></i><span>Notifications</span><span class="fls-badge">5</span></a>
+      <a href="#" class="fls-link" id="feedNotifLink"><i class="fas fa-bell"></i><span>Notifications</span><span class="fls-badge" id="feedNotifSideBadge"></span></a>
     </nav>
 
     <div class="fls-divider"></div>
@@ -548,6 +548,10 @@
       return;
     }
 
+    // Real story viewer
+    var realStory = e.target.closest('.fd-real-story-card');
+    if (realStory) { openStoryViewer(realStory.dataset.storyIndex); return; }
+
     // "Your Story" card
     var storyAdd = e.target.closest('.fd-story-add-card');
     if (storyAdd) { openStoryModal(); return; }
@@ -621,15 +625,17 @@
   });
 
   // ── Render real stories from Firestore ───────────────────────────────
+  var _currentStories = [];
   function renderRealStories(stories) {
     var container = document.getElementById('fd-real-stories');
     if (!container) return;
-    if (!stories || !stories.length) { container.innerHTML = ''; return; }
-    container.innerHTML = stories.map(function (s) {
+    _currentStories = stories || [];
+    if (!_currentStories.length) { container.innerHTML = ''; return; }
+    container.innerHTML = _currentStories.map(function (s, idx) {
       var av = s.authorAvatar
         ? '<img src="' + escHtml(s.authorAvatar) + '" alt="" class="fd-story-avatar">'
         : '<div class="fd-story-avatar fd-story-avatar--init">' + escHtml((s.authorName||'U').charAt(0).toUpperCase()) + '</div>';
-      return '<div class="fd-story-card">' +
+      return '<button type="button" class="fd-story-card fd-real-story-card" data-story-index="' + idx + '">' +
         '<div class="fd-story-visual">' +
           '<div class="fd-story-bg" style="background:linear-gradient(135deg,#10b981,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:1.8rem">' +
             (s.mediaUrl ? '<img src="' + escHtml(s.mediaUrl) + '" style="width:100%;height:100%;object-fit:cover">' : '📖') +
@@ -637,9 +643,69 @@
         '</div>' +
         '<span class="fd-story-label">' + escHtml(s.authorName || 'User') + '</span>' +
         '<span class="fd-story-time">' + timeAgo(s.createdAt) + '</span>' +
-        '</div>';
+        '</button>';
     }).join('');
   }
+
+  function openStoryViewer(index) {
+    index = Number(index) || 0;
+    if (!_currentStories.length) return;
+    var existing = document.getElementById('ghStoryViewer');
+    if (existing) existing.remove();
+    var overlay = document.createElement('div');
+    overlay.id = 'ghStoryViewer';
+    overlay.className = 'gh-story-viewer';
+    document.body.appendChild(overlay);
+    function draw(i) {
+      if (i < 0) i = _currentStories.length - 1;
+      if (i >= _currentStories.length) i = 0;
+      overlay.dataset.index = i;
+      var s = _currentStories[i] || {};
+      overlay.innerHTML = '<div class="gh-story-box">' +
+        '<div class="gh-story-top"><div class="gh-story-author">' +
+          (s.authorAvatar ? '<img src="'+escHtml(s.authorAvatar)+'" alt="">' : '<span>'+escHtml((s.authorName||'U').charAt(0).toUpperCase())+'</span>') +
+          '<div><strong>'+escHtml(s.authorName||'User')+'</strong><small>'+timeAgo(s.createdAt)+'</small></div></div>' +
+          '<button class="gh-story-close" type="button">✕</button></div>' +
+        '<div class="gh-story-content">' + (s.mediaUrl ? '<img src="'+escHtml(s.mediaUrl)+'" alt="Story">' : '<p>'+escHtml(s.text||'Story')+'</p>') + '</div>' +
+        '<button class="gh-story-nav gh-story-prev" type="button">‹</button><button class="gh-story-nav gh-story-next" type="button">›</button>' +
+      '</div>';
+      overlay.querySelector('.gh-story-close').onclick = function(){ overlay.remove(); };
+      overlay.querySelector('.gh-story-prev').onclick = function(e){ e.stopPropagation(); draw(Number(overlay.dataset.index)-1); };
+      overlay.querySelector('.gh-story-next').onclick = function(e){ e.stopPropagation(); draw(Number(overlay.dataset.index)+1); };
+    }
+    overlay.onclick = function(e){ if(e.target===overlay) overlay.remove(); };
+    draw(index);
+  }
+
+
+  function renderFeedNotifPanel() {
+    var panel = document.getElementById('feedNotifPanel');
+    if (!panel) return;
+    var list = window._feedNotifications || [];
+    if (!list.length) {
+      panel.innerHTML = '<div class="feed-notif-head">Notifications</div><div class="feed-notif-empty">No notifications yet</div>';
+      return;
+    }
+    panel.innerHTML = '<div class="feed-notif-head">Notifications</div>' + list.map(function(n){
+      return '<button type="button" class="feed-notif-item '+(!n.read?'unread':'')+'" data-notif-id="'+escHtml(n.id)+'"><strong>'+escHtml(n.title || n.type || 'Notification')+'</strong><span>'+escHtml(n.message || n.body || '')+'</span></button>';
+    }).join('');
+  }
+
+  function toggleFeedNotifPanel(e) {
+    if (e) e.preventDefault();
+    var panel = document.getElementById('feedNotifPanel');
+    if (!panel) return;
+    panel.classList.toggle('open');
+    renderFeedNotifPanel();
+  }
+
+  document.addEventListener('click', function(e){
+    if (e.target.closest('#feedNotifBtn') || e.target.closest('#feedNotifLink')) { toggleFeedNotifPanel(e); return; }
+    var ni = e.target.closest('.feed-notif-item');
+    if (ni) { if(window.GeoSocial) window.GeoSocial.markNotificationRead(ni.dataset.notifId); ni.classList.remove('unread'); return; }
+    var panel = document.getElementById('feedNotifPanel');
+    if (panel && panel.classList.contains('open') && !e.target.closest('#feedNotifPanel')) panel.classList.remove('open');
+  });
 
   // ── User notifications (admin messages) ──────────────────────────────
   var _seenNotifIds = {};
@@ -653,9 +719,13 @@
     if (!uid || !window.GeoSocial) return;
     if (_notifUnsubscribe) _notifUnsubscribe();
     _notifUnsubscribe = window.GeoSocial.listenUserNotifications(uid, function (notifs) {
+      window._feedNotifications = notifs || [];
       var unread = notifs.filter(function (n) { return !n.read; });
       var badge = document.querySelector('.ftb-badge');
+      var sideBadge = document.getElementById('feedNotifSideBadge');
       if (badge) badge.textContent = unread.length || '';
+      if (sideBadge) sideBadge.textContent = unread.length || '';
+      renderFeedNotifPanel();
 
       unread.forEach(function (n) {
         if (_seenNotifIds[n.id]) return;

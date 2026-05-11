@@ -256,6 +256,47 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+
+    // ADMIN-MANAGED MARKETPLACE / CONTENT COLLECTIONS
+    match /rewards/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /challenges/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /services/{docId} {
+      allow read: if true;
+      allow create: if isAdmin() || newOwnerMatches();
+      allow update, delete: if isAdmin() || existingOwnerMatches();
+    }
+
+    match /realEstateListings/{docId} {
+      allow read: if true;
+      allow create: if isAdmin() || newOwnerMatches();
+      allow update, delete: if isAdmin() || existingOwnerMatches();
+    }
+
+    match /learningItems/{docId} {
+      allow read: if true;
+      allow create: if isAdmin() || newOwnerMatches();
+      allow update, delete: if isAdmin() || existingOwnerMatches();
+    }
+
+    match /creators/{docId} {
+      allow read: if true;
+      allow create: if isAdmin() || newOwnerMatches();
+      allow update, delete: if isAdmin() || existingOwnerMatches();
+    }
+
+    match /liveActivity/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

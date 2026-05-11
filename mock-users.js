@@ -1,13 +1,2 @@
-/* GeoHub — Mock Social Data (cleared for production) */
-
-const MOCK_USERS = [];
-const MOCK_STORIES = [];
-const MOCK_FEED_POSTS = [];
-const MOCK_CHALLENGES = [];
-const MOCK_GROUP_ACTIVITIES = [];
-
-window.MOCK_USERS = MOCK_USERS;
-window.MOCK_STORIES = MOCK_STORIES;
-window.MOCK_FEED_POSTS = MOCK_FEED_POSTS;
-window.MOCK_CHALLENGES = MOCK_CHALLENGES;
-window.MOCK_GROUP_ACTIVITIES = MOCK_GROUP_ACTIVITIES;
+// GeoHub production cleanup: demo/static data removed.
+// This file is intentionally kept as a safe no-op stub to avoid broken references.

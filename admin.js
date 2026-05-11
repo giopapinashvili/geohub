@@ -849,6 +849,40 @@
     toast('All notifications marked as read');
   };
 
+
+  /* ── CONTENT STUDIO ─────────────────────────────────────── */
+  function bindContentStudio() {
+    var form = document.getElementById('adminContentForm');
+    if (!form || form._wired) return;
+    form._wired = true;
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (!window.GeoFirebase || !window.GeoFirebase.fs) return toast('Firebase not ready');
+      var gf = window.GeoFirebase, fs = gf.fs, db = gf.db;
+      var user = gf.auth && gf.auth.currentUser;
+      if (!user) return toast('Admin login required');
+      var col = document.getElementById('adminContentCollection').value;
+      var title = document.getElementById('adminContentTitle').value.trim();
+      var desc = document.getElementById('adminContentDesc').value.trim();
+      var city = document.getElementById('adminContentCity').value.trim();
+      var category = document.getElementById('adminContentCategory').value.trim();
+      if (!title) return toast('Title is required');
+      var btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+      fs.addDoc(fs.collection(db, col), {
+        name: title, title: title, description: desc, city: city, location: city, category: category,
+        status: 'active', createdBy: user.uid, ownerId: user.uid, userId: user.uid,
+        createdAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp()
+      }).then(function(){
+        form.reset(); toast('Real item created');
+      }).catch(function(err){
+        console.error('[Admin Content Studio]', err); toast('Create failed: ' + err.message);
+      }).finally(function(){
+        btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Create real item';
+      });
+    });
+  }
+
   /* ── GLOBAL SEARCH ────────────────────────────────────────── */
   window.handleGlobalSearch = function (q) {
     if (!q.trim()) return;
@@ -883,6 +917,7 @@
     renderCreators();
     renderModQueue();
     setTimeout(drawOverviewCharts, 120);
+    bindContentStudio();
 
     window.addEventListener('resize', function () {
       if (currentSection === 'overview') drawOverviewCharts();

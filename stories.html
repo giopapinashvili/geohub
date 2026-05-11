@@ -1,126 +1,25 @@
-﻿<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-  <title>Stories & Reels — GeoHub</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#04050d">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  <link rel="stylesheet" href="stories.css">
-</head>
-<body>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Stories — GeoHub</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="components.css">
+<link rel="stylesheet" href="navbar.css">
+<link rel="stylesheet" href="mobile-nav.css">
+<link rel="stylesheet" href="social-layer.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<div class="sr-page">
-
-  <!-- ══ TABS BAR ═════════════════════════════════════════════ -->
-  <div class="sr-tabs-bar">
-    <a href="feed.html" class="sr-logo-back" title="Back to Feed">
-      <i class="fas fa-location-dot"></i>
-    </a>
-    <div class="sr-tabs-scroll" id="srTabsScroll">
-      <button class="sr-tab active" data-tab="foryou">✨ For You</button>
-      <button class="sr-tab" data-tab="nearby">📍 Nearby</button>
-      <button class="sr-tab" data-tab="events">🎪 Events</button>
-      <button class="sr-tab" data-tab="places">🏙️ Places</button>
-      <button class="sr-tab" data-tab="creators">🎨 Creators</button>
-      <button class="sr-tab" data-tab="challenges">🏆 Challenges</button>
-      <button class="sr-tab" data-tab="live">📡 Live</button>
-    </div>
-    <a href="camera.html?mode=story" title="Create Story" style="flex-shrink:0;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#10b981,#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.85rem;text-decoration:none;box-shadow:0 0 12px rgba(16,185,129,0.4)">
-      <i class="fas fa-plus"></i>
-    </a>
-  </div>
-
-  <!-- ══ STAGE ════════════════════════════════════════════════ -->
-  <div class="sr-stage">
-    <div class="sr-reel-wrap">
-
-      <!-- Prev arrow (desktop) -->
-      <button class="sr-ext sr-ext-up" id="srExtUp"><i class="fas fa-chevron-up"></i></button>
-
-      <!-- THE REEL CARD -->
-      <div class="sr-reel" id="srReel">
-
-        <!-- Gradient background + emoji -->
-        <div class="sr-media" id="srMedia">
-          <div class="sr-emoji" id="srEmoji">☕</div>
-          <div class="sr-scene" id="srScene"></div>
-          <div class="sr-media-noise"></div>
-        </div>
-
-        <!-- Vignette -->
-        <div class="sr-vignette"></div>
-
-        <!-- Progress bar -->
-        <div class="sr-pb-row"><div class="sr-pb-fill" id="srPbFill"></div></div>
-
-        <!-- Top header -->
-        <div class="sr-top-hd">
-          <a href="feed.html" class="sr-close-btn" id="srClose"><i class="fas fa-times"></i></a>
-          <div class="sr-type-chip" id="srTypeChip"></div>
-          <button class="sr-more-btn"><i class="fas fa-ellipsis-h"></i></button>
-        </div>
-
-        <!-- Navigation tap zones -->
-        <div class="sr-nav-l" id="srNavL"></div>
-        <div class="sr-nav-r" id="srNavR"></div>
-
-        <!-- Right-side actions -->
-        <aside class="sr-side" id="srSide"></aside>
-
-        <!-- Bottom content -->
-        <div class="sr-content" id="srContent"></div>
-
-      </div><!-- .sr-reel -->
-
-      <!-- Next arrow (desktop) -->
-      <button class="sr-ext sr-ext-dn" id="srExtDn"><i class="fas fa-chevron-down"></i></button>
-
-    </div><!-- .sr-reel-wrap -->
-  </div><!-- .sr-stage -->
-
-  <!-- ══ COMMENT DRAWER ═══════════════════════════════════════ -->
-  <div class="sr-ovl" id="srDrawerOvl"></div>
-  <div class="sr-drawer" id="srDrawer">
-    <div class="sr-drawer-handle"></div>
-    <div class="sr-drawer-title" id="srDrawerTitle">Comments</div>
-    <div class="sr-comments-list" id="srCommentsList"></div>
-    <div class="sr-comment-input-row">
-      <input class="sr-comment-inp" id="srCommentInp" type="text" placeholder="Add a comment…">
-      <button class="sr-comment-send" onclick="window.srSendComment()">Send</button>
-    </div>
-  </div>
-
-  <!-- ══ SHARE PANEL ══════════════════════════════════════════ -->
-  <div class="sr-ovl" id="srShareOvl"></div>
-  <div class="sr-share-panel" id="srSharePanel">
-    <div class="sr-share-handle"></div>
-    <div class="sr-share-ttl">Share this Reel</div>
-    <div class="sr-share-grid" id="srShareGrid"></div>
-    <div class="sr-copy-link" onclick="window.srCopyLink()">
-      <div class="sr-copy-ico"><i class="fas fa-link"></i></div>
-      <div class="sr-copy-lbl">Copy link</div>
-    </div>
-  </div>
-
-  <!-- ══ TOAST ════════════════════════════════════════════════ -->
-  <div class="sr-toast" id="srToast"></div>
-
-</div><!-- .sr-page -->
-
-<div id="srAmbient"></div>
-
-<script src="mock-users.js"></script>
+<style>
+body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}.clean-page{padding-top:90px;min-height:100vh;background:radial-gradient(circle at top left,rgba(16,185,129,.16),transparent 35%),#05070f}.clean-hero{max-width:1180px;margin:0 auto;padding:70px 24px 42px}.clean-badge{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border:1px solid rgba(16,185,129,.3);border-radius:999px;color:#10e0a0;background:rgba(16,185,129,.08);font-weight:800;text-transform:uppercase;font-size:.72rem;letter-spacing:.04em}.clean-title{font-size:clamp(2.4rem,5vw,4.8rem);line-height:1.05;margin:22px 0 16px;font-weight:950;max-width:760px}.clean-title span{background:linear-gradient(135deg,#10e0a0,#3b82f6);-webkit-background-clip:text;color:transparent}.clean-desc{max-width:640px;color:#9aa6bd;font-size:1.05rem;line-height:1.7}.clean-search{margin-top:30px;display:flex;gap:12px;max-width:620px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:10px}.clean-search input{flex:1;background:transparent;border:0;color:#fff;outline:0;padding:8px 10px;font-size:1rem}.clean-search button,.clean-admin{border:0;border-radius:14px;padding:12px 20px;background:linear-gradient(135deg,#10b981,#3b82f6);color:white;font-weight:800;text-decoration:none;display:inline-flex;align-items:center;gap:8px}.clean-stats{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:14px;max-width:740px;margin-top:28px}.clean-stat{padding:18px;border:1px solid rgba(255,255,255,.07);border-radius:18px;background:rgba(255,255,255,.035)}.clean-stat strong{display:block;font-size:1.7rem}.clean-stat span{color:#64748b;font-size:.78rem}.clean-tabs{border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);padding:0 24px;display:flex;gap:24px;max-width:100%;overflow-x:auto;background:rgba(255,255,255,.03)}.clean-tab{background:transparent;border:0;color:#94a3b8;padding:18px 0;font-weight:800}.clean-tab.active{color:#10e0a0;border-bottom:2px solid #10e0a0}.clean-content{max-width:1180px;margin:0 auto;padding:34px 24px 90px;display:grid;grid-template-columns:280px 1fr;gap:24px}.clean-card{border:1px solid rgba(255,255,255,.07);border-radius:20px;background:rgba(255,255,255,.045);padding:22px}.clean-empty{min-height:260px;display:flex;align-items:center;justify-content:center;text-align:center;color:#94a3b8;border:1px dashed rgba(255,255,255,.14);border-radius:22px;background:rgba(255,255,255,.02)}.clean-empty i{font-size:2rem;color:#10e0a0;margin-bottom:12px}.clean-empty h3{color:#f8fafc;margin:0 0 8px}@media(max-width:900px){.clean-page{padding-top:72px}.clean-hero{padding:42px 18px 28px}.clean-content{grid-template-columns:1fr;padding:22px 18px 120px}.clean-stats{grid-template-columns:repeat(2,1fr)}}
+</style></head><body class="clean-body page-stories"><nav class="navbar" id="navbar">
+  <a href="index.html" class="navbar-brand"><div class="logo-icon">🌍</div><span class="logo-text">Geo<span class="logo-geo">Hub</span></span></a>
+  <ul class="navbar-links"></ul>
+  <div class="navbar-actions"></div>
+  <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu"></div><main class="clean-page"><section class="clean-hero"><div class="clean-badge"><i class="fas fa-circle"></i>Stories</div><h1 class="clean-title">Real <span>Stories</span></h1><p class="clean-desc">Stories are displayed from Firestore only. Demo story content is removed.</p><div class="clean-search"><input placeholder="Search real stories..."><button><i class="fas fa-search"></i> Search</button></div><div class="clean-stats"><div class="clean-stat"><strong id="stat-total">0</strong><span>Real items</span></div><div class="clean-stat"><strong>0</strong><span>Added today</span></div><div class="clean-stat"><strong>0</strong><span>Verified</span></div><div class="clean-stat"><strong>0</strong><span>Pending review</span></div></div></section><div class="clean-tabs"><button class="clean-tab active">Active Stories</button><button class="clean-tab ">My Stories</button></div><section class="clean-content"><aside class="clean-card"><strong>Filters</strong><p style="color:#64748b;line-height:1.6">No fake categories are shown. Real filters will appear after admins add content.</p><a class="clean-admin" href="admin.html"><i class="fas fa-plus"></i> Add in Admin</a></aside><div class="clean-empty" id="cleanList"><div><i class="fas fa-database"></i><h3>No real stories yet</h3><p>Add real content from the Admin Panel. Demo data has been removed.</p></div></div></section></main><script type="module">
+window.addEventListener('GeoFirebaseReady', async function(){try{const gf=window.GeoFirebase,fs=gf.fs,db=gf.db;const snap=await fs.getDocs(fs.query(fs.collection(db,'stories'),fs.limit(50)));const total=document.getElementById('stat-total');if(total)total.textContent=snap.size;if(snap.size>0){function esc(v){return String(v||'Untitled').replace(/[<>&]/g,function(s){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[s]})}document.getElementById('cleanList').innerHTML='<div style="width:100%">'+snap.docs.map(function(d){const x=d.data();return '<div class="clean-card" style="margin-bottom:12px"><strong>'+esc(x.name||x.title||x.text)+'</strong><p style="color:#94a3b8;margin:.5rem 0 0">Real Firestore item</p></div>'}).join('')+'</div>';}}catch(e){console.warn('clean page load',e.message);}});
+</script>
 <script type="module" src="firebase-config.js"></script>
-<script src="config.js"></script>
-<script src="api-client.js"></script>
-<script src="main.js"></script>
 <script src="account.js"></script>
-<script src="stories.js"></script>
-<script src="demo-mode.js"></script>
-</body>
-</html>
+<script src="nav-cleanup.js"></script>
+<script src="mobile-nav.js"></script>
+<script src="social-layer.js"></script>
+</body></html>

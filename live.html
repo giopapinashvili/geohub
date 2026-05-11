@@ -1,193 +1,25 @@
-﻿<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Live City — GeoHub</title>
-    <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="components.css">
-  <link rel="stylesheet" href="navbar.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#10b981">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="GeoHub">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
-    <link rel="stylesheet" href="mobile-nav.css">
-    <link rel="stylesheet" href="social-layer.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    />
-  </head>
-  <body>
-    <nav class="navbar" id="navbar">
-      <a href="index.html" class="navbar-brand">
-        <div class="logo-icon"><i class="fas fa-location-dot"></i></div>
-        <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
-      </a>
-      <ul class="navbar-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="feed.html">Discover</a></li>
-        <li><a href="places.html">Places</a></li>
-        <li><a href="rewards.html">Rewards</a></li>
-        <li><a href="challenges.html">Challenges</a></li>
-        <li><a href="map.html">Map</a></li>
-        <li><a href="add-business.html">Add Business</a></li>
-        <li><a href="dashboard.html">Dashboard</a></li>
-        <li><a href="live.html" class="active">Live</a></li>
-        <li><a href="assistant.html">Assistant</a></li>
-      </ul>
-      <div class="navbar-actions">
-        <a href="profile.html" class="btn-ghost-nav"
-          ><i class="fas fa-user-circle"></i> Profile</a
-        >
-      </div>
-      <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
-    </nav>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Live City — GeoHub</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="components.css">
+<link rel="stylesheet" href="navbar.css">
+<link rel="stylesheet" href="mobile-nav.css">
+<link rel="stylesheet" href="social-layer.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <div class="mobile-menu">
-      <a href="index.html">Home</a>
-      <a href="feed.html">Discover</a>
-      <a href="places.html">Places</a>
-      <a href="rewards.html">Rewards</a>
-      <a href="challenges.html">Challenges</a>
-      <a href="map.html">Map</a>
-      <a href="add-business.html">Add Business</a>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="live.html">Live</a>
-      <a href="assistant.html">Assistant</a>
-    </div>
-
-    <main class="live-page">
-      <section class="live-hero">
-        <div class="live-hero-card">
-          <span class="badge badge-gold">Live City</span>
-          <h1>GeoHub Live — The City Is Moving Now</h1>
-          <p>
-            See what is happening in real time across the city: events, busy
-            places, trending crowds, rewards, and live social moments. This mock
-            simulation updates automatically, no backend required.
-          </p>
-          <div class="live-stat-grid">
-            <div class="live-stat">
-              <strong id="livePulseCount">18</strong
-              ><small>active hotspots</small>
-            </div>
-            <div class="live-stat">
-              <strong id="liveEventCount">7</strong><small>events live</small>
-            </div>
-            <div class="live-stat">
-              <strong id="liveGroupCount">12</strong
-              ><small>groups nearby</small>
-            </div>
-            <div class="live-stat">
-              <strong id="liveNotifCount">5</strong><small>new alerts</small>
-            </div>
-          </div>
-          <div class="live-status-banner">
-            <span
-              ><strong id="livePhaseLabel">Evening</strong> pulse — currently
-              showing nightlife, social rides, and reward streaks.</span
-            >
-            <span class="badge badge-green">City mode active</span>
-          </div>
-        </div>
-
-        <div class="live-panel">
-          <div class="live-panel-header">
-            <h3>AI Live Suggestions</h3>
-            <span class="badge badge-blue">Smart</span>
-          </div>
-          <div class="live-suggest-list" id="liveSuggestions"></div>
-          <p class="live-footer-note">
-            Suggestions adapt to time-of-day and your city pulse.
-          </p>
-        </div>
-      </section>
-
-      <div class="live-grid">
-        <div class="live-column">
-          <div class="live-card">
-            <div class="live-card-header">
-              <h2>Live Activity Feed</h2>
-              <span class="badge">LIVE</span>
-            </div>
-            <div class="live-feed" id="liveFeed"></div>
-          </div>
-
-          <div class="live-card">
-            <div class="live-card-header">
-              <h2>Ongoing Events Radar</h2>
-              <span class="badge badge-gold">Events</span>
-            </div>
-            <div class="live-event-radar" id="eventRadar"></div>
-          </div>
-
-          <div class="live-card">
-            <div class="live-card-header">
-              <h2>Nearby Groups</h2>
-              <span class="badge badge-green">Join</span>
-            </div>
-            <div class="live-group-list" id="groupDiscovery"></div>
-          </div>
-        </div>
-
-        <div class="live-column">
-          <div class="live-map-panel">
-            <div class="live-card">
-              <div class="live-card-header">
-                <h2>Live City Map</h2>
-                <span class="badge badge-purple">Radar</span>
-              </div>
-              <div class="live-map" id="liveMap"></div>
-            </div>
-
-            <div class="live-card">
-              <div class="live-card-header">
-                <h2>Trending Now</h2>
-                <span class="badge badge-red">Hot</span>
-              </div>
-              <div class="live-event-radar" id="trendingNow"></div>
-            </div>
-
-            <div class="live-card">
-              <div class="live-card-header">
-                <h2>Busy Places</h2>
-                <span class="badge badge-blue">Crowd</span>
-              </div>
-              <div class="live-place-list" id="busyPlaces"></div>
-            </div>
-
-            <div class="live-card">
-              <div class="live-card-header">
-                <h2>Live Stories</h2>
-                <span class="badge badge-gold">Stories</span>
-              </div>
-              <div class="live-story-strip" id="liveStories"></div>
-            </div>
-
-            <div class="live-card">
-              <div class="live-card-header">
-                <h2>City Alerts</h2>
-                <span class="badge badge-green">Now</span>
-              </div>
-              <div class="live-notification-list" id="liveNotifications"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
-
-    <script src="mock-users.js"></script>
-    <script type="module" src="firebase-config.js"></script>
-<script src="config.js"></script>
-  <script src="api-client.js"></script>
-  <script src="main.js"></script>
-  <script src="account.js"></script>
-    <script src="live.js"></script>
-  <script src="nav-cleanup.js"></script>
-  <script src="mobile-nav.js"></script>
-<script src="demo-mode.js"></script>
-</body>
-</html>
+<style>
+body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}.clean-page{padding-top:90px;min-height:100vh;background:radial-gradient(circle at top left,rgba(16,185,129,.16),transparent 35%),#05070f}.clean-hero{max-width:1180px;margin:0 auto;padding:70px 24px 42px}.clean-badge{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border:1px solid rgba(16,185,129,.3);border-radius:999px;color:#10e0a0;background:rgba(16,185,129,.08);font-weight:800;text-transform:uppercase;font-size:.72rem;letter-spacing:.04em}.clean-title{font-size:clamp(2.4rem,5vw,4.8rem);line-height:1.05;margin:22px 0 16px;font-weight:950;max-width:760px}.clean-title span{background:linear-gradient(135deg,#10e0a0,#3b82f6);-webkit-background-clip:text;color:transparent}.clean-desc{max-width:640px;color:#9aa6bd;font-size:1.05rem;line-height:1.7}.clean-search{margin-top:30px;display:flex;gap:12px;max-width:620px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:10px}.clean-search input{flex:1;background:transparent;border:0;color:#fff;outline:0;padding:8px 10px;font-size:1rem}.clean-search button,.clean-admin{border:0;border-radius:14px;padding:12px 20px;background:linear-gradient(135deg,#10b981,#3b82f6);color:white;font-weight:800;text-decoration:none;display:inline-flex;align-items:center;gap:8px}.clean-stats{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:14px;max-width:740px;margin-top:28px}.clean-stat{padding:18px;border:1px solid rgba(255,255,255,.07);border-radius:18px;background:rgba(255,255,255,.035)}.clean-stat strong{display:block;font-size:1.7rem}.clean-stat span{color:#64748b;font-size:.78rem}.clean-tabs{border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);padding:0 24px;display:flex;gap:24px;max-width:100%;overflow-x:auto;background:rgba(255,255,255,.03)}.clean-tab{background:transparent;border:0;color:#94a3b8;padding:18px 0;font-weight:800}.clean-tab.active{color:#10e0a0;border-bottom:2px solid #10e0a0}.clean-content{max-width:1180px;margin:0 auto;padding:34px 24px 90px;display:grid;grid-template-columns:280px 1fr;gap:24px}.clean-card{border:1px solid rgba(255,255,255,.07);border-radius:20px;background:rgba(255,255,255,.045);padding:22px}.clean-empty{min-height:260px;display:flex;align-items:center;justify-content:center;text-align:center;color:#94a3b8;border:1px dashed rgba(255,255,255,.14);border-radius:22px;background:rgba(255,255,255,.02)}.clean-empty i{font-size:2rem;color:#10e0a0;margin-bottom:12px}.clean-empty h3{color:#f8fafc;margin:0 0 8px}@media(max-width:900px){.clean-page{padding-top:72px}.clean-hero{padding:42px 18px 28px}.clean-content{grid-template-columns:1fr;padding:22px 18px 120px}.clean-stats{grid-template-columns:repeat(2,1fr)}}
+</style></head><body class="clean-body page-live"><nav class="navbar" id="navbar">
+  <a href="index.html" class="navbar-brand"><div class="logo-icon">🌍</div><span class="logo-text">Geo<span class="logo-geo">Hub</span></span></a>
+  <ul class="navbar-links"></ul>
+  <div class="navbar-actions"></div>
+  <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu"></div><main class="clean-page"><section class="clean-hero"><div class="clean-badge"><i class="fas fa-circle"></i>Live City</div><h1 class="clean-title">GeoHub Live — <span>Real Activity</span></h1><p class="clean-desc">Live city data now comes only from real check-ins, events, groups and alerts. Demo simulation counters are removed.</p><div class="clean-search"><input placeholder="Search real liveActivity..."><button><i class="fas fa-search"></i> Search</button></div><div class="clean-stats"><div class="clean-stat"><strong id="stat-total">0</strong><span>Real items</span></div><div class="clean-stat"><strong>0</strong><span>Added today</span></div><div class="clean-stat"><strong>0</strong><span>Verified</span></div><div class="clean-stat"><strong>0</strong><span>Pending review</span></div></div></section><div class="clean-tabs"><button class="clean-tab active">Activity</button><button class="clean-tab ">Map</button><button class="clean-tab ">Alerts</button></div><section class="clean-content"><aside class="clean-card"><strong>Filters</strong><p style="color:#64748b;line-height:1.6">No fake categories are shown. Real filters will appear after admins add content.</p><a class="clean-admin" href="admin.html"><i class="fas fa-plus"></i> Add in Admin</a></aside><div class="clean-empty" id="cleanList"><div><i class="fas fa-database"></i><h3>No real liveActivity yet</h3><p>Add real content from the Admin Panel. Demo data has been removed.</p></div></div></section></main><script type="module">
+window.addEventListener('GeoFirebaseReady', async function(){try{const gf=window.GeoFirebase,fs=gf.fs,db=gf.db;const snap=await fs.getDocs(fs.query(fs.collection(db,'liveActivity'),fs.limit(50)));const total=document.getElementById('stat-total');if(total)total.textContent=snap.size;if(snap.size>0){function esc(v){return String(v||'Untitled').replace(/[<>&]/g,function(s){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[s]})}document.getElementById('cleanList').innerHTML='<div style="width:100%">'+snap.docs.map(function(d){const x=d.data();return '<div class="clean-card" style="margin-bottom:12px"><strong>'+esc(x.name||x.title||x.text)+'</strong><p style="color:#94a3b8;margin:.5rem 0 0">Real Firestore item</p></div>'}).join('')+'</div>';}}catch(e){console.warn('clean page load',e.message);}});
+</script>
+<script type="module" src="firebase-config.js"></script>
+<script src="account.js"></script>
+<script src="nav-cleanup.js"></script>
+<script src="mobile-nav.js"></script>
+<script src="social-layer.js"></script>
+</body></html>

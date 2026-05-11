@@ -1,5 +1,2 @@
-/* GeoHub — Mock Interactions (cleared for production) */
-
-const MOCK_INTERACTIONS = { comments: {}, reactions: {}, activity: [] };
-
-window.MOCK_INTERACTIONS = MOCK_INTERACTIONS;
+// GeoHub production cleanup: demo/static data removed.
+// This file is intentionally kept as a safe no-op stub to avoid broken references.
