@@ -307,11 +307,22 @@
     var btn = document.createElement('button');
     btn.id = 'geoLangToggle';
     btn.setAttribute('aria-label', 'Switch language');
-    // show the language you will switch TO
     btn.textContent = _lang === 'ka' ? 'EN' : 'ქარ';
     btn.onclick = function() { window.GeoLang.toggle(); };
     var actions = document.querySelector('.navbar-actions');
     if (actions) actions.insertBefore(btn, actions.firstChild);
+  }
+
+  // Re-add the toggle whenever account.js rewrites navbar-actions (async Firebase auth)
+  function watchNavActions() {
+    var actions = document.querySelector('.navbar-actions');
+    if (!actions) return;
+    var observer = new MutationObserver(function() {
+      if (!document.getElementById('geoLangToggle')) {
+        addLangToggle();
+      }
+    });
+    observer.observe(actions, { childList: true, subtree: false });
   }
 
   function cleanupActions() {
@@ -344,10 +355,11 @@
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { init(); applyTranslations(); });
+    document.addEventListener('DOMContentLoaded', function() { init(); applyTranslations(); watchNavActions(); });
   } else {
     init();
     applyTranslations();
+    watchNavActions();
   }
 
 })();
