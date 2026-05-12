@@ -1,10 +1,7 @@
 /* ================================================================
    GeoHub — Shared JavaScript (navbar, utilities, components)
    ================================================================
-   BACKEND PREP: Direct localStorage calls in this file should
-   eventually be replaced with GeoAPI.* calls from api-client.js.
-   Storage key constants are now centralised in GeoConfig.STORAGE_KEYS
-   (config.js). See backend-roadmap.md for migration milestones.
+   Firestore-backed runtime helpers. Persistent app state is stored in Firestore.
    ================================================================ */
 
 // ======================== NAVBAR ========================
@@ -336,16 +333,40 @@ function initScrollAnimations() {
   });
 }
 
-// ======================== SAFE STORAGE ========================
+// ======================== FIRESTORE-BACKED UI STATE ========================
 const safeStorage = {
+  _cache: {},
+  _loaded: {},
+  _uid() { return (window.GeoAuth && window.GeoAuth.getCurrentUser && window.GeoAuth.getCurrentUser()?.uid) || (window.GeoCurrentUser && window.GeoCurrentUser.uid) || 'guest'; },
+  _ref(key) {
+    const fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) return null;
+    return fb.fs.doc(fb.db, 'userUiState', this._uid() + '_' + String(key).replace(/[^a-zA-Z0-9_-]/g, '_'));
+  },
   get(key, fallback) {
-    try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch(e) { return fallback; }
+    if (Object.prototype.hasOwnProperty.call(this._cache, key)) return this._cache[key];
+    this._cache[key] = fallback;
+    const ref = this._ref(key);
+    if (ref && !this._loaded[key]) {
+      this._loaded[key] = true;
+      window.GeoFirebase.fs.getDoc(ref).then((snap) => {
+        if (snap.exists() && snap.data().value !== undefined) {
+          this._cache[key] = snap.data().value;
+          window.dispatchEvent(new CustomEvent('GeoStateLoaded', { detail: { key, value: this._cache[key] } }));
+        }
+      }).catch(() => {});
+    }
+    return fallback;
   },
   set(key, val) {
-    try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+    this._cache[key] = val;
+    const ref = this._ref(key);
+    if (ref) window.GeoFirebase.fs.setDoc(ref, { key, uid: this._uid(), value: val, updatedAt: Date.now() }, { merge: true }).catch(() => {});
   },
   remove(key) {
-    try { localStorage.removeItem(key); } catch(e) {}
+    delete this._cache[key];
+    const ref = this._ref(key);
+    if (ref) window.GeoFirebase.fs.deleteDoc(ref).catch(() => {});
   },
 };
 window.safeStorage = safeStorage;

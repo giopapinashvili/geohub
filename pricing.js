@@ -474,13 +474,13 @@
   function fmtP(n) { return n === 0 ? '₾0' : '₾' + n; }
 
   function getCurrentPlan() {
-    try { return JSON.parse(localStorage.getItem('geohub_subscription') || 'null'); } catch (_) { return null; }
+    try { return window.safeStorage ? window.safeStorage.get('geohub_subscription', null) : null; } catch (_) { return null; }
   }
 
   function saveCurrentPlan(plan, aud, billing) {
     var next = new Date(); next.setMonth(next.getMonth() + (billing === 'yearly' ? 12 : 1));
     var sub = { planId: plan.id, planName: plan.name, icon: plan.icon, audience: aud, billing: billing, price: billing === 'yearly' ? plan.yearly : plan.monthly, nextBilling: next.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) };
-    try { localStorage.setItem('geohub_subscription', JSON.stringify(sub)); } catch (_) {}
+    try { if (window.safeStorage) window.safeStorage.set('geohub_subscription', sub); } catch (_) {}
   }
 
   /* ── RENDER PLANS ────────────────────────────────────────── */
@@ -601,7 +601,7 @@
   /* ── FREE CTA ────────────────────────────────────────────── */
   window.handleFreeCta = function (planId) {
     var sub = { planId: planId, planName: 'Free Explorer', icon: '🗺️', audience: activeAud, billing: 'free', price: 0, nextBilling: 'Never' };
-    try { localStorage.setItem('geohub_subscription', JSON.stringify(sub)); } catch (_) {}
+    try { if (window.safeStorage) window.safeStorage.set('geohub_subscription', sub); } catch (_) {}
     renderPlans();
     loadCurrentPlan();
   };
@@ -702,7 +702,7 @@
     updateOrderSummary();
   };
 
-  /* ── MOCK PAYMENT ────────────────────────────────────────── */
+  /* ── PLACEHOLDER PAYMENT ────────────────────────────────────────── */
   window.fmtCard = function (inp) {
     var v = inp.value.replace(/\D/g, '').slice(0, 16);
     inp.value = v.replace(/(.{4})/g, '$1 ').trim();
@@ -803,7 +803,7 @@
 
   window.cancelSub = function () {
     if (!confirm('Cancel subscription? You\'ll revert to the Free plan at end of billing period.')) return;
-    try { localStorage.removeItem('geohub_subscription'); } catch (_) {}
+    try { if (window.safeStorage) window.safeStorage.remove('geohub_subscription'); } catch (_) {}
     loadCurrentPlan();
     renderPlans();
     var dash = document.getElementById('subDash');

@@ -39,57 +39,126 @@
   }
 
   function installComposerFix(){
-    const photoBtn = Array.from(document.querySelectorAll('button,a,div')).find(el => /Photo\/Video/i.test(el.textContent||''));
-    const tagBtn = Array.from(document.querySelectorAll('button,a,div')).find(el => /Tag People/i.test(el.textContent||''));
-    const feelBtn = Array.from(document.querySelectorAll('button,a,div')).find(el => /Feeling\/Activity/i.test(el.textContent||''));
-    const input = document.querySelector('.composer-input, .post-input, input[placeholder*="mind"], textarea[placeholder*="mind"], input[placeholder*="GeoHub"]') || document.querySelector('.create-post input, .post-composer input');
-    const send = document.querySelector('.composer-send, .post-send, .send-post-btn, button[title="Post"], .create-post button[type="submit"]') || Array.from(document.querySelectorAll('button')).find(b => /paper-plane|Post/i.test(b.innerHTML+b.textContent));
+    if(!/feed\.html|\/feed/.test(location.pathname)) return;
+
+    function isVisible(el){
+      if(!el) return false;
+      const r = el.getBoundingClientRect();
+      const s = getComputedStyle(el);
+      return r.width > 0 && r.height > 0 && s.display !== 'none' && s.visibility !== 'hidden';
+    }
+
+    function findAction(label){
+      const candidates = Array.from(document.querySelectorAll(
+        'button, a, [role="button"], .composer-action, .post-action, .create-action, .composer-option'
+      ));
+      return candidates.find(el => {
+        const text = (el.textContent || '').replace(/\s+/g,' ').trim();
+        if(!isVisible(el)) return false;
+        if(!text.includes(label)) return false;
+        // IMPORTANT: avoid binding to large parent cards/sections.
+        const r = el.getBoundingClientRect();
+        return r.width < 260 && r.height < 90;
+      });
+    }
+
+    const photoBtn = findAction('Photo/Video');
+    const tagBtn = findAction('Tag People');
+    const feelBtn = findAction('Feeling/Activity');
+
+    const input = document.querySelector(
+      '.composer-input, .post-input, input[placeholder*="mind"], textarea[placeholder*="mind"], input[placeholder*="GeoHub"]'
+    ) || document.querySelector('.create-post input, .post-composer input');
+
     const composer = input ? input.closest('.composer, .post-composer, .create-post, .feed-create, .feed-composer, .feed-card') : null;
-    if(!input || !send || send.dataset.v6Composer) return;
+    if(!input || !composer) return;
+
+    const send = composer.querySelector('.composer-send, .post-send, .send-post-btn, button[title="Post"], button[type="submit"]')
+      || Array.from(composer.querySelectorAll('button')).find(b => /paper-plane|Post/i.test(b.innerHTML + b.textContent));
+
+    if(!send || send.dataset.v6Composer) return;
     send.dataset.v6Composer='1';
 
     let selectedFile = null, selectedDataUrl = '', taggedUsers=[], feeling='';
     let fileInput = document.getElementById('ghV6FileInput');
     if(!fileInput){
-      fileInput=document.createElement('input'); fileInput.type='file'; fileInput.accept='image/*,video/*'; fileInput.id='ghV6FileInput'; fileInput.style.display='none'; document.body.appendChild(fileInput);
+      fileInput=document.createElement('input');
+      fileInput.type='file';
+      fileInput.accept='image/*,video/*';
+      fileInput.id='ghV6FileInput';
+      fileInput.style.display='none';
+      document.body.appendChild(fileInput);
     }
+
     let preview = document.getElementById('ghV6Preview');
-    if(!preview && composer){ preview=document.createElement('div'); preview.id='ghV6Preview'; preview.style.cssText='margin:12px 18px;border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden;display:none;padding:10px;color:#94a3b8'; composer.appendChild(preview); }
+    if(!preview){
+      preview=document.createElement('div');
+      preview.id='ghV6Preview';
+      preview.style.cssText='margin:12px 18px;border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden;display:none;padding:10px;color:#94a3b8';
+      composer.appendChild(preview);
+    }
+
     function renderPreview(){
-      if(!preview) return;
       let html='';
       if(selectedDataUrl){
-        if((selectedFile && selectedFile.type||'').startsWith('video/')) html+='<video controls style="max-width:100%;border-radius:10px" src="'+esc(selectedDataUrl)+'"></video>';
-        else html+='<img style="max-width:100%;max-height:320px;border-radius:10px;object-fit:cover" src="'+esc(selectedDataUrl)+'">';
+        if((selectedFile && selectedFile.type || '').startsWith('video/')) {
+          html+='<video controls style="max-width:100%;border-radius:10px" src="'+esc(selectedDataUrl)+'"></video>';
+        } else {
+          html+='<img style="max-width:100%;max-height:320px;border-radius:10px;object-fit:cover" src="'+esc(selectedDataUrl)+'">';
+        }
       }
       if(taggedUsers.length) html+='<div style="margin-top:8px">Tagged: '+taggedUsers.map(u=>'@'+esc(u.username||u.email||u.fullName||u.uid)).join(', ')+'</div>';
       if(feeling) html+='<div style="margin-top:8px">Feeling: <b>'+esc(feeling)+'</b></div>';
-      preview.innerHTML=html; preview.style.display=html?'block':'none';
+      preview.innerHTML=html;
+      preview.style.display=html?'block':'none';
     }
-    if(photoBtn && !photoBtn.dataset.v6Bound){ photoBtn.dataset.v6Bound='1'; photoBtn.addEventListener('click', e=>{e.preventDefault(); fileInput.click();}); }
+
+    if(photoBtn && !photoBtn.dataset.v7Bound){
+      photoBtn.dataset.v7Bound='1';
+      photoBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        fileInput.click();
+      });
+    }
+
     fileInput.onchange=function(){
-      selectedFile=this.files&&this.files[0]; if(!selectedFile) return;
-      const r=new FileReader(); r.onload=()=>{selectedDataUrl=r.result; renderPreview();}; r.readAsDataURL(selectedFile);
+      selectedFile=this.files && this.files[0];
+      if(!selectedFile) return;
+      const r=new FileReader();
+      r.onload=()=>{ selectedDataUrl=r.result; renderPreview(); };
+      r.readAsDataURL(selectedFile);
     };
-    if(tagBtn && !tagBtn.dataset.v6Bound){ tagBtn.dataset.v6Bound='1'; tagBtn.addEventListener('click', async e=>{
-      e.preventDefault();
-      const q=prompt('Enter user email, username or name to tag:');
-      if(!q) return;
-      const u=await findUserByInput(q);
-      if(!u){ alert('User not found. Try exact email or username.'); return; }
-      if(!taggedUsers.some(x=>(x.uid||x.id)===(u.uid||u.id))) taggedUsers.push(u);
-      renderPreview();
-    });}
-    if(feelBtn && !feelBtn.dataset.v6Bound){ feelBtn.dataset.v6Bound='1'; feelBtn.addEventListener('click', e=>{
-      e.preventDefault();
-      const q=prompt('Feeling / Activity (example: traveling, happy, working):', feeling || 'traveling');
-      if(q){ feeling=q.trim(); renderPreview(); }
-    });}
+
+    if(tagBtn && !tagBtn.dataset.v7Bound){
+      tagBtn.dataset.v7Bound='1';
+      tagBtn.addEventListener('click', async function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        const q=prompt('Enter user email, username or name to tag:');
+        if(!q) return;
+        const u=await findUserByInput(q);
+        if(!u){ alert('User not found. Try exact email or username.'); return; }
+        if(!taggedUsers.some(x=>(x.uid||x.id)===(u.uid||u.id))) taggedUsers.push(u);
+        renderPreview();
+      });
+    }
+
+    if(feelBtn && !feelBtn.dataset.v7Bound){
+      feelBtn.dataset.v7Bound='1';
+      feelBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        const q=prompt('Feeling / Activity (example: traveling, happy, working):', feeling || 'traveling');
+        if(q){ feeling=q.trim(); renderPreview(); }
+      });
+    }
 
     send.addEventListener('click', async function(e){
-      const text=(input.value||input.textContent||'').trim();
+      const text=(input.value || input.textContent || '').trim();
       if(!text && !selectedDataUrl) return;
-      e.preventDefault(); e.stopImmediatePropagation();
+      e.preventDefault();
+      e.stopImmediatePropagation();
       send.disabled=true;
       try{
         const extra={
@@ -99,10 +168,17 @@
           feeling: feeling || ''
         };
         await window.GeoSocial.createPost(text, selectedDataUrl || null, function(){
-          input.value=''; input.textContent='';
-          selectedFile=null; selectedDataUrl=''; taggedUsers=[]; feeling=''; renderPreview();
+          input.value='';
+          input.textContent='';
+          selectedFile=null;
+          selectedDataUrl='';
+          taggedUsers=[];
+          feeling='';
+          renderPreview();
         }, extra);
-      }finally{ setTimeout(()=>{send.disabled=false;},700); }
+      } finally {
+        setTimeout(()=>{ send.disabled=false; },700);
+      }
     }, true);
   }
 

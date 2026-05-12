@@ -22,29 +22,29 @@ const GeoConfig = Object.freeze({
   WS_URL:         'wss://ws.geohub.ge',   // WebSocket for Live City
 
   /* ── Demo / environment ──────────────────────────────────── */
-  DEMO_MODE: true,    // flip to false when real backend is connected
+  DEMO_MODE: false,   // production Firebase mode
   ENV: 'development', // 'development' | 'staging' | 'production'
 
   /* ── Feature flags ───────────────────────────────────────── */
   // Set to true progressively as each backend service goes live
   FEATURE_FLAGS: {
-    realAuth:        false,  // JWT/session auth via backend
-    realFeed:        false,  // Feed posts from database
+    realAuth:        true,   // Firebase Auth
+    realFeed:        true,   // Firestore feed
     realRewards:     false,  // Rewards engine with QR codes
     realPayments:    false,  // Stripe/BOG payments for tickets
     realPush:        false,  // Web push via FCM/VAPID
     realSearch:      false,  // Algolia / PostgreSQL full-text
     realMaps:        false,  // Mapbox / Google Maps API
     fileUpload:      false,  // S3 / Supabase Storage media upload
-    socialLogin:     false,  // Google / Apple OAuth
+    socialLogin:     true,   // Google OAuth
     liveWebSocket:   false,  // Real-time Live City feed
     emailVerify:     false,  // Email confirmation on sign-up
-    adminPanel:      false,  // Internal dashboard for moderation
+    adminPanel:      true,   // Firestore admin dashboard
     analytics:       false,  // PostHog / Mixpanel event tracking
   },
 
-  /* ── localStorage key registry ──────────────────────────── */
-  // All localStorage keys in one place — prevents key collisions
+  /* ── Firestore UI-state key registry ─────────────────────── */
+  // Keys are used as Firestore document identifiers by safeStorage.
   STORAGE_KEYS: {
     authUser:           'geohub_auth_user',
     authToken:          'geohub_auth_token',
@@ -98,8 +98,8 @@ const GeoConfig = Object.freeze({
     trust:         'trust.html',
   },
 
-  /* ── Mock / simulation settings ─────────────────────────── */
-  MOCK: {
+  /* ── Placeholder / simulation settings ─────────────────────────── */
+  PLACEHOLDER: {
     delay:          { min: 180, max: 700 },   // simulated API latency ms
     defaultCity:    'Tbilisi',
     xpPerCheckin:   35,

@@ -28,9 +28,7 @@
     return '';
   }
 
-  function getAuthUser() {
-    try { var v = localStorage.getItem('geohub_auth_user'); return v ? JSON.parse(v) : null; } catch (e) { return null; }
-  }
+  function getAuthUser() { return (window.GeoAuth && window.GeoAuth.getCurrentUser && window.GeoAuth.getCurrentUser()) || window.GeoCurrentUser || null; }
 
   // ── INJECT BOTTOM NAV ─────────────────────────────────────────
 
@@ -162,7 +160,7 @@
   });
 
   function injectInstallPrompt() {
-    if (sessionStorage.getItem('gh_install_dismissed')) return;
+    if (window.safeStorage && window.safeStorage.get('gh_install_dismissed', false)) return;
     if (document.getElementById('app-install-prompt')) return;
 
     var el = document.createElement('div');
@@ -191,7 +189,7 @@
     el.style.transform = 'translateY(24px)';
     el.style.transition = 'opacity 0.3s, transform 0.3s';
     setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 320);
-    sessionStorage.setItem('gh_install_dismissed', '1');
+    window.safeStorage && window.safeStorage.set('gh_install_dismissed', true);
   };
 
   window.ghInstall = function () {
@@ -272,7 +270,7 @@
   function showSplash() {
     var isPWA = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
     if (!isPWA) return;
-    if (sessionStorage.getItem('gh_splashed')) return;
+    if (window.safeStorage && window.safeStorage.get('gh_splashed', false)) return;
 
     var el = document.createElement('div');
     el.className = 'app-splash';
@@ -288,7 +286,7 @@
       setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 420);
     }, 1300);
 
-    sessionStorage.setItem('gh_splashed', '1');
+    window.safeStorage && window.safeStorage.set('gh_splashed', true);
   }
 
   // ── SERVICE WORKER ────────────────────────────────────────────

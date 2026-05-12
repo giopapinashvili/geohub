@@ -1,6 +1,6 @@
 # GeoHub — Backend Roadmap
 
-> This document outlines the path from the current localStorage-based prototype to a production backend. Written for a technical lead or backend developer picking up this project.
+> This document outlines the path from the current Firestore-based prototype to a production backend. Written for a technical lead or backend developer picking up this project.
 
 ---
 
@@ -179,13 +179,13 @@ Bucket structure:
 
 ## 5. Maps / Geolocation Plan
 
-### Phase 1 (current) — static mock
+### Phase 1 (current) — static placeholder
 - No real map API calls
 - lat/lng stored in data, not rendered live
 
 ### Phase 2 (Mapbox GL JS — recommended)
 ```javascript
-// Replace mock map divs with:
+// Replace placeholder map divs with:
 mapboxgl.accessToken = 'pk.geohub...';
 const map = new mapboxgl.Map({
   container: 'liveMap',
@@ -320,11 +320,11 @@ steps:
 - [ ] `POST /auth/login` → JWT
 - [ ] `GET /auth/me`
 - [ ] `PATCH /auth/me` (profile update)
-- [ ] Update `auth.js` → call real API instead of localStorage
+- [ ] Update `auth.js` → call real API instead of Firestore
 - [ ] Update `account.js` → call `GeoAPI.getCurrentUser()`
 
 ### Milestone 2 — Places + Feed (Week 3–4)
-- [ ] Seed `places` table with all mock BUSINESSES data
+- [ ] Seed `places` table with all placeholder BUSINESSES data
 - [ ] `GET /places` with city/category filters
 - [ ] `GET /places/:id`
 - [ ] `POST /checkins`
@@ -381,11 +381,11 @@ When connecting each feature, update these files:
 | File | What to change |
 |------|----------------|
 | `auth.js` | Replace `doLogin/doSignup` with `GeoAPI.login/signup` |
-| `account.js` | Replace localStorage reads with `GeoAPI.getCurrentUser` |
-| `feed.js` | Replace `MOCK_FEED_POSTS` with `GeoAPI.getFeed()` |
+| `account.js` | Replace Firestore reads with `GeoAPI.getCurrentUser` |
+| `feed.js` | Replace `REAL_FEED_POSTS` with `GeoAPI.getFeed()` |
 | `rewards.html` script | Replace static data with `GeoAPI.getRewards()` |
-| `events.js` | Replace mock events with `GeoAPI.getEvents()` |
-| `messages.js` | Replace mock convos with `GeoAPI.getMessages()` |
+| `events.js` | Replace placeholder events with `GeoAPI.getEvents()` |
+| `messages.js` | Replace placeholder convos with `GeoAPI.getMessages()` |
 | `checkin.html` script | Replace fake XP with `GeoAPI.createCheckin()` |
 | `business.js` | Replace `BUSINESSES` with `GeoAPI.getPlace(id)` |
 | `config.js` | Flip `DEMO_MODE: false` and `FEATURE_FLAGS` |

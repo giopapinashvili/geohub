@@ -1,4 +1,4 @@
-/* GeoHub messages legacy mock disabled for production Firebase mode.
+/* GeoHub messages legacy demo disabled for production Firebase mode.
    Real messaging is handled by real-messages.js + firestore-social.js. */
 (function(){
   window.showToast = window.showToast || function(msg){

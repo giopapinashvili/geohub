@@ -127,14 +127,14 @@
 
   /* ── LOCAL MISSIONS (from report modal) ─────────────────── */
   function loadLocalMissions() {
-    try { localMissions = JSON.parse(localStorage.getItem('geohub_reported_missions')) || []; }
+    try { localMissions = (window.safeStorage && window.safeStorage.get('geohub_reported_missions', [])) || []; }
     catch (_) { localMissions = []; }
   }
 
   function saveLocalMission(m) {
     localMissions.unshift(m);
-    try { localStorage.setItem('geohub_reported_missions', JSON.stringify(localMissions.slice(0, 20))); }
-    catch (_) { /* quota */ }
+    try { if (window.safeStorage) window.safeStorage.set('geohub_reported_missions', localMissions.slice(0, 20)); }
+    catch (_) { /* ignore */ }
   }
 
   /* ── RING ANIMATION ──────────────────────────────────────── */
@@ -364,8 +364,8 @@
     btn.classList.add('selected');
     reportUrgency = val;
   }
-  function mockPhotoAttach(el) {
-    document.getElementById('photoMockLabel').textContent = '✓ Photo attached (mock)';
+  function photoAttach(el) {
+    document.getElementById('photoPlaceholderLabel').textContent = '✓ Photo attached';
     el.style.borderColor = 'rgba(16,185,129,0.5)';
     el.style.background = 'rgba(16,185,129,0.08)';
     el.querySelector('i').style.color = 'var(--green)';
@@ -400,14 +400,14 @@
     reportUrgency = 'medium';
     document.querySelectorAll('.pt-type-btn').forEach(b => b.classList.remove('selected'));
     document.querySelectorAll('.pt-urg-btn').forEach((b, i) => b.classList.toggle('selected', i === 1));
-    document.getElementById('photoMockLabel').textContent = 'Tap to attach photo';
+    document.getElementById('photoPlaceholderLabel').textContent = 'Tap to attach photo';
   }
 
   window.openReport   = openReport;
   window.closeReport  = closeReport;
   window.selectType   = selectType;
   window.selectUrgency = selectUrgency;
-  window.mockPhotoAttach = mockPhotoAttach;
+  window.photoAttach = photoAttach;
   window.submitReport = submitReport;
   window.toggleFilter = () => ptToast('Filter: All missions');
 

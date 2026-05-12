@@ -174,6 +174,22 @@
     if (intro[2]) intro[2].innerHTML = '<i class="fas fa-calendar-alt"></i> Join date not set';
     if (intro[3]) intro[3].innerHTML = '<i class="fas fa-globe"></i> ' + (user.username ? 'geohub.ge/@' + esc(user.username) : 'No public username set');
     const lifestyle = $('.lifestyle-scores'); if (lifestyle) lifestyle.innerHTML = '<div style="color:var(--text-muted);font-size:.85rem;padding:8px 0">Activity scores will appear after real check-ins and posts.</div>';
+    const trustList = $('#trustItemsList');
+    if (trustList) {
+      var checkins = Number(user.checkinCount || user.checkinsCount || 0);
+      var cameraProofs = Number(user.cameraProofs || user.cameraProofCount || 0);
+      var phoneOk = !!user.phoneVerified;
+      var idOk = !!user.idVerified;
+      var cities = Number(user.citiesVisited || user.visitedCities || 0);
+      trustList.innerHTML = [
+        '<div class="trust-item ok"><i class="fas fa-check-circle"></i> Real account</div>',
+        cameraProofs > 0 ? '<div class="trust-item ok"><i class="fas fa-camera"></i> ' + cameraProofs + ' camera proof' + (cameraProofs !== 1 ? 's' : '') + '</div>' : '<div class="trust-item warn"><i class="fas fa-camera"></i> No camera proofs yet</div>',
+        checkins > 0 ? '<div class="trust-item ok"><i class="fas fa-map-marker-alt"></i> ' + checkins + ' real check-in' + (checkins !== 1 ? 's' : '') + '</div>' : '<div class="trust-item warn"><i class="fas fa-map-marker-alt"></i> No check-ins yet</div>',
+        phoneOk ? '<div class="trust-item ok"><i class="fas fa-phone"></i> Phone verified</div>' : '<div class="trust-item warn"><i class="fas fa-phone"></i> Phone not verified</div>',
+        idOk ? '<div class="trust-item ok"><i class="fas fa-id-card"></i> Identity verified</div>' : '<div class="trust-item warn"><i class="fas fa-id-card"></i> ID not verified yet</div>'
+      ].join('');
+      const citiesEl = document.getElementById('citiesVisited'); if (citiesEl) citiesEl.textContent = cities + ' cities';
+    }
     const fav = $('.fav-cats'); if (fav) fav.innerHTML = user.interests.length ? user.interests.map(i => '<div class="fav-cat-chip">' + esc(i) + '</div>').join('') : '<div style="color:var(--text-muted);font-size:.85rem">No interests set yet</div>';
     ['spCitiesVal','spFriendsVal','spLikesVal','spGroupsVal'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '0'; });
     const review = $('#mostLikedReviewCard'); if (review) review.innerHTML = '<div class="sidebar-card-title">Most Helpful Review</div><div style="color:var(--text-muted);font-size:.85rem">No reviews yet</div>';
@@ -195,6 +211,45 @@
     emptyTab('#tab-rewards', 'fa-gift', 'No rewards yet', 'Rewards will appear after real XP and business offers are connected.', 'rewards.html', 'Open Rewards');
     emptyTab('#tab-challenges', 'fa-trophy', 'No challenges yet', 'Real challenges will appear here when added by GeoHub.', null, '');
     emptyTab('#tab-reviews', 'fa-star', 'No reviews yet', 'Real reviews will appear here after you write them.', 'reviews.html', 'Write Review');
+    if (window.GeoSocial && window.GeoSocial.listenSavedPosts) {
+      function updateSavedEmpty() {
+        var ps = $('#saved-posts-section'), pl = $('#saved-places-section'), em = $('#saved-empty-state');
+        if (!em) return;
+        em.style.display = ((!ps || !ps.innerHTML.trim()) && (!pl || !pl.innerHTML.trim())) ? '' : 'none';
+      }
+      function updateSavedCount(total) {
+        var cnt = $('.ptab[data-tab="saved"] .tab-count'); if (cnt) cnt.textContent = total || '';
+      }
+      window.GeoSocial.listenSavedPosts(user.uid, function (posts) {
+        var sec = $('#saved-posts-section'); if (!sec) return;
+        if (!posts.length) { sec.innerHTML = ''; updateSavedEmpty(); updateSavedCount(0); return; }
+        sec.innerHTML = '<div style="font-size:.75rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px"><i class="fas fa-file-alt" style="margin-right:6px"></i>Saved Posts</div>'
+          + '<div class="posts-grid">' + posts.map(function (post) {
+            return '<div class="post-thumb">'
+              + (post.mediaUrl ? '<img src="' + esc(post.mediaUrl) + '" alt="Post">'
+                : '<div style="background:var(--bg-elevated);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.9rem;padding:14px;box-sizing:border-box;text-align:center;color:var(--text-secondary)">' + esc((post.text || '').slice(0, 80)) + '</div>')
+              + '<div class="post-overlay"><span><i class="fas fa-heart"></i> ' + (post.likeCount || 0) + '</span><span><i class="fas fa-comment"></i> ' + (post.commentCount || 0) + '</span></div>'
+              + '</div>';
+          }).join('') + '</div>';
+        updateSavedEmpty(); updateSavedCount(posts.length);
+      });
+      window.GeoSocial.listenSavedPlaces(user.uid, function (places) {
+        var sec = $('#saved-places-section'); if (!sec) return;
+        if (!places.length) { sec.innerHTML = ''; updateSavedEmpty(); return; }
+        sec.innerHTML = '<div style="font-size:.75rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin:20px 0 12px"><i class="fas fa-map-marker-alt" style="margin-right:6px"></i>Saved Places</div>'
+          + '<div style="display:flex;flex-direction:column;gap:10px">'
+          + places.map(function (p) {
+            var grad = 'linear-gradient(135deg,#10b981,#3b82f6)';
+            var cover = p.photoUrl ? '<img src="' + esc(p.photoUrl) + '" style="width:100%;height:100%;object-fit:cover;border-radius:10px">' : '<div style="width:100%;height:100%;background:' + grad + ';border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas fa-map-marker-alt" style="color:#fff;font-size:1.1rem"></i></div>';
+            return '<a href="places.html" style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;text-decoration:none;color:inherit;transition:border-color .15s">'
+              + '<div style="width:52px;height:52px;border-radius:10px;overflow:hidden;flex-shrink:0">' + cover + '</div>'
+              + '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:.88rem;color:#f0f4ff;margin-bottom:3px">' + esc(p.name || 'Unknown Place') + '</div>'
+              + '<div style="font-size:.74rem;color:#64748b">' + esc(p.category || '') + (p.address ? ' · ' + esc(p.address) : '') + '</div></div>'
+              + '<i class="fas fa-bookmark" style="color:#10b981;font-size:.88rem;flex-shrink:0"></i></a>';
+          }).join('') + '</div>';
+        updateSavedEmpty();
+      });
+    }
     if (window.GeoSocial && window.GeoSocial.listenUserPosts) {
       window.GeoSocial.listenUserPosts(user.uid, posts => {
         const count = $('.ptab[data-tab="posts"] .tab-count'); if (count) count.textContent = posts.length || '0';

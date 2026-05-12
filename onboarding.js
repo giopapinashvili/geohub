@@ -131,7 +131,7 @@ function getAiSuggestion(city, interests, accountType) {
 // ── INIT ─────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', function () {
-  const saved = localStorage.getItem('geohub_onboarding');
+  const saved = window.safeStorage ? JSON.stringify(window.safeStorage.get('geohub_onboarding', null)) : null;
   if (saved) {
     try {
       const data = JSON.parse(saved);
@@ -546,7 +546,7 @@ function renderWelcomeBack(data) {
 }
 
 function restartOnboarding() {
-  localStorage.removeItem('geohub_onboarding');
+  if (window.safeStorage) window.safeStorage.remove('geohub_onboarding');
   obState.accountType = null;
   obState.interests = [];
   obState.city = null;
@@ -565,7 +565,7 @@ function saveToStorage(profile) {
     profile:     profile,
     completedAt: new Date().toISOString(),
   };
-  localStorage.setItem('geohub_onboarding', JSON.stringify(data));
+  if (window.safeStorage) window.safeStorage.set('geohub_onboarding', data);
 }
 
 // ── TOAST ─────────────────────────────────────────────────────────

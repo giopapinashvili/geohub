@@ -36,7 +36,21 @@ service cloud.firestore {
     function onlyCountersChanged() {
       return signedIn()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'likeCount', 'commentCount', 'shareCount', 'reactionCount', 'updatedAt'
+          'likeCount', 'commentCount', 'shareCount', 'reactionCount', 'saveCount', 'updatedAt'
+        ]);
+    }
+
+    function onlyBusinessCountersChanged() {
+      return signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'followerCount', 'postCount', 'reviewCount', 'ratingAverage', 'ratingTotal', 'updatedAt'
+        ]);
+    }
+
+    function onlyGroupCountersChanged() {
+      return signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'memberCount', 'postCount', 'updatedAt'
         ]);
     }
 
@@ -107,7 +121,29 @@ service cloud.firestore {
     match /businesses/{businessId} {
       allow read: if true;
       allow create: if newOwnerMatches();
-      allow update, delete: if isAdmin() || existingOwnerMatches();
+      allow update: if isAdmin() || existingOwnerMatches() || onlyBusinessCountersChanged();
+      allow delete: if isAdmin() || existingOwnerMatches();
+    }
+
+
+    // BUSINESS PAGE ADMINS / FOLLOWERS / REVIEWS
+    match /businessAdmins/{adminId} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
+      allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid());
+    }
+
+    match /businessFollowers/{followId} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
+      allow update: if false;
+      allow delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid());
+    }
+
+    match /businessReviews/{reviewId} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
+      allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid());
     }
 
     // FOLLOWS
@@ -140,11 +176,12 @@ service cloud.firestore {
       ));
     }
 
-    // GROUPS + MEMBERS
+    // GROUPS + MEMBERS + JOIN REQUESTS
     match /groups/{groupId} {
       allow read: if true;
       allow create: if newOwnerMatches();
-      allow update, delete: if isAdmin() || existingOwnerMatches();
+      allow update: if isAdmin() || existingOwnerMatches() || onlyGroupCountersChanged();
+      allow delete: if isAdmin() || existingOwnerMatches();
     }
 
     match /groupMembers/{memberId} {
@@ -155,6 +192,21 @@ service cloud.firestore {
       allow update, delete: if isAdmin() || (signedIn() && (
         resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid()
       ));
+    }
+
+    match /groupPosts/{postId} {
+      allow read: if true;
+      allow create: if newOwnerMatches();
+      allow update, delete: if isAdmin() || existingOwnerMatches() || onlyCountersChanged();
+    }
+
+    match /groupJoinRequests/{requestId} {
+      allow read: if signedIn() && (
+        resource.data.get('userId', '') == uid() || isAdmin()
+      );
+      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
+      allow delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid());
+      allow update: if isAdmin();
     }
 
     // EVENTS + PARTICIPANTS
@@ -228,11 +280,32 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // REVIEWS
+    // REVIEWS (generic)
     match /reviews/{reviewId} {
       allow read: if true;
       allow create: if newOwnerMatches();
       allow update, delete: if isAdmin() || existingOwnerMatches();
+    }
+
+    // PLACE REVIEWS
+    match /placeReviews/{reviewId} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
+      allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid());
+    }
+
+    // SAVED ITEMS
+    match /savedItems/{itemId} {
+      allow read: if signedIn() && (
+        resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid() || isAdmin()
+      );
+      allow create: if signedIn() && (
+        request.resource.data.get('userId', '') == uid() || request.resource.data.get('uid', '') == uid()
+      );
+      allow delete: if isAdmin() || (signedIn() && (
+        resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid()
+      ));
+      allow update: if false;
     }
 
     // REWARDS
@@ -295,6 +368,70 @@ service cloud.firestore {
     match /liveActivity/{docId} {
       allow read: if true;
       allow create, update, delete: if isAdmin();
+    }
+
+
+    // FIRESTORE-BACKED UI STATE / PREFERENCES
+    match /userUiState/{stateId} {
+      allow read: if signedIn() && (resource.data.get('uid', '') == uid() || isAdmin());
+      allow create: if signedIn() && request.resource.data.get('uid', '') == uid();
+      allow update: if signedIn() && (resource.data.get('uid', '') == uid() || isAdmin())
+        && request.resource.data.get('uid', '') == resource.data.get('uid', '');
+      allow delete: if signedIn() && (resource.data.get('uid', '') == uid() || isAdmin());
+    }
+
+    match /adminFlags/{flagId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // TOP-LEVEL API CLIENT COLLECTIONS
+    match /messages/{messageId} {
+      allow read: if isAdmin() || (signedIn() && (
+        resource.data.get('senderId', '') == uid() ||
+        resource.data.get('userId', '') == uid() ||
+        resource.data.get('recipientId', '') == uid()
+      ));
+      allow create: if signedIn() && (
+        request.resource.data.get('senderId', '') == uid() ||
+        request.resource.data.get('userId', '') == uid() ||
+        request.resource.data.get('createdBy', '') == uid()
+      );
+      allow update, delete: if isAdmin() || (signedIn() && (
+        resource.data.get('senderId', '') == uid() ||
+        resource.data.get('userId', '') == uid()
+      ));
+    }
+
+    match /tickets/{docId} {
+      allow create: if newOwnerMatches();
+      allow read, update, delete: if isAdmin() || existingOwnerMatches();
+    }
+
+    match /campaigns/{docId} {
+      allow read: if true;
+      allow create: if newOwnerMatches();
+      allow update, delete: if isAdmin() || existingOwnerMatches();
+    }
+
+    match /collabOffers/{docId} {
+      allow create: if newOwnerMatches();
+      allow read, update, delete: if isAdmin() || existingOwnerMatches();
+    }
+
+    match /serviceRequests/{docId} {
+      allow create: if newOwnerMatches();
+      allow read, update, delete: if isAdmin() || existingOwnerMatches();
+    }
+
+    match /lessonBookings/{docId} {
+      allow create: if newOwnerMatches();
+      allow read, update, delete: if isAdmin() || existingOwnerMatches();
+    }
+
+    match /challengeProgress/{docId} {
+      allow create: if newOwnerMatches();
+      allow read, update, delete: if isAdmin() || existingOwnerMatches();
     }
 
     match /{document=**} {

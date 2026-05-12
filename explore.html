@@ -1,210 +1,21 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Explore Georgia — GeoHub</title>
+  <title>Discover — GeoHub</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="components.css">
   <link rel="stylesheet" href="navbar.css">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#10b981">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="GeoHub">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="mobile-nav.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="explore.css">
+  <link rel="stylesheet" href="geohub-social-redesign.css">
+  <meta name="theme-color" content="#10b981">
 </head>
-<body>
-
-<!-- NAVBAR -->
-<nav class="navbar" id="navbar">
-  <a href="index.html" class="navbar-brand">
-    <div class="logo-icon">🌍</div>
-    <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
-  </a>
-  <ul class="navbar-links">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="feed.html">Discover</a></li>
-    <li><a href="places.html" class="active">Places</a></li>
-    <li><a href="rewards.html">Rewards</a></li>
-    <li><a href="challenges.html">Challenges</a></li>
-    <li><a href="map.html">Map</a></li>
-    <li><a href="add-business.html">Add Business</a></li>
-    <li><a href="creators.html">Creators</a></li>
-    <li><a href="dashboard.html">Dashboard</a></li>
-  </ul>
-  <div class="navbar-actions">
-    <a href="profile.html" class="btn-ghost-nav"><i class="fas fa-user-circle"></i> Profile</a>
-    <a href="auth.html?tab=signup" class="btn btn-primary btn-sm">Sign Up</a>
-  </div>
-  <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
-</nav>
-<div class="mobile-menu">
-  <a href="index.html">Home</a><a href="feed.html">Discover</a>
-  <a href="places.html">Places</a><a href="rewards.html">Rewards</a><a href="challenges.html">Challenges</a><a href="map.html">Map</a><a href="add-business.html">Add Business</a><a href="creators.html">Creators</a><a href="dashboard.html">Dashboard</a>
-</div>
-
-<div class="explore-layout container">
-
-  <!-- ======================== FILTERS SIDEBAR ======================== -->
-  <aside class="filters-panel">
-    <div class="filters-header">
-      <h3><i class="fas fa-sliders-h" style="color:var(--green);margin-right:8px"></i>Filters</h3>
-      <span class="filters-clear" id="clearFilters">Clear all</span>
-    </div>
-
-    <!-- Search -->
-    <div class="filter-group">
-      <div class="explore-search-bar">
-        <input type="text" id="sidebarSearch" placeholder="Search name, place...">
-        <button><i class="fas fa-search"></i></button>
-      </div>
-    </div>
-
-    <!-- Category -->
-    <div class="filter-group">
-      <div class="filter-group-title">Category</div>
-      <div id="catFilters">
-        <label class="filter-option"><input type="radio" name="category" value=""> All Categories</label>
-        <label class="filter-option"><input type="radio" name="category" value="tours"> 🗺️ Tours</label>
-        <label class="filter-option"><input type="radio" name="category" value="cafes"> ☕ Cafés</label>
-        <label class="filter-option"><input type="radio" name="category" value="restaurants"> 🍽️ Restaurants</label>
-        <label class="filter-option"><input type="radio" name="category" value="hotels"> 🏨 Hotels</label>
-        <label class="filter-option"><input type="radio" name="category" value="guesthouses"> 🏡 Guesthouses</label>
-        <label class="filter-option"><input type="radio" name="category" value="hiking"> 🥾 Hiking</label>
-        <label class="filter-option"><input type="radio" name="category" value="attractions"> 🏛️ Attractions</label>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- City -->
-    <div class="filter-group">
-      <div class="filter-group-title">City / Region</div>
-      <label class="filter-option"><input type="checkbox" name="city" value="Tbilisi"> Tbilisi</label>
-      <label class="filter-option"><input type="checkbox" name="city" value="Kazbegi"> Kazbegi</label>
-      <label class="filter-option"><input type="checkbox" name="city" value="Batumi"> Batumi</label>
-      <label class="filter-option"><input type="checkbox" name="city" value="Mestia"> Mestia</label>
-      <label class="filter-option"><input type="checkbox" name="city" value="Gudauri"> Gudauri</label>
-      <label class="filter-option"><input type="checkbox" name="city" value="Borjomi"> Borjomi</label>
-      <label class="filter-option"><input type="checkbox" name="city" value="Telavi"> Telavi</label>
-      <label class="filter-option"><input type="checkbox" name="city" value="Sighnaghi"> Sighnaghi</label>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- Min Rating -->
-    <div class="filter-group">
-      <div class="filter-group-title">Minimum Rating</div>
-      <div class="rating-input">
-        <div class="rating-btn" data-rating="3">3+⭐</div>
-        <div class="rating-btn" data-rating="4">4+⭐</div>
-        <div class="rating-btn active" data-rating="0">Any</div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- Price -->
-    <div class="filter-group">
-      <div class="filter-group-title">Price Range (GEL)</div>
-      <div class="price-range">
-        <input type="range" id="priceRange" min="0" max="1000" value="1000" step="10">
-        <div class="price-range-labels">
-          <span>0 GEL</span>
-          <span id="priceLabel">Up to 1000 GEL</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- Tags -->
-    <div class="filter-group">
-      <div class="filter-group-title">Features</div>
-      <div class="filter-tag-grid">
-        <span class="filter-tag" data-tag="mountain">🏔️ Mountain</span>
-        <span class="filter-tag" data-tag="beach">🏖️ Beach</span>
-        <span class="filter-tag" data-tag="wine">🍷 Wine</span>
-        <span class="filter-tag" data-tag="adventure">⚡ Adventure</span>
-        <span class="filter-tag" data-tag="luxury">✨ Luxury</span>
-        <span class="filter-tag" data-tag="family-friendly">👨‍👩‍👧 Family</span>
-        <span class="filter-tag" data-tag="romantic">💕 Romantic</span>
-        <span class="filter-tag" data-tag="hiking">🥾 Hiking</span>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <label class="filter-option">
-      <input type="checkbox" name="verified"> <span><i class="fas fa-check-circle" style="color:var(--blue)"></i> Verified Only</span>
-    </label>
-    <label class="filter-option">
-      <input type="checkbox" name="premium"> <span><i class="fas fa-star" style="color:var(--gold)"></i> Premium Only</span>
-    </label>
-
-    <div style="margin-top:20px">
-      <a href="map.html" class="btn btn-ghost btn-full btn-sm" style="justify-content:center;">
-        <i class="fas fa-map"></i> View on Map
-      </a>
-    </div>
-  </aside>
-
-  <!-- ======================== RESULTS ======================== -->
-  <div class="results-area">
-
-    <!-- Active Filters -->
-    <div class="active-filters" id="activeFilters" style="display:none"></div>
-
-    <!-- Results Header -->
-    <div class="results-header">
-      <div class="results-count">
-        Showing <strong id="resultsCount">12</strong> results
-        <span id="resultsContext"></span>
-      </div>
-      <div class="results-sort">
-        <select class="sort-select" id="sortSelect">
-          <option value="featured">Featured First</option>
-          <option value="rating">Highest Rated</option>
-          <option value="price-asc">Price: Low to High</option>
-          <option value="price-desc">Price: High to Low</option>
-          <option value="reviews">Most Reviewed</option>
-        </select>
-        <div class="view-toggle">
-          <button class="view-btn active" id="gridView" title="Grid view"><i class="fas fa-th"></i></button>
-          <button class="view-btn" id="listView" title="List view"><i class="fas fa-list"></i></button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Results Grid -->
-    <div id="resultsGrid" class="listings-grid"></div>
-
-    <!-- No Results -->
-    <div class="no-results hidden" id="noResults">
-      <div class="icon">🔍</div>
-      <h3>No results found</h3>
-      <p>Try adjusting your filters or search in a different area</p>
-      <button class="btn btn-primary" style="margin-top:16px" onclick="clearAllFilters()">Clear filters</button>
-    </div>
-
-    <!-- Pagination -->
-    <div style="display:flex;justify-content:center;gap:8px;margin-top:40px" id="pagination"></div>
-  </div>
-</div>
-
-
-<script type="module" src="firebase-config.js"></script>
-<script src="config.js"></script>
-  <script src="api-client.js"></script>
-  <script src="main.js"></script>
-  <script src="account.js"></script>
-  <script src="explore.js"></script>
-<script src="nav-cleanup.js"></script>
-<script src="mobile-nav.js"></script>
-
+<body data-gh-page="discover">
+  <noscript>GeoHub requires JavaScript.</noscript>
+  <script type="module" src="firebase-config.js"></script>
+  <script src="firestore-social.js"></script>
+  <script src="geohub-social-redesign.js"></script>
 </body>
 </html>

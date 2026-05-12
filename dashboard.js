@@ -232,9 +232,7 @@ function saveDashProfile() {
   var user = window.GeoMode.getCurrentUser();
   if (!user) return;
 
-  var bizKey = 'geohub_business_' + (user.uid || user.id || 'anon');
-  var existing = null;
-  try { existing = JSON.parse(localStorage.getItem(bizKey) || 'null'); } catch (e) {}
+  var existing = window.__geoDashboardBusiness || {};
   existing = existing || {};
 
   var name = document.getElementById('profBizName').value.trim();
@@ -248,7 +246,10 @@ function saveDashProfile() {
   existing.instagram = document.getElementById('profBizInstagram').value.trim() || existing.instagram || '';
   existing.email    = document.getElementById('profBizEmail').value.trim() || existing.email || '';
 
-  localStorage.setItem(bizKey, JSON.stringify(existing));
+  window.__geoDashboardBusiness = existing;
+  if (window.GeoFirebase && window.GeoFirebase.db && window.GeoFirebase.fs) {
+    window.GeoFirebase.fs.setDoc(window.GeoFirebase.fs.doc(window.GeoFirebase.db, 'businesses', existing.id || (user.uid + '_dashboard_business')), Object.assign({}, existing, { id: existing.id || (user.uid + '_dashboard_business'), ownerId: user.uid, createdBy: user.uid, status: 'active', updatedAt: Date.now() }), { merge: true }).catch(function(e){ console.warn('[Dashboard] business save failed', e.message); });
+  }
 
   // Update live preview elements
   var bizName = existing.name || 'Your Business';
@@ -296,12 +297,15 @@ function saveDashProfile() {
   // Not logged in at all → redirect to auth
   if (!user) { window.location.href = 'auth.html'; return; }
 
-  // Demo/mock user → show Kazbegi Adventures as-is
+  // Demo user → show Kazbegi Adventures as-is
   if (!window.GeoMode.isRealUser()) return;
 
-  var bizKey = 'geohub_business_' + (user.uid || user.id || 'anon');
-  var biz = null;
-  try { biz = JSON.parse(localStorage.getItem(bizKey) || 'null'); } catch (e) {}
+  var biz = window.__geoDashboardBusiness || null;
+  if (!biz && window.GeoFirebase && window.GeoFirebase.db && window.GeoFirebase.fs) {
+    window.GeoFirebase.fs.getDocs(window.GeoFirebase.fs.query(window.GeoFirebase.fs.collection(window.GeoFirebase.db, 'businesses'), window.GeoFirebase.fs.where('ownerId', '==', user.uid || user.id), window.GeoFirebase.fs.limit(1))).then(function(snap){
+      if (!snap.empty) { var d = snap.docs[0]; window.__geoDashboardBusiness = Object.assign({ id: d.id }, d.data()); window.location.reload(); }
+    }).catch(function(){});
+  }
 
   var nav   = document.querySelector('.dashboard-nav');
   var main  = document.querySelector('.dashboard-content');
@@ -376,7 +380,7 @@ function saveDashProfile() {
   var pubList = document.getElementById('publishedPostsList');
   if (pubList) pubList.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--text-muted);font-size:0.85rem"><i class="fas fa-edit" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>No posts yet — compose your first post above</div>';
 
-  // Zero stats and clear mock data for new business with no activity
+  // Zero stats and clear demo data for new business with no activity
   if (!biz.hasActivity) {
     document.querySelectorAll('.kpi-value, .stat-value').forEach(function (el) {
       if (!isNaN(parseInt(el.textContent))) el.textContent = '0';

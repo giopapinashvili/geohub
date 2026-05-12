@@ -39,11 +39,9 @@ function formatBudgetSuggestion(value) {
   );
 }
 
-function getMockUser(userId) {
+function getPlaceholderUser(userId) {
   return (
-    window.MOCK_USERS?.find((user) => user.id === userId) ||
-    window.MOCK_USERS?.[0] ||
-    null
+        null
   );
 }
 
@@ -103,7 +101,7 @@ function showToast(message) {
 function renderUserDropdown() {
   const select = document.getElementById("userSelect");
   select.innerHTML = "";
-  const users = window.MOCK_USERS || [];
+  const users = []; // production data comes from Firebase user profile
   users.forEach((user) => {
     const option = document.createElement("option");
     option.value = user.id;
@@ -234,7 +232,7 @@ function addAssistantMessage(role, content) {
 
 function generatePlan() {
   const userSelect = document.getElementById("userSelect");
-  const user = getMockUser(userSelect.value);
+  const user = getPlaceholderUser(userSelect.value);
   const prompt =
     document.getElementById("assistantInput").value.trim() ||
     "Create an optimized GeoHub lifestyle plan.";
@@ -253,7 +251,7 @@ function generatePlan() {
 function saveCurrentPlan() {
   const input = document.getElementById("assistantInput").value.trim();
   const userSelect = document.getElementById("userSelect");
-  const user = getMockUser(userSelect.value);
+  const user = getPlaceholderUser(userSelect.value);
   const mood = getSelectedChips("moodChips")[0] || "Balanced";
   const interests = getSelectedChips("interestChips");
   const budget = Number(document.getElementById("budgetRange").value);
@@ -285,7 +283,7 @@ function saveCurrentPlan() {
 
 function handleUserChanged() {
   const userSelect = document.getElementById("userSelect");
-  const user = getMockUser(userSelect.value);
+  const user = getPlaceholderUser(userSelect.value);
   updateSelectedUserBox(user);
   buildRecommendationCards(user);
   buildXpPanel(user);

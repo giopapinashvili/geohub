@@ -5,7 +5,7 @@
 // ======================== DATA ========================
 (function () {
   var _u = null;
-  try { var v = localStorage.getItem('geohub_auth_user'); _u = v ? JSON.parse(v) : null; } catch (e) {}
+  try { _u = (window.GeoAuth && window.GeoAuth.getCurrentUser && window.GeoAuth.getCurrentUser()) || window.GeoCurrentUser || null; } catch (e) {}
   var _score = (_u && _u.trustScore) ? _u.trustScore : 0;
   window._MY_TRUST_SCORE = _score;
 })();
@@ -79,7 +79,7 @@ const SAFETY_STATS = {
   trusted: 4821, resolution: '94%', avgTime: '4.2h',
 };
 
-const MOCK_REPORT_FEED = [];
+const REPORT_FEED = [];
 
 const CREDIBILITY_INDICATORS = [
   { icon: 'fas fa-camera',       color: '#3b82f6', label: 'Camera Proof',      desc: 'Photo taken in-app with GPS + timestamp during visit' },
@@ -266,7 +266,7 @@ function renderSafety() {
   const feedEl = document.getElementById('safetyFeed');
   if (feedEl) {
     const STATUS = { resolved: ['badge-green','Resolved'], under_review: ['badge-gold','Under Review'], dismissed: ['badge-gray','Dismissed'], pending: ['badge-blue','Pending'] };
-    const all = [...MOCK_REPORT_FEED, ...myReports.slice(0, 4)].sort((a, b) => b.ts - a.ts).slice(0, 10);
+    const all = [...REPORT_FEED, ...myReports.slice(0, 4)].sort((a, b) => b.ts - a.ts).slice(0, 10);
     feedEl.innerHTML = all.map(r => {
       const rt = REPORT_TYPES.find(t => t.id === r.type) || { label: r.type, icon: 'fas fa-flag', color: '#64748b' };
       const [badgeCls, badgeLbl] = STATUS[r.status] || ['badge-gray', r.status];

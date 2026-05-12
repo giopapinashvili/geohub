@@ -179,15 +179,15 @@
     .mbc-save { font-size: 0.62rem; color: var(--gold); }
 
     /* Payment inputs */
-    .mock-card { background: rgba(255,255,255,0.03); border: 1px solid var(--b); border-radius: var(--rs); padding: 16px; margin-bottom: 18px; }
-    .mock-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-    .mock-card-header span { font-size: 0.72rem; color: var(--ts); font-weight: 600; }
-    .mock-card-icons { display: flex; gap: 6px; }
-    .mock-card-icons i { font-size: 1.2rem; color: var(--ts); }
-    .mock-input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--b); border-radius: var(--rs); padding: 10px 13px; color: var(--t); font-size: 0.84rem; font-family: var(--mono); outline: none; transition: border-color 0.2s; margin-bottom: 8px; }
-    .mock-input:focus { border-color: rgba(16,185,129,0.4); }
-    .mock-input::placeholder { color: var(--td); font-family: inherit; font-size: 0.8rem; }
-    .mock-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .checkout-card { background: rgba(255,255,255,0.03); border: 1px solid var(--b); border-radius: var(--rs); padding: 16px; margin-bottom: 18px; }
+    .checkout-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .checkout-card-header span { font-size: 0.72rem; color: var(--ts); font-weight: 600; }
+    .checkout-card-icons { display: flex; gap: 6px; }
+    .checkout-card-icons i { font-size: 1.2rem; color: var(--ts); }
+    .checkout-input { width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--b); border-radius: var(--rs); padding: 10px 13px; color: var(--t); font-size: 0.84rem; font-family: var(--mono); outline: none; transition: border-color 0.2s; margin-bottom: 8px; }
+    .checkout-input:focus { border-color: rgba(16,185,129,0.4); }
+    .checkout-input::placeholder { color: var(--td); font-family: inherit; font-size: 0.8rem; }
+    .checkout-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
     /* Coupon */
     .coupon-row { display: flex; gap: 8px; margin-bottom: 18px; }

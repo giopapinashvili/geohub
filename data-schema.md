@@ -11,7 +11,7 @@ Core identity record. Created on sign-up.
 
 | Field | Type | Notes |
 |-------|------|-------|
-| `id` * | string | `u_<timestamp>` (mock) / UUID (prod) |
+| `id` * | string | `u_<timestamp>` (placeholder) / UUID (prod) |
 | `fullName` * | string | Display name |
 | `username` * | string | Unique, 3–32 chars, lowercase |
 | `email` * | string | Unique, verified in prod |

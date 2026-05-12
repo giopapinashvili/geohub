@@ -1,25 +1,288 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Search — GeoHub</title>
-<link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="components.css">
-<link rel="stylesheet" href="navbar.css">
-<link rel="stylesheet" href="mobile-nav.css">
-<link rel="stylesheet" href="social-layer.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search — GeoHub</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="navbar.css">
+  <link rel="stylesheet" href="mobile-nav.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+  *{box-sizing:border-box}
+  body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden;margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 
-<style>
-body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}.clean-page{padding-top:90px;min-height:100vh;background:radial-gradient(circle at top left,rgba(16,185,129,.16),transparent 35%),#05070f}.clean-hero{max-width:1180px;margin:0 auto;padding:70px 24px 42px}.clean-badge{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border:1px solid rgba(16,185,129,.3);border-radius:999px;color:#10e0a0;background:rgba(16,185,129,.08);font-weight:800;text-transform:uppercase;font-size:.72rem;letter-spacing:.04em}.clean-title{font-size:clamp(2.4rem,5vw,4.8rem);line-height:1.05;margin:22px 0 16px;font-weight:950;max-width:760px}.clean-title span{background:linear-gradient(135deg,#10e0a0,#3b82f6);-webkit-background-clip:text;color:transparent}.clean-desc{max-width:640px;color:#9aa6bd;font-size:1.05rem;line-height:1.7}.clean-search{margin-top:30px;display:flex;gap:12px;max-width:620px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:10px}.clean-search input{flex:1;background:transparent;border:0;color:#fff;outline:0;padding:8px 10px;font-size:1rem}.clean-search button,.clean-admin{border:0;border-radius:14px;padding:12px 20px;background:linear-gradient(135deg,#10b981,#3b82f6);color:white;font-weight:800;text-decoration:none;display:inline-flex;align-items:center;gap:8px}.clean-stats{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:14px;max-width:740px;margin-top:28px}.clean-stat{padding:18px;border:1px solid rgba(255,255,255,.07);border-radius:18px;background:rgba(255,255,255,.035)}.clean-stat strong{display:block;font-size:1.7rem}.clean-stat span{color:#64748b;font-size:.78rem}.clean-tabs{border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);padding:0 24px;display:flex;gap:24px;max-width:100%;overflow-x:auto;background:rgba(255,255,255,.03)}.clean-tab{background:transparent;border:0;color:#94a3b8;padding:18px 0;font-weight:800}.clean-tab.active{color:#10e0a0;border-bottom:2px solid #10e0a0}.clean-content{max-width:1180px;margin:0 auto;padding:34px 24px 90px;display:grid;grid-template-columns:280px 1fr;gap:24px}.clean-card{border:1px solid rgba(255,255,255,.07);border-radius:20px;background:rgba(255,255,255,.045);padding:22px}.clean-empty{min-height:260px;display:flex;align-items:center;justify-content:center;text-align:center;color:#94a3b8;border:1px dashed rgba(255,255,255,.14);border-radius:22px;background:rgba(255,255,255,.02)}.clean-empty i{font-size:2rem;color:#10e0a0;margin-bottom:12px}.clean-empty h3{color:#f8fafc;margin:0 0 8px}@media(max-width:900px){.clean-page{padding-top:72px}.clean-hero{padding:42px 18px 28px}.clean-content{grid-template-columns:1fr;padding:22px 18px 120px}.clean-stats{grid-template-columns:repeat(2,1fr)}}
-</style></head><body class="clean-body page-search"><nav class="navbar" id="navbar">
-  <a href="index.html" class="navbar-brand"><div class="logo-icon">🌍</div><span class="logo-text">Geo<span class="logo-geo">Hub</span></span></a>
-  <ul class="navbar-links"></ul>
-  <div class="navbar-actions"></div>
-  <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
-</nav>
-<div class="mobile-menu"></div><main class="clean-page"><section class="clean-hero"><div class="clean-badge"><i class="fas fa-circle"></i>Search</div><h1 class="clean-title">Search <span>Real GeoHub Data</span></h1><p class="clean-desc">Search results come only from real Firestore data. Fake search records are removed.</p><div class="clean-search"><input placeholder="Search real places..."><button><i class="fas fa-search"></i> Search</button></div><div class="clean-stats"><div class="clean-stat"><strong id="stat-total">0</strong><span>Real items</span></div><div class="clean-stat"><strong>0</strong><span>Added today</span></div><div class="clean-stat"><strong>0</strong><span>Verified</span></div><div class="clean-stat"><strong>0</strong><span>Pending review</span></div></div></section><div class="clean-tabs"><button class="clean-tab active">Places</button><button class="clean-tab ">People</button><button class="clean-tab ">Businesses</button></div><section class="clean-content"><aside class="clean-card"><strong>Filters</strong><p style="color:#64748b;line-height:1.6">No fake categories are shown. Real filters will appear after admins add content.</p><a class="clean-admin" href="admin.html"><i class="fas fa-plus"></i> Add in Admin</a></aside><div class="clean-empty" id="cleanList"><div><i class="fas fa-database"></i><h3>No real places yet</h3><p>Add real content from the Admin Panel. Demo data has been removed.</p></div></div></section></main><script type="module">
-window.addEventListener('GeoFirebaseReady', async function(){try{const gf=window.GeoFirebase,fs=gf.fs,db=gf.db;const snap=await fs.getDocs(fs.query(fs.collection(db,'places'),fs.limit(50)));const total=document.getElementById('stat-total');if(total)total.textContent=snap.size;if(snap.size>0){function esc(v){return String(v||'Untitled').replace(/[<>&]/g,function(s){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[s]})}document.getElementById('cleanList').innerHTML='<div style="width:100%">'+snap.docs.map(function(d){const x=d.data();return '<div class="clean-card" style="margin-bottom:12px"><strong>'+esc(x.name||x.title||x.text)+'</strong><p style="color:#94a3b8;margin:.5rem 0 0">Real Firestore item</p></div>'}).join('')+'</div>';}}catch(e){console.warn('clean page load',e.message);}});
-</script>
+  /* ── TOP BAR ── */
+  .srch-topbar{position:fixed;top:0;left:0;right:0;height:60px;background:rgba(5,7,15,.97);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:12px;padding:0 20px;z-index:200;backdrop-filter:blur(20px)}
+  .srch-brand{display:flex;align-items:center;gap:8px;text-decoration:none;color:#f8fafc;font-weight:900;white-space:nowrap;font-size:1rem}
+  .srch-brand-logo{width:32px;height:32px;background:linear-gradient(135deg,#10b981,#3b82f6);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;color:#fff;flex-shrink:0}
+  .srch-input-wrap{flex:1;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:26px;padding:9px 16px;transition:border-color .2s}
+  .srch-input-wrap:focus-within{border-color:rgba(16,185,129,.5)}
+  .srch-input-wrap i{color:#64748b}
+  .srch-input-wrap input{flex:1;background:none;border:none;outline:none;color:#f8fafc;font-size:.95rem;font-family:inherit}
+  .srch-input-wrap input::placeholder{color:#4b5563}
+  .srch-clear{background:none;border:none;color:#4b5563;cursor:pointer;font-size:.85rem;padding:2px 4px;display:none}
+  .srch-clear.visible{display:block}
+
+  /* ── TABS ── */
+  .srch-tabs{margin-top:60px;background:rgba(255,255,255,.025);border-bottom:1px solid rgba(255,255,255,.07);display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:0 20px;position:sticky;top:60px;z-index:100;backdrop-filter:blur(10px)}
+  .srch-tabs::-webkit-scrollbar{display:none}
+  .srch-tab{display:flex;align-items:center;gap:6px;padding:14px 16px;background:none;border:none;border-bottom:2px solid transparent;color:#64748b;font-weight:700;font-size:.82rem;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .2s}
+  .srch-tab:hover{color:#e2e8f0}
+  .srch-tab.active{color:#10b981;border-bottom-color:#10b981}
+  .srch-tab-count{background:rgba(16,185,129,.15);color:#10b981;border-radius:99px;padding:1px 7px;font-size:.7rem;font-weight:800}
+
+  /* ── MAIN ── */
+  .srch-main{max-width:900px;margin:0 auto;padding:24px 20px 100px}
+
+  /* ── INITIAL STATE ── */
+  .srch-welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;text-align:center;color:#64748b}
+  .srch-welcome i{font-size:3rem;color:#10b981;opacity:.5;margin-bottom:20px}
+  .srch-welcome h2{font-size:1.4rem;font-weight:900;color:#f0f4ff;margin:0 0 8px}
+  .srch-welcome p{font-size:.9rem;max-width:320px;line-height:1.65}
+
+  /* ── LOADING ── */
+  .srch-loading{display:flex;align-items:center;justify-content:center;padding:60px;color:#64748b;gap:10px}
+
+  /* ── RESULTS ── */
+  .srch-section{margin-bottom:28px}
+  .srch-section-title{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#4b5563;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .srch-results{display:flex;flex-direction:column;gap:8px}
+
+  /* ── RESULT ITEMS ── */
+  .srch-item{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);cursor:pointer;transition:all .15s;text-decoration:none;color:inherit}
+  .srch-item:hover{background:rgba(255,255,255,.07);border-color:rgba(16,185,129,.25);transform:translateX(2px)}
+  .srch-item-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;flex-shrink:0;overflow:hidden}
+  .srch-item-icon img{width:100%;height:100%;object-fit:cover}
+  .srch-item-body{flex:1;min-width:0}
+  .srch-item-name{font-size:.9rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px}
+  .srch-item-sub{font-size:.76rem;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .srch-item-type{font-size:.65rem;font-weight:800;padding:3px 9px;border-radius:99px;flex-shrink:0}
+
+  /* Type colors */
+  .type-user{background:rgba(59,130,246,.15);color:#60a5fa}
+  .type-group{background:rgba(16,185,129,.15);color:#34d399}
+  .type-place{background:rgba(245,158,11,.15);color:#fbbf24}
+  .type-post{background:rgba(168,85,247,.15);color:#c084fc}
+
+  /* ── EMPTY ── */
+  .srch-empty{text-align:center;padding:40px;color:#64748b}
+  .srch-empty i{font-size:2rem;display:block;margin-bottom:12px;opacity:.5}
+
+  /* ── MOBILE ── */
+  @media(max-width:600px){
+    .srch-topbar{padding:0 12px}
+    .srch-brand span{display:none}
+    .srch-main{padding:16px 12px 100px}
+    .srch-tabs{padding:0 12px}
+  }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="srch-topbar">
+  <a href="index.html" class="srch-brand">
+    <div class="srch-brand-logo">GH</div>
+    <span>GeoHub</span>
+  </a>
+  <div class="srch-input-wrap">
+    <i class="fas fa-search"></i>
+    <input type="search" id="srchInput" placeholder="Search people, groups, places, posts…" autocomplete="off" autocorrect="off" spellcheck="false">
+    <button class="srch-clear" id="srchClear" onclick="clearSearch()" title="Clear">✕</button>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="srch-tabs" id="srchTabs">
+  <button class="srch-tab active" data-tab="all" onclick="setTab('all',this)">
+    <i class="fas fa-th"></i> All
+  </button>
+  <button class="srch-tab" data-tab="people" onclick="setTab('people',this)">
+    <i class="fas fa-user"></i> People <span class="srch-tab-count" id="cnt-people" style="display:none"></span>
+  </button>
+  <button class="srch-tab" data-tab="groups" onclick="setTab('groups',this)">
+    <i class="fas fa-users"></i> Groups <span class="srch-tab-count" id="cnt-groups" style="display:none"></span>
+  </button>
+  <button class="srch-tab" data-tab="places" onclick="setTab('places',this)">
+    <i class="fas fa-map-marker-alt"></i> Places <span class="srch-tab-count" id="cnt-places" style="display:none"></span>
+  </button>
+  <button class="srch-tab" data-tab="posts" onclick="setTab('posts',this)">
+    <i class="fas fa-newspaper"></i> Posts <span class="srch-tab-count" id="cnt-posts" style="display:none"></span>
+  </button>
+</div>
+
+<!-- MAIN -->
+<main class="srch-main" id="srchMain">
+  <div class="srch-welcome" id="srchWelcome">
+    <i class="fas fa-search"></i>
+    <h2>Search GeoHub</h2>
+    <p>Find people, groups, places, and posts from across Georgia.</p>
+  </div>
+</main>
+
+<script src="firestore-social.js"></script>
 <script type="module" src="firebase-config.js"></script>
 <script src="account.js"></script>
 <script src="nav-cleanup.js"></script>
 <script src="mobile-nav.js"></script>
-<script src="social-layer.js"></script>
-</body></html>
+
+<script>
+  var _currentTab = 'all';
+  var _lastResults = { users:[], groups:[], places:[], posts:[] };
+  var _searchDebounce = null;
+
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  window.logClick = function(type){ try { console.info('[GeoHub search click]', type); } catch(e) {} };
+  function timeAgo(ts){
+    if(!ts) return '';
+    var ms=ts.toMillis?ts.toMillis():(ts.seconds?ts.seconds*1000:Number(ts));
+    var d=Math.floor((Date.now()-ms)/1000);
+    if(d<60) return d+'s ago';
+    if(d<3600) return Math.floor(d/60)+'m ago';
+    if(d<86400) return Math.floor(d/3600)+'h ago';
+    return Math.floor(d/86400)+'d ago';
+  }
+
+  function setTab(tab, el){
+    _currentTab = tab;
+    document.querySelectorAll('.srch-tab').forEach(function(t){ t.classList.remove('active'); });
+    if(el) el.classList.add('active');
+    var q = document.getElementById('srchInput').value.trim();
+    if(q) renderResults(_lastResults);
+  }
+
+  function clearSearch(){
+    document.getElementById('srchInput').value = '';
+    document.getElementById('srchClear').classList.remove('visible');
+    showWelcome();
+  }
+
+  function showWelcome(){
+    document.getElementById('srchMain').innerHTML = '<div class="srch-welcome" id="srchWelcome"><i class="fas fa-search"></i><h2>Search GeoHub</h2><p>Find people, groups, places, and posts from across Georgia.</p></div>';
+    updateCounts({ users:[], groups:[], places:[], posts:[] });
+  }
+
+  function updateCounts(results){
+    ['people','groups','places','posts'].forEach(function(tab){
+      var k = tab==='people'?'users':tab;
+      var cnt = document.getElementById('cnt-'+tab);
+      var n = (results[k]||[]).length;
+      if(cnt){ cnt.textContent=n; cnt.style.display=n?'inline':'none'; }
+    });
+  }
+
+  function renderResults(results){
+    _lastResults = results;
+    updateCounts(results);
+    var main = document.getElementById('srchMain');
+    var tab = _currentTab;
+
+    function userItem(u){
+      var av = u.photoURL||u.avatarUrl||u.avatar||'';
+      var iconHtml = av ? '<img src="'+esc(av)+'" alt="" onerror="this.outerHTML=\'<div>'+esc((u.name||u.displayName||'U').charAt(0).toUpperCase())+'</div>\'">' : esc((u.name||u.displayName||'U').charAt(0).toUpperCase());
+      return '<a class="srch-item" href="profile.html?uid='+esc(u.id||u.uid)+'" onclick="logClick(\'user\')">'+
+        '<div class="srch-item-icon" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">'+iconHtml+'</div>'+
+        '<div class="srch-item-body"><div class="srch-item-name">'+esc(u.name||u.displayName||u.email||'User')+'</div><div class="srch-item-sub">'+esc(u.username?'@'+u.username:'People on GeoHub')+'</div></div>'+
+        '<span class="srch-item-type type-user">Person</span></a>';
+    }
+
+    function groupItem(g){
+      return '<div class="srch-item" onclick="location.href=\'groups.html\'">'+
+        '<div class="srch-item-icon" style="background:linear-gradient(135deg,#10b981,#34d399)"><i class="fas fa-users"></i></div>'+
+        '<div class="srch-item-body"><div class="srch-item-name">'+esc(g.name)+'</div><div class="srch-item-sub">'+(g.memberCount||0)+' members · '+esc(g.category||'Group')+'</div></div>'+
+        '<span class="srch-item-type type-group">Group</span></div>';
+    }
+
+    function placeItem(p){
+      return '<div class="srch-item" onclick="location.href=\'places.html\'">'+
+        '<div class="srch-item-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="fas fa-map-marker-alt"></i></div>'+
+        '<div class="srch-item-body"><div class="srch-item-name">'+esc(p.name)+'</div><div class="srch-item-sub">'+esc(p.address||p.category||'Place')+'</div></div>'+
+        '<span class="srch-item-type type-place">Place</span></div>';
+    }
+
+    function postItem(p){
+      var av = p.authorAvatar||'';
+      var iconHtml = av ? '<img src="'+esc(av)+'" alt="" onerror="this.outerHTML=\'<div style=\'font-size:.8rem\'>'+(p.authorName||'U').charAt(0).toUpperCase()+'</div>\'">' : esc((p.authorName||'U').charAt(0).toUpperCase());
+      return '<div class="srch-item" onclick="location.href=\'feed.html\'">'+
+        '<div class="srch-item-icon" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">'+iconHtml+'</div>'+
+        '<div class="srch-item-body"><div class="srch-item-name">'+esc(p.authorName||'Post')+'</div><div class="srch-item-sub">'+esc((p.text||'').substring(0,60))+'</div></div>'+
+        '<span class="srch-item-type type-post">Post</span></div>';
+    }
+
+    function section(title, icon, items, renderFn, emptyMsg){
+      if(!items.length) return '';
+      return '<div class="srch-section"><div class="srch-section-title"><i class="'+icon+'" style="color:#10b981"></i> '+title+' ('+items.length+')</div><div class="srch-results">'+items.slice(0,10).map(renderFn).join('')+'</div></div>';
+    }
+
+    var html = '';
+
+    if(tab==='all'||tab==='people'){
+      var usrs = results.users||[];
+      if(usrs.length) html += section('People','fas fa-user',usrs,userItem);
+    }
+    if(tab==='all'||tab==='groups'){
+      var grps = results.groups||[];
+      if(grps.length) html += section('Groups','fas fa-users',grps,groupItem);
+    }
+    if(tab==='all'||tab==='places'){
+      var plcs = results.places||[];
+      if(plcs.length) html += section('Places','fas fa-map-marker-alt',plcs,placeItem);
+    }
+    if(tab==='all'||tab==='posts'){
+      var psts = results.posts||[];
+      if(psts.length) html += section('Posts','fas fa-newspaper',psts,postItem);
+    }
+
+    if(!html){
+      var q = document.getElementById('srchInput').value.trim();
+      html = '<div class="srch-empty"><i class="fas fa-search"></i>No results for "'+esc(q)+'"<p style="margin:8px 0 0;font-size:.84rem">Try different keywords</p></div>';
+    }
+
+    main.innerHTML = html;
+  }
+
+  document.getElementById('srchInput').addEventListener('input', function(){
+    var q = this.value.trim();
+    document.getElementById('srchClear').classList.toggle('visible', q.length>0);
+
+    if(!q){ showWelcome(); return; }
+
+    document.getElementById('srchMain').innerHTML = '<div class="srch-loading"><i class="fas fa-spinner fa-spin"></i> Searching…</div>';
+
+    clearTimeout(_searchDebounce);
+    _searchDebounce = setTimeout(function(){
+      var GS = window.GeoSocial;
+      if(!GS){ return; }
+      GS.searchFirestore(q, function(results){
+        var curQ = document.getElementById('srchInput').value.trim();
+        if(curQ !== q) return;
+        renderResults(results);
+      });
+    }, 350);
+  });
+
+  // pre-fill from URL ?q=
+  window.addEventListener('GeoSocialReady', function(){
+    var params = new URLSearchParams(location.search);
+    var q = params.get('q');
+    if(q){
+      var inp = document.getElementById('srchInput');
+      inp.value = q;
+      inp.dispatchEvent(new Event('input'));
+    } else {
+      inp && inp.focus();
+    }
+  });
+
+  if(!window.GeoSocial) {
+    window.addEventListener('GeoSocialReady', function(){
+      var inp = document.getElementById('srchInput');
+      if(inp && !inp.value) inp.focus();
+    }, {once:true});
+  } else {
+    document.getElementById('srchInput').focus();
+  }
+</script>
+</body>
+</html>

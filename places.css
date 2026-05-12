@@ -113,15 +113,15 @@
     .ai-chip { padding: 3px 9px; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 600; background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-secondary); cursor: pointer; transition: all 0.2s; }
     .ai-chip:hover { border-color: var(--green); color: var(--green); }
 
-    /* ── MOCK MAP ── */
-    .mock-map-section { margin-bottom: 22px; }
+    /* ── PLACEHOLDER MAP ── */
+    .placeholder-map-section { margin-bottom: 22px; }
     .map-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
     .map-section-title { font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
     .map-live-dot { width: 7px; height: 7px; border-radius: 50%; background: #ef4444; animation: livePulse 1.5s infinite; }
     @keyframes livePulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
     .map-expand-btn { font-size: 0.76rem; color: var(--green); cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 4px; }
 
-    .mock-map {
+    .placeholder-map {
       position: relative; height: 380px; border-radius: var(--radius-xl);
       overflow: hidden; border: 1px solid var(--border);
       background: #04070e;
@@ -317,7 +317,7 @@
       .discovery-layout { grid-template-columns: 1fr; }
       .discovery-sidebar { display: none; }
       .places-grid { grid-template-columns: 1fr 1fr; }
-      .mock-map { height: 280px; }
+      .placeholder-map { height: 280px; }
     }
     @media (max-width: 520px) {
       .places-grid { grid-template-columns: 1fr; }

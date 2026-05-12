@@ -283,4 +283,50 @@
     /* ── RESPONSIVE ── */
     @media (max-width: 1200px) { :root { --sw: 200px; } .g6 { grid-template-columns: repeat(3,1fr); } }
     @media (max-width: 900px) { .g4 { grid-template-columns: repeat(2,1fr); } .g3 { grid-template-columns: repeat(2,1fr); } .g2 { grid-template-columns: 1fr; } }
-    @media (max-width: 640px) { .shell { grid-template-columns: 1fr; } .sidebar { display: none; } .tb-logo { width: auto; } }
+    @media (max-width: 640px) {
+      .shell { grid-template-columns: 1fr; }
+      .tb-logo { width: auto; }
+      .tb-search-wrap { max-width: none; flex: 1; }
+      .tb-live span { display: none; }
+      .tb-admin-name, .tb-admin-role { display: none; }
+      .tb-mobile-menu { display: flex !important; }
+      .sidebar {
+        display: block !important;
+        position: fixed;
+        top: 0; left: 0; bottom: 0;
+        width: 260px;
+        z-index: 9000;
+        transform: translateX(-100%);
+        transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+        box-shadow: 8px 0 40px rgba(0,0,0,0.6);
+        padding-top: 56px;
+      }
+      .sidebar.mobile-open { transform: translateX(0); }
+      .admin-sidebar-overlay {
+        display: none;
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,0.55);
+        z-index: 8999;
+        backdrop-filter: blur(2px);
+      }
+      .admin-sidebar-overlay.active { display: block; }
+      .sec { padding: 16px; }
+      .ph { flex-direction: column; gap: 10px; }
+      .ph-actions { flex-wrap: wrap; }
+      .g2, .g3, .g4, .g6 { grid-template-columns: 1fr !important; }
+    }
+
+    /* Mobile menu toggle button (hidden on desktop) */
+    .tb-mobile-menu {
+      display: none;
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--ts);
+      align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .tb-mobile-menu:hover { background: rgba(255,255,255,0.1); color: var(--t); }

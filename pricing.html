@@ -189,20 +189,20 @@
 
       <!-- Payment -->
       <div class="modal-field-label">Payment Details</div>
-      <div class="mock-card">
-        <div class="mock-card-header">
+      <div class="checkout-card">
+        <div class="checkout-card-header">
           <span>Card details — demo mode</span>
-          <div class="mock-card-icons">
+          <div class="checkout-card-icons">
             <i class="fab fa-cc-visa"></i>
             <i class="fab fa-cc-mastercard"></i>
           </div>
         </div>
-        <input class="mock-input" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" oninput="fmtCard(this)">
-        <div class="mock-row">
-          <input class="mock-input" id="cardExpiry" placeholder="MM / YY" maxlength="7" oninput="fmtExpiry(this)">
-          <input class="mock-input" id="cardCvv" placeholder="CVV" maxlength="3" type="password">
+        <input class="checkout-input" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" oninput="fmtCard(this)">
+        <div class="checkout-row">
+          <input class="checkout-input" id="cardExpiry" placeholder="MM / YY" maxlength="7" oninput="fmtExpiry(this)">
+          <input class="checkout-input" id="cardCvv" placeholder="CVV" maxlength="3" type="password">
         </div>
-        <input class="mock-input" id="cardName" placeholder="Cardholder name" style="margin-bottom:0">
+        <input class="checkout-input" id="cardName" placeholder="Cardholder name" style="margin-bottom:0">
       </div>
 
       <!-- Coupon -->
@@ -225,7 +225,7 @@
       <button class="pay-btn" id="payBtn" onclick="processPayment()">
         <i class="fas fa-lock"></i> <span id="payBtnLabel">Pay ₾0</span>
       </button>
-      <div class="pay-note"><i class="fas fa-shield-alt"></i> Secure mock checkout · No real charges · Demo mode</div>
+      <div class="pay-note"><i class="fas fa-shield-alt"></i> Secure checkout placeholder · No real charges until payment provider is connected</div>
     </div>
   </div>
 </div>

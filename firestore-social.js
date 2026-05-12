@@ -66,6 +66,25 @@
       listenUserPosts: function (uid, cb) { cb([]); return function () {}; },
       listenUserCheckins: function (uid, cb) { cb([]); return function () {}; },
       trackShare: noop,
+      createGroup: noop,
+      listenGroups: function (o, cb) { (cb||o)([]); return function(){}; },
+      listenMyGroups: function (uid, cb) { cb([]); return function(){}; },
+      createGroupPost: noop,
+      listenGroupPosts: function (id, cb) { cb([]); return function(){}; },
+      createPlace: noop,
+      listenPlaces: function (o, cb) { (cb||o)([]); return function(){}; },
+      toggleSaveItem: noop,
+      checkSavedItem: function (t, id, cb) { cb(false); },
+      listenSavedItems: function (uid, t, cb) { cb([]); return function(){}; },
+      listenSavedPosts: function (uid, cb) { cb([]); return function(){}; },
+      listenSavedPlaces: function (uid, cb) { cb([]); return function(){}; },
+      createPlaceReview: function (placeId, rating, comment, cb) { noop(); if(cb) cb(false); },
+      listenPlaceReviews: function (placeId, cb) { cb([]); return function(){}; },
+      requestJoinGroup: function (groupId, cb) { noop(); if(cb) cb('error'); },
+      checkJoinRequest: function (groupId, cb) { cb(false); },
+      getMyJoinRequests: function (cb) { cb({}); },
+      searchFirestore: function (q, cb) { cb({ users:[], groups:[], places:[], posts:[] }); },
+      findUserByInput: function () { return Promise.resolve(null); },
       requireAuth: showLoginPrompt,
       toast: toast
     };
@@ -352,15 +371,20 @@
       requireAuth(function (user) {
         var uid = user.uid;
         var ref = doc(db, 'groupMembers', groupId + '_' + uid);
+        var groupRef = doc(db, 'groups', groupId);
         getDoc(ref).then(function (d) {
           if (d.exists()) {
             return deleteDoc(ref).then(function () {
+              return updateDoc(groupRef, { memberCount: increment(-1) }).catch(function(){});
+            }).then(function () {
               toast('Left group');
               if (callback) callback(false);
             });
           } else {
-            return setDoc(ref, { groupId: groupId, groupName: groupName || '', uid: uid, userId: uid, status: 'joined', joinedAt: serverTimestamp(), createdAt: serverTimestamp() })
+            return setDoc(ref, { groupId: groupId, groupName: groupName || '', uid: uid, userId: uid, role: 'member', status: 'joined', joinedAt: serverTimestamp(), createdAt: serverTimestamp() })
               .then(function () {
+                return updateDoc(groupRef, { memberCount: increment(1) }).catch(function(){});
+              }).then(function () {
                 toast('Joined ' + (groupName || 'group') + '!');
                 if (callback) callback(true);
               });
@@ -369,6 +393,105 @@
           console.error('[GeoSocial] toggleGroupMember', err);
           toast('Action failed.', 'error');
         });
+      });
+    }
+
+    function createGroup(data, callback) {
+      requireAuth(function (user) {
+        var me = meData() || {};
+        var name = (data.name || '').trim();
+        if (!name) return toast('Group name is required', 'error');
+        addDoc(collection(db, 'groups'), {
+          name: name,
+          description: (data.description || '').trim(),
+          category: data.category || 'general',
+          coverUrl: data.coverUrl || '',
+          privacy: data.privacy || 'public',
+          location: data.location || '',
+          tags: data.tags || [],
+          creatorId: user.uid,
+          userId: user.uid,
+          creatorName: me.name || user.displayName || 'GeoHub User',
+          creatorAvatar: me.avatar || user.photoURL || '',
+          memberCount: 1,
+          postCount: 0,
+          createdAt: serverTimestamp()
+        }).then(function (ref) {
+          return setDoc(doc(db, 'groupMembers', ref.id + '_' + user.uid), {
+            groupId: ref.id, groupName: name, uid: user.uid, userId: user.uid,
+            role: 'admin', status: 'joined', joinedAt: serverTimestamp(), createdAt: serverTimestamp()
+          }).then(function () { toast('Group created!'); if (callback) callback(ref.id); });
+        }).catch(function (err) {
+          console.error('[GeoSocial] createGroup', err);
+          toast('Failed to create group: ' + (err.code || err.message), 'error');
+          if (callback) callback(null);
+        });
+      });
+    }
+
+    function listenGroups(opts, callback) {
+      if (typeof opts === 'function') { callback = opts; opts = {}; }
+      var cat = (opts && opts.category) || '';
+      var q = (cat && cat !== 'all')
+        ? query(collection(db, 'groups'), where('category', '==', cat), limit(50))
+        : query(collection(db, 'groups'), limit(50));
+      return onSnapshot(q, function (snap) {
+        var items = [];
+        snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        items.sort(function (a, b) {
+          function ms(v) { return v && v.toMillis ? v.toMillis() : (v && v.seconds ? v.seconds * 1000 : 0); }
+          return ms(b.createdAt) - ms(a.createdAt);
+        });
+        callback(items);
+      }, function (err) { console.error('[GeoSocial] listenGroups error:', err.code, err.message); callback([]); });
+    }
+
+    function listenMyGroups(uid, callback) {
+      if (!uid) { callback([]); return function () {}; }
+      var q = query(collection(db, 'groupMembers'), where('uid', '==', uid), limit(50));
+      return onSnapshot(q, function (snap) {
+        var memberDocs = [];
+        snap.forEach(function (d) { memberDocs.push(d.data()); });
+        if (!memberDocs.length) { callback([]); return; }
+        var ids = memberDocs.map(function (m) { return m.groupId; }).filter(Boolean);
+        Promise.all(ids.map(function (gid) {
+          return getDoc(doc(db, 'groups', gid))
+            .then(function (d) { return d.exists() ? Object.assign({ id: d.id }, d.data()) : null; })
+            .catch(function () { return null; });
+        })).then(function (groups) { callback(groups.filter(Boolean)); });
+      }, function (err) { console.warn('[GeoSocial] listenMyGroups', err.message); callback([]); });
+    }
+
+    function createGroupPost(groupId, text, mediaUrl, callback) {
+      if (!text || !text.trim()) return;
+      requireAuth(function (user) {
+        var me = meData() || {};
+        addDoc(collection(db, 'groupPosts'), {
+          groupId: groupId, text: text.trim(), mediaUrl: mediaUrl || null,
+          authorId: user.uid, userId: user.uid,
+          authorName: me.name || user.displayName || 'GeoHub User',
+          authorAvatar: me.avatar || user.photoURL || '',
+          likeCount: 0, commentCount: 0, createdAt: serverTimestamp()
+        }).then(function () {
+          return updateDoc(doc(db, 'groups', groupId), { postCount: increment(1) }).catch(function(){});
+        }).then(function () { toast('Posted!'); if (callback) callback(); })
+          .catch(function (err) { console.error('[GeoSocial] createGroupPost', err); toast('Failed to post.', 'error'); });
+      });
+    }
+
+    function listenGroupPosts(groupId, callback) {
+      var q = query(collection(db, 'groupPosts'), where('groupId', '==', groupId), limit(50));
+      return onSnapshot(q, function (snap) {
+        var items = [];
+        snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        items.sort(function (a, b) {
+          function ms(v) { return v && v.toMillis ? v.toMillis() : (v && v.seconds ? v.seconds * 1000 : 0); }
+          return ms(b.createdAt) - ms(a.createdAt);
+        });
+        callback(items);
+      }, function (err) {
+        console.error('[GeoSocial] listenGroupPosts error:', err.code, err.message);
+        callback([]);
       });
     }
 
@@ -465,15 +588,16 @@
       if (!uid) return function () {};
       var q = query(collection(db, 'userNotifications'),
         where('userId', '==', uid),
-        orderBy('createdAt', 'desc'),
         limit(30));
       return onSnapshot(q, function (snap) {
         var notifs = [];
         snap.forEach(function (d) { notifs.push(Object.assign({ id: d.id }, d.data())); });
+        notifs.sort(function (a, b) {
+          function ms(v) { return v && v.toMillis ? v.toMillis() : (v && v.seconds ? v.seconds * 1000 : 0); }
+          return ms(b.createdAt) - ms(a.createdAt);
+        });
         callback(notifs);
-      }, function (err) {
-        console.warn('[GeoSocial] listenUserNotifications', err.message);
-      });
+      }, function (err) { console.warn('[GeoSocial] listenUserNotifications', err.message); });
     }
 
     function markNotificationRead(notifId) {
@@ -504,15 +628,16 @@
     }
 
     function listenUserCheckins(uid, callback) {
-      var q = query(collection(db, 'checkins'), where('authorId', '==', uid), orderBy('createdAt', 'desc'), limit(30));
+      var q = query(collection(db, 'checkins'), where('authorId', '==', uid), limit(30));
       return onSnapshot(q, function (snap) {
         var items = [];
         snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        items.sort(function (a, b) {
+          function ms(v) { return v && v.toMillis ? v.toMillis() : (v && v.seconds ? v.seconds * 1000 : 0); }
+          return ms(b.createdAt) - ms(a.createdAt);
+        });
         callback(items);
-      }, function (err) {
-        console.warn('[GeoSocial] listenUserCheckins', err.message);
-        callback([]);
-      });
+      }, function (err) { console.warn('[GeoSocial] listenUserCheckins', err.message); callback([]); });
     }
 
     function tsToMillis(value) {
@@ -646,6 +771,280 @@
       }, function (err) { console.warn('[GeoSocial] listenMessages', err.message); callback([]); });
     }
 
+    // ── PLACES ──────────────────────────────────────────────────────────
+    function createPlace(data, callback) {
+      requireAuth(function (user) {
+        var me = meData() || {};
+        var name = (data.name || '').trim();
+        if (!name) return toast('Place name is required', 'error');
+        addDoc(collection(db, 'places'), {
+          name: name,
+          description: (data.description || '').trim(),
+          category: data.category || 'other',
+          photoUrl: data.photoUrl || '',
+          address: data.address || '',
+          lat: data.lat || null,
+          lng: data.lng || null,
+          tags: data.tags || [],
+          creatorId: user.uid,
+          userId: user.uid,
+          creatorName: me.name || user.displayName || 'GeoHub User',
+          rating: 0, reviewCount: 0, saveCount: 0,
+          createdAt: serverTimestamp()
+        }).then(function (ref) {
+          toast('Place added!');
+          if (callback) callback(ref.id);
+        }).catch(function (err) {
+          console.error('[GeoSocial] createPlace', err);
+          toast('Failed to add place: ' + (err.code || err.message), 'error');
+          if (callback) callback(null);
+        });
+      });
+    }
+
+    function listenPlaces(opts, callback) {
+      if (typeof opts === 'function') { callback = opts; opts = {}; }
+      var cat = (opts && opts.category) || '';
+      var q = (cat && cat !== 'all')
+        ? query(collection(db, 'places'), where('category', '==', cat), limit(50))
+        : query(collection(db, 'places'), limit(50));
+      return onSnapshot(q, function (snap) {
+        var items = [];
+        snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        items.sort(function (a, b) {
+          function ms(v) { return v && v.toMillis ? v.toMillis() : (v && v.seconds ? v.seconds * 1000 : 0); }
+          return ms(b.createdAt) - ms(a.createdAt);
+        });
+        callback(items);
+      }, function (err) { console.error('[GeoSocial] listenPlaces error:', err.code, err.message); callback([]); });
+    }
+
+    // ── SAVE ITEMS (generic: posts, places, etc.) ─────────────────────────
+    function toggleSaveItem(type, itemId, callback) {
+      requireAuth(function (user) {
+        var uid = user.uid;
+        var ref = doc(db, 'savedItems', uid + '_' + type + '_' + itemId);
+        getDoc(ref).then(function (d) {
+          if (d.exists()) {
+            return deleteDoc(ref).then(function () { toast('Removed from saved'); if (callback) callback(false); });
+          } else {
+            return setDoc(ref, { userId: uid, uid: uid, type: type, itemId: itemId, createdAt: serverTimestamp() })
+              .then(function () { toast('Saved!'); if (callback) callback(true); });
+          }
+        }).catch(function (err) {
+          console.error('[GeoSocial] toggleSaveItem', err);
+          toast('Action failed.', 'error');
+        });
+      });
+    }
+
+    function checkSavedItem(type, itemId, callback) {
+      var uid = currentUid();
+      if (!uid) return callback(false);
+      getDoc(doc(db, 'savedItems', uid + '_' + type + '_' + itemId))
+        .then(function (d) { callback(d.exists()); })
+        .catch(function () { callback(false); });
+    }
+
+    function listenSavedItems(uid, type, callback) {
+      if (!uid) { callback([]); return function () {}; }
+      var q = (type && type !== 'all')
+        ? query(collection(db, 'savedItems'), where('userId', '==', uid), where('type', '==', type), limit(50))
+        : query(collection(db, 'savedItems'), where('userId', '==', uid), limit(50));
+      return onSnapshot(q, function (snap) {
+        var items = [];
+        snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        callback(items);
+      }, function (err) { console.warn('[GeoSocial] listenSavedItems', err.message); callback([]); });
+    }
+
+    function listenSavedPosts(uid, callback) {
+      if (!uid) { callback([]); return function () {}; }
+      var q = query(collection(db, 'savedPosts'), where('userId', '==', uid), limit(50));
+      return onSnapshot(q, function (snap) {
+        var ids = [];
+        snap.forEach(function (d) { var data = d.data(); if (data.postId) ids.push(data.postId); });
+        if (!ids.length) { callback([]); return; }
+        Promise.all(ids.slice(0, 20).map(function (pid) {
+          return getDoc(doc(db, 'posts', pid))
+            .then(function (d) { return d.exists() ? Object.assign({ id: d.id }, d.data()) : null; })
+            .catch(function () { return null; });
+        })).then(function (posts) { callback(posts.filter(Boolean)); });
+      }, function (err) { console.warn('[GeoSocial] listenSavedPosts', err.message); callback([]); });
+    }
+
+    function listenSavedPlaces(uid, callback) {
+      if (!uid) { callback([]); return function () {}; }
+      var q = query(collection(db, 'savedItems'), where('userId', '==', uid), where('type', '==', 'place'), limit(50));
+      return onSnapshot(q, function (snap) {
+        var ids = [];
+        snap.forEach(function (d) { var data = d.data(); if (data.itemId) ids.push(data.itemId); });
+        if (!ids.length) { callback([]); return; }
+        Promise.all(ids.slice(0, 20).map(function (placeId) {
+          return getDoc(doc(db, 'places', placeId))
+            .then(function (d) { return d.exists() ? Object.assign({ id: d.id }, d.data()) : null; })
+            .catch(function () { return null; });
+        })).then(function (places) { callback(places.filter(Boolean)); });
+      }, function (err) { console.warn('[GeoSocial] listenSavedPlaces', err.message); callback([]); });
+    }
+
+    // ── GROUP JOIN REQUESTS ───────────────────────────────────────────────
+    function requestJoinGroup(groupId, callback) {
+      requireAuth(function (user) {
+        var reqRef = doc(db, 'groupJoinRequests', groupId + '__' + user.uid);
+        getDoc(reqRef).then(function (d) {
+          if (d.exists()) {
+            deleteDoc(reqRef).then(function () {
+              toast('Join request cancelled');
+              if (callback) callback('cancelled');
+            });
+          } else {
+            setDoc(reqRef, {
+              groupId: groupId,
+              userId: user.uid,
+              userName: user.displayName || user.email || 'User',
+              userPhoto: user.photoURL || '',
+              status: 'pending',
+              createdAt: serverTimestamp()
+            }).then(function () {
+              toast('Join request sent!');
+              if (callback) callback('pending');
+            });
+          }
+        }).catch(function () {
+          toast('Failed to send request', 'error');
+          if (callback) callback('error');
+        });
+      });
+    }
+
+    function checkJoinRequest(groupId, callback) {
+      var user = auth.currentUser;
+      if (!user) { callback(false); return; }
+      var reqRef = doc(db, 'groupJoinRequests', groupId + '__' + user.uid);
+      getDoc(reqRef).then(function (d) { callback(d.exists() ? 'pending' : false); }).catch(function () { callback(false); });
+    }
+
+    function getMyJoinRequests(callback) {
+      var user = auth.currentUser;
+      if (!user) { callback({}); return; }
+      getDocs(query(collection(db, 'groupJoinRequests'), where('userId', '==', user.uid), limit(100)))
+        .then(function (snap) {
+          var map = {};
+          snap.forEach(function (d) { var r = d.data(); if (r.groupId) map[r.groupId] = 'pending'; });
+          callback(map);
+        }).catch(function () { callback({}); });
+    }
+
+    // ── PLACE REVIEWS ────────────────────────────────────────────────────
+    function createPlaceReview(placeId, rating, comment, callback) {
+      var user = auth.currentUser;
+      if (!user) { showLoginPrompt(); return; }
+      var placeRef = doc(db, 'places', placeId);
+      var reviewRef = doc(collection(db, 'placeReviews'));
+      runTransaction(db, function (txn) {
+        return txn.get(placeRef).then(function (placeDoc) {
+          var data = placeDoc.exists() ? placeDoc.data() : {};
+          var prevCount = data.reviewCount || 0;
+          var prevTotal = data.ratingTotal || 0;
+          var newCount = prevCount + 1;
+          var newTotal = prevTotal + rating;
+          var newAvg = Math.round((newTotal / newCount) * 10) / 10;
+          txn.set(reviewRef, {
+            placeId: placeId,
+            userId: user.uid,
+            userName: user.displayName || user.email || 'User',
+            userPhoto: user.photoURL || '',
+            rating: rating,
+            comment: (comment || '').trim(),
+            createdAt: serverTimestamp()
+          });
+          txn.update(placeRef, {
+            reviewCount: newCount,
+            ratingTotal: newTotal,
+            rating: newAvg
+          });
+        });
+      }).then(function () {
+        toast('Review submitted!');
+        if (callback) callback(true);
+      }).catch(function (err) {
+        toast('Failed to submit review', 'error');
+        if (callback) callback(false);
+      });
+    }
+
+    function listenPlaceReviews(placeId, callback) {
+      if (!placeId) { callback([]); return function () {}; }
+      var q = query(collection(db, 'placeReviews'), where('placeId', '==', placeId), limit(30));
+      return onSnapshot(q, function (snap) {
+        var reviews = [];
+        snap.forEach(function (d) { reviews.push(Object.assign({ id: d.id }, d.data())); });
+        reviews.sort(function (a, b) {
+          function ms(v) { return v && v.toMillis ? v.toMillis() : (v && v.seconds ? v.seconds * 1000 : 0); }
+          return ms(b.createdAt) - ms(a.createdAt);
+        });
+        callback(reviews);
+      }, function (err) { console.warn('[GeoSocial] listenPlaceReviews', err.message); callback([]); });
+    }
+
+    // ── SEARCH ───────────────────────────────────────────────────────────
+    function searchFirestore(q_str, callback) {
+      if (!q_str || !q_str.trim()) { callback({ users: [], groups: [], places: [], posts: [] }); return; }
+      var q = q_str.trim().toLowerCase();
+      var results = { users: [], groups: [], places: [], posts: [] };
+      var pending = 4;
+      function done() { if (--pending === 0) callback(results); }
+      function filterText(val) { return (val || '').toLowerCase().includes(q); }
+
+      getDocs(query(collection(db, 'users'), limit(200))).then(function (snap) {
+        snap.forEach(function (d) {
+          var u = Object.assign({ id: d.id }, d.data());
+          if (filterText(u.name) || filterText(u.displayName) || filterText(u.username) || filterText(u.email)) results.users.push(u);
+        }); done();
+      }).catch(done);
+
+      getDocs(query(collection(db, 'groups'), orderBy('createdAt', 'desc'), limit(200))).then(function (snap) {
+        snap.forEach(function (d) {
+          var g = Object.assign({ id: d.id }, d.data());
+          if (filterText(g.name) || filterText(g.description) || filterText(g.category)) results.groups.push(g);
+        }); done();
+      }).catch(done);
+
+      getDocs(query(collection(db, 'places'), orderBy('createdAt', 'desc'), limit(200))).then(function (snap) {
+        snap.forEach(function (d) {
+          var p = Object.assign({ id: d.id }, d.data());
+          if (filterText(p.name) || filterText(p.description) || filterText(p.address) || filterText(p.category)) results.places.push(p);
+        }); done();
+      }).catch(done);
+
+      getDocs(query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(200))).then(function (snap) {
+        snap.forEach(function (d) {
+          var p = Object.assign({ id: d.id }, d.data());
+          if (filterText(p.text) || filterText(p.authorName)) results.posts.push(p);
+        }); done();
+      }).catch(done);
+    }
+
+    function findUserByInput(input) {
+      if (!input || !input.trim()) return Promise.resolve(null);
+      var q = input.trim().toLowerCase();
+      return getDocs(query(collection(db, 'users'), limit(200))).then(function (snap) {
+        var found = null;
+        snap.forEach(function (d) {
+          if (found) return;
+          var u = Object.assign({ id: d.id, uid: d.id }, d.data());
+          if ((u.email || '').toLowerCase() === q ||
+              (u.username || '').toLowerCase() === q ||
+              (u.name || '').toLowerCase().includes(q) ||
+              (u.displayName || '').toLowerCase().includes(q)) {
+            found = u;
+          }
+        });
+        return found;
+      });
+    }
+
     // ── Public API ───────────────────────────────────────────────────────
     window.GeoSocial = {
       createPost:              createPost,
@@ -675,6 +1074,25 @@
       checkSaved:              checkSaved,
       checkGroupMember:        checkGroupMember,
       checkEventParticipant:   checkEventParticipant,
+      createGroup:             createGroup,
+      listenGroups:            listenGroups,
+      listenMyGroups:          listenMyGroups,
+      createGroupPost:         createGroupPost,
+      listenGroupPosts:        listenGroupPosts,
+      createPlace:             createPlace,
+      listenPlaces:            listenPlaces,
+      toggleSaveItem:          toggleSaveItem,
+      checkSavedItem:          checkSavedItem,
+      listenSavedItems:        listenSavedItems,
+      listenSavedPosts:        listenSavedPosts,
+      listenSavedPlaces:       listenSavedPlaces,
+      createPlaceReview:       createPlaceReview,
+      listenPlaceReviews:      listenPlaceReviews,
+      requestJoinGroup:        requestJoinGroup,
+      checkJoinRequest:        checkJoinRequest,
+      getMyJoinRequests:       getMyJoinRequests,
+      searchFirestore:         searchFirestore,
+      findUserByInput:         findUserByInput,
       requireAuth:             requireAuth,
       toast:                   toast
     };
@@ -683,12 +1101,20 @@
   }
 
   // ── Bootstrap ────────────────────────────────────────────────────────
+  var booted = false;
+  function boot(gf) {
+    if (booted) return;
+    booted = true;
+    if (gf) setup(gf);
+    else setupFallback();
+  }
   if (window.GeoFirebase) {
-    setup(window.GeoFirebase);
+    boot(window.GeoFirebase);
   } else {
     window.addEventListener('GeoFirebaseReady', function () {
-      if (window.GeoFirebase) setup(window.GeoFirebase);
-      else setupFallback();
+      boot(window.GeoFirebase || null);
     }, { once: true });
+    // If the Firebase module is blocked/offline, do not leave pages waiting forever.
+    setTimeout(function () { boot(window.GeoFirebase || null); }, 3000);
   }
 })();

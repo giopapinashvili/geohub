@@ -107,7 +107,7 @@
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // LANG ENGINE
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  var _lang = localStorage.getItem('geohub_lang') || 'en';
+  var _lang = window.GeoLang || 'en';
 
   function t(key) {
     return (_lang === 'ka' && KA[key]) ? KA[key] : key;
@@ -155,7 +155,7 @@
     t: t,
     apply: applyTranslations,
     toggle: function() {
-      localStorage.setItem('geohub_lang', _lang === 'en' ? 'ka' : 'en');
+      window.GeoLang = _lang === 'en' ? 'ka' : 'en';
       window.location.reload();
     }
   };

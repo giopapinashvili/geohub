@@ -146,40 +146,135 @@ let currentStep = 1;
     });
   }
 
-  function submitForm() {
-    document.getElementById('step4').classList.remove('active');
-    document.getElementById('stepSuccess').classList.add('active');
-    document.getElementById('progressFill').style.width = '100%';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    // Save business under the current user so dashboard shows it
-    try {
-      var name = (document.getElementById('bizNameInput') || {}).value || 'My Business';
-      var desc = (document.getElementById('descInput') || {}).value || '';
-      var city = (document.getElementById('citySelect') || {}).value || 'Tbilisi';
-      var cat  = (document.querySelector('.cat-option.selected') || {}).dataset?.cat || '';
-      var biz  = { name: name, desc: desc, city: city, category: cat, createdAt: Date.now(), hasActivity: false };
-      var authRaw = localStorage.getItem('geohub_auth_user');
-      var authUser = authRaw ? JSON.parse(authRaw) : null;
-      if (authUser) {
-        var key = 'geohub_business_' + (authUser.uid || authUser.id || 'anon');
-        localStorage.setItem(key, JSON.stringify(biz));
-      }
-      localStorage.setItem('geohub_user_business', JSON.stringify(biz));
-    } catch (e) {}
+  function collectHours() {
+    var hours = {};
+    days.forEach(function(d) {
+      var closed = document.getElementById('closed_' + d).checked;
+      hours[d] = {
+        closed: closed,
+        open: closed ? '' : document.getElementById('open_' + d).value,
+        close: closed ? '' : document.getElementById('close_' + d).value
+      };
+    });
+    return hours;
   }
 
-  // Hide account creation section if already logged in
+  function collectServices() {
+    return Array.from(document.querySelectorAll('#servicesInputs .form-row')).map(function(row) {
+      var inputs = row.querySelectorAll('input');
+      return {
+        name: (inputs[0] && inputs[0].value || '').trim(),
+        price: (inputs[1] && inputs[1].value || '').trim()
+      };
+    }).filter(function(x) { return x.name || x.price; });
+  }
+
+  function firstPreviewImage(selector) {
+    var img = document.querySelector(selector + ' img');
+    return img ? img.src : '';
+  }
+
+  function submitForm() {
+    if (!validateStep1()) return;
+
+    var geo = window.GeoFirebase;
+    var user = geo && geo.auth && geo.auth.currentUser;
+    if (!user) {
+      if (window.GeoSocial && window.GeoSocial.requireAuth) window.GeoSocial.requireAuth();
+      else window.location.href = 'auth.html';
+      return;
+    }
+
+    var f = geo.fs;
+    var name = (document.getElementById('bizNameInput') || {}).value.trim();
+    var desc = (document.getElementById('descInput') || {}).value.trim();
+    var city = (document.getElementById('citySelect') || {}).value;
+    var catEl = document.querySelector('.cat-option.selected');
+    var cat = catEl ? catEl.dataset.cat : selectedCategory;
+    var cover = firstPreviewImage('#coverUpload') || '';
+    var gallery = Array.from(document.querySelectorAll('#uploadedPhotos img')).map(function(img){ return img.src; }).slice(0,10);
+
+    var submitBtn = document.querySelector('button[onclick="submitForm()"]');
+    var oldHtml = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...'; }
+
+    var payload = {
+      name: name,
+      title: name,
+      description: desc,
+      desc: desc,
+      category: cat || 'business',
+      city: city,
+      address: (document.getElementById('addressInput') || {}).value || '',
+      phone: (document.getElementById('phoneInput') || {}).value || '',
+      email: (document.getElementById('emailInput') || {}).value || '',
+      website: (document.getElementById('websiteInput') || {}).value || '',
+      whatsapp: (document.getElementById('whatsappInput') || {}).value || '',
+      instagram: (document.getElementById('instagramInput') || {}).value || '',
+      facebook: (document.getElementById('facebookInput') || {}).value || '',
+      socialLinks: {
+        instagram: (document.getElementById('instagramInput') || {}).value || '',
+        facebook: (document.getElementById('facebookInput') || {}).value || ''
+      },
+      startingPrice: (document.getElementById('startingPriceInput') || {}).value || '',
+      priceRange: (document.getElementById('priceRangeSelect') || {}).value || '',
+      tags: tags.slice(0, 8),
+      workingHours: collectHours(),
+      services: collectServices(),
+      plan: selectedPlan || 'free',
+      coverImageUrl: cover,
+      imageUrl: cover,
+      logoUrl: '',
+      galleryUrls: gallery,
+      ownerId: user.uid,
+      createdBy: user.uid,
+      userId: user.uid,
+      ownerName: user.displayName || (user.email ? user.email.split('@')[0] : 'GeoHub User'),
+      ownerEmail: user.email || '',
+      status: 'active',
+      verified: false,
+      followerCount: 0,
+      postCount: 0,
+      reviewCount: 0,
+      ratingAverage: 0,
+      createdAt: f.serverTimestamp(),
+      updatedAt: f.serverTimestamp()
+    };
+
+    f.addDoc(f.collection(geo.db, 'businesses'), payload).then(function(ref) {
+      return f.setDoc(f.doc(geo.db, 'businessAdmins', ref.id + '_' + user.uid), {
+        businessId: ref.id,
+        userId: user.uid,
+        role: 'owner',
+        createdAt: f.serverTimestamp()
+      }).then(function(){ return ref; });
+    }).then(function(ref) {
+      document.getElementById('step4').classList.remove('active');
+      document.getElementById('stepSuccess').classList.add('active');
+      document.getElementById('progressFill').style.width = '100%';
+      window.GeoLastCreatedBusinessId = ref.id;
+      setTimeout(function(){ window.location.href = 'business.html?id=' + encodeURIComponent(ref.id); }, 900);
+    }).catch(function(err) {
+      console.error('[AddBusiness] Firestore create failed', err);
+      alert('Business could not be created: ' + (err.code || err.message));
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = oldHtml; }
+    });
+  }
+
+  // Hide account creation section if already logged in through Firebase Auth
   (function() {
-    try {
-      var authRaw = localStorage.getItem('geohub_auth_user');
-      if (authRaw && JSON.parse(authRaw)) {
+    function apply() {
+      var user = window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser;
+      if (!user) user = window.GeoAuth && window.GeoAuth.getCurrentUser && window.GeoAuth.getCurrentUser();
+      if (user) {
         var fields = document.getElementById('accountFormFields');
         var notice = document.getElementById('accountAlreadyIn');
         if (fields) fields.style.display = 'none';
         if (notice) notice.style.display = 'block';
       }
-    } catch(e) {}
+    }
+    apply();
+    window.addEventListener('GeoAuthReady', apply);
   })();
 
   // Upload zone — file picker + preview

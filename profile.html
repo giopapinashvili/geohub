@@ -125,6 +125,7 @@
     <div class="ptab" data-tab="checkins">Check-ins <span class="tab-count">0</span></div>
     <div class="ptab" data-tab="rewards">Rewards</div>
     <div class="ptab" data-tab="challenges">Challenges</div>
+    <div class="ptab" data-tab="saved">Saved <span class="tab-count"></span></div>
     <div class="ptab" data-tab="reviews" onclick="location.href='reviews.html'">Reviews <span class="tab-count">0</span> <i class="fas fa-external-link-alt" style="font-size:0.55rem;opacity:0.5;margin-left:2px"></i></div>
   </div>
 </div>
@@ -243,18 +244,18 @@
           <div class="trust-info-sub">Trust score appears after real activity</div>
         </div>
       </div>
-      <div class="trust-items">
-        <div class="trust-item ok"><i class="fas fa-check-circle"></i> Profile verified</div>
-        <div class="trust-item ok"><i class="fas fa-camera"></i> 27 camera proofs</div>
-        <div class="trust-item ok"><i class="fas fa-map-marker-alt"></i> 43 real check-ins</div>
-        <div class="trust-item ok"><i class="fas fa-phone"></i> Phone verified</div>
+      <div class="trust-items" id="trustItemsList">
+        <div class="trust-item ok"><i class="fas fa-check-circle"></i> Profile created</div>
+        <div class="trust-item warn"><i class="fas fa-camera"></i> No camera proofs yet</div>
+        <div class="trust-item warn"><i class="fas fa-map-marker-alt"></i> No real check-ins yet</div>
+        <div class="trust-item warn"><i class="fas fa-phone"></i> Phone not verified</div>
         <div class="trust-item warn"><i class="fas fa-id-card"></i> ID not verified yet</div>
       </div>
     </div>
 
     <!-- Georgia Discovery Map -->
     <div class="sidebar-card geo-map-widget">
-      <div class="geo-map-widget-title">Discovery Map <span style="color:var(--green);font-weight:700">12 cities</span></div>
+      <div class="geo-map-widget-title">Discovery Map <span style="color:var(--green);font-weight:700" id="citiesVisited">0 cities</span></div>
       <div class="geo-map-container">
         <div class="geo-shape"></div>
         <div class="city-pin highlight" style="left:55%;top:62%"><div class="city-pin-dot"></div><div class="city-pin-label">Tbilisi</div></div>
@@ -303,6 +304,12 @@
     <div class="tab-panel" id="tab-rewards"><div class="empty-profile-state"><i class="fas fa-gift"></i><h3>No rewards yet</h3><p>Real rewards will appear here.</p></div></div>
 
     <div class="tab-panel" id="tab-challenges"><div class="empty-profile-state"><i class="fas fa-trophy"></i><h3>No challenges yet</h3><p>Real challenges will appear here.</p></div></div>
+
+    <div class="tab-panel" id="tab-saved">
+      <div id="saved-posts-section"></div>
+      <div id="saved-places-section"></div>
+      <div id="saved-empty-state" class="empty-profile-state"><i class="fas fa-bookmark"></i><h3>Nothing saved yet</h3><p>Save posts and places to find them here.</p></div>
+    </div>
 
     <div class="tab-panel" id="tab-reviews"><div class="empty-profile-state"><i class="fas fa-star"></i><h3>No reviews yet</h3><p>Real reviews will appear here.</p></div></div>
 

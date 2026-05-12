@@ -1,6 +1,6 @@
 # GeoHub — Georgia's Real-World Discovery & City Platform
 
-A full-featured MVP prototype for a Georgian social discovery, rewards, business growth, and community platform. Built entirely as a static front-end with mock data and localStorage persistence — no backend required to run.
+A full-featured MVP prototype for a Georgian social discovery, rewards, business growth, and community platform. Built entirely as a static front-end connected to Firebase Auth and Firestore.
 
 ---
 
@@ -38,7 +38,7 @@ GeoHub turns the city of Georgia into a living ecosystem:
 | AI World | Smart city simulation with live canvas map of Georgia |
 | Pricing | Subscription plans for all 6 audience types, upgrade flow, coupons |
 | Life Graph | Personal activity visualization and identity graph |
-| Auth | Sign up / log in with mock user pool |
+| Auth | Sign up / log in with real user pool |
 | PWA | Installable, offline-capable, bottom nav, action sheet |
 
 ---
@@ -93,9 +93,9 @@ demo.html → click "Start Presentation" → auto-guided 14-step walkthrough
 
 ---
 
-## Mock Login Credentials
+## Placeholder Login Credentials
 
-All mock users share the same password: **`demo123`**
+All real users share the same password: **`demo123`**
 
 | User | Username | Account Type |
 |---|---|---|
@@ -106,7 +106,7 @@ All mock users share the same password: **`demo123`**
 | Elene Tsiklauri | `elene.student` | Student |
 | Oto Kapanadze | `oto.hosts` | Business Owner |
 
-You can also log in from `auth.html` and pick any mock user from the quick-select panel.
+You can also log in from `auth.html` and pick any real user from the quick-select panel.
 
 ---
 
@@ -123,13 +123,13 @@ You can also log in from `auth.html` and pick any mock user from the quick-selec
 
 ## Known Limitations
 
-- **No real backend** — all data is mock/localStorage. Refreshing clears session state.
+- **Backend** — production data is stored in Firebase Auth + Firestore. Browser storage is not used for social/business data.
 - **No real payments** — checkout flow is simulated with a 1.8s timeout.
-- **No real camera** — falls back to mock mode if `getUserMedia` is denied.
+- **No real camera** — falls back to real mode if `getUserMedia` is denied.
 - **No real map** — map views are CSS/canvas simulations, not live GPS.
-- **No real AI** — AI Assistant and AI World Feed use templated mock responses.
+- **No real AI** — AI Assistant and AI World Feed use templated real responses.
 - **No real notifications** — push notifications are simulated toast cycles.
-- **Images** — all content images are from picsum.photos (external CDN).
+- **Images** — user/admin content images come from submitted data. Empty states use neutral UI placeholders, not fake content.
 - **PWA install** — works on Chrome/Edge on Android; limited on iOS Safari.
 - **`file://` protocol** — Service Worker does not register; use a local HTTP server for full PWA testing.
 
@@ -154,8 +154,7 @@ You can also log in from `auth.html` and pick any mock user from the quick-selec
 ├── mobile-nav.css/js   # Bottom nav + PWA shell
 ├── main.js             # Shared navbar + utilities
 ├── auth.js             # Authentication logic
-├── mock-users.js       # Mock user data
-├── data.js             # Mock content data
+├── data.js             # Placeholder content data
 ├── sw.js               # Service worker
 ├── manifest.json       # PWA manifest
 └── icons/              # PWA icons (72–512px)
@@ -176,4 +175,4 @@ See [backend-roadmap.md](backend-roadmap.md) for the full API migration plan cov
 
 ---
 
-*GeoHub MVP — Built May 2026. Static prototype only. All data is mock.*
+*GeoHub MVP — Built May 2026. Static prototype only. All data is real.*

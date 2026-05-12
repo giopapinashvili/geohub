@@ -13,6 +13,7 @@
 
   <!-- ═══ TOPBAR ═══ -->
   <header class="topbar">
+    <button class="tb-mobile-menu" onclick="toggleAdminSidebar()" title="Menu"><i class="fas fa-bars"></i></button>
     <div class="tb-logo">
       <div class="tb-logo-icon">G</div>
       <div>
@@ -28,7 +29,7 @@
     <div class="tb-right">
       <button class="tb-btn" title="Alerts" onclick="adminNav('notifications')">
         <i class="fas fa-bell"></i>
-        <span class="tb-badge" id="notifBadge">3</span>
+        <span class="tb-badge" id="notifBadge" style="display:none">0</span>
       </button>
       <button class="tb-btn" title="Moderation" onclick="adminNav('moderation')">
         <i class="fas fa-shield-alt"></i>
@@ -44,8 +45,11 @@
     </div>
   </header>
 
+  <!-- Mobile sidebar overlay -->
+  <div class="admin-sidebar-overlay" id="adminSidebarOverlay" onclick="toggleAdminSidebar()"></div>
+
   <!-- ═══ SIDEBAR ═══ -->
-  <aside class="sidebar">
+  <aside class="sidebar" id="adminSidebar">
     <div class="sb-lbl">Platform</div>
     <div class="sb-item active" onclick="adminNav('overview')"><span class="sb-ic"><i class="fas fa-th-large"></i></span> Overview</div>
     <div class="sb-item" onclick="adminNav('live')"><span class="sb-ic"><i class="fas fa-circle" style="color:var(--green);font-size:0.55rem"></i></span> Live Monitor <span class="sb-cnt" id="sb-live">0</span></div>
@@ -137,12 +141,8 @@
         </div>
         <div class="panel">
           <div class="panel-hdr"><div class="panel-title">Activity Mix</div></div>
-          <div class="bl">
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">📍 Check-ins</span><span class="bi-val">38%</span></div><div class="bt"><div class="bf green" style="width:38%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">⭐ Reviews</span><span class="bi-val">22%</span></div><div class="bt"><div class="bf gold" style="width:22%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🎬 Stories</span><span class="bi-val">18%</span></div><div class="bt"><div class="bf purple" style="width:18%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🎁 Rewards</span><span class="bi-val">13%</span></div><div class="bt"><div class="bf blue" style="width:13%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🛡️ Patriot</span><span class="bi-val">9%</span></div><div class="bt"><div class="bf orange" style="width:9%"></div></div></div>
+          <div class="bl" id="activityMixPanel">
+            <div style="text-align:center;padding:24px;color:var(--ts);font-size:0.82rem">No activity data yet — stats will populate as users engage</div>
           </div>
         </div>
       </div>
@@ -173,10 +173,7 @@
           </div>
           <div class="panel">
             <div class="panel-hdr"><div class="panel-title">Active City Zones</div></div>
-            <div class="mini-row"><span class="lbl">🟢 Tbilisi Center</span><span class="badge bg-green">Very Active</span></div>
-            <div class="mini-row"><span class="lbl">🟢 Vake Park</span><span class="badge bg-green">Active</span></div>
-            <div class="mini-row"><span class="lbl">🟡 Batumi</span><span class="badge bg-gold">Active</span></div>
-            <div class="mini-row"><span class="lbl">⚪ Kakheti</span><span class="badge bg-gray">Quiet</span></div>
+            <div id="cityZonesPanel" style="text-align:center;padding:20px;color:var(--ts);font-size:0.8rem;opacity:0.6">No active zones yet</div>
           </div>
         </div>
       </div>
@@ -268,9 +265,7 @@
           </div>
         </div>
         <div>
-          <div class="ai-alert"><div class="ai-hdr"><i class="fas fa-robot"></i> AI Alert · Coordinated Review Pattern</div><div class="ai-body">14 reviews on "Stamba Hotel" from accounts created same day. GPS overlap &lt;10m. Confidence: 91%. Action recommended: batch suspend.</div></div>
-          <div class="ai-alert"><div class="ai-hdr"><i class="fas fa-robot"></i> AI Alert · Fake Check-in Cluster</div><div class="ai-body">7 check-ins at Old Town from identical device fingerprints, 2-minute window. Variance ±3m. Likely automated. Confidence: 87%.</div></div>
-          <div class="ai-alert"><div class="ai-hdr"><i class="fas fa-robot"></i> AI Alert · Trust Score Spike</div><div class="ai-body">User @giorgi_k trust jumped +28 in 48h from self-referral loop. Manual review recommended. Confidence: 74%.</div></div>
+          <div id="aiAlertsPanel" style="text-align:center;padding:24px;color:var(--ts);font-size:0.82rem;opacity:0.7"><i class="fas fa-robot" style="font-size:1.2rem;display:block;margin-bottom:8px;opacity:0.3"></i>No AI alerts — system is monitoring</div>
         </div>
       </div>
       <div class="panel">
@@ -518,5 +513,24 @@
 
 <script type="module" src="firebase-config.js"></script>
 <script src="admin.js"></script>
+<script>
+function toggleAdminSidebar() {
+  var sidebar = document.getElementById('adminSidebar');
+  var overlay = document.getElementById('adminSidebarOverlay');
+  if (!sidebar) return;
+  var open = sidebar.classList.toggle('mobile-open');
+  if (overlay) overlay.classList.toggle('active', open);
+}
+// Close sidebar when nav item clicked on mobile
+document.addEventListener('click', function(e) {
+  var item = e.target.closest('.sb-item');
+  if (item && window.innerWidth <= 640) {
+    var sidebar = document.getElementById('adminSidebar');
+    var overlay = document.getElementById('adminSidebarOverlay');
+    if (sidebar) sidebar.classList.remove('mobile-open');
+    if (overlay) overlay.classList.remove('active');
+  }
+});
+</script>
 </body>
 </html>
