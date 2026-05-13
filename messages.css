@@ -261,3 +261,19 @@
 
 /* Step 4 message placeholder cleanup */
 .msg-modal[hidden]{display:none}.msg-modal{position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:10020;display:grid;place-items:center;padding:18px}.msg-modal-card{width:min(460px,100%);background:#0b1220;border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:18px;box-shadow:0 25px 70px rgba(0,0,0,.45);position:relative}.msg-modal-card h3{margin:0 0 6px;color:#f8fafc}.msg-modal-card p{margin:0 0 14px;color:var(--text-muted);font-size:.86rem}.msg-modal-close{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:999px;border:0;background:rgba(255,255,255,.08);color:#fff;cursor:pointer}.new-conversation-results{display:grid;gap:8px;margin-top:12px;max-height:360px;overflow:auto}.new-conversation-user{display:grid;grid-template-columns:42px 1fr;grid-template-areas:'av name' 'av meta';gap:2px 10px;text-align:left;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);color:#f8fafc;border-radius:14px;padding:10px;cursor:pointer}.new-conversation-user span{grid-area:av;width:42px;height:42px;border-radius:999px;background:linear-gradient(135deg,#10b981,#3b82f6);display:grid;place-items:center;font-weight:900;overflow:hidden}.new-conversation-user img{width:100%;height:100%;object-fit:cover}.new-conversation-user strong{grid-area:name;font-size:.9rem}.new-conversation-user small{grid-area:meta;color:var(--text-muted);font-size:.75rem}.new-conversation-user:hover{border-color:rgba(16,185,129,.45);background:rgba(16,185,129,.08)}
+
+
+/* GeoHub hotfix: message reaction picker clipping/overflow */
+.chat-window,.chat-messages,.msg-row,.msg-col,.msg-bubble-wrap{overflow:visible!important;}
+.chat-messages{position:relative;}
+.msg-bubble-wrap{position:relative;display:inline-flex;align-items:flex-end;gap:6px;max-width:100%;}
+.msg-reaction-trigger{border:0!important;background:rgba(15,23,42,.86)!important;color:#f8fafc!important;border-radius:999px!important;min-width:26px!important;height:26px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;font-size:14px!important;line-height:1!important;cursor:pointer!important;box-shadow:0 8px 22px rgba(0,0,0,.24)!important;}
+.msg-reaction-trigger.active{background:rgba(16,185,129,.24)!important;}
+.msg-reaction-picker{position:absolute!important;display:none;gap:6px;padding:7px;background:#111827;border:1px solid rgba(255,255,255,.16);border-radius:999px;box-shadow:0 18px 45px rgba(0,0,0,.42);z-index:2147482600!important;white-space:nowrap;bottom:calc(100% + 8px);right:0;max-width:calc(100vw - 32px);}
+.msg-row.received .msg-reaction-picker{left:0;right:auto;}
+.msg-reaction-picker.open{display:flex!important;}
+.msg-reaction-picker button{border:0;background:transparent;font-size:20px;line-height:1;cursor:pointer;padding:5px;border-radius:999px;transition:transform .12s ease,background .12s ease;}
+.msg-reaction-picker button:hover{transform:translateY(-2px) scale(1.12);background:rgba(255,255,255,.1);}
+.msg-reaction-summary{display:flex;gap:4px;align-items:center;margin-top:4px;min-height:18px;}
+.msg-reaction-badge{display:inline-flex;align-items:center;gap:2px;font-size:12px;background:rgba(15,23,42,.86);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:2px 7px;}
+@media(max-width:720px){.msg-reaction-picker{left:0!important;right:auto!important;}.msg-row.sent .msg-reaction-picker{right:0!important;left:auto!important;}}

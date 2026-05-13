@@ -129,10 +129,11 @@
   async function toggleReaction(messageId, emoji){
     if(!activeConversation || !messageId) return;
     try{
-      await window.GeoSocial.toggleMessageReaction(activeConversation, messageId, emoji || '❤️');
+      const ok = await window.GeoSocial.toggleMessageReaction(activeConversation, messageId, emoji || '❤️');
+      if (!ok) console.warn('[Messages] reaction was not saved');
     }catch(err){
       console.error('[Messages] reaction failed', err);
-      window.showToast && window.showToast('Message reaction failed');
+      window.showToast && window.showToast('Reaction failed');
     }
   }
 

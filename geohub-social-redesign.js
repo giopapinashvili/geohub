@@ -232,7 +232,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       state.badgeUnsubs = [];
       var u=authUser(); if(!u) return;
       try{
-        state.badgeUnsubs.push(GS().listenUserNotifications(u.uid, function(items){ var n=items.filter(function(x){return !x.read;}).length; var b=$('#ghNotifBadge'); if(b) b.textContent=n?String(n):''; }));
+        state.badgeUnsubs.push(GS().listenUserNotifications(u.uid, function(items){ var n=items.filter(function(x){return !x.read && !x.seen;}).length; var b=$('#ghNotifBadge'); if(b) b.textContent=n?String(n):''; }));
         var q=fs().query(fs().collection(db(),'conversations'), fs().where('participants','array-contains',u.uid), fs().limit(25));
         state.badgeUnsubs.push(fs().onSnapshot(q,function(snap){ var n=0; snap.forEach(function(d){ var x=d.data()||{}; if(x.lastSenderId && x.lastSenderId!==u.uid && Array.isArray(x.unreadFor) && x.unreadFor.indexOf(u.uid)>-1) n++; }); var b=$('#ghMsgBadge'); if(b) b.textContent=n?String(n):''; },function(){ }));
       }catch(e){}
@@ -277,7 +277,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(!authUser() || !fs()) return;
     $all('[data-notif]').forEach(function(a){
       var id=a.dataset.notif;
-      fs().updateDoc(fs().doc(db(),'userNotifications',id), { read:true, updatedAt:fs().serverTimestamp() }).catch(function(){});
+      fs().updateDoc(fs().doc(db(),'userNotifications',id), { read:true, seen:true, openedAt:fs().serverTimestamp(), updatedAt:fs().serverTimestamp() }).catch(function(){});
     });
   }
 

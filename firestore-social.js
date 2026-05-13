@@ -172,6 +172,7 @@
         message: body || '',
         href: href || 'feed.html',
         read: false,
+        seen: false,
         createdAt: serverTimestamp()
       }, extra || {});
       return addDoc(collection(db, 'userNotifications'), payload).catch(function (err) {
@@ -1359,8 +1360,14 @@
     }
 
     function markNotificationRead(notifId) {
-      updateDoc(doc(db, 'userNotifications', notifId), { read: true, updatedAt: serverTimestamp() })
-        .catch(function (err) { console.warn('[GeoSocial] markNotifRead', err.message); });
+      if (!notifId) return Promise.resolve(false);
+      return updateDoc(doc(db, 'userNotifications', notifId), {
+        read: true,
+        seen: true,
+        openedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }).then(function(){ return true; })
+        .catch(function (err) { console.warn('[GeoSocial] markNotifRead', err.message); return false; });
     }
 
     function listenUserPosts(uid, callback) {
