@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ka-GE">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -97,6 +97,25 @@
           <div class="form-hint">This will be your public name on GeoHub</div>
         </div>
 
+
+
+        <div class="form-group">
+          <label class="form-label required">Business Type</label>
+          <div class="business-type-selector" id="businessTypeSelector">
+            <button type="button" class="business-type-option selected" data-business-type="physical">
+              <span class="business-type-icon">📍</span>
+              <strong>Physical Location</strong>
+              <small>Customers can visit a real address. Good for cafés, hotels, shops, restaurants.</small>
+            </button>
+            <button type="button" class="business-type-option" data-business-type="online">
+              <span class="business-type-icon">🌐</span>
+              <strong>Online / Nationwide</strong>
+              <small>No office required. Works across Georgia, online, or by remote service.</small>
+            </button>
+          </div>
+          <div class="form-hint" id="businessTypeHint">Physical businesses appear on the map and nearby discovery.</div>
+        </div>
+
         <div class="form-group">
           <label class="form-label required">Category</label>
           <div class="category-selector" id="catSelector">
@@ -109,33 +128,51 @@
             <div class="cat-option" data-cat="attractions"><span class="cat-icon">🏛️</span>Attraction</div>
             <div class="cat-option" data-cat="beauty"><span class="cat-icon">💆</span>Beauty</div>
             <div class="cat-option" data-cat="dental"><span class="cat-icon">🦷</span>Dental</div>
+            <div class="cat-option" data-cat="travel-agency"><span class="cat-icon">✈️</span>Travel Agency</div>
+            <div class="cat-option" data-cat="web-studio"><span class="cat-icon">💻</span>Web Studio</div>
+            <div class="cat-option" data-cat="consulting"><span class="cat-icon">📞</span>Consulting</div>
+            <div class="cat-option" data-cat="online-education"><span class="cat-icon">🎓</span>Online Education</div>
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label required">City</label>
-            <select class="form-select" id="citySelect">
-              <option value="">Select city...</option>
-              <option>Tbilisi</option>
-              <option>Batumi</option>
-              <option>Kazbegi</option>
-              <option>Kutaisi</option>
-              <option>Gudauri</option>
-              <option>Sighnaghi</option>
-              <option>Mestia</option>
-              <option>Borjomi</option>
-              <option>Telavi</option>
-              <option>Gori</option>
-              <option>Mtskheta</option>
-              <option>Zugdidi</option>
-              <option>Other</option>
-            </select>
+        <div id="physicalLocationFields">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label required" id="cityLabel">City</label>
+              <select class="form-select" id="citySelect">
+                <option value="">Select city...</option>
+                <option>Tbilisi</option>
+                <option>Batumi</option>
+                <option>Kazbegi</option>
+                <option>Kutaisi</option>
+                <option>Gudauri</option>
+                <option>Sighnaghi</option>
+                <option>Mestia</option>
+                <option>Borjomi</option>
+                <option>Telavi</option>
+                <option>Gori</option>
+                <option>Mtskheta</option>
+                <option>Zugdidi</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" id="addressLabel">Address</label>
+              <input type="text" class="form-input" placeholder="Street address or area" id="addressInput">
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Address</label>
-            <input type="text" class="form-input" placeholder="Street address or area" id="addressInput">
-          </div>
+        </div>
+
+        <div class="form-group" id="onlineServiceAreaFields" style="display:none">
+          <label class="form-label required">Service Area</label>
+          <select class="form-select" id="serviceAreaSelect">
+            <option value="georgia">All Georgia</option>
+            <option value="worldwide">Worldwide / Remote</option>
+            <option value="tbilisi">Tbilisi only</option>
+            <option value="batumi">Batumi only</option>
+            <option value="regions">Selected Georgian regions</option>
+          </select>
+          <div class="form-hint">Online businesses do not need an exact address or map pin. Example: travel agency, web studio, online store.</div>
         </div>
 
         <div class="form-group">
@@ -271,7 +308,7 @@
           <div id="uploadedPhotos" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px"></div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" id="mapsLinkGroup">
           <label class="form-label">Google Maps Link <span style="color:var(--text-muted);font-size:0.7rem">(optional)</span></label>
           <input type="url" class="form-input" placeholder="https://maps.google.com/..." id="mapsLink">
           <div class="form-hint">Paste your Google Maps location link for accurate placement on our map</div>
@@ -311,7 +348,7 @@
           <div class="plan-option selected" data-plan="free">
             <div class="plan-name">Free</div>
             <div class="plan-price">0 GEL</div>
-            <div class="plan-desc">Basic listing with contact info and map location</div>
+            <div class="plan-desc">Basic listing with contact info and optional map location</div>
           </div>
           <div class="plan-option" data-plan="premium">
             <div class="plan-name">Premium ✨</div>

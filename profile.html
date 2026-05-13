@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="social-layer.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="profile.css">
+  <link rel="stylesheet" href="geohub-points.css">
 </head>
 <body class="page-profile">
 
@@ -86,7 +87,7 @@
     <div class="profile-hero-right">
       <div class="profile-stats-bar">
         <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label">Places</div></div>
-        <div class="pstat" style="cursor:pointer" onclick="location.href='reviews.html'"><div class="pstat-value">0</div><div class="pstat-label" style="color:var(--green)">Reviews ↗</div></div>
+        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label" style="color:var(--green)">Friends</div></div>
         <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label">Followers</div></div>
         <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label">Following</div></div>
         <div class="pstat"><div class="pstat-value" style="color:var(--green)">0</div><div class="pstat-label">GeoPoints</div></div>
@@ -123,8 +124,11 @@
     <div class="ptab active" data-tab="posts">Posts <span class="tab-count">0</span></div>
     <div class="ptab" data-tab="places">Places <span class="tab-count">0</span></div>
     <div class="ptab" data-tab="checkins">Check-ins <span class="tab-count">0</span></div>
+    <div class="ptab" data-tab="friends">Friends <span class="tab-count">0</span></div>
     <div class="ptab" data-tab="rewards">Rewards</div>
     <div class="ptab" data-tab="challenges">Challenges</div>
+    <div class="ptab" data-tab="businesses">Businesses <span class="tab-count">0</span></div>
+    <div class="ptab" data-tab="badges">Badges <span class="tab-count">0</span></div>
     <div class="ptab" data-tab="saved">Saved <span class="tab-count"></span></div>
     <div class="ptab" data-tab="reviews" onclick="location.href='reviews.html'">Reviews <span class="tab-count">0</span> <i class="fas fa-external-link-alt" style="font-size:0.55rem;opacity:0.5;margin-left:2px"></i></div>
   </div>
@@ -301,9 +305,15 @@
 
     <div class="tab-panel" id="tab-checkins"><div class="empty-profile-state"><i class="fas fa-location-dot"></i><h3>No check-ins yet</h3><p>Real Firestore check-ins will appear here.</p></div></div>
 
+    <div class="tab-panel" id="tab-friends"><div class="empty-profile-state"><i class="fas fa-user-group"></i><h3>No friends yet</h3><p>Friends and incoming requests will appear here.</p></div></div>
+
     <div class="tab-panel" id="tab-rewards"><div class="empty-profile-state"><i class="fas fa-gift"></i><h3>No rewards yet</h3><p>Real rewards will appear here.</p></div></div>
 
     <div class="tab-panel" id="tab-challenges"><div class="empty-profile-state"><i class="fas fa-trophy"></i><h3>No challenges yet</h3><p>Real challenges will appear here.</p></div></div>
+
+    <div class="tab-panel" id="tab-businesses"><div class="empty-profile-state"><i class="fas fa-store"></i><h3>No businesses yet</h3><p>Managed business pages will appear here.</p></div></div>
+
+    <div class="tab-panel" id="tab-badges"><div class="empty-profile-state"><i class="fas fa-medal"></i><h3>No badges yet</h3><p>Badges appear after check-ins, posts and community actions.</p></div></div>
 
     <div class="tab-panel" id="tab-saved">
       <div id="saved-posts-section"></div>
@@ -323,6 +333,7 @@
 <script src="account.js"></script>
 <script src="firestore-social.js"></script>
 <script src="profile.js"></script>
+<script src="geohub-points.js"></script>
 <script src="nav-cleanup.js"></script>
 <script src="mobile-nav.js"></script>
 <script src="geohub-fixes.js"></script>

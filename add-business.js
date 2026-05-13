@@ -2,6 +2,10 @@ let currentStep = 1;
   let tags = [];
   let selectedCategory = '';
   let selectedPlan = 'free';
+  let selectedBusinessType = 'physical';
+  let selectedServiceArea = 'georgia';
+  let editingBusinessId = new URLSearchParams(location.search).get('edit') || '';
+  let editingBusinessData = null;
 
   // Hours inputs
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -23,6 +27,148 @@ let currentStep = 1;
       document.getElementById(`close_${d}`).style.opacity = e.target.checked ? '0.4' : '1';
     });
   });
+
+
+  function getBusinessType() {
+    var selected = document.querySelector('.business-type-option.selected');
+    return (selected && selected.dataset.businessType) || selectedBusinessType || 'physical';
+  }
+
+  function getServiceArea() {
+    var sel = document.getElementById('serviceAreaSelect');
+    return (sel && sel.value) || selectedServiceArea || 'georgia';
+  }
+
+  function serviceAreaLabel(area) {
+    return {
+      georgia: 'Available across Georgia',
+      worldwide: 'Worldwide / Remote',
+      tbilisi: 'Tbilisi only',
+      batumi: 'Batumi only',
+      regions: 'Selected Georgian regions'
+    }[area || 'georgia'] || 'Available online';
+  }
+
+  function applyBusinessTypeUI() {
+    var type = getBusinessType();
+    var isOnline = type === 'online';
+    var physical = document.getElementById('physicalLocationFields');
+    var online = document.getElementById('onlineServiceAreaFields');
+    var city = document.getElementById('citySelect');
+    var address = document.getElementById('addressInput');
+    var maps = document.getElementById('mapsLinkGroup');
+    var hint = document.getElementById('businessTypeHint');
+    var previewCity = document.getElementById('previewCity');
+
+    if (physical) physical.style.display = isOnline ? 'none' : 'block';
+    if (online) online.style.display = isOnline ? 'block' : 'none';
+    if (maps) maps.style.display = isOnline ? 'none' : 'block';
+
+    if (city) city.required = !isOnline;
+    if (address) address.required = false;
+
+    if (hint) hint.textContent = isOnline
+      ? 'Online businesses can serve all Georgia without a physical address or map pin.'
+      : 'Physical businesses appear on the map and nearby discovery.';
+
+    if (isOnline && previewCity) previewCity.textContent = serviceAreaLabel(getServiceArea());
+    if (!isOnline && previewCity) previewCity.textContent = city && city.value ? city.value + ', Georgia' : 'City, Georgia';
+  }
+
+  document.querySelectorAll('.business-type-option').forEach(function(opt) {
+    opt.addEventListener('click', function() {
+      document.querySelectorAll('.business-type-option').forEach(function(o) { o.classList.remove('selected'); });
+      opt.classList.add('selected');
+      selectedBusinessType = opt.dataset.businessType || 'physical';
+      clearFieldErrors();
+      applyBusinessTypeUI();
+
+
+  function setValue(id, value) {
+    var el = document.getElementById(id);
+    if (el) el.value = value || '';
+  }
+
+  function selectCategory(cat) {
+    if (!cat) return;
+    var opt = document.querySelector('.cat-option[data-cat="' + String(cat).replace(/"/g, '\\"') + '"]');
+    if (!opt) return;
+    document.querySelectorAll('.cat-option').forEach(function(o) { o.classList.remove('selected'); });
+    opt.classList.add('selected');
+    selectedCategory = cat;
+    var preview = document.getElementById('previewCat');
+    if (preview) preview.textContent = opt.querySelector('.cat-icon').textContent + ' ' + opt.textContent.replace(/[^\w\s]/g,'').trim();
+  }
+
+  function selectBusinessType(type) {
+    selectedBusinessType = type === 'online' ? 'online' : 'physical';
+    document.querySelectorAll('.business-type-option').forEach(function(o) {
+      o.classList.toggle('selected', o.dataset.businessType === selectedBusinessType);
+    });
+    applyBusinessTypeUI();
+  }
+
+  function loadEditBusinessIfNeeded() {
+    if (!editingBusinessId) return;
+    var geo = window.GeoFirebase;
+    if (!geo || !geo.fs || !geo.db) {
+      window.addEventListener('GeoFirebaseReady', loadEditBusinessIfNeeded, { once: true });
+      return;
+    }
+    var f = geo.fs;
+    f.getDoc(f.doc(geo.db, 'businesses', editingBusinessId)).then(function(snap) {
+      if (!snap.exists()) {
+        alert('Business not found.');
+        return;
+      }
+      var data = snap.data() || {};
+      editingBusinessData = data;
+      var title = document.querySelector('.form-header h1');
+      var subtitle = document.querySelector('.form-header p');
+      if (title) title.innerHTML = 'Edit <span class="gradient-text">Business Page</span>';
+      if (subtitle) subtitle.textContent = 'Update your GeoHub business page. Online businesses can work across all Georgia without an address.';
+      setValue('bizNameInput', data.name || data.title || '');
+      setValue('descInput', data.description || data.desc || '');
+      setValue('citySelect', data.city || '');
+      setValue('addressInput', data.address || '');
+      setValue('phoneInput', data.phone || '');
+      setValue('whatsappInput', data.whatsapp || '');
+      setValue('emailInput', data.email || '');
+      setValue('websiteInput', data.website || '');
+      setValue('instagramInput', data.instagram || (data.socialLinks && data.socialLinks.instagram) || '');
+      setValue('facebookInput', data.facebook || (data.socialLinks && data.socialLinks.facebook) || '');
+      setValue('startingPriceInput', data.startingPrice || '');
+      setValue('priceRangeSelect', data.priceRange || '');
+      setValue('mapsLink', data.mapsLink || '');
+      selectedPlan = data.plan || 'free';
+      selectedServiceArea = data.serviceArea || 'georgia';
+      setValue('serviceAreaSelect', selectedServiceArea);
+      selectBusinessType(data.businessType || (data.isOnline ? 'online' : 'physical'));
+      selectCategory(data.category || '');
+      tags = Array.isArray(data.tags) ? data.tags.slice(0,8) : [];
+      renderTags();
+      var pn = document.getElementById('previewName');
+      if (pn) pn.textContent = data.name || data.title || 'Your Business Name';
+      applyBusinessTypeUI();
+      var btn = document.querySelector('button[onclick="submitForm()"]');
+      if (btn) btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+    }).catch(function(err) {
+      console.error('[AddBusiness] edit load failed', err);
+      alert('Could not load business for editing: ' + (err.code || err.message));
+    });
+  }
+  loadEditBusinessIfNeeded();
+    });
+  });
+
+  var serviceAreaSelect = document.getElementById('serviceAreaSelect');
+  if (serviceAreaSelect) {
+    serviceAreaSelect.addEventListener('change', function(e) {
+      selectedServiceArea = e.target.value || 'georgia';
+      applyBusinessTypeUI();
+    });
+  }
+  applyBusinessTypeUI();
 
   // Category selector
   document.querySelectorAll('.cat-option').forEach(opt => {
@@ -65,7 +211,11 @@ let currentStep = 1;
     document.getElementById('previewName').textContent = e.target.value || 'Your Business Name';
   });
   document.getElementById('citySelect').addEventListener('change', e => {
-    document.getElementById('previewCity').textContent = e.target.value ? `${e.target.value}, Georgia` : 'City, Georgia';
+    if (getBusinessType() === 'online') {
+      document.getElementById('previewCity').textContent = serviceAreaLabel(getServiceArea());
+    } else {
+      document.getElementById('previewCity').textContent = e.target.value ? `${e.target.value}, Georgia` : 'City, Georgia';
+    }
   });
 
   // Plan selector
@@ -109,6 +259,7 @@ let currentStep = 1;
     var name = document.getElementById('bizNameInput').value.trim();
     var city = document.getElementById('citySelect').value;
     var cat  = document.querySelector('.cat-option.selected');
+    var type = getBusinessType();
     var ok = true;
     if (!name) { markFieldError(document.getElementById('bizNameInput'), 'Business name is required.'); ok = false; }
     if (!cat)  {
@@ -119,7 +270,7 @@ let currentStep = 1;
       document.getElementById('catSelector').parentNode.appendChild(catErr);
       ok = false;
     }
-    if (!city) { markFieldError(document.getElementById('citySelect'), 'Please select a city.'); ok = false; }
+    if (type !== 'online' && !city) { markFieldError(document.getElementById('citySelect'), 'Please select a city for a physical business.'); ok = false; }
     return ok;
   }
 
@@ -189,6 +340,9 @@ let currentStep = 1;
     var name = (document.getElementById('bizNameInput') || {}).value.trim();
     var desc = (document.getElementById('descInput') || {}).value.trim();
     var city = (document.getElementById('citySelect') || {}).value;
+    var businessType = getBusinessType();
+    var serviceArea = businessType === 'online' ? getServiceArea() : (city ? city.toLowerCase() : 'local');
+    var serviceAreaText = businessType === 'online' ? serviceAreaLabel(serviceArea) : (city ? city + ', Georgia' : 'Local business');
     var catEl = document.querySelector('.cat-option.selected');
     var cat = catEl ? catEl.dataset.cat : selectedCategory;
     var cover = firstPreviewImage('#coverUpload') || '';
@@ -196,7 +350,7 @@ let currentStep = 1;
 
     var submitBtn = document.querySelector('button[onclick="submitForm()"]');
     var oldHtml = submitBtn ? submitBtn.innerHTML : '';
-    if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...'; }
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (editingBusinessId ? 'Saving...' : 'Creating...'); }
 
     var payload = {
       name: name,
@@ -204,11 +358,16 @@ let currentStep = 1;
       description: desc,
       desc: desc,
       category: cat || 'business',
-      city: city,
-      address: (document.getElementById('addressInput') || {}).value || '',
+      businessType: businessType,
+      serviceArea: serviceArea,
+      serviceAreaText: serviceAreaText,
+      isOnline: businessType === 'online',
+      city: businessType === 'online' ? '' : city,
+      address: businessType === 'online' ? '' : ((document.getElementById('addressInput') || {}).value || ''),
       phone: (document.getElementById('phoneInput') || {}).value || '',
       email: (document.getElementById('emailInput') || {}).value || '',
       website: (document.getElementById('websiteInput') || {}).value || '',
+      mapsLink: businessType === 'online' ? '' : ((document.getElementById('mapsLink') || {}).value || ''),
       whatsapp: (document.getElementById('whatsappInput') || {}).value || '',
       instagram: (document.getElementById('instagramInput') || {}).value || '',
       facebook: (document.getElementById('facebookInput') || {}).value || '',
@@ -241,14 +400,24 @@ let currentStep = 1;
       updatedAt: f.serverTimestamp()
     };
 
-    f.addDoc(f.collection(geo.db, 'businesses'), payload).then(function(ref) {
-      return f.setDoc(f.doc(geo.db, 'businessAdmins', ref.id + '_' + user.uid), {
-        businessId: ref.id,
-        userId: user.uid,
-        role: 'owner',
-        createdAt: f.serverTimestamp()
-      }).then(function(){ return ref; });
-    }).then(function(ref) {
+    var savePromise;
+    if (editingBusinessId) {
+      payload.updatedAt = f.serverTimestamp();
+      delete payload.createdAt;
+      savePromise = f.updateDoc(f.doc(geo.db, 'businesses', editingBusinessId), payload)
+        .then(function(){ return { id: editingBusinessId }; });
+    } else {
+      savePromise = f.addDoc(f.collection(geo.db, 'businesses'), payload).then(function(ref) {
+        return f.setDoc(f.doc(geo.db, 'businessAdmins', ref.id + '_' + user.uid), {
+          businessId: ref.id,
+          userId: user.uid,
+          role: 'owner',
+          createdAt: f.serverTimestamp()
+        }).then(function(){ return ref; });
+      });
+    }
+
+    savePromise.then(function(ref) {
       document.getElementById('step4').classList.remove('active');
       document.getElementById('stepSuccess').classList.add('active');
       document.getElementById('progressFill').style.width = '100%';

@@ -3,7 +3,6 @@
   function esc(v){return String(v==null?'':v).replace(/[&<>\"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c];});}
   function initials(name,email){
     name=String(name||'').trim(); email=String(email||'').toLowerCase();
-    if(!name && email==='gio.papinashvili20@gmail.com') name='Giorgi Papinashvili';
     if(!name && email) name=email.split('@')[0].replace(/[._-]+/g,' ');
     var parts=name.split(/\s+/).filter(Boolean);
     if(parts.length>=2) return (parts[0][0]+parts[1][0]).toUpperCase();
@@ -17,7 +16,6 @@
   function nameFromUser(user){
     if(!user) return 'GeoHub User';
     if(user.displayName) return user.displayName;
-    if(user.email==='gio.papinashvili20@gmail.com') return 'Giorgi Papinashvili';
     return user.email ? user.email.split('@')[0].replace(/[._-]+/g,' ').replace(/\b\w/g,function(m){return m.toUpperCase();}) : 'GeoHub User';
   }
   function waitFirebase(cb){

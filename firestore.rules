@@ -7,10 +7,7 @@ service cloud.firestore {
     function uid() { return request.auth.uid; }
     function isOwner(userId) { return signedIn() && uid() == userId; }
     function isAdmin() {
-      return signedIn() && request.auth.token.email in [
-        "gio.papinashvili26@gmail.com",
-        "gio.papinashvili20@gmail.com"
-      ];
+      return signedIn() && exists(/databases/$(database)/documents/admins/$(uid()));
     }
 
     function newOwnerMatches() {
@@ -34,24 +31,27 @@ service cloud.firestore {
     }
 
     function onlyCountersChanged() {
-      return signedIn()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'likeCount', 'commentCount', 'shareCount', 'reactionCount', 'saveCount', 'updatedAt'
-        ]);
+      return signedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'likeCount', 'commentCount', 'shareCount', 'reactionCount', 'saveCount', 'updatedAt'
+      ]);
     }
 
     function onlyBusinessCountersChanged() {
-      return signedIn()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'followerCount', 'postCount', 'reviewCount', 'ratingAverage', 'ratingTotal', 'updatedAt'
-        ]);
+      return signedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'followerCount', 'postCount', 'reviewCount', 'ratingAverage', 'ratingTotal', 'updatedAt'
+      ]);
     }
 
     function onlyGroupCountersChanged() {
-      return signedIn()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'memberCount', 'postCount', 'updatedAt'
-        ]);
+      return signedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'memberCount', 'postCount', 'updatedAt'
+      ]);
+    }
+
+    function onlyUserPublicCountersChanged() {
+      return signedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'followers', 'following', 'friendsCount', 'postsCount', 'geoPointsEarnedTotal', 'geoPointsSentTotal', 'geoPointsReceivedTotal', 'geoPointsSpentTotal', 'updatedAt'
+      ]);
     }
 
     function isConversationParticipant(conversationId) {
@@ -60,382 +60,140 @@ service cloud.firestore {
         && uid() in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
     }
 
-    // USERS / PUBLIC PROFILES
     match /users/{userId} {
       allow read: if true;
       allow create: if isOwner(userId);
-      allow update: if isOwner(userId) || isAdmin();
+      allow update: if isOwner(userId) || isAdmin() || onlyUserPublicCountersChanged();
       allow delete: if isAdmin();
-
-      match /private/{docId} {
-        allow read, write: if isOwner(userId) || isAdmin();
-      }
+      match /private/{docId} { allow read, write: if isOwner(userId) || isAdmin(); }
     }
 
-    // POSTS + COMMENTS + LIKES/REACTIONS
+    // Admin UIDs are managed in Firestore. Create admins/{uid} manually from Firebase Console before publishing this rule.
+    match /admins/{adminId} {
+      allow read: if isOwner(adminId) || isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
     match /posts/{postId} {
       allow read: if true;
       allow create: if newOwnerMatches();
       allow update: if isAdmin() || existingOwnerMatches() || onlyCountersChanged();
       allow delete: if isAdmin() || existingOwnerMatches();
-
       match /comments/{commentId} {
         allow read: if true;
         allow create: if newOwnerMatches() && request.resource.data.get('text', '') is string;
         allow update, delete: if isAdmin() || existingOwnerMatches();
+        match /replies/{replyId} {
+          allow read: if true;
+          allow create: if newOwnerMatches() && request.resource.data.get('text', '') is string;
+          allow update, delete: if isAdmin() || existingOwnerMatches();
+        }
       }
-
-      match /likes/{userId} {
-        allow read: if true;
-        allow create, update, delete: if isOwner(userId);
-      }
-
-      match /reactions/{userId} {
-        allow read: if true;
-        allow create, update, delete: if isOwner(userId);
-      }
+      match /likes/{userId} { allow read: if true; allow create, update, delete: if isOwner(userId); }
+      match /reactions/{userId} { allow read: if true; allow create, update, delete: if isOwner(userId); }
     }
 
-    // STORIES
-    match /stories/{storyId} {
-      allow read: if true;
-      allow create: if newOwnerMatches();
-      allow update, delete: if isAdmin() || existingOwnerMatches();
-    }
+    match /stories/{storyId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /checkins/{checkinId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /places/{placeId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
 
-    // CHECK-INS
-    match /checkins/{checkinId} {
-      allow read: if true;
-      allow create: if newOwnerMatches();
-      allow update, delete: if isAdmin() || existingOwnerMatches();
-    }
-
-    // PLACES / MAP LOCATIONS
-    match /places/{placeId} {
-      allow read: if true;
-      allow create: if newOwnerMatches();
-      allow update, delete: if isAdmin() || existingOwnerMatches();
-    }
-
-    // BUSINESSES
     match /businesses/{businessId} {
       allow read: if true;
       allow create: if newOwnerMatches();
       allow update: if isAdmin() || existingOwnerMatches() || onlyBusinessCountersChanged();
       allow delete: if isAdmin() || existingOwnerMatches();
     }
+    match /businessAdmins/{adminId} { allow read: if true; allow create: if signedIn() && request.resource.data.get('userId', '') == uid(); allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
+    match /businessFollowers/{followId} { allow read: if true; allow create: if signedIn() && request.resource.data.get('userId', '') == uid(); allow update: if false; allow delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
+    match /businessReviews/{reviewId} { allow read: if true; allow create: if signedIn() && request.resource.data.get('userId', '') == uid(); allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
+    match /businessOffers/{offerId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /businessAnalytics/{analyticsId} { allow read: if isAdmin() || (signedIn() && resource.data.get('ownerId', '') == uid()); allow create, update: if signedIn() && request.resource.data.get('ownerId', '') == uid(); allow delete: if isAdmin(); }
 
+    match /follows/{followId} { allow read: if true; allow create: if signedIn() && request.resource.data.get('followerId', '') == uid(); allow update: if false; allow delete: if isAdmin() || (signedIn() && (resource.data.get('followerId', '') == uid() || resource.data.get('followingId', '') == uid() || resource.data.get('targetId', '') == uid())); }
+    match /savedPosts/{saveId} { allow read: if signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid() || isAdmin()); allow create: if signedIn() && (request.resource.data.get('userId', '') == uid() || request.resource.data.get('uid', '') == uid()); allow update: if false; allow delete: if isAdmin() || (signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid())); }
+    match /savedItems/{itemId} { allow read: if signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid() || isAdmin()); allow create: if signedIn() && (request.resource.data.get('userId', '') == uid() || request.resource.data.get('uid', '') == uid()); allow update: if false; allow delete: if isAdmin() || (signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid())); }
 
-    // BUSINESS PAGE ADMINS / FOLLOWERS / REVIEWS
-    match /businessAdmins/{adminId} {
-      allow read: if true;
-      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
-      allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid());
+    match /groups/{groupId} { allow read: if true; allow create: if newOwnerMatches(); allow update: if isAdmin() || existingOwnerMatches() || onlyGroupCountersChanged(); allow delete: if isAdmin() || existingOwnerMatches(); }
+    match /groupMembers/{memberId} { allow read: if true; allow create: if signedIn() && (request.resource.data.get('userId', '') == uid() || request.resource.data.get('uid', '') == uid()); allow update, delete: if isAdmin() || (signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid())); }
+    match /groupPosts/{postId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches() || onlyCountersChanged(); }
+    match /groupJoinRequests/{requestId} { allow read: if signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('toUserId', '') == uid() || isAdmin()); allow create: if signedIn() && request.resource.data.get('userId', '') == uid(); allow update: if isAdmin(); allow delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
+
+    match /events/{eventId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /eventParticipants/{participantId} { allow read: if true; allow create: if signedIn() && (request.resource.data.get('userId', '') == uid() || request.resource.data.get('uid', '') == uid()); allow update, delete: if isAdmin() || (signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid())); }
+
+    match /friendRequests/{requestId} { allow read: if signedIn() && (resource.data.get('fromUserId', '') == uid() || resource.data.get('fromId', '') == uid() || resource.data.get('toUserId', '') == uid() || resource.data.get('toId', '') == uid() || isAdmin()); allow create: if signedIn() && (request.resource.data.get('fromUserId', '') == uid() || request.resource.data.get('fromId', '') == uid()); allow update, delete: if isAdmin() || (signedIn() && (resource.data.get('fromUserId', '') == uid() || resource.data.get('fromId', '') == uid() || resource.data.get('toUserId', '') == uid() || resource.data.get('toId', '') == uid())); }
+    match /friends/{friendId} { allow read: if true; allow create: if signedIn() && uid() in request.resource.data.users; allow update: if false; allow delete: if isAdmin() || (signedIn() && uid() in resource.data.users); }
+
+    match /conversations/{conversationId} { allow create: if signedIn() && uid() in request.resource.data.participants; allow read, update, delete: if isAdmin() || (signedIn() && uid() in resource.data.participants); match /messages/{messageId} { allow read: if isAdmin() || isConversationParticipant(conversationId); allow create: if isAdmin() || (isConversationParticipant(conversationId) && request.resource.data.senderId == uid()); allow update, delete: if isAdmin() || (signedIn() && resource.data.senderId == uid()); } }
+    match /chats/{chatId} { allow create: if signedIn() && uid() in request.resource.data.participants; allow read, update, delete: if isAdmin() || (signedIn() && uid() in resource.data.participants); match /messages/{messageId} { allow read, create: if isAdmin() || (signedIn() && uid() in get(/databases/$(database)/documents/chats/$(chatId)).data.participants); allow update, delete: if isAdmin() || (signedIn() && resource.data.senderId == uid()); } }
+
+    match /userNotifications/{notificationId} { allow read: if signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('toUserId', '') == uid() || isAdmin()); allow create: if isAdmin() || (signedIn() && request.resource.data.get('fromUserId', '') == uid() && (request.resource.data.get('userId', '') != uid() || request.resource.data.get('toUserId', '') != uid())); allow update: if isAdmin() || (signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('toUserId', '') == uid()) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'seen', 'updatedAt'])); allow delete: if isAdmin(); }
+
+    match /reviews/{reviewId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /placeReviews/{reviewId} { allow read: if true; allow create: if signedIn() && request.resource.data.get('userId', '') == uid(); allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
+
+    // GeoPoints economy: client-side MVP. For high-value campaigns, move awarding/redemption to Cloud Functions.
+    match /pointEarnRequests/{requestId} {
+      allow read: if signedIn() && (resource.data.get('userId', '') == uid() || isAdmin());
+      allow create: if signedIn() && request.resource.data.get('userId', '') == uid() && request.resource.data.get('status', '') == 'pending';
+      allow update, delete: if isAdmin();
     }
 
-    match /businessFollowers/{followId} {
-      allow read: if true;
-      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
-      allow update: if false;
-      allow delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid());
-    }
-
-    match /businessReviews/{reviewId} {
-      allow read: if true;
-      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
-      allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid());
-    }
-
-    // FOLLOWS
-    match /follows/{followId} {
-      allow read: if true;
-      allow create: if signedIn() && request.resource.data.get('followerId', '') == uid();
-      allow update: if false;
-      allow delete: if isAdmin()
-        || (signedIn() && (
-          resource.data.get('followerId', '') == uid() ||
-          resource.data.get('followingId', '') == uid() ||
-          resource.data.get('targetId', '') == uid()
-        ));
-    }
-
-    // SAVED POSTS
-    match /savedPosts/{saveId} {
-      allow read: if signedIn() && (
-        resource.data.get('userId', '') == uid() ||
-        resource.data.get('uid', '') == uid() ||
-        isAdmin()
-      );
+    match /pointTransactions/{transactionId} {
+      allow read: if signedIn() && (uid() in resource.data.participantIds || isAdmin());
       allow create: if signedIn() && (
-        request.resource.data.get('userId', '') == uid() ||
-        request.resource.data.get('uid', '') == uid()
+        isAdmin() ||
+        (
+          request.resource.data.get('amount', 0) > 0 &&
+          request.resource.data.get('amount', 0) <= 10000 &&
+          uid() in request.resource.data.participantIds &&
+          request.resource.data.get('type', '') in ['gift', 'spend', 'redeem'] &&
+          request.resource.data.get('fromUserId', '') == uid()
+        )
       );
-      allow update: if false;
-      allow delete: if isAdmin() || (signedIn() && (
-        resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid()
-      ));
+      allow update, delete: if isAdmin();
     }
 
-    // GROUPS + MEMBERS + JOIN REQUESTS
-    match /groups/{groupId} {
+    match /rewards/{rewardId} {
       allow read: if true;
-      allow create: if newOwnerMatches();
-      allow update: if isAdmin() || existingOwnerMatches() || onlyGroupCountersChanged();
+      allow create: if isAdmin() || newOwnerMatches();
+      allow update: if isAdmin() || existingOwnerMatches();
       allow delete: if isAdmin() || existingOwnerMatches();
     }
 
-    match /groupMembers/{memberId} {
-      allow read: if true;
-      allow create: if signedIn() && (
-        request.resource.data.get('userId', '') == uid() || request.resource.data.get('uid', '') == uid()
-      );
-      allow update, delete: if isAdmin() || (signedIn() && (
-        resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid()
-      ));
-    }
-
-    match /groupPosts/{postId} {
-      allow read: if true;
-      allow create: if newOwnerMatches();
-      allow update, delete: if isAdmin() || existingOwnerMatches() || onlyCountersChanged();
-    }
-
-    match /groupJoinRequests/{requestId} {
-      allow read: if signedIn() && (
-        resource.data.get('userId', '') == uid() || isAdmin()
-      );
+    match /rewardCoupons/{couponId} {
+      allow read: if signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('businessOwnerId', '') == uid() || isAdmin());
       allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
-      allow delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid());
-      allow update: if isAdmin();
-    }
-
-    // EVENTS + PARTICIPANTS
-    match /events/{eventId} {
-      allow read: if true;
-      allow create: if newOwnerMatches();
-      allow update, delete: if isAdmin() || existingOwnerMatches();
-    }
-
-    match /eventParticipants/{participantId} {
-      allow read: if true;
-      allow create: if signedIn() && (
-        request.resource.data.get('userId', '') == uid() || request.resource.data.get('uid', '') == uid()
-      );
-      allow update, delete: if isAdmin() || (signedIn() && (
-        resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid()
-      ));
-    }
-
-    // FRIEND REQUESTS
-    match /friendRequests/{requestId} {
-      allow read: if signedIn() && (
-        resource.data.get('fromUserId', '') == uid() ||
-        resource.data.get('fromId', '') == uid() ||
-        resource.data.get('toUserId', '') == uid() ||
-        resource.data.get('toId', '') == uid() ||
-        isAdmin()
-      );
-      allow create: if signedIn() && (
-        request.resource.data.get('fromUserId', '') == uid() || request.resource.data.get('fromId', '') == uid()
-      );
-      allow update, delete: if isAdmin() || (signedIn() && (
-        resource.data.get('fromUserId', '') == uid() ||
-        resource.data.get('fromId', '') == uid() ||
-        resource.data.get('toUserId', '') == uid() ||
-        resource.data.get('toId', '') == uid()
-      ));
-    }
-
-    // CONVERSATIONS / MESSAGES
-    match /conversations/{conversationId} {
-      allow create: if signedIn() && uid() in request.resource.data.participants;
-      allow read, update, delete: if isAdmin() || (signedIn() && uid() in resource.data.participants);
-
-      match /messages/{messageId} {
-        allow read: if isAdmin() || isConversationParticipant(conversationId);
-        allow create: if isAdmin() || (isConversationParticipant(conversationId) && request.resource.data.senderId == uid());
-        allow update, delete: if isAdmin() || (signedIn() && resource.data.senderId == uid());
-      }
-    }
-
-    // Backward compatibility for old chats/* code
-    match /chats/{chatId} {
-      allow create: if signedIn() && uid() in request.resource.data.participants;
-      allow read, update, delete: if isAdmin() || (signedIn() && uid() in resource.data.participants);
-      match /messages/{messageId} {
-        allow read, create: if isAdmin() || (signedIn() && uid() in get(/databases/$(database)/documents/chats/$(chatId)).data.participants);
-        allow update, delete: if isAdmin() || (signedIn() && resource.data.senderId == uid());
-      }
-    }
-
-    // USER NOTIFICATIONS
-    match /userNotifications/{notificationId} {
-      allow read: if signedIn() && (
-        resource.data.get('userId', '') == uid() || resource.data.get('toUserId', '') == uid() || isAdmin()
-      );
-      allow create: if isAdmin() || (signedIn() && request.resource.data.get('fromUserId', '') == uid() && (request.resource.data.get('userId', '') != uid() || request.resource.data.get('toUserId', '') != uid()));
-      allow update: if isAdmin() || (signedIn() && (
-        resource.data.get('userId', '') == uid() || resource.data.get('toUserId', '') == uid()
-      ) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'seen', 'updatedAt']));
+      allow update: if isAdmin() || (signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('businessOwnerId', '') == uid()) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','usedAt','usedBy','updatedAt']));
       allow delete: if isAdmin();
     }
+    match /rewardClaims/{claimId} { allow create: if signedIn() && (request.resource.data.get('userId', '') == uid() || request.resource.data.get('uid', '') == uid()); allow read, update, delete: if isAdmin() || (signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid())); }
 
-    // REVIEWS (generic)
-    match /reviews/{reviewId} {
-      allow read: if true;
-      allow create: if newOwnerMatches();
-      allow update, delete: if isAdmin() || existingOwnerMatches();
-    }
+    match /reports/{reportId} { allow create: if signedIn(); allow read, update, delete: if isAdmin(); }
+    match /hiddenPosts/{hiddenId} { allow read: if signedIn() && (resource.data.get('userId', '') == uid() || isAdmin()); allow create: if signedIn() && request.resource.data.get('userId', '') == uid(); allow update: if false; allow delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
+    match /blockedUsers/{blockId} { allow read: if signedIn() && (resource.data.get('blockerId', '') == uid() || isAdmin()); allow create: if signedIn() && request.resource.data.get('blockerId', '') == uid(); allow update: if false; allow delete: if isAdmin() || (signedIn() && resource.data.get('blockerId', '') == uid()); }
+    match /userBadges/{badgeId} { allow read: if true; allow create: if signedIn() && (request.resource.data.get('userId', '') == uid() || isAdmin()); allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
 
-    // PLACE REVIEWS
-    match /placeReviews/{reviewId} {
-      allow read: if true;
-      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
-      allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid());
-    }
+    match /admin/{docId} { allow read, write: if isAdmin(); }
+    match /challenges/{docId} { allow read: if true; allow create, update, delete: if isAdmin(); }
+    match /services/{docId} { allow read: if true; allow create: if isAdmin() || newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /realEstateListings/{docId} { allow read: if true; allow create: if isAdmin() || newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /learningItems/{docId} { allow read: if true; allow create: if isAdmin() || newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /creators/{docId} { allow read: if true; allow create: if isAdmin() || newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /liveActivity/{docId} { allow read: if true; allow create, update, delete: if isAdmin(); }
+    match /collections/{collectionId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /routes/{routeId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
 
-    // SAVED ITEMS
-    match /savedItems/{itemId} {
-      allow read: if signedIn() && (
-        resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid() || isAdmin()
-      );
-      allow create: if signedIn() && (
-        request.resource.data.get('userId', '') == uid() || request.resource.data.get('uid', '') == uid()
-      );
-      allow delete: if isAdmin() || (signedIn() && (
-        resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid()
-      ));
-      allow update: if false;
-    }
+    match /userUiState/{stateId} { allow read: if signedIn() && (resource.data.get('uid', '') == uid() || isAdmin()); allow create: if signedIn() && request.resource.data.get('uid', '') == uid(); allow update: if signedIn() && (resource.data.get('uid', '') == uid() || isAdmin()) && request.resource.data.get('uid', '') == resource.data.get('uid', ''); allow delete: if signedIn() && (resource.data.get('uid', '') == uid() || isAdmin()); }
+    match /adminFlags/{flagId} { allow read: if true; allow create, update, delete: if isAdmin(); }
+    match /messages/{messageId} { allow read: if isAdmin() || (signedIn() && (resource.data.get('senderId', '') == uid() || resource.data.get('userId', '') == uid() || resource.data.get('recipientId', '') == uid())); allow create: if signedIn() && (request.resource.data.get('senderId', '') == uid() || request.resource.data.get('userId', '') == uid() || request.resource.data.get('createdBy', '') == uid()); allow update, delete: if isAdmin() || (signedIn() && (resource.data.get('senderId', '') == uid() || resource.data.get('userId', '') == uid())); }
+    match /tickets/{docId} { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /campaigns/{docId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /collabOffers/{docId} { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /serviceRequests/{docId} { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /lessonBookings/{docId} { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /challengeProgress/{docId} { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
 
-    // REWARDS
-    match /rewardClaims/{claimId} {
-      allow create: if signedIn() && (
-        request.resource.data.get('userId', '') == uid() || request.resource.data.get('uid', '') == uid()
-      );
-      allow read, update, delete: if isAdmin() || (signedIn() && (
-        resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid()
-      ));
-    }
-
-    // REPORTS
-    match /reports/{reportId} {
-      allow create: if signedIn();
-      allow read, update, delete: if isAdmin();
-    }
-
-    // ADMIN
-    match /admin/{docId} {
-      allow read, write: if isAdmin();
-    }
-
-
-    // ADMIN-MANAGED MARKETPLACE / CONTENT COLLECTIONS
-    match /rewards/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isAdmin();
-    }
-
-    match /challenges/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isAdmin();
-    }
-
-    match /services/{docId} {
-      allow read: if true;
-      allow create: if isAdmin() || newOwnerMatches();
-      allow update, delete: if isAdmin() || existingOwnerMatches();
-    }
-
-    match /realEstateListings/{docId} {
-      allow read: if true;
-      allow create: if isAdmin() || newOwnerMatches();
-      allow update, delete: if isAdmin() || existingOwnerMatches();
-    }
-
-    match /learningItems/{docId} {
-      allow read: if true;
-      allow create: if isAdmin() || newOwnerMatches();
-      allow update, delete: if isAdmin() || existingOwnerMatches();
-    }
-
-    match /creators/{docId} {
-      allow read: if true;
-      allow create: if isAdmin() || newOwnerMatches();
-      allow update, delete: if isAdmin() || existingOwnerMatches();
-    }
-
-    match /liveActivity/{docId} {
-      allow read: if true;
-      allow create, update, delete: if isAdmin();
-    }
-
-
-    // FIRESTORE-BACKED UI STATE / PREFERENCES
-    match /userUiState/{stateId} {
-      allow read: if signedIn() && (resource.data.get('uid', '') == uid() || isAdmin());
-      allow create: if signedIn() && request.resource.data.get('uid', '') == uid();
-      allow update: if signedIn() && (resource.data.get('uid', '') == uid() || isAdmin())
-        && request.resource.data.get('uid', '') == resource.data.get('uid', '');
-      allow delete: if signedIn() && (resource.data.get('uid', '') == uid() || isAdmin());
-    }
-
-    match /adminFlags/{flagId} {
-      allow read: if true;
-      allow create, update, delete: if isAdmin();
-    }
-
-    // TOP-LEVEL API CLIENT COLLECTIONS
-    match /messages/{messageId} {
-      allow read: if isAdmin() || (signedIn() && (
-        resource.data.get('senderId', '') == uid() ||
-        resource.data.get('userId', '') == uid() ||
-        resource.data.get('recipientId', '') == uid()
-      ));
-      allow create: if signedIn() && (
-        request.resource.data.get('senderId', '') == uid() ||
-        request.resource.data.get('userId', '') == uid() ||
-        request.resource.data.get('createdBy', '') == uid()
-      );
-      allow update, delete: if isAdmin() || (signedIn() && (
-        resource.data.get('senderId', '') == uid() ||
-        resource.data.get('userId', '') == uid()
-      ));
-    }
-
-    match /tickets/{docId} {
-      allow create: if newOwnerMatches();
-      allow read, update, delete: if isAdmin() || existingOwnerMatches();
-    }
-
-    match /campaigns/{docId} {
-      allow read: if true;
-      allow create: if newOwnerMatches();
-      allow update, delete: if isAdmin() || existingOwnerMatches();
-    }
-
-    match /collabOffers/{docId} {
-      allow create: if newOwnerMatches();
-      allow read, update, delete: if isAdmin() || existingOwnerMatches();
-    }
-
-    match /serviceRequests/{docId} {
-      allow create: if newOwnerMatches();
-      allow read, update, delete: if isAdmin() || existingOwnerMatches();
-    }
-
-    match /lessonBookings/{docId} {
-      allow create: if newOwnerMatches();
-      allow read, update, delete: if isAdmin() || existingOwnerMatches();
-    }
-
-    match /challengeProgress/{docId} {
-      allow create: if newOwnerMatches();
-      allow read, update, delete: if isAdmin() || existingOwnerMatches();
-    }
-
-    match /{document=**} {
-      allow read, write: if false;
-    }
+    match /{document=**} { allow read, write: if false; }
   }
 }

@@ -22,7 +22,7 @@
 ## Theme switcher
 - Added topbar button: `#ghThemeToggle`.
 - It toggles `html[data-gh-theme="light"]` and `html[data-gh-theme="dark"]`.
-- No localStorage/sessionStorage was added.
+- No browser storage was added.
 - Current implementation changes theme during the session and respects browser preferred color scheme on first load.
 
 ## QA checks run
@@ -31,4 +31,4 @@
 - Existing functionality was not intentionally changed; only shell/top visual layout and CSS theme variables were updated.
 
 ## Notes
-- If you want the selected theme to persist after refresh, add Firestore-backed `userUiState.theme` or a non-storage cookie approach. Browser localStorage/sessionStorage was intentionally not used because this project was cleaned to Firestore-only.
+- If you want the selected theme to persist after refresh, add Firestore-backed `userUiState.theme` or a non-storage cookie approach. Browser browser storage was intentionally not used because this project was cleaned to Firestore-only.

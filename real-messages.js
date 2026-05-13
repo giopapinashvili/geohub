@@ -7,15 +7,15 @@
   function whenReady(cb){ if(window.GeoSocial && window.GeoFirebase) return cb(); window.addEventListener('GeoSocialReady', cb, {once:true}); }
   function otherId(conv){ const uid=window.GeoFirebase?.auth?.currentUser?.uid; return (conv.participants||[]).find(id=>id!==uid) || ''; }
   async function userName(uid){
-    try{ const GF=window.GeoFirebase; const snap=await GF.fs.getDoc(GF.fs.doc(GF.db,'users',uid)); if(snap.exists()){ const d=snap.data(); return d.fullName||d.displayName||d.email||'GeoHub User'; }}catch(e){}
+    try{ const GF=window.GeoFirebase; const snap=await GF.fs.getDoc(GF.fs.doc(GF.db,'users',uid)); if(snap.exists()){ const d=snap.data(); return d.fullName||d.displayName||d.name||d.username||d.email||'GeoHub User'; }}catch(e){}
     return 'GeoHub User';
   }
   async function renderConvs(convs){
     const list=$('#convList'); if(!list) return;
     if(!convs.length){ list.innerHTML='<div class="conv-empty"><i class="fas fa-inbox"></i><p>No conversations yet</p></div>'; return; }
     const rows=[];
-    for(const c of convs){ const oid=otherId(c); rows.push({c, name: await userName(oid)}); }
-    list.innerHTML=rows.map(({c,name})=>'<div class="conv-item '+(c.id===activeConversation?'active':'')+'" data-conv-id="'+esc(c.id)+'"><div class="conv-av-wrap"><div class="av-placeholder">'+esc(name[0]||'U')+'</div></div><div class="conv-info"><div class="conv-top-row"><span class="conv-name">'+esc(name)+'</span></div><div class="conv-bottom-row"><span class="conv-preview">'+esc(c.lastMessage||'No messages yet')+'</span></div></div></div>').join('');
+    for(const c of convs){ const oid=otherId(c); rows.push({c, oid, name: await userName(oid)}); }
+    list.innerHTML=rows.map(({c,oid,name})=>'<div class="conv-item '+(c.id===activeConversation?'active':'')+'" data-conv-id="'+esc(c.id)+'"><a class="conv-av-wrap" href="profile.html?id='+esc(oid)+'" data-open-user-profile="'+esc(oid)+'"><div class="av-placeholder">'+esc(name[0]||'U')+'</div></a><div class="conv-info"><div class="conv-top-row"><a class="conv-name" href="profile.html?id='+esc(oid)+'" data-open-user-profile="'+esc(oid)+'">'+esc(name)+'</a></div><div class="conv-bottom-row"><span class="conv-preview">'+esc(c.lastMessage||'No messages yet')+'</span></div></div></div>').join('');
   }
   function renderMessages(items){
     const box=$('#chatMessages'); if(!box) return;
@@ -27,7 +27,13 @@
   async function openConversation(cid){
     activeConversation=cid;
     if(unsubMsgs) unsubMsgs();
-    const header=$('#chatHeader'); if(header) header.innerHTML='<div style="padding:18px 20px;font-weight:700">Messages</div>';
+    const header=$('#chatHeader');
+    if(header){
+      const convs = window.__geohubLastConvs || [];
+      const conv = convs.find(x => x.id === cid) || null;
+      const oid = conv ? otherId(conv) : '';
+      userName(oid).then(name => { header.innerHTML='<div style="padding:18px 20px;font-weight:700"><a href="profile.html?id='+esc(oid)+'" style="color:inherit;text-decoration:none">'+esc(name || 'Messages')+'</a></div>'; });
+    }
     unsubMsgs=window.GeoSocial.listenMessages(cid, renderMessages);
     renderComposer();
   }
@@ -67,8 +73,8 @@
     const target=new URLSearchParams(location.search).get('with');
     if(target){ window.GeoSocial.startConversation(target, cid=>openConversation(cid)); }
     if(unsubConvs) unsubConvs();
-    unsubConvs=window.GeoSocial.listenConversations(convs=>{ renderConvs(convs); if(!activeConversation && convs[0]) openConversation(convs[0].id); });
-    document.addEventListener('click', e=>{ const row=e.target.closest('[data-conv-id]'); if(row) openConversation(row.dataset.convId); });
+    unsubConvs=window.GeoSocial.listenConversations(convs=>{ window.__geohubLastConvs = convs || []; renderConvs(convs); if(!activeConversation && convs[0]) openConversation(convs[0].id); });
+    document.addEventListener('click', e=>{ if(e.target.closest('[data-open-user-profile]')) return; const row=e.target.closest('[data-conv-id]'); if(row) openConversation(row.dataset.convId); });
   }
   whenReady(init);
 })();

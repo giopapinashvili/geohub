@@ -81,15 +81,7 @@
     { emoji: '🐾', title: 'Fed 8 Street Cats', date: 'Apr 20', xp: 100, trust: 4 },
     { emoji: '🚨', title: 'Safety Alert Filed', date: 'Apr 17', xp: 180, trust: 7 },
   ];
-
-  const LEADERBOARD = [
-    { name: 'Nino Kvaratskhelia', av: 'NK', color: '#10b981', xp: 8420, trust: 94, impact: 'City Champion', badges: ['🛡️ Patriot Pro','🌿 Eco Hero'] },
-    { name: 'Giorgi Beridze', av: 'GB', color: '#3b82f6', xp: 6750, trust: 88, impact: 'District Leader', badges: ['🏆 Top Helper'] },
-    { name: 'Tamar Lomidze', av: 'TL', color: '#a855f7', xp: 5940, trust: 82, impact: 'Community Star', badges: ['🤝 Civic Guard'] },
-    { name: 'Luka Tabatadze', av: 'LT', color: '#f59e0b', xp: 4820, trust: 76, impact: 'Rising Hero', badges: ['♻️ Eco Helper'] },
-    { name: 'Mariam Jgerenaia', av: 'MJ', color: '#06b6d4', xp: 4210, trust: 71, impact: 'Neighborhood Watch', badges: ['🌳 Park Guard'] },
-    { name: 'You (Gio P.)', av: 'GP', color: '#f97316', xp: 2840, trust: 74, impact: 'Patriot Rookie', badges: ['🇬🇪 Patriot'] },
-  ];
+  let LEADERBOARD = [];
 
   const CIVIC_REWARDS = [
     { emoji: '☕', title: 'Café Discount', desc: '20% off at partner cafés across Tbilisi. Earned through civic participation.', cost: '500 XP', locked: false },
@@ -120,6 +112,7 @@
     renderNearby();
     renderDone();
     renderLeaderboard();
+    loadRealLeaderboard();
     renderRewards();
     animateRing();
     startAICycle();
@@ -255,14 +248,39 @@
   }
 
   /* ── RENDER LEADERBOARD ──────────────────────────────────── */
+  function loadRealLeaderboard() {
+    const fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) return;
+    try {
+      const q = fb.fs.query(fb.fs.collection(fb.db, 'users'), fb.fs.orderBy('xp', 'desc'), fb.fs.limit(10));
+      fb.fs.getDocs(q).then(snap => {
+        LEADERBOARD = [];
+        snap.forEach(d => {
+          const u = d.data() || {};
+          LEADERBOARD.push({
+            id: d.id,
+            name: u.fullName || u.displayName || u.username || u.email || 'GeoHub User',
+            av: ((u.fullName || u.displayName || u.username || 'GH').match(/\b\w/g) || ['G','H']).slice(0,2).join('').toUpperCase(),
+            color: '#10b981', xp: Number(u.xp || 0), trust: Number(u.trustScore || 0),
+            impact: u.explorerLevel || 'Explorer', badges: Array.isArray(u.badges) && u.badges.length ? u.badges.slice(0,2) : ['🌍 GeoHub']
+          });
+        });
+        renderLeaderboard();
+      }).catch(() => renderLeaderboard());
+    } catch (e) { renderLeaderboard(); }
+  }
+
   function renderLeaderboard() {
     const list = document.getElementById('lbList');
     if (!list) return;
+    if (!LEADERBOARD.length) {
+      list.innerHTML = '<div class="lb-card"><div class="lb-info"><div class="lb-name">Leaderboard coming soon</div><div class="lb-badges-row"><span class="lb-badge">Real XP rankings will appear after users earn XP.</span></div></div></div>';
+      return;
+    }
     const rankLabel = ['🥇','🥈','🥉'];
     list.innerHTML = LEADERBOARD.map((u, i) => {
       const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-      const isMe = u.name.includes('You');
-      return `<div class="lb-card${i < 3 ? ' top' : ''}${isMe ? '" style="border-color:rgba(249,115,22,0.4);background:linear-gradient(135deg,rgba(249,115,22,0.05),var(--bg-card))' : ''}">
+      return `<div class="lb-card${i < 3 ? ' top' : ''}">
         <div class="lb-rank ${rankClass}">${i < 3 ? rankLabel[i] : '#' + (i+1)}</div>
         <div class="lb-av" style="background:${u.color}">${u.av}</div>
         <div class="lb-info">
@@ -270,7 +288,7 @@
           <div class="lb-badges-row">${u.badges.map(b => `<span class="lb-badge">${b}</span>`).join('')}</div>
         </div>
         <div class="lb-score-col">
-          <div class="lb-xp">${u.xp.toLocaleString()} XP</div>
+          <div class="lb-xp">${Number(u.xp||0).toLocaleString()} XP</div>
           <div class="lb-trust">Trust ${u.trust}</div>
           <div class="lb-impact">${u.impact}</div>
         </div>

@@ -20,7 +20,7 @@ function fbUserToGeoUser(fbUser) {
     avatar: fbUser.photoURL || '',
     coverImage: '',
     bio: '',
-    city: 'Tbilisi',
+    city: 'all_georgia',
     explorerLevel: 'New Explorer',
     xp: 0,
     rank: 9999,
