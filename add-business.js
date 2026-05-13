@@ -82,7 +82,8 @@ let currentStep = 1;
       selectedBusinessType = opt.dataset.businessType || 'physical';
       clearFieldErrors();
       applyBusinessTypeUI();
-
+    });
+  });
 
   function setValue(id, value) {
     var el = document.getElementById(id);
@@ -157,9 +158,11 @@ let currentStep = 1;
       alert('Could not load business for editing: ' + (err.code || err.message));
     });
   }
-  loadEditBusinessIfNeeded();
-    });
-  });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadEditBusinessIfNeeded, { once: true });
+  } else {
+    loadEditBusinessIfNeeded();
+  }
 
   var serviceAreaSelect = document.getElementById('serviceAreaSelect');
   if (serviceAreaSelect) {

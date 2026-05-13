@@ -48,12 +48,6 @@ service cloud.firestore {
       ]);
     }
 
-    function onlyUserPublicCountersChanged() {
-      return signedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-        'followers', 'following', 'friendsCount', 'postsCount', 'geoPointsEarnedTotal', 'geoPointsSentTotal', 'geoPointsReceivedTotal', 'geoPointsSpentTotal', 'updatedAt'
-      ]);
-    }
-
     function isConversationParticipant(conversationId) {
       return signedIn()
         && exists(/databases/$(database)/documents/conversations/$(conversationId))
@@ -63,7 +57,7 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if true;
       allow create: if isOwner(userId);
-      allow update: if isOwner(userId) || isAdmin() || onlyUserPublicCountersChanged();
+      allow update: if isOwner(userId) || isAdmin();
       allow delete: if isAdmin();
       match /private/{docId} { allow read, write: if isOwner(userId) || isAdmin(); }
     }

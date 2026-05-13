@@ -7,7 +7,7 @@
 
   var PATH = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   var PAGE = document.body && document.body.dataset ? document.body.dataset.ghPage : '';
-  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], safetyUnsub: null, sharedPostCache: {} };
+  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false };
 
   function applyTheme(theme){
     theme = theme === 'dark' ? 'dark' : 'light';
@@ -78,8 +78,27 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(author && state.blockedUserIds.indexOf(author) > -1) return false;
     var visibility = (p.visibility || 'public').toLowerCase();
     if(visibility === 'onlyme' || visibility === 'only_me') return !!(u && author === u.uid);
-    if(visibility === 'friends' || visibility === 'followers') return true;
+    if(visibility === 'friends') return !!(u && (author === u.uid || state.friendIds.indexOf(author) > -1));
+    if(visibility === 'followers') return !!(u && (author === u.uid || state.followingIds.indexOf(author) > -1));
     return true;
+  }
+
+  function setupAudienceAccess(onChange){
+    var u=authUser();
+    state.friendIds = [];
+    state.followingIds = [];
+    state.audienceLoaded = false;
+    if(!u || !fs() || !db()){ if(typeof onChange === 'function') onChange(); return; }
+    Promise.all([
+      fs().getDocs(fs().query(fs().collection(db(),'friends'), fs().where('users','array-contains',u.uid), fs().limit(300))).then(function(snap){
+        var ids=[]; snap.forEach(function(d){ var arr=(d.data()||{}).users||[]; var other=arr.find(function(id){ return id !== u.uid; }); if(other) ids.push(other); });
+        state.friendIds = ids;
+      }).catch(function(){ state.friendIds=[]; }),
+      fs().getDocs(fs().query(fs().collection(db(),'follows'), fs().where('followerId','==',u.uid), fs().limit(500))).then(function(snap){
+        var ids=[]; snap.forEach(function(d){ var following=(d.data()||{}).followingId; if(following) ids.push(following); });
+        state.followingIds = ids;
+      }).catch(function(){ state.followingIds=[]; })
+    ]).then(function(){ state.audienceLoaded = true; if(typeof onChange === 'function') onChange(); });
   }
 
   function extractMentions(textVal){
@@ -654,6 +673,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         setTimeout(openDeepLinkedPost, 350);
       }
       setupSafetyListener(paint);
+      setupAudienceAccess(paint);
       GS().listenFeed(function(posts){ lastPosts=posts; paint(); }, 20);
     });
   }
@@ -765,7 +785,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     box.innerHTML=(isOwner?'<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="gh-avatar">'+esc(initials(b.name))+'</span><button class="gh-composer-fake" data-post-as-business>Post as '+esc(b.name||'business')+'</button></div></section>':'')+'<div id="ghBusinessPosts"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>';
     box.onclick=function(e){ if(e.target.closest('[data-post-as-business]')) openPostModal({ targetType:'business', targetId:b.id, authorType:'business', businessId:b.id, authorId:b.id, authorName:b.name, authorAvatar:b.logoUrl||b.coverImageUrl||'', createdByUserId:authUser() && authUser().uid }); };
     bindPostInteractions(box);
-    listenTargetPosts('business', b.id, function(posts){ var list=$('#ghBusinessPosts'); if(!list) return; posts=posts.filter(canSeePost); if(!posts.length){ list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Business page updates will appear here.</p></div>'; return; } list.innerHTML=posts.map(postCard).join(''); bindPostInteractions(list); posts.forEach(function(p){hydrateReactionState(p.id);}); hydrateSharedPreviews(list); });
+    setupAudienceAccess(function(){ var list=$('#ghBusinessPosts'); if(list && list._lastPosts) { var posts=list._lastPosts.filter(canSeePost); list.innerHTML=posts.length ? posts.map(postCard).join('') : '<div class="gh-card gh-empty"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Business page updates will appear here.</p></div>'; hydrateSharedPreviews(list); } });
+    listenTargetPosts('business', b.id, function(posts){ var list=$('#ghBusinessPosts'); if(!list) return; list._lastPosts=posts||[]; posts=posts.filter(canSeePost); if(!posts.length){ list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Business page updates will appear here.</p></div>'; return; } list.innerHTML=posts.map(postCard).join(''); bindPostInteractions(list); posts.forEach(function(p){hydrateReactionState(p.id);}); hydrateSharedPreviews(list); });
   }
 
   function aboutRow(ic, txt){ return '<div class="gh-about-row"><i class="fas '+ic+'"></i><span>'+esc(txt)+'</span></div>'; }

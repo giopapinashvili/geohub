@@ -464,6 +464,23 @@
       return listenWallet(uid, function(wallet){ callback(wallet.transactions || []); });
     }
 
+    function walletRef(uid) {
+      return doc(db, 'users', uid, 'private', 'wallet');
+    }
+
+    function ensureWalletSnapshot(uid) {
+      return getWalletSnapshot(uid).then(function(wallet){
+        return {
+          credits: Math.max(0, Number(wallet.earned || 0) + Number(wallet.received || 0)),
+          reservedDebits: Math.max(0, Number(wallet.sent || 0) + Number(wallet.spent || 0)),
+          sent: Math.max(0, Number(wallet.sent || 0)),
+          spent: Math.max(0, Number(wallet.spent || 0)),
+          received: Math.max(0, Number(wallet.received || 0)),
+          updatedAt: serverTimestamp()
+        };
+      });
+    }
+
     function awardPoints(amount, reason, targetType, targetId, callback) {
       // Security hardening: public clients must not create completed `earn` pointTransactions.
       // This creates a pending earn request for a future Cloud Function/admin workflow.
@@ -498,9 +515,23 @@
           if (!target || !(target.uid || target.id)) throw new Error('recipient-not-found');
           var targetId = target.uid || target.id;
           if (targetId === user.uid) throw new Error('self-transfer');
-          return getWalletSnapshot(user.uid).then(function(wallet){
-            if (wallet.balance < n) throw new Error('insufficient-points');
-            return addDoc(collection(db, 'pointTransactions'), {
+          return ensureWalletSnapshot(user.uid).then(function(initialWallet){
+            var txRef = doc(collection(db, 'pointTransactions'));
+            return runTransaction(db, function(tx){
+              return tx.get(walletRef(user.uid)).then(function(walletSnap){
+                var wallet = walletSnap.exists() ? (walletSnap.data() || {}) : initialWallet;
+                var credits = Math.max(Number(wallet.credits || 0), Number(initialWallet.credits || 0));
+                var reservedDebits = wallet.reservedDebits != null
+                  ? Math.max(0, Number(wallet.reservedDebits || 0))
+                  : Math.max(0, credits - Math.max(0, Number(wallet.balance || 0)));
+                if (credits - reservedDebits < n) throw new Error('insufficient-points');
+                tx.set(walletRef(user.uid), {
+                  credits: credits,
+                  reservedDebits: reservedDebits + n,
+                  sent: Math.max(Number(wallet.sent || 0), Number(initialWallet.sent || 0)) + n,
+                  updatedAt: serverTimestamp()
+                }, { merge: true });
+                tx.set(txRef, {
               type: 'gift', amount: n,
               fromUserId: user.uid, toUserId: targetId,
               fromName: me.name || user.displayName || 'GeoHub User',
@@ -508,7 +539,10 @@
               participantIds: [user.uid, targetId],
               message: String(message || '').slice(0, 240), reason: 'Gift points',
               status: 'completed', createdAt: serverTimestamp()
-            }).then(function(ref){ return { ref: ref, targetId: targetId }; });
+                });
+                return { ref: txRef, targetId: targetId };
+              });
+            });
           });
         }).then(function(res){
           updateDoc(doc(db, 'users', user.uid), { geoPointsSentTotal: increment(n), updatedAt: serverTimestamp() }).catch(function(){});
@@ -526,13 +560,30 @@
       var n = normalAmount(amount);
       if (!n) { toast('Invalid GeoPoints amount', 'error'); if(callback) callback(false); return; }
       requireAuth(function(user){
-        getWalletSnapshot(user.uid).then(function(wallet){
-          if (wallet.balance < n) throw new Error('insufficient-points');
-          return addDoc(collection(db, 'pointTransactions'), {
+        ensureWalletSnapshot(user.uid).then(function(initialWallet){
+          var txRef = doc(collection(db, 'pointTransactions'));
+          return runTransaction(db, function(tx){
+            return tx.get(walletRef(user.uid)).then(function(walletSnap){
+              var wallet = walletSnap.exists() ? (walletSnap.data() || {}) : initialWallet;
+              var credits = Math.max(Number(wallet.credits || 0), Number(initialWallet.credits || 0));
+              var reservedDebits = wallet.reservedDebits != null
+                ? Math.max(0, Number(wallet.reservedDebits || 0))
+                : Math.max(0, credits - Math.max(0, Number(wallet.balance || 0)));
+              if (credits - reservedDebits < n) throw new Error('insufficient-points');
+              tx.set(walletRef(user.uid), {
+                credits: credits,
+                reservedDebits: reservedDebits + n,
+                spent: Math.max(Number(wallet.spent || 0), Number(initialWallet.spent || 0)) + n,
+                updatedAt: serverTimestamp()
+              }, { merge: true });
+              tx.set(txRef, {
             type: 'spend', amount: n,
             fromUserId: user.uid, toUserId: 'platform', participantIds: [user.uid],
             reason: reason || 'GeoHub platform benefit', targetType: targetType || '', targetId: targetId || '',
             status: 'completed', createdAt: serverTimestamp()
+              });
+              return txRef;
+            });
           });
         }).then(function(ref){ updateDoc(doc(db, 'users', user.uid), { geoPointsSpentTotal: increment(n), updatedAt: serverTimestamp() }).catch(function(){}); toast('GeoPoints spent'); if(callback) callback(true, ref.id); })
           .catch(function(err){ toast(err.message === 'insufficient-points' ? 'Not enough GeoPoints' : 'Could not spend GeoPoints', 'error'); if(callback) callback(false, err); });
