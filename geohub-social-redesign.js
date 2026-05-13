@@ -312,11 +312,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     $('#ghSubmitPost').onclick=function(){
       var txt=$('#ghPostText').value, url=picked || $('#ghPostImg').value.trim();
       var payload=Object.assign({ visibility: $('#ghPostVisibility').value, feeling: $('#ghPostFeeling').value.trim(), mentions: extractMentions(txt) }, extra||{});
-      $('#ghSubmitPost').disabled = true;
+      var submitBtn = $('#ghSubmitPost');
+      submitBtn.disabled = true;
+      submitBtn.dataset.originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = url ? '<i class="fas fa-circle-notch fa-spin"></i> Uploading…' : '<i class="fas fa-circle-notch fa-spin"></i> Posting…';
       prepareMedia(url, 'posts').then(function(finalUrl){
         if(url && !finalUrl) throw new Error('Image upload failed');
         GS().createPost(txt, finalUrl, function(){ var m=$('#ghPostModal'); if(m)m.remove(); }, payload);
-      }).catch(function(){ toast('Image upload failed', 'error'); }).finally(function(){ var b=$('#ghSubmitPost'); if(b)b.disabled=false; });
+      }).catch(function(err){ console.error('[GeoHub] post image upload failed', err); toast('Image upload failed. Check Cloudinary settings.', 'error'); }).finally(function(){ var b=$('#ghSubmitPost'); if(b){ b.disabled=false; b.innerHTML=b.dataset.originalText || '<i class="fas fa-paper-plane"></i> Post'; } });
     };
   }
 
@@ -325,7 +328,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var body='<textarea class="gh-textarea" id="ghStoryText" placeholder="Story text…"></textarea><div style="height:10px"></div><input class="gh-input" id="ghStoryImg" placeholder="Image URL optional"><div style="height:10px"></div><button class="gh-btn ghost full" id="ghPickStoryImage" type="button"><i class="fas fa-image"></i> Choose image</button><div id="ghStoryPreview" style="margin-top:10px"></div>';
     modal('Add story', body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitStory">Share story</button>', 'ghStoryModal');
     var picked=''; $('#ghPickStoryImage').onclick=function(){ triggerImagePick(function(url){ picked=url; $('#ghStoryImg').value=''; $('#ghStoryPreview').innerHTML=url?'<img src="'+esc(url)+'" style="width:100%;max-height:260px;object-fit:cover;border-radius:16px;border:1px solid var(--gh-border)">':''; }); };
-    $('#ghSubmitStory').onclick=function(){ var t=$('#ghStoryText').value, url=picked||$('#ghStoryImg').value.trim(); if(!t.trim()&&!url)return toast('Story needs text or image','error'); if(!GS().createStory) return toast('Stories unavailable','error'); $('#ghSubmitStory').disabled=true; prepareMedia(url,'stories').then(function(finalUrl){ if(url && !finalUrl) throw new Error('Image upload failed'); GS().createStory(t,finalUrl,function(){ var m=$('#ghStoryModal'); if(m)m.remove(); }); }).catch(function(){ toast('Image upload failed','error'); }).finally(function(){ var b=$('#ghSubmitStory'); if(b)b.disabled=false; }); };
+    $('#ghSubmitStory').onclick=function(){ var t=$('#ghStoryText').value, url=picked||$('#ghStoryImg').value.trim(); if(!t.trim()&&!url)return toast('Story needs text or image','error'); if(!GS().createStory) return toast('Stories unavailable','error'); var submitBtn=$('#ghSubmitStory'); submitBtn.disabled=true; submitBtn.dataset.originalText=submitBtn.innerHTML; submitBtn.innerHTML=url?'<i class="fas fa-circle-notch fa-spin"></i> Uploading…':'<i class="fas fa-circle-notch fa-spin"></i> Sharing…'; prepareMedia(url,'stories').then(function(finalUrl){ if(url && !finalUrl) throw new Error('Image upload failed'); GS().createStory(t,finalUrl,function(){ var m=$('#ghStoryModal'); if(m)m.remove(); }); }).catch(function(err){ console.error('[GeoHub] story image upload failed', err); toast('Image upload failed. Check Cloudinary settings.','error'); }).finally(function(){ var b=$('#ghSubmitStory'); if(b){ b.disabled=false; b.innerHTML=b.dataset.originalText||'Share story'; } }); };
   }
 
   function normalizeStoryItem(s){
