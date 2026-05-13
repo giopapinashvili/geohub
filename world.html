@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GeoHub World — Smart City Simulation</title>
   <link rel="stylesheet" href="world.css">
+<link rel="stylesheet" href="chat-popup.css">
+  <link rel="stylesheet" href="responsive-polish.css">
 </head>
 <body>
 
@@ -37,34 +39,34 @@
       <div class="ps-title">📡 Live Now</div>
       <div class="counter-grid">
         <div class="ctr">
-          <div class="ctr-val" id="ctr-users">2,841</div>
+          <div class="ctr-val" id="ctr-users">0</div>
           <div class="ctr-label">Active Users</div>
-          <div class="ctr-delta" id="delta-users">↑ +12 /min</div>
+          <div class="ctr-delta" id="delta-users">Real data</div>
         </div>
         <div class="ctr">
-          <div class="ctr-val green" id="ctr-checkins">1,204</div>
+          <div class="ctr-val green" id="ctr-checkins">0</div>
           <div class="ctr-label">Check-ins</div>
-          <div class="ctr-delta" id="delta-checkins">↑ +8 /min</div>
+          <div class="ctr-delta" id="delta-checkins">Real data</div>
         </div>
         <div class="ctr">
-          <div class="ctr-val gold" id="ctr-rewards">387</div>
+          <div class="ctr-val gold" id="ctr-rewards">0</div>
           <div class="ctr-label">Rewards Claimed</div>
-          <div class="ctr-delta" id="delta-rewards">↑ +3 /min</div>
+          <div class="ctr-delta" id="delta-rewards">Real data</div>
         </div>
         <div class="ctr">
-          <div class="ctr-val purple" id="ctr-missions">94</div>
+          <div class="ctr-val purple" id="ctr-missions">0</div>
           <div class="ctr-label">Missions Done</div>
-          <div class="ctr-delta" id="delta-missions">↑ +1 /min</div>
+          <div class="ctr-delta" id="delta-missions">Real data</div>
         </div>
         <div class="ctr">
-          <div class="ctr-val" id="ctr-tickets">628</div>
+          <div class="ctr-val" id="ctr-tickets">0</div>
           <div class="ctr-label">Tickets Booked</div>
-          <div class="ctr-delta" id="delta-tickets">↑ +5 /min</div>
+          <div class="ctr-delta" id="delta-tickets">Real data</div>
         </div>
         <div class="ctr">
-          <div class="ctr-val green" id="ctr-stories">319</div>
+          <div class="ctr-val green" id="ctr-stories">0</div>
           <div class="ctr-label">Live Stories</div>
-          <div class="ctr-delta" id="delta-stories">↑ +4 /min</div>
+          <div class="ctr-delta" id="delta-stories">Real data</div>
         </div>
       </div>
     </div>
@@ -126,63 +128,66 @@
     <div class="bc">
       <div class="bc-icon">👥</div>
       <div>
-        <div class="bc-val" id="bc-users">2,841</div>
+        <div class="bc-val" id="bc-users">0</div>
         <div class="bc-label">Users Online</div>
-        <div class="bc-trend" id="bc-users-trend">↑ +12%</div>
+        <div class="bc-trend" id="bc-users-trend">0</div>
       </div>
     </div>
     <div class="bc">
       <div class="bc-icon">📍</div>
       <div>
-        <div class="bc-val" id="bc-checkins">1,204</div>
+        <div class="bc-val" id="bc-checkins">0</div>
         <div class="bc-label">Check-ins Today</div>
-        <div class="bc-trend">↑ +8%</div>
+        <div class="bc-trend">Real data</div>
       </div>
     </div>
     <div class="bc">
       <div class="bc-icon">🎟️</div>
       <div>
-        <div class="bc-val" id="bc-tickets">628</div>
+        <div class="bc-val" id="bc-tickets">0</div>
         <div class="bc-label">Tickets Booked</div>
-        <div class="bc-trend">↑ +15%</div>
+        <div class="bc-trend">Real data</div>
       </div>
     </div>
     <div class="bc">
       <div class="bc-icon">🏆</div>
       <div>
-        <div class="bc-val" id="bc-rewards">387</div>
+        <div class="bc-val" id="bc-rewards">0</div>
         <div class="bc-label">Rewards Claimed</div>
-        <div class="bc-trend" style="color:var(--gold)">↑ +22%</div>
+        <div class="bc-trend" style="color:var(--gold)">Real data</div>
       </div>
     </div>
     <div class="bc">
       <div class="bc-icon">🛡️</div>
       <div>
-        <div class="bc-val" id="bc-missions">94</div>
+        <div class="bc-val" id="bc-missions">0</div>
         <div class="bc-label">Missions Complete</div>
-        <div class="bc-trend" style="color:var(--green)">↑ +6%</div>
+        <div class="bc-trend" style="color:var(--green)">Real data</div>
       </div>
     </div>
     <div class="bc">
       <div class="bc-icon">🎬</div>
       <div>
-        <div class="bc-val" id="bc-stories">319</div>
+        <div class="bc-val" id="bc-stories">0</div>
         <div class="bc-label">Live Stories</div>
-        <div class="bc-trend" style="color:var(--purple)">↑ +18%</div>
+        <div class="bc-trend" style="color:var(--purple)">Real data</div>
       </div>
     </div>
     <div class="bc" style="border-right:none">
       <div class="bc-icon">💎</div>
       <div>
-        <div class="bc-val" style="color:var(--gold)" id="bc-xp">48,290</div>
+        <div class="bc-val" style="color:var(--gold)" id="bc-xp">0</div>
         <div class="bc-label">XP Earned Today</div>
-        <div class="bc-trend" style="color:var(--gold)">↑ +31%</div>
+        <div class="bc-trend" style="color:var(--gold)">Real data</div>
       </div>
     </div>
   </div>
 
 </div>
 
-<script src="world.js"></script>
+<script defer src="world.js"></script>
+<script defer src="chat-popup.js"></script>
+<script defer src="geohub-production-stabilization-v1.js"></script>
+  <script defer src="responsive-polish.js"></script>
 </body>
 </html>

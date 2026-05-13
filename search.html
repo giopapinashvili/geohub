@@ -77,6 +77,8 @@
     .srch-tabs{padding:0 12px}
   }
   </style>
+  <link rel="stylesheet" href="chat-popup.css">
+  <link rel="stylesheet" href="responsive-polish.css">
 </head>
 <body>
 
@@ -121,11 +123,12 @@
   </div>
 </main>
 
-<script src="firestore-social.js"></script>
+<script defer src="firestore-social.js"></script>
+<script defer src="chat-popup.js"></script>
 <script type="module" src="firebase-config.js"></script>
-<script src="account.js"></script>
-<script src="nav-cleanup.js"></script>
-<script src="mobile-nav.js"></script>
+<script defer src="account.js"></script>
+<script defer src="nav-cleanup.js"></script>
+<script defer src="mobile-nav.js"></script>
 
 <script>
   var _currentTab = 'all';
@@ -180,7 +183,7 @@
 
     function userItem(u){
       var av = u.photoURL||u.avatarUrl||u.avatar||'';
-      var iconHtml = av ? '<img src="'+esc(av)+'" alt="" onerror="this.outerHTML=\'<div>'+esc((u.name||u.displayName||'U').charAt(0).toUpperCase())+'</div>\'">' : esc((u.name||u.displayName||'U').charAt(0).toUpperCase());
+      var iconHtml = av ? '<img loading="lazy" decoding="async" src="'+esc(av)+'" alt="" onerror="this.outerHTML=\'<div>'+esc((u.name||u.displayName||'U').charAt(0).toUpperCase())+'</div>\'">' : esc((u.name||u.displayName||'U').charAt(0).toUpperCase());
       return '<a class="srch-item" href="profile.html?id='+esc(u.id||u.uid)+'" onclick="logClick(\'user\')">'+
         '<div class="srch-item-icon" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">'+iconHtml+'</div>'+
         '<div class="srch-item-body"><div class="srch-item-name">'+esc(u.name||u.displayName||u.email||'User')+'</div><div class="srch-item-sub">'+esc(u.username?'@'+u.username:'People on GeoHub')+'</div></div>'+
@@ -211,7 +214,7 @@
 
     function postItem(p){
       var av = p.authorAvatar||'';
-      var iconHtml = av ? '<img src="'+esc(av)+'" alt="" onerror="this.outerHTML=\'<div style=\'font-size:.8rem\'>'+(p.authorName||'U').charAt(0).toUpperCase()+'</div>\'">' : esc((p.authorName||'U').charAt(0).toUpperCase());
+      var iconHtml = av ? '<img loading="lazy" decoding="async" src="'+esc(av)+'" alt="" onerror="this.outerHTML=\'<div style=\'font-size:.8rem\'>'+(p.authorName||'U').charAt(0).toUpperCase()+'</div>\'">' : esc((p.authorName||'U').charAt(0).toUpperCase());
       return '<div class="srch-item" onclick="location.href=\'feed.html#post-'+esc(p.id||'')+'\'">'+
         '<div class="srch-item-icon" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">'+iconHtml+'</div>'+
         '<div class="srch-item-body"><div class="srch-item-name">'+esc(p.authorName||'Post')+'</div><div class="srch-item-sub">'+esc((p.text||'').substring(0,60))+'</div></div>'+
@@ -296,5 +299,7 @@
     document.getElementById('srchInput').focus();
   }
 </script>
+<script defer src="geohub-production-stabilization-v1.js"></script>
+  <script defer src="responsive-polish.js"></script>
 </body>
 </html>

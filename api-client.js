@@ -12,8 +12,8 @@
   function list(name, field, value, max) {
     return new Promise(function(resolve) {
       var geo = fb(); if (!geo || !geo.db || !geo.fs) return resolve(fail('Firebase unavailable', 503));
-      var q = geo.fs.query(geo.fs.collection(geo.db, name), geo.fs.orderBy('createdAt', 'desc'), geo.fs.limit(max || 50));
-      if (field && value !== undefined) q = geo.fs.query(geo.fs.collection(geo.db, name), geo.fs.where(field, '==', value), geo.fs.limit(max || 50));
+      var q = geo.fs.query(geo.fs.collection(geo.db, name), geo.fs.orderBy('createdAt', 'desc'), geo.fs.limit(max || 20));
+      if (field && value !== undefined) q = geo.fs.query(geo.fs.collection(geo.db, name), geo.fs.where(field, '==', value), geo.fs.limit(max || 20));
       geo.fs.getDocs(q).then(function(snap){ var arr=[]; snap.forEach(function(d){ arr.push(Object.assign({ id:d.id }, d.data())); }); resolve(ok(arr)); }).catch(function(e){ resolve(fail(e.message, 500)); });
     });
   }
@@ -52,6 +52,6 @@
   function bookLesson(teacherId, data) { return add('lessonBookings', Object.assign({ teacherId: teacherId }, data || {})); }
   function submitReport(targetType, targetId, reason, details) { return add('reports', { targetType: targetType, targetId: targetId, reason: reason, details: details, status: 'pending' }); }
   function getNotifications() { var u=authUser(); return u ? list('userNotifications','userId',u.uid) : Promise.resolve(fail('Authentication required',401)); }
-  function markNotificationsRead() { var geo=fb(), u=authUser(); if(!geo||!u) return Promise.resolve(fail('Firebase unavailable or not logged in',503)); return geo.fs.getDocs(geo.fs.query(geo.fs.collection(geo.db,'userNotifications'), geo.fs.where('userId','==',u.uid), geo.fs.where('read','==',false))).then(function(snap){ var batch=geo.fs.writeBatch(geo.db); snap.forEach(function(d){ batch.update(d.ref,{read:true}); }); return batch.commit().then(function(){ return ok({updated:snap.size}); }); }).catch(function(e){ return fail(e.message,500); }); }
+  function markNotificationsRead() { var geo=fb(), u=authUser(); if(!geo||!u) return Promise.resolve(fail('Firebase unavailable or not logged in',503)); return geo.fs.getDocs(geo.fs.query(geo.fs.collection(geo.db,'userNotifications'), geo.fs.where('userId','==',u.uid), geo.fs.where('read','==',false), geo.fs.limit(30))).then(function(snap){ var batch=geo.fs.writeBatch(geo.db); snap.forEach(function(d){ batch.update(d.ref,{read:true}); }); return batch.commit().then(function(){ return ok({updated:snap.size}); }); }).catch(function(e){ return fail(e.message,500); }); }
   window.GeoAPI = { login, signup, logout, getCurrentUser, updateProfile, getFeed, createPost, createCheckin, getPlaces, getPlace, getRewards, claimReward, getChallenges, joinChallenge, getEvents, bookTicket, getMessages, sendMessage, getBusinesses, createCampaign, getCreators, sendCollabOffer, getListings, requestService, bookLesson, submitReport, getNotifications, markNotificationsRead };
 })();

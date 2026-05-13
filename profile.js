@@ -135,6 +135,33 @@
     $$('.ptab .tab-count').forEach(c => { c.textContent = '0'; });
   }
 
+  async function refreshRealStats(user) {
+    const GF = window.GeoFirebase;
+    if (!GF || !GF.fs || !GF.db || !user || !user.uid) return;
+    const count = async q => {
+      if (GF.fs.getCountFromServer) {
+        const snap = await GF.fs.getCountFromServer(q);
+        return snap.data().count || 0;
+      }
+      const snap = await GF.fs.getDocs(q);
+      return snap.size || 0;
+    };
+    try {
+      const [posts, friends, followers, following] = await Promise.all([
+        count(GF.fs.query(GF.fs.collection(GF.db, 'posts'), GF.fs.where('authorId', '==', user.uid), GF.fs.limit(200))).catch(() => 0),
+        count(GF.fs.query(GF.fs.collection(GF.db, 'friends'), GF.fs.where('users', 'array-contains', user.uid), GF.fs.limit(200))).catch(() => 0),
+        count(GF.fs.query(GF.fs.collection(GF.db, 'follows'), GF.fs.where('followingId', '==', user.uid), GF.fs.limit(200))).catch(() => 0),
+        count(GF.fs.query(GF.fs.collection(GF.db, 'follows'), GF.fs.where('followerId', '==', user.uid), GF.fs.limit(200))).catch(() => 0)
+      ]);
+      const vals = [Number(user.visitedPlaces || 0), friends, followers, following, user.pointsBalance || Math.floor(Number(user.xp || 0) / 10), Number(user.trustScore || 0)];
+      $$('.profile-stats-bar .pstat-value').forEach((el, i) => { el.textContent = compact(vals[i] || 0); });
+      const postTab = $('.ptab[data-tab="posts"] .tab-count'); if (postTab) postTab.textContent = posts || '0';
+      const friendsTab = $('.ptab[data-tab="friends"] .tab-count'); if (friendsTab) friendsTab.textContent = friends || '0';
+    } catch (err) {
+      console.warn('[Profile] real stats failed', err && err.message);
+    }
+  }
+
   function renderIdentity(user, fbUser) {
     document.title = user.fullName + ' — GeoHub';
     const cover = $('.profile-cover');
@@ -163,6 +190,7 @@
       window.GeoSocial.listenFriendshipStatus(user.uid, status => updateFriendButtons(user.uid, status));
     }
     renderStats(user);
+    refreshRealStats(user);
     renderStaticEmptyStates(user);
   }
 

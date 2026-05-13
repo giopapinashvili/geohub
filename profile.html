@@ -18,6 +18,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="profile.css">
   <link rel="stylesheet" href="geohub-points.css">
+  <link rel="stylesheet" href="chat-popup.css">
+  <link rel="stylesheet" href="responsive-polish.css">
 </head>
 <body class="page-profile">
 
@@ -66,7 +68,7 @@
     <!-- Avatar + Name Block -->
     <div class="profile-hero-left">
       <div class="profile-avatar-wrap">
-        <img class="profile-avatar" src="https://api.dicebear.com/7.x/initials/svg?seed=GeoHub" alt="Profile">
+        <img class="profile-avatar" src="https://api.dicebear.com/7.x/initials/svg?seed=GeoHub" alt="Profile" loading="lazy" decoding="async">
         <div class="avatar-level">1</div>
       </div>
       <div class="profile-name-block">
@@ -328,15 +330,18 @@
 </div><!-- /profile-layout -->
 
 <script type="module" src="firebase-config.js"></script>
-<script src="config.js"></script>
-<script src="main.js"></script>
-<script src="account.js"></script>
-<script src="firestore-social.js"></script>
-<script src="profile.js"></script>
-<script src="geohub-points.js"></script>
-<script src="nav-cleanup.js"></script>
-<script src="mobile-nav.js"></script>
-<script src="geohub-fixes.js"></script>
-<script src="geohub-production-v6.js"></script>
+<script defer src="config.js"></script>
+<script defer src="main.js"></script>
+<script defer src="account.js"></script>
+<script defer src="firestore-social.js"></script>
+<script defer src="chat-popup.js"></script>
+<script defer src="profile.js"></script>
+<script defer src="geohub-points.js"></script>
+<script defer src="nav-cleanup.js"></script>
+<script defer src="mobile-nav.js"></script>
+<script defer src="geohub-fixes.js"></script>
+<script defer src="geohub-production-v6.js"></script>
+<script defer src="geohub-production-stabilization-v1.js"></script>
+  <script defer src="responsive-polish.js"></script>
 </body>
 </html>

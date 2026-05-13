@@ -7,7 +7,7 @@
 
   var PATH = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   var PAGE = document.body && document.body.dataset ? document.body.dataset.ghPage : '';
-  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], safetyUnsub: null };
+  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], safetyUnsub: null, sharedPostCache: {} };
 
   function applyTheme(theme){
     theme = theme === 'dark' ? 'dark' : 'light';
@@ -56,8 +56,8 @@
 function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=Math.max(1, Math.floor((Date.now()-t)/1000)); if(s<60)return s+'s'; var m=Math.floor(s/60); if(m<60)return m+'m'; var h=Math.floor(m/60); if(h<24)return h+'h'; var d=Math.floor(h/24); if(d<30)return d+'d'; var mo=Math.floor(d/30); if(mo<12)return mo+'mo'; return Math.floor(mo/12)+'y'; }
   function initials(name){ name=text(name,'GeoHub'); return name.split(/\s+/).slice(0,2).map(function(x){return x[0];}).join('').toUpperCase(); }
   function img(url, alt){ return url ? '<img src="'+esc(url)+'" alt="'+esc(alt||'')+'" loading="lazy" onerror="this.remove()">' : ''; }
-  function readFileAsDataUrl(file){ return new Promise(function(resolve,reject){ if(!file) return resolve(''); var r=new FileReader(); r.onload=function(){ resolve(r.result||''); }; r.onerror=reject; r.readAsDataURL(file); }); }
-  function triggerImagePick(cb){ var input=document.createElement('input'); input.type='file'; input.accept='image/*'; input.style.display='none'; document.body.appendChild(input); input.onchange=function(){ var f=input.files && input.files[0]; readFileAsDataUrl(f).then(function(url){ cb(url); }).finally(function(){ input.remove(); }); }; input.click(); }
+  function readFileAsDataUrl(file){ return new Promise(function(resolve,reject){ if(!file) return resolve(''); if(!/^image\/(png|jpe?g|webp|gif)$/i.test(file.type||'')) return reject(new Error('Use a PNG, JPG, WEBP or GIF image.')); if(file.size > 8 * 1024 * 1024) return reject(new Error('Image must be under 8 MB.')); var r=new FileReader(); r.onload=function(){ resolve(r.result||''); }; r.onerror=reject; r.readAsDataURL(file); }); }
+  function triggerImagePick(cb){ var input=document.createElement('input'); input.type='file'; input.accept='image/png,image/jpeg,image/webp,image/gif'; input.style.display='none'; document.body.appendChild(input); input.onchange=function(){ var f=input.files && input.files[0]; readFileAsDataUrl(f).then(function(url){ cb(url); }).catch(function(err){ toast(err.message || 'Image could not be read','error'); }).finally(function(){ input.remove(); }); }; input.click(); }
   function iconFor(type){ return ({post:'fa-newspaper',business:'fa-store',group:'fa-users',place:'fa-map-marker-alt',event:'fa-calendar',service:'fa-briefcase',reward:'fa-gift',challenge:'fa-trophy',learning:'fa-graduation-cap',creator:'fa-user-astronaut'})[type] || 'fa-circle'; }
   function labelFor(type){ return ({post:'Post',business:'Business',group:'Group',place:'Place',event:'Event',service:'Service',reward:'Reward',challenge:'Challenge',learning:'Learning',creator:'Creator'})[type] || text(type,'Item'); }
   function toast(msg, type){ if(window.GeoSocial && window.GeoSocial.toast) return window.GeoSocial.toast(msg,type); var old=$('.gh-toast'); if(old) old.remove(); var el=document.createElement('div'); el.className='gh-toast'+(type==='error'?' error':''); el.textContent=msg; document.body.appendChild(el); requestAnimationFrame(function(){el.classList.add('show');}); setTimeout(function(){el.classList.remove('show'); setTimeout(function(){el.remove();},250);},2300); }
@@ -172,9 +172,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(e.target.closest('[data-create-post]')) openPostModal({});
       if(e.target.closest('[data-create-story]')) openStoryModal();
       if(e.target.closest('#ghNotifBtn')) openNotifications();
+      var notif=e.target.closest('[data-notif]');
+      if(notif && GS() && GS().markNotificationRead) GS().markNotificationRead(notif.dataset.notif);
     });
     var gs=$('#ghGlobalSearch'); if(gs){ gs.addEventListener('keydown', function(e){ if(e.key==='Enter' && gs.value.trim()) location.href='search.html?q='+encodeURIComponent(gs.value.trim()); }); }
-    loadRightRail();
+    if(window.requestIdleCallback) requestIdleCallback(loadRightRail, { timeout: 2500 });
+    else setTimeout(loadRightRail, 700);
   }
 
   function updateTopUser(){
@@ -206,11 +209,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var nb=$('#ghNotifBadge'), mb=$('#ghMsgBadge');
       if(nb) nb.textContent='';
       if(mb) mb.textContent='';
+      (state.badgeUnsubs || []).forEach(function(u){ try{ if(u) u(); }catch(e){} });
+      state.badgeUnsubs = [];
       var u=authUser(); if(!u) return;
       try{
-        GS().listenUserNotifications(u.uid, function(items){ var n=items.filter(function(x){return !x.read;}).length; var b=$('#ghNotifBadge'); if(b) b.textContent=n?String(n):''; });
-        var q=fs().query(fs().collection(db(),'conversations'), fs().where('participants','array-contains',u.uid));
-        fs().onSnapshot(q,function(snap){ var n=0; snap.forEach(function(d){ var x=d.data()||{}; if(x.lastSenderId && x.lastSenderId!==u.uid && !(x.readBy||[]).includes(u.uid)) n++; }); var b=$('#ghMsgBadge'); if(b) b.textContent=n?String(n):''; },function(){ });
+        state.badgeUnsubs.push(GS().listenUserNotifications(u.uid, function(items){ var n=items.filter(function(x){return !x.read;}).length; var b=$('#ghNotifBadge'); if(b) b.textContent=n?String(n):''; }));
+        var q=fs().query(fs().collection(db(),'conversations'), fs().where('participants','array-contains',u.uid), fs().limit(25));
+        state.badgeUnsubs.push(fs().onSnapshot(q,function(snap){ var n=0; snap.forEach(function(d){ var x=d.data()||{}; if(x.lastSenderId && x.lastSenderId!==u.uid && Array.isArray(x.unreadFor) && x.unreadFor.indexOf(u.uid)>-1) n++; }); var b=$('#ghMsgBadge'); if(b) b.textContent=n?String(n):''; },function(){ }));
       }catch(e){}
     });
   }
@@ -239,12 +244,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     ready(function(){
       var uid=authUser().uid;
       $('#ghMarkAllRead').onclick=function(){ markVisibleNotificationsRead(); };
-      GS().listenUserNotifications(uid, function(items){
+      var unsub = GS().listenUserNotifications(uid, function(items){
         var box=$('#ghNotifList'); if(!box) return;
         if(!items.length){ box.innerHTML='<div class="gh-empty"><i class="fas fa-bell"></i><h3>No notifications</h3><p>Likes, comments, messages and requests will appear here.</p></div>'; return; }
         box.innerHTML='<div class="gh-mini-list">'+items.slice(0,30).map(function(n){return '<a class="gh-mini-item '+(!n.read?'unread':'')+'" href="'+esc(n.href||'feed.html')+'" data-notif="'+esc(n.id)+'"><span class="gh-mini-thumb"><i class="fas fa-bell"></i></span><div><strong>'+esc(n.title||'GeoHub')+'</strong><span>'+esc(n.body||n.message||'')+' · '+timeAgo(n.createdAt)+'</span></div></a>';}).join('')+'</div>';
-        setTimeout(markVisibleNotificationsRead, 900);
       });
+      var modalEl = $('#ghNotifModal');
+      if(modalEl) modalEl._unsub = unsub;
     });
   }
 
@@ -261,14 +267,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var wrap=document.createElement('div'); wrap.className='gh-modal-backdrop'; if(id) wrap.id=id;
     wrap.innerHTML='<div class="gh-modal"><div class="gh-modal-head"><h3>'+esc(title)+'</h3><button class="gh-modal-close" data-close-modal>✕</button></div><div class="gh-modal-body">'+body+'</div><div class="gh-modal-actions">'+(actions||'<button class="gh-btn ghost" data-close-modal>Cancel</button>')+'</div></div>';
     document.body.appendChild(wrap);
-    wrap.addEventListener('click', function(e){ if(e.target===wrap || e.target.closest('[data-close-modal]')) wrap.remove(); });
+    wrap.addEventListener('click', function(e){ if(e.target===wrap || e.target.closest('[data-close-modal]')){ if(wrap._unsub) try{ wrap._unsub(); }catch(_e){} wrap.remove(); } });
     return wrap;
   }
 
 
   function prepareMedia(url, folder){
     if(!url) return Promise.resolve('');
-    if(GS() && GS().uploadImageDataUrl) return GS().uploadImageDataUrl(url, folder || 'posts');
+    if(GS() && GS().uploadImageDataUrl) return GS().uploadImageDataUrl(url, folder || 'posts').then(function(finalUrl){
+      if(url.indexOf('data:') === 0 && !finalUrl) throw new Error('Image upload failed');
+      return finalUrl;
+    });
     return Promise.resolve(url);
   }
 
@@ -286,6 +295,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var payload=Object.assign({ visibility: $('#ghPostVisibility').value, feeling: $('#ghPostFeeling').value.trim(), mentions: extractMentions(txt) }, extra||{});
       $('#ghSubmitPost').disabled = true;
       prepareMedia(url, 'posts').then(function(finalUrl){
+        if(url && !finalUrl) throw new Error('Image upload failed');
         GS().createPost(txt, finalUrl, function(){ var m=$('#ghPostModal'); if(m)m.remove(); }, payload);
       }).catch(function(){ toast('Image upload failed', 'error'); }).finally(function(){ var b=$('#ghSubmitPost'); if(b)b.disabled=false; });
     };
@@ -296,25 +306,128 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var body='<textarea class="gh-textarea" id="ghStoryText" placeholder="Story text…"></textarea><div style="height:10px"></div><input class="gh-input" id="ghStoryImg" placeholder="Image URL optional"><div style="height:10px"></div><button class="gh-btn ghost full" id="ghPickStoryImage" type="button"><i class="fas fa-image"></i> Choose image</button><div id="ghStoryPreview" style="margin-top:10px"></div>';
     modal('Add story', body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitStory">Share story</button>', 'ghStoryModal');
     var picked=''; $('#ghPickStoryImage').onclick=function(){ triggerImagePick(function(url){ picked=url; $('#ghStoryImg').value=''; $('#ghStoryPreview').innerHTML=url?'<img src="'+esc(url)+'" style="width:100%;max-height:260px;object-fit:cover;border-radius:16px;border:1px solid var(--gh-border)">':''; }); };
-    $('#ghSubmitStory').onclick=function(){ var t=$('#ghStoryText').value, url=picked||$('#ghStoryImg').value.trim(); if(!t.trim()&&!url)return toast('Story needs text or image','error'); if(!GS().createStory) return toast('Stories unavailable','error'); $('#ghSubmitStory').disabled=true; prepareMedia(url,'stories').then(function(finalUrl){ GS().createStory(t,finalUrl,function(){ var m=$('#ghStoryModal'); if(m)m.remove(); }); }).finally(function(){ var b=$('#ghSubmitStory'); if(b)b.disabled=false; }); };
+    $('#ghSubmitStory').onclick=function(){ var t=$('#ghStoryText').value, url=picked||$('#ghStoryImg').value.trim(); if(!t.trim()&&!url)return toast('Story needs text or image','error'); if(!GS().createStory) return toast('Stories unavailable','error'); $('#ghSubmitStory').disabled=true; prepareMedia(url,'stories').then(function(finalUrl){ if(url && !finalUrl) throw new Error('Image upload failed'); GS().createStory(t,finalUrl,function(){ var m=$('#ghStoryModal'); if(m)m.remove(); }); }).catch(function(){ toast('Image upload failed','error'); }).finally(function(){ var b=$('#ghSubmitStory'); if(b)b.disabled=false; }); };
+  }
+
+  function normalizeStoryItem(s){
+    s=s||{};
+    return Object.assign({}, s, {
+      id: s.id || s.storyId || '',
+      authorId: s.authorId || s.userId || s.uid || '',
+      authorName: s.authorName || s.userName || s.name || 'GeoHub User',
+      authorAvatar: s.authorAvatar || s.userPhotoURL || s.photoURL || '',
+      mediaUrl: s.mediaUrl || s.imageUrl || s.photoUrl || '',
+      text: s.text || s.caption || '',
+      createdAt: s.createdAt || s.timestamp || Date.now()
+    });
+  }
+
+  function buildStoryGroups(items){
+    var groups=[], map={};
+    (items||[]).map(normalizeStoryItem).forEach(function(story){
+      var key = story.authorId || story.authorName || story.id || 'unknown';
+      if(!map[key]){
+        map[key] = { key:key, authorId:story.authorId, authorName:story.authorName, authorAvatar:story.authorAvatar, stories:[] };
+        groups.push(map[key]);
+      }
+      if(story.authorAvatar && !map[key].authorAvatar) map[key].authorAvatar = story.authorAvatar;
+      map[key].stories.push(story);
+    });
+    groups.forEach(function(g){ g.stories.sort(function(a,b){ return ts(b.createdAt)-ts(a.createdAt); }); });
+    return groups;
+  }
+
+  function renderStoryCard(group, index){
+    var first = group.stories[0] || {};
+    var media = first.mediaUrl || '';
+    var av = group.authorAvatar || '';
+    return '<button type="button" class="gh-story-card gh-story-v2-card" data-story-group="'+index+'" aria-label="Open '+esc(group.authorName)+' stories">'+
+      '<div class="gh-story-bg">'+(media ? img(media, group.authorName) : '<span>📖</span>')+'</div>'+
+      '<span class="gh-story-avatar-mini">'+(av ? img(av, group.authorName) : esc(initials(group.authorName)))+'</span>'+
+      (group.stories.length > 1 ? '<span class="gh-story-count">'+group.stories.length+'</span>' : '')+
+      '<strong>'+esc(group.authorName)+'</strong>'+
+      '<small>'+timeAgo(first.createdAt)+'</small>'+
+    '</button>';
   }
 
   function loadStories(selector, mini){
     ready(function(){
       var box=$(selector); if(!box) return;
+      if(box.dataset.storiesBound === '1') return;
+      box.dataset.storiesBound = '1';
+      var groups=[];
+      box.innerHTML='<button type="button" class="gh-story-card gh-story-add" data-create-story><div><i class="fas fa-plus-circle"></i><br><strong>Create</strong></div></button>';
       GS().listenStories(function(items){
-        var add='<div class="gh-story-card gh-story-add" data-create-story><div><i class="fas fa-plus-circle"></i><br><strong>Create</strong></div></div>';
-        if(!items.length){ box.innerHTML=add; return; }
-        box.innerHTML=add+items.slice(0,12).map(function(s){ var name=s.authorName||s.userName||'Story'; var photo=s.mediaUrl||s.imageUrl; var uid=s.authorId||s.userId||''; return '<div class="gh-story-card" data-story-id="'+esc(s.id)+'" data-story-author="'+esc(name)+'" data-story-author-id="'+esc(uid)+'" data-story-text="'+esc(s.text||'')+'" data-story-media="'+esc(photo||'')+'">'+(photo?img(photo,name):'')+'<strong>'+esc(name)+'</strong></div>'; }).join('');
-        box.onclick=function(e){ var st=e.target.closest('[data-story-id]'); if(st) openStoryViewer(st); if(e.target.closest('[data-create-story]')) openStoryModal(); };
+        groups = buildStoryGroups(items || []);
+        var add='<button type="button" class="gh-story-card gh-story-add" data-create-story><div><i class="fas fa-plus-circle"></i><br><strong>Create</strong></div></button>';
+        box.innerHTML = add + groups.slice(0, 16).map(renderStoryCard).join('');
+      });
+      box.addEventListener('click', function(e){
+        var add = e.target.closest('[data-create-story]');
+        if(add){ e.preventDefault(); openStoryModal(); return; }
+        var card = e.target.closest('[data-story-group]');
+        if(card){ e.preventDefault(); openStoryViewer(groups, Number(card.dataset.storyGroup)||0, 0); }
       });
     });
   }
 
-  function openStoryViewer(el){
-    var media=el.dataset.storyMedia||'', author=el.dataset.storyAuthor||'Story', storyText=el.dataset.storyText||'', authorId=el.dataset.storyAuthorId||'';
-    var body='<div class="gh-story-viewer">'+(media?'<img src="'+esc(media)+'" alt="story">':'')+'<div class="gh-story-viewer-text"><strong>'+userProfileAnchor(authorId,'gh-profile-name-link',esc(author),'Open '+author+' profile')+'</strong><p>'+esc(storyText||'')+'</p></div></div>';
-    modal(author, body, '<button class="gh-btn ghost" data-close-modal>Close</button>', 'ghStoryViewerModal');
+  function openStoryViewer(groupsOrElement, groupIndex, storyIndex){
+    var groups = Array.isArray(groupsOrElement) ? groupsOrElement : null;
+    if(!groups){
+      var el = groupsOrElement;
+      var story = normalizeStoryItem({
+        id: el && el.dataset ? el.dataset.storyId : '',
+        authorId: el && el.dataset ? el.dataset.storyAuthorId : '',
+        authorName: el && el.dataset ? el.dataset.storyAuthor : 'Story',
+        text: el && el.dataset ? el.dataset.storyText : '',
+        mediaUrl: el && el.dataset ? el.dataset.storyMedia : ''
+      });
+      groups = buildStoryGroups([story]);
+      groupIndex = 0;
+      storyIndex = 0;
+    }
+    if(!groups || !groups.length) return;
+    groupIndex = Number(groupIndex)||0;
+    storyIndex = Number(storyIndex)||0;
+    var old = document.getElementById('ghStoryOverlay'); if(old) old.remove();
+    var overlay = document.createElement('div');
+    overlay.id = 'ghStoryOverlay';
+    overlay.className = 'gh-story-overlay';
+    document.body.appendChild(overlay);
+    document.body.classList.add('gh-story-open');
+
+    function close(){ overlay.remove(); document.body.classList.remove('gh-story-open'); document.removeEventListener('keydown', onKey); }
+    function normalizeIndexes(){
+      if(groupIndex < 0) groupIndex = groups.length - 1;
+      if(groupIndex >= groups.length) groupIndex = 0;
+      var g = groups[groupIndex];
+      if(storyIndex < 0){ groupIndex = groupIndex - 1; if(groupIndex < 0) groupIndex = groups.length - 1; g = groups[groupIndex]; storyIndex = g.stories.length - 1; }
+      if(storyIndex >= g.stories.length){ groupIndex = groupIndex + 1; if(groupIndex >= groups.length) groupIndex = 0; g = groups[groupIndex]; storyIndex = 0; }
+    }
+    function draw(){
+      normalizeIndexes();
+      var g = groups[groupIndex];
+      var st = g.stories[storyIndex] || {};
+      var media = st.mediaUrl || '';
+      overlay.innerHTML = '<div class="gh-story-shell" role="dialog" aria-modal="true" aria-label="Story viewer">'+
+        '<div class="gh-story-progress">'+g.stories.map(function(_,i){ return '<span class="'+(i<=storyIndex?'active':'')+'"></span>'; }).join('')+'</div>'+
+        '<div class="gh-story-head"><div class="gh-story-author">'+(g.authorAvatar?'<span class="gh-story-author-avatar">'+img(g.authorAvatar,g.authorName)+'</span>':'<span class="gh-story-author-avatar initials">'+esc(initials(g.authorName))+'</span>')+'<div><strong>'+esc(g.authorName)+'</strong><small>'+(storyIndex+1)+'/'+g.stories.length+' · '+timeAgo(st.createdAt)+'</small></div></div><button type="button" class="gh-story-close" aria-label="Close story">×</button></div>'+
+        '<div class="gh-story-main">'+(media?'<img src="'+esc(media)+'" alt="Story image" loading="eager">':'<p>'+esc(st.text||'Story')+'</p>')+(media && st.text?'<div class="gh-story-caption">'+esc(st.text)+'</div>':'')+'</div>'+
+        '<button type="button" class="gh-story-nav prev" aria-label="Previous story">‹</button><button type="button" class="gh-story-nav next" aria-label="Next story">›</button>'+
+      '</div>';
+      overlay.querySelector('.gh-story-close').onclick = close;
+      overlay.querySelector('.gh-story-nav.prev').onclick = function(e){ e.stopPropagation(); storyIndex--; draw(); };
+      overlay.querySelector('.gh-story-nav.next').onclick = function(e){ e.stopPropagation(); storyIndex++; draw(); };
+      overlay.querySelector('.gh-story-main').onclick = function(e){
+        var r = overlay.querySelector('.gh-story-main').getBoundingClientRect();
+        if(e.clientX < r.left + r.width/2) storyIndex--; else storyIndex++;
+        draw();
+      };
+    }
+    function onKey(e){ if(e.key==='Escape') close(); if(e.key==='ArrowLeft'){ storyIndex--; draw(); } if(e.key==='ArrowRight'){ storyIndex++; draw(); } }
+    document.addEventListener('keydown', onKey);
+    overlay.addEventListener('click', function(e){ if(e.target === overlay) close(); });
+    draw();
   }
 
   function postCard(p, options){
@@ -329,7 +442,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+target+(p.feeling?' · '+esc(p.feeling):'')+'</div></div><button class="gh-post-more" data-post-menu><i class="fas fa-ellipsis"></i></button></div>'+
       (p.text?'<div class="gh-post-text">'+esc(p.text)+'</div>':'')+
       (imgUrl?'<img class="gh-post-img" src="'+esc(imgUrl)+'" alt="post image" loading="lazy">':'')+
-      (p.sharedPostId?'<div class="gh-shared-preview"><i class="fas fa-share"></i><div><strong>Shared post</strong><span>'+esc(p.sharedPostId)+'</span></div></div>':'')+
+      (p.sharedPostId?'<div class="gh-shared-preview" data-shared-post="'+esc(p.sharedPostId)+'"><i class="fas fa-share"></i><div><strong>Shared post</strong><span>Loading original post...</span></div></div>':'')+
       '<div class="gh-post-stats"><span><i class="fas fa-thumbs-up"></i> <b data-like-count>'+Number(p.likeCount||p.reactionCount||0)+'</b></span><span><b data-comment-count>'+Number(p.commentCount||0)+'</b> comments · <b>'+Number(p.shareCount||0)+'</b> shares</span></div>'+
       '<div class="gh-post-actions"><button class="gh-act" data-like><i class="fas fa-thumbs-up"></i> Like</button><button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> Comment</button><button class="gh-act" data-share><i class="fas fa-share"></i> Share</button><button class="gh-act" data-save><i class="fas fa-bookmark"></i> Save</button></div>'+
       '<div class="gh-reaction-strip"><button data-reaction="like">👍</button><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button></div>'+
@@ -390,6 +503,33 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     $all('[data-reaction]',card).forEach(function(b){ b.classList.toggle('active',b.dataset.reaction===type); });
   }
 
+  function renderSharedPreviewData(p){
+    if(!p) return '<i class="fas fa-share"></i><div><strong>Original post unavailable</strong><span>This post was deleted or is private.</span></div>';
+    var name=p.authorName||p.userName||'GeoHub User';
+    var imgUrl=p.imageUrl||p.mediaUrl||p.photoUrl||'';
+    return (imgUrl?'<span class="gh-shared-thumb">'+img(imgUrl,'Shared post')+'</span>':'<i class="fas fa-share"></i>')+
+      '<div><strong>'+esc(name)+'</strong><span>'+esc((p.text||'Photo post').slice(0,140))+' - '+timeAgo(p.createdAt)+'</span></div>';
+  }
+
+  function hydrateSharedPreviews(root){
+    if(!fs() || !db()) return;
+    $all('[data-shared-post]', root || document).forEach(function(el){
+      var id=el.dataset.sharedPost;
+      if(!id || el.dataset.loaded==='1') return;
+      el.dataset.loaded='1';
+      var cached=state.sharedPostCache[id];
+      if(cached !== undefined){ el.innerHTML=renderSharedPreviewData(cached); return; }
+      fs().getDoc(fs().doc(db(),'posts',id)).then(function(snap){
+        var post=snap.exists()?Object.assign({id:id}, snap.data()):null;
+        state.sharedPostCache[id]=post;
+        el.innerHTML=renderSharedPreviewData(post);
+      }).catch(function(){
+        state.sharedPostCache[id]=null;
+        el.innerHTML=renderSharedPreviewData(null);
+      });
+    });
+  }
+
   function toggleComments(card,pid){
     var box=card.querySelector('[data-comments]'); if(!box) return; box.hidden=!box.hidden; if(box.hidden) return;
     if(state.postsUnsubs[pid]) return;
@@ -428,8 +568,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function sharePost(pid){
     if(!requireLogin()) return;
-    var body='<textarea class="gh-textarea" id="ghShareText" placeholder="Say something about this…"></textarea><div class="gh-form-grid"><select class="gh-select" id="ghShareVisibility"><option value="public">🌍 Public</option><option value="friends">👥 Friends / Followers</option><option value="onlyme">🔒 Only me</option></select><button class="gh-btn ghost" id="ghCopySharedLink" type="button"><i class="fas fa-link"></i> Copy link</button></div><div class="gh-shared-preview" style="margin-top:10px"><i class="fas fa-share"></i><div><strong>Shared post</strong><span>'+esc(pid)+'</span></div></div>';
+    var body='<textarea class="gh-textarea" id="ghShareText" placeholder="Say something about this…"></textarea><div class="gh-form-grid"><select class="gh-select" id="ghShareVisibility"><option value="public">🌍 Public</option><option value="friends">👥 Friends / Followers</option><option value="onlyme">🔒 Only me</option></select><button class="gh-btn ghost" id="ghCopySharedLink" type="button"><i class="fas fa-link"></i> Copy link</button></div><div class="gh-shared-preview" data-shared-post="'+esc(pid)+'" style="margin-top:10px"><i class="fas fa-share"></i><div><strong>Shared post</strong><span>Loading original post...</span></div></div>';
     modal('Share post', body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitShare">Share to feed</button>', 'ghShareModal');
+    hydrateSharedPreviews($('#ghShareModal'));
     $('#ghCopySharedLink').onclick=function(){ navigator.clipboard && navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast('Post link copied');}); };
     $('#ghSubmitShare').onclick=function(){ GS().createPost($('#ghShareText').value, '', function(){ if($('#ghShareModal')) $('#ghShareModal').remove(); if(GS().trackShare) GS().trackShare(pid); }, { sharedPostId: pid, visibility: $('#ghShareVisibility').value }); };
   }
@@ -468,7 +609,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function setTextById(id, value){ var el=document.getElementById(id); if(el) el.textContent=value; }
   function updateGeoPulse(){
     ready(function(){
-      Promise.all([getLatest('posts',200), getLatest('events',200), getLatest('businesses',200), getLatest('checkins',200)]).then(function(res){
+      Promise.all([getLatest('posts',25), getLatest('events',25), getLatest('businesses',25), getLatest('checkins',25)]).then(function(res){
         var posts=res[0].length, events=res[1].length, businesses=res[2].length, checkins=res[3].length;
         setTextById('gpPosts', posts); setTextById('gpPosts2', posts);
         setTextById('gpEvents', events); setTextById('gpEvents2', events);
@@ -509,10 +650,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(!visible.length){ list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-seedling"></i><h3>Feed is empty</h3><p>Create the first real post or adjust hidden/blocked filters.</p><button class="gh-btn" data-create-post><i class="fas fa-plus"></i>Create post</button></div>'; return; }
         list.innerHTML=visible.map(function(p){ return postCard(p); }).join('');
         visible.forEach(function(p){ try{ hydrateReactionState(p.id); }catch(e){} });
+        hydrateSharedPreviews(list);
         setTimeout(openDeepLinkedPost, 350);
       }
       setupSafetyListener(paint);
-      GS().listenFeed(function(posts){ lastPosts=posts; paint(); }, 50);
+      GS().listenFeed(function(posts){ lastPosts=posts; paint(); }, 20);
     });
   }
 
@@ -542,7 +684,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
     ready(function(){
       var collections=[['posts','post'],['businesses','business'],['groups','group'],['places','place'],['events','event'],['services','service'],['rewards','reward'],['challenges','challenge'],['learningItems','learning'],['creators','creator']];
-      Promise.all(collections.map(function(c){ return getLatest(c[0],80).then(function(arr){ return arr.map(function(x){ x._type=c[1]; return x; }); }); })).then(function(all){ items=[].concat.apply([],all).sort(function(a,b){return ts(b.createdAt)-ts(a.createdAt);}); paint(); }).catch(function(err){ var list=$('#ghDiscoverList'); if(list) list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Discover failed</h3><p>'+esc(err.message||err)+'</p></div>'; });
+      Promise.all(collections.map(function(c){ return getLatest(c[0],20).then(function(arr){ return arr.map(function(x){ x._type=c[1]; return x; }); }); })).then(function(all){ items=[].concat.apply([],all).sort(function(a,b){return ts(b.createdAt)-ts(a.createdAt);}); paint(); }).catch(function(err){ var list=$('#ghDiscoverList'); if(list) list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Discover failed</h3><p>'+esc(err.message||err)+'</p></div>'; });
     });
   }
 
@@ -623,7 +765,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     box.innerHTML=(isOwner?'<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="gh-avatar">'+esc(initials(b.name))+'</span><button class="gh-composer-fake" data-post-as-business>Post as '+esc(b.name||'business')+'</button></div></section>':'')+'<div id="ghBusinessPosts"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>';
     box.onclick=function(e){ if(e.target.closest('[data-post-as-business]')) openPostModal({ targetType:'business', targetId:b.id, authorType:'business', businessId:b.id, authorId:b.id, authorName:b.name, authorAvatar:b.logoUrl||b.coverImageUrl||'', createdByUserId:authUser() && authUser().uid }); };
     bindPostInteractions(box);
-    listenTargetPosts('business', b.id, function(posts){ var list=$('#ghBusinessPosts'); if(!list) return; posts=posts.filter(canSeePost); if(!posts.length){ list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Business page updates will appear here.</p></div>'; return; } list.innerHTML=posts.map(postCard).join(''); bindPostInteractions(list); posts.forEach(function(p){hydrateReactionState(p.id);}); });
+    listenTargetPosts('business', b.id, function(posts){ var list=$('#ghBusinessPosts'); if(!list) return; posts=posts.filter(canSeePost); if(!posts.length){ list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Business page updates will appear here.</p></div>'; return; } list.innerHTML=posts.map(postCard).join(''); bindPostInteractions(list); posts.forEach(function(p){hydrateReactionState(p.id);}); hydrateSharedPreviews(list); });
   }
 
   function aboutRow(ic, txt){ return '<div class="gh-about-row"><i class="fas '+ic+'"></i><span>'+esc(txt)+'</span></div>'; }
@@ -819,7 +961,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function renderComingSoon(){
     var title = (PAGE || PATH.replace('.html','') || 'section').replace(/[-_]/g,' ');
     title = title.charAt(0).toUpperCase() + title.slice(1);
-    shell({ active: PAGE, center: '<div class="gh-card gh-empty" style="min-height:360px"><i class="fas fa-tools"></i><h3>'+esc(title)+' is coming soon</h3><p>This section is not ready yet. No fake demo content is shown.</p><a class="gh-btn" href="feed.html">Back to Feed</a></div>' });
+    shell({ active: PAGE, center: '<div class="gh-card gh-empty" style="min-height:360px"><i class="fas fa-tools"></i><h3>'+esc(title)+' is admin-controlled</h3><p>This section is not ready yet. No fake demo content is shown.</p><a class="gh-btn" href="feed.html">Back to Feed</a></div>' });
   }
 
   function init(){

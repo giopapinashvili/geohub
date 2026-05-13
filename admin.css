@@ -17,10 +17,13 @@
     html, body { height: 100%; background: var(--bg0); color: var(--t); font-family: 'Inter', system-ui, sans-serif; overflow: hidden; }
 
     /* ── SHELL ── */
-    .shell { display: grid; grid-template-columns: var(--sw) 1fr; grid-template-rows: var(--th) 1fr; height: 100vh; }
+    .shell { display: grid; grid-template-columns: var(--sw) minmax(0, 1fr); grid-template-rows: var(--th) minmax(0, 1fr); height: 100vh; width: 100vw; overflow: hidden; }
+
+    /* Desktop grid placement: the mobile overlay div exists in the DOM, so it must not auto-place into the grid. */
+    .admin-sidebar-overlay { display: none; }
 
     /* ── TOPBAR ── */
-    .topbar { grid-column: 1/-1; display: flex; align-items: center; gap: 14px; padding: 0 18px; background: rgba(6,8,16,0.98); border-bottom: 1px solid var(--b); z-index: 100; }
+    .topbar { grid-column: 1/-1; grid-row: 1; display: flex; align-items: center; gap: 14px; padding: 0 18px; background: rgba(6,8,16,0.98); border-bottom: 1px solid var(--b); z-index: 100; }
     .tb-logo { display: flex; align-items: center; gap: 9px; width: var(--sw); padding-right: 16px; flex-shrink: 0; }
     .tb-logo-icon { width: 26px; height: 26px; border-radius: 7px; background: linear-gradient(135deg,#10b981,#3b82f6); display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 900; color: #000; }
     .tb-logo-name { font-size: 0.82rem; font-weight: 800; }
@@ -42,7 +45,7 @@
     .tb-admin-role { font-size: 0.58rem; color: var(--green); font-weight: 600; }
 
     /* ── SIDEBAR ── */
-    .sidebar { background: var(--bg1); border-right: 1px solid var(--b); overflow-y: auto; scrollbar-width: none; padding: 10px 0 20px; }
+    .sidebar { grid-column: 1; grid-row: 2; min-width: 0; background: var(--bg1); border-right: 1px solid var(--b); overflow-y: auto; scrollbar-width: none; padding: 10px 0 20px; }
     .sidebar::-webkit-scrollbar { display: none; }
     .sb-lbl { font-size: 0.56rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--td); padding: 10px 16px 4px; }
     .sb-item { display: flex; align-items: center; gap: 9px; padding: 7px 14px; margin: 1px 6px; border-radius: var(--rs); cursor: pointer; color: var(--ts); font-size: 0.78rem; font-weight: 600; transition: all 0.18s; user-select: none; }
@@ -55,7 +58,7 @@
     .sb-div { height: 1px; background: var(--b); margin: 8px 14px; }
 
     /* ── MAIN ── */
-    .main { overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
+    .main { grid-column: 2; grid-row: 2; min-width: 0; width: 100%; overflow-x: hidden; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent; }
     .main::-webkit-scrollbar { width: 4px; }
     .main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.09); border-radius: 2px; }
 
@@ -284,7 +287,8 @@
     @media (max-width: 1200px) { :root { --sw: 200px; } .g6 { grid-template-columns: repeat(3,1fr); } }
     @media (max-width: 900px) { .g4 { grid-template-columns: repeat(2,1fr); } .g3 { grid-template-columns: repeat(2,1fr); } .g2 { grid-template-columns: 1fr; } }
     @media (max-width: 640px) {
-      .shell { grid-template-columns: 1fr; }
+      .shell { grid-template-columns: 1fr; grid-template-rows: var(--th) minmax(0,1fr); }
+      .main { grid-column: 1; grid-row: 2; }
       .tb-logo { width: auto; }
       .tb-search-wrap { max-width: none; flex: 1; }
       .tb-live span { display: none; }
@@ -330,3 +334,15 @@
       flex-shrink: 0;
     }
     .tb-mobile-menu:hover { background: rgba(255,255,255,0.1); color: var(--t); }
+
+/* Step 4 Production Admin cleanup */
+.admin-step4-extra input,.admin-step4-extra select{padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);outline:none;min-width:0}
+.admin-step4-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.admin-step4-hint{padding:10px 12px;border:1px solid rgba(16,185,129,.22);background:rgba(16,185,129,.08);border-radius:12px;color:#a7f3d0;font-size:.78rem;font-weight:700;line-height:1.45}
+.admin-step4-list-panel{max-width:860px;margin-top:16px}
+.admin-step4-list{display:grid;gap:10px;padding:6px 0 0}
+.admin-step4-row{display:grid;grid-template-columns:54px 1fr auto;gap:12px;align-items:center;padding:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);border-radius:14px}
+.admin-step4-thumb{width:54px;height:54px;border-radius:12px;background:rgba(255,255,255,.06);display:grid;place-items:center;color:var(--ts);overflow:hidden}
+.admin-step4-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.admin-step4-main{min-width:0;display:grid;gap:3px}.admin-step4-main strong{font-size:.9rem;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.admin-step4-main span{font-size:.72rem;color:var(--ts)}.admin-step4-main p{margin:0;font-size:.75rem;color:var(--td);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.admin-step4-empty{padding:22px;text-align:center;color:var(--ts);border:1px dashed rgba(255,255,255,.14);border-radius:14px;background:rgba(255,255,255,.025)}
+@media(max-width:640px){.admin-step4-grid{grid-template-columns:1fr}.admin-step4-row{grid-template-columns:44px 1fr}.admin-step4-row .btn{grid-column:1 / -1;justify-self:start}.admin-step4-thumb{width:44px;height:44px}}

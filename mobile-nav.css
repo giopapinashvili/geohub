@@ -493,3 +493,18 @@
   /* Notifications still show on desktop */
   .app-notif-toast { top: 20px; left: auto; right: 20px; width: 340px; }
 }
+
+
+/* Performance hotfix: reduce expensive effects on low-power/mobile devices */
+@media (max-width: 768px), (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+  .gh-live-stats, .glass, .card, .modal, .dropdown, .nav, .mobile-menu, .clean-card, .clean-stat {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+img { content-visibility: auto; }

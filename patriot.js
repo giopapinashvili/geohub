@@ -274,7 +274,7 @@
     const list = document.getElementById('lbList');
     if (!list) return;
     if (!LEADERBOARD.length) {
-      list.innerHTML = '<div class="lb-card"><div class="lb-info"><div class="lb-name">Leaderboard coming soon</div><div class="lb-badges-row"><span class="lb-badge">Real XP rankings will appear after users earn XP.</span></div></div></div>';
+      list.innerHTML = '<div class="lb-card"><div class="lb-info"><div class="lb-name">Leaderboard admin-controlled</div><div class="lb-badges-row"><span class="lb-badge">Real XP rankings will appear after users earn XP.</span></div></div></div>';
       return;
     }
     const rankLabel = ['🥇','🥈','🥉'];

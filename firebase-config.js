@@ -5,7 +5,7 @@ import {
   doc, setDoc, getDoc, getDocs, updateDoc, addDoc,
   collection, query, orderBy, where, limit,
   onSnapshot, deleteDoc, serverTimestamp, increment,
-  writeBatch, runTransaction
+  writeBatch, runTransaction, arrayUnion, arrayRemove
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { getAnalytics, isSupported } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
@@ -28,7 +28,7 @@ try {
   const storage = getStorage(app);
   window.GeoFirebase = {
     app, auth, db, storage,
-    fs: { doc, setDoc, getDoc, getDocs, updateDoc, addDoc, collection, query, orderBy, where, limit, onSnapshot, deleteDoc, serverTimestamp, increment, writeBatch, runTransaction }, authFns: { signOut, onAuthStateChanged }, storageFns: { storageRef, uploadBytes, getDownloadURL }
+    fs: { doc, setDoc, getDoc, getDocs, updateDoc, addDoc, collection, query, orderBy, where, limit, onSnapshot, deleteDoc, serverTimestamp, increment, writeBatch, runTransaction, arrayUnion, arrayRemove }, authFns: { signOut, onAuthStateChanged }, storageFns: { storageRef, uploadBytes, getDownloadURL }
   };
   isSupported().then(ok => { if (ok) getAnalytics(app); }).catch(() => {});
   window.dispatchEvent(new Event('GeoFirebaseReady'));
