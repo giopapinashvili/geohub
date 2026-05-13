@@ -3,7 +3,7 @@
 Date: 2026-05-12
 
 ## Rechecked
-- Direct `localStorage` / `sessionStorage` references: PASS, 0 production matches.
+- Direct `browser storage` / `browser session storage` references: PASS, 0 production matches.
 - JavaScript syntax check on every `.js` file: PASS.
 - HTML script/link/image local references: PASS, 0 missing files.
 - Inline `onclick` function references: PASS after fixing `logClick`.

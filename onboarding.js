@@ -31,6 +31,7 @@ const OB_DATA = {
   ],
 
   cities: [
+    { id: 'all_georgia', name: 'All Georgia', region: 'Nationwide feed', emoji: '🇬🇪' },
     { id: 'tbilisi',   name: 'Tbilisi',   region: 'Capital',     emoji: '🏛️' },
     { id: 'batumi',    name: 'Batumi',    region: 'Adjara',      emoji: '🌊' },
     { id: 'kutaisi',   name: 'Kutaisi',   region: 'Imereti',     emoji: '🏔️' },
@@ -59,7 +60,9 @@ const obState = {
   step: 1,
   accountType: null,
   interests: [],
-  city: null,
+  city: 'all_georgia',
+  cities: ['all_georgia'],
+  cityScope: 'all_georgia',
   goals: [],
 };
 
@@ -120,7 +123,7 @@ const REWARD_MAP = {
 };
 
 function getAiSuggestion(city, interests, accountType) {
-  const cityName = OB_DATA.cities.find(c => c.id === city)?.name || city;
+  const cityName = city === 'all_georgia' ? 'all Georgia' : (OB_DATA.cities.find(c => c.id === city)?.name || city || 'Georgia');
   const interest = OB_DATA.interests.find(i => i.id === interests[0])?.label || 'exploration';
   if (accountType === 'business') return `"Help me attract more customers to my ${cityName} business this week with XP rewards."`;
   if (accountType === 'creator') return `"Plan a content creation day in ${cityName} focused on ${interest} — maximize reach and XP."`;
@@ -178,8 +181,8 @@ function validateStep(step) {
     showToast('Pick at least 3 interests.');
     return false;
   }
-  if (step === 4 && !obState.city) {
-    showToast('Choose your city to continue.');
+  if (step === 4 && (!obState.cities || !obState.cities.length)) {
+    showToast('Choose at least one area, or select All Georgia.');
     return false;
   }
   if (step === 5 && obState.goals.length < 2) {
@@ -346,8 +349,9 @@ function toggleInterest(id) {
 // ── STEP 4: CITY ──────────────────────────────────────────────────
 
 function renderCity() {
+  var selected = obState.cities || [obState.city || 'all_georgia'];
   var cards = OB_DATA.cities.map(function (c) {
-    var sel = obState.city === c.id;
+    var sel = selected.indexOf(c.id) !== -1;
     return '<div class="ob-city-card' + (sel ? ' selected' : '') + '"' +
       ' onclick="selectCity(\'' + c.id + '\')">' +
       '<div class="ob-city-emoji">' + c.emoji + '</div>' +
@@ -357,18 +361,29 @@ function renderCity() {
   }).join('');
 
   return '<div class="ob-step-header">' +
-    '<div class="ob-step-kicker">Step 3 — Location</div>' +
-    '<h2>Which city do you explore?</h2>' +
-    '<p>Your local feed, events, groups, businesses, and AI plans will be based on your city.</p>' +
+    '<div class="ob-step-kicker">Step 3 — Areas</div>' +
+    '<h2>Which parts of Georgia interest you?</h2>' +
+    '<p>Georgia is small and people move between cities often. Choose <strong>All Georgia</strong> for a nationwide feed, or select several cities/regions.</p>' +
   '</div>' +
-  '<div class="ob-city-grid">' + cards + '</div>';
+  '<div class="ob-city-grid">' + cards + '</div>' +
+  '<div class="ob-select-count"><strong>' + selected.length + '</strong> area option' + (selected.length === 1 ? '' : 's') + ' selected</div>';
 }
 
 function selectCity(id) {
-  obState.city = id;
-  document.querySelectorAll('.ob-city-card').forEach(function (el, i) {
-    el.classList.toggle('selected', OB_DATA.cities[i].id === id);
-  });
+  if (!obState.cities) obState.cities = obState.city ? [obState.city] : ['all_georgia'];
+  if (id === 'all_georgia') {
+    obState.cities = ['all_georgia'];
+    obState.city = 'all_georgia';
+    obState.cityScope = 'all_georgia';
+  } else {
+    obState.cities = obState.cities.filter(function (x) { return x !== 'all_georgia'; });
+    var idx = obState.cities.indexOf(id);
+    if (idx === -1) obState.cities.push(id); else obState.cities.splice(idx, 1);
+    if (!obState.cities.length) obState.cities = ['all_georgia'];
+    obState.city = obState.cities[0];
+    obState.cityScope = obState.cities.indexOf('all_georgia') !== -1 ? 'all_georgia' : 'multi_city';
+  }
+  renderStep(4);
 }
 
 // ── STEP 5: GOALS ─────────────────────────────────────────────────
@@ -410,7 +425,9 @@ function computeProfile() {
   var typeId = obState.accountType || 'explorer';
   var feed = FEED_TYPES[typeId] || FEED_TYPES.explorer;
   var typeData = OB_DATA.accountTypes.find(function (t) { return t.id === typeId; }) || OB_DATA.accountTypes[0];
-  var cityData = OB_DATA.cities.find(function (c) { return c.id === obState.city; }) || OB_DATA.cities[0];
+  var selectedCities = obState.cities && obState.cities.length ? obState.cities : [obState.city || 'all_georgia'];
+  var cityData = selectedCities.indexOf('all_georgia') !== -1 ? OB_DATA.cities[0] : (OB_DATA.cities.find(function (c) { return c.id === selectedCities[0]; }) || OB_DATA.cities[0]);
+  var cityNames = selectedCities.indexOf('all_georgia') !== -1 ? ['All Georgia'] : selectedCities.map(function(id){ var c = OB_DATA.cities.find(function(x){return x.id===id;}); return c ? c.name : id; });
 
   var topInterests = obState.interests.length ? obState.interests.slice(0, 3) : ['cafes', 'events', 'travel'];
   var groups = topInterests.map(function (id) { return GROUP_MAP[id] || { name: 'City Explorers', members: '500+' }; });
@@ -428,7 +445,9 @@ function computeProfile() {
     accountColor: typeData.color,
     accountIcon: typeData.icon,
     city: obState.city,
-    cityName: cityData.name,
+    cities: selectedCities,
+    cityScope: selectedCities.indexOf('all_georgia') !== -1 ? 'all_georgia' : 'multi_city',
+    cityName: cityNames.join(', '),
     cityEmoji: cityData.emoji,
     interests: obState.interests,
     goals: obState.goals,
@@ -549,7 +568,9 @@ function restartOnboarding() {
   if (window.safeStorage) window.safeStorage.remove('geohub_onboarding');
   obState.accountType = null;
   obState.interests = [];
-  obState.city = null;
+  obState.city = 'all_georgia';
+  obState.cities = ['all_georgia'];
+  obState.cityScope = 'all_georgia';
   obState.goals = [];
   renderStep(1);
 }
@@ -561,6 +582,8 @@ function saveToStorage(profile) {
     accountType: obState.accountType,
     interests:   obState.interests,
     city:        obState.city,
+    cities:      obState.cities || [obState.city || 'all_georgia'],
+    cityScope:   obState.cityScope || 'all_georgia',
     goals:       obState.goals,
     profile:     profile,
     completedAt: new Date().toISOString(),

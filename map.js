@@ -91,7 +91,7 @@
   function loadCollection(name) {
     const GF = window.GeoFirebase;
     if (!GF || !GF.db || !GF.fs) return Promise.resolve([]);
-    return GF.fs.getDocs(GF.fs.collection(GF.db, name)).then(snap => {
+    return GF.fs.getDocs(GF.fs.query(GF.fs.collection(GF.db, name), GF.fs.limit(100))).then(snap => {
       const out = [];
       snap.forEach(d => { const p = normalize(d.id, d.data(), name); if (p) out.push(p); });
       return out;

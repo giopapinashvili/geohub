@@ -145,7 +145,7 @@
       emoji: '📸',
       bg: 'rgba(236,72,153,0.15)',
       color: '#f472b6',
-      title: 'Stories coming soon!',
+      title: 'Open Stories',
       text: '24h city moments — launching with the next update.',
       link: null,
     });

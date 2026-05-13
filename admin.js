@@ -1,18 +1,26 @@
 (function () {
   'use strict';
-
   /* ── AUTH GUARD ────────────────────────────────────────────── */
-  var ADMIN_EMAILS = ['gio.papinashvili26@gmail.com', 'gio.papinashvili20@gmail.com'];
   function adminGuardReady(cb) {
+    function waitFirebase(fn){
+      if (window.GeoFirebase && window.GeoFirebase.db && window.GeoFirebase.fs) return fn();
+      window.addEventListener('GeoFirebaseReady', fn, { once: true });
+    }
     function check() {
       var u = (window.GeoAuth && window.GeoAuth.getCurrentUser && window.GeoAuth.getCurrentUser()) || window.GeoCurrentUser || (window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser);
-      if (!u) { window.location.href = 'auth.html'; return; }
-      if (!ADMIN_EMAILS.includes((u.email || '').toLowerCase())) { window.location.href = 'index.html'; return; }
-      if (cb) cb(u);
+      if (!u || !u.uid) { window.location.href = 'auth.html'; return; }
+      waitFirebase(function(){
+        var fb = window.GeoFirebase, f = fb && fb.fs;
+        if (!fb || !f) { window.location.href = 'index.html'; return; }
+        f.getDoc(f.doc(fb.db, 'admins', u.uid)).then(function(snap){
+          if (!snap.exists()) { window.location.href = 'index.html'; return; }
+          if (cb) cb(u);
+        }).catch(function(){ window.location.href = 'index.html'; });
+      });
     }
     if (window.GeoAuth && window.GeoAuth.isReady && window.GeoAuth.isReady()) check();
     else window.addEventListener('GeoAuthReady', check, { once: true });
-    setTimeout(function(){ if (!(window.GeoAuth && window.GeoAuth.getCurrentUser && window.GeoAuth.getCurrentUser())) check(); }, 1200);
+    setTimeout(function(){ if (!(window.GeoAuth && window.GeoAuth.getCurrentUser && window.GeoAuth.getCurrentUser())) check(); }, 1600);
   }
   adminGuardReady();
 

@@ -2,7 +2,6 @@
 (function () {
   'use strict';
 
-  var ADMIN_EMAILS = ['gio.papinashvili26@gmail.com', 'gio.papinashvili20@gmail.com'];
   var currentUser = window.GeoCurrentUser || null;
   var authReady = false;
   var appLang = 'en';
@@ -10,6 +9,11 @@
   function esc(s) { return String(s || '').replace(/[&<>'"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]; }); }
   function fb() { return window.GeoFirebase; }
   function fs() { return fb() && fb().fs; }
+  function checkAdminDoc(uid, cb) {
+    var geo = fb(), f = fs();
+    if (!geo || !f || !uid) return cb(false);
+    f.getDoc(f.doc(geo.db, 'admins', uid)).then(function(snap){ cb(!!snap.exists()); }).catch(function(){ cb(false); });
+  }
 
   function fbUserToGeoUser(fbUser) {
     if (!fbUser) return null;
@@ -70,20 +74,21 @@
     var user = getCurrentUser();
     if (user) {
       var firstName = (user.fullName || user.displayName || 'User').split(' ')[0];
-      var isAdmin = ADMIN_EMAILS.includes((user.email || '').toLowerCase());
+      var isAdmin = !!(user.isAdmin || user.adminRole);
       actionsEl.innerHTML = '<div class="auth-nav-user" id="authNavUser">' +
         '<img src="' + esc(user.avatar || user.photoURL || '') + '" alt="' + esc(firstName) + '" class="auth-nav-avatar" onerror="this.style.display=\'none\'">' +
         '<span class="auth-nav-name">' + esc(firstName) + '</span><i class="fas fa-chevron-down auth-nav-caret"></i>' +
         '<div class="auth-nav-dropdown" id="authNavDropdown">' +
-        '<a href="profile.html" class="auth-dd-item"><i class="fas fa-user"></i> My Profile</a>' +
+        '<a href="profile.html?id=' + esc(user.uid || user.id || '') + '" class="auth-dd-item"><i class="fas fa-user"></i> My Profile</a>' +
         '<a href="rewards.html" class="auth-dd-item"><i class="fas fa-trophy"></i> Rewards</a>' +
         '<a href="messages.html" class="auth-dd-item"><i class="fas fa-envelope"></i> Messages</a>' +
         '<a href="dashboard.html" class="auth-dd-item"><i class="fas fa-chart-bar"></i> Dashboard</a>' +
         '<button class="auth-dd-item" id="authSettingsBtn"><i class="fas fa-cog"></i> Settings</button>' +
-        (isAdmin ? '<a href="admin.html" class="auth-dd-item" style="color:#10b981"><i class="fas fa-shield-alt"></i> Admin Panel</a>' : '') +
+        (isAdmin ? '<a href="admin.html" class="auth-dd-item auth-admin-link" style="color:#10b981"><i class="fas fa-shield-alt"></i> Admin Panel</a>' : '') +
         '<div class="auth-dd-sep"></div><button class="auth-dd-item auth-dd-logout" id="authLogoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button></div></div>';
       var navUser = document.getElementById('authNavUser');
       var navDrop = document.getElementById('authNavDropdown');
+      checkAdminDoc(user.uid || user.id, function(ok){ if(ok && navDrop && !navDrop.querySelector('.auth-admin-link')){ var a=document.createElement('a'); a.href='admin.html'; a.className='auth-dd-item auth-admin-link'; a.style.color='#10b981'; a.innerHTML='<i class="fas fa-shield-alt"></i> Admin Panel'; var sep=navDrop.querySelector('.auth-dd-sep'); navDrop.insertBefore(a, sep || navDrop.lastChild); } });
       if (navUser) navUser.addEventListener('click', function (e) { e.stopPropagation(); if(navDrop) navDrop.classList.toggle('open'); });
       document.addEventListener('click', function () { if (navDrop) navDrop.classList.remove('open'); });
       var out = document.getElementById('authLogoutBtn'); if (out) out.addEventListener('click', doLogout);
@@ -101,7 +106,7 @@
     menu.querySelectorAll('a[href="profile.html"],a[href="auth.html"]').forEach(function(a){ if(a.textContent.match(/Login|Profile|Sign/i)) a.remove(); });
     var user = getCurrentUser();
     var item = document.createElement('a');
-    item.href = user ? 'profile.html' : 'auth.html';
+    item.href = user ? 'profile.html?id=' + encodeURIComponent(user.uid || user.id || '') : 'auth.html';
     item.innerHTML = user ? '<i class="fas fa-user-circle"></i> ' + esc(user.fullName || 'Profile') : '<i class="fas fa-sign-in-alt"></i> Login / Sign Up';
     menu.appendChild(item);
   }

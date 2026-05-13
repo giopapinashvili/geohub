@@ -9,7 +9,6 @@
   function initialLetters(name, email) {
     name = String(name || '').trim();
     email = String(email || '').trim().toLowerCase();
-    if (!name && email === 'gio.papinashvili20@gmail.com') name = 'Giorgi Papinashvili';
     if (!name && email) name = email.split('@')[0].replace(/[._-]+/g, ' ');
     const parts = name.split(/\s+/).filter(Boolean);
     if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
@@ -51,8 +50,7 @@
   function normalizeProfile(fbUser, data) {
     data = data || {};
     const email = data.email || (fbUser && fbUser.email) || '';
-    let fullName = data.fullName || data.displayName || (fbUser && fbUser.displayName) || '';
-    if (!fullName && email === 'gio.papinashvili20@gmail.com') fullName = 'Giorgi Papinashvili';
+    let fullName = data.fullName || data.displayName || data.name || (fbUser && fbUser.displayName) || '';
     if (!fullName && email) fullName = email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, m => m.toUpperCase());
     const initials = initialLetters(fullName, email);
     const avatar = data.avatar || data.photoURL || (fbUser && fbUser.photoURL) || initialsSvg(initials);
@@ -65,15 +63,19 @@
       avatar,
       coverImage: data.coverImage || '',
       bio: data.bio || '',
-      city: data.city || '',
+      city: data.cityScope === 'all_georgia' ? 'All Georgia' : (data.city || ''),
+      cities: Array.isArray(data.cities) ? data.cities : (data.city ? [data.city] : ['all_georgia']),
+      cityScope: data.cityScope || (data.city === 'all_georgia' ? 'all_georgia' : ''),
       accountType: data.accountType || 'Explorer',
       explorerLevel: data.explorerLevel || 'New Explorer',
       xp: Number(data.xp || 0),
       followers: Number(data.followers || 0),
+      friendsCount: Number(data.friendsCount || 0),
       following: Number(data.following || 0),
       postsCount: Number(data.postsCount || 0),
       visitedPlaces: Number(data.visitedPlaces || 0),
       trustScore: Number(data.trustScore || 0),
+      pointsBalance: Number(data.pointsBalance || data.geoPointsBalance || 0),
       interests: Array.isArray(data.interests) ? data.interests : [],
       badges: Array.isArray(data.badges) ? data.badges : [],
       createdAt: data.createdAt || data.joinedAt || null,
@@ -92,7 +94,7 @@
         username: profile.username,
         email: profile.email,
         avatar: profile.avatar,
-        bio: '', city: '', accountType: 'Explorer', interests: [],
+        bio: '', city: 'all_georgia', cityScope: 'all_georgia', cities: ['all_georgia'], accountType: 'Explorer', interests: [],
         xp: 0, followers: 0, following: 0, postsCount: 0, visitedPlaces: 0, trustScore: 0,
         createdAt: GF.fs.serverTimestamp()
       }, { merge: true }).catch(err => console.warn('[Profile] create user doc failed', err.message));
@@ -102,7 +104,7 @@
 
   async function findProfile(GF, fbUser) {
     const params = new URLSearchParams(location.search);
-    const uid = params.get('uid');
+    const uid = params.get('id') || params.get('uid');
     const username = params.get('user') || (location.pathname.match(/@([^/?#]+)/) || [])[1];
 
     if (!uid && !username) return ensureOwnProfile(GF, fbUser);
@@ -128,9 +130,36 @@
   function level(user) { return Math.max(1, Math.floor(Number(user.xp || 0) / 1000) + 1); }
 
   function renderStats(user) {
-    const vals = [user.visitedPlaces, 0, user.followers, user.following, Math.floor(user.xp / 10), user.trustScore];
+    const vals = [user.visitedPlaces, user.friendsCount || 0, user.followers, user.following, user.pointsBalance || Math.floor(user.xp / 10), user.trustScore];
     $$('.profile-stats-bar .pstat-value').forEach((el, i) => { el.textContent = compact(vals[i] || 0); });
     $$('.ptab .tab-count').forEach(c => { c.textContent = '0'; });
+  }
+
+  async function refreshRealStats(user) {
+    const GF = window.GeoFirebase;
+    if (!GF || !GF.fs || !GF.db || !user || !user.uid) return;
+    const count = async q => {
+      if (GF.fs.getCountFromServer) {
+        const snap = await GF.fs.getCountFromServer(q);
+        return snap.data().count || 0;
+      }
+      const snap = await GF.fs.getDocs(q);
+      return snap.size || 0;
+    };
+    try {
+      const [posts, friends, followers, following] = await Promise.all([
+        count(GF.fs.query(GF.fs.collection(GF.db, 'posts'), GF.fs.where('authorId', '==', user.uid), GF.fs.limit(200))).catch(() => 0),
+        count(GF.fs.query(GF.fs.collection(GF.db, 'friends'), GF.fs.where('users', 'array-contains', user.uid), GF.fs.limit(200))).catch(() => 0),
+        count(GF.fs.query(GF.fs.collection(GF.db, 'follows'), GF.fs.where('followingId', '==', user.uid), GF.fs.limit(200))).catch(() => 0),
+        count(GF.fs.query(GF.fs.collection(GF.db, 'follows'), GF.fs.where('followerId', '==', user.uid), GF.fs.limit(200))).catch(() => 0)
+      ]);
+      const vals = [Number(user.visitedPlaces || 0), friends, followers, following, user.pointsBalance || Math.floor(Number(user.xp || 0) / 10), Number(user.trustScore || 0)];
+      $$('.profile-stats-bar .pstat-value').forEach((el, i) => { el.textContent = compact(vals[i] || 0); });
+      const postTab = $('.ptab[data-tab="posts"] .tab-count'); if (postTab) postTab.textContent = posts || '0';
+      const friendsTab = $('.ptab[data-tab="friends"] .tab-count'); if (friendsTab) friendsTab.textContent = friends || '0';
+    } catch (err) {
+      console.warn('[Profile] real stats failed', err && err.message);
+    }
   }
 
   function renderIdentity(user, fbUser) {
@@ -146,9 +175,9 @@
     if (badges) badges.innerHTML = '<span class="trust-badge green"><i class="fas fa-check-circle"></i> Real account</span><span class="trust-badge gold"><i class="fas fa-bolt"></i> ' + compact(user.xp) + ' XP</span><span class="trust-badge purple"><i class="fas fa-id-badge"></i> ' + esc(user.accountType) + '</span>';
     const own = fbUser && user.uid === fbUser.uid;
     const coverActions = $('.cover-actions');
-    if (coverActions) coverActions.innerHTML = own ? '<button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button>' : '<button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> Follow</button>';
+    if (coverActions) coverActions.innerHTML = own ? '<button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button>' : '<button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> Add Friend</button>';
     const actions = $('.profile-actions');
-    if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i></button><button class="btn btn-ghost btn-sm" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i></button><button class="btn btn-primary btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> Follow</button>';
+    if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i></button><button class="btn btn-ghost btn-sm" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> Message</button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> Add Friend</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> Follow</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '"><i class="fas fa-ban"></i></button>';
     if (!own && window.GeoSocial && window.GeoSocial.checkFollowing) {
       window.GeoSocial.checkFollowing(user.uid, isFollowing => {
         $$('[data-follow-user="' + user.uid + '"]').forEach(btn => {
@@ -157,7 +186,11 @@
         });
       });
     }
+    if (!own && window.GeoSocial && window.GeoSocial.listenFriendshipStatus) {
+      window.GeoSocial.listenFriendshipStatus(user.uid, status => updateFriendButtons(user.uid, status));
+    }
     renderStats(user);
+    refreshRealStats(user);
     renderStaticEmptyStates(user);
   }
 
@@ -169,7 +202,7 @@
     const nums = $('.xp-bar-numbers'); if (nums) nums.textContent = xp + ' / ' + (l * 1000) + ' XP';
     const next = $('.xp-to-next'); if (next) next.textContent = (1000 - inLvl) + ' XP to Level ' + (l + 1);
     const intro = $$('.intro-item');
-    if (intro[0]) intro[0].innerHTML = '<i class="fas fa-map-marker-alt"></i> ' + (user.city ? esc(user.city) : 'No location set');
+    if (intro[0]) intro[0].innerHTML = '<i class="fas fa-map-marker-alt"></i> ' + (user.cityScope === 'all_georgia' ? 'Interested in all Georgia' : (user.city ? esc(user.city) : 'No location set'));
     if (intro[1]) intro[1].innerHTML = '<i class="fas fa-hiking"></i> ' + esc(user.accountType || 'Explorer');
     if (intro[2]) intro[2].innerHTML = '<i class="fas fa-calendar-alt"></i> Join date not set';
     if (intro[3]) intro[3].innerHTML = '<i class="fas fa-globe"></i> ' + (user.username ? 'geohub.ge/@' + esc(user.username) : 'No public username set');
@@ -199,6 +232,27 @@
     const highlights = $('.profile-highlights'); if (highlights) highlights.innerHTML = '<div class="highlight-item highlight-add" data-add-highlight><div class="highlight-ring add-ring"><i class="fas fa-plus"></i></div><div class="highlight-label">New</div></div>';
   }
 
+  function updateFriendButtons(uid, status) {
+    status = status || { state: 'none' };
+    $$('[data-friend-user="' + uid + '"]').forEach(btn => {
+      btn.dataset.friendState = status.state || 'none';
+      btn.dataset.requestId = status.requestId || '';
+      if (status.state === 'friends') {
+        btn.classList.add('following');
+        btn.innerHTML = '<i class="fas fa-user-check"></i> Friends';
+      } else if (status.state === 'incoming') {
+        btn.classList.add('following');
+        btn.innerHTML = '<i class="fas fa-user-clock"></i> Respond';
+      } else if (status.state === 'outgoing') {
+        btn.classList.add('following');
+        btn.innerHTML = '<i class="fas fa-clock"></i> Request sent';
+      } else {
+        btn.classList.remove('following');
+        btn.innerHTML = '<i class="fas fa-user-plus"></i> Add Friend';
+      }
+    });
+  }
+
   function emptyTab(id, icon, title, text, href, cta) {
     const el = $(id); if (!el) return;
     el.innerHTML = '<div class="empty-profile-state"><i class="fas ' + icon + '"></i><h3>' + title + '</h3><p>' + text + '</p>' + (href ? '<a href="' + href + '" class="btn btn-primary btn-sm" style="margin-top:12px">' + cta + '</a>' : '') + '</div>';
@@ -208,9 +262,12 @@
     emptyTab('#tab-posts', 'fa-seedling', 'No posts yet', 'Real posts from Firestore will appear here.', 'feed.html?compose=1', 'Create Post');
     emptyTab('#tab-places', 'fa-map-marker-alt', 'No visited places yet', 'Check in to real places and they will appear here.', 'map.html', 'Explore Map');
     emptyTab('#tab-checkins', 'fa-location-dot', 'No check-ins yet', 'Real check-ins will appear here.', 'checkin.html', 'Check in');
+    emptyTab('#tab-friends', 'fa-user-group', 'No friends yet', 'Friends and requests will appear here.', null, '');
     emptyTab('#tab-rewards', 'fa-gift', 'No rewards yet', 'Rewards will appear after real XP and business offers are connected.', 'rewards.html', 'Open Rewards');
     emptyTab('#tab-challenges', 'fa-trophy', 'No challenges yet', 'Real challenges will appear here when added by GeoHub.', null, '');
     emptyTab('#tab-reviews', 'fa-star', 'No reviews yet', 'Real reviews will appear here after you write them.', 'reviews.html', 'Write Review');
+    renderBadgeTab(user);
+    renderBusinessesTab(user);
     if (window.GeoSocial && window.GeoSocial.listenSavedPosts) {
       function updateSavedEmpty() {
         var ps = $('#saved-posts-section'), pl = $('#saved-places-section'), em = $('#saved-empty-state');
@@ -250,6 +307,25 @@
         updateSavedEmpty();
       });
     }
+    if (window.GeoSocial && window.GeoSocial.listenFriends) {
+      const friendsTab = $('#tab-friends');
+      const countEl = $('.ptab[data-tab="friends"] .tab-count');
+      const ownProfile = window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser && window.GeoFirebase.auth.currentUser.uid === user.uid;
+      if (ownProfile && window.GeoSocial.listenFriendRequests) {
+        window.GeoSocial.listenFriendRequests(requests => {
+          const pending = requests.map(r => '<div class="gh-friend-card"><span class="gh-avatar">GH</span><div style="flex:1"><strong>Friend request</strong><span>From user: '+esc(r.fromUserId||r.fromId||'')+'</span><div class="gh-friend-request-actions"><button class="btn btn-primary btn-sm" data-accept-request="'+esc(r.id)+'">Accept</button><button class="btn btn-ghost btn-sm" data-reject-request="'+esc(r.id)+'">Reject</button></div></div></div>').join('');
+          if (friendsTab && pending) friendsTab.dataset.pendingRequestsHtml = '<div style="font-weight:800;margin:0 0 10px">Friend Requests</div><div class="gh-friend-grid">'+pending+'</div><div style="height:18px"></div>';
+        });
+      }
+      window.GeoSocial.listenFriends(user.uid, friends => {
+        if (countEl) countEl.textContent = friends.length || '0';
+        if (!friendsTab) return;
+        const pendingHtml = friendsTab.dataset.pendingRequestsHtml || '';
+        if (!friends.length && !pendingHtml) { friendsTab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-user-group"></i><h3>No friends yet</h3><p>Send friend requests from profiles.</p></div>'; return; }
+        friendsTab.innerHTML = pendingHtml + (friends.length ? '<div style="font-weight:800;margin:0 0 10px">Friends</div><div class="gh-friend-grid">'+friends.map(f => '<a class="gh-friend-card" href="profile.html?id='+encodeURIComponent(f.uid||f.id)+'"><span class="gh-avatar">'+(f.avatar||f.photoURL ? '<img src="'+esc(f.avatar||f.photoURL)+'" alt="">' : esc(initialLetters(f.fullName||f.displayName||f.name||'GeoHub User',f.email)))+'</span><div><strong>'+esc(f.fullName||f.displayName||f.name||'GeoHub User')+'</strong><span>@'+esc(f.username||'user')+'</span></div></a>').join('')+'</div>' : '');
+      });
+    }
+
     if (window.GeoSocial && window.GeoSocial.listenUserPosts) {
       window.GeoSocial.listenUserPosts(user.uid, posts => {
         const count = $('.ptab[data-tab="posts"] .tab-count'); if (count) count.textContent = posts.length || '0';
@@ -258,6 +334,48 @@
         tab.innerHTML = '<div class="posts-grid">' + posts.map(post => '<div class="post-thumb">' + (post.mediaUrl ? '<img src="' + esc(post.mediaUrl) + '" alt="Post">' : '<div style="background:var(--bg-elevated);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1rem;padding:16px;box-sizing:border-box;text-align:center;color:var(--text-secondary)">' + esc(post.text || '') + '</div>') + '<div class="post-overlay"><span><i class="fas fa-heart"></i> ' + (post.likeCount || 0) + '</span><span><i class="fas fa-comment"></i> ' + (post.commentCount || 0) + '</span></div></div>').join('') + '</div>';
       });
     }
+  }
+
+
+  function renderBadgeTab(user){
+    const tab = $('#tab-badges'); if(!tab) return;
+    if (window.GeoSocial && window.GeoSocial.listenUserBadges) {
+      window.GeoSocial.listenUserBadges(user.uid, badges => {
+        const cnt = $('.ptab[data-tab="badges"] .tab-count'); if(cnt) cnt.textContent = badges.length || '0';
+        if(!badges.length){ tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-medal"></i><h3>No badges yet</h3><p>Check in, post and help the community to earn badges.</p></div>'; return; }
+        tab.innerHTML = '<div class="gh-friend-grid">'+badges.map(b => '<div class="gh-friend-card"><span class="gh-avatar"><i class="fas '+esc(b.icon||'fa-medal')+'"></i></span><div><strong>'+esc(b.title||b.badgeId||'Badge')+'</strong><span>'+esc(b.description||'GeoHub achievement')+'</span></div></div>').join('')+'</div>';
+      });
+    }
+  }
+
+  function renderBusinessesTab(user){
+    const tab = $('#tab-businesses'); if(!tab) return;
+    if (window.GeoSocial && window.GeoSocial.listenManagedBusinesses) {
+      window.GeoSocial.listenManagedBusinesses(user.uid, businesses => {
+        const cnt = $('.ptab[data-tab="businesses"] .tab-count'); if(cnt) cnt.textContent = businesses.length || '0';
+        if(!businesses.length){ tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-store"></i><h3>No business pages yet</h3><p>Business pages you manage will appear here.</p><a class="btn btn-primary btn-sm" href="add-business.html">Add Business</a></div>'; return; }
+        tab.innerHTML = '<div class="gh-friend-grid">'+businesses.map(b => '<a class="gh-friend-card" href="business.html?id='+encodeURIComponent(b.id)+'"><span class="gh-avatar">'+(b.logoUrl||b.coverImageUrl?'<img src="'+esc(b.logoUrl||b.coverImageUrl)+'" alt="">':esc(initialLetters(b.name||'Business')) )+'</span><div><strong>'+esc(b.name||'Business')+'</strong><span>'+esc(b.businessType==='online'?'Online / Nationwide':(b.city||b.category||'Business'))+'</span></div></a>').join('')+'</div>';
+      });
+    }
+  }
+
+  function openEditProfileModal(){
+    const currentName = $('.profile-name') ? $('.profile-name').textContent : '';
+    const currentBio = $('.profile-bio') ? $('.profile-bio').textContent.replace('No bio yet.','') : '';
+    const html = '<div class="gh-modal-backdrop" id="profileEditModal"><div class="gh-modal"><div class="gh-modal-head"><h3>Edit profile</h3><button class="gh-modal-close" data-close-profile-modal>✕</button></div><div class="gh-modal-body"><input class="gh-input" id="peName" placeholder="Full name" value="'+esc(currentName)+'"><div style="height:10px"></div><textarea class="gh-textarea" id="peBio" placeholder="Bio">'+esc(currentBio)+'</textarea><div style="height:10px"></div><select class="gh-select" id="peScope"><option value="all_georgia">Interested in all Georgia</option><option value="multi_city">Specific cities / regions</option></select><div style="height:10px"></div><input class="gh-input" id="peCities" placeholder="Cities/regions, e.g. Tbilisi, Batumi, Kazbegi"></div><div class="gh-modal-actions"><button class="btn btn-ghost btn-sm" data-close-profile-modal>Cancel</button><button class="btn btn-primary btn-sm" id="peSave">Save</button></div></div></div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+    const modal = $('#profileEditModal');
+    modal.addEventListener('click', e => { if(e.target === modal || e.target.closest('[data-close-profile-modal]')) modal.remove(); });
+    $('#peSave').onclick = async function(){
+      const GF = window.GeoFirebase; const u = GF && GF.auth && GF.auth.currentUser; if(!u) return;
+      const scope = $('#peScope').value;
+      const cityText = $('#peCities').value.trim();
+      const cities = scope === 'all_georgia' ? ['all_georgia'] : cityText.split(',').map(x=>x.trim()).filter(Boolean);
+      try {
+        await GF.fs.updateDoc(GF.fs.doc(GF.db,'users',u.uid), { fullName: $('#peName').value.trim(), displayName: $('#peName').value.trim(), bio: $('#peBio').value.trim(), cityScope: scope, city: scope === 'all_georgia' ? 'all_georgia' : (cities[0] || ''), cities: cities, updatedAt: GF.fs.serverTimestamp() });
+        toast('Profile updated'); modal.remove(); location.reload();
+      } catch(err){ toast('Profile update failed', 'error'); }
+    };
   }
 
   function initTabs() {
@@ -285,7 +403,7 @@
       }
       onAuthReady(GF, async fbUser => {
         if (!fbUser) {
-          location.replace('auth.html?next=' + encodeURIComponent('profile.html'));
+          location.replace('auth.html?next=' + encodeURIComponent((location.pathname.split('/').pop() || 'profile.html') + location.search));
           return;
         }
         try {
@@ -320,12 +438,52 @@
         });
       });
     }
+    const friendBtn = e.target.closest('[data-friend-user]');
+    if (friendBtn) {
+      e.preventDefault();
+      const target = friendBtn.dataset.friendUser;
+      const st = friendBtn.dataset.friendState || 'none';
+      if (!window.GeoSocial || !target) return toast('Friends system is still loading', 'error');
+      if (st === 'incoming') {
+        const reqId = friendBtn.dataset.requestId;
+        if (reqId) window.GeoSocial.respondFriendRequest(reqId, true, () => updateFriendButtons(target, { state: 'friends' }));
+      } else if (st === 'friends') {
+        if (confirm('Remove this friend?')) window.GeoSocial.removeFriend(target, () => updateFriendButtons(target, { state: 'none' }));
+      } else if (st === 'outgoing') {
+        toast('Friend request is already pending');
+      } else {
+        window.GeoSocial.sendFriendRequest(target, state => updateFriendButtons(target, { state: state || 'outgoing' }));
+      }
+    }
+    const acceptBtn = e.target.closest('[data-accept-request]');
+    if (acceptBtn && window.GeoSocial) { e.preventDefault(); window.GeoSocial.respondFriendRequest(acceptBtn.dataset.acceptRequest, true, () => location.reload()); }
+    const rejectBtn = e.target.closest('[data-reject-request]');
+    if (rejectBtn && window.GeoSocial) { e.preventDefault(); window.GeoSocial.respondFriendRequest(rejectBtn.dataset.rejectRequest, false, () => location.reload()); }
+
     const msgBtn = e.target.closest('[data-message-user]');
     if (msgBtn) {
       e.preventDefault();
       const target = msgBtn.dataset.messageUser;
       if (!window.GeoSocial || !target) return toast('Messages are still loading', 'error');
       window.GeoSocial.startConversation(target, () => { location.href = 'messages.html?with=' + encodeURIComponent(target); });
+    }
+    if (e.target.closest('[data-edit-profile]')) {
+      e.preventDefault();
+      openEditProfileModal();
+    }
+    const reportBtn = e.target.closest('[data-report-user]');
+    if (reportBtn) {
+      e.preventDefault();
+      const target = reportBtn.dataset.reportUser;
+      if (window.GeoSocial && window.GeoSocial.reportTarget) window.GeoSocial.reportTarget('user', target, 'Reported from profile');
+    }
+    const blockBtn = e.target.closest('[data-block-user]');
+    if (blockBtn) {
+      e.preventDefault();
+      const target = blockBtn.dataset.blockUser;
+      if (target && confirm('Block this user? Their posts will be hidden from your feed.')) {
+        if (window.GeoSocial && window.GeoSocial.blockUser) window.GeoSocial.blockUser(target, () => { location.href='feed.html'; });
+      }
     }
     if (e.target.closest('[data-add-highlight]')) {
       e.preventDefault();

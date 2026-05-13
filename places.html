@@ -154,6 +154,8 @@
     .pl-grid{grid-template-columns:1fr}
   }
   </style>
+  <link rel="stylesheet" href="chat-popup.css">
+  <link rel="stylesheet" href="responsive-polish.css">
 </head>
 <body>
 
@@ -248,7 +250,7 @@
       <div class="pl-field">
         <label>Photo URL (optional)</label>
         <input type="url" id="plPhoto" placeholder="https://…" oninput="previewPhoto(this.value)">
-        <img id="plPhotoPreview" class="pl-photo-preview" alt="">
+        <img id="plPhotoPreview" class="pl-photo-preview" alt="" loading="lazy" decoding="async">
       </div>
       <button class="pl-modal-submit" id="plSubmitBtn" onclick="submitAddPlace()">
         <i class="fas fa-map-pin"></i> Add Place
@@ -262,12 +264,13 @@
   <div class="pl-detail" id="plDetailBox"></div>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="firestore-social.js"></script>
+<script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script defer src="firestore-social.js"></script>
+<script defer src="chat-popup.js"></script>
 <script type="module" src="firebase-config.js"></script>
-<script src="account.js"></script>
-<script src="nav-cleanup.js"></script>
-<script src="mobile-nav.js"></script>
+<script defer src="account.js"></script>
+<script defer src="nav-cleanup.js"></script>
+<script defer src="mobile-nav.js"></script>
 
 <script>
   var _currentCat = 'all';
@@ -308,7 +311,7 @@
 
   function renderCard(p, saved){
     return '<div class="pl-card" data-id="'+esc(p.id)+'" onclick="openPlaceDetail(\''+esc(p.id)+'\')">'+
-      '<div class="pl-card-img" style="'+coverBg(p)+'">'+(p.photoUrl?'<img src="'+esc(p.photoUrl)+'" alt="" onerror="this.style.display=\'none\'">':'')+
+      '<div class="pl-card-img" style="'+coverBg(p)+'">'+(p.photoUrl?'<img loading="lazy" decoding="async" src="'+esc(p.photoUrl)+'" alt="" onerror="this.style.display=\'none\'">':'')+
         '<span class="pl-card-cat-badge">'+esc(p.category||'Place')+'</span>'+
         '<button class="pl-card-save'+(saved?' saved':'')+'" data-id="'+esc(p.id)+'" onclick="handleSave(event,\''+esc(p.id)+'\')" title="'+(saved?'Unsave':'Save')+'">'+
           '<i class="'+(saved?'fas':'far')+' fa-bookmark"></i>'+
@@ -502,7 +505,7 @@
     var saved = !!_savedIds[p.id];
     box.innerHTML =
       '<div class="pl-detail-img" style="'+coverBg(p)+'">'+
-        (p.photoUrl?'<img src="'+esc(p.photoUrl)+'" alt="" onerror="this.style.display=\'none\'">':'')+
+        (p.photoUrl?'<img loading="lazy" decoding="async" src="'+esc(p.photoUrl)+'" alt="" onerror="this.style.display=\'none\'">':'')+
         '<button class="pl-detail-close" onclick="closePlaceDetail()">✕</button>'+
       '</div>'+
       '<div class="pl-detail-body">'+
@@ -652,5 +655,7 @@
   if(window.GeoSocial) init();
   else window.addEventListener('GeoSocialReady', init, {once:true});
 </script>
+<script defer src="geohub-production-stabilization-v1.js"></script>
+  <script defer src="responsive-polish.js"></script>
 </body>
 </html>

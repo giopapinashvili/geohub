@@ -14,32 +14,10 @@
   ];
 
   /* ── AI FEED TEMPLATES ───────────────────────────────────────── */
-  var FEED_POOL = [
-    { icon:'🔥', text:'Vake district is trending tonight — 3x normal foot traffic detected.', tag:'trend', city:'tbilisi' },
-    { icon:'🎭', text:'3 creator meetups happening now in Tbilisi. 240+ attendees confirmed.', tag:'creator', city:'tbilisi' },
-    { icon:'⛰️', text:'Kazbegi exploration activity up +42% this weekend. New patriot missions unlocked.', tag:'patriot', city:'kazbegi' },
-    { icon:'🏆', text:'Reward claim spike near Fabrika Café — 47 claims in the last 30 minutes.', tag:'reward', city:'tbilisi' },
-    { icon:'🛡️', text:'Patriot cleanup mission completed in Batumi Boulevard. Trust score +8 for 12 users.', tag:'patriot', city:'batumi' },
-    { icon:'🍷', text:'Sighnaghi Wine Route check-ins surging. 82 new reviews posted today.', tag:'trend', city:'sighnaghi' },
-    { icon:'🎵', text:'Nightlife activity in Tbilisi Old Town peaked — 6 live events simultaneous.', tag:'event', city:'tbilisi' },
-    { icon:'📸', text:'Creator @nino.geo went live with 1,200 viewers exploring Mtskheta.', tag:'creator', city:'mtskheta' },
-    { icon:'🚨', text:'Suspicious review cluster flagged in Kutaisi Center. AI moderation active.', tag:'alert', city:'kutaisi' },
-    { icon:'☕', text:'Café check-in density record broken in Saburtalo — 340 check-ins today.', tag:'trend', city:'tbilisi' },
-    { icon:'🎟️', text:'Concert tickets for Tbilisi Jazz Fest sold out in 8 minutes. 2,400 attendees.', tag:'event', city:'tbilisi' },
-    { icon:'🌱', text:'Zugdidi eco-trail challenge completed by first 50 explorers. Badge unlocked.', tag:'patriot', city:'zugdidi' },
-    { icon:'💎', text:'GeoHub Pro subscriptions up 18% this week. Businesses reporting 2.3x reach.', tag:'trend', city:'tbilisi' },
-    { icon:'🗺️', text:'New exploration zone unlocked in Gori — 15 pioneer explorers awarded.', tag:'reward', city:'gori' },
-    { icon:'🤝', text:'Community litter pickup in Batumi — 34 participants, Patriot XP distributed.', tag:'patriot', city:'batumi' }
-  ];
+  var FEED_POOL = [];
 
   /* ── PREDICTIONS ─────────────────────────────────────────────── */
-  var PREDICTIONS = [
-    { title:'Vake Hotspot Tomorrow', sub:'AI predicts 3.1x user density based on weekend trend + scheduled events.', conf:'94% confidence', cls:'', icon:'🔥' },
-    { title:'Fabrika Café Growth', sub:'New business gaining momentum. Likely trending in top 5 by next week.', conf:'87% confidence', cls:'gold', icon:'☕' },
-    { title:'Creator @luka.tbilisi Rising', sub:'Content velocity +240% this month. Expected viral reel within 48h.', conf:'82% confidence', cls:'purple', icon:'🎬' },
-    { title:'Jazz Festival Effect', sub:'Nightlife zone will extend to Vera district Friday 22:00–02:00.', conf:'91% confidence', cls:'green', icon:'🎵' },
-    { title:'Kazbegi Weekend Rush', sub:'Explorer bookings suggest +60% activity Sat–Sun. Hotel capacity near 95%.', conf:'88% confidence', cls:'orange', icon:'⛰️' }
-  ];
+  var PREDICTIONS = [];
 
   /* ── ZONE TRENDS ─────────────────────────────────────────────── */
   var ZONES = [
@@ -77,7 +55,7 @@
   var currentTOD = 'afternoon';
 
   /* ── STATE ───────────────────────────────────────────────────── */
-  var counters = { users:2841, checkins:1204, rewards:387, missions:94, tickets:628, stories:319, xp:48290 };
+  var counters = { users:0, checkins:0, rewards:0, missions:0, tickets:0, stories:0, xp:0 };
   var activeHeatmap = 'Activity';
   var feedItems = [];
   var feedBadgeCount = 3;
@@ -107,12 +85,15 @@
     buildTrendBars();
     buildPredictions();
     seedFeed(6);
+    loadRealWorldData();
     buildSocialLayer();
 
     startAnimation();
     startCounters();
-    setInterval(injectFeedItem, 5000);
-    setInterval(updateTrendBars, 4000);
+    // Production: no fake/random feed injection or trend mutation.
+    // Re-enable only when connected to real analytics events.
+    // setInterval(injectFeedItem, 5000);
+    // setInterval(updateTrendBars, 4000);
     startSimClock();
 
     setTimeOfDay('afternoon');
@@ -416,6 +397,7 @@
 
   function buildPredictions() {
     var el = document.getElementById('predList');
+    if (!PREDICTIONS.length) { el.innerHTML = '<div class="pred"><div class="pred-title">🤖 Real predictions pending</div><div class="pred-sub">Predictions will appear after GeoHub has enough real activity data.</div><div class="pred-conf">No fake predictions</div></div>'; return; }
     el.innerHTML = PREDICTIONS.map(function(p) {
       return '<div class="pred '+p.cls+'">' +
         '<div class="pred-title">' + p.icon + ' ' + p.title + '</div>' +
@@ -426,6 +408,7 @@
   }
 
   function seedFeed(n) {
+    if (!FEED_POOL.length) { renderRealWorldFeed(); return; }
     var shuffled = FEED_POOL.slice().sort(function(){ return Math.random()-.5; });
     for (var i = 0; i < Math.min(n, shuffled.length); i++) {
       feedItems.unshift(shuffled[i]);
@@ -434,6 +417,7 @@
   }
 
   function injectFeedItem() {
+    if (!FEED_POOL.length) return;
     var item = FEED_POOL[Math.floor(Math.random() * FEED_POOL.length)];
     feedItems.unshift(item);
     if (feedItems.length > 12) feedItems.pop();
@@ -482,17 +466,55 @@
 
   /* ── COUNTERS ────────────────────────────────────────────────── */
   function startCounters() {
-    setInterval(function() {
-      var mult = TIME_CONFIG[currentTOD] ? TIME_CONFIG[currentTOD].actMult : 1;
-      counters.users    += Math.floor(Math.random() * 8 * mult);
-      counters.checkins += Math.floor(Math.random() * 6 * mult);
-      counters.rewards  += Math.floor(Math.random() * 3 * mult);
-      counters.missions += Math.random() < .3 * mult ? 1 : 0;
-      counters.tickets  += Math.floor(Math.random() * 4 * mult);
-      counters.stories  += Math.floor(Math.random() * 3 * mult);
-      counters.xp       += Math.floor(Math.random() * 120 * mult);
+    updateCounterDOM();
+  }
+
+  async function countCollection(name) {
+    try {
+      var GF = window.GeoFirebase;
+      if (!GF || !GF.db || !GF.fs) return 0;
+      var col = GF.fs.collection(GF.db, name);
+      if (GF.fs.getCountFromServer) {
+        var snap = await GF.fs.getCountFromServer(col);
+        return snap.data().count || 0;
+      }
+      var snap2 = await GF.fs.getDocs(GF.fs.query(col, GF.fs.limit(1000)));
+      return snap2.size || 0;
+    } catch (e) { return 0; }
+  }
+
+  async function loadRealWorldData() {
+    function ready(cb){
+      if (window.GeoFirebase && window.GeoFirebase.db && window.GeoFirebase.fs) cb();
+      else window.addEventListener('GeoFirebaseReady', cb, { once:true });
+    }
+    ready(async function(){
+      var names = ['users','checkins','rewards','challenges','events','stories','pointTransactions'];
+      var values = await Promise.all(names.map(countCollection));
+      counters = { users:values[0], checkins:values[1], rewards:values[2], missions:values[3], tickets:values[4], stories:values[5], xp:values[6] };
       updateCounterDOM();
-    }, 3000);
+      renderRealWorldFeed();
+    });
+  }
+
+  function renderRealWorldFeed() {
+    var el = document.getElementById('aiFeed');
+    if (!el) return;
+    var total = counters.users + counters.checkins + counters.rewards + counters.missions + counters.tickets + counters.stories;
+    if (!total) {
+      el.innerHTML = '<div class="feed-item"><div class="feed-icon">🌍</div><div><div class="feed-text">No live GeoHub activity yet. Real activity will appear here after users create posts, check-ins, stories, events, rewards, and missions.</div><div class="feed-time">Live data only</div><span class="feed-tag tag-live">real data</span></div></div>';
+      var badge = document.getElementById('feedBadge'); if (badge) badge.textContent = '0';
+      return;
+    }
+    feedItems = [
+      { icon:'👥', text:counters.users + ' real users are registered on GeoHub.', tag:'live', city:'Georgia' },
+      { icon:'📍', text:counters.checkins + ' real check-ins have been created.', tag:'trend', city:'Georgia' },
+      { icon:'🎟️', text:counters.tickets + ' real events are available.', tag:'event', city:'Georgia' },
+      { icon:'🏆', text:counters.rewards + ' real rewards are available.', tag:'reward', city:'Georgia' },
+      { icon:'📖', text:counters.stories + ' real stories have been shared.', tag:'creator', city:'Georgia' }
+    ];
+    var badge = document.getElementById('feedBadge'); if (badge) badge.textContent = String(feedItems.length);
+    renderFeed();
   }
 
   function updateCounterDOM() {

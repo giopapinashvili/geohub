@@ -58,6 +58,13 @@
       toggleGroupMember: noop,
       toggleEventParticipant: noop,
       sendFriendRequest: noop,
+      listenFriendshipStatus: function(toUserId, cb){ cb({state:'none'}); return function(){}; },
+      respondFriendRequest: function(){ noop(); },
+      listenFriendRequests: function(cb){ cb([]); return function(){}; },
+      listenFriends: function(uid, cb){ cb([]); return function(){}; },
+      removeFriend: function(){ noop(); },
+      addCommentReply: function(){ noop(); },
+      listenCommentReplies: function(postId, commentId, cb){ cb([]); return function(){}; },
       createCheckin: noop,
       createStory: noop,
       listenStories: function () { return function () {}; },
@@ -69,6 +76,7 @@
       createGroup: noop,
       listenGroups: function (o, cb) { (cb||o)([]); return function(){}; },
       listenMyGroups: function (uid, cb) { cb([]); return function(){}; },
+      listenGroupMembers: function(groupId, cb){ cb([]); return function(){}; },
       createGroupPost: noop,
       listenGroupPosts: function (id, cb) { cb([]); return function(){}; },
       createPlace: noop,
@@ -84,6 +92,19 @@
       checkJoinRequest: function (groupId, cb) { cb(false); },
       getMyJoinRequests: function (cb) { cb({}); },
       searchFirestore: function (q, cb) { cb({ users:[], groups:[], places:[], posts:[] }); },
+
+      // GeoPoints economy fallback
+      listenWallet: function(uid, cb){ cb({ balance:0, earned:0, received:0, sent:0, spent:0, redeemed:0, transactions:[] }); return function(){}; },
+      getWalletSnapshot: function(uid){ return Promise.resolve({ balance:0, earned:0, received:0, sent:0, spent:0, redeemed:0, transactions:[] }); },
+      awardPoints: noop,
+      sendPoints: noop,
+      spendPoints: noop,
+      createReward: noop,
+      listenRewards: function(opts, cb){ (cb||opts)([]); return function(){}; },
+      redeemReward: function(){ noop(); },
+      listenMyCoupons: function(uid, cb){ cb([]); return function(){}; },
+      listenPointTransactions: function(uid, cb){ cb([]); return function(){}; },
+      redeemCoupon: function(){ noop(); },
       findUserByInput: function () { return Promise.resolve(null); },
       requireAuth: showLoginPrompt,
       toast: toast
@@ -157,6 +178,219 @@
       });
     }
 
+
+
+    // ── PHASE 2: Storage + Safety + Dashboard helpers ───────────────────
+    function dataUrlToBlob(dataUrl) {
+      var parts = String(dataUrl || '').split(',');
+      if (parts.length < 2) return null;
+      var meta = parts[0] || '';
+      var mime = (meta.match(/data:([^;]+)/) || [])[1] || 'application/octet-stream';
+      var bin = atob(parts[1]);
+      var arr = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      return new Blob([arr], { type: mime });
+    }
+
+    // Cloudinary unsigned upload configuration. Firebase Storage is not required for GeoHub media uploads.
+    var GEOHUB_CLOUDINARY = {
+      cloudName: 'dw5dqk2w7',
+      uploadPreset: 'geohub_unsigned',
+      rootFolder: 'geohub'
+    };
+
+    function cloudinaryFolder(folder, uid) {
+      var safeFolder = String(folder || 'uploads').replace(/[^a-zA-Z0-9_\-/]/g, '').replace(/^\/+|\/+$/g, '') || 'uploads';
+      var safeUid = String(uid || 'anonymous').replace(/[^a-zA-Z0-9_-]/g, '');
+      return GEOHUB_CLOUDINARY.rootFolder + '/' + safeFolder + '/' + safeUid;
+    }
+
+    function uploadBlobToCloudinary(blob, folder, user) {
+      if (!blob) return Promise.resolve('');
+      var form = new FormData();
+      form.append('file', blob);
+      form.append('upload_preset', GEOHUB_CLOUDINARY.uploadPreset);
+      form.append('folder', cloudinaryFolder(folder, user && user.uid));
+      form.append('tags', 'geohub,' + String(folder || 'uploads'));
+      var url = 'https://api.cloudinary.com/v1_1/' + encodeURIComponent(GEOHUB_CLOUDINARY.cloudName) + '/image/upload';
+      return fetch(url, { method: 'POST', body: form })
+        .then(function(res){
+          return res.json().then(function(body){
+            if (!res.ok || !body.secure_url) {
+              throw new Error((body && body.error && body.error.message) || ('Cloudinary upload failed: ' + res.status));
+            }
+            return body.secure_url;
+          });
+        });
+    }
+
+    function compressImageBlob(blob, maxSide, quality) {
+      maxSide = maxSide || 1600;
+      quality = quality || 0.82;
+      if (!blob || !/^image\//i.test(blob.type || '') || /gif/i.test(blob.type || '')) return Promise.resolve(blob);
+      if (!window.createImageBitmap || !document.createElement) return Promise.resolve(blob);
+      return createImageBitmap(blob).then(function(bitmap){
+        var w = bitmap.width, h = bitmap.height;
+        var scale = Math.min(1, maxSide / Math.max(w, h));
+        if (scale >= 1 && blob.size <= 900 * 1024) return blob;
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(w * scale));
+        canvas.height = Math.max(1, Math.round(h * scale));
+        var ctx = canvas.getContext('2d', { alpha: false });
+        ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+        if (bitmap.close) bitmap.close();
+        return new Promise(function(resolve){
+          canvas.toBlob(function(out){ resolve(out || blob); }, 'image/jpeg', quality);
+        });
+      }).catch(function(){ return blob; });
+    }
+
+    function uploadImageDataUrl(dataUrl, folder, callback) {
+      if (!dataUrl || typeof dataUrl !== 'string' || dataUrl.indexOf('data:') !== 0) {
+        if (callback) callback(dataUrl || '');
+        return Promise.resolve(dataUrl || '');
+      }
+      return new Promise(function(resolve){
+        requireAuth(function(user){
+          var blob = dataUrlToBlob(dataUrl);
+          if (!blob) {
+            toast('Invalid image data', 'error');
+            if (callback) callback('');
+            resolve('');
+            return;
+          }
+          if (!/^image\/(png|jpe?g|webp|gif)$/i.test(blob.type || '')) {
+            toast('Use a PNG, JPG, WEBP or GIF image.', 'error');
+            if (callback) callback('');
+            resolve('');
+            return;
+          }
+          if (blob.size > 8 * 1024 * 1024) {
+            toast('Image is too large. Choose a file under 8 MB.', 'error');
+            if (callback) callback('');
+            resolve('');
+            return;
+          }
+          compressImageBlob(blob).then(function(finalBlob){
+            return uploadBlobToCloudinary(finalBlob, folder, user);
+          }).then(function(url){
+            if (callback) callback(url);
+            resolve(url);
+          }).catch(function(err){
+            console.error('[GeoSocial] Cloudinary upload failed:', err && err.message ? err.message : err);
+            toast('Image upload failed. Check Cloudinary unsigned preset.', 'error');
+            if (callback) callback('');
+            resolve('');
+          });
+        });
+      });
+    }
+
+    function hidePost(postId, callback) {
+      requireAuth(function(user){
+        setDoc(doc(db, 'hiddenPosts', user.uid + '_' + postId), {
+          userId: user.uid, postId: postId, createdAt: serverTimestamp()
+        }).then(function(){ toast('Post hidden'); if(callback) callback(true); })
+          .catch(function(err){ console.error('[GeoSocial] hidePost', err); toast('Could not hide post.', 'error'); if(callback) callback(false, err); });
+      });
+    }
+
+    function blockUser(targetUserId, callback) {
+      requireAuth(function(user){
+        if (!targetUserId || targetUserId === user.uid) return;
+        setDoc(doc(db, 'blockedUsers', user.uid + '_' + targetUserId), {
+          blockerId: user.uid, blockedId: targetUserId, createdAt: serverTimestamp()
+        }).then(function(){ toast('User blocked'); if(callback) callback(true); })
+          .catch(function(err){ console.error('[GeoSocial] blockUser', err); toast('Could not block user.', 'error'); if(callback) callback(false, err); });
+      });
+    }
+
+    function unblockUser(targetUserId, callback) {
+      requireAuth(function(user){
+        deleteDoc(doc(db, 'blockedUsers', user.uid + '_' + targetUserId))
+          .then(function(){ toast('User unblocked'); if(callback) callback(false); })
+          .catch(function(err){ console.error('[GeoSocial] unblockUser', err); toast('Could not unblock user.', 'error'); });
+      });
+    }
+
+    function listenSafetyPrefs(callback) {
+      var uid = currentUid();
+      if (!uid) { callback({ hiddenPostIds: [], blockedUserIds: [] }); return function(){}; }
+      var state = { hiddenPostIds: [], blockedUserIds: [] };
+      function emit(){ callback({ hiddenPostIds: state.hiddenPostIds.slice(), blockedUserIds: state.blockedUserIds.slice() }); }
+      var uh = onSnapshot(query(collection(db, 'hiddenPosts'), where('userId', '==', uid), limit(200)), function(snap){
+        var ids=[]; snap.forEach(function(d){ var x=d.data()||{}; if(x.postId) ids.push(x.postId); }); state.hiddenPostIds=ids; emit();
+      }, function(err){ console.warn('[GeoSocial] hiddenPosts', err.message); emit(); });
+      var ub = onSnapshot(query(collection(db, 'blockedUsers'), where('blockerId', '==', uid), limit(200)), function(snap){
+        var ids=[]; snap.forEach(function(d){ var x=d.data()||{}; if(x.blockedId) ids.push(x.blockedId); }); state.blockedUserIds=ids; emit();
+      }, function(err){ console.warn('[GeoSocial] blockedUsers', err.message); emit(); });
+      return function(){ try{uh();}catch(e){} try{ub();}catch(e){} };
+    }
+
+    function reportTarget(type, id, reason, details, callback) {
+      requireAuth(function(user){
+        addDoc(collection(db, 'reports'), {
+          reporterId: user.uid, targetType: type, targetId: id,
+          reason: reason || 'report', details: details || '', status: 'pending', createdAt: serverTimestamp()
+        }).then(function(){ toast('Report sent'); if(callback) callback(true); })
+          .catch(function(err){ console.error('[GeoSocial] reportTarget', err); toast('Report failed.', 'error'); if(callback) callback(false, err); });
+      });
+    }
+
+    function listenManagedBusinesses(uid, callback) {
+      uid = uid || currentUid();
+      if (!uid) { callback([]); return function(){}; }
+      var q = query(collection(db, 'businessAdmins'), where('userId', '==', uid), limit(50));
+      return onSnapshot(q, function(snap){
+        var ids=[]; snap.forEach(function(d){ var x=d.data()||{}; if(x.businessId) ids.push(x.businessId); });
+        if(!ids.length){ callback([]); return; }
+        Promise.all(ids.slice(0,30).map(function(id){
+          return getDoc(doc(db,'businesses',id)).then(function(bs){ return bs.exists()?Object.assign({id:id},bs.data()):null; }).catch(function(){return null;});
+        })).then(function(rows){ callback(rows.filter(Boolean)); });
+      }, function(err){ console.warn('[GeoSocial] listenManagedBusinesses', err.message); callback([]); });
+    }
+
+    function listenUserBadges(uid, callback) {
+      uid = uid || currentUid();
+      if (!uid) { callback([]); return function(){}; }
+      var q = query(collection(db, 'userBadges'), where('userId', '==', uid), limit(80));
+      return onSnapshot(q, function(snap){ var items=[]; snap.forEach(function(d){ items.push(Object.assign({id:d.id}, d.data())); }); callback(items); }, function(){ callback([]); });
+    }
+
+    function createBusinessOffer(businessId, data, callback) {
+      requireAuth(function(user){
+        data = data || {};
+        if (!(data.title || '').trim()) return toast('Offer title is required', 'error');
+        addDoc(collection(db,'businessOffers'), {
+          businessId: businessId,
+          title: (data.title || '').trim(),
+          description: (data.description || '').trim(),
+          startsAt: data.startsAt || '',
+          endsAt: data.endsAt || '',
+          createdBy: user.uid,
+          ownerId: user.uid,
+          status: 'active',
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        }).then(function(ref){ toast('Offer created'); if(callback) callback(ref.id); })
+          .catch(function(err){ console.error('[GeoSocial] createBusinessOffer', err); toast('Offer failed.', 'error'); if(callback) callback(null, err); });
+      });
+    }
+
+    function getBusinessDashboard(businessId, callback) {
+      Promise.all([
+        getDocs(query(collection(db,'businessFollowers'), where('businessId','==',businessId), limit(500))).catch(function(){return null;}),
+        getDocs(query(collection(db,'posts'), where('targetType','==','business'), where('targetId','==',businessId), limit(100))).catch(function(){return null;}),
+        getDocs(query(collection(db,'businessReviews'), where('businessId','==',businessId), limit(100))).catch(function(){return null;}),
+        getDocs(query(collection(db,'businessOffers'), where('businessId','==',businessId), limit(50))).catch(function(){return null;}),
+        getDocs(query(collection(db,'rewards'), where('businessId','==',businessId), limit(50))).catch(function(){return null;})
+      ]).then(function(res){
+        function count(snap){ return snap && !snap.empty ? snap.size : 0; }
+        var offers=[]; if(res[3]) res[3].forEach(function(d){ offers.push(Object.assign({id:d.id}, d.data())); });
+        var rewards=[]; if(res[4]) res[4].forEach(function(d){ rewards.push(Object.assign({id:d.id}, d.data())); });
+        callback({ followers: count(res[0]), posts: count(res[1]), reviews: count(res[2]), offers: offers, rewards: rewards });
+      }).catch(function(){ callback({ followers:0, posts:0, reviews:0, offers:[], rewards:[] }); });
+    }
     function getPostOwner(postId) {
       return getDoc(doc(db, 'posts', postId)).then(function (snap) {
         if (!snap.exists()) return null;
@@ -167,6 +401,303 @@
 
     function conversationIdFor(a, b) {
       return [a, b].sort().join('_');
+    }
+
+
+
+    // ── GEOPOINTS / REWARD STORE ECONOMY ───────────────────────────────
+    function normalAmount(value) {
+      var n = Math.floor(Number(value || 0));
+      return isFinite(n) && n > 0 ? n : 0;
+    }
+
+    function couponCode(prefix) {
+      return (prefix || 'GH') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase() + '-' + Date.now().toString(36).slice(-5).toUpperCase();
+    }
+
+    function computeWallet(transactions, targetUid) {
+      var uid = targetUid || currentUid();
+      var wallet = {
+        uid: uid || '', balance: 0, earned: 0, received: 0, sent: 0, spent: 0, redeemed: 0, refunded: 0,
+        transactions: (transactions || []).slice().sort(function(a, b){ return tsToMillis(b.createdAt) - tsToMillis(a.createdAt); })
+      };
+      wallet.transactions.forEach(function(tx){
+        var amount = normalAmount(tx.amount);
+        if (!amount) return;
+        var type = String(tx.type || '').toLowerCase();
+        var from = tx.fromUserId || tx.fromId || '';
+        var to = tx.toUserId || tx.toId || tx.userId || '';
+        if ((type === 'earn' || type === 'admin_adjustment') && to === uid) { wallet.earned += amount; wallet.balance += amount; }
+        else if (type === 'refund' && to === uid) { wallet.refunded += amount; wallet.balance += amount; }
+        else if (type === 'gift') {
+          if (from === uid) { wallet.sent += amount; wallet.balance -= amount; }
+          if (to === uid) { wallet.received += amount; wallet.balance += amount; }
+        } else if ((type === 'spend' || type === 'redeem') && from === uid) {
+          if (type === 'redeem') wallet.redeemed += amount;
+          else wallet.spent += amount;
+          wallet.balance -= amount;
+        }
+      });
+      wallet.balance = Math.max(0, wallet.balance);
+      return wallet;
+    }
+
+    function getWalletSnapshot(uid) {
+      uid = uid || currentUid();
+      if (!uid) return Promise.resolve(computeWallet([], ''));
+      return getDocs(query(collection(db, 'pointTransactions'), where('participantIds', 'array-contains', uid), limit(500)))
+        .then(function(snap){ var rows=[]; snap.forEach(function(d){ rows.push(Object.assign({ id:d.id }, d.data())); }); return computeWallet(rows, uid); })
+        .catch(function(err){ console.warn('[GeoSocial] getWalletSnapshot', err.message); return computeWallet([], uid); });
+    }
+
+    function listenWallet(uid, callback) {
+      uid = uid || currentUid();
+      if (!uid) { callback(computeWallet([], '')); return function(){}; }
+      var q = query(collection(db, 'pointTransactions'), where('participantIds', 'array-contains', uid), limit(500));
+      return onSnapshot(q, function(snap){
+        var rows=[]; snap.forEach(function(d){ rows.push(Object.assign({ id:d.id }, d.data())); });
+        callback(computeWallet(rows, uid));
+      }, function(err){ console.warn('[GeoSocial] listenWallet', err.message); callback(computeWallet([], uid)); });
+    }
+
+    function listenPointTransactions(uid, callback) {
+      return listenWallet(uid, function(wallet){ callback(wallet.transactions || []); });
+    }
+
+    function walletRef(uid) {
+      return doc(db, 'users', uid, 'private', 'wallet');
+    }
+
+    function ensureWalletSnapshot(uid) {
+      return getWalletSnapshot(uid).then(function(wallet){
+        return {
+          credits: Math.max(0, Number(wallet.earned || 0) + Number(wallet.received || 0)),
+          reservedDebits: Math.max(0, Number(wallet.sent || 0) + Number(wallet.spent || 0)),
+          sent: Math.max(0, Number(wallet.sent || 0)),
+          spent: Math.max(0, Number(wallet.spent || 0)),
+          received: Math.max(0, Number(wallet.received || 0)),
+          updatedAt: serverTimestamp()
+        };
+      });
+    }
+
+    function awardPoints(amount, reason, targetType, targetId, callback) {
+      // Security hardening: public clients must not create completed `earn` pointTransactions.
+      // This creates a pending earn request for a future Cloud Function/admin workflow.
+      var n = Math.min(1000, normalAmount(amount));
+      if (!n) return Promise.resolve(false);
+      return new Promise(function(resolve){
+        requireAuth(function(user){
+          var me = meData() || {};
+          addDoc(collection(db, 'pointEarnRequests'), {
+            userId: user.uid, toUserId: user.uid, amount: n,
+            reason: reason || 'GeoHub activity', targetType: targetType || '', targetId: targetId || '',
+            userName: me.name || user.displayName || 'GeoHub User',
+            status: 'pending', createdAt: serverTimestamp()
+          }).then(function(ref){
+            console.info('[GeoSocial] GeoPoints earn request queued. Approve with Cloud Function/admin:', ref.id);
+            if (callback) callback(true, ref.id);
+            resolve(true);
+          }).catch(function(err){ console.warn('[GeoSocial] awardPoints request', err.message); if(callback) callback(false, err); resolve(false); });
+        });
+      });
+    }
+
+    function sendPoints(recipientInput, amount, message, callback) {
+      var n = normalAmount(amount);
+      if (!n) { toast('Enter a valid GeoPoints amount', 'error'); if(callback) callback(false); return; }
+      requireAuth(function(user){
+        var me = meData() || {};
+        var targetPromise = (typeof recipientInput === 'object' && recipientInput && (recipientInput.uid || recipientInput.id))
+          ? Promise.resolve(recipientInput)
+          : findUserByInput(String(recipientInput || ''));
+        targetPromise.then(function(target){
+          if (!target || !(target.uid || target.id)) throw new Error('recipient-not-found');
+          var targetId = target.uid || target.id;
+          if (targetId === user.uid) throw new Error('self-transfer');
+          return ensureWalletSnapshot(user.uid).then(function(initialWallet){
+            var txRef = doc(collection(db, 'pointTransactions'));
+            return runTransaction(db, function(tx){
+              return tx.get(walletRef(user.uid)).then(function(walletSnap){
+                var wallet = walletSnap.exists() ? (walletSnap.data() || {}) : initialWallet;
+                var credits = Math.max(Number(wallet.credits || 0), Number(initialWallet.credits || 0));
+                var reservedDebits = wallet.reservedDebits != null
+                  ? Math.max(0, Number(wallet.reservedDebits || 0))
+                  : Math.max(0, credits - Math.max(0, Number(wallet.balance || 0)));
+                if (credits - reservedDebits < n) throw new Error('insufficient-points');
+                tx.set(walletRef(user.uid), {
+                  credits: credits,
+                  reservedDebits: reservedDebits + n,
+                  sent: Math.max(Number(wallet.sent || 0), Number(initialWallet.sent || 0)) + n,
+                  updatedAt: serverTimestamp()
+                }, { merge: true });
+                tx.set(txRef, {
+              type: 'gift', amount: n,
+              fromUserId: user.uid, toUserId: targetId,
+              fromName: me.name || user.displayName || 'GeoHub User',
+              toName: target.fullName || target.displayName || target.name || target.email || 'GeoHub User',
+              participantIds: [user.uid, targetId],
+              message: String(message || '').slice(0, 240), reason: 'Gift points',
+              status: 'completed', createdAt: serverTimestamp()
+                });
+                return { ref: txRef, targetId: targetId };
+              });
+            });
+          });
+        }).then(function(res){
+          updateDoc(doc(db, 'users', user.uid), { geoPointsSentTotal: increment(n), updatedAt: serverTimestamp() }).catch(function(){});
+          updateDoc(doc(db, 'users', res.targetId), { geoPointsReceivedTotal: increment(n), updatedAt: serverTimestamp() }).catch(function(){});
+          createNotification(res.targetId, 'points_received', (me.name || 'GeoHub User') + ' sent you ' + n + ' GeoPoints', message || 'You received GeoPoints.', 'rewards.html?tab=wallet', { amount: n });
+          toast('GeoPoints sent'); if(callback) callback(true, res.ref.id);
+        }).catch(function(err){
+          var msg = err.message === 'recipient-not-found' ? 'Recipient not found' : err.message === 'self-transfer' ? 'You cannot send points to yourself' : err.message === 'insufficient-points' ? 'Not enough GeoPoints' : 'Could not send GeoPoints';
+          toast(msg, 'error'); if(callback) callback(false, err);
+        });
+      });
+    }
+
+    function spendPoints(amount, reason, targetType, targetId, callback) {
+      var n = normalAmount(amount);
+      if (!n) { toast('Invalid GeoPoints amount', 'error'); if(callback) callback(false); return; }
+      requireAuth(function(user){
+        ensureWalletSnapshot(user.uid).then(function(initialWallet){
+          var txRef = doc(collection(db, 'pointTransactions'));
+          return runTransaction(db, function(tx){
+            return tx.get(walletRef(user.uid)).then(function(walletSnap){
+              var wallet = walletSnap.exists() ? (walletSnap.data() || {}) : initialWallet;
+              var credits = Math.max(Number(wallet.credits || 0), Number(initialWallet.credits || 0));
+              var reservedDebits = wallet.reservedDebits != null
+                ? Math.max(0, Number(wallet.reservedDebits || 0))
+                : Math.max(0, credits - Math.max(0, Number(wallet.balance || 0)));
+              if (credits - reservedDebits < n) throw new Error('insufficient-points');
+              tx.set(walletRef(user.uid), {
+                credits: credits,
+                reservedDebits: reservedDebits + n,
+                spent: Math.max(Number(wallet.spent || 0), Number(initialWallet.spent || 0)) + n,
+                updatedAt: serverTimestamp()
+              }, { merge: true });
+              tx.set(txRef, {
+            type: 'spend', amount: n,
+            fromUserId: user.uid, toUserId: 'platform', participantIds: [user.uid],
+            reason: reason || 'GeoHub platform benefit', targetType: targetType || '', targetId: targetId || '',
+            status: 'completed', createdAt: serverTimestamp()
+              });
+              return txRef;
+            });
+          });
+        }).then(function(ref){ updateDoc(doc(db, 'users', user.uid), { geoPointsSpentTotal: increment(n), updatedAt: serverTimestamp() }).catch(function(){}); toast('GeoPoints spent'); if(callback) callback(true, ref.id); })
+          .catch(function(err){ toast(err.message === 'insufficient-points' ? 'Not enough GeoPoints' : 'Could not spend GeoPoints', 'error'); if(callback) callback(false, err); });
+      });
+    }
+
+    function createReward(data, callback) {
+      requireAuth(function(user){
+        data = data || {};
+        var title = String(data.title || '').trim();
+        var price = normalAmount(data.pointPrice || data.price || data.points);
+        if (!title) { toast('Reward title is required', 'error'); if(callback) callback(null); return; }
+        if (!price) { toast('Point price is required', 'error'); if(callback) callback(null); return; }
+        addDoc(collection(db, 'rewards'), {
+          title: title, name: title,
+          description: String(data.description || '').trim(),
+          rewardType: data.rewardType || 'discount',
+          businessId: data.businessId || '', businessName: data.businessName || '',
+          pointPrice: price,
+          quantityTotal: normalAmount(data.quantityTotal || data.quantity || 0),
+          quantityRemaining: normalAmount(data.quantityRemaining || data.quantityTotal || data.quantity || 0),
+          expiresAt: data.expiresAt || '', terms: String(data.terms || '').trim(),
+          imageUrl: data.imageUrl || '', status: data.status || 'active',
+          createdBy: user.uid, ownerId: user.uid, userId: user.uid,
+          createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+        }).then(function(ref){ toast('Reward created'); if(callback) callback(ref.id); })
+          .catch(function(err){ console.error('[GeoSocial] createReward', err); toast('Reward create failed', 'error'); if(callback) callback(null, err); });
+      });
+    }
+
+    function listenRewards(opts, callback) {
+      if (typeof opts === 'function') { callback = opts; opts = {}; }
+      opts = opts || {};
+      var q = query(collection(db, 'rewards'), limit(opts.limit || 100));
+      return onSnapshot(q, function(snap){
+        var rows=[]; snap.forEach(function(d){ var x=Object.assign({ id:d.id }, d.data()); if((x.status || 'active') === 'active') rows.push(x); });
+        rows.sort(function(a,b){ return tsToMillis(b.createdAt)-tsToMillis(a.createdAt); });
+        callback(rows);
+      }, function(err){ console.warn('[GeoSocial] listenRewards', err.message); callback([]); });
+    }
+
+    function redeemReward(rewardId, callback) {
+      requireAuth(function(user){
+        var rewardRef = doc(db, 'rewards', rewardId);
+        getDoc(rewardRef).then(function(rewardSnap){
+          if (!rewardSnap.exists()) throw new Error('reward-not-found');
+          var reward = Object.assign({ id: rewardSnap.id }, rewardSnap.data());
+          var price = normalAmount(reward.pointPrice || reward.price || reward.points);
+          if (!price) throw new Error('invalid-price');
+          return getWalletSnapshot(user.uid).then(function(wallet){
+            if (wallet.balance < price) throw new Error('insufficient-points');
+            var couponRef = doc(collection(db, 'rewardCoupons'));
+            var txRef = doc(collection(db, 'pointTransactions'));
+            var code = couponCode('GH');
+            var participantIds = [user.uid];
+            if (!runTransaction) throw new Error('transactions-unavailable');
+            return runTransaction(db, function(tx){
+              return tx.get(rewardRef).then(function(rs){
+                if (!rs.exists()) throw new Error('reward-not-found');
+                var r = rs.data() || {};
+                var remaining = Number(r.quantityRemaining || 0);
+                if (remaining <= 0 && Number(r.quantityTotal || 0) > 0) throw new Error('sold-out');
+                if (Number(r.quantityTotal || 0) > 0) tx.update(rewardRef, { quantityRemaining: increment(-1), updatedAt: serverTimestamp() });
+                tx.set(couponRef, {
+                  rewardId: rewardId, userId: user.uid, businessId: r.businessId || '',
+                  rewardTitle: r.title || r.name || 'Reward', pointPrice: price,
+                  businessOwnerId: r.ownerId || r.createdBy || '',
+                  code: code, qrValue: code, status: 'active',
+                  createdAt: serverTimestamp(), expiresAt: r.expiresAt || ''
+                });
+                tx.set(txRef, {
+                  type: 'redeem', amount: price, fromUserId: user.uid, toUserId: r.businessId || 'partner',
+                  participantIds: participantIds, reason: 'Redeemed reward: ' + (r.title || r.name || rewardId),
+                  targetType: 'reward', targetId: rewardId, couponId: couponRef.id,
+                  status: 'completed', createdAt: serverTimestamp()
+                });
+              });
+            }).then(function(){ return { couponId: couponRef.id, code: code, reward: reward }; });
+          });
+        }).then(function(res){
+          updateDoc(doc(db, 'users', user.uid), { geoPointsSpentTotal: increment(Number(res.reward.pointPrice || 0)), updatedAt: serverTimestamp() }).catch(function(){});
+          toast('Coupon unlocked: ' + res.code);
+          if(callback) callback(true, res);
+        }).catch(function(err){
+          var msg = err.message === 'insufficient-points' ? 'Not enough GeoPoints' : err.message === 'sold-out' ? 'Reward sold out' : 'Could not redeem reward';
+          toast(msg, 'error'); if(callback) callback(false, err);
+        });
+      });
+    }
+
+    function listenMyCoupons(uid, callback) {
+      uid = uid || currentUid();
+      if (!uid) { callback([]); return function(){}; }
+      var q = query(collection(db, 'rewardCoupons'), where('userId', '==', uid), limit(100));
+      return onSnapshot(q, function(snap){
+        var rows=[]; snap.forEach(function(d){ rows.push(Object.assign({ id:d.id }, d.data())); });
+        rows.sort(function(a,b){ return tsToMillis(b.createdAt)-tsToMillis(a.createdAt); });
+        callback(rows);
+      }, function(err){ console.warn('[GeoSocial] listenMyCoupons', err.message); callback([]); });
+    }
+
+    function redeemCoupon(code, businessId, callback) {
+      code = String(code || '').trim().toUpperCase();
+      if (!code) { toast('Enter coupon code', 'error'); if(callback) callback(false); return; }
+      requireAuth(function(user){
+        getDocs(query(collection(db, 'rewardCoupons'), where('code', '==', code), limit(1))).then(function(snap){
+          if (snap.empty) throw new Error('not-found');
+          var d = snap.docs[0]; var c = d.data() || {};
+          if (c.status !== 'active') throw new Error('not-active');
+          if (businessId && c.businessId && c.businessId !== businessId) throw new Error('wrong-business');
+          return updateDoc(doc(db, 'rewardCoupons', d.id), { status:'used', usedAt: serverTimestamp(), usedBy: user.uid, updatedAt: serverTimestamp() });
+        }).then(function(){ toast('Coupon redeemed'); if(callback) callback(true); })
+          .catch(function(err){ var msg = err.message === 'not-found' ? 'Coupon not found' : err.message === 'not-active' ? 'Coupon already used/expired' : err.message === 'wrong-business' ? 'This coupon belongs to another business' : 'Could not redeem coupon'; toast(msg, 'error'); if(callback) callback(false, err); });
+      });
     }
 
     // ── POSTS ────────────────────────────────────────────────────────────
@@ -189,9 +720,15 @@
           likeCount: 0,
           commentCount: 0,
           shareCount: 0,
+          visibility: (extra && extra.visibility) || 'public',
+          status: 'active',
+          sharedPostId: extra && extra.sharedPostId ? extra.sharedPostId : null,
+          targetType: extra && extra.targetType ? extra.targetType : 'user',
+          targetId: extra && extra.targetId ? extra.targetId : user.uid,
           createdAt: serverTimestamp()
         }).then(function (ref) {
           toast('Post published!');
+          awardPoints(20, 'Create post', 'post', ref.id);
           if (callback) callback(ref.id);
         }).catch(function (err) {
           console.error('[GeoSocial] createPost', err);
@@ -201,7 +738,7 @@
     }
 
     function listenFeed(callback, limitN) {
-      var q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(limitN || 30));
+      var q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(Math.min(Number(limitN) || 20, 30)));
       return onSnapshot(q, function (snap) {
         var posts = [];
         snap.forEach(function (d) { posts.push(Object.assign({ id: d.id }, d.data())); });
@@ -263,6 +800,7 @@
       if (!text || !text.trim()) return;
       requireAuth(function (user) {
         var me = meData() || {};
+        var commentRef = null;
         addDoc(collection(db, 'posts', postId, 'comments'), {
           text: text.trim(),
           authorId: user.uid,
@@ -270,15 +808,19 @@
           authorName: me.name || user.displayName || 'GeoHub User',
           authorAvatar: me.avatar || user.photoURL || '',
           likes: 0,
+          status: 'active',
           createdAt: serverTimestamp()
-        }).then(function () {
+        }).then(function (ref) {
+          commentRef = ref;
           return updateDoc(doc(db, 'posts', postId), { commentCount: increment(1) });
         }).then(function () {
           return getPostOwner(postId).then(function (ownerId) {
-            return createNotification(ownerId, 'comment', (meData() || {}).name + ' commented on your post', text.trim(), 'feed.html#post-' + postId, { postId: postId });
+            var cid = commentRef && commentRef.id;
+            return createNotification(ownerId, 'comment', (meData() || {}).name + ' commented on your post', text.trim(), 'feed.html?post=' + postId + (cid ? '&comment=' + cid : ''), { postId: postId, commentId: cid || '' });
           });
         }).then(function () {
           toast('Comment posted');
+          awardPoints(5, 'Comment on post', 'post', postId);
           if (callback) callback();
         }).catch(function (err) {
           console.error('[GeoSocial] addComment', err);
@@ -289,13 +831,62 @@
     }
 
     function listenComments(postId, callback) {
-      var q = query(collection(db, 'posts', postId, 'comments'), orderBy('createdAt', 'asc'));
+      var q = query(collection(db, 'posts', postId, 'comments'), orderBy('createdAt', 'asc'), limit(40));
       return onSnapshot(q, function (snap) {
         var comments = [];
         snap.forEach(function (d) { comments.push(Object.assign({ id: d.id }, d.data())); });
         callback(comments);
       }, function (err) {
         console.warn('[GeoSocial] listenComments', err.message);
+      });
+    }
+
+
+    function addCommentReply(postId, commentId, text, callback) {
+      if (!text || !text.trim()) return;
+      requireAuth(function (user) {
+        var me = meData() || {};
+        var replyText = text.trim();
+        addDoc(collection(db, 'posts', postId, 'comments', commentId, 'replies'), {
+          postId: postId,
+          commentId: commentId,
+          text: replyText,
+          authorId: user.uid,
+          userId: user.uid,
+          authorName: me.name || user.displayName || 'GeoHub User',
+          authorAvatar: me.avatar || user.photoURL || '',
+          likeCount: 0,
+          status: 'active',
+          createdAt: serverTimestamp()
+        }).then(function () {
+          return updateDoc(doc(db, 'posts', postId), { commentCount: increment(1) }).catch(function(){});
+        }).then(function () {
+          return getDoc(doc(db, 'posts', postId, 'comments', commentId)).then(function (snap) {
+            var c = snap.exists() ? snap.data() : {};
+            var ownerId = c.authorId || c.userId || null;
+            return createNotification(ownerId, 'reply', (me.name || 'GeoHub User') + ' replied to your comment', replyText, 'feed.html?post=' + postId + '&comment=' + commentId, { postId: postId, commentId: commentId });
+          });
+        }).then(function () {
+          toast('Reply posted');
+          awardPoints(3, 'Reply to comment', 'post', postId);
+          if (callback) callback();
+        }).catch(function (err) {
+          console.error('[GeoSocial] addCommentReply', err);
+          toast('Failed to reply.', 'error');
+          if (callback) callback(null, err);
+        });
+      });
+    }
+
+    function listenCommentReplies(postId, commentId, callback) {
+      var q = query(collection(db, 'posts', postId, 'comments', commentId, 'replies'), orderBy('createdAt', 'asc'), limit(50));
+      return onSnapshot(q, function (snap) {
+        var replies = [];
+        snap.forEach(function (d) { replies.push(Object.assign({ id: d.id }, d.data())); });
+        callback(replies);
+      }, function (err) {
+        console.warn('[GeoSocial] listenCommentReplies', err.message);
+        callback([]);
       });
     }
 
@@ -315,11 +906,11 @@
               if (callback) callback(false);
             });
           } else {
-            return setDoc(ref, { followerId: uid, followingId: targetUserId, targetId: targetUserId, createdAt: serverTimestamp() })
+          return setDoc(ref, { followerId: uid, followingId: targetUserId, createdAt: serverTimestamp() })
               .then(function () {
                 return updateDoc(doc(db, 'users', targetUserId), { followers: increment(1) }).catch(function(){})
                   .then(function(){ return updateDoc(doc(db, 'users', uid), { following: increment(1) }).catch(function(){}); })
-                  .then(function(){ return createNotification(targetUserId, 'follow', (meData() || {}).name + ' followed you', 'You have a new follower.', 'profile.html?uid=' + uid, { followerId: uid }); });
+                  .then(function(){ return createNotification(targetUserId, 'follow', (meData() || {}).name + ' followed you', 'You have a new follower.', 'profile.html?id=' + uid, { followerId: uid }); });
               })
               .then(function () {
                 toast('Following');
@@ -462,6 +1053,24 @@
       }, function (err) { console.warn('[GeoSocial] listenMyGroups', err.message); callback([]); });
     }
 
+    function listenGroupMembers(groupId, callback) {
+      if (!groupId) { callback([]); return function(){}; }
+      var q = query(collection(db, 'groupMembers'), where('groupId', '==', groupId), limit(100));
+      return onSnapshot(q, function(snap){
+        var members=[];
+        snap.forEach(function(d){ members.push(Object.assign({id:d.id}, d.data())); });
+        if(!members.length){ callback([]); return; }
+        Promise.all(members.map(function(m){
+          var uid = m.userId || m.uid;
+          if(!uid) return Promise.resolve(null);
+          return getDoc(doc(db,'users',uid)).then(function(us){
+            var data = us.exists() ? us.data() : {};
+            return Object.assign({}, m, { profile: Object.assign({uid:uid,id:uid}, data) });
+          }).catch(function(){ return Object.assign({}, m, { profile:{uid:uid,id:uid,fullName:'GeoHub User'} }); });
+        })).then(function(rows){ callback(rows.filter(Boolean)); });
+      }, function(err){ console.warn('[GeoSocial] listenGroupMembers', err.message); callback([]); });
+    }
+
     function createGroupPost(groupId, text, mediaUrl, callback) {
       if (!text || !text.trim()) return;
       requireAuth(function (user) {
@@ -520,20 +1129,147 @@
       });
     }
 
-    // ── FRIEND REQUESTS ──────────────────────────────────────────────────
+    // ── FRIEND REQUESTS / FRIENDS ───────────────────────────────────────
+    function friendshipId(a, b) {
+      return [a, b].sort().join('_');
+    }
+
     function sendFriendRequest(toUserId, callback) {
       requireAuth(function (user) {
         var uid = user.uid;
-        if (uid === toUserId) return;
-        var ref = doc(db, 'friendRequests', uid + '_' + toUserId);
-        setDoc(ref, { fromId: uid, fromUserId: uid, toId: toUserId, toUserId: toUserId, status: 'pending', createdAt: serverTimestamp() }, { merge: false })
-          .then(function () {
-            toast('Friend request sent!');
-            if (callback) callback();
-          }).catch(function (err) {
-            console.error('[GeoSocial] sendFriendRequest', err);
-            toast(err.code === 'permission-denied' ? 'Request already sent.' : 'Failed to send request.', 'error');
-          });
+        if (!toUserId || uid === toUserId) { toast('You cannot send a friend request to yourself.', 'error'); if(callback) callback('self'); return; }
+        var fid = friendshipId(uid, toUserId);
+        var friendRef = doc(db, 'friends', fid);
+        var reqRef = doc(db, 'friendRequests', uid + '_' + toUserId);
+        var reverseReqRef = doc(db, 'friendRequests', toUserId + '_' + uid);
+        getDoc(friendRef).then(function(friendSnap){
+          if (friendSnap.exists()) throw new Error('already-friends');
+          return getDoc(reqRef);
+        }).then(function(existing){
+          if (existing.exists()) throw new Error('already-requested');
+          return getDoc(reverseReqRef);
+        }).then(function(reverseExisting){
+          if (reverseExisting.exists() && (reverseExisting.data() || {}).status === 'pending') throw new Error('incoming-request-exists');
+          return setDoc(reqRef, {
+            fromUserId: uid,
+            toUserId: toUserId,
+            status: 'pending',
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+          }, { merge: false });
+        }).then(function () {
+          var me = meData() || {};
+          return createNotification(toUserId, 'friend_request', (me.name || 'GeoHub User') + ' sent you a friend request', 'Open the profile to accept or reject.', 'profile.html?id=' + uid, { fromUserId: uid });
+        }).then(function () {
+          toast('Friend request sent');
+          if (callback) callback('pending');
+        }).catch(function (err) {
+          var msg = err && err.message;
+          if (msg === 'already-friends') { toast('Already friends'); if(callback) callback('friends'); return; }
+          if (msg === 'already-requested') { toast('Request already sent'); if(callback) callback('pending'); return; }
+          if (msg === 'incoming-request-exists') { toast('This user already sent you a request'); if(callback) callback('incoming'); return; }
+          console.error('[GeoSocial] sendFriendRequest failed', { code: err && err.code, message: err && err.message, fromUserId: uid, toUserId: toUserId });
+          toast('Failed to send request.', 'error');
+          if (callback) callback('error', err);
+        });
+      });
+    }
+
+    function listenFriendshipStatus(targetUserId, callback) {
+      var uid = currentUid();
+      if (!uid || !targetUserId || uid === targetUserId) { callback({ state: uid === targetUserId ? 'self' : 'none' }); return function(){}; }
+      var unsubs = [];
+      var status = { state: 'none' };
+      function emit(){ callback(Object.assign({}, status)); }
+      unsubs.push(onSnapshot(doc(db, 'friends', friendshipId(uid, targetUserId)), function(snap){
+        if (snap.exists()) status = { state: 'friends', friendId: snap.id };
+        else if (status.state === 'friends') status = { state: 'none' };
+        emit();
+      }, function(){ emit(); }));
+      unsubs.push(onSnapshot(doc(db, 'friendRequests', uid + '_' + targetUserId), function(snap){
+        if (status.state === 'friends') return emit();
+        if (snap.exists() && (snap.data()||{}).status === 'pending') status = { state: 'outgoing', requestId: snap.id };
+        else if (status.state === 'outgoing') status = { state: 'none' };
+        emit();
+      }, function(){ emit(); }));
+      unsubs.push(onSnapshot(doc(db, 'friendRequests', targetUserId + '_' + uid), function(snap){
+        if (status.state === 'friends') return emit();
+        if (snap.exists() && (snap.data()||{}).status === 'pending') status = { state: 'incoming', requestId: snap.id, fromUserId: targetUserId };
+        else if (status.state === 'incoming') status = { state: 'none' };
+        emit();
+      }, function(){ emit(); }));
+      return function(){ unsubs.forEach(function(u){ try{u();}catch(e){} }); };
+    }
+
+    function respondFriendRequest(requestId, accept, callback) {
+      requireAuth(function(user){
+        var reqRef = doc(db, 'friendRequests', requestId);
+        getDoc(reqRef).then(function(snap){
+          if (!snap.exists()) throw new Error('request-not-found');
+          var r = snap.data() || {};
+          if ((r.toUserId || r.toId) !== user.uid && !((auth.currentUser.email||'') && false)) throw new Error('not-your-request');
+          if (!accept) {
+            return updateDoc(reqRef, { status: 'rejected', reviewedAt: serverTimestamp(), updatedAt: serverTimestamp() }).then(function(){ return {accepted:false, fromId:r.fromUserId||r.fromId}; });
+          }
+          var fromId = r.fromUserId || r.fromId;
+          var fid = friendshipId(fromId, user.uid);
+          return setDoc(doc(db, 'friends', fid), {
+            users: [fromId, user.uid],
+            userA: fromId,
+            userB: user.uid,
+            createdAt: serverTimestamp()
+          }, { merge: true }).then(function(){
+            return updateDoc(reqRef, { status: 'accepted', reviewedAt: serverTimestamp(), updatedAt: serverTimestamp() }).catch(function(){});
+          }).then(function(){
+            updateDoc(doc(db, 'users', fromId), { friendsCount: increment(1) }).catch(function(){});
+            updateDoc(doc(db, 'users', user.uid), { friendsCount: increment(1) }).catch(function(){});
+            return createNotification(fromId, 'friend_accept', (meData()||{}).name + ' accepted your friend request', 'You are now friends on GeoHub.', 'profile.html?id=' + user.uid, { friendId: user.uid });
+          }).then(function(){ return {accepted:true, fromId:fromId}; });
+        }).then(function(res){
+          toast(res.accepted ? 'Friend request accepted' : 'Friend request rejected');
+          if(callback) callback(res);
+        }).catch(function(err){
+          console.error('[GeoSocial] respondFriendRequest', err);
+          toast('Could not update request.', 'error');
+          if(callback) callback(null, err);
+        });
+      });
+    }
+
+    function listenFriendRequests(callback) {
+      var uid = currentUid();
+      if (!uid) { callback([]); return function(){}; }
+      var q = query(collection(db, 'friendRequests'), where('toUserId', '==', uid), where('status', '==', 'pending'), limit(50));
+      return onSnapshot(q, function(snap){
+        var items=[];
+        snap.forEach(function(d){ items.push(Object.assign({id:d.id}, d.data())); });
+        items.sort(function(a,b){ return tsToMillis(b.createdAt)-tsToMillis(a.createdAt); });
+        callback(items);
+      }, function(err){ console.warn('[GeoSocial] listenFriendRequests', err.message); callback([]); });
+    }
+
+    function listenFriends(uid, callback) {
+      uid = uid || currentUid();
+      if (!uid) { callback([]); return function(){}; }
+      var q = query(collection(db, 'friends'), where('users', 'array-contains', uid), limit(100));
+      return onSnapshot(q, function(snap){
+        var ids=[];
+        snap.forEach(function(d){ var data=d.data()||{}; var other=(data.users||[]).find(function(x){ return x !== uid; }); if(other) ids.push(other); });
+        if(!ids.length){ callback([]); return; }
+        Promise.all(ids.slice(0,50).map(function(id){ return getDoc(doc(db,'users',id)).then(function(us){ return us.exists()?Object.assign({id:id,uid:id},us.data()):{id:id,uid:id,fullName:'GeoHub User'}; }).catch(function(){ return null; }); }))
+          .then(function(users){ callback(users.filter(Boolean)); });
+      }, function(err){ console.warn('[GeoSocial] listenFriends', err.message); callback([]); });
+    }
+
+    function removeFriend(targetUserId, callback) {
+      requireAuth(function(user){
+        var fid = friendshipId(user.uid, targetUserId);
+        deleteDoc(doc(db, 'friends', fid)).then(function(){
+          updateDoc(doc(db, 'users', targetUserId), { friendsCount: increment(-1) }).catch(function(){});
+          updateDoc(doc(db, 'users', user.uid), { friendsCount: increment(-1) }).catch(function(){});
+          toast('Friend removed');
+          if(callback) callback(false);
+        }).catch(function(err){ console.error('[GeoSocial] removeFriend', err); toast('Could not remove friend.', 'error'); });
       });
     }
 
@@ -551,7 +1287,17 @@
           authorAvatar: me.avatar || user.photoURL || '',
           createdAt: serverTimestamp()
         }).then(function () {
+          updateDoc(doc(db, 'users', user.uid), {
+            xp: increment(Number(xpAwarded || 50)),
+            visitedPlaces: increment(1),
+            checkinCount: increment(1),
+            updatedAt: serverTimestamp()
+          }).catch(function(){});
+          setDoc(doc(db, 'userBadges', user.uid + '_first_checkin'), {
+            userId: user.uid, badgeId: 'first_checkin', title: 'First Check-in', icon: 'fa-location-dot', createdAt: serverTimestamp()
+          }, { merge: true }).catch(function(){});
           toast('Checked in at ' + (placeName || 'place') + '! +' + (xpAwarded || 50) + ' XP');
+          awardPoints(Number(xpAwarded || 50), 'Check-in', 'checkin', placeId || '').catch(function(){});
           if (callback) callback();
         }).catch(function (err) {
           console.error('[GeoSocial] createCheckin', err);
@@ -588,7 +1334,7 @@
       if (!uid) return function () {};
       var q = query(collection(db, 'userNotifications'),
         where('userId', '==', uid),
-        limit(30));
+        limit(25));
       return onSnapshot(q, function (snap) {
         var notifs = [];
         snap.forEach(function (d) { notifs.push(Object.assign({ id: d.id }, d.data())); });
@@ -601,7 +1347,7 @@
     }
 
     function markNotificationRead(notifId) {
-      updateDoc(doc(db, 'userNotifications', notifId), { read: true })
+      updateDoc(doc(db, 'userNotifications', notifId), { read: true, updatedAt: serverTimestamp() })
         .catch(function (err) { console.warn('[GeoSocial] markNotifRead', err.message); });
     }
 
@@ -650,7 +1396,7 @@
     }
 
     function listenStories(callback) {
-      var q = query(collection(db, 'stories'), orderBy('createdAt', 'desc'), limit(50));
+      var q = query(collection(db, 'stories'), orderBy('createdAt', 'desc'), limit(24));
       return onSnapshot(q, function (snap) {
         var now = Date.now();
         var stories = [];
@@ -706,7 +1452,9 @@
           participants: [user.uid, targetUserId],
           updatedAt: serverTimestamp(),
           createdAt: serverTimestamp(),
-          lastMessage: ''
+          lastMessage: '',
+          unreadFor: [],
+          readBy: {}
         }, { merge: true }).then(function () {
           if (callback) callback(cid);
         }).catch(function (err) {
@@ -716,8 +1464,12 @@
       });
     }
 
-    function sendMessage(conversationId, text, callback) {
-      if (!text || !text.trim()) return;
+    function sendMessage(conversationId, text, callback, extra) {
+      extra = extra || {};
+      var cleanText = String(text || '').trim();
+      var mediaUrl = String(extra.mediaUrl || '').trim();
+      var mediaType = String(extra.mediaType || '').trim();
+      if (!cleanText && !mediaUrl) return;
       requireAuth(function (user) {
         var me = meData() || {};
         var convRef = doc(db, 'conversations', conversationId);
@@ -725,22 +1477,32 @@
           if (!snap.exists()) throw new Error('Conversation not found');
           var conv = snap.data() || {};
           var otherId = (conv.participants || []).find(function (id) { return id !== user.uid; });
+          var preview = cleanText || (mediaType === 'image' ? '📷 Photo' : 'Attachment');
           return addDoc(collection(db, 'conversations', conversationId, 'messages'), {
             conversationId: conversationId,
             senderId: user.uid,
             authorId: user.uid,
-            text: text.trim(),
-            createdAt: serverTimestamp()
+            text: cleanText,
+            mediaUrl: mediaUrl || '',
+            mediaType: mediaType || '',
+            likedBy: [],
+            readBy: [user.uid],
+            deletedFor: [],
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
           }).then(function () {
-            return updateDoc(convRef, { lastMessage: text.trim(), lastSenderId: user.uid, updatedAt: serverTimestamp() });
+            var patch = { lastMessage: preview, lastSenderId: user.uid, updatedAt: serverTimestamp(), unreadFor: otherId ? fs.arrayUnion(otherId) : [] };
+            patch['readBy.' + user.uid] = serverTimestamp();
+            return updateDoc(convRef, patch);
           }).then(function () {
-            return createNotification(otherId, 'message', (me.name || 'GeoHub User') + ' sent you a message', text.trim(), 'messages.html?with=' + user.uid, { conversationId: conversationId });
+            return createNotification(otherId, 'message', (me.name || 'GeoHub User') + ' sent you a message', preview, 'messages.html?with=' + user.uid, { conversationId: conversationId });
           });
         }).then(function () {
-          if (callback) callback();
+          if (callback) callback(true);
         }).catch(function (err) {
           console.error('[GeoSocial] sendMessage', err);
           toast('Message failed.', 'error');
+          if (callback) callback(false, err);
         });
       });
     }
@@ -754,7 +1516,7 @@
           return t(b.updatedAt || b.createdAt) - t(a.updatedAt || a.createdAt);
         });
       }
-      var q = query(collection(db, 'conversations'), where('participants', 'array-contains', uid));
+      var q = query(collection(db, 'conversations'), where('participants', 'array-contains', uid), limit(25));
       return onSnapshot(q, function (snap) {
         var items = [];
         snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
@@ -763,12 +1525,93 @@
     }
 
     function listenMessages(conversationId, callback) {
-      var q = query(collection(db, 'conversations', conversationId, 'messages'), orderBy('createdAt', 'asc'), limit(100));
+      var q = query(collection(db, 'conversations', conversationId, 'messages'), orderBy('createdAt', 'asc'), limit(60));
       return onSnapshot(q, function (snap) {
         var items = [];
         snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
         callback(items);
       }, function (err) { console.warn('[GeoSocial] listenMessages', err.message); callback([]); });
+    }
+
+    function markConversationRead(conversationId, callback) {
+      var uid = currentUid();
+      if (!uid || !conversationId) { if(callback) callback(false); return Promise.resolve(false); }
+      var patch = { unreadFor: fs.arrayRemove(uid), updatedAt: serverTimestamp() };
+      patch['readBy.' + uid] = serverTimestamp();
+      return updateDoc(doc(db, 'conversations', conversationId), patch)
+        .then(function(){ if(callback) callback(true); return true; })
+        .catch(function(err){ console.warn('[GeoSocial] markConversationRead', err.message); if(callback) callback(false, err); return false; });
+    }
+
+    function reactionDocId(conversationId, messageId, uid) {
+      return String(conversationId || '').replace(/[^A-Za-z0-9_-]/g, '_') + '__' +
+        String(messageId || '').replace(/[^A-Za-z0-9_-]/g, '_') + '__' +
+        String(uid || '').replace(/[^A-Za-z0-9_-]/g, '_');
+    }
+
+    function toggleMessageReaction(conversationId, messageId, emoji, callback) {
+      emoji = emoji || '❤️';
+      var uid = currentUid();
+      if (!uid || !conversationId || !messageId) { if(callback) callback(false); return Promise.resolve(false); }
+
+      var reactionRef = doc(db, 'messageReactions', reactionDocId(conversationId, messageId, uid));
+
+      return getDoc(reactionRef).then(function(snap){
+        if (snap.exists()) {
+          var old = snap.data() || {};
+          if (old.emoji === emoji) {
+            return deleteDoc(reactionRef).then(function(){
+              if(callback) callback(false);
+              return false;
+            });
+          }
+          return updateDoc(reactionRef, {
+            emoji: emoji,
+            updatedAt: serverTimestamp()
+          }).then(function(){
+            if(callback) callback(true);
+            return true;
+          });
+        }
+        return setDoc(reactionRef, {
+          conversationId: conversationId,
+          messageId: messageId,
+          userId: uid,
+          emoji: emoji,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        }).then(function(){
+          if(callback) callback(true);
+          return true;
+        });
+      }).catch(function(err){
+        console.warn('[GeoSocial] toggleMessageReaction', err.message);
+        toast('Reaction failed: ' + (err.code || err.message || 'permission'), 'error');
+        if(callback) callback(false, err);
+        return false;
+      });
+    }
+
+    function listenMessageReactions(conversationId, callback) {
+      var uid = currentUid();
+      if (!uid || !conversationId) { callback && callback([]); return function(){}; }
+      var q = query(collection(db, 'messageReactions'), where('conversationId', '==', conversationId), limit(500));
+      return onSnapshot(q, function(snap){
+        var rows = [];
+        snap.forEach(function(d){ rows.push(Object.assign({ id:d.id }, d.data())); });
+        callback && callback(rows);
+      }, function(err){ console.warn('[GeoSocial] listenMessageReactions', err.message); callback && callback([]); });
+    }
+
+    function deleteMessage(conversationId, messageId, mode, callback) {
+      var uid = currentUid();
+      if (!uid || !conversationId || !messageId) { if(callback) callback(false); return; }
+      var ref = doc(db, 'conversations', conversationId, 'messages', messageId);
+      var patch = mode === 'everyone'
+        ? { text: 'Message deleted', deleted: true, deletedBy: uid, updatedAt: serverTimestamp() }
+        : { deletedFor: fs.arrayUnion(uid), updatedAt: serverTimestamp() };
+      updateDoc(ref, patch).then(function(){ if(callback) callback(true); })
+        .catch(function(err){ console.warn('[GeoSocial] deleteMessage', err.message); toast('Delete failed.', 'error'); if(callback) callback(false, err); });
     }
 
     // ── PLACES ──────────────────────────────────────────────────────────
@@ -990,40 +1833,27 @@
 
     // ── SEARCH ───────────────────────────────────────────────────────────
     function searchFirestore(q_str, callback) {
-      if (!q_str || !q_str.trim()) { callback({ users: [], groups: [], places: [], posts: [] }); return; }
-      var q = q_str.trim().toLowerCase();
-      var results = { users: [], groups: [], places: [], posts: [] };
-      var pending = 4;
-      function done() { if (--pending === 0) callback(results); }
-      function filterText(val) { return (val || '').toLowerCase().includes(q); }
-
-      getDocs(query(collection(db, 'users'), limit(200))).then(function (snap) {
-        snap.forEach(function (d) {
-          var u = Object.assign({ id: d.id }, d.data());
-          if (filterText(u.name) || filterText(u.displayName) || filterText(u.username) || filterText(u.email)) results.users.push(u);
-        }); done();
-      }).catch(done);
-
-      getDocs(query(collection(db, 'groups'), orderBy('createdAt', 'desc'), limit(200))).then(function (snap) {
-        snap.forEach(function (d) {
-          var g = Object.assign({ id: d.id }, d.data());
-          if (filterText(g.name) || filterText(g.description) || filterText(g.category)) results.groups.push(g);
-        }); done();
-      }).catch(done);
-
-      getDocs(query(collection(db, 'places'), orderBy('createdAt', 'desc'), limit(200))).then(function (snap) {
-        snap.forEach(function (d) {
-          var p = Object.assign({ id: d.id }, d.data());
-          if (filterText(p.name) || filterText(p.description) || filterText(p.address) || filterText(p.category)) results.places.push(p);
-        }); done();
-      }).catch(done);
-
-      getDocs(query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(200))).then(function (snap) {
-        snap.forEach(function (d) {
-          var p = Object.assign({ id: d.id }, d.data());
-          if (filterText(p.text) || filterText(p.authorName)) results.posts.push(p);
-        }); done();
-      }).catch(done);
+      if (!q_str || !q_str.trim()) { callback({ users: [], groups: [], places: [], posts: [], businesses: [], events: [], services: [], rewards: [] }); return; }
+      var needle = q_str.trim().toLowerCase();
+      var results = { users: [], groups: [], places: [], posts: [], businesses: [], events: [], services: [], rewards: [] };
+      var jobs = [
+        ['users', 'users'], ['groups', 'groups'], ['places', 'places'], ['posts', 'posts'],
+        ['businesses', 'businesses'], ['events', 'events'], ['services', 'services'], ['rewards', 'rewards']
+      ];
+      var pending = jobs.length;
+      function done(){ if(--pending === 0) callback(results); }
+      function filterText(val){ return String(val || '').toLowerCase().includes(needle); }
+      jobs.forEach(function(pair){
+        var key = pair[0], col = pair[1];
+        getDocs(query(collection(db, col), limit(200))).then(function(snap){
+          snap.forEach(function(d){
+            var x = Object.assign({ id: d.id }, d.data());
+            var hay = [x.name, x.title, x.fullName, x.displayName, x.username, x.email, x.text, x.description, x.desc, x.city, x.category, x.address].join(' ');
+            if(filterText(hay)) results[key].push(x);
+          });
+          done();
+        }).catch(function(){ done(); });
+      });
     }
 
     function findUserByInput(input) {
@@ -1059,6 +1889,13 @@
       toggleGroupMember:       toggleGroupMember,
       toggleEventParticipant:  toggleEventParticipant,
       sendFriendRequest:       sendFriendRequest,
+      listenFriendshipStatus: listenFriendshipStatus,
+      respondFriendRequest:   respondFriendRequest,
+      listenFriendRequests:   listenFriendRequests,
+      listenFriends:          listenFriends,
+      removeFriend:           removeFriend,
+      addCommentReply:        addCommentReply,
+      listenCommentReplies:   listenCommentReplies,
       createCheckin:           createCheckin,
       createStory:             createStory,
       listenStories:           listenStories,
@@ -1070,6 +1907,10 @@
       sendMessage:             sendMessage,
       listenConversations:     listenConversations,
       listenMessages:          listenMessages,
+      markConversationRead:    markConversationRead,
+      toggleMessageReaction:   toggleMessageReaction,
+      listenMessageReactions:   listenMessageReactions,
+      deleteMessage:           deleteMessage,
       trackShare:              trackShare,
       checkSaved:              checkSaved,
       checkGroupMember:        checkGroupMember,
@@ -1077,6 +1918,7 @@
       createGroup:             createGroup,
       listenGroups:            listenGroups,
       listenMyGroups:          listenMyGroups,
+      listenGroupMembers:      listenGroupMembers,
       createGroupPost:         createGroupPost,
       listenGroupPosts:        listenGroupPosts,
       createPlace:             createPlace,
@@ -1091,6 +1933,28 @@
       requestJoinGroup:        requestJoinGroup,
       checkJoinRequest:        checkJoinRequest,
       getMyJoinRequests:       getMyJoinRequests,
+      uploadImageDataUrl:      uploadImageDataUrl,
+      hidePost:                hidePost,
+      blockUser:               blockUser,
+      unblockUser:             unblockUser,
+      listenSafetyPrefs:       listenSafetyPrefs,
+      reportTarget:            reportTarget,
+      listenManagedBusinesses: listenManagedBusinesses,
+      listenUserBadges:        listenUserBadges,
+      createBusinessOffer:     createBusinessOffer,
+      getBusinessDashboard:    getBusinessDashboard,
+
+      listenWallet:            listenWallet,
+      getWalletSnapshot:       getWalletSnapshot,
+      listenPointTransactions: listenPointTransactions,
+      awardPoints:             awardPoints,
+      sendPoints:              sendPoints,
+      spendPoints:             spendPoints,
+      createReward:            createReward,
+      listenRewards:           listenRewards,
+      redeemReward:            redeemReward,
+      listenMyCoupons:         listenMyCoupons,
+      redeemCoupon:            redeemCoupon,
       searchFirestore:         searchFirestore,
       findUserByInput:         findUserByInput,
       requireAuth:             requireAuth,

@@ -16,6 +16,8 @@
   <link rel="stylesheet" href="mobile-nav.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="messages.css">
+  <link rel="stylesheet" href="chat-popup.css">
+  <link rel="stylesheet" href="responsive-polish.css">
 </head>
 <body class="page-messages">
   <nav class="navbar" id="navbar">
@@ -42,7 +44,7 @@
           <div class="sidebar-title">
             Messages
             <div class="sidebar-title-actions">
-              <button class="sidebar-icon-btn" title="New message" onclick="showToast('New conversation coming soon!')"><i class="fas fa-edit"></i></button>
+              <button class="sidebar-icon-btn" title="New message" onclick="openNewConversationSearch()"><i class="fas fa-edit"></i></button>
               <button class="sidebar-icon-btn" title="Filter"><i class="fas fa-sliders-h"></i></button>
             </div>
           </div>
@@ -86,11 +88,11 @@
 
         <!-- Input bar -->
         <div class="chat-input-bar">
-          <button class="input-btn" title="Attach image" onclick="showToast('Attachment coming soon!')"><i class="fas fa-paperclip"></i></button>
+          <button class="input-btn" title="Attach image" data-pick-image><i class="fas fa-paperclip"></i></button>
           <input type="text" id="msgInput" class="msg-input" placeholder="Type a message…">
           <button class="input-btn" id="emojiBtn" title="Emoji" onclick="toggleEmojiPicker()"><i class="fas fa-smile"></i></button>
           <button class="send-btn" onclick="sendMsg()" title="Send"><i class="fas fa-paper-plane"></i></button>
-          <div class="emoji-picker-wrap" id="emojiPicker"></div>
+          <div class="emoji-picker-wrap" id="emojiPicker"></div><input id="messageImageInput" type="file" accept="image/*" hidden>
         </div>
       </div>
 
@@ -104,22 +106,34 @@
     </div>
   </div>
 
+
+  <div id="newConversationModal" class="msg-modal" hidden>
+    <div class="msg-modal-card">
+      <button class="msg-modal-close" type="button" onclick="closeNewConversationSearch()">×</button>
+      <h3>Start a conversation</h3>
+      <p>Search real users and open a chat.</p>
+      <input id="newConversationSearch" class="msg-input" placeholder="Search by name or email…" oninput="searchNewConversationUsers(this.value)">
+      <div id="newConversationResults" class="new-conversation-results"></div>
+    </div>
+  </div>
+
   <div id="msgToast" class="msg-toast"></div>
 
-  <script src="messages-page.js"></script>
+  <script defer src="messages-page.js"></script>
   
-  <script src="mode.js"></script>
+  <script defer src="mode.js"></script>
   <script type="module" src="firebase-config.js"></script>
-<script src="firestore-social.js"></script>
-<script src="config.js"></script>
-  <script src="api-client.js"></script>
-  <script src="main.js"></script>
-  <script src="account.js"></script>
-  <script src="messages.js"></script>
-<script src="real-messages.js"></script>
-<script src="nav-cleanup.js"></script>
-<script src="mobile-nav.js"></script>
+<script defer src="firestore-social.js"></script>
+<script defer src="config.js"></script>
+  <script defer src="api-client.js"></script>
+  <script defer src="main.js"></script>
+  <script defer src="account.js"></script>
+<script defer src="real-messages.js"></script>
+<script defer src="nav-cleanup.js"></script>
+<script defer src="mobile-nav.js"></script>
 
-<script src="geohub-production-v6.js"></script>
+<script defer src="geohub-production-v6.js"></script>
+<script defer src="geohub-production-stabilization-v1.js"></script>
+  <script defer src="responsive-polish.js"></script>
 </body>
 </html>

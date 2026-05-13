@@ -19,7 +19,9 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
-  </head>
+  <link rel="stylesheet" href="chat-popup.css">
+  <link rel="stylesheet" href="responsive-polish.css">
+</head>
   <body>
     <nav class="navbar" id="navbar">
       <a href="index.html" class="navbar-brand">
@@ -73,6 +75,8 @@
             <img
               src=""
               alt="GeoHub Assistant"
+              loading="lazy"
+              decoding="async"
             />
             <div class="user-details">
               <strong>Personalized recommendations</strong>
@@ -254,13 +258,16 @@
 
     
     <script type="module" src="firebase-config.js"></script>
-<script src="config.js"></script>
-  <script src="api-client.js"></script>
-  <script src="main.js"></script>
-  <script src="account.js"></script>
-    <script src="assistant.js"></script>
-  <script src="nav-cleanup.js"></script>
-<script src="mobile-nav.js"></script>
+<script defer src="config.js"></script>
+  <script defer src="api-client.js"></script>
+  <script defer src="main.js"></script>
+  <script defer src="account.js"></script>
+    <script defer src="assistant.js"></script>
+  <script defer src="nav-cleanup.js"></script>
+<script defer src="mobile-nav.js"></script>
 
+<script defer src="chat-popup.js"></script>
+<script defer src="geohub-production-stabilization-v1.js"></script>
+  <script defer src="responsive-polish.js"></script>
 </body>
 </html>
