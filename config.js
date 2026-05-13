@@ -35,12 +35,23 @@ const GeoConfig = Object.freeze({
     realPush:        false,  // Web push via FCM/VAPID
     realSearch:      false,  // Algolia / PostgreSQL full-text
     realMaps:        false,  // Mapbox / Google Maps API
-    fileUpload:      false,  // S3 / Supabase Storage media upload
+    fileUpload:      true,   // Cloudinary unsigned media upload
     socialLogin:     true,   // Google OAuth
     liveWebSocket:   false,  // Real-time Live City feed
     emailVerify:     false,  // Email confirmation on sign-up
     adminPanel:      true,   // Firestore admin dashboard
     analytics:       false,  // PostHog / Mixpanel event tracking
+  },
+
+
+
+  /* ── Media uploads ───────────────────────────────────────── */
+  // GeoHub uses Cloudinary unsigned uploads because Firebase Storage requires an upgrade for this project.
+  // Never put a Cloudinary API secret in frontend code.
+  CLOUDINARY: {
+    cloudName: 'dw5dqk2w7',
+    uploadPreset: 'geohub_unsigned',
+    rootFolder: 'geohub',
   },
 
   /* ── Firestore UI-state key registry ─────────────────────── */

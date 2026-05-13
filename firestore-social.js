@@ -106,6 +106,7 @@
       listenPointTransactions: function(uid, cb){ cb([]); return function(){}; },
       redeemCoupon: function(){ noop(); },
       findUserByInput: function () { return Promise.resolve(null); },
+      uploadImageDataUrl: function(dataUrl, folder, callback){ if(callback) callback(''); return Promise.resolve(''); },
       requireAuth: showLoginPrompt,
       toast: toast
     };
@@ -192,12 +193,19 @@
       return new Blob([arr], { type: mime });
     }
 
-    // Cloudinary unsigned upload configuration. Firebase Storage is not required for GeoHub media uploads.
+    // Cloudinary unsigned upload configuration. Firebase Storage is intentionally not used:
+    // Firebase Storage is unavailable on the Spark plan for this project.
+    // You can override these from DevTools or config.js with window.GEOHUB_CLOUDINARY_CONFIG.
+    var cloudinaryOverride = window.GEOHUB_CLOUDINARY_CONFIG || (window.GeoConfig && window.GeoConfig.CLOUDINARY) || {};
     var GEOHUB_CLOUDINARY = {
-      cloudName: 'dw5dqk2w7',
-      uploadPreset: 'geohub_unsigned',
-      rootFolder: 'geohub'
+      cloudName: cloudinaryOverride.cloudName || 'dw5dqk2w7',
+      uploadPreset: cloudinaryOverride.uploadPreset || 'geohub_unsigned',
+      rootFolder: cloudinaryOverride.rootFolder || 'geohub'
     };
+
+    function cloudinaryConfigured() {
+      return !!(GEOHUB_CLOUDINARY.cloudName && GEOHUB_CLOUDINARY.uploadPreset);
+    }
 
     function cloudinaryFolder(folder, uid) {
       var safeFolder = String(folder || 'uploads').replace(/[^a-zA-Z0-9_\-/]/g, '').replace(/^\/+|\/+$/g, '') || 'uploads';
@@ -207,21 +215,25 @@
 
     function uploadBlobToCloudinary(blob, folder, user) {
       if (!blob) return Promise.resolve('');
+      if (!cloudinaryConfigured()) return Promise.reject(new Error('Cloudinary is not configured'));
       var form = new FormData();
       form.append('file', blob);
       form.append('upload_preset', GEOHUB_CLOUDINARY.uploadPreset);
       form.append('folder', cloudinaryFolder(folder, user && user.uid));
       form.append('tags', 'geohub,' + String(folder || 'uploads'));
       var url = 'https://api.cloudinary.com/v1_1/' + encodeURIComponent(GEOHUB_CLOUDINARY.cloudName) + '/image/upload';
-      return fetch(url, { method: 'POST', body: form })
+      var controller = window.AbortController ? new AbortController() : null;
+      var timer = controller ? setTimeout(function(){ controller.abort(); }, 30000) : null;
+      return fetch(url, { method: 'POST', body: form, signal: controller ? controller.signal : undefined })
         .then(function(res){
-          return res.json().then(function(body){
+          return res.json().catch(function(){ return {}; }).then(function(body){
             if (!res.ok || !body.secure_url) {
               throw new Error((body && body.error && body.error.message) || ('Cloudinary upload failed: ' + res.status));
             }
             return body.secure_url;
           });
-        });
+        })
+        .finally(function(){ if (timer) clearTimeout(timer); });
     }
 
     function compressImageBlob(blob, maxSide, quality) {
