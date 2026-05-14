@@ -732,8 +732,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function businessListCard(b){
-    var title=b.name||'Untitled business'; var photo=getItemCover(b);
-    return '<article class="gh-card gh-item-card"><div class="gh-item-media">'+itemMediaHtml(photo,title,'fa-store')+'<span class="gh-type-badge"><i class="fas fa-store"></i> Business Page</span></div><div class="gh-item-body"><h3>'+esc(title)+'</h3><p>'+esc(b.description||b.desc||'Business page on GeoHub')+'</p><div class="gh-item-meta"><span class="gh-chip">'+esc(b.category||'Business')+'</span>'+businessModeChip(b)+'<span class="gh-chip">'+Number(b.followerCount||0)+' followers</span></div><div class="gh-card-actions"><a class="gh-btn sm" href="business.html?id='+encodeURIComponent(b.id)+'">View Page</a><button class="gh-btn sm ghost" data-follow-business="'+esc(b.id)+'"><i class="fas fa-plus"></i> Follow</button><button class="gh-btn sm ghost" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button></div></div></article>';
+    var title=b.title||b.name||'Untitled business'; var photo=b.coverUrl||getItemCover(b);
+    return '<article class="gh-card gh-item-card"><div class="gh-item-media">'+itemMediaHtml(photo,title,'fa-store')+'<span class="gh-type-badge"><i class="fas fa-store"></i> Business Page</span></div><div class="gh-item-body"><h3>'+esc(title)+'</h3><p>'+esc(b.description||'Business page on GeoHub')+'</p><div class="gh-item-meta"><span class="gh-chip">'+esc(b.category||'Business')+'</span>'+businessModeChip(b)+'<span class="gh-chip">'+Number(b.followerCount||0)+' followers</span></div><div class="gh-card-actions"><a class="gh-btn sm" href="business.html?id='+encodeURIComponent(b.id)+'">View Page</a><button class="gh-btn sm ghost" data-follow-business="'+esc(b.id)+'"><i class="fas fa-plus"></i> Follow</button><button class="gh-btn sm ghost" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button></div></div></article>';
   }
 
   function renderBusinesses(){
@@ -743,7 +743,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var all=[]; state.bizFilter='all';
     function paint(){ var q=($('#ghBusinessSearch').value||'').toLowerCase(); var arr=all.filter(function(b){ var cat=(b.category||'').toLowerCase(); var ok=state.bizFilter==='all'||cat.includes(state.bizFilter)||(state.bizFilter==='online' && isOnlineBusiness(b)); if(!ok)return false; return !q || JSON.stringify(b).toLowerCase().includes(q); }); var list=$('#ghBusinessList'); if(!arr.length){list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-store"></i><h3>No businesses yet</h3><p>Add a business and GeoHub will create a page for it.</p><a href="add-business.html" class="gh-btn">Add Business</a></div>';return;} list.innerHTML='<div class="gh-grid">'+arr.map(businessListCard).join('')+'</div>'; }
     $('#ghBusinessSearch').oninput=paint; $('#ghCenter').addEventListener('click', function(e){ var f=e.target.closest('[data-biz-filter]'); if(f){ state.bizFilter=f.dataset.bizFilter; $all('[data-biz-filter]').forEach(function(x){x.classList.toggle('active',x===f);}); paint(); } var fb=e.target.closest('[data-follow-business]'); if(fb) followBusiness(fb.dataset.followBusiness); var s=e.target.closest('[data-save-item]'); if(s){ if(!requireLogin())return; GS().toggleSaveItem(s.dataset.type,s.dataset.id); } });
-    ready(function(){ var q=fs().query(fs().collection(db(),'businesses'), fs().orderBy('createdAt','desc'), fs().limit(40)); var _u=fs().onSnapshot(q,function(snap){ all=[]; snap.forEach(function(d){ all.push(Object.assign({id:d.id},d.data())); }); paint(); }, function(err){ $('#ghBusinessList').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Could not load businesses</h3><p>'+esc(err.message)+'</p></div>'; }); state.pageUnsubs.push(_u); });
+    ready(function(){ var q=fs().query(fs().collection(db(),'businesses'), fs().orderBy('createdAt','desc'), fs().limit(40)); var _u=fs().onSnapshot(q,function(snap){ all=[]; snap.forEach(function(d){ var schema=window.GH||{}; all.push(schema.normBiz?schema.normBiz(d.data(),d.id):Object.assign({id:d.id},d.data())); }); paint(); }, function(err){ $('#ghBusinessList').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Could not load businesses</h3><p>'+esc(err.message)+'</p></div>'; }); state.pageUnsubs.push(_u); });
   }
 
   function renderBusinessDetail(id){
@@ -751,15 +751,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     ready(function(){
       var _u=fs().onSnapshot(fs().doc(db(),'businesses',id), function(snap){
         if(!snap.exists()){ $('#ghBusinessDetail').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-store-slash"></i><h3>Business not found</h3><p>This page does not exist or was removed.</p></div>'; return; }
-        var b=Object.assign({id:id}, snap.data()); paintBusinessDetail(b);
+        var raw=snap.data()||{}; var b=(window.GH&&window.GH.normBiz)?window.GH.normBiz(raw,id):Object.assign({id:id},raw); paintBusinessDetail(b);
       }, function(err){ $('#ghBusinessDetail').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Load failed</h3><p>'+esc(err.message)+'</p></div>'; });
       state.pageUnsubs.push(_u);
     });
   }
 
   function paintBusinessDetail(b){
-    var title=b.name||'Business'; var cover=getItemCover(b); var logo=b.logoUrl||''; var isOwner=authUser() && (b.ownerId===authUser().uid || b.createdBy===authUser().uid || b.userId===authUser().uid);
-    $('#ghBusinessDetail').innerHTML='<section class="gh-card" style="padding:0;overflow:hidden"><div class="gh-page-cover">'+(cover?img(cover,title):'')+'</div><div class="gh-page-info"><div class="gh-page-logo">'+(logo?img(logo,title):esc(initials(title)))+'</div><div class="gh-page-title"><h1>'+esc(title)+'</h1><p><i class="fas fa-store"></i> '+esc(b.category||'Business')+' · '+esc(businessAreaLabel(b))+' · '+Number(b.followerCount||0)+' followers</p></div><div class="gh-page-actions"><button class="gh-btn gh-follow-business-btn" data-follow-business="'+esc(b.id)+'"><i class="fas fa-plus"></i> Follow</button><button class="gh-btn ghost" data-message-business="'+esc(b.ownerId||b.createdBy||'')+'"><i class="fas fa-comment"></i> Message</button><button class="gh-btn ghost" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button>'+(isOwner?'<button class="gh-btn ghost" data-edit-business><i class="fas fa-gear"></i> Manage</button>':'')+'</div></div><div class="gh-tabbar"><button class="gh-tab active" data-business-tab="posts">Posts</button><button class="gh-tab" data-business-tab="about">About</button><button class="gh-tab" data-business-tab="reviews">Reviews</button><button class="gh-tab" data-business-tab="photos">Photos</button>'+(isOwner?'<button class="gh-tab" data-business-tab="manage">Dashboard</button>':'')+'</div></section><div id="ghBusinessTabContent"></div>';
+    var title=b.title||b.name||'Business'; var cover=b.coverUrl||getItemCover(b); var logo=b.logoUrl||''; var owner=b.ownerId||b.createdBy||b.userId||''; var isOwner=!!(authUser() && authUser().uid && (b.ownerId===authUser().uid || b.createdBy===authUser().uid || b.userId===authUser().uid));
+    $('#ghBusinessDetail').innerHTML='<section class="gh-card" style="padding:0;overflow:hidden"><div class="gh-page-cover">'+(cover?img(cover,title):'<div class="gh-item-no-img" style="min-height:200px"><i class="fas fa-store"></i></div>')+'</div><div class="gh-page-info"><div class="gh-page-logo">'+(logo?img(logo,title):esc(initials(title)))+'</div><div class="gh-page-title"><h1>'+esc(title)+'</h1><p><i class="fas fa-store"></i> '+esc(b.category||'Business')+' · '+esc(businessAreaLabel(b))+' · '+Number(b.followerCount||0)+' followers'+(b.verified?'<span class="gh-chip" style="margin-left:6px;background:rgba(16,185,129,.15)"><i class="fas fa-circle-check" style="color:var(--green)"></i> Verified</span>':'')+'</p></div><div class="gh-page-actions"><button class="gh-btn gh-follow-business-btn" data-follow-business="'+esc(b.id)+'"><i class="fas fa-plus"></i> Follow</button><button class="gh-btn ghost" data-message-business="'+esc(owner)+'"><i class="fas fa-comment"></i> Message</button><button class="gh-btn ghost" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button>'+(isOwner?'<button class="gh-btn ghost" data-edit-business><i class="fas fa-gear"></i> Manage</button>':'')+'</div></div><div class="gh-tabbar"><button class="gh-tab active" data-business-tab="posts">Posts</button><button class="gh-tab" data-business-tab="about">About</button><button class="gh-tab" data-business-tab="reviews">Reviews</button><button class="gh-tab" data-business-tab="photos">Photos</button><button class="gh-tab" data-business-tab="services">Services</button>'+(isOwner?'<button class="gh-tab" data-business-tab="manage">Dashboard</button>':'')+'</div></section><div id="ghBusinessTabContent"></div>';
     $('#ghBusinessDetail').onclick=function(e){ var tab=e.target.closest('[data-business-tab]'); if(tab){ state.currentBusinessTab=tab.dataset.businessTab; $all('[data-business-tab]').forEach(function(x){x.classList.toggle('active',x===tab);}); renderBusinessTab(b); } var fl=e.target.closest('[data-follow-business]'); if(fl) followBusiness(b.id); var sv=e.target.closest('[data-save-item]'); if(sv){ if(!requireLogin())return; GS().toggleSaveItem(sv.dataset.type,sv.dataset.id); } var msg=e.target.closest('[data-message-business]'); if(msg){ var owner=msg.dataset.messageBusiness; if(!owner) return toast('Business owner not available','error'); if(!requireLogin()) return; GS().startConversation(owner,function(){ location.href='messages.html?with='+encodeURIComponent(owner); }); } var edit=e.target.closest('[data-edit-business]'); if(edit) location.href='add-business.html?edit='+encodeURIComponent(b.id); };
     updateBusinessFollowButton(b.id);
     renderBusinessTab(b);
@@ -769,7 +769,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function renderBusinessManageTab(b){
     var box=$('#ghBusinessTabContent'); if(!box)return;
     box.innerHTML='<div class="gh-card"><div class="gh-section-title"><div><h2>Business Dashboard</h2><p class="gh-muted" style="margin:.25rem 0 0">Manage your page, offers and analytics.</p></div><button class="gh-btn" data-new-reward><i class="fas fa-gift"></i>New reward</button><button class="gh-btn ghost" data-new-offer><i class="fas fa-tag"></i>New offer</button></div><div class="gh-live-stats gh-dashboard-stats"><div><i class="fas fa-users"></i><strong id="bdFollowers">—</strong><span>Followers</span></div><div><i class="fas fa-newspaper"></i><strong id="bdPosts">—</strong><span>Posts</span></div><div><i class="fas fa-star"></i><strong id="bdReviews">—</strong><span>Reviews</span></div><div><i class="fas fa-tag"></i><strong id="bdOffers">—</strong><span>Offers</span></div><div><i class="fas fa-gift"></i><strong id="bdRewards">—</strong><span>Rewards</span></div></div><div class="gh-card-actions" style="margin-top:14px"><button class="gh-btn ghost" data-edit-business><i class="fas fa-pen"></i>Edit page</button><a class="gh-btn ghost" href="events.html"><i class="fas fa-calendar-plus"></i>Create event</a><button class="gh-btn ghost" data-post-as-business><i class="fas fa-bullhorn"></i>Post update</button></div></div><div class="gh-card"><div class="gh-section-title"><h3>Partner Rewards</h3><a class="gh-small" href="rewards.html">Reward Store</a></div><div id="bdRewardsList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div></div><div class="gh-card"><div class="gh-section-title"><h3>Active Offers</h3></div><div id="bdOffersList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
-    box.onclick=function(e){ if(e.target.closest('[data-new-reward]')) openBusinessRewardModal(b); if(e.target.closest('[data-new-offer]')) openBusinessOfferModal(b); if(e.target.closest('[data-edit-business]')) location.href='add-business.html?edit='+encodeURIComponent(b.id); if(e.target.closest('[data-post-as-business]')) openPostModal({ targetType:'business', targetId:b.id, authorType:'business', businessId:b.id, authorId:b.id, authorName:b.name, authorAvatar:b.logoUrl||b.coverImageUrl||'', createdByUserId:authUser() && authUser().uid }); };
+    var bTitleM=b.title||b.name||'Business';
+    box.onclick=function(e){ if(e.target.closest('[data-new-reward]')) openBusinessRewardModal(b); if(e.target.closest('[data-new-offer]')) openBusinessOfferModal(b); if(e.target.closest('[data-edit-business]')) location.href='add-business.html?edit='+encodeURIComponent(b.id); if(e.target.closest('[data-post-as-business]')) openPostModal({ targetType:'business', targetId:b.id, authorType:'business', businessId:b.id, authorId:b.id, authorName:bTitleM, authorAvatar:b.logoUrl||b.coverUrl||'', createdByUserId:authUser() && authUser().uid }); };
     if(GS().getBusinessDashboard) GS().getBusinessDashboard(b.id,function(stats){
       setTextById('bdFollowers', stats.followers || b.followerCount || 0); setTextById('bdPosts', stats.posts || b.postCount || 0); setTextById('bdReviews', stats.reviews || b.reviewCount || 0); setTextById('bdOffers', (stats.offers||[]).length); setTextById('bdRewards', (stats.rewards||[]).length);
       var rlist=$('#bdRewardsList'); var rewards=stats.rewards||[]; if(rlist){ if(!rewards.length){ rlist.innerHTML='<div class="gh-empty"><i class="fas fa-gift"></i><h3>No rewards yet</h3><p>Create coupons that users unlock with GeoPoints.</p></div>'; } else { rlist.innerHTML='<div class="gh-mini-list">'+rewards.map(function(r){return '<a class="gh-mini-item" href="rewards.html"><span class="gh-mini-thumb"><i class="fas fa-gift"></i></span><div><strong>'+esc(r.title||r.name||'Reward')+'</strong><span>'+Number(r.pointPrice||0)+' GeoPoints · '+esc(r.rewardType||'reward')+'</span></div></a>';}).join('')+'</div>'; }}
@@ -779,10 +780,63 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
 
+  function renderBusinessServices(b){
+    var box=$('#ghBusinessTabContent'); if(!box)return;
+    var isOwner=!!(authUser() && authUser().uid && (b.ownerId===authUser().uid || b.createdBy===authUser().uid || b.userId===authUser().uid));
+    box.innerHTML='<div class="gh-card"><div class="gh-section-title"><h2>Services</h2>'+(isOwner?'<button class="gh-btn sm" data-add-service><i class="fas fa-plus"></i> Add service</button>':'')+'</div><div id="ghServicesList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
+    box.onclick=function(e){ if(e.target.closest('[data-add-service]')) openAddServiceModal(b); };
+    if(!fs()||!db()){ $('#ghServicesList').innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>Services unavailable</h3></div>'; return; }
+    fs().getDocs(fs().query(fs().collection(db(),'businesses',b.id,'services'),fs().orderBy('order','asc'))).then(function(snap){
+      var list=$('#ghServicesList'); if(!list)return;
+      var items=[]; snap.forEach(function(d){items.push(Object.assign({id:d.id},d.data()));});
+      if(!items.length){ list.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>No services listed yet</h3>'+(isOwner?'<button class="gh-btn" data-add-service>Add first service</button>':'')+'</div>'; return; }
+      list.innerHTML='<div class="gh-grid">'+items.map(function(svc){ return '<div class="gh-card" style="padding:16px"><strong>'+esc(svc.title||svc.name||'Service')+'</strong>'+(svc.price?'<span class="gh-chip" style="margin-left:8px">'+esc(svc.price)+' '+(svc.currency||'GEL')+'</span>':'')+(svc.description?'<p style="margin:.5rem 0 0;font-size:.9rem;color:var(--text-secondary)">'+esc(svc.description)+'</p>':'')+'</div>'; }).join('')+'</div>';
+    }).catch(function(){ var list=$('#ghServicesList'); if(list) list.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>No services yet</h3></div>'; });
+  }
+
+  function openAddServiceModal(b){
+    if(!requireLogin()) return;
+    var body='<input class="gh-input" id="svcTitle" placeholder="Service name, e.g. Website Design"><div style="height:8px"></div><textarea class="gh-textarea" id="svcDesc" placeholder="Service description (optional)"></textarea><div class="gh-form-grid" style="margin-top:8px"><input class="gh-input" id="svcPrice" type="text" placeholder="Price e.g. 150"><select class="gh-select" id="svcCurrency"><option value="GEL">GEL</option><option value="USD">USD</option><option value="EUR">EUR</option></select></div>';
+    modal('Add Service', body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="svcSubmit">Add service</button>', 'ghSvcModal');
+    $('#svcSubmit').onclick=function(){
+      var title=($('#svcTitle').value||'').trim(); if(!title) return toast('Service name required','error');
+      var ts=fs().serverTimestamp(); var schema=window.GH||{};
+      var fields={title:title, description:$('#svcDesc').value.trim(), price:$('#svcPrice').value.trim(), currency:$('#svcCurrency').value||'GEL'};
+      var doc=schema.newService ? schema.newService(fields, authUser().uid, 0, ts) : Object.assign(fields,{status:'active',order:0,createdBy:authUser().uid,createdAt:ts,updatedAt:ts});
+      fs().addDoc(fs().collection(db(),'businesses',b.id,'services'),doc).then(function(){
+        var m=$('#ghSvcModal'); if(m)m.remove(); toast('Service added'); renderBusinessServices(b);
+      }).catch(function(err){ toast('Failed: '+(err.message||err),'error'); });
+    };
+  }
+
+  function renderBusinessPhotos(b){
+    var box=$('#ghBusinessTabContent'); if(!box)return;
+    var isOwner=!!(authUser() && authUser().uid && (b.ownerId===authUser().uid || b.createdBy===authUser().uid || b.userId===authUser().uid));
+    box.innerHTML='<div class="gh-card"><div class="gh-section-title"><h2>Photos</h2>'+(isOwner?'<button class="gh-btn sm" data-upload-gallery-photo><i class="fas fa-upload"></i> Upload</button>':'')+'</div><div id="ghGalleryGrid"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
+    box.onclick=function(e){ if(e.target.closest('[data-upload-gallery-photo]')) uploadGalleryPhoto(b); };
+    if(!fs()||!db()){ $('#ghGalleryGrid').innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>Photos unavailable</h3></div>'; return; }
+    fs().getDocs(fs().query(fs().collection(db(),'businesses',b.id,'gallery'),fs().orderBy('order','asc'))).then(function(snap){
+      var grid=$('#ghGalleryGrid'); if(!grid)return;
+      var photos=[]; snap.forEach(function(d){photos.push(Object.assign({id:d.id},d.data()));});
+      if(!photos.length){ grid.innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>No photos yet</h3>'+(isOwner?'<button class="gh-btn" data-upload-gallery-photo>Upload first photo</button>':'')+'</div>'; return; }
+      grid.innerHTML='<div class="gh-gallery-grid">'+photos.map(function(p){ return '<div class="gh-gallery-item"><img src="'+esc(p.url)+'" alt="'+esc(p.caption||'')+'" loading="lazy" onerror="this.closest(\'.gh-gallery-item\').remove()"></div>'; }).join('')+'</div>';
+    }).catch(function(){ var grid=$('#ghGalleryGrid'); if(grid) grid.innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>No photos yet</h3></div>'; });
+  }
+
+  function uploadGalleryPhoto(b){
+    if(!requireLogin()) return;
+    triggerImagePick(function(dataUrl){ if(!dataUrl) return;
+      var ts=fs().serverTimestamp(); var schema=window.GH||{};
+      var idx=Date.now();
+      var doc=schema.newGalleryPhoto ? schema.newGalleryPhoto(dataUrl, authUser().uid, '', idx, ts) : {url:dataUrl,caption:'',order:idx,uploadedBy:authUser().uid,createdAt:ts};
+      fs().addDoc(fs().collection(db(),'businesses',b.id,'gallery'),doc).then(function(){ toast('Photo added'); renderBusinessPhotos(b); }).catch(function(err){ toast('Upload failed: '+(err.message||err),'error'); });
+    });
+  }
+
   function openBusinessRewardModal(b){
     if(!requireLogin()) return;
     var body='<input class="gh-input" id="brTitle" placeholder="Reward title, e.g. Free coffee"><div style="height:10px"></div><textarea class="gh-textarea" id="brDesc" placeholder="Reward details and how it works"></textarea><div class="gh-form-grid"><select class="gh-select" id="brType"><option value="discount">Discount</option><option value="free_item">Free item</option><option value="visit">Daily visit / pass</option><option value="course">Online course</option><option value="platform_perk">GeoHub perk</option></select><input class="gh-input" id="brPrice" type="number" min="1" placeholder="Point price"></div><div class="gh-form-grid"><input class="gh-input" id="brQty" type="number" min="0" placeholder="Quantity, 0 = unlimited"><input class="gh-input" id="brExpires" placeholder="Expires, e.g. 2026-06-30"></div><div style="height:10px"></div><textarea class="gh-textarea" id="brTerms" placeholder="Terms: no cash value, one-time use, partner conditions…"></textarea>';
-    modal('New partner reward for '+(b.name||'business'), body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="brSubmit"><i class="fas fa-gift"></i>Create reward</button>', 'ghRewardModal');
+    modal('New partner reward for '+(b.title||b.name||'business'), body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="brSubmit"><i class="fas fa-gift"></i>Create reward</button>', 'ghRewardModal');
     $('#brSubmit').onclick=function(){
       if(!GS().createReward) return toast('Reward system unavailable','error');
       GS().createReward({ businessId:b.id, businessName:b.name||'', title:$('#brTitle').value, description:$('#brDesc').value, rewardType:$('#brType').value, pointPrice:$('#brPrice').value, quantity:$('#brQty').value, expiresAt:$('#brExpires').value, terms:$('#brTerms').value }, function(){ var m=$('#ghRewardModal'); if(m)m.remove(); renderBusinessManageTab(b); });
@@ -792,22 +846,37 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function openBusinessOfferModal(b){
     if(!requireLogin()) return;
     var body='<input class="gh-input" id="boTitle" placeholder="Offer title, e.g. Weekend discount"><div style="height:10px"></div><textarea class="gh-textarea" id="boDesc" placeholder="Offer details"></textarea><div class="gh-form-grid"><input class="gh-input" id="boStarts" placeholder="Starts e.g. today"><input class="gh-input" id="boEnds" placeholder="Ends e.g. Sunday"></div>';
-    modal('New offer for '+(b.name||'business'), body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="boSubmit">Create offer</button>', 'ghOfferModal');
+    modal('New offer for '+(b.title||b.name||'business'), body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="boSubmit">Create offer</button>', 'ghOfferModal');
     $('#boSubmit').onclick=function(){ if(!GS().createBusinessOffer) return toast('Offers unavailable','error'); GS().createBusinessOffer(b.id,{ title:$('#boTitle').value, description:$('#boDesc').value, startsAt:$('#boStarts').value, endsAt:$('#boEnds').value },function(){ var m=$('#ghOfferModal'); if(m)m.remove(); renderBusinessManageTab(b); }); };
   }
 
   function renderBusinessTab(b){
     var box=$('#ghBusinessTabContent'); if(!box)return; var tab=state.currentBusinessTab||'posts';
+    var bTitle = b.title||b.name||'Business';
     if(tab==='about'){
+      var sLinks=b.socialLinks||{}; var ig=sLinks.instagram||b.instagram||''; var fb=sLinks.facebook||b.facebook||''; var wa=sLinks.whatsapp||b.whatsapp||'';
       box.innerHTML='<div class="gh-card"><div class="gh-section-title"><h2>About</h2></div><div class="gh-about-list">'+
-        aboutRow('fa-align-left',b.description||b.desc||'No description yet')+aboutRow(isOnlineBusiness(b)?'fa-globe':'fa-location-dot',isOnlineBusiness(b)?businessAreaLabel(b):(b.address||b.city||'No address'))+(isOnlineBusiness(b)?aboutRow('fa-laptop','Online / nationwide service'):'')+aboutRow('fa-phone',b.phone||'No phone')+aboutRow('fa-envelope',b.email||'No email')+aboutRow('fa-globe',b.website||'No website')+aboutRow('fa-clock',formatWorkingHours(b.workingHours))+'</div></div>'; return;
+        aboutRow('fa-align-left',b.description||'No description yet')+
+        aboutRow(isOnlineBusiness(b)?'fa-globe':'fa-location-dot',isOnlineBusiness(b)?businessAreaLabel(b):(b.address||b.city||'No address'))+
+        (isOnlineBusiness(b)?aboutRow('fa-laptop','Online / nationwide service'):'')+
+        aboutRow('fa-phone',b.phone||'No phone')+
+        aboutRow('fa-envelope',b.email||'No email')+
+        aboutRow('fa-globe',b.website||'No website')+
+        (ig?aboutRow('fa-brands fa-instagram','Instagram: '+ig):'')+
+        (fb?aboutRow('fa-brands fa-facebook','Facebook: '+fb):'')+
+        (wa?aboutRow('fa-brands fa-whatsapp','WhatsApp: '+wa):'')+
+        aboutRow('fa-clock',formatWorkingHours(b.workingHours))+
+        (b.priceRange?aboutRow('fa-tag','Price range: '+b.priceRange):'')+
+        (b.startingPrice?aboutRow('fa-tag','Starting from: '+b.startingPrice):'')+
+        '</div></div>'; return;
     }
     if(tab==='reviews') return renderBusinessReviews(b);
     if(tab==='manage') return renderBusinessManageTab(b);
-    if(tab==='photos'){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-images"></i><h3>Photos</h3><p>Photos from business posts will appear here.</p></div>'; return; }
-    var isOwner=authUser() && (b.ownerId===authUser().uid || b.createdBy===authUser().uid || b.userId===authUser().uid);
-    box.innerHTML=(isOwner?'<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="gh-avatar">'+esc(initials(b.name))+'</span><button class="gh-composer-fake" data-post-as-business>Post as '+esc(b.name||'business')+'</button></div></section>':'')+'<div id="ghBusinessPosts"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>';
-    box.onclick=function(e){ if(e.target.closest('[data-post-as-business]')) openPostModal({ targetType:'business', targetId:b.id, authorType:'business', businessId:b.id, authorId:b.id, authorName:b.name, authorAvatar:b.logoUrl||b.coverImageUrl||'', createdByUserId:authUser() && authUser().uid }); };
+    if(tab==='services') return renderBusinessServices(b);
+    if(tab==='photos'){ renderBusinessPhotos(b); return; }
+    var isOwner=!!(authUser() && authUser().uid && (b.ownerId===authUser().uid || b.createdBy===authUser().uid || b.userId===authUser().uid));
+    box.innerHTML=(isOwner?'<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="gh-avatar">'+esc(initials(bTitle))+'</span><button class="gh-composer-fake" data-post-as-business>Post as '+esc(bTitle)+'</button></div></section>':'')+'<div id="ghBusinessPosts"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>';
+    box.onclick=function(e){ if(e.target.closest('[data-post-as-business]')) openPostModal({ targetType:'business', targetId:b.id, authorType:'business', businessId:b.id, authorId:b.id, authorName:bTitle, authorAvatar:b.logoUrl||b.coverUrl||'', createdByUserId:authUser() && authUser().uid }); };
     bindPostInteractions(box);
     setupAudienceAccess(function(){ var list=$('#ghBusinessPosts'); if(list && list._lastPosts) { var posts=list._lastPosts.filter(canSeePost); list.innerHTML=posts.length ? posts.map(postCard).join('') : '<div class="gh-card gh-empty"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Business page updates will appear here.</p></div>'; hydrateSharedPreviews(list); } });
     listenTargetPosts('business', b.id, function(posts){ var list=$('#ghBusinessPosts'); if(!list) return; list._lastPosts=posts||[]; posts=posts.filter(canSeePost); if(!posts.length){ list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Business page updates will appear here.</p></div>'; return; } list.innerHTML=posts.map(postCard).join(''); bindPostInteractions(list); posts.forEach(function(p){hydrateReactionState(p.id);}); hydrateSharedPreviews(list); });
@@ -825,7 +894,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function createBusinessReview(businessId, rating, textVal){
     if(!requireLogin()) return; var u=currentUserInfo(); var textClean=(textVal||'').trim(); if(!textClean) return toast('Write review first','error');
-    fs().addDoc(fs().collection(db(),'businessReviews'), { businessId:businessId, userId:u.uid, userName:u.name, userPhoto:u.avatar, rating:rating, text:textClean, status:'active', createdAt:fs().serverTimestamp() }).then(function(){ return fs().updateDoc(fs().doc(db(),'businesses',businessId), { reviewCount: fs().increment(1) }).catch(function(){}); }).then(function(){ if(GS().awardPoints) GS().awardPoints(25, 'Write business review', 'business', businessId); toast('Review submitted'); $('#ghReviewText').value=''; }).catch(function(err){ toast('Review failed: '+(err.code||err.message),'error'); });
+    var ts=fs().serverTimestamp(); var schema=window.GH||{};
+    var doc=schema.newBusinessReview ? schema.newBusinessReview(businessId,u.uid,u.name,u.avatar,rating,textClean,ts) : {businessId:businessId,userId:u.uid,userName:u.name,userAvatarUrl:u.avatar,rating:rating,text:textClean,status:'active',helpful:0,reported:false,createdAt:ts,updatedAt:ts};
+    fs().addDoc(fs().collection(db(),'businessReviews'),doc).then(function(){ return fs().updateDoc(fs().doc(db(),'businesses',businessId),{reviewCount:fs().increment(1),ratingTotal:fs().increment(rating),ratingCount:fs().increment(1)}).catch(function(){}); }).then(function(){ if(GS().awardPoints) GS().awardPoints(25,'Write business review','business',businessId); toast('Review submitted'); $('#ghReviewText').value=''; }).catch(function(err){ toast('Review failed: '+(err.code||err.message),'error'); });
   }
   function listenBusinessReviews(businessId, cb){ var q=fs().query(fs().collection(db(),'businessReviews'), fs().where('businessId','==',businessId), fs().limit(50)); var _u=fs().onSnapshot(q,function(snap){ var arr=[]; snap.forEach(function(d){arr.push(Object.assign({id:d.id},d.data()));}); arr.sort(function(a,b){return ts(b.createdAt)-ts(a.createdAt);}); cb(arr); },function(){cb([]); }); state.pageUnsubs.push(_u); }
 

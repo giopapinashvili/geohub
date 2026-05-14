@@ -355,68 +355,81 @@ let currentStep = 1;
     var oldHtml = submitBtn ? submitBtn.innerHTML : '';
     if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (editingBusinessId ? 'Saving...' : 'Creating...'); }
 
-    var payload = {
-      name: name,
-      title: name,
-      description: desc,
-      desc: desc,
-      category: cat || 'business',
-      businessType: businessType,
-      serviceArea: serviceArea,
+    var schema = window.GH || {};
+    var ts = f.serverTimestamp();
+    var fields = {
+      title:           name,
+      description:     desc,
+      category:        cat || 'business',
+      businessType:    businessType,
+      serviceArea:     serviceArea,
       serviceAreaText: serviceAreaText,
-      isOnline: businessType === 'online',
-      city: businessType === 'online' ? '' : city,
-      address: businessType === 'online' ? '' : ((document.getElementById('addressInput') || {}).value || ''),
-      phone: (document.getElementById('phoneInput') || {}).value || '',
-      email: (document.getElementById('emailInput') || {}).value || '',
-      website: (document.getElementById('websiteInput') || {}).value || '',
-      mapsLink: businessType === 'online' ? '' : ((document.getElementById('mapsLink') || {}).value || ''),
-      whatsapp: (document.getElementById('whatsappInput') || {}).value || '',
-      instagram: (document.getElementById('instagramInput') || {}).value || '',
-      facebook: (document.getElementById('facebookInput') || {}).value || '',
-      socialLinks: {
-        instagram: (document.getElementById('instagramInput') || {}).value || '',
-        facebook: (document.getElementById('facebookInput') || {}).value || ''
-      },
-      startingPrice: (document.getElementById('startingPriceInput') || {}).value || '',
-      priceRange: (document.getElementById('priceRangeSelect') || {}).value || '',
-      tags: tags.slice(0, 8),
-      workingHours: collectHours(),
-      services: collectServices(),
-      plan: selectedPlan || 'free',
-      coverImageUrl: cover,
-      imageUrl: cover,
-      logoUrl: '',
-      galleryUrls: gallery,
-      ownerId: user.uid,
-      createdBy: user.uid,
-      userId: user.uid,
-      ownerName: user.displayName || (user.email ? user.email.split('@')[0] : 'GeoHub User'),
-      ownerEmail: user.email || '',
-      status: 'active',
-      verified: false,
-      followerCount: 0,
-      postCount: 0,
-      reviewCount: 0,
-      ratingAverage: 0,
-      createdAt: f.serverTimestamp(),
-      updatedAt: f.serverTimestamp()
+      city:            city,
+      address:         (document.getElementById('addressInput') || {}).value || '',
+      phone:           (document.getElementById('phoneInput') || {}).value || '',
+      email:           (document.getElementById('emailInput') || {}).value || '',
+      website:         (document.getElementById('websiteInput') || {}).value || '',
+      mapsLink:        (document.getElementById('mapsLink') || {}).value || '',
+      instagram:       (document.getElementById('instagramInput') || {}).value || '',
+      facebook:        (document.getElementById('facebookInput') || {}).value || '',
+      whatsapp:        (document.getElementById('whatsappInput') || {}).value || '',
+      startingPrice:   (document.getElementById('startingPriceInput') || {}).value || '',
+      priceRange:      (document.getElementById('priceRangeSelect') || {}).value || '',
+      tags:            tags.slice(0, 8),
+      workingHours:    collectHours(),
+      plan:            selectedPlan || 'free',
+      coverUrl:        cover,
+      logoUrl:         '',
     };
+
+    var userName = user.displayName || (user.email ? user.email.split('@')[0] : 'GeoHub User');
+    var payload = schema.newBusiness
+      ? schema.newBusiness(fields, user.uid, userName, user.email || '', ts)
+      : Object.assign(fields, {
+          ownerId: user.uid, ownerName: userName, ownerEmail: user.email || '',
+          isOnline: businessType === 'online',
+          status: 'active', verified: false,
+          followerCount: 0, postCount: 0, reviewCount: 0, viewCount: 0,
+          ratingAverage: 0, ratingTotal: 0, ratingCount: 0,
+          createdAt: ts, updatedAt: ts,
+        });
+
+    var rawServices = collectServices();
+    var galleryUrls = gallery;
 
     var savePromise;
     if (editingBusinessId) {
-      payload.updatedAt = f.serverTimestamp();
-      delete payload.createdAt;
-      savePromise = f.updateDoc(f.doc(geo.db, 'businesses', editingBusinessId), payload)
-        .then(function(){ return { id: editingBusinessId }; });
+      var updatePayload = Object.assign({}, payload);
+      delete updatePayload.createdAt;
+      updatePayload.updatedAt = ts;
+      savePromise = f.updateDoc(f.doc(geo.db, 'businesses', editingBusinessId), updatePayload)
+        .then(function () { return { id: editingBusinessId }; });
     } else {
-      savePromise = f.addDoc(f.collection(geo.db, 'businesses'), payload).then(function(ref) {
-        return f.setDoc(f.doc(geo.db, 'businessAdmins', ref.id + '_' + user.uid), {
-          businessId: ref.id,
-          userId: user.uid,
-          role: 'owner',
-          createdAt: f.serverTimestamp()
-        }).then(function(){ return ref; });
+      savePromise = f.addDoc(f.collection(geo.db, 'businesses'), payload).then(function (ref) {
+        var afterWrites = [];
+
+        // businessAdmins record (ownership)
+        afterWrites.push(f.setDoc(f.doc(geo.db, 'businessAdmins', ref.id + '_' + user.uid), {
+          businessId: ref.id, userId: user.uid, role: 'owner', createdAt: ts
+        }));
+
+        // gallery subcollection
+        galleryUrls.forEach(function (url, i) {
+          var photo = schema.newGalleryPhoto
+            ? schema.newGalleryPhoto(url, user.uid, '', i, ts)
+            : { url: url, caption: '', order: i, uploadedBy: user.uid, createdAt: ts };
+          afterWrites.push(f.addDoc(f.collection(geo.db, 'businesses', ref.id, 'gallery'), photo));
+        });
+
+        // services subcollection
+        rawServices.forEach(function (svc, i) {
+          var svcDoc = schema.newService
+            ? schema.newService({ title: svc.name, price: svc.price }, user.uid, i, ts)
+            : { title: svc.name || '', price: svc.price || '', currency: 'GEL', status: 'active', order: i, createdBy: user.uid, createdAt: ts, updatedAt: ts };
+          afterWrites.push(f.addDoc(f.collection(geo.db, 'businesses', ref.id, 'services'), svcDoc));
+        });
+
+        return Promise.all(afterWrites).then(function () { return ref; });
       });
     }
 
