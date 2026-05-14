@@ -149,10 +149,28 @@
     var old = document.getElementById('accountSettingsModal'); if (old) old.remove();
     var m = document.createElement('div');
     m.id = 'accountSettingsModal'; m.className = 'auth-modal-overlay';
-    m.innerHTML = '<div class="auth-modal-card" style="max-width:520px"><button class="auth-modal-close" id="asClose"><i class="fas fa-times"></i></button><h3>Account Settings</h3><p>Update your public GeoHub profile.</p><input id="asName" class="form-input" style="margin:8px 0" value="' + esc(user.fullName || '') + '" placeholder="Name"><input id="asCity" class="form-input" style="margin:8px 0" value="' + esc(user.city || '') + '" placeholder="City"><textarea id="asBio" class="form-input" style="margin:8px 0;min-height:90px" placeholder="Bio">' + esc(user.bio || '') + '</textarea><button class="btn-primary auth-modal-btn" id="asSave">Save</button></div>';
-    document.body.appendChild(m); requestAnimationFrame(function(){ m.classList.add('open'); });
+    var notifHTML = window.GeoPush ? window.GeoPush.buildSettingsHTML() : '';
+    m.innerHTML = '<div class="auth-modal-card" style="max-width:520px;max-height:90vh;overflow-y:auto">'
+      + '<button class="auth-modal-close" id="asClose"><i class="fas fa-times"></i></button>'
+      + '<h3>Account Settings</h3>'
+      + '<p>Update your public GeoHub profile.</p>'
+      + '<input id="asName" class="form-input" style="margin:8px 0" value="' + esc(user.fullName || '') + '" placeholder="Name">'
+      + '<input id="asCity" class="form-input" style="margin:8px 0" value="' + esc(user.city || '') + '" placeholder="City">'
+      + '<textarea id="asBio" class="form-input" style="margin:8px 0;min-height:90px" placeholder="Bio">' + esc(user.bio || '') + '</textarea>'
+      + '<button class="btn-primary auth-modal-btn" id="asSave">Save</button>'
+      + notifHTML
+      + '</div>';
+    document.body.appendChild(m);
+    requestAnimationFrame(function(){ m.classList.add('open'); });
     m.querySelector('#asClose').addEventListener('click', function(){ m.remove(); });
-    m.querySelector('#asSave').addEventListener('click', function(){ updateUser({ fullName: document.getElementById('asName').value.trim(), city: document.getElementById('asCity').value.trim(), bio: document.getElementById('asBio').value.trim() }).then(function(){ m.remove(); initAuthNav(); }); });
+    m.querySelector('#asSave').addEventListener('click', function(){
+      updateUser({
+        fullName: document.getElementById('asName').value.trim(),
+        city:     document.getElementById('asCity').value.trim(),
+        bio:      document.getElementById('asBio').value.trim()
+      }).then(function(){ m.remove(); initAuthNav(); });
+    });
+    if (window.GeoPush) window.GeoPush.bindSettingsEvents();
   }
 
   function startAuthListener() {
@@ -163,4 +181,11 @@
 
   document.addEventListener('DOMContentLoaded', function(){ initAuthNav(); initMobileMenuAuth(); initProtectedActions(); });
   if (window.GeoFirebase && window.GeoFirebase.auth) startAuthListener(); else window.addEventListener('GeoFirebaseReady', startAuthListener, { once: true });
+
+  // Load push notifications module on all pages
+  if ('serviceWorker' in navigator && !document.getElementById('ghPushScript')) {
+    var _ps = document.createElement('script');
+    _ps.id = 'ghPushScript'; _ps.defer = true; _ps.src = 'push-notifications.js';
+    document.head.appendChild(_ps);
+  }
 })();

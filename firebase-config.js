@@ -8,6 +8,7 @@ import {
   writeBatch, runTransaction, arrayUnion, arrayRemove
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { getAnalytics, isSupported } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js';
+import { getMessaging, isSupported as isMsgSupported } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js';
 
 // IMPORTANT: Restrict this Firebase Web API key in Google Cloud Console → APIs & Services → Credentials → HTTP referrers to your production domains only.
 const firebaseConfig = {
@@ -30,6 +31,9 @@ try {
     authFns: { signOut, onAuthStateChanged }
   };
   isSupported().then(ok => { if (ok) getAnalytics(app); }).catch(() => {});
+  isMsgSupported().then(ok => {
+    if (ok) window.GeoFirebase.messaging = getMessaging(app);
+  }).catch(() => {});
   window.dispatchEvent(new Event('GeoFirebaseReady'));
 } catch (err) {
   console.warn('[GeoHub] Firebase init failed — online features disabled.', err.message);
