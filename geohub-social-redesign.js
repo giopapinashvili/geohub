@@ -804,7 +804,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               '<button class="gh-btn gh-follow-business-btn" data-follow-business="'+esc(b.id)+'"><i class="fas fa-plus"></i> Follow</button>'+
               '<button class="gh-btn ghost" data-message-business="'+esc(owner)+'"><i class="fas fa-comment"></i> Message</button>'+
               (isOwner?'<button class="gh-btn ghost" data-edit-business><i class="fas fa-gear"></i> Edit</button>':'')+
-              '<button class="gh-btn ghost" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button>'+
+              '<button class="gh-btn ghost" aria-label="Save business" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button>'+
             '</div>'+
           '</div>'+
         '</div>'+
@@ -895,31 +895,32 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function renderBizDashOverview(b){
     var cont=$('#ghDashContent'); if(!cont) return;
     var ratingAvg=b.ratingCount>0?(b.ratingTotal/b.ratingCount).toFixed(1):(b.ratingAverage>0?Number(b.ratingAverage).toFixed(1):null);
+    var statusColor=b.status==='active'?'#10b981':b.status==='suspended'?'#ef4444':'#f59e0b';
     cont.innerHTML=
       '<div class="gh-dash-section">'+
         '<h2 class="gh-dash-section-title">Overview</h2>'+
         '<div class="gh-dash-stats-grid">'+
           '<div class="gh-dash-stat-card"><i class="fas fa-users"></i><strong>'+Number(b.followerCount||0)+'</strong><span>Followers</span></div>'+
           '<div class="gh-dash-stat-card"><i class="fas fa-newspaper"></i><strong>'+Number(b.postCount||0)+'</strong><span>Posts</span></div>'+
-          '<div class="gh-dash-stat-card"><i class="fas fa-star"></i><strong>'+(ratingAvg||'—')+'</strong><span>Rating</span></div>'+
+          '<div class="gh-dash-stat-card"><i class="fas fa-star" style="color:#facc15"></i><strong>'+(ratingAvg||'—')+'</strong><span>Rating</span></div>'+
           '<div class="gh-dash-stat-card"><i class="fas fa-comments"></i><strong>'+Number(b.reviewCount||0)+'</strong><span>Reviews</span></div>'+
         '</div>'+
         '<div class="gh-dash-info-grid">'+
           '<div class="gh-card" style="margin-bottom:0">'+
-            '<div class="gh-biz-sec-head"><h3>Business Info</h3><button class="gh-btn sm ghost" data-dash-section="settings">Edit</button></div>'+
+            '<div class="gh-biz-sec-head"><h3>Business Info</h3><button class="gh-btn sm ghost" data-dash-section="settings"><i class="fas fa-pencil"></i> Edit</button></div>'+
             '<div class="gh-about-list">'+
               aboutRow('fa-store',b.title||b.name||'Untitled')+
               aboutRow('fa-tag',b.category||'No category')+
-              aboutRow('fa-circle-dot',b.status||'active')+
+              '<div class="gh-about-row"><i class="fas fa-circle-dot" style="color:'+statusColor+'"></i><span style="color:'+statusColor+';font-weight:700;text-transform:capitalize">'+esc(b.status||'active')+'</span></div>'+
               (b.plan&&b.plan!=='free'?aboutRow('fa-crown','Pro plan'):aboutRow('fa-circle-check','Free listing'))+
             '</div>'+
           '</div>'+
           '<div class="gh-card" style="margin-bottom:0">'+
             '<div class="gh-biz-sec-head"><h3>Quick Actions</h3></div>'+
-            '<div style="display:flex;flex-wrap:wrap;gap:8px">'+
-              '<button class="gh-btn ghost" data-ov-post-as-biz><i class="fas fa-bullhorn"></i> Post update</button>'+
-              '<button class="gh-btn ghost" data-dash-section="services"><i class="fas fa-plus"></i> Add service</button>'+
-              '<button class="gh-btn ghost" data-dash-section="gallery"><i class="fas fa-images"></i> Upload photo</button>'+
+            '<div style="display:flex;flex-direction:column;gap:8px">'+
+              '<button class="gh-btn full ghost" data-ov-post-as-biz><i class="fas fa-bullhorn"></i> Post an update</button>'+
+              '<button class="gh-btn full ghost" data-dash-section="services"><i class="fas fa-briefcase"></i> Manage services</button>'+
+              '<button class="gh-btn full ghost" data-dash-section="gallery"><i class="fas fa-images"></i> Upload to gallery</button>'+
             '</div>'+
           '</div>'+
         '</div>'+
@@ -940,27 +941,29 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div class="gh-card">'+
           '<div class="gh-biz-sec-head"><h3>Basic Info</h3></div>'+
           '<div class="gh-form-rows">'+
-            '<label class="gh-form-label">Business Name<input class="gh-input" id="dsTitle" value="'+esc(b.title||b.name||'')+'"></label>'+
-            '<label class="gh-form-label">Description<textarea class="gh-textarea" id="dsDesc" rows="3">'+esc(b.description||'')+'</textarea></label>'+
-            '<label class="gh-form-label">Category<input class="gh-input" id="dsCat" value="'+esc(b.category||'')+'" placeholder="e.g. Restaurant, Salon, Tech"></label>'+
+            '<label class="gh-form-label" for="dsTitle">Business Name<input class="gh-input" id="dsTitle" value="'+esc(b.title||b.name||'')+'"></label>'+
+            '<label class="gh-form-label" for="dsDesc">Description<textarea class="gh-textarea" id="dsDesc" rows="3">'+esc(b.description||'')+'</textarea></label>'+
+            '<label class="gh-form-label" for="dsCat">Category<input class="gh-input" id="dsCat" value="'+esc(b.category||'')+'" placeholder="e.g. Restaurant, Salon, Tech"></label>'+
           '</div>'+
         '</div>'+
         '<div class="gh-card">'+
           '<div class="gh-biz-sec-head"><h3>Contact & Links</h3></div>'+
           '<div class="gh-form-rows">'+
-            '<label class="gh-form-label">Phone<input class="gh-input" id="dsPhone" value="'+esc(b.phone||'')+'" placeholder="+995 5XX XXX XXX"></label>'+
-            '<label class="gh-form-label">Email<input class="gh-input" id="dsEmail" value="'+esc(b.email||'')+'" placeholder="contact@yourbusiness.com"></label>'+
-            '<label class="gh-form-label">Website<input class="gh-input" id="dsWebsite" value="'+esc(b.website||'')+'" placeholder="https://yourbusiness.com"></label>'+
-            '<label class="gh-form-label">Instagram<input class="gh-input" id="dsIg" value="'+esc(sLinks.instagram||'')+'"></label>'+
-            '<label class="gh-form-label">Facebook<input class="gh-input" id="dsFb" value="'+esc(sLinks.facebook||'')+'"></label>'+
-            '<label class="gh-form-label">WhatsApp<input class="gh-input" id="dsWa" value="'+esc(sLinks.whatsapp||'')+'"></label>'+
+            '<label class="gh-form-label" for="dsPhone">Phone<input class="gh-input" id="dsPhone" value="'+esc(b.phone||'')+'" placeholder="+995 5XX XXX XXX"></label>'+
+            '<label class="gh-form-label" for="dsEmail">Email<input class="gh-input" id="dsEmail" value="'+esc(b.email||'')+'" placeholder="contact@yourbusiness.com"></label>'+
+            '<label class="gh-form-label" for="dsWebsite">Website<input class="gh-input" id="dsWebsite" value="'+esc(b.website||'')+'" placeholder="https://yourbusiness.com"></label>'+
+            '<div class="gh-form-grid">'+
+              '<label class="gh-form-label" for="dsIg">Instagram<input class="gh-input" id="dsIg" value="'+esc(sLinks.instagram||'')+'" placeholder="@handle"></label>'+
+              '<label class="gh-form-label" for="dsFb">Facebook<input class="gh-input" id="dsFb" value="'+esc(sLinks.facebook||'')+'" placeholder="page name or URL"></label>'+
+            '</div>'+
+            '<label class="gh-form-label" for="dsWa">WhatsApp<input class="gh-input" id="dsWa" value="'+esc(sLinks.whatsapp||'')+'" placeholder="+995 5XX XXX XXX"></label>'+
           '</div>'+
         '</div>'+
         '<div class="gh-card">'+
           '<div class="gh-biz-sec-head"><h3>Branding</h3></div>'+
           '<div class="gh-form-rows">'+
-            '<label class="gh-form-label">Cover Image URL<input class="gh-input" id="dsCover" value="'+esc(b.coverUrl||'')+'" placeholder="https://..."></label>'+
-            '<label class="gh-form-label">Logo URL<input class="gh-input" id="dsLogo" value="'+esc(b.logoUrl||'')+'" placeholder="https://..."></label>'+
+            '<label class="gh-form-label" for="dsCover">Cover Image URL<input class="gh-input" id="dsCover" value="'+esc(b.coverUrl||'')+'" placeholder="https://..."></label>'+
+            '<label class="gh-form-label" for="dsLogo">Logo URL<input class="gh-input" id="dsLogo" value="'+esc(b.logoUrl||'')+'" placeholder="https://..."></label>'+
           '</div>'+
         '</div>'+
         '<div class="gh-dash-actions"><button class="gh-btn" id="dsSaveBtn"><i class="fas fa-check"></i> Save changes</button></div>'+
@@ -1007,7 +1010,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var bTitle=b.title||b.name||'Business';
     cont.innerHTML=
       '<div class="gh-dash-section">'+
-        '<div class="gh-biz-sec-head"><h2 class="gh-dash-section-title" style="margin:0">Posts</h2>'+
+        '<div class="gh-biz-sec-head"><h2 class="gh-dash-section-title">Posts</h2>'+
           '<button class="gh-btn" data-dp-post-as-biz><i class="fas fa-bullhorn"></i> Post update</button>'+
         '</div>'+
         '<div id="ghDashPostsList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
@@ -1028,7 +1031,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var cont=$('#ghDashContent'); if(!cont) return;
     cont.innerHTML=
       '<div class="gh-dash-section">'+
-        '<div class="gh-biz-sec-head"><h2 class="gh-dash-section-title" style="margin:0">Services</h2>'+
+        '<div class="gh-biz-sec-head"><h2 class="gh-dash-section-title">Services</h2>'+
           '<button class="gh-btn" data-ds-add-svc><i class="fas fa-plus"></i> Add service</button>'+
         '</div>'+
         '<div id="ghDashSvcList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
@@ -1084,7 +1087,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var cont=$('#ghDashContent'); if(!cont) return;
     cont.innerHTML=
       '<div class="gh-dash-section">'+
-        '<div class="gh-biz-sec-head"><h2 class="gh-dash-section-title" style="margin:0">Gallery</h2>'+
+        '<div class="gh-biz-sec-head"><h2 class="gh-dash-section-title">Gallery</h2>'+
           '<button class="gh-btn" data-dg-add><i class="fas fa-plus"></i> Add photo</button>'+
         '</div>'+
         '<div id="ghDashGallery"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
@@ -1565,7 +1568,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function starsHtml(rating, max){
     max = max || 5; rating = Number(rating) || 0;
     var full=Math.round(rating); var out='';
-    for(var i=1;i<=max;i++) out+='<span style="color:'+(i<=full?'#facc15':'#334155')+'">★</span>';
+    for(var i=1;i<=max;i++) out+='<span class="gh-star-'+(i<=full?'full':'empty')+'">★</span>';
     return out;
   }
 

@@ -700,7 +700,7 @@ html[data-gh-theme="dark"] body.gh-fb-inspired .gh-panel{
 .gh-dash-stat-card span{font-size:.75rem;color:var(--gh-muted)}
 .gh-dash-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .gh-form-rows{display:grid;gap:12px}
-.gh-form-label{display:grid;gap:5px;font-size:.82rem;font-weight:600;color:var(--gh-muted)}
+.gh-form-label{display:flex;flex-direction:column;gap:5px;font-size:.82rem;font-weight:600;color:var(--gh-muted)}
 .gh-dash-actions{display:flex;justify-content:flex-end;gap:8px;padding-top:4px}
 .gh-dash-coming-soon{text-align:center;padding:32px 16px;display:grid;gap:14px;place-items:center}
 .gh-dash-cs-icon{font-size:2.8rem;color:var(--gh-muted);display:block}
@@ -768,3 +768,158 @@ html[data-gh-theme="dark"] body.gh-fb-inspired .gh-panel{
 .gh-gallery-pick-or{color:var(--gh-muted);font-size:.82rem;font-weight:600;white-space:nowrap}
 .gh-form-check{display:flex;align-items:center;gap:8px;font-size:.88rem;font-weight:600;color:var(--gh-text);cursor:pointer}
 .gh-form-check input[type="checkbox"]{width:16px;height:16px;cursor:pointer;accent-color:var(--gh-green)}
+
+/* ── Phase 6 Step 5.5 — UI/UX Polish Pass ──────────────────────────── */
+
+/* Focus rings — keyboard / tab accessibility */
+.gh-btn:focus-visible,.gh-biz-tab:focus-visible,.gh-tab:focus-visible,
+.gh-pill:focus-visible,.gh-dash-nav-item:focus-visible,
+.gh-gallery-feat-btn:focus-visible,.gh-gallery-delete-btn:focus-visible,
+.gh-gm-close:focus-visible,.gh-gm-prev:focus-visible,.gh-gm-next:focus-visible{
+  outline:2px solid var(--gh-green);outline-offset:2px;
+}
+
+/* Input focus — unified ring across the app */
+.gh-input:focus,.gh-textarea:focus,.gh-select:focus{
+  border-color:var(--gh-border-strong);
+  box-shadow:0 0 0 3px rgba(16,185,129,.09);
+}
+
+/* Compact empty states inside dashboard sections */
+.gh-dash-section .gh-empty{min-height:140px;padding:20px}
+
+/* Remove inline margin:0 hacks on dash section titles via CSS instead */
+.gh-dash-section .gh-biz-sec-head .gh-dash-section-title,
+.gh-dash-section>.gh-dash-section-title{margin:0}
+
+/* Business hero — always render, even without cover image */
+.gh-biz-cover{min-height:180px}
+
+/* Stat numbers — tighter letter spacing for large numbers */
+.gh-biz-stat strong,.gh-dash-stat-card strong,.gh-dash-analytics-val{letter-spacing:-.04em}
+
+/* Active tab — slightly bolder weight */
+.gh-biz-tab.active{font-weight:950}
+
+/* Service grid — single column on small phones */
+@media(max-width:540px){
+  .gh-svc-grid{grid-template-columns:1fr;gap:10px}
+}
+
+/* Service filter chips — horizontal scroll on narrow screens */
+@media(max-width:480px){
+  .gh-svc-filter-row{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:4px}
+  .gh-svc-filter-row::-webkit-scrollbar{display:none}
+  .gh-svc-filter-row .gh-pill{flex-shrink:0;padding:7px 10px;font-size:.77rem}
+}
+
+/* Service CTA — minimum touch target */
+.gh-svc-cta{min-height:40px}
+
+/* Gallery management — always visible on touch devices (no hover) */
+@media(hover:none){
+  .gh-gallery-mgmt-bar,.gh-gallery-delete-btn{opacity:1!important}
+}
+
+/* Modal — slide-up sheet on small mobile */
+@media(max-width:480px){
+  .gh-modal-backdrop{padding:0;align-items:flex-end}
+  .gh-modal{border-radius:24px 24px 0 0;max-height:92svh;width:100%}
+  .gh-modal-body{padding:14px 16px}
+  .gh-modal-actions{padding:12px 16px;gap:8px}
+  .gh-modal-actions .gh-btn{flex:1}
+}
+
+/* Business action buttons — compact on mobile */
+@media(max-width:480px){
+  .gh-biz-actions{gap:6px}
+  .gh-biz-actions .gh-btn{padding:9px 10px;font-size:.79rem}
+}
+
+/* Business tabs — tighter on very small phones */
+@media(max-width:420px){
+  .gh-biz-tab{padding:11px 8px;font-size:.78rem}
+}
+
+/* Dashboard: tighter gaps + single column on small phones */
+@media(max-width:480px){
+  .gh-dash-section{gap:10px}
+  .gh-dash-info-grid{grid-template-columns:1fr}
+}
+
+/* Dashboard sidebar scroll on mobile */
+@media(max-width:900px){
+  .gh-dash-sidebar{box-shadow:none}
+  .gh-dash-sidebar-nav{-webkit-overflow-scrolling:touch}
+}
+
+/* Consistent minimum touch targets for mgmt buttons */
+.gh-gallery-feat-btn,.gh-gallery-delete-btn,.gh-svc-mgmt-row .gh-btn{min-width:32px;min-height:32px}
+
+/* ── Light theme adjustments ──────────────────────────────────────── */
+
+/* Service cards — light theme surfaces */
+html[data-gh-theme="light"] .gh-svc-card,
+html[data-gh-theme="light"] .gh-svc-card2,
+html[data-gh-theme="light"] .gh-svc-dash-item{
+  background:rgba(22,101,52,.03);
+  border-color:rgba(22,101,52,.11);
+}
+html[data-gh-theme="light"] .gh-svc-card:hover,
+html[data-gh-theme="light"] .gh-svc-card2:hover,
+html[data-gh-theme="light"] .gh-svc-dash-item:hover{
+  background:rgba(22,101,52,.07);
+  border-color:rgba(22,101,52,.22);
+}
+
+/* Featured badge — readable on light bg */
+html[data-gh-theme="light"] .gh-svc-badge.featured{
+  background:rgba(180,130,0,.10);color:#7a5f02;border-color:rgba(180,130,0,.22);
+}
+
+/* Business info cards — light */
+html[data-gh-theme="light"] .gh-biz-info-card{background:rgba(22,101,52,.04)}
+
+/* Dashboard stat + analytics cards — light */
+html[data-gh-theme="light"] .gh-dash-stat-card,
+html[data-gh-theme="light"] .gh-dash-analytics-card{background:rgba(255,255,255,.75);border-color:rgba(22,101,52,.10)}
+
+/* Dashboard sidebar — light */
+html[data-gh-theme="light"] .gh-dash-sidebar{background:rgba(255,255,255,.88);border-color:rgba(22,101,52,.10)}
+html[data-gh-theme="light"] .gh-dash-nav-item.active{background:rgba(21,148,71,.11);color:#0a5229}
+html[data-gh-theme="light"] .gh-dash-nav-item.active i{color:#159447}
+html[data-gh-theme="light"] .gh-dash-nav-item:hover{background:rgba(21,148,71,.06)}
+
+/* Gallery — light bg */
+html[data-gh-theme="light"] .gh-gallery-item{background:rgba(22,101,52,.07)}
+
+/* Preview posts — light */
+html[data-gh-theme="light"] .gh-biz-preview-post{background:rgba(22,101,52,.04);border-color:rgba(22,101,52,.10)}
+
+/* Review cards — light borders */
+html[data-gh-theme="light"] .gh-review-card{border-bottom-color:rgba(22,101,52,.10)}
+
+/* Svc price — light readable */
+html[data-gh-theme="light"] .gh-svc-price strong,
+html[data-gh-theme="light"] .gh-svc-price-block strong,
+html[data-gh-theme="light"] .gh-svc-dash-price{color:#0a5229}
+
+/* Gallery lightbox — always dark regardless of theme */
+.gh-gallery-modal,.gh-gm-backdrop{color-scheme:dark}
+
+/* Business page card — ensure it uses theme surface properly */
+.gh-biz-page{background:var(--gh-card)}
+
+/* Review card first — no top padding gap */
+.gh-review-card:first-child{padding-top:4px}
+
+/* ── Scrollbar polish ─────────────────────────────────────────────── */
+.gh-biz-tabs::-webkit-scrollbar,.gh-dash-sidebar-nav::-webkit-scrollbar{display:none}
+.gh-modal{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.12) transparent}
+.gh-modal::-webkit-scrollbar{width:4px}
+.gh-modal::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18);border-radius:99px}
+
+/* Star rating — theme-aware colors */
+.gh-star-full{color:#facc15}
+.gh-star-empty{color:rgba(148,163,184,.35)}
+html[data-gh-theme="light"] .gh-star-empty{color:rgba(100,116,139,.25)}
