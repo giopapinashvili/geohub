@@ -60,6 +60,8 @@ service cloud.firestore {
       allow update: if isOwner(userId) || isAdmin();
       allow delete: if isAdmin();
       match /private/{docId} { allow read, write: if isOwner(userId) || isAdmin(); }
+      // FCM push tokens — user owns their own tokens, admin can read for broadcast
+      match /fcmTokens/{token} { allow read: if isOwner(userId) || isAdmin(); allow write: if isOwner(userId); }
     }
 
     // Admin UIDs are managed in Firestore. Create admins/{uid} manually from Firebase Console before publishing this rule.
@@ -217,6 +219,12 @@ service cloud.firestore {
     match /adminFlags/{flagId} { allow read: if true; allow create, update, delete: if isAdmin(); }
     match /messages/{messageId} { allow read: if isAdmin() || (signedIn() && (resource.data.get('senderId', '') == uid() || resource.data.get('userId', '') == uid() || resource.data.get('recipientId', '') == uid())); allow create: if signedIn() && (request.resource.data.get('senderId', '') == uid() || request.resource.data.get('userId', '') == uid() || request.resource.data.get('createdBy', '') == uid()); allow update, delete: if isAdmin() || (signedIn() && (resource.data.get('senderId', '') == uid() || resource.data.get('userId', '') == uid())); }
     match /tickets/{docId} { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
+    // Stripe payment sessions — written by Cloudflare Worker (admin), read by ticket owner
+    match /payments/{paymentId} { allow read: if isAdmin() || existingOwnerMatches(); allow create, update: if isAdmin(); allow delete: if isAdmin(); }
+    // Event tickets issued after successful payment — written by Cloudflare Worker (admin)
+    match /eventTickets/{ticketId} { allow read: if isAdmin() || existingOwnerMatches(); allow create, update: if isAdmin(); allow delete: if isAdmin(); }
+    // Business Premium subscriptions (sub-collection)
+    match /businesses/{businessId}/subscriptions/{subId} { allow read: if isAdmin() || (signedIn() && resource.data.get('ownerId','') == uid()); allow create, update, delete: if isAdmin(); }
     match /campaigns/{docId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
     match /collabOffers/{docId} { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
     match /serviceRequests/{docId} { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }

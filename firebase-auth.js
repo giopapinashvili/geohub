@@ -97,7 +97,16 @@ async function fbGoogleLogin() {
   var auth = window.GeoFirebase && window.GeoFirebase.auth;
   if (!auth) throw new Error('Firebase not available');
   var provider = new GoogleAuthProvider();
-  var cred = await signInWithPopup(auth, provider);
+  var cred;
+  try {
+    cred = await signInWithPopup(auth, provider);
+  } catch (err) {
+    // User closed popup or blocked — not an app error
+    if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+      throw Object.assign(new Error('Google sign-in was cancelled.'), { code: err.code });
+    }
+    throw err;
+  }
   var geoUser = await mergeWithFirestore(fbUserToGeoUser(cred.user));
   geoUser.lastSeen = Date.now();
   await saveUserToFirestore(geoUser);

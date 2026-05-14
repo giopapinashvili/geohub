@@ -851,6 +851,7 @@
         callback(comments);
       }, function (err) {
         console.warn('[GeoSocial] listenComments', err.message);
+        callback([]);
       });
     }
 

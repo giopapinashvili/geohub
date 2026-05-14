@@ -20,7 +20,23 @@
     }
     if (window.GeoAuth && window.GeoAuth.isReady && window.GeoAuth.isReady()) check();
     else window.addEventListener('GeoAuthReady', check, { once: true });
-    setTimeout(function(){ if (!(window.GeoAuth && window.GeoAuth.getCurrentUser && window.GeoAuth.getCurrentUser())) check(); }, 1600);
+    // Fallback: wait for Firebase Auth's own onAuthStateChanged to fire (handles slow/offline starts)
+    if (window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.authFns) {
+      var _unsub = window.GeoFirebase.authFns.onAuthStateChanged(window.GeoFirebase.auth, function (u) {
+        _unsub();
+        if (!u) { window.location.href = 'auth.html'; return; }
+        window.GeoCurrentUser = window.GeoCurrentUser || u;
+        check();
+      });
+    } else {
+      // Last resort: 4s timeout (doubled from before to tolerate slow mobile connections)
+      setTimeout(function () {
+        if (!(window.GeoAuth && window.GeoAuth.getCurrentUser && window.GeoAuth.getCurrentUser()) &&
+            !(window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser)) {
+          window.location.href = 'auth.html';
+        }
+      }, 4000);
+    }
   }
   adminGuardReady();
 
@@ -809,10 +825,59 @@
 
 
   /* ── CONTENT STUDIO ─────────────────────────────────────── */
+
+  var CONTENT_EXT_FIELDS = {
+    events: [
+      { id: 'csDate',     label: 'Date & Time',    type: 'datetime-local', key: 'date' },
+      { id: 'csPrice',    label: 'Ticket Price (₾, 0 = free)', type: 'number', key: 'ticketPrice', min: 0 },
+      { id: 'csCapacity', label: 'Capacity (0 = unlimited)', type: 'number', key: 'capacity', min: 0 },
+      { id: 'csVenue',    label: 'Venue / address', type: 'text', key: 'venue' }
+    ],
+    places: [
+      { id: 'csAddress',  label: 'Address',  type: 'text',   key: 'address' },
+      { id: 'csLat',      label: 'Latitude', type: 'number', key: 'lat',  step: 'any' },
+      { id: 'csLng',      label: 'Longitude',type: 'number', key: 'lng',  step: 'any' }
+    ],
+    businesses: [
+      { id: 'csPhone',    label: 'Phone',    type: 'tel',  key: 'phone' },
+      { id: 'csAddress',  label: 'Address',  type: 'text', key: 'address' },
+      { id: 'csWebsite',  label: 'Website',  type: 'url',  key: 'website' },
+      { id: 'csInstagram',label: 'Instagram (@handle)', type: 'text', key: 'instagram' }
+    ],
+    groups: [
+      { id: 'csJoinType', label: 'Join type (open/invite)', type: 'text', key: 'joinType', placeholder: 'open' },
+      { id: 'csMaxMembers',label: 'Max members (0 = unlimited)', type: 'number', key: 'maxMembers', min: 0 }
+    ],
+    rewards: [
+      { id: 'csXpCost',   label: 'XP cost', type: 'number', key: 'xpCost', min: 0 },
+      { id: 'csExpiry',   label: 'Expiry date', type: 'date', key: 'expiresAt' }
+    ]
+  };
+
+  function renderExtFields(col) {
+    var container = document.getElementById('adminExtFields');
+    if (!container) return;
+    var fields = CONTENT_EXT_FIELDS[col] || [];
+    container.innerHTML = fields.map(function(f) {
+      return '<input id="' + f.id + '" type="' + f.type + '" placeholder="' + (f.label || f.key) + '" '
+        + (f.min !== undefined ? 'min="' + f.min + '" ' : '')
+        + (f.step ? 'step="' + f.step + '" ' : '')
+        + (f.placeholder ? 'data-ph="' + f.placeholder + '" ' : '')
+        + 'style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">';
+    }).join('');
+  }
+
   function bindContentStudio() {
     var form = document.getElementById('adminContentForm');
     if (!form || form._wired) return;
     form._wired = true;
+
+    var colSel = document.getElementById('adminContentCollection');
+    if (colSel) {
+      colSel.addEventListener('change', function() { renderExtFields(colSel.value); });
+      renderExtFields(colSel.value);
+    }
+
     form.addEventListener('submit', function(e) {
       e.preventDefault();
       if (!window.GeoFirebase || !window.GeoFirebase.fs) return toast('Firebase not ready');
@@ -824,18 +889,40 @@
       var desc = document.getElementById('adminContentDesc').value.trim();
       var city = document.getElementById('adminContentCity').value.trim();
       var category = document.getElementById('adminContentCategory').value.trim();
+      var image = document.getElementById('adminContentImage').value.trim();
       if (!title) return toast('Title is required');
-      var btn = form.querySelector('button[type="submit"]');
-      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
-      fs.addDoc(fs.collection(db, col), {
-        name: title, title: title, description: desc, city: city, location: city, category: category,
+
+      var doc = {
+        name: title, title: title, description: desc, city: city,
+        location: city, category: category, image: image || null,
         status: 'active', createdBy: user.uid, ownerId: user.uid, userId: user.uid,
         createdAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp()
-      }).then(function(){
-        form.reset(); toast('Real item created');
-      }).catch(function(err){
+      };
+
+      // Collect extended fields for this collection type
+      (CONTENT_EXT_FIELDS[col] || []).forEach(function(f) {
+        var el = document.getElementById(f.id);
+        if (!el) return;
+        var v = el.value.trim();
+        if (!v) return;
+        if (f.type === 'number') {
+          doc[f.key] = Number(v);
+        } else if (f.type === 'datetime-local' || f.type === 'date') {
+          doc[f.key] = new Date(v).getTime();
+        } else {
+          doc[f.key] = v;
+        }
+      });
+
+      var btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+      fs.addDoc(fs.collection(db, col), doc).then(function(ref) {
+        form.reset();
+        renderExtFields(col);
+        toast('Created: ' + title + ' (ID: ' + ref.id.slice(-6) + ')');
+      }).catch(function(err) {
         console.error('[Admin Content Studio]', err); toast('Create failed: ' + err.message);
-      }).finally(function(){
+      }).finally(function() {
         btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Create real item';
       });
     });
