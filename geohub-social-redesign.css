@@ -373,123 +373,147 @@ body.gh-fb-inspired .gh-empty.mini p{font-size:.78rem;margin:0;color:#94a3b8}
 @media(max-width:1280px){body.gh-fb-inspired .gh-layout{grid-template-columns:86px minmax(0,1fr) 310px}body.gh-fb-inspired .gh-nav-item span{display:none}body.gh-fb-inspired .gh-nav-item{justify-content:center}body.gh-fb-inspired .gh-topbar{grid-template-columns:220px minmax(220px,380px) 1fr auto}.gh-center-tabs{gap:8px}}
 @media(max-width:980px){body.gh-fb-inspired .gh-topbar{grid-template-columns:1fr auto}body.gh-fb-inspired .gh-top-search,body.gh-fb-inspired .gh-center-tabs{display:none}body.gh-fb-inspired .gh-layout{grid-template-columns:1fr;padding:12px}body.gh-fb-inspired .gh-left,body.gh-fb-inspired .gh-right{position:static;max-height:none}body.gh-fb-inspired .gh-left{display:none}body.gh-fb-inspired .gh-story-card{height:180px;min-width:105px}body.gh-fb-inspired .gh-composer-actions{grid-template-columns:repeat(2,1fr)}}
 
-/* =========================================================
-   GeoHub Day/Night Theme Final Patch
-   Light mode is a real bright premium UI, not a washed dark UI.
-   Dark mode keeps the modern blue glass social dashboard style.
-   ========================================================= */
-:root,
-html[data-gh-theme="light"]{
-  --gh-bg:#f7f9ff;
-  --gh-bg-2:#eef3ff;
-  --gh-panel:rgba(255,255,255,.92);
-  --gh-card:rgba(255,255,255,.96);
-  --gh-card-soft:#f3f6ff;
-  --gh-border:rgba(20,35,80,.10);
-  --gh-border-strong:rgba(37,99,235,.22);
-  --gh-text:#0f172a;
-  --gh-muted:#64748b;
-  --gh-dim:#94a3b8;
-  --gh-green:#16a34a;
-  --gh-green-2:#22c55e;
-  --gh-blue:#2563eb;
-  --gh-purple:#7c3aed;
-  --gh-red:#ef4444;
-  --gh-yellow:#f59e0b;
-  --gh-shadow:0 18px 45px rgba(15,23,42,.08);
-}
-html[data-gh-theme="dark"]{
-  --gh-bg:#07111f;
-  --gh-bg-2:#0d1628;
-  --gh-panel:rgba(10,20,36,.86);
-  --gh-card:rgba(13,25,44,.90);
-  --gh-card-soft:rgba(22,35,58,.82);
-  --gh-border:rgba(148,163,184,.14);
-  --gh-border-strong:rgba(59,130,246,.34);
-  --gh-text:#f8fafc;
-  --gh-muted:#aab7ca;
-  --gh-dim:#75849a;
-  --gh-green:#22c55e;
-  --gh-green-2:#4ade80;
-  --gh-blue:#3b82f6;
-  --gh-purple:#8b5cf6;
-  --gh-red:#fb7185;
-  --gh-yellow:#fbbf24;
-  --gh-shadow:0 22px 70px rgba(0,0,0,.42);
-}
-html[data-gh-theme] *,html[data-gh-theme] *::before,html[data-gh-theme] *::after{transition:background-color .22s ease,border-color .22s ease,color .22s ease,box-shadow .22s ease,opacity .22s ease;}
-body.gh-social-body{
-  background:linear-gradient(180deg,#ffffff 0%,var(--gh-bg) 38%,var(--gh-bg-2) 100%)!important;
-  color:var(--gh-text)!important;
-}
-html[data-gh-theme="dark"] body.gh-social-body{
+/* REAL Day/Night theme fix v2 — proper premium light theme, not dark-mode inversion */
+html[data-gh-theme="light"] body.gh-fb-inspired.gh-social-body{
   background:
-    radial-gradient(circle at 15% 0%,rgba(37,99,235,.17),transparent 30vw),
-    radial-gradient(circle at 88% 5%,rgba(124,58,237,.16),transparent 28vw),
-    linear-gradient(135deg,var(--gh-bg),var(--gh-bg-2) 58%,#091427)!important;
+    radial-gradient(circle at 8% 0%, rgba(59,130,246,.08), transparent 30vw),
+    radial-gradient(circle at 92% 8%, rgba(124,58,237,.08), transparent 26vw),
+    linear-gradient(180deg,#ffffff 0%,#f7f9fe 48%,#f3f6fb 100%) !important;
+  color:#0f172a !important;
 }
-.gh-topbar{
-  background:rgba(255,255,255,.88)!important;
-  border-bottom:1px solid var(--gh-border)!important;
-  box-shadow:0 8px 30px rgba(15,23,42,.06)!important;
-  backdrop-filter:blur(22px)!important;
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-topbar{
+  background:rgba(255,255,255,.92) !important;
+  border-bottom:1px solid rgba(15,23,42,.08) !important;
+  box-shadow:0 10px 30px rgba(15,23,42,.06) !important;
+  backdrop-filter:blur(18px);
 }
-html[data-gh-theme="dark"] .gh-topbar{
-  background:rgba(7,17,31,.86)!important;
-  box-shadow:0 10px 36px rgba(0,0,0,.28)!important;
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-brand span{color:#0f172a !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-brand span span{color:#2563eb !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-brand-mark{
+  background:linear-gradient(135deg,#2563eb,#7c3aed) !important;
+  box-shadow:0 14px 34px rgba(37,99,235,.22) !important;
 }
-.gh-panel,.gh-card,.gh-right-widget,.gh-post,.gh-composer{
-  background:var(--gh-card)!important;
-  border:1px solid var(--gh-border)!important;
-  box-shadow:var(--gh-shadow)!important;
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-top-search input{
+  background:#f3f6fb !important;
+  color:#172033 !important;
+  border:1px solid rgba(15,23,42,.08) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 8px 22px rgba(15,23,42,.04) !important;
 }
-.gh-left .gh-panel{
-  background:rgba(255,255,255,.78)!important;
-  box-shadow:none!important;
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-top-search input::placeholder{color:#64748b !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-center-tabs a,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-center-tabs button{color:#64748b !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-center-tabs .active,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-center-tabs a:hover,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-center-tabs button:hover{color:#2563eb !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-center-tabs .active::after{background:#2563eb !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-icon-btn,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-user-btn{
+  background:#f8fafc !important;
+  border:1px solid rgba(15,23,42,.08) !important;
+  color:#0f172a !important;
+  box-shadow:0 8px 22px rgba(15,23,42,.05) !important;
 }
-html[data-gh-theme="dark"] .gh-left .gh-panel{background:rgba(8,18,32,.72)!important;}
-.gh-brand-mark{background:linear-gradient(135deg,#2563eb,#7c3aed)!important;box-shadow:0 14px 30px rgba(37,99,235,.25)!important;}
-.gh-brand-mark::before{content:"📍"!important;}
-.gh-brand span span{color:var(--gh-blue)!important;}
-.gh-top-search input,.gh-composer-fake{
-  background:var(--gh-card-soft)!important;
-  color:var(--gh-text)!important;
-  border:1px solid var(--gh-border)!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.70)!important;
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-create-btn{
+  background:linear-gradient(135deg,#2563eb,#7c3aed) !important;
+  color:white !important;
+  border:0 !important;
+  box-shadow:0 14px 32px rgba(37,99,235,.22) !important;
 }
-html[data-gh-theme="dark"] .gh-top-search input,html[data-gh-theme="dark"] .gh-composer-fake{box-shadow:inset 0 1px 0 rgba(255,255,255,.05)!important;}
-.gh-icon-btn,.gh-user-btn{
-  background:var(--gh-card-soft)!important;
-  color:var(--gh-text)!important;
-  border:1px solid var(--gh-border)!important;
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-card,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-panel{
+  background:rgba(255,255,255,.94) !important;
+  color:#0f172a !important;
+  border:1px solid rgba(15,23,42,.08) !important;
+  box-shadow:0 16px 44px rgba(15,23,42,.07) !important;
 }
-.gh-create-btn{
-  background:linear-gradient(135deg,#2563eb,#7c3aed)!important;
-  color:#fff!important;
-  border:0!important;
-  box-shadow:0 16px 34px rgba(37,99,235,.24)!important;
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-left .gh-panel{
+  background:rgba(255,255,255,.82) !important;
+  border-color:rgba(15,23,42,.07) !important;
+  box-shadow:0 12px 32px rgba(15,23,42,.05) !important;
 }
-.gh-center-tabs a.active,.gh-center-tabs button.active,.gh-center-tabs a:hover,.gh-center-tabs button:hover{color:var(--gh-blue)!important;}
-.gh-center-tabs a.active::after,.gh-center-tabs button.active::after{background:linear-gradient(90deg,#2563eb,#7c3aed)!important;}
-.gh-nav-item{color:var(--gh-text)!important;}
-.gh-nav-item i{color:var(--gh-blue)!important;opacity:1!important;}
-.gh-nav-item.active{
-  background:linear-gradient(135deg,rgba(37,99,235,.12),rgba(124,58,237,.10))!important;
-  box-shadow:inset 0 0 0 1px rgba(37,99,235,.12)!important;
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-nav-item{
+  color:#172033 !important;
 }
-.gh-nav-item.active i,.gh-nav-item.active span{color:var(--gh-blue)!important;}
-.gh-story-card{box-shadow:0 14px 32px rgba(15,23,42,.13)!important;}
-.gh-story-add{background:linear-gradient(180deg,#f8fbff,#eef4ff)!important;border:1px solid var(--gh-border)!important;}
-html[data-gh-theme="dark"] .gh-story-add{background:linear-gradient(180deg,rgba(18,32,54,.95),rgba(11,23,40,.95))!important;}
-.gh-story-add i,.gh-story-add .gh-story-plus{background:linear-gradient(135deg,#2563eb,#7c3aed)!important;color:#fff!important;}
-.gh-composer-action:hover,.gh-act:hover,.gh-act.active{background:rgba(37,99,235,.08)!important;border-color:rgba(37,99,235,.12)!important;color:var(--gh-blue)!important;}
-.gh-mini-item{background:var(--gh-card-soft)!important;border:1px solid var(--gh-border)!important;}
-.gh-mini-thumb{background:linear-gradient(135deg,#2563eb,#7c3aed)!important;color:#fff!important;}
-.gh-premium-card{background:linear-gradient(135deg,#2563eb,#7c3aed)!important;color:#fff!important;}
-.gh-badge-count{background:#ef4444!important;color:#fff!important;}
-.gh-empty{background:var(--gh-card-soft)!important;border:1px dashed var(--gh-border-strong)!important;color:var(--gh-muted)!important;}
-.gh-empty i{color:var(--gh-blue)!important;}
-.gh-post-img{box-shadow:0 16px 38px rgba(15,23,42,.12)!important;}
-html[data-gh-theme="dark"] .gh-post-img{box-shadow:0 18px 48px rgba(0,0,0,.32)!important;}
-.gh-chip,.gh-post-target{background:rgba(37,99,235,.10)!important;color:var(--gh-blue)!important;border-color:rgba(37,99,235,.18)!important;}
-.gh-theme-toggle i{color:var(--gh-text)!important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-nav-item i{color:#64748b !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-nav-item:hover{
+  background:rgba(37,99,235,.07) !important;
+}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-nav-item.active{
+  background:linear-gradient(90deg,rgba(37,99,235,.12),rgba(124,58,237,.07)) !important;
+  color:#1d4ed8 !important;
+  box-shadow:inset 3px 0 0 #2563eb !important;
+}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-nav-item.active i{color:#2563eb !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-story-strip-card{
+  background:rgba(255,255,255,.92) !important;
+}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-story-add{
+  background:linear-gradient(180deg,#f8fbff,#eef4ff) !important;
+  border:1px solid rgba(37,99,235,.10) !important;
+}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-story-card{
+  background:#f8fafc !important;
+  border:1px solid rgba(15,23,42,.08) !important;
+  box-shadow:0 12px 30px rgba(15,23,42,.10) !important;
+}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-composer-fake{
+  background:#f6f8fd !important;
+  border:1px solid rgba(15,23,42,.08) !important;
+  color:#64748b !important;
+}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-composer-actions{border-top-color:rgba(15,23,42,.08) !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-composer-action{
+  color:#334155 !important;
+  background:transparent !important;
+}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-composer-action:hover{
+  background:rgba(37,99,235,.07) !important;
+  border-color:rgba(37,99,235,.10) !important;
+}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-post-text,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-post-author strong,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-mini-item strong,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-section-title h1,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-section-title h2,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-section-title h3{
+  color:#0f172a !important;
+}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-post-meta,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-mini-item span,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-empty.mini p{color:#64748b !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-act{color:#475569 !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-act:hover,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-act.active{background:rgba(37,99,235,.08) !important;color:#1d4ed8 !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-post-actions{border-top-color:rgba(15,23,42,.08) !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-mini-item{
+  background:#f8fafc !important;
+  border:1px solid rgba(15,23,42,.07) !important;
+  color:#0f172a !important;
+}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-mini-item:hover{background:#f1f5f9 !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-mini-thumb{background:linear-gradient(135deg,#2563eb,#7c3aed) !important;color:white !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-empty.mini{
+  background:#f8fafc !important;
+  border:1px dashed rgba(37,99,235,.18) !important;
+}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-empty.mini i{color:#2563eb !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-empty.mini h3{color:#172033 !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-small{color:#2563eb !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-chip,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-post-target{
+  background:rgba(37,99,235,.08) !important;
+  border-color:rgba(37,99,235,.12) !important;
+  color:#2563eb !important;
+}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-badge-count{background:#ef4444 !important;color:white !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-right::-webkit-scrollbar-thumb,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-left::-webkit-scrollbar-thumb{background:rgba(15,23,42,.18) !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-floating-chat,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-chat-fab{box-shadow:0 14px 34px rgba(15,23,42,.16) !important;}
+
+/* Keep the dark theme intentionally dark and readable */
+html[data-gh-theme="dark"] body.gh-fb-inspired .gh-card,
+html[data-gh-theme="dark"] body.gh-fb-inspired .gh-panel{
+  background:linear-gradient(180deg,rgba(12,25,43,.86),rgba(9,20,36,.82)) !important;
+  color:#eaf2ff !important;
+}

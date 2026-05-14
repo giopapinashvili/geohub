@@ -8,28 +8,23 @@
   var PATH = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   var PAGE = document.body && document.body.dataset ? document.body.dataset.ghPage : '';
   var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false };
-  var THEME_KEY = 'geohub_theme_mode';
 
   function applyTheme(theme){
     theme = theme === 'dark' ? 'dark' : 'light';
     state.theme = theme;
     document.documentElement.setAttribute('data-gh-theme', theme);
     document.body && document.body.setAttribute('data-gh-theme', theme);
-    try { localStorage.setItem(THEME_KEY, theme); } catch(e) {}
-    var meta = document.querySelector('meta[name="theme-color"]');
-    if(meta) meta.setAttribute('content', theme === 'dark' ? '#07111f' : '#ffffff');
+    try { localStorage.setItem('gh_theme', theme); } catch(e) {}
     var btn = document.getElementById('ghThemeToggle');
     if(btn){
       btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
       btn.innerHTML = theme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-      btn.title = theme === 'dark' ? 'Day mode' : 'Night mode';
     }
   }
   function initTheme(){
-    var saved = '';
-    try { saved = localStorage.getItem(THEME_KEY) || ''; } catch(e) {}
-    var preferred = saved || document.documentElement.getAttribute('data-gh-theme') || 'light';
-    applyTheme(preferred);
+    var preferred = 'dark';
+    try { preferred = localStorage.getItem('gh_theme') || preferred; } catch(e) {}
+    applyTheme(document.documentElement.getAttribute('data-gh-theme') || preferred);
   }
 
   function $(s, root){ return (root || document).querySelector(s); }
