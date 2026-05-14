@@ -1034,26 +1034,42 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div id="ghDashSvcList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
       '</div>';
     cont.onclick=function(e){
-      if(e.target.closest('[data-ds-add-svc]')) openAddServiceModal(b,function(){loadDashServices(b);});
+      if(e.target.closest('[data-ds-add-svc]')) openServiceModal(b,null,function(){loadDashServices(b);});
+      var edit=e.target.closest('[data-edit-service]'); if(edit){ loadServiceForEdit(b,edit.dataset.editService,function(svc){if(svc) openServiceModal(b,svc,function(){loadDashServices(b);});}); }
       var del=e.target.closest('[data-delete-service]'); if(del) deleteService(b,del.dataset.deleteService);
+      var tog=e.target.closest('[data-toggle-svc-active]'); if(tog) toggleServiceActive(b,tog.dataset.toggleSvcActive,tog.dataset.isSvcActive!=='true');
+      var feat=e.target.closest('[data-toggle-svc-feat]'); if(feat) toggleServiceFeatured(b,feat.dataset.toggleSvcFeat,feat.dataset.isSvcFeat!=='true');
     };
     loadDashServices(b);
   }
 
   function loadDashServices(b){
-    if(!fs()||!db()){ var el=$('#ghDashSvcList'); if(el) el.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>Unavailable</h3></div>'; return; }
-    fs().getDocs(fs().query(fs().collection(db(),'businesses',b.id,'services'),fs().orderBy('order','asc'))).then(function(snap){
-      var el=$('#ghDashSvcList'); if(!el) return;
-      var items=[]; snap.forEach(function(d){items.push(Object.assign({id:d.id},d.data()));});
-      if(!items.length){ el.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>No services yet</h3><p>Add your first service to show clients what you offer.</p><button class="gh-btn" data-ds-add-svc>Add service</button></div>'; return; }
-      el.innerHTML='<div class="gh-svc-list">'+items.map(function(s){
-        return '<div class="gh-svc-card">'+
-          '<div class="gh-svc-info"><h3>'+esc(s.title||s.name||'Service')+'</h3>'+(s.description?'<p>'+esc(s.description)+'</p>':'')+'</div>'+
-          (s.price?'<div class="gh-svc-price"><strong>'+esc(s.price)+'</strong><span>'+esc(s.currency||'GEL')+'</span></div>':'')+
-          '<button class="gh-btn sm ghost" data-delete-service="'+esc(s.id)+'"><i class="fas fa-trash"></i></button>'+
+    var el=$('#ghDashSvcList'); if(!el) return;
+    el.innerHTML='<div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div>';
+    loadServices(b.id,function(items){
+      var el2=$('#ghDashSvcList'); if(!el2) return;
+      if(!items.length){ el2.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>No services yet</h3><p>Add your first service to show clients what you offer.</p><button class="gh-btn" data-ds-add-svc>Add service</button></div>'; return; }
+      el2.innerHTML='<div class="gh-svc-dash-list">'+items.map(function(s){
+        return '<div class="gh-svc-dash-item'+(s.active?'':' gh-svc-inactive')+'">'+
+          (s.imageUrl?'<img class="gh-svc-dash-thumb" src="'+esc(s.imageUrl)+'" alt="'+esc(s.title)+'" onerror="this.style.display=\'none\'">':'')+
+          '<div class="gh-svc-dash-info">'+
+            '<div class="gh-svc-dash-badges">'+
+              (s.featured?'<span class="gh-svc-badge featured"><i class="fas fa-star"></i></span>':'')+
+              '<span class="gh-svc-badge type">'+esc(s.type||'service')+'</span>'+
+              (!s.active?'<span class="gh-svc-badge inactive">Inactive</span>':'')+
+            '</div>'+
+            '<strong>'+esc(s.title)+'</strong>'+(s.price?'<span class="gh-svc-dash-price">'+esc(s.price)+' '+esc(s.currency||'GEL')+'</span>':'')+
+            (s.description?'<p>'+esc(s.description.slice(0,80))+(s.description.length>80?'…':'')+'</p>':'')+
+          '</div>'+
+          '<div class="gh-svc-mgmt-row">'+
+            '<button class="gh-gallery-feat-btn" data-toggle-svc-feat="'+esc(s.id)+'" data-is-svc-feat="'+!!s.featured+'" title="'+(s.featured?'Unmark featured':'Mark featured')+'">'+(s.featured?'<i class="fas fa-star" style="color:#facc15"></i>':'<i class="far fa-star"></i>')+'</button>'+
+            '<button class="gh-btn sm ghost" data-toggle-svc-active="'+esc(s.id)+'" data-is-svc-active="'+!!s.active+'" title="'+(s.active?'Deactivate':'Activate')+'">'+(s.active?'<i class="fas fa-eye"></i>':'<i class="fas fa-eye-slash"></i>')+'</button>'+
+            '<button class="gh-btn sm ghost" data-edit-service="'+esc(s.id)+'"><i class="fas fa-pencil"></i></button>'+
+            '<button class="gh-btn sm ghost" data-delete-service="'+esc(s.id)+'"><i class="fas fa-trash"></i></button>'+
+          '</div>'+
         '</div>';
       }).join('')+'</div>';
-    }).catch(function(){ var el=$('#ghDashSvcList'); if(el) el.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>Load failed</h3></div>'; });
+    },true);
   }
 
   function deleteService(b, serviceId){
@@ -1199,34 +1215,175 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
 
-  function renderBusinessServices(b){
-    var box=$('#ghBusinessTabContent'); if(!box)return;
-    var isOwner=!!(authUser() && authUser().uid && (b.ownerId===authUser().uid || b.createdBy===authUser().uid || b.userId===authUser().uid));
-    box.innerHTML='<div class="gh-card"><div class="gh-section-title"><h2>Services</h2>'+(isOwner?'<button class="gh-btn sm" data-add-service><i class="fas fa-plus"></i> Add service</button>':'')+'</div><div id="ghServicesList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
-    box.onclick=function(e){ if(e.target.closest('[data-add-service]')) openAddServiceModal(b); };
-    if(!fs()||!db()){ $('#ghServicesList').innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>Services unavailable</h3></div>'; return; }
-    fs().getDocs(fs().query(fs().collection(db(),'businesses',b.id,'services'),fs().orderBy('order','asc'))).then(function(snap){
-      var list=$('#ghServicesList'); if(!list)return;
-      var items=[]; snap.forEach(function(d){items.push(Object.assign({id:d.id},d.data()));});
-      if(!items.length){ list.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>No services listed yet</h3>'+(isOwner?'<button class="gh-btn" data-add-service>Add first service</button>':'')+'</div>'; return; }
-      list.innerHTML='<div class="gh-grid">'+items.map(function(svc){ return '<div class="gh-card" style="padding:16px"><strong>'+esc(svc.title||svc.name||'Service')+'</strong>'+(svc.price?'<span class="gh-chip" style="margin-left:8px">'+esc(svc.price)+' '+(svc.currency||'GEL')+'</span>':'')+(svc.description?'<p style="margin:.5rem 0 0;font-size:.9rem;color:var(--text-secondary)">'+esc(svc.description)+'</p>':'')+'</div>'; }).join('')+'</div>';
-    }).catch(function(){ var list=$('#ghServicesList'); if(list) list.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>No services yet</h3></div>'; });
+  function normService(d, id){
+    if(!d) return null;
+    return {
+      id:         id||d.id||'',
+      title:      d.title||d.name||'',
+      description:d.description||'',
+      price:      d.price||'',
+      currency:   d.currency||'GEL',
+      category:   d.category||'',
+      imageUrl:   d.imageUrl||d.image||'',
+      type:       d.type||'service',
+      featured:   !!d.featured,
+      active:     d.active!==false,
+      bookingUrl: d.bookingUrl||'',
+      order:      Number(d.order)||0,
+      createdAt:  d.createdAt||null,
+    };
   }
 
-  function openAddServiceModal(b, onSuccess){
-    if(!requireLogin()) return;
-    var body='<input class="gh-input" id="svcTitle" placeholder="Service name, e.g. Website Design"><div style="height:8px"></div><textarea class="gh-textarea" id="svcDesc" placeholder="Service description (optional)"></textarea><div class="gh-form-grid" style="margin-top:8px"><input class="gh-input" id="svcPrice" type="text" placeholder="Price e.g. 150"><select class="gh-select" id="svcCurrency"><option value="GEL">GEL</option><option value="USD">USD</option><option value="EUR">EUR</option></select></div>';
-    modal('Add Service', body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="svcSubmit">Add service</button>', 'ghSvcModal');
-    $('#svcSubmit').onclick=function(){
-      var title=($('#svcTitle').value||'').trim(); if(!title) return toast('Service name required','error');
-      var ts=fs().serverTimestamp(); var schema=window.GH||{};
-      var fields={title:title, description:$('#svcDesc').value.trim(), price:$('#svcPrice').value.trim(), currency:$('#svcCurrency').value||'GEL'};
-      var doc=schema.newService ? schema.newService(fields, authUser().uid, 0, ts) : Object.assign(fields,{status:'active',order:0,createdBy:authUser().uid,createdAt:ts,updatedAt:ts});
-      fs().addDoc(fs().collection(db(),'businesses',b.id,'services'),doc).then(function(){
-        var m=$('#ghSvcModal'); if(m)m.remove(); toast('Service added');
-        if(typeof onSuccess==='function') onSuccess(); else renderBusinessServices(b);
-      }).catch(function(err){ toast('Failed: '+(err.message||err),'error'); });
+  function loadServices(businessId, cb, includeInactive){
+    if(!fs()||!db()){ cb([]); return; }
+    fs().getDocs(fs().collection(db(),'businesses',businessId,'services')).then(function(snap){
+      var items=[]; snap.forEach(function(d){items.push(normService(Object.assign({id:d.id},d.data()),d.id));});
+      if(!includeInactive) items=items.filter(function(s){return s.active;});
+      // Featured first, then by order ascending — sorted in JS to avoid compound index
+      items.sort(function(a,b){ var af=!!a.featured,bf=!!b.featured; if(af!==bf) return bf?-1:1; return (Number(a.order)||0)-(Number(b.order)||0); });
+      cb(items);
+    }).catch(function(){ cb([]); });
+  }
+
+  function loadServiceForEdit(b, svcId, cb){
+    if(!fs()||!db()){ cb(null); return; }
+    fs().getDoc(fs().doc(db(),'businesses',b.id,'services',svcId)).then(function(snap){
+      if(!snap.exists()){ cb(null); return; }
+      cb(normService(Object.assign({id:snap.id},snap.data()),snap.id));
+    }).catch(function(){ cb(null); });
+  }
+
+  function svcPublicCard(s, b){
+    var type=s.type||'service';
+    var ctaHtml='';
+    if(s.bookingUrl) ctaHtml='<a href="'+esc(s.bookingUrl)+'" target="_blank" rel="noopener" class="gh-svc-cta"><i class="fas fa-calendar-check"></i> Book / Contact</a>';
+    else if(b&&b.phone) ctaHtml='<a href="tel:'+esc(b.phone)+'" class="gh-svc-cta"><i class="fas fa-phone"></i> Call</a>';
+    else if(b&&b.website) ctaHtml='<a href="'+esc(b.website)+'" target="_blank" rel="noopener" class="gh-svc-cta"><i class="fas fa-globe"></i> Visit website</a>';
+    return '<div class="gh-svc-card2">'+
+      (s.imageUrl?'<div class="gh-svc-card-img"><img src="'+esc(s.imageUrl)+'" alt="'+esc(s.title)+'" loading="lazy" onerror="this.closest(\'.gh-svc-card-img\').style.display=\'none\'"></div>':'')+
+      '<div class="gh-svc-body">'+
+        '<div class="gh-svc-header-row">'+
+          '<div class="gh-svc-badges">'+
+            (s.featured?'<span class="gh-svc-badge featured"><i class="fas fa-star"></i> Featured</span>':'')+
+            '<span class="gh-svc-badge type">'+esc(type.charAt(0).toUpperCase()+type.slice(1))+'</span>'+
+            (s.category?'<span class="gh-svc-badge cat">'+esc(s.category)+'</span>':'')+
+          '</div>'+
+          (s.price?'<div class="gh-svc-price-block"><strong>'+esc(s.price)+'</strong><span>'+esc(s.currency||'GEL')+'</span></div>':'')+
+        '</div>'+
+        '<h3 class="gh-svc-title">'+esc(s.title)+'</h3>'+
+        (s.description?'<p class="gh-svc-desc">'+esc(s.description)+'</p>':'')+
+        ctaHtml+
+      '</div>'+
+    '</div>';
+  }
+
+  function renderBusinessServices(b){
+    var box=$('#ghBusinessTabContent'); if(!box)return;
+    var isOwner=!!(authUser()&&authUser().uid&&(b.ownerId===authUser().uid||b.createdBy===authUser().uid||b.userId===authUser().uid));
+    state.svcFilter='all';
+    box.innerHTML=
+      '<div class="gh-card">'+
+        '<div class="gh-biz-sec-head"><h2>Services</h2>'+(isOwner?'<button class="gh-btn sm" data-svc-add><i class="fas fa-plus"></i> Add</button>':'')+'</div>'+
+        '<div class="gh-svc-filter-row" id="ghSvcFilterRow"></div>'+
+        '<div id="ghServicesList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
+      '</div>';
+    box.onclick=function(e){
+      if(e.target.closest('[data-svc-add]')) openServiceModal(b,null,function(){renderBusinessServices(b);});
+      var chip=e.target.closest('[data-svc-filter]');
+      if(chip){ state.svcFilter=chip.dataset.svcFilter; paintSvcFilterChips(state.allSvcs||[],state.svcFilter); paintSvcPublic(state.allSvcs||[],state.svcFilter,b); }
     };
+    loadServices(b.id,function(items){
+      state.allSvcs=items;
+      paintSvcFilterChips(items,'all');
+      var list=$('#ghServicesList'); if(!list)return;
+      if(!items.length){list.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>No services listed yet</h3>'+(isOwner?'<p>Add your first service.</p><button class="gh-btn" data-svc-add>Add service</button>':'<p>This business has not added any services yet.</p>')+'</div>'; return;}
+      paintSvcPublic(items,'all',b);
+    });
+  }
+
+  function paintSvcFilterChips(items, active){
+    var row=$('#ghSvcFilterRow'); if(!row)return;
+    var cats=[]; items.forEach(function(s){if(s.category&&cats.indexOf(s.category)<0)cats.push(s.category);});
+    var filters=[{k:'all',l:'All'},{k:'service',l:'Services'},{k:'product',l:'Products'},{k:'featured',l:'Featured'}];
+    cats.forEach(function(c){filters.push({k:'cat:'+c,l:c});});
+    row.innerHTML=filters.map(function(f){return '<button class="gh-pill'+(f.k===(active||'all')?' active':'')+'" data-svc-filter="'+esc(f.k)+'">'+esc(f.l)+'</button>';}).join('');
+  }
+
+  function paintSvcPublic(items, filter, b){
+    var list=$('#ghServicesList'); if(!list)return;
+    var show=items.filter(function(s){
+      if(filter==='service') return s.type==='service'||s.type===''||!s.type;
+      if(filter==='product') return s.type==='product';
+      if(filter==='featured') return s.featured;
+      if(filter&&filter.indexOf('cat:')===0) return s.category===filter.slice(4);
+      return true;
+    });
+    if(!show.length){list.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>Nothing here yet</h3></div>'; return;}
+    list.innerHTML='<div class="gh-svc-grid">'+show.map(function(s){return svcPublicCard(s,b);}).join('')+'</div>';
+  }
+
+  function openServiceModal(b, svc, onSuccess){
+    if(!requireLogin()) return;
+    var isEdit=!!(svc&&svc.id);
+    var body=
+      '<div class="gh-form-rows">'+
+        '<label class="gh-form-label">Service name *</label>'+
+        '<input class="gh-input" id="svcTitle" placeholder="e.g. Website Design" value="'+esc(isEdit?(svc.title||''):'')+'">'+
+        '<label class="gh-form-label">Type</label>'+
+        '<select class="gh-select" id="svcType">'+
+          '<option value="service"'+((!isEdit||(svc.type||'service')==='service')?' selected':'')+'>Service</option>'+
+          '<option value="product"'+(isEdit&&svc.type==='product'?' selected':'')+'>Product</option>'+
+        '</select>'+
+        '<label class="gh-form-label">Description</label>'+
+        '<textarea class="gh-textarea" id="svcDesc" placeholder="Describe this service or product">'+esc(isEdit?(svc.description||''):'')+'</textarea>'+
+        '<div class="gh-form-grid">'+
+          '<div><label class="gh-form-label">Price</label><input class="gh-input" id="svcPrice" placeholder="e.g. 150" value="'+esc(isEdit?(svc.price||''):'')+'"></div>'+
+          '<div><label class="gh-form-label">Currency</label><select class="gh-select" id="svcCurrency">'+
+            '<option value="GEL"'+((!isEdit||svc.currency==='GEL')?' selected':'')+'>GEL</option>'+
+            '<option value="USD"'+(isEdit&&svc.currency==='USD'?' selected':'')+'>USD</option>'+
+            '<option value="EUR"'+(isEdit&&svc.currency==='EUR'?' selected':'')+'>EUR</option>'+
+          '</select></div>'+
+        '</div>'+
+        '<label class="gh-form-label">Category (optional)</label>'+
+        '<input class="gh-input" id="svcCat" placeholder="e.g. Design, Photography" value="'+esc(isEdit?(svc.category||''):'')+'">'+
+        '<label class="gh-form-label">Image URL (optional)</label>'+
+        '<input class="gh-input" id="svcImg" placeholder="https://..." value="'+esc(isEdit?(svc.imageUrl||''):'')+'">'+
+        '<label class="gh-form-label">Booking / Contact URL (optional)</label>'+
+        '<input class="gh-input" id="svcBook" placeholder="https://..." value="'+esc(isEdit?(svc.bookingUrl||''):'')+'">'+
+        '<div style="display:flex;gap:18px;margin-top:4px">'+
+          '<label class="gh-form-check"><input type="checkbox" id="svcFeatured"'+(isEdit&&svc.featured?' checked':'')+'>  Featured</label>'+
+          '<label class="gh-form-check"><input type="checkbox" id="svcActive"'+((!isEdit||svc.active!==false)?' checked':'')+'>  Active (visible publicly)</label>'+
+        '</div>'+
+      '</div>';
+    modal(isEdit?'Edit Service':'Add Service', body,
+      '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="svcSubmit">'+(isEdit?'Save changes':'Add service')+'</button>',
+      'ghSvcModal');
+    $('#svcSubmit').onclick=function(){
+      var titleVal=($('#svcTitle').value||'').trim(); if(!titleVal) return toast('Service name required','error');
+      var tsFn=fs().serverTimestamp(); var schema=window.GH||{};
+      var fields={title:titleVal,type:$('#svcType').value||'service',description:$('#svcDesc').value.trim(),price:$('#svcPrice').value.trim(),currency:$('#svcCurrency').value||'GEL',category:$('#svcCat').value.trim(),imageUrl:$('#svcImg').value.trim(),bookingUrl:$('#svcBook').value.trim(),featured:!!$('#svcFeatured').checked,active:!!$('#svcActive').checked};
+      var btn=$('#svcSubmit'); if(btn) btn.disabled=true;
+      function done(){ var m=$('#ghSvcModal'); if(m)m.remove(); toast(isEdit?'Service updated':'Service added'); if(typeof onSuccess==='function') onSuccess(); }
+      function fail(err){ toast('Failed: '+(err.message||err),'error'); var b2=$('#svcSubmit'); if(b2)b2.disabled=false; }
+      if(isEdit){
+        fs().updateDoc(fs().doc(db(),'businesses',b.id,'services',svc.id),Object.assign({},fields,{updatedAt:tsFn})).then(done).catch(fail);
+      } else {
+        var base=schema.newService?schema.newService(fields,authUser().uid,0,tsFn):{title:fields.title,description:fields.description,price:fields.price,currency:fields.currency,status:'active',order:0,createdBy:authUser().uid,createdAt:tsFn,updatedAt:tsFn};
+        fs().addDoc(fs().collection(db(),'businesses',b.id,'services'),Object.assign(base,{type:fields.type,featured:fields.featured,active:fields.active,imageUrl:fields.imageUrl,bookingUrl:fields.bookingUrl,category:fields.category||base.category||''})).then(done).catch(fail);
+      }
+    };
+  }
+
+  function openAddServiceModal(b, cb){ openServiceModal(b,null,cb); }
+
+  function toggleServiceActive(b, svcId, isActive){
+    if(!svcId||!fs()||!db()) return;
+    fs().updateDoc(fs().doc(db(),'businesses',b.id,'services',svcId),{active:isActive,status:isActive?'active':'inactive',updatedAt:fs().serverTimestamp()}).then(function(){loadDashServices(b);}).catch(function(err){toast('Failed: '+(err.message||err),'error');});
+  }
+
+  function toggleServiceFeatured(b, svcId, isFeatured){
+    if(!svcId||!fs()||!db()) return;
+    fs().updateDoc(fs().doc(db(),'businesses',b.id,'services',svcId),{featured:isFeatured,updatedAt:fs().serverTimestamp()}).then(function(){loadDashServices(b);}).catch(function(err){toast('Failed: '+(err.message||err),'error');});
   }
 
   function renderBusinessPhotos(b){
@@ -1451,12 +1608,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
     listenTargetPosts('business',b.id,function(posts){ var el=$('#ghOvPosts'); if(!el)return; posts=posts.filter(canSeePost).slice(0,3); if(!posts.length){el.innerHTML='<div class="gh-empty" style="min-height:60px"><i class="fas fa-newspaper"></i><p>No posts yet</p></div>'; return;} el.innerHTML='<div class="gh-biz-preview-posts">'+posts.map(function(p){ return '<div class="gh-biz-preview-post">'+esc((p.text||'').slice(0,160))+'</div>'; }).join('')+'</div>'; });
 
-    if(fs()&&db()) fs().getDocs(fs().query(fs().collection(db(),'businesses',b.id,'services'),fs().orderBy('order','asc'),fs().limit(3))).then(function(snap){
+    loadServices(b.id,function(items){
       var el=$('#ghOvSvc'); if(!el)return;
-      var items=[]; snap.forEach(function(d){items.push(Object.assign({id:d.id},d.data()));});
-      if(!items.length){$('#ghOvSvcWrap').style.display='none'; return;}
-      el.innerHTML='<div class="gh-svc-list">'+items.map(function(s){ return '<div class="gh-svc-card"><div class="gh-svc-info"><h3>'+esc(s.title||s.name||'Service')+'</h3>'+(s.description?'<p>'+esc(s.description)+'</p>':'')+'</div>'+(s.price?'<div class="gh-svc-price"><strong>'+esc(s.price)+'</strong><span>'+esc(s.currency||'GEL')+'</span></div>':'')+'</div>'; }).join('')+'</div>';
-    }).catch(function(){$('#ghOvSvcWrap')&&($('#ghOvSvcWrap').style.display='none');});
+      items=items.slice(0,3);
+      if(!items.length){var wrap=$('#ghOvSvcWrap'); if(wrap) wrap.style.display='none'; return;}
+      el.innerHTML='<div class="gh-svc-list">'+items.map(function(s){return '<div class="gh-svc-card">'+
+        (s.featured?'<span class="gh-svc-badge featured" style="margin-bottom:5px"><i class="fas fa-star"></i></span>':'')+
+        '<div class="gh-svc-info"><h3>'+esc(s.title)+'</h3>'+(s.description?'<p>'+esc(s.description.slice(0,80))+'</p>':'')+'</div>'+
+        (s.price?'<div class="gh-svc-price"><strong>'+esc(s.price)+'</strong><span>'+esc(s.currency||'GEL')+'</span></div>':'')+
+      '</div>';}).join('')+'</div>';
+    });
   }
 
   function renderBusinessAbout(b){
@@ -1554,27 +1715,6 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       }).join('')+'</div>';
       box.addEventListener('click',function(e){ var rep=e.target.closest('[data-report-review]'); if(rep){ if(!requireLogin())return; toast('Review reported — thank you'); } });
     });
-  }
-
-  function renderBusinessServices(b){
-    var box=$('#ghBusinessTabContent'); if(!box)return;
-    var isOwner=!!(authUser()&&authUser().uid&&(b.ownerId===authUser().uid||b.createdBy===authUser().uid||b.userId===authUser().uid));
-    box.innerHTML=
-      '<div class="gh-card"><div class="gh-biz-sec-head"><h3>Services</h3>'+(isOwner?'<button class="gh-btn sm" data-add-service><i class="fas fa-plus"></i> Add service</button>':'')+'</div>'+
-      '<div id="ghServicesList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
-    box.onclick=function(e){ if(e.target.closest('[data-add-service]')) openAddServiceModal(b); };
-    if(!fs()||!db()){ $('#ghServicesList').innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>Services unavailable</h3></div>'; return; }
-    fs().getDocs(fs().query(fs().collection(db(),'businesses',b.id,'services'),fs().orderBy('order','asc'))).then(function(snap){
-      var list=$('#ghServicesList'); if(!list)return;
-      var items=[]; snap.forEach(function(d){items.push(Object.assign({id:d.id},d.data()));});
-      if(!items.length){ list.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>No services listed yet</h3>'+(isOwner?'<p>Add your first service to show clients what you offer.</p><button class="gh-btn" data-add-service>Add first service</button>':'<p>This business has not added services yet.</p>')+'</div>'; return; }
-      list.innerHTML='<div class="gh-svc-list">'+items.map(function(s){
-        return '<div class="gh-svc-card">'+
-          '<div class="gh-svc-info"><h3>'+esc(s.title||s.name||'Service')+'</h3>'+(s.description?'<p>'+esc(s.description)+'</p>':'')+'</div>'+
-          (s.price?'<div class="gh-svc-price"><strong>'+esc(s.price)+'</strong><span>'+esc(s.currency||'GEL')+'</span></div>':'')+
-        '</div>';
-      }).join('')+'</div>';
-    }).catch(function(){ var list=$('#ghServicesList'); if(list) list.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>No services yet</h3></div>'; });
   }
 
   function createBusinessReview(businessId, rating, textVal){
