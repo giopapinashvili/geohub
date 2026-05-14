@@ -7,7 +7,7 @@
 
   var PATH = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   var PAGE = document.body && document.body.dataset ? document.body.dataset.ghPage : '';
-  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false, pageUnsubs: [] };
+  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false, pageUnsubs: [] };
 
   function applyTheme(theme){
     theme = theme === 'dark' ? 'dark' : 'light';
@@ -835,16 +835,361 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
 
   function renderBusinessManageTab(b){
-    var box=$('#ghBusinessTabContent'); if(!box)return;
-    box.innerHTML='<div class="gh-card"><div class="gh-section-title"><div><h2>Business Dashboard</h2><p class="gh-muted" style="margin:.25rem 0 0">Manage your page, offers and analytics.</p></div><button class="gh-btn" data-new-reward><i class="fas fa-gift"></i>New reward</button><button class="gh-btn ghost" data-new-offer><i class="fas fa-tag"></i>New offer</button></div><div class="gh-live-stats gh-dashboard-stats"><div><i class="fas fa-users"></i><strong id="bdFollowers">—</strong><span>Followers</span></div><div><i class="fas fa-newspaper"></i><strong id="bdPosts">—</strong><span>Posts</span></div><div><i class="fas fa-star"></i><strong id="bdReviews">—</strong><span>Reviews</span></div><div><i class="fas fa-tag"></i><strong id="bdOffers">—</strong><span>Offers</span></div><div><i class="fas fa-gift"></i><strong id="bdRewards">—</strong><span>Rewards</span></div></div><div class="gh-card-actions" style="margin-top:14px"><button class="gh-btn ghost" data-edit-business><i class="fas fa-pen"></i>Edit page</button><a class="gh-btn ghost" href="events.html"><i class="fas fa-calendar-plus"></i>Create event</a><button class="gh-btn ghost" data-post-as-business><i class="fas fa-bullhorn"></i>Post update</button></div></div><div class="gh-card"><div class="gh-section-title"><h3>Partner Rewards</h3><a class="gh-small" href="rewards.html">Reward Store</a></div><div id="bdRewardsList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div></div><div class="gh-card"><div class="gh-section-title"><h3>Active Offers</h3></div><div id="bdOffersList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
-    var bTitleM=b.title||b.name||'Business';
-    box.onclick=function(e){ if(e.target.closest('[data-new-reward]')) openBusinessRewardModal(b); if(e.target.closest('[data-new-offer]')) openBusinessOfferModal(b); if(e.target.closest('[data-edit-business]')) location.href='add-business.html?edit='+encodeURIComponent(b.id); if(e.target.closest('[data-post-as-business]')) openPostModal({ targetType:'business', targetId:b.id, authorType:'business', businessId:b.id, authorId:b.id, authorName:bTitleM, authorAvatar:b.logoUrl||b.coverUrl||'', createdByUserId:authUser() && authUser().uid }); };
-    if(GS().getBusinessDashboard) GS().getBusinessDashboard(b.id,function(stats){
-      setTextById('bdFollowers', stats.followers || b.followerCount || 0); setTextById('bdPosts', stats.posts || b.postCount || 0); setTextById('bdReviews', stats.reviews || b.reviewCount || 0); setTextById('bdOffers', (stats.offers||[]).length); setTextById('bdRewards', (stats.rewards||[]).length);
-      var rlist=$('#bdRewardsList'); var rewards=stats.rewards||[]; if(rlist){ if(!rewards.length){ rlist.innerHTML='<div class="gh-empty"><i class="fas fa-gift"></i><h3>No rewards yet</h3><p>Create coupons that users unlock with GeoPoints.</p></div>'; } else { rlist.innerHTML='<div class="gh-mini-list">'+rewards.map(function(r){return '<a class="gh-mini-item" href="rewards.html"><span class="gh-mini-thumb"><i class="fas fa-gift"></i></span><div><strong>'+esc(r.title||r.name||'Reward')+'</strong><span>'+Number(r.pointPrice||0)+' GeoPoints · '+esc(r.rewardType||'reward')+'</span></div></a>';}).join('')+'</div>'; }}
-      var list=$('#bdOffersList'); if(!list)return; var offers=stats.offers||[]; if(!offers.length){ list.innerHTML='<div class="gh-empty"><i class="fas fa-tag"></i><h3>No offers yet</h3><p>Create a discount, announcement or campaign for your followers.</p></div>'; return; }
-      list.innerHTML='<div class="gh-mini-list">'+offers.map(function(o){return '<div class="gh-mini-item"><span class="gh-mini-thumb"><i class="fas fa-tag"></i></span><div><strong>'+esc(o.title||'Offer')+'</strong><span>'+esc(o.description||'')+'</span></div></div>';}).join('')+'</div>';
+    var box=$('#ghBusinessTabContent'); if(!box) return;
+    // Hard ownership guard — re-validated in JS before any UI renders
+    var u=authUser();
+    if(!u||!u.uid||(b.ownerId!==u.uid&&b.createdBy!==u.uid&&b.userId!==u.uid)){
+      box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-lock"></i><h3>Access Denied</h3><p>You do not have permission to manage this business.</p></div>';
+      return;
+    }
+    if(!state.bizDashSection) state.bizDashSection='overview';
+    var sections=[
+      {id:'overview', icon:'fa-chart-line',  l:'Overview'},
+      {id:'settings', icon:'fa-gear',        l:'Settings'},
+      {id:'posts',    icon:'fa-newspaper',   l:'Posts'},
+      {id:'services', icon:'fa-briefcase',   l:'Services'},
+      {id:'gallery',  icon:'fa-images',      l:'Gallery'},
+      {id:'reviews',  icon:'fa-star',        l:'Reviews'},
+      {id:'employees',icon:'fa-user-group',  l:'Employees'},
+      {id:'analytics',icon:'fa-chart-bar',   l:'Analytics'},
+    ];
+    var sideNav='<nav class="gh-dash-sidebar-nav">'+
+      sections.map(function(s){ return '<button class="gh-dash-nav-item'+(state.bizDashSection===s.id?' active':'')+'" data-dash-section="'+s.id+'"><i class="fas '+s.icon+'"></i><span>'+s.l+'</span></button>'; }).join('')+
+      '<hr class="gh-dash-divider">'+
+      '<button class="gh-dash-nav-item" data-edit-business-direct><i class="fas fa-pen"></i><span>Edit Page</span></button>'+
+    '</nav>';
+    box.innerHTML=
+      '<div class="gh-dash-wrap">'+
+        '<div class="gh-dash-sidebar">'+
+          '<div class="gh-dash-sidebar-header">'+
+            '<div class="gh-dash-biz-logo">'+(b.logoUrl?'<img src="'+esc(b.logoUrl)+'" alt="" onerror="this.remove()">':esc(initials(b.title||b.name||'B')))+'</div>'+
+            '<div>'+
+              '<div class="gh-dash-biz-name">'+esc(b.title||b.name||'Business')+'</div>'+
+              '<div class="gh-dash-biz-status gh-dash-status-'+esc((b.status||'active').replace(/[^a-z_]/g,''))+'">'+esc(b.status||'active')+'</div>'+
+            '</div>'+
+          '</div>'+
+          sideNav+
+        '</div>'+
+        '<div class="gh-dash-content" id="ghDashContent"></div>'+
+      '</div>';
+    box.onclick=function(e){
+      var nav=e.target.closest('[data-dash-section]');
+      if(nav){ state.bizDashSection=nav.dataset.dashSection; $all('[data-dash-section]').forEach(function(x){x.classList.toggle('active',x.dataset.dashSection===state.bizDashSection);}); renderBizDashSection(b); return; }
+      if(e.target.closest('[data-edit-business-direct]')){ location.href='add-business.html?edit='+encodeURIComponent(b.id); }
+    };
+    renderBizDashSection(b);
+  }
+
+  function renderBizDashSection(b){
+    var s=state.bizDashSection||'overview';
+    if(s==='overview')  return renderBizDashOverview(b);
+    if(s==='settings')  return renderBizDashSettings(b);
+    if(s==='posts')     return renderBizDashPosts(b);
+    if(s==='services')  return renderBizDashServices(b);
+    if(s==='gallery')   return renderBizDashGallery(b);
+    if(s==='reviews')   return renderBizDashReviews(b);
+    if(s==='employees') return renderBizDashEmployees(b);
+    if(s==='analytics') return renderBizDashAnalytics(b);
+  }
+
+  function renderBizDashOverview(b){
+    var cont=$('#ghDashContent'); if(!cont) return;
+    var ratingAvg=b.ratingCount>0?(b.ratingTotal/b.ratingCount).toFixed(1):(b.ratingAverage>0?Number(b.ratingAverage).toFixed(1):null);
+    cont.innerHTML=
+      '<div class="gh-dash-section">'+
+        '<h2 class="gh-dash-section-title">Overview</h2>'+
+        '<div class="gh-dash-stats-grid">'+
+          '<div class="gh-dash-stat-card"><i class="fas fa-users"></i><strong>'+Number(b.followerCount||0)+'</strong><span>Followers</span></div>'+
+          '<div class="gh-dash-stat-card"><i class="fas fa-newspaper"></i><strong>'+Number(b.postCount||0)+'</strong><span>Posts</span></div>'+
+          '<div class="gh-dash-stat-card"><i class="fas fa-star"></i><strong>'+(ratingAvg||'—')+'</strong><span>Rating</span></div>'+
+          '<div class="gh-dash-stat-card"><i class="fas fa-comments"></i><strong>'+Number(b.reviewCount||0)+'</strong><span>Reviews</span></div>'+
+        '</div>'+
+        '<div class="gh-dash-info-grid">'+
+          '<div class="gh-card" style="margin-bottom:0">'+
+            '<div class="gh-biz-sec-head"><h3>Business Info</h3><button class="gh-btn sm ghost" data-dash-section="settings">Edit</button></div>'+
+            '<div class="gh-about-list">'+
+              aboutRow('fa-store',b.title||b.name||'Untitled')+
+              aboutRow('fa-tag',b.category||'No category')+
+              aboutRow('fa-circle-dot',b.status||'active')+
+              (b.plan&&b.plan!=='free'?aboutRow('fa-crown','Pro plan'):aboutRow('fa-circle-check','Free listing'))+
+            '</div>'+
+          '</div>'+
+          '<div class="gh-card" style="margin-bottom:0">'+
+            '<div class="gh-biz-sec-head"><h3>Quick Actions</h3></div>'+
+            '<div style="display:flex;flex-wrap:wrap;gap:8px">'+
+              '<button class="gh-btn ghost" data-ov-post-as-biz><i class="fas fa-bullhorn"></i> Post update</button>'+
+              '<button class="gh-btn ghost" data-dash-section="services"><i class="fas fa-plus"></i> Add service</button>'+
+              '<button class="gh-btn ghost" data-dash-section="gallery"><i class="fas fa-images"></i> Upload photo</button>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    cont.onclick=function(e){
+      var nav=e.target.closest('[data-dash-section]');
+      if(nav){ state.bizDashSection=nav.dataset.dashSection; $all('[data-dash-section]').forEach(function(x){x.classList.toggle('active',x.dataset.dashSection===state.bizDashSection);}); renderBizDashSection(b); return; }
+      if(e.target.closest('[data-ov-post-as-biz]')){ var bTitle=b.title||b.name||'Business'; openPostModal({targetType:'business',targetId:b.id,authorType:'business',businessId:b.id,authorId:b.id,authorName:bTitle,authorAvatar:b.logoUrl||b.coverUrl||'',createdByUserId:authUser()&&authUser().uid}); }
+    };
+  }
+
+  function renderBizDashSettings(b){
+    var cont=$('#ghDashContent'); if(!cont) return;
+    var sLinks=b.socialLinks||{};
+    cont.innerHTML=
+      '<div class="gh-dash-section">'+
+        '<h2 class="gh-dash-section-title">Settings</h2>'+
+        '<div class="gh-card">'+
+          '<div class="gh-biz-sec-head"><h3>Basic Info</h3></div>'+
+          '<div class="gh-form-rows">'+
+            '<label class="gh-form-label">Business Name<input class="gh-input" id="dsTitle" value="'+esc(b.title||b.name||'')+'"></label>'+
+            '<label class="gh-form-label">Description<textarea class="gh-textarea" id="dsDesc" rows="3">'+esc(b.description||'')+'</textarea></label>'+
+            '<label class="gh-form-label">Category<input class="gh-input" id="dsCat" value="'+esc(b.category||'')+'" placeholder="e.g. Restaurant, Salon, Tech"></label>'+
+          '</div>'+
+        '</div>'+
+        '<div class="gh-card">'+
+          '<div class="gh-biz-sec-head"><h3>Contact & Links</h3></div>'+
+          '<div class="gh-form-rows">'+
+            '<label class="gh-form-label">Phone<input class="gh-input" id="dsPhone" value="'+esc(b.phone||'')+'" placeholder="+995 5XX XXX XXX"></label>'+
+            '<label class="gh-form-label">Email<input class="gh-input" id="dsEmail" value="'+esc(b.email||'')+'" placeholder="contact@yourbusiness.com"></label>'+
+            '<label class="gh-form-label">Website<input class="gh-input" id="dsWebsite" value="'+esc(b.website||'')+'" placeholder="https://yourbusiness.com"></label>'+
+            '<label class="gh-form-label">Instagram<input class="gh-input" id="dsIg" value="'+esc(sLinks.instagram||'')+'"></label>'+
+            '<label class="gh-form-label">Facebook<input class="gh-input" id="dsFb" value="'+esc(sLinks.facebook||'')+'"></label>'+
+            '<label class="gh-form-label">WhatsApp<input class="gh-input" id="dsWa" value="'+esc(sLinks.whatsapp||'')+'"></label>'+
+          '</div>'+
+        '</div>'+
+        '<div class="gh-card">'+
+          '<div class="gh-biz-sec-head"><h3>Branding</h3></div>'+
+          '<div class="gh-form-rows">'+
+            '<label class="gh-form-label">Cover Image URL<input class="gh-input" id="dsCover" value="'+esc(b.coverUrl||'')+'" placeholder="https://..."></label>'+
+            '<label class="gh-form-label">Logo URL<input class="gh-input" id="dsLogo" value="'+esc(b.logoUrl||'')+'" placeholder="https://..."></label>'+
+          '</div>'+
+        '</div>'+
+        '<div class="gh-dash-actions"><button class="gh-btn" id="dsSaveBtn"><i class="fas fa-check"></i> Save changes</button></div>'+
+      '</div>';
+    $('#dsSaveBtn').onclick=function(){ saveBizSettings(b); };
+  }
+
+  function saveBizSettings(b){
+    var u=authUser();
+    if(!u||!u.uid) return toast('Not logged in','error');
+    if(b.ownerId!==u.uid&&b.createdBy!==u.uid&&b.userId!==u.uid) return toast('Access denied','error');
+    if(!fs()||!db()) return toast('Database unavailable','error');
+    var title=($('#dsTitle').value||'').trim();
+    if(!title) return toast('Business name required','error');
+    var fields={
+      title:      title,
+      description:($('#dsDesc').value||'').trim(),
+      category:   ($('#dsCat').value||'').trim(),
+      phone:      ($('#dsPhone').value||'').trim(),
+      email:      ($('#dsEmail').value||'').trim(),
+      website:    ($('#dsWebsite').value||'').trim(),
+      socialLinks:{
+        instagram:($('#dsIg').value||'').trim(),
+        facebook: ($('#dsFb').value||'').trim(),
+        whatsapp: ($('#dsWa').value||'').trim(),
+      },
+      coverUrl:   ($('#dsCover').value||'').trim(),
+      logoUrl:    ($('#dsLogo').value||'').trim(),
+      updatedAt:  fs().serverTimestamp(),
+    };
+    var btn=$('#dsSaveBtn');
+    if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Saving…';}
+    fs().updateDoc(fs().doc(db(),'businesses',b.id),fields).then(function(){
+      toast('Settings saved');
+      if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-check"></i> Save changes';}
+    }).catch(function(err){
+      toast('Save failed: '+(err.message||err),'error');
+      if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-check"></i> Save changes';}
     });
+  }
+
+  function renderBizDashPosts(b){
+    var cont=$('#ghDashContent'); if(!cont) return;
+    var bTitle=b.title||b.name||'Business';
+    cont.innerHTML=
+      '<div class="gh-dash-section">'+
+        '<div class="gh-biz-sec-head"><h2 class="gh-dash-section-title" style="margin:0">Posts</h2>'+
+          '<button class="gh-btn" data-dp-post-as-biz><i class="fas fa-bullhorn"></i> Post update</button>'+
+        '</div>'+
+        '<div id="ghDashPostsList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
+      '</div>';
+    cont.onclick=function(e){ if(e.target.closest('[data-dp-post-as-biz]')){ openPostModal({targetType:'business',targetId:b.id,authorType:'business',businessId:b.id,authorId:b.id,authorName:bTitle,authorAvatar:b.logoUrl||b.coverUrl||'',createdByUserId:authUser()&&authUser().uid}); } };
+    listenTargetPosts('business',b.id,function(posts){
+      var el=$('#ghDashPostsList'); if(!el) return;
+      posts=posts.filter(canSeePost);
+      if(!posts.length){el.innerHTML='<div class="gh-empty"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Post updates to engage with your followers.</p></div>'; return;}
+      el.innerHTML=posts.map(postCard).join('');
+      bindPostInteractions(el);
+      posts.forEach(function(p){hydrateReactionState(p.id);});
+      hydrateSharedPreviews(el);
+    });
+  }
+
+  function renderBizDashServices(b){
+    var cont=$('#ghDashContent'); if(!cont) return;
+    cont.innerHTML=
+      '<div class="gh-dash-section">'+
+        '<div class="gh-biz-sec-head"><h2 class="gh-dash-section-title" style="margin:0">Services</h2>'+
+          '<button class="gh-btn" data-ds-add-svc><i class="fas fa-plus"></i> Add service</button>'+
+        '</div>'+
+        '<div id="ghDashSvcList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
+      '</div>';
+    cont.onclick=function(e){
+      if(e.target.closest('[data-ds-add-svc]')) openAddServiceModal(b,function(){loadDashServices(b);});
+      var del=e.target.closest('[data-delete-service]'); if(del) deleteService(b,del.dataset.deleteService);
+    };
+    loadDashServices(b);
+  }
+
+  function loadDashServices(b){
+    if(!fs()||!db()){ var el=$('#ghDashSvcList'); if(el) el.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>Unavailable</h3></div>'; return; }
+    fs().getDocs(fs().query(fs().collection(db(),'businesses',b.id,'services'),fs().orderBy('order','asc'))).then(function(snap){
+      var el=$('#ghDashSvcList'); if(!el) return;
+      var items=[]; snap.forEach(function(d){items.push(Object.assign({id:d.id},d.data()));});
+      if(!items.length){ el.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>No services yet</h3><p>Add your first service to show clients what you offer.</p><button class="gh-btn" data-ds-add-svc>Add service</button></div>'; return; }
+      el.innerHTML='<div class="gh-svc-list">'+items.map(function(s){
+        return '<div class="gh-svc-card">'+
+          '<div class="gh-svc-info"><h3>'+esc(s.title||s.name||'Service')+'</h3>'+(s.description?'<p>'+esc(s.description)+'</p>':'')+'</div>'+
+          (s.price?'<div class="gh-svc-price"><strong>'+esc(s.price)+'</strong><span>'+esc(s.currency||'GEL')+'</span></div>':'')+
+          '<button class="gh-btn sm ghost" data-delete-service="'+esc(s.id)+'"><i class="fas fa-trash"></i></button>'+
+        '</div>';
+      }).join('')+'</div>';
+    }).catch(function(){ var el=$('#ghDashSvcList'); if(el) el.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>Load failed</h3></div>'; });
+  }
+
+  function deleteService(b, serviceId){
+    if(!serviceId||!fs()||!db()) return;
+    if(!confirm('Delete this service?')) return;
+    fs().deleteDoc(fs().doc(db(),'businesses',b.id,'services',serviceId)).then(function(){
+      toast('Service deleted'); loadDashServices(b);
+    }).catch(function(err){ toast('Failed: '+(err.message||err),'error'); });
+  }
+
+  function renderBizDashGallery(b){
+    var cont=$('#ghDashContent'); if(!cont) return;
+    cont.innerHTML=
+      '<div class="gh-dash-section">'+
+        '<div class="gh-biz-sec-head"><h2 class="gh-dash-section-title" style="margin:0">Gallery</h2>'+
+          '<button class="gh-btn" data-dg-upload><i class="fas fa-upload"></i> Upload photo</button>'+
+        '</div>'+
+        '<div id="ghDashGallery"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
+      '</div>';
+    cont.onclick=function(e){
+      if(e.target.closest('[data-dg-upload]')) uploadGalleryPhoto(b,function(){loadDashGallery(b);});
+      var del=e.target.closest('[data-delete-photo]'); if(del) deleteGalleryPhoto(b,del.dataset.deletePhoto);
+    };
+    loadDashGallery(b);
+  }
+
+  function loadDashGallery(b){
+    if(!fs()||!db()){ var el=$('#ghDashGallery'); if(el) el.innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>Unavailable</h3></div>'; return; }
+    fs().getDocs(fs().query(fs().collection(db(),'businesses',b.id,'gallery'),fs().orderBy('order','asc'))).then(function(snap){
+      var el=$('#ghDashGallery'); if(!el) return;
+      var photos=[]; snap.forEach(function(d){photos.push(Object.assign({id:d.id},d.data()));});
+      if(!photos.length){ el.innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>No photos yet</h3><p>Upload photos to showcase your business.</p><button class="gh-btn" data-dg-upload>Upload first photo</button></div>'; return; }
+      el.innerHTML='<div class="gh-gallery-grid">'+photos.map(function(p){
+        return '<div class="gh-gallery-item gh-gallery-item-mgmt">'+
+          '<img src="'+esc(p.url)+'" alt="'+esc(p.caption||'')+'" loading="lazy" onerror="this.closest(\'.gh-gallery-item\').remove()">'+
+          '<button class="gh-gallery-delete-btn" data-delete-photo="'+esc(p.id)+'"><i class="fas fa-trash"></i></button>'+
+        '</div>';
+      }).join('')+'</div>';
+    }).catch(function(){ var el=$('#ghDashGallery'); if(el) el.innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>Load failed</h3></div>'; });
+  }
+
+  function deleteGalleryPhoto(b, photoId){
+    if(!photoId||!fs()||!db()) return;
+    if(!confirm('Delete this photo?')) return;
+    fs().deleteDoc(fs().doc(db(),'businesses',b.id,'gallery',photoId)).then(function(){
+      toast('Photo deleted'); loadDashGallery(b);
+    }).catch(function(err){ toast('Failed: '+(err.message||err),'error'); });
+  }
+
+  function renderBizDashReviews(b){
+    var cont=$('#ghDashContent'); if(!cont) return;
+    var ratingAvg=b.ratingCount>0?(b.ratingTotal/b.ratingCount).toFixed(1):(b.ratingAverage>0?Number(b.ratingAverage).toFixed(1):null);
+    cont.innerHTML=
+      '<div class="gh-dash-section">'+
+        '<h2 class="gh-dash-section-title">Reviews</h2>'+
+        (ratingAvg?
+          '<div class="gh-card" style="margin-bottom:0">'+
+            '<div class="gh-biz-rating-row"><div class="gh-biz-rating-big">'+ratingAvg+'</div>'+
+            '<div><span class="gh-biz-rating-stars">'+starsHtml(ratingAvg)+'</span><span class="gh-biz-rating-sub">'+Number(b.ratingCount||b.reviewCount||0)+' reviews</span></div></div>'+
+          '</div>' : '')+
+        '<div class="gh-card" style="margin-bottom:0"><div id="ghDashRevList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>'+
+      '</div>';
+    listenBusinessReviews(b.id,function(items){
+      var el=$('#ghDashRevList'); if(!el) return;
+      if(!items.length){el.innerHTML='<div class="gh-empty"><i class="fas fa-star"></i><h3>No reviews yet</h3><p>Customer reviews will appear here.</p></div>'; return;}
+      el.innerHTML='<div class="gh-reviews-wrap">'+items.map(function(r){
+        var normR=window.GH&&window.GH.normReview?window.GH.normReview(r,r.id):r;
+        var rating=Number(normR.rating||r.rating||0); var name=normR.userName||'User';
+        return '<div class="gh-review-card">'+
+          '<div class="gh-review-head">'+
+            '<div class="gh-avatar">'+esc(initials(name))+'</div>'+
+            '<div class="gh-review-user-info"><strong>'+esc(name)+'</strong><span>'+timeAgo(normR.createdAt||r.createdAt)+'</span></div>'+
+            '<div class="gh-review-stars-row"><span class="gh-review-stars">'+starsHtml(rating)+'</span><span class="gh-review-rating-num">'+rating.toFixed(1)+'</span></div>'+
+          '</div>'+
+          '<p class="gh-review-text">'+esc(normR.text||r.text||'')+'</p>'+
+          '<div class="gh-review-footer">'+
+            '<span class="gh-review-date">'+(normR.createdAt?new Date(ts(normR.createdAt)).toLocaleDateString():'')+'</span>'+
+            '<button class="gh-btn sm ghost" disabled title="Reply feature coming in a future update"><i class="fas fa-reply"></i> Reply</button>'+
+          '</div>'+
+        '</div>';
+      }).join('')+'</div>';
+    });
+  }
+
+  function renderBizDashEmployees(b){
+    var cont=$('#ghDashContent'); if(!cont) return;
+    cont.innerHTML=
+      '<div class="gh-dash-section">'+
+        '<h2 class="gh-dash-section-title">Employees</h2>'+
+        '<div class="gh-card">'+
+          '<div class="gh-dash-coming-soon">'+
+            '<i class="fas fa-user-group gh-dash-cs-icon"></i>'+
+            '<h3>Employee System — Coming in Phase 9</h3>'+
+            '<p>Invite employees, assign roles (owner, admin, staff), manage permissions, and track activity across your business page.</p>'+
+            '<div class="gh-dash-feature-list">'+
+              '<div class="gh-dash-feature-item"><i class="fas fa-envelope"></i><span>Email invitations</span></div>'+
+              '<div class="gh-dash-feature-item"><i class="fas fa-shield-halved"></i><span>Role-based permissions</span></div>'+
+              '<div class="gh-dash-feature-item"><i class="fas fa-id-badge"></i><span>Employee profiles</span></div>'+
+              '<div class="gh-dash-feature-item"><i class="fas fa-circle-check"></i><span>Identity verification</span></div>'+
+            '</div>'+
+            '<button class="gh-btn ghost" disabled><i class="fas fa-paper-plane"></i> Invite employee (coming soon)</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+  }
+
+  function renderBizDashAnalytics(b){
+    var cont=$('#ghDashContent'); if(!cont) return;
+    cont.innerHTML=
+      '<div class="gh-dash-section">'+
+        '<h2 class="gh-dash-section-title">Analytics</h2>'+
+        '<div class="gh-dash-analytics-grid">'+
+          '<div class="gh-dash-analytics-card"><i class="fas fa-eye"></i><div class="gh-dash-analytics-body"><span class="gh-dash-analytics-label">Profile Views</span><strong class="gh-dash-analytics-val" id="daViews">—</strong></div></div>'+
+          '<div class="gh-dash-analytics-card"><i class="fas fa-users"></i><div class="gh-dash-analytics-body"><span class="gh-dash-analytics-label">Followers</span><strong class="gh-dash-analytics-val">'+Number(b.followerCount||0)+'</strong></div></div>'+
+          '<div class="gh-dash-analytics-card"><i class="fas fa-newspaper"></i><div class="gh-dash-analytics-body"><span class="gh-dash-analytics-label">Posts</span><strong class="gh-dash-analytics-val">'+Number(b.postCount||0)+'</strong></div></div>'+
+          '<div class="gh-dash-analytics-card"><i class="fas fa-star"></i><div class="gh-dash-analytics-body"><span class="gh-dash-analytics-label">Reviews</span><strong class="gh-dash-analytics-val">'+Number(b.reviewCount||0)+'</strong></div></div>'+
+        '</div>'+
+        '<div class="gh-card" style="margin-top:14px">'+
+          '<div class="gh-biz-sec-head"><h3>Detailed Analytics</h3></div>'+
+          '<div id="ghDashAnalyticsDetail"><div class="gh-empty"><i class="fas fa-chart-bar"></i><h3>No analytics data yet</h3><p>Analytics tracking activates once your business receives engagement.</p></div></div>'+
+        '</div>'+
+      '</div>';
+    if(fs()&&db()){
+      fs().getDocs(fs().query(fs().collection(db(),'businesses',b.id,'analytics'),fs().orderBy('date','desc'),fs().limit(30))).then(function(snap){
+        if(snap.empty) return;
+        var days=[]; snap.forEach(function(d){days.push(Object.assign({id:d.id},d.data()));});
+        var totalViews=days.reduce(function(sum,d){return sum+(Number(d.views)||0);},0);
+        var vEl=$('#daViews'); if(vEl) vEl.textContent=totalViews||'—';
+        if(!totalViews) return;
+        var detail=$('#ghDashAnalyticsDetail'); if(!detail) return;
+        detail.innerHTML='<p class="gh-muted" style="font-size:.85rem;margin:0 0 12px">Last 30 days</p>'+
+          '<div class="gh-dash-analytics-days">'+days.slice(0,7).map(function(d){
+            return '<div class="gh-dash-analytics-day"><span class="gh-dash-analytics-day-date">'+esc(d.date||'')+'</span><span>'+Number(d.views||0)+' views</span></div>';
+          }).join('')+'</div>';
+      }).catch(function(){});
+    }
   }
 
 
@@ -862,7 +1207,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }).catch(function(){ var list=$('#ghServicesList'); if(list) list.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>No services yet</h3></div>'; });
   }
 
-  function openAddServiceModal(b){
+  function openAddServiceModal(b, onSuccess){
     if(!requireLogin()) return;
     var body='<input class="gh-input" id="svcTitle" placeholder="Service name, e.g. Website Design"><div style="height:8px"></div><textarea class="gh-textarea" id="svcDesc" placeholder="Service description (optional)"></textarea><div class="gh-form-grid" style="margin-top:8px"><input class="gh-input" id="svcPrice" type="text" placeholder="Price e.g. 150"><select class="gh-select" id="svcCurrency"><option value="GEL">GEL</option><option value="USD">USD</option><option value="EUR">EUR</option></select></div>';
     modal('Add Service', body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="svcSubmit">Add service</button>', 'ghSvcModal');
@@ -872,7 +1217,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var fields={title:title, description:$('#svcDesc').value.trim(), price:$('#svcPrice').value.trim(), currency:$('#svcCurrency').value||'GEL'};
       var doc=schema.newService ? schema.newService(fields, authUser().uid, 0, ts) : Object.assign(fields,{status:'active',order:0,createdBy:authUser().uid,createdAt:ts,updatedAt:ts});
       fs().addDoc(fs().collection(db(),'businesses',b.id,'services'),doc).then(function(){
-        var m=$('#ghSvcModal'); if(m)m.remove(); toast('Service added'); renderBusinessServices(b);
+        var m=$('#ghSvcModal'); if(m)m.remove(); toast('Service added');
+        if(typeof onSuccess==='function') onSuccess(); else renderBusinessServices(b);
       }).catch(function(err){ toast('Failed: '+(err.message||err),'error'); });
     };
   }
@@ -891,13 +1237,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }).catch(function(){ var grid=$('#ghGalleryGrid'); if(grid) grid.innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>No photos yet</h3></div>'; });
   }
 
-  function uploadGalleryPhoto(b){
+  function uploadGalleryPhoto(b, onSuccess){
     if(!requireLogin()) return;
     triggerImagePick(function(dataUrl){ if(!dataUrl) return;
       var ts=fs().serverTimestamp(); var schema=window.GH||{};
       var idx=Date.now();
       var doc=schema.newGalleryPhoto ? schema.newGalleryPhoto(dataUrl, authUser().uid, '', idx, ts) : {url:dataUrl,caption:'',order:idx,uploadedBy:authUser().uid,createdAt:ts};
-      fs().addDoc(fs().collection(db(),'businesses',b.id,'gallery'),doc).then(function(){ toast('Photo added'); renderBusinessPhotos(b); }).catch(function(err){ toast('Upload failed: '+(err.message||err),'error'); });
+      fs().addDoc(fs().collection(db(),'businesses',b.id,'gallery'),doc).then(function(){
+        toast('Photo added');
+        if(typeof onSuccess==='function') onSuccess(); else renderBusinessPhotos(b);
+      }).catch(function(err){ toast('Upload failed: '+(err.message||err),'error'); });
     });
   }
 
