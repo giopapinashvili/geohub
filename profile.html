@@ -15,42 +15,45 @@
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
   <link rel="stylesheet" href="profile.css">
   <link rel="stylesheet" href="geohub-points.css">
+  <link rel="stylesheet" href="geohub-social-redesign.css">
   <link rel="stylesheet" href="chat-popup.css">
   <link rel="stylesheet" href="responsive-polish.css">
+  <style>
+    /* Bridge: map legacy CSS variables → GH design tokens */
+    :root {
+      --navbar-height: var(--gh-topbar-h, 78px);
+      --green: var(--gh-green);
+      --gold: var(--gh-yellow);
+      --blue: var(--gh-blue);
+      --bg-0: var(--gh-bg);
+      --bg-1: var(--gh-bg);
+      --bg-card: var(--gh-card);
+      --bg-elevated: var(--gh-card-soft);
+      --text-primary: var(--gh-text);
+      --text-secondary: var(--gh-muted);
+      --text-muted: var(--gh-muted);
+      --border: var(--gh-border);
+      --border-subtle: var(--gh-border);
+      --border-emphasis: var(--gh-border-strong);
+      --radius-md: var(--gh-radius-md);
+      --radius-full: var(--gh-radius-full);
+      --radius-lg: var(--gh-radius-lg);
+      --radius-xl: var(--gh-radius-xl);
+      --transition: var(--gh-dur-fast) var(--gh-ease);
+    }
+    /* Profile page body uses gh-social-body background */
+    body.page-profile {
+      background: var(--gh-bg) !important;
+      color: var(--gh-text) !important;
+    }
+    /* Sidebar card uses card surface */
+    .sidebar-card { background: var(--gh-card); border-color: var(--gh-border); }
+  </style>
 </head>
-<body class="page-profile">
-
-<!-- NAVBAR -->
-<nav class="navbar" id="navbar">
-  <a href="index.html" class="navbar-brand">
-    <div class="logo-icon">🌍</div>
-    <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
-  </a>
-  <ul class="navbar-links">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="feed.html">Discover</a></li>
-    <li><a href="places.html">Places</a></li>
-    <li><a href="rewards.html">Rewards</a></li>
-    <li><a href="challenges.html">Challenges</a></li>
-    <li><a href="map.html">Map</a></li>
-    <li><a href="add-business.html">Add Business</a></li>
-    <li><a href="creators.html">Creators</a></li>
-    <li><a href="dashboard.html">Dashboard</a></li>
-  </ul>
-  <div class="navbar-actions">
-    <a href="profile.html" class="btn-ghost-nav active"><i class="fas fa-user-circle"></i> Profile</a>
-    <a href="auth.html?tab=signup" class="btn btn-primary btn-sm">Sign Up</a>
-  </div>
-  <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
-</nav>
-<div class="mobile-menu">
-  <a href="index.html">Home</a><a href="feed.html">Discover</a>
-  <a href="places.html">Places</a><a href="rewards.html">Rewards</a><a href="challenges.html">Challenges</a><a href="map.html">Map</a>
-  <a href="add-business.html">Add Business</a><a href="creators.html">Creators</a><a href="dashboard.html">Dashboard</a><a href="profile.html" class="active">Profile</a>
-</div>
+<body class="page-profile" data-gh-page="profile">
 
 <!-- COVER -->
-<div class="profile-cover" style="margin-top:var(--navbar-height,68px)">
+<div class="profile-cover" style="margin-top:var(--gh-topbar-h,78px)">
   <div class="cover-grid"></div>
   <div class="cover-actions">
     <button class="cover-btn"><i class="fas fa-share-alt"></i> Share</button>
@@ -327,18 +330,15 @@
 </div><!-- /profile-layout -->
 
 <script type="module" src="firebase-config.js"></script>
-<script defer src="config.js"></script>
-<script defer src="main.js"></script>
+<script defer src="gh-schema.js"></script>
 <script defer src="account.js"></script>
+<script defer src="nav-cleanup.js"></script>
+<script defer src="mobile-nav.js"></script>
 <script defer src="firestore-social.js"></script>
 <script defer src="chat-popup.js"></script>
 <script defer src="profile.js"></script>
 <script defer src="geohub-points.js"></script>
-<script defer src="nav-cleanup.js"></script>
-<script defer src="mobile-nav.js"></script>
-<script defer src="geohub-fixes.js"></script>
-<script defer src="geohub-production-v6.js"></script>
 <script defer src="geohub-production-stabilization-v1.js"></script>
-  <script defer src="responsive-polish.js"></script>
+<script defer src="responsive-polish.js"></script>
 </body>
 </html>

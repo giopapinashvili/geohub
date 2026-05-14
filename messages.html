@@ -14,24 +14,29 @@
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
   <link rel="stylesheet" href="messages.css">
+  <link rel="stylesheet" href="geohub-social-redesign.css">
   <link rel="stylesheet" href="chat-popup.css">
   <link rel="stylesheet" href="responsive-polish.css">
+  <style>
+    /* Bridge: map legacy CSS variables → GH design tokens */
+    :root {
+      --navbar-height: var(--gh-topbar-h, 78px);
+      --bg-0: var(--gh-bg);
+      --bg-1: var(--gh-bg);
+      --bg-card: var(--gh-card);
+      --bg-elevated: var(--gh-card-soft);
+      --text-primary: var(--gh-text);
+      --text-secondary: var(--gh-muted);
+      --text-muted: var(--gh-muted);
+      --border: var(--gh-border);
+      --border-subtle: var(--gh-border);
+      --border-emphasis: var(--gh-border-strong);
+      --radius-full: var(--gh-radius-full);
+      --transition: var(--gh-dur-fast) var(--gh-ease);
+    }
+  </style>
 </head>
-<body class="page-messages">
-  <nav class="navbar" id="navbar">
-    <a href="index.html" class="navbar-brand">
-      <div class="logo-icon">🌍</div>
-      <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
-    </a>
-    <ul class="navbar-links"></ul>
-    <div class="navbar-actions">
-      <a href="profile.html" class="btn btn-ghost btn-sm"><i class="fas fa-user"></i> Profile</a>
-    </div>
-    <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
-  </nav>
-  <div class="mobile-menu"></div>
+<body class="page-messages" data-gh-page="messages">
 
   <div class="messages-page">
     <div class="messages-layout">
@@ -117,22 +122,18 @@
 
   <div id="msgToast" class="msg-toast"></div>
 
-  <script defer src="messages-page.js"></script>
-  
-  <script defer src="mode.js"></script>
   <script type="module" src="firebase-config.js"></script>
-<script defer src="firestore-social.js"></script>
-<script defer src="config.js"></script>
-  <script defer src="api-client.js"></script>
-  <script defer src="main.js"></script>
+  <script defer src="gh-schema.js"></script>
   <script defer src="account.js"></script>
-<script defer src="messages.js"></script>
-<script defer src="real-messages.js"></script>
-<script defer src="nav-cleanup.js"></script>
-<script defer src="mobile-nav.js"></script>
-
-<script defer src="geohub-production-v6.js"></script>
-<script defer src="geohub-production-stabilization-v1.js"></script>
+  <script defer src="nav-cleanup.js"></script>
+  <script defer src="mobile-nav.js"></script>
+  <script defer src="firestore-social.js"></script>
+  <script defer src="api-client.js"></script>
+  <script defer src="messages-page.js"></script>
+  <script defer src="messages.js"></script>
+  <script defer src="real-messages.js"></script>
+  <script defer src="chat-popup.js"></script>
+  <script defer src="geohub-production-stabilization-v1.js"></script>
   <script defer src="responsive-polish.js"></script>
 </body>
 </html>
