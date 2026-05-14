@@ -987,3 +987,105 @@ html[data-gh-theme="light"] .gh-time-input:focus{border-color:var(--gh-green)}
   .gh-contact-cta-btn{padding:7px 11px;font-size:.78rem}
   .gh-hours-status-row{gap:6px}
 }
+
+/* ── Phase 6 Step 7 — Reviews + Reputation Foundation ──────────────── */
+
+/* Rating summary */
+.gh-rv-summary-card{margin-bottom:0}
+.gh-rv-summary-inner{display:flex;gap:20px;align-items:flex-start}
+.gh-rv-summary-score{display:flex;flex-direction:column;align-items:center;min-width:80px;gap:3px}
+.gh-rv-big-score{font-size:2.8rem;font-weight:950;line-height:1;color:var(--gh-text)}
+.gh-rv-summary-stars{font-size:.9rem;letter-spacing:1px}
+.gh-rv-summary-count{font-size:.76rem;color:var(--gh-muted);white-space:nowrap;text-align:center}
+
+/* Distribution bars */
+.gh-rv-dist{display:grid;gap:5px;flex:1}
+.gh-rv-dist-row{display:flex;align-items:center;gap:8px}
+.gh-rv-dist-label{font-size:.72rem;color:var(--gh-muted);min-width:26px;text-align:right;white-space:nowrap}
+.gh-rv-dist-label .fas{font-size:.6rem;color:#facc15;margin-left:1px}
+.gh-rv-dist-bar{flex:1;height:7px;background:var(--gh-card-soft);border-radius:99px;overflow:hidden}
+.gh-rv-dist-fill{height:100%;background:var(--gh-green);border-radius:99px;transition:width .3s ease}
+.gh-rv-dist-count{font-size:.7rem;color:var(--gh-muted);min-width:14px;text-align:right}
+
+/* Sort chips */
+.gh-rv-sort-row{display:flex;gap:4px;align-items:center;flex-shrink:0;flex-wrap:wrap}
+.gh-rv-sort-chip{padding:4px 10px;border-radius:99px;font-size:.74rem;font-weight:500;border:1px solid var(--gh-border);background:transparent;color:var(--gh-muted);cursor:pointer;transition:all .15s;line-height:1.4}
+.gh-rv-sort-chip.active,.gh-rv-sort-chip:hover{background:var(--gh-green);border-color:var(--gh-green);color:#fff}
+
+/* Write form */
+.gh-rv-write-form{display:grid;gap:12px}
+.gh-rv-write-label{font-size:.81rem;color:var(--gh-muted);font-weight:500}
+.gh-rv-stars-row{display:flex;gap:2px}
+.gh-rv-star-btn{border:none;background:transparent;color:rgba(148,163,184,.35);font-size:1.6rem;cursor:pointer;padding:0 3px;line-height:1;transition:color .1s,transform .1s}
+.gh-rv-star-btn.active{color:#facc15}
+.gh-rv-star-btn:hover{transform:scale(1.2);color:#facc15}
+.gh-rv-write-actions{display:flex;justify-content:flex-end}
+.gh-rv-already{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 14px;background:rgba(16,185,129,.07);border-radius:var(--gh-radius);border:1px solid rgba(16,185,129,.2);font-size:.86rem;color:var(--gh-green);font-weight:500}
+.gh-rv-already i{font-size:.95rem}
+.gh-rv-already-actions{display:flex;gap:6px;margin-left:auto}
+
+/* Review card */
+.gh-rv-card{padding:14px 0;border-bottom:1px solid var(--gh-border)}
+.gh-rv-card:first-child{padding-top:6px}
+.gh-rv-card:last-child{border-bottom:none;padding-bottom:4px}
+.gh-rv-hidden{opacity:.5}
+.gh-rv-flagged{background:rgba(239,68,68,.04);border-radius:8px;padding:12px 10px;margin:2px 0}
+.gh-rv-head{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+.gh-rv-user-info{flex:1;min-width:0}
+.gh-rv-user-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:.86rem;font-weight:600;margin-bottom:3px}
+.gh-rv-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.gh-rv-stars{color:#facc15;font-size:.8rem;letter-spacing:.3px}
+.gh-rv-rating-num{font-size:.76rem;font-weight:700;color:var(--gh-text)}
+.gh-rv-time{font-size:.72rem;color:var(--gh-muted)}
+.gh-rv-edited{font-size:.7rem;color:var(--gh-muted);font-style:italic}
+.gh-rv-text{color:var(--gh-text);font-size:.9rem;line-height:1.65;margin:0 0 10px}
+.gh-rv-verified{color:var(--gh-green);font-size:.78rem}
+.gh-rv-badge{display:inline-block;font-size:.66rem;padding:1px 7px;border-radius:99px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;vertical-align:middle}
+.gh-rv-badge.hidden{background:rgba(100,116,139,.2);color:var(--gh-muted)}
+.gh-rv-badge.flagged{background:rgba(239,68,68,.15);color:#ef4444}
+
+/* Footer actions */
+.gh-rv-footer{display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;min-height:28px}
+.gh-rv-own-actions{display:flex;gap:5px}
+.gh-rv-footer-right{display:flex;gap:5px;margin-left:auto}
+
+/* xs button variant */
+.gh-btn.xs{padding:3px 9px;font-size:.72rem;border-radius:6px;line-height:1.5}
+.gh-btn.xs.danger{color:#ef4444;border-color:rgba(239,68,68,.25)}
+.gh-btn.xs.danger:hover{background:rgba(239,68,68,.10);border-color:#ef4444}
+
+/* Owner reply */
+.gh-rv-reply{background:var(--gh-card-soft);border-left:3px solid var(--gh-green);border-radius:0 8px 8px 0;padding:10px 14px;margin:6px 0 10px 24px}
+.gh-rv-reply-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px}
+.gh-rv-reply-label{font-size:.76rem;font-weight:600;color:var(--gh-green);display:flex;align-items:center;gap:4px}
+.gh-rv-reply-time{font-size:.71rem;color:var(--gh-muted);flex:1}
+.gh-rv-reply-actions{display:flex;gap:3px;margin-left:auto}
+.gh-rv-reply-text{font-size:.85rem;color:var(--gh-text);line-height:1.6;margin:0}
+
+/* Report option */
+.gh-rv-report-option{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:.86rem;border:1px solid var(--gh-border);transition:background .12s;user-select:none}
+.gh-rv-report-option:hover{background:var(--gh-card-soft)}
+.gh-rv-report-option input{accent-color:var(--gh-green);cursor:pointer}
+
+/* Light theme */
+html[data-gh-theme="light"] .gh-rv-card{border-bottom-color:rgba(22,101,52,.09)}
+html[data-gh-theme="light"] .gh-rv-reply{background:rgba(16,185,129,.06)}
+html[data-gh-theme="light"] .gh-rv-already{background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.22)}
+html[data-gh-theme="light"] .gh-rv-dist-bar{background:#e2e8f0}
+html[data-gh-theme="light"] .gh-rv-sort-chip{border-color:#cbd5e1;color:#64748b}
+html[data-gh-theme="light"] .gh-rv-star-btn{color:#cbd5e1}
+html[data-gh-theme="light"] .gh-rv-badge.flagged{background:rgba(239,68,68,.1);color:#c0392b}
+html[data-gh-theme="light"] .gh-rv-report-option{border-color:#e2e8f0}
+html[data-gh-theme="light"] .gh-rv-flagged{background:rgba(239,68,68,.03)}
+
+/* Mobile */
+@media(max-width:540px){
+  .gh-rv-summary-inner{flex-direction:column;gap:10px}
+  .gh-rv-summary-score{flex-direction:row;align-items:center;gap:10px;min-width:auto}
+  .gh-rv-big-score{font-size:2.2rem}
+  .gh-rv-reply{margin-left:8px}
+  .gh-rv-already{flex-direction:column;align-items:flex-start;gap:8px}
+  .gh-rv-already-actions{margin-left:0}
+  .gh-rv-sort-row{gap:3px}
+  .gh-rv-sort-chip{padding:3px 8px;font-size:.7rem}
+}

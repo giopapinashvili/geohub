@@ -198,6 +198,13 @@
       status:     d.status || 'active',
       helpful:    Number(d.helpful) || 0,
       reported:   !!d.reported,
+      editedAt:            d.editedAt            || null,
+      ownerReply:          d.ownerReply          || null,
+      reportCount:         Number(d.reportCount) || 0,
+      hidden:              !!d.hidden,
+      moderationStatus:    d.moderationStatus    || 'active',
+      verifiedInteraction: !!d.verifiedInteraction,
+      helpfulCount:        Number(d.helpfulCount || d.helpful) || 0,
       createdAt:  d.createdAt || null,
     };
   }

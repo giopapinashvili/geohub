@@ -1840,61 +1840,278 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '</div>';
   }
 
+  /* ── Review helpers ── */
+  function normReviewFull(d, id){
+    var base=(window.GH&&window.GH.normReview)?window.GH.normReview(d,id):{id:id||d.id||'',businessId:d.businessId||'',userId:d.userId||'',userName:d.userName||'User',avatarUrl:d.userAvatarUrl||d.userPhoto||d.avatar||'',rating:Number(d.rating)||0,text:d.text||d.comment||'',status:d.status||'active',helpful:Number(d.helpful)||0,reported:!!d.reported,createdAt:d.createdAt||null};
+    return Object.assign(base,{editedAt:d.editedAt||null,ownerReply:d.ownerReply||null,reportCount:Number(d.reportCount)||0,hidden:!!d.hidden,moderationStatus:d.moderationStatus||'active',verifiedInteraction:!!d.verifiedInteraction,helpfulCount:Number(d.helpfulCount||d.helpful)||0});
+  }
+
+  function ratingDistHtml(reviews){
+    var counts=[0,0,0,0,0];
+    reviews.forEach(function(r){var v=Math.round(Number(r.rating)||0);if(v>=1&&v<=5)counts[v-1]++;});
+    var max=Math.max.apply(null,counts)||1;
+    var out='<div class="gh-rv-dist">';
+    for(var s=5;s>=1;s--){var c=counts[s-1];var pct=Math.round((c/max)*100);out+='<div class="gh-rv-dist-row"><span class="gh-rv-dist-label">'+s+'<i class="fas fa-star"></i></span><div class="gh-rv-dist-bar"><div class="gh-rv-dist-fill" style="width:'+pct+'%"></div></div><span class="gh-rv-dist-count">'+c+'</span></div>';}
+    return out+'</div>';
+  }
+
+  function reviewWriteFormHtml(rating){
+    var r=rating||state.reviewWriteRating||5;
+    return '<div class="gh-rv-write-form">'+
+      '<div class="gh-rv-write-label">Your rating</div>'+
+      '<div class="gh-rv-stars-row" id="ghReviewStars">'+[1,2,3,4,5].map(function(i){return '<button type="button" class="gh-rv-star-btn'+(i<=r?' active':'')+'" data-star="'+i+'">★</button>';}).join('')+'</div>'+
+      '<textarea class="gh-textarea" id="ghReviewText" placeholder="Describe your experience…" rows="3"></textarea>'+
+      '<div class="gh-rv-write-actions"><button class="gh-btn" id="ghSubmitReview"><i class="fas fa-star"></i> Submit review</button></div>'+
+    '</div>';
+  }
+
+  function reviewCardHtml(r, isOwner, currentUid){
+    if(r.hidden&&!isOwner) return '';
+    var isAuthor=!!(currentUid&&currentUid===r.userId);
+    var name=r.userName||'User';
+    var avHtml=r.avatarUrl?img(r.avatarUrl,name):esc(initials(name));
+    var rating=Number(r.rating||0);
+    var edited=r.editedAt?'<span class="gh-rv-edited">· edited</span>':'';
+    var verified=r.verifiedInteraction?'<span class="gh-rv-verified" title="Verified interaction"><i class="fas fa-circle-check"></i></span>':'';
+    var replyHtml='';
+    if(r.ownerReply&&r.ownerReply.text){
+      var rp=r.ownerReply;
+      replyHtml='<div class="gh-rv-reply">'+
+        '<div class="gh-rv-reply-head">'+
+          '<span class="gh-rv-reply-label"><i class="fas fa-reply"></i> Owner reply</span>'+
+          '<span class="gh-rv-reply-time">'+timeAgo(rp.createdAt)+(rp.editedAt?'<span class="gh-rv-edited"> · edited</span>':'')+'</span>'+
+          (isOwner?'<div class="gh-rv-reply-actions">'+
+            '<button class="gh-btn xs ghost" data-edit-reply="'+esc(r.id)+'" title="Edit reply"><i class="fas fa-pen"></i></button>'+
+            '<button class="gh-btn xs ghost" data-delete-reply="'+esc(r.id)+'" title="Delete reply"><i class="fas fa-trash"></i></button>'+
+          '</div>':'')+
+        '</div>'+
+        '<p class="gh-rv-reply-text">'+esc(rp.text)+'</p>'+
+      '</div>';
+    }
+    var ownActions=isAuthor?
+      '<div class="gh-rv-own-actions">'+
+        '<button class="gh-btn xs ghost" data-edit-review="'+esc(r.id)+'" data-review-rating="'+rating+'" data-review-text="'+esc(r.text||'')+'" title="Edit"><i class="fas fa-pen"></i> Edit</button>'+
+        '<button class="gh-btn xs ghost danger" data-delete-review="'+esc(r.id)+'" data-review-rating="'+rating+'" title="Delete"><i class="fas fa-trash"></i> Delete</button>'+
+      '</div>':'';
+    var ownerReplyBtn=(isOwner&&!isAuthor&&!r.ownerReply)?
+      '<button class="gh-btn xs ghost" data-reply-review="'+esc(r.id)+'" title="Reply"><i class="fas fa-reply"></i> Reply</button>':'';
+    var reportBtn=(!isAuthor&&currentUid)?
+      '<button class="gh-btn xs ghost" data-report-review="'+esc(r.id)+'" title="Report"><i class="fas fa-flag"></i></button>':'';
+    return '<div class="gh-rv-card'+(r.hidden?' gh-rv-hidden':'')+(r.moderationStatus==='flagged'?' gh-rv-flagged':'')+'" data-review-id="'+esc(r.id)+'">'+
+      '<div class="gh-rv-head">'+
+        userProfileAnchor(r.userId,'gh-avatar gh-profile-avatar-link',avHtml,'Open '+name)+
+        '<div class="gh-rv-user-info">'+
+          '<div class="gh-rv-user-row">'+
+            '<strong>'+userProfileAnchor(r.userId,'gh-profile-name-link',esc(name),'Open '+name)+'</strong>'+
+            verified+
+            (r.hidden?'<span class="gh-rv-badge hidden">hidden</span>':'')+
+            (r.moderationStatus==='flagged'?'<span class="gh-rv-badge flagged">flagged</span>':'')+
+          '</div>'+
+          '<div class="gh-rv-meta">'+
+            '<span class="gh-rv-stars">'+starsHtml(rating)+'</span>'+
+            '<span class="gh-rv-rating-num">'+rating.toFixed(1)+'</span>'+
+            '<span class="gh-rv-time">'+timeAgo(r.createdAt)+edited+'</span>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      (r.text?'<p class="gh-rv-text">'+esc(r.text)+'</p>':'')+
+      replyHtml+
+      '<div class="gh-rv-footer">'+ownActions+'<div class="gh-rv-footer-right">'+ownerReplyBtn+reportBtn+'</div></div>'+
+    '</div>';
+  }
+
   function renderBusinessReviews(b){
     var box=$('#ghBusinessTabContent'); if(!box)return;
-    var isOwner=!!(authUser()&&authUser().uid&&(b.ownerId===authUser().uid||b.createdBy===authUser().uid||b.userId===authUser().uid));
-    var ratingAvg=b.ratingCount>0?(b.ratingTotal/b.ratingCount).toFixed(1):(b.ratingAverage>0?Number(b.ratingAverage).toFixed(1):null);
-    var ratingSummary=ratingAvg?
-      '<div class="gh-biz-rating-row"><div class="gh-biz-rating-big">'+ratingAvg+'</div><div><span class="gh-biz-rating-stars">'+starsHtml(ratingAvg)+'</span><span class="gh-biz-rating-sub">'+Number(b.ratingCount||b.reviewCount||0)+' reviews</span></div></div>':'';
-    box.innerHTML=
-      (ratingSummary?'<div class="gh-card" style="margin-bottom:14px">'+ratingSummary+'</div>':'')+
-      (!isOwner?
-        '<div class="gh-card" style="margin-bottom:14px"><div class="gh-biz-sec-head"><h3>Write a Review</h3></div>'+
-        '<div class="gh-review-form"><div class="gh-stars" id="ghReviewStars">'+[1,2,3,4,5].map(function(i){return '<button class="gh-star active" data-star="'+i+'">★</button>';}).join('')+'</div>'+
-        '<textarea class="gh-textarea" id="ghReviewText" placeholder="Describe your experience…"></textarea>'+
-        '<button class="gh-btn" id="ghSubmitReview"><i class="fas fa-star"></i> Submit review</button></div></div>' : '')+
-      '<div class="gh-card" style="margin-bottom:0"><div id="ghBusinessReviewsList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
-    if(!isOwner && $('#ghReviewStars')){
-      $('#ghReviewStars').onclick=function(e){ var s=e.target.closest('[data-star]'); if(!s)return; state.starRating=Number(s.dataset.star); $all('[data-star]').forEach(function(x){x.classList.toggle('active',Number(x.dataset.star)<=state.starRating);}); };
-      $('#ghSubmitReview').onclick=function(){ createBusinessReview(b.id,state.starRating||5,$('#ghReviewText').value); };
+    var u=authUser(); var currentUid=u?u.uid:'';
+    var isOwner=!!(u&&(b.ownerId===u.uid||b.createdBy===u.uid||b.userId===u.uid));
+    var cachedReviews=[]; state.reviewSort=state.reviewSort||'newest'; state.reviewWriteRating=5;
+
+    function sortedReviews(arr){
+      var out=arr.slice();
+      if(state.reviewSort==='highest') out.sort(function(a,b){return (Number(b.rating)||0)-(Number(a.rating)||0)||ts(b.createdAt)-ts(a.createdAt);});
+      else if(state.reviewSort==='lowest') out.sort(function(a,b){return (Number(a.rating)||0)-(Number(b.rating)||0)||ts(b.createdAt)-ts(a.createdAt);});
+      else out.sort(function(a,b){return ts(b.createdAt)-ts(a.createdAt);});
+      return out;
     }
+
+    function wireWriteForm(){
+      var stars=$('#ghReviewStars'); var submit=$('#ghSubmitReview');
+      if(stars) stars.onclick=function(e){var s=e.target.closest('[data-star]');if(!s)return;state.reviewWriteRating=Number(s.dataset.star);$all('#ghReviewStars [data-star]').forEach(function(x){x.classList.toggle('active',Number(x.dataset.star)<=state.reviewWriteRating);});};
+      if(submit) submit.onclick=function(){createBusinessReview(b.id,state.reviewWriteRating||5,($('#ghReviewText')||{}).value||'');};
+    }
+
+    function renderList(reviews){
+      $all('[data-rv-sort]').forEach(function(x){x.classList.toggle('active',x.dataset.rvSort===state.reviewSort);});
+      var userReview=currentUid?reviews.find(function(r){return r.userId===currentUid;}):null;
+      var formWrap=$('#ghRvFormWrap');
+      if(formWrap){
+        if(userReview){
+          formWrap.innerHTML='<div class="gh-rv-already"><i class="fas fa-check-circle"></i> You reviewed this business.'+
+            '<div class="gh-rv-already-actions">'+
+            '<button class="gh-btn xs ghost" data-edit-review="'+esc(userReview.id)+'" data-review-rating="'+Number(userReview.rating||0)+'" data-review-text="'+esc(userReview.text||'')+'"><i class="fas fa-pen"></i> Edit</button>'+
+            '<button class="gh-btn xs ghost danger" data-delete-review="'+esc(userReview.id)+'" data-review-rating="'+Number(userReview.rating||0)+'"><i class="fas fa-trash"></i> Delete</button>'+
+            '</div></div>';
+        } else {
+          formWrap.innerHTML=reviewWriteFormHtml(state.reviewWriteRating);
+          wireWriteForm();
+        }
+      }
+      var summaryEl=$('#ghRvSummary');
+      if(summaryEl&&reviews.length>0){
+        var total=reviews.reduce(function(acc,r){return acc+(Number(r.rating)||0);},0);
+        var avg=(total/reviews.length).toFixed(1);
+        var cnt=reviews.length;
+        summaryEl.innerHTML='<div class="gh-rv-summary-inner">'+
+          '<div class="gh-rv-summary-score">'+
+            '<div class="gh-rv-big-score">'+avg+'</div>'+
+            '<div class="gh-rv-summary-stars">'+starsHtml(parseFloat(avg))+'</div>'+
+            '<div class="gh-rv-summary-count">'+cnt+' review'+(cnt!==1?'s':'')+'</div>'+
+          '</div>'+ratingDistHtml(reviews)+'</div>';
+        summaryEl.style.display='';
+      }
+      var listEl=$('#ghRvList'); if(!listEl)return;
+      var sorted=sortedReviews(reviews);
+      if(!sorted.length){
+        listEl.innerHTML=isOwner?
+          '<div class="gh-empty"><i class="fas fa-star"></i><h3>No reviews yet</h3><p>Reviews will appear here when customers leave feedback.</p></div>':
+          '<div class="gh-empty"><i class="fas fa-star"></i><h3>No reviews yet</h3><p>Be the first to review this business.</p></div>';
+        return;
+      }
+      listEl.innerHTML=sorted.map(function(r){return reviewCardHtml(r,isOwner,currentUid);}).join('');
+    }
+
+    var ratingAvg=b.ratingCount>0?(b.ratingTotal/b.ratingCount).toFixed(1):(b.ratingAverage>0?Number(b.ratingAverage).toFixed(1):null);
+    var cnt=Number(b.ratingCount||b.reviewCount||0);
+    box.innerHTML='<div style="display:grid;gap:14px">'+
+      '<div class="gh-card gh-rv-summary-card" style="margin-bottom:0'+(ratingAvg?'':'display:none')+'" id="ghRvSummary">'+
+        (ratingAvg?'<div class="gh-rv-summary-inner"><div class="gh-rv-summary-score"><div class="gh-rv-big-score">'+ratingAvg+'</div><div class="gh-rv-summary-stars">'+starsHtml(parseFloat(ratingAvg))+'</div><div class="gh-rv-summary-count">'+cnt+' review'+(cnt!==1?'s':'')+'</div></div><div class="gh-rv-dist-placeholder"><i class="fas fa-circle-notch fa-spin gh-muted"></i></div></div>':'')+'</div>'+
+      (!isOwner?'<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Write a Review</h3></div><div id="ghRvFormWrap">'+reviewWriteFormHtml(5)+'</div></div>':'')+
+      '<div class="gh-card" style="margin-bottom:0">'+
+        '<div class="gh-biz-sec-head"><h3>Reviews</h3><div class="gh-rv-sort-row">'+
+          ['newest','highest','lowest'].map(function(s){return '<button class="gh-rv-sort-chip'+(state.reviewSort===s?' active':'')+'" data-rv-sort="'+s+'">'+s.charAt(0).toUpperCase()+s.slice(1)+'</button>';}).join('')+
+        '</div></div>'+
+        '<div id="ghRvList"><div class="gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
+      '</div>'+
+    '</div>';
+
+    if(!isOwner) wireWriteForm();
+
+    box.onclick=function(e){
+      var sortChip=e.target.closest('[data-rv-sort]'); if(sortChip){state.reviewSort=sortChip.dataset.rvSort;renderList(cachedReviews);return;}
+      var editBtn=e.target.closest('[data-edit-review]'); if(editBtn){openEditReviewModal(b,editBtn.dataset.editReview,Number(editBtn.dataset.reviewRating||0),editBtn.dataset.reviewText||'');return;}
+      var delBtn=e.target.closest('[data-delete-review]'); if(delBtn){deleteBusinessReview(delBtn.dataset.deleteReview,b.id,Number(delBtn.dataset.reviewRating||0));return;}
+      var replyBtn=e.target.closest('[data-reply-review]'); if(replyBtn){openOwnerReplyModal(replyBtn.dataset.replyReview,false,'');return;}
+      var editReply=e.target.closest('[data-edit-reply]'); if(editReply){var rv=cachedReviews.find(function(r){return r.id===editReply.dataset.editReply;});openOwnerReplyModal(editReply.dataset.editReply,true,rv&&rv.ownerReply&&rv.ownerReply.text||'');return;}
+      var delReply=e.target.closest('[data-delete-reply]'); if(delReply){deleteOwnerReply(delReply.dataset.deleteReply);return;}
+      var repBtn=e.target.closest('[data-report-review]'); if(repBtn){if(!requireLogin())return;openReportReviewModal(repBtn.dataset.reportReview,b.id);return;}
+    };
+
     listenBusinessReviews(b.id,function(items){
-      var list=$('#ghBusinessReviewsList'); if(!list)return;
-      if(!items.length){list.innerHTML='<div class="gh-empty"><i class="fas fa-star"></i><h3>No reviews yet</h3><p>Be the first to review this business.</p></div>'; return;}
-      list.innerHTML='<div class="gh-reviews-wrap">'+items.map(function(r){
-        var normR=window.GH&&window.GH.normReview?window.GH.normReview(r,r.id):r;
-        var uid=normR.userId||''; var name=normR.userName||'User'; var avatar=normR.avatarUrl||r.userPhoto||'';
-        var avHtml=avatar?img(avatar,name):esc(initials(name));
-        var rating=Number(normR.rating||r.rating||0);
-        return '<div class="gh-review-card">'+
-          '<div class="gh-review-head">'+
-            userProfileAnchor(uid,'gh-avatar gh-profile-avatar-link',avHtml,'Open '+name)+
-            '<div class="gh-review-user-info">'+
-              '<strong>'+userProfileAnchor(uid,'gh-profile-name-link',esc(name),'Open '+name)+'</strong>'+
-              '<span>'+timeAgo(normR.createdAt||r.createdAt)+'</span>'+
-            '</div>'+
-            '<div class="gh-review-stars-row">'+
-              '<span class="gh-review-stars">'+starsHtml(rating)+'</span>'+
-              '<span class="gh-review-rating-num">'+rating.toFixed(1)+'</span>'+
-            '</div>'+
-          '</div>'+
-          '<p class="gh-review-text">'+esc(normR.text||r.text||r.comment||'')+'</p>'+
-          '<div class="gh-review-footer">'+
-            '<span class="gh-review-date">'+(normR.createdAt||r.createdAt ? new Date(ts(normR.createdAt||r.createdAt)).toLocaleDateString() : '')+'</span>'+
-            '<button class="gh-btn sm ghost" data-report-review="'+esc(r.id||'')+'" title="Report review"><i class="fas fa-flag"></i></button>'+
-          '</div>'+
-        '</div>';
-      }).join('')+'</div>';
-      box.addEventListener('click',function(e){ var rep=e.target.closest('[data-report-review]'); if(rep){ if(!requireLogin())return; toast('Review reported — thank you'); } });
+      cachedReviews=items.map(function(d){return normReviewFull(d,d.id);});
+      renderList(cachedReviews);
     });
   }
 
   function createBusinessReview(businessId, rating, textVal){
-    if(!requireLogin()) return; var u=currentUserInfo(); var textClean=(textVal||'').trim(); if(!textClean) return toast('Write review first','error');
-    var ts=fs().serverTimestamp(); var schema=window.GH||{};
-    var doc=schema.newBusinessReview ? schema.newBusinessReview(businessId,u.uid,u.name,u.avatar,rating,textClean,ts) : {businessId:businessId,userId:u.uid,userName:u.name,userAvatarUrl:u.avatar,rating:rating,text:textClean,status:'active',helpful:0,reported:false,createdAt:ts,updatedAt:ts};
-    fs().addDoc(fs().collection(db(),'businessReviews'),doc).then(function(){ return fs().updateDoc(fs().doc(db(),'businesses',businessId),{reviewCount:fs().increment(1),ratingTotal:fs().increment(rating),ratingCount:fs().increment(1)}).catch(function(){}); }).then(function(){ if(GS().awardPoints) GS().awardPoints(25,'Write business review','business',businessId); toast('Review submitted'); $('#ghReviewText').value=''; }).catch(function(err){ toast('Review failed: '+(err.code||err.message),'error'); });
+    if(!requireLogin()) return;
+    var u=currentUserInfo(); var textClean=(textVal||'').trim();
+    if(!textClean) return toast('Write a review first','error');
+    if(rating<1||rating>5) return toast('Select a star rating','error');
+    var schema=window.GH||{};
+    var now=fs().serverTimestamp();
+    var doc=schema.newBusinessReview?schema.newBusinessReview(businessId,u.uid,u.name,u.avatar,rating,textClean,now):{businessId:businessId,userId:u.uid,userName:u.name,userAvatarUrl:u.avatar,rating:rating,text:textClean,status:'active',helpful:0,reported:false,createdAt:now,updatedAt:now};
+    Object.assign(doc,{editedAt:null,ownerReply:null,reportCount:0,hidden:false,moderationStatus:'active',verifiedInteraction:false,helpfulCount:0});
+    fs().addDoc(fs().collection(db(),'businessReviews'),doc)
+      .then(function(){return fs().updateDoc(fs().doc(db(),'businesses',businessId),{reviewCount:fs().increment(1),ratingTotal:fs().increment(rating),ratingCount:fs().increment(1)}).catch(function(){});})
+      .then(function(){if(GS().awardPoints)GS().awardPoints(25,'Write business review','business',businessId);toast('Review submitted');state.reviewWriteRating=5;})
+      .catch(function(err){toast('Review failed: '+(err.code||err.message),'error');});
   }
+
+  function openEditReviewModal(b, reviewId, oldRating, oldText){
+    if(!requireLogin()) return;
+    state.editStarRating=oldRating||5;
+    var body='<div class="gh-rv-write-form">'+
+      '<div class="gh-rv-write-label">Your rating</div>'+
+      '<div class="gh-rv-stars-row" id="ghEditStars">'+[1,2,3,4,5].map(function(i){return '<button type="button" class="gh-rv-star-btn'+(i<=state.editStarRating?' active':'')+'" data-star="'+i+'">★</button>';}).join('')+'</div>'+
+      '<textarea class="gh-textarea" id="ghEditText" rows="3">'+esc(oldText)+'</textarea>'+
+    '</div>';
+    modal('Edit Your Review',body,'<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSaveEditReview">Save changes</button>','ghEditReviewModal');
+    setTimeout(function(){
+      var stars=$('#ghEditStars'); var save=$('#ghSaveEditReview');
+      if(stars) stars.onclick=function(e){var s=e.target.closest('[data-star]');if(!s)return;state.editStarRating=Number(s.dataset.star);$all('#ghEditStars [data-star]').forEach(function(x){x.classList.toggle('active',Number(x.dataset.star)<=state.editStarRating);});};
+      if(save) save.onclick=function(){editBusinessReview(reviewId,b.id,oldRating,state.editStarRating,($('#ghEditText')||{}).value||'');};
+    },80);
+  }
+
+  function editBusinessReview(reviewId, bizId, oldRating, newRating, newText){
+    var textClean=(newText||'').trim(); if(!textClean) return toast('Review text is required','error');
+    fs().updateDoc(fs().doc(db(),'businessReviews',reviewId),{rating:newRating,text:textClean,editedAt:fs().serverTimestamp(),updatedAt:fs().serverTimestamp()})
+      .then(function(){var diff=newRating-oldRating;if(diff!==0)return fs().updateDoc(fs().doc(db(),'businesses',bizId),{ratingTotal:fs().increment(diff)}).catch(function(){});})
+      .then(function(){var m=document.getElementById('ghEditReviewModal');if(m)m.remove();toast('Review updated');})
+      .catch(function(err){toast('Update failed: '+(err.code||err.message),'error');});
+  }
+
+  function deleteBusinessReview(reviewId, bizId, oldRating){
+    if(!confirm('Delete your review? This cannot be undone.')) return;
+    fs().deleteDoc(fs().doc(db(),'businessReviews',reviewId))
+      .then(function(){return fs().updateDoc(fs().doc(db(),'businesses',bizId),{reviewCount:fs().increment(-1),ratingTotal:fs().increment(-oldRating),ratingCount:fs().increment(-1)}).catch(function(){});})
+      .then(function(){toast('Review deleted');})
+      .catch(function(err){toast('Delete failed: '+(err.code||err.message),'error');});
+  }
+
+  function openOwnerReplyModal(reviewId, isEdit, existingText){
+    if(!requireLogin()) return;
+    var body='<textarea class="gh-textarea" id="ghReplyText" rows="3" placeholder="Write your reply…">'+esc(existingText||'')+'</textarea>';
+    modal(isEdit?'Edit Reply':'Reply to Review',body,'<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitReply">'+(isEdit?'Save changes':'Post reply')+'</button>','ghOwnerReplyModal');
+    setTimeout(function(){
+      var submit=$('#ghSubmitReply'); if(!submit)return;
+      submit.onclick=function(){submitOwnerReply(reviewId,($('#ghReplyText')||{}).value||'',isEdit);};
+    },80);
+  }
+
+  function submitOwnerReply(reviewId, replyText, isEdit){
+    var textClean=(replyText||'').trim(); if(!textClean) return toast('Write a reply first','error');
+    var u=currentUserInfo();
+    var replyObj={text:textClean,authorId:u.uid,authorName:u.name};
+    if(isEdit){replyObj.editedAt=fs().serverTimestamp();}
+    else{replyObj.createdAt=fs().serverTimestamp();}
+    fs().updateDoc(fs().doc(db(),'businessReviews',reviewId),{ownerReply:replyObj})
+      .then(function(){var m=document.getElementById('ghOwnerReplyModal');if(m)m.remove();toast(isEdit?'Reply updated':'Reply posted');})
+      .catch(function(err){toast('Failed: '+(err.code||err.message),'error');});
+  }
+
+  function deleteOwnerReply(reviewId){
+    if(!confirm('Delete your reply?')) return;
+    fs().updateDoc(fs().doc(db(),'businessReviews',reviewId),{ownerReply:null})
+      .then(function(){toast('Reply deleted');})
+      .catch(function(err){toast('Failed: '+(err.code||err.message),'error');});
+  }
+
+  function openReportReviewModal(reviewId, bizId){
+    var reasons=['spam','fake','abuse','scam','other'];
+    var body='<p class="gh-muted" style="margin:0 0 12px;font-size:.87rem">Why are you reporting this review?</p>'+
+      '<div style="display:grid;gap:6px">'+reasons.map(function(r,i){return '<label class="gh-rv-report-option"><input type="radio" name="ghRvReportReason" value="'+r+'"'+(i===0?' checked':'')+'>'+r.charAt(0).toUpperCase()+r.slice(1)+'</label>';}).join('')+'</div>'+
+      '<textarea class="gh-textarea" id="ghReportDetails" placeholder="Additional details (optional)" style="margin-top:12px" rows="2"></textarea>';
+    modal('Report Review',body,'<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn danger" id="ghSubmitRvReport">Report</button>','ghReportReviewModal');
+    setTimeout(function(){
+      var submit=$('#ghSubmitRvReport'); if(!submit)return;
+      submit.onclick=function(){
+        var reason=(document.querySelector('input[name="ghRvReportReason"]:checked')||{}).value||'other';
+        var details=($('#ghReportDetails')||{}).value||'';
+        submitReviewReport(reviewId,bizId,reason,details);
+      };
+    },80);
+  }
+
+  function submitReviewReport(reviewId, bizId, reason, details){
+    var u=currentUserInfo(); var schema=window.GH||{};
+    var reportDoc=schema.newReport?schema.newReport(u.uid,'review',reviewId,reason,details,fs().serverTimestamp()):{reporterId:u.uid,targetType:'review',targetId:reviewId,reason:reason,details:details,status:'pending',reviewedBy:null,reviewedAt:null,createdAt:fs().serverTimestamp()};
+    fs().addDoc(fs().collection(db(),'reports'),reportDoc)
+      .then(function(){return fs().updateDoc(fs().doc(db(),'businessReviews',reviewId),{reportCount:fs().increment(1),reported:true}).catch(function(){});})
+      .then(function(){var m=document.getElementById('ghReportReviewModal');if(m)m.remove();toast('Report submitted — thank you');})
+      .catch(function(err){toast('Report failed: '+(err.code||err.message),'error');});
+  }
+
   function listenBusinessReviews(businessId, cb){ var q=fs().query(fs().collection(db(),'businessReviews'), fs().where('businessId','==',businessId), fs().limit(50)); var _u=fs().onSnapshot(q,function(snap){ var arr=[]; snap.forEach(function(d){arr.push(Object.assign({id:d.id},d.data()));}); arr.sort(function(a,b){return ts(b.createdAt)-ts(a.createdAt);}); cb(arr); },function(){cb([]); }); state.pageUnsubs.push(_u); }
 
   function updateBusinessFollowButton(businessId){
