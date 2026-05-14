@@ -296,8 +296,9 @@
     other:'linear-gradient(135deg,#10b981,#3b82f6)',
   };
 
+  function getPlaceImage(p){ return p.imageUrl||p.image||p.coverImage||p.coverImageUrl||p.coverUrl||p.photoUrl||p.thumbnail||''; }
   function coverBg(p){
-    if(p.photoUrl) return 'background:#0e1120';
+    if(getPlaceImage(p)) return 'background:#0e1120';
     return 'background:'+(CAT_COVERS[p.category]||CAT_COVERS.other);
   }
 
@@ -310,8 +311,9 @@
   }
 
   function renderCard(p, saved){
+    var _pimg=getPlaceImage(p);
     return '<div class="pl-card" data-id="'+esc(p.id)+'" onclick="openPlaceDetail(\''+esc(p.id)+'\')">'+
-      '<div class="pl-card-img" style="'+coverBg(p)+'">'+(p.photoUrl?'<img loading="lazy" decoding="async" src="'+esc(p.photoUrl)+'" alt="" onerror="this.style.display=\'none\'">':'')+
+      '<div class="pl-card-img" style="'+coverBg(p)+'">'+(_pimg?'<img loading="lazy" decoding="async" src="'+esc(_pimg)+'" alt="" onerror="this.style.display=\'none\'">':'')+
         '<span class="pl-card-cat-badge">'+esc(p.category||'Place')+'</span>'+
         '<button class="pl-card-save'+(saved?' saved':'')+'" data-id="'+esc(p.id)+'" onclick="handleSave(event,\''+esc(p.id)+'\')" title="'+(saved?'Unsave':'Save')+'">'+
           '<i class="'+(saved?'fas':'far')+' fa-bookmark"></i>'+
@@ -502,10 +504,10 @@
       box.innerHTML='<p style="padding:24px;color:#94a3b8">Place not found.</p>';
       return;
     }
-    var saved = !!_savedIds[p.id];
+    var saved = !!_savedIds[p.id]; var _dimg=getPlaceImage(p);
     box.innerHTML =
       '<div class="pl-detail-img" style="'+coverBg(p)+'">'+
-        (p.photoUrl?'<img loading="lazy" decoding="async" src="'+esc(p.photoUrl)+'" alt="" onerror="this.style.display=\'none\'">':'')+
+        (_dimg?'<img loading="lazy" decoding="async" src="'+esc(_dimg)+'" alt="" onerror="this.style.display=\'none\'">':'')+
         '<button class="pl-detail-close" onclick="closePlaceDetail()">✕</button>'+
       '</div>'+
       '<div class="pl-detail-body">'+

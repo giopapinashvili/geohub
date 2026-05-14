@@ -14,6 +14,7 @@
   function user() { return window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser; }
   function GS()   { return window.GeoSocial; }
   function toast(msg, t) { if (GS() && GS().toast) GS().toast(msg, t); else alert(msg); }
+  function getEventImage(e){ return e.imageUrl||e.image||e.coverImage||e.coverImageUrl||e.coverUrl||e.photoUrl||e.thumbnail||''; }
 
   // ── Render helpers ─────────────────────────────────────────────────────────
 
@@ -86,8 +87,8 @@
         'onmouseover="this.style.borderColor=\'rgba(16,185,129,.35)\';this.style.transform=\'translateY(-2px)\'"',
         'onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\';this.style.transform=\'\'">',
 
-        event.image
-          ? '<div style="height:170px;overflow:hidden"><img src="' + esc(event.image) + '" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>'
+        getEventImage(event)
+          ? '<div style="height:170px;overflow:hidden"><img src="' + esc(getEventImage(event)) + '" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>'
           : '<div style="height:90px;background:linear-gradient(135deg,rgba(16,185,129,.2),rgba(59,130,246,.15));display:flex;align-items:center;justify-content:center;font-size:2.2rem">🎉</div>',
 
         '<div style="padding:16px;flex:1;display:flex;flex-direction:column;gap:9px">',

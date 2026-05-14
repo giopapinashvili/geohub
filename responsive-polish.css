@@ -236,6 +236,23 @@ html[data-page="messages"] #ghChatPopRoot{display:none!important;}
   .msg-bubble-wrap{max-width:86%!important;}
 }
 
+/* ─── Item card image placeholder ────────────────────────── */
+.gh-item-no-img {
+  width: 100%;
+  height: 100%;
+  min-height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(16,185,129,.12), rgba(59,130,246,.10));
+  color: rgba(255,255,255,.28);
+  font-size: 2rem;
+}
+html[data-gh-theme="light"] .gh-item-no-img {
+  background: linear-gradient(135deg, rgba(16,185,129,.09), rgba(59,130,246,.07));
+  color: rgba(0,0,0,.18);
+}
+
 /* ─── Light Theme: body + nav + clean pages ───────────────── */
 html[data-gh-theme="light"] body {
   background: var(--bg-0);

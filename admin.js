@@ -914,7 +914,8 @@
 
       var doc = {
         name: title, title: title, description: desc, city: city,
-        location: city, category: category, image: image || null,
+        location: city, category: category,
+        image: image || null, imageUrl: image || null,
         status: 'active', createdBy: user.uid, ownerId: user.uid, userId: user.uid,
         createdAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp()
       };
@@ -991,9 +992,12 @@
     if (resEl) resEl.style.display = 'none';
 
     var promises = items.map(function(it) {
+      var imgNorm = it.imageUrl||it.image||it.coverImage||it.coverImageUrl||it.coverUrl||it.photoUrl||it.thumbnail||null;
       var doc = Object.assign({}, it, {
         name: it.name || it.title,
         title: it.title || it.name,
+        imageUrl: imgNorm,
+        image: imgNorm,
         status: it.status || 'active',
         createdBy: user.uid, ownerId: user.uid, userId: user.uid,
         createdAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp()
