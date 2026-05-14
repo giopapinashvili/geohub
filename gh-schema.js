@@ -287,29 +287,55 @@
     };
   }
 
-  function newStaff(businessId, userId, role, invitedBy, ts) {
+  function newStaff(businessId, userId, fields, invitedBy, ts) {
+    var f = (fields && typeof fields === 'object') ? fields : {};
     return {
-      businessId: businessId || '',
-      userId:     userId || '',
-      role:       role || 'staff',
-      status:     'invited',
-      invitedBy:  invitedBy || '',
-      invitedAt:  ts,
-      joinedAt:   null,
+      businessId:     businessId || '',
+      userId:         userId     || '',
+      email:          f.email        || '',
+      displayName:    f.displayName  || '',
+      roleTitle:      f.roleTitle    || '',
+      employmentType: f.employmentType || 'full_time',
+      role:           f.roleTitle    || 'staff',
+      status:         'active',
+      visibility:     f.visibility   || 'public',
+      invitedBy:      invitedBy      || '',
+      joinedAt:       ts,
     };
   }
 
-  function newInvite(businessId, businessTitle, inviteeEmail, role, sentBy, ts) {
+  function newInvite(businessId, businessTitle, invitedEmail, fields, invitedBy, invitedByName, ts) {
+    var f = (fields && typeof fields === 'object') ? fields : {};
     return {
-      businessId:    businessId    || '',
-      businessTitle: businessTitle || '',
-      inviteeEmail:  inviteeEmail  || '',
-      role:          role          || 'staff',
-      status:        'pending',
-      sentBy:        sentBy || '',
-      createdAt:     ts,
-      expiresAt:     null,
-      acceptedAt:    null,
+      businessId:     businessId     || '',
+      businessTitle:  businessTitle  || '',
+      invitedEmail:   invitedEmail   || '',
+      inviteeEmail:   invitedEmail   || '',
+      roleTitle:      f.roleTitle    || '',
+      employmentType: f.employmentType || 'full_time',
+      message:        f.message      || '',
+      role:           f.roleTitle    || 'staff',
+      status:         'pending',
+      invitedBy:      invitedBy      || '',
+      invitedByName:  invitedByName  || '',
+      sentBy:         invitedBy      || '',
+      invitedAt:      ts,
+      createdAt:      ts,
+      respondedAt:    null,
+      expiresAt:      null,
+    };
+  }
+
+  function newWorkHistory(businessId, businessTitle, fields, ts) {
+    var f = (fields && typeof fields === 'object') ? fields : {};
+    return {
+      businessId:     businessId     || '',
+      businessTitle:  businessTitle  || '',
+      roleTitle:      f.roleTitle    || '',
+      employmentType: f.employmentType || 'full_time',
+      status:         'active',
+      startedAt:      ts,
+      visibility:     f.visibility   || 'public',
     };
   }
 
@@ -384,6 +410,7 @@
     newService:       newService,
     newStaff:         newStaff,
     newInvite:        newInvite,
+    newWorkHistory:   newWorkHistory,
     newAnalyticsDay:  newAnalyticsDay,
     newReport:        newReport,
     newBusinessReview: newBusinessReview,

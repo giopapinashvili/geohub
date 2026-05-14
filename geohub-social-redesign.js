@@ -1382,26 +1382,224 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
   }
 
+  /* ── Employee invite helpers ─────────────────────────────── */
+  function empTypeLabel(t){
+    var m={full_time:'Full-time',part_time:'Part-time',freelance:'Freelance',temporary:'Temporary',internship:'Internship'};
+    return m[t]||t||'';
+  }
+  function empStatusBadge(s){
+    var cls={pending:'pending',accepted:'accepted',declined:'declined',cancelled:'cancelled'};
+    return '<span class="gh-emp-badge '+(cls[s]||'')+'">'+esc(s||'')+'</span>';
+  }
+  function loadBizInvites(bizId, cb){
+    if(!fs()||!db()){cb([]);return;}
+    fs().getDocs(fs().collection(db(),'businesses',bizId,'invites')).then(function(snap){
+      var items=[]; snap.forEach(function(d){items.push(Object.assign({id:d.id},d.data()));});
+      items.sort(function(a,b){var o={pending:0,accepted:1,declined:2,cancelled:3};var ao=o[a.status]||4,bo=o[b.status]||4;if(ao!==bo)return ao-bo;return ts(b.invitedAt)-ts(a.invitedAt);});
+      cb(items);
+    }).catch(function(){cb([]);});
+  }
+  function loadBizStaff(bizId, cb, publicOnly){
+    if(!fs()||!db()){cb([]);return;}
+    fs().getDocs(fs().collection(db(),'businesses',bizId,'staff')).then(function(snap){
+      var items=[]; snap.forEach(function(d){items.push(Object.assign({id:d.id},d.data()));});
+      if(publicOnly) items=items.filter(function(s){return s.visibility==='public';});
+      cb(items);
+    }).catch(function(){cb([]);});
+  }
+  function openInviteModal(b){
+    if(!requireLogin()) return;
+    modal('Invite Employee',
+      '<label class="gh-form-label">Email address *</label>'+
+      '<input class="gh-input" id="ghInvEmail" type="email" placeholder="employee@example.com">'+
+      '<div style="height:10px"></div>'+
+      '<label class="gh-form-label">Role / Job title *</label>'+
+      '<input class="gh-input" id="ghInvRole" placeholder="e.g. Sales Manager, Developer…" maxlength="60">'+
+      '<div style="height:10px"></div>'+
+      '<label class="gh-form-label">Employment type</label>'+
+      '<select class="gh-select" id="ghInvType">'+
+        '<option value="full_time">Full-time</option>'+
+        '<option value="part_time">Part-time</option>'+
+        '<option value="freelance">Freelance</option>'+
+        '<option value="temporary">Temporary</option>'+
+        '<option value="internship">Internship</option>'+
+      '</select>'+
+      '<div style="height:10px"></div>'+
+      '<label class="gh-form-label">Personal message (optional)</label>'+
+      '<textarea class="gh-textarea" id="ghInvMsg" placeholder="Add a note to your invitation…" rows="3" maxlength="300"></textarea>'+
+      '<div id="ghInvError" style="display:none" class="gh-form-hint error"></div>',
+      '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSendInvite"><i class="fas fa-paper-plane"></i> Send Invitation</button>',
+      'ghInviteModal');
+    $('#ghSendInvite').onclick=function(){
+      var email=($('#ghInvEmail').value||'').trim().toLowerCase();
+      var role=($('#ghInvRole').value||'').trim();
+      var type=$('#ghInvType').value||'full_time';
+      var msg=($('#ghInvMsg').value||'').trim();
+      var errEl=$('#ghInvError');
+      if(!email||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){errEl.textContent='Valid email required.';errEl.style.display='';return;}
+      if(!role){errEl.textContent='Role / job title required.';errEl.style.display='';return;}
+      errEl.style.display='none';
+      var btn=$('#ghSendInvite');btn.disabled=true;btn.textContent='Sending…';
+      sendEmpInvite(b,{email:email,roleTitle:role,employmentType:type,message:msg},function(ok){
+        if(ok){closeModal('ghInviteModal');renderBizDashEmployees(b);}
+        else{btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i> Send Invitation';errEl.textContent='Failed. Try again.';errEl.style.display='';}
+      });
+    };
+  }
+  function sendEmpInvite(b, fields, cb){
+    if(!fs()||!db()||!authUser()){cb(false);return;}
+    var u=authUser();
+    var ga=window.GeoAuth&&window.GeoAuth.getCurrentUser&&window.GeoAuth.getCurrentUser();
+    var senderName=(ga&&(ga.fullName||ga.displayName||ga.name))||u.displayName||u.email||'';
+    fs().addDoc(fs().collection(db(),'businesses',b.id,'invites'),{
+      businessId:b.id,businessTitle:b.title||b.name||'',
+      invitedEmail:fields.email,inviteeEmail:fields.email,
+      roleTitle:fields.roleTitle||'',employmentType:fields.employmentType||'full_time',
+      message:fields.message||'',status:'pending',
+      invitedBy:u.uid,invitedByName:senderName,
+      invitedAt:fs().serverTimestamp(),respondedAt:null,
+    }).then(function(){cb(true);}).catch(function(){cb(false);});
+  }
+  function cancelEmpInvite(b, inviteId, cb){
+    if(!fs()||!db()){if(cb)cb(false);return;}
+    fs().updateDoc(fs().doc(db(),'businesses',b.id,'invites',inviteId),{status:'cancelled',respondedAt:fs().serverTimestamp()})
+      .then(function(){if(cb)cb(true);}).catch(function(){if(cb)cb(false);});
+  }
+  function acceptEmpInvite(b, invite){
+    if(!requireLogin()) return;
+    var u=authUser(); if(!u||!u.uid) return;
+    var ga=window.GeoAuth&&window.GeoAuth.getCurrentUser&&window.GeoAuth.getCurrentUser();
+    var displayName=(ga&&(ga.fullName||ga.displayName||ga.name))||u.displayName||(u.email||'').split('@')[0]||'';
+    var email=(u.email||'').toLowerCase().trim();
+    var invEmail=(invite.invitedEmail||invite.inviteeEmail||'').toLowerCase().trim();
+    if(email!==invEmail){toast('This invitation is not for your account.','error');return;}
+    var invRef=fs().doc(db(),'businesses',b.id,'invites',invite.id);
+    var staffRef=fs().doc(db(),'businesses',b.id,'staff',u.uid);
+    var now=fs().serverTimestamp();
+    Promise.all([
+      fs().updateDoc(invRef,{status:'accepted',respondedAt:now}),
+      fs().setDoc(staffRef,{
+        userId:u.uid,email:email,displayName:displayName,
+        roleTitle:invite.roleTitle||'',employmentType:invite.employmentType||'full_time',
+        status:'active',visibility:'public',joinedAt:now,invitedBy:invite.invitedBy||'',
+      }),
+    ]).then(function(){
+      fs().setDoc(fs().doc(db(),'users',u.uid,'workHistory',b.id),{
+        businessId:b.id,businessTitle:b.title||b.name||'',
+        roleTitle:invite.roleTitle||'',employmentType:invite.employmentType||'full_time',
+        status:'active',startedAt:now,visibility:'public',
+      },{merge:true}).catch(function(){});
+      toast('Welcome to the team!');
+      renderBusinessTab(b);
+    }).catch(function(err){toast('Failed: '+(err.code||err.message),'error');});
+  }
+  function declineEmpInvite(b, inviteId){
+    if(!fs()||!db()) return;
+    fs().updateDoc(fs().doc(db(),'businesses',b.id,'invites',inviteId),{status:'declined',respondedAt:fs().serverTimestamp()})
+      .then(function(){toast('Invitation declined.');renderBusinessAbout(b);}).catch(function(e){toast('Failed: '+(e.code||e.message),'error');});
+  }
+  function updateStaffVisibility(b, staffId, visibility){
+    if(!fs()||!db()) return;
+    fs().updateDoc(fs().doc(db(),'businesses',b.id,'staff',staffId),{visibility:visibility})
+      .then(function(){toast('Visibility updated.');}).catch(function(e){toast('Failed: '+(e.code||e.message),'error');});
+  }
+
   function renderBizDashEmployees(b){
     var cont=$('#ghDashContent'); if(!cont) return;
     cont.innerHTML=
       '<div class="gh-dash-section">'+
-        '<h2 class="gh-dash-section-title">Employees</h2>'+
-        '<div class="gh-card">'+
-          '<div class="gh-dash-coming-soon">'+
-            '<i class="fas fa-user-group gh-dash-cs-icon"></i>'+
-            '<h3>Employee System — Coming in Phase 9</h3>'+
-            '<p>Invite employees, assign roles (owner, admin, staff), manage permissions, and track activity across your business page.</p>'+
-            '<div class="gh-dash-feature-list">'+
-              '<div class="gh-dash-feature-item"><i class="fas fa-envelope"></i><span>Email invitations</span></div>'+
-              '<div class="gh-dash-feature-item"><i class="fas fa-shield-halved"></i><span>Role-based permissions</span></div>'+
-              '<div class="gh-dash-feature-item"><i class="fas fa-id-badge"></i><span>Employee profiles</span></div>'+
-              '<div class="gh-dash-feature-item"><i class="fas fa-circle-check"></i><span>Identity verification</span></div>'+
-            '</div>'+
-            '<button class="gh-btn ghost" disabled><i class="fas fa-paper-plane"></i> Invite employee (coming soon)</button>'+
-          '</div>'+
+        '<div class="gh-emp-header">'+
+          '<h2 class="gh-dash-section-title" style="margin:0">Employees</h2>'+
+          '<button class="gh-btn sm" id="ghEmpInviteBtn"><i class="fas fa-paper-plane"></i> Invite</button>'+
         '</div>'+
+        '<div id="ghEmpBody"><div class="gh-empty" style="padding:24px 0"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
       '</div>';
+    $('#ghEmpInviteBtn').onclick=function(){openInviteModal(b);};
+    function paint(){
+      var el=$('#ghEmpBody'); if(!el) return;
+      loadBizInvites(b.id,function(invites){
+        loadBizStaff(b.id,function(staff){
+          var pending=invites.filter(function(i){return i.status==='pending';});
+          var declined=invites.filter(function(i){return i.status==='declined'||i.status==='cancelled';});
+          var html='';
+          // Active team members
+          html+='<div class="gh-emp-section">'+
+            '<div class="gh-emp-sec-title"><i class="fas fa-user-check"></i> Team Members ('+staff.length+')</div>';
+          if(!staff.length){html+='<div class="gh-emp-empty">No team members yet. Send your first invitation.</div>';}
+          else{html+='<div class="gh-emp-list">'+staff.map(function(s){
+            var sid=s.userId||s.id;
+            return '<div class="gh-emp-card">'+
+              '<div class="gh-avatar" style="flex-shrink:0">'+esc(initials(s.displayName||s.email||'?'))+'</div>'+
+              '<div class="gh-emp-info">'+
+                '<div class="gh-emp-name">'+esc(s.displayName||s.email||'Employee')+'</div>'+
+                '<div class="gh-emp-meta">'+
+                  (s.roleTitle?'<span class="gh-emp-role">'+esc(s.roleTitle)+'</span>':'')+
+                  (s.employmentType?'<span class="gh-emp-type">'+esc(empTypeLabel(s.employmentType))+'</span>':'')+
+                  '<span class="gh-emp-badge accepted">Active</span>'+
+                '</div>'+
+              '</div>'+
+              '<select class="gh-emp-vis-select" data-staff-vis="'+esc(sid)+'" title="Profile visibility">'+
+                '<option value="public"'+(s.visibility==='public'?' selected':'')+'>Public</option>'+
+                '<option value="companies_only"'+(s.visibility==='companies_only'?' selected':'')+'>Companies only</option>'+
+                '<option value="hidden"'+(s.visibility==='hidden'?' selected':'')+'>Hidden</option>'+
+              '</select>'+
+            '</div>';
+          }).join('')+'</div>';}
+          html+='</div>';
+          // Pending invites
+          html+='<div class="gh-emp-section">'+
+            '<div class="gh-emp-sec-title"><i class="fas fa-clock"></i> Pending Invites ('+pending.length+')</div>';
+          if(!pending.length){html+='<div class="gh-emp-empty">No pending invites.</div>';}
+          else{html+='<div class="gh-emp-list">'+pending.map(function(inv){
+            return '<div class="gh-emp-card">'+
+              '<div class="gh-avatar" style="flex-shrink:0;color:var(--gh-muted);font-size:.85rem"><i class="fas fa-envelope"></i></div>'+
+              '<div class="gh-emp-info">'+
+                '<div class="gh-emp-name">'+esc(inv.invitedEmail||inv.inviteeEmail||'')+'</div>'+
+                '<div class="gh-emp-meta">'+
+                  (inv.roleTitle?'<span class="gh-emp-role">'+esc(inv.roleTitle)+'</span>':'')+
+                  (inv.employmentType?'<span class="gh-emp-type">'+esc(empTypeLabel(inv.employmentType))+'</span>':'')+
+                  '<span class="gh-emp-badge pending">Pending</span>'+
+                '</div>'+
+                (inv.message?'<div class="gh-emp-msg">"'+esc(inv.message)+'"</div>':'')+
+              '</div>'+
+              '<button class="gh-btn xs danger" data-cancel-invite="'+esc(inv.id)+'"><i class="fas fa-xmark"></i> Cancel</button>'+
+            '</div>';
+          }).join('')+'</div>';}
+          html+='</div>';
+          // Declined/cancelled — collapsible
+          if(declined.length){
+            html+='<details class="gh-emp-section">'+
+              '<summary class="gh-emp-sec-title" style="cursor:pointer;user-select:none"><i class="fas fa-ban"></i> Declined / Cancelled ('+declined.length+')</summary>'+
+              '<div class="gh-emp-list" style="margin-top:10px">'+declined.map(function(inv){
+                return '<div class="gh-emp-card muted">'+
+                  '<div class="gh-emp-info">'+
+                    '<div class="gh-emp-name">'+esc(inv.invitedEmail||inv.inviteeEmail||'')+'</div>'+
+                    '<div class="gh-emp-meta">'+empStatusBadge(inv.status)+(inv.roleTitle?'<span class="gh-emp-role">'+esc(inv.roleTitle)+'</span>':'')+'</div>'+
+                  '</div>'+
+                '</div>';
+              }).join('')+'</div>'+
+            '</details>';
+          }
+          el.innerHTML=html;
+          // Bind cancel buttons
+          el.querySelectorAll('[data-cancel-invite]').forEach(function(btn){
+            btn.onclick=function(){
+              if(!confirm('Cancel this invitation?')) return;
+              btn.disabled=true;btn.innerHTML='…';
+              cancelEmpInvite(b,btn.dataset.cancelInvite,function(ok){
+                if(ok){toast('Invitation cancelled.');paint();}
+                else{btn.disabled=false;btn.innerHTML='<i class="fas fa-xmark"></i> Cancel';toast('Failed','error');}
+              });
+            };
+          });
+          // Bind visibility selects
+          el.querySelectorAll('[data-staff-vis]').forEach(function(sel){
+            sel.onchange=function(){updateStaffVisibility(b,sel.dataset.staffVis,sel.value);};
+          });
+        });
+      });
+    }
+    paint();
   }
 
   function renderBizDashAnalytics(b){
@@ -1952,6 +2150,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var hasContact=b.phone||b.email||b.website||ig||fb||wa||tk||li||bookingUrl;
 
     box.innerHTML=
+      '<div id="ghBizInviteBanner"></div>'+
       '<div class="gh-biz-about-grid">'+
         '<div style="display:grid;gap:12px">'+
           (b.description?'<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>About</h3></div><p style="margin:0;line-height:1.65;font-size:.9rem;color:var(--gh-text)">'+esc(b.description)+'</p></div>':'')+
@@ -1989,7 +2188,59 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             (b.plan&&b.plan!=='free'?aboutRow('fa-crown','Pro plan'):aboutRow('fa-circle-check','Free listing'))+
           '</div></div>'+
         '</div>'+
-      '</div>';
+      '</div>'+
+      '<div id="ghBizTeamSection" style="margin-top:16px"></div>';
+    loadPublicTeam(b);
+    checkInviteBanner(b);
+  }
+
+  function loadPublicTeam(b){
+    var el=$('#ghBizTeamSection'); if(!el) return;
+    loadBizStaff(b.id,function(staff){
+      if(!staff.length){return;}
+      el.innerHTML='<div class="gh-card" style="margin-bottom:0">'+
+        '<div class="gh-biz-sec-head"><h3>Team</h3></div>'+
+        '<div class="gh-team-grid">'+
+        staff.map(function(s){
+          return '<div class="gh-team-card">'+
+            '<div class="gh-team-avatar">'+esc(initials(s.displayName||s.email||'?'))+'</div>'+
+            '<div class="gh-team-name">'+esc(s.displayName||s.email||'Team member')+'</div>'+
+            (s.roleTitle?'<div class="gh-team-role">'+esc(s.roleTitle)+'</div>':'')+
+            (s.employmentType?'<div class="gh-team-type">'+esc(empTypeLabel(s.employmentType))+'</div>':'')+
+          '</div>';
+        }).join('')+
+        '</div></div>';
+    },true);
+  }
+
+  function checkInviteBanner(b){
+    var u=authUser(); if(!u||!u.email||!fs()||!db()) return;
+    var el=$('#ghBizInviteBanner'); if(!el) return;
+    var email=(u.email||'').toLowerCase().trim();
+    fs().getDocs(fs().query(
+      fs().collection(db(),'businesses',b.id,'invites'),
+      fs().where('invitedEmail','==',email),
+      fs().where('status','==','pending')
+    )).then(function(snap){
+      if(snap.empty) return;
+      var inv=Object.assign({id:snap.docs[0].id},snap.docs[0].data());
+      el.innerHTML=
+        '<div class="gh-invite-banner">'+
+          '<div class="gh-invite-banner-title"><i class="fas fa-envelope-open-text"></i> You have a pending job invitation</div>'+
+          '<div class="gh-invite-banner-meta">'+
+            '<strong>'+esc(b.title||b.name||'This business')+'</strong> invited you'+
+            (inv.roleTitle?' as <strong>'+esc(inv.roleTitle)+'</strong>':'')+
+            (inv.employmentType?' ('+esc(empTypeLabel(inv.employmentType))+')':'')+'.'+
+          '</div>'+
+          (inv.message?'<div class="gh-invite-banner-msg">&#8220;'+esc(inv.message)+'&#8221;</div>':'')+
+          '<div class="gh-invite-banner-actions">'+
+            '<button class="gh-btn" id="ghAcceptInvite"><i class="fas fa-check"></i> Accept</button>'+
+            '<button class="gh-btn ghost" id="ghDeclineInvite"><i class="fas fa-xmark"></i> Decline</button>'+
+          '</div>'+
+        '</div>';
+      $('#ghAcceptInvite').onclick=function(){acceptEmpInvite(b,inv);};
+      $('#ghDeclineInvite').onclick=function(){if(confirm('Decline this invitation?'))declineEmpInvite(b,inv.id);};
+    }).catch(function(){});
   }
 
   /* ── Review helpers ── */
