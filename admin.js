@@ -949,6 +949,7 @@
           if (desc) lines.push(esc(desc.slice(0, 120)) + (desc.length > 120 ? '…' : ''));
           if (city) lines.push('City: ' + esc(city));
           if (category) lines.push('Category: ' + esc(category));
+          if (image) lines.push('Image: <code style="font-size:.75rem">' + esc(image.slice(0, 72)) + (image.length > 72 ? '…' : '') + '</code>');
           previewBody.innerHTML = lines.join('<br>');
           preview.style.display = 'block';
           setTimeout(function() { if (preview) preview.style.display = 'none'; }, 8000);

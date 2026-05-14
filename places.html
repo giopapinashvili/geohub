@@ -298,7 +298,7 @@
 
   function getPlaceImage(p){ return p.imageUrl||p.image||p.coverImage||p.coverImageUrl||p.coverUrl||p.photoUrl||p.thumbnail||''; }
   function coverBg(p){
-    if(getPlaceImage(p)) return 'background:#0e1120';
+    // Always show category gradient — it shows through if the image fails to load
     return 'background:'+(CAT_COVERS[p.category]||CAT_COVERS.other);
   }
 
