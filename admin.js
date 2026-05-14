@@ -649,7 +649,7 @@
         : '<div class="uav" style="width:38px;height:38px;font-size:0.9rem;background:linear-gradient(135deg,#10b981,#3b82f6);flex-shrink:0">' + initLetter + '</div>';
 
       var mediaHtml = (item.mediaUrl && item._col !== 'checkins')
-        ? '<img src="' + escHtmlAdmin(item.mediaUrl) + '" style="max-height:130px;border-radius:8px;margin-top:8px;object-fit:cover;max-width:100%">'
+        ? '<img src="' + escHtmlAdmin(item.mediaUrl) + '" loading="lazy" decoding="async" style="max-height:130px;border-radius:8px;margin-top:8px;object-fit:cover;max-width:100%">'
         : '';
 
       var authorId   = escAttr(item.authorId   || '');

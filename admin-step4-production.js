@@ -215,7 +215,7 @@
           var title = d.title || d.name || d.displayName || doc.id;
           var meta = [d.city || d.location, d.category, d.status].filter(Boolean).join(' · ');
           html += '<div class="admin-step4-row" data-col="'+esc(col)+'" data-id="'+esc(doc.id)+'">'+
-            '<div class="admin-step4-thumb">'+(d.imageUrl || d.coverUrl ? '<img src="'+esc(d.imageUrl || d.coverUrl)+'" alt="">' : '<i class="fas fa-database"></i>')+'</div>'+
+            '<div class="admin-step4-thumb">'+(d.imageUrl || d.coverUrl ? '<img src="'+esc(d.imageUrl || d.coverUrl)+'" alt="" loading="lazy" decoding="async">' : '<i class="fas fa-database"></i>')+'</div>'+
             '<div class="admin-step4-main"><strong>'+esc(title)+'</strong><span>'+esc(meta || 'Firestore item')+'</span><p>'+esc((d.description || '').slice(0,120))+'</p></div>'+
             '<button class="btn btn-red btn-sm" type="button" data-admin-delete="'+esc(doc.id)+'"><i class="fas fa-trash"></i></button>'+
           '</div>';

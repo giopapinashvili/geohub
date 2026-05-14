@@ -283,7 +283,7 @@
         sec.innerHTML = '<div style="font-size:.75rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px"><i class="fas fa-file-alt" style="margin-right:6px"></i>Saved Posts</div>'
           + '<div class="posts-grid">' + posts.map(function (post) {
             return '<div class="post-thumb">'
-              + (post.mediaUrl ? '<img src="' + esc(post.mediaUrl) + '" alt="Post">'
+              + (post.mediaUrl ? '<img src="' + esc(post.mediaUrl) + '" alt="Post" loading="lazy" decoding="async">'
                 : '<div style="background:var(--bg-elevated);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.9rem;padding:14px;box-sizing:border-box;text-align:center;color:var(--text-secondary)">' + esc((post.text || '').slice(0, 80)) + '</div>')
               + '<div class="post-overlay"><span><i class="fas fa-heart"></i> ' + (post.likeCount || 0) + '</span><span><i class="fas fa-comment"></i> ' + (post.commentCount || 0) + '</span></div>'
               + '</div>';
@@ -297,7 +297,7 @@
           + '<div style="display:flex;flex-direction:column;gap:10px">'
           + places.map(function (p) {
             var grad = 'linear-gradient(135deg,#10b981,#3b82f6)';
-            var cover = p.photoUrl ? '<img src="' + esc(p.photoUrl) + '" style="width:100%;height:100%;object-fit:cover;border-radius:10px">' : '<div style="width:100%;height:100%;background:' + grad + ';border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas fa-map-marker-alt" style="color:#fff;font-size:1.1rem"></i></div>';
+            var cover = p.photoUrl ? '<img src="' + esc(p.photoUrl) + '" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;border-radius:10px">' : '<div style="width:100%;height:100%;background:' + grad + ';border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas fa-map-marker-alt" style="color:#fff;font-size:1.1rem"></i></div>';
             return '<a href="places.html" style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;text-decoration:none;color:inherit;transition:border-color .15s">'
               + '<div style="width:52px;height:52px;border-radius:10px;overflow:hidden;flex-shrink:0">' + cover + '</div>'
               + '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:.88rem;color:#f0f4ff;margin-bottom:3px">' + esc(p.name || 'Unknown Place') + '</div>'
@@ -322,7 +322,7 @@
         if (!friendsTab) return;
         const pendingHtml = friendsTab.dataset.pendingRequestsHtml || '';
         if (!friends.length && !pendingHtml) { friendsTab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-user-group"></i><h3>No friends yet</h3><p>Send friend requests from profiles.</p></div>'; return; }
-        friendsTab.innerHTML = pendingHtml + (friends.length ? '<div style="font-weight:800;margin:0 0 10px">Friends</div><div class="gh-friend-grid">'+friends.map(f => '<a class="gh-friend-card" href="profile.html?id='+encodeURIComponent(f.uid||f.id)+'"><span class="gh-avatar">'+(f.avatar||f.photoURL ? '<img src="'+esc(f.avatar||f.photoURL)+'" alt="">' : esc(initialLetters(f.fullName||f.displayName||f.name||'GeoHub User',f.email)))+'</span><div><strong>'+esc(f.fullName||f.displayName||f.name||'GeoHub User')+'</strong><span>@'+esc(f.username||'user')+'</span></div></a>').join('')+'</div>' : '');
+        friendsTab.innerHTML = pendingHtml + (friends.length ? '<div style="font-weight:800;margin:0 0 10px">Friends</div><div class="gh-friend-grid">'+friends.map(f => '<a class="gh-friend-card" href="profile.html?id='+encodeURIComponent(f.uid||f.id)+'"><span class="gh-avatar">'+(f.avatar||f.photoURL ? '<img src="'+esc(f.avatar||f.photoURL)+'" alt="" loading="lazy" decoding="async">' : esc(initialLetters(f.fullName||f.displayName||f.name||'GeoHub User',f.email)))+'</span><div><strong>'+esc(f.fullName||f.displayName||f.name||'GeoHub User')+'</strong><span>@'+esc(f.username||'user')+'</span></div></a>').join('')+'</div>' : '');
       });
     }
 
@@ -331,7 +331,7 @@
         const count = $('.ptab[data-tab="posts"] .tab-count'); if (count) count.textContent = posts.length || '0';
         if (!posts.length) return;
         const tab = $('#tab-posts');
-        tab.innerHTML = '<div class="posts-grid">' + posts.map(post => '<div class="post-thumb">' + (post.mediaUrl ? '<img src="' + esc(post.mediaUrl) + '" alt="Post">' : '<div style="background:var(--bg-elevated);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1rem;padding:16px;box-sizing:border-box;text-align:center;color:var(--text-secondary)">' + esc(post.text || '') + '</div>') + '<div class="post-overlay"><span><i class="fas fa-heart"></i> ' + (post.likeCount || 0) + '</span><span><i class="fas fa-comment"></i> ' + (post.commentCount || 0) + '</span></div></div>').join('') + '</div>';
+        tab.innerHTML = '<div class="posts-grid">' + posts.map(post => '<div class="post-thumb">' + (post.mediaUrl ? '<img src="' + esc(post.mediaUrl) + '" alt="Post" loading="lazy" decoding="async">' : '<div style="background:var(--bg-elevated);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1rem;padding:16px;box-sizing:border-box;text-align:center;color:var(--text-secondary)">' + esc(post.text || '') + '</div>') + '<div class="post-overlay"><span><i class="fas fa-heart"></i> ' + (post.likeCount || 0) + '</span><span><i class="fas fa-comment"></i> ' + (post.commentCount || 0) + '</span></div></div>').join('') + '</div>';
       });
     }
   }
@@ -354,7 +354,7 @@
       window.GeoSocial.listenManagedBusinesses(user.uid, businesses => {
         const cnt = $('.ptab[data-tab="businesses"] .tab-count'); if(cnt) cnt.textContent = businesses.length || '0';
         if(!businesses.length){ tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-store"></i><h3>No business pages yet</h3><p>Business pages you manage will appear here.</p><a class="btn btn-primary btn-sm" href="add-business.html">Add Business</a></div>'; return; }
-        tab.innerHTML = '<div class="gh-friend-grid">'+businesses.map(b => '<a class="gh-friend-card" href="business.html?id='+encodeURIComponent(b.id)+'"><span class="gh-avatar">'+(b.logoUrl||b.coverImageUrl?'<img src="'+esc(b.logoUrl||b.coverImageUrl)+'" alt="">':esc(initialLetters(b.name||'Business')) )+'</span><div><strong>'+esc(b.name||'Business')+'</strong><span>'+esc(b.businessType==='online'?'Online / Nationwide':(b.city||b.category||'Business'))+'</span></div></a>').join('')+'</div>';
+        tab.innerHTML = '<div class="gh-friend-grid">'+businesses.map(b => '<a class="gh-friend-card" href="business.html?id='+encodeURIComponent(b.id)+'"><span class="gh-avatar">'+(b.logoUrl||b.coverImageUrl?'<img src="'+esc(b.logoUrl||b.coverImageUrl)+'" alt="" loading="lazy" decoding="async">':esc(initialLetters(b.name||'Business')) )+'</span><div><strong>'+esc(b.name||'Business')+'</strong><span>'+esc(b.businessType==='online'?'Online / Nationwide':(b.city||b.category||'Business'))+'</span></div></a>').join('')+'</div>';
       });
     }
   }

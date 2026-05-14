@@ -322,7 +322,7 @@
       const rows=[];
       snap.forEach(d=>{ const u=Object.assign({id:d.id}, d.data()||{}); const hay=[u.fullName,u.name,u.username,u.email].filter(Boolean).join(' ').toLowerCase(); if(u.id!==me && hay.includes(q)) rows.push(u); });
       if(!rows.length){ box.innerHTML='<div class="admin-step4-empty">No matching users.</div>'; return; }
-      box.innerHTML=rows.slice(0,12).map(u=>'<button type="button" class="new-conversation-user" data-start-user="'+esc(u.id)+'"><span>'+(u.avatar||u.photoURL?'<img src="'+esc(u.avatar||u.photoURL)+'" alt="">':esc(((u.fullName||u.name||u.email||'?')[0]||'?').toUpperCase()))+'</span><strong>'+esc(u.fullName||u.name||u.username||u.email||'User')+'</strong><small>'+esc(u.email||('@'+(u.username||'')))+'</small></button>').join('');
+      box.innerHTML=rows.slice(0,12).map(u=>'<button type="button" class="new-conversation-user" data-start-user="'+esc(u.id)+'"><span>'+(u.avatar||u.photoURL?'<img src="'+esc(u.avatar||u.photoURL)+'" alt="" loading="lazy" decoding="async">':esc(((u.fullName||u.name||u.email||'?')[0]||'?').toUpperCase()))+'</span><strong>'+esc(u.fullName||u.name||u.username||u.email||'User')+'</strong><small>'+esc(u.email||('@'+(u.username||'')))+'</small></button>').join('');
     }catch(err){ console.error('[Messages] user search failed', err); box.innerHTML='<div class="admin-step4-empty">Search failed: '+esc(err.message)+'</div>'; }
   };
   document.addEventListener('click', async function(e){
