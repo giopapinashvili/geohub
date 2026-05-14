@@ -718,6 +718,37 @@ html[data-gh-theme="dark"] body.gh-fb-inspired .gh-panel{
 .gh-dash-analytics-days{display:grid;gap:6px}
 .gh-dash-analytics-day{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--gh-card-soft);border-radius:8px;font-size:.85rem}
 .gh-dash-analytics-day-date{color:var(--gh-muted);font-weight:600}
+
+/* ── Business Analytics Dashboard (Step 8) ───────────────── */
+.gh-da-section{margin-bottom:20px}
+.gh-da-section-title{margin:0 0 10px;font-size:.82rem;font-weight:700;color:var(--gh-text);text-transform:uppercase;letter-spacing:.05em}
+.gh-da-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:4px}
+.gh-da-kpi-card{background:var(--gh-card);border:1px solid var(--gh-border);border-radius:12px;padding:14px 12px;display:flex;gap:10px;align-items:center}
+.gh-da-kpi-card i{font-size:1.2rem;color:var(--gh-green);width:22px;text-align:center;flex-shrink:0}
+.gh-da-kpi-body{display:grid;gap:1px;min-width:0}
+.gh-da-kpi-val{font-size:1.2rem;font-weight:800;color:var(--gh-text);line-height:1}
+.gh-da-kpi-label{font-size:.67rem;font-weight:600;color:var(--gh-muted);text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gh-da-actions{display:grid;gap:6px}
+.gh-da-action-row{display:grid;grid-template-columns:20px 88px 1fr 34px;align-items:center;gap:8px;padding:7px 10px;background:var(--gh-card-soft);border-radius:8px}
+.gh-da-action-icon{font-size:.82rem;color:var(--gh-green);text-align:center}
+.gh-da-action-label{font-size:.82rem;color:var(--gh-text);font-weight:500}
+.gh-da-bar-wrap{height:6px;background:var(--gh-border);border-radius:3px;overflow:hidden}
+.gh-da-bar-fill{height:100%;background:var(--gh-green);border-radius:3px;transition:width .4s ease}
+.gh-da-action-val{font-size:.82rem;font-weight:700;color:var(--gh-text);text-align:right}
+.gh-da-days{display:grid;gap:4px}
+.gh-da-day-head{display:grid;grid-template-columns:1fr 56px 68px 56px;gap:8px;padding:5px 10px;font-size:.7rem;font-weight:700;color:var(--gh-muted);text-transform:uppercase;letter-spacing:.04em}
+.gh-da-day-row{display:grid;grid-template-columns:1fr 56px 68px 56px;gap:8px;padding:7px 10px;background:var(--gh-card-soft);border-radius:8px;font-size:.83rem;color:var(--gh-text)}
+.gh-da-today{background:rgba(16,185,129,.1)!important;border:1px solid rgba(16,185,129,.25);font-weight:600}
+html[data-gh-theme="light"] .gh-da-today{background:rgba(16,185,129,.08)!important;border-color:rgba(16,185,129,.2)}
+@media(max-width:700px){
+  .gh-da-kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .gh-da-action-row{grid-template-columns:18px 76px 1fr 28px}
+  .gh-da-action-label{font-size:.76rem}
+}
+@media(max-width:420px){
+  .gh-da-day-head,.gh-da-day-row{grid-template-columns:1fr 44px 54px 44px;font-size:.76rem}
+}
+
 .gh-gallery-item-mgmt{position:relative}
 .gh-gallery-delete-btn{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);border:none;color:#fff;border-radius:8px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;opacity:0;transition:opacity .15s;backdrop-filter:blur(4px)}
 .gh-gallery-item-mgmt:hover .gh-gallery-delete-btn{opacity:1}

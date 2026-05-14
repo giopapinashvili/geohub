@@ -315,15 +315,23 @@
 
   function newAnalyticsDay(date, ts) {
     return {
-      date:            date || '',
-      views:           0,
-      uniqueViews:     0,
-      follows:         0,
-      unfollows:       0,
-      postImpressions: 0,
-      postEngagements: 0,
-      reviewsReceived: 0,
-      updatedAt:       ts,
+      date:              date || '',
+      views:             0,
+      uniqueViews:       0,
+      phoneClicks:       0,
+      whatsappClicks:    0,
+      emailClicks:       0,
+      bookingClicks:     0,
+      websiteClicks:     0,
+      directionsClicks:  0,
+      serviceClicks:     0,
+      galleryViews:      0,
+      follows:           0,
+      unfollows:         0,
+      postImpressions:   0,
+      postEngagements:   0,
+      reviewsReceived:   0,
+      updatedAt:         ts,
     };
   }
 

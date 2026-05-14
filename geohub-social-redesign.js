@@ -7,7 +7,7 @@
 
   var PATH = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   var PAGE = document.body && document.body.dataset ? document.body.dataset.ghPage : '';
-  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false, pageUnsubs: [] };
+  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null };
 
   /* ── User cache (instant topbar, no flash) ──────────────── */
   var USER_CACHE_KEY = 'gh_uc1';
@@ -19,6 +19,27 @@
     try{localStorage.setItem(USER_CACHE_KEY,JSON.stringify({uid:u.uid,name:u.name||'',avatar:u.avatar||'',ts:Date.now()}));}catch(e){}
   }
   function clearCachedUser(){try{localStorage.removeItem(USER_CACHE_KEY);}catch(e){}}
+
+  /* ── Analytics helpers ───────────────────────────────────── */
+  function todayDateKey(){
+    var d=new Date(); var mm=String(d.getMonth()+1).padStart(2,'0'); var dd=String(d.getDate()).padStart(2,'0');
+    return d.getFullYear()+'-'+mm+'-'+dd;
+  }
+  function bizTrack(bizId, field){
+    if(!bizId||!field||!fs()||!db()) return;
+    var uid=authUser()&&authUser().uid;
+    if(uid&&state.currentBizOwner&&uid===state.currentBizOwner) return;
+    var upd={updatedAt:fs().serverTimestamp()}; upd[field]=fs().increment(1);
+    fs().setDoc(fs().doc(db(),'businesses',bizId,'analytics',todayDateKey()),upd,{merge:true}).catch(function(){});
+  }
+  function trackBizView(bizId, ownerId){
+    if(!bizId||!fs()||!db()) return;
+    var uid=authUser()&&authUser().uid;
+    if(uid&&ownerId&&uid===ownerId) return;
+    var key='ghbv_'+bizId; if(sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key,'1');
+    fs().setDoc(fs().doc(db(),'businesses',bizId,'analytics',todayDateKey()),{views:fs().increment(1),uniqueViews:fs().increment(1),updatedAt:fs().serverTimestamp()},{merge:true}).catch(function(){});
+  }
 
   /* ── Skeleton post card (feed loading state) ─────────────── */
   function skelPostCard(){
@@ -924,6 +945,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var logo   = b.logoUrl||'';
     var owner  = b.ownerId||b.createdBy||b.userId||'';
     var isOwner= !!(authUser() && authUser().uid && owner && authUser().uid===owner);
+    state.currentBizId = b.id;
+    state.currentBizOwner = owner;
 
     var statusBadge='';
     if(b.status==='suspended') statusBadge='<span class="gh-biz-status-badge suspended"><i class="fas fa-ban"></i> Suspended</span>';
@@ -988,10 +1011,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var sv=e.target.closest('[data-save-item]'); if(sv){ if(!requireLogin())return; GS().toggleSaveItem(sv.dataset.type,sv.dataset.id); return; }
       var msg=e.target.closest('[data-message-business]'); if(msg){ var oid=msg.dataset.messageBusiness; if(!oid) return toast('Business owner not available','error'); if(!requireLogin()) return; GS().startConversation(oid,function(){ location.href='messages.html?with='+encodeURIComponent(oid); }); return; }
       var edit=e.target.closest('[data-edit-business]'); if(edit) location.href='add-business.html?edit='+encodeURIComponent(b.id);
+      var cta=e.target.closest('[data-track-cta]'); if(cta&&state.currentBizId) bizTrack(state.currentBizId,cta.dataset.trackCta);
     };
 
     updateBusinessFollowButton(b.id);
     renderBusinessTab(b);
+    trackBizView(b.id, owner);
   }
 
 
@@ -1381,34 +1406,90 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function renderBizDashAnalytics(b){
     var cont=$('#ghDashContent'); if(!cont) return;
-    cont.innerHTML=
-      '<div class="gh-dash-section">'+
-        '<h2 class="gh-dash-section-title">Analytics</h2>'+
-        '<div class="gh-dash-analytics-grid">'+
-          '<div class="gh-dash-analytics-card"><i class="fas fa-eye"></i><div class="gh-dash-analytics-body"><span class="gh-dash-analytics-label">Profile Views</span><strong class="gh-dash-analytics-val" id="daViews">—</strong></div></div>'+
-          '<div class="gh-dash-analytics-card"><i class="fas fa-users"></i><div class="gh-dash-analytics-body"><span class="gh-dash-analytics-label">Followers</span><strong class="gh-dash-analytics-val">'+Number(b.followerCount||0)+'</strong></div></div>'+
-          '<div class="gh-dash-analytics-card"><i class="fas fa-newspaper"></i><div class="gh-dash-analytics-body"><span class="gh-dash-analytics-label">Posts</span><strong class="gh-dash-analytics-val">'+Number(b.postCount||0)+'</strong></div></div>'+
-          '<div class="gh-dash-analytics-card"><i class="fas fa-star"></i><div class="gh-dash-analytics-body"><span class="gh-dash-analytics-label">Reviews</span><strong class="gh-dash-analytics-val">'+Number(b.reviewCount||0)+'</strong></div></div>'+
+    cont.innerHTML='<div class="gh-dash-section"><h2 class="gh-dash-section-title">Analytics</h2><div id="ghDaBody"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
+    if(!fs()||!db()) return;
+    fs().getDocs(fs().query(fs().collection(db(),'businesses',b.id,'analytics'),fs().orderBy('date','desc'),fs().limit(30))).then(function(snap){
+      var days=[]; snap.forEach(function(d){days.push(Object.assign({id:d.id},d.data()));});
+      var el=$('#ghDaBody'); if(!el) return;
+      var today=todayDateKey();
+      var todayData=days.find(function(d){return d.date===today;})||{};
+      var sum7={views:0,phones:0,wa:0,email:0,booking:0,website:0,directions:0,service:0,follows:0};
+      var sum30={views:0,phones:0,wa:0,email:0,booking:0,website:0,directions:0,service:0,follows:0,unfollows:0};
+      days.forEach(function(d,i){
+        var ph=Number(d.phoneClicks)||0,wa=Number(d.whatsappClicks)||0,em=Number(d.emailClicks)||0;
+        var bk=Number(d.bookingClicks)||0,ws=Number(d.websiteClicks)||0,dr=Number(d.directionsClicks)||0;
+        var sv=Number(d.serviceClicks)||0,fl=Number(d.follows)||0,ufl=Number(d.unfollows)||0,vi=Number(d.views)||0;
+        sum30.views+=vi;sum30.phones+=ph;sum30.wa+=wa;sum30.email+=em;sum30.booking+=bk;
+        sum30.website+=ws;sum30.directions+=dr;sum30.service+=sv;sum30.follows+=fl;sum30.unfollows+=ufl;
+        if(i<7){sum7.views+=vi;sum7.phones+=ph;sum7.wa+=wa;sum7.email+=em;sum7.booking+=bk;sum7.website+=ws;sum7.directions+=dr;sum7.service+=sv;sum7.follows+=fl;}
+      });
+      var viewsToday=Number(todayData.views)||0;
+      var interactions=[
+        {icon:'fa-phone',label:'Calls',val:sum30.phones},
+        {icon:'fa-brands fa-whatsapp',label:'WhatsApp',val:sum30.wa},
+        {icon:'fa-envelope',label:'Emails',val:sum30.email},
+        {icon:'fa-calendar-check',label:'Bookings',val:sum30.booking},
+        {icon:'fa-globe',label:'Website',val:sum30.website},
+        {icon:'fa-map-location-dot',label:'Directions',val:sum30.directions},
+        {icon:'fa-briefcase',label:'Services',val:sum30.service},
+      ];
+      var maxIA=Math.max.apply(null,interactions.map(function(x){return x.val;}))||1;
+      var hasData=days.length>0&&(sum30.views>0||interactions.some(function(x){return x.val>0;}));
+      if(!hasData){
+        el.innerHTML='<div class="gh-card"><div class="gh-empty"><i class="fas fa-chart-bar"></i><h3>No analytics data yet</h3><p>Activity will appear after people visit or contact this business.</p></div></div>';
+        return;
+      }
+      function daKpiCard(icon,label,val){
+        return '<div class="gh-da-kpi-card"><i class="fas '+icon+'"></i><div class="gh-da-kpi-body"><span class="gh-da-kpi-val">'+val+'</span><span class="gh-da-kpi-label">'+label+'</span></div></div>';
+      }
+      var ratingAvg=b.ratingCount>0?(b.ratingTotal/b.ratingCount).toFixed(1):(b.ratingAverage>0?Number(b.ratingAverage).toFixed(1):'—');
+      el.innerHTML=
+        '<div class="gh-da-section">'+
+          '<h3 class="gh-da-section-title">Overview</h3>'+
+          '<div class="gh-da-kpi-grid">'+
+            daKpiCard('fa-eye','Views Today',viewsToday||'—')+
+            daKpiCard('fa-calendar-week','Views 7d',sum7.views||'—')+
+            daKpiCard('fa-calendar','Views 30d',sum30.views||'—')+
+            daKpiCard('fa-users','Followers',Number(b.followerCount||0))+
+            daKpiCard('fa-star','Rating',ratingAvg)+
+            daKpiCard('fa-comment-dots','Reviews',Number(b.reviewCount||0))+
+            daKpiCard('fa-newspaper','Posts',Number(b.postCount||0))+
+            daKpiCard('fa-heart','Follows 30d',sum30.follows||'—')+
+          '</div>'+
         '</div>'+
-        '<div class="gh-card" style="margin-top:14px">'+
-          '<div class="gh-biz-sec-head"><h3>Detailed Analytics</h3></div>'+
-          '<div id="ghDashAnalyticsDetail"><div class="gh-empty"><i class="fas fa-chart-bar"></i><h3>No analytics data yet</h3><p>Analytics tracking activates once your business receives engagement.</p></div></div>'+
-        '</div>'+
-      '</div>';
-    if(fs()&&db()){
-      fs().getDocs(fs().query(fs().collection(db(),'businesses',b.id,'analytics'),fs().orderBy('date','desc'),fs().limit(30))).then(function(snap){
-        if(snap.empty) return;
-        var days=[]; snap.forEach(function(d){days.push(Object.assign({id:d.id},d.data()));});
-        var totalViews=days.reduce(function(sum,d){return sum+(Number(d.views)||0);},0);
-        var vEl=$('#daViews'); if(vEl) vEl.textContent=totalViews||'—';
-        if(!totalViews) return;
-        var detail=$('#ghDashAnalyticsDetail'); if(!detail) return;
-        detail.innerHTML='<p class="gh-muted" style="font-size:.85rem;margin:0 0 12px">Last 30 days</p>'+
-          '<div class="gh-dash-analytics-days">'+days.slice(0,7).map(function(d){
-            return '<div class="gh-dash-analytics-day"><span class="gh-dash-analytics-day-date">'+esc(d.date||'')+'</span><span>'+Number(d.views||0)+' views</span></div>';
-          }).join('')+'</div>';
-      }).catch(function(){});
-    }
+        (interactions.some(function(x){return x.val>0;})?
+          '<div class="gh-da-section">'+
+            '<h3 class="gh-da-section-title">Contact Interactions <span class="gh-muted" style="font-size:.78rem;font-weight:400">(last 30 days)</span></h3>'+
+            '<div class="gh-da-actions">'+
+              interactions.map(function(x){
+                var pct=Math.round((x.val/maxIA)*100);
+                return '<div class="gh-da-action-row">'+
+                  '<i class="fas '+x.icon+' gh-da-action-icon"></i>'+
+                  '<span class="gh-da-action-label">'+x.label+'</span>'+
+                  '<div class="gh-da-bar-wrap"><div class="gh-da-bar-fill" style="width:'+pct+'%"></div></div>'+
+                  '<span class="gh-da-action-val">'+x.val+'</span>'+
+                '</div>';
+              }).join('')+
+            '</div>'+
+          '</div>':'')+
+        (days.slice(0,7).length>0?
+          '<div class="gh-da-section">'+
+            '<h3 class="gh-da-section-title">Last 7 days</h3>'+
+            '<div class="gh-da-days">'+
+              '<div class="gh-da-day-head"><span>Date</span><span>Views</span><span>Contacts</span><span>Follows</span></div>'+
+              days.slice(0,7).map(function(d){
+                var contacts=(Number(d.phoneClicks)||0)+(Number(d.whatsappClicks)||0)+(Number(d.emailClicks)||0)+(Number(d.bookingClicks)||0)+(Number(d.websiteClicks)||0)+(Number(d.directionsClicks)||0)+(Number(d.serviceClicks)||0);
+                var isToday=d.date===today;
+                return '<div class="gh-da-day-row'+(isToday?' gh-da-today':'')+'">'+
+                  '<span>'+(isToday?'Today':esc(d.date||''))+'</span>'+
+                  '<span>'+(Number(d.views)||0)+'</span>'+
+                  '<span>'+contacts+'</span>'+
+                  '<span>'+(Number(d.follows)||0)+'</span>'+
+                '</div>';
+              }).join('')+
+            '</div>'+
+          '</div>':'');
+    }).catch(function(){var el=$('#ghDaBody');if(el)el.innerHTML='<div class="gh-card"><div class="gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Failed to load analytics</h3></div></div>';});
   }
 
 
@@ -1453,9 +1534,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function svcPublicCard(s, b){
     var type=s.type||'service';
     var ctaHtml='';
-    if(s.bookingUrl) ctaHtml='<a href="'+esc(s.bookingUrl)+'" target="_blank" rel="noopener" class="gh-svc-cta"><i class="fas fa-calendar-check"></i> Book / Contact</a>';
-    else if(b&&b.phone) ctaHtml='<a href="tel:'+esc(b.phone)+'" class="gh-svc-cta"><i class="fas fa-phone"></i> Call</a>';
-    else if(b&&b.website) ctaHtml='<a href="'+esc(b.website)+'" target="_blank" rel="noopener" class="gh-svc-cta"><i class="fas fa-globe"></i> Visit website</a>';
+    if(s.bookingUrl) ctaHtml='<a href="'+esc(s.bookingUrl)+'" target="_blank" rel="noopener" class="gh-svc-cta" data-track-cta="serviceClicks"><i class="fas fa-calendar-check"></i> Book / Contact</a>';
+    else if(b&&b.phone) ctaHtml='<a href="tel:'+esc(b.phone)+'" class="gh-svc-cta" data-track-cta="serviceClicks"><i class="fas fa-phone"></i> Call</a>';
+    else if(b&&b.website) ctaHtml='<a href="'+esc(b.website)+'" target="_blank" rel="noopener" class="gh-svc-cta" data-track-cta="serviceClicks"><i class="fas fa-globe"></i> Visit website</a>';
     return '<div class="gh-svc-card2">'+
       (s.imageUrl?'<div class="gh-svc-card-img"><img src="'+esc(s.imageUrl)+'" alt="'+esc(s.title)+'" loading="lazy" onerror="this.closest(\'.gh-svc-card-img\').style.display=\'none\'"></div>':'')+
       '<div class="gh-svc-body">'+
@@ -1625,6 +1706,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function openGalleryPreview(photos, startIdx){
+    if(state.currentBizId) bizTrack(state.currentBizId,'galleryViews');
     var cur={idx:startIdx||0};
     function render(){
       var m=$('#ghGalleryModal'); if(!m) return;
@@ -1860,12 +1942,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
     // Contact CTA buttons — only for real data
     var ctaBtns=[];
-    if(b.phone)      ctaBtns.push('<a href="tel:'+esc(b.phone)+'" class="gh-contact-cta-btn"><i class="fas fa-phone"></i> Call</a>');
-    if(wa)           ctaBtns.push('<a href="https://wa.me/'+esc(wa.replace(/\D/g,''))+'" target="_blank" rel="noopener" class="gh-contact-cta-btn"><i class="fab fa-whatsapp"></i> WhatsApp</a>');
-    if(b.email)      ctaBtns.push('<a href="mailto:'+esc(b.email)+'" class="gh-contact-cta-btn"><i class="fas fa-envelope"></i> Email</a>');
-    if(bookingUrl)   ctaBtns.push('<a href="'+esc(bookingUrl)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn primary"><i class="fas fa-calendar-check"></i> Book</a>');
-    if(b.website)    ctaBtns.push('<a href="'+esc(b.website)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn"><i class="fas fa-globe"></i> Website</a>');
-    if(!isOnlineBusiness(b)&&b.mapsLink) ctaBtns.push('<a href="'+esc(b.mapsLink)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn"><i class="fas fa-map-location-dot"></i> Directions</a>');
+    if(b.phone)      ctaBtns.push('<a href="tel:'+esc(b.phone)+'" class="gh-contact-cta-btn" data-track-cta="phoneClicks"><i class="fas fa-phone"></i> Call</a>');
+    if(wa)           ctaBtns.push('<a href="https://wa.me/'+esc(wa.replace(/\D/g,''))+'" target="_blank" rel="noopener" class="gh-contact-cta-btn" data-track-cta="whatsappClicks"><i class="fab fa-whatsapp"></i> WhatsApp</a>');
+    if(b.email)      ctaBtns.push('<a href="mailto:'+esc(b.email)+'" class="gh-contact-cta-btn" data-track-cta="emailClicks"><i class="fas fa-envelope"></i> Email</a>');
+    if(bookingUrl)   ctaBtns.push('<a href="'+esc(bookingUrl)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn primary" data-track-cta="bookingClicks"><i class="fas fa-calendar-check"></i> Book</a>');
+    if(b.website)    ctaBtns.push('<a href="'+esc(b.website)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn" data-track-cta="websiteClicks"><i class="fas fa-globe"></i> Website</a>');
+    if(!isOnlineBusiness(b)&&b.mapsLink) ctaBtns.push('<a href="'+esc(b.mapsLink)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn" data-track-cta="directionsClicks"><i class="fas fa-map-location-dot"></i> Directions</a>');
     var ctaHtml=ctaBtns.length?'<div class="gh-contact-ctas">'+ctaBtns.join('')+'</div>':'';
     var hasContact=b.phone||b.email||b.website||ig||fb||wa||tk||li||bookingUrl;
 
@@ -2215,11 +2297,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(d.exists()){
         return fs().deleteDoc(ref)
           .then(function(){ return fs().updateDoc(biz,{followerCount:fs().increment(-1)}).catch(function(){}); })
-          .then(function(){toast('Unfollowed');});
+          .then(function(){bizTrack(businessId,'unfollows');toast('Unfollowed');});
       }
       return fs().setDoc(ref,{businessId:businessId,userId:uid,createdAt:fs().serverTimestamp()})
         .then(function(){return fs().updateDoc(biz,{followerCount:fs().increment(1)}).catch(function(){});})
-        .then(function(){toast('Following business');});
+        .then(function(){bizTrack(businessId,'follows');toast('Following business');});
     }).catch(function(err){toast('Follow failed: '+(err.code||err.message),'error');})
       .finally(function(){ if(btn){ btn.disabled=false; btn.classList.remove('is-loading'); } updateBusinessFollowButton(businessId); });
   }
