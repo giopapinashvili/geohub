@@ -1069,30 +1069,36 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     cont.innerHTML=
       '<div class="gh-dash-section">'+
         '<div class="gh-biz-sec-head"><h2 class="gh-dash-section-title" style="margin:0">Gallery</h2>'+
-          '<button class="gh-btn" data-dg-upload><i class="fas fa-upload"></i> Upload photo</button>'+
+          '<button class="gh-btn" data-dg-add><i class="fas fa-plus"></i> Add photo</button>'+
         '</div>'+
         '<div id="ghDashGallery"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
       '</div>';
     cont.onclick=function(e){
-      if(e.target.closest('[data-dg-upload]')) uploadGalleryPhoto(b,function(){loadDashGallery(b);});
+      if(e.target.closest('[data-dg-add]')) openAddGalleryPhotoModal(b,function(){loadDashGallery(b);});
       var del=e.target.closest('[data-delete-photo]'); if(del) deleteGalleryPhoto(b,del.dataset.deletePhoto);
+      var feat=e.target.closest('[data-toggle-featured]'); if(feat) toggleGalleryFeatured(b,feat.dataset.toggleFeatured,feat.dataset.isFeatured==='true');
     };
     loadDashGallery(b);
   }
 
   function loadDashGallery(b){
-    if(!fs()||!db()){ var el=$('#ghDashGallery'); if(el) el.innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>Unavailable</h3></div>'; return; }
-    fs().getDocs(fs().query(fs().collection(db(),'businesses',b.id,'gallery'),fs().orderBy('order','asc'))).then(function(snap){
-      var el=$('#ghDashGallery'); if(!el) return;
-      var photos=[]; snap.forEach(function(d){photos.push(Object.assign({id:d.id},d.data()));});
-      if(!photos.length){ el.innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>No photos yet</h3><p>Upload photos to showcase your business.</p><button class="gh-btn" data-dg-upload>Upload first photo</button></div>'; return; }
-      el.innerHTML='<div class="gh-gallery-grid">'+photos.map(function(p){
-        return '<div class="gh-gallery-item gh-gallery-item-mgmt">'+
-          '<img src="'+esc(p.url)+'" alt="'+esc(p.caption||'')+'" loading="lazy" onerror="this.closest(\'.gh-gallery-item\').remove()">'+
-          '<button class="gh-gallery-delete-btn" data-delete-photo="'+esc(p.id)+'"><i class="fas fa-trash"></i></button>'+
+    var el=$('#ghDashGallery'); if(!el) return;
+    el.innerHTML='<div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div>';
+    loadGalleryPhotos(b.id,function(photos){
+      var el2=$('#ghDashGallery'); if(!el2) return;
+      if(!photos.length){ el2.innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>No photos yet</h3><p>Upload photos to showcase your business.</p><button class="gh-btn" data-dg-add>Add first photo</button></div>'; return; }
+      el2.innerHTML='<div class="gh-gallery-grid">'+photos.map(function(p){
+        return '<div class="gh-gallery-item gh-gallery-item-mgmt'+(p.featured?' gh-gallery-item-featured':'')+'" data-ph-id="'+esc(p.id)+'">'+
+          '<img src="'+esc(p.url||p.imageUrl||'')+'" alt="'+esc(p.caption||'')+'" loading="lazy" onerror="this.closest(\'.gh-gallery-item\').style.display=\'none\'">'+
+          (p.featured?'<span class="gh-gallery-featured-badge"><i class="fas fa-star"></i></span>':'')+
+          (p.caption?'<div class="gh-gallery-caption">'+esc(p.caption)+'</div>':'')+
+          '<div class="gh-gallery-mgmt-bar">'+
+            '<button class="gh-gallery-feat-btn" data-toggle-featured="'+esc(p.id)+'" data-is-featured="'+!!p.featured+'" title="'+(p.featured?'Unmark featured':'Mark as featured')+'">'+(p.featured?'<i class="fas fa-star" style="color:#facc15"></i>':'<i class="far fa-star"></i>')+'</button>'+
+            '<button class="gh-gallery-delete-btn" data-delete-photo="'+esc(p.id)+'"><i class="fas fa-trash"></i></button>'+
+          '</div>'+
         '</div>';
       }).join('')+'</div>';
-    }).catch(function(){ var el=$('#ghDashGallery'); if(el) el.innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>Load failed</h3></div>'; });
+    });
   }
 
   function deleteGalleryPhoto(b, photoId){
@@ -1224,30 +1230,134 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function renderBusinessPhotos(b){
-    var box=$('#ghBusinessTabContent'); if(!box)return;
-    var isOwner=!!(authUser() && authUser().uid && (b.ownerId===authUser().uid || b.createdBy===authUser().uid || b.userId===authUser().uid));
-    box.innerHTML='<div class="gh-card"><div class="gh-section-title"><h2>Photos</h2>'+(isOwner?'<button class="gh-btn sm" data-upload-gallery-photo><i class="fas fa-upload"></i> Upload</button>':'')+'</div><div id="ghGalleryGrid"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
-    box.onclick=function(e){ if(e.target.closest('[data-upload-gallery-photo]')) uploadGalleryPhoto(b); };
+    var box=$('#ghBusinessTabContent'); if(!box) return;
+    var isOwner=!!(authUser()&&authUser().uid&&(b.ownerId===authUser().uid||b.createdBy===authUser().uid||b.userId===authUser().uid));
+    box.innerHTML=
+      '<div class="gh-card">'+
+        '<div class="gh-biz-sec-head"><h2>Photos</h2>'+(isOwner?'<button class="gh-btn sm" data-pub-add-photo><i class="fas fa-plus"></i> Add photo</button>':'')+'</div>'+
+        '<div id="ghGalleryGrid"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
+      '</div>';
+    box.onclick=function(e){ if(e.target.closest('[data-pub-add-photo]')) openAddGalleryPhotoModal(b,function(){renderBusinessPhotos(b);}); };
     if(!fs()||!db()){ $('#ghGalleryGrid').innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>Photos unavailable</h3></div>'; return; }
-    fs().getDocs(fs().query(fs().collection(db(),'businesses',b.id,'gallery'),fs().orderBy('order','asc'))).then(function(snap){
-      var grid=$('#ghGalleryGrid'); if(!grid)return;
-      var photos=[]; snap.forEach(function(d){photos.push(Object.assign({id:d.id},d.data()));});
-      if(!photos.length){ grid.innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>No photos yet</h3>'+(isOwner?'<button class="gh-btn" data-upload-gallery-photo>Upload first photo</button>':'')+'</div>'; return; }
-      grid.innerHTML='<div class="gh-gallery-grid">'+photos.map(function(p){ return '<div class="gh-gallery-item"><img src="'+esc(p.url)+'" alt="'+esc(p.caption||'')+'" loading="lazy" onerror="this.closest(\'.gh-gallery-item\').remove()"></div>'; }).join('')+'</div>';
-    }).catch(function(){ var grid=$('#ghGalleryGrid'); if(grid) grid.innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>No photos yet</h3></div>'; });
+    loadGalleryPhotos(b.id,function(photos){
+      var grid=$('#ghGalleryGrid'); if(!grid) return;
+      if(!photos.length){
+        grid.innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>No photos yet</h3>'+(isOwner?'<p>Add photos to showcase your business.</p><button class="gh-btn" data-pub-add-photo>Add first photo</button>':'<p>No photos have been added yet.</p>')+'</div>';
+        return;
+      }
+      grid.innerHTML='<div class="gh-gallery-grid">'+photos.map(function(p,i){
+        return '<div class="gh-gallery-item'+(p.featured?' gh-gallery-item-featured':'')+'" data-gallery-idx="'+i+'">'+
+          (p.featured?'<span class="gh-gallery-featured-badge"><i class="fas fa-star"></i></span>':'')+
+          '<img src="'+esc(p.url||p.imageUrl||'')+'" alt="'+esc(p.caption||'')+'" loading="lazy" onerror="this.closest(\'.gh-gallery-item\').style.display=\'none\'">'+
+          (p.caption?'<div class="gh-gallery-caption">'+esc(p.caption)+'</div>':'')+
+        '</div>';
+      }).join('')+'</div>';
+      grid.onclick=function(e){ var item=e.target.closest('[data-gallery-idx]'); if(item) openGalleryPreview(photos,Number(item.dataset.galleryIdx)); };
+    });
   }
 
   function uploadGalleryPhoto(b, onSuccess){
+    openAddGalleryPhotoModal(b, onSuccess||function(){renderBusinessPhotos(b);});
+  }
+
+  function loadGalleryPhotos(businessId, cb){
+    if(!fs()||!db()){ cb([]); return; }
+    fs().getDocs(fs().query(fs().collection(db(),'businesses',businessId,'gallery'))).then(function(snap){
+      var photos=[]; snap.forEach(function(d){photos.push(Object.assign({id:d.id},d.data()));});
+      // Featured first, then by order ascending — sorted in JS to avoid compound index
+      photos.sort(function(a,b){ var af=!!a.featured,bf=!!b.featured; if(af!==bf) return bf?-1:1; return (Number(a.order)||0)-(Number(b.order)||0); });
+      cb(photos);
+    }).catch(function(){ cb([]); });
+  }
+
+  function openGalleryPreview(photos, startIdx){
+    var cur={idx:startIdx||0};
+    function render(){
+      var m=$('#ghGalleryModal'); if(!m) return;
+      var p=photos[cur.idx]; if(!p) return;
+      var imgEl=m.querySelector('.gh-gm-img');
+      var capEl=m.querySelector('.gh-gm-caption');
+      var ctrEl=m.querySelector('.gh-gm-counter');
+      var featEl=m.querySelector('.gh-gm-featured');
+      if(imgEl){ imgEl.src=''; imgEl.src=p.url||p.imageUrl||''; imgEl.alt=p.caption||''; }
+      if(capEl){ capEl.textContent=p.caption||''; capEl.style.display=p.caption?'':'none'; }
+      if(ctrEl) ctrEl.textContent=(cur.idx+1)+' / '+photos.length;
+      if(featEl) featEl.style.display=p.featured?'':'none';
+      var prevBtn=m.querySelector('.gh-gm-prev'), nextBtn=m.querySelector('.gh-gm-next');
+      if(prevBtn) prevBtn.disabled=cur.idx===0;
+      if(nextBtn) nextBtn.disabled=cur.idx===photos.length-1;
+    }
+    var old=$('#ghGalleryModal'); if(old) old.remove();
+    var el=document.createElement('div'); el.id='ghGalleryModal'; el.className='gh-gallery-modal';
+    el.innerHTML=
+      '<div class="gh-gm-backdrop"></div>'+
+      '<div class="gh-gm-dialog">'+
+        '<button class="gh-gm-close" aria-label="Close"><i class="fas fa-times"></i></button>'+
+        '<div class="gh-gm-img-wrap">'+
+          '<img class="gh-gm-img" src="" alt="" loading="lazy" onerror="this.src=\'\'">'+
+          '<button class="gh-gm-prev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>'+
+          '<button class="gh-gm-next" aria-label="Next"><i class="fas fa-chevron-right"></i></button>'+
+        '</div>'+
+        '<div class="gh-gm-footer">'+
+          '<span class="gh-gm-featured"><i class="fas fa-star" style="color:#facc15"></i> Featured</span>'+
+          '<span class="gh-gm-caption"></span>'+
+          '<span class="gh-gm-counter"></span>'+
+        '</div>'+
+      '</div>';
+    document.body.appendChild(el);
+    function closeModal(){ var m2=$('#ghGalleryModal'); if(m2){m2.classList.remove('open');setTimeout(function(){m2.remove();},180);} document.removeEventListener('keydown',onKey); }
+    el.querySelector('.gh-gm-backdrop').onclick=closeModal;
+    el.querySelector('.gh-gm-close').onclick=closeModal;
+    el.querySelector('.gh-gm-prev').onclick=function(){ if(cur.idx>0){cur.idx--;render();} };
+    el.querySelector('.gh-gm-next').onclick=function(){ if(cur.idx<photos.length-1){cur.idx++;render();} };
+    function onKey(e){ if(!$('#ghGalleryModal')){document.removeEventListener('keydown',onKey);return;} if(e.key==='Escape') closeModal(); if(e.key==='ArrowLeft'&&cur.idx>0){cur.idx--;render();} if(e.key==='ArrowRight'&&cur.idx<photos.length-1){cur.idx++;render();} }
+    document.addEventListener('keydown',onKey);
+    render();
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ el.classList.add('open'); }); });
+  }
+
+  function openAddGalleryPhotoModal(b, onSuccess){
     if(!requireLogin()) return;
-    triggerImagePick(function(dataUrl){ if(!dataUrl) return;
-      var ts=fs().serverTimestamp(); var schema=window.GH||{};
-      var idx=Date.now();
-      var doc=schema.newGalleryPhoto ? schema.newGalleryPhoto(dataUrl, authUser().uid, '', idx, ts) : {url:dataUrl,caption:'',order:idx,uploadedBy:authUser().uid,createdAt:ts};
+    var pickedUrl='';
+    var body=
+      '<div class="gh-form-rows">'+
+        '<div>'+
+          '<div class="gh-gallery-pick-row">'+
+            '<button type="button" class="gh-btn ghost" id="gpmPickFile"><i class="fas fa-upload"></i> Upload from device</button>'+
+            '<span class="gh-gallery-pick-or">or</span>'+
+            '<input class="gh-input" id="gpmUrl" placeholder="Paste image URL https://…">'+
+          '</div>'+
+          '<div id="gpmPreview" style="display:none;margin-top:10px;text-align:center"><img id="gpmPreviewImg" src="" alt="" style="max-width:100%;max-height:180px;border-radius:10px;object-fit:contain;background:rgba(0,0,0,.1)"></div>'+
+        '</div>'+
+        '<label class="gh-form-label">Caption (optional)<input class="gh-input" id="gpmCaption" placeholder="Describe this photo…"></label>'+
+        '<label class="gh-form-label">Category (optional)<input class="gh-input" id="gpmCategory" placeholder="e.g. Interior, Team, Products"></label>'+
+        '<label class="gh-form-check"><input type="checkbox" id="gpmFeatured"><span>Mark as featured photo</span></label>'+
+      '</div>';
+    modal('Add Photo', body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="gpmSubmit"><i class="fas fa-plus"></i> Add photo</button>', 'ghGalleryPhotoModal');
+    $('#gpmPickFile').onclick=function(){
+      triggerImagePick(function(dataUrl){ if(!dataUrl) return; pickedUrl=dataUrl; var prev=$('#gpmPreview'),img=$('#gpmPreviewImg'); if(prev&&img){img.src=dataUrl;prev.style.display='';} var urlIn=$('#gpmUrl'); if(urlIn) urlIn.value=''; });
+    };
+    $('#gpmUrl').oninput=function(){ var v=this.value.trim(); pickedUrl=''; var prev=$('#gpmPreview'),img=$('#gpmPreviewImg'); if(prev&&img&&v){img.src=v;prev.style.display='';} else if(prev) prev.style.display='none'; };
+    $('#gpmSubmit').onclick=function(){
+      var url=pickedUrl||($('#gpmUrl').value||'').trim(); if(!url) return toast('Add a photo first','error');
+      var caption=($('#gpmCaption').value||'').trim(), category=($('#gpmCategory').value||'').trim(), featured=!!$('#gpmFeatured').checked;
+      var now=fs().serverTimestamp(), schema=window.GH||{};
+      var doc=schema.newGalleryPhoto
+        ? Object.assign(schema.newGalleryPhoto(url,authUser().uid,caption,Date.now(),now),{category:category,featured:featured})
+        : {url:url,caption:caption,category:category,featured:featured,order:Date.now(),uploadedBy:authUser().uid,createdAt:now};
+      var btn=$('#gpmSubmit'); if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Adding…';}
       fs().addDoc(fs().collection(db(),'businesses',b.id,'gallery'),doc).then(function(){
-        toast('Photo added');
-        if(typeof onSuccess==='function') onSuccess(); else renderBusinessPhotos(b);
-      }).catch(function(err){ toast('Upload failed: '+(err.message||err),'error'); });
-    });
+        var m=$('#ghGalleryPhotoModal'); if(m) m.remove(); toast('Photo added');
+        if(typeof onSuccess==='function') onSuccess();
+      }).catch(function(err){ toast('Failed: '+(err.message||err),'error'); if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-plus"></i> Add photo';} });
+    };
+  }
+
+  function toggleGalleryFeatured(b, photoId, isFeatured){
+    if(!photoId||!fs()||!db()) return;
+    fs().updateDoc(fs().doc(db(),'businesses',b.id,'gallery',photoId),{featured:!isFeatured}).then(function(){
+      toast(isFeatured?'Removed from featured':'Marked as featured'); loadDashGallery(b);
+    }).catch(function(err){ toast('Failed: '+(err.message||err),'error'); });
   }
 
   function openBusinessRewardModal(b){
