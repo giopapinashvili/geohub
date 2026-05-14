@@ -1300,3 +1300,98 @@ html[data-gh-theme="light"] .gh-invite-banner{background:rgba(16,185,129,.05)}
   .gh-invite-banner-actions .gh-btn{width:100%;justify-content:center}
   .gh-team-grid{grid-template-columns:repeat(2,1fr)}
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 7 Step 2 — Token Adoption + Responsive Business UI
+   Touch targets · Token migration · Breakpoint polish
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── 1. Touch targets (--gh-touch-min = 44px) ─────────────── */
+.gh-btn{min-height:var(--gh-touch-min)}
+.gh-btn.xs{min-height:unset}
+.gh-biz-tab,.gh-tab{min-height:var(--gh-touch-min)}
+.gh-dash-nav-item{min-height:var(--gh-touch-min)}
+.gh-pill{min-height:var(--gh-touch-min);display:inline-flex;align-items:center;justify-content:center}
+.gh-contact-cta-btn{min-height:var(--gh-touch-min)}
+.gh-user-btn,.gh-create-btn{min-height:var(--gh-touch-min)}
+.gh-icon-btn{width:var(--gh-touch-min);height:var(--gh-touch-min);min-width:var(--gh-touch-min)}
+.gh-gm-close,.gh-gm-prev,.gh-gm-next{width:var(--gh-touch-min);height:var(--gh-touch-min)}
+@media(max-width:480px){
+  .gh-gm-close,.gh-gm-prev,.gh-gm-next{width:40px;height:40px}
+  .gh-dash-nav-item{width:var(--gh-touch-min);height:var(--gh-touch-min)}
+}
+
+/* ── 2. Token adoption — transitions ──────────────────────── */
+.gh-biz-tab,.gh-pill,.gh-btn,.gh-svc-card,.gh-svc-card2,.gh-svc-cta,
+.gh-dash-nav-item,.gh-rv-sort-chip,.gh-contact-cta-btn{
+  transition-duration:var(--gh-dur-fast);
+  transition-timing-function:var(--gh-ease);
+}
+
+/* ── 3. Token adoption — border-radius ────────────────────── */
+.gh-emp-section,.gh-da-kpi-card,.gh-dash-stat-card,
+.gh-biz-info-card,.gh-svc-card,.gh-rv-already{border-radius:var(--gh-radius-md)}
+.gh-svc-card2,.gh-invite-banner{border-radius:var(--gh-radius)}
+.gh-da-bar-wrap,.gh-svc-cta,.gh-emp-type,.gh-time-input{border-radius:var(--gh-radius-sm)}
+.gh-emp-badge{border-radius:var(--gh-radius-md)}
+
+/* ── 4. Token adoption — typography ───────────────────────── */
+.gh-biz-ic-label,.gh-type-badge,.gh-biz-verified,.gh-emp-badge,
+.gh-svc-badge,.gh-da-section-title,.gh-emp-sec-title,.gh-da-kpi-label{font-size:var(--gh-fs-xs)}
+.gh-dash-section-title{font-size:var(--gh-fs-lg)}
+.gh-biz-sec-head h3{font-size:var(--gh-fs-xs)}
+
+/* ── 5. Business Hero polish ───────────────────────────────── */
+/* Long business names break at word boundary */
+.gh-biz-title-row h1{overflow-wrap:break-word;word-break:break-word}
+.gh-biz-name-area{min-width:0}
+/* Stats bar — scrollable on tiny phones (4 stats, safe but overflow:hidden would clip) */
+.gh-biz-stats-bar{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.gh-biz-stats-bar::-webkit-scrollbar{display:none}
+.gh-biz-stat{flex-shrink:0;min-width:62px}
+/* Verified badge stays on one line */
+.gh-biz-verified{flex-shrink:0}
+
+/* ── 6. Dashboard component tokens ────────────────────────── */
+.gh-form-rows{gap:var(--gh-sp-3)}
+.gh-emp-header{margin-bottom:var(--gh-sp-3)}
+
+/* ── 7. Responsive — 720px ─────────────────────────────────── */
+@media(max-width:720px){
+  .gh-biz-stat strong{font-size:.88rem}
+  .gh-biz-stat span{font-size:.6rem}
+  .gh-dash-section-title{font-size:var(--gh-fs-md)}
+}
+
+/* ── 8. Responsive — 540px ─────────────────────────────────── */
+@media(max-width:540px){
+  .gh-biz-stat{padding:10px 4px;min-width:52px}
+  .gh-biz-stat strong{font-size:.82rem}
+  .gh-biz-stat span{font-size:.55rem;letter-spacing:0}
+  .gh-biz-actions .gh-btn{flex:1;min-width:72px}
+  .gh-modal-head{padding:var(--gh-sp-4)}
+  .gh-invite-banner{padding:var(--gh-sp-3) var(--gh-sp-4)}
+}
+
+/* ── 9. Responsive — 480px ─────────────────────────────────── */
+@media(max-width:480px){
+  .gh-biz-header-inner{gap:var(--gh-sp-2)}
+  .gh-biz-actions{width:100%}
+  .gh-biz-actions .gh-btn{flex:1}
+  .gh-dash-section-title{font-size:var(--gh-fs-md)}
+  .gh-da-kpi-val{font-size:var(--gh-fs-lg)}
+  .gh-dash-section{gap:var(--gh-sp-2)}
+}
+
+/* ── 10. Light theme — business UI verification ────────────── */
+html[data-gh-theme="light"] .gh-biz-page{background:rgba(255,255,255,.96);border-color:rgba(22,101,52,.09)}
+html[data-gh-theme="light"] .gh-biz-stats-bar{border-color:rgba(22,101,52,.09)}
+html[data-gh-theme="light"] .gh-biz-stat{border-right-color:rgba(22,101,52,.09)}
+html[data-gh-theme="light"] .gh-biz-tabs{border-bottom-color:rgba(22,101,52,.09)}
+html[data-gh-theme="light"] .gh-da-kpi-card{background:rgba(255,255,255,.78);border-color:rgba(22,101,52,.10)}
+html[data-gh-theme="light"] .gh-da-action-row{background:rgba(22,101,52,.04)}
+html[data-gh-theme="light"] .gh-da-day-row{background:rgba(22,101,52,.04)}
+html[data-gh-theme="light"] .gh-emp-section{background:rgba(255,255,255,.88);border-color:rgba(22,101,52,.10)}
+html[data-gh-theme="light"] .gh-emp-card{background:rgba(22,101,52,.03)}
+html[data-gh-theme="light"] .gh-team-card{background:rgba(22,101,52,.04)}
+html[data-gh-theme="light"] .gh-team-avatar{background:rgba(255,255,255,.9);border-color:rgba(22,101,52,.12)}
