@@ -284,3 +284,91 @@ body.gh-story-open{overflow:hidden}
 .gh-story-main{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(135deg,#0f172a,#020617);cursor:pointer}.gh-story-main img{width:100%;height:100%;object-fit:cover}.gh-story-main p{font-size:1.65rem;line-height:1.35;font-weight:900;text-align:center;color:#fff;padding:34px;margin:0}.gh-story-caption{position:absolute;left:16px;right:16px;bottom:18px;background:rgba(0,0,0,.48);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:12px;color:#fff;line-height:1.45;font-weight:800;text-align:center;backdrop-filter:blur(8px)}
 .gh-story-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:6;width:44px;height:44px;border:0;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;font-size:2rem;line-height:1;cursor:pointer;display:grid;place-items:center}.gh-story-nav.prev{left:10px}.gh-story-nav.next{right:10px}.gh-story-nav:hover,.gh-story-close:hover{background:rgba(255,255,255,.22)}
 @media(max-width:620px){.gh-story-overlay{padding:0}.gh-story-shell{width:100vw;height:100svh;border-radius:0;border:0}.gh-story-nav{width:38px;height:38px;background:rgba(0,0,0,.26)}}
+
+/* GeoHub feed layout refresh — inspired by the provided social dashboard screenshot.
+   Visual-only: all cards use existing Firebase/Firestore data and empty states. */
+body.gh-fb-inspired.gh-social-body{
+  background:
+    radial-gradient(circle at 12% 0%, rgba(40,112,255,.16), transparent 32vw),
+    radial-gradient(circle at 78% 2%, rgba(44,232,121,.08), transparent 30vw),
+    linear-gradient(135deg,#050b14 0%,#081321 52%,#07101c 100%)!important;
+  color:#eaf2ff;
+}
+body.gh-fb-inspired .gh-topbar{
+  height:72px;
+  grid-template-columns:250px minmax(280px,430px) 1fr auto;
+  gap:18px;
+  padding:0 18px;
+  background:rgba(5,13,24,.78);
+  border-bottom:1px solid rgba(148,163,184,.12);
+  backdrop-filter:blur(22px);
+  box-shadow:0 12px 38px rgba(0,0,0,.28);
+}
+body.gh-fb-inspired .gh-brand-mark{
+  background:linear-gradient(135deg,#1e66ff,#2d82ff)!important;
+  width:42px;height:42px;border-radius:14px;
+  box-shadow:0 18px 44px rgba(30,102,255,.35);
+}
+body.gh-fb-inspired .gh-brand-mark::before{content:'📍';font-size:24px;color:white}
+body.gh-fb-inspired .gh-brand span{color:#f8fbff;font-size:1.46rem;font-weight:950;letter-spacing:-.04em}
+body.gh-fb-inspired .gh-brand span span{color:#f8fbff}
+body.gh-fb-inspired .gh-top-search{max-width:430px}
+body.gh-fb-inspired .gh-top-search input{
+  height:46px;border-radius:13px;background:rgba(30,44,67,.72)!important;
+  border:1px solid rgba(148,163,184,.12);color:#dbeafe;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+body.gh-fb-inspired .gh-center-tabs{display:flex;align-items:center;justify-content:center;gap:24px;height:100%}
+body.gh-fb-inspired .gh-center-tabs a,body.gh-fb-inspired .gh-center-tabs button{
+  position:relative;width:62px;height:72px;display:grid;place-items:center;background:transparent;border:0;color:#97a7bb;
+  font-size:1.22rem;text-decoration:none;cursor:pointer;
+}
+body.gh-fb-inspired .gh-center-tabs .active,body.gh-fb-inspired .gh-center-tabs a:hover,body.gh-fb-inspired .gh-center-tabs button:hover{color:#2f7cff}
+body.gh-fb-inspired .gh-center-tabs .active::after{content:'';position:absolute;left:6px;right:6px;bottom:0;height:3px;background:#2f7cff;border-radius:99px 99px 0 0}
+body.gh-fb-inspired .gh-top-actions{gap:12px}
+body.gh-fb-inspired .gh-icon-btn,body.gh-fb-inspired .gh-user-btn,body.gh-fb-inspired .gh-create-btn{
+  height:44px;border-radius:11px;background:rgba(17,30,49,.85);border:1px solid rgba(148,163,184,.12);color:#eaf2ff;
+}
+body.gh-fb-inspired .gh-create-btn{background:linear-gradient(135deg,#1264ff,#2d7dff);box-shadow:0 16px 38px rgba(45,125,255,.27)}
+body.gh-fb-inspired .gh-shell{padding-top:72px}
+body.gh-fb-inspired .gh-layout{
+  width:100%;max-width:1760px;margin:0 auto;grid-template-columns:252px minmax(0,860px) 330px;gap:18px;padding:18px 18px 44px;
+}
+body.gh-fb-inspired .gh-left{position:sticky;top:88px;align-self:start}
+body.gh-fb-inspired .gh-left .gh-panel{padding:10px;background:rgba(7,17,31,.66);border-color:rgba(148,163,184,.10);box-shadow:none}
+body.gh-fb-inspired .gh-nav-item{height:48px;padding:0 14px;border-radius:10px;color:#e5edf8;font-weight:800}
+body.gh-fb-inspired .gh-nav-item i{width:25px;text-align:center;color:#97a8bd;font-size:1.08rem}
+body.gh-fb-inspired .gh-nav-item.active{background:linear-gradient(90deg,rgba(36,117,255,.30),rgba(36,117,255,.10));box-shadow:inset 3px 0 0 #2678ff;color:#eaf2ff}
+body.gh-fb-inspired .gh-nav-item.active i{color:#2f7cff}
+body.gh-fb-inspired .gh-card,body.gh-fb-inspired .gh-panel{
+  background:linear-gradient(180deg,rgba(12,25,43,.82),rgba(9,20,36,.80));
+  border:1px solid rgba(148,163,184,.12);box-shadow:0 18px 42px rgba(0,0,0,.22);border-radius:12px;
+}
+body.gh-fb-inspired .gh-story-strip-card{padding:16px;margin-bottom:14px;border-radius:12px}
+body.gh-fb-inspired .gh-stories{gap:10px;padding:0;overflow-x:auto}
+body.gh-fb-inspired .gh-story-card{height:232px;min-width:132px;border-radius:11px;background:rgba(16,31,50,.86);border:1px solid rgba(148,163,184,.14)}
+body.gh-fb-inspired .gh-story-add{border-style:dashed;background:rgba(10,24,42,.78)}
+body.gh-fb-inspired .gh-story-card strong{font-size:.86rem;color:white;text-shadow:0 2px 12px rgba(0,0,0,.65)}
+body.gh-fb-inspired .gh-composer{padding:14px;margin-bottom:14px}
+body.gh-fb-inspired .gh-composer-fake{height:48px;border-radius:24px;background:rgba(25,39,59,.78);border:1px solid rgba(148,163,184,.08);color:#aab8cb;text-align:left;padding:0 18px;font-weight:800}
+body.gh-fb-inspired .gh-composer-actions{border-top:1px solid rgba(148,163,184,.10);padding-top:10px;margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+body.gh-fb-inspired .gh-composer-action{height:42px;border-radius:10px;background:transparent;color:#c6d2e3;border:1px solid transparent}
+body.gh-fb-inspired .gh-composer-action:hover{background:rgba(45,125,255,.10);border-color:rgba(45,125,255,.18)}
+body.gh-fb-inspired .gh-post{border-radius:12px;margin-bottom:12px;overflow:hidden}
+body.gh-fb-inspired .gh-post-img{border-radius:8px;max-height:520px;width:100%;object-fit:cover}
+body.gh-fb-inspired .gh-post-actions{border-top:1px solid rgba(148,163,184,.10);padding-top:6px}
+body.gh-fb-inspired .gh-act{border-radius:8px;color:#c4cede}
+body.gh-fb-inspired .gh-act:hover,body.gh-fb-inspired .gh-act.active{background:rgba(45,125,255,.11);color:#eaf2ff;border-color:transparent}
+body.gh-fb-inspired .gh-right{position:sticky;top:88px;align-self:start;max-height:calc(100vh - 104px);overflow:auto;padding-right:2px}
+body.gh-fb-inspired .gh-right-widget{padding:14px;margin-bottom:14px;border-radius:12px}
+body.gh-fb-inspired .gh-section-title h2,body.gh-fb-inspired .gh-section-title h3{color:#f4f8ff;font-size:1rem;letter-spacing:-.02em}
+body.gh-fb-inspired .gh-small{color:#4c91ff;font-weight:900}
+body.gh-fb-inspired .gh-mini-item{border-radius:10px;padding:9px;background:rgba(17,31,51,.42);border:1px solid rgba(148,163,184,.08)}
+body.gh-fb-inspired .gh-mini-thumb{width:54px;height:46px;border-radius:9px;background:linear-gradient(135deg,#10284a,#1f68ff);overflow:hidden}
+body.gh-fb-inspired .gh-mini-thumb img{width:100%;height:100%;object-fit:cover}
+body.gh-fb-inspired .gh-empty.mini{min-height:92px;padding:16px;text-align:left;background:rgba(17,31,51,.35);border-radius:10px}
+body.gh-fb-inspired .gh-empty.mini i{font-size:1.2rem;margin:0 0 8px;color:#4c91ff}
+body.gh-fb-inspired .gh-empty.mini h3{font-size:.9rem;margin:0 0 4px;color:#eaf2ff}
+body.gh-fb-inspired .gh-empty.mini p{font-size:.78rem;margin:0;color:#94a3b8}
+@media(max-width:1280px){body.gh-fb-inspired .gh-layout{grid-template-columns:86px minmax(0,1fr) 310px}body.gh-fb-inspired .gh-nav-item span{display:none}body.gh-fb-inspired .gh-nav-item{justify-content:center}body.gh-fb-inspired .gh-topbar{grid-template-columns:220px minmax(220px,380px) 1fr auto}.gh-center-tabs{gap:8px}}
+@media(max-width:980px){body.gh-fb-inspired .gh-topbar{grid-template-columns:1fr auto}body.gh-fb-inspired .gh-top-search,body.gh-fb-inspired .gh-center-tabs{display:none}body.gh-fb-inspired .gh-layout{grid-template-columns:1fr;padding:12px}body.gh-fb-inspired .gh-left,body.gh-fb-inspired .gh-right{position:static;max-height:none}body.gh-fb-inspired .gh-left{display:none}body.gh-fb-inspired .gh-story-card{height:180px;min-width:105px}body.gh-fb-inspired .gh-composer-actions{grid-template-columns:repeat(2,1fr)}}

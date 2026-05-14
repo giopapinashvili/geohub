@@ -21,7 +21,7 @@
     }
   }
   function initTheme(){
-    var preferred = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+    var preferred = 'dark';
     applyTheme(document.documentElement.getAttribute('data-gh-theme') || preferred);
   }
 
@@ -125,7 +125,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function shell(opts){
     opts = opts || {};
-    document.body.classList.add('gh-social-body');
+    document.body.classList.add('gh-social-body','gh-fb-inspired');
     initTheme();
     document.body.innerHTML = '<div class="gh-shell">'+topbar()+
       '<div class="gh-layout">'+leftNav(opts.active||'')+'<main class="gh-center" id="ghCenter"></main>'+rightRail(opts.right||'')+'</div>'+createMenu()+'</div>';
@@ -137,24 +137,26 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function topbar(){
-    return '<header class="gh-topbar">'+
+    return '<header class="gh-topbar gh-hub-topbar">'+
       '<a class="gh-brand" href="feed.html"><div class="gh-brand-mark">GH</div><span>Geo<span>Hub</span></span></a>'+
-      '<div class="gh-top-search"><i class="fas fa-search"></i><input id="ghGlobalSearch" placeholder="Search GeoHub…"></div>'+
+      '<div class="gh-top-search"><i class="fas fa-search"></i><input id="ghGlobalSearch" placeholder="მოძებნე ადგილები, ადამიანები, ჯგუფები…"></div>'+
+      '<nav class="gh-center-tabs" aria-label="Primary navigation">'+
+        '<a class="active" href="feed.html" title="Feed"><i class="fas fa-house"></i></a>'+
+        '<a href="groups.html" title="Groups"><i class="fas fa-user-group"></i></a>'+
+        '<a href="messages.html" title="Messages"><i class="fas fa-comment-dots"></i><b class="gh-badge-count" id="ghMsgBadge"></b></a>'+
+        '<button type="button" id="ghNotifBtn" title="Notifications"><i class="fas fa-bell"></i><b class="gh-badge-count" id="ghNotifBadge"></b></button>'+
+      '</nav>'+
       '<div class="gh-top-actions">'+
-        '<button class="gh-icon-btn gh-sidebar-toggle" id="ghSidebarToggle" title="Collapse sidebars"><i class="fas fa-bars-staggered"></i></button>'+
-        '<a class="gh-icon-btn" href="feed.html" title="Home"><i class="fas fa-house"></i></a>'+
-        '<a class="gh-icon-btn" href="explore.html" title="Discover"><i class="fas fa-compass"></i></a>'+
-        '<button class="gh-create-btn" id="ghCreateBtn"><i class="fas fa-plus"></i><span>Create</span></button>'+
+        '<button class="gh-icon-btn gh-sidebar-toggle" id="ghSidebarToggle" title="Collapse sidebar"><i class="fas fa-bars-staggered"></i></button>'+
         '<button class="gh-icon-btn gh-theme-toggle" id="ghThemeToggle" title="Toggle light/dark mode"><i class="fas fa-moon"></i></button>'+
-        '<a class="gh-icon-btn" href="messages.html" title="Messages"><i class="fas fa-comment-dots"></i><b class="gh-badge-count" id="ghMsgBadge"></b></a>'+
-        '<button class="gh-icon-btn" id="ghNotifBtn" title="Notifications"><i class="fas fa-bell"></i><b class="gh-badge-count" id="ghNotifBadge"></b></button>'+
         '<a class="gh-user-btn" href="auth.html"><span class="gh-avatar" id="ghTopAvatar">GH</span><span id="ghTopName">Sign in</span></a>'+
+        '<button class="gh-create-btn" id="ghCreateBtn"><i class="fas fa-plus"></i><span>შექმნა</span></button>'+
       '</div></header>';
   }
 
   function leftNav(active){
     var items=[
-      ['feed','feed.html','fa-house','Home'],['discover','explore.html','fa-compass','Discover'],['groups','groups.html','fa-users','Groups'],['business','business.html','fa-store','Businesses'],['places','places.html','fa-map-marker-alt','Places'],['events','events.html','fa-calendar','Events'],['services','services.html','fa-briefcase','Services'],['learning','learning.html','fa-graduation-cap','Learning'],['rewards','rewards.html','fa-gift','Rewards'],['challenges','challenges.html','fa-trophy','Challenges'],['messages','messages.html','fa-comment-dots','Messages'],['profile','auth.html','fa-user','Profile'],['saved','auth.html','fa-bookmark','Saved']
+      ['feed','feed.html','fa-house','მთავარი Feed'],['places','places.html','fa-location-dot','რუკა / Places'],['business','business.html','fa-store','Businesses'],['groups','groups.html','fa-users','Groups'],['events','events.html','fa-calendar-xmark','Events'],['messages','messages.html','fa-comment-dots','Messages'],['notifications','feed.html#notifications','fa-bell','Notifications'],['rewards','rewards.html','fa-gift','Rewards / Points'],['challenges','challenges.html','fa-trophy','Challenges'],['services','services.html','fa-grip','Services'],['realestate','real-estate.html','fa-house-chimney','Real Estate'],['learning','learning.html','fa-graduation-cap','Learning'],['creators','creators.html','fa-camera-retro','Creators'],['trust','trust.html','fa-shield-halved','Trust / Safety'],['admin','admin.html','fa-user-shield','Admin Panel']
     ];
     return '<aside class="gh-left"><nav class="gh-panel">'+items.map(function(it){return '<a class="gh-nav-item '+(active===it[0]?'active':'')+'" href="'+it[1]+'"><i class="fas '+it[2]+'"></i><span>'+it[3]+'</span></a>';}).join('')+'</nav></aside>';
   }
@@ -164,9 +166,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function defaultRight(){
-    return '<div class="gh-panel gh-right-widget gh-happening"><div class="gh-section-title"><h3>What’s happening</h3><a class="gh-small" href="explore.html">See all</a></div><div class="gh-mini-list" id="ghSuggestions"><div class="gh-mini-item"><span class="gh-mini-thumb"><i class="fas fa-spinner fa-spin"></i></span><div><strong>Loading real activity…</strong><span>Firestore</span></div></div></div></div>'+
-      '<div class="gh-panel gh-right-widget gh-premium-card"><div><strong><i class="fas fa-crown"></i> GeoHub Premium</strong><p>More rewards, more discovery, more Georgia.</p><a href="pricing.html" class="gh-btn sm ghost">Go Premium</a></div></div>'+
-      '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Quick actions</h3></div><div class="gh-mini-list"><a class="gh-mini-item" href="add-business.html"><span class="gh-mini-thumb"><i class="fas fa-store"></i></span><div><strong>Add business</strong><span>Create a page</span></div></a><a class="gh-mini-item" href="groups.html"><span class="gh-mini-thumb"><i class="fas fa-users"></i></span><div><strong>Create group</strong><span>Build community</span></div></a></div></div>';
+    return '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Nearby Places</h3><a class="gh-small" href="places.html">ყველა</a></div><div class="gh-mini-list" id="ghRightPlaces"><div class="gh-mini-item"><span class="gh-mini-thumb"><i class="fas fa-spinner fa-spin"></i></span><div><strong>Loading places…</strong><span>Firestore</span></div></div></div></div>'+
+      '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Upcoming Events</h3><a class="gh-small" href="events.html">ყველა</a></div><div class="gh-mini-list" id="ghRightEvents"><div class="gh-mini-item"><span class="gh-mini-thumb"><i class="fas fa-spinner fa-spin"></i></span><div><strong>Loading events…</strong><span>Firestore</span></div></div></div></div>'+
+      '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Suggested Groups</h3><a class="gh-small" href="groups.html">ყველა</a></div><div class="gh-mini-list" id="ghSuggestions"><div class="gh-mini-item"><span class="gh-mini-thumb"><i class="fas fa-spinner fa-spin"></i></span><div><strong>Loading groups…</strong><span>Firestore</span></div></div></div></div>'+
+      '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Rewards & Coupons</h3><a class="gh-small" href="rewards.html">ყველა</a></div><div class="gh-mini-list" id="ghRightRewards"><div class="gh-empty mini"><i class="fas fa-gift"></i><h3>No rewards yet</h3><p>Real rewards appear after admin adds them.</p></div></div></div>';
   }
 
   function createMenu(){
@@ -243,10 +246,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     ready(function(){
       if($('#ghRightStories')) loadStories('#ghRightStories', true);
       var list=$('#ghSuggestions'); if(!list) return;
-      Promise.all([getLatest('businesses',4), getLatest('groups',4)]).then(function(res){
-        var items=res[0].map(function(x){x._type='business';return x;}).concat(res[1].map(function(x){x._type='group';return x;})).slice(0,6);
-        if(!items.length){ list.innerHTML='<div class="gh-empty" style="min-height:120px"><i class="fas fa-seedling"></i><h3>Nothing yet</h3><p>Real suggestions appear after content is added.</p></div>'; return; }
-        list.innerHTML=items.map(function(x){ var title=x.name||x.title||'Untitled'; var photo=x.logoUrl||x.coverImageUrl||x.coverUrl||x.imageUrl||x.photoUrl; return '<a class="gh-mini-item" href="'+docLink(x._type,x.id)+'"><span class="gh-mini-thumb">'+(photo?img(photo,title):'<i class="fas '+iconFor(x._type)+'"></i>')+'</span><div><strong>'+esc(title)+'</strong><span>'+labelFor(x._type)+' · '+esc(x.city||x.category||'GeoHub')+'</span></div></a>'; }).join('');
+      Promise.all([getLatest('groups',4), getLatest('places',4), getLatest('events',3), getLatest('rewards',3)]).then(function(res){
+        var groups=res[0], places=res[1], events=res[2], rewards=res[3];
+        if(!groups.length){ list.innerHTML='<div class="gh-empty mini"><i class="fas fa-users"></i><h3>No groups yet</h3><p>Real groups appear after creation.</p></div>'; }
+        else { list.innerHTML=groups.map(function(x){ var title=x.name||x.title||'Untitled'; var photo=x.logoUrl||x.coverImageUrl||x.coverUrl||x.imageUrl||x.photoUrl; return '<a class="gh-mini-item" href="'+docLink('group',x.id)+'"><span class="gh-mini-thumb">'+(photo?img(photo,title):'<i class="fas fa-users"></i>')+'</span><div><strong>'+esc(title)+'</strong><span>'+esc(x.category||'Group')+'</span></div></a>'; }).join(''); }
+        var pl=$('#ghRightPlaces'); if(pl){ pl.innerHTML = places.length ? places.map(function(x){ var title=x.name||x.title||'Untitled'; var photo=x.imageUrl||x.photoUrl||x.coverUrl||x.coverImageUrl; return '<a class="gh-mini-item" href="'+docLink('place',x.id)+'"><span class="gh-mini-thumb">'+(photo?img(photo,title):'<i class="fas fa-location-dot"></i>')+'</span><div><strong>'+esc(title)+'</strong><span>'+esc(x.city||x.region||'Place')+'</span></div></a>'; }).join('') : '<div class="gh-empty mini"><i class="fas fa-location-dot"></i><h3>No places yet</h3><p>Real places appear after admin adds them.</p></div>'; }
+        var ev=$('#ghRightEvents'); if(ev){ ev.innerHTML = events.length ? events.map(function(x){ var title=x.name||x.title||'Untitled'; var when=x.startDate||x.date||x.createdAt; return '<a class="gh-mini-item" href="'+docLink('event',x.id)+'"><span class="gh-mini-thumb event"><i class="fas fa-calendar"></i></span><div><strong>'+esc(title)+'</strong><span>'+esc(x.city||x.location||timeAgo(when))+'</span></div></a>'; }).join('') : '<div class="gh-empty mini"><i class="fas fa-calendar"></i><h3>No events yet</h3><p>Real events appear after admin adds them.</p></div>'; }
+        var rw=$('#ghRightRewards'); if(rw){ rw.innerHTML = rewards.length ? rewards.map(function(x){ var title=x.name||x.title||'Untitled'; var pts=x.points||x.cost||x.price||''; return '<a class="gh-mini-item" href="rewards.html"><span class="gh-mini-thumb reward"><i class="fas fa-gift"></i></span><div><strong>'+esc(title)+'</strong><span>'+esc(pts?pts+' points':'Reward')+'</span></div></a>'; }).join('') : '<div class="gh-empty mini"><i class="fas fa-gift"></i><h3>No rewards yet</h3><p>Real rewards appear after admin adds them.</p></div>'; }
       });
     });
   }
@@ -657,14 +663,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function renderFeed(){
     shell({ active:'feed', center:
-      '<section class="gh-card gh-live-map"><div class="gh-live-map-bg"><div class="gh-map-dot gh-map-dot-a"><b id="gpPosts">—</b><span>Posts</span></div><div class="gh-map-dot gh-map-dot-b"><b id="gpEvents">—</b><span>Events</span></div><div class="gh-map-dot gh-map-dot-c"><b id="gpBusinesses">—</b><span>Businesses</span></div><div class="gh-map-dot gh-map-dot-d"><b id="gpCheckins">—</b><span>Check-ins</span></div></div><div class="gh-live-map-head"><div><h1>GeoPulse — Live Georgia</h1><p>Real activity from posts, businesses, events and check-ins.</p></div><a href="map.html" class="gh-btn ghost"><i class="fas fa-location-dot"></i> Open Full Map</a></div><div class="gh-live-stats"><div><i class="fas fa-wave-square"></i><strong id="gpActive">Loading</strong><span>Activity</span></div><div><i class="fas fa-calendar"></i><strong id="gpEvents2">—</strong><span>Events</span></div><div><i class="fas fa-location-dot"></i><strong id="gpCheckins2">—</strong><span>Check-ins</span></div><div><i class="fas fa-comment-dots"></i><strong id="gpPosts2">—</strong><span>Posts</span></div></div></section>'+
-      '<section class="gh-card"><div class="gh-section-title"><h2>Stories from Places</h2><a class="gh-small" href="explore.html">See all</a></div><div class="gh-stories" id="ghStories"></div></section>'+
+      '<section class="gh-card gh-story-strip-card"><div class="gh-stories" id="ghStories"></div></section>'+
       '<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="gh-avatar" id="ghComposerAvatar">GH</span><button class="gh-composer-fake" data-create-post>რას აზიარებ დღეს?</button></div><div class="gh-composer-actions"><button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Place</button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:#38bdf8"></i> Business</button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:#f59e0b"></i> Event</button></div></section>'+
       '<div id="ghFeedList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>Loading feed…</h3></div></div>'
     });
     var u=currentUserInfo(); var ca=$('#ghComposerAvatar'); if(ca) ca.innerHTML = u.avatar ? img(u.avatar,u.name) : esc(initials(u.name));
     loadStories('#ghStories');
-    updateGeoPulse();
     ready(function(){
       var list=$('#ghFeedList'); bindPostInteractions(list); var lastPosts=[];
       function paint(){
