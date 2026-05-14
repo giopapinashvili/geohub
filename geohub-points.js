@@ -52,10 +52,26 @@
     if(!state.rewards.length){box.innerHTML='<div class="gp-empty"><i class="fas fa-gift"></i><h2>No partner rewards yet</h2><p>Business owners can create coffee, gym visit, course discount, product coupon or special discount rewards from their Business Dashboard.</p></div>';return;}
     box.innerHTML='<div class="gp-section-title"><h2>Partner rewards & discounts</h2><span class="gp-chip">'+state.rewards.length+' active</span></div><div class="gp-grid">'+state.rewards.map(function(r){var price=Number(r.pointPrice||r.price||0);var q=Number(r.quantityRemaining||0), qt=Number(r.quantityTotal||0);return '<article class="gp-card"><div class="gp-kicker">'+esc(r.rewardType||'reward')+'</div><h3>'+esc(r.title||r.name||'Reward')+'</h3><p>'+esc(r.description||'Partner coupon / discount reward')+'</p><div class="gp-meta"><span class="gp-price"><i class="fas fa-coins"></i>'+compact(price)+' pts</span>'+(r.businessName?'<span class="gp-chip">'+esc(r.businessName)+'</span>':'')+(qt>0?'<span class="gp-chip">'+q+' left</span>':'<span class="gp-chip">Unlimited</span>')+'</div>'+(r.terms?'<p style="font-size:.82rem">'+esc(r.terms)+'</p>':'')+'<button class="gp-btn" data-buy-reward="'+esc(r.id)+'"><i class="fas fa-ticket"></i>Unlock coupon</button></article>';}).join('')+'</div>';
   }
+  function qrImageUrl(code){
+    return 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data='+encodeURIComponent(code)+'&format=svg&margin=1';
+  }
+  function copyCouponCode(code, btnId){
+    navigator.clipboard && navigator.clipboard.writeText(code).then(function(){
+      var b=document.getElementById(btnId); if(b){b.innerHTML='<i class="fas fa-check"></i> Copied!'; setTimeout(function(){b.innerHTML='<i class="fas fa-copy"></i> Copy code';},1800);}
+    });
+  }
+  window._copyCouponCode = copyCouponCode;
   function paintCoupons(box){
     if(!user()){box.innerHTML='<div class="gp-empty"><h2>Sign in to see your coupons</h2><a class="gp-btn" href="auth.html">Sign in</a></div>';return;}
     if(!state.coupons.length){box.innerHTML='<div class="gp-empty"><i class="fas fa-ticket"></i><h2>No coupons yet</h2><p>Unlock rewards with GeoPoints and coupon codes will appear here.</p></div>';return;}
-    box.innerHTML='<div class="gp-section-title"><h2>My coupons</h2><span class="gp-chip">Show this code to the partner</span></div><div class="gp-grid">'+state.coupons.map(function(c){return '<article class="gp-card"><div class="gp-kicker">'+esc(c.status||'active')+'</div><h3>'+esc(c.rewardTitle||'Reward coupon')+'</h3><div class="gp-code">'+esc(c.code||c.qrValue||'')+'</div><div class="gp-meta"><span class="gp-price">'+compact(c.pointPrice||0)+' pts</span>'+(c.expiresAt?'<span class="gp-chip">Expires '+esc(c.expiresAt)+'</span>':'')+'</div><p>One-time use. Non-cash, non-refundable partner coupon.</p></article>';}).join('')+'</div>';
+    box.innerHTML='<div class="gp-section-title"><h2>My coupons</h2><span class="gp-chip">Show QR or code to the partner</span></div><div class="gp-grid">'+state.coupons.map(function(c,i){
+      var code=c.code||c.qrValue||''; var btnId='cpCopy'+i;
+      return '<article class="gp-card"><div class="gp-kicker">'+esc(c.status||'active')+'</div><h3>'+esc(c.rewardTitle||'Reward coupon')+'</h3>'
+        +(code?'<div style="text-align:center;margin:12px 0"><img src="'+qrImageUrl(code)+'" alt="QR Code" style="width:160px;height:160px;border-radius:8px;background:#fff;padding:4px" loading="lazy"></div>':'')
+        +'<div class="gp-code" style="letter-spacing:0.1em;font-size:1.05rem;margin-bottom:8px">'+esc(code)+'</div>'
+        +(code?'<button class="gp-btn" style="width:100%;margin-bottom:8px" id="'+btnId+'" onclick="window._copyCouponCode(\''+esc(code)+'\',\''+btnId+'\')"><i class="fas fa-copy"></i> Copy code</button>':'')
+        +'<div class="gp-meta"><span class="gp-price">'+compact(c.pointPrice||0)+' pts</span>'+(c.expiresAt?'<span class="gp-chip">Expires '+esc(c.expiresAt)+'</span>':'')+'</div><p>One-time use. Show QR or code to partner to redeem.</p></article>';
+    }).join('')+'</div>';
   }
   function paintSend(box){
     if(!user()){box.innerHTML='<div class="gp-empty"><h2>Sign in to send GeoPoints</h2><a class="gp-btn" href="auth.html">Sign in</a></div>';return;}
