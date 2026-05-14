@@ -3,7 +3,8 @@
   'use strict';
 
   var VAPID_KEY = 'BEOHtXTao7lj08Lkq6WMRzelk7GrGBCeYSO304UKw6bCd-NB1Y_kLe2U1MR2ArckX9IHI94wAULDZREoGBnudkQ';
-  var SW_PATH   = '/firebase-messaging-sw.js';
+  // sw.js handles both PWA cache and FCM background messages (single scope)
+  var SW_PATH   = '/sw.js';
 
   var _messaging          = null;
   var _initialized        = false;
@@ -40,10 +41,16 @@
   function storageDel(key)      { try { localStorage.removeItem(key);   } catch(e) {} }
 
   // ── Firestore token operations ─────────────────────────────────────────────
-  function saveFCMToken(token) {
+  // Firestore path: users/{uid}/fcmTokens/{token} — 4 segments (even = document ref)
+  function tokenRef(token) {
     var u = currentUser(); var d = db(); var fs = fsApi();
-    if (!u || !d || !fs || !token) return Promise.resolve();
-    var ref = fs.doc(d, 'users', u.uid, 'private', 'fcmTokens', token);
+    if (!u || !d || !fs || !token) return null;
+    return fs.doc(d, 'users', u.uid, 'fcmTokens', token);
+  }
+
+  function saveFCMToken(token) {
+    var ref = tokenRef(token); var fs = fsApi();
+    if (!ref || !fs) return Promise.resolve();
     return fs.setDoc(ref, {
       token:       token,
       platform:    'web',
@@ -54,18 +61,15 @@
   }
 
   function removeFCMToken(token) {
-    var u = currentUser(); var d = db(); var fs = fsApi();
-    if (!u || !d || !fs || !token) return Promise.resolve();
-    return fs.deleteDoc(fs.doc(d, 'users', u.uid, 'private', 'fcmTokens', token))
-             .catch(function () {});
+    var ref = tokenRef(token); var fs = fsApi();
+    if (!ref || !fs) return Promise.resolve();
+    return fs.deleteDoc(ref).catch(function () {});
   }
 
   function refreshTokenTimestamp(token) {
-    var u = currentUser(); var d = db(); var fs = fsApi();
-    if (!u || !d || !fs || !token) return;
-    fs.updateDoc(fs.doc(d, 'users', u.uid, 'private', 'fcmTokens', token), {
-      lastUsedAt: fs.serverTimestamp()
-    }).catch(function () {});
+    var ref = tokenRef(token); var fs = fsApi();
+    if (!ref || !fs) return;
+    fs.updateDoc(ref, { lastUsedAt: fs.serverTimestamp() }).catch(function () {});
   }
 
   // ── Firebase Messaging (lazy import) ───────────────────────────────────────
@@ -114,13 +118,14 @@
     }).catch(function () {});
   }
 
-  // ── Init (register SW + start foreground listener) ─────────────────────────
+  // ── Init (reuse existing SW from mobile-nav.js + start foreground listener) ─
   function init() {
     if (_initialized || !supported()) return Promise.resolve();
     _initialized = true;
 
-    return navigator.serviceWorker.register(SW_PATH, { scope: '/' })
-      .then(function () { return navigator.serviceWorker.ready; })
+    // mobile-nav.js already registers sw.js (which handles both cache + FCM).
+    // We only wait for it to be ready — no duplicate registration.
+    return navigator.serviceWorker.ready
       .then(function () { return getMessagingInstance(); })
       .then(function (messaging) {
         if (!messaging) return;

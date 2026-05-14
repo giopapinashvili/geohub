@@ -31,10 +31,12 @@ try {
     authFns: { signOut, onAuthStateChanged }
   };
   isSupported().then(ok => { if (ok) getAnalytics(app); }).catch(() => {});
-  isMsgSupported().then(ok => {
-    if (ok) window.GeoFirebase.messaging = getMessaging(app);
-  }).catch(() => {});
-  window.dispatchEvent(new Event('GeoFirebaseReady'));
+  // Resolve messaging before firing GeoFirebaseReady so push-notifications.js
+  // can safely reuse the instance without a race condition.
+  isMsgSupported()
+    .then(ok => { if (ok) window.GeoFirebase.messaging = getMessaging(app); })
+    .catch(() => {})
+    .finally(() => { window.dispatchEvent(new Event('GeoFirebaseReady')); });
 } catch (err) {
   console.warn('[GeoHub] Firebase init failed — online features disabled.', err.message);
   window.GeoFirebase = null;
