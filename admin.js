@@ -878,6 +878,26 @@
       renderExtFields(colSel.value);
     }
 
+    // Live JSON validation for bulk import textarea
+    var bulkJson = document.getElementById('adminBulkJson');
+    var bulkVal  = document.getElementById('adminBulkValidation');
+    if (bulkJson && bulkVal) {
+      bulkJson.addEventListener('input', function() {
+        var v = bulkJson.value.trim();
+        if (!v) { bulkVal.style.color = '#94a3b8'; bulkVal.textContent = ''; return; }
+        try {
+          var arr = JSON.parse(v);
+          if (!Array.isArray(arr)) throw new Error('Must be an array');
+          var missing = arr.filter(function(it) { return !it || (!it.name && !it.title); }).length;
+          bulkVal.style.color = missing ? '#f59e0b' : '#10e0a0';
+          bulkVal.textContent = arr.length + ' items' + (missing ? ' · ' + missing + ' missing name/title' : ' · valid');
+        } catch(e) {
+          bulkVal.style.color = '#ef4444';
+          bulkVal.textContent = 'JSON error: ' + e.message;
+        }
+      });
+    }
+
     form.addEventListener('submit', function(e) {
       e.preventDefault();
       if (!window.GeoFirebase || !window.GeoFirebase.fs) return toast('Firebase not ready');
@@ -920,6 +940,18 @@
         form.reset();
         renderExtFields(col);
         toast('Created: ' + title + ' (ID: ' + ref.id.slice(-6) + ')');
+        // Show live preview
+        var preview = document.getElementById('adminContentPreview');
+        var previewBody = document.getElementById('adminContentPreviewBody');
+        if (preview && previewBody) {
+          var lines = ['<strong>' + esc(title) + '</strong> → <code style="font-size:.78rem">' + col + '/' + ref.id + '</code>'];
+          if (desc) lines.push(esc(desc.slice(0, 120)) + (desc.length > 120 ? '…' : ''));
+          if (city) lines.push('City: ' + esc(city));
+          if (category) lines.push('Category: ' + esc(category));
+          previewBody.innerHTML = lines.join('<br>');
+          preview.style.display = 'block';
+          setTimeout(function() { if (preview) preview.style.display = 'none'; }, 8000);
+        }
       }).catch(function(err) {
         console.error('[Admin Content Studio]', err); toast('Create failed: ' + err.message);
       }).finally(function() {
@@ -927,6 +959,61 @@
       });
     });
   }
+
+  /* ── JSON BULK IMPORT ─────────────────────────────────────── */
+  window.adminBulkImport = function() {
+    var jsonEl = document.getElementById('adminBulkJson');
+    var colEl  = document.getElementById('adminBulkCollection');
+    var valEl  = document.getElementById('adminBulkValidation');
+    var resEl  = document.getElementById('adminBulkResult');
+    if (!jsonEl || !colEl) return;
+
+    var raw = jsonEl.value.trim();
+    if (!raw) { if (valEl) valEl.textContent = 'Paste a JSON array first.'; return; }
+
+    var items;
+    try { items = JSON.parse(raw); } catch(e) { if (valEl) valEl.style.color = '#ef4444'; valEl.textContent = 'Invalid JSON: ' + e.message; return; }
+    if (!Array.isArray(items)) { if (valEl) { valEl.style.color = '#ef4444'; valEl.textContent = 'Must be a JSON array [ {...}, ... ]'; } return; }
+    if (items.length === 0) { if (valEl) valEl.textContent = 'Array is empty.'; return; }
+    if (items.length > 200) { if (valEl) { valEl.style.color = '#ef4444'; valEl.textContent = 'Max 200 items per import.'; } return; }
+
+    // Validate required field
+    var missing = items.filter(function(it) { return !it || typeof it !== 'object' || (!it.name && !it.title); });
+    if (missing.length) { if (valEl) { valEl.style.color = '#ef4444'; valEl.textContent = missing.length + ' item(s) are missing a name/title field.'; } return; }
+
+    if (!window.GeoFirebase || !window.GeoFirebase.fs) return toast('Firebase not ready');
+    var gf = window.GeoFirebase, fs = gf.fs, db = gf.db;
+    var user = gf.auth && gf.auth.currentUser;
+    if (!user) return toast('Admin login required');
+
+    var col = colEl.value;
+    if (valEl) { valEl.style.color = '#94a3b8'; valEl.textContent = 'Importing ' + items.length + ' items…'; }
+    if (resEl) resEl.style.display = 'none';
+
+    var promises = items.map(function(it) {
+      var doc = Object.assign({}, it, {
+        name: it.name || it.title,
+        title: it.title || it.name,
+        status: it.status || 'active',
+        createdBy: user.uid, ownerId: user.uid, userId: user.uid,
+        createdAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp()
+      });
+      return fs.addDoc(fs.collection(db, col), doc);
+    });
+
+    Promise.allSettled(promises).then(function(results) {
+      var ok  = results.filter(function(r) { return r.status === 'fulfilled'; }).length;
+      var err = results.filter(function(r) { return r.status === 'rejected'; }).length;
+      jsonEl.value = '';
+      if (valEl) { valEl.style.color = '#10e0a0'; valEl.textContent = 'Done.'; }
+      if (resEl) {
+        resEl.style.display = 'block';
+        resEl.innerHTML = '<i class="fas fa-check-circle"></i> Imported <strong>' + ok + '</strong> items into <strong>' + col + '</strong>'
+          + (err ? ' · <span style="color:#ef4444">' + err + ' failed</span>' : '');
+      }
+      toast('Imported ' + ok + ' items' + (err ? ', ' + err + ' failed' : ''));
+    });
+  };
 
   /* ── GLOBAL SEARCH ────────────────────────────────────────── */
   window.handleGlobalSearch = function (q) {

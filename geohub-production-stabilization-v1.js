@@ -10,6 +10,9 @@
   if (window.__GeoHubProductionStabilizationV1) return;
   window.__GeoHubProductionStabilizationV1 = true;
 
+  // Apply saved theme before first paint to avoid flash
+  try { var _t = localStorage.getItem('gh_theme'); if (_t === 'dark' || _t === 'light') document.documentElement.setAttribute('data-gh-theme', _t); } catch(e) {}
+
   const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const $ = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));

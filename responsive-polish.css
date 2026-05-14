@@ -235,3 +235,99 @@ html[data-page="messages"] #ghChatPopRoot{display:none!important;}
   .gh-chat-msg-wrap{max-width:86%!important;}
   .msg-bubble-wrap{max-width:86%!important;}
 }
+
+/* ─── Light Theme: body + nav + clean pages ───────────────── */
+html[data-gh-theme="light"] body {
+  background: var(--bg-0);
+  color: var(--text-primary);
+}
+html[data-gh-theme="light"] .navbar,
+html[data-gh-theme="light"] .topbar,
+html[data-gh-theme="light"] .main-header {
+  background: rgba(248,250,249,0.93)!important;
+  border-bottom: 1px solid var(--border)!important;
+  backdrop-filter: var(--glass-blur-sm);
+}
+html[data-gh-theme="light"] .navbar-brand .logo-text,
+html[data-gh-theme="light"] .navbar a,
+html[data-gh-theme="light"] .hamburger span {
+  color: var(--text-primary)!important;
+  background-color: var(--text-primary)!important;
+}
+html[data-gh-theme="light"] .navbar-brand .logo-text {
+  background: none!important;
+  color: var(--text-primary)!important;
+}
+html[data-gh-theme="light"] .app-bottom-nav {
+  background: rgba(248,250,249,0.95)!important;
+  border-top: 1px solid var(--border)!important;
+}
+html[data-gh-theme="light"] .app-nav-item {
+  color: var(--text-secondary)!important;
+}
+html[data-gh-theme="light"] .app-nav-item.active,
+html[data-gh-theme="light"] .app-nav-item:hover {
+  color: var(--green)!important;
+}
+html[data-gh-theme="light"] .clean-page {
+  background: var(--bg-0)!important;
+}
+html[data-gh-theme="light"] .clean-hero {
+  background: transparent!important;
+}
+html[data-gh-theme="light"] .clean-card,
+html[data-gh-theme="light"] .clean-stat {
+  background: var(--bg-card)!important;
+  border-color: var(--border)!important;
+  color: var(--text-primary)!important;
+}
+html[data-gh-theme="light"] .clean-stat strong {
+  color: var(--text-primary)!important;
+}
+html[data-gh-theme="light"] .clean-stat span {
+  color: var(--text-secondary)!important;
+}
+html[data-gh-theme="light"] .clean-title,
+html[data-gh-theme="light"] .clean-card strong {
+  color: var(--text-primary)!important;
+}
+html[data-gh-theme="light"] .clean-desc,
+html[data-gh-theme="light"] .clean-tab {
+  color: var(--text-secondary)!important;
+}
+html[data-gh-theme="light"] .clean-tab.active {
+  color: var(--green)!important;
+  border-bottom-color: var(--green)!important;
+}
+html[data-gh-theme="light"] .clean-tabs {
+  background: var(--bg-elevated)!important;
+  border-color: var(--border)!important;
+}
+html[data-gh-theme="light"] .clean-empty {
+  background: var(--bg-elevated)!important;
+  border-color: var(--border-emphasis)!important;
+}
+html[data-gh-theme="light"] .clean-empty h3 {
+  color: var(--text-primary)!important;
+}
+html[data-gh-theme="light"] .clean-search {
+  background: var(--bg-card)!important;
+  border-color: var(--border)!important;
+}
+html[data-gh-theme="light"] .clean-search input {
+  color: var(--text-primary)!important;
+}
+html[data-gh-theme="light"] .panel,
+html[data-gh-theme="light"] .card,
+html[data-gh-theme="light"] .gh-card,
+html[data-gh-theme="light"] .geo-event-card,
+html[data-gh-theme="light"] .geo-place-card,
+html[data-gh-theme="light"] .group-card,
+html[data-gh-theme="light"] .business-card {
+  background: var(--bg-card)!important;
+  border-color: var(--border)!important;
+}
+html[data-gh-theme="light"] .mobile-menu {
+  background: rgba(248,250,249,0.98)!important;
+  border-bottom: 1px solid var(--border)!important;
+}

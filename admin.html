@@ -435,9 +435,6 @@
               <option value="events">Events</option>
               <option value="rewards">Rewards / Coupons</option>
               <option value="challenges">Challenges</option>
-              <option value="services">Services</option>
-              <option value="realEstateListings">Real Estate Listings</option>
-              <option value="learningItems">Learning / Courses</option>
               <option value="creators">Creators</option>
             </select>
           </label>
@@ -456,6 +453,34 @@
           <div id="adminExtFields" style="display:grid;gap:12px"></div>
           <button class="btn btn-primary btn-sm" type="submit" style="justify-self:start"><i class="fas fa-plus"></i> Create real item</button>
         </form>
+        <!-- Live preview after create -->
+        <div id="adminContentPreview" style="display:none;margin-top:18px;padding:16px;border-radius:14px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25)">
+          <div style="font-weight:800;color:#10e0a0;margin-bottom:6px"><i class="fas fa-check-circle"></i> Created successfully</div>
+          <div id="adminContentPreviewBody" style="font-size:.85rem;color:var(--ts,#94a3b8);line-height:1.6"></div>
+        </div>
+      </div>
+      <!-- JSON Bulk Import -->
+      <div class="panel" style="max-width:860px;margin-top:18px">
+        <div class="panel-hdr"><div class="panel-title">JSON Bulk Import</div><div class="panel-sub">Paste a JSON array of objects to batch-create items in a collection.</div></div>
+        <div style="display:grid;gap:12px;padding:8px 0 4px">
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Collection
+            <select id="adminBulkCollection" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+              <option value="places">Places / Map locations</option>
+              <option value="businesses">Businesses</option>
+              <option value="groups">Groups</option>
+              <option value="events">Events</option>
+              <option value="rewards">Rewards / Coupons</option>
+              <option value="challenges">Challenges</option>
+              <option value="creators">Creators</option>
+            </select>
+          </label>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">JSON Array
+            <textarea id="adminBulkJson" rows="6" placeholder='[{"name":"Tbilisi Garden","city":"Tbilisi","category":"park"},...]' style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);resize:vertical;font-family:monospace;font-size:.8rem"></textarea>
+          </label>
+          <div id="adminBulkValidation" style="font-size:.8rem;color:#94a3b8;min-height:1.4em"></div>
+          <button class="btn btn-primary btn-sm" onclick="adminBulkImport()" style="justify-self:start"><i class="fas fa-upload"></i> Import items</button>
+          <div id="adminBulkResult" style="display:none;padding:12px;border-radius:10px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);font-size:.85rem;color:#10e0a0"></div>
+        </div>
       </div>
     </section>
 
