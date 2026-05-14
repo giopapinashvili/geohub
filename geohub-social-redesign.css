@@ -923,3 +923,67 @@ html[data-gh-theme="light"] .gh-svc-dash-price{color:#0a5229}
 .gh-star-full{color:#facc15}
 .gh-star-empty{color:rgba(148,163,184,.35)}
 html[data-gh-theme="light"] .gh-star-empty{color:rgba(100,116,139,.25)}
+
+/* ── Phase 6 Step 6 — Working Hours + Contact Logic ──────────────── */
+
+/* Open / Closed status badge */
+.gh-hours-status{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:.72rem;font-weight:600;vertical-align:middle;line-height:1.6}
+.gh-hours-status.open{background:rgba(16,185,129,.18);color:#10b981}
+.gh-hours-status.closed{background:rgba(239,68,68,.16);color:#ef4444}
+html[data-gh-theme="light"] .gh-hours-status.open{background:rgba(16,185,129,.14);color:#057a55}
+html[data-gh-theme="light"] .gh-hours-status.closed{background:rgba(239,68,68,.12);color:#c0392b}
+.gh-hours-status i{font-size:.45rem;vertical-align:middle}
+
+/* Hours status row on public About tab */
+.gh-hours-status-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.gh-hours-today-label{font-size:.82rem;font-weight:500;color:var(--gh-text)}
+.gh-hours-next{font-size:.75rem;color:var(--gh-muted);margin-left:2px}
+
+/* Day grid on About tab */
+.gh-hours-grid{display:grid;gap:2px;margin-top:8px}
+.gh-hours-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--gh-border);font-size:.82rem}
+.gh-hours-row:last-child{border-bottom:none}
+.gh-hours-row.gh-today{color:var(--gh-green);font-weight:600}
+.gh-hours-day-name{color:var(--gh-muted);min-width:80px}
+.gh-hours-row.gh-today .gh-hours-day-name{color:var(--gh-green)}
+.gh-hours-closed-label{font-style:italic;color:var(--gh-muted);font-size:.78rem}
+
+/* Contact CTA buttons row */
+.gh-contact-ctas{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.gh-contact-cta-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--gh-radius);font-size:.82rem;font-weight:500;border:1px solid var(--gh-border);background:var(--gh-card-soft);color:var(--gh-text);text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s,transform .1s}
+.gh-contact-cta-btn:hover{background:rgba(255,255,255,.06);border-color:var(--gh-green)}
+.gh-contact-cta-btn:active{transform:scale(.97)}
+.gh-contact-cta-btn.primary{background:var(--gh-green);border-color:var(--gh-green);color:#fff;font-weight:600}
+.gh-contact-cta-btn.primary:hover{background:#0ea673;border-color:#0ea673}
+html[data-gh-theme="light"] .gh-contact-cta-btn{background:#f1f5f9;border-color:#cbd5e1;color:#1e293b}
+html[data-gh-theme="light"] .gh-contact-cta-btn:hover{background:#e2e8f0;border-color:#10b981}
+html[data-gh-theme="light"] .gh-contact-cta-btn.primary{background:var(--gh-green);border-color:var(--gh-green);color:#fff}
+
+/* Working hours editor — dashboard */
+.gh-hours-editor{display:grid;gap:6px;margin-top:6px}
+.gh-hours-editor-row{display:grid;grid-template-columns:120px auto 1fr;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--gh-border)}
+.gh-hours-editor-row:last-child{border-bottom:none}
+.gh-hours-editor-day{font-size:.84rem;font-weight:500;color:var(--gh-text)}
+.gh-hours-closed-toggle{display:inline-flex;align-items:center;gap:5px;font-size:.8rem;color:var(--gh-muted);cursor:pointer;user-select:none;white-space:nowrap}
+.gh-hours-closed-toggle input[type=checkbox]{width:14px;height:14px;accent-color:var(--gh-green);cursor:pointer}
+.gh-hours-times{display:flex;align-items:center;gap:6px}
+.gh-hours-times-hidden{display:none}
+.gh-time-input{background:var(--gh-card-soft);border:1px solid var(--gh-border);color:var(--gh-text);border-radius:6px;padding:5px 8px;font-size:.82rem;width:82px;outline:none;transition:border-color .15s}
+.gh-time-input:focus{border-color:var(--gh-green)}
+.gh-hours-dash{color:var(--gh-muted);font-size:.82rem}
+html[data-gh-theme="light"] .gh-time-input{background:#f8fafc;border-color:#cbd5e1;color:#1e293b}
+html[data-gh-theme="light"] .gh-time-input:focus{border-color:var(--gh-green)}
+
+/* Form hint text */
+.gh-form-hint{font-size:.76rem;color:var(--gh-muted);margin-top:3px;line-height:1.4}
+.gh-form-hint.error{color:#ef4444}
+
+/* Mobile responsive for hours editor */
+@media(max-width:540px){
+  .gh-hours-editor-row{grid-template-columns:1fr;gap:5px;padding:8px 0}
+  .gh-hours-times{flex-wrap:wrap}
+  .gh-time-input{width:76px}
+  .gh-contact-ctas{gap:6px}
+  .gh-contact-cta-btn{padding:7px 11px;font-size:.78rem}
+  .gh-hours-status-row{gap:6px}
+}

@@ -9,6 +9,10 @@
   var PAGE = document.body && document.body.dataset ? document.body.dataset.ghPage : '';
   var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false, pageUnsubs: [] };
 
+  /* ── Working hours constants ────────────────────────────── */
+  var DAYS_KEYS   = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+  var DAYS_LABELS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
   function applyTheme(theme){
     theme = theme === 'dark' ? 'dark' : 'light';
     state.theme = theme;
@@ -55,13 +59,100 @@
     if(!hours) return 'Working hours not added';
     if(typeof hours === 'string') return hours;
     if(typeof hours === 'object'){
-      var today = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][new Date().getDay()];
-      var h = hours[today] || hours[today.toLowerCase()] || null;
-      if(h){ return h.closed ? 'Closed today' : ((h.open||'09:00')+' - '+(h.close||'18:00')+' today'); }
-      return 'Working hours added';
+      var todayJs = new Date().getDay(); // 0=Sun
+      var todayKey = DAYS_KEYS[todayJs===0?6:todayJs-1];
+      var h = hours[todayKey] || hours[DAYS_LABELS[todayJs===0?6:todayJs-1]] || hours[DAYS_LABELS[todayJs===0?6:todayJs-1].toLowerCase()] || null;
+      if(h){ return h.closed ? 'Closed today' : ((h.open||'09:00')+' – '+(h.close||'18:00')); }
+      return 'Hours added';
     }
     return 'Working hours not added';
   }
+
+  function normWorkingHours(raw){
+    if(!raw||typeof raw!=='object'||Array.isArray(raw)) return null;
+    var out={};
+    DAYS_KEYS.forEach(function(k,i){
+      var h=raw[k]||raw[DAYS_LABELS[i]]||raw[DAYS_LABELS[i].toLowerCase()]||null;
+      out[k]=h&&typeof h==='object'
+        ?{closed:!!h.closed,open:h.open||'09:00',close:h.close||'18:00'}
+        :{closed:false,open:'09:00',close:'18:00'};
+    });
+    return out;
+  }
+
+  function parseMins(t){ var p=(t||'00:00').split(':'); return parseInt(p[0]||0)*60+parseInt(p[1]||0); }
+
+  function isOpenNow(nhObj){
+    if(!nhObj) return null;
+    var now=new Date();
+    var jsDay=now.getDay();
+    var todayIdx=jsDay===0?6:jsDay-1;
+    var h=nhObj[DAYS_KEYS[todayIdx]]; if(!h) return null;
+    if(h.closed){
+      var nextOpen=null;
+      for(var i=1;i<=7;i++){
+        var ni=(todayIdx+i)%7; var nh=nhObj[DAYS_KEYS[ni]];
+        if(nh&&!nh.closed){ nextOpen=(i===1?'Tomorrow':'On '+DAYS_LABELS[ni])+' at '+(nh.open||'09:00'); break; }
+      }
+      return {open:false,nextOpen:nextOpen};
+    }
+    var openT=h.open||'09:00'; var closeT=h.close||'18:00';
+    var nowM=now.getHours()*60+now.getMinutes();
+    var openM=parseMins(openT); var closeM=parseMins(closeT);
+    var isOpen=nowM>=openM&&nowM<closeM;
+    var nextOpen2=null;
+    if(!isOpen){
+      if(nowM<openM) nextOpen2='Today at '+openT;
+      else { for(var j=1;j<=7;j++){ var nj=(todayIdx+j)%7; var njh=nhObj[DAYS_KEYS[nj]]; if(njh&&!njh.closed){ nextOpen2=(j===1?'Tomorrow':'On '+DAYS_LABELS[nj])+' at '+(njh.open||'09:00'); break; } } }
+    }
+    return {open:isOpen,hours:openT+' – '+closeT,nextOpen:nextOpen2};
+  }
+
+  function openStatusBadge(wh){
+    if(!wh||typeof wh!=='object') return '';
+    var nh=normWorkingHours(wh); if(!nh) return '';
+    var s=isOpenNow(nh); if(!s) return '';
+    var label=s.open?'Open now':'Closed';
+    var extra=(!s.open&&s.nextOpen)?'<span class="gh-hours-next"> · '+esc(s.nextOpen)+'</span>':'';
+    return '<span class="gh-hours-status '+(s.open?'open':'closed')+'"><i class="fas fa-circle"></i> '+label+'</span>'+extra;
+  }
+
+  function workingHoursEditorHtml(wh){
+    var n=normWorkingHours(wh)||{};
+    DAYS_KEYS.forEach(function(k){ if(!n[k]) n[k]={closed:false,open:'09:00',close:'18:00'}; });
+    return '<div class="gh-hours-editor" id="ghHoursEditor">'+
+      DAYS_KEYS.map(function(k,i){
+        var h=n[k];
+        return '<div class="gh-hours-editor-row">'+
+          '<span class="gh-hours-editor-day">'+DAYS_LABELS[i].slice(0,3)+'</span>'+
+          '<label class="gh-hours-closed-toggle"><input type="checkbox" data-day="'+k+'" data-type="closed" id="hDay_'+k+'_closed"'+(h.closed?' checked':'')+'> <span>Closed</span></label>'+
+          '<div class="gh-hours-times'+(h.closed?' gh-hours-times-hidden':'')+'" id="hDay_'+k+'_times">'+
+            '<input type="time" class="gh-input gh-time-input" id="hDay_'+k+'_open" value="'+esc(h.open)+'" data-day="'+k+'" data-type="open">'+
+            '<span class="gh-hours-dash">–</span>'+
+            '<input type="time" class="gh-input gh-time-input" id="hDay_'+k+'_close" value="'+esc(h.close)+'" data-day="'+k+'" data-type="close">'+
+          '</div>'+
+        '</div>';
+      }).join('')+
+    '</div>';
+  }
+
+  function readWorkingHoursFromForm(){
+    var wh={};
+    DAYS_KEYS.forEach(function(k){
+      var cb=$('#hDay_'+k+'_closed'); if(!cb) return;
+      wh[k]=cb.checked
+        ?{closed:true}
+        :{closed:false,open:($('#hDay_'+k+'_open')&&$('#hDay_'+k+'_open').value)||'09:00',close:($('#hDay_'+k+'_close')&&$('#hDay_'+k+'_close').value)||'18:00'};
+    });
+    return Object.keys(wh).length===7?wh:null;
+  }
+
+  function bizInfoCardHtml(icon, label, valueHtml){
+    return '<div class="gh-biz-info-card"><i class="fas '+icon+'"></i><div><span class="gh-biz-ic-label">'+esc(label)+'</span><span class="gh-biz-ic-value">'+valueHtml+'</span></div></div>';
+  }
+
+  function isValidUrl(v){ return !v||/^https?:\/\/.+\..+/.test(v); }
+  function isValidEmail(v){ return !v||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=Math.max(1, Math.floor((Date.now()-t)/1000)); if(s<60)return s+'s'; var m=Math.floor(s/60); if(m<60)return m+'m'; var h=Math.floor(m/60); if(h<24)return h+'h'; var d=Math.floor(h/24); if(d<30)return d+'d'; var mo=Math.floor(d/30); if(mo<12)return mo+'mo'; return Math.floor(mo/12)+'y'; }
   function initials(name){ name=text(name,'GeoHub'); return name.split(/\s+/).slice(0,2).map(function(x){return x[0];}).join('').toUpperCase(); }
   function img(url, alt){ return url ? '<img src="'+esc(url)+'" alt="'+esc(alt||'')+'" loading="lazy" onerror="this.remove()">' : ''; }
@@ -949,15 +1040,26 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div class="gh-card">'+
           '<div class="gh-biz-sec-head"><h3>Contact & Links</h3></div>'+
           '<div class="gh-form-rows">'+
-            '<label class="gh-form-label" for="dsPhone">Phone<input class="gh-input" id="dsPhone" value="'+esc(b.phone||'')+'" placeholder="+995 5XX XXX XXX"></label>'+
-            '<label class="gh-form-label" for="dsEmail">Email<input class="gh-input" id="dsEmail" value="'+esc(b.email||'')+'" placeholder="contact@yourbusiness.com"></label>'+
-            '<label class="gh-form-label" for="dsWebsite">Website<input class="gh-input" id="dsWebsite" value="'+esc(b.website||'')+'" placeholder="https://yourbusiness.com"></label>'+
             '<div class="gh-form-grid">'+
-              '<label class="gh-form-label" for="dsIg">Instagram<input class="gh-input" id="dsIg" value="'+esc(sLinks.instagram||'')+'" placeholder="@handle"></label>'+
-              '<label class="gh-form-label" for="dsFb">Facebook<input class="gh-input" id="dsFb" value="'+esc(sLinks.facebook||'')+'" placeholder="page name or URL"></label>'+
+              '<label class="gh-form-label" for="dsPhone">Phone<input class="gh-input" id="dsPhone" value="'+esc(b.phone||'')+'" placeholder="+995 5XX XXX XXX"></label>'+
+              '<label class="gh-form-label" for="dsEmail">Email<input class="gh-input" id="dsEmail" value="'+esc(b.email||'')+'" placeholder="contact@yourbusiness.com"></label>'+
             '</div>'+
-            '<label class="gh-form-label" for="dsWa">WhatsApp<input class="gh-input" id="dsWa" value="'+esc(sLinks.whatsapp||'')+'" placeholder="+995 5XX XXX XXX"></label>'+
+            '<label class="gh-form-label" for="dsWebsite">Website<input class="gh-input" id="dsWebsite" value="'+esc(b.website||'')+'" placeholder="https://yourbusiness.com"></label>'+
+            '<label class="gh-form-label" for="dsBooking">Booking / Appointment URL<input class="gh-input" id="dsBooking" value="'+esc(b.bookingUrl||'')+'" placeholder="https://..."></label>'+
+            '<div class="gh-form-grid">'+
+              '<label class="gh-form-label" for="dsIg"><i class="fab fa-instagram"></i> Instagram<input class="gh-input" id="dsIg" value="'+esc(sLinks.instagram||'')+'" placeholder="@handle"></label>'+
+              '<label class="gh-form-label" for="dsFb"><i class="fab fa-facebook"></i> Facebook<input class="gh-input" id="dsFb" value="'+esc(sLinks.facebook||'')+'" placeholder="page name or URL"></label>'+
+            '</div>'+
+            '<div class="gh-form-grid">'+
+              '<label class="gh-form-label" for="dsWa"><i class="fab fa-whatsapp"></i> WhatsApp<input class="gh-input" id="dsWa" value="'+esc(sLinks.whatsapp||'')+'" placeholder="+995 5XX XXX XXX"></label>'+
+              '<label class="gh-form-label" for="dsTk"><i class="fab fa-tiktok"></i> TikTok<input class="gh-input" id="dsTk" value="'+esc(sLinks.tiktok||'')+'" placeholder="@handle"></label>'+
+            '</div>'+
+            '<label class="gh-form-label" for="dsLi"><i class="fab fa-linkedin"></i> LinkedIn<input class="gh-input" id="dsLi" value="'+esc(sLinks.linkedin||'')+'" placeholder="https://linkedin.com/company/..."></label>'+
           '</div>'+
+        '</div>'+
+        '<div class="gh-card">'+
+          '<div class="gh-biz-sec-head"><h3>Working Hours</h3><span class="gh-form-hint">Customers see when you\'re open</span></div>'+
+          workingHoursEditorHtml(b.workingHours)+
         '</div>'+
         '<div class="gh-card">'+
           '<div class="gh-biz-sec-head"><h3>Branding</h3></div>'+
@@ -969,6 +1071,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div class="gh-dash-actions"><button class="gh-btn" id="dsSaveBtn"><i class="fas fa-check"></i> Save changes</button></div>'+
       '</div>';
     $('#dsSaveBtn').onclick=function(){ saveBizSettings(b); };
+    // Wire closed-toggle visibility for time inputs
+    var editor=$('#ghHoursEditor');
+    if(editor) editor.addEventListener('change',function(e){
+      var cb=e.target;
+      if(!cb||cb.dataset.type!=='closed') return;
+      var timesEl=$('#hDay_'+cb.dataset.day+'_times');
+      if(timesEl) timesEl.classList.toggle('gh-hours-times-hidden',cb.checked);
+    });
   }
 
   function saveBizSettings(b){
@@ -978,22 +1088,36 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(!fs()||!db()) return toast('Database unavailable','error');
     var title=($('#dsTitle').value||'').trim();
     if(!title) return toast('Business name required','error');
+    // Soft validation — warn but don't hard-block
+    var website=($('#dsWebsite').value||'').trim();
+    var booking=($('#dsBooking').value||'').trim();
+    var email=($('#dsEmail').value||'').trim();
+    var li=($('#dsLi').value||'').trim();
+    if(website&&!isValidUrl(website)) return toast('Website should start with https://','error');
+    if(booking&&!isValidUrl(booking)) return toast('Booking URL should start with https://','error');
+    if(li&&!isValidUrl(li)) return toast('LinkedIn URL should start with https://','error');
+    if(email&&!isValidEmail(email)) return toast('Email address looks invalid','error');
+    var wh=readWorkingHoursFromForm();
     var fields={
       title:      title,
       description:($('#dsDesc').value||'').trim(),
       category:   ($('#dsCat').value||'').trim(),
       phone:      ($('#dsPhone').value||'').trim(),
-      email:      ($('#dsEmail').value||'').trim(),
-      website:    ($('#dsWebsite').value||'').trim(),
+      email:      email,
+      website:    website,
+      bookingUrl: booking,
       socialLinks:{
         instagram:($('#dsIg').value||'').trim(),
         facebook: ($('#dsFb').value||'').trim(),
         whatsapp: ($('#dsWa').value||'').trim(),
+        tiktok:   ($('#dsTk').value||'').trim(),
+        linkedin: li,
       },
       coverUrl:   ($('#dsCover').value||'').trim(),
       logoUrl:    ($('#dsLogo').value||'').trim(),
       updatedAt:  fs().serverTimestamp(),
     };
+    if(wh) fields.workingHours=wh;
     var btn=$('#dsSaveBtn');
     if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Saving…';}
     fs().updateDoc(fs().doc(db(),'businesses',b.id),fields).then(function(){
@@ -1582,7 +1706,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(b.website)  infoCards+=bizInfoCard('fa-globe','Website',b.website,b.website);
     if(!isOnlineBusiness(b)&&b.city) infoCards+=bizInfoCard('fa-location-dot','Location',b.address?b.address+', '+b.city:b.city,'');
     if(isOnlineBusiness(b))          infoCards+=bizInfoCard('fa-globe','Service area',b.serviceAreaText||businessAreaLabel(b),'');
-    if(b.workingHours) infoCards+=bizInfoCard('fa-clock','Hours',formatWorkingHours(b.workingHours),'');
+    if(b.workingHours){
+      var nhOv=normWorkingHours(b.workingHours);
+      var ovS=nhOv?isOpenNow(nhOv):null;
+      var ovBadge=ovS?'<span class="gh-hours-status '+(ovS.open?'open':'closed')+'" style="margin-left:6px;font-size:.7rem"><i class="fas fa-circle" style="font-size:.5rem;vertical-align:middle"></i> '+(ovS.open?'Open now':'Closed')+'</span>':'';
+      infoCards+=bizInfoCardHtml('fa-clock','Today',esc(formatWorkingHours(b.workingHours))+ovBadge);
+    }
     if(b.priceRange||b.startingPrice) infoCards+=bizInfoCard('fa-tag','Pricing',(b.startingPrice?'From '+b.startingPrice+' · ':'')+esc(b.priceRange||''));
     var sIg=sLinks.instagram||b.instagram||''; var sFb=sLinks.facebook||b.facebook||''; var sWa=sLinks.whatsapp||b.whatsapp||'';
     if(sIg) infoCards+=bizInfoCard('fa-brands fa-instagram','Instagram',sIg,'https://instagram.com/'+sIg.replace(/^@/,''));
@@ -1625,47 +1754,87 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function renderBusinessAbout(b){
     var box=$('#ghBusinessTabContent'); if(!box)return;
-    var sLinks=b.socialLinks||{}; var ig=sLinks.instagram||b.instagram||''; var fb=sLinks.facebook||b.facebook||''; var wa=sLinks.whatsapp||b.whatsapp||'';
-    var days=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-    var todayName=days[new Date().getDay()===0?6:new Date().getDay()-1];
-    var hoursHtml='';
-    if(b.workingHours && typeof b.workingHours==='object'){
-      hoursHtml='<div class="gh-hours-grid">'+days.map(function(d){
-        var h=b.workingHours[d]||null; var label=h ? (h.closed?'Closed':(h.open||'09:00')+' – '+(h.close||'18:00')) : '—';
-        return '<div class="gh-hours-row'+(d===todayName?' today':'')+'"><span>'+d.slice(0,3)+'</span><span>'+esc(label)+'</span></div>';
-      }).join('')+'</div>';
-    } else if(b.workingHours){
-      hoursHtml='<p style="margin:0;font-size:.88rem;color:var(--gh-text)">'+esc(String(b.workingHours))+'</p>';
+    var sLinks=b.socialLinks||{};
+    var ig=sLinks.instagram||b.instagram||'';
+    var fb=sLinks.facebook||b.facebook||'';
+    var wa=sLinks.whatsapp||b.whatsapp||'';
+    var tk=sLinks.tiktok||'';
+    var li=sLinks.linkedin||'';
+    var bookingUrl=b.bookingUrl||sLinks.bookingUrl||'';
+    var todayIdx=new Date().getDay()===0?6:new Date().getDay()-1;
+    var todayLabel=DAYS_LABELS[todayIdx];
+
+    // Working hours block with open/closed status
+    var nh=b.workingHours&&typeof b.workingHours==='object'?normWorkingHours(b.workingHours):null;
+    var openStatus=nh?isOpenNow(nh):null;
+    var hoursStatusHtml='';
+    if(openStatus){
+      hoursStatusHtml='<div class="gh-hours-status-row">'+
+        '<span class="gh-hours-status '+(openStatus.open?'open':'closed')+'"><i class="fas fa-circle"></i> '+(openStatus.open?'Open now':'Closed')+'</span>'+
+        (openStatus.hours?'<span class="gh-hours-today-label">'+esc(openStatus.hours)+'</span>':'')+
+        (!openStatus.open&&openStatus.nextOpen?'<span class="gh-hours-next">Opens '+esc(openStatus.nextOpen)+'</span>':'')+
+      '</div>';
     }
+    var hoursHtml='';
+    if(nh){
+      hoursHtml=hoursStatusHtml+'<div class="gh-hours-grid">'+DAYS_KEYS.map(function(k,i){
+        var h=nh[k]; var isToday=DAYS_LABELS[i]===todayLabel;
+        var label=h?(h.closed?'<em class="gh-hours-closed-label">Closed</em>':esc((h.open||'09:00')+' – '+(h.close||'18:00'))):'—';
+        return '<div class="gh-hours-row'+(isToday?' today':'')+'"><span>'+DAYS_LABELS[i].slice(0,3)+'</span><span>'+label+'</span></div>';
+      }).join('')+'</div>';
+    } else if(b.workingHours&&typeof b.workingHours==='string'){
+      hoursHtml='<p style="margin:0;font-size:.88rem;color:var(--gh-text)">'+esc(b.workingHours)+'</p>';
+    } else {
+      hoursHtml='<p class="gh-muted" style="margin:0;font-size:.85rem">Working hours not added yet.</p>';
+    }
+
+    // Contact CTA buttons — only for real data
+    var ctaBtns=[];
+    if(b.phone)      ctaBtns.push('<a href="tel:'+esc(b.phone)+'" class="gh-contact-cta-btn"><i class="fas fa-phone"></i> Call</a>');
+    if(wa)           ctaBtns.push('<a href="https://wa.me/'+esc(wa.replace(/\D/g,''))+'" target="_blank" rel="noopener" class="gh-contact-cta-btn"><i class="fab fa-whatsapp"></i> WhatsApp</a>');
+    if(b.email)      ctaBtns.push('<a href="mailto:'+esc(b.email)+'" class="gh-contact-cta-btn"><i class="fas fa-envelope"></i> Email</a>');
+    if(bookingUrl)   ctaBtns.push('<a href="'+esc(bookingUrl)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn primary"><i class="fas fa-calendar-check"></i> Book</a>');
+    if(b.website)    ctaBtns.push('<a href="'+esc(b.website)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn"><i class="fas fa-globe"></i> Website</a>');
+    if(!isOnlineBusiness(b)&&b.mapsLink) ctaBtns.push('<a href="'+esc(b.mapsLink)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn"><i class="fas fa-map-location-dot"></i> Directions</a>');
+    var ctaHtml=ctaBtns.length?'<div class="gh-contact-ctas">'+ctaBtns.join('')+'</div>':'';
+    var hasContact=b.phone||b.email||b.website||ig||fb||wa||tk||li||bookingUrl;
+
     box.innerHTML=
       '<div class="gh-biz-about-grid">'+
         '<div style="display:grid;gap:12px">'+
-          (b.description ? '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Description</h3></div><p style="margin:0;line-height:1.65;font-size:.9rem;color:var(--gh-text)">'+esc(b.description)+'</p></div>' : '')+
-          '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Contact</h3></div><div class="gh-about-list">'+
-            (b.phone ? aboutRow('fa-phone',b.phone) : '')+
-            (b.email ? aboutRow('fa-envelope',b.email) : '')+
-            (b.website ? aboutRow('fa-globe',b.website) : '')+
-            (ig ? aboutRow('fa-brands fa-instagram','@'+ig.replace(/^@/,'')) : '')+
-            (fb ? aboutRow('fa-brands fa-facebook',fb) : '')+
-            (wa ? aboutRow('fa-brands fa-whatsapp',wa) : '')+
-            (!b.phone&&!b.email&&!b.website&&!ig&&!fb&&!wa ? '<p style="color:var(--gh-muted);font-size:.85rem;margin:0">No contact info added yet.</p>' : '')+
-          '</div></div>'+
-          (!isOnlineBusiness(b)&&(b.city||b.address) ? '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Location</h3></div><div class="gh-about-list">'+
-            aboutRow('fa-location-dot',b.address?b.address+', '+b.city:b.city)+
-            (b.mapsLink?'<a href="'+esc(b.mapsLink)+'" target="_blank" rel="noopener" class="gh-btn sm ghost" style="margin-top:4px"><i class="fas fa-map"></i> View on map</a>':'')+
-          '</div></div>' : '')+
-          (isOnlineBusiness(b) ? '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Service Area</h3></div>'+aboutRow('fa-globe',b.serviceAreaText||businessAreaLabel(b))+'</div>' : '')+
+          (b.description?'<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>About</h3></div><p style="margin:0;line-height:1.65;font-size:.9rem;color:var(--gh-text)">'+esc(b.description)+'</p></div>':'')+
+          '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Contact</h3></div>'+
+            ctaHtml+
+            '<div class="gh-about-list">'+
+              (b.phone?aboutRow('fa-phone',b.phone):'')+
+              (b.email?aboutRow('fa-envelope',b.email):'')+
+              (b.website?aboutRow('fa-globe',b.website):'')+
+              (ig?aboutRow('fa-brands fa-instagram','@'+ig.replace(/^@/,'')):'')+
+              (fb?aboutRow('fa-brands fa-facebook',fb):'')+
+              (wa?aboutRow('fa-brands fa-whatsapp',wa):'')+
+              (tk?aboutRow('fa-brands fa-tiktok','@'+tk.replace(/^@/,'')):'')+
+              (li?aboutRow('fa-brands fa-linkedin',li):'')+
+              (!hasContact?'<p class="gh-muted" style="font-size:.85rem;margin:0">No contact info added yet.</p>':'')+
+            '</div>'+
+          '</div>'+
+          (!isOnlineBusiness(b)&&(b.city||b.address)?
+            '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Location</h3></div><div class="gh-about-list">'+
+              aboutRow('fa-location-dot',b.address?b.address+', '+b.city:b.city)+
+              (b.mapsLink?'<a href="'+esc(b.mapsLink)+'" target="_blank" rel="noopener" class="gh-btn sm ghost" style="margin-top:8px"><i class="fas fa-map"></i> View on map</a>':'')+
+            '</div></div>':'')+
+          (isOnlineBusiness(b)?'<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Service Area</h3></div>'+aboutRow('fa-globe',b.serviceAreaText||businessAreaLabel(b))+'</div>':'')+
         '</div>'+
         '<div style="display:grid;gap:12px">'+
-          (hoursHtml ? '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Working Hours</h3></div>'+hoursHtml+'</div>' : '')+
-          ((b.priceRange||b.startingPrice) ? '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Pricing</h3></div><div class="gh-about-list">'+
-            (b.priceRange ? aboutRow('fa-tag','Range: '+b.priceRange) : '')+
-            (b.startingPrice ? aboutRow('fa-tag','Starting from: '+b.startingPrice) : '')+
-          '</div></div>' : '')+
+          '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Working Hours</h3></div>'+hoursHtml+'</div>'+
+          ((b.priceRange||b.startingPrice)?
+            '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Pricing</h3></div><div class="gh-about-list">'+
+              (b.priceRange?aboutRow('fa-tag','Range: '+b.priceRange):'')+
+              (b.startingPrice?aboutRow('fa-tag','Starting from: '+b.startingPrice):'')+
+            '</div></div>':'')+
           '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Details</h3></div><div class="gh-about-list">'+
             aboutRow('fa-store',b.category||'Business')+
             aboutRow(isOnlineBusiness(b)?'fa-globe':'fa-location-dot',isOnlineBusiness(b)?'Online service':'Physical business')+
-            (b.plan&&b.plan!=='free' ? aboutRow('fa-crown','Pro plan') : aboutRow('fa-circle-check','Free listing'))+
+            (b.plan&&b.plan!=='free'?aboutRow('fa-crown','Pro plan'):aboutRow('fa-circle-check','Free listing'))+
           '</div></div>'+
         '</div>'+
       '</div>';
