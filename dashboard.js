@@ -12,14 +12,16 @@
   const viewData = [42, 67, 55, 89, 103, 78, 95];
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const maxV = Math.max(...viewData);
-  document.getElementById('viewsChart').innerHTML = viewData.map((v, i) => `
+  var _vc = document.getElementById('viewsChart');
+  if (_vc) _vc.innerHTML = viewData.map((v, i) => `
     <div class="chart-col">
       <div class="chart-bar-v" style="height:${(v/maxV)*100}%;" title="${v} views on ${days[i]}"></div>
       <div class="chart-col-label">${days[i]}</div>
     </div>`).join('');
 
   // Reviews
-  document.getElementById('dashReviews').innerHTML = REVIEWS.filter(r => r.businessId === 2).concat([
+  var _dashRevEl = document.getElementById('dashReviews');
+  if (_dashRevEl && typeof REVIEWS !== 'undefined') _dashRevEl.innerHTML = REVIEWS.filter(r => r.businessId === 2).concat([
     { id: 10, author: 'Emily W.', avatar: 'E', rating: 5, date: '2024-12-01', text: 'Best tour in Georgia! Giorgi was an incredible guide. The 4x4 route was breathtaking.' },
     { id: 11, author: 'David L.', avatar: 'D', rating: 5, date: '2024-11-20', text: 'Excellent experience, highly professional team. Booked for 4 people and everyone loved it.' },
   ]).map(r => `
@@ -41,7 +43,7 @@
       </div>
     </div>`).join('');
 
-  initScrollAnimations();
+  if (typeof initScrollAnimations === 'function') initScrollAnimations();
 
   // ===== GROWTH SYSTEM JS =====
 
@@ -108,32 +110,38 @@
   // Analytics views chart (30 days)
   const analyticsData = [28,34,41,38,55,62,48,70,83,77,91,68,74,85,92,79,103,88,95,110,97,84,119,126,108,131,143,128,138,152];
   const maxA = Math.max(...analyticsData);
-  document.getElementById('analyticsViewsChart').innerHTML = analyticsData.map(v => `
-    <div style="flex:1;border-radius:2px 2px 0 0;background:var(--gradient-brand);opacity:0.75;min-height:3px;transition:opacity .25s;cursor:pointer" style="height:${(v/maxA)*100}%" title="${v} views" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.75">
-    </div>`).join('');
-  // Fix heights via JS after render
-  setTimeout(() => {
-    const bars = document.querySelectorAll('#analyticsViewsChart > div');
-    analyticsData.forEach((v, i) => { if (bars[i]) bars[i].style.height = `${(v/maxA)*100}%`; });
-  }, 50);
+  var _avc = document.getElementById('analyticsViewsChart');
+  if (_avc) {
+    _avc.innerHTML = analyticsData.map(v => `
+      <div style="flex:1;border-radius:2px 2px 0 0;background:var(--gradient-brand);opacity:0.75;min-height:3px;transition:opacity .25s;cursor:pointer" style="height:${(v/maxA)*100}%" title="${v} views" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.75">
+      </div>`).join('');
+    setTimeout(() => {
+      const bars = document.querySelectorAll('#analyticsViewsChart > div');
+      analyticsData.forEach((v, i) => { if (bars[i]) bars[i].style.height = `${(v/maxA)*100}%`; });
+    }, 50);
+  }
 
   // Peak Hours chart
   const peakData = [5,3,8,15,22,34,45,68,72,64,58,71,80,88,92,85,75,62,78,84,76,55,38,20];
   const maxP = Math.max(...peakData);
   const peakLevels = peakData.map(v => v > 70 ? 'high' : v > 40 ? 'medium' : '');
   const peakHours = ['8am','9','10','11','12','1pm','2','3','4','5','6','7pm','8','9','10','11pm'];
-  document.getElementById('peakHoursChart').innerHTML = peakData.slice(0, 16).map((v, i) => `
+  var _phc = document.getElementById('peakHoursChart');
+  if (_phc) _phc.innerHTML = peakData.slice(0, 16).map((v, i) => `
     <div class="peak-bar ${peakLevels[i]}" style="height:${(v/maxP)*100}%" data-tip="${['8am','9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm','6pm','7pm','8pm','9pm','10pm','11pm'][i]}: ${v} visits"></div>`).join('');
 
   // QR Scan chart
   const qrData = [8, 14, 11, 18, 24, 31, 19];
   const maxQ = Math.max(...qrData);
-  document.getElementById('qrScanChart').innerHTML = qrData.map((v, i) => `
-    <div style="flex:1;border-radius:3px 3px 0 0;background:var(--gradient-brand);opacity:0.8;min-height:3px;cursor:pointer;transition:opacity .25s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8" title="${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]}: ${v} scans"></div>`).join('');
-  setTimeout(() => {
-    const qBars = document.querySelectorAll('#qrScanChart > div');
-    qrData.forEach((v, i) => { if (qBars[i]) qBars[i].style.height = `${(v/maxQ)*100}%`; });
-  }, 50);
+  var _qsc = document.getElementById('qrScanChart');
+  if (_qsc) {
+    _qsc.innerHTML = qrData.map((v, i) => `
+      <div style="flex:1;border-radius:3px 3px 0 0;background:var(--gradient-brand);opacity:0.8;min-height:3px;cursor:pointer;transition:opacity .25s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8" title="${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i]}: ${v} scans"></div>`).join('');
+    setTimeout(() => {
+      const qBars = document.querySelectorAll('#qrScanChart > div');
+      qrData.forEach((v, i) => { if (qBars[i]) qBars[i].style.height = `${(v/maxQ)*100}%`; });
+    }, 50);
+  }
 
   // QR pixel art generator (decorative)
   function buildQR(containerId) {
@@ -396,4 +404,37 @@ function saveDashProfile() {
       if (bookTable) bookTable.innerHTML = '<tbody><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted);font-size:0.85rem"><i class="fas fa-calendar" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>No bookings yet</td></tr></tbody>';
     }
   }
+
+  // Render Premium upgrade UI if subscription is not active
+  (function renderPremiumUpgrade(businessId, currentStatus) {
+    var container = document.getElementById('premiumUpgradeSection');
+    if (!container) return;
+
+    if (currentStatus === 'active') {
+      container.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:16px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:14px">'
+        + '<i class="fas fa-crown" style="color:#10e0a0;font-size:1.3rem"></i>'
+        + '<div><div style="font-weight:700;color:#10e0a0">GeoHub Premium Active</div>'
+        + '<div style="font-size:0.78rem;color:#64748b;margin-top:2px">Verified badge, priority placement &amp; analytics unlocked</div></div></div>';
+      return;
+    }
+
+    container.innerHTML = '<div style="padding:20px;background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.2);border-radius:16px">'
+      + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
+      + '<i class="fas fa-crown" style="color:#f59e0b;font-size:1.4rem"></i>'
+      + '<div><div style="font-weight:800;font-size:1rem">Upgrade to Premium</div>'
+      + '<div style="font-size:0.78rem;color:#64748b">Verified badge · Priority placement · Full analytics</div></div></div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+      + '<button class="geo-premium-btn" data-plan="monthly" style="padding:12px;border:1px solid rgba(59,130,246,.35);border-radius:12px;background:rgba(59,130,246,.1);color:#f8fafc;font-weight:700;cursor:pointer">'
+      + '<div style="font-size:1.1rem;color:#3b82f6">29 ₾</div><div style="font-size:0.72rem;color:#94a3b8">per month</div></button>'
+      + '<button class="geo-premium-btn" data-plan="yearly" style="padding:12px;border:1px solid rgba(16,185,129,.35);border-radius:12px;background:rgba(16,185,129,.1);color:#f8fafc;font-weight:700;cursor:pointer">'
+      + '<div style="font-size:1.1rem;color:#10e0a0">249 ₾</div><div style="font-size:0.72rem;color:#94a3b8">per year · save 30%</div></button>'
+      + '</div></div>';
+
+    container.querySelectorAll('.geo-premium-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (!window.GeoCheckout) return;
+        window.GeoCheckout.upgradeBusinessPremium(businessId, btn.dataset.plan, btn);
+      });
+    });
+  })(biz.id || (user.uid + '_dashboard_business'), biz.subscriptionStatus);
 })();

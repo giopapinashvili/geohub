@@ -31,7 +31,7 @@ const GeoConfig = Object.freeze({
     realAuth:        true,   // Firebase Auth
     realFeed:        true,   // Firestore feed
     realRewards:     false,  // Rewards engine with QR codes
-    realPayments:    false,  // Stripe/BOG payments for tickets
+    realPayments:    true,   // Stripe/BOG payments for tickets
     realPush:        false,  // Web push via FCM/VAPID
     realSearch:      false,  // Algolia / PostgreSQL full-text
     realMaps:        false,  // Mapbox / Google Maps API
@@ -107,6 +107,14 @@ const GeoConfig = Object.freeze({
     realEstate:    'real-estate.html',
     services:      'services.html',
     trust:         'trust.html',
+  },
+
+  /* ── Payments ────────────────────────────────────────────────── */
+  PAYMENTS: {
+    // Cloudflare Worker URL — set after `wrangler deploy`
+    WORKER_URL: 'https://geohub-payments.geohub.workers.dev',
+    // Stripe publishable key — safe to expose in frontend
+    STRIPE_PUBLISHABLE_KEY: 'pk_live_REPLACE_WITH_YOUR_KEY',
   },
 
   /* ── Placeholder / simulation settings ─────────────────────────── */
