@@ -6,7 +6,8 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  sendEmailVerification
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 
 function fbUserToGeoUser(fbUser) {
@@ -67,15 +68,23 @@ async function fbSignUp(email, password, fullName) {
   var geoUser = fbUserToGeoUser(cred.user);
   if (fullName) geoUser.fullName = fullName;
   await saveUserToFirestore(geoUser);
-  window.GeoCurrentUser = geoUser;
-  window.dispatchEvent(new CustomEvent('GeoAuthReady', { detail: geoUser }));
-  return geoUser;
+  await sendEmailVerification(cred.user);
+  await signOut(auth);
+  window.GeoCurrentUser = null;
+  return { emailVerificationSent: true, email: email };
 }
 
 async function fbSignIn(email, password) {
   var auth = window.GeoFirebase && window.GeoFirebase.auth;
   if (!auth) throw new Error('Firebase not available');
   var cred = await signInWithEmailAndPassword(auth, email, password);
+  if (!cred.user.emailVerified) {
+    await signOut(auth);
+    var err = new Error('Please verify your email before logging in. Check your inbox.');
+    err.code = 'auth/email-not-verified';
+    err.fbUser = cred.user;
+    throw err;
+  }
   var geoUser = await mergeWithFirestore(fbUserToGeoUser(cred.user));
   geoUser.lastSeen = Date.now();
   await saveUserToFirestore(geoUser);
@@ -128,4 +137,14 @@ function onAuthChange(callback) {
   });
 }
 
-window.GeoFirebaseAuth = { signUp: fbSignUp, signIn: fbSignIn, googleLogin: fbGoogleLogin, logout: fbLogout, onAuthChange: onAuthChange, saveUserToFirestore: saveUserToFirestore, loadUserFromFirestore: loadUserFromFirestore, resetPassword: fbResetPassword };
+async function fbResendVerification(email, password) {
+  var auth = window.GeoFirebase && window.GeoFirebase.auth;
+  if (!auth) throw new Error('Firebase not available');
+  var cred = await signInWithEmailAndPassword(auth, email, password);
+  if (cred.user.emailVerified) { await signOut(auth); return { alreadyVerified: true }; }
+  await sendEmailVerification(cred.user);
+  await signOut(auth);
+  return { sent: true };
+}
+
+window.GeoFirebaseAuth = { signUp: fbSignUp, signIn: fbSignIn, googleLogin: fbGoogleLogin, logout: fbLogout, onAuthChange: onAuthChange, saveUserToFirestore: saveUserToFirestore, loadUserFromFirestore: loadUserFromFirestore, resetPassword: fbResetPassword, resendVerification: fbResendVerification };

@@ -12,7 +12,8 @@
       'auth/weak-password': 'Password must be at least 6 characters.',
       'auth/popup-closed-by-user': 'Google sign-in cancelled.',
       'auth/network-request-failed': 'Network error. Check your connection.',
-      'auth/too-many-requests': 'Too many attempts. Please try again later.'
+      'auth/too-many-requests': 'Too many attempts. Please try again later.',
+      'auth/email-not-verified': 'Please verify your email before logging in. Check your inbox.'
     };
     return (err && (map[err.code] || err.message)) || 'Authentication failed. Please try again.';
   }
@@ -56,16 +57,44 @@
     var form = document.getElementById('loginForm'); if (!form) return;
     var errEl = document.getElementById('loginError'); var btn = document.getElementById('loginBtn');
     form.addEventListener('submit', function (e) {
-      e.preventDefault(); errEl.textContent = '';
+      e.preventDefault(); errEl.textContent = ''; errEl.innerHTML = '';
       var email = document.getElementById('loginIdentifier').value.trim().toLowerCase();
       var pwd = document.getElementById('loginPassword').value;
       if (!email || !pwd) { errEl.textContent = 'Please fill in both fields.'; return; }
       if (email.indexOf('@') === -1) { errEl.textContent = 'Use your email address to log in.'; return; }
       if (!window.GeoFirebaseAuth) { errEl.textContent = 'Firebase Auth is not ready. Refresh and try again.'; return; }
       btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in…';
-      window.GeoFirebaseAuth.signIn(email, pwd).then(function () { btn.innerHTML = '<i class="fas fa-check"></i> Welcome back!'; btn.style.background = '#10b981'; setTimeout(goAfterAuth, 500); })
-        .catch(function (err) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login'; errEl.textContent = fbErrMsg(err); });
+      window.GeoFirebaseAuth.signIn(email, pwd).then(function () {
+        btn.innerHTML = '<i class="fas fa-check"></i> Welcome back!'; btn.style.background = '#10b981'; setTimeout(goAfterAuth, 500);
+      }).catch(function (err) {
+        btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
+        if (err && err.code === 'auth/email-not-verified') {
+          errEl.innerHTML = fbErrMsg(err) + ' <button type="button" id="resendVerBtn" style="background:none;border:none;color:#10b981;cursor:pointer;text-decoration:underline;font-size:inherit">Resend email</button>';
+          var resendBtn = document.getElementById('resendVerBtn');
+          if (resendBtn) resendBtn.addEventListener('click', function () {
+            resendBtn.disabled = true; resendBtn.textContent = 'Sending…';
+            window.GeoFirebaseAuth.resendVerification(email, pwd)
+              .then(function (r) { errEl.innerHTML = r && r.alreadyVerified ? '<span style="color:#10b981">Email already verified — try logging in!</span>' : '<span style="color:#10b981">Verification email sent! Check your inbox.</span>'; })
+              .catch(function () { resendBtn.disabled = false; resendBtn.textContent = 'Resend email'; });
+          });
+        } else {
+          errEl.textContent = fbErrMsg(err);
+        }
+      });
     });
+  }
+
+  function showVerificationSent(email) {
+    var form = document.getElementById('signupForm');
+    if (form) form.style.display = 'none';
+    var container = form ? form.parentElement : document.querySelector('.auth-card');
+    if (!container) return;
+    container.innerHTML = '<div style="text-align:center;padding:2rem 1rem">'
+      + '<div style="font-size:3rem;margin-bottom:1rem">📧</div>'
+      + '<h2 style="color:#10b981;margin-bottom:.75rem">Verify your email</h2>'
+      + '<p style="color:#94a3b8;margin-bottom:1.5rem">We sent a verification link to <strong style="color:#e2e8f0">' + email + '</strong>.<br>Click the link in the email, then come back to log in.</p>'
+      + '<a href="auth.html" class="auth-submit" style="display:inline-block;text-decoration:none;padding:.75rem 2rem"><i class="fas fa-sign-in-alt"></i> Go to Login</a>'
+      + '</div>';
   }
 
   function initSignupForm() {
@@ -85,12 +114,13 @@
       if (!terms) { errEl.textContent = 'Please accept the terms.'; return; }
       if (!window.GeoFirebaseAuth) { errEl.textContent = 'Firebase Auth is not ready. Refresh and try again.'; return; }
       btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating…';
-      window.GeoFirebaseAuth.signUp(email, password, fullName).then(function (user) {
-        var fb = window.GeoFirebase, f = fb && fb.fs;
-        var updates = { username: username, city: city || 'Tbilisi', accountType: acctType || 'Explorer', interests: interests, fullName: fullName, updatedAt: Date.now() };
-        if (fb && f && user && user.uid) return f.setDoc(f.doc(fb.db, 'users', user.uid), updates, { merge: true });
-      }).then(function () { btn.innerHTML = '<i class="fas fa-check"></i> Account created!'; btn.style.background = '#10b981'; setTimeout(goAfterAuth, 600); })
-        .catch(function (err) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-user-plus"></i> Sign Up'; errEl.textContent = fbErrMsg(err); });
+      window.GeoFirebaseAuth.signUp(email, password, fullName).then(function (result) {
+        if (result && result.emailVerificationSent) {
+          var fb = window.GeoFirebase, f = fb && fb.fs;
+          showVerificationSent(email);
+          return;
+        }
+      }).catch(function (err) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-user-plus"></i> Sign Up'; errEl.textContent = fbErrMsg(err); });
     });
   }
 
