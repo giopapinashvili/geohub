@@ -405,7 +405,7 @@ function saveDashProfile() {
     }
   }
 
-  // Render Premium upgrade UI if subscription is not active
+  // Render Premium upgrade UI
   (function renderPremiumUpgrade(businessId, currentStatus) {
     var container = document.getElementById('premiumUpgradeSection');
     if (!container) return;
@@ -415,6 +415,17 @@ function saveDashProfile() {
         + '<i class="fas fa-crown" style="color:#10e0a0;font-size:1.3rem"></i>'
         + '<div><div style="font-weight:700;color:#10e0a0">GeoHub Premium Active</div>'
         + '<div style="font-size:0.78rem;color:#64748b;margin-top:2px">Verified badge, priority placement &amp; analytics unlocked</div></div></div>';
+      return;
+    }
+
+    var paymentsEnabled = window.GeoConfig && window.GeoConfig.FEATURE_FLAGS && window.GeoConfig.FEATURE_FLAGS.realPayments;
+
+    if (!paymentsEnabled) {
+      container.innerHTML = '<div style="padding:16px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.18);border-radius:14px">'
+        + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
+        + '<i class="fas fa-crown" style="color:#f59e0b"></i>'
+        + '<span style="font-weight:700;font-size:.9rem">GeoHub Premium</span></div>'
+        + '<p style="font-size:.75rem;color:#64748b;margin:0">Verified badge, priority placement &amp; full analytics. Available soon.</p></div>';
       return;
     }
 

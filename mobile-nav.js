@@ -90,10 +90,10 @@
     sheet.innerHTML =
       '<div class="app-action-sheet-handle" aria-hidden="true"></div>' +
       '<div class="app-action-sheet-title">Quick Actions</div>' +
-      actionItem('map.html',       'fas fa-location-dot',       'rgba(16,185,129,0.15)',  '#34d399',  'Quick Check-in',  'Tag your location and earn XP') +
-      actionItem('feed.html',      'fas fa-pen-to-square',       'rgba(59,130,246,0.15)',  '#60a5fa',  'Create Post',     'Share a place, tip, or update') +
-      actionItem('assistant.html', 'fas fa-wand-magic-sparkles', 'rgba(168,85,247,0.15)', '#c084fc',  'Start AI Plan',   'Get a personalized day plan from GeoAI') +
-      actionItem('events.html',    'fas fa-calendar-plus',       'rgba(245,158,11,0.15)', '#fbbf24',  'Create Event',    'Organize a meetup or city event') +
+      actionItem('map.html',     'fas fa-location-dot',   'rgba(16,185,129,0.15)', '#34d399', 'Quick Check-in', 'Tag your location and earn XP') +
+      actionItem('feed.html',    'fas fa-pen-to-square',  'rgba(59,130,246,0.15)', '#60a5fa', 'Create Post',    'Share a place, tip, or update') +
+      actionItem('events.html',  'fas fa-calendar-plus',  'rgba(245,158,11,0.15)', '#fbbf24', 'Create Event',   'Organize a meetup or city event') +
+      actionItem('places.html',  'fas fa-location-dot',   'rgba(16,185,129,0.12)', '#6ee7b7', 'Find a Place',   'Search for restaurants, cafes and more') +
       '<div class="app-action-item" onclick="showStoryToast();closeActionSheet();" style="cursor:pointer">' +
         '<div class="app-action-icon" style="background:rgba(236,72,153,0.15);color:#f472b6"><i class="fas fa-circle-plus" aria-hidden="true"></i></div>' +
         '<div class="app-action-text"><h4>Add Story</h4><p>Share a 24h city moment</p></div>' +

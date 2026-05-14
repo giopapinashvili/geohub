@@ -729,7 +729,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var all=[]; state.bizFilter='all';
     function paint(){ var q=($('#ghBusinessSearch').value||'').toLowerCase(); var arr=all.filter(function(b){ var cat=(b.category||'').toLowerCase(); var ok=state.bizFilter==='all'||cat.includes(state.bizFilter)||(state.bizFilter==='online' && isOnlineBusiness(b)); if(!ok)return false; return !q || JSON.stringify(b).toLowerCase().includes(q); }); var list=$('#ghBusinessList'); if(!arr.length){list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-store"></i><h3>No businesses yet</h3><p>Add a business and GeoHub will create a page for it.</p><a href="add-business.html" class="gh-btn">Add Business</a></div>';return;} list.innerHTML='<div class="gh-grid">'+arr.map(businessListCard).join('')+'</div>'; }
     $('#ghBusinessSearch').oninput=paint; $('#ghCenter').addEventListener('click', function(e){ var f=e.target.closest('[data-biz-filter]'); if(f){ state.bizFilter=f.dataset.bizFilter; $all('[data-biz-filter]').forEach(function(x){x.classList.toggle('active',x===f);}); paint(); } var fb=e.target.closest('[data-follow-business]'); if(fb) followBusiness(fb.dataset.followBusiness); var s=e.target.closest('[data-save-item]'); if(s){ if(!requireLogin())return; GS().toggleSaveItem(s.dataset.type,s.dataset.id); } });
-    ready(function(){ var q=fs().query(fs().collection(db(),'businesses'), fs().limit(100)); fs().onSnapshot(q,function(snap){ all=[]; snap.forEach(function(d){ all.push(Object.assign({id:d.id},d.data())); }); all.sort(function(a,b){return ts(b.createdAt)-ts(a.createdAt);}); paint(); }, function(err){ $('#ghBusinessList').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Could not load businesses</h3><p>'+esc(err.message)+'</p></div>'; }); });
+    ready(function(){ var q=fs().query(fs().collection(db(),'businesses'), fs().orderBy('createdAt','desc'), fs().limit(40)); fs().onSnapshot(q,function(snap){ all=[]; snap.forEach(function(d){ all.push(Object.assign({id:d.id},d.data())); }); paint(); }, function(err){ $('#ghBusinessList').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Could not load businesses</h3><p>'+esc(err.message)+'</p></div>'; }); });
   }
 
   function renderBusinessDetail(id){
@@ -1006,4 +1006,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
+
+  // Clean up all Firestore listeners when navigating away to avoid runaway billing
+  window.addEventListener('pagehide', function() {
+    if(state.authUnsub){ try{ state.authUnsub(); }catch(e){} state.authUnsub=null; }
+    if(state.safetyUnsub){ try{ state.safetyUnsub(); }catch(e){} state.safetyUnsub=null; }
+    (state.badgeUnsubs||[]).forEach(function(u){ try{ if(u) u(); }catch(e){} });
+    state.badgeUnsubs=[];
+    Object.values(state.postsUnsubs||{}).forEach(function(u){ try{ if(u) u(); }catch(e){} });
+    state.postsUnsubs={};
+    Object.values(state.replyUnsubs||{}).forEach(function(u){ try{ if(u) u(); }catch(e){} });
+    state.replyUnsubs={};
+  });
 })();

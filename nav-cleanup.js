@@ -177,12 +177,9 @@
     {
       label: 'Explore',
       items: [
-        { label: 'Places',      href: 'places.html',      icon: 'fa-location-dot' },
-        { label: 'Events',      href: 'events.html',      icon: 'fa-ticket' },
-        { label: 'Groups',      href: 'groups.html',      icon: 'fa-users' },
-        { label: 'Real Estate', href: 'real-estate.html', icon: 'fa-building' },
-        { label: 'Learning',    href: 'learning.html',    icon: 'fa-graduation-cap' },
-        { label: 'Marketplace', href: 'services.html',    icon: 'fa-briefcase' }
+        { label: 'Places',  href: 'places.html', icon: 'fa-location-dot' },
+        { label: 'Events',  href: 'events.html', icon: 'fa-ticket' },
+        { label: 'Groups',  href: 'groups.html', icon: 'fa-users' }
       ]
     },
     {
@@ -200,8 +197,7 @@
         { label: 'Messages',   href: 'messages.html',   icon: 'fa-message' },
         { label: 'Rewards',    href: 'rewards.html',    icon: 'fa-gift' },
         { label: 'Challenges', href: 'challenges.html', icon: 'fa-trophy' },
-        { label: 'Trust',      href: 'trust.html',      icon: 'fa-shield-halved' },
-        { label: 'Assistant',  href: 'assistant.html',  icon: 'fa-sparkles' }
+        { label: 'Trust',      href: 'trust.html',      icon: 'fa-shield-halved' }
       ]
     }
   ];

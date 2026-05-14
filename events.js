@@ -57,6 +57,11 @@
     if (!price || price <= 0) {
       return '<span style="color:#94a3b8;font-size:.8rem"><i class="fas fa-ticket"></i> Free entry</span>';
     }
+    var paymentsEnabled = window.GeoConfig && window.GeoConfig.FEATURE_FLAGS && window.GeoConfig.FEATURE_FLAGS.realPayments;
+    if (!paymentsEnabled) {
+      return '<span style="color:#64748b;font-size:.78rem;background:rgba(255,255,255,.05);padding:4px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.08)">'
+        + '<i class="fas fa-ticket"></i> ' + price.toFixed(0) + ' &#x20BE; &middot; Tickets coming soon</span>';
+    }
     return '<button class="geo-ticket-btn" data-event-id="' + esc(event.id) + '" style="'
       + 'background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;'
       + 'border-radius:10px;padding:9px 18px;font-weight:700;cursor:pointer;font-size:.83rem;'
@@ -171,6 +176,8 @@
 
   // ── Firestore ─────────────────────────────────────────────────────────────
 
+  var _eventsUnsub = null;
+
   function loadEvents() {
     var fb = window.GeoFirebase;
     if (!fb || !fb.db || !fb.fs) return;
@@ -179,10 +186,10 @@
     var q = fs.query(
       fs.collection(fb.db, 'events'),
       fs.orderBy('createdAt', 'desc'),
-      fs.limit(120)
+      fs.limit(60)
     );
 
-    fs.onSnapshot(q, function (snap) {
+    _eventsUnsub = fs.onSnapshot(q, function (snap) {
       state.all = [];
       snap.forEach(function (d) { state.all.push(Object.assign({ id: d.id }, d.data())); });
       paint();
@@ -190,6 +197,10 @@
       console.warn('[GeoHub Events]', err.message);
     });
   }
+
+  window.addEventListener('pagehide', function () {
+    if (_eventsUnsub) { try { _eventsUnsub(); } catch (e) {} _eventsUnsub = null; }
+  });
 
   // ── Controls ──────────────────────────────────────────────────────────────
 

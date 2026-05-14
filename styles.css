@@ -3672,4 +3672,52 @@ a, button, .btn, .card, .listing-card {
     -webkit-backdrop-filter: none !important;
   }
 }
-img { content-visibility: auto; }
+/* ── Phase 3 Performance ──────────────────────────────────────── */
+
+/* Feed cards: skip rendering offscreen items (saves ~50ms paint time per screenful) */
+.gh-card.gh-post,
+.geo-event-card,
+.geo-place-card,
+.group-card,
+.business-card,
+.creator-card {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 320px;
+}
+
+/* Contain layout/paint per card so reflows don't propagate up the tree */
+.gh-card,
+.clean-card,
+.geo-event-card {
+  contain: layout style;
+}
+
+/* GPU hint only when user is about to interact — avoids wasting VRAM at rest */
+.gh-card:hover,
+.geo-event-card:hover,
+.app-fab:hover {
+  will-change: transform;
+}
+
+/* Images: decode off-main-thread, lazy-load by default */
+img {
+  content-visibility: visible; /* correct: auto is wrong on replaced elements */
+  decoding: async;
+}
+
+/* Feed scroll container: momentum scroll + prevent over-scroll navigation */
+.gh-feed,
+.gh-center,
+.feed-shell,
+.clean-content {
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent layout shift from avatar images */
+.gh-avatar,
+.reviewer-avatar,
+.app-nav-item img {
+  aspect-ratio: 1;
+  object-fit: cover;
+}

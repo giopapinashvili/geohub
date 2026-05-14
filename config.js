@@ -31,7 +31,7 @@ const GeoConfig = Object.freeze({
     realAuth:        true,   // Firebase Auth
     realFeed:        true,   // Firestore feed
     realRewards:     false,  // Rewards engine with QR codes
-    realPayments:    true,   // Stripe/BOG payments for tickets
+    realPayments:    false,  // Stripe/BOG payments — paused (Georgia not directly supported by Stripe)
     realPush:        false,  // Web push via FCM/VAPID
     realSearch:      false,  // Algolia / PostgreSQL full-text
     realMaps:        false,  // Mapbox / Google Maps API

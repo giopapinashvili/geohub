@@ -51,25 +51,10 @@
       desktopNav.insertBefore(item, dashboardLink || null);
     }
 
-    if (desktopNav && !desktopNav.querySelector('a[href="assistant.html"]')) {
-      const item = document.createElement("li");
-      item.appendChild(createLink("assistant.html", "Assistant"));
-      const dashboardLink = desktopNav.querySelector(
-        'a[href="dashboard.html"]',
-      )?.parentElement;
-      desktopNav.insertBefore(item, dashboardLink || null);
-    }
-
     if (mobileNav && !mobileNav.querySelector('a[href="live.html"]')) {
       const liveLink = createLink("live.html", "Live");
       const dashboardLink = mobileNav.querySelector('a[href="dashboard.html"]');
       mobileNav.insertBefore(liveLink, dashboardLink || null);
-    }
-
-    if (mobileNav && !mobileNav.querySelector('a[href="assistant.html"]')) {
-      const assistantLink = createLink("assistant.html", "Assistant");
-      const dashboardLink = mobileNav.querySelector('a[href="dashboard.html"]');
-      mobileNav.insertBefore(assistantLink, dashboardLink || null);
     }
 
     if (desktopNav && !desktopNav.querySelector('a[href="trust.html"]')) {
@@ -90,53 +75,7 @@
       mobileNav.insertBefore(trustLink, creatorsEl || dashEl || null);
     }
 
-    if (desktopNav && !desktopNav.querySelector('a[href="real-estate.html"]')) {
-      const item = document.createElement("li");
-      const a = createLink("real-estate.html", "Real Estate");
-      if (window.location.pathname.endsWith("real-estate.html")) a.classList.add("active");
-      item.appendChild(a);
-      const dashEl = desktopNav.querySelector('a[href="dashboard.html"]')?.parentElement;
-      desktopNav.insertBefore(item, dashEl || null);
-    }
 
-    if (mobileNav && !mobileNav.querySelector('a[href="real-estate.html"]')) {
-      const reLink = createLink("real-estate.html", "Real Estate");
-      if (window.location.pathname.endsWith("real-estate.html")) reLink.classList.add("active");
-      const dashEl = mobileNav.querySelector('a[href="dashboard.html"]');
-      mobileNav.insertBefore(reLink, dashEl || null);
-    }
-
-    if (desktopNav && !desktopNav.querySelector('a[href="services.html"]')) {
-      const item = document.createElement("li");
-      const a = createLink("services.html", "Services");
-      if (window.location.pathname.endsWith("services.html")) a.classList.add("active");
-      item.appendChild(a);
-      const dashEl = desktopNav.querySelector('a[href="dashboard.html"]')?.parentElement;
-      desktopNav.insertBefore(item, dashEl || null);
-    }
-
-    if (mobileNav && !mobileNav.querySelector('a[href="services.html"]')) {
-      const svLink = createLink("services.html", "Services");
-      if (window.location.pathname.endsWith("services.html")) svLink.classList.add("active");
-      const dashEl = mobileNav.querySelector('a[href="dashboard.html"]');
-      mobileNav.insertBefore(svLink, dashEl || null);
-    }
-
-    if (desktopNav && !desktopNav.querySelector('a[href="learning.html"]')) {
-      const item = document.createElement("li");
-      const a = createLink("learning.html", "Learning");
-      if (window.location.pathname.endsWith("learning.html")) a.classList.add("active");
-      item.appendChild(a);
-      const dashEl = desktopNav.querySelector('a[href="dashboard.html"]')?.parentElement;
-      desktopNav.insertBefore(item, dashEl || null);
-    }
-
-    if (mobileNav && !mobileNav.querySelector('a[href="learning.html"]')) {
-      const lrLink = createLink("learning.html", "Learning");
-      if (window.location.pathname.endsWith("learning.html")) lrLink.classList.add("active");
-      const dashEl = mobileNav.querySelector('a[href="dashboard.html"]');
-      mobileNav.insertBefore(lrLink, dashEl || null);
-    }
 
     if (desktopNav && !desktopNav.querySelector('a[href="messages.html"]')) {
       const item = document.createElement("li");
