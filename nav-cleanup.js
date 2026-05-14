@@ -9,10 +9,9 @@
     // ── nav items
     'Home':'მთავარი','Discover':'აღმოაჩინე','Map':'რუქა','Live':'პირდაპირი',
     'Places':'ადგილები','Events':'ღონისძიებები','Groups':'ჯგუფები',
-    'Real Estate':'უძრავი ქონება','Learning':'სწავლება','Marketplace':'მარკეტი',
     'Dashboard':'დაფა','Add Business':'ბიზნესის დამატება','Creators':'შემქმნელები',
     'Profile':'პროფილი','Messages':'შეტყობინებები','Rewards':'ჯილდოები',
-    'Challenges':'გამოწვევები','Trust':'ნდობა','Assistant':'ასისტენტი',
+    'Challenges':'გამოწვევები','Trust':'ნდობა',
     // ── common UI (text-node walker)
     'Sign Up':'რეგისტრაცია','Sign In':'შესვლა','Login':'შესვლა','Log in':'შესვლა',
     'Register':'რეგისტრაცია','Log Out':'გამოსვლა','Sign Out':'გამოსვლა',
