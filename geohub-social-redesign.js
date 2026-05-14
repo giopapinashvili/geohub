@@ -758,9 +758,77 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function paintBusinessDetail(b){
-    var title=b.title||b.name||'Business'; var cover=b.coverUrl||getItemCover(b); var logo=b.logoUrl||''; var owner=b.ownerId||b.createdBy||b.userId||''; var isOwner=!!(authUser() && authUser().uid && (b.ownerId===authUser().uid || b.createdBy===authUser().uid || b.userId===authUser().uid));
-    $('#ghBusinessDetail').innerHTML='<section class="gh-card" style="padding:0;overflow:hidden"><div class="gh-page-cover">'+(cover?img(cover,title):'<div class="gh-item-no-img" style="min-height:200px"><i class="fas fa-store"></i></div>')+'</div><div class="gh-page-info"><div class="gh-page-logo">'+(logo?img(logo,title):esc(initials(title)))+'</div><div class="gh-page-title"><h1>'+esc(title)+'</h1><p><i class="fas fa-store"></i> '+esc(b.category||'Business')+' · '+esc(businessAreaLabel(b))+' · '+Number(b.followerCount||0)+' followers'+(b.verified?'<span class="gh-chip" style="margin-left:6px;background:rgba(16,185,129,.15)"><i class="fas fa-circle-check" style="color:var(--green)"></i> Verified</span>':'')+'</p></div><div class="gh-page-actions"><button class="gh-btn gh-follow-business-btn" data-follow-business="'+esc(b.id)+'"><i class="fas fa-plus"></i> Follow</button><button class="gh-btn ghost" data-message-business="'+esc(owner)+'"><i class="fas fa-comment"></i> Message</button><button class="gh-btn ghost" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button>'+(isOwner?'<button class="gh-btn ghost" data-edit-business><i class="fas fa-gear"></i> Manage</button>':'')+'</div></div><div class="gh-tabbar"><button class="gh-tab active" data-business-tab="posts">Posts</button><button class="gh-tab" data-business-tab="about">About</button><button class="gh-tab" data-business-tab="reviews">Reviews</button><button class="gh-tab" data-business-tab="photos">Photos</button><button class="gh-tab" data-business-tab="services">Services</button>'+(isOwner?'<button class="gh-tab" data-business-tab="manage">Dashboard</button>':'')+'</div></section><div id="ghBusinessTabContent"></div>';
-    $('#ghBusinessDetail').onclick=function(e){ var tab=e.target.closest('[data-business-tab]'); if(tab){ state.currentBusinessTab=tab.dataset.businessTab; $all('[data-business-tab]').forEach(function(x){x.classList.toggle('active',x===tab);}); renderBusinessTab(b); } var fl=e.target.closest('[data-follow-business]'); if(fl) followBusiness(b.id); var sv=e.target.closest('[data-save-item]'); if(sv){ if(!requireLogin())return; GS().toggleSaveItem(sv.dataset.type,sv.dataset.id); } var msg=e.target.closest('[data-message-business]'); if(msg){ var owner=msg.dataset.messageBusiness; if(!owner) return toast('Business owner not available','error'); if(!requireLogin()) return; GS().startConversation(owner,function(){ location.href='messages.html?with='+encodeURIComponent(owner); }); } var edit=e.target.closest('[data-edit-business]'); if(edit) location.href='add-business.html?edit='+encodeURIComponent(b.id); };
+    var title  = b.title||b.name||'Business';
+    var cover  = b.coverUrl||getItemCover(b);
+    var logo   = b.logoUrl||'';
+    var owner  = b.ownerId||b.createdBy||b.userId||'';
+    var isOwner= !!(authUser() && authUser().uid && owner && authUser().uid===owner);
+
+    var statusBadge='';
+    if(b.status==='suspended') statusBadge='<span class="gh-biz-status-badge suspended"><i class="fas fa-ban"></i> Suspended</span>';
+    else if(b.status==='under_review') statusBadge='<span class="gh-biz-status-badge under-review"><i class="fas fa-clock"></i> Under Review</span>';
+
+    var coverHtml = cover ? '<img src="'+esc(cover)+'" alt="'+esc(title)+'" loading="lazy" onerror="this.remove()">' : '';
+    var logoHtml  = logo  ? '<img src="'+esc(logo)+'"  alt="'+esc(title)+'" loading="lazy" onerror="this.remove()">' : esc(initials(title));
+
+    var verifiedBadge = b.verified ? '<span class="gh-biz-verified"><i class="fas fa-circle-check"></i> Verified</span>' : '';
+    var shortDesc = b.description ? '<p class="gh-biz-short-desc">'+esc(b.description)+'</p>' : '';
+
+    var ratingAvg = b.ratingCount > 0
+      ? (b.ratingTotal/b.ratingCount).toFixed(1)
+      : (b.ratingAverage > 0 ? Number(b.ratingAverage).toFixed(1) : null);
+    var ratingDisplay = ratingAvg ? ratingAvg+' ★' : '—';
+
+    var tabs=[{id:'overview',l:'Overview'},{id:'posts',l:'Posts'},{id:'services',l:'Services'},{id:'photos',l:'Photos'},{id:'reviews',l:'Reviews'},{id:'about',l:'About'}];
+    if(isOwner) tabs.push({id:'manage',l:'Dashboard'});
+    var tabsHtml=tabs.map(function(t){
+      return '<button class="gh-biz-tab'+(t.id==='overview'?' active':'')+'" data-biz-tab="'+t.id+'">'+t.l+'</button>';
+    }).join('');
+
+    $('#ghBusinessDetail').innerHTML=
+      '<div class="gh-biz-page">'+
+        '<div class="gh-biz-cover">'+coverHtml+statusBadge+'</div>'+
+        '<div class="gh-biz-header">'+
+          '<div class="gh-biz-logo">'+logoHtml+'</div>'+
+          '<div class="gh-biz-header-inner">'+
+            '<div class="gh-biz-name-area">'+
+              '<div class="gh-biz-title-row"><h1>'+esc(title)+'</h1>'+verifiedBadge+'</div>'+
+              '<div class="gh-biz-chips">'+
+                (b.category?'<span class="gh-chip">'+esc(b.category)+'</span>':'')+
+                (isOnlineBusiness(b)?'<span class="gh-chip"><i class="fas fa-globe"></i> '+esc(businessAreaLabel(b))+'</span>':'<span class="gh-chip"><i class="fas fa-location-dot"></i> '+esc(businessAreaLabel(b))+'</span>')+
+                (b.plan&&b.plan!=='free'?'<span class="gh-chip" style="background:rgba(250,204,21,.12);color:#facc15;border-color:rgba(250,204,21,.25)"><i class="fas fa-crown"></i> Pro</span>':'')+
+              '</div>'+
+              shortDesc+
+            '</div>'+
+            '<div class="gh-biz-actions">'+
+              '<button class="gh-btn gh-follow-business-btn" data-follow-business="'+esc(b.id)+'"><i class="fas fa-plus"></i> Follow</button>'+
+              '<button class="gh-btn ghost" data-message-business="'+esc(owner)+'"><i class="fas fa-comment"></i> Message</button>'+
+              (isOwner?'<button class="gh-btn ghost" data-edit-business><i class="fas fa-gear"></i> Edit</button>':'')+
+              '<button class="gh-btn ghost" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+        '<div class="gh-biz-stats-bar">'+
+          '<div class="gh-biz-stat"><strong>'+Number(b.followerCount||0)+'</strong><span>Followers</span></div>'+
+          '<div class="gh-biz-stat"><strong>'+ratingDisplay+'</strong><span>Rating</span></div>'+
+          '<div class="gh-biz-stat"><strong>'+Number(b.reviewCount||0)+'</strong><span>Reviews</span></div>'+
+          '<div class="gh-biz-stat"><strong>'+Number(b.postCount||0)+'</strong><span>Posts</span></div>'+
+        '</div>'+
+        '<div class="gh-biz-tabs" id="ghBizTabs">'+tabsHtml+'</div>'+
+      '</div>'+
+      '<div id="ghBusinessTabContent"></div>';
+
+    state.currentBusinessTab='overview';
+
+    $('#ghBusinessDetail').onclick=function(e){
+      var tab=e.target.closest('[data-biz-tab]');
+      if(tab){ state.currentBusinessTab=tab.dataset.bizTab; $all('[data-biz-tab]').forEach(function(x){x.classList.toggle('active',x===tab);}); renderBusinessTab(b); return; }
+      var fl=e.target.closest('[data-follow-business]'); if(fl){ followBusiness(b.id); return; }
+      var sv=e.target.closest('[data-save-item]'); if(sv){ if(!requireLogin())return; GS().toggleSaveItem(sv.dataset.type,sv.dataset.id); return; }
+      var msg=e.target.closest('[data-message-business]'); if(msg){ var oid=msg.dataset.messageBusiness; if(!oid) return toast('Business owner not available','error'); if(!requireLogin()) return; GS().startConversation(oid,function(){ location.href='messages.html?with='+encodeURIComponent(oid); }); return; }
+      var edit=e.target.closest('[data-edit-business]'); if(edit) location.href='add-business.html?edit='+encodeURIComponent(b.id);
+    };
+
     updateBusinessFollowButton(b.id);
     renderBusinessTab(b);
   }
@@ -851,45 +919,203 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function renderBusinessTab(b){
-    var box=$('#ghBusinessTabContent'); if(!box)return; var tab=state.currentBusinessTab||'posts';
-    var bTitle = b.title||b.name||'Business';
-    if(tab==='about'){
-      var sLinks=b.socialLinks||{}; var ig=sLinks.instagram||b.instagram||''; var fb=sLinks.facebook||b.facebook||''; var wa=sLinks.whatsapp||b.whatsapp||'';
-      box.innerHTML='<div class="gh-card"><div class="gh-section-title"><h2>About</h2></div><div class="gh-about-list">'+
-        aboutRow('fa-align-left',b.description||'No description yet')+
-        aboutRow(isOnlineBusiness(b)?'fa-globe':'fa-location-dot',isOnlineBusiness(b)?businessAreaLabel(b):(b.address||b.city||'No address'))+
-        (isOnlineBusiness(b)?aboutRow('fa-laptop','Online / nationwide service'):'')+
-        aboutRow('fa-phone',b.phone||'No phone')+
-        aboutRow('fa-envelope',b.email||'No email')+
-        aboutRow('fa-globe',b.website||'No website')+
-        (ig?aboutRow('fa-brands fa-instagram','Instagram: '+ig):'')+
-        (fb?aboutRow('fa-brands fa-facebook','Facebook: '+fb):'')+
-        (wa?aboutRow('fa-brands fa-whatsapp','WhatsApp: '+wa):'')+
-        aboutRow('fa-clock',formatWorkingHours(b.workingHours))+
-        (b.priceRange?aboutRow('fa-tag','Price range: '+b.priceRange):'')+
-        (b.startingPrice?aboutRow('fa-tag','Starting from: '+b.startingPrice):'')+
-        '</div></div>'; return;
-    }
-    if(tab==='reviews') return renderBusinessReviews(b);
-    if(tab==='manage') return renderBusinessManageTab(b);
-    if(tab==='services') return renderBusinessServices(b);
-    if(tab==='photos'){ renderBusinessPhotos(b); return; }
+    var box=$('#ghBusinessTabContent'); if(!box)return;
+    var tab=state.currentBusinessTab||'overview';
+    if(tab==='overview')  return renderBusinessOverview(b);
+    if(tab==='about')     return renderBusinessAbout(b);
+    if(tab==='reviews')   return renderBusinessReviews(b);
+    if(tab==='manage')    return renderBusinessManageTab(b);
+    if(tab==='services')  return renderBusinessServices(b);
+    if(tab==='photos')  { renderBusinessPhotos(b); return; }
+    // posts tab
+    var bTitle=b.title||b.name||'Business';
     var isOwner=!!(authUser() && authUser().uid && (b.ownerId===authUser().uid || b.createdBy===authUser().uid || b.userId===authUser().uid));
-    box.innerHTML=(isOwner?'<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="gh-avatar">'+esc(initials(bTitle))+'</span><button class="gh-composer-fake" data-post-as-business>Post as '+esc(bTitle)+'</button></div></section>':'')+'<div id="ghBusinessPosts"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>';
-    box.onclick=function(e){ if(e.target.closest('[data-post-as-business]')) openPostModal({ targetType:'business', targetId:b.id, authorType:'business', businessId:b.id, authorId:b.id, authorName:bTitle, authorAvatar:b.logoUrl||b.coverUrl||'', createdByUserId:authUser() && authUser().uid }); };
+    box.innerHTML=
+      (isOwner?'<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="gh-avatar">'+esc(initials(bTitle))+'</span><button class="gh-composer-fake" data-post-as-business>Post as '+esc(bTitle)+'</button></div></section>':'')+
+      '<div id="ghBusinessPosts"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>';
+    box.onclick=function(e){ if(e.target.closest('[data-post-as-business]')) openPostModal({ targetType:'business',targetId:b.id,authorType:'business',businessId:b.id,authorId:b.id,authorName:bTitle,authorAvatar:b.logoUrl||b.coverUrl||'',createdByUserId:authUser()&&authUser().uid }); };
     bindPostInteractions(box);
-    setupAudienceAccess(function(){ var list=$('#ghBusinessPosts'); if(list && list._lastPosts) { var posts=list._lastPosts.filter(canSeePost); list.innerHTML=posts.length ? posts.map(postCard).join('') : '<div class="gh-card gh-empty"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Business page updates will appear here.</p></div>'; hydrateSharedPreviews(list); } });
-    listenTargetPosts('business', b.id, function(posts){ var list=$('#ghBusinessPosts'); if(!list) return; list._lastPosts=posts||[]; posts=posts.filter(canSeePost); if(!posts.length){ list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Business page updates will appear here.</p></div>'; return; } list.innerHTML=posts.map(postCard).join(''); bindPostInteractions(list); posts.forEach(function(p){hydrateReactionState(p.id);}); hydrateSharedPreviews(list); });
+    setupAudienceAccess(function(){ var list=$('#ghBusinessPosts'); if(list&&list._lastPosts){ var posts=list._lastPosts.filter(canSeePost); list.innerHTML=posts.length?posts.map(postCard).join(''):'<div class="gh-card gh-empty"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Business updates will appear here.</p></div>'; hydrateSharedPreviews(list); } });
+    listenTargetPosts('business',b.id,function(posts){ var list=$('#ghBusinessPosts'); if(!list)return; list._lastPosts=posts||[]; posts=posts.filter(canSeePost); if(!posts.length){list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Business page updates will appear here.</p></div>';return;} list.innerHTML=posts.map(postCard).join(''); bindPostInteractions(list); posts.forEach(function(p){hydrateReactionState(p.id);}); hydrateSharedPreviews(list); });
   }
 
   function aboutRow(ic, txt){ return '<div class="gh-about-row"><i class="fas '+ic+'"></i><span>'+esc(txt)+'</span></div>'; }
 
+  function bizInfoCard(icon, label, value, link){
+    var valHtml = link ? '<a href="'+esc(link)+'" target="_blank" rel="noopener">'+esc(value)+'</a>' : esc(value);
+    return '<div class="gh-biz-info-card"><i class="fas '+icon+'"></i><div><span class="gh-biz-ic-label">'+esc(label)+'</span><span class="gh-biz-ic-value">'+valHtml+'</span></div></div>';
+  }
+
+  function starsHtml(rating, max){
+    max = max || 5; rating = Number(rating) || 0;
+    var full=Math.round(rating); var out='';
+    for(var i=1;i<=max;i++) out+='<span style="color:'+(i<=full?'#facc15':'#334155')+'">★</span>';
+    return out;
+  }
+
+  function renderBusinessOverview(b){
+    var box=$('#ghBusinessTabContent'); if(!box)return;
+    var sLinks=b.socialLinks||{};
+    var ratingAvg = b.ratingCount>0 ? (b.ratingTotal/b.ratingCount).toFixed(1) : (b.ratingAverage>0 ? Number(b.ratingAverage).toFixed(1) : null);
+    var infoCards='';
+    if(b.phone)    infoCards+=bizInfoCard('fa-phone','Phone',b.phone,'tel:'+b.phone);
+    if(b.email)    infoCards+=bizInfoCard('fa-envelope','Email',b.email,'mailto:'+b.email);
+    if(b.website)  infoCards+=bizInfoCard('fa-globe','Website',b.website,b.website);
+    if(!isOnlineBusiness(b)&&b.city) infoCards+=bizInfoCard('fa-location-dot','Location',b.address?b.address+', '+b.city:b.city,'');
+    if(isOnlineBusiness(b))          infoCards+=bizInfoCard('fa-globe','Service area',b.serviceAreaText||businessAreaLabel(b),'');
+    if(b.workingHours) infoCards+=bizInfoCard('fa-clock','Hours',formatWorkingHours(b.workingHours),'');
+    if(b.priceRange||b.startingPrice) infoCards+=bizInfoCard('fa-tag','Pricing',(b.startingPrice?'From '+b.startingPrice+' · ':'')+esc(b.priceRange||''));
+    var sIg=sLinks.instagram||b.instagram||''; var sFb=sLinks.facebook||b.facebook||''; var sWa=sLinks.whatsapp||b.whatsapp||'';
+    if(sIg) infoCards+=bizInfoCard('fa-brands fa-instagram','Instagram',sIg,'https://instagram.com/'+sIg.replace(/^@/,''));
+    if(sFb) infoCards+=bizInfoCard('fa-brands fa-facebook','Facebook',sFb,sFb.startsWith('http')?sFb:'https://facebook.com/'+sFb);
+    if(sWa) infoCards+=bizInfoCard('fa-brands fa-whatsapp','WhatsApp',sWa,'https://wa.me/'+sWa.replace(/\D/g,''));
+
+    var ratingSection = ratingAvg ?
+      '<div class="gh-card" style="margin-bottom:0">'+
+        '<div class="gh-biz-sec-head"><h3>Rating</h3><button class="gh-btn sm ghost" data-switch-tab="reviews">All reviews</button></div>'+
+        '<div class="gh-biz-rating-row">'+
+          '<div class="gh-biz-rating-big">'+ratingAvg+'</div>'+
+          '<div><span class="gh-biz-rating-stars">'+starsHtml(ratingAvg)+'</span><span class="gh-biz-rating-sub">'+Number(b.ratingCount||b.reviewCount||0)+' reviews</span></div>'+
+        '</div>'+
+      '</div>' : '';
+
+    box.innerHTML=
+      '<div style="display:grid;gap:14px">'+
+      (b.description ? '<div class="gh-card" style="margin-bottom:0"><p style="margin:0;line-height:1.65;color:var(--gh-text)">'+esc(b.description)+'</p></div>' : '')+
+      (infoCards ? '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Contact & Info</h3></div><div class="gh-biz-info-grid">'+infoCards+'</div></div>' : '')+
+      ratingSection+
+      '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Latest Posts</h3><button class="gh-btn sm ghost" data-switch-tab="posts">All posts</button></div><div id="ghOvPosts"><div class="gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>'+
+      '<div class="gh-card" style="margin-bottom:0" id="ghOvSvcWrap"><div class="gh-biz-sec-head"><h3>Services</h3><button class="gh-btn sm ghost" data-switch-tab="services">All services</button></div><div id="ghOvSvc"><div class="gh-empty" style="min-height:60px"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>'+
+      '</div>';
+
+    box.onclick=function(e){ var sw=e.target.closest('[data-switch-tab]'); if(sw){ state.currentBusinessTab=sw.dataset.switchTab; $all('[data-biz-tab]').forEach(function(x){x.classList.toggle('active',x.dataset.bizTab===state.currentBusinessTab);}); renderBusinessTab(b); } };
+
+    listenTargetPosts('business',b.id,function(posts){ var el=$('#ghOvPosts'); if(!el)return; posts=posts.filter(canSeePost).slice(0,3); if(!posts.length){el.innerHTML='<div class="gh-empty" style="min-height:60px"><i class="fas fa-newspaper"></i><p>No posts yet</p></div>'; return;} el.innerHTML='<div class="gh-biz-preview-posts">'+posts.map(function(p){ return '<div class="gh-biz-preview-post">'+esc((p.text||'').slice(0,160))+'</div>'; }).join('')+'</div>'; });
+
+    if(fs()&&db()) fs().getDocs(fs().query(fs().collection(db(),'businesses',b.id,'services'),fs().orderBy('order','asc'),fs().limit(3))).then(function(snap){
+      var el=$('#ghOvSvc'); if(!el)return;
+      var items=[]; snap.forEach(function(d){items.push(Object.assign({id:d.id},d.data()));});
+      if(!items.length){$('#ghOvSvcWrap').style.display='none'; return;}
+      el.innerHTML='<div class="gh-svc-list">'+items.map(function(s){ return '<div class="gh-svc-card"><div class="gh-svc-info"><h3>'+esc(s.title||s.name||'Service')+'</h3>'+(s.description?'<p>'+esc(s.description)+'</p>':'')+'</div>'+(s.price?'<div class="gh-svc-price"><strong>'+esc(s.price)+'</strong><span>'+esc(s.currency||'GEL')+'</span></div>':'')+'</div>'; }).join('')+'</div>';
+    }).catch(function(){$('#ghOvSvcWrap')&&($('#ghOvSvcWrap').style.display='none');});
+  }
+
+  function renderBusinessAbout(b){
+    var box=$('#ghBusinessTabContent'); if(!box)return;
+    var sLinks=b.socialLinks||{}; var ig=sLinks.instagram||b.instagram||''; var fb=sLinks.facebook||b.facebook||''; var wa=sLinks.whatsapp||b.whatsapp||'';
+    var days=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    var todayName=days[new Date().getDay()===0?6:new Date().getDay()-1];
+    var hoursHtml='';
+    if(b.workingHours && typeof b.workingHours==='object'){
+      hoursHtml='<div class="gh-hours-grid">'+days.map(function(d){
+        var h=b.workingHours[d]||null; var label=h ? (h.closed?'Closed':(h.open||'09:00')+' – '+(h.close||'18:00')) : '—';
+        return '<div class="gh-hours-row'+(d===todayName?' today':'')+'"><span>'+d.slice(0,3)+'</span><span>'+esc(label)+'</span></div>';
+      }).join('')+'</div>';
+    } else if(b.workingHours){
+      hoursHtml='<p style="margin:0;font-size:.88rem;color:var(--gh-text)">'+esc(String(b.workingHours))+'</p>';
+    }
+    box.innerHTML=
+      '<div class="gh-biz-about-grid">'+
+        '<div style="display:grid;gap:12px">'+
+          (b.description ? '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Description</h3></div><p style="margin:0;line-height:1.65;font-size:.9rem;color:var(--gh-text)">'+esc(b.description)+'</p></div>' : '')+
+          '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Contact</h3></div><div class="gh-about-list">'+
+            (b.phone ? aboutRow('fa-phone',b.phone) : '')+
+            (b.email ? aboutRow('fa-envelope',b.email) : '')+
+            (b.website ? aboutRow('fa-globe',b.website) : '')+
+            (ig ? aboutRow('fa-brands fa-instagram','@'+ig.replace(/^@/,'')) : '')+
+            (fb ? aboutRow('fa-brands fa-facebook',fb) : '')+
+            (wa ? aboutRow('fa-brands fa-whatsapp',wa) : '')+
+            (!b.phone&&!b.email&&!b.website&&!ig&&!fb&&!wa ? '<p style="color:var(--gh-muted);font-size:.85rem;margin:0">No contact info added yet.</p>' : '')+
+          '</div></div>'+
+          (!isOnlineBusiness(b)&&(b.city||b.address) ? '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Location</h3></div><div class="gh-about-list">'+
+            aboutRow('fa-location-dot',b.address?b.address+', '+b.city:b.city)+
+            (b.mapsLink?'<a href="'+esc(b.mapsLink)+'" target="_blank" rel="noopener" class="gh-btn sm ghost" style="margin-top:4px"><i class="fas fa-map"></i> View on map</a>':'')+
+          '</div></div>' : '')+
+          (isOnlineBusiness(b) ? '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Service Area</h3></div>'+aboutRow('fa-globe',b.serviceAreaText||businessAreaLabel(b))+'</div>' : '')+
+        '</div>'+
+        '<div style="display:grid;gap:12px">'+
+          (hoursHtml ? '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Working Hours</h3></div>'+hoursHtml+'</div>' : '')+
+          ((b.priceRange||b.startingPrice) ? '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Pricing</h3></div><div class="gh-about-list">'+
+            (b.priceRange ? aboutRow('fa-tag','Range: '+b.priceRange) : '')+
+            (b.startingPrice ? aboutRow('fa-tag','Starting from: '+b.startingPrice) : '')+
+          '</div></div>' : '')+
+          '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Details</h3></div><div class="gh-about-list">'+
+            aboutRow('fa-store',b.category||'Business')+
+            aboutRow(isOnlineBusiness(b)?'fa-globe':'fa-location-dot',isOnlineBusiness(b)?'Online service':'Physical business')+
+            (b.plan&&b.plan!=='free' ? aboutRow('fa-crown','Pro plan') : aboutRow('fa-circle-check','Free listing'))+
+          '</div></div>'+
+        '</div>'+
+      '</div>';
+  }
+
   function renderBusinessReviews(b){
-    var box=$('#ghBusinessTabContent');
-    box.innerHTML='<div class="gh-card"><div class="gh-section-title"><h2>Reviews</h2><span class="gh-small">'+Number(b.reviewCount||0)+' reviews</span></div><div class="gh-review-form"><div class="gh-stars" id="ghReviewStars">'+[1,2,3,4,5].map(function(i){return '<button class="gh-star active" data-star="'+i+'">★</button>';}).join('')+'</div><textarea class="gh-textarea" id="ghReviewText" placeholder="Write a review…"></textarea><button class="gh-btn" id="ghSubmitReview">Submit review</button></div></div><div id="ghBusinessReviewsList"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>';
-    $('#ghReviewStars').onclick=function(e){ var s=e.target.closest('[data-star]'); if(!s)return; state.starRating=Number(s.dataset.star); $all('[data-star]').forEach(function(x){x.classList.toggle('active', Number(x.dataset.star)<=state.starRating);}); };
-    $('#ghSubmitReview').onclick=function(){ createBusinessReview(b.id, state.starRating||5, $('#ghReviewText').value); };
-    listenBusinessReviews(b.id, function(items){ var list=$('#ghBusinessReviewsList'); if(!items.length){list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-star"></i><h3>No reviews yet</h3><p>Be first to review this business.</p></div>';return;} list.innerHTML=items.map(function(r){ var uid=r.userId||r.authorId||''; var name=r.userName||r.authorName||'User'; var avHtml=(r.userPhoto?img(r.userPhoto,name):esc(initials(name))); return '<div class="gh-card"><div class="gh-post-head">'+userProfileAnchor(uid,'gh-avatar gh-profile-avatar-link',avHtml,'Open '+name+' profile')+'<div><div class="gh-post-name">'+userProfileAnchor(uid,'gh-profile-name-link',esc(name),'Open '+name+' profile')+'</div><div class="gh-post-time">'+('★'.repeat(Number(r.rating||5)))+' · '+timeAgo(r.createdAt)+'</div></div></div><div class="gh-post-text">'+esc(r.text||r.comment||'')+'</div></div>';}).join(''); });
+    var box=$('#ghBusinessTabContent'); if(!box)return;
+    var isOwner=!!(authUser()&&authUser().uid&&(b.ownerId===authUser().uid||b.createdBy===authUser().uid||b.userId===authUser().uid));
+    var ratingAvg=b.ratingCount>0?(b.ratingTotal/b.ratingCount).toFixed(1):(b.ratingAverage>0?Number(b.ratingAverage).toFixed(1):null);
+    var ratingSummary=ratingAvg?
+      '<div class="gh-biz-rating-row"><div class="gh-biz-rating-big">'+ratingAvg+'</div><div><span class="gh-biz-rating-stars">'+starsHtml(ratingAvg)+'</span><span class="gh-biz-rating-sub">'+Number(b.ratingCount||b.reviewCount||0)+' reviews</span></div></div>':'';
+    box.innerHTML=
+      (ratingSummary?'<div class="gh-card" style="margin-bottom:14px">'+ratingSummary+'</div>':'')+
+      (!isOwner?
+        '<div class="gh-card" style="margin-bottom:14px"><div class="gh-biz-sec-head"><h3>Write a Review</h3></div>'+
+        '<div class="gh-review-form"><div class="gh-stars" id="ghReviewStars">'+[1,2,3,4,5].map(function(i){return '<button class="gh-star active" data-star="'+i+'">★</button>';}).join('')+'</div>'+
+        '<textarea class="gh-textarea" id="ghReviewText" placeholder="Describe your experience…"></textarea>'+
+        '<button class="gh-btn" id="ghSubmitReview"><i class="fas fa-star"></i> Submit review</button></div></div>' : '')+
+      '<div class="gh-card" style="margin-bottom:0"><div id="ghBusinessReviewsList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
+    if(!isOwner && $('#ghReviewStars')){
+      $('#ghReviewStars').onclick=function(e){ var s=e.target.closest('[data-star]'); if(!s)return; state.starRating=Number(s.dataset.star); $all('[data-star]').forEach(function(x){x.classList.toggle('active',Number(x.dataset.star)<=state.starRating);}); };
+      $('#ghSubmitReview').onclick=function(){ createBusinessReview(b.id,state.starRating||5,$('#ghReviewText').value); };
+    }
+    listenBusinessReviews(b.id,function(items){
+      var list=$('#ghBusinessReviewsList'); if(!list)return;
+      if(!items.length){list.innerHTML='<div class="gh-empty"><i class="fas fa-star"></i><h3>No reviews yet</h3><p>Be the first to review this business.</p></div>'; return;}
+      list.innerHTML='<div class="gh-reviews-wrap">'+items.map(function(r){
+        var normR=window.GH&&window.GH.normReview?window.GH.normReview(r,r.id):r;
+        var uid=normR.userId||''; var name=normR.userName||'User'; var avatar=normR.avatarUrl||r.userPhoto||'';
+        var avHtml=avatar?img(avatar,name):esc(initials(name));
+        var rating=Number(normR.rating||r.rating||0);
+        return '<div class="gh-review-card">'+
+          '<div class="gh-review-head">'+
+            userProfileAnchor(uid,'gh-avatar gh-profile-avatar-link',avHtml,'Open '+name)+
+            '<div class="gh-review-user-info">'+
+              '<strong>'+userProfileAnchor(uid,'gh-profile-name-link',esc(name),'Open '+name)+'</strong>'+
+              '<span>'+timeAgo(normR.createdAt||r.createdAt)+'</span>'+
+            '</div>'+
+            '<div class="gh-review-stars-row">'+
+              '<span class="gh-review-stars">'+starsHtml(rating)+'</span>'+
+              '<span class="gh-review-rating-num">'+rating.toFixed(1)+'</span>'+
+            '</div>'+
+          '</div>'+
+          '<p class="gh-review-text">'+esc(normR.text||r.text||r.comment||'')+'</p>'+
+          '<div class="gh-review-footer">'+
+            '<span class="gh-review-date">'+(normR.createdAt||r.createdAt ? new Date(ts(normR.createdAt||r.createdAt)).toLocaleDateString() : '')+'</span>'+
+            '<button class="gh-btn sm ghost" data-report-review="'+esc(r.id||'')+'" title="Report review"><i class="fas fa-flag"></i></button>'+
+          '</div>'+
+        '</div>';
+      }).join('')+'</div>';
+      box.addEventListener('click',function(e){ var rep=e.target.closest('[data-report-review]'); if(rep){ if(!requireLogin())return; toast('Review reported — thank you'); } });
+    });
+  }
+
+  function renderBusinessServices(b){
+    var box=$('#ghBusinessTabContent'); if(!box)return;
+    var isOwner=!!(authUser()&&authUser().uid&&(b.ownerId===authUser().uid||b.createdBy===authUser().uid||b.userId===authUser().uid));
+    box.innerHTML=
+      '<div class="gh-card"><div class="gh-biz-sec-head"><h3>Services</h3>'+(isOwner?'<button class="gh-btn sm" data-add-service><i class="fas fa-plus"></i> Add service</button>':'')+'</div>'+
+      '<div id="ghServicesList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
+    box.onclick=function(e){ if(e.target.closest('[data-add-service]')) openAddServiceModal(b); };
+    if(!fs()||!db()){ $('#ghServicesList').innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>Services unavailable</h3></div>'; return; }
+    fs().getDocs(fs().query(fs().collection(db(),'businesses',b.id,'services'),fs().orderBy('order','asc'))).then(function(snap){
+      var list=$('#ghServicesList'); if(!list)return;
+      var items=[]; snap.forEach(function(d){items.push(Object.assign({id:d.id},d.data()));});
+      if(!items.length){ list.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>No services listed yet</h3>'+(isOwner?'<p>Add your first service to show clients what you offer.</p><button class="gh-btn" data-add-service>Add first service</button>':'<p>This business has not added services yet.</p>')+'</div>'; return; }
+      list.innerHTML='<div class="gh-svc-list">'+items.map(function(s){
+        return '<div class="gh-svc-card">'+
+          '<div class="gh-svc-info"><h3>'+esc(s.title||s.name||'Service')+'</h3>'+(s.description?'<p>'+esc(s.description)+'</p>':'')+'</div>'+
+          (s.price?'<div class="gh-svc-price"><strong>'+esc(s.price)+'</strong><span>'+esc(s.currency||'GEL')+'</span></div>':'')+
+        '</div>';
+      }).join('')+'</div>';
+    }).catch(function(){ var list=$('#ghServicesList'); if(list) list.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>No services yet</h3></div>'; });
   }
 
   function createBusinessReview(businessId, rating, textVal){
