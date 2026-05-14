@@ -22,9 +22,13 @@
     }
   }
   function initTheme(){
-    var preferred = 'dark';
-    try { preferred = localStorage.getItem('gh_theme') || preferred; } catch(e) {}
-    applyTheme(document.documentElement.getAttribute('data-gh-theme') || preferred);
+    var current = document.documentElement.getAttribute('data-gh-theme') || 'dark';
+    state.theme = current;
+    var btn = document.getElementById('ghThemeToggle');
+    if(btn){
+      btn.setAttribute('aria-label', current === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+      btn.innerHTML = current === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    }
   }
 
   function $(s, root){ return (root || document).querySelector(s); }
@@ -33,6 +37,8 @@
   function text(v, fallback){ v = String(v == null ? '' : v).trim(); return v || fallback || ''; }
   function ts(v){ if(!v) return 0; if(typeof v.toMillis === 'function') return v.toMillis(); if(v.seconds) return v.seconds * 1000; if(v instanceof Date) return v.getTime(); if(typeof v === 'number') return v; return Date.parse(v) || 0; }
   function getItemImage(x){ return x.imageUrl||x.image||x.coverImage||x.coverImageUrl||x.coverUrl||x.photoUrl||x.mediaUrl||x.logoUrl||x.thumbnail||''; }
+  function getItemCover(x){ return x.coverImage||x.coverImageUrl||x.coverUrl||x.imageUrl||x.image||x.photoUrl||x.thumbnail||(x.photos&&x.photos[0])||(x.images&&x.images[0])||''; }
+  function itemMediaHtml(photo,title,icon){ return '<div class="gh-item-no-img"><i class="fas '+icon+'"></i></div>'+(photo?'<img src="'+esc(photo)+'" alt="'+esc(title||'')+'" loading="lazy" onerror="this.remove()">':''); }
   
   function isOnlineBusiness(b){ return !!(b && (b.businessType === 'online' || b.isOnline === true)); }
   function businessAreaLabel(b){
@@ -698,7 +704,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function discoverItem(x){
     var type=x._type; var title=x.title||x.name||x.text||'Untitled'; var desc=x.description||x.desc||x.text||x.category||''; var photo=getItemImage(x);
     if(type==='post') title=x.authorName ? x.authorName+' posted' : 'Post';
-    return '<article class="gh-card gh-item-card" data-discover-card data-type="'+esc(type)+'"><div class="gh-item-media">'+(photo?img(photo,title):'<div class="gh-item-no-img"><i class="fas '+iconFor(type)+'"></i></div>')+'<span class="gh-type-badge"><i class="fas '+iconFor(type)+'"></i> '+labelFor(type)+'</span></div><div class="gh-item-body"><h3>'+esc(title)+'</h3><p>'+esc(desc||'Real GeoHub item')+'</p><div class="gh-item-meta">'+(type==='business'?businessModeChip(x):(x.city?'<span class="gh-chip"><i class="fas fa-location-dot"></i> '+esc(x.city)+'</span>':''))+(x.category?'<span class="gh-chip">'+esc(x.category)+'</span>':'')+'<span class="gh-chip">'+timeAgo(x.createdAt)+'</span></div><div class="gh-card-actions"><a class="gh-btn sm" href="'+docLink(type,x.id)+'">View</a><button class="gh-btn sm ghost" data-save-item data-type="'+esc(type)+'" data-id="'+esc(x.id)+'"><i class="fas fa-bookmark"></i></button><button class="gh-btn sm ghost" data-share-item data-url="'+docLink(type,x.id)+'"><i class="fas fa-share"></i></button></div></div></article>';
+    return '<article class="gh-card gh-item-card" data-discover-card data-type="'+esc(type)+'"><div class="gh-item-media">'+itemMediaHtml(photo,title,iconFor(type))+'<span class="gh-type-badge"><i class="fas '+iconFor(type)+'"></i> '+labelFor(type)+'</span></div><div class="gh-item-body"><h3>'+esc(title)+'</h3><p>'+esc(desc||'Real GeoHub item')+'</p><div class="gh-item-meta">'+(type==='business'?businessModeChip(x):(x.city?'<span class="gh-chip"><i class="fas fa-location-dot"></i> '+esc(x.city)+'</span>':''))+(x.category?'<span class="gh-chip">'+esc(x.category)+'</span>':'')+'<span class="gh-chip">'+timeAgo(x.createdAt)+'</span></div><div class="gh-card-actions"><a class="gh-btn sm" href="'+docLink(type,x.id)+'">View</a><button class="gh-btn sm ghost" data-save-item data-type="'+esc(type)+'" data-id="'+esc(x.id)+'"><i class="fas fa-bookmark"></i></button><button class="gh-btn sm ghost" data-share-item data-url="'+docLink(type,x.id)+'"><i class="fas fa-share"></i></button></div></div></article>';
   }
 
   function renderDiscover(){
@@ -726,8 +732,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function businessListCard(b){
-    var title=b.name||'Untitled business'; var photo=getItemImage(b);
-    return '<article class="gh-card gh-item-card"><div class="gh-item-media">'+(photo?img(photo,title):'<div class="gh-item-no-img"><i class="fas fa-store"></i></div>')+'<span class="gh-type-badge"><i class="fas fa-store"></i> Business Page</span></div><div class="gh-item-body"><h3>'+esc(title)+'</h3><p>'+esc(b.description||b.desc||'Business page on GeoHub')+'</p><div class="gh-item-meta"><span class="gh-chip">'+esc(b.category||'Business')+'</span>'+businessModeChip(b)+'<span class="gh-chip">'+Number(b.followerCount||0)+' followers</span></div><div class="gh-card-actions"><a class="gh-btn sm" href="business.html?id='+encodeURIComponent(b.id)+'">View Page</a><button class="gh-btn sm ghost" data-follow-business="'+esc(b.id)+'"><i class="fas fa-plus"></i> Follow</button><button class="gh-btn sm ghost" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button></div></div></article>';
+    var title=b.name||'Untitled business'; var photo=getItemCover(b);
+    return '<article class="gh-card gh-item-card"><div class="gh-item-media">'+itemMediaHtml(photo,title,'fa-store')+'<span class="gh-type-badge"><i class="fas fa-store"></i> Business Page</span></div><div class="gh-item-body"><h3>'+esc(title)+'</h3><p>'+esc(b.description||b.desc||'Business page on GeoHub')+'</p><div class="gh-item-meta"><span class="gh-chip">'+esc(b.category||'Business')+'</span>'+businessModeChip(b)+'<span class="gh-chip">'+Number(b.followerCount||0)+' followers</span></div><div class="gh-card-actions"><a class="gh-btn sm" href="business.html?id='+encodeURIComponent(b.id)+'">View Page</a><button class="gh-btn sm ghost" data-follow-business="'+esc(b.id)+'"><i class="fas fa-plus"></i> Follow</button><button class="gh-btn sm ghost" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button></div></div></article>';
   }
 
   function renderBusinesses(){
@@ -752,7 +758,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function paintBusinessDetail(b){
-    var title=b.name||'Business'; var cover=getItemImage(b); var logo=b.logoUrl||''; var isOwner=authUser() && (b.ownerId===authUser().uid || b.createdBy===authUser().uid || b.userId===authUser().uid);
+    var title=b.name||'Business'; var cover=getItemCover(b); var logo=b.logoUrl||''; var isOwner=authUser() && (b.ownerId===authUser().uid || b.createdBy===authUser().uid || b.userId===authUser().uid);
     $('#ghBusinessDetail').innerHTML='<section class="gh-card" style="padding:0;overflow:hidden"><div class="gh-page-cover">'+(cover?img(cover,title):'')+'</div><div class="gh-page-info"><div class="gh-page-logo">'+(logo?img(logo,title):esc(initials(title)))+'</div><div class="gh-page-title"><h1>'+esc(title)+'</h1><p><i class="fas fa-store"></i> '+esc(b.category||'Business')+' · '+esc(businessAreaLabel(b))+' · '+Number(b.followerCount||0)+' followers</p></div><div class="gh-page-actions"><button class="gh-btn gh-follow-business-btn" data-follow-business="'+esc(b.id)+'"><i class="fas fa-plus"></i> Follow</button><button class="gh-btn ghost" data-message-business="'+esc(b.ownerId||b.createdBy||'')+'"><i class="fas fa-comment"></i> Message</button><button class="gh-btn ghost" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button>'+(isOwner?'<button class="gh-btn ghost" data-edit-business><i class="fas fa-gear"></i> Manage</button>':'')+'</div></div><div class="gh-tabbar"><button class="gh-tab active" data-business-tab="posts">Posts</button><button class="gh-tab" data-business-tab="about">About</button><button class="gh-tab" data-business-tab="reviews">Reviews</button><button class="gh-tab" data-business-tab="photos">Photos</button>'+(isOwner?'<button class="gh-tab" data-business-tab="manage">Dashboard</button>':'')+'</div></section><div id="ghBusinessTabContent"></div>';
     $('#ghBusinessDetail').onclick=function(e){ var tab=e.target.closest('[data-business-tab]'); if(tab){ state.currentBusinessTab=tab.dataset.businessTab; $all('[data-business-tab]').forEach(function(x){x.classList.toggle('active',x===tab);}); renderBusinessTab(b); } var fl=e.target.closest('[data-follow-business]'); if(fl) followBusiness(b.id); var sv=e.target.closest('[data-save-item]'); if(sv){ if(!requireLogin())return; GS().toggleSaveItem(sv.dataset.type,sv.dataset.id); } var msg=e.target.closest('[data-message-business]'); if(msg){ var owner=msg.dataset.messageBusiness; if(!owner) return toast('Business owner not available','error'); if(!requireLogin()) return; GS().startConversation(owner,function(){ location.href='messages.html?with='+encodeURIComponent(owner); }); } var edit=e.target.closest('[data-edit-business]'); if(edit) location.href='add-business.html?edit='+encodeURIComponent(b.id); };
     updateBusinessFollowButton(b.id);
@@ -880,7 +886,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(location.hash==='#create') setTimeout(openGroupCreate,350);
   }
 
-  function groupCard(g){ var title=g.name||'Untitled group'; var cover=getItemImage(g); return '<article class="gh-card gh-item-card"><div class="gh-item-media">'+(cover?img(cover,title):'<div class="gh-item-no-img"><i class="fas fa-users"></i></div>')+'<span class="gh-type-badge"><i class="fas fa-users"></i> '+esc(g.privacy||'public')+'</span></div><div class="gh-item-body"><h3>'+esc(title)+'</h3><p>'+esc(g.description||'Group community on GeoHub')+'</p><div class="gh-item-meta"><span class="gh-chip">'+Number(g.memberCount||0)+' members</span><span class="gh-chip">'+esc(g.category||'general')+'</span></div><div class="gh-card-actions"><a class="gh-btn sm" href="groups.html?id='+encodeURIComponent(g.id)+'">View group</a><button class="gh-btn sm ghost" data-join-group="'+esc(g.id)+'" data-name="'+esc(title)+'" data-privacy="'+esc(g.privacy||'public')+'">Join</button></div></div></article>'; }
+  function groupCard(g){ var title=g.name||'Untitled group'; var cover=getItemCover(g); return '<article class="gh-card gh-item-card"><div class="gh-item-media">'+itemMediaHtml(cover,title,'fa-users')+'<span class="gh-type-badge"><i class="fas fa-users"></i> '+esc(g.privacy||'public')+'</span></div><div class="gh-item-body"><h3>'+esc(title)+'</h3><p>'+esc(g.description||'Group community on GeoHub')+'</p><div class="gh-item-meta"><span class="gh-chip">'+Number(g.memberCount||0)+' members</span><span class="gh-chip">'+esc(g.category||'general')+'</span></div><div class="gh-card-actions"><a class="gh-btn sm" href="groups.html?id='+encodeURIComponent(g.id)+'">View group</a><button class="gh-btn sm ghost" data-join-group="'+esc(g.id)+'" data-name="'+esc(title)+'" data-privacy="'+esc(g.privacy||'public')+'">Join</button></div></div></article>'; }
 
   function openGroupCreate(){
     if(!requireLogin()) return;
@@ -895,7 +901,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function paintGroupDetail(g){
-    var title=g.name||'Group'; var cover=getItemImage(g);
+    var title=g.name||'Group'; var cover=getItemCover(g);
     $('#ghGroupDetail').innerHTML='<section class="gh-card" style="padding:0;overflow:hidden"><div class="gh-page-cover">'+(cover?img(cover,title):'')+'</div><div class="gh-page-info"><div class="gh-page-logo"><i class="fas fa-users"></i></div><div class="gh-page-title"><h1>'+esc(title)+'</h1><p>'+esc(g.privacy||'public')+' group · '+Number(g.memberCount||0)+' members · '+esc(g.category||'general')+'</p></div><div class="gh-page-actions"><button class="gh-btn" data-join-group="'+esc(g.id)+'" data-name="'+esc(title)+'" data-privacy="'+esc(g.privacy||'public')+'"><i class="fas fa-user-plus"></i> Join</button><button class="gh-btn ghost" data-share-group><i class="fas fa-share"></i> Share</button></div></div><div class="gh-tabbar"><button class="gh-tab active" data-group-detail-tab="discussion">Discussion</button><button class="gh-tab" data-group-detail-tab="about">About</button><button class="gh-tab" data-group-detail-tab="members">Members</button><button class="gh-tab" data-group-detail-tab="media">Media</button></div></section><div id="ghGroupTabContent"></div>';
     $('#ghGroupDetail').onclick=function(e){ var tab=e.target.closest('[data-group-detail-tab]'); if(tab){ state.currentGroupTab=tab.dataset.groupDetailTab; $all('[data-group-detail-tab]').forEach(function(x){x.classList.toggle('active',x===tab);}); renderGroupTab(g); } var j=e.target.closest('[data-join-group]'); if(j){ if((g.privacy||'public')==='private') GS().requestJoinGroup(g.id); else GS().toggleGroupMember(g.id,title); } var sh=e.target.closest('[data-share-group]'); if(sh && navigator.clipboard) navigator.clipboard.writeText(location.href).then(function(){toast('Group link copied');}); };
     renderGroupTab(g);

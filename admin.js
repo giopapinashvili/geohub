@@ -1012,9 +1012,22 @@
       jsonEl.value = '';
       if (valEl) { valEl.style.color = '#10e0a0'; valEl.textContent = 'Done.'; }
       if (resEl) {
+        var rows = results.map(function(r, i) {
+          var it = items[i];
+          var t = (it && (it.title || it.name)) || ('item ' + (i + 1));
+          var tEsc = t.replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; });
+          if (r.status === 'fulfilled') {
+            var docId = r.value && r.value.id ? r.value.id : '—';
+            return '<li style="color:#10e0a0;padding:3px 0"><i class="fas fa-check" style="width:14px"></i> <strong>' + tEsc + '</strong> <span style="color:#64748b;font-size:.78em">' + col + '/' + docId + '</span></li>';
+          }
+          var errMsg = (r.reason && r.reason.message) || 'failed';
+          var errEsc = errMsg.replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; });
+          return '<li style="color:#ef4444;padding:3px 0"><i class="fas fa-xmark" style="width:14px"></i> <strong>' + tEsc + '</strong> <span style="font-size:.78em">' + errEsc + '</span></li>';
+        }).join('');
         resEl.style.display = 'block';
-        resEl.innerHTML = '<i class="fas fa-check-circle"></i> Imported <strong>' + ok + '</strong> items into <strong>' + col + '</strong>'
-          + (err ? ' · <span style="color:#ef4444">' + err + ' failed</span>' : '');
+        resEl.innerHTML = '<div style="margin-bottom:10px;font-size:.9rem"><i class="fas fa-check-circle" style="color:#10e0a0"></i> Imported <strong>' + ok + '</strong> into <strong>' + col + '</strong>'
+          + (err ? ' &nbsp;·&nbsp; <span style="color:#ef4444">' + err + ' failed</span>' : '') + '</div>'
+          + '<ul style="list-style:none;padding:0;margin:0;max-height:220px;overflow-y:auto;font-size:.82rem">' + rows + '</ul>';
       }
       toast('Imported ' + ok + ' items' + (err ? ', ' + err + ' failed' : ''));
     });
