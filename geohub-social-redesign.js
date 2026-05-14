@@ -9,6 +9,33 @@
   var PAGE = document.body && document.body.dataset ? document.body.dataset.ghPage : '';
   var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false, pageUnsubs: [] };
 
+  /* ── User cache (instant topbar, no flash) ──────────────── */
+  var USER_CACHE_KEY = 'gh_uc1';
+  function getCachedUser(){
+    try{var s=localStorage.getItem(USER_CACHE_KEY);if(!s)return null;var d=JSON.parse(s);if(Date.now()-d.ts>7*864e5){localStorage.removeItem(USER_CACHE_KEY);return null;}return d;}catch(e){return null;}
+  }
+  function setCachedUser(u){
+    if(!u||!u.uid)return;
+    try{localStorage.setItem(USER_CACHE_KEY,JSON.stringify({uid:u.uid,name:u.name||'',avatar:u.avatar||'',ts:Date.now()}));}catch(e){}
+  }
+  function clearCachedUser(){try{localStorage.removeItem(USER_CACHE_KEY);}catch(e){}}
+
+  /* ── Skeleton post card (feed loading state) ─────────────── */
+  function skelPostCard(){
+    return '<div class="gh-skel-post">'+
+      '<div class="gh-skel-post-head"><div class="gh-avatar gh-skel"></div>'+
+        '<div style="flex:1;min-width:0"><div class="gh-skel-line" style="width:130px;height:13px;margin-bottom:6px"></div>'+
+        '<div class="gh-skel-line" style="width:72px;height:10px"></div></div></div>'+
+      '<div class="gh-skel-line" style="width:95%;height:13px;margin:10px 0 6px"></div>'+
+      '<div class="gh-skel-line" style="width:78%;height:13px;margin-bottom:6px"></div>'+
+      '<div class="gh-skel-line" style="width:86%;height:13px;margin-bottom:14px"></div>'+
+      '<div class="gh-skel-img"></div>'+
+      '<div class="gh-skel-post-actions"><div class="gh-skel-line" style="width:58px;height:11px"></div>'+
+        '<div class="gh-skel-line" style="width:58px;height:11px"></div>'+
+        '<div class="gh-skel-line" style="width:58px;height:11px"></div></div>'+
+    '</div>';
+  }
+
   /* ── Working hours constants ────────────────────────────── */
   var DAYS_KEYS   = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
   var DAYS_LABELS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
@@ -237,6 +264,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function topbar(){
+    var c=getCachedUser();
+    var avClass='gh-avatar'+(c?'':' gh-skel');
+    var avContent=c?(c.avatar?'<img src="'+esc(c.avatar)+'" alt="" loading="eager" onerror="this.remove()">':esc(initials(c.name||''))):'';
+    var nameContent=c?esc((c.name||'').split(' ')[0]):'';
+    var nameAttr=c?'':' class="gh-skel-line"';
+    var userHref=c?('profile.html?id='+encodeURIComponent(c.uid)):'#';
     return '<header class="gh-topbar gh-hub-topbar">'+
       '<a class="gh-brand" href="feed.html"><div class="gh-brand-mark">GH</div><span>Geo<span>Hub</span></span></a>'+
       '<div class="gh-top-search"><i class="fas fa-search"></i><input id="ghGlobalSearch" placeholder="მოძებნე ადგილები, ადამიანები, ჯგუფები…"></div>'+
@@ -249,7 +282,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-top-actions">'+
         '<button class="gh-icon-btn gh-sidebar-toggle" id="ghSidebarToggle" title="Collapse sidebar"><i class="fas fa-bars-staggered"></i></button>'+
         '<button class="gh-icon-btn gh-theme-toggle" id="ghThemeToggle" title="Toggle light/dark mode"><i class="fas fa-moon"></i></button>'+
-        '<a class="gh-user-btn" href="auth.html"><span class="gh-avatar" id="ghTopAvatar">GH</span><span id="ghTopName">Sign in</span></a>'+
+        '<a class="gh-user-btn" href="'+userHref+'"><span class="'+avClass+'" id="ghTopAvatar">'+avContent+'</span><span id="ghTopName"'+nameAttr+'>'+nameContent+'</span></a>'+
         '<button class="gh-create-btn" id="ghCreateBtn"><i class="fas fa-plus"></i><span>შექმნა</span></button>'+
       '</div></header>';
   }
@@ -300,25 +333,60 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var gs=$('#ghGlobalSearch'); if(gs){ gs.addEventListener('keydown', function(e){ if(e.key==='Enter' && gs.value.trim()) location.href='search.html?q='+encodeURIComponent(gs.value.trim()); }); }
     if(window.requestIdleCallback) requestIdleCallback(loadRightRail, { timeout: 2500 });
     else setTimeout(loadRightRail, 700);
+    // When Firestore profile fully loads, refresh cache + topbar with richer data
+    window.addEventListener('GeoAuthReady', function(e){
+      var p=e&&e.detail;
+      if(p&&p.uid){
+        setCachedUser({uid:p.uid,name:p.fullName||p.displayName||p.name||'',avatar:p.avatar||p.photoURL||''});
+      } else {
+        clearCachedUser();
+      }
+      updateTopUser();
+    });
   }
 
   function updateTopUser(){
-    var u=currentUserInfo(); var av=$('#ghTopAvatar'), nm=$('#ghTopName'), link=document.querySelector('.gh-user-btn');
-    if(av) av.innerHTML = u.avatar ? img(u.avatar,u.name) : esc(initials(u.name));
-    if(nm) nm.textContent = authUser() ? u.name.split(' ')[0] : 'Sign in';
-    if(link) link.setAttribute('href', authUser() ? profileLink(u.uid) : 'auth.html');
+    var isAuth=!!authUser(); var cached=getCachedUser();
+    var av=$('#ghTopAvatar'), nm=$('#ghTopName'), link=document.querySelector('.gh-user-btn');
+    if(!isAuth){
+      if(cached){
+        // Cache already rendered by topbar(); only ensure link is set
+        if(link && link.getAttribute('href')==='#') link.setAttribute('href','profile.html?id='+encodeURIComponent(cached.uid));
+        return;
+      }
+      // No auth, no cache — apply skeleton (first-visit / logged-out state)
+      if(av){ av.className='gh-avatar gh-skel'; av.innerHTML=''; }
+      if(nm){ nm.className='gh-skel-line'; nm.textContent=''; }
+      if(link) link.setAttribute('href','#');
+      return;
+    }
+    // Auth resolved — render real user
+    var u=currentUserInfo();
+    // Prefer GeoAuth Firestore profile for name/avatar if richer
+    var ga=window.GeoAuth&&window.GeoAuth.getCurrentUser&&window.GeoAuth.getCurrentUser();
+    var displayName=(ga&&(ga.fullName||ga.displayName||ga.name))||u.name||'';
+    var displayAvatar=(ga&&(ga.avatar||ga.photoURL))||u.avatar||'';
+    if(av){ av.className='gh-avatar'; av.innerHTML=displayAvatar?img(displayAvatar,displayName):esc(initials(displayName||'')); }
+    if(nm){ nm.className=''; nm.textContent=(displayName||'').split(' ')[0]||'Me'; }
+    if(link) link.setAttribute('href', profileLink(u.uid));
     document.querySelectorAll('.gh-nav-item').forEach(function(a){
       var txt=(a.textContent||'').trim().toLowerCase();
-      if(txt==='profile') a.setAttribute('href', authUser() ? profileLink(u.uid) : 'auth.html');
-      if(txt==='saved') a.setAttribute('href', authUser() ? profileLink(u.uid)+'&tab=saved' : 'auth.html');
+      if(txt==='profile') a.setAttribute('href', profileLink(u.uid));
+      if(txt==='saved') a.setAttribute('href', profileLink(u.uid)+'&tab=saved');
     });
+    // Update composer avatar if present
+    var ca=$('#ghComposerAvatar');
+    if(ca){ ca.className='gh-avatar'; ca.innerHTML=displayAvatar?img(displayAvatar,displayName):esc(initials(displayName||'')); }
+    // Persist to cache
+    setCachedUser({uid:u.uid,name:displayName,avatar:displayAvatar});
   }
 
   function bindAuthState(){
     var gf=GF();
     if(!gf || !gf.authFns || !gf.authFns.onAuthStateChanged || !gf.auth) return;
     if(state.authUnsub){ try{ state.authUnsub(); }catch(e){} state.authUnsub=null; }
-    state.authUnsub = gf.authFns.onAuthStateChanged(gf.auth, function(){
+    state.authUnsub = gf.authFns.onAuthStateChanged(gf.auth, function(fbUser){
+      if(!fbUser) clearCachedUser();
       updateTopUser();
       listenBadges();
       var bid = new URLSearchParams(location.search).get('id');
@@ -769,12 +837,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function renderFeed(){
+    var c=getCachedUser();
+    var compAvClass='gh-avatar'+(c?'':' gh-skel');
+    var compAvContent=c?(c.avatar?'<img src="'+esc(c.avatar)+'" alt="" loading="eager" onerror="this.remove()">':esc(initials(c.name||''))):'';
     shell({ active:'feed', center:
       '<section class="gh-card gh-story-strip-card"><div class="gh-stories" id="ghStories"></div></section>'+
-      '<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="gh-avatar" id="ghComposerAvatar">GH</span><button class="gh-composer-fake" data-create-post>რას აზიარებ დღეს?</button></div><div class="gh-composer-actions"><button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Place</button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:#38bdf8"></i> Business</button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:#f59e0b"></i> Event</button></div></section>'+
-      '<div id="ghFeedList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>Loading feed…</h3></div></div>'
+      '<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="'+compAvClass+'" id="ghComposerAvatar">'+compAvContent+'</span><button class="gh-composer-fake" data-create-post>რას აზიარებ დღეს?</button></div><div class="gh-composer-actions"><button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Place</button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:#38bdf8"></i> Business</button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:#f59e0b"></i> Event</button></div></section>'+
+      '<div id="ghFeedList">'+skelPostCard()+skelPostCard()+skelPostCard()+'</div>'
     });
-    var u=currentUserInfo(); var ca=$('#ghComposerAvatar'); if(ca) ca.innerHTML = u.avatar ? img(u.avatar,u.name) : esc(initials(u.name));
     loadStories('#ghStories');
     ready(function(){
       var list=$('#ghFeedList'); bindPostInteractions(list); var lastPosts=[];

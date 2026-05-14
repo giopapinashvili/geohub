@@ -1089,3 +1089,41 @@ html[data-gh-theme="light"] .gh-rv-flagged{background:rgba(239,68,68,.03)}
   .gh-rv-sort-row{gap:3px}
   .gh-rv-sort-chip{padding:3px 8px;font-size:.7rem}
 }
+
+/* ── Skeleton Loaders ──────────────────────────────────────────────── */
+@keyframes gh-shimmer{
+  0%{background-position:-600px 0}
+  100%{background-position:600px 0}
+}
+.gh-skel,.gh-skel-line,.gh-skel-img{
+  background:linear-gradient(90deg,rgba(255,255,255,.05) 25%,rgba(255,255,255,.10) 37%,rgba(255,255,255,.05) 63%);
+  background-size:600px 100%;
+  animation:gh-shimmer 1.4s infinite linear;
+  color:transparent!important;
+  pointer-events:none;
+  border-radius:6px;
+}
+/* Topbar avatar skeleton — preserve circle shape */
+#ghTopAvatar.gh-skel{border-radius:50%}
+/* Topbar name skeleton */
+#ghTopName.gh-skel-line{display:inline-block;width:52px;height:12px;vertical-align:middle;border-radius:6px;margin-left:4px}
+/* Composer avatar skeleton */
+#ghComposerAvatar.gh-skel{border-radius:50%}
+
+/* Feed skeleton post card */
+.gh-skel-post{background:var(--gh-card);border-radius:var(--gh-radius);padding:18px 16px;margin-bottom:12px}
+.gh-skel-post-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.gh-skel-post-head .gh-avatar{flex-shrink:0;width:40px;height:40px}
+.gh-skel-img{width:100%;height:200px;border-radius:10px;margin-bottom:12px}
+.gh-skel-post-actions{display:flex;gap:16px;margin-top:14px}
+
+/* Light theme shimmer */
+html[data-gh-theme="light"] .gh-skel,
+html[data-gh-theme="light"] .gh-skel-line,
+html[data-gh-theme="light"] .gh-skel-img{
+  background:linear-gradient(90deg,#e2e8f0 25%,#f1f5f9 37%,#e2e8f0 63%);
+  background-size:600px 100%;
+}
+
+/* Skeleton shouldn't block transition when real content arrives */
+.gh-skel-post{transition:opacity .2s}
