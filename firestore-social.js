@@ -1331,7 +1331,19 @@
         var items=[];
         snap.forEach(function(d){ items.push(Object.assign({id:d.id}, d.data())); });
         items.sort(function(a,b){ return tsToMillis(b.createdAt)-tsToMillis(a.createdAt); });
-        callback(items);
+        if (!items.length) { callback([]); return; }
+        Promise.all(items.map(function(r){
+          var fromId = r.fromUserId || r.fromId || '';
+          if (!fromId) return Promise.resolve(r);
+          return getDoc(doc(db, 'users', fromId)).then(function(us){
+            var u = us.exists() ? us.data() : {};
+            return Object.assign({}, r, {
+              senderName: u.fullName || u.displayName || u.name || 'GeoHub User',
+              senderUsername: u.username || fromId,
+              senderAvatar: u.avatar || u.photoURL || ''
+            });
+          }).catch(function(){ return r; });
+        })).then(function(enriched){ callback(enriched); });
       }, function(err){ console.warn('[GeoSocial] listenFriendRequests', err.message); callback([]); });
     }
 

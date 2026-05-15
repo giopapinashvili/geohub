@@ -315,7 +315,21 @@
       const ownProfile = window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser && window.GeoFirebase.auth.currentUser.uid === user.uid;
       if (ownProfile && window.GeoSocial.listenFriendRequests) {
         window.GeoSocial.listenFriendRequests(requests => {
-          const pending = requests.map(r => '<div class="gh-friend-card"><span class="gh-avatar">GH</span><div style="flex:1"><strong>Friend request</strong><span>From user: '+esc(r.fromUserId||r.fromId||'')+'</span><div class="gh-friend-request-actions"><button class="btn btn-primary btn-sm" data-accept-request="'+esc(r.id)+'">Accept</button><button class="btn btn-ghost btn-sm" data-reject-request="'+esc(r.id)+'">Reject</button></div></div></div>').join('');
+          const pending = requests.map(r => {
+            const fromId = r.fromUserId || r.fromId || '';
+            const avatarHtml = r.senderAvatar
+              ? '<img src="' + esc(r.senderAvatar) + '" alt="" loading="lazy" decoding="async">'
+              : esc(initialLetters(r.senderName || 'GeoHub User', ''));
+            return '<a class="gh-friend-card" href="profile.html?id=' + encodeURIComponent(fromId) + '" style="text-decoration:none;color:inherit">'
+              + '<span class="gh-avatar">' + avatarHtml + '</span>'
+              + '<div style="flex:1;min-width:0">'
+              + '<strong>' + esc(r.senderName || 'GeoHub User') + '</strong>'
+              + '<span>@' + esc(r.senderUsername || fromId) + '</span>'
+              + '<div class="gh-friend-request-actions" onclick="event.preventDefault()">'
+              + '<button class="btn btn-primary btn-sm" data-accept-request="' + esc(r.id) + '">Accept</button>'
+              + '<button class="btn btn-ghost btn-sm" data-reject-request="' + esc(r.id) + '">Decline</button>'
+              + '</div></div></a>';
+          }).join('');
           if (friendsTab && pending) friendsTab.dataset.pendingRequestsHtml = '<div style="font-weight:800;margin:0 0 10px">Friend Requests</div><div class="gh-friend-grid">'+pending+'</div><div style="height:18px"></div>';
         });
       }
