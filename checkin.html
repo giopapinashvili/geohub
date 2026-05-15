@@ -805,11 +805,15 @@
       $id('ciPlaceMeta').textContent  = [place.city, place.country].filter(Boolean).join(', ') || 'Place selected';
       closeModal();
 
-      // Reset GPS when place changes
-      state.userLoc  = null;
+      // Preserve user location; recalculate proximity for the newly selected place
+      var prevLoc = state.userLoc;
       state.proximity = null;
       state.verified  = false;
       resetGpsUI();
+      if (prevLoc) {
+        state.userLoc = prevLoc;
+        applyLocation(prevLoc);
+      }
       updateXp();
       updateSubmitBtn();
 
@@ -830,6 +834,89 @@
       $id('ciAccuracy').classList.remove('show');
       $id('ciGpsError').classList.remove('show');
       $id('ciGpsError').textContent = '';
+    }
+
+    /* ── Apply a known location to current state + UI ───────────────────── */
+    function applyLocation(loc) {
+      var accEl = $id('ciAccuracy');
+      accEl.textContent = 'GPS accuracy: ±' + loc.accuracy + ' m';
+      accEl.classList.add('show');
+
+      if (!state.place) {
+        var ring0 = $id('ciDistRing');
+        ring0.classList.add('visible');
+        $id('ciDistRingOuter').className = 'ci-dist-ring-outer ok';
+        $id('ciDistVal').textContent  = '✓';
+        $id('ciDistUnit').textContent = '';
+        $id('ciDistStatus').className = 'ci-dist-status ok';
+        $id('ciDistStatus').textContent = 'Location ready — select a place';
+        $id('ciGpsStatusBadge').textContent = 'Location ready';
+        $id('ciGpsStatusBadge').style.cssText = 'font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(16,185,129,0.12);color:#34d399';
+        $id('ciGetLocLabel').textContent = 'Location Ready';
+        updateXp();
+        updateSubmitBtn();
+        return;
+      }
+
+      var placeLat = state.place.lat || state.place.latitude;
+      var placeLng = state.place.lng || state.place.longitude;
+      if (placeLat && placeLng) {
+        var GC = window.GeoCheckin;
+        var dist = GC
+          ? GC.haversine(loc.lat, loc.lng, Number(placeLat), Number(placeLng))
+          : Math.round(6371000 * 2 * Math.asin(Math.sqrt(
+              Math.pow(Math.sin((Number(placeLat) - loc.lat) * Math.PI / 360), 2) +
+              Math.cos(loc.lat * Math.PI / 180) * Math.cos(Number(placeLat) * Math.PI / 180) *
+              Math.pow(Math.sin((Number(placeLng) - loc.lng) * Math.PI / 360), 2))));
+        var RADIUS  = RADIUS_M_val();
+        var maxAcc  = (GC && GC.GPS_MAX_ACC) || 150;
+        state.proximity = { distance: dist, withinRadius: dist <= RADIUS };
+        state.verified  = dist <= RADIUS && loc.accuracy <= maxAcc;
+        console.log('[GeoHub] User coords:', loc.lat, loc.lng,
+          '| Place coords:', placeLat, placeLng,
+          '| Distance:', dist + 'm | Radius:', RADIUS + 'm | Accuracy:±' + loc.accuracy + 'm | Verified:', state.verified);
+
+        var ring = $id('ciDistRing');
+        ring.classList.add('visible');
+        var outer = $id('ciDistRingOuter');
+        $id('ciDistVal').textContent  = dist < 1000 ? dist : (dist / 1000).toFixed(1);
+        $id('ciDistUnit').textContent = dist < 1000 ? 'meters' : 'km';
+        var statusEl = $id('ciDistStatus');
+        if (state.verified) {
+          outer.className = 'ci-dist-ring-outer ok';
+          statusEl.className = 'ci-dist-status ok';
+          statusEl.textContent = '✓ Within range';
+        } else {
+          outer.className = 'ci-dist-ring-outer far';
+          statusEl.className = 'ci-dist-status far';
+          statusEl.textContent = dist > RADIUS
+            ? '⚠ You are too far from this place to verify check-in.'
+            : '⚠ GPS signal weak (±' + loc.accuracy + ' m) — move to a clearer area';
+        }
+      } else {
+        state.verified = false;
+        var ring2 = $id('ciDistRing');
+        ring2.classList.add('visible');
+        $id('ciDistRingOuter').className = 'ci-dist-ring-outer';
+        $id('ciDistVal').textContent  = '?';
+        $id('ciDistUnit').textContent = '';
+        $id('ciDistStatus').className = 'ci-dist-status far';
+        $id('ciDistStatus').textContent = 'This place has no coordinates yet';
+      }
+
+      var badge = $id('ciGpsStatusBadge');
+      if (state.verified) {
+        badge.textContent = '✓ Verified';
+        badge.style.cssText = 'font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(16,185,129,0.12);color:#34d399';
+        $id('ciGetLocBtn').classList.add('verified');
+        $id('ciGetLocLabel').textContent = '✓ Location Verified';
+      } else {
+        badge.textContent = 'Unverified';
+        badge.style.cssText = 'font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(245,158,11,0.1);color:#fbbf24';
+        $id('ciGetLocLabel').textContent = 'Retry Location';
+      }
+      updateXp();
+      updateSubmitBtn();
     }
 
     $id('ciGetLocBtn').addEventListener('click', function () {
@@ -860,84 +947,7 @@
             accuracy: Math.round(pos.coords.accuracy)
           };
           state.userLoc = loc;
-
-          var accEl = $id('ciAccuracy');
-          accEl.textContent = 'GPS accuracy: \xb1' + loc.accuracy + ' m';
-          accEl.classList.add('show');
-
-          if (!state.place) {
-            var ring0 = $id('ciDistRing');
-            ring0.classList.add('visible');
-            $id('ciDistRingOuter').className = 'ci-dist-ring-outer ok';
-            $id('ciDistVal').textContent  = '✓';
-            $id('ciDistUnit').textContent = '';
-            $id('ciDistStatus').className = 'ci-dist-status ok';
-            $id('ciDistStatus').textContent = 'Location ready — select a place';
-            $id('ciGpsStatusBadge').textContent = 'Location ready';
-            $id('ciGpsStatusBadge').style.cssText = 'font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(16,185,129,0.12);color:#34d399';
-            $id('ciGetLocLabel').textContent = 'Location Ready';
-            updateXp();
-            updateSubmitBtn();
-            return;
-          }
-
-          var placeLat = state.place.lat || state.place.latitude;
-          var placeLng = state.place.lng || state.place.longitude;
-          if (placeLat && placeLng) {
-            var GC = window.GeoCheckin;
-            var dist = GC
-              ? GC.haversine(loc.lat, loc.lng, Number(placeLat), Number(placeLng))
-              : Math.round(6371000 * 2 * Math.asin(Math.sqrt(
-                  Math.pow(Math.sin((Number(placeLat) - loc.lat) * Math.PI / 360), 2) +
-                  Math.cos(loc.lat * Math.PI / 180) * Math.cos(Number(placeLat) * Math.PI / 180) *
-                  Math.pow(Math.sin((Number(placeLng) - loc.lng) * Math.PI / 360), 2))));
-            var RADIUS  = RADIUS_M_val();
-            var maxAcc  = (GC && GC.GPS_MAX_ACC) || 150;
-            state.proximity = { distance: dist, withinRadius: dist <= RADIUS };
-            state.verified  = dist <= RADIUS && loc.accuracy <= maxAcc;
-            console.log('[GeoHub] distance to place:', dist, 'm — verified:', state.verified);
-
-            var ring = $id('ciDistRing');
-            ring.classList.add('visible');
-            var outer = $id('ciDistRingOuter');
-            $id('ciDistVal').textContent  = dist < 1000 ? dist : (dist / 1000).toFixed(1);
-            $id('ciDistUnit').textContent = dist < 1000 ? 'meters' : 'km';
-            var statusEl = $id('ciDistStatus');
-            if (state.verified) {
-              outer.className = 'ci-dist-ring-outer ok';
-              statusEl.className = 'ci-dist-status ok';
-              statusEl.textContent = '✓ Within range';
-            } else {
-              outer.className = 'ci-dist-ring-outer far';
-              statusEl.className = 'ci-dist-status far';
-              statusEl.textContent = dist > RADIUS
-                ? '⚠ ' + (dist < 1000 ? dist + ' m' : (dist / 1000).toFixed(1) + ' km') + ' away — too far'
-                : '⚠ GPS signal weak (\xb1' + loc.accuracy + ' m)';
-            }
-          } else {
-            state.verified = false;
-            var ring2 = $id('ciDistRing');
-            ring2.classList.add('visible');
-            $id('ciDistRingOuter').className = 'ci-dist-ring-outer';
-            $id('ciDistVal').textContent  = '?';
-            $id('ciDistUnit').textContent = '';
-            $id('ciDistStatus').className = 'ci-dist-status far';
-            $id('ciDistStatus').textContent = 'This place has no coordinates yet';
-          }
-
-          var badge = $id('ciGpsStatusBadge');
-          if (state.verified) {
-            badge.textContent = '✓ Verified';
-            badge.style.cssText = 'font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(16,185,129,0.12);color:#34d399';
-            $id('ciGetLocBtn').classList.add('verified');
-            $id('ciGetLocLabel').textContent = '✓ Location Verified';
-          } else {
-            badge.textContent = 'Unverified';
-            badge.style.cssText = 'font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(245,158,11,0.1);color:#fbbf24';
-            $id('ciGetLocLabel').textContent = 'Retry Location';
-          }
-          updateXp();
-          updateSubmitBtn();
+          applyLocation(loc);
         },
         function (err) {
           console.error('[GeoHub] geolocation error', err.code, err.message);
@@ -1058,6 +1068,7 @@
         if (isQr)                              verMethod = 'qr';
         else if (state.verified && photoUrl)   verMethod = 'gps_photo';
         else if (state.verified)               verMethod = 'gps';
+        else if (state.userLoc)                verMethod = 'gps_failed';
 
         var data = {
           placeId:            state.place.id || '',
