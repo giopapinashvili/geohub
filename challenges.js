@@ -55,7 +55,10 @@
     var remaining = Math.max(0, target - progress);
     var title = c.title || c.name || 'Untitled challenge';
     var end = dateLabel(c.endAt);
-    return '<article class="challenge-card' + (completed ? ' is-complete' : '') + '">' +
+    return '<article class="challenge-card' + (completed ? ' is-complete' : '') + '"' +
+      ' data-chal-id="' + esc(c.id || '') + '"' +
+      ' tabindex="0"' +
+      ' aria-label="' + esc(title) + '">' +
       '<div class="challenge-card-top">' +
         '<span class="challenge-type"><i class="fas ' + (completed ? 'fa-check' : 'fa-bolt') + '"></i>' + esc(typeLabel(c.type)) + '</span>' +
         '<span class="challenge-xp">+' + compact(c.xpReward || 0) + ' XP</span>' +
@@ -96,6 +99,96 @@
       paint();
     });
   }
+
+  /* ── Challenge detail modal ────────────────────────────────────────── */
+  var MODAL_ID = 'chalDetailOverlay';
+
+  function ensureModal() {
+    if (document.getElementById(MODAL_ID)) return;
+    var el = document.createElement('div');
+    el.id = MODAL_ID;
+    el.className = 'chalm-overlay';
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('role', 'dialog');
+    el.innerHTML =
+      '<div class="chalm-sheet" id="chalDetailSheet" tabindex="-1">' +
+        '<div class="chalm-handle" aria-hidden="true"></div>' +
+        '<div class="chalm-head">' +
+          '<div class="chalm-badges" id="chalDetailBadges"></div>' +
+          '<button class="chalm-close" id="chalDetailClose" aria-label="Close">' +
+            '<i class="fas fa-times"></i>' +
+          '</button>' +
+        '</div>' +
+        '<h2 class="chalm-title" id="chalDetailTitle"></h2>' +
+        '<p class="chalm-desc" id="chalDetailDesc"></p>' +
+        '<div class="chalm-xp-row" id="chalDetailXp"></div>' +
+        '<div class="chalm-prog-wrap" id="chalDetailProg"></div>' +
+        '<div class="chalm-completed-msg" id="chalDetailComplete">' +
+          '<i class="fas fa-check-circle"></i> Challenge completed' +
+        '</div>' +
+        '<div class="chalm-ts" id="chalDetailTs"></div>' +
+      '</div>';
+    document.body.appendChild(el);
+    el.addEventListener('click', function (e) {
+      if (e.target === el) closeModal();
+    });
+    document.getElementById('chalDetailClose').addEventListener('click', closeModal);
+  }
+
+  function openModal(c) {
+    ensureModal();
+    var p = state.progress[c.id] || {};
+    var target = Math.max(1, Number(c.targetCount || p.targetCount || 1));
+    var prog = Math.min(target, Math.max(0, Number(p.progress || 0)));
+    var completed = p.completed === true;
+    var pct = completed ? 100 : Math.round((prog / target) * 100);
+    var remaining = Math.max(0, target - prog);
+
+    document.getElementById('chalDetailBadges').innerHTML =
+      '<span class="chalm-type-badge chalm-type-' + esc(c.type || 'default') + '">' +
+        esc(typeLabel(c.type)) +
+      '</span>' +
+      (completed ? '<span class="chalm-done-badge"><i class="fas fa-check"></i> Completed</span>' : '');
+
+    document.getElementById('chalDetailTitle').textContent = c.title || c.name || 'Challenge';
+    document.getElementById('chalDetailDesc').textContent = c.description || 'Complete real activity to make progress on this challenge.';
+
+    document.getElementById('chalDetailXp').innerHTML =
+      '<i class="fas fa-bolt"></i> +' + compact(c.xpReward || 0) + ' XP reward';
+
+    document.getElementById('chalDetailProg').innerHTML =
+      '<div class="chalm-prog-labels">' +
+        '<span>' + prog + ' / ' + target + '</span>' +
+        '<span>' + pct + '%</span>' +
+      '</div>' +
+      '<div class="chalm-prog-bar"><span style="width:' + pct + '%"></span></div>' +
+      (!completed ? '<div class="chalm-prog-note">' + remaining + ' more to go</div>' : '');
+
+    var completeEl = document.getElementById('chalDetailComplete');
+    completeEl.style.display = completed ? 'flex' : 'none';
+
+    var tsEl = document.getElementById('chalDetailTs');
+    if (completed && p.completedAt) {
+      tsEl.innerHTML = '<i class="fas fa-calendar-check"></i> Completed ' + dateLabel(p.completedAt);
+      tsEl.style.display = 'flex';
+    } else if (c.endAt) {
+      tsEl.innerHTML = '<i class="fas fa-calendar"></i> Ends ' + dateLabel(c.endAt);
+      tsEl.style.display = 'flex';
+    } else {
+      tsEl.style.display = 'none';
+    }
+
+    document.getElementById(MODAL_ID).classList.add('open');
+    var sheet = document.getElementById('chalDetailSheet');
+    if (sheet) sheet.focus();
+  }
+
+  function closeModal() {
+    var overlay = document.getElementById(MODAL_ID);
+    if (overlay) overlay.classList.remove('open');
+  }
+
+  /* ── Event bindings ────────────────────────────────────────────────── */
   function bind() {
     var search = $('challengeSearch');
     if (search) {
@@ -104,14 +197,39 @@
         paint();
       });
     }
+
+    // Single delegated click listener on document — survives innerHTML repaints, no duplicates
     document.addEventListener('click', function (e) {
       var tab = e.target.closest('[data-challenge-tab]');
-      if (tab) {
-        state.tab = tab.dataset.challengeTab || 'active';
-        paint();
+      if (tab) { state.tab = tab.dataset.challengeTab || 'active'; paint(); return; }
+
+      var card = e.target.closest('.challenge-card[data-chal-id]');
+      if (card) {
+        var id = card.dataset.chalId;
+        var all = state.active.concat(state.completed);
+        for (var i = 0; i < all.length; i++) {
+          if (all[i].id === id) { openModal(all[i]); return; }
+        }
+      }
+    });
+
+    // Keyboard: ESC closes, Enter/Space activates focused card
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { closeModal(); return; }
+      if (e.key === 'Enter' || e.key === ' ') {
+        var focused = document.activeElement;
+        var card = focused && focused.closest('.challenge-card[data-chal-id]');
+        if (!card) return;
+        e.preventDefault();
+        var id = card.dataset.chalId;
+        var all = state.active.concat(state.completed);
+        for (var i = 0; i < all.length; i++) {
+          if (all[i].id === id) { openModal(all[i]); return; }
+        }
       }
     });
   }
+
   function init() {
     bind();
     if (window.GeoChallenges) start();

@@ -740,3 +740,245 @@ body.page-challenges [data-install-prompt] {
     display: none !important;
   }
 }
+
+/* ── Challenge card interactivity ─────────────────────────────────── */
+.challenge-card[data-chal-id] {
+  cursor: pointer;
+  transition: border-color .2s, transform .18s, box-shadow .18s;
+  outline: none;
+}
+.challenge-card[data-chal-id]:hover {
+  border-color: rgba(16, 224, 160, .38);
+  transform: translateY(-2px);
+  box-shadow: 0 20px 48px rgba(0,0,0,.26);
+}
+.challenge-card[data-chal-id]:active {
+  transform: scale(.99);
+}
+.challenge-card[data-chal-id]:focus-visible {
+  outline: 2px solid rgba(16, 224, 160, .7);
+  outline-offset: 3px;
+}
+
+/* ── Challenge detail modal / bottom-sheet ────────────────────────── */
+.chalm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9100;
+  background: rgba(0,0,0,.62);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .22s ease;
+}
+.chalm-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+.chalm-sheet {
+  width: 100%;
+  max-width: 640px;
+  max-height: 92dvh;
+  overflow-y: auto;
+  background: #0e1628;
+  border-radius: 20px 20px 0 0;
+  padding: 8px 22px 40px;
+  outline: none;
+  transform: translateY(32px);
+  transition: transform .26s cubic-bezier(.33,1,.68,1);
+  overscroll-behavior: contain;
+}
+.chalm-overlay.open .chalm-sheet {
+  transform: translateY(0);
+}
+.chalm-handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,.16);
+  margin: 10px auto 18px;
+}
+.chalm-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.chalm-badges {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.chalm-type-badge {
+  padding: 4px 10px;
+  border-radius: 7px;
+  font-size: .68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.chalm-type-badge.chalm-type-daily    { background: rgba(245,158,11,.16); color: #fbbf24; }
+.chalm-type-badge.chalm-type-weekly   { background: rgba(59,130,246,.16); color: #60a5fa; }
+.chalm-type-badge.chalm-type-city     { background: rgba(16,185,129,.16); color: #10e0a0; }
+.chalm-type-badge.chalm-type-business { background: rgba(168,85,247,.16); color: #c084fc; }
+.chalm-type-badge.chalm-type-group    { background: rgba(239,68,68,.14); color: #f87171; }
+.chalm-type-badge.chalm-type-patriot  { background: rgba(249,115,22,.16); color: #fb923c; }
+.chalm-type-badge.chalm-type-default  { background: rgba(148,163,184,.12); color: #94a3b8; }
+.chalm-done-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 7px;
+  font-size: .68rem;
+  font-weight: 800;
+  background: rgba(16,185,129,.16);
+  color: #10e0a0;
+}
+.chalm-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.14);
+  background: transparent;
+  color: #94a3b8;
+  font-size: .85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background .15s, color .15s;
+  margin-left: 8px;
+}
+.chalm-close:hover {
+  background: rgba(255,255,255,.1);
+  color: #f8fafc;
+}
+.chalm-title {
+  font-size: 1.28rem;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #f8fafc;
+  margin: 0 0 10px;
+}
+.chalm-desc {
+  font-size: .88rem;
+  color: #b8c7d9;
+  line-height: 1.65;
+  margin: 0 0 18px;
+}
+.chalm-xp-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: rgba(251,191,36,.08);
+  border: 1px solid rgba(251,191,36,.18);
+  color: #fbbf24;
+  font-size: .88rem;
+  font-weight: 800;
+  margin-bottom: 18px;
+}
+.chalm-prog-wrap {
+  margin-bottom: 14px;
+}
+.chalm-prog-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: .78rem;
+  color: #94a3b8;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.chalm-prog-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(148,163,184,.16);
+  overflow: hidden;
+}
+.chalm-prog-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #10b981, #3b82f6);
+  transition: width .4s ease;
+}
+.chalm-prog-note {
+  margin-top: 7px;
+  font-size: .76rem;
+  color: #94a3b8;
+}
+.chalm-completed-msg {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: rgba(16,185,129,.1);
+  border: 1px solid rgba(16,185,129,.28);
+  color: #10e0a0;
+  font-size: .85rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+.chalm-ts {
+  display: none;
+  align-items: center;
+  gap: 7px;
+  font-size: .76rem;
+  color: #94a3b8;
+  margin-top: 10px;
+}
+
+/* Desktop: centered modal */
+@media (min-width: 640px) {
+  .chalm-overlay {
+    align-items: center;
+    padding: 20px;
+  }
+  .chalm-sheet {
+    border-radius: 20px;
+    max-height: 88dvh;
+    padding-bottom: 28px;
+  }
+  .chalm-handle {
+    display: none;
+  }
+}
+
+/* Light theme overrides */
+@media (prefers-color-scheme: light) {
+  .chalm-sheet {
+    background: #ffffff;
+    box-shadow: 0 24px 72px rgba(0,0,0,.18);
+  }
+  .chalm-title { color: #0f172a; }
+  .chalm-desc { color: #475569; }
+  .chalm-close { border-color: rgba(15,23,42,.14); color: #64748b; }
+  .chalm-close:hover { background: rgba(15,23,42,.06); color: #0f172a; }
+  .chalm-prog-labels { color: #64748b; }
+  .chalm-prog-bar { background: rgba(15,23,42,.1); }
+  .chalm-prog-note { color: #64748b; }
+  .chalm-ts { color: #64748b; }
+  .chalm-overlay { background: rgba(15,23,42,.44); }
+}
+[data-gh-theme="light"] .chalm-sheet {
+  background: #ffffff;
+  box-shadow: 0 24px 72px rgba(0,0,0,.18);
+}
+[data-gh-theme="light"] .chalm-title { color: #0f172a; }
+[data-gh-theme="light"] .chalm-desc { color: #475569; }
+[data-gh-theme="light"] .chalm-close { border-color: rgba(15,23,42,.14); color: #64748b; }
+[data-gh-theme="light"] .chalm-close:hover { background: rgba(15,23,42,.06); color: #0f172a; }
+[data-gh-theme="light"] .chalm-prog-labels { color: #64748b; }
+[data-gh-theme="light"] .chalm-prog-bar { background: rgba(15,23,42,.1); }
+[data-gh-theme="light"] .chalm-prog-note { color: #64748b; }
+[data-gh-theme="light"] .chalm-ts { color: #64748b; }
+[data-gh-theme="light"] .chalm-overlay { background: rgba(15,23,42,.44); }
