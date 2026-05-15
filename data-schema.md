@@ -181,6 +181,45 @@ Extends Place with owner relationship and platform settings.
 
 ## Challenge
 
+Phase 3.2 foundation uses normalized challenge documents and per-user progress.
+
+Collection: `challenges/{challengeId}`
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `title` * | string | |
+| `description` | string | |
+| `type` * | enum | `checkin \| photo \| qr \| event \| distance` |
+| `targetCount` * | number | Number of matching actions required |
+| `xpReward` * | number | XP awarded once on completion |
+| `badge` | string | Optional badge ID awarded on completion |
+| `city` | string | Optional city constraint |
+| `businessId` | string | Optional business constraint |
+| `placeId` | string | Optional place constraint |
+| `eventId` | string | Optional event constraint |
+| `startAt` | timestamp | Optional activation start |
+| `endAt` | timestamp | Optional expiration |
+| `active` | boolean | |
+| `createdAt` | timestamp | |
+| `createdBy` | string | Admin UID |
+
+User progress: `users/{uid}/challengeProgress/{challengeId}`
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `userId` * | string | Owner UID |
+| `challengeId` * | string | FK to challenge document |
+| `progress` * | number | Current count |
+| `targetCount` | number | Snapshot of target |
+| `completed` * | boolean | Locks once true |
+| `completedAt` | timestamp | Set on completion |
+| `xpAwarded` * | boolean | Prevents duplicate challenge XP |
+| `proofType` | enum | `checkin \| photo \| qr \| event` |
+| `relatedCheckins` | string[] | Check-in document IDs |
+| `lastUpdated` | timestamp | |
+
+Legacy shape below is retained for older seed/admin references.
+
 | Field | Type | Notes |
 |-------|------|-------|
 | `id` * | string | |

@@ -59,6 +59,20 @@ service cloud.firestore {
       allow create: if isOwner(userId);
       allow update: if isOwner(userId) || isAdmin();
       allow delete: if isAdmin();
+      match /challengeProgress/{challengeId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId)
+          && request.resource.data.get('userId', '') == userId
+          && request.resource.data.get('challengeId', '') == challengeId;
+        allow update: if isOwner(userId)
+          && resource.data.get('userId', '') == userId
+          && request.resource.data.get('userId', '') == userId
+          && request.resource.data.get('challengeId', '') == challengeId
+          && request.resource.data.get('progress', 0) >= resource.data.get('progress', 0)
+          && !(resource.data.get('completed', false) == true && request.resource.data.get('completed', false) != true)
+          && !(resource.data.get('xpAwarded', false) == true && request.resource.data.get('xpAwarded', false) != true);
+        allow delete: if isAdmin();
+      }
       match /private/{docId} { allow read, write: if isOwner(userId) || isAdmin(); }
       // FCM push tokens — user owns their own tokens, admin can read for broadcast
       match /fcmTokens/{token} { allow read: if isOwner(userId) || isAdmin(); allow write: if isOwner(userId); }

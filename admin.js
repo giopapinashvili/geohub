@@ -851,6 +851,15 @@
     rewards: [
       { id: 'csXpCost',   label: 'XP cost', type: 'number', key: 'xpCost', min: 0 },
       { id: 'csExpiry',   label: 'Expiry date', type: 'date', key: 'expiresAt' }
+    ],
+    challenges: [
+      { id: 'csChallengeType', label: 'Type (checkin/photo/qr/event/distance)', type: 'text', key: 'type', placeholder: 'checkin' },
+      { id: 'csChallengeTarget', label: 'Target count', type: 'number', key: 'targetCount', min: 1 },
+      { id: 'csChallengeXp', label: 'XP reward', type: 'number', key: 'xpReward', min: 0 },
+      { id: 'csChallengePlace', label: 'Place ID optional', type: 'text', key: 'placeId' },
+      { id: 'csChallengeBusiness', label: 'Business ID optional', type: 'text', key: 'businessId' },
+      { id: 'csChallengeStart', label: 'Start date', type: 'date', key: 'startAt' },
+      { id: 'csChallengeEnd', label: 'End date', type: 'date', key: 'endAt' }
     ]
   };
 
@@ -919,6 +928,12 @@
         status: 'active', createdBy: user.uid, ownerId: user.uid, userId: user.uid,
         createdAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp()
       };
+      if (col === 'challenges') {
+        doc.type = 'checkin';
+        doc.targetCount = 1;
+        doc.xpReward = 100;
+        doc.active = true;
+      }
 
       // Collect extended fields for this collection type
       (CONTENT_EXT_FIELDS[col] || []).forEach(function(f) {

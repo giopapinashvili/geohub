@@ -1301,7 +1301,7 @@
           authorName: me.name || user.displayName || 'GeoHub User',
           authorAvatar: me.avatar || user.photoURL || '',
           createdAt: serverTimestamp()
-        }).then(function () {
+        }).then(function (docRef) {
           updateDoc(doc(db, 'users', user.uid), {
             xp: increment(Number(xpAwarded || 50)),
             visitedPlaces: increment(1),
@@ -1313,6 +1313,17 @@
           }, { merge: true }).catch(function(){});
           toast('Checked in at ' + (placeName || 'place') + '! +' + (xpAwarded || 50) + ' XP');
           awardPoints(Number(xpAwarded || 50), 'Check-in', 'checkin', placeId || '').catch(function(){});
+          if (window.GeoChallenges && window.GeoChallenges.evaluateCheckin) {
+            window.GeoChallenges.evaluateCheckin({
+              userId: user.uid,
+              authorId: user.uid,
+              placeId: placeId || '',
+              placeName: placeName || '',
+              checkinType: 'normal',
+              verified: true,
+              xpAwarded: Number(xpAwarded || 50)
+            }, docRef.id);
+          }
           if (callback) callback();
         }).catch(function (err) {
           console.error('[GeoSocial] createCheckin', err);
@@ -1359,6 +1370,14 @@
             createdAt: serverTimestamp()
           }, { merge: true }).catch(function(){});
           awardPoints(xp, 'Check-in at ' + (data.placeName || 'place'), 'checkin', data.placeId || '').catch(function(){});
+          if (window.GeoChallenges && window.GeoChallenges.evaluateCheckin) {
+            window.GeoChallenges.evaluateCheckin(Object.assign({}, data, {
+              userId: user.uid,
+              authorId: user.uid,
+              verified: data.verified === true,
+              xpAwarded: xp
+            }), docRef.id);
+          }
           if (callback) callback({ success: true, xpAwarded: xp, checkinId: docRef.id });
         }).catch(function (err) {
           console.error('[GeoSocial] createCheckinFull', err);
