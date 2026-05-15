@@ -833,37 +833,75 @@
     }
 
     $id('ciGetLocBtn').addEventListener('click', function () {
-      if (!state.place) { showToast('Please select a place first.', 'warn'); return; }
+      console.log('[GeoHub] location button clicked');
       var btn = $id('ciGetLocBtn');
       btn.disabled = true;
       $id('ciGetLocLabel').textContent = 'Getting location…';
       $id('ciGpsError').classList.remove('show');
 
-      var GC = window.GeoCheckin;
-      if (!GC) { showToast('Check-in module not loaded yet.', 'warn'); btn.disabled = false; return; }
+      if (!navigator.geolocation) {
+        console.warn('[GeoHub] navigator.geolocation not available');
+        btn.disabled = false;
+        $id('ciGetLocLabel').textContent = 'GPS not supported';
+        var errUnsupported = $id('ciGpsError');
+        errUnsupported.textContent = 'Your browser does not support geolocation. Try Chrome or Safari on HTTPS.';
+        errUnsupported.classList.add('show');
+        return;
+      }
+      console.log('[GeoHub] navigator.geolocation available — calling getCurrentPosition');
 
-      GC.requestLocation(
-        function (loc) {
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          console.log('[GeoHub] geolocation success', pos.coords.latitude, pos.coords.longitude, 'acc:', pos.coords.accuracy);
           btn.disabled = false;
+          var loc = {
+            lat:      pos.coords.latitude,
+            lng:      pos.coords.longitude,
+            accuracy: Math.round(pos.coords.accuracy)
+          };
           state.userLoc = loc;
 
-          // Show accuracy
           var accEl = $id('ciAccuracy');
-          accEl.textContent = 'GPS accuracy: ±' + loc.accuracy + ' m';
+          accEl.textContent = 'GPS accuracy: \xb1' + loc.accuracy + ' m';
           accEl.classList.add('show');
 
-          // Proximity check
-          if (state.place.lat && state.place.lng) {
-            var prox = GC.verifyProximity(loc.lat, loc.lng, state.place.lat, state.place.lng);
-            state.proximity = prox;
-            state.verified  = prox.withinRadius && loc.accuracy <= GC.GPS_MAX_ACC;
+          if (!state.place) {
+            var ring0 = $id('ciDistRing');
+            ring0.classList.add('visible');
+            $id('ciDistRingOuter').className = 'ci-dist-ring-outer ok';
+            $id('ciDistVal').textContent  = '✓';
+            $id('ciDistUnit').textContent = '';
+            $id('ciDistStatus').className = 'ci-dist-status ok';
+            $id('ciDistStatus').textContent = 'Location ready — select a place';
+            $id('ciGpsStatusBadge').textContent = 'Location ready';
+            $id('ciGpsStatusBadge').style.cssText = 'font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(16,185,129,0.12);color:#34d399';
+            $id('ciGetLocLabel').textContent = 'Location Ready';
+            updateXp();
+            updateSubmitBtn();
+            return;
+          }
 
-            // Distance ring
+          var placeLat = state.place.lat || state.place.latitude;
+          var placeLng = state.place.lng || state.place.longitude;
+          if (placeLat && placeLng) {
+            var GC = window.GeoCheckin;
+            var dist = GC
+              ? GC.haversine(loc.lat, loc.lng, Number(placeLat), Number(placeLng))
+              : Math.round(6371000 * 2 * Math.asin(Math.sqrt(
+                  Math.pow(Math.sin((Number(placeLat) - loc.lat) * Math.PI / 360), 2) +
+                  Math.cos(loc.lat * Math.PI / 180) * Math.cos(Number(placeLat) * Math.PI / 180) *
+                  Math.pow(Math.sin((Number(placeLng) - loc.lng) * Math.PI / 360), 2))));
+            var RADIUS  = RADIUS_M_val();
+            var maxAcc  = (GC && GC.GPS_MAX_ACC) || 150;
+            state.proximity = { distance: dist, withinRadius: dist <= RADIUS };
+            state.verified  = dist <= RADIUS && loc.accuracy <= maxAcc;
+            console.log('[GeoHub] distance to place:', dist, 'm — verified:', state.verified);
+
             var ring = $id('ciDistRing');
             ring.classList.add('visible');
             var outer = $id('ciDistRingOuter');
-            $id('ciDistVal').textContent  = prox.distance < 1000 ? prox.distance : (prox.distance/1000).toFixed(1);
-            $id('ciDistUnit').textContent = prox.distance < 1000 ? 'meters' : 'km';
+            $id('ciDistVal').textContent  = dist < 1000 ? dist : (dist / 1000).toFixed(1);
+            $id('ciDistUnit').textContent = dist < 1000 ? 'meters' : 'km';
             var statusEl = $id('ciDistStatus');
             if (state.verified) {
               outer.className = 'ci-dist-ring-outer ok';
@@ -872,12 +910,11 @@
             } else {
               outer.className = 'ci-dist-ring-outer far';
               statusEl.className = 'ci-dist-status far';
-              statusEl.textContent = prox.distance > RADIUS_M_val() ?
-                '⚠ ' + prox.label + ' away — too far' :
-                '⚠ GPS signal weak';
+              statusEl.textContent = dist > RADIUS
+                ? '⚠ ' + (dist < 1000 ? dist + ' m' : (dist / 1000).toFixed(1) + ' km') + ' away — too far'
+                : '⚠ GPS signal weak (\xb1' + loc.accuracy + ' m)';
             }
           } else {
-            // Place has no coordinates — skip distance, mark as unverified
             state.verified = false;
             var ring2 = $id('ciDistRing');
             ring2.classList.add('visible');
@@ -885,10 +922,9 @@
             $id('ciDistVal').textContent  = '?';
             $id('ciDistUnit').textContent = '';
             $id('ciDistStatus').className = 'ci-dist-status far';
-            $id('ciDistStatus').textContent = 'No coordinates for this place';
+            $id('ciDistStatus').textContent = 'This place has no coordinates yet';
           }
 
-          // Badge update
           var badge = $id('ciGpsStatusBadge');
           if (state.verified) {
             badge.textContent = '✓ Verified';
@@ -900,22 +936,26 @@
             badge.style.cssText = 'font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(245,158,11,0.1);color:#fbbf24';
             $id('ciGetLocLabel').textContent = 'Retry Location';
           }
-
           updateXp();
           updateSubmitBtn();
         },
         function (err) {
+          console.error('[GeoHub] geolocation error', err.code, err.message);
           btn.disabled = false;
+          var msgs = {
+            1: 'Location permission denied. Allow location access in browser settings.',
+            2: 'Location signal unavailable. Move near a window or outdoors.',
+            3: 'Location request timed out. Please try again.'
+          };
           $id('ciGetLocLabel').textContent = 'Retry Location';
           var errEl = $id('ciGpsError');
-          errEl.textContent = err.message;
+          errEl.textContent = msgs[err.code] || 'GPS error (' + err.code + '). Please try again.';
           errEl.classList.add('show');
-
-          // Allow unverified check-in after denial
           state.verified = false;
           updateXp();
           updateSubmitBtn();
-        }
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
       );
     });
 
@@ -1077,85 +1117,156 @@
       if (e.target === this) closeModal();
     });
 
+    /* Cache of fetched businesses — filtered client-side so no nameLower index needed */
+    var cachedPlaces = [];
+    var placesLoaded = false;
+
     function openModal() {
       $id('ciModalOverlay').classList.add('open');
       $id('ciModalSearch').value = '';
-      $id('ciModalResults').innerHTML = '<div class="ci-modal-empty"><i class="fas fa-location-dot"></i>Start typing to search nearby places</div>';
+      if (placesLoaded) {
+        renderPlaceOptions(cachedPlaces);
+      } else {
+        $id('ciModalResults').innerHTML = '<div class="ci-modal-loading"><i class="fas fa-spinner fa-spin"></i> Loading places…</div>';
+        loadAllPlaces();
+      }
       setTimeout(function () { $id('ciModalSearch').focus(); }, 200);
     }
     function closeModal() {
       $id('ciModalOverlay').classList.remove('open');
     }
 
+    function loadAllPlaces() {
+      var GF = window.GeoFirebase;
+      if (!GF || !GF.db || !GF.fs) {
+        console.error('[GeoHub] Firebase not ready when loading places');
+        $id('ciModalResults').innerHTML = '<div class="ci-modal-empty"><i class="fas fa-triangle-exclamation"></i>Firebase not ready — reload the page.</div>';
+        return;
+      }
+      GF.fs.getDocs(
+        GF.fs.query(GF.fs.collection(GF.db, 'businesses'), GF.fs.limit(50))
+      ).then(function (snap) {
+        var items = [];
+        snap.forEach(function (d) {
+          var b = d.data();
+          var nm = (b.name || b.title || '').trim();
+          if (!nm) return;
+          items.push({
+            id:       d.id,
+            name:     nm,
+            lat:      b.lat || b.latitude  || (b.location && typeof b.location === 'object' ? b.location.lat  : null) || null,
+            lng:      b.lng || b.longitude || (b.location && typeof b.location === 'object' ? b.location.lng : null) || null,
+            city:     b.city || (typeof b.location === 'string' ? b.location : '') || '',
+            country:  b.country || 'Georgia',
+            category: b.category || ''
+          });
+        });
+        console.log('[GeoHub] Loaded', items.length, 'businesses for check-in search');
+        cachedPlaces = items;
+        placesLoaded = true;
+        renderPlaceOptions(items);
+      }).catch(function (err) {
+        console.error('[GeoHub] Failed to load businesses:', err);
+        $id('ciModalResults').innerHTML = '<div class="ci-modal-empty"><i class="fas fa-triangle-exclamation"></i>Could not load places: ' + esc((err && (err.code || err.message)) || 'Unknown error') + '</div>';
+      });
+    }
+
     var searchTimer;
     $id('ciModalSearch').addEventListener('input', function () {
       clearTimeout(searchTimer);
       var q = this.value.trim();
-      if (q.length < 2) {
-        $id('ciModalResults').innerHTML = '<div class="ci-modal-empty"><i class="fas fa-location-dot"></i>Start typing to search nearby places</div>';
-        return;
-      }
-      $id('ciModalResults').innerHTML = '<div class="ci-modal-loading"><i class="fas fa-spinner fa-spin"></i> Searching…</div>';
-      searchTimer = setTimeout(function () { searchPlaces(q); }, 350);
+      if (!placesLoaded) return;
+      if (!q) { renderPlaceOptions(cachedPlaces); return; }
+      searchTimer = setTimeout(function () {
+        var qLower = q.toLowerCase();
+        var filtered = cachedPlaces.filter(function (p) {
+          return p.name.toLowerCase().indexOf(qLower) !== -1 ||
+                 (p.city || '').toLowerCase().indexOf(qLower) !== -1 ||
+                 (p.category || '').toLowerCase().indexOf(qLower) !== -1;
+        });
+        if (filtered.length === 0 && q.length >= 2) {
+          searchPlacesFirestore(q);
+        } else {
+          renderPlaceOptions(filtered, q);
+        }
+      }, 200);
     });
 
-    function searchPlaces(q) {
-      var GF = window.GeoFirebase;
-      if (!GF) {
-        $id('ciModalResults').innerHTML = '<div class="ci-modal-empty"><i class="fas fa-triangle-exclamation"></i>Firebase not ready</div>';
+    function renderPlaceOptions(items, query) {
+      if (!items || items.length === 0) {
+        var msg = query ? 'No places found for "' + esc(query) + '"' : 'No places registered yet.';
+        $id('ciModalResults').innerHTML = '<div class="ci-modal-empty"><i class="fas fa-search"></i>' + msg + '</div>';
         return;
       }
-      var qLower = q.toLowerCase();
-      var qEnd   = q.toLowerCase() + '';
-      GF.fs.getDocs(
-        GF.fs.query(
-          GF.fs.collection(GF.db, 'businesses'),
-          GF.fs.where('nameLower', '>=', qLower),
-          GF.fs.where('nameLower', '<=', qEnd),
-          GF.fs.limit(20)
-        )
-      ).then(function (snap) {
-        if (snap.empty) {
-          $id('ciModalResults').innerHTML = '<div class="ci-modal-empty"><i class="fas fa-search"></i>No places found for "' + esc(q) + '"</div>';
-          return;
-        }
-        var html = '';
-        snap.docs.forEach(function (d) {
-          var b = d.data();
-          var emoji = CATEGORY_EMOJIS[b.category] || CATEGORY_EMOJIS.default;
-          html += '<div class="ci-place-option" data-id="' + esc(d.id) + '" ' +
-                  'data-name="' + esc(b.name||'') + '" ' +
-                  'data-lat="' + (b.lat||b.latitude||'') + '" ' +
-                  'data-lng="' + (b.lng||b.longitude||'') + '" ' +
-                  'data-city="' + esc(b.city||b.location||'') + '" ' +
-                  'data-cat="' + esc(b.category||'') + '">' +
-            '<div class="ci-place-option-icon">' + emoji + '</div>' +
-            '<div class="ci-place-option-info">' +
-              '<strong>' + esc(b.name||'Unnamed') + '</strong>' +
-              '<span>' + esc([b.category, b.city||b.location].filter(Boolean).join(' · ')) + '</span>' +
-            '</div>' +
-          '</div>';
+      var html = '';
+      items.forEach(function (p) {
+        var emoji = CATEGORY_EMOJIS[(p.category || '').toLowerCase()] || CATEGORY_EMOJIS.default;
+        html += '<div class="ci-place-option"' +
+                ' data-id="' + esc(p.id) + '"' +
+                ' data-name="' + esc(p.name) + '"' +
+                ' data-lat="' + (p.lat || '') + '"' +
+                ' data-lng="' + (p.lng || '') + '"' +
+                ' data-city="' + esc(p.city || '') + '"' +
+                ' data-cat="' + esc(p.category || '') + '">' +
+          '<div class="ci-place-option-icon">' + emoji + '</div>' +
+          '<div class="ci-place-option-info">' +
+            '<strong>' + esc(p.name) + '</strong>' +
+            '<span>' + esc([p.category, p.city].filter(Boolean).join(' \xb7 ')) + '</span>' +
+          '</div>' +
+        '</div>';
+      });
+      $id('ciModalResults').innerHTML = html;
+      $id('ciModalResults').querySelectorAll('.ci-place-option').forEach(function (el) {
+        el.addEventListener('click', function () {
+          var place = {
+            id:         el.dataset.id,
+            name:       el.dataset.name,
+            lat:        parseFloat(el.dataset.lat) || null,
+            lng:        parseFloat(el.dataset.lng) || null,
+            city:       el.dataset.city,
+            country:    'Georgia',
+            category:   el.dataset.cat,
+            businessId: el.dataset.id
+          };
+          setPlace(place);
+          if (state.userLoc && (place.lat || place.lng)) {
+            setTimeout(function () { $id('ciGetLocBtn').click(); }, 50);
+          }
         });
-        $id('ciModalResults').innerHTML = html;
-        $id('ciModalResults').querySelectorAll('.ci-place-option').forEach(function (el) {
-          el.addEventListener('click', function () {
-            setPlace({
-              id:         el.dataset.id,
-              name:       el.dataset.name,
-              lat:        parseFloat(el.dataset.lat) || null,
-              lng:        parseFloat(el.dataset.lng) || null,
-              city:       el.dataset.city,
-              country:    'Georgia',
-              category:   el.dataset.cat,
-              businessId: el.dataset.id
-            });
-          });
-        });
-      }).catch(function () {
-        $id('ciModalResults').innerHTML = '<div class="ci-modal-empty"><i class="fas fa-triangle-exclamation"></i>Search failed. Try again.</div>';
       });
     }
 
+    function searchPlacesFirestore(q) {
+      var GF = window.GeoFirebase;
+      if (!GF || !GF.db || !GF.fs) return;
+      $id('ciModalResults').innerHTML = '<div class="ci-modal-loading"><i class="fas fa-spinner fa-spin"></i> Searching…</div>';
+      GF.fs.getDocs(
+        GF.fs.query(GF.fs.collection(GF.db, 'businesses'), GF.fs.limit(50))
+      ).then(function (snap) {
+        var qLower = q.toLowerCase();
+        var items = [];
+        snap.forEach(function (d) {
+          var b = d.data();
+          var nm = (b.name || b.title || '').trim();
+          if (!nm || nm.toLowerCase().indexOf(qLower) === -1) return;
+          var item = {
+            id: d.id, name: nm,
+            lat: b.lat || b.latitude  || null,
+            lng: b.lng || b.longitude || null,
+            city: b.city || (typeof b.location === 'string' ? b.location : '') || '',
+            country: b.country || 'Georgia',
+            category: b.category || ''
+          };
+          items.push(item);
+          if (!cachedPlaces.find(function (p) { return p.id === d.id; })) cachedPlaces.push(item);
+        });
+        console.log('[GeoHub] Firestore fallback for "' + q + '" returned', items.length, 'results');
+        renderPlaceOptions(items, q);
+      }).catch(function (err) {
+        console.error('[GeoHub] Firestore search error:', err);
+        $id('ciModalResults').innerHTML = '<div class="ci-modal-empty"><i class="fas fa-triangle-exclamation"></i>Search failed: ' + esc((err && (err.code || err.message)) || 'error') + '</div>';
+      });
+    }
     function esc(v) {
       return String(v||'').replace(/[&<>"']/g, function (c) {
         return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];

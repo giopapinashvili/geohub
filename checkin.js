@@ -9,7 +9,7 @@
   var COOLDOWN_MS    = 3 * 3600 * 1000;
   var GPS_MAX_ACC    = 150;
   var GPS_TIMEOUT    = 15000;
-  var GPS_MAX_AGE    = 30000;
+  var GPS_MAX_AGE    = 0;
   var XP_GPS         = 50;
   var XP_GPS_PHOTO   = 65;
   var XP_QR          = 60;
