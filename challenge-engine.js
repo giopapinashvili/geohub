@@ -95,17 +95,22 @@
   }
 
   function challengeMatchesCheckin(challenge, checkin) {
-    if (!challenge || !checkin || checkin.verified !== true) return false;
+    if (!challenge || !checkin) return false;
+    var type = (challenge.type || 'checkin').toLowerCase();
+
+    // photo / qr / event / distance require GPS-verified; plain 'checkin' accepts any submission
+    if (type !== 'checkin' && checkin.verified !== true) return false;
+
     if (challenge.city && String(challenge.city).toLowerCase() !== String(checkin.city || '').toLowerCase()) return false;
     if (challenge.businessId && challenge.businessId !== checkin.businessId) return false;
     if (challenge.placeId && challenge.placeId !== checkin.placeId) return false;
     if (challenge.eventId && challenge.eventId !== checkin.eventId) return false;
 
-    if (challenge.type === 'photo') return !!checkin.photoUrl;
-    if (challenge.type === 'qr') return checkin.checkinType === 'qr' || checkin.verificationMethod === 'qr';
-    if (challenge.type === 'event') return !!checkin.eventId || !!challenge.eventId;
-    if (challenge.type === 'distance') return Number(checkin.distanceMeters || 0) > 0;
-    return true;
+    if (type === 'photo') return !!checkin.photoUrl;
+    if (type === 'qr') return checkin.checkinType === 'qr' || checkin.verificationMethod === 'qr';
+    if (type === 'event') return !!checkin.eventId || !!challenge.eventId;
+    if (type === 'distance') return Number(checkin.distanceMeters || 0) > 0;
+    return true; // 'checkin' type — any submitted check-in counts
   }
 
   function proofTypeFor(challenge, checkin) {
@@ -125,28 +130,41 @@
     return f.runTransaction(db(), function (tx) {
       return tx.get(pRef).then(function (snap) {
         var current = snap.exists() ? (snap.data() || {}) : {};
-        if (current.completed === true) return { completedNow: false, alreadyCompleted: true };
+        if (current.completed === true) {
+          console.log('[ChallengeEngine] already completed:', challenge.id, '— skipping');
+          return { completedNow: false, alreadyCompleted: true };
+        }
 
         var previous = Math.max(0, Number(current.progress || 0));
         var next = Math.min(target, previous + 1);
         var completedNow = next >= target;
+        var awardXp = completedNow && current.xpAwarded !== true && challenge.xpReward > 0;
+
         var payload = {
           userId: userId,
           challengeId: challenge.id,
           progress: next,
           targetCount: target,
           completed: completedNow,
-          xpAwarded: completedNow ? true : current.xpAwarded === true,
+          xpAwarded: completedNow ? true : (current.xpAwarded === true),
+          xpReward: challenge.xpReward,
           proofType: proofTypeFor(challenge, checkin),
-          lastUpdated: f.serverTimestamp()
+          updatedAt: f.serverTimestamp()
         };
         if (!snap.exists()) payload.createdAt = f.serverTimestamp();
         if (completedNow) payload.completedAt = f.serverTimestamp();
         if (f.arrayUnion && checkinId) payload.relatedCheckins = f.arrayUnion(checkinId);
 
         tx.set(pRef, payload, { merge: true });
-        if (completedNow && current.xpAwarded !== true && challenge.xpReward > 0) {
+
+        console.log('[ChallengeEngine] progress updated:', challenge.id, next + '/' + target);
+
+        if (completedNow) {
+          console.log('[ChallengeEngine] challenge completed:', challenge.id);
+        }
+        if (awardXp) {
           tx.update(userRef, { xp: f.increment(challenge.xpReward), updatedAt: f.serverTimestamp() });
+          console.log('[ChallengeEngine] xp awarded:', challenge.xpReward, 'for', challenge.id);
         }
         if (completedNow && badgeRef) {
           tx.set(badgeRef, {
@@ -170,8 +188,10 @@
       if (callback) callback({ completed: [] });
       return Promise.resolve({ completed: [] });
     }
+    console.log('[ChallengeEngine] evaluating checkin', checkinId || '(no id)', '— verified:', checkin.verified);
     return getActiveChallenges().then(function (challenges) {
       var matching = challenges.filter(function (c) { return challengeMatchesCheckin(c, checkin); });
+      console.log('[ChallengeEngine] active challenges:', challenges.length, '— matched:', matching.length);
       return Promise.all(matching.map(function (c) { return applyCheckinToChallenge(userId, c, checkin, checkinId); }));
     }).then(function (results) {
       var completed = results.filter(function (r) { return r && r.completedNow; }).map(function (r) { return r.challenge; });
@@ -182,7 +202,7 @@
       if (callback) callback(out);
       return out;
     }).catch(function (err) {
-      console.warn('[GeoChallenges] evaluateCheckin', err.message);
+      console.warn('[ChallengeEngine] evaluateCheckin error:', err.message, err);
       if (callback) callback({ completed: [], error: err.message });
       return { completed: [], error: err.message };
     });
