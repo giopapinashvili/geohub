@@ -531,3 +531,45 @@ img { content-visibility: auto; }
   .auth-nav-name, .auth-nav-caret { display: none !important; }
   .auth-nav-user { padding: 4px 6px 4px 4px !important; }
 }
+
+/* ── Global search autocomplete dropdown (social shell) ── */
+.gh-search-drop {
+  background: var(--bg-elevated, #0d1021);
+  border: 1px solid var(--border, rgba(255,255,255,.1));
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(0,0,0,.55);
+  animation: ghDropFadeIn 0.15s ease;
+}
+@keyframes ghDropFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.gh-search-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; text-decoration: none;
+  color: var(--text-primary, #f0f4ff); transition: background 0.15s;
+}
+.gh-search-row:hover { background: rgba(255,255,255,.05); }
+.gh-search-row-icon {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: rgba(16,185,129,.1); display: flex; align-items: center;
+  justify-content: center; color: var(--green, #10b981);
+  font-size: 0.72rem; flex-shrink: 0;
+}
+.gh-search-row-body { display: flex; flex-direction: column; min-width: 0; }
+.gh-search-row-name {
+  font-size: 0.82rem; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.gh-search-row-sub {
+  font-size: 0.7rem; color: var(--text-muted, #6b7280);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.gh-search-see-all {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 14px; border-top: 1px solid rgba(255,255,255,.06);
+  font-size: 0.76rem; font-weight: 700; color: var(--green, #10b981);
+  text-decoration: none; transition: background 0.15s;
+}
+.gh-search-see-all:hover { background: rgba(16,185,129,.06); }

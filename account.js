@@ -221,6 +221,7 @@
       var isAdmin = !!(user.isAdmin || user.adminRole);
       clearBellListeners();
       actionsEl.innerHTML =
+        '<a href="search.html" class="nav-icon-btn" title="Search" aria-label="Search"><i class="fas fa-search"></i></a>' +
         '<a href="messages.html" class="nav-icon-btn" id="navMsgBtn" title="Messages" aria-label="Messages"><i class="fas fa-comment-dots"></i><b class="nav-badge" id="navMsgBadge" style="display:none"></b></a>' +
         '<button type="button" class="nav-icon-btn" id="navBellBtn" title="Notifications" aria-label="Notifications"><i class="fas fa-bell"></i><b class="nav-badge" id="navNotifBadge" style="display:none"></b></button>' +
         '<div class="auth-nav-user" id="authNavUser">' +

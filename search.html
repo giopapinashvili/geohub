@@ -12,299 +12,395 @@
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
-  <style>
-  *{box-sizing:border-box}
-  body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden;margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-
-  /* ── TOP BAR ── */
-  .srch-topbar{position:fixed;top:0;left:0;right:0;height:60px;background:rgba(5,7,15,.97);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:12px;padding:0 20px;z-index:200;backdrop-filter:blur(20px)}
-  .srch-brand{display:flex;align-items:center;gap:8px;text-decoration:none;color:#f8fafc;font-weight:900;white-space:nowrap;font-size:1rem}
-  .srch-brand-logo{width:32px;height:32px;background:linear-gradient(135deg,#10b981,#3b82f6);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;color:#fff;flex-shrink:0}
-  .srch-input-wrap{flex:1;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:26px;padding:9px 16px;transition:border-color .2s}
-  .srch-input-wrap:focus-within{border-color:rgba(16,185,129,.5)}
-  .srch-input-wrap i{color:#64748b}
-  .srch-input-wrap input{flex:1;background:none;border:none;outline:none;color:#f8fafc;font-size:.95rem;font-family:inherit}
-  .srch-input-wrap input::placeholder{color:#4b5563}
-  .srch-clear{background:none;border:none;color:#4b5563;cursor:pointer;font-size:.85rem;padding:2px 4px;display:none}
-  .srch-clear.visible{display:block}
-
-  /* ── TABS ── */
-  .srch-tabs{margin-top:60px;background:rgba(255,255,255,.025);border-bottom:1px solid rgba(255,255,255,.07);display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding:0 20px;position:sticky;top:60px;z-index:100;backdrop-filter:blur(10px)}
-  .srch-tabs::-webkit-scrollbar{display:none}
-  .srch-tab{display:flex;align-items:center;gap:6px;padding:14px 16px;background:none;border:none;border-bottom:2px solid transparent;color:#64748b;font-weight:700;font-size:.82rem;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .2s}
-  .srch-tab:hover{color:#e2e8f0}
-  .srch-tab.active{color:#10b981;border-bottom-color:#10b981}
-  .srch-tab-count{background:rgba(16,185,129,.15);color:#10b981;border-radius:99px;padding:1px 7px;font-size:.7rem;font-weight:800}
-
-  /* ── MAIN ── */
-  .srch-main{max-width:900px;margin:0 auto;padding:24px 20px 100px}
-
-  /* ── INITIAL STATE ── */
-  .srch-welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh;text-align:center;color:#64748b}
-  .srch-welcome i{font-size:3rem;color:#10b981;opacity:.5;margin-bottom:20px}
-  .srch-welcome h2{font-size:1.4rem;font-weight:900;color:#f0f4ff;margin:0 0 8px}
-  .srch-welcome p{font-size:.9rem;max-width:320px;line-height:1.65}
-
-  /* ── LOADING ── */
-  .srch-loading{display:flex;align-items:center;justify-content:center;padding:60px;color:#64748b;gap:10px}
-
-  /* ── RESULTS ── */
-  .srch-section{margin-bottom:28px}
-  .srch-section-title{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#4b5563;margin-bottom:12px;display:flex;align-items:center;gap:8px}
-  .srch-results{display:flex;flex-direction:column;gap:8px}
-
-  /* ── RESULT ITEMS ── */
-  .srch-item{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);cursor:pointer;transition:all .15s;text-decoration:none;color:inherit}
-  .srch-item:hover{background:rgba(255,255,255,.07);border-color:rgba(16,185,129,.25);transform:translateX(2px)}
-  .srch-item-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;flex-shrink:0;overflow:hidden}
-  .srch-item-icon img{width:100%;height:100%;object-fit:cover}
-  .srch-item-body{flex:1;min-width:0}
-  .srch-item-name{font-size:.9rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px}
-  .srch-item-sub{font-size:.76rem;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .srch-item-type{font-size:.65rem;font-weight:800;padding:3px 9px;border-radius:99px;flex-shrink:0}
-
-  /* Type colors */
-  .type-user{background:rgba(59,130,246,.15);color:#60a5fa}
-  .type-group{background:rgba(16,185,129,.15);color:#34d399}
-  .type-place{background:rgba(245,158,11,.15);color:#fbbf24}
-  .type-post{background:rgba(168,85,247,.15);color:#c084fc}
-
-  /* ── EMPTY ── */
-  .srch-empty{text-align:center;padding:40px;color:#64748b}
-  .srch-empty i{font-size:2rem;display:block;margin-bottom:12px;opacity:.5}
-
-  /* ── MOBILE ── */
-  @media(max-width:600px){
-    .srch-topbar{padding:0 12px}
-    .srch-brand span{display:none}
-    .srch-main{padding:16px 12px 100px}
-    .srch-tabs{padding:0 12px}
-  }
-  </style>
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css">
+  </noscript>
+  <link rel="stylesheet" href="search.css">
   <link rel="stylesheet" href="chat-popup.css">
   <link rel="stylesheet" href="responsive-polish.css">
+  <meta name="theme-color" content="#10b981">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:#04050d;color:#f0f4ff;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow-x:hidden;min-height:100vh}
+    --green:#10b981;--text-primary:#f0f4ff;--text-muted:#6b7280;--border:rgba(255,255,255,.1);--bg-elevated:#0d1021;
+  </style>
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
 </head>
 <body>
-
-<!-- TOP BAR -->
-<header class="srch-topbar">
-  <a href="index.html" class="srch-brand">
-    <div class="srch-brand-logo">GH</div>
-    <span>GeoHub</span>
-  </a>
-  <div class="srch-input-wrap">
-    <i class="fas fa-search"></i>
-    <input type="search" id="srchInput" placeholder="Search people, groups, places, posts…" autocomplete="off" autocorrect="off" spellcheck="false">
-    <button class="srch-clear" id="srchClear" onclick="clearSearch()" title="Clear">✕</button>
-  </div>
-</header>
-
-<!-- TABS -->
-<div class="srch-tabs" id="srchTabs">
-  <button class="srch-tab active" data-tab="all" onclick="setTab('all',this)">
-    <i class="fas fa-th"></i> All
-  </button>
-  <button class="srch-tab" data-tab="people" onclick="setTab('people',this)">
-    <i class="fas fa-user"></i> People <span class="srch-tab-count" id="cnt-people" style="display:none"></span>
-  </button>
-  <button class="srch-tab" data-tab="groups" onclick="setTab('groups',this)">
-    <i class="fas fa-users"></i> Groups <span class="srch-tab-count" id="cnt-groups" style="display:none"></span>
-  </button>
-  <button class="srch-tab" data-tab="places" onclick="setTab('places',this)">
-    <i class="fas fa-map-marker-alt"></i> Places <span class="srch-tab-count" id="cnt-places" style="display:none"></span>
-  </button>
-  <button class="srch-tab" data-tab="posts" onclick="setTab('posts',this)">
-    <i class="fas fa-newspaper"></i> Posts <span class="srch-tab-count" id="cnt-posts" style="display:none"></span>
-  </button>
-</div>
-
-<!-- MAIN -->
-<main class="srch-main" id="srchMain">
-  <div class="srch-welcome" id="srchWelcome">
-    <i class="fas fa-search"></i>
-    <h2>Search GeoHub</h2>
-    <p>Find people, groups, places, and posts from across Georgia.</p>
-  </div>
-</main>
-
-<script defer src="firestore-social.js"></script>
-<script defer src="chat-popup.js"></script>
-<script type="module" src="firebase-config.js"></script>
-<script defer src="account.js"></script>
-<script defer src="nav-cleanup.js"></script>
-<script defer src="mobile-nav.js"></script>
-
-<script>
-  var _currentTab = 'all';
-  var _lastResults = { users:[], groups:[], places:[], posts:[], businesses:[], events:[], services:[], rewards:[] };
-  var _searchDebounce = null;
-
-  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-  window.logClick = function(type){ try { console.info('[GeoHub search click]', type); } catch(e) {} };
-  function timeAgo(ts){
-    if(!ts) return '';
-    var ms=ts.toMillis?ts.toMillis():(ts.seconds?ts.seconds*1000:Number(ts));
-    var d=Math.floor((Date.now()-ms)/1000);
-    if(d<60) return d+'s ago';
-    if(d<3600) return Math.floor(d/60)+'m ago';
-    if(d<86400) return Math.floor(d/3600)+'h ago';
-    return Math.floor(d/86400)+'d ago';
-  }
-
-  function setTab(tab, el){
-    _currentTab = tab;
-    document.querySelectorAll('.srch-tab').forEach(function(t){ t.classList.remove('active'); });
-    if(el) el.classList.add('active');
-    var q = document.getElementById('srchInput').value.trim();
-    if(q) renderResults(_lastResults);
-  }
-
-  function clearSearch(){
-    document.getElementById('srchInput').value = '';
-    document.getElementById('srchClear').classList.remove('visible');
-    showWelcome();
-  }
-
-  function showWelcome(){
-    document.getElementById('srchMain').innerHTML = '<div class="srch-welcome" id="srchWelcome"><i class="fas fa-search"></i><h2>Search GeoHub</h2><p>Find people, groups, places, and posts from across Georgia.</p></div>';
-    updateCounts({ users:[], groups:[], places:[], posts:[], businesses:[], events:[], services:[], rewards:[] });
-  }
-
-  function updateCounts(results){
-    ['people','groups','places','posts'].forEach(function(tab){
-      var k = tab==='people'?'users':tab;
-      var cnt = document.getElementById('cnt-'+tab);
-      var n = (results[k]||[]).length;
-      if(cnt){ cnt.textContent=n; cnt.style.display=n?'inline':'none'; }
-    });
-  }
-
-  function renderResults(results){
-    _lastResults = results;
-    updateCounts(results);
-    var main = document.getElementById('srchMain');
-    var tab = _currentTab;
-
-    function userItem(u){
-      var av = u.photoURL||u.avatarUrl||u.avatar||'';
-      var iconHtml = av ? '<img loading="lazy" decoding="async" src="'+esc(av)+'" alt="" onerror="this.outerHTML=\'<div>'+esc((u.name||u.displayName||'U').charAt(0).toUpperCase())+'</div>\'">' : esc((u.name||u.displayName||'U').charAt(0).toUpperCase());
-      return '<a class="srch-item" href="profile.html?id='+esc(u.id||u.uid)+'" onclick="logClick(\'user\')">'+
-        '<div class="srch-item-icon" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">'+iconHtml+'</div>'+
-        '<div class="srch-item-body"><div class="srch-item-name">'+esc(u.name||u.displayName||u.email||'User')+'</div><div class="srch-item-sub">'+esc(u.username?'@'+u.username:'People on GeoHub')+'</div></div>'+
-        '<span class="srch-item-type type-user">Person</span></a>';
-    }
-
-    function groupItem(g){
-      return '<div class="srch-item" onclick="location.href=\'groups.html?id='+esc(g.id||g.uid||'')+'\'">'+
-        '<div class="srch-item-icon" style="background:linear-gradient(135deg,#10b981,#34d399)"><i class="fas fa-users"></i></div>'+
-        '<div class="srch-item-body"><div class="srch-item-name">'+esc(g.name)+'</div><div class="srch-item-sub">'+(g.memberCount||0)+' members · '+esc(g.category||'Group')+'</div></div>'+
-        '<span class="srch-item-type type-group">Group</span></div>';
-    }
-
-    function placeItem(p){
-      return '<div class="srch-item" onclick="location.href=\'places.html\'">'+
-        '<div class="srch-item-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="fas fa-map-marker-alt"></i></div>'+
-        '<div class="srch-item-body"><div class="srch-item-name">'+esc(p.name)+'</div><div class="srch-item-sub">'+esc(p.address||p.category||'Place')+'</div></div>'+
-        '<span class="srch-item-type type-place">Place</span></div>';
-    }
-
-
-    function businessItem(b){
-      return '<a class="srch-item" href="business.html?id='+esc(b.id||'')+'" onclick="logClick(\'business\')"><div class="srch-item-icon" style="background:linear-gradient(135deg,#10b981,#2f80ed)"><i class="fas fa-store"></i></div><div class="srch-item-body"><div class="srch-item-name">'+esc(b.name||b.title||'Business')+'</div><div class="srch-item-sub">'+esc(b.businessType==='online'?'Online / Nationwide':(b.city||b.category||'Business'))+'</div></div><span class="srch-item-type type-group">Business</span></a>';
-    }
-    function rewardItem(r){
-      return '<a class="srch-item" href="rewards.html" onclick="logClick(\'reward\')"><div class="srch-item-icon" style="background:linear-gradient(135deg,#f59e0b,#10b981)"><i class="fas fa-gift"></i></div><div class="srch-item-body"><div class="srch-item-name">'+esc(r.title||r.name||'Reward')+'</div><div class="srch-item-sub">'+esc((r.pointPrice||0)+' GeoPoints · '+(r.rewardType||'reward'))+'</div></div><span class="srch-item-type type-place">Reward</span></a>';
-    }
-
-    function postItem(p){
-      var av = p.authorAvatar||'';
-      var iconHtml = av ? '<img loading="lazy" decoding="async" src="'+esc(av)+'" alt="" onerror="this.outerHTML=\'<div style=\'font-size:.8rem\'>'+(p.authorName||'U').charAt(0).toUpperCase()+'</div>\'">' : esc((p.authorName||'U').charAt(0).toUpperCase());
-      return '<div class="srch-item" onclick="location.href=\'feed.html#post-'+esc(p.id||'')+'\'">'+
-        '<div class="srch-item-icon" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">'+iconHtml+'</div>'+
-        '<div class="srch-item-body"><div class="srch-item-name">'+esc(p.authorName||'Post')+'</div><div class="srch-item-sub">'+esc((p.text||'').substring(0,60))+'</div></div>'+
-        '<span class="srch-item-type type-post">Post</span></div>';
-    }
-
-    function section(title, icon, items, renderFn, emptyMsg){
-      if(!items.length) return '';
-      return '<div class="srch-section"><div class="srch-section-title"><i class="'+icon+'" style="color:#10b981"></i> '+title+' ('+items.length+')</div><div class="srch-results">'+items.slice(0,10).map(renderFn).join('')+'</div></div>';
-    }
-
-    var html = '';
-
-    if(tab==='all'||tab==='people'){
-      var usrs = results.users||[];
-      if(usrs.length) html += section('People','fas fa-user',usrs,userItem);
-    }
-    if(tab==='all'||tab==='groups'){
-      var grps = results.groups||[];
-      if(grps.length) html += section('Groups','fas fa-users',grps,groupItem);
-    }
-    if(tab==='all'||tab==='places'){
-      var plcs = results.places||[];
-      if(plcs.length) html += section('Places','fas fa-map-marker-alt',plcs,placeItem);
-    }
-    if(tab==='all'){
-      var biz = results.businesses||[]; if(biz.length) html += section('Businesses','fas fa-store',biz,businessItem);
-      var rw = results.rewards||[]; if(rw.length) html += section('Rewards','fas fa-gift',rw,rewardItem);
-    }
-    if(tab==='all'||tab==='posts'){
-      var psts = results.posts||[];
-      if(psts.length) html += section('Posts','fas fa-newspaper',psts,postItem);
-    }
-
-    if(!html){
-      var q = document.getElementById('srchInput').value.trim();
-      html = '<div class="srch-empty"><i class="fas fa-search"></i>No results for "'+esc(q)+'"<p style="margin:8px 0 0;font-size:.84rem">Try different keywords</p></div>';
-    }
-
-    main.innerHTML = html;
-  }
-
-  document.getElementById('srchInput').addEventListener('input', function(){
-    var q = this.value.trim();
-    document.getElementById('srchClear').classList.toggle('visible', q.length>0);
-
-    if(!q){ showWelcome(); return; }
-
-    document.getElementById('srchMain').innerHTML = '<div class="srch-loading"><i class="fas fa-spinner fa-spin"></i> Searching…</div>';
-
-    clearTimeout(_searchDebounce);
-    _searchDebounce = setTimeout(function(){
-      var GS = window.GeoSocial;
-      if(!GS){ return; }
-      GS.searchFirestore(q, function(results){
-        var curQ = document.getElementById('srchInput').value.trim();
-        if(curQ !== q) return;
-        renderResults(results);
-      });
-    }, 350);
-  });
-
-  // pre-fill from URL ?q=
-  window.addEventListener('GeoSocialReady', function(){
-    var params = new URLSearchParams(location.search);
-    var q = params.get('q');
-    if(q){
-      var inp = document.getElementById('srchInput');
-      inp.value = q;
-      inp.dispatchEvent(new Event('input'));
-    } else {
-      inp && inp.focus();
-    }
-  });
-
-  if(!window.GeoSocial) {
-    window.addEventListener('GeoSocialReady', function(){
-      var inp = document.getElementById('srchInput');
-      if(inp && !inp.value) inp.focus();
-    }, {once:true});
-  } else {
-    document.getElementById('srchInput').focus();
-  }
-</script>
-<script defer src="geohub-production-stabilization-v1.js"></script>
+  <noscript>GeoHub requires JavaScript.</noscript>
+  <script type="module" src="firebase-config.js"></script>
+  <script defer src="account.js"></script>
+  <script defer src="nav-cleanup.js"></script>
+  <script defer src="mobile-nav.js"></script>
+  <script defer src="firestore-social.js"></script>
+  <script defer src="chat-popup.js"></script>
+  <script defer src="geohub-production-stabilization-v1.js"></script>
   <script defer src="responsive-polish.js"></script>
+
+  <!-- TOP BAR -->
+  <div class="sr-topbar">
+    <a href="javascript:history.back()" class="sr-back" aria-label="Back"><i class="fas fa-arrow-left"></i></a>
+    <div class="sr-topbar-input-wrap">
+      <i class="fas fa-search sr-topbar-icon"></i>
+      <input class="sr-topbar-input" id="srchInput" type="search"
+             placeholder="Search people, places, businesses…"
+             autocomplete="off" autocorrect="off" spellcheck="false">
+      <button class="sr-topbar-clear" id="srchClear" aria-label="Clear"><i class="fas fa-times"></i></button>
+    </div>
+  </div>
+
+  <!-- CATEGORY TABS -->
+  <div class="sr-cats-bar">
+    <div class="sr-cats-scroll" id="srchTabs"></div>
+  </div>
+
+  <!-- PAGE BODY -->
+  <div class="sr-page">
+    <div class="sr-body" id="srchBody"></div>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var RECENT_KEY = 'gh_recent_searches';
+    var MAX_RECENT = 8;
+    var _tab = 'all';
+    var _lastResults = null;
+    var _debounce = null;
+
+    var TABS = [
+      { id:'all',        label:'All',        icon:'fas fa-th' },
+      { id:'people',     label:'People',     icon:'fas fa-user' },
+      { id:'businesses', label:'Businesses', icon:'fas fa-store' },
+      { id:'places',     label:'Places',     icon:'fas fa-map-marker-alt' },
+      { id:'events',     label:'Events',     icon:'fas fa-calendar' },
+      { id:'groups',     label:'Groups',     icon:'fas fa-users' },
+      { id:'posts',      label:'Posts',      icon:'fas fa-newspaper' },
+      { id:'services',   label:'Services',   icon:'fas fa-grip' },
+      { id:'creators',   label:'Creators',   icon:'fas fa-camera-retro' },
+      { id:'learning',   label:'Learning',   icon:'fas fa-graduation-cap' }
+    ];
+
+    var TAB_KEY = {
+      all:null, people:'users', businesses:'businesses', places:'places',
+      events:'events', groups:'groups', posts:'posts', services:'services',
+      creators:'creators', learning:'learningItems'
+    };
+
+    function esc(s) {
+      return String(s || '').replace(/[&<>'"]/g, function(c) {
+        return { '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[c];
+      });
+    }
+
+    /* ── Recent searches ── */
+    function getRecent() {
+      try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch(e) { return []; }
+    }
+    function saveRecent(q) {
+      var list = getRecent().filter(function(s) { return s !== q; });
+      list.unshift(q);
+      try { localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, MAX_RECENT))); } catch(e) {}
+    }
+    function removeRecent(q) {
+      var list = getRecent().filter(function(s) { return s !== q; });
+      try { localStorage.setItem(RECENT_KEY, JSON.stringify(list)); } catch(e) {}
+    }
+    function clearAllRecent() {
+      try { localStorage.removeItem(RECENT_KEY); } catch(e) {}
+    }
+
+    /* ── Tab management ── */
+    function buildTabs() {
+      var container = document.getElementById('srchTabs');
+      if (!container) return;
+      container.innerHTML = TABS.map(function(tab) {
+        return '<button class="sr-cat-tab' + (tab.id === 'all' ? ' active' : '') + '" data-sr-tab="' + tab.id + '">' +
+          '<i class="' + tab.icon + '"></i> ' + tab.label +
+          '<span class="sr-cat-count" id="sr-cnt-' + tab.id + '" style="display:none">0</span>' +
+          '</button>';
+      }).join('');
+      container.addEventListener('click', function(e) {
+        var btn = e.target.closest('[data-sr-tab]');
+        if (!btn) return;
+        setTab(btn.dataset.srTab);
+      });
+    }
+
+    function setTab(tabId) {
+      _tab = tabId;
+      document.querySelectorAll('.sr-cat-tab').forEach(function(t) {
+        t.classList.toggle('active', t.dataset.srTab === tabId);
+      });
+      var q = document.getElementById('srchInput').value.trim();
+      if (q && _lastResults) renderResults(_lastResults, q);
+    }
+
+    function updateCounts(results) {
+      var keyMap = {
+        people:'users', businesses:'businesses', places:'places', events:'events',
+        groups:'groups', posts:'posts', services:'services', creators:'creators', learning:'learningItems'
+      };
+      var total = 0;
+      Object.keys(keyMap).forEach(function(tabId) {
+        var cnt = document.getElementById('sr-cnt-' + tabId);
+        var n = (results[keyMap[tabId]] || []).length;
+        total += n;
+        if (cnt) { cnt.textContent = n; cnt.style.display = n ? 'inline' : 'none'; }
+      });
+      var allCnt = document.getElementById('sr-cnt-all');
+      if (allCnt) { allCnt.textContent = total; allCnt.style.display = total ? 'inline' : 'none'; }
+    }
+
+    /* ── Discover state ── */
+    function showDiscover() {
+      var body = document.getElementById('srchBody');
+      if (!body) return;
+      var recent = getRecent();
+      var html = '';
+      if (recent.length) {
+        html = '<div class="sr-section-title" style="display:flex;align-items:center;gap:6px;margin-bottom:10px">' +
+          '<i class="fas fa-history" style="color:#10b981"></i> Recent searches' +
+          '<button class="sr-recent-clear-all" onclick="window._srClearAll()">Clear all</button></div>' +
+          '<div class="sr-recent-list">' +
+          recent.map(function(q) {
+            var qe = esc(q), qj = JSON.stringify(q);
+            return '<div class="sr-recent-item" onclick="window._srRunRecent(' + qj + ')">' +
+              '<div class="sr-recent-icon"><i class="fas fa-clock"></i></div>' +
+              '<span class="sr-recent-text">' + qe + '</span>' +
+              '<button class="sr-recent-del" onclick="event.stopPropagation();window._srDelRecent(' + qj + ')" title="Remove"><i class="fas fa-times"></i></button>' +
+              '</div>';
+          }).join('') +
+          '</div>';
+      } else {
+        html = '<div class="sr-no-results">' +
+          '<i class="fas fa-search"></i>' +
+          '<p>Search for <span>people, places, businesses,</span><br>groups, events and more.</p>' +
+          '</div>';
+      }
+      body.innerHTML = html;
+    }
+
+    /* ── Loading skeletons ── */
+    function showSkeletons() {
+      var body = document.getElementById('srchBody');
+      if (!body) return;
+      var skels = '';
+      for (var i = 0; i < 7; i++) {
+        skels += '<div class="sr-skel-item">' +
+          '<div class="sr-skel-av"></div>' +
+          '<div class="sr-skel-body">' +
+          '<div class="sr-skel-line" style="width:' + (50 + Math.floor(i * 7) % 30) + '%"></div>' +
+          '<div class="sr-skel-line" style="width:' + (30 + Math.floor(i * 11) % 25) + '%;margin-top:6px"></div>' +
+          '</div></div>';
+      }
+      body.innerHTML = skels;
+    }
+
+    /* ── Result item HTML ── */
+    function itemHtml(type, item) {
+      var href = '#', av = '', name = '', sub = '', badge = '', badgeClass = '';
+      if (type === 'user') {
+        href = 'profile.html?id=' + encodeURIComponent(item.id || item.uid || '');
+        av   = item.avatar || item.photoURL || item.avatarUrl || '';
+        name = item.fullName || item.displayName || item.name || 'GeoHub User';
+        sub  = item.username ? '@' + item.username : (item.email || '');
+        badge = 'Person'; badgeClass = 'sr-badge-user';
+      } else if (type === 'business') {
+        href = 'business.html?id=' + encodeURIComponent(item.id || '');
+        av   = item.logo || item.coverImage || item.image || '';
+        name = item.name || item.title || 'Business';
+        sub  = item.businessType === 'online' ? 'Online / Nationwide' : (item.city || item.category || 'Business');
+        badge = 'Business'; badgeClass = 'sr-badge-biz';
+      } else if (type === 'place') {
+        href = 'places.html';
+        av   = item.image || item.coverImage || '';
+        name = item.name || 'Place';
+        sub  = item.address || item.category || item.city || 'Place';
+        badge = 'Place'; badgeClass = 'sr-badge-place';
+      } else if (type === 'event') {
+        href = 'events.html?id=' + encodeURIComponent(item.id || '');
+        av   = item.coverImage || item.image || '';
+        name = item.name || item.title || 'Event';
+        sub  = item.date || item.location || item.category || 'Event';
+        badge = 'Event'; badgeClass = 'sr-badge-event';
+      } else if (type === 'group') {
+        href = 'groups.html?id=' + encodeURIComponent(item.id || '');
+        av   = item.avatar || item.image || '';
+        name = item.name || 'Group';
+        sub  = (item.memberCount || 0) + ' members' + (item.category ? ' · ' + item.category : '');
+        badge = 'Group'; badgeClass = 'sr-badge-group';
+      } else if (type === 'post') {
+        href = 'feed.html#post-' + encodeURIComponent(item.id || '');
+        av   = item.authorAvatar || '';
+        name = item.authorName || 'Post';
+        sub  = (item.text || '').substring(0, 80);
+        badge = 'Post'; badgeClass = 'sr-badge-post';
+      } else if (type === 'service') {
+        href = 'services.html';
+        av   = item.image || '';
+        name = item.name || item.title || 'Service';
+        sub  = item.category || item.description || 'Service';
+        badge = 'Service'; badgeClass = 'sr-badge-service';
+      } else if (type === 'creator') {
+        href = 'creators.html?id=' + encodeURIComponent(item.id || '');
+        av   = item.avatar || item.photoURL || '';
+        name = item.name || item.displayName || 'Creator';
+        sub  = '@' + (item.username || item.id || '') + ' · Creator';
+        badge = 'Creator'; badgeClass = 'sr-badge-creator';
+      } else if (type === 'learning') {
+        href = 'learning.html?id=' + encodeURIComponent(item.id || '');
+        av   = item.image || item.thumbnail || '';
+        name = item.title || item.name || 'Course';
+        sub  = item.category || item.instructor || 'Learning';
+        badge = 'Learning'; badgeClass = 'sr-badge-learning';
+      }
+      var initial = esc((name || '?').charAt(0).toUpperCase());
+      var avHtml = av
+        ? '<img src="' + esc(av) + '" alt="" loading="lazy" decoding="async" onerror="this.outerHTML=\'<span>' + initial + '</span>\'">'
+        : '<span>' + initial + '</span>';
+      return '<a class="sr-item" href="' + esc(href) + '">' +
+        '<div class="sr-item-av">' + avHtml + '</div>' +
+        '<div class="sr-item-body">' +
+          '<div class="sr-item-name">' + esc(name) + '</div>' +
+          '<div class="sr-item-sub">' + esc(sub) + '</div>' +
+        '</div>' +
+        '<span class="sr-badge ' + badgeClass + '">' + badge + '</span>' +
+        '</a>';
+    }
+
+    /* ── Section with optional see-more ── */
+    function sectionHtml(title, icon, items, type, limitItems) {
+      if (!items.length) return '';
+      var limit = limitItems ? 5 : items.length;
+      var displayed = items.slice(0, limit);
+      var q = document.getElementById('srchInput').value.trim();
+      var seeMore = limitItems && items.length > 5
+        ? '<a class="sr-see-more" href="search.html?q=' + encodeURIComponent(q) + '&tab=' + encodeURIComponent(type) + '">See all ' + items.length + ' <i class="fas fa-arrow-right"></i></a>'
+        : '';
+      return '<div class="sr-section">' +
+        '<div class="sr-section-head">' +
+          '<span class="sr-section-title"><i class="' + icon + '" style="color:#10b981"></i> ' + title + ' <span class="sr-cnt-badge">' + items.length + '</span></span>' +
+          seeMore +
+        '</div>' +
+        '<div class="sr-results-list">' + displayed.map(function(item) { return itemHtml(type, item); }).join('') + '</div>' +
+        '</div>';
+    }
+
+    /* ── Render results ── */
+    function renderResults(results, q) {
+      _lastResults = results;
+      updateCounts(results);
+      var body = document.getElementById('srchBody');
+      if (!body) return;
+      var tab = _tab;
+      var isAll = tab === 'all';
+      var html = '';
+      var sections = [
+        { tabId:'people',     key:'users',        title:'People',     icon:'fas fa-user',            type:'user' },
+        { tabId:'businesses', key:'businesses',    title:'Businesses', icon:'fas fa-store',           type:'business' },
+        { tabId:'places',     key:'places',        title:'Places',     icon:'fas fa-map-marker-alt',  type:'place' },
+        { tabId:'events',     key:'events',        title:'Events',     icon:'fas fa-calendar',        type:'event' },
+        { tabId:'groups',     key:'groups',        title:'Groups',     icon:'fas fa-users',           type:'group' },
+        { tabId:'posts',      key:'posts',         title:'Posts',      icon:'fas fa-newspaper',       type:'post' },
+        { tabId:'services',   key:'services',      title:'Services',   icon:'fas fa-grip',            type:'service' },
+        { tabId:'creators',   key:'creators',      title:'Creators',   icon:'fas fa-camera-retro',   type:'creator' },
+        { tabId:'learning',   key:'learningItems', title:'Learning',   icon:'fas fa-graduation-cap',  type:'learning' }
+      ];
+      sections.forEach(function(sec) {
+        if (isAll || tab === sec.tabId) {
+          html += sectionHtml(sec.title, sec.icon, results[sec.key] || [], sec.type, isAll);
+        }
+      });
+      if (!html) {
+        html = '<div class="sr-no-results">' +
+          '<i class="fas fa-search"></i>' +
+          '<p>No results for <span>"' + esc(q) + '"</span></p>' +
+          '<p style="margin-top:8px;font-size:.8rem">Try different keywords or check spelling</p>' +
+          '</div>';
+      }
+      body.innerHTML = html;
+    }
+
+    /* ── Global onclick helpers ── */
+    window._srClearAll = function() { clearAllRecent(); showDiscover(); };
+    window._srDelRecent = function(q) { removeRecent(q); showDiscover(); };
+    window._srRunRecent = function(q) {
+      var inp = document.getElementById('srchInput');
+      if (inp) { inp.value = q; inp.dispatchEvent(new Event('input')); }
+    };
+
+    /* ── Search trigger ── */
+    function doSearch(q) {
+      if (!q) { showDiscover(); return; }
+      showSkeletons();
+      var GS = window.GeoSocial;
+      if (!GS || !GS.searchFirestore) {
+        window.addEventListener('GeoSocialReady', function() { doSearch(q); }, { once: true });
+        return;
+      }
+      GS.searchFirestore(q, function(results) {
+        if (document.getElementById('srchInput').value.trim() !== q) return;
+        saveRecent(q);
+        renderResults(results, q);
+      });
+    }
+
+    /* ── Input events ── */
+    var inp = document.getElementById('srchInput');
+    var clearBtn = document.getElementById('srchClear');
+
+    inp.addEventListener('input', function() {
+      var q = this.value.trim();
+      if (clearBtn) clearBtn.classList.toggle('visible', q.length > 0);
+      clearTimeout(_debounce);
+      if (!q) { showDiscover(); return; }
+      showSkeletons();
+      _debounce = setTimeout(function() { doSearch(q); }, 300);
+    });
+
+    clearBtn.addEventListener('click', function() {
+      inp.value = '';
+      clearBtn.classList.remove('visible');
+      showDiscover();
+      inp.focus();
+    });
+
+    inp.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') { this.value = ''; clearBtn.classList.remove('visible'); showDiscover(); }
+    });
+
+    /* ── Cleanup ── */
+    window.addEventListener('pagehide', function() { clearTimeout(_debounce); });
+
+    /* ── Init ── */
+    function handleTabParam() {
+      var tabParam = new URLSearchParams(location.search).get('tab');
+      if (tabParam && TABS.some(function(t) { return t.id === tabParam; })) setTab(tabParam);
+    }
+
+    buildTabs();
+    var initQ = new URLSearchParams(location.search).get('q') || '';
+    if (initQ) {
+      inp.value = initQ;
+      if (clearBtn) clearBtn.classList.add('visible');
+      handleTabParam();
+      showSkeletons();
+      if (window.GeoSocial) {
+        doSearch(initQ);
+      } else {
+        window.addEventListener('GeoSocialReady', function() { doSearch(initQ); }, { once: true });
+      }
+    } else {
+      handleTabParam();
+      showDiscover();
+      setTimeout(function() { inp.focus(); }, 100);
+    }
+
+  })();
+  </script>
 </body>
 </html>

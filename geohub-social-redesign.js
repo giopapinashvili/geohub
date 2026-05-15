@@ -363,7 +363,49 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var notif=e.target.closest('[data-notif]');
       if(notif && GS() && GS().markNotificationRead) GS().markNotificationRead(notif.dataset.notif);
     });
-    var gs=$('#ghGlobalSearch'); if(gs){ gs.addEventListener('keydown', function(e){ if(e.key==='Enter' && gs.value.trim()) location.href='search.html?q='+encodeURIComponent(gs.value.trim()); }); }
+    var gs=$('#ghGlobalSearch');
+    if(gs){
+      var _gsDrop=null, _gsTimer=null;
+      function _gsClose(){ if(_gsDrop){ _gsDrop.remove(); _gsDrop=null; } }
+      gs.addEventListener('keydown',function(e){
+        if(e.key==='Enter'&&gs.value.trim()){ _gsClose(); location.href='search.html?q='+encodeURIComponent(gs.value.trim()); }
+        if(e.key==='Escape'){ _gsClose(); }
+      });
+      document.addEventListener('click',function(e){ if(_gsDrop&&!gs.contains(e.target)&&!_gsDrop.contains(e.target)) _gsClose(); });
+      gs.addEventListener('input',function(){
+        var q=gs.value.trim();
+        clearTimeout(_gsTimer);
+        if(!q){ _gsClose(); return; }
+        _gsTimer=setTimeout(function(){
+          var geo=GS();
+          if(!geo||!geo.searchFirestore) return;
+          geo.searchFirestore(q,function(res){
+            if(gs.value.trim()!==q) return;
+            var items=[];
+            var typeIcon={user:'fas fa-user',business:'fas fa-store',place:'fas fa-map-marker-alt',group:'fas fa-users',event:'fas fa-calendar'};
+            (res.users||[]).slice(0,2).forEach(function(u){ items.push({type:'user',label:u.fullName||u.displayName||u.name||'User',sub:'@'+(u.username||u.id||''),href:'profile.html?id='+encodeURIComponent(u.id||u.uid||'')}); });
+            (res.businesses||[]).slice(0,2).forEach(function(b){ items.push({type:'business',label:b.name||'Business',sub:b.city||b.category||'Business',href:'business.html?id='+encodeURIComponent(b.id||'')}); });
+            (res.places||[]).slice(0,1).forEach(function(p){ items.push({type:'place',label:p.name||'Place',sub:p.address||p.category||'Place',href:'places.html'}); });
+            (res.groups||[]).slice(0,1).forEach(function(g){ items.push({type:'group',label:g.name||'Group',sub:(g.memberCount||0)+' members',href:'groups.html?id='+encodeURIComponent(g.id||'')}); });
+            (res.events||[]).slice(0,1).forEach(function(ev){ items.push({type:'event',label:ev.name||ev.title||'Event',sub:ev.location||'Event',href:'events.html?id='+encodeURIComponent(ev.id||'')}); });
+            _gsClose();
+            if(!items.length) return;
+            var rect=gs.getBoundingClientRect();
+            _gsDrop=document.createElement('div');
+            _gsDrop.className='gh-search-drop';
+            _gsDrop.style.cssText='position:fixed;top:'+(rect.bottom+4)+'px;left:'+rect.left+'px;width:'+Math.max(rect.width,260)+'px;z-index:9999';
+            _gsDrop.innerHTML=items.slice(0,6).map(function(it){
+              return '<a class="gh-search-row" href="'+esc(it.href)+'" onclick="'+esc('document.getElementById("ghGlobalSearch").value=""')+'">' +
+                '<span class="gh-search-row-icon"><i class="'+(typeIcon[it.type]||'fas fa-search')+'"></i></span>'+
+                '<span class="gh-search-row-body"><span class="gh-search-row-name">'+esc(it.label)+'</span><span class="gh-search-row-sub">'+esc(it.sub)+'</span></span>'+
+                '</a>';
+            }).join('')+
+            '<a class="gh-search-see-all" href="search.html?q='+encodeURIComponent(q)+'" onclick="document.getElementById(\'ghGlobalSearch\').value=\'\'">See all results for &#8220;'+esc(q)+'&#8221; <i class="fas fa-arrow-right"></i></a>';
+            document.body.appendChild(_gsDrop);
+          });
+        },300);
+      });
+    }
     if(window.requestIdleCallback) requestIdleCallback(loadRightRail, { timeout: 2500 });
     else setTimeout(loadRightRail, 700);
     // When Firestore profile fully loads, refresh cache + topbar with richer data

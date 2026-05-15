@@ -153,3 +153,89 @@
     /* ── TOAST ── */
     #srToast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(60px); z-index: 9999; background: rgba(16,185,129,0.95); color: #000; padding: 10px 22px; border-radius: 9999px; font-size: 0.82rem; font-weight: 800; display: flex; align-items: center; gap: 8px; white-space: nowrap; opacity: 0; pointer-events: none; transition: transform 0.4s cubic-bezier(.34,1.56,.64,1), opacity 0.3s; }
     #srToast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* ── SKELETON ── */
+.sr-skel-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.04);
+}
+.sr-skel-av {
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,.06) 25%, rgba(255,255,255,.1) 50%, rgba(255,255,255,.06) 75%);
+  background-size: 200% 100%; animation: srSkelShimmer 1.4s ease-in-out infinite;
+}
+.sr-skel-body { flex: 1; }
+.sr-skel-line {
+  height: 12px; border-radius: 6px;
+  background: linear-gradient(90deg, rgba(255,255,255,.06) 25%, rgba(255,255,255,.1) 50%, rgba(255,255,255,.06) 75%);
+  background-size: 200% 100%; animation: srSkelShimmer 1.4s ease-in-out infinite;
+}
+@keyframes srSkelShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── SECTION ── */
+.sr-section { margin-bottom: 24px; }
+.sr-section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px; padding: 4px 0;
+}
+.sr-cnt-badge {
+  display: inline-block; background: rgba(255,255,255,.08); border-radius: 4px;
+  padding: 1px 5px; font-size: 0.62rem; font-weight: 800; margin-left: 4px;
+}
+.sr-see-more {
+  font-size: 0.73rem; font-weight: 700; color: var(--green, #10b981);
+  text-decoration: none; display: flex; align-items: center; gap: 4px;
+}
+.sr-see-more:hover { opacity: 0.8; }
+.sr-results-list { display: flex; flex-direction: column; gap: 4px; }
+
+/* ── RESULT LIST ITEMS ── */
+.sr-item {
+  display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  border-radius: 12px; text-decoration: none;
+  color: var(--text-primary, #f0f4ff);
+  transition: background 0.15s; border: 1px solid transparent;
+}
+.sr-item:hover { background: rgba(255,255,255,.05); border-color: rgba(16,185,129,.15); }
+.sr-item-av {
+  width: 44px; height: 44px; border-radius: 12px; overflow: hidden; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, rgba(16,185,129,.2), rgba(59,130,246,.2));
+  font-size: 1.1rem; font-weight: 800; color: var(--text-primary, #f0f4ff);
+}
+.sr-item-av img { width: 100%; height: 100%; object-fit: cover; }
+.sr-item-body { flex: 1; min-width: 0; }
+.sr-item-name {
+  font-size: 0.88rem; font-weight: 700;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px;
+}
+.sr-item-sub {
+  font-size: 0.74rem; color: var(--text-muted, #6b7280);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ── TYPE BADGES ── */
+.sr-badge {
+  flex-shrink: 0; padding: 3px 8px; border-radius: 6px;
+  font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.sr-badge-user     { background: rgba(59,130,246,.15);  color: #60a5fa; }
+.sr-badge-biz      { background: rgba(16,185,129,.15);  color: #34d399; }
+.sr-badge-place    { background: rgba(245,158,11,.15);  color: #fbbf24; }
+.sr-badge-event    { background: rgba(239,68,68,.15);   color: #f87171; }
+.sr-badge-group    { background: rgba(16,185,129,.15);  color: #34d399; }
+.sr-badge-post     { background: rgba(168,85,247,.15);  color: #c084fc; }
+.sr-badge-service  { background: rgba(6,182,212,.15);   color: #22d3ee; }
+.sr-badge-creator  { background: rgba(236,72,153,.15);  color: #f472b6; }
+.sr-badge-learning { background: rgba(251,146,60,.15);  color: #fb923c; }
+
+/* ── RECENT CLEAR ALL ── */
+.sr-recent-clear-all {
+  margin-left: auto; background: none; border: none;
+  color: var(--green, #10b981); font-size: 0.72rem; font-weight: 700;
+  cursor: pointer; padding: 2px 6px; border-radius: 5px; transition: background 0.15s;
+}
+.sr-recent-clear-all:hover { background: rgba(16,185,129,.08); }

@@ -2009,26 +2009,77 @@
 
     // ── SEARCH ───────────────────────────────────────────────────────────
     function searchFirestore(q_str, callback) {
-      if (!q_str || !q_str.trim()) { callback({ users: [], groups: [], places: [], posts: [], businesses: [], events: [], services: [], rewards: [] }); return; }
-      var needle = q_str.trim().toLowerCase();
-      var results = { users: [], groups: [], places: [], posts: [], businesses: [], events: [], services: [], rewards: [] };
+      var empty = { users:[], groups:[], places:[], posts:[], businesses:[], events:[], services:[], rewards:[], creators:[], learningItems:[] };
+      if (!q_str || !q_str.trim()) { callback(empty); return; }
+      var needle   = q_str.trim();
+      var nLow     = needle.toLowerCase();
+      var nCap     = nLow.charAt(0).toUpperCase() + nLow.slice(1);
+
+      function matchNeedle(obj) {
+        var hay = [obj.name, obj.title, obj.fullName, obj.displayName, obj.username,
+                   obj.email, obj.text, obj.description, obj.desc, obj.category,
+                   obj.city, obj.address].join(' ').toLowerCase();
+        return hay.includes(nLow);
+      }
+
+      function prefixSnap(col, field, start) {
+        var end = start + '';
+        return getDocs(query(collection(db, col), where(field, '>=', start), where(field, '<=', end), limit(25)))
+          .then(function(snap) {
+            var items = [];
+            snap.forEach(function(d) { items.push(Object.assign({ id: d.id }, d.data())); });
+            return items;
+          }).catch(function() { return []; });
+      }
+
+      function scanFallback(col) {
+        return getDocs(query(collection(db, col), limit(100))).then(function(snap) {
+          var items = [];
+          snap.forEach(function(d) {
+            var x = Object.assign({ id: d.id }, d.data());
+            if (matchNeedle(x)) items.push(x);
+          });
+          return items;
+        }).catch(function() { return []; });
+      }
+
+      function dedup(arr) {
+        var seen = {};
+        return arr.filter(function(x) { if (seen[x.id]) return false; seen[x.id] = 1; return true; });
+      }
+
+      function searchCol(col, fields) {
+        if (!fields.length) return scanFallback(col);
+        var promises = [];
+        fields.forEach(function(f) {
+          promises.push(prefixSnap(col, f, nLow));
+          if (nCap !== nLow) promises.push(prefixSnap(col, f, nCap));
+        });
+        return Promise.all(promises).then(function(arrays) {
+          var combined = dedup([].concat.apply([], arrays));
+          return combined.length ? combined : scanFallback(col);
+        });
+      }
+
+      var r = Object.assign({}, empty);
       var jobs = [
-        ['users', 'users'], ['groups', 'groups'], ['places', 'places'], ['posts', 'posts'],
-        ['businesses', 'businesses'], ['events', 'events'], ['services', 'services'], ['rewards', 'rewards']
+        { key:'users',         col:'users',         fields:['username','fullName','displayName'] },
+        { key:'groups',        col:'groups',        fields:['name'] },
+        { key:'places',        col:'places',        fields:['name'] },
+        { key:'businesses',    col:'businesses',    fields:['name'] },
+        { key:'events',        col:'events',        fields:['name','title'] },
+        { key:'services',      col:'services',      fields:['name','title'] },
+        { key:'rewards',       col:'rewards',       fields:['title','name'] },
+        { key:'creators',      col:'creators',      fields:['name','username'] },
+        { key:'learningItems', col:'learningItems', fields:['title','name'] },
+        { key:'posts',         col:'posts',         fields:[] }
       ];
       var pending = jobs.length;
-      function done(){ if(--pending === 0) callback(results); }
-      function filterText(val){ return String(val || '').toLowerCase().includes(needle); }
-      jobs.forEach(function(pair){
-        var key = pair[0], col = pair[1];
-        getDocs(query(collection(db, col), limit(200))).then(function(snap){
-          snap.forEach(function(d){
-            var x = Object.assign({ id: d.id }, d.data());
-            var hay = [x.name, x.title, x.fullName, x.displayName, x.username, x.email, x.text, x.description, x.desc, x.city, x.category, x.address].join(' ');
-            if(filterText(hay)) results[key].push(x);
-          });
-          done();
-        }).catch(function(){ done(); });
+      function done() { if (--pending === 0) callback(r); }
+      jobs.forEach(function(job) {
+        searchCol(job.col, job.fields)
+          .then(function(items) { r[job.key] = items; done(); })
+          .catch(function() { done(); });
       });
     }
 
