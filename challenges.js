@@ -55,13 +55,15 @@
     var remaining = Math.max(0, target - progress);
     var title = c.title || c.name || 'Untitled challenge';
     var end = dateLabel(c.endAt);
+    // p.xpReward is written by the engine; falls back to challenge doc field
+    var xpDisplay = Number(p.xpReward || c.xpReward || 0);
     return '<article class="challenge-card' + (completed ? ' is-complete' : '') + '"' +
       ' data-chal-id="' + esc(c.id || '') + '"' +
       ' tabindex="0"' +
       ' aria-label="' + esc(title) + '">' +
       '<div class="challenge-card-top">' +
         '<span class="challenge-type"><i class="fas ' + (completed ? 'fa-check' : 'fa-bolt') + '"></i>' + esc(typeLabel(c.type)) + '</span>' +
-        '<span class="challenge-xp">+' + compact(c.xpReward || 0) + ' XP</span>' +
+        '<span class="challenge-xp">+' + compact(xpDisplay) + ' XP</span>' +
       '</div>' +
       '<h2>' + esc(title) + '</h2>' +
       '<p>' + esc(c.description || 'Complete real activity to make progress.') + '</p>' +
@@ -232,8 +234,34 @@
 
   function init() {
     bind();
-    if (window.GeoChallenges) start();
-    else window.addEventListener('GeoChallengesReady', start, { once: true });
+
+    // Ensure GeoChallenges is ready before starting
+    function tryStart() {
+      if (!window.GeoChallenges) {
+        window.addEventListener('GeoChallengesReady', tryStart, { once: true });
+        return;
+      }
+      start();
+    }
+
+    // Wait for Firebase Auth to restore the session before calling start().
+    // firebase-config.js is a type="module" script; auth.currentUser is null
+    // until onAuthStateChanged fires even when the user is signed in.
+    // Without this wait, listenUserChallenges sees uid()===null, skips the
+    // challengeProgress onSnapshot, and progress never reaches the UI.
+    function hookAuth(gf) {
+      if (!gf || !gf.authFns || !gf.authFns.onAuthStateChanged) { tryStart(); return; }
+      var unsub = gf.authFns.onAuthStateChanged(gf.auth, function () {
+        unsub(); // one-shot: only need the initial auth state
+        tryStart();
+      });
+    }
+
+    if (window.GeoFirebase) {
+      hookAuth(window.GeoFirebase);
+    } else {
+      window.addEventListener('GeoFirebaseReady', function () { hookAuth(window.GeoFirebase); }, { once: true });
+    }
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

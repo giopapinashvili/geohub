@@ -431,6 +431,7 @@
 }
 .challenge-card.is-complete {
   border-color: rgba(16, 185, 129, .44);
+  background: rgba(16, 185, 129, .03);
 }
 .challenge-card.is-complete::after {
   content: "";
@@ -438,6 +439,15 @@
   inset: 0 0 auto;
   height: 3px;
   background: linear-gradient(90deg, #10b981, #3b82f6);
+}
+.challenge-card.is-complete .challenge-progress span {
+  background: linear-gradient(90deg, #10b981, #10e0a0);
+}
+.challenge-card.is-complete .challenge-xp {
+  color: #10e0a0;
+}
+.challenge-card.is-complete .challenge-type {
+  color: #10e0a0;
 }
 .challenge-card-top,
 .challenge-meta,
