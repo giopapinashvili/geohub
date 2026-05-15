@@ -7,6 +7,7 @@ import {
   onSnapshot, deleteDoc, serverTimestamp, increment,
   writeBatch, runTransaction, arrayUnion, arrayRemove
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 import { getAnalytics, isSupported } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js';
 import { getMessaging, isSupported as isMsgSupported } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js';
 
@@ -28,6 +29,10 @@ try {
   window.GeoFirebase = {
     app, auth, db,
     fs: { doc, setDoc, getDoc, getDocs, updateDoc, addDoc, collection, query, orderBy, where, limit, onSnapshot, deleteDoc, serverTimestamp, increment, writeBatch, runTransaction, arrayUnion, arrayRemove },
+    storage: getStorage(app),
+    storageRef,
+    uploadBytesResumable,
+    getDownloadURL,
     authFns: { signOut, onAuthStateChanged }
   };
   isSupported().then(ok => { if (ok) getAnalytics(app); }).catch(() => {});

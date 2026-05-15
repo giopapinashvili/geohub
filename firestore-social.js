@@ -66,6 +66,7 @@
       addCommentReply: function(){ noop(); },
       listenCommentReplies: function(postId, commentId, cb){ cb([]); return function(){}; },
       createCheckin: noop,
+      createCheckinFull: noop,
       createStory: noop,
       listenStories: function () { return function () {}; },
       listenUserNotifications: function (uid, cb) { cb([]); return function () {}; },
@@ -1320,6 +1321,53 @@
       });
     }
 
+    function createCheckinFull(data, callback) {
+      requireAuth(function (user) {
+        var me = meData() || {};
+        var xp = Number(data.xpAwarded || 50);
+        addDoc(collection(db, 'checkins'), {
+          userId:             user.uid,
+          authorId:           user.uid,
+          authorName:         me.name || user.displayName || 'GeoHub User',
+          authorAvatar:       me.avatar || user.photoURL || '',
+          placeId:            data.placeId     || '',
+          placeName:          data.placeName   || '',
+          businessId:         data.businessId  || null,
+          eventId:            data.eventId     || null,
+          city:               data.city        || '',
+          country:            data.country     || 'Georgia',
+          lat:                data.lat         || null,
+          lng:                data.lng         || null,
+          accuracy:           data.accuracy    || null,
+          checkinType:        data.checkinType || 'normal',
+          photoUrl:           data.photoUrl    || null,
+          caption:            data.caption     || '',
+          verified:           data.verified    === true,
+          verificationMethod: data.verificationMethod || 'none',
+          xpAwarded:          xp,
+          createdAt:          serverTimestamp()
+        }).then(function (docRef) {
+          updateDoc(doc(db, 'users', user.uid), {
+            xp:             increment(xp),
+            visitedPlaces:  increment(1),
+            checkinCount:   increment(1),
+            updatedAt:      serverTimestamp()
+          }).catch(function(){});
+          setDoc(doc(db, 'userBadges', user.uid + '_first_checkin'), {
+            userId: user.uid, badgeId: 'first_checkin',
+            title: 'First Check-in', icon: 'fa-location-dot',
+            createdAt: serverTimestamp()
+          }, { merge: true }).catch(function(){});
+          awardPoints(xp, 'Check-in at ' + (data.placeName || 'place'), 'checkin', data.placeId || '').catch(function(){});
+          if (callback) callback({ success: true, xpAwarded: xp, checkinId: docRef.id });
+        }).catch(function (err) {
+          console.error('[GeoSocial] createCheckinFull', err);
+          toast('Check-in failed. Please try again.', 'error');
+          if (callback) callback({ success: false, error: err.message });
+        });
+      });
+    }
+
     // ── STORIES ─────────────────────────────────────────────────────────
     function createStory(text, mediaUrl, callback) {
       requireAuth(function (user) {
@@ -1917,6 +1965,7 @@
       addCommentReply:        addCommentReply,
       listenCommentReplies:   listenCommentReplies,
       createCheckin:           createCheckin,
+      createCheckinFull:           createCheckinFull,
       createStory:             createStory,
       listenStories:           listenStories,
       listenUserNotifications: listenUserNotifications,
