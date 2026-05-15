@@ -520,11 +520,11 @@
             </label>
             <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Type *
               <select id="cfType" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-                <option value="checkin">checkin — any check-in</option>
-                <option value="photo">photo — camera proof required</option>
-                <option value="qr">qr — QR code check-in</option>
-                <option value="event">event — event attendance</option>
-                <option value="distance">distance — GPS distance</option>
+                <option value="checkin_count">checkin_count — any check-in</option>
+                <option value="city_checkin">city_checkin — must match city field</option>
+                <option value="place_checkin">place_checkin — must match place ID</option>
+                <option value="business_checkin">business_checkin — must match business ID</option>
+                <option value="date_limited_checkin">date_limited_checkin — within start/end dates</option>
               </select>
             </label>
           </div>

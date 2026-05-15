@@ -857,7 +857,7 @@
       { id: 'csExpiry',   label: 'Expiry date', type: 'date', key: 'expiresAt' }
     ],
     challenges: [
-      { id: 'csChallengeType', label: 'Type (checkin/photo/qr/event/distance)', type: 'text', key: 'type', placeholder: 'checkin' },
+      { id: 'csChallengeType', label: 'Type (checkin_count / city_checkin / place_checkin / business_checkin / date_limited_checkin)', type: 'text', key: 'type', placeholder: 'checkin_count' },
       { id: 'csChallengeTarget', label: 'Target count', type: 'number', key: 'targetCount', min: 1 },
       { id: 'csChallengeXp', label: 'XP reward', type: 'number', key: 'xpReward', min: 0 },
       { id: 'csChallengePlace', label: 'Place ID optional', type: 'text', key: 'placeId' },
@@ -933,7 +933,7 @@
         createdAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp()
       };
       if (col === 'challenges') {
-        doc.type = 'checkin';
+        doc.type = 'checkin_count';
         doc.targetCount = 1;
         doc.xpReward = 100;
         doc.active = true;
@@ -1118,7 +1118,11 @@
       list.innerHTML = '<div class="admin-step4-empty"><i class="fas fa-bolt" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>No challenges yet — create one using the form below.</div>';
       return;
     }
-    var TYPE_COLORS = { checkin: 'bg-green', photo: 'bg-blue', qr: 'bg-purple', event: 'bg-gold', distance: 'bg-orange' };
+    var TYPE_COLORS = {
+      checkin_count: 'bg-green', city_checkin: 'bg-blue', place_checkin: 'bg-purple',
+      business_checkin: 'bg-gold', date_limited_checkin: 'bg-orange',
+      checkin: 'bg-green', photo: 'bg-blue', qr: 'bg-purple', event: 'bg-gold', distance: 'bg-orange'
+    };
     list.innerHTML = rows.map(function (c) {
       var typeColor = TYPE_COLORS[c.type || 'checkin'] || 'bg-gray';
       var xp = Number(c.xpReward || 0);
@@ -1132,7 +1136,7 @@
           '<span>' +
             '<span class="badge ' + typeColor + '" style="margin-right:4px">' + escHtmlAdmin(c.type || 'checkin') + '</span>' +
             (c.active ? '<span class="badge bg-green">Active</span>' : '<span class="badge bg-gray">Inactive</span>') +
-            (c.badge ? ' <span class="badge bg-purple" style="margin-left:2px"><i class="fas fa-medal"></i> ' + escHtmlAdmin(c.badge) + '</span>' : '') +
+            (c.badge ? ' <span class="badge bg-purple" style="margin-left:2px"><i class="fas fa-medal"></i> ' + escHtmlAdmin(c.badgeId || (typeof c.badge === 'string' ? c.badge : 'badge')) + '</span>' : '') +
           '</span>' +
           '<p>' + escHtmlAdmin(c.description || '—') + '</p>' +
           '<span style="font-size:.7rem;color:var(--ts)">Target: <strong style="color:var(--t)">' + target + '</strong> &nbsp;·&nbsp; XP: <strong style="color:var(--gold)">+' + xp + '</strong>' +
@@ -1189,7 +1193,7 @@
       var placeId = el('cfPlaceId'); if (placeId) placeId.value = c.placeId || '';
       var bizId = el('cfBusinessId'); if (bizId) bizId.value = c.businessId || '';
       var active = el('cfActive'); if (active) active.checked = c.active === true;
-      var bId = el('cfBadgeId'); if (bId) bId.value = c.badge || '';
+      var bId = el('cfBadgeId'); if (bId) bId.value = c.badgeId || (typeof c.badge === 'string' ? c.badge : '') || '';
       var bTitle = el('cfBadgeTitle'); if (bTitle) bTitle.value = c.badgeTitle || '';
       var bIcon = el('cfBadgeIcon'); if (bIcon) bIcon.value = c.badgeIcon || '';
       var bRarity = el('cfBadgeRarity'); if (bRarity) bRarity.value = c.badgeRarity || 'common';
@@ -1285,13 +1289,15 @@
       if (startVal) doc.startAt = new Date(startVal).getTime();
       if (endVal) doc.endAt = new Date(endVal).getTime();
       if (badgeId) {
-        doc.badge = badgeId;
+        doc.badge = true;
+        doc.badgeId = badgeId;
         doc.badgeTitle = ((document.getElementById('cfBadgeTitle') || {}).value || '').trim() || titleVal;
         doc.badgeIcon = ((document.getElementById('cfBadgeIcon') || {}).value || '').trim() || 'fa-medal';
         doc.badgeRarity = (document.getElementById('cfBadgeRarity') || {}).value || 'common';
         doc.badgeDescription = ((document.getElementById('cfBadgeDesc') || {}).value || '').trim();
       } else {
-        doc.badge = null;
+        doc.badge = false;
+        doc.badgeId = null;
       }
 
       var btn = document.getElementById('chalSaveBtn');

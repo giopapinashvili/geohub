@@ -49,7 +49,7 @@
   function cardHtml(c) {
     var p = state.progress[c.id] || {};
     var target = Math.max(1, Number(c.targetCount || p.targetCount || 1));
-    var progress = Math.min(target, Math.max(0, Number(p.progress || 0)));
+    var progress = Math.min(target, Math.max(0, Number(p.count || p.progress || 0)));
     var completed = p.completed === true;
     var pct = completed ? 100 : Math.round((progress / target) * 100);
     var remaining = Math.max(0, target - progress);
@@ -143,7 +143,7 @@
     ensureModal();
     var p = state.progress[c.id] || {};
     var target = Math.max(1, Number(c.targetCount || p.targetCount || 1));
-    var prog = Math.min(target, Math.max(0, Number(p.progress || 0)));
+    var prog = Math.min(target, Math.max(0, Number(p.count || p.progress || 0)));
     var completed = p.completed === true;
     var pct = completed ? 100 : Math.round((prog / target) * 100);
     var remaining = Math.max(0, target - prog);

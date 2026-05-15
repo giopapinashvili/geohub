@@ -60,18 +60,28 @@ service cloud.firestore {
       allow update: if isOwner(userId) || isAdmin();
       allow delete: if isAdmin();
       match /challengeProgress/{challengeId} {
+        // TODO: For production XP/badge integrity, move challenge evaluation to Cloud Functions
+        // (Firestore trigger on checkins/{id}). Client-side transactions prevent concurrent races
+        // but a modified client can still bypass field validation. Cloud Functions would own
+        // all progress writes and make these rules read-only for the owner.
         allow read: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId)
-          && request.resource.data.get('userId', '') == userId
+          && (request.resource.data.get('userId', '') == userId || request.resource.data.get('uid', '') == userId)
           && request.resource.data.get('challengeId', '') == challengeId;
         allow update: if isOwner(userId)
-          && resource.data.get('userId', '') == userId
-          && request.resource.data.get('userId', '') == userId
+          && (resource.data.get('userId', '') == userId || resource.data.get('uid', '') == userId)
+          && (request.resource.data.get('userId', '') == userId || request.resource.data.get('uid', '') == userId)
           && request.resource.data.get('challengeId', '') == challengeId
+          && request.resource.data.get('count', 0) >= resource.data.get('count', 0)
           && request.resource.data.get('progress', 0) >= resource.data.get('progress', 0)
           && !(resource.data.get('completed', false) == true && request.resource.data.get('completed', false) != true)
           && !(resource.data.get('xpAwarded', false) == true && request.resource.data.get('xpAwarded', false) != true);
         allow delete: if isAdmin();
+        match /sources/{sourceId} {
+          allow read: if isOwner(userId) || isAdmin();
+          allow create: if isOwner(userId);
+          allow delete: if isAdmin();
+        }
       }
       match /badges/{badgeId} {
         allow read: if isOwner(userId) || isAdmin();

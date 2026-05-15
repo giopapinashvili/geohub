@@ -6,10 +6,15 @@
 
   var ACTIVE_LIMIT = 100;
   var TYPE_LABELS = {
-    checkin: 'Verified check-in',
-    photo: 'Photo proof',
-    qr: 'QR check-in',
-    event: 'Event attendance',
+    checkin_count:         'Check-in Count',
+    city_checkin:          'City Check-in',
+    place_checkin:         'Place Check-in',
+    business_checkin:      'Business Check-in',
+    date_limited_checkin:  'Time-Limited',
+    checkin:  'Check-in',
+    photo:    'Photo Proof',
+    qr:       'QR Check-in',
+    event:    'Event',
     distance: 'Distance'
   };
 
@@ -105,27 +110,42 @@
 
   function challengeMatchesCheckin(challenge, checkin) {
     if (!challenge || !checkin) return false;
-    var type = (challenge.type || 'checkin').toLowerCase();
-
-    // photo / qr / event / distance require GPS-verified; plain 'checkin' accepts any submission
-    if (type !== 'checkin' && checkin.verified !== true) return false;
-
-    if (challenge.city && String(challenge.city).toLowerCase() !== String(checkin.city || '').toLowerCase()) return false;
-    if (challenge.businessId && challenge.businessId !== checkin.businessId) return false;
-    if (challenge.placeId && challenge.placeId !== checkin.placeId) return false;
-    if (challenge.eventId && challenge.eventId !== checkin.eventId) return false;
-
-    if (type === 'photo') return !!checkin.photoUrl;
-    if (type === 'qr') return checkin.checkinType === 'qr' || checkin.verificationMethod === 'qr';
-    if (type === 'event') return !!checkin.eventId || !!challenge.eventId;
-    if (type === 'distance') return Number(checkin.distanceMeters || 0) > 0;
-    return true; // 'checkin' type — any submitted check-in counts
+    var type = String(challenge.type || 'checkin_count').toLowerCase();
+    switch (type) {
+      case 'checkin_count':
+      case 'date_limited_checkin': // date range already enforced by isActiveChallenge
+        return true;
+      case 'city_checkin':
+        return !!challenge.city &&
+          String(challenge.city).toLowerCase() === String(checkin.city || '').toLowerCase();
+      case 'place_checkin':
+        return !!challenge.placeId && challenge.placeId === checkin.placeId;
+      case 'business_checkin':
+        return !!challenge.businessId && challenge.businessId === checkin.businessId;
+      // backward compat — old type names
+      case 'checkin':
+        return true;
+      case 'photo':
+        return checkin.verified === true && !!checkin.photoUrl;
+      case 'qr':
+        return checkin.verified === true &&
+          (checkin.checkinType === 'qr' || checkin.verificationMethod === 'qr');
+      case 'event':
+        return checkin.verified === true && (!!checkin.eventId || !!challenge.eventId);
+      case 'distance':
+        return checkin.verified === true && Number(checkin.distanceMeters || 0) > 0;
+      default:
+        return false;
+    }
   }
 
   function proofTypeFor(challenge, checkin) {
-    if (challenge.type === 'photo') return 'photo';
-    if (challenge.type === 'qr') return 'qr';
-    if (challenge.type === 'event') return 'event';
+    var t = challenge.type || 'checkin_count';
+    if (t === 'photo') return 'photo';
+    if (t === 'qr') return 'qr';
+    if (t === 'event') return 'event';
+    var newTypes = ['checkin_count', 'city_checkin', 'place_checkin', 'business_checkin', 'date_limited_checkin'];
+    if (newTypes.indexOf(t) !== -1) return t;
     return checkin && checkin.checkinType === 'qr' ? 'qr' : 'checkin';
   }
 
@@ -133,53 +153,80 @@
     var f = fs();
     var pRef = progressRef(userId, challenge.id);
     var userRef = f.doc(db(), 'users', userId);
-    var badgeId = challenge.badge || null;
-    var badgeRef = badgeId ? f.doc(db(), 'users', userId, 'badges', badgeId) : null;
     var target = clampTarget(challenge);
 
+    // Resolve badge ID: new format (badge:true + badgeId:'slug') or old format (badge:'slug')
+    var resolvedBadgeId = challenge.badgeId ||
+      (typeof challenge.badge === 'string' && challenge.badge ? challenge.badge : null);
+    var badgeRef = resolvedBadgeId
+      ? f.doc(db(), 'users', userId, 'badges', resolvedBadgeId)
+      : null;
+
+    // Source dedup ref — prevents the same check-in from incrementing a challenge twice
+    var sourceRef = (checkinId && f.doc)
+      ? f.doc(db(), 'users', userId, 'challengeProgress', challenge.id, 'sources', checkinId)
+      : null;
+
     return f.runTransaction(db(), function (tx) {
-      return tx.get(pRef).then(function (snap) {
+      var reads = [tx.get(pRef)];
+      if (sourceRef) reads.push(tx.get(sourceRef));
+
+      return Promise.all(reads).then(function (results) {
+        var snap = results[0];
+        var sourceSnap = sourceRef ? results[1] : null;
+
+        // Deduplication: skip if this exact check-in was already counted
+        if (sourceSnap && sourceSnap.exists()) {
+          console.log('[ChallengeEngine] duplicate checkin', checkinId, 'for', challenge.id, '— skipping');
+          return { completedNow: false, alreadyProcessed: true };
+        }
+
         var current = snap.exists() ? (snap.data() || {}) : {};
         if (current.completed === true) {
           console.log('[ChallengeEngine] already completed:', challenge.id, '— skipping');
           return { completedNow: false, alreadyCompleted: true };
         }
 
-        var previous = Math.max(0, Number(current.progress || 0));
+        var previous = Math.max(0, Number(current.count || current.progress || 0));
         var next = Math.min(target, previous + 1);
         var completedNow = next >= target;
         var awardXp = completedNow && current.xpAwarded !== true && challenge.xpReward > 0;
 
         var payload = {
+          uid: userId,
           userId: userId,
           challengeId: challenge.id,
-          progress: next,
+          count: next,                             // primary progress field
+          progress: next,                          // backward compat for UI
           targetCount: target,
           completed: completedNow,
           xpAwarded: completedNow ? true : (current.xpAwarded === true),
           xpReward: challenge.xpReward,
-          proofType: proofTypeFor(challenge, checkin),
+          sourceType: proofTypeFor(challenge, checkin),
+          proofType: proofTypeFor(challenge, checkin),  // backward compat
           updatedAt: f.serverTimestamp()
         };
+        if (checkinId) payload.lastSourceId = checkinId;
         if (!snap.exists()) payload.createdAt = f.serverTimestamp();
         if (completedNow) payload.completedAt = f.serverTimestamp();
-        if (f.arrayUnion && checkinId) payload.relatedCheckins = f.arrayUnion(checkinId);
 
         tx.set(pRef, payload, { merge: true });
 
-        console.log('[ChallengeEngine] progress updated:', challenge.id, next + '/' + target);
-
-        if (completedNow) {
-          console.log('[ChallengeEngine] challenge completed:', challenge.id);
+        // Mark this check-in as processed so it can never double-count
+        if (sourceRef) {
+          tx.set(sourceRef, { processedAt: f.serverTimestamp() });
         }
+
+        console.log('[ChallengeEngine] progress updated:', challenge.id, next + '/' + target);
+        if (completedNow) console.log('[ChallengeEngine] challenge completed:', challenge.id);
         if (awardXp) {
           tx.update(userRef, { xp: f.increment(challenge.xpReward), updatedAt: f.serverTimestamp() });
           console.log('[ChallengeEngine] xp awarded:', challenge.xpReward, 'for', challenge.id);
         }
         if (completedNow && badgeRef) {
-          var bDef = BADGE_DEFAULTS[badgeId] || {};
+          var bDef = BADGE_DEFAULTS[resolvedBadgeId] || {};
           tx.set(badgeRef, {
-            badgeId: badgeId,
+            badgeId: resolvedBadgeId,
             challengeId: challenge.id,
             title: challenge.badgeTitle || bDef.title || challenge.title || 'Challenge Badge',
             description: challenge.badgeDescription || bDef.description || '',
