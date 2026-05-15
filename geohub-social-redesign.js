@@ -217,7 +217,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function initials(name){ name=text(name,'GeoHub'); return name.split(/\s+/).slice(0,2).map(function(x){return x[0];}).join('').toUpperCase(); }
   function img(url, alt){ return url ? '<img src="'+esc(url)+'" alt="'+esc(alt||'')+'" loading="lazy" onerror="this.remove()">' : ''; }
   function readFileAsDataUrl(file){ return new Promise(function(resolve,reject){ if(!file) return resolve(''); if(!/^image\/(png|jpe?g|webp|gif)$/i.test(file.type||'')) return reject(new Error('Use a PNG, JPG, WEBP or GIF image.')); if(file.size > 8 * 1024 * 1024) return reject(new Error('Image must be under 8 MB.')); var r=new FileReader(); r.onload=function(){ resolve(r.result||''); }; r.onerror=reject; r.readAsDataURL(file); }); }
-  function triggerImagePick(cb){ var input=document.createElement('input'); input.type='file'; input.accept='image/png,image/jpeg,image/webp,image/gif'; input.style.display='none'; document.body.appendChild(input); input.onchange=function(){ var f=input.files && input.files[0]; readFileAsDataUrl(f).then(function(url){ cb(url); }).catch(function(err){ toast(err.message || 'Image could not be read','error'); }).finally(function(){ input.remove(); }); }; input.click(); }
+  function triggerImagePick(cb){ var input=document.createElement('input'); input.type='file'; input.accept='image/png,image/jpeg,image/webp,image/gif'; input.style.display='none'; document.body.appendChild(input); input.onchange=function(){ var f=input.files && input.files[0]; readFileAsDataUrl(f).then(function(url){ cb(url, f); }).catch(function(err){ toast(err.message || 'Image could not be read','error'); }).finally(function(){ input.remove(); }); }; input.click(); }
   function iconFor(type){ return ({post:'fa-newspaper',business:'fa-store',group:'fa-users',place:'fa-map-marker-alt',event:'fa-calendar',service:'fa-briefcase',reward:'fa-gift',challenge:'fa-trophy',learning:'fa-graduation-cap',creator:'fa-user-astronaut'})[type] || 'fa-circle'; }
   function labelFor(type){ return ({post:'Post',business:'Business',group:'Group',place:'Place',event:'Event',service:'Service',reward:'Reward',challenge:'Challenge',learning:'Learning',creator:'Creator'})[type] || text(type,'Item'); }
   function toast(msg, type){ if(window.GeoSocial && window.GeoSocial.toast) return window.GeoSocial.toast(msg,type); var old=$('.gh-toast'); if(old) old.remove(); var el=document.createElement('div'); el.className='gh-toast'+(type==='error'?' error':''); el.textContent=msg; document.body.appendChild(el); requestAnimationFrame(function(){el.classList.add('show');}); setTimeout(function(){el.classList.remove('show'); setTimeout(function(){el.remove();},250);},2300); }
@@ -498,44 +498,101 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
 
-  function prepareMedia(url, folder){
-    if(!url) return Promise.resolve('');
-    if(GS() && GS().uploadImageDataUrl) return GS().uploadImageDataUrl(url, folder || 'posts').then(function(finalUrl){
-      if(url.indexOf('data:') === 0 && !finalUrl) throw new Error('Image upload failed');
+  function prepareMedia(urlOrFile, folder, onProgress){
+    if(!urlOrFile) return Promise.resolve('');
+    if(urlOrFile instanceof File){
+      if(GS() && GS().uploadFile) return GS().uploadFile(urlOrFile, folder || 'posts', onProgress);
+      return readFileAsDataUrl(urlOrFile).then(function(dataUrl){ return prepareMedia(dataUrl, folder, onProgress); });
+    }
+    if(GS() && GS().uploadImageDataUrl) return GS().uploadImageDataUrl(urlOrFile, folder || 'posts').then(function(finalUrl){
+      if(urlOrFile.indexOf('data:') === 0 && !finalUrl) throw new Error('Image upload failed');
       return finalUrl;
     });
-    return Promise.resolve(url);
+    return Promise.resolve(urlOrFile);
   }
 
   function openPostModal(extra){
     if(!requireLogin()) return;
     var body='<textarea class="gh-textarea" id="ghPostText" placeholder="რას აზიარებ დღეს?"></textarea>'+
       '<div class="gh-form-grid"><select class="gh-select" id="ghPostVisibility"><option value="public">🌍 Public</option><option value="friends">👥 Friends / Followers</option><option value="onlyme">🔒 Only me</option></select><input class="gh-input" id="ghPostFeeling" placeholder="Feeling / activity optional"></div>'+
-      '<div style="height:10px"></div><input class="gh-input" id="ghPostImg" placeholder="Image URL optional"><div style="height:10px"></div><button class="gh-btn ghost full" id="ghPickPostImage" type="button"><i class="fas fa-image"></i> Choose image from device</button><div id="ghPostPreview" style="margin-top:10px"></div>'+
+      '<div style="height:10px"></div><input class="gh-input" id="ghPostImg" placeholder="Image URL optional"><div style="height:10px"></div>'+
+      '<button class="gh-btn ghost full" id="ghPickPostImage" type="button"><i class="fas fa-image"></i> Choose image from device</button>'+
+      '<div id="ghPostPreview" style="margin-top:10px"></div>'+
+      '<div class="gh-upload-progress" id="ghPostUploadBar" style="display:none"><div class="gh-upload-track"><div class="gh-upload-bar" id="ghPostUploadFill"></div></div><span id="ghPostUploadPct">0%</span></div>'+
       '<div class="gh-small" style="margin-top:10px">Tip: mention people with @username. Privacy is saved with the post.</div>';
     modal('Create post', body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitPost"><i class="fas fa-paper-plane"></i> Post</button>', 'ghPostModal');
-    var picked='';
-    $('#ghPickPostImage').onclick=function(){ triggerImagePick(function(url){ picked=url; $('#ghPostImg').value=''; $('#ghPostPreview').innerHTML=url?'<img src="'+esc(url)+'" style="width:100%;max-height:260px;object-fit:cover;border-radius:16px;border:1px solid var(--gh-border)">':''; }); };
+    var picked='', pickedFile=null;
+    $('#ghPickPostImage').onclick=function(){
+      triggerImagePick(function(url, file){
+        picked=url; pickedFile=file||null;
+        $('#ghPostImg').value='';
+        $('#ghPostPreview').innerHTML=url?'<img src="'+esc(url)+'" style="width:100%;max-height:260px;object-fit:cover;border-radius:16px;border:1px solid var(--gh-border)">':'';
+      });
+    };
     $('#ghSubmitPost').onclick=function(){
-      var txt=$('#ghPostText').value, url=picked || $('#ghPostImg').value.trim();
+      var txt=$('#ghPostText').value, urlInput=$('#ghPostImg').value.trim();
+      var mediaSource = pickedFile || picked || urlInput;
+      if(!txt.trim() && !mediaSource) return toast('Write something or pick an image','error');
       var payload=Object.assign({ visibility: $('#ghPostVisibility').value, feeling: $('#ghPostFeeling').value.trim(), mentions: extractMentions(txt) }, extra||{});
       var submitBtn = $('#ghSubmitPost');
+      if(submitBtn.disabled) return;
       submitBtn.disabled = true;
       submitBtn.dataset.originalText = submitBtn.innerHTML;
-      submitBtn.innerHTML = url ? '<i class="fas fa-circle-notch fa-spin"></i> Uploading…' : '<i class="fas fa-circle-notch fa-spin"></i> Posting…';
-      prepareMedia(url, 'posts').then(function(finalUrl){
-        if(url && !finalUrl) throw new Error('Image upload failed');
+      submitBtn.innerHTML = mediaSource ? '<i class="fas fa-circle-notch fa-spin"></i> Uploading…' : '<i class="fas fa-circle-notch fa-spin"></i> Posting…';
+      var bar=$('#ghPostUploadBar'), fill=$('#ghPostUploadFill'), pctEl=$('#ghPostUploadPct');
+      if(bar && mediaSource) bar.style.display='flex';
+      prepareMedia(mediaSource, 'posts', function(pct){
+        if(fill) fill.style.width=pct+'%';
+        if(pctEl) pctEl.textContent=pct+'%';
+        submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> '+pct+'%';
+      }).then(function(finalUrl){
+        if(mediaSource && !finalUrl && !(urlInput && !picked && !pickedFile)) throw new Error('Image upload failed');
+        if(bar) bar.style.display='none';
+        submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
         GS().createPost(txt, finalUrl, function(){ var m=$('#ghPostModal'); if(m)m.remove(); }, payload);
-      }).catch(function(err){ console.error('[GeoHub] post image upload failed', err); toast('Image upload failed. Check Cloudinary settings.', 'error'); }).finally(function(){ var b=$('#ghSubmitPost'); if(b){ b.disabled=false; b.innerHTML=b.dataset.originalText || '<i class="fas fa-paper-plane"></i> Post'; } });
+      }).catch(function(err){ console.error('[GeoHub] post image upload failed', err); toast('Image upload failed. Check Cloudinary settings.', 'error'); if(bar) bar.style.display='none'; })
+        .finally(function(){ var b=$('#ghSubmitPost'); if(b){ b.disabled=false; b.innerHTML=b.dataset.originalText || '<i class="fas fa-paper-plane"></i> Post'; } });
     };
   }
 
   function openStoryModal(){
     if(!requireLogin()) return;
-    var body='<textarea class="gh-textarea" id="ghStoryText" placeholder="Story text…"></textarea><div style="height:10px"></div><input class="gh-input" id="ghStoryImg" placeholder="Image URL optional"><div style="height:10px"></div><button class="gh-btn ghost full" id="ghPickStoryImage" type="button"><i class="fas fa-image"></i> Choose image</button><div id="ghStoryPreview" style="margin-top:10px"></div>';
+    var body='<textarea class="gh-textarea" id="ghStoryText" placeholder="Story text…"></textarea>'+
+      '<div style="height:10px"></div><input class="gh-input" id="ghStoryImg" placeholder="Image URL optional"><div style="height:10px"></div>'+
+      '<button class="gh-btn ghost full" id="ghPickStoryImage" type="button"><i class="fas fa-image"></i> Choose image</button>'+
+      '<div id="ghStoryPreview" style="margin-top:10px"></div>'+
+      '<div class="gh-upload-progress" id="ghStoryUploadBar" style="display:none"><div class="gh-upload-track"><div class="gh-upload-bar" id="ghStoryUploadFill"></div></div><span id="ghStoryUploadPct">0%</span></div>';
     modal('Add story', body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitStory">Share story</button>', 'ghStoryModal');
-    var picked=''; $('#ghPickStoryImage').onclick=function(){ triggerImagePick(function(url){ picked=url; $('#ghStoryImg').value=''; $('#ghStoryPreview').innerHTML=url?'<img src="'+esc(url)+'" style="width:100%;max-height:260px;object-fit:cover;border-radius:16px;border:1px solid var(--gh-border)">':''; }); };
-    $('#ghSubmitStory').onclick=function(){ var t=$('#ghStoryText').value, url=picked||$('#ghStoryImg').value.trim(); if(!t.trim()&&!url)return toast('Story needs text or image','error'); if(!GS().createStory) return toast('Stories unavailable','error'); var submitBtn=$('#ghSubmitStory'); submitBtn.disabled=true; submitBtn.dataset.originalText=submitBtn.innerHTML; submitBtn.innerHTML=url?'<i class="fas fa-circle-notch fa-spin"></i> Uploading…':'<i class="fas fa-circle-notch fa-spin"></i> Sharing…'; prepareMedia(url,'stories').then(function(finalUrl){ if(url && !finalUrl) throw new Error('Image upload failed'); GS().createStory(t,finalUrl,function(){ var m=$('#ghStoryModal'); if(m)m.remove(); }); }).catch(function(err){ console.error('[GeoHub] story image upload failed', err); toast('Image upload failed. Check Cloudinary settings.','error'); }).finally(function(){ var b=$('#ghSubmitStory'); if(b){ b.disabled=false; b.innerHTML=b.dataset.originalText||'Share story'; } }); };
+    var picked='', pickedFile=null;
+    $('#ghPickStoryImage').onclick=function(){
+      triggerImagePick(function(url, file){
+        picked=url; pickedFile=file||null;
+        $('#ghStoryImg').value='';
+        $('#ghStoryPreview').innerHTML=url?'<img src="'+esc(url)+'" style="width:100%;max-height:260px;object-fit:cover;border-radius:16px;border:1px solid var(--gh-border)">':'';
+      });
+    };
+    $('#ghSubmitStory').onclick=function(){
+      var t=$('#ghStoryText').value, urlInput=$('#ghStoryImg').value.trim();
+      var mediaSource=pickedFile||picked||urlInput;
+      if(!t.trim()&&!mediaSource) return toast('Story needs text or image','error');
+      if(!GS().createStory) return toast('Stories unavailable','error');
+      var submitBtn=$('#ghSubmitStory');
+      if(submitBtn.disabled) return;
+      submitBtn.disabled=true; submitBtn.dataset.originalText=submitBtn.innerHTML;
+      submitBtn.innerHTML=mediaSource?'<i class="fas fa-circle-notch fa-spin"></i> Uploading…':'<i class="fas fa-circle-notch fa-spin"></i> Sharing…';
+      var bar=$('#ghStoryUploadBar'), fill=$('#ghStoryUploadFill'), pctEl=$('#ghStoryUploadPct');
+      if(bar && mediaSource) bar.style.display='flex';
+      prepareMedia(mediaSource,'stories',function(pct){
+        if(fill) fill.style.width=pct+'%';
+        if(pctEl) pctEl.textContent=pct+'%';
+        submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> '+pct+'%';
+      }).then(function(finalUrl){
+        if(mediaSource && !finalUrl && !(urlInput && !picked && !pickedFile)) throw new Error('Image upload failed');
+        if(bar) bar.style.display='none';
+        GS().createStory(t,finalUrl,function(){ var m=$('#ghStoryModal'); if(m)m.remove(); });
+      }).catch(function(err){ console.error('[GeoHub] story image upload failed', err); toast('Image upload failed. Check Cloudinary settings.','error'); if(bar) bar.style.display='none'; })
+        .finally(function(){ var b=$('#ghSubmitStory'); if(b){ b.disabled=false; b.innerHTML=b.dataset.originalText||'Share story'; } });
+    };
   }
 
   function normalizeStoryItem(s){
@@ -552,8 +609,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function buildStoryGroups(items){
-    var groups=[], map={};
+    var groups=[], map={}, seenIds={};
     (items||[]).map(normalizeStoryItem).forEach(function(story){
+      if(story.id && seenIds[story.id]) return;
+      if(story.id) seenIds[story.id]=true;
       var key = story.authorId || story.authorName || story.id || 'unknown';
       if(!map[key]){
         map[key] = { key:key, authorId:story.authorId, authorName:story.authorName, authorAvatar:story.authorAvatar, stories:[] };
@@ -625,43 +684,74 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     document.body.appendChild(overlay);
     document.body.classList.add('gh-story-open');
 
-    function close(){ overlay.remove(); document.body.classList.remove('gh-story-open'); document.removeEventListener('keydown', onKey); }
-    function normalizeIndexes(){
-      if(groupIndex < 0) groupIndex = groups.length - 1;
-      if(groupIndex >= groups.length) groupIndex = 0;
+    var _autoTimer = null;
+    var STORY_DUR = 5000;
+
+    function clearTimer(){ if(_autoTimer){ clearTimeout(_autoTimer); _autoTimer=null; } }
+    function close(){ clearTimer(); overlay.remove(); document.body.classList.remove('gh-story-open'); document.removeEventListener('keydown', onKey); }
+
+    function tryAdvance(){
       var g = groups[groupIndex];
-      if(storyIndex < 0){ groupIndex = groupIndex - 1; if(groupIndex < 0) groupIndex = groups.length - 1; g = groups[groupIndex]; storyIndex = g.stories.length - 1; }
-      if(storyIndex >= g.stories.length){ groupIndex = groupIndex + 1; if(groupIndex >= groups.length) groupIndex = 0; g = groups[groupIndex]; storyIndex = 0; }
+      var nextS = storyIndex + 1;
+      if(nextS < g.stories.length){ storyIndex=nextS; draw(); return; }
+      var nextG = groupIndex + 1;
+      if(nextG < groups.length){ groupIndex=nextG; storyIndex=0; draw(); return; }
+      close();
     }
+
     function draw(){
-      normalizeIndexes();
+      clearTimer();
       var g = groups[groupIndex];
       var st = g.stories[storyIndex] || {};
       var media = st.mediaUrl || '';
-      overlay.innerHTML = '<div class="gh-story-shell" role="dialog" aria-modal="true" aria-label="Story viewer">'+
-        '<div class="gh-story-progress">'+g.stories.map(function(_,i){ return '<span class="'+(i<=storyIndex?'active':'')+'"></span>'; }).join('')+'</div>'+
-        '<div class="gh-story-head"><div class="gh-story-author">'+(g.authorAvatar?'<span class="gh-story-author-avatar">'+img(g.authorAvatar,g.authorName)+'</span>':'<span class="gh-story-author-avatar initials">'+esc(initials(g.authorName))+'</span>')+'<div><strong>'+esc(g.authorName)+'</strong><small>'+(storyIndex+1)+'/'+g.stories.length+' · '+timeAgo(st.createdAt)+'</small></div></div><button type="button" class="gh-story-close" aria-label="Close story">×</button></div>'+
-        '<div class="gh-story-main">'+(media?'<img src="'+esc(media)+'" alt="Story image" loading="eager" onerror="this.style.display=\'none\'">':'<p>'+esc(st.text||'Story')+'</p>')+(media && st.text?'<div class="gh-story-caption">'+esc(st.text)+'</div>':'')+'</div>'+
-        '<button type="button" class="gh-story-nav prev" aria-label="Previous story">‹</button><button type="button" class="gh-story-nav next" aria-label="Next story">›</button>'+
-      '</div>';
+      var bars = g.stories.map(function(_,i){
+        return '<span class="'+(i < storyIndex ? 'done' : (i === storyIndex ? 'current' : ''))+'"></span>';
+      }).join('');
+      overlay.innerHTML =
+        '<div class="gh-story-shell" role="dialog" aria-modal="true" aria-label="Story viewer">'+
+        '<div class="gh-story-progress">'+bars+'</div>'+
+        '<div class="gh-story-head">'+
+          '<div class="gh-story-author">'+
+            (g.authorAvatar?'<span class="gh-story-author-avatar">'+img(g.authorAvatar,g.authorName)+'</span>':'<span class="gh-story-author-avatar initials">'+esc(initials(g.authorName))+'</span>')+
+            '<div><strong>'+esc(g.authorName)+'</strong><small>'+(storyIndex+1)+'/'+g.stories.length+' · '+timeAgo(st.createdAt)+'</small></div>'+
+          '</div>'+
+          '<button type="button" class="gh-story-close" aria-label="Close story">×</button>'+
+        '</div>'+
+        '<div class="gh-story-main">'+
+          (media?'<img src="'+esc(media)+'" alt="Story image" loading="eager" onerror="this.style.display=\'none\'">':'<p>'+esc(st.text||'Story')+'</p>')+
+          (media && st.text?'<div class="gh-story-caption">'+esc(st.text)+'</div>':'')+
+        '</div>'+
+        '<button type="button" class="gh-story-nav prev" aria-label="Previous story">‹</button>'+
+        '<button type="button" class="gh-story-nav next" aria-label="Next story">›</button>'+
+        '</div>';
+
       overlay.querySelector('.gh-story-close').onclick = close;
-      overlay.querySelector('.gh-story-nav.prev').onclick = function(e){ e.stopPropagation(); storyIndex--; draw(); };
-      overlay.querySelector('.gh-story-nav.next').onclick = function(e){ e.stopPropagation(); storyIndex++; draw(); };
-      overlay.querySelector('.gh-story-main').onclick = function(e){
-        var r = overlay.querySelector('.gh-story-main').getBoundingClientRect();
-        if(e.clientX < r.left + r.width/2) storyIndex--; else storyIndex++;
+      overlay.querySelector('.gh-story-nav.prev').onclick = function(e){
+        e.stopPropagation();
+        if(storyIndex > 0){ storyIndex--; } else if(groupIndex > 0){ groupIndex--; storyIndex=groups[groupIndex].stories.length-1; } else return;
         draw();
       };
+      overlay.querySelector('.gh-story-nav.next').onclick = function(e){ e.stopPropagation(); tryAdvance(); };
+      overlay.querySelector('.gh-story-main').onclick = function(e){
+        if(e.target.closest('.gh-story-caption')) return;
+        var r = overlay.querySelector('.gh-story-main').getBoundingClientRect();
+        if(e.clientX < r.left + r.width * 0.35){
+          if(storyIndex > 0){ storyIndex--; } else if(groupIndex > 0){ groupIndex--; storyIndex=groups[groupIndex].stories.length-1; } else return;
+          draw();
+        } else { tryAdvance(); }
+      };
+
+      _autoTimer = setTimeout(tryAdvance, STORY_DUR);
     }
-    function onKey(e){ if(e.key==='Escape') close(); if(e.key==='ArrowLeft'){ storyIndex--; draw(); } if(e.key==='ArrowRight'){ storyIndex++; draw(); } }
+
+    function onKey(e){ if(e.key==='Escape') close(); if(e.key==='ArrowLeft'){ clearTimer(); if(storyIndex>0){storyIndex--;}else if(groupIndex>0){groupIndex--;storyIndex=groups[groupIndex].stories.length-1;}else return; draw(); } if(e.key==='ArrowRight'){ clearTimer(); tryAdvance(); } }
     document.addEventListener('keydown', onKey);
     overlay.addEventListener('click', function(e){ if(e.target === overlay) close(); });
-    // Swipe left/right to navigate stories on touch devices
     var _tx = 0;
     overlay.addEventListener('touchstart', function(e){ _tx = e.changedTouches[0].clientX; }, { passive: true });
     overlay.addEventListener('touchend', function(e){
       var dx = e.changedTouches[0].clientX - _tx;
-      if(Math.abs(dx) > 48){ if(dx < 0) storyIndex++; else storyIndex--; draw(); }
+      if(Math.abs(dx) > 48){ clearTimer(); if(dx < 0){ tryAdvance(); } else { if(storyIndex>0){storyIndex--;}else if(groupIndex>0){groupIndex--;storyIndex=groups[groupIndex].stories.length-1;} draw(); } }
     }, { passive: true });
     draw();
   }
