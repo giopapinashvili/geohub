@@ -96,6 +96,28 @@
     } catch(e) {}
   }
 
+  var NOTIF_ICONS = {
+    like:      { icon: 'fa-heart',    color: '#ef4444' },
+    comment:   { icon: 'fa-comment',  color: '#3b82f6' },
+    reply:     { icon: 'fa-reply',    color: '#8b5cf6' },
+    follow:    { icon: 'fa-user-plus',color: '#10b981' },
+    message:   { icon: 'fa-envelope', color: '#06b6d4' },
+    reward:    { icon: 'fa-gift',     color: '#f59e0b' },
+    badge:     { icon: 'fa-medal',    color: '#f59e0b' },
+    challenge: { icon: 'fa-trophy',   color: '#f59e0b' }
+  };
+
+  function notifTimeAgo(ts) {
+    if (!ts) return '';
+    var ms = ts.toMillis ? ts.toMillis() : (ts.seconds ? ts.seconds * 1000 : 0);
+    if (!ms) return '';
+    var diff = Date.now() - ms;
+    if (diff < 60000) return 'just now';
+    if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+    if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+    return Math.floor(diff / 86400000) + 'd ago';
+  }
+
   function openNavNotifications(uid, f, geo) {
     var existing = document.getElementById('navNotifPanel');
     if (existing) { if (existing._unsub) existing._unsub(); existing.remove(); return; }
@@ -105,8 +127,13 @@
     panel.innerHTML =
       '<div class="nav-notif-header"><strong>Notifications</strong>' +
       '<button class="nav-notif-close" id="navNotifClose"><i class="fas fa-times"></i></button></div>' +
-      '<div class="nav-notif-list" id="navNotifList"><div class="nav-notif-loading"><i class="fas fa-circle-notch fa-spin"></i></div></div>' +
-      '<div class="nav-notif-footer"><button class="nav-notif-mark-all" id="navNotifMarkAll">Mark all read</button></div>';
+      '<div class="nav-notif-list" id="navNotifList">' +
+      '<div class="nav-notif-skel-item"></div><div class="nav-notif-skel-item"></div><div class="nav-notif-skel-item"></div>' +
+      '</div>' +
+      '<div class="nav-notif-footer">' +
+      '<button class="nav-notif-mark-all" id="navNotifMarkAll">Mark all read</button>' +
+      '<a class="nav-notif-view-all" href="notifications.html">View all</a>' +
+      '</div>';
     document.body.appendChild(panel);
     requestAnimationFrame(function() { panel.classList.add('open'); });
     var outsideHandler = null;
@@ -143,11 +170,23 @@
           return;
         }
         list.innerHTML = items.map(function(n) {
+          var ic = NOTIF_ICONS[n.type] || { icon: 'fa-bell', color: '#10b981' };
           return '<a class="nav-notif-item' + (!n.read ? ' unread' : '') + '" href="' + esc(n.href || '#') + '" data-notif-id="' + esc(n.id) + '">' +
-            '<div class="nav-notif-icon"><i class="fas fa-bell"></i></div>' +
+            '<div class="nav-notif-icon" style="color:' + ic.color + '"><i class="fas ' + ic.icon + '"></i></div>' +
             '<div class="nav-notif-text"><strong>' + esc(n.title || 'GeoHub') + '</strong>' +
-            '<span>' + esc(n.body || n.message || '') + '</span></div></a>';
+            '<span>' + esc(n.body || n.message || '') + (n.createdAt ? ' · ' + notifTimeAgo(n.createdAt) : '') + '</span></div>' +
+            (!n.read ? '<div class="nav-notif-dot"></div>' : '') +
+            '</a>';
         }).join('');
+        list.querySelectorAll('[data-notif-id]').forEach(function(a) {
+          a.addEventListener('click', function() {
+            var id = a.dataset.notifId;
+            try { f.updateDoc(f.doc(geo.db, 'userNotifications', id), { read: true, seen: true }); } catch(e) {}
+          });
+        });
+        var badge = document.getElementById('navNotifBadge');
+        var unreadCount = items.filter(function(n) { return !n.read && !n.seen; }).length;
+        if (badge) { badge.textContent = unreadCount > 99 ? '99+' : unreadCount > 0 ? String(unreadCount) : ''; badge.style.display = unreadCount > 0 ? '' : 'none'; }
       }, function() {
         var list = document.getElementById('navNotifList');
         if (list) list.innerHTML = '<div class="nav-notif-empty"><i class="fas fa-bell"></i><p>No notifications yet</p></div>';
@@ -163,7 +202,12 @@
         panel.querySelectorAll('[data-notif-id]').forEach(function(a) {
           var id = a.dataset.notifId;
           try { f.updateDoc(f.doc(geo.db, 'userNotifications', id), { read: true, seen: true }); } catch(e) {}
+          a.classList.remove('unread');
+          var dot = a.querySelector('.nav-notif-dot');
+          if (dot) dot.remove();
         });
+        var badge = document.getElementById('navNotifBadge');
+        if (badge) { badge.textContent = ''; badge.style.display = 'none'; }
       });
     }
   }

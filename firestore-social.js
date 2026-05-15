@@ -158,7 +158,7 @@
     }
 
 
-    function createNotification(toUserId, type, title, body, href, extra) {
+    function createNotification(toUserId, type, title, body, href, extra, dedupKey) {
       var me = meData() || {};
       if (!toUserId || !me.uid || toUserId === me.uid) return Promise.resolve();
       var payload = Object.assign({
@@ -176,8 +176,35 @@
         seen: false,
         createdAt: serverTimestamp()
       }, extra || {});
+      if (dedupKey) {
+        return setDoc(doc(db, 'userNotifications', dedupKey), payload).catch(function (err) {
+          console.warn('[GeoSocial] createNotification', err.message);
+        });
+      }
       return addDoc(collection(db, 'userNotifications'), payload).catch(function (err) {
         console.warn('[GeoSocial] createNotification', err.message);
+      });
+    }
+
+    function createSystemNotification(toUserId, type, title, body, href, extra) {
+      if (!toUserId) return Promise.resolve();
+      var payload = Object.assign({
+        userId: toUserId,
+        toUserId: toUserId,
+        fromUserId: 'system',
+        fromName: 'GeoHub',
+        fromAvatar: '',
+        type: type || 'notification',
+        title: title || 'GeoHub',
+        body: body || '',
+        message: body || '',
+        href: href || 'feed.html',
+        read: false,
+        seen: false,
+        createdAt: serverTimestamp()
+      }, extra || {});
+      return addDoc(collection(db, 'userNotifications'), payload).catch(function (err) {
+        console.warn('[GeoSocial] createSystemNotification', err.message);
       });
     }
 
@@ -723,6 +750,7 @@
           });
         }).then(function(res){
           updateDoc(doc(db, 'users', user.uid), { geoPointsSpentTotal: increment(Number(res.reward.pointPrice || 0)), updatedAt: serverTimestamp() }).catch(function(){});
+          createSystemNotification(user.uid, 'reward', 'Reward Redeemed!', 'You redeemed: ' + (res.reward.title || res.reward.name || 'a reward'), 'rewards.html').catch(function(){});
           toast('Coupon unlocked: ' + res.code);
           if(callback) callback(true, res);
         }).catch(function(err){
@@ -834,7 +862,7 @@
         work.then(function () {
           if (nextLiked) {
             getPostOwner(postId).then(function (ownerId) {
-              return createNotification(ownerId, 'like', (meData() || {}).name + ' liked your post', 'Someone liked your post.', 'feed.html#post-' + postId, { postId: postId });
+              return createNotification(ownerId, 'like', (meData() || {}).name + ' liked your post', 'Someone liked your post.', 'feed.html#post-' + postId, { postId: postId }, 'like_' + (meData() || {}).uid + '_' + postId);
             });
           }
           if (callback) callback(nextLiked);
@@ -969,7 +997,7 @@
               .then(function () {
                 return updateDoc(doc(db, 'users', targetUserId), { followers: increment(1) }).catch(function(){})
                   .then(function(){ return updateDoc(doc(db, 'users', uid), { following: increment(1) }).catch(function(){}); })
-                  .then(function(){ return createNotification(targetUserId, 'follow', (meData() || {}).name + ' followed you', 'You have a new follower.', 'profile.html?id=' + uid, { followerId: uid }); });
+                  .then(function(){ return createNotification(targetUserId, 'follow', (meData() || {}).name + ' followed you', 'You have a new follower.', 'profile.html?id=' + uid, { followerId: uid }, 'follow_' + uid + '_' + targetUserId); });
               })
               .then(function () {
                 toast('Following');
@@ -1354,7 +1382,9 @@
           }).catch(function(){});
           setDoc(doc(db, 'userBadges', user.uid + '_first_checkin'), {
             userId: user.uid, badgeId: 'first_checkin', title: 'First Check-in', icon: 'fa-location-dot', createdAt: serverTimestamp()
-          }, { merge: true }).catch(function(){});
+          }, { merge: true }).then(function(){
+            createSystemNotification(user.uid, 'badge', 'Badge Earned: First Check-in!', 'You earned the First Check-in badge.', 'profile.html', { badgeId: 'first_checkin' }).catch(function(){});
+          }).catch(function(){});
           toast('Checked in at ' + (placeName || 'place') + '! +' + (xpAwarded || 50) + ' XP');
           awardPoints(Number(xpAwarded || 50), 'Check-in', 'checkin', placeId || '').catch(function(){});
           if (window.GeoChallenges && window.GeoChallenges.evaluateCheckin) {
@@ -2034,6 +2064,7 @@
       createCheckinFull:           createCheckinFull,
       createStory:             createStory,
       listenStories:           listenStories,
+      createSystemNotification: createSystemNotification,
       listenUserNotifications: listenUserNotifications,
       markNotificationRead:    markNotificationRead,
       listenUserPosts:         listenUserPosts,

@@ -271,9 +271,12 @@
       return Promise.all(matching.map(function (c) { return applyCheckinToChallenge(userId, c, checkin, checkinId); }));
     }).then(function (results) {
       var completed = results.filter(function (r) { return r && r.completedNow; }).map(function (r) { return r.challenge; });
-      if (completed.length && window.GeoSocial && window.GeoSocial.toast) {
+      if (completed.length && window.GeoSocial) {
         var c0 = completed[0];
-        window.GeoSocial.toast('Challenge completed: ' + (c0.title || c0.name || 'Challenge') + ' (+' + (c0.xpReward || 0) + ' XP)');
+        if (window.GeoSocial.toast) window.GeoSocial.toast('Challenge completed: ' + (c0.title || c0.name || 'Challenge') + ' (+' + (c0.xpReward || 0) + ' XP)');
+        if (window.GeoSocial.createSystemNotification) {
+          window.GeoSocial.createSystemNotification(userId, 'challenge', 'Challenge Completed: ' + (c0.title || c0.name || 'Challenge'), 'You earned ' + (c0.xpReward || 0) + ' XP!', 'feed.html', { challengeId: c0.id || '' }).catch(function(){});
+        }
       }
       var out = { completed: completed };
       if (callback) callback(out);

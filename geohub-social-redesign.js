@@ -322,7 +322,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function leftNav(active){
     var items=[
-      ['feed','feed.html','fa-house','მთავარი Feed'],['places','places.html','fa-location-dot','რუკა / Places'],['business','business.html','fa-store','Businesses'],['groups','groups.html','fa-users','Groups'],['events','events.html','fa-calendar-xmark','Events'],['messages','messages.html','fa-comment-dots','Messages'],['notifications','feed.html#notifications','fa-bell','Notifications'],['rewards','rewards.html','fa-gift','Rewards / Points'],['challenges','challenges.html','fa-trophy','Challenges'],['services','services.html','fa-grip','Services'],['realestate','real-estate.html','fa-house-chimney','Real Estate'],['learning','learning.html','fa-graduation-cap','Learning'],['creators','creators.html','fa-camera-retro','Creators'],['trust','trust.html','fa-shield-halved','Trust / Safety'],['admin','admin.html','fa-user-shield','Admin Panel']
+      ['feed','feed.html','fa-house','მთავარი Feed'],['places','places.html','fa-location-dot','რუკა / Places'],['business','business.html','fa-store','Businesses'],['groups','groups.html','fa-users','Groups'],['events','events.html','fa-calendar-xmark','Events'],['messages','messages.html','fa-comment-dots','Messages'],['notifications','notifications.html','fa-bell','Notifications'],['rewards','rewards.html','fa-gift','Rewards / Points'],['challenges','challenges.html','fa-trophy','Challenges'],['services','services.html','fa-grip','Services'],['realestate','real-estate.html','fa-house-chimney','Real Estate'],['learning','learning.html','fa-graduation-cap','Learning'],['creators','creators.html','fa-camera-retro','Creators'],['trust','trust.html','fa-shield-halved','Trust / Safety'],['admin','admin.html','fa-user-shield','Admin Panel']
     ];
     return '<aside class="gh-left"><nav class="gh-panel">'+items.map(function(it){return '<a class="gh-nav-item '+(active===it[0]?'active':'')+'" href="'+it[1]+'"><i class="fas '+it[2]+'"></i><span>'+it[3]+'</span></a>';}).join('')+'</nav></aside>';
   }
@@ -463,17 +463,39 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     return fs().getDocs(fs().query(fs().collection(db(), collectionName), fs().limit(n||10))).then(function(snap){ var arr=[]; snap.forEach(function(d){ arr.push(Object.assign({id:d.id}, d.data())); }); arr.sort(function(a,b){ return ts(b.createdAt)-ts(a.createdAt); }); return arr; }).catch(function(){ return []; });
   }
 
+  var GH_NOTIF_ICONS = {
+    like:      { icon: 'fa-heart',    color: '#ef4444' },
+    comment:   { icon: 'fa-comment',  color: '#3b82f6' },
+    reply:     { icon: 'fa-reply',    color: '#8b5cf6' },
+    follow:    { icon: 'fa-user-plus',color: '#10b981' },
+    message:   { icon: 'fa-envelope', color: '#06b6d4' },
+    reward:    { icon: 'fa-gift',     color: '#f59e0b' },
+    badge:     { icon: 'fa-medal',    color: '#f59e0b' },
+    challenge: { icon: 'fa-trophy',   color: '#f59e0b' }
+  };
+
   function openNotifications(){
     if(!requireLogin()) return;
     var existing=$('#ghNotifModal'); if(existing){existing.remove();return;}
-    modal('Notifications','<div id="ghNotifList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>Loading…</h3></div></div>','<button class="gh-btn ghost" id="ghMarkAllRead">Mark all read</button><button class="gh-btn ghost" data-close-modal>Close</button>','ghNotifModal');
+    modal('Notifications','<div id="ghNotifList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>Loading…</h3></div></div>','<button class="gh-btn ghost" id="ghMarkAllRead">Mark all read</button><a class="gh-btn ghost" href="notifications.html">View all</a><button class="gh-btn ghost" data-close-modal>Close</button>','ghNotifModal');
     ready(function(){
       var uid=authUser().uid;
       $('#ghMarkAllRead').onclick=function(){ markVisibleNotificationsRead(); };
       var unsub = GS().listenUserNotifications(uid, function(items){
         var box=$('#ghNotifList'); if(!box) return;
         if(!items.length){ box.innerHTML='<div class="gh-empty"><i class="fas fa-bell"></i><h3>No notifications</h3><p>Likes, comments, messages and requests will appear here.</p></div>'; return; }
-        box.innerHTML='<div class="gh-mini-list">'+items.slice(0,30).map(function(n){return '<a class="gh-mini-item '+(!n.read?'unread':'')+'" href="'+esc(n.href||'feed.html')+'" data-notif="'+esc(n.id)+'"><span class="gh-mini-thumb"><i class="fas fa-bell"></i></span><div><strong>'+esc(n.title||'GeoHub')+'</strong><span>'+esc(n.body||n.message||'')+' · '+timeAgo(n.createdAt)+'</span></div></a>';}).join('')+'</div>';
+        box.innerHTML='<div class="gh-mini-list">'+items.slice(0,30).map(function(n){
+          var ic=GH_NOTIF_ICONS[n.type]||{icon:'fa-bell',color:'#10b981'};
+          return '<a class="gh-mini-item '+(!n.read?'unread':'')+'" href="'+esc(n.href||'feed.html')+'" data-notif="'+esc(n.id)+'">'+
+            '<span class="gh-mini-thumb" style="color:'+ic.color+'"><i class="fas '+ic.icon+'"></i></span>'+
+            '<div><strong>'+esc(n.title||'GeoHub')+'</strong><span>'+esc(n.body||n.message||'')+' · '+timeAgo(n.createdAt)+'</span></div></a>';
+        }).join('')+'</div>';
+        $all('[data-notif]').forEach(function(a){
+          a.addEventListener('click', function(){
+            var id=a.dataset.notif;
+            if(fs()) fs().updateDoc(fs().doc(db(),'userNotifications',id),{read:true,seen:true}).catch(function(){});
+          }, {once:true});
+        });
       });
       var modalEl = $('#ghNotifModal');
       if(modalEl) modalEl._unsub = unsub;
@@ -2940,6 +2962,144 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     };
   }
 
+  var NP_ICONS = {
+    like:      { icon: 'fa-heart',    color: '#ef4444' },
+    comment:   { icon: 'fa-comment',  color: '#3b82f6' },
+    reply:     { icon: 'fa-reply',    color: '#8b5cf6' },
+    follow:    { icon: 'fa-user-plus',color: '#10b981' },
+    message:   { icon: 'fa-envelope', color: '#06b6d4' },
+    reward:    { icon: 'fa-gift',     color: '#f59e0b' },
+    badge:     { icon: 'fa-medal',    color: '#f59e0b' },
+    challenge: { icon: 'fa-trophy',   color: '#f59e0b' }
+  };
+  var NP_FILTERS = [
+    { key: 'all', label: 'All' },
+    { key: 'like', label: 'Likes' },
+    { key: 'comment', label: 'Comments' },
+    { key: 'follow', label: 'Follows' },
+    { key: 'message', label: 'Messages' },
+    { key: 'reward', label: 'Rewards' }
+  ];
+
+  function npTimeAgo(ts) {
+    if (!ts) return '';
+    var ms = ts.toMillis ? ts.toMillis() : (ts.seconds ? ts.seconds * 1000 : 0);
+    if (!ms) return '';
+    var diff = Date.now() - ms;
+    if (diff < 60000) return 'just now';
+    if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+    if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+    return Math.floor(diff / 86400000) + 'd ago';
+  }
+
+  function npDayLabel(ts) {
+    if (!ts) return 'Older';
+    var ms = ts.toMillis ? ts.toMillis() : (ts.seconds ? ts.seconds * 1000 : 0);
+    if (!ms) return 'Older';
+    var now = Date.now(), diff = now - ms;
+    var today = new Date(); today.setHours(0,0,0,0);
+    var itemDate = new Date(ms); itemDate.setHours(0,0,0,0);
+    if (itemDate.getTime() === today.getTime()) return 'Today';
+    if (today.getTime() - itemDate.getTime() === 86400000) return 'Yesterday';
+    if (diff < 7 * 86400000) return 'This week';
+    return 'Older';
+  }
+
+  function renderNotifications() {
+    shell({ active: 'notifications', right: '', center:
+      '<div class="np-page">' +
+        '<div class="np-head">' +
+          '<h2><i class="fas fa-bell"></i> Notifications</h2>' +
+          '<button class="np-mark-all gh-btn ghost" id="npMarkAll"><i class="fas fa-check-double"></i> Mark all read</button>' +
+        '</div>' +
+        '<div class="np-filters" id="npFilters">' +
+          NP_FILTERS.map(function(f,i){ return '<button class="np-filter-btn'+(i===0?' active':'')+'" data-np-filter="'+f.key+'">'+f.label+'</button>'; }).join('') +
+        '</div>' +
+        '<div id="npList">' +
+          '<div class="np-skel"></div><div class="np-skel"></div><div class="np-skel"></div>' +
+          '<div class="np-skel"></div><div class="np-skel"></div>' +
+        '</div>' +
+      '</div>'
+    });
+    var npUnsub = null;
+    var npFilter = 'all';
+    var npItems = [];
+
+    function npRender() {
+      var box = $('#npList'); if (!box) return;
+      var filtered = npFilter === 'all' ? npItems : npItems.filter(function(n){ return n.type === npFilter; });
+      if (!filtered.length) {
+        box.innerHTML = '<div class="np-empty"><i class="fas fa-bell"></i><h3>No notifications</h3><p>' + (npFilter === 'all' ? 'Likes, comments, follows and rewards will appear here.' : 'No ' + npFilter + ' notifications yet.') + '</p></div>';
+        return;
+      }
+      var groups = {}, order = [];
+      filtered.forEach(function(n) {
+        var label = npDayLabel(n.createdAt);
+        if (!groups[label]) { groups[label] = []; order.push(label); }
+        groups[label].push(n);
+      });
+      box.innerHTML = order.map(function(label) {
+        return '<div class="np-group">' +
+          '<div class="np-group-label">' + esc(label) + '</div>' +
+          groups[label].map(function(n) {
+            var ic = NP_ICONS[n.type] || { icon: 'fa-bell', color: '#10b981' };
+            return '<a class="np-item' + (!n.read ? ' unread' : '') + '" href="' + esc(n.href || '#') + '" data-np-id="' + esc(n.id) + '">' +
+              '<div class="np-item-icon" style="background:' + ic.color + '22;color:' + ic.color + '"><i class="fas ' + ic.icon + '"></i></div>' +
+              '<div class="np-item-body">' +
+                '<div class="np-item-title">' + esc(n.title || 'GeoHub') + '</div>' +
+                '<div class="np-item-sub">' + esc(n.body || n.message || '') + '</div>' +
+                '<div class="np-item-time">' + npTimeAgo(n.createdAt) + '</div>' +
+              '</div>' +
+              (!n.read ? '<div class="np-unread-dot"></div>' : '') +
+            '</a>';
+          }).join('') +
+        '</div>';
+      }).join('');
+      box.querySelectorAll('[data-np-id]').forEach(function(a) {
+        a.addEventListener('click', function() {
+          var id = a.dataset.npId;
+          a.classList.remove('unread');
+          var dot = a.querySelector('.np-unread-dot'); if (dot) dot.remove();
+          if (fs()) fs().updateDoc(fs().doc(db(), 'userNotifications', id), { read: true, seen: true }).catch(function(){});
+        }, { once: true });
+      });
+    }
+
+    var filterBar = $('#npFilters');
+    if (filterBar) {
+      filterBar.addEventListener('click', function(e) {
+        var btn = e.target.closest('[data-np-filter]');
+        if (!btn) return;
+        npFilter = btn.dataset.npFilter;
+        filterBar.querySelectorAll('.np-filter-btn').forEach(function(b){ b.classList.toggle('active', b === btn); });
+        npRender();
+      });
+    }
+
+    var markAllBtn = $('#npMarkAll');
+    if (markAllBtn) {
+      markAllBtn.addEventListener('click', function() {
+        npItems.forEach(function(n) {
+          if (!n.read) {
+            n.read = true;
+            if (fs()) fs().updateDoc(fs().doc(db(), 'userNotifications', n.id), { read: true, seen: true }).catch(function(){});
+          }
+        });
+        npRender();
+        var badge = $('#ghNotifBadge'); if (badge) badge.textContent = '';
+      });
+    }
+
+    ready(function() {
+      var u = authUser(); if (!u) return;
+      npUnsub = GS().listenUserNotifications(u.uid, function(items) {
+        npItems = items;
+        npRender();
+      });
+      state.pageUnsubs.push(npUnsub);
+    });
+  }
+
   function renderComingSoon(){
     var title = (PAGE || PATH.replace('.html','') || 'section').replace(/[-_]/g,' ');
     title = title.charAt(0).toUpperCase() + title.slice(1);
@@ -2954,6 +3114,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(PAGE==='business' || PATH==='business.html') return renderBusinesses();
     if(PAGE==='groups' || PATH==='groups.html') return renderGroups();
     if(PAGE==='add-business' || PATH==='add-business.html') return patchAddBusinessPage();
+    if(PAGE==='notifications' || PATH==='notifications.html') return renderNotifications();
     return renderComingSoon();
   }
 

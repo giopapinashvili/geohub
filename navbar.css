@@ -504,6 +504,27 @@ img { content-visibility: auto; }
   padding: 0; font-family: inherit; transition: opacity 0.15s;
 }
 .nav-notif-mark-all:hover { opacity: 0.75; }
+.nav-notif-view-all {
+  font-size: 0.8rem; color: var(--text-muted, #6b7280); text-decoration: none;
+  margin-left: auto; transition: color 0.15s;
+}
+.nav-notif-view-all:hover { color: var(--green, #10b981); }
+.nav-notif-footer { display: flex; align-items: center; }
+.nav-notif-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green, #10b981); flex-shrink: 0; margin-left: auto;
+}
+.nav-notif-skel-item {
+  height: 52px; margin: 4px 12px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--bg-elevated, rgba(255,255,255,.06)) 25%, var(--bg-card, rgba(255,255,255,.1)) 50%, var(--bg-elevated, rgba(255,255,255,.06)) 75%);
+  background-size: 200% 100%;
+  animation: navNotifSkel 1.4s ease-in-out infinite;
+}
+@keyframes navNotifSkel {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 @media (max-width: 768px) {
   .nav-notif-panel { right: 8px; left: 8px; width: auto; }
   /* Hide auth name text on mobile so bell + avatar + hamburger fit */
