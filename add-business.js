@@ -377,11 +377,11 @@ let currentStep = 1;
     var latRaw = (document.getElementById('bizLatInput') || {}).value || '';
     var lngRaw = (document.getElementById('bizLngInput') || {}).value || '';
     if (latRaw || lngRaw) {
+      if ((latRaw && !lngRaw) || (!latRaw && lngRaw)) { alert('Both latitude and longitude are required.'); return; }
       var latNum = parseFloat(latRaw), lngNum = parseFloat(lngRaw);
       if (isNaN(latNum) || isNaN(lngNum)) { alert('Latitude and longitude must be valid numbers.'); return; }
       if (latNum < -90 || latNum > 90) { alert('Latitude must be between -90 and 90.'); return; }
       if (lngNum < -180 || lngNum > 180) { alert('Longitude must be between -180 and 180.'); return; }
-      if ((latRaw && !lngRaw) || (!latRaw && lngRaw)) { alert('Both latitude and longitude are required.'); return; }
     }
 
     var submitBtn = document.querySelector('button[onclick="submitForm()"]');
