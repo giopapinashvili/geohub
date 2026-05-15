@@ -14,6 +14,15 @@
 
   if (SKIP_PAGES.some(function (p) { return currentPage.includes(p); })) return;
 
+  // Self-inject mobile-nav.css so pages don't need to load it explicitly
+  (function() {
+    if (document.querySelector('link[href*="mobile-nav.css"]')) return;
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'mobile-nav.css';
+    document.head.appendChild(link);
+  })();
+
   // ── ACTIVE PAGE DETECTION ─────────────────────────────────────
 
   function getActiveTab() {
