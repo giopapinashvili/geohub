@@ -73,6 +73,11 @@ service cloud.firestore {
           && !(resource.data.get('xpAwarded', false) == true && request.resource.data.get('xpAwarded', false) != true);
         allow delete: if isAdmin();
       }
+      match /badges/{badgeId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create, update: if isOwner(userId) || isAdmin();
+        allow delete: if isAdmin();
+      }
       match /private/{docId} { allow read, write: if isOwner(userId) || isAdmin(); }
       // FCM push tokens — user owns their own tokens, admin can read for broadcast
       match /fcmTokens/{token} { allow read: if isOwner(userId) || isAdmin(); allow write: if isOwner(userId); }

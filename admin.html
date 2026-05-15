@@ -70,6 +70,7 @@
     <div class="sb-item" onclick="adminNav('businesses')"><span class="sb-ic"><i class="fas fa-store"></i></span> Businesses <span class="sb-cnt" id="sb-biz-side">0</span></div>
     <div class="sb-item" onclick="adminNav('creators')"><span class="sb-ic"><i class="fas fa-star"></i></span> Creators <span class="sb-cnt" id="sb-creators">0</span></div>
     <div class="sb-item" onclick="adminNav('content')"><span class="sb-ic"><i class="fas fa-plus-square"></i></span> Content Studio</div>
+    <div class="sb-item" onclick="adminNav('challenges')"><span class="sb-ic"><i class="fas fa-bolt"></i></span> Challenge Studio <span class="sb-cnt" id="sb-challenges">0</span></div>
     <div class="sb-lbl">Safety</div>
     <div class="sb-item" onclick="adminNav('moderation')"><span class="sb-ic"><i class="fas fa-flag"></i></span> Moderation <span class="sb-cnt danger" id="sb-mod">0</span></div>
     <div class="sb-item" onclick="adminNav('trust')"><span class="sb-ic"><i class="fas fa-check-circle"></i></span> Trust & Safety</div>
@@ -492,6 +493,127 @@
       </div>
     </section>
 
+
+    <!-- ─── CHALLENGE STUDIO ─── -->
+    <section class="sec" id="sec-challenges">
+      <div class="ph">
+        <div><div class="ph-title">Challenge &amp; Badge Studio</div><div class="ph-sub" id="chalStudioSub">Loading challenges…</div></div>
+        <div class="ph-actions">
+          <button class="btn btn-primary btn-sm" onclick="chalFormMode('create')"><i class="fas fa-plus"></i> New Challenge</button>
+        </div>
+      </div>
+
+      <!-- Live challenge list -->
+      <div id="chalList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px"></div>
+
+      <!-- Create / Edit form -->
+      <div class="panel" style="max-width:860px" id="chalFormPanel">
+        <div class="panel-hdr">
+          <div><div class="panel-title" id="chalFormTitle">New Challenge</div><div class="panel-sub">Fill required fields then save</div></div>
+          <button class="btn btn-ghost btn-sm" id="chalFormCancel" style="display:none" onclick="chalFormMode('none')"><i class="fas fa-times"></i> Cancel</button>
+        </div>
+        <form id="chalForm" style="display:grid;gap:14px;padding:8px 0 4px">
+          <input type="hidden" id="chalEditId">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Title *
+              <input id="cfTitle" required placeholder="e.g. Tbilisi Explorer" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Type *
+              <select id="cfType" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+                <option value="checkin">checkin — any check-in</option>
+                <option value="photo">photo — camera proof required</option>
+                <option value="qr">qr — QR code check-in</option>
+                <option value="event">event — event attendance</option>
+                <option value="distance">distance — GPS distance</option>
+              </select>
+            </label>
+          </div>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Description
+            <textarea id="cfDesc" rows="3" placeholder="Short description shown on the challenge card" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);resize:vertical"></textarea>
+          </label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Target count *
+              <input id="cfTarget" type="number" min="1" value="1" required style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">XP reward
+              <input id="cfXp" type="number" min="0" value="100" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">City (optional)
+              <input id="cfCity" placeholder="Tbilisi" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Start date (optional)
+              <input id="cfStart" type="date" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">End date (optional)
+              <input id="cfEnd" type="date" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Place ID (optional)
+              <input id="cfPlaceId" placeholder="Firestore place doc ID" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Business ID (optional)
+              <input id="cfBusinessId" placeholder="Firestore business doc ID" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+          </div>
+          <div class="tog-wrap" style="max-width:420px">
+            <div><div class="tog-label">Active</div><div class="tog-sub">Visible and accepting progress from users</div></div>
+            <label class="tog-sw"><input type="checkbox" id="cfActive" checked><span class="tog-slider"></span></label>
+          </div>
+          <!-- Badge section -->
+          <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:16px">
+            <div style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--td);margin-bottom:12px">
+              <i class="fas fa-medal" style="color:var(--gold);margin-right:6px"></i>Badge Reward (optional)
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Badge ID (slug)
+                <input id="cfBadgeId" placeholder="e.g. first_checkin" oninput="chalBadgePreview()" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+              </label>
+              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Badge title
+                <input id="cfBadgeTitle" placeholder="e.g. First Check-in" oninput="chalBadgePreview()" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+              </label>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Badge icon (FA class)
+                <input id="cfBadgeIcon" placeholder="fa-medal" oninput="chalBadgePreview()" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+              </label>
+              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Rarity
+                <select id="cfBadgeRarity" onchange="chalBadgePreview()" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+                  <option value="common">common</option>
+                  <option value="rare">rare</option>
+                  <option value="epic">epic</option>
+                  <option value="legendary">legendary</option>
+                </select>
+              </label>
+              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Sort order
+                <input id="cfSort" type="number" value="0" min="0" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+              </label>
+            </div>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800;margin-bottom:12px">Badge description
+              <input id="cfBadgeDesc" placeholder="Short text shown on badge card" oninput="chalBadgePreview()" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <!-- Live badge preview -->
+            <div id="chalBadgePreviewWrap" style="display:none;padding:14px;border:1px solid rgba(168,85,247,.25);border-radius:12px;background:rgba(168,85,247,.06);margin-bottom:4px">
+              <div style="font-size:.66rem;font-weight:700;color:var(--td);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Badge Preview</div>
+              <div style="display:flex;align-items:center;gap:12px">
+                <div id="chalBadgePreviewIcon" style="width:44px;height:44px;border-radius:12px;background:rgba(16,185,129,.1);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0"></div>
+                <div>
+                  <div id="chalBadgePreviewTitle" style="font-weight:800;font-size:.9rem"></div>
+                  <div id="chalBadgePreviewDesc" style="font-size:.72rem;color:var(--ts)"></div>
+                  <div id="chalBadgePreviewRarity" style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:2px"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;padding-top:4px">
+            <button class="btn btn-primary btn-sm" type="submit" id="chalSaveBtn"><i class="fas fa-save"></i> Save challenge</button>
+            <button class="btn btn-ghost btn-sm" type="button" id="chalCancelBtn" style="display:none" onclick="chalFormMode('none')"><i class="fas fa-times"></i> Cancel</button>
+          </div>
+        </form>
+      </div>
+    </section>
 
   </div><!-- end .main -->
 </div><!-- end .shell -->

@@ -61,6 +61,9 @@
   var selectedUser   = null;
   var modItems       = MOD_QUEUE.slice();
   var notifCount     = 0;
+  var _chalUnsubscribe = function () {};
+  var _chalEditId    = null;
+  var BADGE_RARITY_COLORS = { common: '#94a3b8', rare: '#3b82f6', epic: '#a855f7', legendary: '#f59e0b' };
 
   /* ── NAVIGATION ──────────────────────────────────────────── */
   window.adminNav = function (section) {
@@ -82,6 +85,7 @@
     if (section === 'revenue')  { setTimeout(drawRevChart, 80); setTimeout(drawRevTrendChart, 80); }
     if (section === 'overview') { setTimeout(drawOverviewCharts, 80); }
     if (section === 'activity') { setTimeout(function () { window.loadActivity(_activityFilter || 'all'); }, 60); }
+    if (section === 'challenges') { loadChallenges(); }
   };
 
   /* ── TOAST ───────────────────────────────────────────────── */
@@ -1072,6 +1076,249 @@
     toast('Dashboard refreshed');
   };
 
+  /* ── CHALLENGE STUDIO ────────────────────────────────────── */
+  function toDateInput(v) {
+    if (!v) return '';
+    var ms = typeof v.toMillis === 'function' ? v.toMillis() : (v.seconds ? v.seconds * 1000 : Number(v));
+    if (!ms || isNaN(ms)) return '';
+    return new Date(ms).toISOString().slice(0, 10);
+  }
+
+  function loadChallenges() {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) {
+      window.addEventListener('GeoFirebaseReady', function () { loadChallenges(); }, { once: true });
+      return;
+    }
+    _chalUnsubscribe();
+    var db = fb.db, fs = fb.fs;
+    _chalUnsubscribe = fs.onSnapshot(
+      fs.query(fs.collection(db, 'challenges'), fs.orderBy('createdAt', 'desc')),
+      function (snap) {
+        var rows = [];
+        snap.forEach(function (d) { rows.push(Object.assign({ id: d.id }, d.data())); });
+        renderChallengeList(rows);
+        var sb = document.getElementById('sb-challenges');
+        if (sb) sb.textContent = rows.length;
+        var sub = document.getElementById('chalStudioSub');
+        if (sub) sub.textContent = rows.length + ' challenge' + (rows.length !== 1 ? 's' : '') + ' in Firestore';
+      },
+      function (err) {
+        console.warn('[Admin] challenges listen', err.message);
+        var list = document.getElementById('chalList');
+        if (list) list.innerHTML = '<div class="alert danger"><i class="fas fa-exclamation-triangle"></i> ' + escHtmlAdmin(err.message) + '</div>';
+      }
+    );
+  }
+
+  function renderChallengeList(rows) {
+    var list = document.getElementById('chalList');
+    if (!list) return;
+    if (!rows.length) {
+      list.innerHTML = '<div class="admin-step4-empty"><i class="fas fa-bolt" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>No challenges yet — create one using the form below.</div>';
+      return;
+    }
+    var TYPE_COLORS = { checkin: 'bg-green', photo: 'bg-blue', qr: 'bg-purple', event: 'bg-gold', distance: 'bg-orange' };
+    list.innerHTML = rows.map(function (c) {
+      var typeColor = TYPE_COLORS[c.type || 'checkin'] || 'bg-gray';
+      var xp = Number(c.xpReward || 0);
+      var target = Number(c.targetCount || 1);
+      return '<div class="admin-step4-row" id="chal-row-' + escHtmlAdmin(c.id) + '">' +
+        '<div class="admin-step4-thumb" style="background:' + (c.active ? 'rgba(16,185,129,.1)' : 'rgba(255,255,255,.04)') + '">' +
+          '<i class="fas fa-bolt" style="color:' + (c.active ? 'var(--green)' : 'var(--ts)') + ';font-size:1.2rem"></i>' +
+        '</div>' +
+        '<div class="admin-step4-main">' +
+          '<strong>' + escHtmlAdmin(c.title || c.name || 'Untitled') + '</strong>' +
+          '<span>' +
+            '<span class="badge ' + typeColor + '" style="margin-right:4px">' + escHtmlAdmin(c.type || 'checkin') + '</span>' +
+            (c.active ? '<span class="badge bg-green">Active</span>' : '<span class="badge bg-gray">Inactive</span>') +
+            (c.badge ? ' <span class="badge bg-purple" style="margin-left:2px"><i class="fas fa-medal"></i> ' + escHtmlAdmin(c.badge) + '</span>' : '') +
+          '</span>' +
+          '<p>' + escHtmlAdmin(c.description || '—') + '</p>' +
+          '<span style="font-size:.7rem;color:var(--ts)">Target: <strong style="color:var(--t)">' + target + '</strong> &nbsp;·&nbsp; XP: <strong style="color:var(--gold)">+' + xp + '</strong>' +
+            (c.city ? ' &nbsp;·&nbsp; ' + escHtmlAdmin(c.city) : '') +
+          '</span>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0">' +
+          '<button class="btn btn-ghost btn-xs" onclick="chalEdit(\'' + escAttr(c.id) + '\')"><i class="fas fa-pen"></i> Edit</button>' +
+          '<button class="btn btn-' + (c.active ? 'gold' : 'green') + ' btn-xs" onclick="chalToggleActive(\'' + escAttr(c.id) + '\',' + !c.active + ')">' +
+            (c.active ? '<i class="fas fa-pause"></i> Deactivate' : '<i class="fas fa-play"></i> Activate') +
+          '</button>' +
+          '<button class="btn btn-red btn-xs" onclick="chalDelete(\'' + escAttr(c.id) + '\',\'' + escAttr(c.title || c.name || 'this challenge') + '\')"><i class="fas fa-trash"></i> Delete</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  window.chalFormMode = function (mode) {
+    var panel = document.getElementById('chalFormPanel');
+    var formTitleEl = document.getElementById('chalFormTitle');
+    var form = document.getElementById('chalForm');
+    var cancelBtnInForm = document.getElementById('chalCancelBtn');
+    var cancelBtnInHdr = document.getElementById('chalFormCancel');
+    var hiddenId = document.getElementById('chalEditId');
+    var previewWrap = document.getElementById('chalBadgePreviewWrap');
+    _chalEditId = null;
+    if (form) form.reset();
+    if (hiddenId) hiddenId.value = '';
+    if (previewWrap) previewWrap.style.display = 'none';
+    if (formTitleEl) formTitleEl.textContent = 'New Challenge';
+    var showCancel = (mode === 'create');
+    if (cancelBtnInForm) cancelBtnInForm.style.display = showCancel ? '' : 'none';
+    if (cancelBtnInHdr) cancelBtnInHdr.style.display = showCancel ? '' : 'none';
+    if (mode === 'create' && panel) panel.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  window.chalEdit = function (id) {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) { toast('Firebase not ready', 'rgba(239,68,68,0.95)'); return; }
+    fb.fs.getDoc(fb.fs.doc(fb.db, 'challenges', id)).then(function (snap) {
+      if (!snap.exists()) { toast('Challenge not found', 'rgba(239,68,68,0.95)'); return; }
+      var c = snap.data();
+      _chalEditId = id;
+      function el(i) { return document.getElementById(i); }
+      var hiddenId = el('chalEditId'); if (hiddenId) hiddenId.value = id;
+      var t = el('cfTitle'); if (t) t.value = c.title || c.name || '';
+      var typeEl = el('cfType'); if (typeEl) typeEl.value = c.type || 'checkin';
+      var desc = el('cfDesc'); if (desc) desc.value = c.description || '';
+      var target = el('cfTarget'); if (target) target.value = c.targetCount || 1;
+      var xp = el('cfXp'); if (xp) xp.value = c.xpReward || 0;
+      var city = el('cfCity'); if (city) city.value = c.city || '';
+      var start = el('cfStart'); if (start) start.value = toDateInput(c.startAt);
+      var end = el('cfEnd'); if (end) end.value = toDateInput(c.endAt);
+      var placeId = el('cfPlaceId'); if (placeId) placeId.value = c.placeId || '';
+      var bizId = el('cfBusinessId'); if (bizId) bizId.value = c.businessId || '';
+      var active = el('cfActive'); if (active) active.checked = c.active === true;
+      var bId = el('cfBadgeId'); if (bId) bId.value = c.badge || '';
+      var bTitle = el('cfBadgeTitle'); if (bTitle) bTitle.value = c.badgeTitle || '';
+      var bIcon = el('cfBadgeIcon'); if (bIcon) bIcon.value = c.badgeIcon || '';
+      var bRarity = el('cfBadgeRarity'); if (bRarity) bRarity.value = c.badgeRarity || 'common';
+      var bDesc = el('cfBadgeDesc'); if (bDesc) bDesc.value = c.badgeDescription || '';
+      var sort = el('cfSort'); if (sort) sort.value = c.sortOrder || 0;
+      var formTitleEl = el('chalFormTitle'); if (formTitleEl) formTitleEl.textContent = 'Edit Challenge';
+      var cancelBtnInForm = el('chalCancelBtn'); if (cancelBtnInForm) cancelBtnInForm.style.display = '';
+      var cancelBtnInHdr = el('chalFormCancel'); if (cancelBtnInHdr) cancelBtnInHdr.style.display = '';
+      window.chalBadgePreview();
+      var panel = el('chalFormPanel');
+      if (panel) panel.scrollIntoView({ behavior: 'smooth' });
+    }).catch(function (err) {
+      toast('Load failed: ' + err.message, 'rgba(239,68,68,0.95)');
+    });
+  };
+
+  window.chalBadgePreview = function () {
+    var badgeId = ((document.getElementById('cfBadgeId') || {}).value || '').trim();
+    var bTitle = (document.getElementById('cfBadgeTitle') || {}).value || badgeId;
+    var bIcon = ((document.getElementById('cfBadgeIcon') || {}).value || '').trim() || 'fa-medal';
+    var bRarity = ((document.getElementById('cfBadgeRarity') || {}).value) || 'common';
+    var bDesc = (document.getElementById('cfBadgeDesc') || {}).value || '';
+    var wrap = document.getElementById('chalBadgePreviewWrap');
+    if (!wrap) return;
+    if (!badgeId) { wrap.style.display = 'none'; return; }
+    var rc = BADGE_RARITY_COLORS[bRarity] || '#94a3b8';
+    wrap.style.display = 'block';
+    var iconEl = document.getElementById('chalBadgePreviewIcon');
+    if (iconEl) { iconEl.style.color = rc; iconEl.innerHTML = '<i class="fas ' + escHtmlAdmin(bIcon) + '"></i>'; }
+    var titleEl = document.getElementById('chalBadgePreviewTitle');
+    if (titleEl) titleEl.textContent = bTitle || badgeId;
+    var descEl = document.getElementById('chalBadgePreviewDesc');
+    if (descEl) descEl.textContent = bDesc || 'GeoHub achievement';
+    var rarityEl = document.getElementById('chalBadgePreviewRarity');
+    if (rarityEl) { rarityEl.textContent = bRarity; rarityEl.style.color = rc; }
+  };
+
+  window.chalToggleActive = function (id, newActive) {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) { toast('Firebase not ready', 'rgba(239,68,68,0.95)'); return; }
+    fb.fs.updateDoc(fb.fs.doc(fb.db, 'challenges', id), { active: newActive, updatedAt: fb.fs.serverTimestamp() })
+      .then(function () { toast(newActive ? 'Challenge activated' : 'Challenge deactivated'); })
+      .catch(function (err) { toast('Update failed: ' + err.message, 'rgba(239,68,68,0.95)'); });
+  };
+
+  window.chalDelete = function (id, name) {
+    if (!confirm('Delete challenge "' + name + '"?\nThis cannot be undone.')) return;
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) { toast('Firebase not ready', 'rgba(239,68,68,0.95)'); return; }
+    fb.fs.deleteDoc(fb.fs.doc(fb.db, 'challenges', id))
+      .then(function () { toast('Challenge deleted'); })
+      .catch(function (err) { toast('Delete failed: ' + err.message, 'rgba(239,68,68,0.95)'); });
+  };
+
+  function bindChallengeStudio() {
+    var form = document.getElementById('chalForm');
+    if (!form || form._wired) return;
+    form._wired = true;
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var fb = window.GeoFirebase;
+      if (!fb || !fb.db || !fb.fs) { toast('Firebase not ready', 'rgba(239,68,68,0.95)'); return; }
+      var db = fb.db, fs = fb.fs;
+      var user = fb.auth && fb.auth.currentUser;
+      if (!user) { toast('Admin login required', 'rgba(239,68,68,0.95)'); return; }
+
+      var titleVal = ((document.getElementById('cfTitle') || {}).value || '').trim();
+      if (!titleVal) { toast('Title is required', 'rgba(239,68,68,0.95)'); return; }
+
+      var target = Math.max(1, parseInt(((document.getElementById('cfTarget') || {}).value || '1'), 10) || 1);
+      var xpVal = Math.max(0, parseInt(((document.getElementById('cfXp') || {}).value || '0'), 10) || 0);
+      var startVal = (document.getElementById('cfStart') || {}).value || '';
+      var endVal = (document.getElementById('cfEnd') || {}).value || '';
+      var badgeId = ((document.getElementById('cfBadgeId') || {}).value || '').trim();
+      var cityVal = ((document.getElementById('cfCity') || {}).value || '').trim();
+      var placeVal = ((document.getElementById('cfPlaceId') || {}).value || '').trim();
+      var bizVal = ((document.getElementById('cfBusinessId') || {}).value || '').trim();
+
+      var doc = {
+        title: titleVal,
+        name: titleVal,
+        description: ((document.getElementById('cfDesc') || {}).value || '').trim(),
+        type: (document.getElementById('cfType') || {}).value || 'checkin',
+        targetCount: target,
+        xpReward: xpVal,
+        city: cityVal || null,
+        placeId: placeVal || null,
+        businessId: bizVal || null,
+        active: !!((document.getElementById('cfActive') || {}).checked),
+        sortOrder: parseInt(((document.getElementById('cfSort') || {}).value || '0'), 10) || 0,
+        updatedAt: fs.serverTimestamp()
+      };
+      if (startVal) doc.startAt = new Date(startVal).getTime();
+      if (endVal) doc.endAt = new Date(endVal).getTime();
+      if (badgeId) {
+        doc.badge = badgeId;
+        doc.badgeTitle = ((document.getElementById('cfBadgeTitle') || {}).value || '').trim() || titleVal;
+        doc.badgeIcon = ((document.getElementById('cfBadgeIcon') || {}).value || '').trim() || 'fa-medal';
+        doc.badgeRarity = (document.getElementById('cfBadgeRarity') || {}).value || 'common';
+        doc.badgeDescription = ((document.getElementById('cfBadgeDesc') || {}).value || '').trim();
+      } else {
+        doc.badge = null;
+      }
+
+      var btn = document.getElementById('chalSaveBtn');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…'; }
+
+      var editId = (document.getElementById('chalEditId') || {}).value || '';
+      var op;
+      if (editId) {
+        op = fs.setDoc(fs.doc(db, 'challenges', editId), doc, { merge: true });
+      } else {
+        doc.createdAt = fs.serverTimestamp();
+        doc.createdBy = user.uid;
+        op = fs.addDoc(fs.collection(db, 'challenges'), doc);
+      }
+
+      op.then(function () {
+        toast(editId ? 'Challenge updated' : 'Challenge created: ' + titleVal);
+        window.chalFormMode('none');
+      }).catch(function (err) {
+        console.error('[Admin] chalForm', err);
+        toast('Save failed: ' + err.message, 'rgba(239,68,68,0.95)');
+      }).finally(function () {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Save challenge'; }
+      });
+    });
+  }
+
   /* ── INIT ────────────────────────────────────────────────── */
   function init() {
     loadRealStats();
@@ -1083,6 +1330,7 @@
     renderModQueue();
     setTimeout(drawOverviewCharts, 120);
     bindContentStudio();
+    bindChallengeStudio();
 
     window.addEventListener('resize', function () {
       if (currentSection === 'overview') drawOverviewCharts();
