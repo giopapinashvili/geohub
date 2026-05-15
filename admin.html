@@ -443,6 +443,10 @@
               <option value="businesses">Businesses</option>
               <option value="groups">Groups</option>
               <option value="events">Events</option>
+              <option value="services">Services</option>
+              <option value="realEstateListings">Real Estate Listings</option>
+              <option value="learningItems">Learning / Courses</option>
+              <option value="liveActivity">Live Activity / Hotspots</option>
               <option value="rewards">Rewards / Coupons</option>
               <option value="challenges">Challenges</option>
               <option value="creators">Creators</option>
@@ -479,6 +483,10 @@
               <option value="businesses">Businesses</option>
               <option value="groups">Groups</option>
               <option value="events">Events</option>
+              <option value="services">Services</option>
+              <option value="realEstateListings">Real Estate Listings</option>
+              <option value="learningItems">Learning / Courses</option>
+              <option value="liveActivity">Live Activity / Hotspots</option>
               <option value="rewards">Rewards / Coupons</option>
               <option value="challenges">Challenges</option>
               <option value="creators">Creators</option>
@@ -490,6 +498,33 @@
           <div id="adminBulkValidation" style="font-size:.8rem;color:#94a3b8;min-height:1.4em"></div>
           <button class="btn btn-primary btn-sm" onclick="adminBulkImport()" style="justify-self:start"><i class="fas fa-upload"></i> Import items</button>
           <div id="adminBulkResult" style="display:none;padding:12px;border-radius:10px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);font-size:.85rem;color:#10e0a0"></div>
+        </div>
+      </div>
+
+      <!-- Content Manager: list, activate/deactivate, delete -->
+      <div class="panel" style="max-width:860px;margin-top:18px">
+        <div class="panel-hdr">
+          <div><div class="panel-title">Content Manager</div><div class="panel-sub">View, activate/deactivate, and delete items in any collection</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="loadContentList()"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+        <div style="display:flex;gap:10px;padding:8px 0 12px;align-items:center">
+          <select id="manageContentCol" style="flex:1;padding:10px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <option value="places">Places</option>
+            <option value="businesses">Businesses</option>
+            <option value="groups">Groups</option>
+            <option value="events">Events</option>
+            <option value="services">Services</option>
+            <option value="realEstateListings">Real Estate Listings</option>
+            <option value="learningItems">Learning / Courses</option>
+            <option value="liveActivity">Live Activity</option>
+            <option value="creators">Creators</option>
+            <option value="challenges">Challenges</option>
+            <option value="rewards">Rewards</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="loadContentList()"><i class="fas fa-search"></i> Load</button>
+        </div>
+        <div id="manageContentList" style="min-height:60px">
+          <div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">Select a collection and click Load.</div>
         </div>
       </div>
     </section>

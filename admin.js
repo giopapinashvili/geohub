@@ -865,6 +865,32 @@
       { id: 'csChallengeBusiness', label: 'Business ID optional', type: 'text', key: 'businessId' },
       { id: 'csChallengeStart', label: 'Start date', type: 'date', key: 'startAt' },
       { id: 'csChallengeEnd', label: 'End date', type: 'date', key: 'endAt' }
+    ],
+    services: [
+      { id: 'csServiceType', label: 'Service type (e.g. plumbing, legal, tutoring)', type: 'text', key: 'serviceType' },
+      { id: 'csPrice', label: 'Starting price ₾ (0 = negotiable)', type: 'number', key: 'price', min: 0 },
+      { id: 'csPhone', label: 'Contact phone', type: 'tel', key: 'phone' },
+      { id: 'csAddress', label: 'Address / area', type: 'text', key: 'address' }
+    ],
+    realEstateListings: [
+      { id: 'csListingType', label: 'Type (sale / rent)', type: 'text', key: 'listingType', placeholder: 'sale' },
+      { id: 'csPrice', label: 'Price ₾', type: 'number', key: 'price', min: 0 },
+      { id: 'csArea', label: 'Area m²', type: 'number', key: 'area', min: 0 },
+      { id: 'csBedrooms', label: 'Bedrooms', type: 'number', key: 'bedrooms', min: 0 },
+      { id: 'csAddress', label: 'Address', type: 'text', key: 'address' }
+    ],
+    learningItems: [
+      { id: 'csTeacher', label: 'Teacher / instructor name', type: 'text', key: 'teacher' },
+      { id: 'csSubject', label: 'Subject (e.g. English, Math, Programming)', type: 'text', key: 'subject' },
+      { id: 'csPrice', label: 'Price ₾ (0 = free)', type: 'number', key: 'price', min: 0 },
+      { id: 'csDuration', label: 'Duration (e.g. 8 weeks, 20 hours)', type: 'text', key: 'duration' },
+      { id: 'csFormat', label: 'Format (online / in-person / hybrid)', type: 'text', key: 'format', placeholder: 'online' }
+    ],
+    liveActivity: [
+      { id: 'csAlertType', label: 'Type (hotspot / event / alert / news)', type: 'text', key: 'alertType', placeholder: 'hotspot' },
+      { id: 'csIntensity', label: 'Intensity 1–5', type: 'number', key: 'intensity', min: 1 },
+      { id: 'csLat', label: 'Latitude', type: 'number', key: 'lat', step: 'any' },
+      { id: 'csLng', label: 'Longitude', type: 'number', key: 'lng', step: 'any' }
     ]
   };
 
@@ -1537,6 +1563,73 @@
       });
     });
   }
+
+  /* ── CONTENT MANAGER ───────────────────────────────────── */
+  window.loadContentList = function () {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.fs || !fb.db) { toast('Firebase not ready'); return; }
+    var col = ((document.getElementById('manageContentCol') || {}).value || '').trim();
+    if (!col) return;
+    var list = document.getElementById('manageContentList');
+    if (list) list.innerHTML = '<div style="text-align:center;padding:28px;color:var(--ts)"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
+
+    fb.fs.getDocs(fb.fs.query(fb.fs.collection(fb.db, col), fb.fs.limit(60)))
+      .then(function (snap) {
+        if (!list) return;
+        if (snap.empty) {
+          list.innerHTML = '<div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">No items in ' + escHtmlAdmin(col) + '.</div>';
+          return;
+        }
+        var rows = [];
+        snap.forEach(function (d) {
+          var data = d.data();
+          var active = data.status === 'active' || (data.active === true && data.status !== 'inactive');
+          var label = escHtmlAdmin(data.title || data.name || d.id.slice(-8));
+          rows.push(
+            '<div class="bi" style="display:flex;align-items:center;gap:10px">' +
+              '<div style="flex:1;min-width:0">' +
+                '<div style="font-size:.82rem;font-weight:700;color:#f0f4ff">' + label + '</div>' +
+                '<div style="font-size:.68rem;color:var(--ts)">' + escHtmlAdmin(d.id) + ' &nbsp;·&nbsp; ' +
+                  (active ? '<span style="color:#10e0a0">active</span>' : '<span style="color:#f59e0b">inactive</span>') +
+                '</div>' +
+              '</div>' +
+              '<button class="btn btn-ghost btn-sm" onclick="adminToggleItem(\'' + escHtmlAdmin(col) + '\',\'' + escHtmlAdmin(d.id) + '\',' + (active ? 'true' : 'false') + ')">' +
+                (active ? 'Deactivate' : 'Activate') +
+              '</button>' +
+              '<button class="btn btn-ghost btn-sm" style="color:#ef4444;border-color:rgba(239,68,68,.35)" ' +
+                'onclick="adminDeleteItem(\'' + escHtmlAdmin(col) + '\',\'' + escHtmlAdmin(d.id) + '\')">' +
+                '<i class="fas fa-trash"></i>' +
+              '</button>' +
+            '</div>'
+          );
+        });
+        list.innerHTML = '<div class="bl">' + rows.join('') + '</div>';
+      }).catch(function (err) {
+        if (list) list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ts);font-size:.82rem">Load failed: ' + escHtmlAdmin(err.message) + '</div>';
+      });
+  };
+
+  window.adminToggleItem = function (col, id, currentlyActive) {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.fs) return;
+    var newStatus = currentlyActive ? 'inactive' : 'active';
+    fb.fs.setDoc(fb.fs.doc(fb.db, col, id), { status: newStatus, active: !currentlyActive, updatedAt: fb.fs.serverTimestamp() }, { merge: true })
+      .then(function () {
+        toast((currentlyActive ? 'Deactivated' : 'Activated') + ': ' + id.slice(-6));
+        window.loadContentList();
+      }).catch(function (err) { toast('Toggle failed: ' + err.message); });
+  };
+
+  window.adminDeleteItem = function (col, id) {
+    if (!confirm('Delete this item permanently from ' + col + '? This cannot be undone.')) return;
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.fs) return;
+    fb.fs.deleteDoc(fb.fs.doc(fb.db, col, id))
+      .then(function () {
+        toast('Deleted: ' + id.slice(-6));
+        window.loadContentList();
+      }).catch(function (err) { toast('Delete failed: ' + err.message); });
+  };
 
   /* ── ADMIN ADJUST POINTS ────────────────────────────────── */
   window.doAdminAdjust = function () {

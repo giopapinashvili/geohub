@@ -155,7 +155,7 @@ service cloud.firestore {
     match /groupPosts/{postId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches() || onlyCountersChanged(); }
     match /groupJoinRequests/{requestId} { allow read: if signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('toUserId', '') == uid() || isAdmin()); allow create: if signedIn() && request.resource.data.get('userId', '') == uid(); allow update: if isAdmin(); allow delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
 
-    match /events/{eventId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /events/{eventId} { allow read: if true; allow create, update, delete: if isAdmin(); }
     match /eventParticipants/{participantId} { allow read: if true; allow create: if signedIn() && (request.resource.data.get('userId', '') == uid() || request.resource.data.get('uid', '') == uid()); allow update, delete: if isAdmin() || (signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid())); }
 
     match /friendRequests/{requestId} { allow read: if signedIn() && (resource.data.get('fromUserId', '') == uid() || resource.data.get('toUserId', '') == uid() || isAdmin()); allow create: if signedIn() && request.resource.data.keys().hasAll(['fromUserId','toUserId','status','createdAt']) && request.resource.data.get('fromUserId', '') == uid() && request.resource.data.get('toUserId', '') != uid() && request.resource.data.get('status', '') == 'pending'; allow update, delete: if isAdmin() || (signedIn() && (resource.data.get('fromUserId', '') == uid() || resource.data.get('toUserId', '') == uid())); }
@@ -247,10 +247,10 @@ service cloud.firestore {
 
     match /admin/{docId} { allow read, write: if isAdmin(); }
     match /challenges/{docId} { allow read: if true; allow create, update, delete: if isAdmin(); }
-    match /services/{docId} { allow read: if true; allow create: if isAdmin() || newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
-    match /realEstateListings/{docId} { allow read: if true; allow create: if isAdmin() || newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
-    match /learningItems/{docId} { allow read: if true; allow create: if isAdmin() || newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
-    match /creators/{docId} { allow read: if true; allow create: if isAdmin() || newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /services/{docId} { allow read: if true; allow create, update, delete: if isAdmin(); }
+    match /realEstateListings/{docId} { allow read: if true; allow create, update, delete: if isAdmin(); }
+    match /learningItems/{docId} { allow read: if true; allow create, update, delete: if isAdmin(); }
+    match /creators/{docId} { allow read: if true; allow create, update, delete: if isAdmin(); }
     match /liveActivity/{docId} { allow read: if true; allow create, update, delete: if isAdmin(); }
     match /collections/{collectionId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
     match /routes/{routeId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
