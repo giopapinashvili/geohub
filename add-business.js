@@ -370,8 +370,9 @@ let currentStep = 1;
     var serviceAreaText = businessType === 'online' ? serviceAreaLabel(serviceArea) : (city ? city + ', Georgia' : 'Local business');
     var catEl = document.querySelector('.cat-option.selected');
     var cat = catEl ? catEl.dataset.cat : selectedCategory;
-    var cover = firstPreviewImage('#coverUpload') || '';
-    var gallery = Array.from(document.querySelectorAll('#uploadedPhotos img')).map(function(img){ return img.src; }).slice(0,10);
+    if (_pendingUploads > 0) { alert('Please wait for images to finish uploading.'); return; }
+    var cover = (function(){ var img = document.querySelector('#coverUpload img[data-cloud-url]') || document.querySelector('#coverUpload img'); return img ? (img.dataset.cloudUrl || '') : ''; })();
+    var gallery = Array.from(document.querySelectorAll('#uploadedPhotos img[data-cloud-url]')).map(function(img){ return img.dataset.cloudUrl || ''; }).filter(Boolean).slice(0, 10);
 
     // Validate lat/lng if provided
     var latRaw = (document.getElementById('bizLatInput') || {}).value || '';
@@ -497,6 +498,50 @@ let currentStep = 1;
     window.addEventListener('GeoAuthReady', apply);
   })();
 
+  var _pendingUploads = 0;
+
+  function bizUploadFile(file, folder, onProgress) {
+    var GS = window.GeoSocial;
+    if (GS && GS.uploadFile) return GS.uploadFile(file, folder, onProgress);
+    return new Promise(function(resolve) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var GS2 = window.GeoSocial;
+        if (GS2 && GS2.uploadImageDataUrl) {
+          GS2.uploadImageDataUrl(e.target.result, folder, function(url) { resolve(url); });
+        } else { resolve(''); }
+      };
+      reader.onerror = function() { resolve(''); };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function bizShowZoneProgress(zone, pct) {
+    var bar = zone.querySelector('.biz-upload-bar');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.className = 'biz-upload-bar';
+      bar.style.cssText = 'position:absolute;bottom:0;left:0;height:3px;background:linear-gradient(90deg,#10b981,#3b82f6);transition:width .2s;border-radius:0 0 var(--radius-sm,6px) var(--radius-sm,6px)';
+      zone.style.position = 'relative';
+      zone.appendChild(bar);
+    }
+    bar.style.width = pct + '%';
+    if (pct >= 100) setTimeout(function(){ if (bar.parentNode) bar.remove(); }, 600);
+  }
+
+  function bizDisableSubmit(busy) {
+    var btn = document.querySelector('button[onclick="submitForm()"]');
+    if (!btn) return;
+    if (busy) {
+      btn.disabled = true;
+      if (!btn.dataset.origHtml) btn.dataset.origHtml = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Uploading images…';
+    } else {
+      btn.disabled = false;
+      if (btn.dataset.origHtml) { btn.innerHTML = btn.dataset.origHtml; delete btn.dataset.origHtml; }
+    }
+  }
+
   // Upload zone — file picker + preview
   ['coverUpload','galleryUpload'].forEach(id => {
     const zone = document.getElementById(id);
@@ -508,6 +553,7 @@ let currentStep = 1;
       handleFiles(id, zone, files);
     });
     zone.addEventListener('click', () => {
+      if (zone.dataset.uploading) return;
       const inp = document.createElement('input');
       inp.type = 'file'; inp.accept = 'image/*'; if (id === 'galleryUpload') inp.multiple = true;
       inp.style.display = 'none';
@@ -521,20 +567,58 @@ let currentStep = 1;
   });
 
   function handleFiles(id, zone, files) {
-    files.slice(0, 10).forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
+    if (!files || !files.length) return;
+    var folder = id === 'coverUpload' ? 'businesses/cover' : 'businesses/gallery';
+    files.slice(0, 10).forEach(function(file) {
+      _pendingUploads++;
+      bizDisableSubmit(true);
+      zone.dataset.uploading = '1';
+
+      var placeholder = document.createElement('div');
+      placeholder.style.cssText = 'width:80px;height:64px;border-radius:6px;background:rgba(255,255,255,.07);display:inline-flex;align-items:center;justify-content:center;color:#64748b;font-size:.7rem;flex-shrink:0';
+      placeholder.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
+
+      if (id === 'coverUpload') {
+        zone.innerHTML = '';
+        zone.appendChild(placeholder);
+        placeholder.style.cssText = 'width:100%;height:120px;border-radius:var(--radius-sm);background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;color:#64748b';
+      } else {
+        document.getElementById('uploadedPhotos').appendChild(placeholder);
+      }
+
+      bizUploadFile(file, folder, function(pct) { bizShowZoneProgress(zone, pct); }).then(function(url) {
+        placeholder.remove();
+        if (!url) {
+          placeholder.remove();
+          return;
+        }
+        var img = document.createElement('img');
+        img.dataset.cloudUrl = url;
+        img.alt = '';
+        img.onerror = function() { this.closest('div') && this.closest('div').remove(); };
+
         if (id === 'coverUpload') {
-          zone.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:120px;object-fit:cover;border-radius:var(--radius-sm);display:block">`;
+          img.style.cssText = 'width:100%;height:120px;object-fit:cover;border-radius:var(--radius-sm);display:block';
+          zone.innerHTML = '';
+          zone.appendChild(img);
+          img.src = url;
           const ph = document.querySelector('.preview-img-ph');
-          if (ph) ph.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:160px;object-fit:cover;display:block">`;
+          if (ph) {
+            var phImg = document.createElement('img');
+            phImg.src = url;
+            phImg.style.cssText = 'width:100%;height:160px;object-fit:cover;display:block';
+            ph.innerHTML = '';
+            ph.appendChild(phImg);
+          }
         } else {
-          const img = document.createElement('img');
-          img.src = ev.target.result;
+          img.src = url;
           img.style.cssText = 'width:80px;height:64px;object-fit:cover;border-radius:6px';
           document.getElementById('uploadedPhotos').appendChild(img);
         }
-      };
-      reader.readAsDataURL(file);
+      }).finally(function() {
+        _pendingUploads--;
+        delete zone.dataset.uploading;
+        if (_pendingUploads <= 0) { _pendingUploads = 0; bizDisableSubmit(false); }
+      });
     });
   }

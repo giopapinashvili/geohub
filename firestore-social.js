@@ -215,27 +215,71 @@
       return GEOHUB_CLOUDINARY.rootFolder + '/' + safeFolder + '/' + safeUid;
     }
 
-    function uploadBlobToCloudinary(blob, folder, user) {
+    function uploadBlobToCloudinary(blob, folder, user, onProgress, _attempt) {
       if (!blob) return Promise.resolve('');
       if (!cloudinaryConfigured()) return Promise.reject(new Error('Cloudinary is not configured'));
+      _attempt = _attempt || 1;
       var form = new FormData();
       form.append('file', blob);
       form.append('upload_preset', GEOHUB_CLOUDINARY.uploadPreset);
       form.append('folder', cloudinaryFolder(folder, user && user.uid));
       form.append('tags', 'geohub,' + String(folder || 'uploads'));
-      var url = 'https://api.cloudinary.com/v1_1/' + encodeURIComponent(GEOHUB_CLOUDINARY.cloudName) + '/image/upload';
-      var controller = window.AbortController ? new AbortController() : null;
-      var timer = controller ? setTimeout(function(){ controller.abort(); }, 30000) : null;
-      return fetch(url, { method: 'POST', body: form, signal: controller ? controller.signal : undefined })
-        .then(function(res){
-          return res.json().catch(function(){ return {}; }).then(function(body){
-            if (!res.ok || !body.secure_url) {
-              throw new Error((body && body.error && body.error.message) || ('Cloudinary upload failed: ' + res.status));
-            }
-            return body.secure_url;
+      var apiUrl = 'https://api.cloudinary.com/v1_1/' + encodeURIComponent(GEOHUB_CLOUDINARY.cloudName) + '/image/upload';
+      return new Promise(function(resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', apiUrl);
+        if (onProgress && xhr.upload) {
+          xhr.upload.addEventListener('progress', function(e) {
+            if (e.lengthComputable) onProgress(Math.round(e.loaded / e.total * 100));
           });
-        })
-        .finally(function(){ if (timer) clearTimeout(timer); });
+        }
+        var timer = setTimeout(function(){ xhr.abort(); }, 30000);
+        xhr.onload = function() {
+          clearTimeout(timer);
+          var body = {};
+          try { body = JSON.parse(xhr.responseText); } catch(e) {}
+          if (xhr.status >= 200 && xhr.status < 300 && body.secure_url) {
+            resolve(body.secure_url);
+          } else {
+            reject(new Error((body.error && body.error.message) || ('Cloudinary upload failed: ' + xhr.status)));
+          }
+        };
+        xhr.onerror = function() { clearTimeout(timer); reject(new Error('Network error')); };
+        xhr.onabort = function() { clearTimeout(timer); reject(new Error('Upload timeout')); };
+        xhr.send(form);
+      }).catch(function(err) {
+        if (_attempt < 3) {
+          return new Promise(function(res){ setTimeout(res, _attempt * 2000); }).then(function(){
+            return uploadBlobToCloudinary(blob, folder, user, onProgress, _attempt + 1);
+          });
+        }
+        throw err;
+      });
+    }
+
+    function uploadFile(file, folder, onProgress) {
+      if (!file) return Promise.resolve('');
+      return new Promise(function(resolve) {
+        requireAuth(function(user) {
+          if (!/^image\/(png|jpe?g|webp|gif)$/i.test(file.type || '')) {
+            toast('Use a PNG, JPG, WEBP or GIF image.', 'error');
+            return resolve('');
+          }
+          if (file.size > 8 * 1024 * 1024) {
+            toast('Image is too large. Choose a file under 8 MB.', 'error');
+            return resolve('');
+          }
+          compressImageBlob(file).then(function(compressed) {
+            return uploadBlobToCloudinary(compressed, folder, user, onProgress);
+          }).then(function(url) {
+            resolve(url);
+          }).catch(function(err) {
+            console.error('[GeoSocial] uploadFile failed:', err && err.message ? err.message : err);
+            toast('Image upload failed. Check your connection and try again.', 'error');
+            resolve('');
+          });
+        });
+      });
     }
 
     function compressImageBlob(blob, maxSide, quality) {
@@ -2025,6 +2069,7 @@
       checkJoinRequest:        checkJoinRequest,
       getMyJoinRequests:       getMyJoinRequests,
       uploadImageDataUrl:      uploadImageDataUrl,
+      uploadFile:              uploadFile,
       hidePost:                hidePost,
       blockUser:               blockUser,
       unblockUser:             unblockUser,

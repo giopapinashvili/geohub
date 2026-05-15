@@ -257,10 +257,18 @@
     var m = document.createElement('div');
     m.id = 'accountSettingsModal'; m.className = 'auth-modal-overlay';
     var notifHTML = window.GeoPush ? window.GeoPush.buildSettingsHTML() : '';
+    var avatarSrc = esc(user.avatar || user.photoURL || '');
     m.innerHTML = '<div class="auth-modal-card" style="max-width:520px;max-height:90vh;overflow-y:auto">'
       + '<button class="auth-modal-close" id="asClose"><i class="fas fa-times"></i></button>'
       + '<h3>Account Settings</h3>'
-      + '<p>Update your public GeoHub profile.</p>'
+      + '<div style="display:flex;align-items:center;gap:14px;margin:12px 0 16px">'
+      + '<div id="asAvatarWrap" style="position:relative;width:64px;height:64px;border-radius:50%;overflow:hidden;background:var(--bg-elevated,#1a1d2e);flex-shrink:0">'
+      + (avatarSrc ? '<img id="asAvatarImg" src="' + avatarSrc + '" alt="Avatar" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\'">' : '')
+      + '</div>'
+      + '<div style="flex:1">'
+      + '<button type="button" class="btn-ghost" id="asChangeAvatar" style="font-size:.82rem;padding:6px 12px"><i class="fas fa-camera"></i> Change avatar</button>'
+      + '<div id="asAvatarStatus" style="font-size:.75rem;color:#64748b;margin-top:4px"></div>'
+      + '</div></div>'
       + '<input id="asName" class="form-input" style="margin:8px 0" value="' + esc(user.fullName || '') + '" placeholder="Name">'
       + '<input id="asCity" class="form-input" style="margin:8px 0" value="' + esc(user.city || '') + '" placeholder="City">'
       + '<textarea id="asBio" class="form-input" style="margin:8px 0;min-height:90px" placeholder="Bio">' + esc(user.bio || '') + '</textarea>'
@@ -270,12 +278,46 @@
     document.body.appendChild(m);
     requestAnimationFrame(function(){ m.classList.add('open'); });
     m.querySelector('#asClose').addEventListener('click', function(){ m.remove(); });
+
+    var _pendingAvatar = '';
+    m.querySelector('#asChangeAvatar').addEventListener('click', function() {
+      var inp = document.createElement('input');
+      inp.type = 'file'; inp.accept = 'image/png,image/jpeg,image/webp,image/gif'; inp.style.display = 'none';
+      document.body.appendChild(inp);
+      inp.onchange = function() {
+        var file = inp.files && inp.files[0];
+        inp.remove();
+        if (!file) return;
+        var GS = window.GeoSocial;
+        if (!GS || !GS.uploadFile) { var status = document.getElementById('asAvatarStatus'); if (status) status.textContent = 'Avatar upload unavailable.'; return; }
+        var btn = document.getElementById('asChangeAvatar');
+        var status = document.getElementById('asAvatarStatus');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Uploading…'; }
+        if (status) status.textContent = '';
+        GS.uploadFile(file, 'avatars', function(pct) { if (status) status.textContent = pct + '%'; }).then(function(url) {
+          _pendingAvatar = url || '';
+          if (url) {
+            var wrap = document.getElementById('asAvatarWrap');
+            if (wrap) { wrap.innerHTML = '<img id="asAvatarImg" src="' + esc(url) + '" alt="Avatar" style="width:100%;height:100%;object-fit:cover">'; }
+            if (status) status.textContent = 'Ready to save';
+          } else {
+            if (status) status.textContent = 'Upload failed. Try again.';
+          }
+        }).finally(function() {
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> Change avatar'; }
+        });
+      };
+      inp.click();
+    });
+
     m.querySelector('#asSave').addEventListener('click', function(){
-      updateUser({
+      var updates = {
         fullName: document.getElementById('asName').value.trim(),
         city:     document.getElementById('asCity').value.trim(),
         bio:      document.getElementById('asBio').value.trim()
-      }).then(function(){ m.remove(); initAuthNav(); });
+      };
+      if (_pendingAvatar) updates.avatar = _pendingAvatar;
+      updateUser(updates).then(function(){ m.remove(); initAuthNav(); });
     });
     if (window.GeoPush) window.GeoPush.bindSettingsEvents();
   }

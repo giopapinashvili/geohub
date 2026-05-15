@@ -641,7 +641,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       overlay.innerHTML = '<div class="gh-story-shell" role="dialog" aria-modal="true" aria-label="Story viewer">'+
         '<div class="gh-story-progress">'+g.stories.map(function(_,i){ return '<span class="'+(i<=storyIndex?'active':'')+'"></span>'; }).join('')+'</div>'+
         '<div class="gh-story-head"><div class="gh-story-author">'+(g.authorAvatar?'<span class="gh-story-author-avatar">'+img(g.authorAvatar,g.authorName)+'</span>':'<span class="gh-story-author-avatar initials">'+esc(initials(g.authorName))+'</span>')+'<div><strong>'+esc(g.authorName)+'</strong><small>'+(storyIndex+1)+'/'+g.stories.length+' · '+timeAgo(st.createdAt)+'</small></div></div><button type="button" class="gh-story-close" aria-label="Close story">×</button></div>'+
-        '<div class="gh-story-main">'+(media?'<img src="'+esc(media)+'" alt="Story image" loading="eager">':'<p>'+esc(st.text||'Story')+'</p>')+(media && st.text?'<div class="gh-story-caption">'+esc(st.text)+'</div>':'')+'</div>'+
+        '<div class="gh-story-main">'+(media?'<img src="'+esc(media)+'" alt="Story image" loading="eager" onerror="this.style.display=\'none\'">':'<p>'+esc(st.text||'Story')+'</p>')+(media && st.text?'<div class="gh-story-caption">'+esc(st.text)+'</div>':'')+'</div>'+
         '<button type="button" class="gh-story-nav prev" aria-label="Previous story">‹</button><button type="button" class="gh-story-nav next" aria-label="Next story">›</button>'+
       '</div>';
       overlay.querySelector('.gh-story-close').onclick = close;
@@ -677,7 +677,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     return '<article class="gh-card gh-post" id="post-'+esc(pid)+'" data-post-id="'+esc(pid)+'" data-author-id="'+esc(authorId)+'">'+
       '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+target+(p.feeling?' · '+esc(p.feeling):'')+'</div></div><button class="gh-post-more" data-post-menu><i class="fas fa-ellipsis"></i></button></div>'+
       (p.text?'<div class="gh-post-text">'+esc(p.text)+'</div>':'')+
-      (imgUrl?'<img class="gh-post-img" src="'+esc(imgUrl)+'" alt="post image" loading="lazy">':'')+
+      (imgUrl?'<img class="gh-post-img" src="'+esc(imgUrl)+'" alt="post image" loading="lazy" onerror="this.style.display=\'none\'">':'')+
       (p.sharedPostId?'<div class="gh-shared-preview" data-shared-post="'+esc(p.sharedPostId)+'"><i class="fas fa-share"></i><div><strong>Shared post</strong><span>Loading original post...</span></div></div>':'')+
       '<div class="gh-post-stats"><span><i class="fas fa-thumbs-up"></i> <b data-like-count>'+Number(p.likeCount||p.reactionCount||0)+'</b></span><span><b data-comment-count>'+Number(p.commentCount||0)+'</b> comments · <b>'+Number(p.shareCount||0)+'</b> shares</span></div>'+
       '<div class="gh-post-actions"><button class="gh-act" data-like><i class="fas fa-thumbs-up"></i> Like</button><button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> Comment</button><button class="gh-act" data-share><i class="fas fa-share"></i> Share</button><button class="gh-act" data-save><i class="fas fa-bookmark"></i> Save</button></div>'+

@@ -117,10 +117,15 @@
 .rw-card-img {
   height: 150px;
   overflow: hidden;
-  background: rgba(255,255,255,.03);
+  background: linear-gradient(135deg, rgba(16,185,129,.06), rgba(59,130,246,.06));
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .rw-card-img img { width: 100%; height: 100%; object-fit: cover; }
+.rw-card-img img[style*="display: none"] ~ * { display: block; }
+.rw-card-img img[style*="display: none"] + .rw-img-fallback { font-size: 2rem; color: rgba(16,185,129,.4); }
 .rw-card-img-placeholder {
   display: flex;
   align-items: center;

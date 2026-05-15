@@ -164,7 +164,7 @@
         : unlimited ? '' : '<span>' + stock + ' available</span>';
 
     var imgHtml = r.imageUrl
-      ? '<div class="rw-card-img"><img src="' + esc(r.imageUrl) + '" alt="' + esc(r.title || 'Reward') + '" loading="lazy"></div>'
+      ? '<div class="rw-card-img"><img src="' + esc(r.imageUrl) + '" alt="' + esc(r.title || 'Reward') + '" loading="lazy" onerror="this.style.display=\'none\'"></div>'
       : '<div class="rw-card-img rw-card-img-placeholder"><i class="fas ' + icon + '"></i></div>';
 
     var btnDisabled = !canAfford || outOfStock;
