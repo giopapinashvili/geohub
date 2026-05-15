@@ -730,14 +730,15 @@
 
     /* ── State ──────────────────────────────────────────────────────── */
     var state = {
-      place:    null,   // { id, name, lat, lng, city, country, category, businessId }
-      userLoc:  null,   // { lat, lng, accuracy }
-      proximity: null,  // { distance, withinRadius }
-      photoFile: null,
-      photoUrl:  null,
-      verified:  false,
-      xp:        50,
-      submitting: false
+      place:       null,  // { id, name, lat, lng, city, country, category, businessId }
+      userLoc:     null,  // { lat, lng, accuracy }
+      proximity:   null,  // { distance, withinRadius }
+      photoFile:   null,
+      photoUrl:    null,
+      verified:    false,
+      checkinType: 'normal', // 'normal' | 'qr'
+      xp:          50,
+      submitting:  false
     };
 
     /* ── DOM refs ───────────────────────────────────────────────────── */
@@ -753,10 +754,41 @@
       var city = p.get('city')    || '';
       var cat  = p.get('category')|| '';
       var bid  = p.get('businessId') || '';
+      var fromQr = p.get('from') === 'qr';
       if (name) {
         setPlace({ id: id, name: name, lat: isNaN(lat)?null:lat, lng: isNaN(lng)?null:lng,
                    city: city, country: 'Georgia', category: cat, businessId: bid });
       }
+      if (fromQr) setQrVerified();
+    }
+
+    /* ── Mark check-in as QR-verified ──────────────────────────────────── */
+    function setQrVerified() {
+      state.verified    = true;
+      state.checkinType = 'qr';
+      var badge = $id('ciGpsStatusBadge');
+      badge.textContent = '✓ QR Verified';
+      badge.style.cssText = 'font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(99,102,241,0.12);color:#a78bfa';
+      var btn   = $id('ciGetLocBtn');
+      btn.classList.add('verified');
+      btn.style.background   = 'rgba(99,102,241,0.1)';
+      btn.style.borderColor  = 'rgba(99,102,241,0.3)';
+      btn.style.color        = '#a78bfa';
+      $id('ciGetLocLabel').textContent = '✓ QR Code Verified — GPS Optional';
+      var distRing = $id('ciDistRing');
+      distRing.classList.add('visible');
+      $id('ciDistRingOuter').className = 'ci-dist-ring-outer ok';
+      $id('ciDistRingOuter').style.borderColor = '#a78bfa';
+      $id('ciDistRingOuter').style.boxShadow   = '0 0 24px rgba(99,102,241,0.3)';
+      $id('ciDistVal').textContent  = 'QR';
+      $id('ciDistUnit').textContent = '';
+      var statusEl = $id('ciDistStatus');
+      statusEl.className   = 'ci-dist-status ok';
+      statusEl.style.background = 'rgba(99,102,241,0.12)';
+      statusEl.style.color      = '#a78bfa';
+      statusEl.textContent = '✓ QR verified';
+      updateXp();
+      updateSubmitBtn();
     }
 
     /* ── Set active place ───────────────────────────────────────────── */
@@ -930,7 +962,7 @@
       var xp = GC ? GC.calcXP({
         verified:    state.verified,
         hasPhoto:    !!state.photoFile,
-        checkinType: 'normal'
+        checkinType: state.checkinType || 'normal'
       }) : (state.verified ? 50 : 10);
       state.xp = xp;
       $id('ciXpVal').textContent = xp;
@@ -981,8 +1013,11 @@
       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking in…';
 
       function doSubmit(photoUrl) {
+        var isQr = state.checkinType === 'qr';
         var verMethod = 'none';
-        if (state.verified) verMethod = photoUrl ? 'gps_photo' : 'gps';
+        if (isQr)                              verMethod = 'qr';
+        else if (state.verified && photoUrl)   verMethod = 'gps_photo';
+        else if (state.verified)               verMethod = 'gps';
 
         var data = {
           placeId:            state.place.id || '',
@@ -994,7 +1029,7 @@
           lat:                state.userLoc ? state.userLoc.lat      : null,
           lng:                state.userLoc ? state.userLoc.lng      : null,
           accuracy:           state.userLoc ? state.userLoc.accuracy : null,
-          checkinType:        'normal',
+          checkinType:        state.checkinType || 'normal',
           photoUrl:           photoUrl || null,
           caption:            ($id('ciCaption').value || '').trim(),
           verified:           state.verified,

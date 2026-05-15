@@ -100,6 +100,11 @@ service cloud.firestore {
       allow delete: if isAdmin() || existingOwnerMatches();
     }
     match /businessAdmins/{adminId} { allow read: if true; allow create: if signedIn() && request.resource.data.get('userId', '') == uid(); allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
+    match /businesses/{businessId}/qrScanLogs/{logId} {
+      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
+      allow read: if isAdmin() || (signedIn() && get(/databases/$(database)/documents/businesses/$(businessId)).data.get('ownerId', '') == uid());
+      allow update, delete: if isAdmin();
+    }
     match /businessFollowers/{followId} { allow read: if true; allow create: if signedIn() && request.resource.data.get('userId', '') == uid(); allow update: if false; allow delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
     match /businessReviews/{reviewId} { allow read: if true; allow create: if signedIn() && request.resource.data.get('userId', '') == uid(); allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
     match /businessOffers/{offerId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }

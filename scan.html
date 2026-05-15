@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Scan QR — GeoHub</title>
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css">
+  </noscript>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── Reset / base ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      height: 100dvh;
+      background: #04050d;
+      color: #f0f4ff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+
+    /* ── Top bar ──────────────────────────────────────────────── */
+    .sc-topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 16px;
+      background: rgba(4,5,13,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      z-index: 100;
+      padding-top: env(safe-area-inset-top);
+    }
+    .sc-back-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #f0f4ff;
+      font-size: 0.9rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      text-decoration: none;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .sc-back-btn:hover { background: rgba(255,255,255,0.12); }
+    .sc-title { font-size: 1rem; font-weight: 800; flex: 1; }
+    .sc-logo { font-size: 1.1rem; font-weight: 900; color: #10b981; }
+
+    /* ── Screens ──────────────────────────────────────────────── */
+    .sc-screen {
+      position: fixed;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+    }
+    .sc-screen.active { display: flex; }
+
+    /* ── Scanner screen ───────────────────────────────────────── */
+    #scCamera {
+      background: #000;
+      align-items: center;
+      justify-content: center;
+    }
+    #scVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    #scCanvas { display: none; }
+
+    /* QR frame overlay */
+    .sc-qr-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      padding-top: 56px;
+    }
+    .sc-qr-frame {
+      width: 230px; height: 230px;
+      position: relative;
+    }
+    .sc-qr-corner {
+      position: absolute;
+      width: 34px; height: 34px;
+      border-color: #10b981;
+      border-style: solid;
+    }
+    .sc-qr-corner.tl { top:0; left:0; border-width:3px 0 0 3px; border-radius:8px 0 0 0; }
+    .sc-qr-corner.tr { top:0; right:0; border-width:3px 3px 0 0; border-radius:0 8px 0 0; }
+    .sc-qr-corner.bl { bottom:0; left:0; border-width:0 0 3px 3px; border-radius:0 0 0 8px; }
+    .sc-qr-corner.br { bottom:0; right:0; border-width:0 3px 3px 0; border-radius:0 0 8px 0; }
+    .sc-scan-line {
+      position: absolute;
+      left: 4px; right: 4px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #10b981, transparent);
+      box-shadow: 0 0 12px rgba(16,185,129,0.8);
+      animation: qrScan 2s linear infinite;
+      top: 4px;
+    }
+    @keyframes qrScan { 0% { top: 4px; } 100% { top: calc(100% - 6px); } }
+    .sc-qr-hint {
+      margin-top: 24px;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.55);
+      font-weight: 600;
+      text-align: center;
+      padding: 0 32px;
+    }
+
+    /* Torch + flip buttons */
+    .sc-cam-controls {
+      position: absolute;
+      bottom: max(32px, env(safe-area-inset-bottom));
+      left: 0; right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    .sc-cam-btn {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.14);
+      color: #fff;
+      font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: background 0.15s;
+    }
+    .sc-cam-btn:hover { background: rgba(255,255,255,0.12); }
+    .sc-cam-btn.active { background: rgba(255,255,255,0.18); }
+
+    /* ── No-camera fallback ───────────────────────────────────── */
+    #scNoCam {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 64px 32px;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .sc-no-cam-icon { font-size: 3rem; color: #64748b; }
+    .sc-no-cam-title { font-size: 1.2rem; font-weight: 800; }
+    .sc-no-cam-text { font-size: 0.88rem; color: #94a3b8; line-height: 1.6; max-width: 300px; }
+    .sc-no-cam-home {
+      padding: 14px 28px;
+      border-radius: 14px;
+      background: linear-gradient(135deg,#10b981,#3b82f6);
+      border: none;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 8px;
+    }
+
+    /* ── Confirmation screen ──────────────────────────────────── */
+    #scConfirm {
+      align-items: center;
+      justify-content: flex-end;
+      background: rgba(4,5,13,0.94);
+      padding-bottom: max(32px, env(safe-area-inset-bottom));
+    }
+    .sc-confirm-sheet {
+      width: 100%;
+      max-width: 540px;
+      background: #0c0e1c;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px 24px 0 0;
+      padding: 16px 24px 28px;
+      animation: slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .sc-sheet-handle {
+      width: 36px; height: 4px;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.15);
+      margin: 0 auto 20px;
+    }
+    .sc-biz-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .sc-biz-avatar {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(59,130,246,0.2));
+      border: 1px solid rgba(16,185,129,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+    .sc-biz-info { flex: 1; min-width: 0; }
+    .sc-biz-name { font-size: 1.1rem; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sc-biz-meta { font-size: 0.8rem; color: #94a3b8; margin-top: 3px; }
+    .sc-qr-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #a78bfa;
+      background: rgba(99,102,241,0.12);
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: 99px;
+      padding: 5px 12px;
+      margin-bottom: 20px;
+    }
+    .sc-xp-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: rgba(16,185,129,0.07);
+      border: 1px solid rgba(16,185,129,0.18);
+      border-radius: 14px;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #34d399;
+    }
+    .sc-xp-row i { font-size: 0.85rem; }
+    .sc-checkin-btn {
+      width: 100%;
+      padding: 15px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #10b981, #3b82f6);
+      border: none;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 20px rgba(16,185,129,0.4);
+      margin-bottom: 12px;
+      transition: all 0.25s;
+    }
+    .sc-checkin-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(16,185,129,0.5); }
+    .sc-cancel-btn {
+      width: 100%;
+      padding: 13px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #94a3b8;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .sc-cancel-btn:hover { background: rgba(255,255,255,0.08); }
+
+    /* ── Error screen ─────────────────────────────────────────── */
+    #scError {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 64px 32px;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .sc-err-icon { font-size: 2.8rem; color: #ef4444; }
+    .sc-err-title { font-size: 1.1rem; font-weight: 800; }
+    .sc-err-msg { font-size: 0.88rem; color: #94a3b8; line-height: 1.6; max-width: 300px; }
+    .sc-err-retry {
+      padding: 13px 28px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #f0f4ff;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .sc-err-retry:hover { background: rgba(255,255,255,0.12); }
+
+    /* ── Loading screen ───────────────────────────────────────── */
+    #scLoading {
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .sc-loading-spinner { font-size: 2rem; color: #10b981; }
+    .sc-loading-text { font-size: 0.9rem; color: #94a3b8; }
+  </style>
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="sc-topbar">
+    <a href="javascript:history.back()" class="sc-back-btn"><i class="fas fa-arrow-left"></i></a>
+    <div class="sc-title">Scan QR Code</div>
+    <div class="sc-logo">GeoHub</div>
+  </div>
+
+  <!-- Loading screen -->
+  <div class="sc-screen active" id="scLoading" style="padding-top:56px">
+    <div class="sc-loading-spinner"><i class="fas fa-circle-notch fa-spin"></i></div>
+    <div class="sc-loading-text">Loading…</div>
+  </div>
+
+  <!-- Camera scanner screen -->
+  <div class="sc-screen" id="scCamera" style="padding-top:56px">
+    <video id="scVideo" autoplay muted playsinline></video>
+    <canvas id="scCanvas"></canvas>
+    <div class="sc-qr-overlay">
+      <div class="sc-qr-frame">
+        <div class="sc-qr-corner tl"></div>
+        <div class="sc-qr-corner tr"></div>
+        <div class="sc-qr-corner bl"></div>
+        <div class="sc-qr-corner br"></div>
+        <div class="sc-scan-line"></div>
+      </div>
+      <div class="sc-qr-hint">Point at a GeoHub QR code</div>
+    </div>
+    <div class="sc-cam-controls">
+      <button class="sc-cam-btn" id="scFlipBtn" title="Flip camera"><i class="fas fa-camera-rotate"></i></button>
+    </div>
+  </div>
+
+  <!-- Confirmation bottom sheet -->
+  <div class="sc-screen" id="scConfirm" style="padding-top:56px">
+    <div class="sc-confirm-sheet">
+      <div class="sc-sheet-handle"></div>
+      <div class="sc-biz-row">
+        <div class="sc-biz-avatar" id="scBizEmoji">📍</div>
+        <div class="sc-biz-info">
+          <div class="sc-biz-name" id="scBizName">Loading…</div>
+          <div class="sc-biz-meta" id="scBizMeta"></div>
+        </div>
+      </div>
+      <div class="sc-qr-badge"><i class="fas fa-qrcode"></i> QR Code Verified</div>
+      <div class="sc-xp-row">
+        <i class="fas fa-bolt"></i>
+        <span>60 XP for QR check-in</span>
+      </div>
+      <button class="sc-checkin-btn" id="scCheckinBtn">
+        <i class="fas fa-location-dot"></i>
+        Check In Now
+      </button>
+      <button class="sc-cancel-btn" onclick="goBack()">
+        <i class="fas fa-times"></i> Cancel
+      </button>
+    </div>
+  </div>
+
+  <!-- Error screen -->
+  <div class="sc-screen" id="scError" style="padding-top:56px">
+    <div class="sc-err-icon"><i class="fas fa-triangle-exclamation"></i></div>
+    <div class="sc-err-title" id="scErrTitle">Invalid QR Code</div>
+    <div class="sc-err-msg" id="scErrMsg">This QR code is not a valid GeoHub check-in code.</div>
+    <button class="sc-err-retry" id="scErrRetry" onclick="restartScanner()">
+      <i class="fas fa-rotate-right"></i> Try Again
+    </button>
+    <a href="index.html" style="margin-top:8px;font-size:0.85rem;color:#94a3b8;text-decoration:none">← Back to Home</a>
+  </div>
+
+  <!-- No-camera fallback -->
+  <div class="sc-screen" id="scNoCam" style="padding-top:56px">
+    <div class="sc-no-cam-icon"><i class="fas fa-video-slash"></i></div>
+    <div class="sc-no-cam-title">Camera not available</div>
+    <div class="sc-no-cam-text">
+      This device doesn't support camera access, or permission was denied.
+      Ask the business owner for the QR code ID to check in manually.
+    </div>
+    <a href="checkin.html" class="sc-no-cam-home"><i class="fas fa-location-dot"></i> Manual Check-in</a>
+  </div>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script defer src="gh-schema.js"></script>
+  <script defer src="firestore-social.js"></script>
+  <script defer src="account.js"></script>
+  <script defer src="qr-engine.js"></script>
+
+  <!-- jsQR — lightweight QR decoder (30 KB) -->
+  <script>
+  (function () {
+    'use strict';
+
+    var JSQR_URL = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
+
+    /* ── State ─────────────────────────────────────────────────── */
+    var bizData        = null;  // resolved business document
+    var scannerStream  = null;
+    var scannerActive  = false;
+    var facingMode     = 'environment';
+    var scanAnimFrame  = null;
+
+    var CATEGORY_EMOJIS = {
+      restaurant:'🍽️', cafe:'☕', hotel:'🏨', guesthouse:'🏡',
+      tour:'🗺️', attraction:'🏛️', bar:'🍺', shop:'🛍️', spa:'💆',
+      default:'📍'
+    };
+
+    /* ── Screen helpers ────────────────────────────────────────── */
+    function showScreen(id) {
+      ['scLoading','scCamera','scConfirm','scError','scNoCam'].forEach(function (s) {
+        var el = document.getElementById(s);
+        if (el) el.classList.toggle('active', s === id);
+      });
+    }
+
+    function showError(title, msg, showRetry) {
+      document.getElementById('scErrTitle').textContent = title || 'Error';
+      document.getElementById('scErrMsg').textContent   = msg   || '';
+      var btn = document.getElementById('scErrRetry');
+      if (btn) btn.style.display = showRetry === false ? 'none' : '';
+      showScreen('scError');
+      stopScanner();
+    }
+
+    /* ── URL param ?code ───────────────────────────────────────── */
+    function getCodeParam() {
+      try {
+        return new URLSearchParams(location.search).get('code') || '';
+      } catch (e) { return ''; }
+    }
+
+    /* ── Wait for Firebase + GeoQr to be ready ─────────────────── */
+    function waitReady(cb) {
+      if (window.GeoFirebase && window.GeoQr) { cb(); return; }
+      var tries = 0;
+      var iv = setInterval(function () {
+        tries++;
+        if (window.GeoFirebase && window.GeoQr) { clearInterval(iv); cb(); return; }
+        if (tries > 30) { clearInterval(iv); cb(); }
+      }, 150);
+    }
+
+    /* ── Resolve business from validated code ─────────────────── */
+    function resolveAndConfirm(validationResult) {
+      showScreen('scLoading');
+      var GF = window.GeoFirebase;
+      if (!GF || !GF.db || !GF.fs) {
+        showError('System not ready', 'Please reload the page and try again.', false);
+        return;
+      }
+      var businessId = validationResult.businessId;
+      GF.fs.getDoc(GF.fs.doc(GF.db, 'businesses', businessId)).then(function (snap) {
+        if (!snap.exists()) {
+          showError('Business not found', 'This QR code refers to a business that no longer exists.', true);
+          return;
+        }
+        var data = snap.data();
+        // Verify qrCode field matches (confirms QR is active)
+        if (data.qrCode && data.qrCode !== validationResult.qrCode) {
+          showError('QR code invalid', 'This QR code has been revoked or replaced. Please ask the business for their latest QR code.', false);
+          return;
+        }
+        bizData = Object.assign({ id: businessId }, data);
+        showConfirm(bizData);
+
+        // Track scan (best-effort, rate-limited)
+        var GQ = window.GeoQr;
+        var GF2 = window.GeoFirebase;
+        var userId = GF2 && GF2.auth && GF2.auth.currentUser ? GF2.auth.currentUser.uid : null;
+        if (GQ) GQ.trackQrScan(businessId, userId);
+
+      }).catch(function () {
+        showError('Network error', 'Could not verify this QR code. Check your connection and try again.', true);
+      });
+    }
+
+    function showConfirm(biz) {
+      var emoji = CATEGORY_EMOJIS[(biz.category||'').toLowerCase()] || CATEGORY_EMOJIS.default;
+      document.getElementById('scBizEmoji').textContent = emoji;
+      document.getElementById('scBizName').textContent  = biz.title || biz.name || 'Unknown Place';
+      var meta = [biz.category, biz.city || biz.location].filter(Boolean).join(' · ');
+      document.getElementById('scBizMeta').textContent  = meta;
+
+      var btn = document.getElementById('scCheckinBtn');
+      btn.onclick = function () { goToCheckin(biz); };
+
+      showScreen('scConfirm');
+    }
+
+    function goToCheckin(biz) {
+      var params = new URLSearchParams({
+        businessId: biz.id,
+        name:       biz.title || biz.name || '',
+        city:       biz.city  || biz.location || '',
+        category:   biz.category || '',
+        from:       'qr'
+      });
+      if (biz.lat || biz.latitude)  params.set('lat', biz.lat || biz.latitude);
+      if (biz.lng || biz.longitude) params.set('lng', biz.lng || biz.longitude);
+      location.href = 'checkin.html?' + params.toString();
+    }
+
+    /* ── QR scanning loop ──────────────────────────────────────── */
+    function scanFrame() {
+      if (!scannerActive) return;
+      var video  = document.getElementById('scVideo');
+      var canvas = document.getElementById('scCanvas');
+      if (!video || !canvas) return;
+      if (video.readyState !== video.READY_STATE_HAVE_ENOUGH_DATA &&
+          video.readyState < 4) {
+        scanAnimFrame = requestAnimationFrame(scanFrame);
+        return;
+      }
+      canvas.width  = video.videoWidth;
+      canvas.height = video.videoHeight;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      var code = window.jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: 'dontInvert'
+      });
+      if (code && code.data) {
+        scannerActive = false;
+        cancelAnimationFrame(scanAnimFrame);
+        handleScannedData(code.data);
+        return;
+      }
+      scanAnimFrame = requestAnimationFrame(scanFrame);
+    }
+
+    function handleScannedData(raw) {
+      var GQ = window.GeoQr;
+      if (!GQ) { showError('System not ready', 'Please reload and try again.', true); return; }
+      var result = GQ.validateQrCode(raw);
+      if (!result.valid) {
+        showError('Not a GeoHub QR code', 'This QR code was not issued by GeoHub. Only valid GeoHub business QR codes can be scanned here.', true);
+        return;
+      }
+      resolveAndConfirm(result);
+    }
+
+    /* ── Camera ────────────────────────────────────────────────── */
+    function startCamera(mode) {
+      facingMode = mode || facingMode;
+      if (scannerStream) {
+        scannerStream.getTracks().forEach(function (t) { t.stop(); });
+        scannerStream = null;
+      }
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showScreen('scNoCam');
+        return;
+      }
+      var constraints = { video: { facingMode: facingMode, width: { ideal: 1280 }, height: { ideal: 720 } } };
+      navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
+        scannerStream = stream;
+        var video = document.getElementById('scVideo');
+        video.srcObject = stream;
+        video.play().catch(function () {});
+        scannerActive = true;
+        loadJsQr(function () {
+          showScreen('scCamera');
+          scanFrame();
+        });
+      }).catch(function (err) {
+        if (err.name === 'NotAllowedError') {
+          showError('Camera permission denied',
+            'Please allow camera access in your browser settings, then reload the page.', false);
+        } else {
+          showScreen('scNoCam');
+        }
+      });
+    }
+
+    function stopScanner() {
+      scannerActive = false;
+      cancelAnimationFrame(scanAnimFrame);
+      if (scannerStream) {
+        scannerStream.getTracks().forEach(function (t) { t.stop(); });
+        scannerStream = null;
+      }
+    }
+
+    function restartScanner() {
+      bizData = null;
+      startCamera();
+    }
+    window.restartScanner = restartScanner;
+
+    function goBack() {
+      stopScanner();
+      history.back();
+    }
+    window.goBack = goBack;
+
+    /* Flip camera */
+    document.getElementById('scFlipBtn').addEventListener('click', function () {
+      facingMode = facingMode === 'environment' ? 'user' : 'environment';
+      scannerActive = false;
+      startCamera(facingMode);
+    });
+
+    /* ── Load jsQR lazily ──────────────────────────────────────── */
+    function loadJsQr(cb) {
+      if (window.jsQR) { cb(); return; }
+      var s = document.createElement('script');
+      s.src = JSQR_URL;
+      s.onload = cb;
+      s.onerror = function () {
+        showError('Scanner library failed to load', 'Check your internet connection and reload.', false);
+      };
+      document.head.appendChild(s);
+    }
+
+    /* ── Entry point ───────────────────────────────────────────── */
+    function init() {
+      var code = getCodeParam();
+      if (code) {
+        // QR already decoded (opened via link from QR image)
+        waitReady(function () {
+          var GQ = window.GeoQr;
+          if (!GQ) { showError('System not ready', 'Please reload.', false); return; }
+          var result = GQ.validateQrCode(code);
+          if (!result.valid) {
+            showError('Invalid QR code', 'The code in this link is not valid.', false);
+            return;
+          }
+          resolveAndConfirm(result);
+        });
+      } else {
+        // Launch camera scanner
+        waitReady(function () {
+          startCamera();
+        });
+      }
+    }
+
+    window.addEventListener('GeoFirebaseReady', function () {
+      // Firebase ready — init if not yet done
+      if (document.getElementById('scLoading').classList.contains('active')) {
+        init();
+      }
+    });
+
+    // Also try immediately (scripts may already be loaded)
+    if (window.GeoFirebase) {
+      init();
+    } else {
+      // Give scripts 600ms before giving up waiting for GeoFirebaseReady
+      setTimeout(function () {
+        if (document.getElementById('scLoading').classList.contains('active')) {
+          init();
+        }
+      }, 600);
+    }
+  }());
+  </script>
+</body>
+</html>

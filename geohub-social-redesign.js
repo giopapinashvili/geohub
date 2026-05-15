@@ -1038,6 +1038,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       {id:'reviews',  icon:'fa-star',        l:'Reviews'},
       {id:'employees',icon:'fa-user-group',  l:'Employees'},
       {id:'analytics',icon:'fa-chart-bar',   l:'Analytics'},
+      {id:'qr',       icon:'fa-qrcode',      l:'QR Check-in'},
     ];
     var sideNav='<nav class="gh-dash-sidebar-nav">'+
       sections.map(function(s){ return '<button class="gh-dash-nav-item'+(state.bizDashSection===s.id?' active':'')+'" data-dash-section="'+s.id+'"><i class="fas '+s.icon+'"></i><span>'+s.l+'</span></button>'; }).join('')+
@@ -1076,6 +1077,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(s==='reviews')   return renderBizDashReviews(b);
     if(s==='employees') return renderBizDashEmployees(b);
     if(s==='analytics') return renderBizDashAnalytics(b);
+    if(s==='qr')        return renderBizDashQr(b);
   }
 
   function renderBizDashOverview(b){
@@ -1244,6 +1246,108 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       posts.forEach(function(p){hydrateReactionState(p.id);});
       hydrateSharedPreviews(el);
     });
+  }
+
+  /* ── QR Check-in dashboard section ────────────────────────────────
+     Loads qrcode.js lazily, generates/reads the qrCode field, renders
+     the QR image plus copy/download actions and scan stats.
+  ─────────────────────────────────────────────────────────────────── */
+  function renderBizDashQr(b){
+    var cont=$('#ghDashContent'); if(!cont) return;
+    cont.innerHTML=
+      '<div class="gh-dash-section">'+
+        '<h2 class="gh-dash-section-title">QR Check-in</h2>'+
+        '<div id="ghQrBody"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i><p>Loading QR code…</p></div></div>'+
+      '</div>';
+
+    var GQ=window.GeoQr;
+    if(!GQ){
+      var el2=$('#ghQrBody'); if(el2) el2.innerHTML='<div class="gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>QR engine not loaded</h3><p>Please reload the page.</p></div>';
+      return;
+    }
+
+    GQ.ensureBusinessQr(b.id, function(res){
+      var el=$('#ghQrBody'); if(!el) return;
+      if(!res){
+        el.innerHTML='<div class="gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Could not generate QR</h3><p>Make sure you own this business and try again.</p></div>';
+        return;
+      }
+      var scanUrl=location.origin+'/scan.html?code='+encodeURIComponent(res.qrCode);
+      el.innerHTML=
+        '<div class="gh-card" style="text-align:center">'+
+          '<div class="gh-biz-sec-head" style="justify-content:center"><h3>Your Business QR Code</h3></div>'+
+          '<p style="font-size:0.82rem;color:var(--gh-muted,#64748b);margin:0 0 16px">Customers scan this code to check in instantly and earn 60 XP.</p>'+
+          '<div id="ghQrCanvas" style="display:inline-block;background:#fff;padding:16px;border-radius:16px;margin-bottom:16px"></div>'+
+          '<div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px">'+
+            '<button class="gh-btn ghost sm" id="ghQrCopy"><i class="fas fa-copy"></i> Copy Code</button>'+
+            '<button class="gh-btn sm" id="ghQrDownload"><i class="fas fa-download"></i> Download PNG</button>'+
+          '</div>'+
+          '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:0.8rem;margin-bottom:16px">'+
+            '<i class="fas fa-qrcode" style="color:#10b981;flex-shrink:0"></i>'+
+            '<code style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;color:#94a3b8" title="'+esc(res.qrCode)+'">'+esc(res.qrCode)+'</code>'+
+          '</div>'+
+          '<div style="font-size:0.78rem;color:var(--gh-muted,#64748b)">QR check-ins: <strong id="ghQrScanCount">…</strong></div>'+
+        '</div>'+
+        '<div class="gh-card" style="background:rgba(99,102,241,0.05);border-color:rgba(99,102,241,0.15)">'+
+          '<div class="gh-biz-sec-head"><h3>How to use</h3></div>'+
+          '<ol style="padding-left:18px;font-size:0.85rem;line-height:2;color:var(--gh-muted,#64748b)">'+
+            '<li>Download and print the QR code, or display it on a screen.</li>'+
+            '<li>Place it at your entrance, counter, or table.</li>'+
+            '<li>Customers open GeoHub, tap <strong>Scan QR</strong>, and scan the code.</li>'+
+            '<li>They earn <strong>60 XP</strong> instantly — verified by QR.</li>'+
+          '</ol>'+
+        '</div>';
+
+      // Load qrcode.js lazily then render
+      loadQrCodeLib(function(){
+        var canvas=$('#ghQrCanvas'); if(!canvas) return;
+        try {
+          // eslint-disable-next-line no-new
+          new QRCode(canvas, {
+            text:          scanUrl,
+            width:         200,
+            height:        200,
+            colorDark:     '#000000',
+            colorLight:    '#ffffff',
+            correctLevel:  QRCode.CorrectLevel.M
+          });
+        } catch(e){ canvas.innerHTML='<p style="color:#ef4444;font-size:0.8rem">QR generation failed.</p>'; }
+      });
+
+      // Copy button
+      $('#ghQrCopy')&&($('#ghQrCopy').onclick=function(){
+        try{ navigator.clipboard.writeText(res.qrCode).then(function(){ toast('QR code ID copied!'); }).catch(function(){ toast(res.qrCode,'info'); }); }
+        catch(e){ toast(res.qrCode,'info'); }
+      });
+
+      // Download PNG button
+      $('#ghQrDownload')&&($('#ghQrDownload').onclick=function(){
+        var img=$('#ghQrCanvas img');
+        var cvs=$('#ghQrCanvas canvas');
+        if(img&&img.src){
+          var a=document.createElement('a'); a.href=img.src; a.download='geohub-qr-'+b.id.slice(0,8)+'.png'; a.click();
+        } else if(cvs){
+          var a2=document.createElement('a'); a2.href=cvs.toDataURL('image/png'); a2.download='geohub-qr-'+b.id.slice(0,8)+'.png'; a2.click();
+        } else { toast('QR image not ready yet. Try again.','warn'); }
+      });
+
+      // Load scan count
+      GQ.getQrScanCount(b.id, function(count){
+        var el2=$('#ghQrScanCount'); if(el2) el2.textContent=count;
+      });
+    });
+  }
+
+  function loadQrCodeLib(cb){
+    if(window.QRCode){ cb(); return; }
+    var s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js';
+    s.onload=cb;
+    s.onerror=function(){
+      var el=$('#ghQrCanvas');
+      if(el) el.innerHTML='<p style="color:#ef4444;font-size:0.8rem;padding:10px">QR library failed to load. Check internet connection.</p>';
+    };
+    document.head.appendChild(s);
   }
 
   function renderBizDashServices(b){
