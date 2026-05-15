@@ -162,6 +162,20 @@
               <input type="text" class="form-input" placeholder="Street address or area" id="addressInput">
             </div>
           </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Latitude <span style="color:var(--text-muted);font-size:0.7rem">(for GPS check-in)</span></label>
+              <input type="number" class="form-input" placeholder="e.g. 41.6938" id="bizLatInput" step="any" min="-90" max="90">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Longitude <span style="color:var(--text-muted);font-size:0.7rem">(for GPS check-in)</span></label>
+              <input type="number" class="form-input" placeholder="e.g. 44.8015" id="bizLngInput" step="any" min="-180" max="180">
+            </div>
+          </div>
+          <div class="form-group">
+            <button type="button" class="btn-outline" onclick="fillMyLocation()" id="useMyLocBtn" style="padding:8px 16px;font-size:0.85rem"><i class="fas fa-location-crosshairs"></i> Use My Current Location</button>
+            <div class="form-hint">Fills latitude &amp; longitude automatically from your device. Required for customers to GPS-verify check-ins at your business.</div>
+          </div>
         </div>
 
         <div class="form-group" id="onlineServiceAreaFields" style="display:none">

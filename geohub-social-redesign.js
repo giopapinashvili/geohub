@@ -97,6 +97,18 @@
     if(!isOnlineBusiness(b)) return b && b.city ? b.city : 'Local';
     return b.serviceAreaText || ({georgia:'Available across Georgia', worldwide:'Worldwide / Remote', tbilisi:'Tbilisi only', batumi:'Batumi only', regions:'Selected regions'}[b.serviceArea] || 'Online Service');
   }
+  function getPlaceCoords(p) {
+    if (!p) return null;
+    var lat = p.lat != null ? Number(p.lat) :
+              p.latitude != null ? Number(p.latitude) :
+              (p.location && typeof p.location === 'object' && p.location.lat != null) ? Number(p.location.lat) : null;
+    var lng = p.lng != null ? Number(p.lng) :
+              p.longitude != null ? Number(p.longitude) :
+              (p.location && typeof p.location === 'object' && p.location.lng != null) ? Number(p.location.lng) : null;
+    if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) return null;
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+    return { lat: lat, lng: lng };
+  }
   function businessModeChip(b){
     return isOnlineBusiness(b)
       ? '<span class="gh-chip gh-chip-online"><i class="fas fa-globe"></i> '+esc(businessAreaLabel(b))+'</span>'
@@ -1158,6 +1170,18 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '<div class="gh-biz-sec-head"><h3>Working Hours</h3><span class="gh-form-hint">Customers see when you\'re open</span></div>'+
           workingHoursEditorHtml(b.workingHours)+
         '</div>'+
+        (!isOnlineBusiness(b)?
+        '<div class="gh-card">'+
+          '<div class="gh-biz-sec-head"><h3>Location Coordinates</h3><span class="gh-form-hint">Required for GPS check-in verification</span></div>'+
+          '<div class="gh-form-rows">'+
+            (!getPlaceCoords(b)?'<div style="padding:6px 0 10px;color:#f59e0b;font-size:.82rem"><i class="fas fa-triangle-exclamation"></i> No coordinates saved — customers cannot GPS-verify check-ins at this place.</div>':'')+
+            '<div class="gh-form-grid">'+
+              '<label class="gh-form-label" for="dsLat">Latitude<input class="gh-input" id="dsLat" type="number" step="any" min="-90" max="90" value="'+(getPlaceCoords(b)?getPlaceCoords(b).lat:esc(b.lat||b.latitude||''))+'" placeholder="e.g. 41.6938"></label>'+
+              '<label class="gh-form-label" for="dsLng">Longitude<input class="gh-input" id="dsLng" type="number" step="any" min="-180" max="180" value="'+(getPlaceCoords(b)?getPlaceCoords(b).lng:esc(b.lng||b.longitude||''))+'" placeholder="e.g. 44.8015"></label>'+
+            '</div>'+
+            '<button type="button" class="gh-btn sm ghost" id="dsGetLocBtn" style="margin-top:4px"><i class="fas fa-location-crosshairs"></i> Use My Current Location</button>'+
+          '</div>'+
+        '</div>':'')+
         '<div class="gh-card">'+
           '<div class="gh-biz-sec-head"><h3>Branding</h3></div>'+
           '<div class="gh-form-rows">'+
@@ -1168,6 +1192,24 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div class="gh-dash-actions"><button class="gh-btn" id="dsSaveBtn"><i class="fas fa-check"></i> Save changes</button></div>'+
       '</div>';
     $('#dsSaveBtn').onclick=function(){ saveBizSettings(b); };
+    var dsLocBtn=$('#dsGetLocBtn');
+    if(dsLocBtn) dsLocBtn.onclick=function(){
+      if(!navigator.geolocation){ toast('GPS not available on this device','error'); return; }
+      dsLocBtn.disabled=true; dsLocBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Getting location…';
+      navigator.geolocation.getCurrentPosition(function(pos){
+        var lat=pos.coords.latitude.toFixed(6);
+        var lng=pos.coords.longitude.toFixed(6);
+        var latEl=$('#dsLat'); var lngEl=$('#dsLng');
+        if(latEl) latEl.value=lat;
+        if(lngEl) lngEl.value=lng;
+        dsLocBtn.disabled=false; dsLocBtn.innerHTML='<i class="fas fa-location-crosshairs"></i> Use My Current Location';
+        toast('Location filled: '+lat+', '+lng);
+      },function(err){
+        dsLocBtn.disabled=false; dsLocBtn.innerHTML='<i class="fas fa-location-crosshairs"></i> Use My Current Location';
+        var msgs={1:'Location permission denied.',2:'Signal unavailable.',3:'Request timed out.'};
+        toast(msgs[err.code]||'GPS error','error');
+      },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+    };
     // Wire closed-toggle visibility for time inputs
     var editor=$('#ghHoursEditor');
     if(editor) editor.addEventListener('change',function(e){
@@ -1195,6 +1237,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(li&&!isValidUrl(li)) return toast('LinkedIn URL should start with https://','error');
     if(email&&!isValidEmail(email)) return toast('Email address looks invalid','error');
     var wh=readWorkingHoursFromForm();
+    var latRaw=($('#dsLat')?$('#dsLat').value||'':'').trim();
+    var lngRaw=($('#dsLng')?$('#dsLng').value||'':'').trim();
+    var lat=latRaw?parseFloat(latRaw):null;
+    var lng=lngRaw?parseFloat(lngRaw):null;
+    if((latRaw||lngRaw)&&(isNaN(lat)||isNaN(lng))) return toast('Coordinates must be valid numbers','error');
+    if(lat!=null&&(lat<-90||lat>90)) return toast('Latitude must be between -90 and 90','error');
+    if(lng!=null&&(lng<-180||lng>180)) return toast('Longitude must be between -180 and 180','error');
+    if((latRaw&&!lngRaw)||(lngRaw&&!latRaw)) return toast('Both latitude and longitude are required','error');
     var fields={
       title:      title,
       description:($('#dsDesc').value||'').trim(),
@@ -1214,6 +1264,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       logoUrl:    ($('#dsLogo').value||'').trim(),
       updatedAt:  fs().serverTimestamp(),
     };
+    if(lat!=null&&lng!=null){ fields.lat=lat; fields.lng=lng; }
     if(wh) fields.workingHours=wh;
     var btn=$('#dsSaveBtn');
     if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Saving…';}
@@ -2217,6 +2268,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var bookingUrl=b.bookingUrl||sLinks.bookingUrl||'';
     var todayIdx=new Date().getDay()===0?6:new Date().getDay()-1;
     var todayLabel=DAYS_LABELS[todayIdx];
+    var _placeCoords=getPlaceCoords(b);
+    var _mapsUrl=b.mapsLink||(_placeCoords?'https://maps.google.com/?q='+_placeCoords.lat+','+_placeCoords.lng:null);
 
     // Working hours block with open/closed status
     var nh=b.workingHours&&typeof b.workingHours==='object'?normWorkingHours(b.workingHours):null;
@@ -2249,7 +2302,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(b.email)      ctaBtns.push('<a href="mailto:'+esc(b.email)+'" class="gh-contact-cta-btn" data-track-cta="emailClicks"><i class="fas fa-envelope"></i> Email</a>');
     if(bookingUrl)   ctaBtns.push('<a href="'+esc(bookingUrl)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn primary" data-track-cta="bookingClicks"><i class="fas fa-calendar-check"></i> Book</a>');
     if(b.website)    ctaBtns.push('<a href="'+esc(b.website)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn" data-track-cta="websiteClicks"><i class="fas fa-globe"></i> Website</a>');
-    if(!isOnlineBusiness(b)&&b.mapsLink) ctaBtns.push('<a href="'+esc(b.mapsLink)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn" data-track-cta="directionsClicks"><i class="fas fa-map-location-dot"></i> Directions</a>');
+    if(!isOnlineBusiness(b)&&_mapsUrl) ctaBtns.push('<a href="'+esc(_mapsUrl)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn" data-track-cta="directionsClicks"><i class="fas fa-map-location-dot"></i> Directions</a>');
     var ctaHtml=ctaBtns.length?'<div class="gh-contact-ctas">'+ctaBtns.join('')+'</div>':'';
     var hasContact=b.phone||b.email||b.website||ig||fb||wa||tk||li||bookingUrl;
 
@@ -2275,7 +2328,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           (!isOnlineBusiness(b)&&(b.city||b.address)?
             '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Location</h3></div><div class="gh-about-list">'+
               aboutRow('fa-location-dot',b.address?b.address+', '+b.city:b.city)+
-              (b.mapsLink?'<a href="'+esc(b.mapsLink)+'" target="_blank" rel="noopener" class="gh-btn sm ghost" style="margin-top:8px"><i class="fas fa-map"></i> View on map</a>':'')+
+              (_mapsUrl?'<a href="'+esc(_mapsUrl)+'" target="_blank" rel="noopener" class="gh-btn sm ghost" style="margin-top:8px"><i class="fas fa-map-location-dot"></i> Directions</a>':'')+
+              (!_placeCoords&&!isOnlineBusiness(b)?'<p style="margin:8px 0 0;font-size:.78rem;color:#f59e0b"><i class="fas fa-triangle-exclamation"></i> GPS coordinates not set — check-in distance verification unavailable</p>':'')+
             '</div></div>':'')+
           (isOnlineBusiness(b)?'<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Service Area</h3></div>'+aboutRow('fa-globe',b.serviceAreaText||businessAreaLabel(b))+'</div>':'')+
         '</div>'+

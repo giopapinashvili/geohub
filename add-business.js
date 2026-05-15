@@ -328,6 +328,28 @@ let currentStep = 1;
     return img ? img.src : '';
   }
 
+  function fillMyLocation() {
+    var btn = document.getElementById('useMyLocBtn');
+    if (!navigator.geolocation) {
+      alert('GPS is not available on this device or browser.');
+      return;
+    }
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting location…'; }
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      var lat = pos.coords.latitude.toFixed(6);
+      var lng = pos.coords.longitude.toFixed(6);
+      var latEl = document.getElementById('bizLatInput');
+      var lngEl = document.getElementById('bizLngInput');
+      if (latEl) latEl.value = lat;
+      if (lngEl) lngEl.value = lng;
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-location-crosshairs"></i> Use My Current Location'; }
+    }, function (err) {
+      var msgs = { 1: 'Location permission denied.', 2: 'Signal unavailable.', 3: 'Request timed out.' };
+      alert(msgs[err.code] || 'GPS error. Please try again.');
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-location-crosshairs"></i> Use My Current Location'; }
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+  }
+
   function submitForm() {
     if (!validateStep1()) return;
 
@@ -351,6 +373,17 @@ let currentStep = 1;
     var cover = firstPreviewImage('#coverUpload') || '';
     var gallery = Array.from(document.querySelectorAll('#uploadedPhotos img')).map(function(img){ return img.src; }).slice(0,10);
 
+    // Validate lat/lng if provided
+    var latRaw = (document.getElementById('bizLatInput') || {}).value || '';
+    var lngRaw = (document.getElementById('bizLngInput') || {}).value || '';
+    if (latRaw || lngRaw) {
+      var latNum = parseFloat(latRaw), lngNum = parseFloat(lngRaw);
+      if (isNaN(latNum) || isNaN(lngNum)) { alert('Latitude and longitude must be valid numbers.'); return; }
+      if (latNum < -90 || latNum > 90) { alert('Latitude must be between -90 and 90.'); return; }
+      if (lngNum < -180 || lngNum > 180) { alert('Longitude must be between -180 and 180.'); return; }
+      if ((latRaw && !lngRaw) || (!latRaw && lngRaw)) { alert('Both latitude and longitude are required.'); return; }
+    }
+
     var submitBtn = document.querySelector('button[onclick="submitForm()"]');
     var oldHtml = submitBtn ? submitBtn.innerHTML : '';
     if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (editingBusinessId ? 'Saving...' : 'Creating...'); }
@@ -370,6 +403,8 @@ let currentStep = 1;
       email:           (document.getElementById('emailInput') || {}).value || '',
       website:         (document.getElementById('websiteInput') || {}).value || '',
       mapsLink:        (document.getElementById('mapsLink') || {}).value || '',
+      lat:             parseFloat((document.getElementById('bizLatInput') || {}).value) || null,
+      lng:             parseFloat((document.getElementById('bizLngInput') || {}).value) || null,
       instagram:       (document.getElementById('instagramInput') || {}).value || '',
       facebook:        (document.getElementById('facebookInput') || {}).value || '',
       whatsapp:        (document.getElementById('whatsappInput') || {}).value || '',
