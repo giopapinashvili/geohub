@@ -7,7 +7,7 @@
   <link rel="dns-prefetch" href="https://firestore.googleapis.com">
   <link rel="dns-prefetch" href="https://firebase.googleapis.com">
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
   <title>Messages — GeoHub</title>
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
@@ -21,12 +21,9 @@
   <link rel="stylesheet" href="responsive-polish.css">
   <style>
     /* Bridge: map legacy CSS variables → GH design tokens */
-    /* responsive-polish.js adds .messages-page to body — neutralize unintended padding */
     body.messages-page { padding-top: 0 !important; height: 100dvh !important; overflow: hidden !important; }
-    /* messages-page div fills full viewport; padding-top offsets the fixed navbar */
-    body.page-messages .messages-page { height: 100dvh !important; }
     :root {
-      --navbar-height: var(--gh-topbar-h, 78px);
+      --navbar-height: var(--gh-topbar-h, 68px);
       --bg-0: var(--gh-bg);
       --bg-1: var(--gh-bg);
       --bg-card: var(--gh-card);
@@ -143,6 +140,17 @@
 
   <div id="msgToast" class="msg-toast"></div>
 
+  <script>
+    /* iOS Safari keyboard: keep input bar above keyboard via visualViewport */
+    if(window.visualViewport){
+      window.visualViewport.addEventListener('resize',function(){
+        var mp=document.querySelector('.messages-page');
+        if(!mp) return;
+        var offset=Math.max(0, window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop);
+        mp.style.bottom=offset+'px';
+      });
+    }
+  </script>
   <script defer src="messages-page.js"></script>
 
   <script defer src="mode.js"></script>

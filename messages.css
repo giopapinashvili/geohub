@@ -1,8 +1,6 @@
 /* ===== PAGE ===== */
     body.page-messages { overflow: hidden; height: 100dvh; }
     .messages-page {
-      padding-top: var(--navbar-height, 68px);
-      height: 100dvh;
       display: flex;
       flex-direction: column;
       min-height: 0;
@@ -221,9 +219,6 @@
       }
       .info-panel.panel-visible { display: flex; }
     }
-    @media (max-width: 768px) {
-      .messages-page { padding-top: var(--navbar-height, 68px); }
-    }
     @media (max-width: 680px) {
       .messages-layout { grid-template-columns: 1fr; grid-template-rows: minmax(180px, 36dvh) minmax(0, 1fr); }
       .msg-sidebar { display: flex; min-height:0; }
@@ -278,70 +273,48 @@
 .msg-reaction-badge{display:inline-flex;align-items:center;gap:2px;font-size:12px;background:rgba(15,23,42,.86);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:2px 7px;}
 @media(max-width:720px){.msg-reaction-picker{left:0!important;right:auto!important;}.msg-row.sent .msg-reaction-picker{right:0!important;left:auto!important;}}
 
-/* GeoHub fix v2: restore Messages page vertical scrolling after reaction picker hotfix */
-body.page-messages{
-  height:100dvh!important;
-  min-height:100dvh!important;
-  overflow:hidden!important;
-}
+/* ── Messages page: fixed panel from nav-bottom to viewport bottom ── */
+body.page-messages{overflow:hidden!important;height:100dvh!important;}
 body.page-messages .messages-page{
-  height:calc(100dvh - var(--navbar-height, 68px))!important;
-  min-height:0!important;
-  padding-top:var(--navbar-height, 68px)!important;
+  position:fixed!important;
+  top:var(--navbar-height,68px)!important;
+  left:0!important;right:0!important;bottom:0!important;
+  height:auto!important;min-height:0!important;
+  padding-top:0!important;margin-top:0!important;
   overflow:hidden!important;
-  display:flex!important;
-  flex-direction:column!important;
+  display:flex!important;flex-direction:column!important;
 }
 body.page-messages .messages-layout{
-  flex:1 1 auto!important;
-  min-height:0!important;
-  height:100%!important;
-  overflow:hidden!important;
+  flex:1 1 auto!important;min-height:0!important;
+  height:100%!important;overflow:hidden!important;
 }
 body.page-messages .chat-window{
-  min-height:0!important;
-  height:100%!important;
-  overflow:hidden!important;
-  display:flex!important;
-  flex-direction:column!important;
+  min-height:0!important;height:100%!important;
+  overflow:hidden!important;display:flex!important;flex-direction:column!important;
 }
 body.page-messages .chat-header,
 body.page-messages .typing-row,
 body.page-messages .quick-replies-bar,
-body.page-messages .chat-input-bar{
-  flex:0 0 auto!important;
-}
+body.page-messages .chat-input-bar{flex:0 0 auto!important;}
 body.page-messages .chat-messages{
-  flex:1 1 auto!important;
-  min-height:0!important;
-  height:auto!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  -webkit-overflow-scrolling:touch!important;
-  overscroll-behavior:contain!important;
+  flex:1 1 auto!important;min-height:0!important;height:auto!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;
+}
+body.page-messages .chat-input-bar{
+  padding-bottom:max(10px,env(safe-area-inset-bottom,0px))!important;
 }
 body.page-messages .msg-row,
 body.page-messages .msg-col,
-body.page-messages .msg-bubble-wrap{
-  overflow:visible!important;
-}
+body.page-messages .msg-bubble-wrap{overflow:visible!important;}
 body.page-messages .emoji-picker-wrap,
-body.page-messages .msg-reaction-picker{
-  z-index:2147483000!important;
-}
+body.page-messages .msg-reaction-picker{z-index:2147483000!important;}
 @media(max-width:680px){
   body.page-messages .messages-layout{
     grid-template-columns:1fr!important;
     grid-template-rows:minmax(150px,34dvh) minmax(0,1fr)!important;
   }
-  body.page-messages .messages-layout.chat-open{
-    grid-template-rows:0 minmax(0,1fr)!important;
-  }
-  body.page-messages .msg-sidebar{
-    min-height:0!important;
-    overflow:hidden!important;
-  }
-  body.page-messages .conv-list{
-    overflow-y:auto!important;
-  }
+  body.page-messages .messages-layout.chat-open{grid-template-rows:0 minmax(0,1fr)!important;}
+  body.page-messages .msg-sidebar{min-height:0!important;overflow:hidden!important;}
+  body.page-messages .conv-list{overflow-y:auto!important;}
 }
