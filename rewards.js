@@ -83,24 +83,12 @@
 
   function loadDailyTransferred(GF) {
     var uid = state.fbUser.uid;
-    var todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-    GF.fs.getDocs(
-      GF.fs.query(
-        GF.fs.collection(GF.db, 'pointTransactions'),
-        GF.fs.where('fromUserId', '==', uid),
-        GF.fs.where('type', '==', 'gift'),
-        GF.fs.limit(100)
-      )
-    ).then(function (snap) {
-      var total = 0;
-      snap.forEach(function (d) {
-        var data = d.data();
-        if (toMs(data.createdAt) >= todayStart.getTime()) {
-          total += Number(data.amount || 0);
-        }
-      });
-      state.dailyTransferred = total;
-    }).catch(function () { state.dailyTransferred = 0; });
+    var todayStr = new Date().toISOString().slice(0, 10);
+    GF.fs.getDoc(GF.fs.doc(GF.db, 'dailyTransferTotals', uid + '_' + todayStr))
+      .then(function (snap) {
+        state.dailyTransferred = snap.exists() ? Number((snap.data() || {}).total || 0) : 0;
+        renderBalanceUI();
+      }).catch(function () { state.dailyTransferred = 0; });
   }
 
   function renderBalanceUI() {
@@ -262,73 +250,22 @@
   function executeRedeem(rewardId, modalEl) {
     var GF = window.GeoFirebase;
     if (!GF || !state.fbUser) return;
-    var r = null;
-    for (var i = 0; i < state.rewards.length; i++) {
-      if (state.rewards[i].id === rewardId) { r = state.rewards[i]; break; }
-    }
-    if (!r) return;
-
-    var cost = Number(r.cost || r.pointsCost || 0);
-    var uid = state.fbUser.uid;
-    var f = GF.fs, db = GF.db;
 
     var btn = document.getElementById('redeemConfirm');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing…'; }
 
-    var rewardRef = f.doc(db, 'rewards', rewardId);
-    var userRef = f.doc(db, 'users', uid);
-    var userRewardRef = f.doc(f.collection(db, 'userRewards'));
-    var txRef = f.doc(f.collection(db, 'pointTransactions'));
-
-    f.runTransaction(db, function (tx) {
-      return Promise.all([tx.get(rewardRef), tx.get(userRef)]).then(function (results) {
-        var rewardSnap = results[0], userSnap = results[1];
-        var rd = rewardSnap.data() || {};
-        var ud = userSnap.data() || {};
-
-        var balance = Number(ud.pointsBalance || ud.geoPointsBalance || 0);
-        var stock = rd.stock != null ? Number(rd.stock) : null;
-
-        if (balance < cost) throw new Error('Insufficient points balance (' + balance + ' < ' + cost + ')');
-        if (stock !== null && stock === 0) throw new Error('This reward is out of stock');
-        if (!rd.active) throw new Error('This reward is no longer available');
-
-        tx.update(userRef, { pointsBalance: f.increment(-cost), updatedAt: f.serverTimestamp() });
-
-        if (rd.stock != null) {
-          tx.update(rewardRef, { stock: f.increment(-1), updatedAt: f.serverTimestamp() });
-        }
-
-        tx.set(userRewardRef, {
-          userId: uid,
-          rewardId: rewardId,
-          rewardTitle: r.title || 'Reward',
-          cost: cost,
-          status: 'active',
-          redeemedAt: f.serverTimestamp(),
-          createdAt: f.serverTimestamp()
-        });
-
-        tx.set(txRef, {
-          type: 'redeem',
-          fromUserId: uid,
-          toUserId: null,
-          amount: cost,
-          rewardId: rewardId,
-          rewardTitle: r.title || 'Reward',
-          participantIds: [uid],
-          createdAt: f.serverTimestamp()
-        });
+    var requestId = Date.now().toString(36) + Math.random().toString(36).slice(2);
+    GF.httpsCallable(GF.functions, 'redeemReward')({ rewardId: rewardId, requestId: requestId })
+      .then(function () {
+        if (modalEl) modalEl.remove();
+        toast('Reward redeemed! Check your profile wallet for details.');
+        loadUserRewards(GF);
+      }).catch(function (err) {
+        console.error('[Rewards] redeem', err);
+        var msg = (err.message || '').replace(/^Firebase:\s*/i, '').replace(/\s*\(functions\/[^)]+\)\.?$/, '');
+        toast(msg || 'Redemption failed. Please try again.', 'error');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Confirm Redeem'; }
       });
-    }).then(function () {
-      if (modalEl) modalEl.remove();
-      toast('Reward redeemed! Check your profile wallet for details.');
-      loadUserRewards(GF);
-    }).catch(function (err) {
-      console.error('[Rewards] redeem', err);
-      toast(err.message || 'Redemption failed. Please try again.', 'error');
-      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Confirm Redeem'; }
-    });
   }
 
   /* ── Transfer modal ──────────────────────────────────────────── */
@@ -402,35 +339,20 @@
         return;
       }
 
-      var senderRef = f.doc(db, 'users', uid);
-      var receiverRef = f.doc(db, 'users', recipientUid);
-      var txRef = f.doc(f.collection(db, 'pointTransactions'));
-
-      f.runTransaction(db, function (tx) {
-        return tx.get(senderRef).then(function (senderSnap) {
-          var d = senderSnap.data() || {};
-          var balance = Number(d.pointsBalance || d.geoPointsBalance || 0);
-          if (balance < amtRaw) throw new Error('Insufficient balance');
-
-          tx.update(senderRef, { pointsBalance: f.increment(-amtRaw), updatedAt: f.serverTimestamp() });
-          tx.update(receiverRef, { pointsBalance: f.increment(amtRaw), updatedAt: f.serverTimestamp() });
-          tx.set(txRef, {
-            type: 'gift',
-            fromUserId: uid,
-            toUserId: recipientUid,
-            amount: amtRaw,
-            message: message || null,
-            participantIds: [uid, recipientUid],
-            createdAt: f.serverTimestamp()
-          });
-        });
+      var requestId = Date.now().toString(36) + Math.random().toString(36).slice(2);
+      GF.httpsCallable(GF.functions, 'transferPoints')({
+        toUserId: recipientUid,
+        amount: amtRaw,
+        message: message || null,
+        requestId: requestId
       }).then(function () {
         state.dailyTransferred += amtRaw;
         if (modalEl) modalEl.remove();
         toast('Sent ' + amtRaw + ' pts successfully!');
       }).catch(function (err) {
         console.error('[Rewards] transfer', err);
-        toast(err.message || 'Transfer failed. Please try again.', 'error');
+        var msg = (err.message || '').replace(/^Firebase:\s*/i, '').replace(/\s*\(functions\/[^)]+\)\.?$/, '');
+        toast(msg || 'Transfer failed. Please try again.', 'error');
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Points'; }
       });
     }

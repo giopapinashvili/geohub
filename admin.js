@@ -1386,8 +1386,9 @@
         var rows = [];
         snap.forEach(function (d) {
           var data = d.data();
-          var typeLabel = data.type === 'gift' ? '<span style="color:var(--green)">Transfer</span>'
+          var typeLabel = (data.type === 'gift' || data.type === 'transfer_sent') ? '<span style="color:var(--green)">Transfer</span>'
             : data.type === 'redeem' ? '<span style="color:var(--blue)">Redeem</span>'
+            : data.type === 'admin_adjustment' ? '<span style="color:var(--gold)">Admin Adj.</span>'
             : '<span style="color:var(--ts)">' + escHtmlAdmin(data.type || 'tx') + '</span>';
           rows.push('<div class="bi" style="display:flex;align-items:center;gap:12px">' +
             '<div style="flex:1;min-width:0">' +
@@ -1536,6 +1537,40 @@
       });
     });
   }
+
+  /* ── ADMIN ADJUST POINTS ────────────────────────────────── */
+  window.doAdminAdjust = function () {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.functions || !fb.httpsCallable) { toast('Firebase not ready', 'rgba(239,68,68,.95)'); return; }
+
+    var userId = ((document.getElementById('adjUserId') || {}).value || '').trim();
+    var amtRaw = ((document.getElementById('adjAmount') || {}).value || '').trim();
+    var reason = ((document.getElementById('adjReason') || {}).value || '').trim();
+
+    if (!userId) { toast('User ID is required', 'rgba(239,68,68,.95)'); return; }
+    var amount = parseInt(amtRaw, 10);
+    if (isNaN(amount) || amount === 0) { toast('Amount must be a non-zero integer', 'rgba(239,68,68,.95)'); return; }
+    if (!reason) { toast('Reason is required', 'rgba(239,68,68,.95)'); return; }
+
+    var btn = document.getElementById('adjBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Applying…'; }
+
+    fb.httpsCallable(fb.functions, 'adminAdjustPoints')({ userId: userId, amount: amount, reason: reason })
+      .then(function (result) {
+        var d = result.data || result;
+        toast('Adjusted: ' + (amount > 0 ? '+' : '') + amount + ' pts. New balance: ' + d.newBalance + ' pts');
+        var el = document.getElementById('adjUserId'); if (el) el.value = '';
+        var el2 = document.getElementById('adjAmount'); if (el2) el2.value = '';
+        var el3 = document.getElementById('adjReason'); if (el3) el3.value = '';
+        loadAdminRewards();
+      }).catch(function (err) {
+        console.error('[Admin] adminAdjustPoints', err);
+        var msg = (err.message || '').replace(/^Firebase:\s*/i, '').replace(/\s*\(functions\/[^)]+\)\.?$/, '');
+        toast(msg || 'Adjustment failed', 'rgba(239,68,68,.95)');
+      }).finally(function () {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sliders-h"></i> Apply Adjustment'; }
+      });
+  };
 
   /* ── INIT ────────────────────────────────────────────────── */
   function init() {

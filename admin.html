@@ -682,6 +682,25 @@
         <div id="rwList" style="padding:4px 0"><div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">Loading rewards…</div></div>
       </div>
 
+      <!-- Manual Balance Adjustment -->
+      <div class="panel">
+        <div class="panel-hdr">
+          <div><div class="panel-title">Manual Balance Adjustment</div><div class="panel-sub">Award or deduct points for a specific user (admin only)</div></div>
+        </div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+          <label style="font-size:.78rem;font-weight:600;color:var(--ts)">User ID
+            <input id="adjUserId" class="rw-input" style="margin-top:4px;width:100%;box-sizing:border-box" placeholder="Firebase UID of the user" autocomplete="off">
+          </label>
+          <label style="font-size:.78rem;font-weight:600;color:var(--ts)">Amount (positive = award, negative = deduct)
+            <input id="adjAmount" type="number" class="rw-input" style="margin-top:4px;width:100%;box-sizing:border-box" placeholder="e.g. 200 or -50">
+          </label>
+          <label style="font-size:.78rem;font-weight:600;color:var(--ts)">Reason
+            <input id="adjReason" class="rw-input" style="margin-top:4px;width:100%;box-sizing:border-box" placeholder="Brief reason for audit trail" maxlength="200">
+          </label>
+          <button id="adjBtn" class="btn btn-primary btn-sm" style="align-self:flex-start" onclick="doAdminAdjust()"><i class="fas fa-sliders-h"></i> Apply Adjustment</button>
+        </div>
+      </div>
+
       <!-- Recent Transactions -->
       <div class="panel">
         <div class="panel-hdr">
