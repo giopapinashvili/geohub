@@ -1740,7 +1740,10 @@
         : query(collection(db, 'places'), limit(50));
       return onSnapshot(q, function (snap) {
         var items = [];
-        snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        snap.forEach(function (d) {
+          var item = Object.assign({ id: d.id }, d.data());
+          if (item.status !== 'inactive') items.push(item);
+        });
         items.sort(function (a, b) {
           function ms(v) { return v && v.toMillis ? v.toMillis() : (v && v.seconds ? v.seconds * 1000 : 0); }
           return ms(b.createdAt) - ms(a.createdAt);

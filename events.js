@@ -184,19 +184,33 @@
     if (!fb || !fb.db || !fb.fs) return;
     var fs = fb.fs;
 
-    var q = fs.query(
-      fs.collection(fb.db, 'events'),
-      fs.orderBy('createdAt', 'desc'),
-      fs.limit(60)
-    );
+    function subscribe(q) {
+      _eventsUnsub = fs.onSnapshot(q, function (snap) {
+        state.all = [];
+        snap.forEach(function (d) {
+          var item = Object.assign({ id: d.id }, d.data());
+          if (item.status !== 'inactive') state.all.push(item);
+        });
+        paint();
+      }, function (err) {
+        console.warn('[GeoHub Events]', err.message);
+      });
+    }
 
-    _eventsUnsub = fs.onSnapshot(q, function (snap) {
-      state.all = [];
-      snap.forEach(function (d) { state.all.push(Object.assign({ id: d.id }, d.data())); });
-      paint();
-    }, function (err) {
-      console.warn('[GeoHub Events]', err.message);
-    });
+    try {
+      subscribe(fs.query(
+        fs.collection(fb.db, 'events'),
+        fs.where('status', '==', 'active'),
+        fs.orderBy('createdAt', 'desc'),
+        fs.limit(60)
+      ));
+    } catch (e) {
+      subscribe(fs.query(
+        fs.collection(fb.db, 'events'),
+        fs.orderBy('createdAt', 'desc'),
+        fs.limit(60)
+      ));
+    }
   }
 
   window.addEventListener('pagehide', function () {
