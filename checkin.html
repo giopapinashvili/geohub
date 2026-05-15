@@ -1,32 +1,1174 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
-  <link rel="dns-prefetch" href="https://firebase.googleapis.com">
-  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Check In — GeoHub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Check In — GeoHub</title>
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
-
-<style>
-body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}.clean-page{padding-top:90px;min-height:100vh;background:radial-gradient(circle at top left,rgba(16,185,129,.16),transparent 35%),#05070f}.clean-hero{max-width:1180px;margin:0 auto;padding:70px 24px 42px}.clean-badge{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border:1px solid rgba(16,185,129,.3);border-radius:999px;color:#10e0a0;background:rgba(16,185,129,.08);font-weight:800;text-transform:uppercase;font-size:.72rem;letter-spacing:.04em}.clean-title{font-size:clamp(2.4rem,5vw,4.8rem);line-height:1.05;margin:22px 0 16px;font-weight:950;max-width:760px}.clean-title span{background:linear-gradient(135deg,#10e0a0,#3b82f6);-webkit-background-clip:text;color:transparent}.clean-desc{max-width:640px;color:#9aa6bd;font-size:1.05rem;line-height:1.7}.clean-search{margin-top:30px;display:flex;gap:12px;max-width:620px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:10px}.clean-search input{flex:1;background:transparent;border:0;color:#fff;outline:0;padding:8px 10px;font-size:1rem}.clean-search button,.clean-admin{border:0;border-radius:14px;padding:12px 20px;background:linear-gradient(135deg,#10b981,#3b82f6);color:white;font-weight:800;text-decoration:none;display:inline-flex;align-items:center;gap:8px}.clean-stats{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:14px;max-width:740px;margin-top:28px}.clean-stat{padding:18px;border:1px solid rgba(255,255,255,.07);border-radius:18px;background:rgba(255,255,255,.035)}.clean-stat strong{display:block;font-size:1.7rem}.clean-stat span{color:#64748b;font-size:.78rem}.clean-tabs{border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);padding:0 24px;display:flex;gap:24px;max-width:100%;overflow-x:auto;background:rgba(255,255,255,.03)}.clean-tab{background:transparent;border:0;color:#94a3b8;padding:18px 0;font-weight:800}.clean-tab.active{color:#10e0a0;border-bottom:2px solid #10e0a0}.clean-content{max-width:1180px;margin:0 auto;padding:34px 24px 90px;display:grid;grid-template-columns:280px 1fr;gap:24px}.clean-card{border:1px solid rgba(255,255,255,.07);border-radius:20px;background:rgba(255,255,255,.045);padding:22px}.clean-empty{min-height:260px;display:flex;align-items:center;justify-content:center;text-align:center;color:#94a3b8;border:1px dashed rgba(255,255,255,.14);border-radius:22px;background:rgba(255,255,255,.02)}.clean-empty i{font-size:2rem;color:#10e0a0;margin-bottom:12px}.clean-empty h3{color:#f8fafc;margin:0 0 8px}@media(max-width:900px){.clean-page{padding-top:72px}.clean-hero{padding:42px 18px 28px}.clean-content{grid-template-columns:1fr;padding:22px 18px 120px}.clean-stats{grid-template-columns:repeat(2,1fr)}}
-</style><link rel="stylesheet" href="chat-popup.css">
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css">
+  </noscript>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="navbar.css">
   <link rel="stylesheet" href="responsive-polish.css">
-</head><body class="clean-body page-checkin"><nav class="navbar" id="navbar">
-  <a href="index.html" class="navbar-brand"><div class="logo-icon">🌍</div><span class="logo-text">Geo<span class="logo-geo">Hub</span></span></a>
-  <ul class="navbar-links"></ul>
-  <div class="navbar-actions"></div>
-  <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
-</nav>
-<div class="mobile-menu"></div><main class="clean-page"><section class="clean-hero"><div class="clean-badge"><i class="fas fa-circle"></i>Check-in</div><h1 class="clean-title">Add a <span>Real Check-in</span></h1><p class="clean-desc">Check-ins are created by real users and stored in Firestore. Fake places are removed.</p><div class="clean-search"><input placeholder="Search real checkins..."><button><i class="fas fa-search"></i> Search</button></div><div class="clean-stats"><div class="clean-stat"><strong id="stat-total">0</strong><span>Real items</span></div><div class="clean-stat"><strong>0</strong><span>Added today</span></div><div class="clean-stat"><strong>0</strong><span>Verified</span></div><div class="clean-stat"><strong>0</strong><span>Pending review</span></div></div></section><div class="clean-tabs"><button class="clean-tab active">Recent</button><button class="clean-tab ">Nearby</button><button class="clean-tab ">Mine</button></div><section class="clean-content"><aside class="clean-card"><strong>Filters</strong><p style="color:#64748b;line-height:1.6">No fake categories are shown. Real filters will appear after admins add content.</p><span class="clean-admin"><i class="fas fa-clock"></i> Admin-controlled</span></aside><div class="clean-empty" id="cleanList"><div><i class="fas fa-database"></i><h3>No real checkins yet</h3><p>Add real content from the Admin Panel. Demo data has been removed.</p></div></div></section></main><script type="module">
-window.addEventListener('GeoFirebaseReady', async function(){try{const gf=window.GeoFirebase,fs=gf.fs,db=gf.db;const snap=await fs.getDocs(fs.query(fs.collection(db,'checkins'),fs.limit(50)));const total=document.getElementById('stat-total');if(total)total.textContent=snap.size;if(snap.size>0){function esc(v){return String(v||'Untitled').replace(/[<>&]/g,function(s){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[s]})}document.getElementById('cleanList').innerHTML='<div style="width:100%">'+snap.docs.map(function(d){const x=d.data();return '<div class="clean-card" style="margin-bottom:12px"><strong>'+esc(x.name||x.title||x.text)+'</strong><p style="color:#94a3b8;margin:.5rem 0 0">Real Firestore item</p></div>'}).join('')+'</div>';}}catch(e){console.warn('clean page load',e.message);}});
-</script>
-<script type="module" src="firebase-config.js"></script>
-<script defer src="account.js"></script>
-<script defer src="nav-cleanup.js"></script>
-<script defer src="mobile-nav.js"></script>
-<script defer src="chat-popup.js"></script>
-<script defer src="geohub-production-stabilization-v1.js"></script>
+  <style>
+    /* ── Page shell ───────────────────────────────────────────── */
+    body.page-checkin { background: var(--bg-0, #04050d); color: var(--text-primary, #f0f4ff); }
+    .ci-wrap {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 96px 16px 120px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* ── Page header ──────────────────────────────────────────── */
+    .ci-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+    .ci-head-icon {
+      width: 44px; height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #10b981, #3b82f6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+      box-shadow: 0 4px 16px rgba(16,185,129,0.4);
+    }
+    .ci-head h1 { font-size: 1.45rem; font-weight: 900; margin: 0; }
+    .ci-head p  { font-size: 0.8rem; color: var(--text-muted, #64748b); margin: 2px 0 0; }
+
+    /* ── Card base ────────────────────────────────────────────── */
+    .ci-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+    .ci-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .ci-card-header i { color: #10b981; font-size: 0.95rem; width: 16px; text-align: center; }
+    .ci-card-header h3 { font-size: 0.88rem; font-weight: 800; margin: 0; flex: 1; }
+    .ci-opt {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--text-muted, #64748b);
+      background: rgba(255,255,255,0.06);
+      border-radius: 6px;
+      padding: 2px 7px;
+      margin-left: 4px;
+    }
+    .ci-card-body { padding: 14px 16px; }
+
+    /* ── Place card ───────────────────────────────────────────── */
+    .ci-place-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+    }
+    .ci-place-avatar {
+      width: 46px; height: 46px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(59,130,246,0.2));
+      border: 1px solid rgba(16,185,129,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .ci-place-info { flex: 1; min-width: 0; }
+    .ci-place-info h2 {
+      font-size: 1rem; font-weight: 800; margin: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ci-place-info p {
+      font-size: 0.78rem; color: var(--text-muted, #64748b);
+      margin: 2px 0 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .ci-change-btn {
+      padding: 6px 13px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text-primary, #f0f4ff);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .ci-change-btn:hover { background: rgba(255,255,255,0.12); }
+
+    /* ── GPS section ──────────────────────────────────────────── */
+    .ci-gps-body { padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+
+    .ci-dist-ring {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .ci-dist-ring.visible { display: flex; }
+    .ci-dist-ring-outer {
+      width: 110px; height: 110px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      transition: border-color 0.4s;
+    }
+    .ci-dist-ring-outer.ok   { border-color: #10b981; box-shadow: 0 0 24px rgba(16,185,129,0.3); }
+    .ci-dist-ring-outer.far  { border-color: #f59e0b; box-shadow: 0 0 24px rgba(245,158,11,0.3); }
+    .ci-dist-ring-inner { text-align: center; }
+    .ci-dist-val { font-size: 1.55rem; font-weight: 900; line-height: 1; }
+    .ci-dist-unit { font-size: 0.68rem; color: var(--text-muted, #64748b); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .ci-dist-status {
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 99px;
+    }
+    .ci-dist-status.ok  { background: rgba(16,185,129,0.12); color: #34d399; }
+    .ci-dist-status.far { background: rgba(245,158,11,0.12); color: #fbbf24; }
+
+    .ci-gps-btn {
+      width: 100%;
+      padding: 13px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, rgba(16,185,129,0.12), rgba(59,130,246,0.12));
+      border: 1px solid rgba(16,185,129,0.3);
+      color: #34d399;
+      font-size: 0.92rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .ci-gps-btn:hover { background: rgba(16,185,129,0.18); }
+    .ci-gps-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .ci-gps-btn.verified { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.5); color: #10b981; }
+
+    .ci-gps-error {
+      display: none;
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.25);
+      color: #f87171;
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+    .ci-gps-error.show { display: block; }
+
+    .ci-accuracy {
+      font-size: 0.72rem;
+      color: var(--text-muted, #64748b);
+      display: none;
+    }
+    .ci-accuracy.show { display: block; }
+
+    /* ── Photo section ────────────────────────────────────────── */
+    .ci-photo-area { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+    .ci-photo-preview {
+      display: none;
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .ci-photo-preview.show { display: block; }
+    .ci-photo-preview img {
+      width: 100%;
+      max-height: 240px;
+      object-fit: cover;
+      display: block;
+      border-radius: 14px;
+    }
+    .ci-photo-remove {
+      position: absolute;
+      top: 8px; right: 8px;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.6);
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem;
+      transition: background 0.15s;
+    }
+    .ci-photo-remove:hover { background: rgba(239,68,68,0.8); }
+    .ci-photo-btn {
+      width: 100%;
+      padding: 13px;
+      border-radius: 13px;
+      background: rgba(255,255,255,0.04);
+      border: 1px dashed rgba(255,255,255,0.16);
+      color: var(--text-secondary, #94a3b8);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .ci-photo-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(16,185,129,0.4); color: #34d399; }
+    .ci-upload-progress {
+      display: none;
+      height: 4px;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+    }
+    .ci-upload-progress.show { display: block; }
+    .ci-upload-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #3b82f6);
+      border-radius: 99px;
+      transition: width 0.3s;
+      width: 0%;
+    }
+
+    /* ── Caption ──────────────────────────────────────────────── */
+    .ci-caption-area { padding: 0 16px 14px; }
+    .ci-caption {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      color: var(--text-primary, #f0f4ff);
+      font-size: 0.92rem;
+      line-height: 1.5;
+      padding: 11px 14px;
+      resize: none;
+      box-sizing: border-box;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      min-height: 72px;
+    }
+    .ci-caption::placeholder { color: var(--text-muted, #64748b); }
+    .ci-caption:focus { outline: none; border-color: rgba(16,185,129,0.4); }
+    .ci-caption-count { font-size: 0.72rem; color: var(--text-muted, #64748b); text-align: right; margin-top: 4px; }
+
+    /* ── XP preview ───────────────────────────────────────────── */
+    .ci-xp-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: rgba(16,185,129,0.07);
+      border: 1px solid rgba(16,185,129,0.18);
+      border-radius: 14px;
+    }
+    .ci-xp-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: #34d399;
+    }
+    .ci-xp-badge i { font-size: 0.9rem; }
+    .ci-xp-label { font-size: 0.82rem; color: var(--text-secondary, #94a3b8); }
+    .ci-xp-unverified-note {
+      font-size: 0.72rem;
+      color: var(--text-muted, #64748b);
+      text-align: center;
+      display: none;
+    }
+    .ci-xp-unverified-note.show { display: block; }
+
+    /* ── Cooldown notice ──────────────────────────────────────── */
+    .ci-cooldown-notice {
+      display: none;
+      padding: 12px 16px;
+      border-radius: 14px;
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.2);
+      color: #fbbf24;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+    }
+    .ci-cooldown-notice.show { display: flex; }
+
+    /* ── Submit button ────────────────────────────────────────── */
+    .ci-submit {
+      width: 100%;
+      padding: 15px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #10b981, #3b82f6);
+      border: none;
+      color: white;
+      font-size: 1rem;
+      font-weight: 900;
+      cursor: pointer;
+      transition: all 0.25s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 20px rgba(16,185,129,0.4);
+      letter-spacing: 0.2px;
+    }
+    .ci-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(16,185,129,0.5); }
+    .ci-submit:active { transform: scale(0.98); }
+    .ci-submit:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* ── Place search modal ───────────────────────────────────── */
+    .ci-modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(8px);
+      z-index: 9100;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0 0 0;
+    }
+    .ci-modal-overlay.open { display: flex; }
+    .ci-modal {
+      background: #0c0e1c;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px 24px 0 0;
+      width: 100%;
+      max-width: 560px;
+      max-height: 82dvh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .ci-modal-handle {
+      width: 36px; height: 4px;
+      border-radius: 99px;
+      background: rgba(255,255,255,0.15);
+      margin: 10px auto 0;
+      flex-shrink: 0;
+    }
+    .ci-modal-title {
+      padding: 14px 18px 8px;
+      font-size: 1rem;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    .ci-modal-search-row {
+      padding: 0 16px 12px;
+      flex-shrink: 0;
+    }
+    .ci-modal-search {
+      width: 100%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: var(--text-primary, #f0f4ff);
+      font-size: 0.92rem;
+      padding: 11px 14px 11px 38px;
+      box-sizing: border-box;
+      outline: none;
+      font-family: inherit;
+    }
+    .ci-modal-search:focus { border-color: rgba(16,185,129,0.4); }
+    .ci-modal-search-wrap { position: relative; }
+    .ci-modal-search-wrap i {
+      position: absolute;
+      left: 13px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted, #64748b);
+      font-size: 0.85rem;
+      pointer-events: none;
+    }
+    .ci-modal-results {
+      overflow-y: auto;
+      flex: 1;
+      padding: 0 8px 20px;
+    }
+    .ci-modal-results::-webkit-scrollbar { width: 3px; }
+    .ci-modal-results::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    .ci-place-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .ci-place-option:hover { background: rgba(255,255,255,0.06); }
+    .ci-place-option-icon {
+      width: 40px; height: 40px;
+      border-radius: 11px;
+      background: rgba(16,185,129,0.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .ci-place-option-info strong { display: block; font-size: 0.9rem; font-weight: 700; }
+    .ci-place-option-info span { font-size: 0.75rem; color: var(--text-muted, #64748b); }
+    .ci-modal-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted, #64748b);
+      font-size: 0.88rem;
+    }
+    .ci-modal-empty i { font-size: 1.8rem; margin-bottom: 10px; display: block; }
+    .ci-modal-loading {
+      text-align: center;
+      padding: 30px;
+      color: var(--text-muted, #64748b);
+      font-size: 0.85rem;
+    }
+
+    /* ── Success overlay ──────────────────────────────────────── */
+    .ci-success-overlay {
+      position: fixed; inset: 0;
+      background: #04050d;
+      z-index: 9200;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 32px;
+      animation: fadeIn 0.35s ease;
+    }
+    .ci-success-overlay.show { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .ci-success-ring {
+      width: 110px; height: 110px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #10b981, #3b82f6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.8rem;
+      margin-bottom: 24px;
+      box-shadow: 0 0 60px rgba(16,185,129,0.5);
+      animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .ci-success-overlay h2 { font-size: 2rem; font-weight: 900; margin: 0 0 6px; }
+    .ci-success-overlay p  { color: var(--text-secondary, #94a3b8); margin: 0 0 24px; font-size: 0.95rem; }
+    .ci-xp-awarded {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16,185,129,0.12);
+      border: 1px solid rgba(16,185,129,0.3);
+      border-radius: 99px;
+      padding: 10px 22px;
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: #34d399;
+      margin-bottom: 32px;
+    }
+    .ci-success-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 320px; }
+    .ci-btn-primary {
+      padding: 14px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #10b981, #3b82f6);
+      border: none;
+      color: white;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+    }
+    .ci-btn-ghost {
+      padding: 13px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-secondary, #94a3b8);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+    }
+
+    /* ── Auth gate ────────────────────────────────────────────── */
+    .ci-auth-gate {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+    }
+    .ci-auth-gate.show { display: block; }
+    .ci-auth-gate i { font-size: 2.5rem; color: #10b981; margin-bottom: 14px; display: block; }
+    .ci-auth-gate h2 { font-size: 1.2rem; font-weight: 800; margin: 0 0 8px; }
+    .ci-auth-gate p { color: var(--text-secondary, #94a3b8); font-size: 0.88rem; margin: 0 0 22px; }
+  </style>
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+</head>
+<body class="page-checkin">
+
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="logo-icon">🌍</div>
+      <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
+    </a>
+    <ul class="navbar-links"></ul>
+    <div class="navbar-actions"></div>
+    <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-menu"></div>
+
+  <div class="ci-wrap">
+
+    <!-- Auth gate (shown when not logged in) -->
+    <div class="ci-auth-gate" id="ciAuthGate">
+      <i class="fas fa-location-dot"></i>
+      <h2>Sign in to Check In</h2>
+      <p>You need a GeoHub account to check in at places and earn XP.</p>
+      <a href="auth.html?redirect=checkin.html" class="ci-btn-primary" style="display:inline-block;max-width:260px;margin:0 auto">
+        <i class="fas fa-sign-in-alt"></i> Log In / Sign Up
+      </a>
+    </div>
+
+    <!-- Main check-in UI (shown when logged in) -->
+    <div id="ciMain" style="display:none; flex-direction:column; gap:12px;">
+
+      <!-- Header -->
+      <div class="ci-head">
+        <div class="ci-head-icon">📍</div>
+        <div>
+          <h1>Check In</h1>
+          <p>Verify your visit and earn XP</p>
+        </div>
+      </div>
+
+      <!-- Place card -->
+      <div class="ci-card">
+        <div class="ci-place-row">
+          <div class="ci-place-avatar" id="ciPlaceEmoji">📍</div>
+          <div class="ci-place-info">
+            <h2 id="ciPlaceName">Select a Place</h2>
+            <p id="ciPlaceMeta">Tap "Change" to search for a place</p>
+          </div>
+          <button class="ci-change-btn" id="ciChangePlaceBtn">
+            <i class="fas fa-search"></i> Change
+          </button>
+        </div>
+      </div>
+
+      <!-- GPS verification -->
+      <div class="ci-card">
+        <div class="ci-card-header">
+          <i class="fas fa-location-crosshairs"></i>
+          <h3>Verify Location</h3>
+          <span id="ciGpsStatusBadge" style="font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,0.06);color:#64748b">Not verified</span>
+        </div>
+        <div class="ci-gps-body">
+          <div class="ci-dist-ring" id="ciDistRing">
+            <div class="ci-dist-ring-outer" id="ciDistRingOuter">
+              <div class="ci-dist-ring-inner">
+                <div class="ci-dist-val" id="ciDistVal">--</div>
+                <div class="ci-dist-unit" id="ciDistUnit">meters</div>
+              </div>
+            </div>
+            <div class="ci-dist-status" id="ciDistStatus">Checking…</div>
+          </div>
+          <p class="ci-accuracy" id="ciAccuracy"></p>
+          <button class="ci-gps-btn" id="ciGetLocBtn">
+            <i class="fas fa-location-crosshairs"></i>
+            <span id="ciGetLocLabel">Get My Location</span>
+          </button>
+          <div class="ci-gps-error" id="ciGpsError"></div>
+        </div>
+      </div>
+
+      <!-- Photo -->
+      <div class="ci-card">
+        <div class="ci-card-header">
+          <i class="fas fa-camera"></i>
+          <h3>Add Photo <span class="ci-opt">+15 XP</span></h3>
+        </div>
+        <div class="ci-photo-area">
+          <div class="ci-photo-preview" id="ciPhotoPreview">
+            <img id="ciPhotoImg" src="" alt="Check-in photo">
+            <button class="ci-photo-remove" id="ciPhotoRemove" title="Remove photo">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="ci-upload-progress" id="ciUploadProgress">
+            <div class="ci-upload-bar" id="ciUploadBar"></div>
+          </div>
+          <button class="ci-photo-btn" id="ciPhotoBtn">
+            <i class="fas fa-camera-retro"></i>
+            <span id="ciPhotoBtnLabel">Take Photo or Upload</span>
+          </button>
+          <input type="file" id="ciPhotoInput" accept="image/*" capture="environment" hidden>
+        </div>
+      </div>
+
+      <!-- Caption -->
+      <div class="ci-card">
+        <div class="ci-card-header">
+          <i class="fas fa-pen-to-square"></i>
+          <h3>Caption <span class="ci-opt">optional</span></h3>
+        </div>
+        <div class="ci-caption-area">
+          <textarea class="ci-caption" id="ciCaption" placeholder="What's happening here? Share a note…" maxlength="200" rows="3"></textarea>
+          <div class="ci-caption-count"><span id="ciCaptionCount">0</span>/200</div>
+        </div>
+      </div>
+
+      <!-- Cooldown notice -->
+      <div class="ci-cooldown-notice" id="ciCooldownNotice">
+        <i class="fas fa-clock"></i>
+        <span id="ciCooldownMsg">You already checked in here recently. Try again in --</span>
+      </div>
+
+      <!-- XP preview -->
+      <div class="ci-xp-row">
+        <div class="ci-xp-badge">
+          <i class="fas fa-bolt"></i>
+          <span id="ciXpVal">50</span> XP
+        </div>
+        <div class="ci-xp-label">for this check-in</div>
+      </div>
+      <div class="ci-xp-unverified-note" id="ciUnverifiedNote">
+        Verify your GPS location to earn full XP
+      </div>
+
+      <!-- Submit -->
+      <button class="ci-submit" id="ciSubmitBtn">
+        <i class="fas fa-location-dot"></i>
+        Check In Now
+      </button>
+
+    </div><!-- /ciMain -->
+  </div><!-- /ci-wrap -->
+
+  <!-- Place Search Modal -->
+  <div class="ci-modal-overlay" id="ciModalOverlay">
+    <div class="ci-modal" id="ciModal">
+      <div class="ci-modal-handle"></div>
+      <div class="ci-modal-title">Search for a Place</div>
+      <div class="ci-modal-search-row">
+        <div class="ci-modal-search-wrap">
+          <i class="fas fa-search"></i>
+          <input type="text" class="ci-modal-search" id="ciModalSearch"
+                 placeholder="Restaurant, café, attraction…" autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+      <div class="ci-modal-results" id="ciModalResults">
+        <div class="ci-modal-empty">
+          <i class="fas fa-location-dot"></i>
+          Start typing to search nearby places
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success overlay -->
+  <div class="ci-success-overlay" id="ciSuccessOverlay">
+    <div class="ci-success-ring">✓</div>
+    <h2>Checked In!</h2>
+    <p id="ciSuccessPlace">at your location</p>
+    <div class="ci-xp-awarded">
+      <i class="fas fa-bolt"></i>
+      +<span id="ciSuccessXp">50</span> XP
+    </div>
+    <div class="ci-success-actions">
+      <a href="feed.html" class="ci-btn-primary">
+        <i class="fas fa-compass"></i> View Activity Feed
+      </a>
+      <a href="rewards.html" class="ci-btn-ghost">
+        <i class="fas fa-gift"></i> My Rewards
+      </a>
+      <button class="ci-btn-ghost" onclick="window.history.back()">
+        <i class="fas fa-arrow-left"></i> Go Back
+      </button>
+    </div>
+  </div>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script defer src="gh-schema.js"></script>
+  <script defer src="firestore-social.js"></script>
+  <script defer src="config.js"></script>
+  <script defer src="api-client.js"></script>
+  <script defer src="main.js"></script>
+  <script defer src="account.js"></script>
+  <script defer src="checkin.js"></script>
+  <script defer src="nav-cleanup.js"></script>
+  <script defer src="mobile-nav.js"></script>
   <script defer src="responsive-polish.js"></script>
-</body></html>
+
+  <script>
+  (function () {
+    'use strict';
+
+    /* ── State ──────────────────────────────────────────────────────── */
+    var state = {
+      place:    null,   // { id, name, lat, lng, city, country, category, businessId }
+      userLoc:  null,   // { lat, lng, accuracy }
+      proximity: null,  // { distance, withinRadius }
+      photoFile: null,
+      photoUrl:  null,
+      verified:  false,
+      xp:        50,
+      submitting: false
+    };
+
+    /* ── DOM refs ───────────────────────────────────────────────────── */
+    function $id(id) { return document.getElementById(id); }
+
+    /* ── URL param place pre-fill ───────────────────────────────────── */
+    function loadFromUrl() {
+      var p = new URLSearchParams(location.search);
+      var id   = p.get('placeId')   || p.get('businessId') || '';
+      var name = p.get('placeName') || p.get('name')       || '';
+      var lat  = parseFloat(p.get('lat')  || '');
+      var lng  = parseFloat(p.get('lng')  || '');
+      var city = p.get('city')    || '';
+      var cat  = p.get('category')|| '';
+      var bid  = p.get('businessId') || '';
+      if (name) {
+        setPlace({ id: id, name: name, lat: isNaN(lat)?null:lat, lng: isNaN(lng)?null:lng,
+                   city: city, country: 'Georgia', category: cat, businessId: bid });
+      }
+    }
+
+    /* ── Set active place ───────────────────────────────────────────── */
+    var CATEGORY_EMOJIS = {
+      restaurant:'🍽️', cafe:'☕', hotel:'🏨', guesthouse:'🏡',
+      tour:'🗺️', attraction:'🏛️', bar:'🍺', shop:'🛍️', spa:'💆',
+      default:'📍'
+    };
+    function setPlace(place) {
+      state.place = place;
+      var emoji = CATEGORY_EMOJIS[place.category] || CATEGORY_EMOJIS.default;
+      $id('ciPlaceEmoji').textContent = emoji;
+      $id('ciPlaceName').textContent  = place.name || 'Unknown Place';
+      $id('ciPlaceMeta').textContent  = [place.city, place.country].filter(Boolean).join(', ') || 'Place selected';
+      closeModal();
+
+      // Reset GPS when place changes
+      state.userLoc  = null;
+      state.proximity = null;
+      state.verified  = false;
+      resetGpsUI();
+      updateXp();
+      updateSubmitBtn();
+
+      // Auto-start cooldown check if user is already authenticated
+      var GF = window.GeoFirebase;
+      if (GF && GF.auth && GF.auth.currentUser && place.id) {
+        checkCooldownUI(GF.auth.currentUser.uid);
+      }
+    }
+
+    /* ── GPS UI ─────────────────────────────────────────────────────── */
+    function resetGpsUI() {
+      $id('ciDistRing').classList.remove('visible');
+      $id('ciGpsStatusBadge').textContent = 'Not verified';
+      $id('ciGpsStatusBadge').style.cssText = 'font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,0.06);color:#64748b';
+      $id('ciGetLocBtn').classList.remove('verified');
+      $id('ciGetLocLabel').textContent = 'Get My Location';
+      $id('ciAccuracy').classList.remove('show');
+      $id('ciGpsError').classList.remove('show');
+      $id('ciGpsError').textContent = '';
+    }
+
+    $id('ciGetLocBtn').addEventListener('click', function () {
+      if (!state.place) { showToast('Please select a place first.', 'warn'); return; }
+      var btn = $id('ciGetLocBtn');
+      btn.disabled = true;
+      $id('ciGetLocLabel').textContent = 'Getting location…';
+      $id('ciGpsError').classList.remove('show');
+
+      var GC = window.GeoCheckin;
+      if (!GC) { showToast('Check-in module not loaded yet.', 'warn'); btn.disabled = false; return; }
+
+      GC.requestLocation(
+        function (loc) {
+          btn.disabled = false;
+          state.userLoc = loc;
+
+          // Show accuracy
+          var accEl = $id('ciAccuracy');
+          accEl.textContent = 'GPS accuracy: ±' + loc.accuracy + ' m';
+          accEl.classList.add('show');
+
+          // Proximity check
+          if (state.place.lat && state.place.lng) {
+            var prox = GC.verifyProximity(loc.lat, loc.lng, state.place.lat, state.place.lng);
+            state.proximity = prox;
+            state.verified  = prox.withinRadius && loc.accuracy <= GC.GPS_MAX_ACC;
+
+            // Distance ring
+            var ring = $id('ciDistRing');
+            ring.classList.add('visible');
+            var outer = $id('ciDistRingOuter');
+            $id('ciDistVal').textContent  = prox.distance < 1000 ? prox.distance : (prox.distance/1000).toFixed(1);
+            $id('ciDistUnit').textContent = prox.distance < 1000 ? 'meters' : 'km';
+            var statusEl = $id('ciDistStatus');
+            if (state.verified) {
+              outer.className = 'ci-dist-ring-outer ok';
+              statusEl.className = 'ci-dist-status ok';
+              statusEl.textContent = '✓ Within range';
+            } else {
+              outer.className = 'ci-dist-ring-outer far';
+              statusEl.className = 'ci-dist-status far';
+              statusEl.textContent = prox.distance > RADIUS_M_val() ?
+                '⚠ ' + prox.label + ' away — too far' :
+                '⚠ GPS signal weak';
+            }
+          } else {
+            // Place has no coordinates — skip distance, mark as unverified
+            state.verified = false;
+            var ring2 = $id('ciDistRing');
+            ring2.classList.add('visible');
+            $id('ciDistRingOuter').className = 'ci-dist-ring-outer';
+            $id('ciDistVal').textContent  = '?';
+            $id('ciDistUnit').textContent = '';
+            $id('ciDistStatus').className = 'ci-dist-status far';
+            $id('ciDistStatus').textContent = 'No coordinates for this place';
+          }
+
+          // Badge update
+          var badge = $id('ciGpsStatusBadge');
+          if (state.verified) {
+            badge.textContent = '✓ Verified';
+            badge.style.cssText = 'font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(16,185,129,0.12);color:#34d399';
+            $id('ciGetLocBtn').classList.add('verified');
+            $id('ciGetLocLabel').textContent = '✓ Location Verified';
+          } else {
+            badge.textContent = 'Unverified';
+            badge.style.cssText = 'font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(245,158,11,0.1);color:#fbbf24';
+            $id('ciGetLocLabel').textContent = 'Retry Location';
+          }
+
+          updateXp();
+          updateSubmitBtn();
+        },
+        function (err) {
+          btn.disabled = false;
+          $id('ciGetLocLabel').textContent = 'Retry Location';
+          var errEl = $id('ciGpsError');
+          errEl.textContent = err.message;
+          errEl.classList.add('show');
+
+          // Allow unverified check-in after denial
+          state.verified = false;
+          updateXp();
+          updateSubmitBtn();
+        }
+      );
+    });
+
+    function RADIUS_M_val() { return (window.GeoCheckin && window.GeoCheckin.RADIUS_M) || 100; }
+
+    /* ── Photo ──────────────────────────────────────────────────────── */
+    $id('ciPhotoBtn').addEventListener('click', function () { $id('ciPhotoInput').click(); });
+    $id('ciPhotoInput').addEventListener('change', function (e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) return;
+      if (file.size > 8 * 1024 * 1024) { showToast('Photo too large. Max 8 MB.', 'error'); return; }
+      state.photoFile = file;
+
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        $id('ciPhotoImg').src = ev.target.result;
+        $id('ciPhotoPreview').classList.add('show');
+        $id('ciPhotoBtnLabel').textContent = 'Change Photo';
+        updateXp();
+        updateSubmitBtn();
+      };
+      reader.readAsDataURL(file);
+    });
+
+    $id('ciPhotoRemove').addEventListener('click', function () {
+      state.photoFile = null;
+      state.photoUrl  = null;
+      $id('ciPhotoInput').value = '';
+      $id('ciPhotoImg').src = '';
+      $id('ciPhotoPreview').classList.remove('show');
+      $id('ciPhotoBtnLabel').textContent = 'Take Photo or Upload';
+      updateXp();
+      updateSubmitBtn();
+    });
+
+    /* ── Caption char count ─────────────────────────────────────────── */
+    $id('ciCaption').addEventListener('input', function () {
+      $id('ciCaptionCount').textContent = this.value.length;
+    });
+
+    /* ── XP + button state ──────────────────────────────────────────── */
+    function updateXp() {
+      var GC = window.GeoCheckin;
+      var xp = GC ? GC.calcXP({
+        verified:    state.verified,
+        hasPhoto:    !!state.photoFile,
+        checkinType: 'normal'
+      }) : (state.verified ? 50 : 10);
+      state.xp = xp;
+      $id('ciXpVal').textContent = xp;
+      var note = $id('ciUnverifiedNote');
+      if (!state.verified && state.userLoc !== null) {
+        note.classList.add('show');
+      } else {
+        note.classList.remove('show');
+      }
+    }
+
+    function updateSubmitBtn() {
+      var btn = $id('ciSubmitBtn');
+      var hasPlace = !!state.place;
+      // Allow submit if: place selected + (GPS verified OR GPS attempted + user chose to proceed)
+      var canSubmit = hasPlace && !state.submitting;
+      btn.disabled = !canSubmit;
+    }
+
+    /* ── Cooldown check ─────────────────────────────────────────────── */
+    function checkCooldownUI(userId) {
+      var GC = window.GeoCheckin;
+      if (!GC || !state.place || !state.place.id) return;
+      GC.checkCooldown(userId, state.place.id, function (res) {
+        var el = $id('ciCooldownNotice');
+        if (!res.canCheckin) {
+          $id('ciCooldownMsg').textContent = 'You already checked in here recently. Try again in ' + res.label + '.';
+          el.classList.add('show');
+          $id('ciSubmitBtn').disabled = true;
+        } else {
+          el.classList.remove('show');
+          updateSubmitBtn();
+        }
+      });
+    }
+
+    /* ── Submit ─────────────────────────────────────────────────────── */
+    $id('ciSubmitBtn').addEventListener('click', function () {
+      if (!state.place) { showToast('Please select a place.', 'warn'); return; }
+      var GF = window.GeoFirebase;
+      var GC = window.GeoCheckin;
+      if (!GF || !GF.auth || !GF.auth.currentUser) { location.href = 'auth.html?redirect=checkin.html'; return; }
+      if (state.submitting) return;
+      state.submitting = true;
+
+      var btn = $id('ciSubmitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking in…';
+
+      function doSubmit(photoUrl) {
+        var verMethod = 'none';
+        if (state.verified) verMethod = photoUrl ? 'gps_photo' : 'gps';
+
+        var data = {
+          placeId:            state.place.id || '',
+          placeName:          state.place.name || '',
+          businessId:         state.place.businessId || null,
+          eventId:            null,
+          city:               state.place.city    || '',
+          country:            state.place.country || 'Georgia',
+          lat:                state.userLoc ? state.userLoc.lat      : null,
+          lng:                state.userLoc ? state.userLoc.lng      : null,
+          accuracy:           state.userLoc ? state.userLoc.accuracy : null,
+          checkinType:        'normal',
+          photoUrl:           photoUrl || null,
+          caption:            ($id('ciCaption').value || '').trim(),
+          verified:           state.verified,
+          verificationMethod: verMethod,
+          xpAwarded:          state.xp
+        };
+
+        GC.submit(data, function (result) {
+          state.submitting = false;
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-location-dot"></i> Check In Now';
+
+          if (result && result.success) {
+            $id('ciSuccessPlace').textContent = 'at ' + (state.place.name || 'your location');
+            $id('ciSuccessXp').textContent    = result.xpAwarded || state.xp;
+            $id('ciSuccessOverlay').classList.add('show');
+          } else {
+            showToast((result && result.error) || 'Check-in failed. Please try again.', 'error');
+          }
+        });
+      }
+
+      // Upload photo first if present
+      if (state.photoFile && GC.uploadPhoto) {
+        var prog = $id('ciUploadProgress');
+        var bar  = $id('ciUploadBar');
+        prog.classList.add('show');
+        GC.uploadPhoto(
+          state.photoFile,
+          GF.auth.currentUser.uid,
+          function (pct) { bar.style.width = pct + '%'; },
+          function (url) {
+            prog.classList.remove('show');
+            doSubmit(url);
+          }
+        );
+      } else {
+        doSubmit(null);
+      }
+    });
+
+    /* ── Place search modal ─────────────────────────────────────────── */
+    $id('ciChangePlaceBtn').addEventListener('click', openModal);
+    $id('ciModalOverlay').addEventListener('click', function (e) {
+      if (e.target === this) closeModal();
+    });
+
+    function openModal() {
+      $id('ciModalOverlay').classList.add('open');
+      $id('ciModalSearch').value = '';
+      $id('ciModalResults').innerHTML = '<div class="ci-modal-empty"><i class="fas fa-location-dot"></i>Start typing to search nearby places</div>';
+      setTimeout(function () { $id('ciModalSearch').focus(); }, 200);
+    }
+    function closeModal() {
+      $id('ciModalOverlay').classList.remove('open');
+    }
+
+    var searchTimer;
+    $id('ciModalSearch').addEventListener('input', function () {
+      clearTimeout(searchTimer);
+      var q = this.value.trim();
+      if (q.length < 2) {
+        $id('ciModalResults').innerHTML = '<div class="ci-modal-empty"><i class="fas fa-location-dot"></i>Start typing to search nearby places</div>';
+        return;
+      }
+      $id('ciModalResults').innerHTML = '<div class="ci-modal-loading"><i class="fas fa-spinner fa-spin"></i> Searching…</div>';
+      searchTimer = setTimeout(function () { searchPlaces(q); }, 350);
+    });
+
+    function searchPlaces(q) {
+      var GF = window.GeoFirebase;
+      if (!GF) {
+        $id('ciModalResults').innerHTML = '<div class="ci-modal-empty"><i class="fas fa-triangle-exclamation"></i>Firebase not ready</div>';
+        return;
+      }
+      var qLower = q.toLowerCase();
+      var qEnd   = q.toLowerCase() + '';
+      GF.fs.getDocs(
+        GF.fs.query(
+          GF.fs.collection(GF.db, 'businesses'),
+          GF.fs.where('nameLower', '>=', qLower),
+          GF.fs.where('nameLower', '<=', qEnd),
+          GF.fs.limit(20)
+        )
+      ).then(function (snap) {
+        if (snap.empty) {
+          $id('ciModalResults').innerHTML = '<div class="ci-modal-empty"><i class="fas fa-search"></i>No places found for "' + esc(q) + '"</div>';
+          return;
+        }
+        var html = '';
+        snap.docs.forEach(function (d) {
+          var b = d.data();
+          var emoji = CATEGORY_EMOJIS[b.category] || CATEGORY_EMOJIS.default;
+          html += '<div class="ci-place-option" data-id="' + esc(d.id) + '" ' +
+                  'data-name="' + esc(b.name||'') + '" ' +
+                  'data-lat="' + (b.lat||b.latitude||'') + '" ' +
+                  'data-lng="' + (b.lng||b.longitude||'') + '" ' +
+                  'data-city="' + esc(b.city||b.location||'') + '" ' +
+                  'data-cat="' + esc(b.category||'') + '">' +
+            '<div class="ci-place-option-icon">' + emoji + '</div>' +
+            '<div class="ci-place-option-info">' +
+              '<strong>' + esc(b.name||'Unnamed') + '</strong>' +
+              '<span>' + esc([b.category, b.city||b.location].filter(Boolean).join(' · ')) + '</span>' +
+            '</div>' +
+          '</div>';
+        });
+        $id('ciModalResults').innerHTML = html;
+        $id('ciModalResults').querySelectorAll('.ci-place-option').forEach(function (el) {
+          el.addEventListener('click', function () {
+            setPlace({
+              id:         el.dataset.id,
+              name:       el.dataset.name,
+              lat:        parseFloat(el.dataset.lat) || null,
+              lng:        parseFloat(el.dataset.lng) || null,
+              city:       el.dataset.city,
+              country:    'Georgia',
+              category:   el.dataset.cat,
+              businessId: el.dataset.id
+            });
+          });
+        });
+      }).catch(function () {
+        $id('ciModalResults').innerHTML = '<div class="ci-modal-empty"><i class="fas fa-triangle-exclamation"></i>Search failed. Try again.</div>';
+      });
+    }
+
+    function esc(v) {
+      return String(v||'').replace(/[&<>"']/g, function (c) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+      });
+    }
+
+    /* ── Toast ──────────────────────────────────────────────────────── */
+    function showToast(msg, type) {
+      var GS = window.GeoSocial;
+      if (GS && GS.toast) { GS.toast(msg, type); return; }
+      var el = document.createElement('div');
+      el.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1a1f35;border:1px solid rgba(255,255,255,0.12);color:#f0f4ff;padding:11px 20px;border-radius:12px;font-size:0.88rem;font-weight:600;z-index:9999;pointer-events:none;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,0.5)';
+      el.textContent = msg;
+      document.body.appendChild(el);
+      setTimeout(function () { el.remove(); }, 2800);
+    }
+
+    /* ── Auth check on page load ────────────────────────────────────── */
+    function initPage() {
+      var GF = window.GeoFirebase;
+      if (!GF || !GF.auth) {
+        setTimeout(initPage, 300);
+        return;
+      }
+      GF.authFns.onAuthStateChanged(GF.auth, function (user) {
+        if (user) {
+          $id('ciAuthGate').classList.remove('show');
+          var main = $id('ciMain');
+          main.style.display = 'flex';
+          loadFromUrl();
+          if (state.place && state.place.id) checkCooldownUI(user.uid);
+          updateXp();
+          updateSubmitBtn();
+        } else {
+          $id('ciMain').style.display = 'none';
+          $id('ciAuthGate').classList.add('show');
+        }
+      });
+    }
+
+    // Keyboard dismiss modal
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    window.addEventListener('GeoFirebaseReady', initPage);
+    if (window.GeoFirebase) initPage();
+  }());
+  </script>
+</body>
+</html>
