@@ -3243,6 +3243,7 @@ main a:not([class]):hover {
   background-size: 200% 100%;
   animation: skeletonShimmer 1.4s infinite;
   border-radius: var(--radius-sm);
+  will-change: background-position;
 }
 @keyframes skeletonShimmer {
   from { background-position: 200% 0; }

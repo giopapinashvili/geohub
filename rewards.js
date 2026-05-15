@@ -447,6 +447,11 @@
     });
   }
 
+  window.addEventListener('pagehide', function () {
+    if (_unsubRewards) { try { _unsubRewards(); } catch (e) {} _unsubRewards = null; }
+    if (_unsubBalance) { try { _unsubBalance(); } catch (e) {} _unsubBalance = null; }
+  });
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 }());

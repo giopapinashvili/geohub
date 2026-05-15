@@ -238,6 +238,7 @@
   animation: rwModalSlideUp .22s ease;
   max-height: 90vh;
   overflow-y: auto;
+  will-change: transform;
 }
 @media (min-width: 540px) { .rw-modal { border-radius: 20px; animation: rwModalFadeIn .18s ease; } }
 

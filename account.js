@@ -109,14 +109,20 @@
       '<div class="nav-notif-footer"><button class="nav-notif-mark-all" id="navNotifMarkAll">Mark all read</button></div>';
     document.body.appendChild(panel);
     requestAnimationFrame(function() { panel.classList.add('open'); });
-    var closePanel = function() { if (panel.parentNode) { if (panel._unsub) panel._unsub(); panel.remove(); } };
+    var outsideHandler = null;
+    var closePanel = function() {
+      if (panel.parentNode) {
+        if (panel._unsub) panel._unsub();
+        panel.remove();
+        if (outsideHandler) { document.removeEventListener('click', outsideHandler); outsideHandler = null; }
+      }
+    };
     document.getElementById('navNotifClose').addEventListener('click', closePanel);
     setTimeout(function() {
-      var outsideHandler = function(e) {
+      outsideHandler = function(e) {
         var bell = document.getElementById('navBellBtn');
         if (!panel.contains(e.target) && (!bell || !bell.contains(e.target))) {
           closePanel();
-          document.removeEventListener('click', outsideHandler);
         }
       };
       document.addEventListener('click', outsideHandler);
@@ -282,6 +288,8 @@
 
   document.addEventListener('DOMContentLoaded', function(){ initAuthNav(); initMobileMenuAuth(); initProtectedActions(); });
   if (window.GeoFirebase && window.GeoFirebase.auth) startAuthListener(); else window.addEventListener('GeoFirebaseReady', startAuthListener, { once: true });
+
+  window.addEventListener('pagehide', clearBellListeners);
 
   // Load push notifications module on all pages
   if ('serviceWorker' in navigator && !document.getElementById('ghPushScript')) {
