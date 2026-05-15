@@ -968,21 +968,52 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function postMenu(pid, card){
     if(!requireLogin()) return;
     var authorId = card && card.dataset ? card.dataset.authorId : '';
-    var body='<div class="gh-mini-list"><button class="gh-mini-item" data-copy-post-link><span class="gh-mini-thumb"><i class="fas fa-link"></i></span><div><strong>Copy link</strong><span>Share a direct link</span></div></button><button class="gh-mini-item" data-menu-save><span class="gh-mini-thumb"><i class="fas fa-bookmark"></i></span><div><strong>Save post</strong><span>Keep it for later</span></div></button><button class="gh-mini-item" data-menu-hide><span class="gh-mini-thumb"><i class="fas fa-eye-slash"></i></span><div><strong>Hide post</strong><span>Remove it from your feed</span></div></button><button class="gh-mini-item" data-menu-report><span class="gh-mini-thumb"><i class="fas fa-flag"></i></span><div><strong>Report post</strong><span>Send to moderation</span></div></button>'+(authorId?'<button class="gh-mini-item" data-menu-report-user><span class="gh-mini-thumb"><i class="fas fa-user-shield"></i></span><div><strong>Report author</strong><span>Report this user</span></div></button><button class="gh-mini-item danger" data-menu-block-user><span class="gh-mini-thumb"><i class="fas fa-ban"></i></span><div><strong>Block author</strong><span>Hide this user from your GeoHub</span></div></button>':'')+'</div>';
+    var authorMenu = authorId
+      ? '<button class="gh-mini-item" data-menu-report-user><span class="gh-mini-thumb"><i class="fas fa-user-shield"></i></span><div><strong>Report author</strong><span>Report this user</span></div></button>' +
+        '<button class="gh-mini-item" data-menu-mute-user><span class="gh-mini-thumb"><i class="fas fa-volume-mute"></i></span><div><strong>Mute author</strong><span>Hide from your feed silently</span></div></button>' +
+        '<button class="gh-mini-item danger" data-menu-block-user><span class="gh-mini-thumb"><i class="fas fa-ban"></i></span><div><strong>Block author</strong><span>Hide this user from your GeoHub</span></div></button>'
+      : '';
+    var body='<div class="gh-mini-list">' +
+      '<button class="gh-mini-item" data-copy-post-link><span class="gh-mini-thumb"><i class="fas fa-link"></i></span><div><strong>Copy link</strong><span>Share a direct link</span></div></button>' +
+      '<button class="gh-mini-item" data-menu-save><span class="gh-mini-thumb"><i class="fas fa-bookmark"></i></span><div><strong>Save post</strong><span>Keep it for later</span></div></button>' +
+      '<button class="gh-mini-item" data-menu-hide><span class="gh-mini-thumb"><i class="fas fa-eye-slash"></i></span><div><strong>Hide post</strong><span>Remove it from your feed</span></div></button>' +
+      '<button class="gh-mini-item" data-menu-report><span class="gh-mini-thumb"><i class="fas fa-flag"></i></span><div><strong>Report post</strong><span>Send to moderation</span></div></button>' +
+      authorMenu + '</div>';
     modal('Post options', body, '<button class="gh-btn ghost" data-close-modal>Close</button>', 'ghPostMenuModal');
     var m=$('#ghPostMenuModal');
+    var authorName = card && card.dataset ? (card.dataset.authorName || '') : '';
     m.addEventListener('click', function(e){
       if(e.target.closest('[data-menu-save]')){ GS().toggleSavePost(pid); m.remove(); }
       if(e.target.closest('[data-menu-hide]')){ if(GS().hidePost) GS().hidePost(pid,function(){ if(card) card.remove(); }); m.remove(); }
-      if(e.target.closest('[data-menu-report]')){ if(GS().reportTarget) GS().reportTarget('post',pid,'Reported from post menu'); else createReport('post',pid,'Reported from post menu'); m.remove(); }
-      if(e.target.closest('[data-menu-report-user]') && authorId){ if(GS().reportTarget) GS().reportTarget('user',authorId,'Reported from post menu'); m.remove(); }
-      if(e.target.closest('[data-menu-block-user]') && authorId){ if(confirm('Block this user? Their posts will be hidden from your feed.')){ if(GS().blockUser) GS().blockUser(authorId,function(){ if(card) card.remove(); }); } m.remove(); }
+      if(e.target.closest('[data-menu-report]')){
+        m.remove();
+        if(window.GeoModeration) window.GeoModeration.openReportModal('post', pid, '');
+        else if(GS().reportTarget) GS().reportTarget('post', pid, 'Reported from post menu');
+      }
+      if(e.target.closest('[data-menu-report-user]') && authorId){
+        m.remove();
+        if(window.GeoModeration) window.GeoModeration.openReportModal('user', authorId, authorName);
+        else if(GS().reportTarget) GS().reportTarget('user', authorId, 'Reported from post menu');
+      }
+      if(e.target.closest('[data-menu-mute-user]') && authorId){
+        m.remove();
+        if(window.GeoModeration) window.GeoModeration.openMuteConfirm(authorId, authorName, function(){ if(GS().muteUser) GS().muteUser(authorId); });
+        else if(GS().muteUser) GS().muteUser(authorId);
+      }
+      if(e.target.closest('[data-menu-block-user]') && authorId){
+        m.remove();
+        if(window.GeoModeration) window.GeoModeration.openBlockConfirm(authorId, authorName, function(){ if(GS().blockUser) GS().blockUser(authorId, function(){ if(card) card.remove(); }); });
+        else if(GS().blockUser) GS().blockUser(authorId, function(){ if(card) card.remove(); });
+      }
     });
   }
 
   function createReport(type,id,reason){
     if(!requireLogin()) return;
-    if(GS() && GS().reportTarget) return GS().reportTarget(type,id,reason); var u=authUser(); fs().addDoc(fs().collection(db(),'reports'), { reporterId:u.uid, targetType:type, targetId:id, reason:reason||'report', status:'pending', createdAt:fs().serverTimestamp() }).then(function(){toast('Report sent');}).catch(function(){toast('Report failed','error');});
+    if(window.GeoModeration) { window.GeoModeration.openReportModal(type, id, ''); return; }
+    if(GS() && GS().reportTarget) return GS().reportTarget(type, id, reason);
+    var u=authUser();
+    fs().addDoc(fs().collection(db(),'reports'), { reporterId:u.uid, targetType:type, targetId:id, reason:reason||'report', status:'pending', createdAt:fs().serverTimestamp() }).then(function(){toast('Report sent');}).catch(function(){toast('Report failed','error');});
   }
 
 

@@ -15,6 +15,7 @@
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="moderation.css">
 <link rel="stylesheet" href="chat-popup.css">
   <link rel="stylesheet" href="responsive-polish.css">
 </head>
@@ -245,15 +246,32 @@
     <section class="sec" id="sec-moderation">
       <div class="ph">
         <div><div class="ph-title">Content Moderation</div><div class="ph-sub" id="modSub">0 items in queue</div></div>
-        <div class="ph-actions">
-          <button class="btn btn-ghost btn-sm" onclick="filterMod('all')">All</button>
-          <button class="btn btn-ghost btn-sm" onclick="filterMod('review')">Reviews</button>
-          <button class="btn btn-ghost btn-sm" onclick="filterMod('checkin')">Check-ins</button>
-          <button class="btn btn-ghost btn-sm" onclick="filterMod('user')">Users</button>
-          <button class="btn btn-ghost btn-sm" onclick="filterMod('content')">Content</button>
-        </div>
+      </div>
+      <!-- Status filter -->
+      <div class="mod-filters-bar" id="modStatusBar">
+        <button class="mod-filter-btn active" onclick="filterModStatus('pending')">Pending</button>
+        <button class="mod-filter-btn" onclick="filterModStatus('resolved')">Resolved</button>
+        <button class="mod-filter-btn" onclick="filterModStatus('dismissed')">Dismissed</button>
+        <button class="mod-filter-btn" onclick="filterModStatus('all')">All</button>
+      </div>
+      <!-- Type filter -->
+      <div class="mod-filters-bar" id="modTypeBar">
+        <button class="mod-filter-btn active" onclick="filterMod('all')">All Types</button>
+        <button class="mod-filter-btn" onclick="filterMod('post')">Posts</button>
+        <button class="mod-filter-btn" onclick="filterMod('comment')">Comments</button>
+        <button class="mod-filter-btn" onclick="filterMod('user')">Users</button>
+        <button class="mod-filter-btn" onclick="filterMod('place')">Places</button>
+        <button class="mod-filter-btn" onclick="filterMod('business')">Businesses</button>
+        <button class="mod-filter-btn" onclick="filterMod('event')">Events</button>
+        <button class="mod-filter-btn" onclick="filterMod('group')">Groups</button>
       </div>
       <div style="display:flex;flex-direction:column;gap:9px" id="modQueue"></div>
+
+      <!-- Audit log -->
+      <div class="ph" style="margin-top:28px">
+        <div><div class="ph-title">Moderation Audit Log</div><div class="ph-sub">Recent admin actions</div></div>
+      </div>
+      <div id="modAuditLog" style="display:flex;flex-direction:column"></div>
     </section>
 
     <!-- ─── TRUST & SAFETY ─── -->

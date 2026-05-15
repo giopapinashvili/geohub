@@ -177,7 +177,7 @@
     const coverActions = $('.cover-actions');
     if (coverActions) coverActions.innerHTML = own ? '<button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button>' : '<button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> Add Friend</button>';
     const actions = $('.profile-actions');
-    if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i></button><button class="btn btn-ghost btn-sm" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> Message</button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> Add Friend</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> Follow</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '"><i class="fas fa-ban"></i></button>';
+    if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i></button><button class="btn btn-ghost btn-sm" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> Message</button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> Add Friend</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> Follow</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '" data-user-name="' + esc(fullName) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-mute-user="' + esc(user.uid) + '" data-user-name="' + esc(fullName) + '"><i class="fas fa-volume-mute"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '" data-user-name="' + esc(fullName) + '"><i class="fas fa-ban"></i></button>';
     if (!own && window.GeoSocial && window.GeoSocial.checkFollowing) {
       window.GeoSocial.checkFollowing(user.uid, isFollowing => {
         $$('[data-follow-user="' + user.uid + '"]').forEach(btn => {
@@ -643,13 +643,26 @@
     if (reportBtn) {
       e.preventDefault();
       const target = reportBtn.dataset.reportUser;
-      if (window.GeoSocial && window.GeoSocial.reportTarget) window.GeoSocial.reportTarget('user', target, 'Reported from profile');
+      const uname = reportBtn.dataset.userName || '';
+      if (window.GeoModeration) window.GeoModeration.openReportModal('user', target, uname);
+      else if (window.GeoSocial && window.GeoSocial.reportTarget) window.GeoSocial.reportTarget('user', target, 'Reported from profile');
+    }
+    const muteBtn = e.target.closest('[data-mute-user]');
+    if (muteBtn) {
+      e.preventDefault();
+      const target = muteBtn.dataset.muteUser;
+      const uname = muteBtn.dataset.userName || '';
+      if (window.GeoModeration) window.GeoModeration.openMuteConfirm(target, uname, function(){ if(window.GeoSocial && window.GeoSocial.muteUser) window.GeoSocial.muteUser(target); });
+      else if (window.GeoSocial && window.GeoSocial.muteUser) window.GeoSocial.muteUser(target);
     }
     const blockBtn = e.target.closest('[data-block-user]');
     if (blockBtn) {
       e.preventDefault();
       const target = blockBtn.dataset.blockUser;
-      if (target && confirm('Block this user? Their posts will be hidden from your feed.')) {
+      const uname = blockBtn.dataset.userName || '';
+      if (window.GeoModeration) {
+        window.GeoModeration.openBlockConfirm(target, uname, function(){ if(window.GeoSocial && window.GeoSocial.blockUser) window.GeoSocial.blockUser(target, () => { location.href='feed.html'; }); });
+      } else if (target && confirm('Block this user? Their posts will be hidden from your feed.')) {
         if (window.GeoSocial && window.GeoSocial.blockUser) window.GeoSocial.blockUser(target, () => { location.href='feed.html'; });
       }
     }

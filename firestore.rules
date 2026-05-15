@@ -246,9 +246,18 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
-    match /reports/{reportId} { allow create: if signedIn(); allow read, update, delete: if isAdmin(); }
+    // Reports — users can create, cannot update; admins can read/update/delete
+    match /reports/{reportId} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasAll(['reporterId','targetType','targetId','reason','status','createdAt'])
+        && request.resource.data.get('reporterId', '') == uid()
+        && request.resource.data.get('status', '') == 'pending';
+      allow read, update, delete: if isAdmin();
+    }
     match /hiddenPosts/{hiddenId} { allow read: if signedIn() && (resource.data.get('userId', '') == uid() || isAdmin()); allow create: if signedIn() && request.resource.data.get('userId', '') == uid(); allow update: if false; allow delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
     match /blockedUsers/{blockId} { allow read: if signedIn() && (resource.data.get('blockerId', '') == uid() || isAdmin()); allow create: if signedIn() && request.resource.data.get('blockerId', '') == uid(); allow update: if false; allow delete: if isAdmin() || (signedIn() && resource.data.get('blockerId', '') == uid()); }
+    match /mutedUsers/{muteId} { allow read: if signedIn() && (resource.data.get('muterId', '') == uid() || isAdmin()); allow create: if signedIn() && request.resource.data.get('muterId', '') == uid(); allow update: if false; allow delete: if isAdmin() || (signedIn() && resource.data.get('muterId', '') == uid()); }
+    match /moderationActions/{actionId} { allow read, create, update, delete: if isAdmin(); }
     match /userBadges/{badgeId} { allow read: if true; allow create: if signedIn() && (request.resource.data.get('userId', '') == uid() || isAdmin()); allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
 
     match /admin/{docId} { allow read, write: if isAdmin(); }

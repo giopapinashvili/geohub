@@ -59,7 +59,7 @@
   var liveTimer      = null;
   var liveActiveCount = 0;
   var selectedUser   = null;
-  var modItems       = MOD_QUEUE.slice();
+  var modItems       = []; // legacy — real data loaded from Firestore via loadModeration()
   var notifCount     = 0;
   var _chalUnsubscribe = function () {};
   var _chalEditId    = null;
@@ -513,43 +513,200 @@
     toast('Creator ' + (c ? c.handle : '') + ' featured on discovery');
   };
 
-  /* ── MODERATION QUEUE ─────────────────────────────────────── */
-  var modFilter = 'all';
+  /* ── MODERATION QUEUE (Firestore) ─────────────────────────── */
+  var modStatusFilter = 'pending';
+  var modTypeFilter   = 'all';
+  var modReportUnsub  = null;
+  var modReports      = [];
+
+  function modTimeAgo(ts) {
+    if (!ts) return '';
+    var ms = ts.toMillis ? ts.toMillis() : (ts.seconds ? ts.seconds * 1000 : Number(ts));
+    var d = Math.floor((Date.now() - ms) / 1000);
+    if (d < 60) return d + 's ago';
+    if (d < 3600) return Math.floor(d / 60) + 'm ago';
+    if (d < 86400) return Math.floor(d / 3600) + 'h ago';
+    return Math.floor(d / 86400) + 'd ago';
+  }
+
+  function loadModeration() {
+    var el = document.getElementById('modQueue');
+    if (!el) return;
+    el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--ts)"><i class="fas fa-spinner fa-spin"></i> Loading reports…</div>';
+    var geo = window.GeoFirebase;
+    if (!geo || !geo.fs || !geo.db) {
+      el.innerHTML = '<div class="mod-empty"><i class="fas fa-exclamation-circle"></i><p>Firebase not ready</p></div>';
+      return;
+    }
+    var f = geo.fs, db = geo.db;
+    if (modReportUnsub) { try { modReportUnsub(); } catch (e) {} modReportUnsub = null; }
+    var conditions = [f.orderBy('createdAt', 'desc'), f.limit(100)];
+    if (modStatusFilter !== 'all') conditions.unshift(f.where('status', '==', modStatusFilter));
+    if (modTypeFilter   !== 'all') conditions.unshift(f.where('targetType', '==', modTypeFilter));
+    var q = f.query.apply(null, [f.collection(db, 'reports')].concat(conditions));
+    modReportUnsub = f.onSnapshot(q, function (snap) {
+      modReports = [];
+      snap.forEach(function (d) { modReports.push(Object.assign({ id: d.id }, d.data())); });
+      var pending = modReports.filter(function (r) { return r.status === 'pending'; }).length;
+      var countEl = document.getElementById('modSub');
+      if (countEl) countEl.textContent = modReports.length + ' reports · ' + pending + ' pending';
+      var sbEl = document.getElementById('sb-mod');
+      if (sbEl) sbEl.textContent = pending > 0 ? String(pending) : '';
+      renderModQueue();
+    }, function (err) {
+      if (el) el.innerHTML = '<div class="mod-empty"><i class="fas fa-lock"></i><p>Admin access required to view reports.</p></div>';
+      console.warn('[Admin] reports listener', err.message);
+    });
+  }
 
   function renderModQueue() {
     var el = document.getElementById('modQueue');
     if (!el) return;
-    var list = modFilter === 'all' ? modItems : modItems.filter(function (m) { return m.type === modFilter; });
-    var countEl = document.getElementById('modSub');
-    if (countEl) countEl.textContent = list.length + ' items in queue';
-    document.getElementById('sb-mod').textContent = modItems.length;
-
-    el.innerHTML = list.map(function (m) {
-      var pBadge = { high:'<span class="badge bg-red">High Priority</span>', medium:'<span class="badge bg-gold">Medium</span>', low:'<span class="badge bg-gray">Low</span>' }[m.priority] || '';
-      return '<div class="mod-card" id="mod-' + m.id + '">' +
-        '<div class="mod-hdr"><div class="mod-ic" style="background:' + m.bg + '">' + m.icon + '</div>' +
-        '<div class="mod-info"><div class="mod-title">' + m.title + '</div><div class="mod-sub">' + m.sub + '</div></div>' +
-        pBadge + '</div>' +
-        '<div class="mod-body">' + m.body + '</div>' +
-        '<div class="mod-acts">' +
-        '<button class="btn btn-red btn-sm" onclick="modAction(' + m.id + ',\'remove\')"><i class="fas fa-trash"></i> Remove</button>' +
-        '<button class="btn btn-gold btn-sm" onclick="modAction(' + m.id + ',\'warn\')"><i class="fas fa-exclamation"></i> Warn User</button>' +
-        '<button class="btn btn-ghost btn-sm" onclick="modAction(' + m.id + ',\'ignore\')"><i class="fas fa-eye-slash"></i> Ignore</button>' +
-        '<button class="btn btn-ghost btn-sm" onclick="modAction(' + m.id + ',\'suspend\')"><i class="fas fa-ban"></i> Suspend</button>' +
-        '</div></div>';
+    if (!modReports.length) {
+      el.innerHTML = '<div class="mod-empty"><i class="fas fa-check-circle" style="color:#10b981"></i><p>No reports match these filters.</p></div>';
+      return;
+    }
+    el.innerHTML = modReports.map(function (r) {
+      var typeClass   = 'mod-badge-' + (r.targetType || 'post');
+      var statusClass = 'mod-status-' + (r.status || 'pending');
+      var isPending   = (r.status || 'pending') === 'pending';
+      var id  = esc(r.id);
+      var tid = esc(r.targetId || '—');
+      var rid = esc(r.reporterId || '—');
+      return '<div class="mod-report-card' + (isPending ? ' unread' : '') + '">' +
+        '<div class="mod-report-meta">' +
+          '<span class="mod-type-badge ' + typeClass + '">' + esc(r.targetType || 'unknown') + '</span>' +
+          '<span class="mod-report-reason">' + esc(r.reason || 'No reason given') + '</span>' +
+          '<span class="mod-status-badge ' + statusClass + '">' + esc(r.status || 'pending') + '</span>' +
+        '</div>' +
+        (r.details ? '<div class="mod-report-details">' + esc(r.details) + '</div>' : '') +
+        '<div class="mod-report-details" style="font-size:.69rem">Target: <code>' + tid + '</code> &nbsp;·&nbsp; Reporter: <code>' + rid + '</code></div>' +
+        '<div class="mod-report-footer">' +
+          '<span class="mod-report-time">' + modTimeAgo(r.createdAt) + '</span>' +
+          (isPending
+            ? '<button class="mod-act-btn mod-act-resolve" onclick="modResolve(\'' + id + '\')"><i class="fas fa-check"></i> Resolve</button>' +
+              '<button class="mod-act-btn mod-act-dismiss" onclick="modDismiss(\'' + id + '\')"><i class="fas fa-eye-slash"></i> Dismiss</button>' +
+              '<button class="mod-act-btn mod-act-remove"  onclick="modRemoveContent(\'' + id + '\',\'' + esc(r.targetType || '') + '\',\'' + esc(r.targetId || '') + '\')"><i class="fas fa-trash"></i> Remove</button>' +
+              '<button class="mod-act-btn mod-act-warn"    onclick="modWarnUser(\'' + id + '\',\'' + esc(r.reporterId || '') + '\')"><i class="fas fa-exclamation-triangle"></i> Warn</button>'
+            : '') +
+        '</div>' +
+        '</div>';
     }).join('');
   }
 
-  window.filterMod = function (type) { modFilter = type; renderModQueue(); };
-
-  window.modAction = function (id, action) {
-    modItems = modItems.filter(function (m) { return m.id !== id; });
-    var msgs = { remove:'Content removed from platform', warn:'User warning issued', ignore:'Item dismissed from queue', suspend:'User suspended' };
-    var colors = { remove:'rgba(239,68,68,0.95)', warn:'rgba(245,158,11,0.95)', ignore:null, suspend:'rgba(239,68,68,0.95)' };
-    toast(msgs[action] || 'Done', colors[action]);
-    document.getElementById('sb-mod').textContent = modItems.length;
-    renderModQueue();
+  window.filterMod = function (type) {
+    modTypeFilter = type;
+    document.querySelectorAll('#modTypeBar .mod-filter-btn').forEach(function (b) {
+      b.classList.toggle('active', b.textContent.trim().toLowerCase().replace(' types','') === (type === 'all' ? 'all types' : type).toLowerCase().replace(' types',''));
+    });
+    loadModeration();
   };
+  window.filterModStatus = function (status) {
+    modStatusFilter = status;
+    document.querySelectorAll('#modStatusBar .mod-filter-btn').forEach(function (b) {
+      b.classList.toggle('active', b.textContent.trim().toLowerCase() === status);
+    });
+    loadModeration();
+  };
+
+  function modUpdateReport(id, status, extra) {
+    var geo = window.GeoFirebase;
+    if (!geo || !geo.fs) return Promise.reject(new Error('no firebase'));
+    var f = geo.fs;
+    return f.updateDoc(f.doc(geo.db, 'reports', id), Object.assign({
+      status: status, resolvedAt: f.serverTimestamp(),
+      resolvedBy: (window.GeoCurrentUser || {}).uid || ''
+    }, extra || {}));
+  }
+  function modLogAction(action, targetId, targetType, notes) {
+    var geo = window.GeoFirebase;
+    if (!geo || !geo.fs) return Promise.resolve();
+    var f = geo.fs;
+    return f.addDoc(f.collection(geo.db, 'moderationActions'), {
+      action: action, targetId: targetId || '', targetType: targetType || '',
+      notes: notes || '', adminId: (window.GeoCurrentUser || {}).uid || '', createdAt: f.serverTimestamp()
+    });
+  }
+
+  window.modResolve = function (id) {
+    modUpdateReport(id, 'resolved')
+      .then(function () { toast('Report resolved'); })
+      .catch(function (e) { toast('Error: ' + e.message, 'rgba(239,68,68,.9)'); });
+  };
+  window.modDismiss = function (id) {
+    modUpdateReport(id, 'dismissed')
+      .then(function () { toast('Report dismissed'); })
+      .catch(function (e) { toast('Error: ' + e.message, 'rgba(239,68,68,.9)'); });
+  };
+  window.modRemoveContent = function (reportId, targetType, targetId) {
+    if (!targetId) { toast('No target ID', 'rgba(239,68,68,.9)'); return; }
+    if (!confirm('Permanently remove this ' + (targetType || 'item') + '?\nID: ' + targetId + '\n\nThis cannot be undone.')) return;
+    var geo = window.GeoFirebase;
+    if (!geo || !geo.fs) return;
+    var f = geo.fs, db = geo.db;
+    var colMap = { post:'posts', user:'users', comment:'posts', place:'places', business:'businesses', event:'events', group:'groups' };
+    var col = colMap[targetType] || (targetType + 's');
+    f.deleteDoc(f.doc(db, col, targetId))
+      .then(function () { return modUpdateReport(reportId, 'resolved', { action: 'content_removed' }); })
+      .then(function () { return modLogAction('content_removed', targetId, targetType); })
+      .then(function () { toast('Content removed'); loadAuditLog(); })
+      .catch(function (e) { toast('Failed: ' + e.message, 'rgba(239,68,68,.9)'); });
+  };
+  window.modWarnUser = function (reportId, userId) {
+    var notes = prompt('Warning notes (internal only):');
+    if (notes === null) return;
+    modUpdateReport(reportId, 'resolved', { action: 'user_warned' })
+      .then(function () { return modLogAction('user_warned', userId, 'user', notes); })
+      .then(function () { toast('Warning logged'); loadAuditLog(); })
+      .catch(function (e) { toast('Failed: ' + e.message, 'rgba(239,68,68,.9)'); });
+  };
+  window.modSuspendUser = function (userId) {
+    if (!userId || !confirm('Suspend user ' + userId + '? They will be marked suspended.')) return;
+    var geo = window.GeoFirebase;
+    if (!geo || !geo.fs) return;
+    var f = geo.fs;
+    f.updateDoc(f.doc(geo.db, 'users', userId), {
+      suspended: true, suspendedAt: f.serverTimestamp(), suspendedBy: (window.GeoCurrentUser || {}).uid || ''
+    }).then(function () { return modLogAction('user_suspended', userId, 'user'); })
+      .then(function () { toast('User suspended'); loadAuditLog(); })
+      .catch(function (e) { toast('Failed: ' + e.message, 'rgba(239,68,68,.9)'); });
+  };
+
+  /* ── Audit log ── */
+  function loadAuditLog() {
+    var el = document.getElementById('modAuditLog');
+    if (!el) return;
+    var geo = window.GeoFirebase;
+    if (!geo || !geo.fs || !geo.db) return;
+    var f = geo.fs, db = geo.db;
+    f.getDocs(f.query(f.collection(db, 'moderationActions'), f.orderBy('createdAt', 'desc'), f.limit(30)))
+      .then(function (snap) {
+        if (snap.empty) {
+          el.innerHTML = '<div class="mod-empty" style="padding:16px 0"><i class="fas fa-shield-alt"></i><p>No moderation actions yet.</p></div>';
+          return;
+        }
+        var iconMap = {
+          content_removed: '<i class="fas fa-trash" style="color:#f87171"></i>',
+          user_warned:     '<i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i>',
+          user_suspended:  '<i class="fas fa-ban" style="color:#f87171"></i>'
+        };
+        el.innerHTML = snap.docs.map(function (d) {
+          var a = d.data();
+          return '<div class="mod-audit-item">' +
+            '<div class="mod-audit-icon" style="background:rgba(255,255,255,.05)">' +
+              (iconMap[a.action] || '<i class="fas fa-shield-alt" style="color:#64748b"></i>') +
+            '</div>' +
+            '<div class="mod-audit-body">' +
+              '<div class="mod-audit-action">' + esc(a.action || 'action') + '</div>' +
+              '<div class="mod-audit-meta">Target: ' + esc(a.targetId || '—') +
+                ' &nbsp;·&nbsp; Admin: ' + esc(a.adminId || '—') +
+                (a.notes ? ' &nbsp;·&nbsp; ' + esc(a.notes) : '') +
+                ' &nbsp;·&nbsp; ' + modTimeAgo(a.createdAt) +
+              '</div>' +
+            '</div></div>';
+        }).join('');
+      }).catch(function () {});
+  }
 
   /* ── ACTIVITY ────────────────────────────────────────────── */
   var _activityFilter = 'all';
@@ -1693,7 +1850,8 @@
     renderUsers();
     renderBusinesses();
     renderCreators();
-    renderModQueue();
+    loadModeration();
+    loadAuditLog();
     setTimeout(drawOverviewCharts, 120);
     bindContentStudio();
     bindChallengeStudio();

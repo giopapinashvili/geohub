@@ -108,6 +108,11 @@
       redeemCoupon: function(){ noop(); },
       findUserByInput: function () { return Promise.resolve(null); },
       uploadImageDataUrl: function(dataUrl, folder, callback){ if(callback) callback(''); return Promise.resolve(''); },
+      muteUser: function(){ noop(); },
+      unmuteUser: function(){ noop(); },
+      listenReports: function(o, cb){ cb([]); return function(){}; },
+      updateReportStatus: function(id, s, e, cb){ if(cb) cb(false); },
+      createModerationAction: function(a, t, ty, n, cb){ if(cb) cb(false); },
       requireAuth: showLoginPrompt,
       toast: toast
     };
@@ -398,18 +403,39 @@
       });
     }
 
+    function muteUser(targetUserId, callback) {
+      requireAuth(function(user){
+        if (!targetUserId || targetUserId === user.uid) return;
+        setDoc(doc(db, 'mutedUsers', user.uid + '_' + targetUserId), {
+          muterId: user.uid, mutedId: targetUserId, createdAt: serverTimestamp()
+        }).then(function(){ toast('User muted'); if(callback) callback(true); })
+          .catch(function(err){ console.error('[GeoSocial] muteUser', err); toast('Could not mute user.', 'error'); if(callback) callback(false, err); });
+      });
+    }
+
+    function unmuteUser(targetUserId, callback) {
+      requireAuth(function(user){
+        deleteDoc(doc(db, 'mutedUsers', user.uid + '_' + targetUserId))
+          .then(function(){ toast('User unmuted'); if(callback) callback(true); })
+          .catch(function(err){ console.error('[GeoSocial] unmuteUser', err); toast('Could not unmute user.', 'error'); });
+      });
+    }
+
     function listenSafetyPrefs(callback) {
       var uid = currentUid();
-      if (!uid) { callback({ hiddenPostIds: [], blockedUserIds: [] }); return function(){}; }
-      var state = { hiddenPostIds: [], blockedUserIds: [] };
-      function emit(){ callback({ hiddenPostIds: state.hiddenPostIds.slice(), blockedUserIds: state.blockedUserIds.slice() }); }
+      if (!uid) { callback({ hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [] }); return function(){}; }
+      var state = { hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [] };
+      function emit(){ callback({ hiddenPostIds: state.hiddenPostIds.slice(), blockedUserIds: state.blockedUserIds.slice(), mutedUserIds: state.mutedUserIds.slice() }); }
       var uh = onSnapshot(query(collection(db, 'hiddenPosts'), where('userId', '==', uid), limit(200)), function(snap){
         var ids=[]; snap.forEach(function(d){ var x=d.data()||{}; if(x.postId) ids.push(x.postId); }); state.hiddenPostIds=ids; emit();
       }, function(err){ console.warn('[GeoSocial] hiddenPosts', err.message); emit(); });
       var ub = onSnapshot(query(collection(db, 'blockedUsers'), where('blockerId', '==', uid), limit(200)), function(snap){
         var ids=[]; snap.forEach(function(d){ var x=d.data()||{}; if(x.blockedId) ids.push(x.blockedId); }); state.blockedUserIds=ids; emit();
       }, function(err){ console.warn('[GeoSocial] blockedUsers', err.message); emit(); });
-      return function(){ try{uh();}catch(e){} try{ub();}catch(e){} };
+      var um = onSnapshot(query(collection(db, 'mutedUsers'), where('muterId', '==', uid), limit(200)), function(snap){
+        var ids=[]; snap.forEach(function(d){ var x=d.data()||{}; if(x.mutedId) ids.push(x.mutedId); }); state.mutedUserIds=ids; emit();
+      }, function(err){ console.warn('[GeoSocial] mutedUsers', err.message); emit(); });
+      return function(){ try{uh();}catch(e){} try{ub();}catch(e){} try{um();}catch(e){} };
     }
 
     function reportTarget(type, id, reason, details, callback) {
@@ -417,9 +443,38 @@
         addDoc(collection(db, 'reports'), {
           reporterId: user.uid, targetType: type, targetId: id,
           reason: reason || 'report', details: details || '', status: 'pending', createdAt: serverTimestamp()
-        }).then(function(){ toast('Report sent'); if(callback) callback(true); })
+        }).then(function(){ toast('Report submitted'); if(callback) callback(true); })
           .catch(function(err){ console.error('[GeoSocial] reportTarget', err); toast('Report failed.', 'error'); if(callback) callback(false, err); });
       });
+    }
+
+    // ── Admin: listen to reports with optional status/type filter ─────────
+    function listenReports(opts, callback) {
+      var conditions = [orderBy('createdAt', 'desc'), limit(100)];
+      if (opts && opts.status && opts.status !== 'all') conditions.unshift(where('status', '==', opts.status));
+      if (opts && opts.targetType && opts.targetType !== 'all') conditions.unshift(where('targetType', '==', opts.targetType));
+      var q = query.apply(null, [collection(db, 'reports')].concat(conditions));
+      return onSnapshot(q, function(snap){
+        var items = [];
+        snap.forEach(function(d){ items.push(Object.assign({ id: d.id }, d.data())); });
+        callback(items);
+      }, function(err){ console.warn('[GeoSocial] listenReports', err.message); callback([]); });
+    }
+
+    function updateReportStatus(reportId, status, extra, callback) {
+      var uid = currentUid();
+      updateDoc(doc(db, 'reports', reportId), Object.assign({ status: status, resolvedAt: serverTimestamp(), resolvedBy: uid || '' }, extra || {}))
+        .then(function(){ if(callback) callback(true); })
+        .catch(function(err){ console.error('[GeoSocial] updateReportStatus', err); if(callback) callback(false, err); });
+    }
+
+    function createModerationAction(action, targetId, targetType, notes, callback) {
+      var uid = currentUid();
+      addDoc(collection(db, 'moderationActions'), {
+        action: action, targetId: targetId || '', targetType: targetType || '',
+        notes: notes || '', adminId: uid || '', createdAt: serverTimestamp()
+      }).then(function(){ if(callback) callback(true); })
+        .catch(function(err){ console.error('[GeoSocial] createModerationAction', err); if(callback) callback(false, err); });
     }
 
     function listenManagedBusinesses(uid, callback) {
@@ -2167,8 +2222,13 @@
       hidePost:                hidePost,
       blockUser:               blockUser,
       unblockUser:             unblockUser,
+      muteUser:                muteUser,
+      unmuteUser:              unmuteUser,
       listenSafetyPrefs:       listenSafetyPrefs,
       reportTarget:            reportTarget,
+      listenReports:           listenReports,
+      updateReportStatus:      updateReportStatus,
+      createModerationAction:  createModerationAction,
       listenManagedBusinesses: listenManagedBusinesses,
       listenUserBadges:        listenUserBadges,
       createBusinessOffer:     createBusinessOffer,
