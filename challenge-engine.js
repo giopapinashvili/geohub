@@ -13,6 +13,15 @@
     distance: 'Distance'
   };
 
+  var BADGE_DEFAULTS = {
+    first_checkin: {
+      title: 'First Check-in',
+      description: 'Completed your first GeoHub check-in.',
+      icon: 'fa-location-dot',
+      rarity: 'common'
+    }
+  };
+
   function GF() { return window.GeoFirebase; }
   function uid() { return GF() && GF().auth && GF().auth.currentUser ? GF().auth.currentUser.uid : null; }
   function fs() { return GF() && GF().fs; }
@@ -124,7 +133,8 @@
     var f = fs();
     var pRef = progressRef(userId, challenge.id);
     var userRef = f.doc(db(), 'users', userId);
-    var badgeRef = challenge.badge ? f.doc(db(), 'userBadges', userId + '_' + challenge.badge) : null;
+    var badgeId = challenge.badge || null;
+    var badgeRef = badgeId ? f.doc(db(), 'users', userId, 'badges', badgeId) : null;
     var target = clampTarget(challenge);
 
     return f.runTransaction(db(), function (tx) {
@@ -167,14 +177,15 @@
           console.log('[ChallengeEngine] xp awarded:', challenge.xpReward, 'for', challenge.id);
         }
         if (completedNow && badgeRef) {
+          var bDef = BADGE_DEFAULTS[badgeId] || {};
           tx.set(badgeRef, {
-            userId: userId,
-            badgeId: challenge.badge,
-            title: challenge.title || 'Challenge complete',
-            icon: 'fa-trophy',
-            source: 'challenge',
+            badgeId: badgeId,
             challengeId: challenge.id,
-            createdAt: f.serverTimestamp()
+            title: challenge.badgeTitle || bDef.title || challenge.title || 'Challenge Badge',
+            description: challenge.badgeDescription || bDef.description || '',
+            icon: challenge.badgeIcon || bDef.icon || 'fa-trophy',
+            rarity: challenge.badgeRarity || bDef.rarity || 'common',
+            earnedAt: f.serverTimestamp()
           }, { merge: true });
         }
         return { completedNow: completedNow, challenge: challenge };
@@ -196,7 +207,8 @@
     }).then(function (results) {
       var completed = results.filter(function (r) { return r && r.completedNow; }).map(function (r) { return r.challenge; });
       if (completed.length && window.GeoSocial && window.GeoSocial.toast) {
-        window.GeoSocial.toast('Challenge complete: ' + completed[0].title + ' +' + completed[0].xpReward + ' XP');
+        var c0 = completed[0];
+        window.GeoSocial.toast('Challenge completed: ' + (c0.title || c0.name || 'Challenge') + ' (+' + (c0.xpReward || 0) + ' XP)');
       }
       var out = { completed: completed };
       if (callback) callback(out);

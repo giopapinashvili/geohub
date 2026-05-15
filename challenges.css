@@ -992,3 +992,43 @@ body.page-challenges [data-install-prompt] {
 [data-gh-theme="light"] .chalm-prog-note { color: #64748b; }
 [data-gh-theme="light"] .chalm-ts { color: #64748b; }
 [data-gh-theme="light"] .chalm-overlay { background: rgba(15,23,42,.44); }
+
+/* ── Badge pill on challenge cards ─────────────────────────────────── */
+.ch-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: .72rem;
+  font-weight: 700;
+  background: rgba(245,158,11,.1);
+  border: 1px solid rgba(245,158,11,.2);
+  color: #fbbf24;
+}
+.ch-badge-pill.is-earned {
+  background: rgba(16,185,129,.1);
+  border-color: rgba(16,185,129,.25);
+  color: #10e0a0;
+}
+
+/* ── Badge unlock row in detail modal ───────────────────────────────── */
+.chalm-badge-unlock {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(245,158,11,.08);
+  border: 1px solid rgba(245,158,11,.2);
+  color: #fbbf24;
+  font-size: .85rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+.chalm-badge-unlock.is-earned {
+  background: rgba(16,185,129,.1);
+  border-color: rgba(16,185,129,.28);
+  color: #10e0a0;
+}

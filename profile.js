@@ -337,14 +337,52 @@
   }
 
 
-  function renderBadgeTab(user){
-    const tab = $('#tab-badges'); if(!tab) return;
-    if (window.GeoSocial && window.GeoSocial.listenUserBadges) {
-      window.GeoSocial.listenUserBadges(user.uid, badges => {
-        const cnt = $('.ptab[data-tab="badges"] .tab-count'); if(cnt) cnt.textContent = badges.length || '0';
-        if(!badges.length){ tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-medal"></i><h3>No badges yet</h3><p>Check in, post and help the community to earn badges.</p></div>'; return; }
-        tab.innerHTML = '<div class="gh-friend-grid">'+badges.map(b => '<div class="gh-friend-card"><span class="gh-avatar"><i class="fas '+esc(b.icon||'fa-medal')+'"></i></span><div><strong>'+esc(b.title||b.badgeId||'Badge')+'</strong><span>'+esc(b.description||'GeoHub achievement')+'</span></div></div>').join('')+'</div>';
-      });
+  var BADGE_RARITY_COLOR = { common: '#94a3b8', rare: '#3b82f6', epic: '#a855f7', legendary: '#f59e0b' };
+
+  function paintBadges(tab, badges) {
+    const cnt = $('.ptab[data-tab="badges"] .tab-count');
+    if (cnt) cnt.textContent = badges.length || '0';
+    if (!badges.length) {
+      tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-medal"></i><h3>No badges yet</h3><p>Complete challenges to earn badges.</p></div>';
+      return;
+    }
+    tab.innerHTML = '<div class="gh-friend-grid">' + badges.map(function (b) {
+      const rc = BADGE_RARITY_COLOR[b.rarity] || '#94a3b8';
+      return '<div class="gh-friend-card">' +
+        '<span class="gh-avatar" style="background:rgba(16,185,129,.1);color:' + rc + '">' +
+          '<i class="fas ' + esc(b.icon || 'fa-medal') + '"></i>' +
+        '</span>' +
+        '<div>' +
+          '<strong>' + esc(b.title || b.badgeId || 'Badge') + '</strong>' +
+          '<span>' + esc(b.description || 'GeoHub achievement') + '</span>' +
+          (b.rarity ? '<span style="font-size:.65rem;color:' + rc + ';font-weight:700;text-transform:uppercase;margin-top:2px;display:block">' + esc(b.rarity) + '</span>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('') + '</div>';
+  }
+
+  function renderBadgeTab(user) {
+    const tab = $('#tab-badges');
+    if (!tab) return;
+    const GF = window.GeoFirebase;
+    if (GF && GF.db && GF.fs) {
+      // Primary: read from users/{uid}/badges (written by challenge-engine.js)
+      GF.fs.onSnapshot(
+        GF.fs.collection(GF.db, 'users', user.uid, 'badges'),
+        function (snap) {
+          const badges = [];
+          snap.forEach(function (d) { badges.push(Object.assign({ id: d.id }, d.data())); });
+          paintBadges(tab, badges);
+        },
+        function () {
+          // Fallback: read from userBadges (written by firestore-social.js)
+          if (window.GeoSocial && window.GeoSocial.listenUserBadges) {
+            window.GeoSocial.listenUserBadges(user.uid, function (badges) { paintBadges(tab, badges); });
+          }
+        }
+      );
+    } else if (window.GeoSocial && window.GeoSocial.listenUserBadges) {
+      window.GeoSocial.listenUserBadges(user.uid, function (badges) { paintBadges(tab, badges); });
     }
   }
 

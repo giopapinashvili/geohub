@@ -74,6 +74,7 @@
       '</div>' +
       '<div class="challenge-progress-row"><span>' + progress + ' / ' + target + '</span><span>' + pct + '%</span></div>' +
       '<div class="challenge-progress" aria-label="Challenge progress"><span style="width:' + pct + '%"></span></div>' +
+      (c.badge ? '<div class="ch-badge-pill' + (completed ? ' is-earned' : '') + '"><i class="fas fa-medal"></i> ' + (completed ? 'Badge earned' : 'Badge reward') + '</div>' : '') +
     '</article>';
   }
   function paint() {
@@ -128,6 +129,7 @@
         '<div class="chalm-completed-msg" id="chalDetailComplete">' +
           '<i class="fas fa-check-circle"></i> Challenge completed' +
         '</div>' +
+        '<div class="chalm-badge-unlock" id="chalDetailBadgeUnlock"></div>' +
         '<div class="chalm-ts" id="chalDetailTs"></div>' +
       '</div>';
     document.body.appendChild(el);
@@ -155,8 +157,9 @@
     document.getElementById('chalDetailTitle').textContent = c.title || c.name || 'Challenge';
     document.getElementById('chalDetailDesc').textContent = c.description || 'Complete real activity to make progress on this challenge.';
 
+    var xpModal = Number(p.xpReward || c.xpReward || 0);
     document.getElementById('chalDetailXp').innerHTML =
-      '<i class="fas fa-bolt"></i> +' + compact(c.xpReward || 0) + ' XP reward';
+      '<i class="fas fa-bolt"></i> +' + compact(xpModal) + ' XP reward';
 
     document.getElementById('chalDetailProg').innerHTML =
       '<div class="chalm-prog-labels">' +
@@ -178,6 +181,19 @@
       tsEl.style.display = 'flex';
     } else {
       tsEl.style.display = 'none';
+    }
+
+    var badgeEl = document.getElementById('chalDetailBadgeUnlock');
+    if (badgeEl) {
+      if (c.badge) {
+        badgeEl.innerHTML = completed
+          ? '<i class="fas fa-medal"></i> Badge unlocked!'
+          : '<i class="fas fa-medal"></i> Earns a badge on completion';
+        badgeEl.className = 'chalm-badge-unlock' + (completed ? ' is-earned' : '');
+        badgeEl.style.display = 'flex';
+      } else {
+        badgeEl.style.display = 'none';
+      }
     }
 
     document.getElementById(MODAL_ID).classList.add('open');
