@@ -859,8 +859,12 @@
     ],
     challenges: [
       { id: 'csChallengeType', label: 'Type (checkin_count / city_checkin / place_checkin / business_checkin / date_limited_checkin)', type: 'text', key: 'type', placeholder: 'checkin_count' },
+      { id: 'csChallengeCategory', label: 'Category (travel / food / events / patriot / fitness / exploration / community)', type: 'text', key: 'category', placeholder: 'exploration' },
       { id: 'csChallengeTarget', label: 'Target count', type: 'number', key: 'targetCount', min: 1 },
       { id: 'csChallengeXp', label: 'XP reward', type: 'number', key: 'xpReward', min: 0 },
+      { id: 'csChallengeBadgeId', label: 'Badge ID optional', type: 'text', key: 'badgeId' },
+      { id: 'csChallengeBadgeTitle', label: 'Badge title optional', type: 'text', key: 'badgeTitle' },
+      { id: 'csChallengeBadgeRarity', label: 'Badge rarity optional', type: 'text', key: 'badgeRarity', placeholder: 'common' },
       { id: 'csChallengePlace', label: 'Place ID optional', type: 'text', key: 'placeId' },
       { id: 'csChallengeBusiness', label: 'Business ID optional', type: 'text', key: 'businessId' },
       { id: 'csChallengeStart', label: 'Start date', type: 'date', key: 'startAt' },
@@ -1211,6 +1215,7 @@
       var hiddenId = el('chalEditId'); if (hiddenId) hiddenId.value = id;
       var t = el('cfTitle'); if (t) t.value = c.title || c.name || '';
       var typeEl = el('cfType'); if (typeEl) typeEl.value = c.type || 'checkin';
+      var categoryEl = el('cfCategory'); if (categoryEl) categoryEl.value = c.category || 'exploration';
       var desc = el('cfDesc'); if (desc) desc.value = c.description || '';
       var target = el('cfTarget'); if (target) target.value = c.targetCount || 1;
       var xp = el('cfXp'); if (xp) xp.value = c.xpReward || 0;
@@ -1304,6 +1309,7 @@
         name: titleVal,
         description: ((document.getElementById('cfDesc') || {}).value || '').trim(),
         type: (document.getElementById('cfType') || {}).value || 'checkin',
+        category: (document.getElementById('cfCategory') || {}).value || 'exploration',
         targetCount: target,
         xpReward: xpVal,
         city: cityVal || null,
@@ -1340,7 +1346,21 @@
         op = fs.addDoc(fs.collection(db, 'challenges'), doc);
       }
 
-      op.then(function () {
+      op.then(function (ref) {
+        var challengeId = editId || (ref && ref.id) || '';
+        if (badgeId) {
+          return fs.setDoc(fs.doc(db, 'badges', badgeId), {
+            title: doc.badgeTitle,
+            description: doc.badgeDescription || '',
+            icon: doc.badgeIcon,
+            rarity: doc.badgeRarity || 'common',
+            xpBonus: 0,
+            challengeId: challengeId,
+            createdAt: fs.serverTimestamp(),
+            updatedAt: fs.serverTimestamp()
+          }, { merge: true });
+        }
+      }).then(function () {
         toast(editId ? 'Challenge updated' : 'Challenge created: ' + titleVal);
         window.chalFormMode('none');
       }).catch(function (err) {

@@ -18,6 +18,24 @@
     distance: 'Distance'
   };
 
+  var CATEGORY_LABELS = {
+    travel: 'Travel',
+    food: 'Food',
+    events: 'Events',
+    patriot: 'Patriot',
+    fitness: 'Fitness',
+    exploration: 'Exploration',
+    community: 'Community'
+  };
+
+  var RARITY_LABELS = {
+    common: 'Common',
+    uncommon: 'Uncommon',
+    rare: 'Rare',
+    epic: 'Epic',
+    legendary: 'Legendary'
+  };
+
   var BADGE_DEFAULTS = {
     first_checkin: {
       title: 'First Check-in',

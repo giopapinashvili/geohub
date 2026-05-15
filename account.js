@@ -5,6 +5,7 @@
   var currentUser = window.GeoCurrentUser || null;
   var authReady = false;
   var appLang = 'en';
+  var _bellUnsubs = [];
 
   function esc(s) { return String(s || '').replace(/[&<>'"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]; }); }
   function fb() { return window.GeoFirebase; }
@@ -68,6 +69,99 @@
     if (actionsEl) actionsEl.insertBefore(b, actionsEl.firstChild);
   }
 
+  function clearBellListeners() {
+    _bellUnsubs.forEach(function(u) { try { u(); } catch(e) {} });
+    _bellUnsubs = [];
+  }
+
+  function wireBadges(uid, f, geo) {
+    if (!uid || !f || !geo) return;
+    try {
+      var nq = f.query(f.collection(geo.db, 'userNotifications'), f.where('userId', '==', uid), f.limit(25));
+      _bellUnsubs.push(f.onSnapshot(nq, function(snap) {
+        var count = 0;
+        snap.forEach(function(d) { var x = d.data(); if (!x.read && !x.seen) count++; });
+        var b = document.getElementById('navNotifBadge');
+        if (b) { b.textContent = count > 99 ? '99+' : count > 0 ? String(count) : ''; b.style.display = count > 0 ? '' : 'none'; }
+      }, function() {}));
+    } catch(e) {}
+    try {
+      var cq = f.query(f.collection(geo.db, 'chats'), f.where('members', 'array-contains', uid));
+      _bellUnsubs.push(f.onSnapshot(cq, function(snap) {
+        var count = 0;
+        snap.forEach(function(d) { var x = d.data() || {}; if (x.lastSenderId && x.lastSenderId !== uid && Array.isArray(x.unreadFor) && x.unreadFor.indexOf(uid) > -1) count++; });
+        var b = document.getElementById('navMsgBadge');
+        if (b) { b.textContent = count > 99 ? '99+' : count > 0 ? String(count) : ''; b.style.display = count > 0 ? '' : 'none'; }
+      }, function() {}));
+    } catch(e) {}
+  }
+
+  function openNavNotifications(uid, f, geo) {
+    var existing = document.getElementById('navNotifPanel');
+    if (existing) { if (existing._unsub) existing._unsub(); existing.remove(); return; }
+    var panel = document.createElement('div');
+    panel.id = 'navNotifPanel';
+    panel.className = 'nav-notif-panel';
+    panel.innerHTML =
+      '<div class="nav-notif-header"><strong>Notifications</strong>' +
+      '<button class="nav-notif-close" id="navNotifClose"><i class="fas fa-times"></i></button></div>' +
+      '<div class="nav-notif-list" id="navNotifList"><div class="nav-notif-loading"><i class="fas fa-circle-notch fa-spin"></i></div></div>' +
+      '<div class="nav-notif-footer"><button class="nav-notif-mark-all" id="navNotifMarkAll">Mark all read</button></div>';
+    document.body.appendChild(panel);
+    requestAnimationFrame(function() { panel.classList.add('open'); });
+    var closePanel = function() { if (panel.parentNode) { if (panel._unsub) panel._unsub(); panel.remove(); } };
+    document.getElementById('navNotifClose').addEventListener('click', closePanel);
+    setTimeout(function() {
+      var outsideHandler = function(e) {
+        var bell = document.getElementById('navBellBtn');
+        if (!panel.contains(e.target) && (!bell || !bell.contains(e.target))) {
+          closePanel();
+          document.removeEventListener('click', outsideHandler);
+        }
+      };
+      document.addEventListener('click', outsideHandler);
+    }, 0);
+    try {
+      var q = f.query(f.collection(geo.db, 'userNotifications'), f.where('userId', '==', uid), f.limit(20));
+      var unsub = f.onSnapshot(q, function(snap) {
+        var items = [];
+        snap.forEach(function(d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        items.sort(function(a, b) {
+          function ms(v) { return v && v.toMillis ? v.toMillis() : (v && v.seconds ? v.seconds * 1000 : 0); }
+          return ms(b.createdAt) - ms(a.createdAt);
+        });
+        var list = document.getElementById('navNotifList');
+        if (!list) return;
+        if (!items.length) {
+          list.innerHTML = '<div class="nav-notif-empty"><i class="fas fa-bell"></i><p>No notifications yet</p></div>';
+          return;
+        }
+        list.innerHTML = items.map(function(n) {
+          return '<a class="nav-notif-item' + (!n.read ? ' unread' : '') + '" href="' + esc(n.href || '#') + '" data-notif-id="' + esc(n.id) + '">' +
+            '<div class="nav-notif-icon"><i class="fas fa-bell"></i></div>' +
+            '<div class="nav-notif-text"><strong>' + esc(n.title || 'GeoHub') + '</strong>' +
+            '<span>' + esc(n.body || n.message || '') + '</span></div></a>';
+        }).join('');
+      }, function() {
+        var list = document.getElementById('navNotifList');
+        if (list) list.innerHTML = '<div class="nav-notif-empty"><i class="fas fa-bell"></i><p>No notifications yet</p></div>';
+      });
+      panel._unsub = unsub;
+    } catch(e) {
+      var list = document.getElementById('navNotifList');
+      if (list) list.innerHTML = '<div class="nav-notif-empty"><i class="fas fa-bell"></i><p>No notifications yet</p></div>';
+    }
+    var markAllBtn = document.getElementById('navNotifMarkAll');
+    if (markAllBtn) {
+      markAllBtn.addEventListener('click', function() {
+        panel.querySelectorAll('[data-notif-id]').forEach(function(a) {
+          var id = a.dataset.notifId;
+          try { f.updateDoc(f.doc(geo.db, 'userNotifications', id), { read: true, seen: true }); } catch(e) {}
+        });
+      });
+    }
+  }
+
   function initAuthNav() {
     var actionsEl = document.querySelector('.navbar-actions');
     if (!actionsEl) return;
@@ -75,7 +169,11 @@
     if (user) {
       var firstName = (user.fullName || user.displayName || 'User').split(' ')[0];
       var isAdmin = !!(user.isAdmin || user.adminRole);
-      actionsEl.innerHTML = '<div class="auth-nav-user" id="authNavUser">' +
+      clearBellListeners();
+      actionsEl.innerHTML =
+        '<a href="messages.html" class="nav-icon-btn" id="navMsgBtn" title="Messages" aria-label="Messages"><i class="fas fa-comment-dots"></i><b class="nav-badge" id="navMsgBadge" style="display:none"></b></a>' +
+        '<button type="button" class="nav-icon-btn" id="navBellBtn" title="Notifications" aria-label="Notifications"><i class="fas fa-bell"></i><b class="nav-badge" id="navNotifBadge" style="display:none"></b></button>' +
+        '<div class="auth-nav-user" id="authNavUser">' +
         '<img src="' + esc(user.avatar || user.photoURL || '') + '" alt="' + esc(firstName) + '" class="auth-nav-avatar" onerror="this.style.display=\'none\'">' +
         '<span class="auth-nav-name">' + esc(firstName) + '</span><i class="fas fa-chevron-down auth-nav-caret"></i>' +
         '<div class="auth-nav-dropdown" id="authNavDropdown">' +
@@ -93,6 +191,9 @@
       document.addEventListener('click', function () { if (navDrop) navDrop.classList.remove('open'); });
       var out = document.getElementById('authLogoutBtn'); if (out) out.addEventListener('click', doLogout);
       var set = document.getElementById('authSettingsBtn'); if (set) set.addEventListener('click', function(){ showAccountSettings(); });
+      var bellBtn = document.getElementById('navBellBtn');
+      if (bellBtn) { bellBtn.addEventListener('click', function(e) { e.stopPropagation(); var geo = fb(), f = fs(); if (geo && f) openNavNotifications(user.uid || user.id, f, geo); }); }
+      var _geo = fb(), _f = fs(); if (_geo && _f) wireBadges(user.uid || user.id, _f, _geo);
     } else {
       actionsEl.innerHTML = '<a href="auth.html" class="btn-ghost-nav"><i class="fas fa-sign-in-alt"></i> Login</a>' +
         '<a href="auth.html?tab=signup" class="btn-primary" style="padding:8px 16px;font-size:0.875rem;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;font-weight:600;"><i class="fas fa-user-plus"></i> Sign Up</a>';

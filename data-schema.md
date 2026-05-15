@@ -190,9 +190,13 @@ Collection: `challenges/{challengeId}`
 | `title` * | string | |
 | `description` | string | |
 | `type` * | enum | `checkin \| photo \| qr \| event \| distance` |
+| `category` | enum | `travel \| food \| events \| patriot \| fitness \| exploration \| community` |
 | `targetCount` * | number | Number of matching actions required |
 | `xpReward` * | number | XP awarded once on completion |
-| `badge` | string | Optional badge ID awarded on completion |
+| `badgeId` | string | Optional badge ID awarded on completion |
+| `badgeTitle` | string | Optional card/modal badge label |
+| `badgeIcon` | string | Optional Font Awesome icon class |
+| `badgeRarity` | enum | `common \| uncommon \| rare \| epic \| legendary` |
 | `city` | string | Optional city constraint |
 | `businessId` | string | Optional business constraint |
 | `placeId` | string | Optional place constraint |
@@ -214,9 +218,37 @@ User progress: `users/{uid}/challengeProgress/{challengeId}`
 | `completed` * | boolean | Locks once true |
 | `completedAt` | timestamp | Set on completion |
 | `xpAwarded` * | boolean | Prevents duplicate challenge XP |
+| `badgeAwarded` | boolean | Prevents duplicate badge grant |
+| `rewardSummary` | object | Snapshot of XP/badge completion reward |
 | `proofType` | enum | `checkin \| photo \| qr \| event` |
 | `relatedCheckins` | string[] | Check-in document IDs |
 | `lastUpdated` | timestamp | |
+
+Badge catalog: `badges/{badgeId}`
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `title` * | string | |
+| `description` | string | |
+| `icon` | string | Font Awesome icon class |
+| `rarity` | enum | `common \| uncommon \| rare \| epic \| legendary` |
+| `xpBonus` | number | Optional extra XP metadata |
+| `challengeId` | string | Optional source challenge |
+| `createdAt` | timestamp | |
+
+User badge grant: `users/{uid}/badges/{badgeId}`
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `userId` * | string | Owner UID |
+| `badgeId` * | string | Badge ID |
+| `title` | string | Snapshot label |
+| `description` | string | Snapshot description |
+| `icon` | string | Snapshot icon |
+| `rarity` | string | Snapshot rarity |
+| `challengeId` | string | Source challenge |
+| `source` | string | `challenge` |
+| `earnedAt` | timestamp | |
 
 Legacy shape below is retained for older seed/admin references.
 

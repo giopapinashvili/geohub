@@ -409,3 +409,101 @@
   }
 }
 img { content-visibility: auto; }
+
+/* ================================================================
+   NOTIFICATION BELL & MESSAGES BADGE (standard navbar pages)
+   ================================================================ */
+.nav-icon-btn {
+  position: relative;
+  width: 36px; height: 36px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: var(--text-secondary, #94a3b8);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.15s, color 0.15s;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.nav-icon-btn:hover { background: var(--bg-elevated, rgba(255,255,255,.08)); color: var(--text-primary, #f8fafc); }
+.nav-badge {
+  position: absolute;
+  top: 2px; right: 2px;
+  min-width: 16px; height: 16px;
+  background: #ef4444;
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.58rem;
+  font-weight: 800;
+  line-height: 16px;
+  text-align: center;
+  padding: 0 3px;
+}
+
+/* ── Notification panel ── */
+.nav-notif-panel {
+  position: fixed;
+  top: calc(var(--navbar-height, 68px) + 8px);
+  right: 16px;
+  width: 340px;
+  max-height: 440px;
+  background: var(--bg-card, #111827);
+  border: 1px solid var(--border, rgba(255,255,255,.12));
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.55);
+  z-index: 2000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.nav-notif-panel.open { opacity: 1; transform: translateY(0); }
+.nav-notif-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border, rgba(255,255,255,.08));
+  flex-shrink: 0;
+}
+.nav-notif-header strong { font-size: 0.9rem; color: var(--text-primary, #f8fafc); }
+.nav-notif-close {
+  background: none; border: none; color: var(--text-muted, #6b7280);
+  cursor: pointer; font-size: 0.85rem; padding: 4px 6px;
+  border-radius: 6px; line-height: 1; transition: background 0.15s;
+}
+.nav-notif-close:hover { background: var(--bg-elevated, rgba(255,255,255,.08)); }
+.nav-notif-list { overflow-y: auto; flex: 1; }
+.nav-notif-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 11px 16px;
+  text-decoration: none;
+  border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,.06));
+  transition: background 0.15s;
+}
+.nav-notif-item:last-child { border-bottom: none; }
+.nav-notif-item:hover { background: var(--bg-elevated, rgba(255,255,255,.05)); }
+.nav-notif-item.unread { background: rgba(16,185,129,.06); }
+.nav-notif-icon { color: var(--green, #10b981); font-size: 0.82rem; margin-top: 3px; flex-shrink: 0; }
+.nav-notif-text { min-width: 0; }
+.nav-notif-text strong { display: block; font-size: 0.82rem; color: var(--text-primary, #f8fafc); margin-bottom: 2px; font-weight: 600; }
+.nav-notif-text span { font-size: 0.76rem; color: var(--text-muted, #6b7280); overflow: hidden; text-overflow: ellipsis; display: block; white-space: nowrap; max-width: 250px; }
+.nav-notif-empty { padding: 32px 16px; text-align: center; color: var(--text-muted, #6b7280); }
+.nav-notif-empty i { display: block; font-size: 1.8rem; color: var(--green, #10b981); margin-bottom: 10px; opacity: 0.7; }
+.nav-notif-empty p { margin: 0; font-size: 0.85rem; }
+.nav-notif-loading { padding: 32px 16px; text-align: center; color: var(--text-muted, #6b7280); font-size: 1.2rem; }
+.nav-notif-footer { padding: 10px 16px; border-top: 1px solid var(--border, rgba(255,255,255,.08)); flex-shrink: 0; }
+.nav-notif-mark-all {
+  background: none; border: none; color: var(--green, #10b981);
+  cursor: pointer; font-size: 0.8rem; font-weight: 600;
+  padding: 0; font-family: inherit; transition: opacity 0.15s;
+}
+.nav-notif-mark-all:hover { opacity: 0.75; }
+@media (max-width: 768px) {
+  .nav-notif-panel { right: 8px; left: 8px; width: auto; }
+  /* Hide auth name text on mobile so bell + avatar + hamburger fit */
+  .auth-nav-name, .auth-nav-caret { display: none !important; }
+  .auth-nav-user { padding: 4px 6px 4px 4px !important; }
+}

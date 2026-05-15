@@ -18,21 +18,17 @@
   *{box-sizing:border-box}
   body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden;margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 
-  /* ── TOP BAR ── */
-  .pl-topbar{position:fixed;top:0;left:0;right:0;height:60px;background:rgba(5,7,15,.97);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:200;backdrop-filter:blur(20px)}
-  .pl-brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#f8fafc;font-weight:900;font-size:1.1rem}
-  .pl-brand-logo{width:34px;height:34px;background:linear-gradient(135deg,#10b981,#3b82f6);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:900;color:#fff}
-  .pl-search-wrap{flex:1;max-width:420px;margin:0 16px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:8px 14px}
+  /* ── PLACES TOOLBAR (search + controls, sits below standard navbar) ── */
+  .pl-toolbar{margin-top:var(--navbar-height,68px);position:sticky;top:var(--navbar-height,68px);left:0;right:0;background:rgba(5,7,15,.97);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;padding:8px 20px;z-index:150;backdrop-filter:blur(20px)}
+  .pl-search-wrap{flex:1;max-width:420px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:8px 14px}
   .pl-search-wrap i{color:#64748b;font-size:.85rem}
   .pl-search-wrap input{background:none;border:none;outline:none;color:#f8fafc;font-size:.88rem;width:100%}
   .pl-search-wrap input::placeholder{color:#4b5563}
-  .pl-topbar-actions{display:flex;align-items:center;gap:10px}
   .pl-add-btn{display:flex;align-items:center;gap:7px;padding:9px 16px;background:linear-gradient(135deg,#10b981,#3b82f6);border:none;border-radius:20px;color:#fff;font-weight:700;font-size:.84rem;cursor:pointer;white-space:nowrap;transition:opacity .2s}
   .pl-add-btn:hover{opacity:.88}
-  .pl-map-btn{display:flex;align-items:center;gap:6px;padding:9px 14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:20px;color:#e2e8f0;font-weight:600;font-size:.84rem;cursor:pointer;text-decoration:none}
 
   /* ── CATEGORY TABS ── */
-  .pl-cats{background:rgba(255,255,255,.025);border-bottom:1px solid rgba(255,255,255,.07);margin-top:60px;padding:0 20px;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;position:sticky;top:60px;z-index:100;backdrop-filter:blur(10px)}
+  .pl-cats{background:rgba(255,255,255,.025);border-bottom:1px solid rgba(255,255,255,.07);padding:0 20px;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;position:sticky;top:calc(var(--navbar-height,68px) + 52px);z-index:100;backdrop-filter:blur(10px)}
   .pl-cats::-webkit-scrollbar{display:none}
   .pl-cat-btn{display:flex;align-items:center;gap:6px;padding:14px 16px;background:none;border:none;color:#64748b;font-weight:700;font-size:.82rem;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;font-family:inherit}
   .pl-cat-btn:hover{color:#e2e8f0}
@@ -138,7 +134,7 @@
   .pl-view-toggle{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:3px;flex-shrink:0}
   .pl-view-btn{padding:6px 12px;border-radius:16px;border:none;background:none;color:#64748b;font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;font-family:inherit}
   .pl-view-btn.active{background:rgba(16,185,129,.15);color:#10b981}
-  #plMapContainer{display:none;height:calc(100vh - 120px);min-height:400px;border-radius:0;position:sticky;top:0}
+  #plMapContainer{display:none;height:calc(100vh - calc(var(--navbar-height,68px) + 100px));min-height:400px;border-radius:0;position:sticky;top:0}
   #plMapContainer.visible{display:block}
   .pl-map-popup{font-family:Inter,sans-serif;min-width:160px}
   .pl-map-popup h4{margin:0 0 4px;font-size:.88rem;font-weight:700;color:#0f172a}
@@ -147,9 +143,8 @@
 
   /* ── MOBILE ── */
   @media(max-width:768px){
-    .pl-topbar{padding:0 12px}
+    .pl-toolbar{padding:8px 12px;gap:6px}
     .pl-search-wrap{max-width:none;flex:1}
-    .pl-map-btn span{display:none}
     .pl-main{padding:16px 12px 100px}
     .pl-grid{grid-template-columns:1fr 1fr}
     .pl-detail,.pl-modal{border-radius:0;max-height:100vh}
@@ -159,6 +154,8 @@
     .pl-grid{grid-template-columns:1fr}
   }
   </style>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="navbar.css">
   <link rel="stylesheet" href="geohub-social-redesign.css">
   <link rel="stylesheet" href="chat-popup.css">
   <link rel="stylesheet" href="responsive-polish.css">
@@ -166,24 +163,25 @@
 </head>
 <body>
 
-<!-- TOP BAR -->
-<header class="pl-topbar">
-  <a href="index.html" class="pl-brand">
-    <div class="pl-brand-logo">GH</div>
-    <span>Places</span>
-  </a>
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="navbar-brand"><div class="logo-icon">🌍</div><span class="logo-text">Geo<span class="logo-geo">Hub</span></span></a>
+  <ul class="navbar-links"></ul>
+  <div class="navbar-actions"></div>
+  <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu"></div>
+<!-- PLACES TOOLBAR -->
+<div class="pl-toolbar">
   <div class="pl-search-wrap">
     <i class="fas fa-search"></i>
     <input type="text" id="plSearchInput" placeholder="Search places…">
   </div>
-  <div class="pl-topbar-actions">
-    <div class="pl-view-toggle">
-      <button class="pl-view-btn active" id="viewBtnGrid" onclick="setView('grid')"><i class="fas fa-th"></i> Grid</button>
-      <button class="pl-view-btn" id="viewBtnMap" onclick="setView('map')"><i class="fas fa-map"></i> Map</button>
-    </div>
-    <button class="pl-add-btn" id="plAddBtn"><i class="fas fa-plus"></i> Add Place</button>
+  <div class="pl-view-toggle">
+    <button class="pl-view-btn active" id="viewBtnGrid" onclick="setView('grid')"><i class="fas fa-th"></i> Grid</button>
+    <button class="pl-view-btn" id="viewBtnMap" onclick="setView('map')"><i class="fas fa-map"></i> Map</button>
   </div>
-</header>
+  <button class="pl-add-btn" id="plAddBtn"><i class="fas fa-plus"></i> Add Place</button>
+</div>
 
 <!-- CATEGORY TABS -->
 <div class="pl-cats" id="plCats">

@@ -1,5 +1,5 @@
 /* ===== PAGE ===== */
-    .trust-page { padding-top: 68px; min-height: 100vh; }
+    .trust-page { padding-top: var(--navbar-height, 68px); min-height: 100vh; }
 
     /* ===== HERO ===== */
     .trust-hero {

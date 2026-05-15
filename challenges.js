@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  var state = { tab: 'active', active: [], completed: [], progress: {}, query: '' };
+  var state = { tab: 'active', active: [], completed: [], progress: {}, query: '', category: 'all' };
   var unsubscribe = function () {};
 
   function $(id) { return document.getElementById(id); }
@@ -13,6 +13,14 @@
   function typeLabel(type) {
     var labels = window.GeoChallenges ? window.GeoChallenges.TYPE_LABELS : {};
     return labels[type] || 'Challenge';
+  }
+  function categoryLabel(category) {
+    var labels = window.GeoChallenges ? window.GeoChallenges.CATEGORY_LABELS : {};
+    return labels[category] || 'Exploration';
+  }
+  function rarityLabel(rarity) {
+    var labels = window.GeoChallenges ? window.GeoChallenges.RARITY_LABELS : {};
+    return labels[rarity] || 'Common';
   }
   function compact(n) {
     n = Number(n || 0);
@@ -32,6 +40,9 @@
   }
   function currentList() {
     var rows = state.tab === 'completed' ? state.completed : state.active;
+    if (state.category !== 'all') {
+      rows = rows.filter(function (c) { return (c.category || 'exploration') === state.category; });
+    }
     var q = state.query.trim().toLowerCase();
     if (!q) return rows;
     return rows.filter(function (c) {
@@ -57,7 +68,10 @@
     var end = dateLabel(c.endAt);
     // p.xpReward is written by the engine; falls back to challenge doc field
     var xpDisplay = Number(p.xpReward || c.xpReward || 0);
-    return '<article class="challenge-card' + (completed ? ' is-complete' : '') + '"' +
+    var badgeId = c.badgeId || (typeof c.badge === 'string' ? c.badge : '');
+    var rarity = c.badgeRarity || 'common';
+    var badgeTitle = c.badgeTitle || c.badgeName || (badgeId ? 'Badge reward' : '');
+    return '<article class="challenge-card rarity-' + esc(rarity) + (completed ? ' is-complete' : '') + '"' +
       ' data-chal-id="' + esc(c.id || '') + '"' +
       ' tabindex="0"' +
       ' aria-label="' + esc(title) + '">' +
@@ -68,14 +82,30 @@
       '<h2>' + esc(title) + '</h2>' +
       '<p>' + esc(c.description || 'Complete real activity to make progress.') + '</p>' +
       '<div class="challenge-meta">' +
+        '<span><i class="fas fa-layer-group"></i>' + esc(categoryLabel(c.category || 'exploration')) + '</span>' +
         (c.city ? '<span><i class="fas fa-location-dot"></i>' + esc(c.city) + '</span>' : '') +
         (end ? '<span><i class="fas fa-calendar"></i>Ends ' + esc(end) + '</span>' : '') +
         (completed ? '<span><i class="fas fa-lock"></i>Completed</span>' : '<span>' + remaining + ' remaining</span>') +
       '</div>' +
+      (badgeId ? '<div class="challenge-badge-preview"><span class="challenge-badge-icon"><i class="fas ' + esc(c.badgeIcon || c.icon || 'fa-medal') + '"></i></span><div><strong>' + esc(badgeTitle) + '</strong><small>' + esc(rarityLabel(rarity)) + ' badge' + (completed ? ' unlocked' : '') + '</small></div></div>' : '') +
       '<div class="challenge-progress-row"><span>' + progress + ' / ' + target + '</span><span>' + pct + '%</span></div>' +
       '<div class="challenge-progress" aria-label="Challenge progress"><span style="width:' + pct + '%"></span></div>' +
-      (c.badge ? '<div class="ch-badge-pill' + (completed ? ' is-earned' : '') + '"><i class="fas fa-medal"></i> ' + (completed ? 'Badge earned' : 'Badge reward') + '</div>' : '') +
     '</article>';
+  }
+  function categoryTabsHtml() {
+    var cats = [
+      ['all', 'All'],
+      ['travel', 'Travel'],
+      ['food', 'Food'],
+      ['events', 'Events'],
+      ['patriot', 'Patriot'],
+      ['fitness', 'Fitness'],
+      ['exploration', 'Exploration'],
+      ['community', 'Community']
+    ];
+    return cats.map(function (c) {
+      return '<button type="button" class="' + (state.category === c[0] ? 'active' : '') + '" data-challenge-category="' + c[0] + '">' + c[1] + '</button>';
+    }).join('');
   }
   function paint() {
     var activeCount = $('challengeActiveCount');
@@ -88,6 +118,8 @@
     document.querySelectorAll('[data-challenge-tab]').forEach(function (btn) {
       btn.classList.toggle('active', btn.dataset.challengeTab === state.tab);
     });
+    var cats = $('challengeCategoryTabs');
+    if (cats) cats.innerHTML = categoryTabsHtml();
     if (!grid) return;
     var rows = currentList();
     grid.innerHTML = rows.length ? rows.map(cardHtml).join('') : emptyHtml();
@@ -220,6 +252,8 @@
     document.addEventListener('click', function (e) {
       var tab = e.target.closest('[data-challenge-tab]');
       if (tab) { state.tab = tab.dataset.challengeTab || 'active'; paint(); return; }
+      var cat = e.target.closest('[data-challenge-category]');
+      if (cat) { state.category = cat.dataset.challengeCategory || 'all'; paint(); return; }
 
       var card = e.target.closest('.challenge-card[data-chal-id]');
       if (card) {

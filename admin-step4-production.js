@@ -8,7 +8,7 @@
     groups: { label:'Groups', titleKey:'name', defaults:{ type:'group', status:'active', privacy:'public', memberCount:0, postCount:0 } },
     events: { label:'Events', titleKey:'title', defaults:{ type:'event', status:'active', visibility:'public', goingCount:0, interestedCount:0 } },
     rewards: { label:'Rewards / Coupons', titleKey:'title', defaults:{ type:'reward', status:'active', stock:0, claimedCount:0, visibility:'public' } },
-    challenges: { label:'Challenges', titleKey:'title', defaults:{ type:'checkin', targetCount:1, xpReward:100, active:true, status:'active', participantCount:0, visibility:'public' } },
+    challenges: { label:'Challenges', titleKey:'title', defaults:{ type:'checkin_count', category:'exploration', targetCount:1, xpReward:100, active:true, status:'active', participantCount:0, visibility:'public' } },
     services: { label:'Services', titleKey:'title', defaults:{ type:'service', status:'active', visibility:'public' } },
     realEstateListings: { label:'Real Estate Listings', titleKey:'title', defaults:{ type:'real_estate', status:'active', visibility:'public' } },
     learningItems: { label:'Learning / Courses', titleKey:'title', defaults:{ type:'learning', status:'active', visibility:'public' } },
