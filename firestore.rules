@@ -248,8 +248,6 @@ service cloud.firestore {
     match /collabOffers/{docId} { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
     match /serviceRequests/{docId} { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
     match /lessonBookings/{docId} { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
-    match /challengeProgress/{docId} { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
-
     match /{document=**} { allow read, write: if false; }
   }
 }
