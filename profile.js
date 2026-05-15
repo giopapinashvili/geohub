@@ -225,6 +225,8 @@
     }
     const fav = $('.fav-cats'); if (fav) fav.innerHTML = user.interests.length ? user.interests.map(i => '<div class="fav-cat-chip">' + esc(i) + '</div>').join('') : '<div style="color:var(--text-muted);font-size:.85rem">No interests set yet</div>';
     ['spCitiesVal','spFriendsVal','spLikesVal','spGroupsVal'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '0'; });
+    const miniPts = $('.mini-wallet-pts'); if (miniPts) miniPts.textContent = compact(user.pointsBalance || 0) + ' pts';
+    const miniSub = $('.mini-wallet-sub'); if (miniSub) miniSub.innerHTML = '<strong>' + compact(user.pointsBalance || 0) + ' pts</strong> earned · <a href="rewards.html" style="color:var(--green);text-decoration:none">Open store</a>';
     const review = $('#mostLikedReviewCard'); if (review) review.innerHTML = '<div class="sidebar-card-title">Most Helpful Review</div><div style="color:var(--text-muted);font-size:.85rem">No reviews yet</div>';
     const activity = $('.activity-feed .activity-feed-list'); if (activity) activity.innerHTML = '<div style="color:var(--text-muted);font-size:.85rem;padding:12px 0">No real activity yet</div>';
     const thumbs = $('.followers-thumbs'); if (thumbs) thumbs.innerHTML = '';
@@ -258,12 +260,12 @@
     el.innerHTML = '<div class="empty-profile-state"><i class="fas ' + icon + '"></i><h3>' + title + '</h3><p>' + text + '</p>' + (href ? '<a href="' + href + '" class="btn btn-primary btn-sm" style="margin-top:12px">' + cta + '</a>' : '') + '</div>';
   }
 
-  function renderTabs(user) {
+  function renderTabs(user, fbUser) {
     emptyTab('#tab-posts', 'fa-seedling', 'No posts yet', 'Real posts from Firestore will appear here.', 'feed.html?compose=1', 'Create Post');
     emptyTab('#tab-places', 'fa-map-marker-alt', 'No visited places yet', 'Check in to real places and they will appear here.', 'map.html', 'Explore Map');
     emptyTab('#tab-checkins', 'fa-location-dot', 'No check-ins yet', 'Real check-ins will appear here.', 'checkin.html', 'Check in');
     emptyTab('#tab-friends', 'fa-user-group', 'No friends yet', 'Friends and requests will appear here.', null, '');
-    emptyTab('#tab-rewards', 'fa-gift', 'No rewards yet', 'Rewards will appear after real XP and business offers are connected.', 'rewards.html', 'Open Rewards');
+    renderRewardsTab(user, fbUser);
     emptyTab('#tab-challenges', 'fa-trophy', 'No challenges yet', 'Real challenges will appear here when added by GeoHub.', null, '');
     emptyTab('#tab-reviews', 'fa-star', 'No reviews yet', 'Real reviews will appear here after you write them.', 'reviews.html', 'Write Review');
     renderBadgeTab(user);
@@ -336,6 +338,120 @@
     }
   }
 
+
+  function renderRewardsTab(user, fbUser) {
+    const tab = $('#tab-rewards');
+    if (!tab) return;
+    const GF = window.GeoFirebase;
+    const own = fbUser && user.uid === fbUser.uid;
+    const viewingUid = user.uid;
+
+    // Header: balance + action buttons
+    const bal = compact(user.pointsBalance || 0);
+    let headerHtml = '<div class="rw-profile-bal">' +
+      '<div>' +
+        '<div class="rw-profile-bal-label"><i class="fas fa-coins" style="margin-right:5px;color:#10b981"></i>GeoPoints Balance</div>' +
+        '<div class="rw-profile-bal-pts">' + esc(bal) + ' pts</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px">' +
+        (own
+          ? '<button class="btn btn-ghost btn-sm" id="profSendPtsBtn" style="text-decoration:none" onclick="window.location.href=\'rewards.html\'"><i class="fas fa-coins"></i> Rewards Store</button>'
+          : '<button class="btn btn-primary btn-sm" id="profSendPtsBtn"><i class="fas fa-paper-plane"></i> Send Points</button>') +
+      '</div>' +
+    '</div>';
+
+    tab.innerHTML = headerHtml + '<div id="profTxList" style="margin-top:4px"><div style="color:var(--text-muted);font-size:.82rem;padding:12px 0;text-align:center"><i class="fas fa-spinner fa-spin"></i> Loading history…</div></div>';
+
+    // Wire "Send Points" button on other user's profile
+    if (!own) {
+      const sendBtn = document.getElementById('profSendPtsBtn');
+      if (sendBtn) {
+        sendBtn.onclick = function () {
+          window.location.href = 'rewards.html?to=' + encodeURIComponent(viewingUid);
+        };
+      }
+    }
+
+    if (!GF || !GF.db || !GF.fs || !fbUser) return;
+
+    // Load transaction history (only for own profile — can't read other users' transactions)
+    if (!own) {
+      const txList = document.getElementById('profTxList');
+      if (txList) txList.innerHTML = '<div style="color:var(--text-muted);font-size:.82rem;padding:12px 0">Transaction history is private.</div>';
+      return;
+    }
+
+    const uid = fbUser.uid;
+    Promise.all([
+      GF.fs.getDocs(GF.fs.query(
+        GF.fs.collection(GF.db, 'pointTransactions'),
+        GF.fs.where('participantIds', 'array-contains', uid),
+        GF.fs.limit(30)
+      )).catch(() => ({ forEach: () => {} })),
+      GF.fs.getDocs(GF.fs.query(
+        GF.fs.collection(GF.db, 'userRewards'),
+        GF.fs.where('userId', '==', uid),
+        GF.fs.limit(20)
+      )).catch(() => ({ forEach: () => {} }))
+    ]).then(([txSnap, rwSnap]) => {
+      const items = [];
+
+      txSnap.forEach(d => {
+        const data = d.data();
+        const ms = typeof data.createdAt === 'object' && data.createdAt
+          ? (typeof data.createdAt.toMillis === 'function' ? data.createdAt.toMillis() : (data.createdAt.seconds || 0) * 1000)
+          : (Number(data.createdAt) || 0);
+        items.push({ ms, type: data.type || 'tx', amount: Number(data.amount || 0), fromId: data.fromUserId, toId: data.toUserId, msg: data.message || '', title: data.rewardTitle || '' });
+      });
+      rwSnap.forEach(d => {
+        const data = d.data();
+        const ms = typeof data.createdAt === 'object' && data.createdAt
+          ? (typeof data.createdAt.toMillis === 'function' ? data.createdAt.toMillis() : (data.createdAt.seconds || 0) * 1000)
+          : (Number(data.createdAt) || 0);
+        items.push({ ms, type: 'userReward', amount: Number(data.cost || 0), title: data.rewardTitle || 'Reward', status: data.status || '' });
+      });
+
+      items.sort((a, b) => b.ms - a.ms);
+
+      const txList = document.getElementById('profTxList');
+      if (!txList) return;
+
+      if (!items.length) {
+        txList.innerHTML = '<div class="empty-profile-state"><i class="fas fa-coins"></i><h3>No transactions yet</h3><p>Earn GeoPoints through check-ins, challenges, and community activity. Redeem them in the <a href="rewards.html" style="color:var(--green)">Rewards Store</a>.</p></div>';
+        return;
+      }
+
+      const rows = items.map(item => {
+        let iconClass, dir, label, amtHtml;
+        if (item.type === 'gift') {
+          const isSender = item.fromId === uid;
+          iconClass = isSender ? 'sent' : 'gift';
+          const icon = isSender ? 'fa-paper-plane' : 'fa-gift';
+          label = isSender ? 'Sent points' + (item.msg ? ': ' + esc(item.msg.slice(0, 40)) : '') : 'Received points' + (item.msg ? ': ' + esc(item.msg.slice(0, 40)) : '');
+          amtHtml = isSender
+            ? '<div class="rw-history-amount neg">−' + compact(item.amount) + '</div>'
+            : '<div class="rw-history-amount pos">+' + compact(item.amount) + '</div>';
+          return '<div class="rw-history-item">' +
+            '<div class="rw-history-icon ' + iconClass + '"><i class="fas ' + icon + '"></i></div>' +
+            '<div class="rw-history-info"><div class="rw-history-title">' + label + '</div><div class="rw-history-meta">Transfer</div></div>' +
+            amtHtml + '</div>';
+        }
+        if (item.type === 'redeem' || item.type === 'userReward') {
+          return '<div class="rw-history-item">' +
+            '<div class="rw-history-icon redeem"><i class="fas fa-ticket-alt"></i></div>' +
+            '<div class="rw-history-info"><div class="rw-history-title">Redeemed: ' + esc(item.title || 'Reward') + '</div><div class="rw-history-meta">Redemption</div></div>' +
+            '<div class="rw-history-amount neg">−' + compact(item.amount) + '</div></div>';
+        }
+        return '';
+      }).filter(Boolean);
+
+      txList.innerHTML = rows.length
+        ? '<div class="rw-history-list">' + rows.join('') + '</div>'
+        : '<div style="color:var(--text-muted);font-size:.82rem;padding:12px 0">No transaction history.</div>';
+    }).catch(err => {
+      console.warn('[Profile] rewards tab', err.message);
+    });
+  }
 
   var BADGE_RARITY_COLOR = { common: '#94a3b8', rare: '#3b82f6', epic: '#a855f7', legendary: '#f59e0b' };
 
@@ -448,8 +564,8 @@
           const profile = await findProfile(GF, fbUser);
           if (!profile) return userNotFound();
           renderIdentity(profile, fbUser);
-          if (window.GeoSocial) renderTabs(profile);
-          else window.addEventListener('GeoSocialReady', () => renderTabs(profile), { once: true });
+          if (window.GeoSocial) renderTabs(profile, fbUser);
+          else window.addEventListener('GeoSocialReady', () => renderTabs(profile, fbUser), { once: true });
         } catch (err) {
           console.error('[Profile]', err);
           userNotFound();

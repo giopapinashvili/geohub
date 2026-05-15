@@ -1,36 +1,109 @@
 <!DOCTYPE html>
-<html lang="ka">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="dns-prefetch" href="https://firestore.googleapis.com">
   <link rel="dns-prefetch" href="https://firebase.googleapis.com">
-  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GeoPoints & Rewards — GeoHub</title>
-  <meta name="description" content="GeoHub GeoPoints wallet, partner discounts, coupons and platform boosts.">
+  <title>Rewards — GeoHub</title>
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
-  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
-  <link rel="stylesheet" href="geohub-social-redesign.css">
-  <link rel="stylesheet" href="geohub-points.css">
-  <link rel="stylesheet" href="chat-popup.css">
-  <link rel="stylesheet" href="responsive-polish.css">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"></noscript>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="navbar.css">
+  <link rel="stylesheet" href="rewards.css">
   <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
 </head>
-<body data-gh-page="rewards" data-gp-page="rewards">
+<body class="rw-page" data-gh-page="rewards">
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="navbar-brand">
+    <div class="logo-icon">🌍</div>
+    <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
+  </a>
+  <ul class="navbar-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="feed.html">Discover</a></li>
+    <li><a href="places.html">Places</a></li>
+    <li><a href="rewards.html" class="active">Rewards</a></li>
+    <li><a href="challenges.html">Challenges</a></li>
+    <li><a href="map.html">Map</a></li>
+    <li><a href="add-business.html">Add Business</a></li>
+    <li><a href="creators.html">Creators</a></li>
+  </ul>
+  <div class="navbar-actions">
+    <a href="profile.html" class="btn-ghost-nav"><i class="fas fa-user-circle"></i> Profile</a>
+    <a href="auth.html?tab=signup" class="btn btn-primary btn-sm">Sign Up</a>
+  </div>
+  <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html">Home</a><a href="feed.html">Discover</a>
+  <a href="places.html">Places</a><a href="rewards.html" class="active">Rewards</a>
+  <a href="challenges.html">Challenges</a><a href="map.html">Map</a>
+  <a href="add-business.html">Add Business</a><a href="creators.html">Creators</a>
+  <a href="profile.html">Profile</a>
+</div>
+
+<div class="rw-inner">
+
+  <!-- Balance Hero -->
+  <div class="rw-hero">
+    <div class="rw-hero-left">
+      <div class="rw-hero-label"><i class="fas fa-coins" style="margin-right:5px;color:#10b981"></i>GeoPoints Balance</div>
+      <div class="rw-hero-balance" id="rwBalance">— pts</div>
+      <div class="rw-hero-sub" id="rwBalanceSub">Loading your balance…</div>
+    </div>
+    <div class="rw-hero-actions">
+      <button class="rw-btn-primary" data-send-points>
+        <i class="fas fa-paper-plane"></i> Send Points
+      </button>
+      <a href="profile.html#tab-rewards" class="rw-btn-ghost">
+        <i class="fas fa-history"></i> History
+      </a>
+    </div>
+  </div>
+
+  <!-- Info strip -->
+  <div style="font-size:.75rem;color:#64748b;margin-bottom:20px;display:flex;align-items:center;gap:6px">
+    <i class="fas fa-info-circle" style="color:#3b82f6"></i>
+    GeoPoints are non-cash loyalty rewards. They cannot be withdrawn or exchanged for real money.
+  </div>
+
+  <!-- Category Filters -->
+  <div class="rw-filters">
+    <button class="rw-filter-btn active" data-rw-filter="all">All Rewards</button>
+    <button class="rw-filter-btn" data-rw-filter="food_drink">Food &amp; Drink</button>
+    <button class="rw-filter-btn" data-rw-filter="experience">Experience</button>
+    <button class="rw-filter-btn" data-rw-filter="shopping">Shopping</button>
+    <button class="rw-filter-btn" data-rw-filter="entertainment">Entertainment</button>
+    <button class="rw-filter-btn" data-rw-filter="travel">Travel</button>
+  </div>
+
+  <!-- Rewards Grid -->
+  <div class="rw-section-title"><i class="fas fa-gift" style="margin-right:5px"></i>Available Rewards</div>
+  <div class="rw-grid" id="rwGrid">
+    <div class="rw-empty">
+      <i class="fas fa-spinner fa-spin"></i>
+      <h3>Loading rewards…</h3>
+      <p>Fetching the latest rewards from GeoHub.</p>
+    </div>
+  </div>
+
+</div><!-- /rw-inner -->
+
+<!-- Toast -->
+<div class="rw-toast" id="rwToast"></div>
+
 <script type="module" src="firebase-config.js"></script>
 <script defer src="gh-schema.js"></script>
-<script defer src="account.js"></script>
+<script defer src="config.js"></script>
+<script defer src="main.js"></script>
+<script defer src="rewards.js"></script>
 <script defer src="nav-cleanup.js"></script>
 <script defer src="mobile-nav.js"></script>
-<script defer src="firestore-social.js"></script>
-<script defer src="chat-popup.js"></script>
-<script defer src="geohub-social-redesign.js"></script>
-<script defer src="geohub-points.js"></script>
-<script defer src="geohub-production-stabilization-v1.js"></script>
-<script defer src="responsive-polish.js"></script>
 </body>
 </html>

@@ -71,6 +71,7 @@
     <div class="sb-item" onclick="adminNav('creators')"><span class="sb-ic"><i class="fas fa-star"></i></span> Creators <span class="sb-cnt" id="sb-creators">0</span></div>
     <div class="sb-item" onclick="adminNav('content')"><span class="sb-ic"><i class="fas fa-plus-square"></i></span> Content Studio</div>
     <div class="sb-item" onclick="adminNav('challenges')"><span class="sb-ic"><i class="fas fa-bolt"></i></span> Challenge Studio <span class="sb-cnt" id="sb-challenges">0</span></div>
+    <div class="sb-item" onclick="adminNav('rewards')"><span class="sb-ic"><i class="fas fa-gift"></i></span> Rewards <span class="sb-cnt" id="sb-rewards">0</span></div>
     <div class="sb-lbl">Safety</div>
     <div class="sb-item" onclick="adminNav('moderation')"><span class="sb-ic"><i class="fas fa-flag"></i></span> Moderation <span class="sb-cnt danger" id="sb-mod">0</span></div>
     <div class="sb-item" onclick="adminNav('trust')"><span class="sb-ic"><i class="fas fa-check-circle"></i></span> Trust & Safety</div>
@@ -612,6 +613,81 @@
             <button class="btn btn-ghost btn-sm" type="button" id="chalCancelBtn" style="display:none" onclick="chalFormMode('none')"><i class="fas fa-times"></i> Cancel</button>
           </div>
         </form>
+      </div>
+    </section>
+
+    <!-- ─── REWARDS ─── -->
+    <section class="sec" id="sec-rewards">
+      <div class="ph">
+        <div><div class="ph-title">Rewards Management</div><div class="ph-sub" id="rewardsSubtitle">Manage the GeoPoints rewards store</div></div>
+        <div class="ph-actions">
+          <button class="btn btn-primary btn-sm" onclick="rwFormMode('create')"><i class="fas fa-plus"></i> New Reward</button>
+        </div>
+      </div>
+
+      <!-- Create / Edit Form -->
+      <div class="panel mb16" id="rwForm" style="display:none">
+        <div class="panel-hdr"><div class="panel-title" id="rwFormTitle">Create Reward</div></div>
+        <form id="rwFormEl" onsubmit="rwSave(event)" style="display:grid;gap:14px;padding:18px 0 4px">
+          <input type="hidden" id="rwEditId">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Title *
+              <input id="rwTitle" placeholder="e.g. Free Coffee at Café X" required style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Category
+              <select id="rwCategory" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+                <option value="food_drink">Food &amp; Drink</option>
+                <option value="experience">Experience</option>
+                <option value="shopping">Shopping</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="travel">Travel</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+          </div>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Description
+            <textarea id="rwDesc" rows="2" placeholder="Short description shown to users" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);resize:vertical;font-family:inherit"></textarea>
+          </label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Points Cost *
+              <input id="rwCost" type="number" min="1" placeholder="e.g. 500" required style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Stock (blank = unlimited)
+              <input id="rwStock" type="number" min="0" placeholder="e.g. 100" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Sort Order
+              <input id="rwSort" type="number" value="0" min="0" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+          </div>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Image URL (optional)
+            <input id="rwImage" placeholder="https://…" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+          </label>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Terms / Redemption note (optional)
+            <input id="rwTerms" placeholder="e.g. Valid at all Tbilisi branches. Show QR at checkout." style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+          </label>
+          <div class="tog-wrap" style="max-width:420px">
+            <div><div class="tog-label">Active</div><div class="tog-sub">Visible to users in the rewards store</div></div>
+            <label class="tog-sw"><input type="checkbox" id="rwActive" checked><span class="tog-slider"></span></label>
+          </div>
+          <div style="display:flex;gap:8px;padding-top:4px">
+            <button class="btn btn-primary btn-sm" type="submit" id="rwSaveBtn"><i class="fas fa-save"></i> Save reward</button>
+            <button class="btn btn-ghost btn-sm" type="button" onclick="rwFormMode('none')"><i class="fas fa-times"></i> Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Rewards List -->
+      <div class="panel mb16">
+        <div class="panel-hdr"><div class="panel-title">All Rewards</div></div>
+        <div id="rwList" style="padding:4px 0"><div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">Loading rewards…</div></div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="panel">
+        <div class="panel-hdr">
+          <div><div class="panel-title">Recent Point Transactions</div><div class="panel-sub">Last 50 transfers and redemptions</div></div>
+        </div>
+        <div id="rwTxList" style="padding:4px 0"><div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">Loading transactions…</div></div>
       </div>
     </section>
 

@@ -86,6 +86,7 @@
     if (section === 'overview') { setTimeout(drawOverviewCharts, 80); }
     if (section === 'activity') { setTimeout(function () { window.loadActivity(_activityFilter || 'all'); }, 60); }
     if (section === 'challenges') { loadChallenges(); }
+    if (section === 'rewards')    { loadAdminRewards(); }
   };
 
   /* ── TOAST ───────────────────────────────────────────────── */
@@ -1325,6 +1326,217 @@
     });
   }
 
+  /* ── REWARDS STUDIO ─────────────────────────────────────── */
+  var _rwEditId = null;
+
+  function loadAdminRewards() {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) return;
+    var f = fb.fs, db = fb.db;
+
+    // Load all rewards (active + inactive)
+    f.getDocs(f.query(f.collection(db, 'rewards'), f.limit(200))).then(function (snap) {
+      var rows = [];
+      snap.forEach(function (d) { rows.push(Object.assign({ id: d.id }, d.data())); });
+      rows.sort(function (a, b) { return Number(a.sortOrder || 0) - Number(b.sortOrder || 0); });
+
+      var el = document.getElementById('sb-rewards');
+      if (el) el.textContent = rows.length;
+      var sub = document.getElementById('rewardsSubtitle');
+      if (sub) sub.textContent = rows.length + ' rewards in store';
+
+      var list = document.getElementById('rwList');
+      if (!list) return;
+      if (!rows.length) {
+        list.innerHTML = '<div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">No rewards yet. Click "New Reward" to add one.</div>';
+        return;
+      }
+      list.innerHTML = '<div class="bl">' + rows.map(function (r) {
+        var stock = r.stock != null ? String(r.stock) + ' left' : '∞ unlimited';
+        var cost = Number(r.cost || r.pointsCost || 0);
+        var activeStyle = r.active ? 'color:var(--green)' : 'color:var(--red)';
+        return '<div class="bi" style="display:flex;align-items:center;gap:12px">' +
+          '<div style="flex:1;min-width:0">' +
+            '<div style="font-weight:700;font-size:.88rem">' + escHtmlAdmin(r.title || 'Untitled') + '</div>' +
+            '<div style="font-size:.72rem;color:var(--ts);margin-top:2px">' +
+              escHtmlAdmin(r.category || 'other') + ' &nbsp;·&nbsp; ' +
+              '<span style="color:var(--gold);font-weight:700">' + cost + ' pts</span>' +
+              ' &nbsp;·&nbsp; ' + escHtmlAdmin(stock) +
+              ' &nbsp;·&nbsp; <span style="' + activeStyle + ';font-weight:700">' + (r.active ? 'Active' : 'Inactive') + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<button class="btn btn-ghost btn-sm" onclick="rwEdit(\'' + escAttr(r.id) + '\')"><i class="fas fa-edit"></i></button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="rwToggleActive(\'' + escAttr(r.id) + '\',' + (r.active ? 'false' : 'true') + ')" title="' + (r.active ? 'Deactivate' : 'Activate') + '"><i class="fas ' + (r.active ? 'fa-eye-slash' : 'fa-eye') + '"></i></button>' +
+          '<button class="btn btn-ghost btn-sm" onclick="rwDelete(\'' + escAttr(r.id) + '\')" style="color:var(--red)"><i class="fas fa-trash"></i></button>' +
+        '</div>';
+      }).join('') + '</div>';
+    }).catch(function (err) {
+      console.error('[Admin] loadAdminRewards', err);
+    });
+
+    // Load recent transactions
+    f.getDocs(f.query(f.collection(db, 'pointTransactions'), f.orderBy('createdAt', 'desc'), f.limit(50)))
+      .then(function (snap) {
+        var txList = document.getElementById('rwTxList');
+        if (!txList) return;
+        if (snap.empty) {
+          txList.innerHTML = '<div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">No point transactions yet.</div>';
+          return;
+        }
+        var rows = [];
+        snap.forEach(function (d) {
+          var data = d.data();
+          var typeLabel = data.type === 'gift' ? '<span style="color:var(--green)">Transfer</span>'
+            : data.type === 'redeem' ? '<span style="color:var(--blue)">Redeem</span>'
+            : '<span style="color:var(--ts)">' + escHtmlAdmin(data.type || 'tx') + '</span>';
+          rows.push('<div class="bi" style="display:flex;align-items:center;gap:12px">' +
+            '<div style="flex:1;min-width:0">' +
+              '<div style="font-size:.78rem;font-weight:700">' + typeLabel + ' &nbsp;' +
+                '<span style="color:var(--gold);font-weight:800">' + Number(data.amount || 0) + ' pts</span>' +
+                (data.rewardTitle ? ' &nbsp;·&nbsp; ' + escHtmlAdmin(data.rewardTitle) : '') +
+                (data.message ? ' &nbsp;·&nbsp; <em style="color:var(--ts)">' + escHtmlAdmin(String(data.message).slice(0, 50)) + '</em>' : '') +
+              '</div>' +
+              '<div style="font-size:.67rem;color:var(--ts);margin-top:2px">' +
+                'from: <code style="font-size:.67rem">' + escHtmlAdmin((data.fromUserId || '').slice(0, 14)) + '…</code>' +
+                (data.toUserId ? ' → to: <code style="font-size:.67rem">' + escHtmlAdmin((data.toUserId || '').slice(0, 14)) + '…</code>' : '') +
+              '</div>' +
+            '</div>' +
+          '</div>');
+        });
+        txList.innerHTML = '<div class="bl">' + rows.join('') + '</div>';
+      }).catch(function (err) {
+        var txList = document.getElementById('rwTxList');
+        if (txList) txList.innerHTML = '<div style="text-align:center;padding:28px;color:var(--ts);font-size:.72rem">Could not load transactions — index may be building.<br>Try again in a moment.</div>';
+        console.warn('[Admin] txList', err && err.message);
+      });
+  }
+
+  window.rwFormMode = function (mode) {
+    var form = document.getElementById('rwForm');
+    var formTitle = document.getElementById('rwFormTitle');
+    if (!form) return;
+    if (mode === 'none') {
+      form.style.display = 'none';
+      _rwEditId = null;
+      var el = document.getElementById('rwEditId'); if (el) el.value = '';
+      var f = document.getElementById('rwFormEl'); if (f) f.reset();
+      return;
+    }
+    form.style.display = '';
+    if (formTitle) formTitle.textContent = mode === 'create' ? 'Create Reward' : 'Edit Reward';
+    if (mode === 'create') {
+      _rwEditId = null;
+      var el = document.getElementById('rwEditId'); if (el) el.value = '';
+      var f = document.getElementById('rwFormEl'); if (f) f.reset();
+      var active = document.getElementById('rwActive'); if (active) active.checked = true;
+    }
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  window.rwEdit = function (id) {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) return;
+    fb.fs.getDoc(fb.fs.doc(fb.db, 'rewards', id)).then(function (snap) {
+      if (!snap.exists()) { toast('Reward not found', 'rgba(239,68,68,.95)'); return; }
+      var c = Object.assign({ id: snap.id }, snap.data());
+      _rwEditId = id;
+      window.rwFormMode('edit');
+      var set = function (elId, val) { var el = document.getElementById(elId); if (el) el.value = val != null ? val : ''; };
+      set('rwEditId', id);
+      set('rwTitle', c.title || '');
+      set('rwDesc', c.description || '');
+      set('rwCost', c.cost || c.pointsCost || '');
+      set('rwStock', c.stock != null ? c.stock : '');
+      set('rwSort', c.sortOrder || '0');
+      set('rwImage', c.imageUrl || '');
+      set('rwTerms', c.termsNote || '');
+      set('rwCategory', c.category || 'other');
+      var active = document.getElementById('rwActive'); if (active) active.checked = !!c.active;
+    }).catch(function (err) {
+      toast('Load failed: ' + err.message, 'rgba(239,68,68,.95)');
+    });
+  };
+
+  window.rwToggleActive = function (id, makeActive) {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) return;
+    fb.fs.setDoc(fb.fs.doc(fb.db, 'rewards', id), { active: makeActive, updatedAt: fb.fs.serverTimestamp() }, { merge: true })
+      .then(function () {
+        toast(makeActive ? 'Reward activated' : 'Reward deactivated');
+        loadAdminRewards();
+      }).catch(function (err) { toast('Failed: ' + err.message, 'rgba(239,68,68,.95)'); });
+  };
+
+  window.rwDelete = function (id) {
+    if (!confirm('Delete this reward permanently?')) return;
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) return;
+    fb.fs.deleteDoc(fb.fs.doc(fb.db, 'rewards', id))
+      .then(function () { toast('Reward deleted'); loadAdminRewards(); })
+      .catch(function (err) { toast('Delete failed: ' + err.message, 'rgba(239,68,68,.95)'); });
+  };
+
+  function bindRewardsStudio() {
+    var form = document.getElementById('rwFormEl');
+    if (!form) return;
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var fb = window.GeoFirebase;
+      if (!fb || !fb.db || !fb.fs) return;
+      var user = (window.GeoAuth && window.GeoAuth.getCurrentUser && window.GeoAuth.getCurrentUser())
+        || (fb.auth && fb.auth.currentUser);
+      if (!user) { toast('Not logged in', 'rgba(239,68,68,.95)'); return; }
+
+      var f = fb.fs, db = fb.db;
+
+      var title = ((document.getElementById('rwTitle') || {}).value || '').trim();
+      var desc = ((document.getElementById('rwDesc') || {}).value || '').trim();
+      var cost = parseInt(((document.getElementById('rwCost') || {}).value || '0'), 10) || 0;
+      var stockRaw = ((document.getElementById('rwStock') || {}).value || '').trim();
+      var sort = parseInt(((document.getElementById('rwSort') || {}).value || '0'), 10) || 0;
+      var image = ((document.getElementById('rwImage') || {}).value || '').trim();
+      var terms = ((document.getElementById('rwTerms') || {}).value || '').trim();
+      var category = (document.getElementById('rwCategory') || {}).value || 'other';
+      var active = !!((document.getElementById('rwActive') || {}).checked);
+
+      if (!title) { toast('Title is required', 'rgba(239,68,68,.95)'); return; }
+      if (cost < 1) { toast('Points cost must be at least 1', 'rgba(239,68,68,.95)'); return; }
+
+      var doc = {
+        title: title,
+        description: desc || null,
+        category: category,
+        cost: cost,
+        pointsCost: cost,
+        stock: stockRaw !== '' ? parseInt(stockRaw, 10) : null,
+        sortOrder: sort,
+        imageUrl: image || null,
+        termsNote: terms || null,
+        active: active,
+        updatedAt: f.serverTimestamp()
+      };
+
+      var btn = document.getElementById('rwSaveBtn');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…'; }
+
+      var editId = (document.getElementById('rwEditId') || {}).value || '';
+      var op = editId
+        ? f.setDoc(f.doc(db, 'rewards', editId), doc, { merge: true })
+        : (function () { doc.createdAt = f.serverTimestamp(); doc.createdBy = user.uid; return f.addDoc(f.collection(db, 'rewards'), doc); })();
+
+      op.then(function () {
+        toast(editId ? 'Reward updated' : 'Reward created: ' + title);
+        window.rwFormMode('none');
+        loadAdminRewards();
+      }).catch(function (err) {
+        console.error('[Admin] rwSave', err);
+        toast('Save failed: ' + err.message, 'rgba(239,68,68,.95)');
+      }).finally(function () {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Save reward'; }
+      });
+    });
+  }
+
   /* ── INIT ────────────────────────────────────────────────── */
   function init() {
     loadRealStats();
@@ -1337,6 +1549,7 @@
     setTimeout(drawOverviewCharts, 120);
     bindContentStudio();
     bindChallengeStudio();
+    bindRewardsStudio();
 
     window.addEventListener('resize', function () {
       if (currentSection === 'overview') drawOverviewCharts();

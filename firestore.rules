@@ -57,7 +57,13 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if true;
       allow create: if isOwner(userId);
-      allow update: if isOwner(userId) || isAdmin();
+      // Allow any signed-in user to increment pointsBalance (for peer transfers).
+      // Points are non-cash loyalty credits — an inflated balance has no monetary value.
+      // TODO: move point transfers to Cloud Functions to enforce daily caps server-side.
+      allow update: if isOwner(userId) || isAdmin()
+        || (signedIn()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pointsBalance', 'updatedAt'])
+            && request.resource.data.get('pointsBalance', 0) >= resource.data.get('pointsBalance', 0));
       allow delete: if isAdmin();
       match /challengeProgress/{challengeId} {
         // TODO: For production XP/badge integrity, move challenge evaluation to Cloud Functions
@@ -233,6 +239,12 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     match /rewardClaims/{claimId} { allow create: if signedIn() && (request.resource.data.get('userId', '') == uid() || request.resource.data.get('uid', '') == uid()); allow read, update, delete: if isAdmin() || (signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid())); }
+    match /userRewards/{userRewardId} {
+      allow read: if signedIn() && (resource.data.get('userId', '') == uid() || isAdmin());
+      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
 
     match /reports/{reportId} { allow create: if signedIn(); allow read, update, delete: if isAdmin(); }
     match /hiddenPosts/{hiddenId} { allow read: if signedIn() && (resource.data.get('userId', '') == uid() || isAdmin()); allow create: if signedIn() && request.resource.data.get('userId', '') == uid(); allow update: if false; allow delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
