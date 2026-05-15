@@ -23,6 +23,8 @@
     /* Bridge: map legacy CSS variables → GH design tokens */
     /* responsive-polish.js adds .messages-page to body — neutralize unintended padding */
     body.messages-page { padding-top: 0 !important; height: 100dvh !important; overflow: hidden !important; }
+    /* messages-page div fills full viewport; padding-top offsets the fixed navbar */
+    body.page-messages .messages-page { height: 100dvh !important; }
     :root {
       --navbar-height: var(--gh-topbar-h, 78px);
       --bg-0: var(--gh-bg);
