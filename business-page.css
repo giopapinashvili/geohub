@@ -688,7 +688,16 @@ body.biz-detail-active > *:not(#biz-detail-root):not(.navbar):not(.mobile-menu):
 }
 .biz-post-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
 
+.biz-post-logo-link { flex-shrink: 0; display: block; }
 .biz-post-meta  { flex: 1; min-width: 0; }
+.biz-post-name-link {
+  font-size: .88rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  text-decoration: none;
+  display: block;
+}
+.biz-post-name-link:hover { color: #10b981; }
 .biz-post-name  { font-size: .88rem; font-weight: 700; color: #f1f5f9; }
 .biz-post-time  { font-size: .74rem; color: #64748b; margin-top: 1px; }
 
@@ -1485,16 +1494,28 @@ body.biz-detail-active > *:not(#biz-detail-root):not(.navbar):not(.mobile-menu):
   gap: 2px;
   opacity: 0;
   pointer-events: none;
-  transition: opacity .16s, transform .16s cubic-bezier(.34,1.56,.64,1);
+  /* Delay hide by 300ms so cursor can move from button to picker without it vanishing */
+  transition: opacity .16s .3s, transform .16s .3s cubic-bezier(.34,1.56,.64,1);
   box-shadow: 0 8px 32px rgba(0,0,0,.5);
   z-index: 500;
   white-space: nowrap;
+}
+/* Invisible bridge covers the 6px gap between picker bottom and button top */
+.biz-rx-picker::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: -16px;
+  right: -16px;
+  height: 10px;
 }
 .biz-rx-wrap:hover .biz-rx-picker,
 .biz-rx-picker.open {
   opacity: 1;
   pointer-events: auto;
   transform: translateX(-50%) scale(1);
+  /* Show instantly, no delay */
+  transition: opacity .16s, transform .16s cubic-bezier(.34,1.56,.64,1);
 }
 .biz-rx-item {
   font-size: 1.45rem;
@@ -1586,11 +1607,16 @@ body.biz-detail-active > *:not(#biz-detail-root):not(.navbar):not(.mobile-menu):
   display: inline-block;
   max-width: calc(100% - 44px);
 }
+.biz-cmt-right { flex: 1; min-width: 0; }
+.biz-cmt-av-link { flex-shrink: 0; display: block; }
 .biz-cmt-bubble-name {
   font-size: .78rem;
   font-weight: 700;
   color: #e2e8f0;
+  text-decoration: none;
+  display: block;
 }
+.biz-cmt-bubble-name:hover { text-decoration: underline; color: #10b981; }
 .biz-cmt-bubble-text {
   font-size: .85rem;
   color: #cbd5e1;
@@ -1598,12 +1624,37 @@ body.biz-detail-active > *:not(#biz-detail-root):not(.navbar):not(.mobile-menu):
   margin-top: 2px;
   word-break: break-word;
 }
-.biz-cmt-bubble-time {
-  font-size: .72rem;
-  color: #475569;
+.biz-cmt-bubble-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
   margin-top: 3px;
   padding-left: 2px;
 }
+.biz-cmt-bubble-time {
+  font-size: .72rem;
+  color: #475569;
+}
+.biz-cmt-like-count {
+  font-size: .72rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.biz-cmt-actions { display: flex; gap: 4px; }
+.biz-cmt-act-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: .72rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0 2px;
+  font-family: inherit;
+}
+.biz-cmt-act-btn:hover { color: #10b981; text-decoration: underline; }
 
 /* Comment composer */
 .biz-cmt-composer {

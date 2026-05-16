@@ -481,6 +481,53 @@
     '</div>';
   }
 
+  // ── RENDER: COMMENT BUBBLE ───────────────────────────────────
+
+  function canManageComment(c) {
+    if (!_currentUser) return false;
+    return _isOwner || (c && (c.authorId === _currentUser.uid || c.userId === _currentUser.uid));
+  }
+
+  function commentBubbleHtml(c, postId) {
+    var name = c.authorName || c.userName || 'User';
+    var authorId = c.authorId || c.userId || '';
+    var profileLink = 'profile.html?id=' + encodeURIComponent(authorId);
+    var avInner = c.authorAvatar
+      ? '<img src="'+esc(c.authorAvatar)+'" class="biz-cmt-av-img" alt="" onerror="this.style.display=\'none\'">'
+      : '<span class="biz-cmt-av">'+esc((name[0]||'U').toUpperCase())+'</span>';
+    var avHtml = authorId
+      ? '<a href="'+esc(profileLink)+'" class="biz-cmt-av-link" style="flex-shrink:0">'+avInner+'</a>'
+      : '<span style="flex-shrink:0">'+avInner+'</span>';
+    var pid = esc(postId);
+    var cid = esc(c.id);
+    var canEdit  = canManageComment(c);
+    var isAuthor = _currentUser && (c.authorId === _currentUser.uid || c.userId === _currentUser.uid);
+    var actionsHtml = canEdit
+      ? '<span class="biz-cmt-actions">'+
+          (isAuthor ? '<button class="biz-cmt-act-btn" onclick="window._bizActions.editComment(\''+pid+'\',\''+cid+'\',this)">Edit</button>' : '')+
+          '<button class="biz-cmt-act-btn" onclick="window._bizActions.deleteComment(\''+pid+'\',\''+cid+'\',this)">Delete</button>'+
+        '</span>'
+      : '';
+    var likesHtml = (c.likes > 0)
+      ? '<span class="biz-cmt-like-count"><i class="fas fa-thumbs-up"></i> '+c.likes+'</span>'
+      : '';
+    return '<div class="biz-cmt-bubble-wrap" data-cid="'+cid+'">'+
+      avHtml+
+      '<div class="biz-cmt-right">'+
+        '<div class="biz-cmt-bubble">'+
+          '<a href="'+esc(profileLink)+'" class="biz-cmt-bubble-name">'+esc(name)+'</a>'+
+          '<div class="biz-cmt-bubble-text" id="biz-cmt-text-'+pid+'-'+cid+'">'+esc(c.text||'')+'</div>'+
+        '</div>'+
+        '<div class="biz-cmt-bubble-meta">'+
+          '<span class="biz-cmt-bubble-time">'+timeAgo(c.createdAt)+'</span>'+
+          likesHtml+
+          '<button class="biz-cmt-act-btn" onclick="window._bizActions.replyToComment(\''+pid+'\',\''+esc(name)+'\')">Reply</button>'+
+          actionsHtml+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }
+
   // ── RENDER: POST CARD ────────────────────────────────────────
 
   function postCardHtml(post, biz) {
@@ -597,17 +644,18 @@
         '</div>';
     }
 
+    var bizLink = 'business.html?id='+esc(BIZ_ID);
     return '<div class="biz-post-card" data-post-id="'+pid+'"'+
         (post.pinned ? ' data-pinned="1"' : '')+
         ' data-vis="'+esc(post.visibility||'public')+'"'+'>'+
       (post.pinned ? '<div class="biz-post-pinned"><i class="fas fa-thumbtack"></i> Pinned post</div>' : '')+
       '<div class="biz-post-header">'+
-        '<div class="biz-post-logo">'+logo+'</div>'+
+        '<a href="'+bizLink+'" class="biz-post-logo-link"><div class="biz-post-logo">'+logo+'</div></a>'+
         '<div class="biz-post-meta">'+
-          '<div class="biz-post-name">'+esc(biz.title||'Business')+
+          '<a href="'+bizLink+'" class="biz-post-name-link">'+esc(biz.title||'Business')+
             ((biz.verified||biz.status==='verified')?' <i class="fas fa-check-circle" style="color:#34d399;font-size:.72rem"></i>':'')+
             visBadge+
-          '</div>'+
+          '</a>'+
           '<div class="biz-post-time">'+timeAgo(post.createdAt)+' · <i class="fas fa-earth-americas" style="font-size:.7rem;opacity:.6"></i></div>'+
         '</div>'+
         menuHtml+
@@ -948,12 +996,13 @@
   function ensureNavbar() {
     if (document.getElementById('navbar')) return;
     var user = _currentUser;
-    var actionsHtml = user
-      ? '<a href="profile.html?uid=' + encodeURIComponent(user.uid) + '" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:inherit">' +
+    // Use #authNavUser placeholder so account-switcher.js can mount its dropdown
+    var authNavHtml = user
+      ? '<div id="authNavUser" style="display:flex;align-items:center;gap:6px">' +
           (user.photoURL
             ? '<img src="' + esc(user.photoURL) + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid rgba(16,185,129,.4)" alt="" onerror="this.style.display=\'none\'">'
             : '<span style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#10b981,#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.8rem;flex-shrink:0">' + esc(((user.displayName||user.email||'U')[0]).toUpperCase()) + '</span>') +
-        '</a>'
+        '</div>'
       : '<a href="auth.html" style="background:#10b981;color:#fff;padding:6px 14px;border-radius:20px;text-decoration:none;font-size:.82rem;font-weight:600">Sign In</a>';
 
     var nav = document.createElement('nav');
@@ -969,7 +1018,7 @@
         '<li><a href="business.html">Businesses</a></li>' +
         '<li><a href="map.html">Map</a></li>' +
       '</ul>' +
-      '<div class="navbar-actions" style="display:flex;align-items:center;gap:8px">' + actionsHtml + '</div>' +
+      '<div class="navbar-actions" style="display:flex;align-items:center;gap:8px">' + authNavHtml + '</div>' +
       '<button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false">' +
         '<span></span><span></span><span></span>' +
       '</button>';
@@ -981,6 +1030,24 @@
       var mm = document.createElement('div');
       mm.className = 'mobile-menu';
       if (nav.after) nav.after(mm); else nav.parentNode.insertBefore(mm, nav.nextSibling);
+    }
+
+    // Re-fire GeoAuthReady so account-switcher replaces #authNavUser with its full dropdown.
+    // shell() from geohub-social-redesign wipes the body (killing the original navbar),
+    // so account-switcher's MutationObserver is watching a detached node. Re-dispatching
+    // the event is the reliable way to remount it into the new navbar.
+    if (user) {
+      var profile = window.GeoCurrentUser || {
+        uid: user.uid,
+        email: user.email || '',
+        fullName: user.displayName || '',
+        displayName: user.displayName || '',
+        photoURL: user.photoURL || '',
+        avatar: user.photoURL || ''
+      };
+      setTimeout(function() {
+        window.dispatchEvent(new CustomEvent('GeoAuthReady', { detail: profile }));
+      }, 0);
     }
   }
 
@@ -1265,31 +1332,19 @@
       }
       GeoSocial.listenComments(postId, function(comments) {
         if (!listEl.isConnected) return;
-        if (!comments || !comments.length) {
+        var active = (comments || []).filter(function(c){ return c.status !== 'deleted'; });
+        if (!active.length) {
           listEl.innerHTML = '<div class="biz-cmt-empty">No comments yet.</div>';
-          return;
+        } else {
+          listEl.innerHTML = active.map(function(c) {
+            return commentBubbleHtml(c, postId);
+          }).join('');
         }
-        listEl.innerHTML = comments.map(function(c) {
-          var name = c.authorName || c.userName || 'User';
-          var avHtml = c.authorAvatar
-            ? '<img src="'+esc(c.authorAvatar)+'" class="biz-cmt-av-img" alt="" onerror="this.style.display=\'none\'">'
-            : '<span class="biz-cmt-av">'+esc((name[0]||'U').toUpperCase())+'</span>';
-          return '<div class="biz-cmt-bubble-wrap">'+
-            avHtml+
-            '<div>'+
-              '<div class="biz-cmt-bubble">'+
-                '<div class="biz-cmt-bubble-name">'+esc(name)+'</div>'+
-                '<div class="biz-cmt-bubble-text">'+esc(c.text||'')+'</div>'+
-              '</div>'+
-              '<div class="biz-cmt-bubble-time">'+timeAgo(c.createdAt)+'</div>'+
-            '</div>'+
-          '</div>';
-        }).join('');
         // Update comment count badge
         var card = document.querySelector('[data-post-id="'+CSS.escape(postId)+'"]');
         if (card) {
           var cntBtn = card.querySelector('.biz-count-btn');
-          if (cntBtn) cntBtn.textContent = comments.length + ' comment' + (comments.length===1?'':'s');
+          if (cntBtn) cntBtn.textContent = active.length + ' comment' + (active.length===1?'':'s');
         }
       });
     },
@@ -1318,6 +1373,72 @@
         if (err) { showToast('Could not post comment', false); return; }
         _fs.updateDoc(_fs.doc(_db,'posts',postId),{commentCount:_fs.increment(1)}).catch(function(){});
       });
+    },
+
+    // ── Comment edit/delete/reply ─────────────────────────────────
+    editComment: function(postId, commentId, btnEl) {
+      if (!_currentUser) return;
+      var textEl = document.getElementById('biz-cmt-text-'+postId+'-'+commentId);
+      if (!textEl) return;
+      if (textEl.querySelector('textarea')) return; // already editing
+      var current = textEl.textContent || '';
+      var ta = document.createElement('textarea');
+      ta.className = 'biz-cmt-edit-ta';
+      ta.value = current;
+      ta.rows = 2;
+      ta.style.cssText = 'width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#f1f5f9;padding:6px 10px;resize:none;font-size:.87rem;font-family:inherit;outline:none';
+      var saveBtn = document.createElement('button');
+      saveBtn.className = 'biz-cmt-send-btn';
+      saveBtn.style.cssText = 'margin-top:4px;font-size:.78rem;padding:4px 12px;border-radius:12px';
+      saveBtn.innerHTML = 'Save';
+      var cancel = document.createElement('button');
+      cancel.style.cssText = 'margin-top:4px;margin-left:6px;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:.78rem;padding:4px 8px';
+      cancel.textContent = 'Cancel';
+      textEl.innerHTML = '';
+      textEl.appendChild(ta);
+      textEl.appendChild(document.createElement('br'));
+      textEl.appendChild(saveBtn);
+      textEl.appendChild(cancel);
+      ta.focus();
+      cancel.onclick = function() { textEl.innerHTML = esc(current); };
+      saveBtn.onclick = function() {
+        var newText = ta.value.trim();
+        if (!newText || newText === current) { textEl.innerHTML = esc(current); return; }
+        saveBtn.disabled = true; saveBtn.textContent = '…';
+        _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId), {
+          text: newText, updatedAt: _fs.serverTimestamp()
+        }).then(function() {
+          textEl.innerHTML = esc(newText);
+          showToast('Comment updated');
+        }).catch(function(err) {
+          textEl.innerHTML = esc(current);
+          showToast('Could not edit: '+(err.code||err.message), false);
+        });
+      };
+    },
+
+    deleteComment: function(postId, commentId, btnEl) {
+      if (!_currentUser) return;
+      if (!confirm('Delete this comment?')) return;
+      _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId), {
+        status: 'deleted', updatedAt: _fs.serverTimestamp()
+      }).then(function() {
+        var wrap = document.querySelector('[data-cid="'+CSS.escape(commentId)+'"]');
+        if (wrap) { wrap.style.transition='opacity .2s'; wrap.style.opacity='0'; setTimeout(function(){ wrap.remove(); },220); }
+        _fs.updateDoc(_fs.doc(_db,'posts',postId),{commentCount:_fs.increment(-1)}).catch(function(){});
+        showToast('Comment deleted');
+      }).catch(function(err) { showToast('Could not delete: '+(err.code||err.message), false); });
+    },
+
+    replyToComment: function(postId, authorName) {
+      var box = document.getElementById('biz-cmt-' + postId);
+      if (box && box.style.display === 'none') { box.style.display = 'block'; }
+      var ta = box && box.querySelector('textarea.biz-cmt-textarea');
+      if (!ta) return;
+      var prefix = '@' + authorName + ' ';
+      if (!ta.value.startsWith(prefix)) { ta.value = prefix + ta.value.replace(/^@\S+ /,''); }
+      ta.focus();
+      ta.selectionStart = ta.selectionEnd = ta.value.length;
     },
 
     // ── Reactions ─────────────────────────────────────────────────

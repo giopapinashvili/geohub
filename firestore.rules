@@ -104,6 +104,18 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/businessAdmins/$(bizId + '_' + request.auth.uid));
     }
 
+    // Business owner of the post's business can moderate comments.
+    function isBizOwnerOfPost(postId) {
+      var bizId = get(/databases/$(database)/documents/posts/$(postId)).data.get('businessId', '');
+      return bizId != '' && isBizOwner(bizId);
+    }
+
+    // Comment author may only change text/updatedAt on their own comments.
+    function onlyCommentTextChanged() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['text', 'updatedAt']);
+    }
+
     function onlyGroupCountersChanged() {
       return signedIn()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
@@ -246,7 +258,11 @@ service cloud.firestore {
         allow create: if newOwnerMatches()
           && request.resource.data.get('text', '') is string
           && request.resource.data.get('text', '').size() > 0;
-        allow update, delete: if isAdmin() || existingOwnerMatches();
+        // Authors may edit text only; biz owner may soft-delete (status field); admins may do anything
+        allow update: if isAdmin()
+          || (existingOwnerMatches() && onlyCommentTextChanged())
+          || isBizOwnerOfPost(postId);
+        allow delete: if isAdmin() || existingOwnerMatches() || isBizOwnerOfPost(postId);
 
         match /replies/{replyId} {
           allow read: if true;
