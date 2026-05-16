@@ -49,7 +49,7 @@
   </style>
   <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
 </head>
-<body class="page-profile" data-gh-page="profile">
+<body class="page-profile" data-gh-page="profile" data-profile-mode="user">
 
 <nav class="navbar" id="navbar">
   <a href="index.html" class="navbar-brand"><div class="logo-icon">🌍</div><span class="logo-text">Geo<span class="logo-geo">Hub</span></span></a>
@@ -131,15 +131,13 @@
   <!-- Profile Tabs -->
   <div class="profile-tabs" id="profileTabs">
     <div class="ptab active" data-tab="posts">Posts <span class="tab-count">0</span></div>
-    <div class="ptab" data-tab="places">Places <span class="tab-count">0</span></div>
-    <div class="ptab" data-tab="checkins">Check-ins <span class="tab-count">0</span></div>
+    <div class="ptab" data-tab="about">About</div>
+    <div class="ptab" data-tab="gallery">Gallery <span class="tab-count"></span></div>
     <div class="ptab" data-tab="friends">Friends <span class="tab-count">0</span></div>
-    <div class="ptab" data-tab="rewards">Rewards</div>
-    <div class="ptab" data-tab="challenges">Challenges</div>
+    <div class="ptab" data-tab="checkins">Check-ins <span class="tab-count">0</span></div>
     <div class="ptab" data-tab="businesses">Businesses <span class="tab-count">0</span></div>
     <div class="ptab" data-tab="badges">Badges <span class="tab-count">0</span></div>
     <div class="ptab" data-tab="saved">Saved <span class="tab-count"></span></div>
-    <div class="ptab" data-tab="reviews" onclick="location.href='reviews.html'">Reviews <span class="tab-count">0</span> <i class="fas fa-external-link-alt" style="font-size:0.55rem;opacity:0.5;margin-left:2px"></i></div>
   </div>
 </div>
 
@@ -309,16 +307,15 @@
     <!-- ── POSTS TAB ── -->
     <div class="tab-panel active" id="tab-posts"><div class="empty-profile-state"><i class="fas fa-spinner fa-spin"></i><p>Loading real posts…</p></div></div>
 
-    <!-- ── PLACES TAB ── -->
-    <div class="tab-panel" id="tab-places"><div class="empty-profile-state"><i class="fas fa-map-marker-alt"></i><h3>No visited places yet</h3><p>Real visited places will appear here.</p></div></div>
+    <!-- ── ABOUT TAB ── -->
+    <div class="tab-panel" id="tab-about"><div class="empty-profile-state"><i class="fas fa-user"></i><h3>Loading…</h3></div></div>
 
-    <div class="tab-panel" id="tab-checkins"><div class="empty-profile-state"><i class="fas fa-location-dot"></i><h3>No check-ins yet</h3><p>Real Firestore check-ins will appear here.</p></div></div>
+    <!-- ── GALLERY TAB ── -->
+    <div class="tab-panel" id="tab-gallery"><div class="empty-profile-state"><i class="fas fa-images"></i><h3>No photos yet</h3><p>Posts with photos will appear here.</p></div></div>
 
     <div class="tab-panel" id="tab-friends"><div class="empty-profile-state"><i class="fas fa-user-group"></i><h3>No friends yet</h3><p>Friends and incoming requests will appear here.</p></div></div>
 
-    <div class="tab-panel" id="tab-rewards"><div class="empty-profile-state"><i class="fas fa-gift"></i><h3>No rewards yet</h3><p>Real rewards will appear here.</p></div></div>
-
-    <div class="tab-panel" id="tab-challenges"><div class="empty-profile-state"><i class="fas fa-trophy"></i><h3>No challenges yet</h3><p>Real challenges will appear here.</p></div></div>
+    <div class="tab-panel" id="tab-checkins"><div class="empty-profile-state"><i class="fas fa-location-dot"></i><h3>No check-ins yet</h3><p>Real Firestore check-ins will appear here.</p></div></div>
 
     <div class="tab-panel" id="tab-businesses"><div class="empty-profile-state"><i class="fas fa-store"></i><h3>No businesses yet</h3><p>Managed business pages will appear here.</p></div></div>
 
@@ -329,8 +326,6 @@
       <div id="saved-places-section"></div>
       <div id="saved-empty-state" class="empty-profile-state"><i class="fas fa-bookmark"></i><h3>Nothing saved yet</h3><p>Save posts and places to find them here.</p></div>
     </div>
-
-    <div class="tab-panel" id="tab-reviews"><div class="empty-profile-state"><i class="fas fa-star"></i><h3>No reviews yet</h3><p>Real reviews will appear here.</p></div></div>
 
       </div><!-- /profile-main -->
 

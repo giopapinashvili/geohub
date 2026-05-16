@@ -6,6 +6,28 @@
   const esc = (v) => String(v == null ? '' : v).replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
   const compact = (v) => Number(v || 0) >= 1000 ? (Number(v) / 1000).toFixed(Number(v) >= 10000 ? 0 : 1) + 'k' : String(Number(v || 0));
 
+  function timeAgo(ts) {
+    if (!ts) return '';
+    var ms = typeof ts === 'object' ? (ts.toMillis ? ts.toMillis() : (ts.seconds || 0) * 1000) : Number(ts);
+    var diff = Date.now() - ms;
+    if (diff < 60000) return 'just now';
+    if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+    if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+    if (diff < 604800000) return Math.floor(diff / 86400000) + 'd ago';
+    return new Date(ms).toLocaleDateString();
+  }
+
+  function isOpenNow(workingHours) {
+    if (!workingHours) return null;
+    var days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+    var day = days[new Date().getDay()];
+    var h = workingHours[day];
+    if (!h || h.closed) return false;
+    var now = new Date(); var cur = now.getHours() * 60 + now.getMinutes();
+    function toMin(t) { var p = String(t || '00:00').split(':'); return parseInt(p[0] || 0) * 60 + parseInt(p[1] || 0); }
+    return cur >= toMin(h.open) && cur < toMin(h.close);
+  }
+
   function initialLetters(name, email) {
     name = String(name || '').trim();
     email = String(email || '').trim().toLowerCase();
@@ -78,6 +100,8 @@
       pointsBalance: Number(data.pointsBalance || data.geoPointsBalance || 0),
       interests: Array.isArray(data.interests) ? data.interests : [],
       badges: Array.isArray(data.badges) ? data.badges : [],
+      socialLinks: data.socialLinks || {},
+      website: data.website || '',
       createdAt: data.createdAt || data.joinedAt || null,
       privacy: data.privacy || null,
       initials
@@ -309,12 +333,9 @@
 
   function renderTabs(user, fbUser) {
     emptyTab('#tab-posts', 'fa-seedling', 'No posts yet', 'Real posts from Firestore will appear here.', 'feed.html?compose=1', 'Create Post');
-    emptyTab('#tab-places', 'fa-map-marker-alt', 'No visited places yet', 'Check in to real places and they will appear here.', 'map.html', 'Explore Map');
     emptyTab('#tab-checkins', 'fa-location-dot', 'No check-ins yet', 'Real check-ins will appear here.', 'checkin.html', 'Check in');
     emptyTab('#tab-friends', 'fa-user-group', 'No friends yet', 'Friends and requests will appear here.', null, '');
-    renderRewardsTab(user, fbUser);
-    emptyTab('#tab-challenges', 'fa-trophy', 'No challenges yet', 'Real challenges will appear here when added by GeoHub.', null, '');
-    emptyTab('#tab-reviews', 'fa-star', 'No reviews yet', 'Real reviews will appear here after you write them.', 'reviews.html', 'Write Review');
+    renderAboutTab(user);
     renderBadgeTab(user);
     renderBusinessesTab(user);
     if (window.GeoSocial && window.GeoSocial.listenSavedPosts) {
@@ -390,11 +411,12 @@
     }
 
     if (window.GeoSocial && window.GeoSocial.listenUserPosts) {
-      window.GeoSocial.listenUserPosts(user.uid, posts => {
-        const count = $('.ptab[data-tab="posts"] .tab-count'); if (count) count.textContent = posts.length || '0';
-        if (!posts.length) return;
-        const tab = $('#tab-posts');
-        tab.innerHTML = '<div class="posts-grid">' + posts.map(post => '<div class="post-thumb">' + (post.mediaUrl ? '<img src="' + esc(post.mediaUrl) + '" alt="Post" loading="lazy" decoding="async">' : '<div style="background:var(--bg-elevated);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:1rem;padding:16px;box-sizing:border-box;text-align:center;color:var(--text-secondary)">' + esc(post.text || '') + '</div>') + '<div class="post-overlay"><span><i class="fas fa-heart"></i> ' + (post.likeCount || 0) + '</span><span><i class="fas fa-comment"></i> ' + (post.commentCount || 0) + '</span></div></div>').join('') + '</div>';
+      window.GeoSocial.listenUserPosts(user.uid, function(posts) {
+        var count = $('.ptab[data-tab="posts"] .tab-count'); if (count) count.textContent = posts.length || '0';
+        renderGalleryTab(posts);
+        if (!posts.length) { emptyTab('#tab-posts', 'fa-seedling', 'No posts yet', 'Real posts from Firestore will appear here.', 'feed.html?compose=1', 'Create Post'); return; }
+        var tab = $('#tab-posts');
+        if (tab) tab.innerHTML = '<div class="post-feed-list">' + posts.map(function(p) { return postCardHtml(p, user); }).join('') + '</div>';
       });
     }
   }
@@ -572,6 +594,236 @@
         tab.innerHTML = '<div class="gh-friend-grid">'+businesses.map(b => '<a class="gh-friend-card" href="business.html?id='+encodeURIComponent(b.id)+'"><span class="gh-avatar">'+(b.logoUrl||b.coverImageUrl?'<img src="'+esc(b.logoUrl||b.coverImageUrl)+'" alt="" loading="lazy" decoding="async">':esc(initialLetters(b.name||'Business')) )+'</span><div><strong>'+esc(b.name||'Business')+'</strong><span>'+esc(b.businessType==='online'?'Online / Nationwide':(b.city||b.category||'Business'))+'</span></div></a>').join('')+'</div>';
       });
     }
+  }
+
+  function postCardHtml(post, user) {
+    var ts = timeAgo(post.createdAt || post.timestamp);
+    var text = esc(post.text || post.content || '');
+    var media = post.mediaUrl ? '<div class="pfc-media"><img src="' + esc(post.mediaUrl) + '" alt="Post" loading="lazy" decoding="async"></div>' : '';
+    return '<div class="post-feed-card">'
+      + '<div class="pfc-header"><img class="pfc-avatar" src="' + esc(user.avatar || '') + '" alt="" loading="lazy" decoding="async"><div><div class="pfc-name">' + esc(user.fullName) + '</div><div class="pfc-time">' + (ts || '') + '</div></div></div>'
+      + (text ? '<div class="pfc-text">' + text + '</div>' : '')
+      + media
+      + '<div class="pfc-footer"><span class="pfc-stat"><i class="fas fa-heart"></i> ' + (post.likeCount || 0) + '</span><span class="pfc-stat"><i class="fas fa-comment"></i> ' + (post.commentCount || 0) + '</span></div>'
+      + '</div>';
+  }
+
+  function renderGalleryTab(posts) {
+    var tab = $('#tab-gallery'); if (!tab) return;
+    var media = (posts || []).filter(function(p) { return !!p.mediaUrl; });
+    var cnt = $('.ptab[data-tab="gallery"] .tab-count'); if (cnt) cnt.textContent = media.length || '';
+    if (!media.length) { tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-images"></i><h3>No photos yet</h3><p>Posts with photos will appear in the gallery.</p></div>'; return; }
+    tab.innerHTML = '<div class="gallery-grid">' + media.map(function(p) {
+      return '<div class="gallery-item"><img src="' + esc(p.mediaUrl) + '" alt="" loading="lazy" decoding="async"><div class="gallery-overlay"><span><i class="fas fa-heart"></i> ' + (p.likeCount || 0) + '</span></div></div>';
+    }).join('') + '</div>';
+  }
+
+  function renderAboutTab(user) {
+    var tab = $('#tab-about'); if (!tab) return;
+    var sl = user.socialLinks || {};
+    var ICONS = { instagram:'fa-instagram', facebook:'fa-facebook', linkedin:'fa-linkedin', tiktok:'fa-tiktok', twitter:'fa-twitter', youtube:'fa-youtube' };
+    var html = '<div class="about-card">';
+    if (user.bio) html += '<div class="about-bio">' + esc(user.bio) + '</div>';
+    html += '<div class="about-section-title">Location</div>';
+    html += '<div class="about-item"><i class="fas fa-map-marker-alt"></i> ' + (user.cityScope === 'all_georgia' ? 'Interested in all Georgia' : esc(user.city || 'No location set')) + '</div>';
+    if (user.website) html += '<div class="about-item"><i class="fas fa-globe"></i> <a href="' + esc(user.website) + '" target="_blank" rel="noopener noreferrer">' + esc(user.website) + '</a></div>';
+    var joinYear = '';
+    if (user.createdAt) {
+      try {
+        if (typeof user.createdAt.toDate === 'function') joinYear = user.createdAt.toDate().getFullYear();
+        else if (user.createdAt.seconds) joinYear = new Date(user.createdAt.seconds * 1000).getFullYear();
+        else if (typeof user.createdAt === 'number') joinYear = new Date(user.createdAt).getFullYear();
+      } catch(e) {}
+    }
+    if (joinYear) html += '<div class="about-item"><i class="fas fa-calendar-alt"></i> Member since ' + joinYear + '</div>';
+    if (user.interests && user.interests.length) {
+      html += '<div class="about-section-title">Interests</div>';
+      html += '<div class="about-interests">' + user.interests.map(function(i) { return '<span class="about-interest-chip">' + esc(i) + '</span>'; }).join('') + '</div>';
+    }
+    var links = Object.entries(sl).filter(function(e) { return !!e[1]; });
+    if (links.length) {
+      html += '<div class="about-section-title">Social Links</div>';
+      html += '<div class="about-links">' + links.map(function(e) {
+        return '<a class="about-link-chip" href="https://' + esc(e[0]) + '.com/' + esc(e[1]) + '" target="_blank" rel="noopener noreferrer"><i class="fab ' + (ICONS[e[0]] || 'fa-link') + '"></i> ' + esc(e[1]) + '</a>';
+      }).join('') + '</div>';
+    }
+    html += '</div>';
+    tab.innerHTML = html;
+  }
+
+  function applyCreatorMode(user) {
+    document.body.setAttribute('data-profile-mode', 'creator');
+    var badge = $('.trust-badges');
+    if (badge && !badge.querySelector('.creator-badge')) {
+      badge.insertAdjacentHTML('beforeend', '<span class="trust-badge creator-badge"><i class="fas fa-star"></i> Creator</span>');
+    }
+  }
+
+  function loadBizMode(bizId, GF, fbUser) {
+    document.body.setAttribute('data-profile-mode', 'business');
+    GF.fs.getDoc(GF.fs.doc(GF.db, 'businesses', bizId)).then(function(snap) {
+      if (!snap.exists()) {
+        var main = $('.profile-layout') || document.body;
+        main.innerHTML = '<div class="empty-profile-state" style="max-width:720px;margin:80px auto;text-align:center"><i class="fas fa-store-slash"></i><h2>Business not found</h2><p>This page does not exist or was removed.</p><a class="btn btn-primary btn-sm" href="index.html">Go Home</a></div>';
+        return;
+      }
+      renderBizPage(Object.assign({ id: snap.id }, snap.data()), fbUser, GF);
+    }).catch(function(err) { console.warn('[Profile] biz load failed', err && err.message); });
+  }
+
+  function renderBizPage(biz, fbUser, GF) {
+    document.title = (biz.name || biz.title || 'Business') + ' — GeoHub';
+    var isOwner = fbUser && (fbUser.uid === biz.ownerId || (Array.isArray(biz.adminIds) && biz.adminIds.includes(fbUser.uid)));
+    var isOpen = isOpenNow(biz.workingHours);
+    var openBadge = isOpen === null ? '' : (isOpen
+      ? '<span class="biz-open-badge open"><i class="fas fa-circle" style="font-size:.45rem"></i> Open Now</span>'
+      : '<span class="biz-open-badge closed"><i class="fas fa-circle" style="font-size:.45rem"></i> Closed</span>');
+    var cover = $('.profile-cover');
+    if (cover && biz.coverUrl) cover.style.backgroundImage = 'linear-gradient(180deg,rgba(4,5,13,0.08),rgba(4,5,13,0.72)),url(\'' + esc(biz.coverUrl) + '\')';
+    var identity = $('.profile-identity-section');
+    if (identity) {
+      identity.innerHTML = '<div style="max-width:1200px;margin:0 auto;padding:0 24px 16px">'
+        + '<div style="display:flex;align-items:flex-end;gap:20px">'
+        + '<div class="biz-logo-wrap">'
+        + (biz.logoUrl ? '<img src="' + esc(biz.logoUrl) + '" alt="Logo">' : '<div class="biz-logo-placeholder">🏢</div>')
+        + '</div>'
+        + '<div class="biz-info">'
+        + '<div class="biz-name-row"><div class="biz-name">' + esc(biz.name || biz.title || 'Business') + '</div>'
+        + (biz.verified || biz.status === 'active' ? '<span class="biz-verified-badge"><i class="fas fa-check-circle"></i> Verified</span>' : '')
+        + openBadge + '</div>'
+        + '<div class="biz-cat-row">' + esc(biz.category || '') + (biz.city ? ' · ' + esc(biz.city) : '') + (biz.rating ? ' · ★ ' + Number(biz.rating).toFixed(1) + ' (' + (biz.reviewCount || 0) + ')' : '') + '</div>'
+        + '<div class="biz-actions">'
+        + (biz.phone ? '<a class="biz-action-btn primary" href="tel:' + esc(biz.phone) + '"><i class="fas fa-phone"></i> Call</a>' : '')
+        + (biz.whatsapp ? '<a class="biz-action-btn ghost" href="https://wa.me/' + esc(biz.whatsapp) + '" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> WhatsApp</a>' : '')
+        + (biz.website ? '<a class="biz-action-btn ghost" href="' + esc(biz.website) + '" target="_blank" rel="noopener noreferrer"><i class="fas fa-globe"></i> Website</a>' : '')
+        + (isOwner ? '<a class="biz-action-btn ghost" href="add-business.html?edit=' + esc(biz.id) + '"><i class="fas fa-pen"></i> Edit</a>' : '')
+        + '</div></div></div></div>';
+    }
+    var xpSec = $('.xp-progress-section'); if (xpSec) xpSec.style.display = 'none';
+    var tabsEl = $('#profileTabs');
+    var bizTabs = ['overview','services','reviews','about'];
+    if (isOwner) bizTabs.push('dashboard');
+    var bizLabels = { overview:'Overview', services:'Services', reviews:'Reviews', about:'About', dashboard:'Dashboard' };
+    if (tabsEl) {
+      tabsEl.innerHTML = bizTabs.map(function(k, i) {
+        return '<div class="ptab' + (i === 0 ? ' active' : '') + '" data-tab="biz-' + k + '">' + bizLabels[k] + '</div>';
+      }).join('');
+    }
+    var mainEl = $('.profile-main');
+    if (mainEl) {
+      mainEl.innerHTML = bizTabs.map(function(k, i) {
+        return '<div class="tab-panel' + (i === 0 ? ' active' : '') + '" id="tab-biz-' + k + '"></div>';
+      }).join('');
+    }
+    var sidebar = $('.profile-sidebar');
+    if (sidebar) renderBizSidebar(biz, sidebar);
+    $$('.ptab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        $$('.ptab').forEach(function(t) { t.classList.remove('active'); });
+        $$('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+        tab.classList.add('active');
+        var p = $('#tab-' + tab.dataset.tab); if (p) p.classList.add('active');
+      });
+    });
+    renderBizOverview(biz);
+    renderBizServices(biz);
+    renderBizReviews(biz, GF);
+    renderBizAbout(biz);
+    if (isOwner) renderBizDashboard(biz, GF, fbUser);
+  }
+
+  function renderBizSidebar(biz, sidebar) {
+    var hours = biz.workingHours || {};
+    var days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+    var dayLabels = { monday:'Mon', tuesday:'Tue', wednesday:'Wed', thursday:'Thu', friday:'Fri', saturday:'Sat', sunday:'Sun' };
+    var todayKey = days[(new Date().getDay() + 6) % 7];
+    sidebar.innerHTML = '<div class="sidebar-card"><div class="sidebar-card-title">Contact</div>'
+      + (biz.phone ? '<div class="intro-item"><i class="fas fa-phone"></i> ' + esc(biz.phone) + '</div>' : '')
+      + (biz.email ? '<div class="intro-item"><i class="fas fa-envelope"></i> ' + esc(biz.email) + '</div>' : '')
+      + (biz.address ? '<div class="intro-item"><i class="fas fa-map-marker-alt"></i> ' + esc(biz.address) + '</div>' : '')
+      + (biz.website ? '<div class="intro-item"><i class="fas fa-globe"></i> <a href="' + esc(biz.website) + '" target="_blank" rel="noopener" style="color:var(--green);text-decoration:none">' + esc(biz.website) + '</a></div>' : '')
+      + '</div>'
+      + '<div class="sidebar-card"><div class="sidebar-card-title">Hours</div>'
+      + days.map(function(d) {
+          var h = hours[d]; var isToday = d === todayKey;
+          var t = (h && !h.closed) ? esc(h.open || '') + ' – ' + esc(h.close || '') : '<span class="biz-hours-closed">Closed</span>';
+          return '<div class="biz-hours-row' + (isToday ? ' today' : '') + '"><span>' + dayLabels[d] + '</span><span>' + t + '</span></div>';
+        }).join('')
+      + '</div>'
+      + (biz.description ? '<div class="sidebar-card"><div class="sidebar-card-title">About</div><p style="font-size:.85rem;color:var(--text-secondary);line-height:1.6;margin:0">' + esc(biz.description) + '</p></div>' : '');
+  }
+
+  function renderBizOverview(biz) {
+    var tab = $('#tab-biz-overview'); if (!tab) return;
+    var html = '<div style="display:flex;flex-direction:column;gap:14px">';
+    if (biz.description) html += '<div class="biz-info-card"><p style="font-size:.9rem;color:var(--text-secondary);line-height:1.7;margin:0">' + esc(biz.description) + '</p></div>';
+    if (biz.phone || biz.email || biz.website || biz.address) {
+      html += '<div class="biz-info-card"><div class="biz-info-card-title">Contact</div>'
+        + (biz.phone ? '<div class="biz-detail-item"><i class="fas fa-phone"></i> ' + esc(biz.phone) + '</div>' : '')
+        + (biz.email ? '<div class="biz-detail-item"><i class="fas fa-envelope"></i> ' + esc(biz.email) + '</div>' : '')
+        + (biz.address ? '<div class="biz-detail-item"><i class="fas fa-map-marker-alt"></i> ' + esc(biz.address) + '</div>' : '')
+        + (biz.website ? '<div class="biz-detail-item"><i class="fas fa-globe"></i> <a href="' + esc(biz.website) + '" target="_blank" rel="noopener" style="color:var(--green)">' + esc(biz.website) + '</a></div>' : '')
+        + '</div>';
+    }
+    if (Array.isArray(biz.galleryPhotos) && biz.galleryPhotos.length) {
+      html += '<div class="biz-info-card"><div class="biz-info-card-title">Photos</div><div class="gallery-grid">'
+        + biz.galleryPhotos.slice(0,6).map(function(url) { return '<div class="gallery-item"><img src="' + esc(url) + '" alt="" loading="lazy" decoding="async"></div>'; }).join('')
+        + '</div></div>';
+    }
+    if (!biz.description && !biz.phone && !biz.email && !biz.website && !biz.address && !(Array.isArray(biz.galleryPhotos) && biz.galleryPhotos.length)) {
+      html += '<div class="empty-profile-state"><i class="fas fa-store"></i><h3>No info yet</h3><p>The owner hasn\'t added details yet.</p></div>';
+    }
+    tab.innerHTML = html + '</div>';
+  }
+
+  function renderBizServices(biz) {
+    var tab = $('#tab-biz-services'); if (!tab) return;
+    var services = Array.isArray(biz.services) ? biz.services : [];
+    if (!services.length) { tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-toolbox"></i><h3>No services listed</h3><p>Services will appear after the owner adds them.</p></div>'; return; }
+    tab.innerHTML = '<div class="biz-services-list">' + services.map(function(s) {
+      var name = typeof s === 'string' ? s : (s.name || '');
+      var desc = typeof s === 'object' ? (s.description || '') : '';
+      var price = typeof s === 'object' ? (s.price || '') : '';
+      return '<div class="biz-service-item"><div class="biz-service-icon"><i class="fas fa-check"></i></div><div><div class="biz-service-name">' + esc(name) + '</div>' + (desc ? '<div class="biz-service-desc">' + esc(desc) + '</div>' : '') + '</div>' + (price ? '<div class="biz-service-price">' + esc(price) + '</div>' : '') + '</div>';
+    }).join('') + '</div>';
+  }
+
+  function renderBizReviews(biz, GF) {
+    var tab = $('#tab-biz-reviews'); if (!tab) return;
+    if (!GF || !GF.db || !GF.fs || !biz.id) { tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-star"></i><h3>No reviews yet</h3></div>'; return; }
+    GF.fs.getDocs(GF.fs.query(GF.fs.collection(GF.db,'reviews'), GF.fs.where('businessId','==',biz.id), GF.fs.orderBy('createdAt','desc'), GF.fs.limit(20))).then(function(snap) {
+      if (snap.empty) { tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-star"></i><h3>No reviews yet</h3><p>Be the first to review.</p></div>'; return; }
+      var rows = [];
+      snap.forEach(function(d) {
+        var r = d.data(); var stars = '★'.repeat(Math.min(5, Math.round(r.rating || 0)));
+        rows.push('<div class="biz-review-card"><div class="biz-reviewer-row"><div class="biz-reviewer-avatar">' + esc(initialLetters(r.authorName||'User','')) + '</div><div style="flex:1"><div style="font-weight:700;font-size:.88rem">' + esc(r.authorName||'Anonymous') + '</div><div class="biz-stars">' + stars + '</div></div><div style="font-size:.72rem;color:var(--text-muted)">' + timeAgo(r.createdAt) + '</div></div>' + (r.text ? '<p style="font-size:.85rem;color:var(--text-secondary);line-height:1.6;margin:0">' + esc(r.text) + '</p>' : '') + '</div>');
+      });
+      tab.innerHTML = rows.join('');
+    }).catch(function() { tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-star"></i><h3>No reviews yet</h3></div>'; });
+  }
+
+  function renderBizAbout(biz) {
+    var tab = $('#tab-biz-about'); if (!tab) return;
+    var html = '<div class="about-card">';
+    if (biz.description) html += '<div class="about-bio">' + esc(biz.description) + '</div>';
+    html += '<div class="about-section-title">Details</div>';
+    if (biz.category) html += '<div class="about-item"><i class="fas fa-tag"></i> ' + esc(biz.category) + '</div>';
+    if (biz.address || biz.city) html += '<div class="about-item"><i class="fas fa-map-marker-alt"></i> ' + esc(biz.address || biz.city) + '</div>';
+    if (biz.phone) html += '<div class="about-item"><i class="fas fa-phone"></i> ' + esc(biz.phone) + '</div>';
+    if (biz.email) html += '<div class="about-item"><i class="fas fa-envelope"></i> ' + esc(biz.email) + '</div>';
+    if (biz.website) html += '<div class="about-item"><i class="fas fa-globe"></i> <a href="' + esc(biz.website) + '" target="_blank" rel="noopener" style="color:var(--green)">' + esc(biz.website) + '</a></div>';
+    if (biz.priceRange) html += '<div class="about-item"><i class="fas fa-dollar-sign"></i> ' + esc(biz.priceRange) + '</div>';
+    tab.innerHTML = html + '</div>';
+  }
+
+  function renderBizDashboard(biz, GF, fbUser) {
+    var tab = $('#tab-biz-dashboard'); if (!tab) return;
+    tab.innerHTML = '<div class="biz-info-card"><div class="biz-info-card-title">Owner Dashboard</div>'
+      + '<div class="biz-detail-item"><i class="fas fa-star"></i> Rating: ' + (biz.rating ? Number(biz.rating).toFixed(1) + ' (' + (biz.reviewCount||0) + ' reviews)' : 'No ratings yet') + '</div>'
+      + '<div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">'
+      + '<a class="biz-action-btn primary" href="add-business.html?edit=' + esc(biz.id) + '"><i class="fas fa-pen"></i> Edit Business Info</a>'
+      + '<a class="biz-action-btn ghost" href="business.html?id=' + esc(biz.id) + '"><i class="fas fa-eye"></i> View Public Page</a>'
+      + '</div></div>';
   }
 
   function openEditProfileModal() {
@@ -825,10 +1077,13 @@
           location.replace('auth.html?next=' + encodeURIComponent((location.pathname.split('/').pop() || 'profile.html') + location.search));
           return;
         }
+        const _bizId = new URLSearchParams(location.search).get('biz');
+        if (_bizId) { loadBizMode(_bizId, GF, fbUser); return; }
         try {
           const profile = await findProfile(GF, fbUser);
           if (!profile) return userNotFound();
           renderIdentity(profile, fbUser);
+          if ((profile.accountType || '').toLowerCase() === 'creator') applyCreatorMode(profile);
           const isOwnProfile = profile.uid === fbUser.uid;
           const privPref = (profile.privacy || {}).profilePref || 'public';
           if (!isOwnProfile && privPref === 'friends') {
