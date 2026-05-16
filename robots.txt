@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# Private & account-only pages
+Disallow: /admin.html
+Disallow: /auth.html
+Disallow: /safety.html
+Disallow: /messages.html
+Disallow: /profile.html
+Disallow: /onboarding.html
+Disallow: /dashboard.html
+Disallow: /add-business.html
+Disallow: /camera.html
+Disallow: /checkin.html
+Disallow: /scan.html
+Disallow: /payment-cancel.html
+Disallow: /payment-success.html
+Disallow: /notifications.html
+Disallow: /offline.html
+Disallow: /stories.html
+Disallow: /assistant.html
+
+Sitemap: https://geohub.pages.dev/sitemap.xml

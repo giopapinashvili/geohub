@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Core -->
+  <url><loc>https://geohub.pages.dev/index.html</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://geohub.pages.dev/feed.html</loc><changefreq>hourly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://geohub.pages.dev/map.html</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://geohub.pages.dev/explore.html</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://geohub.pages.dev/search.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+
+  <!-- Places & businesses -->
+  <url><loc>https://geohub.pages.dev/places.html</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://geohub.pages.dev/business.html</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://geohub.pages.dev/real-estate.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://geohub.pages.dev/services.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://geohub.pages.dev/reviews.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+
+  <!-- Community -->
+  <url><loc>https://geohub.pages.dev/events.html</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://geohub.pages.dev/groups.html</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://geohub.pages.dev/live.html</loc><changefreq>hourly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://geohub.pages.dev/creators.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+
+  <!-- Gamification -->
+  <url><loc>https://geohub.pages.dev/rewards.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://geohub.pages.dev/challenges.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://geohub.pages.dev/patriot.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://geohub.pages.dev/learning.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://geohub.pages.dev/lifegraph.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+
+  <!-- Showcase -->
+  <url><loc>https://geohub.pages.dev/world.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://geohub.pages.dev/demo.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+
+  <!-- Business / pricing -->
+  <url><loc>https://geohub.pages.dev/pricing.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
+  <!-- Legal / trust -->
+  <url><loc>https://geohub.pages.dev/privacy.html</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://geohub.pages.dev/terms.html</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://geohub.pages.dev/trust.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+
+</urlset>
