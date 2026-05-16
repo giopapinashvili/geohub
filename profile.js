@@ -176,7 +176,20 @@
     if (badges) badges.innerHTML = '<span class="trust-badge green"><i class="fas fa-check-circle"></i> Real account</span><span class="trust-badge gold"><i class="fas fa-bolt"></i> ' + compact(user.xp) + ' XP</span><span class="trust-badge purple"><i class="fas fa-id-badge"></i> ' + esc(user.accountType) + '</span>';
     const own = fbUser && user.uid === fbUser.uid;
     const coverActions = $('.cover-actions');
-    if (coverActions) coverActions.innerHTML = own ? '<button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button>' : '<button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> Add Friend</button>';
+    if (coverActions) coverActions.innerHTML = own
+      ? '<button class="cover-btn" data-edit-cover><i class="fas fa-camera"></i> Edit Cover</button><button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button>'
+      : '<button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> Add Friend</button>';
+    if (own) {
+      const avatarWrap = $('.profile-avatar-wrap');
+      if (avatarWrap && !avatarWrap.querySelector('.profile-avatar-edit')) {
+        const editBtn = document.createElement('button');
+        editBtn.className = 'profile-avatar-edit';
+        editBtn.setAttribute('data-change-avatar', '');
+        editBtn.setAttribute('aria-label', 'Change profile photo');
+        editBtn.innerHTML = '<i class="fas fa-camera"></i>';
+        avatarWrap.appendChild(editBtn);
+      }
+    }
     const actions = $('.profile-actions');
     if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i></button><button class="btn btn-ghost btn-sm" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> Message</button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> Add Friend</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> Follow</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '" data-user-name="' + esc(fullName) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-mute-user="' + esc(user.uid) + '" data-user-name="' + esc(fullName) + '"><i class="fas fa-volume-mute"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '" data-user-name="' + esc(fullName) + '"><i class="fas fa-ban"></i></button>';
     if (!own && window.GeoSocial && window.GeoSocial.checkFollowing) {
@@ -561,23 +574,217 @@
     }
   }
 
-  function openEditProfileModal(){
-    const currentName = $('.profile-name') ? $('.profile-name').textContent : '';
-    const currentBio = $('.profile-bio') ? $('.profile-bio').textContent.replace('No bio yet.','') : '';
-    const html = '<div class="gh-modal-backdrop" id="profileEditModal"><div class="gh-modal"><div class="gh-modal-head"><h3>Edit profile</h3><button class="gh-modal-close" data-close-profile-modal>✕</button></div><div class="gh-modal-body"><input class="gh-input" id="peName" placeholder="Full name" value="'+esc(currentName)+'"><div style="height:10px"></div><textarea class="gh-textarea" id="peBio" placeholder="Bio">'+esc(currentBio)+'</textarea><div style="height:10px"></div><select class="gh-select" id="peScope"><option value="all_georgia">Interested in all Georgia</option><option value="multi_city">Specific cities / regions</option></select><div style="height:10px"></div><input class="gh-input" id="peCities" placeholder="Cities/regions, e.g. Tbilisi, Batumi, Kazbegi"></div><div class="gh-modal-actions"><button class="btn btn-ghost btn-sm" data-close-profile-modal>Cancel</button><button class="btn btn-primary btn-sm" id="peSave">Save</button></div></div></div>';
-    document.body.insertAdjacentHTML('beforeend', html);
-    const modal = $('#profileEditModal');
-    modal.addEventListener('click', e => { if(e.target === modal || e.target.closest('[data-close-profile-modal]')) modal.remove(); });
-    $('#peSave').onclick = async function(){
-      const GF = window.GeoFirebase; const u = GF && GF.auth && GF.auth.currentUser; if(!u) return;
-      const scope = $('#peScope').value;
-      const cityText = $('#peCities').value.trim();
-      const cities = scope === 'all_georgia' ? ['all_georgia'] : cityText.split(',').map(x=>x.trim()).filter(Boolean);
+  function openEditProfileModal() {
+    const GF = window.GeoFirebase;
+    const fbUser = GF && GF.auth && GF.auth.currentUser;
+    if (!fbUser) return;
+
+    const u = window.GeoCurrentUser || {};
+    const currentAvatar   = u.avatar || u.photoURL || '';
+    const currentCover    = u.coverImage || '';
+    const currentName     = u.fullName || u.displayName || '';
+    const currentUsername = u.username || '';
+    const currentBio      = u.bio || '';
+    const currentCityScope = u.cityScope || 'all_georgia';
+    const currentCities   = Array.isArray(u.cities) ? u.cities.filter(c => c !== 'all_georgia').join(', ') : '';
+    const currentWebsite  = u.website || '';
+    const sl = u.socialLinks || {};
+    const currentInterests = Array.isArray(u.interests) ? u.interests : [];
+
+    const INTERESTS = ['Hiking','Cafés','Food','History','Arts','Nature','Sports','Nightlife','Shopping','Music','Photography','Travel','Adventure','Culture','Architecture'];
+
+    const old = document.getElementById('profileEditModal'); if (old) old.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'profileEditModal';
+    overlay.className = 'profile-edit-overlay';
+    overlay.innerHTML = '<div class="profile-edit-sheet">'
+      + '<div class="profile-edit-head"><h3>Edit Profile</h3><button class="profile-edit-close" id="peClose"><i class="fas fa-times"></i></button></div>'
+      + '<div class="profile-edit-body">'
+
+      /* Photos */
+      + '<div class="profile-edit-section">'
+      + '<div class="profile-edit-section-title"><i class="fas fa-images"></i> Photos</div>'
+      + '<div class="profile-edit-photos-row">'
+      + '<div class="profile-edit-cover-wrap" id="peCoverWrap">'
+      + (currentCover ? '<img id="peCoverImg" src="' + esc(currentCover) + '" alt="Cover">' : '')
+      + '<div class="profile-edit-cover-overlay" id="peCoverOverlay"><i class="fas fa-camera"></i><span>Edit Cover</span></div>'
+      + '</div>'
+      + '<div class="profile-edit-avatar-col">'
+      + '<div class="profile-edit-avatar-preview" id="peAvatarWrap">'
+      + '<img id="peAvatarImg" src="' + esc(currentAvatar) + '" alt="Avatar">'
+      + '<div class="profile-edit-avatar-badge"><i class="fas fa-camera"></i></div>'
+      + '</div>'
+      + '<span class="profile-edit-avatar-label">Photo</span>'
+      + '</div>'
+      + '</div>'
+      + '<div class="upload-progress-bar-wrap" id="peUploadProgress" style="display:none"><div class="upload-progress-bar" id="peUploadBar"></div></div>'
+      + '<div class="upload-status-text" id="peUploadStatus"></div>'
+      + '</div>'
+
+      /* Basic info */
+      + '<div class="profile-edit-section">'
+      + '<div class="profile-edit-section-title"><i class="fas fa-user"></i> Basic Info</div>'
+      + '<div class="profile-edit-field"><label>Full Name</label><input class="profile-edit-input" id="peName" placeholder="Your full name" value="' + esc(currentName) + '"></div>'
+      + '<div class="profile-edit-field"><label>Username</label><input class="profile-edit-input" id="peUsername" placeholder="your_username" value="' + esc(currentUsername) + '"></div>'
+      + '<div class="profile-edit-field"><label>Bio</label><textarea class="profile-edit-textarea" id="peBio" placeholder="Tell people about yourself…">' + esc(currentBio) + '</textarea></div>'
+      + '</div>'
+
+      /* Location */
+      + '<div class="profile-edit-section">'
+      + '<div class="profile-edit-section-title"><i class="fas fa-map-marker-alt"></i> Location &amp; Interests</div>'
+      + '<div class="profile-edit-field"><label>Location Scope</label><select class="profile-edit-input" id="peScope"><option value="all_georgia"' + (currentCityScope === 'all_georgia' ? ' selected' : '') + '>Interested in all Georgia</option><option value="multi_city"' + (currentCityScope !== 'all_georgia' ? ' selected' : '') + '>Specific cities / regions</option></select></div>'
+      + '<div class="profile-edit-field" id="peCitiesField"' + (currentCityScope === 'all_georgia' ? ' style="display:none"' : '') + '><label>Cities / Regions</label><input class="profile-edit-input" id="peCities" placeholder="Tbilisi, Batumi, Kazbegi" value="' + esc(currentCities) + '"></div>'
+      + '<div class="profile-edit-field"><label>Interests</label><div class="interests-wrap" id="peInterests">'
+      + INTERESTS.map(function(i) { return '<div class="interest-chip' + (currentInterests.indexOf(i) > -1 ? ' selected' : '') + '" data-interest="' + esc(i) + '">' + esc(i) + '</div>'; }).join('')
+      + '</div></div>'
+      + '</div>'
+
+      /* Links */
+      + '<div class="profile-edit-section">'
+      + '<div class="profile-edit-section-title"><i class="fas fa-link"></i> Links &amp; Contact</div>'
+      + '<div class="profile-edit-field"><label>Website</label><input class="profile-edit-input" id="peWebsite" placeholder="https://yourwebsite.com" value="' + esc(currentWebsite) + '"></div>'
+      + '<div class="profile-edit-field"><label>Social Links</label><div class="social-links-grid">'
+      + '<div class="social-link-field"><span class="social-link-icon"><i class="fab fa-instagram"></i></span><input id="peInstagram" placeholder="instagram" value="' + esc(sl.instagram || '') + '"></div>'
+      + '<div class="social-link-field"><span class="social-link-icon"><i class="fab fa-facebook"></i></span><input id="peFacebook" placeholder="facebook" value="' + esc(sl.facebook || '') + '"></div>'
+      + '<div class="social-link-field"><span class="social-link-icon"><i class="fab fa-linkedin"></i></span><input id="peLinkedin" placeholder="linkedin" value="' + esc(sl.linkedin || '') + '"></div>'
+      + '<div class="social-link-field"><span class="social-link-icon"><i class="fab fa-tiktok"></i></span><input id="peTiktok" placeholder="tiktok" value="' + esc(sl.tiktok || '') + '"></div>'
+      + '</div></div>'
+      + '</div>'
+
+      + '</div>'/* end body */
+      + '<div class="profile-edit-footer"><button class="btn btn-ghost btn-sm" id="peCancel">Cancel</button><button class="btn btn-primary btn-sm" id="peSaveBtn"><i class="fas fa-check"></i> Save Changes</button></div>'
+      + '</div>';/* end sheet */
+
+    document.body.appendChild(overlay);
+    requestAnimationFrame(function() { overlay.classList.add('open'); });
+
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+    overlay.querySelector('#peClose').addEventListener('click', function() { overlay.remove(); });
+    overlay.querySelector('#peCancel').addEventListener('click', function() { overlay.remove(); });
+
+    overlay.querySelector('#peScope').addEventListener('change', function() {
+      const cf = document.getElementById('peCitiesField');
+      if (cf) cf.style.display = this.value === 'all_georgia' ? 'none' : '';
+    });
+
+    overlay.querySelector('#peInterests').addEventListener('click', function(e) {
+      const chip = e.target.closest('.interest-chip');
+      if (chip) chip.classList.toggle('selected');
+    });
+
+    var _pendingAvatar = '', _pendingCover = '';
+
+    function doUpload(file, folder, onUrl) {
+      const GS = window.GeoSocial;
+      if (!GS || !GS.uploadFile) { var st = document.getElementById('peUploadStatus'); if (st) st.textContent = 'Upload unavailable.'; return; }
+      const pw = document.getElementById('peUploadProgress');
+      const pb = document.getElementById('peUploadBar');
+      const st = document.getElementById('peUploadStatus');
+      if (pw) pw.style.display = '';
+      if (pb) pb.style.width = '0%';
+      if (st) st.textContent = 'Uploading…';
+      GS.uploadFile(file, folder, function(pct) {
+        if (pb) pb.style.width = pct + '%';
+        if (st) st.textContent = pct + '%';
+      }).then(function(url) {
+        if (pw) pw.style.display = 'none';
+        if (url) { if (st) st.textContent = 'Uploaded ✓'; onUrl(url); }
+        else { if (st) st.textContent = 'Upload failed — try again.'; }
+      }).catch(function() {
+        if (pw) pw.style.display = 'none';
+        if (st) st.textContent = 'Upload failed — try again.';
+      });
+    }
+
+    overlay.querySelector('#peAvatarWrap').addEventListener('click', function() {
+      var inp = document.createElement('input');
+      inp.type = 'file'; inp.accept = 'image/png,image/jpeg,image/webp'; inp.style.display = 'none';
+      document.body.appendChild(inp);
+      inp.onchange = function() {
+        var f = inp.files && inp.files[0]; inp.remove(); if (!f) return;
+        doUpload(f, 'avatars', function(url) {
+          _pendingAvatar = url;
+          var img = document.getElementById('peAvatarImg'); if (img) img.src = url;
+        });
+      };
+      inp.click();
+    });
+
+    overlay.querySelector('#peCoverWrap').addEventListener('click', function() {
+      var inp = document.createElement('input');
+      inp.type = 'file'; inp.accept = 'image/png,image/jpeg,image/webp'; inp.style.display = 'none';
+      document.body.appendChild(inp);
+      inp.onchange = function() {
+        var f = inp.files && inp.files[0]; inp.remove(); if (!f) return;
+        doUpload(f, 'covers', function(url) {
+          _pendingCover = url;
+          var wrap = document.getElementById('peCoverWrap');
+          var ov   = document.getElementById('peCoverOverlay');
+          var img  = document.getElementById('peCoverImg');
+          if (!img && wrap) { img = document.createElement('img'); img.id = 'peCoverImg'; img.alt = 'Cover'; wrap.insertBefore(img, ov || null); }
+          if (img) img.src = url;
+        });
+      };
+      inp.click();
+    });
+
+    overlay.querySelector('#peSaveBtn').addEventListener('click', async function() {
+      if (!GF || !GF.fs || !fbUser) return;
+      const saveBtn = this;
+      saveBtn.disabled = true; saveBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Saving…';
+
+      const scope    = document.getElementById('peScope').value;
+      const cityText = (document.getElementById('peCities') ? document.getElementById('peCities').value : '').trim();
+      const cities   = scope === 'all_georgia' ? ['all_georgia'] : cityText.split(',').map(function(x){ return x.trim(); }).filter(Boolean);
+
+      const selectedInterests = [];
+      overlay.querySelectorAll('.interest-chip.selected').forEach(function(el) { selectedInterests.push(el.dataset.interest); });
+
+      const updates = {
+        fullName:    (document.getElementById('peName').value || '').trim(),
+        displayName: (document.getElementById('peName').value || '').trim(),
+        username:    (document.getElementById('peUsername').value || '').trim().toLowerCase().replace(/[^a-z0-9_.]/g,''),
+        bio:         (document.getElementById('peBio').value || '').trim(),
+        cityScope:   scope,
+        city:        scope === 'all_georgia' ? 'all_georgia' : (cities[0] || ''),
+        cities:      cities,
+        website:     (document.getElementById('peWebsite').value || '').trim(),
+        socialLinks: {
+          instagram: (document.getElementById('peInstagram').value || '').trim(),
+          facebook:  (document.getElementById('peFacebook').value || '').trim(),
+          linkedin:  (document.getElementById('peLinkedin').value || '').trim(),
+          tiktok:    (document.getElementById('peTiktok').value || '').trim()
+        },
+        interests:   selectedInterests,
+        updatedAt:   GF.fs.serverTimestamp()
+      };
+      if (_pendingAvatar) updates.avatar = _pendingAvatar;
+      if (_pendingCover)  updates.coverImage = _pendingCover;
+
       try {
-        await GF.fs.updateDoc(GF.fs.doc(GF.db,'users',u.uid), { fullName: $('#peName').value.trim(), displayName: $('#peName').value.trim(), bio: $('#peBio').value.trim(), cityScope: scope, city: scope === 'all_georgia' ? 'all_georgia' : (cities[0] || ''), cities: cities, updatedAt: GF.fs.serverTimestamp() });
-        toast('Profile updated'); modal.remove(); location.reload();
-      } catch(err){ toast('Profile update failed', 'error'); }
-    };
+        await GF.fs.updateDoc(GF.fs.doc(GF.db, 'users', fbUser.uid), updates);
+        if (window.GeoCurrentUser) Object.assign(window.GeoCurrentUser, updates);
+        if (window.GeoAuth && window.GeoAuth.updateUser) window.GeoAuth.updateUser(updates);
+        overlay.remove();
+        /* Reflect changes immediately in the page */
+        if (_pendingCover) {
+          const cover = $('.profile-cover');
+          if (cover) cover.style.backgroundImage = 'linear-gradient(180deg,rgba(4,5,13,0.08),rgba(4,5,13,0.72)),url(\'' + _pendingCover + '\')';
+        }
+        if (_pendingAvatar) {
+          const avEl = $('.profile-avatar'); if (avEl) avEl.src = _pendingAvatar;
+          $$('.gh-avatar-img,.nav-avatar,[data-nav-avatar]').forEach(function(el) { el.src = _pendingAvatar; });
+        }
+        if (updates.fullName) { const nm = $('.profile-name'); if (nm) nm.textContent = updates.fullName; }
+        if ('bio' in updates) { const bioEl = $('.profile-bio'); if (bioEl) bioEl.textContent = updates.bio || 'No bio yet.'; }
+        if (updates.username || updates.city) { const hnd = $('.profile-handle'); if (hnd) hnd.textContent = '@' + (updates.username || (window.GeoCurrentUser && window.GeoCurrentUser.username) || 'user') + (updates.city && updates.city !== 'all_georgia' ? ' · ' + updates.city : ''); }
+        toast('Profile saved');
+      } catch (err) {
+        toast('Save failed: ' + (err && err.message ? err.message : 'Unknown error'), 'error');
+        saveBtn.disabled = false; saveBtn.innerHTML = '<i class="fas fa-check"></i> Save Changes';
+      }
+    });
   }
 
   function initTabs() {
@@ -692,6 +899,50 @@
     if (e.target.closest('[data-edit-profile]')) {
       e.preventDefault();
       openEditProfileModal();
+    }
+    if (e.target.closest('[data-change-avatar]')) {
+      e.preventDefault();
+      var inp = document.createElement('input');
+      inp.type = 'file'; inp.accept = 'image/png,image/jpeg,image/webp'; inp.style.display = 'none';
+      document.body.appendChild(inp);
+      inp.onchange = async function() {
+        var file = inp.files && inp.files[0]; inp.remove(); if (!file) return;
+        var GS = window.GeoSocial; var GF2 = window.GeoFirebase;
+        if (!GS || !GS.uploadFile || !GF2 || !GF2.auth || !GF2.auth.currentUser) return;
+        var fbU = GF2.auth.currentUser;
+        try {
+          var url = await GS.uploadFile(file, 'avatars', function(){});
+          if (!url) { toast('Upload failed', 'error'); return; }
+          await GF2.fs.updateDoc(GF2.fs.doc(GF2.db, 'users', fbU.uid), { avatar: url, updatedAt: GF2.fs.serverTimestamp() });
+          var avEl = $('.profile-avatar'); if (avEl) avEl.src = url;
+          $$('.gh-avatar-img,.nav-avatar,[data-nav-avatar]').forEach(function(el){ el.src = url; });
+          if (window.GeoCurrentUser) window.GeoCurrentUser.avatar = url;
+          toast('Profile photo updated');
+        } catch(err) { toast('Photo update failed', 'error'); }
+      };
+      inp.click();
+    }
+    if (e.target.closest('[data-edit-cover]')) {
+      e.preventDefault();
+      var inp2 = document.createElement('input');
+      inp2.type = 'file'; inp2.accept = 'image/png,image/jpeg,image/webp'; inp2.style.display = 'none';
+      document.body.appendChild(inp2);
+      inp2.onchange = async function() {
+        var file = inp2.files && inp2.files[0]; inp2.remove(); if (!file) return;
+        var GS = window.GeoSocial; var GF2 = window.GeoFirebase;
+        if (!GS || !GS.uploadFile || !GF2 || !GF2.auth || !GF2.auth.currentUser) return;
+        var fbU = GF2.auth.currentUser;
+        try {
+          var url = await GS.uploadFile(file, 'covers', function(){});
+          if (!url) { toast('Upload failed', 'error'); return; }
+          await GF2.fs.updateDoc(GF2.fs.doc(GF2.db, 'users', fbU.uid), { coverImage: url, updatedAt: GF2.fs.serverTimestamp() });
+          var coverEl = $('.profile-cover');
+          if (coverEl) coverEl.style.backgroundImage = 'linear-gradient(180deg,rgba(4,5,13,0.08),rgba(4,5,13,0.72)),url(\'' + url + '\')';
+          if (window.GeoCurrentUser) window.GeoCurrentUser.coverImage = url;
+          toast('Cover photo updated');
+        } catch(err) { toast('Cover update failed', 'error'); }
+      };
+      inp2.click();
     }
     const unblockBtn = e.target.closest('[data-unblock-user]');
     if (unblockBtn) {
