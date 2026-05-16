@@ -597,7 +597,7 @@
   }
 
   function showPrivateProfileGate(name) {
-    $$('.ptab-bar, .profile-tabs-wrap, .profile-content-area, [class*="ptab-pane"]').forEach(el => { el.style.display = 'none'; });
+    $$('#profileTabs, .profile-tabs, .profile-sidebar, .tab-panel').forEach(el => { el.style.display = 'none'; });
     $$('[data-follow-user],[data-friend-user],[data-message-user]').forEach(el => { el.style.display = 'none'; });
     const main = $('.profile-layout') || document.body;
     const gate = document.createElement('div');

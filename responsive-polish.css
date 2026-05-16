@@ -50,8 +50,9 @@ body.gh-overlay-open .app-bottom-nav{pointer-events:none;}
 
 /* Messenger should not cover mobile bottom navigation and should not appear on full messages page. */
 body.messages-page #ghChatPopRoot,
+body.page-messages #ghChatPopRoot,
 body[data-page="messages"] #ghChatPopRoot,
-html[data-page="messages"] #ghChatPopRoot{display:none!important;}
+body[data-gh-page="messages"] #ghChatPopRoot{display:none!important;}
 #ghChatPopRoot.gh-chat-pop-root{
   right:18px!important;
   bottom:calc(18px + var(--gh-safe-bottom))!important;
