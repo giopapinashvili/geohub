@@ -89,6 +89,7 @@
     if (section === 'rewards')    { loadAdminRewards(); }
     if (section === 'analytics')  { loadAdminAnalytics(); }
     if (section === 'errors')     { loadAdminErrors(); }
+    if (section === 'businesses') { loadAdminBusinesses(); }
   };
 
   /* ── TOAST ───────────────────────────────────────────────── */
@@ -476,6 +477,139 @@
     if (b) b.featured = !b.featured;
     toast(b.featured ? 'Business featured on homepage' : 'Business unfeatured');
     renderBusinesses();
+  };
+
+  /* ── BUSINESSES (Firestore) ──────────────────────────────────── */
+  function loadAdminBusinesses() {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db) return;
+    var el = document.getElementById('bizList');
+    if (el) el.innerHTML = '<div style="color:#94a3b8;font-size:.85rem;padding:20px"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
+
+    fb.fs.getDocs(fb.fs.query(fb.fs.collection(fb.db, 'businesses'), fb.fs.orderBy('createdAt', 'desc'), fb.fs.limit(100)))
+      .then(function (snap) {
+        if (!snap.size) {
+          if (el) el.innerHTML = '<div style="color:#64748b;font-size:.85rem;text-align:center;padding:40px">No businesses yet.</div>';
+          return;
+        }
+        var html = '';
+        snap.forEach(function (d) {
+          var b = Object.assign({ id: d.id }, d.data());
+          var statusBadge = {
+            verified: '<span class="badge bg-green"><i class="fas fa-check"></i> Verified</span>',
+            active:   '<span class="badge bg-blue">Active</span>',
+            pending:  '<span class="badge bg-gold">Pending</span>',
+            rejected: '<span class="badge bg-red">Rejected</span>',
+            inactive: '<span class="badge" style="background:rgba(100,116,139,.2);color:#94a3b8">Inactive</span>',
+          }[b.status || 'active'] || '<span class="badge bg-blue">Active</span>';
+
+          var loc = b.isOnline ? '<i class="fas fa-globe"></i> Online' : ('<i class="fas fa-location-dot"></i> ' + (b.city || 'Unknown'));
+          var views = b.viewCount || 0;
+          var saves = b.saveCount || 0;
+          var quotes = b.quoteCount || 0;
+
+          html += '<div class="biz-card">' +
+            '<div class="biz-ico" style="background:rgba(16,185,129,.12);color:#10b981;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">' +
+              '<i class="fas fa-store"></i>' +
+            '</div>' +
+            '<div style="flex:1;min-width:0">' +
+              '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:2px">' +
+                '<div class="biz-name">' + esc(b.title || 'Unnamed') + '</div>' +
+                statusBadge +
+                (b.featured ? '<span class="badge bg-purple"><i class="fas fa-star"></i> Featured</span>' : '') +
+              '</div>' +
+              '<div class="biz-meta" style="font-size:.75rem;color:#64748b;margin-bottom:4px">' + esc(b.category || '—') + ' · ' + loc + '</div>' +
+              '<div class="biz-stats" style="font-size:.72rem;color:#94a3b8">' +
+                'Views <strong>' + views + '</strong> · ' +
+                'Saves <strong>' + saves + '</strong> · ' +
+                'Quotes <strong>' + quotes + '</strong> · ' +
+                'Reviews <strong>' + (b.reviewCount || 0) + '</strong>' +
+              '</div>' +
+              '<div class="biz-acts" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">' +
+                (b.status !== 'verified'
+                  ? '<button class="btn btn-green btn-sm" onclick="adminVerifyBiz(\'' + d.id + '\')"><i class="fas fa-check"></i> Verify</button>'
+                  : '<button class="btn btn-ghost btn-sm" disabled><i class="fas fa-check-circle"></i> Verified</button>') +
+                (b.status !== 'inactive'
+                  ? '<button class="btn btn-gold btn-sm" onclick="adminDeactivateBiz(\'' + d.id + '\')"><i class="fas fa-ban"></i> Deactivate</button>'
+                  : '<button class="btn btn-ghost btn-sm" onclick="adminActivateBiz(\'' + d.id + '\')"><i class="fas fa-check"></i> Reactivate</button>') +
+                '<button class="btn btn-' + (b.featured ? 'gold' : 'ghost') + ' btn-sm" onclick="adminToggleFeature(\'' + d.id + '\', ' + (!b.featured) + ')">' +
+                  (b.featured ? '<i class="fas fa-star"></i> Unfeature' : '<i class="far fa-star"></i> Feature') + '</button>' +
+                '<a href="business.html?id=' + d.id + '" target="_blank" class="btn btn-ghost btn-sm"><i class="fas fa-external-link-alt"></i> View</a>' +
+                '<button class="btn btn-ghost btn-sm" onclick="adminViewQuotes(\'' + d.id + '\', this)"><i class="fas fa-inbox"></i> Quotes</button>' +
+              '</div>' +
+              '<div id="admin-quotes-' + d.id + '" style="display:none;margin-top:8px;font-size:.8rem;color:#94a3b8"></div>' +
+            '</div>' +
+          '</div>';
+        });
+        if (el) el.innerHTML = html;
+      }).catch(function (err) {
+        console.error('[Admin] loadAdminBusinesses failed', err);
+        if (el) el.innerHTML = '<div style="color:#ef4444;font-size:.85rem;padding:20px">Could not load businesses.</div>';
+      });
+  }
+
+  function esc(str) { return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  window.adminVerifyBiz = function (id) {
+    var fb = window.GeoFirebase;
+    if (!fb) return;
+    fb.fs.updateDoc(fb.fs.doc(fb.db, 'businesses', id), { status: 'verified', verified: true, verifiedAt: fb.fs.serverTimestamp() })
+      .then(function () { toast('Business verified ✓'); loadAdminBusinesses(); })
+      .catch(function (e) { toast('Error: ' + e.message, 'rgba(239,68,68,.95)'); });
+  };
+
+  window.adminDeactivateBiz = function (id) {
+    var fb = window.GeoFirebase;
+    if (!fb) return;
+    fb.fs.updateDoc(fb.fs.doc(fb.db, 'businesses', id), { status: 'inactive', updatedAt: fb.fs.serverTimestamp() })
+      .then(function () { toast('Business deactivated', 'rgba(245,158,11,.95)'); loadAdminBusinesses(); })
+      .catch(function (e) { toast('Error: ' + e.message, 'rgba(239,68,68,.95)'); });
+  };
+
+  window.adminActivateBiz = function (id) {
+    var fb = window.GeoFirebase;
+    if (!fb) return;
+    fb.fs.updateDoc(fb.fs.doc(fb.db, 'businesses', id), { status: 'active', updatedAt: fb.fs.serverTimestamp() })
+      .then(function () { toast('Business reactivated'); loadAdminBusinesses(); })
+      .catch(function (e) { toast('Error: ' + e.message, 'rgba(239,68,68,.95)'); });
+  };
+
+  window.adminToggleFeature = function (id, featureState) {
+    var fb = window.GeoFirebase;
+    if (!fb) return;
+    fb.fs.updateDoc(fb.fs.doc(fb.db, 'businesses', id), { featured: featureState, updatedAt: fb.fs.serverTimestamp() })
+      .then(function () { toast(featureState ? 'Business featured' : 'Business unfeatured'); loadAdminBusinesses(); })
+      .catch(function (e) { toast('Error: ' + e.message, 'rgba(239,68,68,.95)'); });
+  };
+
+  window.adminViewQuotes = function (bizId, btn) {
+    var panel = document.getElementById('admin-quotes-' + bizId);
+    if (!panel) return;
+    if (panel.style.display !== 'none') { panel.style.display = 'none'; return; }
+    panel.style.display = 'block';
+    panel.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading quotes…';
+    var fb = window.GeoFirebase;
+    if (!fb) return;
+    fb.fs.getDocs(fb.fs.query(
+      fb.fs.collection(fb.db, 'businesses', bizId, 'quoteRequests'),
+      fb.fs.orderBy('createdAt', 'desc'),
+      fb.fs.limit(10)
+    )).then(function (snap) {
+      if (!snap.size) { panel.innerHTML = 'No quote requests.'; return; }
+      var html = '';
+      snap.forEach(function (d) {
+        var q = d.data();
+        var ts = q.createdAt ? (q.createdAt.toDate ? q.createdAt.toDate().toLocaleDateString() : '') : '';
+        html += '<div style="background:rgba(255,255,255,.04);border-radius:8px;padding:8px 10px;margin-bottom:6px">' +
+          '<strong style="color:#f1f5f9">' + esc(q.name || 'Anonymous') + '</strong>' +
+          (q.status === 'new' ? ' <span style="background:rgba(16,185,129,.15);color:#34d399;border-radius:4px;font-size:.65rem;padding:1px 6px;font-weight:700">NEW</span>' : '') +
+          ' <span style="color:#64748b;font-size:.72rem">' + ts + '</span><br>' +
+          '<span style="color:#94a3b8">' + esc(q.email || '') + (q.phone ? ' · ' + esc(q.phone) : '') + '</span><br>' +
+          '<span style="color:#94a3b8">' + esc((q.message || '').slice(0, 120)) + '</span>' +
+          '</div>';
+      });
+      panel.innerHTML = html;
+    }).catch(function () { panel.innerHTML = 'Could not load quotes.'; });
   };
 
   /* ── CREATORS ─────────────────────────────────────────────── */

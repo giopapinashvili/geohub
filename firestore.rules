@@ -84,8 +84,16 @@ service cloud.firestore {
       return signedIn()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'followerCount', 'postCount', 'reviewCount',
-          'ratingAverage', 'ratingTotal', 'updatedAt'
+          'ratingAverage', 'ratingTotal', 'ratingCount',
+          'viewCount', 'saveCount', 'quoteCount', 'updatedAt'
         ]);
+    }
+
+    // Returns true when the requesting user owns the business at bizId.
+    // Uses exists() on businessAdmins rather than a get() to keep cost low.
+    function isBizOwner(bizId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/businessAdmins/$(bizId + '_' + request.auth.uid));
     }
 
     function onlyGroupCountersChanged() {
@@ -242,22 +250,57 @@ service cloud.firestore {
       allow create: if newOwnerMatches();
       allow update: if isAdmin() || existingOwnerMatches() || onlyBusinessCountersChanged();
       allow delete: if isAdmin() || existingOwnerMatches();
+
+      // ── Services, products, and price list: owner CRUD, public read ──
+      match /services/{serviceId} {
+        allow read: if true;
+        allow create, update, delete: if isAdmin() || isBizOwner(businessId);
+      }
+      match /products/{productId} {
+        allow read: if true;
+        allow create, update, delete: if isAdmin() || isBizOwner(businessId);
+      }
+      match /priceList/{itemId} {
+        allow read: if true;
+        allow create, update, delete: if isAdmin() || isBizOwner(businessId);
+      }
+
+      // ── Gallery: owner can CRUD, public read ──────────────────────────
+      match /gallery/{photoId} {
+        allow read: if true;
+        allow create, update, delete: if isAdmin() || isBizOwner(businessId);
+      }
+
+      // ── Quote requests: any signed-in user can submit (self-attributed).
+      // Only the business owner and admins can read them.
+      match /quoteRequests/{reqId} {
+        allow create: if signedIn()
+          && request.resource.data.get('submittedBy', '') == uid()
+          && request.resource.data.get('businessId', '') == businessId
+          && request.resource.data.get('name',    '') is string
+          && request.resource.data.get('message', '') is string;
+        allow read: if isAdmin() || isBizOwner(businessId);
+        allow update: if isAdmin() || isBizOwner(businessId);
+        allow delete: if isAdmin();
+      }
+
+      // ── QR scan logs: unchanged ──────────────────────────────────────
+      match /qrScanLogs/{logId} {
+        allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
+        allow read: if isAdmin()
+          || (signedIn()
+              && get(/databases/$(database)/documents/businesses/$(businessId)).data.get('ownerId', '') == uid());
+        allow update, delete: if isAdmin();
+      }
+      match /subscriptions/{subId} {
+        allow read: if isAdmin() || (signedIn() && resource.data.get('ownerId', '') == uid());
+        allow create, update, delete: if isAdmin();
+      }
     }
     match /businessAdmins/{adminId} {
       allow read: if true;
       allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
       allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid());
-    }
-    match /businesses/{businessId}/qrScanLogs/{logId} {
-      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
-      allow read: if isAdmin()
-        || (signedIn()
-            && get(/databases/$(database)/documents/businesses/$(businessId)).data.get('ownerId', '') == uid());
-      allow update, delete: if isAdmin();
-    }
-    match /businesses/{businessId}/subscriptions/{subId} {
-      allow read: if isAdmin() || (signedIn() && resource.data.get('ownerId', '') == uid());
-      allow create, update, delete: if isAdmin();
     }
     match /businessFollowers/{followId} {
       allow read: if true;
@@ -742,6 +785,19 @@ service cloud.firestore {
     match /collabOffers/{docId}    { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
     match /serviceRequests/{docId} { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
     match /lessonBookings/{docId}  { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
+
+    // ── SAVED BUSINESSES ─────────────────────────────────────────────────────
+    // Document ID convention: {userId}_{businessId}
+    match /savedBusinesses/{saveId} {
+      allow read: if signedIn()
+        && (resource.data.get('userId', '') == uid() || isAdmin());
+      allow create: if signedIn()
+        && request.resource.data.get('userId', '') == uid()
+        && request.resource.data.get('businessId', '') is string;
+      allow update: if false;
+      allow delete: if signedIn()
+        && (resource.data.get('userId', '') == uid() || isAdmin());
+    }
 
     // ── INVITES & REFERRALS ───────────────────────────────────────────────────
     // Invite codes are created by users and updated only to increment the use
