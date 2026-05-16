@@ -3,137 +3,239 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function signedIn() { return request.auth != null; }
-    function uid() { return request.auth.uid; }
-    function isOwner(userId) { return signedIn() && uid() == userId; }
+    // ── CORE HELPERS ──────────────────────────────────────────────────────────
+
+    function signedIn() {
+      return request.auth != null;
+    }
+    function uid() {
+      return request.auth.uid;
+    }
+    function isOwner(userId) {
+      return signedIn() && uid() == userId;
+    }
     function isAdmin() {
-      return signedIn() && exists(/databases/$(database)/documents/admins/$(uid()));
+      return signedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
+    // Caller's UID appears in at least one standard ownership field of the
+    // document being created. Used for create-only guards.
     function newOwnerMatches() {
       return signedIn() && (
-        request.resource.data.get('userId', '') == uid() ||
-        request.resource.data.get('authorId', '') == uid() ||
-        request.resource.data.get('uid', '') == uid() ||
+        request.resource.data.get('userId',    '') == uid() ||
+        request.resource.data.get('authorId',  '') == uid() ||
+        request.resource.data.get('uid',       '') == uid() ||
         request.resource.data.get('createdBy', '') == uid() ||
-        request.resource.data.get('ownerId', '') == uid()
+        request.resource.data.get('ownerId',   '') == uid()
       );
     }
 
+    // Caller owns the existing document being read/updated/deleted.
     function existingOwnerMatches() {
       return signedIn() && (
-        resource.data.get('userId', '') == uid() ||
-        resource.data.get('authorId', '') == uid() ||
-        resource.data.get('uid', '') == uid() ||
+        resource.data.get('userId',    '') == uid() ||
+        resource.data.get('authorId',  '') == uid() ||
+        resource.data.get('uid',       '') == uid() ||
         resource.data.get('createdBy', '') == uid() ||
-        resource.data.get('ownerId', '') == uid()
+        resource.data.get('ownerId',   '') == uid()
       );
     }
 
-    function economyFieldsUnchanged() {
+    // ── USER FIELD PROTECTION ─────────────────────────────────────────────────
+
+    // Fields that only Cloud Functions or an admin may write on a user document.
+    // Blocks economy inflation, trust manipulation, and privilege escalation.
+    // This list must stay in sync with userCreateFieldsSafe() below.
+    function userAdminOnlyFields() {
       return !request.resource.data.diff(resource.data).affectedKeys().hasAny([
         'pointsBalance', 'totalPointsEarned', 'totalPointsSpent',
-        'totalPointsTransferred', 'totalPointsReceived'
+        'totalPointsTransferred', 'totalPointsReceived',
+        'xp', 'level', 'trustScore', 'verified',
+        'role', 'isAdmin', 'adminLevel', 'premiumUntil'
       ]);
     }
 
-    function onlyCountersChanged() {
-      return signedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-        'likeCount', 'commentCount', 'shareCount', 'reactionCount', 'saveCount', 'updatedAt'
+    // On creation a new user document must not include any admin/economy field.
+    // Prevents bootstrapping an elevated account before any CF or admin action.
+    function userCreateFieldsSafe() {
+      return !request.resource.data.keys().hasAny([
+        'pointsBalance', 'totalPointsEarned', 'totalPointsSpent',
+        'totalPointsTransferred', 'totalPointsReceived',
+        'xp', 'level', 'trustScore', 'verified',
+        'role', 'isAdmin', 'adminLevel', 'premiumUntil'
       ]);
+    }
+
+    // ── COUNTER HELPERS ───────────────────────────────────────────────────────
+
+    // Social engagement counters updated client-side for MVP.
+    // TODO: Move to Cloud Function Firestore triggers for true integrity.
+    //       A modified client can currently send arbitrary counter values.
+    function onlyCountersChanged() {
+      return signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'likeCount', 'commentCount', 'shareCount',
+          'reactionCount', 'saveCount', 'updatedAt'
+        ]);
     }
 
     function onlyBusinessCountersChanged() {
-      return signedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-        'followerCount', 'postCount', 'reviewCount', 'ratingAverage', 'ratingTotal', 'updatedAt'
-      ]);
+      return signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'followerCount', 'postCount', 'reviewCount',
+          'ratingAverage', 'ratingTotal', 'updatedAt'
+        ]);
     }
 
     function onlyGroupCountersChanged() {
-      return signedIn() && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-        'memberCount', 'postCount', 'updatedAt'
-      ]);
+      return signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'memberCount', 'postCount', 'updatedAt'
+        ]);
     }
 
+    // Reads the conversation doc to verify participant membership.
+    // Note: each call costs one extra Firestore read; cache this if rules get slow.
     function isConversationParticipant(conversationId) {
       return signedIn()
         && exists(/databases/$(database)/documents/conversations/$(conversationId))
         && uid() in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
     }
 
+    // ── USERS ─────────────────────────────────────────────────────────────────
+
     match /users/{userId} {
       allow read: if true;
-      allow create: if isOwner(userId);
-      allow update: if (isOwner(userId) && economyFieldsUnchanged()) || isAdmin();
+
+      // Create: must be own document; must not pre-set economy or admin fields
+      // (those are initialised by Cloud Functions on first sign-in).
+      allow create: if isOwner(userId) && userCreateFieldsSafe();
+
+      // Update: owner may edit display/bio fields but never economy or admin
+      // fields.  Admin may change anything.
+      allow update: if (isOwner(userId) && userAdminOnlyFields()) || isAdmin();
+
       allow delete: if isAdmin();
+
+      // ── Challenge progress ──────────────────────────────────────────────────
+      // Client writes are allowed for MVP because moving this to Cloud Functions
+      // is a significant refactor.  The rules enforce a ratchet (count/progress
+      // can only increase) and immutability of the completed/xpAwarded flags.
+      //
+      // TODO: For full XP integrity, trigger a Cloud Function on checkin creates
+      // that owns all progress writes and makes these rules read-only for owner.
       match /challengeProgress/{challengeId} {
-        // TODO: For production XP/badge integrity, move challenge evaluation to Cloud Functions
-        // (Firestore trigger on checkins/{id}). Client-side transactions prevent concurrent races
-        // but a modified client can still bypass field validation. Cloud Functions would own
-        // all progress writes and make these rules read-only for the owner.
         allow read: if isOwner(userId) || isAdmin();
+
         allow create: if isOwner(userId)
-          && (request.resource.data.get('userId', '') == userId || request.resource.data.get('uid', '') == userId)
-          && request.resource.data.get('challengeId', '') == challengeId;
-        allow update: if isOwner(userId)
-          && (resource.data.get('userId', '') == userId || resource.data.get('uid', '') == userId)
-          && (request.resource.data.get('userId', '') == userId || request.resource.data.get('uid', '') == userId)
+          && (request.resource.data.get('userId', '') == userId
+              || request.resource.data.get('uid', '') == userId)
           && request.resource.data.get('challengeId', '') == challengeId
-          && request.resource.data.get('count', 0) >= resource.data.get('count', 0)
+          && request.resource.data.get('count', 0) is number
+          && request.resource.data.get('progress', 0) is number;
+
+        allow update: if isOwner(userId)
+          // Ownership fields must not change
+          && (resource.data.get('userId', '') == userId
+              || resource.data.get('uid', '') == userId)
+          && (request.resource.data.get('userId', '') == userId
+              || request.resource.data.get('uid', '') == userId)
+          && request.resource.data.get('challengeId', '') == challengeId
+          // Ratchet: count and progress may only increase
+          && request.resource.data.get('count',    0) >= resource.data.get('count',    0)
           && request.resource.data.get('progress', 0) >= resource.data.get('progress', 0)
-          && !(resource.data.get('completed', false) == true && request.resource.data.get('completed', false) != true)
-          && !(resource.data.get('xpAwarded', false) == true && request.resource.data.get('xpAwarded', false) != true);
+          // These two flags are immutable once set true
+          && !(resource.data.get('completed',  false) == true
+               && request.resource.data.get('completed',  false) != true)
+          && !(resource.data.get('xpAwarded',  false) == true
+               && request.resource.data.get('xpAwarded',  false) != true);
+
         allow delete: if isAdmin();
+
         match /sources/{sourceId} {
           allow read: if isOwner(userId) || isAdmin();
           allow create: if isOwner(userId);
           allow delete: if isAdmin();
         }
       }
+
+      // ── Badges (sub-collection) ─────────────────────────────────────────────
+      // Owner may create their own badge documents (needed for current client
+      // award flow after challenge completion).  Field validation prevents
+      // self-granting special/rarity flags.  Updates are admin-only so that a
+      // badge cannot be upgraded after award.
+      //
+      // TODO: Move badge creation to a Cloud Function triggered by
+      // challengeProgress completions; then change create to admin-only here.
       match /badges/{badgeId} {
         allow read: if true;
+
         allow create: if isOwner(userId)
-          && request.resource.data.get('userId', '') == userId
-          && request.resource.data.get('badgeId', '') == badgeId;
-        allow update: if isOwner(userId)
-          && resource.data.get('userId', '') == userId
-          && request.resource.data.get('userId', '') == userId
-          && request.resource.data.get('badgeId', '') == badgeId;
-        allow delete: if isAdmin();
+          && request.resource.data.get('userId',  '') == userId
+          && request.resource.data.get('badgeId', '') == badgeId
+          // Prevent self-granting privilege flags
+          && !request.resource.data.keys().hasAny([
+               'adminGranted', 'special', 'grantedBy'
+             ]);
+
+        // Updates are admin-only: no post-hoc badge inflation.
+        allow update, delete: if isAdmin();
       }
-      match /private/{docId} { allow read, write: if isOwner(userId) || isAdmin(); }
-      // FCM push tokens — user owns their own tokens, admin can read for broadcast
-      match /fcmTokens/{token} { allow read: if isOwner(userId) || isAdmin(); allow write: if isOwner(userId); }
+
+      match /private/{docId}   { allow read, write: if isOwner(userId) || isAdmin(); }
+      match /fcmTokens/{token} {
+        allow read:  if isOwner(userId) || isAdmin();
+        allow write: if isOwner(userId);
+      }
     }
 
-    // Admin UIDs are managed in Firestore. Create admins/{uid} manually from Firebase Console before publishing this rule.
+    // Admin UIDs are set manually in the Firebase Console.
+    // No public API must ever allow a user to write here.
     match /admins/{adminId} {
-      allow read: if isOwner(adminId) || isAdmin();
+      allow read:                   if isOwner(adminId) || isAdmin();
       allow create, update, delete: if isAdmin();
     }
 
+    // ── SOCIAL CONTENT ────────────────────────────────────────────────────────
+
     match /posts/{postId} {
       allow read: if true;
-      allow create: if newOwnerMatches();
+      // Require either text or a media URL so an empty document cannot be used
+      // as a fake engagement anchor.
+      allow create: if newOwnerMatches()
+        && request.resource.data.get('text', '') is string
+        && (request.resource.data.get('text', '') != ''
+            || request.resource.data.get('mediaUrl', '') != '');
       allow update: if isAdmin() || existingOwnerMatches() || onlyCountersChanged();
       allow delete: if isAdmin() || existingOwnerMatches();
+
       match /comments/{commentId} {
         allow read: if true;
-        allow create: if newOwnerMatches() && request.resource.data.get('text', '') is string;
+        allow create: if newOwnerMatches()
+          && request.resource.data.get('text', '') is string
+          && request.resource.data.get('text', '').size() > 0;
         allow update, delete: if isAdmin() || existingOwnerMatches();
+
         match /replies/{replyId} {
           allow read: if true;
-          allow create: if newOwnerMatches() && request.resource.data.get('text', '') is string;
+          allow create: if newOwnerMatches()
+            && request.resource.data.get('text', '') is string
+            && request.resource.data.get('text', '').size() > 0;
           allow update, delete: if isAdmin() || existingOwnerMatches();
         }
       }
-      match /likes/{userId} { allow read: if true; allow create, update, delete: if isOwner(userId); }
-      match /reactions/{userId} { allow read: if true; allow create, update, delete: if isOwner(userId); }
+
+      // Each like/reaction doc ID is the user's own UID — self-only write.
+      match /likes/{likeUserId}     { allow read: if true; allow create, update, delete: if isOwner(likeUserId); }
+      match /reactions/{rxUserId}   { allow read: if true; allow create, update, delete: if isOwner(rxUserId); }
     }
 
-    match /stories/{storyId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /stories/{storyId}    { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
     match /checkins/{checkinId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
-    match /places/{placeId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /places/{placeId}     { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+
+    // ── BUSINESSES ────────────────────────────────────────────────────────────
 
     match /businesses/{businessId} {
       allow read: if true;
@@ -141,91 +243,305 @@ service cloud.firestore {
       allow update: if isAdmin() || existingOwnerMatches() || onlyBusinessCountersChanged();
       allow delete: if isAdmin() || existingOwnerMatches();
     }
-    match /businessAdmins/{adminId} { allow read: if true; allow create: if signedIn() && request.resource.data.get('userId', '') == uid(); allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
+    match /businessAdmins/{adminId} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
+      allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid());
+    }
     match /businesses/{businessId}/qrScanLogs/{logId} {
       allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
-      allow read: if isAdmin() || (signedIn() && get(/databases/$(database)/documents/businesses/$(businessId)).data.get('ownerId', '') == uid());
+      allow read: if isAdmin()
+        || (signedIn()
+            && get(/databases/$(database)/documents/businesses/$(businessId)).data.get('ownerId', '') == uid());
       allow update, delete: if isAdmin();
     }
-    match /businessFollowers/{followId} { allow read: if true; allow create: if signedIn() && request.resource.data.get('userId', '') == uid(); allow update: if false; allow delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
-    match /businessReviews/{reviewId} { allow read: if true; allow create: if signedIn() && request.resource.data.get('userId', '') == uid(); allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
-    match /businessOffers/{offerId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
-    match /businessAnalytics/{analyticsId} { allow read: if isAdmin() || (signedIn() && resource.data.get('ownerId', '') == uid()); allow create, update: if signedIn() && request.resource.data.get('ownerId', '') == uid(); allow delete: if isAdmin(); }
+    match /businesses/{businessId}/subscriptions/{subId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.get('ownerId', '') == uid());
+      allow create, update, delete: if isAdmin();
+    }
+    match /businessFollowers/{followId} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
+      allow update: if false;
+      allow delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid());
+    }
+    match /businessReviews/{reviewId} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
+      allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid());
+    }
+    match /businessOffers/{offerId} {
+      allow read: if true;
+      allow create: if newOwnerMatches();
+      allow update, delete: if isAdmin() || existingOwnerMatches();
+    }
+    match /businessAnalytics/{analyticsId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.get('ownerId', '') == uid());
+      allow create, update: if signedIn() && request.resource.data.get('ownerId', '') == uid();
+      allow delete: if isAdmin();
+    }
 
-    match /follows/{followId} { allow read: if true; allow create: if signedIn() && request.resource.data.keys().hasAll(['followerId','followingId','createdAt']) && request.resource.data.get('followerId', '') == uid() && request.resource.data.get('followingId', '') != uid(); allow update: if false; allow delete: if isAdmin() || (signedIn() && (resource.data.get('followerId', '') == uid() || resource.data.get('followingId', '') == uid())); }
-    match /savedPosts/{saveId} { allow read: if signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid() || isAdmin()); allow create: if signedIn() && (request.resource.data.get('userId', '') == uid() || request.resource.data.get('uid', '') == uid()); allow update: if false; allow delete: if isAdmin() || (signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid())); }
-    match /savedItems/{itemId} { allow read: if signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid() || isAdmin()); allow create: if signedIn() && (request.resource.data.get('userId', '') == uid() || request.resource.data.get('uid', '') == uid()); allow update: if false; allow delete: if isAdmin() || (signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid())); }
+    // ── SOCIAL GRAPH ──────────────────────────────────────────────────────────
 
-    match /groups/{groupId} { allow read: if true; allow create: if newOwnerMatches(); allow update: if isAdmin() || existingOwnerMatches() || onlyGroupCountersChanged(); allow delete: if isAdmin() || existingOwnerMatches(); }
-    match /groupMembers/{memberId} { allow read: if true; allow create: if signedIn() && (request.resource.data.get('userId', '') == uid() || request.resource.data.get('uid', '') == uid()); allow update, delete: if isAdmin() || (signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid())); }
-    match /groupPosts/{postId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches() || onlyCountersChanged(); }
-    match /groupJoinRequests/{requestId} { allow read: if signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('toUserId', '') == uid() || isAdmin()); allow create: if signedIn() && request.resource.data.get('userId', '') == uid(); allow update: if isAdmin(); allow delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
+    match /follows/{followId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasAll(['followerId', 'followingId', 'createdAt'])
+        && request.resource.data.get('followerId', '') == uid()
+        // Users may not follow themselves
+        && request.resource.data.get('followingId', '') != uid();
+      allow update: if false;
+      allow delete: if isAdmin()
+        || (signedIn()
+            && (resource.data.get('followerId', '') == uid()
+                || resource.data.get('followingId', '') == uid()));
+    }
+    match /savedPosts/{saveId} {
+      allow read: if signedIn()
+        && (resource.data.get('userId', '') == uid()
+            || resource.data.get('uid', '') == uid()
+            || isAdmin());
+      allow create: if signedIn()
+        && (request.resource.data.get('userId', '') == uid()
+            || request.resource.data.get('uid', '') == uid());
+      allow update: if false;
+      allow delete: if isAdmin()
+        || (signedIn()
+            && (resource.data.get('userId', '') == uid()
+                || resource.data.get('uid', '') == uid()));
+    }
+    match /savedItems/{itemId} {
+      allow read: if signedIn()
+        && (resource.data.get('userId', '') == uid()
+            || resource.data.get('uid', '') == uid()
+            || isAdmin());
+      allow create: if signedIn()
+        && (request.resource.data.get('userId', '') == uid()
+            || request.resource.data.get('uid', '') == uid());
+      allow update: if false;
+      allow delete: if isAdmin()
+        || (signedIn()
+            && (resource.data.get('userId', '') == uid()
+                || resource.data.get('uid', '') == uid()));
+    }
 
-    match /events/{eventId} { allow read: if true; allow create, update, delete: if isAdmin(); }
-    match /eventParticipants/{participantId} { allow read: if true; allow create: if signedIn() && (request.resource.data.get('userId', '') == uid() || request.resource.data.get('uid', '') == uid()); allow update, delete: if isAdmin() || (signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid())); }
+    // ── GROUPS ────────────────────────────────────────────────────────────────
 
-    match /friendRequests/{requestId} { allow read: if signedIn() && (resource.data.get('fromUserId', '') == uid() || resource.data.get('toUserId', '') == uid() || isAdmin()); allow create: if signedIn() && request.resource.data.keys().hasAll(['fromUserId','toUserId','status','createdAt']) && request.resource.data.get('fromUserId', '') == uid() && request.resource.data.get('toUserId', '') != uid() && request.resource.data.get('status', '') == 'pending'; allow update, delete: if isAdmin() || (signedIn() && (resource.data.get('fromUserId', '') == uid() || resource.data.get('toUserId', '') == uid())); }
-    match /friends/{friendId} { allow read: if true; allow create: if signedIn() && uid() in request.resource.data.users; allow update: if false; allow delete: if isAdmin() || (signedIn() && uid() in resource.data.users); }
+    match /groups/{groupId} {
+      allow read: if true;
+      allow create: if newOwnerMatches();
+      allow update: if isAdmin() || existingOwnerMatches() || onlyGroupCountersChanged();
+      allow delete: if isAdmin() || existingOwnerMatches();
+    }
+    match /groupMembers/{memberId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && (request.resource.data.get('userId', '') == uid()
+            || request.resource.data.get('uid', '') == uid());
+      allow update, delete: if isAdmin()
+        || (signedIn()
+            && (resource.data.get('userId', '') == uid()
+                || resource.data.get('uid', '') == uid()));
+    }
+    match /groupPosts/{postId} {
+      allow read: if true;
+      allow create: if newOwnerMatches();
+      allow update, delete: if isAdmin() || existingOwnerMatches() || onlyCountersChanged();
+    }
+    match /groupJoinRequests/{requestId} {
+      allow read: if signedIn()
+        && (resource.data.get('userId', '') == uid()
+            || resource.data.get('toUserId', '') == uid()
+            || isAdmin());
+      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
+      allow update: if isAdmin();
+      allow delete: if isAdmin()
+        || (signedIn() && resource.data.get('userId', '') == uid());
+    }
+
+    // ── EVENTS ────────────────────────────────────────────────────────────────
+
+    match /events/{eventId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+    match /eventParticipants/{participantId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && (request.resource.data.get('userId', '') == uid()
+            || request.resource.data.get('uid', '') == uid());
+      allow update, delete: if isAdmin()
+        || (signedIn()
+            && (resource.data.get('userId', '') == uid()
+                || resource.data.get('uid', '') == uid()));
+    }
+
+    // ── MESSAGING ─────────────────────────────────────────────────────────────
+
+    match /friendRequests/{requestId} {
+      allow read: if signedIn()
+        && (resource.data.get('fromUserId', '') == uid()
+            || resource.data.get('toUserId', '') == uid()
+            || isAdmin());
+      allow create: if signedIn()
+        && request.resource.data.keys().hasAll(['fromUserId', 'toUserId', 'status', 'createdAt'])
+        && request.resource.data.get('fromUserId', '') == uid()
+        // Cannot send a request to yourself
+        && request.resource.data.get('toUserId', '') != uid()
+        && request.resource.data.get('status', '') == 'pending';
+      allow update, delete: if isAdmin()
+        || (signedIn()
+            && (resource.data.get('fromUserId', '') == uid()
+                || resource.data.get('toUserId', '') == uid()));
+    }
+    match /friends/{friendId} {
+      allow read: if true;
+      allow create: if signedIn() && uid() in request.resource.data.users;
+      allow update: if false;
+      allow delete: if isAdmin() || (signedIn() && uid() in resource.data.users);
+    }
 
     match /conversations/{conversationId} {
       allow create: if signedIn() && uid() in request.resource.data.participants;
-      allow read, update, delete: if isAdmin() || (signedIn() && uid() in resource.data.participants);
+      allow read, update, delete: if isAdmin()
+        || (signedIn() && uid() in resource.data.participants);
+
       match /messages/{messageId} {
         allow read: if isAdmin() || isConversationParticipant(conversationId);
-        allow create: if isAdmin() || (isConversationParticipant(conversationId) && request.resource.data.senderId == uid());
+        // Only a participant may create a message and only as themselves.
+        allow create: if isAdmin()
+          || (isConversationParticipant(conversationId)
+              && request.resource.data.senderId == uid());
+        // Sender may edit their own message; any participant may mark it
+        // deleted/liked (narrow field allowlist).
         allow update: if isAdmin()
           || (signedIn() && resource.data.senderId == uid())
           || (isConversationParticipant(conversationId)
-              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likedBy','deletedFor','updatedAt']));
-        allow delete: if isAdmin() || (signedIn() && resource.data.senderId == uid());
+              && request.resource.data.diff(resource.data).affectedKeys()
+                   .hasOnly(['likedBy', 'deletedFor', 'updatedAt']));
+        allow delete: if isAdmin()
+          || (signedIn() && resource.data.senderId == uid());
       }
     }
 
+    // Message reactions: broad read (needed before the reaction doc exists)
+    // but tightly validated on write.
     match /messageReactions/{reactionId} {
-      // Read is intentionally broad for signed-in users. toggleMessageReaction() first reads a
-      // deterministic reaction doc; if it does not exist yet, participant-based read rules can
-      // reject that lookup before the app can create it, causing permission-denied.
       allow read: if signedIn();
       allow create: if signedIn()
         && request.resource.data.get('userId', '') == uid()
         && request.resource.data.get('conversationId', '') is string
-        && request.resource.data.get('messageId', '') is string
-        && request.resource.data.get('emoji', '') is string
-        && request.resource.data.keys().hasOnly(['conversationId','messageId','userId','emoji','createdAt','updatedAt'])
+        && request.resource.data.get('messageId',      '') is string
+        && request.resource.data.get('emoji',          '') is string
+        && request.resource.data.keys().hasOnly([
+             'conversationId', 'messageId', 'userId', 'emoji', 'createdAt', 'updatedAt'
+           ])
         && exists(/databases/$(database)/documents/conversations/$(request.resource.data.conversationId))
         && uid() in get(/databases/$(database)/documents/conversations/$(request.resource.data.conversationId)).data.participants;
       allow update: if signedIn()
         && resource.data.get('userId', '') == uid()
         && request.resource.data.get('userId', '') == uid()
+        // Immutable fields must not change
         && request.resource.data.get('conversationId', '') == resource.data.get('conversationId', '')
-        && request.resource.data.get('messageId', '') == resource.data.get('messageId', '')
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['emoji','updatedAt']);
+        && request.resource.data.get('messageId',      '') == resource.data.get('messageId',      '')
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['emoji', 'updatedAt']);
       allow delete: if signedIn() && resource.data.get('userId', '') == uid();
     }
 
-    match /chats/{chatId} { allow create: if signedIn() && uid() in request.resource.data.participants; allow read, update, delete: if isAdmin() || (signedIn() && uid() in resource.data.participants); match /messages/{messageId} { allow read, create: if isAdmin() || (signedIn() && uid() in get(/databases/$(database)/documents/chats/$(chatId)).data.participants); allow update, delete: if isAdmin() || (signedIn() && resource.data.senderId == uid()); } }
+    match /chats/{chatId} {
+      allow create: if signedIn() && uid() in request.resource.data.participants;
+      allow read, update, delete: if isAdmin()
+        || (signedIn() && uid() in resource.data.participants);
+      match /messages/{messageId} {
+        allow read, create: if isAdmin()
+          || (signedIn()
+              && uid() in get(/databases/$(database)/documents/chats/$(chatId)).data.participants);
+        allow update, delete: if isAdmin()
+          || (signedIn() && resource.data.senderId == uid());
+      }
+    }
 
-    match /userNotifications/{notificationId} { allow read: if signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('toUserId', '') == uid() || isAdmin()); allow create: if isAdmin() || (signedIn() && request.resource.data.get('fromUserId', '') == uid() && (request.resource.data.get('userId', '') != uid() || request.resource.data.get('toUserId', '') != uid())); allow update: if isAdmin() || (signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('toUserId', '') == uid()) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'seen', 'openedAt', 'updatedAt'])); allow delete: if isAdmin(); }
+    // Legacy top-level messages collection (kept for back-compat with older
+    // message threads; prefer /conversations for new writes).
+    match /messages/{messageId} {
+      allow read: if isAdmin()
+        || (signedIn()
+            && (resource.data.get('senderId',    '') == uid()
+                || resource.data.get('userId',    '') == uid()
+                || resource.data.get('recipientId','') == uid()));
+      allow create: if signedIn()
+        && (request.resource.data.get('senderId',    '') == uid()
+            || request.resource.data.get('userId',   '') == uid()
+            || request.resource.data.get('createdBy','') == uid());
+      allow update, delete: if isAdmin()
+        || (signedIn()
+            && (resource.data.get('senderId', '') == uid()
+                || resource.data.get('userId', '') == uid()));
+    }
 
-    match /reviews/{reviewId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
-    match /placeReviews/{reviewId} { allow read: if true; allow create: if signedIn() && request.resource.data.get('userId', '') == uid(); allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
+    // ── NOTIFICATIONS ─────────────────────────────────────────────────────────
 
-    // GeoPoints economy: client-side MVP. For high-value campaigns, move awarding/redemption to Cloud Functions.
+    match /userNotifications/{notificationId} {
+      allow read: if signedIn()
+        && (resource.data.get('userId',   '') == uid()
+            || resource.data.get('toUserId','') == uid()
+            || isAdmin());
+      allow create: if isAdmin()
+        || (signedIn()
+            && request.resource.data.get('fromUserId', '') == uid()
+            // Users may not send a notification to themselves
+            && (request.resource.data.get('userId',    '') != uid()
+                || request.resource.data.get('toUserId','') != uid()));
+      // Recipients may only mark a notification read/seen, nothing else.
+      allow update: if isAdmin()
+        || (signedIn()
+            && (resource.data.get('userId',   '') == uid()
+                || resource.data.get('toUserId','') == uid())
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['read', 'seen', 'openedAt', 'updatedAt']));
+      allow delete: if isAdmin();
+    }
+
+    // ── REVIEWS ───────────────────────────────────────────────────────────────
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if newOwnerMatches();
+      allow update, delete: if isAdmin() || existingOwnerMatches();
+    }
+    match /placeReviews/{reviewId} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
+      allow update, delete: if isAdmin()
+        || (signedIn() && resource.data.get('userId', '') == uid());
+    }
+
+    // ── ECONOMY ───────────────────────────────────────────────────────────────
+    // GeoPoints balances are owned by Cloud Functions for high-value operations.
+    // Client-side rules block the most obvious attacks; CF owns all mutations.
+
     match /dailyTransferTotals/{docId} {
-      allow read: if signedIn() && resource.data.get('uid', '') == uid();
+      // Users may only see their own transfer totals.
+      allow read:  if signedIn() && resource.data.get('uid', '') == uid();
       allow write: if isAdmin();
     }
-
     match /pointEarnRequests/{requestId} {
-      allow read: if signedIn() && (resource.data.get('userId', '') == uid() || isAdmin());
-      allow create: if signedIn() && request.resource.data.get('userId', '') == uid() && request.resource.data.get('status', '') == 'pending';
+      allow read: if signedIn()
+        && (resource.data.get('userId', '') == uid() || isAdmin());
+      allow create: if signedIn()
+        && request.resource.data.get('userId', '') == uid()
+        // New requests must start as pending; CF processes them.
+        && request.resource.data.get('status', '') == 'pending';
       allow update, delete: if isAdmin();
     }
-
     match /pointTransactions/{transactionId} {
-      allow read: if signedIn() && (uid() in resource.data.participantIds || isAdmin());
+      // Users can read only transactions they participated in.
+      allow read: if signedIn()
+        && (uid() in resource.data.participantIds || isAdmin());
       allow create, update, delete: if isAdmin();
     }
+
+    // ── REWARDS ───────────────────────────────────────────────────────────────
 
     match /rewards/{rewardId} {
       allow read: if true;
@@ -233,84 +549,204 @@ service cloud.firestore {
       allow update: if isAdmin() || existingOwnerMatches();
       allow delete: if isAdmin() || existingOwnerMatches();
     }
-
     match /rewardCoupons/{couponId} {
-      allow read: if signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('businessOwnerId', '') == uid() || isAdmin());
+      allow read: if signedIn()
+        && (resource.data.get('userId',          '') == uid()
+            || resource.data.get('businessOwnerId','') == uid()
+            || isAdmin());
       allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
-      allow update: if isAdmin() || (signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('businessOwnerId', '') == uid()) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','usedAt','usedBy','updatedAt']));
+      // After creation only status fields may change (redeem flow).
+      allow update: if isAdmin()
+        || (signedIn()
+            && (resource.data.get('userId',          '') == uid()
+                || resource.data.get('businessOwnerId','') == uid())
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['status', 'usedAt', 'usedBy', 'updatedAt']));
       allow delete: if isAdmin();
     }
-    match /rewardClaims/{claimId} { allow create: if signedIn() && (request.resource.data.get('userId', '') == uid() || request.resource.data.get('uid', '') == uid()); allow read, update, delete: if isAdmin() || (signedIn() && (resource.data.get('userId', '') == uid() || resource.data.get('uid', '') == uid())); }
+    match /rewardClaims/{claimId} {
+      allow create: if signedIn()
+        && (request.resource.data.get('userId', '') == uid()
+            || request.resource.data.get('uid',   '') == uid());
+      allow read, update, delete: if isAdmin()
+        || (signedIn()
+            && (resource.data.get('userId', '') == uid()
+                || resource.data.get('uid',   '') == uid()));
+    }
+    // userRewards are awarded by Cloud Functions; users cannot create their own.
     match /userRewards/{userRewardId} {
-      allow read: if signedIn() && (resource.data.get('userId', '') == uid() || isAdmin());
+      allow read: if signedIn()
+        && (resource.data.get('userId', '') == uid() || isAdmin());
       allow create, update, delete: if isAdmin();
     }
 
-    // Reports — users can create, cannot update; admins can read/update/delete
+    // ── SAFETY & MODERATION ───────────────────────────────────────────────────
+
+    // Reports: created once by a signed-in user; immutable after that.
+    // Status transitions are admin-only (prevents reporter manipulation).
+    // Reporters cannot read their own report after submission.
     match /reports/{reportId} {
       allow create: if signedIn()
-        && request.resource.data.keys().hasAll(['reporterId','targetType','targetId','reason','status','createdAt'])
+        && request.resource.data.keys().hasAll([
+             'reporterId', 'targetType', 'targetId', 'reason', 'status', 'createdAt'
+           ])
         && request.resource.data.get('reporterId', '') == uid()
+        // Status must be pending on creation; admin sets resolution.
         && request.resource.data.get('status', '') == 'pending';
       allow read, update, delete: if isAdmin();
     }
-    match /hiddenPosts/{hiddenId} { allow read: if signedIn() && (resource.data.get('userId', '') == uid() || isAdmin()); allow create: if signedIn() && request.resource.data.get('userId', '') == uid(); allow update: if false; allow delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
-    match /blockedUsers/{blockId} { allow read: if signedIn() && (resource.data.get('blockerId', '') == uid() || isAdmin()); allow create: if signedIn() && request.resource.data.get('blockerId', '') == uid(); allow update: if false; allow delete: if isAdmin() || (signedIn() && resource.data.get('blockerId', '') == uid()); }
-    match /mutedUsers/{muteId} { allow read: if signedIn() && (resource.data.get('muterId', '') == uid() || isAdmin()); allow create: if signedIn() && request.resource.data.get('muterId', '') == uid(); allow update: if false; allow delete: if isAdmin() || (signedIn() && resource.data.get('muterId', '') == uid()); }
-    match /moderationActions/{actionId} { allow read, create, update, delete: if isAdmin(); }
-    match /userBadges/{badgeId} { allow read: if true; allow create: if signedIn() && (request.resource.data.get('userId', '') == uid() || isAdmin()); allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid()); }
 
-    match /admin/{docId} { allow read, write: if isAdmin(); }
-    match /badges/{badgeId} { allow read: if true; allow create, update, delete: if isAdmin(); }
-    match /challenges/{docId} { allow read: if true; allow create, update, delete: if isAdmin(); }
-    match /services/{docId} { allow read: if true; allow create, update, delete: if isAdmin(); }
+    match /hiddenPosts/{hiddenId} {
+      allow read: if signedIn()
+        && (resource.data.get('userId', '') == uid() || isAdmin());
+      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
+      allow update: if false;
+      allow delete: if isAdmin()
+        || (signedIn() && resource.data.get('userId', '') == uid());
+    }
+
+    // Only the blocker may read their own block list.
+    // The blocked user cannot discover they are blocked via rules.
+    match /blockedUsers/{blockId} {
+      allow read: if signedIn()
+        && (resource.data.get('blockerId', '') == uid() || isAdmin());
+      allow create: if signedIn()
+        && request.resource.data.get('blockerId', '') == uid()
+        // Users may not block themselves
+        && request.resource.data.get('blockedId', '') != uid();
+      // Immutable after creation.
+      allow update: if false;
+      allow delete: if isAdmin()
+        || (signedIn() && resource.data.get('blockerId', '') == uid());
+    }
+
+    match /mutedUsers/{muteId} {
+      allow read: if signedIn()
+        && (resource.data.get('muterId', '') == uid() || isAdmin());
+      allow create: if signedIn() && request.resource.data.get('muterId', '') == uid();
+      allow update: if false;
+      allow delete: if isAdmin()
+        || (signedIn() && resource.data.get('muterId', '') == uid());
+    }
+
+    // Moderation action log: strictly admin-only (audit trail of decisions).
+    match /moderationActions/{actionId} {
+      allow read, create, update, delete: if isAdmin();
+    }
+
+    // Top-level userBadges collection (display/feed use).
+    // Owner may create, admin owns updates (prevent post-hoc inflation).
+    match /userBadges/{badgeId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && (request.resource.data.get('userId', '') == uid() || isAdmin());
+      // Updates admin-only: prevents badge property escalation after award.
+      allow update, delete: if isAdmin()
+        || (signedIn() && resource.data.get('userId', '') == uid());
+    }
+
+    // ── ADMIN-ONLY COLLECTIONS ────────────────────────────────────────────────
+
+    match /admin/{docId}              { allow read, write: if isAdmin(); }
+    match /badges/{badgeId}           { allow read: if true; allow create, update, delete: if isAdmin(); }
+    match /challenges/{docId}         { allow read: if true; allow create, update, delete: if isAdmin(); }
+    match /services/{docId}           { allow read: if true; allow create, update, delete: if isAdmin(); }
     match /realEstateListings/{docId} { allow read: if true; allow create, update, delete: if isAdmin(); }
-    match /learningItems/{docId} { allow read: if true; allow create, update, delete: if isAdmin(); }
-    match /creators/{docId} { allow read: if true; allow create, update, delete: if isAdmin(); }
-    match /liveActivity/{docId} { allow read: if true; allow create, update, delete: if isAdmin(); }
+    match /learningItems/{docId}      { allow read: if true; allow create, update, delete: if isAdmin(); }
+    match /creators/{docId}           { allow read: if true; allow create, update, delete: if isAdmin(); }
+    match /liveActivity/{docId}       { allow read: if true; allow create, update, delete: if isAdmin(); }
+
+    // ── USER-GENERATED CONTENT COLLECTIONS ───────────────────────────────────
+
     match /collections/{collectionId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
-    match /routes/{routeId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /routes/{routeId}            { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
 
-    match /userUiState/{stateId} { allow read: if signedIn() && (resource.data.get('uid', '') == uid() || isAdmin()); allow create: if signedIn() && request.resource.data.get('uid', '') == uid(); allow update: if signedIn() && (resource.data.get('uid', '') == uid() || isAdmin()) && request.resource.data.get('uid', '') == resource.data.get('uid', ''); allow delete: if signedIn() && (resource.data.get('uid', '') == uid() || isAdmin()); }
-    match /adminFlags/{flagId} { allow read: if true; allow create, update, delete: if isAdmin(); }
+    // ── UI STATE & FLAGS ──────────────────────────────────────────────────────
 
-    // Analytics — signed-in users write (tracking), admins read
+    match /userUiState/{stateId} {
+      allow read: if signedIn()
+        && (resource.data.get('uid', '') == uid() || isAdmin());
+      allow create: if signedIn() && request.resource.data.get('uid', '') == uid();
+      allow update: if signedIn()
+        && (resource.data.get('uid', '') == uid() || isAdmin())
+        // uid field is immutable
+        && request.resource.data.get('uid', '') == resource.data.get('uid', '');
+      allow delete: if signedIn()
+        && (resource.data.get('uid', '') == uid() || isAdmin());
+    }
+    match /adminFlags/{flagId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── ANALYTICS ─────────────────────────────────────────────────────────────
+    // Design: signed-in users write (client-side telemetry), admins read.
+    // Unauthenticated requests are always denied — no anonymous tracking.
+    // uid fields in error/upload docs must match the caller (no faking errors
+    // for another user). Presence docs are owner-only with field validation.
+
+    // Daily aggregate counters (pageViews, searches, events, errors — keyed
+    // analytics/{subcol}/daily/{YYYY-MM-DD}).
     match /analytics/{subcol}/daily/{dateDoc} {
       allow read: if isAdmin();
       allow create, update: if signedIn();
     }
+
+    // Presence heartbeats: owner-only with mandatory field validation.
     match /analytics/presence/users/{userId} {
       allow read: if isAdmin();
-      allow create, update: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        // uid field must match the document ID (the user's uid)
+        && request.resource.data.get('uid',  '') == userId
+        && request.resource.data.get('page', '') is string
+        && request.resource.data.get('page', '').size() > 0
+        && request.resource.data.get('page', '').size() < 100;
     }
+
+    // JS error log: any signed-in user may append (self-reporting).
+    // uid field if present must match caller — prevents spoofing another
+    // user's identity in an error report.
     match /analytics/errors/log/{docId} {
       allow read: if isAdmin();
-      allow create: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.get('message', '') is string
+        && request.resource.data.get('page',    '') is string
+        && (request.resource.data.get('uid', '') == ''
+            || request.resource.data.get('uid', '') == uid());
     }
-    match /analytics/errors/counts/{docId} {
-      allow read: if isAdmin();
-      allow create, update: if signedIn();
-    }
+
+    // Upload failure log — same uid constraint as errors.
     match /analytics/uploads/failures/{docId} {
       allow read: if isAdmin();
-      allow create: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.get('type', '') is string
+        && request.resource.data.get('page', '') is string
+        && (request.resource.data.get('uid', '') == ''
+            || request.resource.data.get('uid', '') == uid());
     }
+
+    // Performance samples: aggregate, no personal data.
     match /analytics/performance/pages/{pageDoc} {
       allow read: if isAdmin();
       allow create, update: if signedIn();
     }
-    match /messages/{messageId} { allow read: if isAdmin() || (signedIn() && (resource.data.get('senderId', '') == uid() || resource.data.get('userId', '') == uid() || resource.data.get('recipientId', '') == uid())); allow create: if signedIn() && (request.resource.data.get('senderId', '') == uid() || request.resource.data.get('userId', '') == uid() || request.resource.data.get('createdBy', '') == uid()); allow update, delete: if isAdmin() || (signedIn() && (resource.data.get('senderId', '') == uid() || resource.data.get('userId', '') == uid())); }
-    match /tickets/{docId} { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
-    // Stripe payment sessions — written by Cloudflare Worker (admin), read by ticket owner
-    match /payments/{paymentId} { allow read: if isAdmin() || existingOwnerMatches(); allow create, update: if isAdmin(); allow delete: if isAdmin(); }
-    // Event tickets issued after successful payment — written by Cloudflare Worker (admin)
-    match /eventTickets/{ticketId} { allow read: if isAdmin() || existingOwnerMatches(); allow create, update: if isAdmin(); allow delete: if isAdmin(); }
-    // Business Premium subscriptions (sub-collection)
-    match /businesses/{businessId}/subscriptions/{subId} { allow read: if isAdmin() || (signedIn() && resource.data.get('ownerId','') == uid()); allow create, update, delete: if isAdmin(); }
-    match /campaigns/{docId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
-    match /collabOffers/{docId} { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
+
+    // ── PAYMENTS & MARKETPLACE ────────────────────────────────────────────────
+
+    match /tickets/{docId}         { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
+    // Payments are written by the Cloudflare Worker (runs as admin); users
+    // may read their own payment records only.
+    match /payments/{paymentId}    { allow read: if isAdmin() || existingOwnerMatches(); allow create, update, delete: if isAdmin(); }
+    match /eventTickets/{ticketId} { allow read: if isAdmin() || existingOwnerMatches(); allow create, update, delete: if isAdmin(); }
+    match /campaigns/{docId}       { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /collabOffers/{docId}    { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
     match /serviceRequests/{docId} { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
-    match /lessonBookings/{docId} { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /lessonBookings/{docId}  { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
+
+    // ── DENY-ALL FALLBACK ─────────────────────────────────────────────────────
+    // Any collection not explicitly listed above is blocked.
+    // This prevents accidental exposure when new collections are added without
+    // corresponding rules.
     match /{document=**} { allow read, write: if false; }
   }
 }

@@ -2038,15 +2038,15 @@
     Promise.all([
       fs.getDocs(fs.query(fs.collection(db, 'analytics', 'errors', 'log'), fs.orderBy('timestamp', 'desc'), fs.limit(30))),
       fs.getDocs(fs.query(fs.collection(db, 'analytics', 'uploads', 'failures'), fs.orderBy('timestamp', 'desc'), fs.limit(20))),
-      fs.getDoc(fs.doc(db, 'analytics', 'errors', 'counts', 'daily'))
+      fs.getDoc(fs.doc(db, 'analytics', 'errors', 'daily', todayKey))
     ]).then(function (res) {
       var errDocs = [];
       res[0].forEach(function (d) { errDocs.push(Object.assign({ _id: d.id }, d.data())); });
       var upDocs = [];
       res[1].forEach(function (d) { upDocs.push(Object.assign({ _id: d.id }, d.data())); });
-      var counts = res[2].exists() ? res[2].data() : {};
+      var todayData = res[2].exists() ? res[2].data() : {};
 
-      var todayErrs = counts[todayKey] || 0;
+      var todayErrs = todayData.count || 0;
       var pagesAffected = new Set(errDocs.map(function (d) { return d.page; })).size;
 
       var e1 = document.getElementById('err-today');     if (e1) e1.textContent = todayErrs;
