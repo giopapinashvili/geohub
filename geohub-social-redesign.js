@@ -854,6 +854,20 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(e.target.closest('[data-post-menu]')){ postMenu(pid,card); }
       var rb=e.target.closest('[data-comment-reply]'); if(rb){ e.preventDefault(); openReplyForm(card,pid,rb.dataset.commentId); }
       var cr=e.target.closest('[data-copy-post-link]'); if(cr && navigator.clipboard){ navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast('Post link copied');}); }
+      // Comment edit
+      var eb=e.target.closest('[data-edit-comment]'); if(eb){ e.preventDefault(); openFeedCommentEditor(pid, eb.dataset.commentId, eb); }
+      // Comment delete
+      var db2=e.target.closest('[data-delete-comment]'); if(db2){ e.preventDefault();
+        if(!confirm('Delete this comment?')) return;
+        var cid2=db2.dataset.commentId;
+        fs().updateDoc(fs().doc(db(),'posts',pid,'comments',cid2),{status:'deleted',updatedAt:fs().serverTimestamp()})
+          .then(function(){
+            var row=card.querySelector('[data-comment-id="'+CSS.escape(cid2)+'"]');
+            if(row){row.style.transition='opacity .2s';row.style.opacity='0';setTimeout(function(){row.remove();},220);}
+            fs().updateDoc(fs().doc(db(),'posts',pid),{commentCount:fs().increment(-1)}).catch(function(){});
+            toast('Comment deleted');
+          }).catch(function(err){toast('Could not delete: '+(err.code||err.message),'error');});
+      }
     });
     root.addEventListener('submit', function(e){
       var form=e.target.closest('[data-comment-form]');
@@ -939,10 +953,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function commentCard(pid,c){
     var name=c.authorName||c.userName||'User'; var uid=c.authorId||c.userId||''; var avHtml=(c.authorAvatar?img(c.authorAvatar,name):esc(initials(name)));
+    var u=authUser(); var isOwn=u && uid && u.uid===uid;
+    var ownerBtns = isOwn
+      ? ' · <button type="button" class="gh-cmt-act" data-edit-comment data-comment-id="'+esc(c.id)+'" data-post-id="'+esc(pid)+'">Edit</button>'+
+        ' · <button type="button" class="gh-cmt-act" data-delete-comment data-comment-id="'+esc(c.id)+'" data-post-id="'+esc(pid)+'">Delete</button>'
+      : '';
     return '<div class="gh-comment-row" data-comment-id="'+esc(c.id)+'">'+
       userProfileAnchor(uid,'gh-avatar gh-profile-avatar-link',avHtml,'Open '+name+' profile').replace('class="gh-avatar gh-profile-avatar-link"','class="gh-avatar gh-profile-avatar-link" style="width:32px;height:32px"')+
-      '<div class="gh-comment-main"><div class="gh-comment-bubble"><strong>'+userProfileAnchor(uid,'gh-profile-name-link',esc(name),'Open '+name+' profile')+'</strong><span>'+esc(c.text||'')+'</span></div>'+
-      '<div class="gh-small gh-comment-actions">'+timeAgo(c.createdAt)+' · <button type="button" data-comment-reply data-comment-id="'+esc(c.id)+'">Reply</button></div>'+
+      '<div class="gh-comment-main"><div class="gh-comment-bubble"><strong>'+userProfileAnchor(uid,'gh-profile-name-link',esc(name),'Open '+name+' profile')+'</strong><span class="gh-cmt-text" data-cmt-text>'+esc(c.text||'')+'</span></div>'+
+      '<div class="gh-small gh-comment-actions">'+timeAgo(c.createdAt)+' · <button type="button" data-comment-reply data-comment-id="'+esc(c.id)+'">Reply</button>'+ownerBtns+'</div>'+
       '<form class="gh-reply-form" data-reply-form data-comment-id="'+esc(c.id)+'" hidden><input class="gh-input" placeholder="Write a reply…"><button class="gh-btn sm"><i class="fas fa-paper-plane"></i></button></form>'+
       '<div class="gh-replies" data-replies-for="'+esc(c.id)+'"></div></div></div>';
   }
@@ -975,21 +994,40 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function postMenu(pid, card){
     if(!requireLogin()) return;
     var authorId = card && card.dataset ? card.dataset.authorId : '';
-    var authorMenu = authorId
+    var u = authUser();
+    var isOwn = u && authorId && u.uid === authorId;
+    var ownMenu = isOwn
+      ? '<button class="gh-mini-item" data-menu-edit-post><span class="gh-mini-thumb"><i class="fas fa-pen"></i></span><div><strong>Edit post</strong><span>Change text or visibility</span></div></button>' +
+        '<button class="gh-mini-item danger" data-menu-delete-post><span class="gh-mini-thumb"><i class="fas fa-trash"></i></span><div><strong>Delete post</strong><span>Permanently remove this post</span></div></button>'
+      : '';
+    var authorMenu = (!isOwn && authorId)
       ? '<button class="gh-mini-item" data-menu-report-user><span class="gh-mini-thumb"><i class="fas fa-user-shield"></i></span><div><strong>Report author</strong><span>Report this user</span></div></button>' +
         '<button class="gh-mini-item" data-menu-mute-user><span class="gh-mini-thumb"><i class="fas fa-volume-mute"></i></span><div><strong>Mute author</strong><span>Hide from your feed silently</span></div></button>' +
         '<button class="gh-mini-item danger" data-menu-block-user><span class="gh-mini-thumb"><i class="fas fa-ban"></i></span><div><strong>Block author</strong><span>Hide this user from your GeoHub</span></div></button>'
       : '';
     var body='<div class="gh-mini-list">' +
+      ownMenu +
       '<button class="gh-mini-item" data-copy-post-link><span class="gh-mini-thumb"><i class="fas fa-link"></i></span><div><strong>Copy link</strong><span>Share a direct link</span></div></button>' +
       '<button class="gh-mini-item" data-menu-save><span class="gh-mini-thumb"><i class="fas fa-bookmark"></i></span><div><strong>Save post</strong><span>Keep it for later</span></div></button>' +
-      '<button class="gh-mini-item" data-menu-hide><span class="gh-mini-thumb"><i class="fas fa-eye-slash"></i></span><div><strong>Hide post</strong><span>Remove it from your feed</span></div></button>' +
-      '<button class="gh-mini-item" data-menu-report><span class="gh-mini-thumb"><i class="fas fa-flag"></i></span><div><strong>Report post</strong><span>Send to moderation</span></div></button>' +
+      (!isOwn ? '<button class="gh-mini-item" data-menu-hide><span class="gh-mini-thumb"><i class="fas fa-eye-slash"></i></span><div><strong>Hide post</strong><span>Remove it from your feed</span></div></button>' : '') +
+      (!isOwn ? '<button class="gh-mini-item" data-menu-report><span class="gh-mini-thumb"><i class="fas fa-flag"></i></span><div><strong>Report post</strong><span>Send to moderation</span></div></button>' : '') +
       authorMenu + '</div>';
     modal('Post options', body, '<button class="gh-btn ghost" data-close-modal>Close</button>', 'ghPostMenuModal');
     var m=$('#ghPostMenuModal');
     var authorName = card && card.dataset ? (card.dataset.authorName || '') : '';
     m.addEventListener('click', function(e){
+      if(e.target.closest('[data-menu-edit-post]') && isOwn){
+        m.remove();
+        openFeedPostEditor(pid, card);
+      }
+      if(e.target.closest('[data-menu-delete-post]') && isOwn){
+        m.remove();
+        if(!confirm('Delete this post? This cannot be undone.')) return;
+        fs().updateDoc(fs().doc(db(),'posts',pid), { status:'deleted', updatedAt:fs().serverTimestamp() })
+          .then(function(){ if(card){ card.style.transition='opacity .25s'; card.style.opacity='0'; setTimeout(function(){ card.remove(); },260); } toast('Post deleted'); })
+          .catch(function(err){ toast('Could not delete: '+(err.code||err.message),'error'); });
+      }
+      if(e.target.closest('[data-copy-post-link]')){ navigator.clipboard && navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast('Link copied!');}); m.remove(); }
       if(e.target.closest('[data-menu-save]')){ GS().toggleSavePost(pid); m.remove(); }
       if(e.target.closest('[data-menu-hide]')){ if(GS().hidePost) GS().hidePost(pid,function(){ if(card) card.remove(); }); m.remove(); }
       if(e.target.closest('[data-menu-report]')){
@@ -1013,6 +1051,73 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         else if(GS().blockUser) GS().blockUser(authorId, function(){ if(card) card.remove(); });
       }
     });
+  }
+
+  function openFeedCommentEditor(pid, cid, btnEl) {
+    var row = document.querySelector('[data-comment-id="'+CSS.escape(cid)+'"]');
+    if (!row) return;
+    var textEl = row.querySelector('[data-cmt-text]');
+    if (!textEl || textEl.querySelector('textarea')) return;
+    var current = textEl.textContent || '';
+    var ta = document.createElement('textarea');
+    ta.className = 'gh-input'; ta.rows = 2;
+    ta.style.cssText = 'width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#f1f5f9;padding:6px 10px;resize:none;font-size:.87rem;font-family:inherit;outline:none;display:block;margin-top:4px';
+    ta.value = current;
+    var saveBtn = document.createElement('button');
+    saveBtn.style.cssText = 'margin-top:4px;background:#10b981;color:#fff;border:none;border-radius:10px;padding:4px 14px;font-size:.8rem;cursor:pointer;font-family:inherit';
+    saveBtn.textContent = 'Save';
+    var cancelBtn = document.createElement('button');
+    cancelBtn.style.cssText = 'margin-top:4px;margin-left:6px;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:.8rem;padding:4px 8px;font-family:inherit';
+    cancelBtn.textContent = 'Cancel';
+    textEl.innerHTML = '';
+    textEl.appendChild(ta);
+    textEl.appendChild(document.createElement('br'));
+    textEl.appendChild(saveBtn);
+    textEl.appendChild(cancelBtn);
+    ta.focus();
+    cancelBtn.onclick = function() { textEl.innerHTML = esc(current); };
+    saveBtn.onclick = function() {
+      var newText = ta.value.trim();
+      if (!newText || newText === current) { textEl.innerHTML = esc(current); return; }
+      saveBtn.disabled = true; saveBtn.textContent = '…';
+      fs().updateDoc(fs().doc(db(),'posts',pid,'comments',cid), { text:newText, updatedAt:fs().serverTimestamp() })
+        .then(function(){ textEl.innerHTML = esc(newText); toast('Comment updated'); })
+        .catch(function(){ textEl.innerHTML = esc(current); toast('Could not edit','error'); });
+    };
+  }
+
+  function openFeedPostEditor(pid, card) {
+    fs().getDoc(fs().doc(db(),'posts',pid)).then(function(snap){
+      if(!snap.exists()) return;
+      var d = snap.data();
+      var currentText = d.text || '';
+      var currentVis = d.visibility || 'public';
+      var body = '<textarea class="gh-textarea" id="ghEditPostText" rows="4" style="min-height:100px">'+esc(currentText)+'</textarea>'+
+        '<div style="margin-top:10px"><select class="gh-select" id="ghEditPostVis">'+
+          '<option value="public"'+(currentVis==='public'?' selected':'')+'>🌍 Public</option>'+
+          '<option value="friends"'+(currentVis==='friends'?' selected':'')+'>👥 Friends / Followers</option>'+
+          '<option value="onlyme"'+(currentVis==='onlyme'?' selected':'')+'>🔒 Only me</option>'+
+        '</select></div>';
+      modal('Edit post', body,
+        '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSavePostEdit">Save</button>',
+        'ghEditPostModal');
+      document.getElementById('ghSavePostEdit').onclick = function() {
+        var newText = document.getElementById('ghEditPostText').value.trim();
+        var newVis  = document.getElementById('ghEditPostVis').value;
+        if(!newText) return;
+        fs().updateDoc(fs().doc(db(),'posts',pid), { text:newText, visibility:newVis, updatedAt:fs().serverTimestamp() })
+          .then(function(){
+            var m = document.getElementById('ghEditPostModal'); if(m) m.remove();
+            // Update text in card without full reload
+            if(card){
+              var textEl = card.querySelector('.gh-post-text');
+              if(textEl) textEl.textContent = newText;
+            }
+            toast('Post updated');
+          })
+          .catch(function(err){ toast('Could not save: '+(err.code||err.message),'error'); });
+      };
+    }).catch(function(){ toast('Could not load post','error'); });
   }
 
   function createReport(type,id,reason){
@@ -1130,7 +1235,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var all=[]; state.bizFilter='all';
     function paint(){ var q=($('#ghBusinessSearch').value||'').toLowerCase(); var arr=all.filter(function(b){ var cat=(b.category||'').toLowerCase(); var ok=state.bizFilter==='all'||cat.includes(state.bizFilter)||(state.bizFilter==='online' && isOnlineBusiness(b)); if(!ok)return false; return !q || JSON.stringify(b).toLowerCase().includes(q); }); var list=$('#ghBusinessList'); if(!arr.length){list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-store"></i><h3>No businesses yet</h3><p>Add a business and GeoHub will create a page for it.</p><a href="add-business.html" class="gh-btn">Add Business</a></div>';return;} list.innerHTML='<div class="gh-grid">'+arr.map(businessListCard).join('')+'</div>'; }
     $('#ghBusinessSearch').oninput=paint; $('#ghCenter').addEventListener('click', function(e){ var f=e.target.closest('[data-biz-filter]'); if(f){ state.bizFilter=f.dataset.bizFilter; $all('[data-biz-filter]').forEach(function(x){x.classList.toggle('active',x===f);}); paint(); } var fb=e.target.closest('[data-follow-business]'); if(fb) followBusiness(fb.dataset.followBusiness); var s=e.target.closest('[data-save-item]'); if(s){ if(!requireLogin())return; GS().toggleSaveItem(s.dataset.type,s.dataset.id); } });
-    ready(function(){ var q=fs().query(fs().collection(db(),'businesses'), fs().orderBy('createdAt','desc'), fs().limit(40)); var _u=fs().onSnapshot(q,function(snap){ all=[]; snap.forEach(function(d){ var schema=window.GH||{}; all.push(schema.normBiz?schema.normBiz(d.data(),d.id):Object.assign({id:d.id},d.data())); }); paint(); }, function(err){ $('#ghBusinessList').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Could not load businesses</h3><p>'+esc(err.message)+'</p></div>'; }); state.pageUnsubs.push(_u); });
+    ready(function(){ var q=fs().query(fs().collection(db(),'businesses'), fs().orderBy('createdAt','desc'), fs().limit(40)); var _u=fs().onSnapshot(q,function(snap){ all=[]; snap.forEach(function(d){ var schema=window.GH||{}; var biz=schema.normBiz?schema.normBiz(d.data(),d.id):Object.assign({id:d.id},d.data()); if(biz.status==='deleted') return; all.push(biz); }); paint(); }, function(err){ $('#ghBusinessList').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Could not load businesses</h3><p>'+esc(err.message)+'</p></div>'; }); state.pageUnsubs.push(_u); });
   }
 
   function renderBusinessDetail(id){

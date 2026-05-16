@@ -344,6 +344,7 @@
           '<button class="biz-admin-btn" onclick="window._bizActions.openBlockManager()"><i class="fas fa-plus-circle"></i> Add Block</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.openCompose()"><i class="fas fa-pen-to-square"></i> New Post</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
+          '<button class="biz-admin-btn" style="color:#f87171;border-color:rgba(248,113,113,.3)" onclick="window._bizActions.deletePage()"><i class="fas fa-trash"></i> Delete Page</button>'+
         '</div>'+
         '<button class="biz-admin-btn biz-preview-toggle" onclick="window._bizActions.togglePreview()">'+
           '<i class="fas fa-eye"></i> Preview as Visitor'+
@@ -1925,6 +1926,27 @@
           setTimeout(function(){ el.remove(); }, 260);
         });
       }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+    },
+
+    deletePage: function() {
+      if (!_currentUser || !_isOwner) return;
+      var pageName = _biz && _biz.title ? _biz.title : 'this page';
+      var confirmed = window.prompt('To delete this page permanently, type the page name:\n\n"' + pageName + '"');
+      if (confirmed === null) return;
+      if (confirmed.trim() !== pageName) { showToast('Name did not match. Page not deleted.', false); return; }
+      var btn = document.querySelector('.biz-admin-btn[onclick*="deletePage"]');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting…'; }
+      _fs.updateDoc(_fs.doc(_db, 'businesses', BIZ_ID), {
+        status: 'deleted',
+        deletedAt: _fs.serverTimestamp(),
+        deletedBy: _currentUser.uid
+      }).then(function() {
+        showToast('Page deleted');
+        setTimeout(function() { window.location.href = 'business.html'; }, 1200);
+      }).catch(function(err) {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash"></i> Delete Page'; }
+        showToast('Could not delete page: ' + (err.code || err.message), false);
+      });
     },
 
     // ── Toggle comments ───────────────────────────────────────────
