@@ -12,8 +12,11 @@
   var _biz         = null;
   var _currentUser = null;
   var _isOwner     = false;
+  var _isPageAdmin = false;
+  var _pageAdminRole = null;
   var _isSaved     = false;
   var _isFollowing = false;
+  var _notificationsOn = true;
   var _reviewRating  = 0;
   var _previewMode   = false;
   var _postReactions = {}; // { postId: { key, emoji, loaded } }
@@ -64,8 +67,11 @@
   }
   function canManagePost(post) {
     if (!_currentUser) return false;
-    // Business owner can manage any post on their page; post author can manage their own
-    return _isOwner || (post && post.authorId === _currentUser.uid);
+    return _isOwner || _isPageAdmin || (post && post.authorId === _currentUser.uid);
+  }
+
+  function isAdminOrOwner() {
+    return _isOwner || _isPageAdmin;
   }
 
   function isOpenNow(wh) {
@@ -152,8 +158,11 @@
       var followCls  = _isFollowing ? 'following' : 'primary';
       var followIcon = _isFollowing ? 'fa-check' : 'fa-plus';
       var followLbl  = _isFollowing ? 'Following' : 'Follow';
+      var notifIcon  = _notificationsOn ? 'fas fa-bell' : 'far fa-bell';
+      var notifTitle = _notificationsOn ? 'Notifications on' : 'Notifications off';
       actions =
         '<button class="biz-action-btn '+followCls+'" id="biz-follow-btn" onclick="window._bizActions.toggleFollow()"><i class="fas '+followIcon+'"></i> '+followLbl+'</button>'+
+        (_isFollowing ? '<button class="biz-action-btn biz-notif-btn" id="biz-notif-btn" title="'+notifTitle+'" onclick="window._bizActions.toggleNotifications()"><i class="'+notifIcon+'"></i></button>' : '')+
         '<button class="biz-action-btn primary" onclick="window._bizActions.openQuote()"><i class="fas fa-paper-plane"></i> Quote</button>'+
         '<button class="biz-action-btn '+ (_isSaved?'saved':'')+'" id="biz-save-btn" onclick="window._bizActions.toggleSave()"><i class="'+(_isSaved?'fas':'far')+' fa-bookmark"></i> '+(_isSaved?'Saved':'Save')+'</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.share()"><i class="fas fa-share-nodes"></i> Share</button>';
@@ -211,12 +220,15 @@
     var tabs = [
       {id:'overview', label:'Overview'},
       {id:'posts',    label:'Posts'},
+      {id:'events',   label:'Events'},
       {id:'services', label:'Services'},
       {id:'products', label:'Products'},
       {id:'photos',   label:'Photos'},
       {id:'reviews',  label:'Reviews'},
+      {id:'faq',      label:'FAQ'},
       {id:'about',    label:'About'},
     ];
+    if (_isOwner) tabs.push({id:'insights',  label:'Insights'});
     if (_isOwner) tabs.push({id:'dashboard', label:'Dashboard'});
     return '<div class="biz-tabs">'+
       tabs.map(function(t,i){
@@ -715,6 +727,12 @@
         '</div>';
     }
 
+    var viewsHtml = isAdminOrOwner()
+      ? '<div class="biz-post-views" id="biz-views-'+pid+'">'+
+          '<i class="fas fa-eye"></i> '+(post.viewCount||0)+' views'+
+        '</div>'
+      : '';
+
     var bizLink = 'business.html?id='+esc(BIZ_ID);
     return '<div class="biz-post-card" data-post-id="'+pid+'"'+
         (post.pinned ? ' data-pinned="1"' : '')+
@@ -733,6 +751,7 @@
       '</div>'+
       (post.text ? '<div class="biz-post-text">'+esc(post.text)+'</div>' : '')+
       mediaHtml+
+      viewsHtml+
       countsHtml+
       '<div class="biz-post-reactions">'+
         '<div class="biz-rx-wrap" data-pid="'+pid+'">'+
@@ -946,8 +965,22 @@
         '<a href="add-business.html?edit='+esc(BIZ_ID)+'" class="biz-owner-action-btn edit"><i class="fas fa-pen"></i> Edit Page Info</a>'+
         '<button class="biz-owner-action-btn photo" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add Photo</button>'+
         '<button class="biz-owner-action-btn quotes" onclick="window._bizActions.loadOwnerQuotes()"><i class="fas fa-inbox"></i> View Quote Requests</button>'+
+        '<button class="biz-owner-action-btn" onclick="window._bizActions.switchTab(\'insights\')" style="background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.3);color:#60a5fa"><i class="fas fa-chart-line"></i> View Insights</button>'+
       '</div>'+
       '<div id="biz-owner-quotes-panel" style="display:none;padding:0 16px 14px"></div>'+
+      '<div class="biz-dash-section" style="padding:0 16px 14px">'+
+        '<div class="biz-dash-section-title"><i class="fas fa-user-shield"></i> Page Admins</div>'+
+        '<div class="biz-admin-add-form" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">'+
+          '<input class="biz-form-input" id="biz-new-admin-uid" placeholder="User ID" style="flex:1;min-width:160px">'+
+          '<select class="biz-form-input" id="biz-new-admin-role" style="width:130px">'+
+            '<option value="moderator">Moderator</option>'+
+            '<option value="editor">Editor</option>'+
+            '<option value="admin">Admin</option>'+
+          '</select>'+
+          '<button class="biz-submit-btn" style="padding:9px 16px" onclick="window._bizActions.addPageAdmin(document.getElementById(\'biz-new-admin-uid\').value.trim(),document.getElementById(\'biz-new-admin-role\').value)"><i class="fas fa-plus"></i> Add</button>'+
+        '</div>'+
+        '<div id="biz-admin-list"><div style="color:#64748b;font-size:.82rem"><i class="fas fa-spinner fa-spin"></i> Loading…</div></div>'+
+      '</div>'+
     '</div>';
   }
 
@@ -1163,9 +1196,20 @@
             renderReviews(reviews, biz)+
           '</div>'+
 
+          '<div class="biz-tab-panel" data-panel="events">'+
+            '<div id="biz-events-panel"><div class="biz-loading-inline"><i class="fas fa-spinner fa-spin"></i> Loading events…</div></div>'+
+          '</div>'+
+
+          '<div class="biz-tab-panel" data-panel="faq">'+
+            '<div id="biz-faq-panel"><div class="biz-loading-inline"><i class="fas fa-spinner fa-spin"></i> Loading FAQ…</div></div>'+
+          '</div>'+
+
           '<div class="biz-tab-panel" data-panel="about">'+
             renderAboutTab(biz)+
+            '<div id="biz-milestones-section"></div>'+
           '</div>'+
+
+          (_isOwner?'<div class="biz-tab-panel" data-panel="insights"><div id="biz-insights-panel"><div class="biz-loading-inline"><i class="fas fa-spinner fa-spin"></i> Loading insights…</div></div></div>':'')+
 
           (_isOwner?'<div class="biz-tab-panel" data-panel="dashboard">'+renderOwnerDashboard(biz)+'</div>':'')+
 
@@ -1198,6 +1242,13 @@
     _previewMode = false;
     loadBizPosts();
     loadPageBlocks();
+    loadEvents(BIZ_ID);
+    loadFaq(BIZ_ID);
+    loadMilestones(BIZ_ID);
+    if (_isOwner) {
+      loadInsights(BIZ_ID);
+      window._bizActions.refreshAdminList();
+    }
   }
 
   // ── LOAD POSTS ────────────────────────────────────────────────
@@ -1245,6 +1296,37 @@
       var pre = '<div class="biz-post-list">'+posts.slice(0,3).map(function(p){ return postCardHtml(p,_biz); }).join('')+'</div>';
       if (overviewEl) overviewEl.innerHTML = pre;
       if (allEl)      allEl.innerHTML      = all;
+
+      // Set up IntersectionObserver to track post views
+      if (_currentUser && 'IntersectionObserver' in window) {
+        var seenKey = 'biz_seen_' + BIZ_ID;
+        var seen = JSON.parse(sessionStorage.getItem(seenKey) || '{}');
+        var obs = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (!entry.isIntersecting) return;
+            var card = entry.target;
+            var pid = card.dataset.postId;
+            if (!pid || seen[pid]) return;
+            seen[pid] = 1;
+            sessionStorage.setItem(seenKey, JSON.stringify(seen));
+            obs.unobserve(card);
+            _fs.setDoc(
+              _fs.doc(_db,'posts',pid,'views',_currentUser.uid),
+              {userId:_currentUser.uid, seenAt:_fs.serverTimestamp()},
+              {merge:true}
+            ).then(function(){
+              return _fs.updateDoc(_fs.doc(_db,'posts',pid),{viewCount:_fs.increment(1)});
+            }).then(function(){
+              var vEl = document.getElementById('biz-views-'+CSS.escape(pid));
+              if (vEl && isAdminOrOwner()) {
+                var cur = parseInt(vEl.textContent.replace(/[^\d]/g,''),10)||0;
+                vEl.innerHTML = '<i class="fas fa-eye"></i> '+(cur+1)+' views';
+              }
+            }).catch(function(){});
+          });
+        }, {threshold: 0.5});
+        document.querySelectorAll('.biz-post-card').forEach(function(card) { obs.observe(card); });
+      }
 
       // Pre-load current user's reaction state for all visible posts
       if (_currentUser) {
@@ -1316,18 +1398,33 @@
 
       var loadFollow = _currentUser
         ? _fs.getDoc(_fs.doc(_db,'businessFollowers',_currentUser.uid+'_'+BIZ_ID))
-            .then(function(s){ return s.exists(); })
-            .catch(function(){ return false; })
-        : Promise.resolve(false);
+            .then(function(s){ if(!s.exists()) return {exists:false}; return {exists:true,data:s.data()}; })
+            .catch(function(){ return {exists:false}; })
+        : Promise.resolve({exists:false});
 
-      return Promise.all([loadServices, loadPriceList, loadGallery, loadReviews, loadSaved, loadFollow, loadProducts])
+      var loadAdminRole = _currentUser && !_isOwner
+        ? _fs.getDoc(_fs.doc(_db,'businesses',BIZ_ID,'admins',_currentUser.uid))
+            .then(function(s){ return s.exists() ? s.data() : null; })
+            .catch(function(){ return null; })
+        : Promise.resolve(null);
+
+      return Promise.all([loadServices, loadPriceList, loadGallery, loadReviews, loadSaved, loadFollow, loadProducts, loadAdminRole])
         .then(function(r) {
           _isSaved     = r[4];
-          _isFollowing = r[5];
+          var followResult = r[5];
+          _isFollowing = followResult.exists;
+          _notificationsOn = followResult.exists ? (followResult.data && followResult.data.notifications !== false) : true;
+          var adminData = r[7];
+          _isPageAdmin = !!adminData;
+          _pageAdminRole = adminData ? (adminData.role || null) : null;
           renderPage(_biz, r[0], r[1], r[2], r[3], r[6]);
 
           if (!_isOwner) {
-            _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID),{viewCount:_fs.increment(1)}).catch(function(){});
+            var pvKey = 'biz_pv_' + BIZ_ID;
+            if (!sessionStorage.getItem(pvKey)) {
+              sessionStorage.setItem(pvKey, '1');
+              _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID),{viewCount:_fs.increment(1)}).catch(function(){});
+            }
           }
         });
 
@@ -1336,6 +1433,239 @@
       var r = document.getElementById('biz-detail-root');
       if (r) r.innerHTML = '<div class="biz-error-state"><i class="fas fa-exclamation-circle"></i><h3>Could not load</h3><p>Check your connection and try again.</p></div>';
     });
+  }
+
+  // ── EVENTS ────────────────────────────────────────────────────
+
+  function loadEvents(bizId) {
+    var el = document.getElementById('biz-events-panel');
+    if (!el) return;
+    var createBtn = isAdminOrOwner()
+      ? '<button class="biz-submit-btn" style="margin-bottom:18px" onclick="window._bizActions.openCreateEvent()"><i class="fas fa-plus"></i> Create Event</button>'
+      : '';
+    safeSnap(
+      _fs.getDocs(_fs.query(
+        _fs.collection(_db,'businesses',bizId,'events'),
+        _fs.orderBy('date','asc')
+      ))
+    ).then(function(events) {
+      if (!events.length) {
+        el.innerHTML = createBtn +
+          '<div class="biz-empty-state"><i class="fas fa-calendar-days"></i><p>No events yet.</p></div>';
+        return;
+      }
+      var cards = events.map(function(ev) {
+        var dateStr = '';
+        if (ev.date) {
+          var ms = ev.date.toMillis ? ev.date.toMillis() : (ev.date.seconds ? ev.date.seconds*1000 : Number(ev.date));
+          dateStr = new Date(ms).toLocaleString();
+        }
+        var coverHtml = ev.coverUrl
+          ? '<img class="biz-event-cover" src="'+esc(ev.coverUrl)+'" alt="" loading="lazy">'
+          : '<div class="biz-event-cover-ph"><i class="fas fa-calendar-days"></i></div>';
+        var rsvpHtml = _currentUser && !isAdminOrOwner()
+          ? '<div class="biz-event-rsvp" id="biz-ersvp-'+esc(ev.id)+'">'+
+              '<button class="biz-rsvp-btn" data-status="going" onclick="window._bizActions.rsvpEvent(\''+esc(ev.id)+'\',\'going\')">Going</button>'+
+              '<button class="biz-rsvp-btn" data-status="interested" onclick="window._bizActions.rsvpEvent(\''+esc(ev.id)+'\',\'interested\')">Interested</button>'+
+              '<button class="biz-rsvp-btn" data-status="cant_go" onclick="window._bizActions.rsvpEvent(\''+esc(ev.id)+'\',\'cant_go\')">Can\'t Go</button>'+
+            '</div>'
+          : '';
+        return '<div class="biz-event-card">'+
+          coverHtml+
+          '<div class="biz-event-body">'+
+            '<div class="biz-event-name">'+esc(ev.name||'Event')+'</div>'+
+            (dateStr?'<div class="biz-event-date"><i class="fas fa-clock"></i> '+dateStr+'</div>':'')+
+            (ev.location?'<div class="biz-event-loc"><i class="fas fa-location-dot"></i> '+esc(ev.location)+'</div>':'')+
+            (ev.description?'<div class="biz-event-desc">'+esc(ev.description)+'</div>':'')+
+            (ev.maxAttendees?'<div class="biz-event-cap"><i class="fas fa-users"></i> Max '+ev.maxAttendees+' attendees</div>':'')+
+            rsvpHtml+
+          '</div>'+
+        '</div>';
+      }).join('');
+      el.innerHTML = createBtn + '<div class="biz-events-list">'+cards+'</div>';
+      if (_currentUser) {
+        events.forEach(function(ev) {
+          _fs.getDoc(_fs.doc(_db,'businesses',bizId,'events',ev.id,'rsvps',_currentUser.uid))
+            .then(function(s) {
+              if (!s.exists()) return;
+              var status = s.data().status;
+              var wrap = document.getElementById('biz-ersvp-'+CSS.escape(ev.id));
+              if (wrap) wrap.querySelectorAll('.biz-rsvp-btn').forEach(function(b){
+                b.classList.toggle('active', b.dataset.status === status);
+              });
+            }).catch(function(){});
+        });
+      }
+    });
+  }
+
+  // ── FAQ ───────────────────────────────────────────────────────
+
+  function loadFaq(bizId) {
+    var el = document.getElementById('biz-faq-panel');
+    if (!el) return;
+    var addBtn = isAdminOrOwner()
+      ? '<button class="biz-submit-btn" style="margin-bottom:18px" onclick="window._bizActions.openAddFaq()"><i class="fas fa-plus"></i> Add FAQ Item</button>'
+      : '';
+    var askBtn = (_currentUser && !isAdminOrOwner())
+      ? '<div class="biz-faq-ask-form" id="biz-faq-ask-form" style="margin-bottom:18px">'+
+          '<input class="biz-form-input" id="biz-faq-question-inp" placeholder="Ask a question…">'+
+          '<button class="biz-submit-btn" style="margin-top:8px" onclick="window._bizActions.submitQuestion()"><i class="fas fa-paper-plane"></i> Submit Question</button>'+
+        '</div>'
+      : '';
+    var questionsList = isAdminOrOwner()
+      ? '<div id="biz-faq-questions-section"><div style="color:#64748b;font-size:.82rem;margin-bottom:6px">Visitor Questions:</div>'+
+          '<div id="biz-faq-questions-list"><i class="fas fa-spinner fa-spin"></i></div></div>'
+      : '';
+    safeSnap(_fs.getDocs(_fs.collection(_db,'businesses',bizId,'faq'))).then(function(items) {
+      var faqHtml = items.length
+        ? items.map(function(item) {
+            var ansBtn = isAdminOrOwner() && !item.answer
+              ? '<button class="biz-cmt-act-btn" onclick="window._bizActions.openAnswerFaq(\''+esc(item.id)+'\')">Answer</button>'
+              : '';
+            var delBtn = isAdminOrOwner()
+              ? '<button class="biz-cmt-act-btn" style="color:#f87171" onclick="window._bizActions.deleteFaqItem(\''+esc(item.id)+'\')">Delete</button>'
+              : '';
+            return '<div class="biz-faq-item" id="biz-faq-'+esc(item.id)+'">'+
+              '<div class="biz-faq-q"><i class="fas fa-circle-question"></i> '+esc(item.question||'')+'</div>'+
+              (item.answer?'<div class="biz-faq-a"><i class="fas fa-circle-check"></i> '+esc(item.answer)+'</div>':'')+
+              '<div class="biz-faq-actions">'+ansBtn+delBtn+'</div>'+
+            '</div>';
+          }).join('')
+        : '<div class="biz-empty-state"><i class="fas fa-circle-question"></i><p>No FAQ items yet.</p></div>';
+      el.innerHTML = addBtn + askBtn + '<div id="biz-faq-list">'+faqHtml+'</div>' + questionsList;
+      if (isAdminOrOwner()) loadVisitorQuestions(bizId);
+    });
+  }
+
+  function loadVisitorQuestions(bizId) {
+    var el = document.getElementById('biz-faq-questions-list');
+    if (!el) return;
+    safeSnap(_fs.getDocs(_fs.query(
+      _fs.collection(_db,'businesses',bizId,'faqQuestions'),
+      _fs.orderBy('createdAt','desc'),
+      _fs.limit(20)
+    ))).then(function(questions) {
+      if (!questions.length) { el.innerHTML = '<div style="color:#64748b;font-size:.82rem">No visitor questions yet.</div>'; return; }
+      el.innerHTML = questions.map(function(q) {
+        return '<div class="biz-faq-question-item">'+
+          '<div class="biz-faq-q">'+esc(q.question||'')+'</div>'+
+          '<div class="biz-faq-meta">'+esc(q.authorName||'Anonymous')+' · '+timeAgo(q.createdAt)+'</div>'+
+          (q.answered ? '' : '<button class="biz-cmt-act-btn" onclick="window._bizActions.promoteQuestion(\''+esc(q.id)+'\',\''+esc(q.question||'')+'\')">Add to FAQ</button>')+
+        '</div>';
+      }).join('');
+    });
+  }
+
+  // ── MILESTONES ────────────────────────────────────────────────
+
+  function loadMilestones(bizId) {
+    var el = document.getElementById('biz-milestones-section');
+    if (!el) return;
+    safeSnap(_fs.getDocs(_fs.query(
+      _fs.collection(_db,'businesses',bizId,'milestones'),
+      _fs.orderBy('date','asc')
+    ))).then(function(items) {
+      if (!items.length && !isAdminOrOwner()) return;
+      var addBtn = isAdminOrOwner()
+        ? '<button class="biz-submit-btn" style="margin-bottom:14px" onclick="window._bizActions.openAddMilestone()"><i class="fas fa-plus"></i> Add Milestone</button>'
+        : '';
+      if (!items.length) {
+        el.innerHTML = '<div class="biz-section" style="margin-top:14px"><div class="biz-section-header"><div class="biz-section-title"><i class="fas fa-flag"></i> Milestones</div></div>'+addBtn+'</div>';
+        return;
+      }
+      var timeline = items.map(function(m) {
+        var yr = '';
+        if (m.date) {
+          var ms = m.date.toMillis ? m.date.toMillis() : (m.date.seconds ? m.date.seconds*1000 : Number(m.date));
+          yr = new Date(ms).getFullYear();
+        }
+        var delBtn = isAdminOrOwner()
+          ? '<button class="biz-cmt-act-btn" style="color:#f87171;margin-top:4px" onclick="window._bizActions.deleteMilestone(\''+esc(m.id)+'\')">Delete</button>'
+          : '';
+        return '<div class="biz-milestone-item">'+
+          (yr?'<div class="biz-milestone-year">'+yr+'</div>':'')+
+          '<div class="biz-milestone-content">'+
+            '<div class="biz-milestone-title">'+esc(m.title||'')+'</div>'+
+            (m.description?'<div class="biz-milestone-desc">'+esc(m.description)+'</div>':'')+
+            delBtn+
+          '</div>'+
+        '</div>';
+      }).join('');
+      el.innerHTML = '<div class="biz-section" style="margin-top:14px">'+
+        '<div class="biz-section-header"><div class="biz-section-title"><i class="fas fa-flag"></i> Milestones</div></div>'+
+        addBtn+
+        '<div class="biz-milestone-timeline">'+timeline+'</div>'+
+      '</div>';
+    });
+  }
+
+  // ── INSIGHTS ──────────────────────────────────────────────────
+
+  function loadInsights(bizId) {
+    var el = document.getElementById('biz-insights-panel');
+    if (!el || !_isOwner) return;
+    Promise.all([
+      _fs.getDoc(_fs.doc(_db,'businesses',bizId)),
+      safeSnap(_fs.getDocs(_fs.query(
+        _fs.collection(_db,'posts'),
+        _fs.where('businessId','==',bizId),
+        _fs.limit(50)
+      ))),
+      _fs.getDocs(_fs.query(
+        _fs.collection(_db,'businessFollowers'),
+        _fs.where('businessId','==',bizId),
+        _fs.limit(500)
+      )).catch(function(){ return {docs:[]}; })
+    ]).then(function(results) {
+      var bizData = results[0].exists() ? results[0].data() : {};
+      var posts = results[1].filter(function(p){ return p.status !== 'deleted'; });
+      var totalReactions = 0, totalComments = 0;
+      posts.forEach(function(p){ totalReactions += (p.likeCount||0); totalComments += (p.commentCount||0); });
+      var topPosts = posts.slice().sort(function(a,b){
+        return ((b.likeCount||0)+(b.commentCount||0)) - ((a.likeCount||0)+(a.commentCount||0));
+      }).slice(0,3);
+      var maxScore = topPosts.length ? ((topPosts[0].likeCount||0)+(topPosts[0].commentCount||0)) : 1;
+
+      var statsHtml =
+        '<div class="biz-insights-stats">'+
+          insightStat('fa-eye','Page Views', bizData.viewCount||0, '#3b82f6')+
+          insightStat('fa-users','Followers', bizData.followerCount||0, '#10b981')+
+          insightStat('fa-newspaper','Posts', posts.length, '#8b5cf6')+
+          insightStat('fa-thumbs-up','Total Reactions', totalReactions, '#f59e0b')+
+          insightStat('fa-comment','Total Comments', totalComments, '#06b6d4')+
+          insightStat('fa-bookmark','Saves', bizData.saveCount||0, '#f43f5e')+
+        '</div>';
+
+      var topPostsHtml = topPosts.length
+        ? '<div class="biz-insights-section"><div class="biz-insights-title"><i class="fas fa-trophy"></i> Top Performing Posts</div>'+
+            topPosts.map(function(p) {
+              var score = (p.likeCount||0)+(p.commentCount||0);
+              var pct = maxScore > 0 ? Math.round(score/maxScore*100) : 0;
+              return '<div class="biz-insights-post-row">'+
+                '<div class="biz-insights-post-text">'+esc((p.text||'(no text)').slice(0,60))+'</div>'+
+                '<div class="biz-insights-bar-wrap"><div class="biz-insights-bar" style="width:'+pct+'%"></div></div>'+
+                '<div class="biz-insights-post-score">👍 '+(p.likeCount||0)+' · 💬 '+(p.commentCount||0)+'</div>'+
+              '</div>';
+            }).join('')+
+          '</div>'
+        : '';
+
+      el.innerHTML = '<div class="biz-insights-wrap">'+
+        '<div class="biz-dash-header"><i class="fas fa-chart-line"></i> Page Insights</div>'+
+        statsHtml + topPostsHtml +
+      '</div>';
+    }).catch(function(err) {
+      if (el) el.innerHTML = '<div class="biz-empty-state"><i class="fas fa-triangle-exclamation"></i><p>Could not load insights.</p></div>';
+    });
+  }
+
+  function insightStat(icon, label, val, color) {
+    return '<div class="biz-insights-stat">'+
+      '<div class="biz-insights-stat-icon" style="color:'+color+';background:'+color+'1a"><i class="fas '+icon+'"></i></div>'+
+      '<div class="biz-insights-stat-val">'+compact(val)+'</div>'+
+      '<div class="biz-insights-stat-label">'+label+'</div>'+
+    '</div>';
   }
 
   // ── ACTIONS ───────────────────────────────────────────────────
@@ -2358,6 +2688,288 @@
         loadPageBlocks();
         window._bizActions.refreshBlockManagerList();
       }).catch(function() { showToast('Could not save', false); });
+    },
+
+    // ── Notification toggle ───────────────────────────────────────
+    toggleNotifications: function() {
+      if (!_currentUser) return;
+      _notificationsOn = !_notificationsOn;
+      var followRef = _fs.doc(_db,'businessFollowers',_currentUser.uid+'_'+BIZ_ID);
+      _fs.updateDoc(followRef, {notifications: _notificationsOn}).catch(function(){});
+      var btn = document.getElementById('biz-notif-btn');
+      if (btn) {
+        btn.innerHTML = '<i class="'+(_notificationsOn?'fas':'far')+' fa-bell"></i>';
+        btn.title = _notificationsOn ? 'Notifications on' : 'Notifications off';
+      }
+      showToast(_notificationsOn ? 'Notifications enabled' : 'Notifications disabled');
+    },
+
+    // ── Events ────────────────────────────────────────────────────
+    openCreateEvent: function() {
+      if (!isAdminOrOwner()) return;
+      var html = '<div class="biz-modal-overlay" id="biz-create-event-modal" onclick="if(event.target===this)window._bizActions.closeCreateEvent()">'+
+        '<div class="biz-modal-sheet">'+
+          '<div class="biz-modal-handle"></div>'+
+          '<button class="biz-modal-close" onclick="window._bizActions.closeCreateEvent()"><i class="fas fa-times"></i></button>'+
+          '<div class="biz-modal-title">Create Event</div>'+
+          '<div class="biz-form-group"><label class="biz-form-label">Event Name *</label><input class="biz-form-input" id="ev-name" placeholder="Event name"></div>'+
+          '<div class="biz-form-group"><label class="biz-form-label">Description</label><textarea class="biz-form-textarea" id="ev-desc" placeholder="Describe the event…"></textarea></div>'+
+          '<div class="biz-form-group"><label class="biz-form-label">Date & Time *</label><input class="biz-form-input" id="ev-date" type="datetime-local"></div>'+
+          '<div class="biz-form-group"><label class="biz-form-label">Location</label><input class="biz-form-input" id="ev-loc" placeholder="Address or online link"></div>'+
+          '<div class="biz-form-group"><label class="biz-form-label">Cover Image URL</label><input class="biz-form-input" id="ev-cover" placeholder="https://…" type="url"></div>'+
+          '<div class="biz-form-group"><label class="biz-form-label">Max Attendees</label><input class="biz-form-input" id="ev-max" type="number" placeholder="Leave empty for unlimited"></div>'+
+          '<button class="biz-submit-btn" id="ev-submit-btn" onclick="window._bizActions.saveEvent()"><i class="fas fa-calendar-plus"></i> Create Event</button>'+
+        '</div>'+
+      '</div>';
+      var existing = document.getElementById('biz-create-event-modal');
+      if (existing) existing.remove();
+      document.body.insertAdjacentHTML('beforeend', html);
+      document.getElementById('biz-create-event-modal').classList.add('open');
+    },
+
+    closeCreateEvent: function() {
+      var m = document.getElementById('biz-create-event-modal');
+      if (m) m.remove();
+    },
+
+    saveEvent: function() {
+      if (!isAdminOrOwner()) return;
+      var name  = ((document.getElementById('ev-name')||{}).value||'').trim();
+      var desc  = ((document.getElementById('ev-desc')||{}).value||'').trim();
+      var date  = (document.getElementById('ev-date')||{}).value;
+      var loc   = ((document.getElementById('ev-loc')||{}).value||'').trim();
+      var cover = ((document.getElementById('ev-cover')||{}).value||'').trim();
+      var maxA  = parseInt(((document.getElementById('ev-max')||{}).value||''),10)||0;
+      if (!name || !date) { showToast('Event name and date are required', false); return; }
+      var btn = document.getElementById('ev-submit-btn');
+      if (btn) { btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>'; }
+      _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'events'), {
+        name: name, description: desc,
+        date: new Date(date),
+        location: loc, coverUrl: cover,
+        maxAttendees: maxA||null, createdBy: _currentUser.uid,
+        createdAt: _fs.serverTimestamp(), attendeeCount: 0
+      }).then(function() {
+        showToast('Event created!');
+        window._bizActions.closeCreateEvent();
+        loadEvents(BIZ_ID);
+      }).catch(function(err) {
+        showToast('Could not create event: '+(err.code||err.message), false);
+        if (btn) { btn.disabled=false; btn.innerHTML='<i class="fas fa-calendar-plus"></i> Create Event'; }
+      });
+    },
+
+    rsvpEvent: function(eventId, status) {
+      if (!_currentUser) { showToast('Sign in to RSVP', false); return; }
+      _fs.setDoc(
+        _fs.doc(_db,'businesses',BIZ_ID,'events',eventId,'rsvps',_currentUser.uid),
+        {userId:_currentUser.uid, status:status, updatedAt:_fs.serverTimestamp()},
+        {merge:true}
+      ).then(function() {
+        showToast('RSVP saved: '+status.replace('_',' '));
+        var wrap = document.getElementById('biz-ersvp-'+CSS.escape(eventId));
+        if (wrap) wrap.querySelectorAll('.biz-rsvp-btn').forEach(function(b){
+          b.classList.toggle('active', b.dataset.status === status);
+        });
+      }).catch(function(){ showToast('Could not save RSVP', false); });
+    },
+
+    // ── FAQ ───────────────────────────────────────────────────────
+    openAddFaq: function() {
+      if (!isAdminOrOwner()) return;
+      var html = '<div class="biz-modal-overlay" id="biz-add-faq-modal" onclick="if(event.target===this)window._bizActions.closeAddFaq()">'+
+        '<div class="biz-modal-sheet">'+
+          '<div class="biz-modal-handle"></div>'+
+          '<button class="biz-modal-close" onclick="window._bizActions.closeAddFaq()"><i class="fas fa-times"></i></button>'+
+          '<div class="biz-modal-title">Add FAQ Item</div>'+
+          '<div class="biz-form-group"><label class="biz-form-label">Question *</label><input class="biz-form-input" id="faq-q-inp" placeholder="Frequently asked question…"></div>'+
+          '<div class="biz-form-group"><label class="biz-form-label">Answer *</label><textarea class="biz-form-textarea" id="faq-a-inp" placeholder="Your answer…"></textarea></div>'+
+          '<button class="biz-submit-btn" id="faq-submit-btn" onclick="window._bizActions.saveFaqItem()"><i class="fas fa-plus"></i> Add FAQ</button>'+
+        '</div>'+
+      '</div>';
+      var existing = document.getElementById('biz-add-faq-modal');
+      if (existing) existing.remove();
+      document.body.insertAdjacentHTML('beforeend', html);
+      document.getElementById('biz-add-faq-modal').classList.add('open');
+    },
+
+    closeAddFaq: function() {
+      var m = document.getElementById('biz-add-faq-modal'); if (m) m.remove();
+    },
+
+    saveFaqItem: function() {
+      if (!isAdminOrOwner()) return;
+      var q = ((document.getElementById('faq-q-inp')||{}).value||'').trim();
+      var a = ((document.getElementById('faq-a-inp')||{}).value||'').trim();
+      if (!q || !a) { showToast('Question and answer are required', false); return; }
+      var btn = document.getElementById('faq-submit-btn');
+      if (btn) { btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>'; }
+      _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'faq'), {
+        question: q, answer: a, createdBy: _currentUser.uid, createdAt: _fs.serverTimestamp()
+      }).then(function() {
+        showToast('FAQ item added!');
+        window._bizActions.closeAddFaq();
+        loadFaq(BIZ_ID);
+      }).catch(function(err) {
+        showToast('Could not add FAQ: '+(err.code||err.message), false);
+        if (btn) { btn.disabled=false; btn.innerHTML='<i class="fas fa-plus"></i> Add FAQ'; }
+      });
+    },
+
+    deleteFaqItem: function(faqId) {
+      if (!isAdminOrOwner() || !confirm('Delete this FAQ item?')) return;
+      _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'faq',faqId)).then(function() {
+        showToast('FAQ item deleted');
+        loadFaq(BIZ_ID);
+      }).catch(function(){ showToast('Could not delete', false); });
+    },
+
+    openAnswerFaq: function(faqId) {
+      var item = document.getElementById('biz-faq-'+faqId);
+      if (!item || item.querySelector('textarea')) return;
+      var ta = document.createElement('textarea');
+      ta.className = 'biz-cmt-edit-ta';
+      ta.placeholder = 'Write your answer…';
+      ta.rows = 3;
+      ta.style.cssText = 'width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#f1f5f9;padding:8px 12px;resize:none;font-size:.87rem;font-family:inherit;outline:none;margin-top:8px;box-sizing:border-box';
+      var saveBtn = document.createElement('button');
+      saveBtn.className = 'biz-submit-btn';
+      saveBtn.style.cssText = 'margin-top:6px;font-size:.8rem;padding:6px 14px';
+      saveBtn.textContent = 'Save Answer';
+      item.appendChild(ta);
+      item.appendChild(saveBtn);
+      ta.focus();
+      saveBtn.onclick = function() {
+        var ans = ta.value.trim();
+        if (!ans) return;
+        saveBtn.disabled = true; saveBtn.textContent = '…';
+        _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID,'faq',faqId), {
+          answer: ans, updatedAt: _fs.serverTimestamp()
+        }).then(function() {
+          showToast('Answer saved');
+          loadFaq(BIZ_ID);
+        }).catch(function(){ showToast('Could not save', false); });
+      };
+    },
+
+    submitQuestion: function() {
+      if (!_currentUser) { showToast('Sign in to ask a question', false); return; }
+      var inp = document.getElementById('biz-faq-question-inp');
+      var q = inp ? inp.value.trim() : '';
+      if (!q) { showToast('Please enter a question', false); return; }
+      _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'faqQuestions'), {
+        question: q,
+        authorId: _currentUser.uid,
+        authorName: _currentUser.displayName || (_currentUser.email||'').split('@')[0] || 'User',
+        createdAt: _fs.serverTimestamp(), answered: false
+      }).then(function() {
+        showToast('Question submitted!');
+        if (inp) inp.value = '';
+      }).catch(function(){ showToast('Could not submit question', false); });
+    },
+
+    promoteQuestion: function(questionId, questionText) {
+      if (!isAdminOrOwner()) return;
+      var ans = window.prompt('Answer for: "'+questionText+'"');
+      if (!ans || !ans.trim()) return;
+      _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'faq'), {
+        question: questionText, answer: ans.trim(),
+        createdBy: _currentUser.uid, createdAt: _fs.serverTimestamp()
+      }).then(function() {
+        return _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID,'faqQuestions',questionId), {answered:true});
+      }).then(function() {
+        showToast('Added to FAQ!');
+        loadFaq(BIZ_ID);
+      }).catch(function(){ showToast('Could not add to FAQ', false); });
+    },
+
+    // ── Milestones ────────────────────────────────────────────────
+    openAddMilestone: function() {
+      if (!isAdminOrOwner()) return;
+      var html = '<div class="biz-modal-overlay" id="biz-add-milestone-modal" onclick="if(event.target===this)window._bizActions.closeAddMilestone()">'+
+        '<div class="biz-modal-sheet">'+
+          '<div class="biz-modal-handle"></div>'+
+          '<button class="biz-modal-close" onclick="window._bizActions.closeAddMilestone()"><i class="fas fa-times"></i></button>'+
+          '<div class="biz-modal-title">Add Milestone</div>'+
+          '<div class="biz-form-group"><label class="biz-form-label">Title *</label><input class="biz-form-input" id="ms-title" placeholder="e.g. Opened first location"></div>'+
+          '<div class="biz-form-group"><label class="biz-form-label">Date *</label><input class="biz-form-input" id="ms-date" type="date"></div>'+
+          '<div class="biz-form-group"><label class="biz-form-label">Description</label><textarea class="biz-form-textarea" id="ms-desc" placeholder="More details…"></textarea></div>'+
+          '<button class="biz-submit-btn" id="ms-submit-btn" onclick="window._bizActions.saveMilestone()"><i class="fas fa-flag"></i> Add Milestone</button>'+
+        '</div>'+
+      '</div>';
+      var existing = document.getElementById('biz-add-milestone-modal');
+      if (existing) existing.remove();
+      document.body.insertAdjacentHTML('beforeend', html);
+      document.getElementById('biz-add-milestone-modal').classList.add('open');
+    },
+
+    closeAddMilestone: function() {
+      var m = document.getElementById('biz-add-milestone-modal'); if (m) m.remove();
+    },
+
+    saveMilestone: function() {
+      if (!isAdminOrOwner()) return;
+      var title = ((document.getElementById('ms-title')||{}).value||'').trim();
+      var date  = (document.getElementById('ms-date')||{}).value;
+      var desc  = ((document.getElementById('ms-desc')||{}).value||'').trim();
+      if (!title || !date) { showToast('Title and date are required', false); return; }
+      var btn = document.getElementById('ms-submit-btn');
+      if (btn) { btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>'; }
+      _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'milestones'), {
+        title: title, description: desc,
+        date: new Date(date),
+        createdBy: _currentUser.uid, createdAt: _fs.serverTimestamp()
+      }).then(function() {
+        showToast('Milestone added!');
+        window._bizActions.closeAddMilestone();
+        loadMilestones(BIZ_ID);
+      }).catch(function(err) {
+        showToast('Could not add milestone: '+(err.code||err.message), false);
+        if (btn) { btn.disabled=false; btn.innerHTML='<i class="fas fa-flag"></i> Add Milestone'; }
+      });
+    },
+
+    deleteMilestone: function(milestoneId) {
+      if (!isAdminOrOwner() || !confirm('Delete this milestone?')) return;
+      _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'milestones',milestoneId)).then(function() {
+        showToast('Milestone deleted');
+        loadMilestones(BIZ_ID);
+      }).catch(function(){ showToast('Could not delete', false); });
+    },
+
+    // ── Page Admin Roles ──────────────────────────────────────────
+    addPageAdmin: function(userId, role) {
+      if (!_isOwner) return;
+      if (!userId || !role) { showToast('User ID and role are required', false); return; }
+      _fs.setDoc(_fs.doc(_db,'businesses',BIZ_ID,'admins',userId), {
+        role: role, addedBy: _currentUser.uid, addedAt: _fs.serverTimestamp()
+      }).then(function() {
+        showToast('Admin added!');
+        window._bizActions.refreshAdminList();
+      }).catch(function(err){ showToast('Could not add admin: '+(err.code||err.message), false); });
+    },
+
+    removePageAdmin: function(userId) {
+      if (!_isOwner || !confirm('Remove this admin?')) return;
+      _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'admins',userId)).then(function() {
+        showToast('Admin removed');
+        window._bizActions.refreshAdminList();
+      }).catch(function(){ showToast('Could not remove admin', false); });
+    },
+
+    refreshAdminList: function() {
+      var el = document.getElementById('biz-admin-list');
+      if (!el) return;
+      safeSnap(_fs.getDocs(_fs.collection(_db,'businesses',BIZ_ID,'admins'))).then(function(admins) {
+        if (!admins.length) { el.innerHTML = '<div style="color:#64748b;font-size:.82rem">No additional admins.</div>'; return; }
+        el.innerHTML = admins.map(function(a) {
+          return '<div class="biz-admin-role-item">'+
+            '<span class="biz-admin-role-badge">'+esc(a.role||'admin')+'</span>'+
+            '<span class="biz-admin-role-uid">'+esc(a.id||a.userId||'')+'</span>'+
+            '<button class="biz-cmt-act-btn" style="color:#f87171" onclick="window._bizActions.removePageAdmin(\''+esc(a.id||'')+'\')">Remove</button>'+
+          '</div>';
+        }).join('');
+      });
     },
 
     goToQuotes: function(){ window._bizActions.switchTab('dashboard'); setTimeout(function(){ window._bizActions.loadOwnerQuotes(); },100); },

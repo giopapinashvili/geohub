@@ -106,16 +106,30 @@
           </div>
         </div>
 
+        <!-- Message search bar -->
+        <div class="msg-search-wrap" id="msgSearchWrap" style="display:none">
+          <i class="fas fa-search"></i>
+          <input type="text" id="msgSearchInput" class="msg-search-input" placeholder="Search messages…">
+          <button class="msg-search-close" type="button" onclick="window.__ghToggleSearch()"><i class="fas fa-times"></i></button>
+        </div>
+
+        <!-- Reply preview bar -->
+        <div class="reply-preview-bar" id="replyPreviewBar" style="display:none"></div>
+
         <!-- Quick replies -->
         <div class="quick-replies-bar" id="quickRepliesBar" style="display:none"></div>
 
         <!-- Input bar -->
         <div class="chat-input-bar">
           <button class="input-btn" title="Attach image" data-pick-image><i class="fas fa-paperclip"></i></button>
+          <button class="input-btn" id="fileAttachBtn" title="Attach file"><i class="fas fa-file-alt"></i></button>
           <input type="text" id="msgInput" class="msg-input" placeholder="Type a message…">
           <button class="input-btn" id="emojiBtn" title="Emoji" onclick="toggleEmojiPicker()"><i class="fas fa-smile"></i></button>
+          <button class="input-btn" id="voiceBtn" title="Hold to record voice"><i class="fas fa-microphone"></i></button>
           <button class="send-btn" onclick="sendMsg()" title="Send"><i class="fas fa-paper-plane"></i></button>
-          <div class="emoji-picker-wrap" id="emojiPicker"></div><input id="messageImageInput" type="file" accept="image/*" hidden>
+          <div class="emoji-picker-wrap" id="emojiPicker"></div>
+          <input id="messageImageInput" type="file" accept="image/*" hidden>
+          <input id="messageFileInput" type="file" accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.csv" hidden>
         </div>
       </div>
 

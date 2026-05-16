@@ -90,8 +90,43 @@
       createPlaceReview: function (placeId, rating, comment, cb) { noop(); if(cb) cb(false); },
       listenPlaceReviews: function (placeId, cb) { cb([]); return function(){}; },
       requestJoinGroup: function (groupId, cb) { noop(); if(cb) cb('error'); },
+      requestJoinGroupWithAnswers: function (groupId, answers, cb) { noop(); if(cb) cb('error'); },
       checkJoinRequest: function (groupId, cb) { cb(false); },
       getMyJoinRequests: function (cb) { cb({}); },
+      listenGroupJoinRequests: function(groupId, cb){ cb([]); return function(){}; },
+      approveJoinRequest: function(a,b,c,cb){ noop(); if(cb) cb(false); },
+      declineJoinRequest: function(a,cb){ noop(); if(cb) cb(false); },
+      uploadGroupCover: function(a,b,cb){ noop(); if(cb) cb(null); },
+      updateGroupRules: function(a,b,cb){ noop(); if(cb) cb(false); },
+      generateGroupInviteToken: function(a,cb){ noop(); if(cb) cb(null); },
+      disableGroupInviteToken: function(a,cb){ noop(); if(cb) cb(false); },
+      getGroupByInviteToken: function(t,cb){ cb(null); },
+      joinGroupViaInvite: function(a,b,cb){ noop(); if(cb) cb(false); },
+      updateGroupJoinQuestions: function(a,b,cb){ noop(); if(cb) cb(false); },
+      setGroupMemberRole: function(a,b,c,cb){ noop(); if(cb) cb(false); },
+      getGroupMemberRole: function(a,cb){ cb(null); },
+      banGroupMember: function(a,b,c,d,cb){ noop(); if(cb) cb(false); },
+      removeGroupMember: function(a,b,cb){ noop(); if(cb) cb(false); },
+      leaveGroup: function(a,cb){ noop(); if(cb) cb(false); },
+      updateGroupPostApproval: function(a,b,cb){ noop(); if(cb) cb(false); },
+      listenPendingGroupPosts: function(a,cb){ cb([]); return function(){}; },
+      approveGroupPost: function(a,cb){ noop(); if(cb) cb(false); },
+      declineGroupPost: function(a,cb){ noop(); if(cb) cb(false); },
+      pinGroupPost: function(a,b,cb){ noop(); if(cb) cb(false); },
+      unpinGroupPost: function(a,b,cb){ noop(); if(cb) cb(false); },
+      createGroupEvent: function(a,b,cb){ noop(); if(cb) cb(null); },
+      listenGroupEvents: function(a,cb){ cb([]); return function(){}; },
+      rsvpGroupEvent: function(a,b,c,cb){ noop(); if(cb) cb(false); },
+      uploadGroupFile: function(a,b,cb){ noop(); if(cb) cb(null); },
+      listenGroupFiles: function(a,cb){ cb([]); return function(){}; },
+      deleteGroupFile: function(a,b,cb){ noop(); if(cb) cb(false); },
+      sendGroupChatMessage: function(a,b,cb){ noop(); if(cb) cb(null); },
+      listenGroupChat: function(a,cb){ cb([]); return function(){}; },
+      deleteGroupChatMessage: function(a,b,cb){ noop(); if(cb) cb(false); },
+      getGroupInsights: function(a,cb){ cb(null); },
+      setGroupMute: function(a,b,cb){ noop(); if(cb) cb(false); },
+      getGroupMuteStatus: function(a,cb){ cb(false); },
+      updateGroupSettings: function(a,b,cb){ noop(); if(cb) cb(false); },
       searchFirestore: function (q, cb) { cb({ users:[], groups:[], places:[], posts:[] }); },
 
       // GeoPoints economy fallback
@@ -120,6 +155,16 @@
       listenReports: function(o, cb){ cb([]); return function(){}; },
       updateReportStatus: function(id, s, e, cb){ if(cb) cb(false); },
       createModerationAction: function(a, t, ty, n, cb){ if(cb) cb(false); },
+      editMessage: function(){ noop(); },
+      setTyping: function(){},
+      markMessagesSeen: function(){},
+      setConversationArchive: function(id, a, cb){ if(cb) cb(false); },
+      setConversationMute: function(id, m, cb){ if(cb) cb(false); },
+      setConversationTheme: function(id, t, cb){ if(cb) cb(false); },
+      setConversationNickname: function(id, u, n, cb){ if(cb) cb(false); },
+      listenConversationSettings: function(id, cb){ cb({}); return function(){}; },
+      uploadAudioBlob: function(b, u, cb){ if(cb) cb(''); return Promise.resolve(''); },
+      uploadDocumentBlob: function(b, f, u, cb){ if(cb) cb(''); return Promise.resolve(''); },
       requireAuth: showLoginPrompt,
       toast: toast
     };
@@ -1983,6 +2028,139 @@
         .catch(function(err){ console.warn('[GeoSocial] deleteMessage', err.message); toast('Delete failed.', 'error'); if(callback) callback(false, err); });
     }
 
+    function editMessage(conversationId, messageId, newText, callback) {
+      var uid = currentUid();
+      if (!uid || !conversationId || !messageId) { if(callback) callback(false); return; }
+      var ref = doc(db, 'conversations', conversationId, 'messages', messageId);
+      updateDoc(ref, { text: String(newText || '').trim(), edited: true, updatedAt: serverTimestamp() })
+        .then(function(){ if(callback) callback(true); })
+        .catch(function(err){ console.warn('[GeoSocial] editMessage', err.message); toast('Edit failed.', 'error'); if(callback) callback(false, err); });
+    }
+
+    function setTyping(conversationId, isTyping) {
+      var uid = currentUid();
+      if (!uid || !conversationId) return;
+      var ref = doc(db, 'conversations', conversationId);
+      var field = 'typingUsers.' + uid;
+      var patch = {};
+      if (isTyping) {
+        patch[field] = serverTimestamp();
+      } else {
+        patch[field] = fs.deleteField ? fs.deleteField() : null;
+      }
+      updateDoc(ref, patch).catch(function(e){ console.warn('[GeoSocial] setTyping', e.message); });
+    }
+
+    function markMessagesSeen(conversationId, messageIds) {
+      var uid = currentUid();
+      if (!uid || !conversationId || !messageIds || !messageIds.length) return;
+      var batch = fs.writeBatch ? fs.writeBatch(db) : null;
+      if (!batch) return;
+      messageIds.forEach(function(mid){
+        var ref = doc(db, 'conversations', conversationId, 'messages', mid);
+        batch.update(ref, { seenBy: fs.arrayUnion(uid) });
+      });
+      batch.commit().catch(function(e){ console.warn('[GeoSocial] markMessagesSeen', e.message); });
+    }
+
+    function setConversationArchive(conversationId, archived, callback) {
+      var uid = currentUid();
+      if (!uid || !conversationId) { if(callback) callback(false); return; }
+      var ref = doc(db, 'userConversationSettings', uid + '_' + conversationId);
+      setDoc(ref, { userId: uid, conversationId: conversationId, archived: !!archived, updatedAt: serverTimestamp() }, { merge: true })
+        .then(function(){ if(callback) callback(true); })
+        .catch(function(err){ console.warn('[GeoSocial] setConversationArchive', err.message); if(callback) callback(false); });
+    }
+
+    function setConversationMute(conversationId, mutedUntil, callback) {
+      var uid = currentUid();
+      if (!uid || !conversationId) { if(callback) callback(false); return; }
+      var ref = doc(db, 'userConversationSettings', uid + '_' + conversationId);
+      setDoc(ref, { userId: uid, conversationId: conversationId, mutedUntil: mutedUntil || null, updatedAt: serverTimestamp() }, { merge: true })
+        .then(function(){ if(callback) callback(true); })
+        .catch(function(err){ console.warn('[GeoSocial] setConversationMute', err.message); if(callback) callback(false); });
+    }
+
+    function setConversationTheme(conversationId, theme, callback) {
+      if (!conversationId) { if(callback) callback(false); return; }
+      updateDoc(doc(db, 'conversations', conversationId), { theme: theme || '', updatedAt: serverTimestamp() })
+        .then(function(){ if(callback) callback(true); })
+        .catch(function(err){ console.warn('[GeoSocial] setConversationTheme', err.message); if(callback) callback(false); });
+    }
+
+    function setConversationNickname(conversationId, targetUid, nickname, callback) {
+      if (!conversationId) { if(callback) callback(false); return; }
+      var patch = {};
+      patch['nicknames.' + targetUid] = nickname || '';
+      updateDoc(doc(db, 'conversations', conversationId), patch)
+        .then(function(){ if(callback) callback(true); })
+        .catch(function(err){ console.warn('[GeoSocial] setConversationNickname', err.message); if(callback) callback(false); });
+    }
+
+    function listenConversationSettings(conversationId, callback) {
+      var uid = currentUid();
+      if (!uid || !conversationId) { callback({}); return function(){}; }
+      return onSnapshot(doc(db, 'userConversationSettings', uid + '_' + conversationId), function(snap){
+        callback(snap.exists() ? (snap.data() || {}) : {});
+      }, function(err){ console.warn('[GeoSocial] listenConversationSettings', err.message); callback({}); });
+    }
+
+    function uploadAudioBlob(blob, uid, callback) {
+      if (!blob || !cloudinaryConfigured()) { if(callback) callback(''); return Promise.resolve(''); }
+      var form = new FormData();
+      form.append('file', blob, 'voice.webm');
+      form.append('upload_preset', GEOHUB_CLOUDINARY.uploadPreset);
+      form.append('folder', cloudinaryFolder('voice', uid));
+      form.append('resource_type', 'video');
+      var apiUrl = 'https://api.cloudinary.com/v1_1/' + encodeURIComponent(GEOHUB_CLOUDINARY.cloudName) + '/video/upload';
+      return new Promise(function(resolve){
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', apiUrl);
+        var timer = setTimeout(function(){ xhr.abort(); }, 30000);
+        xhr.onload = function(){
+          clearTimeout(timer);
+          var body = {};
+          try { body = JSON.parse(xhr.responseText); } catch(e) {}
+          if (xhr.status >= 200 && xhr.status < 300 && body.secure_url) {
+            if(callback) callback(body.secure_url); resolve(body.secure_url);
+          } else {
+            if(callback) callback(''); resolve('');
+          }
+        };
+        xhr.onerror = function(){ clearTimeout(timer); if(callback) callback(''); resolve(''); };
+        xhr.onabort = function(){ clearTimeout(timer); if(callback) callback(''); resolve(''); };
+        xhr.send(form);
+      });
+    }
+
+    function uploadDocumentBlob(blob, filename, uid, callback) {
+      if (!blob || !cloudinaryConfigured()) { if(callback) callback(''); return Promise.resolve(''); }
+      var form = new FormData();
+      form.append('file', blob, filename || 'document');
+      form.append('upload_preset', GEOHUB_CLOUDINARY.uploadPreset);
+      form.append('folder', cloudinaryFolder('files', uid));
+      form.append('resource_type', 'raw');
+      var apiUrl = 'https://api.cloudinary.com/v1_1/' + encodeURIComponent(GEOHUB_CLOUDINARY.cloudName) + '/raw/upload';
+      return new Promise(function(resolve){
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', apiUrl);
+        var timer = setTimeout(function(){ xhr.abort(); }, 60000);
+        xhr.onload = function(){
+          clearTimeout(timer);
+          var body = {};
+          try { body = JSON.parse(xhr.responseText); } catch(e) {}
+          if (xhr.status >= 200 && xhr.status < 300 && body.secure_url) {
+            if(callback) callback(body.secure_url); resolve(body.secure_url);
+          } else {
+            if(callback) callback(''); resolve('');
+          }
+        };
+        xhr.onerror = function(){ clearTimeout(timer); if(callback) callback(''); resolve(''); };
+        xhr.onabort = function(){ clearTimeout(timer); if(callback) callback(''); resolve(''); };
+        xhr.send(form);
+      });
+    }
+
     // ── PLACES ──────────────────────────────────────────────────────────
     function createPlace(data, callback) {
       requireAuth(function (user) {
@@ -2101,6 +2279,454 @@
             .catch(function () { return null; });
         })).then(function (places) { callback(places.filter(Boolean)); });
       }, function (err) { console.warn('[GeoSocial] listenSavedPlaces', err.message); callback([]); });
+    }
+
+    // ── GROUP ADVANCED FEATURES ───────────────────────────────────────────
+
+    // Cover photo upload via Cloudinary
+    function uploadGroupCover(groupId, file, callback) {
+      requireAuth(function (user) {
+        var cfg = window.GEOHUB_CLOUDINARY;
+        if (!cfg || !cfg.cloudName || !cfg.uploadPreset) {
+          toast('Cloudinary not configured', 'error');
+          if (callback) callback(null);
+          return;
+        }
+        var fd = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', cfg.uploadPreset);
+        fd.append('folder', 'group_covers');
+        fetch('https://api.cloudinary.com/v1_1/' + cfg.cloudName + '/image/upload', { method: 'POST', body: fd })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (!data.secure_url) throw new Error('No URL from Cloudinary');
+            return updateDoc(doc(db, 'groups', groupId), { coverUrl: data.secure_url, updatedAt: serverTimestamp() })
+              .then(function () { toast('Cover photo updated!'); if (callback) callback(data.secure_url); });
+          }).catch(function (err) { console.error('[GeoSocial] uploadGroupCover', err); toast('Cover upload failed', 'error'); if (callback) callback(null); });
+      });
+    }
+
+    // Group rules CRUD
+    function updateGroupRules(groupId, rules, callback) {
+      requireAuth(function () {
+        updateDoc(doc(db, 'groups', groupId), { rules: rules, updatedAt: serverTimestamp() })
+          .then(function () { toast('Rules updated!'); if (callback) callback(true); })
+          .catch(function (err) { toast('Failed to update rules', 'error'); if (callback) callback(false); });
+      });
+    }
+
+    // Invite token generation
+    function generateGroupInviteToken(groupId, callback) {
+      requireAuth(function () {
+        var token = Math.random().toString(36).substr(2, 8);
+        updateDoc(doc(db, 'groups', groupId), { inviteToken: token, inviteEnabled: true, updatedAt: serverTimestamp() })
+          .then(function () { toast('Invite link generated!'); if (callback) callback(token); })
+          .catch(function (err) { toast('Failed', 'error'); if (callback) callback(null); });
+      });
+    }
+
+    function disableGroupInviteToken(groupId, callback) {
+      requireAuth(function () {
+        updateDoc(doc(db, 'groups', groupId), { inviteEnabled: false, updatedAt: serverTimestamp() })
+          .then(function () { toast('Invite link disabled'); if (callback) callback(true); })
+          .catch(function () { if (callback) callback(false); });
+      });
+    }
+
+    function getGroupByInviteToken(token, callback) {
+      getDocs(query(collection(db, 'groups'), where('inviteToken', '==', token), where('inviteEnabled', '==', true), limit(1)))
+        .then(function (snap) {
+          if (snap.empty) { callback(null); return; }
+          var d = snap.docs[0];
+          callback(Object.assign({ id: d.id }, d.data()));
+        }).catch(function () { callback(null); });
+    }
+
+    // Join via invite token — bypasses questions / membership request
+    function joinGroupViaInvite(groupId, groupName, callback) {
+      requireAuth(function (user) {
+        var me = meData() || {};
+        var ref = doc(db, 'groupMembers', groupId + '_' + user.uid);
+        setDoc(ref, {
+          groupId: groupId, groupName: groupName || '', uid: user.uid, userId: user.uid,
+          role: 'member', status: 'joined', joinedViaInvite: true,
+          joinedAt: serverTimestamp(), createdAt: serverTimestamp()
+        }).then(function () {
+          return updateDoc(doc(db, 'groups', groupId), { memberCount: increment(1) }).catch(function(){});
+        }).then(function () {
+          toast('Joined ' + (groupName || 'group') + '!');
+          if (callback) callback(true);
+        }).catch(function (err) { toast('Failed to join', 'error'); if (callback) callback(false); });
+      });
+    }
+
+    // Join questions
+    function updateGroupJoinQuestions(groupId, questions, callback) {
+      requireAuth(function () {
+        updateDoc(doc(db, 'groups', groupId), { joinQuestions: questions, updatedAt: serverTimestamp() })
+          .then(function () { toast('Questions saved!'); if (callback) callback(true); })
+          .catch(function () { toast('Failed', 'error'); if (callback) callback(false); });
+      });
+    }
+
+    // Submit join request with answers
+    function requestJoinGroupWithAnswers(groupId, answers, callback) {
+      requireAuth(function (user) {
+        var reqRef = doc(db, 'groupJoinRequests', groupId + '__' + user.uid);
+        var me = meData() || {};
+        setDoc(reqRef, {
+          groupId: groupId, userId: user.uid,
+          userName: me.name || user.displayName || user.email || 'User',
+          userPhoto: me.avatar || user.photoURL || '',
+          answers: answers || [],
+          status: 'pending',
+          createdAt: serverTimestamp()
+        }).then(function () {
+          toast('Join request sent!');
+          if (callback) callback('pending');
+        }).catch(function () { toast('Failed to send request', 'error'); if (callback) callback('error'); });
+      });
+    }
+
+    // Listen to join requests for a group (owner/admin only)
+    function listenGroupJoinRequests(groupId, callback) {
+      if (!groupId) { callback([]); return function(){}; }
+      var q = query(collection(db, 'groupJoinRequests'), where('groupId', '==', groupId), where('status', '==', 'pending'), limit(50));
+      return onSnapshot(q, function (snap) {
+        var items = [];
+        snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        callback(items);
+      }, function () { callback([]); });
+    }
+
+    // Approve / decline join request
+    function approveJoinRequest(groupId, requestId, userId, callback) {
+      requireAuth(function (user) {
+        var me = meData() || {};
+        var reqRef = doc(db, 'groupJoinRequests', requestId);
+        updateDoc(reqRef, { status: 'approved', approvedBy: user.uid, approvedAt: serverTimestamp() })
+          .then(function () {
+            return setDoc(doc(db, 'groupMembers', groupId + '_' + userId), {
+              groupId: groupId, uid: userId, userId: userId,
+              role: 'member', status: 'joined',
+              joinedAt: serverTimestamp(), createdAt: serverTimestamp()
+            });
+          }).then(function () {
+            return updateDoc(doc(db, 'groups', groupId), { memberCount: increment(1) }).catch(function(){});
+          }).then(function () { toast('Member approved!'); if (callback) callback(true); })
+          .catch(function () { toast('Failed', 'error'); if (callback) callback(false); });
+      });
+    }
+
+    function declineJoinRequest(requestId, callback) {
+      requireAuth(function () {
+        updateDoc(doc(db, 'groupJoinRequests'), requestId, { status: 'declined', updatedAt: serverTimestamp() })
+          .catch(function(){});
+        deleteDoc(doc(db, 'groupJoinRequests', requestId))
+          .then(function () { toast('Request declined'); if (callback) callback(true); })
+          .catch(function () { toast('Failed', 'error'); if (callback) callback(false); });
+      });
+    }
+
+    // Member role management
+    function setGroupMemberRole(groupId, targetUserId, role, callback) {
+      requireAuth(function () {
+        var validRoles = ['owner', 'admin', 'moderator', 'member'];
+        if (validRoles.indexOf(role) === -1) { toast('Invalid role', 'error'); return; }
+        updateDoc(doc(db, 'groupMembers', groupId + '_' + targetUserId), { role: role, updatedAt: serverTimestamp() })
+          .then(function () { toast('Role updated to ' + role); if (callback) callback(true); })
+          .catch(function () { toast('Failed to update role', 'error'); if (callback) callback(false); });
+      });
+    }
+
+    // Get current user's role in group
+    function getGroupMemberRole(groupId, callback) {
+      var uid = currentUid();
+      if (!uid) { callback(null); return; }
+      getDoc(doc(db, 'groupMembers', groupId + '_' + uid))
+        .then(function (d) { callback(d.exists() ? (d.data().role || 'member') : null); })
+        .catch(function () { callback(null); });
+    }
+
+    // Ban a member
+    function banGroupMember(groupId, targetUserId, reason, days, callback) {
+      requireAuth(function (user) {
+        var bannedUntil = days === 0 ? null : new Date(Date.now() + days * 86400000);
+        var banRef = doc(db, 'groups', groupId, 'bans', targetUserId);
+        setDoc(banRef, {
+          userId: targetUserId, reason: reason || '', days: days,
+          bannedUntil: bannedUntil ? fs.Timestamp ? fs.Timestamp.fromDate(bannedUntil) : bannedUntil.toISOString() : null,
+          permanent: days === 0, bannedBy: user.uid, createdAt: serverTimestamp()
+        }).then(function () {
+          return deleteDoc(doc(db, 'groupMembers', groupId + '_' + targetUserId)).catch(function(){});
+        }).then(function () {
+          return updateDoc(doc(db, 'groups', groupId), { memberCount: increment(-1) }).catch(function(){});
+        }).then(function () { toast('Member banned'); if (callback) callback(true); })
+          .catch(function () { toast('Failed to ban', 'error'); if (callback) callback(false); });
+      });
+    }
+
+    // Remove member (no ban)
+    function removeGroupMember(groupId, targetUserId, callback) {
+      requireAuth(function () {
+        deleteDoc(doc(db, 'groupMembers', groupId + '_' + targetUserId))
+          .then(function () {
+            return updateDoc(doc(db, 'groups', groupId), { memberCount: increment(-1) }).catch(function(){});
+          }).then(function () { toast('Member removed'); if (callback) callback(true); })
+          .catch(function () { toast('Failed to remove', 'error'); if (callback) callback(false); });
+      });
+    }
+
+    // Leave group (for current user)
+    function leaveGroup(groupId, callback) {
+      requireAuth(function (user) {
+        var ref = doc(db, 'groupMembers', groupId + '_' + user.uid);
+        deleteDoc(ref).then(function () {
+          return updateDoc(doc(db, 'groups', groupId), { memberCount: increment(-1) }).catch(function(){});
+        }).then(function () { toast('You left the group'); if (callback) callback(true); })
+          .catch(function () { toast('Failed to leave', 'error'); if (callback) callback(false); });
+      });
+    }
+
+    // Post approval queue
+    function updateGroupPostApproval(groupId, enabled, callback) {
+      requireAuth(function () {
+        updateDoc(doc(db, 'groups', groupId), { postApproval: enabled, updatedAt: serverTimestamp() })
+          .then(function () { toast('Post approval ' + (enabled ? 'enabled' : 'disabled')); if (callback) callback(true); })
+          .catch(function () { if (callback) callback(false); });
+      });
+    }
+
+    function listenPendingGroupPosts(groupId, callback) {
+      var q = query(collection(db, 'posts'), where('targetId', '==', groupId), where('targetType', '==', 'group'), where('status', '==', 'pending'), limit(30));
+      return onSnapshot(q, function (snap) {
+        var items = [];
+        snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        callback(items);
+      }, function () { callback([]); });
+    }
+
+    function approveGroupPost(postId, callback) {
+      requireAuth(function () {
+        updateDoc(doc(db, 'posts', postId), { status: 'active', approvedAt: serverTimestamp() })
+          .then(function () { toast('Post approved!'); if (callback) callback(true); })
+          .catch(function () { toast('Failed', 'error'); if (callback) callback(false); });
+      });
+    }
+
+    function declineGroupPost(postId, callback) {
+      requireAuth(function () {
+        updateDoc(doc(db, 'posts', postId), { status: 'declined', declinedAt: serverTimestamp() })
+          .then(function () { toast('Post declined'); if (callback) callback(true); })
+          .catch(function () { toast('Failed', 'error'); if (callback) callback(false); });
+      });
+    }
+
+    // Announcements / pinned posts
+    function pinGroupPost(groupId, postId, callback) {
+      requireAuth(function () {
+        getDoc(doc(db, 'groups', groupId)).then(function (d) {
+          var data = d.exists() ? d.data() : {};
+          var pinned = data.pinnedPostIds || [];
+          if (pinned.indexOf(postId) === -1) pinned.unshift(postId);
+          pinned = pinned.slice(0, 5); // max 5 pinned
+          return updateDoc(doc(db, 'groups', groupId), { pinnedPostIds: pinned, updatedAt: serverTimestamp() });
+        }).then(function () {
+          return updateDoc(doc(db, 'posts', postId), { pinned: true, updatedAt: serverTimestamp() }).catch(function(){});
+        }).then(function () { toast('Post pinned!'); if (callback) callback(true); })
+          .catch(function () { toast('Failed to pin', 'error'); if (callback) callback(false); });
+      });
+    }
+
+    function unpinGroupPost(groupId, postId, callback) {
+      requireAuth(function () {
+        getDoc(doc(db, 'groups', groupId)).then(function (d) {
+          var data = d.exists() ? d.data() : {};
+          var pinned = (data.pinnedPostIds || []).filter(function (id) { return id !== postId; });
+          return updateDoc(doc(db, 'groups', groupId), { pinnedPostIds: pinned, updatedAt: serverTimestamp() });
+        }).then(function () {
+          return updateDoc(doc(db, 'posts', postId), { pinned: false, updatedAt: serverTimestamp() }).catch(function(){});
+        }).then(function () { toast('Post unpinned'); if (callback) callback(true); })
+          .catch(function () { toast('Failed', 'error'); if (callback) callback(false); });
+      });
+    }
+
+    // Group Events
+    function createGroupEvent(groupId, data, callback) {
+      requireAuth(function (user) {
+        var me = meData() || {};
+        addDoc(collection(db, 'groups', groupId, 'events'), {
+          name: (data.name || '').trim(),
+          description: (data.description || '').trim(),
+          location: (data.location || '').trim(),
+          date: data.date || '',
+          coverUrl: data.coverUrl || '',
+          creatorId: user.uid,
+          creatorName: me.name || user.displayName || 'GeoHub User',
+          rsvpCount: 0,
+          groupId: groupId,
+          createdAt: serverTimestamp()
+        }).then(function (ref) { toast('Event created!'); if (callback) callback(ref.id); })
+          .catch(function (err) { console.error('[GeoSocial] createGroupEvent', err); toast('Failed to create event', 'error'); if (callback) callback(null); });
+      });
+    }
+
+    function listenGroupEvents(groupId, callback) {
+      if (!groupId) { callback([]); return function(){}; }
+      var q = query(collection(db, 'groups', groupId, 'events'), orderBy('date', 'asc'), limit(30));
+      return onSnapshot(q, function (snap) {
+        var items = [];
+        snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        callback(items);
+      }, function () { callback([]); });
+    }
+
+    function rsvpGroupEvent(groupId, eventId, status, callback) {
+      requireAuth(function (user) {
+        var me = meData() || {};
+        var rsvpRef = doc(db, 'groups', groupId, 'events', eventId, 'rsvps', user.uid);
+        setDoc(rsvpRef, {
+          userId: user.uid, userName: me.name || user.displayName || 'User',
+          status: status || 'going', createdAt: serverTimestamp()
+        }).then(function () { toast('RSVP: ' + (status || 'going')); if (callback) callback(true); })
+          .catch(function () { toast('RSVP failed', 'error'); if (callback) callback(false); });
+      });
+    }
+
+    // Group Files
+    function uploadGroupFile(groupId, file, callback) {
+      requireAuth(function (user) {
+        var me = meData() || {};
+        var cfg = window.GEOHUB_CLOUDINARY;
+        if (!cfg || !cfg.cloudName || !cfg.uploadPreset) {
+          toast('Cloudinary not configured', 'error');
+          if (callback) callback(null);
+          return;
+        }
+        var fd = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', cfg.uploadPreset);
+        fd.append('folder', 'group_files');
+        var resourceType = file.type && file.type.startsWith('image') ? 'image' : 'raw';
+        fetch('https://api.cloudinary.com/v1_1/' + cfg.cloudName + '/' + resourceType + '/upload', { method: 'POST', body: fd })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (!data.secure_url) throw new Error('No URL');
+            return addDoc(collection(db, 'groups', groupId, 'files'), {
+              name: file.name, size: file.size, type: file.type,
+              url: data.secure_url, uploaderId: user.uid,
+              uploaderName: me.name || user.displayName || 'User',
+              createdAt: serverTimestamp()
+            });
+          }).then(function (ref) { toast('File uploaded!'); if (callback) callback(ref.id); })
+          .catch(function (err) { console.error('[GeoSocial] uploadGroupFile', err); toast('Upload failed', 'error'); if (callback) callback(null); });
+      });
+    }
+
+    function listenGroupFiles(groupId, callback) {
+      if (!groupId) { callback([]); return function(){}; }
+      var q = query(collection(db, 'groups', groupId, 'files'), orderBy('createdAt', 'desc'), limit(50));
+      return onSnapshot(q, function (snap) {
+        var items = [];
+        snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        callback(items);
+      }, function () { callback([]); });
+    }
+
+    function deleteGroupFile(groupId, fileId, callback) {
+      requireAuth(function () {
+        deleteDoc(doc(db, 'groups', groupId, 'files', fileId))
+          .then(function () { toast('File deleted'); if (callback) callback(true); })
+          .catch(function () { toast('Failed to delete', 'error'); if (callback) callback(false); });
+      });
+    }
+
+    // Group Chat
+    function sendGroupChatMessage(groupId, text, callback) {
+      requireAuth(function (user) {
+        var me = meData() || {};
+        if (!text || !text.trim()) return;
+        addDoc(collection(db, 'groups', groupId, 'chatMessages'), {
+          text: text.trim(), senderId: user.uid,
+          senderName: me.name || user.displayName || 'User',
+          senderAvatar: me.avatar || user.photoURL || '',
+          createdAt: serverTimestamp()
+        }).then(function (ref) { if (callback) callback(ref.id); })
+          .catch(function (err) { console.error('[GeoSocial] sendGroupChatMessage', err); toast('Failed to send', 'error'); });
+      });
+    }
+
+    function listenGroupChat(groupId, callback) {
+      if (!groupId) { callback([]); return function(){}; }
+      var q = query(collection(db, 'groups', groupId, 'chatMessages'), orderBy('createdAt', 'asc'), limit(50));
+      return onSnapshot(q, function (snap) {
+        var items = [];
+        snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        callback(items);
+      }, function () { callback([]); });
+    }
+
+    function deleteGroupChatMessage(groupId, msgId, callback) {
+      requireAuth(function () {
+        deleteDoc(doc(db, 'groups', groupId, 'chatMessages', msgId))
+          .then(function () { if (callback) callback(true); })
+          .catch(function () { if (callback) callback(false); });
+      });
+    }
+
+    // Group Insights
+    function getGroupInsights(groupId, callback) {
+      if (!groupId) { callback(null); return; }
+      var thirtyDaysAgo = new Date(Date.now() - 30 * 86400000);
+      var sevenDaysAgo = new Date(Date.now() - 7 * 86400000);
+      var tsFrom30 = { seconds: Math.floor(thirtyDaysAgo.getTime() / 1000), nanoseconds: 0 };
+      var tsFrom7 = { seconds: Math.floor(sevenDaysAgo.getTime() / 1000), nanoseconds: 0 };
+      Promise.all([
+        getDocs(query(collection(db, 'posts'), where('targetId', '==', groupId), where('targetType', '==', 'group'), where('createdAt', '>=', tsFrom30), limit(100))),
+        getDocs(query(collection(db, 'groupMembers'), where('groupId', '==', groupId), limit(200)))
+      ]).then(function (res) {
+        var recentPosts = res[0];
+        var members = res[1];
+        var postCount30 = recentPosts.size;
+        var authorIds = {};
+        recentPosts.forEach(function (d) { var uid = d.data().userId || d.data().authorId; if (uid) authorIds[uid] = (authorIds[uid] || 0) + 1; });
+        var topContributors = Object.keys(authorIds).map(function (uid) { return { uid: uid, count: authorIds[uid] }; }).sort(function (a, b) { return b.count - a.count; }).slice(0, 5);
+        callback({
+          memberCount: members.size,
+          postCount30: postCount30,
+          topContributors: topContributors
+        });
+      }).catch(function (err) { console.error('[GeoSocial] getGroupInsights', err); callback(null); });
+    }
+
+    // Group notification mute
+    function setGroupMute(groupId, muted, callback) {
+      requireAuth(function (user) {
+        var ref = doc(db, 'groupMembers', groupId + '_' + user.uid);
+        updateDoc(ref, { muted: muted, updatedAt: serverTimestamp() })
+          .then(function () { toast(muted ? 'Group muted' : 'Group unmuted'); if (callback) callback(true); })
+          .catch(function () { if (callback) callback(false); });
+      });
+    }
+
+    function getGroupMuteStatus(groupId, callback) {
+      var uid = currentUid();
+      if (!uid) { callback(false); return; }
+      getDoc(doc(db, 'groupMembers', groupId + '_' + uid))
+        .then(function (d) { callback(d.exists() ? !!(d.data().muted) : false); })
+        .catch(function () { callback(false); });
+    }
+
+    // Update group settings (privacy, postApproval, name, desc, category)
+    function updateGroupSettings(groupId, settings, callback) {
+      requireAuth(function () {
+        var allowed = ['name', 'description', 'category', 'privacy', 'postApproval', 'rules', 'joinQuestions', 'coverUrl', 'inviteToken', 'inviteEnabled', 'pinnedPostIds', 'updatedAt'];
+        var upd = { updatedAt: serverTimestamp() };
+        Object.keys(settings).forEach(function (k) { if (allowed.indexOf(k) !== -1) upd[k] = settings[k]; });
+        updateDoc(doc(db, 'groups', groupId), upd)
+          .then(function () { toast('Settings saved!'); if (callback) callback(true); })
+          .catch(function (err) { toast('Failed to save: ' + (err.code || err.message), 'error'); if (callback) callback(false); });
+      });
     }
 
     // ── GROUP JOIN REQUESTS ───────────────────────────────────────────────
@@ -2336,6 +2962,16 @@
       toggleMessageReaction:   toggleMessageReaction,
       listenMessageReactions:   listenMessageReactions,
       deleteMessage:           deleteMessage,
+      editMessage:             editMessage,
+      setTyping:               setTyping,
+      markMessagesSeen:        markMessagesSeen,
+      setConversationArchive:  setConversationArchive,
+      setConversationMute:     setConversationMute,
+      setConversationTheme:    setConversationTheme,
+      setConversationNickname: setConversationNickname,
+      listenConversationSettings: listenConversationSettings,
+      uploadAudioBlob:         uploadAudioBlob,
+      uploadDocumentBlob:      uploadDocumentBlob,
       trackShare:              trackShare,
       checkSaved:              checkSaved,
       checkGroupMember:        checkGroupMember,
@@ -2356,8 +2992,43 @@
       createPlaceReview:       createPlaceReview,
       listenPlaceReviews:      listenPlaceReviews,
       requestJoinGroup:        requestJoinGroup,
+      requestJoinGroupWithAnswers: requestJoinGroupWithAnswers,
       checkJoinRequest:        checkJoinRequest,
       getMyJoinRequests:       getMyJoinRequests,
+      listenGroupJoinRequests: listenGroupJoinRequests,
+      approveJoinRequest:      approveJoinRequest,
+      declineJoinRequest:      declineJoinRequest,
+      uploadGroupCover:        uploadGroupCover,
+      updateGroupRules:        updateGroupRules,
+      generateGroupInviteToken: generateGroupInviteToken,
+      disableGroupInviteToken: disableGroupInviteToken,
+      getGroupByInviteToken:   getGroupByInviteToken,
+      joinGroupViaInvite:      joinGroupViaInvite,
+      updateGroupJoinQuestions: updateGroupJoinQuestions,
+      setGroupMemberRole:      setGroupMemberRole,
+      getGroupMemberRole:      getGroupMemberRole,
+      banGroupMember:          banGroupMember,
+      removeGroupMember:       removeGroupMember,
+      leaveGroup:              leaveGroup,
+      updateGroupPostApproval: updateGroupPostApproval,
+      listenPendingGroupPosts: listenPendingGroupPosts,
+      approveGroupPost:        approveGroupPost,
+      declineGroupPost:        declineGroupPost,
+      pinGroupPost:            pinGroupPost,
+      unpinGroupPost:          unpinGroupPost,
+      createGroupEvent:        createGroupEvent,
+      listenGroupEvents:       listenGroupEvents,
+      rsvpGroupEvent:          rsvpGroupEvent,
+      uploadGroupFile:         uploadGroupFile,
+      listenGroupFiles:        listenGroupFiles,
+      deleteGroupFile:         deleteGroupFile,
+      sendGroupChatMessage:    sendGroupChatMessage,
+      listenGroupChat:         listenGroupChat,
+      deleteGroupChatMessage:  deleteGroupChatMessage,
+      getGroupInsights:        getGroupInsights,
+      setGroupMute:            setGroupMute,
+      getGroupMuteStatus:      getGroupMuteStatus,
+      updateGroupSettings:     updateGroupSettings,
       uploadImageDataUrl:      uploadImageDataUrl,
       uploadFile:              uploadFile,
       hidePost:                hidePost,

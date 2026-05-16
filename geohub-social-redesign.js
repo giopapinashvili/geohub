@@ -577,17 +577,55 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     return Promise.resolve(urlOrFile);
   }
 
+  var BG_GRADIENTS = [
+    'linear-gradient(135deg,#10b981,#064e3b)',
+    'linear-gradient(135deg,#3b82f6,#1e40af)',
+    'linear-gradient(135deg,#8b5cf6,#4c1d95)',
+    'linear-gradient(135deg,#f59e0b,#92400e)',
+    'linear-gradient(135deg,#ec4899,#831843)',
+    'linear-gradient(135deg,#06b6d4,#0e7490)',
+    'linear-gradient(135deg,#0f172a,#1e293b)',
+    'linear-gradient(135deg,#ef4444,#991b1b)'
+  ];
+  var FEELINGS = [
+    '😊 Happy','😂 Laughing','😍 Loved','😢 Sad','😠 Angry',
+    '🎉 Celebrating','💪 Motivated','🙏 Grateful','🎂 Birthday','🏖️ Traveling'
+  ];
+
   function openPostModal(extra){
     if(!requireLogin()) return;
-    var body='<textarea class="gh-textarea" id="ghPostText" placeholder="რას აზიარებ დღეს?"></textarea>'+
-      '<div class="gh-form-grid"><select class="gh-select" id="ghPostVisibility"><option value="public">🌍 Public</option><option value="friends">👥 Friends / Followers</option><option value="onlyme">🔒 Only me</option></select><input class="gh-input" id="ghPostFeeling" placeholder="Feeling / activity optional"></div>'+
+    var body=
+      '<div id="ghPollComposer" style="display:none">'+
+        '<textarea class="gh-textarea" id="ghPollQuestion" placeholder="Ask a question…" rows="2"></textarea>'+
+        '<div id="ghPollOpts">'+
+          '<input class="gh-input" style="margin-bottom:7px" data-poll-opt placeholder="Option 1">'+
+          '<input class="gh-input" style="margin-bottom:7px" data-poll-opt placeholder="Option 2">'+
+        '</div>'+
+        '<button class="gh-btn ghost" id="ghPollAddOpt" type="button" style="margin-bottom:10px"><i class="fas fa-plus"></i> Add option</button>'+
+        '<select class="gh-select" id="ghPollDuration"><option value="1">1 day</option><option value="3" selected>3 days</option><option value="7">7 days</option></select>'+
+      '</div>'+
+      '<div id="ghRegularComposer">'+
+        '<textarea class="gh-textarea" id="ghPostText" placeholder="რას აზიარებ დღეს?"></textarea>'+
+        '<div id="ghLinkPreviewCard" style="display:none" class="gh-lp-composer-preview"></div>'+
+        '<div class="gh-feeling-row" id="ghFeelingRow">'+FEELINGS.map(function(f){ return '<button type="button" class="gh-feeling-chip" data-feeling="'+esc(f)+'">'+esc(f)+'</button>'; }).join('')+'</div>'+
+        '<div id="ghSelectedFeeling" style="display:none;font-size:.84rem;color:var(--gh-green);margin:4px 0 8px;padding:4px 10px;background:rgba(16,185,129,.08);border-radius:10px"></div>'+
+        '<div class="gh-bg-picker" id="ghBgPicker">'+BG_GRADIENTS.map(function(g,i){ return '<button type="button" class="gh-bg-swatch" data-bg-gradient="'+esc(g)+'" style="background:'+esc(g)+'"'+(i===0?' title="No color"':'')+' aria-label="Color '+i+'"></button>'; }).join('')+'<button type="button" class="gh-bg-swatch gh-bg-none" data-bg-gradient="" title="No color"><i class="fas fa-times"></i></button></div>'+
+      '</div>'+
+      '<div class="gh-form-grid" style="margin-top:10px"><select class="gh-select" id="ghPostVisibility"><option value="public">🌍 Public</option><option value="friends">👥 Friends / Followers</option><option value="onlyme">🔒 Only me</option></select></div>'+
       '<div style="height:10px"></div><input class="gh-input" id="ghPostImg" placeholder="Image URL optional"><div style="height:10px"></div>'+
-      '<button class="gh-btn ghost full" id="ghPickPostImage" type="button"><i class="fas fa-image"></i> Choose image from device</button>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+        '<button class="gh-btn ghost" id="ghPickPostImage" type="button"><i class="fas fa-image"></i> Image</button>'+
+        '<button class="gh-btn ghost" id="ghTogglePoll" type="button"><i class="fas fa-chart-bar"></i> Poll</button>'+
+        '<button class="gh-btn ghost" id="ghToggleFeeling" type="button"><i class="fas fa-face-smile"></i> Feeling</button>'+
+      '</div>'+
       '<div id="ghPostPreview" style="margin-top:10px"></div>'+
-      '<div class="gh-upload-progress" id="ghPostUploadBar" style="display:none"><div class="gh-upload-track"><div class="gh-upload-bar" id="ghPostUploadFill"></div></div><span id="ghPostUploadPct">0%</span></div>'+
-      '<div class="gh-small" style="margin-top:10px">Tip: mention people with @username. Privacy is saved with the post.</div>';
+      '<div class="gh-upload-progress" id="ghPostUploadBar" style="display:none"><div class="gh-upload-track"><div class="gh-upload-bar" id="ghPostUploadFill"></div></div><span id="ghPostUploadPct">0%</span></div>';
+
     modal('Create post', body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitPost"><i class="fas fa-paper-plane"></i> Post</button>', 'ghPostModal');
-    var picked='', pickedFile=null;
+
+    var picked='', pickedFile=null, selectedFeeling='', selectedBg='', pollMode=false, feelingRowVisible=false;
+    var _lpTimer=null, _lpUrl='';
+
     $('#ghPickPostImage').onclick=function(){
       triggerImagePick(function(url, file){
         picked=url; pickedFile=file||null;
@@ -595,13 +633,103 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         $('#ghPostPreview').innerHTML=url?'<img src="'+esc(url)+'" style="width:100%;max-height:260px;object-fit:cover;border-radius:16px;border:1px solid var(--gh-border)">':'';
       });
     };
+
+    $('#ghTogglePoll').onclick=function(){
+      pollMode=!pollMode;
+      $('#ghPollComposer').style.display=pollMode?'':'none';
+      $('#ghRegularComposer').style.display=pollMode?'none':'';
+      this.classList.toggle('active',pollMode);
+    };
+
+    $('#ghToggleFeeling').onclick=function(){
+      feelingRowVisible=!feelingRowVisible;
+      $('#ghFeelingRow').style.display=feelingRowVisible?'flex':'none';
+      this.classList.toggle('active',feelingRowVisible);
+    };
+    $('#ghFeelingRow').style.display='none';
+
+    var feelingRow=$('#ghFeelingRow');
+    if(feelingRow) feelingRow.addEventListener('click',function(e){
+      var chip=e.target.closest('[data-feeling]'); if(!chip) return;
+      selectedFeeling = chip.dataset.feeling===selectedFeeling ? '' : chip.dataset.feeling;
+      feelingRow.querySelectorAll('.gh-feeling-chip').forEach(function(b){ b.classList.toggle('active', b.dataset.feeling===selectedFeeling); });
+      var sf=$('#ghSelectedFeeling');
+      if(sf){ sf.style.display=selectedFeeling?'block':'none'; sf.textContent=selectedFeeling?'Feeling: '+selectedFeeling:''; }
+    });
+
+    var bgPicker=$('#ghBgPicker');
+    if(bgPicker) bgPicker.addEventListener('click',function(e){
+      var sw=e.target.closest('[data-bg-gradient]'); if(!sw) return;
+      selectedBg=sw.dataset.bgGradient;
+      bgPicker.querySelectorAll('.gh-bg-swatch').forEach(function(b){ b.classList.toggle('active', b===sw); });
+    });
+
+    if($('#ghPollAddOpt')) $('#ghPollAddOpt').onclick=function(){
+      var opts=$all('[data-poll-opt]','#ghPollOpts'); if(opts.length>=4) return;
+      var inp=document.createElement('input'); inp.className='gh-input'; inp.style.marginBottom='7px'; inp.dataset.pollOpt=''; inp.placeholder='Option '+(opts.length+1);
+      $('#ghPollOpts').insertBefore(inp, this);
+    };
+
+    var ta=$('#ghPostText');
+    if(ta) ta.addEventListener('input', function(){
+      clearTimeout(_lpTimer);
+      _lpTimer=setTimeout(function(){ detectAndLoadLinkPreview(ta.value); }, 700);
+    });
+
+    function detectAndLoadLinkPreview(textVal){
+      var m=textVal.match(/https?:\/\/[^\s]+/);
+      if(!m){ hideLinkPreview(); return; }
+      var url=m[0];
+      if(url===_lpUrl) return;
+      _lpUrl=url;
+      var card=$('#ghLinkPreviewCard'); if(!card) return;
+      card.style.display='block'; card.innerHTML='<i class="fas fa-circle-notch fa-spin gh-muted"></i>';
+      fetch('https://api.allorigins.win/get?url='+encodeURIComponent(url))
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+          var html=data.contents||'';
+          var title=(html.match(/<title[^>]*>([^<]+)<\/title>/i)||[])[1]||'';
+          var desc=(html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i)||html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']description["']/i)||[])[1]||'';
+          var img=(html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)||html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i)||[])[1]||'';
+          var domain=url.replace(/^https?:\/\//,'').split('/')[0];
+          if(!title){ hideLinkPreview(); return; }
+          state._lpData={url:url,title:title.slice(0,120),description:desc.slice(0,200),image:img,domain:domain};
+          card.style.display='block';
+          card.innerHTML='<div class="gh-lp-composer-inner">'+(img?'<img src="'+esc(img)+'" loading="lazy" onerror="this.remove()">':'')+'<div><div class="gh-lp-domain">'+esc(domain)+'</div><div class="gh-lp-title">'+esc(title.slice(0,80))+'</div>'+(desc?'<div class="gh-lp-desc">'+esc(desc.slice(0,120))+'</div>':'')+'</div><button type="button" class="gh-lp-remove" id="ghRemoveLp"><i class="fas fa-times"></i></button></div>';
+          var rmBtn=$('#ghRemoveLp'); if(rmBtn) rmBtn.onclick=function(){ hideLinkPreview(); };
+        }).catch(function(){ hideLinkPreview(); });
+    }
+    function hideLinkPreview(){ _lpUrl=''; state._lpData=null; var c=$('#ghLinkPreviewCard'); if(c){c.style.display='none';c.innerHTML='';} }
+
     $('#ghSubmitPost').onclick=function(){
-      var txt=$('#ghPostText').value, urlInput=$('#ghPostImg').value.trim();
+      var submitBtn = $('#ghSubmitPost'); if(submitBtn.disabled) return;
+
+      if(pollMode){
+        var question=($('#ghPollQuestion')||{}).value||''; question=question.trim();
+        var optInputs=$all('[data-poll-opt]'); var opts=optInputs.map(function(i,idx){ return {id:String(idx),text:(i.value||'').trim(),votes:0}; }).filter(function(o){ return o.text; });
+        if(!question) return toast('Poll needs a question','error');
+        if(opts.length<2) return toast('Add at least 2 options','error');
+        var durDays=Number(($('#ghPollDuration')||{}).value||3);
+        var endsAt=new Date(Date.now()+durDays*86400000);
+        submitBtn.disabled=true; submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
+        GS().createPost('', '', function(){ var m=$('#ghPostModal'); if(m)m.remove(); submitBtn.disabled=false; }, Object.assign({
+          type:'poll',
+          poll:{question:question,options:opts,endsAt:endsAt,totalVotes:0},
+          visibility:($('#ghPostVisibility')||{}).value||'public'
+        }, extra||{}));
+        return;
+      }
+
+      var txt=($('#ghPostText')||{}).value||'', urlInput=($('#ghPostImg')||{}).value.trim();
       var mediaSource = pickedFile || picked || urlInput;
       if(!txt.trim() && !mediaSource) return toast('Write something or pick an image','error');
-      var payload=Object.assign({ visibility: $('#ghPostVisibility').value, feeling: $('#ghPostFeeling').value.trim(), mentions: extractMentions(txt) }, extra||{});
-      var submitBtn = $('#ghSubmitPost');
-      if(submitBtn.disabled) return;
+      var payload=Object.assign({
+        visibility: ($('#ghPostVisibility')||{}).value||'public',
+        feeling: selectedFeeling,
+        bgGradient: selectedBg,
+        linkPreview: state._lpData||null,
+        mentions: extractMentions(txt)
+      }, extra||{});
       submitBtn.disabled = true;
       submitBtn.dataset.originalText = submitBtn.innerHTML;
       submitBtn.innerHTML = mediaSource ? '<i class="fas fa-circle-notch fa-spin"></i> Uploading…' : '<i class="fas fa-circle-notch fa-spin"></i> Posting…';
@@ -822,6 +950,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     draw();
   }
 
+  var RX_EMOJIS = { like:'👍', love:'❤️', haha:'😂', wow:'😮', sad:'😢', angry:'😡' };
+
   function postCard(p, options){
     options=options||{}; var name=p.authorName||p.userName||p.businessName||'GeoHub User'; var av=p.authorAvatar||p.userPhotoURL||p.logoUrl||''; var imgUrl=p.imageUrl||p.mediaUrl||p.photoUrl||''; var pid=p.id; var target='';
     var authorHref = authorLinkFor(p);
@@ -830,16 +960,94 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var authorAttrs = authorId ? ' data-user-profile="'+esc(authorId)+'"' : '';
     if(p.targetType && p.targetId) target='<div class="gh-post-target"><i class="fas '+iconFor(p.targetType)+'"></i>'+esc(labelFor(p.targetType))+'</div>';
     var privacyIcon = (p.visibility==='onlyme'||p.visibility==='only_me') ? 'fa-lock' : ((p.visibility==='friends'||p.visibility==='followers') ? 'fa-user-group' : 'fa-earth-europe');
+
+    var bgStyle = (p.bgGradient && (p.text||'').length < 150) ? ' style="background:'+esc(p.bgGradient)+';border-radius:18px;padding:32px 20px;text-align:center;min-height:180px;display:flex;align-items:center;justify-content:center"' : '';
+    var postTextHtml = p.text ? (p.bgGradient && (p.text||'').length < 150
+      ? '<div class="gh-post-bg-text"'+bgStyle+'><span>'+esc(p.text)+'</span></div>'
+      : '<div class="gh-post-text">'+esc(p.text)+'</div>') : '';
+
+    var pollHtml = '';
+    if(p.type==='poll' && p.poll) {
+      var pol=p.poll; var totalV=pol.totalVotes||0;
+      pollHtml = '<div class="gh-poll-card" data-poll-pid="'+esc(pid)+'">' +
+        '<div class="gh-poll-question">'+esc(pol.question||'')+'</div>' +
+        (pol.options||[]).map(function(opt){
+          var pct = totalV > 0 ? Math.round((opt.votes||0)/totalV*100) : 0;
+          return '<button class="gh-poll-opt" data-poll-vote data-pid="'+esc(pid)+'" data-opt-id="'+esc(opt.id)+'">' +
+            '<div class="gh-poll-bar" style="width:'+pct+'%"></div>' +
+            '<span class="gh-poll-label">'+esc(opt.text)+'</span>' +
+            '<span class="gh-poll-pct">'+pct+'%</span>' +
+          '</button>';
+        }).join('') +
+        '<div class="gh-poll-footer">'+totalV+' votes</div>' +
+      '</div>';
+    }
+
+    var linkPrevHtml = '';
+    if(p.linkPreview && p.linkPreview.url) {
+      var lp=p.linkPreview;
+      linkPrevHtml = '<a class="gh-link-preview" href="'+esc(lp.url)+'" target="_blank" rel="noopener">' +
+        (lp.image ? '<img src="'+esc(lp.image)+'" alt="'+esc(lp.title||'')+'" loading="lazy" onerror="this.remove()">' : '') +
+        '<div class="gh-lp-body">' +
+          '<div class="gh-lp-domain">'+esc(lp.domain||lp.url)+'</div>' +
+          '<div class="gh-lp-title">'+esc(lp.title||'')+'</div>' +
+          (lp.description ? '<div class="gh-lp-desc">'+esc(lp.description)+'</div>' : '') +
+        '</div>' +
+      '</a>';
+    }
+
+    var totalRx = Number(p.likeCount||p.reactionCount||0);
     return '<article class="gh-card gh-post" id="post-'+esc(pid)+'" data-post-id="'+esc(pid)+'" data-author-id="'+esc(authorId)+'">'+
       '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+target+(p.feeling?' · '+esc(p.feeling):'')+'</div></div><button class="gh-post-more" data-post-menu><i class="fas fa-ellipsis"></i></button></div>'+
-      (p.text?'<div class="gh-post-text">'+esc(p.text)+'</div>':'')+
+      postTextHtml+
       (imgUrl?'<img class="gh-post-img" src="'+esc(imgUrl)+'" alt="post image" loading="lazy" onerror="this.style.display=\'none\'">':'')+
+      pollHtml+
+      linkPrevHtml+
       (p.sharedPostId?'<div class="gh-shared-preview" data-shared-post="'+esc(p.sharedPostId)+'"><i class="fas fa-share"></i><div><strong>Shared post</strong><span>Loading original post...</span></div></div>':'')+
-      '<div class="gh-post-stats"><span><i class="fas fa-thumbs-up"></i> <b data-like-count>'+Number(p.likeCount||p.reactionCount||0)+'</b></span><span><b data-comment-count>'+Number(p.commentCount||0)+'</b> comments · <b>'+Number(p.shareCount||0)+'</b> shares</span></div>'+
+      '<div class="gh-post-stats"><span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'"><i class="fas fa-thumbs-up"></i> <b data-like-count>'+totalRx+'</b>'+(totalRx?' people reacted':'')+'</button></span><span><b data-comment-count>'+Number(p.commentCount||0)+'</b> comments · <b>'+Number(p.shareCount||0)+'</b> shares</span></div>'+
+      '<div class="gh-rx-breakdown" data-rx-pid="'+esc(pid)+'"></div>'+
       '<div class="gh-post-actions"><button class="gh-act" data-like><i class="fas fa-thumbs-up"></i> Like</button><button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> Comment</button><button class="gh-act" data-share><i class="fas fa-share"></i> Share</button><button class="gh-act" data-save><i class="fas fa-bookmark"></i> Save</button></div>'+
       '<div class="gh-reaction-strip"><button data-reaction="like">👍</button><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button></div>'+
       '<div class="gh-comments" data-comments hidden><div data-comments-list></div><form class="gh-comment-form" data-comment-form><input class="gh-input" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form></div>'+
     '</article>';
+  }
+
+  function loadReactionBreakdown(pid) {
+    if(!fs() || !db()) return;
+    fs().getDocs(fs().query(fs().collection(db(),'posts',pid,'reactions'), fs().limit(50))).then(function(snap){
+      var counts = {};
+      snap.forEach(function(d){ var t=(d.data()||{}).type||'like'; counts[t]=(counts[t]||0)+1; });
+      var types = Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; }).slice(0,3);
+      var box = document.querySelector('[data-rx-pid="'+CSS.escape(pid)+'"]');
+      if(!box) return;
+      if(!types.length){ box.innerHTML=''; return; }
+      box.innerHTML = types.map(function(t){ return '<span class="gh-rx-chip">'+RX_EMOJIS[t]+' '+counts[t]+'</span>'; }).join('');
+    }).catch(function(){});
+  }
+
+  function openWhoReactedModal(pid) {
+    if(!fs() || !db()) return;
+    modal('Who Reacted', '<div class="gh-who-rx-tabs" id="ghWhoRxTabs"><button class="gh-who-rx-tab active" data-rx-tab="all">All</button>'+Object.keys(RX_EMOJIS).map(function(t){ return '<button class="gh-who-rx-tab" data-rx-tab="'+t+'">'+RX_EMOJIS[t]+'</button>'; }).join('')+'</div><div id="ghWhoRxList"><i class="fas fa-circle-notch fa-spin gh-muted"></i></div>', '<button class="gh-btn ghost" data-close-modal>Close</button>', 'ghWhoRxModal');
+    var allReactions = [];
+    fs().getDocs(fs().query(fs().collection(db(),'posts',pid,'reactions'), fs().limit(50))).then(function(snap){
+      snap.forEach(function(d){ allReactions.push(Object.assign({id:d.id}, d.data())); });
+      renderWhoRxList('all');
+    }).catch(function(){ var box=$('#ghWhoRxList'); if(box) box.innerHTML='<div class="gh-muted" style="padding:10px">Could not load.</div>'; });
+    function renderWhoRxList(tab) {
+      var box=$('#ghWhoRxList'); if(!box) return;
+      var items = tab==='all' ? allReactions : allReactions.filter(function(r){ return r.type===tab; });
+      if(!items.length){ box.innerHTML='<div class="gh-muted" style="padding:10px 0">No reactions yet.</div>'; return; }
+      box.innerHTML = '<div class="gh-mini-list">'+items.map(function(r){
+        var av = r.photoURL ? img(r.photoURL, r.displayName||'') : esc(initials(r.displayName||''));
+        return '<a class="gh-mini-item" href="'+profileLink(r.userId||r.id||'')+'"><span class="gh-avatar" style="width:36px;height:36px">'+av+'</span><div><strong>'+esc(r.displayName||'GeoHub User')+'</strong><span>'+RX_EMOJIS[r.type||'like']+'</span></div></a>';
+      }).join('')+'</div>';
+    }
+    var tabBar=$('#ghWhoRxTabs');
+    if(tabBar) tabBar.addEventListener('click', function(e){
+      var btn=e.target.closest('[data-rx-tab]'); if(!btn) return;
+      tabBar.querySelectorAll('.gh-who-rx-tab').forEach(function(b){ b.classList.toggle('active',b===btn); });
+      renderWhoRxList(btn.dataset.rxTab);
+    });
   }
 
   function bindPostInteractions(root){
@@ -854,9 +1062,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(e.target.closest('[data-post-menu]')){ postMenu(pid,card); }
       var rb=e.target.closest('[data-comment-reply]'); if(rb){ e.preventDefault(); openReplyForm(card,pid,rb.dataset.commentId); }
       var cr=e.target.closest('[data-copy-post-link]'); if(cr && navigator.clipboard){ navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast('Post link copied');}); }
-      // Comment edit
+      var wrBtn=e.target.closest('[data-who-reacted]'); if(wrBtn){ openWhoReactedModal(wrBtn.dataset.whoReacted); }
+      var pv=e.target.closest('[data-poll-vote]'); if(pv){ if(!requireLogin()) return; submitPollVote(pv.dataset.pid, pv.dataset.optId, card); }
+      var clBtn=e.target.closest('[data-comment-like]'); if(clBtn){ if(!requireLogin()) return; toggleCommentReaction(pid, clBtn.dataset.commentId, clBtn.dataset.commentReaction||'like', clBtn); }
       var eb=e.target.closest('[data-edit-comment]'); if(eb){ e.preventDefault(); openFeedCommentEditor(pid, eb.dataset.commentId, eb); }
-      // Comment delete
       var db2=e.target.closest('[data-delete-comment]'); if(db2){ e.preventDefault();
         if(!confirm('Delete this comment?')) return;
         var cid2=db2.dataset.commentId;
@@ -958,12 +1167,64 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       ? ' · <button type="button" class="gh-cmt-act" data-edit-comment data-comment-id="'+esc(c.id)+'" data-post-id="'+esc(pid)+'">Edit</button>'+
         ' · <button type="button" class="gh-cmt-act" data-delete-comment data-comment-id="'+esc(c.id)+'" data-post-id="'+esc(pid)+'">Delete</button>'
       : '';
+    var rxCount = Number(c.reactionCount||0);
+    var rxType = c._myRxType||'';
+    var rxLabel = rxType ? (RX_EMOJIS[rxType]+' '+(rxCount||1)) : '👍 '+(rxCount||'Like');
     return '<div class="gh-comment-row" data-comment-id="'+esc(c.id)+'">'+
       userProfileAnchor(uid,'gh-avatar gh-profile-avatar-link',avHtml,'Open '+name+' profile').replace('class="gh-avatar gh-profile-avatar-link"','class="gh-avatar gh-profile-avatar-link" style="width:32px;height:32px"')+
       '<div class="gh-comment-main"><div class="gh-comment-bubble"><strong>'+userProfileAnchor(uid,'gh-profile-name-link',esc(name),'Open '+name+' profile')+'</strong><span class="gh-cmt-text" data-cmt-text>'+esc(c.text||'')+'</span></div>'+
-      '<div class="gh-small gh-comment-actions">'+timeAgo(c.createdAt)+' · <button type="button" data-comment-reply data-comment-id="'+esc(c.id)+'">Reply</button>'+ownerBtns+'</div>'+
+      '<div class="gh-small gh-comment-actions">'+timeAgo(c.createdAt)+' · <button type="button" data-comment-reply data-comment-id="'+esc(c.id)+'">Reply</button>'+
+      ' · <span class="gh-cmt-rx-wrap"><button type="button" class="gh-cmt-act gh-cmt-rx-btn'+(rxType?' active':'')+'" data-comment-like data-comment-id="'+esc(c.id)+'" data-comment-reaction="'+esc(rxType||'like')+'">'+rxLabel+'</button>'+
+      '<span class="gh-cmt-rx-picker" data-rx-picker="'+esc(c.id)+'">'+Object.keys(RX_EMOJIS).map(function(t){ return '<button type="button" class="gh-cmt-rx-pick" data-comment-like data-comment-id="'+esc(c.id)+'" data-comment-reaction="'+t+'">'+RX_EMOJIS[t]+'</button>'; }).join('')+'</span></span>'+
+      ownerBtns+'</div>'+
       '<form class="gh-reply-form" data-reply-form data-comment-id="'+esc(c.id)+'" hidden><input class="gh-input" placeholder="Write a reply…"><button class="gh-btn sm"><i class="fas fa-paper-plane"></i></button></form>'+
       '<div class="gh-replies" data-replies-for="'+esc(c.id)+'"></div></div></div>';
+  }
+
+  function toggleCommentReaction(pid, cid, type, btn) {
+    var u=authUser(); if(!u) return requireLogin();
+    var f=fs(), rxRef=f.doc(db(),'posts',pid,'comments',cid,'reactions',u.uid);
+    var commentRef=f.doc(db(),'posts',pid,'comments',cid);
+    f.getDoc(rxRef).then(function(snap){
+      var exists=snap.exists(), prev=exists?(snap.data()||{}).type||'like':'';
+      if(exists && prev===type){
+        return f.deleteDoc(rxRef).then(function(){
+          return f.updateDoc(commentRef,{reactionCount:f.increment(-1)}).catch(function(){});
+        }).then(function(){
+          if(btn){ btn.classList.remove('active'); btn.dataset.commentReaction='like'; btn.textContent='👍 Like'; }
+        });
+      }
+      var write=f.setDoc(rxRef,{userId:u.uid,type:type,createdAt:f.serverTimestamp()},{merge:true});
+      if(!exists) write=write.then(function(){ return f.updateDoc(commentRef,{reactionCount:f.increment(1)}).catch(function(){}); });
+      return write.then(function(){
+        if(btn){ btn.classList.add('active'); btn.dataset.commentReaction=type; btn.textContent=RX_EMOJIS[type]+' 1'; }
+      });
+    }).catch(function(err){ toast('Reaction failed','error'); });
+  }
+
+  function submitPollVote(pid, optId, card) {
+    var u=authUser(); if(!u) return requireLogin();
+    var f=fs(); var voteRef=f.doc(db(),'posts',pid,'pollVotes',u.uid);
+    f.getDoc(voteRef).then(function(snap){
+      if(snap.exists()){ toast('You already voted','error'); return; }
+      return f.setDoc(voteRef,{optionId:optId,userId:u.uid,createdAt:f.serverTimestamp()})
+        .then(function(){
+          return Promise.all([
+            f.updateDoc(f.doc(db(),'posts',pid),{'poll.totalVotes':f.increment(1)}).catch(function(){}),
+            f.getDoc(f.doc(db(),'posts',pid)).then(function(ps){
+              if(!ps.exists()) return;
+              var pd=ps.data().poll||{}; var opts=(pd.options||[]).map(function(o){
+                return o.id===optId ? Object.assign({},o,{votes:(o.votes||0)+1}) : o;
+              });
+              return f.updateDoc(f.doc(db(),'posts',pid),{'poll.options':opts}).catch(function(){});
+            })
+          ]);
+        }).then(function(){
+          var pollDiv=card&&card.querySelector('[data-poll-pid]');
+          if(pollDiv) pollDiv.classList.add('voted');
+          toast('Vote recorded');
+        });
+    }).catch(function(err){ toast('Vote failed: '+(err.code||err.message),'error'); });
   }
 
   function openReplyForm(card,pid,cid){
@@ -1167,23 +1428,108 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(cid){ setTimeout(function(){ var c = card.querySelector('[data-comment-id="'+CSS.escape(cid)+'"]'); if(c){ c.classList.add('gh-deep-linked-comment'); c.scrollIntoView({ behavior:'smooth', block:'center' }); } }, 1200); }
   }
 
+  function feedRightSidebar(){
+    return '<div id="ghFeedRight">'+
+      '<div class="gh-panel gh-right-widget" id="ghOnlineFriendsPanel"><div class="gh-section-title"><h3><i class="fas fa-circle" style="color:#22c55e;font-size:.55rem"></i> Online Friends</h3></div><div id="ghOnlineFriendsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghBirthdayPanel"><div class="gh-section-title"><h3>🎂 Birthdays</h3></div><div id="ghBirthdayList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
+      '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Suggested Pages</h3><a class="gh-small" href="business.html">All</a></div><div id="ghSuggestedPages"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
+      '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Contacts</h3></div><input class="gh-input" id="ghContactsSearch" placeholder="Search contacts…" style="margin-bottom:8px"><div id="ghContactsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
+    '</div>';
+  }
+
+  function loadFeedRightSidebar(){
+    ready(function(){
+      var u=authUser(); if(!u) return;
+      var fiveMinsAgo=new Date(Date.now()-5*60*1000);
+      fs().getDocs(fs().query(fs().collection(db(),'users'), fs().where('lastSeen','>',fiveMinsAgo), fs().limit(15))).then(function(snap){
+        var box=$('#ghOnlineFriendsList'); if(!box) return;
+        var items=[]; snap.forEach(function(d){ if(d.id!==u.uid) items.push(Object.assign({id:d.id},d.data())); });
+        if(!items.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">No friends online</div>'; return; }
+        box.innerHTML='<div class="gh-contacts-list">'+items.slice(0,8).map(function(p){
+          var name=p.fullName||p.displayName||p.name||'User';
+          var av=p.avatar||p.photoURL||'';
+          return '<a class="gh-contact-row" href="messages.html?with='+esc(p.id)+'"><span class="gh-avatar" style="width:32px;height:32px">'+(av?img(av,name):esc(initials(name)))+'</span><span class="gh-contact-name">'+esc(name)+'</span><span class="gh-online-dot"></span></a>';
+        }).join('')+'</div>';
+      }).catch(function(){});
+
+      var now=new Date(); var thisMonth=now.getMonth()+1;
+      fs().getDocs(fs().query(fs().collection(db(),'users'), fs().where('birthdayMonth','==',thisMonth), fs().limit(10))).then(function(snap){
+        var box=$('#ghBirthdayList'); if(!box) return;
+        var items=[]; snap.forEach(function(d){ items.push(Object.assign({id:d.id},d.data())); });
+        if(!items.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">No birthdays this month</div>'; return; }
+        box.innerHTML=items.slice(0,5).map(function(p){
+          var name=p.fullName||p.displayName||p.name||'User';
+          var day=p.birthdayDay||0; var today=now.getDate();
+          var label=day===today?'Today!':'in '+(day-today)+'d';
+          return '<div class="gh-birthday-row"><span>🎂</span><span>'+esc(name)+'\'s birthday '+esc(label)+'</span></div>';
+        }).join('');
+      }).catch(function(){});
+
+      getLatest('businesses',6).then(function(items){
+        var box=$('#ghSuggestedPages'); if(!box||!items.length) return;
+        box.innerHTML='<div class="gh-mini-list">'+items.slice(0,3).map(function(b){
+          var title=b.title||b.name||'Business'; var logo=b.logoUrl||'';
+          return '<div class="gh-mini-item"><span class="gh-mini-thumb">'+(logo?img(logo,title):'<i class="fas fa-store"></i>')+'</span><div style="flex:1"><strong>'+esc(title)+'</strong><span>'+esc(b.category||'Business')+'</span></div><button class="gh-btn sm ghost" onclick="location.href=\'business.html?id='+esc(b.id)+'\'">View</button></div>';
+        }).join('')+'</div>';
+      }).catch(function(){});
+
+      loadContactsList(u.uid);
+    });
+  }
+
+  function loadContactsList(uid){
+    if(!fs()||!db()) return;
+    var box=$('#ghContactsList'); if(!box) return;
+    var allContacts=[];
+    Promise.all([
+      fs().getDocs(fs().query(fs().collection(db(),'follows'), fs().where('followerId','==',uid), fs().limit(50))).then(function(snap){
+        var ids=[]; snap.forEach(function(d){ var id=(d.data()||{}).followingId; if(id&&id!==uid) ids.push(id); });
+        return ids;
+      }).catch(function(){ return []; })
+    ]).then(function(res){
+      var ids=res[0]; if(!ids.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">No contacts yet</div>'; return; }
+      return Promise.all(ids.slice(0,20).map(function(id){ return fs().getDoc(fs().doc(db(),'users',id)).then(function(d){ return d.exists()?Object.assign({id:d.id},d.data()):null; }).catch(function(){ return null; }); }));
+    }).then(function(profiles){
+      if(!profiles) return;
+      allContacts=(profiles||[]).filter(Boolean);
+      renderContactsList(allContacts,'');
+    }).catch(function(){});
+
+    var search=$('#ghContactsSearch');
+    if(search) search.addEventListener('input',function(){ renderContactsList(allContacts, search.value.trim().toLowerCase()); });
+  }
+
+  function renderContactsList(contacts, q){
+    var box=$('#ghContactsList'); if(!box) return;
+    var filtered=q ? contacts.filter(function(p){ return (p.fullName||p.displayName||p.name||'').toLowerCase().includes(q); }) : contacts;
+    if(!filtered.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">No contacts found</div>'; return; }
+    box.innerHTML='<div class="gh-contacts-list">'+filtered.slice(0,15).map(function(p){
+      var name=p.fullName||p.displayName||p.name||'User';
+      var av=p.avatar||p.photoURL||'';
+      return '<a class="gh-contact-row" href="messages.html?with='+esc(p.id)+'"><span class="gh-avatar" style="width:32px;height:32px">'+(av?img(av,name):esc(initials(name)))+'</span><span class="gh-contact-name">'+esc(name)+'</span></a>';
+    }).join('')+'</div>';
+  }
+
   function renderFeed(){
     var c=getCachedUser();
     var compAvClass='gh-avatar'+(c?'':' gh-skel');
     var compAvContent=c?(c.avatar?'<img src="'+esc(c.avatar)+'" alt="" loading="eager" onerror="this.remove()">':esc(initials(c.name||''))):'';
-    shell({ active:'feed', center:
-      '<section class="gh-card gh-story-strip-card"><div class="gh-stories" id="ghStories"></div></section>'+
-      '<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="'+compAvClass+'" id="ghComposerAvatar">'+compAvContent+'</span><button class="gh-composer-fake" data-create-post>რას აზიარებ დღეს?</button></div><div class="gh-composer-actions"><button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Place</button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:#38bdf8"></i> Business</button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:#f59e0b"></i> Event</button></div></section>'+
-      '<div id="ghFeedList">'+skelPostCard()+skelPostCard()+skelPostCard()+'</div>'
+    shell({ active:'feed',
+      right: feedRightSidebar(),
+      center:
+        '<section class="gh-card gh-story-strip-card"><div class="gh-stories" id="ghStories"></div></section>'+
+        '<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="'+compAvClass+'" id="ghComposerAvatar">'+compAvContent+'</span><button class="gh-composer-fake" data-create-post>რას აზიარებ დღეს?</button></div><div class="gh-composer-actions"><button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Place</button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:#38bdf8"></i> Business</button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:#f59e0b"></i> Event</button></div></section>'+
+        '<div id="ghFeedList">'+skelPostCard()+skelPostCard()+skelPostCard()+'</div>'
     });
     loadStories('#ghStories');
+    loadFeedRightSidebar();
     ready(function(){
       var list=$('#ghFeedList'); bindPostInteractions(list); var lastPosts=[];
       function paint(){
         var visible=lastPosts.filter(canSeePost);
         if(!visible.length){ list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-seedling"></i><h3>Feed is empty</h3><p>Create the first real post or adjust hidden/blocked filters.</p><button class="gh-btn" data-create-post><i class="fas fa-plus"></i>Create post</button></div>'; return; }
         list.innerHTML=visible.map(function(p){ return postCard(p); }).join('');
-        visible.forEach(function(p){ try{ hydrateReactionState(p.id); }catch(e){} });
+        visible.forEach(function(p){ try{ hydrateReactionState(p.id); loadReactionBreakdown(p.id); }catch(e){} });
         hydrateSharedPreviews(list);
         setTimeout(openDeepLinkedPost, 350);
       }
@@ -3139,6 +3485,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         authorName:extra.authorName||me.name,
         authorAvatar:extra.authorAvatar||me.avatar,
         sharedPostId:extra.sharedPostId||null,
+        type:extra.type||'post',
+        poll:extra.poll||null,
+        bgGradient:extra.bgGradient||null,
+        linkPreview:extra.linkPreview||null,
         likeCount:0, reactionCount:0, commentCount:0, shareCount:0, saveCount:0,
         status:'active', createdAt:GF.fs.serverTimestamp(), updatedAt:GF.fs.serverTimestamp()
       };

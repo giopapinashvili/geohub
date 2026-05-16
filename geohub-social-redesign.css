@@ -1402,3 +1402,89 @@ html[data-gh-theme="light"] .gh-emp-section{background:rgba(255,255,255,.88);bor
 html[data-gh-theme="light"] .gh-emp-card{background:rgba(22,101,52,.03)}
 html[data-gh-theme="light"] .gh-team-card{background:rgba(22,101,52,.04)}
 html[data-gh-theme="light"] .gh-team-avatar{background:rgba(255,255,255,.9);border-color:rgba(22,101,52,.12)}
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 8 — Social Mega Improvements
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Reaction breakdown (per-emoji counts under post) ────── */
+.gh-rx-breakdown{display:flex;gap:6px;flex-wrap:wrap;padding:4px 0 2px;min-height:0}
+.gh-rx-chip{font-size:.8rem;color:var(--gh-muted);background:rgba(255,255,255,.05);border:1px solid var(--gh-border);border-radius:999px;padding:3px 9px;cursor:default}
+.gh-rx-who-btn{background:none;border:none;color:var(--gh-muted);cursor:pointer;font-size:.78rem;padding:0;display:inline-flex;align-items:center;gap:4px}
+.gh-rx-who-btn:hover{color:var(--gh-text);text-decoration:underline}
+.gh-who-rx-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.gh-who-rx-tab{border:1px solid var(--gh-border);background:rgba(255,255,255,.05);color:var(--gh-muted);border-radius:999px;padding:6px 12px;cursor:pointer;font-weight:800;font-size:.82rem}
+.gh-who-rx-tab.active{background:rgba(16,185,129,.14);color:var(--gh-text);border-color:var(--gh-border-strong)}
+
+/* ── Comment reactions ───────────────────────────────────── */
+.gh-cmt-rx-wrap{position:relative;display:inline-block}
+.gh-cmt-rx-btn{font-size:.75rem;padding:2px 7px;border-radius:8px;color:var(--gh-muted)}
+.gh-cmt-rx-btn.active{color:var(--gh-green)}
+.gh-cmt-rx-picker{position:absolute;bottom:calc(100% + 6px);left:0;display:none;gap:4px;background:var(--gh-card);border:1px solid var(--gh-border);border-radius:999px;padding:5px 8px;z-index:200;box-shadow:0 8px 28px rgba(0,0,0,.35);white-space:nowrap}
+.gh-cmt-rx-wrap:hover .gh-cmt-rx-picker{display:flex}
+.gh-cmt-rx-pick{border:none;background:transparent;font-size:1.2rem;cursor:pointer;padding:2px 3px;border-radius:8px;transition:.12s}
+.gh-cmt-rx-pick:hover{transform:scale(1.3)}
+
+/* ── Post composer – Feeling ─────────────────────────────── */
+.gh-feeling-row{display:flex;gap:6px;flex-wrap:wrap;padding:8px 0;overflow-x:auto;scrollbar-width:none}
+.gh-feeling-row::-webkit-scrollbar{display:none}
+.gh-feeling-chip{border:1px solid var(--gh-border);background:rgba(255,255,255,.05);color:var(--gh-muted);border-radius:999px;padding:6px 11px;cursor:pointer;font-size:.78rem;font-weight:800;white-space:nowrap;transition:.14s}
+.gh-feeling-chip.active,.gh-feeling-chip:hover{background:rgba(16,185,129,.13);color:var(--gh-text);border-color:var(--gh-border-strong)}
+
+/* ── Post composer – Background Color ───────────────────── */
+.gh-bg-picker{display:flex;gap:7px;flex-wrap:wrap;padding:8px 0}
+.gh-bg-swatch{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:.14s;display:inline-flex;align-items:center;justify-content:center;font-size:.72rem;color:#fff}
+.gh-bg-swatch.active{transform:scale(1.25);border-color:#fff}
+.gh-bg-none{background:rgba(255,255,255,.08);color:var(--gh-muted)}
+.gh-post-bg-text{width:100%;display:flex;align-items:center;justify-content:center;min-height:180px;border-radius:18px;margin:8px 0}
+.gh-post-bg-text span{font-size:1.25rem;font-weight:900;color:#fff;text-align:center;line-height:1.4;text-shadow:0 2px 12px rgba(0,0,0,.4);padding:20px}
+
+/* ── Post composer – Link Preview ───────────────────────── */
+.gh-lp-composer-preview{border:1px solid var(--gh-border);border-radius:14px;overflow:hidden;margin-top:8px;background:rgba(255,255,255,.04)}
+.gh-lp-composer-inner{display:flex;gap:10px;align-items:flex-start;padding:10px;position:relative}
+.gh-lp-composer-inner img{width:72px;height:60px;object-fit:cover;border-radius:10px;flex:0 0 auto}
+.gh-lp-remove{position:absolute;top:6px;right:6px;border:none;background:rgba(0,0,0,.4);color:#fff;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:.72rem;display:flex;align-items:center;justify-content:center}
+.gh-link-preview{display:block;border:1px solid var(--gh-border);border-radius:14px;overflow:hidden;text-decoration:none;color:var(--gh-text);margin:8px 0;background:rgba(255,255,255,.04);transition:.15s}
+.gh-link-preview:hover{border-color:var(--gh-border-strong);background:rgba(16,185,129,.05)}
+.gh-link-preview img{width:100%;max-height:200px;object-fit:cover}
+.gh-lp-body{padding:10px 12px}
+.gh-lp-domain{font-size:.7rem;color:var(--gh-muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.gh-lp-title{font-weight:900;font-size:.9rem;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.gh-lp-desc{font-size:.78rem;color:var(--gh-muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ── Post composer – Poll ────────────────────────────────── */
+.gh-poll-card{background:rgba(255,255,255,.04);border:1px solid var(--gh-border);border-radius:16px;padding:14px;margin:8px 0}
+.gh-poll-question{font-weight:900;font-size:1rem;margin-bottom:12px;color:var(--gh-text)}
+.gh-poll-opt{width:100%;border:1px solid var(--gh-border);background:rgba(255,255,255,.04);color:var(--gh-text);border-radius:12px;padding:10px 14px;margin-bottom:7px;position:relative;overflow:hidden;cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;font-weight:800;transition:.15s}
+.gh-poll-opt:hover{border-color:var(--gh-border-strong);background:rgba(16,185,129,.07)}
+.gh-poll-bar{position:absolute;left:0;top:0;bottom:0;background:rgba(16,185,129,.18);border-radius:12px;transition:width .4s ease;pointer-events:none}
+.gh-poll-label{position:relative;z-index:1}
+.gh-poll-pct{position:relative;z-index:1;font-size:.78rem;color:var(--gh-muted);font-weight:700}
+.gh-poll-footer{font-size:.75rem;color:var(--gh-muted);margin-top:6px;text-align:center}
+.gh-poll-card.voted .gh-poll-opt{cursor:default}
+
+/* ── Feed right sidebar ──────────────────────────────────── */
+#ghFeedRight{display:flex;flex-direction:column;gap:14px}
+.gh-contacts-list{display:flex;flex-direction:column;gap:4px;max-height:280px;overflow-y:auto;scrollbar-width:thin}
+.gh-contact-row{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:10px;text-decoration:none;color:var(--gh-text);font-weight:700;font-size:.84rem;transition:.14s;cursor:pointer}
+.gh-contact-row:hover{background:rgba(16,185,129,.1)}
+.gh-contact-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gh-online-dot{width:9px;height:9px;border-radius:50%;background:#22c55e;flex:0 0 auto;box-shadow:0 0 0 2px var(--gh-card)}
+.gh-birthday-row{display:flex;gap:8px;align-items:flex-start;font-size:.83rem;padding:4px 0;color:var(--gh-text);font-weight:600}
+
+/* ── Light theme overrides for new components ────────────── */
+html[data-gh-theme="light"] .gh-rx-chip{background:rgba(0,0,0,.05);color:#475569}
+html[data-gh-theme="light"] .gh-who-rx-tab{background:rgba(0,0,0,.04);color:#475569}
+html[data-gh-theme="light"] .gh-poll-opt{background:rgba(0,0,0,.03);color:#1e293b}
+html[data-gh-theme="light"] .gh-poll-bar{background:rgba(16,185,129,.2)}
+html[data-gh-theme="light"] .gh-link-preview{background:rgba(0,0,0,.03);color:#1e293b}
+html[data-gh-theme="light"] .gh-contact-row{color:#1e293b}
+html[data-gh-theme="light"] .gh-cmt-rx-picker{background:#fff}
+
+/* ── Responsive: right sidebar collapse ─────────────────── */
+@media(max-width:1200px){#ghFeedRight{display:none}}
+@media(max-width:920px){.gh-layout{grid-template-columns:1fr !important}}
+@media(max-width:768px){
+  .gh-cmt-rx-picker{bottom:auto;top:calc(100% + 4px)}
+  .gh-feeling-row{flex-wrap:nowrap}
+}

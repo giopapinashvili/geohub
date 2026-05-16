@@ -227,6 +227,30 @@
     if (!own && window.GeoSocial && window.GeoSocial.listenFriendshipStatus) {
       window.GeoSocial.listenFriendshipStatus(user.uid, status => updateFriendButtons(user.uid, status));
     }
+    // Online status display
+    if (!own) {
+      var onlineEl = document.getElementById('profile-online-status');
+      if (!onlineEl) {
+        onlineEl = document.createElement('div');
+        onlineEl.id = 'profile-online-status';
+        onlineEl.style.cssText = 'margin-top:4px';
+        var nameBlock = document.querySelector('.profile-name-block');
+        if (nameBlock) nameBlock.appendChild(onlineEl);
+      }
+      if (window.GeoFriendships) window.GeoFriendships.renderOnlineStatus(user.uid, onlineEl);
+      else window.addEventListener('GeoFriendshipsReady', function() { if (window.GeoFriendships) window.GeoFriendships.renderOnlineStatus(user.uid, onlineEl); }, { once: true });
+      // Mutual friends
+      var mutualEl = document.getElementById('profile-mutual-friends');
+      if (!mutualEl) {
+        mutualEl = document.createElement('div');
+        mutualEl.id = 'profile-mutual-friends';
+        mutualEl.style.cssText = 'margin-top:6px';
+        var nameBlock2 = document.querySelector('.profile-name-block');
+        if (nameBlock2) nameBlock2.appendChild(mutualEl);
+      }
+      if (window.GeoFriendships) window.GeoFriendships.renderMutualFriendsWidget(user.uid, mutualEl);
+      else window.addEventListener('GeoFriendshipsReady', function() { if (window.GeoFriendships) window.GeoFriendships.renderMutualFriendsWidget(user.uid, mutualEl); }, { once: true });
+    }
     if (!own && window.GeoSocial) {
       if (window.GeoSocial.checkBlocking) {
         window.GeoSocial.checkBlocking(user.uid, function(amBlocking) {
@@ -263,6 +287,23 @@
     renderStats(user);
     refreshRealStats(user);
     renderStaticEmptyStates(user);
+  }
+
+  function renderPymkSidebar() {
+    var card = document.querySelector('.following-card.sidebar-card');
+    if (!card) return;
+    var inner = card.querySelector('[style]') || card.lastElementChild;
+    if (inner) inner.remove();
+    var target = document.createElement('div');
+    target.id = 'pymk-sidebar-content';
+    card.appendChild(target);
+    if (window.GeoFriendships) {
+      window.GeoFriendships.renderPymkWidget(target);
+    } else {
+      window.addEventListener('GeoFriendshipsReady', function() {
+        if (window.GeoFriendships) window.GeoFriendships.renderPymkWidget(target);
+      }, { once: true });
+    }
   }
 
   function renderStaticEmptyStates(user) {
@@ -622,10 +663,18 @@
     var tab = $('#tab-about'); if (!tab) return;
     var sl = user.socialLinks || {};
     var ICONS = { instagram:'fa-instagram', facebook:'fa-facebook', linkedin:'fa-linkedin', tiktok:'fa-tiktok', twitter:'fa-twitter', youtube:'fa-youtube' };
+    var GF = window.GeoFirebase;
+    var fbUser = GF && GF.auth && GF.auth.currentUser;
+    var isOwn = fbUser && user.uid === fbUser.uid;
+
     var html = '<div class="about-card">';
     if (user.bio) html += '<div class="about-bio">' + esc(user.bio) + '</div>';
     html += '<div class="about-section-title">Location</div>';
     html += '<div class="about-item"><i class="fas fa-map-marker-alt"></i> ' + (user.cityScope === 'all_georgia' ? 'Interested in all Georgia' : esc(user.city || 'No location set')) + '</div>';
+    if (user.hometown) html += '<div class="about-item"><i class="fas fa-home"></i> From ' + esc(user.hometown) + '</div>';
+    if (user.currentCity) html += '<div class="about-item"><i class="fas fa-city"></i> Lives in ' + esc(user.currentCity) + '</div>';
+    if (user.relationshipStatus) html += '<div class="about-item"><i class="fas fa-heart"></i> ' + esc(user.relationshipStatus) + '</div>';
+    if (user.birthday) html += '<div class="about-item"><i class="fas fa-birthday-cake"></i> Birthday: ' + esc(user.birthday) + '</div>';
     if (user.website) html += '<div class="about-item"><i class="fas fa-globe"></i> <a href="' + esc(user.website) + '" target="_blank" rel="noopener noreferrer">' + esc(user.website) + '</a></div>';
     var joinYear = '';
     if (user.createdAt) {
@@ -636,6 +685,48 @@
       } catch(e) {}
     }
     if (joinYear) html += '<div class="about-item"><i class="fas fa-calendar-alt"></i> Member since ' + joinYear + '</div>';
+
+    // ── Work History ──
+    html += '<div class="about-section-title">Work' + (isOwn ? '<button class="about-add-btn" data-work-add>+ Add</button>' : '') + '</div>';
+    var work = Array.isArray(user.work) ? user.work : [];
+    if (work.length) {
+      work.forEach(function(w, idx) {
+        html += '<div class="about-item about-work-item" data-work-idx="' + idx + '">'
+          + '<i class="fas fa-briefcase" style="color:#10b981"></i> '
+          + '<div style="flex:1"><strong>' + esc(w.position || 'Employee') + '</strong> at <strong>' + esc(w.company || '') + '</strong>'
+          + (w.from ? '<div style="font-size:.75rem;color:var(--gh-muted,#64748b);margin-top:2px">' + esc(w.from) + ' – ' + (w.current ? 'Present' : esc(w.to || '')) + '</div>' : '')
+          + '</div>'
+          + (isOwn ? '<button class="about-edit-btn" data-work-edit="' + idx + '" title="Edit"><i class="fas fa-pen"></i></button>' : '')
+          + '</div>';
+      });
+    } else {
+      html += '<div class="about-item" style="color:var(--gh-muted,#64748b)"><i class="fas fa-briefcase"></i> ' + (isOwn ? 'Add your work history' : 'No work info') + '</div>';
+    }
+
+    // ── Education ──
+    html += '<div class="about-section-title">Education' + (isOwn ? '<button class="about-add-btn" data-edu-add>+ Add</button>' : '') + '</div>';
+    var edu = Array.isArray(user.education) ? user.education : [];
+    if (edu.length) {
+      edu.forEach(function(e, idx) {
+        html += '<div class="about-item about-edu-item" data-edu-idx="' + idx + '">'
+          + '<i class="fas fa-graduation-cap" style="color:#3b82f6"></i> '
+          + '<div style="flex:1"><strong>' + esc(e.school || '') + '</strong>'
+          + (e.degree ? ' · ' + esc(e.degree) : '')
+          + (e.from ? '<div style="font-size:.75rem;color:var(--gh-muted,#64748b);margin-top:2px">' + esc(e.from) + ' – ' + esc(e.to || 'Present') + '</div>' : '')
+          + '</div>'
+          + (isOwn ? '<button class="about-edit-btn" data-edu-edit="' + idx + '" title="Edit"><i class="fas fa-pen"></i></button>' : '')
+          + '</div>';
+      });
+    } else {
+      html += '<div class="about-item" style="color:var(--gh-muted,#64748b)"><i class="fas fa-graduation-cap"></i> ' + (isOwn ? 'Add your education' : 'No education info') + '</div>';
+    }
+
+    // ── Languages ──
+    if (Array.isArray(user.languages) && user.languages.length) {
+      html += '<div class="about-section-title">Languages</div>';
+      html += '<div class="about-interests">' + user.languages.map(function(l) { return '<span class="about-interest-chip">' + esc(l) + '</span>'; }).join('') + '</div>';
+    }
+
     if (user.interests && user.interests.length) {
       html += '<div class="about-section-title">Interests</div>';
       html += '<div class="about-interests">' + user.interests.map(function(i) { return '<span class="about-interest-chip">' + esc(i) + '</span>'; }).join('') + '</div>';
@@ -648,7 +739,252 @@
       }).join('') + '</div>';
     }
     html += '</div>';
+
+    // ── Life Events Timeline ──
+    html += '<div id="about-life-events" style="margin-top:8px"></div>';
+
     tab.innerHTML = html;
+
+    // Load life events
+    if (GF && GF.db && GF.fs) {
+      renderLifeEventsTimeline(user, isOwn);
+    }
+
+    // Work / Education event delegation
+    tab.addEventListener('click', function(ev) {
+      if (ev.target.closest('[data-work-add]')) { ev.preventDefault(); openWorkModal(user, -1); }
+      var we = ev.target.closest('[data-work-edit]');
+      if (we) { ev.preventDefault(); openWorkModal(user, parseInt(we.dataset.workEdit)); }
+      if (ev.target.closest('[data-edu-add]')) { ev.preventDefault(); openEduModal(user, -1); }
+      var ee = ev.target.closest('[data-edu-edit]');
+      if (ee) { ev.preventDefault(); openEduModal(user, parseInt(ee.dataset.eduEdit)); }
+      if (ev.target.closest('[data-life-event-add]')) { ev.preventDefault(); openLifeEventModal(user); }
+    });
+  }
+
+  function renderLifeEventsTimeline(user, isOwn) {
+    var container = document.getElementById('about-life-events');
+    if (!container) return;
+    var GF = window.GeoFirebase;
+    if (!GF || !GF.db || !GF.fs) return;
+
+    // Auto-generate events from work/education
+    var events = [];
+    (Array.isArray(user.work) ? user.work : []).forEach(function(w) {
+      if (w.from && w.company) events.push({ type: 'work', year: w.from, label: 'Started working at ' + w.company, icon: 'fa-briefcase', color: '#10b981' });
+    });
+    (Array.isArray(user.education) ? user.education : []).forEach(function(e) {
+      if (e.to && e.school) events.push({ type: 'edu', year: e.to, label: 'Graduated from ' + e.school, icon: 'fa-graduation-cap', color: '#3b82f6' });
+    });
+
+    // Load custom life events from Firestore
+    GF.fs.getDocs(GF.fs.query(
+      GF.fs.collection(GF.db, 'users', user.uid, 'lifeEvents'),
+      GF.fs.orderBy('year', 'desc'),
+      GF.fs.limit(20)
+    )).then(function(snap) {
+      snap.forEach(function(d) {
+        var data = Object.assign({ id: d.id }, d.data());
+        events.push({ type: 'custom', year: data.year || '', label: data.label || 'Life event', icon: data.icon || 'fa-star', color: '#f59e0b', id: data.id });
+      });
+      events.sort(function(a, b) { return String(b.year).localeCompare(String(a.year)); });
+      paintLifeEvents(container, events, user, isOwn);
+    }).catch(function() {
+      events.sort(function(a, b) { return String(b.year).localeCompare(String(a.year)); });
+      paintLifeEvents(container, events, user, isOwn);
+    });
+  }
+
+  function paintLifeEvents(container, events, user, isOwn) {
+    if (!events.length && !isOwn) { container.innerHTML = ''; return; }
+    var html = '<div class="about-section-title">Life Events' + (isOwn ? '<button class="about-add-btn" data-life-event-add>+ Add</button>' : '') + '</div>';
+    if (!events.length) {
+      html += '<div class="about-item" style="color:var(--gh-muted,#64748b)"><i class="fas fa-star"></i> Add your first life event</div>';
+    } else {
+      html += '<div class="life-events-timeline">';
+      events.forEach(function(ev) {
+        html += '<div class="life-event-item">'
+          + '<div class="life-event-dot" style="background:' + esc(ev.color || '#6d3fd9') + '"><i class="fas ' + esc(ev.icon) + '"></i></div>'
+          + '<div class="life-event-content">'
+          + '<div class="life-event-label">' + esc(ev.label) + '</div>'
+          + '<div class="life-event-year">' + esc(ev.year) + '</div>'
+          + '</div>'
+          + '</div>';
+      });
+      html += '</div>';
+    }
+    container.innerHTML = html;
+  }
+
+  function openWorkModal(user, idx) {
+    var work = Array.isArray(user.work) ? user.work : [];
+    var entry = idx >= 0 ? (work[idx] || {}) : {};
+    var isNew = idx < 0;
+    var old = document.getElementById('gh-work-modal'); if (old) old.remove();
+    var ov = document.createElement('div');
+    ov.id = 'gh-work-modal';
+    ov.className = 'profile-edit-overlay';
+    ov.innerHTML = '<div class="profile-edit-sheet" style="max-width:500px">'
+      + '<div class="profile-edit-head"><h3>' + (isNew ? 'Add Work' : 'Edit Work') + '</h3><button class="profile-edit-close" id="gwClose"><i class="fas fa-times"></i></button></div>'
+      + '<div class="profile-edit-body">'
+      + '<div class="profile-edit-field"><label>Company</label><input class="profile-edit-input" id="gwCompany" placeholder="Company name" value="' + esc(entry.company || '') + '"></div>'
+      + '<div class="profile-edit-field"><label>Position / Title</label><input class="profile-edit-input" id="gwPosition" placeholder="Software Engineer" value="' + esc(entry.position || '') + '"></div>'
+      + '<div class="profile-edit-field"><label>From (year)</label><input class="profile-edit-input" id="gwFrom" placeholder="2020" value="' + esc(entry.from || '') + '"></div>'
+      + '<div class="profile-edit-field"><label>To (year or leave blank)</label><input class="profile-edit-input" id="gwTo" placeholder="2023 or leave blank for current" value="' + esc(entry.to || '') + '"></div>'
+      + '<div class="profile-edit-field"><label><input type="checkbox" id="gwCurrent"' + (entry.current ? ' checked' : '') + '> Currently work here</label></div>'
+      + (idx >= 0 ? '<div style="margin-top:8px"><button class="btn btn-ghost btn-sm" id="gwDelete" style="color:#f87171"><i class="fas fa-trash"></i> Remove</button></div>' : '')
+      + '</div>'
+      + '<div class="profile-edit-footer"><button class="btn btn-ghost btn-sm" id="gwCancel">Cancel</button><button class="btn btn-primary btn-sm" id="gwSave"><i class="fas fa-check"></i> Save</button></div>'
+      + '</div>';
+    document.body.appendChild(ov);
+    requestAnimationFrame(function() { ov.classList.add('open'); });
+    ov.addEventListener('click', function(e) { if (e.target === ov) ov.remove(); });
+    ov.querySelector('#gwClose').addEventListener('click', function() { ov.remove(); });
+    ov.querySelector('#gwCancel').addEventListener('click', function() { ov.remove(); });
+
+    function saveWork() {
+      var newEntry = {
+        company: (document.getElementById('gwCompany').value || '').trim(),
+        position: (document.getElementById('gwPosition').value || '').trim(),
+        from: (document.getElementById('gwFrom').value || '').trim(),
+        to: (document.getElementById('gwTo').value || '').trim(),
+        current: document.getElementById('gwCurrent').checked
+      };
+      if (!newEntry.company) { toast('Company name is required.', 'error'); return; }
+      var newWork = work.slice();
+      if (isNew) newWork.push(newEntry);
+      else newWork[idx] = newEntry;
+      var GF = window.GeoFirebase;
+      var fbUser = GF && GF.auth && GF.auth.currentUser;
+      if (!GF || !GF.db || !GF.fs || !fbUser) { toast('Not signed in.', 'error'); return; }
+      GF.fs.updateDoc(GF.fs.doc(GF.db, 'users', fbUser.uid), { work: newWork }).then(function() {
+        toast('Work history saved.');
+        user.work = newWork;
+        renderAboutTab(user);
+        ov.remove();
+      }).catch(function(err) { toast('Save failed: ' + (err && err.message), 'error'); });
+    }
+
+    ov.querySelector('#gwSave').addEventListener('click', saveWork);
+    var delBtn = ov.querySelector('#gwDelete');
+    if (delBtn) {
+      delBtn.addEventListener('click', function() {
+        if (!confirm('Remove this work entry?')) return;
+        var newWork = work.filter(function(_, i) { return i !== idx; });
+        var GF = window.GeoFirebase;
+        var fbUser = GF && GF.auth && GF.auth.currentUser;
+        if (!GF || !GF.db || !GF.fs || !fbUser) return;
+        GF.fs.updateDoc(GF.fs.doc(GF.db, 'users', fbUser.uid), { work: newWork }).then(function() {
+          toast('Work entry removed.');
+          user.work = newWork;
+          renderAboutTab(user);
+          ov.remove();
+        }).catch(function(err) { toast('Remove failed: ' + (err && err.message), 'error'); });
+      });
+    }
+  }
+
+  function openEduModal(user, idx) {
+    var edu = Array.isArray(user.education) ? user.education : [];
+    var entry = idx >= 0 ? (edu[idx] || {}) : {};
+    var isNew = idx < 0;
+    var old = document.getElementById('gh-edu-modal'); if (old) old.remove();
+    var ov = document.createElement('div');
+    ov.id = 'gh-edu-modal';
+    ov.className = 'profile-edit-overlay';
+    ov.innerHTML = '<div class="profile-edit-sheet" style="max-width:500px">'
+      + '<div class="profile-edit-head"><h3>' + (isNew ? 'Add Education' : 'Edit Education') + '</h3><button class="profile-edit-close" id="geClose"><i class="fas fa-times"></i></button></div>'
+      + '<div class="profile-edit-body">'
+      + '<div class="profile-edit-field"><label>School / University</label><input class="profile-edit-input" id="geSchool" placeholder="University name" value="' + esc(entry.school || '') + '"></div>'
+      + '<div class="profile-edit-field"><label>Degree</label><input class="profile-edit-input" id="geDegree" placeholder="Bachelor\'s, Master\'s…" value="' + esc(entry.degree || '') + '"></div>'
+      + '<div class="profile-edit-field"><label>From (year)</label><input class="profile-edit-input" id="geFrom" placeholder="2018" value="' + esc(entry.from || '') + '"></div>'
+      + '<div class="profile-edit-field"><label>To (year)</label><input class="profile-edit-input" id="geTo" placeholder="2022" value="' + esc(entry.to || '') + '"></div>'
+      + (idx >= 0 ? '<div style="margin-top:8px"><button class="btn btn-ghost btn-sm" id="geDelete" style="color:#f87171"><i class="fas fa-trash"></i> Remove</button></div>' : '')
+      + '</div>'
+      + '<div class="profile-edit-footer"><button class="btn btn-ghost btn-sm" id="geCancel">Cancel</button><button class="btn btn-primary btn-sm" id="geSave"><i class="fas fa-check"></i> Save</button></div>'
+      + '</div>';
+    document.body.appendChild(ov);
+    requestAnimationFrame(function() { ov.classList.add('open'); });
+    ov.addEventListener('click', function(e) { if (e.target === ov) ov.remove(); });
+    ov.querySelector('#geClose').addEventListener('click', function() { ov.remove(); });
+    ov.querySelector('#geCancel').addEventListener('click', function() { ov.remove(); });
+
+    function saveEdu() {
+      var newEntry = {
+        school: (document.getElementById('geSchool').value || '').trim(),
+        degree: (document.getElementById('geDegree').value || '').trim(),
+        from: (document.getElementById('geFrom').value || '').trim(),
+        to: (document.getElementById('geTo').value || '').trim()
+      };
+      if (!newEntry.school) { toast('School name is required.', 'error'); return; }
+      var newEdu = edu.slice();
+      if (isNew) newEdu.push(newEntry);
+      else newEdu[idx] = newEntry;
+      var GF = window.GeoFirebase;
+      var fbUser = GF && GF.auth && GF.auth.currentUser;
+      if (!GF || !GF.db || !GF.fs || !fbUser) { toast('Not signed in.', 'error'); return; }
+      GF.fs.updateDoc(GF.fs.doc(GF.db, 'users', fbUser.uid), { education: newEdu }).then(function() {
+        toast('Education saved.');
+        user.education = newEdu;
+        renderAboutTab(user);
+        ov.remove();
+      }).catch(function(err) { toast('Save failed: ' + (err && err.message), 'error'); });
+    }
+
+    ov.querySelector('#geSave').addEventListener('click', saveEdu);
+    var delBtn = ov.querySelector('#geDelete');
+    if (delBtn) {
+      delBtn.addEventListener('click', function() {
+        if (!confirm('Remove this education entry?')) return;
+        var newEdu = edu.filter(function(_, i) { return i !== idx; });
+        var GF = window.GeoFirebase;
+        var fbUser = GF && GF.auth && GF.auth.currentUser;
+        if (!GF || !GF.db || !GF.fs || !fbUser) return;
+        GF.fs.updateDoc(GF.fs.doc(GF.db, 'users', fbUser.uid), { education: newEdu }).then(function() {
+          toast('Education entry removed.');
+          user.education = newEdu;
+          renderAboutTab(user);
+          ov.remove();
+        }).catch(function(err) { toast('Remove failed: ' + (err && err.message), 'error'); });
+      });
+    }
+  }
+
+  function openLifeEventModal(user) {
+    var old = document.getElementById('gh-life-event-modal'); if (old) old.remove();
+    var ov = document.createElement('div');
+    ov.id = 'gh-life-event-modal';
+    ov.className = 'profile-edit-overlay';
+    ov.innerHTML = '<div class="profile-edit-sheet" style="max-width:480px">'
+      + '<div class="profile-edit-head"><h3>Add Life Event</h3><button class="profile-edit-close" id="gleClose"><i class="fas fa-times"></i></button></div>'
+      + '<div class="profile-edit-body">'
+      + '<div class="profile-edit-field"><label>Event Description</label><input class="profile-edit-input" id="gleLabel" placeholder="e.g. Moved to Tbilisi, Started a new chapter…"></div>'
+      + '<div class="profile-edit-field"><label>Year</label><input class="profile-edit-input" id="gleYear" placeholder="2023" type="number" min="1900" max="2099"></div>'
+      + '<div class="profile-edit-field"><label>Icon</label><select class="profile-edit-input" id="gleIcon"><option value="fa-star">⭐ Milestone</option><option value="fa-map-marker-alt">📍 Moved</option><option value="fa-heart">❤️ Relationship</option><option value="fa-baby">👶 New family</option><option value="fa-plane">✈️ Travel</option><option value="fa-trophy">🏆 Achievement</option></select></div>'
+      + '</div>'
+      + '<div class="profile-edit-footer"><button class="btn btn-ghost btn-sm" id="gleCancel">Cancel</button><button class="btn btn-primary btn-sm" id="gleSave"><i class="fas fa-check"></i> Add Event</button></div>'
+      + '</div>';
+    document.body.appendChild(ov);
+    requestAnimationFrame(function() { ov.classList.add('open'); });
+    ov.addEventListener('click', function(e) { if (e.target === ov) ov.remove(); });
+    ov.querySelector('#gleClose').addEventListener('click', function() { ov.remove(); });
+    ov.querySelector('#gleCancel').addEventListener('click', function() { ov.remove(); });
+    ov.querySelector('#gleSave').addEventListener('click', function() {
+      var label = (document.getElementById('gleLabel').value || '').trim();
+      var year  = (document.getElementById('gleYear').value || '').trim();
+      var icon  = document.getElementById('gleIcon').value || 'fa-star';
+      if (!label) { toast('Please describe the event.', 'error'); return; }
+      var GF = window.GeoFirebase;
+      var fbUser = GF && GF.auth && GF.auth.currentUser;
+      if (!GF || !GF.db || !GF.fs || !fbUser) { toast('Not signed in.', 'error'); return; }
+      GF.fs.addDoc(GF.fs.collection(GF.db, 'users', fbUser.uid, 'lifeEvents'), {
+        label: label, year: year, icon: icon, createdAt: GF.fs.serverTimestamp()
+      }).then(function() {
+        toast('Life event added!');
+        renderAboutTab(user);
+        ov.remove();
+      }).catch(function(err) { toast('Save failed: ' + (err && err.message), 'error'); });
+    });
   }
 
   function applyCreatorMode(user) {
@@ -1096,6 +1432,16 @@
           }
           if (window.GeoSocial) renderTabs(profile, fbUser);
           else window.addEventListener('GeoSocialReady', () => renderTabs(profile, fbUser), { once: true });
+
+          // People You May Know sidebar
+          renderPymkSidebar();
+
+          // Birthday check (own profile: check friends' birthdays)
+          if (isOwnProfile && window.GeoFriendships) {
+            window.GeoFriendships.getFriends(fbUser.uid, function(friendUids) {
+              window.GeoFriendships.checkFriendBirthdays(friendUids);
+            });
+          }
         } catch (err) {
           console.error('[Profile]', err);
           userNotFound();
@@ -1127,22 +1473,66 @@
       e.preventDefault();
       const target = friendBtn.dataset.friendUser;
       const st = friendBtn.dataset.friendState || 'none';
-      if (!window.GeoSocial || !target) return toast('Friends system is still loading', 'error');
-      if (st === 'incoming') {
-        const reqId = friendBtn.dataset.requestId;
-        if (reqId) window.GeoSocial.respondFriendRequest(reqId, true, () => updateFriendButtons(target, { state: 'friends' }));
-      } else if (st === 'friends') {
-        if (confirm('Remove this friend?')) window.GeoSocial.removeFriend(target, () => updateFriendButtons(target, { state: 'none' }));
-      } else if (st === 'outgoing') {
-        toast('Friend request is already pending');
+      // Prefer GeoFriendships for a richer, real experience
+      if (window.GeoFriendships) {
+        if (st === 'pending_received' || st === 'incoming') {
+          // Show respond UI
+          const reqId = friendBtn.dataset.requestId;
+          if (reqId) {
+            var choice = confirm('Accept friend request from this user?');
+            if (choice) {
+              window.GeoFriendships.accept(reqId, target);
+              updateFriendButtons(target, { state: 'friends' });
+            } else {
+              window.GeoFriendships.decline(reqId);
+              updateFriendButtons(target, { state: 'none' });
+            }
+          } else {
+            // Lookup request id dynamically
+            window.GeoFriendships.getStatus(target, function(status) {});
+          }
+        } else if (st === 'friends') {
+          if (confirm('Unfriend this person?')) {
+            window.GeoFriendships.unfriend(target);
+            updateFriendButtons(target, { state: 'none' });
+          }
+        } else if (st === 'pending_sent' || st === 'outgoing') {
+          toast('Friend request already sent — waiting for response.');
+        } else {
+          window.GeoFriendships.sendRequest(target);
+          updateFriendButtons(target, { state: 'pending_sent' });
+        }
+      } else if (window.GeoSocial) {
+        // Legacy fallback
+        if (st === 'incoming') {
+          const reqId = friendBtn.dataset.requestId;
+          if (reqId) window.GeoSocial.respondFriendRequest(reqId, true, () => updateFriendButtons(target, { state: 'friends' }));
+        } else if (st === 'friends') {
+          if (confirm('Remove this friend?')) window.GeoSocial.removeFriend(target, () => updateFriendButtons(target, { state: 'none' }));
+        } else if (st === 'outgoing') {
+          toast('Friend request is already pending');
+        } else {
+          window.GeoSocial.sendFriendRequest(target, state => updateFriendButtons(target, { state: state || 'outgoing' }));
+        }
       } else {
-        window.GeoSocial.sendFriendRequest(target, state => updateFriendButtons(target, { state: state || 'outgoing' }));
+        toast('Friends system is still loading', 'error');
       }
     }
     const acceptBtn = e.target.closest('[data-accept-request]');
-    if (acceptBtn && window.GeoSocial) { e.preventDefault(); window.GeoSocial.respondFriendRequest(acceptBtn.dataset.acceptRequest, true, () => location.reload()); }
+    if (acceptBtn) {
+      e.preventDefault();
+      const reqId = acceptBtn.dataset.acceptRequest;
+      const fromUid = acceptBtn.dataset.fromUserId || '';
+      if (window.GeoFriendships) { window.GeoFriendships.accept(reqId, fromUid); }
+      else if (window.GeoSocial) { window.GeoSocial.respondFriendRequest(reqId, true, () => location.reload()); }
+    }
     const rejectBtn = e.target.closest('[data-reject-request]');
-    if (rejectBtn && window.GeoSocial) { e.preventDefault(); window.GeoSocial.respondFriendRequest(rejectBtn.dataset.rejectRequest, false, () => location.reload()); }
+    if (rejectBtn) {
+      e.preventDefault();
+      const reqId = rejectBtn.dataset.rejectRequest;
+      if (window.GeoFriendships) { window.GeoFriendships.decline(reqId); }
+      else if (window.GeoSocial) { window.GeoSocial.respondFriendRequest(reqId, false, () => location.reload()); }
+    }
 
     const msgBtn = e.target.closest('[data-message-user]');
     if (msgBtn) {
