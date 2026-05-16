@@ -473,64 +473,78 @@
 
   // ── DATA LOADING ──────────────────────────────────────────────
 
+  // Wraps a getDocs() promise — returns [] on any error so one failing
+  // subcollection never kills the whole page load.
+  function safeSnap(promise) {
+    return promise.then(function (snap) {
+      var arr = [];
+      snap.forEach(function (d) { arr.push(Object.assign({ id: d.id }, d.data())); });
+      return arr;
+    }).catch(function (err) {
+      console.warn('[BizPage] Optional query failed:', err.code || err.message);
+      return [];
+    });
+  }
+
   function load() {
     var root = document.getElementById('biz-detail-root');
+    if (!root) return;
     root.innerHTML = '<div class="biz-loading"><i class="fas fa-spinner fa-spin"></i><span>Loading…</span></div>';
     document.body.classList.add('biz-detail-active');
 
-    var bizRef = _fs.doc(_db, 'businesses', BIZ_ID);
-
-    Promise.all([
-      _fs.getDoc(bizRef),
-      _fs.getDocs(_fs.query(_fs.collection(_db, 'businesses', BIZ_ID, 'services'), _fs.orderBy('order', 'asc'))),
-      _fs.getDocs(_fs.query(_fs.collection(_db, 'businesses', BIZ_ID, 'priceList'), _fs.orderBy('order', 'asc'))),
-      _fs.getDocs(_fs.query(_fs.collection(_db, 'businesses', BIZ_ID, 'gallery'),  _fs.orderBy('order', 'asc'))),
-      _fs.getDocs(_fs.query(
-        _fs.collection(_db, 'businessReviews'),
-        _fs.where('businessId', '==', BIZ_ID),
-        _fs.orderBy('createdAt', 'desc'),
-        _fs.limit(20)
-      )),
-    ]).then(function (results) {
-      var bizSnap    = results[0];
-      var svcSnap    = results[1];
-      var priceSnap  = results[2];
-      var galSnap    = results[3];
-      var revSnap    = results[4];
-
+    // ── Step 1: load core business doc (required) ──────────────
+    _fs.getDoc(_fs.doc(_db, 'businesses', BIZ_ID)).then(function (bizSnap) {
       if (!bizSnap.exists()) {
-        document.getElementById('biz-detail-root').innerHTML =
-          '<div class="biz-error-state"><i class="fas fa-store-slash"></i><h3>Business not found</h3><p>This business page doesn\'t exist or was removed.</p><a href="index.html" style="color:#10b981;text-decoration:none">Back to GeoHub</a></div>';
+        root.innerHTML =
+          '<div class="biz-error-state"><i class="fas fa-store-slash"></i><h3>Business not found</h3>' +
+          '<p>This business page doesn\'t exist or was removed.</p>' +
+          '<a href="index.html" style="color:#10b981;text-decoration:none">Back to GeoHub</a></div>';
         return;
       }
 
-      _biz = Object.assign({ id: BIZ_ID }, bizSnap.data());
-
-      var services  = []; svcSnap.forEach(function (d) { services.push(Object.assign({ id: d.id }, d.data())); });
-      var priceList = []; priceSnap.forEach(function (d) { priceList.push(Object.assign({ id: d.id }, d.data())); });
-      var gallery   = []; galSnap.forEach(function (d) { gallery.push(Object.assign({ id: d.id }, d.data())); });
-      var reviews   = []; revSnap.forEach(function (d) { reviews.push(Object.assign({ id: d.id }, d.data())); });
-
-      // Check owner
+      _biz     = Object.assign({ id: BIZ_ID }, bizSnap.data());
       _isOwner = !!(_currentUser && (_biz.ownerId === _currentUser.uid));
 
-      // Check saved state
-      var savedCheck = _currentUser
+      // ── Step 2: load optional modules — each has its own catch ─
+      var loadServices = safeSnap(
+        _fs.getDocs(_fs.query(_fs.collection(_db, 'businesses', BIZ_ID, 'services'),  _fs.orderBy('order', 'asc')))
+      );
+      var loadPriceList = safeSnap(
+        _fs.getDocs(_fs.query(_fs.collection(_db, 'businesses', BIZ_ID, 'priceList'), _fs.orderBy('order', 'asc')))
+      );
+      var loadGallery = safeSnap(
+        _fs.getDocs(_fs.query(_fs.collection(_db, 'businesses', BIZ_ID, 'gallery'),   _fs.orderBy('order', 'asc')))
+      );
+      var loadReviews = safeSnap(
+        _fs.getDocs(_fs.query(
+          _fs.collection(_db, 'businessReviews'),
+          _fs.where('businessId', '==', BIZ_ID),
+          _fs.orderBy('createdAt', 'desc'),
+          _fs.limit(20)
+        ))
+      );
+      var loadSaved = _currentUser
         ? _fs.getDoc(_fs.doc(_db, 'savedBusinesses', _currentUser.uid + '_' + BIZ_ID))
-        : Promise.resolve({ exists: function () { return false; } });
+            .then(function (s) { return s.exists(); })
+            .catch(function (err) { console.warn('[BizPage] savedBusinesses check failed:', err.code || err.message); return false; })
+        : Promise.resolve(false);
 
-      return savedCheck.then(function (savedSnap) {
-        _isSaved = savedSnap.exists();
-        renderPage(_biz, services, priceList, gallery, reviews);
+      // Promise.all is safe here — every sub-promise is pre-caught and resolves
+      return Promise.all([loadServices, loadPriceList, loadGallery, loadReviews, loadSaved])
+        .then(function (results) {
+          _isSaved = results[4];
+          renderPage(_biz, results[0], results[1], results[2], results[3]);
 
-        // Track page view (fire and forget)
-        if (!_isOwner) {
-          _fs.updateDoc(bizRef, { viewCount: _fs.increment(1) }).catch(function () {});
-        }
-      });
+          // Track page view (fire and forget)
+          if (!_isOwner) {
+            _fs.updateDoc(_fs.doc(_db, 'businesses', BIZ_ID), { viewCount: _fs.increment(1) }).catch(function () {});
+          }
+        });
+
     }).catch(function (err) {
-      console.error('[BizPage] Load failed', err);
-      document.getElementById('biz-detail-root').innerHTML =
+      // Only fires if the core business getDoc itself failed (network, etc.)
+      console.error('[BizPage] Core business load failed:', err.code, err.message, err);
+      root.innerHTML =
         '<div class="biz-error-state"><i class="fas fa-exclamation-circle"></i><h3>Could not load</h3><p>Check your connection and try again.</p></div>';
     });
   }
