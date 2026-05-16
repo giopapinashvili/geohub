@@ -176,17 +176,19 @@
       replaceTarget.parentNode.replaceChild(wrap, replaceTarget);
       console.log('[AccountSwitcher] mounted — replaced #authNavUser');
     } else {
-      // Fallback: find navbar-actions (multiple selector variants)
-      var actions = document.querySelector(
-        '.navbar-actions, .nav-actions, [data-navbar-actions], .topbar-actions'
-      );
+      // Fallback: ONLY look inside the real top <nav class="navbar"> to avoid
+      // matching sidebar or page-body elements that share class names.
+      var topNav = document.querySelector('nav.navbar') || document.querySelector('nav#navbar');
+      var actions = topNav ? topNav.querySelector('.navbar-actions') : null;
       if (actions) {
         actions.appendChild(wrap);
-        console.log('[AccountSwitcher] mounted — appended to navbar-actions');
+        console.log('[AccountSwitcher] mounted — appended to nav.navbar .navbar-actions');
+      } else if (topNav) {
+        topNav.appendChild(wrap);
+        console.log('[AccountSwitcher] mounted — appended to nav.navbar');
       } else {
-        var navbar = document.querySelector('.navbar, header');
-        if (navbar) { navbar.appendChild(wrap); console.log('[AccountSwitcher] mounted — appended to navbar'); }
-        else { document.body.appendChild(wrap); console.warn('[AccountSwitcher] mounted — fallback to body'); }
+        document.body.appendChild(wrap);
+        console.warn('[AccountSwitcher] mounted — fallback to body (no nav.navbar found)');
       }
     }
 
@@ -205,7 +207,7 @@
 
   function startObserver() {
     if (_observer) { _observer.disconnect(); _observer = null; }
-    var root = document.querySelector('.navbar, header, .navbar-actions') || document.body;
+    var root = document.querySelector('nav.navbar, nav#navbar') || document.querySelector('header') || document.body;
     _observer = new MutationObserver(function() {
       if (!_user) return;
       var authUser = document.getElementById('authNavUser');
