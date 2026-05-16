@@ -743,6 +743,22 @@ service cloud.firestore {
     match /serviceRequests/{docId} { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
     match /lessonBookings/{docId}  { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
 
+    // ── INVITES & REFERRALS ───────────────────────────────────────────────────
+    // Invite codes are created by users and updated only to increment the use
+    // counter. The createdBy and code fields are immutable after creation.
+    match /invites/{code} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.get('createdBy', '') == uid()
+        && request.resource.data.get('uses', -1) == 0;
+      // Only the use counter and lastUsedAt timestamp may change.
+      allow update: if signedIn()
+        && resource.data.get('createdBy', '') != ''
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['uses', 'lastUsedAt']);
+      allow delete: if isAdmin();
+    }
+
     // ── DENY-ALL FALLBACK ─────────────────────────────────────────────────────
     // Any collection not explicitly listed above is blocked.
     // This prevents accidental exposure when new collections are added without

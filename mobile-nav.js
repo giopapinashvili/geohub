@@ -601,17 +601,25 @@
   window.openCmdPalette   = openCmdPalette;
   window.closeCmdPalette  = closeCmdPalette;
 
-  function injectAnalytics() {
-    if (document.querySelector('script[src*="analytics.js"]')) return;
+  function injectScript(src) {
+    if (document.querySelector('script[src*="' + src + '"]')) return;
     var s = document.createElement('script');
-    s.src = 'analytics.js';
+    s.src = src;
     s.defer = true;
     document.head.appendChild(s);
+  }
+
+  function injectAnalytics() { injectScript('analytics.js'); }
+  function injectGrowthScripts() {
+    injectScript('invite.js');
+    injectScript('growth.js');
+    injectScript('share.js');
   }
 
   function init() {
     injectPWAMeta();
     injectAnalytics();
+    injectGrowthScripts();
     showSplash();
     injectBottomNav();
     injectActionSheet();

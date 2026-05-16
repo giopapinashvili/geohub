@@ -589,6 +589,31 @@ function saveToStorage(profile) {
     completedAt: new Date().toISOString(),
   };
   if (window.safeStorage) window.safeStorage.set('geohub_onboarding', data);
+  saveOnboardingToFirestore(data);
+}
+
+function saveOnboardingToFirestore(data) {
+  function doSave(fb) {
+    var user = fb.auth && fb.auth.currentUser;
+    if (!user) return;
+    var update = {
+      onboardingComplete: true,
+      onboardingCompletedAt: fb.fs.serverTimestamp(),
+      accountType: data.accountType || 'explorer',
+      interests:   data.interests   || [],
+      city:        data.city        || 'all_georgia',
+      cities:      data.cities      || [data.city || 'all_georgia'],
+      goals:       data.goals       || [],
+    };
+    fb.fs.updateDoc(fb.fs.doc(fb.db, 'users', user.uid), update).catch(function () {});
+  }
+  if (window.GeoFirebase && window.GeoFirebase.auth) {
+    doSave(window.GeoFirebase);
+  } else {
+    window.addEventListener('GeoFirebaseReady', function () {
+      if (window.GeoFirebase) doSave(window.GeoFirebase);
+    }, { once: true });
+  }
 }
 
 // ── TOAST ─────────────────────────────────────────────────────────
