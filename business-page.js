@@ -1063,12 +1063,15 @@
     },
 
     submitBizPost: function() {
-      if(!_currentUser||!_isOwner) return;
-      var text=(document.getElementById('biz-compose-text')||{}).value||'';
+      if(!_currentUser){ showToast('Sign in to post',false); return; }
+      if(!_isOwner){ showToast('Only the page owner can post',false); return; }
+      var textVal=(document.getElementById('biz-compose-text')||{}).value||'';
       var files=window._composePendingFiles||[];
-      if(!text.trim()&&!files.length){ showToast('Write something or add a photo',false); return; }
+      if(!textVal.trim()&&!files.length){ showToast('Write something or add a photo',false); return; }
       var btn=document.getElementById('biz-compose-btn');
       if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Posting…'; }
+
+      var capturedUrls=[];
 
       var uploadAll = files.length
         ? Promise.all(files.map(function(f){
@@ -1077,21 +1080,40 @@
         : Promise.resolve([]);
 
       uploadAll.then(function(urls){
-        var validUrls=urls.filter(Boolean);
+        capturedUrls=urls.filter(Boolean);
         return _fs.addDoc(_fs.collection(_db,'posts'),{
-          text:text.trim(),businessId:BIZ_ID,authorId:_currentUser.uid,
+          text:textVal.trim(),businessId:BIZ_ID,authorId:_currentUser.uid,
           authorName:_biz.title||'Business',authorAvatar:_biz.logoUrl||'',
           type:'business',likeCount:0,commentCount:0,shareCount:0,
-          mediaUrls:validUrls,createdAt:_fs.serverTimestamp(),
+          mediaUrls:capturedUrls,createdAt:_fs.serverTimestamp(),
         });
-      }).then(function(){
+      }).then(function(docRef){
         window._bizActions.closeCompose();
         showToast('Posted!');
-        loadBizPosts();
         if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i> Post'; }
+        // Optimistic UI: prepend post immediately without waiting for re-fetch
+        var nowTs = { toMillis: function(){ return Date.now(); } };
+        var newPost = {
+          id: docRef.id, text: textVal.trim(), businessId: BIZ_ID,
+          authorId: _currentUser.uid, authorName: _biz.title||'Business',
+          authorAvatar: _biz.logoUrl||'', type: 'business',
+          mediaUrls: capturedUrls, createdAt: nowTs,
+          likeCount: 0, commentCount: 0, shareCount: 0
+        };
+        var card = postCardHtml(newPost, _biz);
+        ['biz-posts-overview','biz-posts-all'].forEach(function(elId){
+          var el = document.getElementById(elId);
+          if (!el) return;
+          var list = el.querySelector('.biz-post-list');
+          if (list) {
+            list.insertAdjacentHTML('afterbegin', card);
+          } else {
+            el.innerHTML = '<div class="biz-post-list">'+card+'</div>';
+          }
+        });
       }).catch(function(err){
         console.error('[BizPage] Post failed',err);
-        showToast('Could not post. Try again.',false);
+        showToast('Post failed: '+(err.code||err.message||'check console'),false);
         if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i> Post'; }
       });
     },

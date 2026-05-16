@@ -214,7 +214,8 @@ service cloud.firestore {
       allow create: if newOwnerMatches()
         && request.resource.data.get('text', '') is string
         && (request.resource.data.get('text', '') != ''
-            || request.resource.data.get('mediaUrl', '') != '');
+            || request.resource.data.get('mediaUrl', '') != ''
+            || request.resource.data.get('mediaUrls', []).size() > 0);
       allow update: if isAdmin() || existingOwnerMatches() || onlyCountersChanged();
       allow delete: if isAdmin() || existingOwnerMatches();
 
