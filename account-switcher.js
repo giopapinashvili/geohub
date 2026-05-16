@@ -1,27 +1,40 @@
 /* ================================================================
-   GeoHub — Account Switcher
-   Injects an account dropdown into .navbar-actions on any page
+   GeoHub — Account Switcher (v2)
+   Injects an account dropdown into the navbar.
+
+   Strategy: account.js overwrites .navbar-actions innerHTML via an
+   async loadProfile() call, destroying any element we inject during
+   the onAuthStateChanged sync window. We solve this by:
+   1. Listening for the 'GeoAuthReady' event (dispatched by account.js
+      AFTER it has finished injecting #authNavUser).
+   2. Replacing #authNavUser (account.js's element) with our wrap.
+   3. Using a MutationObserver as a catch-all for re-renders
+      (e.g., after settings save).
    ================================================================ */
 (function () {
   'use strict';
 
-  var _db, _fs, _auth;
+  var _db, _fs;
   var _user = null;
   var _businesses = [];
   var _isOpen = false;
+  var _outsideClickBound = false;
+  var _observer = null;
+
+  /* ── helpers ───────────────────────────────────────────────── */
 
   function esc(s) {
     return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // ── Render dropdown content ────────────────────────────────────
+  /* ── dropdown HTML ─────────────────────────────────────────── */
 
   function renderDropdown() {
     if (!_user) return '';
 
     var avatarContent = _user.photoURL
       ? '<img src="'+esc(_user.photoURL)+'" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">'
-      : (_user.displayName || _user.email || 'U').charAt(0).toUpperCase();
+      : esc((_user.displayName || _user.email || 'U').charAt(0).toUpperCase());
 
     var profileSection =
       '<a class="geo-sw-profile" href="profile.html">'+
@@ -67,64 +80,25 @@
     return profileSection + bizSection + bottomSection;
   }
 
-  // ── Inject button into navbar ─────────────────────────────────
+  /* ── button label HTML ─────────────────────────────────────── */
 
-  function injectBtn() {
-    if (document.getElementById('geo-sw-wrap')) return;
-
-    var wrap = document.createElement('div');
-    wrap.id = 'geo-sw-wrap';
-    wrap.className = 'geo-sw-wrap';
-
-    var btn = document.createElement('button');
-    btn.id = 'geo-sw-btn';
-    btn.className = 'geo-sw-btn';
-    btn.setAttribute('aria-label', 'Account switcher');
-    btn.setAttribute('aria-haspopup', 'true');
-    btn.onclick = toggle;
-    wrap.appendChild(btn);
-
-    var dropdown = document.createElement('div');
-    dropdown.id = 'geo-sw-dropdown';
-    dropdown.className = 'geo-sw-dropdown';
-    dropdown.setAttribute('role', 'menu');
-    wrap.appendChild(dropdown);
-
-    // Insert at start of navbar-actions (before any other action buttons)
-    var actions = document.querySelector('.navbar-actions');
-    if (actions) {
-      actions.insertBefore(wrap, actions.firstChild);
-    } else {
-      // Fallback: try appending to navbar
-      var nav = document.querySelector('.navbar');
-      if (nav) nav.appendChild(wrap);
-    }
-
-    // Close on outside click
-    document.addEventListener('click', function(e) {
-      var w = document.getElementById('geo-sw-wrap');
-      if (w && !w.contains(e.target)) close();
-    });
-  }
-
-  function updateBtnLabel() {
-    var btn = document.getElementById('geo-sw-btn');
-    if (!btn || !_user) return;
-
+  function btnLabelHtml() {
+    if (!_user) return '';
     var avatarHtml = _user.photoURL
       ? '<img src="'+esc(_user.photoURL)+'" alt="" class="geo-sw-avatar" style="object-fit:cover" onerror="this.style.display=\'none\'">'
-      : '<div class="geo-sw-avatar">'+(_user.displayName||_user.email||'U').charAt(0).toUpperCase()+'</div>';
-
+      : '<div class="geo-sw-avatar">'+esc((_user.displayName||_user.email||'U').charAt(0).toUpperCase())+'</div>';
     var name = _user.displayName || (_user.email||'').split('@')[0] || 'Account';
-    btn.innerHTML =
-      avatarHtml +
+    return avatarHtml +
       '<span style="max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem">'+esc(name)+'</span>'+
       '<i class="fas fa-chevron-down geo-sw-chevron"></i>';
   }
 
-  // ── Toggle ────────────────────────────────────────────────────
+  /* ── toggle ────────────────────────────────────────────────── */
 
-  function toggle() { _isOpen ? close() : open(); }
+  function toggle(e) {
+    if (e) e.stopPropagation();
+    _isOpen ? close() : open();
+  }
 
   function open() {
     _isOpen = true;
@@ -133,8 +107,18 @@
     if (btn) btn.classList.add('open');
     if (dropdown) {
       dropdown.innerHTML = renderDropdown();
+      // Position dropdown below the button using fixed coords
+      var rect = btn ? btn.getBoundingClientRect() : null;
+      if (rect) {
+        var top = rect.bottom + 8;
+        var right = window.innerWidth - rect.right;
+        dropdown.style.top = top + 'px';
+        dropdown.style.right = right + 'px';
+        dropdown.style.left = 'auto';
+      }
       dropdown.classList.add('open');
     }
+    console.log('[AccountSwitcher] dropdown opened');
   }
 
   function close() {
@@ -145,9 +129,106 @@
     if (dropdown) dropdown.classList.remove('open');
   }
 
-  // ── Data ──────────────────────────────────────────────────────
+  /* ── mount ─────────────────────────────────────────────────── */
+
+  function mountWrap(replaceTarget) {
+    if (!_user) return;
+
+    // Remove stale wrap if any
+    var old = document.getElementById('geo-sw-wrap');
+    if (old) old.remove();
+
+    var wrap = document.createElement('div');
+    wrap.id = 'geo-sw-wrap';
+    wrap.className = 'geo-sw-wrap';
+
+    var btn = document.createElement('button');
+    btn.id = 'geo-sw-btn';
+    btn.className = 'geo-sw-btn';
+    btn.setAttribute('aria-label', 'Account switcher');
+    btn.setAttribute('aria-haspopup', 'true');
+    btn.innerHTML = btnLabelHtml();
+    btn.addEventListener('click', toggle);
+    wrap.appendChild(btn);
+
+    var dropdown = document.createElement('div');
+    dropdown.id = 'geo-sw-dropdown';
+    dropdown.className = 'geo-sw-dropdown';
+    dropdown.setAttribute('role', 'menu');
+    wrap.appendChild(dropdown);
+
+    // Try replacing #authNavUser (the account.js element) if supplied
+    if (replaceTarget && replaceTarget.parentNode) {
+      replaceTarget.parentNode.replaceChild(wrap, replaceTarget);
+      console.log('[AccountSwitcher] mounted — replaced #authNavUser');
+    } else {
+      // Fallback: find navbar-actions (multiple selector variants)
+      var actions = document.querySelector(
+        '.navbar-actions, .nav-actions, [data-navbar-actions], .topbar-actions'
+      );
+      if (actions) {
+        actions.appendChild(wrap);
+        console.log('[AccountSwitcher] mounted — appended to navbar-actions');
+      } else {
+        var navbar = document.querySelector('.navbar, header');
+        if (navbar) { navbar.appendChild(wrap); console.log('[AccountSwitcher] mounted — appended to navbar'); }
+        else { document.body.appendChild(wrap); console.warn('[AccountSwitcher] mounted — fallback to body'); }
+      }
+    }
+
+    // Bind outside-click once
+    if (!_outsideClickBound) {
+      _outsideClickBound = true;
+      document.addEventListener('click', function(e) {
+        if (!_isOpen) return;
+        var w = document.getElementById('geo-sw-wrap');
+        if (w && !w.contains(e.target)) close();
+      });
+    }
+  }
+
+  /* ── observe navbar for re-renders (account.js may re-run initAuthNav) ── */
+
+  function startObserver() {
+    if (_observer) { _observer.disconnect(); _observer = null; }
+    var root = document.querySelector('.navbar, header, .navbar-actions') || document.body;
+    _observer = new MutationObserver(function() {
+      if (!_user) return;
+      var authUser = document.getElementById('authNavUser');
+      var ourWrap  = document.getElementById('geo-sw-wrap');
+      // account.js injected its UI and destroyed ours → replace
+      if (authUser && !ourWrap) {
+        console.log('[AccountSwitcher] re-mounting after navbar re-render');
+        mountWrap(authUser);
+      }
+    });
+    _observer.observe(root, { childList: true, subtree: true });
+    console.log('[AccountSwitcher] observer started');
+  }
+
+  /* ── GeoAuthReady: fired by account.js after initAuthNav() ── */
+
+  window.addEventListener('GeoAuthReady', function(e) {
+    var profile = e.detail;
+    if (!profile) return;
+    // Normalise to the shape our renderer expects
+    _user = {
+      displayName: profile.fullName || profile.displayName || profile.username || '',
+      email: profile.email || '',
+      photoURL: profile.avatar || profile.photoURL || '',
+      uid: profile.uid || profile.id || ''
+    };
+    console.log('[AccountSwitcher] user ready via GeoAuthReady:', _user.email);
+    var authUser = document.getElementById('authNavUser');
+    mountWrap(authUser || null);
+    if (_user.uid) loadUserBusinesses(_user.uid);
+    startObserver();
+  });
+
+  /* ── data ──────────────────────────────────────────────────── */
 
   function loadUserBusinesses(uid) {
+    if (!_db || !_fs) return;
     _businesses = [];
     var q = _fs.query(
       _fs.collection(_db, 'businessAdmins'),
@@ -155,14 +236,12 @@
       _fs.limit(10)
     );
     _fs.getDocs(q).then(function(snap) {
-      if (!snap.size) return;
+      if (!snap.size) return null;
       var bizIds = [];
       snap.forEach(function(d) {
-        // doc id format: bizId_userId — extract bizId (everything before last underscore+uid)
-        var id = d.id.replace('_'+uid, '');
+        var id = d.id.replace('_' + uid, '');
         if (id) bizIds.push(id);
       });
-      if (!bizIds.length) return;
       return Promise.all(bizIds.map(function(id) {
         return _fs.getDoc(_fs.doc(_db, 'businesses', id))
           .then(function(d) { return d.exists() ? Object.assign({id: d.id}, d.data()) : null; })
@@ -171,30 +250,44 @@
     }).then(function(results) {
       if (!results) return;
       _businesses = results.filter(Boolean);
+      // Refresh button label in dropdown if open
+      if (_isOpen) {
+        var dd = document.getElementById('geo-sw-dropdown');
+        if (dd && dd.classList.contains('open')) dd.innerHTML = renderDropdown();
+      }
     }).catch(function() {});
   }
 
-  // ── Init ──────────────────────────────────────────────────────
+  /* ── init ──────────────────────────────────────────────────── */
 
   function init(fb) {
-    _db = fb.db; _fs = fb.fs; _auth = fb.auth;
-
-    fb.authFns.onAuthStateChanged(_auth, function(user) {
-      _user = user;
-      if (user) {
-        injectBtn();
-        updateBtnLabel();
-        loadUserBusinesses(user.uid);
+    _db = fb.db; _fs = fb.fs;
+    console.log('[AccountSwitcher] loaded, Firebase ready');
+    // GeoAuthReady handler above handles the primary mount.
+    // If GeoAuthReady already fired before this script loaded (unlikely
+    // with defer, but handle it), check for #authNavUser immediately.
+    if (window.GeoCurrentUser && window.GeoCurrentUser.uid) {
+      _user = {
+        displayName: window.GeoCurrentUser.fullName || window.GeoCurrentUser.displayName || '',
+        email: window.GeoCurrentUser.email || '',
+        photoURL: window.GeoCurrentUser.avatar || window.GeoCurrentUser.photoURL || '',
+        uid: window.GeoCurrentUser.uid
+      };
+      var authUser = document.getElementById('authNavUser');
+      if (authUser) {
+        console.log('[AccountSwitcher] late-init: replacing existing #authNavUser');
+        mountWrap(authUser);
+        loadUserBusinesses(_user.uid);
+        startObserver();
       } else {
-        _businesses = [];
-        close();
-        var wrap = document.getElementById('geo-sw-wrap');
-        if (wrap) wrap.remove();
+        startObserver(); // observe for when account.js finishes
       }
-    });
+    } else {
+      startObserver(); // observe for when account.js finishes
+    }
   }
 
-  // ── Public API ────────────────────────────────────────────────
+  /* ── public API ────────────────────────────────────────────── */
 
   window._geoSW = {
     close: close,
@@ -202,13 +295,14 @@
     signOut: function() {
       var fb = window.GeoFirebase;
       if (fb && fb.auth && fb.authFns) {
-        fb.authFns.signOut(fb.auth).then(function() {
-          window.location.href = 'index.html';
-        }).catch(function() {});
+        fb.authFns.signOut(fb.auth)
+          .then(function() { window.location.href = 'index.html'; })
+          .catch(function() {});
       }
     }
   };
 
   if (window.GeoFirebase && window.GeoFirebase.db) init(window.GeoFirebase);
   else window.addEventListener('GeoFirebaseReady', function() { init(window.GeoFirebase); }, {once: true});
+
 })();

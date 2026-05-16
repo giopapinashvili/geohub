@@ -28,14 +28,16 @@
 
 /* ── Dropdown ─────────────────────────────────────────────── */
 .geo-sw-dropdown {
-  position: absolute; top: calc(100% + 8px); right: 0;
+  position: fixed; /* fixed so it's never clipped by overflow:hidden ancestors */
   width: 296px; background: #0f172a;
-  border: 1px solid rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.12);
   border-radius: 18px; padding: 8px;
-  z-index: 99990;
-  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  z-index: 100000; /* above navbar z-index */
+  box-shadow: 0 20px 60px rgba(0,0,0,.7);
   transform: scale(.95) translateY(-6px); opacity: 0; pointer-events: none;
   transition: all .18s cubic-bezier(.22,1,.36,1);
+  /* top/right set dynamically by JS */
+  top: 60px; right: 16px;
 }
 .geo-sw-dropdown.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
 
