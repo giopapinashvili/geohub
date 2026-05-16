@@ -113,6 +113,10 @@
       checkBlocking:  function(t, cb){ if(cb) cb(false); },
       checkBlockedBy: function(t, cb){ if(cb) cb(false); },
       checkMuting:    function(t, cb){ if(cb) cb(false); },
+      getPrivacySettings: function(uid, cb){ cb({ messagingPref:'everyone', followPref:'everyone', profilePref:'public', postsPref:'public', friendRequestPref:'everyone' }); },
+      updatePrivacySettings: function(s, cb){ if(cb) cb(false); },
+      getBlockedUsersList: function(cb){ cb([]); },
+      getMutedUsersList: function(cb){ cb([]); },
       listenReports: function(o, cb){ cb([]); return function(){}; },
       updateReportStatus: function(id, s, e, cb){ if(cb) cb(false); },
       createModerationAction: function(a, t, ty, n, cb){ if(cb) cb(false); },
@@ -466,6 +470,65 @@
         var ids=[]; snap.forEach(function(d){ var x=d.data()||{}; if(x.mutedId) ids.push(x.mutedId); }); state.mutedUserIds=ids; emit();
       }, function(err){ console.warn('[GeoSocial] mutedUsers', err.message); emit(); });
       return function(){ try{uh();}catch(e){} try{ub();}catch(e){} try{um();}catch(e){} };
+    }
+
+    var PRIVACY_DEFAULTS = { messagingPref: 'everyone', followPref: 'everyone', profilePref: 'public', postsPref: 'public', friendRequestPref: 'everyone' };
+
+    function getPrivacySettings(userId, callback) {
+      var uid = userId || currentUid();
+      if (!uid) { callback(Object.assign({}, PRIVACY_DEFAULTS)); return; }
+      getDoc(doc(db, 'users', uid)).then(function(snap) {
+        var data = (snap.exists() ? snap.data() : {}) || {};
+        callback(Object.assign({}, PRIVACY_DEFAULTS, data.privacy || {}));
+      }).catch(function() { callback(Object.assign({}, PRIVACY_DEFAULTS)); });
+    }
+
+    function updatePrivacySettings(settings, callback) {
+      requireAuth(function(user) {
+        updateDoc(doc(db, 'users', user.uid), { privacy: settings })
+          .then(function() { if (callback) callback(true); })
+          .catch(function(err) { console.error('[GeoSocial] updatePrivacySettings', err); toast('Could not save settings.', 'error'); if (callback) callback(false); });
+      });
+    }
+
+    function getBlockedUsersList(callback) {
+      requireAuth(function(user) {
+        getDocs(query(collection(db, 'blockedUsers'), where('blockerId', '==', user.uid), limit(200))).then(function(snap) {
+          var ids = [];
+          snap.forEach(function(d) { var x = d.data() || {}; if (x.blockedId) ids.push(x.blockedId); });
+          if (!ids.length) { callback([]); return; }
+          Promise.all(ids.map(function(id) { return getDoc(doc(db, 'users', id)).catch(function(){ return null; }); }))
+            .then(function(snaps) {
+              var users = [];
+              snaps.forEach(function(s, i) {
+                if (!s) return;
+                var d = s.exists() ? s.data() : {};
+                users.push({ id: ids[i], name: d.fullName || d.displayName || d.name || 'Unknown', username: d.username || '', avatar: d.avatar || d.photoURL || '' });
+              });
+              callback(users);
+            });
+        }).catch(function() { callback([]); });
+      });
+    }
+
+    function getMutedUsersList(callback) {
+      requireAuth(function(user) {
+        getDocs(query(collection(db, 'mutedUsers'), where('muterId', '==', user.uid), limit(200))).then(function(snap) {
+          var ids = [];
+          snap.forEach(function(d) { var x = d.data() || {}; if (x.mutedId) ids.push(x.mutedId); });
+          if (!ids.length) { callback([]); return; }
+          Promise.all(ids.map(function(id) { return getDoc(doc(db, 'users', id)).catch(function(){ return null; }); }))
+            .then(function(snaps) {
+              var users = [];
+              snaps.forEach(function(s, i) {
+                if (!s) return;
+                var d = s.exists() ? s.data() : {};
+                users.push({ id: ids[i], name: d.fullName || d.displayName || d.name || 'Unknown', username: d.username || '', avatar: d.avatar || d.photoURL || '' });
+              });
+              callback(users);
+            });
+        }).catch(function() { callback([]); });
+      });
     }
 
     function reportTarget(type, id, reason, details, callback) {
@@ -1089,7 +1152,11 @@
               if (callback) callback(false);
             });
           } else {
-          return setDoc(ref, { followerId: uid, followingId: targetUserId, createdAt: serverTimestamp() })
+          return getDoc(doc(db, 'users', targetUserId)).then(function(tSnap) {
+            var tData = (tSnap.exists() ? tSnap.data() : {}) || {};
+            var pref = (tData.privacy || {}).followPref || 'everyone';
+            if (pref === 'nobody') { toast('This user does not accept followers.', 'error'); if (callback) callback(false); return Promise.resolve(null); }
+            return setDoc(ref, { followerId: uid, followingId: targetUserId, createdAt: serverTimestamp() })
               .then(function () {
                 return updateDoc(doc(db, 'users', targetUserId), { followers: increment(1) }).catch(function(){})
                   .then(function(){ return updateDoc(doc(db, 'users', uid), { following: increment(1) }).catch(function(){}); })
@@ -1099,6 +1166,7 @@
                 toast('Following');
                 if (callback) callback(true);
               });
+          });
           }
         }).catch(function (err) {
           console.error('[GeoSocial] toggleFollow', err);
@@ -1325,7 +1393,13 @@
         var friendRef = doc(db, 'friends', fid);
         var reqRef = doc(db, 'friendRequests', uid + '_' + toUserId);
         var reverseReqRef = doc(db, 'friendRequests', toUserId + '_' + uid);
-        getDoc(friendRef).then(function(friendSnap){
+        getDoc(doc(db, 'users', toUserId)).then(function(tSnap) {
+          var tData = (tSnap.exists() ? tSnap.data() : {}) || {};
+          var pref = (tData.privacy || {}).friendRequestPref || 'everyone';
+          if (pref === 'nobody') { toast('This user is not accepting friend requests.', 'error'); if (callback) callback('denied'); return Promise.reject('denied'); }
+        }).then(function() {
+          return getDoc(friendRef);
+        }).then(function(friendSnap){
           if (friendSnap.exists()) throw new Error('already-friends');
           return getDoc(reqRef);
         }).then(function(existing){
@@ -1347,6 +1421,7 @@
           toast('Friend request sent');
           if (callback) callback('pending');
         }).catch(function (err) {
+          if (err === 'denied') return;
           var msg = err && err.message;
           if (msg === 'already-friends') { toast('Already friends'); if(callback) callback('friends'); return; }
           if (msg === 'already-requested') { toast('Request already sent'); if(callback) callback('pending'); return; }
@@ -1718,10 +1793,28 @@
         if (!targetUserId || targetUserId === user.uid) return;
         Promise.all([
           getDoc(doc(db, 'blockedUsers', user.uid + '_' + targetUserId)),
-          getDoc(doc(db, 'blockedUsers', targetUserId + '_' + user.uid))
+          getDoc(doc(db, 'blockedUsers', targetUserId + '_' + user.uid)),
+          getDoc(doc(db, 'users', targetUserId))
         ]).then(function(snaps) {
           if (snaps[0].exists()) { toast('Unblock this user to send messages.', 'error'); return; }
           if (snaps[1].exists()) { toast('You cannot message this user.', 'error'); return; }
+          var tData = (snaps[2].exists() ? snaps[2].data() : {}) || {};
+          var msgPref = (tData.privacy || {}).messagingPref || 'everyone';
+          if (msgPref === 'nobody') { toast('This user is not accepting messages.', 'error'); return; }
+          if (msgPref === 'friends') {
+            return getDoc(doc(db, 'friends', friendshipId(user.uid, targetUserId))).then(function(fSnap) {
+              if (!fSnap.exists()) { toast('This user only accepts messages from friends.', 'error'); return; }
+              var cid = conversationIdFor(user.uid, targetUserId);
+              return setDoc(doc(db, 'conversations', cid), {
+                participants: [user.uid, targetUserId],
+                updatedAt: serverTimestamp(),
+                createdAt: serverTimestamp(),
+                lastMessage: '',
+                unreadFor: [],
+                readBy: {}
+              }, { merge: true }).then(function () { if (callback) callback(cid); });
+            });
+          }
           var cid = conversationIdFor(user.uid, targetUserId);
           return setDoc(doc(db, 'conversations', cid), {
             participants: [user.uid, targetUserId],
@@ -2276,6 +2369,10 @@
       checkBlockedBy:          checkBlockedBy,
       checkMuting:             checkMuting,
       listenSafetyPrefs:       listenSafetyPrefs,
+      getPrivacySettings:      getPrivacySettings,
+      updatePrivacySettings:   updatePrivacySettings,
+      getBlockedUsersList:     getBlockedUsersList,
+      getMutedUsersList:       getMutedUsersList,
       reportTarget:            reportTarget,
       listenReports:           listenReports,
       updateReportStatus:      updateReportStatus,

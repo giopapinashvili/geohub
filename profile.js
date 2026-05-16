@@ -79,6 +79,7 @@
       interests: Array.isArray(data.interests) ? data.interests : [],
       badges: Array.isArray(data.badges) ? data.badges : [],
       createdAt: data.createdAt || data.joinedAt || null,
+      privacy: data.privacy || null,
       initials
     };
   }
@@ -595,6 +596,16 @@
     main.innerHTML = '<div class="empty-profile-state" style="max-width:720px;margin:120px auto;text-align:center"><i class="fas fa-user-slash"></i><h2>User not found</h2><p>This profile does not exist or was removed.</p><a class="btn btn-primary btn-sm" href="feed.html">Back to Feed</a></div>';
   }
 
+  function showPrivateProfileGate(name) {
+    $$('.ptab-bar, .profile-tabs-wrap, .profile-content-area, [class*="ptab-pane"]').forEach(el => { el.style.display = 'none'; });
+    $$('[data-follow-user],[data-friend-user],[data-message-user]').forEach(el => { el.style.display = 'none'; });
+    const main = $('.profile-layout') || document.body;
+    const gate = document.createElement('div');
+    gate.className = 'private-profile-gate';
+    gate.innerHTML = '<i class="fas fa-lock"></i><h3>This profile is private</h3><p>' + (name ? name + ' only shares' : 'This account only shares') + ' their profile with friends.</p>';
+    main.appendChild(gate);
+  }
+
   function start() {
     initTabs();
     whenFirebase(GF => {
@@ -611,6 +622,16 @@
           const profile = await findProfile(GF, fbUser);
           if (!profile) return userNotFound();
           renderIdentity(profile, fbUser);
+          const isOwnProfile = profile.uid === fbUser.uid;
+          const privPref = (profile.privacy || {}).profilePref || 'public';
+          if (!isOwnProfile && privPref === 'friends') {
+            const fid = [fbUser.uid, profile.uid].sort().join('_');
+            const fSnap = await GF.fs.getDoc(GF.fs.doc(GF.db, 'friends', fid)).catch(() => null);
+            if (!fSnap || !fSnap.exists()) {
+              showPrivateProfileGate(profile.fullName);
+              return;
+            }
+          }
           if (window.GeoSocial) renderTabs(profile, fbUser);
           else window.addEventListener('GeoSocialReady', () => renderTabs(profile, fbUser), { once: true });
         } catch (err) {

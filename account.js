@@ -232,6 +232,7 @@
         '<a href="rewards.html" class="auth-dd-item"><i class="fas fa-trophy"></i> Rewards</a>' +
         '<a href="messages.html" class="auth-dd-item"><i class="fas fa-envelope"></i> Messages</a>' +
         '<a href="dashboard.html" class="auth-dd-item"><i class="fas fa-chart-bar"></i> Dashboard</a>' +
+        '<a href="safety.html" class="auth-dd-item"><i class="fas fa-shield-alt"></i> Privacy &amp; Safety</a>' +
         '<button class="auth-dd-item" id="authSettingsBtn"><i class="fas fa-cog"></i> Settings</button>' +
         (isAdmin ? '<a href="admin.html" class="auth-dd-item auth-admin-link" style="color:#10b981"><i class="fas fa-shield-alt"></i> Admin Panel</a>' : '') +
         '<div class="auth-dd-sep"></div><button class="auth-dd-item auth-dd-logout" id="authLogoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button></div></div>';
