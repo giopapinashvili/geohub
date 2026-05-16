@@ -494,7 +494,8 @@
         '</div>'
       : '';
 
-    return '<div class="biz-post-card">'+
+    var pid = esc(post.id);
+    return '<div class="biz-post-card" data-post-id="'+pid+'">'+
       '<div class="biz-post-header">'+
         '<div class="biz-post-logo">'+logo+'</div>'+
         '<div class="biz-post-meta">'+
@@ -508,9 +509,16 @@
       mediaHtml+
       countsHtml+
       '<div class="biz-post-reactions">'+
-        '<button class="biz-react-btn" data-post="'+esc(post.id)+'" onclick="window._bizActions.likePost(\''+esc(post.id)+'\',this)"><i class="far fa-thumbs-up"></i> Like</button>'+
-        '<button class="biz-react-btn"><i class="far fa-comment"></i> Comment</button>'+
-        '<button class="biz-react-btn" onclick="window._bizActions.share()"><i class="fas fa-share-nodes"></i> Share</button>'+
+        '<button class="biz-react-btn" data-post="'+pid+'" onclick="window._bizActions.likePost(\''+pid+'\',this)"><i class="far fa-thumbs-up"></i> Like</button>'+
+        '<button class="biz-react-btn" onclick="window._bizActions.toggleBizComment(\''+pid+'\')"><i class="far fa-comment"></i> Comment</button>'+
+        '<button class="biz-react-btn" onclick="window._bizActions.shareBizPost(\''+pid+'\')"><i class="fas fa-share-nodes"></i> Share</button>'+
+      '</div>'+
+      '<div class="biz-post-comments" id="biz-cmt-'+pid+'" style="display:none;padding:8px 16px 8px;border-top:1px solid rgba(255,255,255,.06)">'+
+        '<div id="biz-cmt-list-'+pid+'"><div style="color:#64748b;font-size:.8rem;padding:2px 0">No comments yet.</div></div>'+
+        '<form style="display:flex;gap:8px;margin-top:10px" onsubmit="window._bizActions.submitBizComment(\''+pid+'\',this);return false;">'+
+          '<input class="biz-form-input" placeholder="Write a comment…" style="flex:1;padding:7px 12px;font-size:.84rem" required>'+
+          '<button type="submit" class="biz-submit-btn" style="padding:7px 14px;font-size:.82rem"><i class="fas fa-paper-plane"></i></button>'+
+        '</form>'+
       '</div>'+
     '</div>';
   }
@@ -759,7 +767,52 @@
 
   // ── MAIN RENDER ───────────────────────────────────────────────
 
+  // ── NAVBAR RECOVERY ───────────────────────────────────────────
+  // geohub-social-redesign.js calls shell() which replaces document.body.innerHTML,
+  // wiping any static <nav> from business.html. We re-inject a minimal navbar
+  // as a direct child of <body> so the CSS exclusion rule keeps it visible.
+
+  function ensureNavbar() {
+    if (document.getElementById('navbar')) return;
+    var user = _currentUser;
+    var actionsHtml = user
+      ? '<a href="profile.html?uid=' + encodeURIComponent(user.uid) + '" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:inherit">' +
+          (user.photoURL
+            ? '<img src="' + esc(user.photoURL) + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid rgba(16,185,129,.4)" alt="" onerror="this.style.display=\'none\'">'
+            : '<span style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#10b981,#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.8rem;flex-shrink:0">' + esc(((user.displayName||user.email||'U')[0]).toUpperCase()) + '</span>') +
+        '</a>'
+      : '<a href="auth.html" style="background:#10b981;color:#fff;padding:6px 14px;border-radius:20px;text-decoration:none;font-size:.82rem;font-weight:600">Sign In</a>';
+
+    var nav = document.createElement('nav');
+    nav.className = 'navbar';
+    nav.id = 'navbar';
+    nav.innerHTML =
+      '<a href="index.html" class="navbar-brand">' +
+        '<div class="logo-icon">🌍</div>' +
+        '<span class="logo-text">Geo<span class="logo-geo">Hub</span></span>' +
+      '</a>' +
+      '<ul class="navbar-links">' +
+        '<li><a href="feed.html">Feed</a></li>' +
+        '<li><a href="business.html">Businesses</a></li>' +
+        '<li><a href="map.html">Map</a></li>' +
+      '</ul>' +
+      '<div class="navbar-actions" style="display:flex;align-items:center;gap:8px">' + actionsHtml + '</div>' +
+      '<button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false">' +
+        '<span></span><span></span><span></span>' +
+      '</button>';
+
+    var root = document.getElementById('biz-detail-root');
+    document.body.insertBefore(nav, root || document.body.firstChild);
+
+    if (!document.querySelector('.mobile-menu')) {
+      var mm = document.createElement('div');
+      mm.className = 'mobile-menu';
+      if (nav.after) nav.after(mm); else nav.parentNode.insertBefore(mm, nav.nextSibling);
+    }
+  }
+
   function renderPage(biz, services, priceList, gallery, reviews, products) {
+    ensureNavbar();
     document.title = esc(biz.title||'Business')+' — GeoHub';
     var meta = document.querySelector('meta[name="description"]');
     if (meta) meta.content = biz.description ? biz.description.slice(0,155) : 'View '+(biz.title||'Business')+' on GeoHub';
@@ -840,14 +893,23 @@
     var overviewEl = document.getElementById('biz-posts-overview');
     var allEl      = document.getElementById('biz-posts-all');
 
-    safeSnap(
-      _fs.getDocs(_fs.query(
-        _fs.collection(_db,'posts'),
-        _fs.where('businessId','==',BIZ_ID),
-        _fs.orderBy('createdAt','desc'),
-        _fs.limit(20)
-      ))
-    ).then(function(posts) {
+    // Query without orderBy to avoid requiring a composite index.
+    // Client-side sort by createdAt descending is applied after fetch.
+    var q = _fs.query(
+      _fs.collection(_db,'posts'),
+      _fs.where('businessId','==',BIZ_ID),
+      _fs.limit(30)
+    );
+    _fs.getDocs(q).then(function(snap) {
+      var posts = [];
+      snap.forEach(function(d){ posts.push(Object.assign({id:d.id}, d.data())); });
+      // Sort newest-first client-side
+      posts.sort(function(a,b){
+        var ta = a.createdAt ? (a.createdAt.seconds || (a.createdAt.toMillis ? a.createdAt.toMillis()/1000 : 0)) : 0;
+        var tb = b.createdAt ? (b.createdAt.seconds || (b.createdAt.toMillis ? b.createdAt.toMillis()/1000 : 0)) : 0;
+        return tb - ta;
+      });
+      posts = posts.slice(0, 20);
       var empty = '<div class="biz-empty-state"><i class="fas fa-seedling"></i>'+
         (_isOwner?'<p>No posts yet. Use the composer above to create your first post.</p>':'<p>No posts yet.</p>')+'</div>';
       if (!posts.length) {
@@ -859,6 +921,11 @@
       var pre = '<div class="biz-post-list">'+posts.slice(0,3).map(function(p){ return postCardHtml(p,_biz); }).join('')+'</div>';
       if (overviewEl) overviewEl.innerHTML = pre;
       if (allEl)      allEl.innerHTML      = all;
+    }).catch(function(err){
+      console.error('[BizPage] loadBizPosts failed:', err.code||err.message);
+      var msg = '<div class="biz-empty-state"><i class="fas fa-triangle-exclamation"></i><p>Could not load posts ('+esc(err.code||'error')+').</p></div>';
+      if (overviewEl) overviewEl.innerHTML = msg;
+      if (allEl)      allEl.innerHTML      = msg;
     });
   }
 
@@ -991,6 +1058,88 @@
       if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ showToast('Link copied!'); }).catch(function(){}); }
     },
 
+    // ── Post-level comment toggle ─────────────────────────────────
+    toggleBizComment: function(postId) {
+      var box = document.getElementById('biz-cmt-' + postId);
+      if (!box) return;
+      var opening = box.style.display === 'none' || box.style.display === '';
+      box.style.display = opening ? 'block' : 'none';
+      if (!opening || box.dataset.loaded) return;
+      box.dataset.loaded = '1';
+      var listEl = document.getElementById('biz-cmt-list-' + postId);
+      if (!listEl) return;
+      var GeoSocial = window.GeoSocial;
+      if (!GeoSocial || !GeoSocial.listenComments) {
+        listEl.innerHTML = '<div style="color:#64748b;font-size:.8rem">Comments unavailable.</div>';
+        return;
+      }
+      GeoSocial.listenComments(postId, function(comments) {
+        if (!listEl.isConnected) return;
+        if (!comments || !comments.length) {
+          listEl.innerHTML = '<div style="color:#64748b;font-size:.8rem;padding:2px 0">No comments yet.</div>';
+          return;
+        }
+        listEl.innerHTML = comments.map(function(c) {
+          var name = c.authorName || c.userName || 'User';
+          var av = c.authorAvatar
+            ? '<img src="'+esc(c.authorAvatar)+'" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.style.display=\'none\'">'
+            : '<span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#10b981,#3b82f6);display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;color:#fff;flex-shrink:0">'+esc((name[0]||'U').toUpperCase())+'</span>';
+          return '<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px">'+
+            av+
+            '<div style="background:rgba(255,255,255,.05);border-radius:12px;padding:7px 12px;flex:1;min-width:0">'+
+              '<strong style="font-size:.8rem;color:#f1f5f9">'+esc(name)+'</strong>'+
+              '<span style="font-size:.76rem;color:#64748b;margin-left:8px">'+timeAgo(c.createdAt)+'</span>'+
+              '<div style="font-size:.84rem;color:#cbd5e1;margin-top:3px;word-break:break-word">'+esc(c.text||'')+'</div>'+
+            '</div>'+
+          '</div>';
+        }).join('');
+        // Update comment count badge
+        var card = document.querySelector('[data-post-id="'+CSS.escape(postId)+'"]');
+        if (card) {
+          var countRow = card.querySelector('.biz-post-count-row span:last-child');
+          if (countRow) countRow.textContent = comments.length + ' comment' + (comments.length===1?'':'s');
+        }
+      });
+    },
+
+    submitBizComment: function(postId, form) {
+      var input = form && form.querySelector('input');
+      if (!input) return;
+      var val = input.value.trim();
+      if (!val) return;
+      if (!_currentUser) { showToast('Sign in to comment', false); return; }
+      var GeoSocial = window.GeoSocial;
+      if (!GeoSocial || !GeoSocial.addComment) { showToast('Comments not available', false); return; }
+      input.disabled = true;
+      GeoSocial.addComment(postId, val, function(err) {
+        input.value = '';
+        input.disabled = false;
+        if (err) { showToast('Could not post comment', false); return; }
+        _fs.updateDoc(_fs.doc(_db,'posts',postId),{commentCount:_fs.increment(1)}).catch(function(){});
+      });
+    },
+
+    shareBizPost: function(postId) {
+      if (!_currentUser) { showToast('Sign in to share', false); return; }
+      var GeoSocial = window.GeoSocial;
+      if (!GeoSocial) {
+        var url = window.location.origin + '/business.html?id=' + encodeURIComponent(BIZ_ID) + '#post-' + postId;
+        if (navigator.share) navigator.share({ title: (_biz&&_biz.title)||'GeoHub Post', url: url }).catch(function(){});
+        else if (navigator.clipboard) navigator.clipboard.writeText(url).then(function(){ showToast('Link copied!'); });
+        return;
+      }
+      var caption = 'Check out this post from ' + esc((_biz&&_biz.title)||'this business') + ' on GeoHub.';
+      GeoSocial.createPost(caption, '', function(newId) {
+        if (newId) {
+          showToast('Shared to your profile!');
+          if (GeoSocial.trackShare) GeoSocial.trackShare(postId);
+          _fs.updateDoc(_fs.doc(_db,'posts',postId),{shareCount:_fs.increment(1)}).catch(function(){});
+        } else {
+          showToast('Could not share. Try again.', false);
+        }
+      }, { sharedPostId: postId, visibility: 'public', targetType: 'user' });
+    },
+
     openQuote: function() {
       if(!_currentUser){ showToast('Sign in to request a quote',false); window.location.href='auth.html'; return; }
       var m=document.getElementById('biz-quote-modal'); if(m) m.classList.add('open');
@@ -1082,10 +1231,21 @@
       uploadAll.then(function(urls){
         capturedUrls=urls.filter(Boolean);
         return _fs.addDoc(_fs.collection(_db,'posts'),{
-          text:textVal.trim(),businessId:BIZ_ID,authorId:_currentUser.uid,
-          authorName:_biz.title||'Business',authorAvatar:_biz.logoUrl||'',
-          type:'business',likeCount:0,commentCount:0,shareCount:0,
-          mediaUrls:capturedUrls,createdAt:_fs.serverTimestamp(),
+          text:textVal.trim(),
+          businessId:BIZ_ID,
+          authorId:_currentUser.uid,
+          authorName:_biz.title||'Business',
+          authorAvatar:_biz.logoUrl||'',
+          authorType:'business',
+          targetType:'business',
+          targetId:BIZ_ID,
+          type:'business',
+          visibility:'public',
+          status:'active',
+          likeCount:0,commentCount:0,shareCount:0,reactionCount:0,saveCount:0,
+          mediaUrls:capturedUrls,
+          createdAt:_fs.serverTimestamp(),
+          updatedAt:_fs.serverTimestamp(),
         });
       }).then(function(docRef){
         window._bizActions.closeCompose();
@@ -1096,7 +1256,9 @@
         var newPost = {
           id: docRef.id, text: textVal.trim(), businessId: BIZ_ID,
           authorId: _currentUser.uid, authorName: _biz.title||'Business',
-          authorAvatar: _biz.logoUrl||'', type: 'business',
+          authorAvatar: _biz.logoUrl||'',
+          authorType:'business', targetType:'business', targetId:BIZ_ID,
+          type:'business', visibility:'public', status:'active',
           mediaUrls: capturedUrls, createdAt: nowTs,
           likeCount: 0, commentCount: 0, shareCount: 0
         };

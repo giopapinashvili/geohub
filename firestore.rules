@@ -215,7 +215,10 @@ service cloud.firestore {
         && request.resource.data.get('text', '') is string
         && (request.resource.data.get('text', '') != ''
             || request.resource.data.get('mediaUrl', '') != ''
-            || request.resource.data.get('mediaUrls', []).size() > 0);
+            || request.resource.data.get('mediaUrls', []).size() > 0)
+        // If the post claims a businessId, the poster must own that business.
+        && (request.resource.data.get('businessId', '') == ''
+            || isBizOwner(request.resource.data.get('businessId', '')));
       allow update: if isAdmin() || existingOwnerMatches() || onlyCountersChanged();
       allow delete: if isAdmin() || existingOwnerMatches();
 
