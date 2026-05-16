@@ -298,6 +298,19 @@ service cloud.firestore {
         allow read: if isAdmin() || (signedIn() && resource.data.get('ownerId', '') == uid());
         allow create, update, delete: if isAdmin();
       }
+
+      // ── Page Blocks: public can read enabled blocks; only owner/admin can write ──
+      match /pageBlocks/{blockId} {
+        allow read: if resource.data.get('enabled', true) == true
+          || isAdmin()
+          || isBizOwner(businessId)
+          || (signedIn()
+              && get(/databases/$(database)/documents/businesses/$(businessId)).data.get('ownerId', '') == uid());
+        allow create, update, delete: if isAdmin()
+          || isBizOwner(businessId)
+          || (signedIn()
+              && get(/databases/$(database)/documents/businesses/$(businessId)).data.get('ownerId', '') == uid());
+      }
     }
     match /businessAdmins/{adminId} {
       allow read: if true;

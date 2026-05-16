@@ -15,6 +15,7 @@
   var _isSaved     = false;
   var _isFollowing = false;
   var _reviewRating = 0;
+  var _previewMode  = false;
 
   // ── HELPERS ───────────────────────────────────────────────────
 
@@ -312,12 +313,133 @@
     return html || '';
   }
 
+  // ── RENDER: ADMIN TOOLBAR ─────────────────────────────────────
+
+  function renderAdminToolbar(biz) {
+    if (!_isOwner) return '';
+    return '<div class="biz-admin-toolbar" id="biz-admin-toolbar">'+
+      '<div class="biz-admin-toolbar-inner">'+
+        '<span class="biz-admin-badge"><i class="fas fa-crown"></i> Admin Mode</span>'+
+        '<div class="biz-admin-toolbar-btns">'+
+          '<a href="add-business.html?edit='+esc(BIZ_ID)+'" class="biz-admin-btn"><i class="fas fa-pen"></i> Edit Page</a>'+
+          '<button class="biz-admin-btn" onclick="window._bizActions.openBlockManager()"><i class="fas fa-plus-circle"></i> Add Block</button>'+
+          '<button class="biz-admin-btn" onclick="window._bizActions.openCompose()"><i class="fas fa-pen-to-square"></i> New Post</button>'+
+          '<button class="biz-admin-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
+        '</div>'+
+        '<button class="biz-admin-btn biz-preview-toggle" onclick="window._bizActions.togglePreview()">'+
+          '<i class="fas fa-eye"></i> Preview as Visitor'+
+        '</button>'+
+      '</div>'+
+    '</div>';
+  }
+
+  // ── RENDER: PAGE BLOCK CARD ────────────────────────────────────
+
+  function renderPageBlockCard(block, idx, total) {
+    var controls = _isOwner
+      ? '<div class="biz-block-controls">'+
+          '<button class="biz-block-btn" title="Edit" onclick="window._bizActions.editBlock(\''+esc(block.id)+'\')"><i class="fas fa-pencil"></i></button>'+
+          (idx > 0 ? '<button class="biz-block-btn" title="Move Up" onclick="window._bizActions.moveBlock(\''+esc(block.id)+'\',\'up\')"><i class="fas fa-arrow-up"></i></button>' : '')+
+          (idx < total-1 ? '<button class="biz-block-btn" title="Move Down" onclick="window._bizActions.moveBlock(\''+esc(block.id)+'\',\'down\')"><i class="fas fa-arrow-down"></i></button>' : '')+
+          '<button class="biz-block-btn delete" title="Delete" onclick="window._bizActions.deleteBlock(\''+esc(block.id)+'\')"><i class="fas fa-trash"></i></button>'+
+        '</div>'
+      : '';
+
+    var inner = '';
+    if (block.type === 'announcement') {
+      inner = '<div class="biz-block-type-announcement">'+
+        '<div class="biz-block-announce-icon"><i class="fas fa-bullhorn"></i></div>'+
+        '<div style="flex:1;min-width:0">'+
+          (block.title ? '<div class="biz-block-title">'+esc(block.title)+'</div>' : '')+
+          (block.content ? '<div class="biz-block-body">'+esc(block.content)+'</div>' : '')+
+        '</div>'+
+      '</div>';
+    } else if (block.type === 'cta') {
+      inner = '<div class="biz-block-type-cta">'+
+        (block.title ? '<div class="biz-block-cta-title">'+esc(block.title)+'</div>' : '')+
+        (block.content ? '<div class="biz-block-cta-sub">'+esc(block.content)+'</div>' : '')+
+        '<div class="biz-block-cta-btns">'+
+          '<button class="biz-cta-primary" onclick="window._bizActions.openQuote()"><i class="fas fa-paper-plane"></i> Request a Quote</button>'+
+          '<button class="biz-cta-secondary" onclick="window._bizActions.share()"><i class="fas fa-share-nodes"></i> Share</button>'+
+        '</div>'+
+      '</div>';
+    } else {
+      inner = '<div class="biz-block-type-text">'+
+        (block.title ? '<div class="biz-block-title">'+esc(block.title)+'</div>' : '')+
+        (block.content ? '<div class="biz-block-body">'+esc(block.content)+'</div>' : '')+
+      '</div>';
+    }
+
+    return '<div class="biz-page-block" data-block-id="'+esc(block.id)+'">'+controls+inner+'</div>';
+  }
+
+  // ── LOAD PAGE BLOCKS ──────────────────────────────────────────
+
+  function loadPageBlocks() {
+    var el = document.getElementById('biz-page-blocks');
+    if (!el) return;
+    safeSnap(
+      _fs.getDocs(_fs.query(
+        _fs.collection(_db,'businesses',BIZ_ID,'pageBlocks'),
+        _fs.orderBy('order','asc')
+      ))
+    ).then(function(blocks) {
+      var visible = blocks.filter(function(b){ return _isOwner || b.enabled !== false; });
+      if (!visible.length) {
+        el.innerHTML = _isOwner
+          ? '<div class="biz-block-add-prompt" onclick="window._bizActions.openBlockManager()">'+
+              '<i class="fas fa-plus-circle"></i>'+
+              '<span>Add page blocks — announcements, text, CTAs</span>'+
+            '</div>'
+          : '';
+        return;
+      }
+      el.innerHTML = visible.map(function(b,i){ return renderPageBlockCard(b, i, visible.length); }).join('');
+    });
+  }
+
+  // ── RENDER: BLOCK MANAGER MODAL ───────────────────────────────
+
+  function renderBlockManagerModal() {
+    return '<div class="biz-modal-overlay" id="biz-block-manager" onclick="if(event.target===this)window._bizActions.closeBlockManager()">'+
+      '<div class="biz-modal-sheet" style="max-height:85vh;overflow-y:auto">'+
+        '<div class="biz-modal-handle"></div>'+
+        '<button class="biz-modal-close" onclick="window._bizActions.closeBlockManager()"><i class="fas fa-times"></i></button>'+
+        '<div class="biz-modal-title"><i class="fas fa-layer-group"></i> Page Blocks</div>'+
+        '<div class="biz-modal-sub">Add custom sections that appear on your page</div>'+
+        '<div class="biz-add-block-form">'+
+          '<div class="biz-form-group">'+
+            '<label class="biz-form-label">Block Type</label>'+
+            '<div class="biz-block-type-row">'+
+              '<button class="biz-block-type-chip active" data-btype="text" onclick="window._bizActions.selectBlockType(this,\'text\')"><i class="fas fa-align-left"></i> Text</button>'+
+              '<button class="biz-block-type-chip" data-btype="announcement" onclick="window._bizActions.selectBlockType(this,\'announcement\')"><i class="fas fa-bullhorn"></i> Announcement</button>'+
+              '<button class="biz-block-type-chip" data-btype="cta" onclick="window._bizActions.selectBlockType(this,\'cta\')"><i class="fas fa-hand-pointer"></i> CTA Buttons</button>'+
+            '</div>'+
+            '<input type="hidden" id="biz-block-type-val" value="text">'+
+          '</div>'+
+          '<div class="biz-form-group">'+
+            '<label class="biz-form-label">Title <span style="color:#64748b;font-weight:400">(optional)</span></label>'+
+            '<input class="biz-form-input" id="biz-block-title-inp" placeholder="Block heading…">'+
+          '</div>'+
+          '<div class="biz-form-group">'+
+            '<label class="biz-form-label">Content</label>'+
+            '<textarea class="biz-form-textarea" id="biz-block-content-inp" placeholder="Write something…" style="min-height:80px"></textarea>'+
+          '</div>'+
+          '<button class="biz-submit-btn" id="biz-add-block-btn" onclick="window._bizActions.saveNewBlock()"><i class="fas fa-plus"></i> Add Block</button>'+
+        '</div>'+
+        '<div class="biz-block-manager-list-header">Existing Blocks</div>'+
+        '<div id="biz-block-manager-list"><div style="color:#64748b;font-size:.82rem;padding:8px 0"><i class="fas fa-spinner fa-spin"></i> Loading…</div></div>'+
+      '</div>'+
+    '</div>';
+  }
+
   // ── RENDER: 3-COLUMN OVERVIEW ────────────────────────────────
 
   function renderOverview3Col(biz, services, products, gallery, reviews) {
     return '<div class="biz-overview-3col">'+
       '<div class="biz-left-sidebar">'+renderLeftSidebar(biz)+'</div>'+
       '<div class="biz-center-col">'+
+        '<div id="biz-page-blocks"></div>'+
         (_isOwner ? renderComposer(biz) : '')+
         '<div id="biz-posts-overview">'+renderPostsSkeleton(3)+'</div>'+
       '</div>'+
@@ -647,6 +769,7 @@
       '<div class="biz-page-wrap">'+
         renderHeader(biz)+
         renderContact(biz)+
+        (_isOwner ? renderAdminToolbar(biz) : '')+
         renderTabBar()+
         '<div class="biz-tab-panels">'+
 
@@ -686,7 +809,11 @@
       '</div>'+
       renderQuoteModal(biz)+
       (_isOwner?renderComposeModal(biz):'')+
-      renderLightbox();
+      (_isOwner?renderBlockManagerModal():'')+
+      renderLightbox()+
+      (_isOwner?'<div class="biz-preview-fab" id="biz-preview-fab" style="display:none">'+
+        '<button onclick="window._bizActions.togglePreview()" title="Exit Preview Mode">'+
+          '<i class="fas fa-eye-slash"></i> Exit Preview</button></div>':'');
 
     _reviewRating = 0;
 
@@ -702,7 +829,9 @@
       });
     });
 
+    _previewMode = false;
     loadBizPosts();
+    loadPageBlocks();
   }
 
   // ── LOAD POSTS ────────────────────────────────────────────────
@@ -1023,6 +1152,175 @@
         }).then(function(){ showToast('Photo added!'); load(); }).catch(function(){ showToast('Could not save',false); });
       },function(pct){ if(pct<100) showToast('Uploading… '+pct+'%'); });
       input.value='';
+    },
+
+    togglePreview: function() {
+      _previewMode = !_previewMode;
+      var wrap = document.querySelector('.biz-page-wrap');
+      var toolbar = document.getElementById('biz-admin-toolbar');
+      var fab = document.getElementById('biz-preview-fab');
+      if (_previewMode) {
+        if (wrap) wrap.classList.add('biz-preview-active');
+        if (toolbar) toolbar.style.display = 'none';
+        if (fab) fab.style.display = '';
+      } else {
+        if (wrap) wrap.classList.remove('biz-preview-active');
+        if (toolbar) toolbar.style.display = '';
+        if (fab) fab.style.display = 'none';
+      }
+    },
+
+    openBlockManager: function() {
+      var m = document.getElementById('biz-block-manager');
+      if (m) { m.classList.add('open'); window._bizActions.refreshBlockManagerList(); }
+    },
+    closeBlockManager: function() {
+      var m = document.getElementById('biz-block-manager'); if (m) m.classList.remove('open');
+    },
+
+    selectBlockType: function(btn, type) {
+      document.querySelectorAll('.biz-block-type-chip').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      var inp = document.getElementById('biz-block-type-val'); if (inp) inp.value = type;
+    },
+
+    saveNewBlock: function() {
+      if (!_currentUser || !_isOwner) return;
+      var type    = ((document.getElementById('biz-block-type-val')||{}).value || 'text').trim();
+      var title   = ((document.getElementById('biz-block-title-inp')||{}).value || '').trim();
+      var content = ((document.getElementById('biz-block-content-inp')||{}).value || '').trim();
+      if (!content && !title) { showToast('Add a title or content', false); return; }
+      var btn = document.getElementById('biz-add-block-btn');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding…'; }
+      _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'pageBlocks'), {
+        type: type, title: title, content: content,
+        enabled: true, order: Date.now(),
+        createdBy: _currentUser.uid, createdAt: _fs.serverTimestamp(),
+      }).then(function() {
+        showToast('Block added!');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Add Block'; }
+        var ti = document.getElementById('biz-block-title-inp');
+        var ci = document.getElementById('biz-block-content-inp');
+        if (ti) ti.value = '';
+        if (ci) ci.value = '';
+        window._bizActions.refreshBlockManagerList();
+        loadPageBlocks();
+      }).catch(function(err) {
+        console.error('[BizPage] addBlock failed', err);
+        showToast('Could not add block', false);
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Add Block'; }
+      });
+    },
+
+    deleteBlock: function(blockId) {
+      if (!_currentUser || !_isOwner) return;
+      if (!confirm('Delete this block?')) return;
+      _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'pageBlocks',blockId))
+        .then(function() {
+          showToast('Block deleted');
+          loadPageBlocks();
+          window._bizActions.refreshBlockManagerList();
+        }).catch(function() { showToast('Could not delete', false); });
+    },
+
+    editBlock: function(blockId) {
+      window._bizActions.openBlockManager();
+      setTimeout(function() {
+        var item = document.querySelector('[data-bid="'+blockId+'"]');
+        if (item) {
+          item.scrollIntoView({behavior:'smooth', block:'center'});
+          var editBtn = item.querySelector('.biz-mgr-edit-btn');
+          if (editBtn) editBtn.click();
+        }
+      }, 250);
+    },
+
+    moveBlock: function(blockId, dir) {
+      if (!_currentUser || !_isOwner) return;
+      safeSnap(
+        _fs.getDocs(_fs.query(
+          _fs.collection(_db,'businesses',BIZ_ID,'pageBlocks'),
+          _fs.orderBy('order','asc')
+        ))
+      ).then(function(blocks) {
+        var idx = -1;
+        for (var i = 0; i < blocks.length; i++) { if (blocks[i].id === blockId) { idx = i; break; } }
+        if (idx < 0) return;
+        var swapIdx = dir === 'up' ? idx - 1 : idx + 1;
+        if (swapIdx < 0 || swapIdx >= blocks.length) return;
+        var a = blocks[idx], b2 = blocks[swapIdx];
+        var aOrder = typeof a.order === 'number' ? a.order : idx * 1000;
+        var bOrder = typeof b2.order === 'number' ? b2.order : swapIdx * 1000;
+        return Promise.all([
+          _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID,'pageBlocks',a.id), {order: bOrder}),
+          _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID,'pageBlocks',b2.id), {order: aOrder}),
+        ]);
+      }).then(function() { loadPageBlocks(); }).catch(function() { showToast('Could not reorder', false); });
+    },
+
+    refreshBlockManagerList: function() {
+      var list = document.getElementById('biz-block-manager-list');
+      if (!list) return;
+      list.innerHTML = '<div style="color:#64748b;font-size:.82rem;padding:8px 0"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
+      safeSnap(
+        _fs.getDocs(_fs.query(
+          _fs.collection(_db,'businesses',BIZ_ID,'pageBlocks'),
+          _fs.orderBy('order','asc')
+        ))
+      ).then(function(blocks) {
+        if (!blocks.length) {
+          list.innerHTML = '<div style="color:#64748b;font-size:.82rem;padding:8px 0">No blocks yet. Add one above!</div>';
+          return;
+        }
+        list.innerHTML = blocks.map(function(b) {
+          var typeIcon = b.type==='announcement' ? 'fa-bullhorn' : b.type==='cta' ? 'fa-hand-pointer' : 'fa-align-left';
+          return '<div class="biz-mgr-block-item" data-bid="'+esc(b.id)+'">'+
+            '<div class="biz-mgr-block-type-icon"><i class="fas '+typeIcon+'"></i></div>'+
+            '<div class="biz-mgr-block-info">'+
+              '<div class="biz-mgr-block-name">'+esc(b.title||'(no title)')+'</div>'+
+              '<div class="biz-mgr-block-meta">'+esc(b.type||'text')+(b.enabled===false?' · hidden':'')+'</div>'+
+            '</div>'+
+            '<div class="biz-mgr-block-actions">'+
+              '<button class="biz-mgr-edit-btn" onclick="window._bizActions.openEditBlockInline(\''+esc(b.id)+'\',this)"><i class="fas fa-pencil"></i></button>'+
+              '<button class="biz-mgr-del-btn" onclick="window._bizActions.deleteBlock(\''+esc(b.id)+'\')"><i class="fas fa-trash"></i></button>'+
+            '</div>'+
+          '</div>';
+        }).join('');
+      });
+    },
+
+    openEditBlockInline: function(blockId, editBtnEl) {
+      var item = editBtnEl.closest('[data-bid]');
+      if (!item) return;
+      var existing = item.querySelector('.biz-mgr-inline-edit');
+      if (existing) { existing.remove(); return; }
+      _fs.getDoc(_fs.doc(_db,'businesses',BIZ_ID,'pageBlocks',blockId)).then(function(d) {
+        if (!d.exists()) return;
+        var b = d.data();
+        var form = document.createElement('div');
+        form.className = 'biz-mgr-inline-edit';
+        form.innerHTML =
+          '<input class="biz-form-input" id="biz-ei-t-'+esc(blockId)+'" value="'+esc(b.title||'')+'" placeholder="Title">'+
+          '<textarea class="biz-form-textarea" id="biz-ei-c-'+esc(blockId)+'" style="min-height:70px;margin-top:6px">'+esc(b.content||'')+'</textarea>'+
+          '<div style="display:flex;gap:8px;margin-top:8px">'+
+            '<button class="biz-submit-btn" style="flex:1;padding:9px" onclick="window._bizActions.saveBlockEdit(\''+esc(blockId)+'\')"><i class="fas fa-check"></i> Save</button>'+
+            '<button class="biz-action-btn" style="padding:9px 14px" onclick="this.closest(\'.biz-mgr-inline-edit\').remove()">Cancel</button>'+
+          '</div>';
+        item.appendChild(form);
+      }).catch(function() {});
+    },
+
+    saveBlockEdit: function(blockId) {
+      var ti = document.getElementById('biz-ei-t-'+blockId);
+      var ci = document.getElementById('biz-ei-c-'+blockId);
+      if (!ti || !ci) return;
+      _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID,'pageBlocks',blockId), {
+        title: ti.value.trim(), content: ci.value.trim(), updatedAt: _fs.serverTimestamp(),
+      }).then(function() {
+        showToast('Block updated!');
+        loadPageBlocks();
+        window._bizActions.refreshBlockManagerList();
+      }).catch(function() { showToast('Could not save', false); });
     },
 
     goToQuotes: function(){ window._bizActions.switchTab('dashboard'); setTimeout(function(){ window._bizActions.loadOwnerQuotes(); },100); },
