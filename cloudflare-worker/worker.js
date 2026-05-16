@@ -26,9 +26,6 @@ const ALLOWED_ORIGINS = [
   'https://geohub.pages.dev',
   'https://geohub.ge',
   'https://www.geohub.ge',
-  'http://localhost:5500',
-  'http://127.0.0.1:5500',
-  'http://localhost:3000',
 ];
 
 function corsHeaders(request) {

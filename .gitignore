@@ -2,3 +2,26 @@
 *.local
 .DS_Store
 Thumbs.db
+# Development report files — not for production
+*_REPORT.md
+*_FIXED.md
+*_FIX_REPORT.md
+QA_*.md
+GEOPOINTS_*.md
+PHASE*.md
+STEP*.md
+SOCIAL_*.md
+MESSENGER_*.md
+MESSAGES_*.md
+MESSAGE_*.md
+GEOHUB_*.md
+GLOBAL_*.md
+DESIGN_*.md
+PERFORMANCE_*.md
+FIRESTORE_*.md
+FACEBOOK_*.md
+CRITICAL_*.md
+CLOUDINARY_*.md
+CHAT_*.md
+BUSINESS_*.md
+ADMIN_*.md
