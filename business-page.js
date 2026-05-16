@@ -14,8 +14,20 @@
   var _isOwner     = false;
   var _isSaved     = false;
   var _isFollowing = false;
-  var _reviewRating = 0;
-  var _previewMode  = false;
+  var _reviewRating  = 0;
+  var _previewMode   = false;
+  var _postReactions = {}; // { postId: { key, emoji, loaded } }
+  var _sharePostId   = null;
+  var _rxLongTimer   = null;
+
+  var REACTIONS = [
+    { key:'like',  emoji:'👍', label:'Like'  },
+    { key:'love',  emoji:'❤️', label:'Love'  },
+    { key:'haha',  emoji:'😂', label:'Haha'  },
+    { key:'wow',   emoji:'😮', label:'Wow'   },
+    { key:'sad',   emoji:'😢', label:'Sad'   },
+    { key:'angry', emoji:'😡', label:'Angry' },
+  ];
 
   // ── HELPERS ───────────────────────────────────────────────────
 
@@ -465,11 +477,12 @@
   // ── RENDER: POST CARD ────────────────────────────────────────
 
   function postCardHtml(post, biz) {
+    var pid = esc(post.id);
     var logo = biz.logoUrl
       ? '<img src="'+esc(biz.logoUrl)+'" alt="">'
       : esc((biz.title||'B')[0]);
 
-    // Media: single or multi-image
+    // Media
     var mediaHtml = '';
     var urls = post.mediaUrls && post.mediaUrls.length ? post.mediaUrls : (post.mediaUrl ? [post.mediaUrl] : []);
     if (urls.length === 1) {
@@ -478,23 +491,38 @@
       var gridN = Math.min(urls.length, 4);
       mediaHtml = '<div class="biz-post-grid biz-post-grid-'+gridN+'">'+
         urls.slice(0,4).map(function(u,i){
-          var extra = (i===3 && urls.length>4) ? '<div class="biz-post-grid-more">+'+( urls.length-4)+'</div>' : '';
-          return '<div class="biz-post-grid-item" onclick="window._bizActions.openPhoto(\''+esc(u)+'\')">' +
+          var extra = (i===3 && urls.length>4) ? '<div class="biz-post-grid-more">+'+(urls.length-4)+'</div>' : '';
+          return '<div class="biz-post-grid-item" onclick="window._bizActions.openPhoto(\''+esc(u)+'\')">'+
             '<img src="'+esc(u)+'" loading="lazy" alt="">'+extra+'</div>';
-        }).join('')+
-      '</div>';
+        }).join('')+'</div>';
     }
 
+    // Counts row
     var likeCount    = post.likeCount    || 0;
     var commentCount = post.commentCount || 0;
-    var countsHtml   = (likeCount > 0 || commentCount > 0)
+    var countsHtml = (likeCount > 0 || commentCount > 0)
       ? '<div class="biz-post-count-row">'+
-          (likeCount    > 0 ? '<span>👍 '+likeCount+'</span>' : '')+
-          (commentCount > 0 ? '<span style="margin-left:auto">'+commentCount+' comments</span>' : '')+
+          (likeCount > 0 ? '<span id="biz-lk-cnt-'+pid+'">👍 '+compact(likeCount)+'</span>' : '')+
+          (commentCount > 0 ? '<button class="biz-count-btn" onclick="window._bizActions.toggleBizComment(\''+pid+'\')">'+commentCount+' comment'+(commentCount===1?'':'s')+'</button>' : '')+
         '</div>'
       : '';
 
-    var pid = esc(post.id);
+    // Reaction picker
+    var rxPickerHtml = REACTIONS.map(function(r){
+      return '<button class="biz-rx-item" title="'+esc(r.label)+'" onclick="window._bizActions.setReaction(\''+pid+'\',\''+r.key+'\')">'+r.emoji+'</button>';
+    }).join('');
+
+    // Commenter avatar for composer
+    var user = _currentUser;
+    var cmtAvHtml;
+    if (user && user.photoURL) {
+      cmtAvHtml = '<img src="'+esc(user.photoURL)+'" class="biz-cmt-av-img" alt="" onerror="this.style.display=\'none\'">';
+    } else if (user) {
+      cmtAvHtml = '<span class="biz-cmt-av">'+esc(((user.displayName||user.email||'U')[0]).toUpperCase())+'</span>';
+    } else {
+      cmtAvHtml = '<span class="biz-cmt-av biz-cmt-av-guest"><i class="fas fa-user"></i></span>';
+    }
+
     return '<div class="biz-post-card" data-post-id="'+pid+'">'+
       '<div class="biz-post-header">'+
         '<div class="biz-post-logo">'+logo+'</div>'+
@@ -505,20 +533,41 @@
           '<div class="biz-post-time">'+timeAgo(post.createdAt)+' · <i class="fas fa-earth-americas" style="font-size:.7rem;opacity:.6"></i></div>'+
         '</div>'+
       '</div>'+
-      (post.text?'<div class="biz-post-text">'+esc(post.text)+'</div>':'')+
+      (post.text ? '<div class="biz-post-text">'+esc(post.text)+'</div>' : '')+
       mediaHtml+
       countsHtml+
       '<div class="biz-post-reactions">'+
-        '<button class="biz-react-btn" data-post="'+pid+'" onclick="window._bizActions.likePost(\''+pid+'\',this)"><i class="far fa-thumbs-up"></i> Like</button>'+
+        '<div class="biz-rx-wrap" data-pid="'+pid+'">'+
+          '<div class="biz-rx-picker" id="biz-rxp-'+pid+'">'+rxPickerHtml+'</div>'+
+          '<button class="biz-react-btn" '+
+            'onclick="window._bizActions.toggleReaction(\''+pid+'\')" '+
+            'oncontextmenu="event.preventDefault();window._bizActions.openReactionPicker(\''+pid+'\')" '+
+            'ontouchstart="window._bizActions._rxLongPress(\''+pid+'\',event)" '+
+            'ontouchend="window._bizActions._rxCancelPress()" '+
+            'ontouchmove="window._bizActions._rxCancelPress()">'+
+            '<i class="far fa-thumbs-up"></i> Like'+
+          '</button>'+
+        '</div>'+
         '<button class="biz-react-btn" onclick="window._bizActions.toggleBizComment(\''+pid+'\')"><i class="far fa-comment"></i> Comment</button>'+
-        '<button class="biz-react-btn" onclick="window._bizActions.shareBizPost(\''+pid+'\')"><i class="fas fa-share-nodes"></i> Share</button>'+
+        '<button class="biz-react-btn" onclick="window._bizActions.openShareModal(\''+pid+'\')"><i class="fas fa-share-nodes"></i> Share</button>'+
       '</div>'+
-      '<div class="biz-post-comments" id="biz-cmt-'+pid+'" style="display:none;padding:8px 16px 8px;border-top:1px solid rgba(255,255,255,.06)">'+
-        '<div id="biz-cmt-list-'+pid+'"><div style="color:#64748b;font-size:.8rem;padding:2px 0">No comments yet.</div></div>'+
-        '<form style="display:flex;gap:8px;margin-top:10px" onsubmit="window._bizActions.submitBizComment(\''+pid+'\',this);return false;">'+
-          '<input class="biz-form-input" placeholder="Write a comment…" style="flex:1;padding:7px 12px;font-size:.84rem" required>'+
-          '<button type="submit" class="biz-submit-btn" style="padding:7px 14px;font-size:.82rem"><i class="fas fa-paper-plane"></i></button>'+
-        '</form>'+
+      '<div class="biz-cmt-section" id="biz-cmt-'+pid+'" style="display:none">'+
+        '<div class="biz-cmt-thread" id="biz-cmt-list-'+pid+'">'+
+          '<div class="biz-cmt-empty">No comments yet.</div>'+
+        '</div>'+
+        '<div class="biz-cmt-composer">'+
+          cmtAvHtml+
+          '<div class="biz-cmt-input-wrap">'+
+            '<textarea class="biz-cmt-textarea" placeholder="Write a comment…" rows="1" '+
+              'oninput="this.style.height=\'auto\';this.style.height=Math.min(this.scrollHeight,120)+\'px\'" '+
+              'onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();window._bizActions.submitBizComment(\''+pid+'\',this);}">'+
+            '</textarea>'+
+            '<button class="biz-cmt-send-btn" type="button" '+
+              'onclick="window._bizActions.submitBizComment(\''+pid+'\',this.parentNode.querySelector(\'textarea\'))">'+
+              '<i class="fas fa-paper-plane"></i>'+
+            '</button>'+
+          '</div>'+
+        '</div>'+
       '</div>'+
     '</div>';
   }
@@ -767,6 +816,37 @@
 
   // ── MAIN RENDER ───────────────────────────────────────────────
 
+  // ── SHARE MODAL ───────────────────────────────────────────────
+
+  function renderShareModal() {
+    return '<div class="biz-share-overlay" id="biz-share-overlay" onclick="if(event.target===this)window._bizActions.closeShareModal()">'+
+      '<div class="biz-share-sheet">'+
+        '<div class="biz-share-drag"></div>'+
+        '<div class="biz-share-title">Share post</div>'+
+        '<textarea class="biz-share-caption" id="biz-share-caption" placeholder="Say something about this post… (optional)" rows="2"></textarea>'+
+        '<div class="biz-share-options">'+
+          '<button class="biz-share-opt" onclick="window._bizActions.submitShare(\'feed\')">'+
+            '<span class="biz-share-opt-icon"><i class="fas fa-globe"></i></span>'+
+            '<span class="biz-share-opt-text"><strong>Share to feed</strong><small>Visible to everyone on GeoHub</small></span>'+
+          '</button>'+
+          '<button class="biz-share-opt" onclick="window._bizActions.submitShare(\'profile\')">'+
+            '<span class="biz-share-opt-icon"><i class="fas fa-user"></i></span>'+
+            '<span class="biz-share-opt-text"><strong>Share to my profile</strong><small>Appears on your profile page</small></span>'+
+          '</button>'+
+          '<button class="biz-share-opt" onclick="window._bizActions.copyShareLink()">'+
+            '<span class="biz-share-opt-icon"><i class="fas fa-link"></i></span>'+
+            '<span class="biz-share-opt-text"><strong>Copy link</strong><small>Copy post URL to clipboard</small></span>'+
+          '</button>'+
+          '<button class="biz-share-opt" onclick="window._bizActions.nativeShare()">'+
+            '<span class="biz-share-opt-icon"><i class="fas fa-arrow-up-from-bracket"></i></span>'+
+            '<span class="biz-share-opt-text"><strong>Share via…</strong><small>Use your device\'s share sheet</small></span>'+
+          '</button>'+
+        '</div>'+
+        '<button class="biz-share-cancel" onclick="window._bizActions.closeShareModal()">Cancel</button>'+
+      '</div>'+
+    '</div>';
+  }
+
   // ── NAVBAR RECOVERY ───────────────────────────────────────────
   // geohub-social-redesign.js calls shell() which replaces document.body.innerHTML,
   // wiping any static <nav> from business.html. We re-inject a minimal navbar
@@ -863,6 +943,7 @@
       renderQuoteModal(biz)+
       (_isOwner?renderComposeModal(biz):'')+
       (_isOwner?renderBlockManagerModal():'')+
+      renderShareModal()+
       renderLightbox()+
       (_isOwner?'<div class="biz-preview-fab" id="biz-preview-fab" style="display:none">'+
         '<button onclick="window._bizActions.togglePreview()" title="Exit Preview Mode">'+
@@ -1058,87 +1139,243 @@
       if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ showToast('Link copied!'); }).catch(function(){}); }
     },
 
-    // ── Post-level comment toggle ─────────────────────────────────
+    // ── Comment toggle ────────────────────────────────────────────
     toggleBizComment: function(postId) {
       var box = document.getElementById('biz-cmt-' + postId);
       if (!box) return;
       var opening = box.style.display === 'none' || box.style.display === '';
       box.style.display = opening ? 'block' : 'none';
+      if (opening) {
+        var ta = box.querySelector('textarea');
+        if (ta) setTimeout(function(){ ta.focus(); }, 60);
+      }
       if (!opening || box.dataset.loaded) return;
       box.dataset.loaded = '1';
       var listEl = document.getElementById('biz-cmt-list-' + postId);
       if (!listEl) return;
       var GeoSocial = window.GeoSocial;
       if (!GeoSocial || !GeoSocial.listenComments) {
-        listEl.innerHTML = '<div style="color:#64748b;font-size:.8rem">Comments unavailable.</div>';
+        listEl.innerHTML = '<div class="biz-cmt-empty">Comments unavailable.</div>';
         return;
       }
       GeoSocial.listenComments(postId, function(comments) {
         if (!listEl.isConnected) return;
         if (!comments || !comments.length) {
-          listEl.innerHTML = '<div style="color:#64748b;font-size:.8rem;padding:2px 0">No comments yet.</div>';
+          listEl.innerHTML = '<div class="biz-cmt-empty">No comments yet.</div>';
           return;
         }
         listEl.innerHTML = comments.map(function(c) {
           var name = c.authorName || c.userName || 'User';
-          var av = c.authorAvatar
-            ? '<img src="'+esc(c.authorAvatar)+'" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.style.display=\'none\'">'
-            : '<span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#10b981,#3b82f6);display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:900;color:#fff;flex-shrink:0">'+esc((name[0]||'U').toUpperCase())+'</span>';
-          return '<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px">'+
-            av+
-            '<div style="background:rgba(255,255,255,.05);border-radius:12px;padding:7px 12px;flex:1;min-width:0">'+
-              '<strong style="font-size:.8rem;color:#f1f5f9">'+esc(name)+'</strong>'+
-              '<span style="font-size:.76rem;color:#64748b;margin-left:8px">'+timeAgo(c.createdAt)+'</span>'+
-              '<div style="font-size:.84rem;color:#cbd5e1;margin-top:3px;word-break:break-word">'+esc(c.text||'')+'</div>'+
+          var avHtml = c.authorAvatar
+            ? '<img src="'+esc(c.authorAvatar)+'" class="biz-cmt-av-img" alt="" onerror="this.style.display=\'none\'">'
+            : '<span class="biz-cmt-av">'+esc((name[0]||'U').toUpperCase())+'</span>';
+          return '<div class="biz-cmt-bubble-wrap">'+
+            avHtml+
+            '<div>'+
+              '<div class="biz-cmt-bubble">'+
+                '<div class="biz-cmt-bubble-name">'+esc(name)+'</div>'+
+                '<div class="biz-cmt-bubble-text">'+esc(c.text||'')+'</div>'+
+              '</div>'+
+              '<div class="biz-cmt-bubble-time">'+timeAgo(c.createdAt)+'</div>'+
             '</div>'+
           '</div>';
         }).join('');
         // Update comment count badge
         var card = document.querySelector('[data-post-id="'+CSS.escape(postId)+'"]');
         if (card) {
-          var countRow = card.querySelector('.biz-post-count-row span:last-child');
-          if (countRow) countRow.textContent = comments.length + ' comment' + (comments.length===1?'':'s');
+          var cntBtn = card.querySelector('.biz-count-btn');
+          if (cntBtn) cntBtn.textContent = comments.length + ' comment' + (comments.length===1?'':'s');
         }
       });
     },
 
-    submitBizComment: function(postId, form) {
-      var input = form && form.querySelector('input');
-      if (!input) return;
-      var val = input.value.trim();
+    submitBizComment: function(postId, elOrForm) {
+      var ta;
+      if (elOrForm && elOrForm.tagName === 'TEXTAREA') {
+        ta = elOrForm;
+      } else if (elOrForm && elOrForm.querySelector) {
+        ta = elOrForm.querySelector('textarea') || elOrForm.querySelector('input');
+      }
+      if (!ta) return;
+      var val = ta.value.trim();
       if (!val) return;
       if (!_currentUser) { showToast('Sign in to comment', false); return; }
       var GeoSocial = window.GeoSocial;
       if (!GeoSocial || !GeoSocial.addComment) { showToast('Comments not available', false); return; }
-      input.disabled = true;
+      ta.disabled = true;
+      var sendBtn = ta.parentNode && ta.parentNode.querySelector('.biz-cmt-send-btn');
+      if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
       GeoSocial.addComment(postId, val, function(err) {
-        input.value = '';
-        input.disabled = false;
+        ta.value = '';
+        ta.style.height = 'auto';
+        ta.disabled = false;
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>'; }
         if (err) { showToast('Could not post comment', false); return; }
         _fs.updateDoc(_fs.doc(_db,'posts',postId),{commentCount:_fs.increment(1)}).catch(function(){});
       });
     },
 
-    shareBizPost: function(postId) {
-      if (!_currentUser) { showToast('Sign in to share', false); return; }
-      var GeoSocial = window.GeoSocial;
-      if (!GeoSocial) {
-        var url = window.location.origin + '/business.html?id=' + encodeURIComponent(BIZ_ID) + '#post-' + postId;
-        if (navigator.share) navigator.share({ title: (_biz&&_biz.title)||'GeoHub Post', url: url }).catch(function(){});
-        else if (navigator.clipboard) navigator.clipboard.writeText(url).then(function(){ showToast('Link copied!'); });
-        return;
-      }
-      var caption = 'Check out this post from ' + esc((_biz&&_biz.title)||'this business') + ' on GeoHub.';
-      GeoSocial.createPost(caption, '', function(newId) {
-        if (newId) {
-          showToast('Shared to your profile!');
-          if (GeoSocial.trackShare) GeoSocial.trackShare(postId);
-          _fs.updateDoc(_fs.doc(_db,'posts',postId),{shareCount:_fs.increment(1)}).catch(function(){});
-        } else {
-          showToast('Could not share. Try again.', false);
+    // ── Reactions ─────────────────────────────────────────────────
+    setReaction: function(postId, key) {
+      if (!_currentUser) { showToast('Sign in to react', false); return; }
+      window._bizActions.closeAllPickers();
+      var pr = _postReactions[postId] || {};
+      var prevKey = pr.key || null;
+      var rx = REACTIONS.find(function(r){ return r.key === key; }) || REACTIONS[0];
+      var btnEl = document.querySelector('.biz-rx-wrap[data-pid="'+CSS.escape(postId)+'"] .biz-react-btn');
+      var rxRef = _fs.doc(_db,'posts',postId,'reactions',_currentUser.uid);
+
+      if (prevKey === key) {
+        // Toggle off — remove reaction
+        _postReactions[postId] = { loaded: true };
+        _fs.deleteDoc(rxRef).catch(function(){});
+        if (key === 'like') _fs.deleteDoc(_fs.doc(_db,'posts',postId,'likes',_currentUser.uid)).catch(function(){});
+        if (btnEl) { btnEl.removeAttribute('data-reaction'); btnEl.innerHTML = '<i class="far fa-thumbs-up"></i> Like'; }
+        _fs.updateDoc(_fs.doc(_db,'posts',postId),{likeCount:_fs.increment(-1)}).catch(function(){});
+        var lcEl = document.getElementById('biz-lk-cnt-'+postId);
+        if (lcEl) { var c = parseInt(lcEl.textContent.replace(/[^\d]/g,''),10)||0; lcEl.textContent = '👍 '+compact(Math.max(0,c-1)); }
+      } else {
+        // Set / change reaction
+        _postReactions[postId] = { loaded: true, key: key, emoji: rx.emoji };
+        _fs.setDoc(rxRef,{key:key,emoji:rx.emoji,userId:_currentUser.uid,createdAt:_fs.serverTimestamp()},{merge:true}).catch(function(){});
+        if (key === 'like') _fs.setDoc(_fs.doc(_db,'posts',postId,'likes',_currentUser.uid),{userId:_currentUser.uid,createdAt:_fs.serverTimestamp()},{merge:true}).catch(function(){});
+        if (btnEl) { btnEl.setAttribute('data-reaction', key); btnEl.innerHTML = rx.emoji + ' ' + rx.label; }
+        if (!prevKey) {
+          _fs.updateDoc(_fs.doc(_db,'posts',postId),{likeCount:_fs.increment(1)}).catch(function(){});
+          var lkEl = document.getElementById('biz-lk-cnt-'+postId);
+          if (lkEl) { lkEl.textContent = '👍 '+compact((parseInt(lkEl.textContent.replace(/[^\d]/g,''),10)||0)+1); }
         }
-      }, { sharedPostId: postId, visibility: 'public', targetType: 'user' });
+      }
     },
+
+    toggleReaction: function(postId) {
+      if (!_currentUser) { showToast('Sign in to react', false); return; }
+      var pr = _postReactions[postId];
+      if (pr && pr.loaded) {
+        window._bizActions.setReaction(postId, pr.key || 'like');
+      } else {
+        _postReactions[postId] = { loading: true };
+        _fs.getDoc(_fs.doc(_db,'posts',postId,'reactions',_currentUser.uid))
+          .then(function(snap) {
+            if (!snap.exists()) {
+              _postReactions[postId] = { loaded: true };
+              window._bizActions.setReaction(postId, 'like');
+            } else {
+              var d = snap.data();
+              _postReactions[postId] = { loaded: true, key: d.key, emoji: d.emoji };
+              var rx = REACTIONS.find(function(r){ return r.key === d.key; }) || REACTIONS[0];
+              var btnEl = document.querySelector('.biz-rx-wrap[data-pid="'+CSS.escape(postId)+'"] .biz-react-btn');
+              if (btnEl) { btnEl.setAttribute('data-reaction', d.key); btnEl.innerHTML = d.emoji + ' ' + rx.label; }
+              // User clicked again → toggle off
+              window._bizActions.setReaction(postId, d.key);
+            }
+          })
+          .catch(function(){ _postReactions[postId]={loaded:true}; window._bizActions.setReaction(postId,'like'); });
+      }
+    },
+
+    openReactionPicker: function(postId) {
+      window._bizActions.closeAllPickers();
+      var picker = document.getElementById('biz-rxp-'+postId);
+      if (picker) picker.classList.add('open');
+      setTimeout(function(){
+        document.addEventListener('click', function _h(e){
+          if (!e.target.closest || !e.target.closest('.biz-rx-wrap')) window._bizActions.closeAllPickers();
+          document.removeEventListener('click', _h);
+        });
+      }, 0);
+    },
+
+    closeAllPickers: function() {
+      document.querySelectorAll('.biz-rx-picker.open').forEach(function(p){ p.classList.remove('open'); });
+    },
+
+    _rxLongPress: function(postId, e) {
+      _rxLongTimer = setTimeout(function(){
+        _rxLongTimer = null;
+        e.preventDefault();
+        window._bizActions.openReactionPicker(postId);
+      }, 600);
+    },
+
+    _rxCancelPress: function() {
+      if (_rxLongTimer) { clearTimeout(_rxLongTimer); _rxLongTimer = null; }
+    },
+
+    // ── Share modal ───────────────────────────────────────────────
+    openShareModal: function(postId) {
+      if (!_currentUser) { showToast('Sign in to share', false); return; }
+      _sharePostId = postId;
+      var overlay = document.getElementById('biz-share-overlay');
+      if (!overlay) return;
+      var cap = document.getElementById('biz-share-caption');
+      if (cap) cap.value = '';
+      overlay.classList.add('open');
+    },
+
+    closeShareModal: function() {
+      _sharePostId = null;
+      var overlay = document.getElementById('biz-share-overlay');
+      if (overlay) overlay.classList.remove('open');
+    },
+
+    submitShare: function(type) {
+      if (!_currentUser || !_sharePostId) return;
+      var postId = _sharePostId;
+      var caption = ((document.getElementById('biz-share-caption')||{}).value||'').trim();
+      window._bizActions.closeShareModal();
+      var extra = { type:'share', sharedPostId:postId, sharedBusinessId:BIZ_ID, visibility:'public', targetType: type==='profile'?'user':'public' };
+      var GeoSocial = window.GeoSocial;
+      if (GeoSocial && GeoSocial.createPost) {
+        GeoSocial.createPost(caption, '', function(newId) {
+          if (newId) {
+            showToast('Shared!');
+            _fs.updateDoc(_fs.doc(_db,'posts',postId),{shareCount:_fs.increment(1)}).catch(function(){});
+          } else { showToast('Could not share', false); }
+        }, extra);
+      } else {
+        var authorName = _currentUser.displayName || (_currentUser.email||'').split('@')[0] || 'User';
+        _fs.addDoc(_fs.collection(_db,'posts'), Object.assign({
+          text:caption, authorId:_currentUser.uid, authorName:authorName,
+          authorAvatar:_currentUser.photoURL||'', status:'active',
+          likeCount:0, commentCount:0, shareCount:0, reactionCount:0, saveCount:0,
+          createdAt:_fs.serverTimestamp(), updatedAt:_fs.serverTimestamp(),
+        }, extra))
+        .then(function(){
+          showToast('Shared!');
+          _fs.updateDoc(_fs.doc(_db,'posts',postId),{shareCount:_fs.increment(1)}).catch(function(){});
+        }).catch(function(){ showToast('Could not share', false); });
+      }
+    },
+
+    copyShareLink: function() {
+      var postId = _sharePostId;
+      window._bizActions.closeShareModal();
+      var url = window.location.origin + window.location.pathname + '?id=' + encodeURIComponent(BIZ_ID) + '#post-' + (postId||'');
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(function(){ showToast('Link copied!'); }).catch(function(){ showToast('Could not copy', false); });
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = url; ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); showToast('Link copied!'); } catch(e){ showToast('Could not copy', false); }
+        document.body.removeChild(ta);
+      }
+    },
+
+    nativeShare: function() {
+      var postId = _sharePostId;
+      window._bizActions.closeShareModal();
+      var url = window.location.origin + window.location.pathname + '?id=' + encodeURIComponent(BIZ_ID) + '#post-' + (postId||'');
+      if (navigator.share) {
+        navigator.share({ title: (_biz&&_biz.title)||'GeoHub Post', url: url }).catch(function(){});
+      } else if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(function(){ showToast('Link copied!'); }).catch(function(){});
+      }
+    },
+
+    // kept for backward compat with any cached cards
+    likePost: function(postId) { window._bizActions.toggleReaction(postId); },
 
     openQuote: function() {
       if(!_currentUser){ showToast('Sign in to request a quote',false); window.location.href='auth.html'; return; }
@@ -1556,6 +1793,13 @@
     load();
     fb.authFns.onAuthStateChanged(_auth,function(user){ if(user&&user!==_currentUser){ _currentUser=user; load(); } });
   }
+
+  // Close reaction pickers on outside click
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest || !e.target.closest('.biz-rx-wrap')) {
+      document.querySelectorAll('.biz-rx-picker.open').forEach(function(p){ p.classList.remove('open'); });
+    }
+  }, true);
 
   if(window.GeoFirebase&&window.GeoFirebase.db) init(window.GeoFirebase);
   else window.addEventListener('GeoFirebaseReady',function(){ init(window.GeoFirebase); },{once:true});
