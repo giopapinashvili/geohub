@@ -110,6 +110,9 @@
       uploadImageDataUrl: function(dataUrl, folder, callback){ if(callback) callback(''); return Promise.resolve(''); },
       muteUser: function(){ noop(); },
       unmuteUser: function(){ noop(); },
+      checkBlocking:  function(t, cb){ if(cb) cb(false); },
+      checkBlockedBy: function(t, cb){ if(cb) cb(false); },
+      checkMuting:    function(t, cb){ if(cb) cb(false); },
       listenReports: function(o, cb){ cb([]); return function(){}; },
       updateReportStatus: function(id, s, e, cb){ if(cb) cb(false); },
       createModerationAction: function(a, t, ty, n, cb){ if(cb) cb(false); },
@@ -418,6 +421,33 @@
         deleteDoc(doc(db, 'mutedUsers', user.uid + '_' + targetUserId))
           .then(function(){ toast('User unmuted'); if(callback) callback(true); })
           .catch(function(err){ console.error('[GeoSocial] unmuteUser', err); toast('Could not unmute user.', 'error'); });
+      });
+    }
+
+    function checkBlocking(targetUserId, callback) {
+      requireAuth(function(user){
+        if (!targetUserId) { callback(false); return; }
+        getDoc(doc(db, 'blockedUsers', user.uid + '_' + targetUserId))
+          .then(function(snap){ callback(snap.exists()); })
+          .catch(function(){ callback(false); });
+      });
+    }
+
+    function checkBlockedBy(targetUserId, callback) {
+      requireAuth(function(user){
+        if (!targetUserId) { callback(false); return; }
+        getDoc(doc(db, 'blockedUsers', targetUserId + '_' + user.uid))
+          .then(function(snap){ callback(snap.exists()); })
+          .catch(function(){ callback(false); });
+      });
+    }
+
+    function checkMuting(targetUserId, callback) {
+      requireAuth(function(user){
+        if (!targetUserId) { callback(false); return; }
+        getDoc(doc(db, 'mutedUsers', user.uid + '_' + targetUserId))
+          .then(function(snap){ callback(snap.exists()); })
+          .catch(function(){ callback(false); });
       });
     }
 
@@ -942,28 +972,39 @@
       requireAuth(function (user) {
         var me = meData() || {};
         var commentRef = null;
-        addDoc(collection(db, 'posts', postId, 'comments'), {
-          text: text.trim(),
-          authorId: user.uid,
-          userId: user.uid,
-          authorName: me.name || user.displayName || 'GeoHub User',
-          authorAvatar: me.avatar || user.photoURL || '',
-          likes: 0,
-          status: 'active',
-          createdAt: serverTimestamp()
+        var postOwnerId = null;
+        getPostOwner(postId).then(function(ownerId) {
+          postOwnerId = ownerId;
+          if (!ownerId) return { exists: function(){ return false; } };
+          return getDoc(doc(db, 'blockedUsers', ownerId + '_' + user.uid));
+        }).then(function(blockSnap) {
+          if (blockSnap && blockSnap.exists()) {
+            toast('You cannot comment on this post.', 'error');
+            if (callback) callback(null, new Error('blocked'));
+            return Promise.reject('blocked');
+          }
+          return addDoc(collection(db, 'posts', postId, 'comments'), {
+            text: text.trim(),
+            authorId: user.uid,
+            userId: user.uid,
+            authorName: me.name || user.displayName || 'GeoHub User',
+            authorAvatar: me.avatar || user.photoURL || '',
+            likes: 0,
+            status: 'active',
+            createdAt: serverTimestamp()
+          });
         }).then(function (ref) {
           commentRef = ref;
           return updateDoc(doc(db, 'posts', postId), { commentCount: increment(1) });
         }).then(function () {
-          return getPostOwner(postId).then(function (ownerId) {
-            var cid = commentRef && commentRef.id;
-            return createNotification(ownerId, 'comment', (meData() || {}).name + ' commented on your post', text.trim(), 'feed.html?post=' + postId + (cid ? '&comment=' + cid : ''), { postId: postId, commentId: cid || '' });
-          });
+          var cid = commentRef && commentRef.id;
+          return createNotification(postOwnerId, 'comment', (meData() || {}).name + ' commented on your post', text.trim(), 'feed.html?post=' + postId + (cid ? '&comment=' + cid : ''), { postId: postId, commentId: cid || '' });
         }).then(function () {
           toast('Comment posted');
           awardPoints(5, 'Comment on post', 'post', postId);
           if (callback) callback();
         }).catch(function (err) {
+          if (err === 'blocked') return;
           console.error('[GeoSocial] addComment', err);
           toast('Failed to comment.', 'error');
           if (callback) callback(null, err);
@@ -1675,16 +1716,23 @@
     function startConversation(targetUserId, callback) {
       requireAuth(function (user) {
         if (!targetUserId || targetUserId === user.uid) return;
-        var cid = conversationIdFor(user.uid, targetUserId);
-        setDoc(doc(db, 'conversations', cid), {
-          participants: [user.uid, targetUserId],
-          updatedAt: serverTimestamp(),
-          createdAt: serverTimestamp(),
-          lastMessage: '',
-          unreadFor: [],
-          readBy: {}
-        }, { merge: true }).then(function () {
-          if (callback) callback(cid);
+        Promise.all([
+          getDoc(doc(db, 'blockedUsers', user.uid + '_' + targetUserId)),
+          getDoc(doc(db, 'blockedUsers', targetUserId + '_' + user.uid))
+        ]).then(function(snaps) {
+          if (snaps[0].exists()) { toast('Unblock this user to send messages.', 'error'); return; }
+          if (snaps[1].exists()) { toast('You cannot message this user.', 'error'); return; }
+          var cid = conversationIdFor(user.uid, targetUserId);
+          return setDoc(doc(db, 'conversations', cid), {
+            participants: [user.uid, targetUserId],
+            updatedAt: serverTimestamp(),
+            createdAt: serverTimestamp(),
+            lastMessage: '',
+            unreadFor: [],
+            readBy: {}
+          }, { merge: true }).then(function () {
+            if (callback) callback(cid);
+          });
         }).catch(function (err) {
           console.error('[GeoSocial] startConversation', err);
           toast('Could not open messages.', 'error');
@@ -2224,6 +2272,9 @@
       unblockUser:             unblockUser,
       muteUser:                muteUser,
       unmuteUser:              unmuteUser,
+      checkBlocking:           checkBlocking,
+      checkBlockedBy:          checkBlockedBy,
+      checkMuting:             checkMuting,
       listenSafetyPrefs:       listenSafetyPrefs,
       reportTarget:            reportTarget,
       listenReports:           listenReports,

@@ -189,6 +189,39 @@
     if (!own && window.GeoSocial && window.GeoSocial.listenFriendshipStatus) {
       window.GeoSocial.listenFriendshipStatus(user.uid, status => updateFriendButtons(user.uid, status));
     }
+    if (!own && window.GeoSocial) {
+      if (window.GeoSocial.checkBlocking) {
+        window.GeoSocial.checkBlocking(user.uid, function(amBlocking) {
+          const btn = document.querySelector('[data-block-user="' + user.uid + '"]');
+          if (!btn || !amBlocking) return;
+          btn.setAttribute('data-unblock-user', user.uid);
+          btn.removeAttribute('data-block-user');
+          btn.innerHTML = '<i class="fas fa-ban" style="color:#f87171"></i>';
+          btn.title = 'Unblock';
+        });
+      }
+      if (window.GeoSocial.checkMuting) {
+        window.GeoSocial.checkMuting(user.uid, function(amMuting) {
+          const btn = document.querySelector('[data-mute-user="' + user.uid + '"]');
+          if (!btn || !amMuting) return;
+          btn.setAttribute('data-unmute-user', user.uid);
+          btn.removeAttribute('data-mute-user');
+          btn.innerHTML = '<i class="fas fa-volume-up" style="color:#f59e0b"></i>';
+          btn.title = 'Unmute';
+        });
+      }
+      if (window.GeoSocial.checkBlockedBy) {
+        window.GeoSocial.checkBlockedBy(user.uid, function(blockedByThem) {
+          if (!blockedByThem) return;
+          const msgBtn = document.querySelector('[data-message-user]');
+          const friendBtn = document.querySelector('[data-friend-user]');
+          const followBtn = document.querySelector('[data-follow-user]');
+          if (msgBtn) msgBtn.style.display = 'none';
+          if (friendBtn) friendBtn.style.display = 'none';
+          if (followBtn) followBtn.style.display = 'none';
+        });
+      }
+    }
     renderStats(user);
     refreshRealStats(user);
     renderStaticEmptyStates(user);
@@ -638,6 +671,32 @@
     if (e.target.closest('[data-edit-profile]')) {
       e.preventDefault();
       openEditProfileModal();
+    }
+    const unblockBtn = e.target.closest('[data-unblock-user]');
+    if (unblockBtn) {
+      e.preventDefault();
+      const target = unblockBtn.dataset.unblockUser;
+      if (window.GeoSocial && window.GeoSocial.unblockUser) {
+        window.GeoSocial.unblockUser(target, function() {
+          unblockBtn.setAttribute('data-block-user', target);
+          unblockBtn.removeAttribute('data-unblock-user');
+          unblockBtn.innerHTML = '<i class="fas fa-ban"></i>';
+          unblockBtn.title = 'Block';
+        });
+      }
+    }
+    const unmuteBtn = e.target.closest('[data-unmute-user]');
+    if (unmuteBtn) {
+      e.preventDefault();
+      const target = unmuteBtn.dataset.unmuteUser;
+      if (window.GeoSocial && window.GeoSocial.unmuteUser) {
+        window.GeoSocial.unmuteUser(target, function() {
+          unmuteBtn.setAttribute('data-mute-user', target);
+          unmuteBtn.removeAttribute('data-unmute-user');
+          unmuteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+          unmuteBtn.title = 'Mute';
+        });
+      }
     }
     const reportBtn = e.target.closest('[data-report-user]');
     if (reportBtn) {

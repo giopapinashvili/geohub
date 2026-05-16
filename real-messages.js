@@ -10,6 +10,7 @@
   let unsubConvs = null;
   let unsubMsgs = null;
   let unsubReactions = null;
+  let unsubSafety = null;
   let sendingMessage = false;
   let reactionState = {};
 
@@ -48,14 +49,16 @@
   async function renderConvs(convs){
     const list=$('#convList');
     if(!list) return;
-    if(!convs.length){
+    const blockedIds = window._ghBlockedUserIds || [];
+    const visibleConvs = blockedIds.length ? convs.filter(c=>{ const oid=otherId(c); return !oid||!blockedIds.includes(oid); }) : convs;
+    if(!visibleConvs.length){
       list.innerHTML='<div class="conv-empty"><i class="fas fa-inbox"></i><p>No conversations yet</p></div>';
       updateMsgBadge(0);
       return;
     }
     const rows=[];
     let unreadCount=0;
-    for(const c of convs){
+    for(const c of visibleConvs){
       const oid=otherId(c);
       const u=await userInfo(oid);
       const unread = Array.isArray(c.unreadFor) && c.unreadFor.includes(currentUid());
@@ -320,6 +323,13 @@
     showConvLoading();
     renderComposer();
     bindClicks();
+    if(window.GeoSocial && window.GeoSocial.listenSafetyPrefs) {
+      if(unsubSafety) try{unsubSafety();}catch(e){}
+      unsubSafety = window.GeoSocial.listenSafetyPrefs(function(prefs){
+        window._ghBlockedUserIds = prefs.blockedUserIds || [];
+        if(window.__geohubLastConvs) renderConvs(window.__geohubLastConvs);
+      });
+    }
     const target=new URLSearchParams(location.search).get('with');
     if(target){ window.GeoSocial.startConversation(target, cid=>openConversation(cid)); }
     if(unsubConvs) unsubConvs();
@@ -333,6 +343,7 @@
       if(unsubConvs){ try{ unsubConvs(); }catch(e){} unsubConvs=null; }
       if(unsubMsgs){ try{ unsubMsgs(); }catch(e){} unsubMsgs=null; }
       if(unsubReactions){ try{ unsubReactions(); }catch(e){} unsubReactions=null; }
+      if(unsubSafety){ try{ unsubSafety(); }catch(e){} unsubSafety=null; }
     }, {once:true});
   }
 
@@ -363,7 +374,8 @@
       const snap=await gf.fs.getDocs(gf.fs.query(gf.fs.collection(gf.db,'users'), gf.fs.limit(40)));
       const me=gf.auth&&gf.auth.currentUser&&gf.auth.currentUser.uid;
       const rows=[];
-      snap.forEach(d=>{ const u=Object.assign({id:d.id}, d.data()||{}); const hay=[u.fullName,u.name,u.username,u.email].filter(Boolean).join(' ').toLowerCase(); if(u.id!==me && hay.includes(q)) rows.push(u); });
+      const blockedIds = window._ghBlockedUserIds || [];
+      snap.forEach(d=>{ const u=Object.assign({id:d.id}, d.data()||{}); const hay=[u.fullName,u.name,u.username,u.email].filter(Boolean).join(' ').toLowerCase(); if(u.id!==me && !blockedIds.includes(u.id) && hay.includes(q)) rows.push(u); });
       if(!rows.length){ box.innerHTML='<div style="color:var(--text-muted);font-size:.85rem;padding:8px 0">No matching users.</div>'; return; }
       box.innerHTML=rows.slice(0,12).map(u=>'<button type="button" class="new-conversation-user" data-start-user="'+esc(u.id)+'"><span>'+(u.avatar||u.photoURL?'<img src="'+esc(u.avatar||u.photoURL)+'" alt="" loading="lazy">':esc(((u.fullName||u.name||u.email||'?')[0]||'?').toUpperCase()))+'</span><strong>'+esc(u.fullName||u.name||u.username||u.email||'User')+'</strong><small>'+esc(u.email||('@'+(u.username||'')))+'</small></button>').join('');
     }catch(err){ console.error('[Messages] user search failed', err); box.innerHTML='<div style="color:var(--text-muted);font-size:.85rem">Search failed: '+esc(err.message)+'</div>'; }

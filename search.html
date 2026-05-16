@@ -345,6 +345,10 @@
       GS.searchFirestore(q, function(results) {
         if (document.getElementById('srchInput').value.trim() !== q) return;
         saveRecent(q);
+        var blocked = window._ghSrchBlockedIds || [];
+        if (blocked.length && results.users) {
+          results = Object.assign({}, results, { users: results.users.filter(function(u){ return blocked.indexOf(u.id) === -1; }) });
+        }
         renderResults(results, q);
       });
     }
@@ -373,9 +377,6 @@
       if (e.key === 'Escape') { this.value = ''; clearBtn.classList.remove('visible'); showDiscover(); }
     });
 
-    /* ── Cleanup ── */
-    window.addEventListener('pagehide', function() { clearTimeout(_debounce); });
-
     /* ── Init ── */
     function handleTabParam() {
       var tabParam = new URLSearchParams(location.search).get('tab');
@@ -383,6 +384,21 @@
     }
 
     buildTabs();
+    function setupSafetyPrefs() {
+      var GS = window.GeoSocial;
+      if (GS && GS.listenSafetyPrefs) {
+        GS.listenSafetyPrefs(function(prefs) {
+          window._ghSrchBlockedIds = prefs.blockedUserIds || [];
+          if (_lastResults) {
+            var q = document.getElementById('srchInput').value.trim();
+            if (q) renderResults(_lastResults, q);
+          }
+        });
+      }
+    }
+    if (window.GeoSocial) { setupSafetyPrefs(); }
+    else { window.addEventListener('GeoSocialReady', setupSafetyPrefs, { once: true }); }
+    window.addEventListener('pagehide', function() { clearTimeout(_debounce); });
     var initQ = new URLSearchParams(location.search).get('q') || '';
     if (initQ) {
       inp.value = initQ;

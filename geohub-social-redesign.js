@@ -7,7 +7,7 @@
 
   var PATH = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   var PAGE = document.body && document.body.dataset ? document.body.dataset.ghPage : '';
-  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null };
+  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null };
 
   /* ── User cache (instant topbar, no flash) ──────────────── */
   var USER_CACHE_KEY = 'gh_uc1';
@@ -236,6 +236,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var author = p.authorId || p.userId || p.createdByUserId || p.createdBy || '';
     if(p.id && state.hiddenPostIds.indexOf(p.id) > -1) return false;
     if(author && state.blockedUserIds.indexOf(author) > -1) return false;
+    if(author && state.mutedUserIds.indexOf(author) > -1) return false;
     var visibility = (p.visibility || 'public').toLowerCase();
     if(visibility === 'onlyme' || visibility === 'only_me') return !!(u && author === u.uid);
     if(visibility === 'friends') return !!(u && (author === u.uid || state.friendIds.indexOf(author) > -1));
@@ -525,8 +526,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       $('#ghMarkAllRead').onclick=function(){ markVisibleNotificationsRead(); };
       var unsub = GS().listenUserNotifications(uid, function(items){
         var box=$('#ghNotifList'); if(!box) return;
-        if(!items.length){ box.innerHTML='<div class="gh-empty"><i class="fas fa-bell"></i><h3>No notifications</h3><p>Likes, comments, messages and requests will appear here.</p></div>'; return; }
-        box.innerHTML='<div class="gh-mini-list">'+items.slice(0,30).map(function(n){
+        var visibleNotifs=items.filter(function(n){ var actor=n.actorId||n.fromUserId||n.senderId||n.authorId||''; return !actor||state.blockedUserIds.indexOf(actor)===-1; });
+        if(!visibleNotifs.length){ box.innerHTML='<div class="gh-empty"><i class="fas fa-bell"></i><h3>No notifications</h3><p>Likes, comments, messages and requests will appear here.</p></div>'; return; }
+        box.innerHTML='<div class="gh-mini-list">'+visibleNotifs.slice(0,30).map(function(n){
           var ic=GH_NOTIF_ICONS[n.type]||{icon:'fa-bell',color:'#10b981'};
           return '<a class="gh-mini-item '+(!n.read?'unread':'')+'" href="'+esc(n.href||'feed.html')+'" data-notif="'+esc(n.id)+'">'+
             '<span class="gh-mini-thumb" style="color:'+ic.color+'"><i class="fas '+ic.icon+'"></i></span>'+
@@ -925,9 +927,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(state.postsUnsubs[pid]) return;
     var list=card.querySelector('[data-comments-list]');
     state.postsUnsubs[pid]=GS().listenComments(pid,function(items){
-      if(!items.length){ list.innerHTML='<div class="gh-small" style="padding:10px 6px">No comments yet.</div>'; return; }
-      list.innerHTML=items.map(function(c){ return commentCard(pid,c); }).join('');
-      items.forEach(function(c){ loadReplies(pid,c.id); });
+      var visible=items.filter(function(c){
+        var uid=c.authorId||c.userId||'';
+        return !uid||(state.blockedUserIds.indexOf(uid)===-1&&state.mutedUserIds.indexOf(uid)===-1);
+      });
+      if(!visible.length){ list.innerHTML='<div class="gh-small" style="padding:10px 6px">No comments yet.</div>'; return; }
+      list.innerHTML=visible.map(function(c){ return commentCard(pid,c); }).join('');
+      visible.forEach(function(c){ loadReplies(pid,c.id); });
     });
   }
 
@@ -951,8 +957,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(!GS().listenCommentReplies) return;
     state.replyUnsubs[key]=GS().listenCommentReplies(pid,cid,function(items){
       var box=document.querySelector('[data-post-id="'+CSS.escape(pid)+'"] [data-replies-for="'+CSS.escape(cid)+'"]'); if(!box) return;
-      if(!items.length){ box.innerHTML=''; return; }
-      box.innerHTML=items.map(function(r){ var name=r.authorName||'User'; var uid=r.authorId||r.userId||''; var av=(r.authorAvatar?img(r.authorAvatar,name):esc(initials(name))); return '<div class="gh-reply-row">'+userProfileAnchor(uid,'gh-avatar gh-profile-avatar-link',av,'Open '+name+' profile').replace('class="gh-avatar gh-profile-avatar-link"','class="gh-avatar gh-profile-avatar-link" style="width:26px;height:26px"')+'<div><div class="gh-comment-bubble"><strong>'+userProfileAnchor(uid,'gh-profile-name-link',esc(name),'Open '+name+' profile')+'</strong><span>'+esc(r.text||'')+'</span></div><div class="gh-small" style="padding-left:8px;margin-top:3px">'+timeAgo(r.createdAt)+'</div></div></div>'; }).join('');
+      var visible=items.filter(function(r){ var uid=r.authorId||r.userId||''; return !uid||(state.blockedUserIds.indexOf(uid)===-1&&state.mutedUserIds.indexOf(uid)===-1); });
+      if(!visible.length){ box.innerHTML=''; return; }
+      box.innerHTML=visible.map(function(r){ var name=r.authorName||'User'; var uid=r.authorId||r.userId||''; var av=(r.authorAvatar?img(r.authorAvatar,name):esc(initials(name))); return '<div class="gh-reply-row">'+userProfileAnchor(uid,'gh-avatar gh-profile-avatar-link',av,'Open '+name+' profile').replace('class="gh-avatar gh-profile-avatar-link"','class="gh-avatar gh-profile-avatar-link" style="width:26px;height:26px"')+'<div><div class="gh-comment-bubble"><strong>'+userProfileAnchor(uid,'gh-profile-name-link',esc(name),'Open '+name+' profile')+'</strong><span>'+esc(r.text||'')+'</span></div><div class="gh-small" style="padding-left:8px;margin-top:3px">'+timeAgo(r.createdAt)+'</div></div></div>'; }).join('');
     });
   }
 
@@ -1023,6 +1030,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     state.safetyUnsub = GS().listenSafetyPrefs(function(prefs){
       state.hiddenPostIds = prefs.hiddenPostIds || [];
       state.blockedUserIds = prefs.blockedUserIds || [];
+      state.mutedUserIds = prefs.mutedUserIds || [];
       if(typeof onChange === 'function') onChange();
     });
   }
