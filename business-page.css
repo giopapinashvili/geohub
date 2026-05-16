@@ -2,9 +2,43 @@
    GeoHub — Business Page (Premium Social Business Page)
    ================================================================ */
 
+/* ── CSS DESIGN TOKENS (navbar.css depends on these) ─────────── */
+/* Defined here because business.html does not load styles.css.  */
+:root {
+  --navbar-height:    68px;
+  --z-navbar:         9990;
+  --sp-6:             24px;
+  --bg:               #04050d;
+  --bg-elevated:      rgba(255,255,255,.08);
+  --bg-hover:         rgba(255,255,255,.06);
+  --border:           rgba(255,255,255,.08);
+  --border-subtle:    rgba(255,255,255,.04);
+  --text-primary:     #f1f5f9;
+  --text-secondary:   #94a3b8;
+  --green:            #10b981;
+  --green-hover:      #059669;
+  --red:              #ef4444;
+  --radius-sm:        8px;
+  --transition:       0.15s ease;
+  --gradient-brand:   linear-gradient(135deg, #10b981, #064e3b);
+  --shadow-green:     0 0 20px rgba(16,185,129,.2);
+  --glass-blur:       blur(20px);
+  --border-focus:     rgba(16,185,129,.5);
+}
+
 /* ── BODY / ROOT ─────────────────────────────────────────────── */
 body.biz-detail-active > *:not(#biz-detail-root):not(.navbar):not(.mobile-menu):not(#geo-sw-wrap):not(#geo-sw-dropdown):not(#app-bottom-nav):not(#app-action-overlay):not(#app-action-sheet):not(.app-notif-container):not(#geo-cmd-overlay):not(#app-install-prompt):not(#gh-offline-banner):not(#gh-update-banner):not(script):not(noscript) {
   display: none !important;
+}
+
+/* geohub-social-redesign.css sets body.gh-social-body .navbar { display:none!important }.
+   Override it with higher specificity when the business detail page is active. */
+body.biz-detail-active .navbar,
+body.biz-detail-active .navbar.navbar {
+  display: flex !important;
+}
+body.biz-detail-active .mobile-menu {
+  display: block !important;
 }
 
 #biz-detail-root {
@@ -355,8 +389,8 @@ body.biz-detail-active > *:not(#biz-detail-root):not(.navbar):not(.mobile-menu):
 
 .biz-left-sidebar {
   position: sticky;
-  top: 60px;
-  max-height: calc(100vh - 80px);
+  top: calc(var(--navbar-height, 68px) + 48px);
+  max-height: calc(100vh - calc(var(--navbar-height, 68px) + 60px));
   overflow-y: auto;
   scrollbar-width: none;
   display: flex;
@@ -369,8 +403,8 @@ body.biz-detail-active > *:not(#biz-detail-root):not(.navbar):not(.mobile-menu):
 
 .biz-right-sidebar {
   position: sticky;
-  top: 60px;
-  max-height: calc(100vh - 80px);
+  top: calc(var(--navbar-height, 68px) + 48px);
+  max-height: calc(100vh - calc(var(--navbar-height, 68px) + 60px));
   overflow-y: auto;
   scrollbar-width: none;
   display: flex;
