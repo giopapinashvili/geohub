@@ -106,7 +106,7 @@ service cloud.firestore {
 
     // Business owner of the post's business can moderate comments.
     function isBizOwnerOfPost(postId) {
-      var bizId = get(/databases/$(database)/documents/posts/$(postId)).data.get('businessId', '');
+      let bizId = get(/databases/$(database)/documents/posts/$(postId)).data.get('businessId', '');
       return bizId != '' && isBizOwner(bizId);
     }
 
