@@ -80,6 +80,14 @@ service cloud.firestore {
         ]);
     }
 
+    // Fields a post owner/business owner may edit after creation.
+    function onlyPostManagementFields() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'text', 'status', 'visibility', 'commentsDisabled',
+        'pinned', 'updatedAt'
+      ]);
+    }
+
     function onlyBusinessCountersChanged() {
       return signedIn()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
@@ -221,8 +229,17 @@ service cloud.firestore {
         // If the post claims a businessId, the poster must own that business.
         && (request.resource.data.get('businessId', '') == ''
             || isBizOwner(request.resource.data.get('businessId', '')));
-      allow update: if isAdmin() || existingOwnerMatches() || onlyCountersChanged();
-      allow delete: if isAdmin() || existingOwnerMatches();
+      allow update: if isAdmin()
+        || onlyCountersChanged()
+        || (existingOwnerMatches() && onlyPostManagementFields())
+        // Business owner may manage any post on their page (edit text, status, visibility, etc.)
+        || (isBizOwner(resource.data.get('businessId', ''))
+            && resource.data.get('businessId', '') != ''
+            && onlyPostManagementFields());
+      allow delete: if isAdmin()
+        || existingOwnerMatches()
+        || (isBizOwner(resource.data.get('businessId', ''))
+            && resource.data.get('businessId', '') != '');
 
       match /comments/{commentId} {
         allow read: if true;

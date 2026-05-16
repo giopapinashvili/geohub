@@ -18,6 +18,7 @@
   var _previewMode   = false;
   var _postReactions = {}; // { postId: { key, emoji, loaded } }
   var _sharePostId   = null;
+  var _editPostId    = null;
   var _rxLongTimer   = null;
 
   var REACTIONS = [
@@ -61,6 +62,12 @@
     for(var j=0;j<empty;j++) out+='☆';
     return out+'</span>';
   }
+  function canManagePost(post) {
+    if (!_currentUser) return false;
+    // Business owner can manage any post on their page; post author can manage their own
+    return _isOwner || (post && post.authorId === _currentUser.uid);
+  }
+
   function isOpenNow(wh) {
     if (!wh) return null;
     var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -523,15 +530,87 @@
       cmtAvHtml = '<span class="biz-cmt-av biz-cmt-av-guest"><i class="fas fa-user"></i></span>';
     }
 
-    return '<div class="biz-post-card" data-post-id="'+pid+'">'+
+    // Visibility icon
+    var visIcon = { 'followers':'<i class="fas fa-user-group"></i>', 'private':'<i class="fas fa-lock"></i>' }[post.visibility] || '';
+    var visBadge = visIcon ? '<span class="biz-vis-badge">'+visIcon+'</span>' : '';
+
+    // Owner menu
+    var menuHtml = '';
+    if (canManagePost(post)) {
+      var isPinned = !!post.pinned;
+      var cmtOff   = !!post.commentsDisabled;
+      var vis      = post.visibility || 'public';
+      menuHtml =
+        '<div class="biz-post-menu-wrap">'+
+          '<button class="biz-post-menu-btn" title="Post options" '+
+            'onclick="event.stopPropagation();window._bizActions.openPostMenu(\''+pid+'\',this)">'+
+            '<i class="fas fa-ellipsis"></i>'+
+          '</button>'+
+          '<div class="biz-post-menu-dropdown" id="biz-pmenu-'+pid+'">'+
+            '<button class="biz-pmenu-item" onclick="window._bizActions.editPost(\''+pid+'\')"><i class="fas fa-pen"></i> Edit post</button>'+
+            '<button class="biz-pmenu-item" onclick="window._bizActions.pinPost(\''+pid+'\')">'+
+              '<i class="fas fa-thumbtack"></i> '+(isPinned?'Unpin post':'Pin post')+
+            '</button>'+
+            '<div class="biz-pmenu-sep"></div>'+
+            '<button class="biz-pmenu-item" onclick="window._bizActions.togglePostComments(\''+pid+'\')">'+
+              '<i class="fas fa-comment-slash"></i> '+(cmtOff?'Enable comments':'Disable comments')+
+            '</button>'+
+            '<div class="biz-pmenu-sep"></div>'+
+            '<button class="biz-pmenu-item" onclick="window._bizActions.setPostVisibility(\''+pid+'\',\'public\')">'+
+              '<i class="fas fa-globe"></i> Public'+(vis==='public'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+
+            '</button>'+
+            '<button class="biz-pmenu-item" onclick="window._bizActions.setPostVisibility(\''+pid+'\',\'followers\')">'+
+              '<i class="fas fa-user-group"></i> Followers only'+(vis==='followers'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+
+            '</button>'+
+            '<button class="biz-pmenu-item" onclick="window._bizActions.setPostVisibility(\''+pid+'\',\'private\')">'+
+              '<i class="fas fa-lock"></i> Private'+(vis==='private'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+
+            '</button>'+
+            '<div class="biz-pmenu-sep"></div>'+
+            '<button class="biz-pmenu-item danger" onclick="window._bizActions.deletePost(\''+pid+'\')"><i class="fas fa-trash"></i> Delete post</button>'+
+          '</div>'+
+        '</div>';
+    }
+
+    // Comment section inner
+    var cmtInner;
+    if (post.commentsDisabled) {
+      cmtInner =
+        '<div class="biz-cmt-thread" id="biz-cmt-list-'+pid+'"></div>'+
+        '<div class="biz-cmt-off"><i class="fas fa-comment-slash"></i> Comments are turned off.</div>';
+    } else {
+      cmtInner =
+        '<div class="biz-cmt-thread" id="biz-cmt-list-'+pid+'">'+
+          '<div class="biz-cmt-empty">No comments yet.</div>'+
+        '</div>'+
+        '<div class="biz-cmt-composer">'+
+          cmtAvHtml+
+          '<div class="biz-cmt-input-wrap">'+
+            '<textarea class="biz-cmt-textarea" placeholder="Write a comment…" rows="1" '+
+              'oninput="this.style.height=\'auto\';this.style.height=Math.min(this.scrollHeight,120)+\'px\'" '+
+              'onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();window._bizActions.submitBizComment(\''+pid+'\',this);}">'+
+            '</textarea>'+
+            '<button class="biz-cmt-send-btn" type="button" '+
+              'onclick="window._bizActions.submitBizComment(\''+pid+'\',this.parentNode.querySelector(\'textarea\'))">'+
+              '<i class="fas fa-paper-plane"></i>'+
+            '</button>'+
+          '</div>'+
+        '</div>';
+    }
+
+    return '<div class="biz-post-card" data-post-id="'+pid+'"'+
+        (post.pinned ? ' data-pinned="1"' : '')+
+        ' data-vis="'+esc(post.visibility||'public')+'"'+'>'+
+      (post.pinned ? '<div class="biz-post-pinned"><i class="fas fa-thumbtack"></i> Pinned post</div>' : '')+
       '<div class="biz-post-header">'+
         '<div class="biz-post-logo">'+logo+'</div>'+
         '<div class="biz-post-meta">'+
           '<div class="biz-post-name">'+esc(biz.title||'Business')+
             ((biz.verified||biz.status==='verified')?' <i class="fas fa-check-circle" style="color:#34d399;font-size:.72rem"></i>':'')+
+            visBadge+
           '</div>'+
           '<div class="biz-post-time">'+timeAgo(post.createdAt)+' · <i class="fas fa-earth-americas" style="font-size:.7rem;opacity:.6"></i></div>'+
         '</div>'+
+        menuHtml+
       '</div>'+
       (post.text ? '<div class="biz-post-text">'+esc(post.text)+'</div>' : '')+
       mediaHtml+
@@ -552,22 +631,7 @@
         '<button class="biz-react-btn" onclick="window._bizActions.openShareModal(\''+pid+'\')"><i class="fas fa-share-nodes"></i> Share</button>'+
       '</div>'+
       '<div class="biz-cmt-section" id="biz-cmt-'+pid+'" style="display:none">'+
-        '<div class="biz-cmt-thread" id="biz-cmt-list-'+pid+'">'+
-          '<div class="biz-cmt-empty">No comments yet.</div>'+
-        '</div>'+
-        '<div class="biz-cmt-composer">'+
-          cmtAvHtml+
-          '<div class="biz-cmt-input-wrap">'+
-            '<textarea class="biz-cmt-textarea" placeholder="Write a comment…" rows="1" '+
-              'oninput="this.style.height=\'auto\';this.style.height=Math.min(this.scrollHeight,120)+\'px\'" '+
-              'onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();window._bizActions.submitBizComment(\''+pid+'\',this);}">'+
-            '</textarea>'+
-            '<button class="biz-cmt-send-btn" type="button" '+
-              'onclick="window._bizActions.submitBizComment(\''+pid+'\',this.parentNode.querySelector(\'textarea\'))">'+
-              '<i class="fas fa-paper-plane"></i>'+
-            '</button>'+
-          '</div>'+
-        '</div>'+
+        cmtInner+
       '</div>'+
     '</div>';
   }
@@ -816,6 +880,35 @@
 
   // ── MAIN RENDER ───────────────────────────────────────────────
 
+  // ── EDIT POST MODAL ───────────────────────────────────────────
+
+  function renderEditModal() {
+    return '<div class="biz-modal-overlay" id="biz-edit-modal">'+
+      '<div class="biz-modal-sheet" id="biz-edit-sheet">'+
+        '<div class="biz-modal-handle"></div>'+
+        '<button class="biz-modal-close" onclick="window._bizActions.closeEditModal()"><i class="fas fa-times"></i></button>'+
+        '<div class="biz-modal-title">Edit Post</div>'+
+        '<div class="biz-modal-sub" style="margin-bottom:16px">Changes are visible immediately</div>'+
+        '<textarea class="biz-edit-textarea" id="biz-edit-textarea" placeholder="What\'s on your mind?" rows="4"></textarea>'+
+        '<div class="biz-edit-vis-row">'+
+          '<i class="fas fa-globe" style="color:#64748b"></i>'+
+          '<span>Visibility:</span>'+
+          '<select id="biz-edit-vis">'+
+            '<option value="public">Public</option>'+
+            '<option value="followers">Followers only</option>'+
+            '<option value="private">Private</option>'+
+          '</select>'+
+        '</div>'+
+        '<div class="biz-edit-footer">'+
+          '<button class="biz-cancel-btn" onclick="window._bizActions.closeEditModal()">Cancel</button>'+
+          '<button class="biz-submit-btn" id="biz-edit-save-btn" onclick="window._bizActions.savePostEdit()">'+
+            '<i class="fas fa-check"></i> Save'+
+          '</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }
+
   // ── SHARE MODAL ───────────────────────────────────────────────
 
   function renderShareModal() {
@@ -944,6 +1037,7 @@
       (_isOwner?renderComposeModal(biz):'')+
       (_isOwner?renderBlockManagerModal():'')+
       renderShareModal()+
+      renderEditModal()+
       renderLightbox()+
       (_isOwner?'<div class="biz-preview-fab" id="biz-preview-fab" style="display:none">'+
         '<button onclick="window._bizActions.togglePreview()" title="Exit Preview Mode">'+
@@ -984,8 +1078,19 @@
     _fs.getDocs(q).then(function(snap) {
       var posts = [];
       snap.forEach(function(d){ posts.push(Object.assign({id:d.id}, d.data())); });
-      // Sort newest-first client-side
+
+      // Filter deleted and visibility-restricted posts
+      posts = posts.filter(function(p) {
+        if (p.status === 'deleted') return false;
+        if (p.visibility === 'private'   && !_isOwner) return false;
+        if (p.visibility === 'followers' && !_isOwner && !_isFollowing) return false;
+        return true;
+      });
+
+      // Sort: pinned first, then newest-first
       posts.sort(function(a,b){
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return  1;
         var ta = a.createdAt ? (a.createdAt.seconds || (a.createdAt.toMillis ? a.createdAt.toMillis()/1000 : 0)) : 0;
         var tb = b.createdAt ? (b.createdAt.seconds || (b.createdAt.toMillis ? b.createdAt.toMillis()/1000 : 0)) : 0;
         return tb - ta;
@@ -1376,6 +1481,147 @@
 
     // kept for backward compat with any cached cards
     likePost: function(postId) { window._bizActions.toggleReaction(postId); },
+
+    // ── Post owner menu ───────────────────────────────────────────
+    openPostMenu: function(postId, btnEl) {
+      // Close all other open menus first
+      document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){
+        if (d.id !== 'biz-pmenu-'+postId) d.classList.remove('open');
+      });
+      var dd = document.getElementById('biz-pmenu-' + postId);
+      if (!dd) return;
+      var isOpen = dd.classList.contains('open');
+      dd.classList.toggle('open', !isOpen);
+      if (!isOpen) {
+        // Close on next outside click
+        setTimeout(function(){
+          document.addEventListener('click', function _h(e){
+            if (!e.target.closest || !e.target.closest('.biz-post-menu-wrap')) {
+              document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
+            }
+            document.removeEventListener('click', _h);
+          });
+        }, 0);
+      }
+    },
+
+    // ── Edit post ─────────────────────────────────────────────────
+    editPost: function(postId) {
+      document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
+      var card = document.querySelector('[data-post-id="'+CSS.escape(postId)+'"]');
+      if (!card) return;
+      var textEl = card.querySelector('.biz-post-text');
+      var currentText = textEl ? textEl.textContent : '';
+      // Infer current visibility from the card's data-vis or the post — fall back to 'public'
+      var currentVis = card.dataset.vis || 'public';
+      _editPostId = postId;
+      var modal = document.getElementById('biz-edit-modal');
+      var ta    = document.getElementById('biz-edit-textarea');
+      var sel   = document.getElementById('biz-edit-vis');
+      if (!modal || !ta) return;
+      ta.value = currentText;
+      if (sel) sel.value = currentVis;
+      modal.classList.add('open');
+      setTimeout(function(){ ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }, 80);
+    },
+
+    closeEditModal: function() {
+      _editPostId = null;
+      var modal = document.getElementById('biz-edit-modal');
+      if (modal) modal.classList.remove('open');
+    },
+
+    savePostEdit: function() {
+      if (!_editPostId) return;
+      var ta  = document.getElementById('biz-edit-textarea');
+      var sel = document.getElementById('biz-edit-vis');
+      var btn = document.getElementById('biz-edit-save-btn');
+      if (!ta) return;
+      var newText = ta.value.trim();
+      var newVis  = sel ? sel.value : 'public';
+      if (!newText) { showToast('Post text cannot be empty', false); return; }
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
+      var postId = _editPostId;
+      _fs.updateDoc(_fs.doc(_db,'posts',postId), {
+        text: newText, visibility: newVis, updatedAt: _fs.serverTimestamp()
+      }).then(function(){
+        window._bizActions.closeEditModal();
+        showToast('Post updated');
+        // Update card in place
+        var card = document.querySelector('[data-post-id="'+CSS.escape(postId)+'"]');
+        if (card) {
+          var textEl = card.querySelector('.biz-post-text');
+          if (textEl) textEl.textContent = newText;
+          card.dataset.vis = newVis;
+        }
+      }).catch(function(err){
+        showToast('Could not save: '+(err.code||err.message), false);
+      }).finally(function(){
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Save'; }
+      });
+    },
+
+    // ── Delete post ───────────────────────────────────────────────
+    deletePost: function(postId) {
+      document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
+      if (!_currentUser) return;
+      if (!confirm('Delete this post? This cannot be undone.')) return;
+      _fs.updateDoc(_fs.doc(_db,'posts',postId), {
+        status: 'deleted', updatedAt: _fs.serverTimestamp()
+      }).then(function(){
+        showToast('Post deleted');
+        // Remove card from all lists
+        document.querySelectorAll('[data-post-id="'+CSS.escape(postId)+'"]').forEach(function(el){
+          el.style.transition = 'opacity .25s';
+          el.style.opacity = '0';
+          setTimeout(function(){ el.remove(); }, 260);
+        });
+      }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+    },
+
+    // ── Toggle comments ───────────────────────────────────────────
+    togglePostComments: function(postId) {
+      document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
+      if (!_currentUser) return;
+      // Read current state from the card's comment section
+      var cmt = document.getElementById('biz-cmt-' + postId);
+      var isOff = cmt && !!cmt.querySelector('.biz-cmt-off');
+      var newVal = !isOff;
+      _fs.updateDoc(_fs.doc(_db,'posts',postId), {
+        commentsDisabled: newVal, updatedAt: _fs.serverTimestamp()
+      }).then(function(){
+        showToast(newVal ? 'Comments disabled' : 'Comments enabled');
+        // Reload posts to reflect new state
+        loadBizPosts();
+      }).catch(function(err){ showToast('Could not update: '+(err.code||err.message), false); });
+    },
+
+    // ── Pin / unpin ───────────────────────────────────────────────
+    pinPost: function(postId) {
+      document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
+      if (!_currentUser) return;
+      var card = document.querySelector('[data-post-id="'+CSS.escape(postId)+'"]');
+      var isPinned = card && card.dataset.pinned === '1';
+      _fs.updateDoc(_fs.doc(_db,'posts',postId), {
+        pinned: !isPinned, updatedAt: _fs.serverTimestamp()
+      }).then(function(){
+        showToast(isPinned ? 'Post unpinned' : 'Post pinned');
+        loadBizPosts();
+      }).catch(function(err){ showToast('Could not update: '+(err.code||err.message), false); });
+    },
+
+    // ── Set visibility ────────────────────────────────────────────
+    setPostVisibility: function(postId, vis) {
+      document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
+      if (!_currentUser) return;
+      _fs.updateDoc(_fs.doc(_db,'posts',postId), {
+        visibility: vis, updatedAt: _fs.serverTimestamp()
+      }).then(function(){
+        var labels = { public:'Public', followers:'Followers only', private:'Private' };
+        showToast('Visibility: '+(labels[vis]||vis));
+        loadBizPosts();
+      }).catch(function(err){ showToast('Could not update: '+(err.code||err.message), false); });
+    },
 
     openQuote: function() {
       if(!_currentUser){ showToast('Sign in to request a quote',false); window.location.href='auth.html'; return; }
