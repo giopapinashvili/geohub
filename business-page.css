@@ -1161,8 +1161,69 @@ body.biz-detail-active > *:not(#biz-detail-root):not(#app-bottom-nav):not(#app-a
 .biz-modal-close  { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,.07); border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #94a3b8; font-size: .9rem; }
 .biz-modal-close:hover { background: rgba(255,255,255,.12); color: #f1f5f9; }
 
-.biz-compose-textarea { width: 100%; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 12px 14px; color: #f1f5f9; font-size: .92rem; font-family: inherit; resize: none; min-height: 110px; margin-bottom: 14px; box-sizing: border-box; }
+.biz-compose-textarea { width: 100%; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 12px 14px; color: #f1f5f9; font-size: .92rem; font-family: inherit; resize: none; min-height: 110px; margin-bottom: 10px; box-sizing: border-box; }
 .biz-compose-textarea:focus { outline: none; border-color: #10b981; }
+
+.biz-compose-photos {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.biz-compose-photo-thumb {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.12);
+  flex-shrink: 0;
+}
+.biz-compose-photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.biz-compose-photo-thumb button {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.72);
+  border: none;
+  color: #fff;
+  font-size: .6rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.biz-compose-photo-thumb button:hover { background: rgba(239,68,68,.8); }
+
+.biz-compose-media-bar {
+  display: flex;
+  gap: 8px;
+  padding: 10px 0 14px;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+
+.biz-compose-media-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: rgba(16,185,129,.08);
+  border: 1px solid rgba(16,185,129,.2);
+  border-radius: 8px;
+  color: #34d399;
+  font-size: .8rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+}
+.biz-compose-media-btn:hover { background: rgba(16,185,129,.16); border-color: rgba(16,185,129,.35); }
+
 .biz-compose-footer { display: flex; gap: 10px; justify-content: flex-end; }
 
 /* ── LIGHTBOX ────────────────────────────────────────────────── */

@@ -615,6 +615,11 @@
         '<div class="biz-modal-title">Create Post</div>'+
         '<div class="biz-modal-sub">Posting as <strong>'+esc(biz.title||'your business')+'</strong></div>'+
         '<textarea class="biz-compose-textarea" id="biz-compose-text" placeholder="What\'s happening?"></textarea>'+
+        '<div id="biz-compose-photos" class="biz-compose-photos"></div>'+
+        '<div class="biz-compose-media-bar">'+
+          '<button type="button" class="biz-compose-media-btn" onclick="window._bizActions.openPhotoInCompose()"><i class="fas fa-image"></i> Add Photo</button>'+
+          '<input type="file" id="biz-compose-photo-input" accept="image/*" multiple style="display:none" onchange="window._bizActions.handleComposePhoto(this)">'+
+        '</div>'+
         '<div class="biz-compose-footer">'+
           '<button class="biz-action-btn" onclick="window._bizActions.closeCompose()">Cancel</button>'+
           '<button class="biz-action-btn primary" id="biz-compose-btn" onclick="window._bizActions.submitBizPost()"><i class="fas fa-paper-plane"></i> Post</button>'+
@@ -891,18 +896,65 @@
     closeCompose: function(){
       var m=document.getElementById('biz-compose-modal');
       if(m){ m.classList.remove('open'); var ta=document.getElementById('biz-compose-text'); if(ta) ta.value=''; }
+      window._composePendingFiles = [];
+      var pr=document.getElementById('biz-compose-photos'); if(pr) pr.innerHTML='';
+    },
+
+    openPhotoInCompose: function(){
+      var inp=document.getElementById('biz-compose-photo-input'); if(inp) inp.click();
+    },
+
+    handleComposePhoto: function(input){
+      if(!input.files||!input.files.length) return;
+      var files=Array.from(input.files).slice(0,4);
+      window._composePendingFiles=(window._composePendingFiles||[]).concat(files).slice(0,4);
+      input.value='';
+      window._bizActions._renderComposePreview();
+    },
+
+    removeComposePhoto: function(idx){
+      if(!window._composePendingFiles) return;
+      window._composePendingFiles.splice(idx,1);
+      window._bizActions._renderComposePreview();
+    },
+
+    _renderComposePreview: function(){
+      var pr=document.getElementById('biz-compose-photos'); if(!pr) return;
+      var files=window._composePendingFiles||[];
+      pr.innerHTML='';
+      files.forEach(function(file,i){
+        var reader=new FileReader();
+        reader.onload=function(e){
+          var d=document.createElement('div'); d.className='biz-compose-photo-thumb';
+          d.innerHTML='<img src="'+e.target.result+'" alt=""><button type="button" onclick="window._bizActions.removeComposePhoto('+i+')"><i class="fas fa-times"></i></button>';
+          pr.appendChild(d);
+        };
+        reader.readAsDataURL(file);
+      });
     },
 
     submitBizPost: function() {
       if(!_currentUser||!_isOwner) return;
       var text=(document.getElementById('biz-compose-text')||{}).value||'';
-      if(!text.trim()){ showToast('Write something first',false); return; }
+      var files=window._composePendingFiles||[];
+      if(!text.trim()&&!files.length){ showToast('Write something or add a photo',false); return; }
       var btn=document.getElementById('biz-compose-btn');
       if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Posting…'; }
-      _fs.addDoc(_fs.collection(_db,'posts'),{
-        text:text.trim(),businessId:BIZ_ID,authorId:_currentUser.uid,
-        authorName:_biz.title||'Business',authorAvatar:_biz.logoUrl||'',
-        type:'business',likeCount:0,commentCount:0,shareCount:0,createdAt:_fs.serverTimestamp(),
+
+      var uploadAll = files.length
+        ? Promise.all(files.map(function(f){
+            return new Promise(function(res){ directCloudinaryUpload(f,res,null); });
+          }))
+        : Promise.resolve([]);
+
+      uploadAll.then(function(urls){
+        var validUrls=urls.filter(Boolean);
+        return _fs.addDoc(_fs.collection(_db,'posts'),{
+          text:text.trim(),businessId:BIZ_ID,authorId:_currentUser.uid,
+          authorName:_biz.title||'Business',authorAvatar:_biz.logoUrl||'',
+          type:'business',likeCount:0,commentCount:0,shareCount:0,
+          mediaUrls:validUrls,createdAt:_fs.serverTimestamp(),
+        });
       }).then(function(){
         window._bizActions.closeCompose();
         showToast('Posted!');
