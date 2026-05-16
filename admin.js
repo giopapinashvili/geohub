@@ -87,6 +87,8 @@
     if (section === 'activity') { setTimeout(function () { window.loadActivity(_activityFilter || 'all'); }, 60); }
     if (section === 'challenges') { loadChallenges(); }
     if (section === 'rewards')    { loadAdminRewards(); }
+    if (section === 'analytics')  { loadAdminAnalytics(); }
+    if (section === 'errors')     { loadAdminErrors(); }
   };
 
   /* ── TOAST ───────────────────────────────────────────────── */
@@ -1841,6 +1843,227 @@
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-sliders-h"></i> Apply Adjustment'; }
       });
   };
+
+  /* ── ANALYTICS DASHBOARD ─────────────────────────────────── */
+  function getDateStr(daysAgo) {
+    var d = new Date(Date.now() - daysAgo * 86400000);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function escA(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function renderTopPages(data) {
+    var el = document.getElementById('an-top-pages');
+    if (!el) return;
+    var entries = Object.keys(data).filter(function (k) { return k !== '_total'; })
+      .map(function (k) { return { page: k, count: data[k] }; })
+      .sort(function (a, b) { return b.count - a.count; }).slice(0, 8);
+    if (!entries.length) { el.innerHTML = '<div style="padding:16px;text-align:center;opacity:0.5">No data yet</div>'; return; }
+    var max = entries[0].count || 1;
+    el.innerHTML = entries.map(function (e) {
+      var pct = Math.round((e.count / max) * 100);
+      return '<div style="margin-bottom:8px">' +
+        '<div style="display:flex;justify-content:space-between;font-size:0.76rem;margin-bottom:3px">' +
+          '<span style="color:var(--t)">' + escA(e.page) + '</span>' +
+          '<span style="color:var(--green);font-weight:700">' + e.count + '</span>' +
+        '</div>' +
+        '<div style="height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden">' +
+          '<div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,#10b981,#3b82f6);border-radius:3px;transition:width 0.6s ease"></div>' +
+        '</div></div>';
+    }).join('');
+  }
+
+  function renderTopSearches(data) {
+    var el = document.getElementById('an-top-searches');
+    if (!el) return;
+    var entries = Object.keys(data).filter(function (k) { return k !== '_count'; })
+      .map(function (k) { return { term: k.replace(/^t_/, '').replace(/_/g, ' '), count: data[k] }; })
+      .sort(function (a, b) { return b.count - a.count; }).slice(0, 8);
+    if (!entries.length) { el.innerHTML = '<div style="padding:16px;text-align:center;opacity:0.5">No searches yet</div>'; return; }
+    el.innerHTML = entries.map(function (e) {
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">' +
+        '<span style="color:var(--t);font-size:0.8rem">' + escA(e.term) + '</span>' +
+        '<span style="color:var(--ts);font-size:0.74rem;font-weight:700">' + e.count + 'x</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  function render7DayTrend(days) {
+    var el = document.getElementById('an-trend');
+    if (!el) return;
+    var totals = days.map(function (d) { return d._total || 0; });
+    var max = Math.max.apply(null, totals) || 1;
+    el.innerHTML = days.map(function (d, i) {
+      var h = Math.max(6, Math.round((d._total || 0) / max * 72));
+      var label = getDateStr(6 - i).slice(5);
+      return '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1">' +
+        '<div style="font-size:0.65rem;color:var(--ts)">' + (d._total || 0) + '</div>' +
+        '<div style="width:100%;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#10b981,#3b82f6);height:' + h + 'px"></div>' +
+        '<div style="font-size:0.62rem;color:var(--ts)">' + label + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderPerf(data) {
+    var el = document.getElementById('an-perf');
+    if (!el) return;
+    if (!data || !data.samples) { el.innerHTML = '<div style="padding:12px;opacity:0.5">No performance data yet</div>'; return; }
+    var s = data.samples;
+    var ttfb    = s && data.sum_ttfb    ? Math.round(data.sum_ttfb / s)    : '—';
+    var domLoad = s && data.sum_domLoad ? Math.round(data.sum_domLoad / s) : '—';
+    var lcp     = s && data.sum_lcp     ? Math.round(data.sum_lcp / s)     : '—';
+    var total   = s && data.sum_total   ? Math.round(data.sum_total / s)   : '—';
+    el.innerHTML = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">' +
+      ['TTFB', ttfb, 'DOM Load', domLoad, 'LCP', lcp, 'Total', total].reduce(function (acc, v, i) {
+        if (i % 2 === 0) acc.push('<div style="text-align:center">');
+        if (i % 2 === 0) acc.push('<div style="font-size:1.1rem;font-weight:800;color:var(--green)">' + v + '</div>');
+        else acc.push('<div style="font-size:0.7rem;color:var(--ts)">' + v + ' ms</div></div>');
+        return acc;
+      }, []).join('') +
+    '</div>';
+  }
+
+  function loadAdminAnalytics() {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) {
+      window.addEventListener('GeoFirebaseReady', function () { loadAdminAnalytics(); }, { once: true });
+      return;
+    }
+    var db = fb.db, fs = fb.fs;
+    var today = getDateStr(0);
+    var subEl = document.getElementById('analyticsSub');
+    if (subEl) subEl.textContent = 'Loading…';
+
+    var pvEl = document.getElementById('an-pv');
+    var onlineEl = document.getElementById('an-online');
+    var searchEl = document.getElementById('an-searches');
+    var evEl = document.getElementById('an-events');
+
+    Promise.all([
+      fs.getDoc(fs.doc(db, 'analytics', 'pageViews', 'daily', today)),
+      fs.getDoc(fs.doc(db, 'analytics', 'searches', 'daily', today)),
+      fs.getDoc(fs.doc(db, 'analytics', 'events', 'daily', today)),
+      fs.getDoc(fs.doc(db, 'analytics', 'performance', 'pages', 'index.html')),
+      fs.getDocs(fs.query(
+        fs.collection(db, 'analytics', 'presence', 'users'),
+        fs.where('lastSeen', '>', new Date(Date.now() - 5 * 60 * 1000))
+      ))
+    ]).then(function (res) {
+      var pvData   = res[0].exists() ? res[0].data() : {};
+      var srData   = res[1].exists() ? res[1].data() : {};
+      var evData   = res[2].exists() ? res[2].data() : {};
+      var perfData = res[3].exists() ? res[3].data() : null;
+      var onlineCount = res[4].size;
+
+      var pvTotal = pvData._total || 0;
+      var srTotal = srData._count || 0;
+      var evTotal = Object.keys(evData).reduce(function (s, k) { return s + (evData[k] || 0); }, 0);
+
+      if (pvEl)     pvEl.textContent     = pvTotal;
+      if (onlineEl) onlineEl.textContent = onlineCount;
+      if (searchEl) searchEl.textContent = srTotal;
+      if (evEl)     evEl.textContent     = evTotal;
+      if (subEl)    subEl.textContent    = 'Updated ' + new Date().toLocaleTimeString();
+
+      var sbEl = document.getElementById('sb-analytics');
+      if (sbEl) sbEl.textContent = pvTotal || '0';
+
+      renderTopPages(pvData);
+      renderTopSearches(srData);
+      renderPerf(perfData);
+
+      var trendPromises = [];
+      for (var i = 6; i >= 0; i--) {
+        trendPromises.push(fs.getDoc(fs.doc(db, 'analytics', 'pageViews', 'daily', getDateStr(i))));
+      }
+      Promise.all(trendPromises).then(function (snaps) {
+        var days = snaps.map(function (s) { return s.exists() ? s.data() : {}; });
+        render7DayTrend(days);
+      }).catch(function () {});
+    }).catch(function (err) {
+      if (subEl) subEl.textContent = 'Load failed — check Firestore rules';
+      console.warn('[Admin] analytics', err && err.message);
+    });
+  }
+
+  /* ── ERROR MONITOR ────────────────────────────────────────── */
+  function renderErrorLog(docs) {
+    var el = document.getElementById('err-log');
+    if (!el) return;
+    if (!docs.length) {
+      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--ts);font-size:0.8rem"><i class="fas fa-check-circle" style="color:#10b981;margin-right:6px"></i>No JS errors logged</div>';
+      return;
+    }
+    el.innerHTML = docs.map(function (d) {
+      var ts = d.timestamp ? (d.timestamp.toDate ? d.timestamp.toDate().toLocaleString() : new Date(d.timestamp.seconds * 1000).toLocaleString()) : '—';
+      return '<div style="padding:10px 12px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:8px">' +
+        '<div style="font-size:0.78rem;font-weight:700;color:#ef4444;margin-bottom:3px">' + escA(String(d.message || '').slice(0, 120)) + '</div>' +
+        '<div style="font-size:0.68rem;color:var(--ts)">' +
+          escA(d.page || '—') + ' &nbsp;·&nbsp; line ' + (d.line || 0) +
+          (d.uid ? ' &nbsp;·&nbsp; uid: ' + escA(String(d.uid).slice(0, 12)) + '…' : '') +
+          ' &nbsp;·&nbsp; ' + ts +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function renderUploadFailures(docs) {
+    var el = document.getElementById('err-uploads-log');
+    if (!el) return;
+    if (!docs.length) {
+      el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--ts);font-size:0.8rem"><i class="fas fa-check-circle" style="color:#10b981;margin-right:6px"></i>No upload failures</div>';
+      return;
+    }
+    el.innerHTML = docs.map(function (d) {
+      var ts = d.timestamp ? (d.timestamp.toDate ? d.timestamp.toDate().toLocaleString() : new Date(d.timestamp.seconds * 1000).toLocaleString()) : '—';
+      return '<div style="padding:9px 12px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:8px">' +
+        '<div style="font-size:0.76rem;font-weight:700;color:#f59e0b">' + escA(d.type || 'unknown') + '</div>' +
+        '<div style="font-size:0.68rem;color:var(--ts)">' + escA(String(d.reason || '').slice(0, 100)) + ' &nbsp;·&nbsp; ' + escA(d.page || '—') + ' &nbsp;·&nbsp; ' + ts + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function loadAdminErrors() {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) {
+      window.addEventListener('GeoFirebaseReady', function () { loadAdminErrors(); }, { once: true });
+      return;
+    }
+    var db = fb.db, fs = fb.fs;
+    var subEl = document.getElementById('errorsSub');
+    var todayKey = getDateStr(0);
+
+    Promise.all([
+      fs.getDocs(fs.query(fs.collection(db, 'analytics', 'errors', 'log'), fs.orderBy('timestamp', 'desc'), fs.limit(30))),
+      fs.getDocs(fs.query(fs.collection(db, 'analytics', 'uploads', 'failures'), fs.orderBy('timestamp', 'desc'), fs.limit(20))),
+      fs.getDoc(fs.doc(db, 'analytics', 'errors', 'counts', 'daily'))
+    ]).then(function (res) {
+      var errDocs = [];
+      res[0].forEach(function (d) { errDocs.push(Object.assign({ _id: d.id }, d.data())); });
+      var upDocs = [];
+      res[1].forEach(function (d) { upDocs.push(Object.assign({ _id: d.id }, d.data())); });
+      var counts = res[2].exists() ? res[2].data() : {};
+
+      var todayErrs = counts[todayKey] || 0;
+      var pagesAffected = new Set(errDocs.map(function (d) { return d.page; })).size;
+
+      var e1 = document.getElementById('err-today');     if (e1) e1.textContent = todayErrs;
+      var e2 = document.getElementById('err-uploads');   if (e2) e2.textContent = upDocs.length;
+      var e3 = document.getElementById('err-pages');     if (e3) e3.textContent = pagesAffected;
+      if (subEl) subEl.textContent = errDocs.length + ' errors · ' + upDocs.length + ' upload failures';
+
+      var sbEl = document.getElementById('sb-errors');
+      if (sbEl) sbEl.textContent = todayErrs > 0 ? String(todayErrs) : '0';
+
+      renderErrorLog(errDocs);
+      renderUploadFailures(upDocs);
+    }).catch(function (err) {
+      if (subEl) subEl.textContent = 'Load failed — check Firestore rules';
+      console.warn('[Admin] errors', err && err.message);
+    });
+  }
 
   /* ── INIT ────────────────────────────────────────────────── */
   function init() {

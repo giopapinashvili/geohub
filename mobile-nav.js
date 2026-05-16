@@ -601,8 +601,17 @@
   window.openCmdPalette   = openCmdPalette;
   window.closeCmdPalette  = closeCmdPalette;
 
+  function injectAnalytics() {
+    if (document.querySelector('script[src*="analytics.js"]')) return;
+    var s = document.createElement('script');
+    s.src = 'analytics.js';
+    s.defer = true;
+    document.head.appendChild(s);
+  }
+
   function init() {
     injectPWAMeta();
+    injectAnalytics();
     showSplash();
     injectBottomNav();
     injectActionSheet();

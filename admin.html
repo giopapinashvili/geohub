@@ -80,6 +80,8 @@
     <div class="sb-lbl">Analytics</div>
     <div class="sb-item" onclick="adminNav('revenue')"><span class="sb-ic"><i class="fas fa-chart-line"></i></span> Revenue</div>
     <div class="sb-item" onclick="adminNav('city')"><span class="sb-ic"><i class="fas fa-map"></i></span> City Analytics</div>
+    <div class="sb-item" onclick="adminNav('analytics')"><span class="sb-ic"><i class="fas fa-chart-bar"></i></span> Site Analytics <span class="sb-cnt" id="sb-analytics">—</span></div>
+    <div class="sb-item" onclick="adminNav('errors')"><span class="sb-ic"><i class="fas fa-exclamation-triangle"></i></span> Error Monitor <span class="sb-cnt danger" id="sb-errors">0</span></div>
     <div class="sb-lbl">System</div>
     <div class="sb-item" onclick="adminNav('controls')"><span class="sb-ic"><i class="fas fa-sliders-h"></i></span> Platform Controls</div>
     <div class="sb-div"></div>
@@ -772,6 +774,83 @@
           <div><div class="panel-title">Recent Point Transactions</div><div class="panel-sub">Last 50 transfers and redemptions</div></div>
         </div>
         <div id="rwTxList" style="padding:4px 0"><div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">Loading transactions…</div></div>
+      </div>
+    </section>
+
+    <!-- ─── SITE ANALYTICS ─── -->
+    <section class="sec" id="sec-analytics">
+      <div class="ph">
+        <div><div class="ph-title">Site Analytics</div><div class="ph-sub" id="analyticsSub">Loading…</div></div>
+        <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="loadAdminAnalytics()"><i class="fas fa-sync-alt"></i> Refresh</button></div>
+      </div>
+      <div class="g4 mb12">
+        <div class="sc green">
+          <div class="sc-ico">👁</div><div class="sc-val" id="an-pv">—</div><div class="sc-lbl">Page Views Today</div>
+          <div class="sc-glow" style="background:radial-gradient(#10b981,transparent)"></div>
+        </div>
+        <div class="sc blue">
+          <div class="sc-ico">🟢</div><div class="sc-val" id="an-online">—</div><div class="sc-lbl">Online Now</div>
+          <div class="sc-glow" style="background:radial-gradient(#3b82f6,transparent)"></div>
+        </div>
+        <div class="sc gold">
+          <div class="sc-ico">🔍</div><div class="sc-val" id="an-searches">—</div><div class="sc-lbl">Searches Today</div>
+          <div class="sc-glow" style="background:radial-gradient(#f59e0b,transparent)"></div>
+        </div>
+        <div class="sc purple">
+          <div class="sc-ico">⚡</div><div class="sc-val" id="an-events">—</div><div class="sc-lbl">Events Today</div>
+          <div class="sc-glow" style="background:radial-gradient(#a855f7,transparent)"></div>
+        </div>
+      </div>
+      <div class="g2 mb12">
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">Top Pages Today</div></div>
+          <div id="an-top-pages" style="padding:8px 0;min-height:80px;color:var(--ts);font-size:0.82rem">Loading…</div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">Top Searches</div></div>
+          <div id="an-top-searches" style="padding:8px 0;min-height:80px;color:var(--ts);font-size:0.82rem">Loading…</div>
+        </div>
+      </div>
+      <div class="panel mb12">
+        <div class="panel-hdr"><div class="panel-title">7-Day Page Views</div></div>
+        <div id="an-trend" style="display:flex;align-items:flex-end;gap:6px;height:80px;padding:8px 4px">
+          <div style="color:var(--ts);font-size:0.78rem;padding-top:20px">Loading…</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr"><div class="panel-title">Avg Performance (ms)</div></div>
+        <div id="an-perf" style="padding:8px 0;min-height:60px;color:var(--ts);font-size:0.82rem">Loading…</div>
+      </div>
+    </section>
+
+    <!-- ─── ERROR MONITOR ─── -->
+    <section class="sec" id="sec-errors">
+      <div class="ph">
+        <div><div class="ph-title">Error Monitor</div><div class="ph-sub" id="errorsSub">Loading…</div></div>
+        <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="loadAdminErrors()"><i class="fas fa-sync-alt"></i> Refresh</button></div>
+      </div>
+      <div class="g3 mb12">
+        <div class="sc" style="border-color:rgba(239,68,68,.3)">
+          <div class="sc-ico">🔴</div><div class="sc-val" id="err-today">—</div><div class="sc-lbl">JS Errors Today</div>
+        </div>
+        <div class="sc" style="border-color:rgba(245,158,11,.3)">
+          <div class="sc-ico">📤</div><div class="sc-val" id="err-uploads">—</div><div class="sc-lbl">Failed Uploads</div>
+        </div>
+        <div class="sc" style="border-color:rgba(59,130,246,.3)">
+          <div class="sc-ico">📄</div><div class="sc-val" id="err-pages">—</div><div class="sc-lbl">Pages Affected</div>
+        </div>
+      </div>
+      <div class="panel mb12">
+        <div class="panel-hdr"><div class="panel-title">Recent JS Errors</div></div>
+        <div id="err-log" style="display:flex;flex-direction:column;gap:8px;padding:4px 0;min-height:80px">
+          <div style="text-align:center;padding:32px;color:var(--ts);font-size:0.82rem">Loading…</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr"><div class="panel-title">Upload Failures</div></div>
+        <div id="err-uploads-log" style="display:flex;flex-direction:column;gap:8px;padding:4px 0;min-height:60px">
+          <div style="text-align:center;padding:24px;color:var(--ts);font-size:0.82rem">Loading…</div>
+        </div>
       </div>
     </section>
 
