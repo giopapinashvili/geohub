@@ -118,7 +118,7 @@
 
     var badges = '';
     if (biz.verified||biz.status==='verified') badges+='<span class="biz-badge biz-badge-verified"><i class="fas fa-check-circle"></i> Verified</span>';
-    if (_isOwner)    badges+='<span class="biz-badge biz-badge-owner"><i class="fas fa-crown"></i> Your Business</span>';
+    if (_isOwner)    badges+='<span class="biz-badge biz-badge-owner"><i class="fas fa-crown"></i> Your Page</span>';
     if (biz.featured) badges+='<span class="biz-badge biz-badge-featured"><i class="fas fa-star"></i> Featured</span>';
     if (biz.isOnline) badges+='<span class="biz-badge biz-badge-online"><i class="fas fa-globe"></i> Online</span>';
 
@@ -488,6 +488,42 @@
     return _isOwner || (c && (c.authorId === _currentUser.uid || c.userId === _currentUser.uid));
   }
 
+  function replyBubbleHtml(r, postId, commentId) {
+    var name = r.authorName || r.userName || 'User';
+    var authorId = r.authorId || r.userId || '';
+    var profileLink = 'profile.html?id=' + encodeURIComponent(authorId);
+    var avInner = r.authorAvatar
+      ? '<img src="'+esc(r.authorAvatar)+'" alt="" style="width:26px;height:26px;border-radius:50%;object-fit:cover" onerror="this.style.display=\'none\'">'
+      : '<span class="biz-cmt-av" style="width:26px;height:26px;font-size:.65rem">'+esc((name[0]||'U').toUpperCase())+'</span>';
+    var avHtml = authorId
+      ? '<a href="'+esc(profileLink)+'" class="biz-cmt-av-link" style="flex-shrink:0">'+avInner+'</a>'
+      : '<span style="flex-shrink:0">'+avInner+'</span>';
+    var pid = esc(postId);
+    var cid = esc(commentId);
+    var rid = esc(r.id);
+    var canEdit = _currentUser && (_isOwner || r.authorId === _currentUser.uid || r.userId === _currentUser.uid);
+    var isAuthor = _currentUser && (r.authorId === _currentUser.uid || r.userId === _currentUser.uid);
+    var actionsHtml = canEdit
+      ? '<span class="biz-cmt-actions">'+
+          (isAuthor ? '<button class="biz-cmt-act-btn" onclick="window._bizActions.editReply(\''+pid+'\',\''+cid+'\',\''+rid+'\',this)">Edit</button>' : '')+
+          '<button class="biz-cmt-act-btn" onclick="window._bizActions.deleteReply(\''+pid+'\',\''+cid+'\',\''+rid+'\',this)">Delete</button>'+
+        '</span>'
+      : '';
+    return '<div class="biz-cmt-bubble-wrap" data-rid="'+rid+'" style="margin-top:6px">'+
+      avHtml+
+      '<div class="biz-cmt-right">'+
+        '<div class="biz-cmt-bubble" style="background:rgba(255,255,255,.04)">'+
+          '<a href="'+esc(profileLink)+'" class="biz-cmt-bubble-name">'+esc(name)+'</a>'+
+          '<div id="biz-reply-text-'+pid+'-'+cid+'-'+rid+'">'+esc(r.text||'')+'</div>'+
+        '</div>'+
+        '<div class="biz-cmt-bubble-meta">'+
+          '<span class="biz-cmt-bubble-time">'+timeAgo(r.createdAt)+'</span>'+
+          actionsHtml+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }
+
   function commentBubbleHtml(c, postId) {
     var name = c.authorName || c.userName || 'User';
     var authorId = c.authorId || c.userId || '';
@@ -511,6 +547,16 @@
     var likesHtml = (c.likes > 0)
       ? '<span class="biz-cmt-like-count"><i class="fas fa-thumbs-up"></i> '+c.likes+'</span>'
       : '';
+    var replyCount = c.replyCount || 0;
+
+    // Reply composer avatar
+    var user = _currentUser;
+    var replyAvHtml = user && user.photoURL
+      ? '<img src="'+esc(user.photoURL)+'" alt="" style="width:26px;height:26px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.style.display=\'none\'">'
+      : user
+        ? '<span class="biz-cmt-av" style="width:26px;height:26px;font-size:.65rem;flex-shrink:0">'+esc(((user.displayName||user.email||'U')[0]).toUpperCase())+'</span>'
+        : '<span class="biz-cmt-av biz-cmt-av-guest" style="width:26px;height:26px;flex-shrink:0"><i class="fas fa-user" style="font-size:.65rem"></i></span>';
+
     return '<div class="biz-cmt-bubble-wrap" data-cid="'+cid+'">'+
       avHtml+
       '<div class="biz-cmt-right">'+
@@ -521,8 +567,32 @@
         '<div class="biz-cmt-bubble-meta">'+
           '<span class="biz-cmt-bubble-time">'+timeAgo(c.createdAt)+'</span>'+
           likesHtml+
-          '<button class="biz-cmt-act-btn" onclick="window._bizActions.replyToComment(\''+pid+'\',\''+esc(name)+'\')">Reply</button>'+
+          '<button class="biz-cmt-act-btn" onclick="window._bizActions.replyToComment(\''+pid+'\',\''+cid+'\',\''+esc(name)+'\')">Reply</button>'+
           actionsHtml+
+        '</div>'+
+        '<div class="biz-comment-replies-wrap" style="margin-top:4px">'+
+          (replyCount > 0
+            ? '<button class="biz-cmt-act-btn biz-view-replies-btn" id="biz-vrb-'+pid+'-'+cid+'" data-count="'+replyCount+'" '+
+                'onclick="window._bizActions.toggleReplies(\''+pid+'\',\''+cid+'\',this)">'+
+                '<i class="fas fa-chevron-down" style="font-size:.6rem"></i> '+replyCount+' repl'+(replyCount===1?'y':'ies')+
+              '</button>'
+            : '<span id="biz-vrb-'+pid+'-'+cid+'" data-count="0" style="display:none"></span>')+
+          '<div class="biz-replies-section" id="biz-replies-'+pid+'-'+cid+'" style="display:none;padding-left:4px;margin-top:4px"></div>'+
+        '</div>'+
+        '<div class="biz-reply-composer" id="biz-rpl-'+pid+'-'+cid+'" style="display:none;margin-top:6px">'+
+          '<div style="display:flex;gap:7px;align-items:flex-start">'+
+            replyAvHtml+
+            '<div class="biz-cmt-input-wrap" style="flex:1">'+
+              '<textarea class="biz-cmt-textarea" placeholder="Write a reply…" rows="1" '+
+                'oninput="this.style.height=\'auto\';this.style.height=Math.min(this.scrollHeight,100)+\'px\'" '+
+                'onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();window._bizActions.submitBizReply(\''+pid+'\',\''+cid+'\',this);}">'+
+              '</textarea>'+
+              '<button class="biz-cmt-send-btn" type="button" '+
+                'onclick="window._bizActions.submitBizReply(\''+pid+'\',\''+cid+'\',this.parentNode.querySelector(\'textarea\'))">'+
+                '<i class="fas fa-paper-plane"></i>'+
+              '</button>'+
+            '</div>'+
+          '</div>'+
         '</div>'+
       '</div>'+
     '</div>';
@@ -872,7 +942,7 @@
         }).join('')+
       '</div>'+
       '<div class="biz-dash-actions">'+
-        '<a href="add-business.html?edit='+esc(BIZ_ID)+'" class="biz-owner-action-btn edit"><i class="fas fa-pen"></i> Edit Business Info</a>'+
+        '<a href="add-business.html?edit='+esc(BIZ_ID)+'" class="biz-owner-action-btn edit"><i class="fas fa-pen"></i> Edit Page Info</a>'+
         '<button class="biz-owner-action-btn photo" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add Photo</button>'+
         '<button class="biz-owner-action-btn quotes" onclick="window._bizActions.loadOwnerQuotes()"><i class="fas fa-inbox"></i> View Quote Requests</button>'+
       '</div>'+
@@ -1015,7 +1085,7 @@
       '</a>' +
       '<ul class="navbar-links">' +
         '<li><a href="feed.html">Feed</a></li>' +
-        '<li><a href="business.html">Businesses</a></li>' +
+        '<li><a href="business.html">Pages</a></li>' +
         '<li><a href="map.html">Map</a></li>' +
       '</ul>' +
       '<div class="navbar-actions" style="display:flex;align-items:center;gap:8px">' + authNavHtml + '</div>' +
@@ -1174,6 +1244,25 @@
       var pre = '<div class="biz-post-list">'+posts.slice(0,3).map(function(p){ return postCardHtml(p,_biz); }).join('')+'</div>';
       if (overviewEl) overviewEl.innerHTML = pre;
       if (allEl)      allEl.innerHTML      = all;
+
+      // Pre-load current user's reaction state for all visible posts
+      if (_currentUser) {
+        posts.forEach(function(p) {
+          if (_postReactions[p.id] && _postReactions[p.id].loaded) return;
+          _fs.getDoc(_fs.doc(_db,'posts',p.id,'reactions',_currentUser.uid))
+            .then(function(snap) {
+              if (!snap.exists()) { _postReactions[p.id] = {loaded:true}; return; }
+              var d = snap.data();
+              _postReactions[p.id] = {loaded:true, key:d.key, emoji:d.emoji};
+              var rx = REACTIONS.find(function(r){ return r.key === d.key; });
+              if (!rx) return;
+              document.querySelectorAll('.biz-rx-wrap[data-pid="'+CSS.escape(p.id)+'"] .biz-react-btn').forEach(function(btnEl) {
+                btnEl.setAttribute('data-reaction', d.key);
+                btnEl.innerHTML = d.emoji + ' ' + rx.label;
+              });
+            }).catch(function(){});
+        });
+      }
     }).catch(function(err){
       console.error('[BizPage] loadBizPosts failed:', err.code||err.message);
       var msg = '<div class="biz-empty-state"><i class="fas fa-triangle-exclamation"></i><p>Could not load posts ('+esc(err.code||'error')+').</p></div>';
@@ -1430,15 +1519,153 @@
       }).catch(function(err) { showToast('Could not delete: '+(err.code||err.message), false); });
     },
 
-    replyToComment: function(postId, authorName) {
-      var box = document.getElementById('biz-cmt-' + postId);
-      if (box && box.style.display === 'none') { box.style.display = 'block'; }
-      var ta = box && box.querySelector('textarea.biz-cmt-textarea');
+    replyToComment: function(postId, commentId, authorName) {
+      var composerId = 'biz-rpl-' + postId + '-' + commentId;
+      var composer = document.getElementById(composerId);
+      if (!composer) return;
+      var isHidden = composer.style.display === 'none' || !composer.style.display;
+      if (isHidden) {
+        composer.style.display = 'block';
+        var ta = composer.querySelector('textarea');
+        if (ta) {
+          var prefix = '@' + authorName + ' ';
+          if (!ta.value.startsWith(prefix)) ta.value = prefix;
+          setTimeout(function(){ ta.focus(); ta.selectionStart = ta.selectionEnd = ta.value.length; }, 50);
+        }
+      } else {
+        composer.style.display = 'none';
+      }
+    },
+
+    submitBizReply: function(postId, commentId, ta) {
       if (!ta) return;
-      var prefix = '@' + authorName + ' ';
-      if (!ta.value.startsWith(prefix)) { ta.value = prefix + ta.value.replace(/^@\S+ /,''); }
+      var val = ta.value.trim();
+      if (!val) return;
+      if (!_currentUser) { showToast('Sign in to reply', false); return; }
+      ta.disabled = true;
+      var sendBtn = ta.parentNode && ta.parentNode.querySelector('.biz-cmt-send-btn');
+      if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
+      var done = function(err) {
+        ta.disabled = false;
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>'; }
+        if (err) { showToast('Could not post reply', false); return; }
+        ta.value = ''; ta.style.height = 'auto';
+        var composer = document.getElementById('biz-rpl-'+postId+'-'+commentId);
+        if (composer) composer.style.display = 'none';
+        _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId), {replyCount: _fs.increment(1)}).catch(function(){});
+        showToast('Reply posted!');
+        window._bizActions.toggleReplies(postId, commentId, null, true);
+      };
+      var GeoSocial = window.GeoSocial;
+      if (GeoSocial && GeoSocial.addCommentReply) {
+        GeoSocial.addCommentReply(postId, commentId, val, done);
+      } else {
+        _fs.addDoc(_fs.collection(_db,'posts',postId,'comments',commentId,'replies'), {
+          text: val,
+          authorId: _currentUser.uid,
+          userId: _currentUser.uid,
+          authorName: _currentUser.displayName || (_currentUser.email||'').split('@')[0] || 'User',
+          authorAvatar: _currentUser.photoURL || '',
+          createdAt: _fs.serverTimestamp(),
+          status: 'active'
+        }).then(function(){ done(null); }).catch(done);
+      }
+    },
+
+    toggleReplies: function(postId, commentId, btnEl, forceOpen) {
+      var section = document.getElementById('biz-replies-'+postId+'-'+commentId);
+      if (!section) return;
+      var isVisible = section.style.display !== 'none' && section.style.display !== '';
+      // Toggle closed (unless forceOpen)
+      if (!forceOpen && isVisible) {
+        section.style.display = 'none';
+        if (btnEl) {
+          var cnt = parseInt(btnEl.dataset.count || '0', 10);
+          btnEl.innerHTML = '<i class="fas fa-chevron-down" style="font-size:.6rem"></i> '+cnt+' repl'+(cnt===1?'y':'ies');
+        }
+        return;
+      }
+      // Open section
+      section.style.display = 'block';
+      if (btnEl) { btnEl.innerHTML = '<i class="fas fa-chevron-up" style="font-size:.6rem"></i> Hide replies'; btnEl.style.display = ''; }
+      var vrb = document.getElementById('biz-vrb-'+postId+'-'+commentId);
+      if (vrb) vrb.style.display = '';
+      // If real-time listener is active, it updates automatically
+      if (section.dataset.listening) return;
+      // If getDocs already loaded and not forcing refresh, done
+      if (section.dataset.loaded && !forceOpen) return;
+      section.dataset.loaded = '1';
+      if (!isVisible) section.innerHTML = '<div style="color:#64748b;font-size:.78rem;padding:4px 0"><i class="fas fa-spinner fa-spin"></i></div>';
+      var render = function(replies) {
+        if (!section.isConnected) return;
+        var active = (replies||[]).filter(function(r){ return r.status !== 'deleted'; });
+        section.innerHTML = active.length
+          ? active.map(function(r){ return replyBubbleHtml(r, postId, commentId); }).join('')
+          : '';
+        var vrbEl = document.getElementById('biz-vrb-'+postId+'-'+commentId);
+        if (vrbEl) { vrbEl.dataset.count = String(active.length); vrbEl.style.display = active.length ? '' : 'none'; }
+      };
+      var GeoSocial = window.GeoSocial;
+      if (GeoSocial && GeoSocial.listenCommentReplies) {
+        section.dataset.listening = '1';
+        GeoSocial.listenCommentReplies(postId, commentId, render);
+      } else {
+        _fs.getDocs(_fs.collection(_db,'posts',postId,'comments',commentId,'replies'))
+          .then(function(snap) {
+            var replies = [];
+            snap.forEach(function(d){ replies.push(Object.assign({id:d.id},d.data())); });
+            replies.sort(function(a,b){
+              var ta=(a.createdAt&&a.createdAt.seconds)||0, tb=(b.createdAt&&b.createdAt.seconds)||0;
+              return ta-tb;
+            });
+            render(replies);
+          }).catch(function(){ render([]); });
+      }
+    },
+
+    editReply: function(postId, commentId, replyId, btnEl) {
+      if (!_currentUser) return;
+      var textEl = document.getElementById('biz-reply-text-'+postId+'-'+commentId+'-'+replyId);
+      if (!textEl || textEl.querySelector('textarea')) return;
+      var current = textEl.textContent || '';
+      var ta = document.createElement('textarea');
+      ta.value = current; ta.rows = 2;
+      ta.style.cssText = 'width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#f1f5f9;padding:6px 10px;resize:none;font-size:.87rem;font-family:inherit;outline:none';
+      var saveBtn = document.createElement('button');
+      saveBtn.style.cssText = 'margin-top:4px;font-size:.78rem;padding:4px 12px;border-radius:12px;background:#10b981;color:#fff;border:none;cursor:pointer;font-family:inherit';
+      saveBtn.textContent = 'Save';
+      var cancel = document.createElement('button');
+      cancel.style.cssText = 'margin-top:4px;margin-left:6px;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:.78rem;padding:4px 8px;font-family:inherit';
+      cancel.textContent = 'Cancel';
+      textEl.innerHTML = '';
+      textEl.appendChild(ta); textEl.appendChild(document.createElement('br'));
+      textEl.appendChild(saveBtn); textEl.appendChild(cancel);
       ta.focus();
-      ta.selectionStart = ta.selectionEnd = ta.value.length;
+      cancel.onclick = function() { textEl.innerHTML = esc(current); };
+      saveBtn.onclick = function() {
+        var newText = ta.value.trim();
+        if (!newText || newText === current) { textEl.innerHTML = esc(current); return; }
+        saveBtn.disabled = true; saveBtn.textContent = '…';
+        _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId,'replies',replyId), {
+          text: newText, updatedAt: _fs.serverTimestamp()
+        }).then(function() {
+          textEl.innerHTML = esc(newText);
+          showToast('Reply updated');
+        }).catch(function() { textEl.innerHTML = esc(current); showToast('Could not edit reply', false); });
+      };
+    },
+
+    deleteReply: function(postId, commentId, replyId, btnEl) {
+      if (!_currentUser) return;
+      if (!confirm('Delete this reply?')) return;
+      _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId,'replies',replyId), {
+        status: 'deleted', updatedAt: _fs.serverTimestamp()
+      }).then(function() {
+        var wrap = document.querySelector('[data-rid="'+CSS.escape(replyId)+'"]');
+        if (wrap) { wrap.style.transition='opacity .2s'; wrap.style.opacity='0'; setTimeout(function(){ wrap.remove(); },220); }
+        _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId), {replyCount: _fs.increment(-1)}).catch(function(){});
+        showToast('Reply deleted');
+      }).catch(function() { showToast('Could not delete reply', false); });
     },
 
     // ── Reactions ─────────────────────────────────────────────────

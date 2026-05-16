@@ -17,6 +17,7 @@
   var _db, _fs;
   var _user = null;
   var _businesses = [];
+  var _groups = [];
   var _isOpen = false;
   var _outsideClickBound = false;
   var _observer = null;
@@ -65,7 +66,7 @@
       '<div class="geo-sw-divider"></div>'+
       '<a class="geo-sw-item" href="add-business.html">'+
         '<div class="geo-sw-item-icon create"><i class="fas fa-plus"></i></div>'+
-        '<span class="geo-sw-item-name">Create Business Page</span>'+
+        '<span class="geo-sw-item-name">Create Page</span>'+
       '</a>'+
       '<div class="geo-sw-divider"></div>'+
       '<a class="geo-sw-item" href="profile.html">'+
@@ -77,7 +78,20 @@
         '<span class="geo-sw-item-name" style="color:#f87171">Sign Out</span>'+
       '</button>';
 
-    return profileSection + bizSection + bottomSection;
+    var groupSection = '';
+    if (_groups && _groups.length) {
+      groupSection = '<div class="geo-sw-divider"></div><div class="geo-sw-section-label">Your Groups</div>';
+      _groups.forEach(function(g) {
+        groupSection +=
+          '<a class="geo-sw-item" href="groups.html?id='+esc(g.id)+'">'+
+            '<div class="geo-sw-item-icon biz"><i class="fas fa-users"></i></div>'+
+            '<span class="geo-sw-item-name">'+esc(g.name||'Group')+'</span>'+
+            '<span class="geo-sw-owner-pill">Admin</span>'+
+          '</a>';
+      });
+    }
+
+    return profileSection + bizSection + groupSection + bottomSection;
   }
 
   /* ── button label HTML ─────────────────────────────────────── */
@@ -221,7 +235,7 @@
     console.log('[AccountSwitcher] user ready via GeoAuthReady:', _user.email);
     var authUser = document.getElementById('authNavUser');
     mountWrap(authUser || null);
-    if (_user.uid) loadUserBusinesses(_user.uid);
+    if (_user.uid) { loadUserBusinesses(_user.uid); loadUserGroups(_user.uid); }
     startObserver();
   });
 
@@ -258,6 +272,22 @@
     }).catch(function() {});
   }
 
+  function loadUserGroups(uid) {
+    if (!_db || !_fs) return;
+    _groups = [];
+    _fs.getDocs(_fs.query(
+      _fs.collection(_db, 'groups'),
+      _fs.where('ownerId', '==', uid),
+      _fs.limit(5)
+    )).then(function(snap) {
+      snap.forEach(function(d) { _groups.push(Object.assign({id: d.id}, d.data())); });
+      if (_isOpen) {
+        var dd = document.getElementById('geo-sw-dropdown');
+        if (dd && dd.classList.contains('open')) dd.innerHTML = renderDropdown();
+      }
+    }).catch(function() {});
+  }
+
   /* ── init ──────────────────────────────────────────────────── */
 
   function init(fb) {
@@ -278,6 +308,7 @@
         console.log('[AccountSwitcher] late-init: replacing existing #authNavUser');
         mountWrap(authUser);
         loadUserBusinesses(_user.uid);
+        loadUserGroups(_user.uid);
         startObserver();
       } else {
         startObserver(); // observe for when account.js finishes
