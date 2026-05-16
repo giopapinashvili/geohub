@@ -677,10 +677,10 @@
 
     function doUpload(file, folder, onUrl) {
       const GS = window.GeoSocial;
-      if (!GS || !GS.uploadFile) { var st = document.getElementById('peUploadStatus'); if (st) st.textContent = 'Upload unavailable.'; return; }
       const pw = document.getElementById('peUploadProgress');
       const pb = document.getElementById('peUploadBar');
       const st = document.getElementById('peUploadStatus');
+      if (!GS || !GS.uploadFile) { if (st) st.textContent = 'Upload unavailable.'; return; }
       if (pw) pw.style.display = '';
       if (pb) pb.style.width = '0%';
       if (st) st.textContent = 'Uploading…';
