@@ -40,6 +40,13 @@
 </head>
 <body data-gh-page="business">
   <noscript>GeoHub requires JavaScript.</noscript>
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="navbar-brand"><div class="logo-icon">🌍</div><span class="logo-text">Geo<span class="logo-geo">Hub</span></span></a>
+    <ul class="navbar-links"></ul>
+    <div class="navbar-actions"></div>
+    <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="mobile-menu"></div>
   <!-- Business detail root — populated by business-page.js when ?id= is in URL -->
   <div id="biz-detail-root"></div>
   <script type="module" src="firebase-config.js"></script>
