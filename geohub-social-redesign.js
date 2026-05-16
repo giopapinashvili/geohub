@@ -3858,7 +3858,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(PAGE==='rewards' || PATH==='rewards.html') return; // geohub-points.js renders the integrated rewards app shell.
     if(PAGE==='feed' || PATH==='feed.html' || PATH==='index.html') return renderFeed();
     if(PAGE==='discover' || PATH==='explore.html') return renderDiscover();
-    if(PAGE==='business' || PATH==='business.html') return renderBusinesses();
+    if(PAGE==='business' || PATH==='business.html') {
+      if (new URLSearchParams(location.search).get('id')) return; // business-page.js renders detail pages
+      return renderBusinesses();
+    }
     if(PAGE==='groups' || PATH==='groups.html') return renderGroups();
     if(PAGE==='add-business' || PATH==='add-business.html') return patchAddBusinessPage();
     if(PAGE==='notifications' || PATH==='notifications.html') return renderNotifications();

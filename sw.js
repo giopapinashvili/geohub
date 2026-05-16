@@ -5,7 +5,7 @@
    ├─────────────────────────────────────────────┼────────────────────────────┤
    │ Firebase Auth / Firestore / FCM APIs        │ Network only (pass through)│
    │ CDN scripts (Font Awesome, Firebase SDK)    │ Cache first, 7-day max-age │
-   │ Firebase Storage images (avatars, uploads)  │ Cache first, 30-day max-age│
+   │ Cloudinary images (avatars, uploads)        │ Cache first, 30-day max-age│
    │ Local images / icons / SVG                  │ Cache first, 30-day max-age│
    │ Local CSS / JS                              │ Stale-while-revalidate     │
    │ HTML pages (same origin)                    │ Network first → offline.html│
@@ -23,7 +23,6 @@ try {
     apiKey:            'AIzaSyBFjplTgrv7SGLagXzppoUXmSp60PMO_HI',
     authDomain:        'geohub-main.firebaseapp.com',
     projectId:         'geohub-main',
-    storageBucket:     'geohub-main.firebasestorage.app',
     messagingSenderId: '18115935679',
     appId:             '1:18115935679:web:b17b3f3814256cd97e750a'
   });
@@ -170,8 +169,8 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  /* 3. Firebase Storage images (user avatars, post images) → Cache first */
-  if (url.hostname.indexOf('firebasestorage.googleapis.com') !== -1) {
+  /* 3. Cloudinary images (user avatars, post images) → Cache first */
+  if (url.hostname.indexOf('res.cloudinary.com') !== -1) {
     event.respondWith(imageFirst(req));
     return;
   }

@@ -11,6 +11,7 @@
 
   var SKIP_PAGES = ['onboarding.html'];
   var currentPage = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  if (currentPage && currentPage.indexOf('.') === -1) currentPage += '.html';
 
   if (SKIP_PAGES.some(function (p) { return currentPage.includes(p); })) return;
 

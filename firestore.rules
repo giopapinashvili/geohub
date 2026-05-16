@@ -76,7 +76,7 @@ service cloud.firestore {
       return signedIn()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'likeCount', 'commentCount', 'shareCount',
-          'reactionCount', 'saveCount', 'updatedAt'
+          'reactionCount', 'saveCount', 'viewCount', 'updatedAt'
         ]);
     }
 
@@ -84,7 +84,7 @@ service cloud.firestore {
     function onlyPostManagementFields() {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
         'text', 'status', 'visibility', 'commentsDisabled',
-        'pinned', 'updatedAt'
+        'pinned', 'approvedAt', 'declinedAt', 'updatedAt'
       ]);
     }
 
@@ -104,16 +104,108 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/businessAdmins/$(bizId + '_' + request.auth.uid));
     }
 
+    // New per-page admin roles live under businesses/{businessId}/admins/{uid}.
+    function isBizPageAdmin(bizId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/businesses/$(bizId)/admins/$(request.auth.uid));
+    }
+
+    // Some older business documents only store ownerId on /businesses/{id}.
+    function isBizDocOwner(bizId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/businesses/$(bizId))
+        && get(/databases/$(database)/documents/businesses/$(bizId)).data.get('ownerId', '') == uid();
+    }
+
+    function canManageBiz(bizId) {
+      return isAdmin() || isBizOwner(bizId) || isBizPageAdmin(bizId) || isBizDocOwner(bizId);
+    }
+
+    function isGroupMember(groupId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/groupMembers/$(groupId + '_' + request.auth.uid));
+    }
+
+    function isGroupManager(groupId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/groupMembers/$(groupId + '_' + request.auth.uid))
+        && get(/databases/$(database)/documents/groupMembers/$(groupId + '_' + request.auth.uid)).data.get('role', 'member') in ['owner', 'admin', 'moderator'];
+    }
+
+    function isGroupOwnerOrAdmin(groupId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/groupMembers/$(groupId + '_' + request.auth.uid))
+        && get(/databases/$(database)/documents/groupMembers/$(groupId + '_' + request.auth.uid)).data.get('role', 'member') in ['owner', 'admin'];
+    }
+
     // Business owner of the post's business can moderate comments.
     function isBizOwnerOfPost(postId) {
       let bizId = get(/databases/$(database)/documents/posts/$(postId)).data.get('businessId', '');
-      return bizId != '' && isBizOwner(bizId);
+      return bizId != '' && canManageBiz(bizId);
+    }
+
+    function isGroupManagerOfPost() {
+      let groupId = resource.data.get('groupId', resource.data.get('targetId', ''));
+      return groupId != '' && resource.data.get('targetType', '') == 'group' && isGroupManager(groupId);
     }
 
     // Comment author may only change text/updatedAt on their own comments.
     function onlyCommentTextChanged() {
       return request.resource.data.diff(resource.data).affectedKeys()
         .hasOnly(['text', 'updatedAt']);
+    }
+
+    function onlyCommentCountersChanged() {
+      return signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['reactionCount', 'replyCount', 'updatedAt']);
+    }
+
+    function onlyCommentSoftDeleteChanged() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['status', 'updatedAt'])
+        && request.resource.data.get('status', '') in ['active', 'deleted'];
+    }
+
+    function onlyPollChanged() {
+      return signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['poll', 'updatedAt']);
+    }
+
+    function onlyBusinessReviewCountersChanged() {
+      return signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['reportCount', 'reported', 'updatedAt']);
+    }
+
+    function onlyBusinessOwnerReplyChanged() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['ownerReply', 'updatedAt']);
+    }
+
+    function onlyMessageParticipantMetaChanged() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['likedBy', 'deletedFor', 'seenBy', 'readBy', 'delivered', 'updatedAt']);
+    }
+
+    function onlyMessageSenderEditChanged() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly([
+          'text', 'body', 'message', 'content',
+          'edited', 'editedAt', 'deleted', 'deletedBy', 'deletedAt',
+          'status', 'updatedAt',
+          'mediaUrl', 'mediaType', 'imageUrl', 'fileName', 'fileSize',
+          'attachment', 'attachments', 'replyTo'
+        ]);
+    }
+
+    function onlyConversationSettingsOwner() {
+      return signedIn()
+        && request.resource.data.get('userId', '') == uid()
+        && request.resource.data.keys().hasOnly([
+             'userId', 'conversationId', 'archived', 'mutedUntil', 'theme', 'nickname', 'updatedAt'
+           ]);
     }
 
     function onlyGroupCountersChanged() {
@@ -226,6 +318,11 @@ service cloud.firestore {
         allow update: if isOwner(userId) || isAdmin();
         allow delete: if isOwner(userId) || isAdmin();
       }
+
+      match /workHistory/{businessId} {
+        allow read: if true;
+        allow create, update, delete: if isOwner(userId) || isAdmin();
+      }
     }
 
     // Admin UIDs are set manually in the Firebase Console.
@@ -253,39 +350,65 @@ service cloud.firestore {
             || isBizOwner(request.resource.data.get('businessId', '')));
       allow update: if isAdmin()
         || onlyCountersChanged()
+        || onlyPollChanged()
         || (existingOwnerMatches() && onlyPostManagementFields())
-        // Business owner may manage any post on their page (edit text, status, visibility, etc.)
-        || (isBizOwner(resource.data.get('businessId', ''))
+        // Business owner/page admin may manage any post on their page.
+        || (canManageBiz(resource.data.get('businessId', ''))
             && resource.data.get('businessId', '') != ''
-            && onlyPostManagementFields());
+            && onlyPostManagementFields())
+        // Group owner/admin/moderator may approve, decline, pin, or soft-delete group posts.
+        || (isGroupManagerOfPost() && onlyPostManagementFields());
       allow delete: if isAdmin()
         || existingOwnerMatches()
-        || (isBizOwner(resource.data.get('businessId', ''))
-            && resource.data.get('businessId', '') != '');
+        || (canManageBiz(resource.data.get('businessId', ''))
+            && resource.data.get('businessId', '') != '')
+        || isGroupManagerOfPost();
 
       match /comments/{commentId} {
         allow read: if true;
         allow create: if newOwnerMatches()
           && request.resource.data.get('text', '') is string
           && request.resource.data.get('text', '').size() > 0;
-        // Authors may edit text only; biz owner may soft-delete (status field); admins may do anything
+        // Authors may edit text or soft-delete their own comments; counters are updated by reactions/replies.
         allow update: if isAdmin()
-          || (existingOwnerMatches() && onlyCommentTextChanged())
+          || onlyCommentCountersChanged()
+          || (existingOwnerMatches() && (onlyCommentTextChanged() || onlyCommentSoftDeleteChanged()))
           || isBizOwnerOfPost(postId);
         allow delete: if isAdmin() || existingOwnerMatches() || isBizOwnerOfPost(postId);
+
+        match /reactions/{rxUserId} {
+          allow read: if true;
+          allow create, update: if isOwner(rxUserId)
+            && request.resource.data.get('userId', rxUserId) == uid();
+          allow delete: if isAdmin() || isOwner(rxUserId);
+        }
 
         match /replies/{replyId} {
           allow read: if true;
           allow create: if newOwnerMatches()
             && request.resource.data.get('text', '') is string
             && request.resource.data.get('text', '').size() > 0;
-          allow update, delete: if isAdmin() || existingOwnerMatches();
+          allow update, delete: if isAdmin() || existingOwnerMatches() || isBizOwnerOfPost(postId);
         }
       }
 
-      // Each like/reaction doc ID is the user's own UID — self-only write.
+      // Each like/reaction/poll/view doc ID is the user's own UID — self-only write.
       match /likes/{likeUserId}     { allow read: if true; allow create, update, delete: if isOwner(likeUserId); }
       match /reactions/{rxUserId}   { allow read: if true; allow create, update, delete: if isOwner(rxUserId); }
+      match /pollVotes/{voteUserId} {
+        allow read: if true;
+        allow create: if isOwner(voteUserId)
+          && request.resource.data.get('userId', voteUserId) == uid()
+          && request.resource.data.get('optionId', '') is string;
+        allow update: if false;
+        allow delete: if isAdmin() || isOwner(voteUserId);
+      }
+      match /views/{viewerId} {
+        allow read: if isAdmin() || isOwner(viewerId) || existingOwnerMatches();
+        allow create, update: if isOwner(viewerId)
+          && request.resource.data.get('userId', viewerId) == uid();
+        allow delete: if isAdmin() || isOwner(viewerId);
+      }
     }
 
     match /stories/{storyId}    { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
@@ -297,27 +420,27 @@ service cloud.firestore {
     match /businesses/{businessId} {
       allow read: if true;
       allow create: if newOwnerMatches();
-      allow update: if isAdmin() || existingOwnerMatches() || onlyBusinessCountersChanged();
-      allow delete: if isAdmin() || existingOwnerMatches();
+      allow update: if canManageBiz(businessId) || existingOwnerMatches() || onlyBusinessCountersChanged();
+      allow delete: if canManageBiz(businessId) || existingOwnerMatches();
 
-      // ── Services, products, and price list: owner CRUD, public read ──
+      // ── Services, products, and price list: owner/page-admin CRUD, public read ──
       match /services/{serviceId} {
         allow read: if true;
-        allow create, update, delete: if isAdmin() || isBizOwner(businessId);
+        allow create, update, delete: if canManageBiz(businessId);
       }
       match /products/{productId} {
         allow read: if true;
-        allow create, update, delete: if isAdmin() || isBizOwner(businessId);
+        allow create, update, delete: if canManageBiz(businessId);
       }
       match /priceList/{itemId} {
         allow read: if true;
-        allow create, update, delete: if isAdmin() || isBizOwner(businessId);
+        allow create, update, delete: if canManageBiz(businessId);
       }
 
       // ── Gallery: owner can CRUD, public read ──────────────────────────
       match /gallery/{photoId} {
         allow read: if true;
-        allow create, update, delete: if isAdmin() || isBizOwner(businessId);
+        allow create, update, delete: if canManageBiz(businessId);
       }
 
       // ── Quote requests: any signed-in user can submit (self-attributed).
@@ -328,37 +451,98 @@ service cloud.firestore {
           && request.resource.data.get('businessId', '') == businessId
           && request.resource.data.get('name',    '') is string
           && request.resource.data.get('message', '') is string;
-        allow read: if isAdmin() || isBizOwner(businessId)
-          || (signedIn() && get(/databases/$(database)/documents/businesses/$(businessId)).data.get('ownerId', '') == uid());
-        allow update: if isAdmin() || isBizOwner(businessId)
-          || (signedIn() && get(/databases/$(database)/documents/businesses/$(businessId)).data.get('ownerId', '') == uid());
+        allow read: if canManageBiz(businessId)
+          || (signedIn() && resource.data.get('submittedBy', '') == uid());
+        allow update: if canManageBiz(businessId)
+          || (signedIn() && resource.data.get('submittedBy', '') == uid()
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt']));
         allow delete: if isAdmin();
       }
 
       // ── QR scan logs: unchanged ──────────────────────────────────────
       match /qrScanLogs/{logId} {
         allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
-        allow read: if isAdmin()
-          || (signedIn()
-              && get(/databases/$(database)/documents/businesses/$(businessId)).data.get('ownerId', '') == uid());
+        allow read: if canManageBiz(businessId);
         allow update, delete: if isAdmin();
       }
       match /subscriptions/{subId} {
-        allow read: if isAdmin() || (signedIn() && resource.data.get('ownerId', '') == uid());
+        allow read: if canManageBiz(businessId) || (signedIn() && resource.data.get('ownerId', '') == uid());
         allow create, update, delete: if isAdmin();
       }
 
       // ── Page Blocks: public can read enabled blocks; only owner/admin can write ──
       match /pageBlocks/{blockId} {
-        allow read: if resource.data.get('enabled', true) == true
-          || isAdmin()
-          || isBizOwner(businessId)
+        allow read: if resource.data.get('enabled', true) == true || canManageBiz(businessId);
+        allow create, update, delete: if canManageBiz(businessId);
+      }
+
+      // Per-page admin roles used by Business Page Pro Tools.
+      match /admins/{adminUserId} {
+        allow read: if canManageBiz(businessId) || isOwner(adminUserId);
+        allow create, update, delete: if isAdmin() || isBizOwner(businessId) || isBizDocOwner(businessId);
+      }
+
+      match /events/{eventId} {
+        allow read: if true;
+        allow create, update, delete: if canManageBiz(businessId);
+
+        match /rsvps/{rsvpUserId} {
+          allow read: if true;
+          allow create, update: if isOwner(rsvpUserId)
+            && request.resource.data.get('userId', rsvpUserId) == uid();
+          allow delete: if isAdmin() || isOwner(rsvpUserId) || canManageBiz(businessId);
+        }
+      }
+
+      match /faq/{faqId} {
+        allow read: if true;
+        allow create, update, delete: if canManageBiz(businessId);
+      }
+
+      match /faqQuestions/{questionId} {
+        allow read: if canManageBiz(businessId)
+          || (signedIn() && resource.data.get('userId', '') == uid());
+        allow create: if signedIn()
+          && request.resource.data.get('userId', '') == uid();
+        allow update: if canManageBiz(businessId)
+          || (signedIn() && resource.data.get('userId', '') == uid()
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['question', 'updatedAt']));
+        allow delete: if canManageBiz(businessId)
+          || (signedIn() && resource.data.get('userId', '') == uid());
+      }
+
+      match /milestones/{milestoneId} {
+        allow read: if true;
+        allow create, update, delete: if canManageBiz(businessId);
+      }
+
+      match /analytics/{dateDoc} {
+        allow read: if canManageBiz(businessId);
+        allow create, update: if signedIn();
+        allow delete: if isAdmin();
+      }
+
+      match /invites/{inviteId} {
+        allow read: if canManageBiz(businessId)
           || (signedIn()
-              && get(/databases/$(database)/documents/businesses/$(businessId)).data.get('ownerId', '') == uid());
-        allow create, update, delete: if isAdmin()
-          || isBizOwner(businessId)
+              && (resource.data.get('invitedEmail', '') == request.auth.token.email
+                  || resource.data.get('inviteeEmail', '') == request.auth.token.email));
+        allow create: if canManageBiz(businessId)
+          && request.resource.data.get('businessId', '') == businessId;
+        allow update: if canManageBiz(businessId)
           || (signedIn()
-              && get(/databases/$(database)/documents/businesses/$(businessId)).data.get('ownerId', '') == uid());
+              && (resource.data.get('invitedEmail', '') == request.auth.token.email
+                  || resource.data.get('inviteeEmail', '') == request.auth.token.email)
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'respondedAt']));
+        allow delete: if canManageBiz(businessId);
+      }
+
+      match /staff/{staffUserId} {
+        allow read: if true;
+        allow create, update: if canManageBiz(businessId)
+          || (isOwner(staffUserId)
+              && request.resource.data.get('userId', staffUserId) == uid());
+        allow delete: if canManageBiz(businessId) || isOwner(staffUserId);
       }
     }
     match /businessAdmins/{adminId} {
@@ -375,7 +559,13 @@ service cloud.firestore {
     match /businessReviews/{reviewId} {
       allow read: if true;
       allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
-      allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid());
+      allow update: if isAdmin()
+        || (signedIn() && resource.data.get('userId', '') == uid())
+        || onlyBusinessReviewCountersChanged()
+        || (canManageBiz(resource.data.get('businessId', '')) && onlyBusinessOwnerReplyChanged());
+      allow delete: if isAdmin()
+        || (signedIn() && resource.data.get('userId', '') == uid())
+        || canManageBiz(resource.data.get('businessId', ''));
     }
     match /businessOffers/{offerId} {
       allow read: if true;
@@ -437,8 +627,43 @@ service cloud.firestore {
     match /groups/{groupId} {
       allow read: if true;
       allow create: if newOwnerMatches();
-      allow update: if isAdmin() || existingOwnerMatches() || onlyGroupCountersChanged();
-      allow delete: if isAdmin() || existingOwnerMatches();
+      allow update: if isAdmin() || existingOwnerMatches() || isGroupOwnerOrAdmin(groupId) || onlyGroupCountersChanged();
+      allow delete: if isAdmin() || existingOwnerMatches() || isGroupOwnerOrAdmin(groupId);
+
+      match /bans/{bannedUserId} {
+        allow read: if isAdmin() || isGroupManager(groupId) || isOwner(bannedUserId);
+        allow create, update, delete: if isAdmin() || isGroupManager(groupId);
+      }
+
+      match /events/{eventId} {
+        allow read: if true;
+        allow create, update, delete: if isAdmin() || isGroupManager(groupId);
+
+        match /rsvps/{rsvpUserId} {
+          allow read: if true;
+          allow create, update: if isOwner(rsvpUserId)
+            && request.resource.data.get('userId', rsvpUserId) == uid();
+          allow delete: if isAdmin() || isOwner(rsvpUserId) || isGroupManager(groupId);
+        }
+      }
+
+      match /files/{fileId} {
+        allow read: if true;
+        allow create: if signedIn()
+          && request.resource.data.get('uploaderId', '') == uid();
+        allow update, delete: if isAdmin()
+          || isGroupManager(groupId)
+          || (signedIn() && resource.data.get('uploaderId', '') == uid());
+      }
+
+      match /chatMessages/{messageId} {
+        allow read: if true;
+        allow create: if signedIn()
+          && request.resource.data.get('senderId', '') == uid();
+        allow update, delete: if isAdmin()
+          || isGroupManager(groupId)
+          || (signedIn() && resource.data.get('senderId', '') == uid());
+      }
     }
     match /groupMembers/{memberId} {
       allow read: if true;
@@ -448,7 +673,8 @@ service cloud.firestore {
       allow update, delete: if isAdmin()
         || (signedIn()
             && (resource.data.get('userId', '') == uid()
-                || resource.data.get('uid', '') == uid()));
+                || resource.data.get('uid', '') == uid()))
+        || isGroupManager(resource.data.get('groupId', ''));
     }
     match /groupPosts/{postId} {
       allow read: if true;
@@ -459,10 +685,12 @@ service cloud.firestore {
       allow read: if signedIn()
         && (resource.data.get('userId', '') == uid()
             || resource.data.get('toUserId', '') == uid()
+            || isGroupManager(resource.data.get('groupId', ''))
             || isAdmin());
       allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
-      allow update: if isAdmin();
+      allow update: if isAdmin() || isGroupManager(resource.data.get('groupId', ''));
       allow delete: if isAdmin()
+        || isGroupManager(resource.data.get('groupId', ''))
         || (signedIn() && resource.data.get('userId', '') == uid());
     }
 
@@ -536,10 +764,8 @@ service cloud.firestore {
         // Sender may edit their own message; any participant may mark it
         // deleted/liked (narrow field allowlist).
         allow update: if isAdmin()
-          || (signedIn() && resource.data.senderId == uid())
-          || (isConversationParticipant(conversationId)
-              && request.resource.data.diff(resource.data).affectedKeys()
-                   .hasOnly(['likedBy', 'deletedFor', 'updatedAt']));
+          || (signedIn() && resource.data.senderId == uid() && onlyMessageSenderEditChanged())
+          || (isConversationParticipant(conversationId) && onlyMessageParticipantMetaChanged());
         allow delete: if isAdmin()
           || (signedIn() && resource.data.senderId == uid());
       }
@@ -569,16 +795,42 @@ service cloud.firestore {
       allow delete: if signedIn() && resource.data.get('userId', '') == uid();
     }
 
+    match /userConversationSettings/{settingId} {
+      allow read: if signedIn()
+        && (resource.data.get('userId', '') == uid() || isAdmin());
+      allow create, update: if onlyConversationSettingsOwner();
+      allow delete: if isAdmin()
+        || (signedIn() && resource.data.get('userId', '') == uid());
+    }
+
     match /chats/{chatId} {
-      allow create: if signedIn() && uid() in request.resource.data.participants;
+      allow create: if signedIn()
+        && (uid() in request.resource.data.get('participants', [])
+            || uid() in request.resource.data.get('members', []));
       allow read, update, delete: if isAdmin()
-        || (signedIn() && uid() in resource.data.participants);
+        || (signedIn()
+            && (uid() in resource.data.get('participants', [])
+                || uid() in resource.data.get('members', [])));
       match /messages/{messageId} {
-        allow read, create: if isAdmin()
+        allow read: if isAdmin()
           || (signedIn()
-              && uid() in get(/databases/$(database)/documents/chats/$(chatId)).data.participants);
-        allow update, delete: if isAdmin()
-          || (signedIn() && resource.data.senderId == uid());
+              && (uid() in get(/databases/$(database)/documents/chats/$(chatId)).data.get('participants', [])
+                  || uid() in get(/databases/$(database)/documents/chats/$(chatId)).data.get('members', [])));
+        allow create: if isAdmin()
+          || (signedIn()
+              && (uid() in get(/databases/$(database)/documents/chats/$(chatId)).data.get('participants', [])
+                  || uid() in get(/databases/$(database)/documents/chats/$(chatId)).data.get('members', []))
+              && (request.resource.data.get('senderId', '') == uid()
+                  || request.resource.data.get('userId', '') == uid()
+                  || request.resource.data.get('authorId', '') == uid()));
+        allow update: if isAdmin()
+          || (signedIn() && resource.data.get('senderId', '') == uid() && onlyMessageSenderEditChanged())
+          || (signedIn()
+              && (uid() in get(/databases/$(database)/documents/chats/$(chatId)).data.get('participants', [])
+                  || uid() in get(/databases/$(database)/documents/chats/$(chatId)).data.get('members', []))
+              && onlyMessageParticipantMetaChanged());
+        allow delete: if isAdmin()
+          || (signedIn() && resource.data.get('senderId', '') == uid());
       }
     }
 
@@ -726,11 +978,13 @@ service cloud.firestore {
         || (signedIn() && resource.data.get('userId', '') == uid());
     }
 
-    // Only the blocker may read their own block list.
-    // The blocked user cannot discover they are blocked via rules.
+    // The client checks exact block documents before comments/messages, e.g.
+    // blockedUsers/{postOwnerId}_{currentUserId}. Firestore also applies rules
+    // to non-existent docs; a resource.data-based read rule denies those reads
+    // before the app can learn "not blocked". For this MVP we allow signed-in
+    // users to read block records, while writes stay owner-only and immutable.
     match /blockedUsers/{blockId} {
-      allow read: if signedIn()
-        && (resource.data.get('blockerId', '') == uid() || isAdmin());
+      allow read: if signedIn();
       allow create: if signedIn()
         && request.resource.data.get('blockerId', '') == uid()
         // Users may not block themselves

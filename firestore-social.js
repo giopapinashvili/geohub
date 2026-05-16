@@ -1079,44 +1079,71 @@
       if (!text || !text.trim()) return;
       requireAuth(function (user) {
         var me = meData() || {};
-        var commentRef = null;
+        var cleanText = text.trim();
         var postOwnerId = null;
-        getPostOwner(postId).then(function(ownerId) {
-          postOwnerId = ownerId;
-          if (!ownerId) return { exists: function(){ return false; } };
-          return getDoc(doc(db, 'blockedUsers', ownerId + '_' + user.uid));
-        }).then(function(blockSnap) {
-          if (blockSnap && blockSnap.exists()) {
-            toast('You cannot comment on this post.', 'error');
-            if (callback) callback(null, new Error('blocked'));
-            return Promise.reject('blocked');
-          }
-          return addDoc(collection(db, 'posts', postId, 'comments'), {
-            text: text.trim(),
-            authorId: user.uid,
-            userId: user.uid,
-            authorName: me.name || user.displayName || 'GeoHub User',
-            authorAvatar: me.avatar || user.photoURL || '',
-            likes: 0,
-            status: 'active',
-            createdAt: serverTimestamp()
+
+        // Comments must not fail because an optional pre-check/counter/notification fails.
+        // The only operation that decides success is the actual comment create.
+        getPostOwner(postId)
+          .catch(function (err) {
+            console.warn('[GeoSocial] comment owner lookup skipped:', err && err.message ? err.message : err);
+            return null;
+          })
+          .then(function(ownerId) {
+            postOwnerId = ownerId;
+            if (!ownerId) return { exists: function(){ return false; } };
+            return getDoc(doc(db, 'blockedUsers', ownerId + '_' + user.uid)).catch(function(err) {
+              console.warn('[GeoSocial] block check before comment skipped:', err && err.message ? err.message : err);
+              return { exists: function(){ return false; } };
+            });
+          })
+          .then(function(blockSnap) {
+            if (blockSnap && blockSnap.exists && blockSnap.exists()) {
+              toast('You cannot comment on this post.', 'error');
+              if (callback) callback(new Error('blocked'));
+              return null;
+            }
+            return addDoc(collection(db, 'posts', postId, 'comments'), {
+              text: cleanText,
+              authorId: user.uid,
+              userId: user.uid,
+              authorName: me.name || user.displayName || 'GeoHub User',
+              authorAvatar: me.avatar || user.photoURL || '',
+              likes: 0,
+              reactionCount: 0,
+              replyCount: 0,
+              status: 'active',
+              createdAt: serverTimestamp(),
+              updatedAt: serverTimestamp()
+            });
+          })
+          .then(function (ref) {
+            if (!ref) return;
+
+            // UI success immediately after the comment document exists.
+            toast('Comment posted');
+            if (callback) callback(null, ref.id);
+
+            // Non-critical side effects: never roll back the visible comment.
+            updateDoc(doc(db, 'posts', postId), { commentCount: increment(1), updatedAt: serverTimestamp() })
+              .catch(function(err){ console.warn('[GeoSocial] comment counter skipped:', err && err.message ? err.message : err); });
+
+            createNotification(
+              postOwnerId,
+              'comment',
+              (me.name || 'GeoHub User') + ' commented on your post',
+              cleanText,
+              'feed.html?post=' + postId + '&comment=' + ref.id,
+              { postId: postId, commentId: ref.id }
+            ).catch(function(){});
+
+            awardPoints(5, 'Comment on post', 'post', postId).catch(function(){});
+          })
+          .catch(function (err) {
+            console.error('[GeoSocial] addComment', err);
+            toast('Failed to comment.', 'error');
+            if (callback) callback(err);
           });
-        }).then(function (ref) {
-          commentRef = ref;
-          return updateDoc(doc(db, 'posts', postId), { commentCount: increment(1) });
-        }).then(function () {
-          var cid = commentRef && commentRef.id;
-          return createNotification(postOwnerId, 'comment', (meData() || {}).name + ' commented on your post', text.trim(), 'feed.html?post=' + postId + (cid ? '&comment=' + cid : ''), { postId: postId, commentId: cid || '' });
-        }).then(function () {
-          toast('Comment posted');
-          awardPoints(5, 'Comment on post', 'post', postId);
-          if (callback) callback();
-        }).catch(function (err) {
-          if (err === 'blocked') return;
-          console.error('[GeoSocial] addComment', err);
-          toast('Failed to comment.', 'error');
-          if (callback) callback(null, err);
-        });
       });
     }
 
@@ -1882,7 +1909,10 @@
       extra = extra || {};
       var cleanText = String(text || '').trim();
       var mediaUrl = String(extra.mediaUrl || '').trim();
-      var mediaType = String(extra.mediaType || '').trim();
+      var mediaType = String(extra.mediaType || extra.type || '').trim();
+      var fileName = String(extra.fileName || '').trim();
+      var fileSize = Number(extra.fileSize || 0) || 0;
+      var replyTo = extra.replyTo && typeof extra.replyTo === 'object' ? extra.replyTo : null;
       if (!cleanText && !mediaUrl) return;
       requireAuth(function (user) {
         var me = meData() || {};
@@ -1891,20 +1921,26 @@
           if (!snap.exists()) throw new Error('Conversation not found');
           var conv = snap.data() || {};
           var otherId = (conv.participants || []).find(function (id) { return id !== user.uid; });
-          var preview = cleanText || (mediaType === 'image' ? '📷 Photo' : 'Attachment');
-          return addDoc(collection(db, 'conversations', conversationId, 'messages'), {
+          var preview = cleanText || (mediaType === 'image' ? '📷 Photo' : (fileName ? '📎 ' + fileName : 'Attachment'));
+          var messageDoc = {
             conversationId: conversationId,
             senderId: user.uid,
             authorId: user.uid,
             text: cleanText,
             mediaUrl: mediaUrl || '',
             mediaType: mediaType || '',
+            fileName: fileName || '',
+            fileSize: fileSize,
+            replyTo: replyTo,
             likedBy: [],
             readBy: [user.uid],
+            seenBy: [user.uid],
             deletedFor: [],
+            delivered: true,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
-          }).then(function () {
+          };
+          return addDoc(collection(db, 'conversations', conversationId, 'messages'), messageDoc).then(function () {
             var patch = { lastMessage: preview, lastSenderId: user.uid, updatedAt: serverTimestamp(), unreadFor: otherId ? fs.arrayUnion(otherId) : [] };
             patch['readBy.' + user.uid] = serverTimestamp();
             return updateDoc(convRef, patch);
@@ -2420,7 +2456,7 @@
 
     function declineJoinRequest(requestId, callback) {
       requireAuth(function () {
-        updateDoc(doc(db, 'groupJoinRequests'), requestId, { status: 'declined', updatedAt: serverTimestamp() })
+        updateDoc(doc(db, 'groupJoinRequests', requestId), { status: 'declined', updatedAt: serverTimestamp() })
           .catch(function(){});
         deleteDoc(doc(db, 'groupJoinRequests', requestId))
           .then(function () { toast('Request declined'); if (callback) callback(true); })

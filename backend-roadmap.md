@@ -12,7 +12,7 @@
 |---------|-----------------|------|
 | Auth | Firebase Auth | Free tier generous |
 | Database | Firestore | Serverless, real-time |
-| File storage | Firebase Storage | 5 GB free |
+| Media uploads | Cloudinary unsigned uploads | Works without Firebase Storage/Blaze for MVP |
 | Functions | Cloud Functions | Pay per invocation |
 | Push notifications | FCM | Free |
 | Hosting | Firebase Hosting | Free + CDN |

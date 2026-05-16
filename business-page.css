@@ -37,8 +37,16 @@ body.biz-detail-active .navbar,
 body.biz-detail-active .navbar.navbar {
   display: flex !important;
 }
-body.biz-detail-active .mobile-menu {
-  display: block !important;
+/* Keep the mobile menu hidden until the hamburger opens it. The old rule forced
+   .mobile-menu visible on business detail pages, covering the whole page on desktop. */
+body.biz-detail-active .mobile-menu:not(.open) {
+  display: none !important;
+}
+@media (min-width: 769px) {
+  body.biz-detail-active .mobile-menu,
+  body.biz-detail-active .mobile-menu.open {
+    display: none !important;
+  }
 }
 
 #biz-detail-root {

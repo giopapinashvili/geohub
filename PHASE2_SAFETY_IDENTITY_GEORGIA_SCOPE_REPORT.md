@@ -24,9 +24,8 @@ Implemented on top of `Geohub1_facebook_features_phase1.zip`.
   - edit page
   - post update.
 - Image upload pipeline:
-  - Firebase Storage helper added.
-  - post/story image data URLs upload to Storage when available.
-  - safe fallback remains if Storage is unavailable.
+  - Cloudinary upload helper is used for post/story/profile/check-in media.
+  - Firebase Storage is intentionally not required on the free/Spark setup.
 - Onboarding changed from single-city assumption to Georgia-wide/multi-area interests:
   - `All Georgia`
   - multi-city/region selection.

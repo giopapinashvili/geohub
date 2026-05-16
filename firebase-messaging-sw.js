@@ -6,7 +6,6 @@ firebase.initializeApp({
   apiKey: 'AIzaSyBFjplTgrv7SGLagXzppoUXmSp60PMO_HI',
   authDomain: 'geohub-main.firebaseapp.com',
   projectId: 'geohub-main',
-  storageBucket: 'geohub-main.firebasestorage.app',
   messagingSenderId: '18115935679',
   appId: '1:18115935679:web:b17b3f3814256cd97e750a'
 });

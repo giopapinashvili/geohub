@@ -62,9 +62,9 @@ This pass focuses on stabilizing the existing production code instead of adding 
 - `geohub-production-stabilization-v1.js` was injected into all HTML pages.
 
 ## Important manual step after deployment
-Publish both rule files in Firebase:
+Publish Firestore rules only:
 - Firestore Database → Rules → publish `firestore.rules`
-- Storage → Rules → publish `storage.rules`
+- Storage: no action needed; GeoHub media uploads use Cloudinary.
 
 ## Live test still required
 This ZIP is code-level verified. Final confirmation still requires testing on your deployed Firebase/Cloudflare environment with two real accounts.

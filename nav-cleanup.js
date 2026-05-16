@@ -202,7 +202,10 @@
   ];
 
   function currentFile() {
-    return (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    var p = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    if (!p || p === '/') p = 'index.html';
+    if (p.indexOf('.') === -1) p += '.html';
+    return p;
   }
 
   function isActive(item) {
@@ -363,6 +366,14 @@
     var hamburger  = document.getElementById('geoHamburger');
     var mobileMenu = document.querySelector('.mobile-menu');
     if (!hamburger || !mobileMenu) return;
+
+    function closeOnDesktop() {
+      if (window.matchMedia && window.matchMedia('(min-width: 769px)').matches) {
+        window.geoCloseMenu();
+      }
+    }
+    closeOnDesktop();
+    window.addEventListener('resize', closeOnDesktop);
 
     // onclick="geoToggleMenu()" is already set in HTML — just wire close-on-outside-click
     document.addEventListener('click', function(e) {

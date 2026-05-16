@@ -7,7 +7,6 @@ import {
   onSnapshot, deleteDoc, serverTimestamp, increment,
   writeBatch, runTransaction, arrayUnion, arrayRemove
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js';
 import { getAnalytics, isSupported } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js';
 import { getMessaging, isSupported as isMsgSupported } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js';
@@ -17,7 +16,6 @@ const firebaseConfig = {
   apiKey: "AIzaSyBFjplTgrv7SGLagXzppoUXmSp60PMO_HI",
   authDomain: "geohub-main.firebaseapp.com",
   projectId: "geohub-main",
-  storageBucket: "geohub-main.firebasestorage.app",
   messagingSenderId: "18115935679",
   appId: "1:18115935679:web:b17b3f3814256cd97e750a",
   measurementId: "G-NCBVQ4J9VF"
@@ -31,10 +29,6 @@ try {
   window.GeoFirebase = {
     app, auth, db,
     fs: { doc, setDoc, getDoc, getDocs, updateDoc, addDoc, collection, query, orderBy, where, limit, onSnapshot, deleteDoc, serverTimestamp, increment, writeBatch, runTransaction, arrayUnion, arrayRemove },
-    storage: getStorage(app),
-    storageRef,
-    uploadBytesResumable,
-    getDownloadURL,
     authFns: { signOut, onAuthStateChanged },
     functions,
     httpsCallable

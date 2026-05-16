@@ -92,22 +92,28 @@
   }
 
   function uploadPhoto(file, userId, onProgress, callback) {
-    var GF = window.GeoFirebase;
-    if (!GF || !GF.storage || !GF.storageRef || !GF.uploadBytesResumable || !GF.getDownloadURL) {
-      callback(null);
+    var GS = window.GeoSocial;
+
+    // GeoHub uses Cloudinary unsigned uploads for media.
+    // Firebase Storage is intentionally not used because this project stays on the free Spark plan.
+    if (!file || !GS || !GS.uploadFile) {
+      if (callback) callback(null);
       return;
     }
+
     try {
-      var safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 60);
-      var path = 'checkins/' + userId + '/' + Date.now() + '_' + safeName;
-      var ref  = GF.storageRef(GF.storage, path);
-      var task = GF.uploadBytesResumable(ref, file);
-      task.on('state_changed',
-        function (s) { if (onProgress) onProgress(Math.round(s.bytesTransferred / s.totalBytes * 100)); },
-        function ()  { callback(null); },
-        function ()  { GF.getDownloadURL(task.snapshot.ref).then(callback).catch(function(){ callback(null); }); }
-      );
-    } catch (e) { callback(null); }
+      GS.uploadFile(file, 'checkins', function (pct) {
+        if (onProgress) onProgress(pct);
+      }).then(function (url) {
+        if (callback) callback(url || null);
+      }).catch(function (err) {
+        console.warn('[GeoCheckin] Cloudinary check-in photo upload failed:', err && err.message ? err.message : err);
+        if (callback) callback(null);
+      });
+    } catch (e) {
+      console.warn('[GeoCheckin] Cloudinary check-in photo upload failed:', e && e.message ? e.message : e);
+      if (callback) callback(null);
+    }
   }
 
   function submit(data, callback) {

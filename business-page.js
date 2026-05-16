@@ -5,6 +5,15 @@
 (function () {
   'use strict';
 
+  function ensureBusinessNavbarCss() {
+    if (document.querySelector('link[href*="navbar.css"]')) return;
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'navbar.css';
+    document.head.appendChild(link);
+  }
+  ensureBusinessNavbarCss();
+
   var BIZ_ID = new URLSearchParams(window.location.search).get('id');
   if (!BIZ_ID) return;
 
@@ -1786,12 +1795,11 @@
       var sendBtn = ta.parentNode && ta.parentNode.querySelector('.biz-cmt-send-btn');
       if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
       GeoSocial.addComment(postId, val, function(err) {
-        ta.value = '';
-        ta.style.height = 'auto';
         ta.disabled = false;
         if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>'; }
         if (err) { showToast('Could not post comment', false); return; }
-        _fs.updateDoc(_fs.doc(_db,'posts',postId),{commentCount:_fs.increment(1)}).catch(function(){});
+        ta.value = '';
+        ta.style.height = 'auto';
       });
     },
 
