@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#10b981">
+  <title>Offline — GeoHub</title>
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#04050d;--card:#0c0e1c;--green:#10b981;--green-dim:#0d9268;
+      --text:#f0f4ff;--muted:#6b7280;--border:rgba(255,255,255,.08);
+    }
+    html[data-gh-theme="light"]{
+      --bg:#f8faf9;--card:#ffffff;--text:#0f172a;--muted:#64748b;--border:rgba(0,0,0,.08);
+    }
+    html,body{height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif}
+    body{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:24px;text-align:center;}
+
+    .logo{font-size:1.4rem;font-weight:900;letter-spacing:-.03em;color:var(--text);margin-bottom:40px;}
+    .logo span{color:var(--green)}
+
+    .icon-wrap{
+      width:96px;height:96px;border-radius:50%;
+      background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(59,130,246,.12));
+      border:2px solid rgba(16,185,129,.25);
+      display:flex;align-items:center;justify-content:center;
+      font-size:2.8rem;margin:0 auto 28px;
+      animation:pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.25)}50%{box-shadow:0 0 0 16px rgba(16,185,129,.0)}}
+
+    h1{font-size:1.75rem;font-weight:800;letter-spacing:-.03em;margin-bottom:10px;color:var(--text)}
+    p{font-size:0.95rem;color:var(--muted);line-height:1.6;max-width:320px;margin:0 auto 32px}
+
+    .try-btn{
+      display:inline-flex;align-items:center;gap:8px;
+      background:var(--green);color:#fff;border:none;
+      padding:13px 32px;border-radius:12px;font-size:0.95rem;font-weight:700;
+      cursor:pointer;transition:background .2s,transform .1s;
+      text-decoration:none;
+    }
+    .try-btn:active{transform:scale(0.97)}
+    .try-btn:hover{background:var(--green-dim)}
+
+    .cached-note{
+      margin-top:32px;font-size:0.78rem;color:var(--muted);
+      border:1px solid var(--border);border-radius:10px;
+      padding:12px 18px;max-width:300px;line-height:1.5;
+    }
+    .cached-note a{color:var(--green);text-decoration:none;font-weight:600}
+
+    .dots{display:flex;gap:6px;justify-content:center;margin-top:12px}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--green);opacity:.3;animation:blink 1.2s ease-in-out infinite}
+    .dot:nth-child(2){animation-delay:.2s}
+    .dot:nth-child(3){animation-delay:.4s}
+    @keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
+
+    #status{font-size:0.75rem;color:var(--muted);margin-top:10px;min-height:18px}
+    #status.online{color:var(--green)}
+  </style>
+</head>
+<body>
+  <div class="logo">Geo<span>Hub</span></div>
+
+  <div class="icon-wrap">📡</div>
+
+  <h1>You're offline</h1>
+  <p>Check your connection and try again. Some pages you visited recently may still be available.</p>
+
+  <button class="try-btn" onclick="tryReload()">
+    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+    Try again
+  </button>
+
+  <div id="status"></div>
+
+  <div class="dots" id="dots">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+  <div class="cached-note">
+    <strong>Cached pages still work.</strong><br>
+    Try navigating to <a href="/feed.html">Explore</a>, <a href="/map.html">Map</a>, or <a href="/profile.html">Profile</a> — they may be cached from your last visit.
+  </div>
+
+  <script>
+    var statusEl = document.getElementById('status');
+    var dots = document.getElementById('dots');
+
+    function tryReload() {
+      statusEl.textContent = 'Checking connection…';
+      statusEl.className = '';
+      setTimeout(function() { window.location.reload(); }, 400);
+    }
+
+    window.addEventListener('online', function() {
+      statusEl.textContent = '✓ Back online — reloading…';
+      statusEl.className = 'online';
+      dots.style.display = 'none';
+      setTimeout(function() {
+        history.length > 1 ? history.back() : window.location.replace('/index.html');
+      }, 800);
+    });
+
+    window.addEventListener('offline', function() {
+      statusEl.textContent = 'Still offline.';
+    });
+
+    if (navigator.onLine) {
+      statusEl.textContent = 'Connection detected — tap Try again.';
+      statusEl.className = 'online';
+    }
+  </script>
+</body>
+</html>

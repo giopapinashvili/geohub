@@ -298,12 +298,119 @@
     window.safeStorage && window.safeStorage.set('gh_splashed', true);
   }
 
+  // ── PWA META INJECTION ────────────────────────────────────────
+
+  function injectPWAMeta() {
+    if (!document.querySelector('link[rel="manifest"]')) {
+      var ml = document.createElement('link');
+      ml.rel = 'manifest'; ml.href = '/manifest.json';
+      document.head.appendChild(ml);
+    }
+    if (!document.querySelector('link[rel="apple-touch-icon"]')) {
+      var al = document.createElement('link');
+      al.rel = 'apple-touch-icon'; al.href = '/icons/icon-192.png';
+      document.head.appendChild(al);
+    }
+    if (!document.querySelector('link[rel="icon"]')) {
+      var il = document.createElement('link');
+      il.rel = 'icon'; il.type = 'image/png'; il.href = '/icons/icon-96.png';
+      document.head.appendChild(il);
+    }
+    var metas = {
+      'mobile-web-app-capable': 'yes',
+      'apple-mobile-web-app-capable': 'yes',
+      'apple-mobile-web-app-status-bar-style': 'black-translucent',
+      'apple-mobile-web-app-title': 'GeoHub',
+      'theme-color': '#10b981',
+    };
+    Object.keys(metas).forEach(function(name) {
+      if (!document.querySelector('meta[name="' + name + '"]')) {
+        var m = document.createElement('meta');
+        m.name = name; m.content = metas[name];
+        document.head.appendChild(m);
+      }
+    });
+  }
+
+  // ── OFFLINE / UPDATE BANNERS ──────────────────────────────────
+
+  function injectOfflineBanner() {
+    if (document.getElementById('gh-offline-banner')) return;
+    var style = document.createElement('style');
+    style.textContent = [
+      '#gh-offline-banner{position:fixed;top:0;left:0;right:0;z-index:99999;background:#ef4444;color:#fff;text-align:center;padding:10px 16px;font-size:0.83rem;font-weight:600;transform:translateY(-100%);transition:transform 0.28s ease;pointer-events:none;letter-spacing:.01em}',
+      '#gh-offline-banner.visible{transform:translateY(0);pointer-events:auto}',
+      '#gh-update-banner{position:fixed;bottom:0;left:0;right:0;z-index:99998;background:#0c0e1c;border-top:2px solid rgba(16,185,129,.5);color:#f1f5f9;display:flex;align-items:center;justify-content:center;gap:14px;padding:13px 16px;font-size:0.83rem;transform:translateY(100%);transition:transform 0.28s ease;pointer-events:none}',
+      '#gh-update-banner.visible{transform:translateY(0);pointer-events:auto}',
+      '#gh-update-banner strong{color:#34d399}',
+      '#gh-update-banner button{background:#10b981;color:#fff;border:none;border-radius:8px;padding:7px 18px;font-size:0.78rem;font-weight:700;cursor:pointer;flex-shrink:0}',
+      '#gh-update-banner button:hover{background:#0d9268}',
+    ].join('');
+    document.head.appendChild(style);
+
+    var ob = document.createElement('div');
+    ob.id = 'gh-offline-banner';
+    ob.setAttribute('role', 'alert');
+    ob.textContent = '📡 You\'re offline — some features may not work';
+    document.body.appendChild(ob);
+
+    var ub = document.createElement('div');
+    ub.id = 'gh-update-banner';
+    ub.setAttribute('role', 'status');
+    ub.innerHTML = '<span>🎉 <strong>New version available</strong></span><button onclick="window.location.reload()">Reload</button>';
+    document.body.appendChild(ub);
+  }
+
+  function showOfflineBanner() {
+    var b = document.getElementById('gh-offline-banner');
+    if (b) b.classList.add('visible');
+  }
+
+  function hideOfflineBanner() {
+    var b = document.getElementById('gh-offline-banner');
+    if (b) b.classList.remove('visible');
+  }
+
+  function showSWUpdateBanner() {
+    var b = document.getElementById('gh-update-banner');
+    if (b) b.classList.add('visible');
+  }
+
+  function setupConnectivityListeners() {
+    window.addEventListener('offline', showOfflineBanner);
+    window.addEventListener('online',  hideOfflineBanner);
+    if (!navigator.onLine) showOfflineBanner();
+  }
+
   // ── SERVICE WORKER ────────────────────────────────────────────
 
   function registerSW() {
     if (!('serviceWorker' in navigator)) return;
     if (window.location.protocol === 'file:') return;
-    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function () {});
+
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).then(function(reg) {
+      reg.addEventListener('updatefound', function() {
+        var nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', function() {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            showSWUpdateBanner();
+          }
+        });
+      });
+      setInterval(function() { reg.update().catch(function() {}); }, 30 * 60 * 1000);
+    }).catch(function() {});
+
+    var refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function() {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+
+    navigator.serviceWorker.addEventListener('message', function(ev) {
+      if (ev.data && ev.data.type === 'SW_UPDATED') showSWUpdateBanner();
+    });
   }
 
   // ── ESCAPE KEY ────────────────────────────────────────────────
@@ -495,10 +602,13 @@
   window.closeCmdPalette  = closeCmdPalette;
 
   function init() {
+    injectPWAMeta();
     showSplash();
     injectBottomNav();
     injectActionSheet();
     injectNotifContainer();
+    injectOfflineBanner();
+    setupConnectivityListeners();
     injectInstallPrompt();
     injectCmdPalette();
     registerSW();
