@@ -279,8 +279,10 @@ service cloud.firestore {
           && request.resource.data.get('businessId', '') == businessId
           && request.resource.data.get('name',    '') is string
           && request.resource.data.get('message', '') is string;
-        allow read: if isAdmin() || isBizOwner(businessId);
-        allow update: if isAdmin() || isBizOwner(businessId);
+        allow read: if isAdmin() || isBizOwner(businessId)
+          || (signedIn() && get(/databases/$(database)/documents/businesses/$(businessId)).data.get('ownerId', '') == uid());
+        allow update: if isAdmin() || isBizOwner(businessId)
+          || (signedIn() && get(/databases/$(database)/documents/businesses/$(businessId)).data.get('ownerId', '') == uid());
         allow delete: if isAdmin();
       }
 
@@ -790,7 +792,10 @@ service cloud.firestore {
     // Document ID convention: {userId}_{businessId}
     match /savedBusinesses/{saveId} {
       allow read: if signedIn()
-        && (resource.data.get('userId', '') == uid() || isAdmin());
+        && (resource == null
+            || resource.data.get('userId', '') == uid()
+            || resource.data.get('uid', '') == uid()
+            || isAdmin());
       allow create: if signedIn()
         && request.resource.data.get('userId', '') == uid()
         && request.resource.data.get('businessId', '') is string;
