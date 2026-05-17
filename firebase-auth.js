@@ -11,7 +11,6 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 
 function fbUserToGeoUser(fbUser) {
-  var seed = (fbUser.displayName || fbUser.email || 'user').replace(/\W/g, '').toLowerCase() || 'fbuser';
   return {
     id: fbUser.uid,
     uid: fbUser.uid,
@@ -23,15 +22,12 @@ function fbUserToGeoUser(fbUser) {
     bio: '',
     city: 'all_georgia',
     explorerLevel: 'New Explorer',
-    xp: 0,
-    rank: 9999,
     badges: [],
     interests: [],
     followers: 0,
     following: 0,
     postsCount: 0,
     visitedPlaces: 0,
-    trustScore: 0,
     accountType: 'Explorer',
     isFirebaseUser: true,
     createdAt: Date.now(),
@@ -42,7 +38,11 @@ function fbUserToGeoUser(fbUser) {
 async function saveUserToFirestore(geoUser) {
   var fb = window.GeoFirebase;
   if (!fb || !fb.db || !fb.fs || !geoUser || !geoUser.uid) return;
-  await fb.fs.setDoc(fb.fs.doc(fb.db, 'users', geoUser.uid), Object.assign({}, geoUser, { updatedAt: Date.now() }), { merge: true });
+  try {
+    await fb.fs.setDoc(fb.fs.doc(fb.db, 'users', geoUser.uid), Object.assign({}, geoUser, { updatedAt: Date.now() }), { merge: true });
+  } catch (e) {
+    console.warn('[GeoAuth] saveUserToFirestore failed (non-fatal):', e && e.code, e && e.message);
+  }
 }
 
 async function loadUserFromFirestore(uid) {
