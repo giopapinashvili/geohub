@@ -482,7 +482,7 @@
       '<div class="biz-left-sidebar">'+renderLeftSidebar(biz)+'</div>'+
       '<div class="biz-center-col">'+
         '<div id="biz-page-blocks"></div>'+
-        (_isOwner ? renderComposer(biz) : '')+
+        (_currentUser ? renderComposer(biz) : '')+
         '<div id="biz-posts-overview">'+renderPostsSkeleton(3)+'</div>'+
       '</div>'+
       '<div class="biz-right-sidebar">'+renderRightSidebar(biz, services, products, reviews, gallery)+'</div>'+
@@ -744,11 +744,28 @@
       : '';
 
     var bizLink = 'business.html?id='+esc(BIZ_ID);
-    return '<div class="biz-post-card" data-post-id="'+pid+'"'+
-        (post.pinned ? ' data-pinned="1"' : '')+
-        ' data-vis="'+esc(post.visibility||'public')+'"'+'>'+
-      (post.pinned ? '<div class="biz-post-pinned"><i class="fas fa-thumbtack"></i> Pinned post</div>' : '')+
-      '<div class="biz-post-header">'+
+
+    // Visitor posts show the user's identity; business posts show the page logo
+    var isUserPost = post.authorType === 'user';
+    var postHeaderHtml;
+    if (isUserPost) {
+      var uName = post.authorName || 'Visitor';
+      var uAv   = post.authorAvatar || '';
+      var uLink = 'profile.html?id=' + encodeURIComponent(post.authorId || '');
+      var uAvInner = uAv
+        ? '<img src="'+esc(uAv)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.style.display=\'none\'">'
+        : esc((uName[0]||'U').toUpperCase());
+      postHeaderHtml =
+        '<a href="'+esc(uLink)+'" class="biz-post-logo-link"><div class="biz-post-logo" style="border-radius:50%">'+uAvInner+'</div></a>'+
+        '<div class="biz-post-meta">'+
+          '<a href="'+esc(uLink)+'" class="biz-post-name-link">'+esc(uName)+'</a>'+
+          '<div class="biz-post-time">'+timeAgo(post.createdAt)+
+            (biz.title ? ' · <a href="'+bizLink+'" style="color:#10b981;text-decoration:none;font-size:.75rem">on '+esc(biz.title)+'</a>' : '')+
+            ' · <i class="fas fa-earth-americas" style="font-size:.7rem;opacity:.6"></i>'+
+          '</div>'+
+        '</div>';
+    } else {
+      postHeaderHtml =
         '<a href="'+bizLink+'" class="biz-post-logo-link"><div class="biz-post-logo">'+logo+'</div></a>'+
         '<div class="biz-post-meta">'+
           '<a href="'+bizLink+'" class="biz-post-name-link">'+esc(biz.title||'Business')+
@@ -756,7 +773,15 @@
             visBadge+
           '</a>'+
           '<div class="biz-post-time">'+timeAgo(post.createdAt)+' · <i class="fas fa-earth-americas" style="font-size:.7rem;opacity:.6"></i></div>'+
-        '</div>'+
+        '</div>';
+    }
+
+    return '<div class="biz-post-card" data-post-id="'+pid+'"'+
+        (post.pinned ? ' data-pinned="1"' : '')+
+        ' data-vis="'+esc(post.visibility||'public')+'"'+'>'+
+      (post.pinned ? '<div class="biz-post-pinned"><i class="fas fa-thumbtack"></i> Pinned post</div>' : '')+
+      '<div class="biz-post-header">'+
+        postHeaderHtml+
         menuHtml+
       '</div>'+
       (post.text ? '<div class="biz-post-text">'+esc(post.text)+'</div>' : '')+
@@ -1013,12 +1038,26 @@
   }
 
   function renderComposeModal(biz) {
+    var identityHtml;
+    if (_isOwner || _isPageAdmin) {
+      // Owner/admin can choose to post as the business or as themselves
+      identityHtml =
+        '<div class="biz-compose-identity-row">'+
+          '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.84rem;color:#94a3b8">'+
+            '<input type="checkbox" id="biz-identity-as-biz" checked onchange="window._bizActions._updateIdentityLabel()">'+
+            '<span id="biz-identity-label">Posting as <strong>'+esc(biz.title||'your business')+'</strong></span>'+
+          '</label>'+
+        '</div>';
+    } else {
+      var visName = _currentUser ? (_currentUser.displayName || _currentUser.email || 'you') : 'you';
+      identityHtml = '<div class="biz-modal-sub">Posting as <strong>'+esc(visName)+'</strong></div>';
+    }
     return '<div class="biz-modal-overlay" id="biz-compose-modal" onclick="if(event.target===this)window._bizActions.closeCompose()">'+
       '<div class="biz-modal-sheet">'+
         '<div class="biz-modal-handle"></div>'+
         '<button class="biz-modal-close" onclick="window._bizActions.closeCompose()"><i class="fas fa-times"></i></button>'+
         '<div class="biz-modal-title">Create Post</div>'+
-        '<div class="biz-modal-sub">Posting as <strong>'+esc(biz.title||'your business')+'</strong></div>'+
+        identityHtml+
         '<textarea class="biz-compose-textarea" id="biz-compose-text" placeholder="What\'s happening?"></textarea>'+
         '<div id="biz-compose-photos" class="biz-compose-photos"></div>'+
         '<div class="biz-compose-media-bar">'+
@@ -1387,6 +1426,10 @@
       }
 
       _biz     = Object.assign({id:BIZ_ID}, bizSnap.data());
+      if (_biz.status === 'deleted' || _biz.deleted === true) {
+        root.innerHTML = '<div class="biz-error-state"><i class="fas fa-store-slash"></i><h3>Page not found</h3><p>This business page has been deleted or is no longer available.</p><a href="business.html" style="color:#10b981;text-decoration:none">← Back to Businesses</a></div>';
+        return;
+      }
       _isOwner = !!(_currentUser && _biz.ownerId === _currentUser.uid);
 
       var loadServices  = safeSnap(_fs.getDocs(_fs.query(_fs.collection(_db,'businesses',BIZ_ID,'services'),  _fs.orderBy('order','asc'))));
@@ -2375,6 +2418,18 @@
       });
     },
 
+    _updateIdentityLabel: function() {
+      var chk = document.getElementById('biz-identity-as-biz');
+      var lbl = document.getElementById('biz-identity-label');
+      if (!lbl) return;
+      if (chk && chk.checked) {
+        lbl.innerHTML = 'Posting as <strong>'+esc(_biz && _biz.title ? _biz.title : 'your business')+'</strong>';
+      } else {
+        var myName = _currentUser ? (_currentUser.displayName || _currentUser.email || 'you') : 'you';
+        lbl.innerHTML = 'Posting as <strong>'+esc(myName)+'</strong>';
+      }
+    },
+
     openCompose:  function(){ var m=document.getElementById('biz-compose-modal'); if(m) m.classList.add('open'); },
     closeCompose: function(){
       var m=document.getElementById('biz-compose-modal');
@@ -2417,13 +2472,20 @@
     },
 
     submitBizPost: function() {
-      if(!_currentUser){ showToast('Sign in to post',false); return; }
-      if(!_isOwner){ showToast('Only the page owner can post',false); return; }
+      if(!_currentUser){ showToast('Sign in to post',false); window.location.href='auth.html'; return; }
       var textVal=(document.getElementById('biz-compose-text')||{}).value||'';
       var files=window._composePendingFiles||[];
       if(!textVal.trim()&&!files.length){ showToast('Write something or add a photo',false); return; }
       var btn=document.getElementById('biz-compose-btn');
       if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Posting…'; }
+
+      // Determine post identity: owner/admin can toggle between business and self
+      var chk = document.getElementById('biz-identity-as-biz');
+      var postAsBiz = (_isOwner || _isPageAdmin) && (!chk || chk.checked);
+      var authorId     = _currentUser.uid;
+      var authorName   = postAsBiz ? (_biz.title||'Business') : (_currentUser.displayName || _currentUser.email || 'User');
+      var authorAvatar = postAsBiz ? (_biz.logoUrl||'') : (_currentUser.photoURL||'');
+      var authorType   = postAsBiz ? 'business' : 'user';
 
       var capturedUrls=[];
 
@@ -2438,10 +2500,10 @@
         return _fs.addDoc(_fs.collection(_db,'posts'),{
           text:textVal.trim(),
           businessId:BIZ_ID,
-          authorId:_currentUser.uid,
-          authorName:_biz.title||'Business',
-          authorAvatar:_biz.logoUrl||'',
-          authorType:'business',
+          authorId:authorId,
+          authorName:authorName,
+          authorAvatar:authorAvatar,
+          authorType:authorType,
           targetType:'business',
           targetId:BIZ_ID,
           type:'business',
@@ -2460,9 +2522,9 @@
         var nowTs = { toMillis: function(){ return Date.now(); } };
         var newPost = {
           id: docRef.id, text: textVal.trim(), businessId: BIZ_ID,
-          authorId: _currentUser.uid, authorName: _biz.title||'Business',
-          authorAvatar: _biz.logoUrl||'',
-          authorType:'business', targetType:'business', targetId:BIZ_ID,
+          authorId: authorId, authorName: authorName,
+          authorAvatar: authorAvatar,
+          authorType: authorType, targetType:'business', targetId:BIZ_ID,
           type:'business', visibility:'public', status:'active',
           mediaUrls: capturedUrls, createdAt: nowTs,
           likeCount: 0, commentCount: 0, shareCount: 0

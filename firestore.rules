@@ -346,9 +346,12 @@ service cloud.firestore {
             // Poll/share posts may have no normal caption text
             || request.resource.data.get('type', '') == 'poll'
             || request.resource.data.get('sharedPostId', '') != '')
-        // If the post claims a businessId, the poster must own that business.
+        // If the post claims a businessId:
+        //  - visitors posting as themselves (authorType == 'user') are allowed on any business page
+        //  - posting as the business identity (authorType == 'business') requires being the biz owner/admin
         && (request.resource.data.get('businessId', '') == ''
-            || isBizOwner(request.resource.data.get('businessId', '')));
+            || request.resource.data.get('authorType', 'user') == 'user'
+            || canManageBiz(request.resource.data.get('businessId', '')));
       allow update: if isAdmin()
         || onlyCountersChanged()
         || onlyPollChanged()

@@ -457,7 +457,16 @@
         renderGalleryTab(posts);
         if (!posts.length) { emptyTab('#tab-posts', 'fa-seedling', 'No posts yet', 'Real posts from Firestore will appear here.', 'feed.html?compose=1', 'Create Post'); return; }
         var tab = $('#tab-posts');
-        if (tab) tab.innerHTML = '<div class="post-feed-list">' + posts.map(function(p) { return postCardHtml(p, user); }).join('') + '</div>';
+        if (!tab) return;
+        if (window.GeoSocialUI && window.GeoSocialUI.postCard && window.GeoSocialUI.bindPostInteractions) {
+          // Use the full interactive post card from the social engine
+          tab.innerHTML = '<div class="post-feed-list" id="profile-posts-list">' + posts.map(function(p) { return window.GeoSocialUI.postCard(p); }).join('') + '</div>';
+          var list = tab.querySelector('#profile-posts-list');
+          if (list) window.GeoSocialUI.bindPostInteractions(list);
+        } else {
+          // Fallback: static read-only cards
+          tab.innerHTML = '<div class="post-feed-list">' + posts.map(function(p) { return postCardHtml(p, user); }).join('') + '</div>';
+        }
       });
     }
   }

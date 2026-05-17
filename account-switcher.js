@@ -324,7 +324,13 @@
       });
       return Promise.all(bizIds.map(function(id) {
         return _fs.getDoc(_fs.doc(_db, 'businesses', id))
-          .then(function(d) { return d.exists() ? Object.assign({id: d.id}, d.data()) : null; })
+          .then(function(d) {
+            if (!d.exists()) return null;
+            var data = d.data();
+            // Skip soft-deleted pages so they don't appear in the account switcher
+            if (data.status === 'deleted' || data.deleted === true) return null;
+            return Object.assign({id: d.id}, data);
+          })
           .catch(function() { return null; });
       }));
     }).then(function(results) {

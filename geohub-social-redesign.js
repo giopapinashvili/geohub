@@ -665,7 +665,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
 
     if($('#ghPollAddOpt')) $('#ghPollAddOpt').onclick=function(){
-      var opts=$all('[data-poll-opt]','#ghPollOpts'); if(opts.length>=4) return;
+      var opts=$all('[data-poll-opt]','#ghPollOpts'); if(opts.length>=6) return;
       var inp=document.createElement('input'); inp.className='gh-input'; inp.style.marginBottom='7px'; inp.dataset.pollOpt=''; inp.placeholder='Option '+(opts.length+1);
       $('#ghPollOpts').insertBefore(inp, this);
     };
@@ -1031,6 +1031,19 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var allReactions = [];
     fs().getDocs(fs().query(fs().collection(db(),'posts',pid,'reactions'), fs().limit(50))).then(function(snap){
       snap.forEach(function(d){ allReactions.push(Object.assign({id:d.id}, d.data())); });
+      // Fetch real user profiles so we display accurate names/avatars
+      return Promise.all(allReactions.map(function(r){
+        var uid = r.userId || r.id || '';
+        if(!uid) return Promise.resolve();
+        return fs().getDoc(fs().doc(db(),'users',uid)).then(function(uSnap){
+          if(uSnap.exists()){
+            var u = uSnap.data();
+            r.displayName = u.fullName || u.displayName || u.username || r.displayName || 'GeoHub User';
+            r.photoURL = u.avatar || u.photoURL || r.photoURL || '';
+          }
+        }).catch(function(){});
+      }));
+    }).then(function(){
       renderWhoRxList('all');
     }).catch(function(){ var box=$('#ghWhoRxList'); if(box) box.innerHTML='<div class="gh-muted" style="padding:10px">Could not load.</div>'; });
     function renderWhoRxList(tab) {
@@ -1038,8 +1051,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var items = tab==='all' ? allReactions : allReactions.filter(function(r){ return r.type===tab; });
       if(!items.length){ box.innerHTML='<div class="gh-muted" style="padding:10px 0">No reactions yet.</div>'; return; }
       box.innerHTML = '<div class="gh-mini-list">'+items.map(function(r){
-        var av = r.photoURL ? img(r.photoURL, r.displayName||'') : esc(initials(r.displayName||''));
-        return '<a class="gh-mini-item" href="'+profileLink(r.userId||r.id||'')+'"><span class="gh-avatar" style="width:36px;height:36px">'+av+'</span><div><strong>'+esc(r.displayName||'GeoHub User')+'</strong><span>'+RX_EMOJIS[r.type||'like']+'</span></div></a>';
+        var name = r.displayName || 'GeoHub User';
+        var av = r.photoURL ? img(r.photoURL, name) : esc(initials(name));
+        return '<a class="gh-mini-item" href="'+profileLink(r.userId||r.id||'')+'"><span class="gh-avatar" style="width:36px;height:36px">'+av+'</span><div><strong>'+esc(name)+'</strong><span>'+RX_EMOJIS[r.type||'like']+'</span></div></a>';
       }).join('')+'</div>';
     }
     var tabBar=$('#ghWhoRxTabs');
@@ -1084,6 +1098,59 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var rform=e.target.closest('[data-reply-form]');
       if(rform){ e.preventDefault(); var card2=rform.closest('[data-post-id]'), pid2=card2.dataset.postId, cid=rform.dataset.commentId; var rin=rform.querySelector('input'); var rv=rin.value.trim(); if(!rv) return; if(!requireLogin()) return; if(GS().addCommentReply) GS().addCommentReply(pid2,cid,rv,function(){ rin.value=''; rform.hidden=true; }); else toast('Replies are not available','error'); }
     });
+
+    // Reaction strip: show on Like hover, hide after 1.5s delay
+    // Comment reaction picker: show on hover, 1.5s minimum stay
+    root.addEventListener('mouseover', function(e){
+      if(e.target.closest('[data-like]')){
+        var card3 = e.target.closest('[data-post-id]'); if(!card3) return;
+        var strip = card3.querySelector('.gh-reaction-strip'); if(!strip) return;
+        clearTimeout(strip._rxt); strip.classList.add('visible');
+      }
+      var strip2 = e.target.closest('.gh-reaction-strip');
+      if(strip2){ clearTimeout(strip2._rxt); }
+      if(e.target.closest('.gh-cmt-rx-btn') || e.target.closest('.gh-cmt-rx-picker')){
+        var wrap = e.target.closest('.gh-cmt-rx-wrap'); if(!wrap) return;
+        var pk = wrap.querySelector('.gh-cmt-rx-picker'); if(!pk) return;
+        clearTimeout(pk._rxt); pk.classList.add('visible');
+      }
+    });
+    root.addEventListener('mouseout', function(e){
+      var strip3 = e.target.closest('.gh-reaction-strip');
+      if(strip3){
+        var rel = e.relatedTarget;
+        if(!rel || !strip3.contains(rel)){
+          clearTimeout(strip3._rxt);
+          strip3._rxt = setTimeout(function(){ strip3.classList.remove('visible'); }, 1500);
+        }
+        return;
+      }
+      if(e.target.closest('[data-like]') && !e.target.closest('.gh-reaction-strip')){
+        var card4 = e.target.closest('[data-post-id]'); if(!card4) return;
+        var rel2 = e.relatedTarget;
+        var s = card4.querySelector('.gh-reaction-strip'); if(!s) return;
+        if(!rel2 || !s.contains(rel2)){ clearTimeout(s._rxt); s._rxt = setTimeout(function(){ s.classList.remove('visible'); }, 1500); }
+        return;
+      }
+      var wrap2 = e.target.closest('.gh-cmt-rx-wrap');
+      if(wrap2){
+        var rel3 = e.relatedTarget;
+        if(!rel3 || !wrap2.contains(rel3)){
+          var pk2 = wrap2.querySelector('.gh-cmt-rx-picker'); if(!pk2) return;
+          clearTimeout(pk2._rxt); pk2._rxt = setTimeout(function(){ pk2.classList.remove('visible'); }, 1500);
+        }
+      }
+    });
+    // Mobile: tap Like to toggle reaction strip for 3s
+    root.addEventListener('touchstart', function(e){
+      if(e.target.closest('[data-like]')){
+        var card5 = e.target.closest('[data-post-id]'); if(!card5) return;
+        var strip4 = card5.querySelector('.gh-reaction-strip'); if(!strip4) return;
+        clearTimeout(strip4._rxt);
+        strip4.classList.add('visible');
+        strip4._rxt = setTimeout(function(){ strip4.classList.remove('visible'); }, 3000);
+      }
+    }, { passive: true });
   }
 
 
@@ -1119,11 +1186,29 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function renderSharedPreviewData(p){
-    if(!p) return '<i class="fas fa-share"></i><div><strong>Original post unavailable</strong><span>This post was deleted or is private.</span></div>';
-    var name=p.authorName||p.userName||'GeoHub User';
-    var imgUrl=p.imageUrl||p.mediaUrl||p.photoUrl||'';
-    return (imgUrl?'<span class="gh-shared-thumb">'+img(imgUrl,'Shared post')+'</span>':'<i class="fas fa-share"></i>')+
-      '<div><strong>'+esc(name)+'</strong><span>'+esc((p.text||'Photo post').slice(0,140))+' - '+timeAgo(p.createdAt)+'</span></div>';
+    if(!p || p.status==='deleted') {
+      return '<div class="gh-shared-unavail"><i class="fas fa-ban"></i><span>Original post unavailable</span></div>';
+    }
+    var name = p.authorName || p.userName || p.businessName || 'GeoHub User';
+    var av = p.authorAvatar || p.userPhotoURL || p.logoUrl || '';
+    var authorId = p.authorId || p.userId || '';
+    var avHtml = av
+      ? '<img src="'+esc(av)+'" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.style.display=\'none\'">'
+      : esc(initials(name));
+    var privacyIcon = (p.visibility==='onlyme'||p.visibility==='only_me') ? 'fa-lock' : ((p.visibility==='friends'||p.visibility==='followers') ? 'fa-user-group' : 'fa-earth-europe');
+    var imgUrl = p.imageUrl || p.mediaUrl || p.photoUrl || '';
+    var authorHref = authorId ? profileLink(authorId) : '#';
+    return '<div class="gh-shared-embed">'+
+      '<div class="gh-shared-embed-head">'+
+        '<a class="gh-avatar" href="'+esc(authorHref)+'" style="width:32px;height:32px;flex-shrink:0">'+avHtml+'</a>'+
+        '<div>'+
+          '<a class="gh-shared-embed-name" href="'+esc(authorHref)+'">'+esc(name)+'</a>'+
+          '<div class="gh-small gh-muted">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i></div>'+
+        '</div>'+
+      '</div>'+
+      (p.text ? '<div class="gh-shared-embed-text">'+esc(p.text.slice(0,300))+(p.text.length>300?'…':'')+'</div>' : '')+
+      (imgUrl ? '<img class="gh-shared-embed-img" src="'+esc(imgUrl)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '')+
+    '</div>';
   }
 
   function hydrateSharedPreviews(root){
@@ -3869,6 +3954,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
+
+  // Expose rendering helpers for other scripts (e.g. profile.js)
+  window.GeoSocialUI = {
+    postCard: postCard,
+    bindPostInteractions: bindPostInteractions
+  };
 
   // Clean up all Firestore listeners when navigating away to avoid runaway billing
   window.addEventListener('pagehide', function() {
