@@ -881,7 +881,8 @@
     }
     var cards = products.map(function(p) {
       var thumbHtml = p.imageUrl
-        ? '<img src="'+esc(p.imageUrl)+'" alt="'+esc(p.name||'')+'" loading="lazy">'
+        ? '<img src="'+esc(p.imageUrl)+'" alt="'+esc(p.name||'')+'" loading="lazy" onerror="this.onerror=null;this.style.display=\'none\';var ph=this.parentNode.querySelector(\'.biz-product-ph\');if(ph)ph.style.display=\'flex\'">'
+          + '<div class="biz-product-ph" style="display:none"><i class="fas fa-box"></i></div>'
         : '<div class="biz-product-ph"><i class="fas fa-box"></i></div>';
       return '<div class="biz-product-card">'+
         '<div class="biz-product-thumb">'+thumbHtml+
@@ -915,7 +916,7 @@
       return '<div class="biz-price-item">'+
         '<span class="biz-price-label">'+esc(item.label||item.name||item.title||'')+'</span>'+
         '<span class="biz-price-dots"></span>'+
-        '<span class="biz-price-val">'+fmtPrice(item.price)+'</span>'+
+        '<span class="biz-price-val">'+esc(item.price||'')+'</span>'+
         (owner ? '<button class="biz-cmt-act-btn" title="Delete" style="color:#f87171;margin-left:8px;flex-shrink:0" onclick="window._bizActions.deletePriceItem(\''+esc(item.id||'')+'\')"><i class="fas fa-trash"></i></button>' : '')+
       '</div>';
     }).join('');
@@ -948,7 +949,7 @@
     var sorted = photos.slice().sort(function(a,b){return (a.order||0)-(b.order||0);});
     var items  = sorted.map(function(p){
       return '<div class="biz-gallery-item" onclick="window._bizActions.openPhoto(\''+esc(p.url)+'\')">'+
-        '<img src="'+esc(p.url)+'" alt="'+esc(p.caption||'')+'" loading="lazy">'+
+        '<img src="'+esc(p.url)+'" alt="'+esc(p.caption||'')+'" loading="lazy" onerror="this.onerror=null;this.style.display=\'none\'">'+
         (p.caption?'<div class="biz-gallery-caption">'+esc(p.caption)+'</div>':'')+
         (owner ? '<div class="biz-gallery-del-wrap" onclick="event.stopPropagation()"><button class="biz-gallery-del-btn" title="Delete photo" onclick="window._bizActions.deleteGalleryPhoto(\''+esc(p.id||'')+'\')"><i class="fas fa-trash"></i></button></div>' : '')+
       '</div>';
@@ -1835,10 +1836,7 @@
   function reloadGalleryTab() {
     var panel = document.querySelector('.biz-tab-panel[data-panel="photos"]');
     if (!panel) return;
-    safeSnap(_fs.getDocs(_fs.query(
-      _fs.collection(_db,'businesses',BIZ_ID,'gallery'),
-      _fs.orderBy('order','asc')
-    ))).then(function(photos) {
+    safeSnap(_fs.getDocs(_fs.collection(_db,'businesses',BIZ_ID,'gallery'))).then(function(photos) {
       panel.innerHTML = renderGallery(photos);
     });
   }
@@ -3393,7 +3391,7 @@
           showToast('Photo added!');
           reloadGalleryTab();
         }).catch(function(err){ showToast('Could not save: '+(err.code||err.message), false); });
-      }, function(pct){ if(pct<100) showToast('Uploading… '+pct+'%'); });
+      });
     },
 
     deleteGalleryPhoto: function(id) {
@@ -3437,7 +3435,7 @@
       if (!text) { showToast('Reply cannot be empty', false); return; }
       if (ta) ta.disabled = true;
       _fs.updateDoc(_fs.doc(_db,'businessReviews',reviewId), {
-        ownerReply: text, ownerReplyAt: _fs.serverTimestamp()
+        ownerReply: text, updatedAt: _fs.serverTimestamp()
       }).then(function(){
         showToast('Reply posted!');
         reloadReviewsTab();
