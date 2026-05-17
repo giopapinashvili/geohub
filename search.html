@@ -246,42 +246,63 @@
 
     /* ── Result item HTML ── */
     function itemHtml(type, item) {
-      var href = '#', av = '', name = '', sub = '', badge = '', badgeClass = '';
+      var href = '#', av = '', name = '', sub = '', badge = '', badgeClass = '', extra = '', verified = false;
       if (type === 'user') {
         href = 'profile.html?id=' + encodeURIComponent(item.id || item.uid || '');
         av   = item.avatar || item.photoURL || item.avatarUrl || '';
         name = item.fullName || item.displayName || item.name || 'GeoHub User';
-        sub  = item.username ? '@' + item.username : (item.email || '');
+        sub  = item.username ? '@' + item.username : '';
+        extra = (item.bio || item.about || item.location || item.city || '').toString().trim().substring(0, 60);
+        verified = item.verified === true;
         badge = 'Person'; badgeClass = 'sr-badge-user';
       } else if (type === 'business') {
         href = 'business.html?id=' + encodeURIComponent(item.id || '');
         av   = item.logo || item.coverImage || item.image || '';
         name = item.name || item.title || 'Business';
-        sub  = item.businessType === 'online' ? 'Online / Nationwide' : (item.city || item.category || 'Business');
+        verified = item.verified === true;
+        var _bz = [];
+        if (item.category) _bz.push(item.category);
+        if (item.businessType === 'online') _bz.push('Online');
+        else if (item.city) _bz.push(item.city);
+        sub = _bz.join(' · ') || 'Business';
         badge = 'Business'; badgeClass = 'sr-badge-biz';
       } else if (type === 'place') {
         href = 'places.html';
         av   = item.image || item.coverImage || '';
         name = item.name || 'Place';
-        sub  = item.address || item.category || item.city || 'Place';
+        var _pl = [];
+        if (item.category) _pl.push(item.category);
+        if (item.city) _pl.push(item.city);
+        else if (item.address) _pl.push(item.address);
+        sub = _pl.join(' · ') || 'Place';
         badge = 'Place'; badgeClass = 'sr-badge-place';
       } else if (type === 'event') {
         href = 'events.html?id=' + encodeURIComponent(item.id || '');
         av   = item.coverImage || item.image || '';
         name = item.name || item.title || 'Event';
-        sub  = item.date || item.location || item.category || 'Event';
+        var _ev = [];
+        var _evd = item.date || item.startDate || item.eventDate || '';
+        if (_evd) _ev.push(String(_evd).substring(0, 10));
+        if (item.location || item.city) _ev.push(item.location || item.city);
+        sub = _ev.join(' · ') || (item.category || 'Event');
         badge = 'Event'; badgeClass = 'sr-badge-event';
       } else if (type === 'group') {
         href = 'groups.html?id=' + encodeURIComponent(item.id || '');
         av   = item.avatar || item.image || '';
         name = item.name || 'Group';
-        sub  = (item.memberCount || 0) + ' members' + (item.category ? ' · ' + item.category : '');
+        var _gr = [];
+        if (item.memberCount) _gr.push(item.memberCount + ' members');
+        var _priv = item.privacy || item.privacyLevel || '';
+        _gr.push(_priv === 'private' ? 'Private' : 'Public');
+        if (item.category) _gr.push(item.category);
+        sub = _gr.join(' · ');
         badge = 'Group'; badgeClass = 'sr-badge-group';
       } else if (type === 'post') {
-        href = 'feed.html#post-' + encodeURIComponent(item.id || '');
+        href = 'feed.html';
         av   = item.authorAvatar || '';
-        name = item.authorName || 'Post';
-        sub  = (item.text || '').substring(0, 80);
+        name = item.authorName || 'GeoHub Post';
+        sub  = (item.text || '').trim().replace(/\s+/g, ' ').substring(0, 80) || '(no caption)';
+        if (item.mediaUrl || (Array.isArray(item.mediaUrls) && item.mediaUrls.length)) extra = 'Has media';
         badge = 'Post'; badgeClass = 'sr-badge-post';
       } else if (type === 'service') {
         href = 'services.html';
@@ -293,24 +314,27 @@
         href = 'creators.html?id=' + encodeURIComponent(item.id || '');
         av   = item.avatar || item.photoURL || '';
         name = item.name || item.displayName || 'Creator';
-        sub  = '@' + (item.username || item.id || '') + ' · Creator';
+        sub  = '@' + (item.username || item.id || '') + (item.category ? ' · ' + item.category : ' · Creator');
         badge = 'Creator'; badgeClass = 'sr-badge-creator';
       } else if (type === 'learning') {
         href = 'learning.html?id=' + encodeURIComponent(item.id || '');
         av   = item.image || item.thumbnail || '';
         name = item.title || item.name || 'Course';
-        sub  = item.category || item.instructor || 'Learning';
+        sub  = (item.instructor ? item.instructor + ' · ' : '') + (item.category || 'Learning');
         badge = 'Learning'; badgeClass = 'sr-badge-learning';
       }
       var initial = esc((name || '?').charAt(0).toUpperCase());
       var avHtml = av
         ? '<img src="' + esc(av) + '" alt="" loading="lazy" decoding="async" onerror="this.outerHTML=\'<span>' + initial + '</span>\'">'
         : '<span>' + initial + '</span>';
+      var verBadge = verified ? ' <i class="fas fa-circle-check sr-verified" title="Verified"></i>' : '';
+      var extraHtml = extra ? '<div class="sr-item-extra">' + esc(extra) + '</div>' : '';
       return '<a class="sr-item" href="' + esc(href) + '">' +
-        '<div class="sr-item-av">' + avHtml + '</div>' +
+        '<div class="sr-item-av sr-av-' + type + '">' + avHtml + '</div>' +
         '<div class="sr-item-body">' +
-          '<div class="sr-item-name">' + esc(name) + '</div>' +
+          '<div class="sr-item-name">' + esc(name) + verBadge + '</div>' +
           '<div class="sr-item-sub">' + esc(sub) + '</div>' +
+          extraHtml +
         '</div>' +
         '<span class="sr-badge ' + badgeClass + '">' + badge + '</span>' +
         '</a>';
@@ -359,6 +383,9 @@
           html += sectionHtml(sec.title, sec.icon, results[sec.key] || [], sec.type, isAll);
         }
       });
+      if (tab === 'posts' && (results.posts || []).length > 0) {
+        html += '<p style="text-align:center;font-size:.7rem;color:var(--text-muted);padding:4px 0 8px">Showing recent posts only · full post search requires indexing</p>';
+      }
       if (!html) {
         html = '<div class="sr-no-results">' +
           '<i class="fas fa-search"></i>' +
@@ -374,8 +401,21 @@
     window._srDelRecent = function(q) { removeRecent(q); showDiscover(); };
     window._srRunRecent = function(q) {
       var inp = document.getElementById('srchInput');
+      var gs = document.getElementById('ghGlobalSearch');
       if (inp) { inp.value = q; inp.dispatchEvent(new Event('input')); }
+      if (gs) gs.value = q;
     };
+
+    /* ── Error state ── */
+    function showError() {
+      var body = document.getElementById('srchBody');
+      if (!body) return;
+      body.innerHTML = '<div class="sr-no-results">' +
+        '<i class="fas fa-triangle-exclamation"></i>' +
+        '<p>Search unavailable right now.</p>' +
+        '<p style="margin-top:8px;font-size:.8rem">Check your connection and try again.</p>' +
+        '</div>';
+    }
 
     /* ── Search trigger ── */
     function doSearch(q) {
@@ -386,7 +426,11 @@
         window.addEventListener('GeoSocialReady', function() { doSearch(q); }, { once: true });
         return;
       }
+      var _srTimeout = setTimeout(function() {
+        if ((document.getElementById('srchInput') || {}).value && document.getElementById('srchInput').value.trim() === q) showError();
+      }, 12000);
       GS.searchFirestore(q, function(results) {
+        clearTimeout(_srTimeout);
         if (document.getElementById('srchInput').value.trim() !== q) return;
         saveRecent(q);
         var blocked = window._ghSrchBlockedIds || [];

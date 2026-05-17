@@ -239,3 +239,20 @@
   cursor: pointer; padding: 2px 6px; border-radius: 5px; transition: background 0.15s;
 }
 .sr-recent-clear-all:hover { background: rgba(16,185,129,.08); }
+
+/* ── EXTRA INFO LINE (bio, media hint, etc.) ── */
+.sr-item-extra {
+  font-size: 0.68rem; color: var(--text-muted, #6b7280); margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: 0.85;
+}
+
+/* ── PER-TYPE AVATAR SHAPES ── */
+.sr-av-user  { border-radius: 50% !important; }
+.sr-av-post  { border-radius: 50% !important; }
+.sr-av-business { border-radius: 10px; background: linear-gradient(135deg, rgba(16,185,129,.18), rgba(6,182,212,.18)); }
+.sr-av-place    { border-radius: 10px; background: linear-gradient(135deg, rgba(245,158,11,.18), rgba(251,146,60,.18)); }
+.sr-av-event    { border-radius: 10px; background: linear-gradient(135deg, rgba(239,68,68,.18), rgba(245,158,11,.18)); }
+.sr-av-group    { border-radius: 10px; background: linear-gradient(135deg, rgba(168,85,247,.18), rgba(236,72,153,.18)); }
+.sr-av-service  { border-radius: 10px; background: linear-gradient(135deg, rgba(6,182,212,.18), rgba(59,130,246,.18)); }
+.sr-av-creator  { border-radius: 50% !important; background: linear-gradient(135deg, rgba(236,72,153,.18), rgba(168,85,247,.18)); }
+.sr-av-learning { border-radius: 10px; background: linear-gradient(135deg, rgba(251,146,60,.18), rgba(245,158,11,.18)); }
