@@ -170,7 +170,6 @@
   function applyCheckinToChallenge(userId, challenge, checkin, checkinId) {
     var f = fs();
     var pRef = progressRef(userId, challenge.id);
-    var userRef = f.doc(db(), 'users', userId);
     var target = clampTarget(challenge);
 
     // Resolve badge ID: new format (badge:true + badgeId:'slug') or old format (badge:'slug')
@@ -237,10 +236,6 @@
 
         console.log('[ChallengeEngine] progress updated:', challenge.id, next + '/' + target);
         if (completedNow) console.log('[ChallengeEngine] challenge completed:', challenge.id);
-        if (awardXp) {
-          tx.update(userRef, { xp: f.increment(challenge.xpReward), updatedAt: f.serverTimestamp() });
-          console.log('[ChallengeEngine] xp awarded:', challenge.xpReward, 'for', challenge.id);
-        }
         if (completedNow && badgeRef) {
           var bDef = BADGE_DEFAULTS[resolvedBadgeId] || {};
           tx.set(badgeRef, {

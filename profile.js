@@ -660,9 +660,8 @@
     var GF = window.GeoFirebase;
     if (!GF || !GF.db || !GF.fs) return;
     GF.fs.getDocs(GF.fs.query(
-      GF.fs.collection(GF.db, 'checkIns'),
+      GF.fs.collection(GF.db, 'checkins'),
       GF.fs.where('userId', '==', user.uid),
-      GF.fs.orderBy('createdAt', 'desc'),
       GF.fs.limit(30)
     )).then(function(snap) {
       var cnt = $('.ptab[data-tab="checkins"] .tab-count');
@@ -670,6 +669,7 @@
       if (cnt) cnt.textContent = snap.size;
       var items = [];
       snap.forEach(function(d) { items.push(Object.assign({ id: d.id }, d.data())); });
+      items.sort(function(a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
       tab.innerHTML = '<div class="gh-friend-grid">' + items.map(function(c) {
         var linkStart = c.placeId ? '<a href="places.html?id=' + encodeURIComponent(c.placeId) + '" style="color:#10b981;text-decoration:none">' : '';
         var linkEnd   = c.placeId ? '</a>' : '';

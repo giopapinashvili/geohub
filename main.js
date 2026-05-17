@@ -275,37 +275,60 @@ function initScrollAnimations() {
 // ======================== FIRESTORE-BACKED UI STATE ========================
 const safeStorage = {
   _cache: {},
-  _loaded: {},
+  _loaded: false,
   _uid() { return (window.GeoAuth && window.GeoAuth.getCurrentUser && window.GeoAuth.getCurrentUser()?.uid) || (window.GeoCurrentUser && window.GeoCurrentUser.uid) || 'guest'; },
-  _ref(key) {
+  _ref() {
     const fb = window.GeoFirebase;
     if (!fb || !fb.db || !fb.fs) return null;
-    return fb.fs.doc(fb.db, 'userUiState', this._uid() + '_' + String(key).replace(/[^a-zA-Z0-9_-]/g, '_'));
+    return fb.fs.doc(fb.db, 'userUiState', this._uid());
   },
   get(key, fallback) {
-    if (Object.prototype.hasOwnProperty.call(this._cache, key)) return this._cache[key];
+    if (Object.prototype.hasOwnProperty.call(this._cache, key)) {
+      const v = this._cache[key]; return (v === null || v === undefined) ? fallback : v;
+    }
     this._cache[key] = fallback;
-    const ref = this._ref(key);
-    if (ref && !this._loaded[key]) {
-      this._loaded[key] = true;
+    const ref = this._ref();
+    if (ref && !this._loaded) {
+      this._loaded = true;
       window.GeoFirebase.fs.getDoc(ref).then((snap) => {
-        if (snap.exists() && snap.data().value !== undefined) {
-          this._cache[key] = snap.data().value;
-          window.dispatchEvent(new CustomEvent('GeoStateLoaded', { detail: { key, value: this._cache[key] } }));
+        if (snap.exists()) {
+          const vals = snap.data().values || {};
+          Object.keys(vals).forEach(k => {
+            if (vals[k] !== null) {
+              this._cache[k] = vals[k];
+              window.dispatchEvent(new CustomEvent('GeoStateLoaded', { detail: { key: k, value: vals[k] } }));
+            }
+          });
         }
-      }).catch(() => {});
+      }).catch(() => { this._loaded = false; });
     }
     return fallback;
   },
   set(key, val) {
     this._cache[key] = val;
-    const ref = this._ref(key);
-    if (ref) window.GeoFirebase.fs.setDoc(ref, { key, uid: this._uid(), value: val, updatedAt: Date.now() }, { merge: true }).catch(() => {});
+    const ref = this._ref();
+    if (ref) {
+      const fb = window.GeoFirebase;
+      const safeKey = String(key).replace(/[^a-zA-Z0-9_]/g, '_');
+      const patch = { uid: this._uid(), updatedAt: Date.now() };
+      patch['values.' + safeKey] = val;
+      fb.fs.updateDoc(ref, patch).catch(() => {
+        const init = { uid: this._uid(), updatedAt: Date.now(), values: {} };
+        init.values[safeKey] = val;
+        fb.fs.setDoc(ref, init).catch(() => {});
+      });
+    }
   },
   remove(key) {
     delete this._cache[key];
-    const ref = this._ref(key);
-    if (ref) window.GeoFirebase.fs.deleteDoc(ref).catch(() => {});
+    const ref = this._ref();
+    if (ref) {
+      const fb = window.GeoFirebase;
+      const safeKey = String(key).replace(/[^a-zA-Z0-9_]/g, '_');
+      const patch = { updatedAt: Date.now() };
+      patch['values.' + safeKey] = null;
+      fb.fs.updateDoc(ref, patch).catch(() => {});
+    }
   },
 };
 window.safeStorage = safeStorage;

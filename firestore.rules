@@ -572,8 +572,13 @@ service cloud.firestore {
     }
     match /businessAdmins/{adminId} {
       allow read: if true;
-      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
-      allow update, delete: if isAdmin() || (signedIn() && resource.data.get('userId', '') == uid());
+      allow create: if isAdmin()
+        || (signedIn()
+            && request.resource.data.get('userId', '') == uid()
+            && request.resource.data.get('businessId', '') is string
+            && request.resource.data.get('businessId', '') != ''
+            && get(/databases/$(database)/documents/businesses/$(request.resource.data.get('businessId',''))).data.get('ownerId','') == uid());
+      allow update, delete: if isAdmin();
     }
     match /businessFollowers/{followId} {
       allow read: if true;
@@ -943,9 +948,7 @@ service cloud.firestore {
 
     match /rewards/{rewardId} {
       allow read: if true;
-      allow create: if isAdmin() || newOwnerMatches();
-      allow update: if isAdmin() || existingOwnerMatches();
-      allow delete: if isAdmin() || existingOwnerMatches();
+      allow create, update, delete: if isAdmin();
     }
     match /rewardCoupons/{couponId} {
       allow read: if signedIn()
@@ -1035,14 +1038,13 @@ service cloud.firestore {
     }
 
     // Top-level userBadges collection (display/feed use).
-    // Owner may create, admin owns updates (prevent post-hoc inflation).
+    // Owner may create with field restrictions; updates are admin-only.
     match /userBadges/{badgeId} {
       allow read: if true;
       allow create: if signedIn()
-        && (request.resource.data.get('userId', '') == uid() || isAdmin());
-      // Updates admin-only: prevents badge property escalation after award.
-      allow update, delete: if isAdmin()
-        || (signedIn() && resource.data.get('userId', '') == uid());
+        && request.resource.data.get('userId', '') == uid()
+        && !request.resource.data.keys().hasAny(['adminGranted', 'special', 'grantedBy']);
+      allow update, delete: if isAdmin();
     }
 
     // ── ADMIN-ONLY COLLECTIONS ────────────────────────────────────────────────
