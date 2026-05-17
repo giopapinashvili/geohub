@@ -1379,8 +1379,8 @@
           },
           onOpenPhoto: function(url) { if (window._bizActions && window._bizActions.openPhoto) window._bizActions.openPhoto(url); else window.open(url, '_blank', 'noopener'); }
         };
-        if (overviewEl) gs.bindPostInteractions(overviewEl, bizInteractionOptions);
-        if (allEl)      gs.bindPostInteractions(allEl, bizInteractionOptions);
+        if (overviewEl && !overviewEl._bizBound) { gs.bindPostInteractions(overviewEl, bizInteractionOptions); overviewEl._bizBound = true; }
+        if (allEl && !allEl._bizBound)           { gs.bindPostInteractions(allEl, bizInteractionOptions);      allEl._bizBound = true; }
       }
 
       // Set up IntersectionObserver to track post views

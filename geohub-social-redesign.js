@@ -1169,10 +1169,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var counts = {};
       snap.forEach(function(d){ var t=(d.data()||{}).type||'like'; counts[t]=(counts[t]||0)+1; });
       var types = Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; }).slice(0,3);
-      var box = document.querySelector('[data-rx-pid="'+CSS.escape(pid)+'"]');
-      if(!box) return;
-      if(!types.length){ box.innerHTML=''; return; }
-      box.innerHTML = types.map(function(t){ return '<span class="gh-rx-chip">'+RX_EMOJIS[t]+' '+counts[t]+'</span>'; }).join('');
+      var boxes = document.querySelectorAll('[data-rx-pid="'+CSS.escape(pid)+'"]');
+      if(!boxes.length) return;
+      var rxHtml = types.length ? types.map(function(t){ return '<span class="gh-rx-chip">'+RX_EMOJIS[t]+' '+counts[t]+'</span>'; }).join('') : '';
+      boxes.forEach(function(box){ box.innerHTML = rxHtml; });
     }).catch(function(){});
   }
 
@@ -1370,14 +1370,20 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function hydrateReactionState(postId){
     var u=authUser(); if(!u || !fs()) return;
-    var card=document.querySelector('[data-post-id="'+CSS.escape(postId)+'"]');
-    if(!card) return;
+    var cards=document.querySelectorAll('[data-post-id="'+CSS.escape(postId)+'"]');
+    if(!cards.length) return;
     fs().getDoc(fs().doc(db(),'posts',postId,'reactions',u.uid)).then(function(snap){
-      if(snap.exists()) updateReactionUi(card, (snap.data()||{}).type || 'like');
-      else if(GS().checkLiked) GS().checkLiked(postId,function(liked){ if(liked) updateReactionUi(card,'like'); });
-    }).catch(function(){ if(GS().checkLiked) GS().checkLiked(postId,function(liked){ if(liked) updateReactionUi(card,'like'); }); });
-    // Hydrate poll vote selection if this card is a poll
-    if(card.querySelector('[data-poll-pid]')) hydratePollVote(postId);
+      var type=snap.exists() ? ((snap.data()||{}).type||'like') : '';
+      cards.forEach(function(card){
+        if(type) updateReactionUi(card,type);
+        else if(GS().checkLiked) GS().checkLiked(postId,function(liked){ if(liked) updateReactionUi(card,'like'); });
+      });
+    }).catch(function(){
+      if(GS().checkLiked) GS().checkLiked(postId,function(liked){
+        cards.forEach(function(card){ if(liked) updateReactionUi(card,'like'); });
+      });
+    });
+    cards.forEach(function(card){ if(card.querySelector('[data-poll-pid]')) hydratePollVote(postId); });
   }
 
   function setReaction(postId, type, card){
