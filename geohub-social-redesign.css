@@ -1554,3 +1554,34 @@ body.gh-has-injected-nav .gh-left .gh-nav-item{justify-content:flex-start}
   body.gh-has-injected-nav{padding-left:0;padding-top:70px}
   body.gh-has-injected-nav .gh-left{display:none!important}
 }
+
+/* ── Shared post card extras (biz context + multi-image grid) ─── */
+
+/* Pinned post banner */
+.gh-post-pinned-banner{display:flex;align-items:center;gap:6px;padding:6px 16px;background:rgba(16,185,129,.1);border-bottom:1px solid rgba(16,185,129,.18);font-size:.78rem;color:#34d399;font-weight:700}
+
+/* View count row (biz admins) */
+.gh-post-view-count{padding:3px 16px 0;font-size:.74rem;color:#9ca3af;display:flex;align-items:center;gap:4px}
+
+/* Comments disabled notice */
+.gh-comments-disabled{padding:10px 16px;font-size:.82rem;color:#9ca3af;display:flex;align-items:center;gap:7px;border-top:1px solid rgba(148,163,184,.12)}
+
+/* "on BusinessName" inline link in post time */
+.gh-biz-posted-on{color:#10b981!important;text-decoration:none;font-weight:500}
+.gh-biz-posted-on:hover{text-decoration:underline}
+
+/* Multi-image grid */
+.gh-post-media-grid{display:grid;gap:2px;margin-top:10px;border-radius:14px;overflow:hidden}
+.gh-post-grid-2{grid-template-columns:1fr 1fr}
+.gh-post-grid-3{grid-template-columns:1fr 1fr;grid-template-rows:auto auto}
+.gh-post-grid-3 .gh-post-grid-item:first-child{grid-column:1/-1}
+.gh-post-grid-4{grid-template-columns:1fr 1fr}
+.gh-post-grid-item{position:relative;overflow:hidden;cursor:pointer;background:#0f172a}
+.gh-post-grid-item img{width:100%;height:200px;object-fit:cover;display:block;transition:transform .2s ease}
+.gh-post-grid-3 .gh-post-grid-item:first-child img{height:280px}
+.gh-post-grid-item:hover img{transform:scale(1.03)}
+.gh-post-grid-more{position:absolute;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:900;color:#fff}
+@media(max-width:640px){
+  .gh-post-grid-item img{height:140px}
+  .gh-post-grid-3 .gh-post-grid-item:first-child img{height:180px}
+}

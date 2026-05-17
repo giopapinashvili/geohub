@@ -1027,7 +1027,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   var RX_EMOJIS = { like:'👍', love:'❤️', haha:'😂', wow:'😮', sad:'😢', angry:'😡' };
 
   function postCard(p, options){
-    options=options||{}; var name=p.authorName||p.userName||p.businessName||'GeoHub User'; var av=p.authorAvatar||p.userPhotoURL||p.logoUrl||''; var imgUrl=p.imageUrl||p.mediaUrl||p.photoUrl||(p.mediaUrls&&p.mediaUrls[0])||''; var pid=p.id; var target='';
+    options=options||{};
+    // Business context flags
+    var bizCtx = !!(options.biz);
+    var biz = options.biz || null;
+    var canManage = options.canManage; // boolean when biz, undefined for feed
+    var isAdmin = !!options.isAdmin;
+
+    var name=p.authorName||p.userName||p.businessName||'GeoHub User';
+    var av=p.authorAvatar||p.userPhotoURL||p.logoUrl||'';
+    var pid=p.id; var target='';
     var authorHref = authorLinkFor(p);
     var authorId = p.authorId || p.userId || p.createdByUserId || p.createdBy || '';
     var avatarHtml = (av?img(av,name):esc(initials(name)));
@@ -1035,10 +1044,30 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(p.targetType && p.targetId) target='<div class="gh-post-target"><i class="fas '+iconFor(p.targetType)+'"></i>'+esc(labelFor(p.targetType))+'</div>';
     var privacyIcon = (p.visibility==='onlyme'||p.visibility==='only_me') ? 'fa-lock' : ((p.visibility==='friends'||p.visibility==='followers') ? 'fa-user-group' : 'fa-earth-europe');
 
+    // "posted on BusinessName" for visitor posts inside a biz context
+    var bizPostedOnHtml = (bizCtx && biz && p.authorType==='user')
+      ? ' · <a href="business.html?id='+encodeURIComponent(biz.id||'')+'" class="gh-biz-posted-on">on '+esc(biz.title||'Business')+'</a>'
+      : '';
+
     var bgStyle = (p.bgGradient && (p.text||'').length < 150) ? ' style="background:'+esc(p.bgGradient)+';border-radius:18px;padding:32px 20px;text-align:center;min-height:180px;display:flex;align-items:center;justify-content:center"' : '';
     var postTextHtml = p.text ? (p.bgGradient && (p.text||'').length < 150
       ? '<div class="gh-post-bg-text"'+bgStyle+'><span>'+esc(p.text)+'</span></div>'
       : '<div class="gh-post-text">'+esc(p.text)+'</div>') : '';
+
+    // Media: multi-image grid or single image
+    var multiUrls = (p.mediaUrls && p.mediaUrls.length > 1) ? p.mediaUrls : [];
+    var singleImgUrl = multiUrls.length ? '' : (p.imageUrl||p.mediaUrl||p.photoUrl||(p.mediaUrls&&p.mediaUrls[0])||'');
+    var mediaHtml = '';
+    if (multiUrls.length > 1) {
+      var gridN = Math.min(multiUrls.length, 4);
+      mediaHtml = '<div class="gh-post-media-grid gh-post-grid-'+gridN+'">' +
+        multiUrls.slice(0,4).map(function(u,i){
+          var moreOv = (i===3 && multiUrls.length>4) ? '<div class="gh-post-grid-more">+'+(multiUrls.length-4)+'</div>' : '';
+          return '<div class="gh-post-grid-item" data-open-photo="'+esc(u)+'"><img src="'+esc(u)+'" loading="lazy" alt="" onerror="this.style.display=\'none\'">'+moreOv+'</div>';
+        }).join('')+'</div>';
+    } else if (singleImgUrl) {
+      mediaHtml = '<img class="gh-post-img" src="'+esc(singleImgUrl)+'" alt="post image" loading="lazy" onerror="this.style.display=\'none\'">';
+    }
 
     var pollHtml = '';
     if(p.type==='poll' && p.poll) {
@@ -1075,18 +1104,62 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }
 
     var totalRx = Number(p.likeCount||p.reactionCount||0);
-    return '<article class="gh-card gh-post" id="post-'+esc(pid)+'" data-post-id="'+esc(pid)+'" data-author-id="'+esc(authorId)+'">'+
-      '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+target+(p.feeling?' · '+esc(p.feeling):'')+'</div></div><button class="gh-post-more" data-post-menu><i class="fas fa-ellipsis"></i></button></div>'+
+
+    // Business context extras
+    var pinBanner = (bizCtx && p.pinned) ? '<div class="gh-post-pinned-banner"><i class="fas fa-thumbtack"></i> Pinned post</div>' : '';
+    var viewCountHtml = (bizCtx && isAdmin) ? '<div class="gh-post-view-count" id="post-views-'+esc(pid)+'"><i class="fas fa-eye"></i> '+(p.viewCount||0)+' views</div>' : '';
+
+    // More/menu button — biz mode shows dropdown, feed mode opens modal
+    var moreBtn;
+    if (bizCtx && canManage) {
+      var isPinned=!!p.pinned; var cmtOff=!!p.commentsDisabled; var vis=p.visibility||'public';
+      moreBtn =
+        '<div class="biz-post-menu-wrap">'+
+        '<button class="gh-post-more" data-biz-post-menu title="Post options"><i class="fas fa-ellipsis"></i></button>'+
+        '<div class="biz-post-menu-dropdown" id="biz-pmenu-'+esc(pid)+'">'+
+          '<button class="biz-pmenu-item" data-biz-action="edit" data-pid="'+esc(pid)+'"><i class="fas fa-pen"></i> Edit post</button>'+
+          '<button class="biz-pmenu-item" data-biz-action="pin" data-pid="'+esc(pid)+'" data-pinned="'+(isPinned?'1':'0')+'"><i class="fas fa-thumbtack"></i> '+(isPinned?'Unpin':'Pin')+' post</button>'+
+          '<div class="biz-pmenu-sep"></div>'+
+          '<button class="biz-pmenu-item" data-biz-action="toggleComments" data-pid="'+esc(pid)+'" data-cmt-off="'+(cmtOff?'1':'0')+'"><i class="fas fa-comment-slash"></i> '+(cmtOff?'Enable':'Disable')+' comments</button>'+
+          '<div class="biz-pmenu-sep"></div>'+
+          '<button class="biz-pmenu-item" data-biz-action="setVis" data-pid="'+esc(pid)+'" data-vis="public"><i class="fas fa-globe"></i> Public'+(vis==='public'?' <i class="fas fa-check" style="color:#10b981;font-size:.65rem"></i>':'')+' </button>'+
+          '<button class="biz-pmenu-item" data-biz-action="setVis" data-pid="'+esc(pid)+'" data-vis="followers"><i class="fas fa-user-group"></i> Followers'+(vis==='followers'?' <i class="fas fa-check" style="color:#10b981;font-size:.65rem"></i>':'')+' </button>'+
+          '<button class="biz-pmenu-item" data-biz-action="setVis" data-pid="'+esc(pid)+'" data-vis="private"><i class="fas fa-lock"></i> Private'+(vis==='private'?' <i class="fas fa-check" style="color:#10b981;font-size:.65rem"></i>':'')+' </button>'+
+          '<div class="biz-pmenu-sep"></div>'+
+          '<button class="biz-pmenu-item danger" data-biz-action="delete" data-pid="'+esc(pid)+'"><i class="fas fa-trash"></i> Delete post</button>'+
+        '</div>'+
+        '</div>';
+    } else if (bizCtx) {
+      moreBtn = ''; // not a manager in biz context — no menu
+    } else {
+      moreBtn = '<button class="gh-post-more" data-post-menu><i class="fas fa-ellipsis"></i></button>';
+    }
+
+    // Comment form — hide when commentsDisabled in biz context
+    var cmtFormHtml = (bizCtx && p.commentsDisabled)
+      ? '<div class="gh-comments-disabled"><i class="fas fa-comment-slash"></i> Comments are turned off.</div>'
+      : '<form class="gh-comment-form" data-comment-form><input class="gh-input" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>';
+
+    // Card element data attributes
+    var cardAttrs = ' id="post-'+esc(pid)+'" data-post-id="'+esc(pid)+'" data-author-id="'+esc(authorId)+'"';
+    if (bizCtx && p.pinned) cardAttrs += ' data-pinned="1"';
+    if (bizCtx) cardAttrs += ' data-vis="'+esc(p.visibility||'public')+'"';
+    if (bizCtx && isAdmin) cardAttrs += ' data-biz-admin="1"';
+
+    return '<article class="gh-card gh-post"'+cardAttrs+'>'+
+      pinBanner+
+      '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+target+(p.feeling?' · '+esc(p.feeling):'')+bizPostedOnHtml+'</div></div>'+moreBtn+'</div>'+
       postTextHtml+
-      (imgUrl?'<img class="gh-post-img" src="'+esc(imgUrl)+'" alt="post image" loading="lazy" onerror="this.style.display=\'none\'">':'')+
+      mediaHtml+
       pollHtml+
       linkPrevHtml+
       (p.sharedPostId?'<div class="gh-shared-preview" data-shared-post="'+esc(p.sharedPostId)+'"><i class="fas fa-share"></i><div><strong>Shared post</strong><span>Loading original post...</span></div></div>':'')+
+      viewCountHtml+
       '<div class="gh-post-stats"><span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'"><i class="fas fa-thumbs-up"></i> <b data-like-count>'+totalRx+'</b>'+(totalRx?' people reacted':'')+'</button></span><span><b data-comment-count>'+Math.max(0,Number(p.commentCount||0))+'</b> comments · <b>'+Number(p.shareCount||0)+'</b> shares</span></div>'+
       '<div class="gh-rx-breakdown" data-rx-pid="'+esc(pid)+'"></div>'+
       '<div class="gh-post-actions"><button class="gh-act" data-like><i class="fas fa-thumbs-up"></i> Like</button><button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> Comment</button><button class="gh-act" data-share><i class="fas fa-share"></i> Share</button><button class="gh-act" data-save><i class="fas fa-bookmark"></i> Save</button></div>'+
       '<div class="gh-reaction-strip"><button data-reaction="like">👍</button><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button></div>'+
-      '<div class="gh-comments" data-comments hidden><div data-comments-list></div><form class="gh-comment-form" data-comment-form><input class="gh-input" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form></div>'+
+      '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+cmtFormHtml+'</div>'+
     '</article>';
   }
 
@@ -1142,10 +1215,57 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
   }
 
-  function bindPostInteractions(root){
+  function bindPostInteractions(root, options){
     root = root || document;
+    options = options || {};
     root.addEventListener('click', function(e){
+      // Business post menu toggle — intercept before generic card check
+      var bizMenuBtn = e.target.closest('[data-biz-post-menu]');
+      if (bizMenuBtn) {
+        e.stopPropagation();
+        var bizCard0 = bizMenuBtn.closest('[data-post-id]');
+        var bizPid0 = bizCard0 ? bizCard0.dataset.postId : '';
+        var dd = bizPid0 ? document.getElementById('biz-pmenu-'+bizPid0) : null;
+        if (dd) {
+          var isOpen0 = dd.classList.contains('open');
+          document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
+          if (!isOpen0) {
+            var rect0 = bizMenuBtn.getBoundingClientRect();
+            dd.style.top = (rect0.bottom+4)+'px';
+            dd.style.right = (window.innerWidth-rect0.right)+'px';
+            dd.style.left = '';
+            dd.classList.add('open');
+            setTimeout(function(){
+              document.addEventListener('click', function _bzh(ev){
+                if (!ev.target.closest || !ev.target.closest('.biz-post-menu-wrap')) {
+                  document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
+                }
+                document.removeEventListener('click', _bzh);
+              });
+            }, 0);
+          }
+        }
+        return;
+      }
+
       var card=e.target.closest('[data-post-id]'); if(!card) return; var pid=card.dataset.postId;
+
+      // Business-specific menu actions (edit, pin, toggleComments, setVis, delete)
+      var bizAction = e.target.closest('[data-biz-action]');
+      if (bizAction) {
+        document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
+        if (options.onBizAction) options.onBizAction(bizAction.dataset.pid||pid, bizAction.dataset.bizAction, bizAction.dataset);
+        return;
+      }
+
+      // Multi-image grid photo click
+      var photoItem = e.target.closest('[data-open-photo]');
+      if (photoItem) {
+        var photoUrl = photoItem.dataset.openPhoto;
+        if (options.onOpenPhoto) options.onOpenPhoto(photoUrl);
+        else if (photoUrl) window.open(photoUrl, '_blank', 'noopener');
+        return;
+      }
       if(e.target.closest('[data-like]')){ if(!requireLogin()) return; setReaction(pid,'like',card); }
       var ro=e.target.closest('[data-reaction]'); if(ro){ if(!requireLogin()) return; setReaction(pid,ro.dataset.reaction,card); }
       if(e.target.closest('[data-comment-toggle]')){ toggleComments(card,pid); }
@@ -1188,7 +1308,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
     root.addEventListener('submit', function(e){
       var form=e.target.closest('[data-comment-form]');
-      if(form){ e.preventDefault(); var card=form.closest('[data-post-id]'), pid=card.dataset.postId; var input=form.querySelector('input'); var val=input.value.trim(); if(!val) return; if(!requireLogin()) return; state.openCommentPids[pid]=true; GS().addComment(pid,val,function(){ input.value=''; },buildActorExtra()); return; }
+      if(form){ e.preventDefault(); var card=form.closest('[data-post-id]'), pid=card.dataset.postId; var input=form.querySelector('input,textarea'); var val=input.value.trim(); if(!val) return; if(!requireLogin()) return; state.openCommentPids[pid]=true; GS().addComment(pid,val,function(){ input.value=''; },buildActorExtra()); return; }
       var rform=e.target.closest('[data-reply-form]');
       if(rform){ e.preventDefault(); var card2=rform.closest('[data-post-id]'), pid2=card2.dataset.postId, cid=rform.dataset.commentId; var rin=rform.querySelector('input'); var rv=rin.value.trim(); if(!rv) return; if(!requireLogin()) return; if(GS().addCommentReply) GS().addCommentReply(pid2,cid,rv,function(){ rin.value=''; rform.hidden=true; },buildActorExtra()); else toast('Replies are not available','error'); }
     });
@@ -1363,15 +1483,18 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var u=authUser();
     // isOwn: true for direct author OR for the real user behind a business-posted comment
     var isOwn=u&&(u.uid===uid||(c.createdByUid&&u.uid===c.createdByUid)||(c.userId&&u.uid===c.userId));
+    // Biz admins can delete any comment on posts they manage
+    var postCard0=document.querySelector('[data-post-id="'+CSS.escape(pid)+'"]');
+    var isBizAdmin=!!(postCard0&&postCard0.dataset.bizAdmin==='1');
+    var canDelete=isOwn||isBizAdmin;
     // Author link: business comments link to business page
     var isBizComment=(c.authorType==='business')&&(c.businessId||c.authorId);
     var cAuthorHref=isBizComment?('business.html?id='+encodeURIComponent(c.businessId||c.authorId)):profileLink(uid);
     var avAnchor='<a class="gh-avatar gh-profile-avatar-link" href="'+esc(cAuthorHref)+'" style="width:32px;height:32px" title="'+esc('Open '+name+' profile')+'">'+avHtml+'</a>';
     var nameAnchor='<a class="gh-profile-name-link" href="'+esc(cAuthorHref)+'" title="'+esc('Open '+name+' profile')+'">'+esc(name)+'</a>';
-    var ownerBtns = isOwn
-      ? ' · <button type="button" class="gh-cmt-act" data-edit-comment data-comment-id="'+esc(c.id)+'" data-post-id="'+esc(pid)+'">Edit</button>'+
-        ' · <button type="button" class="gh-cmt-act" data-delete-comment data-comment-id="'+esc(c.id)+'" data-post-id="'+esc(pid)+'">Delete</button>'
-      : '';
+    var ownerBtns =
+      (isOwn ? ' · <button type="button" class="gh-cmt-act" data-edit-comment data-comment-id="'+esc(c.id)+'" data-post-id="'+esc(pid)+'">Edit</button>' : '')+
+      (canDelete ? ' · <button type="button" class="gh-cmt-act" data-delete-comment data-comment-id="'+esc(c.id)+'" data-post-id="'+esc(pid)+'">Delete</button>' : '');
     var rxCount = Number(c.reactionCount||0);
     var rxType = c._myRxType||'';
     var rxLabel = rxType ? (RX_EMOJIS[rxType]+' '+(rxCount||1)) : '👍 '+(rxCount||'Like');
@@ -4214,7 +4337,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   // Expose rendering helpers for other scripts (e.g. profile.js)
   window.GeoSocialUI = {
     postCard: postCard,
-    bindPostInteractions: bindPostInteractions
+    bindPostInteractions: bindPostInteractions,
+    hydrateReactionState: hydrateReactionState,
+    loadReactionBreakdown: loadReactionBreakdown,
+    hydratePollVote: hydratePollVote,
+    renderCommentsForPid: renderCommentsForPid
   };
 
   // Clean up all Firestore listeners when navigating away to avoid runaway billing

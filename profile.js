@@ -462,7 +462,13 @@
           // Use the full interactive post card from the social engine
           tab.innerHTML = '<div class="post-feed-list" id="profile-posts-list">' + posts.map(function(p) { return window.GeoSocialUI.postCard(p); }).join('') + '</div>';
           var list = tab.querySelector('#profile-posts-list');
-          if (list) window.GeoSocialUI.bindPostInteractions(list);
+          if (list) {
+            window.GeoSocialUI.bindPostInteractions(list);
+            posts.forEach(function(p) {
+              try { if (window.GeoSocialUI.hydrateReactionState) window.GeoSocialUI.hydrateReactionState(p.id); } catch(e) {}
+              try { if (window.GeoSocialUI.loadReactionBreakdown) window.GeoSocialUI.loadReactionBreakdown(p.id); } catch(e) {}
+            });
+          }
         } else {
           // Fallback: static read-only cards
           tab.innerHTML = '<div class="post-feed-list">' + posts.map(function(p) { return postCardHtml(p, user); }).join('') + '</div>';

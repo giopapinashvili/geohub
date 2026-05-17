@@ -28,7 +28,8 @@
   var _notificationsOn = true;
   var _reviewRating  = 0;
   var _previewMode   = false;
-  var _postReactions = {}; // { postId: { key, emoji, loaded } }
+  var _postReactions = {}; // legacy, kept for compat
+  var _currentPosts  = []; // posts loaded in current render cycle
   var _sharePostId   = null;
   var _editPostId    = null;
   var _rxLongTimer   = null;
@@ -622,7 +623,17 @@
   }
 
   // ── RENDER: POST CARD ────────────────────────────────────────
+  // Delegates to the shared GeoSocialUI.postCard() with biz-context options.
 
+  function bizPostOptions(post) {
+    return {
+      biz: _biz,
+      canManage: canManagePost(post),
+      isAdmin: isAdminOrOwner()
+    };
+  }
+
+  // Kept for any legacy reference; replaced in loadBizPosts by shared card.
   function postCardHtml(post, biz) {
     var pid = esc(post.id);
     var logo = biz.logoUrl
@@ -1341,10 +1352,36 @@
         if (allEl)      allEl.innerHTML      = empty;
         return;
       }
-      var all = '<div class="biz-post-list">'+posts.map(function(p){ return postCardHtml(p,_biz); }).join('')+'</div>';
-      var pre = '<div class="biz-post-list">'+posts.slice(0,3).map(function(p){ return postCardHtml(p,_biz); }).join('')+'</div>';
+      // Store for biz menu actions
+      _currentPosts = posts;
+
+      // Render using shared post card
+      var gs = window.GeoSocialUI;
+      var renderCard = gs && gs.postCard
+        ? function(p){ return gs.postCard(p, bizPostOptions(p)); }
+        : function(p){ return postCardHtml(p, _biz); }; // legacy fallback
+
+      var overviewPosts = posts.slice(0, 3);
+      var pre = '<div class="biz-post-list">'+overviewPosts.map(renderCard).join('')+'</div>';
+      var all = '<div class="biz-post-list">'+posts.map(renderCard).join('')+'</div>';
       if (overviewEl) overviewEl.innerHTML = pre;
       if (allEl)      allEl.innerHTML      = all;
+
+      // Wire shared interaction handlers (comments, reactions, polls, replies)
+      if (gs && gs.bindPostInteractions) {
+        var bizInteractionOptions = {
+          onBizAction: function(pid, action, data) {
+            if (action === 'edit')           window._bizActions.editPost(pid);
+            else if (action === 'pin')       window._bizActions.pinPost(pid);
+            else if (action === 'toggleComments') window._bizActions.togglePostComments(pid);
+            else if (action === 'setVis')   window._bizActions.setPostVisibility(pid, data.vis);
+            else if (action === 'delete')   window._bizActions.deletePost(pid);
+          },
+          onOpenPhoto: function(url) { if (window._bizActions && window._bizActions.openPhoto) window._bizActions.openPhoto(url); else window.open(url, '_blank', 'noopener'); }
+        };
+        if (overviewEl) gs.bindPostInteractions(overviewEl, bizInteractionOptions);
+        if (allEl)      gs.bindPostInteractions(allEl, bizInteractionOptions);
+      }
 
       // Set up IntersectionObserver to track post views
       if (_currentUser && 'IntersectionObserver' in window) {
@@ -1366,7 +1403,8 @@
             ).then(function(){
               return _fs.updateDoc(_fs.doc(_db,'posts',pid),{viewCount:_fs.increment(1)});
             }).then(function(){
-              var vEl = document.getElementById('biz-views-'+CSS.escape(pid));
+              // Update view count in shared card
+              var vEl = document.getElementById('post-views-'+CSS.escape(pid));
               if (vEl && isAdminOrOwner()) {
                 var cur = parseInt(vEl.textContent.replace(/[^\d]/g,''),10)||0;
                 vEl.innerHTML = '<i class="fas fa-eye"></i> '+(cur+1)+' views';
@@ -1374,25 +1412,15 @@
             }).catch(function(){});
           });
         }, {threshold: 0.5});
-        document.querySelectorAll('.biz-post-card').forEach(function(card) { obs.observe(card); });
+        // Observe shared .gh-post cards (and legacy .biz-post-card if any)
+        document.querySelectorAll('.gh-card.gh-post, .biz-post-card').forEach(function(card) { obs.observe(card); });
       }
 
-      // Pre-load current user's reaction state for all visible posts
-      if (_currentUser) {
+      // Hydrate reaction + poll state using shared API
+      if (gs && gs.hydrateReactionState && _currentUser) {
         posts.forEach(function(p) {
-          if (_postReactions[p.id] && _postReactions[p.id].loaded) return;
-          _fs.getDoc(_fs.doc(_db,'posts',p.id,'reactions',_currentUser.uid))
-            .then(function(snap) {
-              if (!snap.exists()) { _postReactions[p.id] = {loaded:true}; return; }
-              var d = snap.data();
-              _postReactions[p.id] = {loaded:true, key:d.key, emoji:d.emoji};
-              var rx = REACTIONS.find(function(r){ return r.key === d.key; });
-              if (!rx) return;
-              document.querySelectorAll('.biz-rx-wrap[data-pid="'+CSS.escape(p.id)+'"] .biz-react-btn').forEach(function(btnEl) {
-                btnEl.setAttribute('data-reaction', d.key);
-                btnEl.innerHTML = d.emoji + ' ' + rx.label;
-              });
-            }).catch(function(){});
+          try { gs.hydrateReactionState(p.id); } catch(e) {}
+          try { if (gs.loadReactionBreakdown) gs.loadReactionBreakdown(p.id); } catch(e) {}
         });
       }
     }).catch(function(err){
@@ -2261,9 +2289,8 @@
       document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
       var card = document.querySelector('[data-post-id="'+CSS.escape(postId)+'"]');
       if (!card) return;
-      var textEl = card.querySelector('.biz-post-text');
+      var textEl = card.querySelector('.gh-post-text, .biz-post-text');
       var currentText = textEl ? textEl.textContent : '';
-      // Infer current visibility from the card's data-vis or the post — fall back to 'public'
       var currentVis = card.dataset.vis || 'public';
       _editPostId = postId;
       var modal = document.getElementById('biz-edit-modal');
@@ -2301,7 +2328,7 @@
         // Update card in place
         var card = document.querySelector('[data-post-id="'+CSS.escape(postId)+'"]');
         if (card) {
-          var textEl = card.querySelector('.biz-post-text');
+          var textEl = card.querySelector('.gh-post-text, .biz-post-text');
           if (textEl) textEl.textContent = newText;
           card.dataset.vis = newVis;
         }
@@ -2355,9 +2382,9 @@
     togglePostComments: function(postId) {
       document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
       if (!_currentUser) return;
-      // Read current state from the card's comment section
-      var cmt = document.getElementById('biz-cmt-' + postId);
-      var isOff = cmt && !!cmt.querySelector('.biz-cmt-off');
+      // Read current disabled state from _currentPosts (cards may use shared structure now)
+      var post0 = _currentPosts && _currentPosts.find(function(p){ return p.id === postId; });
+      var isOff = post0 ? !!post0.commentsDisabled : false;
       var newVal = !isOff;
       _fs.updateDoc(_fs.doc(_db,'posts',postId), {
         commentsDisabled: newVal, updatedAt: _fs.serverTimestamp()
