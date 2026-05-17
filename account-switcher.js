@@ -48,9 +48,10 @@
     for (var i = 0; i < _businesses.length; i++) {
       if (_businesses[i].id === actor.businessId) { biz = _businesses[i]; break; }
     }
-    if (!biz) { btn.innerHTML = btnLabelHtml(); return; }
-    var iconInner = biz.logoUrl
-      ? '<img src="'+esc(biz.logoUrl)+'" alt="" class="geo-sw-avatar" style="object-fit:cover">'
+    // If businesses haven't loaded yet, use actor data from localStorage as fallback
+    if (!biz) biz = { id: actor.businessId, title: actor.title || 'Business', logoUrl: actor.logoUrl || '' };
+    var iconInner = (biz.logoUrl || actor.logoUrl)
+      ? '<img src="'+esc(biz.logoUrl || actor.logoUrl)+'" alt="" class="geo-sw-avatar" style="object-fit:cover">'
       : '<div class="geo-sw-avatar"><i class="fas fa-store" style="font-size:.8rem"></i></div>';
     var badge = _pendingRequests.length
       ? '<span style="position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;border-radius:50%;width:18px;height:18px;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--gh-bg,#0d111f);pointer-events:none">'+Math.min(_pendingRequests.length, 9)+'</span>'

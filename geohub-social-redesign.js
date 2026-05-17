@@ -7,7 +7,7 @@
 
   var PATH = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   var PAGE = document.body && document.body.dataset ? document.body.dataset.ghPage : '';
-  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null };
+  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null, openCommentPids: {}, cachedComments: {} };
 
   /* ── User cache (instant topbar, no flash) ──────────────── */
   var USER_CACHE_KEY = 'gh_uc1';
@@ -457,9 +457,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(txt==='profile') a.setAttribute('href', profileLink(u.uid));
       if(txt==='saved') a.setAttribute('href', profileLink(u.uid)+'&tab=saved');
     });
-    // Update composer avatar if present
+    // Update composer avatar — use active actor identity if business, otherwise user
     var ca=$('#ghComposerAvatar');
-    if(ca){ ca.className='gh-avatar'; ca.innerHTML=displayAvatar?img(displayAvatar,displayName):esc(initials(displayName||'')); }
+    if(ca){
+      var _actor=getActiveActor();
+      var _av=displayAvatar, _nm=displayName;
+      if(_actor && _actor.type==='business'){
+        _av=_actor.logoUrl||''; _nm=_actor.title||'Business';
+      }
+      ca.className='gh-avatar'; ca.innerHTML=_av?img(_av,_nm):esc(initials(_nm||''));
+    }
     // Persist to cache
     setCachedUser({uid:u.uid,name:displayName,avatar:displayAvatar});
   }
@@ -672,9 +679,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
 
     if($('#ghPollAddOpt')) $('#ghPollAddOpt').onclick=function(){
-      var opts=$all('[data-poll-opt]','#ghPollOpts'); if(opts.length>=6) return;
+      var pollOptsEl=$('#ghPollOpts'); if(!pollOptsEl) return;
+      var opts=$all('[data-poll-opt]', pollOptsEl); if(opts.length>=6) return;
       var inp=document.createElement('input'); inp.className='gh-input'; inp.style.marginBottom='7px'; inp.dataset.pollOpt=''; inp.placeholder='Option '+(opts.length+1);
-      $('#ghPollOpts').appendChild(inp);
+      pollOptsEl.appendChild(inp);
     };
 
     var ta=$('#ghPostText');
@@ -711,24 +719,42 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     $('#ghSubmitPost').onclick=function(){
       var submitBtn = $('#ghSubmitPost'); if(submitBtn.disabled) return;
 
+      var urlInput=($('#ghPostImg')||{}).value.trim();
+      var mediaSource = pickedFile || picked || urlInput;
+      var bar=$('#ghPostUploadBar'), fill=$('#ghPostUploadFill'), pctEl=$('#ghPostUploadPct');
+
       if(pollMode){
         var question=($('#ghPollQuestion')||{}).value||''; question=question.trim();
-        var optInputs=$all('[data-poll-opt]'); var opts=optInputs.map(function(i,idx){ return {id:String(idx),text:(i.value||'').trim(),votes:0}; }).filter(function(o){ return o.text; });
+        var pollOptsEl=$('#ghPollOpts');
+        var optInputs=$all('[data-poll-opt]', pollOptsEl);
+        var opts=optInputs.map(function(i,idx){ return {id:String(idx),text:(i.value||'').trim(),votes:0}; }).filter(function(o){ return o.text; });
         if(!question) return toast('Poll needs a question','error');
         if(opts.length<2) return toast('Add at least 2 options','error');
         var durDays=Number(($('#ghPollDuration')||{}).value||3);
         var endsAt=new Date(Date.now()+durDays*86400000);
-        submitBtn.disabled=true; submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
-        GS().createPost(question, '', function(){ var m=$('#ghPostModal'); if(m)m.remove(); submitBtn.disabled=false; }, Object.assign({
+        var pollPayload=Object.assign({
           type:'poll',
           poll:{question:question,options:opts,endsAt:endsAt,totalVotes:0},
           visibility:($('#ghPostVisibility')||{}).value||'public'
-        }, extra||{}));
+        }, extra||{});
+        submitBtn.disabled=true;
+        submitBtn.dataset.originalText=submitBtn.innerHTML;
+        submitBtn.innerHTML=mediaSource?'<i class="fas fa-circle-notch fa-spin"></i> Uploading…':'<i class="fas fa-circle-notch fa-spin"></i> Posting…';
+        if(bar && mediaSource) bar.style.display='flex';
+        prepareMedia(mediaSource, 'posts', function(pct){
+          if(fill) fill.style.width=pct+'%';
+          if(pctEl) pctEl.textContent=pct+'%';
+          submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> '+pct+'%';
+        }).then(function(finalUrl){
+          if(bar) bar.style.display='none';
+          submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
+          GS().createPost(question, finalUrl||null, function(){ var m=$('#ghPostModal'); if(m)m.remove(); }, pollPayload);
+        }).catch(function(err){ console.error('[GeoHub] poll image upload failed', err); toast('Image upload failed. Check Cloudinary settings.', 'error'); if(bar) bar.style.display='none'; })
+          .finally(function(){ var b=$('#ghSubmitPost'); if(b){ b.disabled=false; b.innerHTML=b.dataset.originalText || '<i class="fas fa-paper-plane"></i> Post'; } });
         return;
       }
 
-      var txt=($('#ghPostText')||{}).value||'', urlInput=($('#ghPostImg')||{}).value.trim();
-      var mediaSource = pickedFile || picked || urlInput;
+      var txt=($('#ghPostText')||{}).value||'';
       if(!txt.trim() && !mediaSource) return toast('Write something or pick an image','error');
       var payload=Object.assign({
         visibility: ($('#ghPostVisibility')||{}).value||'public',
@@ -740,7 +766,6 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       submitBtn.disabled = true;
       submitBtn.dataset.originalText = submitBtn.innerHTML;
       submitBtn.innerHTML = mediaSource ? '<i class="fas fa-circle-notch fa-spin"></i> Uploading…' : '<i class="fas fa-circle-notch fa-spin"></i> Posting…';
-      var bar=$('#ghPostUploadBar'), fill=$('#ghPostUploadFill'), pctEl=$('#ghPostUploadPct');
       if(bar && mediaSource) bar.style.display='flex';
       prepareMedia(mediaSource, 'posts', function(pct){
         if(fill) fill.style.width=pct+'%';
@@ -1101,7 +1126,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
     root.addEventListener('submit', function(e){
       var form=e.target.closest('[data-comment-form]');
-      if(form){ e.preventDefault(); var card=form.closest('[data-post-id]'), pid=card.dataset.postId; var input=form.querySelector('input'); var val=input.value.trim(); if(!val) return; if(!requireLogin()) return; GS().addComment(pid,val,function(){ input.value=''; }); return; }
+      if(form){ e.preventDefault(); var card=form.closest('[data-post-id]'), pid=card.dataset.postId; var input=form.querySelector('input'); var val=input.value.trim(); if(!val) return; if(!requireLogin()) return; state.openCommentPids[pid]=true; GS().addComment(pid,val,function(){ input.value=''; }); return; }
       var rform=e.target.closest('[data-reply-form]');
       if(rform){ e.preventDefault(); var card2=rform.closest('[data-post-id]'), pid2=card2.dataset.postId, cid=rform.dataset.commentId; var rin=rform.querySelector('input'); var rv=rin.value.trim(); if(!rv) return; if(!requireLogin()) return; if(GS().addCommentReply) GS().addCommentReply(pid2,cid,rv,function(){ rin.value=''; rform.hidden=true; }); else toast('Replies are not available','error'); }
     });
@@ -1237,18 +1262,34 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
   }
 
+  function renderCommentsForPid(pid, items){
+    var currentCard=document.querySelector('[data-post-id="'+CSS.escape(pid)+'"]');
+    if(!currentCard) return;
+    var currentList=currentCard.querySelector('[data-comments-list]'); if(!currentList) return;
+    var currentBox=currentCard.querySelector('[data-comments]');
+    if(currentBox && state.openCommentPids[pid]) currentBox.hidden=false;
+    var visible=items.filter(function(c){
+      var uid=c.authorId||c.userId||'';
+      return !uid||(state.blockedUserIds.indexOf(uid)===-1&&state.mutedUserIds.indexOf(uid)===-1);
+    });
+    if(!visible.length){ currentList.innerHTML='<div class="gh-small" style="padding:10px 6px">No comments yet.</div>'; return; }
+    currentList.innerHTML=visible.map(function(c){ return commentCard(pid,c); }).join('');
+    visible.forEach(function(c){ loadReplies(pid,c.id); });
+  }
+
   function toggleComments(card,pid){
-    var box=card.querySelector('[data-comments]'); if(!box) return; box.hidden=!box.hidden; if(box.hidden) return;
-    if(state.postsUnsubs[pid]) return;
-    var list=card.querySelector('[data-comments-list]');
+    var box=card.querySelector('[data-comments]'); if(!box) return;
+    box.hidden=!box.hidden;
+    if(box.hidden){ delete state.openCommentPids[pid]; return; }
+    state.openCommentPids[pid]=true;
+    // If listener already active, render from cache and return
+    if(state.postsUnsubs[pid]){
+      if(state.cachedComments[pid]) renderCommentsForPid(pid, state.cachedComments[pid]);
+      return;
+    }
     state.postsUnsubs[pid]=GS().listenComments(pid,function(items){
-      var visible=items.filter(function(c){
-        var uid=c.authorId||c.userId||'';
-        return !uid||(state.blockedUserIds.indexOf(uid)===-1&&state.mutedUserIds.indexOf(uid)===-1);
-      });
-      if(!visible.length){ list.innerHTML='<div class="gh-small" style="padding:10px 6px">No comments yet.</div>'; return; }
-      list.innerHTML=visible.map(function(c){ return commentCard(pid,c); }).join('');
-      visible.forEach(function(c){ loadReplies(pid,c.id); });
+      state.cachedComments[pid]=items;
+      renderCommentsForPid(pid, items);
     });
   }
 
@@ -1637,6 +1678,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         list.innerHTML=visible.map(function(p){ return postCard(p); }).join('');
         visible.forEach(function(p){ try{ hydrateReactionState(p.id); loadReactionBreakdown(p.id); }catch(e){} });
         hydrateSharedPreviews(list);
+        // Restore open comment sections that were visible before re-render
+        Object.keys(state.openCommentPids).forEach(function(pid){
+          if(state.cachedComments[pid]) renderCommentsForPid(pid, state.cachedComments[pid]);
+        });
         setTimeout(openDeepLinkedPost, 350);
       }
       setupSafetyListener(paint);
