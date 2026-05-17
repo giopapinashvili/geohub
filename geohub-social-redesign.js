@@ -1031,18 +1031,22 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
     var pollHtml = '';
     if(p.type==='poll' && p.poll) {
-      var pol=p.poll; var totalV=pol.totalVotes||0;
+      var pol=p.poll; var totalV=Math.max(0,Number(pol.totalVotes||0));
+      var pollEndsAt=pol.endsAt||pol.expiresAt;
+      var pollExpired=pollEndsAt&&(new Date(pollEndsAt.toMillis?pollEndsAt.toMillis():pollEndsAt)<new Date());
       pollHtml = '<div class="gh-poll-card" data-poll-pid="'+esc(pid)+'">' +
         '<div class="gh-poll-question">'+esc(pol.question||'')+'</div>' +
         (pol.options||[]).map(function(opt){
-          var pct = totalV > 0 ? Math.round((opt.votes||0)/totalV*100) : 0;
-          return '<button class="gh-poll-opt" data-poll-vote data-pid="'+esc(pid)+'" data-opt-id="'+esc(opt.id)+'">' +
+          var pct = totalV > 0 ? Math.round(Math.max(0,Number(opt.votes||0))/totalV*100) : 0;
+          return '<button class="gh-poll-opt'+(pollExpired?' expired':'')+'" '+
+            (pollExpired?'disabled ':'data-poll-vote ')+
+            'data-pid="'+esc(pid)+'" data-opt-id="'+esc(opt.id)+'">' +
             '<div class="gh-poll-bar" style="width:'+pct+'%"></div>' +
             '<span class="gh-poll-label">'+esc(opt.text)+'</span>' +
             '<span class="gh-poll-pct">'+pct+'%</span>' +
           '</button>';
         }).join('') +
-        '<div class="gh-poll-footer">'+totalV+' votes</div>' +
+        '<div class="gh-poll-footer">'+totalV+' vote'+(totalV===1?'':'s')+(pollExpired?' · <em>Poll ended</em>':'')+'</div>' +
       '</div>';
     }
 
@@ -1226,6 +1230,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(snap.exists()) updateReactionUi(card, (snap.data()||{}).type || 'like');
       else if(GS().checkLiked) GS().checkLiked(postId,function(liked){ if(liked) updateReactionUi(card,'like'); });
     }).catch(function(){ if(GS().checkLiked) GS().checkLiked(postId,function(liked){ if(liked) updateReactionUi(card,'like'); }); });
+    // Hydrate poll vote selection if this card is a poll
+    if(card.querySelector('[data-poll-pid]')) hydratePollVote(postId);
   }
 
   function setReaction(postId, type, card){
@@ -1375,29 +1381,96 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }).catch(function(err){ toast('Reaction failed','error'); });
   }
 
+  function updatePollUi(pid, opts, totalVotes, myOptId, card){
+    var pollDiv=(card&&card.querySelector('[data-poll-pid]'))||
+      document.querySelector('[data-post-id="'+CSS.escape(pid)+'"] [data-poll-pid]');
+    if(!pollDiv) return;
+    var totalV=Math.max(0,Number(totalVotes||0));
+    $all('.gh-poll-opt',pollDiv).forEach(function(btn){
+      var oId=btn.dataset.optId||'';
+      var opt=null; for(var i=0;i<opts.length;i++){ if(opts[i].id===oId){opt=opts[i];break;} }
+      var votes=opt?Math.max(0,Number(opt.votes||0)):0;
+      var pct=totalV>0?Math.round(votes/totalV*100):0;
+      var bar=btn.querySelector('.gh-poll-bar'); if(bar) bar.style.width=pct+'%';
+      var pctEl=btn.querySelector('.gh-poll-pct'); if(pctEl) pctEl.textContent=pct+'%';
+      btn.classList.toggle('selected',!!(oId&&oId===myOptId));
+    });
+    var footer=pollDiv.querySelector('.gh-poll-footer');
+    if(footer) footer.textContent=totalV+' vote'+(totalV===1?'':'s')+(pollDiv.querySelector('.gh-poll-opt.expired')?' · Poll ended':'');
+    if(myOptId) pollDiv.classList.add('voted');
+  }
+
+  function hydratePollVote(pid){
+    var u=authUser(); if(!u||!fs()) return;
+    fs().getDoc(fs().doc(db(),'posts',pid,'pollVotes',u.uid)).then(function(snap){
+      if(!snap.exists()) return;
+      var myOptId=(snap.data()||{}).optionId||'';
+      if(!myOptId) return;
+      var card=document.querySelector('[data-post-id="'+CSS.escape(pid)+'"]'); if(!card) return;
+      var pollDiv=card.querySelector('[data-poll-pid]'); if(!pollDiv) return;
+      $all('.gh-poll-opt',pollDiv).forEach(function(btn){
+        btn.classList.toggle('selected',btn.dataset.optId===myOptId);
+      });
+      pollDiv.classList.add('voted');
+    }).catch(function(){});
+  }
+
   function submitPollVote(pid, optId, card) {
     var u=authUser(); if(!u) return requireLogin();
-    var f=fs(); var voteRef=f.doc(db(),'posts',pid,'pollVotes',u.uid);
-    f.getDoc(voteRef).then(function(snap){
-      if(snap.exists()){ toast('You already voted','error'); return; }
-      return f.setDoc(voteRef,{optionId:optId,userId:u.uid,createdAt:f.serverTimestamp()})
+    var f=fs();
+    var voteRef=f.doc(db(),'posts',pid,'pollVotes',u.uid);
+    var postRef=f.doc(db(),'posts',pid);
+
+    // Disable all options while writing to prevent double-click
+    var pollDiv=card&&card.querySelector('[data-poll-pid]');
+    function enableOpts(){ if(pollDiv) $all('.gh-poll-opt',pollDiv).forEach(function(b){ b.disabled=false; }); }
+    if(pollDiv) $all('.gh-poll-opt',pollDiv).forEach(function(b){ b.disabled=true; });
+
+    Promise.all([f.getDoc(voteRef), f.getDoc(postRef)]).then(function(results){
+      var voteSnap=results[0], postSnap=results[1];
+      var prevOptId=voteSnap.exists()?((voteSnap.data()||{}).optionId||''):'';
+
+      // Same option clicked — no-op (keep selected state unchanged)
+      if(prevOptId===optId){ enableOpts(); return; }
+
+      if(!postSnap.exists()){ enableOpts(); return; }
+      var pd=postSnap.data().poll||{};
+      var origOpts=(pd.options||[]).slice();
+      var origTotal=Math.max(0,Number(pd.totalVotes||0));
+
+      // Compute new counts (floor at 0 to prevent negative)
+      var newOpts=origOpts.map(function(o){
+        var v=Math.max(0,Number(o.votes||0));
+        if(o.id===prevOptId) v=Math.max(0,v-1);
+        if(o.id===optId) v=v+1;
+        return Object.assign({},o,{votes:v});
+      });
+      var newTotal=prevOptId?origTotal:origTotal+1; // only increment total on first vote
+
+      // Optimistic UI update immediately
+      updatePollUi(pid,newOpts,newTotal,optId,card);
+
+      // Write vote doc (create or update)
+      var voteWrite=voteSnap.exists()
+        ?f.updateDoc(voteRef,{optionId:optId,updatedAt:f.serverTimestamp()})
+        :f.setDoc(voteRef,{optionId:optId,uid:u.uid,userId:u.uid,createdAt:f.serverTimestamp(),updatedAt:f.serverTimestamp()});
+
+      return voteWrite
         .then(function(){
-          return Promise.all([
-            f.updateDoc(f.doc(db(),'posts',pid),{'poll.totalVotes':f.increment(1)}).catch(function(){}),
-            f.getDoc(f.doc(db(),'posts',pid)).then(function(ps){
-              if(!ps.exists()) return;
-              var pd=ps.data().poll||{}; var opts=(pd.options||[]).map(function(o){
-                return o.id===optId ? Object.assign({},o,{votes:(o.votes||0)+1}) : o;
-              });
-              return f.updateDoc(f.doc(db(),'posts',pid),{'poll.options':opts}).catch(function(){});
-            })
-          ]);
-        }).then(function(){
-          var pollDiv=card&&card.querySelector('[data-poll-pid]');
-          if(pollDiv) pollDiv.classList.add('voted');
-          toast('Vote recorded');
+          // TODO: move to Cloud Function for true atomicity (Blaze plan required)
+          return f.updateDoc(postRef,{'poll.options':newOpts,'poll.totalVotes':newTotal}).catch(function(){});
+        })
+        .then(function(){ enableOpts(); toast('Vote recorded'); })
+        .catch(function(err){
+          // Revert optimistic UI to original state
+          updatePollUi(pid,origOpts,origTotal,prevOptId,card);
+          enableOpts();
+          toast('Vote failed: '+(err.code||err.message),'error');
         });
-    }).catch(function(err){ toast('Vote failed: '+(err.code||err.message),'error'); });
+    }).catch(function(err){
+      enableOpts();
+      toast('Vote failed: '+(err.code||err.message),'error');
+    });
   }
 
   function openReplyForm(card,pid,cid){

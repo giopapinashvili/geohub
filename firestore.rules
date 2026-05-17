@@ -413,7 +413,11 @@ service cloud.firestore {
         allow create: if isOwner(voteUserId)
           && request.resource.data.get('userId', voteUserId) == uid()
           && request.resource.data.get('optionId', '') is string;
-        allow update: if false;
+        // Allow changing vote: only optionId and updatedAt may change
+        allow update: if isOwner(voteUserId)
+          && request.resource.data.get('optionId', '') is string
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['optionId', 'updatedAt']);
         allow delete: if isAdmin() || isOwner(voteUserId);
       }
       match /views/{viewerId} {
