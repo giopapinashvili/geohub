@@ -120,7 +120,7 @@
         email: profile.email,
         avatar: profile.avatar,
         bio: '', city: 'all_georgia', cityScope: 'all_georgia', cities: ['all_georgia'], accountType: 'Explorer', interests: [],
-        xp: 0, followers: 0, following: 0, postsCount: 0, visitedPlaces: 0, trustScore: 0,
+        followers: 0, following: 0, postsCount: 0, visitedPlaces: 0,
         createdAt: GF.fs.serverTimestamp()
       }, { merge: true }).catch(err => console.warn('[Profile] create user doc failed', err.message));
     }
@@ -215,7 +215,7 @@
       }
     }
     const actions = $('.profile-actions');
-    if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i></button><button class="btn btn-ghost btn-sm" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> Message</button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> Add Friend</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> Follow</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '" data-user-name="' + esc(fullName) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-mute-user="' + esc(user.uid) + '" data-user-name="' + esc(fullName) + '"><i class="fas fa-volume-mute"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '" data-user-name="' + esc(fullName) + '"><i class="fas fa-ban"></i></button>';
+    if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i></button><button class="btn btn-ghost btn-sm" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> Message</button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> Add Friend</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> Follow</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-mute-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-volume-mute"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-ban"></i></button>';
     if (!own && window.GeoSocial && window.GeoSocial.checkFollowing) {
       window.GeoSocial.checkFollowing(user.uid, isFollowing => {
         $$('[data-follow-user="' + user.uid + '"]').forEach(btn => {
@@ -287,6 +287,7 @@
     renderStats(user);
     refreshRealStats(user);
     renderStaticEmptyStates(user);
+    if (own) maybeShowCompletionHint(user);
   }
 
   function renderPymkSidebar() {
@@ -379,6 +380,7 @@
     renderAboutTab(user);
     renderBadgeTab(user);
     renderBusinessesTab(user);
+    loadCheckinsTab(user);
     if (window.GeoSocial && window.GeoSocial.listenSavedPosts) {
       function updateSavedEmpty() {
         var ps = $('#saved-posts-section'), pl = $('#saved-places-section'), em = $('#saved-empty-state');
@@ -394,7 +396,7 @@
         sec.innerHTML = '<div style="font-size:.75rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px"><i class="fas fa-file-alt" style="margin-right:6px"></i>Saved Posts</div>'
           + '<div class="posts-grid">' + posts.map(function (post) {
             return '<div class="post-thumb">'
-              + (post.mediaUrl ? '<img src="' + esc(post.mediaUrl) + '" alt="Post" loading="lazy" decoding="async">'
+              + (post.mediaUrl ? '<img src="' + esc(post.mediaUrl) + '" alt="Post" loading="lazy" decoding="async" onerror="this.onerror=null;this.style.display=\'none\'">'
                 : '<div style="background:var(--bg-elevated);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.9rem;padding:14px;box-sizing:border-box;text-align:center;color:var(--text-secondary)">' + esc((post.text || '').slice(0, 80)) + '</div>')
               + '<div class="post-overlay"><span><i class="fas fa-heart"></i> ' + (post.likeCount || 0) + '</span><span><i class="fas fa-comment"></i> ' + (post.commentCount || 0) + '</span></div>'
               + '</div>';
@@ -447,7 +449,7 @@
         if (!friendsTab) return;
         const pendingHtml = friendsTab.dataset.pendingRequestsHtml || '';
         if (!friends.length && !pendingHtml) { friendsTab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-user-group"></i><h3>No friends yet</h3><p>Send friend requests from profiles.</p></div>'; return; }
-        friendsTab.innerHTML = pendingHtml + (friends.length ? '<div style="font-weight:800;margin:0 0 10px">Friends</div><div class="gh-friend-grid">'+friends.map(f => '<a class="gh-friend-card" href="profile.html?id='+encodeURIComponent(f.uid||f.id)+'"><span class="gh-avatar">'+(f.avatar||f.photoURL ? '<img src="'+esc(f.avatar||f.photoURL)+'" alt="" loading="lazy" decoding="async">' : esc(initialLetters(f.fullName||f.displayName||f.name||'GeoHub User',f.email)))+'</span><div><strong>'+esc(f.fullName||f.displayName||f.name||'GeoHub User')+'</strong><span>@'+esc(f.username||'user')+'</span></div></a>').join('')+'</div>' : '');
+        friendsTab.innerHTML = pendingHtml + (friends.length ? '<div style="font-weight:800;margin:0 0 10px">Friends</div><div class="gh-friend-grid">'+friends.map(f => '<a class="gh-friend-card" href="profile.html?id='+encodeURIComponent(f.uid||f.id)+'"><span class="gh-avatar">'+(f.avatar||f.photoURL ? '<img src="'+esc(f.avatar||f.photoURL)+'" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.style.display=\'none\'">' : esc(initialLetters(f.fullName||f.displayName||f.name||'GeoHub User',f.email)))+'</span><div><strong>'+esc(f.fullName||f.displayName||f.name||'GeoHub User')+'</strong><span>@'+esc(f.username||'user')+'</span></div></a>').join('')+'</div>' : '');
       });
     }
 
@@ -652,6 +654,37 @@
     }
   }
 
+  function loadCheckinsTab(user) {
+    var tab = $('#tab-checkins');
+    if (!tab) return;
+    var GF = window.GeoFirebase;
+    if (!GF || !GF.db || !GF.fs) return;
+    GF.fs.getDocs(GF.fs.query(
+      GF.fs.collection(GF.db, 'checkIns'),
+      GF.fs.where('userId', '==', user.uid),
+      GF.fs.orderBy('createdAt', 'desc'),
+      GF.fs.limit(30)
+    )).then(function(snap) {
+      var cnt = $('.ptab[data-tab="checkins"] .tab-count');
+      if (snap.empty) { if (cnt) cnt.textContent = '0'; return; }
+      if (cnt) cnt.textContent = snap.size;
+      var items = [];
+      snap.forEach(function(d) { items.push(Object.assign({ id: d.id }, d.data())); });
+      tab.innerHTML = '<div class="gh-friend-grid">' + items.map(function(c) {
+        var linkStart = c.placeId ? '<a href="places.html?id=' + encodeURIComponent(c.placeId) + '" style="color:#10b981;text-decoration:none">' : '';
+        var linkEnd   = c.placeId ? '</a>' : '';
+        return '<div class="gh-friend-card">'
+          + '<span class="gh-avatar" style="background:rgba(16,185,129,.1)"><i class="fas fa-map-marker-alt" style="color:#10b981"></i></span>'
+          + '<div>'
+            + '<strong>' + esc(c.placeName || c.name || 'Check-in') + '</strong>'
+            + '<span>' + linkStart + esc(c.city || c.location || '') + linkEnd + '</span>'
+            + (c.createdAt ? '<span style="font-size:.7rem;color:#64748b;display:block;margin-top:2px">' + timeAgo(c.createdAt) + '</span>' : '')
+          + '</div>'
+        + '</div>';
+      }).join('') + '</div>';
+    }).catch(function() { /* keep empty state */ });
+  }
+
   function postCardHtml(post, user) {
     var ts = timeAgo(post.createdAt || post.timestamp);
     var text = esc(post.text || post.content || '');
@@ -670,7 +703,7 @@
     var cnt = $('.ptab[data-tab="gallery"] .tab-count'); if (cnt) cnt.textContent = media.length || '';
     if (!media.length) { tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-images"></i><h3>No photos yet</h3><p>Posts with photos will appear in the gallery.</p></div>'; return; }
     tab.innerHTML = '<div class="gallery-grid">' + media.map(function(p) {
-      return '<div class="gallery-item"><img src="' + esc(p.mediaUrl) + '" alt="" loading="lazy" decoding="async"><div class="gallery-overlay"><span><i class="fas fa-heart"></i> ' + (p.likeCount || 0) + '</span></div></div>';
+      return '<div class="gallery-item"><img src="' + esc(p.mediaUrl) + '" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.closest(\'.gallery-item\').style.display=\'none\'"><div class="gallery-overlay"><span><i class="fas fa-heart"></i> ' + (p.likeCount || 0) + '</span></div></div>';
     }).join('') + '</div>';
   }
 
@@ -1000,6 +1033,25 @@
         ov.remove();
       }).catch(function(err) { toast('Save failed: ' + (err && err.message), 'error'); });
     });
+  }
+
+  function maybeShowCompletionHint(user) {
+    var old = document.getElementById('profile-completion-hint');
+    if (old) old.remove();
+    var missing = [];
+    if (!user.bio) missing.push('bio');
+    if (!user.avatar || user.avatar.indexOf('data:') === 0) missing.push('profile photo');
+    if (!user.interests || !user.interests.length) missing.push('interests');
+    if (!missing.length) return;
+    var hint = document.createElement('div');
+    hint.id = 'profile-completion-hint';
+    hint.className = 'profile-completion-hint';
+    hint.innerHTML = '<i class="fas fa-circle-info"></i> Complete your profile — add your '
+      + missing.join(', ')
+      + '. <button class="hint-edit-btn" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button>'
+      + '<button class="hint-close-btn" onclick="document.getElementById(\'profile-completion-hint\').remove()" aria-label="Dismiss">&times;</button>';
+    var nameBlock = document.querySelector('.profile-name-block');
+    if (nameBlock) nameBlock.insertAdjacentElement('beforebegin', hint);
   }
 
   function applyCreatorMode(user) {
