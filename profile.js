@@ -470,8 +470,8 @@
             });
           }
         } else {
-          // Fallback: static read-only cards
-          tab.innerHTML = '<div class="post-feed-list">' + posts.map(function(p) { return postCardHtml(p, user); }).join('') + '</div>';
+          // Fallback: social engine unavailable
+          tab.innerHTML = '<div class="post-feed-list" style="padding:32px;text-align:center;color:var(--gh-muted)"><i class="fas fa-rotate-right" style="font-size:1.5rem"></i><p style="margin-top:8px">Refresh the page to load posts.</p></div>';
         }
       });
     }

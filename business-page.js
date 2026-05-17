@@ -512,6 +512,8 @@
     return _isOwner || (c && (c.authorId === _currentUser.uid || c.userId === _currentUser.uid));
   }
 
+  // ── LEGACY RENDERERS (unreachable in production — GeoSocialUI always loads before business-page.js) ──
+
   function replyBubbleHtml(r, postId, commentId) {
     var name = r.authorName || r.userName || 'User';
     var authorId = r.authorId || r.userId || '';
@@ -633,7 +635,6 @@
     };
   }
 
-  // Kept for any legacy reference; replaced in loadBizPosts by shared card.
   function postCardHtml(post, biz) {
     var pid = esc(post.id);
     var logo = biz.logoUrl
@@ -819,6 +820,8 @@
       '</div>'+
     '</div>';
   }
+
+  // ── END LEGACY RENDERERS ────────────────────────────────────
 
   // ── RENDER: SERVICE CARDS ────────────────────────────────────
 
@@ -1359,7 +1362,7 @@
       var gs = window.GeoSocialUI;
       var renderCard = gs && gs.postCard
         ? function(p){ return gs.postCard(p, bizPostOptions(p)); }
-        : function(p){ return postCardHtml(p, _biz); }; // legacy fallback
+        : function(p){ return '<article class="gh-card gh-post" data-post-id="'+esc(p.id||'')+'"><div style="padding:16px;color:var(--gh-muted);text-align:center"><i class="fas fa-rotate-right"></i> Refresh to load posts.</div></article>'; };
 
       var overviewPosts = posts.slice(0, 3);
       var pre = '<div class="biz-post-list">'+overviewPosts.map(renderCard).join('')+'</div>';
@@ -2566,7 +2569,7 @@
         var gs2 = window.GeoSocialUI;
         var card = (gs2 && gs2.postCard)
           ? gs2.postCard(newPost, bizPostOptions(newPost))
-          : postCardHtml(newPost, _biz);
+          : '<article class="gh-card gh-post" data-post-id="'+esc(newPost.id||'')+'"><div style="padding:16px;color:var(--gh-muted);text-align:center"><i class="fas fa-rotate-right"></i> Refresh to see your post.</div></article>';
         ['biz-posts-overview','biz-posts-all'].forEach(function(elId){
           var el = document.getElementById(elId);
           if (!el) return;
