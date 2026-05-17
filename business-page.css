@@ -2374,3 +2374,56 @@ body.gh-has-injected-nav .biz-right-sidebar {
   }
   body.gh-has-injected-nav .biz-right-sidebar{display:none}
 }
+
+
+/* ── PHASE 6: OWNER PRO TOOLS ──────────────────────────────────── */
+
+/* Add button in section headers */
+.biz-section-add-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(16,185,129,.35);
+  background: rgba(16,185,129,.08); color: #10b981;
+  font-size: .78rem; font-weight: 700; cursor: pointer;
+  transition: background .14s, border-color .14s; white-space: nowrap;
+}
+.biz-section-add-btn:hover { background: rgba(16,185,129,.16); border-color: rgba(16,185,129,.5); }
+
+/* Owner action buttons row on service cards */
+.biz-owner-card-actions {
+  display: flex; gap: 4px; justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+/* Delete overlay on gallery / product thumb */
+.biz-gallery-item { position: relative; }
+.biz-product-thumb { position: relative; }
+.biz-gallery-del-wrap {
+  position: absolute; top: 6px; right: 6px; z-index: 2;
+  opacity: 0; transition: opacity .15s;
+}
+.biz-gallery-item:hover .biz-gallery-del-wrap,
+.biz-product-card:hover .biz-gallery-del-wrap { opacity: 1; }
+.biz-gallery-del-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(239,68,68,.85); border: none;
+  color: #fff; font-size: .75rem; cursor: pointer;
+  transition: background .14s;
+}
+.biz-gallery-del-btn:hover { background: #ef4444; }
+
+/* Owner reply display on review cards */
+.biz-owner-reply {
+  margin-top: 10px; padding: 10px 12px;
+  background: rgba(16,185,129,.06); border-left: 3px solid rgba(16,185,129,.4);
+  border-radius: 0 8px 8px 0; font-size: .83rem; color: #94a3b8; line-height: 1.5;
+}
+.biz-owner-reply i { color: #10b981; margin-right: 4px; }
+.biz-owner-reply strong { color: #10b981; font-weight: 700; }
+.biz-owner-reply span { color: #cbd5e1; }
+
+/* Reply toggle button */
+.biz-reply-toggle-btn { margin-top: 8px; }
+
+/* Reply form inside review card */
+.biz-review-reply-form { margin-top: 10px; }

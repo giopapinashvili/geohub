@@ -828,13 +828,27 @@
   var SVC_ICONS = ['fa-star','fa-bolt','fa-palette','fa-code','fa-camera','fa-chart-bar','fa-music','fa-heart','fa-wrench','fa-car','fa-briefcase','fa-scissors','fa-laptop','fa-utensils','fa-dumbbell'];
 
   function renderServiceCards(services) {
+    var owner = isAdminOrOwner();
+    var header = '<div class="biz-section-header">'+
+      '<div class="biz-section-title"><i class="fas fa-briefcase"></i> Services</div>'+
+      (owner ? '<button class="biz-section-add-btn" onclick="window._bizActions.openAddService()"><i class="fas fa-plus"></i> Add Service</button>' : '')+
+    '</div>';
     if (!services || !services.length) {
-      return '<div class="biz-section"><div class="biz-section-header"><div class="biz-section-title"><i class="fas fa-briefcase"></i> Services</div></div>'+
-        '<div class="biz-empty-state"><i class="fas fa-list-check"></i><p>No services listed yet.</p></div></div>';
+      return '<div class="biz-section">'+header+
+        '<div class="biz-empty-state"><i class="fas fa-list-check"></i>'+
+        (owner
+          ? '<p>Add your first service so visitors know what you offer.</p>'+
+            '<button class="biz-section-add-btn" style="margin-top:8px" onclick="window._bizActions.openAddService()"><i class="fas fa-plus"></i> Add Service</button>'
+          : '<p>No services listed yet.</p>')+
+        '</div></div>';
     }
     var cards = services.map(function(s, i) {
       var icon = s.icon ? s.icon : SVC_ICONS[i % SVC_ICONS.length];
       return '<div class="biz-service-card">'+
+        (owner ? '<div class="biz-owner-card-actions">'+
+          '<button class="biz-cmt-act-btn" title="Edit" onclick="window._bizActions.editService(\''+esc(s.id||'')+'\')"><i class="fas fa-pencil"></i></button>'+
+          '<button class="biz-cmt-act-btn" title="Delete" style="color:#f87171" onclick="window._bizActions.deleteService(\''+esc(s.id||'')+'\')"><i class="fas fa-trash"></i></button>'+
+        '</div>' : '')+
         '<div class="biz-service-card-top">'+
           '<div class="biz-service-card-icon"><i class="fas '+esc(icon)+'"></i></div>'+
           (s.price?'<div class="biz-service-card-price">'+fmtPrice(s.price)+'</div>':'')+
@@ -842,72 +856,109 @@
         '<div class="biz-service-card-name">'+esc(s.title||s.name||'')+'</div>'+
         (s.description?'<div class="biz-service-card-desc">'+esc(s.description)+'</div>':'')+
         (s.duration?'<div class="biz-service-card-meta"><i class="fas fa-clock"></i> '+esc(s.duration)+'</div>':'')+
-        '<button class="biz-service-cta" onclick="window._bizActions.openQuote()">Request</button>'+
+        (!owner ? '<button class="biz-service-cta" onclick="window._bizActions.openQuote()">Request</button>' : '')+
       '</div>';
     }).join('');
-    return '<div class="biz-service-cards-grid">'+cards+'</div>';
+    return '<div class="biz-section">'+header+'<div class="biz-service-cards-grid">'+cards+'</div></div>';
   }
 
   // ── RENDER: PRODUCT CARDS ────────────────────────────────────
 
   function renderProductCards(products) {
+    var owner = isAdminOrOwner();
+    var header = '<div class="biz-section-header">'+
+      '<div class="biz-section-title"><i class="fas fa-box"></i> Products</div>'+
+      (owner ? '<button class="biz-section-add-btn" onclick="window._bizActions.openAddProduct()"><i class="fas fa-plus"></i> Add Product</button>' : '')+
+    '</div>';
     if (!products || !products.length) {
-      return '<div class="biz-section"><div class="biz-section-header"><div class="biz-section-title"><i class="fas fa-box"></i> Products</div></div>'+
-        '<div class="biz-empty-state"><i class="fas fa-box-open"></i><p>No products listed yet.</p></div></div>';
+      return '<div class="biz-section">'+header+
+        '<div class="biz-empty-state"><i class="fas fa-box-open"></i>'+
+        (owner
+          ? '<p>Add your first product to showcase what you sell.</p>'+
+            '<button class="biz-section-add-btn" style="margin-top:8px" onclick="window._bizActions.openAddProduct()"><i class="fas fa-plus"></i> Add Product</button>'
+          : '<p>No products listed yet.</p>')+
+        '</div></div>';
     }
     var cards = products.map(function(p) {
       var thumbHtml = p.imageUrl
         ? '<img src="'+esc(p.imageUrl)+'" alt="'+esc(p.name||'')+'" loading="lazy">'
         : '<div class="biz-product-ph"><i class="fas fa-box"></i></div>';
       return '<div class="biz-product-card">'+
-        '<div class="biz-product-thumb">'+thumbHtml+'</div>'+
+        '<div class="biz-product-thumb">'+thumbHtml+
+          (owner ? '<div class="biz-gallery-del-wrap" onclick="event.stopPropagation()"><button class="biz-gallery-del-btn" title="Delete product" onclick="window._bizActions.deleteProduct(\''+esc(p.id||'')+'\')"><i class="fas fa-trash"></i></button></div>' : '')+
+        '</div>'+
         '<div class="biz-product-body">'+
           '<div class="biz-product-name">'+esc(p.name||p.title||'')+'</div>'+
           (p.description?'<div class="biz-product-desc">'+esc(p.description.slice(0,90))+'</div>':'')+
           '<div class="biz-product-footer">'+
             (p.price?'<span class="biz-product-price">'+fmtPrice(p.price)+'</span>':'')+
-            '<button class="biz-product-cta" onclick="window._bizActions.openQuote()">Inquire</button>'+
+            (!owner ? '<button class="biz-product-cta" onclick="window._bizActions.openQuote()">Inquire</button>' : '')+
           '</div>'+
         '</div>'+
       '</div>';
     }).join('');
-    return '<div class="biz-product-cards-grid">'+cards+'</div>';
+    return '<div class="biz-section">'+header+'<div class="biz-product-cards-grid">'+cards+'</div></div>';
   }
 
   // ── RENDER: PRICE LIST ───────────────────────────────────────
 
   function renderPriceList(items) {
-    if (!items || !items.length) return '';
+    var owner = isAdminOrOwner();
+    if (!items || !items.length) {
+      if (!owner) return '';
+      return '<div class="biz-section" style="margin-top:14px">'+
+        '<div class="biz-section-header"><div class="biz-section-title"><i class="fas fa-tag"></i> Price List</div>'+
+        '<button class="biz-section-add-btn" onclick="window._bizActions.openAddPriceItem()"><i class="fas fa-plus"></i> Add Item</button></div>'+
+        '<div class="biz-empty-state"><i class="fas fa-tag"></i><p>Add price items to show your rates.</p></div></div>';
+    }
     var rows = items.map(function(item){
       return '<div class="biz-price-item">'+
         '<span class="biz-price-label">'+esc(item.label||item.name||item.title||'')+'</span>'+
         '<span class="biz-price-dots"></span>'+
         '<span class="biz-price-val">'+fmtPrice(item.price)+'</span>'+
+        (owner ? '<button class="biz-cmt-act-btn" title="Delete" style="color:#f87171;margin-left:8px;flex-shrink:0" onclick="window._bizActions.deletePriceItem(\''+esc(item.id||'')+'\')"><i class="fas fa-trash"></i></button>' : '')+
       '</div>';
     }).join('');
     return '<div class="biz-section" style="margin-top:14px">'+
-      '<div class="biz-section-header"><div class="biz-section-title"><i class="fas fa-tag"></i> Price List</div><span class="biz-section-badge">'+items.length+' items</span></div>'+
+      '<div class="biz-section-header"><div class="biz-section-title"><i class="fas fa-tag"></i> Price List</div>'+
+      (owner
+        ? '<button class="biz-section-add-btn" onclick="window._bizActions.openAddPriceItem()"><i class="fas fa-plus"></i> Add Item</button>'
+        : '<span class="biz-section-badge">'+items.length+' items</span>')+
+      '</div>'+
       '<div class="biz-section-body">'+rows+'</div></div>';
   }
 
   // ── RENDER: GALLERY ──────────────────────────────────────────
 
   function renderGallery(photos) {
+    var owner = isAdminOrOwner();
+    var addBtn = owner
+      ? '<button class="biz-section-add-btn" onclick="window._bizActions.openOwnerPhotoInGallery()"><i class="fas fa-plus"></i> Add Photo</button>'
+      : '';
+    var fileInput = owner
+      ? '<input type="file" id="biz-gallery-file-input" accept="image/*" style="display:none" onchange="window._bizActions.handleGalleryPhoto(this)">'
+      : '';
     if (!photos || !photos.length) {
-      return '<div class="biz-section"><div class="biz-section-header"><div class="biz-section-title"><i class="fas fa-images"></i> Photos</div></div>'+
-        '<div class="biz-empty-state"><i class="fas fa-images"></i><p>No photos yet.</p></div></div>';
+      return '<div class="biz-section">'+
+        '<div class="biz-section-header"><div class="biz-section-title"><i class="fas fa-images"></i> Photos</div>'+addBtn+'</div>'+
+        '<div class="biz-empty-state"><i class="fas fa-images"></i>'+
+        (owner ? '<p>Upload photos to show off your business.</p>' : '<p>No photos yet.</p>')+
+        '</div>'+fileInput+'</div>';
     }
     var sorted = photos.slice().sort(function(a,b){return (a.order||0)-(b.order||0);});
-    var items  = sorted.map(function(p,i){
+    var items  = sorted.map(function(p){
       return '<div class="biz-gallery-item" onclick="window._bizActions.openPhoto(\''+esc(p.url)+'\')">'+
         '<img src="'+esc(p.url)+'" alt="'+esc(p.caption||'')+'" loading="lazy">'+
         (p.caption?'<div class="biz-gallery-caption">'+esc(p.caption)+'</div>':'')+
+        (owner ? '<div class="biz-gallery-del-wrap" onclick="event.stopPropagation()"><button class="biz-gallery-del-btn" title="Delete photo" onclick="window._bizActions.deleteGalleryPhoto(\''+esc(p.id||'')+'\')"><i class="fas fa-trash"></i></button></div>' : '')+
       '</div>';
     }).join('');
     return '<div class="biz-section">'+
       '<div class="biz-section-header"><div class="biz-section-title"><i class="fas fa-images"></i> Photos</div>'+
-      '<span class="biz-section-badge">'+sorted.length+'</span></div>'+
-      '<div class="biz-gallery-masonry">'+items+'</div></div>';
+      (owner ? addBtn : '<span class="biz-section-badge">'+sorted.length+'</span>')+
+      '</div>'+
+      '<div class="biz-gallery-masonry">'+items+'</div>'+
+      fileInput+'</div>';
   }
 
   // ── RENDER: REVIEWS ──────────────────────────────────────────
@@ -935,10 +986,19 @@
     var cards = (!reviews||!reviews.length)
       ? '<div class="biz-empty-state" style="padding:16px 0"><i class="fas fa-star"></i><p>No reviews yet — be the first!</p></div>'
       : reviews.map(function(r){
+          var replyHtml = '';
+          if (r.ownerReply) {
+            replyHtml = '<div class="biz-owner-reply"><i class="fas fa-reply"></i> <strong>Owner replied:</strong> <span>'+esc(r.ownerReply)+'</span></div>';
+          } else if (_isOwner) {
+            replyHtml = '<div id="biz-reply-wrap-'+esc(r.id||'')+'">'+
+              '<button class="biz-cmt-act-btn biz-reply-toggle-btn" onclick="window._bizActions.replyToReview(\''+esc(r.id||'')+'\')"><i class="fas fa-reply"></i> Reply</button>'+
+            '</div>';
+          }
           return '<div class="biz-review-card">'+
             '<div class="biz-review-header"><span class="biz-review-author">'+esc(r.authorName||'User')+'</span><span class="biz-review-date">'+timeAgo(r.createdAt)+'</span></div>'+
             '<div class="biz-review-stars">'+'★'.repeat(r.rating||0)+'☆'.repeat(5-(r.rating||0))+'</div>'+
             (r.text?'<div class="biz-review-text">'+esc(r.text)+'</div>':'')+
+            replyHtml+
           '</div>';
         }).join('');
     return '<div class="biz-section">'+
@@ -1750,6 +1810,50 @@
       '<div class="biz-insights-stat-val">'+compact(val)+'</div>'+
       '<div class="biz-insights-stat-label">'+label+'</div>'+
     '</div>';
+  }
+
+  // ── TAB RELOAD HELPERS ────────────────────────────────────────
+
+  function reloadServicesTab() {
+    var panel = document.querySelector('.biz-tab-panel[data-panel="services"]');
+    if (!panel) return;
+    safeSnap(_fs.getDocs(_fs.collection(_db,'businesses',BIZ_ID,'services'))).then(function(services) {
+      safeSnap(_fs.getDocs(_fs.collection(_db,'businesses',BIZ_ID,'priceList'))).then(function(priceList) {
+        panel.innerHTML = renderServiceCards(services) + renderPriceList(priceList);
+      });
+    });
+  }
+
+  function reloadProductsTab() {
+    var panel = document.querySelector('.biz-tab-panel[data-panel="products"]');
+    if (!panel) return;
+    safeSnap(_fs.getDocs(_fs.collection(_db,'businesses',BIZ_ID,'products'))).then(function(products) {
+      panel.innerHTML = renderProductCards(products);
+    });
+  }
+
+  function reloadGalleryTab() {
+    var panel = document.querySelector('.biz-tab-panel[data-panel="photos"]');
+    if (!panel) return;
+    safeSnap(_fs.getDocs(_fs.query(
+      _fs.collection(_db,'businesses',BIZ_ID,'gallery'),
+      _fs.orderBy('order','asc')
+    ))).then(function(photos) {
+      panel.innerHTML = renderGallery(photos);
+    });
+  }
+
+  function reloadReviewsTab() {
+    var panel = document.querySelector('.biz-tab-panel[data-panel="reviews"]');
+    if (!panel || !_biz) return;
+    safeSnap(_fs.getDocs(_fs.query(
+      _fs.collection(_db,'businessReviews'),
+      _fs.where('businessId','==',BIZ_ID),
+      _fs.orderBy('createdAt','desc'),
+      _fs.limit(30)
+    ))).then(function(reviews) {
+      panel.innerHTML = renderReviews(reviews, _biz);
+    });
   }
 
   // ── ACTIONS ───────────────────────────────────────────────────
@@ -3093,6 +3197,253 @@
             '<button class="biz-cmt-act-btn" style="color:#f87171" onclick="window._bizActions.removePageAdmin(\''+esc(a.id||'')+'\')">Remove</button>'+
           '</div>';
         }).join('');
+      });
+    },
+
+    // ── Service CRUD ──────────────────────────────────────────────
+    openAddService: function() {
+      if (!isAdminOrOwner()) return;
+      var existing = document.getElementById('biz-add-service-modal');
+      if (existing) existing.remove();
+      var html = '<div class="biz-modal-overlay" id="biz-add-service-modal" onclick="if(event.target===this)this.remove()">'+
+        '<div class="biz-modal-sheet">'+
+          '<div class="biz-modal-handle"></div>'+
+          '<button class="biz-modal-close" onclick="document.getElementById(\'biz-add-service-modal\').remove()"><i class="fas fa-times"></i></button>'+
+          '<div class="biz-modal-title" id="svc-modal-title"><i class="fas fa-briefcase"></i> Add Service</div>'+
+          '<div class="biz-form-group"><label class="biz-form-label">Service Name *</label><input class="biz-form-input" id="svc-title" placeholder="e.g. Website Design"></div>'+
+          '<div class="biz-form-group"><label class="biz-form-label">Description</label><textarea class="biz-form-textarea" id="svc-desc" placeholder="What\'s included…"></textarea></div>'+
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+            '<div class="biz-form-group"><label class="biz-form-label">Price</label><input class="biz-form-input" id="svc-price" placeholder="e.g. ₾250"></div>'+
+            '<div class="biz-form-group"><label class="biz-form-label">Duration</label><input class="biz-form-input" id="svc-duration" placeholder="e.g. 2 hours"></div>'+
+          '</div>'+
+          '<button class="biz-submit-btn" id="svc-save-btn" onclick="window._bizActions.saveService()"><i class="fas fa-check"></i> Save Service</button>'+
+        '</div>'+
+      '</div>';
+      document.body.insertAdjacentHTML('beforeend', html);
+      document.getElementById('biz-add-service-modal').classList.add('open');
+    },
+
+    saveService: function() {
+      if (!isAdminOrOwner()) return;
+      var title = ((document.getElementById('svc-title')||{}).value||'').trim();
+      var desc  = ((document.getElementById('svc-desc')||{}).value||'').trim();
+      var price = ((document.getElementById('svc-price')||{}).value||'').trim();
+      var dur   = ((document.getElementById('svc-duration')||{}).value||'').trim();
+      var btn   = document.getElementById('svc-save-btn');
+      var editId = btn && btn.dataset.editId;
+      if (!title) { showToast('Service name is required', false); return; }
+      if (btn) { btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving…'; }
+      var data = { title:title, description:desc, price:price, duration:dur, updatedAt:_fs.serverTimestamp() };
+      var op = editId
+        ? _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID,'services',editId), data)
+        : _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'services'), Object.assign({createdAt:_fs.serverTimestamp()}, data));
+      op.then(function(){
+        var m = document.getElementById('biz-add-service-modal'); if(m) m.remove();
+        showToast(editId ? 'Service updated!' : 'Service added!');
+        reloadServicesTab();
+      }).catch(function(err){
+        showToast('Could not save: '+(err.code||err.message), false);
+        if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-check"></i> Save Service'; }
+      });
+    },
+
+    editService: function(id) {
+      if (!isAdminOrOwner() || !id) return;
+      _fs.getDoc(_fs.doc(_db,'businesses',BIZ_ID,'services',id)).then(function(snap){
+        if (!snap.exists()) { showToast('Service not found', false); return; }
+        var s = snap.data();
+        window._bizActions.openAddService();
+        setTimeout(function(){
+          var t=document.getElementById('svc-title'); if(t) t.value=s.title||s.name||'';
+          var d=document.getElementById('svc-desc');  if(d) d.value=s.description||'';
+          var p=document.getElementById('svc-price'); if(p) p.value=s.price||'';
+          var u=document.getElementById('svc-duration'); if(u) u.value=s.duration||'';
+          var btn=document.getElementById('svc-save-btn');
+          if(btn){ btn.dataset.editId=id; btn.innerHTML='<i class="fas fa-check"></i> Update Service'; }
+          var lbl=document.getElementById('svc-modal-title');
+          if(lbl) lbl.innerHTML='<i class="fas fa-pencil"></i> Edit Service';
+        }, 80);
+      }).catch(function(){ showToast('Could not load service', false); });
+    },
+
+    deleteService: function(id) {
+      if (!isAdminOrOwner() || !id) return;
+      if (!confirm('Delete this service?')) return;
+      _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'services',id)).then(function(){
+        showToast('Service deleted');
+        reloadServicesTab();
+      }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+    },
+
+    // ── Product CRUD ──────────────────────────────────────────────
+    openAddProduct: function() {
+      if (!isAdminOrOwner()) return;
+      var existing = document.getElementById('biz-add-product-modal');
+      if (existing) existing.remove();
+      var html = '<div class="biz-modal-overlay" id="biz-add-product-modal" onclick="if(event.target===this)this.remove()">'+
+        '<div class="biz-modal-sheet">'+
+          '<div class="biz-modal-handle"></div>'+
+          '<button class="biz-modal-close" onclick="document.getElementById(\'biz-add-product-modal\').remove()"><i class="fas fa-times"></i></button>'+
+          '<div class="biz-modal-title"><i class="fas fa-box"></i> Add Product</div>'+
+          '<div class="biz-form-group"><label class="biz-form-label">Product Name *</label><input class="biz-form-input" id="prd-name" placeholder="e.g. Handmade Pottery"></div>'+
+          '<div class="biz-form-group"><label class="biz-form-label">Description</label><textarea class="biz-form-textarea" id="prd-desc" placeholder="Brief description…" style="min-height:70px"></textarea></div>'+
+          '<div class="biz-form-group"><label class="biz-form-label">Price</label><input class="biz-form-input" id="prd-price" placeholder="e.g. ₾45"></div>'+
+          '<button class="biz-submit-btn" id="prd-save-btn" onclick="window._bizActions.saveProduct()"><i class="fas fa-check"></i> Save Product</button>'+
+        '</div>'+
+      '</div>';
+      document.body.insertAdjacentHTML('beforeend', html);
+      document.getElementById('biz-add-product-modal').classList.add('open');
+    },
+
+    saveProduct: function() {
+      if (!isAdminOrOwner()) return;
+      var name  = ((document.getElementById('prd-name')||{}).value||'').trim();
+      var desc  = ((document.getElementById('prd-desc')||{}).value||'').trim();
+      var price = ((document.getElementById('prd-price')||{}).value||'').trim();
+      var btn   = document.getElementById('prd-save-btn');
+      if (!name) { showToast('Product name is required', false); return; }
+      if (btn) { btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving…'; }
+      _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'products'), {
+        name:name, description:desc, price:price, createdAt:_fs.serverTimestamp(), updatedAt:_fs.serverTimestamp()
+      }).then(function(){
+        var m = document.getElementById('biz-add-product-modal'); if(m) m.remove();
+        showToast('Product added!');
+        reloadProductsTab();
+      }).catch(function(err){
+        showToast('Could not save: '+(err.code||err.message), false);
+        if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-check"></i> Save Product'; }
+      });
+    },
+
+    deleteProduct: function(id) {
+      if (!isAdminOrOwner() || !id) return;
+      if (!confirm('Delete this product?')) return;
+      _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'products',id)).then(function(){
+        showToast('Product deleted');
+        reloadProductsTab();
+      }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+    },
+
+    // ── Price List CRUD ───────────────────────────────────────────
+    openAddPriceItem: function() {
+      if (!isAdminOrOwner()) return;
+      var existing = document.getElementById('biz-add-price-modal');
+      if (existing) existing.remove();
+      var html = '<div class="biz-modal-overlay" id="biz-add-price-modal" onclick="if(event.target===this)this.remove()">'+
+        '<div class="biz-modal-sheet">'+
+          '<div class="biz-modal-handle"></div>'+
+          '<button class="biz-modal-close" onclick="document.getElementById(\'biz-add-price-modal\').remove()"><i class="fas fa-times"></i></button>'+
+          '<div class="biz-modal-title"><i class="fas fa-tag"></i> Add Price Item</div>'+
+          '<div class="biz-form-group"><label class="biz-form-label">Item Name *</label><input class="biz-form-input" id="pri-label" placeholder="e.g. Haircut"></div>'+
+          '<div class="biz-form-group"><label class="biz-form-label">Price *</label><input class="biz-form-input" id="pri-price" placeholder="e.g. ₾30 or From ₾20"></div>'+
+          '<button class="biz-submit-btn" id="pri-save-btn" onclick="window._bizActions.savePriceItem()"><i class="fas fa-check"></i> Add to Price List</button>'+
+        '</div>'+
+      '</div>';
+      document.body.insertAdjacentHTML('beforeend', html);
+      document.getElementById('biz-add-price-modal').classList.add('open');
+    },
+
+    savePriceItem: function() {
+      if (!isAdminOrOwner()) return;
+      var label = ((document.getElementById('pri-label')||{}).value||'').trim();
+      var price = ((document.getElementById('pri-price')||{}).value||'').trim();
+      var btn   = document.getElementById('pri-save-btn');
+      if (!label || !price) { showToast('Name and price are required', false); return; }
+      if (btn) { btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving…'; }
+      _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'priceList'), {
+        label:label, price:price, createdAt:_fs.serverTimestamp()
+      }).then(function(){
+        var m = document.getElementById('biz-add-price-modal'); if(m) m.remove();
+        showToast('Price item added!');
+        reloadServicesTab();
+      }).catch(function(err){
+        showToast('Could not save: '+(err.code||err.message), false);
+        if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-check"></i> Add to Price List'; }
+      });
+    },
+
+    deletePriceItem: function(id) {
+      if (!isAdminOrOwner() || !id) return;
+      if (!confirm('Remove this price item?')) return;
+      _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'priceList',id)).then(function(){
+        showToast('Price item removed');
+        reloadServicesTab();
+      }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+    },
+
+    // ── Gallery owner actions ─────────────────────────────────────
+    openOwnerPhotoInGallery: function() {
+      if (!isAdminOrOwner()) return;
+      var inp = document.getElementById('biz-gallery-file-input');
+      if (inp) inp.click();
+    },
+
+    handleGalleryPhoto: function(input) {
+      if (!isAdminOrOwner() || !input.files || !input.files.length) return;
+      var file = input.files[0];
+      input.value = '';
+      showToast('Uploading photo…');
+      directCloudinaryUpload(file, function(url) {
+        if (!url) { showToast('Upload failed', false); return; }
+        _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'gallery'), {
+          url:url, caption:'', order:Date.now(),
+          uploadedBy:_currentUser ? _currentUser.uid : '',
+          createdAt:_fs.serverTimestamp()
+        }).then(function(){
+          showToast('Photo added!');
+          reloadGalleryTab();
+        }).catch(function(err){ showToast('Could not save: '+(err.code||err.message), false); });
+      }, function(pct){ if(pct<100) showToast('Uploading… '+pct+'%'); });
+    },
+
+    deleteGalleryPhoto: function(id) {
+      if (!isAdminOrOwner() || !id) return;
+      if (!confirm('Delete this photo?')) return;
+      _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'gallery',id)).then(function(){
+        showToast('Photo deleted');
+        reloadGalleryTab();
+      }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+    },
+
+    // ── Review owner reply ────────────────────────────────────────
+    replyToReview: function(reviewId) {
+      if (!_isOwner || !reviewId) return;
+      var wrap = document.getElementById('biz-reply-wrap-'+reviewId);
+      if (!wrap) return;
+      wrap.innerHTML =
+        '<div class="biz-review-reply-form">'+
+          '<textarea class="biz-form-textarea" id="biz-reply-ta-'+reviewId+'" rows="2" placeholder="Write a reply…" style="min-height:60px;margin-bottom:8px"></textarea>'+
+          '<div style="display:flex;gap:8px">'+
+            '<button class="biz-submit-btn" style="flex:1;padding:8px 14px;font-size:.82rem" '+
+              'onclick="window._bizActions.saveReviewReply(\''+reviewId+'\',document.getElementById(\'biz-reply-ta-'+reviewId+'\'))">'+
+              '<i class="fas fa-paper-plane"></i> Post Reply</button>'+
+            '<button class="biz-cmt-act-btn" style="white-space:nowrap" '+
+              'onclick="window._bizActions.cancelReviewReply(\''+reviewId+'\')">Cancel</button>'+
+          '</div>'+
+        '</div>';
+      var ta = document.getElementById('biz-reply-ta-'+reviewId);
+      if (ta) setTimeout(function(){ ta.focus(); }, 60);
+    },
+
+    cancelReviewReply: function(reviewId) {
+      var wrap = document.getElementById('biz-reply-wrap-'+reviewId);
+      if (!wrap) return;
+      wrap.innerHTML = '<button class="biz-cmt-act-btn biz-reply-toggle-btn" onclick="window._bizActions.replyToReview(\''+reviewId+'\')"><i class="fas fa-reply"></i> Reply</button>';
+    },
+
+    saveReviewReply: function(reviewId, ta) {
+      if (!_isOwner || !reviewId) return;
+      var text = ta ? ta.value.trim() : '';
+      if (!text) { showToast('Reply cannot be empty', false); return; }
+      if (ta) ta.disabled = true;
+      _fs.updateDoc(_fs.doc(_db,'businessReviews',reviewId), {
+        ownerReply: text, ownerReplyAt: _fs.serverTimestamp()
+      }).then(function(){
+        showToast('Reply posted!');
+        reloadReviewsTab();
+      }).catch(function(err){
+        showToast('Could not post reply: '+(err.code||err.message), false);
+        if (ta) ta.disabled = false;
       });
     },
 
