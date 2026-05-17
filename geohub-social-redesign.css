@@ -1541,9 +1541,14 @@ body.gh-has-injected-nav .profile-identity-section .profile-tabs{top:72px!import
 body.gh-has-injected-nav .profile-identity-section{top:unset!important}
 body.gh-has-injected-nav.gh-sidebar-collapsed .gh-left{display:none!important}
 body.gh-has-injected-nav.gh-sidebar-collapsed{padding-left:0!important}
+/* Keep nav text labels visible while sidebar is full-width (overrides base 1180px rule) */
+body.gh-has-injected-nav .gh-left .gh-nav-item span{display:inline}
+body.gh-has-injected-nav .gh-left .gh-nav-item{justify-content:flex-start}
 @media(max-width:1120px){
   body.gh-has-injected-nav{padding-left:86px}
   body.gh-has-injected-nav .gh-left{width:86px}
+  body.gh-has-injected-nav .gh-left .gh-nav-item span{display:none}
+  body.gh-has-injected-nav .gh-left .gh-nav-item{justify-content:center}
 }
 @media(max-width:920px){
   body.gh-has-injected-nav{padding-left:0;padding-top:70px}

@@ -2363,3 +2363,11 @@ body.gh-has-injected-nav .biz-right-sidebar {
   top: calc(72px + 48px);
   max-height: calc(100vh - 132px);
 }
+/* At 1280px with 252px sidebar the center column of the 3-col grid
+   shrinks to ~282px — switch to 2-col before it gets ugly */
+@media(max-width:1280px){
+  body.gh-has-injected-nav .biz-overview-3col{
+    grid-template-columns:260px minmax(0,1fr);
+  }
+  body.gh-has-injected-nav .biz-right-sidebar{display:none}
+}
