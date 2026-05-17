@@ -343,7 +343,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var items=[
       ['feed','feed.html','fa-house','მთავარი Feed'],['places','places.html','fa-location-dot','რუკა / Places'],['business','business.html','fa-store','Businesses'],['groups','groups.html','fa-users','Groups'],['events','events.html','fa-calendar-xmark','Events'],['messages','messages.html','fa-comment-dots','Messages'],['notifications','notifications.html','fa-bell','Notifications'],['rewards','rewards.html','fa-gift','Rewards / Points'],['challenges','challenges.html','fa-trophy','Challenges'],['services','services.html','fa-grip','Services'],['realestate','real-estate.html','fa-house-chimney','Real Estate'],['learning','learning.html','fa-graduation-cap','Learning'],['creators','creators.html','fa-camera-retro','Creators'],['trust','trust.html','fa-shield-halved','Trust / Safety'],['admin','admin.html','fa-user-shield','Admin Panel']
     ];
-    return '<aside class="gh-left"><nav class="gh-panel">'+items.map(function(it){return '<a class="gh-nav-item '+(active===it[0]?'active':'')+'" href="'+it[1]+'"><i class="fas '+it[2]+'"></i><span>'+it[3]+'</span></a>';}).join('')+'</nav></aside>';
+    return '<aside class="gh-left"><nav class="gh-panel">'+items.map(function(it){return '<a class="gh-nav-item '+(active===it[0]?'active':'')+'" href="'+it[1]+'"><i class="fas '+it[2]+'"></i><span>'+it[3]+'</span></a>';}).join('')+'<button class="gh-nav-tour-btn" data-start-tour><i class="fas fa-question-circle"></i><span>How GeoHub works</span></button>'+'</nav></aside>';
   }
 
   function rightRail(extra){
@@ -377,6 +377,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(e.target.closest('[data-create-post]')) openPostModal(buildActorExtra());
       if(e.target.closest('[data-create-story]')) openStoryModal();
       if(e.target.closest('#ghNotifBtn')) openNotifications();
+      if(e.target.closest('[data-start-tour]')){ var _tu=authUser(); startTour(_tu?_tu.uid:null); }
       var notif=e.target.closest('[data-notif]');
       if(notif && GS() && GS().markNotificationRead) GS().markNotificationRead(notif.dataset.notif);
     });
@@ -2095,6 +2096,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               '<a class="gh-onboard-step" href="groups.html"><i class="fas fa-users"></i>Join or create a group<i class="fas fa-chevron-right gh-onboard-arrow"></i></a>'+
               '<a class="gh-onboard-step" href="events.html"><i class="fas fa-calendar-alt"></i>Find upcoming events<i class="fas fa-chevron-right gh-onboard-arrow"></i></a>'+
               '<button class="gh-onboard-step" data-create-post><i class="fas fa-pen"></i>Share your first post<i class="fas fa-chevron-right gh-onboard-arrow"></i></button>'+
+              '<button class="gh-onboard-step" style="border-color:rgba(16,185,129,.2);background:rgba(16,185,129,.06)" onclick="window._ghStartTour&&window._ghStartTour(\''+esc(uid)+'\')"><i class="fas fa-compass"></i>Take a quick tour of GeoHub<i class="fas fa-chevron-right gh-onboard-arrow"></i></button>'+
             '</div>'+
           '</div>';
         }
@@ -2124,6 +2126,95 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
     window._ghSaveUiState=_saveUiState;
   }
+
+  // ── Guided Tour ──────────────────────────────────────────────────────────
+
+  var TOUR_STEPS=[
+    {icon:'fa-house',title:'Your Feed',desc:'Create posts, share photos, add stories, and react to real content from people across Georgia.',sel:'#ghFeedList, .gh-composer'},
+    {icon:'fa-search',title:'Search Everything',desc:'Find people, businesses, places, groups, and events instantly using the search bar at the top.',sel:'#ghGlobalSearch'},
+    {icon:'fa-store',title:'Business Pages',desc:'Discover verified Georgian businesses, leave reviews, request quotes, and follow your favorites.',sel:'a[href="business.html"]'},
+    {icon:'fa-location-dot',title:'Places, Events & Groups',desc:'Explore real places on the map, find upcoming events, and join communities that share your interests.',sel:'a[href="places.html"]'},
+    {icon:'fa-comment-dots',title:'Messages & Notifications',desc:'Stay connected — chat with friends and get notified about reactions, comments, and friend requests.',sel:'a[href="messages.html"]'},
+    {icon:'fa-user',title:'Your Profile',desc:'Add your photo, fill in your bio, earn badges, and build your reputation in the GeoHub community.',sel:'a[href="profile.html"], .gh-user-btn'}
+  ];
+  var _tourSt={step:0,uid:null};
+
+  function _tourEl(sel){ if(!sel)return null; try{return document.querySelector(sel);}catch(e){return null;} }
+  function _tourClearHL(){ document.querySelectorAll('.gh-tour-hl').forEach(function(el){el.classList.remove('gh-tour-hl');}); }
+
+  function _tourRender(){
+    var box=document.getElementById('ghTourBox'); if(!box)return;
+    var s=_tourSt.step; var step=TOUR_STEPS[s]; var total=TOUR_STEPS.length; var last=s===total-1;
+    var targetEl=_tourEl(step.sel);
+    _tourClearHL();
+    if(targetEl){
+      targetEl.classList.add('gh-tour-hl');
+      try{ targetEl.scrollIntoView({behavior:'smooth',block:'nearest',inline:'nearest'}); }catch(e){}
+    }
+    var dots=TOUR_STEPS.map(function(_,i){return '<span class="gh-tour-dot'+(i===s?' gh-tour-dot-on':'')+'"></span>';}).join('');
+    box.innerHTML=
+      '<div class="gh-tour-icon"><i class="fas '+esc(step.icon)+'"></i></div>'+
+      '<div class="gh-tour-dots">'+dots+'</div>'+
+      '<h3 class="gh-tour-h">'+esc(step.title)+'</h3>'+
+      '<p class="gh-tour-p">'+esc(step.desc)+'</p>'+
+      '<div class="gh-tour-btns">'+
+        (s>0?'<button class="gh-tbtn" data-tbk>‹ Back</button>':'<span></span>')+
+        '<div class="gh-tour-right">'+
+          '<button class="gh-tbtn" data-tsk>Skip</button>'+
+          (last?'<button class="gh-tbtn gh-tbtn-p" data-tfn>Finish ✓</button>':'<button class="gh-tbtn gh-tbtn-p" data-tnx>Next ›</button>')+
+        '</div>'+
+      '</div>';
+    var isMobile=window.innerWidth<640;
+    if(!targetEl||isMobile){
+      box.className='gh-tour-box gh-tour-cx';
+      box.style.top=''; box.style.left=''; box.style.width='';
+    } else {
+      box.className='gh-tour-box';
+      var r=targetEl.getBoundingClientRect(); var bw=300; var bh=220; var vw=window.innerWidth; var vh=window.innerHeight;
+      var top=r.bottom+12; if(top+bh>vh) top=Math.max(12,r.top-bh-12);
+      var left=Math.max(12,Math.min(r.left,vw-bw-12));
+      box.style.top=top+'px'; box.style.left=left+'px'; box.style.width=bw+'px';
+    }
+    var bk=box.querySelector('[data-tbk]'); if(bk) bk.onclick=function(){_tourSt.step--;_tourRender();};
+    var sk=box.querySelector('[data-tsk]'); if(sk) sk.onclick=function(){_tourDone(false,true);};
+    var nx=box.querySelector('[data-tnx]'); if(nx) nx.onclick=function(){_tourSt.step++;_tourRender();};
+    var fn=box.querySelector('[data-tfn]'); if(fn) fn.onclick=function(){_tourDone(true,false);};
+  }
+
+  function _tourDone(completed,skipped){
+    _tourClearHL();
+    var box=document.getElementById('ghTourBox'); var bd=document.getElementById('ghTourBd');
+    function fadeOut(el){ if(!el)return; el.style.opacity='0'; el.style.transform='scale(.95)'; setTimeout(function(){if(el.parentNode)el.remove();},260); }
+    fadeOut(box); fadeOut(bd);
+    var uid=_tourSt.uid;
+    if(uid){
+      var up={};
+      if(completed){up.tourCompleted=true;up.tourCompletedAt=new Date().toISOString();}
+      if(skipped){up.tourSkipped=true;up.tourSkippedAt=new Date().toISOString();}
+      if(completed||skipped) _saveUiState(uid,up);
+    }
+  }
+
+  function startTour(uid){
+    _tourSt.step=0; _tourSt.uid=uid||null;
+    var old=document.getElementById('ghTourBox'); if(old)old.remove();
+    var obd=document.getElementById('ghTourBd'); if(obd)obd.remove();
+    _tourClearHL();
+    var bd=document.createElement('div'); bd.id='ghTourBd'; bd.className='gh-tour-bd';
+    document.body.appendChild(bd);
+    var box=document.createElement('div'); box.id='ghTourBox'; box.className='gh-tour-box';
+    box.style.opacity='0'; box.style.transform='scale(.94)';
+    document.body.appendChild(box);
+    _tourRender();
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        box.style.transition='opacity .22s,transform .22s,top .25s,left .25s';
+        box.style.opacity='1'; box.style.transform='';
+      });
+    });
+  }
+
+  window._ghStartTour=startTour;
 
   function renderFeed(){
     var c=getFeedComposerActor();

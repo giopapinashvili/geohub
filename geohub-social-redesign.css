@@ -1654,3 +1654,27 @@ body.gh-has-injected-nav.page-messages .messages-page{left:252px!important}
 .gh-profile-prompt-body span{font-size:.78rem;color:var(--gh-muted)}
 .gh-profile-prompt-btn{flex-shrink:0;padding:6px 14px;border-radius:9px;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.3);color:#f59e0b;font-size:.78rem;font-weight:700;cursor:pointer;text-decoration:none}
 @media(max-width:540px){.gh-onboard-card{padding:18px 14px 16px}.gh-onboard-steps{gap:6px}.gh-profile-prompt{flex-wrap:wrap}}
+
+/* ── Guided Tour ────────────────────────────────────────────── */
+.gh-tour-bd{position:fixed;inset:0;z-index:99996;background:rgba(5,7,15,.52);pointer-events:none;animation:ghTourFadeIn .22s ease;transition:opacity .22s}
+.gh-tour-box{position:fixed;z-index:99997;background:#0e1120;border:1px solid rgba(16,185,129,.28);border-radius:18px;padding:22px 20px 18px;box-shadow:0 24px 60px rgba(0,0,0,.85),0 0 0 1px rgba(16,185,129,.08);pointer-events:all;transition:opacity .22s,transform .22s,top .25s,left .25s}
+.gh-tour-cx{top:50%!important;left:50%!important;transform:translate(-50%,-50%)!important;width:340px!important;transition:opacity .22s,transform .22s!important}
+.gh-tour-icon{width:42px;height:42px;border-radius:12px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);display:flex;align-items:center;justify-content:center;color:var(--gh-green);font-size:1.1rem;margin-bottom:12px}
+.gh-tour-dots{display:flex;gap:5px;margin-bottom:14px;align-items:center}
+.gh-tour-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.15);transition:all .2s}
+.gh-tour-dot-on{background:var(--gh-green);width:18px;border-radius:3px}
+.gh-tour-h{font-size:1rem;font-weight:800;color:var(--gh-text);margin:0 0 6px}
+.gh-tour-p{font-size:.83rem;color:var(--gh-muted);line-height:1.55;margin:0 0 16px}
+.gh-tour-btns{display:flex;align-items:center;justify-content:space-between}
+.gh-tour-right{display:flex;gap:8px;align-items:center}
+.gh-tbtn{padding:8px 16px;border-radius:9px;border:1px solid rgba(255,255,255,.1);font-size:.8rem;font-weight:700;cursor:pointer;background:rgba(255,255,255,.05);color:var(--gh-muted);transition:background .12s,color .12s}
+.gh-tbtn:hover{background:rgba(255,255,255,.12);color:var(--gh-text)}
+.gh-tbtn-p{background:linear-gradient(135deg,#10b981,#3b82f6);color:#fff;border-color:transparent}
+.gh-tbtn-p:hover{filter:brightness(1.1);color:#fff}
+.gh-tour-hl{outline:3px solid rgba(16,185,129,.75)!important;outline-offset:3px!important;position:relative!important;z-index:99998!important;border-radius:6px;animation:ghTourPulse 2s ease-in-out infinite}
+@keyframes ghTourFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes ghTourPulse{0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.35)}50%{box-shadow:0 0 0 10px rgba(16,185,129,0)}}
+.gh-nav-tour-btn{width:100%;text-align:left;background:transparent;border:0;border-top:1px solid var(--gh-border);cursor:pointer;padding:10px 14px 10px 16px;display:flex;align-items:center;gap:10px;color:var(--gh-muted);font-size:.82rem;margin-top:4px;transition:background .12s,color .12s}
+.gh-nav-tour-btn:hover{background:rgba(255,255,255,.04);color:var(--gh-text)}
+.gh-nav-tour-btn i{width:18px;text-align:center}
+@media(max-width:640px){.gh-tour-box,.gh-tour-cx{width:calc(100vw - 24px)!important;left:12px!important;top:auto!important;bottom:90px!important;transform:none!important}}
