@@ -295,7 +295,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     opts = opts || {};
     document.body.classList.add('gh-social-body','gh-fb-inspired');
     initTheme();
-    document.body.innerHTML = '<div class="gh-shell">'+topbar()+
+    var _ctMap={feed:'feed',groups:'groups',messages:'messages',notifications:'notifications'};
+    document.body.innerHTML = '<div class="gh-shell">'+topbar(_ctMap[opts.active]||'')+
       '<div class="gh-layout">'+leftNav(opts.active||'')+'<main class="gh-center" id="ghCenter"></main>'+rightRail(opts.right||'')+'</div></div>';
     $('#ghCenter').innerHTML = opts.center || '';
     bindShell();
@@ -304,14 +305,31 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     listenBadges();
   }
 
-  function topbar(){
+  function injectShellNav(activePage){
+    if(document.querySelector('.gh-topbar')) return;
+    document.body.classList.add('gh-social-body','gh-fb-inspired','gh-has-injected-nav');
+    initTheme();
+    var tbDiv=document.createElement('div');
+    tbDiv.innerHTML=topbar();
+    document.body.insertBefore(tbDiv.firstChild, document.body.firstChild);
+    var lvDiv=document.createElement('div');
+    lvDiv.innerHTML=leftNav(activePage);
+    document.body.insertBefore(lvDiv.firstChild, document.body.children[1]||null);
+    bindShell();
+    updateTopUser();
+    bindAuthState();
+    listenBadges();
+  }
+
+  function topbar(centerActive){
+    function ca(t){ return centerActive===t?' class="active"':''; }
     return '<header class="gh-topbar gh-hub-topbar">'+
       '<a class="gh-brand" href="feed.html"><div class="gh-brand-mark">GH</div><span>Geo<span>Hub</span></span></a>'+
       '<div class="gh-top-search"><i class="fas fa-search"></i><input id="ghGlobalSearch" placeholder="მოძებნე ადგილები, ადამიანები, ჯგუფები…"></div>'+
       '<nav class="gh-center-tabs" aria-label="Primary navigation">'+
-        '<a class="active" href="feed.html" title="Feed"><i class="fas fa-house"></i></a>'+
-        '<a href="groups.html" title="Groups"><i class="fas fa-user-group"></i></a>'+
-        '<a href="messages.html" title="Messages"><i class="fas fa-comment-dots"></i><b class="gh-badge-count" id="ghMsgBadge"></b></a>'+
+        '<a'+ca('feed')+' href="feed.html" title="Feed"><i class="fas fa-house"></i></a>'+
+        '<a'+ca('groups')+' href="groups.html" title="Groups"><i class="fas fa-user-group"></i></a>'+
+        '<a'+ca('messages')+' href="messages.html" title="Messages"><i class="fas fa-comment-dots"></i><b class="gh-badge-count" id="ghMsgBadge"></b></a>'+
         '<button type="button" id="ghNotifBtn" title="Notifications"><i class="fas fa-bell"></i><b class="gh-badge-count" id="ghNotifBadge"></b></button>'+
       '</nav>'+
       '<div class="gh-top-actions">'+
@@ -4181,13 +4199,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(PAGE==='feed' || PATH==='feed.html' || PATH==='index.html') return renderFeed();
     if(PAGE==='discover' || PATH==='explore.html') return renderDiscover();
     if(PAGE==='business' || PATH==='business.html') {
-      if (new URLSearchParams(location.search).get('id')) return; // business-page.js renders detail pages
+      if(new URLSearchParams(location.search).get('id')){ injectShellNav('business'); return; } // business-page.js renders detail
       return renderBusinesses();
     }
     if(PAGE==='groups' || PATH==='groups.html') return renderGroups();
     if(PAGE==='add-business' || PATH==='add-business.html') return patchAddBusinessPage();
     if(PAGE==='notifications' || PATH==='notifications.html') return renderNotifications();
-    if(PAGE==='profile' || PATH==='profile.html') return; // profile.js renders profile
+    if(PAGE==='profile' || PATH==='profile.html'){ injectShellNav('profile'); return; } // profile.js renders profile content
     return renderComingSoon();
   }
 

@@ -48,37 +48,6 @@
     <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
   </nav>
   <div class="mobile-menu"></div>
-  <!-- Preserve global navbar when geohub-social-redesign.js calls shell() on the business detail page.
-       shell() sets document.body.innerHTML which wipes everything. This inline (non-defer) script
-       intercepts that assignment and re-inserts the navbar + mobile-menu immediately after, so
-       account.js / nav-cleanup.js / account-switcher.js keep working normally. -->
-  <script>
-  (function () {
-    if (!new URLSearchParams(location.search).get('id')) return;
-    var proto = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
-    if (!proto || !proto.set) return;
-    var _orig = proto.set;
-    Object.defineProperty(document.body, 'innerHTML', {
-      configurable: true,
-      enumerable:   proto.enumerable,
-      get: function ()    { return proto.get.call(this); },
-      set: function (val) {
-        var nav = document.getElementById('navbar');
-        var mm  = document.querySelector('.mobile-menu');
-        _orig.call(this, val);
-        // Re-insert navbar at the top of the new body content
-        if (nav && !document.getElementById('navbar')) {
-          this.insertBefore(nav, this.firstChild);
-        }
-        // Re-insert mobile-menu right after navbar
-        if (mm && !this.querySelector('.mobile-menu')) {
-          var navEl = document.getElementById('navbar');
-          this.insertBefore(mm, navEl ? navEl.nextSibling : this.firstChild);
-        }
-      }
-    });
-  }());
-  </script>
   <!-- Business detail root — populated by business-page.js when ?id= is in URL -->
   <div id="biz-detail-root"></div>
   <script type="module" src="firebase-config.js"></script>

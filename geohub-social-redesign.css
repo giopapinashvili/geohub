@@ -1523,3 +1523,26 @@ html[data-gh-theme="light"] body.gh-fb-inspired .gh-input{
   background:#e9f0f7 !important;
   border-color:rgba(51,65,85,.12) !important;
 }
+
+/* ── Injected shell nav (profile, business detail, etc.) ─────── */
+body.gh-has-injected-nav{padding-top:72px;padding-left:252px}
+body.gh-has-injected-nav .navbar,
+body.gh-has-injected-nav #navbar{display:none!important}
+body.gh-has-injected-nav .mobile-menu{display:none!important}
+body.gh-has-injected-nav .profile-cover{margin-top:0!important}
+body.gh-has-injected-nav .gh-left{
+  position:fixed!important;top:72px;left:0;
+  width:252px;height:calc(100vh - 72px);
+  overflow-y:auto;scrollbar-width:thin;
+  z-index:999;align-self:unset
+}
+body.gh-has-injected-nav.gh-sidebar-collapsed .gh-left{display:none!important}
+body.gh-has-injected-nav.gh-sidebar-collapsed{padding-left:0!important}
+@media(max-width:1280px){
+  body.gh-has-injected-nav{padding-left:82px}
+  body.gh-has-injected-nav .gh-left{width:82px}
+}
+@media(max-width:920px){
+  body.gh-has-injected-nav{padding-left:0;padding-top:70px}
+  body.gh-has-injected-nav .gh-left{display:none!important}
+}
