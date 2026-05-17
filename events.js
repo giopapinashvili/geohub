@@ -257,9 +257,15 @@
       var gs = GS();
       if (gs && gs.rsvpEvent) {
         rBtn.disabled = true;
-        gs.rsvpEvent(rBtn.dataset.eventId, function (ok) {
+        gs.rsvpEvent(rBtn.dataset.eventId, function (result) {
           rBtn.disabled = false;
-          if (ok) { rBtn.style.color = '#10b981'; rBtn.innerHTML = '<i class="fas fa-check"></i> Going!'; }
+          if (result === true) {
+            rBtn.style.color = '#10b981'; rBtn.style.borderColor = 'rgba(16,185,129,.3)';
+            rBtn.innerHTML = '<i class="fas fa-check"></i> Going!';
+          } else if (result === 'removed') {
+            rBtn.style.color = '#94a3b8'; rBtn.style.borderColor = '';
+            rBtn.innerHTML = '<i class="fas fa-calendar-check"></i> RSVP';
+          }
         });
       } else {
         rBtn.style.color = '#10b981';

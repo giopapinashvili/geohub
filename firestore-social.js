@@ -117,6 +117,7 @@
       createGroupEvent: function(a,b,cb){ noop(); if(cb) cb(null); },
       listenGroupEvents: function(a,cb){ cb([]); return function(){}; },
       rsvpGroupEvent: function(a,b,c,cb){ noop(); if(cb) cb(false); },
+      rsvpEvent: function(a,cb){ noop(); if(cb) cb(false); },
       uploadGroupFile: function(a,b,cb){ noop(); if(cb) cb(null); },
       listenGroupFiles: function(a,cb){ cb([]); return function(){}; },
       deleteGroupFile: function(a,b,cb){ noop(); if(cb) cb(false); },
@@ -1876,6 +1877,36 @@
         .catch(function () { callback(false); });
     }
 
+    function rsvpEvent(eventId, callback) {
+      requireAuth(function (user) {
+        var participantId = eventId + '_' + user.uid;
+        var docRef = doc(db, 'eventParticipants', participantId);
+        getDoc(docRef).then(function (snap) {
+          if (snap.exists()) {
+            return deleteDoc(docRef).then(function () {
+              toast('RSVP removed');
+              if (callback) callback('removed');
+            });
+          }
+          return setDoc(docRef, {
+            eventId: eventId,
+            userId: user.uid,
+            uid: user.uid,
+            displayName: user.displayName || '',
+            photoURL: user.photoURL || '',
+            createdAt: serverTimestamp()
+          }).then(function () {
+            toast('RSVP saved!');
+            if (callback) callback(true);
+          });
+        }).catch(function (err) {
+          console.error('[GeoSocial] rsvpEvent', err);
+          toast('RSVP failed', 'error');
+          if (callback) callback(false);
+        });
+      });
+    }
+
     // ── SHARES ──────────────────────────────────────────────────────────
     function trackShare(postId) {
       updateDoc(doc(db, 'posts', postId), { shareCount: increment(1) })
@@ -3086,6 +3117,7 @@
       createGroupEvent:        createGroupEvent,
       listenGroupEvents:       listenGroupEvents,
       rsvpGroupEvent:          rsvpGroupEvent,
+      rsvpEvent:               rsvpEvent,
       uploadGroupFile:         uploadGroupFile,
       listenGroupFiles:        listenGroupFiles,
       deleteGroupFile:         deleteGroupFile,

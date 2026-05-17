@@ -55,10 +55,6 @@
 
   /* ── page configs ─────────────────────────────────────────────── */
   var PAGE_CONFIGS = {
-    'page-events': {
-      collection: 'events',
-      label: 'Events'
-    },
     'page-creators': {
       collection: 'creators',
       label: 'Creators'
@@ -219,7 +215,6 @@
   }
 
   var RENDERERS = {
-    'page-events': renderEvent,
     'page-creators': renderCreator,
     'page-real-estate': renderRealEstate,
     'page-live': renderLive,
