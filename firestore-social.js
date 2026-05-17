@@ -1170,29 +1170,39 @@
     }
 
 
-    function addCommentReply(postId, commentId, text, callback) {
+    function addCommentReply(postId, commentId, text, callback, extra) {
       if (!text || !text.trim()) return;
+      extra = extra || {};
       requireAuth(function (user) {
         var me = meData() || {};
         var replyText = text.trim();
+        var rAuthorId   = extra.authorId     || user.uid;
+        var rAuthorType = extra.authorType   || 'user';
+        var rAuthorName = extra.authorName   || me.name || user.displayName || 'GeoHub User';
+        var rAuthorAv   = extra.authorAvatar || me.avatar || user.photoURL || '';
+        var rBizId      = extra.businessId   || null;
         addDoc(collection(db, 'posts', postId, 'comments', commentId, 'replies'), {
-          postId: postId,
-          commentId: commentId,
-          text: replyText,
-          authorId: user.uid,
-          userId: user.uid,
-          authorName: me.name || user.displayName || 'GeoHub User',
-          authorAvatar: me.avatar || user.photoURL || '',
-          likeCount: 0,
-          status: 'active',
-          createdAt: serverTimestamp()
+          postId:       postId,
+          commentId:    commentId,
+          text:         replyText,
+          authorId:     rAuthorId,
+          userId:       user.uid,
+          createdByUid: user.uid,
+          authorType:   rAuthorType,
+          authorName:   rAuthorName,
+          authorAvatar: rAuthorAv,
+          businessId:   rBizId,
+          likeCount:    0,
+          status:       'active',
+          createdAt:    serverTimestamp()
         }).then(function () {
-          return updateDoc(doc(db, 'posts', postId), { commentCount: increment(1) }).catch(function(){});
+          // Increment replyCount on the comment (not commentCount on the post)
+          return updateDoc(doc(db, 'posts', postId, 'comments', commentId), { replyCount: increment(1) }).catch(function(){});
         }).then(function () {
           return getDoc(doc(db, 'posts', postId, 'comments', commentId)).then(function (snap) {
             var c = snap.exists() ? snap.data() : {};
             var ownerId = c.authorId || c.userId || null;
-            return createNotification(ownerId, 'reply', (me.name || 'GeoHub User') + ' replied to your comment', replyText, 'feed.html?post=' + postId + '&comment=' + commentId, { postId: postId, commentId: commentId });
+            return createNotification(ownerId, 'reply', rAuthorName + ' replied to your comment', replyText, 'feed.html?post=' + postId + '&comment=' + commentId, { postId: postId, commentId: commentId });
           });
         }).then(function () {
           toast('Reply posted');

@@ -7,7 +7,7 @@
 
   var PATH = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   var PAGE = document.body && document.body.dataset ? document.body.dataset.ghPage : '';
-  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null, openCommentPids: {}, cachedComments: {} };
+  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null, openCommentPids: {}, cachedComments: {}, cachedReplies: {} };
 
   /* ── User cache (instant topbar, no flash) ──────────────── */
   var USER_CACHE_KEY = 'gh_uc1';
@@ -1152,12 +1152,27 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             toast('Comment deleted');
           }).catch(function(err){db2.disabled=false;toast('Could not delete: '+(err.code||err.message),'error');});
       }
+      var drBtn=e.target.closest('[data-delete-reply]'); if(drBtn){ e.preventDefault();
+        if(!confirm('Delete this reply?')) return;
+        var rid=drBtn.dataset.replyId, rcid=drBtn.dataset.commentId;
+        drBtn.disabled=true;
+        fs().deleteDoc(fs().doc(db(),'posts',pid,'comments',rcid,'replies',rid))
+          .then(function(){
+            var rrow=card.querySelector('[data-reply-id="'+CSS.escape(rid)+'"]');
+            if(rrow){rrow.style.transition='opacity .2s';rrow.style.opacity='0';setTimeout(function(){rrow.remove();},220);}
+            fs().updateDoc(fs().doc(db(),'posts',pid,'comments',rcid),{replyCount:fs().increment(-1)}).catch(function(){});
+            // Update cache to prevent deleted reply reappearing on next paint
+            var rkey=pid+'_'+rcid;
+            if(state.cachedReplies[rkey]) state.cachedReplies[rkey]=state.cachedReplies[rkey].filter(function(r){return r.id!==rid;});
+            toast('Reply deleted');
+          }).catch(function(err){drBtn.disabled=false;toast('Could not delete: '+(err.code||err.message),'error');});
+      }
     });
     root.addEventListener('submit', function(e){
       var form=e.target.closest('[data-comment-form]');
       if(form){ e.preventDefault(); var card=form.closest('[data-post-id]'), pid=card.dataset.postId; var input=form.querySelector('input'); var val=input.value.trim(); if(!val) return; if(!requireLogin()) return; state.openCommentPids[pid]=true; GS().addComment(pid,val,function(){ input.value=''; },buildActorExtra()); return; }
       var rform=e.target.closest('[data-reply-form]');
-      if(rform){ e.preventDefault(); var card2=rform.closest('[data-post-id]'), pid2=card2.dataset.postId, cid=rform.dataset.commentId; var rin=rform.querySelector('input'); var rv=rin.value.trim(); if(!rv) return; if(!requireLogin()) return; if(GS().addCommentReply) GS().addCommentReply(pid2,cid,rv,function(){ rin.value=''; rform.hidden=true; }); else toast('Replies are not available','error'); }
+      if(rform){ e.preventDefault(); var card2=rform.closest('[data-post-id]'), pid2=card2.dataset.postId, cid=rform.dataset.commentId; var rin=rform.querySelector('input'); var rv=rin.value.trim(); if(!rv) return; if(!requireLogin()) return; if(GS().addCommentReply) GS().addCommentReply(pid2,cid,rv,function(){ rin.value=''; rform.hidden=true; },buildActorExtra()); else toast('Replies are not available','error'); }
     });
 
     // Reaction strip: show on Like hover, hide after 1.5s delay
@@ -1471,14 +1486,44 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(!f) return; f.hidden=!f.hidden; if(!f.hidden){ var input=f.querySelector('input'); if(input) input.focus(); }
   }
 
+  function replyCard(pid, r){
+    var u=authUser();
+    var rUid=r.authorId||r.userId||'';
+    var name=r.authorName||'User';
+    var av=r.authorAvatar?img(r.authorAvatar,name):esc(initials(name));
+    var avEl=userProfileAnchor(rUid,'gh-avatar gh-reply-avatar',av,'');
+    var nameEl=userProfileAnchor(rUid,'gh-profile-name-link',esc(name),'');
+    var isOwn=u&&(u.uid===rUid||(r.createdByUid&&u.uid===r.createdByUid)||(r.userId&&u.uid===r.userId));
+    var delBtn=isOwn?(' · <button type="button" class="gh-cmt-act" data-delete-reply data-reply-id="'+esc(r.id)+'" data-comment-id="'+esc(r.commentId||'')+'" title="Delete reply"><i class="fas fa-trash" style="font-size:.65rem"></i></button>'):'';
+    return '<div class="gh-reply-row" data-reply-id="'+esc(r.id)+'">'+avEl+
+      '<div class="gh-comment-main"><div class="gh-comment-bubble"><strong>'+nameEl+'</strong><span class="gh-cmt-text">'+esc(r.text||'')+'</span></div>'+
+      '<div class="gh-small gh-comment-actions">'+timeAgo(r.createdAt)+delBtn+'</div>'+
+    '</div></div>';
+  }
+
+  function renderRepliesIntoBox(pid, cid, items){
+    var box=document.querySelector('[data-post-id="'+CSS.escape(pid)+'"] [data-replies-for="'+CSS.escape(cid)+'"]');
+    if(!box) return;
+    var visible=items.filter(function(r){
+      if(r.status==='deleted') return false;
+      var uid=r.authorId||r.userId||'';
+      return !uid||(state.blockedUserIds.indexOf(uid)===-1&&state.mutedUserIds.indexOf(uid)===-1);
+    });
+    box.innerHTML=visible.length?visible.map(function(r){ return replyCard(pid,r); }).join(''):'';
+  }
+
   function loadReplies(pid,cid){
-    var key=pid+'_'+cid; if(state.replyUnsubs[key]) return;
-    if(!GS().listenCommentReplies) return;
+    var key=pid+'_'+cid;
+    if(state.replyUnsubs[key]){
+      // Listener already active — DOM was rebuilt by paint()/renderCommentsForPid, repopulate from cache
+      var cached=state.cachedReplies[key];
+      if(cached) renderRepliesIntoBox(pid,cid,cached);
+      return;
+    }
+    if(!GS||!GS()||!GS().listenCommentReplies) return;
     state.replyUnsubs[key]=GS().listenCommentReplies(pid,cid,function(items){
-      var box=document.querySelector('[data-post-id="'+CSS.escape(pid)+'"] [data-replies-for="'+CSS.escape(cid)+'"]'); if(!box) return;
-      var visible=items.filter(function(r){ var uid=r.authorId||r.userId||''; return !uid||(state.blockedUserIds.indexOf(uid)===-1&&state.mutedUserIds.indexOf(uid)===-1); });
-      if(!visible.length){ box.innerHTML=''; return; }
-      box.innerHTML=visible.map(function(r){ var name=r.authorName||'User'; var uid=r.authorId||r.userId||''; var av=(r.authorAvatar?img(r.authorAvatar,name):esc(initials(name))); return '<div class="gh-reply-row">'+userProfileAnchor(uid,'gh-avatar gh-profile-avatar-link',av,'Open '+name+' profile').replace('class="gh-avatar gh-profile-avatar-link"','class="gh-avatar gh-profile-avatar-link" style="width:26px;height:26px"')+'<div><div class="gh-comment-bubble"><strong>'+userProfileAnchor(uid,'gh-profile-name-link',esc(name),'Open '+name+' profile')+'</strong><span>'+esc(r.text||'')+'</span></div><div class="gh-small" style="padding-left:8px;margin-top:3px">'+timeAgo(r.createdAt)+'</div></div></div>'; }).join('');
+      state.cachedReplies[key]=items;
+      renderRepliesIntoBox(pid,cid,items);
     });
   }
 
