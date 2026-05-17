@@ -3,7 +3,7 @@
    ───────────────────────────────────────────────────────────
    TOKENS   :root custom properties — single source of truth
    UTILITIES .gh-flex / .gh-gap-* / .gh-truncate / .gh-sr-only
-   BREAKPOINTS 1280 · 920 · 768 · 540 · 480 · 420 px
+   BREAKPOINTS 1120 · 980 · 920 · 768 · 540 · 480 · 420 px
    THEMES   html[data-gh-theme="light"] / dark
    ═══════════════════════════════════════════════════════════ */
 
@@ -629,7 +629,7 @@ body.gh-fb-inspired .gh-empty.mini{min-height:92px;padding:16px;text-align:left;
 body.gh-fb-inspired .gh-empty.mini i{font-size:1.2rem;margin:0 0 8px;color:#4c91ff}
 body.gh-fb-inspired .gh-empty.mini h3{font-size:.9rem;margin:0 0 4px;color:#eaf2ff}
 body.gh-fb-inspired .gh-empty.mini p{font-size:.78rem;margin:0;color:#94a3b8}
-@media(max-width:1280px){body.gh-fb-inspired .gh-layout{grid-template-columns:86px minmax(0,1fr) 310px}body.gh-fb-inspired .gh-nav-item span{display:none}body.gh-fb-inspired .gh-nav-item{justify-content:center}body.gh-fb-inspired .gh-topbar{grid-template-columns:220px minmax(220px,380px) 1fr auto}.gh-center-tabs{gap:8px}}
+@media(max-width:1120px){body.gh-fb-inspired .gh-layout{grid-template-columns:86px minmax(0,1fr) 310px}body.gh-fb-inspired .gh-nav-item span{display:none}body.gh-fb-inspired .gh-nav-item{justify-content:center}body.gh-fb-inspired .gh-topbar{grid-template-columns:220px minmax(220px,380px) 1fr auto}.gh-center-tabs{gap:8px}}
 @media(max-width:980px){body.gh-fb-inspired .gh-topbar{grid-template-columns:1fr auto}body.gh-fb-inspired .gh-top-search,body.gh-fb-inspired .gh-center-tabs{display:none}body.gh-fb-inspired .gh-layout{grid-template-columns:1fr;padding:12px}body.gh-fb-inspired .gh-left,body.gh-fb-inspired .gh-right{position:static;max-height:none}body.gh-fb-inspired .gh-left{display:none}body.gh-fb-inspired .gh-story-card{height:180px;min-width:105px}body.gh-fb-inspired .gh-composer-actions{grid-template-columns:repeat(2,1fr)}}
 
 /* REAL Day/Night theme fix v2 — proper premium light theme, not dark-mode inversion */
@@ -1541,9 +1541,9 @@ body.gh-has-injected-nav .profile-identity-section .profile-tabs{top:72px!import
 body.gh-has-injected-nav .profile-identity-section{top:unset!important}
 body.gh-has-injected-nav.gh-sidebar-collapsed .gh-left{display:none!important}
 body.gh-has-injected-nav.gh-sidebar-collapsed{padding-left:0!important}
-@media(max-width:1280px){
-  body.gh-has-injected-nav{padding-left:82px}
-  body.gh-has-injected-nav .gh-left{width:82px}
+@media(max-width:1120px){
+  body.gh-has-injected-nav{padding-left:86px}
+  body.gh-has-injected-nav .gh-left{width:86px}
 }
 @media(max-width:920px){
   body.gh-has-injected-nav{padding-left:0;padding-top:70px}
