@@ -1036,7 +1036,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       pollHtml+
       linkPrevHtml+
       (p.sharedPostId?'<div class="gh-shared-preview" data-shared-post="'+esc(p.sharedPostId)+'"><i class="fas fa-share"></i><div><strong>Shared post</strong><span>Loading original post...</span></div></div>':'')+
-      '<div class="gh-post-stats"><span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'"><i class="fas fa-thumbs-up"></i> <b data-like-count>'+totalRx+'</b>'+(totalRx?' people reacted':'')+'</button></span><span><b data-comment-count>'+Number(p.commentCount||0)+'</b> comments · <b>'+Number(p.shareCount||0)+'</b> shares</span></div>'+
+      '<div class="gh-post-stats"><span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'"><i class="fas fa-thumbs-up"></i> <b data-like-count>'+totalRx+'</b>'+(totalRx?' people reacted':'')+'</button></span><span><b data-comment-count>'+Math.max(0,Number(p.commentCount||0))+'</b> comments · <b>'+Number(p.shareCount||0)+'</b> shares</span></div>'+
       '<div class="gh-rx-breakdown" data-rx-pid="'+esc(pid)+'"></div>'+
       '<div class="gh-post-actions"><button class="gh-act" data-like><i class="fas fa-thumbs-up"></i> Like</button><button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> Comment</button><button class="gh-act" data-share><i class="fas fa-share"></i> Share</button><button class="gh-act" data-save><i class="fas fa-bookmark"></i> Save</button></div>'+
       '<div class="gh-reaction-strip"><button data-reaction="like">👍</button><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button></div>'+
@@ -1115,13 +1115,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var db2=e.target.closest('[data-delete-comment]'); if(db2){ e.preventDefault();
         if(!confirm('Delete this comment?')) return;
         var cid2=db2.dataset.commentId;
-        fs().updateDoc(fs().doc(db(),'posts',pid,'comments',cid2),{status:'deleted',updatedAt:fs().serverTimestamp()})
+        db2.disabled=true;
+        fs().deleteDoc(fs().doc(db(),'posts',pid,'comments',cid2))
           .then(function(){
             var row=card.querySelector('[data-comment-id="'+CSS.escape(cid2)+'"]');
             if(row){row.style.transition='opacity .2s';row.style.opacity='0';setTimeout(function(){row.remove();},220);}
             fs().updateDoc(fs().doc(db(),'posts',pid),{commentCount:fs().increment(-1)}).catch(function(){});
             toast('Comment deleted');
-          }).catch(function(err){toast('Could not delete: '+(err.code||err.message),'error');});
+          }).catch(function(err){db2.disabled=false;toast('Could not delete: '+(err.code||err.message),'error');});
       }
     });
     root.addEventListener('submit', function(e){
@@ -1269,6 +1270,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var currentBox=currentCard.querySelector('[data-comments]');
     if(currentBox && state.openCommentPids[pid]) currentBox.hidden=false;
     var visible=items.filter(function(c){
+      if(c.status==='deleted') return false;
       var uid=c.authorId||c.userId||'';
       return !uid||(state.blockedUserIds.indexOf(uid)===-1&&state.mutedUserIds.indexOf(uid)===-1);
     });

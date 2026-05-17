@@ -144,6 +144,15 @@ service cloud.firestore {
       return bizId != '' && canManageBiz(bizId);
     }
 
+    // Post author can moderate (delete) comments on their own post.
+    function isPostOwner(postId) {
+      let p = get(/databases/$(database)/documents/posts/$(postId)).data;
+      return signedIn()
+        && (p.get('createdByUid', '') == uid()
+            || p.get('authorId',   '') == uid()
+            || p.get('userId',     '') == uid());
+    }
+
     function isGroupManagerOfPost() {
       let groupId = resource.data.get('groupId', resource.data.get('targetId', ''));
       return groupId != '' && resource.data.get('targetType', '') == 'group' && isGroupManager(groupId);
@@ -378,7 +387,7 @@ service cloud.firestore {
           || onlyCommentCountersChanged()
           || (existingOwnerMatches() && (onlyCommentTextChanged() || onlyCommentSoftDeleteChanged()))
           || isBizOwnerOfPost(postId);
-        allow delete: if isAdmin() || existingOwnerMatches() || isBizOwnerOfPost(postId);
+        allow delete: if isAdmin() || existingOwnerMatches() || isBizOwnerOfPost(postId) || isPostOwner(postId);
 
         match /reactions/{rxUserId} {
           allow read: if true;
@@ -392,7 +401,7 @@ service cloud.firestore {
           allow create: if newOwnerMatches()
             && request.resource.data.get('text', '') is string
             && request.resource.data.get('text', '').size() > 0;
-          allow update, delete: if isAdmin() || existingOwnerMatches() || isBizOwnerOfPost(postId);
+          allow update, delete: if isAdmin() || existingOwnerMatches() || isBizOwnerOfPost(postId) || isPostOwner(postId);
         }
       }
 
