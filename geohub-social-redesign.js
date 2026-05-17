@@ -4586,6 +4586,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function init(){
+    // Never inject the app shell on auth / login / onboarding pages.
+    var AUTH_PAGES = ['auth.html','onboarding.html','login.html','register.html','signup.html'];
+    if(AUTH_PAGES.indexOf(PATH) !== -1) return;
     ready(function(){ enhanceGeoSocial(); });
     if(PAGE==='rewards' || PATH==='rewards.html') return; // geohub-points.js renders the integrated rewards app shell.
     if(PAGE==='feed' || PATH==='feed.html' || PATH==='index.html') return renderFeed();
