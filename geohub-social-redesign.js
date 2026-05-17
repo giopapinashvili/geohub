@@ -4125,7 +4125,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     shell({ active:'groups', center:'<div id="ghGroupDetail"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>Loading group…</h3></div></div>' });
     state.currentGroupId=id; state.currentGroupRole=null; state.currentGroupData=null; state.currentGroupMuted=false;
     ready(function(){
-      GS().getGroupMemberRole(id, function(role){ state.currentGroupRole=role; });
+      GS().getGroupMemberRole(id, function(role){
+        var prev=state.currentGroupRole; state.currentGroupRole=role;
+        if(prev!==role && state.currentGroupData) paintGroupDetail(state.currentGroupData);
+      });
       GS().getGroupMuteStatus(id, function(muted){ state.currentGroupMuted=muted; });
       var _u=fs().onSnapshot(fs().doc(db(),'groups',id), function(snap){ if(!snap.exists()){ $('#ghGroupDetail').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-users-slash"></i><h3>Group not found</h3></div>'; return; } var g=Object.assign({id:id},snap.data()); state.currentGroupData=g; paintGroupDetail(g); }, function(err){ $('#ghGroupDetail').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Failed</h3><p>'+esc(err.message)+'</p></div>'; });
       state.pageUnsubs.push(_u);
