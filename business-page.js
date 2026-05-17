@@ -173,6 +173,7 @@
         '<button class="biz-action-btn '+followCls+'" id="biz-follow-btn" onclick="window._bizActions.toggleFollow()"><i class="fas '+followIcon+'"></i> '+followLbl+'</button>'+
         (_isFollowing ? '<button class="biz-action-btn biz-notif-btn" id="biz-notif-btn" title="'+notifTitle+'" onclick="window._bizActions.toggleNotifications()"><i class="'+notifIcon+'"></i></button>' : '')+
         '<button class="biz-action-btn primary" onclick="window._bizActions.openQuote()"><i class="fas fa-paper-plane"></i> Quote</button>'+
+        '<button class="biz-action-btn" onclick="window._bizActions.openMessage()"><i class="fas fa-comment-dots"></i> Message</button>'+
         '<button class="biz-action-btn '+ (_isSaved?'saved':'')+'" id="biz-save-btn" onclick="window._bizActions.toggleSave()"><i class="'+(_isSaved?'fas':'far')+' fa-bookmark"></i> '+(_isSaved?'Saved':'Save')+'</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.share()"><i class="fas fa-share-nodes"></i> Share</button>';
       if (biz.phone) actions+='<a href="tel:'+esc(biz.phone)+'" class="biz-action-btn"><i class="fas fa-phone"></i> Call</a>';
@@ -1738,6 +1739,19 @@
       if(window.GeoShare){ window.GeoShare.sharePlace(BIZ_ID,_biz&&_biz.title,_biz&&_biz.city); return; }
       if(navigator.share){ navigator.share({title:(_biz&&_biz.title)||'GeoHub Business',url:url}).catch(function(){}); return; }
       if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ showToast('Link copied!'); }).catch(function(){}); }
+    },
+
+    openMessage: function() {
+      if (!_currentUser) { showToast('Sign in to message this page', false); window.location.href='auth.html'; return; }
+      var ownerId = (_biz && (_biz.ownerId || _biz.createdBy || _biz.userId)) || '';
+      if (!ownerId) { showToast('This page has no message recipient yet', false); return; }
+      if (ownerId === _currentUser.uid) { showToast('You are the page owner', false); return; }
+      if (window.GeoChatPopup && window.GeoChatPopup.openWithUser) {
+        window.GeoChatPopup.openWithUser(ownerId);
+        showToast('Opening page messages…');
+        return;
+      }
+      window.location.href = 'messages.html?with=' + encodeURIComponent(ownerId) + '&business=' + encodeURIComponent(BIZ_ID);
     },
 
     // ── Comment toggle ────────────────────────────────────────────

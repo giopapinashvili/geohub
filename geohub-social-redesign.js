@@ -712,7 +712,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var durDays=Number(($('#ghPollDuration')||{}).value||3);
         var endsAt=new Date(Date.now()+durDays*86400000);
         submitBtn.disabled=true; submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
-        GS().createPost('', '', function(){ var m=$('#ghPostModal'); if(m)m.remove(); submitBtn.disabled=false; }, Object.assign({
+        GS().createPost(question, '', function(){ var m=$('#ghPostModal'); if(m)m.remove(); submitBtn.disabled=false; }, Object.assign({
           type:'poll',
           poll:{question:question,options:opts,endsAt:endsAt,totalVotes:0},
           visibility:($('#ghPostVisibility')||{}).value||'public'
@@ -1431,7 +1431,6 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function feedRightSidebar(){
     return '<div id="ghFeedRight">'+
       '<div class="gh-panel gh-right-widget" id="ghOnlineFriendsPanel"><div class="gh-section-title"><h3><i class="fas fa-circle" style="color:#22c55e;font-size:.55rem"></i> Online Friends</h3></div><div id="ghOnlineFriendsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
-      '<div class="gh-panel gh-right-widget" id="ghBirthdayPanel"><div class="gh-section-title"><h3>🎂 Birthdays</h3></div><div id="ghBirthdayList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Suggested Pages</h3><a class="gh-small" href="business.html">All</a></div><div id="ghSuggestedPages"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Contacts</h3></div><input class="gh-input" id="ghContactsSearch" placeholder="Search contacts…" style="margin-bottom:8px"><div id="ghContactsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
     '</div>';
@@ -1439,7 +1438,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function loadFeedRightSidebar(){
     ready(function(){
-      var u=authUser(); if(!u) return;
+      var u=authUser();
+      var onlineBox=$('#ghOnlineFriendsList');
+      var pagesBox=$('#ghSuggestedPages');
+      var contactsBox=$('#ghContactsList');
+      if(!u){
+        if(onlineBox) onlineBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see online contacts</div>';
+        if(pagesBox) pagesBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see suggestions</div>';
+        if(contactsBox) contactsBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see contacts</div>';
+        return;
+      }
+
       var fiveMinsAgo=new Date(Date.now()-5*60*1000);
       fs().getDocs(fs().query(fs().collection(db(),'users'), fs().where('lastSeen','>',fiveMinsAgo), fs().limit(15))).then(function(snap){
         var box=$('#ghOnlineFriendsList'); if(!box) return;
@@ -1450,36 +1459,24 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           var av=p.avatar||p.photoURL||'';
           return '<a class="gh-contact-row" href="messages.html?with='+esc(p.id)+'"><span class="gh-avatar" style="width:32px;height:32px">'+(av?img(av,name):esc(initials(name)))+'</span><span class="gh-contact-name">'+esc(name)+'</span><span class="gh-online-dot"></span></a>';
         }).join('')+'</div>';
-      }).catch(function(){});
-
-      var now=new Date(); var thisMonth=now.getMonth()+1;
-      fs().getDocs(fs().query(fs().collection(db(),'users'), fs().where('birthdayMonth','==',thisMonth), fs().limit(10))).then(function(snap){
-        var box=$('#ghBirthdayList'); if(!box) return;
-        var items=[]; snap.forEach(function(d){ items.push(Object.assign({id:d.id},d.data())); });
-        if(!items.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">No birthdays this month</div>'; return; }
-        box.innerHTML=items.slice(0,5).map(function(p){
-          var name=p.fullName||p.displayName||p.name||'User';
-          var day=p.birthdayDay||0; var today=now.getDate();
-          var label=day===today?'Today!':'in '+(day-today)+'d';
-          return '<div class="gh-birthday-row"><span>🎂</span><span>'+esc(name)+'\'s birthday '+esc(label)+'</span></div>';
-        }).join('');
-      }).catch(function(){});
+      }).catch(function(){ var box=$('#ghOnlineFriendsList'); if(box) box.innerHTML='<div class="gh-muted" style="font-size:.82rem">Online list unavailable</div>'; });
 
       getLatest('businesses',6).then(function(items){
-        var box=$('#ghSuggestedPages'); if(!box||!items.length) return;
+        var box=$('#ghSuggestedPages'); if(!box) return;
+        if(!items.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">No business pages yet</div>'; return; }
         box.innerHTML='<div class="gh-mini-list">'+items.slice(0,3).map(function(b){
           var title=b.title||b.name||'Business'; var logo=b.logoUrl||'';
           return '<div class="gh-mini-item"><span class="gh-mini-thumb">'+(logo?img(logo,title):'<i class="fas fa-store"></i>')+'</span><div style="flex:1"><strong>'+esc(title)+'</strong><span>'+esc(b.category||'Business')+'</span></div><button class="gh-btn sm ghost" onclick="location.href=\'business.html?id='+esc(b.id)+'\'">View</button></div>';
         }).join('')+'</div>';
-      }).catch(function(){});
+      }).catch(function(){ var box=$('#ghSuggestedPages'); if(box) box.innerHTML='<div class="gh-muted" style="font-size:.82rem">Suggested pages unavailable</div>'; });
 
       loadContactsList(u.uid);
     });
   }
 
   function loadContactsList(uid){
-    if(!fs()||!db()) return;
     var box=$('#ghContactsList'); if(!box) return;
+    if(!fs()||!db()){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">Contacts unavailable</div>'; return; }
     var allContacts=[];
     Promise.all([
       fs().getDocs(fs().query(fs().collection(db(),'follows'), fs().where('followerId','==',uid), fs().limit(50))).then(function(snap){
@@ -1493,7 +1490,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(!profiles) return;
       allContacts=(profiles||[]).filter(Boolean);
       renderContactsList(allContacts,'');
-    }).catch(function(){});
+    }).catch(function(){ var box=$('#ghContactsList'); if(box) box.innerHTML='<div class="gh-muted" style="font-size:.82rem">Contacts unavailable</div>'; });
 
     var search=$('#ghContactsSearch');
     if(search) search.addEventListener('input',function(){ renderContactsList(allContacts, search.value.trim().toLowerCase()); });
@@ -3677,7 +3674,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       extra=extra||{};
       var GF=window.GeoFirebase, user=GF && GF.auth && GF.auth.currentUser;
       if(!user){ window.GeoSocial.requireAuth(); return; }
-      var clean=(textVal||'').trim(); if(!clean && !mediaUrl && !extra.sharedPostId) return toast('Write something first','error');
+      var clean=(textVal||'').trim();
+      var isPoll = extra.type === 'poll' && extra.poll && extra.poll.question;
+      if(!clean && !mediaUrl && !extra.sharedPostId && !isPoll) return toast('Write something first','error');
+      if(isPoll && !clean) clean = String(extra.poll.question || '').trim();
       var me=currentUserInfo();
       var payload={
         text:clean,

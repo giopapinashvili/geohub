@@ -1488,3 +1488,32 @@ html[data-gh-theme="light"] .gh-cmt-rx-picker{background:#fff}
   .gh-cmt-rx-picker{bottom:auto;top:calc(100% + 4px)}
   .gh-feeling-row{flex-wrap:nowrap}
 }
+
+
+/* GeoHub light mode comfort polish: keep the page light, but avoid pure-white glare. */
+html[data-gh-theme="light"] body.gh-fb-inspired.gh-social-body{
+  background:
+    radial-gradient(circle at 8% 0%, rgba(37,99,235,.10), transparent 30vw),
+    radial-gradient(circle at 92% 8%, rgba(16,185,129,.08), transparent 28vw),
+    linear-gradient(180deg,#edf3f8 0%,#e7eef6 48%,#dfe8f3 100%) !important;
+}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-topbar{
+  background:rgba(245,248,252,.94) !important;
+  border-bottom-color:rgba(51,65,85,.10) !important;
+}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-card,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-panel{
+  background:rgba(248,250,252,.90) !important;
+  border-color:rgba(51,65,85,.12) !important;
+  box-shadow:0 16px 38px rgba(30,41,59,.09) !important;
+}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-left .gh-panel,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-story-strip-card{
+  background:rgba(241,245,249,.88) !important;
+}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-composer-fake,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-top-search input,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-input{
+  background:#e9f0f7 !important;
+  border-color:rgba(51,65,85,.12) !important;
+}

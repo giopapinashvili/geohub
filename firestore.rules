@@ -343,7 +343,8 @@ service cloud.firestore {
         && (request.resource.data.get('text', '') != ''
             || request.resource.data.get('mediaUrl', '') != ''
             || request.resource.data.get('mediaUrls', []).size() > 0
-            // Share posts may have no caption text
+            // Poll/share posts may have no normal caption text
+            || request.resource.data.get('type', '') == 'poll'
             || request.resource.data.get('sharedPostId', '') != '')
         // If the post claims a businessId, the poster must own that business.
         && (request.resource.data.get('businessId', '') == ''
