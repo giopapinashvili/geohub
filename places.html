@@ -550,15 +550,8 @@
   document.getElementById('plAddModal').addEventListener('click', function(e){ if(e.target===this) closeAddModal(); });
 
   // ── PLACE DETAIL ─────────────────────────────────────────────────────────
-  function openPlaceDetail(placeId){
-    var overlay = document.getElementById('plDetailOverlay');
+  function _renderPlaceDetail(p){
     var box = document.getElementById('plDetailBox');
-    overlay.classList.add('open');
-    var p = _allPlaces.find(function(x){return x.id===placeId;});
-    if(!p){
-      box.innerHTML='<p style="padding:24px;color:#94a3b8">Place not found.</p>';
-      return;
-    }
     var saved = !!_savedIds[p.id]; var _dimg=getPlaceImage(p);
     box.innerHTML =
       '<div class="pl-detail-img" style="'+coverBg(p)+'">'+
@@ -602,9 +595,23 @@
           '<div id="plReviewsList"><div style="padding:12px;color:#4b5563;font-size:.82rem">Loading reviews…</div></div>'+
         '</div>'+
       '</div>';
-
     initReviewStars();
     loadReviews(p.id);
+  }
+
+  function openPlaceDetail(placeId){
+    var overlay = document.getElementById('plDetailOverlay');
+    var box = document.getElementById('plDetailBox');
+    overlay.classList.add('open');
+    var p = _allPlaces.find(function(x){return x.id===placeId;});
+    if(p){ _renderPlaceDetail(p); return; }
+    box.innerHTML='<div style="padding:40px;text-align:center;color:#64748b"><i class="fas fa-circle-notch fa-spin" style="font-size:1.5rem"></i></div>';
+    var gf = window.GeoFirebase;
+    if(!gf||!gf.fs||!gf.db){ box.innerHTML='<p style="padding:24px;color:#94a3b8">Place not found.</p>'; return; }
+    gf.fs.getDoc(gf.fs.doc(gf.db,'places',placeId)).then(function(snap){
+      if(!snap.exists()){ box.innerHTML='<p style="padding:24px;color:#94a3b8">Place not found.</p>'; return; }
+      _renderPlaceDetail(Object.assign({id:snap.id},snap.data()));
+    }).catch(function(){ box.innerHTML='<p style="padding:24px;color:#94a3b8">Could not load place.</p>'; });
   }
 
   function initReviewStars(){
@@ -702,6 +709,8 @@
 
   // ── INIT ─────────────────────────────────────────────────────────────────
   function init(){
+    var urlId = new URLSearchParams(location.search).get('id');
+    if(urlId) openPlaceDetail(urlId);
     loadPlaces();
     var gf = window.GeoFirebase;
     if(gf&&gf.auth&&gf.auth.onAuthStateChanged){

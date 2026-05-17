@@ -269,9 +269,85 @@
     }
   });
 
+  // ── Event detail overlay ──────────────────────────────────────────────────
+
+  function _renderEventDetail(ev) {
+    var box = document.getElementById('evDetailBox');
+    if (!box) return;
+    var img = getEventImage(ev);
+    var dateVal = ev.date || ev.startDate;
+    var going   = Number(ev.rsvpCount || ev.attendees || 0);
+    var cap     = Number(ev.capacity || 0);
+    var soldOut = cap > 0 && going >= cap;
+    box.innerHTML =
+      '<div style="position:relative">'
+        + (img
+            ? '<div style="height:220px;overflow:hidden;border-radius:22px 22px 0 0"><img src="' + esc(img) + '" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>'
+            : '<div style="height:110px;background:linear-gradient(135deg,rgba(16,185,129,.2),rgba(59,130,246,.15));border-radius:22px 22px 0 0;display:flex;align-items:center;justify-content:center;font-size:3rem">🎉</div>')
+        + '<button onclick="closeEventDetail()" style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,.55);border:none;color:#fff;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:.95rem;line-height:1">✕</button>'
+      + '</div>'
+      + '<div style="padding:22px">'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap">'
+          + '<div>'
+            + '<h2 style="font-size:1.25rem;font-weight:900;margin:0 0 8px;color:#f8fafc">' + esc(ev.title || ev.name || 'Event') + '</h2>'
+            + categoryBadge(ev.category)
+          + '</div>'
+          + '<span style="color:#' + (isFuture(dateVal) ? '10b981' : '64748b') + ';font-size:.72rem;font-weight:700;background:rgba(' + (isFuture(dateVal) ? '16,185,129' : '255,255,255') + ',.08);padding:3px 10px;border-radius:6px;white-space:nowrap;align-self:flex-start">' + (isFuture(dateVal) ? 'UPCOMING' : 'PAST') + '</span>'
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;gap:7px;font-size:.84rem;color:#94a3b8;margin:14px 0">'
+          + (dateVal ? '<span><i class="fas fa-calendar" style="width:16px;text-align:center;color:#10b981;margin-right:7px"></i>' + formatDate(dateVal) + (formatTime(dateVal) ? ' &middot; ' + formatTime(dateVal) : '') + '</span>' : '')
+          + ((ev.location || ev.venue) ? '<span><i class="fas fa-map-marker-alt" style="width:16px;text-align:center;color:#3b82f6;margin-right:7px"></i>' + esc(ev.location || ev.venue) + '</span>' : '')
+          + (cap > 0
+              ? '<span><i class="fas fa-users" style="width:16px;text-align:center;color:#f59e0b;margin-right:7px"></i>' + going + ' / ' + cap + ' attendees</span>'
+              : (going > 0 ? '<span><i class="fas fa-users" style="width:16px;text-align:center;color:#f59e0b;margin-right:7px"></i>' + going + ' going</span>' : ''))
+        + '</div>'
+        + (ev.description ? '<p style="font-size:.88rem;color:#94a3b8;line-height:1.65;margin:0 0 16px">' + esc(ev.description) + '</p>' : '')
+        + '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
+          + (soldOut
+              ? '<span style="color:#ef4444;font-size:.85rem;font-weight:700"><i class="fas fa-ban"></i> Sold out</span>'
+              : ticketButton(ev))
+          + '<button class="geo-rsvp-btn" data-event-id="' + esc(ev.id) + '" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#94a3b8;border-radius:8px;padding:8px 16px;cursor:pointer;font-size:.82rem;font-weight:600"><i class="fas fa-calendar-check"></i> RSVP</button>'
+        + '</div>'
+      + '</div>';
+  }
+
+  function openEventDetail(eventId) {
+    var overlay = document.getElementById('evDetailOverlay');
+    var box     = document.getElementById('evDetailBox');
+    if (!overlay || !box) return;
+    overlay.classList.add('open');
+    var ev = state.all.find(function (e) { return e.id === eventId; });
+    if (ev) { _renderEventDetail(ev); return; }
+    box.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b"><i class="fas fa-circle-notch fa-spin" style="font-size:1.5rem"></i></div>';
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.fs || !fb.db) { box.innerHTML = '<p style="padding:24px;color:#94a3b8">Event not found.</p>'; return; }
+    fb.fs.getDoc(fb.fs.doc(fb.db, 'events', eventId)).then(function (snap) {
+      if (!snap.exists()) { box.innerHTML = '<p style="padding:24px;color:#94a3b8">Event not found.</p>'; return; }
+      _renderEventDetail(Object.assign({ id: snap.id }, snap.data()));
+    }).catch(function () { box.innerHTML = '<p style="padding:24px;color:#94a3b8">Could not load event.</p>'; });
+  }
+
+  function closeEventDetail() {
+    var overlay = document.getElementById('evDetailOverlay');
+    if (overlay) overlay.classList.remove('open');
+  }
+
+  window.openEventDetail  = openEventDetail;
+  window.closeEventDetail = closeEventDetail;
+
+  (function () {
+    var ov = document.getElementById('evDetailOverlay');
+    if (ov) ov.addEventListener('click', function (e) { if (e.target === ov) closeEventDetail(); });
+  })();
+
   // ── Boot ──────────────────────────────────────────────────────────────────
 
-  function boot() { bindControls(); loadEvents(); }
+  function boot() {
+    bindControls();
+    loadEvents();
+    var urlId = new URLSearchParams(location.search).get('id');
+    if (urlId) openEventDetail(urlId);
+  }
 
   if (window.GeoFirebase) boot();
   else window.addEventListener('GeoFirebaseReady', boot, { once: true });
