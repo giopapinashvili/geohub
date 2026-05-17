@@ -426,6 +426,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       }
       updateTopUser();
     });
+    // Re-render topbar + composer on every actor change (account switcher), global across all pages
+    window.addEventListener('GeoActorChanged', function(){ updateTopUser(); });
   }
 
   function updateTopUser(){
@@ -449,26 +451,54 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var ga=window.GeoAuth&&window.GeoAuth.getCurrentUser&&window.GeoAuth.getCurrentUser();
     var displayName=(ga&&(ga.fullName||ga.displayName||ga.name))||u.name||'';
     var displayAvatar=(ga&&(ga.avatar||ga.photoURL))||u.avatar||'';
-    if(av){ av.className='gh-avatar'; av.innerHTML=displayAvatar?img(displayAvatar,displayName):esc(initials(displayName||'')); }
-    if(nm){ nm.className=''; nm.textContent=(displayName||'').split(' ')[0]||'Me'; }
-    if(link) link.setAttribute('href', profileLink(u.uid));
+    // Determine topbar + composer identity: business actor overrides user
+    var _actor=getActiveActor();
+    var topName=displayName, topAvatar=displayAvatar, topHref=profileLink(u.uid);
+    if(_actor&&_actor.type==='business'){
+      topName=_actor.title||'Business'; topAvatar=_actor.logoUrl||'';
+      topHref='business.html?id='+encodeURIComponent(_actor.businessId||'');
+    }
+    if(av){ av.className='gh-avatar'; av.innerHTML=topAvatar?img(topAvatar,topName):esc(initials(topName||'')); }
+    if(nm){ nm.className=''; nm.textContent=(topName||'').split(' ')[0]||'Me'; }
+    if(link) link.setAttribute('href', topHref);
     document.querySelectorAll('.gh-nav-item').forEach(function(a){
       var txt=(a.textContent||'').trim().toLowerCase();
       if(txt==='profile') a.setAttribute('href', profileLink(u.uid));
       if(txt==='saved') a.setAttribute('href', profileLink(u.uid)+'&tab=saved');
     });
-    // Update composer avatar — use active actor identity if business, otherwise user
+    // Update composer avatar with active actor identity
     var ca=$('#ghComposerAvatar');
-    if(ca){
-      var _actor=getActiveActor();
-      var _av=displayAvatar, _nm=displayName;
-      if(_actor && _actor.type==='business'){
-        _av=_actor.logoUrl||''; _nm=_actor.title||'Business';
-      }
-      ca.className='gh-avatar'; ca.innerHTML=_av?img(_av,_nm):esc(initials(_nm||''));
-    }
-    // Persist to cache
+    if(ca){ ca.className='gh-avatar'; ca.innerHTML=topAvatar?img(topAvatar,topName):esc(initials(topName||'')); }
+    // Persist to cache (always real user data, not actor data)
     setCachedUser({uid:u.uid,name:displayName,avatar:displayAvatar});
+  }
+
+  function validateActorOnLoad(){
+    var actor=getActiveActor();
+    if(!actor||actor.type!=='business'||!actor.businessId) return;
+    if(!fs()||!db()) return;
+    var uid=authUser()&&authUser().uid; if(!uid) return;
+    // Verify business still exists, is not deleted, and current user is still an admin
+    Promise.all([
+      fs().getDoc(fs().doc(db(),'businesses',actor.businessId)),
+      fs().getDoc(fs().doc(db(),'businessAdmins',actor.businessId+'_'+uid))
+    ]).then(function(results){
+      var bizSnap=results[0], adminSnap=results[1];
+      var bizData=bizSnap.exists()?bizSnap.data():{};
+      if(!bizSnap.exists()||bizData.status==='deleted'||bizData.deleted===true||!adminSnap.exists()){
+        // Business gone or user no longer admin — reset actor to user
+        try{localStorage.removeItem('gh_active_actor');}catch(e){}
+        window.dispatchEvent(new CustomEvent('GeoActorChanged',{detail:{type:'user',uid:uid}}));
+        return;
+      }
+      // Refresh stored actor with fresh name/logo
+      var fresh=Object.assign({},actor,{
+        title:bizData.title||bizData.name||actor.title||'Business',
+        logoUrl:bizData.logoUrl||bizData.logo||bizData.avatar||actor.logoUrl||''
+      });
+      try{localStorage.setItem('gh_active_actor',JSON.stringify(fresh));}catch(e){}
+      window.dispatchEvent(new CustomEvent('GeoActorChanged',{detail:fresh}));
+    }).catch(function(){});
   }
 
   function bindAuthState(){
@@ -476,9 +506,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(!gf || !gf.authFns || !gf.authFns.onAuthStateChanged || !gf.auth) return;
     if(state.authUnsub){ try{ state.authUnsub(); }catch(e){} state.authUnsub=null; }
     state.authUnsub = gf.authFns.onAuthStateChanged(gf.auth, function(fbUser){
-      if(!fbUser) clearCachedUser();
+      if(!fbUser){ clearCachedUser(); try{localStorage.removeItem('gh_active_actor');}catch(e){} }
       updateTopUser();
       listenBadges();
+      if(fbUser) validateActorOnLoad();
       var bid = new URLSearchParams(location.search).get('id');
       if((state.page === 'business' || PAGE === 'business') && bid) updateBusinessFollowButton(bid);
     });
@@ -1127,7 +1158,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
     root.addEventListener('submit', function(e){
       var form=e.target.closest('[data-comment-form]');
-      if(form){ e.preventDefault(); var card=form.closest('[data-post-id]'), pid=card.dataset.postId; var input=form.querySelector('input'); var val=input.value.trim(); if(!val) return; if(!requireLogin()) return; state.openCommentPids[pid]=true; GS().addComment(pid,val,function(){ input.value=''; }); return; }
+      if(form){ e.preventDefault(); var card=form.closest('[data-post-id]'), pid=card.dataset.postId; var input=form.querySelector('input'); var val=input.value.trim(); if(!val) return; if(!requireLogin()) return; state.openCommentPids[pid]=true; GS().addComment(pid,val,function(){ input.value=''; },buildActorExtra()); return; }
       var rform=e.target.closest('[data-reply-form]');
       if(rform){ e.preventDefault(); var card2=rform.closest('[data-post-id]'), pid2=card2.dataset.postId, cid=rform.dataset.commentId; var rin=rform.querySelector('input'); var rv=rin.value.trim(); if(!rv) return; if(!requireLogin()) return; if(GS().addCommentReply) GS().addCommentReply(pid2,cid,rv,function(){ rin.value=''; rform.hidden=true; }); else toast('Replies are not available','error'); }
     });
@@ -1297,7 +1328,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function commentCard(pid,c){
     var name=c.authorName||c.userName||'User'; var uid=c.authorId||c.userId||''; var avHtml=(c.authorAvatar?img(c.authorAvatar,name):esc(initials(name)));
-    var u=authUser(); var isOwn=u && uid && u.uid===uid;
+    var u=authUser();
+    // isOwn: true for direct author OR for the real user behind a business-posted comment
+    var isOwn=u&&(u.uid===uid||(c.createdByUid&&u.uid===c.createdByUid)||(c.userId&&u.uid===c.userId));
+    // Author link: business comments link to business page
+    var isBizComment=(c.authorType==='business')&&(c.businessId||c.authorId);
+    var cAuthorHref=isBizComment?('business.html?id='+encodeURIComponent(c.businessId||c.authorId)):profileLink(uid);
+    var avAnchor='<a class="gh-avatar gh-profile-avatar-link" href="'+esc(cAuthorHref)+'" style="width:32px;height:32px" title="'+esc('Open '+name+' profile')+'">'+avHtml+'</a>';
+    var nameAnchor='<a class="gh-profile-name-link" href="'+esc(cAuthorHref)+'" title="'+esc('Open '+name+' profile')+'">'+esc(name)+'</a>';
     var ownerBtns = isOwn
       ? ' · <button type="button" class="gh-cmt-act" data-edit-comment data-comment-id="'+esc(c.id)+'" data-post-id="'+esc(pid)+'">Edit</button>'+
         ' · <button type="button" class="gh-cmt-act" data-delete-comment data-comment-id="'+esc(c.id)+'" data-post-id="'+esc(pid)+'">Delete</button>'
@@ -1306,8 +1344,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var rxType = c._myRxType||'';
     var rxLabel = rxType ? (RX_EMOJIS[rxType]+' '+(rxCount||1)) : '👍 '+(rxCount||'Like');
     return '<div class="gh-comment-row" data-comment-id="'+esc(c.id)+'">'+
-      userProfileAnchor(uid,'gh-avatar gh-profile-avatar-link',avHtml,'Open '+name+' profile').replace('class="gh-avatar gh-profile-avatar-link"','class="gh-avatar gh-profile-avatar-link" style="width:32px;height:32px"')+
-      '<div class="gh-comment-main"><div class="gh-comment-bubble"><strong>'+userProfileAnchor(uid,'gh-profile-name-link',esc(name),'Open '+name+' profile')+'</strong><span class="gh-cmt-text" data-cmt-text>'+esc(c.text||'')+'</span></div>'+
+      avAnchor+
+      '<div class="gh-comment-main"><div class="gh-comment-bubble"><strong>'+nameAnchor+'</strong><span class="gh-cmt-text" data-cmt-text>'+esc(c.text||'')+'</span></div>'+
       '<div class="gh-small gh-comment-actions">'+timeAgo(c.createdAt)+' · <button type="button" data-comment-reply data-comment-id="'+esc(c.id)+'">Reply</button>'+
       ' · <span class="gh-cmt-rx-wrap"><button type="button" class="gh-cmt-act gh-cmt-rx-btn'+(rxType?' active':'')+'" data-comment-like data-comment-id="'+esc(c.id)+'" data-comment-reaction="'+esc(rxType||'like')+'">'+rxLabel+'</button>'+
       '<span class="gh-cmt-rx-picker" data-rx-picker="'+esc(c.id)+'">'+Object.keys(RX_EMOJIS).map(function(t){ return '<button type="button" class="gh-cmt-rx-pick" data-comment-like data-comment-id="'+esc(c.id)+'" data-comment-reaction="'+t+'">'+RX_EMOJIS[t]+'</button>'; }).join('')+'</span></span>'+

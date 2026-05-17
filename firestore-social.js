@@ -1075,12 +1075,19 @@
     }
 
     // ── COMMENTS ────────────────────────────────────────────────────────
-    function addComment(postId, text, callback) {
+    function addComment(postId, text, callback, extra) {
+      extra = extra || {};
       if (!text || !text.trim()) return;
       requireAuth(function (user) {
         var me = meData() || {};
         var cleanText = text.trim();
         var postOwnerId = null;
+        // Actor identity — business actor or fallback to current user
+        var cAuthorId     = extra.authorId     || user.uid;
+        var cAuthorType   = extra.authorType   || 'user';
+        var cAuthorName   = extra.authorName   || me.name || user.displayName || 'GeoHub User';
+        var cAuthorAvatar = extra.authorAvatar || me.avatar || user.photoURL  || '';
+        var cBusinessId   = extra.businessId   || null;
 
         // Comments must not fail because an optional pre-check/counter/notification fails.
         // The only operation that decides success is the actual comment create.
@@ -1105,10 +1112,13 @@
             }
             return addDoc(collection(db, 'posts', postId, 'comments'), {
               text: cleanText,
-              authorId: user.uid,
-              userId: user.uid,
-              authorName: me.name || user.displayName || 'GeoHub User',
-              authorAvatar: me.avatar || user.photoURL || '',
+              authorId:     cAuthorId,
+              userId:       user.uid,     // always real Firebase UID — satisfies Firestore newOwnerMatches()
+              createdByUid: user.uid,
+              authorType:   cAuthorType,
+              authorName:   cAuthorName,
+              authorAvatar: cAuthorAvatar,
+              businessId:   cBusinessId,
               likes: 0,
               reactionCount: 0,
               replyCount: 0,
