@@ -17,8 +17,8 @@
   function uid(){ return window.GeoFirebase?.auth?.currentUser?.uid || null; }
   function otherId(conv){ const me=uid(); return (conv?.participants||[]).find(id=>id!==me) || ''; }
   function initials(name){ return (String(name||'U').trim()[0] || 'U').toUpperCase(); }
-  function showBtn(show){ const b=document.querySelector('.gh-chat-pop-btn'); if(b) b.classList.toggle('show', !!show); }
-  function showFloatingButtonNow(){ mount(); showBtn(true); }
+  function showBtn(show, count){ const b=document.querySelector('.gh-chat-pop-btn'); const badge=document.querySelector('.gh-cpb-badge'); if(b) b.classList.toggle('show', !!show); if(badge){ const n=count>0?String(count>99?'99+':count):''; badge.textContent=n; badge.style.display=n?'':'none'; } }
+  function countUnread(){ const me=uid(); return state.convs.filter(conv=>{ const t=ts(conv.updatedAt||conv.createdAt); const lastSeen=Number(localStorage.getItem('gh_chat_seen_'+conv.id)||'0'); return conv.lastSenderId && conv.lastSenderId!==me && t>lastSeen; }).length; }
 
   async function getUser(userId){
     if(!userId) return { id:'', name:'GeoHub User', avatar:'' };
@@ -41,7 +41,7 @@
     const root=document.createElement('div');
     root.id='ghChatPopRoot'; root.className='gh-chat-pop-root';
     root.innerHTML = `
-      <button class="gh-chat-pop-btn" type="button" aria-label="Open messages"><span class="dot"></span><span>Messages</span></button>
+      <button class="gh-chat-pop-btn" type="button" aria-label="Open messages"><span>Messages</span><span class="gh-cpb-badge" style="display:none"></span></button>
       <section class="gh-chat-pop" aria-label="GeoHub chat">
         <header class="gh-chat-head">
           <div class="gh-chat-avatar" id="ghChatAvatar">G</div>
@@ -135,8 +135,8 @@
   }
 
   function openUI(){ document.querySelector('.gh-chat-pop')?.classList.add('open'); state.open=true; showBtn(false); }
-  function minimize(){ document.querySelector('.gh-chat-pop')?.classList.remove('open'); state.open=false; showBtn(true); }
-  function close(){ document.querySelector('.gh-chat-pop')?.classList.remove('open'); state.open=false; showBtn(!!uid()); }
+  function minimize(){ document.querySelector('.gh-chat-pop')?.classList.remove('open'); state.open=false; const u=countUnread(); showBtn(u>0,u); }
+  function close(){ document.querySelector('.gh-chat-pop')?.classList.remove('open'); state.open=false; const u=countUnread(); showBtn(u>0,u); }
   function openLastOrFirst(){ const conv=state.convs[0]; if(conv) openConversation(conv.id); else openUI(); }
 
   function openConversation(cid){
@@ -192,8 +192,9 @@
   function handleConvs(convs){
     const previous = new Map(state.convs.map(c=>[c.id,c]));
     state.convs=convs||[];
-    // Keep the Messenger bubble visible on every page for logged-in users, even when there are no conversations yet.
-    showBtn(!state.open && !!uid());
+    // Show floating button only when there are unread messages; hide when 0 or panel is open.
+    const unread=countUnread();
+    if(!state.open) showBtn(unread>0, unread); else showBtn(false);
     const me=uid();
     state.convs.forEach(conv=>{
       const t=ts(conv.updatedAt || conv.createdAt);
@@ -211,9 +212,8 @@
   function start(){
     mount();
     const auth=window.GeoFirebase?.auth;
-    if(!auth?.currentUser){ showBtn(true); return; }
-    // Show immediately; don't wait for Firestore conversations to load.
-    showBtn(!state.open);
+    if(!auth?.currentUser){ showBtn(false); return; }
+    // Don't show eagerly — handleConvs decides based on unread count (fail closed).
     if(state.unsubConvs) state.unsubConvs();
     state.unsubConvs=window.GeoSocial.listenConversations(handleConvs);
   }
@@ -225,7 +225,7 @@
   };
 
   function safeStart(){
-    showFloatingButtonNow();
+    mount(); // ensure DOM exists without showing button yet
     if(window.GeoSocial && window.GeoFirebase && window.GeoFirebase.auth){
       const auth=window.GeoFirebase.auth;
       if(auth?.onAuthStateChanged && !window.__GeoHubChatAuthBound){
@@ -239,7 +239,7 @@
   }
 
   function bootVisibleButton(){
-    showFloatingButtonNow();
+    // Don't show button eagerly — handleConvs will reveal it only if unread > 0.
     let tries = 0;
     const timer = setInterval(()=>{
       tries += 1;

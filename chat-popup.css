@@ -8,12 +8,16 @@
 .gh-chat-toast{position:fixed;right:18px;bottom:92px;z-index:99991;display:none;gap:10px;align-items:center;width:min(330px,calc(100vw - 24px));background:#111827;color:#fff;border:1px solid rgba(16,185,129,.35);border-radius:16px;padding:12px;box-shadow:0 18px 50px rgba(0,0,0,.45);cursor:pointer}.gh-chat-toast.show{display:flex}.gh-chat-toast .t-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#10b981,#3b82f6);display:grid;place-items:center;font-weight:900}.gh-chat-toast .t-text{min-width:0}.gh-chat-toast .t-name{font-weight:900;font-size:.88rem}.gh-chat-toast .t-msg{font-size:.78rem;color:#cbd5e1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media(max-width:640px){.gh-chat-pop-root{right:10px;bottom:10px}.gh-chat-pop{width:calc(100vw - 20px);height:min(74vh,560px);border-radius:18px}.gh-chat-toast{right:10px;bottom:82px;width:calc(100vw - 20px)}}
 
-/* FORCE: global messenger button must be visible on every page */
+/* Unread count badge on the floating button */
+.gh-chat-pop-btn .gh-cpb-badge{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:#ef4444;color:#fff;font-size:.65rem;font-weight:900;display:none;align-items:center;justify-content:center;line-height:1}
+.gh-chat-pop-btn.show .gh-cpb-badge:not(:empty){display:inline-flex}
+
+/* Floating button root — hidden by default, shown only when unread > 0 */
 #ghChatPopRoot.gh-chat-pop-root{position:fixed!important;right:20px!important;bottom:20px!important;z-index:2147483000!important;pointer-events:auto!important}
-#ghChatPopRoot .gh-chat-pop-btn{min-width:58px!important;min-height:58px!important;display:none!important;visibility:visible!important;opacity:1!important;align-items:center!important;justify-content:center!important;gap:8px!important;background:linear-gradient(135deg,#0ea5e9,#10b981)!important;color:#fff!important;border:1px solid rgba(255,255,255,.18)!important;border-radius:999px!important;box-shadow:0 18px 50px rgba(0,0,0,.45)!important;font-weight:900!important}
+#ghChatPopRoot .gh-chat-pop-btn{display:none!important;align-items:center!important;justify-content:center!important;gap:8px!important;padding:10px 16px!important;background:linear-gradient(135deg,#0ea5e9,#10b981)!important;color:#fff!important;border:1px solid rgba(255,255,255,.18)!important;border-radius:999px!important;box-shadow:0 18px 50px rgba(0,0,0,.45)!important;font-weight:900!important}
 #ghChatPopRoot .gh-chat-pop-btn.show{display:flex!important}
 #ghChatPopRoot .gh-chat-pop.open + *{display:none}
-@media(max-width:640px){#ghChatPopRoot.gh-chat-pop-root{right:12px!important;bottom:12px!important}#ghChatPopRoot .gh-chat-pop-btn{width:56px!important;height:56px!important;padding:0!important}#ghChatPopRoot .gh-chat-pop-btn span:not(.dot){display:none!important}}
+@media(max-width:640px){#ghChatPopRoot.gh-chat-pop-root{right:12px!important;bottom:12px!important}#ghChatPopRoot .gh-chat-pop-btn{padding:10px 14px!important}#ghChatPopRoot .gh-chat-pop-btn span:first-child{display:none!important}}
 
 
 /* Messenger production reaction/media polish */
