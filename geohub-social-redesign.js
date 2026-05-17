@@ -1232,7 +1232,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           if (!isOpen0) {
             var rect0 = bizMenuBtn.getBoundingClientRect();
             dd.style.top = (rect0.bottom+4)+'px';
-            dd.style.right = (window.innerWidth-rect0.right)+'px';
+            dd.style.right = Math.max(0, Math.min(window.innerWidth - rect0.right, window.innerWidth - 218)) + 'px';
             dd.style.left = '';
             dd.classList.add('open');
             setTimeout(function(){

@@ -1905,6 +1905,9 @@ body.gh-has-injected-nav #biz-detail-root {
   border-radius: 14px;
   padding: 6px;
   min-width: 210px;
+  max-width: calc(100vw - 16px);
+  max-height: min(280px, 60vh);
+  overflow-y: auto;
   z-index: 9999;
   box-shadow: 0 10px 40px rgba(0,0,0,.55);
   opacity: 0;

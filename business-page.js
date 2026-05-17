@@ -2270,7 +2270,7 @@
         // Position fixed relative to viewport to escape any overflow:hidden parent
         var rect = btnEl.getBoundingClientRect();
         dd.style.top = (rect.bottom + 4) + 'px';
-        dd.style.right = (window.innerWidth - rect.right) + 'px';
+        dd.style.right = Math.max(0, Math.min(window.innerWidth - rect.right, window.innerWidth - 218)) + 'px';
         dd.style.left = '';
       }
       dd.classList.toggle('open', !isOpen);
