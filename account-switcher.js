@@ -288,8 +288,13 @@
     dropdown.setAttribute('role', 'menu');
     wrap.appendChild(dropdown);
 
-    // Try replacing #authNavUser (the account.js element) if supplied
-    if (replaceTarget && replaceTarget.parentNode) {
+    // 1. Social redesign slot (#ghActorBtnSlot injected by geohub-social-redesign.js topbar)
+    var slot = document.getElementById('ghActorBtnSlot');
+    if (slot && slot.parentNode) {
+      slot.parentNode.replaceChild(wrap, slot);
+      console.log('[AccountSwitcher] mounted — replaced #ghActorBtnSlot');
+    // 2. account.js element (#authNavUser)
+    } else if (replaceTarget && replaceTarget.parentNode) {
       replaceTarget.parentNode.replaceChild(wrap, replaceTarget);
       console.log('[AccountSwitcher] mounted — replaced #authNavUser');
     } else {
@@ -327,17 +332,31 @@
     var root = document.querySelector('nav.navbar, nav#navbar') || document.querySelector('header') || document.body;
     _observer = new MutationObserver(function() {
       if (!_user) return;
-      var authUser = document.getElementById('authNavUser');
-      var ourWrap  = document.getElementById('geo-sw-wrap');
-      // account.js injected its UI and destroyed ours → replace
-      if (authUser && !ourWrap) {
+      var ourWrap    = document.getElementById('geo-sw-wrap');
+      if (ourWrap) return; // already mounted
+      var slot       = document.getElementById('ghActorBtnSlot');
+      var authUserEl = document.getElementById('authNavUser');
+      if (slot) {
+        console.log('[AccountSwitcher] re-mounting after social topbar re-render');
+        mountWrap(null);
+      } else if (authUserEl) {
         console.log('[AccountSwitcher] re-mounting after navbar re-render');
-        mountWrap(authUser);
+        mountWrap(authUserEl);
       }
     });
     _observer.observe(root, { childList: true, subtree: true });
     console.log('[AccountSwitcher] observer started');
   }
+
+  /* ── GeoActorChanged: keep button in sync when actor is changed externally ── */
+
+  window.addEventListener('GeoActorChanged', function() {
+    updateNavbarForActor(getActiveActor());
+    if (_isOpen) {
+      var dd = document.getElementById('geo-sw-dropdown');
+      if (dd && dd.classList.contains('open')) dd.innerHTML = renderDropdown();
+    }
+  });
 
   /* ── GeoAuthReady: fired by account.js after initAuthNav() ── */
 

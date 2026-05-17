@@ -296,7 +296,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     document.body.classList.add('gh-social-body','gh-fb-inspired');
     initTheme();
     document.body.innerHTML = '<div class="gh-shell">'+topbar()+
-      '<div class="gh-layout">'+leftNav(opts.active||'')+'<main class="gh-center" id="ghCenter"></main>'+rightRail(opts.right||'')+'</div>'+createMenu()+'</div>';
+      '<div class="gh-layout">'+leftNav(opts.active||'')+'<main class="gh-center" id="ghCenter"></main>'+rightRail(opts.right||'')+'</div></div>';
     $('#ghCenter').innerHTML = opts.center || '';
     bindShell();
     updateTopUser();
@@ -305,12 +305,6 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function topbar(){
-    var c=getCachedUser();
-    var avClass='gh-avatar'+(c?'':' gh-skel');
-    var avContent=c?(c.avatar?'<img src="'+esc(c.avatar)+'" alt="" loading="eager" onerror="this.remove()">':esc(initials(c.name||''))):'';
-    var nameContent=c?esc((c.name||'').split(' ')[0]):'';
-    var nameAttr=c?'':' class="gh-skel-line"';
-    var userHref=c?('profile.html?id='+encodeURIComponent(c.uid)):'#';
     return '<header class="gh-topbar gh-hub-topbar">'+
       '<a class="gh-brand" href="feed.html"><div class="gh-brand-mark">GH</div><span>Geo<span>Hub</span></span></a>'+
       '<div class="gh-top-search"><i class="fas fa-search"></i><input id="ghGlobalSearch" placeholder="მოძებნე ადგილები, ადამიანები, ჯგუფები…"></div>'+
@@ -323,8 +317,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-top-actions">'+
         '<button class="gh-icon-btn gh-sidebar-toggle" id="ghSidebarToggle" title="Collapse sidebar"><i class="fas fa-bars-staggered"></i></button>'+
         '<button class="gh-icon-btn gh-theme-toggle" id="ghThemeToggle" title="Toggle light/dark mode"><i class="fas fa-moon"></i></button>'+
-        '<a class="gh-user-btn" href="'+userHref+'"><span class="'+avClass+'" id="ghTopAvatar">'+avContent+'</span><span id="ghTopName"'+nameAttr+'>'+nameContent+'</span></a>'+
-        '<button class="gh-create-btn" id="ghCreateBtn"><i class="fas fa-plus"></i><span>შექმნა</span></button>'+
+        '<div id="ghActorBtnSlot" class="gh-actor-btn-slot"></div>'+
       '</div></header>';
   }
 
@@ -358,8 +351,6 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function bindShell(){
-    var createBtn=$('#ghCreateBtn'), menu=$('#ghCreateMenu');
-    if(createBtn && menu){ createBtn.onclick=function(e){ e.stopPropagation(); menu.classList.toggle('open'); }; document.addEventListener('click', function(){ menu.classList.remove('open'); }); menu.onclick=function(e){ e.stopPropagation(); }; }
     var themeBtn=$('#ghThemeToggle');
     if(themeBtn){ themeBtn.onclick=function(e){ e.preventDefault(); e.stopPropagation(); applyTheme(state.theme==='dark' ? 'light' : 'dark'); }; applyTheme(state.theme); }
     var sideBtn=$('#ghSidebarToggle');

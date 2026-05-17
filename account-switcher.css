@@ -97,3 +97,46 @@
   padding: 2px 7px; border-radius: 999px;
   background: rgba(16,185,129,.15); color: #10b981; flex-shrink: 0;
 }
+
+/* ── Social redesign (gh-fb-inspired) integration ────────── */
+.gh-actor-btn-slot { display: inline-flex; align-items: center; }
+
+body.gh-fb-inspired .geo-sw-btn {
+  height: 44px;
+  border-radius: 11px;
+  background: rgba(17,30,49,.85);
+  border: 1px solid rgba(148,163,184,.12);
+  color: #eaf2ff;
+  padding: 0 14px 0 10px;
+}
+body.gh-fb-inspired .geo-sw-btn:hover {
+  background: rgba(16,185,129,.11);
+  border-color: rgba(148,163,184,.25);
+}
+
+/* ── Light mode button ───────────────────────────────────── */
+html[data-gh-theme="light"] body.gh-fb-inspired .geo-sw-btn {
+  background: #f8fafc;
+  border: 1px solid rgba(15,23,42,.08);
+  color: #0f172a;
+  box-shadow: 0 8px 22px rgba(15,23,42,.05);
+}
+html[data-gh-theme="light"] body.gh-fb-inspired .geo-sw-btn:hover {
+  background: rgba(15,23,42,.04);
+  border-color: rgba(15,23,42,.15);
+}
+
+/* ── Light mode dropdown ─────────────────────────────────── */
+html[data-gh-theme="light"] .geo-sw-dropdown {
+  background: #fff;
+  border-color: rgba(15,23,42,.1);
+  box-shadow: 0 20px 60px rgba(15,23,42,.15);
+}
+html[data-gh-theme="light"] .geo-sw-profile { color: #0f172a; }
+html[data-gh-theme="light"] .geo-sw-profile:hover { background: rgba(15,23,42,.04); }
+html[data-gh-theme="light"] .geo-sw-profile-name { color: #0f172a; }
+html[data-gh-theme="light"] .geo-sw-profile-email { color: #64748b; }
+html[data-gh-theme="light"] .geo-sw-item { color: #334155; }
+html[data-gh-theme="light"] .geo-sw-item:hover { background: rgba(15,23,42,.04); color: #0f172a; }
+html[data-gh-theme="light"] .geo-sw-divider { background: rgba(15,23,42,.07); }
+html[data-gh-theme="light"] .geo-sw-section-label { color: #94a3b8; }
