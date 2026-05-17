@@ -1650,7 +1650,6 @@
           createdAt: serverTimestamp()
         }).then(function (docRef) {
           updateDoc(doc(db, 'users', user.uid), {
-            xp: increment(Number(xpAwarded || 50)),
             visitedPlaces: increment(1),
             checkinCount: increment(1),
             updatedAt: serverTimestamp()
@@ -1708,7 +1707,6 @@
           createdAt:          serverTimestamp()
         }).then(function (docRef) {
           updateDoc(doc(db, 'users', user.uid), {
-            xp:             increment(xp),
             visitedPlaces:  increment(1),
             checkinCount:   increment(1),
             updatedAt:      serverTimestamp()
