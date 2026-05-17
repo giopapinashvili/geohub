@@ -267,7 +267,7 @@
         sub = _bz.join(' · ') || 'Business';
         badge = 'Business'; badgeClass = 'sr-badge-biz';
       } else if (type === 'place') {
-        href = 'places.html';
+        href = 'places.html?id=' + encodeURIComponent(item.id || '');
         av   = item.image || item.coverImage || '';
         name = item.name || 'Place';
         var _pl = [];
