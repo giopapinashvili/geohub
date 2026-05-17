@@ -24,6 +24,42 @@
   var _outsideClickBound = false;
   var _observer = null;
 
+  var ACTOR_KEY = 'gh_active_actor';
+
+  function getActiveActor() {
+    try { return JSON.parse(localStorage.getItem(ACTOR_KEY) || 'null'); } catch(e) { return null; }
+  }
+
+  function setActiveActor(actor) {
+    try { localStorage.setItem(ACTOR_KEY, JSON.stringify(actor)); } catch(e) {}
+    updateNavbarForActor(actor);
+    window.dispatchEvent(new CustomEvent('GeoActorChanged', { detail: actor }));
+    close();
+  }
+
+  function updateNavbarForActor(actor) {
+    var btn = document.getElementById('geo-sw-btn');
+    if (!btn) return;
+    if (!actor || actor.type === 'user') {
+      btn.innerHTML = btnLabelHtml();
+      return;
+    }
+    var biz = null;
+    for (var i = 0; i < _businesses.length; i++) {
+      if (_businesses[i].id === actor.businessId) { biz = _businesses[i]; break; }
+    }
+    if (!biz) { btn.innerHTML = btnLabelHtml(); return; }
+    var iconInner = biz.logoUrl
+      ? '<img src="'+esc(biz.logoUrl)+'" alt="" class="geo-sw-avatar" style="object-fit:cover">'
+      : '<div class="geo-sw-avatar"><i class="fas fa-store" style="font-size:.8rem"></i></div>';
+    var badge = _pendingRequests.length
+      ? '<span style="position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;border-radius:50%;width:18px;height:18px;font-size:.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--gh-bg,#0d111f);pointer-events:none">'+Math.min(_pendingRequests.length, 9)+'</span>'
+      : '';
+    btn.innerHTML = '<span style="position:relative;display:inline-flex;flex-shrink:0">'+iconInner+badge+'</span>' +
+      '<span style="max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.82rem">'+esc(biz.title||'Business')+'</span>'+
+      '<i class="fas fa-chevron-down geo-sw-chevron"></i>';
+  }
+
   /* ── helpers ───────────────────────────────────────────────── */
 
   function esc(s) {
@@ -76,6 +112,21 @@
       }
     }
 
+    var currentActor = getActiveActor();
+    var actorBanner = '';
+    if (currentActor && currentActor.type === 'business') {
+      var actingBiz = null;
+      for (var i = 0; i < _businesses.length; i++) {
+        if (_businesses[i].id === currentActor.businessId) { actingBiz = _businesses[i]; break; }
+      }
+      if (actingBiz) {
+        actorBanner = '<div style="background:rgba(16,185,129,.08);border-bottom:1px solid rgba(16,185,129,.15);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.78rem;color:#10b981">'+
+          '<span><i class="fas fa-store"></i> Acting as <strong>'+esc(actingBiz.title||'Business')+'</strong></span>'+
+          '<button onclick="event.stopPropagation();window._geoSW.switchToUser()" style="background:none;border:1px solid rgba(255,255,255,.1);color:#94a3b8;font-size:.72rem;cursor:pointer;padding:3px 8px;border-radius:6px">Switch back</button>'+
+        '</div>';
+      }
+    }
+
     var bizSection = '';
     if (_businesses.length) {
       bizSection = '<div class="geo-sw-divider"></div><div class="geo-sw-section-label">Your Pages</div>';
@@ -83,12 +134,14 @@
         var iconInner = biz.logoUrl
           ? '<img src="'+esc(biz.logoUrl)+'" alt="">'
           : '<i class="fas fa-store"></i>';
+        var isActive = currentActor && currentActor.type === 'business' && currentActor.businessId === biz.id;
         bizSection +=
-          '<a class="geo-sw-item" href="business.html?id='+esc(biz.id)+'">'+
+          '<div class="geo-sw-item" style="cursor:pointer" onclick="window._geoSW.switchToBusiness(\''+esc(biz.id)+'\')">'+
             '<div class="geo-sw-item-icon biz">'+iconInner+'</div>'+
             '<span class="geo-sw-item-name">'+esc(biz.title||'Business')+'</span>'+
-            '<span class="geo-sw-owner-pill">Owner</span>'+
-          '</a>';
+            (isActive ? '<span class="geo-sw-owner-pill" style="background:#10b981;color:#fff">Active</span>' : '<span class="geo-sw-owner-pill">Owner</span>')+
+            '<a href="business.html?id='+esc(biz.id)+'" onclick="event.stopPropagation()" style="margin-left:4px;color:#64748b;font-size:.8rem;padding:4px;border-radius:6px;display:flex;align-items:center" title="Open page"><i class="fas fa-arrow-up-right-from-square"></i></a>'+
+          '</div>';
       });
     }
 
@@ -121,7 +174,7 @@
       });
     }
 
-    return profileSection + friendReqSection + bizSection + groupSection + bottomSection;
+    return actorBanner + profileSection + friendReqSection + bizSection + groupSection + bottomSection;
   }
 
   /* ── button label HTML ─────────────────────────────────────── */
@@ -141,8 +194,7 @@
   }
 
   function updateBtnBadge() {
-    var btn = document.getElementById('geo-sw-btn');
-    if (btn) btn.innerHTML = btnLabelHtml();
+    updateNavbarForActor(getActiveActor());
   }
 
   /* ── toggle ────────────────────────────────────────────────── */
@@ -336,7 +388,7 @@
     }).then(function(results) {
       if (!results) return;
       _businesses = results.filter(Boolean);
-      // Refresh button label in dropdown if open
+      updateNavbarForActor(getActiveActor());
       if (_isOpen) {
         var dd = document.getElementById('geo-sw-dropdown');
         if (dd && dd.classList.contains('open')) dd.innerHTML = renderDropdown();
@@ -466,7 +518,20 @@
           .then(function() { window.location.href = 'index.html'; })
           .catch(function() {});
       }
-    }
+    },
+    switchToBusiness: function(bizId) {
+      var biz = null;
+      for (var i = 0; i < _businesses.length; i++) {
+        if (_businesses[i].id === bizId) { biz = _businesses[i]; break; }
+      }
+      if (!biz || !_user) return;
+      setActiveActor({ type: 'business', businessId: bizId, ownerUid: _user.uid, title: biz.title || 'Business', logoUrl: biz.logoUrl || '' });
+    },
+    switchToUser: function() {
+      if (!_user) return;
+      setActiveActor({ type: 'user', uid: _user.uid });
+    },
+    getActor: getActiveActor
   };
 
   if (window.GeoFirebase && window.GeoFirebase.db) init(window.GeoFirebase);

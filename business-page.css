@@ -1892,15 +1892,13 @@ body.biz-detail-active .mobile-menu:not(.open) {
 }
 
 .biz-post-menu-dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
+  position: fixed;
   background: #1a2540;
   border: 1px solid rgba(255,255,255,.13);
   border-radius: 14px;
   padding: 6px;
   min-width: 210px;
-  z-index: 700;
+  z-index: 9999;
   box-shadow: 0 10px 40px rgba(0,0,0,.55);
   opacity: 0;
   pointer-events: none;

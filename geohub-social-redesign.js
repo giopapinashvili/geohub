@@ -227,6 +227,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function fs(){ return GF() && GF().fs; }
   function db(){ return GF() && GF().db; }
   function ready(cb){ if(window.GeoSocial && window.GeoFirebase) return cb(); window.addEventListener('GeoSocialReady', function(){ cb(); }, { once:true }); }
+  function getActiveActor(){ try{ return JSON.parse(localStorage.getItem('gh_active_actor')||'null'); }catch(e){ return null; } }
+  function buildActorExtra(){
+    var actor=getActiveActor();
+    if(!actor||actor.type!=='business') return {};
+    var u=authUser();
+    return { authorType:'business', businessId:actor.businessId, authorId:actor.businessId, authorName:actor.title||'Business', authorAvatar:actor.logoUrl||'', createdByUid:u?u.uid:'' };
+  }
   function requireLogin(){ if(authUser()) return true; if(GS()) GS().requireAuth(); else toast('შესვლა აუცილებელია', 'error'); return false; }
   function currentUserInfo(){ var u=authUser(); return { uid:u && u.uid, name:u ? (u.displayName || (u.email||'').split('@')[0] || 'GeoHub User') : 'Guest', avatar:u ? (u.photoURL || '') : ''}; }
   function canSeePost(p){
@@ -358,7 +365,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var sideBtn=$('#ghSidebarToggle');
     if(sideBtn){ sideBtn.onclick=function(e){ e.preventDefault(); e.stopPropagation(); state.sidebarCollapsed=!state.sidebarCollapsed; document.body.classList.toggle('gh-sidebar-collapsed', state.sidebarCollapsed); sideBtn.setAttribute('aria-pressed', state.sidebarCollapsed ? 'true' : 'false'); sideBtn.title = state.sidebarCollapsed ? 'Expand sidebars' : 'Collapse sidebars'; }; }
     document.addEventListener('click', function(e){
-      if(e.target.closest('[data-create-post]')) openPostModal({});
+      if(e.target.closest('[data-create-post]')) openPostModal(buildActorExtra());
       if(e.target.closest('[data-create-story]')) openStoryModal();
       if(e.target.closest('#ghNotifBtn')) openNotifications();
       var notif=e.target.closest('[data-notif]');
@@ -667,7 +674,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if($('#ghPollAddOpt')) $('#ghPollAddOpt').onclick=function(){
       var opts=$all('[data-poll-opt]','#ghPollOpts'); if(opts.length>=6) return;
       var inp=document.createElement('input'); inp.className='gh-input'; inp.style.marginBottom='7px'; inp.dataset.pollOpt=''; inp.placeholder='Option '+(opts.length+1);
-      $('#ghPollOpts').insertBefore(inp, this);
+      $('#ghPollOpts').appendChild(inp);
     };
 
     var ta=$('#ghPostText');
@@ -953,7 +960,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   var RX_EMOJIS = { like:'👍', love:'❤️', haha:'😂', wow:'😮', sad:'😢', angry:'😡' };
 
   function postCard(p, options){
-    options=options||{}; var name=p.authorName||p.userName||p.businessName||'GeoHub User'; var av=p.authorAvatar||p.userPhotoURL||p.logoUrl||''; var imgUrl=p.imageUrl||p.mediaUrl||p.photoUrl||''; var pid=p.id; var target='';
+    options=options||{}; var name=p.authorName||p.userName||p.businessName||'GeoHub User'; var av=p.authorAvatar||p.userPhotoURL||p.logoUrl||''; var imgUrl=p.imageUrl||p.mediaUrl||p.photoUrl||(p.mediaUrls&&p.mediaUrls[0])||''; var pid=p.id; var target='';
     var authorHref = authorLinkFor(p);
     var authorId = p.authorId || p.userId || p.createdByUserId || p.createdBy || '';
     var avatarHtml = (av?img(av,name):esc(initials(name)));
@@ -1523,39 +1530,49 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function loadFeedRightSidebar(){
     ready(function(){
-      var u=authUser();
-      var onlineBox=$('#ghOnlineFriendsList');
-      var pagesBox=$('#ghSuggestedPages');
-      var contactsBox=$('#ghContactsList');
-      if(!u){
-        if(onlineBox) onlineBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see online contacts</div>';
-        if(pagesBox) pagesBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see suggestions</div>';
-        if(contactsBox) contactsBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see contacts</div>';
+      var auth = GF() && GF().auth;
+      if(!auth){
+        var ob=$('#ghOnlineFriendsList'); if(ob) ob.innerHTML='<div class="gh-muted" style="font-size:.82rem">Unavailable</div>';
+        var pb=$('#ghSuggestedPages'); if(pb) pb.innerHTML='<div class="gh-muted" style="font-size:.82rem">Unavailable</div>';
+        var cb=$('#ghContactsList'); if(cb) cb.innerHTML='<div class="gh-muted" style="font-size:.82rem">Unavailable</div>';
         return;
       }
+      // onAuthStateChanged fires once auth is resolved (currentUser may still be null even if ready() fired)
+      var unsub = auth.onAuthStateChanged(function(u){
+        unsub();
+        var onlineBox=$('#ghOnlineFriendsList');
+        var pagesBox=$('#ghSuggestedPages');
+        var contactsBox=$('#ghContactsList');
+        if(!u){
+          if(onlineBox) onlineBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see online contacts</div>';
+          if(pagesBox) pagesBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see suggestions</div>';
+          if(contactsBox) contactsBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see contacts</div>';
+          return;
+        }
 
-      var fiveMinsAgo=new Date(Date.now()-5*60*1000);
-      fs().getDocs(fs().query(fs().collection(db(),'users'), fs().where('lastSeen','>',fiveMinsAgo), fs().limit(15))).then(function(snap){
-        var box=$('#ghOnlineFriendsList'); if(!box) return;
-        var items=[]; snap.forEach(function(d){ if(d.id!==u.uid) items.push(Object.assign({id:d.id},d.data())); });
-        if(!items.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">No friends online</div>'; return; }
-        box.innerHTML='<div class="gh-contacts-list">'+items.slice(0,8).map(function(p){
-          var name=p.fullName||p.displayName||p.name||'User';
-          var av=p.avatar||p.photoURL||'';
-          return '<a class="gh-contact-row" href="messages.html?with='+esc(p.id)+'"><span class="gh-avatar" style="width:32px;height:32px">'+(av?img(av,name):esc(initials(name)))+'</span><span class="gh-contact-name">'+esc(name)+'</span><span class="gh-online-dot"></span></a>';
-        }).join('')+'</div>';
-      }).catch(function(){ var box=$('#ghOnlineFriendsList'); if(box) box.innerHTML='<div class="gh-muted" style="font-size:.82rem">Online list unavailable</div>'; });
+        var fiveMinsAgo=new Date(Date.now()-5*60*1000);
+        fs().getDocs(fs().query(fs().collection(db(),'users'), fs().where('lastSeen','>',fiveMinsAgo), fs().limit(15))).then(function(snap){
+          var box=$('#ghOnlineFriendsList'); if(!box) return;
+          var items=[]; snap.forEach(function(d){ if(d.id!==u.uid) items.push(Object.assign({id:d.id},d.data())); });
+          if(!items.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">No friends online</div>'; return; }
+          box.innerHTML='<div class="gh-contacts-list">'+items.slice(0,8).map(function(p){
+            var name=p.fullName||p.displayName||p.name||'User';
+            var av=p.avatar||p.photoURL||'';
+            return '<a class="gh-contact-row" href="messages.html?with='+esc(p.id)+'"><span class="gh-avatar" style="width:32px;height:32px">'+(av?img(av,name):esc(initials(name)))+'</span><span class="gh-contact-name">'+esc(name)+'</span><span class="gh-online-dot"></span></a>';
+          }).join('')+'</div>';
+        }).catch(function(){ var box=$('#ghOnlineFriendsList'); if(box) box.innerHTML='<div class="gh-muted" style="font-size:.82rem">Online list unavailable</div>'; });
 
-      getLatest('businesses',6).then(function(items){
-        var box=$('#ghSuggestedPages'); if(!box) return;
-        if(!items.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">No business pages yet</div>'; return; }
-        box.innerHTML='<div class="gh-mini-list">'+items.slice(0,3).map(function(b){
-          var title=b.title||b.name||'Business'; var logo=b.logoUrl||'';
-          return '<div class="gh-mini-item"><span class="gh-mini-thumb">'+(logo?img(logo,title):'<i class="fas fa-store"></i>')+'</span><div style="flex:1"><strong>'+esc(title)+'</strong><span>'+esc(b.category||'Business')+'</span></div><button class="gh-btn sm ghost" onclick="location.href=\'business.html?id='+esc(b.id)+'\'">View</button></div>';
-        }).join('')+'</div>';
-      }).catch(function(){ var box=$('#ghSuggestedPages'); if(box) box.innerHTML='<div class="gh-muted" style="font-size:.82rem">Suggested pages unavailable</div>'; });
+        getLatest('businesses',6).then(function(items){
+          var box=$('#ghSuggestedPages'); if(!box) return;
+          if(!items.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">No business pages yet</div>'; return; }
+          box.innerHTML='<div class="gh-mini-list">'+items.slice(0,3).map(function(b){
+            var title=b.title||b.name||'Business'; var logo=b.logoUrl||'';
+            return '<div class="gh-mini-item"><span class="gh-mini-thumb">'+(logo?img(logo,title):'<i class="fas fa-store"></i>')+'</span><div style="flex:1"><strong>'+esc(title)+'</strong><span>'+esc(b.category||'Business')+'</span></div><button class="gh-btn sm ghost" onclick="location.href=\'business.html?id='+esc(b.id)+'\'">View</button></div>';
+          }).join('')+'</div>';
+        }).catch(function(){ var box=$('#ghSuggestedPages'); if(box) box.innerHTML='<div class="gh-muted" style="font-size:.82rem">Suggested pages unavailable</div>'; });
 
-      loadContactsList(u.uid);
+        loadContactsList(u.uid);
+      });
     });
   }
 
@@ -1592,8 +1609,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }).join('')+'</div>';
   }
 
-  function renderFeed(){
+  function getFeedComposerActor(){
+    var actor=getActiveActor();
+    if(actor&&actor.type==='business') return { name:actor.title||'Business', avatar:actor.logoUrl||'' };
     var c=getCachedUser();
+    return c||null;
+  }
+
+  function renderFeed(){
+    var c=getFeedComposerActor();
     var compAvClass='gh-avatar'+(c?'':' gh-skel');
     var compAvContent=c?(c.avatar?'<img src="'+esc(c.avatar)+'" alt="" loading="eager" onerror="this.remove()">':esc(initials(c.name||''))):'';
     shell({ active:'feed',
@@ -1618,6 +1642,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       setupSafetyListener(paint);
       setupAudienceAccess(paint);
       GS().listenFeed(function(posts){ lastPosts=posts; paint(); }, 20);
+    });
+    window.addEventListener('GeoActorChanged', function(){
+      var ca=$('#ghComposerAvatar'); if(!ca) return;
+      var a=getFeedComposerActor();
+      ca.className='gh-avatar';
+      ca.innerHTML=a?(a.avatar?'<img src="'+esc(a.avatar)+'" alt="" loading="eager" onerror="this.remove()">':esc(initials(a.name||''))):'';
     });
   }
 
@@ -3768,6 +3798,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         text:clean,
         mediaUrl:mediaUrl||null,
         imageUrl:mediaUrl||null,
+        mediaUrls:mediaUrl?[mediaUrl]:[],
         visibility:extra.visibility||'public',
         mentions:extra.mentions||extractMentions(clean),
         taggedUserIds:extra.taggedUserIds||[],
@@ -3776,7 +3807,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         targetId:extra.targetId||user.uid,
         authorType:extra.authorType||'user',
         authorId:extra.authorId||user.uid,
+        businessId:extra.businessId||null,
         userId:user.uid,
+        createdByUid:user.uid,
         createdByUserId:extra.createdByUserId||user.uid,
         authorName:extra.authorName||me.name,
         authorAvatar:extra.authorAvatar||me.avatar,
@@ -3950,6 +3983,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(PAGE==='groups' || PATH==='groups.html') return renderGroups();
     if(PAGE==='add-business' || PATH==='add-business.html') return patchAddBusinessPage();
     if(PAGE==='notifications' || PATH==='notifications.html') return renderNotifications();
+    if(PAGE==='profile' || PATH==='profile.html') return; // profile.js renders profile
     return renderComingSoon();
   }
 

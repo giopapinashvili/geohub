@@ -2235,6 +2235,13 @@
       var dd = document.getElementById('biz-pmenu-' + postId);
       if (!dd) return;
       var isOpen = dd.classList.contains('open');
+      if (!isOpen && btnEl) {
+        // Position fixed relative to viewport to escape any overflow:hidden parent
+        var rect = btnEl.getBoundingClientRect();
+        dd.style.top = (rect.bottom + 4) + 'px';
+        dd.style.right = (window.innerWidth - rect.right) + 'px';
+        dd.style.left = '';
+      }
       dd.classList.toggle('open', !isOpen);
       if (!isOpen) {
         // Close on next outside click
