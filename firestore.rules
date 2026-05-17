@@ -56,6 +56,14 @@ service cloud.firestore {
       ]);
     }
 
+    // Validates searchHistory field when it is being modified on a user document.
+    // Must be a list of at most 10 items. Does not fire when searchHistory is untouched.
+    function searchHistoryValid() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['searchHistory'])
+        || (request.resource.data.searchHistory is list
+            && request.resource.data.searchHistory.size() <= 10);
+    }
+
     // On creation a new user document must not include any admin/economy field.
     // Prevents bootstrapping an elevated account before any CF or admin action.
     function userCreateFieldsSafe() {
@@ -242,8 +250,8 @@ service cloud.firestore {
       allow create: if isOwner(userId) && userCreateFieldsSafe();
 
       // Update: owner may edit display/bio fields but never economy or admin
-      // fields.  Admin may change anything.
-      allow update: if (isOwner(userId) && userAdminOnlyFields()) || isAdmin();
+      // fields.  Admin may change anything.  searchHistory must be a list ≤10.
+      allow update: if (isOwner(userId) && userAdminOnlyFields() && searchHistoryValid()) || isAdmin();
 
       allow delete: if isAdmin();
 
