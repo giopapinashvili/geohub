@@ -1628,3 +1628,29 @@ body.gh-has-injected-nav.page-messages .messages-page{left:252px!important}
 .gh-search-loading,.gh-search-empty{padding:13px 14px;font-size:.83rem;color:var(--gh-muted);display:flex;align-items:center;gap:8px}
 .gh-search-empty strong{color:var(--gh-text)}
 @media(max-width:920px){.gh-search-drop{border-radius:10px;max-height:300px}}
+
+/* ── Onboarding / Welcome Card ─────────────────────────────── */
+.gh-onboard-card{position:relative;border:1px solid rgba(16,185,129,.22);border-radius:18px;background:linear-gradient(135deg,rgba(16,185,129,.07) 0%,rgba(59,130,246,.05) 100%);padding:26px 24px 22px;margin-bottom:14px;overflow:hidden}
+.gh-onboard-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(16,185,129,.08),transparent 55%);pointer-events:none}
+.gh-onboard-x{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--gh-muted);font-size:.8rem;transition:background .12s}
+.gh-onboard-x:hover{background:rgba(255,255,255,.12)}
+.gh-onboard-hero{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.gh-onboard-globe{font-size:2rem;line-height:1}
+.gh-onboard-title{font-size:1.05rem;font-weight:800;color:var(--gh-text);margin:0 0 2px}
+.gh-onboard-desc{font-size:.83rem;color:var(--gh-muted);margin:0}
+.gh-onboard-steps{display:flex;flex-direction:column;gap:8px}
+.gh-onboard-step{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);text-decoration:none;color:var(--gh-text);font-size:.83rem;font-weight:600;transition:background .12s}
+.gh-onboard-step:hover{background:rgba(255,255,255,.09)}
+.gh-onboard-step i{width:18px;text-align:center;color:var(--gh-green)}
+.gh-onboard-step .gh-onboard-arrow{margin-left:auto;color:var(--gh-muted);font-size:.72rem}
+@keyframes gh-onboard-out{to{opacity:0;transform:translateY(-10px);max-height:0;padding:0;margin:0;border:0}}
+.gh-onboard-card.dismissing{animation:gh-onboard-out .3s ease forwards;pointer-events:none;overflow:hidden}
+
+/* ── Profile Completion Prompt ────────────────────────────── */
+.gh-profile-prompt{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid rgba(251,191,36,.2);border-radius:14px;background:rgba(251,191,36,.05);margin-bottom:14px}
+.gh-profile-prompt i{color:#f59e0b;font-size:1.1rem}
+.gh-profile-prompt-body{flex:1;min-width:0}
+.gh-profile-prompt-body strong{display:block;font-size:.85rem;color:var(--gh-text)}
+.gh-profile-prompt-body span{font-size:.78rem;color:var(--gh-muted)}
+.gh-profile-prompt-btn{flex-shrink:0;padding:6px 14px;border-radius:9px;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.3);color:#f59e0b;font-size:.78rem;font-weight:700;cursor:pointer;text-decoration:none}
+@media(max-width:540px){.gh-onboard-card{padding:18px 14px 16px}.gh-onboard-steps{gap:6px}.gh-profile-prompt{flex-wrap:wrap}}

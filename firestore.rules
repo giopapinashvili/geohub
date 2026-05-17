@@ -1063,16 +1063,9 @@ service cloud.firestore {
 
     // ── UI STATE & FLAGS ──────────────────────────────────────────────────────
 
-    match /userUiState/{stateId} {
-      allow read: if signedIn()
-        && (resource.data.get('uid', '') == uid() || isAdmin());
-      allow create: if signedIn() && request.resource.data.get('uid', '') == uid();
-      allow update: if signedIn()
-        && (resource.data.get('uid', '') == uid() || isAdmin())
-        // uid field is immutable
-        && request.resource.data.get('uid', '') == resource.data.get('uid', '');
-      allow delete: if signedIn()
-        && (resource.data.get('uid', '') == uid() || isAdmin());
+    match /userUiState/{userId} {
+      // Document ID is the user's UID — owner-only access.
+      allow read, write: if isOwner(userId) || isAdmin();
     }
     match /adminFlags/{flagId} {
       allow read: if true;

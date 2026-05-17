@@ -2055,6 +2055,76 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     return c||null;
   }
 
+  // ── Onboarding helpers ────────────────────────────────────────────────────
+
+  function _loadUiState(uid, cb){
+    var gf=GF(); if(!gf||!gf.fs||!gf.db){ cb({}); return; }
+    gf.fs.getDoc(gf.fs.doc(gf.db,'userUiState',uid)).then(function(snap){
+      cb(snap.exists() ? snap.data() : {});
+    }).catch(function(){ cb({}); });
+  }
+
+  function _saveUiState(uid, updates){
+    var gf=GF(); if(!gf||!gf.fs||!gf.db) return;
+    gf.fs.setDoc(gf.fs.doc(gf.db,'userUiState',uid), updates, {merge:true}).catch(function(){});
+  }
+
+  function maybeShowOnboarding(slot){
+    if(!slot) return;
+    var gf=GF(); if(!gf||!gf.auth||!gf.authFns) return;
+    var unsub=gf.authFns.onAuthStateChanged(gf.auth, function(fbUser){
+      unsub();
+      if(!fbUser) return;
+      var uid=fbUser.uid;
+      _loadUiState(uid, function(st){
+        var html='';
+        if(!st.onboardingDismissed){
+          html+='<div class="gh-onboard-card" id="ghOnboardCard">'+
+            '<button class="gh-onboard-x" onclick="(function(){'+
+              'var c=document.getElementById(\'ghOnboardCard\');'+
+              'if(c){c.classList.add(\'dismissing\');setTimeout(function(){c.remove();},310);}'+
+              'window._ghSaveUiState&&window._ghSaveUiState(\''+esc(uid)+'\',{onboardingDismissed:true});'+
+            '})()"><i class="fas fa-times"></i></button>'+
+            '<div class="gh-onboard-hero"><span class="gh-onboard-globe">🌍</span><div>'+
+              '<p class="gh-onboard-title">Welcome to GeoHub!</p>'+
+              '<p class="gh-onboard-desc">Georgia\'s real community platform — discover, share, connect.</p>'+
+            '</div></div>'+
+            '<div class="gh-onboard-steps">'+
+              '<a class="gh-onboard-step" href="profile.html"><i class="fas fa-user"></i>Complete your profile<i class="fas fa-chevron-right gh-onboard-arrow"></i></a>'+
+              '<a class="gh-onboard-step" href="places.html"><i class="fas fa-map-marker-alt"></i>Explore real places in Georgia<i class="fas fa-chevron-right gh-onboard-arrow"></i></a>'+
+              '<a class="gh-onboard-step" href="groups.html"><i class="fas fa-users"></i>Join or create a group<i class="fas fa-chevron-right gh-onboard-arrow"></i></a>'+
+              '<a class="gh-onboard-step" href="events.html"><i class="fas fa-calendar-alt"></i>Find upcoming events<i class="fas fa-chevron-right gh-onboard-arrow"></i></a>'+
+              '<button class="gh-onboard-step" data-create-post><i class="fas fa-pen"></i>Share your first post<i class="fas fa-chevron-right gh-onboard-arrow"></i></button>'+
+            '</div>'+
+          '</div>';
+        }
+        var missingPhoto=!fbUser.photoURL;
+        var missingName=!fbUser.displayName||fbUser.displayName.trim()==='';
+        if(!st.profilePromptDismissed && (missingPhoto||missingName)){
+          var missing=missingPhoto&&missingName?'photo and display name':missingPhoto?'profile photo':'display name';
+          html+='<div class="gh-profile-prompt" id="ghProfilePrompt">'+
+            '<i class="fas fa-user-circle"></i>'+
+            '<div class="gh-profile-prompt-body">'+
+              '<strong>Finish setting up your profile</strong>'+
+              '<span>Add your '+esc(missing)+' so others can find you.</span>'+
+            '</div>'+
+            '<a class="gh-profile-prompt-btn" href="profile.html">Update</a>'+
+            '<button class="gh-profile-prompt-btn" style="margin-left:6px;background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);color:var(--gh-muted)" onclick="(function(){'+
+              'var e=document.getElementById(\'ghProfilePrompt\');if(e)e.remove();'+
+              'window._ghSaveUiState&&window._ghSaveUiState(\''+esc(uid)+'\',{profilePromptDismissed:true});'+
+            '})()">Dismiss</button>'+
+          '</div>';
+        }
+        if(html){
+          slot.innerHTML=html;
+          var btn=slot.querySelector('[data-create-post]');
+          if(btn) btn.onclick=function(){ openCreatePostModal&&openCreatePostModal(); };
+        }
+      });
+    });
+    window._ghSaveUiState=_saveUiState;
+  }
+
   function renderFeed(){
     var c=getFeedComposerActor();
     var compAvClass='gh-avatar'+(c?'':' gh-skel');
@@ -2064,15 +2134,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       center:
         '<section class="gh-card gh-story-strip-card"><div class="gh-stories" id="ghStories"></div></section>'+
         '<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="'+compAvClass+'" id="ghComposerAvatar">'+compAvContent+'</span><button class="gh-composer-fake" data-create-post>რას აზიარებ დღეს?</button></div><div class="gh-composer-actions"><button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Place</button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:#38bdf8"></i> Business</button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:#f59e0b"></i> Event</button></div></section>'+
+        '<div id="ghWelcomeSlot"></div>'+
         '<div id="ghFeedList">'+skelPostCard()+skelPostCard()+skelPostCard()+'</div>'
     });
     loadStories('#ghStories');
     loadFeedRightSidebar();
     ready(function(){
+      maybeShowOnboarding($('#ghWelcomeSlot'));
       var list=$('#ghFeedList'); bindPostInteractions(list); var lastPosts=[];
       function paint(){
         var visible=lastPosts.filter(canSeePost);
-        if(!visible.length){ list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-seedling"></i><h3>Feed is empty</h3><p>Create the first real post or adjust hidden/blocked filters.</p><button class="gh-btn" data-create-post><i class="fas fa-plus"></i>Create post</button></div>'; return; }
+        if(!visible.length){ list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-seedling"></i><h3>Feed is empty</h3><p>Be the first to post something real, or explore GeoHub below.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="gh-btn" data-create-post><i class="fas fa-plus"></i>Create post</button><a class="gh-btn ghost" href="places.html"><i class="fas fa-map-marker-alt"></i>Explore places</a><a class="gh-btn ghost" href="groups.html"><i class="fas fa-users"></i>Join groups</a></div></div>'; return; }
         list.innerHTML=visible.map(function(p){ return postCard(p); }).join('');
         visible.forEach(function(p){ try{ hydrateReactionState(p.id); loadReactionBreakdown(p.id); }catch(e){} });
         hydrateSharedPreviews(list);
