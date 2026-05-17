@@ -146,6 +146,14 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/groupMembers/$(groupId + '_' + request.auth.uid)).data.get('role', 'member') in ['owner', 'admin'];
     }
 
+    // True when the group's privacy field is 'public' (or absent).
+    // Used to gate subcollection reads: private/secret group content
+    // is only visible to members and admins.
+    // If the group document does not exist, get() throws → false (safe deny).
+    function isGroupPublic(groupId) {
+      return get(/databases/$(database)/documents/groups/$(groupId)).data.get('privacy', 'public') == 'public';
+    }
+
     // Business owner of the post's business can moderate comments.
     function isBizOwnerOfPost(postId) {
       let bizId = get(/databases/$(database)/documents/posts/$(postId)).data.get('businessId', '');
@@ -666,11 +674,11 @@ service cloud.firestore {
       }
 
       match /events/{eventId} {
-        allow read: if true;
+        allow read: if isGroupPublic(groupId) || isGroupMember(groupId) || isAdmin();
         allow create, update, delete: if isAdmin() || isGroupManager(groupId);
 
         match /rsvps/{rsvpUserId} {
-          allow read: if true;
+          allow read: if isGroupPublic(groupId) || isGroupMember(groupId) || isAdmin();
           allow create, update: if isOwner(rsvpUserId)
             && request.resource.data.get('userId', rsvpUserId) == uid();
           allow delete: if isAdmin() || isOwner(rsvpUserId) || isGroupManager(groupId);
@@ -678,7 +686,7 @@ service cloud.firestore {
       }
 
       match /files/{fileId} {
-        allow read: if true;
+        allow read: if isGroupPublic(groupId) || isGroupMember(groupId) || isAdmin();
         allow create: if signedIn()
           && request.resource.data.get('uploaderId', '') == uid();
         allow update, delete: if isAdmin()
@@ -687,7 +695,7 @@ service cloud.firestore {
       }
 
       match /chatMessages/{messageId} {
-        allow read: if true;
+        allow read: if isGroupPublic(groupId) || isGroupMember(groupId) || isAdmin();
         allow create: if signedIn()
           && request.resource.data.get('senderId', '') == uid();
         allow update, delete: if isAdmin()
