@@ -1402,9 +1402,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function updateReactionUi(card,type){
     if(!card) return;
-    var like=card.querySelector('[data-like]');
-    if(like){ like.classList.toggle('active',!!type); like.innerHTML=(type==='love'?'❤️ Love':type==='haha'?'😂 Haha':type==='wow'?'😮 Wow':type==='sad'?'😢 Sad':type==='angry'?'😡 Angry':'<i class="fas fa-thumbs-up"></i> Like'); }
-    $all('[data-reaction]',card).forEach(function(b){ b.classList.toggle('active',b.dataset.reaction===type); });
+    var pid=card.dataset&&card.dataset.postId;
+    var targets=pid?Array.from(document.querySelectorAll('[data-post-id="'+CSS.escape(pid)+'"]')):[card];
+    targets.forEach(function(c){
+      var like=c.querySelector('[data-like]');
+      if(like){ like.classList.toggle('active',!!type); like.innerHTML=(type==='love'?'❤️ Love':type==='haha'?'😂 Haha':type==='wow'?'😮 Wow':type==='sad'?'😢 Sad':type==='angry'?'😡 Angry':'<i class="fas fa-thumbs-up"></i> Like'); }
+      $all('[data-reaction]',c).forEach(function(b){ b.classList.toggle('active',b.dataset.reaction===type); });
+    });
   }
 
   function renderSharedPreviewData(p){
@@ -1453,18 +1457,22 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function renderCommentsForPid(pid, items){
-    var currentCard=document.querySelector('[data-post-id="'+CSS.escape(pid)+'"]');
-    if(!currentCard) return;
-    var currentList=currentCard.querySelector('[data-comments-list]'); if(!currentList) return;
-    var currentBox=currentCard.querySelector('[data-comments]');
-    if(currentBox && state.openCommentPids[pid]) currentBox.hidden=false;
+    var cards=document.querySelectorAll('[data-post-id="'+CSS.escape(pid)+'"]');
+    if(!cards.length) return;
     var visible=items.filter(function(c){
       if(c.status==='deleted') return false;
       var uid=c.authorId||c.userId||'';
       return !uid||(state.blockedUserIds.indexOf(uid)===-1&&state.mutedUserIds.indexOf(uid)===-1);
     });
-    if(!visible.length){ currentList.innerHTML='<div class="gh-small" style="padding:10px 6px">No comments yet.</div>'; return; }
-    currentList.innerHTML=visible.map(function(c){ return commentCard(pid,c); }).join('');
+    var html=visible.length
+      ? visible.map(function(c){ return commentCard(pid,c); }).join('')
+      : '<div class="gh-small" style="padding:10px 6px">No comments yet.</div>';
+    cards.forEach(function(card){
+      var list=card.querySelector('[data-comments-list]'); if(!list) return;
+      var box=card.querySelector('[data-comments]');
+      if(box && state.openCommentPids[pid]) box.hidden=false;
+      list.innerHTML=html;
+    });
     visible.forEach(function(c){ loadReplies(pid,c.id); });
   }
 
@@ -1537,22 +1545,27 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function updatePollUi(pid, opts, totalVotes, myOptId, card){
-    var pollDiv=(card&&card.querySelector('[data-poll-pid]'))||
-      document.querySelector('[data-post-id="'+CSS.escape(pid)+'"] [data-poll-pid]');
-    if(!pollDiv) return;
-    var totalV=Math.max(0,Number(totalVotes||0));
-    $all('.gh-poll-opt',pollDiv).forEach(function(btn){
-      var oId=btn.dataset.optId||'';
-      var opt=null; for(var i=0;i<opts.length;i++){ if(opts[i].id===oId){opt=opts[i];break;} }
-      var votes=opt?Math.max(0,Number(opt.votes||0)):0;
-      var pct=totalV>0?Math.round(votes/totalV*100):0;
-      var bar=btn.querySelector('.gh-poll-bar'); if(bar) bar.style.width=pct+'%';
-      var pctEl=btn.querySelector('.gh-poll-pct'); if(pctEl) pctEl.textContent=pct+'%';
-      btn.classList.toggle('selected',!!(oId&&oId===myOptId));
+    var pollDivs=[];
+    document.querySelectorAll('[data-post-id="'+CSS.escape(pid)+'"]').forEach(function(c){
+      var pd=c.querySelector('[data-poll-pid]'); if(pd) pollDivs.push(pd);
     });
-    var footer=pollDiv.querySelector('.gh-poll-footer');
-    if(footer) footer.textContent=totalV+' vote'+(totalV===1?'':'s')+(pollDiv.querySelector('.gh-poll-opt.expired')?' · Poll ended':'');
-    if(myOptId) pollDiv.classList.add('voted');
+    if(!pollDivs.length && card){ var pd=card.querySelector('[data-poll-pid]'); if(pd) pollDivs.push(pd); }
+    if(!pollDivs.length) return;
+    var totalV=Math.max(0,Number(totalVotes||0));
+    pollDivs.forEach(function(pollDiv){
+      $all('.gh-poll-opt',pollDiv).forEach(function(btn){
+        var oId=btn.dataset.optId||'';
+        var opt=null; for(var i=0;i<opts.length;i++){ if(opts[i].id===oId){opt=opts[i];break;} }
+        var votes=opt?Math.max(0,Number(opt.votes||0)):0;
+        var pct=totalV>0?Math.round(votes/totalV*100):0;
+        var bar=btn.querySelector('.gh-poll-bar'); if(bar) bar.style.width=pct+'%';
+        var pctEl=btn.querySelector('.gh-poll-pct'); if(pctEl) pctEl.textContent=pct+'%';
+        btn.classList.toggle('selected',!!(oId&&oId===myOptId));
+      });
+      var footer=pollDiv.querySelector('.gh-poll-footer');
+      if(footer) footer.textContent=totalV+' vote'+(totalV===1?'':'s')+(pollDiv.querySelector('.gh-poll-opt.expired')?' · Poll ended':'');
+      if(myOptId) pollDiv.classList.add('voted');
+    });
   }
 
   function hydratePollVote(pid){
@@ -1561,12 +1574,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(!snap.exists()) return;
       var myOptId=(snap.data()||{}).optionId||'';
       if(!myOptId) return;
-      var card=document.querySelector('[data-post-id="'+CSS.escape(pid)+'"]'); if(!card) return;
-      var pollDiv=card.querySelector('[data-poll-pid]'); if(!pollDiv) return;
-      $all('.gh-poll-opt',pollDiv).forEach(function(btn){
-        btn.classList.toggle('selected',btn.dataset.optId===myOptId);
+      document.querySelectorAll('[data-post-id="'+CSS.escape(pid)+'"]').forEach(function(card){
+        var pollDiv=card.querySelector('[data-poll-pid]'); if(!pollDiv) return;
+        $all('.gh-poll-opt',pollDiv).forEach(function(btn){
+          btn.classList.toggle('selected',btn.dataset.optId===myOptId);
+        });
+        pollDiv.classList.add('voted');
       });
-      pollDiv.classList.add('voted');
     }).catch(function(){});
   }
 
@@ -1641,7 +1655,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var avEl=userProfileAnchor(rUid,'gh-avatar gh-reply-avatar',av,'');
     var nameEl=userProfileAnchor(rUid,'gh-profile-name-link',esc(name),'');
     var isOwn=u&&(u.uid===rUid||(r.createdByUid&&u.uid===r.createdByUid)||(r.userId&&u.uid===r.userId));
-    var delBtn=isOwn?(' · <button type="button" class="gh-cmt-act" data-delete-reply data-reply-id="'+esc(r.id)+'" data-comment-id="'+esc(r.commentId||'')+'" title="Delete reply"><i class="fas fa-trash" style="font-size:.65rem"></i></button>'):'';
+    var postCard0=document.querySelector('[data-post-id="'+CSS.escape(pid)+'"]');
+    var isBizAdmin=!!(postCard0&&postCard0.dataset.bizAdmin==='1');
+    var canDelete=isOwn||isBizAdmin;
+    var delBtn=canDelete?(' · <button type="button" class="gh-cmt-act" data-delete-reply data-reply-id="'+esc(r.id)+'" data-comment-id="'+esc(r.commentId||'')+'" title="Delete reply"><i class="fas fa-trash" style="font-size:.65rem"></i></button>'):'';
     return '<div class="gh-reply-row" data-reply-id="'+esc(r.id)+'">'+avEl+
       '<div class="gh-comment-main"><div class="gh-comment-bubble"><strong>'+nameEl+'</strong><span class="gh-cmt-text">'+esc(r.text||'')+'</span></div>'+
       '<div class="gh-small gh-comment-actions">'+timeAgo(r.createdAt)+delBtn+'</div>'+
@@ -1649,14 +1666,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function renderRepliesIntoBox(pid, cid, items){
-    var box=document.querySelector('[data-post-id="'+CSS.escape(pid)+'"] [data-replies-for="'+CSS.escape(cid)+'"]');
-    if(!box) return;
     var visible=items.filter(function(r){
       if(r.status==='deleted') return false;
       var uid=r.authorId||r.userId||'';
       return !uid||(state.blockedUserIds.indexOf(uid)===-1&&state.mutedUserIds.indexOf(uid)===-1);
     });
-    box.innerHTML=visible.length?visible.map(function(r){ return replyCard(pid,r); }).join(''):'';
+    var html=visible.length?visible.map(function(r){ return replyCard(pid,r); }).join(''):'';
+    document.querySelectorAll('[data-post-id="'+CSS.escape(pid)+'"] [data-replies-for="'+CSS.escape(cid)+'"]').forEach(function(box){
+      box.innerHTML=html;
+    });
   }
 
   function loadReplies(pid,cid){

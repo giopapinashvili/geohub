@@ -2563,7 +2563,10 @@
           mediaUrls: capturedUrls, createdAt: nowTs,
           likeCount: 0, commentCount: 0, shareCount: 0
         };
-        var card = postCardHtml(newPost, _biz);
+        var gs2 = window.GeoSocialUI;
+        var card = (gs2 && gs2.postCard)
+          ? gs2.postCard(newPost, bizPostOptions(newPost))
+          : postCardHtml(newPost, _biz);
         ['biz-posts-overview','biz-posts-all'].forEach(function(elId){
           var el = document.getElementById(elId);
           if (!el) return;
