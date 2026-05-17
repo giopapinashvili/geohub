@@ -1570,7 +1570,7 @@ body.gh-has-injected-nav.page-messages .messages-page{left:252px!important}
   body.gh-has-injected-nav.page-messages .messages-page{left:86px!important}
 }
 @media(max-width:920px){
-  body.gh-has-injected-nav.page-messages .messages-page{left:0!important}
+  body.gh-has-injected-nav.page-messages .messages-page{left:0!important;top:70px!important}
 }
 
 /* ── Shared post card extras (biz context + multi-image grid) ─── */
