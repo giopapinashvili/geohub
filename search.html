@@ -34,6 +34,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css">
   </noscript>
+  <link rel="stylesheet" href="geohub-social-redesign.css">
   <link rel="stylesheet" href="search.css">
   <link rel="stylesheet" href="chat-popup.css">
   <link rel="stylesheet" href="responsive-polish.css">
@@ -45,13 +46,14 @@
   </style>
   <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
 </head>
-<body>
+<body data-gh-page="search">
   <noscript>GeoHub requires JavaScript.</noscript>
   <script type="module" src="firebase-config.js"></script>
   <script defer src="account.js"></script>
   <script defer src="nav-cleanup.js"></script>
   <script defer src="mobile-nav.js"></script>
   <script defer src="firestore-social.js"></script>
+  <script defer src="geohub-social-redesign.js"></script>
   <script defer src="chat-popup.js"></script>
   <script defer src="geohub-production-stabilization-v1.js"></script>
   <script defer src="responsive-polish.js"></script>
@@ -83,7 +85,7 @@
     'use strict';
 
     var RECENT_KEY = 'gh_recent_searches';
-    var MAX_RECENT = 8;
+    var MAX_RECENT = 10;
     var _tab = 'all';
     var _lastResults = null;
     var _debounce = null;
@@ -117,17 +119,42 @@
     function getRecent() {
       try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch(e) { return []; }
     }
+    function _gfHistorySave(list) {
+      var gfb = window.GeoFirebase;
+      if(!gfb || !gfb.auth || !gfb.auth.currentUser) return;
+      var uid = gfb.auth.currentUser.uid;
+      var fsm = gfb.firestore || gfb.fs;
+      var ddb = gfb.db;
+      if(!fsm || !ddb || !fsm.updateDoc || !fsm.doc) return;
+      fsm.updateDoc(fsm.doc(ddb, 'users', uid), { searchHistory: list }).catch(function(){});
+    }
+    function _gfHistoryLoad(callback) {
+      var gfb = window.GeoFirebase;
+      if(!gfb || !gfb.auth || !gfb.auth.currentUser) { callback(null); return; }
+      var uid = gfb.auth.currentUser.uid;
+      var fsm = gfb.firestore || gfb.fs;
+      var ddb = gfb.db;
+      if(!fsm || !ddb || !fsm.getDoc || !fsm.doc) { callback(null); return; }
+      fsm.getDoc(fsm.doc(ddb, 'users', uid)).then(function(snap) {
+        var data = snap.exists() ? (snap.data() || {}) : {};
+        callback(Array.isArray(data.searchHistory) ? data.searchHistory : null);
+      }).catch(function() { callback(null); });
+    }
     function saveRecent(q) {
       var list = getRecent().filter(function(s) { return s !== q; });
       list.unshift(q);
-      try { localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, MAX_RECENT))); } catch(e) {}
+      list = list.slice(0, MAX_RECENT);
+      try { localStorage.setItem(RECENT_KEY, JSON.stringify(list)); } catch(e) {}
+      _gfHistorySave(list);
     }
     function removeRecent(q) {
       var list = getRecent().filter(function(s) { return s !== q; });
       try { localStorage.setItem(RECENT_KEY, JSON.stringify(list)); } catch(e) {}
+      _gfHistorySave(list);
     }
     function clearAllRecent() {
       try { localStorage.removeItem(RECENT_KEY); } catch(e) {}
+      _gfHistorySave([]);
     }
 
     /* ── Tab management ── */
@@ -416,6 +443,28 @@
     if (window.GeoSocial) { setupSafetyPrefs(); }
     else { window.addEventListener('GeoSocialReady', setupSafetyPrefs, { once: true }); }
     window.addEventListener('pagehide', function() { clearTimeout(_debounce); });
+
+    /* ── Firestore history sync (signed-in users only) ── */
+    function syncFirestoreHistory() {
+      _gfHistoryLoad(function(fsHistory) {
+        if(!fsHistory || !fsHistory.length) return;
+        // Merge: Firestore is source of truth; deduplicate with localStorage
+        var local = getRecent();
+        var merged = fsHistory.slice();
+        local.forEach(function(q) { if(merged.indexOf(q) === -1) merged.push(q); });
+        merged = merged.slice(0, MAX_RECENT);
+        try { localStorage.setItem(RECENT_KEY, JSON.stringify(merged)); } catch(e) {}
+        // Refresh discover view if user hasn't started typing
+        var inp2 = document.getElementById('srchInput');
+        if(!inp2 || !inp2.value.trim()) showDiscover();
+      });
+    }
+    if(window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser) {
+      syncFirestoreHistory();
+    } else {
+      window.addEventListener('GeoFirebaseReady', syncFirestoreHistory, { once: true });
+    }
+
     var initQ = new URLSearchParams(location.search).get('q') || '';
     if (initQ) {
       inp.value = initQ;

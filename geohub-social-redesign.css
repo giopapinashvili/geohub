@@ -1555,6 +1555,24 @@ body.gh-has-injected-nav .gh-left .gh-nav-item{justify-content:flex-start}
   body.gh-has-injected-nav .gh-left{display:none!important}
 }
 
+/* ── Search page: hide own topbar when shell nav is injected ── */
+body.gh-has-injected-nav .sr-topbar{display:none!important}
+body.gh-has-injected-nav .sr-cats-bar{top:72px}
+body.gh-has-injected-nav .sr-page{padding-top:0}
+@media(max-width:920px){
+  body.gh-has-injected-nav .sr-cats-bar{top:70px}
+}
+
+/* ── Messages page: offset fixed panel for shell sidebar ── */
+body.gh-has-injected-nav.page-messages{padding-top:0!important}
+body.gh-has-injected-nav.page-messages .messages-page{left:252px!important}
+@media(max-width:1120px){
+  body.gh-has-injected-nav.page-messages .messages-page{left:86px!important}
+}
+@media(max-width:920px){
+  body.gh-has-injected-nav.page-messages .messages-page{left:0!important}
+}
+
 /* ── Shared post card extras (biz context + multi-image grid) ─── */
 
 /* Pinned post banner */

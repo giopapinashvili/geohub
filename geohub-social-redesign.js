@@ -385,7 +385,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var _gsDrop=null, _gsTimer=null;
       function _gsClose(){ if(_gsDrop){ _gsDrop.remove(); _gsDrop=null; } }
       gs.addEventListener('keydown',function(e){
-        if(e.key==='Enter'&&gs.value.trim()){ _gsClose(); location.href='search.html?q='+encodeURIComponent(gs.value.trim()); }
+        if(e.key==='Enter'&&gs.value.trim()){
+          _gsClose();
+          var _sri=document.getElementById('srchInput');
+          if(_sri){ _sri.value=gs.value.trim(); _sri.dispatchEvent(new Event('input')); gs.blur(); }
+          else { location.href='search.html?q='+encodeURIComponent(gs.value.trim()); }
+        }
         if(e.key==='Escape'){ _gsClose(); }
       });
       document.addEventListener('click',function(e){ if(_gsDrop&&!gs.contains(e.target)&&!_gsDrop.contains(e.target)) _gsClose(); });
@@ -393,6 +398,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var q=gs.value.trim();
         clearTimeout(_gsTimer);
         if(!q){ _gsClose(); return; }
+        // On search page: drive the page's own input, skip quicksearch dropdown
+        var _sri=document.getElementById('srchInput');
+        if(_sri){ _sri.value=gs.value; _sri.dispatchEvent(new Event('input')); return; }
         _gsTimer=setTimeout(function(){
           var geo=GS();
           if(!geo||!geo.searchFirestore) return;
@@ -4334,6 +4342,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
   }
 
+  function renderSearch(){
+    injectShellNav('search');
+    // Sync URL query into topbar search so it stays consistent
+    var sri=document.getElementById('srchInput');
+    var gs2=document.getElementById('ghGlobalSearch');
+    if(sri && gs2 && sri.value) gs2.value=sri.value;
+  }
+
   function renderComingSoon(){
     var title = (PAGE || PATH.replace('.html','') || 'section').replace(/[-_]/g,' ');
     title = title.charAt(0).toUpperCase() + title.slice(1);
@@ -4352,6 +4368,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(PAGE==='groups' || PATH==='groups.html') return renderGroups();
     if(PAGE==='add-business' || PATH==='add-business.html') return patchAddBusinessPage();
     if(PAGE==='notifications' || PATH==='notifications.html') return renderNotifications();
+    if(PAGE==='search' || PATH==='search.html') return renderSearch();
+    if(PAGE==='messages' || PATH==='messages.html'){ injectShellNav('messages'); return; }
     if(PAGE==='profile' || PATH==='profile.html'){ injectShellNav('profile'); return; } // profile.js renders profile content
     return renderComingSoon();
   }
