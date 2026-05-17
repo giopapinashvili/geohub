@@ -383,7 +383,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             var items=[];
             var typeIcon={user:'fas fa-user',business:'fas fa-store',place:'fas fa-map-marker-alt',group:'fas fa-users',event:'fas fa-calendar'};
             (res.users||[]).slice(0,2).forEach(function(u){ items.push({type:'user',label:u.fullName||u.displayName||u.name||'User',sub:'@'+(u.username||u.id||''),href:'profile.html?id='+encodeURIComponent(u.id||u.uid||'')}); });
-            (res.businesses||[]).slice(0,2).forEach(function(b){ items.push({type:'business',label:b.name||'Business',sub:b.city||b.category||'Business',href:'business.html?id='+encodeURIComponent(b.id||'')}); });
+            (res.businesses||[]).filter(function(b){ return !isDeletedBiz(b); }).slice(0,2).forEach(function(b){ items.push({type:'business',label:b.name||'Business',sub:b.city||b.category||'Business',href:'business.html?id='+encodeURIComponent(b.id||'')}); });
             (res.places||[]).slice(0,1).forEach(function(p){ items.push({type:'place',label:p.name||'Place',sub:p.address||p.category||'Place',href:'places.html'}); });
             (res.groups||[]).slice(0,1).forEach(function(g){ items.push({type:'group',label:g.name||'Group',sub:(g.memberCount||0)+' members',href:'groups.html?id='+encodeURIComponent(g.id||'')}); });
             (res.events||[]).slice(0,1).forEach(function(ev){ items.push({type:'event',label:ev.name||ev.title||'Event',sub:ev.location||'Event',href:'events.html?id='+encodeURIComponent(ev.id||'')}); });
@@ -536,6 +536,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       });
     });
   }
+
+  function isDeletedBiz(b){ return !b || b.status==='deleted' || b.deleted===true || !!b.deletedAt; }
 
   function getLatest(collectionName, n){
     if(!GF()) return Promise.resolve([]);
@@ -1707,10 +1709,18 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           }).join('')+'</div>';
         }).catch(function(){ var box=$('#ghOnlineFriendsList'); if(box) box.innerHTML='<div class="gh-muted" style="font-size:.82rem">Online list unavailable</div>'; });
 
-        getLatest('businesses',6).then(function(items){
+        getLatest('businesses',20).then(function(items){
           var box=$('#ghSuggestedPages'); if(!box) return;
-          if(!items.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">No business pages yet</div>'; return; }
-          box.innerHTML='<div class="gh-mini-list">'+items.slice(0,3).map(function(b){
+          var seen={};
+          var visible=items.filter(function(b){
+            if(isDeletedBiz(b)) return false;
+            var key=(b.title||b.name||'').toLowerCase().trim();
+            if(!key||seen[key]) return false;
+            seen[key]=true;
+            return true;
+          });
+          if(!visible.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">No business pages yet</div>'; return; }
+          box.innerHTML='<div class="gh-mini-list">'+visible.slice(0,3).map(function(b){
             var title=b.title||b.name||'Business'; var logo=b.logoUrl||'';
             return '<div class="gh-mini-item"><span class="gh-mini-thumb">'+(logo?img(logo,title):'<i class="fas fa-store"></i>')+'</span><div style="flex:1"><strong>'+esc(title)+'</strong><span>'+esc(b.category||'Business')+'</span></div><button class="gh-btn sm ghost" onclick="location.href=\'business.html?id='+esc(b.id)+'\'">View</button></div>';
           }).join('')+'</div>';
@@ -1842,7 +1852,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var all=[]; state.bizFilter='all';
     function paint(){ var q=($('#ghBusinessSearch').value||'').toLowerCase(); var arr=all.filter(function(b){ var cat=(b.category||'').toLowerCase(); var ok=state.bizFilter==='all'||cat.includes(state.bizFilter)||(state.bizFilter==='online' && isOnlineBusiness(b)); if(!ok)return false; return !q || JSON.stringify(b).toLowerCase().includes(q); }); var list=$('#ghBusinessList'); if(!arr.length){list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-store"></i><h3>No businesses yet</h3><p>Add a business and GeoHub will create a page for it.</p><a href="add-business.html" class="gh-btn">Add Business</a></div>';return;} list.innerHTML='<div class="gh-grid">'+arr.map(businessListCard).join('')+'</div>'; }
     $('#ghBusinessSearch').oninput=paint; $('#ghCenter').addEventListener('click', function(e){ var f=e.target.closest('[data-biz-filter]'); if(f){ state.bizFilter=f.dataset.bizFilter; $all('[data-biz-filter]').forEach(function(x){x.classList.toggle('active',x===f);}); paint(); } var fb=e.target.closest('[data-follow-business]'); if(fb) followBusiness(fb.dataset.followBusiness); var s=e.target.closest('[data-save-item]'); if(s){ if(!requireLogin())return; GS().toggleSaveItem(s.dataset.type,s.dataset.id); } });
-    ready(function(){ var q=fs().query(fs().collection(db(),'businesses'), fs().orderBy('createdAt','desc'), fs().limit(40)); var _u=fs().onSnapshot(q,function(snap){ all=[]; snap.forEach(function(d){ var schema=window.GH||{}; var biz=schema.normBiz?schema.normBiz(d.data(),d.id):Object.assign({id:d.id},d.data()); if(biz.status==='deleted') return; all.push(biz); }); paint(); }, function(err){ $('#ghBusinessList').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Could not load businesses</h3><p>'+esc(err.message)+'</p></div>'; }); state.pageUnsubs.push(_u); });
+    ready(function(){ var q=fs().query(fs().collection(db(),'businesses'), fs().orderBy('createdAt','desc'), fs().limit(40)); var _u=fs().onSnapshot(q,function(snap){ all=[]; snap.forEach(function(d){ var schema=window.GH||{}; var biz=schema.normBiz?schema.normBiz(d.data(),d.id):Object.assign({id:d.id},d.data()); if(isDeletedBiz(biz)) return; all.push(biz); }); paint(); }, function(err){ $('#ghBusinessList').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Could not load businesses</h3><p>'+esc(err.message)+'</p></div>'; }); state.pageUnsubs.push(_u); });
   }
 
   function renderBusinessDetail(id){

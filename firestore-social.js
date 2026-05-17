@@ -2915,6 +2915,9 @@
         var seen = {};
         return arr.filter(function(x) { if (seen[x.id]) return false; seen[x.id] = 1; return true; });
       }
+      function isDeletedBiz(b) {
+        return !b || b.status === 'deleted' || b.deleted === true || !!b.deletedAt;
+      }
 
       function searchCol(col, fields) {
         if (!fields.length) return scanFallback(col);
@@ -2946,7 +2949,11 @@
       function done() { if (--pending === 0) callback(r); }
       jobs.forEach(function(job) {
         searchCol(job.col, job.fields)
-          .then(function(items) { r[job.key] = items; done(); })
+          .then(function(items) {
+            if (job.key === 'businesses') items = items.filter(function(b){ return !isDeletedBiz(b); });
+            r[job.key] = items;
+            done();
+          })
           .catch(function() { done(); });
       });
     }

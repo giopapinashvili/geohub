@@ -400,7 +400,7 @@
             if (!d.exists()) return null;
             var data = d.data();
             // Skip soft-deleted pages so they don't appear in the account switcher
-            if (data.status === 'deleted' || data.deleted === true) return null;
+            if (data.status === 'deleted' || data.deleted === true || !!data.deletedAt) return null;
             return Object.assign({id: d.id}, data);
           })
           .catch(function() { return null; });
