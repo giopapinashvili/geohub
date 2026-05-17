@@ -27,14 +27,15 @@
 }
 
 /* ── BODY / ROOT ─────────────────────────────────────────────── */
-body.biz-detail-active > *:not(#biz-detail-root):not(.navbar):not(.mobile-menu):not(.biz-modal-overlay):not(.biz-lightbox):not(#biz-toast):not(#geo-sw-wrap):not(#geo-sw-dropdown):not(#app-bottom-nav):not(#app-action-overlay):not(#app-action-sheet):not(.app-notif-container):not(#geo-cmd-overlay):not(#app-install-prompt):not(#gh-offline-banner):not(#gh-update-banner):not(script):not(noscript) {
+body.biz-detail-active > *:not(#biz-detail-root):not(.navbar):not(.mobile-menu):not(.biz-modal-overlay):not(.biz-lightbox):not(#biz-toast):not(#geo-sw-wrap):not(#geo-sw-dropdown):not(#app-bottom-nav):not(#app-action-overlay):not(#app-action-sheet):not(.app-notif-container):not(#geo-cmd-overlay):not(#app-install-prompt):not(#gh-offline-banner):not(#gh-update-banner):not(script):not(noscript):not(.gh-topbar):not(.gh-left) {
   display: none !important;
 }
 
 /* geohub-social-redesign.css sets body.gh-social-body .navbar { display:none!important }.
-   Override it with higher specificity when the business detail page is active. */
-body.biz-detail-active .navbar,
-body.biz-detail-active .navbar.navbar {
+   Override it with higher specificity when the business detail page is active WITHOUT the
+   injected shell (gh-has-injected-nav already has its own topbar). */
+body.biz-detail-active:not(.gh-has-injected-nav) .navbar,
+body.biz-detail-active:not(.gh-has-injected-nav) .navbar.navbar {
   display: flex !important;
 }
 /* Keep the mobile menu hidden until the hamburger opens it. The old rule forced
@@ -54,6 +55,10 @@ body.biz-detail-active .mobile-menu:not(.open) {
   min-height: 100vh;
   padding-bottom: 80px;
   padding-top: var(--navbar-height, 68px);
+}
+/* Injected shell already provides padding-top on body — don't double-pad */
+body.gh-has-injected-nav #biz-detail-root {
+  padding-top: 0;
 }
 
 .biz-page-wrap {
@@ -2341,4 +2346,15 @@ body.biz-detail-active .mobile-menu:not(.open) {
 /* ── RESPONSIVE: INSIGHTS ────────────────────────────────────── */
 @media (max-width: 640px) {
   .biz-insights-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── INJECTED SHELL NAV OVERRIDES ────────────────────────────── */
+/* Applied when business.html?id= loads inside the unified gh-topbar + gh-left shell */
+body.gh-has-injected-nav .biz-tabs {
+  top: 72px;
+}
+body.gh-has-injected-nav .biz-left-sidebar,
+body.gh-has-injected-nav .biz-right-sidebar {
+  top: calc(72px + 48px);
+  max-height: calc(100vh - 132px);
 }

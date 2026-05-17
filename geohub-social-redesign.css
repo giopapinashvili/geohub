@@ -1533,9 +1533,12 @@ body.gh-has-injected-nav .profile-cover{margin-top:0!important}
 body.gh-has-injected-nav .gh-left{
   position:fixed!important;top:72px;left:0;
   width:252px;height:calc(100vh - 72px);
-  overflow-y:auto;scrollbar-width:thin;
+  overflow-y:auto;scrollbar-width:none;
   z-index:999;align-self:unset
 }
+body.gh-has-injected-nav .gh-left::-webkit-scrollbar{display:none}
+body.gh-has-injected-nav .profile-identity-section .profile-tabs{top:72px!important}
+body.gh-has-injected-nav .profile-identity-section{top:unset!important}
 body.gh-has-injected-nav.gh-sidebar-collapsed .gh-left{display:none!important}
 body.gh-has-injected-nav.gh-sidebar-collapsed{padding-left:0!important}
 @media(max-width:1280px){

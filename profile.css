@@ -1,6 +1,6 @@
 /* ── Profile Cover ── */
 .profile-cover {
-  height: 280px;
+  height: clamp(260px, 32vw, 380px);
   background: linear-gradient(135deg, #0f1729 0%, #0a2a1a 40%, #071a2e 100%);
   position: relative;
   overflow: hidden;
