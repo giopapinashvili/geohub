@@ -10,6 +10,12 @@
   function esc(s) { return String(s || '').replace(/[&<>'"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]; }); }
   function fb() { return window.GeoFirebase; }
   function fs() { return fb() && fb().fs; }
+  var ADMIN_ONLY_FIELDS = ['xp','trustScore','level','verified','role','isAdmin','adminLevel','premiumUntil','pointsBalance','totalPointsEarned','totalPointsSpent','totalPointsTransferred','totalPointsReceived'];
+  function stripAdminFields(obj) {
+    var out = Object.assign({}, obj);
+    ADMIN_ONLY_FIELDS.forEach(function(k) { delete out[k]; });
+    return out;
+  }
   function checkAdminDoc(uid, cb) {
     var geo = fb(), f = fs();
     if (!geo || !f || !uid) return cb(false);
@@ -29,7 +35,7 @@
     if (!geo || !f) { currentUser = base; window.GeoCurrentUser = base; return Promise.resolve(base); }
     return f.getDoc(f.doc(geo.db, 'users', fbUser.uid)).then(function(snap) {
       if (snap.exists()) Object.assign(base, snap.data(), { uid: fbUser.uid, id: fbUser.uid, email: fbUser.email || (snap.data().email || ''), isFirebaseUser: true });
-      return f.setDoc(f.doc(geo.db, 'users', fbUser.uid), Object.assign({}, base, { updatedAt: Date.now() }), { merge: true }).then(function(){ return base; });
+      return f.setDoc(f.doc(geo.db, 'users', fbUser.uid), stripAdminFields(Object.assign({}, base, { updatedAt: Date.now() })), { merge: true }).then(function(){ return base; });
     }).catch(function(){ return base; }).then(function(profile){ currentUser = profile; window.GeoCurrentUser = profile; return profile; });
   }
 
@@ -42,7 +48,7 @@
     currentUser = merged; window.GeoCurrentUser = merged;
     var geo = fb(), f = fs();
     if (!geo || !f) return Promise.resolve(merged);
-    return f.setDoc(f.doc(geo.db, 'users', merged.uid), merged, { merge: true }).then(function(){ return merged; });
+    return f.setDoc(f.doc(geo.db, 'users', merged.uid), stripAdminFields(merged), { merge: true }).then(function(){ return merged; });
   }
 
   function doLogout() {
