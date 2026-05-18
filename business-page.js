@@ -218,7 +218,12 @@
     if (biz.email)    btns.push('<a href="mailto:'+esc(biz.email)+'" class="biz-contact-btn blue"><i class="fas fa-envelope"></i><span>Email</span></a>');
     if (biz.website) { var ws=biz.website.startsWith('http')?biz.website:'https://'+biz.website; btns.push('<a href="'+esc(ws)+'" target="_blank" rel="noopener noreferrer" class="biz-contact-btn sky"><i class="fas fa-globe"></i><span>Website</span></a>'); }
     if (biz.whatsapp||sl.whatsapp) { var wa=(biz.whatsapp||sl.whatsapp).replace(/\D/g,''); btns.push('<a href="https://wa.me/'+esc(wa)+'" target="_blank" rel="noopener noreferrer" class="biz-contact-btn teal"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></a>'); }
-    if (biz.mapsLink) btns.push('<a href="'+esc(biz.mapsLink)+'" target="_blank" rel="noopener noreferrer" class="biz-contact-btn amber"><i class="fas fa-map-location-dot"></i><span>Map</span></a>');
+    if (biz.mapsLink) {
+      btns.push('<a href="'+esc(biz.mapsLink)+'" target="_blank" rel="noopener noreferrer" class="biz-contact-btn amber"><i class="fas fa-map-location-dot"></i><span>Map</span></a>');
+    } else if (biz.address || (biz.lat && biz.lng)) {
+      var dq = biz.address || (biz.lat+','+biz.lng);
+      btns.push('<a href="https://maps.google.com/?q='+encodeURIComponent(dq)+'" target="_blank" rel="noopener noreferrer" class="biz-contact-btn amber"><i class="fas fa-map-location-dot"></i><span>Directions</span></a>');
+    }
     if (biz.instagram||sl.instagram) { var ig=biz.instagram||sl.instagram; var igUrl=ig.startsWith('http')?ig:'https://instagram.com/'+ig.replace('@',''); btns.push('<a href="'+esc(igUrl)+'" target="_blank" rel="noopener noreferrer" class="biz-contact-btn pink"><i class="fab fa-instagram"></i><span>Instagram</span></a>'); }
     if (biz.facebook||sl.facebook) { var fb=biz.facebook||sl.facebook; var fbUrl=fb.startsWith('http')?fb:'https://facebook.com/'+fb.replace('@',''); btns.push('<a href="'+esc(fbUrl)+'" target="_blank" rel="noopener noreferrer" class="biz-contact-btn blue"><i class="fab fa-facebook"></i><span>Facebook</span></a>'); }
     if (!btns.length) return '';
@@ -856,7 +861,7 @@
         '<div class="biz-service-card-name">'+esc(s.title||s.name||'')+'</div>'+
         (s.description?'<div class="biz-service-card-desc">'+esc(s.description)+'</div>':'')+
         (s.duration?'<div class="biz-service-card-meta"><i class="fas fa-clock"></i> '+esc(s.duration)+'</div>':'')+
-        (!owner ? '<button class="biz-service-cta" onclick="window._bizActions.openQuote()">Request</button>' : '')+
+        (!owner ? '<button class="biz-service-cta" onclick="window._bizActions.openQuote(\''+esc(s.title||s.name||'')+'\',\''+esc(s.id||'')+'\')">Request</button>' : '')+
       '</div>';
     }).join('');
     return '<div class="biz-section">'+header+'<div class="biz-service-cards-grid">'+cards+'</div></div>';
@@ -893,7 +898,7 @@
           (p.description?'<div class="biz-product-desc">'+esc(p.description.slice(0,90))+'</div>':'')+
           '<div class="biz-product-footer">'+
             (p.price?'<span class="biz-product-price">'+fmtPrice(p.price)+'</span>':'')+
-            (!owner ? '<button class="biz-product-cta" onclick="window._bizActions.openQuote()">Inquire</button>' : '')+
+            (!owner ? '<button class="biz-product-cta" onclick="window._bizActions.openQuote(\''+esc(p.name||p.title||'')+'\')">Inquire</button>' : '')+
           '</div>'+
         '</div>'+
       '</div>';
@@ -1106,6 +1111,7 @@
         '<div class="biz-form-group"><label class="biz-form-label">Your Name *</label><input class="biz-form-input" id="q-name" placeholder="Full name" value="'+esc(_currentUser&&_currentUser.displayName||'')+'"></div>'+
         '<div class="biz-form-group"><label class="biz-form-label">Email *</label><input class="biz-form-input" id="q-email" type="email" placeholder="your@email.com" value="'+esc(_currentUser&&_currentUser.email||'')+'"></div>'+
         '<div class="biz-form-group"><label class="biz-form-label">Phone (optional)</label><input class="biz-form-input" id="q-phone" type="tel" placeholder="+995…"></div>'+
+        '<div class="biz-form-group"><label class="biz-form-label">Service / What you need</label><input class="biz-form-input" id="q-service" placeholder="Which service are you interested in?"></div>'+
         '<div class="biz-form-group"><label class="biz-form-label">Message *</label><textarea class="biz-form-textarea" id="q-message" placeholder="Describe what you need…"></textarea></div>'+
         '<button class="biz-submit-btn" id="q-submit-btn" onclick="window._bizActions.submitQuote()"><i class="fas fa-paper-plane"></i> Send Request</button>'+
       '</div>'+
@@ -2527,27 +2533,50 @@
       }).catch(function(err){ showToast('Could not update: '+(err.code||err.message), false); });
     },
 
-    openQuote: function() {
+    openQuote: function(serviceTitle, serviceId) {
       if(!_currentUser){ showToast('Sign in to request a quote',false); window.location.href='auth.html'; return; }
-      var m=document.getElementById('biz-quote-modal'); if(m) m.classList.add('open');
+      var m=document.getElementById('biz-quote-modal'); if(!m) return;
+      var sf=document.getElementById('q-service');
+      if(sf) sf.value = serviceTitle ? String(serviceTitle) : '';
+      m.classList.add('open');
     },
     closeQuote: function() { var m=document.getElementById('biz-quote-modal'); if(m) m.classList.remove('open'); },
 
     submitQuote: function() {
-      var name=(document.getElementById('q-name')||{}).value||'';
-      var email=(document.getElementById('q-email')||{}).value||'';
-      var phone=(document.getElementById('q-phone')||{}).value||'';
-      var msg=(document.getElementById('q-message')||{}).value||'';
-      var btn=document.getElementById('q-submit-btn');
-      if(!name.trim()||!email.trim()||!msg.trim()){ showToast('Please fill in name, email, and message',false); return; }
+      var name    = ((document.getElementById('q-name')||{}).value||'').trim();
+      var email   = ((document.getElementById('q-email')||{}).value||'').trim();
+      var phone   = ((document.getElementById('q-phone')||{}).value||'').trim();
+      var service = ((document.getElementById('q-service')||{}).value||'').trim();
+      var msg     = ((document.getElementById('q-message')||{}).value||'').trim();
+      var btn     = document.getElementById('q-submit-btn');
+      if(!name||!email||!msg){ showToast('Please fill in name, email, and message',false); return; }
       if(!_currentUser){ showToast('Please sign in',false); return; }
       if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Sending…'; }
-      _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'quoteRequests'),{
-        name:name.trim(),email:email.trim(),phone:phone.trim(),message:msg.trim(),
-        submittedBy:_currentUser.uid,businessId:BIZ_ID,status:'new',createdAt:_fs.serverTimestamp(),
-      }).then(function(){
+      var payload = {
+        name: name, email: email, phone: phone, message: msg,
+        submittedBy: _currentUser.uid, businessId: BIZ_ID,
+        status: 'new', createdAt: _fs.serverTimestamp()
+      };
+      if(service) payload.service = service;
+      _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'quoteRequests'), payload).then(function(){
         _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID),{quoteCount:_fs.increment(1)}).catch(function(){});
+        // Notify business owner
+        var ownerId = _biz && _biz.ownerId;
+        if(ownerId && ownerId !== _currentUser.uid && window.GeoSocial && window.GeoSocial.createSystemNotification) {
+          var notifBody = (service ? 'Service: ' + service + ' — ' : '') + msg.slice(0,120);
+          window.GeoSocial.createSystemNotification(
+            ownerId, 'quote_request',
+            name + ' sent a quote request',
+            notifBody,
+            'business.html?id=' + BIZ_ID,
+            { businessId: BIZ_ID, submittedBy: _currentUser.uid }
+          );
+        }
         window._bizActions.closeQuote();
+        // Clear form for next use
+        ['q-name','q-email','q-phone','q-service','q-message'].forEach(function(id){
+          var el=document.getElementById(id); if(el) el.value='';
+        });
         showToast('Quote request sent!');
         if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i> Send Request'; }
       }).catch(function(err){
@@ -3448,26 +3477,56 @@
     goToQuotes: function(){ window._bizActions.switchTab('dashboard'); setTimeout(function(){ window._bizActions.loadOwnerQuotes(); },100); },
 
     loadOwnerQuotes: function() {
+      if(!isAdminOrOwner()) return;
       var panel=document.getElementById('biz-owner-quotes-panel');
       if(!panel) return;
       if(panel.style.display!=='none'){ panel.style.display='none'; return; }
       panel.style.display='block';
       panel.innerHTML='<div style="color:#94a3b8;font-size:.83rem;padding:8px 0"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
-      _fs.getDocs(_fs.query(_fs.collection(_db,'businesses',BIZ_ID,'quoteRequests'),_fs.orderBy('createdAt','desc'),_fs.limit(20)))
+      _fs.getDocs(_fs.query(_fs.collection(_db,'businesses',BIZ_ID,'quoteRequests'),_fs.orderBy('createdAt','desc'),_fs.limit(50)))
         .then(function(snap){
           if(!snap.size){ panel.innerHTML='<p style="color:#64748b;font-size:.83rem;padding:8px 0 0">No quote requests yet.</p>'; return; }
-          var html='<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#64748b;margin-bottom:8px">'+snap.size+' request'+(snap.size===1?'':'s')+'</div>';
+          var statusColors={new:'#ef4444',read:'#64748b',replied:'#10b981',closed:'#f59e0b',archived:'#94a3b8'};
+          var html='<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#64748b;margin-bottom:10px">'+snap.size+' request'+(snap.size===1?'':'s')+'</div>';
           snap.forEach(function(d){
-            var q=d.data(),isNew=q.status==='new';
-            html+='<div class="biz-quote-item">'+
-              '<div class="biz-quote-header"><span class="biz-quote-name">'+esc(q.name||'Anonymous')+(isNew?'<span class="biz-quote-new-badge">New</span>':'')+'</span>'+
-              '<span class="biz-quote-date">'+timeAgo(q.createdAt)+'</span></div>'+
-              '<div class="biz-quote-contact">'+(q.email?esc(q.email):'')+(q.phone?' · '+esc(q.phone):'')+'</div>'+
-              '<div class="biz-quote-msg">'+esc(q.message||'')+'</div></div>';
-            if(isNew) _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID,'quoteRequests',d.id),{status:'read'}).catch(function(){});
+            var q=d.data(), st=q.status||'new', isNew=st==='new';
+            var stColor=statusColors[st]||'#64748b';
+            html+='<div class="biz-quote-item" data-quote-id="'+esc(d.id)+'" style="margin-bottom:14px;padding:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px">'+
+              '<div class="biz-quote-header" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px">'+
+                '<span class="biz-quote-name" style="font-weight:700;color:#f1f5f9">'+esc(q.name||'Anonymous')+
+                  (isNew?'<span class="biz-quote-new-badge" style="margin-left:6px;background:#ef44441a;color:#ef4444;border:1px solid #ef444433;border-radius:4px;padding:1px 6px;font-size:.65rem;font-weight:800">NEW</span>':'')+
+                '</span>'+
+                '<span style="display:flex;align-items:center;gap:8px">'+
+                  '<span style="font-size:.7rem;color:'+stColor+';background:'+stColor+'1a;border:1px solid '+stColor+'33;border-radius:4px;padding:1px 7px;font-weight:700;text-transform:uppercase">'+esc(st)+'</span>'+
+                  '<span class="biz-quote-date" style="color:#64748b;font-size:.75rem">'+timeAgo(q.createdAt)+'</span>'+
+                '</span>'+
+              '</div>'+
+              (q.email||q.phone?'<div class="biz-quote-contact" style="font-size:.78rem;color:#94a3b8;margin-bottom:4px">'+
+                (q.email?'<a href="mailto:'+esc(q.email)+'" style="color:#60a5fa;text-decoration:none">'+esc(q.email)+'</a>':'')+
+                (q.phone?' · <a href="tel:'+esc(q.phone)+'" style="color:#34d399;text-decoration:none">'+esc(q.phone)+'</a>':'')+
+              '</div>':'')+
+              (q.service?'<div style="font-size:.78rem;color:#a78bfa;margin-bottom:4px"><i class="fas fa-briefcase" style="margin-right:4px;font-size:.7rem"></i>'+esc(q.service)+'</div>':'')+
+              '<div class="biz-quote-msg" style="font-size:.82rem;color:#cbd5e1;line-height:1.5;margin-bottom:8px">'+esc(q.message||'')+'</div>'+
+              (st!=='closed'&&st!=='archived'?
+                '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
+                  (st!=='replied'?'<button onclick="window._bizActions.updateQuoteStatus(\''+esc(d.id)+'\',\'replied\')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(16,185,129,.3);background:rgba(16,185,129,.08);color:#10b981;font-size:.74rem;font-weight:600;cursor:pointer"><i class="fas fa-reply"></i> Mark Replied</button>':'')+
+                  '<button onclick="window._bizActions.updateQuoteStatus(\''+esc(d.id)+'\',\'closed\')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(100,116,139,.3);background:rgba(100,116,139,.08);color:#94a3b8;font-size:.74rem;font-weight:600;cursor:pointer"><i class="fas fa-check"></i> Close</button>'+
+                '</div>':'')+
+            '</div>';
+            if(isNew) _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID,'quoteRequests',d.id),{status:'read',updatedAt:_fs.serverTimestamp()}).catch(function(){});
           });
           panel.innerHTML=html;
         }).catch(function(){ panel.innerHTML='<p style="color:#ef4444;font-size:.83rem;padding:8px 0 0">Could not load quote requests.</p>'; });
+    },
+
+    updateQuoteStatus: function(reqId, newStatus) {
+      if(!isAdminOrOwner()) return;
+      _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID,'quoteRequests',reqId),{
+        status: newStatus, updatedAt: _fs.serverTimestamp()
+      }).then(function(){
+        showToast('Status: '+newStatus);
+        window._bizActions.loadOwnerQuotes();
+      }).catch(function(){ showToast('Could not update status',false); });
     },
   };
 
