@@ -1869,3 +1869,45 @@ html[data-gh-theme="light"] .gh-share-opt-icon{background:rgba(0,0,0,.05);border
   .gh-media-lb-next{right:6px}
   .gh-media-lb-counter{bottom:-22px}
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 26 — Facebook-Like Post Composer Upgrade
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Composer actor row (who is posting / destination) ─────── */
+.gh-cmp-actor-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.gh-cmp-actor-av{width:44px;height:44px;flex-shrink:0;font-size:.95rem}
+.gh-cmp-actor-info{display:flex;flex-direction:column;gap:2px}
+.gh-cmp-actor-info strong{font-size:.92rem;font-weight:800;color:var(--gh-text);line-height:1.2}
+.gh-cmp-destination{font-size:.75rem;color:var(--gh-muted);display:flex;align-items:center;gap:4px}
+.gh-cmp-destination i{font-size:.65rem;opacity:.7}
+
+/* ── Composer textarea ─────────────────────────────────────── */
+.gh-cmp-textarea{min-height:90px;resize:none;font-size:1rem;border:none;background:transparent;padding:0;box-shadow:none;color:var(--gh-text);width:100%;outline:none;font-family:inherit;line-height:1.55}
+.gh-cmp-textarea::placeholder{color:var(--gh-muted);font-size:1rem}
+
+/* ── Toolbar ──────────────────────────────────────────────── */
+.gh-cmp-toolbar{display:flex;align-items:center;gap:4px;border-top:1px solid var(--gh-border);margin-top:10px;padding-top:8px;flex-wrap:wrap}
+.gh-cmp-tool{display:flex;align-items:center;gap:6px;border:none;background:transparent;color:var(--gh-muted);font-size:.82rem;font-weight:700;padding:7px 10px;border-radius:10px;cursor:pointer;transition:.13s;font-family:inherit;white-space:nowrap}
+.gh-cmp-tool:hover{background:rgba(255,255,255,.07);color:var(--gh-text)}
+.gh-cmp-tool.active{background:rgba(16,185,129,.12);color:var(--gh-green)}
+.gh-cmp-tool i{font-size:.9rem;width:16px;text-align:center}
+html[data-gh-theme="light"] .gh-cmp-tool:hover{background:rgba(0,0,0,.05)}
+html[data-gh-theme="light"] .gh-cmp-tool.active{background:rgba(16,185,129,.1)}
+
+/* ── Visibility footer row ─────────────────────────────────── */
+.gh-cmp-footer-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+.gh-cmp-vis-select{width:auto;max-width:180px;font-size:.8rem;padding:5px 10px;height:auto}
+
+/* ── Multi-image preview grid ──────────────────────────────── */
+.gh-cmp-media-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.gh-cmp-thumb{position:relative;width:96px;height:96px;border-radius:12px;overflow:hidden;flex-shrink:0;border:1px solid var(--gh-border)}
+.gh-cmp-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.gh-cmp-thumb-rm{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,.7);color:#fff;font-size:.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.gh-cmp-thumb-rm:hover{background:rgba(239,68,68,.85)}
+@media(max-width:480px){
+  .gh-cmp-thumb{width:80px;height:80px}
+  .gh-cmp-tool span{display:none}
+  .gh-cmp-tool{padding:7px 8px}
+  .gh-cmp-vis-select{max-width:140px}
+}

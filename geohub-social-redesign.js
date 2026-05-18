@@ -725,7 +725,29 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function openPostModal(extra){
     if(!requireLogin()) return;
-    var body=
+    extra = extra || {};
+
+    // Build actor / destination row
+    var actor = getActiveActor();
+    var me = currentUserInfo();
+    var isBusinessActor = actor && actor.type === 'business';
+    var actorName = isBusinessActor ? (actor.title || 'Business') : (me.name || 'You');
+    var actorAvatar = isBusinessActor ? (actor.logoUrl || '') : (me.avatar || '');
+    var destination = isBusinessActor
+      ? 'Posting as ' + actorName
+      : (extra._groupName ? 'Posting in ' + extra._groupName : 'Posting to your profile');
+    var actorAvHtml = actorAvatar
+      ? '<img src="'+esc(actorAvatar)+'" alt="" onerror="this.style.display=\'none\'">'
+      : esc(initials(actorName));
+
+    var body =
+      '<div class="gh-cmp-actor-row">'+
+        '<span class="gh-avatar gh-cmp-actor-av">'+actorAvHtml+'</span>'+
+        '<div class="gh-cmp-actor-info">'+
+          '<strong>'+esc(actorName)+'</strong>'+
+          '<span class="gh-cmp-destination"><i class="fas fa-earth-europe"></i> '+esc(destination)+'</span>'+
+        '</div>'+
+      '</div>'+
       '<div id="ghPollComposer" style="display:none">'+
         '<textarea class="gh-textarea" id="ghPollQuestion" placeholder="Ask a question…" rows="2"></textarea>'+
         '<div id="ghPollOpts">'+
@@ -736,40 +758,101 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<select class="gh-select" id="ghPollDuration"><option value="1">1 day</option><option value="3" selected>3 days</option><option value="7">7 days</option></select>'+
       '</div>'+
       '<div id="ghRegularComposer">'+
-        '<textarea class="gh-textarea" id="ghPostText" placeholder="რას აზიარებ დღეს?"></textarea>'+
+        '<textarea class="gh-textarea gh-cmp-textarea" id="ghPostText" placeholder="What\'s on your mind?" rows="4"></textarea>'+
         '<div id="ghLinkPreviewCard" style="display:none" class="gh-lp-composer-preview"></div>'+
         '<div class="gh-feeling-row" id="ghFeelingRow">'+FEELINGS.map(function(f){ return '<button type="button" class="gh-feeling-chip" data-feeling="'+esc(f)+'">'+esc(f)+'</button>'; }).join('')+'</div>'+
         '<div id="ghSelectedFeeling" style="display:none;font-size:.84rem;color:var(--gh-green);margin:4px 0 8px;padding:4px 10px;background:rgba(16,185,129,.08);border-radius:10px"></div>'+
-        '<div class="gh-bg-picker" id="ghBgPicker">'+BG_GRADIENTS.map(function(g,i){ return '<button type="button" class="gh-bg-swatch" data-bg-gradient="'+esc(g)+'" style="background:'+esc(g)+'"'+(i===0?' title="No color"':'')+' aria-label="Color '+i+'"></button>'; }).join('')+'<button type="button" class="gh-bg-swatch gh-bg-none" data-bg-gradient="" title="No color"><i class="fas fa-times"></i></button></div>'+
+        '<div class="gh-bg-picker" id="ghBgPicker" style="display:none">'+BG_GRADIENTS.map(function(g,i){ return '<button type="button" class="gh-bg-swatch" data-bg-gradient="'+esc(g)+'" style="background:'+esc(g)+'"'+(i===0?' title="No color"':'')+' aria-label="Color '+i+'"></button>'; }).join('')+'<button type="button" class="gh-bg-swatch gh-bg-none" data-bg-gradient="" title="No color"><i class="fas fa-times"></i></button></div>'+
+        '<div id="ghCmpMediaGrid" class="gh-cmp-media-grid"></div>'+
       '</div>'+
-      '<div class="gh-form-grid" style="margin-top:10px"><select class="gh-select" id="ghPostVisibility"><option value="public">🌍 Public</option><option value="friends">👥 Friends / Followers</option><option value="onlyme">🔒 Only me</option></select></div>'+
-      '<div style="height:10px"></div><input class="gh-input" id="ghPostImg" placeholder="Image URL optional"><div style="height:10px"></div>'+
-      '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
-        '<button class="gh-btn ghost" id="ghPickPostImage" type="button"><i class="fas fa-image"></i> Image</button>'+
-        '<button class="gh-btn ghost" id="ghTogglePoll" type="button"><i class="fas fa-chart-bar"></i> Poll</button>'+
-        '<button class="gh-btn ghost" id="ghToggleFeeling" type="button"><i class="fas fa-face-smile"></i> Feeling</button>'+
+      '<div class="gh-cmp-footer-row">'+
+        '<select class="gh-select gh-cmp-vis-select" id="ghPostVisibility"><option value="public">🌍 Public</option><option value="friends">👥 Friends</option><option value="onlyme">🔒 Only me</option></select>'+
       '</div>'+
-      '<div id="ghPostPreview" style="margin-top:10px"></div>'+
+      '<div class="gh-cmp-toolbar">'+
+        '<button class="gh-cmp-tool" id="ghPickPostImage" type="button" title="Add photos"><i class="fas fa-image"></i><span>Photo</span></button>'+
+        '<button class="gh-cmp-tool" id="ghTogglePoll" type="button" title="Create poll"><i class="fas fa-chart-bar"></i><span>Poll</span></button>'+
+        '<button class="gh-cmp-tool" id="ghToggleFeeling" type="button" title="Feeling or activity"><i class="fas fa-face-smile"></i><span>Feeling</span></button>'+
+        '<button class="gh-cmp-tool" id="ghToggleBg" type="button" title="Background color"><i class="fas fa-palette"></i><span>Background</span></button>'+
+      '</div>'+
+      '<input type="file" id="ghPostFileInput" accept="image/*" multiple style="display:none">'+
       '<div class="gh-upload-progress" id="ghPostUploadBar" style="display:none"><div class="gh-upload-track"><div class="gh-upload-bar" id="ghPostUploadFill"></div></div><span id="ghPostUploadPct">0%</span></div>';
 
-    modal('Create post', body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitPost"><i class="fas fa-paper-plane"></i> Post</button>', 'ghPostModal');
+    var m = modal('Create post', body,
+      '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitPost" disabled><i class="fas fa-paper-plane"></i> Post</button>',
+      'ghPostModal');
 
-    var picked='', pickedFile=null, selectedFeeling='', selectedBg='', pollMode=false, feelingRowVisible=false;
+    var pickedFiles=[], selectedFeeling='', selectedBg='', pollMode=false, feelingRowVisible=false, bgVisible=false;
     var _lpTimer=null, _lpUrl='';
 
-    $('#ghPickPostImage').onclick=function(){
-      triggerImagePick(function(url, file){
-        picked=url; pickedFile=file||null;
-        $('#ghPostImg').value='';
-        $('#ghPostPreview').innerHTML=url?'<img src="'+esc(url)+'" style="width:100%;max-height:260px;object-fit:cover;border-radius:16px;border:1px solid var(--gh-border)">':'';
+    var ta=$('#ghPostText');
+
+    // Auto-focus
+    if(ta) { ta.focus(); }
+
+    // Validate: enable/disable Post button
+    function updateSubmit(){
+      var btn=$('#ghSubmitPost'); if(!btn) return;
+      var hasText = pollMode
+        ? !!(($('#ghPollQuestion')||{}).value||'').trim()
+        : !!(ta && ta.value.trim());
+      btn.disabled = !(hasText || pickedFiles.length);
+    }
+    if(ta) ta.addEventListener('input', function(){
+      updateSubmit();
+      clearTimeout(_lpTimer);
+      _lpTimer=setTimeout(function(){ detectAndLoadLinkPreview(ta.value); }, 700);
+    });
+    var pqEl=$('#ghPollQuestion');
+    if(pqEl) pqEl.addEventListener('input', updateSubmit);
+
+    // Dirty-state close confirmation (capture phase fires before the modal's bubble-phase close handler)
+    m.addEventListener('click', function(e){
+      if(e.target===m || e.target.closest('[data-close-modal]')){
+        var textVal = pollMode ? (($('#ghPollQuestion')||{}).value||'') : (ta ? ta.value : '');
+        if((textVal.trim() || pickedFiles.length) && !confirm('Discard your post?')){
+          e.stopPropagation();
+          e.preventDefault();
+        }
+      }
+    }, true);
+
+    // Multi-image preview grid
+    function renderMediaGrid(){
+      var grid=$('#ghCmpMediaGrid'); if(!grid) return;
+      if(!pickedFiles.length){ grid.innerHTML=''; return; }
+      grid.innerHTML=pickedFiles.map(function(f,i){
+        var obj=URL.createObjectURL(f);
+        return '<div class="gh-cmp-thumb">'+
+          '<img src="'+esc(obj)+'" alt="" onload="URL.revokeObjectURL(this.src)">'+
+          '<button type="button" class="gh-cmp-thumb-rm" data-rm-idx="'+i+'" title="Remove"><i class="fas fa-times"></i></button>'+
+        '</div>';
+      }).join('');
+      grid.querySelectorAll('[data-rm-idx]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          pickedFiles.splice(Number(btn.dataset.rmIdx),1);
+          renderMediaGrid();
+          updateSubmit();
+        });
       });
-    };
+    }
+
+    var fileInput=$('#ghPostFileInput');
+    if(fileInput) fileInput.addEventListener('change', function(){
+      var newFiles=Array.from(fileInput.files||[]);
+      pickedFiles=pickedFiles.concat(newFiles).slice(0,4);
+      fileInput.value='';
+      renderMediaGrid();
+      updateSubmit();
+    });
+
+    $('#ghPickPostImage').onclick=function(){ if(fileInput) fileInput.click(); };
 
     $('#ghTogglePoll').onclick=function(){
       pollMode=!pollMode;
       $('#ghPollComposer').style.display=pollMode?'':'none';
       $('#ghRegularComposer').style.display=pollMode?'none':'';
       this.classList.toggle('active',pollMode);
+      updateSubmit();
     };
 
     $('#ghToggleFeeling').onclick=function(){
@@ -779,10 +862,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     };
     $('#ghFeelingRow').style.display='none';
 
+    $('#ghToggleBg').onclick=function(){
+      bgVisible=!bgVisible;
+      $('#ghBgPicker').style.display=bgVisible?'flex':'none';
+      this.classList.toggle('active',bgVisible);
+    };
+
     var feelingRow=$('#ghFeelingRow');
     if(feelingRow) feelingRow.addEventListener('click',function(e){
       var chip=e.target.closest('[data-feeling]'); if(!chip) return;
-      selectedFeeling = chip.dataset.feeling===selectedFeeling ? '' : chip.dataset.feeling;
+      selectedFeeling=chip.dataset.feeling===selectedFeeling?'':chip.dataset.feeling;
       feelingRow.querySelectorAll('.gh-feeling-chip').forEach(function(b){ b.classList.toggle('active', b.dataset.feeling===selectedFeeling); });
       var sf=$('#ghSelectedFeeling');
       if(sf){ sf.style.display=selectedFeeling?'block':'none'; sf.textContent=selectedFeeling?'Feeling: '+selectedFeeling:''; }
@@ -799,19 +888,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var pollOptsEl=$('#ghPollOpts'); if(!pollOptsEl) return;
       var opts=$all('[data-poll-opt]', pollOptsEl); if(opts.length>=6) return;
       var inp=document.createElement('input'); inp.className='gh-input'; inp.style.marginBottom='7px'; inp.dataset.pollOpt=''; inp.placeholder='Option '+(opts.length+1);
-      pollOptsEl.appendChild(inp);
+      pollOptsEl.appendChild(inp); inp.addEventListener('input', updateSubmit);
     };
 
-    var ta=$('#ghPostText');
-    if(ta) ta.addEventListener('input', function(){
-      clearTimeout(_lpTimer);
-      _lpTimer=setTimeout(function(){ detectAndLoadLinkPreview(ta.value); }, 700);
-    });
-
     function detectAndLoadLinkPreview(textVal){
-      var m=textVal.match(/https?:\/\/[^\s]+/);
-      if(!m){ hideLinkPreview(); return; }
-      var url=m[0];
+      var urlMatch=textVal.match(/https?:\/\/[^\s]+/);
+      if(!urlMatch){ hideLinkPreview(); return; }
+      var url=urlMatch[0];
       if(url===_lpUrl) return;
       _lpUrl=url;
       var card=$('#ghLinkPreviewCard'); if(!card) return;
@@ -834,45 +917,27 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     function hideLinkPreview(){ _lpUrl=''; state._lpData=null; var c=$('#ghLinkPreviewCard'); if(c){c.style.display='none';c.innerHTML='';} }
 
     $('#ghSubmitPost').onclick=function(){
-      var submitBtn = $('#ghSubmitPost'); if(submitBtn.disabled) return;
-
-      var urlInput=($('#ghPostImg')||{}).value.trim();
-      var mediaSource = pickedFile || picked || urlInput;
+      var submitBtn=$('#ghSubmitPost'); if(!submitBtn || submitBtn.disabled) return;
       var bar=$('#ghPostUploadBar'), fill=$('#ghPostUploadFill'), pctEl=$('#ghPostUploadPct');
 
       if(pollMode){
-        var question=($('#ghPollQuestion')||{}).value||''; question=question.trim();
+        var question=(($('#ghPollQuestion')||{}).value||'').trim();
         var pollOptsEl=$('#ghPollOpts');
-        var optInputs=$all('[data-poll-opt]', pollOptsEl);
-        var opts=optInputs.map(function(i,idx){ return {id:String(idx),text:(i.value||'').trim(),votes:0}; }).filter(function(o){ return o.text; });
+        var opts=$all('[data-poll-opt]', pollOptsEl).map(function(inp,idx){ return {id:String(idx),text:(inp.value||'').trim(),votes:0}; }).filter(function(o){ return o.text; });
         if(!question) return toast('Poll needs a question','error');
-        if(opts.length<2) return toast('Add at least 2 options','error');
+        if(opts.length<2) return toast('Add at least 2 poll options','error');
         var durDays=Number(($('#ghPollDuration')||{}).value||3);
         var endsAt=new Date(Date.now()+durDays*86400000);
-        var pollPayload=Object.assign({
-          type:'poll',
-          poll:{question:question,options:opts,endsAt:endsAt,totalVotes:0},
-          visibility:($('#ghPostVisibility')||{}).value||'public'
-        }, extra||{});
+        var pollPayload=Object.assign({ type:'poll', poll:{question:question,options:opts,endsAt:endsAt,totalVotes:0}, visibility:($('#ghPostVisibility')||{}).value||'public' }, extra||{});
         submitBtn.disabled=true;
-        submitBtn.dataset.originalText=submitBtn.innerHTML;
-        submitBtn.innerHTML=mediaSource?'<i class="fas fa-circle-notch fa-spin"></i> Uploading…':'<i class="fas fa-circle-notch fa-spin"></i> Posting…';
-        if(bar && mediaSource) bar.style.display='flex';
-        prepareMedia(mediaSource, 'posts', function(pct){
-          if(fill) fill.style.width=pct+'%';
-          if(pctEl) pctEl.textContent=pct+'%';
-          submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> '+pct+'%';
-        }).then(function(finalUrl){
-          if(bar) bar.style.display='none';
-          submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
-          GS().createPost(question, finalUrl||null, function(){ var m=$('#ghPostModal'); if(m)m.remove(); }, pollPayload);
-        }).catch(function(err){ console.error('[GeoHub] poll image upload failed', err); toast('Image upload failed. Check Cloudinary settings.', 'error'); if(bar) bar.style.display='none'; })
-          .finally(function(){ var b=$('#ghSubmitPost'); if(b){ b.disabled=false; b.innerHTML=b.dataset.originalText || '<i class="fas fa-paper-plane"></i> Post'; } });
+        submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
+        GS().createPost(question, '', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); }, pollPayload);
         return;
       }
 
-      var txt=($('#ghPostText')||{}).value||'';
-      if(!txt.trim() && !mediaSource) return toast('Write something or pick an image','error');
+      var txt=(ta&&ta.value)||'';
+      if(!txt.trim() && !pickedFiles.length) return toast('Write something or add a photo','error');
+
       var payload=Object.assign({
         visibility: ($('#ghPostVisibility')||{}).value||'public',
         feeling: selectedFeeling,
@@ -880,21 +945,38 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         linkPreview: state._lpData||null,
         mentions: extractMentions(txt)
       }, extra||{});
-      submitBtn.disabled = true;
-      submitBtn.dataset.originalText = submitBtn.innerHTML;
-      submitBtn.innerHTML = mediaSource ? '<i class="fas fa-circle-notch fa-spin"></i> Uploading…' : '<i class="fas fa-circle-notch fa-spin"></i> Posting…';
-      if(bar && mediaSource) bar.style.display='flex';
-      prepareMedia(mediaSource, 'posts', function(pct){
-        if(fill) fill.style.width=pct+'%';
-        if(pctEl) pctEl.textContent=pct+'%';
-        submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> '+pct+'%';
-      }).then(function(finalUrl){
-        if(mediaSource && !finalUrl && !(urlInput && !picked && !pickedFile)) throw new Error('Image upload failed');
-        if(bar) bar.style.display='none';
+
+      submitBtn.disabled=true;
+
+      if(pickedFiles.length){
+        if(bar) bar.style.display='flex';
+        submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Uploading…';
+        var total=pickedFiles.length, done=0;
+        Promise.all(pickedFiles.map(function(f){
+          return prepareMedia(f,'posts',function(pct){
+            var overall=Math.round((done/total)*100+pct/total);
+            if(fill) fill.style.width=overall+'%';
+            if(pctEl) pctEl.textContent=overall+'%';
+            submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> '+overall+'%';
+          }).then(function(url){ done++; return url; });
+        })).then(function(urls){
+          var validUrls=urls.filter(Boolean);
+          if(bar) bar.style.display='none';
+          if(!validUrls.length && pickedFiles.length) throw new Error('All uploads failed');
+          payload.mediaUrls=validUrls;
+          submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
+          GS().createPost(txt, validUrls[0]||'', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); }, payload);
+        }).catch(function(err){
+          console.error('[GeoHub] multi-image upload',err);
+          toast('Image upload failed. Check Cloudinary settings.','error');
+          if(bar) bar.style.display='none';
+          submitBtn.disabled=false;
+          submitBtn.innerHTML='<i class="fas fa-paper-plane"></i> Post';
+        });
+      } else {
         submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
-        GS().createPost(txt, finalUrl, function(){ var m=$('#ghPostModal'); if(m)m.remove(); }, payload);
-      }).catch(function(err){ console.error('[GeoHub] post image upload failed', err); toast('Image upload failed. Check Cloudinary settings.', 'error'); if(bar) bar.style.display='none'; })
-        .finally(function(){ var b=$('#ghSubmitPost'); if(b){ b.disabled=false; b.innerHTML=b.dataset.originalText || '<i class="fas fa-paper-plane"></i> Post'; } });
+        GS().createPost(txt, '', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); }, payload);
+      }
     };
   }
 
@@ -4624,12 +4706,98 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function openGroupPostModal(g){
     if(!requireLogin()) return;
-    var body='<textarea class="gh-textarea" id="ghGroupPostText" placeholder="Write something to the group…" rows="4"></textarea><div style="height:8px"></div><input type="file" class="gh-input" id="ghGroupPostFile" accept="image/*" style="padding:8px"><div style="height:6px"></div><input class="gh-input" id="ghGroupPostImg" placeholder="Or paste image URL">';
-    modal('Post in '+(g.name||'group'), body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitGroupPost">Post</button>', 'ghGroupPostModal');
+    var me=currentUserInfo();
+    var actorAvHtml=me.avatar?'<img src="'+esc(me.avatar)+'" alt="" onerror="this.style.display=\'none\'">':esc(initials(me.name||''));
+
+    var body=
+      '<div class="gh-cmp-actor-row">'+
+        '<span class="gh-avatar gh-cmp-actor-av">'+actorAvHtml+'</span>'+
+        '<div class="gh-cmp-actor-info">'+
+          '<strong>'+esc(me.name||'You')+'</strong>'+
+          '<span class="gh-cmp-destination"><i class="fas fa-users"></i> Posting in '+esc(g.name||'group')+'</span>'+
+        '</div>'+
+      '</div>'+
+      '<textarea class="gh-textarea gh-cmp-textarea" id="ghGroupPostText" placeholder="Write something to the group…" rows="4"></textarea>'+
+      '<div id="ghGroupMediaGrid" class="gh-cmp-media-grid"></div>'+
+      '<input type="file" id="ghGroupPostFile" accept="image/*" style="display:none">'+
+      '<div class="gh-cmp-toolbar">'+
+        '<button class="gh-cmp-tool" id="ghGroupPickPhoto" type="button" title="Add photo"><i class="fas fa-image"></i><span>Photo</span></button>'+
+      '</div>'+
+      '<div class="gh-upload-progress" id="ghGroupUploadBar" style="display:none"><div class="gh-upload-track"><div class="gh-upload-bar" id="ghGroupUploadFill"></div></div><span id="ghGroupUploadPct">0%</span></div>';
+
+    var m=modal('Post in '+(g.name||'group'), body,
+      '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitGroupPost" disabled><i class="fas fa-paper-plane"></i> Post</button>',
+      'ghGroupPostModal');
+
+    var pickedFile=null;
+    var ta=$('#ghGroupPostText');
+    if(ta) ta.focus();
+
+    function updateGroupSubmit(){
+      var btn=$('#ghSubmitGroupPost'); if(!btn) return;
+      btn.disabled=!(ta&&ta.value.trim()) && !pickedFile;
+    }
+    if(ta) ta.addEventListener('input', updateGroupSubmit);
+
+    // Dirty-state close confirmation
+    m.addEventListener('click', function(e){
+      if(e.target===m || e.target.closest('[data-close-modal]')){
+        if(((ta&&ta.value.trim())||pickedFile) && !confirm('Discard your post?')){
+          e.stopPropagation(); e.preventDefault();
+        }
+      }
+    }, true);
+
+    // File picker + preview
+    var fileInput=$('#ghGroupPostFile');
+    if(fileInput) fileInput.addEventListener('change', function(){
+      pickedFile=fileInput.files&&fileInput.files[0]||null;
+      fileInput.value='';
+      var grid=$('#ghGroupMediaGrid'); if(!grid) { updateGroupSubmit(); return; }
+      if(!pickedFile){ grid.innerHTML=''; updateGroupSubmit(); return; }
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        grid.innerHTML='<div class="gh-cmp-thumb">'+
+          '<img src="'+esc(ev.target.result)+'" alt="">'+
+          '<button type="button" class="gh-cmp-thumb-rm" id="ghGroupRmPhoto" title="Remove"><i class="fas fa-times"></i></button>'+
+        '</div>';
+        var rm=$('#ghGroupRmPhoto');
+        if(rm) rm.onclick=function(){ pickedFile=null; grid.innerHTML=''; updateGroupSubmit(); };
+      };
+      reader.readAsDataURL(pickedFile);
+      updateGroupSubmit();
+    });
+    var pickBtn=$('#ghGroupPickPhoto');
+    if(pickBtn) pickBtn.onclick=function(){ if(fileInput) fileInput.click(); };
+
     $('#ghSubmitGroupPost').onclick=function(){
-      var text=$('#ghGroupPostText').value; var imgUrl=($('#ghGroupPostImg').value||'').trim(); var file=$('#ghGroupPostFile').files&&$('#ghGroupPostFile').files[0]; var postStatus=g.postApproval?'pending':'active';
-      if(file){var reader=new FileReader();reader.onload=function(ev){GS().uploadImageDataUrl(ev.target.result,'group_posts',function(url){GS().createPost(text,url||imgUrl,function(){var m=document.getElementById('ghGroupPostModal');if(m)m.remove();if(postStatus==='pending')toast('Post submitted for approval.');},{targetType:'group',targetId:g.id,groupId:g.id,status:postStatus});});};reader.readAsDataURL(file);}
-      else{GS().createPost(text,imgUrl,function(){var m=document.getElementById('ghGroupPostModal');if(m)m.remove();if(postStatus==='pending')toast('Post submitted for approval.');},{targetType:'group',targetId:g.id,groupId:g.id,status:postStatus});}
+      var submitBtn=$('#ghSubmitGroupPost'); if(!submitBtn||submitBtn.disabled) return;
+      var text=ta?ta.value.trim():'';
+      if(!text&&!pickedFile) return toast('Write something or add a photo','error');
+      var postStatus=g.postApproval?'pending':'active';
+      submitBtn.disabled=true;
+      var bar=$('#ghGroupUploadBar'), fill=$('#ghGroupUploadFill'), pctEl=$('#ghGroupUploadPct');
+
+      if(pickedFile){
+        if(bar) bar.style.display='flex';
+        submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Uploading…';
+        prepareMedia(pickedFile,'group_posts',function(pct){
+          if(fill) fill.style.width=pct+'%';
+          if(pctEl) pctEl.textContent=pct+'%';
+        }).then(function(url){
+          if(bar) bar.style.display='none';
+          submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
+          GS().createPost(text,url||'',function(){ var modal=document.getElementById('ghGroupPostModal'); if(modal) modal.remove(); if(postStatus==='pending') toast('Post submitted for approval.'); },{targetType:'group',targetId:g.id,groupId:g.id,status:postStatus});
+        }).catch(function(){
+          if(bar) bar.style.display='none';
+          toast('Image upload failed','error');
+          submitBtn.disabled=false;
+          submitBtn.innerHTML='<i class="fas fa-paper-plane"></i> Post';
+        });
+      } else {
+        submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
+        GS().createPost(text,'',function(){ var modal=document.getElementById('ghGroupPostModal'); if(modal) modal.remove(); if(postStatus==='pending') toast('Post submitted for approval.'); },{targetType:'group',targetId:g.id,groupId:g.id,status:postStatus});
+      }
     };
   }
 
@@ -4699,7 +4867,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         text:clean,
         mediaUrl:mediaUrl||null,
         imageUrl:mediaUrl||null,
-        mediaUrls:mediaUrl?[mediaUrl]:[],
+        mediaUrls:(extra.mediaUrls&&extra.mediaUrls.length)?extra.mediaUrls:(mediaUrl?[mediaUrl]:[]),
         visibility:extra.visibility||'public',
         mentions:extra.mentions||extractMentions(clean),
         taggedUserIds:extra.taggedUserIds||[],

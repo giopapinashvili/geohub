@@ -2602,12 +2602,34 @@
       }
     },
 
-    openCompose:  function(){ var m=document.getElementById('biz-compose-modal'); if(m) m.classList.add('open'); },
+    openCompose: function(){
+      var m=document.getElementById('biz-compose-modal'); if(!m) return;
+      m.classList.add('open');
+      // Auto-focus and disable Post until valid
+      var ta=document.getElementById('biz-compose-text');
+      if(ta){ setTimeout(function(){ ta.focus(); },80); }
+      function _updateBizSubmit(){
+        var btn=document.getElementById('biz-compose-btn'); if(!btn) return;
+        var hasText=!!(ta&&ta.value.trim());
+        var hasFiles=!!(window._composePendingFiles&&window._composePendingFiles.length);
+        btn.disabled=!(hasText||hasFiles);
+      }
+      if(ta){ ta.addEventListener('input',_updateBizSubmit); _updateBizSubmit(); }
+      // Store validator so photo changes can trigger it too
+      window._bizComposeValidate=_updateBizSubmit;
+    },
     closeCompose: function(){
-      var m=document.getElementById('biz-compose-modal');
-      if(m){ m.classList.remove('open'); var ta=document.getElementById('biz-compose-text'); if(ta) ta.value=''; }
-      window._composePendingFiles = [];
+      var m=document.getElementById('biz-compose-modal'); if(!m) return;
+      var ta=document.getElementById('biz-compose-text');
+      var hasText=!!(ta&&ta.value.trim());
+      var hasFiles=!!(window._composePendingFiles&&window._composePendingFiles.length);
+      if((hasText||hasFiles) && !confirm('Discard your post?')) return;
+      m.classList.remove('open');
+      if(ta) ta.value='';
+      window._composePendingFiles=[];
       var pr=document.getElementById('biz-compose-photos'); if(pr) pr.innerHTML='';
+      var btn=document.getElementById('biz-compose-btn'); if(btn) btn.disabled=true;
+      window._bizComposeValidate=null;
     },
 
     openPhotoInCompose: function(){
@@ -2620,12 +2642,14 @@
       window._composePendingFiles=(window._composePendingFiles||[]).concat(files).slice(0,4);
       input.value='';
       window._bizActions._renderComposePreview();
+      if(window._bizComposeValidate) window._bizComposeValidate();
     },
 
     removeComposePhoto: function(idx){
       if(!window._composePendingFiles) return;
       window._composePendingFiles.splice(idx,1);
       window._bizActions._renderComposePreview();
+      if(window._bizComposeValidate) window._bizComposeValidate();
     },
 
     _renderComposePreview: function(){
