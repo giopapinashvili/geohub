@@ -34,6 +34,17 @@
   var _editPostId    = null;
   var _rxLongTimer   = null;
 
+  var _qAll    = [];
+  var _qFilter = 'all';
+  var _qSearch = '';
+  var BIZ_QUOTE_STATUS_COLORS = {
+    new:      { text: '#10b981', bg: 'rgba(16,185,129,.12)',  border: 'rgba(16,185,129,.25)' },
+    read:     { text: '#94a3b8', bg: 'rgba(148,163,184,.1)', border: 'rgba(148,163,184,.2)' },
+    replied:  { text: '#3b82f6', bg: 'rgba(59,130,246,.12)',  border: 'rgba(59,130,246,.25)' },
+    closed:   { text: '#f59e0b', bg: 'rgba(245,158,11,.12)',  border: 'rgba(245,158,11,.25)' },
+    archived: { text: '#6b7280', bg: 'rgba(107,114,128,.1)', border: 'rgba(107,114,128,.2)' }
+  };
+
   var REACTIONS = [
     { key:'like',  emoji:'👍', label:'Like'  },
     { key:'love',  emoji:'❤️', label:'Love'  },
@@ -1869,6 +1880,117 @@
     });
   }
 
+  // ── QUOTE CRM HELPERS ─────────────────────────────────────────
+
+  function _bizQuoteCardHtml(q) {
+    var id    = q._id || '';
+    var st    = q.status || 'new';
+    var stClr = BIZ_QUOTE_STATUS_COLORS[st] || BIZ_QUOTE_STATUS_COLORS.read;
+    var isHigh  = q.priority === 'high';
+    var hasNote = !!(q.ownerNote && q.ownerNote.trim());
+    var notePreview = hasNote
+      ? ': ' + esc((q.ownerNote||'').slice(0,38)) + (q.ownerNote.length > 38 ? '…' : '')
+      : '';
+
+    var statusChip   = '<span class="biz-qi-status-chip" style="color:'+stClr.text+';background:'+stClr.bg+';border-color:'+stClr.border+'">'+esc(st)+'</span>';
+    var sourceChip   = q.service
+      ? '<span class="biz-qi-source-chip src-service"><i class="fas fa-briefcase"></i> '+esc(q.service)+'</span>'
+      : '<span class="biz-qi-source-chip src-general">General</span>';
+    var priorityChip = isHigh ? '<span class="biz-qi-priority-chip">&#x26A1; High</span>' : '';
+
+    var contactHtml = '';
+    if (q.email || q.phone) {
+      contactHtml = '<div class="biz-qi-contact">';
+      if (q.email) contactHtml += '<a class="biz-qi-contact-link" href="mailto:'+esc(q.email)+'"><i class="fas fa-envelope"></i> '+esc(q.email)+'</a>';
+      if (q.phone) contactHtml += '<a class="biz-qi-contact-link" href="tel:'+esc(q.phone)+'"><i class="fas fa-phone"></i> '+esc(q.phone)+'</a>';
+      contactHtml += '</div>';
+    }
+
+    var actionsHtml = '<div class="biz-qi-actions">';
+    actionsHtml += '<button class="biz-qi-action-btn priority'+(isHigh?' is-high':'')+'" onclick="window._bizActions.qTogglePriority(\''+esc(id)+'\',\''+esc(q.priority||'normal')+'\')">'+(isHigh ? 'Normal' : '&#x26A1; High')+'</button>';
+    if (st !== 'replied' && st !== 'closed' && st !== 'archived') {
+      actionsHtml += '<button class="biz-qi-action-btn replied" onclick="window._bizActions.updateQuoteStatus(\''+esc(id)+'\',\'replied\')"><i class="fas fa-reply"></i> Mark Replied</button>';
+    }
+    if (st !== 'closed' && st !== 'archived') {
+      actionsHtml += '<button class="biz-qi-action-btn close" onclick="window._bizActions.updateQuoteStatus(\''+esc(id)+'\',\'closed\')"><i class="fas fa-check"></i> Close</button>';
+    }
+    if (st !== 'archived') {
+      actionsHtml += '<button class="biz-qi-action-btn archive" onclick="window._bizActions.updateQuoteStatus(\''+esc(id)+'\',\'archived\')"><i class="fas fa-archive"></i> Archive</button>';
+    }
+    if (st === 'archived' || st === 'closed') {
+      actionsHtml += '<button class="biz-qi-action-btn reopen" onclick="window._bizActions.updateQuoteStatus(\''+esc(id)+'\',\'read\')"><i class="fas fa-redo"></i> Reopen</button>';
+    }
+    actionsHtml += '</div>';
+
+    return '<div class="biz-qi-card" data-quote-id="'+esc(id)+'">' +
+      '<div class="biz-qi-card-head">' +
+        '<span class="biz-qi-card-name">'+esc(q.name||'Anonymous')+'</span>' +
+        '<span class="biz-qi-card-badges">'+statusChip+sourceChip+priorityChip+'</span>' +
+      '</div>' +
+      contactHtml +
+      '<div class="biz-qi-message">'+esc(q.message||'')+'</div>' +
+      '<div class="biz-qi-meta">'+timeAgo(q.createdAt)+'</div>' +
+      '<div class="biz-qi-note-wrap" id="biz-qi-note-'+esc(id)+'">' +
+        '<button class="biz-qi-note-toggle" onclick="window._bizActions.qToggleNote(\''+esc(id)+'\')"><i class="fas fa-sticky-note"></i> Note'+notePreview+'</button>' +
+        '<div class="biz-qi-note-area" id="biz-qi-note-area-'+esc(id)+'" style="display:none">' +
+          '<textarea class="biz-qi-note-input" id="biz-qi-note-ta-'+esc(id)+'" rows="2" placeholder="Private note visible only to you…">'+esc(q.ownerNote||'')+'</textarea>' +
+          '<button class="biz-qi-note-save" onclick="window._bizActions.qSaveNote(\''+esc(id)+'\')"><i class="fas fa-save"></i> Save</button>' +
+        '</div>' +
+      '</div>' +
+      actionsHtml +
+    '</div>';
+  }
+
+  function _qRender() {
+    var Q_FILTERS = [
+      { key: 'all',      label: 'All'      },
+      { key: 'new',      label: 'New'      },
+      { key: 'read',     label: 'Read'     },
+      { key: 'replied',  label: 'Replied'  },
+      { key: 'closed',   label: 'Closed'   },
+      { key: 'archived', label: 'Archived' },
+      { key: 'high',     label: '&#x26A1; Priority' }
+    ];
+
+    var s = (_qSearch || '').toLowerCase();
+    var filtered = _qAll.filter(function(q) {
+      if (_qFilter === 'high') {
+        if (q.priority !== 'high') return false;
+      } else if (_qFilter !== 'all') {
+        if ((q.status || 'new') !== _qFilter) return false;
+      }
+      if (s) {
+        return (q.name||'').toLowerCase().indexOf(s) !== -1 ||
+               (q.email||'').toLowerCase().indexOf(s) !== -1 ||
+               (q.message||'').toLowerCase().indexOf(s) !== -1 ||
+               (q.service||'').toLowerCase().indexOf(s) !== -1;
+      }
+      return true;
+    });
+
+    var filterHtml = Q_FILTERS.map(function(f) {
+      var cnt;
+      if (f.key === 'all')       cnt = _qAll.length;
+      else if (f.key === 'high') cnt = _qAll.filter(function(q){ return q.priority === 'high'; }).length;
+      else                       cnt = _qAll.filter(function(q){ return (q.status||'new') === f.key; }).length;
+      if (f.key !== 'all' && cnt === 0) return '';
+      return '<button class="biz-qi-filter-btn'+((_qFilter===f.key)?' active':'')+'" onclick="window._bizActions.qFilter(\''+f.key+'\')">'+
+        f.label+' <span class="biz-qi-filter-cnt">'+cnt+'</span>'+
+      '</button>';
+    }).join('');
+
+    var listHtml = filtered.length === 0
+      ? '<div class="biz-qi-empty"><i class="fas fa-inbox"></i><p>No requests match this filter.</p></div>'
+      : filtered.map(function(q){ return _bizQuoteCardHtml(q); }).join('');
+
+    var filterZone = document.getElementById('biz-qi-filter-zone');
+    if (filterZone) filterZone.innerHTML = '<div class="biz-qi-filters">'+filterHtml+'</div>';
+    var listEl = document.getElementById('biz-qi-list');
+    if (listEl) listEl.innerHTML = listHtml;
+    var countEl = document.getElementById('biz-qi-count');
+    if (countEl) countEl.textContent = _qAll.length;
+  }
+
   // ── ACTIONS ───────────────────────────────────────────────────
 
   window._bizActions = {
@@ -3562,56 +3684,103 @@
     goToQuotes: function(){ window._bizActions.switchTab('dashboard'); setTimeout(function(){ window._bizActions.loadOwnerQuotes(); },100); },
 
     loadOwnerQuotes: function() {
-      if(!isAdminOrOwner()) return;
-      var panel=document.getElementById('biz-owner-quotes-panel');
-      if(!panel) return;
-      if(panel.style.display!=='none'){ panel.style.display='none'; return; }
-      panel.style.display='block';
-      panel.innerHTML='<div style="color:#94a3b8;font-size:.83rem;padding:8px 0"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
-      _fs.getDocs(_fs.query(_fs.collection(_db,'businesses',BIZ_ID,'quoteRequests'),_fs.orderBy('createdAt','desc'),_fs.limit(50)))
-        .then(function(snap){
-          if(!snap.size){ panel.innerHTML='<p style="color:#64748b;font-size:.83rem;padding:8px 0 0">No quote requests yet.</p>'; return; }
-          var statusColors={new:'#ef4444',read:'#64748b',replied:'#10b981',closed:'#f59e0b',archived:'#94a3b8'};
-          var html='<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#64748b;margin-bottom:10px">'+snap.size+' request'+(snap.size===1?'':'s')+'</div>';
-          snap.forEach(function(d){
-            var q=d.data(), st=q.status||'new', isNew=st==='new';
-            var stColor=statusColors[st]||'#64748b';
-            html+='<div class="biz-quote-item" data-quote-id="'+esc(d.id)+'" style="margin-bottom:14px;padding:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px">'+
-              '<div class="biz-quote-header" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:6px">'+
-                '<span class="biz-quote-name" style="font-weight:700;color:#f1f5f9">'+esc(q.name||'Anonymous')+
-                  (isNew?'<span class="biz-quote-new-badge" style="margin-left:6px;background:#ef44441a;color:#ef4444;border:1px solid #ef444433;border-radius:4px;padding:1px 6px;font-size:.65rem;font-weight:800">NEW</span>':'')+
-                '</span>'+
-                '<span style="display:flex;align-items:center;gap:8px">'+
-                  '<span style="font-size:.7rem;color:'+stColor+';background:'+stColor+'1a;border:1px solid '+stColor+'33;border-radius:4px;padding:1px 7px;font-weight:700;text-transform:uppercase">'+esc(st)+'</span>'+
-                  '<span class="biz-quote-date" style="color:#64748b;font-size:.75rem">'+timeAgo(q.createdAt)+'</span>'+
-                '</span>'+
-              '</div>'+
-              (q.email||q.phone?'<div class="biz-quote-contact" style="font-size:.78rem;color:#94a3b8;margin-bottom:4px">'+
-                (q.email?'<a href="mailto:'+esc(q.email)+'" style="color:#60a5fa;text-decoration:none">'+esc(q.email)+'</a>':'')+
-                (q.phone?' · <a href="tel:'+esc(q.phone)+'" style="color:#34d399;text-decoration:none">'+esc(q.phone)+'</a>':'')+
-              '</div>':'')+
-              (q.service?'<div style="font-size:.78rem;color:#a78bfa;margin-bottom:4px"><i class="fas fa-briefcase" style="margin-right:4px;font-size:.7rem"></i>'+esc(q.service)+'</div>':'')+
-              '<div class="biz-quote-msg" style="font-size:.82rem;color:#cbd5e1;line-height:1.5;margin-bottom:8px">'+esc(q.message||'')+'</div>'+
-              (st!=='closed'&&st!=='archived'?
-                '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
-                  (st!=='replied'?'<button onclick="window._bizActions.updateQuoteStatus(\''+esc(d.id)+'\',\'replied\')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(16,185,129,.3);background:rgba(16,185,129,.08);color:#10b981;font-size:.74rem;font-weight:600;cursor:pointer"><i class="fas fa-reply"></i> Mark Replied</button>':'')+
-                  '<button onclick="window._bizActions.updateQuoteStatus(\''+esc(d.id)+'\',\'closed\')" style="padding:4px 10px;border-radius:6px;border:1px solid rgba(100,116,139,.3);background:rgba(100,116,139,.08);color:#94a3b8;font-size:.74rem;font-weight:600;cursor:pointer"><i class="fas fa-check"></i> Close</button>'+
-                '</div>':'')+
-            '</div>';
-            if(isNew) _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID,'quoteRequests',d.id),{status:'read',updatedAt:_fs.serverTimestamp()}).catch(function(){});
-          });
-          panel.innerHTML=html;
-        }).catch(function(){ panel.innerHTML='<p style="color:#ef4444;font-size:.83rem;padding:8px 0 0">Could not load quote requests.</p>'; });
+      if (!isAdminOrOwner()) return;
+      var panel = document.getElementById('biz-owner-quotes-panel');
+      if (!panel) return;
+      if (panel.style.display !== 'none' && panel.style.display !== '') {
+        panel.style.display = 'none';
+        return;
+      }
+      panel.style.display = 'block';
+      _qAll = []; _qFilter = 'all'; _qSearch = '';
+      panel.innerHTML =
+        '<div class="biz-qi-wrap">' +
+          '<div class="biz-qi-head">' +
+            '<span class="biz-qi-title"><i class="fas fa-inbox"></i> Quote Requests <span class="biz-qi-count" id="biz-qi-count">…</span></span>' +
+            '<button class="biz-qi-close-btn" onclick="var p=document.getElementById(\'biz-owner-quotes-panel\');if(p)p.style.display=\'none\'"><i class="fas fa-times"></i></button>' +
+          '</div>' +
+          '<div class="biz-qi-search-row"><input class="biz-qi-search" id="biz-qi-search-inp" placeholder="Search name, email, message…" oninput="window._bizActions.qSearch(this.value)"></div>' +
+          '<div id="biz-qi-filter-zone"></div>' +
+          '<div class="biz-qi-loading" id="biz-qi-list"><i class="fas fa-spinner fa-spin"></i> Loading…</div>' +
+        '</div>';
+      _fs.getDocs(_fs.query(
+        _fs.collection(_db, 'businesses', BIZ_ID, 'quoteRequests'),
+        _fs.orderBy('createdAt', 'desc'),
+        _fs.limit(50)
+      )).then(function(snap) {
+        snap.forEach(function(d) {
+          var q = Object.assign({ _id: d.id }, d.data());
+          _qAll.push(q);
+          if ((q.status || 'new') === 'new') {
+            _fs.updateDoc(_fs.doc(_db, 'businesses', BIZ_ID, 'quoteRequests', d.id), {
+              status: 'read', updatedAt: _fs.serverTimestamp()
+            }).catch(function(){});
+          }
+        });
+        _qRender();
+      }).catch(function() {
+        var listEl = document.getElementById('biz-qi-list');
+        if (listEl) listEl.innerHTML = '<div class="biz-qi-error"><i class="fas fa-exclamation-triangle"></i> Could not load quote requests.</div>';
+      });
     },
 
     updateQuoteStatus: function(reqId, newStatus) {
-      if(!isAdminOrOwner()) return;
-      _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID,'quoteRequests',reqId),{
+      if (!isAdminOrOwner()) return;
+      _fs.updateDoc(_fs.doc(_db, 'businesses', BIZ_ID, 'quoteRequests', reqId), {
         status: newStatus, updatedAt: _fs.serverTimestamp()
-      }).then(function(){
-        showToast('Status: '+newStatus);
-        window._bizActions.loadOwnerQuotes();
-      }).catch(function(){ showToast('Could not update status',false); });
+      }).then(function() {
+        var q = _qAll.find(function(q){ return q._id === reqId; });
+        if (q) q.status = newStatus;
+        _qRender();
+        showToast('Status: ' + newStatus);
+      }).catch(function(){ showToast('Could not update status', false); });
+    },
+
+    qFilter: function(f) {
+      _qFilter = f;
+      _qRender();
+    },
+
+    qSearch: function(q) {
+      _qSearch = q;
+      _qRender();
+    },
+
+    qToggleNote: function(reqId) {
+      var area = document.getElementById('biz-qi-note-area-'+reqId);
+      if (!area) return;
+      var isHidden = area.style.display === 'none';
+      area.style.display = isHidden ? 'block' : 'none';
+      if (isHidden) {
+        var ta = document.getElementById('biz-qi-note-ta-'+reqId);
+        if (ta) setTimeout(function(){ ta.focus(); }, 60);
+      }
+    },
+
+    qSaveNote: function(reqId) {
+      if (!isAdminOrOwner()) return;
+      var ta   = document.getElementById('biz-qi-note-ta-'+reqId);
+      var note = ta ? ta.value.trim() : '';
+      _fs.updateDoc(_fs.doc(_db, 'businesses', BIZ_ID, 'quoteRequests', reqId), {
+        ownerNote: note, updatedAt: _fs.serverTimestamp()
+      }).then(function() {
+        var q = _qAll.find(function(q){ return q._id === reqId; });
+        if (q) q.ownerNote = note;
+        _qRender();
+        showToast('Note saved');
+      }).catch(function(){ showToast('Could not save note', false); });
+    },
+
+    qTogglePriority: function(reqId, current) {
+      if (!isAdminOrOwner()) return;
+      var newPrio = current === 'high' ? 'normal' : 'high';
+      _fs.updateDoc(_fs.doc(_db, 'businesses', BIZ_ID, 'quoteRequests', reqId), {
+        priority: newPrio, updatedAt: _fs.serverTimestamp()
+      }).then(function() {
+        var q = _qAll.find(function(q){ return q._id === reqId; });
+        if (q) q.priority = newPrio;
+        _qRender();
+      }).catch(function(){ showToast('Could not update priority', false); });
     },
   };
 

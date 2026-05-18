@@ -1245,6 +1245,78 @@ body.gh-has-injected-nav #biz-detail-root {
 .biz-quote-msg          { font-size: .82rem; color: #94a3b8; line-height: 1.5; }
 .biz-quote-new-badge    { display: inline-block; background: rgba(16,185,129,.12); color: #34d399; border-radius: 6px; font-size: .62rem; font-weight: 700; padding: 1px 7px; margin-left: 6px; }
 
+/* ── QUOTE CRM INBOX v2 ──────────────────────────────────────── */
+.biz-qi-wrap { padding: 0; }
+
+.biz-qi-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; gap: 8px; }
+.biz-qi-title { font-size: .9rem; font-weight: 700; color: #f1f5f9; display: flex; align-items: center; gap: 8px; }
+.biz-qi-title i { color: #10b981; }
+.biz-qi-count { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 18px; background: rgba(16,185,129,.15); color: #10b981; border-radius: 10px; font-size: .7rem; font-weight: 700; padding: 0 5px; }
+.biz-qi-close-btn { background: none; border: none; color: #64748b; cursor: pointer; font-size: .95rem; padding: 4px 6px; border-radius: 6px; transition: color .15s; }
+.biz-qi-close-btn:hover { color: #f1f5f9; }
+
+.biz-qi-search-row { margin-bottom: 10px; }
+.biz-qi-search { width: 100%; box-sizing: border-box; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 8px; color: #f1f5f9; font-size: .82rem; padding: 8px 12px; outline: none; font-family: inherit; transition: border-color .15s; }
+.biz-qi-search::placeholder { color: #64748b; }
+.biz-qi-search:focus { border-color: rgba(16,185,129,.4); }
+
+.biz-qi-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.biz-qi-filter-btn { padding: 4px 10px; border-radius: 16px; border: 1px solid rgba(255,255,255,.12); background: transparent; color: #9ca3af; font-size: .75rem; font-weight: 500; cursor: pointer; font-family: inherit; transition: background .15s, color .15s, border-color .15s; white-space: nowrap; }
+.biz-qi-filter-btn:hover { background: rgba(255,255,255,.06); color: #f1f5f9; }
+.biz-qi-filter-btn.active { background: #10b981; border-color: #10b981; color: #fff; }
+.biz-qi-filter-cnt { opacity: .75; }
+
+.biz-qi-loading { color: #94a3b8; font-size: .83rem; padding: 16px 0; }
+.biz-qi-error   { color: #ef4444; font-size: .83rem; padding: 8px 0; }
+.biz-qi-empty   { text-align: center; padding: 24px 16px; color: #64748b; font-size: .82rem; }
+.biz-qi-empty i { display: block; font-size: 1.6rem; opacity: .4; margin-bottom: 8px; color: #10b981; }
+.biz-qi-empty p { margin: 0; }
+
+.biz-qi-card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07); border-radius: 12px; padding: 13px 14px; margin-bottom: 10px; }
+.biz-qi-card:last-child { margin-bottom: 0; }
+
+.biz-qi-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 7px; }
+.biz-qi-card-name { font-size: .88rem; font-weight: 700; color: #f1f5f9; }
+.biz-qi-card-badges { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+
+.biz-qi-status-chip   { display: inline-block; border: 1px solid; border-radius: 5px; padding: 1px 7px; font-size: .64rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+.biz-qi-source-chip   { display: inline-block; border-radius: 5px; padding: 1px 7px; font-size: .64rem; font-weight: 600; }
+.biz-qi-source-chip.src-service { background: rgba(139,92,246,.12); color: #a78bfa; }
+.biz-qi-source-chip.src-general { background: rgba(100,116,139,.1);  color: #94a3b8; }
+.biz-qi-priority-chip { display: inline-block; background: rgba(245,158,11,.14); color: #f59e0b; border-radius: 5px; padding: 1px 7px; font-size: .64rem; font-weight: 700; }
+
+.biz-qi-contact { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 5px; }
+.biz-qi-contact-link { font-size: .78rem; color: #60a5fa; text-decoration: none; display: flex; align-items: center; gap: 4px; }
+.biz-qi-contact-link[href^="tel:"] { color: #34d399; }
+.biz-qi-contact-link:hover { text-decoration: underline; }
+
+.biz-qi-message { font-size: .82rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 5px; }
+.biz-qi-meta    { font-size: .72rem; color: #475569; margin-bottom: 8px; }
+
+.biz-qi-note-wrap { margin-bottom: 8px; }
+.biz-qi-note-toggle { background: none; border: 1px dashed rgba(255,255,255,.12); border-radius: 6px; color: #64748b; font-size: .75rem; cursor: pointer; padding: 4px 10px; font-family: inherit; width: 100%; text-align: left; transition: border-color .15s, color .15s; }
+.biz-qi-note-toggle:hover { border-color: rgba(255,255,255,.25); color: #94a3b8; }
+.biz-qi-note-area  { margin-top: 6px; }
+.biz-qi-note-input { width: 100%; box-sizing: border-box; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-radius: 6px; color: #f1f5f9; font-size: .8rem; padding: 7px 10px; outline: none; font-family: inherit; resize: vertical; min-height: 56px; }
+.biz-qi-note-input:focus { border-color: rgba(16,185,129,.35); }
+.biz-qi-note-save  { margin-top: 5px; padding: 5px 12px; border-radius: 6px; border: none; background: rgba(16,185,129,.15); color: #10b981; font-size: .75rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: background .15s; }
+.biz-qi-note-save:hover { background: rgba(16,185,129,.25); }
+
+.biz-qi-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.biz-qi-action-btn { padding: 4px 10px; border-radius: 6px; font-size: .74rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: filter .15s; border: 1px solid; }
+.biz-qi-action-btn:hover { filter: brightness(1.2); }
+.biz-qi-action-btn.priority         { border-color: rgba(245,158,11,.3);  background: rgba(245,158,11,.08);  color: #f59e0b; }
+.biz-qi-action-btn.priority.is-high { border-color: rgba(245,158,11,.55); background: rgba(245,158,11,.2);  }
+.biz-qi-action-btn.replied          { border-color: rgba(16,185,129,.3);  background: rgba(16,185,129,.08); color: #10b981; }
+.biz-qi-action-btn.close            { border-color: rgba(100,116,139,.3); background: rgba(100,116,139,.08);color: #94a3b8; }
+.biz-qi-action-btn.archive          { border-color: rgba(107,114,128,.3); background: rgba(107,114,128,.08);color: #6b7280; }
+.biz-qi-action-btn.reopen           { border-color: rgba(59,130,246,.3);  background: rgba(59,130,246,.08); color: #60a5fa; }
+
+@media (max-width: 600px) {
+  .biz-qi-card-head { flex-direction: column; }
+  .biz-qi-action-btn { padding: 4px 8px; font-size: .7rem; }
+}
+
 /* ── MODALS ──────────────────────────────────────────────────── */
 .biz-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.75); backdrop-filter: blur(6px); z-index: 9000; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .2s; }
 .biz-modal-overlay.open { opacity: 1; pointer-events: all; }
