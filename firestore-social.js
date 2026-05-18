@@ -904,15 +904,23 @@
             var rs = results[0]; var walletSnap = results[1];
             if (!rs.exists()) throw new Error('reward-not-found');
             var r = rs.data() || {};
-            var price = normalAmount(r.pointPrice || r.price || r.points);
+            var price = normalAmount(r.cost || r.pointsCost || r.pointPrice || r.price || r.points);
             if (!price) throw new Error('invalid-price');
             var wallet = walletSnap.exists() ? (walletSnap.data() || {}) : {};
             var credits = Math.max(0, Number(wallet.credits || 0));
             var reservedDebits = Math.max(0, Number(wallet.reservedDebits || 0));
             if (credits - reservedDebits < price) throw new Error('insufficient-points');
-            var remaining = Number(r.quantityRemaining || 0);
-            if (remaining <= 0 && Number(r.quantityTotal || 0) > 0) throw new Error('sold-out');
-            if (Number(r.quantityTotal || 0) > 0) tx.update(rewardDocRef, { quantityRemaining: increment(-1), updatedAt: serverTimestamp() });
+            var stockVal = r.stock != null ? Number(r.stock) : null;
+            var remaining = stockVal !== null ? stockVal : Number(r.quantityRemaining || 0);
+            var hasLimit = stockVal !== null ? true : Number(r.quantityTotal || 0) > 0;
+            if (hasLimit && remaining <= 0) throw new Error('sold-out');
+            if (hasLimit) {
+              if (stockVal !== null) {
+                tx.update(rewardDocRef, { stock: increment(-1), updatedAt: serverTimestamp() });
+              } else {
+                tx.update(rewardDocRef, { quantityRemaining: increment(-1), updatedAt: serverTimestamp() });
+              }
+            }
             tx.set(walletRef(user.uid), {
               credits: credits,
               reservedDebits: reservedDebits + price,

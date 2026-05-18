@@ -19,9 +19,20 @@
     if (typeof v === 'number') return v;
     return Date.parse(v) || 0;
   };
+  var relTime = function (v) {
+    var ms = toMs(v);
+    if (!ms) return '';
+    var diff = Math.floor((Date.now() - ms) / 1000);
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
+    return new Date(ms).toLocaleDateString('en', { month: 'short', day: 'numeric' });
+  };
 
   var state = {
     fbUser: null,
+    wallet: { balance: 0, earned: 0, received: 0, sent: 0, spent: 0, redeemed: 0 },
     balance: 0,
     rewards: [],
     userRewards: {},
@@ -31,6 +42,8 @@
 
   var _unsubRewards = null;
   var _unsubBalance = null;
+  var _unsubGifts   = null;
+  var _unsubCoupons = null;
 
   function $ (id) { return document.getElementById(id); }
 
@@ -69,16 +82,26 @@
   /* ── Balance ─────────────────────────────────────────────────── */
   function loadUserBalance(GF) {
     var uid = state.fbUser.uid;
-    _unsubBalance = GF.fs.onSnapshot(
-      GF.fs.doc(GF.db, 'users', uid),
-      function (snap) {
-        var d = snap.data() || {};
-        state.balance = Number(d.pointsBalance || d.geoPointsBalance || 0);
+    var GS = window.GeoSocial;
+    if (GS && GS.listenWallet) {
+      _unsubBalance = GS.listenWallet(uid, function (w) {
+        state.wallet = w || state.wallet;
+        state.balance = state.wallet.balance || 0;
         renderBalanceUI();
         loadDailyTransferred(GF);
-      },
-      function (err) { console.warn('[Rewards] balance', err.message); }
-    );
+      });
+    } else {
+      _unsubBalance = GF.fs.onSnapshot(
+        GF.fs.doc(GF.db, 'users', uid),
+        function (snap) {
+          var d = snap.data() || {};
+          state.balance = Number(d.pointsBalance || d.geoPointsBalance || 0);
+          renderBalanceUI();
+          loadDailyTransferred(GF);
+        },
+        function (err) { console.warn('[Rewards] balance', err.message); }
+      );
+    }
   }
 
   function loadDailyTransferred(GF) {
@@ -96,8 +119,14 @@
     if (el) el.textContent = compact(state.balance) + ' pts';
     var sub = $('rwBalanceSub');
     if (sub) {
+      var w = state.wallet;
       var remaining = Math.max(0, 2000 - state.dailyTransferred);
-      sub.innerHTML = 'Loyalty balance &nbsp;·&nbsp; <strong>' + compact(remaining) + ' pts</strong> transfer limit remaining today';
+      var parts = [];
+      if ((w.earned || 0) > 0) parts.push('Earned: <strong>' + compact(w.earned) + '</strong>');
+      if ((w.received || 0) > 0) parts.push('Received: <strong>' + compact(w.received) + '</strong>');
+      if ((w.redeemed || 0) > 0) parts.push('Redeemed: <strong>' + compact(w.redeemed) + '</strong>');
+      parts.push('Transfer limit: <strong>' + compact(remaining) + ' pts</strong> today');
+      sub.innerHTML = parts.join(' &nbsp;·&nbsp; ');
     }
   }
 
@@ -248,24 +277,26 @@
   }
 
   function executeRedeem(rewardId, modalEl) {
-    var GF = window.GeoFirebase;
-    if (!GF || !state.fbUser) return;
+    var GS = window.GeoSocial;
+    if (!GS || !GS.redeemReward) {
+      toast('Redemption service unavailable. Please reload the page.', 'error');
+      return;
+    }
+    if (!state.fbUser) return;
 
     var btn = document.getElementById('redeemConfirm');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing…'; }
 
-    var requestId = Date.now().toString(36) + Math.random().toString(36).slice(2);
-    GF.httpsCallable(GF.functions, 'redeemReward')({ rewardId: rewardId, requestId: requestId })
-      .then(function () {
+    GS.redeemReward(rewardId, function (ok, data) {
+      if (ok) {
         if (modalEl) modalEl.remove();
-        toast('Reward redeemed! Check your profile wallet for details.');
-        loadUserRewards(GF);
-      }).catch(function (err) {
-        console.error('[Rewards] redeem', err);
-        var msg = (err.message || '').replace(/^Firebase:\s*/i, '').replace(/\s*\(functions\/[^)]+\)\.?$/, '');
-        toast(msg || 'Redemption failed. Please try again.', 'error');
+        var code = (data && data.code) ? ' Code: ' + data.code : '';
+        toast('Reward redeemed!' + code + ' Check My Coupons below.');
+        loadUserRewards(window.GeoFirebase);
+      } else {
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Confirm Redeem'; }
-      });
+      }
+    });
   }
 
   /* ── Transfer modal ──────────────────────────────────────────── */
@@ -312,8 +343,12 @@
   }
 
   function executeTransfer(modalEl) {
-    var GF = window.GeoFirebase;
-    if (!GF || !state.fbUser) return;
+    var GS = window.GeoSocial;
+    if (!GS || !GS.sendPoints) {
+      toast('Transfer service unavailable. Please reload the page.', 'error');
+      return;
+    }
+    if (!state.fbUser) return;
 
     var toInput = ((document.getElementById('transferTo') || {}).value || '').trim();
     var amtRaw = parseInt(((document.getElementById('transferAmt') || {}).value || '0'), 10);
@@ -329,53 +364,107 @@
     var btn = document.getElementById('transferConfirm');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…'; }
 
-    var f = GF.fs, db = GF.db;
-    var uid = state.fbUser.uid;
-
-    function doTransfer(recipientUid) {
-      if (recipientUid === uid) {
-        toast('You cannot send points to yourself', 'error');
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Points'; }
-        return;
-      }
-
-      var requestId = Date.now().toString(36) + Math.random().toString(36).slice(2);
-      GF.httpsCallable(GF.functions, 'transferPoints')({
-        toUserId: recipientUid,
-        amount: amtRaw,
-        message: message || null,
-        requestId: requestId
-      }).then(function () {
+    GS.sendPoints(toInput, amtRaw, message || null, function (ok) {
+      if (ok) {
         state.dailyTransferred += amtRaw;
         if (modalEl) modalEl.remove();
-        toast('Sent ' + amtRaw + ' pts successfully!');
-      }).catch(function (err) {
-        console.error('[Rewards] transfer', err);
-        var msg = (err.message || '').replace(/^Firebase:\s*/i, '').replace(/\s*\(functions\/[^)]+\)\.?$/, '');
-        toast(msg || 'Transfer failed. Please try again.', 'error');
+        toast('Sent ' + amtRaw + ' pts! Recipient must claim the gift.');
+      } else {
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Points'; }
-      });
-    }
+      }
+    });
+  }
 
-    // Resolve username → UID if needed
-    var looksLikeUid = /^[a-zA-Z0-9]{20,}$/.test(toInput);
-    if (looksLikeUid) {
-      doTransfer(toInput);
-    } else {
-      var username = toInput.replace(/^@/, '');
-      f.getDocs(f.query(f.collection(db, 'users'), f.where('username', '==', username), f.limit(1)))
-        .then(function (snap) {
-          if (snap.empty) {
-            toast('User not found: @' + username, 'error');
-            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Points'; }
-            return;
-          }
-          doTransfer(snap.docs[0].id);
-        }).catch(function (err) {
-          toast('Could not find user: ' + (err.message || 'unknown error'), 'error');
-          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Points'; }
-        });
+  /* ── Pending Gifts ───────────────────────────────────────────── */
+  function loadPendingGifts() {
+    var GS = window.GeoSocial;
+    if (!GS || !GS.listenIncomingGifts || !state.fbUser) return;
+    _unsubGifts = GS.listenIncomingGifts(state.fbUser.uid, function (gifts) {
+      renderPendingGifts(gifts);
+    });
+  }
+
+  function renderPendingGifts(gifts) {
+    var panel = $('rwGiftsPanel');
+    var list  = $('rwGiftsList');
+    if (!panel || !list) return;
+    if (!gifts || !gifts.length) {
+      panel.style.display = 'none';
+      list.innerHTML = '';
+      return;
     }
+    panel.style.display = '';
+    list.innerHTML = gifts.map(function (g) {
+      var from = esc(g.fromName || 'Someone');
+      var amt  = compact(g.amount || 0);
+      var msg  = g.message ? esc(g.message) : '';
+      var ago  = relTime(g.createdAt);
+      return '<div class="rw-gift-item">' +
+        '<div class="rw-gift-icon"><i class="fas fa-coins"></i></div>' +
+        '<div class="rw-gift-body">' +
+          '<div class="rw-gift-from"><strong>' + from + '</strong> sent you <strong>' + amt + ' pts</strong></div>' +
+          (msg ? '<div class="rw-gift-msg">' + msg + '</div>' : '') +
+          (ago ? '<div class="rw-gift-meta">' + ago + '</div>' : '') +
+        '</div>' +
+        '<button class="rw-btn-claim" data-claim-gift="' + esc(g.id) + '"><i class="fas fa-hand-holding-heart"></i> Claim</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  function claimGift(giftId, btn) {
+    var GS = window.GeoSocial;
+    if (!GS || !GS.claimPointGift) return;
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
+    GS.claimPointGift(giftId, function (ok, err) {
+      if (ok) {
+        toast('GeoPoints claimed!');
+      } else {
+        var msg = (err && err.message) ? err.message : 'Could not claim gift';
+        toast(msg, 'error');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-hand-holding-heart"></i> Claim'; }
+      }
+    });
+  }
+
+  /* ── My Coupons ──────────────────────────────────────────────── */
+  function loadMyCoupons() {
+    var GS = window.GeoSocial;
+    if (!GS || !GS.listenMyCoupons || !state.fbUser) return;
+    _unsubCoupons = GS.listenMyCoupons(state.fbUser.uid, function (coupons) {
+      renderMyCoupons(coupons);
+    });
+  }
+
+  function renderMyCoupons(coupons) {
+    var panel = $('rwCouponsPanel');
+    var list  = $('rwCouponsList');
+    if (!panel || !list) return;
+    if (!coupons || !coupons.length) {
+      panel.style.display = 'none';
+      list.innerHTML = '';
+      return;
+    }
+    panel.style.display = '';
+    list.innerHTML = coupons.map(function (c) {
+      var title  = esc(c.rewardTitle || c.title || 'Reward');
+      var code   = esc(c.code || '');
+      var status = c.status || 'active';
+      var ago    = relTime(c.createdAt);
+      var statusBadge = status === 'used'
+        ? '<span class="rw-coupon-status rw-coupon-used">Used</span>'
+        : status === 'expired'
+          ? '<span class="rw-coupon-status rw-coupon-expired">Expired</span>'
+          : '<span class="rw-coupon-status rw-coupon-active">Active</span>';
+      return '<div class="rw-coupon-item">' +
+        '<div class="rw-coupon-left"><i class="fas fa-ticket-alt rw-coupon-icon"></i></div>' +
+        '<div class="rw-coupon-body">' +
+          '<div class="rw-coupon-title">' + title + '</div>' +
+          '<div class="rw-coupon-code">' + code + '</div>' +
+          (ago ? '<div class="rw-coupon-meta">' + ago + '</div>' : '') +
+        '</div>' +
+        statusBadge +
+      '</div>';
+    }).join('');
   }
 
   /* ── Event bindings ──────────────────────────────────────────── */
@@ -402,6 +491,12 @@
         openTransferModal();
         return;
       }
+
+      var claimBtn = e.target.closest('[data-claim-gift]');
+      if (claimBtn) {
+        claimGift(claimBtn.dataset.claimGift, claimBtn);
+        return;
+      }
     });
 
     document.addEventListener('keydown', function (e) {
@@ -415,7 +510,6 @@
     var params = new URLSearchParams(location.search);
     var toParam = params.get('to');
     if (toParam) {
-      // Delay until balance loaded, then auto-open transfer modal
       setTimeout(function () {
         openTransferModal();
         setTimeout(function () {
@@ -443,6 +537,8 @@
         loadUserBalance(GF);
         loadRewards(GF);
         loadUserRewards(GF);
+        loadPendingGifts();
+        loadMyCoupons();
       });
     });
   }
@@ -450,6 +546,8 @@
   window.addEventListener('pagehide', function () {
     if (_unsubRewards) { try { _unsubRewards(); } catch (e) {} _unsubRewards = null; }
     if (_unsubBalance) { try { _unsubBalance(); } catch (e) {} _unsubBalance = null; }
+    if (_unsubGifts)   { try { _unsubGifts();   } catch (e) {} _unsubGifts   = null; }
+    if (_unsubCoupons) { try { _unsubCoupons(); } catch (e) {} _unsubCoupons = null; }
   });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
