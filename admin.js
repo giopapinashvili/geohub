@@ -1715,6 +1715,9 @@
         var stock = r.stock != null ? String(r.stock) + ' left' : '∞ unlimited';
         var cost = Number(r.cost || r.pointsCost || 0);
         var activeStyle = r.active ? 'color:var(--green)' : 'color:var(--red)';
+        var expMs = r.expiresAt ? (r.expiresAt.toMillis ? r.expiresAt.toMillis() : (r.expiresAt.seconds ? r.expiresAt.seconds * 1000 : Number(r.expiresAt))) : 0;
+        var expLabel = expMs ? ' &nbsp;·&nbsp; Exp: ' + new Date(expMs).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+        var bizLabel = r.businessName ? ' &nbsp;·&nbsp; <i class="fas fa-store" style="font-size:.65rem"></i> ' + escHtmlAdmin(r.businessName) : '';
         return '<div class="bi" style="display:flex;align-items:center;gap:12px">' +
           '<div style="flex:1;min-width:0">' +
             '<div style="font-weight:700;font-size:.88rem">' + escHtmlAdmin(r.title || 'Untitled') + '</div>' +
@@ -1723,6 +1726,7 @@
               '<span style="color:var(--gold);font-weight:700">' + cost + ' pts</span>' +
               ' &nbsp;·&nbsp; ' + escHtmlAdmin(stock) +
               ' &nbsp;·&nbsp; <span style="' + activeStyle + ';font-weight:700">' + (r.active ? 'Active' : 'Inactive') + '</span>' +
+              bizLabel + expLabel +
             '</div>' +
           '</div>' +
           '<button class="btn btn-ghost btn-sm" onclick="rwEdit(\'' + escAttr(r.id) + '\')"><i class="fas fa-edit"></i></button>' +
@@ -1813,6 +1817,12 @@
       set('rwTerms', c.termsNote || '');
       set('rwCategory', c.category || 'other');
       var active = document.getElementById('rwActive'); if (active) active.checked = !!c.active;
+      // Business-linked fields
+      var expMs = c.expiresAt ? (c.expiresAt.toMillis ? c.expiresAt.toMillis() : (c.expiresAt.seconds ? c.expiresAt.seconds * 1000 : Number(c.expiresAt))) : 0;
+      set('rwExpiresAt', expMs ? new Date(expMs).toISOString().slice(0, 10) : '');
+      set('rwBusinessId', c.businessId || '');
+      set('rwBusinessName', c.businessName || '');
+      set('rwOwnerId', c.ownerId || '');
     }).catch(function (err) {
       toast('Load failed: ' + err.message, 'rgba(239,68,68,.95)');
     });
@@ -1859,6 +1869,10 @@
       var terms = ((document.getElementById('rwTerms') || {}).value || '').trim();
       var category = (document.getElementById('rwCategory') || {}).value || 'other';
       var active = !!((document.getElementById('rwActive') || {}).checked);
+      var expiresDateStr = ((document.getElementById('rwExpiresAt') || {}).value || '').trim();
+      var businessId = ((document.getElementById('rwBusinessId') || {}).value || '').trim();
+      var businessName = ((document.getElementById('rwBusinessName') || {}).value || '').trim();
+      var ownerId = ((document.getElementById('rwOwnerId') || {}).value || '').trim();
 
       if (!title) { toast('Title is required', 'rgba(239,68,68,.95)'); return; }
       if (cost < 1) { toast('Points cost must be at least 1', 'rgba(239,68,68,.95)'); return; }
@@ -1874,6 +1888,10 @@
         imageUrl: image || null,
         termsNote: terms || null,
         active: active,
+        expiresAt: expiresDateStr ? new Date(expiresDateStr) : null,
+        businessId: businessId || null,
+        businessName: businessName || null,
+        ownerId: ownerId || null,
         updatedAt: f.serverTimestamp()
       };
 

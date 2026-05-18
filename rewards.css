@@ -412,6 +412,7 @@
   color: #10b981; font-family: monospace;
   background: rgba(16,185,129,.08); border-radius: 6px;
   padding: 3px 8px; display: inline-block; margin-bottom: 4px;
+  word-break: break-all; max-width: 100%;
 }
 .rw-coupon-meta { font-size: .72rem; color: var(--gh-muted, #64748b); }
 
@@ -443,6 +444,8 @@
 /* ── Business name on reward card ─────────────────────────────── */
 .rw-card-biz { font-size: .74rem; color: var(--gh-muted, #64748b); margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
 .rw-card-biz i { font-size: .68rem; }
+.rw-biz-link { color: #3b82f6; text-decoration: none; }
+.rw-biz-link:hover { text-decoration: underline; }
 
 /* ── Business coupons panel ───────────────────────────────────── */
 .rw-biz-coupon-item {
@@ -452,7 +455,7 @@
   border: 1px solid rgba(245,158,11,.14);
   border-radius: 14px; margin-bottom: 10px;
 }
-.rw-biz-coupon-item .rw-coupon-body { flex: 1; min-width: 0; }
+.rw-biz-coupon-item .rw-coupon-body { flex: 1; min-width: 0; overflow: hidden; }
 
 .rw-btn-mark-used {
   padding: 7px 14px; border-radius: 999px;

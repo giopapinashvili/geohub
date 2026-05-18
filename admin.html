@@ -732,6 +732,22 @@
           <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Terms / Redemption note (optional)
             <input id="rwTerms" placeholder="e.g. Valid at all Tbilisi branches. Show QR at checkout." style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
           </label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Expires At (optional)
+              <input id="rwExpiresAt" type="date" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Business ID (optional)
+              <input id="rwBusinessId" placeholder="Firestore business doc ID" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Business Name (display)
+              <input id="rwBusinessName" placeholder="e.g. Café X (shown on reward card)" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Business Owner UID
+              <input id="rwOwnerId" placeholder="Firebase UID of business owner" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+          </div>
           <div class="tog-wrap" style="max-width:420px">
             <div><div class="tog-label">Active</div><div class="tog-sub">Visible to users in the rewards store</div></div>
             <label class="tog-sw"><input type="checkbox" id="rwActive" checked><span class="tog-slider"></span></label>

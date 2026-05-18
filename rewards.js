@@ -216,7 +216,7 @@
       '<div class="rw-card-body">' +
         '<div class="rw-card-cat"><i class="fas ' + icon + '"></i> ' + esc(r.category || 'reward') + '</div>' +
         '<h3 class="rw-card-title">' + esc(r.title || 'Reward') + '</h3>' +
-        (businessName ? '<div class="rw-card-biz"><i class="fas fa-store"></i> ' + esc(businessName) + '</div>' : '') +
+        (businessName ? '<div class="rw-card-biz"><i class="fas fa-store"></i> ' + (r.businessId ? '<a href="business.html?id=' + esc(r.businessId) + '" class="rw-biz-link">' + esc(businessName) + '</a>' : esc(businessName)) + '</div>' : '') +
         '<p class="rw-card-desc">' + esc(r.description || '') + '</p>' +
         (isExpired ? '<div class="rw-card-expired-badge"><i class="fas fa-clock"></i> Expired</div>' : '') +
         (isInactive && !isExpired ? '<div class="rw-card-expired-badge"><i class="fas fa-ban"></i> Unavailable</div>' : '') +
@@ -518,10 +518,15 @@
     }
     panel.style.display = '';
     list.innerHTML = coupons.map(function (c) {
-      var title  = esc(c.rewardTitle || c.title || 'Reward');
-      var code   = esc(c.code || '');
-      var status = c.status || 'active';
-      var ago    = relTime(c.createdAt);
+      var title   = esc(c.rewardTitle || c.title || 'Reward');
+      var code    = esc(c.code || '');
+      var status  = c.status || 'active';
+      var ago     = relTime(c.createdAt);
+      var expMs   = toMs(c.expiresAt);
+      var expiry  = expMs ? new Date(expMs).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+      var usedMs  = toMs(c.usedAt);
+      var usedAgo = usedMs ? relTime(c.usedAt) : '';
+      var custId  = c.userId ? String(c.userId).slice(0, 10) + '…' : '';
       var statusBadge = status === 'used'
         ? '<span class="rw-coupon-status rw-coupon-used">Used</span>'
         : status === 'expired'
@@ -534,7 +539,10 @@
             '<span class="rw-coupon-code">' + code + '</span>' +
             (c.code ? '<button class="rw-btn-copy-code" data-copy-code="' + esc(c.code) + '" title="Copy code"><i class="fas fa-copy"></i></button>' : '') +
           '</div>' +
-          (ago ? '<div class="rw-coupon-meta">' + ago + '</div>' : '') +
+          (custId ? '<div class="rw-coupon-meta"><i class="fas fa-user" style="font-size:.65rem;margin-right:4px"></i>Customer: ' + esc(custId) + '</div>' : '') +
+          (usedAgo ? '<div class="rw-coupon-meta"><i class="fas fa-check-double" style="font-size:.65rem;margin-right:4px"></i>Used ' + usedAgo + '</div>' : '') +
+          (expiry && status !== 'used' ? '<div class="rw-coupon-meta"><i class="fas fa-calendar" style="font-size:.65rem;margin-right:4px"></i>Exp ' + esc(expiry) + '</div>' : '') +
+          (ago && !usedAgo ? '<div class="rw-coupon-meta">' + ago + '</div>' : '') +
         '</div>' +
         statusBadge +
         (status === 'active'

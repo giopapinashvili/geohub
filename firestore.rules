@@ -992,15 +992,21 @@ service cloud.firestore {
       allow read: if true;
       allow create, delete: if isAdmin();
       // Admins may change anything.
-      // Regular users may decrement quantityRemaining by exactly 1 when
+      // Regular users may decrement quantityRemaining OR stock by exactly 1 when
       // redeeming a reward — all other fields stay unchanged, and only when
       // stock is available.  This keeps the redeem runTransaction working on
       // the Spark plan without Cloud Functions.
+      // Both field names are supported because the admin UI writes `stock` while
+      // the original schema used `quantityRemaining`.
       allow update: if isAdmin()
         || (signedIn()
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['quantityRemaining', 'updatedAt'])
             && resource.data.get('quantityRemaining', 0) > 0
-            && request.resource.data.get('quantityRemaining', 0) == resource.data.get('quantityRemaining', 0) - 1);
+            && request.resource.data.get('quantityRemaining', 0) == resource.data.get('quantityRemaining', 0) - 1)
+        || (signedIn()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock', 'updatedAt'])
+            && resource.data.get('stock', 0) > 0
+            && request.resource.data.get('stock', 0) == resource.data.get('stock', 0) - 1);
     }
     match /rewardCoupons/{couponId} {
       allow read: if signedIn()
@@ -1008,13 +1014,16 @@ service cloud.firestore {
             || resource.data.get('businessOwnerId','') == uid()
             || isAdmin());
       allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
-      // After creation only status fields may change (redeem flow).
+      // Only the business owner of the reward may mark a coupon used (active → used).
+      // Customers cannot self-mark — prevents fraudulent "I already used it" claims.
+      // Immutable fields (userId, businessOwnerId, rewardId, code, pointPrice) cannot change.
       allow update: if isAdmin()
         || (signedIn()
-            && (resource.data.get('userId',          '') == uid()
-                || resource.data.get('businessOwnerId','') == uid())
+            && resource.data.get('businessOwnerId','') == uid()
             && request.resource.data.diff(resource.data).affectedKeys()
-                 .hasOnly(['status', 'usedAt', 'usedBy', 'updatedAt']));
+                 .hasOnly(['status', 'usedAt', 'usedBy', 'updatedAt'])
+            && request.resource.data.get('status', '') == 'used'
+            && resource.data.get('status', '') == 'active');
       allow delete: if isAdmin();
     }
     match /pointGifts/{giftId} {
