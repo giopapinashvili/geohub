@@ -201,17 +201,25 @@
     var price = d.price || d.priceFrom || '';
     var priceStr = price ? ' from &#x20BE;' + esc(String(price)) : '';
     var loc = esc(d.city || d.location || '');
-    return '<div class="cp-card">' +
+    var bizId = d.businessId || d.bizId || '';
+    var bizName = esc(d.businessName || d.bizName || d.businessTitle || '');
+    var cardOpen = bizId
+      ? '<a class="cp-card cp-card-link" href="business.html?id=' + esc(bizId) + '">'
+      : '<div class="cp-card">';
+    var cardClose = bizId ? '</a>' : '</div>';
+    return cardOpen +
       '<div class="cp-card-head">' +
         '<span class="cp-badge">' + svcType + '</span>' +
       '</div>' +
       '<div class="cp-card-title">' + esc(d.title || d.name || '') + '</div>' +
+      (bizName ? '<div class="cp-card-sub"><i class="fa fa-store"></i>' + bizName + '</div>' : '') +
       (priceStr ? '<div class="cp-card-price">' + priceStr + '</div>' : '') +
       (d.description ? '<div class="cp-card-desc">' + snippet(d.description, 80) + '</div>' : '') +
       '<div class="cp-card-meta">' +
         (loc ? '<span><i class="fa fa-map-marker"></i>' + loc + '</span>' : '') +
+        (bizId ? '<span class="cp-biz-link-chip"><i class="fa fa-store"></i>View Business</span>' : '') +
       '</div>' +
-    '</div>';
+    cardClose;
   }
 
   var RENDERERS = {
@@ -245,7 +253,10 @@
       '.cp-card-meta span{display:flex;align-items:center;gap:4px}',
       '.cp-card-meta i{color:#10b981}',
       '.cp-card-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#10b981,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:.88rem;font-weight:800;color:#fff;margin-bottom:12px;overflow:hidden}',
-      '.cp-av-img{width:100%;height:100%;object-fit:cover}'
+      '.cp-av-img{width:100%;height:100%;object-fit:cover}',
+      '.cp-card-link{display:block;text-decoration:none;color:inherit;cursor:pointer}',
+      '.cp-card-link:hover{border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.06)}',
+      '.cp-biz-link-chip{display:inline-flex;align-items:center;gap:4px;color:#10b981;font-size:.72rem;font-weight:700}'
     ].join('');
     document.head.appendChild(s);
   }
