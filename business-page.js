@@ -81,6 +81,14 @@
     if (d < 86400) return Math.floor(d/3600)+'h ago';
     return Math.floor(d/86400)+'d ago';
   }
+  function toMsBiz(v) {
+    if (!v) return 0;
+    if (typeof v.toMillis === 'function') return v.toMillis();
+    if (v && v.seconds) return v.seconds * 1000;
+    if (v instanceof Date) return v.getTime();
+    if (typeof v === 'number') return v;
+    return Date.parse(v) || 0;
+  }
   function starsHtml(rating, cls) {
     var full=Math.floor(rating||0), half=((rating||0)-full)>=0.5, empty=5-full-(half?1:0);
     var out='<span class="'+(cls||'biz-stars')+'">';
@@ -265,6 +273,7 @@
       {id:'products', label:'Products'},
       {id:'photos',   label:'Photos'},
       {id:'reviews',  label:'Reviews'},
+      {id:'rewards',  label:'Rewards'},
       {id:'faq',      label:'FAQ'},
       {id:'about',    label:'About'},
     ];
@@ -408,6 +417,9 @@
       '</div>';
     }
 
+    // Rewards widget — placeholder, populated async by loadBizRewards()
+    html += '<div id="biz-rewards-sidebar" style="display:none"></div>';
+
     return html || '';
   }
 
@@ -423,6 +435,7 @@
           '<button class="biz-admin-btn" onclick="window._bizActions.openBlockManager()"><i class="fas fa-plus-circle"></i> Add Block</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.openCompose()"><i class="fas fa-pen-to-square"></i> New Post</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
+          '<a href="rewards.html" class="biz-admin-btn"><i class="fas fa-gift"></i> My Coupons</a>'+
           '<button class="biz-admin-btn" style="color:#f87171;border-color:rgba(248,113,113,.3)" onclick="window._bizActions.deletePage()"><i class="fas fa-trash"></i> Delete Page</button>'+
         '</div>'+
         '<button class="biz-admin-btn biz-preview-toggle" onclick="window._bizActions.togglePreview()">'+
@@ -1428,6 +1441,10 @@
             '<div id="biz-faq-panel"><div class="biz-loading-inline"><i class="fas fa-spinner fa-spin"></i> Loading FAQ…</div></div>'+
           '</div>'+
 
+          '<div class="biz-tab-panel" data-panel="rewards">'+
+            '<div id="biz-rewards-panel"><div class="biz-loading-inline"><i class="fas fa-spinner fa-spin"></i> Loading rewards…</div></div>'+
+          '</div>'+
+
           '<div class="biz-tab-panel" data-panel="about">'+
             renderAboutTab(biz)+
             '<div id="biz-milestones-section"></div>'+
@@ -1471,6 +1488,7 @@
     loadEvents(BIZ_ID);
     loadFaq(BIZ_ID);
     loadMilestones(BIZ_ID);
+    loadBizRewards(BIZ_ID);
     if (_isOwner) {
       loadInsights(BIZ_ID);
       window._bizActions.refreshAdminList();
@@ -1807,6 +1825,123 @@
         '</div>';
       }).join('');
     });
+  }
+
+  // ── BUSINESS REWARDS ─────────────────────────────────────────
+
+  function loadBizRewards(bizId) {
+    var panelEl  = document.getElementById('biz-rewards-panel');
+    var sideEl   = document.getElementById('biz-rewards-sidebar');
+    if (!panelEl) return;
+
+    // Single where clause — no composite index required; filter active client-side.
+    var q = _fs.query(
+      _fs.collection(_db, 'rewards'),
+      _fs.where('businessId', '==', bizId),
+      _fs.limit(50)
+    );
+    _fs.getDocs(q).then(function(snap) {
+      var rows = [];
+      snap.forEach(function(d) { rows.push(Object.assign({ id: d.id }, d.data())); });
+
+      // Keep only active, non-expired rewards; out-of-stock kept but visually disabled.
+      var now = Date.now();
+      rows = rows.filter(function(r) {
+        if (r.active === false) return false;
+        var expMs = toMsBiz(r.expiresAt);
+        if (expMs && expMs < now) return false;
+        return true;
+      });
+      rows.sort(function(a, b) { return Number(a.sortOrder || 0) - Number(b.sortOrder || 0); });
+
+      // Right sidebar widget
+      if (sideEl) {
+        if (rows.length) {
+          sideEl.style.display = '';
+          sideEl.innerHTML = renderRewardsSidebarContent(rows.slice(0, 3));
+        } else {
+          sideEl.style.display = 'none';
+        }
+      }
+
+      // Tab panel
+      if (!rows.length) {
+        panelEl.innerHTML =
+          '<div class="biz-empty-state"><i class="fas fa-gift"></i>' +
+          (_isOwner
+            ? '<p>No active rewards linked to this business. Create one in the <a href="admin.html" style="color:#10b981">admin panel</a> and set the Business ID to <code>' + esc(bizId) + '</code>.</p>'
+            : '<p>No active rewards available right now. Check back soon!</p>') +
+          '</div>';
+        return;
+      }
+
+      var manageBar = isAdminOrOwner()
+        ? '<div class="biz-rewards-manage-bar"><i class="fas fa-info-circle"></i> Redeem coupons in your ' +
+          '<a href="rewards.html" class="biz-rewards-manage-link">Rewards &amp; Coupons</a> page.</div>'
+        : '';
+
+      panelEl.innerHTML =
+        manageBar +
+        '<div class="biz-rewards-grid">' +
+          rows.map(renderBizRewardCard).join('') +
+        '</div>';
+    }).catch(function(err) {
+      console.warn('[BizPage] rewards', err.message);
+      if (panelEl) panelEl.innerHTML = '<div class="biz-empty-state"><i class="fas fa-gift"></i><p>Could not load rewards.</p></div>';
+    });
+  }
+
+  function renderBizRewardCard(r) {
+    var cost     = Number(r.cost || r.pointsCost || 0);
+    var stockRaw = r.stock != null ? Number(r.stock) : (r.quantityRemaining != null ? Number(r.quantityRemaining) : null);
+    var unlimited  = stockRaw === null;
+    var outOfStock = !unlimited && stockRaw === 0;
+    var expMs  = toMsBiz(r.expiresAt);
+    var expiry = expMs ? new Date(expMs).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+    var catIcons = { food_drink: 'fa-utensils', food: 'fa-utensils', drink: 'fa-coffee',
+                     experience: 'fa-star', shopping: 'fa-shopping-bag',
+                     entertainment: 'fa-film', travel: 'fa-plane', other: 'fa-gift' };
+    var icon = catIcons[r.category] || 'fa-gift';
+
+    var stockBadge = outOfStock
+      ? '<span class="biz-rw-badge biz-rw-oos">Out of stock</span>'
+      : (!unlimited && stockRaw < 10)
+        ? '<span class="biz-rw-badge biz-rw-low">' + stockRaw + ' left</span>'
+        : '';
+
+    return '<div class="biz-reward-card' + (outOfStock ? ' biz-reward-oos' : '') + '">' +
+      '<div class="biz-reward-icon-wrap"><i class="fas ' + icon + '"></i></div>' +
+      '<div class="biz-reward-body">' +
+        '<div class="biz-reward-title">' + esc(r.title || 'Reward') + '</div>' +
+        (r.description ? '<div class="biz-reward-desc">' + esc(r.description) + '</div>' : '') +
+        '<div class="biz-reward-meta">' +
+          '<span class="biz-reward-cost"><i class="fas fa-coins"></i> ' + compact(cost) + ' pts</span>' +
+          (stockBadge) +
+          (expiry ? '<span class="biz-rw-badge biz-rw-exp"><i class="fas fa-calendar"></i> Exp ' + esc(expiry) + '</span>' : '') +
+        '</div>' +
+        (r.termsNote ? '<div class="biz-reward-terms">' + esc(r.termsNote) + '</div>' : '') +
+      '</div>' +
+      '<a href="rewards.html" class="biz-reward-cta' + (outOfStock ? ' biz-reward-cta-oos' : '') + '">' +
+        (outOfStock ? '<i class="fas fa-times-circle"></i> Out of Stock' : '<i class="fas fa-coins"></i> Redeem') +
+      '</a>' +
+    '</div>';
+  }
+
+  function renderRewardsSidebarContent(rewards) {
+    return '<div class="biz-preview-card">' +
+      '<div class="biz-preview-header">' +
+        '<span><i class="fas fa-gift"></i> Rewards</span>' +
+        '<button onclick="window._bizActions.switchTab(\'rewards\')">See all</button>' +
+      '</div>' +
+      rewards.map(function(r) {
+        var cost = Number(r.cost || r.pointsCost || 0);
+        return '<div class="biz-preview-reward-row">' +
+          '<div class="biz-preview-reward-name">' + esc(r.title || 'Reward') + '</div>' +
+          '<span class="biz-preview-reward-cost"><i class="fas fa-coins"></i> ' + compact(cost) + '</span>' +
+        '</div>';
+      }).join('') +
+      '<a href="rewards.html" class="biz-preview-cta">Redeem at Rewards Store</a>' +
+    '</div>';
   }
 
   // ── MILESTONES ────────────────────────────────────────────────

@@ -2652,3 +2652,178 @@ body.gh-has-injected-nav .biz-right-sidebar {
   .biz-detail-product-img-wrap img { max-height: 200px; }
   .biz-detail-svc-icon { width: 52px; height: 52px; font-size: 1.5rem; }
 }
+
+/* ── BUSINESS REWARDS PANEL ──────────────────────────────────── */
+
+.biz-rewards-manage-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .76rem;
+  color: #64748b;
+  padding: 10px 4px 14px;
+}
+.biz-rewards-manage-bar i { color: #3b82f6; font-size: .7rem; }
+.biz-rewards-manage-link {
+  color: #10b981;
+  text-decoration: none;
+  font-weight: 700;
+}
+.biz-rewards-manage-link:hover { text-decoration: underline; }
+
+.biz-rewards-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.biz-reward-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 16px;
+  transition: border-color .15s;
+}
+.biz-reward-card:hover { border-color: rgba(16,185,129,.25); }
+.biz-reward-card.biz-reward-oos {
+  opacity: .6;
+  border-color: rgba(255,255,255,.04);
+}
+.biz-reward-card.biz-reward-oos:hover { border-color: rgba(255,255,255,.07); }
+
+.biz-reward-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(16,185,129,.1);
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.biz-reward-body { flex: 1; min-width: 0; }
+
+.biz-reward-title {
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--gh-text, #f0f4ff);
+  margin-bottom: 4px;
+}
+
+.biz-reward-desc {
+  font-size: .78rem;
+  color: #64748b;
+  margin-bottom: 6px;
+  line-height: 1.45;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.biz-reward-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.biz-reward-cost {
+  font-size: .78rem;
+  font-weight: 800;
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.biz-reward-cost i { font-size: .68rem; }
+
+.biz-rw-badge {
+  font-size: .68rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.biz-rw-oos  { background: rgba(239,68,68,.1);    color: #ef4444; border: 1px solid rgba(239,68,68,.2); }
+.biz-rw-low  { background: rgba(245,158,11,.1);   color: #f59e0b; border: 1px solid rgba(245,158,11,.2); }
+.biz-rw-exp  { background: rgba(100,116,139,.1);  color: #94a3b8; border: 1px solid rgba(100,116,139,.2); display: flex; align-items: center; gap: 4px; }
+.biz-rw-exp i { font-size: .6rem; }
+
+.biz-reward-terms {
+  font-size: .7rem;
+  color: #64748b;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+.biz-reward-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  font-size: .78rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.biz-reward-cta:hover { opacity: .85; }
+.biz-reward-cta.biz-reward-cta-oos {
+  background: rgba(255,255,255,.06);
+  color: #64748b;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── REWARDS SIDEBAR WIDGET ──────────────────────────────────── */
+
+.biz-preview-reward-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+.biz-preview-reward-row:last-of-type { border-bottom: none; }
+.biz-preview-reward-name {
+  font-size: .84rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.biz-preview-reward-cost {
+  font-size: .78rem;
+  font-weight: 800;
+  color: #10b981;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.biz-preview-reward-cost i { font-size: .65rem; }
+
+/* Mobile tweaks for reward cards */
+@media (max-width: 600px) {
+  .biz-reward-card { flex-wrap: wrap; gap: 10px; }
+  .biz-reward-cta { width: 100%; justify-content: center; }
+  .biz-reward-icon-wrap { width: 38px; height: 38px; font-size: .95rem; }
+}
