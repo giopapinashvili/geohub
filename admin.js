@@ -695,6 +695,19 @@
     });
   }
 
+  // Safe URL builder for report targets — avoids injecting unknown collection names.
+  function modTargetUrl(type, id) {
+    if (!type || !id) return '';
+    var map = {
+      user:     'profile.html?id=' + encodeURIComponent(id),
+      business: 'business.html?id=' + encodeURIComponent(id),
+      group:    'groups.html?id=' + encodeURIComponent(id),
+      place:    'places.html?id=' + encodeURIComponent(id),
+      event:    'events.html?id=' + encodeURIComponent(id)
+    };
+    return map[type] || '';
+  }
+
   function renderModQueue() {
     var el = document.getElementById('modQueue');
     if (!el) return;
@@ -706,9 +719,13 @@
       var typeClass   = 'mod-badge-' + (r.targetType || 'post');
       var statusClass = 'mod-status-' + (r.status || 'pending');
       var isPending   = (r.status || 'pending') === 'pending';
-      var id  = esc(r.id);
-      var tid = esc(r.targetId || '—');
-      var rid = esc(r.reporterId || '—');
+      // escAttr() for onclick JS string context; esc() for HTML display.
+      var idA  = escAttr(r.id || '');
+      var ttA  = escAttr(r.targetType || '');
+      var tidA = escAttr(r.targetId || '');
+      var tid  = esc(r.targetId || '—');
+      var rid  = esc(r.reporterId || '—');
+      var viewUrl = modTargetUrl(r.targetType, r.targetId);
       return '<div class="mod-report-card' + (isPending ? ' unread' : '') + '">' +
         '<div class="mod-report-meta">' +
           '<span class="mod-type-badge ' + typeClass + '">' + esc(r.targetType || 'unknown') + '</span>' +
@@ -716,14 +733,17 @@
           '<span class="mod-status-badge ' + statusClass + '">' + esc(r.status || 'pending') + '</span>' +
         '</div>' +
         (r.details ? '<div class="mod-report-details">' + esc(r.details) + '</div>' : '') +
-        '<div class="mod-report-details" style="font-size:.69rem">Target: <code>' + tid + '</code> &nbsp;·&nbsp; Reporter: <code>' + rid + '</code></div>' +
+        '<div class="mod-report-details" style="font-size:.69rem">Target: <code>' + tid + '</code>' +
+          (viewUrl ? ' <a href="' + viewUrl + '" target="_blank" rel="noopener noreferrer" style="color:#10e0a0;font-size:.69rem;margin-left:4px">View</a>' : '') +
+          ' &nbsp;·&nbsp; Reporter: <code>' + rid + '</code>' +
+        '</div>' +
         '<div class="mod-report-footer">' +
           '<span class="mod-report-time">' + modTimeAgo(r.createdAt) + '</span>' +
           (isPending
-            ? '<button class="mod-act-btn mod-act-resolve" onclick="modResolve(\'' + id + '\')"><i class="fas fa-check"></i> Resolve</button>' +
-              '<button class="mod-act-btn mod-act-dismiss" onclick="modDismiss(\'' + id + '\')"><i class="fas fa-eye-slash"></i> Dismiss</button>' +
-              '<button class="mod-act-btn mod-act-remove"  onclick="modRemoveContent(\'' + id + '\',\'' + esc(r.targetType || '') + '\',\'' + esc(r.targetId || '') + '\')"><i class="fas fa-trash"></i> Remove</button>' +
-              '<button class="mod-act-btn mod-act-warn"    onclick="modWarnUser(\'' + id + '\',\'' + esc(r.reporterId || '') + '\')"><i class="fas fa-exclamation-triangle"></i> Warn</button>'
+            ? '<button class="mod-act-btn mod-act-resolve" onclick="modResolve(\'' + idA + '\')"><i class="fas fa-check"></i> Resolve</button>' +
+              '<button class="mod-act-btn mod-act-dismiss" onclick="modDismiss(\'' + idA + '\')"><i class="fas fa-eye-slash"></i> Dismiss</button>' +
+              '<button class="mod-act-btn mod-act-remove"  onclick="modRemoveContent(\'' + idA + '\',\'' + ttA + '\',\'' + tidA + '\')"><i class="fas fa-trash"></i> Remove</button>' +
+              '<button class="mod-act-btn mod-act-warn"    onclick="modWarnUser(\'' + idA + '\',\'' + tidA + '\')"><i class="fas fa-exclamation-triangle"></i> Warn</button>'
             : '') +
         '</div>' +
         '</div>';
@@ -781,7 +801,8 @@
     if (!geo || !geo.fs) return;
     var f = geo.fs, db = geo.db;
     var colMap = { post:'posts', user:'users', comment:'posts', place:'places', business:'businesses', event:'events', group:'groups' };
-    var col = colMap[targetType] || (targetType + 's');
+    var col = colMap[targetType];
+    if (!col) { toast('Unknown content type: ' + esc(targetType || '?'), 'rgba(239,68,68,.9)'); return; }
     f.deleteDoc(f.doc(db, col, targetId))
       .then(function () { return modUpdateReport(reportId, 'resolved', { action: 'content_removed' }); })
       .then(function () { return modLogAction('content_removed', targetId, targetType); })

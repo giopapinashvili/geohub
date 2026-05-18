@@ -52,7 +52,8 @@ service cloud.firestore {
         'pointsBalance', 'totalPointsEarned', 'totalPointsSpent',
         'totalPointsTransferred', 'totalPointsReceived',
         'xp', 'level', 'trustScore', 'verified',
-        'role', 'isAdmin', 'adminLevel', 'premiumUntil'
+        'role', 'isAdmin', 'adminLevel', 'premiumUntil',
+        'suspended', 'suspendedAt', 'suspendedBy'
       ]);
     }
 
@@ -71,7 +72,8 @@ service cloud.firestore {
         'pointsBalance', 'totalPointsEarned', 'totalPointsSpent',
         'totalPointsTransferred', 'totalPointsReceived',
         'xp', 'level', 'trustScore', 'verified',
-        'role', 'isAdmin', 'adminLevel', 'premiumUntil'
+        'role', 'isAdmin', 'adminLevel', 'premiumUntil',
+        'suspended', 'suspendedAt', 'suspendedBy'
       ]);
     }
 
