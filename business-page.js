@@ -45,6 +45,9 @@
     archived: { text: '#6b7280', bg: 'rgba(107,114,128,.1)', border: 'rgba(107,114,128,.2)' }
   };
 
+  var _svcMap  = {};
+  var _prodMap = {};
+
   var REACTIONS = [
     { key:'like',  emoji:'👍', label:'Like'  },
     { key:'love',  emoji:'❤️', label:'Love'  },
@@ -855,6 +858,8 @@
 
   function renderServiceCards(services) {
     var owner = isAdminOrOwner();
+    _svcMap = {};
+    if (services) services.forEach(function(s){ if (s.id) _svcMap[s.id] = s; });
     var header = '<div class="biz-section-header">'+
       '<div class="biz-section-title"><i class="fas fa-briefcase"></i> Services</div>'+
       (owner ? '<button class="biz-section-add-btn" onclick="window._bizActions.openAddService()"><i class="fas fa-plus"></i> Add Service</button>' : '')+
@@ -870,7 +875,8 @@
     }
     var cards = services.map(function(s, i) {
       var icon = s.icon ? s.icon : SVC_ICONS[i % SVC_ICONS.length];
-      return '<div class="biz-service-card">'+
+      var cardAttr = !owner ? ' onclick="window._bizActions.openSvcDetail(\''+esc(s.id||'')+'\')" style="cursor:pointer"' : '';
+      return '<div class="biz-service-card"'+cardAttr+'>'+
         (owner ? '<div class="biz-owner-card-actions">'+
           '<button class="biz-cmt-act-btn" title="Edit" onclick="window._bizActions.editService(\''+esc(s.id||'')+'\')"><i class="fas fa-pencil"></i></button>'+
           '<button class="biz-cmt-act-btn" title="Delete" style="color:#f87171" onclick="window._bizActions.deleteService(\''+esc(s.id||'')+'\')"><i class="fas fa-trash"></i></button>'+
@@ -882,7 +888,7 @@
         '<div class="biz-service-card-name">'+esc(s.title||s.name||'')+'</div>'+
         (s.description?'<div class="biz-service-card-desc">'+esc(s.description)+'</div>':'')+
         (s.duration?'<div class="biz-service-card-meta"><i class="fas fa-clock"></i> '+esc(s.duration)+'</div>':'')+
-        (!owner ? '<button class="biz-service-cta" onclick="window._bizActions.openQuote(\''+esc(s.title||s.name||'')+'\',\''+esc(s.id||'')+'\',\'service\')"><i class="fas fa-paper-plane"></i> Request Service</button>' : '')+
+        (!owner ? '<button class="biz-service-cta" onclick="event.stopPropagation();window._bizActions.openQuote(\''+esc(s.title||s.name||'')+'\',\''+esc(s.id||'')+'\',\'service\')"><i class="fas fa-paper-plane"></i> Request Service</button>' : '')+
       '</div>';
     }).join('');
     return '<div class="biz-section">'+header+'<div class="biz-service-cards-grid">'+cards+'</div></div>';
@@ -892,6 +898,8 @@
 
   function renderProductCards(products) {
     var owner = isAdminOrOwner();
+    _prodMap = {};
+    if (products) products.forEach(function(p){ if (p.id) _prodMap[p.id] = p; });
     var header = '<div class="biz-section-header">'+
       '<div class="biz-section-title"><i class="fas fa-box"></i> Products</div>'+
       (owner ? '<button class="biz-section-add-btn" onclick="window._bizActions.openAddProduct()"><i class="fas fa-plus"></i> Add Product</button>' : '')+
@@ -910,7 +918,8 @@
         ? '<img src="'+esc(p.imageUrl)+'" alt="'+esc(p.name||'')+'" loading="lazy" onerror="this.onerror=null;this.style.display=\'none\';var ph=this.parentNode.querySelector(\'.biz-product-ph\');if(ph)ph.style.display=\'flex\'">'
           + '<div class="biz-product-ph" style="display:none"><i class="fas fa-box"></i></div>'
         : '<div class="biz-product-ph"><i class="fas fa-box"></i></div>';
-      return '<div class="biz-product-card">'+
+      var cardAttr = !owner ? ' onclick="window._bizActions.openProdDetail(\''+esc(p.id||'')+'\')" style="cursor:pointer"' : '';
+      return '<div class="biz-product-card"'+cardAttr+'>'+
         '<div class="biz-product-thumb">'+thumbHtml+
           (owner ? '<div class="biz-gallery-del-wrap" onclick="event.stopPropagation()"><button class="biz-gallery-del-btn" title="Delete product" onclick="window._bizActions.deleteProduct(\''+esc(p.id||'')+'\')"><i class="fas fa-trash"></i></button></div>' : '')+
         '</div>'+
@@ -919,7 +928,7 @@
           (p.description?'<div class="biz-product-desc">'+esc(p.description.slice(0,90))+'</div>':'')+
           '<div class="biz-product-footer">'+
             (p.price?'<span class="biz-product-price">'+fmtPrice(p.price)+'</span>':'')+
-            (!owner ? '<button class="biz-product-cta" onclick="window._bizActions.openQuote(\''+esc(p.name||p.title||'')+'\',\''+esc(p.id||'')+'\',\'product\')">Ask about Product</button>' : '')+
+            (!owner ? '<button class="biz-product-cta" onclick="event.stopPropagation();window._bizActions.openQuote(\''+esc(p.name||p.title||'')+'\',\''+esc(p.id||'')+'\',\'product\')">Ask about Product</button>' : '')+
           '</div>'+
         '</div>'+
       '</div>';
@@ -1116,6 +1125,43 @@
           '<button class="biz-submit-btn" style="padding:9px 16px" onclick="window._bizActions.addPageAdmin(document.getElementById(\'biz-new-admin-uid\').value.trim(),document.getElementById(\'biz-new-admin-role\').value)"><i class="fas fa-plus"></i> Add</button>'+
         '</div>'+
         '<div id="biz-admin-list"><div style="color:#64748b;font-size:.82rem"><i class="fas fa-spinner fa-spin"></i> Loading…</div></div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  // ── RENDER: DETAIL MODALS ────────────────────────────────────
+
+  function renderServiceDetailModal() {
+    return '<div class="biz-modal-overlay" id="biz-svc-detail" onclick="if(event.target===this)window._bizActions.closeSvcDetail()">'+
+      '<div class="biz-modal-sheet">'+
+        '<div class="biz-modal-handle"></div>'+
+        '<button class="biz-modal-close" onclick="window._bizActions.closeSvcDetail()"><i class="fas fa-times"></i></button>'+
+        '<div class="biz-detail-icon-row">'+
+          '<div class="biz-detail-svc-icon" id="biz-svc-d-icon"><i class="fas fa-briefcase"></i></div>'+
+          '<span class="biz-detail-price-chip" id="biz-svc-d-price"></span>'+
+        '</div>'+
+        '<div class="biz-modal-title" id="biz-svc-d-name" style="margin-top:12px"></div>'+
+        '<div class="biz-detail-biz-name" id="biz-svc-d-biz"></div>'+
+        '<div class="biz-detail-meta" id="biz-svc-d-meta"></div>'+
+        '<div class="biz-detail-desc" id="biz-svc-d-desc"></div>'+
+        '<button class="biz-submit-btn" id="biz-svc-d-cta"><i class="fas fa-paper-plane"></i> Request Service</button>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function renderProductDetailModal() {
+    return '<div class="biz-modal-overlay" id="biz-prod-detail" onclick="if(event.target===this)window._bizActions.closeProdDetail()">'+
+      '<div class="biz-modal-sheet">'+
+        '<div class="biz-modal-handle"></div>'+
+        '<button class="biz-modal-close" onclick="window._bizActions.closeProdDetail()"><i class="fas fa-times"></i></button>'+
+        '<div class="biz-detail-product-img-wrap" id="biz-prod-d-img-wrap" style="display:none">'+
+          '<img id="biz-prod-d-img" src="" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'">'+
+        '</div>'+
+        '<div class="biz-modal-title" id="biz-prod-d-name" style="margin-top:12px"></div>'+
+        '<div class="biz-detail-biz-name" id="biz-prod-d-biz"></div>'+
+        '<div class="biz-detail-meta" id="biz-prod-d-meta"></div>'+
+        '<div class="biz-detail-desc" id="biz-prod-d-desc"></div>'+
+        '<button class="biz-submit-btn biz-prod-detail-cta" id="biz-prod-d-cta"><i class="fas fa-comment-dots"></i> Ask about Product</button>'+
       '</div>'+
     '</div>';
   }
@@ -1367,6 +1413,8 @@
         '</div>'+
       '</div>'+
       renderQuoteModal(biz)+
+      renderServiceDetailModal()+
+      renderProductDetailModal()+
       (_isOwner?renderComposeModal(biz):'')+
       (_isOwner?renderBlockManagerModal():'')+
       renderShareModal()+
@@ -3761,6 +3809,63 @@
       }).catch(function(){ showToast('Could not update status', false); });
     },
 
+    // ── Service / Product detail modals ──────────────────────────
+    openSvcDetail: function(svcId) {
+      var s = _svcMap[svcId]; if (!s) return;
+      var m = document.getElementById('biz-svc-detail'); if (!m) return;
+      var iconEl  = document.getElementById('biz-svc-d-icon');
+      var priceEl = document.getElementById('biz-svc-d-price');
+      var nameEl  = document.getElementById('biz-svc-d-name');
+      var bizEl   = document.getElementById('biz-svc-d-biz');
+      var metaEl  = document.getElementById('biz-svc-d-meta');
+      var descEl  = document.getElementById('biz-svc-d-desc');
+      var ctaEl   = document.getElementById('biz-svc-d-cta');
+      if (iconEl)  iconEl.innerHTML = '<i class="fas '+(s.icon||'fa-briefcase')+'"></i>';
+      if (priceEl) { priceEl.textContent = s.price ? fmtPrice(s.price) : ''; priceEl.style.display = s.price ? '' : 'none'; }
+      if (nameEl)  nameEl.textContent = s.title || s.name || '';
+      if (bizEl)   bizEl.textContent  = (_biz && _biz.title) || '';
+      if (metaEl)  { metaEl.innerHTML = s.duration ? '<i class="fas fa-clock"></i> '+esc(s.duration) : ''; metaEl.style.display = s.duration ? '' : 'none'; }
+      if (descEl)  { descEl.textContent = s.description || ''; descEl.style.display = s.description ? '' : 'none'; }
+      if (ctaEl)   ctaEl.onclick = function() { window._bizActions.closeSvcDetail(); window._bizActions.openQuote(s.title||s.name||'', s.id||'', 'service'); };
+      m.classList.add('open');
+    },
+
+    closeSvcDetail: function() {
+      var m = document.getElementById('biz-svc-detail'); if (m) m.classList.remove('open');
+    },
+
+    openProdDetail: function(prodId) {
+      var p = _prodMap[prodId]; if (!p) return;
+      var m = document.getElementById('biz-prod-detail'); if (!m) return;
+      var imgWrap = document.getElementById('biz-prod-d-img-wrap');
+      var imgEl   = document.getElementById('biz-prod-d-img');
+      var nameEl  = document.getElementById('biz-prod-d-name');
+      var bizEl   = document.getElementById('biz-prod-d-biz');
+      var metaEl  = document.getElementById('biz-prod-d-meta');
+      var descEl  = document.getElementById('biz-prod-d-desc');
+      var ctaEl   = document.getElementById('biz-prod-d-cta');
+      if (imgWrap && imgEl) {
+        if (p.imageUrl) { imgEl.src = p.imageUrl; imgEl.alt = p.name||p.title||''; imgWrap.style.display = ''; }
+        else { imgWrap.style.display = 'none'; }
+      }
+      if (nameEl) nameEl.textContent = p.name || p.title || '';
+      if (bizEl)  bizEl.textContent  = (_biz && _biz.title) || '';
+      if (metaEl) {
+        var parts = [];
+        if (p.price)       parts.push('<span class="biz-detail-price-chip">'+fmtPrice(p.price)+'</span>');
+        if (p.stockStatus) parts.push('<span class="biz-detail-stock-chip">'+esc(p.stockStatus)+'</span>');
+        metaEl.innerHTML = parts.join('');
+        metaEl.style.display = parts.length ? '' : 'none';
+      }
+      if (descEl) { descEl.textContent = p.description || ''; descEl.style.display = p.description ? '' : 'none'; }
+      if (ctaEl)  ctaEl.onclick = function() { window._bizActions.closeProdDetail(); window._bizActions.openQuote(p.name||p.title||'', p.id||'', 'product'); };
+      m.classList.add('open');
+    },
+
+    closeProdDetail: function() {
+      var m = document.getElementById('biz-prod-detail'); if (m) m.classList.remove('open');
+    },
+
     qFilter: function(f) {
       _qFilter = f;
       _qRender();
@@ -3839,6 +3944,12 @@
       document.querySelectorAll('.biz-rx-picker.open').forEach(function(p){ p.classList.remove('open'); });
     }
   }, true);
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Escape') return;
+    window._bizActions.closeSvcDetail();
+    window._bizActions.closeProdDetail();
+  });
 
   if(window.GeoFirebase&&window.GeoFirebase.db) init(window.GeoFirebase);
   else window.addEventListener('GeoFirebaseReady',function(){ init(window.GeoFirebase); },{once:true});

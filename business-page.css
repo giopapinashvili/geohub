@@ -2540,3 +2540,111 @@ body.gh-has-injected-nav .biz-right-sidebar {
 
 /* Reply form inside review card */
 .biz-review-reply-form { margin-top: 10px; }
+
+/* ── SERVICE / PRODUCT DETAIL MODALS ────────────────────────── */
+
+/* Service icon in detail modal */
+.biz-detail-icon-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.biz-detail-svc-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(16,185,129,.16), rgba(59,130,246,.1));
+  border: 1px solid rgba(16,185,129,.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+/* Price chip shared between service + product detail */
+.biz-detail-price-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  background: rgba(16,185,129,.12);
+  border: 1px solid rgba(16,185,129,.25);
+  border-radius: 999px;
+  color: #34d399;
+  font-size: .85rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* Business name line below modal title */
+.biz-detail-biz-name {
+  font-size: .82rem;
+  color: #64748b;
+  margin-top: 2px;
+  margin-bottom: 10px;
+}
+
+/* Duration / meta row */
+.biz-detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: .8rem;
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+.biz-detail-meta i { color: #10b981; }
+.biz-detail-meta .biz-detail-stock-chip {
+  display: inline-block;
+  background: rgba(59,130,246,.1);
+  border: 1px solid rgba(59,130,246,.25);
+  border-radius: 5px;
+  padding: 2px 8px;
+  color: #60a5fa;
+  font-size: .74rem;
+  font-weight: 600;
+}
+
+/* Description text */
+.biz-detail-desc {
+  font-size: .88rem;
+  color: #cbd5e1;
+  line-height: 1.65;
+  margin-bottom: 18px;
+  white-space: pre-line;
+}
+
+/* Product image in detail modal */
+.biz-detail-product-img-wrap {
+  width: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255,255,255,.04);
+  margin-bottom: 14px;
+  max-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.biz-detail-product-img-wrap img {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Blue CTA for product detail */
+.biz-prod-detail-cta {
+  background: linear-gradient(135deg, #3b82f6, #6366f1) !important;
+}
+
+@media (max-width: 600px) {
+  .biz-detail-product-img-wrap { max-height: 200px; }
+  .biz-detail-product-img-wrap img { max-height: 200px; }
+  .biz-detail-svc-icon { width: 52px; height: 52px; font-size: 1.5rem; }
+}
