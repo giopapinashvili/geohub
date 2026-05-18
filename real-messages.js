@@ -833,16 +833,31 @@
     }
     const target=new URLSearchParams(location.search).get('with');
     if(target){ window.GeoSocial.startConversation(target, cid=>openConversation(cid)); }
+    const bizParam = new URLSearchParams(location.search).get('business');
+    const cidParam = new URLSearchParams(location.search).get('cid');
     if(unsubConvs) unsubConvs();
-    unsubConvs=window.GeoSocial.listenConversations(convs=>{
-      window.__geohubLastConvs = convs || [];
-      renderConvs(convs || []);
-      if(!activeConversation && convs && convs[0]) openConversation(convs[0].id);
-      else if(!activeConversation && (!convs || !convs.length)){
-        const box=$('#chatMessages');
-        if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-comments"></i><p>Select a conversation to start chatting</p></div>';
-      }
-    });
+    if(bizParam && window.GeoSocial.listenBusinessConversations){
+      unsubConvs = window.GeoSocial.listenBusinessConversations(bizParam, function(convs){
+        window.__geohubLastConvs = convs || [];
+        renderConvs(convs || []);
+        const toOpen = cidParam && !activeConversation ? cidParam : (!activeConversation && convs && convs[0] ? convs[0].id : null);
+        if(toOpen) openConversation(toOpen);
+        else if(!activeConversation && (!convs || !convs.length)){
+          const box=$('#chatMessages');
+          if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-store"></i><p>No messages yet for this business page.</p></div>';
+        }
+      });
+    } else {
+      unsubConvs=window.GeoSocial.listenConversations(convs=>{
+        window.__geohubLastConvs = convs || [];
+        renderConvs(convs || []);
+        if(!activeConversation && convs && convs[0]) openConversation(convs[0].id);
+        else if(!activeConversation && (!convs || !convs.length)){
+          const box=$('#chatMessages');
+          if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-comments"></i><p>Select a conversation to start chatting</p></div>';
+        }
+      });
+    }
 
     window.addEventListener('pagehide', function(){
       if(isTyping && activeConversation) try{ window.GeoSocial?.setTyping(activeConversation,false); }catch(e){}

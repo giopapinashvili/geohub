@@ -2098,6 +2098,29 @@
       });
     }
 
+    function startBusinessConversation(businessId, ownerUid, callback) {
+      requireAuth(function (user) {
+        if (!businessId || !ownerUid) return;
+        if (ownerUid === user.uid) { toast('You own this business.', 'error'); return; }
+        var cid = 'biz_' + businessId + '_' + user.uid;
+        setDoc(doc(db, 'conversations', cid), {
+          participants: [user.uid, ownerUid],
+          businessId: businessId,
+          forBusiness: true,
+          updatedAt: serverTimestamp(),
+          createdAt: serverTimestamp(),
+          lastMessage: '',
+          unreadFor: [],
+          readBy: {}
+        }, { merge: true }).then(function () {
+          if (callback) callback(cid);
+        }).catch(function (err) {
+          console.error('[GeoSocial] startBusinessConversation', err);
+          toast('Could not open business messages.', 'error');
+        });
+      });
+    }
+
     function sendMessage(conversationId, text, callback, extra) {
       extra = extra || {};
       var cleanText = String(text || '').trim();
@@ -2138,7 +2161,8 @@
             patch['readBy.' + user.uid] = serverTimestamp();
             return updateDoc(convRef, patch);
           }).then(function () {
-            return createNotification(otherId, 'message', (me.name || 'GeoHub User') + ' sent you a message', preview, 'messages.html?with=' + user.uid, { conversationId: conversationId });
+            var notifLink = conv.businessId ? 'messages.html?business=' + encodeURIComponent(conv.businessId) + '&cid=' + encodeURIComponent(conversationId) : 'messages.html?with=' + encodeURIComponent(user.uid);
+            return createNotification(otherId, 'message', (me.name || 'GeoHub User') + ' sent you a message', preview, notifLink, { conversationId: conversationId });
           });
         }).then(function () {
           if (callback) callback(true);
@@ -2165,6 +2189,20 @@
         snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
         callback(sortConvs(items));
       }, function (err) { console.warn('[GeoSocial] listenConversations', err.message); callback([]); });
+    }
+
+    function listenBusinessConversations(businessId, callback) {
+      if (!businessId) { if (callback) callback([]); return function () {}; }
+      var q = query(collection(db, 'conversations'), where('businessId', '==', businessId), limit(50));
+      return onSnapshot(q, function (snap) {
+        var items = [];
+        snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        items.sort(function (a, b) {
+          function t(v) { return v && v.toMillis ? v.toMillis() : (v && v.seconds ? v.seconds * 1000 : 0); }
+          return t(b.updatedAt || b.createdAt) - t(a.updatedAt || a.createdAt);
+        });
+        if (callback) callback(items);
+      }, function (err) { console.warn('[GeoSocial] listenBusinessConversations', err.message); if (callback) callback([]); });
     }
 
     function listenMessages(conversationId, callback) {
@@ -3211,6 +3249,8 @@
       listenUserPosts:         listenUserPosts,
       listenUserCheckins:      listenUserCheckins,
       startConversation:       startConversation,
+      startBusinessConversation: startBusinessConversation,
+      listenBusinessConversations: listenBusinessConversations,
       sendMessage:             sendMessage,
       listenConversations:     listenConversations,
       listenMessages:          listenMessages,

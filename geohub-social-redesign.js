@@ -3172,7 +3172,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             '</div>'+
             '<div class="gh-biz-actions">'+
               '<button class="gh-btn gh-follow-business-btn" data-follow-business="'+esc(b.id)+'"><i class="fas fa-plus"></i> Follow</button>'+
-              '<button class="gh-btn ghost" data-message-business="'+esc(owner)+'"><i class="fas fa-comment"></i> Message</button>'+
+              '<button class="gh-btn ghost" data-message-business="'+esc(b.id)+'" data-message-owner="'+esc(owner)+'"><i class="fas fa-comment"></i> Message</button>'+
               (isOwner?'<button class="gh-btn ghost" data-edit-business><i class="fas fa-gear"></i> Edit</button>':'')+
               '<button class="gh-btn ghost" aria-label="Save business" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button>'+
             '</div>'+
@@ -3195,7 +3195,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(tab){ state.currentBusinessTab=tab.dataset.bizTab; $all('[data-biz-tab]').forEach(function(x){x.classList.toggle('active',x===tab);}); renderBusinessTab(b); return; }
       var fl=e.target.closest('[data-follow-business]'); if(fl){ followBusiness(b.id); return; }
       var sv=e.target.closest('[data-save-item]'); if(sv){ if(!requireLogin())return; GS().toggleSaveItem(sv.dataset.type,sv.dataset.id); return; }
-      var msg=e.target.closest('[data-message-business]'); if(msg){ var oid=msg.dataset.messageBusiness; if(!oid) return toast('Business owner not available','error'); if(!requireLogin()) return; GS().startConversation(oid,function(){ location.href='messages.html?with='+encodeURIComponent(oid); }); return; }
+      var msg=e.target.closest('[data-message-business]'); if(msg){ var bizId=msg.dataset.messageBusiness; var oid=msg.dataset.messageOwner; if(!oid) return toast('Business owner not available','error'); if(!requireLogin()) return; GS().startBusinessConversation(bizId,oid,function(cid){ location.href='messages.html?business='+encodeURIComponent(bizId)+'&cid='+encodeURIComponent(cid); }); return; }
       var edit=e.target.closest('[data-edit-business]'); if(edit) location.href='add-business.html?edit='+encodeURIComponent(b.id);
       var cta=e.target.closest('[data-track-cta]'); if(cta&&state.currentBizId) bizTrack(state.currentBizId,cta.dataset.trackCta);
     };
