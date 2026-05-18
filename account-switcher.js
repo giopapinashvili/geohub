@@ -23,6 +23,9 @@
   var _isOpen = false;
   var _outsideClickBound = false;
   var _observer = null;
+  var _bizUnread = {};
+  var _bizUnsubscribers = [];
+  var _beepLastAt = 0;
 
   var ACTOR_KEY = 'gh_active_actor';
 
@@ -65,6 +68,63 @@
 
   function esc(s) {
     return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function playBeep() {
+    var now = Date.now();
+    if (now - _beepLastAt < 4000) return; // debounce — max once per 4 s
+    _beepLastAt = now;
+    try {
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 880;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.22, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.28);
+      setTimeout(function() { try { ctx.close(); } catch(e) {} }, 600);
+    } catch(e) {} // browser blocked autoplay — fail silently
+  }
+
+  function clearBizUnreadListeners() {
+    _bizUnsubscribers.forEach(function(u) { try { u(); } catch(e) {} });
+    _bizUnsubscribers = [];
+    _bizUnread = {};
+  }
+
+  function loadBizUnreadListeners(bizIds, ownerUid) {
+    clearBizUnreadListeners();
+    if (!_db || !_fs || !bizIds.length || !ownerUid) return;
+    var startedAt = Date.now();
+    bizIds.forEach(function(bizId) {
+      _bizUnread[bizId] = 0;
+      var q = _fs.query(
+        _fs.collection(_db, 'conversations'),
+        _fs.where('businessId', '==', bizId),
+        _fs.limit(50)
+      );
+      var unsub = _fs.onSnapshot(q, function(snap) {
+        var prev = _bizUnread[bizId] || 0;
+        var count = 0;
+        snap.forEach(function(d) {
+          var data = d.data();
+          if (Array.isArray(data.unreadFor) && data.unreadFor.indexOf(ownerUid) !== -1) count++;
+        });
+        _bizUnread[bizId] = count;
+        if (count > prev && Date.now() > startedAt + 2500) playBeep();
+        if (_isOpen) {
+          var dd = document.getElementById('geo-sw-dropdown');
+          if (dd && dd.classList.contains('open')) dd.innerHTML = renderDropdown();
+        }
+      }, function(err) {
+        console.warn('[AccountSwitcher] bizUnread', bizId, err.message);
+      });
+      _bizUnsubscribers.push(unsub);
+    });
   }
 
   /* ── dropdown HTML ─────────────────────────────────────────── */
@@ -133,14 +193,17 @@
       bizSection = '<div class="geo-sw-divider"></div><div class="geo-sw-section-label">Your Pages</div>';
       _businesses.forEach(function(biz) {
         var iconInner = biz.logoUrl
-          ? '<img src="'+esc(biz.logoUrl)+'" alt="">'
+          ? '<img src="'+esc(biz.logoUrl)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">'
           : '<i class="fas fa-store"></i>';
         var isActive = currentActor && currentActor.type === 'business' && currentActor.businessId === biz.id;
+        var unreadCount = _bizUnread[biz.id] || 0;
+        var unreadDot = unreadCount > 0 ? '<span class="geo-sw-unread-dot" title="'+unreadCount+' unread message'+(unreadCount !== 1 ? 's' : '')+'"></span>' : '';
         bizSection +=
           '<div class="geo-sw-item" style="cursor:pointer" onclick="window._geoSW.switchToBusiness(\''+esc(biz.id)+'\')">'+
             '<div class="geo-sw-item-icon biz">'+iconInner+'</div>'+
             '<span class="geo-sw-item-name">'+esc(biz.title||'Business')+'</span>'+
             (isActive ? '<span class="geo-sw-owner-pill" style="background:#10b981;color:#fff">Active</span>' : '<span class="geo-sw-owner-pill">Owner</span>')+
+            unreadDot+
             '<a href="business.html?id='+esc(biz.id)+'" onclick="event.stopPropagation()" style="margin-left:4px;color:#64748b;font-size:.8rem;padding:4px;border-radius:6px;display:flex;align-items:center" title="Open page"><i class="fas fa-arrow-up-right-from-square"></i></a>'+
           '</div>';
       });
@@ -413,6 +476,8 @@
         var dd = document.getElementById('geo-sw-dropdown');
         if (dd && dd.classList.contains('open')) dd.innerHTML = renderDropdown();
       }
+      var ownerUid = _user && _user.uid;
+      loadBizUnreadListeners(_businesses.map(function(bz) { return bz.id; }), ownerUid);
     }).catch(function() {});
   }
 
@@ -551,7 +616,17 @@
       if (!_user) return;
       setActiveActor({ type: 'user', uid: _user.uid });
     },
-    getActor: getActiveActor
+    getActor: getActiveActor,
+    onBusinessUpdated: function(bizId, data) {
+      for (var i = 0; i < _businesses.length; i++) {
+        if (_businesses[i].id === bizId) { Object.assign(_businesses[i], data); break; }
+      }
+      updateNavbarForActor(getActiveActor());
+      if (_isOpen) {
+        var dd = document.getElementById('geo-sw-dropdown');
+        if (dd && dd.classList.contains('open')) dd.innerHTML = renderDropdown();
+      }
+    }
   };
 
   if (window.GeoFirebase && window.GeoFirebase.db) init(window.GeoFirebase);

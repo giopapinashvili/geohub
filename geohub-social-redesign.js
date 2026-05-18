@@ -3201,10 +3201,101 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     };
 
     updateBusinessFollowButton(b.id);
+    wireBusinessImageEdits(b);
     renderBusinessTab(b);
     trackBizView(b.id, owner);
   }
 
+  function wireBusinessImageEdits(b) {
+    var ownerUid = b.ownerId || b.createdBy || b.userId || '';
+    var u = authUser();
+    if (!u || !u.uid || !ownerUid || u.uid !== ownerUid) return;
+
+    function doUpload(file, field, onSuccess) {
+      if (!file || !window.GeoSocial) return;
+      toast('Uploading image…');
+      var reader = new FileReader();
+      reader.onload = function() {
+        window.GeoSocial.uploadImageDataUrl(reader.result, 'businesses')
+          .then(function(url) {
+            if (!url) throw new Error('Upload returned no URL');
+            var patch = { updatedAt: fs().serverTimestamp() };
+            patch[field] = url;
+            return fs().updateDoc(fs().doc(db(), 'businesses', b.id), patch)
+              .then(function() { toast('Image updated'); onSuccess(url); });
+          })
+          .catch(function(err) { toast('Upload failed: ' + (err.message || err), 'error'); });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function makeFileInput(accept) {
+      var inp = document.createElement('input');
+      inp.type = 'file'; inp.accept = accept; inp.style.display = 'none';
+      document.body.appendChild(inp);
+      return inp;
+    }
+
+    // Logo edit
+    var logoWrap = document.querySelector('.gh-biz-logo');
+    if (logoWrap) {
+      var logoInput = makeFileInput('image/*');
+      var logoBtn = document.createElement('button');
+      logoBtn.className = 'gh-biz-logo-edit-btn';
+      logoBtn.title = 'Change logo';
+      logoBtn.innerHTML = '<i class="fas fa-camera"></i><span>Edit</span>';
+      logoWrap.appendChild(logoBtn);
+      logoBtn.onclick = function(e) { e.stopPropagation(); logoInput.click(); };
+      logoInput.onchange = function() {
+        var file = logoInput.files && logoInput.files[0]; logoInput.value = '';
+        doUpload(file, 'logoUrl', function(url) {
+          var img = logoWrap.querySelector('img');
+          if (img) {
+            img.src = url;
+            img.onerror = function() { this.style.display = 'none'; };
+          } else {
+            var ni = document.createElement('img');
+            ni.src = url; ni.alt = ''; ni.loading = 'lazy';
+            ni.style.cssText = 'width:100%;height:100%;object-fit:cover';
+            logoWrap.insertBefore(ni, logoWrap.firstChild);
+          }
+          var actor = getActiveActor();
+          if (actor && actor.type === 'business' && actor.businessId === b.id) {
+            actor.logoUrl = url;
+            try { localStorage.setItem('gh_active_actor', JSON.stringify(actor)); } catch(e2) {}
+            window.dispatchEvent(new CustomEvent('GeoActorChanged', { detail: actor }));
+          }
+          if (window._geoSW && window._geoSW.onBusinessUpdated) window._geoSW.onBusinessUpdated(b.id, { logoUrl: url });
+        });
+      };
+    }
+
+    // Cover edit
+    var coverWrap = document.querySelector('.gh-biz-cover');
+    if (coverWrap) {
+      var coverInput = makeFileInput('image/*');
+      var coverBtn = document.createElement('button');
+      coverBtn.className = 'gh-biz-cover-edit-btn';
+      coverBtn.innerHTML = '<i class="fas fa-camera"></i> Edit Cover';
+      coverWrap.appendChild(coverBtn);
+      coverBtn.onclick = function(e) { e.stopPropagation(); coverInput.click(); };
+      coverInput.onchange = function() {
+        var file = coverInput.files && coverInput.files[0]; coverInput.value = '';
+        doUpload(file, 'coverUrl', function(url) {
+          var img = coverWrap.querySelector('img');
+          if (img) {
+            img.src = url;
+            img.onerror = function() { this.style.display = 'none'; };
+          } else {
+            var ni = document.createElement('img');
+            ni.src = url; ni.alt = ''; ni.loading = 'lazy';
+            ni.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
+            coverWrap.insertBefore(ni, coverWrap.firstChild);
+          }
+        });
+      };
+    }
+  }
 
   function renderBusinessManageTab(b){
     var box=$('#ghBusinessTabContent'); if(!box) return;
