@@ -11,15 +11,15 @@
       : String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; });
   }
   function typeLabel(type) {
-    var labels = window.GeoChallenges ? window.GeoChallenges.TYPE_LABELS : {};
+    var labels = (window.GeoChallenges && window.GeoChallenges.TYPE_LABELS) || {};
     return labels[type] || 'Challenge';
   }
   function categoryLabel(category) {
-    var labels = window.GeoChallenges ? window.GeoChallenges.CATEGORY_LABELS : {};
+    var labels = (window.GeoChallenges && window.GeoChallenges.CATEGORY_LABELS) || {};
     return labels[category] || 'Exploration';
   }
   function rarityLabel(rarity) {
-    var labels = window.GeoChallenges ? window.GeoChallenges.RARITY_LABELS : {};
+    var labels = (window.GeoChallenges && window.GeoChallenges.RARITY_LABELS) || {};
     return labels[rarity] || 'Common';
   }
   function compact(n) {
@@ -66,7 +66,6 @@
     var remaining = Math.max(0, target - progress);
     var title = c.title || c.name || 'Untitled challenge';
     var end = dateLabel(c.endAt);
-    // p.xpReward is written by the engine; falls back to challenge doc field
     var xpDisplay = Number(p.xpReward || c.xpReward || 0);
     var badgeId = c.badgeId || (typeof c.badge === 'string' ? c.badge : '');
     var rarity = c.badgeRarity || 'common';
@@ -77,7 +76,7 @@
       ' aria-label="' + esc(title) + '">' +
       '<div class="challenge-card-top">' +
         '<span class="challenge-type"><i class="fas ' + (completed ? 'fa-check' : 'fa-bolt') + '"></i>' + esc(typeLabel(c.type)) + '</span>' +
-        '<span class="challenge-xp">+' + compact(xpDisplay) + ' XP</span>' +
+        (xpDisplay > 0 ? '<span class="challenge-xp"><i class="fas fa-bolt" style="font-size:.7rem"></i> +' + compact(xpDisplay) + ' XP</span>' : '') +
       '</div>' +
       '<h2>' + esc(title) + '</h2>' +
       '<p>' + esc(c.description || 'Complete real activity to make progress.') + '</p>' +
@@ -85,11 +84,12 @@
         '<span><i class="fas fa-layer-group"></i>' + esc(categoryLabel(c.category || 'exploration')) + '</span>' +
         (c.city ? '<span><i class="fas fa-location-dot"></i>' + esc(c.city) + '</span>' : '') +
         (end ? '<span><i class="fas fa-calendar"></i>Ends ' + esc(end) + '</span>' : '') +
-        (completed ? '<span><i class="fas fa-lock"></i>Completed</span>' : '<span>' + remaining + ' remaining</span>') +
+        (completed ? '<span><i class="fas fa-check"></i>Completed</span>' : '<span>' + remaining + ' remaining</span>') +
       '</div>' +
-      (badgeId ? '<div class="challenge-badge-preview"><span class="challenge-badge-icon"><i class="fas ' + esc(c.badgeIcon || c.icon || 'fa-medal') + '"></i></span><div><strong>' + esc(badgeTitle) + '</strong><small>' + esc(rarityLabel(rarity)) + ' badge' + (completed ? ' unlocked' : '') + '</small></div></div>' : '') +
+      (badgeId ? '<div class="ch-badge-pill' + (completed ? ' is-earned' : '') + '"><i class="fas ' + esc(c.badgeIcon || c.icon || 'fa-medal') + '"></i> ' + esc(badgeTitle) + ' · ' + esc(rarityLabel(rarity)) + (completed ? ' <i class="fas fa-check" style="font-size:.6rem"></i>' : '') + '</div>' : '') +
       '<div class="challenge-progress-row"><span>' + progress + ' / ' + target + '</span><span>' + pct + '%</span></div>' +
       '<div class="challenge-progress" aria-label="Challenge progress"><span style="width:' + pct + '%"></span></div>' +
+      (completed && xpDisplay > 0 ? '<div class="ch-xp-pending"><i class="fas fa-hourglass-half"></i> XP awarded after admin confirmation</div>' : '') +
     '</article>';
   }
   function categoryTabsHtml() {
@@ -190,8 +190,15 @@
     document.getElementById('chalDetailDesc').textContent = c.description || 'Complete real activity to make progress on this challenge.';
 
     var xpModal = Number(p.xpReward || c.xpReward || 0);
-    document.getElementById('chalDetailXp').innerHTML =
-      '<i class="fas fa-bolt"></i> +' + compact(xpModal) + ' XP reward';
+    var xpEl = document.getElementById('chalDetailXp');
+    if (xpEl) {
+      if (xpModal > 0) {
+        xpEl.innerHTML = '<i class="fas fa-bolt"></i> +' + compact(xpModal) + ' XP reward';
+        xpEl.style.display = '';
+      } else {
+        xpEl.style.display = 'none';
+      }
+    }
 
     document.getElementById('chalDetailProg').innerHTML =
       '<div class="chalm-prog-labels">' +
@@ -202,7 +209,13 @@
       (!completed ? '<div class="chalm-prog-note">' + remaining + ' more to go</div>' : '');
 
     var completeEl = document.getElementById('chalDetailComplete');
-    completeEl.style.display = completed ? 'flex' : 'none';
+    if (completed) {
+      completeEl.innerHTML = '<i class="fas fa-check-circle"></i> Challenge completed' +
+        (xpModal > 0 ? '<span style="font-size:.72rem;font-weight:600;opacity:.75;margin-left:8px">· XP pending admin confirmation</span>' : '');
+      completeEl.style.display = 'flex';
+    } else {
+      completeEl.style.display = 'none';
+    }
 
     var tsEl = document.getElementById('chalDetailTs');
     if (completed && p.completedAt) {

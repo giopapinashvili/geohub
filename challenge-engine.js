@@ -322,6 +322,8 @@
 
   window.GeoChallenges = {
     TYPE_LABELS: TYPE_LABELS,
+    CATEGORY_LABELS: CATEGORY_LABELS,
+    RARITY_LABELS: RARITY_LABELS,
     normalizeChallenge: normalizeChallenge,
     isActiveChallenge: isActiveChallenge,
     getActiveChallenges: getActiveChallenges,

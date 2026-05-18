@@ -993,6 +993,34 @@ body.page-challenges [data-install-prompt] {
 [data-gh-theme="light"] .chalm-ts { color: #64748b; }
 [data-gh-theme="light"] .chalm-overlay { background: rgba(15,23,42,.44); }
 
+/* ── Rarity card accents ────────────────────────────────────────────── */
+.challenge-card.rarity-rare    { border-color: rgba(59,130,246,.32); }
+.challenge-card.rarity-epic    { border-color: rgba(168,85,247,.38); }
+.challenge-card.rarity-legendary {
+  border-color: rgba(245,158,11,.45);
+  background: rgba(245,158,11,.03);
+}
+.challenge-card.rarity-legendary::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);
+  border-radius: 8px 8px 0 0;
+}
+
+/* ── XP pending note on completed cards ─────────────────────────────── */
+.ch-xp-pending {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .72rem;
+  color: #94a3b8;
+  font-style: italic;
+}
+.ch-xp-pending i { font-size: .65rem; color: #fbbf24; }
+
 /* ── Badge pill on challenge cards ─────────────────────────────────── */
 .ch-badge-pill {
   display: inline-flex;

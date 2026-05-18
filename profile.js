@@ -496,72 +496,82 @@
     const tab = $('#tab-rewards');
     if (!tab) return;
     const GF = window.GeoFirebase;
+    const GS = window.GeoSocial;
     const own = fbUser && user.uid === fbUser.uid;
     const viewingUid = user.uid;
 
-    // Header: balance + action buttons
-    const bal = compact(user.pointsBalance || 0);
-    let headerHtml = '<div class="rw-profile-bal">' +
-      '<div>' +
-        '<div class="rw-profile-bal-label"><i class="fas fa-coins" style="margin-right:5px;color:#10b981"></i>GeoPoints Balance</div>' +
-        '<div class="rw-profile-bal-pts">' + esc(bal) + ' pts</div>' +
-      '</div>' +
-      '<div style="display:flex;gap:8px">' +
-        (own
-          ? '<button class="btn btn-ghost btn-sm" id="profSendPtsBtn" style="text-decoration:none" onclick="window.location.href=\'rewards.html\'"><i class="fas fa-coins"></i> Rewards Store</button>'
-          : '<button class="btn btn-primary btn-sm" id="profSendPtsBtn"><i class="fas fa-paper-plane"></i> Send Points</button>') +
-      '</div>' +
-    '</div>';
-
-    tab.innerHTML = headerHtml + '<div id="profTxList" style="margin-top:4px"><div style="color:var(--text-muted);font-size:.82rem;padding:12px 0;text-align:center"><i class="fas fa-spinner fa-spin"></i> Loading history…</div></div>';
-
-    // Wire "Send Points" button on other user's profile
-    if (!own) {
-      const sendBtn = document.getElementById('profSendPtsBtn');
-      if (sendBtn) {
-        sendBtn.onclick = function () {
-          window.location.href = 'rewards.html?to=' + encodeURIComponent(viewingUid);
-        };
-      }
+    function buildHeader(balPts) {
+      return '<div class="rw-profile-bal">' +
+        '<div>' +
+          '<div class="rw-profile-bal-label"><i class="fas fa-coins" style="margin-right:5px;color:#10b981"></i>GeoPoints Balance</div>' +
+          '<div class="rw-profile-bal-pts" id="profRwBal">' + esc(compact(balPts)) + ' pts</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px">' +
+          (own
+            ? '<button class="btn btn-ghost btn-sm" onclick="window.location.href=\'rewards.html\'"><i class="fas fa-coins"></i> Rewards Store</button>'
+            : '<button class="btn btn-primary btn-sm" id="profSendPtsBtn"><i class="fas fa-paper-plane"></i> Send Points</button>') +
+        '</div>' +
+      '</div>';
     }
 
-    if (!GF || !GF.db || !GF.fs || !fbUser) return;
+    // Show initial balance from public user doc, then update from wallet if own
+    tab.innerHTML = buildHeader(user.pointsBalance || 0) +
+      '<div id="profTxList" style="margin-top:4px"><div style="color:var(--text-muted);font-size:.82rem;padding:12px 0;text-align:center"><i class="fas fa-spinner fa-spin"></i> Loading history…</div></div>';
 
-    // Load transaction history (only for own profile — can't read other users' transactions)
     if (!own) {
+      const sendBtn = document.getElementById('profSendPtsBtn');
+      if (sendBtn) sendBtn.onclick = function () { window.location.href = 'rewards.html?to=' + encodeURIComponent(viewingUid); };
       const txList = document.getElementById('profTxList');
       if (txList) txList.innerHTML = '<div style="color:var(--text-muted);font-size:.82rem;padding:12px 0">Transaction history is private.</div>';
       return;
     }
 
+    if (!GF || !GF.db || !GF.fs || !fbUser) return;
     const uid = fbUser.uid;
+
+    // Update balance from wallet (authoritative source)
+    if (GS && GS.listenWallet) {
+      var _walletUnsub = GS.listenWallet(uid, function (w) {
+        var balEl = document.getElementById('profRwBal');
+        if (balEl) balEl.textContent = compact(w.balance || 0) + ' pts';
+        if (_walletUnsub) { _walletUnsub(); _walletUnsub = null; } // one-shot
+      });
+    } else {
+      GF.fs.getDoc(GF.fs.doc(GF.db, 'users', uid, 'private', 'wallet')).then(function (snap) {
+        if (!snap.exists()) return;
+        var w = snap.data() || {};
+        var bal = Math.max(0, Number(w.credits || 0) - Math.max(0, Number(w.reservedDebits || 0)));
+        var balEl = document.getElementById('profRwBal');
+        if (balEl) balEl.textContent = compact(bal) + ' pts';
+      }).catch(function () {});
+    }
+
+    // Load history: point gifts (sent + received) + reward coupons
+    var toMs = function (v) {
+      if (!v) return 0;
+      if (typeof v.toMillis === 'function') return v.toMillis();
+      if (v.seconds) return v.seconds * 1000;
+      return typeof v === 'number' ? v : (Date.parse(v) || 0);
+    };
+
     Promise.all([
-      GF.fs.getDocs(GF.fs.query(
-        GF.fs.collection(GF.db, 'pointTransactions'),
-        GF.fs.where('participantIds', 'array-contains', uid),
-        GF.fs.limit(30)
-      )).catch(() => ({ forEach: () => {} })),
-      GF.fs.getDocs(GF.fs.query(
-        GF.fs.collection(GF.db, 'userRewards'),
-        GF.fs.where('userId', '==', uid),
-        GF.fs.limit(20)
-      )).catch(() => ({ forEach: () => {} }))
-    ]).then(([txSnap, rwSnap]) => {
+      GF.fs.getDocs(GF.fs.query(GF.fs.collection(GF.db, 'pointGifts'), GF.fs.where('fromUserId', '==', uid), GF.fs.limit(20))).catch(() => ({ forEach: () => {} })),
+      GF.fs.getDocs(GF.fs.query(GF.fs.collection(GF.db, 'pointGifts'), GF.fs.where('toUserId',   '==', uid), GF.fs.limit(20))).catch(() => ({ forEach: () => {} })),
+      GF.fs.getDocs(GF.fs.query(GF.fs.collection(GF.db, 'rewardCoupons'), GF.fs.where('userId', '==', uid), GF.fs.limit(20))).catch(() => ({ forEach: () => {} }))
+    ]).then(([sentSnap, recvSnap, couponSnap]) => {
       const items = [];
 
-      txSnap.forEach(d => {
+      sentSnap.forEach(d => {
         const data = d.data();
-        const ms = typeof data.createdAt === 'object' && data.createdAt
-          ? (typeof data.createdAt.toMillis === 'function' ? data.createdAt.toMillis() : (data.createdAt.seconds || 0) * 1000)
-          : (Number(data.createdAt) || 0);
-        items.push({ ms, type: data.type || 'tx', amount: Number(data.amount || 0), fromId: data.fromUserId, toId: data.toUserId, msg: data.message || '', title: data.rewardTitle || '' });
+        items.push({ ms: toMs(data.createdAt), type: 'gift_sent', amount: Number(data.amount || 0), toName: data.toName || '', msg: data.message || '', status: data.status || '' });
       });
-      rwSnap.forEach(d => {
+      recvSnap.forEach(d => {
         const data = d.data();
-        const ms = typeof data.createdAt === 'object' && data.createdAt
-          ? (typeof data.createdAt.toMillis === 'function' ? data.createdAt.toMillis() : (data.createdAt.seconds || 0) * 1000)
-          : (Number(data.createdAt) || 0);
-        items.push({ ms, type: 'userReward', amount: Number(data.cost || 0), title: data.rewardTitle || 'Reward', status: data.status || '' });
+        items.push({ ms: toMs(data.createdAt), type: 'gift_recv', amount: Number(data.amount || 0), fromName: data.fromName || '', msg: data.message || '', status: data.status || '' });
+      });
+      couponSnap.forEach(d => {
+        const data = d.data();
+        items.push({ ms: toMs(data.createdAt), type: 'coupon', amount: Number(data.pointPrice || data.cost || 0), title: data.rewardTitle || 'Reward', code: data.code || '', status: data.status || '' });
       });
 
       items.sort((a, b) => b.ms - a.ms);
@@ -570,29 +580,29 @@
       if (!txList) return;
 
       if (!items.length) {
-        txList.innerHTML = '<div class="empty-profile-state"><i class="fas fa-coins"></i><h3>No transactions yet</h3><p>Earn GeoPoints through check-ins, challenges, and community activity. Redeem them in the <a href="rewards.html" style="color:var(--green)">Rewards Store</a>.</p></div>';
+        txList.innerHTML = '<div class="empty-profile-state"><i class="fas fa-coins"></i><h3>No activity yet</h3><p>Earn GeoPoints through check-ins, challenges, and community activity. Redeem them in the <a href="rewards.html" style="color:var(--green)">Rewards Store</a>.</p></div>';
         return;
       }
 
       const rows = items.map(item => {
-        let iconClass, dir, label, amtHtml;
-        if (item.type === 'gift') {
-          const isSender = item.fromId === uid;
-          iconClass = isSender ? 'sent' : 'gift';
-          const icon = isSender ? 'fa-paper-plane' : 'fa-gift';
-          label = isSender ? 'Sent points' + (item.msg ? ': ' + esc(item.msg.slice(0, 40)) : '') : 'Received points' + (item.msg ? ': ' + esc(item.msg.slice(0, 40)) : '');
-          amtHtml = isSender
-            ? '<div class="rw-history-amount neg">−' + compact(item.amount) + '</div>'
-            : '<div class="rw-history-amount pos">+' + compact(item.amount) + '</div>';
+        if (item.type === 'gift_sent') {
+          const label = 'Sent to ' + esc(item.toName || 'user') + (item.msg ? ' · ' + esc(item.msg.slice(0, 40)) : '') + (item.status === 'pending' ? ' <span style="font-size:.65rem;color:#f59e0b">(pending)</span>' : '');
           return '<div class="rw-history-item">' +
-            '<div class="rw-history-icon ' + iconClass + '"><i class="fas ' + icon + '"></i></div>' +
-            '<div class="rw-history-info"><div class="rw-history-title">' + label + '</div><div class="rw-history-meta">Transfer</div></div>' +
-            amtHtml + '</div>';
+            '<div class="rw-history-icon sent"><i class="fas fa-paper-plane"></i></div>' +
+            '<div class="rw-history-info"><div class="rw-history-title">' + label + '</div><div class="rw-history-meta">Points transfer</div></div>' +
+            '<div class="rw-history-amount neg">−' + compact(item.amount) + '</div></div>';
         }
-        if (item.type === 'redeem' || item.type === 'userReward') {
+        if (item.type === 'gift_recv') {
+          const label = 'Received from ' + esc(item.fromName || 'user') + (item.msg ? ' · ' + esc(item.msg.slice(0, 40)) : '') + (item.status === 'pending' ? ' <span style="font-size:.65rem;color:#f59e0b">(unclaimed)</span>' : '');
+          return '<div class="rw-history-item">' +
+            '<div class="rw-history-icon gift"><i class="fas fa-gift"></i></div>' +
+            '<div class="rw-history-info"><div class="rw-history-title">' + label + '</div><div class="rw-history-meta">Points gift</div></div>' +
+            '<div class="rw-history-amount pos">+' + compact(item.amount) + '</div></div>';
+        }
+        if (item.type === 'coupon') {
           return '<div class="rw-history-item">' +
             '<div class="rw-history-icon redeem"><i class="fas fa-ticket-alt"></i></div>' +
-            '<div class="rw-history-info"><div class="rw-history-title">Redeemed: ' + esc(item.title || 'Reward') + '</div><div class="rw-history-meta">Redemption</div></div>' +
+            '<div class="rw-history-info"><div class="rw-history-title">Redeemed: ' + esc(item.title) + (item.code ? ' · <code style="font-size:.72rem">' + esc(item.code) + '</code>' : '') + '</div><div class="rw-history-meta">Reward redemption</div></div>' +
             '<div class="rw-history-amount neg">−' + compact(item.amount) + '</div></div>';
         }
         return '';
@@ -600,7 +610,7 @@
 
       txList.innerHTML = rows.length
         ? '<div class="rw-history-list">' + rows.join('') + '</div>'
-        : '<div style="color:var(--text-muted);font-size:.82rem;padding:12px 0">No transaction history.</div>';
+        : '<div style="color:var(--text-muted);font-size:.82rem;padding:12px 0">No transaction history yet.</div>';
     }).catch(err => {
       console.warn('[Profile] rewards tab', err.message);
     });
