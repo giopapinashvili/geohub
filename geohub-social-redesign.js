@@ -1141,7 +1141,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           return '<div class="gh-post-grid-item" data-open-photo="'+esc(u)+'"><img src="'+esc(u)+'" loading="lazy" alt="" onerror="this.style.display=\'none\'">'+moreOv+'</div>';
         }).join('')+'</div>';
     } else if (singleImgUrl) {
-      mediaHtml = '<img class="gh-post-img" src="'+esc(singleImgUrl)+'" alt="post image" loading="lazy" onerror="this.style.display=\'none\'">';
+      mediaHtml = '<div class="gh-post-img-wrap" data-open-photo="'+esc(singleImgUrl)+'"><img class="gh-post-img" src="'+esc(singleImgUrl)+'" alt="post image" loading="lazy" onerror="this.parentElement.style.display=\'none\'"></div>';
     }
 
     var pollHtml = '';
@@ -1230,10 +1230,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       linkPrevHtml+
       (p.sharedPostId?'<div class="gh-shared-preview" data-shared-post="'+esc(p.sharedPostId)+'"><i class="fas fa-share"></i><div><strong>Shared post</strong><span>Loading original post...</span></div></div>':'')+
       viewCountHtml+
-      '<div class="gh-post-stats"><span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'"><i class="fas fa-thumbs-up"></i> <b data-like-count>'+totalRx+'</b>'+(totalRx?' people reacted':'')+'</button></span><span><b data-comment-count>'+Math.max(0,Number(p.commentCount||0))+'</b> comments · <b>'+Number(p.shareCount||0)+'</b> shares</span></div>'+
+      '<div class="gh-post-stats"><span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'"><i class="fas fa-thumbs-up"></i> <b data-like-count>'+totalRx+'</b>'+(totalRx?' people reacted':'')+'</button></span><span><button class="gh-stats-btn" data-open-comments-btn><b data-comment-count>'+Math.max(0,Number(p.commentCount||0))+'</b> comments</button> · <b>'+Number(p.shareCount||0)+'</b> shares</span></div>'+
       '<div class="gh-rx-breakdown" data-rx-pid="'+esc(pid)+'"></div>'+
-      '<div class="gh-post-actions"><button class="gh-act" data-like><i class="fas fa-thumbs-up"></i> Like</button><button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> Comment</button><button class="gh-act" data-share><i class="fas fa-share"></i> Share</button><button class="gh-act" data-save><i class="fas fa-bookmark"></i> Save</button></div>'+
-      '<div class="gh-reaction-strip"><button data-reaction="like">👍</button><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button></div>'+
+      '<div class="gh-post-actions"><span class="gh-like-wrap"><button class="gh-act" data-like><i class="fas fa-thumbs-up"></i> Like</button><div class="gh-reaction-strip"><button data-reaction="like">👍</button><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button></div></span><button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> Comment</button><button class="gh-act" data-share><i class="fas fa-share"></i> Share</button><button class="gh-act" data-save><i class="fas fa-bookmark"></i> Save</button></div>'+
       '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+cmtFormHtml+'</div>'+
     '</article>';
   }
@@ -1338,15 +1337,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if (photoItem) {
         var photoUrl = photoItem.dataset.openPhoto;
         if (options.onOpenPhoto) options.onOpenPhoto(photoUrl);
-        else if (photoUrl) window.open(photoUrl, '_blank', 'noopener');
+        else if (photoUrl) openMediaLightbox(photoUrl);
         return;
       }
       if(e.target.closest('[data-like]')){ if(!requireLogin()) return; setReaction(pid,'like',card); }
       var ro=e.target.closest('[data-reaction]'); if(ro){ if(!requireLogin()) return; setReaction(pid,ro.dataset.reaction,card); }
       if(e.target.closest('[data-comment-toggle]')){ toggleComments(card,pid); }
+      if(e.target.closest('[data-open-comments-btn]')){ openFocusedPost(pid); return; }
       if(e.target.closest('[data-share]')){ sharePost(pid); }
       if(e.target.closest('[data-save]')){ if(!requireLogin()) return; GS().toggleSavePost(pid,function(saved){ var b=card.querySelector('[data-save]'); if(b) b.classList.toggle('active',!!saved); }); }
-      if(e.target.closest('[data-post-menu]')){ postMenu(pid,card); }
+      var menuBtn=e.target.closest('[data-post-menu]'); if(menuBtn){ postMenu(pid,card,menuBtn); }
       var rb=e.target.closest('[data-comment-reply]'); if(rb){ e.preventDefault(); openReplyForm(card,pid,rb.dataset.commentId); }
       var cr=e.target.closest('[data-copy-post-link]'); if(cr && navigator.clipboard){ navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast('Post link copied');}); }
       var wrBtn=e.target.closest('[data-who-reacted]'); if(wrBtn){ openWhoReactedModal(wrBtn.dataset.whoReacted); }
@@ -1776,66 +1776,211 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     $('#ghSubmitShare').onclick=function(){ GS().createPost($('#ghShareText').value, '', function(){ if($('#ghShareModal')) $('#ghShareModal').remove(); if(GS().trackShare) GS().trackShare(pid); }, { sharedPostId: pid, visibility: $('#ghShareVisibility').value }); };
   }
 
-  function postMenu(pid, card){
+  function postMenu(pid, card, anchor){
     if(!requireLogin()) return;
+    // Toggle: clicking the button again closes the existing dropdown
+    var existing = document.getElementById('ghPostMenuDrop');
+    if (existing) { existing.remove(); return; }
+
     var authorId = card && card.dataset ? card.dataset.authorId : '';
+    var authorName = card && card.dataset ? (card.dataset.authorName || '') : '';
     var u = authUser();
     var isOwn = u && authorId && u.uid === authorId;
-    var ownMenu = isOwn
-      ? '<button class="gh-mini-item" data-menu-edit-post><span class="gh-mini-thumb"><i class="fas fa-pen"></i></span><div><strong>Edit post</strong><span>Change text or visibility</span></div></button>' +
-        '<button class="gh-mini-item danger" data-menu-delete-post><span class="gh-mini-thumb"><i class="fas fa-trash"></i></span><div><strong>Delete post</strong><span>Permanently remove this post</span></div></button>'
-      : '';
-    var authorMenu = (!isOwn && authorId)
-      ? '<button class="gh-mini-item" data-menu-report-user><span class="gh-mini-thumb"><i class="fas fa-user-shield"></i></span><div><strong>Report author</strong><span>Report this user</span></div></button>' +
-        '<button class="gh-mini-item" data-menu-mute-user><span class="gh-mini-thumb"><i class="fas fa-volume-mute"></i></span><div><strong>Mute author</strong><span>Hide from your feed silently</span></div></button>' +
-        '<button class="gh-mini-item danger" data-menu-block-user><span class="gh-mini-thumb"><i class="fas fa-ban"></i></span><div><strong>Block author</strong><span>Hide this user from your GeoHub</span></div></button>'
-      : '';
-    var body='<div class="gh-mini-list">' +
-      ownMenu +
-      '<button class="gh-mini-item" data-copy-post-link><span class="gh-mini-thumb"><i class="fas fa-link"></i></span><div><strong>Copy link</strong><span>Share a direct link</span></div></button>' +
-      '<button class="gh-mini-item" data-menu-save><span class="gh-mini-thumb"><i class="fas fa-bookmark"></i></span><div><strong>Save post</strong><span>Keep it for later</span></div></button>' +
-      (!isOwn ? '<button class="gh-mini-item" data-menu-hide><span class="gh-mini-thumb"><i class="fas fa-eye-slash"></i></span><div><strong>Hide post</strong><span>Remove it from your feed</span></div></button>' : '') +
-      (!isOwn ? '<button class="gh-mini-item" data-menu-report><span class="gh-mini-thumb"><i class="fas fa-flag"></i></span><div><strong>Report post</strong><span>Send to moderation</span></div></button>' : '') +
-      authorMenu + '</div>';
-    modal('Post options', body, '<button class="gh-btn ghost" data-close-modal>Close</button>', 'ghPostMenuModal');
-    var m=$('#ghPostMenuModal');
-    var authorName = card && card.dataset ? (card.dataset.authorName || '') : '';
-    m.addEventListener('click', function(e){
-      if(e.target.closest('[data-menu-edit-post]') && isOwn){
-        m.remove();
-        openFeedPostEditor(pid, card);
+
+    var items = '<div class="gh-pmenu-list">';
+    if (isOwn) {
+      items += '<button class="gh-pmenu-item" data-menu-edit-post><i class="fas fa-pen"></i> Edit post</button>';
+      items += '<button class="gh-pmenu-item danger" data-menu-delete-post><i class="fas fa-trash"></i> Delete post</button>';
+      items += '<div class="gh-pmenu-sep"></div>';
+    }
+    items += '<button class="gh-pmenu-item" data-copy-post-link><i class="fas fa-link"></i> Copy link</button>';
+    items += '<button class="gh-pmenu-item" data-menu-save><i class="fas fa-bookmark"></i> Save post</button>';
+    if (!isOwn) {
+      items += '<div class="gh-pmenu-sep"></div>';
+      items += '<button class="gh-pmenu-item" data-menu-hide><i class="fas fa-eye-slash"></i> Hide post</button>';
+      items += '<button class="gh-pmenu-item" data-menu-report><i class="fas fa-flag"></i> Report post</button>';
+      if (authorId) {
+        items += '<div class="gh-pmenu-sep"></div>';
+        items += '<button class="gh-pmenu-item" data-menu-report-user><i class="fas fa-user-shield"></i> Report author</button>';
+        items += '<button class="gh-pmenu-item" data-menu-mute-user><i class="fas fa-volume-mute"></i> Mute author</button>';
+        items += '<button class="gh-pmenu-item danger" data-menu-block-user><i class="fas fa-ban"></i> Block author</button>';
       }
-      if(e.target.closest('[data-menu-delete-post]') && isOwn){
-        m.remove();
-        if(!confirm('Delete this post? This cannot be undone.')) return;
+    }
+    items += '</div>';
+
+    var drop = document.createElement('div');
+    drop.id = 'ghPostMenuDrop';
+    drop.className = 'gh-post-menu-drop';
+    drop.innerHTML = items;
+    document.body.appendChild(drop);
+
+    // Position anchored to the 3-dot button
+    if (anchor) {
+      var rect = anchor.getBoundingClientRect();
+      var top = rect.bottom + window.scrollY + 4;
+      var right = Math.max(8, window.innerWidth - rect.right);
+      drop.style.top = top + 'px';
+      drop.style.right = right + 'px';
+    }
+
+    function closeDrop() { var d = document.getElementById('ghPostMenuDrop'); if (d) d.remove(); }
+
+    drop.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (e.target.closest('[data-menu-edit-post]') && isOwn) { closeDrop(); openFeedPostEditor(pid, card); return; }
+      if (e.target.closest('[data-menu-delete-post]') && isOwn) {
+        closeDrop();
+        if (!confirm('Delete this post? This cannot be undone.')) return;
         fs().updateDoc(fs().doc(db(),'posts',pid), { status:'deleted', updatedAt:fs().serverTimestamp() })
           .then(function(){ if(card){ card.style.transition='opacity .25s'; card.style.opacity='0'; setTimeout(function(){ card.remove(); },260); } toast('Post deleted'); })
           .catch(function(err){ toast('Could not delete: '+(err.code||err.message),'error'); });
+        return;
       }
-      if(e.target.closest('[data-copy-post-link]')){ navigator.clipboard && navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast('Link copied!');}); m.remove(); }
-      if(e.target.closest('[data-menu-save]')){ GS().toggleSavePost(pid); m.remove(); }
-      if(e.target.closest('[data-menu-hide]')){ if(GS().hidePost) GS().hidePost(pid,function(){ if(card) card.remove(); }); m.remove(); }
-      if(e.target.closest('[data-menu-report]')){
-        m.remove();
-        if(window.GeoModeration) window.GeoModeration.openReportModal('post', pid, '');
-        else if(GS().reportTarget) GS().reportTarget('post', pid, 'Reported from post menu');
-      }
-      if(e.target.closest('[data-menu-report-user]') && authorId){
-        m.remove();
-        if(window.GeoModeration) window.GeoModeration.openReportModal('user', authorId, authorName);
-        else if(GS().reportTarget) GS().reportTarget('user', authorId, 'Reported from post menu');
-      }
-      if(e.target.closest('[data-menu-mute-user]') && authorId){
-        m.remove();
-        if(window.GeoModeration) window.GeoModeration.openMuteConfirm(authorId, authorName, function(){ if(GS().muteUser) GS().muteUser(authorId); });
-        else if(GS().muteUser) GS().muteUser(authorId);
-      }
-      if(e.target.closest('[data-menu-block-user]') && authorId){
-        m.remove();
-        if(window.GeoModeration) window.GeoModeration.openBlockConfirm(authorId, authorName, function(){ if(GS().blockUser) GS().blockUser(authorId, function(){ if(card) card.remove(); }); });
-        else if(GS().blockUser) GS().blockUser(authorId, function(){ if(card) card.remove(); });
-      }
+      if (e.target.closest('[data-copy-post-link]')) { navigator.clipboard && navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast('Link copied!');}); closeDrop(); return; }
+      if (e.target.closest('[data-menu-save]')) { if(GS().toggleSavePost) GS().toggleSavePost(pid); closeDrop(); return; }
+      if (e.target.closest('[data-menu-hide]')) { if(GS().hidePost) GS().hidePost(pid, function(){ if(card) card.remove(); }); closeDrop(); return; }
+      if (e.target.closest('[data-menu-report]')) { closeDrop(); if(window.GeoModeration) window.GeoModeration.openReportModal('post', pid, ''); else if(GS().reportTarget) GS().reportTarget('post', pid, 'Reported'); return; }
+      if (e.target.closest('[data-menu-report-user]') && authorId) { closeDrop(); if(window.GeoModeration) window.GeoModeration.openReportModal('user', authorId, authorName); else if(GS().reportTarget) GS().reportTarget('user', authorId, 'Reported'); return; }
+      if (e.target.closest('[data-menu-mute-user]') && authorId) { closeDrop(); if(window.GeoModeration) window.GeoModeration.openMuteConfirm(authorId, authorName, function(){ if(GS().muteUser) GS().muteUser(authorId); }); else if(GS().muteUser) GS().muteUser(authorId); return; }
+      if (e.target.closest('[data-menu-block-user]') && authorId) { closeDrop(); if(window.GeoModeration) window.GeoModeration.openBlockConfirm(authorId, authorName, function(){ if(GS().blockUser) GS().blockUser(authorId, function(){ if(card) card.remove(); }); }); else if(GS().blockUser) GS().blockUser(authorId, function(){ if(card) card.remove(); }); return; }
     });
+
+    // Close on outside click or Escape
+    setTimeout(function() {
+      function _outside(ev) {
+        if (!ev.target.closest || !ev.target.closest('#ghPostMenuDrop')) {
+          closeDrop();
+          document.removeEventListener('click', _outside, true);
+          document.removeEventListener('keydown', _esc);
+        }
+      }
+      function _esc(ev) { if (ev.key === 'Escape') { closeDrop(); document.removeEventListener('click', _outside, true); document.removeEventListener('keydown', _esc); } }
+      document.addEventListener('click', _outside, true);
+      document.addEventListener('keydown', _esc);
+    }, 0);
+  }
+
+  function openFocusedPost(pid) {
+    if (!fs() || !db()) return;
+    if (document.getElementById('ghFocusedPostOverlay')) return; // already open
+
+    var overlay = document.createElement('div');
+    overlay.id = 'ghFocusedPostOverlay';
+    overlay.className = 'gh-fpm-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.innerHTML =
+      '<div class="gh-fpm-panel">' +
+        '<div class="gh-fpm-header">' +
+          '<span class="gh-fpm-title">Post</span>' +
+          '<button class="gh-fpm-close" id="ghFpmClose" aria-label="Close"><i class="fas fa-times"></i></button>' +
+        '</div>' +
+        '<div class="gh-fpm-body" id="ghFpmBody"><div class="gh-fpm-loading"><i class="fas fa-circle-notch fa-spin"></i></div></div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    document.body.classList.add('gh-fpm-open');
+
+    var _ownedListeners = [];
+
+    function closeFpm() {
+      _ownedListeners.forEach(function(item) {
+        if (item.unsub) {
+          try { item.unsub(); } catch(e) {}
+          // Only remove from state if we created it (not if feed already had it)
+          if (item.owned && state.postsUnsubs && state.postsUnsubs[item.pid] === item.unsub) {
+            delete state.postsUnsubs[item.pid];
+          }
+        }
+      });
+      document.body.classList.remove('gh-fpm-open');
+      overlay.style.opacity = '0';
+      setTimeout(function() { overlay.remove(); }, 200);
+      document.removeEventListener('keydown', _keydown);
+    }
+
+    function _keydown(ev) { if (ev.key === 'Escape') closeFpm(); }
+    document.addEventListener('keydown', _keydown);
+
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) closeFpm(); });
+    document.getElementById('ghFpmClose').addEventListener('click', closeFpm);
+
+    fs().getDoc(fs().doc(db(), 'posts', pid)).then(function(snap) {
+      if (!snap.exists()) { document.getElementById('ghFpmBody').innerHTML = '<p class="gh-fpm-empty">Post not found.</p>'; return; }
+      var p = Object.assign({ id: pid }, snap.data());
+      if (p.status === 'deleted') { document.getElementById('ghFpmBody').innerHTML = '<p class="gh-fpm-empty">This post was deleted.</p>'; return; }
+
+      var cardHtml = postCard(p, {});
+      var body = document.getElementById('ghFpmBody');
+      body.innerHTML = '<div class="gh-fpm-card-wrap">' + cardHtml + '</div>';
+
+      // Always show comments in focused modal
+      var card = body.querySelector('[data-post-id="' + CSS.escape(pid) + '"]');
+      if (card) {
+        var commBox = card.querySelector('[data-comments]');
+        if (commBox) commBox.hidden = false;
+        if (!state.openCommentPids) state.openCommentPids = {};
+        state.openCommentPids[pid] = true;
+      }
+
+      // Bind interactions to this modal's subtree
+      bindPostInteractions(body, {
+        onOpenPhoto: function(url) { openMediaLightbox(url); }
+      });
+
+      // Reuse existing comment listener if active; otherwise create one
+      if (state.postsUnsubs && state.postsUnsubs[pid]) {
+        // Feed already has a listener — render cached comments if available
+        if (state.cachedComments && state.cachedComments[pid]) {
+          renderCommentsForPid(pid, state.cachedComments[pid]);
+        }
+      } else if (GS() && GS().listenComments) {
+        var unsub = GS().listenComments(pid, function(items) {
+          if (!state.cachedComments) state.cachedComments = {};
+          state.cachedComments[pid] = items;
+          renderCommentsForPid(pid, items);
+        });
+        if (!state.postsUnsubs) state.postsUnsubs = {};
+        state.postsUnsubs[pid] = unsub;
+        _ownedListeners.push({ pid: pid, unsub: unsub, owned: true });
+      }
+
+      loadReactionBreakdown(pid);
+      hydrateReactionState(pid);
+      if (typeof hydrateSharedPreviews === 'function') hydrateSharedPreviews(body);
+    }).catch(function(err) {
+      var b = document.getElementById('ghFpmBody');
+      if (b) b.innerHTML = '<p class="gh-fpm-empty">Could not load post.</p>';
+      console.error('[GeoHub] openFocusedPost', err);
+    });
+  }
+
+  function openMediaLightbox(url) {
+    if (!url) return;
+    var existing = document.getElementById('ghMediaLightbox');
+    if (existing) existing.remove();
+
+    var lb = document.createElement('div');
+    lb.id = 'ghMediaLightbox';
+    lb.className = 'gh-media-lb';
+    lb.setAttribute('role', 'dialog');
+    lb.setAttribute('aria-modal', 'true');
+    lb.innerHTML =
+      '<div class="gh-media-lb-inner">' +
+        '<button class="gh-media-lb-close" aria-label="Close"><i class="fas fa-times"></i></button>' +
+        '<img class="gh-media-lb-img" src="' + esc(url) + '" alt="Full size image" onerror="this.alt=\'Image could not load\'">' +
+      '</div>';
+    document.body.appendChild(lb);
+
+    function closeLb() {
+      var el = document.getElementById('ghMediaLightbox');
+      if (el) el.remove();
+      document.removeEventListener('keydown', _k);
+    }
+    function _k(ev) { if (ev.key === 'Escape') closeLb(); }
+    document.addEventListener('keydown', _k);
+
+    lb.querySelector('.gh-media-lb-close').addEventListener('click', closeLb);
+    lb.addEventListener('click', function(e) { if (e.target === lb) closeLb(); });
   }
 
   function openFeedCommentEditor(pid, cid, btnEl) {

@@ -341,7 +341,10 @@ body.gh-social-body .mobile-menu{display:none!important}
 @media(max-width:1180px){.gh-topbar{grid-template-columns:230px 1fr auto}.gh-layout{grid-template-columns:82px minmax(0,1fr) 290px}.gh-left .gh-nav-item span{display:none}.gh-left{width:82px}.gh-nav-item{justify-content:center}.gh-nav-item i{width:auto}.gh-panel{padding:10px}.gh-brand span{display:none}.gh-brand{width:50px}}
 @media(max-width:920px){.gh-topbar{grid-template-columns:auto 1fr auto;padding:0 12px}.gh-top-actions .gh-user-btn span,.gh-top-actions .gh-create-btn span{display:none}.gh-layout{grid-template-columns:1fr;padding:12px}.gh-left,.gh-right{display:none}.gh-shell{padding-top:64px}.gh-topbar{height:64px}.gh-grid{grid-template-columns:1fr}.gh-composer-actions{grid-template-columns:repeat(2,1fr)}.gh-page-info{display:block}.gh-page-actions{justify-content:flex-start;margin-top:12px}.gh-page-cover{height:190px}.gh-page-logo{width:92px;height:92px;border-radius:20px}.gh-page-title h1{font-size:1.35rem}.gh-create-menu{right:12px;top:60px}.gh-top-search input{height:40px}}
 @media(max-width:540px){.gh-top-search{display:none}.gh-post-actions{grid-template-columns:repeat(2,1fr)}.gh-card{padding:12px;border-radius:18px}.gh-composer-actions{grid-template-columns:1fr}.gh-item-media{height:130px}.gh-story-card{min-width:96px;height:150px}.gh-page-cover{height:155px}}
-.gh-reaction-strip{display:none;gap:6px;padding:6px 0 8px;border-bottom:1px solid var(--gh-border);justify-content:center;flex-wrap:wrap}.gh-reaction-strip.visible{display:flex}.gh-reaction-strip button{border:none;background:rgba(255,255,255,.055);border-radius:999px;min-width:34px;height:32px;cursor:pointer;font-size:1rem;transition:.15s}.gh-reaction-strip button:hover,.gh-reaction-strip button.active{background:rgba(16,185,129,.16);transform:translateY(-1px)}
+/* Like-wrap: relative container so the reaction strip can float above the button */
+.gh-like-wrap{position:relative;display:flex;align-items:stretch;justify-content:center}
+/* Reaction strip: pill floating above the Like button */
+.gh-reaction-strip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);display:none;gap:2px;padding:5px 8px;background:var(--gh-card);border:1px solid var(--gh-border);border-radius:999px;z-index:var(--gh-z-dropdown);box-shadow:0 6px 24px rgba(0,0,0,.5);white-space:nowrap}.gh-reaction-strip.visible{display:flex}.gh-reaction-strip button{border:none;background:transparent;border-radius:999px;min-width:32px;height:32px;cursor:pointer;font-size:1.15rem;transition:.12s;padding:0 3px}.gh-reaction-strip button:hover,.gh-reaction-strip button.active{transform:scale(1.35) translateY(-2px)}
 /* v3 hotfixes */
 .gh-mini-item.unread{background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.22)}
 .gh-story-viewer{min-height:360px;display:grid;place-items:center;position:relative;background:linear-gradient(160deg,rgba(16,185,129,.18),rgba(2,6,23,.92));border-radius:18px;overflow:hidden;border:1px solid var(--gh-border)}
@@ -1763,3 +1766,65 @@ body.gh-has-injected-nav.page-messages .messages-page{left:252px!important}
   .gr-join-request-actions{width:100%}
   .gr-chat-bubble{max-width:88%}
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 24 — Facebook-style Post UX
+   ══════════════════════════════════════════════════════════════ */
+
+/* Allow reaction strip to float above card without being clipped */
+body.gh-fb-inspired .gh-post{overflow:visible}
+
+/* Single-image click wrapper */
+.gh-post-img-wrap{cursor:pointer;display:block;position:relative}
+.gh-post-img-wrap .gh-post-img{display:block}
+.gh-post-img-wrap:hover::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.06);border-radius:18px;pointer-events:none}
+
+/* Clickable comment count in stats bar */
+.gh-stats-btn{background:none;border:none;color:inherit;font:inherit;cursor:pointer;padding:0;display:inline}
+.gh-stats-btn:hover b{text-decoration:underline}
+
+/* ── Post options dropdown ─────────────────────────────────── */
+.gh-post-menu-drop{position:absolute;background:var(--gh-card);border:1px solid var(--gh-border);border-radius:14px;min-width:220px;max-width:280px;box-shadow:0 8px 32px rgba(0,0,0,.55);z-index:var(--gh-z-dropdown);overflow:hidden;animation:ghDropIn .12s var(--gh-ease-spring)}
+@keyframes ghDropIn{from{opacity:0;transform:scale(.96) translateY(-4px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.gh-pmenu-list{padding:5px 0}
+.gh-pmenu-item{display:flex;align-items:center;gap:10px;width:100%;border:none;background:transparent;color:var(--gh-text);padding:10px 14px;font-size:.88rem;font-weight:700;cursor:pointer;text-align:left;transition:.1s;font-family:inherit}
+.gh-pmenu-item:hover{background:rgba(255,255,255,.07)}
+.gh-pmenu-item i{width:15px;text-align:center;color:var(--gh-muted);font-size:.82rem;flex-shrink:0}
+.gh-pmenu-item.danger{color:var(--gh-red)}
+.gh-pmenu-item.danger i{color:var(--gh-red)}
+.gh-pmenu-item.danger:hover{background:rgba(239,68,68,.10)}
+.gh-pmenu-sep{height:1px;background:var(--gh-border);margin:4px 0}
+html[data-gh-theme="light"] .gh-post-menu-drop{background:#fff;border-color:rgba(15,23,42,.10)}
+html[data-gh-theme="light"] .gh-pmenu-item:hover{background:rgba(0,0,0,.05)}
+html[data-gh-theme="light"] .gh-pmenu-item i{color:#64748b}
+
+/* ── Focused Post Modal ────────────────────────────────────── */
+.gh-fpm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:var(--gh-z-modal);display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;transition:opacity .2s}
+.gh-fpm-panel{background:var(--gh-card);border:1px solid var(--gh-border);border-radius:18px;width:100%;max-width:620px;max-height:calc(100vh - 32px);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,.7);animation:ghFpmIn .18s var(--gh-ease-spring)}
+@keyframes ghFpmIn{from{opacity:0;transform:scale(.97) translateY(8px)}to{opacity:1;transform:none}}
+.gh-fpm-header{display:flex;align-items:center;justify-content:center;padding:12px 48px;border-bottom:1px solid var(--gh-border);flex-shrink:0;position:relative}
+.gh-fpm-title{font-weight:950;font-size:.95rem}
+.gh-fpm-close{position:absolute;right:12px;top:50%;transform:translateY(-50%);border:none;background:rgba(255,255,255,.08);color:var(--gh-muted);width:32px;height:32px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;transition:.14s;flex-shrink:0}
+.gh-fpm-close:hover{background:rgba(255,255,255,.15);color:var(--gh-text)}
+.gh-fpm-body{overflow-y:auto;flex:1;overscroll-behavior:contain}
+/* Post card inside modal: remove outer border/shadow */
+.gh-fpm-body .gh-card{border-radius:0;border-left:none;border-right:none;border-top:none;box-shadow:none}
+/* Keep comments always expanded in modal */
+.gh-fpm-body [data-comment-toggle]{display:none}
+.gh-fpm-loading{display:flex;justify-content:center;align-items:center;padding:48px;font-size:1.6rem;color:var(--gh-muted)}
+.gh-fpm-empty{padding:32px;text-align:center;color:var(--gh-muted);margin:0}
+body.gh-fpm-open{overflow:hidden}
+@media(max-width:640px){
+  .gh-fpm-overlay{padding:0;align-items:flex-end}
+  .gh-fpm-panel{max-width:100%;max-height:92vh;border-radius:22px 22px 0 0}
+}
+html[data-gh-theme="light"] .gh-fpm-panel{background:rgba(248,250,252,.97)}
+
+/* ── Media Lightbox ────────────────────────────────────────── */
+.gh-media-lb{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:calc(var(--gh-z-modal) + 10);display:flex;align-items:center;justify-content:center;cursor:pointer;animation:ghFadeIn .15s ease}
+@keyframes ghFadeIn{from{opacity:0}to{opacity:1}}
+.gh-media-lb-inner{position:relative;max-width:min(92vw,1100px);max-height:90vh;display:flex;align-items:center;justify-content:center;cursor:default}
+.gh-media-lb-img{max-width:100%;max-height:88vh;object-fit:contain;border-radius:10px;display:block;box-shadow:0 24px 64px rgba(0,0,0,.6)}
+.gh-media-lb-close{position:absolute;top:-14px;right:-14px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);transition:.14s;z-index:1}
+.gh-media-lb-close:hover{background:rgba(255,255,255,.28)}
+@media(max-width:540px){.gh-media-lb-close{top:8px;right:8px}}

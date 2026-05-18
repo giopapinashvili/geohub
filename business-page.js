@@ -161,7 +161,7 @@
       actions =
         '<a href="add-business.html?edit='+esc(BIZ_ID)+'" class="biz-action-btn owner-edit"><i class="fas fa-pen"></i> Edit Page</a>'+
         '<button class="biz-action-btn" onclick="window._bizActions.openCompose()"><i class="fas fa-plus"></i> Create Post</button>'+
-        '<button class="biz-action-btn" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add Photo</button>'+
+        '<button class="biz-action-btn" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
         '<input type="file" id="biz-owner-photo-input" accept="image/*" style="display:none" onchange="window._bizActions.handleOwnerPhoto(this)">';
     } else {
@@ -1078,7 +1078,7 @@
       '</div>'+
       '<div class="biz-dash-actions">'+
         '<a href="add-business.html?edit='+esc(BIZ_ID)+'" class="biz-owner-action-btn edit"><i class="fas fa-pen"></i> Edit Page Info</a>'+
-        '<button class="biz-owner-action-btn photo" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add Photo</button>'+
+        '<button class="biz-owner-action-btn photo" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-owner-action-btn quotes" onclick="window._bizActions.loadOwnerQuotes()"><i class="fas fa-inbox"></i> View Quote Requests</button>'+
         '<button class="biz-owner-action-btn" onclick="window._bizActions.switchTab(\'insights\')" style="background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.3);color:#60a5fa"><i class="fas fa-chart-line"></i> View Insights</button>'+
       '</div>'+
