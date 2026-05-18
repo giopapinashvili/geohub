@@ -1905,15 +1905,28 @@
       });
     }
 
-    function addStoryReaction(storyId, reactionEmoji, callback) {
+    function addStoryReaction(storyId, ownerId, reactionEmoji, callback) {
       requireAuth(function(user) {
         if(!storyId) { if(callback) callback(null, new Error('No storyId')); return; }
+        var me = meData() || {};
+        var emoji = reactionEmoji || '❤️';
         setDoc(doc(db, 'stories', storyId, 'reactions', user.uid), {
           userId: user.uid,
-          reaction: reactionEmoji || '❤️',
+          reaction: emoji,
           createdAt: serverTimestamp()
-        }).then(function(){ if(callback) callback(); })
-          .catch(function(err){ console.warn('[GeoSocial] addStoryReaction', err.message); if(callback) callback(null, err); });
+        }).then(function(){
+          if(ownerId && ownerId !== user.uid) {
+            createNotification(
+              ownerId, 'story_reaction',
+              (me.name || 'GeoHub User') + ' reacted ' + emoji + ' to your story',
+              '',
+              'notifications.html',
+              { storyId: storyId, reaction: emoji },
+              'story_reaction_' + user.uid + '_' + storyId
+            ).catch(function(){});
+          }
+          if(callback) callback();
+        }).catch(function(err){ console.warn('[GeoSocial] addStoryReaction', err.message); if(callback) callback(null, err); });
       });
     }
 
@@ -1928,6 +1941,7 @@
       requireAuth(function(user) {
         if(!storyId || !(text||'').trim()) { if(callback) callback(null, new Error('Missing params')); return; }
         var me = meData() || {};
+        var cleanText = text.trim();
         addDoc(collection(db, 'stories', storyId, 'replies'), {
           storyId: storyId,
           ownerId: ownerId || '',
@@ -1935,10 +1949,20 @@
           authorId: user.uid,
           authorName: me.name || user.displayName || 'GeoHub User',
           authorAvatar: me.avatar || user.photoURL || '',
-          text: text.trim(),
+          text: cleanText,
           createdAt: serverTimestamp()
-        }).then(function(){ if(callback) callback(); })
-          .catch(function(err){ console.warn('[GeoSocial] addStoryReply', err.message); toast('Could not send reply.', 'error'); if(callback) callback(null, err); });
+        }).then(function(){
+          if(ownerId && ownerId !== user.uid) {
+            createNotification(
+              ownerId, 'story_reply',
+              (me.name || 'GeoHub User') + ' replied to your story',
+              cleanText.slice(0, 80),
+              'notifications.html',
+              { storyId: storyId }
+            ).catch(function(){});
+          }
+          if(callback) callback();
+        }).catch(function(err){ console.warn('[GeoSocial] addStoryReply', err.message); toast('Could not send reply.', 'error'); if(callback) callback(null, err); });
       });
     }
 

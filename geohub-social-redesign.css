@@ -1964,3 +1964,14 @@ html[data-gh-theme="light"] .gh-cmp-tool.active{background:rgba(16,185,129,.1)}
   .gh-story-react-btn{width:40px;height:40px;font-size:1.15rem}
   .gh-story-reply-input{font-size:.82rem}
 }
+
+/* Bell panel notification avatar + type-badge */
+.gh-notif-av{position:relative;width:40px;height:40px;flex-shrink:0}
+.gh-notif-av-wrap{width:40px;height:40px;border-radius:50%;overflow:hidden;background:var(--gh-card,#111827);display:flex;align-items:center;justify-content:center}
+.gh-notif-av-img{width:40px;height:40px;object-fit:cover;display:block}
+.gh-notif-av-fb{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;background:var(--gh-card-soft,rgba(255,255,255,.08));color:var(--gh-text,#f8fafc)}
+.gh-notif-av-badge{position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:#fff;border:2px solid var(--gh-card,#111827)}
+.gh-notif-body{flex:1;min-width:0}
+.gh-notif-body strong{display:block;font-size:.84rem;line-height:1.3;color:var(--gh-text,#f8fafc)}
+.gh-notif-sub{display:block;font-size:.74rem;color:var(--gh-muted,#9ca3af);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.gh-notif-time{display:block;font-size:.7rem;color:var(--gh-muted,#6b7280);margin-top:1px}

@@ -638,14 +638,20 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   var GH_NOTIF_ICONS = {
-    like:      { icon: 'fa-heart',    color: '#ef4444' },
-    comment:   { icon: 'fa-comment',  color: '#3b82f6' },
-    reply:     { icon: 'fa-reply',    color: '#8b5cf6' },
-    follow:    { icon: 'fa-user-plus',color: '#10b981' },
-    message:   { icon: 'fa-envelope', color: '#06b6d4' },
-    reward:    { icon: 'fa-gift',     color: '#f59e0b' },
-    badge:     { icon: 'fa-medal',    color: '#f59e0b' },
-    challenge: { icon: 'fa-trophy',   color: '#f59e0b' }
+    like:            { icon: 'fa-heart',       color: '#ef4444' },
+    comment:         { icon: 'fa-comment',     color: '#3b82f6' },
+    reply:           { icon: 'fa-reply',       color: '#8b5cf6' },
+    follow:          { icon: 'fa-user-plus',   color: '#10b981' },
+    message:         { icon: 'fa-envelope',    color: '#06b6d4' },
+    reward:          { icon: 'fa-gift',        color: '#f59e0b' },
+    badge:           { icon: 'fa-medal',       color: '#f59e0b' },
+    challenge:       { icon: 'fa-trophy',      color: '#f59e0b' },
+    story_reply:     { icon: 'fa-film',        color: '#ec4899' },
+    story_reaction:  { icon: 'fa-star',        color: '#f97316' },
+    friend_request:  { icon: 'fa-user-clock',  color: '#10b981' },
+    friend_accept:   { icon: 'fa-handshake',   color: '#22d3ee' },
+    points_received: { icon: 'fa-coins',       color: '#eab308' },
+    quote:           { icon: 'fa-file-invoice',color: '#6366f1' }
   };
 
   function openNotifications(){
@@ -661,9 +667,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(!visibleNotifs.length){ box.innerHTML='<div class="gh-empty"><i class="fas fa-bell"></i><h3>No notifications</h3><p>Likes, comments, messages and requests will appear here.</p></div>'; return; }
         box.innerHTML='<div class="gh-mini-list">'+visibleNotifs.slice(0,30).map(function(n){
           var ic=GH_NOTIF_ICONS[n.type]||{icon:'fa-bell',color:'#10b981'};
-          return '<a class="gh-mini-item '+(!n.read?'unread':'')+'" href="'+esc(n.href||'feed.html')+'" data-notif="'+esc(n.id)+'">'+
-            '<span class="gh-mini-thumb" style="color:'+ic.color+'"><i class="fas '+ic.icon+'"></i></span>'+
-            '<div><strong>'+esc(n.title||'GeoHub')+'</strong><span>'+esc(n.body||n.message||'')+' · '+timeAgo(n.createdAt)+'</span></div></a>';
+          var bAv=n.fromAvatar||''; var bInit=((n.fromName||'G')[0]||'G').toUpperCase();
+          var bAvHtml=bAv
+            ?'<img class="gh-notif-av-img" src="'+esc(bAv)+'" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'
+              +'<div class="gh-notif-av-fb" style="display:none">'+esc(bInit)+'</div>'
+            :'<div class="gh-notif-av-fb">'+esc(bInit)+'</div>';
+          return '<a class="gh-mini-item '+(!n.read?'unread':'')+'" href="'+esc(n.href||'notifications.html')+'" data-notif="'+esc(n.id)+'">'
+            +'<div class="gh-notif-av"><div class="gh-notif-av-wrap">'+bAvHtml+'</div>'
+            +'<span class="gh-notif-av-badge" style="background:'+ic.color+'"><i class="fas '+ic.icon+'"></i></span></div>'
+            +'<div class="gh-notif-body"><strong>'+esc(n.title||'GeoHub')+'</strong>'
+            +'<span class="gh-notif-sub">'+esc((n.body||n.message||'').slice(0,60))+'</span>'
+            +'<span class="gh-notif-time">'+timeAgo(n.createdAt)+'</span></div></a>';
         }).join('')+'</div>';
         $all('[data-notif]').forEach(function(a){
           a.addEventListener('click', function(){
@@ -1307,7 +1321,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             if(GS().removeStoryReaction) GS().removeStoryReaction(st.id);
           } else {
             _myReactions[st.id] = em;
-            if(GS().addStoryReaction) GS().addStoryReaction(st.id, em);
+            if(GS().addStoryReaction) GS().addStoryReaction(st.id, st.authorId || '', em);
           }
           overlay.querySelectorAll('[data-story-react]').forEach(function(b){
             b.classList.toggle('active', _myReactions[st.id] === b.dataset.storyReact);
@@ -5102,22 +5116,30 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   var NP_ICONS = {
-    like:      { icon: 'fa-heart',    color: '#ef4444' },
-    comment:   { icon: 'fa-comment',  color: '#3b82f6' },
-    reply:     { icon: 'fa-reply',    color: '#8b5cf6' },
-    follow:    { icon: 'fa-user-plus',color: '#10b981' },
-    message:   { icon: 'fa-envelope', color: '#06b6d4' },
-    reward:    { icon: 'fa-gift',     color: '#f59e0b' },
-    badge:     { icon: 'fa-medal',    color: '#f59e0b' },
-    challenge: { icon: 'fa-trophy',   color: '#f59e0b' }
+    like:            { icon: 'fa-heart',       color: '#ef4444' },
+    comment:         { icon: 'fa-comment',     color: '#3b82f6' },
+    reply:           { icon: 'fa-reply',       color: '#8b5cf6' },
+    follow:          { icon: 'fa-user-plus',   color: '#10b981' },
+    message:         { icon: 'fa-envelope',    color: '#06b6d4' },
+    reward:          { icon: 'fa-gift',        color: '#f59e0b' },
+    badge:           { icon: 'fa-medal',       color: '#f59e0b' },
+    challenge:       { icon: 'fa-trophy',      color: '#f59e0b' },
+    story_reply:     { icon: 'fa-film',        color: '#ec4899' },
+    story_reaction:  { icon: 'fa-star',        color: '#f97316' },
+    friend_request:  { icon: 'fa-user-clock',  color: '#10b981' },
+    friend_accept:   { icon: 'fa-handshake',   color: '#22d3ee' },
+    points_received: { icon: 'fa-coins',       color: '#eab308' },
+    quote:           { icon: 'fa-file-invoice',color: '#6366f1' }
   };
   var NP_FILTERS = [
-    { key: 'all', label: 'All' },
-    { key: 'like', label: 'Likes' },
+    { key: 'all',     label: 'All' },
+    { key: 'like',    label: 'Likes' },
     { key: 'comment', label: 'Comments' },
-    { key: 'follow', label: 'Follows' },
+    { key: 'reply',   label: 'Replies' },
+    { key: 'follow',  label: 'Follows' },
     { key: 'message', label: 'Messages' },
-    { key: 'reward', label: 'Rewards' }
+    { key: 'story',   label: 'Stories',  types: ['story_reply', 'story_reaction'] },
+    { key: 'reward',  label: 'Rewards',  types: ['reward', 'badge', 'challenge', 'points_received'] }
   ];
 
   function npTimeAgo(ts) {
@@ -5166,7 +5188,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
     function npRender() {
       var box = $('#npList'); if (!box) return;
-      var filtered = npFilter === 'all' ? npItems : npItems.filter(function(n){ return n.type === npFilter; });
+      var currentNpF = NP_FILTERS.find(function(f){ return f.key === npFilter; });
+      var filtered = npFilter === 'all' ? npItems : npItems.filter(function(n){
+        if(currentNpF && currentNpF.types) return currentNpF.types.indexOf(n.type) !== -1;
+        return n.type === npFilter;
+      });
       if (!filtered.length) {
         box.innerHTML = '<div class="np-empty"><i class="fas fa-bell"></i><h3>No notifications</h3><p>' + (npFilter === 'all' ? 'Likes, comments, follows and rewards will appear here.' : 'No ' + npFilter + ' notifications yet.') + '</p></div>';
         return;
@@ -5182,8 +5208,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '<div class="np-group-label">' + esc(label) + '</div>' +
           groups[label].map(function(n) {
             var ic = NP_ICONS[n.type] || { icon: 'fa-bell', color: '#10b981' };
-            return '<a class="np-item' + (!n.read ? ' unread' : '') + '" href="' + esc(n.href || '#') + '" data-np-id="' + esc(n.id) + '">' +
-              '<div class="np-item-icon" style="background:' + ic.color + '22;color:' + ic.color + '"><i class="fas ' + ic.icon + '"></i></div>' +
+            var npAv = n.fromAvatar || '';
+            var npInit = ((n.fromName || 'G')[0] || 'G').toUpperCase();
+            var npAvHtml = npAv
+              ? '<img class="np-item-av-img" src="' + esc(npAv) + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'
+                + '<div class="np-item-av-fb" style="display:none">' + esc(npInit) + '</div>'
+              : '<div class="np-item-av-fb">' + esc(npInit) + '</div>';
+            return '<a class="np-item' + (!n.read ? ' unread' : '') + '" href="' + esc(n.href || 'notifications.html') + '" data-np-id="' + esc(n.id) + '">' +
+              '<div class="np-item-av"><div class="np-item-av-wrap">' + npAvHtml + '</div>' +
+              '<span class="np-item-av-badge" style="background:' + ic.color + '"><i class="fas ' + ic.icon + '"></i></span></div>' +
               '<div class="np-item-body">' +
                 '<div class="np-item-title">' + esc(n.title || 'GeoHub') + '</div>' +
                 '<div class="np-item-sub">' + esc(n.body || n.message || '') + '</div>' +
