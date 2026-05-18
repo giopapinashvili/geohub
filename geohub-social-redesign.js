@@ -2570,6 +2570,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function feedRightSidebar(){
     return '<div id="ghFeedRight">'+
       '<div class="gh-panel gh-right-widget" id="ghOnlineFriendsPanel"><div class="gh-section-title"><h3><i class="fas fa-circle" style="color:#22c55e;font-size:.55rem"></i> Online Friends</h3></div><div id="ghOnlineFriendsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghPymkPanel"><div class="gh-section-title"><h3>People You May Know</h3><a class="gh-small" href="search.html">Find people</a></div><div id="ghPymkList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghCreatorPanel"><div class="gh-section-title"><h3>Featured Creators</h3><a class="gh-small" href="creators.html">All</a></div><div id="ghCreatorList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Suggested Pages</h3><a class="gh-small" href="business.html">All</a></div><div id="ghSuggestedPages"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Contacts</h3></div><input class="gh-input" id="ghContactsSearch" placeholder="Search contacts…" style="margin-bottom:8px"><div id="ghContactsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
     '</div>';
@@ -2594,6 +2596,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           if(onlineBox) onlineBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see online contacts</div>';
           if(pagesBox) pagesBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see suggestions</div>';
           if(contactsBox) contactsBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see contacts</div>';
+          var pymkBox=$('#ghPymkList'); if(pymkBox) pymkBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see suggestions</div>';
+          var crBox=$('#ghCreatorList'); if(crBox) crBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see creators</div>';
           return;
         }
 
@@ -2627,8 +2631,61 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         }).catch(function(){ var box=$('#ghSuggestedPages'); if(box) box.innerHTML='<div class="gh-muted" style="font-size:.82rem">Suggested pages unavailable</div>'; });
 
         loadContactsList(u.uid);
+        loadPymkWidget(u.uid);
+        loadCreatorWidget(u.uid);
       });
     });
+  }
+
+  function loadPymkWidget(uid){
+    var box=$('#ghPymkList'); if(!box) return;
+    if(!fs()||!db()){ box.innerHTML=''; var p=$('#ghPymkPanel'); if(p) p.style.display='none'; return; }
+    fs().getDocs(fs().query(fs().collection(db(),'users'), fs().orderBy('followerCount','desc'), fs().limit(12))).then(function(snap){
+      var people=[];
+      snap.forEach(function(d){ if(d.id===uid) return; var data=d.data()||{}; people.push({id:d.id, fullName:data.fullName||data.displayName||data.name||'GeoHub User', avatar:data.avatar||data.photoURL||'', city:data.city||'', accountType:data.accountType||''}); });
+      if(!people.length){ var p=$('#ghPymkPanel'); if(p) p.style.display='none'; return; }
+      var shown=people.slice(0,5);
+      box.innerHTML='<div class="gh-mini-list">'+shown.map(function(p){
+        var name=esc(p.fullName);
+        var avHtml=p.avatar ? '<img src="'+esc(p.avatar)+'" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.onerror=null;this.parentNode.innerHTML=\'<span style=&quot;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6d3fd9,#10b981);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:700;flex-shrink:0&quot;>'+esc(initials(p.fullName))+'</span>\'">' : '<span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6d3fd9,#10b981);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:700;flex-shrink:0">'+esc(initials(p.fullName))+'</span>';
+        var creatorChip=p.accountType==='creator'?'<span style="font-size:.62rem;color:#10b981;font-weight:700;margin-left:4px">● Creator</span>':'';
+        return '<div class="gh-mini-item" style="gap:8px">'+
+          '<a href="profile.html?id='+esc(p.id)+'" style="flex-shrink:0;line-height:0">'+avHtml+'</a>'+
+          '<div style="flex:1;min-width:0;overflow:hidden"><div style="font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+name+creatorChip+'</div><div style="font-size:.72rem;color:var(--gh-muted)">'+esc(p.city||'Georgia')+'</div></div>'+
+          '<button class="gh-btn sm ghost gh-pymk-btn" data-pymk-uid="'+esc(p.id)+'" style="flex-shrink:0;padding:4px 8px;font-size:.72rem">Follow</button>'+
+          '</div>';
+      }).join('')+'</div>';
+      Array.from(box.querySelectorAll('.gh-pymk-btn')).forEach(function(btn){
+        btn.onclick=function(){
+          var tid=btn.dataset.pymkUid;
+          if(!GS()||!GS().toggleFollow){ return; }
+          GS().toggleFollow(tid,function(isNow){
+            btn.textContent=isNow?'Following':'Follow';
+            btn.classList.toggle('gh-btn-active',!!isNow);
+          });
+        };
+      });
+    }).catch(function(){ var p=$('#ghPymkPanel'); if(p) p.style.display='none'; });
+  }
+
+  function loadCreatorWidget(uid){
+    var box=$('#ghCreatorList'); if(!box) return;
+    if(!fs()||!db()){ box.innerHTML=''; var p=$('#ghCreatorPanel'); if(p) p.style.display='none'; return; }
+    fs().getDocs(fs().query(fs().collection(db(),'users'), fs().where('accountType','==','creator'), fs().limit(8))).then(function(snap){
+      var creators=[];
+      snap.forEach(function(d){ if(d.id===uid) return; var data=d.data()||{}; creators.push({id:d.id, fullName:data.fullName||data.displayName||data.name||'Creator', avatar:data.avatar||data.photoURL||'', city:data.city||'', niche:data.niche||data.creatorNiche||data.category||''}); });
+      if(!creators.length){ var p=$('#ghCreatorPanel'); if(p) p.style.display='none'; return; }
+      var shown=creators.slice(0,4);
+      box.innerHTML='<div class="gh-mini-list">'+shown.map(function(c){
+        var name=esc(c.fullName);
+        var avHtml=c.avatar ? '<img src="'+esc(c.avatar)+'" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.onerror=null;this.parentNode.innerHTML=\'<span style=&quot;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#ec4899,#f59e0b);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:700;flex-shrink:0&quot;>'+esc(initials(c.fullName))+'</span>\'">' : '<span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#ec4899,#f59e0b);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:700;flex-shrink:0">'+esc(initials(c.fullName))+'</span>';
+        return '<div class="gh-mini-item" style="gap:8px">'+
+          '<a href="profile.html?id='+esc(c.id)+'" style="flex-shrink:0;line-height:0">'+avHtml+'</a>'+
+          '<div style="flex:1;min-width:0;overflow:hidden"><div style="font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+name+'</div><div style="font-size:.72rem;color:var(--gh-muted)">'+esc(c.niche||c.city||'Creator')+'</div></div>'+
+          '<a href="profile.html?id='+esc(c.id)+'" class="gh-btn sm ghost" style="flex-shrink:0;padding:4px 8px;font-size:.72rem">View</a>'+
+          '</div>';
+      }).join('')+'</div>';
+    }).catch(function(){ var p=$('#ghCreatorPanel'); if(p) p.style.display='none'; });
   }
 
   function loadContactsList(uid){

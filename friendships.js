@@ -392,13 +392,14 @@
     container.innerHTML = '<div style="color:var(--gh-muted,#64748b);font-size:.82rem;padding:12px">Loading suggestions…</div>';
     getSuggestions(function (people) {
       if (!people.length) {
-        container.innerHTML = '<div style="color:var(--gh-muted,#64748b);font-size:.82rem;padding:12px">No suggestions yet. Add more friends to get suggestions.</div>';
+        container.innerHTML = '<div style="color:var(--gh-muted,#64748b);font-size:.82rem;padding:12px">No suggestions yet. Connect with more people to get suggestions.</div>';
         return;
       }
       container.innerHTML = people.map(function (p) {
+        var initial = esc((p.fullName || 'U').charAt(0).toUpperCase());
         var avatarHtml = p.avatar
-          ? '<img src="' + esc(p.avatar) + '" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:cover">'
-          : '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#6d3fd9,#10b981);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.85rem">' + esc((p.fullName || 'U').charAt(0).toUpperCase()) + '</div>';
+          ? '<img src="' + esc(p.avatar) + '" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:cover" onerror="this.onerror=null;this.src=\'data:image/svg+xml,<svg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'40\\\' height=\\\'40\\\'><circle cx=\\\'20\\\' cy=\\\'20\\\' r=\\\'20\\\' fill=\\\'%236d3fd9\\\'/><text x=\\\'50%25\\\' y=\\\'50%25\\\' dy=\\\'.35em\\\' text-anchor=\\\'middle\\\' fill=\\\'%23fff\\\' font-family=\\\'sans-serif\\\' font-weight=\\\'bold\\\' font-size=\\\'16\\\'>'+initial+'</text></svg>\'">'
+          : '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#6d3fd9,#10b981);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.85rem">' + initial + '</div>';
         return '<div class="pymk-card" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--gh-border,rgba(255,255,255,.07))">'
           + '<a href="profile.html?id=' + encodeURIComponent(p.uid) + '" style="flex-shrink:0">' + avatarHtml + '</a>'
           + '<div style="flex:1;min-width:0">'
@@ -409,14 +410,22 @@
           + '</div>';
       }).join('');
 
-      // Wire add buttons
+      // Wire add buttons — use GeoSocial so doc IDs match listenFriendshipStatus
       Array.from(container.querySelectorAll('.pymk-add-btn')).forEach(function (btn) {
         btn.addEventListener('click', function () {
           var uid = btn.dataset.pymkUid;
-          sendRequest(uid);
-          btn.textContent = 'Sent';
-          btn.disabled = true;
-          btn.style.opacity = '0.6';
+          if (window.GeoSocial && window.GeoSocial.sendFriendRequest) {
+            window.GeoSocial.sendFriendRequest(uid, function (state) {
+              btn.textContent = (state === 'friends') ? 'Friends' : 'Sent';
+              btn.disabled = true;
+              btn.style.opacity = '0.6';
+            });
+          } else {
+            sendRequest(uid);
+            btn.textContent = 'Sent';
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+          }
         });
       });
     });

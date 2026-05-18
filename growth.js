@@ -34,7 +34,7 @@
       snap.forEach(function (doc) {
         if (doc.id !== uid && results.length < maxItems) {
           var d = doc.data();
-          results.push({ id: doc.id, displayName: d.displayName, fullName: d.fullName, photoURL: d.photoURL, city: d.city, followerCount: d.followerCount || 0 });
+          results.push({ id: doc.id, displayName: d.displayName, fullName: d.fullName, photoURL: d.avatar || d.photoURL, city: d.city, followerCount: d.followerCount || 0 });
         }
       });
       return results;
@@ -89,7 +89,7 @@
       var results = [];
       snap.forEach(function (doc) {
         var d = doc.data();
-        results.push({ id: doc.id, displayName: d.displayName, fullName: d.fullName, photoURL: d.photoURL, city: d.city, followerCount: d.followerCount || 0 });
+        results.push({ id: doc.id, displayName: d.displayName, fullName: d.fullName, photoURL: d.avatar || d.photoURL, city: d.city, followerCount: d.followerCount || 0 });
       });
       return results;
     });
@@ -133,14 +133,14 @@
             var name = safeEsc(u.displayName || u.fullName || 'User');
             var loc  = u.city ? safeEsc(u.city) : 'Georgia';
             return '<div class="growth-person-card">' +
-              '<a href="profile.html?uid=' + safeEsc(u.id) + '" class="growth-person-link">' +
+              '<a href="profile.html?id=' + safeEsc(u.id) + '" class="growth-person-link">' +
                 avatarHtml(u) +
                 '<div class="growth-person-info">' +
                   '<div class="growth-person-name">' + name + '</div>' +
                   '<div class="growth-person-meta">' + loc + ' · ' + (u.followerCount || 0) + ' followers</div>' +
                 '</div>' +
               '</a>' +
-              '<a href="profile.html?uid=' + safeEsc(u.id) + '" class="growth-follow-btn">Follow</a>' +
+              '<a href="profile.html?id=' + safeEsc(u.id) + '" class="growth-follow-btn">Follow</a>' +
             '</div>';
           }).join('') +
         '</div>';
@@ -224,7 +224,7 @@
           users.map(function (u, i) {
             var name = safeEsc(u.displayName || u.fullName || 'User');
             return '<div class="growth-person-card">' +
-              '<a href="profile.html?uid=' + safeEsc(u.id) + '" class="growth-person-link">' +
+              '<a href="profile.html?id=' + safeEsc(u.id) + '" class="growth-person-link">' +
                 '<span class="growth-rank" style="margin-right:10px">' + (i + 1) + '</span>' +
                 avatarHtml(u) +
                 '<div class="growth-person-info">' +
