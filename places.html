@@ -433,7 +433,8 @@
     if(_unsubPlaces){ _unsubPlaces(); _unsubPlaces=null; }
     function run(){
       var GS = window.GeoSocial;
-      if(!GS){ setTimeout(run,200); return; }
+      var gf = window.GeoFirebase;
+      if(!GS || !gf || !gf.db){ setTimeout(run,200); return; }
       _unsubPlaces = GS.listenPlaces({ category: _currentCat }, function(places){
         _allPlaces = places;
         loadSavedIds(function(){ renderGrid(places); });
@@ -708,18 +709,24 @@
   });
 
   // ── INIT ─────────────────────────────────────────────────────────────────
-  function init(){
+  // GeoSocialReady fires twice: once for the stub, once for the real implementation.
+  // We only run the full init when Firebase DB is genuinely available.
+  var _initDone = false;
+  function tryInit(){
+    if(_initDone) return;
+    var gf = window.GeoFirebase;
+    if(!gf || !gf.db) return; // stub phase — skip
+    _initDone = true;
+    loadPlaces();
     var urlId = new URLSearchParams(location.search).get('id');
     if(urlId) openPlaceDetail(urlId);
-    loadPlaces();
-    var gf = window.GeoFirebase;
-    if(gf&&gf.auth&&gf.auth.onAuthStateChanged){
+    if(gf.auth && gf.auth.onAuthStateChanged){
       gf.auth.onAuthStateChanged(function(user){ if(user) loadSavedIds(function(){ renderGrid(_allPlaces); }); });
     }
   }
 
-  if(window.GeoSocial) init();
-  else window.addEventListener('GeoSocialReady', init, {once:true});
+  window.addEventListener('GeoSocialReady', tryInit);
+  tryInit(); // in case GeoSocial+Firebase are already ready
 
   window.addEventListener('pagehide', function(){
     if(_unsubPlaces){ try{ _unsubPlaces(); }catch(e){} _unsubPlaces=null; }
