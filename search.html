@@ -305,13 +305,14 @@
         if (item.mediaUrl || (Array.isArray(item.mediaUrls) && item.mediaUrls.length)) extra = 'Has media';
         badge = 'Post'; badgeClass = 'sr-badge-post';
       } else if (type === 'service') {
-        href = 'services.html';
+        var _svcBizId = item.businessId || item.bizId || '';
+        href = _svcBizId ? 'business.html?id=' + encodeURIComponent(_svcBizId) : 'services.html';
         av   = item.image || '';
         name = item.name || item.title || 'Service';
         sub  = item.category || item.description || 'Service';
         badge = 'Service'; badgeClass = 'sr-badge-service';
       } else if (type === 'creator') {
-        href = 'creators.html?id=' + encodeURIComponent(item.id || '');
+        href = 'profile.html?id=' + encodeURIComponent(item.uid || item.id || '');
         av   = item.avatar || item.photoURL || '';
         name = item.name || item.displayName || 'Creator';
         sub  = '@' + (item.username || item.id || '') + (item.category ? ' · ' + item.category : ' · Creator');
