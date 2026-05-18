@@ -33,11 +33,22 @@
     try { return JSON.parse(localStorage.getItem(ACTOR_KEY) || 'null'); } catch(e) { return null; }
   }
 
+  function swToast(msg) {
+    if (window.GeoSocial && window.GeoSocial.toast) { window.GeoSocial.toast(msg); return; }
+    var old = document.querySelector('.gh-toast'); if (old) old.remove();
+    var el = document.createElement('div'); el.className = 'gh-toast'; el.textContent = msg;
+    document.body.appendChild(el);
+    requestAnimationFrame(function(){ el.classList.add('show'); });
+    setTimeout(function(){ el.classList.remove('show'); setTimeout(function(){ if(el.parentNode) el.remove(); }, 250); }, 2300);
+  }
+
   function setActiveActor(actor) {
     try { localStorage.setItem(ACTOR_KEY, JSON.stringify(actor)); } catch(e) {}
     updateNavbarForActor(actor);
     window.dispatchEvent(new CustomEvent('GeoActorChanged', { detail: actor }));
     close();
+    if (actor && actor.type === 'business') swToast('Switched to ' + (actor.title || 'Business'));
+    else swToast('Switched back to personal account');
   }
 
   function updateNavbarForActor(actor) {
@@ -136,13 +147,16 @@
       ? '<img src="'+esc(_user.photoURL)+'" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">'
       : esc((_user.displayName || _user.email || 'U').charAt(0).toUpperCase());
 
+    var _curActor = getActiveActor();
+    var isPersonalActive = !_curActor || _curActor.type !== 'business';
     var profileSection =
       '<a class="geo-sw-profile" href="profile.html">'+
         '<div class="geo-sw-profile-avatar">'+avatarContent+'</div>'+
-        '<div>'+
+        '<div style="flex:1;min-width:0">'+
           '<div class="geo-sw-profile-name">'+esc(_user.displayName || (_user.email||'').split('@')[0] || 'User')+'</div>'+
           '<div class="geo-sw-profile-email">'+esc(_user.email||'')+'</div>'+
         '</div>'+
+        (isPersonalActive ? '<span class="geo-sw-owner-pill" style="background:#10b981;color:#fff;flex-shrink:0">Active</span>' : '')+
       '</a>';
 
     // Friend requests section

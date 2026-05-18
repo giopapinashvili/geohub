@@ -594,7 +594,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div class="gh-pmb-actions">'+
           '<a class="gh-pmb-action" href="business.html?id='+encodeURIComponent(_actor.businessId)+'" title="View Page"><i class="fas fa-arrow-up-right-from-square"></i> View Page</a>'+
           '<a class="gh-pmb-action" href="messages.html?business='+encodeURIComponent(_actor.businessId)+'" title="Business Inbox"><i class="fas fa-comment-dots"></i> Inbox</a>'+
-          '<button class="gh-pmb-switch" onclick="(function(){try{localStorage.removeItem(\'gh_active_actor\');}catch(e){}window.dispatchEvent(new CustomEvent(\'GeoActorChanged\',{detail:{type:\'user\'}}));})()">Switch Back</button>'+
+          '<button class="gh-pmb-switch" onclick="if(window._geoSW&&window._geoSW.switchToUser){window._geoSW.switchToUser();}else{try{localStorage.removeItem(\'gh_active_actor\');}catch(e){}window.dispatchEvent(new CustomEvent(\'GeoActorChanged\',{detail:{type:\'user\'}}));}">Switch Back</button>'+
         '</div>'+
       '</div>';
     } else {
@@ -2242,7 +2242,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if ($('#ghShareModal')) $('#ghShareModal').remove();
         if (GS().trackShare) GS().trackShare(pid);
         toast('Shared to your feed!');
-      }, { sharedPostId: pid, visibility: $('#ghShareVisibility').value });
+      }, Object.assign({ sharedPostId: pid, visibility: $('#ghShareVisibility').value }, buildActorExtra()));
     };
   }
 
