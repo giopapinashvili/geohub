@@ -1,7 +1,7 @@
 
 (function(){
   'use strict';
-  var state = { tab: new URLSearchParams(location.search).get('tab') || 'store', wallet: null, rewards: [], coupons: [], gifts: [] };
+  var state = { tab: new URLSearchParams(location.search).get('tab') || 'store', wallet: null, rewards: [], coupons: [], gifts: [], sentGifts: [] };
   function $(s,r){return (r||document).querySelector(s)} function $all(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
   function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
   function compact(n){n=Number(n||0);return n>=1000?(n/1000).toFixed(n>=10000?0:1)+'k':String(n)}
@@ -36,7 +36,8 @@
     if(u && GS().listenWallet) GS().listenWallet(u.uid,function(w){state.wallet=w;updateWallet(); if(state.tab==='history'||state.tab==='send'||state.tab==='spend')paint();});
     else {state.wallet={balance:0,earned:0,received:0,sent:0,spent:0,redeemed:0,transactions:[]};updateWallet();}
     if(u && GS().listenMyCoupons) GS().listenMyCoupons(u.uid,function(c){state.coupons=c; if(state.tab==='coupons')paint();});
-    if(u && GS().listenIncomingGifts) GS().listenIncomingGifts(u.uid,function(g){state.gifts=g; if(state.tab==='history'||state.tab==='send')paint();});
+    if(u && GS().listenIncomingGifts) GS().listenIncomingGifts(u.uid,function(g){state.gifts=g; if(state.tab==='history')paint();});
+    if(u && GS().listenSentGifts) GS().listenSentGifts(u.uid,function(g){state.sentGifts=g; if(state.tab==='send')paint();});
     if(GS().listenRewards) GS().listenRewards(function(r){state.rewards=r; if(state.tab==='store')paint();});
     paint();
   }
@@ -99,10 +100,10 @@
   }
   function paintSend(box){
     if(!user()){box.innerHTML='<div class="gp-empty"><h2>Sign in to send GeoPoints</h2><a class="gp-btn" href="auth.html">Sign in</a></div>';return;}
-    var gifts=state.gifts||[];
-    box.innerHTML='<section class="gp-card" style="max-width:720px"><div class="gp-section-title"><h2>Send GeoPoints</h2><span class="gp-chip">Balance: '+compact((state.wallet||{}).balance||0)+' pts</span></div><div class="gp-form"><input class="gp-input" id="gpRecipient" placeholder="Recipient email, username or user id"><input class="gp-input" id="gpAmount" type="number" min="1" placeholder="Amount"><textarea class="gp-textarea" id="gpMessage" placeholder="Message, e.g. support for your content"></textarea><button class="gp-btn" id="gpSendBtn"><i class="fas fa-paper-plane"></i>Send Points</button></div><p style="color:var(--gp-muted);line-height:1.6;margin-top:16px">Points are sent as a gift — the recipient must open their History tab and tap <strong>Claim</strong> to receive them. Selling GeoPoints or requesting cash-out is not allowed.</p></section>'
-      +(gifts.length?'<div class="gp-section-title" style="margin-top:24px"><h2>Pending gifts you sent</h2><span class="gp-chip">'+gifts.length+' unclaimed</span></div><div class="gp-list">'
-        +gifts.map(function(g){return '<div class="gp-row"><div><strong>'+compact(g.amount||0)+' pts → '+esc(g.toName||'recipient')+'</strong><br><small>'+esc(g.message||'')+'</small></div><span class="gp-chip">Pending</span></div>';}).join('')+'</div>':'');
+    var sentGifts=state.sentGifts||[];
+    box.innerHTML='<section class="gp-card" style="max-width:720px"><div class="gp-section-title"><h2>Send GeoPoints</h2><span class="gp-chip">Balance: '+compact((state.wallet||{}).balance||0)+' pts</span></div><div class="gp-form"><input class="gp-input" id="gpRecipient" placeholder="Recipient email, username or user id"><input class="gp-input" id="gpAmount" type="number" min="1" placeholder="Amount"><textarea class="gp-textarea" id="gpMessage" placeholder="Message, e.g. support for your content"></textarea><button class="gp-btn" id="gpSendBtn"><i class="fas fa-paper-plane"></i>Send Points</button></div><p style="color:var(--gp-muted);line-height:1.6;margin-top:16px">Points are debited from your balance immediately. The recipient must open their <strong>History</strong> tab and tap <strong>Claim</strong> to receive them. Selling GeoPoints or requesting cash-out is not allowed.</p></section>'
+      +(sentGifts.length?'<div class="gp-section-title" style="margin-top:24px"><h2>Pending gifts you sent</h2><span class="gp-chip">'+sentGifts.length+' unclaimed</span></div><div class="gp-list">'
+        +sentGifts.map(function(g){return '<div class="gp-row"><div><strong>'+compact(g.amount||0)+' pts → '+esc(g.toName||'recipient')+'</strong><br><small>'+esc(g.message||'')+'</small></div><span class="gp-chip">Pending claim</span></div>';}).join('')+'</div>':'');
   }
   function sendPoints(){var btn=$('#gpSendBtn'); if(btn&&btn.disabled)return; var r=$('#gpRecipient').value.trim(), a=$('#gpAmount').value, m=$('#gpMessage').value; if(!r||!a)return toast('Recipient and amount are required','error'); if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>Sending…';} GS().sendPoints(r,a,m,function(ok){if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i>Send Points';} if(ok){$('#gpRecipient').value='';$('#gpAmount').value='';$('#gpMessage').value='';state.tab='history';paint();}});}
   function paintBoosts(box){

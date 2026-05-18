@@ -142,6 +142,7 @@
       listenMyCoupons: function(uid, cb){ cb([]); return function(){}; },
       listenPointTransactions: function(uid, cb){ cb([]); return function(){}; },
       listenIncomingGifts: function(uid, cb){ cb([]); return function(){}; },
+      listenSentGifts: function(uid, cb){ cb([]); return function(){}; },
       claimPointGift: function(id, cb){ if(cb) cb(false); },
       redeemCoupon: function(){ noop(); },
       findUserByInput: function () { return Promise.resolve(null); },
@@ -970,6 +971,17 @@
         rows.sort(function(a,b){ return tsToMillis(b.createdAt)-tsToMillis(a.createdAt); });
         callback(rows);
       }, function(err){ console.warn('[GeoSocial] listenIncomingGifts', err.message); callback([]); });
+    }
+
+    function listenSentGifts(uid, callback) {
+      uid = uid || currentUid();
+      if (!uid) { callback([]); return function(){}; }
+      var q = query(collection(db, 'pointGifts'), where('fromUserId', '==', uid), where('status', '==', 'pending'), limit(50));
+      return onSnapshot(q, function(snap){
+        var rows=[]; snap.forEach(function(d){ rows.push(Object.assign({ id:d.id }, d.data())); });
+        rows.sort(function(a,b){ return tsToMillis(b.createdAt)-tsToMillis(a.createdAt); });
+        callback(rows);
+      }, function(err){ console.warn('[GeoSocial] listenSentGifts', err.message); callback([]); });
     }
 
     function claimPointGift(giftId, callback) {
@@ -3200,6 +3212,7 @@
       redeemReward:            redeemReward,
       listenMyCoupons:         listenMyCoupons,
       listenIncomingGifts:     listenIncomingGifts,
+      listenSentGifts:         listenSentGifts,
       claimPointGift:          claimPointGift,
       redeemCoupon:            redeemCoupon,
       searchFirestore:         searchFirestore,
