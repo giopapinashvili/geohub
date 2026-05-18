@@ -1164,6 +1164,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var _paused = false;
     var _inputFocused = false;
     var _myReactions = {};
+    var _rxLoaded = {};
     var STORY_DUR = 5000;
 
     function clearTimer(){ if(_autoTimer){ clearTimeout(_autoTimer); _autoTimer=null; } }
@@ -1252,14 +1253,33 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button type="button" class="gh-story-nav next" aria-label="Next story">›</button>'+
         '</div>';
 
-      // Non-blocking view tracking (rules now allow onlyStoryViewFields)
+      // Non-blocking view tracking — owner excluded; viewCount only increments on first view
       var _fsSdk = window.GeoFirebase && window.GeoFirebase.fs;
       var _db = window.GeoFirebase && window.GeoFirebase.db;
-      if(_cu && st.id && _fsSdk && _db && _fsSdk.updateDoc && _fsSdk.doc){
-        _fsSdk.updateDoc(_fsSdk.doc(_db,'stories',st.id),{
-          viewedBy: _fsSdk.arrayUnion(_cu.uid),
-          viewCount: _fsSdk.increment(1)
-        }).catch(function(){});
+      if(_cu && st.id && !isOwner && _fsSdk && _db && _fsSdk.updateDoc && _fsSdk.doc){
+        var _alreadyViewed = Array.isArray(st.viewedBy) && st.viewedBy.indexOf(_cu.uid) !== -1;
+        var _viewUpdate = _alreadyViewed
+          ? { viewedBy: _fsSdk.arrayUnion(_cu.uid) }
+          : { viewedBy: _fsSdk.arrayUnion(_cu.uid), viewCount: _fsSdk.increment(1) };
+        _fsSdk.updateDoc(_fsSdk.doc(_db,'stories',st.id), _viewUpdate).catch(function(){});
+      }
+
+      // Load existing reaction for this story once per session; updates buttons when resolved
+      if(isSignedIn && st.id && !_rxLoaded[st.id] && _fsSdk && _db && _fsSdk.getDoc && _fsSdk.doc){
+        _rxLoaded[st.id] = true;
+        _fsSdk.getDoc(_fsSdk.doc(_db,'stories',st.id,'reactions',_cu.uid))
+          .then(function(d){
+            if(d && d.exists && d.exists()){
+              var em = (d.data()||{}).reaction || null;
+              if(em) _myReactions[st.id] = em;
+            }
+            var cur = groups[groupIndex] && groups[groupIndex].stories[storyIndex];
+            if(cur && cur.id === st.id){
+              overlay.querySelectorAll('[data-story-react]').forEach(function(b){
+                b.classList.toggle('active', _myReactions[st.id] === b.dataset.storyReact);
+              });
+            }
+          }).catch(function(){});
       }
 
       overlay.querySelector('.gh-story-close').onclick = close;
@@ -1308,12 +1328,20 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           e.stopPropagation();
           var text = replyInput ? replyInput.value.trim() : '';
           if(!text) return;
+          replySend.disabled = true;
+          var origIcon = replySend.innerHTML;
+          replySend.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
+          if(replyInput) replyInput.value = '';
           if(GS().addStoryReply){
             GS().addStoryReply(st.id, st.authorId, text, function(err){
-              if(!err) toast('Reply sent');
+              var btn = overlay.querySelector('#ghStRpSend');
+              if(btn){ btn.disabled = false; btn.innerHTML = origIcon; }
+              if(!err){ toast('Reply sent'); if(replyInput) replyInput.blur(); }
+              else if(replyInput){ replyInput.value = text; replyInput.focus(); }
             });
+          } else {
+            replySend.disabled = false; replySend.innerHTML = origIcon;
           }
-          if(replyInput){ replyInput.value=''; replyInput.blur(); }
         });
       }
 
