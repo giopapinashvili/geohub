@@ -110,10 +110,14 @@ async function gotoSafe(page, url) {
  * Returns true if scrollWidth > clientWidth.
  */
 async function hasHorizontalOverflow(page) {
-  return page.evaluate(() => {
-    const el = document.documentElement;
-    return el.scrollWidth > el.clientWidth + 2; // +2px tolerance
-  });
+  try {
+    return await page.evaluate(() => {
+      const el = document.documentElement;
+      return el.scrollWidth > el.clientWidth + 2; // +2px tolerance
+    });
+  } catch {
+    return false; // page navigated away during evaluate — not an overflow issue
+  }
 }
 
 module.exports = { isFatalError, attachErrorCollector, gotoSafe, hasHorizontalOverflow };

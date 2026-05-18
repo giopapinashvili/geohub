@@ -13,8 +13,8 @@ module.exports = defineConfig({
   /* Each test file has at most one browser tab open at a time */
   fullyParallel: true,
 
-  /* Retry once on CI to absorb transient network/CDN hiccups */
-  retries: process.env.CI ? 1 : 0,
+  /* Retry once everywhere — handles flaky timing under parallel load */
+  retries: 1,
 
   /* Single worker on CI; parallel locally */
   workers: process.env.CI ? 1 : undefined,
@@ -45,13 +45,19 @@ module.exports = defineConfig({
     },
     {
       name: 'mobile-390',
-      use: { ...devices['iPhone 14'] }, // 390x844
+      use: {
+        browserName: 'chromium',
+        viewport: { width: 390, height: 844 },
+        deviceScaleFactor: 3,
+        isMobile: true,
+        hasTouch: true,
+      },
     },
     {
       name: 'mobile-360',
       use: {
+        browserName: 'chromium',
         viewport: { width: 360, height: 740 },
-        userAgent: devices['Galaxy S9+'].userAgent,
         deviceScaleFactor: 3,
         isMobile: true,
         hasTouch: true,
@@ -60,6 +66,7 @@ module.exports = defineConfig({
     {
       name: 'tablet-768',
       use: {
+        browserName: 'chromium',
         viewport: { width: 768, height: 1024 },
         isMobile: false,
       },

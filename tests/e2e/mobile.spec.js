@@ -51,8 +51,8 @@ test.describe('Mobile layout — navbar visible and not duplicated', () => {
       await gotoSafe(page, url);
       await page.waitForTimeout(SETTLE_MS);
 
-      // auth.html typically has no navbar — skip the count check for it
-      if (url !== '/auth.html') {
+      // auth.html has no navbar; index.html uses a JS-rendered sidebar (not nav.navbar)
+      if (url !== '/auth.html' && url !== '/index.html') {
         const navCount = await page.locator('nav.navbar, nav[id="navbar"]').count();
         expect(navCount, `${url} must have exactly one .navbar`).toBe(1);
       }

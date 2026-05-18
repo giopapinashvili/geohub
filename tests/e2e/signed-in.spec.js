@@ -42,7 +42,7 @@ test.describe('Signed-in smoke tests', () => {
     const errors = attachErrorCollector(page);
     await gotoSafe(page, '/auth.html');
 
-    const emailInput    = page.locator('input[type="email"], #email').first();
+    const emailInput    = page.locator('#loginIdentifier, input[type="email"]').first();
     const passwordInput = page.locator('input[type="password"], #password').first();
     const submitBtn     = page.locator(
       'button[type="submit"], button:has-text("Sign in"), button:has-text("Log in"), .auth-submit'
@@ -67,7 +67,7 @@ test.describe('Signed-in smoke tests', () => {
     await page.goto('/auth.html', { waitUntil: 'domcontentloaded' });
 
     // Login
-    const emailInput = page.locator('input[type="email"], #email').first();
+    const emailInput = page.locator('#loginIdentifier, input[type="email"]').first();
     const passInput  = page.locator('input[type="password"], #password').first();
     const submit     = page.locator('button[type="submit"], .auth-submit').first();
     await emailInput.fill(TEST_EMAIL);
@@ -95,7 +95,7 @@ test.describe('Signed-in smoke tests', () => {
     const errors = attachErrorCollector(page);
     await page.goto('/auth.html', { waitUntil: 'domcontentloaded' });
 
-    const emailInput = page.locator('input[type="email"], #email').first();
+    const emailInput = page.locator('#loginIdentifier, input[type="email"]').first();
     const passInput  = page.locator('input[type="password"], #password').first();
     const submit     = page.locator('button[type="submit"], .auth-submit').first();
     await emailInput.fill(TEST_EMAIL);
@@ -132,7 +132,7 @@ test.describe('Signed-in smoke tests', () => {
     });
 
     await page.goto('/auth.html', { waitUntil: 'domcontentloaded' });
-    const emailInput = page.locator('input[type="email"], #email').first();
+    const emailInput = page.locator('#loginIdentifier, input[type="email"]').first();
     const passInput  = page.locator('input[type="password"], #password').first();
     const submit     = page.locator('button[type="submit"], .auth-submit').first();
     await emailInput.fill(TEST_EMAIL);

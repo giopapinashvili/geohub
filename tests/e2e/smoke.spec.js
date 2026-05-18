@@ -86,7 +86,9 @@ test.describe('Auth page functional checks', () => {
     await gotoSafe(page, '/auth.html');
     await page.waitForTimeout(SETTLE_MS);
 
-    const emailInput    = page.locator('input[type="email"], input[name="email"], #email').first();
+    // Login form uses type="text" for email/username (#loginIdentifier) — not type="email"
+    // The signup form has type="email" but is hidden by default
+    const emailInput    = page.locator('#loginIdentifier, input[type="email"]').first();
     const passwordInput = page.locator('input[type="password"], input[name="password"], #password').first();
 
     await expect(emailInput,    'email input present').toBeVisible({ timeout: 8_000 });
