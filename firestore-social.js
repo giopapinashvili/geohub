@@ -141,6 +141,8 @@
       redeemReward: function(){ noop(); },
       listenMyCoupons: function(uid, cb){ cb([]); return function(){}; },
       listenPointTransactions: function(uid, cb){ cb([]); return function(){}; },
+      listenIncomingGifts: function(uid, cb){ cb([]); return function(){}; },
+      claimPointGift: function(id, cb){ if(cb) cb(false); },
       redeemCoupon: function(){ noop(); },
       findUserByInput: function () { return Promise.resolve(null); },
       uploadImageDataUrl: function(dataUrl, folder, callback){ if(callback) callback(''); return Promise.resolve(''); },
@@ -694,69 +696,71 @@
       return (prefix || 'GH') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase() + '-' + Date.now().toString(36).slice(-5).toUpperCase();
     }
 
-    function computeWallet(transactions, targetUid) {
-      var uid = targetUid || currentUid();
-      var wallet = {
-        uid: uid || '', balance: 0, earned: 0, received: 0, sent: 0, spent: 0, redeemed: 0, refunded: 0,
-        transactions: (transactions || []).slice().sort(function(a, b){ return tsToMillis(b.createdAt) - tsToMillis(a.createdAt); })
-      };
-      wallet.transactions.forEach(function(tx){
-        var amount = normalAmount(tx.amount);
-        if (!amount) return;
-        var type = String(tx.type || '').toLowerCase();
-        var from = tx.fromUserId || tx.fromId || '';
-        var to = tx.toUserId || tx.toId || tx.userId || '';
-        if ((type === 'earn' || type === 'admin_adjustment') && to === uid) { wallet.earned += amount; wallet.balance += amount; }
-        else if (type === 'refund' && to === uid) { wallet.refunded += amount; wallet.balance += amount; }
-        else if (type === 'gift') {
-          if (from === uid) { wallet.sent += amount; wallet.balance -= amount; }
-          if (to === uid) { wallet.received += amount; wallet.balance += amount; }
-        } else if ((type === 'spend' || type === 'redeem') && from === uid) {
-          if (type === 'redeem') wallet.redeemed += amount;
-          else wallet.spent += amount;
-          wallet.balance -= amount;
-        }
-      });
-      wallet.balance = Math.max(0, wallet.balance);
-      return wallet;
-    }
-
-    function getWalletSnapshot(uid) {
-      uid = uid || currentUid();
-      if (!uid) return Promise.resolve(computeWallet([], ''));
-      return getDocs(query(collection(db, 'pointTransactions'), where('participantIds', 'array-contains', uid), limit(500)))
-        .then(function(snap){ var rows=[]; snap.forEach(function(d){ rows.push(Object.assign({ id:d.id }, d.data())); }); return computeWallet(rows, uid); })
-        .catch(function(err){ console.warn('[GeoSocial] getWalletSnapshot', err.message); return computeWallet([], uid); });
-    }
-
-    function listenWallet(uid, callback) {
-      uid = uid || currentUid();
-      if (!uid) { callback(computeWallet([], '')); return function(){}; }
-      var q = query(collection(db, 'pointTransactions'), where('participantIds', 'array-contains', uid), limit(500));
-      return onSnapshot(q, function(snap){
-        var rows=[]; snap.forEach(function(d){ rows.push(Object.assign({ id:d.id }, d.data())); });
-        callback(computeWallet(rows, uid));
-      }, function(err){ console.warn('[GeoSocial] listenWallet', err.message); callback(computeWallet([], uid)); });
-    }
-
-    function listenPointTransactions(uid, callback) {
-      return listenWallet(uid, function(wallet){ callback(wallet.transactions || []); });
-    }
-
     function walletRef(uid) {
       return doc(db, 'users', uid, 'private', 'wallet');
     }
 
+    function walletDocToObj(data, uid) {
+      data = data || {};
+      var credits = Math.max(0, Number(data.credits || 0));
+      var reservedDebits = Math.max(0, Number(data.reservedDebits || 0));
+      var received = Math.max(0, Number(data.received || 0));
+      var sent = Math.max(0, Number(data.sent || 0));
+      var spent = Math.max(0, Number(data.spent || 0));
+      var redeemed = Math.max(0, Number(data.redeemed || 0));
+      return {
+        uid: uid || '',
+        balance: Math.max(0, credits - reservedDebits),
+        credits: credits,
+        reservedDebits: reservedDebits,
+        earned: Math.max(0, credits - received),
+        received: received,
+        sent: sent,
+        spent: spent,
+        redeemed: redeemed,
+        transactions: []
+      };
+    }
+
+    function getWalletSnapshot(uid) {
+      uid = uid || currentUid();
+      var empty = walletDocToObj({}, uid || '');
+      if (!uid) return Promise.resolve(empty);
+      return getDoc(walletRef(uid))
+        .then(function(snap){ return walletDocToObj(snap.exists() ? snap.data() : {}, uid); })
+        .catch(function(err){ console.warn('[GeoSocial] getWalletSnapshot', err.message); return empty; });
+    }
+
+    function listenWallet(uid, callback) {
+      uid = uid || currentUid();
+      if (!uid) { callback(walletDocToObj({}, '')); return function(){}; }
+      return onSnapshot(walletRef(uid), function(snap){
+        callback(walletDocToObj(snap.exists() ? snap.data() : {}, uid));
+      }, function(err){ console.warn('[GeoSocial] listenWallet', err.message); callback(walletDocToObj({}, uid)); });
+    }
+
+    function listenPointTransactions(uid, callback) {
+      // pointTransactions is admin-only; transaction history is not available to clients on Spark plan
+      if (callback) callback([]);
+      return function(){};
+    }
+
     function ensureWalletSnapshot(uid) {
-      return getWalletSnapshot(uid).then(function(wallet){
+      uid = uid || currentUid();
+      if (!uid) return Promise.resolve({ credits: 0, reservedDebits: 0, sent: 0, spent: 0, received: 0, redeemed: 0, updatedAt: serverTimestamp() });
+      return getDoc(walletRef(uid)).then(function(snap){
+        var d = snap.exists() ? (snap.data() || {}) : {};
         return {
-          credits: Math.max(0, Number(wallet.earned || 0) + Number(wallet.received || 0)),
-          reservedDebits: Math.max(0, Number(wallet.sent || 0) + Number(wallet.spent || 0)),
-          sent: Math.max(0, Number(wallet.sent || 0)),
-          spent: Math.max(0, Number(wallet.spent || 0)),
-          received: Math.max(0, Number(wallet.received || 0)),
+          credits: Math.max(0, Number(d.credits || 0)),
+          reservedDebits: Math.max(0, Number(d.reservedDebits || 0)),
+          sent: Math.max(0, Number(d.sent || 0)),
+          spent: Math.max(0, Number(d.spent || 0)),
+          received: Math.max(0, Number(d.received || 0)),
+          redeemed: Math.max(0, Number(d.redeemed || 0)),
           updatedAt: serverTimestamp()
         };
+      }).catch(function(){
+        return { credits: 0, reservedDebits: 0, sent: 0, spent: 0, received: 0, redeemed: 0, updatedAt: serverTimestamp() };
       });
     }
 
@@ -794,40 +798,33 @@
           if (!target || !(target.uid || target.id)) throw new Error('recipient-not-found');
           var targetId = target.uid || target.id;
           if (targetId === user.uid) throw new Error('self-transfer');
-          return ensureWalletSnapshot(user.uid).then(function(initialWallet){
-            var txRef = doc(collection(db, 'pointTransactions'));
-            return runTransaction(db, function(tx){
-              return tx.get(walletRef(user.uid)).then(function(walletSnap){
-                var wallet = walletSnap.exists() ? (walletSnap.data() || {}) : initialWallet;
-                var credits = Math.max(Number(wallet.credits || 0), Number(initialWallet.credits || 0));
-                var reservedDebits = wallet.reservedDebits != null
-                  ? Math.max(0, Number(wallet.reservedDebits || 0))
-                  : Math.max(0, credits - Math.max(0, Number(wallet.balance || 0)));
-                if (credits - reservedDebits < n) throw new Error('insufficient-points');
-                tx.set(walletRef(user.uid), {
-                  credits: credits,
-                  reservedDebits: reservedDebits + n,
-                  sent: Math.max(Number(wallet.sent || 0), Number(initialWallet.sent || 0)) + n,
-                  updatedAt: serverTimestamp()
-                }, { merge: true });
-                tx.set(txRef, {
-              type: 'gift', amount: n,
-              fromUserId: user.uid, toUserId: targetId,
-              fromName: me.name || user.displayName || 'GeoHub User',
-              toName: target.fullName || target.displayName || target.name || target.email || 'GeoHub User',
-              participantIds: [user.uid, targetId],
-              message: String(message || '').slice(0, 240), reason: 'Gift points',
-              status: 'completed', createdAt: serverTimestamp()
-                });
-                return { ref: txRef, targetId: targetId };
+          var giftRef = doc(collection(db, 'pointGifts'));
+          return runTransaction(db, function(tx){
+            return tx.get(walletRef(user.uid)).then(function(walletSnap){
+              var wallet = walletSnap.exists() ? (walletSnap.data() || {}) : {};
+              var credits = Math.max(0, Number(wallet.credits || 0));
+              var reservedDebits = Math.max(0, Number(wallet.reservedDebits || 0));
+              if (credits - reservedDebits < n) throw new Error('insufficient-points');
+              tx.set(walletRef(user.uid), {
+                credits: credits,
+                reservedDebits: reservedDebits + n,
+                sent: Math.max(0, Number(wallet.sent || 0)) + n,
+                updatedAt: serverTimestamp()
+              }, { merge: true });
+              tx.set(giftRef, {
+                fromUserId: user.uid, toUserId: targetId, amount: n,
+                fromName: me.name || user.displayName || 'GeoHub User',
+                toName: target.fullName || target.displayName || target.name || target.email || 'GeoHub User',
+                message: String(message || '').slice(0, 240),
+                status: 'pending', createdAt: serverTimestamp()
               });
+              return targetId;
             });
           });
-        }).then(function(res){
+        }).then(function(targetId){
           updateDoc(doc(db, 'users', user.uid), { geoPointsSentTotal: increment(n), updatedAt: serverTimestamp() }).catch(function(){});
-          updateDoc(doc(db, 'users', res.targetId), { geoPointsReceivedTotal: increment(n), updatedAt: serverTimestamp() }).catch(function(){});
-          createNotification(res.targetId, 'points_received', (me.name || 'GeoHub User') + ' sent you ' + n + ' GeoPoints', message || 'You received GeoPoints.', 'rewards.html?tab=wallet', { amount: n });
-          toast('GeoPoints sent'); if(callback) callback(true, res.ref.id);
+          createNotification(targetId, 'points_received', (me.name || 'GeoHub User') + ' sent you ' + n + ' GeoPoints', message || 'Tap to claim your GeoPoints.', 'rewards.html?tab=wallet', { amount: n });
+          toast('GeoPoints sent — recipient must claim'); if(callback) callback(true);
         }).catch(function(err){
           var msg = err.message === 'recipient-not-found' ? 'Recipient not found' : err.message === 'self-transfer' ? 'You cannot send points to yourself' : err.message === 'insufficient-points' ? 'Not enough GeoPoints' : 'Could not send GeoPoints';
           toast(msg, 'error'); if(callback) callback(false, err);
@@ -839,32 +836,20 @@
       var n = normalAmount(amount);
       if (!n) { toast('Invalid GeoPoints amount', 'error'); if(callback) callback(false); return; }
       requireAuth(function(user){
-        ensureWalletSnapshot(user.uid).then(function(initialWallet){
-          var txRef = doc(collection(db, 'pointTransactions'));
-          return runTransaction(db, function(tx){
-            return tx.get(walletRef(user.uid)).then(function(walletSnap){
-              var wallet = walletSnap.exists() ? (walletSnap.data() || {}) : initialWallet;
-              var credits = Math.max(Number(wallet.credits || 0), Number(initialWallet.credits || 0));
-              var reservedDebits = wallet.reservedDebits != null
-                ? Math.max(0, Number(wallet.reservedDebits || 0))
-                : Math.max(0, credits - Math.max(0, Number(wallet.balance || 0)));
-              if (credits - reservedDebits < n) throw new Error('insufficient-points');
-              tx.set(walletRef(user.uid), {
-                credits: credits,
-                reservedDebits: reservedDebits + n,
-                spent: Math.max(Number(wallet.spent || 0), Number(initialWallet.spent || 0)) + n,
-                updatedAt: serverTimestamp()
-              }, { merge: true });
-              tx.set(txRef, {
-            type: 'spend', amount: n,
-            fromUserId: user.uid, toUserId: 'platform', participantIds: [user.uid],
-            reason: reason || 'GeoHub platform benefit', targetType: targetType || '', targetId: targetId || '',
-            status: 'completed', createdAt: serverTimestamp()
-              });
-              return txRef;
-            });
+        runTransaction(db, function(tx){
+          return tx.get(walletRef(user.uid)).then(function(walletSnap){
+            var wallet = walletSnap.exists() ? (walletSnap.data() || {}) : {};
+            var credits = Math.max(0, Number(wallet.credits || 0));
+            var reservedDebits = Math.max(0, Number(wallet.reservedDebits || 0));
+            if (credits - reservedDebits < n) throw new Error('insufficient-points');
+            tx.set(walletRef(user.uid), {
+              credits: credits,
+              reservedDebits: reservedDebits + n,
+              spent: Math.max(0, Number(wallet.spent || 0)) + n,
+              updatedAt: serverTimestamp()
+            }, { merge: true });
           });
-        }).then(function(ref){ updateDoc(doc(db, 'users', user.uid), { geoPointsSpentTotal: increment(n), updatedAt: serverTimestamp() }).catch(function(){}); toast('GeoPoints spent'); if(callback) callback(true, ref.id); })
+        }).then(function(){ updateDoc(doc(db, 'users', user.uid), { geoPointsSpentTotal: increment(n), updatedAt: serverTimestamp() }).catch(function(){}); toast('GeoPoints spent'); if(callback) callback(true); })
           .catch(function(err){ toast(err.message === 'insufficient-points' ? 'Not enough GeoPoints' : 'Could not spend GeoPoints', 'error'); if(callback) callback(false, err); });
       });
     }
@@ -906,49 +891,45 @@
 
     function redeemReward(rewardId, callback) {
       requireAuth(function(user){
-        var rewardRef = doc(db, 'rewards', rewardId);
-        getDoc(rewardRef).then(function(rewardSnap){
-          if (!rewardSnap.exists()) throw new Error('reward-not-found');
-          var reward = Object.assign({ id: rewardSnap.id }, rewardSnap.data());
-          var price = normalAmount(reward.pointPrice || reward.price || reward.points);
-          if (!price) throw new Error('invalid-price');
-          return getWalletSnapshot(user.uid).then(function(wallet){
-            if (wallet.balance < price) throw new Error('insufficient-points');
-            var couponRef = doc(collection(db, 'rewardCoupons'));
-            var txRef = doc(collection(db, 'pointTransactions'));
-            var code = couponCode('GH');
-            var participantIds = [user.uid];
-            if (!runTransaction) throw new Error('transactions-unavailable');
-            return runTransaction(db, function(tx){
-              return tx.get(rewardRef).then(function(rs){
-                if (!rs.exists()) throw new Error('reward-not-found');
-                var r = rs.data() || {};
-                var remaining = Number(r.quantityRemaining || 0);
-                if (remaining <= 0 && Number(r.quantityTotal || 0) > 0) throw new Error('sold-out');
-                if (Number(r.quantityTotal || 0) > 0) tx.update(rewardRef, { quantityRemaining: increment(-1), updatedAt: serverTimestamp() });
-                tx.set(couponRef, {
-                  rewardId: rewardId, userId: user.uid, businessId: r.businessId || '',
-                  rewardTitle: r.title || r.name || 'Reward', pointPrice: price,
-                  businessOwnerId: r.ownerId || r.createdBy || '',
-                  code: code, qrValue: code, status: 'active',
-                  createdAt: serverTimestamp(), expiresAt: r.expiresAt || ''
-                });
-                tx.set(txRef, {
-                  type: 'redeem', amount: price, fromUserId: user.uid, toUserId: r.businessId || 'partner',
-                  participantIds: participantIds, reason: 'Redeemed reward: ' + (r.title || r.name || rewardId),
-                  targetType: 'reward', targetId: rewardId, couponId: couponRef.id,
-                  status: 'completed', createdAt: serverTimestamp()
-                });
-              });
-            }).then(function(){ return { couponId: couponRef.id, code: code, reward: reward }; });
+        var rewardDocRef = doc(db, 'rewards', rewardId);
+        var couponRef = doc(collection(db, 'rewardCoupons'));
+        var code = couponCode('GH');
+        runTransaction(db, function(tx){
+          return Promise.all([tx.get(rewardDocRef), tx.get(walletRef(user.uid))]).then(function(results){
+            var rs = results[0]; var walletSnap = results[1];
+            if (!rs.exists()) throw new Error('reward-not-found');
+            var r = rs.data() || {};
+            var price = normalAmount(r.pointPrice || r.price || r.points);
+            if (!price) throw new Error('invalid-price');
+            var wallet = walletSnap.exists() ? (walletSnap.data() || {}) : {};
+            var credits = Math.max(0, Number(wallet.credits || 0));
+            var reservedDebits = Math.max(0, Number(wallet.reservedDebits || 0));
+            if (credits - reservedDebits < price) throw new Error('insufficient-points');
+            var remaining = Number(r.quantityRemaining || 0);
+            if (remaining <= 0 && Number(r.quantityTotal || 0) > 0) throw new Error('sold-out');
+            if (Number(r.quantityTotal || 0) > 0) tx.update(rewardDocRef, { quantityRemaining: increment(-1), updatedAt: serverTimestamp() });
+            tx.set(walletRef(user.uid), {
+              credits: credits,
+              reservedDebits: reservedDebits + price,
+              redeemed: Math.max(0, Number(wallet.redeemed || 0)) + price,
+              updatedAt: serverTimestamp()
+            }, { merge: true });
+            tx.set(couponRef, {
+              rewardId: rewardId, userId: user.uid, businessId: r.businessId || '',
+              rewardTitle: r.title || r.name || 'Reward', pointPrice: price,
+              businessOwnerId: r.ownerId || r.createdBy || '',
+              code: code, qrValue: code, status: 'active',
+              createdAt: serverTimestamp(), expiresAt: r.expiresAt || ''
+            });
+            return { reward: r, price: price };
           });
         }).then(function(res){
-          updateDoc(doc(db, 'users', user.uid), { geoPointsSpentTotal: increment(Number(res.reward.pointPrice || 0)), updatedAt: serverTimestamp() }).catch(function(){});
+          updateDoc(doc(db, 'users', user.uid), { geoPointsSpentTotal: increment(res.price), updatedAt: serverTimestamp() }).catch(function(){});
           createSystemNotification(user.uid, 'reward', 'Reward Redeemed!', 'You redeemed: ' + (res.reward.title || res.reward.name || 'a reward'), 'rewards.html').catch(function(){});
-          toast('Coupon unlocked: ' + res.code);
-          if(callback) callback(true, res);
+          toast('Coupon unlocked: ' + code);
+          if(callback) callback(true, { couponId: couponRef.id, code: code, reward: res.reward });
         }).catch(function(err){
-          var msg = err.message === 'insufficient-points' ? 'Not enough GeoPoints' : err.message === 'sold-out' ? 'Reward sold out' : 'Could not redeem reward';
+          var msg = err.message === 'insufficient-points' ? 'Not enough GeoPoints' : err.message === 'sold-out' ? 'Reward sold out' : err.message === 'reward-not-found' ? 'Reward not found' : 'Could not redeem reward';
           toast(msg, 'error'); if(callback) callback(false, err);
         });
       });
@@ -977,6 +958,55 @@
           return updateDoc(doc(db, 'rewardCoupons', d.id), { status:'used', usedAt: serverTimestamp(), usedBy: user.uid, updatedAt: serverTimestamp() });
         }).then(function(){ toast('Coupon redeemed'); if(callback) callback(true); })
           .catch(function(err){ var msg = err.message === 'not-found' ? 'Coupon not found' : err.message === 'not-active' ? 'Coupon already used/expired' : err.message === 'wrong-business' ? 'This coupon belongs to another business' : 'Could not redeem coupon'; toast(msg, 'error'); if(callback) callback(false, err); });
+      });
+    }
+
+    function listenIncomingGifts(uid, callback) {
+      uid = uid || currentUid();
+      if (!uid) { callback([]); return function(){}; }
+      var q = query(collection(db, 'pointGifts'), where('toUserId', '==', uid), where('status', '==', 'pending'), limit(50));
+      return onSnapshot(q, function(snap){
+        var rows=[]; snap.forEach(function(d){ rows.push(Object.assign({ id:d.id }, d.data())); });
+        rows.sort(function(a,b){ return tsToMillis(b.createdAt)-tsToMillis(a.createdAt); });
+        callback(rows);
+      }, function(err){ console.warn('[GeoSocial] listenIncomingGifts', err.message); callback([]); });
+    }
+
+    function claimPointGift(giftId, callback) {
+      requireAuth(function(user){
+        var giftDocRef = doc(db, 'pointGifts', giftId);
+        getDoc(giftDocRef).then(function(gSnap){
+          if (!gSnap.exists()) throw new Error('gift-not-found');
+          var g = gSnap.data() || {};
+          if (g.toUserId !== user.uid) throw new Error('not-recipient');
+          if (g.status !== 'pending') throw new Error('already-claimed');
+          var n = normalAmount(g.amount);
+          if (!n) throw new Error('invalid-amount');
+          return runTransaction(db, function(tx){
+            return tx.get(giftDocRef).then(function(gs){
+              var gd = gs.exists() ? (gs.data() || {}) : {};
+              if (gd.toUserId !== user.uid) throw new Error('not-recipient');
+              if (gd.status !== 'pending') throw new Error('already-claimed');
+              return tx.get(walletRef(user.uid)).then(function(walletSnap){
+                var wallet = walletSnap.exists() ? (walletSnap.data() || {}) : {};
+                tx.set(walletRef(user.uid), {
+                  credits: Math.max(0, Number(wallet.credits || 0)) + n,
+                  received: Math.max(0, Number(wallet.received || 0)) + n,
+                  updatedAt: serverTimestamp()
+                }, { merge: true });
+                tx.update(giftDocRef, { status: 'claimed', claimedAt: serverTimestamp() });
+                return n;
+              });
+            });
+          });
+        }).then(function(n){
+          updateDoc(doc(db, 'users', user.uid), { geoPointsReceivedTotal: increment(n), updatedAt: serverTimestamp() }).catch(function(){});
+          toast(n + ' GeoPoints claimed!');
+          if(callback) callback(true, n);
+        }).catch(function(err){
+          var msg = err.message === 'gift-not-found' ? 'Gift not found' : err.message === 'already-claimed' ? 'Already claimed' : err.message === 'not-recipient' ? 'This gift is not for you' : 'Could not claim gift';
+          toast(msg, 'error'); if(callback) callback(false, err);
+        });
       });
     }
 
@@ -3169,6 +3199,8 @@
       listenRewards:           listenRewards,
       redeemReward:            redeemReward,
       listenMyCoupons:         listenMyCoupons,
+      listenIncomingGifts:     listenIncomingGifts,
+      claimPointGift:          claimPointGift,
       redeemCoupon:            redeemCoupon,
       searchFirestore:         searchFirestore,
       findUserByInput:         findUserByInput,

@@ -953,20 +953,8 @@ service cloud.firestore {
       // Users can read only transactions they participated in.
       allow read: if signedIn()
         && (uid() in resource.data.participantIds || isAdmin());
-      // IMPORTANT: create/update/delete are admin-only.
-      //
-      // Why NOT user-writable: computeWallet() derives the displayed balance by
-      // summing pointTransactions where type=='earn'|'admin_adjustment' and
-      // toUserId==uid.  A user-create rule — even with fromUserId==uid() — cannot
-      // prevent the user writing { type:'earn', toUserId:own_uid, amount:9999999 }
-      // which would inflate their balance via the Math.max in ensureWalletSnapshot.
-      //
-      // Limitation (Spark plan, no Cloud Functions): sendPoints / spendPoints /
-      // redeemReward all fail for non-admin users because they write a
-      // pointTransactions record inside runTransaction.  These features require
-      // Cloud Functions on Blaze plan, OR a refactor that removes the
-      // pointTransactions write from the client transaction and reads balance
-      // exclusively from users/{uid}/private/wallet instead.
+      // create/update/delete are admin-only — wallet-doc is the client source of truth.
+      // P2P transfers use pointGifts; spendPoints/redeemReward write users/{uid}/private/wallet.
       allow create, update, delete: if isAdmin();
     }
 
@@ -999,6 +987,25 @@ service cloud.firestore {
                 || resource.data.get('businessOwnerId','') == uid())
             && request.resource.data.diff(resource.data).affectedKeys()
                  .hasOnly(['status', 'usedAt', 'usedBy', 'updatedAt']));
+      allow delete: if isAdmin();
+    }
+    match /pointGifts/{giftId} {
+      allow read: if signedIn()
+        && (resource.data.get('fromUserId','') == uid()
+            || resource.data.get('toUserId','')   == uid()
+            || isAdmin());
+      allow create: if signedIn()
+        && request.resource.data.get('fromUserId','') == uid()
+        && request.resource.data.get('toUserId','')   != uid()
+        && request.resource.data.get('status','')     == 'pending'
+        && request.resource.data.get('amount', 0)     >  0;
+      // Only the recipient may claim (status: pending → claimed).
+      allow update: if isAdmin()
+        || (signedIn()
+            && resource.data.get('toUserId','')   == uid()
+            && resource.data.get('status','')     == 'pending'
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','claimedAt'])
+            && request.resource.data.get('status','') == 'claimed');
       allow delete: if isAdmin();
     }
     match /rewardClaims/{claimId} {
