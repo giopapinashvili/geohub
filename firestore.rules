@@ -953,13 +953,21 @@ service cloud.firestore {
       // Users can read only transactions they participated in.
       allow read: if signedIn()
         && (uid() in resource.data.participantIds || isAdmin());
-      // Users may create their own transaction records (sendPoints / spendPoints /
-      // redeemReward all run client-side on Spark plan).  fromUserId must match
-      // the caller so a user cannot forge records from another user's wallet.
-      allow create: if signedIn()
-        && request.resource.data.get('fromUserId', '') == uid()
-        && uid() in request.resource.data.participantIds;
-      allow update, delete: if isAdmin();
+      // IMPORTANT: create/update/delete are admin-only.
+      //
+      // Why NOT user-writable: computeWallet() derives the displayed balance by
+      // summing pointTransactions where type=='earn'|'admin_adjustment' and
+      // toUserId==uid.  A user-create rule — even with fromUserId==uid() — cannot
+      // prevent the user writing { type:'earn', toUserId:own_uid, amount:9999999 }
+      // which would inflate their balance via the Math.max in ensureWalletSnapshot.
+      //
+      // Limitation (Spark plan, no Cloud Functions): sendPoints / spendPoints /
+      // redeemReward all fail for non-admin users because they write a
+      // pointTransactions record inside runTransaction.  These features require
+      // Cloud Functions on Blaze plan, OR a refactor that removes the
+      // pointTransactions write from the client transaction and reads balance
+      // exclusively from users/{uid}/private/wallet instead.
+      allow create, update, delete: if isAdmin();
     }
 
     // ── REWARDS ───────────────────────────────────────────────────────────────
