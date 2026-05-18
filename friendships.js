@@ -510,6 +510,4 @@
     window.addEventListener('GeoFirebaseReady', tryInit, { once: true });
   }
 
-  console.log('[GeoFriendships] loaded');
-
 })();

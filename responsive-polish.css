@@ -237,6 +237,21 @@ body[data-gh-page="messages"] #ghChatPopRoot{display:none!important;}
   .msg-bubble-wrap{max-width:86%!important;}
 }
 
+/* 360px — iPhone SE / small-phone safety net */
+@media (max-width: 360px){
+  .hero,.page-hero,.section,.clean-hero{padding-left:8px!important;padding-right:8px!important;}
+  h1,.clean-title{font-size:clamp(1.55rem, 9vw, 1.9rem)!important;}
+  .profile-cover{min-height:120px!important;}
+  /* Creator cards: tighten avatar so card body never overflows */
+  .cr-card{gap:10px!important;padding:14px!important;}
+  .cr-avatar-wrap{width:46px!important;height:46px!important;flex-shrink:0!important;}
+  .cr-avatar-initials{font-size:1.1rem!important;}
+  /* Stat grids: force 2-column even at 360px (avoids 3+ col overflow) */
+  .clean-stats{grid-template-columns:1fr 1fr!important;}
+  /* Stack action rows that might still overflow */
+  .profile-actions,.biz-actions,.ev-actions{flex-wrap:wrap!important;gap:6px!important;}
+}
+
 /* ─── Item card image placeholder ────────────────────────── */
 .gh-item-no-img {
   width: 100%;

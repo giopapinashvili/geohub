@@ -194,13 +194,13 @@
 
         // Deduplication: skip if this exact check-in was already counted
         if (sourceSnap && sourceSnap.exists()) {
-          console.log('[ChallengeEngine] duplicate checkin', checkinId, 'for', challenge.id, '— skipping');
+          console.debug('[ChallengeEngine] duplicate checkin', checkinId, 'for', challenge.id, '— skipping');
           return { completedNow: false, alreadyProcessed: true };
         }
 
         var current = snap.exists() ? (snap.data() || {}) : {};
         if (current.completed === true) {
-          console.log('[ChallengeEngine] already completed:', challenge.id, '— skipping');
+          console.debug('[ChallengeEngine] already completed:', challenge.id, '— skipping');
           return { completedNow: false, alreadyCompleted: true };
         }
 
@@ -234,8 +234,8 @@
           tx.set(sourceRef, { processedAt: f.serverTimestamp() });
         }
 
-        console.log('[ChallengeEngine] progress updated:', challenge.id, next + '/' + target);
-        if (completedNow) console.log('[ChallengeEngine] challenge completed:', challenge.id);
+        console.debug('[ChallengeEngine] progress updated:', challenge.id, next + '/' + target);
+        if (completedNow) console.debug('[ChallengeEngine] challenge completed:', challenge.id);
         if (completedNow && badgeRef) {
           var bDef = BADGE_DEFAULTS[resolvedBadgeId] || {};
           tx.set(badgeRef, {
@@ -259,10 +259,10 @@
       if (callback) callback({ completed: [] });
       return Promise.resolve({ completed: [] });
     }
-    console.log('[ChallengeEngine] evaluating checkin', checkinId || '(no id)', '— verified:', checkin.verified);
+    console.debug('[ChallengeEngine] evaluating checkin', checkinId || '(no id)', '— verified:', checkin.verified);
     return getActiveChallenges().then(function (challenges) {
       var matching = challenges.filter(function (c) { return challengeMatchesCheckin(c, checkin); });
-      console.log('[ChallengeEngine] active challenges:', challenges.length, '— matched:', matching.length);
+      console.debug('[ChallengeEngine] active challenges:', challenges.length, '— matched:', matching.length);
       return Promise.all(matching.map(function (c) { return applyCheckinToChallenge(userId, c, checkin, checkinId); }));
     }).then(function (results) {
       var completed = results.filter(function (r) { return r && r.completedNow; }).map(function (r) { return r.challenge; });

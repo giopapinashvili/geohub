@@ -249,7 +249,7 @@
         }
       }, { once: false });
     }
-    console.log('[AccountSwitcher] dropdown opened');
+    console.debug('[AccountSwitcher] dropdown opened');
   }
 
   function close() {
@@ -292,11 +292,11 @@
     var slot = document.getElementById('ghActorBtnSlot');
     if (slot && slot.parentNode) {
       slot.parentNode.replaceChild(wrap, slot);
-      console.log('[AccountSwitcher] mounted — replaced #ghActorBtnSlot');
+      console.debug('[AccountSwitcher] mounted — replaced #ghActorBtnSlot');
     // 2. account.js element (#authNavUser)
     } else if (replaceTarget && replaceTarget.parentNode) {
       replaceTarget.parentNode.replaceChild(wrap, replaceTarget);
-      console.log('[AccountSwitcher] mounted — replaced #authNavUser');
+      console.debug('[AccountSwitcher] mounted — replaced #authNavUser');
     } else {
       // Fallback: ONLY look inside the real top <nav class="navbar"> to avoid
       // matching sidebar or page-body elements that share class names.
@@ -304,10 +304,10 @@
       var actions = topNav ? topNav.querySelector('.navbar-actions') : null;
       if (actions) {
         actions.appendChild(wrap);
-        console.log('[AccountSwitcher] mounted — appended to nav.navbar .navbar-actions');
+        console.debug('[AccountSwitcher] mounted — appended to nav.navbar .navbar-actions');
       } else if (topNav) {
         topNav.appendChild(wrap);
-        console.log('[AccountSwitcher] mounted — appended to nav.navbar');
+        console.debug('[AccountSwitcher] mounted — appended to nav.navbar');
       } else {
         document.body.appendChild(wrap);
         console.warn('[AccountSwitcher] mounted — fallback to body (no nav.navbar found)');
@@ -337,15 +337,15 @@
       var slot       = document.getElementById('ghActorBtnSlot');
       var authUserEl = document.getElementById('authNavUser');
       if (slot) {
-        console.log('[AccountSwitcher] re-mounting after social topbar re-render');
+        console.debug('[AccountSwitcher] re-mounting after social topbar re-render');
         mountWrap(null);
       } else if (authUserEl) {
-        console.log('[AccountSwitcher] re-mounting after navbar re-render');
+        console.debug('[AccountSwitcher] re-mounting after navbar re-render');
         mountWrap(authUserEl);
       }
     });
     _observer.observe(root, { childList: true, subtree: true });
-    console.log('[AccountSwitcher] observer started');
+    console.debug('[AccountSwitcher] observer started');
   }
 
   /* ── GeoActorChanged: keep button in sync when actor is changed externally ── */
@@ -370,7 +370,7 @@
       photoURL: profile.avatar || profile.photoURL || '',
       uid: profile.uid || profile.id || ''
     };
-    console.log('[AccountSwitcher] user ready via GeoAuthReady:', _user.email);
+    console.debug('[AccountSwitcher] user ready via GeoAuthReady:', _user.email);
     var authUser = document.getElementById('authNavUser');
     mountWrap(authUser || null);
     if (_user.uid) { loadUserBusinesses(_user.uid); loadUserGroups(_user.uid); loadFriendRequests(_user.uid); }
@@ -499,7 +499,7 @@
 
   function init(fb) {
     _db = fb.db; _fs = fb.fs;
-    console.log('[AccountSwitcher] loaded, Firebase ready');
+    console.debug('[AccountSwitcher] loaded, Firebase ready');
     // GeoAuthReady handler above handles the primary mount.
     // If GeoAuthReady already fired before this script loaded (unlikely
     // with defer, but handle it), check for #authNavUser immediately.
@@ -512,7 +512,7 @@
       };
       var authUser = document.getElementById('authNavUser');
       if (authUser) {
-        console.log('[AccountSwitcher] late-init: replacing existing #authNavUser');
+        console.debug('[AccountSwitcher] late-init: replacing existing #authNavUser');
         mountWrap(authUser);
         loadUserBusinesses(_user.uid);
         loadUserGroups(_user.uid);

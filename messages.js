@@ -4,7 +4,7 @@
   window.showToast = window.showToast || function(msg){
     var toast=document.getElementById('msgToast');
     if(toast){ toast.textContent=msg; toast.classList.add('show'); setTimeout(function(){toast.classList.remove('show');},2500); }
-    else console.log(msg);
+    else console.debug(msg);
   };
   window.setFilter = window.setFilter || function(filter, el){
     document.querySelectorAll('.filter-tab').forEach(function(t){t.classList.remove('active');});
