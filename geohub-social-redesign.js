@@ -691,7 +691,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     friend_request:  { icon: 'fa-user-clock',  color: '#10b981' },
     friend_accept:   { icon: 'fa-handshake',   color: '#22d3ee' },
     points_received: { icon: 'fa-coins',       color: '#eab308' },
-    quote:           { icon: 'fa-file-invoice',color: '#6366f1' }
+    quote:           { icon: 'fa-file-invoice',color: '#6366f1' },
+    coupon_redeemed: { icon: 'fa-ticket-alt',  color: '#10b981' }
   };
 
   function openNotifications(){
@@ -5346,7 +5347,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     friend_request:  { icon: 'fa-user-clock',  color: '#10b981' },
     friend_accept:   { icon: 'fa-handshake',   color: '#22d3ee' },
     points_received: { icon: 'fa-coins',       color: '#eab308' },
-    quote:           { icon: 'fa-file-invoice',color: '#6366f1' }
+    quote:           { icon: 'fa-file-invoice',color: '#6366f1' },
+    coupon_redeemed: { icon: 'fa-ticket-alt',  color: '#10b981' }
   };
   var NP_FILTERS = [
     { key: 'all',     label: 'All' },

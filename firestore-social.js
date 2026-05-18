@@ -942,6 +942,10 @@
         }).then(function(res){
           updateDoc(doc(db, 'users', user.uid), { geoPointsSpentTotal: increment(res.price), updatedAt: serverTimestamp() }).catch(function(){});
           createSystemNotification(user.uid, 'reward', 'Reward Redeemed!', 'You redeemed: ' + (res.reward.title || res.reward.name || 'a reward'), 'rewards.html').catch(function(){});
+          var _ownerId = res.reward.ownerId || res.reward.createdBy || '';
+          if (_ownerId && _ownerId !== user.uid) {
+            createSystemNotification(_ownerId, 'coupon_redeemed', 'Coupon Redeemed', 'A customer redeemed: ' + (res.reward.title || res.reward.name || 'a reward') + '. Code: ' + code, 'rewards.html').catch(function(){});
+          }
           toast('Coupon unlocked: ' + code);
           if(callback) callback(true, { couponId: couponRef.id, code: code, reward: res.reward });
         }).catch(function(err){

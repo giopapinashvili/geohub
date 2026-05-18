@@ -108,9 +108,10 @@
     reply:     { icon: 'fa-reply',    color: '#8b5cf6' },
     follow:    { icon: 'fa-user-plus',color: '#10b981' },
     message:   { icon: 'fa-envelope', color: '#06b6d4' },
-    reward:    { icon: 'fa-gift',     color: '#f59e0b' },
-    badge:     { icon: 'fa-medal',    color: '#f59e0b' },
-    challenge: { icon: 'fa-trophy',   color: '#f59e0b' }
+    reward:          { icon: 'fa-gift',       color: '#f59e0b' },
+    badge:           { icon: 'fa-medal',      color: '#f59e0b' },
+    challenge:       { icon: 'fa-trophy',     color: '#f59e0b' },
+    coupon_redeemed: { icon: 'fa-ticket-alt', color: '#10b981' }
   };
 
   function notifTimeAgo(ts) {

@@ -467,3 +467,16 @@
 }
 .rw-btn-mark-used:hover:not(:disabled) { background: rgba(59,130,246,.16); border-color: rgba(59,130,246,.5); }
 .rw-btn-mark-used:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── Deep-link focus highlight ────────────────────────────────── */
+.rw-card-focused {
+  border-color: rgba(16,185,129,.6) !important;
+  box-shadow: 0 0 0 3px rgba(16,185,129,.18), 0 8px 32px rgba(16,185,129,.12);
+  animation: rw-focus-pulse 2.4s ease forwards;
+  scroll-margin-top: 80px;
+}
+@keyframes rw-focus-pulse {
+  0%   { box-shadow: 0 0 0 0   rgba(16,185,129,.45), 0 8px 32px rgba(16,185,129,.12); }
+  40%  { box-shadow: 0 0 0 8px rgba(16,185,129,.0),  0 8px 32px rgba(16,185,129,.18); }
+  100% { box-shadow: none; }
+}

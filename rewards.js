@@ -46,6 +46,10 @@
   var _unsubCoupons    = null;
   var _unsubBizCoupons = null;
 
+  var _focusId      = '';
+  var _focusDone    = false;
+  var _focusToasted = false;
+
   function $ (id) { return document.getElementById(id); }
 
   /* ── Toast ───────────────────────────────────────────────────── */
@@ -230,6 +234,16 @@
     '</div>';
   }
 
+  function applyFocus() {
+    if (!_focusId || _focusDone) return;
+    var card = document.querySelector('.rw-card[data-reward-id="' + _focusId + '"]');
+    if (!card) return;
+    _focusDone = true;
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.add('rw-card-focused');
+    setTimeout(function () { card.classList.remove('rw-card-focused'); }, 2500);
+  }
+
   function renderRewards() {
     var grid = $('rwGrid');
     if (!grid) return;
@@ -239,6 +253,11 @@
       return;
     }
     grid.innerHTML = rows.map(cardHtml).join('');
+    applyFocus();
+    if (_focusId && !_focusDone && !_focusToasted) {
+      var inAny = state.rewards.some(function (r) { return r.id === _focusId; });
+      if (!inAny) { _focusToasted = true; toast('This reward is no longer available.'); }
+    }
   }
 
   /* ── Redeem modal ────────────────────────────────────────────── */
@@ -626,9 +645,11 @@
       }
     });
 
-    // Pre-fill recipient from URL param ?to=uid
+    // Pre-fill recipient from URL param ?to=uid; deep-link to reward via ?focus=id
     var params = new URLSearchParams(location.search);
     var toParam = params.get('to');
+    _focusId = params.get('focus') || '';
+    if (_focusId) state.filter = 'all';
     if (toParam) {
       setTimeout(function () {
         openTransferModal();

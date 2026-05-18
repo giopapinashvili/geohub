@@ -1921,7 +1921,7 @@
         '</div>' +
         (r.termsNote ? '<div class="biz-reward-terms">' + esc(r.termsNote) + '</div>' : '') +
       '</div>' +
-      '<a href="rewards.html" class="biz-reward-cta' + (outOfStock ? ' biz-reward-cta-oos' : '') + '">' +
+      '<a href="rewards.html?focus=' + esc(r.id) + '" class="biz-reward-cta' + (outOfStock ? ' biz-reward-cta-oos' : '') + '">' +
         (outOfStock ? '<i class="fas fa-times-circle"></i> Out of Stock' : '<i class="fas fa-coins"></i> Redeem') +
       '</a>' +
     '</div>';
