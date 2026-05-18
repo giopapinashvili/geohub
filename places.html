@@ -147,6 +147,19 @@
   .pl-review-text{font-size:.8rem;color:#94a3b8;line-height:1.5}
   .pl-review-time{font-size:.7rem;color:#4b5563;margin-top:2px}
 
+  /* ── PLACE CHECK-INS ── */
+  .pl-checkins-section{margin-top:16px}
+  .pl-checkins-head{font-size:.78rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+  .pl-checkin-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);align-items:flex-start}
+  .pl-checkin-item:last-child{border-bottom:none}
+  .pl-checkin-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#10b981,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;flex-shrink:0;text-decoration:none;overflow:hidden}
+  .pl-checkin-body{flex:1;min-width:0}
+  .pl-checkin-name{font-size:.8rem;font-weight:700;color:#e2e8f0;text-decoration:none}
+  .pl-checkin-name:hover{color:#10b981}
+  .pl-checkin-meta{font-size:.7rem;color:#64748b;margin-top:2px}
+  .pl-checkin-caption{font-size:.78rem;color:#94a3b8;margin-top:3px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .pl-checkin-photo{width:54px;height:46px;border-radius:8px;object-fit:cover;flex-shrink:0}
+
   /* ── MAP VIEW ── */
   .pl-view-toggle{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:3px;flex-shrink:0}
   .pl-view-btn{padding:6px 12px;border-radius:16px;border:none;background:none;color:#64748b;font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;font-family:inherit}
@@ -554,6 +567,7 @@
   function _renderPlaceDetail(p){
     var box = document.getElementById('plDetailBox');
     var saved = !!_savedIds[p.id]; var _dimg=getPlaceImage(p);
+    var _ciUrl = 'checkin.html?placeId='+encodeURIComponent(p.id||'')+'&placeName='+encodeURIComponent(p.name||'')+'&city='+encodeURIComponent(p.city||'')+'&category='+encodeURIComponent(p.category||'')+(p.lat&&p.lng?'&lat='+encodeURIComponent(p.lat)+'&lng='+encodeURIComponent(p.lng):'');
     box.innerHTML =
       '<div class="pl-detail-img" style="'+coverBg(p)+'">'+
         (_dimg?'<img loading="lazy" decoding="async" src="'+esc(_dimg)+'" alt="" onerror="this.style.display=\'none\'">':'')+
@@ -566,6 +580,7 @@
             '<div class="pl-detail-cat"><i class="fas fa-tag"></i> '+esc(p.category||'Place')+'</div>'+
           '</div>'+
           '<div class="pl-detail-actions">'+
+            '<a class="pl-det-btn" href="'+esc(_ciUrl)+'"><i class="fas fa-location-dot"></i> Check In</a>'+
             '<button class="pl-det-btn'+(saved?' active':'')+'" id="detailSaveBtn" data-id="'+esc(p.id)+'" onclick="handleSaveDetail(\''+esc(p.id)+'\')">'+
               '<i class="'+(saved?'fas':'far')+' fa-bookmark"></i> '+(saved?'Saved':'Save')+
             '</button>'+
@@ -596,9 +611,14 @@
           '</div>'+
           '<div id="plReviewsList"><div style="padding:12px;color:#4b5563;font-size:.82rem">Loading reviews…</div></div>'+
         '</div>'+
+        '<div class="pl-checkins-section">'+
+          '<div class="pl-checkins-head"><i class="fas fa-map-pin"></i> Recent Check-ins</div>'+
+          '<div id="plCheckinsList"><div style="padding:8px 0;color:#4b5563;font-size:.8rem"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div></div>'+
+        '</div>'+
       '</div>';
     initReviewStars();
     loadReviews(p.id);
+    loadPlaceCheckins(p.id);
   }
 
   function openPlaceDetail(placeId){
@@ -694,6 +714,59 @@
     });
   }
 
+  function _relTime(v){
+    if(!v) return '';
+    var ms = typeof v.toMillis==='function' ? v.toMillis() : (v.seconds ? v.seconds*1000 : (typeof v==='number' ? v : Date.parse(v)||0));
+    var diff = Math.floor((Date.now()-ms)/1000);
+    if(diff<60) return 'just now';
+    if(diff<3600) return Math.floor(diff/60)+'m ago';
+    if(diff<86400) return Math.floor(diff/3600)+'h ago';
+    if(diff<604800) return Math.floor(diff/86400)+'d ago';
+    return new Date(ms).toLocaleDateString('en',{month:'short',day:'numeric'});
+  }
+
+  function loadPlaceCheckins(placeId){
+    var list = document.getElementById('plCheckinsList');
+    if(!list) return;
+    var gf = window.GeoFirebase;
+    if(!gf||!gf.fs||!gf.db){ list.innerHTML=''; return; }
+    gf.fs.getDocs(gf.fs.query(
+      gf.fs.collection(gf.db,'checkins'),
+      gf.fs.where('placeId','==',placeId),
+      gf.fs.limit(10)
+    )).then(function(snap){
+      if(snap.empty){
+        list.innerHTML='<p style="font-size:.8rem;color:#4b5563;padding:8px 0">No check-ins yet. <a href="checkin.html?placeId='+encodeURIComponent(placeId)+'" style="color:#10b981">Be the first!</a></p>';
+        return;
+      }
+      var items=[];
+      snap.forEach(function(d){ items.push(Object.assign({id:d.id},d.data())); });
+      items.sort(function(a,b){
+        function ms(v){ return v&&typeof v.toMillis==='function'?v.toMillis():(v&&v.seconds?v.seconds*1000:0); }
+        return ms(b.createdAt)-ms(a.createdAt);
+      });
+      list.innerHTML=items.slice(0,5).map(function(c){
+        var name=c.authorName||c.userName||c.displayName||'User';
+        var uid=c.userId||c.authorId||'';
+        var initials=(name[0]||'U').toUpperCase();
+        var avHref=uid?'profile.html?id='+encodeURIComponent(uid):'#';
+        var avInner=c.authorAvatar
+          ? '<img src="'+esc(c.authorAvatar)+'" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.onerror=null;this.style.display=\'none\'">'
+          : esc(initials);
+        var verBadge=c.verified?'<span style="color:#10b981;font-size:.65rem;margin-left:4px">✓</span>':'';
+        return '<div class="pl-checkin-item">'+
+          '<a href="'+esc(avHref)+'" class="pl-checkin-av">'+avInner+'</a>'+
+          '<div class="pl-checkin-body">'+
+            '<a href="'+esc(avHref)+'" class="pl-checkin-name">'+esc(name)+'</a>'+verBadge+
+            '<div class="pl-checkin-meta">'+_relTime(c.createdAt)+(c.checkinType&&c.checkinType!=='normal'?' · '+esc(c.checkinType):'')+'</div>'+
+            (c.caption?'<div class="pl-checkin-caption">'+esc(c.caption)+'</div>':'')+
+          '</div>'+
+          (c.photoUrl?'<img src="'+esc(c.photoUrl)+'" alt="" class="pl-checkin-photo" loading="lazy" onerror="this.onerror=null;this.style.display=\'none\'">':'')+
+        '</div>';
+      }).join('');
+    }).catch(function(){ list.innerHTML=''; });
+  }
+
   function sharePlaceDetail(placeId, placeName){
     var url = location.origin + location.pathname + '?id=' + encodeURIComponent(placeId);
     if(navigator.share){
@@ -725,6 +798,7 @@
   function closePlaceDetail(){
     document.getElementById('plDetailOverlay').classList.remove('open');
     if(_unsubReviews){ _unsubReviews(); _unsubReviews=null; }
+    var cl=document.getElementById('plCheckinsList'); if(cl) cl.innerHTML='';
   }
   document.getElementById('plDetailOverlay').addEventListener('click', function(e){ if(e.target===this) closePlaceDetail(); });
 

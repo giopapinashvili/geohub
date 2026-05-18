@@ -684,13 +684,19 @@
       function _ciTs(v) { if (!v) return 0; if (typeof v === 'object' && typeof v.toMillis === 'function') return v.toMillis(); if (typeof v === 'object' && v.seconds) return v.seconds * 1000; return Number(v) || 0; }
       items.sort(function(a, b) { return _ciTs(b.createdAt) - _ciTs(a.createdAt); });
       tab.innerHTML = '<div class="gh-friend-grid">' + items.map(function(c) {
-        var linkStart = c.placeId ? '<a href="places.html?id=' + encodeURIComponent(c.placeId) + '" style="color:#10b981;text-decoration:none">' : '';
-        var linkEnd   = c.placeId ? '</a>' : '';
+        var placeHref = c.placeId ? 'places.html?id=' + encodeURIComponent(c.placeId) : '';
+        var placeLink = placeHref ? '<a href="' + esc(placeHref) + '" style="color:#10b981;text-decoration:none">' + esc(c.city || c.location || c.placeName || '') + '</a>' : esc(c.city || c.location || '');
+        var av = c.photoUrl
+          ? '<img src="' + esc(c.photoUrl) + '" alt="" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0" onerror="this.onerror=null;this.style.background=\'rgba(16,185,129,.1)\';this.outerHTML=\'<span class=&quot;gh-avatar&quot; style=&quot;background:rgba(16,185,129,.1)&quot;><i class=&quot;fas fa-map-marker-alt&quot; style=&quot;color:#10b981&quot;></i></span>\'">'
+          : '<span class="gh-avatar" style="background:rgba(16,185,129,.1)"><i class="fas fa-map-marker-alt" style="color:#10b981"></i></span>';
         return '<div class="gh-friend-card">'
-          + '<span class="gh-avatar" style="background:rgba(16,185,129,.1)"><i class="fas fa-map-marker-alt" style="color:#10b981"></i></span>'
-          + '<div>'
-            + '<strong>' + esc(c.placeName || c.name || 'Check-in') + '</strong>'
-            + '<span>' + linkStart + esc(c.city || c.location || '') + linkEnd + '</span>'
+          + av
+          + '<div style="min-width:0">'
+            + (placeHref
+                ? '<strong><a href="' + esc(placeHref) + '" style="color:inherit;text-decoration:none">' + esc(c.placeName || c.name || 'Check-in') + '</a></strong>'
+                : '<strong>' + esc(c.placeName || c.name || 'Check-in') + '</strong>')
+            + '<span>' + placeLink + '</span>'
+            + (c.caption ? '<span style="font-size:.74rem;color:#94a3b8;display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(c.caption) + '</span>' : '')
             + (c.createdAt ? '<span style="font-size:.7rem;color:#64748b;display:block;margin-top:2px">' + timeAgo(c.createdAt) + '</span>' : '')
           + '</div>'
         + '</div>';
