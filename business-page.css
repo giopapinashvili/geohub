@@ -596,6 +596,8 @@ body.gh-has-injected-nav #biz-detail-root {
   border-bottom: 1px solid rgba(255,255,255,.04);
 }
 .biz-preview-service:last-of-type { border-bottom: none; }
+.biz-pv-svc-link { cursor: pointer; transition: background .15s; }
+.biz-pv-svc-link:hover { background: rgba(255,255,255,.05); }
 
 .biz-preview-svc-dot {
   width: 6px;
@@ -624,6 +626,8 @@ body.gh-has-injected-nav #biz-detail-root {
   transition: all .15s;
 }
 .biz-preview-cta:hover { background: rgba(16,185,129,.18); }
+.biz-preview-cta-neutral { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.1); color: #94a3b8; }
+.biz-preview-cta-neutral:hover { background: rgba(255,255,255,.09); }
 
 .biz-preview-products {
   display: grid;

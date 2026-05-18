@@ -326,56 +326,83 @@
 
   function renderRightSidebar(biz, services, products, reviews, gallery) {
     var html = '';
+    var owner = isAdminOrOwner();
 
     // Services preview
     if (services && services.length) {
       html += '<div class="biz-preview-card">'+
-        '<div class="biz-preview-header"><span><i class="fas fa-briefcase"></i> Services</span><button onclick="window._bizActions.switchTab(\'services\')">See all</button></div>'+
+        '<div class="biz-preview-header"><span><i class="fas fa-briefcase"></i> Services</span>'+
+          '<button onclick="window._bizActions.switchTab(\'services\')">See all</button>'+
+        '</div>'+
         services.slice(0,4).map(function(s){
-          return '<div class="biz-preview-service">'+
+          var canDetail = !owner && s.id;
+          var rowCls = 'biz-preview-service'+(canDetail?' biz-pv-svc-link':'');
+          var rowClick = canDetail ? ' onclick="window._bizActions.openSvcDetail(\''+esc(s.id)+'\')"' : '';
+          return '<div class="'+rowCls+'"'+rowClick+'>'+
             '<div class="biz-preview-svc-dot"></div>'+
             '<div style="flex:1;min-width:0"><div class="biz-preview-svc-name">'+esc(s.title||s.name||'')+'</div></div>'+
             (s.price?'<span class="biz-preview-svc-price">'+fmtPrice(s.price)+'</span>':'')+
           '</div>';
         }).join('')+
-        '<button class="biz-preview-cta" onclick="window._bizActions.openQuote()">Request a Service</button>'+
+        '<button class="biz-preview-cta" onclick="window._bizActions.openQuote()">Request a Quote</button>'+
       '</div>';
     }
 
     // Products preview
     if (products && products.length) {
       html += '<div class="biz-preview-card">'+
-        '<div class="biz-preview-header"><span><i class="fas fa-box"></i> Products</span><button onclick="window._bizActions.switchTab(\'products\')">See all</button></div>'+
+        '<div class="biz-preview-header"><span><i class="fas fa-box"></i> Products</span>'+
+          '<button onclick="window._bizActions.switchTab(\'products\')">See all</button>'+
+        '</div>'+
         '<div class="biz-preview-products">'+
           products.slice(0,4).map(function(p){
             var thumb = p.imageUrl
-              ? '<img src="'+esc(p.imageUrl)+'" alt="" loading="lazy">'
+              ? '<img src="'+esc(p.imageUrl)+'" alt="" loading="lazy" onerror="this.onerror=null;this.style.display=\'none\'">'
               : '<div class="biz-preview-product-ph"><i class="fas fa-box"></i></div>';
-            return '<div class="biz-preview-product" onclick="window._bizActions.switchTab(\'products\')">'+thumb+'<div class="biz-preview-product-name">'+esc(p.name||p.title||'')+'</div></div>';
+            var clickFn = !owner && p.id
+              ? 'window._bizActions.openProdDetail(\''+esc(p.id)+'\')'
+              : 'window._bizActions.switchTab(\'products\')';
+            return '<div class="biz-preview-product" onclick="'+clickFn+'">'+
+              thumb+
+              '<div class="biz-preview-product-name">'+esc(p.name||p.title||'')+'</div>'+
+            '</div>';
           }).join('')+
         '</div>'+
       '</div>';
     }
 
-    // Reviews widget
+    // Reviews widget — real data only (ratingCount guard already ensures this)
     if ((biz.ratingCount||0) > 0) {
+      var reviewLabel = (_currentUser && !_isOwner) ? 'Write a Review' : 'See Reviews';
       html += '<div class="biz-preview-card">'+
-        '<div class="biz-preview-header"><span><i class="fas fa-star"></i> Reviews</span><button onclick="window._bizActions.switchTab(\'reviews\')">See all</button></div>'+
+        '<div class="biz-preview-header"><span><i class="fas fa-star"></i> Reviews</span>'+
+          '<button onclick="window._bizActions.switchTab(\'reviews\')">See all</button>'+
+        '</div>'+
         '<div class="biz-preview-rating-widget">'+
           '<div class="biz-preview-big-num">'+(biz.ratingAverage||0).toFixed(1)+'</div>'+
-          '<div>'+starsHtml(biz.ratingAverage,'biz-preview-stars')+'<div style="color:#64748b;font-size:.74rem;margin-top:3px">'+biz.ratingCount+' reviews</div></div>'+
+          '<div>'+
+            starsHtml(biz.ratingAverage,'biz-preview-stars')+
+            '<div style="color:#64748b;font-size:.74rem;margin-top:3px">'+
+              biz.ratingCount+' review'+(biz.ratingCount===1?'':'s')+
+            '</div>'+
+          '</div>'+
         '</div>'+
-        '<button class="biz-preview-cta" onclick="window._bizActions.switchTab(\'reviews\')">Write a Review</button>'+
+        '<button class="biz-preview-cta'+((!_currentUser||_isOwner)?' biz-preview-cta-neutral':'')+'" '+
+          'onclick="window._bizActions.switchTab(\'reviews\')">'+reviewLabel+'</button>'+
       '</div>';
     }
 
     // Gallery preview
     if (gallery && gallery.length) {
       html += '<div class="biz-preview-card">'+
-        '<div class="biz-preview-header"><span><i class="fas fa-images"></i> Photos</span><button onclick="window._bizActions.switchTab(\'photos\')">See all</button></div>'+
+        '<div class="biz-preview-header"><span><i class="fas fa-images"></i> Photos</span>'+
+          '<button onclick="window._bizActions.switchTab(\'photos\')">See all</button>'+
+        '</div>'+
         '<div class="biz-preview-gallery">'+
           gallery.slice(0,6).map(function(p){
-            return '<div class="biz-preview-photo" onclick="window._bizActions.openPhoto(\''+esc(p.url)+'\')"><img src="'+esc(p.url)+'" loading="lazy" alt=""></div>';
+            return '<div class="biz-preview-photo" onclick="window._bizActions.openPhoto(\''+esc(p.url)+'\')">'+
+              '<img src="'+esc(p.url)+'" loading="lazy" alt="" onerror="this.onerror=null;this.style.display=\'none\'">'+
+            '</div>';
           }).join('')+
         '</div>'+
       '</div>';
