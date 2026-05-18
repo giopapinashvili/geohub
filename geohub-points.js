@@ -1,7 +1,7 @@
 
 (function(){
   'use strict';
-  var state = { tab: new URLSearchParams(location.search).get('tab') || 'store', wallet: null, rewards: [], coupons: [] };
+  var state = { tab: new URLSearchParams(location.search).get('tab') || 'store', wallet: null, rewards: [], coupons: [], gifts: [] };
   function $(s,r){return (r||document).querySelector(s)} function $all(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
   function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
   function compact(n){n=Number(n||0);return n>=1000?(n/1000).toFixed(n>=10000?0:1)+'k':String(n)}
@@ -27,6 +27,7 @@
       var buy=e.target.closest('[data-buy-reward]'); if(buy){ if(!user())return location.href='auth.html'; GS().redeemReward(buy.dataset.buyReward,function(ok){if(ok){state.tab='coupons';paint();}}); }
       var spend=e.target.closest('[data-spend-boost]'); if(spend){ if(!user())return location.href='auth.html'; var amount=Number(spend.dataset.amount||0); GS().spendPoints(amount, spend.dataset.label||'GeoHub boost', 'platform_perk', spend.dataset.boost||'', function(ok){if(ok)paint();}); }
       if(e.target.closest('#gpSendBtn')) sendPoints();
+      var claim=e.target.closest('[data-claim-gift]'); if(claim){ var gid=claim.dataset.claimGift; claim.disabled=true; claim.textContent='Claiming…'; GS().claimPointGift(gid,function(ok){ if(!ok){claim.disabled=false;claim.textContent='Claim';} }); }
       if(e.target.closest('#gpTheme')){var cur=document.documentElement.getAttribute('data-gh-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-gh-theme',cur);document.body.setAttribute('data-gh-theme',cur);}
     });
   }
@@ -35,6 +36,7 @@
     if(u && GS().listenWallet) GS().listenWallet(u.uid,function(w){state.wallet=w;updateWallet(); if(state.tab==='history'||state.tab==='send'||state.tab==='spend')paint();});
     else {state.wallet={balance:0,earned:0,received:0,sent:0,spent:0,redeemed:0,transactions:[]};updateWallet();}
     if(u && GS().listenMyCoupons) GS().listenMyCoupons(u.uid,function(c){state.coupons=c; if(state.tab==='coupons')paint();});
+    if(u && GS().listenIncomingGifts) GS().listenIncomingGifts(u.uid,function(g){state.gifts=g; if(state.tab==='history'||state.tab==='send')paint();});
     if(GS().listenRewards) GS().listenRewards(function(r){state.rewards=r; if(state.tab==='store')paint();});
     paint();
   }
@@ -50,7 +52,29 @@
   }
   function paintStore(box){
     if(!state.rewards.length){box.innerHTML='<div class="gp-empty"><i class="fas fa-gift"></i><h2>No partner rewards yet</h2><p>Business owners can create coffee, gym visit, course discount, product coupon or special discount rewards from their Business Dashboard.</p></div>';return;}
-    box.innerHTML='<div class="gp-section-title"><h2>Partner rewards & discounts</h2><span class="gp-chip">'+state.rewards.length+' active</span></div><div class="gp-grid">'+state.rewards.map(function(r){var price=Number(r.pointPrice||r.price||0);var q=Number(r.quantityRemaining||0), qt=Number(r.quantityTotal||0);return '<article class="gp-card"><div class="gp-kicker">'+esc(r.rewardType||'reward')+'</div><h3>'+esc(r.title||r.name||'Reward')+'</h3><p>'+esc(r.description||'Partner coupon / discount reward')+'</p><div class="gp-meta"><span class="gp-price"><i class="fas fa-coins"></i>'+compact(price)+' pts</span>'+(r.businessName?'<span class="gp-chip">'+esc(r.businessName)+'</span>':'')+(qt>0?'<span class="gp-chip">'+q+' left</span>':'<span class="gp-chip">Unlimited</span>')+'</div>'+(r.terms?'<p style="font-size:.82rem">'+esc(r.terms)+'</p>':'')+'<button class="gp-btn" data-buy-reward="'+esc(r.id)+'"><i class="fas fa-ticket"></i>Unlock coupon</button></article>';}).join('')+'</div>';
+    var now=Date.now();
+    box.innerHTML='<div class="gp-section-title"><h2>Partner rewards & discounts</h2><span class="gp-chip">'+state.rewards.length+' listed</span></div><div class="gp-grid">'+state.rewards.map(function(r){
+      var price=Number(r.pointPrice||r.price||0);
+      var q=Number(r.quantityRemaining||0), qt=Number(r.quantityTotal||0);
+      var soldOut=qt>0&&q<=0;
+      var expired=r.expiresAt&&ts(r.expiresAt)>0&&ts(r.expiresAt)<now;
+      var unavailable=soldOut||expired;
+      var bal=(state.wallet||{}).balance||0;
+      var canAfford=bal>=price;
+      return '<article class="gp-card'+(unavailable?' gp-card-dim':'')+'"><div class="gp-kicker">'+esc(r.rewardType||'reward')+'</div>'
+        +(soldOut?'<div class="gp-badge-sold">Sold out</div>':expired?'<div class="gp-badge-sold">Expired</div>':'')
+        +'<h3>'+esc(r.title||r.name||'Reward')+'</h3>'
+        +'<p>'+esc(r.description||'Partner coupon / discount reward')+'</p>'
+        +'<div class="gp-meta"><span class="gp-price"><i class="fas fa-coins"></i>'+compact(price)+' pts</span>'
+        +(r.businessName?'<span class="gp-chip">'+esc(r.businessName)+'</span>':'')
+        +(qt>0&&!soldOut?'<span class="gp-chip '+(q<=5?'gp-chip-warn':'')+'">'+q+' left</span>':!soldOut?'<span class="gp-chip">Unlimited</span>':'')
+        +(r.expiresAt&&!expired?'<span class="gp-chip">Exp '+esc(dateText(r.expiresAt))+'</span>':'')
+        +'</div>'
+        +(r.terms?'<p style="font-size:.82rem;color:var(--gp-muted)">'+esc(r.terms)+'</p>':'')
+        +'<button class="gp-btn" data-buy-reward="'+esc(r.id)+'"'+(unavailable||!canAfford?' disabled':'')+'><i class="fas fa-ticket"></i>'
+        +(unavailable?(soldOut?'Sold out':'Expired'):(!canAfford?'Need '+compact(price-bal)+' more pts':'Unlock coupon'))
+        +'</button></article>';
+    }).join('')+'</div>';
   }
   function qrImageUrl(code){
     return 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data='+encodeURIComponent(code)+'&format=svg&margin=1';
@@ -75,7 +99,10 @@
   }
   function paintSend(box){
     if(!user()){box.innerHTML='<div class="gp-empty"><h2>Sign in to send GeoPoints</h2><a class="gp-btn" href="auth.html">Sign in</a></div>';return;}
-    box.innerHTML='<section class="gp-card" style="max-width:720px"><div class="gp-section-title"><h2>Send GeoPoints</h2><span class="gp-chip">Balance: '+compact((state.wallet||{}).balance||0)+' pts</span></div><div class="gp-form"><input class="gp-input" id="gpRecipient" placeholder="Recipient email, username or user id"><input class="gp-input" id="gpAmount" type="number" min="1" placeholder="Amount"><textarea class="gp-textarea" id="gpMessage" placeholder="Message, e.g. support for your content"></textarea><button class="gp-btn" id="gpSendBtn"><i class="fas fa-paper-plane"></i>Send Points</button></div><p style="color:var(--gp-muted);line-height:1.6;margin-top:16px">Use this for friend help, creator support and group goals. Selling GeoPoints or requesting cash-out is not allowed.</p></section>';
+    var gifts=state.gifts||[];
+    box.innerHTML='<section class="gp-card" style="max-width:720px"><div class="gp-section-title"><h2>Send GeoPoints</h2><span class="gp-chip">Balance: '+compact((state.wallet||{}).balance||0)+' pts</span></div><div class="gp-form"><input class="gp-input" id="gpRecipient" placeholder="Recipient email, username or user id"><input class="gp-input" id="gpAmount" type="number" min="1" placeholder="Amount"><textarea class="gp-textarea" id="gpMessage" placeholder="Message, e.g. support for your content"></textarea><button class="gp-btn" id="gpSendBtn"><i class="fas fa-paper-plane"></i>Send Points</button></div><p style="color:var(--gp-muted);line-height:1.6;margin-top:16px">Points are sent as a gift — the recipient must open their History tab and tap <strong>Claim</strong> to receive them. Selling GeoPoints or requesting cash-out is not allowed.</p></section>'
+      +(gifts.length?'<div class="gp-section-title" style="margin-top:24px"><h2>Pending gifts you sent</h2><span class="gp-chip">'+gifts.length+' unclaimed</span></div><div class="gp-list">'
+        +gifts.map(function(g){return '<div class="gp-row"><div><strong>'+compact(g.amount||0)+' pts → '+esc(g.toName||'recipient')+'</strong><br><small>'+esc(g.message||'')+'</small></div><span class="gp-chip">Pending</span></div>';}).join('')+'</div>':'');
   }
   function sendPoints(){var btn=$('#gpSendBtn'); if(btn&&btn.disabled)return; var r=$('#gpRecipient').value.trim(), a=$('#gpAmount').value, m=$('#gpMessage').value; if(!r||!a)return toast('Recipient and amount are required','error'); if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>Sending…';} GS().sendPoints(r,a,m,function(ok){if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i>Send Points';} if(ok){$('#gpRecipient').value='';$('#gpAmount').value='';$('#gpMessage').value='';state.tab='history';paint();}});}
   function paintBoosts(box){
@@ -83,8 +110,19 @@
     box.innerHTML='<div class="gp-section-title"><h2>GeoHub internal boosts</h2><span class="gp-chip">Platform benefits</span></div><div class="gp-grid">'+items.map(function(i){return '<article class="gp-card"><div class="gp-kicker">GeoHub perk</div><h3>'+esc(i[2])+'</h3><p>Spend GeoPoints inside GeoHub. This is not a cash purchase and cannot be refunded as money.</p><div class="gp-price">'+compact(i[1])+' pts</div><br><br><button class="gp-btn" data-spend-boost="'+i[0]+'" data-amount="'+i[1]+'" data-label="'+esc(i[2])+'">Use GeoPoints</button></article>';}).join('')+'</div>';
   }
   function paintHistory(box){
-    var tx=(state.wallet&&state.wallet.transactions)||[]; if(!tx.length){box.innerHTML='<div class="gp-empty"><i class="fas fa-clock"></i><h2>No GeoPoints history yet</h2><p>Earn, send or redeem GeoPoints and your history will appear here.</p></div>';return;}
-    box.innerHTML='<div class="gp-section-title"><h2>Transaction history</h2><span class="gp-chip">'+tx.length+' records</span></div><div class="gp-list">'+tx.map(function(t){var incoming=(t.toUserId===user().uid&&(t.type==='earn'||t.type==='gift'||t.type==='refund'||t.type==='admin_adjustment'));var sign=incoming?'+':'-';return '<div class="gp-row"><div><strong>'+esc(t.reason||t.type||'GeoPoints')+'</strong><br><small>'+esc(t.type||'')+' · '+dateText(t.createdAt)+' '+(t.message?'· '+esc(t.message):'')+'</small></div><strong style="color:'+(incoming?'var(--gp-green)':'var(--gp-gold)')+'">'+sign+compact(t.amount||0)+'</strong></div>';}).join('')+'</div>';
+    var w=state.wallet||{};
+    var gifts=state.gifts||[];
+    var walletSummary='<div class="gp-section-title"><h2>Wallet summary</h2></div><div class="gp-list">'
+      +'<div class="gp-row"><span>Credits earned</span><strong style="color:var(--gp-green)">'+compact(w.earned||0)+' pts</strong></div>'
+      +'<div class="gp-row"><span>Credits received (claimed gifts)</span><strong style="color:var(--gp-green)">'+compact(w.received||0)+' pts</strong></div>'
+      +'<div class="gp-row"><span>Sent (held pending claim)</span><strong style="color:var(--gp-gold)">'+compact(w.sent||0)+' pts</strong></div>'
+      +'<div class="gp-row"><span>Spent on boosts</span><strong style="color:var(--gp-gold)">'+compact(w.spent||0)+' pts</strong></div>'
+      +'<div class="gp-row"><span>Redeemed for rewards</span><strong style="color:var(--gp-gold)">'+compact(w.redeemed||0)+' pts</strong></div>'
+      +'<div class="gp-row" style="border-top:1px solid var(--border)"><span><strong>Available balance</strong></span><strong style="color:var(--gp-green);font-size:1.1rem">'+compact(w.balance||0)+' pts</strong></div>'
+      +'</div>'
+      +'<p style="color:var(--gp-muted);font-size:.82rem;margin-top:8px">Detailed transaction log requires Cloud Functions (Blaze plan). Balance is derived from your wallet document.</p>';
+    if(!gifts.length){box.innerHTML=walletSummary+'<div class="gp-empty" style="margin-top:24px"><i class="fas fa-inbox"></i><h2>No pending gifts</h2><p>Ask a friend to send GeoPoints — claims will appear here.</p></div>';return;}
+    box.innerHTML=walletSummary+'<div class="gp-section-title" style="margin-top:24px"><h2>Incoming GeoPoints gifts</h2><span class="gp-chip">'+gifts.length+' unclaimed</span></div><div class="gp-list">'+gifts.map(function(g){return '<div class="gp-row"><div><strong>'+compact(g.amount||0)+' pts from '+esc(g.fromName||'GeoHub User')+'</strong><br><small>'+(g.message?esc(g.message)+' · ':'')+dateText(g.createdAt)+'</small></div><button class="gp-btn gp-btn-sm" data-claim-gift="'+esc(g.id)+'">Claim</button></div>';}).join('')+'</div>';
   }
   function updateProfileWallet(){
     ready(function(){var u=user(); if(!u||!GS().listenWallet)return; GS().listenWallet(u.uid,function(w){
