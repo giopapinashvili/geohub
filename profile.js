@@ -1054,13 +1054,73 @@
     if (nameBlock) nameBlock.insertAdjacentElement('beforebegin', hint);
   }
 
-  function applyCreatorMode(user) {
+  function applyCreatorMode(user, fbUser) {
     document.body.setAttribute('data-profile-mode', 'creator');
     var badge = $('.trust-badges');
     if (badge && !badge.querySelector('.creator-badge')) {
       badge.insertAdjacentHTML('beforeend', '<span class="trust-badge creator-badge"><i class="fas fa-star"></i> Creator</span>');
     }
+
+    var nameBlock = document.querySelector('.profile-name-block');
+
+    // Niche / category chip
+    var niche = user.creatorCategory || user.niche || '';
+    if (niche && nameBlock && !nameBlock.querySelector('.creator-niche-chip')) {
+      nameBlock.insertAdjacentHTML('beforeend',
+        '<span class="creator-niche-chip" style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;'
+        + 'background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);border-radius:999px;'
+        + 'font-size:.75rem;font-weight:700;color:#10e0a0;margin-top:6px">'
+        + '<i class="fas fa-hashtag"></i>' + esc(niche) + '</span>');
+    }
+
+    // Social links strip in header
+    var links = user.socialLinks || {};
+    var website = user.website || '';
+    var hasLinks = website || Object.values(links).some(function (v) { return v && String(v).trim(); });
+    if (hasLinks && nameBlock && !nameBlock.querySelector('.creator-social-links')) {
+      var linksHtml = '<div class="creator-social-links" style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;align-items:center">';
+      if (links.instagram) linksHtml += '<a href="https://instagram.com/' + encodeURIComponent(String(links.instagram).replace(/^@/, '')) + '" target="_blank" rel="noopener noreferrer" style="color:#cd486b;font-size:.85rem;text-decoration:none"><i class="fab fa-instagram"></i> ' + esc(String(links.instagram).replace(/^@/, '')) + '</a>';
+      if (links.tiktok) linksHtml += '<a href="https://tiktok.com/@' + encodeURIComponent(String(links.tiktok).replace(/^@/, '')) + '" target="_blank" rel="noopener noreferrer" style="color:#94a3b8;font-size:.85rem;text-decoration:none"><i class="fab fa-tiktok"></i> ' + esc(String(links.tiktok).replace(/^@/, '')) + '</a>';
+      if (links.facebook) linksHtml += '<a href="' + esc(links.facebook) + '" target="_blank" rel="noopener noreferrer" style="color:#4267b2;font-size:.85rem;text-decoration:none"><i class="fab fa-facebook"></i> Facebook</a>';
+      if (links.linkedin) linksHtml += '<a href="' + esc(links.linkedin) + '" target="_blank" rel="noopener noreferrer" style="color:#0077b5;font-size:.85rem;text-decoration:none"><i class="fab fa-linkedin"></i> LinkedIn</a>';
+      if (website) linksHtml += '<a href="' + esc(website) + '" target="_blank" rel="noopener noreferrer" style="color:#10e0a0;font-size:.85rem;text-decoration:none"><i class="fas fa-globe"></i> Website</a>';
+      linksHtml += '</div>';
+      nameBlock.insertAdjacentHTML('beforeend', linksHtml);
+    }
+
+    // Support Creator button for visitors
+    var own = fbUser && user.uid === fbUser.uid;
+    if (!own && fbUser) {
+      var actions = $('.profile-actions');
+      if (actions && !actions.querySelector('.support-creator-btn')) {
+        actions.insertAdjacentHTML('beforeend',
+          '<button class="btn btn-ghost btn-sm support-creator-btn" onclick="window._supportCreator(\''
+          + esc(user.uid) + '\',\'' + esc(user.fullName || 'Creator') + '\')">'
+          + '<i class="fas fa-heart"></i> Support</button>');
+      }
+    }
   }
+
+  window._supportCreator = function (targetUid, targetName) {
+    var GS = window.GeoSocial;
+    if (!GS || !GS.sendPoints) { alert('Points system is still loading. Try again in a moment.'); return; }
+    var raw = prompt('Send GeoPoints to ' + targetName + ':\nEnter amount (1–500):');
+    if (!raw) return;
+    var amount = parseInt(raw, 10);
+    if (!amount || amount <= 0 || amount > 500) { alert('Enter a number between 1 and 500.'); return; }
+    GS.sendPoints(targetUid, amount, 'Support for creator ' + targetName);
+  };
+
+  window._activateCreatorMode = function () {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.auth || !fb.db || !fb.fs) { alert('Loading — please try again.'); return; }
+    var u = fb.auth.currentUser;
+    if (!u) { window.location.href = 'auth.html'; return; }
+    if (!confirm('Activate Creator Mode? Your profile will be listed on the Creators page.')) return;
+    fb.fs.updateDoc(fb.fs.doc(fb.db, 'users', u.uid), { accountType: 'creator' })
+      .then(function () { window.location.reload(); })
+      .catch(function (err) { alert('Could not activate: ' + (err && err.message || 'unknown error')); });
+  };
 
   function loadBizMode(bizId, GF, fbUser) {
     document.body.setAttribute('data-profile-mode', 'business');
@@ -1486,8 +1546,23 @@
           const profile = await findProfile(GF, fbUser);
           if (!profile) return userNotFound();
           renderIdentity(profile, fbUser);
-          if ((profile.accountType || '').toLowerCase() === 'creator') applyCreatorMode(profile);
           const isOwnProfile = profile.uid === fbUser.uid;
+          if ((profile.accountType || '').toLowerCase() === 'creator') {
+            applyCreatorMode(profile, fbUser);
+          } else if (isOwnProfile) {
+            // CTA: own non-creator profile — offer to activate creator mode
+            const nameBlock = document.querySelector('.profile-name-block');
+            if (nameBlock && !nameBlock.querySelector('.creator-cta-btn')) {
+              nameBlock.insertAdjacentHTML('beforeend',
+                '<div style="margin-top:10px">'
+                + '<button class="creator-cta-btn" onclick="window._activateCreatorMode()" style="'
+                + 'display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(16,185,129,.1);'
+                + 'border:1px solid rgba(16,185,129,.25);border-radius:999px;color:#10e0a0;font-size:.78rem;'
+                + 'font-weight:700;cursor:pointer">'
+                + '<i class="fas fa-star"></i> Activate Creator Mode</button>'
+                + '</div>');
+            }
+          }
           const privPref = (profile.privacy || {}).profilePref || 'public';
           if (!isOwnProfile && privPref === 'friends') {
             const fid = [fbUser.uid, profile.uid].sort().join('_');
