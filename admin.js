@@ -1147,10 +1147,14 @@
 
   var CONTENT_EXT_FIELDS = {
     events: [
-      { id: 'csDate',     label: 'Date & Time',    type: 'datetime-local', key: 'date' },
-      { id: 'csPrice',    label: 'Ticket Price (₾, 0 = free)', type: 'number', key: 'ticketPrice', min: 0 },
-      { id: 'csCapacity', label: 'Capacity (0 = unlimited)', type: 'number', key: 'capacity', min: 0 },
-      { id: 'csVenue',    label: 'Venue / address', type: 'text', key: 'venue' }
+      { id: 'csDate',       label: 'Start Date & Time',           type: 'datetime-local', key: 'date' },
+      { id: 'csEndDate',    label: 'End Date & Time (optional)',   type: 'datetime-local', key: 'endDate' },
+      { id: 'csPrice',      label: 'Ticket Price (₾, 0 = free)',  type: 'number', key: 'ticketPrice', min: 0 },
+      { id: 'csCapacity',   label: 'Capacity (0 = unlimited)',    type: 'number', key: 'capacity', min: 0 },
+      { id: 'csVenue',      label: 'Venue / address',             type: 'text',   key: 'venue' },
+      { id: 'csHostName',   label: 'Host / Organizer name',       type: 'text',   key: 'hostName' },
+      { id: 'csBusinessId', label: 'Business ID (optional link)', type: 'text',   key: 'businessId' },
+      { id: 'csGroupId',    label: 'Group ID (optional link)',    type: 'text',   key: 'groupId' }
     ],
     places: [
       { id: 'csAddress',  label: 'Address',  type: 'text',   key: 'address' },
@@ -1234,6 +1238,48 @@
     if (colSel) {
       colSel.addEventListener('change', function() { renderExtFields(colSel.value); });
       renderExtFields(colSel.value);
+    }
+
+    // Cloudinary image upload for Content Studio cover
+    var csImgFile = document.getElementById('adminCsImageFile');
+    if (csImgFile) {
+      csImgFile.addEventListener('change', function() {
+        var file = csImgFile.files && csImgFile.files[0];
+        if (!file) return;
+        var lbl = document.getElementById('adminCsUploadLabel');
+        if (lbl) { lbl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading…'; }
+        var cfg = (window.GeoConfig && window.GeoConfig.CLOUDINARY) || { cloudName: 'dw5dqk2w7', uploadPreset: 'geohub_unsigned', rootFolder: 'geohub' };
+        var fd = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', cfg.uploadPreset);
+        fd.append('folder', (cfg.rootFolder || 'geohub') + '/events');
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'https://api.cloudinary.com/v1_1/' + cfg.cloudName + '/image/upload');
+        xhr.onload = function() {
+          try {
+            var r = JSON.parse(xhr.responseText);
+            var url = r.secure_url || null;
+            if (url) {
+              var imgInput = document.getElementById('adminContentImage');
+              if (imgInput) imgInput.value = url;
+              if (lbl) lbl.innerHTML = '<i class="fas fa-check"></i> Uploaded';
+            } else {
+              if (lbl) lbl.innerHTML = '<i class="fas fa-upload"></i> Upload';
+              toast('Upload failed: no URL returned');
+            }
+          } catch(e) {
+            if (lbl) lbl.innerHTML = '<i class="fas fa-upload"></i> Upload';
+            toast('Upload failed');
+          }
+          csImgFile.value = '';
+        };
+        xhr.onerror = function() {
+          if (lbl) lbl.innerHTML = '<i class="fas fa-upload"></i> Upload';
+          toast('Upload error');
+          csImgFile.value = '';
+        };
+        xhr.send(fd);
+      });
     }
 
     // Live JSON validation for bulk import textarea

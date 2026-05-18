@@ -130,9 +130,11 @@
         '<div style="padding:16px;flex:1;display:flex;flex-direction:column;gap:9px">',
           '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">',
             categoryBadge(event.category),
-            future
-              ? '<span style="color:#10b981;font-size:.7rem;font-weight:700;background:rgba(16,185,129,.1);padding:2px 8px;border-radius:6px">UPCOMING</span>'
-              : '<span style="color:#64748b;font-size:.7rem;background:rgba(255,255,255,.05);padding:2px 8px;border-radius:6px">PAST</span>',
+            event.status === 'cancelled'
+              ? '<span style="color:#ef4444;font-size:.7rem;font-weight:700;background:rgba(239,68,68,.12);padding:2px 8px;border-radius:6px">CANCELLED</span>'
+              : future
+                ? '<span style="color:#10b981;font-size:.7rem;font-weight:700;background:rgba(16,185,129,.1);padding:2px 8px;border-radius:6px">UPCOMING</span>'
+                : '<span style="color:#64748b;font-size:.7rem;background:rgba(255,255,255,.05);padding:2px 8px;border-radius:6px">PAST</span>',
           '</div>',
 
           '<h3 style="font-size:.95rem;font-weight:700;color:#f1f5f9;line-height:1.35;margin:0">' + esc(event.title || event.name || 'Event') + '</h3>',
@@ -487,9 +489,11 @@
             + '<h2 style="font-size:1.25rem;font-weight:900;margin:0 0 8px;color:#f8fafc">' + esc(ev.title || ev.name || 'Event') + '</h2>'
             + categoryBadge(ev.category)
           + '</div>'
-          + '<span style="color:#' + (isFuture(dateVal) ? '10b981' : '64748b') + ';font-size:.72rem;font-weight:700;'
-            + 'background:rgba(' + (isFuture(dateVal) ? '16,185,129' : '255,255,255') + ',.08);padding:3px 10px;border-radius:6px;white-space:nowrap;align-self:flex-start">'
-            + (isFuture(dateVal) ? 'UPCOMING' : 'PAST') + '</span>'
+          + (ev.status === 'cancelled'
+              ? '<span style="color:#ef4444;font-size:.72rem;font-weight:700;background:rgba(239,68,68,.12);padding:3px 10px;border-radius:6px;white-space:nowrap;align-self:flex-start">CANCELLED</span>'
+              : '<span style="color:#' + (isFuture(dateVal) ? '10b981' : '64748b') + ';font-size:.72rem;font-weight:700;'
+                + 'background:rgba(' + (isFuture(dateVal) ? '16,185,129' : '255,255,255') + ',.08);padding:3px 10px;border-radius:6px;white-space:nowrap;align-self:flex-start">'
+                + (isFuture(dateVal) ? 'UPCOMING' : 'PAST') + '</span>')
         + '</div>'
         + '<div style="display:flex;flex-direction:column;gap:7px;font-size:.84rem;color:#94a3b8;margin:14px 0">'
           + (dateVal ? '<span><i class="fas fa-calendar" style="width:16px;text-align:center;color:#10b981;margin-right:7px"></i>' + formatDate(dateVal) + (formatTime(dateVal) ? ' &middot; ' + formatTime(dateVal) : '') + '</span>' : '')
@@ -498,8 +502,11 @@
           + (cap > 0
               ? '<span><i class="fas fa-users" style="width:16px;text-align:center;color:#f59e0b;margin-right:7px"></i>' + going + ' / ' + cap + ' attendees</span>'
               : (going > 0 ? '<span><i class="fas fa-users" style="width:16px;text-align:center;color:#f59e0b;margin-right:7px"></i>' + going + ' going</span>' : ''))
+          + (ev.businessId ? '<span><i class="fas fa-store" style="width:16px;text-align:center;color:#10b981;margin-right:7px"></i><a href="business.html?id=' + esc(ev.businessId) + '" style="color:#10b981;text-decoration:none">View Business Page</a></span>' : '')
+          + (ev.groupId ? '<span><i class="fas fa-users-cog" style="width:16px;text-align:center;color:#a855f7;margin-right:7px"></i><a href="groups.html?id=' + esc(ev.groupId) + '" style="color:#a855f7;text-decoration:none">View Group</a></span>' : '')
         + '</div>'
         + (ev.description ? '<p style="font-size:.88rem;color:#94a3b8;line-height:1.65;margin:0 0 16px">' + esc(ev.description) + '</p>' : '')
+        + '<div id="evRsvpAdminList"></div>'
         // RSVP + ticket row
         + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px">'
           + (soldOut
@@ -528,6 +535,45 @@
           btn.innerHTML = '<i class="fas fa-check"></i> Going!';
         });
       });
+    }
+
+    // Admin: load RSVP participant list
+    var u = user();
+    var fb = window.GeoFirebase;
+    if (u && fb && fb.fs && fb.db) {
+      fb.fs.getDoc(fb.fs.doc(fb.db, 'admins', u.uid)).then(function (snap) {
+        if (!snap.exists()) return;
+        var listEl = document.getElementById('evRsvpAdminList');
+        if (!listEl) return;
+        listEl.innerHTML = '<div style="margin-top:16px;border-top:1px solid rgba(255,255,255,.08);padding-top:14px">'
+          + '<div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">'
+          + '<i class="fas fa-shield-alt" style="color:#10b981;margin-right:5px"></i>Admin · RSVP List</div>'
+          + '<div id="evRsvpAdminListInner" style="font-size:.8rem;color:#94a3b8"><i class="fas fa-circle-notch fa-spin"></i></div>'
+          + '</div>';
+        fb.fs.getDocs(fb.fs.query(
+          fb.fs.collection(fb.db, 'eventParticipants'),
+          fb.fs.where('eventId', '==', ev.id),
+          fb.fs.limit(100)
+        )).then(function (pSnap) {
+          var inner = document.getElementById('evRsvpAdminListInner');
+          if (!inner) return;
+          if (pSnap.empty) { inner.textContent = 'No RSVPs yet.'; return; }
+          var rows = [];
+          pSnap.forEach(function (d) {
+            var p = d.data();
+            rows.push('<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+              + '<i class="fas fa-user-check" style="color:#10b981;font-size:.75rem"></i>'
+              + '<span>' + esc(p.userName || p.userId || d.id) + '</span>'
+              + '</div>');
+          });
+          inner.innerHTML = '<div style="color:#e2e8f0;font-weight:700;margin-bottom:6px">'
+            + pSnap.size + ' attendee' + (pSnap.size !== 1 ? 's' : '') + '</div>'
+            + rows.join('');
+        }).catch(function () {
+          var inner = document.getElementById('evRsvpAdminListInner');
+          if (inner) inner.textContent = 'Could not load participants.';
+        });
+      }).catch(function () {});
     }
   }
 
