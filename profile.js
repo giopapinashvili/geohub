@@ -449,7 +449,7 @@
               + '<strong>' + esc(r.senderName || 'GeoHub User') + '</strong>'
               + '<span>@' + esc(r.senderUsername || fromId) + '</span>'
               + '<div class="gh-friend-request-actions" onclick="event.preventDefault()">'
-              + '<button class="btn btn-primary btn-sm" data-accept-request="' + esc(r.id) + '">Accept</button>'
+              + '<button class="btn btn-primary btn-sm" data-accept-request="' + esc(r.id) + '" data-from-user-id="' + esc(fromId) + '">Accept</button>'
               + '<button class="btn btn-ghost btn-sm" data-reject-request="' + esc(r.id) + '">Decline</button>'
               + '</div></div></a>';
           }).join('');
@@ -1644,46 +1644,26 @@
       e.preventDefault();
       const target = friendBtn.dataset.friendUser;
       const st = friendBtn.dataset.friendState || 'none';
-      // Prefer GeoFriendships for a richer, real experience
-      if (window.GeoFriendships) {
-        if (st === 'pending_received' || st === 'incoming') {
-          // Show respond UI
+      if (window.GeoSocial) {
+        if (st === 'incoming') {
           const reqId = friendBtn.dataset.requestId;
           if (reqId) {
             var choice = confirm('Accept friend request from this user?');
             if (choice) {
-              window.GeoFriendships.accept(reqId, target);
-              updateFriendButtons(target, { state: 'friends' });
+              window.GeoSocial.respondFriendRequest(reqId, true, () => updateFriendButtons(target, { state: 'friends' }));
             } else {
-              window.GeoFriendships.decline(reqId);
-              updateFriendButtons(target, { state: 'none' });
+              window.GeoSocial.respondFriendRequest(reqId, false, () => updateFriendButtons(target, { state: 'none' }));
             }
-          } else {
-            // Lookup request id dynamically
-            window.GeoFriendships.getStatus(target, function(status) {});
           }
         } else if (st === 'friends') {
           if (confirm('Unfriend this person?')) {
-            window.GeoFriendships.unfriend(target);
-            updateFriendButtons(target, { state: 'none' });
+            if (window.GeoSocial.removeFriend) window.GeoSocial.removeFriend(target, () => updateFriendButtons(target, { state: 'none' }));
+            else if (window.GeoFriendships) { window.GeoFriendships.unfriend(target); updateFriendButtons(target, { state: 'none' }); }
           }
-        } else if (st === 'pending_sent' || st === 'outgoing') {
+        } else if (st === 'outgoing') {
           toast('Friend request already sent — waiting for response.');
         } else {
-          window.GeoFriendships.sendRequest(target);
-          updateFriendButtons(target, { state: 'pending_sent' });
-        }
-      } else if (window.GeoSocial) {
-        // Legacy fallback
-        if (st === 'incoming') {
-          const reqId = friendBtn.dataset.requestId;
-          if (reqId) window.GeoSocial.respondFriendRequest(reqId, true, () => updateFriendButtons(target, { state: 'friends' }));
-        } else if (st === 'friends') {
-          if (confirm('Remove this friend?')) window.GeoSocial.removeFriend(target, () => updateFriendButtons(target, { state: 'none' }));
-        } else if (st === 'outgoing') {
-          toast('Friend request is already pending');
-        } else {
-          window.GeoSocial.sendFriendRequest(target, state => updateFriendButtons(target, { state: state || 'outgoing' }));
+          window.GeoSocial.sendFriendRequest(target, function(state) { updateFriendButtons(target, { state: state === 'pending' ? 'outgoing' : (state || 'outgoing') }); });
         }
       } else {
         toast('Friends system is still loading', 'error');

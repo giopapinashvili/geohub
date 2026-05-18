@@ -140,7 +140,7 @@
           // Notification
           if (window.GeoSocial && window.GeoSocial._createNotification) {
             window.GeoSocial._createNotification(toUserId, 'friend_request', 'New Friend Request',
-              (me.displayName || 'Someone') + ' sent you a friend request.', 'profile.html');
+              (me.displayName || 'Someone') + ' sent you a friend request.', 'profile.html?id=' + me.uid);
           }
         }).catch(function (err) {
           console.warn('[GeoFriendships] sendRequest', err.message);
@@ -177,6 +177,10 @@
         })
       ]).then(function () {
         toast('Friend request accepted!');
+        if (window.GeoSocial && window.GeoSocial._createNotification) {
+          window.GeoSocial._createNotification(fromUserId, 'friend_accepted', 'Friend Request Accepted',
+            (me.displayName || 'Someone') + ' accepted your friend request.', 'profile.html?id=' + me.uid);
+        }
       }).catch(function (err) {
         console.warn('[GeoFriendships] accept', err.message);
         toast('Could not accept request.', 'error');
