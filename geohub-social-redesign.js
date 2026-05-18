@@ -232,7 +232,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var actor=getActiveActor();
     if(!actor||actor.type!=='business') return {};
     var u=authUser();
-    return { authorType:'business', businessId:actor.businessId, authorId:actor.businessId, authorName:actor.title||'Business', authorAvatar:actor.logoUrl||'', createdByUid:u?u.uid:'' };
+    return { authorType:'business', businessId:actor.businessId, authorId:actor.businessId, authorName:actor.title||'Business', authorAvatar:actor.logoUrl||'', createdByUid:u?u.uid:'', targetType:'business', targetId:actor.businessId };
   }
   function requireLogin(){ if(authUser()) return true; if(GS()) GS().requireAuth(); else toast('შესვლა აუცილებელია', 'error'); return false; }
   function currentUserInfo(){ var u=authUser(); return { uid:u && u.uid, name:u ? (u.displayName || (u.email||'').split('@')[0] || 'GeoHub User') : 'Guest', avatar:u ? (u.photoURL || '') : ''}; }
@@ -500,18 +500,22 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }
     if(window.requestIdleCallback) requestIdleCallback(loadRightRail, { timeout: 2500 });
     else setTimeout(loadRightRail, 700);
-    // When Firestore profile fully loads, refresh cache + topbar with richer data
-    window.addEventListener('GeoAuthReady', function(e){
-      var p=e&&e.detail;
-      if(p&&p.uid){
-        setCachedUser({uid:p.uid,name:p.fullName||p.displayName||p.name||'',avatar:p.avatar||p.photoURL||''});
-      } else {
-        clearCachedUser();
-      }
-      updateTopUser();
-    });
-    // Re-render topbar + composer on every actor change (account switcher), global across all pages
-    window.addEventListener('GeoActorChanged', function(){ updateTopUser(); });
+    // Register global listeners once only — bindShell() may be called on every page navigation
+    if(!state._shellListenersRegistered){
+      state._shellListenersRegistered=true;
+      // When Firestore profile fully loads, refresh cache + topbar with richer data
+      window.addEventListener('GeoAuthReady', function(e){
+        var p=e&&e.detail;
+        if(p&&p.uid){
+          setCachedUser({uid:p.uid,name:p.fullName||p.displayName||p.name||'',avatar:p.avatar||p.photoURL||''});
+        } else {
+          clearCachedUser();
+        }
+        updateTopUser();
+      });
+      // Re-render topbar + composer on every actor change (account switcher), global across all pages
+      window.addEventListener('GeoActorChanged', function(){ updateTopUser(); });
+    }
   }
 
   function updateTopUser(){
@@ -3062,12 +3066,6 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       setupSafetyListener(paint);
       setupAudienceAccess(paint);
       GS().listenFeed(function(posts){ lastPosts=posts; paint(); }, 20);
-    });
-    window.addEventListener('GeoActorChanged', function(){
-      var ca=$('#ghComposerAvatar'); if(!ca) return;
-      var a=getFeedComposerActor();
-      ca.className='gh-avatar';
-      ca.innerHTML=a?(a.avatar?'<img src="'+esc(a.avatar)+'" alt="" loading="eager" onerror="this.remove()">':esc(initials(a.name||''))):'';
     });
   }
 
