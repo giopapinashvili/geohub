@@ -5,6 +5,7 @@
   const $$ = (s) => Array.from(document.querySelectorAll(s));
   const esc = (v) => String(v == null ? '' : v).replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
   const compact = (v) => Number(v || 0) >= 1000 ? (Number(v) / 1000).toFixed(Number(v) >= 10000 ? 0 : 1) + 'k' : String(Number(v || 0));
+  const safeUrl = (s) => { var u = String(s || '').trim(); return /^https?:\/\//i.test(u) ? u : ''; };
 
   function timeAgo(ts) {
     if (!ts) return '';
@@ -1075,14 +1076,18 @@
 
     // Social links strip in header
     var links = user.socialLinks || {};
-    var website = user.website || '';
-    var hasLinks = website || Object.values(links).some(function (v) { return v && String(v).trim(); });
+    var website = safeUrl(user.website);
+    var igHandle = links.instagram ? String(links.instagram).replace(/^@/, '') : '';
+    var ttHandle = links.tiktok ? String(links.tiktok).replace(/^@/, '') : '';
+    var fbUrl = safeUrl(links.facebook);
+    var liUrl = safeUrl(links.linkedin);
+    var hasLinks = website || igHandle || ttHandle || fbUrl || liUrl;
     if (hasLinks && nameBlock && !nameBlock.querySelector('.creator-social-links')) {
       var linksHtml = '<div class="creator-social-links" style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;align-items:center">';
-      if (links.instagram) linksHtml += '<a href="https://instagram.com/' + encodeURIComponent(String(links.instagram).replace(/^@/, '')) + '" target="_blank" rel="noopener noreferrer" style="color:#cd486b;font-size:.85rem;text-decoration:none"><i class="fab fa-instagram"></i> ' + esc(String(links.instagram).replace(/^@/, '')) + '</a>';
-      if (links.tiktok) linksHtml += '<a href="https://tiktok.com/@' + encodeURIComponent(String(links.tiktok).replace(/^@/, '')) + '" target="_blank" rel="noopener noreferrer" style="color:#94a3b8;font-size:.85rem;text-decoration:none"><i class="fab fa-tiktok"></i> ' + esc(String(links.tiktok).replace(/^@/, '')) + '</a>';
-      if (links.facebook) linksHtml += '<a href="' + esc(links.facebook) + '" target="_blank" rel="noopener noreferrer" style="color:#4267b2;font-size:.85rem;text-decoration:none"><i class="fab fa-facebook"></i> Facebook</a>';
-      if (links.linkedin) linksHtml += '<a href="' + esc(links.linkedin) + '" target="_blank" rel="noopener noreferrer" style="color:#0077b5;font-size:.85rem;text-decoration:none"><i class="fab fa-linkedin"></i> LinkedIn</a>';
+      if (igHandle) linksHtml += '<a href="https://instagram.com/' + encodeURIComponent(igHandle) + '" target="_blank" rel="noopener noreferrer" style="color:#cd486b;font-size:.85rem;text-decoration:none"><i class="fab fa-instagram"></i> ' + esc(igHandle) + '</a>';
+      if (ttHandle) linksHtml += '<a href="https://tiktok.com/@' + encodeURIComponent(ttHandle) + '" target="_blank" rel="noopener noreferrer" style="color:#94a3b8;font-size:.85rem;text-decoration:none"><i class="fab fa-tiktok"></i> ' + esc(ttHandle) + '</a>';
+      if (fbUrl) linksHtml += '<a href="' + esc(fbUrl) + '" target="_blank" rel="noopener noreferrer" style="color:#4267b2;font-size:.85rem;text-decoration:none"><i class="fab fa-facebook"></i> Facebook</a>';
+      if (liUrl) linksHtml += '<a href="' + esc(liUrl) + '" target="_blank" rel="noopener noreferrer" style="color:#0077b5;font-size:.85rem;text-decoration:none"><i class="fab fa-linkedin"></i> LinkedIn</a>';
       if (website) linksHtml += '<a href="' + esc(website) + '" target="_blank" rel="noopener noreferrer" style="color:#10e0a0;font-size:.85rem;text-decoration:none"><i class="fas fa-globe"></i> Website</a>';
       linksHtml += '</div>';
       nameBlock.insertAdjacentHTML('beforeend', linksHtml);
@@ -1104,10 +1109,11 @@
   window._supportCreator = function (targetUid, targetName) {
     var GS = window.GeoSocial;
     if (!GS || !GS.sendPoints) { alert('Points system is still loading. Try again in a moment.'); return; }
-    var raw = prompt('Send GeoPoints to ' + targetName + ':\nEnter amount (1–500):');
+    var raw = (prompt('Send GeoPoints to ' + esc(targetName) + ':\nEnter amount (1–500):') || '').trim();
     if (!raw) return;
+    if (!/^\d+$/.test(raw)) { alert('Enter a whole number between 1 and 500.'); return; }
     var amount = parseInt(raw, 10);
-    if (!amount || amount <= 0 || amount > 500) { alert('Enter a number between 1 and 500.'); return; }
+    if (amount <= 0 || amount > 500) { alert('Enter a number between 1 and 500.'); return; }
     GS.sendPoints(targetUid, amount, 'Support for creator ' + targetName);
   };
 
