@@ -7,7 +7,7 @@
 
   var PATH = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   var PAGE = document.body && document.body.dataset ? document.body.dataset.ghPage : '';
-  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null, openCommentPids: {}, cachedComments: {}, cachedReplies: {} };
+  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null, openCommentPids: {}, cachedComments: {}, cachedReplies: {}, feedTab: 'foryou', userCity: null };
 
   /* ── User cache (instant topbar, no flash) ──────────────── */
   var USER_CACHE_KEY = 'gh_uc1';
@@ -619,13 +619,30 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     ready(function(){
       if($('#ghRightStories')) loadStories('#ghRightStories', true);
       var list=$('#ghSuggestions'); if(!list) return;
-      Promise.all([getLatest('groups',4), getLatest('places',4), getLatest('events',3), getLatest('rewards',3)]).then(function(res){
-        var groups=res[0], places=res[1], events=res[2], rewards=res[3];
-        if(!groups.length){ list.innerHTML='<div class="gh-empty mini"><i class="fas fa-users"></i><h3>No groups yet</h3><p>Real groups appear after creation.</p></div>'; }
-        else { list.innerHTML=groups.map(function(x){ var title=x.name||x.title||'Untitled'; var photo=x.logoUrl||x.coverImageUrl||x.coverUrl||x.imageUrl||x.photoUrl; return '<a class="gh-mini-item" href="'+docLink('group',x.id)+'"><span class="gh-mini-thumb">'+(photo?img(photo,title):'<i class="fas fa-users"></i>')+'</span><div><strong>'+esc(title)+'</strong><span>'+esc(x.category||'Group')+'</span></div></a>'; }).join(''); }
-        var pl=$('#ghRightPlaces'); if(pl){ pl.innerHTML = places.length ? places.map(function(x){ var title=x.name||x.title||'Untitled'; var photo=x.imageUrl||x.photoUrl||x.coverUrl||x.coverImageUrl; return '<a class="gh-mini-item" href="'+docLink('place',x.id)+'"><span class="gh-mini-thumb">'+(photo?img(photo,title):'<i class="fas fa-location-dot"></i>')+'</span><div><strong>'+esc(title)+'</strong><span>'+esc(x.city||x.region||'Place')+'</span></div></a>'; }).join('') : '<div class="gh-empty mini"><i class="fas fa-location-dot"></i><h3>No places yet</h3><p>Real places appear after admin adds them.</p></div>'; }
-        var ev=$('#ghRightEvents'); if(ev){ ev.innerHTML = events.length ? events.map(function(x){ var title=x.name||x.title||'Untitled'; var when=x.startDate||x.date||x.createdAt; return '<a class="gh-mini-item" href="'+docLink('event',x.id)+'"><span class="gh-mini-thumb event"><i class="fas fa-calendar"></i></span><div><strong>'+esc(title)+'</strong><span>'+esc(x.city||x.location||timeAgo(when))+'</span></div></a>'; }).join('') : '<div class="gh-empty mini"><i class="fas fa-calendar"></i><h3>No events yet</h3><p>Real events appear after admin adds them.</p></div>'; }
-        var rw=$('#ghRightRewards'); if(rw){ rw.innerHTML = rewards.length ? rewards.map(function(x){ var title=x.name||x.title||'Untitled'; var pts=x.points||x.cost||x.price||''; return '<a class="gh-mini-item" href="rewards.html"><span class="gh-mini-thumb reward"><i class="fas fa-gift"></i></span><div><strong>'+esc(title)+'</strong><span>'+esc(pts?pts+' points':'Reward')+'</span></div></a>'; }).join('') : '<div class="gh-empty mini"><i class="fas fa-gift"></i><h3>No rewards yet</h3><p>Real rewards appear after admin adds them.</p></div>'; }
+      var uid=authUser()&&authUser().uid;
+      loadUserCity(uid, function(city){
+        Promise.all([getLatest('groups',10), getLatest('places',10), getLatest('events',15), getLatest('rewards',3)]).then(function(res){
+          var allGroups=res[0], allPlaces=res[1], allEvents=res[2], rewards=res[3];
+          // Upcoming events only — filter out past events first, then city-filter
+          var upcomingEvts=allEvents.filter(function(e){ return isFutureTsVal(e.startDate||e.date); });
+          var groups=cityFilter(allGroups.filter(function(g){return (g.privacy||'public')!=='secret';}), city).slice(0,4);
+          var places=cityFilter(allPlaces, city).slice(0,4);
+          var events=cityFilter(upcomingEvts, city, ['city','location']).slice(0,3);
+          var cityLabel=city?' in '+esc(city):'';
+          if(!groups.length){ list.innerHTML='<div class="gh-empty mini"><i class="fas fa-users"></i><h3>No groups yet</h3><p>Real groups appear after creation.</p></div>'; }
+          else { list.innerHTML=groups.map(function(x){ var title=x.name||x.title||'Untitled'; var photo=x.logoUrl||x.coverImageUrl||x.coverUrl||x.imageUrl||x.photoUrl; return '<a class="gh-mini-item" href="'+docLink('group',x.id)+'"><span class="gh-mini-thumb">'+(photo?img(photo,title):'<i class="fas fa-users"></i>')+'</span><div><strong>'+esc(title)+'</strong><span>'+esc(x.category||x.city||'Group')+'</span></div></a>'; }).join(''); }
+          var pl=$('#ghRightPlaces');
+          if(pl){
+            var pTitle=pl.closest('.gh-panel'); if(pTitle){ var h3=pTitle.querySelector('h3'); if(h3&&city) h3.textContent='Nearby Places'+cityLabel; }
+            pl.innerHTML = places.length ? places.map(function(x){ var title=x.name||x.title||'Untitled'; var photo=x.imageUrl||x.photoUrl||x.coverUrl||x.coverImageUrl; return '<a class="gh-mini-item" href="'+docLink('place',x.id)+'"><span class="gh-mini-thumb">'+(photo?img(photo,title):'<i class="fas fa-location-dot"></i>')+'</span><div><strong>'+esc(title)+'</strong><span>'+esc(x.city||x.region||x.category||'Place')+'</span></div></a>'; }).join('') : '<div class="gh-empty mini"><i class="fas fa-location-dot"></i><h3>No places yet</h3><p>Real places appear after admin adds them.</p></div>';
+          }
+          var ev=$('#ghRightEvents');
+          if(ev){
+            var evPanel=ev.closest('.gh-panel'); if(evPanel){ var evH3=evPanel.querySelector('h3'); if(evH3) evH3.textContent='Upcoming Events'+(cityLabel||''); }
+            ev.innerHTML = events.length ? events.map(function(x){ var title=x.name||x.title||'Untitled'; var when=x.startDate||x.date; var whenStr=when?timeAgo(when):''; return '<a class="gh-mini-item" href="events.html?id='+esc(x.id)+'"><span class="gh-mini-thumb event"><i class="fas fa-calendar"></i></span><div><strong>'+esc(title)+'</strong><span>'+esc(x.city||x.location||whenStr)+'</span></div></a>'; }).join('') : '<div class="gh-empty mini"><i class="fas fa-calendar"></i><h3>No upcoming events</h3><p>'+esc(city?'No upcoming events in '+city+' yet.':'Create the first event!')+'</p></div>';
+          }
+          var rw=$('#ghRightRewards'); if(rw){ rw.innerHTML = rewards.length ? rewards.map(function(x){ var title=x.name||x.title||'Untitled'; var pts=x.points||x.cost||x.price||''; return '<a class="gh-mini-item" href="rewards.html"><span class="gh-mini-thumb reward"><i class="fas fa-gift"></i></span><div><strong>'+esc(title)+'</strong><span>'+esc(pts?pts+' points':'Reward')+'</span></div></a>'; }).join('') : '<div class="gh-empty mini"><i class="fas fa-gift"></i><h3>No rewards yet</h3><p>Real rewards appear after admin adds them.</p></div>'; }
+        });
       });
     });
   }
@@ -635,6 +652,29 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function getLatest(collectionName, n){
     if(!GF()) return Promise.resolve([]);
     return fs().getDocs(fs().query(fs().collection(db(), collectionName), fs().limit(n||10))).then(function(snap){ var arr=[]; snap.forEach(function(d){ arr.push(Object.assign({id:d.id}, d.data())); }); arr.sort(function(a,b){ return ts(b.createdAt)-ts(a.createdAt); }); return arr; }).catch(function(){ return []; });
+  }
+
+  function loadUserCity(uid, cb){
+    if(state.userCity !== null){ cb(state.userCity||''); return; }
+    if(!uid||!fs()||!db()){ state.userCity=''; cb(''); return; }
+    fs().getDoc(fs().doc(db(),'users',uid)).then(function(snap){
+      var c=snap.exists()?((snap.data()||{}).city||''):'';
+      state.userCity=(c==='all_georgia'?'':c);
+      cb(state.userCity);
+    }).catch(function(){ state.userCity=''; cb(''); });
+  }
+
+  function cityFilter(items, city, fields){
+    if(!city) return items;
+    fields=fields||['city','location','address'];
+    var low=city.toLowerCase();
+    var matched=items.filter(function(x){ return fields.some(function(f){ return (x[f]||'').toLowerCase()===low; }); });
+    return matched.length?matched:items;
+  }
+
+  function isFutureTsVal(val){
+    if(!val) return false;
+    return ts(val)>Date.now();
   }
 
   var GH_NOTIF_ICONS = {
@@ -2574,6 +2614,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-panel gh-right-widget" id="ghCreatorPanel"><div class="gh-section-title"><h3>Featured Creators</h3><a class="gh-small" href="creators.html">All</a></div><div id="ghCreatorList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Suggested Pages</h3><a class="gh-small" href="business.html">All</a></div><div id="ghSuggestedPages"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget" id="ghFeedGroupsPanel"><div class="gh-section-title"><h3>Suggested Groups</h3><a class="gh-small" href="groups.html">All</a></div><div id="ghFeedGroupsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghFeedEventsPanel"><div class="gh-section-title"><h3>Upcoming Events</h3><a class="gh-small" href="events.html">All</a></div><div id="ghFeedEventsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghFeedCheckinsPanel"><div class="gh-section-title"><h3>Recent Check-ins</h3><a class="gh-small" href="checkin.html">Check in</a></div><div id="ghFeedCheckinsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Contacts</h3></div><input class="gh-input" id="ghContactsSearch" placeholder="Search contacts…" style="margin-bottom:8px"><div id="ghContactsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
     '</div>';
   }
@@ -2585,6 +2627,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var ob=$('#ghOnlineFriendsList'); if(ob) ob.innerHTML='<div class="gh-muted" style="font-size:.82rem">Unavailable</div>';
         var pb=$('#ghSuggestedPages'); if(pb) pb.innerHTML='<div class="gh-muted" style="font-size:.82rem">Unavailable</div>';
         var cb=$('#ghContactsList'); if(cb) cb.innerHTML='<div class="gh-muted" style="font-size:.82rem">Unavailable</div>';
+        loadFeedGroupsWidget(); loadFeedEventsWidget(null); loadFeedCheckinsWidget();
         return;
       }
       // onAuthStateChanged fires once auth is resolved (currentUser may still be null even if ready() fired)
@@ -2599,7 +2642,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           if(contactsBox) contactsBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see contacts</div>';
           var pymkBox=$('#ghPymkList'); if(pymkBox) pymkBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see suggestions</div>';
           var crBox=$('#ghCreatorList'); if(crBox) crBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see creators</div>';
-          loadFeedGroupsWidget();
+          loadFeedGroupsWidget(); loadFeedEventsWidget(null); loadFeedCheckinsWidget();
           return;
         }
 
@@ -2636,6 +2679,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         loadPymkWidget(u.uid);
         loadCreatorWidget(u.uid);
         loadFeedGroupsWidget();
+        loadFeedEventsWidget(u.uid);
+        loadFeedCheckinsWidget();
       });
     });
   }
@@ -2707,6 +2752,52 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '</a>';
       }).join('')+'</div>';
     }).catch(function(){ var p=$('#ghFeedGroupsPanel'); if(p) p.style.display='none'; });
+  }
+
+  function loadFeedEventsWidget(uid){
+    var box=$('#ghFeedEventsList'); if(!box) return;
+    if(!fs()||!db()){ var p=$('#ghFeedEventsPanel'); if(p) p.style.display='none'; return; }
+    loadUserCity(uid, function(city){
+      getLatest('events',15).then(function(allEvents){
+        var upcoming=allEvents.filter(function(e){ return isFutureTsVal(e.startDate||e.date); });
+        var filtered=cityFilter(upcoming, city, ['city','location']);
+        var shown=filtered.slice(0,3);
+        if(!shown.length){ var p=$('#ghFeedEventsPanel'); if(p) p.style.display='none'; return; }
+        var panel=$('#ghFeedEventsPanel');
+        if(panel&&city){ var h3=panel.querySelector('h3'); if(h3) h3.textContent='Upcoming Events in '+city; }
+        box.innerHTML='<div class="gh-mini-list">'+shown.map(function(e){
+          var title=e.name||e.title||'Event';
+          var when=e.startDate||e.date;
+          var whenStr=when?timeAgo(when):'';
+          return '<a class="gh-mini-item" href="events.html?id='+esc(e.id)+'" style="text-decoration:none;color:inherit">'+
+            '<span class="gh-mini-thumb event"><i class="fas fa-calendar-check"></i></span>'+
+            '<div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(title)+'</div>'+
+            '<div style="font-size:.72rem;color:var(--gh-muted)">'+esc(e.city||e.location||whenStr||'Event')+'</div></div>'+
+            '</a>';
+        }).join('')+'</div>';
+      }).catch(function(){ var p=$('#ghFeedEventsPanel'); if(p) p.style.display='none'; });
+    });
+  }
+
+  function loadFeedCheckinsWidget(){
+    var box=$('#ghFeedCheckinsList'); if(!box) return;
+    if(!fs()||!db()){ var p=$('#ghFeedCheckinsPanel'); if(p) p.style.display='none'; return; }
+    getLatest('checkins',8).then(function(checkins){
+      if(!checkins.length){ var p=$('#ghFeedCheckinsPanel'); if(p) p.style.display='none'; return; }
+      box.innerHTML='<div class="gh-mini-list">'+checkins.map(function(c){
+        var placeName=c.placeName||c.name||c.placeTitle||'A place';
+        var city=c.city||c.placeCity||'';
+        var when=c.createdAt;
+        var whenStr=when?timeAgo(when):'';
+        var placeId=c.placeId||c.place||'';
+        var href=placeId?'places.html?id='+esc(placeId):'checkin.html';
+        return '<a class="gh-mini-item" href="'+href+'" style="text-decoration:none;color:inherit">'+
+          '<span class="gh-mini-thumb" style="background:linear-gradient(135deg,#10b981,#06b6d4)"><i class="fas fa-map-pin"></i></span>'+
+          '<div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(placeName)+'</div>'+
+          '<div style="font-size:.72rem;color:var(--gh-muted)">'+esc(city||whenStr||'Check-in')+'</div></div>'+
+          '</a>';
+      }).join('')+'</div>';
+    }).catch(function(){ var p=$('#ghFeedCheckinsPanel'); if(p) p.style.display='none'; });
   }
 
   function loadContactsList(uid){
