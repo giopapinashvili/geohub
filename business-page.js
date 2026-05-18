@@ -1574,6 +1574,11 @@
           _pageAdminRole = adminData ? (adminData.role || null) : null;
           renderPage(_biz, r[0], r[1], r[2], r[3], r[6]);
 
+          // Deep-link: ?#quotes opens the owner quotes panel directly (from notification click)
+          if(location.hash === '#quotes' && _isOwner) {
+            setTimeout(function(){ if(window._bizActions) window._bizActions.goToQuotes(); }, 400);
+          }
+
           if (!_isOwner) {
             var pvKey = 'biz_pv_' + BIZ_ID;
             if (!sessionStorage.getItem(pvKey)) {
@@ -2566,15 +2571,18 @@
         _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID),{quoteCount:_fs.increment(1)}).catch(function(){});
         // Notify business owner
         var ownerId = _biz && _biz.ownerId;
-        if(ownerId && ownerId !== _currentUser.uid && window.GeoSocial && window.GeoSocial.createSystemNotification) {
-          var notifBody = (service ? 'Service: ' + service + ' — ' : '') + msg.slice(0,120);
-          window.GeoSocial.createSystemNotification(
-            ownerId, 'quote_request',
-            name + ' sent a quote request',
-            notifBody,
-            'business.html?id=' + BIZ_ID,
-            { businessId: BIZ_ID, submittedBy: _currentUser.uid }
-          );
+        if(ownerId && ownerId !== _currentUser.uid && window.GeoSocial) {
+          var notifFn = window.GeoSocial.createNotification || window.GeoSocial.createSystemNotification;
+          if(notifFn) {
+            var notifBody = (service ? 'Service: ' + service + ' — ' : '') + msg.slice(0,120);
+            notifFn(
+              ownerId, 'quote_request',
+              name + ' sent you a quote request',
+              notifBody,
+              'business.html?id=' + BIZ_ID + '#quotes',
+              { businessId: BIZ_ID, submittedBy: _currentUser.uid }
+            );
+          }
         }
         window._bizActions.closeQuote();
         // Clear form for next use

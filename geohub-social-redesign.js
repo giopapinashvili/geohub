@@ -2545,6 +2545,28 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(cid){ setTimeout(function(){ var c = card.querySelector('[data-comment-id="'+CSS.escape(cid)+'"]'); if(c){ c.classList.add('gh-deep-linked-comment'); c.scrollIntoView({ behavior:'smooth', block:'center' }); } }, 1200); }
   }
 
+  function openDeepLinkedStory(){
+    var sid = new URLSearchParams(location.search).get('story');
+    if(!sid) return;
+    var GF = window.GeoFirebase;
+    if(!GF || !GF.fs || !GF.db) return;
+    GF.fs.getDoc(GF.fs.doc(GF.db, 'stories', sid)).then(function(snap){
+      if(!snap.exists || !snap.exists()){
+        toast('Story not found or has expired.');
+        return;
+      }
+      var data = snap.data() || {};
+      var tsVal = data.createdAt;
+      var ms = tsVal && tsVal.toMillis ? tsVal.toMillis() : (tsVal && tsVal.seconds ? tsVal.seconds*1000 : 0);
+      if(ms && (Date.now() - ms) > 24 * 3600 * 1000){
+        toast('This story has expired.');
+        return;
+      }
+      var story = normalizeStoryItem(Object.assign({ id: snap.id }, data));
+      openStoryViewer(buildStoryGroups([story]), 0, 0);
+    }).catch(function(){ });
+  }
+
   function feedRightSidebar(){
     return '<div id="ghFeedRight">'+
       '<div class="gh-panel gh-right-widget" id="ghOnlineFriendsPanel"><div class="gh-section-title"><h3><i class="fas fa-circle" style="color:#22c55e;font-size:.55rem"></i> Online Friends</h3></div><div id="ghOnlineFriendsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
@@ -2825,6 +2847,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     loadFeedRightSidebar();
     ready(function(){
       maybeShowOnboarding($('#ghWelcomeSlot'));
+      openDeepLinkedStory();
       var list=$('#ghFeedList'); bindPostInteractions(list); var lastPosts=[];
       function paint(){
         var visible=lastPosts.filter(canSeePost);

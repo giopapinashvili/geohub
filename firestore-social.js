@@ -1920,7 +1920,7 @@
               ownerId, 'story_reaction',
               (me.name || 'GeoHub User') + ' reacted ' + emoji + ' to your story',
               '',
-              'notifications.html',
+              'feed.html?story=' + storyId,
               { storyId: storyId, reaction: emoji },
               'story_reaction_' + user.uid + '_' + storyId
             ).catch(function(){});
@@ -1957,7 +1957,7 @@
               ownerId, 'story_reply',
               (me.name || 'GeoHub User') + ' replied to your story',
               cleanText.slice(0, 80),
-              'notifications.html',
+              'feed.html?story=' + storyId,
               { storyId: storyId }
             ).catch(function(){});
           }
@@ -3157,6 +3157,7 @@
       removeStoryReaction:     removeStoryReaction,
       addStoryReply:           addStoryReply,
       deleteStory:             deleteStory,
+      createNotification:       createNotification,
       createSystemNotification: createSystemNotification,
       listenUserNotifications: listenUserNotifications,
       markNotificationRead:    markNotificationRead,
