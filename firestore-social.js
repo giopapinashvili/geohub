@@ -904,6 +904,9 @@
             var rs = results[0]; var walletSnap = results[1];
             if (!rs.exists()) throw new Error('reward-not-found');
             var r = rs.data() || {};
+            if (r.active === false) throw new Error('not-active');
+            var expMs = tsToMillis(r.expiresAt);
+            if (expMs && expMs < Date.now()) throw new Error('expired');
             var price = normalAmount(r.cost || r.pointsCost || r.pointPrice || r.price || r.points);
             if (!price) throw new Error('invalid-price');
             var wallet = walletSnap.exists() ? (walletSnap.data() || {}) : {};
@@ -942,7 +945,7 @@
           toast('Coupon unlocked: ' + code);
           if(callback) callback(true, { couponId: couponRef.id, code: code, reward: res.reward });
         }).catch(function(err){
-          var msg = err.message === 'insufficient-points' ? 'Not enough GeoPoints' : err.message === 'sold-out' ? 'Reward sold out' : err.message === 'reward-not-found' ? 'Reward not found' : 'Could not redeem reward';
+          var msg = err.message === 'insufficient-points' ? 'Not enough GeoPoints' : err.message === 'sold-out' ? 'Reward sold out' : err.message === 'reward-not-found' ? 'Reward not found' : err.message === 'not-active' ? 'This reward is no longer available' : err.message === 'expired' ? 'This reward has expired' : 'Could not redeem reward';
           toast(msg, 'error'); if(callback) callback(false, err);
         });
       });

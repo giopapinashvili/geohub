@@ -422,3 +422,45 @@
 .rw-coupon-active  { background: rgba(16,185,129,.12);  color: #10b981;  border: 1px solid rgba(16,185,129,.25); }
 .rw-coupon-used    { background: rgba(100,116,139,.12); color: #64748b;  border: 1px solid rgba(100,116,139,.25); }
 .rw-coupon-expired { background: rgba(239,68,68,.1);    color: #ef4444;  border: 1px solid rgba(239,68,68,.2); }
+
+/* ── Coupon code row (code + copy button) ─────────────────────── */
+.rw-coupon-code-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.rw-btn-copy-code {
+  background: none; border: none; color: var(--gh-muted, #64748b);
+  cursor: pointer; font-size: .75rem; padding: 2px 5px;
+  border-radius: 5px; line-height: 1; transition: color .15s, background .15s;
+}
+.rw-btn-copy-code:hover { color: #3b82f6; background: rgba(59,130,246,.1); }
+
+/* ── Expired / inactive badge on reward cards ─────────────────── */
+.rw-card-expired-badge {
+  font-size: .72rem; font-weight: 800; color: #ef4444;
+  background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.2);
+  border-radius: 999px; padding: 3px 10px;
+  display: inline-flex; align-items: center; gap: 5px; margin-bottom: 8px;
+}
+
+/* ── Business name on reward card ─────────────────────────────── */
+.rw-card-biz { font-size: .74rem; color: var(--gh-muted, #64748b); margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
+.rw-card-biz i { font-size: .68rem; }
+
+/* ── Business coupons panel ───────────────────────────────────── */
+.rw-biz-coupon-item {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 14px 16px;
+  background: rgba(245,158,11,.04);
+  border: 1px solid rgba(245,158,11,.14);
+  border-radius: 14px; margin-bottom: 10px;
+}
+.rw-biz-coupon-item .rw-coupon-body { flex: 1; min-width: 0; }
+
+.rw-btn-mark-used {
+  padding: 7px 14px; border-radius: 999px;
+  border: 1px solid rgba(59,130,246,.3);
+  background: rgba(59,130,246,.08); color: #3b82f6;
+  font-size: .76rem; font-weight: 800; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  white-space: nowrap; flex-shrink: 0; transition: background .15s, border-color .15s;
+}
+.rw-btn-mark-used:hover:not(:disabled) { background: rgba(59,130,246,.16); border-color: rgba(59,130,246,.5); }
+.rw-btn-mark-used:disabled { opacity: .5; cursor: not-allowed; }

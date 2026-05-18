@@ -40,10 +40,11 @@
     dailyTransferred: 0
   };
 
-  var _unsubRewards = null;
-  var _unsubBalance = null;
-  var _unsubGifts   = null;
-  var _unsubCoupons = null;
+  var _unsubRewards    = null;
+  var _unsubBalance    = null;
+  var _unsubGifts      = null;
+  var _unsubCoupons    = null;
+  var _unsubBizCoupons = null;
 
   function $ (id) { return document.getElementById(id); }
 
@@ -178,37 +179,47 @@
   }
 
   function cardHtml(r) {
-    var stock = r.stock != null ? Number(r.stock) : null;
-    var unlimited = stock === null;
+    var stockRaw = r.stock != null ? Number(r.stock) : (r.quantityRemaining != null ? Number(r.quantityRemaining) : null);
+    var unlimited = stockRaw === null;
     var cost = Number(r.cost || r.pointsCost || 0);
     var icon = CAT_ICONS[r.category] || 'fa-gift';
     var canAfford = state.balance >= cost;
-    var outOfStock = !unlimited && stock === 0;
+    var outOfStock = !unlimited && stockRaw === 0;
+    var expMs = toMs(r.expiresAt);
+    var isExpired = expMs > 0 && expMs < Date.now();
+    var isInactive = r.active === false;
+    var unavailable = isExpired || isInactive;
     var claimed = (state.userRewards[r.id] || 0) > 0;
+    var businessName = r.businessName || r.business || '';
 
     var stockHtml = outOfStock
       ? '<span class="rw-oos">Out of stock</span>'
-      : !unlimited && stock < 10
-        ? '<span class="rw-low-stock">' + stock + ' left</span>'
-        : unlimited ? '' : '<span>' + stock + ' available</span>';
+      : !unlimited && stockRaw < 10
+        ? '<span class="rw-low-stock">' + stockRaw + ' left</span>'
+        : unlimited ? '' : '<span>' + stockRaw + ' available</span>';
 
     var imgHtml = r.imageUrl
       ? '<div class="rw-card-img"><img src="' + esc(r.imageUrl) + '" alt="' + esc(r.title || 'Reward') + '" loading="lazy" onerror="this.style.display=\'none\'"></div>'
       : '<div class="rw-card-img rw-card-img-placeholder"><i class="fas ' + icon + '"></i></div>';
 
-    var btnDisabled = !canAfford || outOfStock;
-    var btnText = outOfStock
-      ? 'Out of Stock'
-      : !canAfford
-        ? 'Need ' + compact(cost - state.balance) + ' more pts'
-        : 'Redeem';
+    var btnDisabled = !canAfford || outOfStock || unavailable;
+    var btnText = unavailable
+      ? (isExpired ? 'Expired' : 'Unavailable')
+      : outOfStock
+        ? 'Out of Stock'
+        : !canAfford
+          ? 'Need ' + compact(cost - state.balance) + ' more pts'
+          : 'Redeem';
 
-    return '<div class="rw-card' + (outOfStock ? ' rw-card-oos' : '') + '" data-reward-id="' + esc(r.id) + '">' +
+    return '<div class="rw-card' + (outOfStock || unavailable ? ' rw-card-oos' : '') + '" data-reward-id="' + esc(r.id) + '">' +
       imgHtml +
       '<div class="rw-card-body">' +
         '<div class="rw-card-cat"><i class="fas ' + icon + '"></i> ' + esc(r.category || 'reward') + '</div>' +
         '<h3 class="rw-card-title">' + esc(r.title || 'Reward') + '</h3>' +
+        (businessName ? '<div class="rw-card-biz"><i class="fas fa-store"></i> ' + esc(businessName) + '</div>' : '') +
         '<p class="rw-card-desc">' + esc(r.description || '') + '</p>' +
+        (isExpired ? '<div class="rw-card-expired-badge"><i class="fas fa-clock"></i> Expired</div>' : '') +
+        (isInactive && !isExpired ? '<div class="rw-card-expired-badge"><i class="fas fa-ban"></i> Unavailable</div>' : '') +
         '<div class="rw-card-footer">' +
           '<div class="rw-card-cost"><i class="fas fa-coins"></i>' + compact(cost) + ' pts</div>' +
           '<div class="rw-card-stock">' + stockHtml + '</div>' +
@@ -294,7 +305,12 @@
         toast('Reward redeemed!' + code + ' Check My Coupons below.');
         loadUserRewards(window.GeoFirebase);
       } else {
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Confirm Redeem'; }
+        var errCode = data && data.message;
+        if (errCode === 'not-active' || errCode === 'expired' || errCode === 'sold-out') {
+          if (modalEl) modalEl.remove();
+        } else {
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Confirm Redeem'; }
+        }
       }
     });
   }
@@ -450,6 +466,8 @@
       var code   = esc(c.code || '');
       var status = c.status || 'active';
       var ago    = relTime(c.createdAt);
+      var expMs  = toMs(c.expiresAt);
+      var expiry = expMs ? new Date(expMs).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
       var statusBadge = status === 'used'
         ? '<span class="rw-coupon-status rw-coupon-used">Used</span>'
         : status === 'expired'
@@ -459,12 +477,89 @@
         '<div class="rw-coupon-left"><i class="fas fa-ticket-alt rw-coupon-icon"></i></div>' +
         '<div class="rw-coupon-body">' +
           '<div class="rw-coupon-title">' + title + '</div>' +
-          '<div class="rw-coupon-code">' + code + '</div>' +
-          (ago ? '<div class="rw-coupon-meta">' + ago + '</div>' : '') +
+          '<div class="rw-coupon-code-row">' +
+            '<span class="rw-coupon-code">' + code + '</span>' +
+            (c.code ? '<button class="rw-btn-copy-code" data-copy-code="' + esc(c.code) + '" title="Copy code"><i class="fas fa-copy"></i></button>' : '') +
+          '</div>' +
+          (expiry ? '<div class="rw-coupon-meta">Expires ' + esc(expiry) + '</div>' : (ago ? '<div class="rw-coupon-meta">' + ago + '</div>' : '')) +
         '</div>' +
         statusBadge +
       '</div>';
     }).join('');
+  }
+
+  /* ── Business Coupons ───────────────────────────────────────── */
+  function loadBusinessCoupons(GF) {
+    if (!state.fbUser) return;
+    var uid = state.fbUser.uid;
+    var q = GF.fs.query(
+      GF.fs.collection(GF.db, 'rewardCoupons'),
+      GF.fs.where('businessOwnerId', '==', uid),
+      GF.fs.limit(200)
+    );
+    _unsubBizCoupons = GF.fs.onSnapshot(q, function (snap) {
+      var rows = [];
+      snap.forEach(function (d) { rows.push(Object.assign({ id: d.id }, d.data())); });
+      rows.sort(function (a, b) { return toMs(b.createdAt) - toMs(a.createdAt); });
+      renderBusinessCoupons(rows);
+    }, function (err) {
+      console.warn('[Rewards] bizCoupons', err.message);
+    });
+  }
+
+  function renderBusinessCoupons(coupons) {
+    var panel = $('rwBizCouponsPanel');
+    var list  = $('rwBizCouponsList');
+    if (!panel || !list) return;
+    if (!coupons || !coupons.length) {
+      panel.style.display = 'none';
+      list.innerHTML = '';
+      return;
+    }
+    panel.style.display = '';
+    list.innerHTML = coupons.map(function (c) {
+      var title  = esc(c.rewardTitle || c.title || 'Reward');
+      var code   = esc(c.code || '');
+      var status = c.status || 'active';
+      var ago    = relTime(c.createdAt);
+      var statusBadge = status === 'used'
+        ? '<span class="rw-coupon-status rw-coupon-used">Used</span>'
+        : status === 'expired'
+          ? '<span class="rw-coupon-status rw-coupon-expired">Expired</span>'
+          : '<span class="rw-coupon-status rw-coupon-active">Active</span>';
+      return '<div class="rw-biz-coupon-item">' +
+        '<div class="rw-coupon-body">' +
+          '<div class="rw-coupon-title">' + title + '</div>' +
+          '<div class="rw-coupon-code-row">' +
+            '<span class="rw-coupon-code">' + code + '</span>' +
+            (c.code ? '<button class="rw-btn-copy-code" data-copy-code="' + esc(c.code) + '" title="Copy code"><i class="fas fa-copy"></i></button>' : '') +
+          '</div>' +
+          (ago ? '<div class="rw-coupon-meta">' + ago + '</div>' : '') +
+        '</div>' +
+        statusBadge +
+        (status === 'active'
+          ? '<button class="rw-btn-mark-used" data-coupon-id="' + esc(c.id) + '"><i class="fas fa-check-double"></i> Mark Used</button>'
+          : '') +
+      '</div>';
+    }).join('');
+  }
+
+  function markCouponUsed(couponId, btn) {
+    var GF = window.GeoFirebase;
+    if (!GF || !GF.fs || !state.fbUser) return;
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
+    GF.fs.updateDoc(GF.fs.doc(GF.db, 'rewardCoupons', couponId), {
+      status: 'used',
+      usedAt: GF.fs.serverTimestamp(),
+      usedBy: state.fbUser.uid,
+      updatedAt: GF.fs.serverTimestamp()
+    }).then(function () {
+      toast('Coupon marked as used.');
+    }).catch(function (err) {
+      console.warn('[Rewards] markCouponUsed', err.message);
+      toast('Could not update coupon.', 'error');
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check-double"></i> Mark Used'; }
+    });
   }
 
   /* ── Event bindings ──────────────────────────────────────────── */
@@ -495,6 +590,23 @@
       var claimBtn = e.target.closest('[data-claim-gift]');
       if (claimBtn) {
         claimGift(claimBtn.dataset.claimGift, claimBtn);
+        return;
+      }
+
+      var copyBtn = e.target.closest('[data-copy-code]');
+      if (copyBtn) {
+        var copyCode = copyBtn.dataset.copyCode;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(copyCode).then(function () { toast('Code copied!'); }).catch(function () { toast('Code: ' + copyCode); });
+        } else {
+          toast('Code: ' + copyCode);
+        }
+        return;
+      }
+
+      var markUsedBtn = e.target.closest('.rw-btn-mark-used[data-coupon-id]');
+      if (markUsedBtn) {
+        markCouponUsed(markUsedBtn.dataset.couponId, markUsedBtn);
         return;
       }
     });
@@ -539,15 +651,17 @@
         loadUserRewards(GF);
         loadPendingGifts();
         loadMyCoupons();
+        loadBusinessCoupons(GF);
       });
     });
   }
 
   window.addEventListener('pagehide', function () {
-    if (_unsubRewards) { try { _unsubRewards(); } catch (e) {} _unsubRewards = null; }
-    if (_unsubBalance) { try { _unsubBalance(); } catch (e) {} _unsubBalance = null; }
-    if (_unsubGifts)   { try { _unsubGifts();   } catch (e) {} _unsubGifts   = null; }
-    if (_unsubCoupons) { try { _unsubCoupons(); } catch (e) {} _unsubCoupons = null; }
+    if (_unsubRewards)    { try { _unsubRewards();    } catch (e) {} _unsubRewards    = null; }
+    if (_unsubBalance)    { try { _unsubBalance();    } catch (e) {} _unsubBalance    = null; }
+    if (_unsubGifts)      { try { _unsubGifts();      } catch (e) {} _unsubGifts      = null; }
+    if (_unsubCoupons)    { try { _unsubCoupons();    } catch (e) {} _unsubCoupons    = null; }
+    if (_unsubBizCoupons) { try { _unsubBizCoupons(); } catch (e) {} _unsubBizCoupons = null; }
   });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
