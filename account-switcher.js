@@ -181,9 +181,16 @@
         if (_businesses[i].id === currentActor.businessId) { actingBiz = _businesses[i]; break; }
       }
       if (actingBiz) {
-        actorBanner = '<div style="background:rgba(16,185,129,.08);border-bottom:1px solid rgba(16,185,129,.15);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.78rem;color:#10b981">'+
-          '<span><i class="fas fa-store"></i> Acting as <strong>'+esc(actingBiz.title||'Business')+'</strong></span>'+
-          '<button onclick="event.stopPropagation();window._geoSW.switchToUser()" style="background:none;border:1px solid rgba(255,255,255,.1);color:#94a3b8;font-size:.72rem;cursor:pointer;padding:3px 8px;border-radius:6px">Switch back</button>'+
+        actorBanner = '<div style="background:rgba(16,185,129,.08);border-bottom:1px solid rgba(16,185,129,.15);padding:10px 14px;font-size:.78rem;color:#10b981">'+
+          '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px">'+
+            '<span><i class="fas fa-store"></i> Acting as <strong>'+esc(actingBiz.title||'Business')+'</strong></span>'+
+            '<button onclick="event.stopPropagation();window._geoSW.switchToUser()" style="background:none;border:1px solid rgba(255,255,255,.1);color:#94a3b8;font-size:.72rem;cursor:pointer;padding:3px 8px;border-radius:6px">Switch back</button>'+
+          '</div>'+
+          '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
+            '<a href="business.html?id='+esc(actingBiz.id)+'" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:7px;background:rgba(59,130,246,.18);color:#93c5fd;font-size:.72rem;font-weight:700;text-decoration:none"><i class="fas fa-arrow-up-right-from-square"></i> View Page</a>'+
+            '<a href="business.html?id='+esc(actingBiz.id)+'&tab=manage" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:7px;background:rgba(255,255,255,.07);color:#94a3b8;font-size:.72rem;font-weight:700;text-decoration:none"><i class="fas fa-gear"></i> Manage</a>'+
+            '<a href="messages.html?business='+esc(actingBiz.id)+'" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:7px;background:rgba(255,255,255,.07);color:#94a3b8;font-size:.72rem;font-weight:700;text-decoration:none"><i class="fas fa-comment-dots"></i> Inbox</a>'+
+          '</div>'+
         '</div>';
       }
     }

@@ -329,7 +329,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<nav class="gh-center-tabs" aria-label="Primary navigation">'+
         '<a'+ca('feed')+' href="feed.html" title="Feed"><i class="fas fa-house"></i></a>'+
         '<a'+ca('groups')+' href="groups.html" title="Groups"><i class="fas fa-user-group"></i></a>'+
-        '<a'+ca('messages')+' href="messages.html" title="Messages"><i class="fas fa-comment-dots"></i><b class="gh-badge-count" id="ghMsgBadge"></b></a>'+
+        '<a'+ca('messages')+' id="ghMsgLink" href="messages.html" title="Messages"><i class="fas fa-comment-dots"></i><b class="gh-badge-count" id="ghMsgBadge"></b></a>'+
         '<button type="button" id="ghNotifBtn" title="Notifications"><i class="fas fa-bell"></i><b class="gh-badge-count" id="ghNotifBadge"></b></button>'+
       '</nav>'+
       '<div class="gh-top-actions">'+
@@ -514,7 +514,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         updateTopUser();
       });
       // Re-render topbar + composer on every actor change (account switcher), global across all pages
-      window.addEventListener('GeoActorChanged', function(){ updateTopUser(); });
+      window.addEventListener('GeoActorChanged', function(){ updateTopUser(); listenBadges(); });
     }
   }
 
@@ -559,6 +559,48 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(ca){ ca.className='gh-avatar'; ca.innerHTML=topAvatar?img(topAvatar,topName):esc(initials(topName||'')); }
     // Persist to cache (always real user data, not actor data)
     setCachedUser({uid:u.uid,name:displayName,avatar:displayAvatar});
+    // Actor-aware: update messages link in topbar + left nav
+    var msgsHref=(_actor&&_actor.type==='business'&&_actor.businessId)
+      ? 'messages.html?business='+encodeURIComponent(_actor.businessId)
+      : 'messages.html';
+    var msgLink=document.getElementById('ghMsgLink');
+    if(msgLink) msgLink.setAttribute('href',msgsHref);
+    document.querySelectorAll('.gh-nav-item').forEach(function(a){
+      if(a.querySelector('.fa-comment-dots')) a.setAttribute('href',msgsHref);
+    });
+    // Page mode banner
+    updatePageModeBanner(_actor,topName);
+  }
+
+  function updatePageModeBanner(_actor,topName){
+    var banner=document.getElementById('ghPageModeBanner');
+    if(!banner){
+      banner=document.createElement('div');
+      banner.id='ghPageModeBanner';
+      banner.style.display='none';
+      var layout=document.querySelector('.gh-layout');
+      if(layout&&layout.parentNode){ layout.parentNode.insertBefore(banner,layout); }
+      else{
+        var mainEl=document.querySelector('main');
+        if(mainEl){ mainEl.insertBefore(banner,mainEl.firstChild); }
+        else{ document.body.appendChild(banner); }
+      }
+    }
+    var isBiz=_actor&&_actor.type==='business'&&_actor.businessId;
+    if(isBiz){
+      banner.style.display='';
+      banner.innerHTML='<div class="gh-pmb-inner">'+
+        '<i class="fas fa-store"></i> Using GeoHub as <strong>'+esc(topName||'Business')+'</strong>'+
+        '<div class="gh-pmb-actions">'+
+          '<a class="gh-pmb-action" href="business.html?id='+encodeURIComponent(_actor.businessId)+'" title="View Page"><i class="fas fa-arrow-up-right-from-square"></i> View Page</a>'+
+          '<a class="gh-pmb-action" href="messages.html?business='+encodeURIComponent(_actor.businessId)+'" title="Business Inbox"><i class="fas fa-comment-dots"></i> Inbox</a>'+
+          '<button class="gh-pmb-switch" onclick="(function(){try{localStorage.removeItem(\'gh_active_actor\');}catch(e){}window.dispatchEvent(new CustomEvent(\'GeoActorChanged\',{detail:{type:\'user\'}}));})()">Switch Back</button>'+
+        '</div>'+
+      '</div>';
+    } else {
+      banner.style.display='none';
+      banner.innerHTML='';
+    }
   }
 
   function validateActorOnLoad(){
@@ -613,8 +655,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var u=authUser(); if(!u) return;
       try{
         state.badgeUnsubs.push(GS().listenUserNotifications(u.uid, function(items){ var n=items.filter(function(x){return !x.read && !x.seen;}).length; var b=$('#ghNotifBadge'); if(b) b.textContent=n?String(n):''; }));
-        var q=fs().query(fs().collection(db(),'conversations'), fs().where('participants','array-contains',u.uid), fs().limit(25));
-        state.badgeUnsubs.push(fs().onSnapshot(q,function(snap){ var n=0; snap.forEach(function(d){ var x=d.data()||{}; if(x.lastSenderId && x.lastSenderId!==u.uid && Array.isArray(x.unreadFor) && x.unreadFor.indexOf(u.uid)>-1) n++; }); var b=$('#ghMsgBadge'); if(b) b.textContent=n?String(n):''; },function(){ }));
+        var _msgActor=getActiveActor();
+        var _msgQ;
+        if(_msgActor&&_msgActor.type==='business'&&_msgActor.businessId){
+          _msgQ=fs().query(fs().collection(db(),'conversations'),fs().where('businessId','==',_msgActor.businessId),fs().limit(25));
+          state.badgeUnsubs.push(fs().onSnapshot(_msgQ,function(snap){ var n=0; snap.forEach(function(d){ var x=d.data()||{}; if(Array.isArray(x.unreadFor)&&x.unreadFor.indexOf(u.uid)>-1) n++; }); var b=$('#ghMsgBadge'); if(b) b.textContent=n?String(n):''; },function(){}));
+        } else {
+          _msgQ=fs().query(fs().collection(db(),'conversations'),fs().where('participants','array-contains',u.uid),fs().limit(25));
+          state.badgeUnsubs.push(fs().onSnapshot(_msgQ,function(snap){ var n=0; snap.forEach(function(d){ var x=d.data()||{}; if(x.lastSenderId&&x.lastSenderId!==u.uid&&Array.isArray(x.unreadFor)&&x.unreadFor.indexOf(u.uid)>-1) n++; }); var b=$('#ghMsgBadge'); if(b) b.textContent=n?String(n):''; },function(){}));
+        }
       }catch(e){}
     });
   }

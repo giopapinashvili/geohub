@@ -1987,3 +1987,16 @@ html[data-gh-theme="light"] .gh-cmp-tool.active{background:rgba(16,185,129,.1)}
 /* ── Account switcher unread dot ──────────────────────────── */
 .geo-sw-unread-dot{width:9px;height:9px;border-radius:50%;background:#ef4444;flex-shrink:0;margin-left:auto;animation:geo-sw-pulse 1.8s ease-in-out infinite}
 @keyframes geo-sw-pulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.55)}60%{box-shadow:0 0 0 5px rgba(239,68,68,0)}}
+
+/* ── Page mode banner (acting as a business/page) ─────────── */
+#ghPageModeBanner{width:100%;background:linear-gradient(90deg,rgba(16,185,129,.09),rgba(59,130,246,.07));border-bottom:1px solid rgba(16,185,129,.2)}
+.gh-pmb-inner{max-width:1500px;margin:0 auto;padding:7px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:.8rem;color:#6ee7b7}
+.gh-pmb-inner strong{color:#a7f3d0;font-weight:800}
+.gh-pmb-actions{margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.gh-pmb-action{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:7px;background:rgba(59,130,246,.15);color:#93c5fd;font-size:.73rem;font-weight:700;text-decoration:none;transition:background .15s}
+.gh-pmb-action:hover{background:rgba(59,130,246,.28)}
+.gh-pmb-switch{background:none;border:1px solid rgba(255,255,255,.12);color:#94a3b8;font-size:.73rem;font-weight:700;cursor:pointer;padding:4px 10px;border-radius:7px;font-family:inherit;transition:all .15s}
+.gh-pmb-switch:hover{background:rgba(255,255,255,.07);color:#f0f4ff}
+/* Full-shell: banner is first child of gh-shell, right below the fixed topbar padding */
+.gh-shell>#ghPageModeBanner{margin-top:0;margin-bottom:0}
+@media(max-width:640px){.gh-pmb-inner{padding:7px 14px;gap:6px}.gh-pmb-actions{margin-left:0}}
