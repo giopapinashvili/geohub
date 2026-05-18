@@ -692,7 +692,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     friend_accept:   { icon: 'fa-handshake',   color: '#22d3ee' },
     points_received: { icon: 'fa-coins',       color: '#eab308' },
     quote:           { icon: 'fa-file-invoice',color: '#6366f1' },
-    coupon_redeemed: { icon: 'fa-ticket-alt',  color: '#10b981' }
+    coupon_redeemed:     { icon: 'fa-ticket-alt',  color: '#10b981' },
+    group_join_request:  { icon: 'fa-user-clock',  color: '#a855f7' },
+    group_approved:      { icon: 'fa-user-check',  color: '#10b981' },
+    group_declined:      { icon: 'fa-user-times',  color: '#ef4444' }
   };
 
   function openNotifications(){
@@ -4922,8 +4925,21 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function openGroupCreate(){
     if(!requireLogin()) return;
-    var body='<input class="gh-input" id="ghGroupName" placeholder="Group name *"><div style="height:8px"></div><textarea class="gh-textarea" id="ghGroupDesc" placeholder="What is this group about?" rows="3"></textarea><div style="height:8px"></div><select class="gh-select" id="ghGroupCat"><option value="general">General</option><option value="hiking">Hiking</option><option value="travel">Travel</option><option value="photography">Photography</option><option value="business">Business</option><option value="learning">Learning</option><option value="fitness">Fitness</option><option value="nightlife">Nightlife</option></select><div style="height:8px"></div><select class="gh-select" id="ghGroupPrivacy"><option value="public">Public — visible, posts open to all</option><option value="private">Private — visible, posts for members only</option><option value="secret">Secret — invite only, not in search</option></select><div style="height:8px"></div><input class="gh-input" id="ghGroupCover" placeholder="Cover image URL (optional)">';
+    var body='<input class="gh-input" id="ghGroupName" placeholder="Group name *"><div style="height:8px"></div><textarea class="gh-textarea" id="ghGroupDesc" placeholder="What is this group about?" rows="3"></textarea><div style="height:8px"></div><select class="gh-select" id="ghGroupCat"><option value="general">General</option><option value="hiking">Hiking</option><option value="travel">Travel</option><option value="photography">Photography</option><option value="business">Business</option><option value="learning">Learning</option><option value="fitness">Fitness</option><option value="nightlife">Nightlife</option></select><div style="height:8px"></div><select class="gh-select" id="ghGroupPrivacy"><option value="public">Public — visible, posts open to all</option><option value="private">Private — visible, posts for members only</option><option value="secret">Secret — invite only, not in search</option></select><div style="height:8px"></div><div style="display:flex;gap:8px;align-items:center"><input class="gh-input" id="ghGroupCover" placeholder="Cover image URL (optional)" style="flex:1"><label for="ghGroupCoverFile" class="gh-btn ghost sm" id="ghGrCoverUploadLbl" style="cursor:pointer;white-space:nowrap;flex-shrink:0;padding:10px 13px"><i class="fas fa-upload"></i></label><input type="file" id="ghGroupCoverFile" accept="image/*" style="display:none"></div>';
     modal('Create Group', body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitGroup">Create</button>', 'ghGroupCreateModal');
+    (function(){
+      var fi=$('#ghGroupCoverFile'); if(!fi) return;
+      fi.addEventListener('change',function(){
+        var file=fi.files&&fi.files[0]; if(!file) return;
+        var lbl=$('#ghGrCoverUploadLbl'); if(lbl) lbl.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+        var cfg=(window.GeoConfig&&window.GeoConfig.CLOUDINARY)||{cloudName:'dw5dqk2w7',uploadPreset:'geohub_unsigned',rootFolder:'geohub'};
+        var fd=new FormData(); fd.append('file',file); fd.append('upload_preset',cfg.uploadPreset); fd.append('folder',(cfg.rootFolder||'geohub')+'/groups');
+        var xhr=new XMLHttpRequest(); xhr.open('POST','https://api.cloudinary.com/v1_1/'+cfg.cloudName+'/image/upload');
+        xhr.onload=function(){ try{ var r=JSON.parse(xhr.responseText); var url=r.secure_url||null; var ci=$('#ghGroupCover'); if(url&&ci) ci.value=url; if(lbl) lbl.innerHTML=url?'<i class="fas fa-check"></i>':'<i class="fas fa-upload"></i>'; }catch(e){ if(lbl) lbl.innerHTML='<i class="fas fa-upload"></i>'; } fi.value=''; };
+        xhr.onerror=function(){ if(lbl) lbl.innerHTML='<i class="fas fa-upload"></i>'; fi.value=''; };
+        xhr.send(fd);
+      });
+    })();
     $('#ghSubmitGroup').onclick=function(){ GS().createGroup({ name:$('#ghGroupName').value, description:$('#ghGroupDesc').value, category:$('#ghGroupCat').value, privacy:$('#ghGroupPrivacy').value, coverUrl:$('#ghGroupCover').value.trim(), rules:[], joinQuestions:[], pinnedPostIds:[], postApproval:false }, function(id){ if(id) location.href='groups.html?id='+encodeURIComponent(id); }); };
   }
 
@@ -4934,10 +4950,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function renderGroupDetail(id){
     shell({ active:'groups', center:'<div id="ghGroupDetail"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>Loading group…</h3></div></div>' });
-    state.currentGroupId=id; state.currentGroupRole=null; state.currentGroupData=null; state.currentGroupMuted=false;
+    state.currentGroupId=id; state.currentGroupRole=null; state.currentGroupData=null; state.currentGroupMuted=false; state.currentGroupJoinRequested=false;
     ready(function(){
       GS().getGroupMemberRole(id, function(role){
         var prev=state.currentGroupRole; state.currentGroupRole=role;
+        if(!role){ GS().checkJoinRequest(id,function(s){ state.currentGroupJoinRequested=(s==='pending'); if(state.currentGroupData) paintGroupDetail(state.currentGroupData); }); } else { state.currentGroupJoinRequested=false; }
         if(prev!==role && state.currentGroupData) paintGroupDetail(state.currentGroupData);
       });
       GS().getGroupMuteStatus(id, function(muted){ state.currentGroupMuted=muted; });
@@ -4951,7 +4968,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var uid=authUser()&&authUser().uid; var privacy=g.privacy||'public';
     var isAdmin=grIsAdmin(g); var isMember=grIsMember(); var isMuted=state.currentGroupMuted;
     if(privacy==='secret'&&!isMember&&!isAdmin){ $('#ghGroupDetail').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-eye-slash"></i><h3>Secret group</h3><p>You need an invite link to access this group.</p><a class="gh-btn" href="groups.html">Browse Groups</a></div>'; return; }
-    var joinBtn=!isMember?((privacy==='private'||privacy==='secret')?'<button class="gh-btn" data-group-join-request><i class="fas fa-hand-paper"></i> Request to Join</button>':'<button class="gh-btn" data-group-join><i class="fas fa-user-plus"></i> Join</button>'):'<button class="gh-btn ghost" data-group-leave><i class="fas fa-sign-out-alt"></i> Leave</button>';
+    var joinBtn=!isMember?(state.currentGroupJoinRequested?'<button class="gh-btn ghost" data-group-cancel-request><i class="fas fa-hourglass-half"></i> Request Pending</button>':((privacy==='private'||privacy==='secret')?'<button class="gh-btn" data-group-join-request><i class="fas fa-hand-paper"></i> Request to Join</button>':'<button class="gh-btn" data-group-join><i class="fas fa-user-plus"></i> Join</button>')):'<button class="gh-btn ghost" data-group-leave><i class="fas fa-sign-out-alt"></i> Leave</button>';
     var adminBtn=isAdmin?'<button class="gh-btn ghost sm" data-group-admin-panel><i class="fas fa-cog"></i> Manage</button>':'';
     var coverUpBtn=isAdmin?'<button class="gh-btn ghost sm gr-cover-upload-btn" data-group-cover-upload title="Change cover"><i class="fas fa-camera"></i></button>':'';
     $('#ghGroupDetail').innerHTML=
@@ -4959,7 +4976,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div class="gh-page-cover gr-cover-wrap">'+(cover?img(cover,title):'<div class="gr-cover-placeholder"><i class="fas fa-users"></i></div>')+coverUpBtn+'</div>'+
         '<div class="gh-page-info">'+
           '<div class="gh-page-logo"><i class="fas fa-users"></i></div>'+
-          '<div class="gh-page-title"><h1>'+esc(title)+'</h1><p>'+grPrivacyIcon(privacy)+' '+esc(privacy)+' group · '+Number(g.memberCount||0)+' members · '+esc(g.category||'general')+'</p></div>'+
+          '<div class="gh-page-title"><h1>'+esc(title)+'</h1><p>'+grPrivacyIcon(privacy)+' '+esc(privacy)+' group · '+Number(g.memberCount||0)+' members · '+esc(g.category||'general')+(g.city?' &nbsp;·&nbsp; <i class="fas fa-map-marker-alt" style="color:#3b82f6;font-size:.8em"></i> '+esc(g.city):'')+'</p></div>'+
           '<div class="gh-page-actions">'+joinBtn+' '+adminBtn+
             ' <button class="gh-btn ghost sm gr-mute-btn" data-group-mute title="'+(isMuted?'Unmute':'Mute')+'"><i class="fas fa-'+(isMuted?'bell-slash':'bell')+'"></i></button>'+
             ' <button class="gh-btn ghost sm" data-share-group><i class="fas fa-share"></i></button>'+
@@ -4980,6 +4997,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var tab=e.target.closest('[data-group-detail-tab]'); if(tab){ state.currentGroupTab=tab.dataset.groupDetailTab; $all('[data-group-detail-tab]').forEach(function(x){x.classList.toggle('active',x===tab);}); renderGroupTab(g); return; }
       if(e.target.closest('[data-group-join]')){ if(!requireLogin())return; GS().toggleGroupMember(g.id,title,function(){GS().getGroupMemberRole(g.id,function(r){state.currentGroupRole=r;}); paintGroupDetail(g);}); return; }
       if(e.target.closest('[data-group-join-request]')){ if(!requireLogin())return; openGroupJoinRequestModal(g); return; }
+      if(e.target.closest('[data-group-cancel-request]')){ if(!requireLogin())return; GS().requestJoinGroup(g.id,function(){ state.currentGroupJoinRequested=false; paintGroupDetail(g); }); return; }
       if(e.target.closest('[data-group-leave]')){ if(!confirm('Leave "'+title+'"?'))return; GS().leaveGroup(g.id,function(ok){if(ok){state.currentGroupRole=null;paintGroupDetail(g);}}); return; }
       if(e.target.closest('[data-group-mute]')){ if(!requireLogin())return; var newMuted=!state.currentGroupMuted; GS().setGroupMute(g.id,newMuted,function(ok){if(ok){state.currentGroupMuted=newMuted;paintGroupDetail(g);}}); return; }
       if(e.target.closest('[data-group-admin-panel]')){ state.currentGroupTab='admin'; $all('[data-group-detail-tab]').forEach(function(x){x.classList.toggle('active',x.dataset.groupDetailTab==='admin');}); renderGroupTab(g); return; }
@@ -5004,7 +5022,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var questionsHtml=questions.length?'<div style="margin-top:12px"><h4><i class="fas fa-question-circle"></i> Membership Questions</h4>'+questions.map(function(q,i){return '<div style="margin-bottom:10px"><label class="gh-muted" style="font-size:.85rem;display:block;margin-bottom:4px">'+(i+1)+'. '+esc(q.question||q)+'</label><textarea class="gh-textarea" id="ghJoinQ'+i+'" rows="2" placeholder="Your answer…"></textarea></div>';}).join('')+'</div>':'';
     var body=(rulesHtml||questionsHtml)?rulesHtml+questionsHtml:'<p class="gh-muted">Your join request will be sent to the group admin for approval.</p>';
     modal('Request to Join '+esc(g.name||'Group'), body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitJoinRequest">Send Request</button>', 'ghJoinRequestModal');
-    $('#ghSubmitJoinRequest').onclick=function(){ if(rules.length&&!($('#ghRulesAck')&&$('#ghRulesAck').checked)){toast('You must agree to the group rules','error');return;} var answers=questions.map(function(q,i){return {question:q.question||q,answer:($('#ghJoinQ'+i)||{}).value||''};}); GS().requestJoinGroupWithAnswers(g.id,answers,function(){var m=document.getElementById('ghJoinRequestModal');if(m)m.remove();toast('Request sent! Awaiting approval.');}); };
+    $('#ghSubmitJoinRequest').onclick=function(){ if(rules.length&&!($('#ghRulesAck')&&$('#ghRulesAck').checked)){toast('You must agree to the group rules','error');return;} var answers=questions.map(function(q,i){return {question:q.question||q,answer:($('#ghJoinQ'+i)||{}).value||''};}); GS().requestJoinGroupWithAnswers(g.id,answers,function(){var m=document.getElementById('ghJoinRequestModal');if(m)m.remove();toast('Request sent! Awaiting approval.');state.currentGroupJoinRequested=true;if(state.currentGroupData)paintGroupDetail(state.currentGroupData);}); };
   }
 
   function renderGroupTab(g){
@@ -5348,7 +5366,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     friend_accept:   { icon: 'fa-handshake',   color: '#22d3ee' },
     points_received: { icon: 'fa-coins',       color: '#eab308' },
     quote:           { icon: 'fa-file-invoice',color: '#6366f1' },
-    coupon_redeemed: { icon: 'fa-ticket-alt',  color: '#10b981' }
+    coupon_redeemed:     { icon: 'fa-ticket-alt',  color: '#10b981' },
+    group_join_request:  { icon: 'fa-user-clock',  color: '#a855f7' },
+    group_approved:      { icon: 'fa-user-check',  color: '#10b981' },
+    group_declined:      { icon: 'fa-user-times',  color: '#ef4444' }
   };
   var NP_FILTERS = [
     { key: 'all',     label: 'All' },

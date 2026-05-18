@@ -2613,6 +2613,16 @@
         }).then(function () {
           toast('Join request sent!');
           if (callback) callback('pending');
+          getDoc(doc(db, 'groups', groupId)).then(function (gSnap) {
+            if (!gSnap.exists()) return;
+            var gd = gSnap.data();
+            var ownerId = gd.ownerId || gd.creatorId || gd.userId || '';
+            if (ownerId && ownerId !== user.uid) {
+              createSystemNotification(ownerId, 'group_join_request', 'New Join Request',
+                (me.name || user.displayName || 'Someone') + ' wants to join "' + (gd.name || 'your group') + '"',
+                'groups.html?id=' + groupId).catch(function () {});
+            }
+          }).catch(function () {});
         }).catch(function () { toast('Failed to send request', 'error'); if (callback) callback('error'); });
       });
     }
@@ -2642,18 +2652,39 @@
             });
           }).then(function () {
             return updateDoc(doc(db, 'groups', groupId), { memberCount: increment(1) }).catch(function(){});
-          }).then(function () { toast('Member approved!'); if (callback) callback(true); })
+          }).then(function () {
+            toast('Member approved!');
+            if (callback) callback(true);
+            getDoc(doc(db, 'groups', groupId)).then(function (gSnap) {
+              var gName = gSnap.exists() ? (gSnap.data().name || 'the group') : 'the group';
+              createSystemNotification(userId, 'group_approved', 'Join Request Approved',
+                'You have been approved to join "' + gName + '"',
+                'groups.html?id=' + groupId).catch(function () {});
+            }).catch(function () {});
+          })
           .catch(function () { toast('Failed', 'error'); if (callback) callback(false); });
       });
     }
 
     function declineJoinRequest(requestId, callback) {
       requireAuth(function () {
-        updateDoc(doc(db, 'groupJoinRequests', requestId), { status: 'declined', updatedAt: serverTimestamp() })
-          .catch(function(){});
-        deleteDoc(doc(db, 'groupJoinRequests', requestId))
-          .then(function () { toast('Request declined'); if (callback) callback(true); })
-          .catch(function () { toast('Failed', 'error'); if (callback) callback(false); });
+        var reqRef = doc(db, 'groupJoinRequests', requestId);
+        var _tuid = '', _gid = '';
+        getDoc(reqRef).then(function (reqSnap) {
+          if (reqSnap.exists()) { _tuid = reqSnap.data().userId || ''; _gid = reqSnap.data().groupId || ''; }
+          return deleteDoc(reqRef);
+        }).then(function () {
+          toast('Request declined');
+          if (callback) callback(true);
+          if (_tuid && _gid) {
+            getDoc(doc(db, 'groups', _gid)).then(function (gSnap) {
+              var gName = gSnap.exists() ? (gSnap.data().name || 'the group') : 'the group';
+              createSystemNotification(_tuid, 'group_declined', 'Join Request',
+                'Your request to join "' + gName + '" was not approved.',
+                'groups.html').catch(function () {});
+            }).catch(function () {});
+          }
+        }).catch(function () { toast('Failed', 'error'); if (callback) callback(false); });
       });
     }
 

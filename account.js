@@ -111,7 +111,10 @@
     reward:          { icon: 'fa-gift',       color: '#f59e0b' },
     badge:           { icon: 'fa-medal',      color: '#f59e0b' },
     challenge:       { icon: 'fa-trophy',     color: '#f59e0b' },
-    coupon_redeemed: { icon: 'fa-ticket-alt', color: '#10b981' }
+    coupon_redeemed:    { icon: 'fa-ticket-alt', color: '#10b981' },
+    group_join_request: { icon: 'fa-user-clock', color: '#a855f7' },
+    group_approved:     { icon: 'fa-user-check', color: '#10b981' },
+    group_declined:     { icon: 'fa-user-times', color: '#ef4444' }
   };
 
   function notifTimeAgo(ts) {
