@@ -1911,3 +1911,23 @@ html[data-gh-theme="light"] .gh-cmp-tool.active{background:rgba(16,185,129,.1)}
   .gh-cmp-tool{padding:7px 8px}
   .gh-cmp-vis-select{max-width:140px}
 }
+
+/* ── Phase 27 — Stories / Media Experience ─────────────────── */
+
+/* Pause progress bar animation while hovering */
+.gh-story-shell.gh-story-paused .gh-story-progress span.current::after{animation-play-state:paused}
+
+/* Seen indicator — dimmed ring */
+.gh-story-seen .gh-story-avatar-mini{border-color:rgba(255,255,255,.28);opacity:.72}
+.gh-story-seen .gh-story-bg{opacity:.7}
+.gh-story-seen .gh-story-bg::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.28)}
+
+/* Create card with user avatar */
+.gh-story-add{position:relative;overflow:hidden}
+.gh-story-add-avatar{position:absolute;inset:0;width:100%;height:100%;display:block}
+.gh-story-add-avatar img{width:100%;height:100%;object-fit:cover;opacity:.55}
+.gh-story-add-icon{font-size:1.6rem;line-height:1;margin-bottom:4px}
+.gh-story-add strong{position:relative;z-index:2;font-size:.78rem;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+
+/* Empty state */
+.gh-story-empty{display:flex;align-items:center;padding:0 14px;font-size:.82rem;color:var(--gh-muted);white-space:nowrap;flex-shrink:0}

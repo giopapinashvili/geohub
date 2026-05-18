@@ -982,41 +982,75 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function openStoryModal(){
     if(!requireLogin()) return;
-    var body='<textarea class="gh-textarea" id="ghStoryText" placeholder="Story text…"></textarea>'+
-      '<div style="height:10px"></div><input class="gh-input" id="ghStoryImg" placeholder="Image URL optional"><div style="height:10px"></div>'+
-      '<button class="gh-btn ghost full" id="ghPickStoryImage" type="button"><i class="fas fa-image"></i> Choose image</button>'+
+    var me=currentUserInfo();
+    var av=me.avatar||''; var name=me.name||'You';
+    var actorAv='<span class="gh-cmp-actor-av gh-avatar sm">'+(av?'<img src="'+esc(av)+'" alt="">':esc(initials(name)))+'</span>';
+    var body=
+      '<div class="gh-cmp-actor-row">'+
+        actorAv+
+        '<div class="gh-cmp-actor-info">'+
+          '<span class="gh-cmp-actor-name">'+esc(name)+'</span>'+
+          '<span class="gh-cmp-destination">Adding to your story</span>'+
+        '</div>'+
+      '</div>'+
+      '<textarea class="gh-cmp-textarea" id="ghStoryText" placeholder="What\'s your story?…" rows="3"></textarea>'+
       '<div id="ghStoryPreview" style="margin-top:10px"></div>'+
-      '<div class="gh-upload-progress" id="ghStoryUploadBar" style="display:none"><div class="gh-upload-track"><div class="gh-upload-bar" id="ghStoryUploadFill"></div></div><span id="ghStoryUploadPct">0%</span></div>';
-    modal('Add story', body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitStory">Share story</button>', 'ghStoryModal');
-    var picked='', pickedFile=null;
-    $('#ghPickStoryImage').onclick=function(){
-      triggerImagePick(function(url, file){
-        picked=url; pickedFile=file||null;
-        $('#ghStoryImg').value='';
-        $('#ghStoryPreview').innerHTML=url?'<img src="'+esc(url)+'" style="width:100%;max-height:260px;object-fit:cover;border-radius:16px;border:1px solid var(--gh-border)">':'';
-      });
+      '<div class="gh-upload-progress" id="ghStoryUploadBar" style="display:none"><div class="gh-upload-track"><div class="gh-upload-bar" id="ghStoryUploadFill"></div></div><span id="ghStoryUploadPct">0%</span></div>'+
+      '<input type="file" id="ghStoryFilePick" accept="image/*,video/*" style="display:none">'+
+      '<div class="gh-cmp-toolbar" style="margin-top:10px">'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryPhotoBtn"><i class="fas fa-image"></i><span> Photo/Video</span></button>'+
+      '</div>';
+    var m=modal('Add to your story', body,
+      '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitStory" disabled>Share story</button>',
+      'ghStoryModal');
+    var pickedFile=null;
+    function isDirty(){ return !!(($('#ghStoryText')||{}).value||'').trim()||!!pickedFile; }
+    function updateSubmit(){ var btn=$('#ghSubmitStory'); if(btn) btn.disabled=!isDirty(); }
+    m.addEventListener('click', function(e){
+      if(e.target===m||e.target.closest('[data-close-modal]')){
+        if(isDirty()&&!confirm('Discard your story?')){ e.stopPropagation(); e.preventDefault(); }
+      }
+    }, true);
+    var ta=$('#ghStoryText');
+    if(ta){ ta.addEventListener('input', updateSubmit); setTimeout(function(){ ta.focus(); }, 60); }
+    $('#ghStoryPhotoBtn').onclick=function(){ var fp=$('#ghStoryFilePick'); if(fp) fp.click(); };
+    $('#ghStoryFilePick').onchange=function(){
+      var file=this.files&&this.files[0]; if(!file) return;
+      pickedFile=file;
+      var localUrl=URL.createObjectURL(file);
+      var isVideo=file.type.startsWith('video/');
+      $('#ghStoryPreview').innerHTML=isVideo
+        ? '<video src="'+esc(localUrl)+'" style="width:100%;max-height:260px;border-radius:16px;border:1px solid var(--gh-border)" muted playsinline controls></video>'+
+          '<button type="button" id="ghStoryRemoveMedia" style="margin-top:6px;border-radius:8px;padding:4px 12px;background:rgba(220,38,38,.15);color:#ef4444;border:none;cursor:pointer;display:block"><i class="fas fa-times"></i> Remove</button>'
+        : '<div style="position:relative;display:inline-block;width:100%"><img src="'+esc(localUrl)+'" style="width:100%;max-height:260px;object-fit:cover;border-radius:16px;border:1px solid var(--gh-border)">'+
+          '<button type="button" id="ghStoryRemoveMedia" style="position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;background:rgba(15,23,42,.75);border:none;color:#fff;cursor:pointer;font-size:1.1rem;display:grid;place-items:center"><i class="fas fa-times"></i></button></div>';
+      updateSubmit();
+      var rmBtn=$('#ghStoryRemoveMedia');
+      if(rmBtn) rmBtn.onclick=function(){ pickedFile=null; $('#ghStoryPreview').innerHTML=''; updateSubmit(); };
     };
     $('#ghSubmitStory').onclick=function(){
-      var t=$('#ghStoryText').value, urlInput=$('#ghStoryImg').value.trim();
-      var mediaSource=pickedFile||picked||urlInput;
-      if(!t.trim()&&!mediaSource) return toast('Story needs text or image','error');
+      var t=($('#ghStoryText')||{}).value||'';
+      if(!t.trim()&&!pickedFile) return toast('Story needs text or image','error');
       if(!GS().createStory) return toast('Stories unavailable','error');
       var submitBtn=$('#ghSubmitStory');
       if(submitBtn.disabled) return;
-      submitBtn.disabled=true; submitBtn.dataset.originalText=submitBtn.innerHTML;
-      submitBtn.innerHTML=mediaSource?'<i class="fas fa-circle-notch fa-spin"></i> Uploading…':'<i class="fas fa-circle-notch fa-spin"></i> Sharing…';
+      submitBtn.disabled=true;
+      var origHtml=submitBtn.innerHTML;
+      submitBtn.innerHTML=pickedFile?'<i class="fas fa-circle-notch fa-spin"></i> Uploading…':'<i class="fas fa-circle-notch fa-spin"></i> Sharing…';
       var bar=$('#ghStoryUploadBar'), fill=$('#ghStoryUploadFill'), pctEl=$('#ghStoryUploadPct');
-      if(bar && mediaSource) bar.style.display='flex';
-      prepareMedia(mediaSource,'stories',function(pct){
-        if(fill) fill.style.width=pct+'%';
-        if(pctEl) pctEl.textContent=pct+'%';
+      if(bar&&pickedFile) bar.style.display='flex';
+      prepareMedia(pickedFile||null,'stories',function(pct){
+        if(fill) fill.style.width=pct+'%'; if(pctEl) pctEl.textContent=pct+'%';
         submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> '+pct+'%';
       }).then(function(finalUrl){
-        if(mediaSource && !finalUrl && !(urlInput && !picked && !pickedFile)) throw new Error('Image upload failed');
+        if(pickedFile&&!finalUrl) throw new Error('Image upload failed');
         if(bar) bar.style.display='none';
-        GS().createStory(t,finalUrl,function(){ var m=$('#ghStoryModal'); if(m)m.remove(); });
-      }).catch(function(err){ console.error('[GeoHub] story image upload failed', err); toast('Image upload failed. Check Cloudinary settings.','error'); if(bar) bar.style.display='none'; })
-        .finally(function(){ var b=$('#ghSubmitStory'); if(b){ b.disabled=false; b.innerHTML=b.dataset.originalText||'Share story'; } });
+        GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); });
+      }).catch(function(err){
+        console.error('[GeoHub] story upload failed',err);
+        toast('Image upload failed. Check Cloudinary settings.','error');
+        if(bar) bar.style.display='none';
+      }).finally(function(){ var b=$('#ghSubmitStory'); if(b){ b.disabled=false; b.innerHTML=origHtml; } });
     };
   }
 
@@ -1054,7 +1088,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var first = group.stories[0] || {};
     var media = first.mediaUrl || '';
     var av = group.authorAvatar || '';
-    return '<button type="button" class="gh-story-card gh-story-v2-card" data-story-group="'+index+'" aria-label="Open '+esc(group.authorName)+' stories">'+
+    var _cu = window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser;
+    var _uid = _cu ? _cu.uid : '';
+    var allSeen = !!(_uid && group.stories.length > 0 && group.stories.every(function(s){
+      return Array.isArray(s.viewedBy) && s.viewedBy.indexOf(_uid) !== -1;
+    }));
+    return '<button type="button" class="gh-story-card gh-story-v2-card'+(allSeen?' gh-story-seen':'')+'" data-story-group="'+index+'" aria-label="Open '+esc(group.authorName)+' stories">'+
       '<div class="gh-story-bg">'+(media ? img(media, group.authorName) : '<span>📖</span>')+'</div>'+
       '<span class="gh-story-avatar-mini">'+(av ? img(av, group.authorName) : esc(initials(group.authorName)))+'</span>'+
       (group.stories.length > 1 ? '<span class="gh-story-count">'+group.stories.length+'</span>' : '')+
@@ -1069,16 +1108,28 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(box.dataset.storiesBound === '1') return;
       box.dataset.storiesBound = '1';
       var groups=[];
-      box.innerHTML='<button type="button" class="gh-story-card gh-story-add" data-create-story><div><i class="fas fa-plus-circle"></i><br><strong>Create</strong></div></button>';
+      function buildCreateCard(){
+        var me=currentUserInfo(); var av=me.avatar||''; var name=me.name||'';
+        return '<button type="button" class="gh-story-card gh-story-add" data-create-story>'+
+          (av?'<span class="gh-story-add-avatar"><img src="'+esc(av)+'" alt="'+esc(name)+'"></span>':
+              '<div class="gh-story-add-icon"><i class="fas fa-plus-circle"></i></div>')+
+          '<br><strong>Create</strong>'+
+        '</button>';
+      }
+      box.innerHTML=buildCreateCard();
       GS().listenStories(function(items){
-        groups = buildStoryGroups(items || []);
-        var add='<button type="button" class="gh-story-card gh-story-add" data-create-story><div><i class="fas fa-plus-circle"></i><br><strong>Create</strong></div></button>';
-        box.innerHTML = add + groups.slice(0, 16).map(renderStoryCard).join('');
+        groups=buildStoryGroups(items||[]);
+        var add=buildCreateCard();
+        if(!groups.length){
+          box.innerHTML=add+'<span class="gh-story-empty">No stories yet. Be the first!</span>';
+        } else {
+          box.innerHTML=add+groups.slice(0,16).map(renderStoryCard).join('');
+        }
       });
       box.addEventListener('click', function(e){
-        var add = e.target.closest('[data-create-story]');
+        var add=e.target.closest('[data-create-story]');
         if(add){ e.preventDefault(); openStoryModal(); return; }
-        var card = e.target.closest('[data-story-group]');
+        var card=e.target.closest('[data-story-group]');
         if(card){ e.preventDefault(); openStoryViewer(groups, Number(card.dataset.storyGroup)||0, 0); }
       });
     });
@@ -1110,9 +1161,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     document.body.classList.add('gh-story-open');
 
     var _autoTimer = null;
+    var _paused = false;
     var STORY_DUR = 5000;
 
     function clearTimer(){ if(_autoTimer){ clearTimeout(_autoTimer); _autoTimer=null; } }
+    function scheduleAdvance(){ clearTimer(); if(!_paused){ _autoTimer = setTimeout(tryAdvance, STORY_DUR); } }
     function close(){ clearTimer(); overlay.remove(); document.body.classList.remove('gh-story-open'); document.removeEventListener('keydown', onKey); }
 
     function tryAdvance(){
@@ -1150,6 +1203,18 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button type="button" class="gh-story-nav next" aria-label="Next story">›</button>'+
         '</div>';
 
+      // Non-blocking view tracking
+      var _cu = window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser;
+      if(_cu && st.id){
+        var _fsSdk = window.GeoFirebase.fs, _db = window.GeoFirebase.db;
+        if(_fsSdk && _db && _fsSdk.updateDoc && _fsSdk.doc){
+          _fsSdk.updateDoc(_fsSdk.doc(_db,'stories',st.id),{
+            viewedBy: _fsSdk.arrayUnion(_cu.uid),
+            viewCount: _fsSdk.increment(1)
+          }).catch(function(){});
+        }
+      }
+
       overlay.querySelector('.gh-story-close').onclick = close;
       overlay.querySelector('.gh-story-nav.prev').onclick = function(e){
         e.stopPropagation();
@@ -1166,7 +1231,18 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         } else { tryAdvance(); }
       };
 
-      _autoTimer = setTimeout(tryAdvance, STORY_DUR);
+      // Pause auto-advance on hover
+      var shell = overlay.querySelector('.gh-story-shell');
+      if(shell){
+        shell.addEventListener('mouseenter', function(){
+          _paused=true; clearTimer(); shell.classList.add('gh-story-paused');
+        });
+        shell.addEventListener('mouseleave', function(){
+          _paused=false; shell.classList.remove('gh-story-paused'); scheduleAdvance();
+        });
+      }
+
+      scheduleAdvance();
     }
 
     function onKey(e){ if(e.key==='Escape') close(); if(e.key==='ArrowLeft'){ clearTimer(); if(storyIndex>0){storyIndex--;}else if(groupIndex>0){groupIndex--;storyIndex=groups[groupIndex].stories.length-1;}else return; draw(); } if(e.key==='ArrowRight'){ clearTimer(); tryAdvance(); } }
