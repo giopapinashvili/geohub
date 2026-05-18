@@ -2921,31 +2921,14 @@
     function createPlaceReview(placeId, rating, comment, callback) {
       var user = auth.currentUser;
       if (!user) { showLoginPrompt(); return; }
-      var placeRef = doc(db, 'places', placeId);
-      var reviewRef = doc(collection(db, 'placeReviews'));
-      runTransaction(db, function (txn) {
-        return txn.get(placeRef).then(function (placeDoc) {
-          var data = placeDoc.exists() ? placeDoc.data() : {};
-          var prevCount = data.reviewCount || 0;
-          var prevTotal = data.ratingTotal || 0;
-          var newCount = prevCount + 1;
-          var newTotal = prevTotal + rating;
-          var newAvg = Math.round((newTotal / newCount) * 10) / 10;
-          txn.set(reviewRef, {
-            placeId: placeId,
-            userId: user.uid,
-            userName: user.displayName || user.email || 'User',
-            userPhoto: user.photoURL || '',
-            rating: rating,
-            comment: (comment || '').trim(),
-            createdAt: serverTimestamp()
-          });
-          txn.update(placeRef, {
-            reviewCount: newCount,
-            ratingTotal: newTotal,
-            rating: newAvg
-          });
-        });
+      addDoc(collection(db, 'placeReviews'), {
+        placeId: placeId,
+        userId: user.uid,
+        userName: user.displayName || user.email || 'User',
+        userPhoto: user.photoURL || '',
+        rating: rating,
+        comment: (comment || '').trim(),
+        createdAt: serverTimestamp()
       }).then(function () {
         toast('Review submitted!');
         if (callback) callback(true);

@@ -569,6 +569,7 @@
             '<button class="pl-det-btn'+(saved?' active':'')+'" id="detailSaveBtn" data-id="'+esc(p.id)+'" onclick="handleSaveDetail(\''+esc(p.id)+'\')">'+
               '<i class="'+(saved?'fas':'far')+' fa-bookmark"></i> '+(saved?'Saved':'Save')+
             '</button>'+
+            '<button class="pl-det-btn" onclick="sharePlaceDetail(\''+esc(p.id)+'\',\''+esc(p.name)+'\')"><i class="fas fa-share-alt"></i> Share</button>'+
             (p.lat&&p.lng?'<a class="pl-det-btn" href="https://maps.google.com/?q='+p.lat+','+p.lng+'" target="_blank"><i class="fas fa-directions"></i> Directions</a>':'')+
           '</div>'+
         '</div>'+
@@ -661,6 +662,17 @@
     _unsubReviews = GS.listenPlaceReviews(placeId, function(reviews){
       var list = document.getElementById('plReviewsList');
       if(!list) return;
+      var detRating = document.getElementById('detRating');
+      var detCount = document.getElementById('detReviewCount');
+      if(reviews.length){
+        var total = reviews.reduce(function(sum,r){ return sum+(Number(r.rating)||0); },0);
+        var avg = Math.round((total/reviews.length)*10)/10;
+        if(detRating) detRating.textContent = avg;
+        if(detCount) detCount.textContent = reviews.length;
+      } else {
+        if(detRating) detRating.textContent = '—';
+        if(detCount) detCount.textContent = '0';
+      }
       if(!reviews.length){
         list.innerHTML = '<p style="font-size:.8rem;color:#4b5563;padding:8px 0">No reviews yet. Be the first!</p>';
         return;
@@ -680,6 +692,20 @@
         '</div>';
       }).join('');
     });
+  }
+
+  function sharePlaceDetail(placeId, placeName){
+    var url = location.origin + location.pathname + '?id=' + encodeURIComponent(placeId);
+    if(navigator.share){
+      navigator.share({ title: (placeName||'GeoHub Place'), url: url }).catch(function(){});
+    } else if(navigator.clipboard){
+      navigator.clipboard.writeText(url).then(function(){
+        var GS = window.GeoSocial;
+        if(GS && GS.toast) GS.toast('Link copied!');
+      }).catch(function(){ prompt('Copy this link:', url); });
+    } else {
+      prompt('Copy this link:', url);
+    }
   }
 
   function handleSaveDetail(placeId){
