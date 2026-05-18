@@ -39,6 +39,9 @@
   let audioChunks = [];
   let recordingTimer = null;
   let recordingStart = 0;
+  let _convFilter = 'all';
+  let _searchFilter = '';
+  const _userCache = {};
 
   function whenReady(cb){
     if(window.GeoSocial && window.GeoFirebase) return cb();
@@ -50,6 +53,7 @@
   function initials(name){ return (String(name||'U').trim()[0] || 'U').toUpperCase(); }
 
   async function userInfo(uid){
+    if(_userCache[uid]) return _userCache[uid];
     const fallback = { id:uid, name:'GeoHub User', avatar:'' };
     if(!uid) return fallback;
     try{
@@ -57,10 +61,11 @@
       const snap=await GF.fs.getDoc(GF.fs.doc(GF.db,'users',uid));
       if(snap.exists()){
         const d=snap.data()||{};
-        return { id:uid, name:d.fullName||d.displayName||d.name||d.username||d.email||'GeoHub User', avatar:d.photoURL||d.avatar||d.avatarUrl||d.photo||'' };
+        const u={ id:uid, name:d.fullName||d.displayName||d.name||d.username||d.email||'GeoHub User', avatar:d.photoURL||d.avatar||d.avatarUrl||d.photo||'' };
+        _userCache[uid]=u; return u;
       }
     }catch(e){}
-    return fallback;
+    _userCache[uid]=fallback; return fallback;
   }
 
   function displayName(uid, fallback){
@@ -81,28 +86,39 @@
     const list=$('#convList');
     if(!list) return;
     const blockedIds = window._ghBlockedUserIds || [];
-    const visibleConvs = blockedIds.length ? convs.filter(c=>{ const oid=otherId(c); return !oid||!blockedIds.includes(oid); }) : convs;
-    if(!visibleConvs.length){
-      list.innerHTML='<div class="conv-empty"><i class="fas fa-inbox"></i><p>No conversations yet</p></div>';
-      updateMsgBadge(0);
-      return;
-    }
+    const baseConvs = blockedIds.length ? convs.filter(c=>{ const oid=otherId(c); return !oid||!blockedIds.includes(oid); }) : convs;
     const rows=[];
     let unreadCount=0;
-    for(const c of visibleConvs){
+    for(const c of baseConvs){
       const oid=otherId(c);
       const u=await userInfo(oid);
       const unread = Array.isArray(c.unreadFor) && c.unreadFor.includes(currentUid());
       if(unread) unreadCount++;
       rows.push({c, oid, u, unread});
     }
-    list.innerHTML=rows.map(({c,oid,u,unread})=>{
+    let filtered = rows;
+    if(_convFilter === 'unread') filtered = filtered.filter(r=>r.unread);
+    if(_searchFilter){
+      filtered = filtered.filter(r=>{
+        const name = (convNicknames[r.oid] || r.u.name || '').toLowerCase();
+        return name.includes(_searchFilter);
+      });
+    }
+    if(!filtered.length){
+      const msg = _searchFilter ? 'No results for "'+esc(_searchFilter)+'"'
+        : (_convFilter==='unread' ? 'No unread messages' : 'No conversations yet');
+      list.innerHTML='<div class="conv-empty"><i class="fas fa-inbox"></i><p>'+msg+'</p></div>';
+      updateMsgBadge(unreadCount);
+      return;
+    }
+    list.innerHTML=filtered.map(({c,oid,u,unread})=>{
       const name = convNicknames[oid] || u.name;
+      const ts = convTime(c.updatedAt || c.lastMessageAt || c.createdAt || null);
       return '<div class="conv-item '+(c.id===activeConversation?'active':'')+' '+(unread?'has-unread':'')+'" data-conv-id="'+esc(c.id)+'" oncontextmenu="return window.__ghConvCtxMenu(event,\''+esc(c.id)+'\')">'
         + '<a class="conv-av-wrap" href="profile.html?id='+esc(oid)+'" data-open-user-profile="'+esc(oid)+'" onclick="event.stopPropagation()">'
         + (u.avatar ? '<img class="conv-avatar-img" src="'+esc(u.avatar)+'" alt="" onerror="this.style.display=\'none\'">' : '<div class="av-placeholder">'+esc(initials(name))+'</div>')
-        + '</a><div class="conv-info"><div class="conv-top-row"><span class="conv-name">'+esc(name)+'</span>'+(unread?'<span class="conv-unread-dot"></span>':'')+'</div>'
-        + '<div class="conv-bottom-row"><span class="conv-preview">'+esc(c.lastMessage||'No messages yet')+'</span></div></div></div>';
+        + '</a><div class="conv-info"><div class="conv-top-row"><span class="conv-name">'+esc(name)+'</span>'+(ts?'<span class="conv-time">'+esc(ts)+'</span>':'')+'</div>'
+        + '<div class="conv-bottom-row"><span class="conv-preview">'+esc(c.lastMessage||'No messages yet')+'</span>'+(unread?'<span class="conv-unread-dot"></span>':'')+'</div></div></div>';
     }).join('');
     updateMsgBadge(unreadCount);
   }
@@ -146,6 +162,18 @@
     if(bytes < 1024) return bytes+'B';
     if(bytes < 1024*1024) return (bytes/1024).toFixed(1)+'KB';
     return (bytes/1024/1024).toFixed(1)+'MB';
+  }
+
+  function convTime(val){
+    if(!val) return '';
+    const ms = val && val.toMillis ? val.toMillis() : (val && val.seconds ? val.seconds*1000 : Number(val||0));
+    if(!ms) return '';
+    const diff = Date.now() - ms;
+    if(diff < 60000) return 'now';
+    if(diff < 3600000) return Math.floor(diff/60000)+'m';
+    if(diff < 86400000) return Math.floor(diff/3600000)+'h';
+    const d = new Date(ms);
+    return (d.getMonth()+1)+'/'+(d.getDate());
   }
 
   function renderReplyQuote(m){
@@ -663,11 +691,11 @@
 
       window.GeoSocial.sendMessage(activeConversation, text, ok=>{
         if(ok && input) input.value='';
-        if(sendBtn) sendBtn.disabled = false;
+        if(sendBtn) sendBtn.disabled = !(input && input.value.trim());
         const picker=$('#emojiPicker'); if(picker) picker.style.display='none';
         setTimeout(()=>{ sendingMessage=false; }, 350);
       }, payload);
-      setTimeout(()=>{ sendingMessage=false; if(sendBtn) sendBtn.disabled=false; }, 4500);
+      setTimeout(()=>{ sendingMessage=false; if(sendBtn) sendBtn.disabled=!(input&&input.value.trim()); }, 4500);
     }
 
     sendCurrentMsg = doSend;
@@ -681,10 +709,12 @@
     if(input && !input._rmBound){
       input._rmBound = true;
       input.onkeydown=e=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); doSend(); } };
+      input.addEventListener('input', ()=>{ if(sendBtn) sendBtn.disabled = !input.value.trim(); });
     }
     if(sendBtn && !sendBtn._rmBound){
       sendBtn._rmBound = true;
       sendBtn.onclick=e=>{ e.preventDefault(); doSend(); };
+      sendBtn.disabled = !(input && input.value.trim());
     }
     document.querySelectorAll('[data-toggle-emoji]').forEach(btn=>{ if(!btn._rmBound){ btn._rmBound=true; btn.onclick=window.toggleEmojiPicker; } });
     document.querySelectorAll('[data-pick-image]').forEach(btn=>{ if(!btn._rmBound){ btn._rmBound=true; btn.onclick=()=>$('#messageImageInput')?.click(); } });
@@ -808,6 +838,10 @@
       window.__geohubLastConvs = convs || [];
       renderConvs(convs || []);
       if(!activeConversation && convs && convs[0]) openConversation(convs[0].id);
+      else if(!activeConversation && (!convs || !convs.length)){
+        const box=$('#chatMessages');
+        if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-comments"></i><p>Select a conversation to start chatting</p></div>';
+      }
     });
 
     window.addEventListener('pagehide', function(){
@@ -822,6 +856,16 @@
   }
 
   window.openConversation = openConversation;
+  window.setFilter = function(f, btn){
+    _convFilter = f || 'all';
+    document.querySelectorAll('.filter-tab').forEach(b=>b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+    renderConvs(window.__geohubLastConvs || []);
+  };
+  window.searchConvs = function(q){
+    _searchFilter = String(q||'').trim().toLowerCase();
+    renderConvs(window.__geohubLastConvs || []);
+  };
   whenReady(init);
 
   window.openNewConversationSearch = function(){
