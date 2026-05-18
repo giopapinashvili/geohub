@@ -186,10 +186,14 @@
 
     return '<div class="biz-cover" style="'+coverStyle+'">' +
         (!biz.coverUrl?'<i class="fas fa-store biz-cover-placeholder-icon"></i>':'')+
+        (_isOwner ? '<button class="biz-cover-edit-btn" onclick="window._bizActions.editCover()" title="Change cover photo"><i class="fas fa-camera"></i> Edit Cover</button>' : '') +
       '</div>'+
       '<div class="biz-header-body">'+
         '<div class="biz-logo-row">'+
-          '<div class="biz-logo">'+logoInner+'</div>'+
+          (_isOwner
+            ? '<div class="biz-logo biz-logo-editable" onclick="window._bizActions.editLogo()" title="Change logo">'+logoInner+'<div class="biz-logo-edit-overlay"><i class="fas fa-camera"></i></div></div>'
+            : '<div class="biz-logo">'+logoInner+'</div>'
+          )+
           (badges?'<div class="biz-logo-badges">'+badges+'</div>':'')+
         '</div>'+
         '<div class="biz-header-info">'+
@@ -2758,6 +2762,55 @@
     },
 
     ownerAddPhoto: function(){ var inp=document.getElementById('biz-owner-photo-input'); if(inp) inp.click(); },
+
+    editCover: function() {
+      var input = document.createElement('input');
+      input.type = 'file'; input.accept = 'image/*';
+      input.onchange = function() {
+        var file = input.files && input.files[0]; if (!file) return;
+        var btn = document.querySelector('.biz-cover-edit-btn');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>'; }
+        showToast('Uploading cover…');
+        function onDone(url) {
+          if (!url) { showToast('Upload failed', false); if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> Edit Cover'; } return; }
+          _fs.updateDoc(_fs.doc(_db, 'businesses', BIZ_ID), { coverUrl: url }).then(function() {
+            var cover = document.querySelector('.biz-cover');
+            if (cover) { cover.style.backgroundImage = 'url('+url+')'; cover.style.backgroundSize = 'cover'; cover.style.backgroundPosition = 'center'; }
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> Edit Cover'; }
+            showToast('Cover photo updated!');
+          }).catch(function() { showToast('Could not save', false); if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> Edit Cover'; } });
+        }
+        if (window.GeoSocial && window.GeoSocial.uploadFile) {
+          window.GeoSocial.uploadFile(file, 'business-covers', function(pct) { if (pct < 100) showToast('Uploading… '+pct+'%'); }).then(onDone).catch(function() { onDone(null); });
+        } else {
+          directCloudinaryUpload(file, onDone, function(pct) { if (pct < 100) showToast('Uploading… '+pct+'%'); });
+        }
+      };
+      input.click();
+    },
+
+    editLogo: function() {
+      var input = document.createElement('input');
+      input.type = 'file'; input.accept = 'image/*';
+      input.onchange = function() {
+        var file = input.files && input.files[0]; if (!file) return;
+        var logoEl = document.querySelector('.biz-logo'); if (logoEl) logoEl.style.opacity = '0.5';
+        showToast('Uploading logo…');
+        function onDone(url) {
+          if (!url) { showToast('Upload failed', false); if (logoEl) logoEl.style.opacity = ''; return; }
+          _fs.updateDoc(_fs.doc(_db, 'businesses', BIZ_ID), { logoUrl: url }).then(function() {
+            if (logoEl) { logoEl.style.opacity = ''; logoEl.innerHTML = '<img src="'+url+'" alt="logo"><div class="biz-logo-edit-overlay"><i class="fas fa-camera"></i></div>'; }
+            showToast('Logo updated!');
+          }).catch(function() { showToast('Could not save', false); if (logoEl) logoEl.style.opacity = ''; });
+        }
+        if (window.GeoSocial && window.GeoSocial.uploadFile) {
+          window.GeoSocial.uploadFile(file, 'business-logos', function(pct) { if (pct < 100) showToast('Uploading… '+pct+'%'); }).then(onDone).catch(function() { onDone(null); });
+        } else {
+          directCloudinaryUpload(file, onDone, function(pct) { if (pct < 100) showToast('Uploading… '+pct+'%'); });
+        }
+      };
+      input.click();
+    },
 
     handleOwnerPhoto: function(input) {
       if(!input.files||!input.files[0]) return;

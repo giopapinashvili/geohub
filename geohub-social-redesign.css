@@ -1828,3 +1828,44 @@ html[data-gh-theme="light"] .gh-fpm-panel{background:rgba(248,250,252,.97)}
 .gh-media-lb-close{position:absolute;top:-14px;right:-14px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);transition:.14s;z-index:1}
 .gh-media-lb-close:hover{background:rgba(255,255,255,.28)}
 @media(max-width:540px){.gh-media-lb-close{top:8px;right:8px}}
+
+/* ══════════════════════════════════════════════════════════════
+   Phase 25 — Social Share + Focused Post Polish
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Share action sheet ────────────────────────────────────── */
+.gh-share-sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:var(--gh-z-modal);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.gh-share-sheet-overlay.gh-share-sheet-in{opacity:1;pointer-events:auto}
+.gh-share-sheet-overlay.gh-share-sheet-out{opacity:0;pointer-events:none}
+.gh-share-sheet{background:var(--gh-card);border:1px solid var(--gh-border);border-radius:22px 22px 0 0;width:100%;max-width:480px;padding:0 0 max(16px,env(safe-area-inset-bottom)) 0;box-shadow:0 -8px 32px rgba(0,0,0,.5);transform:translateY(100%);transition:transform .22s var(--gh-ease-spring)}
+.gh-share-sheet-overlay.gh-share-sheet-in .gh-share-sheet{transform:translateY(0)}
+.gh-share-sheet-overlay.gh-share-sheet-out .gh-share-sheet{transform:translateY(100%)}
+.gh-share-sheet-handle{width:38px;height:4px;background:var(--gh-border);border-radius:2px;margin:10px auto 14px}
+.gh-share-sheet-title{font-size:.82rem;font-weight:800;color:var(--gh-muted);text-transform:uppercase;letter-spacing:.07em;padding:0 20px 8px;text-align:center}
+.gh-share-opt{display:flex;align-items:center;gap:14px;width:100%;border:none;background:transparent;color:var(--gh-text);padding:12px 20px;cursor:pointer;text-align:left;transition:.12s;font-family:inherit}
+.gh-share-opt:hover,.gh-share-opt:focus-visible{background:rgba(255,255,255,.06);outline:none}
+.gh-share-opt-icon{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.07);border:1px solid var(--gh-border);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;color:var(--gh-green)}
+.gh-share-opt-text{display:flex;flex-direction:column;gap:1px}
+.gh-share-opt-text strong{font-size:.9rem;font-weight:800;line-height:1.2}
+.gh-share-opt-text em{font-style:normal;font-size:.75rem;color:var(--gh-muted)}
+.gh-share-sheet-cancel{display:block;width:calc(100% - 32px);margin:8px 16px 0;padding:12px;border:1px solid var(--gh-border);border-radius:14px;background:rgba(255,255,255,.04);color:var(--gh-text);font-size:.9rem;font-weight:700;cursor:pointer;font-family:inherit;transition:.12s}
+.gh-share-sheet-cancel:hover{background:rgba(255,255,255,.09)}
+html[data-gh-theme="light"] .gh-share-sheet{background:rgba(248,250,252,.97)}
+html[data-gh-theme="light"] .gh-share-opt:hover{background:rgba(0,0,0,.04)}
+html[data-gh-theme="light"] .gh-share-opt-icon{background:rgba(0,0,0,.05);border-color:rgba(15,23,42,.1)}
+@media(min-width:540px){.gh-share-sheet{border-radius:18px;margin-bottom:32px}}
+
+/* ── Who Shared caption line ───────────────────────────────── */
+.gh-who-shared-caption{font-size:.78rem;color:var(--gh-muted);margin-top:2px;line-height:1.4;max-width:260px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+
+/* ── Media lightbox navigation ─────────────────────────────── */
+.gh-media-lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;border:none;background:rgba(255,255,255,.18);color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);transition:.14s;z-index:2}
+.gh-media-lb-nav:hover{background:rgba(255,255,255,.32)}
+.gh-media-lb-prev{left:-54px}
+.gh-media-lb-next{right:-54px}
+.gh-media-lb-counter{position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.75);font-size:.8rem;font-weight:700;white-space:nowrap}
+@media(max-width:680px){
+  .gh-media-lb-prev{left:6px}
+  .gh-media-lb-next{right:6px}
+  .gh-media-lb-counter{bottom:-22px}
+}

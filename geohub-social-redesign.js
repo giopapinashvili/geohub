@@ -1230,7 +1230,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       linkPrevHtml+
       (p.sharedPostId?'<div class="gh-shared-preview" data-shared-post="'+esc(p.sharedPostId)+'"><i class="fas fa-share"></i><div><strong>Shared post</strong><span>Loading original post...</span></div></div>':'')+
       viewCountHtml+
-      '<div class="gh-post-stats"><span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'"><i class="fas fa-thumbs-up"></i> <b data-like-count>'+totalRx+'</b>'+(totalRx?' people reacted':'')+'</button></span><span><button class="gh-stats-btn" data-open-comments-btn><b data-comment-count>'+Math.max(0,Number(p.commentCount||0))+'</b> comments</button> · <b>'+Number(p.shareCount||0)+'</b> shares</span></div>'+
+      '<div class="gh-post-stats"><span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'"><i class="fas fa-thumbs-up"></i> <b data-like-count>'+totalRx+'</b>'+(totalRx?' people reacted':'')+'</button></span><span><button class="gh-stats-btn" data-open-comments-btn><b data-comment-count>'+Math.max(0,Number(p.commentCount||0))+'</b> comments</button> · <button class="gh-stats-btn" data-open-shares-btn><b data-share-count>'+Number(p.shareCount||0)+'</b> shares</button></span></div>'+
       '<div class="gh-rx-breakdown" data-rx-pid="'+esc(pid)+'"></div>'+
       '<div class="gh-post-actions"><span class="gh-like-wrap"><button class="gh-act" data-like><i class="fas fa-thumbs-up"></i> Like</button><div class="gh-reaction-strip"><button data-reaction="like">👍</button><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button></div></span><button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> Comment</button><button class="gh-act" data-share><i class="fas fa-share"></i> Share</button><button class="gh-act" data-save><i class="fas fa-bookmark"></i> Save</button></div>'+
       '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+cmtFormHtml+'</div>'+
@@ -1336,14 +1336,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var photoItem = e.target.closest('[data-open-photo]');
       if (photoItem) {
         var photoUrl = photoItem.dataset.openPhoto;
-        if (options.onOpenPhoto) options.onOpenPhoto(photoUrl);
-        else if (photoUrl) openMediaLightbox(photoUrl);
+        var allPhotos = Array.from(card.querySelectorAll('[data-open-photo]')).map(function(el){ return el.dataset.openPhoto; });
+        var photoIdx = allPhotos.indexOf(photoUrl);
+        if (options.onOpenPhoto) options.onOpenPhoto(photoUrl, allPhotos, photoIdx);
+        else if (photoUrl) openMediaLightbox(photoUrl, allPhotos, photoIdx);
         return;
       }
       if(e.target.closest('[data-like]')){ if(!requireLogin()) return; setReaction(pid,'like',card); }
       var ro=e.target.closest('[data-reaction]'); if(ro){ if(!requireLogin()) return; setReaction(pid,ro.dataset.reaction,card); }
       if(e.target.closest('[data-comment-toggle]')){ toggleComments(card,pid); }
       if(e.target.closest('[data-open-comments-btn]')){ openFocusedPost(pid); return; }
+      if(e.target.closest('[data-open-shares-btn]')){ var scEl=card.querySelector('[data-share-count]'); openWhoSharedModal(pid, scEl ? Number(scEl.textContent||0) : 0); return; }
       if(e.target.closest('[data-share]')){ sharePost(pid); }
       if(e.target.closest('[data-save]')){ if(!requireLogin()) return; GS().toggleSavePost(pid,function(saved){ var b=card.querySelector('[data-save]'); if(b) b.classList.toggle('active',!!saved); }); }
       var menuBtn=e.target.closest('[data-post-menu]'); if(menuBtn){ postMenu(pid,card,menuBtn); }
@@ -1769,11 +1772,122 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function sharePost(pid){
     if(!requireLogin()) return;
-    var body='<textarea class="gh-textarea" id="ghShareText" placeholder="Say something about this…"></textarea><div class="gh-form-grid"><select class="gh-select" id="ghShareVisibility"><option value="public">🌍 Public</option><option value="friends">👥 Friends / Followers</option><option value="onlyme">🔒 Only me</option></select><button class="gh-btn ghost" id="ghCopySharedLink" type="button"><i class="fas fa-link"></i> Copy link</button></div><div class="gh-shared-preview" data-shared-post="'+esc(pid)+'" style="margin-top:10px"><i class="fas fa-share"></i><div><strong>Shared post</strong><span>Loading original post...</span></div></div>';
-    modal('Share post', body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitShare">Share to feed</button>', 'ghShareModal');
+    var existing = document.getElementById('ghShareSheet');
+    if (existing) { existing.remove(); return; }
+
+    var sheet = document.createElement('div');
+    sheet.id = 'ghShareSheet';
+    sheet.className = 'gh-share-sheet-overlay';
+    sheet.innerHTML =
+      '<div class="gh-share-sheet">' +
+        '<div class="gh-share-sheet-handle"></div>' +
+        '<div class="gh-share-sheet-title">Share</div>' +
+        '<button class="gh-share-opt" id="ghShareToFeed">' +
+          '<span class="gh-share-opt-icon"><i class="fas fa-share-nodes"></i></span>' +
+          '<span class="gh-share-opt-text"><strong>Share to GeoHub</strong><em>Post to your feed with a caption</em></span>' +
+        '</button>' +
+        '<button class="gh-share-opt" id="ghShareCopyLink">' +
+          '<span class="gh-share-opt-icon"><i class="fas fa-link"></i></span>' +
+          '<span class="gh-share-opt-text"><strong>Copy link</strong><em>Copy post link to clipboard</em></span>' +
+        '</button>' +
+        (navigator.share ?
+          '<button class="gh-share-opt" id="ghShareNative">' +
+            '<span class="gh-share-opt-icon"><i class="fas fa-ellipsis"></i></span>' +
+            '<span class="gh-share-opt-text"><strong>More options</strong><em>Share via other apps</em></span>' +
+          '</button>'
+          : '') +
+        '<button class="gh-share-sheet-cancel" id="ghShareCancel">Cancel</button>' +
+      '</div>';
+    document.body.appendChild(sheet);
+
+    function closeSheet() {
+      var s = document.getElementById('ghShareSheet');
+      if (s) { s.classList.add('gh-share-sheet-out'); setTimeout(function() { if (s.parentNode) s.remove(); }, 220); }
+    }
+
+    document.getElementById('ghShareToFeed').onclick = function() { closeSheet(); openShareCompose(pid); };
+    document.getElementById('ghShareCopyLink').onclick = function() {
+      if (navigator.clipboard) { navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){ toast('Post link copied'); }); }
+      closeSheet();
+    };
+    if (navigator.share) {
+      document.getElementById('ghShareNative').onclick = function() {
+        navigator.share({ url: location.origin+location.pathname+'#post-'+pid }).catch(function(){});
+        closeSheet();
+      };
+    }
+    document.getElementById('ghShareCancel').onclick = closeSheet;
+    sheet.addEventListener('click', function(e) { if (e.target === sheet) closeSheet(); });
+    setTimeout(function() { sheet.classList.add('gh-share-sheet-in'); }, 10);
+  }
+
+  function openShareCompose(pid) {
+    if (!requireLogin()) return;
+    var body =
+      '<textarea class="gh-textarea" id="ghShareText" placeholder="Say something about this…" rows="3"></textarea>' +
+      '<div class="gh-form-grid" style="margin-top:8px">' +
+        '<select class="gh-select" id="ghShareVisibility">' +
+          '<option value="public">🌍 Public</option>' +
+          '<option value="friends">👥 Friends / Followers</option>' +
+          '<option value="onlyme">🔒 Only me</option>' +
+        '</select>' +
+      '</div>' +
+      '<div class="gh-shared-preview" data-shared-post="'+esc(pid)+'" style="margin-top:10px"><i class="fas fa-circle-notch fa-spin gh-muted"></i></div>';
+    modal('Share to your feed', body,
+      '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitShare">Post</button>',
+      'ghShareModal');
     hydrateSharedPreviews($('#ghShareModal'));
-    $('#ghCopySharedLink').onclick=function(){ navigator.clipboard && navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast('Post link copied');}); };
-    $('#ghSubmitShare').onclick=function(){ GS().createPost($('#ghShareText').value, '', function(){ if($('#ghShareModal')) $('#ghShareModal').remove(); if(GS().trackShare) GS().trackShare(pid); }, { sharedPostId: pid, visibility: $('#ghShareVisibility').value }); };
+    $('#ghSubmitShare').onclick = function() {
+      var btn = $('#ghSubmitShare');
+      if (btn) { btn.disabled = true; btn.textContent = 'Posting…'; }
+      GS().createPost($('#ghShareText').value, '', function() {
+        if ($('#ghShareModal')) $('#ghShareModal').remove();
+        if (GS().trackShare) GS().trackShare(pid);
+        toast('Shared to your feed!');
+      }, { sharedPostId: pid, visibility: $('#ghShareVisibility').value });
+    };
+  }
+
+  function openWhoSharedModal(pid, count) {
+    if (!count || count <= 0) { toast('No shares yet'); return; }
+    if (!fs() || !db()) return;
+    modal('Who Shared', '<div id="ghWhoSharedList" class="gh-who-rx-list"><i class="fas fa-circle-notch fa-spin gh-muted"></i></div>',
+      '<button class="gh-btn ghost" data-close-modal>Close</button>', 'ghWhoSharedModal');
+    fs().getDocs(fs().query(
+      fs().collection(db(), 'posts'),
+      fs().where('sharedPostId', '==', pid),
+      fs().limit(20)
+    )).then(function(snap) {
+      var list = document.getElementById('ghWhoSharedList');
+      if (!list) return;
+      if (snap.empty) { list.innerHTML = '<p class="gh-muted" style="padding:16px 0;text-align:center">No shares yet.</p>'; return; }
+      var rows = [];
+      snap.forEach(function(d) {
+        var p = Object.assign({ id: d.id }, d.data());
+        var name = p.authorName || p.userName || 'GeoHub User';
+        var av = p.authorAvatar || p.userPhotoURL || '';
+        var authorId = p.authorId || p.userId || '';
+        var avHtml = av
+          ? '<img src="'+esc(av)+'" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.style.display=\'none\'">'
+          : esc(initials(name));
+        var href = authorId ? profileLink(authorId) : '#';
+        rows.push(
+          '<div class="gh-who-rx-row">' +
+            '<a class="gh-avatar" href="'+esc(href)+'" style="width:38px;height:38px;flex-shrink:0">'+avHtml+'</a>' +
+            '<div>' +
+              '<a class="gh-who-rx-name" href="'+esc(href)+'">'+esc(name)+'</a>' +
+              '<div class="gh-small gh-muted">'+timeAgo(p.createdAt)+'</div>' +
+              (p.text ? '<div class="gh-who-shared-caption">'+esc(p.text.slice(0,80))+(p.text.length>80?'…':'')+'</div>' : '') +
+            '</div>' +
+          '</div>'
+        );
+      });
+      list.innerHTML = rows.join('');
+    }).catch(function(err) {
+      var list = document.getElementById('ghWhoSharedList');
+      if (list) list.innerHTML = '<p class="gh-muted" style="padding:16px 0;text-align:center">Could not load.</p>';
+      console.warn('[GeoHub] openWhoSharedModal', err);
+    });
   }
 
   function postMenu(pid, card, anchor){
@@ -1909,6 +2023,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var p = Object.assign({ id: pid }, snap.data());
       if (p.status === 'deleted') { document.getElementById('ghFpmBody').innerHTML = '<p class="gh-fpm-empty">This post was deleted.</p>'; return; }
 
+      var titleEl = overlay.querySelector('.gh-fpm-title');
+      if (titleEl) {
+        var pName = p.authorName || p.userName || p.businessName || '';
+        titleEl.textContent = pName ? pName + "’s post" : 'Post';
+      }
       var cardHtml = postCard(p, {});
       var body = document.getElementById('ghFpmBody');
       body.innerHTML = '<div class="gh-fpm-card-wrap">' + cardHtml + '</div>';
@@ -1954,33 +2073,61 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
   }
 
-  function openMediaLightbox(url) {
+  function openMediaLightbox(url, allUrls, idx) {
     if (!url) return;
     var existing = document.getElementById('ghMediaLightbox');
     if (existing) existing.remove();
+
+    var urls = (Array.isArray(allUrls) && allUrls.length > 1) ? allUrls : [url];
+    var cur = (typeof idx === 'number' && idx >= 0 && idx < urls.length) ? idx : Math.max(0, urls.indexOf(url));
 
     var lb = document.createElement('div');
     lb.id = 'ghMediaLightbox';
     lb.className = 'gh-media-lb';
     lb.setAttribute('role', 'dialog');
     lb.setAttribute('aria-modal', 'true');
-    lb.innerHTML =
-      '<div class="gh-media-lb-inner">' +
+
+    function buildInner() {
+      var hasNav = urls.length > 1;
+      return '<div class="gh-media-lb-inner">' +
         '<button class="gh-media-lb-close" aria-label="Close"><i class="fas fa-times"></i></button>' +
-        '<img class="gh-media-lb-img" src="' + esc(url) + '" alt="Full size image" onerror="this.alt=\'Image could not load\'">' +
+        (hasNav ? '<button class="gh-media-lb-nav gh-media-lb-prev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>' : '') +
+        '<img class="gh-media-lb-img" src="'+esc(urls[cur])+'" alt="Full size image" onerror="this.alt=\'Image could not load\'">' +
+        (hasNav ? '<button class="gh-media-lb-nav gh-media-lb-next" aria-label="Next"><i class="fas fa-chevron-right"></i></button>' : '') +
+        (hasNav ? '<div class="gh-media-lb-counter">'+(cur+1)+' / '+urls.length+'</div>' : '') +
       '</div>';
+    }
+
+    lb.innerHTML = buildInner();
     document.body.appendChild(lb);
+
+    function navigate(delta) {
+      cur = (cur + delta + urls.length) % urls.length;
+      lb.innerHTML = buildInner();
+      bindLbEvents();
+    }
 
     function closeLb() {
       var el = document.getElementById('ghMediaLightbox');
       if (el) el.remove();
       document.removeEventListener('keydown', _k);
     }
-    function _k(ev) { if (ev.key === 'Escape') closeLb(); }
+    function _k(ev) {
+      if (ev.key === 'Escape') { closeLb(); return; }
+      if (urls.length > 1 && ev.key === 'ArrowLeft') navigate(-1);
+      if (urls.length > 1 && ev.key === 'ArrowRight') navigate(1);
+    }
     document.addEventListener('keydown', _k);
 
-    lb.querySelector('.gh-media-lb-close').addEventListener('click', closeLb);
-    lb.addEventListener('click', function(e) { if (e.target === lb) closeLb(); });
+    function bindLbEvents() {
+      lb.querySelector('.gh-media-lb-close').addEventListener('click', closeLb);
+      lb.addEventListener('click', function(e) { if (e.target === lb) closeLb(); });
+      var prevBtn = lb.querySelector('.gh-media-lb-prev');
+      var nextBtn = lb.querySelector('.gh-media-lb-next');
+      if (prevBtn) prevBtn.addEventListener('click', function(e) { e.stopPropagation(); navigate(-1); });
+      if (nextBtn) nextBtn.addEventListener('click', function(e) { e.stopPropagation(); navigate(1); });
+    }
+    bindLbEvents();
   }
 
   function openFeedCommentEditor(pid, cid, btnEl) {
