@@ -184,7 +184,7 @@
       actions =
         '<button class="biz-action-btn '+followCls+'" id="biz-follow-btn" onclick="window._bizActions.toggleFollow()"><i class="fas '+followIcon+'"></i> '+followLbl+'</button>'+
         (_isFollowing ? '<button class="biz-action-btn biz-notif-btn" id="biz-notif-btn" title="'+notifTitle+'" onclick="window._bizActions.toggleNotifications()"><i class="'+notifIcon+'"></i></button>' : '')+
-        '<button class="biz-action-btn primary" onclick="window._bizActions.openQuote()"><i class="fas fa-paper-plane"></i> Quote</button>'+
+        '<button class="biz-action-btn primary" onclick="window._bizActions.openQuote()"><i class="fas fa-paper-plane"></i> Request Quote</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.openMessage()"><i class="fas fa-comment-dots"></i> Message</button>'+
         '<button class="biz-action-btn '+ (_isSaved?'saved':'')+'" id="biz-save-btn" onclick="window._bizActions.toggleSave()"><i class="'+(_isSaved?'fas':'far')+' fa-bookmark"></i> '+(_isSaved?'Saved':'Save')+'</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.share()"><i class="fas fa-share-nodes"></i> Share</button>';
@@ -192,6 +192,12 @@
       if (biz.website) {
         var ws=biz.website.startsWith('http')?biz.website:'https://'+biz.website;
         actions+='<a href="'+esc(ws)+'" target="_blank" rel="noopener noreferrer" class="biz-action-btn"><i class="fas fa-globe"></i> Website</a>';
+      }
+      if (!biz.isOnline && biz.mapsLink) {
+        actions+='<a href="'+esc(biz.mapsLink)+'" target="_blank" rel="noopener noreferrer" class="biz-action-btn"><i class="fas fa-map-location-dot"></i> Directions</a>';
+      } else if (!biz.isOnline && (biz.address || (biz.lat && biz.lng))) {
+        var dq=biz.address||(biz.lat+','+biz.lng);
+        actions+='<a href="https://maps.google.com/?q='+encodeURIComponent(dq)+'" target="_blank" rel="noopener noreferrer" class="biz-action-btn"><i class="fas fa-map-location-dot"></i> Directions</a>';
       }
     }
 
@@ -876,7 +882,7 @@
         '<div class="biz-service-card-name">'+esc(s.title||s.name||'')+'</div>'+
         (s.description?'<div class="biz-service-card-desc">'+esc(s.description)+'</div>':'')+
         (s.duration?'<div class="biz-service-card-meta"><i class="fas fa-clock"></i> '+esc(s.duration)+'</div>':'')+
-        (!owner ? '<button class="biz-service-cta" onclick="window._bizActions.openQuote(\''+esc(s.title||s.name||'')+'\',\''+esc(s.id||'')+'\')">Request</button>' : '')+
+        (!owner ? '<button class="biz-service-cta" onclick="window._bizActions.openQuote(\''+esc(s.title||s.name||'')+'\',\''+esc(s.id||'')+'\',\'service\')"><i class="fas fa-paper-plane"></i> Request Service</button>' : '')+
       '</div>';
     }).join('');
     return '<div class="biz-section">'+header+'<div class="biz-service-cards-grid">'+cards+'</div></div>';
@@ -913,7 +919,7 @@
           (p.description?'<div class="biz-product-desc">'+esc(p.description.slice(0,90))+'</div>':'')+
           '<div class="biz-product-footer">'+
             (p.price?'<span class="biz-product-price">'+fmtPrice(p.price)+'</span>':'')+
-            (!owner ? '<button class="biz-product-cta" onclick="window._bizActions.openQuote(\''+esc(p.name||p.title||'')+'\')">Inquire</button>' : '')+
+            (!owner ? '<button class="biz-product-cta" onclick="window._bizActions.openQuote(\''+esc(p.name||p.title||'')+'\',\''+esc(p.id||'')+'\',\'product\')">Ask about Product</button>' : '')+
           '</div>'+
         '</div>'+
       '</div>';
@@ -1121,8 +1127,8 @@
       '<div class="biz-modal-sheet">'+
         '<div class="biz-modal-handle"></div>'+
         '<button class="biz-modal-close" onclick="window._bizActions.closeQuote()"><i class="fas fa-times"></i></button>'+
-        '<div class="biz-modal-title">Request a Quote</div>'+
-        '<div class="biz-modal-sub">Send a message to <strong>'+esc(biz.title||'this business')+'</strong></div>'+
+        '<div class="biz-modal-title" id="biz-q-modal-title">Request a Quote</div>'+
+        '<div class="biz-modal-sub" id="biz-q-modal-sub">Send a message to <strong>'+esc(biz.title||'this business')+'</strong></div>'+
         '<div class="biz-form-group"><label class="biz-form-label">Your Name *</label><input class="biz-form-input" id="q-name" placeholder="Full name" value="'+esc(_currentUser&&_currentUser.displayName||'')+'"></div>'+
         '<div class="biz-form-group"><label class="biz-form-label">Email *</label><input class="biz-form-input" id="q-email" type="email" placeholder="your@email.com" value="'+esc(_currentUser&&_currentUser.email||'')+'"></div>'+
         '<div class="biz-form-group"><label class="biz-form-label">Phone (optional)</label><input class="biz-form-input" id="q-phone" type="tel" placeholder="+995…"></div>'+
@@ -2664,12 +2670,30 @@
       }).catch(function(err){ showToast('Could not update: '+(err.code||err.message), false); });
     },
 
-    openQuote: function(serviceTitle, serviceId) {
-      if(!_currentUser){ showToast('Sign in to request a quote',false); window.location.href='auth.html'; return; }
-      var m=document.getElementById('biz-quote-modal'); if(!m) return;
-      var sf=document.getElementById('q-service');
-      if(sf) sf.value = serviceTitle ? String(serviceTitle) : '';
+    openQuote: function(serviceTitle, serviceId, mode) {
+      if (!_currentUser) { showToast('Sign in to request a quote', false); window.location.href='auth.html'; return; }
+      var m = document.getElementById('biz-quote-modal'); if (!m) return;
+      var sf = document.getElementById('q-service');
+      if (sf) sf.value = serviceTitle ? String(serviceTitle) : '';
+      var titleEl = document.getElementById('biz-q-modal-title');
+      var subEl   = document.getElementById('biz-q-modal-sub');
+      var bizName = (_biz && _biz.title) || 'this business';
+      if (mode === 'service') {
+        if (titleEl) titleEl.textContent = 'Request this Service';
+        if (subEl)   subEl.innerHTML = '<i class="fas fa-briefcase" style="color:#10b981;margin-right:4px"></i>'+
+          esc(serviceTitle||'service')+' &middot; '+esc(bizName);
+      } else if (mode === 'product') {
+        if (titleEl) titleEl.textContent = 'Ask about this Product';
+        if (subEl)   subEl.innerHTML = '<i class="fas fa-box" style="color:#60a5fa;margin-right:4px"></i>'+
+          esc(serviceTitle||'product')+' &middot; '+esc(bizName);
+      } else {
+        if (titleEl) titleEl.textContent = 'Request a Quote';
+        if (subEl)   subEl.innerHTML = 'Send a message to <strong>'+esc(bizName)+'</strong>';
+      }
+      window._quoteMode = mode || 'general';
       m.classList.add('open');
+      var nameEl = document.getElementById('q-name');
+      if (nameEl && !nameEl.value) setTimeout(function(){ nameEl.focus(); }, 100);
     },
     closeQuote: function() { var m=document.getElementById('biz-quote-modal'); if(m) m.classList.remove('open'); },
 
@@ -2686,7 +2710,8 @@
       var payload = {
         name: name, email: email, phone: phone, message: msg,
         submittedBy: _currentUser.uid, businessId: BIZ_ID,
-        status: 'new', createdAt: _fs.serverTimestamp()
+        status: 'new', createdAt: _fs.serverTimestamp(),
+        source: window._quoteMode || 'general'
       };
       if(service) payload.service = service;
       _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'quoteRequests'), payload).then(function(){
