@@ -2573,6 +2573,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-panel gh-right-widget" id="ghPymkPanel"><div class="gh-section-title"><h3>People You May Know</h3><a class="gh-small" href="search.html">Find people</a></div><div id="ghPymkList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget" id="ghCreatorPanel"><div class="gh-section-title"><h3>Featured Creators</h3><a class="gh-small" href="creators.html">All</a></div><div id="ghCreatorList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Suggested Pages</h3><a class="gh-small" href="business.html">All</a></div><div id="ghSuggestedPages"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghFeedGroupsPanel"><div class="gh-section-title"><h3>Suggested Groups</h3><a class="gh-small" href="groups.html">All</a></div><div id="ghFeedGroupsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Contacts</h3></div><input class="gh-input" id="ghContactsSearch" placeholder="Search contacts…" style="margin-bottom:8px"><div id="ghContactsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
     '</div>';
   }
@@ -2598,6 +2599,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           if(contactsBox) contactsBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see contacts</div>';
           var pymkBox=$('#ghPymkList'); if(pymkBox) pymkBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see suggestions</div>';
           var crBox=$('#ghCreatorList'); if(crBox) crBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see creators</div>';
+          loadFeedGroupsWidget();
           return;
         }
 
@@ -2633,6 +2635,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         loadContactsList(u.uid);
         loadPymkWidget(u.uid);
         loadCreatorWidget(u.uid);
+        loadFeedGroupsWidget();
       });
     });
   }
@@ -2686,6 +2689,24 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '</div>';
       }).join('')+'</div>';
     }).catch(function(){ var p=$('#ghCreatorPanel'); if(p) p.style.display='none'; });
+  }
+
+  function loadFeedGroupsWidget(){
+    var box=$('#ghFeedGroupsList'); if(!box) return;
+    if(!fs()||!db()){ var p=$('#ghFeedGroupsPanel'); if(p) p.style.display='none'; return; }
+    getLatest('groups',4).then(function(groups){
+      var pub=groups.filter(function(g){ return (g.privacy||'public')!=='secret'; });
+      if(!pub.length){ var p=$('#ghFeedGroupsPanel'); if(p) p.style.display='none'; return; }
+      box.innerHTML='<div class="gh-mini-list">'+pub.slice(0,4).map(function(g){
+        var title=g.name||g.title||'Group';
+        var photo=g.logoUrl||g.coverImageUrl||g.coverUrl||g.imageUrl||g.photoUrl||'';
+        var members=Number(g.memberCount||g.membersCount||0);
+        return '<a class="gh-mini-item" href="groups.html?id='+esc(g.id)+'" style="text-decoration:none;color:inherit">'+
+          '<span class="gh-mini-thumb">'+(photo?'<img src="'+esc(photo)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:6px" onerror="this.onerror=null;this.style.display=\'none\'">':'<i class="fas fa-users"></i>')+'</span>'+
+          '<div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(title)+'</div><div style="font-size:.72rem;color:var(--gh-muted)">'+esc(g.category||'Group')+(members?' · '+members+' members':'')+'</div></div>'+
+          '</a>';
+      }).join('')+'</div>';
+    }).catch(function(){ var p=$('#ghFeedGroupsPanel'); if(p) p.style.display='none'; });
   }
 
   function loadContactsList(uid){
@@ -2889,6 +2910,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   window._ghStartTour=startTour;
 
   function renderFeed(){
+    state.feedTab = 'foryou';
     var c=getFeedComposerActor();
     var compAvClass='gh-avatar'+(c?'':' gh-skel');
     var compAvContent=c?(c.avatar?'<img src="'+esc(c.avatar)+'" alt="" loading="eager" onerror="this.remove()">':esc(initials(c.name||''))):'';
@@ -2898,6 +2920,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<section class="gh-card gh-story-strip-card"><div class="gh-stories" id="ghStories"></div></section>'+
         '<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="'+compAvClass+'" id="ghComposerAvatar">'+compAvContent+'</span><button class="gh-composer-fake" data-create-post>რას აზიარებ დღეს?</button></div><div class="gh-composer-actions"><button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Place</button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:#38bdf8"></i> Business</button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:#f59e0b"></i> Event</button></div></section>'+
         '<div id="ghWelcomeSlot"></div>'+
+        '<div class="gh-pill-row" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="foryou"><i class="fas fa-house" style="font-size:.75rem"></i> For You</button><button class="gh-pill" data-feed-tab="following"><i class="fas fa-user-group" style="font-size:.75rem"></i> Following</button></div>'+
         '<div id="ghFeedList">'+skelPostCard()+skelPostCard()+skelPostCard()+'</div>'
     });
     loadStories('#ghStories');
@@ -2908,7 +2931,23 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var list=$('#ghFeedList'); bindPostInteractions(list); var lastPosts=[];
       function paint(){
         var visible=lastPosts.filter(canSeePost);
-        if(!visible.length){ list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-seedling"></i><h3>Feed is empty</h3><p>Be the first to post something real, or explore GeoHub below.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="gh-btn" data-create-post><i class="fas fa-plus"></i>Create post</button><a class="gh-btn ghost" href="places.html"><i class="fas fa-map-marker-alt"></i>Explore places</a><a class="gh-btn ghost" href="groups.html"><i class="fas fa-users"></i>Join groups</a></div></div>'; return; }
+        if(state.feedTab === 'following'){
+          var u=authUser();
+          if(u){
+            visible=visible.filter(function(p){
+              var author=p.authorId||p.userId||p.createdByUserId||p.createdBy||'';
+              return author && (author===u.uid || state.followingIds.indexOf(author)>-1);
+            });
+          }
+        }
+        if(!visible.length){
+          if(state.feedTab === 'following'){
+            list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-user-group"></i><h3>Nothing from people you follow</h3><p>Follow people and creators to see their posts here.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="gh-btn ghost" href="search.html"><i class="fas fa-search"></i>Find people</a><a class="gh-btn ghost" href="creators.html"><i class="fas fa-star"></i>Discover creators</a></div></div>';
+          } else {
+            list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-seedling"></i><h3>Feed is empty</h3><p>Start connecting with people, groups, and businesses to fill your feed.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="gh-btn" data-create-post><i class="fas fa-plus"></i>Create post</button><a class="gh-btn ghost" href="search.html"><i class="fas fa-search"></i>Find people</a><a class="gh-btn ghost" href="groups.html"><i class="fas fa-users"></i>Join groups</a><a class="gh-btn ghost" href="business.html"><i class="fas fa-store"></i>Businesses</a><a class="gh-btn ghost" href="creators.html"><i class="fas fa-star"></i>Creators</a></div></div>';
+          }
+          return;
+        }
         list.innerHTML=visible.map(function(p){ return postCard(p); }).join('');
         visible.forEach(function(p){ try{ hydrateReactionState(p.id); loadReactionBreakdown(p.id); }catch(e){} });
         hydrateSharedPreviews(list);
@@ -2918,6 +2957,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         });
         setTimeout(openDeepLinkedPost, 350);
       }
+      var tabsEl=$('#ghFeedTabs');
+      if(tabsEl) tabsEl.addEventListener('click',function(e){
+        var btn=e.target.closest('[data-feed-tab]'); if(!btn) return;
+        state.feedTab=btn.dataset.feedTab;
+        $all('.gh-pill',tabsEl).forEach(function(p){p.classList.toggle('active',p===btn);});
+        paint();
+      });
       setupSafetyListener(paint);
       setupAudienceAccess(paint);
       GS().listenFeed(function(posts){ lastPosts=posts; paint(); }, 20);
