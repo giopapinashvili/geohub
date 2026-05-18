@@ -74,10 +74,8 @@ const REPORT_TYPES = [
   { id: 'fake_offer',   label: 'Fake Creator Offer',  icon: 'fas fa-handshake-slash',    color: '#a78bfa', desc: 'Fraudulent brand collaboration offer' },
 ];
 
-const SAFETY_STATS = {
-  reviewed: 1247, removed: 89, flagged: 34,
-  trusted: 4821, resolution: '94%', avgTime: '4.2h',
-};
+// Safety stats are admin-managed and not client-readable.
+// renderSafety() shows a note instead of fake numbers.
 
 const REPORT_FEED = [];
 
@@ -92,8 +90,8 @@ const CREDIBILITY_INDICATORS = [
 
 // ======================== STATE ========================
 let selectedReportType = null;
-let myReports    = window.safeStorage.get('gh_my_reports',   []);
-let dismissedW   = window.safeStorage.get('gh_dismissed_w', []);
+let myReports    = [];
+let dismissedW   = [];
 
 // ======================== TABS ========================
 function switchTrustTab(tab, el) {
@@ -224,12 +222,37 @@ function submitReport() {
     if (e) { e.textContent = 'Please describe the issue.'; e.classList.remove('hidden'); }
     return;
   }
-  myReports.unshift({ id: 'r_' + Date.now(), type: selectedReportType, target: target || 'Unknown', description: desc, ts: Date.now(), status: 'pending' });
-  window.safeStorage.set('gh_my_reports', myReports);
 
-  document.getElementById('reportFormWrap')?.classList.add('hidden');
-  document.getElementById('reportSuccess')?.classList.remove('hidden');
-  renderSafety();
+  var GF = window.GeoFirebase;
+  if (!GF || !GF.auth || !GF.auth.currentUser) {
+    window.location.href = 'auth.html?next=' + encodeURIComponent(location.href);
+    return;
+  }
+
+  var submitBtn = document.querySelector('.rf-submit-btn');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Submitting…'; }
+
+  var user = GF.auth.currentUser;
+  GF.fs.addDoc(GF.fs.collection(GF.db, 'reports'), {
+    reporterId: user.uid,
+    targetType: selectedReportType,
+    targetId: target || 'unspecified',
+    reason: selectedReportType,
+    details: desc,
+    status: 'pending',
+    createdAt: GF.fs.serverTimestamp()
+  }).then(function() {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit Report'; }
+    myReports.unshift({ id: 'r_' + Date.now(), type: selectedReportType, target: target || 'Unknown', description: desc, ts: Date.now(), status: 'pending' });
+    document.getElementById('reportFormWrap')?.classList.add('hidden');
+    document.getElementById('reportSuccess')?.classList.remove('hidden');
+    renderSafety();
+  }).catch(function(err) {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit Report'; }
+    var e = document.getElementById('reportDescError');
+    if (e) { e.textContent = 'Submission failed. Please try again.'; e.classList.remove('hidden'); }
+    console.error('[GeoHub] submitReport', err);
+  });
 }
 
 function resetReport() {
@@ -246,21 +269,12 @@ function resetReport() {
 function renderSafety() {
   const statsEl = document.getElementById('safetyStats');
   if (statsEl) {
-    const s = SAFETY_STATS;
-    const cards = [
-      { label: 'Reports Reviewed',     val: s.reviewed.toLocaleString(), icon: 'fas fa-clipboard-check', c: '#3b82f6' },
-      { label: 'Fake Reviews Removed', val: s.removed,                   icon: 'fas fa-trash-alt',       c: '#ef4444' },
-      { label: 'Content Flagged',      val: s.flagged,                   icon: 'fas fa-flag',            c: '#f97316' },
-      { label: 'Trusted Users',        val: s.trusted.toLocaleString(),  icon: 'fas fa-shield-alt',      c: '#10b981' },
-      { label: 'Resolution Rate',      val: s.resolution,                icon: 'fas fa-chart-pie',       c: '#a78bfa' },
-      { label: 'Avg Response Time',    val: s.avgTime,                   icon: 'fas fa-clock',           c: '#f59e0b' },
-    ];
-    statsEl.innerHTML = cards.map(c => `
-      <div class="ss-card">
-        <div class="ss-icon" style="color:${c.c}"><i class="${c.icon}"></i></div>
-        <div class="ss-val">${c.val}</div>
-        <div class="ss-lbl">${c.label}</div>
-      </div>`).join('');
+    statsEl.innerHTML = `
+      <div class="ss-admin-note">
+        <i class="fas fa-shield-alt"></i>
+        Safety statistics are reviewed and updated by the GeoHub admin team.
+        Submitted reports are processed within 24–48 hours.
+      </div>`;
   }
 
   const feedEl = document.getElementById('safetyFeed');

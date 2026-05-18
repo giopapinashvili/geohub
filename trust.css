@@ -286,17 +286,17 @@
     .rs-btn:hover { border-color: var(--green); color: var(--green-light); }
 
     /* ===== SAFETY DASHBOARD ===== */
-    #safetyStats {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 14px;
-      margin-bottom: 32px;
+    #safetyStats { margin-bottom: 32px; }
+    .ss-admin-note {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px 20px;
+      background: rgba(16,185,129,.07);
+      border: 1px solid rgba(16,185,129,.2);
+      border-radius: var(--radius-lg);
+      color: var(--text-secondary, #94a3b8);
+      font-size: 0.85rem; line-height: 1.6;
     }
-    .ss-card {
-      background: var(--bg-card); border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg); padding: 20px; text-align: center;
-    }
-    .ss-icon { font-size: 1.3rem; margin-bottom: 10px; }
-    .ss-val  { font-size: 1.6rem; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; }
-    .ss-lbl  { font-size: 0.73rem; color: var(--text-muted); font-weight: 500; }
+    .ss-admin-note i { color: #10b981; font-size: 1.15rem; flex-shrink: 0; }
 
     .safety-feed-title { font-size: 0.88rem; font-weight: 700; color: var(--text-primary); margin-bottom: 14px; }
     #safetyFeed { display: flex; flex-direction: column; gap: 10px; }

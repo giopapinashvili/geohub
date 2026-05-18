@@ -899,10 +899,9 @@ service cloud.firestore {
             || isAdmin());
       allow create: if isAdmin()
         || (signedIn()
-            && request.resource.data.get('fromUserId', '') == uid()
-            // Users may not send a notification to themselves
-            && (request.resource.data.get('userId',    '') != uid()
-                || request.resource.data.get('toUserId','') != uid()));
+            // fromUserId must match the caller (prevents spoofing).
+            // Self-notifications (badge, reward) are allowed: userId == toUserId == uid().
+            && request.resource.data.get('fromUserId', '') == uid());
       // Recipients may only mark a notification read/seen, nothing else.
       allow update: if isAdmin()
         || (signedIn()

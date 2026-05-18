@@ -249,7 +249,7 @@
       var payload = Object.assign({
         userId: toUserId,
         toUserId: toUserId,
-        fromUserId: 'system',
+        fromUserId: currentUid() || toUserId,
         fromName: 'GeoHub',
         fromAvatar: '',
         type: type || 'notification',
