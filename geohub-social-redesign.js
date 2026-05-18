@@ -1162,10 +1162,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
     var _autoTimer = null;
     var _paused = false;
+    var _inputFocused = false;
+    var _myReactions = {};
     var STORY_DUR = 5000;
 
     function clearTimer(){ if(_autoTimer){ clearTimeout(_autoTimer); _autoTimer=null; } }
-    function scheduleAdvance(){ clearTimer(); if(!_paused){ _autoTimer = setTimeout(tryAdvance, STORY_DUR); } }
+    function scheduleAdvance(){ clearTimer(); if(!_paused && !_inputFocused){ _autoTimer = setTimeout(tryAdvance, STORY_DUR); } }
     function close(){ clearTimer(); overlay.remove(); document.body.classList.remove('gh-story-open'); document.removeEventListener('keydown', onKey); }
 
     function tryAdvance(){
@@ -1181,10 +1183,56 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       clearTimer();
       var g = groups[groupIndex];
       var st = g.stories[storyIndex] || {};
+
+      // Skip expired stories
+      if(st.expiresAt){
+        var _exp = typeof st.expiresAt.toMillis==='function' ? st.expiresAt.toMillis() : (st.expiresAt.seconds ? st.expiresAt.seconds*1000 : Number(st.expiresAt)||0);
+        if(_exp && _exp < Date.now()){ tryAdvance(); return; }
+      }
+
       var media = st.mediaUrl || '';
       var bars = g.stories.map(function(_,i){
         return '<span class="'+(i < storyIndex ? 'done' : (i === storyIndex ? 'current' : ''))+'"></span>';
       }).join('');
+
+      var _cu = authUser();
+      var isOwner = !!(_cu && st.authorId && _cu.uid === st.authorId);
+      var isSignedIn = !!_cu;
+
+      // Reactions bar (4 emojis, shown to all signed-in users)
+      var rxEmojis = ['❤️','🔥','😂','😮'];
+      var curRx = _myReactions[st.id] || null;
+      var reactHtml = isSignedIn
+        ? '<div class="gh-story-reactions">'+
+            rxEmojis.map(function(em){
+              return '<button type="button" class="gh-story-react-btn'+(curRx===em?' active':'')+'" data-story-react="'+esc(em)+'">'+em+'</button>';
+            }).join('')+
+          '</div>'
+        : '';
+
+      // Reply input (signed-in non-owner)
+      var replyHtml = isSignedIn && !isOwner
+        ? '<div class="gh-story-reply-row">'+
+            '<input class="gh-story-reply-input" id="ghStRpInput" placeholder="Reply to '+esc(g.authorName)+'…" autocomplete="off" maxlength="300">'+
+            '<button type="button" class="gh-story-reply-send" id="ghStRpSend" aria-label="Send reply"><i class="fas fa-paper-plane"></i></button>'+
+          '</div>'
+        : '';
+
+      // Owner seen count
+      var seenCount = isOwner ? Math.max(Number(st.viewCount)||0, Array.isArray(st.viewedBy) ? st.viewedBy.length : 0) : 0;
+      var seenHtml = isOwner
+        ? '<div class="gh-story-seen-row"><i class="fas fa-eye"></i> Seen by '+seenCount+'</div>'
+        : '';
+
+      // Owner delete button
+      var ownerDeleteHtml = isOwner
+        ? '<button type="button" class="gh-story-owner-del" id="ghStoryDelete" aria-label="Delete story"><i class="fas fa-trash-alt"></i></button>'
+        : '';
+
+      var footerHtml = (reactHtml||replyHtml||seenHtml)
+        ? '<div class="gh-story-footer">'+(reactHtml||'')+(replyHtml||'')+(seenHtml||'')+'</div>'
+        : '';
+
       overlay.innerHTML =
         '<div class="gh-story-shell" role="dialog" aria-modal="true" aria-label="Story viewer">'+
         '<div class="gh-story-progress">'+bars+'</div>'+
@@ -1193,29 +1241,82 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             (g.authorAvatar?'<span class="gh-story-author-avatar">'+img(g.authorAvatar,g.authorName)+'</span>':'<span class="gh-story-author-avatar initials">'+esc(initials(g.authorName))+'</span>')+
             '<div><strong>'+esc(g.authorName)+'</strong><small>'+(storyIndex+1)+'/'+g.stories.length+' · '+timeAgo(st.createdAt)+'</small></div>'+
           '</div>'+
-          '<button type="button" class="gh-story-close" aria-label="Close story">×</button>'+
+          '<div class="gh-story-head-actions">'+ownerDeleteHtml+'<button type="button" class="gh-story-close" aria-label="Close story">×</button></div>'+
         '</div>'+
         '<div class="gh-story-main">'+
           (media?'<img src="'+esc(media)+'" alt="Story image" loading="eager" onerror="this.style.display=\'none\'">':'<p>'+esc(st.text||'Story')+'</p>')+
           (media && st.text?'<div class="gh-story-caption">'+esc(st.text)+'</div>':'')+
         '</div>'+
+        footerHtml+
         '<button type="button" class="gh-story-nav prev" aria-label="Previous story">‹</button>'+
         '<button type="button" class="gh-story-nav next" aria-label="Next story">›</button>'+
         '</div>';
 
-      // Non-blocking view tracking
-      var _cu = window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser;
-      if(_cu && st.id){
-        var _fsSdk = window.GeoFirebase.fs, _db = window.GeoFirebase.db;
-        if(_fsSdk && _db && _fsSdk.updateDoc && _fsSdk.doc){
-          _fsSdk.updateDoc(_fsSdk.doc(_db,'stories',st.id),{
-            viewedBy: _fsSdk.arrayUnion(_cu.uid),
-            viewCount: _fsSdk.increment(1)
-          }).catch(function(){});
-        }
+      // Non-blocking view tracking (rules now allow onlyStoryViewFields)
+      var _fsSdk = window.GeoFirebase && window.GeoFirebase.fs;
+      var _db = window.GeoFirebase && window.GeoFirebase.db;
+      if(_cu && st.id && _fsSdk && _db && _fsSdk.updateDoc && _fsSdk.doc){
+        _fsSdk.updateDoc(_fsSdk.doc(_db,'stories',st.id),{
+          viewedBy: _fsSdk.arrayUnion(_cu.uid),
+          viewCount: _fsSdk.increment(1)
+        }).catch(function(){});
       }
 
       overlay.querySelector('.gh-story-close').onclick = close;
+
+      // Owner delete
+      var delBtn = overlay.querySelector('#ghStoryDelete');
+      if(delBtn) delBtn.onclick = function(e){
+        e.stopPropagation();
+        if(!confirm('Delete this story?')) return;
+        if(GS().deleteStory){
+          GS().deleteStory(st.id, function(err){
+            if(!err){ toast('Story deleted'); close(); }
+            else toast('Could not delete story.','error');
+          });
+        }
+      };
+
+      // Reaction buttons — update only buttons on click, no full redraw
+      overlay.querySelectorAll('[data-story-react]').forEach(function(btn){
+        btn.addEventListener('click', function(e){
+          e.stopPropagation();
+          var em = btn.dataset.storyReact;
+          if(_myReactions[st.id] === em){
+            _myReactions[st.id] = null;
+            if(GS().removeStoryReaction) GS().removeStoryReaction(st.id);
+          } else {
+            _myReactions[st.id] = em;
+            if(GS().addStoryReaction) GS().addStoryReaction(st.id, em);
+          }
+          overlay.querySelectorAll('[data-story-react]').forEach(function(b){
+            b.classList.toggle('active', _myReactions[st.id] === b.dataset.storyReact);
+          });
+        });
+      });
+
+      // Reply input
+      var replyInput = overlay.querySelector('#ghStRpInput');
+      var replySend = overlay.querySelector('#ghStRpSend');
+      if(replyInput){
+        replyInput.addEventListener('focus', function(){ _inputFocused=true; clearTimer(); });
+        replyInput.addEventListener('blur', function(){ _inputFocused=false; if(!_paused) scheduleAdvance(); });
+        replyInput.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); if(replySend) replySend.click(); } });
+      }
+      if(replySend){
+        replySend.addEventListener('click', function(e){
+          e.stopPropagation();
+          var text = replyInput ? replyInput.value.trim() : '';
+          if(!text) return;
+          if(GS().addStoryReply){
+            GS().addStoryReply(st.id, st.authorId, text, function(err){
+              if(!err) toast('Reply sent');
+            });
+          }
+          if(replyInput){ replyInput.value=''; replyInput.blur(); }
+        });
+      }
+
       overlay.querySelector('.gh-story-nav.prev').onclick = function(e){
         e.stopPropagation();
         if(storyIndex > 0){ storyIndex--; } else if(groupIndex > 0){ groupIndex--; storyIndex=groups[groupIndex].stories.length-1; } else return;
@@ -1223,7 +1324,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       };
       overlay.querySelector('.gh-story-nav.next').onclick = function(e){ e.stopPropagation(); tryAdvance(); };
       overlay.querySelector('.gh-story-main').onclick = function(e){
-        if(e.target.closest('.gh-story-caption')) return;
+        if(e.target.closest('.gh-story-caption') || e.target.closest('.gh-story-footer')) return;
         var r = overlay.querySelector('.gh-story-main').getBoundingClientRect();
         if(e.clientX < r.left + r.width * 0.35){
           if(storyIndex > 0){ storyIndex--; } else if(groupIndex > 0){ groupIndex--; storyIndex=groups[groupIndex].stories.length-1; } else return;
@@ -1231,14 +1332,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         } else { tryAdvance(); }
       };
 
-      // Pause auto-advance on hover
+      // Pause auto-advance on hover (desktop)
       var shell = overlay.querySelector('.gh-story-shell');
       if(shell){
         shell.addEventListener('mouseenter', function(){
           _paused=true; clearTimer(); shell.classList.add('gh-story-paused');
         });
         shell.addEventListener('mouseleave', function(){
-          _paused=false; shell.classList.remove('gh-story-paused'); scheduleAdvance();
+          _paused=false; shell.classList.remove('gh-story-paused'); if(!_inputFocused) scheduleAdvance();
         });
       }
 

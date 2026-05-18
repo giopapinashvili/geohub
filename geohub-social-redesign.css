@@ -1931,3 +1931,36 @@ html[data-gh-theme="light"] .gh-cmp-tool.active{background:rgba(16,185,129,.1)}
 
 /* Empty state */
 .gh-story-empty{display:flex;align-items:center;padding:0 14px;font-size:.82rem;color:var(--gh-muted);white-space:nowrap;flex-shrink:0}
+
+/* ── Phase 28 — Story Viewer Footer (reactions + replies + seen) ── */
+
+/* Head: close + optional owner controls */
+.gh-story-head-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.gh-story-owner-del{width:34px;height:34px;border:0;border-radius:50%;background:rgba(239,68,68,.18);color:#ef4444;font-size:.8rem;cursor:pointer;display:grid;place-items:center;transition:background .15s}
+.gh-story-owner-del:hover{background:rgba(239,68,68,.38)}
+
+/* Footer strip at bottom of shell */
+.gh-story-footer{position:relative;z-index:5;padding:8px 14px 12px;background:linear-gradient(to top,rgba(0,0,0,.6) 0%,rgba(0,0,0,0) 100%);display:flex;flex-direction:column;gap:8px}
+
+/* Reaction buttons */
+.gh-story-reactions{display:flex;gap:6px;justify-content:center}
+.gh-story-react-btn{width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-size:1.3rem;cursor:pointer;transition:transform .15s,background .15s;display:grid;place-items:center;flex-shrink:0}
+.gh-story-react-btn:hover{background:rgba(255,255,255,.24);transform:scale(1.1)}
+.gh-story-react-btn.active{background:rgba(255,255,255,.32);transform:scale(1.15);border-color:rgba(255,255,255,.6)}
+
+/* Reply row */
+.gh-story-reply-row{display:flex;gap:8px;align-items:center}
+.gh-story-reply-input{flex:1;height:40px;border-radius:20px;border:1.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);color:#fff;padding:0 16px;font-size:.875rem;outline:none;min-width:0}
+.gh-story-reply-input::placeholder{color:rgba(255,255,255,.5)}
+.gh-story-reply-input:focus{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.16)}
+.gh-story-reply-send{width:40px;height:40px;border-radius:50%;border:none;background:#10b981;color:#fff;font-size:.9rem;cursor:pointer;display:grid;place-items:center;flex-shrink:0;transition:background .15s}
+.gh-story-reply-send:hover{background:#059669}
+
+/* Seen row (owner only) */
+.gh-story-seen-row{display:flex;align-items:center;justify-content:center;gap:6px;font-size:.75rem;color:rgba(255,255,255,.65);padding:2px 0}
+.gh-story-seen-row .fa-eye{color:rgba(255,255,255,.5)}
+
+@media(max-width:480px){
+  .gh-story-react-btn{width:40px;height:40px;font-size:1.15rem}
+  .gh-story-reply-input{font-size:.82rem}
+}

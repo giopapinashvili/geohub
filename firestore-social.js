@@ -69,6 +69,10 @@
       createCheckinFull: noop,
       createStory: noop,
       listenStories: function () { return function () {}; },
+      addStoryReaction: noop,
+      removeStoryReaction: noop,
+      addStoryReply: noop,
+      deleteStory: noop,
       listenUserNotifications: function (uid, cb) { cb([]); return function () {}; },
       markNotificationRead: function () {},
       listenUserPosts: function (uid, cb) { cb([]); return function () {}; },
@@ -1901,6 +1905,52 @@
       });
     }
 
+    function addStoryReaction(storyId, reactionEmoji, callback) {
+      requireAuth(function(user) {
+        if(!storyId) { if(callback) callback(null, new Error('No storyId')); return; }
+        setDoc(doc(db, 'stories', storyId, 'reactions', user.uid), {
+          userId: user.uid,
+          reaction: reactionEmoji || '❤️',
+          createdAt: serverTimestamp()
+        }).then(function(){ if(callback) callback(); })
+          .catch(function(err){ console.warn('[GeoSocial] addStoryReaction', err.message); if(callback) callback(null, err); });
+      });
+    }
+
+    function removeStoryReaction(storyId, callback) {
+      var uid = currentUid(); if(!uid || !storyId) { if(callback) callback(); return; }
+      deleteDoc(doc(db, 'stories', storyId, 'reactions', uid))
+        .then(function(){ if(callback) callback(); })
+        .catch(function(err){ console.warn('[GeoSocial] removeStoryReaction', err.message); if(callback) callback(null, err); });
+    }
+
+    function addStoryReply(storyId, ownerId, text, callback) {
+      requireAuth(function(user) {
+        if(!storyId || !(text||'').trim()) { if(callback) callback(null, new Error('Missing params')); return; }
+        var me = meData() || {};
+        addDoc(collection(db, 'stories', storyId, 'replies'), {
+          storyId: storyId,
+          ownerId: ownerId || '',
+          fromUserId: user.uid,
+          authorId: user.uid,
+          authorName: me.name || user.displayName || 'GeoHub User',
+          authorAvatar: me.avatar || user.photoURL || '',
+          text: text.trim(),
+          createdAt: serverTimestamp()
+        }).then(function(){ if(callback) callback(); })
+          .catch(function(err){ console.warn('[GeoSocial] addStoryReply', err.message); toast('Could not send reply.', 'error'); if(callback) callback(null, err); });
+      });
+    }
+
+    function deleteStory(storyId, callback) {
+      requireAuth(function(user) {
+        if(!storyId) { if(callback) callback(null, new Error('No storyId')); return; }
+        deleteDoc(doc(db, 'stories', storyId))
+          .then(function(){ if(callback) callback(); })
+          .catch(function(err){ console.warn('[GeoSocial] deleteStory', err.message); if(callback) callback(null, err); });
+      });
+    }
+
     // ── CHECK STATE HELPERS ──────────────────────────────────────────────
     function checkSaved(postId, callback) {
       var uid = currentUid();
@@ -3079,6 +3129,10 @@
       createCheckinFull:           createCheckinFull,
       createStory:             createStory,
       listenStories:           listenStories,
+      addStoryReaction:        addStoryReaction,
+      removeStoryReaction:     removeStoryReaction,
+      addStoryReply:           addStoryReply,
+      deleteStory:             deleteStory,
       createSystemNotification: createSystemNotification,
       listenUserNotifications: listenUserNotifications,
       markNotificationRead:    markNotificationRead,

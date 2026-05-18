@@ -90,6 +90,13 @@ service cloud.firestore {
         ]);
     }
 
+    // Any signed-in user may update story view fields only (no other fields).
+    function onlyStoryViewFields() {
+      return signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['viewedBy', 'viewCount', 'updatedAt']);
+    }
+
     // Fields a post owner/business owner may edit after creation.
     function onlyPostManagementFields() {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
@@ -446,7 +453,26 @@ service cloud.firestore {
       }
     }
 
-    match /stories/{storyId}    { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /stories/{storyId} {
+      allow read: if true;
+      allow create: if newOwnerMatches();
+      allow update: if isAdmin() || existingOwnerMatches() || onlyStoryViewFields();
+      allow delete: if isAdmin() || existingOwnerMatches();
+
+      match /reactions/{rxUserId} {
+        allow read: if true;
+        allow create, update: if isOwner(rxUserId);
+        allow delete: if isAdmin() || isOwner(rxUserId);
+      }
+
+      match /replies/{replyId} {
+        allow read: if signedIn();
+        allow create: if newOwnerMatches()
+          && request.resource.data.get('text', '') is string
+          && request.resource.data.get('text', '').size() > 0;
+        allow delete: if isAdmin() || existingOwnerMatches();
+      }
+    }
     match /checkins/{checkinId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
     match /places/{placeId}     { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
 
