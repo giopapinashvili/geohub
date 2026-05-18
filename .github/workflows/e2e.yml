@@ -34,7 +34,9 @@ jobs:
         run: npx playwright test --project=desktop-chrome --project=mobile-390
         env:
           CI: true
-          # Optional: add test credentials as GitHub Secrets for signed-in tests
+          # Signed-in tests — uncomment both lines after adding GitHub Secrets.
+          # See TESTING.md for setup instructions.
+          # Settings → Secrets and variables → Actions → New repository secret
           # GEOHUB_TEST_EMAIL:    ${{ secrets.GEOHUB_TEST_EMAIL }}
           # GEOHUB_TEST_PASSWORD: ${{ secrets.GEOHUB_TEST_PASSWORD }}
 

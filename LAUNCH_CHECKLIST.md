@@ -74,6 +74,10 @@
 - [ ] **Mobile tests pass** — no horizontal overflow at 360px, 390px, 768px
 - [ ] **Missing-route tests pass** — all `?id=__missing_test__` pages show safe fallback
 - [ ] **GitHub Actions** — CI workflow runs on push to master, report uploaded on failure
+- [ ] **Test account created** — dedicated email/password account in Firebase (see TESTING.md)
+- [ ] **Signed-in tests pass** — set `GEOHUB_TEST_EMAIL` / `GEOHUB_TEST_PASSWORD`, run `npm run test:e2e`
+- [ ] **GitHub Secrets set** — `GEOHUB_TEST_EMAIL` and `GEOHUB_TEST_PASSWORD` added to repo secrets
+- [ ] **CI signed-in tests** — uncomment secret lines in `.github/workflows/e2e.yml` after secrets added
 
 ## Performance
 
@@ -109,3 +113,5 @@
 - Phase 18: Admin / Moderation / Safety Center
 - Phase 19: PWA / Mobile App Feel / Launch Polish
 - Phase 20: Final QA / Playwright Smoke Tests / Launch Readiness
+- Phase 21: Playwright Test Results Triage / All Tests Green
+- Phase 22: Signed-in Smoke Tests Setup / TESTING.md
