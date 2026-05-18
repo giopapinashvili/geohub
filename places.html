@@ -171,6 +171,25 @@
   .pl-map-popup p{margin:0 0 8px;font-size:.74rem;color:#64748b}
   .pl-map-popup button{width:100%;padding:6px;background:linear-gradient(135deg,#10b981,#3b82f6);border:none;border-radius:6px;color:#fff;font-weight:700;font-size:.78rem;cursor:pointer}
 
+  /* ── PHOTO GALLERY (check-in photos) ── */
+  .pl-gallery-section{margin-top:16px}
+  .pl-gallery-head{font-size:.78rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+  .pl-gallery{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}
+  .pl-gallery::-webkit-scrollbar{display:none}
+  .pl-gallery-img{width:100px;height:72px;border-radius:10px;object-fit:cover;cursor:pointer;flex-shrink:0;border:1px solid rgba(255,255,255,.08);transition:transform .15s;display:block}
+  .pl-gallery-img:hover{transform:scale(1.05)}
+
+  /* ── LIGHTBOX ── */
+  .pl-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:999999;display:none;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
+  .pl-lightbox.open{display:flex}
+  .pl-lightbox-img{max-width:100%;max-height:90vh;border-radius:12px;object-fit:contain;cursor:default}
+
+  /* ── REVIEW CONTROLS ── */
+  .pl-review-av{overflow:hidden}
+  .pl-review-header{display:flex;align-items:center;gap:6px;margin-bottom:2px}
+  .pl-review-del{margin-left:auto;background:none;border:none;color:#4b5563;font-size:.68rem;cursor:pointer;padding:2px 5px;border-radius:5px;line-height:1;flex-shrink:0}
+  .pl-review-del:hover{color:#ef4444;background:rgba(239,68,68,.08)}
+
   /* ── MOBILE ── */
   @media(max-width:768px){
     .pl-toolbar{padding:8px 12px;gap:6px}
@@ -180,6 +199,8 @@
     .pl-detail,.pl-modal{border-radius:0;max-height:100vh}
     .pl-cats{padding:0 12px}
     #plMapContainer{min-height:200px}
+    .pl-detail-actions{flex-wrap:wrap;gap:6px}
+    .pl-det-btn{font-size:.76rem;padding:7px 11px}
   }
   @media(max-width:480px){
     .pl-grid{grid-template-columns:1fr}
@@ -577,7 +598,7 @@
         '<div class="pl-detail-top">'+
           '<div>'+
             '<h2>'+esc(p.name)+'</h2>'+
-            '<div class="pl-detail-cat"><i class="fas fa-tag"></i> '+esc(p.category||'Place')+'</div>'+
+            '<div class="pl-detail-cat"><i class="fas fa-tag"></i> '+esc(p.category||'Place')+(p.city?' &nbsp;·&nbsp; <i class="fas fa-map-marker-alt"></i> '+esc(p.city):'')+' </div>'+
           '</div>'+
           '<div class="pl-detail-actions">'+
             '<a class="pl-det-btn" href="'+esc(_ciUrl)+'"><i class="fas fa-location-dot"></i> Check In</a>'+
@@ -585,7 +606,7 @@
               '<i class="'+(saved?'fas':'far')+' fa-bookmark"></i> '+(saved?'Saved':'Save')+
             '</button>'+
             '<button class="pl-det-btn" onclick="sharePlaceDetail(\''+esc(p.id)+'\',\''+esc(p.name)+'\')"><i class="fas fa-share-alt"></i> Share</button>'+
-            (p.lat&&p.lng?'<a class="pl-det-btn" href="https://maps.google.com/?q='+p.lat+','+p.lng+'" target="_blank"><i class="fas fa-directions"></i> Directions</a>':'')+
+            (p.lat&&p.lng?'<a class="pl-det-btn" href="https://maps.google.com/?q='+p.lat+','+p.lng+'" target="_blank" rel="noreferrer"><i class="fas fa-directions"></i> Directions</a>':(p.address?'<a class="pl-det-btn" href="https://maps.google.com/?q='+encodeURIComponent(p.address)+'" target="_blank" rel="noreferrer"><i class="fas fa-directions"></i> Directions</a>':''))+
           '</div>'+
         '</div>'+
         (p.address?'<div class="pl-detail-addr"><i class="fas fa-map-marker-alt"></i> '+esc(p.address)+'</div>':'')+
@@ -596,6 +617,10 @@
         '</div>'+
         (p.description?'<div class="pl-detail-desc">'+esc(p.description)+'</div>':'')+
         '<p style="font-size:.78rem;color:#4b5563">Added by '+esc(p.creatorName||'User')+'</p>'+
+        '<div class="pl-gallery-section" id="plGallerySection" style="display:none">'+
+          '<div class="pl-gallery-head"><i class="fas fa-images"></i> Photos</div>'+
+          '<div class="pl-gallery" id="plGallery"></div>'+
+        '</div>'+
         '<div class="pl-reviews-section" id="plReviewsSection">'+
           '<div class="pl-reviews-head">Reviews</div>'+
           '<div class="pl-review-form" id="plReviewForm">'+
@@ -662,6 +687,7 @@
       var rating = parseInt(document.getElementById('plStarsRow').dataset.rating || 0);
       if(!rating){ GS.toast('Please select a star rating', 'error'); return; }
       var comment = document.getElementById('plReviewText').value.trim();
+      if(!comment){ GS.toast('Please write your experience', 'error'); return; }
       var btn = document.querySelector('#plReviewForm .pl-review-submit');
       if(btn){ btn.disabled=true; btn.textContent='Posting…'; }
       GS.createPlaceReview(placeId, rating, comment, function(ok){
@@ -697,14 +723,22 @@
         list.innerHTML = '<p style="font-size:.8rem;color:#4b5563;padding:8px 0">No reviews yet. Be the first!</p>';
         return;
       }
+      var curUid = (window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser) ? window.GeoFirebase.auth.currentUser.uid : '';
       list.innerHTML = reviews.map(function(r){
         var stars = Array(5).fill(0).map(function(_,i){ return '<span style="color:'+(i<r.rating?'#f59e0b':'#374151')+'">&#9733;</span>'; }).join('');
         var time = r.createdAt && r.createdAt.toDate ? new Intl.DateTimeFormat('en',{month:'short',day:'numeric',year:'numeric'}).format(r.createdAt.toDate()) : '';
         var initials = (r.userName||'U').charAt(0).toUpperCase();
+        var avInner = r.userPhoto
+          ? '<img src="'+esc(r.userPhoto)+'" alt="" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.onerror=null;this.style.display=\'none\'">'
+          : esc(initials);
+        var canDelete = curUid && r.userId === curUid;
         return '<div class="pl-review-item">'+
-          '<div class="pl-review-av">'+esc(initials)+'</div>'+
+          '<div class="pl-review-av">'+avInner+'</div>'+
           '<div class="pl-review-body">'+
-            '<div class="pl-review-name">'+esc(r.userName||'User')+'</div>'+
+            '<div class="pl-review-header">'+
+              '<span class="pl-review-name">'+esc(r.userName||'User')+'</span>'+
+              (canDelete?'<button class="pl-review-del" onclick="deleteReview(\''+esc(r.id)+'\')" title="Delete my review"><i class="fas fa-trash-alt"></i></button>':'')+
+            '</div>'+
             '<div class="pl-review-stars">'+stars+'</div>'+
             (r.comment?'<div class="pl-review-text">'+esc(r.comment)+'</div>':'')+
             (time?'<div class="pl-review-time">'+time+'</div>':'')+
@@ -764,6 +798,8 @@
           (c.photoUrl?'<img src="'+esc(c.photoUrl)+'" alt="" class="pl-checkin-photo" loading="lazy" onerror="this.onerror=null;this.style.display=\'none\'">':'')+
         '</div>';
       }).join('');
+      var photos = items.filter(function(c){ return c.photoUrl; }).map(function(c){ return c.photoUrl; });
+      renderPhotosGallery(photos);
     }).catch(function(){ list.innerHTML=''; });
   }
 
@@ -808,6 +844,52 @@
     renderGrid(_allPlaces);
   });
 
+  // ── REVIEW DELETE ────────────────────────────────────────────────────────
+  function deleteReview(reviewId){
+    if(!confirm('Delete your review?')) return;
+    var gf = window.GeoFirebase;
+    if(!gf||!gf.fs||!gf.db) return;
+    gf.fs.deleteDoc(gf.fs.doc(gf.db,'placeReviews',reviewId)).catch(function(){
+      var GS = window.GeoSocial;
+      if(GS&&GS.toast) GS.toast('Could not delete review','error');
+    });
+  }
+
+  // ── PHOTO GALLERY ─────────────────────────────────────────────────────────
+  function renderPhotosGallery(photos){
+    var section = document.getElementById('plGallerySection');
+    var gallery = document.getElementById('plGallery');
+    if(!section||!gallery) return;
+    if(!photos||!photos.length){ section.style.display='none'; return; }
+    section.style.display='';
+    gallery.innerHTML = photos.map(function(url){
+      return '<img src="'+esc(url)+'" alt="" class="pl-gallery-img" loading="lazy"'+
+        ' onerror="this.onerror=null;this.remove()"'+
+        ' onclick="openLightbox(\''+esc(url)+'\')">';
+    }).join('');
+  }
+
+  // ── LIGHTBOX ──────────────────────────────────────────────────────────────
+  function openLightbox(url){
+    var lb = document.getElementById('plLightbox');
+    var img = document.getElementById('plLightboxImg');
+    if(!lb||!img) return;
+    img.src = url;
+    lb.classList.add('open');
+  }
+  function closeLightbox(){
+    var lb = document.getElementById('plLightbox');
+    if(lb){ lb.classList.remove('open'); document.getElementById('plLightboxImg').src=''; }
+  }
+
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape'){
+      closeLightbox();
+      closePlaceDetail();
+      closeAddModal();
+    }
+  });
+
   // ── INIT ─────────────────────────────────────────────────────────────────
   // GeoSocialReady fires twice: once for the stub, once for the real implementation.
   // We only run the full init when Firebase DB is genuinely available.
@@ -833,6 +915,10 @@
     if(_unsubReviews){ try{ _unsubReviews(); }catch(e){} _unsubReviews=null; }
   });
 </script>
+<!-- PHOTO LIGHTBOX -->
+<div class="pl-lightbox" id="plLightbox" onclick="closeLightbox()">
+  <img id="plLightboxImg" class="pl-lightbox-img" src="" alt="" onclick="event.stopPropagation()">
+</div>
 <script defer src="geohub-production-stabilization-v1.js"></script>
   <script defer src="responsive-polish.js"></script>
 </body>

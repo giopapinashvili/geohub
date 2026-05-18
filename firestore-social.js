@@ -3020,6 +3020,7 @@
         createdAt: serverTimestamp()
       }).then(function () {
         toast('Review submitted!');
+        updateDoc(doc(db, 'places', placeId), { reviewCount: increment(1), updatedAt: serverTimestamp() }).catch(function(){});
         if (callback) callback(true);
       }).catch(function (err) {
         toast('Failed to submit review', 'error');
