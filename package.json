@@ -1,0 +1,17 @@
+{
+  "name": "geohub",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GeoHub — Discover Georgia. Static PWA with Firebase backend.",
+  "scripts": {
+    "test:e2e":        "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:ui":     "playwright test --ui",
+    "test:e2e:report": "playwright show-report",
+    "serve":           "http-server . --port 8080 -c-1 --cors -s"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.0",
+    "http-server":      "^14.1.1"
+  }
+}

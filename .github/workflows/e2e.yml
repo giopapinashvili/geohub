@@ -1,0 +1,47 @@
+name: E2E Smoke Tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  smoke-tests:
+    name: Playwright smoke tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install npm dependencies
+        run: npm install
+
+      - name: Install Playwright browsers (Chromium only for speed)
+        run: npx playwright install --with-deps chromium
+
+      # Run only the desktop-chrome and mobile-390 projects in CI.
+      # mobile-360 and tablet-768 are covered locally via full test:e2e.
+      - name: Run smoke tests
+        run: npx playwright test --project=desktop-chrome --project=mobile-390
+        env:
+          CI: true
+          # Optional: add test credentials as GitHub Secrets for signed-in tests
+          # GEOHUB_TEST_EMAIL:    ${{ secrets.GEOHUB_TEST_EMAIL }}
+          # GEOHUB_TEST_PASSWORD: ${{ secrets.GEOHUB_TEST_PASSWORD }}
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: playwright-report/
+          retention-days: 7

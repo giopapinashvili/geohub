@@ -2,6 +2,11 @@
 *.local
 .DS_Store
 Thumbs.db
+# Node / Playwright
+node_modules/
+playwright-report/
+test-results/
+.playwright/
 # Development report files — not for production
 *_REPORT.md
 *_FIXED.md
