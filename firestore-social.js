@@ -1425,12 +1425,19 @@
       if (!text || !text.trim()) return;
       requireAuth(function (user) {
         var me = meData() || {};
-        addDoc(collection(db, 'groupPosts'), {
-          groupId: groupId, text: text.trim(), mediaUrl: mediaUrl || null,
-          authorId: user.uid, userId: user.uid,
-          authorName: me.name || user.displayName || 'GeoHub User',
-          authorAvatar: me.avatar || user.photoURL || '',
-          likeCount: 0, commentCount: 0, createdAt: serverTimestamp()
+        // Fetch group privacy once so it can be denormalised onto the post.
+        // The Firestore rule uses resource.data.groupPrivacy to gate reads
+        // without a per-document get() call inside the rule engine.
+        getDoc(doc(db, 'groups', groupId)).then(function(gSnap) {
+          var groupPrivacy = gSnap.exists() ? (gSnap.data().privacy || 'public') : 'public';
+          return addDoc(collection(db, 'groupPosts'), {
+            groupId: groupId, groupPrivacy: groupPrivacy,
+            text: text.trim(), mediaUrl: mediaUrl || null,
+            authorId: user.uid, userId: user.uid,
+            authorName: me.name || user.displayName || 'GeoHub User',
+            authorAvatar: me.avatar || user.photoURL || '',
+            likeCount: 0, commentCount: 0, createdAt: serverTimestamp()
+          });
         }).then(function () {
           return updateDoc(doc(db, 'groups', groupId), { postCount: increment(1) }).catch(function(){});
         }).then(function () { toast('Posted!'); if (callback) callback(); })
