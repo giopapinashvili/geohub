@@ -192,14 +192,25 @@
     document.title = user.fullName + ' — GeoHub';
     const cover = $('.profile-cover');
     if (cover) cover.style.backgroundImage = user.coverImage ? `linear-gradient(180deg, rgba(4,5,13,0.08), rgba(4,5,13,0.72)), url('${user.coverImage}')` : 'linear-gradient(135deg, rgba(16,185,129,0.20), rgba(77,166,255,0.12), rgba(123,97,255,0.12))';
-    const av = $('.profile-avatar'); if (av) { av.src = user.avatar; av.alt = user.fullName; }
+    const av = $('.profile-avatar'); if (av) { av.src = user.avatar; av.alt = user.fullName; av.onerror = function(){ this.onerror=null; this.src=initialsSvg(user.initials||'GH'); }; }
     const lvl = $('.avatar-level'); if (lvl) lvl.textContent = level(user);
     const name = $('.profile-name'); if (name) name.textContent = user.fullName;
     const handle = $('.profile-handle'); if (handle) handle.textContent = '@' + (user.username || 'user') + (user.city ? ' · ' + user.city : '');
     const bio = $('.profile-bio'); if (bio) bio.textContent = user.bio || 'No bio yet.';
     const badges = $('.trust-badges');
-    if (badges) badges.innerHTML = '<span class="trust-badge green"><i class="fas fa-check-circle"></i> Real account</span><span class="trust-badge gold"><i class="fas fa-bolt"></i> ' + compact(user.xp) + ' XP</span><span class="trust-badge purple"><i class="fas fa-id-badge"></i> ' + esc(user.accountType) + '</span>';
+    if (badges) {
+      var _badgeHtml = '<span class="trust-badge green"><i class="fas fa-check-circle"></i> Real account</span>';
+      if (user.verified === true) _badgeHtml += '<span class="trust-badge blue"><i class="fas fa-circle-check"></i> Verified</span>';
+      if (Number(user.xp) > 0) _badgeHtml += '<span class="trust-badge gold"><i class="fas fa-bolt"></i> ' + compact(user.xp) + ' XP</span>';
+      badges.innerHTML = _badgeHtml;
+    }
     const own = fbUser && user.uid === fbUser.uid;
+    if (!own) {
+      var _savedTabEl = document.querySelector('.ptab[data-tab="saved"]');
+      if (_savedTabEl) _savedTabEl.style.display = 'none';
+      var _savedPanelEl = document.getElementById('tab-saved');
+      if (_savedPanelEl) _savedPanelEl.style.display = 'none';
+    }
     const coverActions = $('.cover-actions');
     if (coverActions) coverActions.innerHTML = own
       ? '<button class="cover-btn" data-edit-cover><i class="fas fa-camera"></i> Edit Cover</button><button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button>'
@@ -670,7 +681,8 @@
       if (cnt) cnt.textContent = snap.size;
       var items = [];
       snap.forEach(function(d) { items.push(Object.assign({ id: d.id }, d.data())); });
-      items.sort(function(a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+      function _ciTs(v) { if (!v) return 0; if (typeof v === 'object' && typeof v.toMillis === 'function') return v.toMillis(); if (typeof v === 'object' && v.seconds) return v.seconds * 1000; return Number(v) || 0; }
+      items.sort(function(a, b) { return _ciTs(b.createdAt) - _ciTs(a.createdAt); });
       tab.innerHTML = '<div class="gh-friend-grid">' + items.map(function(c) {
         var linkStart = c.placeId ? '<a href="places.html?id=' + encodeURIComponent(c.placeId) + '" style="color:#10b981;text-decoration:none">' : '';
         var linkEnd   = c.placeId ? '</a>' : '';
@@ -783,8 +795,19 @@
     var links = Object.entries(sl).filter(function(e) { return !!e[1]; });
     if (links.length) {
       html += '<div class="about-section-title">Social Links</div>';
-      html += '<div class="about-links">' + links.map(function(e) {
-        return '<a class="about-link-chip" href="https://' + esc(e[0]) + '.com/' + esc(e[1]) + '" target="_blank" rel="noopener noreferrer"><i class="fab ' + (ICONS[e[0]] || 'fa-link') + '"></i> ' + esc(e[1]) + '</a>';
+      html += '<div class="about-links">' + links.map(function(pair) {
+        var platform = pair[0], val = String(pair[1] || '');
+        var handle = val.replace(/^@/, '');
+        var href = '';
+        if (platform === 'instagram') href = 'https://instagram.com/' + encodeURIComponent(handle);
+        else if (platform === 'tiktok') href = 'https://tiktok.com/@' + encodeURIComponent(handle);
+        else if (platform === 'facebook') href = safeUrl(val) || ('https://facebook.com/' + encodeURIComponent(handle));
+        else if (platform === 'linkedin') href = safeUrl(val) || ('https://linkedin.com/in/' + encodeURIComponent(handle));
+        else if (platform === 'twitter') href = 'https://twitter.com/' + encodeURIComponent(handle);
+        else if (platform === 'youtube') href = safeUrl(val) || ('https://youtube.com/@' + encodeURIComponent(handle));
+        else href = safeUrl(val) || '';
+        if (!href) return '<span class="about-link-chip"><i class="fab ' + (ICONS[platform] || 'fa-link') + '"></i> ' + esc(val) + '</span>';
+        return '<a class="about-link-chip" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer"><i class="fab ' + (ICONS[platform] || 'fa-link') + '"></i> ' + esc(handle || val) + '</a>';
       }).join('') + '</div>';
     }
     html += '</div>';
