@@ -1999,4 +1999,6 @@ html[data-gh-theme="light"] .gh-cmp-tool.active{background:rgba(16,185,129,.1)}
 .gh-pmb-switch:hover{background:rgba(255,255,255,.07);color:#f0f4ff}
 /* Full-shell: banner is first child of gh-shell, right below the fixed topbar padding */
 .gh-shell>#ghPageModeBanner{margin-top:0;margin-bottom:0}
+/* Messages page: banner is first child of .messages-page (fixed flex column) */
+body.page-messages #ghPageModeBanner{flex-shrink:0;width:100%;z-index:1}
 @media(max-width:640px){.gh-pmb-inner{padding:7px 14px;gap:6px}.gh-pmb-actions{margin-left:0}}

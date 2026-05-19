@@ -581,9 +581,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var layout=document.querySelector('.gh-layout');
       if(layout&&layout.parentNode){ layout.parentNode.insertBefore(banner,layout); }
       else{
-        var mainEl=document.querySelector('main');
-        if(mainEl){ mainEl.insertBefore(banner,mainEl.firstChild); }
-        else{ document.body.appendChild(banner); }
+        var msgPage=document.querySelector('.messages-page');
+        if(msgPage){ msgPage.insertBefore(banner,msgPage.firstChild); }
+        else{
+          var mainEl=document.querySelector('main');
+          if(mainEl){ mainEl.insertBefore(banner,mainEl.firstChild); }
+          else{ document.body.appendChild(banner); }
+        }
       }
     }
     var isBiz=_actor&&_actor.type==='business'&&_actor.businessId;
@@ -615,8 +619,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     ]).then(function(results){
       var bizSnap=results[0], adminSnap=results[1];
       var bizData=bizSnap.exists()?bizSnap.data():{};
-      if(!bizSnap.exists()||bizData.status==='deleted'||bizData.deleted===true||!adminSnap.exists()){
-        // Business gone or user no longer admin — reset actor to user
+      var isOwner=bizData.ownerId===uid||bizData.ownerUid===uid;
+      var isAdmin=adminSnap.exists();
+      if(!bizSnap.exists()||bizData.status==='deleted'||bizData.deleted===true||(!isOwner&&!isAdmin)){
+        // Business gone or user is neither owner nor admin — reset actor to user
         try{localStorage.removeItem('gh_active_actor');}catch(e){}
         window.dispatchEvent(new CustomEvent('GeoActorChanged',{detail:{type:'user',uid:uid}}));
         return;
@@ -624,7 +630,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       // Refresh stored actor with fresh name/logo
       var fresh=Object.assign({},actor,{
         title:bizData.title||bizData.name||actor.title||'Business',
-        logoUrl:bizData.logoUrl||bizData.logo||bizData.avatar||actor.logoUrl||''
+        logoUrl:bizData.logoUrl||bizData.logo||bizData.avatar||actor.logoUrl||'',
+        coverUrl:bizData.coverUrl||bizData.coverImage||actor.coverUrl||''
       });
       try{localStorage.setItem('gh_active_actor',JSON.stringify(fresh));}catch(e){}
       window.dispatchEvent(new CustomEvent('GeoActorChanged',{detail:fresh}));

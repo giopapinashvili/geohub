@@ -466,18 +466,36 @@
   function loadUserBusinesses(uid) {
     if (!_db || !_fs) return;
     _businesses = [];
-    var q = _fs.query(
+    // Query 1: businessAdmins docs where userId === uid
+    var adminP = _fs.getDocs(_fs.query(
       _fs.collection(_db, 'businessAdmins'),
       _fs.where('userId', '==', uid),
       _fs.limit(10)
-    );
-    _fs.getDocs(q).then(function(snap) {
-      if (!snap.size) return null;
-      var bizIds = [];
+    )).then(function(snap) {
+      var ids = [];
       snap.forEach(function(d) {
         var id = d.id.replace('_' + uid, '');
-        if (id) bizIds.push(id);
+        if (id) ids.push(id);
       });
+      return ids;
+    }).catch(function() { return []; });
+    // Query 2: businesses where user is direct owner (ownerId field)
+    var ownerP = _fs.getDocs(_fs.query(
+      _fs.collection(_db, 'businesses'),
+      _fs.where('ownerId', '==', uid),
+      _fs.limit(10)
+    )).then(function(snap) {
+      var ids = [];
+      snap.forEach(function(d) { ids.push(d.id); });
+      return ids;
+    }).catch(function() { return []; });
+    Promise.all([adminP, ownerP]).then(function(both) {
+      // Deduplicate IDs from both sources
+      var seen = {}, bizIds = [];
+      both[0].concat(both[1]).forEach(function(id) {
+        if (id && !seen[id]) { seen[id] = true; bizIds.push(id); }
+      });
+      if (!bizIds.length) return null;
       return Promise.all(bizIds.map(function(id) {
         return _fs.getDoc(_fs.doc(_db, 'businesses', id))
           .then(function(d) {
