@@ -618,7 +618,7 @@
     const indicator = $('#typingIndicator');
     if(!indicator) return;
     if(active.length){
-      indicator.style.display='';
+      indicator.style.display='block';
       const entry = active[0][1];
       const label = entry && typeof entry === 'object' && entry.name ? entry.name : actorLabel(active[0][0], convData);
       indicator.innerHTML = '<div class="typing-name">'+esc(label)+' is typing...</div><div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
