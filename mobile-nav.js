@@ -93,6 +93,12 @@
     }, { passive: true });
   }
 
+  function _mesc(s) {
+    return String(s || '').replace(/[&<>'"]/g, function(c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];
+    });
+  }
+
   function mobileMenuHtml() {
     return '<div class="mobile-account-panel" id="ghMobileAccountSlot"></div>' +
       '<div class="mobile-menu-group"><div class="mobile-menu-title">Main</div>' +
@@ -106,7 +112,6 @@
         '<a class="gh-mobile-menu-row" href="rewards.html"><i class="fas fa-gift"></i><span>Rewards</span></a>' +
       '</div>' +
       '<div class="mobile-menu-group"><div class="mobile-menu-title">Account</div>' +
-        '<a class="gh-mobile-menu-row" href="profile.html"><i class="fas fa-user"></i><span>Profile</span></a>' +
         '<a class="gh-mobile-menu-row" href="business.html"><i class="fas fa-store"></i><span>Businesses</span></a>' +
         '<a class="gh-mobile-menu-row" href="add-business.html"><i class="fas fa-plus-circle"></i><span>Add Page</span></a>' +
         '<div id="ghMobileAuthActions"></div>' +
@@ -117,12 +122,21 @@
     var slot = document.getElementById('ghMobileAuthActions');
     if (!slot) return;
     if (user) {
+      var uid = user.uid || user.id || '';
+      var name = _mesc(user.fullName || user.displayName || 'Profile');
+      var href = uid ? 'profile.html?id=' + encodeURIComponent(uid) : 'profile.html';
       slot.innerHTML =
+        '<a class="gh-mobile-menu-row" href="' + href + '">' +
+          '<i class="fas fa-user"></i><span>' + name + '</span>' +
+        '</a>' +
         '<button type="button" class="gh-mobile-menu-row mobile-menu-danger gh-mobile-menu-danger" data-gh-mobile-logout>' +
           '<i class="fas fa-right-from-bracket"></i><span>Logout</span>' +
         '</button>';
     } else {
-      slot.innerHTML = '';
+      slot.innerHTML =
+        '<a class="gh-mobile-menu-row" href="auth.html">' +
+          '<i class="fas fa-sign-in-alt"></i><span>Login / Sign Up</span>' +
+        '</a>';
     }
   }
 

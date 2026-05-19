@@ -1940,33 +1940,32 @@ body.gh-mobile-menu-open .gh-mobile-menu-overlay {
   background: rgba(0, 0, 0, 0.48) !important;
 }
 
-/* Messenger: explicit never-blank guarantee at all tested widths.
-   These duplicate and strengthen the Phase 65E rules to ensure
-   no combination of earlier CSS can hide both sidebar and chat-window. */
+/* Messenger: true staged mode — inbox first, chat second (Facebook Messenger style) */
 @media (max-width: 768px) {
   body.page-messages .messages-layout {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) !important;
-    grid-template-rows: minmax(160px, 34dvh) minmax(0, 1fr) !important;
+    display: block !important;
+    height: 100% !important;
     overflow: hidden !important;
   }
-  body.page-messages .messages-layout.chat-open {
-    grid-template-rows: 0 minmax(0, 1fr) !important;
-  }
-  /* sidebar: always visible when no chat open */
+  /* Default: show inbox, hide chat window */
   body.page-messages .msg-sidebar {
     display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
     min-width: 0 !important;
     overflow: hidden !important;
   }
-  /* sidebar: hidden when chat open (mobile staged layout) */
-  body.page-messages .messages-layout.chat-open .msg-sidebar {
+  body.page-messages .chat-window {
     display: none !important;
   }
-  /* chat-window: always visible regardless of open state */
-  body.page-messages .chat-window {
+  /* Chat open: hide inbox, show chat full-height */
+  body.page-messages.chat-open .msg-sidebar {
+    display: none !important;
+  }
+  body.page-messages.chat-open .chat-window {
     display: flex !important;
     flex-direction: column !important;
+    height: 100% !important;
     min-width: 0 !important;
     overflow: hidden !important;
   }
@@ -2023,5 +2022,61 @@ body.gh-mobile-menu-open .gh-mobile-menu-overlay {
   }
   body.page-messages .messages-page {
     top: calc(72px + env(safe-area-inset-top, 0px)) !important;
+  }
+}
+
+/* ── Phase 65H: Search / Notifications / Places / Profile / Menu fixes ── */
+
+/* Search — hide injected GH sidebar (it blocks content on mobile) and GH topbar
+   (page has its own sr-topbar); also add scroll clearance for bottom nav */
+@media (max-width: 900px) {
+  body[data-gh-page="search"] > .gh-left { display: none !important; }
+}
+@media (max-width: 768px) {
+  body[data-gh-page="search"] .gh-topbar { display: none !important; }
+  body[data-gh-page="search"] .sr-page {
+    padding-bottom: calc(var(--gh-mobile-nav-h, 68px) + env(safe-area-inset-bottom, 0px) + 20px) !important;
+  }
+}
+
+/* Notifications — hide GH sidebar and right rail on mobile so list is not buried below them */
+@media (max-width: 900px) {
+  body[data-gh-page="notifications"] .gh-left,
+  body[data-gh-page="notifications"] .gh-right { display: none !important; }
+  body[data-gh-page="notifications"] .np-page {
+    padding-bottom: calc(var(--gh-mobile-nav-h, 68px) + env(safe-area-inset-bottom, 0px) + 16px) !important;
+  }
+}
+
+/* Profile — hide lower duplicate Edit Profile / Share / Logout on mobile
+   (cover area already has the primary action buttons) */
+@media (max-width: 768px) {
+  .profile-actions [data-edit-profile],
+  .profile-actions [data-share-profile],
+  .profile-actions [data-logout],
+  .profile-actions .profile-body-logout { display: none !important; }
+}
+
+/* Places — full-width bottom sheet on mobile; fix vertical-letter title bug */
+@media (max-width: 768px) {
+  .pl-detail-overlay { padding: 0 !important; align-items: flex-end !important; }
+  .pl-detail {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: calc(92dvh - env(safe-area-inset-bottom, 0px)) !important;
+    border-radius: 20px 20px 0 0 !important;
+    overflow-y: auto !important;
+  }
+  .pl-detail-top {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+  .pl-detail-top > * { min-width: 0 !important; width: 100% !important; }
+  .pl-detail-top h2 { white-space: normal !important; word-break: normal !important; }
+  .pl-detail-actions {
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    gap: 6px !important;
   }
 }

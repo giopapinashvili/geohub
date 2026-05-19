@@ -704,3 +704,7 @@ body.gh-mobile-menu-open .mobile-menu {
 body.gh-mobile-menu-open .gh-mobile-menu-overlay {
   display: block !important;
 }
+
+/* Suppress account.js-injected raw <a> at bottom of .mobile-menu
+   (we handle auth links ourselves via #ghMobileAuthActions) */
+.mobile-menu > a { display: none !important; }

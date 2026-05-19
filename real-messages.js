@@ -177,7 +177,7 @@
         if(unsubConvSettings){ try{unsubConvSettings();}catch(ex){} unsubConvSettings=null; }
         const box=$('#chatMessages');
         if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-comments"></i><p>Select a conversation</p></div>';
-        document.querySelector('.messages-layout')?.classList.remove('chat-open');
+        document.body.classList.remove('chat-open');
       }
     }
     const rows=[];
@@ -806,7 +806,7 @@
     const box=$('#chatMessages'), hdr=$('#chatHeader');
     if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-comment-dots"></i><p>Select a conversation</p></div>';
     if(hdr) hdr.innerHTML='';
-    document.querySelector('.messages-layout')?.classList.remove('chat-open');
+    document.body.classList.remove('chat-open');
   }
 
   function showConvActionToast(convId, label, actorKeyOld, actorKeyNew, isArchive){
@@ -985,7 +985,7 @@
       : (activeLabelFromLastSeen(u && u.lastSeen) ? '<div class="header-online"><span class="active-dot"></span>'+esc(activeLabelFromLastSeen(u.lastSeen))+'</div>' : '');
     header.innerHTML=
       '<div class="chat-header-left">'
-      +'<button class="back-btn" onclick="document.querySelector(\'.messages-layout\').classList.remove(\'chat-open\')" title="Back"><i class="fas fa-arrow-left"></i></button>'
+      +'<button class="back-btn" onclick="document.body.classList.remove(\'chat-open\')" title="Back"><i class="fas fa-arrow-left"></i></button>'
       +'<div class="chat-header-av">'+(u.avatar?'<img src="'+esc(u.avatar)+'" alt="" onerror="this.style.display=\'none\'">':'<div class="av-placeholder">'+esc(initials(u.name))+'</div>')+'</div>'
       +'<div><div class="chat-header-name">'+esc(displayName(u.id, u.name))+'</div>'+bizCtx+'</div>'
       +'</div>'
@@ -1007,7 +1007,7 @@
 
   async function openConversation(cid){
     activeConversation=cid;
-    document.querySelector('.messages-layout')?.classList.add('chat-open');
+    document.body.classList.add('chat-open');
     document.querySelector('#infoPanel')?.classList.remove('open');
     document.querySelectorAll('.conv-item').forEach(el=>{
       el.classList.toggle('active', el.dataset.convId===cid);
@@ -1651,7 +1651,7 @@
         // Render business header (no "Replying as" — this is customer view)
         if(chatHdr) chatHdr.innerHTML =
           '<div class="chat-header-left">' +
-            '<button class="back-btn" onclick="document.querySelector(\'.messages-layout\').classList.remove(\'chat-open\')" title="Back"><i class="fas fa-arrow-left"></i></button>' +
+            '<button class="back-btn" onclick="document.body.classList.remove(\'chat-open\')" title="Back"><i class="fas fa-arrow-left"></i></button>' +
             '<div class="chat-header-av">' +
               (_withBizLogo ? '<img src="'+esc(_withBizLogo)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">' : '<div class="av-placeholder" style="background:rgba(16,185,129,.2)"><i class="fas fa-store" style="font-size:.9rem;color:#10b981"></i></div>') +
             '</div>' +
@@ -1719,7 +1719,7 @@
           }).catch(function(){});
           activeConversation = cid;
           activeConvData = convDoc;
-          document.querySelector('.messages-layout')?.classList.add('chat-open');
+          document.body.classList.add('chat-open');
           // Update URL to include cid so refresh goes directly to this conversation
           if(!cidParam){
             history.replaceState(null, '',
@@ -1831,7 +1831,8 @@
         dbg('personalInbox convs', convs.length, convs.map(c=>({id:c.id,forBiz:c.forBusiness,customerUid:c.customerUid,inboxActorIds:c.inboxActorIds})));
         window.__geohubLastConvs = convs || [];
         renderConvs(convs || []);
-        if(!activeConversation && convs && convs[0]) openConversation(convs[0].id);
+        var _onMobile = window.matchMedia('(max-width: 768px)').matches;
+        if(!activeConversation && convs && convs[0] && !_onMobile) openConversation(convs[0].id);
         else if(!activeConversation && (!convs || !convs.length)){
           const box=$('#chatMessages');
           if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-comments"></i><p>Select a conversation to start chatting</p></div>';
