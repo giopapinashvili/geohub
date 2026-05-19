@@ -487,3 +487,9 @@ body.page-messages .msg-reaction-picker{z-index:2147483000!important;}
   flex-shrink: 0;
 }
 .gh-undo-btn:hover { background: rgba(16,185,129,.15); }
+
+/* ===== PINNED CONVERSATION ===== */
+.conv-item.is-pinned {
+  border-left: 2px solid rgba(99,102,241,.45);
+  padding-left: calc(var(--conv-pad-left, 12px) - 2px);
+}

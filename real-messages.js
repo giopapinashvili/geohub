@@ -213,6 +213,14 @@
         return name.includes(_searchFilter);
       });
     }
+    // Pinned convs float to top; preserve relative time order within each group
+    const _pinActorKey = currentActorId();
+    filtered.sort((a,b)=>{
+      const ap=Array.isArray(a.c.pinnedForActors)&&a.c.pinnedForActors.includes(_pinActorKey);
+      const bp=Array.isArray(b.c.pinnedForActors)&&b.c.pinnedForActors.includes(_pinActorKey);
+      if(ap===bp) return 0;
+      return ap?-1:1;
+    });
     if(!filtered.length){
       const msg = _searchFilter ? 'No results for "'+esc(_searchFilter)+'"'
         : (_convFilter==='unread' ? 'No unread messages' : 'No conversations yet');
@@ -225,10 +233,12 @@
       const ts = convTime(c.updatedAt || c.lastMessageAt || c.createdAt || null);
       const profileHref = isBiz ? 'business.html?id='+esc(c.businessId) : 'profile.html?id='+esc(oid);
       const bizBadge = isBiz ? '<span style="font-size:.65rem;color:#10b981;vertical-align:middle;margin-right:3px"><i class="fas fa-store"></i></span>' : '';
-      return '<div class="conv-item '+(c.id===activeConversation?'active':'')+' '+(unread?'has-unread':'')+'" data-conv-id="'+esc(c.id)+'" oncontextmenu="return window.__ghConvCtxMenu(event,\''+esc(c.id)+'\')">'
+      const isPinnedConv = Array.isArray(c.pinnedForActors)&&c.pinnedForActors.includes(_pinActorKey);
+      const pinBadge = isPinnedConv ? '<i class="fas fa-thumbtack" style="font-size:.55rem;color:var(--gh-muted,#94a3b8);margin-left:4px;opacity:.65;transform:rotate(45deg);display:inline-block" title="Pinned"></i>' : '';
+      return '<div class="conv-item '+(c.id===activeConversation?'active':'')+' '+(unread?'has-unread':'')+' '+(isPinnedConv?'is-pinned':'')+'" data-conv-id="'+esc(c.id)+'" oncontextmenu="return window.__ghConvCtxMenu(event,\''+esc(c.id)+'\')">'
         + '<a class="conv-av-wrap" href="'+profileHref+'" data-open-user-profile="'+esc(oid)+'" onclick="event.stopPropagation()">'
         + (u.avatar ? '<img class="conv-avatar-img" src="'+esc(u.avatar)+'" alt="" onerror="this.style.display=\'none\'">' : '<div class="av-placeholder">'+esc(initials(name))+'</div>')
-        + '</a><div class="conv-info"><div class="conv-top-row"><span class="conv-name">'+bizBadge+esc(name)+'</span>'+(ts?'<span class="conv-time">'+esc(ts)+'</span>':'')+'</div>'
+        + '</a><div class="conv-info"><div class="conv-top-row"><span class="conv-name">'+bizBadge+esc(name)+pinBadge+'</span>'+(ts?'<span class="conv-time">'+esc(ts)+'</span>':'')+'</div>'
         + '<div class="conv-bottom-row"><span class="conv-preview">'+esc(c.lastMessage||'No messages yet')+'</span>'+(unread?'<span class="conv-unread-dot"></span>':'')+'</div></div>'
         + '<button class="conv-dots-btn" title="More options" aria-label="Conversation options" onclick="event.stopPropagation();window.__ghConvDotsMenu(event,\''+esc(c.id)+'\')"><i class="fas fa-ellipsis-v"></i></button>'
         + '</div>';
@@ -511,22 +521,47 @@
 
   window.__ghMsgCtxMenu = function(e, msgId){
     e.preventDefault();
-    const msg = allMessages.find(m=>m.id===msgId);
+    const msg=allMessages.find(m=>m.id===msgId);
     if(!msg) return false;
-    const mine = isMineMsg(msg);
-    const opts = [];
-    if(mine) opts.push({ icon:'fa-edit', label:'Edit', action:()=>startEdit(msgId, msg) });
-    opts.push({ sep:true });
-    // Delete for me: available on all messages (hides only for current actor)
-    opts.push({ icon:'fa-eye-slash', label:'Delete for me', action:()=>{
-      window.GeoSocial?.deleteMessage(activeConversation, msgId, 'me', null, { actorId: currentActorId() });
+    const mine=isMineMsg(msg);
+    const isDeleted=!!msg.deleted||!!msg.deletedForEveryone;
+    const hasText=!!(msg.text&&!isDeleted);
+    const opts=[];
+
+    // Reply — always available (even on deleted messages shows quoted text)
+    opts.push({icon:'fa-reply',label:'Reply',action:()=>{
+      const convs=window.__geohubLastConvs||[];
+      const conv=convs.find(c=>c.id===activeConversation);
+      const oid=conv?otherId(conv):'';
+      msg.senderName=mine?'You':(convNicknames[msg.senderId]||oid||'User');
+      setReplyState(msg);
+      const input=$('#msgInput')||$('#messageInput');
+      if(input) input.focus();
     }});
-    // Delete for everyone: only on messages sent by current actor (replaces content with placeholder)
-    if(mine) opts.push({ icon:'fa-trash-alt', label:'Delete for everyone', danger:true, action:()=>{
+
+    // Copy text
+    if(hasText) opts.push({icon:'fa-copy',label:'Copy text',action:()=>{
+      try{ navigator.clipboard.writeText(msg.text); window.showToast&&window.showToast('Copied'); }
+      catch(err){ window.showToast&&window.showToast('Could not copy'); }
+    }});
+
+    // Edit (mine, non-deleted, has text)
+    if(mine&&hasText) opts.push({icon:'fa-edit',label:'Edit',action:()=>startEdit(msgId,msg)});
+
+    opts.push({sep:true});
+
+    // Delete for me — always available on non-deleted messages
+    opts.push({icon:'fa-eye-slash',label:'Delete for me',action:()=>{
+      window.GeoSocial?.deleteMessage(activeConversation,msgId,'me',null,{actorId:currentActorId()});
+    }});
+
+    // Delete for everyone — only sender may do this
+    if(mine&&!isDeleted) opts.push({icon:'fa-trash-alt',label:'Delete for everyone',danger:true,action:()=>{
       if(!confirm('Delete this message for everyone? This cannot be undone.')) return;
-      window.GeoSocial?.deleteMessage(activeConversation, msgId, 'everyone', null, { actorId: currentActorId() });
+      window.GeoSocial?.deleteMessage(activeConversation,msgId,'everyone',null,{actorId:currentActorId()});
     }});
-    showContextMenu(e.clientX, e.clientY, opts);
+
+    showContextMenu(e.clientX,e.clientY,opts);
     return false;
   };
 
@@ -601,8 +636,11 @@
       clearTimeout(timer); toast.remove();
       const GF=window.GeoFirebase;
       if(!GF||!GF.fs||!GF.db) return;
-      const patch={hiddenForActors: GF.fs.arrayRemove(actorKeyOld, actorKeyNew||actorKeyOld)};
-      if(isArchive) patch.archivedForActors=GF.fs.arrayRemove(actorKeyNew||actorKeyOld);
+      const patch={
+        hiddenForActors:   GF.fs.arrayRemove(actorKeyOld, actorKeyNew||actorKeyOld),
+        archivedForActors: GF.fs.arrayRemove(actorKeyNew||actorKeyOld),
+        deletedForActors:  GF.fs.arrayRemove(actorKeyNew||actorKeyOld)
+      };
       GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId), patch)
         .then(()=>window.showToast&&window.showToast('Conversation restored'))
         .catch(()=>window.showToast&&window.showToast('Could not undo'));
@@ -637,21 +675,72 @@
       hiddenForActors:   GF.fs.arrayUnion(actorKeyOld, actorKeyNew)
     }).then(()=>{
       if(activeConversation===convId) closeChatPane();
-      window.showToast&&window.showToast('Conversation deleted for you');
+      showConvActionToast(convId,'Conversation deleted for you',actorKeyOld,actorKeyNew,false);
     }).catch(()=>window.showToast&&window.showToast('Could not delete conversation'));
+  }
+
+  function markConvUnread(convId, isCurrentlyUnread){
+    const GF=window.GeoFirebase;
+    if(!GF||!GF.fs||!GF.db) return;
+    const actorKeyNew=currentActorId();
+    GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId),{
+      unreadActors: isCurrentlyUnread ? GF.fs.arrayRemove(actorKeyNew) : GF.fs.arrayUnion(actorKeyNew)
+    }).then(()=>window.showToast&&window.showToast(isCurrentlyUnread?'Marked as read':'Marked as unread'))
+      .catch(()=>{});
+  }
+
+  function togglePinConv(convId, isPinned){
+    const GF=window.GeoFirebase;
+    if(!GF||!GF.fs||!GF.db) return;
+    const actorKeyNew=currentActorId();
+    GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId),{
+      pinnedForActors: isPinned ? GF.fs.arrayRemove(actorKeyNew) : GF.fs.arrayUnion(actorKeyNew)
+    }).then(()=>window.showToast&&window.showToast(isPinned?'Unpinned':'Conversation pinned'))
+      .catch(()=>{});
+  }
+
+  function muteConv(convId, duration){
+    const label=duration>=28800000?'8 hours':'1 hour';
+    window.GeoSocial?.setConversationMute&&window.GeoSocial.setConversationMute(convId,Date.now()+duration,
+      ()=>window.showToast&&window.showToast('Muted '+label));
   }
 
   // 3-dot menu on conv rows (also used as right-click handler)
   function convOptionsMenu(e, convId){
     e.preventDefault();
-    showContextMenu(e.clientX, e.clientY, [
-      { icon:'fa-box-archive', label:'Archive', action:()=>archiveConv(convId) },
-      { sep:true },
-      { icon:'fa-bell-slash', label:'Mute 1 hour', action:()=>window.GeoSocial?.setConversationMute(convId, Date.now()+3600000, ()=>window.showToast&&window.showToast('Muted 1h')) },
-      { icon:'fa-bell-slash', label:'Mute 8 hours', action:()=>window.GeoSocial?.setConversationMute(convId, Date.now()+28800000, ()=>window.showToast&&window.showToast('Muted 8h')) },
-      { sep:true },
-      { icon:'fa-trash', label:'Delete for me', danger:true, action:()=>deleteConvForMe(convId) },
-    ]);
+    const conv=(window.__geohubLastConvs||[]).find(c=>c.id===convId)||{};
+    const actorKeyNew=currentActorId();
+
+    // Link to the other side's profile or business page
+    let profileHref='', profileLabel='View profile';
+    if(conv.forBusiness&&conv.businessId){
+      if(_activeBizId){
+        if(conv.customerUid) profileHref='profile.html?id='+esc(conv.customerUid);
+      } else {
+        profileHref='business.html?id='+esc(conv.businessId);
+        profileLabel='View business page';
+      }
+    } else {
+      const oid=otherId(conv);
+      if(oid) profileHref='profile.html?id='+esc(oid);
+    }
+
+    const isPinned=Array.isArray(conv.pinnedForActors)&&conv.pinnedForActors.includes(actorKeyNew);
+    const isUnread=Array.isArray(conv.unreadActors)&&(conv.unreadActors.includes(actorKeyNew)||
+      (Array.isArray(conv.unreadFor)&&conv.unreadFor.includes(currentUid())));
+
+    const opts=[];
+    if(profileHref) opts.push({icon:'fa-user',label:profileLabel,action:()=>{location.href=profileHref;}});
+    if(profileHref) opts.push({sep:true});
+    opts.push({icon:'fa-box-archive',label:'Archive',action:()=>archiveConv(convId)});
+    opts.push({icon:isUnread?'fa-envelope-open':'fa-envelope',label:isUnread?'Mark as read':'Mark as unread',action:()=>markConvUnread(convId,isUnread)});
+    opts.push({icon:'fa-thumbtack',label:isPinned?'Unpin':'Pin',action:()=>togglePinConv(convId,isPinned)});
+    opts.push({sep:true});
+    opts.push({icon:'fa-bell-slash',label:'Mute 1 hour',action:()=>muteConv(convId,3600000)});
+    opts.push({icon:'fa-bell-slash',label:'Mute 8 hours',action:()=>muteConv(convId,28800000)});
+    opts.push({sep:true});
+    opts.push({icon:'fa-trash',label:'Delete for me',danger:true,action:()=>deleteConvForMe(convId)});
+    showContextMenu(e.clientX,e.clientY,opts);
     return false;
   }
 
