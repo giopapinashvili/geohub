@@ -196,6 +196,11 @@
     if(!/messages\.html|\/messages/.test(location.pathname)) return;
     const _v6p = new URLSearchParams(location.search);
     if(_v6p.has('business') || _v6p.has('withBusiness')) return;
+    // Bail if active identity is a business page — real-messages.js handles the redirect
+    try{
+      const _v6a = JSON.parse(localStorage.getItem('gh_active_actor')||'null');
+      if(_v6a && _v6a.type === 'business' && _v6a.businessId) return;
+    }catch(e){}
     waitReady(function(){
       const GF=window.GeoFirebase, fs=GF.fs, db=GF.db;
       let active=null, unsubMsgs=null, unsubConvs=null, sending=false;

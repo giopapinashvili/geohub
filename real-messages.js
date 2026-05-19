@@ -112,7 +112,9 @@
         oid = otherId(c);
         u = await userInfo(oid);
       }
-      const unread = Array.isArray(c.unreadFor) && c.unreadFor.includes(currentUid());
+      const _actorKey = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
+      const unread = (Array.isArray(c.unreadActors) && c.unreadActors.includes(_actorKey))
+        || (Array.isArray(c.unreadFor) && c.unreadFor.includes(currentUid()));
       if(unread) unreadCount++;
       rows.push({c, oid, u, unread, isBiz});
     }
@@ -604,6 +606,16 @@
       const dot=document.querySelector('.conv-item[data-conv-id="'+cid+'"] .conv-unread-dot');
       if(dot) dot.remove();
     }); }catch(e){}
+    // Also clear actor-level unread (unreadActors array)
+    try{
+      const _rGF = window.GeoFirebase;
+      if(_rGF && _rGF.fs && _rGF.db){
+        const _actorKey2 = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
+        _rGF.fs.updateDoc(_rGF.fs.doc(_rGF.db,'conversations',cid), {
+          unreadActors: _rGF.fs.arrayRemove(_actorKey2)
+        }).catch(()=>{});
+      }
+    }catch(e){}
     renderComposer();
   }
 
@@ -959,6 +971,30 @@
   function init(){
     const auth=window.GeoFirebase?.auth;
     if(!auth?.currentUser){ setTimeout(init,250); return; }
+
+    // Route priority: ?business > ?withBusiness > ?with > active actor
+    // Parse params FIRST — before touching any UI — so we can redirect if needed.
+    const _params = new URLSearchParams(location.search);
+    const bizParam = _params.get('business');
+    const withBizParam = _params.get('withBusiness');
+    const cidParam = _params.get('cid');
+    const target = bizParam ? null : _params.get('with');
+
+    // TASK 1/4: When there is no explicit route param, redirect by active identity
+    // BEFORE rendering anything. This prevents personal inbox flash in page mode.
+    if(!bizParam && !withBizParam && !target){
+      const actor = getStoredActor();
+      if(actor && actor.type === 'business' && actor.businessId){
+        location.replace(location.pathname + '?business=' + encodeURIComponent(actor.businessId));
+        return;
+      }
+    }
+
+    // Clean conflicting URL (e.g. ?with=UID&business=BIZ_ID → ?business=BIZ_ID)
+    if (bizParam && _params.has('with')) {
+      history.replaceState(null, '', location.pathname + '?business=' + encodeURIComponent(bizParam) + (cidParam ? '&cid=' + encodeURIComponent(cidParam) : ''));
+    }
+
     document.querySelector('.messages-layout')?.classList.add('chat-open');
     showConvLoading();
     renderComposer();
@@ -969,17 +1005,6 @@
         window._ghBlockedUserIds = prefs.blockedUserIds || [];
         if(window.__geohubLastConvs) renderConvs(window.__geohubLastConvs);
       });
-    }
-    // Parse params — business wins: ignore ?with when ?business is present
-    const _params = new URLSearchParams(location.search);
-    const bizParam = _params.get('business');
-    const withBizParam = _params.get('withBusiness');
-    const cidParam = _params.get('cid');
-    const target = bizParam ? null : _params.get('with');
-
-    // Clean conflicting URL (e.g. ?with=UID&business=BIZ_ID → ?business=BIZ_ID)
-    if (bizParam && _params.has('with')) {
-      history.replaceState(null, '', location.pathname + '?business=' + encodeURIComponent(bizParam) + (cidParam ? '&cid=' + encodeURIComponent(cidParam) : ''));
     }
 
     if(unsubConvs) unsubConvs();
@@ -1177,6 +1202,20 @@
     renderConvs(window.__geohubLastConvs || []);
   };
   whenReady(init);
+
+  // TASK 1: Real-time actor switch — redirect inbox to match active identity.
+  // Fires when user switches account (personal ↔ business) anywhere on the page.
+  window.addEventListener('GeoActorChanged', function(e){
+    const actor = e.detail || {};
+    const cur = new URLSearchParams(location.search);
+    if(actor.type === 'business' && actor.businessId && !cur.has('business')){
+      // Switched to a business page — go to its inbox immediately
+      location.replace(location.pathname + '?business=' + encodeURIComponent(actor.businessId));
+    } else if(actor.type !== 'business' && cur.has('business') && !cur.has('withBusiness')){
+      // Switched back to personal — go to personal inbox
+      location.replace(location.pathname);
+    }
+  });
 
   window.openNewConversationSearch = function(){
     const modal=document.getElementById('newConversationModal');
