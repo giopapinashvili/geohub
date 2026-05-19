@@ -415,13 +415,16 @@
       if(mainEl) mainEl.style.display = 'none';
       if(btnGrid) btnGrid.classList.remove('active');
       if(btnMap)  btnMap.classList.add('active');
+      document.body.classList.add('pl-map-mode');
       initMap();
       renderMapMarkers(_allPlaces);
+      if(_map) setTimeout(function(){ _map.invalidateSize(); }, 120);
     } else {
       mapCont.classList.remove('visible');
       if(mainEl) mainEl.style.display = '';
       if(btnGrid) btnGrid.classList.add('active');
       if(btnMap)  btnMap.classList.remove('active');
+      document.body.classList.remove('pl-map-mode');
     }
   }
 

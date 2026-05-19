@@ -89,6 +89,7 @@
     var _tab = 'all';
     var _lastResults = null;
     var _debounce = null;
+    var _defaultTabCache = {};
 
     var TABS = [
       { id:'all',        label:'All',        icon:'fas fa-th' },
@@ -180,7 +181,11 @@
         t.classList.toggle('active', t.dataset.srTab === tabId);
       });
       var q = document.getElementById('srchInput').value.trim();
-      if (q && _lastResults) renderResults(_lastResults, q);
+      if (q && _lastResults) {
+        renderResults(_lastResults, q);
+      } else if (!q) {
+        loadDefaultTab(tabId);
+      }
     }
 
     function updateCounts(results) {
@@ -416,6 +421,68 @@
         '<p>Search unavailable right now.</p>' +
         '<p style="margin-top:8px;font-size:.8rem">Check your connection and try again.</p>' +
         '</div>';
+    }
+
+    /* ── Default tab browse (no query) — real Firestore data ── */
+    var _DEFAULT_TYPE_MAP = {
+      people:'user', businesses:'business', places:'place', events:'event',
+      groups:'group', posts:'post', services:'service', creators:'creator',
+      learning:'learning'
+    };
+
+    function renderDefaultTabResults(tabId, items) {
+      var body = document.getElementById('srchBody');
+      if (!body) return;
+      if (!items.length) {
+        body.innerHTML = '<div class="sr-no-results"><i class="fas fa-search"></i>' +
+          '<p>Nothing here yet — be the first to add one!</p></div>';
+        return;
+      }
+      var type = _DEFAULT_TYPE_MAP[tabId] || tabId;
+      body.innerHTML = '<div class="sr-results-list">' +
+        items.map(function(item) { return itemHtml(type, item); }).join('') +
+        '</div>';
+    }
+
+    function loadDefaultTab(tabId) {
+      var collKey = TAB_KEY[tabId];
+      if (!collKey) { showDiscover(); return; }
+
+      if (_defaultTabCache[tabId]) {
+        renderDefaultTabResults(tabId, _defaultTabCache[tabId]);
+        return;
+      }
+
+      showSkeletons();
+
+      function _doLoad() {
+        var gfb = window.GeoFirebase;
+        if (!gfb || !gfb.db || !gfb.fs) { showDiscover(); return; }
+        var fs = gfb.fs;
+        var db = gfb.db;
+        fs.getDocs(fs.query(fs.collection(db, collKey), fs.limit(12)))
+          .then(function(snap) {
+            var items = [];
+            snap.forEach(function(d) { items.push(Object.assign({ id: d.id }, d.data())); });
+            _defaultTabCache[tabId] = items;
+            var inp = document.getElementById('srchInput');
+            if (inp && inp.value.trim()) return;
+            if (_tab !== tabId) return;
+            renderDefaultTabResults(tabId, items);
+          })
+          .catch(function() {
+            var inp = document.getElementById('srchInput');
+            if (inp && inp.value.trim()) return;
+            if (_tab !== tabId) return;
+            showError();
+          });
+      }
+
+      if (window.GeoFirebase && window.GeoFirebase.db) {
+        _doLoad();
+      } else {
+        window.addEventListener('GeoFirebaseReady', _doLoad, { once: true });
+      }
     }
 
     /* ── Search trigger ── */
