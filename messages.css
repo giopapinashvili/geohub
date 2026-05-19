@@ -416,27 +416,42 @@ body.page-messages .msg-reaction-picker{z-index:2147483000!important;}
 /* ===== CONV UNREAD DOT ===== */
 .conv-unread-dot{width:8px;height:8px;background:var(--green,#10b981);border-radius:50%;display:inline-block;flex-shrink:0;margin-left:4px;}
 
-/* ===== CONV HIDE BUTTON ===== */
-/* × button at right of each conversation row — hides for current identity only */
-.conv-hide-btn {
+/* ===== CONV DOTS MENU BUTTON (3-dot, replaces the old × hide button) ===== */
+.conv-dots-btn {
   flex-shrink: 0;
   width: 28px; height: 28px; padding: 0;
   border: none; background: none;
   color: var(--text-muted,#64748b);
   border-radius: 50%;
-  display: none; /* hidden by default; revealed on hover (desktop) */
+  display: none;
   align-items: center; justify-content: center;
   cursor: pointer;
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   transition: background .14s, color .14s;
   margin-left: 2px;
 }
-.conv-item:hover .conv-hide-btn { display: flex; }
-.conv-hide-btn:hover { background: rgba(239,68,68,.13); color: #ef4444; }
-/* Always visible on touch devices / mobile */
+.conv-item:hover .conv-dots-btn { display: flex; }
+.conv-dots-btn:hover { background: rgba(255,255,255,.08); color: var(--gh-text,#f0f4ff); }
 @media (max-width: 640px) {
-  .conv-hide-btn { display: flex; }
+  .conv-dots-btn { display: flex; }
 }
+
+/* ===== MESSAGE DOTS MENU BUTTON ===== */
+.msg-dots-btn {
+  opacity: 0;
+  width: 24px; height: 24px; padding: 0;
+  border: none; background: none;
+  color: var(--text-muted,#64748b);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 0.78rem;
+  transition: opacity .14s, background .14s;
+  flex-shrink: 0;
+}
+.msg-bubble-wrap:hover .msg-dots-btn { opacity: 1; }
+.msg-dots-btn:hover { background: rgba(255,255,255,.09); color: var(--gh-text,#f0f4ff); }
+@media (hover: none) { .msg-dots-btn { opacity: 0.55; } }
 
 /* ===== HIDE UNDO TOAST ===== */
 /* Slides up from bottom after hiding a conversation, with an Undo button */

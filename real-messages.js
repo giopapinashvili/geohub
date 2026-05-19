@@ -230,7 +230,7 @@
         + (u.avatar ? '<img class="conv-avatar-img" src="'+esc(u.avatar)+'" alt="" onerror="this.style.display=\'none\'">' : '<div class="av-placeholder">'+esc(initials(name))+'</div>')
         + '</a><div class="conv-info"><div class="conv-top-row"><span class="conv-name">'+bizBadge+esc(name)+'</span>'+(ts?'<span class="conv-time">'+esc(ts)+'</span>':'')+'</div>'
         + '<div class="conv-bottom-row"><span class="conv-preview">'+esc(c.lastMessage||'No messages yet')+'</span>'+(unread?'<span class="conv-unread-dot"></span>':'')+'</div></div>'
-        + '<button class="conv-hide-btn" title="Hide from inbox" aria-label="Hide conversation" onclick="event.stopPropagation();window.__ghHideConv(\''+esc(c.id)+'\',event)"><i class="fas fa-times"></i></button>'
+        + '<button class="conv-dots-btn" title="More options" aria-label="Conversation options" onclick="event.stopPropagation();window.__ghConvDotsMenu(event,\''+esc(c.id)+'\')"><i class="fas fa-ellipsis-v"></i></button>'
         + '</div>';
     }).join('');
     updateMsgBadge(unreadCount);
@@ -341,7 +341,13 @@
     if(!box) return;
     allMessages = items || [];
     const uid=currentUid();
-    let visible = (allMessages).filter(m=>!(Array.isArray(m.deletedFor)&&m.deletedFor.includes(uid)));
+    const _myActorId = currentActorId();
+    // Exclude messages deleted-for-me: check both canonical (deletedForActors) and legacy (deletedFor)
+    let visible = allMessages.filter(m => {
+      if(Array.isArray(m.deletedFor) && m.deletedFor.includes(uid)) return false;
+      if(Array.isArray(m.deletedForActors) && m.deletedForActors.includes(_myActorId)) return false;
+      return true;
+    });
     if(filterText){
       const q = filterText.toLowerCase();
       visible = visible.filter(m=>(m.text||'').toLowerCase().includes(q));
@@ -356,13 +362,19 @@
     box.innerHTML=visible.map(m=>{
       const mine = isMineMsg(m);
       const summary = summarizeReactions(m.id);
-      const deleted = !!m.deleted;
-      const text = deleted ? '<em>Message deleted</em>' : esc(m.text||'');
+      // deletedForEveryone: show placeholder; legacy deleted field also triggers placeholder
+      const deleted = !!m.deleted || !!m.deletedForEveryone;
+      const text = deleted ? '<em style="color:var(--text-muted,#64748b);font-style:italic">This message was deleted</em>' : esc(m.text||'');
       const media = deleted ? '' : renderMedia(m);
       const replyQuote = deleted ? '' : renderReplyQuote(m);
       const edited = (!deleted && m.edited) ? '<span class="msg-edited">(edited)</span>' : '';
       const receipt = mine ? receiptIcon(m) : '';
-      const contextAttr = mine && !deleted ? ' oncontextmenu="return window.__ghMsgCtxMenu(event,\''+esc(m.id)+'\')" ontouchstart="window.__ghMsgTouchStart(event,\''+esc(m.id)+'\')" ontouchend="window.__ghMsgTouchEnd(event)"' : '';
+      // Context menu (right-click / touch-hold) on ALL non-deleted messages — menu options differ by ownership
+      const contextAttr = !deleted ? ' oncontextmenu="return window.__ghMsgCtxMenu(event,\''+esc(m.id)+'\')" ontouchstart="window.__ghMsgTouchStart(event,\''+esc(m.id)+'\')" ontouchend="window.__ghMsgTouchEnd(event)"' : '';
+      // 3-dot button: visible on hover, only for non-deleted messages
+      const dotsBtn = !deleted
+        ? '<button class="msg-dots-btn" type="button" title="Message options" onclick="event.stopPropagation();return window.__ghMsgCtxMenu(event,\''+esc(m.id)+'\')"><i class="fas fa-ellipsis-h"></i></button>'
+        : '';
       return '<div class="msg-row '+(mine?'sent':'received')+'" data-message-id="'+esc(m.id)+'">'
         + '<div class="msg-col">'
         + '<div class="msg-bubble-wrap">'
@@ -375,6 +387,7 @@
         + '<div class="msg-actions">'
         + '<button class="msg-reply-btn" data-reply-btn title="Reply">↩</button>'
         + '<button class="msg-reaction-trigger '+(summary.mine?'active':'')+'" data-reaction-trigger type="button" title="React">'+(summary.mine?esc(summary.mine):'😊')+'</button>'
+        + dotsBtn
         + '</div>'
         + '<div class="msg-reaction-picker" data-reaction-picker>'+REACTIONS.map(e=>'<button type="button" data-msg-reaction="'+esc(e)+'">'+esc(e)+'</button>').join('')+'</div>'
         + '</div>'
@@ -500,12 +513,20 @@
     e.preventDefault();
     const msg = allMessages.find(m=>m.id===msgId);
     if(!msg) return false;
-    showContextMenu(e.clientX, e.clientY, [
-      { icon:'fa-edit', label:'Edit', action:()=>startEdit(msgId, msg) },
-      { sep:true },
-      { icon:'fa-trash', label:'Delete for me', action:()=>window.GeoSocial?.deleteMessage(activeConversation, msgId, 'me') },
-      { icon:'fa-trash-alt', label:'Delete for everyone', danger:true, action:()=>window.GeoSocial?.deleteMessage(activeConversation, msgId, 'everyone') },
-    ]);
+    const mine = isMineMsg(msg);
+    const opts = [];
+    if(mine) opts.push({ icon:'fa-edit', label:'Edit', action:()=>startEdit(msgId, msg) });
+    opts.push({ sep:true });
+    // Delete for me: available on all messages (hides only for current actor)
+    opts.push({ icon:'fa-eye-slash', label:'Delete for me', action:()=>{
+      window.GeoSocial?.deleteMessage(activeConversation, msgId, 'me', null, { actorId: currentActorId() });
+    }});
+    // Delete for everyone: only on messages sent by current actor (replaces content with placeholder)
+    if(mine) opts.push({ icon:'fa-trash-alt', label:'Delete for everyone', danger:true, action:()=>{
+      if(!confirm('Delete this message for everyone? This cannot be undone.')) return;
+      window.GeoSocial?.deleteMessage(activeConversation, msgId, 'everyone', null, { actorId: currentActorId() });
+    }});
+    showContextMenu(e.clientX, e.clientY, opts);
     return false;
   };
 
@@ -553,35 +574,26 @@
     inp.onkeydown=e=>{ if(e.key==='Escape') toggleSearch(); };
   }
 
-  window.__ghConvCtxMenu = function(e, convId){
-    e.preventDefault();
-    // Write both old and canonical actor key formats during transition
-    const _ctxActorKeyOld = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
-    const _ctxActorKeyNew = currentActorId();
-    showContextMenu(e.clientX, e.clientY, [
-      { icon:'fa-bell-slash', label:'Mute 1 hour', action:()=>window.GeoSocial?.setConversationMute(convId, Date.now()+3600000, ()=>window.showToast&&window.showToast('Muted 1h')) },
-      { icon:'fa-bell-slash', label:'Mute 8 hours', action:()=>window.GeoSocial?.setConversationMute(convId, Date.now()+28800000, ()=>window.showToast&&window.showToast('Muted 8h')) },
-      { icon:'fa-bell-slash', label:'Mute always', action:()=>window.GeoSocial?.setConversationMute(convId, -1, ()=>window.showToast&&window.showToast('Muted')) },
-      { sep:true },
-      { icon:'fa-eye-slash', label:'Hide conversation', action:()=>{
-        const GF=window.GeoFirebase;
-        if(!GF||!GF.fs||!GF.db) return;
-        GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId),{
-          hiddenForActors: GF.fs.arrayUnion(_ctxActorKeyOld, _ctxActorKeyNew)
-        }).then(()=>window.showToast&&window.showToast('Conversation hidden'))
-          .catch(()=>window.showToast&&window.showToast('Could not hide conversation'));
-      }},
-    ]);
-    return false;
-  };
+  // ── Conversation action helpers ─────────────────────────────────────────────
 
-  // ── Per-identity conversation hide (Phase 56B) ───────────────────────────
+  function closeChatPane(){
+    if(!activeConversation) return;
+    activeConversation=null; activeConvData=null;
+    if(unsubMsgs){ try{unsubMsgs();}catch(er){} unsubMsgs=null; }
+    if(unsubReactions){ try{unsubReactions();}catch(er){} unsubReactions=null; }
+    if(unsubConvDoc){ try{unsubConvDoc();}catch(er){} unsubConvDoc=null; }
+    if(unsubConvSettings){ try{unsubConvSettings();}catch(er){} unsubConvSettings=null; }
+    const box=$('#chatMessages'), hdr=$('#chatHeader');
+    if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-comment-dots"></i><p>Select a conversation</p></div>';
+    if(hdr) hdr.innerHTML='';
+    document.querySelector('.messages-layout')?.classList.remove('chat-open');
+  }
 
-  function showHideUndoToast(convId, actorKeyOld, actorKeyNew){
+  function showConvActionToast(convId, label, actorKeyOld, actorKeyNew, isArchive){
     document.querySelectorAll('.gh-hide-undo-toast').forEach(t=>t.remove());
     const toast=document.createElement('div');
     toast.className='gh-hide-undo-toast';
-    toast.innerHTML='<span>Conversation hidden</span><button class="gh-undo-btn" type="button">Undo</button>';
+    toast.innerHTML='<span>'+label+'</span><button class="gh-undo-btn" type="button">Undo</button>';
     document.body.appendChild(toast);
     requestAnimationFrame(()=>requestAnimationFrame(()=>toast.classList.add('show')));
     const timer=setTimeout(()=>{ toast.classList.remove('show'); setTimeout(()=>toast.remove(),300); }, 4500);
@@ -589,44 +601,62 @@
       clearTimeout(timer); toast.remove();
       const GF=window.GeoFirebase;
       if(!GF||!GF.fs||!GF.db) return;
-      GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId),{
-        hiddenForActors: GF.fs.arrayRemove(actorKeyOld, actorKeyNew || actorKeyOld)
-      }).then(()=>window.showToast&&window.showToast('Conversation restored'))
+      const patch={hiddenForActors: GF.fs.arrayRemove(actorKeyOld, actorKeyNew||actorKeyOld)};
+      if(isArchive) patch.archivedForActors=GF.fs.arrayRemove(actorKeyNew||actorKeyOld);
+      GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId), patch)
+        .then(()=>window.showToast&&window.showToast('Conversation restored'))
         .catch(()=>window.showToast&&window.showToast('Could not undo'));
     };
   }
 
-  // Called by the × button on each conv row.
-  // Hides only for the current actor. Writes both old and canonical formats during transition.
-  window.__ghHideConv = function(convId, e){
-    if(e){ e.stopPropagation(); e.preventDefault(); }
-    if(!confirm('Remove this conversation from this inbox?\n\nThis only hides it for the current account. The other side can still see it.')) return;
+  function archiveConv(convId){
     const actorKeyOld = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
     const actorKeyNew = currentActorId();
     const GF=window.GeoFirebase;
     if(!GF||!GF.fs||!GF.db) return;
+    // Write to both archivedForActors (semantic) and hiddenForActors (listener filter)
     GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId),{
-      hiddenForActors: GF.fs.arrayUnion(actorKeyOld, actorKeyNew)
+      archivedForActors: GF.fs.arrayUnion(actorKeyNew),
+      hiddenForActors:   GF.fs.arrayUnion(actorKeyOld, actorKeyNew)
     }).then(()=>{
-      // If this was the open conversation, clear the chat panel
-      if(activeConversation === convId){
-        activeConversation=null;
-        activeConvData=null;
-        // Stop all per-conversation listeners
-        if(unsubMsgs){ try{unsubMsgs();}catch(er){} unsubMsgs=null; }
-        if(unsubReactions){ try{unsubReactions();}catch(er){} unsubReactions=null; }
-        if(unsubConvDoc){ try{unsubConvDoc();}catch(er){} unsubConvDoc=null; }
-        if(unsubConvSettings){ try{unsubConvSettings();}catch(er){} unsubConvSettings=null; }
-        // Clear chat panel and header
-        const box=$('#chatMessages'), hdr=$('#chatHeader');
-        if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-comment-dots"></i><p>Select a conversation</p></div>';
-        if(hdr) hdr.innerHTML='';
-        // On mobile, go back to conv list
-        document.querySelector('.messages-layout')?.classList.remove('chat-open');
-      }
-      showHideUndoToast(convId, actorKeyOld, actorKeyNew);
-    }).catch(()=>window.showToast&&window.showToast('Could not hide conversation'));
-  };
+      if(activeConversation===convId) closeChatPane();
+      showConvActionToast(convId,'Conversation archived',actorKeyOld,actorKeyNew,true);
+    }).catch(()=>window.showToast&&window.showToast('Could not archive'));
+  }
+
+  function deleteConvForMe(convId){
+    if(!confirm('Delete this conversation for you?\n\nThe other person may still see the chat history.')) return;
+    const actorKeyOld = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
+    const actorKeyNew = currentActorId();
+    const GF=window.GeoFirebase;
+    if(!GF||!GF.fs||!GF.db) return;
+    // deletedForActors: listener will exclude this conv for current actor
+    // hiddenForActors: belt-and-suspenders so renderConvs also filters it
+    GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId),{
+      deletedForActors:  GF.fs.arrayUnion(actorKeyNew),
+      hiddenForActors:   GF.fs.arrayUnion(actorKeyOld, actorKeyNew)
+    }).then(()=>{
+      if(activeConversation===convId) closeChatPane();
+      window.showToast&&window.showToast('Conversation deleted for you');
+    }).catch(()=>window.showToast&&window.showToast('Could not delete conversation'));
+  }
+
+  // 3-dot menu on conv rows (also used as right-click handler)
+  function convOptionsMenu(e, convId){
+    e.preventDefault();
+    showContextMenu(e.clientX, e.clientY, [
+      { icon:'fa-box-archive', label:'Archive', action:()=>archiveConv(convId) },
+      { sep:true },
+      { icon:'fa-bell-slash', label:'Mute 1 hour', action:()=>window.GeoSocial?.setConversationMute(convId, Date.now()+3600000, ()=>window.showToast&&window.showToast('Muted 1h')) },
+      { icon:'fa-bell-slash', label:'Mute 8 hours', action:()=>window.GeoSocial?.setConversationMute(convId, Date.now()+28800000, ()=>window.showToast&&window.showToast('Muted 8h')) },
+      { sep:true },
+      { icon:'fa-trash', label:'Delete for me', danger:true, action:()=>deleteConvForMe(convId) },
+    ]);
+    return false;
+  }
+
+  window.__ghConvDotsMenu = function(e, convId){ return convOptionsMenu(e, convId); };
+  window.__ghConvCtxMenu  = function(e, convId){ return convOptionsMenu(e, convId); };
 
   function showThemePicker(){
     document.querySelectorAll('.gh-theme-picker').forEach(m=>m.remove());

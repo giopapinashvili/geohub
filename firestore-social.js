@@ -2190,11 +2190,21 @@
           return addDoc(collection(db, 'conversations', conversationId, 'messages'), messageDoc).then(function () {
             var patch = { lastMessage: preview, lastSenderId: user.uid, lastMessageSenderActorId: senderActorId, updatedAt: serverTimestamp() };
             patch['readBy.' + user.uid] = serverTimestamp();
-            // Unhide conversation for sender (in case they previously hid it, e.g. via context menu)
-            patch.hiddenForActors  = fs.arrayRemove(senderActorId);
-            patch.deletedForActors = fs.arrayRemove(senderActorId);
-            // Determine who gets the unread badge using canonical inboxActorIds where available
+            // Restore conversation for all relevant actors:
+            // - Sender: unarchive/unhide/undelete their own view
+            // - Recipients: unarchive/unhide so new message returns conv to their inbox
+            //   (covers "if other side sends a message, conv returns to inbox" behavior)
             var inboxActors = Array.isArray(conv.inboxActorIds) ? conv.inboxActorIds : [];
+            var _restoreActors = inboxActors.length ? inboxActors : [senderActorId];
+            var _restoreKeys = []; // canonical + legacy-colon format
+            _restoreActors.forEach(function(a) {
+              _restoreKeys.push(a);
+              _restoreKeys.push(a.startsWith('business_') ? 'business:' + a.slice(9) : 'user:' + a.slice(5));
+            });
+            patch.archivedForActors = fs.arrayRemove.apply(null, _restoreActors);
+            patch.hiddenForActors   = fs.arrayRemove.apply(null, _restoreKeys);
+            patch.deletedForActors  = fs.arrayRemove.apply(null, _restoreActors);
+            // Determine who gets the unread badge using canonical inboxActorIds where available
             if(inboxActors.length) {
               // Canonical: all inbox actors except the sender
               var recipients = inboxActors.filter(function(a) { return a !== senderActorId; });
@@ -2297,17 +2307,21 @@
       function flush(pool) {
         var all = Object.values(pool);
         var normalized = all.map(function(d) { return normalizeConv(d.id, d, uid); });
+        // Legacy-colon format: 'user:UID' or 'business:BIZID'
+        var actorIdLegacy = actorId.startsWith('business_') ? 'business:' + actorId.slice(9) : 'user:' + actorId.slice(5);
         var filtered = normalized.filter(function(d) {
           // Must include actorId in inboxActorIds (client-side actor separation)
           if (!Array.isArray(d.inboxActorIds) || d.inboxActorIds.indexOf(actorId) === -1) {
             if (_dbg) console.log('[GeoSocial] exclude', d.id, 'inboxActorIds=', d.inboxActorIds, 'actorId=', actorId);
             return false;
           }
-          // Exclude if explicitly hidden or deleted for this actor
-          if (Array.isArray(d.hiddenForActors) && d.hiddenForActors.indexOf(actorId) !== -1) {
+          // Exclude if hidden for this actor (check both canonical and legacy-colon formats)
+          if (Array.isArray(d.hiddenForActors) &&
+              (d.hiddenForActors.indexOf(actorId) !== -1 || d.hiddenForActors.indexOf(actorIdLegacy) !== -1)) {
             if (_dbg) console.log('[GeoSocial] exclude', d.id, 'hidden for', actorId);
             return false;
           }
+          // Exclude if deleted for this actor (canonical format only — new field)
           if (Array.isArray(d.deletedForActors) && d.deletedForActors.indexOf(actorId) !== -1) {
             if (_dbg) console.log('[GeoSocial] exclude', d.id, 'deleted for', actorId);
             return false;
@@ -2478,13 +2492,32 @@
       }, function(err){ console.warn('[GeoSocial] listenMessageReactions', err.message); callback && callback([]); });
     }
 
-    function deleteMessage(conversationId, messageId, mode, callback) {
+    function deleteMessage(conversationId, messageId, mode, callback, options) {
       var uid = currentUid();
       if (!uid || !conversationId || !messageId) { if(callback) callback(false); return; }
+      // actorId: caller passes via options (preferred) or fall back to canonical user_ form
+      var actorId = (options && options.actorId) || ('user_' + uid);
       var ref = doc(db, 'conversations', conversationId, 'messages', messageId);
-      var patch = mode === 'everyone'
-        ? { text: 'Message deleted', deleted: true, deletedBy: uid, updatedAt: serverTimestamp() }
-        : { deletedFor: fs.arrayUnion(uid), updatedAt: serverTimestamp() };
+      var patch;
+      if (mode === 'everyone') {
+        // Soft-delete for everyone: blank text, keep doc as placeholder
+        patch = {
+          deletedForEveryone: true,
+          deletedAt: serverTimestamp(),
+          deletedByActorId: actorId,
+          text: '',
+          deleted: true,       // legacy compat
+          deletedBy: uid,
+          updatedAt: serverTimestamp()
+        };
+      } else {
+        // Delete for me: hide only from current actor
+        patch = {
+          deletedForActors: fs.arrayUnion(actorId),
+          deletedFor: fs.arrayUnion(uid),  // legacy compat
+          updatedAt: serverTimestamp()
+        };
+      }
       updateDoc(ref, patch).then(function(){ if(callback) callback(true); })
         .catch(function(err){ console.warn('[GeoSocial] deleteMessage', err.message); toast('Delete failed.', 'error'); if(callback) callback(false, err); });
     }

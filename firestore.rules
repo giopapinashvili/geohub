@@ -220,7 +220,7 @@ service cloud.firestore {
 
     function onlyMessageParticipantMetaChanged() {
       return request.resource.data.diff(resource.data).affectedKeys()
-        .hasOnly(['likedBy', 'deletedFor', 'seenBy', 'readBy', 'delivered', 'updatedAt']);
+        .hasOnly(['likedBy', 'deletedFor', 'deletedForActors', 'seenBy', 'readBy', 'delivered', 'updatedAt']);
     }
 
     function onlyMessageSenderEditChanged() {
@@ -228,6 +228,7 @@ service cloud.firestore {
         .hasOnly([
           'text', 'body', 'message', 'content',
           'edited', 'editedAt', 'deleted', 'deletedBy', 'deletedAt',
+          'deletedForEveryone', 'deletedByActorId',
           'status', 'updatedAt',
           'mediaUrl', 'mediaType', 'imageUrl', 'fileName', 'fileSize',
           'attachment', 'attachments', 'replyTo'
