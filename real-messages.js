@@ -93,9 +93,12 @@
     if(!list) return;
     const blockedIds = window._ghBlockedUserIds || [];
     const baseConvs = blockedIds.length ? convs.filter(c=>{ const oid=otherId(c); return !oid||!blockedIds.includes(oid); }) : convs;
+    // Phase 56: filter conversations hidden by current actor (per-identity hide)
+    const _curActorKey = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
+    const visibleConvs = baseConvs.filter(c => !(Array.isArray(c.hiddenForActors) && c.hiddenForActors.includes(_curActorKey)));
     const rows=[];
     let unreadCount=0;
-    for(const c of baseConvs){
+    for(const c of visibleConvs){
       let oid, u, isBiz=false;
       if(c.forBusiness && c.businessId){
         if(_activeBizId){
@@ -208,9 +211,12 @@
 
   function receiptIcon(m){
     const uid = currentUid();
-    const isMine = _activeBizId
-      ? (m.senderActorType === 'business' ? m.senderActorId === _activeBizId : (m.senderActorType == null && (m.senderId === uid || m.authorId === uid)))
-      : (m.senderId === uid || m.authorId === uid);
+    const _rKey = m.senderActorKey || '';
+    const isMine = _rKey
+      ? (_activeBizId ? _rKey === 'business:' + _activeBizId : _rKey === 'user:' + uid)
+      : (_activeBizId
+          ? (m.senderActorType === 'business' ? m.senderActorId === _activeBizId : (m.senderActorType == null && (m.senderId === uid || m.authorId === uid)))
+          : (m.senderId === uid || m.authorId === uid));
     if(!isMine) return '';
     const seenBy = Array.isArray(m.seenBy) ? m.seenBy.filter(id=>id!==uid) : [];
     if(seenBy.length) return '<span class="msg-receipt seen" title="Seen">✓✓</span>';
@@ -249,17 +255,19 @@
     }
     const wasAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
     box.innerHTML=visible.map(m=>{
+      // senderActorKey is the canonical field (Phase 56); fall back to type/id for old messages
+      const _sKey = m.senderActorKey || '';
       let mine;
       if(_activeBizId){
-        // Business inbox: "mine" = messages sent as this business page
-        mine = m.senderActorType === 'business' ? m.senderActorId === _activeBizId
-          : (m.senderActorType == null && (m.senderId === uid || m.authorId === uid));
+        mine = _sKey ? _sKey === 'business:' + _activeBizId
+          : (m.senderActorType === 'business' ? m.senderActorId === _activeBizId
+              : (m.senderActorType == null && (m.senderId === uid || m.authorId === uid)));
       } else if(_withBizId){
-        // Customer biz chat: "mine" = messages sent as this user (not as business)
-        mine = m.senderActorType === 'user' ? (m.senderActorId === uid || m.senderId === uid)
-          : (m.senderActorType == null && (m.senderId === uid || m.authorId === uid));
+        mine = _sKey ? _sKey === 'user:' + uid
+          : (m.senderActorType === 'user' ? (m.senderActorId === uid || m.senderId === uid)
+              : (m.senderActorType == null && (m.senderId === uid || m.authorId === uid)));
       } else {
-        mine = m.senderId === uid || m.authorId === uid;
+        mine = _sKey ? _sKey === 'user:' + uid : (m.senderId === uid || m.authorId === uid);
       }
       const summary = summarizeReactions(m.id);
       const deleted = !!m.deleted;
@@ -461,13 +469,23 @@
 
   window.__ghConvCtxMenu = function(e, convId){
     e.preventDefault();
+    // Actor key for this identity — used for per-identity hide (Phase 56)
+    const _ctxActorKey = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
     showContextMenu(e.clientX, e.clientY, [
-      { icon:'fa-archive', label:'Archive', action:()=>window.GeoSocial?.setConversationArchive(convId, true, ()=>window.showToast&&window.showToast('Archived')) },
       { icon:'fa-bell-slash', label:'Mute 1 hour', action:()=>window.GeoSocial?.setConversationMute(convId, Date.now()+3600000, ()=>window.showToast&&window.showToast('Muted 1h')) },
       { icon:'fa-bell-slash', label:'Mute 8 hours', action:()=>window.GeoSocial?.setConversationMute(convId, Date.now()+28800000, ()=>window.showToast&&window.showToast('Muted 8h')) },
       { icon:'fa-bell-slash', label:'Mute always', action:()=>window.GeoSocial?.setConversationMute(convId, -1, ()=>window.showToast&&window.showToast('Muted')) },
       { sep:true },
-      { icon:'fa-trash', label:'Delete conversation', danger:true, action:()=>{ if(confirm('Delete this conversation for you?')){ window.GeoSocial?.setConversationArchive(convId, true); } } },
+      // Per-actor hide: removes conversation from THIS identity's inbox only
+      // The other identity (personal ↔ page) still sees it
+      { icon:'fa-eye-slash', label:'Hide conversation', action:()=>{
+        const GF=window.GeoFirebase;
+        if(!GF||!GF.fs||!GF.db) return;
+        GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId),{
+          hiddenForActors: GF.fs.arrayUnion(_ctxActorKey)
+        }).then(()=>window.showToast&&window.showToast('Conversation hidden'))
+          .catch(()=>window.showToast&&window.showToast('Could not hide conversation'));
+      }},
     ]);
     return false;
   };
@@ -1059,6 +1077,7 @@
         const convDoc = {
           participants: customerUid === ownerUid ? [customerUid] : [customerUid, ownerUid],
           participantActors: ['user:' + customerUid, 'business:' + withBizParam],
+          inboxKeys: ['user:' + customerUid, 'business:' + withBizParam],
           businessId: withBizParam,
           businessName: _withBizTitle,
           businessLogo: _withBizLogo,

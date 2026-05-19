@@ -2072,6 +2072,7 @@
               var cid = conversationIdFor(user.uid, targetUserId);
               return setDoc(doc(db, 'conversations', cid), {
                 participants: [user.uid, targetUserId],
+                inboxKeys: ['user:' + user.uid, 'user:' + targetUserId],
                 updatedAt: serverTimestamp(),
                 createdAt: serverTimestamp(),
                 lastMessage: '',
@@ -2083,6 +2084,7 @@
           var cid = conversationIdFor(user.uid, targetUserId);
           return setDoc(doc(db, 'conversations', cid), {
             participants: [user.uid, targetUserId],
+            inboxKeys: ['user:' + user.uid, 'user:' + targetUserId],
             updatedAt: serverTimestamp(),
             createdAt: serverTimestamp(),
             lastMessage: '',
@@ -2148,6 +2150,7 @@
             authorId: user.uid,
             senderActorType: senderActorType,
             senderActorId:   senderActorId,
+            senderActorKey:  (senderActorType === 'business' ? 'business:' : 'user:') + senderActorId,
             senderName:      senderName,
             senderAvatar:    senderAvatar,
             text: cleanText,
@@ -2223,10 +2226,19 @@
           return t(b.updatedAt || b.createdAt) - t(a.updatedAt || a.createdAt);
         });
       }
-      var q = query(collection(db, 'conversations'), where('participants', 'array-contains', uid), limit(25));
+      // Increase limit to account for page-admin convs filtered out below
+      var q = query(collection(db, 'conversations'), where('participants', 'array-contains', uid), limit(50));
       return onSnapshot(q, function (snap) {
         var items = [];
-        snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        snap.forEach(function (d) {
+          var data = d.data() || {};
+          // INBOX SEPARATION (Phase 56): Exclude page-admin-only conversations from personal inbox.
+          // A conversation is page-admin-only when forBusiness===true AND the current user is NOT
+          // the customer (customerUid !== uid). Those belong exclusively in ?business=BIZ_ID inbox.
+          // If customerUid is absent (old conv format), include it for backward compatibility.
+          if (data.forBusiness && data.customerUid && data.customerUid !== uid) return;
+          items.push(Object.assign({ id: d.id }, data));
+        });
         callback(sortConvs(items));
       }, function (err) { console.warn('[GeoSocial] listenConversations', err.message); callback([]); });
     }
