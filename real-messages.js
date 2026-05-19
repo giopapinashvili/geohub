@@ -36,6 +36,9 @@
 
   const esc = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const $ = s => document.querySelector(s);
+  // Debug mode: add ?debugMessages=1 to URL to enable verbose inbox logging
+  const _dbgMessages = new URLSearchParams(location.search).get('debugMessages') === '1';
+  function dbg(...args){ if(_dbgMessages) console.log('[GeoHub Msg]', ...args); }
 
   let activeConversation = null;
   let activeConvData = null;
@@ -113,21 +116,64 @@
   async function renderConvs(convs){
     const list=$('#convList');
     if(!list) return;
+    const _uid0 = currentUid();
+    const _actorKeyOld0 = _activeBizId ? 'business:' + _activeBizId : 'user:' + _uid0;
+    const _actorKeyNew0 = currentActorId(); // canonical: 'business_bizId' or 'user_uid'
+    dbg('renderConvs', {mode:_routeMode, actorId:_actorKeyNew0, uid:_uid0, total:convs.length, bizId:_activeBizId});
     const blockedIds = window._ghBlockedUserIds || [];
     const baseConvs = blockedIds.length ? convs.filter(c=>{ const oid=otherId(c); return !oid||!blockedIds.includes(oid); }) : convs;
-    // Phase 56: filter conversations hidden by current actor (per-identity hide)
-    const _curActorKey = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
-    const visibleConvs = baseConvs.filter(c => !(Array.isArray(c.hiddenForActors) && c.hiddenForActors.includes(_curActorKey)));
-    // Phase 56C: defense-in-depth route-mode filter (primary filtering is in firestore-social.js
-    // and in listener guards above; this is a last-resort safeguard).
-    // Personal/customer mode: never show page-admin convs (user is admin but not the customer).
-    // Business mode: never show personal user-to-user convs or other-business convs.
-    const _uid0 = currentUid();
+    // Filter hidden: check BOTH old ('user:uid'/'business:bizId') and canonical ('user_uid'/'business_bizId') formats
+    const visibleConvs = baseConvs.filter(c => {
+      if(!Array.isArray(c.hiddenForActors)) return true;
+      if(c.hiddenForActors.includes(_actorKeyOld0)){ dbg('exclude',c.id,'hiddenForActors(old)'); return false; }
+      if(c.hiddenForActors.includes(_actorKeyNew0)){ dbg('exclude',c.id,'hiddenForActors(new)'); return false; }
+      return true;
+    });
+    // Route-mode guard: prefer canonical inboxActorIds; fall back to legacy fields for old convs
+    // that haven't been backfilled yet. This prevents "No conversations yet" while backfill runs.
     const routeConvs = (_routeMode === 'personalInbox' || _routeMode === 'customerBusinessChat')
-      ? visibleConvs.filter(c => !c.forBusiness || c.customerUid === _uid0)
+      ? visibleConvs.filter(c => {
+          // Canonical Phase 57: inboxActorIds contains 'user_{uid}'
+          if(Array.isArray(c.inboxActorIds) && c.inboxActorIds.includes('user_' + _uid0)){
+            dbg('include',c.id,'inboxActorIds'); return true;
+          }
+          // Personal conv (no business flag at all)
+          if(!c.forBusiness){ dbg('include',c.id,'personal'); return true; }
+          // Business conv where this user is explicitly the customer
+          if(c.customerUid === _uid0){ dbg('include',c.id,'customerUid'); return true; }
+          // Backward compat: old biz conv without customerUid field but user is in participants
+          if(c.forBusiness && !c.customerUid && Array.isArray(c.participants) && c.participants.includes(_uid0)){
+            dbg('include',c.id,'legacy-biz-no-customerUid'); return true;
+          }
+          dbg('exclude',c.id,'biz-not-customer customerUid='+c.customerUid);
+          return false;
+        })
       : (_routeMode === 'businessInbox')
-        ? visibleConvs.filter(c => !!c.forBusiness && c.businessId === _activeBizId)
+        ? visibleConvs.filter(c => {
+            // Canonical Phase 57: inboxActorIds contains 'business_{bizId}'
+            if(Array.isArray(c.inboxActorIds) && c.inboxActorIds.includes('business_' + _activeBizId)){
+              dbg('include',c.id,'inboxActorIds-biz'); return true;
+            }
+            // Legacy: businessId field matches (backfill may not have run yet)
+            if(c.businessId === _activeBizId){ dbg('include',c.id,'businessId-match'); return true; }
+            dbg('exclude',c.id,'biz-wrong-id '+c.businessId);
+            return false;
+          })
         : visibleConvs;
+    // Pane/list sync: if active conv is no longer visible but list has other entries, clear stale right pane
+    if(activeConversation && routeConvs.length > 0 && !routeConvs.find(c => c.id === activeConversation)){
+      if(_routeMode !== 'customerBusinessChat'){ // withBiz mode always has exactly one conv; never clear it
+        dbg('pane-sync','clearing stale active conv',activeConversation);
+        activeConversation = null; activeConvData = null;
+        if(unsubMsgs){ try{unsubMsgs();}catch(ex){} unsubMsgs=null; }
+        if(unsubReactions){ try{unsubReactions();}catch(ex){} unsubReactions=null; }
+        if(unsubConvDoc){ try{unsubConvDoc();}catch(ex){} unsubConvDoc=null; }
+        if(unsubConvSettings){ try{unsubConvSettings();}catch(ex){} unsubConvSettings=null; }
+        const box=$('#chatMessages');
+        if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-comments"></i><p>Select a conversation</p></div>';
+        document.querySelector('.messages-layout')?.classList.remove('chat-open');
+      }
+    }
     const rows=[];
     let unreadCount=0;
     for(const c of routeConvs){
@@ -505,20 +551,19 @@
 
   window.__ghConvCtxMenu = function(e, convId){
     e.preventDefault();
-    // Actor key for this identity — used for per-identity hide (Phase 56)
-    const _ctxActorKey = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
+    // Write both old and canonical actor key formats during transition
+    const _ctxActorKeyOld = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
+    const _ctxActorKeyNew = currentActorId();
     showContextMenu(e.clientX, e.clientY, [
       { icon:'fa-bell-slash', label:'Mute 1 hour', action:()=>window.GeoSocial?.setConversationMute(convId, Date.now()+3600000, ()=>window.showToast&&window.showToast('Muted 1h')) },
       { icon:'fa-bell-slash', label:'Mute 8 hours', action:()=>window.GeoSocial?.setConversationMute(convId, Date.now()+28800000, ()=>window.showToast&&window.showToast('Muted 8h')) },
       { icon:'fa-bell-slash', label:'Mute always', action:()=>window.GeoSocial?.setConversationMute(convId, -1, ()=>window.showToast&&window.showToast('Muted')) },
       { sep:true },
-      // Per-actor hide: removes conversation from THIS identity's inbox only
-      // The other identity (personal ↔ page) still sees it
       { icon:'fa-eye-slash', label:'Hide conversation', action:()=>{
         const GF=window.GeoFirebase;
         if(!GF||!GF.fs||!GF.db) return;
         GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId),{
-          hiddenForActors: GF.fs.arrayUnion(_ctxActorKey)
+          hiddenForActors: GF.fs.arrayUnion(_ctxActorKeyOld, _ctxActorKeyNew)
         }).then(()=>window.showToast&&window.showToast('Conversation hidden'))
           .catch(()=>window.showToast&&window.showToast('Could not hide conversation'));
       }},
@@ -528,7 +573,7 @@
 
   // ── Per-identity conversation hide (Phase 56B) ───────────────────────────
 
-  function showHideUndoToast(convId, actorKey){
+  function showHideUndoToast(convId, actorKeyOld, actorKeyNew){
     document.querySelectorAll('.gh-hide-undo-toast').forEach(t=>t.remove());
     const toast=document.createElement('div');
     toast.className='gh-hide-undo-toast';
@@ -541,23 +586,23 @@
       const GF=window.GeoFirebase;
       if(!GF||!GF.fs||!GF.db) return;
       GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId),{
-        hiddenForActors: GF.fs.arrayRemove(actorKey)
+        hiddenForActors: GF.fs.arrayRemove(actorKeyOld, actorKeyNew || actorKeyOld)
       }).then(()=>window.showToast&&window.showToast('Conversation restored'))
         .catch(()=>window.showToast&&window.showToast('Could not undo'));
     };
   }
 
   // Called by the × button on each conv row.
-  // Hides only for the current actor (user:UID or business:BIZ_ID).
-  // The other party/identity is NOT affected.
+  // Hides only for the current actor. Writes both old and canonical formats during transition.
   window.__ghHideConv = function(convId, e){
     if(e){ e.stopPropagation(); e.preventDefault(); }
     if(!confirm('Remove this conversation from this inbox?\n\nThis only hides it for the current account. The other side can still see it.')) return;
-    const actorKey = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
+    const actorKeyOld = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
+    const actorKeyNew = currentActorId();
     const GF=window.GeoFirebase;
     if(!GF||!GF.fs||!GF.db) return;
     GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId),{
-      hiddenForActors: GF.fs.arrayUnion(actorKey)
+      hiddenForActors: GF.fs.arrayUnion(actorKeyOld, actorKeyNew)
     }).then(()=>{
       // If this was the open conversation, clear the chat panel
       if(activeConversation === convId){
@@ -575,7 +620,7 @@
         // On mobile, go back to conv list
         document.querySelector('.messages-layout')?.classList.remove('chat-open');
       }
-      showHideUndoToast(convId, actorKey);
+      showHideUndoToast(convId, actorKeyOld, actorKeyNew);
     }).catch(()=>window.showToast&&window.showToast('Could not hide conversation'));
   };
 
@@ -678,10 +723,10 @@
       // Business inbox: header shows customer info
       oid = conv.customerUid || otherId(conv) || '';
       u = oid ? await userInfo(oid) : { id: '', name: 'Customer', avatar: '' };
-    } else if(_withBizId && conv && conv.forBusiness){
-      // Customer biz chat: header shows business info
-      oid = conv.businessId || _withBizId;
-      u = { id: oid, name: conv.businessName || _withBizTitle || 'Business', avatar: conv.businessLogo || _withBizLogo || '' };
+    } else if(conv && conv.forBusiness && conv.businessId){
+      // Personal inbox or withBiz mode: show the business/page as the contact — not the owner's profile
+      oid = conv.businessId;
+      u = { id: conv.businessId, name: conv.businessName || _withBizTitle || 'Business', avatar: conv.businessLogo || _withBizLogo || '' };
     } else {
       oid = conv ? otherId(conv) : '';
       u = await userInfo(oid);
@@ -1118,6 +1163,7 @@
       });
     }
 
+    dbg('init', {routeMode: _routeMode || '(resolving)', uid: currentUid(), bizParam, withBizParam, cidParam});
     if(unsubConvs) unsubConvs();
     if(withBizParam){
       // ── Customer-side business chat ─────────────────────────────
@@ -1216,6 +1262,7 @@
       // Personal inbox sidebar — shows all personal convs including this biz conv
       unsubConvs = window.GeoSocial.listenConversations(function(convs){
         if (_routeMode !== 'customerBusinessChat') return; // guard: never render personal data in page mode
+        dbg('customerBusinessChat convs', convs.length, convs.map(c=>c.id));
         window.__geohubLastConvs = convs || [];
         renderConvs(convs || []);
         // Re-highlight the active biz conv after sidebar re-renders
@@ -1260,6 +1307,7 @@
       }
       unsubConvs = window.GeoSocial.listenBusinessConversations(bizParam, function(convs){
         if (_routeMode !== 'businessInbox') return; // guard: never let a stale business listener pollute personal mode
+        dbg('businessInbox convs', convs.length, convs.map(c=>({id:c.id,biz:c.businessId,forBiz:c.forBusiness,inboxActorIds:c.inboxActorIds})));
         window.__geohubLastConvs = convs || [];
         renderConvs(convs || []);
         if(cidParam && !activeConversation){
@@ -1292,6 +1340,7 @@
       if(target){ window.GeoSocial.startConversation(target, cid=>openConversation(cid)); }
       unsubConvs=window.GeoSocial.listenConversations(convs=>{
         if (_routeMode !== 'personalInbox') return; // guard: never let personal listener run in page mode
+        dbg('personalInbox convs', convs.length, convs.map(c=>({id:c.id,forBiz:c.forBusiness,customerUid:c.customerUid,inboxActorIds:c.inboxActorIds})));
         window.__geohubLastConvs = convs || [];
         renderConvs(convs || []);
         if(!activeConversation && convs && convs[0]) openConversation(convs[0].id);

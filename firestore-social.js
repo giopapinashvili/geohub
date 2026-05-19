@@ -2273,13 +2273,13 @@
         snap.forEach(function(d) {
           var data = d.data() || {};
           if (data.forBusiness && data.customerUid && data.customerUid !== uid) return;
-          if (!pool[d.id]) {
-            pool[d.id] = Object.assign({ id: d.id }, data);
-            lazyBackfillConv(d.id, data, uid); // migrate old conv to canonical fields
-          }
+          var isNew = !pool[d.id];
+          pool[d.id] = Object.assign({ id: d.id }, data); // always update pool with fresh Firestore data
+          if (isNew && !data.inboxActorIds) lazyBackfillConv(d.id, data, uid); // backfill only once, only if needed
         });
         snap.docChanges().forEach(function(ch) {
-          if (ch.type === 'removed' && !ch.doc.data().inboxActorIds) delete pool[ch.doc.id];
+          // Only delete if primary query doesn't also have this doc (primary takes precedence for removals)
+          if (ch.type === 'removed' && !(pool[ch.doc.id] && pool[ch.doc.id].inboxActorIds)) delete pool[ch.doc.id];
         });
         flush(pool);
       }, function(err) { console.warn('[GeoSocial] listenConversations(legacy)', err.message); });
@@ -2311,13 +2311,13 @@
       var unsubLeg = onSnapshot(qLeg, function(snap) {
         snap.forEach(function(d) {
           var data = d.data() || {};
-          if (!pool[d.id]) {
-            pool[d.id] = Object.assign({ id: d.id }, data);
-            lazyBackfillConv(d.id, data, currentUid()); // migrate old conv
-          }
+          var isNew = !pool[d.id];
+          pool[d.id] = Object.assign({ id: d.id }, data); // always update pool with fresh Firestore data
+          if (isNew && !data.inboxActorIds) lazyBackfillConv(d.id, data, currentUid()); // backfill only once, only if needed
         });
         snap.docChanges().forEach(function(ch) {
-          if (ch.type === 'removed' && !ch.doc.data().inboxActorIds) delete pool[ch.doc.id];
+          // Only delete if primary query doesn't also have this doc (primary takes precedence for removals)
+          if (ch.type === 'removed' && !(pool[ch.doc.id] && pool[ch.doc.id].inboxActorIds)) delete pool[ch.doc.id];
         });
         flush(pool);
       }, function(err) { console.warn('[GeoSocial] listenBusinessConversations(legacy)', err.message); });
