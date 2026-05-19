@@ -2187,3 +2187,128 @@ body.gh-mobile-menu-open .gh-mobile-menu-overlay,
 body.gh-mobile-menu-open #gh-mobile-menu-overlay {
   pointer-events: auto !important;
 }
+
+/* ── Phase 65L: Definitive mobile messenger composer visibility ── */
+/*
+ * Root issues resolved:
+ *   1. position:sticky on .chat-input-bar has no effect inside overflow:hidden — use relative.
+ *   2. bottom:0 on .messages-page doesn't clear env(safe-area-inset-bottom) in PWA mode.
+ *   3. Multiple earlier phases left conflicting flex/display rules — this block wins last.
+ */
+@media (max-width: 768px) {
+  /* Body: full dynamic viewport, zero padding bleed */
+  body.page-messages {
+    height: 100dvh !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Fixed shell: from navbar bottom to visual viewport bottom, cleared by safe-area */
+  body.page-messages .messages-page {
+    position: fixed !important;
+    top: var(--navbar-height, 72px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: env(safe-area-inset-bottom, 0px) !important;
+    height: auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+  }
+
+  /* Messages layout: single-column block filling flex parent */
+  body.page-messages .messages-layout {
+    display: block !important;
+    flex: 1 1 auto !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Inbox: full-height column when chat is not open */
+  body.page-messages .msg-sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Chat window: hidden by default on mobile */
+  body.page-messages .chat-window {
+    display: none !important;
+  }
+
+  /* Chat open: hide inbox, show chat full-height */
+  body.page-messages.chat-open .msg-sidebar,
+  body.page-messages .messages-layout.chat-open .msg-sidebar {
+    display: none !important;
+  }
+  body.page-messages.chat-open .chat-window,
+  body.page-messages .messages-layout.chat-open .chat-window {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Flex children — header, status bars: shrink to content, never grow */
+  body.page-messages .chat-header {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    z-index: 5 !important;
+  }
+  body.page-messages .typing-row,
+  body.page-messages .msg-search-wrap,
+  body.page-messages .reply-preview-bar,
+  body.page-messages .quick-replies-bar {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+  }
+
+  /* Messages list: fills remaining space, only scrollable region */
+  body.page-messages .chat-messages {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+  }
+
+  /* Composer: always visible at bottom of flex column.
+   * position:sticky requires overflow:auto/scroll on ancestor — not overflow:hidden.
+   * Use position:relative so it flows naturally as the last flex child. */
+  body.page-messages .chat-input-bar {
+    flex: 0 0 auto !important;
+    position: relative !important;
+    bottom: auto !important;
+    padding: 8px 10px !important;
+    padding-bottom: max(10px, env(safe-area-inset-bottom, 0px)) !important;
+    background: var(--bg-0, #04050d) !important;
+    border-top: 1px solid var(--gh-border, rgba(255, 255, 255, 0.08)) !important;
+    z-index: 10 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  /* Input and buttons inside composer must be fully visible */
+  body.page-messages .msg-input {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    min-height: 36px !important;
+  }
+  body.page-messages .input-btn,
+  body.page-messages .send-btn {
+    flex: 0 0 auto !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+}
