@@ -76,6 +76,7 @@
   }
 
   function currentUid(){ return window.GeoFirebase?.auth?.currentUser?.uid || ''; }
+  function currentActorId(){ return _activeBizId ? 'business_' + _activeBizId : 'user_' + currentUid(); }
   function otherId(conv){ const uid=currentUid(); return (conv?.participants||[]).find(id=>id!==uid) || ''; }
   function initials(name){ return (String(name||'U').trim()[0] || 'U').toUpperCase(); }
 
@@ -146,8 +147,10 @@
         oid = otherId(c);
         u = await userInfo(oid);
       }
-      const _actorKey = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
-      const unread = (Array.isArray(c.unreadActors) && c.unreadActors.includes(_actorKey))
+      // Check both old ('business:bizId' / 'user:uid') and new canonical ('business_bizId' / 'user_uid') formats during transition
+      const _actorKeyOld = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
+      const _actorKeyNew = currentActorId();
+      const unread = (Array.isArray(c.unreadActors) && (c.unreadActors.includes(_actorKeyOld) || c.unreadActors.includes(_actorKeyNew)))
         || (Array.isArray(c.unreadFor) && c.unreadFor.includes(currentUid()));
       if(unread) unreadCount++;
       rows.push({c, oid, u, unread, isBiz});
@@ -242,14 +245,27 @@
       + '<span class="msg-reply-quote-text">'+esc((m.replyTo.text||'').slice(0,60))+'</span></div>';
   }
 
+  function isMineMsg(m){
+    const uid = currentUid();
+    const aid = currentActorId();
+    // 1. Canonical Phase 57: senderActorId === 'user_{uid}' or 'business_{bizId}'
+    if (m.senderActorId && m.senderActorId.includes('_')) return m.senderActorId === aid;
+    // 2. Phase 56 senderActorKey: 'business:bizId' / 'user:uid'
+    if (m.senderActorKey) {
+      return _activeBizId ? m.senderActorKey === 'business:' + _activeBizId : m.senderActorKey === 'user:' + uid;
+    }
+    // 3. Legacy: raw senderId / senderActorType
+    if (_activeBizId) {
+      return m.senderActorType === 'business'
+        ? (m.senderActorId === _activeBizId)
+        : (m.senderActorType == null && (m.senderId === uid || m.authorId === uid));
+    }
+    return m.senderId === uid || m.authorId === uid;
+  }
+
   function receiptIcon(m){
     const uid = currentUid();
-    const _rKey = m.senderActorKey || '';
-    const isMine = _rKey
-      ? (_activeBizId ? _rKey === 'business:' + _activeBizId : _rKey === 'user:' + uid)
-      : (_activeBizId
-          ? (m.senderActorType === 'business' ? m.senderActorId === _activeBizId : (m.senderActorType == null && (m.senderId === uid || m.authorId === uid)))
-          : (m.senderId === uid || m.authorId === uid));
+    const isMine = isMineMsg(m);
     if(!isMine) return '';
     const seenBy = Array.isArray(m.seenBy) ? m.seenBy.filter(id=>id!==uid) : [];
     if(seenBy.length) return '<span class="msg-receipt seen" title="Seen">✓✓</span>';
@@ -288,20 +304,7 @@
     }
     const wasAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
     box.innerHTML=visible.map(m=>{
-      // senderActorKey is the canonical field (Phase 56); fall back to type/id for old messages
-      const _sKey = m.senderActorKey || '';
-      let mine;
-      if(_activeBizId){
-        mine = _sKey ? _sKey === 'business:' + _activeBizId
-          : (m.senderActorType === 'business' ? m.senderActorId === _activeBizId
-              : (m.senderActorType == null && (m.senderId === uid || m.authorId === uid)));
-      } else if(_withBizId){
-        mine = _sKey ? _sKey === 'user:' + uid
-          : (m.senderActorType === 'user' ? (m.senderActorId === uid || m.senderId === uid)
-              : (m.senderActorType == null && (m.senderId === uid || m.authorId === uid)));
-      } else {
-        mine = _sKey ? _sKey === 'user:' + uid : (m.senderId === uid || m.authorId === uid);
-      }
+      const mine = isMineMsg(m);
       const summary = summarizeReactions(m.id);
       const deleted = !!m.deleted;
       const text = deleted ? '<em>Message deleted</em>' : esc(m.text||'');
@@ -710,13 +713,15 @@
       const dot=document.querySelector('.conv-item[data-conv-id="'+cid+'"] .conv-unread-dot');
       if(dot) dot.remove();
     }); }catch(e){}
-    // Also clear actor-level unread (unreadActors array)
+    // Also clear actor-level unread (unreadActors array) — remove both old and new format during transition
     try{
       const _rGF = window.GeoFirebase;
       if(_rGF && _rGF.fs && _rGF.db){
-        const _actorKey2 = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
+        const _uid2 = currentUid();
+        const _actorKeyOld2 = _activeBizId ? 'business:' + _activeBizId : 'user:' + _uid2;
+        const _actorKeyNew2 = currentActorId();
         _rGF.fs.updateDoc(_rGF.fs.doc(_rGF.db,'conversations',cid), {
-          unreadActors: _rGF.fs.arrayRemove(_actorKey2)
+          unreadActors: _rGF.fs.arrayRemove(_actorKeyOld2, _actorKeyNew2)
         }).catch(()=>{});
       }
     }catch(e){}
@@ -840,15 +845,17 @@
       if(sendBtn) sendBtn.disabled = true;
 
       const payload = Object.assign({}, extra||{});
-      // Attach sender actor context for business conversations
+      // Attach sender actor context — use canonical 'business_{bizId}' / 'user_{uid}' format
       if(_activeBizId){
         payload.senderActorType = 'business';
-        payload.senderActorId = _activeBizId;
+        payload.senderActorId = 'business_' + _activeBizId;
+        payload.businessId = _activeBizId;
+        payload.senderDisplayName = _activeBizTitle || 'Business';
         payload.senderName = _activeBizTitle || 'Business';
         payload.senderAvatar = _activeBizLogo || '';
       } else {
         payload.senderActorType = 'user';
-        payload.senderActorId = currentUid();
+        payload.senderActorId = 'user_' + currentUid();
         payload.senderAvatar = (_userCache[currentUid()] || {}).avatar || '';
       }
       if(replyState){
@@ -1165,6 +1172,11 @@
           participants: customerUid === ownerUid ? [customerUid] : [customerUid, ownerUid],
           participantActors: ['user:' + customerUid, 'business:' + withBizParam],
           inboxKeys: ['user:' + customerUid, 'business:' + withBizParam],
+          inboxActorIds: ['user_' + customerUid, 'business_' + withBizParam],
+          memberUids: customerUid === ownerUid ? [customerUid] : [customerUid, ownerUid],
+          type: 'customer_business',
+          customerActorId: 'user_' + customerUid,
+          pageActorId: 'business_' + withBizParam,
           businessId: withBizParam,
           businessName: _withBizTitle,
           businessLogo: _withBizLogo,

@@ -2073,6 +2073,9 @@
               return setDoc(doc(db, 'conversations', cid), {
                 participants: [user.uid, targetUserId],
                 inboxKeys: ['user:' + user.uid, 'user:' + targetUserId],
+                inboxActorIds: ['user_' + user.uid, 'user_' + targetUserId],
+                memberUids: [user.uid, targetUserId],
+                type: 'personal',
                 updatedAt: serverTimestamp(),
                 createdAt: serverTimestamp(),
                 lastMessage: '',
@@ -2085,6 +2088,9 @@
           return setDoc(doc(db, 'conversations', cid), {
             participants: [user.uid, targetUserId],
             inboxKeys: ['user:' + user.uid, 'user:' + targetUserId],
+            inboxActorIds: ['user_' + user.uid, 'user_' + targetUserId],
+            memberUids: [user.uid, targetUserId],
+            type: 'personal',
             updatedAt: serverTimestamp(),
             createdAt: serverTimestamp(),
             lastMessage: '',
@@ -2109,6 +2115,13 @@
           participants: [user.uid, ownerUid],
           businessId: businessId,
           forBusiness: true,
+          customerUid: user.uid,
+          ownerUid: ownerUid,
+          type: 'customer_business',
+          customerActorId: 'user_' + user.uid,
+          pageActorId: 'business_' + businessId,
+          inboxActorIds: ['user_' + user.uid, 'business_' + businessId],
+          memberUids: [user.uid, ownerUid],
           updatedAt: serverTimestamp(),
           createdAt: serverTimestamp(),
           lastMessage: '',
@@ -2141,16 +2154,23 @@
           var otherId = (conv.participants || []).find(function (id) { return id !== user.uid; });
           var preview = cleanText || (mediaType === 'image' ? '📷 Photo' : (fileName ? '📎 ' + fileName : 'Attachment'));
           var senderActorType = extra.senderActorType || 'user';
-          var senderActorId   = extra.senderActorId   || user.uid;
-          var senderName      = extra.senderName      || me.name || user.displayName || 'GeoHub User';
+          // Canonical actor ID: 'user_{uid}' or 'business_{bizId}' — never raw UID or bizId alone
+          var rawActorId = extra.senderActorId || (senderActorType === 'business' ? (extra.businessId || '') : user.uid);
+          // Normalise: if caller passed old-format raw UID/bizId, prefix it; if already canonical, keep it
+          var senderActorId = (senderActorType === 'business')
+            ? (rawActorId.startsWith('business_') ? rawActorId : 'business_' + rawActorId)
+            : (rawActorId.startsWith('user_') ? rawActorId : 'user_' + rawActorId);
+          var senderName      = extra.senderName || extra.senderDisplayName || me.name || user.displayName || 'GeoHub User';
           var senderAvatar    = extra.senderAvatar    || me.avatar || '';
           var messageDoc = {
             conversationId: conversationId,
             senderId: user.uid,
             authorId: user.uid,
+            performedByUid: user.uid,
             senderActorType: senderActorType,
             senderActorId:   senderActorId,
-            senderActorKey:  (senderActorType === 'business' ? 'business:' : 'user:') + senderActorId,
+            senderActorKey:  (senderActorType === 'business' ? 'business:' : 'user:') + rawActorId,
+            senderDisplayName: senderName,
             senderName:      senderName,
             senderAvatar:    senderAvatar,
             text: cleanText,
@@ -2176,11 +2196,14 @@
               unreadTarget = senderActorType === 'business'
                 ? (conv.customerUid || '')
                 : (conv.ownerUid || otherId || '');
-              // Track actor-level unread for business convs
-              var actorKey = senderActorType === 'business'
+              // Write both old 'business:bizId' and new canonical 'business_bizId' format during transition
+              var actorKeyOld = senderActorType === 'business'
                 ? 'user:' + (conv.customerUid || user.uid)
                 : 'business:' + conv.businessId;
-              patch.unreadActors = fs.arrayUnion(actorKey);
+              var actorKeyNew = senderActorType === 'business'
+                ? 'user_' + (conv.customerUid || user.uid)
+                : 'business_' + conv.businessId;
+              patch.unreadActors = fs.arrayUnion(actorKeyOld, actorKeyNew);
             } else {
               unreadTarget = otherId || '';
             }
@@ -2220,41 +2243,114 @@
     function listenConversations(callback) {
       var uid = currentUid();
       if (!uid) { callback([]); return function () {}; }
+      var actorId = 'user_' + uid;
       function sortConvs(items){
         return items.sort(function(a,b){
           function t(v){ return v && v.toMillis ? v.toMillis() : (v && v.seconds ? v.seconds*1000 : 0); }
           return t(b.updatedAt || b.createdAt) - t(a.updatedAt || a.createdAt);
         });
       }
-      // Increase limit to account for page-admin convs filtered out below
-      var q = query(collection(db, 'conversations'), where('participants', 'array-contains', uid), limit(50));
-      return onSnapshot(q, function (snap) {
-        var items = [];
-        snap.forEach(function (d) {
+      function flush(pool){ callback(sortConvs(Object.values(pool))); }
+      var pool = {};
+      // Primary query: canonical inboxActorIds (new convs after Phase 57)
+      var qNew = query(collection(db, 'conversations'), where('inboxActorIds', 'array-contains', actorId), limit(50));
+      // Legacy query: participants array (pre-Phase-57 convs; backfill will migrate them)
+      var qLeg = query(collection(db, 'conversations'), where('participants', 'array-contains', uid), limit(50));
+      var unsubNew = onSnapshot(qNew, function(snap) {
+        snap.forEach(function(d) {
           var data = d.data() || {};
-          // INBOX SEPARATION (Phase 56): Exclude page-admin-only conversations from personal inbox.
-          // A conversation is page-admin-only when forBusiness===true AND the current user is NOT
-          // the customer (customerUid !== uid). Those belong exclusively in ?business=BIZ_ID inbox.
-          // If customerUid is absent (old conv format), include it for backward compatibility.
+          // Personal inbox: exclude business page-admin convs where this uid is NOT the customer
           if (data.forBusiness && data.customerUid && data.customerUid !== uid) return;
-          items.push(Object.assign({ id: d.id }, data));
+          pool[d.id] = Object.assign({ id: d.id }, data);
         });
-        callback(sortConvs(items));
-      }, function (err) { console.warn('[GeoSocial] listenConversations', err.message); callback([]); });
+        // Remove docs that disappeared from the new query (deleted or no longer match)
+        snap.docChanges().forEach(function(ch) {
+          if (ch.type === 'removed') delete pool[ch.doc.id];
+        });
+        flush(pool);
+      }, function(err) { console.warn('[GeoSocial] listenConversations(new)', err.message); });
+      var unsubLeg = onSnapshot(qLeg, function(snap) {
+        snap.forEach(function(d) {
+          var data = d.data() || {};
+          if (data.forBusiness && data.customerUid && data.customerUid !== uid) return;
+          if (!pool[d.id]) {
+            pool[d.id] = Object.assign({ id: d.id }, data);
+            lazyBackfillConv(d.id, data, uid); // migrate old conv to canonical fields
+          }
+        });
+        snap.docChanges().forEach(function(ch) {
+          if (ch.type === 'removed' && !ch.doc.data().inboxActorIds) delete pool[ch.doc.id];
+        });
+        flush(pool);
+      }, function(err) { console.warn('[GeoSocial] listenConversations(legacy)', err.message); });
+      return function() { unsubNew(); unsubLeg(); };
     }
 
     function listenBusinessConversations(businessId, callback) {
       if (!businessId) { if (callback) callback([]); return function () {}; }
-      var q = query(collection(db, 'conversations'), where('businessId', '==', businessId), limit(50));
-      return onSnapshot(q, function (snap) {
-        var items = [];
-        snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
-        items.sort(function (a, b) {
-          function t(v) { return v && v.toMillis ? v.toMillis() : (v && v.seconds ? v.seconds * 1000 : 0); }
+      var pageActorId = 'business_' + businessId;
+      function sortItems(items){
+        return items.sort(function(a,b){
+          function t(v){ return v && v.toMillis ? v.toMillis() : (v && v.seconds ? v.seconds*1000 : 0); }
           return t(b.updatedAt || b.createdAt) - t(a.updatedAt || a.createdAt);
         });
-        if (callback) callback(items);
-      }, function (err) { console.warn('[GeoSocial] listenBusinessConversations', err.message); if (callback) callback([]); });
+      }
+      function flush(pool){ if(callback) callback(sortItems(Object.values(pool))); }
+      var pool = {};
+      // Primary query: canonical inboxActorIds (new convs after Phase 57)
+      var qNew = query(collection(db, 'conversations'), where('inboxActorIds', 'array-contains', pageActorId), limit(50));
+      // Legacy query: businessId field (pre-Phase-57 convs)
+      var qLeg = query(collection(db, 'conversations'), where('businessId', '==', businessId), limit(50));
+      var unsubNew = onSnapshot(qNew, function(snap) {
+        snap.forEach(function(d) { pool[d.id] = Object.assign({ id: d.id }, d.data()); });
+        snap.docChanges().forEach(function(ch) {
+          if (ch.type === 'removed') delete pool[ch.doc.id];
+        });
+        flush(pool);
+      }, function(err) { console.warn('[GeoSocial] listenBusinessConversations(new)', err.message); });
+      var unsubLeg = onSnapshot(qLeg, function(snap) {
+        snap.forEach(function(d) {
+          var data = d.data() || {};
+          if (!pool[d.id]) {
+            pool[d.id] = Object.assign({ id: d.id }, data);
+            lazyBackfillConv(d.id, data, currentUid()); // migrate old conv
+          }
+        });
+        snap.docChanges().forEach(function(ch) {
+          if (ch.type === 'removed' && !ch.doc.data().inboxActorIds) delete pool[ch.doc.id];
+        });
+        flush(pool);
+      }, function(err) { console.warn('[GeoSocial] listenBusinessConversations(legacy)', err.message); });
+      return function() { unsubNew(); unsubLeg(); };
+    }
+
+    // ── PHASE 57: lazy backfill for old conversations ────────────────────
+    function lazyBackfillConv(convId, data, uid) {
+      try {
+        if (data.inboxActorIds) return; // already migrated
+        var parts = data.participants || [];
+        var inboxActorIds, type, extraPatch = {};
+        if (data.forBusiness && data.businessId) {
+          var customerUid = data.customerUid || uid;
+          inboxActorIds = ['user_' + customerUid, 'business_' + data.businessId];
+          type = 'customer_business';
+          extraPatch = {
+            customerActorId: 'user_' + customerUid,
+            pageActorId: 'business_' + data.businessId,
+            customerUid: customerUid
+          };
+        } else {
+          inboxActorIds = parts.filter(Boolean).map(function(u) { return 'user_' + u; });
+          type = 'personal';
+        }
+        var memberUids = parts.slice();
+        if (data.ownerUid && memberUids.indexOf(data.ownerUid) === -1) memberUids.push(data.ownerUid);
+        updateDoc(doc(db, 'conversations', convId), Object.assign({
+          inboxActorIds: inboxActorIds,
+          memberUids: memberUids,
+          type: type
+        }, extraPatch)).catch(function() {});
+      } catch(e) {}
     }
 
     function listenMessages(conversationId, callback) {
