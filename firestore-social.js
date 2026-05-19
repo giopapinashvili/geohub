@@ -200,6 +200,7 @@
     var serverTimestamp = fs.serverTimestamp;
     var increment      = fs.increment;
     var runTransaction = fs.runTransaction;
+    var deleteField    = fs.deleteField;
 
     // ── Auth helpers ────────────────────────────────────────────────────
     function requireAuth(cb) {
@@ -2494,19 +2495,24 @@
         if (Array.isArray(data.deletedFor) && data.deletedFor.indexOf(uid) !== -1) throw new Error('message-hidden');
         if (Array.isArray(data.deletedForActors) && data.deletedForActors.indexOf(actorId) !== -1) throw new Error('message-hidden');
 
-        var next = Object.assign({}, (data.reactions && typeof data.reactions === 'object' && !Array.isArray(data.reactions)) ? data.reactions : {});
-        if (next[actorId] === emoji) {
+        var current = data.reactions && typeof data.reactions === 'object' && !Array.isArray(data.reactions)
+          ? data.reactions[actorId]
+          : '';
+        var toggledOff = current === emoji;
+        var patch = { updatedAt: serverTimestamp() };
+        if (toggledOff && deleteField) {
+          patch['reactions.' + actorId] = deleteField();
+        } else if (toggledOff) {
+          var next = Object.assign({}, (data.reactions && typeof data.reactions === 'object' && !Array.isArray(data.reactions)) ? data.reactions : {});
           delete next[actorId];
+          patch.reactions = next;
         } else {
-          next[actorId] = emoji;
+          patch['reactions.' + actorId] = emoji;
         }
 
-        return updateDoc(messageRef, {
-          reactions: next,
-          updatedAt: serverTimestamp()
-        }).then(function(){
-          if(callback) callback(!!next[actorId]);
-          return !!next[actorId];
+        return updateDoc(messageRef, patch).then(function(){
+          if(callback) callback(!toggledOff);
+          return !toggledOff;
         });
       }).catch(function(err){
         console.warn('[GeoSocial] toggleMessageReaction', err.message);

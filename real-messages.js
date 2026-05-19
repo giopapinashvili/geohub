@@ -1225,7 +1225,7 @@
       }
       const trigger=e.target.closest('[data-reaction-trigger]');
       if(trigger){
-        const picker=trigger.parentElement?.querySelector('[data-reaction-picker]');
+        const picker=trigger.closest('.msg-bubble-wrap')?.querySelector('[data-reaction-picker]');
         document.querySelectorAll('[data-reaction-picker].open').forEach(p=>{ if(p!==picker) p.classList.remove('open'); });
         picker?.classList.toggle('open');
         return;
