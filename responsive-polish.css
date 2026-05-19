@@ -9,6 +9,7 @@
 }
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
 body{min-width:0;overflow-x:hidden;}
+body{margin:0;}
 img,video,canvas,svg{max-width:100%;height:auto;}
 button,a,input,textarea,select{touch-action:manipulation;}
 *{box-sizing:border-box;}
@@ -935,5 +936,537 @@ body,
 
   .rw-hero-balance {
     font-size: 2rem!important;
+  }
+}
+
+/* Phase 65 — full phone usability repair */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+}
+
+body,
+main,
+.page,
+.app,
+.shell,
+.layout,
+.content,
+.main-content,
+.page-content,
+.feed-layout,
+.messages-layout,
+.biz-page,
+.profile-layout,
+.gh-layout {
+  min-width: 0 !important;
+}
+
+body * {
+  min-width: 0;
+}
+
+p,
+span,
+strong,
+small,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+a,
+button,
+label,
+.card,
+.panel,
+.post-card,
+.msg-bubble,
+.conv-name,
+.conv-preview,
+.profile-name,
+.biz-page-name {
+  overflow-wrap: anywhere;
+}
+
+img,
+video,
+iframe,
+canvas {
+  max-width: 100% !important;
+}
+
+.modal-card,
+.modal-content,
+.auth-modal-card,
+.gh-modal,
+.gh-modal-card,
+.biz-modal-sheet,
+.biz-share-sheet,
+.rw-modal,
+.sv-modal,
+.ev-detail-modal,
+.create-event-modal,
+.ticket-modal,
+.invite-modal,
+.promo-modal,
+.chal-modal,
+.chalm-sheet,
+.notification-panel,
+.notif-panel {
+  max-width: min(760px, calc(100vw - 24px)) !important;
+  max-height: calc(100dvh - 28px - env(safe-area-inset-bottom, 0px)) !important;
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  body {
+    width: 100% !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding-bottom: calc(var(--gh-mobile-nav-h, 68px) + env(safe-area-inset-bottom, 0px) + 10px) !important;
+  }
+
+  .navbar,
+  .feed-topbar,
+  .gh-topbar,
+  .topbar,
+  .site-header {
+    max-width: 100vw !important;
+    overflow: hidden !important;
+  }
+
+  .navbar {
+    padding-left: max(10px, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(10px, env(safe-area-inset-right, 0px)) !important;
+  }
+
+  .navbar-brand,
+  .ftb-brand,
+  .gh-brand,
+  .chat-header-left,
+  .conv-info,
+  .profile-name-block,
+  .biz-title-block {
+    min-width: 0 !important;
+  }
+
+  .container,
+  .page-container,
+  .main-container,
+  .content-container,
+  .feed-shell,
+  .feed-center,
+  .profile-layout,
+  .profile-identity-inner,
+  .xp-progress-section,
+  .profile-tabs,
+  .biz-page-shell,
+  .biz-main,
+  .biz-tab-panels,
+  .gh-layout,
+  .rw-inner,
+  .chal-page {
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .feed-layout,
+  .gh-layout,
+  .profile-layout,
+  .biz-overview-3col,
+  .events-layout,
+  .places-layout,
+  .groups-layout,
+  .rewards-layout,
+  .products-layout,
+  .notifications-layout,
+  .world-layout,
+  .dashboard-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .feed-left-sidebar,
+  .feed-right-sidebar,
+  .right-sidebar,
+  .left-sidebar,
+  .profile-sidebar,
+  .biz-right-sidebar,
+  .info-panel,
+  .desktop-only {
+    display: none !important;
+  }
+
+  .feed-scroll-area,
+  .chat-messages,
+  .conv-list,
+  .notification-list,
+  .modal-body,
+  .sheet-body {
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+  }
+
+  .stories-row,
+  .fd-stories-wrap,
+  .story-strip,
+  .tabs,
+  .profile-tabs,
+  .biz-tabs,
+  .filter-tabs,
+  .filters-row,
+  .chip-row,
+  .gh-tabs,
+  .clean-tabs {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none;
+  }
+
+  .stories-row::-webkit-scrollbar,
+  .fd-stories-wrap::-webkit-scrollbar,
+  .profile-tabs::-webkit-scrollbar,
+  .biz-tabs::-webkit-scrollbar,
+  .filter-tabs::-webkit-scrollbar,
+  .filters-row::-webkit-scrollbar,
+  .chip-row::-webkit-scrollbar,
+  .gh-tabs::-webkit-scrollbar,
+  .clean-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cards-grid,
+  .posts-grid,
+  .post-grid,
+  .feed-grid,
+  .business-grid,
+  .biz-service-cards-grid,
+  .biz-product-cards-grid,
+  .events-grid,
+  .places-grid,
+  .groups-grid,
+  .rewards-grid,
+  .products-grid,
+  .notifications-grid,
+  .challenge-grid,
+  .challenges-grid,
+  .services-grid,
+  .profile-posts-grid,
+  .friends-grid,
+  .media-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .post-card,
+  .composer-card,
+  .gh-composer,
+  .comment-box,
+  .comment-input-row,
+  .share-sheet,
+  .business-card,
+  .event-card,
+  .place-card,
+  .group-card,
+  .reward-card,
+  .product-card,
+  .notification-card,
+  .profile-card,
+  .about-card,
+  .sidebar-card,
+  .clean-card,
+  .gh-card,
+  .gh-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .btn-row,
+  .actions-row,
+  .profile-actions,
+  .biz-header-actions,
+  .biz-actions,
+  .gh-page-actions,
+  .rw-hero-actions,
+  .card-actions,
+  .modal-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .btn-row > *,
+  .actions-row > *,
+  .profile-actions > *,
+  .biz-header-actions > *,
+  .biz-actions > *,
+  .gh-page-actions > *,
+  .rw-hero-actions > *,
+  .card-actions > *,
+  .modal-actions > * {
+    min-width: 0 !important;
+  }
+
+  .modal-overlay,
+  .auth-modal-overlay,
+  .gh-modal-overlay,
+  .biz-modal-overlay,
+  .biz-share-overlay,
+  .chalm-overlay,
+  .app-action-overlay {
+    padding: 10px !important;
+    align-items: flex-end !important;
+  }
+
+  .modal-card,
+  .modal-content,
+  .auth-modal-card,
+  .gh-modal,
+  .gh-modal-card,
+  .biz-modal-sheet,
+  .biz-share-sheet,
+  .rw-modal,
+  .sv-modal,
+  .ev-detail-modal,
+  .create-event-modal,
+  .ticket-modal,
+  .invite-modal,
+  .promo-modal,
+  .chal-modal,
+  .chalm-sheet {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: calc(92dvh - env(safe-area-inset-bottom, 0px)) !important;
+    border-radius: 18px 18px 0 0 !important;
+  }
+
+  body.page-messages {
+    padding-bottom: 0 !important;
+  }
+
+  body.page-messages .messages-page {
+    top: var(--navbar-height, 68px) !important;
+    bottom: 0 !important;
+  }
+
+  body.page-messages .messages-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(160px, 34dvh) minmax(0, 1fr) !important;
+  }
+
+  body.page-messages .messages-layout.chat-open {
+    grid-template-rows: 0 minmax(0, 1fr) !important;
+  }
+
+  body.page-messages .msg-sidebar,
+  body.page-messages .chat-window,
+  body.page-messages .chat-messages,
+  body.page-messages .chat-input-bar {
+    max-width: 100vw !important;
+  }
+
+  body.page-messages .chat-header {
+    min-height: 54px !important;
+    padding: 8px 10px !important;
+    gap: 8px !important;
+  }
+
+  body.page-messages .chat-header-name {
+    max-width: 44vw !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  body.page-messages .chat-header-actions {
+    gap: 4px !important;
+  }
+
+  body.page-messages .header-action-btn,
+  body.page-messages .back-btn,
+  body.page-messages .input-btn,
+  body.page-messages .send-btn {
+    flex: 0 0 auto !important;
+  }
+
+  body.page-messages .chat-input-bar {
+    position: sticky !important;
+    bottom: 0 !important;
+    padding: 8px 8px max(8px, env(safe-area-inset-bottom, 0px)) !important;
+    gap: 5px !important;
+  }
+
+  body.page-messages .msg-input {
+    min-width: 0 !important;
+  }
+
+  body.page-messages .msg-row {
+    max-width: 100% !important;
+  }
+
+  body.page-messages .msg-col {
+    max-width: 86% !important;
+  }
+
+  body.page-messages .msg-bubble,
+  body.page-messages .msg-bubble-wrap {
+    max-width: 100% !important;
+  }
+
+  body.page-messages .msg-image,
+  body.page-messages .msg-media-link img,
+  body.page-messages .msg-bubble img {
+    max-width: min(68vw, 280px) !important;
+    max-height: 220px !important;
+  }
+
+  body.page-messages .msg-file-card {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  body.page-messages .msg-file-name {
+    max-width: 48vw !important;
+  }
+
+  body.page-messages .msg-reaction-picker,
+  body.page-messages .emoji-picker-wrap {
+    max-width: calc(100vw - 20px) !important;
+  }
+
+  .profile-cover {
+    height: 180px !important;
+  }
+
+  .profile-identity-inner {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .profile-hero-left {
+    align-items: center !important;
+    gap: 12px !important;
+    margin-top: -44px !important;
+  }
+
+  .profile-avatar {
+    width: 86px !important;
+    height: 86px !important;
+  }
+
+  .profile-hero-right {
+    align-items: stretch !important;
+    width: 100% !important;
+  }
+
+  .profile-stats-bar {
+    width: 100% !important;
+    overflow-x: auto !important;
+  }
+
+  .pstat {
+    min-width: 68px !important;
+  }
+
+  .xp-progress-section {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  .biz-cover {
+    height: 180px !important;
+  }
+
+  .biz-header-body {
+    margin-top: -48px !important;
+  }
+
+  .biz-logo {
+    width: 86px !important;
+    height: 86px !important;
+  }
+
+  .biz-contact-strip,
+  .biz-admin-toolbar-inner {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .biz-admin-toolbar {
+    top: var(--navbar-height, 68px) !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .container,
+  .page-container,
+  .main-container,
+  .content-container,
+  .feed-center,
+  .profile-layout,
+  .profile-identity-inner,
+  .xp-progress-section,
+  .profile-tabs,
+  .biz-tab-panels,
+  .gh-layout,
+  .rw-inner,
+  .chal-page {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .feed-scroll-area {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .post-card,
+  .composer-card,
+  .gh-composer,
+  .business-card,
+  .event-card,
+  .place-card,
+  .group-card,
+  .reward-card,
+  .product-card,
+  .notification-card,
+  .profile-card,
+  .about-card,
+  .sidebar-card,
+  .clean-card,
+  .gh-card,
+  .gh-panel {
+    border-radius: 14px !important;
+  }
+
+  .profile-name,
+  .biz-page-name {
+    font-size: clamp(1.25rem, 7vw, 1.55rem) !important;
+  }
+
+  body.page-messages .chat-header-av,
+  body.page-messages .chat-header-av img,
+  body.page-messages .chat-header-av .av-placeholder {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  body.page-messages .header-action-btn {
+    width: 32px !important;
+    height: 32px !important;
   }
 }
