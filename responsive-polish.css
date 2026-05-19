@@ -2374,3 +2374,95 @@ body.gh-mobile-menu-open #gh-mobile-menu-overlay {
     padding-bottom: 10px !important;
   }
 }
+
+/* Phase 65M5: remove the empty mobile Messenger composer blanket. */
+@media (max-width: 768px) {
+  body.page-messages #app-bottom-nav,
+  body.page-messages .app-bottom-nav,
+  body.page-messages .bottom-nav {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  body.page-messages .chat-window,
+  body.page-messages.chat-open .chat-window,
+  body.page-messages .messages-layout.chat-open .chat-window {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    padding-bottom: 0 !important;
+  }
+
+  body.page-messages .chat-messages {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    padding-bottom: 8px !important;
+  }
+
+  body.page-messages .chat-input-bar {
+    flex: 0 0 62px !important;
+    height: 62px !important;
+    min-height: 62px !important;
+    max-height: 62px !important;
+    overflow: visible !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 8px 10px !important;
+    border-radius: 0 !important;
+    background: rgba(2, 24, 28, 0.96) !important;
+    box-shadow: none !important;
+    transform: none !important;
+    position: relative !important;
+    z-index: 80 !important;
+  }
+
+  body.page-messages .msg-input {
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    flex: 1 1 auto !important;
+    overflow-y: hidden !important;
+    margin: 0 !important;
+  }
+
+  body.page-messages .chat-input-bar button,
+  body.page-messages .chat-input-bar .btn,
+  body.page-messages .chat-input-bar .send-btn {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    max-width: 44px !important;
+    max-height: 44px !important;
+    flex: 0 0 44px !important;
+    margin: 0 !important;
+  }
+
+  body.page-messages .typing-row:has(#typingIndicator:not([style*="block"])),
+  body.page-messages .typing-row:has(#typingIndicator[style*="display: none"]),
+  body.page-messages .typing-row:has(#typingIndicator:empty),
+  body.page-messages .quick-replies:empty,
+  body.page-messages .quick-replies-bar:empty,
+  body.page-messages .reply-preview:empty,
+  body.page-messages .reply-preview-bar:empty,
+  body.page-messages .attachment-preview:empty,
+  body.page-messages .upload-preview:empty,
+  body.page-messages .voice-preview:empty,
+  body.page-messages .composer-extra:empty,
+  body.page-messages .msg-extra:empty,
+  body.page-messages .message-extra:empty {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    overflow: hidden !important;
+  }
+}
