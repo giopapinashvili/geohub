@@ -2312,3 +2312,65 @@ body.gh-mobile-menu-open #gh-mobile-menu-overlay {
     min-height: 44px !important;
   }
 }
+
+/* ── Phase 65M: iPhone Messenger padding-only composer lift ──
+ * Keep the real composer. Remove the useless bottom hiding by reserving
+ * a small browser-toolbar pad inside the chat column instead of changing
+ * viewport height with JS. Scoped to mobile messages only.
+ */
+@media (max-width: 768px) {
+  body.page-messages {
+    overflow: hidden !important;
+    padding-bottom: 0 !important;
+    --msg-mobile-bottom-pad: clamp(56px, 8.5vh, 78px);
+  }
+
+  /* If GeoHub is installed as PWA, there is no browser toolbar to clear. */
+  @media (display-mode: standalone) {
+    body.page-messages {
+      --msg-mobile-bottom-pad: max(12px, env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  body.page-messages #app-bottom-nav,
+  body.page-messages .app-bottom-nav,
+  body.page-messages .bottom-nav {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  /* The chat column itself reserves room for Safari/Chrome bottom toolbar.
+     This lifts the composer without changing width/height calculations for other pages. */
+  body.page-messages.chat-open .chat-window,
+  body.page-messages .messages-layout.chat-open .chat-window {
+    box-sizing: border-box !important;
+    padding-bottom: var(--msg-mobile-bottom-pad) !important;
+  }
+
+  body.page-messages .chat-input-bar {
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 8px 10px max(10px, env(safe-area-inset-bottom, 0px)) !important;
+    min-height: 60px !important;
+    max-height: 76px !important;
+  }
+
+  body.page-messages .msg-input {
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+  }
+
+  body.page-messages .input-btn,
+  body.page-messages .send-btn {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  body.page-messages .chat-messages {
+    padding-bottom: 10px !important;
+  }
+}
