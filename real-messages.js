@@ -19,6 +19,8 @@
 
   let activeConversation = null;
   let activeConvData = null;
+  let _activeBizId = null;
+  let _activeBizTitle = '';
   let unsubConvs = null;
   let unsubMsgs = null;
   let unsubReactions = null;
@@ -482,11 +484,14 @@
   function buildHeader(u, conv){
     const header=$('#chatHeader');
     if(!header) return;
+    const bizCtx = _activeBizId
+      ? '<div class="biz-reply-ctx"><i class="fas fa-store"></i> Replying as <strong>'+esc(_activeBizTitle||'Business')+'</strong></div>'
+      : '';
     header.innerHTML=
       '<div class="chat-header-left">'
       +'<button class="back-btn" onclick="document.querySelector(\'.messages-layout\').classList.remove(\'chat-open\')" title="Back"><i class="fas fa-arrow-left"></i></button>'
       +'<div class="chat-header-av">'+(u.avatar?'<img src="'+esc(u.avatar)+'" alt="" onerror="this.style.display=\'none\'">':'<div class="av-placeholder">'+esc(initials(u.name))+'</div>')+'</div>'
-      +'<div><div class="chat-header-name">'+esc(displayName(u.id, u.name))+'</div></div>'
+      +'<div><div class="chat-header-name">'+esc(displayName(u.id, u.name))+'</div>'+bizCtx+'</div>'
       +'</div>'
       +'<div class="chat-header-actions">'
       +'<button class="header-action-btn" title="Search" id="msgSearchBtn" onclick="window.__ghToggleSearch()"><i class="fas fa-search"></i></button>'
@@ -838,6 +843,7 @@
       const biz = snap.data() || {};
       const title = biz.title || biz.name || 'Business';
       const logo = biz.logoUrl || '';
+      _activeBizTitle = title;
       const titleSpan = document.getElementById('bizInboxTitle');
       if (titleSpan) titleSpan.textContent = title + ' Inbox';
       if (logo) {
@@ -850,6 +856,36 @@
           iconEl.parentNode.replaceChild(img, iconEl);
         }
       }
+    } catch(e) {}
+  }
+
+  function getStoredActor(){
+    try{ return JSON.parse(localStorage.getItem('gh_active_actor')||'null'); }catch(e){ return null; }
+  }
+
+  async function syncBizActor(bizId){
+    const uid = currentUid();
+    if (!uid || !bizId) return;
+    // Skip if already acting as this business
+    const cur = getStoredActor();
+    if (cur && cur.type === 'business' && cur.businessId === bizId) return;
+    const GF = window.GeoFirebase;
+    if (!GF || !GF.fs || !GF.db) return;
+    try {
+      const [bizSnap, adminSnap] = await Promise.all([
+        GF.fs.getDoc(GF.fs.doc(GF.db, 'businesses', bizId)),
+        GF.fs.getDoc(GF.fs.doc(GF.db, 'businessAdmins', bizId + '_' + uid))
+      ]);
+      if (!bizSnap.exists() || !adminSnap.exists()) return;
+      const bizData = bizSnap.data() || {};
+      if (bizData.status === 'deleted' || bizData.deleted === true || !!bizData.deletedAt) return;
+      const newActor = {
+        type: 'business', businessId: bizId, ownerUid: uid,
+        title: bizData.title || bizData.name || 'Business',
+        logoUrl: bizData.logoUrl || ''
+      };
+      try { localStorage.setItem('gh_active_actor', JSON.stringify(newActor)); } catch(e) {}
+      window.dispatchEvent(new CustomEvent('GeoActorChanged', { detail: newActor }));
     } catch(e) {}
   }
 
@@ -880,19 +916,47 @@
 
     if(unsubConvs) unsubConvs();
     if(bizParam && window.GeoSocial.listenBusinessConversations){
+      // ── Business inbox mode ───────────────────────────────────
+      _activeBizId = bizParam;
+      _activeBizTitle = '';
+      // Explicitly clear any stale personal conversation state
+      activeConversation = null;
+      activeConvData = null;
+      window.__geohubLastConvs = [];
+      if(unsubMsgs){ try{unsubMsgs();}catch(e){} unsubMsgs=null; }
+      if(unsubConvDoc){ try{unsubConvDoc();}catch(e){} unsubConvDoc=null; }
+      // Reset chat panel to neutral business state
+      const chatBox=$('#chatMessages'), chatHdr=$('#chatHeader');
+      if(chatBox) chatBox.innerHTML='';
+      if(chatHdr) chatHdr.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:0 16px;color:var(--text-muted);font-size:.85rem"><i class="fas fa-store" style="color:#10b981"></i> Select a conversation</div>';
       setBizInboxHeader(bizParam);
+      syncBizActor(bizParam); // async — validates admin and fires GeoActorChanged
       unsubConvs = window.GeoSocial.listenBusinessConversations(bizParam, function(convs){
         window.__geohubLastConvs = convs || [];
         renderConvs(convs || []);
-        const toOpen = cidParam && !activeConversation ? cidParam : (!activeConversation && convs && convs[0] ? convs[0].id : null);
-        if(toOpen) openConversation(toOpen);
-        else if(!activeConversation && (!convs || !convs.length)){
-          const box=$('#chatMessages');
-          if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-store"></i><p>No messages yet for this business page.</p></div>';
+        if(cidParam && !activeConversation){
+          // Verify cid belongs to this business inbox
+          const matchConv = (convs || []).find(function(c){ return c.id === cidParam; });
+          if(matchConv){
+            openConversation(cidParam);
+          } else if(convs && convs.length > 0){
+            // Convs loaded but cid not found — safe fallback
+            const box=$('#chatMessages');
+            if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-store"></i><p>Conversation not found in this inbox.</p></div>';
+          }
+          // if convs still empty, keep loading state and retry on next snapshot
+        } else if(!activeConversation){
+          // No cid — show empty "select a conversation" state (don't auto-open)
+          if(!convs || !convs.length){
+            const box=$('#chatMessages');
+            if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-store"></i><p>No messages yet for this business page.</p></div>';
+          }
         }
       });
     } else {
-      // Personal inbox — only now process ?with
+      // ── Personal inbox mode ───────────────────────────────────
+      _activeBizId = null;
+      _activeBizTitle = '';
       if(target){ window.GeoSocial.startConversation(target, cid=>openConversation(cid)); }
       unsubConvs=window.GeoSocial.listenConversations(convs=>{
         window.__geohubLastConvs = convs || [];
