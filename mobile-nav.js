@@ -109,6 +109,7 @@
         '<a href="profile.html"><i class="fas fa-user"></i><span>Profile</span></a>' +
         '<a href="business.html"><i class="fas fa-store"></i><span>Businesses</span></a>' +
         '<a href="add-business.html"><i class="fas fa-plus-circle"></i><span>Add Page</span></a>' +
+        '<button type="button" class="mobile-menu-danger" data-gh-mobile-logout><i class="fas fa-right-from-bracket"></i><span>Logout</span></button>' +
       '</div>';
   }
 
@@ -214,6 +215,14 @@
       }
       var menuLink = e.target.closest('.mobile-menu a');
       if (menuLink) closeMobileMenu();
+      var logout = e.target.closest('[data-gh-mobile-logout]');
+      if (logout) {
+        e.preventDefault();
+        closeMobileMenu();
+        var fb = window.GeoFirebase;
+        if (fb && fb.authFns && fb.auth) fb.authFns.signOut(fb.auth).finally(function(){ location.href='auth.html'; });
+        else if (fb && fb.auth && fb.auth.signOut) fb.auth.signOut().finally(function(){ location.href='auth.html'; });
+      }
     }, true);
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') closeMobileMenu();
@@ -328,7 +337,7 @@
       '</div>';
     document.body.appendChild(el);
 
-    setTimeout(function () { el.classList.add('visible'); }, 5000);
+    setTimeout(function () { el.classList.add('visible'); document.body.classList.add('gh-install-visible'); }, 5000);
     setTimeout(function () { if (el.parentNode) window.ghDismissInstall(); }, 18000);
   }
 
@@ -338,20 +347,50 @@
     el.style.opacity = '0';
     el.style.transform = 'translateY(24px)';
     el.style.transition = 'opacity 0.3s, transform 0.3s';
+    document.body.classList.remove('gh-install-visible');
     setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 320);
     window.safeStorage && window.safeStorage.set('gh_install_dismissed', true);
   };
+
+  function isIOS() {
+    return /iphone|ipad|ipod/i.test(navigator.userAgent || '') ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  function showInstallInstructions() {
+    var old = document.getElementById('gh-install-help');
+    if (old) old.remove();
+    var modal = document.createElement('div');
+    modal.id = 'gh-install-help';
+    modal.className = 'gh-install-help';
+    modal.innerHTML =
+      '<div class="gh-install-sheet" role="dialog" aria-label="Install GeoHub">' +
+        '<button type="button" class="gh-install-close" aria-label="Close">&times;</button>' +
+        '<div class="install-icon">GH</div>' +
+        '<h3>Install GeoHub</h3>' +
+        '<p>On iPhone, tap Share, then choose Add to Home Screen.</p>' +
+        '<ol><li>Tap the Share button in Safari.</li><li>Choose Add to Home Screen.</li><li>Tap Add.</li></ol>' +
+        '<button type="button" class="install-now gh-install-ok">Got it</button>' +
+      '</div>';
+    document.body.appendChild(modal);
+    modal.addEventListener('click', function(e){
+      if(e.target === modal || e.target.closest('.gh-install-close,.gh-install-ok')) modal.remove();
+    });
+  }
 
   window.ghInstall = function () {
     if (deferredInstall) {
       deferredInstall.prompt();
       deferredInstall.userChoice.then(function () { deferredInstall = null; });
+      window.ghDismissInstall();
+      return;
     }
-    window.ghDismissInstall();
+    showInstallInstructions();
+    if (isIOS()) return;
     pushNotif({
-      emoji: '✅', bg: 'rgba(16,185,129,0.15)', color: '#34d399',
-      title: 'GeoHub installing…',
-      text: 'Use "Add to Home Screen" from your browser menu.',
+      emoji: 'ℹ️', bg: 'rgba(59,130,246,0.15)', color: '#60a5fa',
+      title: 'Install GeoHub',
+      text: 'Use your browser menu to add GeoHub to your home screen.',
       link: null,
     });
   };

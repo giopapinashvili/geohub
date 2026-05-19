@@ -17,8 +17,12 @@
   function uid(){ return window.GeoFirebase?.auth?.currentUser?.uid || null; }
   function otherId(conv){ const me=uid(); return (conv?.participants||[]).find(id=>id!==me) || ''; }
   function initials(name){ return (String(name||'U').trim()[0] || 'U').toUpperCase(); }
-  function showBtn(show, count){ const b=document.querySelector('.gh-chat-pop-btn'); const badge=document.querySelector('.gh-cpb-badge'); if(b) b.classList.toggle('show', !!show); if(badge){ const n=count>0?String(count>99?'99+':count):''; badge.textContent=n; badge.style.display=n?'':'none'; } }
-  function countUnread(){ const me=uid(); return state.convs.filter(conv=>{ const t=ts(conv.updatedAt||conv.createdAt); const lastSeen=Number(localStorage.getItem('gh_chat_seen_'+conv.id)||'0'); return conv.lastSenderId && conv.lastSenderId!==me && t>lastSeen; }).length; }
+  function activeActor(){ if(window.GeoActors?.getActiveActor) return window.GeoActors.getActiveActor(); try{return JSON.parse(localStorage.getItem('gh_active_actor')||'null');}catch(e){return null;} }
+  function activeActorId(){ if(window.GeoActors?.getActiveActorId) return window.GeoActors.getActiveActorId(); const a=activeActor(); if(a?.actorId) return a.actorId; const me=uid(); return me ? 'user_' + me : ''; }
+  function activeBusinessId(){ const a=activeActor(); return a && a.type === 'business' ? a.businessId : ''; }
+  function inboxHref(){ const bizId=activeBusinessId(); return bizId ? 'messages.html?business=' + encodeURIComponent(bizId) : 'messages.html'; }
+  function showBtn(show, count){ const b=document.querySelector('.gh-chat-pop-btn'); const badge=document.querySelector('.gh-cpb-badge'); if(b) b.classList.toggle('show', !!show && !document.body.classList.contains('gh-install-visible')); if(badge){ const n=count>0?String(count>9?'9+':count):''; badge.textContent=n; badge.style.display=n?'':'none'; } }
+  function countUnread(){ const me=uid(); const actorId=activeActorId(); const oldActor=actorId.indexOf('business_')===0?'business:'+actorId.slice(9):(me?'user:'+me:''); return state.convs.filter(conv=>{ if(Array.isArray(conv.unreadActors)) return conv.unreadActors.includes(actorId) || (oldActor && conv.unreadActors.includes(oldActor)); const t=ts(conv.updatedAt||conv.createdAt); const lastSeen=Number(localStorage.getItem('gh_chat_seen_'+conv.id)||'0'); return conv.lastSenderId && conv.lastSenderId!==me && t>lastSeen; }).length; }
 
   async function getUser(userId){
     if(!userId) return { id:'', name:'GeoHub User', avatar:'' };
@@ -41,7 +45,7 @@
     const root=document.createElement('div');
     root.id='ghChatPopRoot'; root.className='gh-chat-pop-root';
     root.innerHTML = `
-      <button class="gh-chat-pop-btn" type="button" aria-label="Open messages"><span>Messages</span><span class="gh-cpb-badge" style="display:none"></span></button>
+      <button class="gh-chat-pop-btn" type="button" aria-label="Open unread messages"><i class="fas fa-comment-dots" aria-hidden="true"></i><span class="gh-cpb-badge" style="display:none"></span></button>
       <section class="gh-chat-pop" aria-label="GeoHub chat">
         <header class="gh-chat-head">
           <div class="gh-chat-avatar" id="ghChatAvatar">G</div>
@@ -61,8 +65,7 @@
     document.body.appendChild(root);
     const toast=document.createElement('div'); toast.id='ghChatToast'; toast.className='gh-chat-toast'; document.body.appendChild(toast);
     root.querySelector('.gh-chat-pop-btn').addEventListener('click', ()=>{
-      if (window.GeoSocial && window.GeoFirebase?.auth?.currentUser) openLastOrFirst();
-      else window.location.href = 'messages.html';
+      window.location.href = inboxHref();
     });
     root.querySelector('[data-gh-min]').addEventListener('click', minimize);
     root.querySelector('[data-gh-close]').addEventListener('click', close);
@@ -215,7 +218,10 @@
     if(!auth?.currentUser){ showBtn(false); return; }
     // Don't show eagerly — handleConvs decides based on unread count (fail closed).
     if(state.unsubConvs) state.unsubConvs();
-    state.unsubConvs=window.GeoSocial.listenConversations(handleConvs);
+    const bizId=activeBusinessId();
+    state.unsubConvs=(bizId && window.GeoSocial.listenBusinessConversations)
+      ? window.GeoSocial.listenBusinessConversations(bizId, handleConvs)
+      : window.GeoSocial.listenConversations(handleConvs);
   }
 
   window.GeoHubChat = {
@@ -251,4 +257,6 @@
   else bootVisibleButton();
   window.addEventListener('GeoSocialReady', safeStart);
   window.addEventListener('GeoFirebaseReady', safeStart);
+  window.addEventListener('GeoActorChanged', safeStart);
+  window.addEventListener('storage', e=>{ if(e.key === 'gh_active_actor') safeStart(); });
 })();

@@ -92,6 +92,26 @@
     display: flex !important;
     pointer-events: auto !important;
   }
+  .mobile-menu-danger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 46px;
+    border: 0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    background: transparent;
+    color: #f87171;
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+  }
+  .mobile-menu-danger i {
+    width: 16px;
+    color: #f87171;
+  }
 }
 .app-nav-item i {
   font-size: 1.18rem;
@@ -324,6 +344,55 @@
   box-shadow: 0 2px 10px rgba(16,185,129,0.3);
 }
 .install-now:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(16,185,129,0.4); }
+
+.gh-install-help {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: grid;
+  place-items: end center;
+  padding: 16px;
+  background: rgba(0,0,0,0.55);
+}
+.gh-install-sheet {
+  position: relative;
+  width: min(420px, 100%);
+  max-height: calc(90dvh - env(safe-area-inset-bottom, 0px));
+  overflow: auto;
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 22px 22px 0 0;
+  background: rgba(15,20,34,0.98);
+  color: #f8fafc;
+  box-shadow: 0 -18px 60px rgba(0,0,0,0.55);
+}
+.gh-install-sheet h3 {
+  margin: 12px 0 6px;
+  font-size: 1rem;
+}
+.gh-install-sheet p,
+.gh-install-sheet li {
+  color: #cbd5e1;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+.gh-install-sheet ol {
+  margin: 10px 0 16px;
+  padding-left: 20px;
+}
+.gh-install-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
 
 /* ── NOTIFICATION TOAST ────────────────────────────────────────── */
 .app-notif-toast {

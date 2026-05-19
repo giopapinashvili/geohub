@@ -1786,3 +1786,137 @@ body.page-messages .msg-attach-sheet button {
     display: inline-flex !important;
   }
 }
+
+/* Phase 65E targeted mobile fixes. Keep these late so they beat older phone rules. */
+@media (max-width: 768px) {
+  .profile-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .profile-actions > .btn,
+  .profile-actions > a,
+  .profile-actions > button {
+    min-height: 44px !important;
+    justify-content: center !important;
+    border-radius: 12px !important;
+    white-space: nowrap !important;
+  }
+
+  .profile-actions .profile-body-logout {
+    display: none !important;
+  }
+
+  .profile-identity-inner {
+    gap: 10px !important;
+  }
+
+  .pl-main,
+  .map-shell,
+  .map-page,
+  .places-page {
+    padding-bottom: calc(var(--gh-mobile-nav-h, 68px) + env(safe-area-inset-bottom, 0px) + 28px) !important;
+  }
+
+  #map,
+  .leaflet-container {
+    scroll-margin-bottom: calc(var(--gh-mobile-nav-h, 68px) + env(safe-area-inset-bottom, 0px) + 18px) !important;
+  }
+
+  .leaflet-popup-content-wrapper,
+  .pl-detail,
+  .pl-modal {
+    max-height: calc(82dvh - var(--gh-mobile-nav-h, 68px)) !important;
+    overflow: auto !important;
+  }
+
+  #ghChatPopRoot .gh-chat-pop-btn .gh-cpb-badge:not(:empty) {
+    display: inline-flex !important;
+  }
+
+  body.gh-install-visible #ghChatPopRoot .gh-chat-pop-btn {
+    display: none !important;
+  }
+}
+
+body.page-messages .messages-page {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100vw !important;
+}
+
+body.gh-has-injected-nav.page-messages .messages-page {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100vw !important;
+}
+
+body.page-messages .messages-layout {
+  display: grid !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+@media (max-width: 768px) {
+  body.page-messages .messages-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(160px, 34dvh) minmax(0, 1fr) !important;
+  }
+
+  body.page-messages .messages-layout.chat-open {
+    grid-template-rows: 0 minmax(0, 1fr) !important;
+  }
+
+  body.page-messages .messages-layout.chat-open .msg-sidebar {
+    display: none !important;
+  }
+
+  body.page-messages .messages-layout:not(.chat-open) .msg-sidebar,
+  body.page-messages .messages-layout.chat-open .chat-window,
+  body.page-messages .chat-window.empty {
+    display: flex !important;
+  }
+
+  body.page-messages .messages-layout:not(.chat-open) .chat-window:not(.empty) {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  body.page-messages .messages-layout,
+  body.page-messages .messages-layout.chat-open {
+    grid-template-columns: minmax(250px, 32vw) minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+
+  body.page-messages .msg-sidebar,
+  body.page-messages .chat-window {
+    display: flex !important;
+    min-width: 0 !important;
+  }
+
+  body.page-messages .info-panel {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  body.page-messages .messages-layout,
+  body.page-messages .messages-layout.chat-open {
+    grid-template-columns: 288px minmax(0, 1fr) 264px !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+
+  body.page-messages .msg-sidebar,
+  body.page-messages .chat-window {
+    display: flex !important;
+    min-width: 0 !important;
+  }
+
+  body.page-messages .info-panel {
+    display: flex !important;
+    min-width: 0 !important;
+  }
+}

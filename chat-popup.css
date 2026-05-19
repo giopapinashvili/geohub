@@ -13,11 +13,13 @@
 .gh-chat-pop-btn.show .gh-cpb-badge:not(:empty){display:inline-flex}
 
 /* Floating button root — hidden by default, shown only when unread > 0 */
-#ghChatPopRoot.gh-chat-pop-root{position:fixed!important;right:20px!important;bottom:20px!important;z-index:2147483000!important;pointer-events:auto!important}
-#ghChatPopRoot .gh-chat-pop-btn{display:none!important;align-items:center!important;justify-content:center!important;gap:8px!important;padding:10px 16px!important;background:linear-gradient(135deg,#0ea5e9,#10b981)!important;color:#fff!important;border:1px solid rgba(255,255,255,.18)!important;border-radius:999px!important;box-shadow:0 18px 50px rgba(0,0,0,.45)!important;font-weight:900!important}
+#ghChatPopRoot.gh-chat-pop-root{position:fixed!important;right:18px!important;bottom:calc(var(--gh-mobile-nav-h,68px) + env(safe-area-inset-bottom,0px) + 12px)!important;z-index:2147483000!important;pointer-events:auto!important}
+#ghChatPopRoot .gh-chat-pop-btn{display:none!important;position:relative!important;align-items:center!important;justify-content:center!important;gap:0!important;width:52px!important;height:52px!important;min-width:52px!important;min-height:52px!important;padding:0!important;background:linear-gradient(135deg,#0ea5e9,#10b981)!important;color:#fff!important;border:1px solid rgba(255,255,255,.18)!important;border-radius:999px!important;box-shadow:0 18px 50px rgba(0,0,0,.45)!important;font-weight:900!important;font-size:1.15rem!important}
 #ghChatPopRoot .gh-chat-pop-btn.show{display:flex!important}
+body.gh-install-visible #ghChatPopRoot .gh-chat-pop-btn{display:none!important}
 #ghChatPopRoot .gh-chat-pop.open + *{display:none}
-@media(max-width:640px){#ghChatPopRoot.gh-chat-pop-root{right:12px!important;bottom:12px!important}#ghChatPopRoot .gh-chat-pop-btn{padding:10px 14px!important}#ghChatPopRoot .gh-chat-pop-btn span:first-child{display:none!important}}
+#ghChatPopRoot .gh-chat-pop-btn .gh-cpb-badge{position:absolute!important;top:-5px!important;right:-5px!important}
+@media(max-width:640px){#ghChatPopRoot.gh-chat-pop-root{right:12px!important;bottom:calc(var(--gh-mobile-nav-h,68px) + env(safe-area-inset-bottom,0px) + 12px)!important}}
 
 
 /* Messenger production reaction/media polish */
