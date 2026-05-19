@@ -866,9 +866,13 @@
   async function syncBizActor(bizId){
     const uid = currentUid();
     if (!uid || !bizId) return;
-    // Skip if already acting as this business
     const cur = getStoredActor();
-    if (cur && cur.type === 'business' && cur.businessId === bizId) return;
+    // If already acting as this business, re-fire event to refresh topbar/banner on page load
+    if (cur && cur.type === 'business' && cur.businessId === bizId) {
+      window.dispatchEvent(new CustomEvent('GeoActorChanged', { detail: cur }));
+      if (window._geoSW && window._geoSW.updateNavbarForActor) window._geoSW.updateNavbarForActor(cur);
+      return;
+    }
     const GF = window.GeoFirebase;
     if (!GF || !GF.fs || !GF.db) return;
     try {
@@ -876,16 +880,22 @@
         GF.fs.getDoc(GF.fs.doc(GF.db, 'businesses', bizId)),
         GF.fs.getDoc(GF.fs.doc(GF.db, 'businessAdmins', bizId + '_' + uid))
       ]);
-      if (!bizSnap.exists() || !adminSnap.exists()) return;
+      if (!bizSnap.exists()) return;
       const bizData = bizSnap.data() || {};
       if (bizData.status === 'deleted' || bizData.deleted === true || !!bizData.deletedAt) return;
+      // Allow access if user is the business owner (ownerId field) OR has a businessAdmins doc
+      const isOwner = bizData.ownerId === uid || bizData.ownerUid === uid;
+      const isAdmin = adminSnap.exists();
+      if (!isOwner && !isAdmin) return;
       const newActor = {
         type: 'business', businessId: bizId, ownerUid: uid,
         title: bizData.title || bizData.name || 'Business',
-        logoUrl: bizData.logoUrl || ''
+        logoUrl: bizData.logoUrl || '',
+        coverUrl: bizData.coverUrl || bizData.coverImage || ''
       };
       try { localStorage.setItem('gh_active_actor', JSON.stringify(newActor)); } catch(e) {}
       window.dispatchEvent(new CustomEvent('GeoActorChanged', { detail: newActor }));
+      if (window._geoSW && window._geoSW.updateNavbarForActor) window._geoSW.updateNavbarForActor(newActor);
     } catch(e) {}
   }
 
@@ -919,38 +929,41 @@
       // ── Business inbox mode ───────────────────────────────────
       _activeBizId = bizParam;
       _activeBizTitle = '';
-      // Explicitly clear any stale personal conversation state
+      // Hard reset ALL stale conversation state and listeners
       activeConversation = null;
       activeConvData = null;
       window.__geohubLastConvs = [];
       if(unsubMsgs){ try{unsubMsgs();}catch(e){} unsubMsgs=null; }
       if(unsubConvDoc){ try{unsubConvDoc();}catch(e){} unsubConvDoc=null; }
-      // Reset chat panel to neutral business state
+      if(unsubReactions){ try{unsubReactions();}catch(e){} unsubReactions=null; }
+      if(unsubConvSettings){ try{unsubConvSettings();}catch(e){} unsubConvSettings=null; }
+      // Hard reset chat DOM — remove active conv highlight + clear panels
+      document.querySelectorAll('.conv-item.active').forEach(function(el){ el.classList.remove('active'); });
       const chatBox=$('#chatMessages'), chatHdr=$('#chatHeader');
-      if(chatBox) chatBox.innerHTML='';
-      if(chatHdr) chatHdr.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:0 16px;color:var(--text-muted);font-size:.85rem"><i class="fas fa-store" style="color:#10b981"></i> Select a conversation</div>';
+      if(chatBox) chatBox.innerHTML='<div class="chat-empty"><i class="fas fa-store"></i><p>Select a conversation</p></div>';
+      if(chatHdr) chatHdr.innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:16px;color:var(--text-muted);font-size:.9rem"><i class="fas fa-store" style="color:#10b981;font-size:1.1rem"></i><span>Select a conversation</span></div>';
       setBizInboxHeader(bizParam);
-      syncBizActor(bizParam); // async — validates admin and fires GeoActorChanged
+      syncBizActor(bizParam); // async — validates owner/admin, fires GeoActorChanged
       unsubConvs = window.GeoSocial.listenBusinessConversations(bizParam, function(convs){
         window.__geohubLastConvs = convs || [];
         renderConvs(convs || []);
         if(cidParam && !activeConversation){
-          // Verify cid belongs to this business inbox
+          // Verify cid belongs to this business inbox before opening
           const matchConv = (convs || []).find(function(c){ return c.id === cidParam; });
           if(matchConv){
             openConversation(cidParam);
           } else if(convs && convs.length > 0){
-            // Convs loaded but cid not found — safe fallback
+            // Convs are loaded but cid is not in this inbox — safe fallback
             const box=$('#chatMessages');
             if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-store"></i><p>Conversation not found in this inbox.</p></div>';
           }
-          // if convs still empty, keep loading state and retry on next snapshot
+          // if convs empty, wait for next real-time snapshot before showing error
         } else if(!activeConversation){
-          // No cid — show empty "select a conversation" state (don't auto-open)
-          if(!convs || !convs.length){
-            const box=$('#chatMessages');
-            if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-store"></i><p>No messages yet for this business page.</p></div>';
-          }
+          // No cid — always render a clear empty state (never leave stale messages)
+          const box=$('#chatMessages');
+          if(box) box.innerHTML = (convs && convs.length)
+            ? '<div class="chat-empty"><i class="fas fa-store"></i><p>Select a conversation to reply</p></div>'
+            : '<div class="chat-empty"><i class="fas fa-store"></i><p>No messages yet for this business page.</p></div>';
         }
       });
     } else {
