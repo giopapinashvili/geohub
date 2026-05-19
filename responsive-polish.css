@@ -2466,3 +2466,60 @@ body.gh-mobile-menu-open #gh-mobile-menu-overlay {
     overflow: hidden !important;
   }
 }
+
+/* Phase 65M6: desktop Messenger info panel must not exist in mobile layout. */
+@media (max-width: 768px) {
+  body.page-messages #infoPanel,
+  body.page-messages .info-panel,
+  body.page-messages.chat-open #infoPanel,
+  body.page-messages.chat-open .info-panel {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    inset: auto !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    flex: 0 0 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    overflow: hidden !important;
+    transform: none !important;
+    z-index: -1 !important;
+  }
+
+  body.page-messages.chat-open .messages-layout {
+    grid-template-columns: 1fr !important;
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  body.page-messages.chat-open .chat-window {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  body.page-messages.chat-open .chat-input-bar {
+    flex: 0 0 62px !important;
+    height: 62px !important;
+    min-height: 62px !important;
+    max-height: 62px !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: visible !important;
+    z-index: 100 !important;
+  }
+}

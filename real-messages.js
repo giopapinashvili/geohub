@@ -86,8 +86,22 @@
     document.body.classList.toggle('chat-open', !!open);
     var layout = document.querySelector('.messages-layout');
     if(layout) layout.classList.toggle('chat-open', !!open);
+    if (open) closeMobileInfoPanel();
   }
-  window.ghChatBack = function(){ setChatOpen(false); };
+  function closeMobileInfoPanel(){
+    if(!isMobileMsg()) return;
+    const panel = document.getElementById('infoPanel');
+    if(panel){
+      panel.classList.remove('open', 'panel-visible');
+      panel.style.display = 'none';
+      panel.hidden = true;
+    }
+  }
+  window.ghChatBack = function(){ closeMobileInfoPanel(); setChatOpen(false); };
+  window.addEventListener('resize', closeMobileInfoPanel);
+  window.addEventListener('orientationchange', closeMobileInfoPanel);
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', closeMobileInfoPanel, { once:true });
+  else closeMobileInfoPanel();
 
   function currentUid(){ return window.GeoFirebase?.auth?.currentUser?.uid || ''; }
   function currentActorId(){
@@ -1011,12 +1025,22 @@
   window.__ghShowNicknames = showNicknamePanel;
   window.__ghToggleInfoPanel = function(){
     const panel=$('#infoPanel');
+    if(isMobileMsg()){
+      if(panel){
+        panel.classList.remove('open', 'panel-visible');
+        panel.style.display='none';
+        panel.hidden=true;
+      }
+      return;
+    }
+    if(panel) panel.hidden=false;
     if(panel) panel.classList.toggle('open');
   };
 
   async function openConversation(cid){
     activeConversation=cid;
     setChatOpen(true);
+    closeMobileInfoPanel();
     document.querySelector('#infoPanel')?.classList.remove('open');
     document.querySelectorAll('.conv-item').forEach(el=>{
       el.classList.toggle('active', el.dataset.convId===cid);
