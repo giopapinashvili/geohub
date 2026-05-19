@@ -817,6 +817,42 @@
     if(list) list.innerHTML='<div class="conv-empty"><i class="fas fa-circle-notch fa-spin"></i><p>Loading…</p></div>';
   }
 
+  async function setBizInboxHeader(bizId){
+    const titleEl = document.querySelector('.sidebar-title');
+    if (!titleEl) return;
+    // Render immediately with placeholder; update with real name when Firestore responds
+    titleEl.innerHTML =
+      '<div style="display:flex;align-items:center;gap:7px;min-width:0;flex:1;overflow:hidden">' +
+        '<i class="fas fa-store biz-inbox-icon" style="color:#10b981;flex-shrink:0;font-size:.95rem"></i>' +
+        '<span id="bizInboxTitle" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:1.05rem;font-weight:800">Business Inbox</span>' +
+      '</div>' +
+      '<div style="display:flex;gap:5px;align-items:center;flex-shrink:0">' +
+        '<a href="messages.html" class="sidebar-icon-btn" title="Personal inbox" style="text-decoration:none;display:flex;align-items:center;justify-content:center"><i class="fas fa-user" style="font-size:.78rem"></i></a>' +
+        '<button class="sidebar-icon-btn" title="New message" onclick="openNewConversationSearch()"><i class="fas fa-edit"></i></button>' +
+      '</div>';
+    try {
+      const GF = window.GeoFirebase;
+      if (!GF || !GF.fs || !GF.db) return;
+      const snap = await GF.fs.getDoc(GF.fs.doc(GF.db, 'businesses', bizId));
+      if (!snap.exists()) return;
+      const biz = snap.data() || {};
+      const title = biz.title || biz.name || 'Business';
+      const logo = biz.logoUrl || '';
+      const titleSpan = document.getElementById('bizInboxTitle');
+      if (titleSpan) titleSpan.textContent = title + ' Inbox';
+      if (logo) {
+        const iconEl = titleEl.querySelector('.biz-inbox-icon');
+        if (iconEl) {
+          const img = document.createElement('img');
+          img.src = logo; img.alt = '';
+          img.style.cssText = 'width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,.1)';
+          img.onerror = function(){ this.style.display='none'; };
+          iconEl.parentNode.replaceChild(img, iconEl);
+        }
+      }
+    } catch(e) {}
+  }
+
   function init(){
     const auth=window.GeoFirebase?.auth;
     if(!auth?.currentUser){ setTimeout(init,250); return; }
@@ -831,12 +867,20 @@
         if(window.__geohubLastConvs) renderConvs(window.__geohubLastConvs);
       });
     }
-    const target=new URLSearchParams(location.search).get('with');
-    if(target){ window.GeoSocial.startConversation(target, cid=>openConversation(cid)); }
-    const bizParam = new URLSearchParams(location.search).get('business');
-    const cidParam = new URLSearchParams(location.search).get('cid');
+    // Parse params — business wins: ignore ?with when ?business is present
+    const _params = new URLSearchParams(location.search);
+    const bizParam = _params.get('business');
+    const cidParam = _params.get('cid');
+    const target = bizParam ? null : _params.get('with');
+
+    // Clean conflicting URL (e.g. ?with=UID&business=BIZ_ID → ?business=BIZ_ID)
+    if (bizParam && _params.has('with')) {
+      history.replaceState(null, '', location.pathname + '?business=' + encodeURIComponent(bizParam) + (cidParam ? '&cid=' + encodeURIComponent(cidParam) : ''));
+    }
+
     if(unsubConvs) unsubConvs();
     if(bizParam && window.GeoSocial.listenBusinessConversations){
+      setBizInboxHeader(bizParam);
       unsubConvs = window.GeoSocial.listenBusinessConversations(bizParam, function(convs){
         window.__geohubLastConvs = convs || [];
         renderConvs(convs || []);
@@ -848,6 +892,8 @@
         }
       });
     } else {
+      // Personal inbox — only now process ?with
+      if(target){ window.GeoSocial.startConversation(target, cid=>openConversation(cid)); }
       unsubConvs=window.GeoSocial.listenConversations(convs=>{
         window.__geohubLastConvs = convs || [];
         renderConvs(convs || []);
