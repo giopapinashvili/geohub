@@ -246,7 +246,7 @@
     updateMsgBadge(unreadCount);
   }
 
-  function summarizeReactions(messageId){
+  function summarizeLegacyReactions(messageId){
     const rows = reactionState[messageId]?.rows || [];
     const counts = {};
     let mine = '';
@@ -256,6 +256,37 @@
       counts[emoji] = (counts[emoji]||0)+1;
       if(r.userId === me) mine = emoji;
     });
+    const badges = Object.entries(counts).map(([emoji,count])=>'<span class="msg-reaction-badge">'+esc(emoji)+' '+(count>1?count:'')+'</span>').join('');
+    return { mine, badges };
+  }
+
+  function summarizeReactions(messageId){
+    const counts = {};
+    let mine = '';
+    const actorId = currentActorId();
+    const msg = (allMessages || []).find(m => m && m.id === messageId) || {};
+    const reactionMap = msg.reactions && typeof msg.reactions === 'object' && !Array.isArray(msg.reactions)
+      ? msg.reactions
+      : null;
+
+    if(reactionMap){
+      Object.keys(reactionMap).forEach(key=>{
+        const emoji = reactionMap[key];
+        if(!emoji) return;
+        counts[emoji] = (counts[emoji]||0)+1;
+        if(key === actorId) mine = emoji;
+      });
+    } else {
+      const rows = reactionState[messageId]?.rows || [];
+      const me = currentUid();
+      rows.forEach(r=>{
+        const emoji = r.emoji || '❤️';
+        const rowActor = r.actorId || (r.userId ? 'user_' + r.userId : '');
+        counts[emoji] = (counts[emoji]||0)+1;
+        if(rowActor === actorId || (!actorId && r.userId === me)) mine = emoji;
+      });
+    }
+
     const badges = Object.entries(counts).map(([emoji,count])=>'<span class="msg-reaction-badge">'+esc(emoji)+' '+(count>1?count:'')+'</span>').join('');
     return { mine, badges };
   }
@@ -385,7 +416,7 @@
       const dotsBtn = !deleted
         ? '<button class="msg-dots-btn" type="button" title="Message options" onclick="event.stopPropagation();return window.__ghMsgCtxMenu(event,\''+esc(m.id)+'\')"><i class="fas fa-ellipsis-h"></i></button>'
         : '';
-      return '<div class="msg-row '+(mine?'sent':'received')+'" data-message-id="'+esc(m.id)+'">'
+      return '<div class="msg-row '+(mine?'sent':'received')+(deleted?' is-deleted':'')+'" data-message-id="'+esc(m.id)+'">'
         + '<div class="msg-col">'
         + '<div class="msg-bubble-wrap">'
         + '<div class="msg-bubble '+(mine?'bubble-sent':'bubble-recv')+'"'+contextAttr+'>'
@@ -439,11 +470,27 @@
     });
   }
 
-  async function toggleReaction(messageId, emoji){
+  async function toggleLegacyReaction(messageId, emoji){
     if(!activeConversation || !messageId) return;
     try{
       await window.GeoSocial.toggleMessageReaction(activeConversation, messageId, emoji || '❤️');
     }catch(err){
+      window.showToast && window.showToast('Reaction failed');
+    }
+  }
+
+  async function toggleReaction(messageId, emoji){
+    if(!activeConversation || !messageId) return;
+    const actorId = currentActorId();
+    const uid = currentUid();
+    const msg = (allMessages || []).find(m => m && m.id === messageId);
+    if(!msg || msg.deleted || msg.deletedForEveryone) return;
+    if(Array.isArray(msg.deletedFor) && msg.deletedFor.includes(uid)) return;
+    if(Array.isArray(msg.deletedForActors) && msg.deletedForActors.includes(actorId)) return;
+    try{
+      await window.GeoSocial.toggleMessageReaction(activeConversation, messageId, emoji || '❤️', null, { actorId });
+    }catch(err){
+      console.error('[GeoHub Msg] Reaction failed', err);
       window.showToast && window.showToast('Reaction failed');
     }
   }

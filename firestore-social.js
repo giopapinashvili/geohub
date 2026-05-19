@@ -2437,7 +2437,7 @@
         String(uid || '').replace(/[^A-Za-z0-9_-]/g, '_');
     }
 
-    function toggleMessageReaction(conversationId, messageId, emoji, callback) {
+    function toggleLegacyMessageReaction(conversationId, messageId, emoji, callback) {
       emoji = emoji || '❤️';
       var uid = currentUid();
       if (!uid || !conversationId || !messageId) { if(callback) callback(false); return Promise.resolve(false); }
@@ -2477,6 +2477,41 @@
         toast('Reaction failed: ' + (err.code || err.message || 'permission'), 'error');
         if(callback) callback(false, err);
         return false;
+      });
+    }
+
+    function toggleMessageReaction(conversationId, messageId, emoji, callback, options) {
+      emoji = emoji || '❤️';
+      var uid = currentUid();
+      var actorId = (options && options.actorId) || (uid ? 'user_' + uid : '');
+      if (!uid || !actorId || !conversationId || !messageId) { if(callback) callback(false); return Promise.resolve(false); }
+
+      var messageRef = doc(db, 'conversations', conversationId, 'messages', messageId);
+      return getDoc(messageRef).then(function(snap){
+        if (!snap.exists()) throw new Error('message-not-found');
+        var data = snap.data() || {};
+        if (data.deleted || data.deletedForEveryone) throw new Error('message-deleted');
+        if (Array.isArray(data.deletedFor) && data.deletedFor.indexOf(uid) !== -1) throw new Error('message-hidden');
+        if (Array.isArray(data.deletedForActors) && data.deletedForActors.indexOf(actorId) !== -1) throw new Error('message-hidden');
+
+        var next = Object.assign({}, (data.reactions && typeof data.reactions === 'object' && !Array.isArray(data.reactions)) ? data.reactions : {});
+        if (next[actorId] === emoji) {
+          delete next[actorId];
+        } else {
+          next[actorId] = emoji;
+        }
+
+        return updateDoc(messageRef, {
+          reactions: next,
+          updatedAt: serverTimestamp()
+        }).then(function(){
+          if(callback) callback(!!next[actorId]);
+          return !!next[actorId];
+        });
+      }).catch(function(err){
+        console.warn('[GeoSocial] toggleMessageReaction', err.message);
+        if(callback) callback(false, err);
+        throw err;
       });
     }
 
