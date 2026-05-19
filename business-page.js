@@ -20,8 +20,9 @@
   var _db, _fs, _auth;
   var _biz         = null;
   var _currentUser = null;
-  var _isOwner     = false;
-  var _isPageAdmin = false;
+  var _isOwner       = false;
+  var _isPageAdmin   = false;
+  var _isActingAsPage = false;
   var _pageAdminRole = null;
   var _isSaved     = false;
   var _isFollowing = false;
@@ -61,6 +62,9 @@
 
   function esc(s) {
     return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function getActiveActor(){
+    try{ return JSON.parse(localStorage.getItem('gh_active_actor')||'null'); }catch(e){ return null; }
   }
   function fmtPrice(p) {
     if (!p && p !== 0) return '';
@@ -103,7 +107,7 @@
   }
 
   function isAdminOrOwner() {
-    return _isOwner || _isPageAdmin;
+    return _isActingAsPage;
   }
 
   function isOpenNow(wh) {
@@ -179,20 +183,28 @@
     var city = biz.isOnline ? (biz.serviceAreaText||'Online · All Georgia') : esc(biz.city||'Georgia');
 
     var actions = '';
-    if (_isOwner) {
+    if (_isActingAsPage) {
+      // ── Page identity mode: show admin controls ───────────────────
       actions =
         '<a href="add-business.html?edit='+esc(BIZ_ID)+'" class="biz-action-btn owner-edit"><i class="fas fa-pen"></i> Edit Page</a>'+
         '<button class="biz-action-btn" onclick="window._bizActions.openCompose()"><i class="fas fa-plus"></i> Create Post</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
-        '<input type="file" id="biz-owner-photo-input" accept="image/*" style="display:none" onchange="window._bizActions.handleOwnerPhoto(this)">';
+        '<input type="file" id="biz-owner-photo-input" accept="image/*" style="display:none" onchange="window._bizActions.handleOwnerPhoto(this)">'+
+        '<button class="biz-action-btn" onclick="window._bizActions.switchToPersonal()"><i class="fas fa-user"></i> Switch to Personal</button>';
     } else {
+      // ── Personal/visitor mode: show visitor controls ──────────────
+      // Owners and admins get a "Switch to Page" button
+      var switchPageBtn = (_isOwner || _isPageAdmin)
+        ? '<button class="biz-action-btn" onclick="window._bizActions.switchToPage()"><i class="fas fa-store"></i> Switch to Page</button>'
+        : '';
       var followCls  = _isFollowing ? 'following' : 'primary';
       var followIcon = _isFollowing ? 'fa-check' : 'fa-plus';
       var followLbl  = _isFollowing ? 'Following' : 'Follow';
       var notifIcon  = _notificationsOn ? 'fas fa-bell' : 'far fa-bell';
       var notifTitle = _notificationsOn ? 'Notifications on' : 'Notifications off';
       actions =
+        switchPageBtn +
         '<button class="biz-action-btn '+followCls+'" id="biz-follow-btn" onclick="window._bizActions.toggleFollow()"><i class="fas '+followIcon+'"></i> '+followLbl+'</button>'+
         (_isFollowing ? '<button class="biz-action-btn biz-notif-btn" id="biz-notif-btn" title="'+notifTitle+'" onclick="window._bizActions.toggleNotifications()"><i class="'+notifIcon+'"></i></button>' : '')+
         '<button class="biz-action-btn primary" onclick="window._bizActions.openQuote()"><i class="fas fa-paper-plane"></i> Request Quote</button>'+
@@ -214,11 +226,11 @@
 
     return '<div class="biz-cover" style="'+coverStyle+'">' +
         (!biz.coverUrl?'<i class="fas fa-store biz-cover-placeholder-icon"></i>':'')+
-        (_isOwner ? '<button class="biz-cover-edit-btn" onclick="window._bizActions.editCover()" title="Change cover photo"><i class="fas fa-camera"></i> Edit Cover</button>' : '') +
+        (_isActingAsPage ? '<button class="biz-cover-edit-btn" onclick="window._bizActions.editCover()" title="Change cover photo"><i class="fas fa-camera"></i> Edit Cover</button>' : '') +
       '</div>'+
       '<div class="biz-header-body">'+
         '<div class="biz-logo-row">'+
-          (_isOwner
+          (_isActingAsPage
             ? '<div class="biz-logo biz-logo-editable" onclick="window._bizActions.editLogo()" title="Change logo">'+logoInner+'<div class="biz-logo-edit-overlay"><i class="fas fa-camera"></i></div></div>'
             : '<div class="biz-logo">'+logoInner+'</div>'
           )+
@@ -277,8 +289,8 @@
       {id:'faq',      label:'FAQ'},
       {id:'about',    label:'About'},
     ];
-    if (_isOwner) tabs.push({id:'insights',  label:'Insights'});
-    if (_isOwner) tabs.push({id:'dashboard', label:'Dashboard'});
+    if (_isActingAsPage) tabs.push({id:'insights',  label:'Insights'});
+    if (_isActingAsPage) tabs.push({id:'dashboard', label:'Dashboard'});
     return '<div class="biz-tabs">'+
       tabs.map(function(t,i){
         return '<button class="biz-tab'+(i===0?' active':'')+'" data-tab="'+t.id+'">'+t.label+'</button>';
@@ -426,7 +438,7 @@
   // ── RENDER: ADMIN TOOLBAR ─────────────────────────────────────
 
   function renderAdminToolbar(biz) {
-    if (!_isOwner) return '';
+    if (!_isActingAsPage) return '';
     return '<div class="biz-admin-toolbar" id="biz-admin-toolbar">'+
       '<div class="biz-admin-toolbar-inner">'+
         '<span class="biz-admin-badge"><i class="fas fa-crown"></i> Admin Mode</span>'+
@@ -448,7 +460,7 @@
   // ── RENDER: PAGE BLOCK CARD ────────────────────────────────────
 
   function renderPageBlockCard(block, idx, total) {
-    var controls = _isOwner
+    var controls = _isActingAsPage
       ? '<div class="biz-block-controls">'+
           '<button class="biz-block-btn" title="Edit" onclick="window._bizActions.editBlock(\''+esc(block.id)+'\')"><i class="fas fa-pencil"></i></button>'+
           (idx > 0 ? '<button class="biz-block-btn" title="Move Up" onclick="window._bizActions.moveBlock(\''+esc(block.id)+'\',\'up\')"><i class="fas fa-arrow-up"></i></button>' : '')+
@@ -1403,7 +1415,7 @@
       '<div class="biz-page-wrap">'+
         renderHeader(biz)+
         renderContact(biz)+
-        (_isOwner ? renderAdminToolbar(biz) : '')+
+        (_isActingAsPage ? renderAdminToolbar(biz) : '')+
         renderTabBar()+
         '<div class="biz-tab-panels">'+
 
@@ -1412,7 +1424,7 @@
           '</div>'+
 
           '<div class="biz-tab-panel" data-panel="posts">'+
-            (_isOwner?'<div style="margin-bottom:14px">'+renderComposer(biz)+'</div>':'')+
+            (_isActingAsPage?'<div style="margin-bottom:14px">'+renderComposer(biz)+'</div>':'')+
             '<div id="biz-posts-all">'+renderPostsSkeleton(3)+'</div>'+
           '</div>'+
 
@@ -1450,21 +1462,21 @@
             '<div id="biz-milestones-section"></div>'+
           '</div>'+
 
-          (_isOwner?'<div class="biz-tab-panel" data-panel="insights"><div id="biz-insights-panel"><div class="biz-loading-inline"><i class="fas fa-spinner fa-spin"></i> Loading insights…</div></div></div>':'')+
+          (_isActingAsPage?'<div class="biz-tab-panel" data-panel="insights"><div id="biz-insights-panel"><div class="biz-loading-inline"><i class="fas fa-spinner fa-spin"></i> Loading insights…</div></div></div>':'')+
 
-          (_isOwner?'<div class="biz-tab-panel" data-panel="dashboard">'+renderOwnerDashboard(biz)+'</div>':'')+
+          (_isActingAsPage?'<div class="biz-tab-panel" data-panel="dashboard">'+renderOwnerDashboard(biz)+'</div>':'')+
 
         '</div>'+
       '</div>'+
       renderQuoteModal(biz)+
       renderServiceDetailModal()+
       renderProductDetailModal()+
-      (_isOwner?renderComposeModal(biz):'')+
-      (_isOwner?renderBlockManagerModal():'')+
+      (_isActingAsPage?renderComposeModal(biz):'')+
+      (_isActingAsPage?renderBlockManagerModal():'')+
       renderShareModal()+
       renderEditModal()+
       renderLightbox()+
-      (_isOwner?'<div class="biz-preview-fab" id="biz-preview-fab" style="display:none">'+
+      (_isActingAsPage?'<div class="biz-preview-fab" id="biz-preview-fab" style="display:none">'+
         '<button onclick="window._bizActions.togglePreview()" title="Exit Preview Mode">'+
           '<i class="fas fa-eye-slash"></i> Exit Preview</button></div>':'');
 
@@ -1489,7 +1501,7 @@
     loadFaq(BIZ_ID);
     loadMilestones(BIZ_ID);
     loadBizRewards(BIZ_ID);
-    if (_isOwner) {
+    if (_isActingAsPage) {
       loadInsights(BIZ_ID);
       window._bizActions.refreshAdminList();
     }
@@ -1643,6 +1655,8 @@
         return;
       }
       _isOwner = !!(_currentUser && _biz.ownerId === _currentUser.uid);
+      var _storedActor = getActiveActor();
+      _isActingAsPage = !!(_storedActor && _storedActor.type === 'business' && _storedActor.businessId === BIZ_ID);
 
       var loadServices  = safeSnap(_fs.getDocs(_fs.query(_fs.collection(_db,'businesses',BIZ_ID,'services'),  _fs.orderBy('order','asc'))));
       var loadPriceList = safeSnap(_fs.getDocs(_fs.query(_fs.collection(_db,'businesses',BIZ_ID,'priceList'), _fs.orderBy('order','asc'))));
@@ -1685,7 +1699,7 @@
           renderPage(_biz, r[0], r[1], r[2], r[3], r[6]);
 
           // Deep-link: ?#quotes opens the owner quotes panel directly (from notification click)
-          if(location.hash === '#quotes' && _isOwner) {
+          if(location.hash === '#quotes' && _isActingAsPage) {
             setTimeout(function(){ if(window._bizActions) window._bizActions.goToQuotes(); }, 400);
           }
 
@@ -1868,7 +1882,7 @@
       if (!rows.length) {
         panelEl.innerHTML =
           '<div class="biz-empty-state"><i class="fas fa-gift"></i>' +
-          (_isOwner
+          (_isActingAsPage
             ? '<p>No active rewards linked to this business. Create one in the <a href="admin.html" style="color:#10b981">admin panel</a> and set the Business ID to <code>' + esc(bizId) + '</code>.</p>'
             : '<p>No active rewards available right now. Check back soon!</p>') +
           '</div>';
@@ -2272,15 +2286,28 @@
 
     openMessage: function() {
       if (!_currentUser) { showToast('Sign in to message this page', false); window.location.href='auth.html'; return; }
-      var ownerId = (_biz && (_biz.ownerId || _biz.createdBy || _biz.userId)) || '';
-      if (!ownerId) { showToast('This page has no message recipient yet', false); return; }
-      if (ownerId === _currentUser.uid) { showToast('You are the page owner', false); return; }
-      if (window.GeoChatPopup && window.GeoChatPopup.openWithUser) {
-        window.GeoChatPopup.openWithUser(ownerId);
-        showToast('Opening page messages…');
-        return;
-      }
-      window.location.href = 'messages.html?with=' + encodeURIComponent(ownerId) + '&business=' + encodeURIComponent(BIZ_ID);
+      window.location.href = 'messages.html?withBusiness=' + encodeURIComponent(BIZ_ID);
+    },
+
+    switchToPage: function() {
+      if (!_currentUser || (!_isOwner && !_isPageAdmin) || !_biz) return;
+      var newActor = {
+        type: 'business', businessId: BIZ_ID, ownerUid: _currentUser.uid,
+        title: _biz.title || _biz.name || 'Business',
+        logoUrl: _biz.logoUrl || '',
+        coverUrl: _biz.coverUrl || _biz.coverImage || ''
+      };
+      try{ localStorage.setItem('gh_active_actor', JSON.stringify(newActor)); }catch(e){}
+      window.dispatchEvent(new CustomEvent('GeoActorChanged', {detail: newActor}));
+      location.reload();
+    },
+
+    switchToPersonal: function() {
+      if (!_currentUser) return;
+      var personalActor = { type: 'user', uid: _currentUser.uid };
+      try{ localStorage.setItem('gh_active_actor', JSON.stringify(personalActor)); }catch(e){}
+      window.dispatchEvent(new CustomEvent('GeoActorChanged', {detail: personalActor}));
+      location.reload();
     },
 
     // ── Comment toggle ────────────────────────────────────────────
@@ -4111,6 +4138,17 @@
     if (e.key !== 'Escape') return;
     window._bizActions.closeSvcDetail();
     window._bizActions.closeProdDetail();
+  });
+
+  // Re-render page when actor changes (e.g. user switches identity via account switcher)
+  window.addEventListener('GeoActorChanged', function(e) {
+    if (!_biz) return;
+    var actor = e.detail || {};
+    var newActingAsPage = !!(actor.type === 'business' && actor.businessId === BIZ_ID);
+    if (newActingAsPage !== _isActingAsPage) {
+      _isActingAsPage = newActingAsPage;
+      location.reload();
+    }
   });
 
   if(window.GeoFirebase&&window.GeoFirebase.db) init(window.GeoFirebase);

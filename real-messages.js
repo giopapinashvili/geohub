@@ -916,6 +916,7 @@
     // Parse params — business wins: ignore ?with when ?business is present
     const _params = new URLSearchParams(location.search);
     const bizParam = _params.get('business');
+    const withBizParam = _params.get('withBusiness');
     const cidParam = _params.get('cid');
     const target = bizParam ? null : _params.get('with');
 
@@ -925,7 +926,74 @@
     }
 
     if(unsubConvs) unsubConvs();
-    if(bizParam && window.GeoSocial.listenBusinessConversations){
+    if(withBizParam){
+      // ── Customer-side business chat ───────────────────────────────
+      // Keep personal identity; create biz conv from customer perspective
+      _activeBizId = null;
+      _activeBizTitle = '';
+      const customerUid = currentUid();
+      const GF = window.GeoFirebase;
+      const cid = 'biz_' + withBizParam + '_' + customerUid;
+      const chatHdr = document.querySelector('#chatHeader');
+      if(chatHdr) chatHdr.innerHTML = '<div style="padding:16px;color:var(--text-muted);font-size:.9rem"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>';
+      GF.fs.getDoc(GF.fs.doc(GF.db, 'businesses', withBizParam)).then(function(snap){
+        const bizData = snap.exists() ? (snap.data() || {}) : {};
+        const ownerUid = bizData.ownerId || bizData.createdBy || '';
+        _activeBizTitle = bizData.title || bizData.name || 'Business';
+        const logoUrl = bizData.logoUrl || '';
+        if(!snap.exists() || !ownerUid){
+          if(chatHdr) chatHdr.innerHTML = '<div style="padding:16px;color:var(--text-muted)"><i class="fas fa-store"></i> Business not found</div>';
+          return;
+        }
+        if(chatHdr) chatHdr.innerHTML =
+          '<div class="chat-header-left">' +
+            '<div class="chat-header-av">' +
+              (logoUrl ? '<img src="'+esc(logoUrl)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">' : '<i class="fas fa-store" style="font-size:1.1rem;color:#10b981"></i>') +
+            '</div>' +
+            '<div><div class="chat-header-name">'+esc(_activeBizTitle)+'</div>' +
+              '<div style="font-size:.7rem;color:var(--text-muted)">Business Page</div>' +
+            '</div>' +
+          '</div>';
+        // Create or merge the conversation doc (allows same-uid edge case for owner messaging own page)
+        const convData = {
+          participants: customerUid === ownerUid ? [customerUid] : [customerUid, ownerUid],
+          businessId: withBizParam,
+          forBusiness: true,
+          customerUid: customerUid,
+          updatedAt: GF.fs.serverTimestamp(),
+          lastMessage: '',
+          unreadFor: [],
+          readBy: {}
+        };
+        GF.fs.setDoc(GF.fs.doc(GF.db, 'conversations', cid),
+          Object.assign({}, convData, {createdAt: GF.fs.serverTimestamp()}),
+          {merge: true}
+        ).then(function(){
+          activeConversation = cid;
+          activeConvData = convData;
+          if(unsubMsgs){ try{unsubMsgs();}catch(e){} unsubMsgs=null; }
+          unsubMsgs = window.GeoSocial.listenMessages(cid, renderMessages);
+        }).catch(function(err){
+          console.error('[GeoHub] withBusiness conv', err);
+          const box = document.querySelector('#chatMessages');
+          if(box) box.innerHTML = '<div class="chat-empty"><i class="fas fa-store"></i><p>Could not open conversation</p></div>';
+        });
+      }).catch(function(){
+        const box = document.querySelector('#chatMessages');
+        if(box) box.innerHTML = '<div class="chat-empty"><i class="fas fa-store"></i><p>Business not found</p></div>';
+      });
+      // Load personal convs sidebar so customer sees all their conversations
+      unsubConvs = window.GeoSocial.listenConversations(function(convs){
+        window.__geohubLastConvs = convs || [];
+        renderConvs(convs || []);
+        // Re-highlight active biz conv after sidebar renders
+        if(activeConversation){
+          document.querySelectorAll('[data-conv-id]').forEach(function(el){
+            el.classList.toggle('active', el.dataset.convId === activeConversation);
+          });
+        }
+      });
+    } else if(bizParam && window.GeoSocial.listenBusinessConversations){
       // ── Business inbox mode ───────────────────────────────────
       _activeBizId = bizParam;
       _activeBizTitle = '';

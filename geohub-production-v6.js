@@ -194,7 +194,8 @@
   // Patch messages page: select conversations from sidebar, open ?with target, and keep composer active.
   function installMessagesFix(){
     if(!/messages\.html|\/messages/.test(location.pathname)) return;
-    if(new URLSearchParams(location.search).has('business')) return;
+    const _v6p = new URLSearchParams(location.search);
+    if(_v6p.has('business') || _v6p.has('withBusiness')) return;
     waitReady(function(){
       const GF=window.GeoFirebase, fs=GF.fs, db=GF.db;
       let active=null, unsubMsgs=null, unsubConvs=null, sending=false;
