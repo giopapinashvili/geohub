@@ -123,7 +123,7 @@
     const _uid0 = currentUid();
     const _actorKeyOld0 = _activeBizId ? 'business:' + _activeBizId : 'user:' + _uid0;
     const _actorKeyNew0 = currentActorId(); // canonical: 'business_bizId' or 'user_uid'
-    dbg('renderConvs', {mode:_routeMode, actorId:_actorKeyNew0, uid:_uid0, total:convs.length, bizId:_activeBizId});
+    dbg('renderConvs', {mode:_routeMode, actorId:_actorKeyNew0, uid:_uid0, total:convs.length, bizId:_activeBizId, convSummary: convs.map(c=>({id:c.id, inboxActorIds:c.inboxActorIds, hiddenForActors:c.hiddenForActors}))});
     const blockedIds = window._ghBlockedUserIds || [];
     const baseConvs = blockedIds.length ? convs.filter(c=>{ const oid=otherId(c); return !oid||!blockedIds.includes(oid); }) : convs;
     // Filter hidden: check BOTH old ('user:uid'/'business:bizId') and canonical ('user_uid'/'business_bizId') formats
@@ -1170,7 +1170,7 @@
       });
     }
 
-    dbg('init', {routeMode: _routeMode || '(resolving)', uid: currentUid(), bizParam, withBizParam, cidParam});
+    dbg('init', {routeMode: _routeMode || '(resolving)', uid: currentUid(), actorId: currentActorId(), bizParam, withBizParam, target, cidParam, querySource: 'memberUids+participants(client-filter)'});
     if(unsubConvs) unsubConvs();
     if(withBizParam){
       // ── Customer-side business chat ─────────────────────────────
@@ -1247,6 +1247,13 @@
           Object.assign({}, convDoc, {createdAt: GF.fs.serverTimestamp()}),
           {merge: true}
         ).then(function(){
+          // Unhide for personal actor in case user previously hid this conv
+          // Covers both legacy ('user:UID') and canonical ('user_UID') formats
+          GF.fs.updateDoc(GF.fs.doc(GF.db, 'conversations', cid), {
+            hiddenForActors:   GF.fs.arrayRemove('user:' + customerUid, 'user_' + customerUid),
+            archivedForActors: GF.fs.arrayRemove('user:' + customerUid, 'user_' + customerUid),
+            deletedForActors:  GF.fs.arrayRemove('user:' + customerUid, 'user_' + customerUid)
+          }).catch(function(){});
           activeConversation = cid;
           activeConvData = convDoc;
           document.querySelector('.messages-layout')?.classList.add('chat-open');
@@ -1303,6 +1310,17 @@
       if(chatHdr) chatHdr.innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:16px;color:var(--text-muted);font-size:.9rem"><i class="fas fa-store" style="color:#10b981;font-size:1.1rem"></i><span>Select a conversation</span></div>';
       setBizInboxHeader(bizParam);
       syncBizActor(bizParam); // async — validates owner/admin, fires GeoActorChanged
+      // Unhide for business actor if cidParam is explicitly given in the URL
+      if(cidParam){
+        const _uf = window.GeoFirebase;
+        if(_uf && _uf.fs && _uf.db){
+          _uf.fs.updateDoc(_uf.fs.doc(_uf.db, 'conversations', cidParam), {
+            hiddenForActors:   _uf.fs.arrayRemove('business:' + bizParam, 'business_' + bizParam),
+            archivedForActors: _uf.fs.arrayRemove('business:' + bizParam, 'business_' + bizParam),
+            deletedForActors:  _uf.fs.arrayRemove('business:' + bizParam, 'business_' + bizParam)
+          }).catch(function(){});
+        }
+      }
       // Migration: patch the owner's own-page conv (biz_{bizId}_{uid}) with businessId/forBusiness
       // if it was created before Phase 54C and lacks these fields.
       const _mGF = window.GeoFirebase;

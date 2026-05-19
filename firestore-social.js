@@ -2188,26 +2188,38 @@
             updatedAt: serverTimestamp()
           };
           return addDoc(collection(db, 'conversations', conversationId, 'messages'), messageDoc).then(function () {
-            var patch = { lastMessage: preview, lastSenderId: user.uid, updatedAt: serverTimestamp() };
+            var patch = { lastMessage: preview, lastSenderId: user.uid, lastMessageSenderActorId: senderActorId, updatedAt: serverTimestamp() };
             patch['readBy.' + user.uid] = serverTimestamp();
-            // Determine who gets the unread badge — use actor context for business convs
-            var unreadTarget;
-            if(conv.businessId && conv.forBusiness){
-              unreadTarget = senderActorType === 'business'
-                ? (conv.customerUid || '')
-                : (conv.ownerUid || otherId || '');
-              // Write both old 'business:bizId' and new canonical 'business_bizId' format during transition
-              var actorKeyOld = senderActorType === 'business'
-                ? 'user:' + (conv.customerUid || user.uid)
-                : 'business:' + conv.businessId;
-              var actorKeyNew = senderActorType === 'business'
-                ? 'user_' + (conv.customerUid || user.uid)
-                : 'business_' + conv.businessId;
-              patch.unreadActors = fs.arrayUnion(actorKeyOld, actorKeyNew);
+            // Unhide conversation for sender (in case they previously hid it, e.g. via context menu)
+            patch.hiddenForActors  = fs.arrayRemove(senderActorId);
+            patch.deletedForActors = fs.arrayRemove(senderActorId);
+            // Determine who gets the unread badge using canonical inboxActorIds where available
+            var inboxActors = Array.isArray(conv.inboxActorIds) ? conv.inboxActorIds : [];
+            if(inboxActors.length) {
+              // Canonical: all inbox actors except the sender
+              var recipients = inboxActors.filter(function(a) { return a !== senderActorId; });
+              if(recipients.length) patch.unreadActors = fs.arrayUnion.apply(null, recipients);
+              // Also keep legacy unreadFor (uid-based) for backward compat
+              var unreadTarget;
+              if(conv.businessId && conv.forBusiness){
+                unreadTarget = senderActorType === 'business' ? (conv.customerUid || '') : (conv.ownerUid || otherId || '');
+              } else {
+                unreadTarget = otherId || '';
+              }
+              if(unreadTarget && unreadTarget !== user.uid) patch.unreadFor = fs.arrayUnion(unreadTarget);
             } else {
-              unreadTarget = otherId || '';
+              // Fallback for docs without inboxActorIds
+              var unreadTarget;
+              if(conv.businessId && conv.forBusiness){
+                unreadTarget = senderActorType === 'business' ? (conv.customerUid || '') : (conv.ownerUid || otherId || '');
+                var actorKeyOld = senderActorType === 'business' ? 'user:' + (conv.customerUid || user.uid) : 'business:' + conv.businessId;
+                var actorKeyNew = senderActorType === 'business' ? 'user_' + (conv.customerUid || user.uid) : 'business_' + conv.businessId;
+                patch.unreadActors = fs.arrayUnion(actorKeyOld, actorKeyNew);
+              } else {
+                unreadTarget = otherId || '';
+              }
+              if(unreadTarget && unreadTarget !== user.uid) patch.unreadFor = fs.arrayUnion(unreadTarget);
             }
-            if(unreadTarget && unreadTarget !== user.uid) patch.unreadFor = fs.arrayUnion(unreadTarget);
             return updateDoc(convRef, patch);
           }).then(function () {
             // Determine notification target and link based on sender actor type
@@ -2240,88 +2252,122 @@
       });
     }
 
+    // ── Phase 61C: normalize a raw conversation doc to ensure all actor fields ─
+    function normalizeConv(id, data, uid) {
+      var n = Object.assign({ id: id }, data);
+      if (!Array.isArray(n.participants)) n.participants = [];
+      if (!Array.isArray(n.memberUids)) n.memberUids = n.participants.slice();
+      if (n.forBusiness && n.businessId) {
+        n.type = n.type || 'customer_business';
+        n.pageActorId = n.pageActorId || ('business_' + n.businessId);
+        // customerUid: prefer stored value, else find the non-owner participant
+        var custUid = n.customerUid ||
+          n.participants.find(function(p) { return p !== n.ownerUid; }) ||
+          uid;
+        n.customerUid = custUid;
+        n.customerActorId = n.customerActorId || ('user_' + custUid);
+        if (!Array.isArray(n.inboxActorIds) || !n.inboxActorIds.length) {
+          n.inboxActorIds = [n.customerActorId, n.pageActorId];
+        }
+      } else {
+        n.type = n.type || 'direct';
+        if (!Array.isArray(n.inboxActorIds) || !n.inboxActorIds.length) {
+          n.inboxActorIds = n.participants.filter(Boolean).map(function(u) { return 'user_' + u; });
+        }
+      }
+      return n;
+    }
+
+    // ── Phase 61C: unified listener — rules-compatible query, client-side filter ─
+    // Query uses memberUids (safe per rules) + participants (legacy fallback).
+    // Actor separation is done entirely in client code by checking inboxActorIds.
+    function listenActorConversations(actorId, callback) {
+      var uid = currentUid();
+      var _dbg = (typeof location !== 'undefined' && new URLSearchParams(location.search).get('debugMessages') === '1');
+      if (!uid) { callback([]); return function () {}; }
+
+      function tsOf(v) { return v && v.toMillis ? v.toMillis() : (v && v.seconds ? v.seconds * 1000 : 0); }
+      function sortConvs(items) {
+        return items.sort(function(a, b) {
+          return tsOf(b.updatedAt || b.lastMessageAt || b.createdAt) -
+                 tsOf(a.updatedAt || a.lastMessageAt || a.createdAt);
+        });
+      }
+
+      function flush(pool) {
+        var all = Object.values(pool);
+        var normalized = all.map(function(d) { return normalizeConv(d.id, d, uid); });
+        var filtered = normalized.filter(function(d) {
+          // Must include actorId in inboxActorIds (client-side actor separation)
+          if (!Array.isArray(d.inboxActorIds) || d.inboxActorIds.indexOf(actorId) === -1) {
+            if (_dbg) console.log('[GeoSocial] exclude', d.id, 'inboxActorIds=', d.inboxActorIds, 'actorId=', actorId);
+            return false;
+          }
+          // Exclude if explicitly hidden or deleted for this actor
+          if (Array.isArray(d.hiddenForActors) && d.hiddenForActors.indexOf(actorId) !== -1) {
+            if (_dbg) console.log('[GeoSocial] exclude', d.id, 'hidden for', actorId);
+            return false;
+          }
+          if (Array.isArray(d.deletedForActors) && d.deletedForActors.indexOf(actorId) !== -1) {
+            if (_dbg) console.log('[GeoSocial] exclude', d.id, 'deleted for', actorId);
+            return false;
+          }
+          if (_dbg) console.log('[GeoSocial] include', d.id, 'inboxActorIds=', d.inboxActorIds);
+          return true;
+        });
+        callback(sortConvs(filtered));
+      }
+
+      var pool = {};
+      // Primary query: memberUids array-contains uid (rules: uid() in memberUids — always safe)
+      var qMember = query(collection(db, 'conversations'), where('memberUids', 'array-contains', uid), limit(60));
+      // Fallback query: participants array-contains uid (legacy docs without memberUids)
+      var qParts  = query(collection(db, 'conversations'), where('participants', 'array-contains', uid), limit(60));
+
+      if (_dbg) console.log('[GeoSocial] listenActorConversations', {actorId: actorId, uid: uid, querySource: 'memberUids+participants'});
+
+      var unsubMember = onSnapshot(qMember, function(snap) {
+        snap.docChanges().forEach(function(ch) {
+          if (ch.type === 'removed') { delete pool[ch.doc.id]; return; }
+          pool[ch.doc.id] = Object.assign({ id: ch.doc.id }, ch.doc.data());
+        });
+        flush(pool);
+      }, function(err) { console.warn('[GeoSocial] listenActorConversations(memberUids)', err.message); });
+
+      var unsubParts = onSnapshot(qParts, function(snap) {
+        snap.docChanges().forEach(function(ch) {
+          if (ch.type === 'removed') {
+            // Only remove if the memberUids query also doesn't cover this doc
+            var existing = pool[ch.doc.id];
+            if (existing && Array.isArray(existing.memberUids) && existing.memberUids.indexOf(uid) !== -1) return;
+            delete pool[ch.doc.id];
+            return;
+          }
+          var data = ch.doc.data() || {};
+          if (!pool[ch.doc.id]) {
+            // New doc from legacy query
+            pool[ch.doc.id] = Object.assign({ id: ch.doc.id }, data);
+            // Trigger backfill to add memberUids so next query hits primary
+            if (!data.memberUids || !data.memberUids.length) lazyBackfillConv(ch.doc.id, data, uid);
+          }
+          // If already in pool from memberUids query, update with fresh data (memberUids takes precedence)
+          // but only refresh if the memberUids version is older or missing
+        });
+        flush(pool);
+      }, function(err) { console.warn('[GeoSocial] listenActorConversations(participants)', err.message); });
+
+      return function() { unsubMember(); unsubParts(); };
+    }
+
     function listenConversations(callback) {
       var uid = currentUid();
       if (!uid) { callback([]); return function () {}; }
-      var actorId = 'user_' + uid;
-      function sortConvs(items){
-        return items.sort(function(a,b){
-          function t(v){ return v && v.toMillis ? v.toMillis() : (v && v.seconds ? v.seconds*1000 : 0); }
-          return t(b.updatedAt || b.createdAt) - t(a.updatedAt || a.createdAt);
-        });
-      }
-      function flush(pool){ callback(sortConvs(Object.values(pool))); }
-      var pool = {};
-      // Primary query: canonical inboxActorIds (new convs after Phase 57)
-      var qNew = query(collection(db, 'conversations'), where('inboxActorIds', 'array-contains', actorId), limit(50));
-      // Legacy query: participants array (pre-Phase-57 convs; backfill will migrate them)
-      var qLeg = query(collection(db, 'conversations'), where('participants', 'array-contains', uid), limit(50));
-      var unsubNew = onSnapshot(qNew, function(snap) {
-        snap.forEach(function(d) {
-          var data = d.data() || {};
-          // Personal inbox: exclude business page-admin convs where this uid is NOT the customer
-          if (data.forBusiness && data.customerUid && data.customerUid !== uid) return;
-          pool[d.id] = Object.assign({ id: d.id }, data);
-        });
-        // Remove docs that disappeared from the new query (deleted or no longer match)
-        snap.docChanges().forEach(function(ch) {
-          if (ch.type === 'removed') delete pool[ch.doc.id];
-        });
-        flush(pool);
-      }, function(err) { console.warn('[GeoSocial] listenConversations(new)', err.message); });
-      var unsubLeg = onSnapshot(qLeg, function(snap) {
-        snap.forEach(function(d) {
-          var data = d.data() || {};
-          if (data.forBusiness && data.customerUid && data.customerUid !== uid) return;
-          var isNew = !pool[d.id];
-          pool[d.id] = Object.assign({ id: d.id }, data); // always update pool with fresh Firestore data
-          if (isNew && !data.inboxActorIds) lazyBackfillConv(d.id, data, uid); // backfill only once, only if needed
-        });
-        snap.docChanges().forEach(function(ch) {
-          // Only delete if primary query doesn't also have this doc (primary takes precedence for removals)
-          if (ch.type === 'removed' && !(pool[ch.doc.id] && pool[ch.doc.id].inboxActorIds)) delete pool[ch.doc.id];
-        });
-        flush(pool);
-      }, function(err) { console.warn('[GeoSocial] listenConversations(legacy)', err.message); });
-      return function() { unsubNew(); unsubLeg(); };
+      return listenActorConversations('user_' + uid, callback);
     }
 
     function listenBusinessConversations(businessId, callback) {
       if (!businessId) { if (callback) callback([]); return function () {}; }
-      var pageActorId = 'business_' + businessId;
-      function sortItems(items){
-        return items.sort(function(a,b){
-          function t(v){ return v && v.toMillis ? v.toMillis() : (v && v.seconds ? v.seconds*1000 : 0); }
-          return t(b.updatedAt || b.createdAt) - t(a.updatedAt || a.createdAt);
-        });
-      }
-      function flush(pool){ if(callback) callback(sortItems(Object.values(pool))); }
-      var pool = {};
-      // Primary query: canonical inboxActorIds (new convs after Phase 57)
-      var qNew = query(collection(db, 'conversations'), where('inboxActorIds', 'array-contains', pageActorId), limit(50));
-      // Legacy query: businessId field (pre-Phase-57 convs)
-      var qLeg = query(collection(db, 'conversations'), where('businessId', '==', businessId), limit(50));
-      var unsubNew = onSnapshot(qNew, function(snap) {
-        snap.forEach(function(d) { pool[d.id] = Object.assign({ id: d.id }, d.data()); });
-        snap.docChanges().forEach(function(ch) {
-          if (ch.type === 'removed') delete pool[ch.doc.id];
-        });
-        flush(pool);
-      }, function(err) { console.warn('[GeoSocial] listenBusinessConversations(new)', err.message); });
-      var unsubLeg = onSnapshot(qLeg, function(snap) {
-        snap.forEach(function(d) {
-          var data = d.data() || {};
-          var isNew = !pool[d.id];
-          pool[d.id] = Object.assign({ id: d.id }, data); // always update pool with fresh Firestore data
-          if (isNew && !data.inboxActorIds) lazyBackfillConv(d.id, data, currentUid()); // backfill only once, only if needed
-        });
-        snap.docChanges().forEach(function(ch) {
-          // Only delete if primary query doesn't also have this doc (primary takes precedence for removals)
-          if (ch.type === 'removed' && !(pool[ch.doc.id] && pool[ch.doc.id].inboxActorIds)) delete pool[ch.doc.id];
-        });
-        flush(pool);
-      }, function(err) { console.warn('[GeoSocial] listenBusinessConversations(legacy)', err.message); });
-      return function() { unsubNew(); unsubLeg(); };
+      return listenActorConversations('business_' + businessId, callback);
     }
 
     // ── PHASE 57: lazy backfill for old conversations ────────────────────
