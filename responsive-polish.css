@@ -1923,21 +1923,28 @@ body.page-messages .messages-layout {
 
 /* ─── Phase 65F: final conflict resolution (loaded last among static CSS) ── */
 
-/* Mobile menu: beats body.gh-social-body and body.gh-has-injected-nav hide rules.
-   Same specificity (0,2,1), later file wins. */
-body.gh-mobile-menu-open .mobile-menu {
-  display: flex !important;
-  flex-direction: column !important;
-  position: fixed !important;
-  z-index: 99991 !important;
-  pointer-events: auto !important;
+/* Mobile drawer open state — scoped to mobile viewport only */
+@media (max-width: 768px) {
+  body.gh-mobile-menu-open .mobile-menu {
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    z-index: 99991 !important;
+    pointer-events: auto !important;
+  }
+  body.gh-mobile-menu-open .gh-mobile-menu-overlay {
+    display: block !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99980 !important;
+    background: rgba(0, 0, 0, 0.48) !important;
+  }
 }
-body.gh-mobile-menu-open .gh-mobile-menu-overlay {
-  display: block !important;
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 99980 !important;
-  background: rgba(0, 0, 0, 0.48) !important;
+/* Desktop safety: gh-mobile-menu-open must never dim or lock desktop */
+@media (min-width: 769px) {
+  body.gh-mobile-menu-open { overflow: auto !important; }
+  body.gh-mobile-menu-open .gh-mobile-menu-overlay { display: none !important; }
+  body.gh-mobile-menu-open .mobile-menu { display: none !important; }
 }
 
 /* Messenger: true staged mode — inbox first, chat second (Facebook Messenger style) */

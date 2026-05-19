@@ -5577,6 +5577,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '</div>'
     });
     var npUnsub = null;
+    var npStarted = false;
     var npFilter = 'all';
     var npItems = [];
 
@@ -5657,13 +5658,20 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }
 
     function _tryStartNpListen() {
-      if (npUnsub) return;
+      if (npUnsub || npStarted) return;
       var u = authUser();
       if (!u) return;
-      npUnsub = GS() && GS().listenUserNotifications
-        ? GS().listenUserNotifications(u.uid, function(items) { npItems = items; npRender(); })
+      npStarted = true;
+      var sub = GS() && GS().listenUserNotifications
+        ? GS().listenUserNotifications(u.uid, function(items) { npItems = items || []; npRender(); })
         : null;
-      if (npUnsub) state.pageUnsubs.push(npUnsub);
+      if (sub) {
+        npUnsub = sub;
+        state.pageUnsubs.push(npUnsub);
+      } else {
+        npStarted = false;
+        npRender();
+      }
     }
     ready(function() { _tryStartNpListen(); });
     window.addEventListener('GeoAuthReady', function() {

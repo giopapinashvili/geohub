@@ -692,17 +692,46 @@ img { content-visibility: auto; }
   color: #f87171 !important;
 }
 
-/* FINAL OVERRIDE: menu open state must beat every page-specific hide rule.
-   Specificity 0,2,0 (body.class .class) — same as gh-social-body rule.
-   Wins because mobile-nav.css is appended to <head> after all static links. */
-body.gh-mobile-menu-open .mobile-menu {
-  display: flex !important;
-  flex-direction: column !important;
-  pointer-events: auto !important;
-  z-index: 99991 !important;
+/* FINAL OVERRIDE: mobile drawer — scoped to mobile viewport only */
+@media (max-width: 768px) {
+  body.gh-mobile-menu-open .mobile-menu {
+    display: flex !important;
+    flex-direction: column !important;
+    pointer-events: auto !important;
+    z-index: 99991 !important;
+  }
+  body.gh-mobile-menu-open .gh-mobile-menu-overlay {
+    display: block !important;
+  }
 }
-body.gh-mobile-menu-open .gh-mobile-menu-overlay {
-  display: block !important;
+
+/* Desktop safety: gh-mobile-menu-open must never affect desktop layout */
+@media (min-width: 769px) {
+  body.gh-mobile-menu-open { overflow: auto !important; }
+  body.gh-mobile-menu-open .gh-mobile-menu-overlay { display: none !important; }
+  body.gh-mobile-menu-open .mobile-menu { display: none !important; }
+}
+
+/* Desktop dropdown — compact right-aligned panel near hamburger */
+@media (min-width: 769px) {
+  body.gh-desktop-menu-open .mobile-menu {
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    top: 68px !important;
+    right: 12px !important;
+    left: auto !important;
+    width: 300px !important;
+    max-height: calc(100dvh - 90px) !important;
+    overflow-y: auto !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    box-shadow: 0 8px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06) !important;
+    z-index: 99991 !important;
+    pointer-events: auto !important;
+  }
+  body.gh-desktop-menu-open .gh-mobile-menu-overlay { display: none !important; }
+  body.gh-desktop-menu-open { overflow: auto !important; }
 }
 
 /* Suppress account.js-injected raw <a> at bottom of .mobile-menu

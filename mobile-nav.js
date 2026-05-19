@@ -207,11 +207,16 @@
     return menu;
   }
 
+  function isMobileViewport() {
+    return window.matchMedia('(max-width: 768px)').matches;
+  }
+
   function setMenuOpen(open) {
     var menu = ensureMobileMenu();
     var overlay = ensureMobileOverlay();
     var hamburger = document.getElementById('geoHamburger') || document.querySelector('.gh-mobile-menu-btn');
     if (!menu) return;
+    if (open) document.body.classList.remove('gh-desktop-menu-open');
     menu.classList.toggle('open', !!open);
     document.body.classList.toggle('gh-mobile-menu-open', !!open);
     if (overlay) overlay.setAttribute('aria-hidden', open ? 'false' : 'true');
@@ -221,9 +226,29 @@
     }
   }
 
+  function setDesktopMenuOpen(open) {
+    var menu = ensureMobileMenu();
+    var hamburger = document.getElementById('geoHamburger') || document.querySelector('.gh-mobile-menu-btn');
+    if (!menu) return;
+    if (open) document.body.classList.remove('gh-mobile-menu-open');
+    menu.classList.toggle('open', !!open);
+    document.body.classList.toggle('gh-desktop-menu-open', !!open);
+    if (hamburger) {
+      hamburger.classList.toggle('open', !!open);
+      hamburger.setAttribute('aria-expanded', String(!!open));
+    }
+  }
+
   function openMobileMenu() { setMenuOpen(true); }
   function closeMobileMenu() { setMenuOpen(false); }
+  function openDesktopMenu() { setDesktopMenuOpen(true); }
+  function closeDesktopMenu() { setDesktopMenuOpen(false); }
   function toggleMobileMenu() {
+    if (!isMobileViewport()) {
+      var isOpen = document.body.classList.contains('gh-desktop-menu-open');
+      setDesktopMenuOpen(!isOpen);
+      return;
+    }
     var menu = ensureMobileMenu();
     setMenuOpen(!(menu && menu.classList.contains('open')));
   }
@@ -234,6 +259,7 @@
   window.openMobileMenu = openMobileMenu;
   window.closeMobileMenu = closeMobileMenu;
   window.toggleMobileMenu = toggleMobileMenu;
+  window.closeDesktopMenu = closeDesktopMenu;
 
   function bindMobileMenuEvents() {
     if (window.__ghMobileMenuEventsBound) return;
@@ -251,19 +277,27 @@
         closeMobileMenu();
         return;
       }
+      // Desktop dropdown: close when clicking outside the menu panel
+      if (document.body.classList.contains('gh-desktop-menu-open')) {
+        var dMenu = document.querySelector('.mobile-menu');
+        if (dMenu && !dMenu.contains(e.target) && !e.target.closest('[data-gh-mobile-menu-toggle]')) {
+          closeDesktopMenu();
+        }
+      }
       var menuLink = e.target.closest('.mobile-menu a');
-      if (menuLink) closeMobileMenu();
+      if (menuLink) { closeMobileMenu(); closeDesktopMenu(); }
       var logout = e.target.closest('[data-gh-mobile-logout]');
       if (logout) {
         e.preventDefault();
         closeMobileMenu();
+        closeDesktopMenu();
         var fb = window.GeoFirebase;
         if (fb && fb.authFns && fb.auth) fb.authFns.signOut(fb.auth).finally(function(){ location.href='auth.html'; });
         else if (fb && fb.auth && fb.auth.signOut) fb.auth.signOut().finally(function(){ location.href='auth.html'; });
       }
     }, true);
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closeMobileMenu();
+      if (e.key === 'Escape') { closeMobileMenu(); closeDesktopMenu(); }
     });
   }
 
@@ -636,7 +670,7 @@
   // ── ESCAPE KEY ────────────────────────────────────────────────
 
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') { closeActionSheet(); closeCmdPalette(); }
+    if (e.key === 'Escape') { closeActionSheet(); closeCmdPalette(); closeDesktopMenu(); }
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); toggleCmdPalette(); }
   });
 

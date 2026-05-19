@@ -80,6 +80,15 @@
     window.addEventListener('GeoSocialReady', cb, {once:true});
   }
 
+  function isMobileMsg(){ return window.matchMedia('(max-width: 768px)').matches; }
+
+  function setChatOpen(open){
+    document.body.classList.toggle('chat-open', !!open);
+    var layout = document.querySelector('.messages-layout');
+    if(layout) layout.classList.toggle('chat-open', !!open);
+  }
+  window.ghChatBack = function(){ setChatOpen(false); };
+
   function currentUid(){ return window.GeoFirebase?.auth?.currentUser?.uid || ''; }
   function currentActorId(){
     if(_activeBizId) return 'business_' + _activeBizId;
@@ -177,7 +186,7 @@
         if(unsubConvSettings){ try{unsubConvSettings();}catch(ex){} unsubConvSettings=null; }
         const box=$('#chatMessages');
         if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-comments"></i><p>Select a conversation</p></div>';
-        document.body.classList.remove('chat-open');
+        setChatOpen(false);
       }
     }
     const rows=[];
@@ -721,7 +730,7 @@
       msg.senderName=mine?'You':(convNicknames[msg.senderId]||oid||'User');
       setReplyState(msg);
       const input=$('#msgInput')||$('#messageInput');
-      if(input) input.focus();
+      if(input && !isMobileMsg()) input.focus();
     }});
 
     // Copy text
@@ -806,7 +815,7 @@
     const box=$('#chatMessages'), hdr=$('#chatHeader');
     if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-comment-dots"></i><p>Select a conversation</p></div>';
     if(hdr) hdr.innerHTML='';
-    document.body.classList.remove('chat-open');
+    setChatOpen(false);
   }
 
   function showConvActionToast(convId, label, actorKeyOld, actorKeyNew, isArchive){
@@ -985,7 +994,7 @@
       : (activeLabelFromLastSeen(u && u.lastSeen) ? '<div class="header-online"><span class="active-dot"></span>'+esc(activeLabelFromLastSeen(u.lastSeen))+'</div>' : '');
     header.innerHTML=
       '<div class="chat-header-left">'
-      +'<button class="back-btn" onclick="document.body.classList.remove(\'chat-open\')" title="Back"><i class="fas fa-arrow-left"></i></button>'
+      +'<button class="back-btn" onclick="ghChatBack()" title="Back"><i class="fas fa-arrow-left"></i></button>'
       +'<div class="chat-header-av">'+(u.avatar?'<img src="'+esc(u.avatar)+'" alt="" onerror="this.style.display=\'none\'">':'<div class="av-placeholder">'+esc(initials(u.name))+'</div>')+'</div>'
       +'<div><div class="chat-header-name">'+esc(displayName(u.id, u.name))+'</div>'+bizCtx+'</div>'
       +'</div>'
@@ -1007,7 +1016,7 @@
 
   async function openConversation(cid){
     activeConversation=cid;
-    document.body.classList.add('chat-open');
+    setChatOpen(true);
     document.querySelector('#infoPanel')?.classList.remove('open');
     document.querySelectorAll('.conv-item').forEach(el=>{
       el.classList.toggle('active', el.dataset.convId===cid);
@@ -1475,7 +1484,7 @@
             msg.senderName = msg.senderId===uid ? 'You' : (convNicknames[msg.senderId]||oid||'User');
             setReplyState(msg);
             const input=$('#msgInput')||$('#messageInput');
-            if(input) input.focus();
+            if(input && !isMobileMsg()) input.focus();
           }
         }
         return;
@@ -1651,7 +1660,7 @@
         // Render business header (no "Replying as" — this is customer view)
         if(chatHdr) chatHdr.innerHTML =
           '<div class="chat-header-left">' +
-            '<button class="back-btn" onclick="document.body.classList.remove(\'chat-open\')" title="Back"><i class="fas fa-arrow-left"></i></button>' +
+            '<button class="back-btn" onclick="ghChatBack()" title="Back"><i class="fas fa-arrow-left"></i></button>' +
             '<div class="chat-header-av">' +
               (_withBizLogo ? '<img src="'+esc(_withBizLogo)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">' : '<div class="av-placeholder" style="background:rgba(16,185,129,.2)"><i class="fas fa-store" style="font-size:.9rem;color:#10b981"></i></div>') +
             '</div>' +
@@ -1719,7 +1728,7 @@
           }).catch(function(){});
           activeConversation = cid;
           activeConvData = convDoc;
-          document.body.classList.add('chat-open');
+          setChatOpen(true);
           // Update URL to include cid so refresh goes directly to this conversation
           if(!cidParam){
             history.replaceState(null, '',
