@@ -143,23 +143,51 @@
   function renderDropdown() {
     if (!_user) return '';
 
-    var avatarContent = _user.photoURL
-      ? '<img src="'+esc(_user.photoURL)+'" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">'
-      : esc((_user.displayName || _user.email || 'U').charAt(0).toUpperCase());
-
     var _curActor = getActiveActor();
     var isPersonalActive = !_curActor || _curActor.type !== 'business';
-    var profileSection =
-      '<a class="geo-sw-profile" href="profile.html">'+
-        '<div class="geo-sw-profile-avatar">'+avatarContent+'</div>'+
-        '<div style="flex:1;min-width:0">'+
-          '<div class="geo-sw-profile-name">'+esc(_user.displayName || (_user.email||'').split('@')[0] || 'User')+'</div>'+
-          '<div class="geo-sw-profile-email">'+esc(_user.email||'')+'</div>'+
-        '</div>'+
-        (isPersonalActive ? '<span class="geo-sw-owner-pill" style="background:#10b981;color:#fff;flex-shrink:0">Active</span>' : '')+
-      '</a>';
 
-    // Friend requests section
+    // ── Active identity card at top (Facebook-style) ────────────
+    var activeName, activeSubtitle, activeAvatarHtml, activeLink;
+    var activeQuickLinks = '';
+    if (isPersonalActive) {
+      activeName = _user.displayName || (_user.email||'').split('@')[0] || 'User';
+      activeSubtitle = _user.email || 'Personal account';
+      activeAvatarHtml = _user.photoURL
+        ? '<img src="'+esc(_user.photoURL)+'" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">'
+        : '<span style="font-size:1.3rem;font-weight:900;color:#fff">'+esc(activeName.charAt(0).toUpperCase())+'</span>';
+      activeLink = 'profile.html';
+    } else {
+      var actingBiz = null;
+      for (var i2 = 0; i2 < _businesses.length; i2++) {
+        if (_businesses[i2].id === _curActor.businessId) { actingBiz = _businesses[i2]; break; }
+      }
+      if (!actingBiz) actingBiz = { id: _curActor.businessId, title: _curActor.title || 'Business', logoUrl: _curActor.logoUrl || '' };
+      activeName = actingBiz.title || 'Business';
+      activeSubtitle = 'Page';
+      activeAvatarHtml = (actingBiz.logoUrl || _curActor.logoUrl)
+        ? '<img src="'+esc(actingBiz.logoUrl || _curActor.logoUrl)+'" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">'
+        : '<i class="fas fa-store" style="font-size:1.1rem;color:#fff"></i>';
+      activeLink = 'business.html?id=' + esc(actingBiz.id);
+      activeQuickLinks =
+        '<div class="geo-sw-quick-links">'+
+          '<a href="business.html?id='+esc(actingBiz.id)+'" onclick="event.stopPropagation()" class="geo-sw-quick-link"><i class="fas fa-arrow-up-right-from-square"></i> View Page</a>'+
+          '<a href="messages.html?business='+esc(actingBiz.id)+'" onclick="event.stopPropagation()" class="geo-sw-quick-link"><i class="fas fa-comment-dots"></i> Inbox</a>'+
+          '<a href="business.html?id='+esc(actingBiz.id)+'&tab=manage" onclick="event.stopPropagation()" class="geo-sw-quick-link"><i class="fas fa-gear"></i> Manage</a>'+
+        '</div>';
+    }
+
+    var topCard =
+      '<a href="'+esc(activeLink)+'" class="geo-sw-active-card" onclick="event.stopPropagation()">'+
+        '<div class="geo-sw-active-avatar">'+activeAvatarHtml+'</div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div class="geo-sw-active-name">'+esc(activeName)+'</div>'+
+          '<div class="geo-sw-active-sub">'+esc(activeSubtitle)+'</div>'+
+        '</div>'+
+        '<span class="geo-sw-active-badge"><i class="fas fa-check"></i></span>'+
+      '</a>'+
+      activeQuickLinks;
+
+    // ── Friend requests ─────────────────────────────────────────
     var friendReqSection = '';
     if (_pendingRequests.length) {
       friendReqSection = '<div class="geo-sw-divider"></div><div class="geo-sw-section-label">Friend Requests <span style="background:#ef4444;color:#fff;border-radius:10px;padding:1px 7px;font-size:.7rem;font-weight:700;margin-left:4px">'+_pendingRequests.length+'</span></div>';
@@ -187,65 +215,61 @@
       }
     }
 
-    var currentActor = getActiveActor();
-    var actorBanner = '';
-    if (currentActor && currentActor.type === 'business') {
-      var actingBiz = null;
-      for (var i = 0; i < _businesses.length; i++) {
-        if (_businesses[i].id === currentActor.businessId) { actingBiz = _businesses[i]; break; }
-      }
-      if (actingBiz) {
-        actorBanner = '<div style="background:rgba(16,185,129,.08);border-bottom:1px solid rgba(16,185,129,.15);padding:10px 14px;font-size:.78rem;color:#10b981">'+
-          '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px">'+
-            '<span><i class="fas fa-store"></i> Page identity: <strong>'+esc(actingBiz.title||'Business')+'</strong></span>'+
-            '<button onclick="event.stopPropagation();window._geoSW.switchToUser()" style="background:none;border:1px solid rgba(255,255,255,.1);color:#94a3b8;font-size:.72rem;cursor:pointer;padding:3px 8px;border-radius:6px">Switch to personal</button>'+
+    // ── Switch account rows ─────────────────────────────────────
+    var switchRows = '';
+
+    // Personal row — shown only when acting as a business page
+    if (!isPersonalActive) {
+      var pName = _user.displayName || (_user.email||'').split('@')[0] || 'User';
+      var pAv = _user.photoURL
+        ? '<img src="'+esc(_user.photoURL)+'" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">'
+        : '<span style="font-weight:900;font-size:.9rem;color:#fff">'+esc(pName.charAt(0).toUpperCase())+'</span>';
+      switchRows +=
+        '<div class="geo-sw-account-row" onclick="window._geoSW.switchToUser()">'+
+          '<div class="geo-sw-account-avatar">'+pAv+'</div>'+
+          '<div class="geo-sw-account-info">'+
+            '<div class="geo-sw-account-name">'+esc(pName)+'</div>'+
+            '<div class="geo-sw-account-type">Personal account</div>'+
           '</div>'+
-          '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
-            '<a href="business.html?id='+esc(actingBiz.id)+'" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:7px;background:rgba(59,130,246,.18);color:#93c5fd;font-size:.72rem;font-weight:700;text-decoration:none"><i class="fas fa-arrow-up-right-from-square"></i> View Page</a>'+
-            '<a href="business.html?id='+esc(actingBiz.id)+'&tab=manage" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:7px;background:rgba(255,255,255,.07);color:#94a3b8;font-size:.72rem;font-weight:700;text-decoration:none"><i class="fas fa-gear"></i> Manage</a>'+
-            '<a href="messages.html?business='+esc(actingBiz.id)+'" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:4px;padding:4px 9px;border-radius:7px;background:rgba(255,255,255,.07);color:#94a3b8;font-size:.72rem;font-weight:700;text-decoration:none"><i class="fas fa-comment-dots"></i> Inbox</a>'+
-          '</div>'+
+          '<button class="geo-sw-switch-btn" onclick="event.stopPropagation();window._geoSW.switchToUser()">Switch</button>'+
         '</div>';
-      }
     }
 
-    var bizSection = '';
-    if (_businesses.length) {
-      bizSection = '<div class="geo-sw-divider"></div><div class="geo-sw-section-label">Your Pages</div>';
-      _businesses.forEach(function(biz) {
-        var iconInner = biz.logoUrl
-          ? '<img src="'+esc(biz.logoUrl)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">'
-          : '<i class="fas fa-store"></i>';
-        var isActive = currentActor && currentActor.type === 'business' && currentActor.businessId === biz.id;
-        var unreadCount = _bizUnread[biz.id] || 0;
-        var unreadDot = unreadCount > 0 ? '<span class="geo-sw-unread-dot" title="'+unreadCount+' unread message'+(unreadCount !== 1 ? 's' : '')+'"></span>' : '';
-        bizSection +=
-          '<div class="geo-sw-item" style="cursor:pointer" onclick="window._geoSW.switchToBusiness(\''+esc(biz.id)+'\')">'+
-            '<div class="geo-sw-item-icon biz">'+iconInner+'</div>'+
-            '<span class="geo-sw-item-name">'+esc(biz.title||'Business')+'</span>'+
-            (isActive ? '<span class="geo-sw-owner-pill" style="background:#10b981;color:#fff">Active</span>' : '<span class="geo-sw-owner-pill">Owner</span>')+
-            unreadDot+
-            '<a href="business.html?id='+esc(biz.id)+'" onclick="event.stopPropagation()" style="margin-left:4px;color:#64748b;font-size:.8rem;padding:4px;border-radius:6px;display:flex;align-items:center" title="Open page"><i class="fas fa-arrow-up-right-from-square"></i></a>'+
-          '</div>';
-      });
+    // Other business pages (skip the active one)
+    _businesses.forEach(function(biz) {
+      var isActive = _curActor && _curActor.type === 'business' && _curActor.businessId === biz.id;
+      if (isActive) return;
+      var bizAv = biz.logoUrl
+        ? '<img src="'+esc(biz.logoUrl)+'" alt="" style="width:100%;height:100%;border-radius:10px;object-fit:cover">'
+        : '<i class="fas fa-store" style="font-size:.82rem;color:#10b981"></i>';
+      var unreadCount = _bizUnread[biz.id] || 0;
+      var unreadBadge = unreadCount > 0
+        ? '<span class="geo-sw-unread-badge">'+Math.min(unreadCount, 9)+'</span>'
+        : '';
+      switchRows +=
+        '<div class="geo-sw-account-row" onclick="window._geoSW.switchToBusiness(\''+esc(biz.id)+'\')">'+
+          '<div class="geo-sw-account-avatar biz">'+bizAv+'</div>'+
+          '<div class="geo-sw-account-info">'+
+            '<div class="geo-sw-account-name">'+esc(biz.title||'Business')+'</div>'+
+            '<div class="geo-sw-account-type">Page</div>'+
+          '</div>'+
+          unreadBadge+
+          '<button class="geo-sw-switch-btn" onclick="event.stopPropagation();window._geoSW.switchToBusiness(\''+esc(biz.id)+'\')">Switch</button>'+
+        '</div>';
+    });
+
+    var switchSection = '';
+    if (switchRows || true) {
+      switchSection =
+        '<div class="geo-sw-divider"></div>'+
+        switchRows+
+        '<div style="display:flex;gap:6px;padding:6px 12px 2px">'+
+          '<a class="geo-sw-view-all" href="profile.html" style="flex:1">View all profiles</a>'+
+          '<a class="geo-sw-view-all" href="add-business.html" style="flex:1;text-align:center">Add page</a>'+
+        '</div>';
     }
 
-    var bottomSection =
-      '<div class="geo-sw-divider"></div>'+
-      '<a class="geo-sw-item" href="add-business.html">'+
-        '<div class="geo-sw-item-icon create"><i class="fas fa-plus"></i></div>'+
-        '<span class="geo-sw-item-name">Create Page</span>'+
-      '</a>'+
-      '<div class="geo-sw-divider"></div>'+
-      '<a class="geo-sw-item" href="profile.html">'+
-        '<div class="geo-sw-item-icon settings"><i class="fas fa-gear"></i></div>'+
-        '<span class="geo-sw-item-name">Settings & Profile</span>'+
-      '</a>'+
-      '<button class="geo-sw-item" onclick="window._geoSW.signOut()" style="font-family:inherit">'+
-        '<div class="geo-sw-item-icon signout"><i class="fas fa-arrow-right-from-bracket"></i></div>'+
-        '<span class="geo-sw-item-name" style="color:#f87171">Sign Out</span>'+
-      '</button>';
-
+    // ── Groups ──────────────────────────────────────────────────
     var groupSection = '';
     if (_groups && _groups.length) {
       groupSection = '<div class="geo-sw-divider"></div><div class="geo-sw-section-label">Your Groups</div>';
@@ -259,8 +283,19 @@
       });
     }
 
-    var personalLabel = '<div class="geo-sw-section-label">Personal Account</div>';
-    return actorBanner + personalLabel + profileSection + friendReqSection + bizSection + groupSection + bottomSection;
+    // ── Bottom actions ──────────────────────────────────────────
+    var bottomSection =
+      '<div class="geo-sw-divider"></div>'+
+      '<a class="geo-sw-item" href="profile.html">'+
+        '<div class="geo-sw-item-icon settings"><i class="fas fa-gear"></i></div>'+
+        '<span class="geo-sw-item-name">Settings & Profile</span>'+
+      '</a>'+
+      '<button class="geo-sw-item" onclick="window._geoSW.signOut()" style="font-family:inherit">'+
+        '<div class="geo-sw-item-icon signout"><i class="fas fa-arrow-right-from-bracket"></i></div>'+
+        '<span class="geo-sw-item-name" style="color:#f87171">Sign Out</span>'+
+      '</button>';
+
+    return topCard + friendReqSection + switchSection + groupSection + bottomSection;
   }
 
   /* ── button label HTML ─────────────────────────────────────── */

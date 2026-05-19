@@ -98,6 +98,105 @@
   background: rgba(16,185,129,.15); color: #10b981; flex-shrink: 0;
 }
 
+/* ── Active identity card (Facebook-style) ───────────────── */
+.geo-sw-active-card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 14px 12px; border-radius: 14px;
+  text-decoration: none; color: inherit;
+  background: rgba(255,255,255,.04);
+  transition: background .14s;
+}
+.geo-sw-active-card:hover { background: rgba(255,255,255,.08); }
+
+.geo-sw-active-avatar {
+  width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg,#10b981,#3b82f6);
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid rgba(255,255,255,.15); overflow: hidden;
+}
+
+.geo-sw-active-name { font-weight: 800; font-size: .97rem; color: #f1f5f9; }
+.geo-sw-active-sub  { font-size: .72rem; color: #64748b; margin-top: 2px; }
+
+.geo-sw-active-badge {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  background: #10b981; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .72rem;
+}
+
+/* ── Quick-action chips below active card ────────────────── */
+.geo-sw-quick-links {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 0 14px 10px;
+}
+.geo-sw-quick-link {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 7px;
+  background: rgba(255,255,255,.07); color: #94a3b8;
+  font-size: .71rem; font-weight: 700; text-decoration: none;
+  transition: background .14s, color .14s;
+}
+.geo-sw-quick-link:hover { background: rgba(59,130,246,.18); color: #93c5fd; }
+
+/* ── Account switch rows ─────────────────────────────────── */
+.geo-sw-account-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 10px;
+  cursor: pointer; transition: background .14s;
+}
+.geo-sw-account-row:hover { background: rgba(255,255,255,.05); }
+
+.geo-sw-account-avatar {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg,#10b981,#3b82f6);
+  display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid rgba(255,255,255,.1); overflow: hidden;
+}
+.geo-sw-account-avatar.biz {
+  border-radius: 10px;
+  background: rgba(16,185,129,.12);
+  border-color: rgba(16,185,129,.2);
+}
+
+.geo-sw-account-info { flex: 1; min-width: 0; }
+.geo-sw-account-name { font-weight: 700; font-size: .88rem; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.geo-sw-account-type { font-size: .7rem; color: #64748b; margin-top: 1px; }
+
+.geo-sw-switch-btn {
+  padding: 5px 11px; border-radius: 7px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1);
+  color: #94a3b8; font-size: .72rem; font-weight: 700;
+  cursor: pointer; flex-shrink: 0;
+  transition: background .14s, color .14s, border-color .14s;
+  font-family: inherit;
+}
+.geo-sw-switch-btn:hover { background: rgba(16,185,129,.15); color: #10b981; border-color: rgba(16,185,129,.3); }
+
+/* ── Unread badges ───────────────────────────────────────── */
+.geo-sw-unread-badge {
+  background: #ef4444; color: #fff; border-radius: 999px;
+  min-width: 18px; height: 18px; padding: 0 5px;
+  font-size: .65rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.geo-sw-unread-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: #ef4444; flex-shrink: 0;
+  border: 2px solid #0f172a;
+}
+
+/* ── View all profiles link ──────────────────────────────── */
+.geo-sw-view-all {
+  display: block; text-align: center; padding: 7px 12px;
+  font-size: .78rem; font-weight: 700; color: #3b82f6;
+  text-decoration: none; border-radius: 8px;
+  transition: background .14s;
+}
+.geo-sw-view-all:hover { background: rgba(59,130,246,.08); }
+
 /* ── Social redesign (gh-fb-inspired) integration ────────── */
 .gh-actor-btn-slot { display: inline-flex; align-items: center; }
 
@@ -140,3 +239,15 @@ html[data-gh-theme="light"] .geo-sw-item { color: #334155; }
 html[data-gh-theme="light"] .geo-sw-item:hover { background: rgba(15,23,42,.04); color: #0f172a; }
 html[data-gh-theme="light"] .geo-sw-divider { background: rgba(15,23,42,.07); }
 html[data-gh-theme="light"] .geo-sw-section-label { color: #94a3b8; }
+html[data-gh-theme="light"] .geo-sw-active-card { background: rgba(15,23,42,.04); }
+html[data-gh-theme="light"] .geo-sw-active-card:hover { background: rgba(15,23,42,.07); }
+html[data-gh-theme="light"] .geo-sw-active-name { color: #0f172a; }
+html[data-gh-theme="light"] .geo-sw-active-sub { color: #64748b; }
+html[data-gh-theme="light"] .geo-sw-quick-link { background: rgba(15,23,42,.06); color: #64748b; }
+html[data-gh-theme="light"] .geo-sw-quick-link:hover { background: rgba(59,130,246,.1); color: #2563eb; }
+html[data-gh-theme="light"] .geo-sw-account-row:hover { background: rgba(15,23,42,.04); }
+html[data-gh-theme="light"] .geo-sw-account-name { color: #1e293b; }
+html[data-gh-theme="light"] .geo-sw-account-type { color: #64748b; }
+html[data-gh-theme="light"] .geo-sw-switch-btn { background: rgba(15,23,42,.06); border-color: rgba(15,23,42,.12); color: #64748b; }
+html[data-gh-theme="light"] .geo-sw-switch-btn:hover { background: rgba(16,185,129,.1); color: #059669; border-color: rgba(16,185,129,.25); }
+html[data-gh-theme="light"] .geo-sw-unread-dot { border-color: #fff; }
