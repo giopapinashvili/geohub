@@ -2080,3 +2080,42 @@ body.gh-mobile-menu-open .gh-mobile-menu-overlay {
     gap: 6px !important;
   }
 }
+
+/* ── PHASE 65I: Critical Mobile UX Fixes ───────────────────────── */
+
+/* 1. Map/Places — account for mobile bottom nav in map height */
+@media (max-width: 768px) {
+  #plMapContainer {
+    height: calc(100dvh - var(--navbar-height, 68px) - 68px - env(safe-area-inset-bottom, 0px) - 50px) !important;
+    min-height: 200px !important;
+  }
+  /* List view bottom clearance so bottom nav doesn't cover last card */
+  .pl-main {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px) + 20px) !important;
+  }
+}
+
+/* 2. Search — restore sr-topbar on mobile (hidden by gh-has-injected-nav rule) */
+@media (max-width: 768px) {
+  body[data-gh-page="search"] .sr-topbar {
+    display: flex !important;
+    top: 0 !important;
+    z-index: 300 !important;
+  }
+  body[data-gh-page="search"] .sr-cats-bar {
+    top: 60px !important;
+  }
+  body[data-gh-page="search"] .sr-page {
+    padding-top: 104px !important;
+  }
+}
+
+/* 3. Messenger — hide bottom nav inside chat, remove conflicting body padding */
+@media (max-width: 768px) {
+  body.page-messages #app-bottom-nav {
+    display: none !important;
+  }
+  body.page-messages {
+    padding-bottom: 0 !important;
+  }
+}
