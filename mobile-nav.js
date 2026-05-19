@@ -6,6 +6,8 @@
 
 (function () {
   'use strict';
+  if (window.__ghMobileNavInit) return;
+  window.__ghMobileNavInit = true;
 
   // ── CONFIG ────────────────────────────────────────────────────
 
@@ -58,7 +60,7 @@
       navItem('search.html',        'fas fa-magnifying-glass', 'Explore', active === 'explore' || currentPage === 'search.html', '') +
       navItem('messages.html',      'fas fa-comment-dots', 'Messages', active === 'messages', '') +
       navItem('notifications.html', 'fas fa-bell', 'Notifications', currentPage === 'notifications.html', '') +
-      navButton('fas fa-bars', 'Menu', 'geoToggleMenu()');
+      navButton('fas fa-bars', 'Menu');
 
     document.body.appendChild(nav);
     setupBottomNavAutoHide(nav);
@@ -72,8 +74,8 @@
     '</a>';
   }
 
-  function navButton(icon, label, action) {
-    return '<button type="button" class="app-nav-item app-nav-menu" onclick="' + action + '" aria-label="' + label + '">' +
+  function navButton(icon, label) {
+    return '<button type="button" class="app-nav-item app-nav-menu" data-gh-mobile-menu-toggle aria-label="' + label + '">' +
       '<i class="' + icon + '" aria-hidden="true"></i>' +
       '<span>' + label + '</span>' +
     '</button>';
@@ -110,8 +112,19 @@
       '</div>';
   }
 
+  function ensureMobileOverlay() {
+    var overlay = document.getElementById('gh-mobile-menu-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'gh-mobile-menu-overlay';
+      overlay.className = 'gh-mobile-menu-overlay';
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(overlay);
+    }
+    return overlay;
+  }
+
   function ensureMobileMenu() {
-    if (currentPage === 'messages.html') return;
     var menu = document.querySelector('.mobile-menu');
     if (!menu) {
       menu = document.createElement('div');
@@ -119,18 +132,92 @@
       document.body.appendChild(menu);
     }
     if (!menu.querySelector('#ghMobileAccountSlot')) menu.innerHTML = mobileMenuHtml();
+    menu.setAttribute('role', 'dialog');
+    menu.setAttribute('aria-label', 'GeoHub mobile menu');
 
     var socialMenu = document.getElementById('ghSidebarToggle');
     if (socialMenu && !socialMenu._ghMenuBound) {
       socialMenu._ghMenuBound = true;
+      socialMenu.type = 'button';
+      socialMenu.classList.add('gh-mobile-menu-btn');
+      socialMenu.setAttribute('data-gh-mobile-menu-toggle', '');
       socialMenu.setAttribute('aria-label', 'Menu');
       socialMenu.title = 'Menu';
       socialMenu.innerHTML = '<i class="fas fa-bars"></i>';
       socialMenu.addEventListener('click', function(e) {
         e.preventDefault();
-        if (window.geoToggleMenu) window.geoToggleMenu();
+        e.stopPropagation();
+        toggleMobileMenu();
       });
     }
+
+    var hamburger = document.getElementById('geoHamburger');
+    if (hamburger) {
+      hamburger.type = 'button';
+      hamburger.setAttribute('data-gh-mobile-menu-toggle', '');
+      if (!hamburger._ghMenuBound) {
+        hamburger._ghMenuBound = true;
+        hamburger.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleMobileMenu();
+        });
+      }
+    }
+    ensureMobileOverlay();
+    return menu;
+  }
+
+  function setMenuOpen(open) {
+    var menu = ensureMobileMenu();
+    var overlay = ensureMobileOverlay();
+    var hamburger = document.getElementById('geoHamburger') || document.querySelector('.gh-mobile-menu-btn');
+    if (!menu) return;
+    menu.classList.toggle('open', !!open);
+    document.body.classList.toggle('gh-mobile-menu-open', !!open);
+    if (overlay) overlay.setAttribute('aria-hidden', open ? 'false' : 'true');
+    if (hamburger) {
+      hamburger.classList.toggle('open', !!open);
+      hamburger.setAttribute('aria-expanded', String(!!open));
+    }
+  }
+
+  function openMobileMenu() { setMenuOpen(true); }
+  function closeMobileMenu() { setMenuOpen(false); }
+  function toggleMobileMenu() {
+    var menu = ensureMobileMenu();
+    setMenuOpen(!(menu && menu.classList.contains('open')));
+  }
+
+  window.geoOpenMenu = openMobileMenu;
+  window.geoCloseMenu = closeMobileMenu;
+  window.geoToggleMenu = toggleMobileMenu;
+  window.openMobileMenu = openMobileMenu;
+  window.closeMobileMenu = closeMobileMenu;
+  window.toggleMobileMenu = toggleMobileMenu;
+
+  function bindMobileMenuEvents() {
+    if (window.__ghMobileMenuEventsBound) return;
+    window.__ghMobileMenuEventsBound = true;
+    document.addEventListener('click', function(e) {
+      var toggle = e.target.closest('[data-gh-mobile-menu-toggle]');
+      if (toggle) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleMobileMenu();
+        return;
+      }
+      if (e.target.closest('#gh-mobile-menu-overlay')) {
+        e.preventDefault();
+        closeMobileMenu();
+        return;
+      }
+      var menuLink = e.target.closest('.mobile-menu a');
+      if (menuLink) closeMobileMenu();
+    }, true);
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeMobileMenu();
+    });
   }
 
   // ── INJECT ACTION SHEET ───────────────────────────────────────
@@ -676,6 +763,7 @@
     injectGrowthScripts();
     showSplash();
     ensureMobileMenu();
+    bindMobileMenuEvents();
     injectBottomNav();
     injectActionSheet();
     injectNotifContainer();

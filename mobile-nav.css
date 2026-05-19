@@ -69,6 +69,30 @@
   background: transparent;
   font: inherit;
 }
+.gh-mobile-menu-overlay {
+  display: none;
+}
+@media (max-width: 768px) {
+  .gh-mobile-menu-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99980;
+    display: none;
+    background: rgba(0,0,0,0.48);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  body.gh-mobile-menu-open .gh-mobile-menu-overlay {
+    display: block;
+  }
+  body.gh-mobile-menu-open {
+    overflow: hidden !important;
+  }
+  body.gh-mobile-menu-open .mobile-menu {
+    display: flex !important;
+    pointer-events: auto !important;
+  }
+}
 .app-nav-item i {
   font-size: 1.18rem;
   transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), color 0.2s;

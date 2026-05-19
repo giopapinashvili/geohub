@@ -152,6 +152,22 @@ body[data-gh-page="messages"] #ghChatPopRoot{display:none!important;}
   .mobile-account-panel:empty {
     display: none !important;
   }
+  .mobile-menu {
+    position: fixed !important;
+    top: calc(64px + env(safe-area-inset-top, 0px)) !important;
+    left: 10px !important;
+    right: 10px !important;
+    bottom: calc(var(--gh-mobile-nav-h) + var(--gh-safe-bottom) + 10px) !important;
+    width: auto !important;
+    max-height: calc(100dvh - 84px - var(--gh-mobile-nav-h) - var(--gh-safe-bottom)) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    z-index: 99990 !important;
+    border-radius: 18px !important;
+    border: 1px solid var(--border, rgba(255,255,255,0.08)) !important;
+    box-shadow: 0 22px 60px rgba(0,0,0,0.45) !important;
+    pointer-events: auto !important;
+  }
   .mobile-account-panel .geo-sw-wrap {
     display: block !important;
     width: 100% !important;

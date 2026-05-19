@@ -697,6 +697,7 @@
     close: close,
     open: open,
     signOut: function() {
+      window.closeMobileMenu && window.closeMobileMenu();
       var fb = window.GeoFirebase;
       if (fb && fb.auth && fb.authFns) {
         fb.authFns.signOut(fb.auth)
@@ -712,11 +713,13 @@
       if (!biz || !_user) return;
       var actorId = window.GeoActors ? window.GeoActors.actorIdForBusiness(bizId) : ('business_' + bizId);
       setActiveActor({ type: 'business', actorId: actorId, businessId: bizId, ownerUid: _user.uid, title: biz.title || 'Business', logoUrl: biz.logoUrl || '' });
+      window.closeMobileMenu && window.closeMobileMenu();
     },
     switchToUser: function() {
       if (!_user) return;
       var actorId = window.GeoActors ? window.GeoActors.actorIdForUser(_user.uid) : ('user_' + _user.uid);
       setActiveActor({ type: 'user', actorId: actorId, uid: _user.uid, displayName: _user.displayName || '', email: _user.email || '', photoURL: _user.photoURL || '' });
+      window.closeMobileMenu && window.closeMobileMenu();
     },
     getActor: getActiveActor,
     onBusinessUpdated: function(bizId, data) {
