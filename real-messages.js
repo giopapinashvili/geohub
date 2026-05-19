@@ -145,7 +145,9 @@
         + '<a class="conv-av-wrap" href="'+profileHref+'" data-open-user-profile="'+esc(oid)+'" onclick="event.stopPropagation()">'
         + (u.avatar ? '<img class="conv-avatar-img" src="'+esc(u.avatar)+'" alt="" onerror="this.style.display=\'none\'">' : '<div class="av-placeholder">'+esc(initials(name))+'</div>')
         + '</a><div class="conv-info"><div class="conv-top-row"><span class="conv-name">'+bizBadge+esc(name)+'</span>'+(ts?'<span class="conv-time">'+esc(ts)+'</span>':'')+'</div>'
-        + '<div class="conv-bottom-row"><span class="conv-preview">'+esc(c.lastMessage||'No messages yet')+'</span>'+(unread?'<span class="conv-unread-dot"></span>':'')+'</div></div></div>';
+        + '<div class="conv-bottom-row"><span class="conv-preview">'+esc(c.lastMessage||'No messages yet')+'</span>'+(unread?'<span class="conv-unread-dot"></span>':'')+'</div></div>'
+        + '<button class="conv-hide-btn" title="Hide from inbox" aria-label="Hide conversation" onclick="event.stopPropagation();window.__ghHideConv(\''+esc(c.id)+'\',event)"><i class="fas fa-times"></i></button>'
+        + '</div>';
     }).join('');
     updateMsgBadge(unreadCount);
   }
@@ -488,6 +490,59 @@
       }},
     ]);
     return false;
+  };
+
+  // ── Per-identity conversation hide (Phase 56B) ───────────────────────────
+
+  function showHideUndoToast(convId, actorKey){
+    document.querySelectorAll('.gh-hide-undo-toast').forEach(t=>t.remove());
+    const toast=document.createElement('div');
+    toast.className='gh-hide-undo-toast';
+    toast.innerHTML='<span>Conversation hidden</span><button class="gh-undo-btn" type="button">Undo</button>';
+    document.body.appendChild(toast);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>toast.classList.add('show')));
+    const timer=setTimeout(()=>{ toast.classList.remove('show'); setTimeout(()=>toast.remove(),300); }, 4500);
+    toast.querySelector('.gh-undo-btn').onclick=()=>{
+      clearTimeout(timer); toast.remove();
+      const GF=window.GeoFirebase;
+      if(!GF||!GF.fs||!GF.db) return;
+      GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId),{
+        hiddenForActors: GF.fs.arrayRemove(actorKey)
+      }).then(()=>window.showToast&&window.showToast('Conversation restored'))
+        .catch(()=>window.showToast&&window.showToast('Could not undo'));
+    };
+  }
+
+  // Called by the × button on each conv row.
+  // Hides only for the current actor (user:UID or business:BIZ_ID).
+  // The other party/identity is NOT affected.
+  window.__ghHideConv = function(convId, e){
+    if(e){ e.stopPropagation(); e.preventDefault(); }
+    if(!confirm('Remove this conversation from this inbox?\n\nThis only hides it for the current account. The other side can still see it.')) return;
+    const actorKey = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
+    const GF=window.GeoFirebase;
+    if(!GF||!GF.fs||!GF.db) return;
+    GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId),{
+      hiddenForActors: GF.fs.arrayUnion(actorKey)
+    }).then(()=>{
+      // If this was the open conversation, clear the chat panel
+      if(activeConversation === convId){
+        activeConversation=null;
+        activeConvData=null;
+        // Stop all per-conversation listeners
+        if(unsubMsgs){ try{unsubMsgs();}catch(er){} unsubMsgs=null; }
+        if(unsubReactions){ try{unsubReactions();}catch(er){} unsubReactions=null; }
+        if(unsubConvDoc){ try{unsubConvDoc();}catch(er){} unsubConvDoc=null; }
+        if(unsubConvSettings){ try{unsubConvSettings();}catch(er){} unsubConvSettings=null; }
+        // Clear chat panel and header
+        const box=$('#chatMessages'), hdr=$('#chatHeader');
+        if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-comment-dots"></i><p>Select a conversation</p></div>';
+        if(hdr) hdr.innerHTML='';
+        // On mobile, go back to conv list
+        document.querySelector('.messages-layout')?.classList.remove('chat-open');
+      }
+      showHideUndoToast(convId, actorKey);
+    }).catch(()=>window.showToast&&window.showToast('Could not hide conversation'));
   };
 
   function showThemePicker(){
