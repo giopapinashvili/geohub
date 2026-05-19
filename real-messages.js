@@ -1607,7 +1607,6 @@
       history.replaceState(null, '', location.pathname + '?business=' + encodeURIComponent(bizParam) + (cidParam ? '&cid=' + encodeURIComponent(cidParam) : ''));
     }
 
-    document.querySelector('.messages-layout')?.classList.add('chat-open');
     showConvLoading();
     renderComposer();
     bindClicks();

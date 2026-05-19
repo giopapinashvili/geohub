@@ -109,8 +109,32 @@
         '<a class="gh-mobile-menu-row" href="profile.html"><i class="fas fa-user"></i><span>Profile</span></a>' +
         '<a class="gh-mobile-menu-row" href="business.html"><i class="fas fa-store"></i><span>Businesses</span></a>' +
         '<a class="gh-mobile-menu-row" href="add-business.html"><i class="fas fa-plus-circle"></i><span>Add Page</span></a>' +
-        '<button type="button" class="gh-mobile-menu-row mobile-menu-danger gh-mobile-menu-danger" data-gh-mobile-logout><i class="fas fa-right-from-bracket"></i><span>Logout</span></button>' +
+        '<div id="ghMobileAuthActions"></div>' +
       '</div>';
+  }
+
+  function updateMobileAuthActions(user) {
+    var slot = document.getElementById('ghMobileAuthActions');
+    if (!slot) return;
+    if (user) {
+      slot.innerHTML =
+        '<button type="button" class="gh-mobile-menu-row mobile-menu-danger gh-mobile-menu-danger" data-gh-mobile-logout>' +
+          '<i class="fas fa-right-from-bracket"></i><span>Logout</span>' +
+        '</button>';
+    } else {
+      slot.innerHTML = '';
+    }
+  }
+
+  function tryUpdateMobileAuth() {
+    var GF = window.GeoFirebase;
+    if (!GF || !GF.auth) return false;
+    updateMobileAuthActions(GF.auth.currentUser || null);
+    if (GF.authFns && GF.authFns.onAuthStateChanged && !window.__ghMobileAuthBound) {
+      window.__ghMobileAuthBound = true;
+      GF.authFns.onAuthStateChanged(GF.auth, function(u) { updateMobileAuthActions(u || null); });
+    }
+    return true;
   }
 
   function ensureMobileOverlay() {
@@ -319,6 +343,8 @@
   });
 
   function injectInstallPrompt() {
+    var isPWA = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    if (isPWA) return;
     if (window.safeStorage && window.safeStorage.get('gh_install_dismissed', false)) return;
     if (document.getElementById('app-install-prompt')) return;
 
@@ -814,6 +840,18 @@
     startNotifCycle();
     setTimeout(function(){ ensureMobileMenu(); injectBottomNav(); }, 400);
     setTimeout(function(){ ensureMobileMenu(); injectBottomNav(); }, 1200);
+
+    if (!tryUpdateMobileAuth()) {
+      var _authPoll = setInterval(function() {
+        if (tryUpdateMobileAuth()) clearInterval(_authPoll);
+      }, 300);
+      setTimeout(function() { clearInterval(_authPoll); }, 8000);
+    }
+    window.addEventListener('GeoFirebaseReady', tryUpdateMobileAuth);
+    window.addEventListener('GeoAuthReady', function(e) {
+      updateMobileAuthActions(e && e.detail || null);
+      tryUpdateMobileAuth();
+    });
   }
 
   if (document.readyState === 'loading') {

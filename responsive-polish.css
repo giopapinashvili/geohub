@@ -2009,3 +2009,19 @@ body.gh-mobile-menu-open .gh-mobile-menu-overlay {
     min-width: 0 !important;
   }
 }
+
+/* Phase 65G: PWA / standalone safe-area (iOS Dynamic Island / notch) */
+@media (display-mode: standalone) {
+  .navbar, nav.navbar, #navbar, .gh-topbar, .feed-topbar, .topbar, .site-header {
+    padding-top: env(safe-area-inset-top, 0px) !important;
+  }
+  body:not(.page-messages) {
+    padding-top: calc(68px + env(safe-area-inset-top, 0px)) !important;
+  }
+  body.page-messages {
+    padding-top: 0 !important;
+  }
+  body.page-messages .messages-page {
+    top: calc(72px + env(safe-area-inset-top, 0px)) !important;
+  }
+}
