@@ -96,7 +96,7 @@
       const snap=await GF.fs.getDoc(GF.fs.doc(GF.db,'users',uid));
       if(snap.exists()){
         const d=snap.data()||{};
-        const u={ id:uid, name:d.fullName||d.displayName||d.name||d.username||d.email||'GeoHub User', avatar:d.photoURL||d.avatar||d.avatarUrl||d.photo||'' };
+        const u={ id:uid, name:d.fullName||d.displayName||d.name||d.username||d.email||'GeoHub User', avatar:d.photoURL||d.avatar||d.avatarUrl||d.photo||'', lastSeen:d.lastSeen||d.lastActive||d.updatedAt||null };
         _userCache[uid]=u; return u;
       }
     }catch(e){}
@@ -198,10 +198,12 @@
         u = await userInfo(oid);
       }
       // Check both old ('business:bizId' / 'user:uid') and new canonical ('business_bizId' / 'user_uid') formats during transition
-      const _actorKeyOld = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
       const _actorKeyNew = currentActorId();
-      const unread = (Array.isArray(c.unreadActors) && (c.unreadActors.includes(_actorKeyOld) || c.unreadActors.includes(_actorKeyNew)))
-        || (Array.isArray(c.unreadFor) && c.unreadFor.includes(currentUid()));
+      const _actorKeyOld = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
+      const hasActorUnread = Array.isArray(c.unreadActors);
+      const unread = hasActorUnread
+        ? (c.unreadActors.includes(_actorKeyNew) || c.unreadActors.includes(_actorKeyOld))
+        : (Array.isArray(c.unreadFor) && !_activeBizId && c.unreadFor.includes(currentUid()));
       if(unread) unreadCount++;
       rows.push({c, oid, u, unread, isBiz});
     }
@@ -330,6 +332,35 @@
     return (d.getMonth()+1)+'/'+(d.getDate());
   }
 
+  function tsMillis(val){
+    return val && val.toMillis ? val.toMillis() : (val && val.seconds ? val.seconds*1000 : Number(val||0));
+  }
+
+  function activeLabelFromLastSeen(val){
+    const ms = tsMillis(val);
+    if(!ms) return '';
+    const diff = Date.now() - ms;
+    if(diff < 5 * 60000) return 'Active recently';
+    if(diff < 3600000) return 'Active '+Math.max(1, Math.floor(diff/60000))+'m ago';
+    if(diff < 86400000) return 'Active '+Math.floor(diff/3600000)+'h ago';
+    return '';
+  }
+
+  function actorLabel(actorId, convData){
+    if(!actorId) return 'Someone';
+    if(actorId.startsWith('business_')){
+      const bid = actorId.slice(9);
+      if(convData && convData.businessId === bid) return convData.businessName || 'Business';
+      return 'Business';
+    }
+    if(actorId.startsWith('user_')){
+      const uid = actorId.slice(5);
+      if(uid === currentUid()) return 'You';
+      return convNicknames[uid] || _userCache[uid]?.name || 'Someone';
+    }
+    return convNicknames[actorId] || _userCache[actorId]?.name || 'Someone';
+  }
+
   function renderReplyQuote(m){
     if(!m.replyTo) return '';
     return '<div class="msg-reply-quote"><span class="msg-reply-quote-name">'+esc(m.replyTo.senderName||'User')+'</span>'
@@ -354,7 +385,7 @@
     return m.senderId === uid || m.authorId === uid;
   }
 
-  function receiptIcon(m){
+  function legacyReceiptIcon(m){
     const uid = currentUid();
     const isMine = isMineMsg(m);
     if(!isMine) return '';
@@ -362,6 +393,16 @@
     if(seenBy.length) return '<span class="msg-receipt seen" title="Seen">✓✓</span>';
     if(m.delivered) return '<span class="msg-receipt delivered" title="Delivered">✓✓</span>';
     return '<span class="msg-receipt sent" title="Sent">✓</span>';
+  }
+
+  function receiptIcon(m){
+    const actorId = currentActorId();
+    const isMine = isMineMsg(m);
+    if(!isMine) return '';
+    const seenByActors = Array.isArray(m.seenByActors) ? m.seenByActors.filter(id=>id!==actorId) : [];
+    const legacySeen = !seenByActors.length && Array.isArray(m.seenBy) ? m.seenBy.filter(id=>id!==currentUid()) : [];
+    if(seenByActors.length || legacySeen.length) return '<span class="msg-receipt seen" title="Seen">Seen</span>';
+    return '<span class="msg-receipt delivered" title="'+(m.delivered?'Delivered':'Sent')+'">✓</span>';
   }
 
   function applyTheme(theme){
@@ -449,9 +490,15 @@
 
   function markVisibleSeen(visible, uid){
     if(!activeConversation || !uid) return;
-    const unseen = visible.filter(m => m.senderId !== uid && m.authorId !== uid && !(Array.isArray(m.seenBy) && m.seenBy.includes(uid))).map(m=>m.id);
+    const actorId = currentActorId();
+    const unseen = visible.filter(m => {
+      if(isMineMsg(m)) return false;
+      if(Array.isArray(m.seenByActors) && m.seenByActors.includes(actorId)) return false;
+      if(!Array.isArray(m.seenByActors) && Array.isArray(m.seenBy) && m.seenBy.includes(uid)) return false;
+      return true;
+    }).map(m=>m.id);
     if(unseen.length && window.GeoSocial?.markMessagesSeen){
-      window.GeoSocial.markMessagesSeen(activeConversation, unseen);
+      window.GeoSocial.markMessagesSeen(activeConversation, unseen, null, { actorId });
     }
   }
 
@@ -517,29 +564,31 @@
       if(!activeConversation) return;
       if(!isTyping){
         isTyping = true;
-        window.GeoSocial?.setTyping && window.GeoSocial.setTyping(activeConversation, true);
+        window.GeoSocial?.setTyping && window.GeoSocial.setTyping(activeConversation, true, { actorId: currentActorId() });
       }
       clearTimeout(typingTimer);
       typingTimer = setTimeout(()=>{
         isTyping = false;
-        window.GeoSocial?.setTyping && window.GeoSocial.setTyping(activeConversation, false);
+        window.GeoSocial?.setTyping && window.GeoSocial.setTyping(activeConversation, false, { actorId: currentActorId() });
       }, 3000);
     });
   }
 
   function handleTypingIndicator(convData){
-    const uid = currentUid();
-    const typingUsers = convData?.typingUsers || {};
+    const actorId = currentActorId();
+    const typingUsers = Object.assign({}, convData?.typingUsers || {}, convData?.typingActors || {});
     const now = Date.now();
     const active = Object.entries(typingUsers).filter(([id, ts])=>{
-      if(id === uid) return false;
-      const t = ts && ts.toMillis ? ts.toMillis() : (ts && ts.seconds ? ts.seconds*1000 : Number(ts||0));
+      if(id === actorId || id === currentUid()) return false;
+      const t = tsMillis(ts);
       return t && (now - t) < 5000;
     });
     const indicator = $('#typingIndicator');
     if(!indicator) return;
     if(active.length){
       indicator.style.display='';
+      const label = actorLabel(active[0][0], convData);
+      indicator.innerHTML = '<div class="typing-name">'+esc(label)+' is typing...</div><div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
     } else {
       indicator.style.display='none';
     }
@@ -847,7 +896,7 @@
     if(!header) return;
     const bizCtx = _activeBizId
       ? '<div class="biz-reply-ctx"><i class="fas fa-store"></i> Replying as <strong>'+esc(_activeBizTitle||'Business')+'</strong></div>'
-      : '';
+      : (activeLabelFromLastSeen(u && u.lastSeen) ? '<div class="header-online"><span class="active-dot"></span>'+esc(activeLabelFromLastSeen(u.lastSeen))+'</div>' : '');
     header.innerHTML=
       '<div class="chat-header-left">'
       +'<button class="back-btn" onclick="document.querySelector(\'.messages-layout\').classList.remove(\'chat-open\')" title="Back"><i class="fas fa-arrow-left"></i></button>'
@@ -957,7 +1006,7 @@
       document.querySelectorAll('.conv-item[data-conv-id="'+cid+'"]').forEach(el=>el.classList.remove('has-unread'));
       const dot=document.querySelector('.conv-item[data-conv-id="'+cid+'"] .conv-unread-dot');
       if(dot) dot.remove();
-    }); }catch(e){}
+    }, { actorId: currentActorId() }); }catch(e){}
     // Also clear actor-level unread (unreadActors array) — remove both old and new format during transition
     try{
       const _rGF = window.GeoFirebase;
@@ -966,7 +1015,8 @@
         const _actorKeyOld2 = _activeBizId ? 'business:' + _activeBizId : 'user:' + _uid2;
         const _actorKeyNew2 = currentActorId();
         _rGF.fs.updateDoc(_rGF.fs.doc(_rGF.db,'conversations',cid), {
-          unreadActors: _rGF.fs.arrayRemove(_actorKeyOld2, _actorKeyNew2)
+          unreadActors: _rGF.fs.arrayRemove(_actorKeyOld2, _actorKeyNew2),
+          updatedAt: _rGF.fs.serverTimestamp()
         }).catch(()=>{});
       }
     }catch(e){}
@@ -1115,7 +1165,7 @@
       if(isTyping){
         isTyping=false;
         clearTimeout(typingTimer);
-        window.GeoSocial?.setTyping && window.GeoSocial.setTyping(activeConversation, false);
+        window.GeoSocial?.setTyping && window.GeoSocial.setTyping(activeConversation, false, { actorId: currentActorId() });
       }
 
       const _sendConvId = activeConversation;
@@ -1610,7 +1660,7 @@
     }
 
     window.addEventListener('pagehide', function(){
-      if(isTyping && activeConversation) try{ window.GeoSocial?.setTyping(activeConversation,false); }catch(e){}
+      if(isTyping && activeConversation) try{ window.GeoSocial?.setTyping(activeConversation,false,{ actorId: currentActorId() }); }catch(e){}
       if(unsubConvs){ try{ unsubConvs(); }catch(e){} unsubConvs=null; }
       if(unsubMsgs){ try{ unsubMsgs(); }catch(e){} unsubMsgs=null; }
       if(unsubReactions){ try{ unsubReactions(); }catch(e){} unsubReactions=null; }

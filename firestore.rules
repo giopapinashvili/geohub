@@ -220,7 +220,7 @@ service cloud.firestore {
 
     function onlyMessageParticipantMetaChanged() {
       return request.resource.data.diff(resource.data).affectedKeys()
-        .hasOnly(['likedBy', 'deletedFor', 'deletedForActors', 'seenBy', 'readBy', 'delivered', 'reactions', 'updatedAt']);
+        .hasOnly(['likedBy', 'deletedFor', 'deletedForActors', 'seenBy', 'readBy', 'seenByActors', 'readByActors', 'delivered', 'reactions', 'updatedAt']);
     }
 
     function onlyMessageSenderEditChanged() {

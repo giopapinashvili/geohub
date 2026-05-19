@@ -2183,6 +2183,8 @@
             likedBy: [],
             readBy: [user.uid],
             seenBy: [user.uid],
+            readByActors: [senderActorId],
+            seenByActors: [senderActorId],
             deletedFor: [],
             delivered: true,
             createdAt: serverTimestamp(),
@@ -2191,6 +2193,9 @@
           return addDoc(collection(db, 'conversations', conversationId, 'messages'), messageDoc).then(function () {
             var patch = { lastMessage: preview, lastSenderId: user.uid, lastMessageSenderActorId: senderActorId, updatedAt: serverTimestamp() };
             patch['readBy.' + user.uid] = serverTimestamp();
+            patch['readByActors.' + senderActorId] = serverTimestamp();
+            patch['typingActors.' + senderActorId] = null;
+            patch['typingUsers.' + user.uid] = null;
             // Restore conversation for all relevant actors:
             // - Sender: unarchive/unhide/undelete their own view
             // - Recipients: unarchive/unhide so new message returns conv to their inbox
@@ -2205,11 +2210,16 @@
             patch.archivedForActors = fs.arrayRemove.apply(null, _restoreActors);
             patch.hiddenForActors   = fs.arrayRemove.apply(null, _restoreKeys);
             patch.deletedForActors  = fs.arrayRemove.apply(null, _restoreActors);
+            var existingUnreadActors = Array.isArray(conv.unreadActors) ? conv.unreadActors.slice() : [];
+            var nextUnreadActors = existingUnreadActors.filter(function(a) { return a !== senderActorId; });
+            function addUnreadActor(a) {
+              if (a && a !== senderActorId && nextUnreadActors.indexOf(a) === -1) nextUnreadActors.push(a);
+            }
             // Determine who gets the unread badge using canonical inboxActorIds where available
             if(inboxActors.length) {
               // Canonical: all inbox actors except the sender
               var recipients = inboxActors.filter(function(a) { return a !== senderActorId; });
-              if(recipients.length) patch.unreadActors = fs.arrayUnion.apply(null, recipients);
+              recipients.forEach(addUnreadActor);
               // Also keep legacy unreadFor (uid-based) for backward compat
               var unreadTarget;
               if(conv.businessId && conv.forBusiness){
@@ -2225,12 +2235,15 @@
                 unreadTarget = senderActorType === 'business' ? (conv.customerUid || '') : (conv.ownerUid || otherId || '');
                 var actorKeyOld = senderActorType === 'business' ? 'user:' + (conv.customerUid || user.uid) : 'business:' + conv.businessId;
                 var actorKeyNew = senderActorType === 'business' ? 'user_' + (conv.customerUid || user.uid) : 'business_' + conv.businessId;
-                patch.unreadActors = fs.arrayUnion(actorKeyOld, actorKeyNew);
+                addUnreadActor(actorKeyOld);
+                addUnreadActor(actorKeyNew);
               } else {
                 unreadTarget = otherId || '';
+                addUnreadActor('user_' + unreadTarget);
               }
               if(unreadTarget && unreadTarget !== user.uid) patch.unreadFor = fs.arrayUnion(unreadTarget);
             }
+            patch.unreadActors = nextUnreadActors;
             return updateDoc(convRef, patch);
           }).then(function () {
             // Determine notification target and link based on sender actor type
@@ -2422,11 +2435,14 @@
       }, function (err) { console.warn('[GeoSocial] listenMessages', err.message); callback([]); });
     }
 
-    function markConversationRead(conversationId, callback) {
+    function markConversationRead(conversationId, callback, options) {
       var uid = currentUid();
       if (!uid || !conversationId) { if(callback) callback(false); return Promise.resolve(false); }
-      var patch = { unreadFor: fs.arrayRemove(uid), updatedAt: serverTimestamp() };
+      var actorId = (options && options.actorId) || (uid ? 'user_' + uid : '');
+      var oldActorId = actorId.indexOf('business_') === 0 ? 'business:' + actorId.slice(9) : 'user:' + uid;
+      var patch = { unreadFor: fs.arrayRemove(uid), unreadActors: fs.arrayRemove(actorId, oldActorId), updatedAt: serverTimestamp() };
       patch['readBy.' + uid] = serverTimestamp();
+      if(actorId) patch['readByActors.' + actorId] = serverTimestamp();
       return updateDoc(doc(db, 'conversations', conversationId), patch)
         .then(function(){ if(callback) callback(true); return true; })
         .catch(function(err){ console.warn('[GeoSocial] markConversationRead', err.message); if(callback) callback(false, err); return false; });
@@ -2571,28 +2587,31 @@
         .catch(function(err){ console.warn('[GeoSocial] editMessage', err.message); toast('Edit failed.', 'error'); if(callback) callback(false, err); });
     }
 
-    function setTyping(conversationId, isTyping) {
+    function setTyping(conversationId, isTyping, options) {
       var uid = currentUid();
       if (!uid || !conversationId) return;
+      var actorId = (options && options.actorId) || (uid ? 'user_' + uid : '');
       var ref = doc(db, 'conversations', conversationId);
-      var field = 'typingUsers.' + uid;
+      var field = 'typingActors.' + actorId;
       var patch = {};
       if (isTyping) {
         patch[field] = serverTimestamp();
       } else {
         patch[field] = fs.deleteField ? fs.deleteField() : null;
       }
+      patch['typingUsers.' + uid] = isTyping ? serverTimestamp() : (fs.deleteField ? fs.deleteField() : null);
       updateDoc(ref, patch).catch(function(e){ console.warn('[GeoSocial] setTyping', e.message); });
     }
 
-    function markMessagesSeen(conversationId, messageIds) {
+    function markMessagesSeen(conversationId, messageIds, callback, options) {
       var uid = currentUid();
       if (!uid || !conversationId || !messageIds || !messageIds.length) return;
+      var actorId = (options && options.actorId) || (uid ? 'user_' + uid : '');
       var batch = fs.writeBatch ? fs.writeBatch(db) : null;
       if (!batch) return;
       messageIds.forEach(function(mid){
         var ref = doc(db, 'conversations', conversationId, 'messages', mid);
-        batch.update(ref, { seenBy: fs.arrayUnion(uid) });
+        batch.update(ref, { seenBy: fs.arrayUnion(uid), readBy: fs.arrayUnion(uid), seenByActors: fs.arrayUnion(actorId), readByActors: fs.arrayUnion(actorId), updatedAt: serverTimestamp() });
       });
       batch.commit().catch(function(e){ console.warn('[GeoSocial] markMessagesSeen', e.message); });
     }
