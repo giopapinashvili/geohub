@@ -69,6 +69,7 @@
   let audioChunks = [];
   let recordingTimer = null;
   let recordingStart = 0;
+  let uploadingAttachment = false;
   let _convFilter = 'all';
   let _searchFilter = '';
   let _routeMode = ''; // 'businessInbox' | 'customerBusinessChat' | 'personalInbox'
@@ -319,6 +320,58 @@
     if(bytes < 1024) return bytes+'B';
     if(bytes < 1024*1024) return (bytes/1024).toFixed(1)+'KB';
     return (bytes/1024/1024).toFixed(1)+'MB';
+  }
+
+  function normalizeAttachments(m){
+    const rows = Array.isArray(m.attachments) ? m.attachments.slice() : [];
+    if(!rows.length && m.mediaUrl){
+      rows.push({
+        type: m.type || m.mediaType || (/^audio/i.test(m.mime||'') ? 'audio' : 'file'),
+        url: m.mediaUrl,
+        name: m.fileName || '',
+        size: m.fileSize || 0,
+        mime: m.mime || '',
+        duration: m.duration || 0
+      });
+    }
+    return rows.filter(a=>a && a.url);
+  }
+
+  function renderAttachment(a){
+    const type = a.type || '';
+    if(type === 'audio'){
+      const dur = a.duration ? Math.round(a.duration) + 's' : '';
+      return '<div class="msg-audio-player"><button class="msg-audio-play" onclick="var a=this.nextElementSibling;a.paused?a.play():a.pause()" type="button"><i class="fas fa-play"></i></button>'
+        + '<audio src="'+esc(a.url)+'" onended="this.currentTime=0" onplay="this.previousElementSibling.innerHTML=\'<i class=\\\"fas fa-pause\\\"></i>\'" onpause="this.previousElementSibling.innerHTML=\'<i class=\\\"fas fa-play\\\"></i>\'"></audio>'
+        + '<div class="msg-audio-wave"></div><span class="msg-audio-dur">'+esc(dur)+'</span></div>';
+    }
+    if(type === 'file'){
+      const size = a.size ? formatFileSize(a.size) : '';
+      return '<a class="msg-file-card" href="'+esc(a.url)+'" target="_blank" rel="noopener">'
+        + '<i class="fas fa-file-alt"></i><div class="msg-file-info"><div class="msg-file-name">'+esc(a.name||'File')+'</div>'
+        + '<div class="msg-file-size">'+esc(size)+'</div></div><i class="fas fa-download"></i></a>';
+    }
+    if(type === 'image' || /^image\//i.test(a.mime||'') || /\.(png|jpe?g|webp|gif)(\?|$)/i.test(a.url)){
+      return '<button class="msg-media-link" type="button" data-msg-image="'+esc(a.url)+'" aria-label="Open image"><img class="msg-image" src="'+esc(a.url)+'" alt="Message image" loading="lazy" decoding="async" onerror="this.style.display=\'none\'"></button>';
+    }
+    return '<a class="msg-file-link" href="'+esc(a.url)+'" target="_blank" rel="noopener">Open attachment</a>';
+  }
+
+  function renderMedia(m){
+    const attachments = normalizeAttachments(m);
+    if(!attachments.length) return '';
+    return '<div class="msg-attachments">'+attachments.map(renderAttachment).join('')+'</div>';
+  }
+
+  function openMessageImage(url){
+    if(!url) return;
+    const existing = document.querySelector('.msg-lightbox');
+    if(existing) existing.remove();
+    const box = document.createElement('div');
+    box.className = 'msg-lightbox';
+    box.innerHTML = '<button class="msg-lightbox-close" type="button" aria-label="Close"><i class="fas fa-times"></i></button><img src="'+esc(url)+'" alt="Message image">';
+    box.addEventListener('click', e=>{ if(e.target === box || e.target.closest('.msg-lightbox-close')) box.remove(); });
+    document.body.appendChild(box);
   }
 
   function convTime(val){
@@ -1091,6 +1144,30 @@
     return await window.GeoSocial.uploadImageDataUrl(dataUrl, 'messages');
   }
 
+  function setAttachmentBusy(busy, label){
+    uploadingAttachment = !!busy;
+    const sendBtn = $('.send-btn') || $('#messageSendBtn');
+    const input = $('#msgInput') || $('#messageInput');
+    const buttons = document.querySelectorAll('[data-pick-image],#fileAttachBtn,#voiceBtn');
+    buttons.forEach(btn=>{ btn.disabled = !!busy; btn.classList.toggle('is-busy', !!busy); });
+    if(sendBtn){
+      sendBtn.disabled = !!busy || !(input && input.value.trim());
+      sendBtn.classList.toggle('is-busy', !!busy);
+      sendBtn.title = busy ? (label || 'Uploading...') : 'Send';
+    }
+  }
+
+  function attachmentFromUpload(type, url, file, extra){
+    return Object.assign({
+      type,
+      url,
+      name: file?.name || (type === 'audio' ? 'Voice message' : ''),
+      size: file?.size || 0,
+      mime: file?.type || '',
+      createdAt: Date.now()
+    }, extra || {});
+  }
+
   async function uploadSelectedFile(file){
     if(!file) return null;
     const allowed = /\.(pdf|doc|docx|txt|xls|xlsx|csv)$/i;
@@ -1106,7 +1183,8 @@
     window.showToast&&window.showToast('Uploading file…');
     const url = await window.GeoSocial.uploadDocumentBlob(file, file.name, uid);
     if(!url){ window.showToast&&window.showToast('Upload failed'); return null; }
-    return { mediaUrl:url, type:'file', fileName:file.name, fileSize:file.size };
+    const attachment = attachmentFromUpload('file', url, file);
+    return { mediaUrl:url, type:'file', fileName:file.name, fileSize:file.size, attachments:[attachment] };
   }
 
   function startVoiceRecording(){
@@ -1121,10 +1199,18 @@
         const blob = new Blob(audioChunks, {type:'audio/webm'});
         if(!activeConversation) return;
         window.showToast&&window.showToast('Uploading voice…');
+        setAttachmentBusy(true, 'Uploading voice...');
         const uid=currentUid();
-        const url = await window.GeoSocial.uploadAudioBlob(blob, uid);
-        if(url) await sendCurrentMsg({ mediaUrl:url, type:'audio', duration });
-        else window.showToast&&window.showToast('Voice upload failed');
+        try{
+          const url = await window.GeoSocial.uploadAudioBlob(blob, uid);
+          setAttachmentBusy(false);
+          if(url) await sendCurrentMsg({ mediaUrl:url, type:'audio', duration, attachments:[attachmentFromUpload('audio', url, { name:'voice.webm', size:blob.size, type:blob.type }, { duration })] });
+          else window.showToast&&window.showToast('Voice upload failed');
+        }catch(err){
+          window.showToast&&window.showToast('Voice upload failed');
+        }finally{
+          setAttachmentBusy(false);
+        }
       };
       recordingStart=Date.now();
       mediaRecorder.start();
@@ -1166,9 +1252,10 @@
     setupTyping();
 
     async function doSend(extra){
-      if(sendingMessage) return;
+      if(sendingMessage || uploadingAttachment) return;
       const text=(input?.value||'').trim();
-      if(!text && !(extra&&extra.mediaUrl) || !activeConversation) return;
+      const hasAttachment = !!(extra && (extra.mediaUrl || (Array.isArray(extra.attachments) && extra.attachments.length)));
+      if((!text && !hasAttachment) || !activeConversation) return;
       sendingMessage = true;
       if(sendBtn) sendBtn.disabled = true;
 
@@ -1206,7 +1293,7 @@
       const _sendConvId = activeConversation;
       window.GeoSocial.sendMessage(activeConversation, text, ok=>{
         if(ok && input) input.value='';
-        if(sendBtn) sendBtn.disabled = !(input && input.value.trim());
+        if(sendBtn) sendBtn.disabled = uploadingAttachment || !(input && input.value.trim());
         const picker=$('#emojiPicker'); if(picker) picker.style.display='none';
         setTimeout(()=>{ sendingMessage=false; }, 350);
         // Force-restore the conv in the left sidebar instantly after send.
@@ -1231,7 +1318,7 @@
           }
         }
       }, payload);
-      setTimeout(()=>{ sendingMessage=false; if(sendBtn) sendBtn.disabled=!(input&&input.value.trim()); }, 4500);
+      setTimeout(()=>{ sendingMessage=false; if(sendBtn) sendBtn.disabled=uploadingAttachment || !(input&&input.value.trim()); }, 4500);
     }
 
     sendCurrentMsg = doSend;
@@ -1245,12 +1332,12 @@
     if(input && !input._rmBound){
       input._rmBound = true;
       input.onkeydown=e=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); doSend(); } };
-      input.addEventListener('input', ()=>{ if(sendBtn) sendBtn.disabled = !input.value.trim(); });
+      input.addEventListener('input', ()=>{ if(sendBtn) sendBtn.disabled = uploadingAttachment || !input.value.trim(); });
     }
     if(sendBtn && !sendBtn._rmBound){
       sendBtn._rmBound = true;
       sendBtn.onclick=e=>{ e.preventDefault(); doSend(); };
-      sendBtn.disabled = !(input && input.value.trim());
+      sendBtn.disabled = uploadingAttachment || !(input && input.value.trim());
     }
     document.querySelectorAll('[data-toggle-emoji]').forEach(btn=>{ if(!btn._rmBound){ btn._rmBound=true; btn.onclick=window.toggleEmojiPicker; } });
     document.querySelectorAll('[data-pick-image]').forEach(btn=>{ if(!btn._rmBound){ btn._rmBound=true; btn.onclick=()=>$('#messageImageInput')?.click(); } });
@@ -1263,11 +1350,15 @@
         fileInput.value='';
         if(!file || !activeConversation) return;
         try{
+          setAttachmentBusy(true, 'Uploading photo...');
           window.showToast && window.showToast('Uploading photo...');
           const url=await uploadSelectedImage(file);
-          if(url) await doSend({ mediaUrl:url, mediaType:'image' });
+          setAttachmentBusy(false);
+          if(url) await doSend({ mediaUrl:url, mediaType:'image', attachments:[attachmentFromUpload('image', url, file)] });
         }catch(err){
           window.showToast && window.showToast('Image upload failed');
+        }finally{
+          setAttachmentBusy(false);
         }
       };
     }
@@ -1279,8 +1370,17 @@
         const file=docInput.files && docInput.files[0];
         docInput.value='';
         if(!file || !activeConversation) return;
-        const extra=await uploadSelectedFile(file);
-        if(extra) await doSend(extra);
+        try{
+          setAttachmentBusy(true, 'Uploading file...');
+          window.showToast && window.showToast('Uploading file...');
+          const extra=await uploadSelectedFile(file);
+          setAttachmentBusy(false);
+          if(extra) await doSend(extra);
+        }catch(err){
+          window.showToast && window.showToast('File upload failed');
+        }finally{
+          setAttachmentBusy(false);
+        }
       };
     }
 
@@ -1304,6 +1404,12 @@
     if(window.__GeoHubMessagesV2ClicksBound) return;
     window.__GeoHubMessagesV2ClicksBound = true;
     document.addEventListener('click', e=>{
+      const img=e.target.closest('[data-msg-image]');
+      if(img){
+        e.preventDefault();
+        openMessageImage(img.dataset.msgImage);
+        return;
+      }
       const react=e.target.closest('[data-msg-reaction]');
       if(react){
         const row=react.closest('[data-message-id]');

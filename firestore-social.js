@@ -2147,8 +2147,19 @@
       var mediaType = String(extra.mediaType || extra.type || '').trim();
       var fileName = String(extra.fileName || '').trim();
       var fileSize = Number(extra.fileSize || 0) || 0;
+      var attachments = Array.isArray(extra.attachments) ? extra.attachments.filter(function(a){ return a && a.url; }).map(function(a){
+        return {
+          type: String(a.type || '').trim() || 'file',
+          url: String(a.url || '').trim(),
+          name: String(a.name || '').trim(),
+          size: Number(a.size || 0) || 0,
+          mime: String(a.mime || '').trim(),
+          duration: Number(a.duration || 0) || 0,
+          createdAt: a.createdAt || Date.now()
+        };
+      }) : [];
       var replyTo = extra.replyTo && typeof extra.replyTo === 'object' ? extra.replyTo : null;
-      if (!cleanText && !mediaUrl) return;
+      if (!cleanText && !mediaUrl && !attachments.length) return;
       requireAuth(function (user) {
         var me = meData() || {};
         var convRef = doc(db, 'conversations', conversationId);
@@ -2156,7 +2167,8 @@
           if (!snap.exists()) throw new Error('Conversation not found');
           var conv = snap.data() || {};
           var otherId = (conv.participants || []).find(function (id) { return id !== user.uid; });
-          var preview = cleanText || (mediaType === 'image' ? '📷 Photo' : (fileName ? '📎 ' + fileName : 'Attachment'));
+          var firstAttachment = attachments[0] || null;
+          var preview = cleanText || (firstAttachment && firstAttachment.type === 'image' ? '📷 Photo' : (firstAttachment && firstAttachment.type === 'audio' ? 'Voice message' : (fileName || (firstAttachment && firstAttachment.name) ? '📎 ' + (fileName || firstAttachment.name) : 'Attachment')));
           var senderActorType = extra.senderActorType || 'user';
           // Canonical actor ID: 'user_{uid}' or 'business_{bizId}' — never raw UID or bizId alone
           var rawActorId = extra.senderActorId || (senderActorType === 'business' ? (extra.businessId || '') : user.uid);
@@ -2182,6 +2194,7 @@
             mediaType: mediaType || '',
             fileName: fileName || '',
             fileSize: fileSize,
+            attachments: attachments,
             replyTo: replyTo,
             likedBy: [],
             readBy: [user.uid],
