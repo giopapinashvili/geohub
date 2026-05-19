@@ -21,6 +21,7 @@
   let activeConvData = null;
   let _activeBizId = null;   // set when in business INBOX mode (?business=BIZ_ID)
   let _activeBizTitle = '';
+  let _activeBizLogo = '';   // logo url for business inbox mode
   let _withBizId = '';       // set when in customer-side biz chat (?withBusiness=BIZ_ID)
   let _withBizTitle = '';
   let _withBizLogo = '';
@@ -96,11 +97,17 @@
     let unreadCount=0;
     for(const c of baseConvs){
       let oid, u, isBiz=false;
-      if(c.forBusiness && c.businessId && !_activeBizId){
-        // Personal/customer view of a business conversation: show the business as contact
-        oid = c.businessId;
-        u = { id: c.businessId, name: c.businessName || 'Business', avatar: c.businessLogo || '' };
-        isBiz = true;
+      if(c.forBusiness && c.businessId){
+        if(_activeBizId){
+          // Business INBOX view: show the customer as the contact
+          oid = c.customerUid || otherId(c) || '';
+          u = oid ? await userInfo(oid) : { id: '', name: 'Customer', avatar: '' };
+        } else {
+          // Personal/customer sidebar: show business as the contact
+          oid = c.businessId;
+          u = { id: c.businessId, name: c.businessName || 'Business', avatar: c.businessLogo || '' };
+          isBiz = true;
+        }
       } else {
         oid = otherId(c);
         u = await userInfo(oid);
@@ -199,7 +206,10 @@
 
   function receiptIcon(m){
     const uid = currentUid();
-    if(m.senderId !== uid && m.authorId !== uid) return '';
+    const isMine = _activeBizId
+      ? (m.senderActorType === 'business' ? m.senderActorId === _activeBizId : (m.senderActorType == null && (m.senderId === uid || m.authorId === uid)))
+      : (m.senderId === uid || m.authorId === uid);
+    if(!isMine) return '';
     const seenBy = Array.isArray(m.seenBy) ? m.seenBy.filter(id=>id!==uid) : [];
     if(seenBy.length) return '<span class="msg-receipt seen" title="Seen">✓✓</span>';
     if(m.delivered) return '<span class="msg-receipt delivered" title="Delivered">✓✓</span>';
@@ -237,7 +247,18 @@
     }
     const wasAtBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 60;
     box.innerHTML=visible.map(m=>{
-      const mine = m.senderId===uid || m.authorId===uid;
+      let mine;
+      if(_activeBizId){
+        // Business inbox: "mine" = messages sent as this business page
+        mine = m.senderActorType === 'business' ? m.senderActorId === _activeBizId
+          : (m.senderActorType == null && (m.senderId === uid || m.authorId === uid));
+      } else if(_withBizId){
+        // Customer biz chat: "mine" = messages sent as this user (not as business)
+        mine = m.senderActorType === 'user' ? (m.senderActorId === uid || m.senderId === uid)
+          : (m.senderActorType == null && (m.senderId === uid || m.authorId === uid));
+      } else {
+        mine = m.senderId === uid || m.authorId === uid;
+      }
       const summary = summarizeReactions(m.id);
       const deleted = !!m.deleted;
       const text = deleted ? '<em>Message deleted</em>' : esc(m.text||'');
@@ -543,8 +564,19 @@
     activeConvData = conv;
     convNicknames = conv?.nicknames || {};
     applyTheme(conv?.theme || '');
-    const oid = conv ? otherId(conv) : '';
-    const u = await userInfo(oid);
+    let oid, u;
+    if(_activeBizId && conv && conv.forBusiness){
+      // Business inbox: header shows customer info
+      oid = conv.customerUid || otherId(conv) || '';
+      u = oid ? await userInfo(oid) : { id: '', name: 'Customer', avatar: '' };
+    } else if(_withBizId && conv && conv.forBusiness){
+      // Customer biz chat: header shows business info
+      oid = conv.businessId || _withBizId;
+      u = { id: oid, name: conv.businessName || _withBizTitle || 'Business', avatar: conv.businessLogo || _withBizLogo || '' };
+    } else {
+      oid = conv ? otherId(conv) : '';
+      u = await userInfo(oid);
+    }
     buildHeader(u, conv);
 
     const GF = window.GeoFirebase;
@@ -697,9 +729,11 @@
         payload.senderActorType = 'business';
         payload.senderActorId = _activeBizId;
         payload.senderName = _activeBizTitle || 'Business';
+        payload.senderAvatar = _activeBizLogo || '';
       } else {
         payload.senderActorType = 'user';
         payload.senderActorId = currentUid();
+        payload.senderAvatar = (_userCache[currentUid()] || {}).avatar || '';
       }
       if(replyState){
         payload.replyTo = {
@@ -866,6 +900,7 @@
       const title = biz.title || biz.name || 'Business';
       const logo = biz.logoUrl || '';
       _activeBizTitle = title;
+      _activeBizLogo = logo;
       const titleSpan = document.getElementById('bizInboxTitle');
       if (titleSpan) titleSpan.textContent = title + ' Inbox';
       if (logo) {
@@ -998,6 +1033,7 @@
         // Create/merge conversation doc (setDoc merge:true is idempotent)
         const convDoc = {
           participants: customerUid === ownerUid ? [customerUid] : [customerUid, ownerUid],
+          participantActors: ['user:' + customerUid, 'business:' + withBizParam],
           businessId: withBizParam,
           businessName: _withBizTitle,
           businessLogo: _withBizLogo,
@@ -1007,6 +1043,7 @@
           updatedAt: GF.fs.serverTimestamp(),
           lastMessage: '',
           unreadFor: [],
+          unreadActors: [],
           readBy: {}
         };
         GF.fs.setDoc(
@@ -1048,6 +1085,7 @@
       // ── Business inbox (page identity) mode ──────────────────
       _activeBizId = bizParam;
       _activeBizTitle = '';
+      _activeBizLogo = '';
       _withBizId = '';
       _withBizTitle = '';
       _withBizLogo = '';
@@ -1066,6 +1104,15 @@
       if(chatHdr) chatHdr.innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:16px;color:var(--text-muted);font-size:.9rem"><i class="fas fa-store" style="color:#10b981;font-size:1.1rem"></i><span>Select a conversation</span></div>';
       setBizInboxHeader(bizParam);
       syncBizActor(bizParam); // async — validates owner/admin, fires GeoActorChanged
+      // Migration: patch the owner's own-page conv (biz_{bizId}_{uid}) with businessId/forBusiness
+      // if it was created before Phase 54C and lacks these fields.
+      const _mGF = window.GeoFirebase;
+      if(_mGF && _mGF.fs && _mGF.db){
+        _mGF.fs.updateDoc(
+          _mGF.fs.doc(_mGF.db, 'conversations', 'biz_' + bizParam + '_' + currentUid()),
+          { businessId: bizParam, forBusiness: true }
+        ).catch(() => {});
+      }
       unsubConvs = window.GeoSocial.listenBusinessConversations(bizParam, function(convs){
         window.__geohubLastConvs = convs || [];
         renderConvs(convs || []);

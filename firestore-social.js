@@ -2141,6 +2141,7 @@
           var senderActorType = extra.senderActorType || 'user';
           var senderActorId   = extra.senderActorId   || user.uid;
           var senderName      = extra.senderName      || me.name || user.displayName || 'GeoHub User';
+          var senderAvatar    = extra.senderAvatar    || me.avatar || '';
           var messageDoc = {
             conversationId: conversationId,
             senderId: user.uid,
@@ -2148,6 +2149,7 @@
             senderActorType: senderActorType,
             senderActorId:   senderActorId,
             senderName:      senderName,
+            senderAvatar:    senderAvatar,
             text: cleanText,
             mediaUrl: mediaUrl || '',
             mediaType: mediaType || '',
@@ -2163,8 +2165,23 @@
             updatedAt: serverTimestamp()
           };
           return addDoc(collection(db, 'conversations', conversationId, 'messages'), messageDoc).then(function () {
-            var patch = { lastMessage: preview, lastSenderId: user.uid, updatedAt: serverTimestamp(), unreadFor: (otherId && otherId !== user.uid) ? fs.arrayUnion(otherId) : [] };
+            var patch = { lastMessage: preview, lastSenderId: user.uid, updatedAt: serverTimestamp() };
             patch['readBy.' + user.uid] = serverTimestamp();
+            // Determine who gets the unread badge — use actor context for business convs
+            var unreadTarget;
+            if(conv.businessId && conv.forBusiness){
+              unreadTarget = senderActorType === 'business'
+                ? (conv.customerUid || '')
+                : (conv.ownerUid || otherId || '');
+              // Track actor-level unread for business convs
+              var actorKey = senderActorType === 'business'
+                ? 'user:' + (conv.customerUid || user.uid)
+                : 'business:' + conv.businessId;
+              patch.unreadActors = fs.arrayUnion(actorKey);
+            } else {
+              unreadTarget = otherId || '';
+            }
+            if(unreadTarget && unreadTarget !== user.uid) patch.unreadFor = fs.arrayUnion(unreadTarget);
             return updateDoc(convRef, patch);
           }).then(function () {
             // Determine notification target and link based on sender actor type

@@ -2292,7 +2292,9 @@
 
     openMessage: function() {
       if (!_currentUser) { showToast('Sign in to message this page', false); window.location.href='auth.html'; return; }
-      window.location.href = 'messages.html?withBusiness=' + encodeURIComponent(BIZ_ID);
+      window.location.href = _isActingAsPage
+        ? 'messages.html?business=' + encodeURIComponent(BIZ_ID)
+        : 'messages.html?withBusiness=' + encodeURIComponent(BIZ_ID);
     },
 
     switchToPage: function() {
