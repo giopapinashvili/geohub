@@ -61,6 +61,7 @@
   let searchActive = false;
   let typingTimer = null;
   let isTyping = false;
+  let lastTypingWrite = 0;
   let convSettings = {};
   let convTheme = '';
   let convNicknames = {};
@@ -361,6 +362,20 @@
     return convNicknames[actorId] || _userCache[actorId]?.name || 'Someone';
   }
 
+  function typingActorMeta(){
+    const actorId = currentActorId();
+    if(actorId.startsWith('business_')){
+      return { actorId, name:_activeBizTitle || activeConvData?.businessName || 'Business', avatar:_activeBizLogo || activeConvData?.businessLogo || '' };
+    }
+    const user = window.GeoFirebase?.auth?.currentUser;
+    return { actorId, name:user?.displayName || (user?.email ? user.email.split('@')[0] : 'GeoHub User'), avatar:user?.photoURL || '' };
+  }
+
+  function typingTime(value){
+    if(value && typeof value === 'object' && !value.toMillis && !value.seconds) return tsMillis(value.at);
+    return tsMillis(value);
+  }
+
   function renderReplyQuote(m){
     if(!m.replyTo) return '';
     return '<div class="msg-reply-quote"><span class="msg-reply-quote-name">'+esc(m.replyTo.senderName||'User')+'</span>'
@@ -562,15 +577,30 @@
     input._typingBound = true;
     input.addEventListener('input', ()=>{
       if(!activeConversation) return;
-      if(!isTyping){
+      const text = (input.value || '').trim();
+      const meta = typingActorMeta();
+      if(!text){
+        isTyping = false;
+        lastTypingWrite = 0;
+        clearTimeout(typingTimer);
+        dbg('typing clear empty', { conversationId: activeConversation, currentActorId: meta.actorId });
+        window.GeoSocial?.setTyping && window.GeoSocial.setTyping(activeConversation, false, meta);
+        return;
+      }
+      const now = Date.now();
+      if(!isTyping || now - lastTypingWrite > 1800){
         isTyping = true;
-        window.GeoSocial?.setTyping && window.GeoSocial.setTyping(activeConversation, true, { actorId: currentActorId() });
+        lastTypingWrite = now;
+        dbg('typing write', { conversationId: activeConversation, currentActorId: meta.actorId, payload: meta });
+        window.GeoSocial?.setTyping && window.GeoSocial.setTyping(activeConversation, true, meta);
       }
       clearTimeout(typingTimer);
       typingTimer = setTimeout(()=>{
         isTyping = false;
-        window.GeoSocial?.setTyping && window.GeoSocial.setTyping(activeConversation, false, { actorId: currentActorId() });
-      }, 3000);
+        lastTypingWrite = 0;
+        dbg('typing clear idle', { conversationId: activeConversation, currentActorId: meta.actorId });
+        window.GeoSocial?.setTyping && window.GeoSocial.setTyping(activeConversation, false, meta);
+      }, 4000);
     });
   }
 
@@ -578,16 +608,19 @@
     const actorId = currentActorId();
     const typingUsers = Object.assign({}, convData?.typingUsers || {}, convData?.typingActors || {});
     const now = Date.now();
-    const active = Object.entries(typingUsers).filter(([id, ts])=>{
+    dbg('typing read', { conversationId: activeConversation, currentActorId: actorId, typingActors: convData?.typingActors || {}, typingUsers: convData?.typingUsers || {} });
+    const active = Object.entries(typingUsers).filter(([id, entry])=>{
       if(id === actorId || id === currentUid()) return false;
-      const t = tsMillis(ts);
+      const t = typingTime(entry);
       return t && (now - t) < 5000;
     });
+    dbg('typing active filtered', active);
     const indicator = $('#typingIndicator');
     if(!indicator) return;
     if(active.length){
       indicator.style.display='';
-      const label = actorLabel(active[0][0], convData);
+      const entry = active[0][1];
+      const label = entry && typeof entry === 'object' && entry.name ? entry.name : actorLabel(active[0][0], convData);
       indicator.innerHTML = '<div class="typing-name">'+esc(label)+' is typing...</div><div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
     } else {
       indicator.style.display='none';
@@ -1165,7 +1198,9 @@
       if(isTyping){
         isTyping=false;
         clearTimeout(typingTimer);
-        window.GeoSocial?.setTyping && window.GeoSocial.setTyping(activeConversation, false, { actorId: currentActorId() });
+        const meta = typingActorMeta();
+        dbg('typing clear send', { conversationId: activeConversation, currentActorId: meta.actorId });
+        window.GeoSocial?.setTyping && window.GeoSocial.setTyping(activeConversation, false, meta);
       }
 
       const _sendConvId = activeConversation;
@@ -1660,7 +1695,7 @@
     }
 
     window.addEventListener('pagehide', function(){
-      if(isTyping && activeConversation) try{ window.GeoSocial?.setTyping(activeConversation,false,{ actorId: currentActorId() }); }catch(e){}
+      if(isTyping && activeConversation) try{ window.GeoSocial?.setTyping(activeConversation,false,typingActorMeta()); }catch(e){}
       if(unsubConvs){ try{ unsubConvs(); }catch(e){} unsubConvs=null; }
       if(unsubMsgs){ try{ unsubMsgs(); }catch(e){} unsubMsgs=null; }
       if(unsubReactions){ try{ unsubReactions(); }catch(e){} unsubReactions=null; }

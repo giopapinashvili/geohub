@@ -181,6 +181,9 @@
 
   // ── Main setup (runs once Firebase is ready) ──────────────────────────
   function setup(GF) {
+    var debugMessages = false;
+    try { debugMessages = new URLSearchParams(location.search).get('debugMessages') === '1'; } catch(e) {}
+    function dbgMessages() { if (debugMessages) console.log.apply(console, ['[GeoSocial Msg]'].concat(Array.prototype.slice.call(arguments))); }
     var db  = GF.db;
     var auth = GF.auth;
     var fs  = GF.fs;
@@ -2595,12 +2598,17 @@
       var field = 'typingActors.' + actorId;
       var patch = {};
       if (isTyping) {
-        patch[field] = serverTimestamp();
+        patch[field] = {
+          name: (options && options.name) || (meData() || {}).name || 'GeoHub User',
+          avatar: (options && options.avatar) || (meData() || {}).avatar || '',
+          at: serverTimestamp()
+        };
       } else {
         patch[field] = fs.deleteField ? fs.deleteField() : null;
       }
       patch['typingUsers.' + uid] = isTyping ? serverTimestamp() : (fs.deleteField ? fs.deleteField() : null);
-      updateDoc(ref, patch).catch(function(e){ console.warn('[GeoSocial] setTyping', e.message); });
+      dbgMessages('setTyping', { conversationId: conversationId, actorId: actorId, patch: patch });
+      updateDoc(ref, patch).catch(function(e){ dbgMessages('setTyping error', e); console.warn('[GeoSocial] setTyping', e.message); });
     }
 
     function markMessagesSeen(conversationId, messageIds, callback, options) {
