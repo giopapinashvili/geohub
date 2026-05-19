@@ -191,69 +191,11 @@
     });
   }
 
-  // Patch messages page: select conversations from sidebar, open ?with target, and keep composer active.
-  function installMessagesFix(){
-    if(!/messages\.html|\/messages/.test(location.pathname)) return;
-    const _v6p = new URLSearchParams(location.search);
-    if(_v6p.has('business') || _v6p.has('withBusiness')) return;
-    // Bail if active identity is a business page — real-messages.js handles the redirect
-    try{
-      const _v6a = JSON.parse(localStorage.getItem('gh_active_actor')||'null');
-      if(_v6a && _v6a.type === 'business' && _v6a.businessId) return;
-    }catch(e){}
-    waitReady(function(){
-      const GF=window.GeoFirebase, fs=GF.fs, db=GF.db;
-      let active=null, unsubMsgs=null, unsubConvs=null, sending=false;
-      const uid=()=>GF.auth.currentUser && GF.auth.currentUser.uid;
-      const convList=$('#convList'), chat=$('#chatMessages'), header=$('#chatHeader'), input=$('#msgInput'), sendBtn=$('.send-btn');
-      async function userName(id){
-        try{ const s=await fs.getDoc(fs.doc(db,'users',id)); if(s.exists()){const d=s.data(); return d.fullName||d.displayName||d.username||d.email||'GeoHub User';}}catch(e){}
-        return 'GeoHub User';
-      }
-      function other(conv){ return (conv.participants||[]).find(x=>x!==uid()) || ''; }
-      async function renderConvs(items){
-        if(!convList) return;
-        if(!items.length){ convList.innerHTML='<div class="conv-empty"><i class="fas fa-inbox"></i><p>No conversations yet</p></div>'; return; }
-        const rows=[];
-        for(const c of items){ rows.push({c,name:await userName(other(c))}); }
-        convList.innerHTML=rows.map(({c,name})=>'<div class="conv-item '+(c.id===active?'active':'')+'" data-conv-id="'+esc(c.id)+'"><div class="conv-av-wrap"><div class="av-placeholder">'+esc((name||'U')[0])+'</div></div><div class="conv-info"><div class="conv-top-row"><span class="conv-name">'+esc(name)+'</span></div><div class="conv-bottom-row"><span class="conv-preview">'+esc(c.lastMessage||'No messages yet')+'</span></div></div></div>').join('');
-      }
-      function renderMessages(items){
-        if(!chat) return;
-        if(!items.length){ chat.innerHTML='<div class="chat-empty"><i class="fas fa-comment-dots"></i><p>No messages yet</p></div>'; return; }
-        chat.innerHTML=items.map(m=>'<div class="msg-row '+(m.senderId===uid()?'sent':'received')+'"><div class="msg-col"><div class="msg-bubble-wrap"><div class="msg-bubble '+(m.senderId===uid()?'bubble-sent':'bubble-recv')+'">'+esc(m.text||'')+'</div></div></div></div>').join('');
-        chat.scrollTop=chat.scrollHeight;
-      }
-      function openConv(cid){
-        active=cid;
-        if(header) header.innerHTML='<div style="padding:18px 20px;font-weight:700">Messages</div>';
-        if(unsubMsgs) unsubMsgs();
-        unsubMsgs=window.GeoSocial.listenMessages(cid, renderMessages);
-        renderConvsCache();
-      }
-      let convCache=[];
-      function renderConvsCache(){ renderConvs(convCache); }
-      async function send(){
-        if(sending||!active||!input) return;
-        const text=(input.value||'').trim(); if(!text) return;
-        sending=true;
-        await window.GeoSocial.sendMessage(active,text,function(){ input.value=''; });
-        setTimeout(()=>sending=false,500);
-      }
-      if(sendBtn) sendBtn.onclick=function(e){e.preventDefault();send();};
-      if(input) input.onkeydown=function(e){ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} };
-      document.addEventListener('click', e=>{ const row=e.target.closest('[data-conv-id]'); if(row) openConv(row.dataset.convId); });
-
-      function init(){
-        if(!uid()) return setTimeout(init,200);
-        const target=new URLSearchParams(location.search).get('with');
-        if(target){ window.GeoSocial.startConversation(target, cid=>openConv(cid)); }
-        if(unsubConvs) unsubConvs();
-        unsubConvs=window.GeoSocial.listenConversations(items=>{ convCache=items||[]; renderConvs(convCache); if(!active && convCache[0]) openConv(convCache[0].id); });
-      }
-      init();
-    });
-  }
+  // Phase 56C: installMessagesFix() is fully disabled.
+  // real-messages.js owns the messages page entirely — routing, listeners,
+  // rendering, and the composer. This legacy v6 patch must not start any
+  // listenConversations() call or touch the conv list on messages.html.
+  function installMessagesFix(){ /* no-op — see real-messages.js */ }
 
   document.addEventListener('DOMContentLoaded', function(){
     setTimeout(installComposerFix,700);

@@ -1,6 +1,26 @@
 (function(){
   'use strict';
 
+  // ── Synchronous pre-redirect ──────────────────────────────────────────────
+  // Runs at script-parse time — before auth polling, GeoSocial wait, or any
+  // listener setup. If the active actor is a business page and the URL has no
+  // explicit route param, redirect to ?business=BIZ_ID and shut down this
+  // module immediately so NOTHING else in the IIFE executes.
+  // This is the hard barrier that prevents personal inbox from rendering even
+  // for a single frame when the user is in page/business mode.
+  {
+    const _sp = new URLSearchParams(location.search);
+    if (!_sp.has('business') && !_sp.has('withBusiness') && !_sp.has('with')) {
+      try {
+        const _sa = JSON.parse(localStorage.getItem('gh_active_actor') || 'null');
+        if (_sa && _sa.type === 'business' && _sa.businessId) {
+          location.replace(location.pathname + '?business=' + encodeURIComponent(_sa.businessId));
+          return; // Stop the entire module — page is navigating
+        }
+      } catch(_se) {}
+    }
+  }
+
   const REACTIONS = ['👍','❤️','😂','😮','😢','😡'];
   const EMOJIS = ['😀','😁','😂','🤣','😊','😍','😘','😎','😢','😭','😡','👍','👎','👏','🙏','💪','🔥','❤️','💚','💯','🎉','✨','🇬🇪'];
   const THEMES = [
@@ -47,6 +67,7 @@
   let recordingStart = 0;
   let _convFilter = 'all';
   let _searchFilter = '';
+  let _routeMode = ''; // 'businessInbox' | 'customerBusinessChat' | 'personalInbox'
   const _userCache = {};
 
   function whenReady(cb){
@@ -96,9 +117,19 @@
     // Phase 56: filter conversations hidden by current actor (per-identity hide)
     const _curActorKey = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
     const visibleConvs = baseConvs.filter(c => !(Array.isArray(c.hiddenForActors) && c.hiddenForActors.includes(_curActorKey)));
+    // Phase 56C: defense-in-depth route-mode filter (primary filtering is in firestore-social.js
+    // and in listener guards above; this is a last-resort safeguard).
+    // Personal/customer mode: never show page-admin convs (user is admin but not the customer).
+    // Business mode: never show personal user-to-user convs or other-business convs.
+    const _uid0 = currentUid();
+    const routeConvs = (_routeMode === 'personalInbox' || _routeMode === 'customerBusinessChat')
+      ? visibleConvs.filter(c => !c.forBusiness || c.customerUid === _uid0)
+      : (_routeMode === 'businessInbox')
+        ? visibleConvs.filter(c => !!c.forBusiness && c.businessId === _activeBizId)
+        : visibleConvs;
     const rows=[];
     let unreadCount=0;
-    for(const c of visibleConvs){
+    for(const c of routeConvs){
       let oid, u, isBiz=false;
       if(c.forBusiness && c.businessId){
         if(_activeBizId){
@@ -1084,6 +1115,7 @@
     if(withBizParam){
       // ── Customer-side business chat ─────────────────────────────
       // Personal identity stays; topbar remains personal user
+      _routeMode = 'customerBusinessChat';
       _activeBizId = null;
       _activeBizTitle = '';
       _withBizId = withBizParam;
@@ -1171,6 +1203,7 @@
 
       // Personal inbox sidebar — shows all personal convs including this biz conv
       unsubConvs = window.GeoSocial.listenConversations(function(convs){
+        if (_routeMode !== 'customerBusinessChat') return; // guard: never render personal data in page mode
         window.__geohubLastConvs = convs || [];
         renderConvs(convs || []);
         // Re-highlight the active biz conv after sidebar re-renders
@@ -1182,6 +1215,7 @@
       });
     } else if(bizParam && window.GeoSocial.listenBusinessConversations){
       // ── Business inbox (page identity) mode ──────────────────
+      _routeMode = 'businessInbox';
       _activeBizId = bizParam;
       _activeBizTitle = '';
       _activeBizLogo = '';
@@ -1213,6 +1247,7 @@
         ).catch(() => {});
       }
       unsubConvs = window.GeoSocial.listenBusinessConversations(bizParam, function(convs){
+        if (_routeMode !== 'businessInbox') return; // guard: never let a stale business listener pollute personal mode
         window.__geohubLastConvs = convs || [];
         renderConvs(convs || []);
         if(cidParam && !activeConversation){
@@ -1236,6 +1271,7 @@
       });
     } else {
       // ── Personal inbox mode ───────────────────────────────────
+      _routeMode = 'personalInbox';
       _activeBizId = null;
       _activeBizTitle = '';
       _withBizId = '';
@@ -1243,6 +1279,7 @@
       _withBizLogo = '';
       if(target){ window.GeoSocial.startConversation(target, cid=>openConversation(cid)); }
       unsubConvs=window.GeoSocial.listenConversations(convs=>{
+        if (_routeMode !== 'personalInbox') return; // guard: never let personal listener run in page mode
         window.__geohubLastConvs = convs || [];
         renderConvs(convs || []);
         if(!activeConversation && convs && convs[0]) openConversation(convs[0].id);
