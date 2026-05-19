@@ -96,20 +96,20 @@
   function mobileMenuHtml() {
     return '<div class="mobile-account-panel" id="ghMobileAccountSlot"></div>' +
       '<div class="mobile-menu-group"><div class="mobile-menu-title">Main</div>' +
-        '<a href="feed.html"><i class="fas fa-house"></i><span>Feed</span></a>' +
-        '<a href="search.html"><i class="fas fa-magnifying-glass"></i><span>Explore / Search</span></a>' +
-        '<a href="messages.html"><i class="fas fa-comment-dots"></i><span>Messages</span></a>' +
-        '<a href="notifications.html"><i class="fas fa-bell"></i><span>Notifications</span></a>' +
-        '<a href="places.html"><i class="fas fa-location-dot"></i><span>Places</span></a>' +
-        '<a href="groups.html"><i class="fas fa-users"></i><span>Groups</span></a>' +
-        '<a href="events.html"><i class="fas fa-calendar"></i><span>Events</span></a>' +
-        '<a href="rewards.html"><i class="fas fa-gift"></i><span>Rewards</span></a>' +
+        '<a class="gh-mobile-menu-row" href="feed.html"><i class="fas fa-house"></i><span>Feed</span></a>' +
+        '<a class="gh-mobile-menu-row" href="search.html"><i class="fas fa-magnifying-glass"></i><span>Explore / Search</span></a>' +
+        '<a class="gh-mobile-menu-row" href="messages.html"><i class="fas fa-comment-dots"></i><span>Messages</span></a>' +
+        '<a class="gh-mobile-menu-row" href="notifications.html"><i class="fas fa-bell"></i><span>Notifications</span></a>' +
+        '<a class="gh-mobile-menu-row" href="places.html"><i class="fas fa-location-dot"></i><span>Places</span></a>' +
+        '<a class="gh-mobile-menu-row" href="groups.html"><i class="fas fa-users"></i><span>Groups</span></a>' +
+        '<a class="gh-mobile-menu-row" href="events.html"><i class="fas fa-calendar"></i><span>Events</span></a>' +
+        '<a class="gh-mobile-menu-row" href="rewards.html"><i class="fas fa-gift"></i><span>Rewards</span></a>' +
       '</div>' +
       '<div class="mobile-menu-group"><div class="mobile-menu-title">Account</div>' +
-        '<a href="profile.html"><i class="fas fa-user"></i><span>Profile</span></a>' +
-        '<a href="business.html"><i class="fas fa-store"></i><span>Businesses</span></a>' +
-        '<a href="add-business.html"><i class="fas fa-plus-circle"></i><span>Add Page</span></a>' +
-        '<button type="button" class="mobile-menu-danger" data-gh-mobile-logout><i class="fas fa-right-from-bracket"></i><span>Logout</span></button>' +
+        '<a class="gh-mobile-menu-row" href="profile.html"><i class="fas fa-user"></i><span>Profile</span></a>' +
+        '<a class="gh-mobile-menu-row" href="business.html"><i class="fas fa-store"></i><span>Businesses</span></a>' +
+        '<a class="gh-mobile-menu-row" href="add-business.html"><i class="fas fa-plus-circle"></i><span>Add Page</span></a>' +
+        '<button type="button" class="gh-mobile-menu-row mobile-menu-danger gh-mobile-menu-danger" data-gh-mobile-logout><i class="fas fa-right-from-bracket"></i><span>Logout</span></button>' +
       '</div>';
   }
 

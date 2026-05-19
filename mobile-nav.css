@@ -615,3 +615,92 @@
   }
 }
 img { content-visibility: auto; }
+
+/* ── MOBILE MENU PANEL + ROW STYLES ───────────────────────────── */
+
+/* Panel: background and layout when open */
+.mobile-menu {
+  background: rgba(8, 12, 22, 0.98);
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+}
+
+.mobile-menu-group {
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 4px 0 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.mobile-menu-group:last-child {
+  border-bottom: 0;
+}
+
+.mobile-menu-title {
+  display: block !important;
+  font-size: 0.63rem !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  color: var(--text-muted, #64748b) !important;
+  padding: 8px 14px 4px !important;
+}
+
+/* Stable row class — beats any page-specific link reset */
+.gh-mobile-menu-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  min-height: 46px !important;
+  padding: 12px 14px !important;
+  border-radius: 12px !important;
+  background: transparent !important;
+  color: var(--text-primary, #f1f5f9) !important;
+  text-decoration: none !important;
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  border: 0 !important;
+  font-family: inherit !important;
+  width: 100% !important;
+  text-align: left !important;
+  -webkit-tap-highlight-color: transparent !important;
+  transition: background 0.15s !important;
+  box-sizing: border-box !important;
+}
+.gh-mobile-menu-row:hover,
+.gh-mobile-menu-row:active {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: var(--text-primary, #f1f5f9) !important;
+  text-decoration: none !important;
+}
+.gh-mobile-menu-row i {
+  width: 18px !important;
+  text-align: center !important;
+  flex-shrink: 0 !important;
+  color: var(--gh-green, #10b981) !important;
+  font-size: 0.95rem !important;
+}
+
+/* Danger variant */
+.gh-mobile-menu-danger,
+.mobile-menu-danger {
+  color: #f87171 !important;
+}
+.gh-mobile-menu-danger i,
+.mobile-menu-danger i {
+  color: #f87171 !important;
+}
+
+/* FINAL OVERRIDE: menu open state must beat every page-specific hide rule.
+   Specificity 0,2,0 (body.class .class) — same as gh-social-body rule.
+   Wins because mobile-nav.css is appended to <head> after all static links. */
+body.gh-mobile-menu-open .mobile-menu {
+  display: flex !important;
+  flex-direction: column !important;
+  pointer-events: auto !important;
+  z-index: 99991 !important;
+}
+body.gh-mobile-menu-open .gh-mobile-menu-overlay {
+  display: block !important;
+}
