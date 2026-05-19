@@ -275,8 +275,10 @@
 .msg-reaction-picker.open{display:flex!important;}
 .msg-reaction-picker button{border:0;background:transparent;font-size:20px;line-height:1;cursor:pointer;padding:5px;border-radius:999px;transition:transform .12s ease,background .12s ease;}
 .msg-reaction-picker button:hover{transform:translateY(-2px) scale(1.12);background:rgba(255,255,255,.1);}
-.msg-reaction-summary{display:flex;gap:4px;align-items:center;margin-top:4px;min-height:18px;}
-.msg-reaction-badge{display:inline-flex;align-items:center;gap:2px;font-size:12px;background:rgba(15,23,42,.86);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:2px 7px;}
+.msg-reaction-summary{position:absolute!important;display:flex;gap:3px;align-items:center;min-height:18px;bottom:-11px;left:10px;z-index:3;pointer-events:none;}
+.msg-row.sent .msg-reaction-summary{left:auto;right:10px;}
+.msg-reaction-badge{display:inline-flex;align-items:center;gap:2px;font-size:11px;line-height:1;background:var(--card,#0f172a);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:3px 7px;box-shadow:0 6px 18px rgba(0,0,0,.22);}
+.msg-bubble-wrap:has(.msg-reaction-summary){margin-bottom:12px;}
 @media(max-width:720px){.msg-reaction-picker{left:0!important;right:auto!important;}.msg-row.sent .msg-reaction-picker{right:0!important;left:auto!important;}}
 
 /* ── Messages page: fixed panel from nav-bottom to viewport bottom ── */

@@ -416,6 +416,9 @@
       const dotsBtn = !deleted
         ? '<button class="msg-dots-btn" type="button" title="Message options" onclick="event.stopPropagation();return window.__ghMsgCtxMenu(event,\''+esc(m.id)+'\')"><i class="fas fa-ellipsis-h"></i></button>'
         : '';
+      const reactionSummary = (!deleted && summary.badges)
+        ? '<div class="msg-reaction-summary">'+summary.badges+'</div>'
+        : '';
       return '<div class="msg-row '+(mine?'sent':'received')+(deleted?' is-deleted':'')+'" data-message-id="'+esc(m.id)+'">'
         + '<div class="msg-col">'
         + '<div class="msg-bubble-wrap">'
@@ -431,11 +434,11 @@
         + dotsBtn
         + '</div>'
         + '<div class="msg-reaction-picker" data-reaction-picker>'+REACTIONS.map(e=>'<button type="button" data-msg-reaction="'+esc(e)+'">'+esc(e)+'</button>').join('')+'</div>'
+        + reactionSummary
         + '</div>'
         + '<div class="msg-meta-row">'
         + (receipt ? receipt : '')
         + '</div>'
-        + '<div class="msg-reaction-summary">'+summary.badges+'</div>'
         + '</div></div>';
     }).join('');
 
