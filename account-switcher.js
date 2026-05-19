@@ -27,10 +27,8 @@
   var _bizUnsubscribers = [];
   var _beepLastAt = 0;
 
-  var ACTOR_KEY = 'gh_active_actor';
-
   function getActiveActor() {
-    try { return JSON.parse(localStorage.getItem(ACTOR_KEY) || 'null'); } catch(e) { return null; }
+    return window.GeoActors ? window.GeoActors.getActiveActor() : null;
   }
 
   function swToast(msg) {
@@ -43,9 +41,9 @@
   }
 
   function setActiveActor(actor) {
-    try { localStorage.setItem(ACTOR_KEY, JSON.stringify(actor)); } catch(e) {}
+    if (window.GeoActors) window.GeoActors.setActiveActor(actor);
+    else { try { localStorage.setItem('gh_active_actor', JSON.stringify(actor)); } catch(e) {} window.dispatchEvent(new CustomEvent('GeoActorChanged', { detail: actor })); }
     updateNavbarForActor(actor);
-    window.dispatchEvent(new CustomEvent('GeoActorChanged', { detail: actor }));
     close();
     if (actor && actor.type === 'business') swToast('Switched to ' + (actor.title || 'Business'));
     else swToast('Switched back to personal account');
@@ -121,9 +119,14 @@
       var unsub = _fs.onSnapshot(q, function(snap) {
         var prev = _bizUnread[bizId] || 0;
         var count = 0;
+        var canonicalBizKey = 'business_' + bizId;
         snap.forEach(function(d) {
           var data = d.data();
-          if (Array.isArray(data.unreadFor) && data.unreadFor.indexOf(ownerUid) !== -1) count++;
+          // Check canonical unreadActors (Phase 57+) and legacy unreadFor formats
+          var inCanonical = Array.isArray(data.unreadActors) && data.unreadActors.indexOf(canonicalBizKey) !== -1;
+          var inLegacyOwner = Array.isArray(data.unreadFor) && data.unreadFor.indexOf(ownerUid) !== -1;
+          var inLegacyBiz = Array.isArray(data.unreadFor) && data.unreadFor.indexOf(bizId) !== -1;
+          if (inCanonical || inLegacyOwner || inLegacyBiz) count++;
         });
         _bizUnread[bizId] = count;
         if (count > prev && Date.now() > startedAt + 2500) playBeep();
@@ -685,11 +688,13 @@
         if (_businesses[i].id === bizId) { biz = _businesses[i]; break; }
       }
       if (!biz || !_user) return;
-      setActiveActor({ type: 'business', businessId: bizId, ownerUid: _user.uid, title: biz.title || 'Business', logoUrl: biz.logoUrl || '' });
+      var actorId = window.GeoActors ? window.GeoActors.actorIdForBusiness(bizId) : ('business_' + bizId);
+      setActiveActor({ type: 'business', actorId: actorId, businessId: bizId, ownerUid: _user.uid, title: biz.title || 'Business', logoUrl: biz.logoUrl || '' });
     },
     switchToUser: function() {
       if (!_user) return;
-      setActiveActor({ type: 'user', uid: _user.uid });
+      var actorId = window.GeoActors ? window.GeoActors.actorIdForUser(_user.uid) : ('user_' + _user.uid);
+      setActiveActor({ type: 'user', actorId: actorId, uid: _user.uid, displayName: _user.displayName || '', email: _user.email || '', photoURL: _user.photoURL || '' });
     },
     getActor: getActiveActor,
     onBusinessUpdated: function(bizId, data) {

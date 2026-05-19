@@ -79,7 +79,11 @@
   }
 
   function currentUid(){ return window.GeoFirebase?.auth?.currentUser?.uid || ''; }
-  function currentActorId(){ return _activeBizId ? 'business_' + _activeBizId : 'user_' + currentUid(); }
+  function currentActorId(){
+    if(_activeBizId) return 'business_' + _activeBizId;
+    const uid = currentUid();
+    return uid ? 'user_' + uid : '';
+  }
   function otherId(conv){ const uid=currentUid(); return (conv?.participants||[]).find(id=>id!==uid) || ''; }
   function initials(name){ return (String(name||'U').trim()[0] || 'U').toUpperCase(); }
 
@@ -1085,6 +1089,7 @@
   }
 
   function getStoredActor(){
+    if(window.GeoActors) return window.GeoActors.getActiveActor();
     try{ return JSON.parse(localStorage.getItem('gh_active_actor')||'null'); }catch(e){ return null; }
   }
 
@@ -1113,13 +1118,15 @@
       const isAdmin = adminSnap.exists();
       if (!isOwner && !isAdmin) return;
       const newActor = {
-        type: 'business', businessId: bizId, ownerUid: uid,
+        type: 'business',
+        actorId: 'business_' + bizId,
+        businessId: bizId, ownerUid: uid,
         title: bizData.title || bizData.name || 'Business',
         logoUrl: bizData.logoUrl || '',
         coverUrl: bizData.coverUrl || bizData.coverImage || ''
       };
-      try { localStorage.setItem('gh_active_actor', JSON.stringify(newActor)); } catch(e) {}
-      window.dispatchEvent(new CustomEvent('GeoActorChanged', { detail: newActor }));
+      if(window.GeoActors) window.GeoActors.setActiveActor(newActor);
+      else { try { localStorage.setItem('gh_active_actor', JSON.stringify(newActor)); } catch(e) {} window.dispatchEvent(new CustomEvent('GeoActorChanged', { detail: newActor })); }
       if (window._geoSW && window._geoSW.updateNavbarForActor) window._geoSW.updateNavbarForActor(newActor);
     } catch(e) {}
   }
