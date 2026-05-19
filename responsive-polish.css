@@ -364,3 +364,576 @@ html[data-gh-theme="light"] .mobile-menu {
   background: rgba(248,250,249,0.98)!important;
   border-bottom: 1px solid var(--border)!important;
 }
+
+/* Phase 58: mobile launch QA polish */
+html,
+body,
+.gh-shell,
+.gh-layout,
+.rw-page,
+.chal-page,
+.profile-page,
+.biz-page-wrap,
+.sv-page,
+.clean-page {
+  min-width: 0;
+}
+
+body,
+.gh-shell,
+.clean-page,
+.rw-page,
+.chal-page,
+.profile-page,
+.biz-page-wrap,
+.sv-page {
+  overflow-x: clip;
+}
+
+.gh-layout,
+.gh-center,
+.gh-left,
+.gh-right,
+.gh-card,
+.gh-panel,
+.gh-item-card,
+.gh-item-body,
+.gh-post-meta,
+.gh-comment-bubble,
+.clean-card,
+.clean-empty,
+.profile-shell,
+.profile-layout,
+.profile-main,
+.profile-sidebar,
+.profile-name-block,
+.about-card,
+.post-feed-card,
+.pfc-header > div,
+.biz-overview-3col,
+.biz-left-sidebar,
+.biz-center-col,
+.biz-right-sidebar,
+.biz-page-block,
+.biz-block-body,
+.biz-info,
+.biz-name-row,
+.biz-contact-strip,
+.biz-tab-panels,
+.gh-biz-page,
+.gh-biz-name-area,
+.gh-biz-sec,
+.gh-biz-info-card,
+.gh-svc-card,
+.gh-svc-info,
+.rw-inner,
+.rw-card,
+.rw-card-body,
+.rw-history-info,
+.rw-coupon-body,
+.chal-page,
+.challenge-card,
+.challenge-card-body,
+.sv-layout,
+.sv-card,
+.sv-modal,
+.svd-hero-info,
+.svd-main,
+.svd-side {
+  min-width: 0!important;
+}
+
+.gh-card *,
+.clean-card *,
+.profile-card *,
+.post-feed-card *,
+.biz-page-wrap *,
+.rw-page *,
+.chal-page *,
+.sv-page *,
+.gh-modal *,
+.biz-modal-sheet *,
+.rw-modal *,
+.sv-modal * {
+  overflow-wrap: anywhere;
+}
+
+.gh-post-text,
+.gh-comment-bubble span,
+.gh-item-body h3,
+.gh-item-body p,
+.clean-title,
+.clean-desc,
+.profile-name,
+.profile-bio,
+.about-bio,
+.pfc-text,
+.biz-name,
+.biz-block-title,
+.biz-block-body,
+.gh-biz-title-row h1,
+.gh-biz-short-desc,
+.gh-biz-ic-value,
+.rw-card-title,
+.rw-card-desc,
+.rw-coupon-code,
+.chal-card-title,
+.challenge-card h3,
+.sv-card h3,
+.svd-hero-info h1 {
+  word-break: normal;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
+.gh-card-actions,
+.gh-post-actions,
+.gh-composer-actions,
+.gh-page-actions,
+.gh-biz-actions,
+.biz-actions,
+.biz-header-actions,
+.biz-compose-footer,
+.rw-hero-actions,
+.rw-modal-actions,
+.chal-actions,
+.challenge-actions,
+.sv-card-actions,
+.svd-actions {
+  min-width: 0;
+}
+
+.clean-search {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.clean-search input {
+  min-width: 0;
+}
+
+.gh-btn,
+.gh-act,
+.gh-pill,
+.gh-tab,
+.gh-biz-tab,
+.biz-action-btn,
+.biz-admin-btn,
+.rw-filter-btn,
+.rw-btn-primary,
+.rw-btn-ghost,
+.rw-btn-redeem,
+.rw-btn-claim,
+.chal-btn,
+.challenge-tabs button,
+.sv-btn,
+.clean-tab {
+  min-height: 44px;
+  max-width: 100%;
+}
+
+.gh-item-media,
+.gh-post-img,
+.pfc-media,
+.pfc-media img,
+.biz-cover,
+.biz-gallery-masonry img,
+.biz-product-card img,
+.biz-service-card img,
+.gh-biz-cover,
+.gh-svc-card-img,
+.rw-card-img,
+.sv-card img,
+.svd-portfolio img {
+  max-width: 100%;
+}
+
+.gh-tabbar,
+.gh-biz-tabs,
+.biz-tabs,
+.profile-tabs,
+.clean-tabs,
+.rw-filters,
+.challenge-tabs,
+.filter-chips-row,
+.sv-cats-inner,
+.sv-tabs-inner,
+.events-tabs-bar,
+.category-chips,
+.quick-filters {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.gh-tabbar::-webkit-scrollbar,
+.gh-biz-tabs::-webkit-scrollbar,
+.biz-tabs::-webkit-scrollbar,
+.profile-tabs::-webkit-scrollbar,
+.clean-tabs::-webkit-scrollbar,
+.rw-filters::-webkit-scrollbar,
+.challenge-tabs::-webkit-scrollbar,
+.filter-chips-row::-webkit-scrollbar,
+.sv-cats-inner::-webkit-scrollbar,
+.sv-tabs-inner::-webkit-scrollbar,
+.events-tabs-bar::-webkit-scrollbar,
+.category-chips::-webkit-scrollbar,
+.quick-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.biz-modal-sheet,
+.rw-modal,
+.sv-modal,
+.gh-modal,
+.gh-modal-backdrop .gh-modal,
+.ev-detail-modal,
+.create-event-modal,
+.ticket-modal,
+.invite-modal,
+.promo-modal,
+.chal-modal {
+  width: min(100%, calc(100vw - 24px))!important;
+  max-height: calc(100dvh - 32px - var(--gh-safe-bottom))!important;
+  overflow: auto!important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.biz-modal-overlay,
+.rw-modal-overlay,
+.sv-modal-overlay,
+.gh-modal-backdrop {
+  padding: 12px;
+}
+
+@media (max-width: 900px) {
+  .gh-layout {
+    width: 100%!important;
+    grid-template-columns: 1fr!important;
+    padding-left: 12px!important;
+    padding-right: 12px!important;
+    padding-bottom: calc(var(--gh-mobile-nav-h) + var(--gh-safe-bottom) + 28px)!important;
+  }
+
+  .gh-left,
+  .gh-right {
+    position: static!important;
+    max-height: none!important;
+    overflow: visible!important;
+  }
+
+  .gh-center {
+    width: 100%!important;
+  }
+
+  .clean-page,
+  .rw-page,
+  .chal-page,
+  .profile-page,
+  .biz-page-wrap,
+  .sv-page {
+    padding-bottom: calc(var(--gh-mobile-nav-h) + var(--gh-safe-bottom) + 24px)!important;
+  }
+
+  .profile-layout,
+  .biz-tab-panels,
+  .rw-inner,
+  .chal-page,
+  .sv-body,
+  .sv-layout {
+    padding-bottom: calc(var(--gh-mobile-nav-h) + var(--gh-safe-bottom) + 28px)!important;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden!important;
+  }
+
+  .gh-topbar {
+    left: 0!important;
+    right: 0!important;
+    width: 100%!important;
+  }
+
+  .gh-brand span,
+  .gh-user-btn span:not(.gh-avatar) {
+    min-width: 0!important;
+  }
+
+  .gh-composer-actions,
+  .gh-post-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr))!important;
+  }
+
+  .gh-act,
+  .gh-composer-action {
+    padding-left: 6px!important;
+    padding-right: 6px!important;
+    font-size: .78rem!important;
+  }
+
+  .gh-card-actions .gh-btn,
+  .gh-page-actions .gh-btn,
+  .gh-biz-actions .gh-btn,
+  .biz-header-actions .biz-action-btn,
+  .biz-actions .biz-action-btn,
+  .rw-hero-actions > *,
+  .chal-actions > *,
+  .challenge-actions > *,
+  .sv-card-actions > *,
+  .svd-actions > * {
+    flex: 1 1 150px;
+  }
+
+  .profile-identity-section .profile-tabs {
+    top: 0;
+  }
+
+  .profile-name-block,
+  .profile-hero-right,
+  .profile-actions {
+    width: 100%;
+  }
+
+  .profile-actions > *,
+  .gh-modal-actions > *,
+  .rw-modal-actions > *,
+  .biz-compose-footer > * {
+    flex: 1 1 140px;
+  }
+
+  .biz-admin-toolbar {
+    top: 0;
+  }
+
+  .biz-admin-toolbar-inner {
+    padding-left: 12px!important;
+    padding-right: 12px!important;
+  }
+
+  .biz-admin-btn.biz-preview-toggle {
+    margin-left: 0;
+  }
+
+  .biz-product-cards-grid,
+  .biz-dash-stats,
+  .gh-biz-info-grid,
+  .gh-svc-grid {
+    grid-template-columns: 1fr!important;
+  }
+
+  .biz-compose-media-bar,
+  .rw-modal-actions {
+    flex-wrap: wrap;
+  }
+
+  .rw-hero {
+    align-items: stretch;
+  }
+
+  .rw-hero > *,
+  .rw-hero-actions {
+    width: 100%;
+  }
+
+  .rw-modal-actions {
+    justify-content: stretch;
+  }
+
+  .rw-btn-primary,
+  .rw-btn-ghost {
+    justify-content: center;
+  }
+
+  .rw-history-item,
+  .rw-coupon-item {
+    align-items: flex-start;
+  }
+
+  .rw-coupon-status {
+    white-space: normal;
+    text-align: center;
+  }
+
+  .sv-search-bar,
+  .svd-hero,
+  .svd-price-box {
+    width: 100%;
+  }
+
+  .discovery-search-wrap,
+  .ev-search-row,
+  .sv-search-bar,
+  .clean-search {
+    min-width: 0;
+  }
+
+  .discovery-search,
+  .ev-search-input-wrap,
+  .sv-search-wrap {
+    min-width: 0!important;
+  }
+
+  .ds-map-toggle,
+  .sv-search-btn,
+  .clean-search button {
+    max-width: 100%;
+  }
+
+  body.page-challenges .challenges-toolbar {
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 340px)!important;
+  }
+
+  .svd-price-box {
+    min-width: 0!important;
+  }
+}
+
+@media (max-width: 520px) {
+  .clean-tabs,
+  .rw-filters,
+  .challenge-tabs,
+  .filter-chips-row,
+  .sv-cats-inner,
+  .sv-tabs-inner,
+  .events-tabs-bar,
+  .category-chips,
+  .quick-filters {
+    flex-wrap: nowrap!important;
+  }
+
+  .ev-search-row,
+  .sv-search-bar,
+  .discovery-search-wrap,
+  .clean-search {
+    align-items: stretch!important;
+  }
+
+  .ev-search-city,
+  .ev-search-select,
+  .sv-search-btn,
+  .ds-map-toggle,
+  .clean-search button {
+    width: 100%!important;
+  }
+
+  .clean-search {
+    flex-wrap: wrap!important;
+  }
+
+  .clean-search input {
+    flex: 1 1 100%!important;
+  }
+
+  body.page-challenges .challenges-toolbar {
+    grid-template-columns: 1fr!important;
+  }
+
+  body.page-challenges .challenge-tabs {
+    width: 100%!important;
+  }
+
+  .gh-card,
+  .gh-panel,
+  .clean-card,
+  .profile-card,
+  .about-card,
+  .post-feed-card,
+  .biz-page-block,
+  .rw-card,
+  .challenge-card,
+  .sv-card {
+    border-radius: 16px!important;
+  }
+
+  .gh-page-info,
+  .gh-biz-header-inner,
+  .biz-header-body,
+  .profile-identity-inner,
+  .rw-history-item,
+  .rw-coupon-item {
+    gap: 10px!important;
+  }
+
+  .gh-page-info,
+  .biz-header-body,
+  .rw-coupon-item {
+    flex-direction: column!important;
+    align-items: stretch!important;
+  }
+
+  .gh-page-actions,
+  .gh-biz-actions,
+  .biz-actions,
+  .biz-header-actions,
+  .profile-actions,
+  .rw-hero-actions,
+  .sv-card-actions,
+  .svd-actions {
+    width: 100%;
+  }
+
+  .gh-page-actions .gh-btn,
+  .gh-biz-actions .gh-btn,
+  .biz-actions .biz-action-btn,
+  .biz-header-actions .biz-action-btn,
+  .profile-actions > *,
+  .rw-hero-actions > *,
+  .sv-card-actions > *,
+  .svd-actions > * {
+    flex: 1 1 100%;
+  }
+
+  .biz-modal-sheet,
+  .rw-modal,
+  .sv-modal,
+  .gh-modal,
+  .ev-detail-modal,
+  .create-event-modal,
+  .ticket-modal,
+  .invite-modal,
+  .promo-modal,
+  .chal-modal {
+    width: 100%!important;
+    max-height: calc(100dvh - 18px - var(--gh-safe-bottom))!important;
+    border-radius: 18px 18px 0 0!important;
+  }
+}
+
+@media (max-width: 380px) {
+  .gh-layout,
+  .rw-inner,
+  .profile-layout,
+  .biz-tab-panels,
+  .chal-page {
+    padding-left: 10px!important;
+    padding-right: 10px!important;
+  }
+
+  .gh-card,
+  .gh-panel,
+  .rw-hero,
+  .rw-card-body,
+  .about-card {
+    padding-left: 12px!important;
+    padding-right: 12px!important;
+  }
+
+  .gh-post-actions,
+  .gh-composer-actions {
+    gap: 4px!important;
+  }
+
+  .gh-act span,
+  .gh-composer-action span {
+    display: none!important;
+  }
+
+  .rw-hero-balance {
+    font-size: 2rem!important;
+  }
+}
