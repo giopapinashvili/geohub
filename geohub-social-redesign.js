@@ -551,7 +551,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(link) link.setAttribute('href', topHref);
     document.querySelectorAll('.gh-nav-item').forEach(function(a){
       var txt=(a.textContent||'').trim().toLowerCase();
-      if(txt==='profile') a.setAttribute('href', profileLink(u.uid));
+      if(txt==='profile'){
+        a.setAttribute('href',(_actor&&_actor.type==='business'&&_actor.businessId)
+          ?'business.html?id='+encodeURIComponent(_actor.businessId)
+          :profileLink(u.uid));
+      }
       if(txt==='saved') a.setAttribute('href', profileLink(u.uid)+'&tab=saved');
     });
     // Update composer avatar with active actor identity
