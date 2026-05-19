@@ -733,6 +733,33 @@
       el.classList.toggle('active', el.dataset.convId===cid);
     });
 
+    // Unhide for current actor when any conv is explicitly opened.
+    // Covers: archive → re-open, delete-for-me → re-open, any hidden conv navigated to.
+    // Also force-patches the local conv list so the left sidebar refreshes instantly
+    // without waiting for the Firestore listener round-trip.
+    {
+      const _oGF = window.GeoFirebase;
+      if (_oGF && _oGF.fs && _oGF.db) {
+        const _oOld = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
+        const _oNew = currentActorId();
+        _oGF.fs.updateDoc(_oGF.fs.doc(_oGF.db, 'conversations', cid), {
+          hiddenForActors:   _oGF.fs.arrayRemove(_oOld, _oNew),
+          archivedForActors: _oGF.fs.arrayRemove(_oNew),
+          deletedForActors:  _oGF.fs.arrayRemove(_oNew)
+        }).catch(()=>{});
+      }
+      // Instant local patch: remove actor from hidden arrays in the cached list
+      const _lc = window.__geohubLastConvs;
+      if (Array.isArray(_lc)) {
+        const _li = _lc.findIndex(c => c.id === cid);
+        if (_li >= 0) {
+          _lc[_li] = Object.assign({}, _lc[_li], {
+            hiddenForActors: [], archivedForActors: [], deletedForActors: []
+          });
+        }
+      }
+    }
+
     if(unsubMsgs){ unsubMsgs(); unsubMsgs=null; }
     if(unsubReactions){ unsubReactions(); unsubReactions=null; }
     if(unsubConvSettings){ unsubConvSettings(); unsubConvSettings=null; }
@@ -952,11 +979,33 @@
         window.GeoSocial?.setTyping && window.GeoSocial.setTyping(activeConversation, false);
       }
 
+      const _sendConvId = activeConversation;
       window.GeoSocial.sendMessage(activeConversation, text, ok=>{
         if(ok && input) input.value='';
         if(sendBtn) sendBtn.disabled = !(input && input.value.trim());
         const picker=$('#emojiPicker'); if(picker) picker.style.display='none';
         setTimeout(()=>{ sendingMessage=false; }, 350);
+        // Force-restore the conv in the left sidebar instantly after send.
+        // sendMessage already patches Firestore (removes from hiddenForActors etc.),
+        // but the Firestore listener may not have fired yet. Push the conv back
+        // locally so the sidebar reflects it without a perceptible delay.
+        if(ok && _sendConvId && activeConvData) {
+          const _sl = window.__geohubLastConvs || [];
+          const _si = _sl.findIndex(c => c.id === _sendConvId);
+          if(_si < 0) {
+            // Conv was filtered out (hidden) — add it back immediately
+            const _sr = Object.assign({}, activeConvData, {
+              hiddenForActors: [], archivedForActors: [], deletedForActors: []
+            });
+            window.__geohubLastConvs = [_sr, ..._sl];
+            renderConvs(window.__geohubLastConvs);
+          } else if(Array.isArray(_sl[_si].hiddenForActors) && _sl[_si].hiddenForActors.length) {
+            _sl[_si] = Object.assign({}, _sl[_si], {
+              hiddenForActors: [], archivedForActors: [], deletedForActors: []
+            });
+            renderConvs(window.__geohubLastConvs);
+          }
+        }
       }, payload);
       setTimeout(()=>{ sendingMessage=false; if(sendBtn) sendBtn.disabled=!(input&&input.value.trim()); }, 4500);
     }
@@ -1277,12 +1326,27 @@
           Object.assign({}, convDoc, {createdAt: GF.fs.serverTimestamp()}),
           {merge: true}
         ).then(function(){
-          // Unhide for personal actor in case user previously hid this conv
-          // Covers both legacy ('user:UID') and canonical ('user_UID') formats
+          // Unhide for personal actor — both legacy ('user:UID') and canonical ('user_UID') formats
           GF.fs.updateDoc(GF.fs.doc(GF.db, 'conversations', cid), {
             hiddenForActors:   GF.fs.arrayRemove('user:' + customerUid, 'user_' + customerUid),
             archivedForActors: GF.fs.arrayRemove('user:' + customerUid, 'user_' + customerUid),
             deletedForActors:  GF.fs.arrayRemove('user:' + customerUid, 'user_' + customerUid)
+          }).then(function() {
+            // Force instant sidebar refresh: add conv to visible list immediately so the
+            // left sidebar shows the biz conv without waiting for the Firestore listener
+            if (!window.__geohubLastConvs) window.__geohubLastConvs = [];
+            var _wfi = window.__geohubLastConvs.findIndex(function(c){ return c.id === cid; });
+            var _wfc = Object.assign({ id: cid }, convDoc, {
+              hiddenForActors: [], archivedForActors: [], deletedForActors: []
+            });
+            if (_wfi >= 0) {
+              window.__geohubLastConvs[_wfi] = Object.assign({}, window.__geohubLastConvs[_wfi], {
+                hiddenForActors: [], archivedForActors: [], deletedForActors: []
+              });
+            } else {
+              window.__geohubLastConvs.unshift(_wfc);
+            }
+            renderConvs(window.__geohubLastConvs);
           }).catch(function(){});
           activeConversation = cid;
           activeConvData = convDoc;

@@ -2358,14 +2358,13 @@
             return;
           }
           var data = ch.doc.data() || {};
-          if (!pool[ch.doc.id]) {
-            // New doc from legacy query
-            pool[ch.doc.id] = Object.assign({ id: ch.doc.id }, data);
-            // Trigger backfill to add memberUids so next query hits primary
-            if (!data.memberUids || !data.memberUids.length) lazyBackfillConv(ch.doc.id, data, uid);
+          var _isNewEntry = !pool[ch.doc.id];
+          // Always update pool data — critical for legacy docs (participants-only, no memberUids)
+          // so that hiddenForActors/archivedForActors changes on 'modified' events are reflected
+          pool[ch.doc.id] = Object.assign({ id: ch.doc.id }, data);
+          if (_isNewEntry && (!data.memberUids || !data.memberUids.length)) {
+            lazyBackfillConv(ch.doc.id, data, uid);
           }
-          // If already in pool from memberUids query, update with fresh data (memberUids takes precedence)
-          // but only refresh if the memberUids version is older or missing
         });
         flush(pool);
       }, function(err) { console.warn('[GeoSocial] listenActorConversations(participants)', err.message); });
