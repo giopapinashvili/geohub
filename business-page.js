@@ -66,6 +66,10 @@
   function getActiveActor(){
     try{ return JSON.parse(localStorage.getItem('gh_active_actor')||'null'); }catch(e){ return null; }
   }
+  function isActingAsBusiness(bizId){
+    var a = getActiveActor();
+    return !!(a && a.type === 'business' && a.businessId === bizId);
+  }
   function fmtPrice(p) {
     if (!p && p !== 0) return '';
     return String(p).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' ₾';
@@ -508,9 +512,9 @@
         _fs.orderBy('order','asc')
       ))
     ).then(function(blocks) {
-      var visible = blocks.filter(function(b){ return _isOwner || b.enabled !== false; });
+      var visible = blocks.filter(function(b){ return _isActingAsPage || b.enabled !== false; });
       if (!visible.length) {
-        el.innerHTML = _isOwner
+        el.innerHTML = _isActingAsPage
           ? '<div class="biz-block-add-prompt" onclick="window._bizActions.openBlockManager()">'+
               '<i class="fas fa-plus-circle"></i>'+
               '<span>Add page blocks — announcements, text, CTAs</span>'+
@@ -1239,8 +1243,8 @@
 
   function renderComposeModal(biz) {
     var identityHtml;
-    if (_isOwner || _isPageAdmin) {
-      // Owner/admin can choose to post as the business or as themselves
+    if (_isActingAsPage) {
+      // Page identity: can choose to post as the business or as themselves
       identityHtml =
         '<div class="biz-compose-identity-row">'+
           '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.84rem;color:#94a3b8">'+
@@ -1405,6 +1409,8 @@
   }
 
   function renderPage(biz, services, priceList, gallery, reviews, products) {
+    // Re-read actor synchronously before each render — prevents stale state from async race conditions
+    _isActingAsPage = isActingAsBusiness(BIZ_ID);
     ensureNavbar();
     document.title = esc(biz.title||'Business')+' — GeoHub';
     var meta = document.querySelector('meta[name="description"]');
@@ -3069,7 +3075,7 @@
 
       // Determine post identity: owner/admin can toggle between business and self
       var chk = document.getElementById('biz-identity-as-biz');
-      var postAsBiz = (_isOwner || _isPageAdmin) && (!chk || chk.checked);
+      var postAsBiz = _isActingAsPage && (!chk || chk.checked);
       var authorId     = _currentUser.uid;
       var authorName   = postAsBiz ? (_biz.title||'Business') : (_currentUser.displayName || _currentUser.email || 'User');
       var authorAvatar = postAsBiz ? (_biz.logoUrl||'') : (_currentUser.photoURL||'');
@@ -4140,15 +4146,16 @@
     window._bizActions.closeProdDetail();
   });
 
-  // Re-render page when actor changes (e.g. user switches identity via account switcher)
+  // Re-render when actor changes (e.g. user switches identity via account switcher)
   window.addEventListener('GeoActorChanged', function(e) {
-    if (!_biz) return;
     var actor = e.detail || {};
     var newActingAsPage = !!(actor.type === 'business' && actor.businessId === BIZ_ID);
-    if (newActingAsPage !== _isActingAsPage) {
-      _isActingAsPage = newActingAsPage;
-      location.reload();
+    var changed = newActingAsPage !== _isActingAsPage;
+    _isActingAsPage = newActingAsPage; // always update — renderPage() re-reads on entry too
+    if (changed && _biz) {
+      location.reload(); // page already rendered; reload for consistent UI
     }
+    // if _biz not loaded yet, renderPage() will call isActingAsBusiness() defensively on entry
   });
 
   if(window.GeoFirebase&&window.GeoFirebase.db) init(window.GeoFirebase);

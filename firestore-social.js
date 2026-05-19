@@ -2138,10 +2138,16 @@
           var conv = snap.data() || {};
           var otherId = (conv.participants || []).find(function (id) { return id !== user.uid; });
           var preview = cleanText || (mediaType === 'image' ? '📷 Photo' : (fileName ? '📎 ' + fileName : 'Attachment'));
+          var senderActorType = extra.senderActorType || 'user';
+          var senderActorId   = extra.senderActorId   || user.uid;
+          var senderName      = extra.senderName      || me.name || user.displayName || 'GeoHub User';
           var messageDoc = {
             conversationId: conversationId,
             senderId: user.uid,
             authorId: user.uid,
+            senderActorType: senderActorType,
+            senderActorId:   senderActorId,
+            senderName:      senderName,
             text: cleanText,
             mediaUrl: mediaUrl || '',
             mediaType: mediaType || '',
@@ -2157,12 +2163,29 @@
             updatedAt: serverTimestamp()
           };
           return addDoc(collection(db, 'conversations', conversationId, 'messages'), messageDoc).then(function () {
-            var patch = { lastMessage: preview, lastSenderId: user.uid, updatedAt: serverTimestamp(), unreadFor: otherId ? fs.arrayUnion(otherId) : [] };
+            var patch = { lastMessage: preview, lastSenderId: user.uid, updatedAt: serverTimestamp(), unreadFor: (otherId && otherId !== user.uid) ? fs.arrayUnion(otherId) : [] };
             patch['readBy.' + user.uid] = serverTimestamp();
             return updateDoc(convRef, patch);
           }).then(function () {
-            var notifLink = conv.businessId ? 'messages.html?business=' + encodeURIComponent(conv.businessId) + '&cid=' + encodeURIComponent(conversationId) : 'messages.html?with=' + encodeURIComponent(user.uid);
-            return createNotification(otherId, 'message', (me.name || 'GeoHub User') + ' sent you a message', preview, notifLink, { conversationId: conversationId });
+            // Determine notification target and link based on sender actor type
+            var notifTargetUid, notifLink;
+            if(conv.businessId && conv.forBusiness) {
+              if(senderActorType === 'business') {
+                // Page replying to customer — send customer to withBusiness route
+                notifTargetUid = conv.customerUid || otherId;
+                notifLink = 'messages.html?withBusiness=' + encodeURIComponent(conv.businessId) + '&cid=' + encodeURIComponent(conversationId);
+              } else {
+                // Customer sending to business — send owner to business inbox
+                notifTargetUid = otherId;
+                notifLink = 'messages.html?business=' + encodeURIComponent(conv.businessId) + '&cid=' + encodeURIComponent(conversationId);
+              }
+            } else {
+              notifTargetUid = otherId;
+              notifLink = 'messages.html?with=' + encodeURIComponent(user.uid);
+            }
+            // Skip self-notification (same uid on both sides, e.g. owner messaging own page as customer)
+            if(!notifTargetUid || notifTargetUid === user.uid) return Promise.resolve();
+            return createNotification(notifTargetUid, 'message', senderName + ' sent you a message', preview, notifLink, { conversationId: conversationId });
           });
         }).then(function () {
           if (callback) callback(true);

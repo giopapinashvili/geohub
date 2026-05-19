@@ -19,8 +19,11 @@
 
   let activeConversation = null;
   let activeConvData = null;
-  let _activeBizId = null;
+  let _activeBizId = null;   // set when in business INBOX mode (?business=BIZ_ID)
   let _activeBizTitle = '';
+  let _withBizId = '';       // set when in customer-side biz chat (?withBusiness=BIZ_ID)
+  let _withBizTitle = '';
+  let _withBizLogo = '';
   let unsubConvs = null;
   let unsubMsgs = null;
   let unsubReactions = null;
@@ -92,11 +95,19 @@
     const rows=[];
     let unreadCount=0;
     for(const c of baseConvs){
-      const oid=otherId(c);
-      const u=await userInfo(oid);
+      let oid, u, isBiz=false;
+      if(c.forBusiness && c.businessId && !_activeBizId){
+        // Personal/customer view of a business conversation: show the business as contact
+        oid = c.businessId;
+        u = { id: c.businessId, name: c.businessName || 'Business', avatar: c.businessLogo || '' };
+        isBiz = true;
+      } else {
+        oid = otherId(c);
+        u = await userInfo(oid);
+      }
       const unread = Array.isArray(c.unreadFor) && c.unreadFor.includes(currentUid());
       if(unread) unreadCount++;
-      rows.push({c, oid, u, unread});
+      rows.push({c, oid, u, unread, isBiz});
     }
     let filtered = rows;
     if(_convFilter === 'unread') filtered = filtered.filter(r=>r.unread);
@@ -113,13 +124,15 @@
       updateMsgBadge(unreadCount);
       return;
     }
-    list.innerHTML=filtered.map(({c,oid,u,unread})=>{
-      const name = convNicknames[oid] || u.name;
+    list.innerHTML=filtered.map(({c,oid,u,unread,isBiz})=>{
+      const name = isBiz ? (u.name || 'Business') : (convNicknames[oid] || u.name);
       const ts = convTime(c.updatedAt || c.lastMessageAt || c.createdAt || null);
+      const profileHref = isBiz ? 'business.html?id='+esc(c.businessId) : 'profile.html?id='+esc(oid);
+      const bizBadge = isBiz ? '<span style="font-size:.65rem;color:#10b981;vertical-align:middle;margin-right:3px"><i class="fas fa-store"></i></span>' : '';
       return '<div class="conv-item '+(c.id===activeConversation?'active':'')+' '+(unread?'has-unread':'')+'" data-conv-id="'+esc(c.id)+'" oncontextmenu="return window.__ghConvCtxMenu(event,\''+esc(c.id)+'\')">'
-        + '<a class="conv-av-wrap" href="profile.html?id='+esc(oid)+'" data-open-user-profile="'+esc(oid)+'" onclick="event.stopPropagation()">'
+        + '<a class="conv-av-wrap" href="'+profileHref+'" data-open-user-profile="'+esc(oid)+'" onclick="event.stopPropagation()">'
         + (u.avatar ? '<img class="conv-avatar-img" src="'+esc(u.avatar)+'" alt="" onerror="this.style.display=\'none\'">' : '<div class="av-placeholder">'+esc(initials(name))+'</div>')
-        + '</a><div class="conv-info"><div class="conv-top-row"><span class="conv-name">'+esc(name)+'</span>'+(ts?'<span class="conv-time">'+esc(ts)+'</span>':'')+'</div>'
+        + '</a><div class="conv-info"><div class="conv-top-row"><span class="conv-name">'+bizBadge+esc(name)+'</span>'+(ts?'<span class="conv-time">'+esc(ts)+'</span>':'')+'</div>'
         + '<div class="conv-bottom-row"><span class="conv-preview">'+esc(c.lastMessage||'No messages yet')+'</span>'+(unread?'<span class="conv-unread-dot"></span>':'')+'</div></div></div>';
     }).join('');
     updateMsgBadge(unreadCount);
@@ -679,6 +692,15 @@
       if(sendBtn) sendBtn.disabled = true;
 
       const payload = Object.assign({}, extra||{});
+      // Attach sender actor context for business conversations
+      if(_activeBizId){
+        payload.senderActorType = 'business';
+        payload.senderActorId = _activeBizId;
+        payload.senderName = _activeBizTitle || 'Business';
+      } else {
+        payload.senderActorType = 'user';
+        payload.senderActorId = currentUid();
+      }
       if(replyState){
         payload.replyTo = {
           messageId: replyState.id,
@@ -927,66 +949,95 @@
 
     if(unsubConvs) unsubConvs();
     if(withBizParam){
-      // ── Customer-side business chat ───────────────────────────────
-      // Keep personal identity; create biz conv from customer perspective
+      // ── Customer-side business chat ─────────────────────────────
+      // Personal identity stays; topbar remains personal user
       _activeBizId = null;
       _activeBizTitle = '';
+      _withBizId = withBizParam;
+      _withBizTitle = '';
+      _withBizLogo = '';
       const customerUid = currentUid();
       const GF = window.GeoFirebase;
-      const cid = 'biz_' + withBizParam + '_' + customerUid;
+      const cid = cidParam || ('biz_' + withBizParam + '_' + customerUid);
+
+      const chatBox = document.querySelector('#chatMessages');
       const chatHdr = document.querySelector('#chatHeader');
       if(chatHdr) chatHdr.innerHTML = '<div style="padding:16px;color:var(--text-muted);font-size:.9rem"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>';
+
+      // Fetch business info then ensure conversation exists
       GF.fs.getDoc(GF.fs.doc(GF.db, 'businesses', withBizParam)).then(function(snap){
-        const bizData = snap.exists() ? (snap.data() || {}) : {};
-        const ownerUid = bizData.ownerId || bizData.createdBy || '';
-        _activeBizTitle = bizData.title || bizData.name || 'Business';
-        const logoUrl = bizData.logoUrl || '';
-        if(!snap.exists() || !ownerUid){
+        if(!snap.exists()){
           if(chatHdr) chatHdr.innerHTML = '<div style="padding:16px;color:var(--text-muted)"><i class="fas fa-store"></i> Business not found</div>';
           return;
         }
+        const bizData = snap.data() || {};
+        const ownerUid = bizData.ownerId || bizData.createdBy || '';
+        _withBizTitle = bizData.title || bizData.name || 'Business';
+        _withBizLogo = bizData.logoUrl || '';
+
+        // Render business header (no "Replying as" — this is customer view)
         if(chatHdr) chatHdr.innerHTML =
           '<div class="chat-header-left">' +
+            '<button class="back-btn" onclick="document.querySelector(\'.messages-layout\').classList.remove(\'chat-open\')" title="Back"><i class="fas fa-arrow-left"></i></button>' +
             '<div class="chat-header-av">' +
-              (logoUrl ? '<img src="'+esc(logoUrl)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">' : '<i class="fas fa-store" style="font-size:1.1rem;color:#10b981"></i>') +
+              (_withBizLogo ? '<img src="'+esc(_withBizLogo)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">' : '<div class="av-placeholder" style="background:rgba(16,185,129,.2)"><i class="fas fa-store" style="font-size:.9rem;color:#10b981"></i></div>') +
             '</div>' +
-            '<div><div class="chat-header-name">'+esc(_activeBizTitle)+'</div>' +
-              '<div style="font-size:.7rem;color:var(--text-muted)">Business Page</div>' +
+            '<div>' +
+              '<div class="chat-header-name">'+esc(_withBizTitle)+'</div>' +
+              '<div style="font-size:.68rem;color:#10b981"><i class="fas fa-store"></i> Business Page</div>' +
             '</div>' +
+          '</div>' +
+          '<div class="chat-header-actions">' +
+            '<button class="header-action-btn" title="Search" id="msgSearchBtn" onclick="window.__ghToggleSearch()"><i class="fas fa-search"></i></button>' +
           '</div>';
-        // Create or merge the conversation doc (allows same-uid edge case for owner messaging own page)
-        const convData = {
+
+        // Set composer placeholder
+        const inputEl = document.querySelector('#msgInput') || document.querySelector('#messageInput');
+        if(inputEl) inputEl.placeholder = 'Message ' + _withBizTitle + '…';
+
+        // Create/merge conversation doc (setDoc merge:true is idempotent)
+        const convDoc = {
           participants: customerUid === ownerUid ? [customerUid] : [customerUid, ownerUid],
           businessId: withBizParam,
+          businessName: _withBizTitle,
+          businessLogo: _withBizLogo,
           forBusiness: true,
           customerUid: customerUid,
+          ownerUid: ownerUid || customerUid,
           updatedAt: GF.fs.serverTimestamp(),
           lastMessage: '',
           unreadFor: [],
           readBy: {}
         };
-        GF.fs.setDoc(GF.fs.doc(GF.db, 'conversations', cid),
-          Object.assign({}, convData, {createdAt: GF.fs.serverTimestamp()}),
+        GF.fs.setDoc(
+          GF.fs.doc(GF.db, 'conversations', cid),
+          Object.assign({}, convDoc, {createdAt: GF.fs.serverTimestamp()}),
           {merge: true}
         ).then(function(){
           activeConversation = cid;
-          activeConvData = convData;
+          activeConvData = convDoc;
+          document.querySelector('.messages-layout')?.classList.add('chat-open');
+          // Update URL to include cid so refresh goes directly to this conversation
+          if(!cidParam){
+            history.replaceState(null, '',
+              location.pathname + '?withBusiness=' + encodeURIComponent(withBizParam) + '&cid=' + encodeURIComponent(cid)
+            );
+          }
           if(unsubMsgs){ try{unsubMsgs();}catch(e){} unsubMsgs=null; }
           unsubMsgs = window.GeoSocial.listenMessages(cid, renderMessages);
         }).catch(function(err){
-          console.error('[GeoHub] withBusiness conv', err);
-          const box = document.querySelector('#chatMessages');
-          if(box) box.innerHTML = '<div class="chat-empty"><i class="fas fa-store"></i><p>Could not open conversation</p></div>';
+          console.error('[GeoHub] withBusiness conv create', err);
+          if(chatBox) chatBox.innerHTML = '<div class="chat-empty"><i class="fas fa-store"></i><p>Could not open conversation</p></div>';
         });
       }).catch(function(){
-        const box = document.querySelector('#chatMessages');
-        if(box) box.innerHTML = '<div class="chat-empty"><i class="fas fa-store"></i><p>Business not found</p></div>';
+        if(chatBox) chatBox.innerHTML = '<div class="chat-empty"><i class="fas fa-store"></i><p>Business not found</p></div>';
       });
-      // Load personal convs sidebar so customer sees all their conversations
+
+      // Personal inbox sidebar — shows all personal convs including this biz conv
       unsubConvs = window.GeoSocial.listenConversations(function(convs){
         window.__geohubLastConvs = convs || [];
         renderConvs(convs || []);
-        // Re-highlight active biz conv after sidebar renders
+        // Re-highlight the active biz conv after sidebar re-renders
         if(activeConversation){
           document.querySelectorAll('[data-conv-id]').forEach(function(el){
             el.classList.toggle('active', el.dataset.convId === activeConversation);
@@ -994,9 +1045,12 @@
         }
       });
     } else if(bizParam && window.GeoSocial.listenBusinessConversations){
-      // ── Business inbox mode ───────────────────────────────────
+      // ── Business inbox (page identity) mode ──────────────────
       _activeBizId = bizParam;
       _activeBizTitle = '';
+      _withBizId = '';
+      _withBizTitle = '';
+      _withBizLogo = '';
       // Hard reset ALL stale conversation state and listeners
       activeConversation = null;
       activeConvData = null;
@@ -1038,6 +1092,9 @@
       // ── Personal inbox mode ───────────────────────────────────
       _activeBizId = null;
       _activeBizTitle = '';
+      _withBizId = '';
+      _withBizTitle = '';
+      _withBizLogo = '';
       if(target){ window.GeoSocial.startConversation(target, cid=>openConversation(cid)); }
       unsubConvs=window.GeoSocial.listenConversations(convs=>{
         window.__geohubLastConvs = convs || [];
