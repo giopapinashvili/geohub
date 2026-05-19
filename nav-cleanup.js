@@ -238,7 +238,8 @@
   }
 
   function renderMobileNav() {
-    return groups.map(function(group) {
+    return '<div class="mobile-account-panel" id="ghMobileAccountSlot"></div>' +
+      groups.map(function(group) {
       return '<div class="mobile-menu-group">' +
         '<div class="mobile-menu-title">' + t(group.label) + '</div>' +
         group.items.map(itemLink).join('') +

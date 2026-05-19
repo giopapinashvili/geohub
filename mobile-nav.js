@@ -43,6 +43,7 @@
   // ── INJECT BOTTOM NAV ─────────────────────────────────────────
 
   function injectBottomNav() {
+    if (currentPage === 'messages.html') return;
     if (document.getElementById('app-bottom-nav')) return;
     var active = getActiveTab();
 
@@ -52,24 +53,15 @@
     nav.setAttribute('role', 'navigation');
     nav.setAttribute('aria-label', 'Main navigation');
 
-    var authUser = getAuthUser();
-    var profileHref  = authUser ? 'profile.html' : 'auth.html';
-    var profileLabel = authUser ? 'Profile' : 'Login';
-    var profileIcon  = authUser ? 'fas fa-user-circle' : 'fas fa-sign-in-alt';
-
     nav.innerHTML =
-      navItem('index.html',  'fas fa-home',    'Home',    active === 'home',    '') +
-      navItem('feed.html',   'fas fa-compass', 'Explore', active === 'explore', '') +
-      '<div class="app-fab-wrap">' +
-        '<button class="app-fab" id="app-fab" aria-label="Quick actions" aria-expanded="false">' +
-          '<i class="fas fa-plus" aria-hidden="true"></i>' +
-        '</button>' +
-      '</div>' +
-      navItem('map.html',       'fas fa-map',        'Map',     active === 'map' || active === 'live', '') +
-      navItem(profileHref,      profileIcon,          profileLabel, active === 'profile', '');
+      navItem('feed.html',          'fas fa-house', 'Feed', active === 'home' || currentPage === 'feed.html', '') +
+      navItem('search.html',        'fas fa-magnifying-glass', 'Explore', active === 'explore' || currentPage === 'search.html', '') +
+      navItem('messages.html',      'fas fa-comment-dots', 'Messages', active === 'messages', '') +
+      navItem('notifications.html', 'fas fa-bell', 'Notifications', currentPage === 'notifications.html', '') +
+      navButton('fas fa-bars', 'Menu', 'geoToggleMenu()');
 
     document.body.appendChild(nav);
-    document.getElementById('app-fab').addEventListener('click', toggleActionSheet);
+    setupBottomNavAutoHide(nav);
   }
 
   function navItem(href, icon, label, isActive, extra) {
@@ -78,6 +70,67 @@
       '<i class="' + icon + '" aria-hidden="true"></i>' +
       '<span>' + label + '</span>' +
     '</a>';
+  }
+
+  function navButton(icon, label, action) {
+    return '<button type="button" class="app-nav-item app-nav-menu" onclick="' + action + '" aria-label="' + label + '">' +
+      '<i class="' + icon + '" aria-hidden="true"></i>' +
+      '<span>' + label + '</span>' +
+    '</button>';
+  }
+
+  function setupBottomNavAutoHide(nav) {
+    if (!nav || nav._ghAutoHideBound) return;
+    nav._ghAutoHideBound = true;
+    var lastY = window.scrollY || 0;
+    window.addEventListener('scroll', function () {
+      var y = window.scrollY || 0;
+      if (Math.abs(y - lastY) < 8) return;
+      nav.classList.toggle('is-hidden', y > lastY && y > 80);
+      lastY = y;
+    }, { passive: true });
+  }
+
+  function mobileMenuHtml() {
+    return '<div class="mobile-account-panel" id="ghMobileAccountSlot"></div>' +
+      '<div class="mobile-menu-group"><div class="mobile-menu-title">Main</div>' +
+        '<a href="feed.html"><i class="fas fa-house"></i><span>Feed</span></a>' +
+        '<a href="search.html"><i class="fas fa-magnifying-glass"></i><span>Explore / Search</span></a>' +
+        '<a href="messages.html"><i class="fas fa-comment-dots"></i><span>Messages</span></a>' +
+        '<a href="notifications.html"><i class="fas fa-bell"></i><span>Notifications</span></a>' +
+        '<a href="places.html"><i class="fas fa-location-dot"></i><span>Places</span></a>' +
+        '<a href="groups.html"><i class="fas fa-users"></i><span>Groups</span></a>' +
+        '<a href="events.html"><i class="fas fa-calendar"></i><span>Events</span></a>' +
+        '<a href="rewards.html"><i class="fas fa-gift"></i><span>Rewards</span></a>' +
+      '</div>' +
+      '<div class="mobile-menu-group"><div class="mobile-menu-title">Account</div>' +
+        '<a href="profile.html"><i class="fas fa-user"></i><span>Profile</span></a>' +
+        '<a href="business.html"><i class="fas fa-store"></i><span>Businesses</span></a>' +
+        '<a href="add-business.html"><i class="fas fa-plus-circle"></i><span>Add Page</span></a>' +
+      '</div>';
+  }
+
+  function ensureMobileMenu() {
+    if (currentPage === 'messages.html') return;
+    var menu = document.querySelector('.mobile-menu');
+    if (!menu) {
+      menu = document.createElement('div');
+      menu.className = 'mobile-menu';
+      document.body.appendChild(menu);
+    }
+    if (!menu.querySelector('#ghMobileAccountSlot')) menu.innerHTML = mobileMenuHtml();
+
+    var socialMenu = document.getElementById('ghSidebarToggle');
+    if (socialMenu && !socialMenu._ghMenuBound) {
+      socialMenu._ghMenuBound = true;
+      socialMenu.setAttribute('aria-label', 'Menu');
+      socialMenu.title = 'Menu';
+      socialMenu.innerHTML = '<i class="fas fa-bars"></i>';
+      socialMenu.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (window.geoToggleMenu) window.geoToggleMenu();
+      });
+    }
   }
 
   // ── INJECT ACTION SHEET ───────────────────────────────────────
@@ -622,6 +675,7 @@
     injectAnalytics();
     injectGrowthScripts();
     showSplash();
+    ensureMobileMenu();
     injectBottomNav();
     injectActionSheet();
     injectNotifContainer();
@@ -631,6 +685,8 @@
     injectCmdPalette();
     registerSW();
     startNotifCycle();
+    setTimeout(function(){ ensureMobileMenu(); injectBottomNav(); }, 400);
+    setTimeout(function(){ ensureMobileMenu(); injectBottomNav(); }, 1200);
   }
 
   if (document.readyState === 'loading') {

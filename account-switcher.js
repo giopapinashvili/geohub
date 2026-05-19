@@ -385,6 +385,47 @@
 
   /* ── mount ─────────────────────────────────────────────────── */
 
+  function isMobileNav() {
+    return window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+  }
+
+  function desktopAccountHost() {
+    var socialActions = document.querySelector('.gh-top-actions');
+    if (socialActions) return socialActions;
+    var topNav = document.querySelector('nav.navbar') || document.querySelector('nav#navbar');
+    var actions = topNav ? topNav.querySelector('.navbar-actions') : null;
+    return actions || topNav || document.body;
+  }
+
+  function placeWrap(wrap, replaceTarget) {
+    var mobileSlot = document.getElementById('ghMobileAccountSlot');
+    if (isMobileNav() && mobileSlot) {
+      mobileSlot.appendChild(wrap);
+      return;
+    }
+    var slot = document.getElementById('ghActorBtnSlot');
+    if (slot && slot.parentNode) {
+      slot.parentNode.replaceChild(wrap, slot);
+    } else if (replaceTarget && replaceTarget.parentNode) {
+      replaceTarget.parentNode.replaceChild(wrap, replaceTarget);
+    } else {
+      desktopAccountHost().appendChild(wrap);
+    }
+  }
+
+  function relocateWrap() {
+    var wrap = document.getElementById('geo-sw-wrap');
+    if (!wrap) return;
+    var mobileSlot = document.getElementById('ghMobileAccountSlot');
+    if (isMobileNav() && mobileSlot && wrap.parentNode !== mobileSlot) {
+      close();
+      mobileSlot.appendChild(wrap);
+    } else if (!isMobileNav() && mobileSlot && wrap.parentNode === mobileSlot) {
+      close();
+      desktopAccountHost().appendChild(wrap);
+    }
+  }
+
   function mountWrap(replaceTarget) {
     if (!_user) return;
 
@@ -411,31 +452,8 @@
     dropdown.setAttribute('role', 'menu');
     wrap.appendChild(dropdown);
 
-    // 1. Social redesign slot (#ghActorBtnSlot injected by geohub-social-redesign.js topbar)
-    var slot = document.getElementById('ghActorBtnSlot');
-    if (slot && slot.parentNode) {
-      slot.parentNode.replaceChild(wrap, slot);
-      console.debug('[AccountSwitcher] mounted — replaced #ghActorBtnSlot');
-    // 2. account.js element (#authNavUser)
-    } else if (replaceTarget && replaceTarget.parentNode) {
-      replaceTarget.parentNode.replaceChild(wrap, replaceTarget);
-      console.debug('[AccountSwitcher] mounted — replaced #authNavUser');
-    } else {
-      // Fallback: ONLY look inside the real top <nav class="navbar"> to avoid
-      // matching sidebar or page-body elements that share class names.
-      var topNav = document.querySelector('nav.navbar') || document.querySelector('nav#navbar');
-      var actions = topNav ? topNav.querySelector('.navbar-actions') : null;
-      if (actions) {
-        actions.appendChild(wrap);
-        console.debug('[AccountSwitcher] mounted — appended to nav.navbar .navbar-actions');
-      } else if (topNav) {
-        topNav.appendChild(wrap);
-        console.debug('[AccountSwitcher] mounted — appended to nav.navbar');
-      } else {
-        document.body.appendChild(wrap);
-        console.warn('[AccountSwitcher] mounted — fallback to body (no nav.navbar found)');
-      }
-    }
+    placeWrap(wrap, replaceTarget);
+    console.debug('[AccountSwitcher] mounted');
 
     // Bind outside-click once
     if (!_outsideClickBound) {
@@ -452,11 +470,11 @@
 
   function startObserver() {
     if (_observer) { _observer.disconnect(); _observer = null; }
-    var root = document.querySelector('nav.navbar, nav#navbar') || document.querySelector('header') || document.body;
+    var root = document.body;
     _observer = new MutationObserver(function() {
       if (!_user) return;
       var ourWrap    = document.getElementById('geo-sw-wrap');
-      if (ourWrap) return; // already mounted
+      if (ourWrap) { relocateWrap(); return; } // already mounted
       var slot       = document.getElementById('ghActorBtnSlot');
       var authUserEl = document.getElementById('authNavUser');
       if (slot) {
@@ -475,6 +493,7 @@
 
   window.addEventListener('GeoActorChanged', function() {
     updateNavbarForActor(getActiveActor());
+    relocateWrap();
     if (_isOpen) {
       var dd = document.getElementById('geo-sw-dropdown');
       if (dd && dd.classList.contains('open')) dd.innerHTML = renderDropdown();
@@ -496,9 +515,12 @@
     console.debug('[AccountSwitcher] user ready via GeoAuthReady:', _user.email);
     var authUser = document.getElementById('authNavUser');
     mountWrap(authUser || null);
+    setTimeout(relocateWrap, 0);
     if (_user.uid) { loadUserBusinesses(_user.uid); loadUserGroups(_user.uid); loadFriendRequests(_user.uid); }
     startObserver();
   });
+
+  window.addEventListener('resize', relocateWrap);
 
   /* ── data ──────────────────────────────────────────────────── */
 

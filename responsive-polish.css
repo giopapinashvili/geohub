@@ -137,15 +137,41 @@ body[data-gh-page="messages"] #ghChatPopRoot{display:none!important;}
     padding:0 12px!important;
   }
   .navbar .navbar-links,
-  .navbar .navbar-actions a:not(.nav-profile-icon):not([href*="profile"]),
+  .navbar .navbar-actions,
   .navbar .btn:not(.nav-profile-icon){
     display:none!important;
   }
   .navbar-brand{min-width:0!important;flex:1 1 auto!important;}
   .navbar-brand .logo-text{font-size:1rem!important;white-space:nowrap!important;}
   .hamburger{display:inline-flex!important;flex:0 0 auto!important;}
+  .mobile-account-panel {
+    display: block !important;
+    padding: 8px 0 12px !important;
+    border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.06)) !important;
+  }
+  .mobile-account-panel:empty {
+    display: none !important;
+  }
+  .mobile-account-panel .geo-sw-wrap {
+    display: block !important;
+    width: 100% !important;
+  }
+  .mobile-account-panel .geo-sw-btn {
+    width: 100% !important;
+    min-height: 52px !important;
+    justify-content: flex-start !important;
+    border-radius: 14px !important;
+  }
+  .mobile-account-panel .geo-sw-dropdown {
+    position: static !important;
+    width: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin-top: 8px !important;
+    transform: none !important;
+  }
   .gh-topbar{
-    grid-template-columns:auto 1fr auto!important;
+    grid-template-columns:minmax(0, 1fr) auto!important;
     width:100vw!important;
     max-width:100vw!important;
     padding:0 10px!important;
@@ -154,13 +180,19 @@ body[data-gh-page="messages"] #ghChatPopRoot{display:none!important;}
   }
   .gh-brand{min-width:0!important;width:auto!important;}
   .gh-brand span{display:inline!important;font-size:1rem!important;white-space:nowrap!important;}
+  .gh-center-tabs,
   .gh-top-search,
+  .gh-top-actions #ghActorBtnSlot,
+  .gh-top-actions .geo-sw-wrap,
   .gh-top-actions a[title="Home"],
   .gh-top-actions a[title="Discover"],
   .gh-top-actions a[title="Messages"],
   .gh-top-actions .gh-create-btn,
   .gh-top-actions .gh-theme-toggle{
     display:none!important;
+  }
+  .gh-sidebar-toggle {
+    display:inline-flex!important;
   }
   .gh-top-actions{gap:6px!important;min-width:0!important;}
   .gh-icon-btn,.gh-user-btn{width:42px!important;min-width:42px!important;padding:0!important;}
@@ -364,6 +396,194 @@ html[data-gh-theme="light"] .business-card {
 html[data-gh-theme="light"] .mobile-menu {
   background: rgba(248,250,249,0.98)!important;
   border-bottom: 1px solid var(--border)!important;
+}
+
+/* Phase 65B: real phone usability polish */
+body.page-messages .app-bottom-nav {
+  display: none !important;
+}
+
+.mobile-info-btn {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  body.page-messages .messages-page {
+    padding-bottom: 0 !important;
+  }
+
+  body.page-messages .chat-input-bar {
+    overflow: visible !important;
+  }
+
+  body.page-messages .input-btn,
+  body.page-messages .send-btn,
+  body.page-messages .sidebar-icon-btn,
+  body.page-messages .header-action-btn,
+  body.page-messages .back-btn,
+  body.page-messages .msg-dots-btn {
+    min-width: 44px !important;
+    width: 44px !important;
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  body.page-messages .msg-input {
+    min-height: 44px !important;
+    flex: 1 1 auto !important;
+  }
+
+  body.page-messages .msg-attach-sheet {
+    position: absolute !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: calc(100% + 8px) !important;
+    display: none !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    padding: 10px !important;
+    border: 1px solid var(--border, rgba(148, 163, 184, 0.18)) !important;
+    border-radius: 16px !important;
+    background: var(--bg-card, #111827) !important;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.3) !important;
+    z-index: 40 !important;
+  }
+
+  body.page-messages .msg-attach-sheet.open {
+    display: grid !important;
+  }
+
+  body.page-messages .msg-attach-sheet button {
+    min-width: 0 !important;
+    min-height: 52px !important;
+    border: 1px solid var(--border, rgba(148, 163, 184, 0.18)) !important;
+    border-radius: 12px !important;
+    background: var(--bg-elevated, rgba(15, 23, 42, 0.92)) !important;
+    color: var(--text-primary, #f8fafc) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    font: inherit !important;
+    font-size: 0.78rem !important;
+  }
+
+  body.page-messages .mobile-info-btn {
+    display: inline-flex !important;
+  }
+
+  body.page-messages .info-panel {
+    display: block !important;
+    position: fixed !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
+    width: auto !important;
+    max-width: calc(100vw - 16px) !important;
+    max-height: 72dvh !important;
+    transform: translateY(calc(100% + 20px)) !important;
+    transition: transform 180ms ease !important;
+    pointer-events: none !important;
+    z-index: 2147483000 !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+  }
+
+  body.page-messages .info-panel.open {
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
+  }
+
+  body.page-messages .info-panel .info-scroll {
+    max-height: 72dvh !important;
+    overflow: auto !important;
+  }
+
+  .profile-tabs {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-right: max(28px, env(safe-area-inset-right, 0px)) !important;
+    scrollbar-width: none !important;
+  }
+
+  .profile-tabs::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .profile-tabs .ptab {
+    flex: 0 0 auto !important;
+    min-height: 44px !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+
+  .profile-tabs .tab-count {
+    flex: 0 0 auto !important;
+    margin-left: 6px !important;
+    position: static !important;
+  }
+
+  .rw-filters {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 4px !important;
+  }
+
+  .rw-filter-btn {
+    flex: 0 0 auto !important;
+    min-height: 44px !important;
+    white-space: nowrap !important;
+  }
+
+  .discovery-search-wrap {
+    flex-wrap: wrap !important;
+    width: 100% !important;
+  }
+
+  .discovery-search {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+  }
+
+  .filter-chips-row {
+    width: 100% !important;
+    padding: 0 12px 4px !important;
+    scroll-padding-inline: 12px !important;
+  }
+
+  .fchip {
+    flex: 0 0 auto !important;
+    min-height: 44px !important;
+    white-space: nowrap !important;
+  }
+
+  .pl-cats {
+    padding: 0 12px 4px !important;
+    scroll-padding-inline: 12px !important;
+  }
+
+  .pl-cat-btn {
+    flex: 0 0 auto !important;
+    min-height: 44px !important;
+    min-width: 44px !important;
+    white-space: nowrap !important;
+  }
+
+  .auth-password-toggle,
+  .password-toggle,
+  .toggle-password,
+  .eye-btn {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  label:has(input[type="checkbox"]),
+  .checkbox-row,
+  .remember-row {
+    min-height: 44px !important;
+  }
 }
 
 /* Phase 58: mobile launch QA polish */
@@ -1468,5 +1688,85 @@ canvas {
   body.page-messages .header-action-btn {
     width: 32px !important;
     height: 32px !important;
+  }
+}
+
+/* Phase 65B final mobile interaction overrides (loaded after earlier phone rules). */
+body.page-messages .app-bottom-nav {
+  display: none !important;
+}
+
+body.page-messages .chat-input-bar {
+  position: relative;
+}
+
+body.page-messages .msg-attach-sheet {
+  position: absolute;
+  left: 8px;
+  bottom: calc(100% + 8px);
+  display: none;
+  grid-template-columns: repeat(3, minmax(74px, 1fr));
+  gap: 8px;
+  width: min(320px, calc(100vw - 16px));
+  padding: 10px;
+  border: 1px solid var(--border, rgba(148, 163, 184, 0.18));
+  border-radius: 16px;
+  background: var(--bg-card, #111827);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.3);
+  z-index: 40;
+}
+
+body.page-messages .msg-attach-sheet.open {
+  display: grid;
+}
+
+body.page-messages .msg-attach-sheet button {
+  min-width: 0;
+  min-height: 48px;
+  border: 1px solid var(--border, rgba(148, 163, 184, 0.18));
+  border-radius: 12px;
+  background: var(--bg-elevated, rgba(15, 23, 42, 0.92));
+  color: var(--text-primary, #f8fafc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font: inherit;
+  font-size: 0.84rem;
+}
+
+@media (max-width: 768px) {
+  body.page-messages .input-btn,
+  body.page-messages .send-btn,
+  body.page-messages .sidebar-icon-btn,
+  body.page-messages .header-action-btn,
+  body.page-messages .back-btn,
+  body.page-messages .msg-dots-btn {
+    min-width: 44px !important;
+    width: 44px !important;
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  body.page-messages .info-panel {
+    display: block !important;
+    position: fixed !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
+    width: auto !important;
+    max-width: calc(100vw - 16px) !important;
+    max-height: 72dvh !important;
+    transform: translateY(calc(100% + 20px)) !important;
+    pointer-events: none !important;
+  }
+
+  body.page-messages .info-panel.open {
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
+  }
+
+  body.page-messages .mobile-info-btn {
+    display: inline-flex !important;
   }
 }

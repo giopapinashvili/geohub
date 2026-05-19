@@ -117,12 +117,15 @@
 
         <!-- Input bar -->
         <div class="chat-input-bar">
-          <button class="input-btn" title="Attach image" data-pick-image><i class="fas fa-paperclip"></i></button>
-          <button class="input-btn" id="fileAttachBtn" title="Attach file"><i class="fas fa-file-alt"></i></button>
+          <button class="input-btn attach-menu-btn" id="attachmentMenuBtn" title="Attachments" aria-label="Attachments" aria-expanded="false" onclick="window.__ghToggleAttachSheet&&window.__ghToggleAttachSheet(event)"><i class="fas fa-plus"></i></button>
           <input type="text" id="msgInput" class="msg-input" placeholder="Type a message…">
           <button class="input-btn" id="emojiBtn" title="Emoji" onclick="toggleEmojiPicker()"><i class="fas fa-smile"></i></button>
-          <button class="input-btn" id="voiceBtn" title="Hold to record voice"><i class="fas fa-microphone"></i></button>
           <button class="send-btn" onclick="sendMsg()" title="Send"><i class="fas fa-paper-plane"></i></button>
+          <div class="msg-attach-sheet" id="msgAttachSheet" aria-hidden="true">
+            <button type="button" data-pick-image><i class="fas fa-image"></i><span>Photo</span></button>
+            <button type="button" id="fileAttachBtn"><i class="fas fa-file-alt"></i><span>File</span></button>
+            <button type="button" id="voiceBtn"><i class="fas fa-microphone"></i><span>Voice</span></button>
+          </div>
           <div class="emoji-picker-wrap" id="emojiPicker"></div>
           <input id="messageImageInput" type="file" accept="image/*" hidden>
           <input id="messageFileInput" type="file" accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.csv" hidden>

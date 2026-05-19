@@ -993,16 +993,22 @@
       +'<button class="header-action-btn" title="Search" id="msgSearchBtn" onclick="window.__ghToggleSearch()"><i class="fas fa-search"></i></button>'
       +'<button class="header-action-btn" title="Theme" onclick="window.__ghShowThemePicker()"><i class="fas fa-palette"></i></button>'
       +'<button class="header-action-btn" title="Nicknames" onclick="window.__ghShowNicknames()"><i class="fas fa-user-tag"></i></button>'
+      +'<button class="header-action-btn mobile-info-btn" title="Info" onclick="window.__ghToggleInfoPanel()"><i class="fas fa-info-circle"></i></button>'
       +'</div>';
   }
 
   window.__ghToggleSearch = toggleSearch;
   window.__ghShowThemePicker = showThemePicker;
   window.__ghShowNicknames = showNicknamePanel;
+  window.__ghToggleInfoPanel = function(){
+    const panel=$('#infoPanel');
+    if(panel) panel.classList.toggle('open');
+  };
 
   async function openConversation(cid){
     activeConversation=cid;
     document.querySelector('.messages-layout')?.classList.add('chat-open');
+    document.querySelector('#infoPanel')?.classList.remove('open');
     document.querySelectorAll('.conv-item').forEach(el=>{
       el.classList.toggle('active', el.dataset.convId===cid);
     });
@@ -1148,7 +1154,7 @@
     uploadingAttachment = !!busy;
     const sendBtn = $('.send-btn') || $('#messageSendBtn');
     const input = $('#msgInput') || $('#messageInput');
-    const buttons = document.querySelectorAll('[data-pick-image],#fileAttachBtn,#voiceBtn');
+    const buttons = document.querySelectorAll('#attachmentMenuBtn,[data-pick-image],#fileAttachBtn,#voiceBtn');
     buttons.forEach(btn=>{ btn.disabled = !!busy; btn.classList.toggle('is-busy', !!busy); });
     if(sendBtn){
       sendBtn.disabled = !!busy || !(input && input.value.trim());
@@ -1232,14 +1238,33 @@
     if(!btn) return;
     if(recording){
       btn.classList.add('recording');
-      btn.innerHTML='<i class="fas fa-stop-circle"></i>';
+      btn.innerHTML='<i class="fas fa-stop-circle"></i><span>Stop</span>';
       btn.title='Stop recording';
     } else {
       btn.classList.remove('recording');
-      btn.innerHTML='<i class="fas fa-microphone"></i>';
+      btn.innerHTML='<i class="fas fa-microphone"></i><span>Voice</span>';
       btn.title='Hold to record voice';
     }
   }
+
+  function closeAttachmentSheet(){
+    const sheet=$('#msgAttachSheet'), btn=$('#attachmentMenuBtn');
+    if(sheet){
+      sheet.classList.remove('open');
+      sheet.setAttribute('aria-hidden','true');
+    }
+    if(btn) btn.setAttribute('aria-expanded','false');
+  }
+
+  window.__ghToggleAttachSheet = function(e){
+    if(e) e.preventDefault();
+    const sheet=$('#msgAttachSheet'), btn=$('#attachmentMenuBtn');
+    if(!sheet) return;
+    const open=!sheet.classList.contains('open');
+    sheet.classList.toggle('open', open);
+    sheet.setAttribute('aria-hidden', open ? 'false' : 'true');
+    if(btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  };
 
   let sendCurrentMsg = null;
 
@@ -1250,6 +1275,17 @@
     setupEmojiPicker();
     setupSearch();
     setupTyping();
+    const attachBtn=$('#attachmentMenuBtn');
+    const attachSheet=$('#msgAttachSheet');
+    if(attachBtn && attachSheet && !attachBtn._rmBound){
+      attachBtn._rmBound=true;
+      attachBtn.onclick=e=>{
+        window.__ghToggleAttachSheet(e);
+      };
+      attachSheet.addEventListener('click', e=>{
+        if(e.target.closest('button')) setTimeout(closeAttachmentSheet, 0);
+      });
+    }
 
     async function doSend(extra){
       if(sendingMessage || uploadingAttachment) return;
@@ -1294,6 +1330,7 @@
       window.GeoSocial.sendMessage(activeConversation, text, ok=>{
         if(ok && input) input.value='';
         if(sendBtn) sendBtn.disabled = uploadingAttachment || !(input && input.value.trim());
+        closeAttachmentSheet();
         const picker=$('#emojiPicker'); if(picker) picker.style.display='none';
         setTimeout(()=>{ sendingMessage=false; }, 350);
         // Force-restore the conv in the left sidebar instantly after send.
@@ -1450,6 +1487,9 @@
     document.addEventListener('click', e=>{
       if(!e.target.closest('#emojiPicker') && !e.target.closest('#emojiBtn')){
         const p=$('#emojiPicker'); if(p && p.style.display==='flex') p.style.display='none';
+      }
+      if(!e.target.closest('#msgAttachSheet') && !e.target.closest('#attachmentMenuBtn')){
+        closeAttachmentSheet();
       }
     });
   }
