@@ -34,6 +34,7 @@
   var _sharePostId   = null;
   var _editPostId    = null;
   var _rxLongTimer   = null;
+  var _bizPostCountCache = {}; // pid -> {comments, reactions, shares}
 
   var _qAll    = [];
   var _qFilter = 'all';
@@ -1519,6 +1520,111 @@
     }
   }
 
+  // ── LOCAL BUSINESS-PAGE POST MENU ────────────────────────────
+  // Uses card.querySelector (not document.getElementById) so duplicate
+  // IDs in overview + all-posts containers are never a problem.
+
+  function bindBusinessPagePostMenu(root) {
+    if (!root) return;
+    if (root.__bizLocalMenuBound) return;
+    root.__bizLocalMenuBound = true;
+
+    root.addEventListener('click', function(e) {
+      var btn = e.target.closest('[data-biz-post-menu]');
+      if (!btn) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+
+      var existing = document.getElementById('ghBizPostMenuDrop');
+      var card = btn.closest('[data-post-id]');
+      if (!card) { if (existing) existing.remove(); return; }
+      var pid = card.dataset.postId;
+      var alreadyOpen = existing && existing.dataset.postId === pid;
+
+      if (existing) existing.remove();
+      if (alreadyOpen) return; // toggle: second click closes
+
+      // KEY: scope dropdown lookup to the clicked card — avoids duplicate ID hazard
+      var dd = card.querySelector('.biz-post-menu-dropdown');
+      if (!dd) return;
+
+      var menu = dd.cloneNode(true);
+      menu.id = 'ghBizPostMenuDrop';
+      menu.dataset.postId = pid;
+
+      // Measure and position fixed near the button
+      menu.style.position = 'fixed';
+      menu.style.left = '0px';
+      menu.style.top = '0px';
+      menu.style.visibility = 'hidden';
+      menu.style.zIndex = '10050';
+      menu.classList.add('open');
+      document.body.appendChild(menu);
+
+      var rect = btn.getBoundingClientRect();
+      var gap = 8;
+      var mw = menu.offsetWidth || 218;
+      var mh = menu.offsetHeight || 260;
+      var vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+      var vh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+      var left = rect.right - mw;
+      if (left < gap) left = gap;
+      if (left + mw > vw - gap) left = Math.max(gap, vw - mw - gap);
+      var top = rect.bottom + gap;
+      if (top + mh > vh - gap) top = rect.top - mh - gap;
+      if (top < gap) top = gap;
+      menu.style.left = Math.round(left) + 'px';
+      menu.style.top = Math.round(top) + 'px';
+      menu.style.visibility = '';
+
+      // Action buttons inside cloned menu
+      menu.addEventListener('click', function(ev) {
+        var ab = ev.target.closest('[data-biz-action]');
+        if (!ab) return;
+        ev.preventDefault();
+        ev.stopPropagation();
+        var action = ab.dataset.bizAction;
+        var f = document.getElementById('ghBizPostMenuDrop');
+        if (f) f.remove();
+        removeDismiss();
+        if (!window._bizActions) return;
+        switch (action) {
+          case 'edit':           window._bizActions.editPost(pid); break;
+          case 'pin':            window._bizActions.pinPost(pid); break;
+          case 'toggleComments': window._bizActions.togglePostComments(pid); break;
+          case 'setVis':         window._bizActions.setPostVisibility(pid, ab.dataset.vis); break;
+          case 'delete':         window._bizActions.deletePost(pid); break;
+        }
+      });
+
+      function _dismiss(ev) {
+        if (ev.type === 'keydown' && ev.key !== 'Escape') return;
+        if (ev.type === 'click') {
+          var t = ev.target;
+          if (t && t.closest) {
+            if (t.closest('#ghBizPostMenuDrop')) return;
+            if (t.closest('[data-biz-post-menu]')) return;
+          }
+        }
+        var f = document.getElementById('ghBizPostMenuDrop');
+        if (f) f.remove();
+        removeDismiss();
+      }
+      function removeDismiss() {
+        document.removeEventListener('click', _dismiss, true);
+        document.removeEventListener('keydown', _dismiss);
+        window.removeEventListener('scroll', _dismiss);
+        window.removeEventListener('resize', _dismiss);
+      }
+      document.addEventListener('click', _dismiss, true);
+      document.addEventListener('keydown', _dismiss);
+      window.addEventListener('scroll', _dismiss);
+      window.addEventListener('resize', _dismiss);
+    });
+  }
+
   // ── LOAD POSTS ────────────────────────────────────────────────
 
   function loadBizPosts() {
@@ -1574,6 +1680,10 @@
       var all = '<div class="biz-post-list">'+posts.map(renderCard).join('')+'</div>';
       if (overviewEl) overviewEl.innerHTML = pre;
       if (allEl)      allEl.innerHTML      = all;
+
+      // Bind local post menu handler FIRST so stopImmediatePropagation fires before bindPostInteractions
+      bindBusinessPagePostMenu(overviewEl);
+      bindBusinessPagePostMenu(allEl);
 
       // Wire shared interaction handlers (comments, reactions, polls, replies)
       if (gs && gs.bindPostInteractions) {
@@ -1635,11 +1745,54 @@
           try { if (gs.loadReactionBreakdown) gs.loadReactionBreakdown(p.id); } catch(e) {}
         });
       }
+
+      // Hydrate real counts from Firestore subcollections
+      hydrateBusinessPostCounts(posts);
     }).catch(function(err){
       console.error('[BizPage] loadBizPosts failed:', err.code||err.message);
       var msg = '<div class="biz-empty-state"><i class="fas fa-triangle-exclamation"></i><p>Could not load posts ('+esc(err.code||'error')+').</p></div>';
       if (overviewEl) overviewEl.innerHTML = msg;
       if (allEl)      allEl.innerHTML      = msg;
+    });
+  }
+
+  function applyBizCountsToDom(pid, counts) {
+    document.querySelectorAll('[data-post-id="'+CSS.escape(pid)+'"]').forEach(function(card) {
+      var likeBtn = card.querySelector('[data-who-reacted]');
+      if (likeBtn) {
+        likeBtn.innerHTML = '<i class="fas fa-thumbs-up"></i> <b data-like-count>'+counts.reactions+'</b>'
+          + (counts.reactions > 0 ? ' people reacted' : '');
+      }
+      var cc = card.querySelector('[data-comment-count]');
+      if (cc) cc.textContent = counts.comments;
+      var sc = card.querySelector('[data-share-count]');
+      if (sc) sc.textContent = counts.shares;
+    });
+  }
+
+  function hydrateBusinessPostCounts(posts) {
+    if (!posts || !posts.length) return;
+    posts.forEach(function(p) {
+      var pid = p.id;
+      if (!pid) return;
+      if (_bizPostCountCache[pid]) {
+        applyBizCountsToDom(pid, _bizPostCountCache[pid]);
+        return;
+      }
+      var qComments  = _fs.query(_fs.collection(_db,'posts',pid,'comments'),  _fs.limit(100));
+      var qReactions = _fs.query(_fs.collection(_db,'posts',pid,'reactions'), _fs.limit(100));
+      var qShares    = _fs.query(_fs.collection(_db,'posts'), _fs.where('sharedPostId','==',pid), _fs.limit(100));
+      Promise.all([
+        _fs.getDocs(qComments),
+        _fs.getDocs(qReactions),
+        _fs.getDocs(qShares)
+      ]).then(function(results) {
+        var counts = { comments: results[0].size, reactions: results[1].size, shares: results[2].size };
+        _bizPostCountCache[pid] = counts;
+        applyBizCountsToDom(pid, counts);
+      }).catch(function(err) {
+        console.warn('[BizPage] hydrateBusinessPostCounts failed for', pid, err.code||err.message);
+      });
     });
   }
 
@@ -3183,6 +3336,9 @@
           }
           if (gs2 && gs2.hydratePostAuthorAvatars) gs2.hydratePostAuthorAvatars(el);
         });
+        bindBusinessPagePostMenu(document.getElementById('biz-posts-overview'));
+        bindBusinessPagePostMenu(document.getElementById('biz-posts-all'));
+        hydrateBusinessPostCounts([newPost]);
       }).catch(function(err){
         console.error('[BizPage] Post failed',err);
         showToast('Post failed: '+(err.code||err.message||'check console'),false);
