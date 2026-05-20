@@ -37,7 +37,7 @@
   var _postSaves     = {};
 
   var BUSINESS_PAGE_POSTS_DISABLED = false;
-  var BUSINESS_PAGE_POST_COMPOSER_ENABLED = false;
+  var BUSINESS_PAGE_POST_COMPOSER_ENABLED = true;
 
   var _qAll    = [];
   var _qFilter = 'all';
@@ -213,6 +213,7 @@
       // ── Page identity mode: show admin controls ───────────────────
       actions =
         '<a href="add-business.html?edit='+esc(BIZ_ID)+'" class="biz-action-btn owner-edit"><i class="fas fa-pen"></i> Edit Page</a>'+
+        '<button class="biz-action-btn" type="button" data-biz-open-compose><i class="fas fa-plus"></i> Create Post</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
         '<input type="file" id="biz-owner-photo-input" accept="image/*" style="display:none" onchange="window._bizActions.handleOwnerPhoto(this)">'+
@@ -470,6 +471,7 @@
         '<div class="biz-admin-toolbar-btns">'+
           '<a href="add-business.html?edit='+esc(BIZ_ID)+'" class="biz-admin-btn"><i class="fas fa-pen"></i> Edit Page</a>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.openBlockManager()"><i class="fas fa-plus-circle"></i> Add Block</button>'+
+          '<button class="biz-admin-btn" type="button" data-biz-open-compose><i class="fas fa-pen-to-square"></i> New Post</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
           '<a href="rewards.html" class="biz-admin-btn"><i class="fas fa-gift"></i> My Coupons</a>'+
           '<button class="biz-admin-btn" style="color:#f87171;border-color:rgba(248,113,113,.3)" onclick="window._bizActions.deletePage()"><i class="fas fa-trash"></i> Delete Page</button>'+
@@ -588,6 +590,7 @@
       '<div class="biz-left-sidebar">'+renderLeftSidebar(biz)+'</div>'+
       '<div class="biz-center-col">'+
         '<div id="biz-page-blocks"></div>'+
+        (_isActingAsPage && BUSINESS_PAGE_POST_COMPOSER_ENABLED ? renderComposer(biz) : '')+
         '<div id="biz-posts-overview">'+renderPostsSkeleton(3)+'</div>'+
       '</div>'+
       '<div class="biz-right-sidebar">'+renderRightSidebar(biz, services, products, reviews, gallery)+'</div>'+
@@ -600,13 +603,13 @@
     var logo = biz.logoUrl
       ? '<img src="'+esc(biz.logoUrl)+'" alt="">'
       : esc((biz.title||'B')[0]);
-    return '<div class="biz-composer" onclick="window._bizActions.openCompose()">'+
+    return '<button type="button" class="biz-composer" data-biz-open-compose>'+
       '<div class="biz-composer-logo">'+logo+'</div>'+
       '<div class="biz-composer-placeholder">What\'s happening at '+esc(biz.title||'your business')+'?</div>'+
       '<div class="biz-composer-actions">'+
         '<span class="biz-composer-action"><i class="fas fa-image"></i></span>'+
       '</div>'+
-    '</div>';
+    '</button>';
   }
 
   // ── RENDER: COMMENT BUBBLE ───────────────────────────────────
@@ -824,9 +827,9 @@
   function postCardHtml(post, biz) {
     var cleanPid = esc(post.id || '');
     if (!cleanPid) return '';
-    var cleanLikeCount = Number(post.likeCount || post.reactionCount || 0);
-    var cleanCommentCount = Number(post.commentCount || 0);
-    var cleanShareCount = Number(post.shareCount || 0);
+    var cleanLikeCount = Number(post._realLikeCount || 0);
+    var cleanCommentCount = Number(post._realCommentCount || 0);
+    var cleanShareCount = Number(post._realShareCount || 0);
     var cleanReaction = _postReactions[post.id] || {};
     var cleanSaved = !!_postSaves[post.id];
     var cleanCommentsDisabled = !!post.commentsDisabled;
@@ -1421,7 +1424,7 @@
       identityHtml =
         '<div class="biz-compose-identity-row">'+
           '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.84rem;color:#94a3b8">'+
-            '<input type="checkbox" id="biz-identity-as-biz" checked onchange="window._bizActions._updateIdentityLabel()">'+
+            '<input type="checkbox" id="biz-identity-as-biz" data-biz-identity-as-biz checked>'+
             '<span id="biz-identity-label">Posting as <strong>'+esc(biz.title||'your business')+'</strong></span>'+
           '</label>'+
         '</div>';
@@ -1429,21 +1432,21 @@
       var visName = _currentUser ? (_currentUser.displayName || _currentUser.email || 'you') : 'you';
       identityHtml = '<div class="biz-modal-sub">Posting as <strong>'+esc(visName)+'</strong></div>';
     }
-    return '<div class="biz-modal-overlay" id="biz-compose-modal" onclick="if(event.target===this)window._bizActions.closeCompose()">'+
+    return '<div class="biz-modal-overlay" id="biz-compose-modal" data-biz-compose-overlay>'+
       '<div class="biz-modal-sheet">'+
         '<div class="biz-modal-handle"></div>'+
-        '<button class="biz-modal-close" onclick="window._bizActions.closeCompose()"><i class="fas fa-times"></i></button>'+
+        '<button class="biz-modal-close" type="button" data-biz-compose-close><i class="fas fa-times"></i></button>'+
         '<div class="biz-modal-title">Create Post</div>'+
         identityHtml+
         '<textarea class="biz-compose-textarea" id="biz-compose-text" placeholder="What\'s happening?"></textarea>'+
         '<div id="biz-compose-photos" class="biz-compose-photos"></div>'+
         '<div class="biz-compose-media-bar">'+
-          '<button type="button" class="biz-compose-media-btn" onclick="window._bizActions.openPhotoInCompose()"><i class="fas fa-image"></i> Add Photo</button>'+
-          '<input type="file" id="biz-compose-photo-input" accept="image/*" multiple style="display:none" onchange="window._bizActions.handleComposePhoto(this)">'+
+          '<button type="button" class="biz-compose-media-btn" data-biz-compose-photo><i class="fas fa-image"></i> Add Photo</button>'+
+          '<input type="file" id="biz-compose-photo-input" data-biz-compose-photo-input accept="image/*" multiple style="display:none">'+
         '</div>'+
         '<div class="biz-compose-footer">'+
-          '<button class="biz-action-btn" onclick="window._bizActions.closeCompose()">Cancel</button>'+
-          '<button class="biz-action-btn primary" id="biz-compose-btn" onclick="window._bizActions.submitBizPost()"><i class="fas fa-paper-plane"></i> Post</button>'+
+          '<button class="biz-action-btn" type="button" data-biz-compose-close>Cancel</button>'+
+          '<button class="biz-action-btn primary" type="button" id="biz-compose-btn" data-biz-compose-submit><i class="fas fa-paper-plane"></i> Post</button>'+
         '</div>'+
       '</div>'+
     '</div>';
@@ -1603,6 +1606,7 @@
           '</div>'+
 
           '<div class="biz-tab-panel" data-panel="posts">'+
+            (_isActingAsPage && BUSINESS_PAGE_POST_COMPOSER_ENABLED ? '<div style="margin-bottom:14px">'+renderComposer(biz)+'</div>' : '')+
             '<div id="biz-posts-all">'+renderPostsSkeleton(3)+'</div>'+
           '</div>'+
 
@@ -1671,6 +1675,7 @@
     });
 
     _previewMode = false;
+    installBusinessPostComposerControls();
     if (!BUSINESS_PAGE_POSTS_DISABLED) loadBizPosts();
     loadPageBlocks();
     loadEvents(BIZ_ID);
@@ -1739,6 +1744,7 @@
       if (allEl)      allEl.innerHTML      = all;
       installCleanBusinessPostInteractions();
       hydrateCleanBusinessPostState(posts);
+      hydrateCleanBusinessPostCounts(posts);
 
       // Set up IntersectionObserver to track post views
       if (_currentUser && 'IntersectionObserver' in window) {
@@ -1854,6 +1860,74 @@
       _fs.getDoc(_fs.doc(_db, 'savedPosts', _currentUser.uid + '_' + post.id))
         .then(function(snap) { setBusinessCleanSaveUi(post.id, snap.exists()); })
         .catch(function(){});
+    });
+  }
+
+  function syncBusinessPostCountFields(post, counts) {
+    if (!post || !post.id || !isBusinessPostOwnerMode()) return;
+    var patch = {};
+    if (Number(post.commentCount || 0) !== counts.comments) patch.commentCount = counts.comments;
+    if (Number(post.likeCount || post.reactionCount || 0) !== counts.reactions) {
+      patch.likeCount = counts.reactions;
+      patch.reactionCount = counts.reactions;
+    }
+    if (Number(post.shareCount || 0) !== counts.shares) patch.shareCount = counts.shares;
+    if (!Object.keys(patch).length) return;
+    patch.updatedAt = _fs.serverTimestamp();
+    _fs.updateDoc(_fs.doc(_db, 'posts', post.id), patch).catch(function(){});
+  }
+
+  function hydrateCleanBusinessPostCounts(posts) {
+    (posts || []).forEach(function(post) {
+      if (!post || !post.id) return;
+      var postId = post.id;
+      var commentsJob = _fs.getDocs(_fs.collection(_db, 'posts', postId, 'comments')).then(function(snap) {
+        var total = 0;
+        snap.forEach(function(d) {
+          var c = d.data() || {};
+          if (c.status !== 'deleted') total++;
+        });
+        setBusinessCleanCount(postId, 'comment', total);
+        return total;
+      }).catch(function() {
+        setBusinessCleanCount(postId, 'comment', 0);
+        return 0;
+      });
+
+      var reactionsJob = _fs.getDocs(_fs.collection(_db, 'posts', postId, 'reactions')).then(function(snap) {
+        var total = 0;
+        snap.forEach(function(){ total++; });
+        setBusinessCleanCount(postId, 'like', total);
+        return total;
+      }).catch(function() {
+        setBusinessCleanCount(postId, 'like', 0);
+        return 0;
+      });
+
+      var sharesJob = _fs.getDocs(_fs.query(
+        _fs.collection(_db, 'posts'),
+        _fs.where('sharedPostId', '==', postId),
+        _fs.limit(100)
+      )).then(function(snap) {
+        var total = 0;
+        snap.forEach(function(d) {
+          var s = d.data() || {};
+          if (s.status !== 'deleted') total++;
+        });
+        setBusinessCleanCount(postId, 'share', total);
+        return total;
+      }).catch(function() {
+        setBusinessCleanCount(postId, 'share', 0);
+        return 0;
+      });
+
+      Promise.all([commentsJob, reactionsJob, sharesJob]).then(function(values) {
+        syncBusinessPostCountFields(post, {
+          comments: values[0] || 0,
+          reactions: values[1] || 0,
+          shares: values[2] || 0
+        });
+      });
     });
   }
 
@@ -2006,7 +2080,7 @@
     if (action === 'feed') {
       if (!_currentUser) { showToast('Sign in to share', false); return; }
       if (btn) btn.disabled = true;
-      var extra = { sharedPostId: postId, sharedBusinessId: BIZ_ID, visibility: 'public', targetType: 'user', targetId: _currentUser.uid };
+      var extra = { type:'share', sharedPostId: postId, sharedBusinessId: BIZ_ID, visibility: 'public', targetType: 'user', targetId: _currentUser.uid };
       var done = function(ok) {
         if (btn) btn.disabled = false;
         if (!ok) { showToast('Could not share', false); return; }
@@ -2183,6 +2257,47 @@
         ta.style.height = 'auto';
         ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
       });
+    });
+  }
+
+  function installBusinessPostComposerControls() {
+    var root = document.getElementById('biz-detail-root');
+    if (!root || root.__bizPostComposerBound) return;
+    root.__bizPostComposerBound = true;
+    root.addEventListener('click', function(e) {
+      if (!e.target || !e.target.closest) return;
+      var overlay = e.target.matches && e.target.matches('[data-biz-compose-overlay]') ? e.target : null;
+      var openBtn = e.target.closest('[data-biz-open-compose]');
+      var closeBtn = e.target.closest('[data-biz-compose-close]');
+      var photoBtn = e.target.closest('[data-biz-compose-photo]');
+      var removeBtn = e.target.closest('[data-biz-compose-remove-photo]');
+      var submitBtn = e.target.closest('[data-biz-compose-submit]');
+      if (openBtn && root.contains(openBtn)) {
+        e.preventDefault();
+        window._bizActions.openCompose();
+      } else if ((closeBtn && root.contains(closeBtn)) || overlay) {
+        e.preventDefault();
+        window._bizActions.closeCompose();
+      } else if (photoBtn && root.contains(photoBtn)) {
+        e.preventDefault();
+        window._bizActions.openPhotoInCompose();
+      } else if (removeBtn && root.contains(removeBtn)) {
+        e.preventDefault();
+        window._bizActions.removeComposePhoto(Number(removeBtn.dataset.bizComposeRemovePhoto || 0));
+      } else if (submitBtn && root.contains(submitBtn)) {
+        e.preventDefault();
+        window._bizActions.submitBizPost();
+      }
+    });
+    root.addEventListener('change', function(e) {
+      if (!e.target || !e.target.closest) return;
+      var identity = e.target.closest('[data-biz-identity-as-biz]');
+      var photoInput = e.target.closest('[data-biz-compose-photo-input]');
+      if (identity && root.contains(identity)) {
+        window._bizActions._updateIdentityLabel();
+      } else if (photoInput && root.contains(photoInput)) {
+        window._bizActions.handleComposePhoto(photoInput);
+      }
     });
   }
 
@@ -3720,16 +3835,16 @@
         var hasFiles=!!(window._composePendingFiles&&window._composePendingFiles.length);
         btn.disabled=!(hasText||hasFiles);
       }
-      if(ta){ ta.addEventListener('input',_updateBizSubmit); _updateBizSubmit(); }
+      if(ta){ ta.oninput=_updateBizSubmit; _updateBizSubmit(); }
       // Store validator so photo changes can trigger it too
       window._bizComposeValidate=_updateBizSubmit;
     },
-    closeCompose: function(){
+    closeCompose: function(force){
       var m=document.getElementById('biz-compose-modal'); if(!m) return;
       var ta=document.getElementById('biz-compose-text');
       var hasText=!!(ta&&ta.value.trim());
       var hasFiles=!!(window._composePendingFiles&&window._composePendingFiles.length);
-      if((hasText||hasFiles) && !confirm('Discard your post?')) return;
+      if(!force && (hasText||hasFiles) && !confirm('Discard your post?')) return;
       m.classList.remove('open');
       if(ta) ta.value='';
       window._composePendingFiles=[];
@@ -3766,7 +3881,7 @@
         var reader=new FileReader();
         reader.onload=function(e){
           var d=document.createElement('div'); d.className='biz-compose-photo-thumb';
-          d.innerHTML='<img src="'+e.target.result+'" alt=""><button type="button" onclick="window._bizActions.removeComposePhoto('+i+')"><i class="fas fa-times"></i></button>';
+          d.innerHTML='<img src="'+e.target.result+'" alt=""><button type="button" data-biz-compose-remove-photo="'+i+'"><i class="fas fa-times"></i></button>';
           pr.appendChild(d);
         };
         reader.readAsDataURL(file);
@@ -3803,6 +3918,9 @@
 
       uploadAll.then(function(urls){
         capturedUrls=urls.filter(Boolean);
+        if (files.length && !capturedUrls.length && !textVal.trim()) {
+          throw new Error('Image upload failed');
+        }
         return _fs.addDoc(_fs.collection(_db,'posts'),{
           text:textVal.trim(),
           businessId:BIZ_ID,
@@ -3821,9 +3939,9 @@
           updatedAt:_fs.serverTimestamp(),
         });
       }).then(function(docRef){
-        window._bizActions.closeCompose();
+        window._bizActions.closeCompose(true);
         showToast('Posted!');
-        if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i> Post'; }
+        if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-paper-plane"></i> Post'; }
         // Optimistic UI: prepend post immediately without waiting for re-fetch
         var nowTs = { toMillis: function(){ return Date.now(); } };
         var newPost = {

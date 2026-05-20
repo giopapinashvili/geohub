@@ -705,6 +705,11 @@ body.gh-has-injected-nav #biz-detail-root {
   padding: 14px 16px;
   cursor: pointer;
   transition: background .15s;
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  margin-bottom: 14px;
 }
 .biz-composer:hover { background: rgba(255,255,255,.07); }
 
@@ -943,6 +948,34 @@ body.gh-has-injected-nav #biz-detail-root {
 }
 .biz-clean-share-actions {
   flex-direction: column;
+}
+
+@media (max-width: 480px) {
+  .biz-post-card { border-radius: 14px; }
+  .biz-post-reactions {
+    flex-wrap: wrap;
+  }
+  .biz-react-btn {
+    flex: 1 1 50%;
+    min-width: 50%;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+  }
+  .biz-react-btn:nth-child(2n) { border-right: none; }
+  .biz-clean-owner-tools {
+    padding: 0 12px 10px;
+  }
+  .biz-clean-owner-btn {
+    flex: 1 1 calc(50% - 8px);
+  }
+  .biz-cmt-section,
+  .biz-clean-edit-panel,
+  .biz-clean-share-panel {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+  #biz-detail-root {
+    padding-bottom: 120px;
+  }
 }
 
 /* ── SERVICE CARDS ───────────────────────────────────────────── */
