@@ -1853,35 +1853,41 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     options = options || {};
     hydratePostAuthorAvatars(root);
     ensurePostMenuDismissers();
+    // Always update options — allows re-calls with onBizAction to take effect even if already bound
+    root.__postInteractionsOptions = options;
     if(root.__ghPostInteractionsBound) return;
     root.__ghPostInteractionsBound = true;
     root.addEventListener('click', function(e){
+      var opts = root.__postInteractionsOptions || {};
       // Business post menu toggle — intercept before generic card check
-      var bizMenuBtn = e.target.closest('[data-biz-post-menu]');
+      var bizMenuBtn = e.target.closest('[data-biz-post-menu], .biz-post-menu-btn');
       if (bizMenuBtn) {
+        e.preventDefault();
         e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
         var bizCard0 = bizMenuBtn.closest('[data-post-id]');
         var bizPid0 = bizCard0 ? bizCard0.dataset.postId : '';
-        var dd = bizCard0 ? bizCard0.querySelector('.biz-post-menu-dropdown') : null;
-        if (dd) {
-          var currentBizMenu = document.getElementById('ghBizPostMenuDrop');
-          var isOpen0 = currentBizMenu && currentBizMenu.dataset.postId === String(bizPid0 || '');
-          closePostMenus();
-          if (!isOpen0) {
-            var floatingMenu = dd.cloneNode(true);
-            floatingMenu.id = 'ghBizPostMenuDrop';
-            floatingMenu.dataset.postId = String(bizPid0 || '');
-            document.body.appendChild(floatingMenu);
-            floatingMenu.addEventListener('click', function(ev){
-              var actionBtn = ev.target.closest && ev.target.closest('[data-biz-action]');
-              if (!actionBtn) return;
-              ev.preventDefault();
-              ev.stopPropagation();
-              closePostMenus();
-              if (options.onBizAction) options.onBizAction(actionBtn.dataset.pid || bizPid0, actionBtn.dataset.bizAction, actionBtn.dataset);
-            });
-            positionFixedPostMenu(floatingMenu, bizMenuBtn, 218);
-          }
+        if (!bizCard0 || !bizPid0) { console.warn('[BizPostMenu] no card/postId for button'); return; }
+        var dd = bizCard0.querySelector('.biz-post-menu-dropdown');
+        if (!dd) { console.warn('[BizPostMenu] no .biz-post-menu-dropdown in card', bizPid0); return; }
+        var currentBizMenu = document.getElementById('ghBizPostMenuDrop');
+        var isOpen0 = currentBizMenu && currentBizMenu.dataset.postId === String(bizPid0 || '');
+        closePostMenus();
+        if (!isOpen0) {
+          var floatingMenu = dd.cloneNode(true);
+          floatingMenu.id = 'ghBizPostMenuDrop';
+          floatingMenu.dataset.postId = String(bizPid0 || '');
+          document.body.appendChild(floatingMenu);
+          floatingMenu.addEventListener('click', function(ev){
+            var actionBtn = ev.target.closest && ev.target.closest('[data-biz-action]');
+            if (!actionBtn) return;
+            ev.preventDefault();
+            ev.stopPropagation();
+            closePostMenus();
+            var currentOpts = root.__postInteractionsOptions || {};
+            if (currentOpts.onBizAction) currentOpts.onBizAction(actionBtn.dataset.pid || bizPid0, actionBtn.dataset.bizAction, actionBtn.dataset);
+          });
+          positionFixedPostMenu(floatingMenu, bizMenuBtn, 218);
         }
         return;
       }
@@ -1892,7 +1898,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var bizAction = e.target.closest('[data-biz-action]');
       if (bizAction) {
         document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
-        if (options.onBizAction) options.onBizAction(bizAction.dataset.pid||pid, bizAction.dataset.bizAction, bizAction.dataset);
+        var currentOpts = root.__postInteractionsOptions || {};
+        if (currentOpts.onBizAction) currentOpts.onBizAction(bizAction.dataset.pid||pid, bizAction.dataset.bizAction, bizAction.dataset);
         return;
       }
 
