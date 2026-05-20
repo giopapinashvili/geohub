@@ -164,21 +164,24 @@
   async function refreshRealStats(user) {
     const GF = window.GeoFirebase;
     if (!GF || !GF.fs || !GF.db || !user || !user.uid) return;
-    const count = async q => {
-      if (GF.fs.getCountFromServer) {
-        const snap = await GF.fs.getCountFromServer(q);
-        return snap.data().count || 0;
-      }
+    const getDocs = async q => {
       const snap = await GF.fs.getDocs(q);
-      return snap.size || 0;
+      return snap.docs || [];
     };
     try {
-      const [posts, friends, followers, following] = await Promise.all([
-        count(GF.fs.query(GF.fs.collection(GF.db, 'posts'), GF.fs.where('authorId', '==', user.uid), GF.fs.limit(200))).catch(() => 0),
-        count(GF.fs.query(GF.fs.collection(GF.db, 'friends'), GF.fs.where('users', 'array-contains', user.uid), GF.fs.limit(200))).catch(() => 0),
-        count(GF.fs.query(GF.fs.collection(GF.db, 'follows'), GF.fs.where('followingId', '==', user.uid), GF.fs.limit(200))).catch(() => 0),
-        count(GF.fs.query(GF.fs.collection(GF.db, 'follows'), GF.fs.where('followerId', '==', user.uid), GF.fs.limit(200))).catch(() => 0)
+      const [postDocs, friendsDocs, friendshipsDocs, followerDocs, followingDocs] = await Promise.all([
+        getDocs(GF.fs.query(GF.fs.collection(GF.db, 'posts'), GF.fs.where('authorId', '==', user.uid), GF.fs.limit(200))).catch(() => []),
+        getDocs(GF.fs.query(GF.fs.collection(GF.db, 'friends'), GF.fs.where('users', 'array-contains', user.uid), GF.fs.limit(200))).catch(() => []),
+        getDocs(GF.fs.query(GF.fs.collection(GF.db, 'friendships'), GF.fs.where('users', 'array-contains', user.uid), GF.fs.limit(200))).catch(() => []),
+        getDocs(GF.fs.query(GF.fs.collection(GF.db, 'follows'), GF.fs.where('followingId', '==', user.uid), GF.fs.limit(200))).catch(() => []),
+        getDocs(GF.fs.query(GF.fs.collection(GF.db, 'follows'), GF.fs.where('followerId', '==', user.uid), GF.fs.limit(200))).catch(() => [])
       ]);
+      // Deduplicate friends across both collections by doc ID (same sorted pair ID used in both).
+      const friendIds = new Set([...friendsDocs.map(d => d.id), ...friendshipsDocs.map(d => d.id)]);
+      const friends = friendIds.size;
+      const posts = postDocs.length;
+      const followers = followerDocs.length;
+      const following = followingDocs.length;
       const vals = [Number(user.visitedPlaces || 0), friends, followers, following, user.pointsBalance || Math.floor(Number(user.xp || 0) / 10), Number(user.trustScore || 0)];
       $$('.profile-stats-bar .pstat-value').forEach((el, i) => { el.textContent = compact(vals[i] || 0); });
       const postTab = $('.ptab[data-tab="posts"] .tab-count'); if (postTab) postTab.textContent = posts || '0';

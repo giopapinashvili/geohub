@@ -1656,24 +1656,44 @@
       if (!uid || !targetUserId || uid === targetUserId) { callback({ state: uid === targetUserId ? 'self' : 'none' }); return function(){}; }
       var unsubs = [];
       var status = { state: 'none' };
-      // Wait for all 3 listeners to fire at least once before emitting, to avoid
+      // Track whether each collection has a friendship doc, so neither listener
+      // can erroneously overwrite a 'friends' state set by the other collection.
+      var friendDocExists = false;
+      var friendshipDocExists = false;
+      // Wait for all 4 listeners to fire at least once before emitting, to avoid
       // intermediate 'none' state flicker during initial load.
       var allSettled = false;
       var settledCount = 0;
       function emit(){
         if (!allSettled) {
           settledCount++;
-          if (settledCount < 3) return;
+          if (settledCount < 4) return;
           allSettled = true;
         }
         console.log('[friends] status', { uid: uid, target: targetUserId, state: status.state, requestId: status.requestId });
         callback(Object.assign({}, status));
       }
-      unsubs.push(onSnapshot(doc(db, 'friends', friendshipId(uid, targetUserId)), function(snap){
-        if (snap.exists()) status = { state: 'friends', friendId: snap.id };
-        else if (status.state === 'friends') status = { state: 'none' };
+      var fid = friendshipId(uid, targetUserId);
+      // Canonical post-Phase-70C friendship docs live in 'friends'.
+      unsubs.push(onSnapshot(doc(db, 'friends', fid), function(snap){
+        friendDocExists = snap.exists();
+        if (friendDocExists || friendshipDocExists) {
+          status = { state: 'friends', friendId: fid };
+        } else if (status.state === 'friends') {
+          status = { state: 'none' };
+        }
         emit();
       }, function(err){ console.warn('[friends] friends-doc listener err', err && err.message); emit(); }));
+      // Legacy pre-Phase-70C friendship docs live in 'friendships'.
+      unsubs.push(onSnapshot(doc(db, 'friendships', fid), function(snap){
+        friendshipDocExists = snap.exists();
+        if (friendDocExists || friendshipDocExists) {
+          status = { state: 'friends', friendId: fid };
+        } else if (status.state === 'friends') {
+          status = { state: 'none' };
+        }
+        emit();
+      }, function(err){ console.warn('[friends] friendships-doc listener err', err && err.message); emit(); }));
       unsubs.push(onSnapshot(doc(db, 'friendRequests', uid + '_' + targetUserId), function(snap){
         if (status.state === 'friends') return emit();
         if (snap.exists() && (snap.data()||{}).status === 'pending') status = { state: 'outgoing', requestId: snap.id };

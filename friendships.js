@@ -244,24 +244,25 @@
       if ((results[0] && results[0].exists()) || (results[1] && results[1].exists())) {
         callback('friends'); return;
       }
-      // Check pending requests: sent by me
+      // Check pending requests: sent by me. Single-field query — no composite index needed;
+      // filter status client-side to avoid requiring a composite Firestore index.
       return GF.fs.getDocs(GF.fs.query(
         GF.fs.collection(GF.db, 'friendRequests'),
         GF.fs.where('fromUserId', '==', me.uid),
         GF.fs.where('toUserId', '==', otherUserId),
-        GF.fs.where('status', '==', 'pending'),
-        GF.fs.limit(1)
+        GF.fs.limit(5)
       )).then(function (snap) {
-        if (!snap.empty) { callback('pending_sent'); return; }
-        // Check pending requests: received by me
+        var hasPendingSent = snap.docs.some(function(d){ return (d.data().status || '') === 'pending'; });
+        if (hasPendingSent) { callback('pending_sent'); return; }
+        // Check pending requests: received by me.
         return GF.fs.getDocs(GF.fs.query(
           GF.fs.collection(GF.db, 'friendRequests'),
           GF.fs.where('fromUserId', '==', otherUserId),
           GF.fs.where('toUserId', '==', me.uid),
-          GF.fs.where('status', '==', 'pending'),
-          GF.fs.limit(1)
+          GF.fs.limit(5)
         )).then(function (snap2) {
-          if (!snap2.empty) { callback('pending_received'); return; }
+          var hasPendingReceived = snap2.docs.some(function(d){ return (d.data().status || '') === 'pending'; });
+          if (hasPendingReceived) { callback('pending_received'); return; }
           callback('none');
         });
       });
@@ -305,18 +306,19 @@
     var me = currentUser();
     if (!GF || !GF.db || !GF.fs || !me) { callback([]); return; }
 
+    // Single-field query only — no composite index needed; filter pending client-side.
     return GF.fs.onSnapshot(
       GF.fs.query(
         GF.fs.collection(GF.db, 'friendRequests'),
         GF.fs.where('toUserId', '==', me.uid),
-        GF.fs.where('status', '==', 'pending'),
-        GF.fs.limit(30)
+        GF.fs.limit(50)
       ),
       function (snap) {
+        var pendingDocs = snap.docs.filter(function(d){ return (d.data().status || '') === 'pending'; });
         var requests = [];
-        var pending = snap.docs.length;
+        var pending = pendingDocs.length;
         if (!pending) { callback([]); return; }
-        snap.docs.forEach(function (d) {
+        pendingDocs.forEach(function (d) {
           var r = Object.assign({ id: d.id }, d.data());
           // Fetch sender profile
           GF.fs.getDoc(GF.fs.doc(GF.db, 'users', r.fromUserId)).then(function (uSnap) {
@@ -325,7 +327,7 @@
             r.senderAvatar = uData.avatar || uData.photoURL || '';
             r.senderUsername = uData.username || r.fromUserId;
             requests.push(r);
-            if (requests.length === snap.docs.length) {
+            if (requests.length === pending) {
               callback(requests);
             }
           }).catch(function () {
@@ -333,7 +335,7 @@
             r.senderAvatar = '';
             r.senderUsername = r.fromUserId;
             requests.push(r);
-            if (requests.length === snap.docs.length) {
+            if (requests.length === pending) {
               callback(requests);
             }
           });

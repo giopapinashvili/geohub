@@ -839,7 +839,7 @@ service cloud.firestore {
                 || request.resource.data.get('customerUid', '') == uid()))
       );
       allow read, update, delete: if isAdmin()
-        || (signedIn() && uid() in resource.data.participants)
+        || (signedIn() && uid() in resource.data.get('participants', []))
         || (signedIn() && uid() in resource.data.get('memberUids', []))
         || (signedIn()
             && resource.data.get('forBusiness', false) == true
