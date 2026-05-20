@@ -34,6 +34,7 @@
   var _sharePostId   = null;
   var _editPostId    = null;
   var _rxLongTimer   = null;
+  var _postSaves     = {};
 
   var _qAll    = [];
   var _qFilter = 'all';
@@ -776,7 +777,7 @@
       var vis      = post.visibility || 'public';
       menuHtml =
         '<div class="biz-post-menu-wrap">'+
-          '<button class="biz-post-menu-btn" title="Post options" '+
+          '<button class="biz-post-menu-btn" title="Post options" data-biz-post-menu '+
             'onclick="event.stopPropagation();window._bizActions.openPostMenu(\''+pid+'\',this)">'+
             '<i class="fas fa-ellipsis"></i>'+
           '</button>'+
@@ -895,7 +896,8 @@
           '</button>'+
         '</div>'+
         '<button class="biz-react-btn" onclick="window._bizActions.toggleBizComment(\''+pid+'\')"><i class="far fa-comment"></i> Comment</button>'+
-        '<button class="biz-react-btn" onclick="window._bizActions.openShareModal(\''+pid+'\')"><i class="fas fa-share-nodes"></i> Share</button>'+
+        '<button class="biz-react-btn biz-post-share-btn" data-biz-post-share onclick="window._bizActions.openShareModal(\''+pid+'\')"><i class="fas fa-share-nodes"></i> Share</button>'+
+        '<button class="biz-react-btn biz-post-save-btn" data-biz-post-save onclick="window._bizActions.togglePostSave(\''+pid+'\',this)"><i class="far fa-bookmark"></i> Save</button>'+
       '</div>'+
       '<div class="biz-cmt-section" id="biz-cmt-'+pid+'" style="display:none">'+
         cmtInner+
@@ -1549,6 +1551,7 @@
       if (!posts.length) {
         if (overviewEl) overviewEl.innerHTML = empty;
         if (allEl)      allEl.innerHTML      = empty;
+        installBusinessPostActionDelegates();
         return;
       }
       _currentPosts = posts;
@@ -1556,6 +1559,7 @@
       var pre = '<div class="biz-post-list">'+posts.slice(0,3).map(function(p){ return postCardHtml(p,_biz); }).join('')+'</div>';
       if (overviewEl) overviewEl.innerHTML = pre;
       if (allEl)      allEl.innerHTML      = all;
+      installBusinessPostActionDelegates();
 
       // Set up IntersectionObserver to track post views
       if (_currentUser && 'IntersectionObserver' in window) {
@@ -1615,6 +1619,56 @@
   }
 
   // ── SAFE SNAP ─────────────────────────────────────────────────
+
+  function buttonText(el) {
+    return (el && (el.textContent || '') || '').replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+
+  function installBusinessPostActionDelegates() {
+    ['biz-posts-overview', 'biz-posts-all'].forEach(function(rootId) {
+      var root = document.getElementById(rootId);
+      if (!root || root.__bizPostActionsBound) return;
+      root.__bizPostActionsBound = true;
+      root.addEventListener('click', function(e) {
+        if (!e.target || !e.target.closest) return;
+
+        var menuBtn = e.target.closest('[data-biz-post-menu], .biz-post-menu-btn, button[title="Post options"], [aria-label="Post options"]');
+        var shareBtn = e.target.closest('[data-biz-post-share], .biz-post-share-btn, button');
+        var saveBtn = e.target.closest('[data-biz-post-save], .biz-post-save-btn, [data-save], button');
+        var action = null;
+        var btn = null;
+
+        if (menuBtn) {
+          action = 'menu';
+          btn = menuBtn;
+        } else if (shareBtn && (shareBtn.matches('[data-biz-post-share], .biz-post-share-btn') || buttonText(shareBtn) === 'share')) {
+          action = 'share';
+          btn = shareBtn;
+        } else if (saveBtn && (saveBtn.matches('[data-biz-post-save], .biz-post-save-btn, [data-save]') || buttonText(saveBtn) === 'save' || buttonText(saveBtn) === 'saved')) {
+          action = 'save';
+          btn = saveBtn;
+        }
+        if (!action) return;
+
+        var card = btn.closest('[data-post-id]');
+        if (!card) return;
+        var postId = card.dataset.postId;
+        if (!postId) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+
+        if (action === 'menu') {
+          window._bizActions.openPostMenu(postId, btn);
+        } else if (action === 'share') {
+          window._bizActions.openShareModal(postId);
+        } else if (action === 'save') {
+          window._bizActions.togglePostSave(postId, btn);
+        }
+      }, true);
+    });
+  }
 
   function safeSnap(promise) {
     return promise.then(function(snap){
@@ -2726,6 +2780,51 @@
       }
     },
 
+    togglePostSave: function(postId, btnEl) {
+      if (!_currentUser) { showToast('Sign in to save', false); return; }
+      var setSavedUi = function(saved) {
+        _postSaves[postId] = !!saved;
+        document.querySelectorAll('[data-post-id="'+CSS.escape(postId)+'"] [data-biz-post-save], [data-post-id="'+CSS.escape(postId)+'"] .biz-post-save-btn').forEach(function(btn) {
+          btn.classList.toggle('active', !!saved);
+          btn.innerHTML = '<i class="'+(saved ? 'fas' : 'far')+' fa-bookmark"></i> '+(saved ? 'Saved' : 'Save');
+        });
+      };
+      if (btnEl) btnEl.disabled = true;
+
+      if (window.GeoSocial && typeof window.GeoSocial.toggleSavePost === 'function') {
+        window.GeoSocial.toggleSavePost(postId, function(saved) {
+          if (btnEl) btnEl.disabled = false;
+          setSavedUi(saved);
+        });
+        return;
+      }
+
+      var saveId = _currentUser.uid + '_' + postId;
+      var saveRef = _fs.doc(_db, 'savedPosts', saveId);
+      _fs.getDoc(saveRef).then(function(snap) {
+        if (snap.exists()) {
+          return _fs.deleteDoc(saveRef).then(function() {
+            setSavedUi(false);
+            showToast('Removed from saved');
+          });
+        }
+        return _fs.setDoc(saveRef, {
+          uid: _currentUser.uid,
+          userId: _currentUser.uid,
+          postId: postId,
+          createdAt: _fs.serverTimestamp()
+        }).then(function() {
+          setSavedUi(true);
+          showToast('Post saved');
+        });
+      }).catch(function(err) {
+        console.error('[BizPage] togglePostSave failed:', err.code || err.message);
+        showToast('Could not save post', false);
+      }).finally(function() {
+        if (btnEl) btnEl.disabled = false;
+      });
+    },
+
     // kept for backward compat with any cached cards
     likePost: function(postId) { window._bizActions.toggleReaction(postId); },
 
@@ -3162,6 +3261,7 @@
             el.innerHTML = '<div class="biz-post-list">'+card+'</div>';
           }
         });
+        installBusinessPostActionDelegates();
       }).catch(function(err){
         console.error('[BizPage] Post failed',err);
         showToast('Post failed: '+(err.code||err.message||'check console'),false);
