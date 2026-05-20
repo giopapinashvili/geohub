@@ -1862,7 +1862,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         e.stopPropagation();
         var bizCard0 = bizMenuBtn.closest('[data-post-id]');
         var bizPid0 = bizCard0 ? bizCard0.dataset.postId : '';
-        var dd = bizPid0 ? document.getElementById('biz-pmenu-'+bizPid0) : null;
+        var dd = bizCard0 ? bizCard0.querySelector('.biz-post-menu-dropdown') : null;
         if (dd) {
           var currentBizMenu = document.getElementById('ghBizPostMenuDrop');
           var isOpen0 = currentBizMenu && currentBizMenu.dataset.postId === String(bizPid0 || '');
