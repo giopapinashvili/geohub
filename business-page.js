@@ -855,7 +855,6 @@
           ? '<button type="button" class="biz-post-more-clean" data-biz-owner-menu data-post-id="'+cleanPid+'" aria-label="Post options" title="Post options"><i class="fas fa-ellipsis"></i></button>'
           : '')+
       '</div>'+
-      renderBusinessPostOwnerToolsClean(post)+
       '<div class="biz-clean-edit-panel" data-biz-edit-panel hidden>'+
         '<textarea class="biz-edit-textarea" data-biz-edit-text rows="4">'+esc(post.text || '')+'</textarea>'+
         '<div class="biz-edit-vis-row">'+
