@@ -2523,3 +2523,18 @@ body.gh-mobile-menu-open #gh-mobile-menu-overlay {
     z-index: 100 !important;
   }
 }
+
+/* ── Phase 69: Followed page banner in personal feed ── */
+.gh-followed-page-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gh-accent, #38bdf8);
+  padding: 6px 16px 4px;
+  border-bottom: 1px solid var(--gh-border, rgba(255,255,255,0.06));
+  text-decoration: none;
+  letter-spacing: .02em;
+}
+.gh-followed-page-banner:hover { text-decoration: underline; }

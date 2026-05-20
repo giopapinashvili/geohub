@@ -7,7 +7,7 @@
 
   var PATH = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   var PAGE = document.body && document.body.dataset ? document.body.dataset.ghPage : '';
-  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null, openCommentPids: {}, cachedComments: {}, cachedReplies: {}, feedTab: 'foryou', feedUnsub: null, feedRenderId: 0, userCity: null };
+  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], followedBusinessIds: [], bizFeedPosts: [], bizFeedUnsub: null, audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null, openCommentPids: {}, cachedComments: {}, cachedReplies: {}, feedTab: 'foryou', feedUnsub: null, feedRenderId: 0, userCity: null };
 
   /* ── User cache (instant topbar, no flash) ──────────────── */
   var USER_CACHE_KEY = 'gh_uc1';
@@ -265,6 +265,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
   function clearFeedListener(){
     if(state.feedUnsub){ try{ state.feedUnsub(); }catch(e){} state.feedUnsub=null; }
+    if(state.bizFeedUnsub){ try{ state.bizFeedUnsub(); }catch(e){} state.bizFeedUnsub=null; }
+    state.bizFeedPosts=[];
   }
   function requireLogin(){ if(authUser()) return true; if(GS()) GS().requireAuth(); else toast('შესვლა აუცილებელია', 'error'); return false; }
   function currentUserInfo(){ var u=authUser(); return { uid:u && u.uid, name:u ? (u.displayName || (u.email||'').split('@')[0] || 'GeoHub User') : 'Guest', avatar:u ? (u.photoURL || '') : ''}; }
@@ -297,7 +299,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       fs().getDocs(fs().query(fs().collection(db(),'follows'), fs().where('followerId','==',u.uid), fs().limit(500))).then(function(snap){
         var ids=[]; snap.forEach(function(d){ var following=(d.data()||{}).followingId; if(following) ids.push(following); });
         state.followingIds = ids;
-      }).catch(function(){ state.followingIds=[]; })
+      }).catch(function(){ state.followingIds=[]; }),
+      fs().getDocs(fs().query(fs().collection(db(),'businessFollowers'), fs().where('userId','==',u.uid), fs().limit(200))).then(function(snap){
+        var ids=[]; snap.forEach(function(d){ var biz=(d.data()||{}).businessId; if(biz) ids.push(biz); });
+        state.followedBusinessIds = ids;
+      }).catch(function(){ state.followedBusinessIds=[]; })
     ]).then(function(){ state.audienceLoaded = true; if(typeof onChange === 'function') onChange(); });
   }
 
@@ -1634,6 +1640,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
     // Business context extras
     var pinBanner = (bizCtx && p.pinned) ? '<div class="gh-post-pinned-banner"><i class="fas fa-thumbtack"></i> Pinned post</div>' : '';
+    var followedPageBanner = options.fromFollowedPage ? '<a class="gh-followed-page-banner" href="business.html?id='+esc(p.targetId||p.businessId||'')+'"><i class="fas fa-store"></i> From a page you follow</a>' : '';
     var viewCountHtml = (bizCtx && isAdmin) ? '<div class="gh-post-view-count" id="post-views-'+esc(pid)+'"><i class="fas fa-eye"></i> '+(p.viewCount||0)+' views</div>' : '';
 
     // More/menu button — biz mode shows dropdown, feed mode opens modal
@@ -1674,6 +1681,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if (bizCtx && isAdmin) cardAttrs += ' data-biz-admin="1"';
 
     return '<article class="gh-card gh-post"'+cardAttrs+'>'+
+      followedPageBanner+
       pinBanner+
       '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+target+(p.feeling?' · '+esc(p.feeling):'')+bizPostedOnHtml+'</div></div>'+moreBtn+'</div>'+
       postTextHtml+
@@ -3247,8 +3255,20 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           if(u){
             visible=visible.filter(function(p){
               var author=p.authorId||p.userId||p.createdByUserId||p.createdBy||'';
-              return author && (author===u.uid || state.followingIds.indexOf(author)>-1);
+              var isFollowedBizPost=p.targetType==='business' && p.targetId && state.followedBusinessIds.indexOf(p.targetId)>-1;
+              return isFollowedBizPost || (author && (author===u.uid || state.followingIds.indexOf(author)>-1));
             });
+          }
+        } else {
+          // foryou: merge in page posts from followed businesses not already in the main feed
+          if(state.followedBusinessIds.length && state.bizFeedPosts.length){
+            var seen={}; visible.forEach(function(p){ seen[p.id]=true; });
+            state.bizFeedPosts.forEach(function(p){
+              if(!seen[p.id] && state.followedBusinessIds.indexOf(p.targetId||'')>-1 && canSeePost(p)){
+                seen[p.id]=true; visible.push(p);
+              }
+            });
+            visible.sort(function(a,b){ return ts(b.createdAt)-ts(a.createdAt); });
           }
         }
         if(!visible.length){
@@ -3261,7 +3281,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           }
           return;
         }
-        list.innerHTML=visible.map(function(p){ return postCard(p); }).join('');
+        list.innerHTML=visible.map(function(p){
+          var isFollowedPage=!pageMode && p.targetType==='business' && p.targetId && state.followedBusinessIds.indexOf(p.targetId)>-1;
+          return postCard(p, isFollowedPage ? {fromFollowedPage:true} : {});
+        }).join('');
         visible.forEach(function(p){ try{ hydrateReactionState(p.id); loadReactionBreakdown(p.id); }catch(e){} });
         hydrateSharedPreviews(list);
         // Restore open comment sections that were visible before re-render
@@ -3291,6 +3314,18 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           lastPosts=posts;
           paint();
         }, 20);
+        // Listen for page posts from any business so we can filter by followed businesses client-side
+        if(state.bizFeedUnsub){ try{state.bizFeedUnsub();}catch(e){} state.bizFeedUnsub=null; }
+        state.bizFeedUnsub=fs().onSnapshot(
+          fs().query(fs().collection(db(),'posts'), fs().where('targetType','==','business'), fs().limit(30)),
+          function(snap){
+            if(renderId!==state.feedRenderId){ if(state.bizFeedUnsub){ try{state.bizFeedUnsub();}catch(e){} state.bizFeedUnsub=null; } return; }
+            var arr=[]; snap.forEach(function(d){ arr.push(Object.assign({id:d.id},d.data())); });
+            state.bizFeedPosts=arr;
+            if(state.followedBusinessIds.length) paint();
+          },
+          function(){ state.bizFeedPosts=[]; }
+        );
       }
     });
   }
