@@ -1646,7 +1646,7 @@
   }
 
   function installBusinessPostActionDelegates() {
-    ['biz-posts-overview', 'biz-posts-all'].forEach(function(rootId) {
+    ['biz-detail-root', 'biz-posts-overview', 'biz-posts-all'].forEach(function(rootId) {
       var root = document.getElementById(rootId);
       if (!root || root.__bizPostActionsBound) return;
       root.__bizPostActionsBound = true;
