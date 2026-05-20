@@ -1844,7 +1844,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       closePostMenus();
     }, true);
     document.addEventListener('keydown', function(ev){ if(ev.key === 'Escape') closePostMenus(); });
-    window.addEventListener('scroll', function(){ closePostMenus(); }, true);
+    window.addEventListener('scroll', function(){ closePostMenus(); }, false);
     window.addEventListener('resize', function(){ closePostMenus(); });
   }
 

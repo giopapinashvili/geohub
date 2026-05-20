@@ -55,7 +55,7 @@
 
   /* Z-index layers */
   --gh-z-base:1;
-  --gh-z-dropdown:1000;
+  --gh-z-dropdown:10000;
   --gh-z-sidebar:9000;
   --gh-z-topbar:9990;
   --gh-z-modal:99999;
