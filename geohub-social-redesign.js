@@ -414,8 +414,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(!state._shellClickBound){
       state._shellClickBound=true;
       document.addEventListener('click', function(e){
-        if(e.target.closest('[data-create-post]')) openPostModal(buildActorExtra());
-        if(e.target.closest('[data-create-story]')) openStoryModal();
+        if(e.target.closest('[data-create-post]')){ e.preventDefault(); e.stopPropagation(); openPostModal(buildActorExtra()); return; }
+        if(e.target.closest('[data-create-story]')){ e.preventDefault(); e.stopPropagation(); openStoryModal(); return; }
         if(e.target.closest('#ghNotifBtn')) openNotifications();
         if(e.target.closest('[data-start-tour]')){ var _tu=authUser(); startTour(_tu?_tu.uid:null); }
         var notif=e.target.closest('[data-notif]');
@@ -683,7 +683,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         coverUrl:bizData.coverUrl||bizData.coverImage||actor.coverUrl||''
       });
       try{localStorage.setItem('gh_active_actor',JSON.stringify(fresh));}catch(e){}
-      window.dispatchEvent(new CustomEvent('GeoActorChanged',{detail:fresh}));
+      var changed = fresh.title !== actor.title || fresh.logoUrl !== actor.logoUrl || fresh.coverUrl !== actor.coverUrl;
+      if(changed) window.dispatchEvent(new CustomEvent('GeoActorChanged',{detail:fresh}));
     }).catch(function(){});
   }
 
@@ -2793,12 +2794,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(!slot) return;
     slot.innerHTML='<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Page Audience</h3></div><div class="gh-audience-loading" style="padding:12px;color:var(--gh-muted);text-align:center;font-size:13px;">Loading...</div></div>';
     Promise.all([
-      fs().getDocs(fs().query(fs().collection(db(),'businessFollowers'), fs().where('businessId','==',bizId), fs().orderBy('createdAt','desc'), fs().limit(6))),
+      fs().getDocs(fs().query(fs().collection(db(),'businessFollowers'), fs().where('businessId','==',bizId), fs().limit(12))),
       fs().getDoc(fs().doc(db(),'businesses',bizId))
     ]).then(function(results){
       var snap=results[0]; var bizDoc=results[1];
       var count=(bizDoc.exists()&&bizDoc.data().followerCount)||snap.size||0;
       var followers=[]; snap.forEach(function(d){ followers.push(d.data()); });
+      followers.sort(function(a,b){ return ts(b.createdAt)-ts(a.createdAt); });
+      followers=followers.slice(0,6);
       var avatarsHtml=followers.map(function(f){
         var href='profile.html?uid='+encodeURIComponent(f.userId||'');
         var name=esc(f.userName||'User');
@@ -5258,6 +5261,30 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function listenTargetPosts(type,id,cb){
+    if(type==='business'){
+      var sourceRows={target:{},business:{}}, settled={target:false,business:false};
+      function emit(){
+        if(!settled.target || !settled.business) return;
+        var rowsById=Object.assign({},sourceRows.target,sourceRows.business);
+        var arr=Object.keys(rowsById).map(function(k){ return rowsById[k]; })
+          .filter(function(p){ return isPageFeedPost(p,id); });
+        arr.sort(function(a,b){return ts(b.createdAt)-ts(a.createdAt);});
+        cb(arr);
+      }
+      function readSnap(kind,snap){
+        var next={};
+        snap.forEach(function(d){ next[d.id]=Object.assign({id:d.id},d.data()); });
+        sourceRows[kind]=next;
+        settled[kind]=true;
+        emit();
+      }
+      var unsubs=[];
+      unsubs.push(fs().onSnapshot(fs().query(fs().collection(db(),'posts'), fs().where('targetId','==',id), fs().limit(50)), function(snap){ readSnap('target',snap); }, function(err){ console.warn('listenTargetPosts targetId',err.message); settled.target=true; emit(); }));
+      unsubs.push(fs().onSnapshot(fs().query(fs().collection(db(),'posts'), fs().where('businessId','==',id), fs().limit(50)), function(snap){ readSnap('business',snap); }, function(err){ console.warn('listenTargetPosts businessId',err.message); settled.business=true; emit(); }));
+      var allUnsub=function(){ unsubs.forEach(function(u){ try{u();}catch(e){} }); };
+      state.pageUnsubs.push(allUnsub);
+      return allUnsub;
+    }
     var q=fs().query(fs().collection(db(),'posts'), fs().where('targetType','==',type), fs().where('targetId','==',id), fs().limit(50));
     var _u=fs().onSnapshot(q,function(snap){ var arr=[]; snap.forEach(function(d){arr.push(Object.assign({id:d.id},d.data()));}); arr.sort(function(a,b){return ts(b.createdAt)-ts(a.createdAt);}); cb(arr); },function(err){ console.warn('listenTargetPosts',err.message); cb([]); });
     state.pageUnsubs.push(_u);
