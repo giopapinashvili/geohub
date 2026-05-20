@@ -1403,6 +1403,20 @@
         doc.active = true;
       }
 
+      if (col === 'places') {
+        var placeCatSel = document.getElementById('adminPlaceCategory');
+        var placeSubSel = document.getElementById('adminPlaceSubcategory');
+        var placeCatId = (placeCatSel && placeCatSel.value) || '';
+        var matchedCat = getPlaceCategories().find(function(c) { return c.id === placeCatId; });
+        if (matchedCat) {
+          doc.categoryId = matchedCat.id;
+          doc.category   = matchedCat.label;
+        } else {
+          doc.categoryId = '';
+        }
+        doc.subcategory = (placeSubSel && placeSubSel.value) || '';
+      }
+
       // Collect extended fields for this collection type
       (CONTENT_EXT_FIELDS[col] || []).forEach(function(f) {
         var el = document.getElementById(f.id);
