@@ -222,6 +222,21 @@
     return menu;
   }
 
+  function ensureDesktopMenu() {
+    var menu = document.querySelector('.gh-desktop-menu-dropdown');
+    if (!menu) {
+      menu = document.createElement('div');
+      menu.className = 'gh-desktop-menu-dropdown';
+      document.body.appendChild(menu);
+    }
+    menu.innerHTML = mobileMenuHtml();
+    menu.setAttribute('role', 'menu');
+    menu.setAttribute('aria-label', 'GeoHub desktop menu');
+    updateMobileAuthActions(getAuthUser());
+    updateActorMessageLinks();
+    return menu;
+  }
+
   function isMobileViewport() {
     return window.matchMedia('(max-width: 768px)').matches;
   }
@@ -232,6 +247,10 @@
     var hamburger = document.getElementById('geoHamburger') || document.querySelector('.gh-mobile-menu-btn');
     if (!menu) return;
     if (open) document.body.classList.remove('gh-desktop-menu-open');
+    if (open) {
+      var desktopMenu = document.querySelector('.gh-desktop-menu-dropdown');
+      if (desktopMenu) desktopMenu.classList.remove('open');
+    }
     menu.classList.toggle('open', !!open);
     document.body.classList.toggle('gh-mobile-menu-open', !!open);
     if (overlay) overlay.setAttribute('aria-hidden', open ? 'false' : 'true');
@@ -242,10 +261,14 @@
   }
 
   function setDesktopMenuOpen(open) {
-    var menu = ensureMobileMenu();
+    var menu = ensureDesktopMenu();
     var hamburger = document.getElementById('geoHamburger') || document.querySelector('.gh-mobile-menu-btn');
     if (!menu) return;
-    if (open) document.body.classList.remove('gh-mobile-menu-open');
+    document.body.classList.remove('gh-mobile-menu-open');
+    var mobile = document.querySelector('.mobile-menu');
+    if (mobile) mobile.classList.remove('open');
+    var overlay = ensureMobileOverlay();
+    if (overlay) overlay.setAttribute('aria-hidden', 'true');
     menu.classList.toggle('open', !!open);
     document.body.classList.toggle('gh-desktop-menu-open', !!open);
     if (hamburger) {
@@ -260,6 +283,7 @@
   function closeDesktopMenu() { setDesktopMenuOpen(false); }
   function toggleMobileMenu() {
     if (!isMobileViewport()) {
+      document.body.classList.remove('gh-mobile-menu-open');
       var isOpen = document.body.classList.contains('gh-desktop-menu-open');
       setDesktopMenuOpen(!isOpen);
       return;
@@ -277,6 +301,7 @@
   window.closeDesktopMenu = closeDesktopMenu;
   window.refreshMobileNav = function() {
     ensureMobileMenu();
+    ensureDesktopMenu();
     injectBottomNav();
     updateActorMessageLinks();
   };
@@ -305,12 +330,12 @@
       }
       // Desktop dropdown: close when clicking outside the menu panel
       if (document.body.classList.contains('gh-desktop-menu-open')) {
-        var dMenu = document.querySelector('.mobile-menu');
+        var dMenu = document.querySelector('.gh-desktop-menu-dropdown');
         if (dMenu && !dMenu.contains(e.target) && !e.target.closest('[data-gh-mobile-menu-toggle]')) {
           closeDesktopMenu();
         }
       }
-      var menuLink = e.target.closest('.mobile-menu a');
+      var menuLink = e.target.closest('.mobile-menu a, .gh-desktop-menu-dropdown a');
       if (menuLink) { closeMobileMenu(); closeDesktopMenu(); }
       var logout = e.target.closest('[data-gh-mobile-logout]');
       if (logout) {
@@ -324,6 +349,17 @@
     }, true);
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') { closeMobileMenu(); closeDesktopMenu(); }
+    });
+    window.addEventListener('resize', function() {
+      if (!isMobileViewport()) {
+        document.body.classList.remove('gh-mobile-menu-open');
+        var mobile = document.querySelector('.mobile-menu');
+        if (mobile) mobile.classList.remove('open');
+        var overlay = document.getElementById('gh-mobile-menu-overlay');
+        if (overlay) overlay.setAttribute('aria-hidden', 'true');
+      } else {
+        closeDesktopMenu();
+      }
     });
   }
 
