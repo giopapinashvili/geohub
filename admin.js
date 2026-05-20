@@ -1286,6 +1286,7 @@
     var textCat = document.getElementById('adminContentCategory');
     var placeCat = document.getElementById('adminPlaceCategory');
     var subSel = document.getElementById('adminPlaceSubcategory');
+    var gWrap  = document.getElementById('adminGooglePlaceWrap');
     var isPlaces = col === 'places';
     if (textCat) textCat.style.display = isPlaces ? 'none' : '';
     if (placeCat) {
@@ -1293,6 +1294,7 @@
       if (isPlaces) populatePlaceCategorySelect('');
     }
     if (subSel) subSel.style.display = 'none';
+    if (gWrap) gWrap.style.display = isPlaces ? 'block' : 'none';
   }
 
   var _editingPlaceId = null; // null = add mode; docId string = edit mode
@@ -1337,6 +1339,9 @@
       sourceUrl: it.sourceUrl || '',
       isVerified: it.isVerified || false,
       status: it.status || 'active',
+      googlePlaceId: it.googlePlaceId || '',
+      googleLinked:  !!(it.googlePlaceId),
+      dataSource:    it.googlePlaceId ? 'manual+google' : 'manual',
       createdBy: user.uid, ownerId: user.uid, userId: user.uid,
       createdAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp()
     };
@@ -1473,6 +1478,11 @@
           doc.categoryId = '';
         }
         doc.subcategory = (placeSubSel && placeSubSel.value) || '';
+        var gPlaceIdEl  = document.getElementById('adminGooglePlaceIdInput');
+        var gPlaceId    = (gPlaceIdEl && gPlaceIdEl.value.trim()) || '';
+        doc.googlePlaceId = gPlaceId;
+        doc.googleLinked  = !!gPlaceId;
+        doc.dataSource    = gPlaceId ? 'manual+google' : 'manual';
       }
 
       // Collect extended fields for this collection type
@@ -2521,6 +2531,14 @@
     var verEl = document.getElementById('adminPlaceIsVerified');
     if (verEl) verEl.value = data.isVerified ? 'true' : 'false';
 
+    // Google Place ID
+    var gPlaceEl = document.getElementById('adminGooglePlaceIdInput');
+    if (gPlaceEl) gPlaceEl.value = data.googlePlaceId || '';
+    var gPreviewPanel = document.getElementById('adminGooglePreviewPanel');
+    if (gPreviewPanel) { gPreviewPanel.style.display = 'none'; gPreviewPanel.innerHTML = ''; }
+    var gSearchPanel = document.getElementById('adminGoogleSearchResults');
+    if (gSearchPanel) { gSearchPanel.style.display = 'none'; gSearchPanel.innerHTML = ''; }
+
     // Category dropdowns
     populatePlaceCategorySelect(data.categoryId || '');
     if (data.categoryId) populatePlaceSubcategorySelect(data.categoryId, data.subcategory || '');
@@ -2556,6 +2574,12 @@
     var form = document.getElementById('adminContentForm');
     if (form) { form.reset(); renderExtFields('places'); }
     adminUpdateImagePreview('');
+    var gPlaceEl = document.getElementById('adminGooglePlaceIdInput');
+    if (gPlaceEl) gPlaceEl.value = '';
+    var gPreviewPanel = document.getElementById('adminGooglePreviewPanel');
+    if (gPreviewPanel) { gPreviewPanel.style.display = 'none'; gPreviewPanel.innerHTML = ''; }
+    var gSearchPanel = document.getElementById('adminGoogleSearchResults');
+    if (gSearchPanel) { gSearchPanel.style.display = 'none'; gSearchPanel.innerHTML = ''; }
     _editingPlaceId = null;
   };
 
@@ -2583,6 +2607,93 @@
       toast(ok ? '✓ ფოტო ჩაიტვირთა' : '✗ ფოტო ვერ ჩაიტვირთა');
       adminUpdateImagePreview(url);
     });
+  };
+
+  window.adminFetchGooglePreview = function() {
+    var idEl  = document.getElementById('adminGooglePlaceIdInput');
+    var panel = document.getElementById('adminGooglePreviewPanel');
+    if (!idEl) return;
+    var placeId = idEl.value.trim();
+    if (!placeId) { toast('Google Place ID ჩაწერეთ'); return; }
+    if (panel) { panel.style.display = 'block'; panel.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ჩატვირთვა…'; }
+    var workerUrl = (window.GeoConfig && window.GeoConfig.PAYMENTS && window.GeoConfig.PAYMENTS.WORKER_URL) || '';
+    fetch(workerUrl + '/api/google-place-details?placeId=' + encodeURIComponent(placeId))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!panel) return;
+        if (data.error) {
+          panel.innerHTML = '<span style="color:#f87171"><i class="fas fa-exclamation-triangle"></i> ' + escHtmlAdmin(data.error) + '</span>';
+          return;
+        }
+        var html = '<strong>' + escHtmlAdmin(data.name) + '</strong>';
+        if (data.address) html += '<br><span style="color:#94a3b8">' + escHtmlAdmin(data.address) + '</span>';
+        if (data.rating) {
+          html += '<br>⭐ ' + data.rating + ' <span style="color:#64748b;font-size:.75rem">(' + (data.userRatingCount || 0) + ' reviews)</span>';
+        }
+        if (data.isOpen !== null && data.isOpen !== undefined) {
+          html += ' &nbsp;<span style="color:' + (data.isOpen ? '#10b981' : '#f87171') + ';font-weight:700">' + (data.isOpen ? 'Open' : 'Closed') + '</span>';
+        }
+        if (data.todayHours) html += '<br><span style="color:#64748b;font-size:.75rem">' + escHtmlAdmin(data.todayHours) + '</span>';
+        if (data.phone) html += '<br><i class="fas fa-phone" style="color:#64748b;width:12px"></i> ' + escHtmlAdmin(data.phone);
+        if (data.website) {
+          html += '<br><i class="fas fa-globe" style="color:#64748b;width:12px"></i> <a href="' + escHtmlAdmin(data.website) + '" target="_blank" rel="noopener" style="color:#818cf8">' + escHtmlAdmin(data.website.replace(/^https?:\/\//, '').slice(0, 50)) + '</a>';
+        }
+        if (data.photos && data.photos.length) {
+          var proxyUrl = workerUrl + '/api/google-place-photo?maxWidth=300&name=' + encodeURIComponent(data.photos[0]);
+          html += '<br><img src="' + escHtmlAdmin(proxyUrl) + '" style="max-height:100px;border-radius:6px;margin-top:6px;display:block" onerror="this.style.display=\'none\'">';
+        }
+        html += '<br><span style="color:#4b5563;font-size:.72rem">Powered by Google</span>';
+        panel.innerHTML = html;
+        panel.style.display = 'block';
+      })
+      .catch(function(err) {
+        if (panel) panel.innerHTML = '<span style="color:#f87171">Fetch failed: ' + escHtmlAdmin(err.message) + '</span>';
+      });
+  };
+
+  window.adminSearchGooglePlace = function() {
+    var qEl  = document.getElementById('adminGoogleSearchInput');
+    var rEl  = document.getElementById('adminGoogleSearchResults');
+    if (!qEl) return;
+    var q = qEl.value.trim();
+    if (!q) { toast('საძიებო სიტყვა ჩაწერეთ'); return; }
+    if (rEl) { rEl.style.display = 'block'; rEl.innerHTML = '<div style="padding:10px;font-size:.82rem"><i class="fas fa-spinner fa-spin"></i> ძიება…</div>'; }
+    var workerUrl = (window.GeoConfig && window.GeoConfig.PAYMENTS && window.GeoConfig.PAYMENTS.WORKER_URL) || '';
+    fetch(workerUrl + '/api/google-place-search?q=' + encodeURIComponent(q))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!rEl) return;
+        if (data.error || !data.results) {
+          rEl.innerHTML = '<div style="padding:10px;color:#f87171">Error: ' + escHtmlAdmin(data.error || 'Unknown') + '</div>';
+          return;
+        }
+        if (!data.results.length) {
+          rEl.innerHTML = '<div style="padding:10px;font-size:.82rem;opacity:.5">No results found</div>';
+          return;
+        }
+        rEl.innerHTML = data.results.map(function(r) {
+          return '<div style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:8px">'
+            + '<div style="flex:1;min-width:0;font-size:.82rem">'
+            + '<div style="font-weight:700">' + escHtmlAdmin(r.name) + '</div>'
+            + '<div style="color:#94a3b8;font-size:.75rem">' + escHtmlAdmin(r.address) + '</div>'
+            + (r.rating ? '<div style="color:#f59e0b;font-size:.75rem">⭐ ' + r.rating + '</div>' : '')
+            + '<div style="color:#4b5563;font-size:.72rem;margin-top:2px">' + escHtmlAdmin(r.id) + '</div>'
+            + '</div>'
+            + '<button type="button" class="btn btn-ghost btn-sm" style="font-size:.75rem;white-space:nowrap" onclick="adminUseGooglePlaceId(' + JSON.stringify(r.id) + ')">Use</button>'
+            + '</div>';
+        }).join('');
+      })
+      .catch(function(err) {
+        if (rEl) rEl.innerHTML = '<div style="padding:10px;color:#f87171">Fetch failed: ' + escHtmlAdmin(err.message) + '</div>';
+      });
+  };
+
+  window.adminUseGooglePlaceId = function(placeId) {
+    var idEl = document.getElementById('adminGooglePlaceIdInput');
+    if (idEl) idEl.value = placeId;
+    var rEl = document.getElementById('adminGoogleSearchResults');
+    if (rEl) { rEl.style.display = 'none'; rEl.innerHTML = ''; }
+    window.adminFetchGooglePreview();
   };
 
   window.adminDeleteItem = function (col, id) {

@@ -24,8 +24,60 @@
   let currentFilter = '', currentSearch = '';
   let disabledCategories = new Set();
   let activeMarker = null, activePlaceId = null;
+  const _googleDetailsCache = {};
 
   function esc(v) { return String(v == null ? '' : v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+  /* ── Google Places helpers ──────────────────────── */
+  function fetchGoogleDetails(googlePlaceId) {
+    if (_googleDetailsCache[googlePlaceId]) return Promise.resolve(_googleDetailsCache[googlePlaceId]);
+    const workerUrl = (window.GeoConfig && window.GeoConfig.PAYMENTS && window.GeoConfig.PAYMENTS.WORKER_URL) || '';
+    if (!workerUrl) return Promise.resolve(null);
+    return fetch(workerUrl + '/api/google-place-details?placeId=' + encodeURIComponent(googlePlaceId))
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data && !data.error) { _googleDetailsCache[googlePlaceId] = data; return data; }
+        return null;
+      })
+      .catch(() => null);
+  }
+
+  function getGooglePhotoUrl(photoName) {
+    const workerUrl = (window.GeoConfig && window.GeoConfig.PAYMENTS && window.GeoConfig.PAYMENTS.WORKER_URL) || '';
+    if (!workerUrl || !photoName) return '';
+    return workerUrl + '/api/google-place-photo?maxWidth=600&name=' + encodeURIComponent(photoName);
+  }
+
+  function renderGoogleSection(gd) {
+    if (!gd) return '';
+    let html = '<div class="map-g-section">';
+    if (gd.isOpen !== null && gd.isOpen !== undefined) {
+      html += '<span class="map-g-status ' + (gd.isOpen ? 'open' : 'closed') + '">' + (gd.isOpen ? 'Open now' : 'Closed now') + '</span>';
+    }
+    if (gd.todayHours) html += '<div class="map-g-hours">' + esc(gd.todayHours) + '</div>';
+    if (gd.rating) {
+      html += '<div class="map-g-rating">⭐ ' + gd.rating + ' <span class="map-g-count">(' + (gd.userRatingCount || 0) + ' reviews on Google)</span></div>';
+    }
+    if (gd.phone) html += '<div class="map-g-detail"><i class="fas fa-phone"></i> ' + esc(gd.phone) + '</div>';
+    if (gd.website) {
+      const wShort = gd.website.replace(/^https?:\/\//, '').slice(0, 36);
+      html += '<div class="map-g-detail"><i class="fas fa-globe"></i> <a href="' + esc(gd.website) + '" target="_blank" rel="noopener">' + esc(wShort) + '</a></div>';
+    }
+    if (gd.reviews && gd.reviews.length) {
+      html += '<div class="map-g-reviews-hd">Google Reviews</div>';
+      gd.reviews.slice(0, 3).forEach(r => {
+        html += '<div class="map-g-review">'
+          + '<span class="map-g-rv-author">' + esc(r.author) + '</span>'
+          + (r.rating ? '<span class="map-g-rv-stars">' + '⭐'.repeat(Math.max(1, Math.min(5, r.rating))) + '</span>' : '')
+          + (r.relativeTime ? '<span class="map-g-rv-time">' + esc(r.relativeTime) + '</span>' : '')
+          + (r.text ? '<div class="map-g-rv-text">' + esc(r.text.slice(0, 150)) + (r.text.length > 150 ? '…' : '') + '</div>' : '')
+          + '</div>';
+      });
+    }
+    html += '<div class="map-g-attr">Powered by Google</div>';
+    html += '</div>';
+    return html;
+  }
 
   /* ── Marker helpers ─────────────────────────────── */
   function getPlaceMarkerStyle(place) {
@@ -80,7 +132,8 @@
       rating:           Number(data.rating || 0),
       reviewCount:      Number(data.reviewCount || 0),
       priceFrom:        data.priceFrom || '',
-      currency:         data.currency || ''
+      currency:         data.currency || '',
+      googlePlaceId:    data.googlePlaceId || ''
     };
   }
 
@@ -163,13 +216,36 @@
     const imgFb    = document.getElementById('panelImgFallback');
     const pStyle   = getPlaceMarkerStyle(p);
     if (img) {
+      img._googleTried = false;
       img.onerror = function() {
-        this.style.display = 'none';
-        if (imgFb) { imgFb.style.display = 'flex'; imgFb.textContent = pStyle.icon || '📍'; imgFb.style.background = pStyle.color || '#1e293b'; }
+        const self = this;
+        if (p.googlePlaceId && !self._googleTried) {
+          self._googleTried = true;
+          fetchGoogleDetails(p.googlePlaceId).then(gd => {
+            if (gd && gd.photos && gd.photos.length) {
+              const gUrl = getGooglePhotoUrl(gd.photos[0]);
+              if (gUrl) { self.src = gUrl; return; }
+            }
+            self.style.display = 'none';
+            if (imgFb) { imgFb.style.display = 'flex'; imgFb.textContent = pStyle.icon || '📍'; imgFb.style.background = pStyle.color || '#1e293b'; }
+          });
+        } else {
+          this.style.display = 'none';
+          if (imgFb) { imgFb.style.display = 'flex'; imgFb.textContent = pStyle.icon || '📍'; imgFb.style.background = pStyle.color || '#1e293b'; }
+        }
       };
       if (p.image) {
         img.src = p.image; img.style.display = '';
         if (imgFb) imgFb.style.display = 'none';
+      } else if (p.googlePlaceId) {
+        img.style.display = 'none';
+        if (imgFb) { imgFb.style.display = 'flex'; imgFb.textContent = pStyle.icon || '📍'; imgFb.style.background = pStyle.color || '#1e293b'; }
+        fetchGoogleDetails(p.googlePlaceId).then(gd => {
+          if (gd && gd.photos && gd.photos.length) {
+            const gUrl = getGooglePhotoUrl(gd.photos[0]);
+            if (gUrl) { img.src = gUrl; img.style.display = ''; img._googleTried = true; if (imgFb) imgFb.style.display = 'none'; }
+          }
+        });
       } else {
         img.style.display = 'none';
         if (imgFb) { imgFb.style.display = 'flex'; imgFb.textContent = pStyle.icon || '📍'; imgFb.style.background = pStyle.color || '#1e293b'; }
@@ -183,6 +259,18 @@
     if (detail) detail.href = p.source === 'businesses' ? 'business.html?id=' + encodeURIComponent(p.id) : '#';
     const maps = document.getElementById('panelMapBtn');
     if (maps) maps.href = 'https://www.google.com/maps/search/' + encodeURIComponent(p.name + ' ' + (p.city || '') + ' Georgia');
+    const gSection = document.getElementById('panelGoogleSection');
+    if (gSection) {
+      gSection.innerHTML = '';
+      gSection.style.display = 'none';
+      if (p.googlePlaceId) {
+        fetchGoogleDetails(p.googlePlaceId).then(gd => {
+          if (!gd) return;
+          gSection.innerHTML = renderGoogleSection(gd);
+          gSection.style.display = 'block';
+        });
+      }
+    }
     if (panel) panel.classList.add('open');
   }
   window.focusPlace = focusPlace;
@@ -201,13 +289,14 @@
     div.innerHTML =
       '<div class="mpc-drag-handle"></div>'
       + '<button class="mpc-close" onclick="window.closeMobileCard()"><i class="fas fa-times"></i></button>'
-      + '<div id="mpcImgWrap" class="mpc-img-wrap"><img id="mpcImg" src="" alt="" onerror="this.parentElement.style.display=\'none\';var f=document.getElementById(\'mpcFallback\');if(f)f.style.display=\'flex\'"></div>'
+      + '<div id="mpcImgWrap" class="mpc-img-wrap"><img id="mpcImg" src="" alt=""></div>'
       + '<div id="mpcFallback" class="mpc-fallback" style="display:none"></div>'
       + '<div class="mpc-body">'
       + '<div id="mpcName" class="mpc-name"></div>'
       + '<div id="mpcCat"  class="mpc-cat"></div>'
       + '<div id="mpcAddr" class="mpc-addr"></div>'
       + '<div id="mpcDesc" class="mpc-desc"></div>'
+      + '<div id="mpcGoogleSection" style="display:none"></div>'
       + '<div class="mpc-btns">'
       + '<a id="mpcDirections" href="#" target="_blank" rel="noopener" class="btn btn-primary btn-sm"><i class="fas fa-directions"></i> Directions</a>'
       + '</div></div>';
@@ -216,15 +305,46 @@
 
   function openMobileCard(p) {
     const card = document.getElementById('mobileCard'); if (!card) return;
-    const style   = getPlaceMarkerStyle(p);
-    const imgWrap = document.getElementById('mpcImgWrap');
-    const img     = document.getElementById('mpcImg');
+    const style    = getPlaceMarkerStyle(p);
+    const imgWrap  = document.getElementById('mpcImgWrap');
+    const img      = document.getElementById('mpcImg');
     const fallback = document.getElementById('mpcFallback');
+    if (img) {
+      img._googleTried = false;
+      img.onerror = function() {
+        const self = this;
+        if (p.googlePlaceId && !self._googleTried) {
+          self._googleTried = true;
+          fetchGoogleDetails(p.googlePlaceId).then(gd => {
+            if (gd && gd.photos && gd.photos.length) {
+              const gUrl = getGooglePhotoUrl(gd.photos[0]);
+              if (gUrl) { self.src = gUrl; if (imgWrap) imgWrap.style.display = ''; return; }
+            }
+            if (imgWrap) imgWrap.style.display = 'none';
+            if (fallback) { fallback.style.display = 'flex'; fallback.style.background = style.color; fallback.textContent = style.icon; }
+          });
+        } else {
+          if (imgWrap) imgWrap.style.display = 'none';
+          if (fallback) { fallback.style.display = 'flex'; fallback.style.background = style.color; fallback.textContent = style.icon; }
+        }
+      };
+    }
     if (p.image) {
-      imgWrap.style.display = ''; img.src = p.image; fallback.style.display = 'none';
+      if (imgWrap) imgWrap.style.display = '';
+      if (img) img.src = p.image;
+      if (fallback) fallback.style.display = 'none';
+    } else if (p.googlePlaceId) {
+      if (imgWrap) imgWrap.style.display = 'none';
+      if (fallback) { fallback.style.display = 'flex'; fallback.style.background = style.color; fallback.textContent = style.icon; }
+      fetchGoogleDetails(p.googlePlaceId).then(gd => {
+        if (gd && gd.photos && gd.photos.length) {
+          const gUrl = getGooglePhotoUrl(gd.photos[0]);
+          if (gUrl && img) { img.src = gUrl; img._googleTried = true; if (imgWrap) imgWrap.style.display = ''; if (fallback) fallback.style.display = 'none'; }
+        }
+      });
     } else {
-      imgWrap.style.display = 'none'; fallback.style.display = 'flex';
-      fallback.style.background = style.color; fallback.textContent = style.icon;
+      if (imgWrap) imgWrap.style.display = 'none';
+      if (fallback) { fallback.style.display = 'flex'; fallback.style.background = style.color; fallback.textContent = style.icon; }
     }
     const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
     setTxt('mpcName', p.name);
@@ -234,6 +354,18 @@
     setTxt('mpcDesc', p.shortDescription || '');
     const dir = document.getElementById('mpcDirections');
     if (dir) dir.href = 'https://www.google.com/maps/search/' + encodeURIComponent(p.name + ' ' + (p.city || '') + ' Georgia');
+    const gSection = document.getElementById('mpcGoogleSection');
+    if (gSection) {
+      gSection.innerHTML = '';
+      gSection.style.display = 'none';
+      if (p.googlePlaceId) {
+        fetchGoogleDetails(p.googlePlaceId).then(gd => {
+          if (!gd) return;
+          gSection.innerHTML = renderGoogleSection(gd);
+          gSection.style.display = 'block';
+        });
+      }
+    }
     card.classList.add('open');
   }
 

@@ -17,6 +17,7 @@ SITE_URL            = "https://geohub.pages.dev"
 #   wrangler secret put FIREBASE_API_KEY
 #   wrangler secret put FIREBASE_CLIENT_EMAIL
 #   wrangler secret put FIREBASE_PRIVATE_KEY
+#   wrangler secret put GOOGLE_MAPS_API_KEY   (Places API New — enable in Google Cloud Console)
 #
 # STRIPE_PRICE_PREMIUM_MONTHLY / YEARLY:
 #   Create a Product + recurring Price in Stripe Dashboard → Products

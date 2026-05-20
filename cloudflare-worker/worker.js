@@ -68,6 +68,15 @@ export default {
       if (pathname.startsWith('/payment-status/') && request.method === 'GET') {
         return await handlePaymentStatus(pathname.slice('/payment-status/'.length), env, cors);
       }
+      if (pathname === '/api/google-place-details' && request.method === 'GET') {
+        return await handleGooglePlaceDetails(request, env, cors);
+      }
+      if (pathname === '/api/google-place-photo' && request.method === 'GET') {
+        return await handleGooglePlacePhoto(request, env, cors);
+      }
+      if (pathname === '/api/google-place-search' && request.method === 'GET') {
+        return await handleGooglePlaceSearch(request, env, cors);
+      }
       return json({ error: 'Not found' }, 404, cors);
     } catch (err) {
       console.error('[GeoHub Worker]', err.message);
@@ -572,4 +581,167 @@ function generateCode(len = 8) {
   const bytes = crypto.getRandomValues(new Uint8Array(len));
   for (const b of bytes) code += chars[b % chars.length];
   return code;
+}
+
+// ── Google Places proxy ───────────────────────────────────────────────────────
+// Required secret (wrangler secret put GOOGLE_MAPS_API_KEY):
+//   Enable "Places API (New)" in Google Cloud Console before use.
+//   API key is NEVER forwarded to the client — all calls go through this worker.
+//   Google data is NEVER stored in Firestore; fetched live on each request.
+//   Show "Powered by Google" attribution whenever displaying Google data.
+
+const _gplaceCache = new Map();
+const GPLACE_CACHE_TTL = 60 * 60 * 1000; // 1 hour
+
+function gplaceFromCache(key) {
+  const entry = _gplaceCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > GPLACE_CACHE_TTL) { _gplaceCache.delete(key); return null; }
+  return entry.data;
+}
+
+function gplacePutCache(key, data) {
+  _gplaceCache.set(key, { ts: Date.now(), data });
+}
+
+async function handleGooglePlaceDetails(request, env, cors) {
+  const url     = new URL(request.url);
+  const placeId = (url.searchParams.get('placeId') || '').trim();
+  if (!placeId || !/^[A-Za-z0-9_-]+$/.test(placeId)) {
+    return json({ error: 'Invalid placeId' }, 400, cors);
+  }
+  if (!env.GOOGLE_MAPS_API_KEY) {
+    return json({ error: 'Google Places not configured' }, 503, cors);
+  }
+
+  const cached = gplaceFromCache('details:' + placeId);
+  if (cached) return json(cached, 200, cors);
+
+  const fieldMask = 'id,displayName,formattedAddress,rating,userRatingCount,currentOpeningHours,internationalPhoneNumber,websiteUri,photos,reviews';
+  const res = await fetch('https://places.googleapis.com/v1/places/' + placeId, {
+    headers: {
+      'X-Goog-Api-Key':   env.GOOGLE_MAPS_API_KEY,
+      'X-Goog-FieldMask': fieldMask,
+    },
+  });
+
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    return json({ error: (errData.error && errData.error.message) || 'Google Places API error' }, res.status, cors);
+  }
+
+  const data       = await res.json();
+  const normalized = normalizeGooglePlace(data, placeId);
+  gplacePutCache('details:' + placeId, normalized);
+  return json(normalized, 200, cors);
+}
+
+function normalizeGooglePlace(data, placeId) {
+  const photos  = (data.photos  || []).slice(0, 3).map(p => p.name || '').filter(Boolean);
+  const reviews = (data.reviews || []).slice(0, 5).map(r => ({
+    author:       (r.authorAttribution && r.authorAttribution.displayName) || 'Anonymous',
+    rating:       r.rating || 0,
+    text:         (r.text && r.text.text) || '',
+    relativeTime: r.relativePublishTimeDescription || '',
+  }));
+
+  let isOpen     = null;
+  let todayHours = '';
+  const ooh = data.currentOpeningHours;
+  if (ooh) {
+    isOpen = ooh.openNow != null ? ooh.openNow : null;
+    const descs = ooh.weekdayDescriptions || [];
+    if (descs.length) {
+      const dayIdx = new Date().getDay(); // 0 = Sunday
+      const idx    = dayIdx === 0 ? 6 : dayIdx - 1; // weekdayDescriptions is Mon[0]…Sun[6]
+      todayHours   = descs[idx] || descs[0] || '';
+    }
+  }
+
+  return {
+    id:              data.id || placeId,
+    name:            (data.displayName && data.displayName.text) || '',
+    address:         data.formattedAddress || '',
+    rating:          data.rating          || null,
+    userRatingCount: data.userRatingCount  || 0,
+    phone:           data.internationalPhoneNumber || '',
+    website:         data.websiteUri || '',
+    isOpen,
+    todayHours,
+    photos,   // resource names "places/xxx/photos/yyy" — client proxies via /api/google-place-photo
+    reviews,
+    attribution: 'Powered by Google',
+  };
+}
+
+async function handleGooglePlacePhoto(request, env, cors) {
+  const url      = new URL(request.url);
+  const name     = (url.searchParams.get('name') || '').trim();
+  const maxWidth = Math.min(1600, Math.max(100, parseInt(url.searchParams.get('maxWidth') || '800', 10)));
+
+  if (!name || !/^places\/[A-Za-z0-9_-]+\/photos\/[A-Za-z0-9_-]+$/.test(name)) {
+    return new Response('Invalid photo name', { status: 400, headers: cors });
+  }
+  if (!env.GOOGLE_MAPS_API_KEY) {
+    return new Response('Google Places not configured', { status: 503, headers: cors });
+  }
+
+  const photoUrl = 'https://places.googleapis.com/v1/' + name + '/media?maxWidthPx=' + maxWidth + '&skipHttpRedirect=true';
+  const res = await fetch(photoUrl, { headers: { 'X-Goog-Api-Key': env.GOOGLE_MAPS_API_KEY } });
+  if (!res.ok) return new Response('Photo not found', { status: 404, headers: cors });
+
+  const ct = res.headers.get('content-type') || '';
+  if (ct.includes('application/json')) {
+    const data     = await res.json();
+    const photoUri = data.photoUri || '';
+    if (!photoUri) return new Response('Photo URI not found', { status: 404, headers: cors });
+    const imgRes = await fetch(photoUri);
+    if (!imgRes.ok) return new Response('Photo fetch failed', { status: 502, headers: cors });
+    const blob    = await imgRes.arrayBuffer();
+    const imgType = imgRes.headers.get('content-type') || 'image/jpeg';
+    return new Response(blob, { status: 200, headers: { 'Content-Type': imgType, 'Cache-Control': 'public, max-age=3600', ...cors } });
+  }
+
+  const blob    = await res.arrayBuffer();
+  const imgType = ct || 'image/jpeg';
+  return new Response(blob, { status: 200, headers: { 'Content-Type': imgType, 'Cache-Control': 'public, max-age=3600', ...cors } });
+}
+
+async function handleGooglePlaceSearch(request, env, cors) {
+  const url = new URL(request.url);
+  const q   = (url.searchParams.get('q') || '').trim();
+  if (!q || q.length < 2) return json({ error: 'Query too short' }, 400, cors);
+  if (!env.GOOGLE_MAPS_API_KEY) return json({ error: 'Google Places not configured' }, 503, cors);
+
+  const cacheKey = 'search:' + q.toLowerCase();
+  const cached   = gplaceFromCache(cacheKey);
+  if (cached) return json(cached, 200, cors);
+
+  const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+    method:  'POST',
+    headers: {
+      'Content-Type':     'application/json',
+      'X-Goog-Api-Key':   env.GOOGLE_MAPS_API_KEY,
+      'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount',
+    },
+    body: JSON.stringify({ textQuery: q + ' Georgia', maxResultCount: 5, languageCode: 'en' }),
+  });
+
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    return json({ error: (errData.error && errData.error.message) || 'Search failed' }, res.status, cors);
+  }
+
+  const data    = await res.json();
+  const results = (data.places || []).map(p => ({
+    id:              p.id || '',
+    name:            (p.displayName && p.displayName.text) || '',
+    address:         p.formattedAddress || '',
+    rating:          p.rating          || null,
+    userRatingCount: p.userRatingCount  || 0,
+  }));
+
+  const out = { results };
+  gplacePutCache(cacheKey, out);
+  return json(out, 200, cors);
 }

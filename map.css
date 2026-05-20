@@ -85,3 +85,22 @@ body, html { height: 100%; overflow: hidden; }
       padding: 4px 10px !important; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
     }
     .place-tooltip.leaflet-tooltip::before { display: none; }
+    /* Google section */
+    .map-g-section { margin: 8px 0 4px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.06); font-size: 0.78rem; }
+    .map-g-status { display: inline-block; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 0.72rem; margin-bottom: 4px; }
+    .map-g-status.open { background: rgba(16,185,129,.15); color: #10b981; }
+    .map-g-status.closed { background: rgba(239,68,68,.12); color: #f87171; }
+    .map-g-hours { color: var(--text-muted); font-size: 0.72rem; margin-bottom: 4px; }
+    .map-g-rating { color: var(--text-secondary); margin-bottom: 3px; }
+    .map-g-count { color: var(--text-muted); font-size: 0.7rem; }
+    .map-g-detail { color: var(--text-secondary); margin-bottom: 3px; display: flex; align-items: baseline; gap: 5px; }
+    .map-g-detail a { color: #818cf8; text-decoration: none; }
+    .map-g-detail a:hover { text-decoration: underline; }
+    .map-g-reviews-hd { font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: .4px; color: var(--text-muted); margin: 8px 0 5px; }
+    .map-g-review { padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+    .map-g-review:last-child { border-bottom: none; }
+    .map-g-rv-author { font-weight: 600; color: var(--text-primary); }
+    .map-g-rv-stars { margin-left: 5px; font-size: 0.7rem; }
+    .map-g-rv-time { margin-left: 6px; color: var(--text-muted); font-size: 0.7rem; }
+    .map-g-rv-text { color: var(--text-secondary); margin-top: 2px; line-height: 1.4; }
+    .map-g-attr { color: var(--text-muted); font-size: 0.68rem; margin-top: 8px; }
