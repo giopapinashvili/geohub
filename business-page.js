@@ -1689,7 +1689,7 @@
         : Promise.resolve(false);
 
       var loadFollow = _currentUser
-        ? _fs.getDoc(_fs.doc(_db,'businessFollowers',_currentUser.uid+'_'+BIZ_ID))
+        ? _fs.getDoc(_fs.doc(_db,'businessFollowers',BIZ_ID+'_'+_currentUser.uid))
             .then(function(s){ if(!s.exists()) return {exists:false}; return {exists:true,data:s.data()}; })
             .catch(function(){ return {exists:false}; })
         : Promise.resolve({exists:false});
@@ -2248,7 +2248,7 @@
 
     toggleFollow: function() {
       if (!_currentUser) { showToast('Sign in to follow','false'); window.location.href='auth.html'; return; }
-      var followId=_currentUser.uid+'_'+BIZ_ID;
+      var followId=BIZ_ID+'_'+_currentUser.uid;
       var followRef=_fs.doc(_db,'businessFollowers',followId);
       var btn=document.getElementById('biz-follow-btn');
       if (_isFollowing) {
@@ -2259,10 +2259,10 @@
           showToast('Unfollowed');
         }).catch(function(){ showToast('Could not unfollow',false); });
       } else {
-        _fs.setDoc(followRef,{userId:_currentUser.uid,businessId:BIZ_ID,followedAt:_fs.serverTimestamp()}).then(function(){
+        _fs.setDoc(followRef,{userId:_currentUser.uid,businessId:BIZ_ID,followedAt:_fs.serverTimestamp(),userName:_currentUser.displayName||'',userAvatar:_currentUser.photoURL||''}).then(function(){
           _isFollowing=true;
           _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID),{followerCount:_fs.increment(1)}).catch(function(){});
-          notifyBusinessPage('business_follow', (_currentUser.displayName || 'Someone') + ' followed your page', 'Your page has a new follower.', 'business.html?id=' + BIZ_ID, { followerId: _currentUser.uid });
+          notifyBusinessPage('page_follow', (_currentUser.displayName || 'Someone') + ' followed your page', 'Your page has a new follower.', 'business.html?id=' + BIZ_ID, { followerId: _currentUser.uid, followerName: _currentUser.displayName||'', followerAvatar: _currentUser.photoURL||'' });
           if(btn){ btn.className='biz-action-btn following'; btn.innerHTML='<i class="fas fa-check"></i> Following'; }
           showToast('Following!');
         }).catch(function(){ showToast('Could not follow',false); });
@@ -3437,7 +3437,7 @@
     toggleNotifications: function() {
       if (!_currentUser) return;
       _notificationsOn = !_notificationsOn;
-      var followRef = _fs.doc(_db,'businessFollowers',_currentUser.uid+'_'+BIZ_ID);
+      var followRef = _fs.doc(_db,'businessFollowers',BIZ_ID+'_'+_currentUser.uid);
       _fs.updateDoc(followRef, {notifications: _notificationsOn}).catch(function(){});
       var btn = document.getElementById('biz-notif-btn');
       if (btn) {

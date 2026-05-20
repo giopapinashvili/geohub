@@ -2775,7 +2775,40 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '<div><strong>'+esc(name)+'</strong><p class="gh-muted">New feed posts from this page are saved to the business page timeline.</p></div>'+
         '</div>'+
       '</div>'+
+      '<div id="gh-page-audience-slot"></div>'+
     '</div>';
+  }
+
+  function loadPageAudienceWidget(bizId){
+    if(!bizId) return;
+    var slot=document.getElementById('gh-page-audience-slot');
+    if(!slot) return;
+    slot.innerHTML='<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Page Audience</h3></div><div class="gh-audience-loading" style="padding:12px;color:var(--gh-muted);text-align:center;font-size:13px;">Loading...</div></div>';
+    Promise.all([
+      fs().getDocs(fs().query(fs().collection(db(),'businessFollowers'), fs().where('businessId','==',bizId), fs().orderBy('createdAt','desc'), fs().limit(6))),
+      fs().getDoc(fs().doc(db(),'businesses',bizId))
+    ]).then(function(results){
+      var snap=results[0]; var bizDoc=results[1];
+      var count=(bizDoc.exists()&&bizDoc.data().followerCount)||snap.size||0;
+      var followers=[]; snap.forEach(function(d){ followers.push(d.data()); });
+      var avatarsHtml=followers.map(function(f){
+        var href='profile.html?uid='+encodeURIComponent(f.userId||'');
+        var name=esc(f.userName||'User');
+        var av=f.userAvatar?img(f.userAvatar,name):'<span class="gh-avatar-initial">'+esc((f.userName||'U').charAt(0).toUpperCase())+'</span>';
+        return '<a href="'+href+'" title="'+name+'" class="gh-audience-avatar">'+av+'</a>';
+      }).join('');
+      slot.innerHTML='<div class="gh-panel gh-right-widget">'+
+        '<div class="gh-section-title"><h3>Page Audience</h3></div>'+
+        '<div class="gh-audience-body" style="padding:12px 16px;">'+
+          '<div class="gh-audience-count" style="font-size:22px;font-weight:700;color:var(--gh-accent);">'+count+'</div>'+
+          '<div style="font-size:12px;color:var(--gh-muted);margin-bottom:10px;">followers</div>'+
+          (avatarsHtml?'<div class="gh-audience-avatars" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">'+avatarsHtml+'</div>':'<div style="font-size:13px;color:var(--gh-muted);margin-bottom:10px;">No followers yet — share your page!</div>')+
+          '<a class="gh-btn sm ghost" href="business.html?id='+encodeURIComponent(bizId)+'#audience" style="font-size:12px;">View All</a>'+
+        '</div>'+
+      '</div>';
+    }).catch(function(){
+      slot.innerHTML='';
+    });
   }
 
   function isPageFeedPost(p,bizId){
@@ -3198,6 +3231,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(window.refreshMobileNav) setTimeout(window.refreshMobileNav, 0);
     if(!pageMode) loadStories('#ghStories');
     if(!pageMode) loadFeedRightSidebar();
+    if(pageMode && actor && actor.businessId) loadPageAudienceWidget(actor.businessId);
     ready(function(){
       if(renderId!==state.feedRenderId) return;
       if(!pageMode) maybeShowOnboarding($('#ghWelcomeSlot'));
@@ -5156,7 +5190,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function followBusiness(businessId){
-    if(!requireLogin()) return; var uid=authUser().uid; var id=businessId+'_'+uid; var ref=fs().doc(db(),'businessFollowers',id); var biz=fs().doc(db(),'businesses',businessId);
+    if(!requireLogin()) return; var user=authUser(); var uid=user.uid; var uName=user.displayName||''; var uAvatar=user.photoURL||''; var id=businessId+'_'+uid; var ref=fs().doc(db(),'businessFollowers',id); var biz=fs().doc(db(),'businesses',businessId);
     var btn=document.querySelector('[data-follow-business="'+businessId+'"]');
     if(btn){ btn.disabled=true; btn.classList.add('is-loading'); }
     return fs().getDoc(ref).then(function(d){
@@ -5165,9 +5199,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           .then(function(){ return fs().updateDoc(biz,{followerCount:fs().increment(-1)}).catch(function(){}); })
           .then(function(){bizTrack(businessId,'unfollows');toast('Unfollowed');});
       }
-      return fs().setDoc(ref,{businessId:businessId,userId:uid,createdAt:fs().serverTimestamp()})
+      return fs().setDoc(ref,{businessId:businessId,userId:uid,createdAt:fs().serverTimestamp(),userName:uName,userAvatar:uAvatar})
         .then(function(){return fs().updateDoc(biz,{followerCount:fs().increment(1)}).catch(function(){});})
-        .then(function(){bizTrack(businessId,'follows');toast('Following business');});
+        .then(function(){
+          bizTrack(businessId,'follows');toast('Following business');
+          GS()&&GS().createActorNotification&&GS().createActorNotification('business',businessId,'page_follow',(uName||'Someone')+' followed your page','Your page has a new follower.','business.html?id='+encodeURIComponent(businessId),{followerId:uid,followerName:uName,followerAvatar:uAvatar,businessId:businessId},'page_follow_'+businessId+'_'+uid).catch(function(){});
+        });
     }).catch(function(err){toast('Follow failed: '+(err.code||err.message),'error');})
       .finally(function(){ if(btn){ btn.disabled=false; btn.classList.remove('is-loading'); } updateBusinessFollowButton(businessId); });
   }
