@@ -851,6 +851,9 @@
       (post.pinned ? '<div class="biz-post-pinned"><i class="fas fa-thumbtack"></i> Pinned post</div>' : '')+
       '<div class="biz-post-header">'+
         renderBusinessPostAuthorClean(post, biz || {})+
+        (isBusinessPostOwnerMode()
+          ? '<button type="button" class="biz-post-more-clean" data-biz-owner-menu data-post-id="'+cleanPid+'" aria-label="Post options" title="Post options"><i class="fas fa-ellipsis"></i></button>'
+          : '')+
       '</div>'+
       renderBusinessPostOwnerToolsClean(post)+
       '<div class="biz-clean-edit-panel" data-biz-edit-panel hidden>'+
@@ -2209,8 +2212,85 @@
     });
   }
 
+  /* ── Clean 3-dot post menu ──────────────────────────── */
+  function closeBizCleanPostMenuEsc(e) {
+    if (e.key === 'Escape') closeBizCleanPostMenu();
+  }
+  function closeBizCleanPostMenuOutside(e) {
+    var menu = document.getElementById('bizCleanPostMenu');
+    if (menu && !menu.contains(e.target)) closeBizCleanPostMenu();
+  }
+  function closeBizCleanPostMenu() {
+    var menu = document.getElementById('bizCleanPostMenu');
+    if (menu && menu.parentNode) menu.parentNode.removeChild(menu);
+    document.removeEventListener('click', closeBizCleanPostMenuOutside, true);
+    document.removeEventListener('keydown', closeBizCleanPostMenuEsc);
+    window.removeEventListener('scroll', closeBizCleanPostMenu);
+    window.removeEventListener('resize', closeBizCleanPostMenu);
+  }
+
+  function openCleanBizPostMenu(postId, button) {
+    closeBizCleanPostMenu();
+    var cards = businessCleanPostCards(postId);
+    var card  = cards[0];
+    var isPinned = card && card.dataset.pinned === '1';
+
+    var menu = document.createElement('div');
+    menu.id        = 'bizCleanPostMenu';
+    menu.className = 'biz-clean-post-menu';
+    menu.innerHTML =
+      '<button type="button" data-biz-menu-action="edit"   data-menu-post-id="'+esc(postId)+'"><i class="fas fa-pen"></i> Edit post</button>'+
+      '<button type="button" data-biz-menu-action="pin"    data-menu-post-id="'+esc(postId)+'"><i class="fas fa-thumbtack"></i> '+(isPinned ? 'Unpin post' : 'Pin post')+'</button>'+
+      '<button type="button" data-biz-menu-action="delete" data-menu-post-id="'+esc(postId)+'" class="danger"><i class="fas fa-trash"></i> Delete post</button>';
+
+    var MENU_W = 190, MENU_H = 140;
+    var rect = button.getBoundingClientRect();
+    var top  = rect.bottom + 8;
+    var left = rect.right - MENU_W;
+    if (left < 8) left = 8;
+    if (left + MENU_W > window.innerWidth - 8) left = window.innerWidth - 8 - MENU_W;
+    if (top + MENU_H > window.innerHeight - 8) top = rect.top - MENU_H - 4;
+    if (top < 8) top = 8;
+
+    menu.style.top  = top  + 'px';
+    menu.style.left = left + 'px';
+
+    menu.addEventListener('click', function(e) {
+      var btn = e.target.closest('[data-biz-menu-action]');
+      if (!btn) return;
+      e.preventDefault(); e.stopPropagation();
+      var action = btn.dataset.bizMenuAction;
+      var pid    = btn.dataset.menuPostId;
+      closeBizCleanPostMenu();
+      var targetCards = businessCleanPostCards(pid);
+      var targetCard  = targetCards[0];
+      if (!targetCard) return;
+      if      (action === 'edit')   toggleBusinessCleanEdit(targetCard);
+      else if (action === 'pin')    pinBusinessCleanPost(targetCard, btn);
+      else if (action === 'delete') deleteBusinessCleanPost(targetCard, btn);
+    });
+
+    document.body.appendChild(menu);
+
+    setTimeout(function() {
+      document.addEventListener('click',   closeBizCleanPostMenuOutside, true);
+      document.addEventListener('keydown', closeBizCleanPostMenuEsc);
+      window.addEventListener('scroll',  closeBizCleanPostMenu);
+      window.addEventListener('resize',  closeBizCleanPostMenu);
+    }, 0);
+  }
+
   function handleBusinessCleanPostClick(e, root) {
     if (!e.target || !e.target.closest) return;
+    var ownerMenuBtn = e.target.closest('[data-biz-owner-menu]');
+    if (ownerMenuBtn && root.contains(ownerMenuBtn)) {
+      e.preventDefault(); e.stopPropagation();
+      var pid = ownerMenuBtn.dataset.postId
+        || (ownerMenuBtn.closest('[data-post-id]') && ownerMenuBtn.closest('[data-post-id]').dataset.postId)
+        || '';
+      if (pid) openCleanBizPostMenu(pid, ownerMenuBtn);
+      return;
+    }
     var shareActionBtn = e.target.closest('[data-biz-share-action]');
     if (shareActionBtn && root.contains(shareActionBtn)) {
       var shareCard = shareActionBtn.closest('[data-biz-clean-post]');
