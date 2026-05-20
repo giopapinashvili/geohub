@@ -36,6 +36,9 @@
   var _rxLongTimer   = null;
   var _postSaves     = {};
 
+  // TODO Phase 74: Rebuild business page posts using one shared post system.
+  var BUSINESS_PAGE_POSTS_DISABLED = true;
+
   var _qAll    = [];
   var _qFilter = 'all';
   var _qSearch = '';
@@ -160,6 +163,17 @@
     var out=''; for(var i=0;i<(n||2);i++) out+=skeletonPostCard(); return out;
   }
 
+  function renderBusinessPostsMaintenanceCard() {
+    return '<div class="biz-empty-state biz-posts-maintenance">'+
+      '<i class="fas fa-screwdriver-wrench"></i>'+
+      '<h3>Page posts are being upgraded</h3>'+
+      '<p>We&rsquo;re rebuilding business page posts to make comments, shares, reactions, and post tools more reliable.</p>'+
+      '<p>'+(_isActingAsPage
+        ? 'Business page posts are temporarily disabled during maintenance.'
+        : 'No page posts available right now.')+'</p>'+
+    '</div>';
+  }
+
   // ── RENDER: HEADER ────────────────────────────────────────────
 
   function renderHeader(biz) {
@@ -199,7 +213,6 @@
       // ── Page identity mode: show admin controls ───────────────────
       actions =
         '<a href="add-business.html?edit='+esc(BIZ_ID)+'" class="biz-action-btn owner-edit"><i class="fas fa-pen"></i> Edit Page</a>'+
-        '<button class="biz-action-btn" onclick="window._bizActions.openCompose()"><i class="fas fa-plus"></i> Create Post</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
         '<input type="file" id="biz-owner-photo-input" accept="image/*" style="display:none" onchange="window._bizActions.handleOwnerPhoto(this)">'+
@@ -457,7 +470,6 @@
         '<div class="biz-admin-toolbar-btns">'+
           '<a href="add-business.html?edit='+esc(BIZ_ID)+'" class="biz-admin-btn"><i class="fas fa-pen"></i> Edit Page</a>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.openBlockManager()"><i class="fas fa-plus-circle"></i> Add Block</button>'+
-          '<button class="biz-admin-btn" onclick="window._bizActions.openCompose()"><i class="fas fa-pen-to-square"></i> New Post</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
           '<a href="rewards.html" class="biz-admin-btn"><i class="fas fa-gift"></i> My Coupons</a>'+
           '<button class="biz-admin-btn" style="color:#f87171;border-color:rgba(248,113,113,.3)" onclick="window._bizActions.deletePage()"><i class="fas fa-trash"></i> Delete Page</button>'+
@@ -576,8 +588,7 @@
       '<div class="biz-left-sidebar">'+renderLeftSidebar(biz)+'</div>'+
       '<div class="biz-center-col">'+
         '<div id="biz-page-blocks"></div>'+
-        (_currentUser ? renderComposer(biz) : '')+
-        '<div id="biz-posts-overview">'+renderPostsSkeleton(3)+'</div>'+
+        '<div id="biz-posts-overview">'+renderBusinessPostsMaintenanceCard()+'</div>'+
       '</div>'+
       '<div class="biz-right-sidebar">'+renderRightSidebar(biz, services, products, reviews, gallery)+'</div>'+
     '</div>';
@@ -1428,8 +1439,7 @@
           '</div>'+
 
           '<div class="biz-tab-panel" data-panel="posts">'+
-            (_isActingAsPage?'<div style="margin-bottom:14px">'+renderComposer(biz)+'</div>':'')+
-            '<div id="biz-posts-all">'+renderPostsSkeleton(3)+'</div>'+
+            '<div id="biz-posts-all">'+renderBusinessPostsMaintenanceCard()+'</div>'+
           '</div>'+
 
           '<div class="biz-tab-panel" data-panel="services">'+
@@ -1475,7 +1485,7 @@
       renderQuoteModal(biz)+
       renderServiceDetailModal()+
       renderProductDetailModal()+
-      (_isActingAsPage?renderComposeModal(biz):'')+
+      (_isActingAsPage && !BUSINESS_PAGE_POSTS_DISABLED ? renderComposeModal(biz) : '')+
       (_isActingAsPage?renderBlockManagerModal():'')+
       renderShareModal()+
       renderEditModal()+
@@ -1499,7 +1509,7 @@
     });
 
     _previewMode = false;
-    loadBizPosts();
+    if (!BUSINESS_PAGE_POSTS_DISABLED) loadBizPosts();
     loadPageBlocks();
     loadEvents(BIZ_ID);
     loadFaq(BIZ_ID);
@@ -1516,6 +1526,12 @@
   function loadBizPosts() {
     var overviewEl = document.getElementById('biz-posts-overview');
     var allEl      = document.getElementById('biz-posts-all');
+    if (BUSINESS_PAGE_POSTS_DISABLED) {
+      _currentPosts = [];
+      if (overviewEl) overviewEl.innerHTML = renderBusinessPostsMaintenanceCard();
+      if (allEl) allEl.innerHTML = renderBusinessPostsMaintenanceCard();
+      return;
+    }
 
     // Query without orderBy to avoid requiring a composite index.
     // Client-side sort by createdAt descending is applied after fetch.
@@ -3207,6 +3223,10 @@
     },
 
     openCompose: function(){
+      if (BUSINESS_PAGE_POSTS_DISABLED) {
+        showToast('Business page posts are temporarily disabled during maintenance.', false);
+        return;
+      }
       var m=document.getElementById('biz-compose-modal'); if(!m) return;
       m.classList.add('open');
       // Auto-focus and disable Post until valid
@@ -3272,6 +3292,10 @@
     },
 
     submitBizPost: function() {
+      if (BUSINESS_PAGE_POSTS_DISABLED) {
+        showToast('Business page posts are temporarily disabled during maintenance.', false);
+        return;
+      }
       if(!_currentUser){ showToast('Sign in to post',false); window.location.href='auth.html'; return; }
       var textVal=(document.getElementById('biz-compose-text')||{}).value||'';
       var files=window._composePendingFiles||[];
