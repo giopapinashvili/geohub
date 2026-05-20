@@ -3003,3 +3003,9 @@ body.gh-has-injected-nav .biz-right-sidebar {
 .biz-clean-post-menu button.danger {
   color: #f87171;
 }
+.biz-clean-post-menu-sep {
+  height: 1px; background: rgba(255,255,255,.07); margin: 5px 0;
+}
+.biz-menu-check {
+  margin-left: auto; color: #10b981; font-size: .72rem; flex-shrink: 0;
+}

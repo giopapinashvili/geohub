@@ -2211,6 +2211,43 @@
     });
   }
 
+  function toggleBusinessCleanComments(card, btn) {
+    if (!isBusinessPostOwnerMode() || !card) return;
+    var postId = card.dataset.postId;
+    var isOff  = card.dataset.commentsDisabled === '1';
+    var newVal = !isOff;
+    if (btn) btn.disabled = true;
+    _fs.updateDoc(_fs.doc(_db, 'posts', postId), {
+      commentsDisabled: newVal, updatedAt: _fs.serverTimestamp()
+    }).then(function() {
+      showToast(newVal ? 'Comments disabled' : 'Comments enabled');
+      loadBizPosts();
+    }).catch(function(err) {
+      showToast('Could not update: ' + (err.code || err.message), false);
+    }).finally(function() {
+      if (btn) btn.disabled = false;
+    });
+  }
+
+  function setBusinessCleanPostVisibility(card, vis, btn) {
+    if (!isBusinessPostOwnerMode() || !card) return;
+    var postId = card.dataset.postId;
+    var allowed = { public: 1, followers: 1, private: 1 };
+    if (!allowed[vis]) return;
+    if (btn) btn.disabled = true;
+    _fs.updateDoc(_fs.doc(_db, 'posts', postId), {
+      visibility: vis, updatedAt: _fs.serverTimestamp()
+    }).then(function() {
+      var labels = { public: 'Public', followers: 'Followers only', private: 'Private' };
+      showToast('Visibility: ' + (labels[vis] || vis));
+      loadBizPosts();
+    }).catch(function(err) {
+      showToast('Could not update: ' + (err.code || err.message), false);
+    }).finally(function() {
+      if (btn) btn.disabled = false;
+    });
+  }
+
   /* ── Clean 3-dot post menu ──────────────────────────── */
   function closeBizCleanPostMenuEsc(e) {
     if (e.key === 'Escape') closeBizCleanPostMenu();
@@ -2233,6 +2270,8 @@
     var cards = businessCleanPostCards(postId);
     var card  = cards[0];
     var isPinned = card && card.dataset.pinned === '1';
+    var isCmtOff = card && card.dataset.commentsDisabled === '1';
+    var curVis   = (card && card.dataset.vis) || 'public';
 
     var menu = document.createElement('div');
     menu.id        = 'bizCleanPostMenu';
@@ -2240,6 +2279,12 @@
     menu.innerHTML =
       '<button type="button" data-biz-menu-action="edit"   data-menu-post-id="'+esc(postId)+'"><i class="fas fa-pen"></i> Edit post</button>'+
       '<button type="button" data-biz-menu-action="pin"    data-menu-post-id="'+esc(postId)+'"><i class="fas fa-thumbtack"></i> '+(isPinned ? 'Unpin post' : 'Pin post')+'</button>'+
+      '<div class="biz-clean-post-menu-sep"></div>'+
+      '<button type="button" data-biz-menu-action="toggleComments" data-menu-post-id="'+esc(postId)+'"><i class="fas fa-comment-slash"></i> '+(isCmtOff ? 'Enable comments' : 'Disable comments')+'</button>'+
+      '<button type="button" data-biz-menu-action="setVis" data-menu-post-id="'+esc(postId)+'" data-menu-vis="public"><i class="fas fa-globe"></i> Public'+(curVis==='public' ? ' <i class="fas fa-check biz-menu-check"></i>' : '')+'</button>'+
+      '<button type="button" data-biz-menu-action="setVis" data-menu-post-id="'+esc(postId)+'" data-menu-vis="followers"><i class="fas fa-user-group"></i> Followers only'+(curVis==='followers' ? ' <i class="fas fa-check biz-menu-check"></i>' : '')+'</button>'+
+      '<button type="button" data-biz-menu-action="setVis" data-menu-post-id="'+esc(postId)+'" data-menu-vis="private"><i class="fas fa-lock"></i> Private'+(curVis==='private' ? ' <i class="fas fa-check biz-menu-check"></i>' : '')+'</button>'+
+      '<div class="biz-clean-post-menu-sep"></div>'+
       '<button type="button" data-biz-menu-action="delete" data-menu-post-id="'+esc(postId)+'" class="danger"><i class="fas fa-trash"></i> Delete post</button>';
 
     menu.addEventListener('click', function(ev) {
@@ -2252,9 +2297,11 @@
       var targetCards = businessCleanPostCards(pid);
       var targetCard  = targetCards[0];
       if (!targetCard) return;
-      if      (action === 'edit')   toggleBusinessCleanEdit(targetCard);
-      else if (action === 'pin')    pinBusinessCleanPost(targetCard, btn);
-      else if (action === 'delete') deleteBusinessCleanPost(targetCard, btn);
+      if      (action === 'edit')           toggleBusinessCleanEdit(targetCard);
+      else if (action === 'pin')            pinBusinessCleanPost(targetCard, btn);
+      else if (action === 'toggleComments') toggleBusinessCleanComments(targetCard, btn);
+      else if (action === 'setVis')         setBusinessCleanPostVisibility(targetCard, btn.dataset.menuVis, btn);
+      else if (action === 'delete')         deleteBusinessCleanPost(targetCard, btn);
     });
 
     // Append first so offsetWidth/offsetHeight are real
