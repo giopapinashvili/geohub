@@ -1485,6 +1485,12 @@ html[data-gh-theme="light"] .gh-team-avatar{background:rgba(255,255,255,.9);bord
 .gh-page-home-actions .gh-btn{min-height:42px}
 .gh-page-composer .gh-composer-fake{color:var(--gh-text);font-weight:900}
 .gh-page-shortcuts{display:grid;gap:8px}
+.gh-page-feed-mode .gh-left,
+.gh-page-feed-mode .gh-right{max-height:none;overflow:visible;scrollbar-width:none}
+.gh-page-feed-mode .gh-left::-webkit-scrollbar,
+.gh-page-feed-mode .gh-right::-webkit-scrollbar{display:none}
+.gh-page-feed-mode .gh-right-widget{overflow:visible}
+.gh-page-feed-empty{min-height:180px}
 .gh-page-shortcut{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;text-decoration:none;color:var(--gh-text);background:rgba(255,255,255,.04);border:1px solid transparent}
 .gh-page-shortcut:hover{border-color:rgba(16,185,129,.18);background:rgba(16,185,129,.08)}
 .gh-page-shortcut i{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(16,185,129,.12);color:var(--gh-green);flex:0 0 auto}
@@ -1587,6 +1593,12 @@ body.gh-has-injected-nav .gh-left .gh-nav-item{justify-content:flex-start}
 
 /* ── Search page: hide own topbar when shell nav is injected ── */
 body.gh-has-injected-nav .sr-topbar{display:none!important}
+body.gh-page-feed-mode.gh-has-injected-nav .gh-left{overflow-y:hidden!important}
+body.gh-page-feed-mode.gh-has-injected-nav .gh-right{max-height:none!important;overflow:visible!important}
+body.gh-page-feed-mode.gh-fb-inspired .gh-left,
+body.gh-page-feed-mode.gh-fb-inspired .gh-right{max-height:none!important;overflow:visible!important;scrollbar-width:none!important}
+body.gh-page-feed-mode.gh-fb-inspired .gh-left::-webkit-scrollbar,
+body.gh-page-feed-mode.gh-fb-inspired .gh-right::-webkit-scrollbar{display:none!important}
 body.gh-has-injected-nav .sr-cats-bar{top:72px}
 body.gh-has-injected-nav .sr-page{padding-top:0}
 @media(max-width:920px){

@@ -2814,8 +2814,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '<a class="gh-btn sm ghost" href="business.html?id='+encodeURIComponent(bizId)+'#audience" style="font-size:12px;">View All</a>'+
         '</div>'+
       '</div>';
-    }).catch(function(){
-      slot.innerHTML='';
+    }).catch(function(err){
+      console.warn('[GeoHub] page audience widget failed', err && err.message);
+      slot.innerHTML='<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Page Audience</h3></div><div class="gh-audience-body" style="padding:12px 16px;"><div style="font-size:13px;color:var(--gh-muted);">No followers yet</div></div></div>';
     });
   }
 
@@ -3211,6 +3212,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var renderId=++state.feedRenderId;
     var actor=activeBusinessActor();
     var pageMode=!!actor;
+    document.body.classList.toggle('gh-page-feed-mode', pageMode);
     state.feedTab = 'foryou';
     var c=getFeedComposerActor();
     var compAvClass='gh-avatar'+(c?'':' gh-skel');
@@ -3244,9 +3246,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(renderId!==state.feedRenderId) return;
       if(!pageMode) maybeShowOnboarding($('#ghWelcomeSlot'));
       openDeepLinkedStory();
-      var list=$('#ghFeedList'); bindPostInteractions(list); var lastPosts=[];
+      var list=$('#ghFeedList'); bindPostInteractions(list); var lastPosts=[]; var pageFeedLoaded=false;
+      function pageFeedEmptyHtml(){
+        return '<div class="gh-card gh-empty gh-page-feed-empty"><i class="fas fa-store"></i><h3>No page posts yet</h3><p>Create a post as '+esc(actor.title||'your page')+' to start building your audience.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="gh-btn" data-create-post><i class="fas fa-plus"></i>Create Page Post</button><a class="gh-btn ghost" href="business.html?id='+encodeURIComponent(actor.businessId)+'"><i class="fas fa-arrow-up-right-from-square"></i>View Page</a><a class="gh-btn ghost" href="'+actorMessagesHref(actor)+'"><i class="fas fa-comment-dots"></i>Page Inbox</a></div></div>';
+      }
       function paint(){
         if(renderId!==state.feedRenderId) return;
+        if(!list) return;
         var visible=lastPosts.filter(canSeePost);
         if(pageMode){
           visible=visible.filter(function(p){ return isPageFeedPost(p, actor.businessId); });
@@ -3273,7 +3279,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         }
         if(!visible.length){
           if(pageMode){
-            list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-store"></i><h3>No page activity yet</h3><p>Create a post as '+esc(actor.title||'your page')+' to start building your audience.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="gh-btn" data-create-post><i class="fas fa-plus"></i>Create Page Post</button><a class="gh-btn ghost" href="business.html?id='+encodeURIComponent(actor.businessId)+'"><i class="fas fa-arrow-up-right-from-square"></i>View Page</a><a class="gh-btn ghost" href="'+actorMessagesHref(actor)+'"><i class="fas fa-comment-dots"></i>Page Inbox</a></div></div>';
+            list.innerHTML=pageFeedEmptyHtml();
           } else if(state.feedTab === 'following'){
             list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-user-group"></i><h3>Nothing from people you follow</h3><p>Follow people and creators to see their posts here.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="gh-btn ghost" href="search.html"><i class="fas fa-search"></i>Find people</a><a class="gh-btn ghost" href="creators.html"><i class="fas fa-star"></i>Discover creators</a></div></div>';
           } else {
@@ -3303,8 +3309,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       setupSafetyListener(paint);
       setupAudienceAccess(paint);
       if(pageMode){
+        setTimeout(function(){
+          if(renderId===state.feedRenderId && !pageFeedLoaded && list){
+            console.warn('[GeoHub] Page feed listener did not return before fallback; showing empty state');
+            list.innerHTML=pageFeedEmptyHtml();
+          }
+        }, 6500);
         state.feedUnsub=listenTargetPosts('business', actor.businessId, function(posts){
           if(renderId!==state.feedRenderId) return;
+          pageFeedLoaded=true;
           lastPosts=posts;
           paint();
         });
