@@ -1295,6 +1295,48 @@
     if (subSel) subSel.style.display = 'none';
   }
 
+  function normalizePlaceImport(it, user, fs) {
+    var cats = getPlaceCategories();
+    var catId    = it.categoryId || '';
+    var catLabel = it.category   || '';
+    var matched  = null;
+    if (catId)    matched = cats.find(function(c) { return c.id    === catId;    });
+    if (!matched && catLabel) matched = cats.find(function(c) { return c.label === catLabel; });
+    if (matched) { catId = matched.id; catLabel = matched.label; }
+    else         { catId = catId || ''; }
+
+    var rawImg = it.imageUrl || it.image || it.coverImage || it.coverImageUrl ||
+                 it.coverUrl || it.photoUrl || it.thumbnail || null;
+    var imgUrl = (rawImg && typeof rawImg === 'string' && /^https?:\/\//i.test(rawImg)) ? rawImg : null;
+
+    var lat = (it.lat  !== undefined && it.lat  !== null && !isNaN(Number(it.lat)))  ? Number(it.lat)  : null;
+    var lng = (it.lng  !== undefined && it.lng  !== null && !isNaN(Number(it.lng)))  ? Number(it.lng)  : null;
+
+    var doc = {
+      name: it.name || it.title,
+      title: it.title || it.name,
+      description: it.description || it.shortDescription || '',
+      shortDescription: it.shortDescription || it.description || '',
+      city: it.city || '',
+      region: it.region || '',
+      district: it.district || '',
+      address: it.address || '',
+      category: catLabel,
+      categoryId: catId,
+      subcategory: it.subcategory || '',
+      imageUrl: imgUrl,
+      image: imgUrl,
+      sourceUrl: it.sourceUrl || '',
+      isVerified: it.isVerified || false,
+      status: it.status || 'active',
+      createdBy: user.uid, ownerId: user.uid, userId: user.uid,
+      createdAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp()
+    };
+    if (lat !== null) doc.lat = lat;
+    if (lng !== null) doc.lng = lng;
+    return doc;
+  }
+
   function bindContentStudio() {
     var form = document.getElementById('adminContentForm');
     if (!form || form._wired) return;
@@ -1459,6 +1501,80 @@
     });
   }
 
+  /* ── DELETE ALL PLACES ────────────────────────────────────── */
+  function setDeletePlacesProgress(msg, color) {
+    var el = document.getElementById('adminDeletePlacesProgress');
+    if (!el) return;
+    el.style.color = color || '#94a3b8';
+    el.textContent = msg;
+  }
+
+  function bindDeleteAllPlacesButton() {
+    var bulkColSel = document.getElementById('adminBulkCollection');
+    var wrap = document.getElementById('adminDeletePlacesWrap');
+    if (!bulkColSel || !wrap) return;
+    function toggle() { wrap.style.display = bulkColSel.value === 'places' ? 'block' : 'none'; }
+    bulkColSel.addEventListener('change', toggle);
+    toggle();
+  }
+
+  window.deleteAllPlaces = function() {
+    var typed = window.prompt('წასაშლელად ჩაწერე DELETE PLACES');
+    if (typed === null) return;
+    if (typed.trim() !== 'DELETE PLACES') { toast('გაუქმდა — ტექსტი არასწორია'); return; }
+    if (!window.confirm('დარწმუნებული ხარ? ეს წაშლის ყველა ადგილს და უკან დაბრუნება შეუძლებელია.')) return;
+
+    if (!window.GeoFirebase || !window.GeoFirebase.fs) return toast('Firebase not ready');
+    var gf = window.GeoFirebase, fs = gf.fs, db = gf.db;
+
+    var btn = document.getElementById('adminDeletePlacesBtn');
+    if (btn) btn.disabled = true;
+    setDeletePlacesProgress('ადგილები იძებნება…');
+
+    fs.getDocs(fs.collection(db, 'places')).then(function(snap) {
+      var docs = snap.docs;
+      if (docs.length === 0) {
+        setDeletePlacesProgress('ადგილები არ მოიძებნა.', '#94a3b8');
+        if (btn) btn.disabled = false;
+        return;
+      }
+      setDeletePlacesProgress('წაიშლება ' + docs.length + ' ადგილი…', '#f59e0b');
+
+      var CHUNK = 400;
+      var chunks = [];
+      for (var i = 0; i < docs.length; i += CHUNK) { chunks.push(docs.slice(i, i + CHUNK)); }
+
+      var deleted = 0;
+      function deleteChunk(idx) {
+        if (idx >= chunks.length) {
+          setDeletePlacesProgress('წაიშალა ' + deleted + ' ადგილი.', '#10e0a0');
+          toast('ყველა ადგილი წაიშალა');
+          if (btn) btn.disabled = false;
+          return;
+        }
+        var batch = fs.writeBatch(db);
+        chunks[idx].forEach(function(d) { batch.delete(d.ref); });
+        batch.commit().then(function() {
+          deleted += chunks[idx].length;
+          setDeletePlacesProgress('წაიშალა ' + deleted + ' / ' + docs.length + '…', '#f59e0b');
+          deleteChunk(idx + 1);
+        }).catch(function(err) {
+          var msg = (err && err.message) || '';
+          setDeletePlacesProgress('შეცდომა: ' + msg, '#ef4444');
+          if (msg.toLowerCase().indexOf('permission') !== -1) toast('წაშლა ვერ მოხერხდა — permission denied');
+          else toast('წაშლა ვერ მოხერხდა: ' + msg);
+          if (btn) btn.disabled = false;
+        });
+      }
+      deleteChunk(0);
+    }).catch(function(err) {
+      var msg = (err && err.message) || '';
+      setDeletePlacesProgress('შეცდომა: ' + msg, '#ef4444');
+      toast('წაშლა ვერ მოხერხდა: ' + msg);
+      if (btn) btn.disabled = false;
+    });
+  };
+
   /* ── JSON BULK IMPORT ─────────────────────────────────────── */
   window.adminBulkImport = function() {
     var jsonEl = document.getElementById('adminBulkJson');
@@ -1490,16 +1606,21 @@
     if (resEl) resEl.style.display = 'none';
 
     var promises = items.map(function(it) {
-      var imgNorm = it.imageUrl||it.image||it.coverImage||it.coverImageUrl||it.coverUrl||it.photoUrl||it.thumbnail||null;
-      var doc = Object.assign({}, it, {
-        name: it.name || it.title,
-        title: it.title || it.name,
-        imageUrl: imgNorm,
-        image: imgNorm,
-        status: it.status || 'active',
-        createdBy: user.uid, ownerId: user.uid, userId: user.uid,
-        createdAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp()
-      });
+      var doc;
+      if (col === 'places') {
+        doc = normalizePlaceImport(it, user, fs);
+      } else {
+        var imgNorm = it.imageUrl||it.image||it.coverImage||it.coverImageUrl||it.coverUrl||it.photoUrl||it.thumbnail||null;
+        doc = Object.assign({}, it, {
+          name: it.name || it.title,
+          title: it.title || it.name,
+          imageUrl: imgNorm,
+          image: imgNorm,
+          status: it.status || 'active',
+          createdBy: user.uid, ownerId: user.uid, userId: user.uid,
+          createdAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp()
+        });
+      }
       return fs.addDoc(fs.collection(db, col), doc);
     });
 
@@ -2385,6 +2506,7 @@
     bindContentStudio();
     bindChallengeStudio();
     bindRewardsStudio();
+    bindDeleteAllPlacesButton();
 
     window.addEventListener('resize', function () {
       if (currentSection === 'overview') drawOverviewCharts();
