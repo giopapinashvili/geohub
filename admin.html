@@ -482,7 +482,13 @@
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
             <input id="adminContentCity" placeholder="City / location optional" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
             <input id="adminContentCategory" placeholder="Category optional" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <select id="adminPlaceCategory" style="display:none;grid-column:2;grid-row:1;padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+              <option value="">აირჩიე კატეგორია</option>
+            </select>
           </div>
+          <select id="adminPlaceSubcategory" disabled style="display:none;padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <option value="">აირჩიე ქვეკატეგორია</option>
+          </select>
           <div style="display:flex;gap:8px;align-items:center">
             <input id="adminContentImage" placeholder="Image URL (optional)" style="flex:1;padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
             <label id="adminCsUploadLabel" for="adminCsImageFile" class="btn btn-ghost btn-sm" style="cursor:pointer;white-space:nowrap;padding:11px 14px"><i class="fas fa-upload"></i> Upload</label>

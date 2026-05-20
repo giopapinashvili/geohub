@@ -1229,6 +1229,72 @@
     }).join('');
   }
 
+  function getPlaceCategories() {
+    return window.GEOHUB_PLACE_CATEGORIES || [];
+  }
+
+  function populatePlaceCategorySelect(selectedValue) {
+    var sel = document.getElementById('adminPlaceCategory');
+    if (!sel) return;
+    var cats = getPlaceCategories();
+    var opts = '<option value="">აირჩიე კატეგორია</option>';
+    cats.forEach(function(c) {
+      var isSelected = selectedValue && (c.id === selectedValue || c.label === selectedValue);
+      opts += '<option value="' + c.id + '"' + (isSelected ? ' selected' : '') + '>' + c.label + '</option>';
+    });
+    sel.innerHTML = opts;
+  }
+
+  function populatePlaceSubcategorySelect(categoryId, selectedSub) {
+    var sel = document.getElementById('adminPlaceSubcategory');
+    if (!sel) return;
+    var cats = getPlaceCategories();
+    var cat = cats.find(function(c) { return c.id === categoryId || c.label === categoryId; });
+    var subs = (cat && cat.subcategories) || [];
+    sel.disabled = subs.length === 0;
+    var opts = '<option value="">აირჩიე ქვეკატეგორია</option>';
+    var foundSub = false;
+    subs.forEach(function(s) {
+      var isSelected = selectedSub && s === selectedSub;
+      if (isSelected) foundSub = true;
+      opts += '<option value="' + s + '"' + (isSelected ? ' selected' : '') + '>' + s + '</option>';
+    });
+    if (selectedSub && !foundSub) {
+      opts += '<option value="' + selectedSub + '" selected>' + selectedSub + '</option>';
+    }
+    sel.innerHTML = opts;
+  }
+
+  function syncPlaceSubcategories() {
+    var catSel = document.getElementById('adminPlaceCategory');
+    var subSel = document.getElementById('adminPlaceSubcategory');
+    var textCat = document.getElementById('adminContentCategory');
+    if (!catSel) return;
+    populatePlaceSubcategorySelect(catSel.value, '');
+    if (subSel) {
+      subSel.style.display = catSel.value ? 'block' : 'none';
+      subSel.disabled = !catSel.value;
+    }
+    if (textCat) {
+      var cats = getPlaceCategories();
+      var cat = cats.find(function(c) { return c.id === catSel.value; });
+      textCat.value = cat ? cat.label : catSel.value;
+    }
+  }
+
+  function togglePlaceCategoryUI(col) {
+    var textCat = document.getElementById('adminContentCategory');
+    var placeCat = document.getElementById('adminPlaceCategory');
+    var subSel = document.getElementById('adminPlaceSubcategory');
+    var isPlaces = col === 'places';
+    if (textCat) textCat.style.display = isPlaces ? 'none' : '';
+    if (placeCat) {
+      placeCat.style.display = isPlaces ? 'block' : 'none';
+      if (isPlaces) populatePlaceCategorySelect('');
+    }
+    if (subSel) subSel.style.display = 'none';
+  }
+
   function bindContentStudio() {
     var form = document.getElementById('adminContentForm');
     if (!form || form._wired) return;
@@ -1236,9 +1302,16 @@
 
     var colSel = document.getElementById('adminContentCollection');
     if (colSel) {
-      colSel.addEventListener('change', function() { renderExtFields(colSel.value); });
+      colSel.addEventListener('change', function() {
+        renderExtFields(colSel.value);
+        togglePlaceCategoryUI(colSel.value);
+      });
       renderExtFields(colSel.value);
+      togglePlaceCategoryUI(colSel.value);
     }
+
+    var placeCatSel = document.getElementById('adminPlaceCategory');
+    if (placeCatSel) placeCatSel.addEventListener('change', syncPlaceSubcategories);
 
     // Cloudinary image upload for Content Studio cover
     var csImgFile = document.getElementById('adminCsImageFile');
