@@ -2768,7 +2768,8 @@
       var oldFloating = document.getElementById('ghBizPostMenuDrop');
       var dd = document.getElementById('biz-pmenu-' + postId);
       if (!dd) return;
-      var isOpen = oldFloating && oldFloating.getAttribute('data-post-id') === String(postId || '');
+      // isOpen must also check for 'open' class — a stale element without the class is not open
+      var isOpen = oldFloating && oldFloating.getAttribute('data-post-id') === String(postId || '') && oldFloating.classList.contains('open');
       if (oldFloating) oldFloating.remove();
       if (!isOpen && btnEl) {
         dd = dd.cloneNode(true);
@@ -2799,14 +2800,21 @@
       }
       if (dd) dd.classList.toggle('open', !isOpen);
       if (!isOpen) {
-        // Close on next outside click
+        // Close on outside click, Escape, or page scroll — remove element from DOM entirely
         setTimeout(function(){
-          document.addEventListener('click', function _h(e){
-            if (!e.target.closest || !e.target.closest('.biz-post-menu-wrap')) {
-              document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
-            }
-            document.removeEventListener('click', _h);
-          });
+          function _bizMenuClose(e) {
+            if (e.type === 'keydown' && e.key !== 'Escape') return;
+            if (e.type === 'click' && e.target.closest && e.target.closest('.biz-post-menu-wrap')) return;
+            var f = document.getElementById('ghBizPostMenuDrop');
+            if (f) f.remove();
+            document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
+            document.removeEventListener('click', _bizMenuClose);
+            document.removeEventListener('keydown', _bizMenuClose);
+            window.removeEventListener('scroll', _bizMenuClose);
+          }
+          document.addEventListener('click', _bizMenuClose);
+          document.addEventListener('keydown', _bizMenuClose);
+          window.addEventListener('scroll', _bizMenuClose);
         }, 0);
       }
     },
