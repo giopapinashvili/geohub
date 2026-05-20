@@ -781,6 +781,8 @@ body.gh-has-injected-nav #biz-detail-root {
   overflow: hidden;
 }
 .biz-post-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+.biz-post-logo-user,
+.biz-post-logo-user img { border-radius: 50%; }
 
 .biz-post-logo-link { flex-shrink: 0; display: block; }
 .biz-post-meta  { flex: 1; min-width: 0; }
@@ -811,6 +813,16 @@ body.gh-has-injected-nav #biz-detail-root {
   display: block;
   cursor: pointer;
 }
+.biz-clean-media-btn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
 
 /* Multi-image grid */
 .biz-post-grid { display: grid; gap: 3px; }
@@ -824,6 +836,10 @@ body.gh-has-injected-nav #biz-detail-root {
   overflow: hidden;
   cursor: pointer;
   background: rgba(255,255,255,.04);
+  border: 0;
+  padding: 0;
+  margin: 0;
+  font: inherit;
 }
 .biz-post-grid-item img {
   width: 100%;
@@ -880,6 +896,54 @@ body.gh-has-injected-nav #biz-detail-root {
 .biz-react-btn:not(:last-child) { border-right: 1px solid rgba(255,255,255,.05); }
 .biz-react-btn.liked { color: #3b82f6; }
 .biz-react-btn i { font-size: .88rem; }
+.biz-post-save-btn.active { color: #10b981; }
+
+.biz-clean-owner-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 16px 12px;
+}
+.biz-clean-owner-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.05);
+  color: #cbd5e1;
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.biz-clean-owner-btn:hover { background: rgba(255,255,255,.09); color: #f8fafc; }
+.biz-clean-owner-btn.primary { background: rgba(16,185,129,.16); color: #34d399; border-color: rgba(16,185,129,.28); }
+.biz-clean-owner-btn.danger { color: #f87171; border-color: rgba(248,113,113,.24); }
+.biz-clean-owner-btn:disabled,
+.biz-react-btn:disabled { opacity: .55; cursor: wait; }
+
+.biz-clean-edit-panel,
+.biz-clean-share-panel {
+  margin: 0 16px 12px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  background: rgba(15,23,42,.72);
+}
+.biz-clean-panel-actions,
+.biz-clean-share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.biz-clean-share-actions {
+  flex-direction: column;
+}
 
 /* ── SERVICE CARDS ───────────────────────────────────────────── */
 .biz-service-cards-grid {
