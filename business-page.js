@@ -29,10 +29,11 @@
   var _notificationsOn = true;
   var _reviewRating  = 0;
   var _previewMode   = false;
+  var _postReactions = {}; // legacy, kept for compat
   var _currentPosts  = []; // posts loaded in current render cycle
   var _sharePostId   = null;
   var _editPostId    = null;
-  var _bizPostCountCache = {}; // pid -> {comments, reactions, shares}
+  var _rxLongTimer   = null;
 
   var _qAll    = [];
   var _qFilter = 'all';
@@ -47,6 +48,15 @@
 
   var _svcMap  = {};
   var _prodMap = {};
+
+  var REACTIONS = [
+    { key:'like',  emoji:'👍', label:'Like'  },
+    { key:'love',  emoji:'❤️', label:'Love'  },
+    { key:'haha',  emoji:'😂', label:'Haha'  },
+    { key:'wow',   emoji:'😮', label:'Wow'   },
+    { key:'sad',   emoji:'😢', label:'Sad'   },
+    { key:'angry', emoji:'😡', label:'Angry' },
+  ];
 
   // ── HELPERS ───────────────────────────────────────────────────
 
@@ -129,152 +139,6 @@
   }
 
   // ── SKELETON ─────────────────────────────────────────────────
-
-  function ensureBusinessPostMenuEmergencyCss() {
-    if (document.getElementById('gh-biz-post-menu-emergency-css')) return;
-    var style = document.createElement('style');
-    style.id = 'gh-biz-post-menu-emergency-css';
-    style.textContent =
-      '#ghBizPostMenuDrop{' +
-        'position:fixed!important;display:block!important;visibility:visible!important;' +
-        'opacity:1!important;pointer-events:auto!important;z-index:10080!important;' +
-        'min-width:190px;padding:6px;background:#111827;color:#f8fafc;' +
-        'border:1px solid rgba(148,163,184,.28);border-radius:12px;' +
-        'box-shadow:0 18px 40px rgba(0,0,0,.38);' +
-      '}' +
-      '#ghBizPostMenuDrop button{' +
-        'display:flex;width:100%;align-items:center;gap:10px;padding:9px 11px;' +
-        'border:0;background:transparent;color:inherit;border-radius:8px;text-align:left;' +
-        'font:600 13px/1.2 system-ui,-apple-system,Segoe UI,sans-serif;cursor:pointer;' +
-      '}' +
-      '#ghBizPostMenuDrop button:hover{background:rgba(255,255,255,.08);}' +
-      '#ghBizPostMenuDrop button[data-biz-menu-danger]{color:#fca5a5;}';
-    document.head.appendChild(style);
-  }
-
-  function closeBusinessPostMenuEmergency() {
-    var existing = document.getElementById('ghBizPostMenuDrop');
-    if (existing) existing.remove();
-  }
-
-  function callBusinessPostMenuAction(postId, actionName, arg) {
-    var actions = window._bizActions || {};
-    var fn = actions[actionName];
-    if (typeof fn !== 'function') {
-      console.warn('[biz-menu] missing action', actionName);
-      return;
-    }
-    if (typeof arg === 'undefined') fn.call(actions, postId);
-    else fn.call(actions, postId, arg);
-  }
-
-  function openBusinessPostMenuEmergency(postId, btn, card) {
-    closeBusinessPostMenuEmergency();
-    ensureBusinessPostMenuEmergencyCss();
-
-    var post = _currentPosts && _currentPosts.find(function(p) { return p.id === postId; });
-    var isPinned = card.dataset.pinned === '1' || !!(post && post.pinned);
-    var commentsDisabled = card.dataset.commentsDisabled === '1' || !!(post && post.commentsDisabled);
-    var menu = document.createElement('div');
-    menu.id = 'ghBizPostMenuDrop';
-    menu.setAttribute('role', 'menu');
-    menu.innerHTML =
-      '<button type="button" role="menuitem" data-biz-menu-action="editPost">Edit post</button>' +
-      '<button type="button" role="menuitem" data-biz-menu-action="pinPost">' + (isPinned ? 'Unpin post' : 'Pin post') + '</button>' +
-      '<button type="button" role="menuitem" data-biz-menu-action="togglePostComments">' + (commentsDisabled ? 'Enable comments' : 'Disable comments') + '</button>' +
-      '<button type="button" role="menuitem" data-biz-menu-action="setPostVisibility" data-biz-menu-vis="public">Public</button>' +
-      '<button type="button" role="menuitem" data-biz-menu-action="setPostVisibility" data-biz-menu-vis="followers">Followers</button>' +
-      '<button type="button" role="menuitem" data-biz-menu-action="setPostVisibility" data-biz-menu-vis="private">Private</button>' +
-      '<button type="button" role="menuitem" data-biz-menu-action="deletePost" data-biz-menu-danger="1">Delete post</button>';
-
-    menu.addEventListener('click', function(e) {
-      var item = e.target.closest('button[data-biz-menu-action]');
-      if (!item) return;
-      e.preventDefault();
-      e.stopPropagation();
-      closeBusinessPostMenuEmergency();
-      var actionName = item.dataset.bizMenuAction;
-      if (actionName === 'setPostVisibility') {
-        callBusinessPostMenuAction(postId, actionName, item.dataset.bizMenuVis);
-      } else {
-        callBusinessPostMenuAction(postId, actionName);
-      }
-    });
-
-    document.body.appendChild(menu);
-
-    var rect = btn.getBoundingClientRect();
-    var menuRect = menu.getBoundingClientRect();
-    var left = rect.right - menuRect.width;
-    if (left < 8) left = rect.left;
-    if (left + menuRect.width > window.innerWidth - 8) left = window.innerWidth - menuRect.width - 8;
-    left = Math.max(8, left);
-    var top = rect.bottom + 8;
-    if (top + menuRect.height > window.innerHeight - 8) top = rect.top - menuRect.height - 8;
-    top = Math.max(8, top);
-    menu.style.left = left + 'px';
-    menu.style.top = top + 'px';
-
-    var cleanup = function() {
-      document.removeEventListener('click', outsideClick, true);
-      document.removeEventListener('keydown', escapeClose, true);
-      window.removeEventListener('scroll', cleanup, true);
-      window.removeEventListener('resize', cleanup, true);
-      closeBusinessPostMenuEmergency();
-    };
-    var outsideClick = function(e) {
-      var current = document.getElementById('ghBizPostMenuDrop');
-      if (current && !current.contains(e.target)) cleanup();
-    };
-    var escapeClose = function(e) {
-      if (e.key === 'Escape') cleanup();
-    };
-
-    setTimeout(function() {
-      document.addEventListener('click', outsideClick, true);
-      document.addEventListener('keydown', escapeClose, true);
-      window.addEventListener('scroll', cleanup, true);
-      window.addEventListener('resize', cleanup, true);
-    }, 0);
-  }
-
-  function installBusinessPostMenuEmergencyHandler() {
-    if (window.__bizPostMenuEmergencyInstalled) return;
-    window.__bizPostMenuEmergencyInstalled = true;
-    document.addEventListener('click', function(e) {
-      var btn = e.target.closest(
-        '[data-biz-post-menu], [data-post-menu], .gh-post-more, .biz-post-menu-btn, button[title="Post options"], [aria-label="Post options"]'
-      );
-
-      if (!btn) return;
-
-      var card = btn.closest('[data-post-id]');
-      if (!card) return;
-
-      var inBizPosts =
-        card.closest('#biz-posts-overview') ||
-        card.closest('#biz-posts-all') ||
-        card.closest('.biz-posts') ||
-        document.body.classList.contains('business-page') ||
-        location.pathname.includes('business');
-
-      if (!inBizPosts) return;
-
-      e.preventDefault();
-      e.stopPropagation();
-      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-
-      var postId = card.dataset.postId;
-      if (!postId) {
-        console.warn('[biz-menu] no postId on card', card);
-        return;
-      }
-
-      openBusinessPostMenuEmergency(postId, btn, card);
-    }, true);
-  }
-
-  installBusinessPostMenuEmergencyHandler();
 
   function skelBox(w, h, r) {
     return '<div class="biz-skel" style="width:'+w+';height:'+h+'px;border-radius:'+(r||8)+'px"></div>';
@@ -740,17 +604,306 @@
     return _isOwner || (c && (c.authorId === _currentUser.uid || c.userId === _currentUser.uid));
   }
 
+  // ── LOCAL POST RENDERERS ─────────────────────────────────────
+
+  function replyBubbleHtml(r, postId, commentId) {
+    var name = r.authorName || r.userName || 'User';
+    var authorId = r.authorId || r.userId || '';
+    var profileLink = 'profile.html?id=' + encodeURIComponent(authorId);
+    var avInner = r.authorAvatar
+      ? '<img src="'+esc(r.authorAvatar)+'" alt="" style="width:26px;height:26px;border-radius:50%;object-fit:cover" onerror="this.style.display=\'none\'">'
+      : '<span class="biz-cmt-av" style="width:26px;height:26px;font-size:.65rem">'+esc((name[0]||'U').toUpperCase())+'</span>';
+    var avHtml = authorId
+      ? '<a href="'+esc(profileLink)+'" class="biz-cmt-av-link" style="flex-shrink:0">'+avInner+'</a>'
+      : '<span style="flex-shrink:0">'+avInner+'</span>';
+    var pid = esc(postId);
+    var cid = esc(commentId);
+    var rid = esc(r.id);
+    var canEdit = _currentUser && (_isOwner || r.authorId === _currentUser.uid || r.userId === _currentUser.uid);
+    var isAuthor = _currentUser && (r.authorId === _currentUser.uid || r.userId === _currentUser.uid);
+    var actionsHtml = canEdit
+      ? '<span class="biz-cmt-actions">'+
+          (isAuthor ? '<button class="biz-cmt-act-btn" onclick="window._bizActions.editReply(\''+pid+'\',\''+cid+'\',\''+rid+'\',this)">Edit</button>' : '')+
+          '<button class="biz-cmt-act-btn" onclick="window._bizActions.deleteReply(\''+pid+'\',\''+cid+'\',\''+rid+'\',this)">Delete</button>'+
+        '</span>'
+      : '';
+    return '<div class="biz-cmt-bubble-wrap" data-rid="'+rid+'" style="margin-top:6px">'+
+      avHtml+
+      '<div class="biz-cmt-right">'+
+        '<div class="biz-cmt-bubble" style="background:rgba(255,255,255,.04)">'+
+          '<a href="'+esc(profileLink)+'" class="biz-cmt-bubble-name">'+esc(name)+'</a>'+
+          '<div id="biz-reply-text-'+pid+'-'+cid+'-'+rid+'">'+esc(r.text||'')+'</div>'+
+        '</div>'+
+        '<div class="biz-cmt-bubble-meta">'+
+          '<span class="biz-cmt-bubble-time">'+timeAgo(r.createdAt)+'</span>'+
+          actionsHtml+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function commentBubbleHtml(c, postId) {
+    var name = c.authorName || c.userName || 'User';
+    var authorId = c.authorId || c.userId || '';
+    var profileLink = 'profile.html?id=' + encodeURIComponent(authorId);
+    var avInner = c.authorAvatar
+      ? '<img src="'+esc(c.authorAvatar)+'" class="biz-cmt-av-img" alt="" onerror="this.style.display=\'none\'">'
+      : '<span class="biz-cmt-av">'+esc((name[0]||'U').toUpperCase())+'</span>';
+    var avHtml = authorId
+      ? '<a href="'+esc(profileLink)+'" class="biz-cmt-av-link" style="flex-shrink:0">'+avInner+'</a>'
+      : '<span style="flex-shrink:0">'+avInner+'</span>';
+    var pid = esc(postId);
+    var cid = esc(c.id);
+    var canEdit  = canManageComment(c);
+    var isAuthor = _currentUser && (c.authorId === _currentUser.uid || c.userId === _currentUser.uid);
+    var actionsHtml = canEdit
+      ? '<span class="biz-cmt-actions">'+
+          (isAuthor ? '<button class="biz-cmt-act-btn" onclick="window._bizActions.editComment(\''+pid+'\',\''+cid+'\',this)">Edit</button>' : '')+
+          '<button class="biz-cmt-act-btn" onclick="window._bizActions.deleteComment(\''+pid+'\',\''+cid+'\',this)">Delete</button>'+
+        '</span>'
+      : '';
+    var likesHtml = (c.likes > 0)
+      ? '<span class="biz-cmt-like-count"><i class="fas fa-thumbs-up"></i> '+c.likes+'</span>'
+      : '';
+    var replyCount = c.replyCount || 0;
+
+    // Reply composer avatar
+    var user = _currentUser;
+    var replyAvHtml = user && user.photoURL
+      ? '<img src="'+esc(user.photoURL)+'" alt="" style="width:26px;height:26px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.style.display=\'none\'">'
+      : user
+        ? '<span class="biz-cmt-av" style="width:26px;height:26px;font-size:.65rem;flex-shrink:0">'+esc(((user.displayName||user.email||'U')[0]).toUpperCase())+'</span>'
+        : '<span class="biz-cmt-av biz-cmt-av-guest" style="width:26px;height:26px;flex-shrink:0"><i class="fas fa-user" style="font-size:.65rem"></i></span>';
+
+    return '<div class="biz-cmt-bubble-wrap" data-cid="'+cid+'">'+
+      avHtml+
+      '<div class="biz-cmt-right">'+
+        '<div class="biz-cmt-bubble">'+
+          '<a href="'+esc(profileLink)+'" class="biz-cmt-bubble-name">'+esc(name)+'</a>'+
+          '<div class="biz-cmt-bubble-text" id="biz-cmt-text-'+pid+'-'+cid+'">'+esc(c.text||'')+'</div>'+
+        '</div>'+
+        '<div class="biz-cmt-bubble-meta">'+
+          '<span class="biz-cmt-bubble-time">'+timeAgo(c.createdAt)+'</span>'+
+          likesHtml+
+          '<button class="biz-cmt-act-btn" onclick="window._bizActions.replyToComment(\''+pid+'\',\''+cid+'\',\''+esc(name)+'\')">Reply</button>'+
+          actionsHtml+
+        '</div>'+
+        '<div class="biz-comment-replies-wrap" style="margin-top:4px">'+
+          (replyCount > 0
+            ? '<button class="biz-cmt-act-btn biz-view-replies-btn" id="biz-vrb-'+pid+'-'+cid+'" data-count="'+replyCount+'" '+
+                'onclick="window._bizActions.toggleReplies(\''+pid+'\',\''+cid+'\',this)">'+
+                '<i class="fas fa-chevron-down" style="font-size:.6rem"></i> '+replyCount+' repl'+(replyCount===1?'y':'ies')+
+              '</button>'
+            : '<span id="biz-vrb-'+pid+'-'+cid+'" data-count="0" style="display:none"></span>')+
+          '<div class="biz-replies-section" id="biz-replies-'+pid+'-'+cid+'" style="display:none;padding-left:4px;margin-top:4px"></div>'+
+        '</div>'+
+        '<div class="biz-reply-composer" id="biz-rpl-'+pid+'-'+cid+'" style="display:none;margin-top:6px">'+
+          '<div style="display:flex;gap:7px;align-items:flex-start">'+
+            replyAvHtml+
+            '<div class="biz-cmt-input-wrap" style="flex:1">'+
+              '<textarea class="biz-cmt-textarea" placeholder="Write a reply…" rows="1" '+
+                'oninput="this.style.height=\'auto\';this.style.height=Math.min(this.scrollHeight,100)+\'px\'" '+
+                'onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();window._bizActions.submitBizReply(\''+pid+'\',\''+cid+'\',this);}">'+
+              '</textarea>'+
+              '<button class="biz-cmt-send-btn" type="button" '+
+                'onclick="window._bizActions.submitBizReply(\''+pid+'\',\''+cid+'\',this.parentNode.querySelector(\'textarea\'))">'+
+                '<i class="fas fa-paper-plane"></i>'+
+              '</button>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }
 
   // ── RENDER: POST CARD ────────────────────────────────────────
-  // Delegates to the shared GeoSocialUI.postCard() with biz-context options.
+  function postCardHtml(post, biz) {
+    var pid = esc(post.id);
+    var logo = biz.logoUrl
+      ? '<img src="'+esc(biz.logoUrl)+'" alt="">'
+      : esc((biz.title||'B')[0]);
 
-  function bizPostOptions(post) {
-    return {
-      biz: _biz,
-      canManage: canManagePost(post),
-      isAdmin: isAdminOrOwner()
-    };
+    // Media
+    var mediaHtml = '';
+    var urls = post.mediaUrls && post.mediaUrls.length ? post.mediaUrls : (post.mediaUrl ? [post.mediaUrl] : []);
+    if (urls.length === 1) {
+      mediaHtml = '<img class="biz-post-media" src="'+esc(urls[0])+'" loading="lazy" alt="" onclick="window._bizActions.openPhoto(\''+esc(urls[0])+'\')">';
+    } else if (urls.length > 1) {
+      var gridN = Math.min(urls.length, 4);
+      mediaHtml = '<div class="biz-post-grid biz-post-grid-'+gridN+'">'+
+        urls.slice(0,4).map(function(u,i){
+          var extra = (i===3 && urls.length>4) ? '<div class="biz-post-grid-more">+'+(urls.length-4)+'</div>' : '';
+          return '<div class="biz-post-grid-item" onclick="window._bizActions.openPhoto(\''+esc(u)+'\')">'+
+            '<img src="'+esc(u)+'" loading="lazy" alt="">'+extra+'</div>';
+        }).join('')+'</div>';
+    }
+
+    // Counts row
+    var likeCount    = post.likeCount    || 0;
+    var commentCount = post.commentCount || 0;
+    var countsHtml = (likeCount > 0 || commentCount > 0)
+      ? '<div class="biz-post-count-row">'+
+          (likeCount > 0 ? '<span id="biz-lk-cnt-'+pid+'">👍 '+compact(likeCount)+'</span>' : '')+
+          (commentCount > 0 ? '<button class="biz-count-btn" onclick="window._bizActions.toggleBizComment(\''+pid+'\')">'+commentCount+' comment'+(commentCount===1?'':'s')+'</button>' : '')+
+        '</div>'
+      : '';
+
+    // Reaction picker
+    var rxPickerHtml = REACTIONS.map(function(r){
+      return '<button class="biz-rx-item" title="'+esc(r.label)+'" onclick="window._bizActions.setReaction(\''+pid+'\',\''+r.key+'\')">'+r.emoji+'</button>';
+    }).join('');
+
+    // Commenter avatar for composer
+    var user = _currentUser;
+    var cmtAvHtml;
+    if (user && user.photoURL) {
+      cmtAvHtml = '<img src="'+esc(user.photoURL)+'" class="biz-cmt-av-img" alt="" onerror="this.style.display=\'none\'">';
+    } else if (user) {
+      cmtAvHtml = '<span class="biz-cmt-av">'+esc(((user.displayName||user.email||'U')[0]).toUpperCase())+'</span>';
+    } else {
+      cmtAvHtml = '<span class="biz-cmt-av biz-cmt-av-guest"><i class="fas fa-user"></i></span>';
+    }
+
+    // Visibility icon
+    var visIcon = { 'followers':'<i class="fas fa-user-group"></i>', 'private':'<i class="fas fa-lock"></i>' }[post.visibility] || '';
+    var visBadge = visIcon ? '<span class="biz-vis-badge">'+visIcon+'</span>' : '';
+
+    // Owner menu
+    var menuHtml = '';
+    if (canManagePost(post)) {
+      var isPinned = !!post.pinned;
+      var cmtOff   = !!post.commentsDisabled;
+      var vis      = post.visibility || 'public';
+      menuHtml =
+        '<div class="biz-post-menu-wrap">'+
+          '<button class="biz-post-menu-btn" title="Post options" '+
+            'onclick="event.stopPropagation();window._bizActions.openPostMenu(\''+pid+'\',this)">'+
+            '<i class="fas fa-ellipsis"></i>'+
+          '</button>'+
+          '<div class="biz-post-menu-dropdown" id="biz-pmenu-'+pid+'">'+
+            '<button class="biz-pmenu-item" onclick="window._bizActions.editPost(\''+pid+'\')"><i class="fas fa-pen"></i> Edit post</button>'+
+            '<button class="biz-pmenu-item" onclick="window._bizActions.pinPost(\''+pid+'\')">'+
+              '<i class="fas fa-thumbtack"></i> '+(isPinned?'Unpin post':'Pin post')+
+            '</button>'+
+            '<div class="biz-pmenu-sep"></div>'+
+            '<button class="biz-pmenu-item" onclick="window._bizActions.togglePostComments(\''+pid+'\')">'+
+              '<i class="fas fa-comment-slash"></i> '+(cmtOff?'Enable comments':'Disable comments')+
+            '</button>'+
+            '<div class="biz-pmenu-sep"></div>'+
+            '<button class="biz-pmenu-item" onclick="window._bizActions.setPostVisibility(\''+pid+'\',\'public\')">'+
+              '<i class="fas fa-globe"></i> Public'+(vis==='public'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+
+            '</button>'+
+            '<button class="biz-pmenu-item" onclick="window._bizActions.setPostVisibility(\''+pid+'\',\'followers\')">'+
+              '<i class="fas fa-user-group"></i> Followers only'+(vis==='followers'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+
+            '</button>'+
+            '<button class="biz-pmenu-item" onclick="window._bizActions.setPostVisibility(\''+pid+'\',\'private\')">'+
+              '<i class="fas fa-lock"></i> Private'+(vis==='private'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+
+            '</button>'+
+            '<div class="biz-pmenu-sep"></div>'+
+            '<button class="biz-pmenu-item danger" onclick="window._bizActions.deletePost(\''+pid+'\')"><i class="fas fa-trash"></i> Delete post</button>'+
+          '</div>'+
+        '</div>';
+    }
+
+    // Comment section inner
+    var cmtInner;
+    if (post.commentsDisabled) {
+      cmtInner =
+        '<div class="biz-cmt-thread" id="biz-cmt-list-'+pid+'"></div>'+
+        '<div class="biz-cmt-off"><i class="fas fa-comment-slash"></i> Comments are turned off.</div>';
+    } else {
+      cmtInner =
+        '<div class="biz-cmt-thread" id="biz-cmt-list-'+pid+'">'+
+          '<div class="biz-cmt-empty">No comments yet.</div>'+
+        '</div>'+
+        '<div class="biz-cmt-composer">'+
+          cmtAvHtml+
+          '<div class="biz-cmt-input-wrap">'+
+            '<textarea class="biz-cmt-textarea" placeholder="Write a comment…" rows="1" '+
+              'oninput="this.style.height=\'auto\';this.style.height=Math.min(this.scrollHeight,120)+\'px\'" '+
+              'onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();window._bizActions.submitBizComment(\''+pid+'\',this);}">'+
+            '</textarea>'+
+            '<button class="biz-cmt-send-btn" type="button" '+
+              'onclick="window._bizActions.submitBizComment(\''+pid+'\',this.parentNode.querySelector(\'textarea\'))">'+
+              '<i class="fas fa-paper-plane"></i>'+
+            '</button>'+
+          '</div>'+
+        '</div>';
+    }
+
+    var viewsHtml = isAdminOrOwner()
+      ? '<div class="biz-post-views" id="biz-views-'+pid+'">'+
+          '<i class="fas fa-eye"></i> '+(post.viewCount||0)+' views'+
+        '</div>'
+      : '';
+
+    var bizLink = 'business.html?id='+esc(BIZ_ID);
+
+    // Visitor posts show the user's identity; business posts show the page logo
+    var isUserPost = post.authorType === 'user';
+    var postHeaderHtml;
+    if (isUserPost) {
+      var uName = post.authorName || 'Visitor';
+      var uAv   = post.authorAvatar || '';
+      var uLink = 'profile.html?id=' + encodeURIComponent(post.authorId || '');
+      var uAvInner = uAv
+        ? '<img src="'+esc(uAv)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.style.display=\'none\'">'
+        : esc((uName[0]||'U').toUpperCase());
+      postHeaderHtml =
+        '<a href="'+esc(uLink)+'" class="biz-post-logo-link"><div class="biz-post-logo" style="border-radius:50%">'+uAvInner+'</div></a>'+
+        '<div class="biz-post-meta">'+
+          '<a href="'+esc(uLink)+'" class="biz-post-name-link">'+esc(uName)+'</a>'+
+          '<div class="biz-post-time">'+timeAgo(post.createdAt)+
+            (biz.title ? ' · <a href="'+bizLink+'" style="color:#10b981;text-decoration:none;font-size:.75rem">on '+esc(biz.title)+'</a>' : '')+
+            ' · <i class="fas fa-earth-americas" style="font-size:.7rem;opacity:.6"></i>'+
+          '</div>'+
+        '</div>';
+    } else {
+      postHeaderHtml =
+        '<a href="'+bizLink+'" class="biz-post-logo-link"><div class="biz-post-logo">'+logo+'</div></a>'+
+        '<div class="biz-post-meta">'+
+          '<a href="'+bizLink+'" class="biz-post-name-link">'+esc(biz.title||'Business')+
+            ((biz.verified||biz.status==='verified')?' <i class="fas fa-check-circle" style="color:#34d399;font-size:.72rem"></i>':'')+
+            visBadge+
+          '</a>'+
+          '<div class="biz-post-time">'+timeAgo(post.createdAt)+' · <i class="fas fa-earth-americas" style="font-size:.7rem;opacity:.6"></i></div>'+
+        '</div>';
+    }
+
+    return '<div class="biz-post-card" data-post-id="'+pid+'"'+
+        (post.pinned ? ' data-pinned="1"' : '')+
+        ' data-vis="'+esc(post.visibility||'public')+'"'+'>'+
+      (post.pinned ? '<div class="biz-post-pinned"><i class="fas fa-thumbtack"></i> Pinned post</div>' : '')+
+      '<div class="biz-post-header">'+
+        postHeaderHtml+
+        menuHtml+
+      '</div>'+
+      (post.text ? '<div class="biz-post-text">'+esc(post.text)+'</div>' : '')+
+      mediaHtml+
+      viewsHtml+
+      countsHtml+
+      '<div class="biz-post-reactions">'+
+        '<div class="biz-rx-wrap" data-pid="'+pid+'">'+
+          '<div class="biz-rx-picker" id="biz-rxp-'+pid+'">'+rxPickerHtml+'</div>'+
+          '<button class="biz-react-btn" '+
+            'onclick="window._bizActions.toggleReaction(\''+pid+'\')" '+
+            'oncontextmenu="event.preventDefault();window._bizActions.openReactionPicker(\''+pid+'\')" '+
+            'ontouchstart="window._bizActions._rxLongPress(\''+pid+'\',event)" '+
+            'ontouchend="window._bizActions._rxCancelPress()" '+
+            'ontouchmove="window._bizActions._rxCancelPress()">'+
+            '<i class="far fa-thumbs-up"></i> Like'+
+          '</button>'+
+        '</div>'+
+        '<button class="biz-react-btn" onclick="window._bizActions.toggleBizComment(\''+pid+'\')"><i class="far fa-comment"></i> Comment</button>'+
+        '<button class="biz-react-btn" onclick="window._bizActions.openShareModal(\''+pid+'\')"><i class="fas fa-share-nodes"></i> Share</button>'+
+      '</div>'+
+      '<div class="biz-cmt-section" id="biz-cmt-'+pid+'" style="display:none">'+
+        cmtInner+
+      '</div>'+
+    '</div>';
   }
+
+  // ── END LOCAL POST RENDERERS ────────────────────────────────
 
   // ── RENDER: SERVICE CARDS ────────────────────────────────────
 
@@ -1398,40 +1551,11 @@
         if (allEl)      allEl.innerHTML      = empty;
         return;
       }
-      // Store for biz menu actions
       _currentPosts = posts;
-
-      // Render using shared post card
-      var gs = window.GeoSocialUI;
-      var renderCard = gs && gs.postCard
-        ? function(p){ return gs.postCard(p, bizPostOptions(p)); }
-        : function(p){ return '<article class="gh-card gh-post" data-post-id="'+esc(p.id||'')+'"><div style="padding:16px;color:var(--gh-muted);text-align:center"><i class="fas fa-rotate-right"></i> Refresh to load posts.</div></article>'; };
-
-      var overviewPosts = posts.slice(0, 3);
-      var pre = '<div class="biz-post-list">'+overviewPosts.map(renderCard).join('')+'</div>';
-      var all = '<div class="biz-post-list">'+posts.map(renderCard).join('')+'</div>';
+      var all = '<div class="biz-post-list">'+posts.map(function(p){ return postCardHtml(p,_biz); }).join('')+'</div>';
+      var pre = '<div class="biz-post-list">'+posts.slice(0,3).map(function(p){ return postCardHtml(p,_biz); }).join('')+'</div>';
       if (overviewEl) overviewEl.innerHTML = pre;
       if (allEl)      allEl.innerHTML      = all;
-
-      // Wire shared interaction handlers (comments, reactions, polls, replies)
-      if (gs && gs.bindPostInteractions) {
-        var bizInteractionOptions = {
-          onBizAction: function(pid, action, data) {
-            if (action === 'edit')           window._bizActions.editPost(pid);
-            else if (action === 'pin')       window._bizActions.pinPost(pid);
-            else if (action === 'toggleComments') window._bizActions.togglePostComments(pid);
-            else if (action === 'setVis')   window._bizActions.setPostVisibility(pid, data.vis);
-            else if (action === 'delete')   window._bizActions.deletePost(pid);
-          },
-          onOpenPhoto: function(url) { if (window._bizActions && window._bizActions.openPhoto) window._bizActions.openPhoto(url); else window.open(url, '_blank', 'noopener'); }
-        };
-        if (overviewEl) gs.bindPostInteractions(overviewEl, bizInteractionOptions);
-        if (allEl)      gs.bindPostInteractions(allEl, bizInteractionOptions);
-        if (gs.hydratePostAuthorAvatars) {
-          if (overviewEl) gs.hydratePostAuthorAvatars(overviewEl);
-          if (allEl) gs.hydratePostAuthorAvatars(allEl);
-        }
-      }
 
       // Set up IntersectionObserver to track post views
       if (_currentUser && 'IntersectionObserver' in window) {
@@ -1453,8 +1577,7 @@
             ).then(function(){
               return _fs.updateDoc(_fs.doc(_db,'posts',pid),{viewCount:_fs.increment(1)});
             }).then(function(){
-              // Update view count in shared card
-              var vEl = document.getElementById('post-views-'+CSS.escape(pid));
+              var vEl = document.getElementById('biz-views-'+CSS.escape(pid));
               if (vEl && isAdminOrOwner()) {
                 var cur = parseInt(vEl.textContent.replace(/[^\d]/g,''),10)||0;
                 vEl.innerHTML = '<i class="fas fa-eye"></i> '+(cur+1)+' views';
@@ -1462,65 +1585,32 @@
             }).catch(function(){});
           });
         }, {threshold: 0.5});
-        // Observe shared .gh-post cards (and legacy .biz-post-card if any)
-        document.querySelectorAll('.gh-card.gh-post, .biz-post-card').forEach(function(card) { obs.observe(card); });
+        document.querySelectorAll('.biz-post-card').forEach(function(card) { obs.observe(card); });
       }
 
-      // Hydrate reaction + poll state using shared API
-      if (gs && gs.hydrateReactionState && _currentUser) {
+      // Pre-load current user's reaction state for all visible posts
+      if (_currentUser) {
         posts.forEach(function(p) {
-          try { gs.hydrateReactionState(p.id); } catch(e) {}
-          try { if (gs.loadReactionBreakdown) gs.loadReactionBreakdown(p.id); } catch(e) {}
+          if (_postReactions[p.id] && _postReactions[p.id].loaded) return;
+          _fs.getDoc(_fs.doc(_db,'posts',p.id,'reactions',_currentUser.uid))
+            .then(function(snap) {
+              if (!snap.exists()) { _postReactions[p.id] = {loaded:true}; return; }
+              var d = snap.data();
+              _postReactions[p.id] = {loaded:true, key:d.key, emoji:d.emoji};
+              var rx = REACTIONS.find(function(r){ return r.key === d.key; });
+              if (!rx) return;
+              document.querySelectorAll('.biz-rx-wrap[data-pid="'+CSS.escape(p.id)+'"] .biz-react-btn').forEach(function(btnEl) {
+                btnEl.setAttribute('data-reaction', d.key);
+                btnEl.innerHTML = d.emoji + ' ' + rx.label;
+              });
+            }).catch(function(){});
         });
       }
-
-      // Hydrate real counts from Firestore subcollections
-      hydrateBusinessPostCounts(posts);
     }).catch(function(err){
       console.error('[BizPage] loadBizPosts failed:', err.code||err.message);
       var msg = '<div class="biz-empty-state"><i class="fas fa-triangle-exclamation"></i><p>Could not load posts ('+esc(err.code||'error')+').</p></div>';
       if (overviewEl) overviewEl.innerHTML = msg;
       if (allEl)      allEl.innerHTML      = msg;
-    });
-  }
-
-  function applyBizCountsToDom(pid, counts) {
-    document.querySelectorAll('[data-post-id="'+CSS.escape(pid)+'"]').forEach(function(card) {
-      var likeBtn = card.querySelector('[data-who-reacted]');
-      if (likeBtn) {
-        likeBtn.innerHTML = '<i class="fas fa-thumbs-up"></i> <b data-like-count>'+counts.reactions+'</b>'
-          + (counts.reactions > 0 ? ' people reacted' : '');
-      }
-      var cc = card.querySelector('[data-comment-count]');
-      if (cc) cc.textContent = counts.comments;
-      var sc = card.querySelector('[data-share-count]');
-      if (sc) sc.textContent = counts.shares;
-    });
-  }
-
-  function hydrateBusinessPostCounts(posts) {
-    if (!posts || !posts.length) return;
-    posts.forEach(function(p) {
-      var pid = p.id;
-      if (!pid) return;
-      if (_bizPostCountCache[pid]) {
-        applyBizCountsToDom(pid, _bizPostCountCache[pid]);
-        return;
-      }
-      var qComments  = _fs.query(_fs.collection(_db,'posts',pid,'comments'),  _fs.limit(100));
-      var qReactions = _fs.query(_fs.collection(_db,'posts',pid,'reactions'), _fs.limit(100));
-      var qShares    = _fs.query(_fs.collection(_db,'posts'), _fs.where('sharedPostId','==',pid), _fs.limit(100));
-      Promise.all([
-        _fs.getDocs(qComments),
-        _fs.getDocs(qReactions),
-        _fs.getDocs(qShares)
-      ]).then(function(results) {
-        var counts = { comments: results[0].size, reactions: results[1].size, shares: results[2].size };
-        _bizPostCountCache[pid] = counts;
-        applyBizCountsToDom(pid, counts);
-      }).catch(function(err) {
-        console.warn('[BizPage] hydrateBusinessPostCounts failed for', pid, err.code||err.message);
-      });
     });
   }
 
@@ -2210,6 +2300,371 @@
       location.reload();
     },
 
+    // ── Comment toggle ────────────────────────────────────────────
+    toggleBizComment: function(postId) {
+      var box = document.getElementById('biz-cmt-' + postId);
+      if (!box) return;
+      var opening = box.style.display === 'none' || box.style.display === '';
+      box.style.display = opening ? 'block' : 'none';
+      if (opening) {
+        var ta = box.querySelector('textarea');
+        if (ta) setTimeout(function(){ ta.focus(); }, 60);
+      }
+      if (!opening || box.dataset.loaded) return;
+      box.dataset.loaded = '1';
+      var listEl = document.getElementById('biz-cmt-list-' + postId);
+      if (!listEl) return;
+      var GeoSocial = window.GeoSocial;
+      if (!GeoSocial || !GeoSocial.listenComments) {
+        listEl.innerHTML = '<div class="biz-cmt-empty">Comments unavailable.</div>';
+        return;
+      }
+      GeoSocial.listenComments(postId, function(comments) {
+        if (!listEl.isConnected) return;
+        var active = (comments || []).filter(function(c){ return c.status !== 'deleted'; });
+        if (!active.length) {
+          listEl.innerHTML = '<div class="biz-cmt-empty">No comments yet.</div>';
+        } else {
+          listEl.innerHTML = active.map(function(c) {
+            return commentBubbleHtml(c, postId);
+          }).join('');
+        }
+        // Update comment count badge
+        var card = document.querySelector('[data-post-id="'+CSS.escape(postId)+'"]');
+        if (card) {
+          var cntBtn = card.querySelector('.biz-count-btn');
+          if (cntBtn) cntBtn.textContent = active.length + ' comment' + (active.length===1?'':'s');
+        }
+      });
+    },
+
+    submitBizComment: function(postId, elOrForm) {
+      var ta;
+      if (elOrForm && elOrForm.tagName === 'TEXTAREA') {
+        ta = elOrForm;
+      } else if (elOrForm && elOrForm.querySelector) {
+        ta = elOrForm.querySelector('textarea') || elOrForm.querySelector('input');
+      }
+      if (!ta) return;
+      var val = ta.value.trim();
+      if (!val) return;
+      if (!_currentUser) { showToast('Sign in to comment', false); return; }
+      var GeoSocial = window.GeoSocial;
+      if (!GeoSocial || !GeoSocial.addComment) { showToast('Comments not available', false); return; }
+      ta.disabled = true;
+      var sendBtn = ta.parentNode && ta.parentNode.querySelector('.biz-cmt-send-btn');
+      if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
+      GeoSocial.addComment(postId, val, function(err) {
+        ta.disabled = false;
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>'; }
+        if (err) { showToast('Could not post comment', false); return; }
+        ta.value = '';
+        ta.style.height = 'auto';
+      });
+    },
+
+    // ── Comment edit/delete/reply ─────────────────────────────────
+    editComment: function(postId, commentId, btnEl) {
+      if (!_currentUser) return;
+      var textEl = document.getElementById('biz-cmt-text-'+postId+'-'+commentId);
+      if (!textEl) return;
+      if (textEl.querySelector('textarea')) return; // already editing
+      var current = textEl.textContent || '';
+      var ta = document.createElement('textarea');
+      ta.className = 'biz-cmt-edit-ta';
+      ta.value = current;
+      ta.rows = 2;
+      ta.style.cssText = 'width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#f1f5f9;padding:6px 10px;resize:none;font-size:.87rem;font-family:inherit;outline:none';
+      var saveBtn = document.createElement('button');
+      saveBtn.className = 'biz-cmt-send-btn';
+      saveBtn.style.cssText = 'margin-top:4px;font-size:.78rem;padding:4px 12px;border-radius:12px';
+      saveBtn.innerHTML = 'Save';
+      var cancel = document.createElement('button');
+      cancel.style.cssText = 'margin-top:4px;margin-left:6px;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:.78rem;padding:4px 8px';
+      cancel.textContent = 'Cancel';
+      textEl.innerHTML = '';
+      textEl.appendChild(ta);
+      textEl.appendChild(document.createElement('br'));
+      textEl.appendChild(saveBtn);
+      textEl.appendChild(cancel);
+      ta.focus();
+      cancel.onclick = function() { textEl.innerHTML = esc(current); };
+      saveBtn.onclick = function() {
+        var newText = ta.value.trim();
+        if (!newText || newText === current) { textEl.innerHTML = esc(current); return; }
+        saveBtn.disabled = true; saveBtn.textContent = '…';
+        _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId), {
+          text: newText, updatedAt: _fs.serverTimestamp()
+        }).then(function() {
+          textEl.innerHTML = esc(newText);
+          showToast('Comment updated');
+        }).catch(function(err) {
+          textEl.innerHTML = esc(current);
+          showToast('Could not edit: '+(err.code||err.message), false);
+        });
+      };
+    },
+
+    deleteComment: function(postId, commentId, btnEl) {
+      if (!_currentUser) return;
+      if (!confirm('Delete this comment?')) return;
+      _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId), {
+        status: 'deleted', updatedAt: _fs.serverTimestamp()
+      }).then(function() {
+        var wrap = document.querySelector('[data-cid="'+CSS.escape(commentId)+'"]');
+        if (wrap) { wrap.style.transition='opacity .2s'; wrap.style.opacity='0'; setTimeout(function(){ wrap.remove(); },220); }
+        _fs.updateDoc(_fs.doc(_db,'posts',postId),{commentCount:_fs.increment(-1)}).catch(function(){});
+        showToast('Comment deleted');
+      }).catch(function(err) { showToast('Could not delete: '+(err.code||err.message), false); });
+    },
+
+    replyToComment: function(postId, commentId, authorName) {
+      var composerId = 'biz-rpl-' + postId + '-' + commentId;
+      var composer = document.getElementById(composerId);
+      if (!composer) return;
+      var isHidden = composer.style.display === 'none' || !composer.style.display;
+      if (isHidden) {
+        composer.style.display = 'block';
+        var ta = composer.querySelector('textarea');
+        if (ta) {
+          var prefix = '@' + authorName + ' ';
+          if (!ta.value.startsWith(prefix)) ta.value = prefix;
+          setTimeout(function(){ ta.focus(); ta.selectionStart = ta.selectionEnd = ta.value.length; }, 50);
+        }
+      } else {
+        composer.style.display = 'none';
+      }
+    },
+
+    submitBizReply: function(postId, commentId, ta) {
+      if (!ta) return;
+      var val = ta.value.trim();
+      if (!val) return;
+      if (!_currentUser) { showToast('Sign in to reply', false); return; }
+      ta.disabled = true;
+      var sendBtn = ta.parentNode && ta.parentNode.querySelector('.biz-cmt-send-btn');
+      if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
+      var done = function(err) {
+        ta.disabled = false;
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>'; }
+        if (err) { showToast('Could not post reply', false); return; }
+        ta.value = ''; ta.style.height = 'auto';
+        var composer = document.getElementById('biz-rpl-'+postId+'-'+commentId);
+        if (composer) composer.style.display = 'none';
+        _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId), {replyCount: _fs.increment(1)}).catch(function(){});
+        showToast('Reply posted!');
+        window._bizActions.toggleReplies(postId, commentId, null, true);
+      };
+      var GeoSocial = window.GeoSocial;
+      if (GeoSocial && GeoSocial.addCommentReply) {
+        GeoSocial.addCommentReply(postId, commentId, val, done);
+      } else {
+        _fs.addDoc(_fs.collection(_db,'posts',postId,'comments',commentId,'replies'), {
+          text: val,
+          authorId: _currentUser.uid,
+          userId: _currentUser.uid,
+          authorName: _currentUser.displayName || (_currentUser.email||'').split('@')[0] || 'User',
+          authorAvatar: _currentUser.photoURL || '',
+          createdAt: _fs.serverTimestamp(),
+          status: 'active'
+        }).then(function(){ done(null); }).catch(done);
+      }
+    },
+
+    toggleReplies: function(postId, commentId, btnEl, forceOpen) {
+      var section = document.getElementById('biz-replies-'+postId+'-'+commentId);
+      if (!section) return;
+      var isVisible = section.style.display !== 'none' && section.style.display !== '';
+      // Toggle closed (unless forceOpen)
+      if (!forceOpen && isVisible) {
+        section.style.display = 'none';
+        if (btnEl) {
+          var cnt = parseInt(btnEl.dataset.count || '0', 10);
+          btnEl.innerHTML = '<i class="fas fa-chevron-down" style="font-size:.6rem"></i> '+cnt+' repl'+(cnt===1?'y':'ies');
+        }
+        return;
+      }
+      // Open section
+      section.style.display = 'block';
+      if (btnEl) { btnEl.innerHTML = '<i class="fas fa-chevron-up" style="font-size:.6rem"></i> Hide replies'; btnEl.style.display = ''; }
+      var vrb = document.getElementById('biz-vrb-'+postId+'-'+commentId);
+      if (vrb) vrb.style.display = '';
+      // If real-time listener is active, it updates automatically
+      if (section.dataset.listening) return;
+      // If getDocs already loaded and not forcing refresh, done
+      if (section.dataset.loaded && !forceOpen) return;
+      section.dataset.loaded = '1';
+      if (!isVisible) section.innerHTML = '<div style="color:#64748b;font-size:.78rem;padding:4px 0"><i class="fas fa-spinner fa-spin"></i></div>';
+      var render = function(replies) {
+        if (!section.isConnected) return;
+        var active = (replies||[]).filter(function(r){ return r.status !== 'deleted'; });
+        section.innerHTML = active.length
+          ? active.map(function(r){ return replyBubbleHtml(r, postId, commentId); }).join('')
+          : '';
+        var vrbEl = document.getElementById('biz-vrb-'+postId+'-'+commentId);
+        if (vrbEl) { vrbEl.dataset.count = String(active.length); vrbEl.style.display = active.length ? '' : 'none'; }
+      };
+      var GeoSocial = window.GeoSocial;
+      if (GeoSocial && GeoSocial.listenCommentReplies) {
+        section.dataset.listening = '1';
+        GeoSocial.listenCommentReplies(postId, commentId, render);
+      } else {
+        _fs.getDocs(_fs.collection(_db,'posts',postId,'comments',commentId,'replies'))
+          .then(function(snap) {
+            var replies = [];
+            snap.forEach(function(d){ replies.push(Object.assign({id:d.id},d.data())); });
+            replies.sort(function(a,b){
+              var ta=(a.createdAt&&a.createdAt.seconds)||0, tb=(b.createdAt&&b.createdAt.seconds)||0;
+              return ta-tb;
+            });
+            render(replies);
+          }).catch(function(){ render([]); });
+      }
+    },
+
+    editReply: function(postId, commentId, replyId, btnEl) {
+      if (!_currentUser) return;
+      var textEl = document.getElementById('biz-reply-text-'+postId+'-'+commentId+'-'+replyId);
+      if (!textEl || textEl.querySelector('textarea')) return;
+      var current = textEl.textContent || '';
+      var ta = document.createElement('textarea');
+      ta.value = current; ta.rows = 2;
+      ta.style.cssText = 'width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#f1f5f9;padding:6px 10px;resize:none;font-size:.87rem;font-family:inherit;outline:none';
+      var saveBtn = document.createElement('button');
+      saveBtn.style.cssText = 'margin-top:4px;font-size:.78rem;padding:4px 12px;border-radius:12px;background:#10b981;color:#fff;border:none;cursor:pointer;font-family:inherit';
+      saveBtn.textContent = 'Save';
+      var cancel = document.createElement('button');
+      cancel.style.cssText = 'margin-top:4px;margin-left:6px;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:.78rem;padding:4px 8px;font-family:inherit';
+      cancel.textContent = 'Cancel';
+      textEl.innerHTML = '';
+      textEl.appendChild(ta); textEl.appendChild(document.createElement('br'));
+      textEl.appendChild(saveBtn); textEl.appendChild(cancel);
+      ta.focus();
+      cancel.onclick = function() { textEl.innerHTML = esc(current); };
+      saveBtn.onclick = function() {
+        var newText = ta.value.trim();
+        if (!newText || newText === current) { textEl.innerHTML = esc(current); return; }
+        saveBtn.disabled = true; saveBtn.textContent = '…';
+        _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId,'replies',replyId), {
+          text: newText, updatedAt: _fs.serverTimestamp()
+        }).then(function() {
+          textEl.innerHTML = esc(newText);
+          showToast('Reply updated');
+        }).catch(function() { textEl.innerHTML = esc(current); showToast('Could not edit reply', false); });
+      };
+    },
+
+    deleteReply: function(postId, commentId, replyId, btnEl) {
+      if (!_currentUser) return;
+      if (!confirm('Delete this reply?')) return;
+      _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId,'replies',replyId), {
+        status: 'deleted', updatedAt: _fs.serverTimestamp()
+      }).then(function() {
+        var wrap = document.querySelector('[data-rid="'+CSS.escape(replyId)+'"]');
+        if (wrap) { wrap.style.transition='opacity .2s'; wrap.style.opacity='0'; setTimeout(function(){ wrap.remove(); },220); }
+        _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId), {replyCount: _fs.increment(-1)}).catch(function(){});
+        showToast('Reply deleted');
+      }).catch(function() { showToast('Could not delete reply', false); });
+    },
+
+    // ── Reactions ─────────────────────────────────────────────────
+    setReaction: function(postId, key) {
+      if (!_currentUser) { showToast('Sign in to react', false); return; }
+      window._bizActions.closeAllPickers();
+      var pr = _postReactions[postId] || {};
+      var prevKey = pr.key || null;
+      var rx = REACTIONS.find(function(r){ return r.key === key; }) || REACTIONS[0];
+      var btnEl = document.querySelector('.biz-rx-wrap[data-pid="'+CSS.escape(postId)+'"] .biz-react-btn');
+      var rxRef = _fs.doc(_db,'posts',postId,'reactions',_currentUser.uid);
+
+      if (prevKey === key) {
+        // Toggle off — remove reaction
+        _postReactions[postId] = { loaded: true };
+        _fs.deleteDoc(rxRef).catch(function(){});
+        if (key === 'like') _fs.deleteDoc(_fs.doc(_db,'posts',postId,'likes',_currentUser.uid)).catch(function(){});
+        if (btnEl) { btnEl.removeAttribute('data-reaction'); btnEl.innerHTML = '<i class="far fa-thumbs-up"></i> Like'; }
+        _fs.updateDoc(_fs.doc(_db,'posts',postId),{likeCount:_fs.increment(-1)}).catch(function(){});
+        var lcEl = document.getElementById('biz-lk-cnt-'+postId);
+        if (lcEl) { var c = parseInt(lcEl.textContent.replace(/[^\d]/g,''),10)||0; lcEl.textContent = '👍 '+compact(Math.max(0,c-1)); }
+      } else {
+        // Set / change reaction
+        _postReactions[postId] = { loaded: true, key: key, emoji: rx.emoji };
+        _fs.setDoc(rxRef,{key:key,emoji:rx.emoji,userId:_currentUser.uid,createdAt:_fs.serverTimestamp()},{merge:true}).catch(function(){});
+        if (key === 'like') _fs.setDoc(_fs.doc(_db,'posts',postId,'likes',_currentUser.uid),{userId:_currentUser.uid,createdAt:_fs.serverTimestamp()},{merge:true}).catch(function(){});
+        if (btnEl) { btnEl.setAttribute('data-reaction', key); btnEl.innerHTML = rx.emoji + ' ' + rx.label; }
+        if (!prevKey) {
+          _fs.updateDoc(_fs.doc(_db,'posts',postId),{likeCount:_fs.increment(1)}).catch(function(){});
+          var lkEl = document.getElementById('biz-lk-cnt-'+postId);
+          if (lkEl) { lkEl.textContent = '👍 '+compact((parseInt(lkEl.textContent.replace(/[^\d]/g,''),10)||0)+1); }
+        }
+      }
+    },
+
+    toggleReaction: function(postId) {
+      if (!_currentUser) { showToast('Sign in to react', false); return; }
+      var pr = _postReactions[postId];
+      if (pr && pr.loaded) {
+        window._bizActions.setReaction(postId, pr.key || 'like');
+      } else {
+        _postReactions[postId] = { loading: true };
+        _fs.getDoc(_fs.doc(_db,'posts',postId,'reactions',_currentUser.uid))
+          .then(function(snap) {
+            if (!snap.exists()) {
+              _postReactions[postId] = { loaded: true };
+              window._bizActions.setReaction(postId, 'like');
+            } else {
+              var d = snap.data();
+              _postReactions[postId] = { loaded: true, key: d.key, emoji: d.emoji };
+              var rx = REACTIONS.find(function(r){ return r.key === d.key; }) || REACTIONS[0];
+              var btnEl = document.querySelector('.biz-rx-wrap[data-pid="'+CSS.escape(postId)+'"] .biz-react-btn');
+              if (btnEl) { btnEl.setAttribute('data-reaction', d.key); btnEl.innerHTML = d.emoji + ' ' + rx.label; }
+              // User clicked again → toggle off
+              window._bizActions.setReaction(postId, d.key);
+            }
+          })
+          .catch(function(){ _postReactions[postId]={loaded:true}; window._bizActions.setReaction(postId,'like'); });
+      }
+    },
+
+    openReactionPicker: function(postId) {
+      window._bizActions.closeAllPickers();
+      var picker = document.getElementById('biz-rxp-'+postId);
+      if (picker) picker.classList.add('open');
+      setTimeout(function(){
+        document.addEventListener('click', function _h(e){
+          if (!e.target.closest || !e.target.closest('.biz-rx-wrap')) window._bizActions.closeAllPickers();
+          document.removeEventListener('click', _h);
+        });
+      }, 0);
+    },
+
+    closeAllPickers: function() {
+      document.querySelectorAll('.biz-rx-picker.open').forEach(function(p){ p.classList.remove('open'); });
+    },
+
+    _rxLongPress: function(postId, e) {
+      _rxLongTimer = setTimeout(function(){
+        _rxLongTimer = null;
+        e.preventDefault();
+        window._bizActions.openReactionPicker(postId);
+      }, 600);
+    },
+
+    _rxCancelPress: function() {
+      if (_rxLongTimer) { clearTimeout(_rxLongTimer); _rxLongTimer = null; }
+    },
+
+    // ── Share modal ───────────────────────────────────────────────
+    openShareModal: function(postId) {
+      if (!_currentUser) { showToast('Sign in to share', false); return; }
+      _sharePostId = postId;
+      var overlay = document.getElementById('biz-share-overlay');
+      if (!overlay) return;
+      var cap = document.getElementById('biz-share-caption');
+      if (cap) cap.value = '';
+      overlay.classList.add('open');
+    },
+
     closeShareModal: function() {
       _sharePostId = null;
       var overlay = document.getElementById('biz-share-overlay');
@@ -2271,6 +2726,80 @@
       }
     },
 
+    // kept for backward compat with any cached cards
+    likePost: function(postId) { window._bizActions.toggleReaction(postId); },
+
+    // ── Post owner menu ───────────────────────────────────────────
+    openPostMenu: function(postId, btnEl) {
+      var oldFloating = document.getElementById('ghBizPostMenuDrop');
+      var isOpen = oldFloating && oldFloating.getAttribute('data-post-id') === String(postId || '');
+      if (oldFloating) oldFloating.remove();
+      document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
+      if (isOpen || !btnEl) return;
+
+      var card = btnEl.closest && btnEl.closest('[data-post-id]');
+      if (!card) return;
+      var sourceMenu = card.querySelector('.biz-post-menu-dropdown');
+      if (!sourceMenu) return;
+
+      var menu = sourceMenu.cloneNode(true);
+      menu.id = 'ghBizPostMenuDrop';
+      menu.setAttribute('data-post-id', String(postId || ''));
+      menu.style.position = 'fixed';
+      menu.style.left = '0px';
+      menu.style.right = 'auto';
+      menu.style.top = '0px';
+      menu.style.display = 'block';
+      menu.style.visibility = 'hidden';
+      menu.style.opacity = '1';
+      menu.style.pointerEvents = 'auto';
+      menu.style.zIndex = '10080';
+      menu.classList.add('open');
+      document.body.appendChild(menu);
+
+      var rect = btnEl.getBoundingClientRect();
+      var menuRect = menu.getBoundingClientRect();
+      var gap = 8;
+      var vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+      var vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+      var menuWidth = menuRect.width || menu.offsetWidth || 218;
+      var menuHeight = menuRect.height || menu.offsetHeight || 260;
+      var left = rect.right - menuWidth;
+      if (left < gap) left = rect.left;
+      if (left + menuWidth > vw - gap) left = vw - menuWidth - gap;
+      left = Math.max(gap, left);
+      var top = rect.bottom + gap;
+      if (top + menuHeight > vh - gap) top = rect.top - menuHeight - gap;
+      top = Math.max(gap, top);
+      menu.style.left = Math.round(left) + 'px';
+      menu.style.top = Math.round(top) + 'px';
+      menu.style.visibility = 'visible';
+
+      var closeMenu = function() {
+        document.removeEventListener('click', outsideClick, true);
+        document.removeEventListener('keydown', escapeClose, true);
+        window.removeEventListener('scroll', closeMenu, true);
+        window.removeEventListener('resize', closeMenu, true);
+        var current = document.getElementById('ghBizPostMenuDrop');
+        if (current) current.remove();
+      };
+      var outsideClick = function(e) {
+        var current = document.getElementById('ghBizPostMenuDrop');
+        if (current && !current.contains(e.target)) closeMenu();
+      };
+      var escapeClose = function(e) {
+        if (e.key === 'Escape') closeMenu();
+      };
+      menu.addEventListener('click', function() {
+        setTimeout(closeMenu, 0);
+      });
+      setTimeout(function(){
+        document.addEventListener('click', outsideClick, true);
+        document.addEventListener('keydown', escapeClose, true);
+        window.addEventListener('scroll', closeMenu, true);
+        window.addEventListener('resize', closeMenu, true);
+      }, 0);
+    },
 
     // ── Edit post ─────────────────────────────────────────────────
     editPost: function(postId) {
@@ -2622,10 +3151,7 @@
           mediaUrls: capturedUrls, createdAt: nowTs,
           likeCount: 0, commentCount: 0, shareCount: 0
         };
-        var gs2 = window.GeoSocialUI;
-        var card = (gs2 && gs2.postCard)
-          ? gs2.postCard(newPost, bizPostOptions(newPost))
-          : '<article class="gh-card gh-post" data-post-id="'+esc(newPost.id||'')+'"><div style="padding:16px;color:var(--gh-muted);text-align:center"><i class="fas fa-rotate-right"></i> Refresh to see your post.</div></article>';
+        var card = postCardHtml(newPost, _biz);
         ['biz-posts-overview','biz-posts-all'].forEach(function(elId){
           var el = document.getElementById(elId);
           if (!el) return;
@@ -2635,9 +3161,7 @@
           } else {
             el.innerHTML = '<div class="biz-post-list">'+card+'</div>';
           }
-          if (gs2 && gs2.hydratePostAuthorAvatars) gs2.hydratePostAuthorAvatars(el);
         });
-        hydrateBusinessPostCounts([newPost]);
       }).catch(function(err){
         console.error('[BizPage] Post failed',err);
         showToast('Post failed: '+(err.code||err.message||'check console'),false);
@@ -3627,7 +4151,6 @@
   // ── INIT ──────────────────────────────────────────────────────
 
   function init(fb) {
-    installBusinessPostMenuEmergencyHandler();
     _db=fb.db; _fs=fb.fs; _auth=fb.auth;
     _currentUser=_auth&&_auth.currentUser;
     var root=document.getElementById('biz-detail-root');
