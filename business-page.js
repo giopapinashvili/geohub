@@ -1624,6 +1624,28 @@
     return (el && (el.textContent || '') || '').replace(/\s+/g, ' ').trim().toLowerCase();
   }
 
+  function getBizPostIdFromButton(btn) {
+    var card = btn && btn.closest && (
+      btn.closest('[data-post-id]') ||
+      btn.closest('article[id^="post-"]') ||
+      btn.closest('.gh-post[id^="post-"]') ||
+      btn.closest('.biz-post-card')
+    );
+
+    if (!card) return { card:null, postId:'' };
+
+    var postId =
+      card.getAttribute('data-post-id') ||
+      card.dataset.postId ||
+      '';
+
+    if (!postId && card.id && card.id.indexOf('post-') === 0) {
+      postId = card.id.slice(5);
+    }
+
+    return { card:card, postId:postId };
+  }
+
   function installBusinessPostActionDelegates() {
     ['biz-posts-overview', 'biz-posts-all'].forEach(function(rootId) {
       var root = document.getElementById(rootId);
@@ -1632,7 +1654,7 @@
       root.addEventListener('click', function(e) {
         if (!e.target || !e.target.closest) return;
 
-        var menuBtn = e.target.closest('[data-biz-post-menu], .biz-post-menu-btn, button[title="Post options"], [aria-label="Post options"]');
+        var menuBtn = e.target.closest('[data-biz-post-menu], .gh-post-more, .biz-post-menu-btn, button[title="Post options"], [aria-label="Post options"]');
         var shareBtn = e.target.closest('[data-biz-post-share], .biz-post-share-btn, button');
         var saveBtn = e.target.closest('[data-biz-post-save], .biz-post-save-btn, [data-save], button');
         var action = null;
@@ -1650,10 +1672,22 @@
         }
         if (!action) return;
 
-        var card = btn.closest('[data-post-id]');
-        if (!card) return;
-        var postId = card.dataset.postId;
-        if (!postId) return;
+        var card;
+        var postId;
+        if (action === 'menu') {
+          var found = getBizPostIdFromButton(btn);
+          card = found.card;
+          postId = found.postId;
+          if (!card || !postId) {
+            console.warn('[biz-menu] could not resolve post id', { btn: btn, card: card });
+            return;
+          }
+        } else {
+          card = btn.closest('[data-post-id]');
+          if (!card) return;
+          postId = card.dataset.postId;
+          if (!postId) return;
+        }
 
         e.preventDefault();
         e.stopPropagation();
@@ -2830,20 +2864,39 @@
 
     // ── Post owner menu ───────────────────────────────────────────
     openPostMenu: function(postId, btnEl) {
+      var found = getBizPostIdFromButton(btnEl);
+      var card = found.card;
+      postId = postId || found.postId;
       var oldFloating = document.getElementById('ghBizPostMenuDrop');
       var isOpen = oldFloating && oldFloating.getAttribute('data-post-id') === String(postId || '');
       if (oldFloating) oldFloating.remove();
       document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
       if (isOpen || !btnEl) return;
 
-      var card = btnEl.closest && btnEl.closest('[data-post-id]');
       if (!card) return;
       var sourceMenu = card.querySelector('.biz-post-menu-dropdown');
-      if (!sourceMenu) return;
+      var post = _currentPosts && _currentPosts.find(function(p){ return p.id === postId; });
+      var isPinned = card.dataset.pinned === '1' || !!(post && post.pinned);
+      var commentsDisabled = card.dataset.commentsDisabled === '1' || !!(post && post.commentsDisabled);
+      var vis = card.dataset.vis || (post && post.visibility) || 'public';
 
-      var menu = sourceMenu.cloneNode(true);
+      var menu = sourceMenu ? sourceMenu.cloneNode(true) : document.createElement('div');
       menu.id = 'ghBizPostMenuDrop';
       menu.setAttribute('data-post-id', String(postId || ''));
+      if (!sourceMenu) {
+        menu.className = 'biz-post-menu-dropdown';
+        menu.innerHTML =
+          '<button class="biz-pmenu-item" onclick="window._bizActions.editPost(\''+esc(postId)+'\')"><i class="fas fa-pen"></i> Edit post</button>'+
+          '<button class="biz-pmenu-item" onclick="window._bizActions.pinPost(\''+esc(postId)+'\')"><i class="fas fa-thumbtack"></i> '+(isPinned?'Unpin post':'Pin post')+'</button>'+
+          '<div class="biz-pmenu-sep"></div>'+
+          '<button class="biz-pmenu-item" onclick="window._bizActions.togglePostComments(\''+esc(postId)+'\')"><i class="fas fa-comment-slash"></i> '+(commentsDisabled?'Enable comments':'Disable comments')+'</button>'+
+          '<div class="biz-pmenu-sep"></div>'+
+          '<button class="biz-pmenu-item" onclick="window._bizActions.setPostVisibility(\''+esc(postId)+'\',\'public\')"><i class="fas fa-globe"></i> Public'+(vis==='public'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+'</button>'+
+          '<button class="biz-pmenu-item" onclick="window._bizActions.setPostVisibility(\''+esc(postId)+'\',\'followers\')"><i class="fas fa-user-group"></i> Followers'+(vis==='followers'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+'</button>'+
+          '<button class="biz-pmenu-item" onclick="window._bizActions.setPostVisibility(\''+esc(postId)+'\',\'private\')"><i class="fas fa-lock"></i> Private'+(vis==='private'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+'</button>'+
+          '<div class="biz-pmenu-sep"></div>'+
+          '<button class="biz-pmenu-item danger" onclick="window._bizActions.deletePost(\''+esc(postId)+'\')"><i class="fas fa-trash"></i> Delete post</button>';
+      }
       menu.style.position = 'fixed';
       menu.style.left = '0px';
       menu.style.right = 'auto';
