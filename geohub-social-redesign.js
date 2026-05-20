@@ -7,7 +7,7 @@
 
   var PATH = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   var PAGE = document.body && document.body.dataset ? document.body.dataset.ghPage : '';
-  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null, openCommentPids: {}, cachedComments: {}, cachedReplies: {}, feedTab: 'foryou', userCity: null };
+  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null, openCommentPids: {}, cachedComments: {}, cachedReplies: {}, feedTab: 'foryou', feedUnsub: null, feedRenderId: 0, userCity: null };
 
   /* ── User cache (instant topbar, no flash) ──────────────── */
   var USER_CACHE_KEY = 'gh_uc1';
@@ -253,6 +253,19 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var u=authUser();
     return { authorType:'business', businessId:actor.businessId, authorId:actor.businessId, authorName:actor.title||'Business', authorAvatar:actor.logoUrl||'', createdByUid:u?u.uid:'', targetType:'business', targetId:actor.businessId };
   }
+  function isBusinessActor(actor){
+    return !!(actor && actor.type==='business' && actor.businessId);
+  }
+  function activeBusinessActor(){
+    var actor=getActiveActor();
+    return isBusinessActor(actor) ? actor : null;
+  }
+  function actorMessagesHref(actor){
+    return isBusinessActor(actor) ? 'messages.html?business='+encodeURIComponent(actor.businessId) : 'messages.html';
+  }
+  function clearFeedListener(){
+    if(state.feedUnsub){ try{ state.feedUnsub(); }catch(e){} state.feedUnsub=null; }
+  }
   function requireLogin(){ if(authUser()) return true; if(GS()) GS().requireAuth(); else toast('შესვლა აუცილებელია', 'error'); return false; }
   function currentUserInfo(){ var u=authUser(); return { uid:u && u.uid, name:u ? (u.displayName || (u.email||'').split('@')[0] || 'GeoHub User') : 'Guest', avatar:u ? (u.photoURL || '') : ''}; }
   function canSeePost(p){
@@ -392,14 +405,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(themeBtn){ themeBtn.onclick=function(e){ e.preventDefault(); e.stopPropagation(); applyTheme(state.theme==='dark' ? 'light' : 'dark'); }; applyTheme(state.theme); }
     var sideBtn=$('#ghSidebarToggle');
     if(sideBtn){ sideBtn.onclick=function(e){ e.preventDefault(); e.stopPropagation(); state.sidebarCollapsed=!state.sidebarCollapsed; document.body.classList.toggle('gh-sidebar-collapsed', state.sidebarCollapsed); sideBtn.setAttribute('aria-pressed', state.sidebarCollapsed ? 'true' : 'false'); sideBtn.title = state.sidebarCollapsed ? 'Expand sidebars' : 'Collapse sidebars'; }; }
-    document.addEventListener('click', function(e){
-      if(e.target.closest('[data-create-post]')) openPostModal(buildActorExtra());
-      if(e.target.closest('[data-create-story]')) openStoryModal();
-      if(e.target.closest('#ghNotifBtn')) openNotifications();
-      if(e.target.closest('[data-start-tour]')){ var _tu=authUser(); startTour(_tu?_tu.uid:null); }
-      var notif=e.target.closest('[data-notif]');
-      if(notif && GS() && GS().markNotificationRead) GS().markNotificationRead(notif.dataset.notif);
-    });
+    if(!state._shellClickBound){
+      state._shellClickBound=true;
+      document.addEventListener('click', function(e){
+        if(e.target.closest('[data-create-post]')) openPostModal(buildActorExtra());
+        if(e.target.closest('[data-create-story]')) openStoryModal();
+        if(e.target.closest('#ghNotifBtn')) openNotifications();
+        if(e.target.closest('[data-start-tour]')){ var _tu=authUser(); startTour(_tu?_tu.uid:null); }
+        var notif=e.target.closest('[data-notif]');
+        if(notif && GS() && GS().markNotificationRead) GS().markNotificationRead(notif.dataset.notif);
+      });
+    }
     var gs=$('#ghGlobalSearch');
     if(gs){
       var _gsDrop=null,_gsTimer=null,_gsIdx=-1,_gsRecentCache=null;
@@ -533,7 +549,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         updateTopUser();
       });
       // Re-render topbar + composer on every actor change (account switcher), global across all pages
-      window.addEventListener('GeoActorChanged', function(){ updateTopUser(); listenBadges(); });
+      window.addEventListener('GeoActorChanged', function(){
+        updateTopUser();
+        listenBadges();
+        if(PAGE==='feed' || PATH==='feed.html' || PATH==='index.html'){
+          renderFeed();
+        }
+      });
     }
   }
 
@@ -583,9 +605,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     // Persist to cache (always real user data, not actor data)
     setCachedUser({uid:u.uid,name:displayName,avatar:displayAvatar});
     // Actor-aware: update messages link in topbar + left nav
-    var msgsHref=(_actor&&_actor.type==='business'&&_actor.businessId)
-      ? 'messages.html?business='+encodeURIComponent(_actor.businessId)
-      : 'messages.html';
+    var msgsHref=actorMessagesHref(_actor);
     var msgLink=document.getElementById('ghMsgLink');
     if(msgLink) msgLink.setAttribute('href',msgsHref);
     document.querySelectorAll('.gh-nav-item').forEach(function(a){
@@ -2711,6 +2731,60 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     '</div>';
   }
 
+  function pageHomeContext(actor){
+    var name=actor.title||actor.name||'Business';
+    var logo=actor.logoUrl||actor.avatar||'';
+    var bizId=actor.businessId;
+    var inbox=actorMessagesHref(actor);
+    return '<section class="gh-card gh-page-home-card">'+
+      '<div class="gh-page-home-main">'+
+        '<span class="gh-page-home-avatar">'+(logo?img(logo,name):'<i class="fas fa-store"></i>')+'</span>'+
+        '<div class="gh-page-home-copy">'+
+          '<h1>'+esc(name)+' Home</h1>'+
+          '<p>You\'re using GeoHub as '+esc(name)+'. Manage posts, messages, quotes, and page activity from here.</p>'+
+        '</div>'+
+      '</div>'+
+      '<div class="gh-page-home-actions">'+
+        '<a class="gh-btn ghost" href="business.html?id='+encodeURIComponent(bizId)+'"><i class="fas fa-arrow-up-right-from-square"></i> View Page</a>'+
+        '<button class="gh-btn" data-create-post><i class="fas fa-plus"></i> Create Page Post</button>'+
+        '<a class="gh-btn ghost" href="'+inbox+'"><i class="fas fa-comment-dots"></i> Page Inbox</a>'+
+        '<a class="gh-btn ghost" href="notifications.html"><i class="fas fa-bell"></i> Page Activity</a>'+
+        '<a class="gh-btn ghost" href="business.html?id='+encodeURIComponent(bizId)+'#quotes"><i class="fas fa-file-signature"></i> Quotes</a>'+
+      '</div>'+
+    '</section>';
+  }
+
+  function pageFeedRightSidebar(actor){
+    var name=actor.title||actor.name||'Business';
+    var bizId=actor.businessId;
+    var inbox=actorMessagesHref(actor);
+    return '<div id="ghFeedRight" class="gh-page-feed-right">'+
+      '<div class="gh-panel gh-right-widget">'+
+        '<div class="gh-section-title"><h3>Page Shortcuts</h3></div>'+
+        '<div class="gh-page-shortcuts">'+
+          '<a class="gh-page-shortcut" href="business.html?id='+encodeURIComponent(bizId)+'"><i class="fas fa-store"></i><span><strong>View Page</strong><small>'+esc(name)+'</small></span></a>'+
+          '<a class="gh-page-shortcut" href="'+inbox+'"><i class="fas fa-comment-dots"></i><span><strong>Page Inbox</strong><small>Business conversations</small></span></a>'+
+          '<a class="gh-page-shortcut" href="notifications.html"><i class="fas fa-bell"></i><span><strong>Page Activity</strong><small>Notifications for this page</small></span></a>'+
+          '<a class="gh-page-shortcut" href="business.html?id='+encodeURIComponent(bizId)+'#quotes"><i class="fas fa-file-signature"></i><span><strong>Quotes</strong><small>Customer quote requests</small></span></a>'+
+        '</div>'+
+      '</div>'+
+      '<div class="gh-panel gh-right-widget">'+
+        '<div class="gh-section-title"><h3>Posting As</h3></div>'+
+        '<div class="gh-page-right-identity">'+
+          '<span class="gh-avatar sm">'+(actor.logoUrl?img(actor.logoUrl,name):esc(initials(name)))+'</span>'+
+          '<div><strong>'+esc(name)+'</strong><p class="gh-muted">New feed posts from this page are saved to the business page timeline.</p></div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function isPageFeedPost(p,bizId){
+    if(!p || !bizId) return false;
+    return (p.targetType==='business' && p.targetId===bizId) ||
+      p.businessId===bizId ||
+      (p.authorType==='business' && p.authorId===bizId);
+  }
+
   function loadFeedRightSidebar(){
     ready(function(){
       var auth = GF() && GF().auth;
@@ -3092,28 +3166,49 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   window._ghStartTour=startTour;
 
   function renderFeed(){
+    clearFeedListener();
+    var renderId=++state.feedRenderId;
+    var actor=activeBusinessActor();
+    var pageMode=!!actor;
     state.feedTab = 'foryou';
     var c=getFeedComposerActor();
     var compAvClass='gh-avatar'+(c?'':' gh-skel');
     var compAvContent=c?(c.avatar?'<img src="'+esc(c.avatar)+'" alt="" loading="eager" onerror="this.remove()">':esc(initials(c.name||''))):'';
+    var composerText=pageMode ? 'Post as '+(actor.title||'Business') : '';
+    var composerActions=pageMode
+      ? '<button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" data-create-post><i class="fas fa-pen-to-square" style="color:#38bdf8"></i> Page Post</button><button class="gh-composer-action" onclick="location.href=\''+actorMessagesHref(actor)+'\'"><i class="fas fa-comment-dots" style="color:#f59e0b"></i> Inbox</button><button class="gh-composer-action" onclick="location.href=\'notifications.html\'"><i class="fas fa-bell" style="color:#ef4444"></i> Activity</button>'
+      : '<button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Place</button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:#38bdf8"></i> Business</button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:#f59e0b"></i> Event</button>';
     shell({ active:'feed',
-      right: feedRightSidebar(),
+      right: pageMode ? pageFeedRightSidebar(actor) : feedRightSidebar(),
       center:
-        '<section class="gh-card gh-story-strip-card"><div class="gh-stories" id="ghStories"></div></section>'+
+        (pageMode ? pageHomeContext(actor) : '<section class="gh-card gh-story-strip-card"><div class="gh-stories" id="ghStories"></div></section>')+
         '<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="'+compAvClass+'" id="ghComposerAvatar">'+compAvContent+'</span><button class="gh-composer-fake" data-create-post>რას აზიარებ დღეს?</button></div><div class="gh-composer-actions"><button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Place</button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:#38bdf8"></i> Business</button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:#f59e0b"></i> Event</button></div></section>'+
-        '<div id="ghWelcomeSlot"></div>'+
-        '<div class="gh-pill-row" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="foryou"><i class="fas fa-house" style="font-size:.75rem"></i> For You</button><button class="gh-pill" data-feed-tab="following"><i class="fas fa-user-group" style="font-size:.75rem"></i> Following</button></div>'+
+        (pageMode ? '' : '<div id="ghWelcomeSlot"></div>')+
+        (pageMode ? '<div class="gh-pill-row gh-page-feed-tabs" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="page"><i class="fas fa-store" style="font-size:.75rem"></i> Page Activity</button></div>' : '<div class="gh-pill-row" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="foryou"><i class="fas fa-house" style="font-size:.75rem"></i> For You</button><button class="gh-pill" data-feed-tab="following"><i class="fas fa-user-group" style="font-size:.75rem"></i> Following</button></div>')+
         '<div id="ghFeedList">'+skelPostCard()+skelPostCard()+skelPostCard()+'</div>'
     });
-    loadStories('#ghStories');
-    loadFeedRightSidebar();
+    if(pageMode){
+      var fake=$('.gh-composer-fake');
+      var actions=$('.gh-composer-actions');
+      var comp=$('.gh-composer');
+      if(comp) comp.classList.add('gh-page-composer');
+      if(fake) fake.textContent=composerText;
+      if(actions) actions.innerHTML=composerActions;
+    }
+    if(window.refreshMobileNav) setTimeout(window.refreshMobileNav, 0);
+    if(!pageMode) loadStories('#ghStories');
+    if(!pageMode) loadFeedRightSidebar();
     ready(function(){
-      maybeShowOnboarding($('#ghWelcomeSlot'));
+      if(renderId!==state.feedRenderId) return;
+      if(!pageMode) maybeShowOnboarding($('#ghWelcomeSlot'));
       openDeepLinkedStory();
       var list=$('#ghFeedList'); bindPostInteractions(list); var lastPosts=[];
       function paint(){
+        if(renderId!==state.feedRenderId) return;
         var visible=lastPosts.filter(canSeePost);
-        if(state.feedTab === 'following'){
+        if(pageMode){
+          visible=visible.filter(function(p){ return isPageFeedPost(p, actor.businessId); });
+        } else if(state.feedTab === 'following'){
           var u=authUser();
           if(u){
             visible=visible.filter(function(p){
@@ -3123,7 +3218,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           }
         }
         if(!visible.length){
-          if(state.feedTab === 'following'){
+          if(pageMode){
+            list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-store"></i><h3>No page activity yet</h3><p>Create a post as '+esc(actor.title||'your page')+' to start building your audience.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="gh-btn" data-create-post><i class="fas fa-plus"></i>Create Page Post</button><a class="gh-btn ghost" href="business.html?id='+encodeURIComponent(actor.businessId)+'"><i class="fas fa-arrow-up-right-from-square"></i>View Page</a><a class="gh-btn ghost" href="'+actorMessagesHref(actor)+'"><i class="fas fa-comment-dots"></i>Page Inbox</a></div></div>';
+          } else if(state.feedTab === 'following'){
             list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-user-group"></i><h3>Nothing from people you follow</h3><p>Follow people and creators to see their posts here.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="gh-btn ghost" href="search.html"><i class="fas fa-search"></i>Find people</a><a class="gh-btn ghost" href="creators.html"><i class="fas fa-star"></i>Discover creators</a></div></div>';
           } else {
             list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-seedling"></i><h3>Feed is empty</h3><p>Start connecting with people, groups, and businesses to fill your feed.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="gh-btn" data-create-post><i class="fas fa-plus"></i>Create post</button><a class="gh-btn ghost" href="search.html"><i class="fas fa-search"></i>Find people</a><a class="gh-btn ghost" href="groups.html"><i class="fas fa-users"></i>Join groups</a><a class="gh-btn ghost" href="business.html"><i class="fas fa-store"></i>Businesses</a><a class="gh-btn ghost" href="creators.html"><i class="fas fa-star"></i>Creators</a></div></div>';
@@ -3148,7 +3245,19 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       });
       setupSafetyListener(paint);
       setupAudienceAccess(paint);
-      GS().listenFeed(function(posts){ lastPosts=posts; paint(); }, 20);
+      if(pageMode){
+        state.feedUnsub=listenTargetPosts('business', actor.businessId, function(posts){
+          if(renderId!==state.feedRenderId) return;
+          lastPosts=posts;
+          paint();
+        });
+      } else {
+        state.feedUnsub=GS().listenFeed(function(posts){
+          if(renderId!==state.feedRenderId) return;
+          lastPosts=posts;
+          paint();
+        }, 20);
+      }
     });
   }
 
@@ -5781,6 +5890,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   window.addEventListener('pagehide', function() {
     if(state.authUnsub){ try{ state.authUnsub(); }catch(e){} state.authUnsub=null; }
     if(state.safetyUnsub){ try{ state.safetyUnsub(); }catch(e){} state.safetyUnsub=null; }
+    clearFeedListener();
     (state.badgeUnsubs||[]).forEach(function(u){ try{ if(u) u(); }catch(e){} });
     state.badgeUnsubs=[];
     Object.values(state.postsUnsubs||{}).forEach(function(u){ try{ if(u) u(); }catch(e){} });

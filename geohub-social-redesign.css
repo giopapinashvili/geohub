@@ -1474,6 +1474,25 @@ html[data-gh-theme="light"] .gh-team-avatar{background:rgba(255,255,255,.9);bord
 
 /* ── Feed right sidebar ──────────────────────────────────── */
 #ghFeedRight{display:flex;flex-direction:column;gap:14px}
+.gh-page-home-card{display:grid;gap:16px;margin-bottom:14px}
+.gh-page-home-main{display:flex;align-items:center;gap:14px;min-width:0}
+.gh-page-home-avatar{width:58px;height:58px;border-radius:16px;display:grid;place-items:center;flex:0 0 auto;overflow:hidden;background:linear-gradient(135deg,#22c55e,#0f766e);color:#fff;font-size:1.2rem;font-weight:900}
+.gh-page-home-avatar img{width:100%;height:100%;object-fit:cover}
+.gh-page-home-copy{min-width:0}
+.gh-page-home-copy h1{margin:0;color:var(--gh-text);font-size:1.35rem;line-height:1.15;overflow-wrap:anywhere}
+.gh-page-home-copy p{margin:5px 0 0;color:var(--gh-muted);font-weight:700;line-height:1.45}
+.gh-page-home-actions{display:flex;gap:8px;flex-wrap:wrap}
+.gh-page-home-actions .gh-btn{min-height:42px}
+.gh-page-composer .gh-composer-fake{color:var(--gh-text);font-weight:900}
+.gh-page-shortcuts{display:grid;gap:8px}
+.gh-page-shortcut{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;text-decoration:none;color:var(--gh-text);background:rgba(255,255,255,.04);border:1px solid transparent}
+.gh-page-shortcut:hover{border-color:rgba(16,185,129,.18);background:rgba(16,185,129,.08)}
+.gh-page-shortcut i{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(16,185,129,.12);color:var(--gh-green);flex:0 0 auto}
+.gh-page-shortcut span{display:grid;gap:2px;min-width:0}
+.gh-page-shortcut strong{font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gh-page-shortcut small{font-size:.75rem;color:var(--gh-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gh-page-right-identity{display:flex;gap:10px;align-items:flex-start}
+.gh-page-right-identity p{margin:4px 0 0;font-size:.78rem;line-height:1.4}
 .gh-contacts-list{display:flex;flex-direction:column;gap:4px;max-height:280px;overflow-y:auto;scrollbar-width:thin}
 .gh-contact-row{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:10px;text-decoration:none;color:var(--gh-text);font-weight:700;font-size:.84rem;transition:.14s;cursor:pointer}
 .gh-contact-row:hover{background:rgba(16,185,129,.1)}
@@ -1496,6 +1515,14 @@ html[data-gh-theme="light"] .gh-cmt-rx-picker{background:#fff}
 @media(max-width:768px){
   .gh-cmt-rx-picker{bottom:auto;top:calc(100% + 4px)}
   .gh-feeling-row{flex-wrap:nowrap}
+  .gh-page-home-card{gap:12px;margin-bottom:12px}
+  .gh-page-home-main{align-items:flex-start}
+  .gh-page-home-avatar{width:50px;height:50px;border-radius:14px}
+  .gh-page-home-copy h1{font-size:1.12rem}
+  .gh-page-home-copy p{font-size:.84rem}
+  .gh-page-home-actions{flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+  .gh-page-home-actions::-webkit-scrollbar{display:none}
+  .gh-page-home-actions .gh-btn{flex:0 0 auto;min-height:44px}
 }
 
 

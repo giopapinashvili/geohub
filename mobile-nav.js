@@ -41,6 +41,21 @@
   }
 
   function getAuthUser() { return (window.GeoAuth && window.GeoAuth.getCurrentUser && window.GeoAuth.getCurrentUser()) || window.GeoCurrentUser || null; }
+  function getActiveActor() {
+    try { return JSON.parse(localStorage.getItem('gh_active_actor') || 'null'); } catch(e) { return null; }
+  }
+  function mobileMessagesHref() {
+    var actor = getActiveActor();
+    return actor && actor.type === 'business' && actor.businessId
+      ? 'messages.html?business=' + encodeURIComponent(actor.businessId)
+      : 'messages.html';
+  }
+  function updateActorMessageLinks() {
+    var href = mobileMessagesHref();
+    document.querySelectorAll('[data-gh-actor-messages]').forEach(function(a) {
+      a.setAttribute('href', href);
+    });
+  }
 
   // ── INJECT BOTTOM NAV ─────────────────────────────────────────
 
@@ -58,7 +73,7 @@
     nav.innerHTML =
       navItem('feed.html',          'fas fa-house', 'Feed', active === 'home' || currentPage === 'feed.html', '') +
       navItem('search.html',        'fas fa-magnifying-glass', 'Explore', active === 'explore' || currentPage === 'search.html', '') +
-      navItem('messages.html',      'fas fa-comment-dots', 'Messages', active === 'messages', '') +
+      navItem(mobileMessagesHref(), 'fas fa-comment-dots', 'Messages', active === 'messages', '', 'data-gh-actor-messages') +
       navItem('notifications.html', 'fas fa-bell', 'Notifications', currentPage === 'notifications.html', '') +
       navButton('fas fa-bars', 'Menu');
 
@@ -66,8 +81,8 @@
     setupBottomNavAutoHide(nav);
   }
 
-  function navItem(href, icon, label, isActive, extra) {
-    return '<a href="' + href + '" class="app-nav-item' + (isActive ? ' active' : '') + (extra ? ' ' + extra : '') + '">' +
+  function navItem(href, icon, label, isActive, extra, attrs) {
+    return '<a href="' + href + '" class="app-nav-item' + (isActive ? ' active' : '') + (extra ? ' ' + extra : '') + '" ' + (attrs || '') + '>' +
       (label === 'Live' ? '<span class="nav-live-dot"></span>' : '') +
       '<i class="' + icon + '" aria-hidden="true"></i>' +
       '<span>' + label + '</span>' +
@@ -104,7 +119,7 @@
       '<div class="mobile-menu-group"><div class="mobile-menu-title">Main</div>' +
         '<a class="gh-mobile-menu-row" href="feed.html"><i class="fas fa-house"></i><span>Feed</span></a>' +
         '<a class="gh-mobile-menu-row" href="search.html"><i class="fas fa-magnifying-glass"></i><span>Explore / Search</span></a>' +
-        '<a class="gh-mobile-menu-row" href="messages.html"><i class="fas fa-comment-dots"></i><span>Messages</span></a>' +
+        '<a class="gh-mobile-menu-row" data-gh-actor-messages href="' + mobileMessagesHref() + '"><i class="fas fa-comment-dots"></i><span>Messages</span></a>' +
         '<a class="gh-mobile-menu-row" href="notifications.html"><i class="fas fa-bell"></i><span>Notifications</span></a>' +
         '<a class="gh-mobile-menu-row" href="places.html"><i class="fas fa-location-dot"></i><span>Places</span></a>' +
         '<a class="gh-mobile-menu-row" href="groups.html"><i class="fas fa-users"></i><span>Groups</span></a>' +
@@ -260,6 +275,11 @@
   window.closeMobileMenu = closeMobileMenu;
   window.toggleMobileMenu = toggleMobileMenu;
   window.closeDesktopMenu = closeDesktopMenu;
+  window.refreshMobileNav = function() {
+    ensureMobileMenu();
+    injectBottomNav();
+    updateActorMessageLinks();
+  };
 
   function bindMobileMenuEvents() {
     if (window.__ghMobileMenuEventsBound) return;
@@ -878,6 +898,7 @@
     ensureMobileMenu();
     bindMobileMenuEvents();
     injectBottomNav();
+    updateActorMessageLinks();
     injectActionSheet();
     injectNotifContainer();
     injectOfflineBanner();
@@ -886,8 +907,9 @@
     injectCmdPalette();
     registerSW();
     startNotifCycle();
-    setTimeout(function(){ ensureMobileMenu(); injectBottomNav(); }, 400);
-    setTimeout(function(){ ensureMobileMenu(); injectBottomNav(); }, 1200);
+    setTimeout(function(){ ensureMobileMenu(); injectBottomNav(); updateActorMessageLinks(); }, 400);
+    setTimeout(function(){ ensureMobileMenu(); injectBottomNav(); updateActorMessageLinks(); }, 1200);
+    window.addEventListener('GeoActorChanged', updateActorMessageLinks);
 
     if (!tryUpdateMobileAuth()) {
       var _authPoll = setInterval(function() {
