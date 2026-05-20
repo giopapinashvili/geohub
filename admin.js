@@ -1295,6 +1295,12 @@
     if (subSel) subSel.style.display = 'none';
   }
 
+  var _editingPlaceId = null; // null = add mode; docId string = edit mode
+
+  function getPlaceImageUrl(place) {
+    return (place && (place.imageUrl || place.image || place.photoUrl || place.mediaUrl)) || '';
+  }
+
   function normalizePlaceImport(it, user, fs) {
     var cats = getPlaceCategories();
     var catId    = it.categoryId || '';
@@ -1305,9 +1311,11 @@
     if (matched) { catId = matched.id; catLabel = matched.label; }
     else         { catId = catId || ''; }
 
+    // imageSearchUrl is always rejected; use only real https image URLs
     var rawImg = it.imageUrl || it.image || it.coverImage || it.coverImageUrl ||
                  it.coverUrl || it.photoUrl || it.thumbnail || null;
-    var imgUrl = (rawImg && typeof rawImg === 'string' && /^https?:\/\//i.test(rawImg)) ? rawImg : null;
+    if (rawImg && rawImg === it.imageSearchUrl) rawImg = null; // explicitly reject imageSearchUrl
+    var imgUrl = (rawImg && typeof rawImg === 'string' && /^https:\/\//i.test(rawImg)) ? rawImg : null;
 
     var lat = (it.lat  !== undefined && it.lat  !== null && !isNaN(Number(it.lat)))  ? Number(it.lat)  : null;
     var lng = (it.lng  !== undefined && it.lng  !== null && !isNaN(Number(it.lng)))  ? Number(it.lng)  : null;
@@ -1397,6 +1405,14 @@
       });
     }
 
+    // Image URL live preview
+    var imgInput = document.getElementById('adminContentImage');
+    if (imgInput) {
+      imgInput.addEventListener('input', function() {
+        adminUpdateImagePreview(imgInput.value.trim());
+      });
+    }
+
     // Live JSON validation for bulk import textarea
     var bulkJson = document.getElementById('adminBulkJson');
     var bulkVal  = document.getElementById('adminBulkValidation');
@@ -1475,28 +1491,57 @@
       });
 
       var btn = form.querySelector('button[type="submit"]');
-      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
-      fs.addDoc(fs.collection(db, col), doc).then(function(ref) {
-        form.reset();
-        renderExtFields(col);
-        toast('Created: ' + title + ' (ID: ' + ref.id.slice(-6) + ')');
-        // Show live preview
+      var isEdit = !!(col === 'places' && _editingPlaceId);
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (isEdit ? 'Updating…' : 'Creating…');
+
+      var savePromise;
+      if (isEdit) {
+        // Edit mode: updateDoc, preserve unknown fields
+        delete doc.createdAt; delete doc.createdBy;
+        doc.updatedAt = fs.serverTimestamp();
+        savePromise = fs.updateDoc(fs.doc(db, col, _editingPlaceId), doc).then(function() {
+          return { id: _editingPlaceId, _update: true };
+        });
+      } else {
+        savePromise = fs.addDoc(fs.collection(db, col), doc);
+      }
+
+      savePromise.then(function(ref) {
+        var docId = ref._update ? ref.id : (ref && ref.id);
+        if (isEdit) {
+          toast('ადგილი განახლდა: ' + title);
+          window.adminCancelEditPlace();
+        } else {
+          form.reset();
+          renderExtFields(col);
+          toast('Created: ' + title + ' (ID: ' + (docId||'').slice(-6) + ')');
+        }
         var preview = document.getElementById('adminContentPreview');
         var previewBody = document.getElementById('adminContentPreviewBody');
         if (preview && previewBody) {
-          var lines = ['<strong>' + esc(title) + '</strong> → <code style="font-size:.78rem">' + col + '/' + ref.id + '</code>'];
+          var lines = ['<strong>' + esc(title) + '</strong> → <code style="font-size:.78rem">' + col + '/' + (docId||'') + '</code>'];
           if (desc) lines.push(esc(desc.slice(0, 120)) + (desc.length > 120 ? '…' : ''));
           if (city) lines.push('City: ' + esc(city));
           if (category) lines.push('Category: ' + esc(category));
-          if (image) lines.push('Image: <code style="font-size:.75rem">' + esc(image.slice(0, 72)) + (image.length > 72 ? '…' : '') + '</code>');
+          if (image) {
+            var imgPreviewStyle = 'max-height:60px;max-width:100%;border-radius:6px;margin-top:4px;display:block';
+            lines.push('Image: <code style="font-size:.75rem">' + esc(image.slice(0, 72)) + (image.length > 72 ? '…' : '') + '</code>' +
+              '<br><img src="' + esc(image) + '" style="' + imgPreviewStyle + '" onerror="this.style.display=\'none\'">');
+          }
           previewBody.innerHTML = lines.join('<br>');
           preview.style.display = 'block';
           setTimeout(function() { if (preview) preview.style.display = 'none'; }, 8000);
         }
+        window.loadContentList();
       }).catch(function(err) {
-        console.error('[Admin Content Studio]', err); toast('Create failed: ' + err.message);
+        console.error('[Admin Content Studio]', err);
+        toast((isEdit ? 'Update' : 'Create') + ' failed: ' + err.message);
       }).finally(function() {
-        btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Create real item';
+        btn.disabled = false;
+        btn.innerHTML = isEdit
+          ? '<i class="fas fa-save"></i> Update Place'
+          : '<i class="fas fa-plus"></i> Create real item';
       });
     });
   }
@@ -1511,12 +1556,203 @@
 
   function bindDeleteAllPlacesButton() {
     var bulkColSel = document.getElementById('adminBulkCollection');
-    var wrap = document.getElementById('adminDeletePlacesWrap');
+    var wrap     = document.getElementById('adminDeletePlacesWrap');
+    var imgWrap  = document.getElementById('adminCheckImagesWrap');
     if (!bulkColSel || !wrap) return;
-    function toggle() { wrap.style.display = bulkColSel.value === 'places' ? 'block' : 'none'; }
+    function toggle() {
+      var isPlaces = bulkColSel.value === 'places';
+      wrap.style.display    = isPlaces ? 'block' : 'none';
+      if (imgWrap) imgWrap.style.display = isPlaces ? 'block' : 'none';
+    }
     bulkColSel.addEventListener('change', toggle);
     toggle();
   }
+
+  /* ── IMAGE URL HELPERS ────────────────────────────────────── */
+  function isLikelyBadImageUrl(url) {
+    if (!url || typeof url !== 'string') return true;
+    if (!/^https?:\/\//i.test(url)) return true;
+    if (url.indexOf('commons.wikimedia.org/wiki/Special:Redirect') !== -1) return true;
+    if (url.indexOf('imageSearchUrl') !== -1) return true;
+    return false;
+  }
+
+  function testImageLoad(url) {
+    return new Promise(function(resolve) {
+      if (!url || typeof url !== 'string' || !/^https?:\/\//i.test(url)) { resolve(false); return; }
+      var img = new Image();
+      var done = false;
+      function finish(ok) { if (!done) { done = true; resolve(ok); } }
+      img.onload  = function() { finish(this.naturalWidth > 0 && this.naturalHeight > 0); };
+      img.onerror = function() { finish(false); };
+      setTimeout(function() { finish(false); }, 8000);
+      img.src = url;
+    });
+  }
+
+  function setBrokenProgress(msg, color) {
+    var el = document.getElementById('adminCheckImagesProgress');
+    if (el) { el.style.color = color || '#94a3b8'; el.textContent = msg; }
+  }
+
+  /* ── BROKEN IMAGE CHECKER ─────────────────────────────────── */
+  window.checkBrokenPlaceImages = function() {
+    if (!window.GeoFirebase || !window.GeoFirebase.fs) return toast('Firebase not ready');
+    var gf = window.GeoFirebase, fs = gf.fs, db = gf.db;
+    var btn = document.getElementById('adminCheckImagesBtn');
+    var panel = document.getElementById('adminBrokenImagesPanel');
+    if (btn) { btn.disabled = true; }
+    if (panel) { panel.style.display = 'none'; panel.innerHTML = ''; }
+    setBrokenProgress('ადგილები იძებნება…');
+
+    fs.getDocs(fs.collection(db, 'places')).then(function(snap) {
+      var docs = snap.docs;
+      if (!docs.length) {
+        setBrokenProgress('ადგილები არ მოიძებნა.', '#94a3b8');
+        if (btn) btn.disabled = false;
+        return;
+      }
+      var total = docs.length;
+      var checked = 0;
+      var broken = [];
+
+      function checkNext(i) {
+        if (i >= docs.length) {
+          setBrokenProgress(broken.length === 0
+            ? 'ყველა ფოტო სწორია (' + total + ' ადგილი).'
+            : broken.length + ' პრობლემური ადგილი ' + total + '-დან.', broken.length ? '#f59e0b' : '#10e0a0');
+          if (btn) btn.disabled = false;
+          renderBrokenPanel(broken);
+          return;
+        }
+        var d = docs[i];
+        var data = d.data() || {};
+        var url = getPlaceImageUrl(data);
+        setBrokenProgress('ფოტოების შემოწმება: ' + (i+1) + ' / ' + total + '…');
+        if (isLikelyBadImageUrl(url)) {
+          broken.push({ id: d.id, data: data, url: url, reason: url ? 'bad URL format' : 'no imageUrl' });
+          checkNext(i + 1);
+        } else {
+          testImageLoad(url).then(function(ok) {
+            if (!ok) broken.push({ id: d.id, data: data, url: url, reason: 'image failed to load' });
+            checkNext(i + 1);
+          });
+        }
+      }
+      checkNext(0);
+    }).catch(function(err) {
+      setBrokenProgress('შეცდომა: ' + (err && err.message), '#ef4444');
+      if (btn) btn.disabled = false;
+    });
+  };
+
+  function renderBrokenPanel(broken) {
+    var panel = document.getElementById('adminBrokenImagesPanel');
+    if (!panel) return;
+    if (!broken.length) { panel.style.display = 'none'; return; }
+    var rows = broken.map(function(b) {
+      var id   = escHtmlAdmin(b.id);
+      var name = escHtmlAdmin(b.data.name || b.data.title || b.id);
+      var cat  = escHtmlAdmin((b.data.category || '') + (b.data.subcategory ? ' / ' + b.data.subcategory : ''));
+      var url  = escHtmlAdmin(b.url || '');
+      var urlShort = escHtmlAdmin((b.url||'').slice(0, 60) + ((b.url||'').length > 60 ? '…' : ''));
+      var reason = escHtmlAdmin(b.reason || '');
+      var imgStyle = 'width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;background:#1e293b';
+      var thumb = b.url
+        ? '<img src="' + url + '" style="' + imgStyle + '" onerror="this.outerHTML=\'<div style=\\\'' + imgStyle + ';display:flex;align-items:center;justify-content:center;font-size:1.2rem\\\'>📍</div>\'">'
+        : '<div style="' + imgStyle + ';display:flex;align-items:center;justify-content:center;font-size:1.2rem">📍</div>';
+      var openBtn = b.url
+        ? '<a href="' + url + '" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="font-size:.72rem">Open</a>'
+        : '';
+      var editBtn = '<button class="btn btn-ghost btn-sm" style="font-size:.72rem" onclick="adminEditPlaceFromBroken(\'' + id + '\')">' +
+        '<i class="fas fa-pen"></i> Edit</button>';
+      var replaceBtn = '<button class="btn btn-ghost btn-sm" style="font-size:.72rem;color:#818cf8;border-color:rgba(99,102,241,.35)" ' +
+        'onclick="adminReplaceImageUrl(\'' + id + '\')"><i class="fas fa-link"></i> Replace URL</button>';
+      var clearBtn = '<button class="btn btn-ghost btn-sm" style="font-size:.72rem;color:#f59e0b;border-color:rgba(245,158,11,.35)" ' +
+        'onclick="adminClearImageUrl(\'' + id + '\',this)"><i class="fas fa-eraser"></i> Clear</button>';
+      var delBtn = '<button class="btn btn-ghost btn-sm" style="font-size:.72rem;color:#ef4444;border-color:rgba(239,68,68,.35)" ' +
+        'onclick="adminDeleteBrokenPlace(\'' + id + '\',\'' + name + '\',this)"><i class="fas fa-trash"></i> Delete</button>';
+      return '<div class="bi" style="gap:8px;padding:8px 6px;flex-wrap:wrap;align-items:flex-start">' +
+        thumb +
+        '<div style="flex:1;min-width:140px">' +
+          '<div style="font-size:.8rem;font-weight:700;color:#f0f4ff">' + name + '</div>' +
+          '<div style="font-size:.7rem;color:#94a3b8">' + cat + '</div>' +
+          '<div style="font-size:.68rem;color:#64748b;word-break:break-all">' + urlShort + '</div>' +
+          '<div style="font-size:.68rem;color:#f87171">' + reason + '</div>' +
+        '</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:4px">' +
+          openBtn + editBtn + replaceBtn + clearBtn + delBtn +
+        '</div>' +
+      '</div>';
+    }).join('');
+    panel.innerHTML =
+      '<div style="font-size:.8rem;font-weight:700;color:#f87171;margin-bottom:8px">' +
+        '<i class="fas fa-exclamation-triangle"></i> პრობლემური ფოტოები (' + broken.length + ')</div>' +
+      '<div class="bl">' + rows + '</div>';
+    panel.style.display = 'block';
+  }
+
+  window.adminReplaceImageUrl = function(placeId) {
+    var newUrl = window.prompt('ახალი imageUrl (https://...)');
+    if (newUrl === null) return;
+    newUrl = newUrl.trim();
+    if (!newUrl) return;
+    if (!/^https:\/\//i.test(newUrl)) { toast('URL უნდა იწყებოდეს https://'); return; }
+    var gf = window.GeoFirebase, fs = gf.fs, db = gf.db;
+    testImageLoad(newUrl).then(function(ok) {
+      if (!ok) {
+        if (!confirm('ფოტო ვერ ჩაიტვირთა. მაინც შეიცვალოს?')) return;
+      }
+      fs.updateDoc(fs.doc(db, 'places', placeId), {
+        imageUrl: newUrl, image: newUrl, updatedAt: fs.serverTimestamp()
+      }).then(function() {
+        toast('imageUrl განახლდა');
+        window.checkBrokenPlaceImages();
+      }).catch(function(err) { toast('შეცდომა: ' + (err && err.message)); });
+    });
+  };
+
+  window.adminClearImageUrl = function(placeId, btn) {
+    if (!confirm('ამ ადგილის ფოტო წაიშალოს?')) return;
+    if (!window.GeoFirebase || !window.GeoFirebase.fs) return toast('Firebase not ready');
+    var gf = window.GeoFirebase, fs = gf.fs, db = gf.db;
+    if (btn) btn.disabled = true;
+    fs.updateDoc(fs.doc(db, 'places', placeId), {
+      imageUrl: '', image: '', updatedAt: fs.serverTimestamp()
+    }).then(function() {
+      toast('ფოტო გასუფთავდა');
+      window.checkBrokenPlaceImages();
+    }).catch(function(err) {
+      toast('შეცდომა: ' + (err && err.message));
+      if (btn) btn.disabled = false;
+    });
+  };
+
+  window.adminDeleteBrokenPlace = function(placeId, name, btn) {
+    if (!confirm('წაიშალოს ადგილი: ' + name + '?')) return;
+    if (!window.GeoFirebase || !window.GeoFirebase.fs) return toast('Firebase not ready');
+    var gf = window.GeoFirebase, fs = gf.fs, db = gf.db;
+    if (btn) btn.disabled = true;
+    fs.deleteDoc(fs.doc(db, 'places', placeId)).then(function() {
+      toast('ადგილი წაიშალა: ' + name);
+      window.checkBrokenPlaceImages();
+    }).catch(function(err) {
+      toast('შეცდომა: ' + (err && err.message));
+      if (btn) btn.disabled = false;
+    });
+  };
+
+  window.adminEditPlaceFromBroken = function(placeId) {
+    if (!window.GeoFirebase || !window.GeoFirebase.fs) return toast('Firebase not ready');
+    var gf = window.GeoFirebase, fs = gf.fs, db = gf.db;
+    fs.getDoc(fs.doc(db, 'places', placeId)).then(function(snap) {
+      if (!snap.exists()) return toast('ადგილი ვერ მოიძებნა');
+      window.adminEditPlace(snap.id, snap.data());
+      // scroll to form
+      var f = document.getElementById('adminContentForm');
+      if (f) f.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }).catch(function(err) { toast('შეცდომა: ' + (err && err.message)); });
+  };
 
   window.deleteAllPlaces = function() {
     var typed = window.prompt('წასაშლელად ჩაწერე DELETE PLACES');
@@ -1602,8 +1838,23 @@
     if (!user) return toast('Admin login required');
 
     var col = colEl.value;
-    if (valEl) { valEl.style.color = '#94a3b8'; valEl.textContent = 'Importing ' + items.length + ' items…'; }
     if (resEl) resEl.style.display = 'none';
+
+    // Warn about suspicious image URLs in places imports
+    if (col === 'places') {
+      var badUrlItems = items.filter(function(it) {
+        var u = it.imageUrl || it.image || '';
+        return u && (isLikelyBadImageUrl(u) || !/\.(jpe?g|png|webp|gif|avif)(\?|$)/i.test(u));
+      });
+      if (badUrlItems.length > 0) {
+        if (valEl) { valEl.style.color = '#f59e0b'; valEl.textContent = badUrlItems.length + ' ადგილს აქვს სავარაუდოდ პრობლემური imageUrl (Wikimedia, non-https, ან არა-პირდაპირი ფოტო ლინკი). ზოგი ფოტო შეიძლება არ გამოჩნდეს.'; }
+        // continue import anyway — just warn
+      } else {
+        if (valEl) { valEl.style.color = '#94a3b8'; valEl.textContent = 'Importing ' + items.length + ' items…'; }
+      }
+    } else {
+      if (valEl) { valEl.style.color = '#94a3b8'; valEl.textContent = 'Importing ' + items.length + ' items…'; }
+    }
 
     var promises = items.map(function(it) {
       var doc;
@@ -2191,14 +2442,26 @@
           var data = d.data();
           var active = data.status === 'active' || (data.active === true && data.status !== 'inactive');
           var label = escHtmlAdmin(data.title || data.name || d.id.slice(-8));
+          var imgUrl = col === 'places' ? escHtmlAdmin(getPlaceImageUrl(data)) : '';
+          var thumb = imgUrl
+            ? '<img src="' + imgUrl + '" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0" ' +
+                'onerror="this.outerHTML=\'<div style=\\\'width:36px;height:36px;border-radius:6px;background:#1e293b;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0\\\'>📍</div>\'">'
+            : '';
+          var editBtn = col === 'places'
+            ? '<button class="btn btn-ghost btn-sm" style="font-size:.72rem" ' +
+                'onclick="adminEditPlaceFromBroken(\'' + escHtmlAdmin(d.id) + '\')">' +
+                '<i class="fas fa-pen"></i></button>'
+            : '';
           rows.push(
-            '<div class="bi" style="display:flex;align-items:center;gap:10px">' +
+            '<div class="bi" style="display:flex;align-items:center;gap:8px">' +
+              thumb +
               '<div style="flex:1;min-width:0">' +
                 '<div style="font-size:.82rem;font-weight:700;color:#f0f4ff">' + label + '</div>' +
                 '<div style="font-size:.68rem;color:var(--ts)">' + escHtmlAdmin(d.id) + ' &nbsp;·&nbsp; ' +
                   (active ? '<span style="color:#10e0a0">active</span>' : '<span style="color:#f59e0b">inactive</span>') +
                 '</div>' +
               '</div>' +
+              editBtn +
               '<button class="btn btn-ghost btn-sm" onclick="adminToggleItem(\'' + escHtmlAdmin(col) + '\',\'' + escHtmlAdmin(d.id) + '\',' + (active ? 'true' : 'false') + ')">' +
                 (active ? 'Deactivate' : 'Activate') +
               '</button>' +
@@ -2224,6 +2487,102 @@
         toast((currentlyActive ? 'Deactivated' : 'Activated') + ': ' + id.slice(-6));
         window.loadContentList();
       }).catch(function (err) { toast('Toggle failed: ' + err.message); });
+  };
+
+  /* ── PLACE EDIT MODE ─────────────────────────────────────── */
+  window.adminEditPlace = function(placeId, data) {
+    if (!placeId || !data) return;
+    _editingPlaceId = placeId;
+
+    // Switch collection selector to 'places'
+    var colSel = document.getElementById('adminContentCollection');
+    if (colSel) { colSel.value = 'places'; colSel.dispatchEvent(new Event('change')); }
+    togglePlaceCategoryUI('places');
+
+    // Populate form fields
+    var set = function(id, val) { var el = document.getElementById(id); if (el) el.value = val || ''; };
+    set('adminContentTitle',    data.name || data.title || '');
+    set('adminContentDesc',     data.shortDescription || data.description || '');
+    set('adminContentCity',     data.city || '');
+    set('adminContentImage',    getPlaceImageUrl(data));
+    set('adminContentCategory', data.category || '');
+
+    // Extended fields (lat, lng, district, address, region, sourceUrl, etc.)
+    var extMap = { adminPlaceLat: 'lat', adminPlaceLng: 'lng', adminPlaceDistrict: 'district',
+                   adminPlaceAddress: 'address', adminPlaceRegion: 'region',
+                   adminPlaceSourceUrl: 'sourceUrl', adminPlaceShortDesc: 'shortDescription' };
+    Object.keys(extMap).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && data[extMap[id]] !== undefined) el.value = data[extMap[id]];
+    });
+    // isVerified / status via ext fields
+    var statEl = document.getElementById('adminPlaceStatus');
+    if (statEl) statEl.value = data.status || 'active';
+    var verEl = document.getElementById('adminPlaceIsVerified');
+    if (verEl) verEl.value = data.isVerified ? 'true' : 'false';
+
+    // Category dropdowns
+    populatePlaceCategorySelect(data.categoryId || '');
+    if (data.categoryId) populatePlaceSubcategorySelect(data.categoryId, data.subcategory || '');
+    syncPlaceSubcategories();
+
+    // Update submit button and show edit indicator
+    var btn = document.querySelector('#adminContentForm button[type="submit"]');
+    if (btn) btn.innerHTML = '<i class="fas fa-save"></i> Update Place';
+
+    var editBar = document.getElementById('adminEditPlaceBar');
+    if (!editBar) {
+      editBar = document.createElement('div');
+      editBar.id = 'adminEditPlaceBar';
+      editBar.style.cssText = 'background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.35);border-radius:10px;padding:8px 14px;margin-bottom:12px;font-size:.82rem;color:#a5b4fc;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap';
+      var form = document.getElementById('adminContentForm');
+      if (form) form.insertBefore(editBar, form.firstChild);
+    }
+    editBar.innerHTML =
+      '<span><i class="fas fa-pen"></i> რედაქტირება: <strong>' + escHtmlAdmin(data.name || data.title || placeId) + '</strong></span>' +
+      '<button type="button" class="btn btn-ghost btn-sm" style="font-size:.75rem;color:#94a3b8" onclick="adminCancelEditPlace()">გაუქმება</button>';
+    editBar.style.display = 'flex';
+
+    // Image preview in form
+    adminUpdateImagePreview(getPlaceImageUrl(data));
+  };
+
+  window.adminCancelEditPlace = function() {
+    _editingPlaceId = null;
+    var editBar = document.getElementById('adminEditPlaceBar');
+    if (editBar) editBar.style.display = 'none';
+    var btn = document.querySelector('#adminContentForm button[type="submit"]');
+    if (btn) btn.innerHTML = '<i class="fas fa-plus"></i> Create real item';
+    var form = document.getElementById('adminContentForm');
+    if (form) { form.reset(); renderExtFields('places'); }
+    adminUpdateImagePreview('');
+    _editingPlaceId = null;
+  };
+
+  function adminUpdateImagePreview(url) {
+    var wrap = document.getElementById('adminImgPreviewWrap');
+    if (!wrap) return;
+    if (!url) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+    var img = wrap.querySelector('img');
+    var ph  = wrap.querySelector('.admin-img-ph');
+    if (img) {
+      img.src = url;
+      img.onerror = function() { this.style.display = 'none'; if (ph) ph.style.display = 'flex'; };
+      img.onload  = function() { this.style.display = ''; if (ph) ph.style.display = 'none'; };
+    }
+  }
+
+  window.adminTestImageUrl = function() {
+    var imgEl = document.getElementById('adminContentImage');
+    if (!imgEl) return;
+    var url = imgEl.value.trim();
+    if (!url) { toast('URL ჩაწერეთ'); return; }
+    toast('შემოწმება…');
+    testImageLoad(url).then(function(ok) {
+      toast(ok ? '✓ ფოტო ჩაიტვირთა' : '✗ ფოტო ვერ ჩაიტვირთა');
+      adminUpdateImagePreview(url);
+    });
   };
 
   window.adminDeleteItem = function (col, id) {

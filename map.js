@@ -158,9 +158,23 @@
       return;
     }
 
-    const panel = document.getElementById('infoPanel');
-    const img   = document.getElementById('panelImg');
-    if (img) { img.src = p.image || ''; img.style.display = p.image ? '' : 'none'; }
+    const panel    = document.getElementById('infoPanel');
+    const img      = document.getElementById('panelImg');
+    const imgFb    = document.getElementById('panelImgFallback');
+    const pStyle   = getPlaceMarkerStyle(p);
+    if (img) {
+      img.onerror = function() {
+        this.style.display = 'none';
+        if (imgFb) { imgFb.style.display = 'flex'; imgFb.textContent = pStyle.icon || '📍'; imgFb.style.background = pStyle.color || '#1e293b'; }
+      };
+      if (p.image) {
+        img.src = p.image; img.style.display = '';
+        if (imgFb) imgFb.style.display = 'none';
+      } else {
+        img.style.display = 'none';
+        if (imgFb) { imgFb.style.display = 'flex'; imgFb.textContent = pStyle.icon || '📍'; imgFb.style.background = pStyle.color || '#1e293b'; }
+      }
+    }
     const title  = document.getElementById('panelTitle'); if (title)  title.textContent  = p.name;
     const cat    = document.getElementById('panelCat');   if (cat)    cat.textContent    = p.categoryLabel + (p.subcategory ? ' · ' + p.subcategory : '');
     const loc    = document.getElementById('panelLoc');   if (loc)    loc.textContent    = p.city ? p.city + ', Georgia' : 'Georgia';
@@ -187,7 +201,7 @@
     div.innerHTML =
       '<div class="mpc-drag-handle"></div>'
       + '<button class="mpc-close" onclick="window.closeMobileCard()"><i class="fas fa-times"></i></button>'
-      + '<div id="mpcImgWrap" class="mpc-img-wrap"><img id="mpcImg" src="" alt="" onerror="this.parentElement.style.display=\'none\'"></div>'
+      + '<div id="mpcImgWrap" class="mpc-img-wrap"><img id="mpcImg" src="" alt="" onerror="this.parentElement.style.display=\'none\';var f=document.getElementById(\'mpcFallback\');if(f)f.style.display=\'flex\'"></div>'
       + '<div id="mpcFallback" class="mpc-fallback" style="display:none"></div>'
       + '<div class="mpc-body">'
       + '<div id="mpcName" class="mpc-name"></div>'
