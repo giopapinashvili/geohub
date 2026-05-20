@@ -1589,7 +1589,6 @@
         };
         if (overviewEl && !overviewEl._bizBound) { gs.bindPostInteractions(overviewEl, bizInteractionOptions); overviewEl._bizBound = true; }
         if (allEl && !allEl._bizBound)           { gs.bindPostInteractions(allEl, bizInteractionOptions);      allEl._bizBound = true; }
-        if (!document._bizBound && window.GeoHubPostInteractions) { window.GeoHubPostInteractions.bind(document, bizInteractionOptions); document._bizBound = true; }
         if (gs.hydratePostAuthorAvatars) {
           if (overviewEl) gs.hydratePostAuthorAvatars(overviewEl);
           if (allEl) gs.hydratePostAuthorAvatars(allEl);
