@@ -46,3 +46,12 @@ body, html { height: 100%; overflow: hidden; }
       font-size: 0.8rem; color: var(--text-secondary); box-shadow: var(--shadow-md);
     }
     .search-count-badge strong { color: var(--green); }
+    .legend-scroll { max-height: 280px; overflow-y: auto; }
+    .legend-icon { font-size: 0.88rem; width: 20px; text-align: center; flex-shrink: 0; }
+    .place-marker-active { filter: drop-shadow(0 0 6px rgba(255,255,255,0.7)); }
+    .place-tooltip.leaflet-tooltip {
+      background: rgba(4,5,13,0.92) !important; border: 1px solid rgba(255,255,255,0.15) !important;
+      color: #f8fafc !important; border-radius: 8px !important; font-size: 0.78rem !important;
+      padding: 4px 10px !important; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
+    }
+    .place-tooltip.leaflet-tooltip::before { display: none; }

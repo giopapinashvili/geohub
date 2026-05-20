@@ -101,13 +101,15 @@
 
     <!-- Category filter chips -->
     <div class="map-filter-chips" id="mapChips">
-      <div class="map-chip active" data-cat="">All</div>
-      <div class="map-chip" data-cat="tours">🗺️ Tours</div>
-      <div class="map-chip" data-cat="restaurants">🍽️ Food</div>
-      <div class="map-chip" data-cat="hotels">🏨 Hotels</div>
-      <div class="map-chip" data-cat="cafes">☕ Cafés</div>
-      <div class="map-chip" data-cat="guesthouses">🏡 Guesthouses</div>
-      <div class="map-chip" data-cat="attractions">🏛️ Sights</div>
+      <div class="map-chip active" data-cat="">ყველა</div>
+      <div class="map-chip" data-cat="food">🍽️ კვება</div>
+      <div class="map-chip" data-cat="cafe">☕ კაფე</div>
+      <div class="map-chip" data-cat="nightlife">🍸 ბარი</div>
+      <div class="map-chip" data-cat="shopping">🛍️ შოპინგი</div>
+      <div class="map-chip" data-cat="nature">🌳 ბუნება</div>
+      <div class="map-chip" data-cat="culture">🏛️ კულტურა</div>
+      <div class="map-chip" data-cat="entertainment">🎮 გასართობი</div>
+      <div class="map-chip" data-cat="transport">🚇 ტრანსპორტი</div>
     </div>
 
     <!-- Results list -->
@@ -123,15 +125,8 @@
       <i class="fas fa-layer-group"></i> Legend
     </button>
 
-    <!-- Legend -->
-    <div class="map-legend" id="legend">
-      <div class="legend-title">Map Legend</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Tours & Activities</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>Hotels & Stays</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Restaurants & Cafés</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#a855f7"></div>Attractions & Sights</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Other Services</div>
-    </div>
+    <!-- Legend — populated dynamically by map.js -->
+    <div class="map-legend" id="legend"></div>
 
     <!-- Count badge -->
     <div class="search-count-badge" id="countBadge">
