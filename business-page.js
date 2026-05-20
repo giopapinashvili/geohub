@@ -28,6 +28,7 @@
   var _isFollowing = false;
   var _notificationsOn = true;
   var _reviewRating  = 0;
+  var _reviewSort    = 'recent';
   var _previewMode   = false;
   var _postReactions = {}; // legacy, kept for compat
   var _currentPosts  = []; // posts loaded in current render cycle
@@ -1233,48 +1234,156 @@
 
   // ── RENDER: REVIEWS ──────────────────────────────────────────
 
+  function _sortedReviews(reviews) {
+    var arr = reviews ? reviews.slice() : [];
+    if (_reviewSort === 'high')
+      arr.sort(function(a,b){ return (b.rating||0)-(a.rating||0) || tsOf(b.createdAt)-tsOf(a.createdAt); });
+    else if (_reviewSort === 'low')
+      arr.sort(function(a,b){ return (a.rating||0)-(b.rating||0) || tsOf(b.createdAt)-tsOf(a.createdAt); });
+    else
+      arr.sort(function(a,b){ return tsOf(b.createdAt)-tsOf(a.createdAt); });
+    return arr;
+  }
+
   function renderReviews(reviews, biz) {
+    var myUid = _currentUser && _currentUser.uid;
+    var sorted = _sortedReviews(reviews);
+
+    // ── Write review form ──
+    var alreadyReviewed = myUid && reviews && reviews.some(function(r){ return r.userId === myUid; });
     var form = '';
     if (_currentUser && !_isOwner) {
-      form = '<div class="biz-review-form">'+
-        '<div class="biz-review-form-title">Write a Review</div>'+
-        '<div class="biz-star-select">'+[1,2,3,4,5].map(function(n){return '<button type="button" class="biz-star-btn" onclick="window._bizActions.setReviewStar('+n+')">☆</button>';}).join('')+'</div>'+
-        '<textarea class="biz-review-input" id="biz-review-text" placeholder="Share your experience…"></textarea>'+
-        '<button class="biz-submit-btn" id="biz-review-submit-btn" onclick="window._bizActions.submitReview()"><i class="fas fa-paper-plane"></i> Submit Review</button>'+
-      '</div>';
+      if (alreadyReviewed) {
+        form = '<div class="biz-review-already"><i class="fas fa-check-circle"></i> You have already reviewed this business.</div>';
+      } else {
+        form = '<div class="biz-review-form">'+
+          '<div class="biz-review-form-title"><i class="fas fa-pen"></i> Write a Review</div>'+
+          '<div class="biz-star-select">'+
+            [1,2,3,4,5].map(function(n){
+              return '<button type="button" class="biz-star-btn" data-star="'+n+'" '+
+                'onclick="window._bizActions.setReviewStar('+n+')" '+
+                'onmouseover="window._bizActions.previewStar('+n+')" '+
+                'onmouseout="window._bizActions.previewStar(0)">☆</button>';
+            }).join('')+
+          '</div>'+
+          '<textarea class="biz-review-input" id="biz-review-text" placeholder="Share your experience…" maxlength="1200"></textarea>'+
+          '<button class="biz-submit-btn" id="biz-review-submit-btn" onclick="window._bizActions.submitReview()">'+
+            '<i class="fas fa-paper-plane"></i> Submit Review</button>'+
+        '</div>';
+      }
     } else if (!_currentUser) {
-      form = '<div style="background:rgba(255,255,255,.04);border-radius:12px;padding:14px;margin-bottom:14px;text-align:center;font-size:.84rem;color:#94a3b8"><a href="auth.html" style="color:#10b981;font-weight:700">Sign in</a> to leave a review.</div>';
+      form = '<div class="biz-review-signin-prompt">'+
+        '<i class="fas fa-star"></i>'+
+        '<p>Have you visited this business?</p>'+
+        '<a href="auth.html" class="biz-submit-btn biz-review-signin-btn">Sign in to write a review</a>'+
+      '</div>';
     }
+
+    // ── Rating summary with 5-star breakdown ──
     var summary = '';
-    if ((biz.ratingCount||0)>0) {
-      summary='<div class="biz-rating-summary"><div>'+
-        '<div class="biz-rating-big">'+(biz.ratingAverage||0).toFixed(1)+'</div>'+
-        starsHtml(biz.ratingAverage,'biz-rating-stars-big')+
-        '<div class="biz-rating-count-label">'+biz.ratingCount+' reviews</div>'+
-      '</div></div>';
+    if ((biz.ratingCount||0) > 0) {
+      var breakdown = [0,0,0,0,0];
+      if (reviews && reviews.length) {
+        reviews.forEach(function(r){
+          var s = Math.min(5, Math.max(1, Math.round(r.rating||0)));
+          if (s >= 1) breakdown[s-1]++;
+        });
+      }
+      var total = biz.ratingCount || 1;
+      var barsHtml = [5,4,3,2,1].map(function(star){
+        var cnt = breakdown[star-1];
+        var pct = Math.round(cnt/total*100);
+        return '<div class="biz-rating-bar-row">'+
+          '<span class="biz-rating-bar-lbl">'+star+'</span>'+
+          '<span class="biz-rating-bar-icon">★</span>'+
+          '<div class="biz-rating-bar-track"><div class="biz-rating-bar-fill" style="width:'+pct+'%"></div></div>'+
+          '<span class="biz-rating-bar-count">'+(cnt||0)+'</span>'+
+        '</div>';
+      }).join('');
+      summary = '<div class="biz-rating-summary">'+
+        '<div class="biz-rating-summary-left">'+
+          '<div class="biz-rating-big">'+(biz.ratingAverage||0).toFixed(1)+'</div>'+
+          starsHtml(biz.ratingAverage,'biz-rating-stars-big')+
+          '<div class="biz-rating-count-label">'+(biz.ratingCount||0)+' review'+((biz.ratingCount||0)===1?'':'s')+'</div>'+
+        '</div>'+
+        '<div class="biz-rating-bars">'+barsHtml+'</div>'+
+      '</div>';
     }
-    var cards = (!reviews||!reviews.length)
-      ? '<div class="biz-empty-state" style="padding:16px 0"><i class="fas fa-star"></i><p>No reviews yet — be the first!</p></div>'
-      : reviews.map(function(r){
+
+    // ── Sort controls ──
+    var sortControls = (sorted.length > 1)
+      ? '<div class="biz-review-sort">'+
+          '<button class="biz-sort-btn'+(_reviewSort==='recent'?' active':'')+'" onclick="window._bizActions.setReviewSort(\'recent\')">Most recent</button>'+
+          '<button class="biz-sort-btn'+(_reviewSort==='high'?' active':'')+'" onclick="window._bizActions.setReviewSort(\'high\')">Highest rated</button>'+
+          '<button class="biz-sort-btn'+(_reviewSort==='low'?' active':'')+'" onclick="window._bizActions.setReviewSort(\'low\')">Lowest rated</button>'+
+        '</div>'
+      : '';
+
+    // ── Review cards ──
+    var bizName = esc(biz.title || biz.name || 'Owner');
+    var cards = (!sorted || !sorted.length)
+      ? '<div class="biz-empty-state"><i class="fas fa-star"></i><p>No reviews yet — be the first!</p></div>'
+      : sorted.map(function(r){
+          var rid = r.id || '';
+          var isMyReview = !!(myUid && r.userId === myUid);
+          var canDelete = isMyReview || _isOwner;
+          var av = r.authorAvatar
+            ? '<img src="'+esc(r.authorAvatar)+'" alt="" loading="lazy" onerror="this.onerror=null;this.remove()">'
+            : '<span class="biz-rv-initials">'+esc((r.authorName||'U').slice(0,2).toUpperCase())+'</span>';
+
           var replyHtml = '';
           if (r.ownerReply) {
-            replyHtml = '<div class="biz-owner-reply"><i class="fas fa-reply"></i> <strong>Owner replied:</strong> <span>'+esc(r.ownerReply)+'</span></div>';
-          } else if (_isOwner) {
-            replyHtml = '<div id="biz-reply-wrap-'+esc(r.id||'')+'">'+
-              '<button class="biz-cmt-act-btn biz-reply-toggle-btn" onclick="window._bizActions.replyToReview(\''+esc(r.id||'')+'\')"><i class="fas fa-reply"></i> Reply</button>'+
+            replyHtml = '<div class="biz-owner-reply">'+
+              '<div class="biz-owner-reply-head">'+
+                '<i class="fas fa-reply"></i> <strong>Response from '+bizName+'</strong>'+
+                (_isOwner && rid
+                  ? '<div class="biz-reply-actions">'+
+                      '<button class="biz-rv-action-btn" onclick="window._bizActions.editReviewReply(\''+esc(rid)+'\')"><i class="fas fa-pen"></i> Edit</button>'+
+                      '<button class="biz-rv-action-btn danger" onclick="window._bizActions.deleteReviewReply(\''+esc(rid)+'\')"><i class="fas fa-times"></i> Delete reply</button>'+
+                    '</div>'
+                  : '')+
+              '</div>'+
+              '<span class="biz-owner-reply-text">'+esc(r.ownerReply)+'</span>'+
+            '</div>';
+          } else if (_isOwner && rid) {
+            replyHtml = '<div id="biz-reply-wrap-'+esc(rid)+'">'+
+              '<button class="biz-cmt-act-btn biz-reply-toggle-btn" onclick="window._bizActions.replyToReview(\''+esc(rid)+'\')">'+
+                '<i class="fas fa-reply"></i> Reply</button>'+
             '</div>';
           }
-          return '<div class="biz-review-card">'+
-            '<div class="biz-review-header"><span class="biz-review-author">'+esc(r.authorName||'User')+'</span><span class="biz-review-date">'+timeAgo(r.createdAt)+'</span></div>'+
-            '<div class="biz-review-stars">'+'★'.repeat(r.rating||0)+'☆'.repeat(5-(r.rating||0))+'</div>'+
+
+          var deleteBtn = (canDelete && rid)
+            ? '<button class="biz-rv-delete-btn" title="Delete review" onclick="window._bizActions.deleteReview(\''+esc(rid)+'\','+(r.rating||0)+')"><i class="fas fa-trash"></i></button>'
+            : '';
+
+          return '<div class="biz-review-card" data-review-id="'+esc(rid)+'" data-owner-reply="'+esc(r.ownerReply||'')+'">'+
+            '<div class="biz-review-header">'+
+              '<div class="biz-rv-author-row">'+
+                '<div class="biz-rv-av">'+av+'</div>'+
+                '<div class="biz-rv-author-info">'+
+                  '<span class="biz-review-author">'+esc(r.authorName||'User')+'</span>'+
+                  '<span class="biz-review-date">'+timeAgo(r.createdAt)+'</span>'+
+                '</div>'+
+              '</div>'+
+              '<div class="biz-rv-header-right">'+
+                '<div class="biz-review-stars">'+'★'.repeat(r.rating||0)+'☆'.repeat(5-(r.rating||0))+'</div>'+
+                deleteBtn+
+              '</div>'+
+            '</div>'+
             (r.text?'<div class="biz-review-text">'+esc(r.text)+'</div>':'')+
             replyHtml+
           '</div>';
         }).join('');
+
     return '<div class="biz-section">'+
-      '<div class="biz-section-header"><div class="biz-section-title"><i class="fas fa-star"></i> Reviews</div>'+
-      ((biz.ratingCount||0)>0?'<span class="biz-section-badge">★ '+(biz.ratingAverage||0).toFixed(1)+'</span>':'')+
-      '</div><div class="biz-section-body">'+summary+form+cards+'</div></div>';
+      '<div class="biz-section-header">'+
+        '<div class="biz-section-title"><i class="fas fa-star"></i> Reviews</div>'+
+        ((biz.ratingCount||0)>0?'<span class="biz-section-badge">★ '+(biz.ratingAverage||0).toFixed(1)+'</span>':'')+
+      '</div>'+
+      '<div class="biz-section-body">'+
+        summary+form+sortControls+cards+
+      '</div>'+
+    '</div>';
   }
 
   // ── RENDER: ABOUT TAB ────────────────────────────────────────
@@ -1663,6 +1772,7 @@
           '<i class="fas fa-eye-slash"></i> Exit Preview</button></div>':'');
 
     _reviewRating = 0;
+    _reviewSort   = 'recent';
 
     // Wire tab clicks
     document.querySelectorAll('.biz-tab').forEach(function(btn) {
@@ -4122,8 +4232,21 @@
     closePhoto: function()   { var lb=document.getElementById('biz-lightbox'); if(lb) lb.classList.remove('open'); },
 
     setReviewStar: function(n) {
-      _reviewRating=n;
-      document.querySelectorAll('.biz-star-btn').forEach(function(b,i){ b.textContent=i<n?'★':'☆'; b.classList.toggle('active',i<n); });
+      _reviewRating = n;
+      document.querySelectorAll('.biz-star-btn').forEach(function(b){
+        var s = parseInt(b.dataset.star||'0', 10);
+        b.textContent = s <= n ? '★' : '☆';
+        b.classList.toggle('active', s <= n);
+      });
+    },
+
+    previewStar: function(n) {
+      var active = n > 0 ? n : _reviewRating;
+      document.querySelectorAll('.biz-star-btn').forEach(function(b){
+        var s = parseInt(b.dataset.star||'0', 10);
+        b.textContent = s <= active ? '★' : '☆';
+        b.classList.toggle('active', s <= active);
+      });
     },
 
     submitReview: function() {
@@ -4134,17 +4257,23 @@
       var btn=document.getElementById('biz-review-submit-btn');
       if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Posting…'; }
       var name=_currentUser.displayName||(_currentUser.email||'').split('@')[0]||'User';
+      var avatar=_currentUser.photoURL||'';
       _fs.addDoc(_fs.collection(_db,'businessReviews'),{
-        businessId:BIZ_ID,userId:_currentUser.uid,authorName:name,
-        rating:_reviewRating,text:text.trim(),createdAt:_fs.serverTimestamp(),
+        businessId:BIZ_ID, userId:_currentUser.uid, authorName:name, authorAvatar:avatar,
+        rating:_reviewRating, text:text.trim(), createdAt:_fs.serverTimestamp(),
       }).then(function(){
         var ot=_biz.ratingTotal||0,oc=_biz.ratingCount||0,nc=oc+1,nt=ot+_reviewRating;
+        var newAvg=Math.round(nt/nc*10)/10;
         notifyBusinessPage('business_review', name + ' reviewed your page', text.trim().slice(0,120), 'business.html?id=' + BIZ_ID + '#reviews', { reviewerId: _currentUser.uid, rating: _reviewRating });
         return _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID),{
-          ratingTotal:nt,ratingCount:nc,ratingAverage:Math.round(nt/nc*10)/10,
-          reviewCount:_fs.increment(1),updatedAt:_fs.serverTimestamp(),
+          ratingTotal:nt, ratingCount:nc, ratingAverage:newAvg,
+          reviewCount:_fs.increment(1), updatedAt:_fs.serverTimestamp(),
+        }).then(function(){
+          _biz.ratingTotal=nt; _biz.ratingCount=nc; _biz.ratingAverage=newAvg;
+          _biz.reviewCount=(_biz.reviewCount||0)+1;
+          _reviewRating=0;
         });
-      }).then(function(){ showToast('Review posted!'); load(); })
+      }).then(function(){ showToast('Review posted!'); reloadReviewsTab(); })
         .catch(function(err){ console.error('[BizPage] Review failed',err); showToast('Could not post review',false); if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i> Submit Review'; } });
     },
 
@@ -4911,6 +5040,74 @@
       }).catch(function(err){
         showToast('Could not post reply: '+(err.code||err.message), false);
         if (ta) ta.disabled = false;
+      });
+    },
+
+    // ── Review sort ──────────────────────────────────────────────
+    setReviewSort: function(sort) {
+      _reviewSort = sort;
+      reloadReviewsTab();
+    },
+
+    // ── Owner delete reply ────────────────────────────────────────
+    deleteReviewReply: function(reviewId) {
+      if (!_isOwner || !reviewId) return;
+      if (!confirm('Delete your reply?')) return;
+      _fs.updateDoc(_fs.doc(_db,'businessReviews',reviewId), {
+        ownerReply: '', updatedAt: _fs.serverTimestamp()
+      }).then(function(){
+        showToast('Reply deleted');
+        reloadReviewsTab();
+      }).catch(function(err){
+        showToast('Could not delete reply: '+(err.code||err.message), false);
+      });
+    },
+
+    // ── Owner edit reply (inline) ─────────────────────────────────
+    editReviewReply: function(reviewId) {
+      if (!_isOwner || !reviewId) return;
+      var card = document.querySelector('[data-review-id="'+CSS.escape(reviewId)+'"]');
+      if (!card) return;
+      var replyDiv = card.querySelector('.biz-owner-reply');
+      if (!replyDiv) return;
+      var existing = card.dataset.ownerReply || '';
+      replyDiv.innerHTML =
+        '<div class="biz-review-reply-form">'+
+          '<textarea class="biz-form-textarea" id="biz-reply-edit-ta-'+reviewId+'" rows="2" style="min-height:60px;margin-bottom:8px">'+esc(existing)+'</textarea>'+
+          '<div style="display:flex;gap:8px">'+
+            '<button class="biz-submit-btn" style="flex:1;padding:8px 14px;font-size:.82rem" '+
+              'onclick="window._bizActions.saveReviewReply(\''+reviewId+'\',document.getElementById(\'biz-reply-edit-ta-'+reviewId+'\'))">'+
+              '<i class="fas fa-paper-plane"></i> Save Reply</button>'+
+            '<button class="biz-cmt-act-btn" style="white-space:nowrap" '+
+              'onclick="window._bizActions.cancelEditReviewReply(\''+reviewId+'\')">Cancel</button>'+
+          '</div>'+
+        '</div>';
+      var ta = document.getElementById('biz-reply-edit-ta-'+reviewId);
+      if (ta) setTimeout(function(){ ta.focus(); ta.selectionStart = ta.selectionEnd = ta.value.length; }, 40);
+    },
+
+    cancelEditReviewReply: function(reviewId) {
+      reloadReviewsTab();
+    },
+
+    // ── Delete review (owner or reviewer) ────────────────────────
+    deleteReview: function(reviewId, rating) {
+      if (!_currentUser || !reviewId) return;
+      if (!confirm('Delete this review?')) return;
+      _fs.deleteDoc(_fs.doc(_db,'businessReviews',reviewId)).then(function(){
+        var oc = Math.max(0, (_biz.ratingCount || 1) - 1);
+        var ot = Math.max(0, (_biz.ratingTotal || 0) - (rating || 0));
+        var newAvg = oc > 0 ? Math.round(ot/oc*10)/10 : 0;
+        _biz.ratingCount = oc; _biz.ratingTotal = ot; _biz.ratingAverage = newAvg;
+        _biz.reviewCount = Math.max(0, (_biz.reviewCount || 1) - 1);
+        _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID),{
+          ratingCount:_fs.increment(-1), ratingTotal:_fs.increment(-(rating||0)),
+          ratingAverage: newAvg, reviewCount:_fs.increment(-1), updatedAt:_fs.serverTimestamp()
+        }).catch(function(){});
+        showToast('Review deleted');
+        reloadReviewsTab();
+      }).catch(function(err){
+        showToast('Could not delete: '+(err.code||err.message), false);
       });
     },
 
