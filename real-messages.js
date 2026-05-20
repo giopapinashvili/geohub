@@ -33,6 +33,7 @@
     { label:'Night',   v:'#6366f1,#1e1b4b' },
     { label:'Gold',    v:'#f59e0b,#d97706' },
   ];
+  const DEFAULT_THEME = THEMES[0].v;
 
   const esc = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const $ = s => document.querySelector(s);
@@ -480,6 +481,9 @@
     const mutedMs = mutedUntil && mutedUntil.toMillis ? mutedUntil.toMillis() : Number(mutedUntil||0);
     const muted = !!(mutedUntil && (!mutedMs || mutedMs > Date.now()));
     const att=detailAttachments();
+    const currentTheme = THEMES.find(t=>t.v === (convTheme || '')) || THEMES.find(t=>t.v === (convTheme || DEFAULT_THEME)) || THEMES[0];
+    const themeVal = convTheme || DEFAULT_THEME;
+    const themeColors = themeVal.split(',').map(c=>esc(c.trim())).join(',');
     const avatar = peer.avatar ? '<img class="info-big-av" src="'+esc(peer.avatar)+'" alt="" onerror="this.style.display=\'none\'">' : '<div class="info-big-av info-av-icon">'+esc(initials(name))+'</div>';
     return (mobile ? '<div class="msg-mobile-details-head"><button type="button" class="msg-mobile-details-close" onclick="window.__ghCloseMobileInfoSheet()"><i class="fas fa-arrow-left"></i></button><strong>Conversation details</strong></div>' : '')+
       '<div class="info-top msg-details-top">'+avatar+
@@ -493,7 +497,7 @@
         '<button type="button" class="info-action-btn" onclick="window.__ghToggleActiveMute()"><i class="fas '+(muted?'fa-bell':'fa-bell-slash')+'"></i> '+(muted?'Unmute':'Mute')+'</button>'+
       '</div>'+
       '<div class="msg-details-section"><div class="msg-details-title"><i class="fas fa-palette"></i> Customize chat</div>'+
-        '<button type="button" class="msg-details-row" onclick="window.__ghShowThemePicker()"><span>Theme/color</span><i class="fas fa-chevron-right"></i></button>'+
+        '<button type="button" class="msg-details-row" onclick="window.__ghShowThemePicker(this)"><span>Theme/color <small class="msg-theme-current"><span class="msg-theme-dot" style="background:linear-gradient(135deg,'+themeColors+')"></span>'+esc(currentTheme.label)+'</small></span><i class="fas fa-chevron-right"></i></button>'+
         '<button type="button" class="msg-details-row" onclick="window.__ghShowNicknames()"><span>Nicknames</span><i class="fas fa-chevron-right"></i></button>'+
       '</div>'+
       renderDetailMedia(att)+
@@ -650,15 +654,20 @@
 
   function applyTheme(theme){
     convTheme = theme || '';
+    const effective = convTheme || DEFAULT_THEME;
+    const parts = effective.split(',').map(c => c.trim()).filter(Boolean);
+    const c1 = parts[0] || '#10b981';
+    const c2 = parts[1] || c1;
+    document.body.style.setProperty('--msg-theme-1', c1);
+    document.body.style.setProperty('--msg-theme-2', c2);
+    document.body.style.setProperty('--msg-theme-gradient', 'linear-gradient(135deg,'+c1+','+c2+')');
     const style = document.getElementById('convThemeStyle') || (() => {
       const s = document.createElement('style'); s.id='convThemeStyle'; document.head.appendChild(s); return s;
     })();
-    if(convTheme){
-      const [c1,c2] = convTheme.split(',');
-      style.textContent = '.bubble-sent { background: linear-gradient(135deg,'+c1+','+c2+') !important; }';
-    } else {
-      style.textContent = '';
-    }
+    style.textContent = 'body.page-messages .bubble-sent{background:var(--msg-theme-gradient)!important;color:#fff!important;}'
+      + 'body.page-messages .send-btn:not(:disabled){background:var(--msg-theme-gradient)!important;color:#fff!important;}'
+      + 'body.page-messages .header-action-btn:hover,body.page-messages .info-action-btn:hover,body.page-messages .msg-details-row:hover{border-color:var(--msg-theme-1)!important;color:var(--msg-theme-1)!important;}'
+      + 'body.page-messages .gh-theme-swatch.active{border-color:#fff!important;box-shadow:0 0 0 2px var(--msg-theme-1),0 10px 24px rgba(0,0,0,.28)!important;}';
   }
 
   function renderMessages(items, filterText){
@@ -1110,25 +1119,43 @@
   window.__ghConvDotsMenu = function(e, convId){ return convOptionsMenu(e, convId); };
   window.__ghConvCtxMenu  = function(e, convId){ return convOptionsMenu(e, convId); };
 
-  function showThemePicker(){
+  function showThemePicker(anchor){
+    if(!activeConversation) return;
     document.querySelectorAll('.gh-theme-picker').forEach(m=>m.remove());
     const picker=document.createElement('div');
-    picker.className='gh-theme-picker';
+    const inline = !!(anchor && anchor.closest && anchor.closest('.info-panel, .msg-mobile-details'));
+    picker.className='gh-theme-picker' + (inline ? ' inline' : '');
     picker.innerHTML='<div class="gh-theme-title">Chat Theme</div>'
-      + THEMES.map(t=>'<button class="gh-theme-swatch'+(convTheme===t.v?' active':'')+'" data-theme-val="'+esc(t.v)+'" style="background:linear-gradient(135deg,'+t.v.split(',').map(c=>esc(c)).join(',')+')" title="'+esc(t.label)+'"></button>').join('')
+      + THEMES.map(t=>'<button type="button" class="gh-theme-swatch'+(((convTheme || DEFAULT_THEME)===t.v)?' active':'')+'" data-theme-val="'+esc(t.v)+'" style="background:linear-gradient(135deg,'+t.v.split(',').map(c=>esc(c)).join(',')+')" title="'+esc(t.label)+'" aria-label="'+esc(t.label)+'"></button>').join('')
       + '<button class="gh-theme-reset" data-theme-val="">Reset</button>';
     picker.querySelectorAll('[data-theme-val]').forEach(btn=>{
       btn.onclick=()=>{
         const val=btn.dataset.themeVal||'';
+        const prevTheme = activeConvData && activeConvData.theme || '';
+        applyTheme(val);
+        activeConvData = Object.assign({}, activeConvData || {}, { theme: val });
+        picker.querySelectorAll('.gh-theme-swatch').forEach(b=>b.classList.toggle('active', (b.dataset.themeVal || DEFAULT_THEME) === (val || DEFAULT_THEME)));
+        renderConversationDetails();
         window.GeoSocial?.setConversationTheme(activeConversation, val, ok=>{
-          if(ok){ applyTheme(val); picker.remove(); }
+          if(ok){
+            if(!inline) picker.remove();
+          } else {
+            applyTheme(prevTheme);
+            activeConvData = Object.assign({}, activeConvData || {}, { theme: prevTheme });
+            renderConversationDetails();
+            window.showToast && window.showToast('Theme update failed');
+          }
         });
       };
     });
-    const header=$('#chatHeader');
-    if(header) header.appendChild(picker);
-    const dismiss=e=>{ if(!picker.contains(e.target)){ picker.remove(); document.removeEventListener('click',dismiss,true); } };
-    setTimeout(()=>document.addEventListener('click',dismiss,true),50);
+    if(inline && anchor){
+      anchor.insertAdjacentElement('afterend', picker);
+    } else {
+      const header=$('#chatHeader');
+      if(header) header.appendChild(picker);
+      const dismiss=e=>{ if(!picker.contains(e.target)){ picker.remove(); document.removeEventListener('click',dismiss,true); } };
+      setTimeout(()=>document.addEventListener('click',dismiss,true),50);
+    }
   }
 
   function showNicknamePanel(){
@@ -1169,7 +1196,7 @@
       +'</div>'
       +'<div class="chat-header-actions">'
       +'<button class="header-action-btn" title="Search" id="msgSearchBtn" onclick="window.__ghToggleSearch()"><i class="fas fa-search"></i></button>'
-      +'<button class="header-action-btn" title="Theme" onclick="window.__ghShowThemePicker()"><i class="fas fa-palette"></i></button>'
+      +'<button class="header-action-btn" title="Theme" onclick="window.__ghShowThemePicker(this)"><i class="fas fa-palette"></i></button>'
       +'<button class="header-action-btn" title="Nicknames" onclick="window.__ghShowNicknames()"><i class="fas fa-user-tag"></i></button>'
       +'<button class="header-action-btn mobile-info-btn" title="Info" onclick="window.__ghToggleInfoPanel()"><i class="fas fa-info-circle"></i></button>'
       +'</div>';

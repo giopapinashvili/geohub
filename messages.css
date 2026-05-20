@@ -456,6 +456,9 @@ body.page-messages .msg-reaction-picker{z-index:2147483000!important;}
 .gh-theme-swatch.active{border-color:#fff;}
 .gh-theme-reset{width:100%;padding:6px;border-radius:8px;background:rgba(255,255,255,.06);border:0;color:var(--text-muted);font-size:.78rem;cursor:pointer;margin-top:4px;}
 .gh-theme-reset:hover{background:rgba(255,255,255,.12);color:#fff;}
+.gh-theme-picker.inline{position:static;width:100%;margin:8px 0 12px;box-shadow:none;background:rgba(255,255,255,.045);border-color:var(--border-subtle);}
+.msg-theme-current{display:inline-flex;align-items:center;gap:6px;margin-left:8px;color:var(--text-muted);font-size:.72rem;font-weight:700;text-transform:none;letter-spacing:0;}
+.msg-theme-dot{width:18px;height:18px;border-radius:50%;display:inline-block;border:1px solid rgba(255,255,255,.28);box-shadow:0 4px 12px rgba(0,0,0,.2);}
 
 /* ===== NICKNAME MODAL ===== */
 .gh-nick-modal{position:fixed;inset:0;background:rgba(0,0,0,.68);z-index:10030;display:grid;place-items:center;padding:18px;}
