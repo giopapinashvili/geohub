@@ -361,18 +361,30 @@
 
   function updateFriendButtons(uid, status) {
     status = status || { state: 'none' };
-    $$('[data-friend-user="' + uid + '"]').forEach(btn => {
+    // Close any open friend dropdowns
+    $$('.friend-dropdown-menu').forEach(function(m){ m.remove(); });
+    $$('[data-friend-user="' + uid + '"]').forEach(function(btn) {
+      // Remove previously injected siblings (decline button)
+      var sib = btn.parentElement && btn.parentElement.querySelector('[data-decline-inline]');
+      if (sib) sib.remove();
       btn.dataset.friendState = status.state || 'none';
       btn.dataset.requestId = status.requestId || '';
       if (status.state === 'friends') {
         btn.classList.add('following');
-        btn.innerHTML = '<i class="fas fa-user-check"></i> Friends';
+        btn.innerHTML = '<i class="fas fa-user-check"></i> Friends <i class="fas fa-chevron-down" style="font-size:.65em;margin-left:4px;opacity:.7"></i>';
       } else if (status.state === 'incoming') {
         btn.classList.add('following');
-        btn.innerHTML = '<i class="fas fa-user-clock"></i> Respond';
+        btn.innerHTML = '<i class="fas fa-check"></i> Accept';
+        // Insert Decline button immediately after
+        var declineBtn = document.createElement('button');
+        declineBtn.className = btn.className.replace('btn-primary','btn-ghost');
+        declineBtn.setAttribute('data-decline-inline', uid);
+        declineBtn.dataset.requestId = status.requestId || '';
+        declineBtn.innerHTML = '<i class="fas fa-times"></i> Decline';
+        btn.insertAdjacentElement('afterend', declineBtn);
       } else if (status.state === 'outgoing') {
-        btn.classList.add('following');
-        btn.innerHTML = '<i class="fas fa-clock"></i> Request sent';
+        btn.classList.remove('following');
+        btn.innerHTML = '<i class="fas fa-clock"></i> Cancel Request';
       } else {
         btn.classList.remove('following');
         btn.innerHTML = '<i class="fas fa-user-plus"></i> Add Friend';
@@ -436,9 +448,21 @@
       const friendsTab = $('#tab-friends');
       const countEl = $('.ptab[data-tab="friends"] .tab-count');
       const ownProfile = window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser && window.GeoFirebase.auth.currentUser.uid === user.uid;
+      function rebuildFriendsTab() {
+        if (!friendsTab) return;
+        const incomingHtml = friendsTab.dataset.incomingHtml || '';
+        const sentHtml = friendsTab.dataset.sentHtml || '';
+        const friendsListHtml = friendsTab.dataset.friendsListHtml || '';
+        const isEmpty = !incomingHtml && !sentHtml && !friendsListHtml;
+        if (isEmpty) {
+          friendsTab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-user-group"></i><h3>No friends yet</h3><p>Send friend requests from profiles.</p></div>';
+        } else {
+          friendsTab.innerHTML = incomingHtml + sentHtml + friendsListHtml;
+        }
+      }
       if (ownProfile && window.GeoSocial.listenFriendRequests) {
-        window.GeoSocial.listenFriendRequests(requests => {
-          const pending = requests.map(r => {
+        window.GeoSocial.listenFriendRequests(function(requests) {
+          const pending = requests.map(function(r) {
             const fromId = r.fromUserId || r.fromId || '';
             const avatarHtml = r.senderAvatar
               ? '<img src="' + esc(r.senderAvatar) + '" alt="" loading="lazy" decoding="async">'
@@ -453,15 +477,39 @@
               + '<button class="btn btn-ghost btn-sm" data-reject-request="' + esc(r.id) + '">Decline</button>'
               + '</div></div></a>';
           }).join('');
-          if (friendsTab && pending) friendsTab.dataset.pendingRequestsHtml = '<div style="font-weight:800;margin:0 0 10px">Friend Requests</div><div class="gh-friend-grid">'+pending+'</div><div style="height:18px"></div>';
+          if (friendsTab) friendsTab.dataset.incomingHtml = pending ? '<div style="font-weight:800;margin:0 0 10px;color:var(--green)"><i class="fas fa-user-clock" style="margin-right:6px"></i>Friend Requests (' + requests.length + ')</div><div class="gh-friend-grid">' + pending + '</div><div style="height:18px"></div>' : '';
+          rebuildFriendsTab();
         });
       }
-      window.GeoSocial.listenFriends(user.uid, friends => {
+      if (ownProfile && window.GeoSocial.listenSentFriendRequests) {
+        window.GeoSocial.listenSentFriendRequests(function(sent) {
+          const sentCards = sent.map(function(r) {
+            const toId = r.toUserId || '';
+            const avHtml = r.recipientAvatar
+              ? '<img src="' + esc(r.recipientAvatar) + '" alt="" loading="lazy" decoding="async">'
+              : esc(initialLetters(r.recipientName || 'GeoHub User', ''));
+            return '<a class="gh-friend-card" href="profile.html?id=' + encodeURIComponent(toId) + '" style="text-decoration:none;color:inherit">'
+              + '<span class="gh-avatar">' + avHtml + '</span>'
+              + '<div style="flex:1;min-width:0">'
+              + '<strong>' + esc(r.recipientName || 'GeoHub User') + '</strong>'
+              + '<span>@' + esc(r.recipientUsername || toId) + '</span>'
+              + '<div class="gh-friend-request-actions" onclick="event.preventDefault()">'
+              + '<button class="btn btn-ghost btn-sm" data-cancel-sent-request="' + esc(r.id) + '" data-to-user-id="' + esc(toId) + '"><i class="fas fa-times"></i> Cancel</button>'
+              + '</div></div></a>';
+          }).join('');
+          if (friendsTab) friendsTab.dataset.sentHtml = sentCards ? '<div style="font-weight:800;margin:0 0 10px"><i class="fas fa-paper-plane" style="margin-right:6px"></i>Sent Requests (' + sent.length + ')</div><div class="gh-friend-grid">' + sentCards + '</div><div style="height:18px"></div>' : '';
+          rebuildFriendsTab();
+        });
+      }
+      window.GeoSocial.listenFriends(user.uid, function(friends) {
         if (countEl) countEl.textContent = friends.length || '0';
-        if (!friendsTab) return;
-        const pendingHtml = friendsTab.dataset.pendingRequestsHtml || '';
-        if (!friends.length && !pendingHtml) { friendsTab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-user-group"></i><h3>No friends yet</h3><p>Send friend requests from profiles.</p></div>'; return; }
-        friendsTab.innerHTML = pendingHtml + (friends.length ? '<div style="font-weight:800;margin:0 0 10px">Friends</div><div class="gh-friend-grid">'+friends.map(f => '<a class="gh-friend-card" href="profile.html?id='+encodeURIComponent(f.uid||f.id)+'"><span class="gh-avatar">'+(f.avatar||f.photoURL ? '<img src="'+esc(f.avatar||f.photoURL)+'" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.style.display=\'none\'">' : esc(initialLetters(f.fullName||f.displayName||f.name||'GeoHub User',f.email)))+'</span><div><strong>'+esc(f.fullName||f.displayName||f.name||'GeoHub User')+'</strong><span>@'+esc(f.username||'user')+'</span></div></a>').join('')+'</div>' : '');
+        const fl = friends.length ? '<div style="font-weight:800;margin:0 0 10px"><i class="fas fa-user-group" style="margin-right:6px"></i>Friends (' + friends.length + ')</div><div class="gh-friend-grid">' + friends.map(function(f) {
+          return '<a class="gh-friend-card" href="profile.html?id=' + encodeURIComponent(f.uid||f.id) + '">'
+            + '<span class="gh-avatar">' + (f.avatar||f.photoURL ? '<img src="'+esc(f.avatar||f.photoURL)+'" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.style.display=\'none\'">' : esc(initialLetters(f.fullName||f.displayName||f.name||'GeoHub User',f.email||''))) + '</span>'
+            + '<div><strong>' + esc(f.fullName||f.displayName||f.name||'GeoHub User') + '</strong><span>@' + esc(f.username||'user') + '</span></div></a>';
+        }).join('') + '</div>' : '';
+        if (friendsTab) friendsTab.dataset.friendsListHtml = fl;
+        rebuildFriendsTab();
       });
     }
 
@@ -1660,29 +1708,89 @@
       e.preventDefault();
       const target = friendBtn.dataset.friendUser;
       const st = friendBtn.dataset.friendState || 'none';
-      if (window.GeoSocial) {
-        if (st === 'incoming') {
-          const reqId = friendBtn.dataset.requestId;
-          if (reqId) {
-            var choice = confirm('Accept friend request from this user?');
-            if (choice) {
-              window.GeoSocial.respondFriendRequest(reqId, true, () => updateFriendButtons(target, { state: 'friends' }));
-            } else {
-              window.GeoSocial.respondFriendRequest(reqId, false, () => updateFriendButtons(target, { state: 'none' }));
-            }
-          }
-        } else if (st === 'friends') {
-          if (confirm('Unfriend this person?')) {
-            if (window.GeoSocial.removeFriend) window.GeoSocial.removeFriend(target, () => updateFriendButtons(target, { state: 'none' }));
-            else if (window.GeoFriendships) { window.GeoFriendships.unfriend(target); updateFriendButtons(target, { state: 'none' }); }
-          }
-        } else if (st === 'outgoing') {
-          toast('Friend request already sent — waiting for response.');
-        } else {
-          window.GeoSocial.sendFriendRequest(target, function(state) { updateFriendButtons(target, { state: state === 'pending' ? 'outgoing' : (state || 'outgoing') }); });
+      if (!window.GeoSocial) { toast('Friends system is still loading', 'error'); return; }
+      if (st === 'incoming') {
+        // Accept directly (Decline is a sibling button handled separately)
+        const reqId = friendBtn.dataset.requestId;
+        if (reqId) {
+          friendBtn.disabled = true;
+          window.GeoSocial.respondFriendRequest(reqId, true, function() {
+            friendBtn.disabled = false;
+            updateFriendButtons(target, { state: 'friends' });
+          });
+        }
+      } else if (st === 'friends') {
+        // Toggle dropdown menu for Unfriend/Message
+        var existingMenu = document.querySelector('.friend-dropdown-menu[data-for="' + target + '"]');
+        if (existingMenu) { existingMenu.remove(); return; }
+        var menu = document.createElement('div');
+        menu.className = 'friend-dropdown-menu';
+        menu.setAttribute('data-for', target);
+        menu.style.cssText = 'position:absolute;z-index:9999;background:var(--bg-card,#0d111f);border:1px solid var(--gh-border,rgba(255,255,255,.1));border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.5);min-width:160px;padding:4px 0;margin-top:4px';
+        menu.innerHTML = '<button class="fd-item" data-message-user="' + esc(target) + '" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 16px;background:none;border:none;color:var(--gh-text,#f0f4ff);cursor:pointer;font-size:.87rem;text-align:left"><i class="fas fa-comment" style="width:14px"></i> Message</button>'
+          + '<button class="fd-item" data-unfriend-user="' + esc(target) + '" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 16px;background:none;border:none;color:#f87171;cursor:pointer;font-size:.87rem;text-align:left"><i class="fas fa-user-minus" style="width:14px"></i> Unfriend</button>';
+        friendBtn.style.position = 'relative';
+        friendBtn.parentElement.style.position = 'relative';
+        friendBtn.insertAdjacentElement('afterend', menu);
+        setTimeout(function() {
+          function closeMenu(ev) { if (!menu.contains(ev.target) && ev.target !== friendBtn) { menu.remove(); document.removeEventListener('click', closeMenu); } }
+          document.addEventListener('click', closeMenu);
+        }, 10);
+      } else if (st === 'outgoing') {
+        // Cancel the outgoing request
+        friendBtn.disabled = true;
+        friendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        if (window.GeoSocial.cancelFriendRequest) {
+          window.GeoSocial.cancelFriendRequest(target, function() {
+            friendBtn.disabled = false;
+            updateFriendButtons(target, { state: 'none' });
+          });
+        } else if (window.GeoFriendships && window.GeoFriendships.cancelRequest) {
+          window.GeoFriendships.cancelRequest(target, function() {
+            friendBtn.disabled = false;
+            updateFriendButtons(target, { state: 'none' });
+          });
         }
       } else {
-        toast('Friends system is still loading', 'error');
+        window.GeoSocial.sendFriendRequest(target, function(state) {
+          updateFriendButtons(target, { state: state === 'pending' ? 'outgoing' : (state || 'outgoing') });
+        });
+      }
+    }
+    // Decline inline button (injected by updateFriendButtons for incoming state)
+    const declineInlineBtn = e.target.closest('[data-decline-inline]');
+    if (declineInlineBtn) {
+      e.preventDefault();
+      const target = declineInlineBtn.dataset.declineInline;
+      const reqId = declineInlineBtn.dataset.requestId;
+      if (reqId && window.GeoSocial) {
+        declineInlineBtn.disabled = true;
+        window.GeoSocial.respondFriendRequest(reqId, false, function() {
+          updateFriendButtons(target, { state: 'none' });
+        });
+      }
+    }
+    // Friend dropdown: Unfriend
+    const unfriendBtn = e.target.closest('[data-unfriend-user]');
+    if (unfriendBtn) {
+      e.preventDefault();
+      const target = unfriendBtn.dataset.unfriendUser;
+      var menu2 = document.querySelector('.friend-dropdown-menu');
+      if (menu2) menu2.remove();
+      if (window.GeoSocial && window.GeoSocial.removeFriend) {
+        window.GeoSocial.removeFriend(target, function() { updateFriendButtons(target, { state: 'none' }); });
+      } else if (window.GeoFriendships) {
+        window.GeoFriendships.unfriend(target);
+        updateFriendButtons(target, { state: 'none' });
+      }
+    }
+    const cancelSentBtn = e.target.closest('[data-cancel-sent-request]');
+    if (cancelSentBtn) {
+      e.preventDefault();
+      const toId = cancelSentBtn.dataset.toUserId || '';
+      if (toId && window.GeoSocial && window.GeoSocial.cancelFriendRequest) {
+        cancelSentBtn.disabled = true;
+        window.GeoSocial.cancelFriendRequest(toId, function() { cancelSentBtn.disabled = false; });
       }
     }
     const acceptBtn = e.target.closest('[data-accept-request]');
@@ -1690,15 +1798,15 @@
       e.preventDefault();
       const reqId = acceptBtn.dataset.acceptRequest;
       const fromUid = acceptBtn.dataset.fromUserId || '';
-      if (window.GeoFriendships) { window.GeoFriendships.accept(reqId, fromUid); }
-      else if (window.GeoSocial) { window.GeoSocial.respondFriendRequest(reqId, true, () => location.reload()); }
+      if (window.GeoSocial) { window.GeoSocial.respondFriendRequest(reqId, true, function(){ }); }
+      else if (window.GeoFriendships) { window.GeoFriendships.accept(reqId, fromUid); }
     }
     const rejectBtn = e.target.closest('[data-reject-request]');
     if (rejectBtn) {
       e.preventDefault();
       const reqId = rejectBtn.dataset.rejectRequest;
-      if (window.GeoFriendships) { window.GeoFriendships.decline(reqId); }
-      else if (window.GeoSocial) { window.GeoSocial.respondFriendRequest(reqId, false, () => location.reload()); }
+      if (window.GeoSocial) { window.GeoSocial.respondFriendRequest(reqId, false, function(){}); }
+      else if (window.GeoFriendships) { window.GeoFriendships.decline(reqId); }
     }
 
     const msgBtn = e.target.closest('[data-message-user]');

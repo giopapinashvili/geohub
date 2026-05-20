@@ -63,6 +63,8 @@
       listenFriendRequests: function(cb){ cb([]); return function(){}; },
       listenFriends: function(uid, cb){ cb([]); return function(){}; },
       removeFriend: function(){ noop(); },
+      cancelFriendRequest: function(){ noop(); },
+      listenSentFriendRequests: function(cb){ cb([]); return function(){}; },
       addCommentReply: function(){ noop(); },
       listenCommentReplies: function(postId, commentId, cb){ cb([]); return function(){}; },
       createCheckin: noop,
@@ -1750,13 +1752,59 @@
     function removeFriend(targetUserId, callback) {
       requireAuth(function(user){
         var fid = friendshipId(user.uid, targetUserId);
-        deleteDoc(doc(db, 'friends', fid)).then(function(){
+        Promise.all([
+          deleteDoc(doc(db, 'friends', fid)).catch(function(){}),
+          deleteDoc(doc(db, 'friendships', fid)).catch(function(){})
+        ]).then(function(){
           updateDoc(doc(db, 'users', targetUserId), { friendsCount: increment(-1) }).catch(function(){});
           updateDoc(doc(db, 'users', user.uid), { friendsCount: increment(-1) }).catch(function(){});
           toast('Friend removed');
           if(callback) callback(false);
         }).catch(function(err){ console.error('[GeoSocial] removeFriend', err); toast('Could not remove friend.', 'error'); });
       });
+    }
+
+    function cancelFriendRequest(toUserId, callback) {
+      requireAuth(function(user){
+        var reqRef = doc(db, 'friendRequests', user.uid + '_' + toUserId);
+        deleteDoc(reqRef).then(function(){
+          toast('Friend request cancelled');
+          if(callback) callback();
+        }).catch(function(err){
+          if(err && err.code === 'not-found'){ if(callback) callback(); return; }
+          console.error('[GeoSocial] cancelFriendRequest', err);
+          toast('Could not cancel request.', 'error');
+          if(callback) callback(err);
+        });
+      });
+    }
+
+    function listenSentFriendRequests(callback) {
+      var uid = currentUid();
+      if(!uid){ callback([]); return function(){}; }
+      // Single-field query — no composite index needed; filter pending client-side
+      var q = query(collection(db,'friendRequests'), where('fromUserId','==',uid), limit(50));
+      return onSnapshot(q, function(snap){
+        var items=[];
+        snap.forEach(function(d){
+          var r=Object.assign({id:d.id},d.data());
+          if((r.status||'')==='pending') items.push(r);
+        });
+        items.sort(function(a,b){ return tsToMillis(b.createdAt)-tsToMillis(a.createdAt); });
+        if(!items.length){ callback([]); return; }
+        Promise.all(items.map(function(r){
+          var toId=r.toUserId||'';
+          if(!toId) return Promise.resolve(r);
+          return getDoc(doc(db,'users',toId)).then(function(us){
+            var u=us.exists()?us.data():{};
+            return Object.assign({},r,{
+              recipientName: u.fullName||u.displayName||u.name||'GeoHub User',
+              recipientUsername: u.username||toId,
+              recipientAvatar: u.avatar||u.photoURL||''
+            });
+          }).catch(function(){ return r; });
+        })).then(function(enriched){ callback(enriched); });
+      }, function(err){ console.warn('[GeoSocial] listenSentFriendRequests', err.message); callback([]); });
     }
 
     // ── CHECK-INS ────────────────────────────────────────────────────────
@@ -3639,6 +3687,8 @@
       listenFriendRequests:   listenFriendRequests,
       listenFriends:          listenFriends,
       removeFriend:           removeFriend,
+      cancelFriendRequest:    cancelFriendRequest,
+      listenSentFriendRequests: listenSentFriendRequests,
       addCommentReply:        addCommentReply,
       listenCommentReplies:   listenCommentReplies,
       createCheckin:           createCheckin,

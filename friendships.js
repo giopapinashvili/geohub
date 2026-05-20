@@ -117,36 +117,49 @@
   /* ── core API ────────────────────────────────────────────────── */
 
   function sendRequest(toUserId) {
+    // Delegate to GeoSocial which uses the correct named doc IDs
+    if (window.GeoSocial && window.GeoSocial.sendFriendRequest) {
+      window.GeoSocial.sendFriendRequest(toUserId, function() {});
+      return;
+    }
     requireAuth(function (me) {
       var GF = window.GeoFirebase;
       if (!GF || !GF.db || !GF.fs) return;
       if (me.uid === toUserId) { toast('You cannot add yourself.', 'error'); return; }
-
-      // Check no existing request/friendship first
-      getStatus(toUserId, function (status) {
-        if (status !== 'none') {
-          if (status === 'friends') toast('Already friends.', 'error');
-          else if (status === 'pending_sent') toast('Request already sent.', 'error');
-          else if (status === 'pending_received') toast('They already sent you a request — accept it!');
-          return;
-        }
-        GF.fs.addDoc(GF.fs.collection(GF.db, 'friendRequests'), {
+      // Use named doc ID matching listenFriendshipStatus
+      var reqRef = GF.fs.doc(GF.db, 'friendRequests', me.uid + '_' + toUserId);
+      GF.fs.getDoc(reqRef).then(function(existing) {
+        if (existing.exists()) { toast('Request already sent.', 'error'); return; }
+        return GF.fs.setDoc(reqRef, {
           fromUserId: me.uid,
           toUserId: toUserId,
           status: 'pending',
-          createdAt: GF.fs.serverTimestamp()
+          createdAt: GF.fs.serverTimestamp(),
+          updatedAt: GF.fs.serverTimestamp()
         }).then(function () {
           toast('Friend request sent!');
-          // Notification
-          if (window.GeoSocial && window.GeoSocial._createNotification) {
-            window.GeoSocial._createNotification(toUserId, 'friend_request', 'New Friend Request',
-              (me.displayName || 'Someone') + ' sent you a friend request.', 'profile.html?id=' + me.uid);
+          if (window.GeoSocial && window.GeoSocial.createNotification) {
+            window.GeoSocial.createNotification(toUserId, 'friend_request', 'New Friend Request',
+              (me.displayName || 'Someone') + ' sent you a friend request.', 'profile.html?id=' + me.uid, { fromUserId: me.uid });
           }
-        }).catch(function (err) {
-          console.warn('[GeoFriendships] sendRequest', err.message);
-          toast('Could not send request.', 'error');
         });
+      }).catch(function (err) {
+        console.warn('[GeoFriendships] sendRequest', err.message);
+        toast('Could not send request.', 'error');
       });
+    });
+  }
+
+  function cancelRequest(toUserId, cb) {
+    if (window.GeoSocial && window.GeoSocial.cancelFriendRequest) {
+      window.GeoSocial.cancelFriendRequest(toUserId, cb); return;
+    }
+    requireAuth(function(me) {
+      var GF = window.GeoFirebase;
+      if (!GF || !GF.db || !GF.fs) { if(cb) cb(new Error('Not ready')); return; }
+      GF.fs.deleteDoc(GF.fs.doc(GF.db, 'friendRequests', me.uid + '_' + toUserId))
+        .then(function() { toast('Request cancelled'); if(cb) cb(); })
+        .catch(function(err) { toast('Could not cancel', 'error'); if(cb) cb(err); });
     });
   }
 
@@ -345,44 +358,53 @@
   function getSuggestions(callback) {
     var me = currentUser();
     if (!me) { callback([]); return; }
-    getFriends(me.uid, function (myFriends) {
-      if (!myFriends.length) { callback([]); return; }
-      var GF = window.GeoFirebase;
-      if (!GF || !GF.db || !GF.fs) { callback([]); return; }
+    var GF = window.GeoFirebase;
+    if (!GF || !GF.db || !GF.fs) { callback([]); return; }
 
-      var myFriendsSet = {};
-      myFriends.forEach(function (uid) { myFriendsSet[uid] = true; });
-      myFriendsSet[me.uid] = true;
+    // Load pending requests (both sent and received) to exclude
+    Promise.all([
+      GF.fs.getDocs(GF.fs.query(GF.fs.collection(GF.db,'friendRequests'), GF.fs.where('fromUserId','==',me.uid), GF.fs.limit(100))).catch(function(){ return {docs:[]}; }),
+      GF.fs.getDocs(GF.fs.query(GF.fs.collection(GF.db,'friendRequests'), GF.fs.where('toUserId','==',me.uid), GF.fs.limit(100))).catch(function(){ return {docs:[]}; })
+    ]).then(function(results) {
+      var pendingSet = {};
+      pendingSet[me.uid] = true;
+      results[0].docs.forEach(function(d){ if((d.data().status||'')==='pending') pendingSet[d.data().toUserId]=true; });
+      results[1].docs.forEach(function(d){ if((d.data().status||'')==='pending') pendingSet[d.data().fromUserId]=true; });
 
-      var suggestions = {};
-      var done = 0;
+      getFriends(me.uid, function (myFriends) {
+        if (!myFriends.length) { callback([]); return; }
 
-      // For each of my friends, get their friends
-      myFriends.slice(0, 10).forEach(function (friendUid) {
-        getFriends(friendUid, function (fofs) {
-          fofs.forEach(function (uid) {
-            if (!myFriendsSet[uid]) {
-              suggestions[uid] = (suggestions[uid] || 0) + 1;
+        var excludeSet = Object.assign({}, pendingSet);
+        myFriends.forEach(function (uid) { excludeSet[uid] = true; });
+
+        var suggestions = {};
+        var done = 0;
+
+        myFriends.slice(0, 10).forEach(function (friendUid) {
+          getFriends(friendUid, function (fofs) {
+            fofs.forEach(function (uid) {
+              if (!excludeSet[uid]) {
+                suggestions[uid] = (suggestions[uid] || 0) + 1;
+              }
+            });
+            done++;
+            if (done === Math.min(myFriends.length, 10)) {
+              var sorted = Object.keys(suggestions).sort(function (a, b) { return suggestions[b] - suggestions[a]; }).slice(0, 10);
+              if (!sorted.length) { callback([]); return; }
+              Promise.all(sorted.map(function (uid) {
+                return GF.fs.getDoc(GF.fs.doc(GF.db, 'users', uid)).then(function (snap) {
+                  if (!snap.exists()) return null;
+                  var d = snap.data();
+                  return { uid: uid, fullName: d.fullName || d.displayName || 'GeoHub User', avatar: d.avatar || d.photoURL || '', username: d.username || uid, mutualCount: suggestions[uid] };
+                }).catch(function () { return null; });
+              })).then(function (results) {
+                callback(results.filter(Boolean));
+              }).catch(function () { callback([]); });
             }
           });
-          done++;
-          if (done === Math.min(myFriends.length, 10)) {
-            var sorted = Object.keys(suggestions).sort(function (a, b) { return suggestions[b] - suggestions[a]; }).slice(0, 10);
-            if (!sorted.length) { callback([]); return; }
-            // Fetch user profiles
-            Promise.all(sorted.map(function (uid) {
-              return GF.fs.getDoc(GF.fs.doc(GF.db, 'users', uid)).then(function (snap) {
-                if (!snap.exists()) return null;
-                var d = snap.data();
-                return { uid: uid, fullName: d.fullName || d.displayName || 'GeoHub User', avatar: d.avatar || d.photoURL || '', username: d.username || uid, mutualCount: suggestions[uid] };
-              }).catch(function () { return null; });
-            })).then(function (results) {
-              callback(results.filter(Boolean));
-            }).catch(function () { callback([]); });
-          }
         });
       });
-    });
+    }).catch(function(){ callback([]); });
   }
 
   /* ── "People You May Know" widget on feed/profile ─────────────── */
@@ -488,6 +510,7 @@
 
   window.GeoFriendships = {
     sendRequest: sendRequest,
+    cancelRequest: cancelRequest,
     accept: accept,
     decline: decline,
     unfriend: unfriend,
@@ -502,6 +525,7 @@
     initPresence: initPresence,
     checkFriendBirthdays: checkFriendBirthdays
   };
+  window.dispatchEvent(new CustomEvent('GeoFriendshipsReady'));
 
   /* ── auto-init presence on Firebase ready ────────────────────── */
 
