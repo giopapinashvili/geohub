@@ -370,8 +370,8 @@
     ]).then(function(results) {
       var pendingSet = {};
       pendingSet[me.uid] = true;
-      results[0].docs.forEach(function(d){ if((d.data().status||'')==='pending') pendingSet[d.data().toUserId]=true; });
-      results[1].docs.forEach(function(d){ if((d.data().status||'')==='pending') pendingSet[d.data().fromUserId]=true; });
+      results[0].docs.forEach(function(d){ pendingSet[d.data().toUserId]=true; });
+      results[1].docs.forEach(function(d){ pendingSet[d.data().fromUserId]=true; });
 
       getFriends(me.uid, function (myFriends) {
         if (!myFriends.length) { callback([]); return; }
@@ -416,7 +416,9 @@
     container.innerHTML = '<div style="color:var(--gh-muted,#64748b);font-size:.82rem;padding:12px">Loading suggestions…</div>';
     getSuggestions(function (people) {
       if (!people.length) {
-        container.innerHTML = '<div style="color:var(--gh-muted,#64748b);font-size:.82rem;padding:12px">No suggestions yet. Connect with more people to get suggestions.</div>';
+        container.innerHTML = '';
+        var card = container.closest ? container.closest('.sidebar-card') : null;
+        if (card) card.style.display = 'none';
         return;
       }
       container.innerHTML = people.map(function (p) {

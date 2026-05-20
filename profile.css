@@ -113,7 +113,7 @@
 .pstat:hover { background: var(--bg-elevated); }
 .pstat-value { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); line-height: 1; }
 .pstat-label { font-size: 0.65rem; color: var(--text-muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.4px; }
-.profile-actions { display: flex; gap: 8px; align-items: center; }
+.profile-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
 /* ── XP Progress ── */
 .xp-progress-section {

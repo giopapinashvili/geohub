@@ -505,11 +505,16 @@
         });
       }
       window.GeoSocial.listenFriends(user.uid, function(friends) {
-        if (countEl) countEl.textContent = friends.length || '0';
+        if (countEl) countEl.textContent = friends.length || '';
         const fl = friends.length ? '<div style="font-weight:800;margin:0 0 10px"><i class="fas fa-user-group" style="margin-right:6px"></i>Friends (' + friends.length + ')</div><div class="gh-friend-grid">' + friends.map(function(f) {
-          return '<a class="gh-friend-card" href="profile.html?id=' + encodeURIComponent(f.uid||f.id) + '">'
+          var fuid = f.uid || f.id;
+          return '<div class="gh-friend-card">'
+            + '<a href="profile.html?id=' + encodeURIComponent(fuid) + '" style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;text-decoration:none;color:inherit;overflow:hidden">'
             + '<span class="gh-avatar">' + (f.avatar||f.photoURL ? '<img src="'+esc(f.avatar||f.photoURL)+'" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.style.display=\'none\'">' : esc(initialLetters(f.fullName||f.displayName||f.name||'GeoHub User',f.email||''))) + '</span>'
-            + '<div><strong>' + esc(f.fullName||f.displayName||f.name||'GeoHub User') + '</strong><span>@' + esc(f.username||'user') + '</span></div></a>';
+            + '<div style="flex:1;min-width:0"><strong>' + esc(f.fullName||f.displayName||f.name||'GeoHub User') + '</strong><span>@' + esc(f.username||'user') + '</span></div>'
+            + '</a>'
+            + (ownProfile ? '<button class="btn btn-ghost btn-sm" data-unfriend-user="' + esc(fuid) + '" title="Unfriend" style="flex-shrink:0;padding:5px 9px;font-size:.75rem"><i class="fas fa-user-minus"></i></button>' : '')
+            + '</div>';
         }).join('') + '</div>' : '';
         if (friendsTab) friendsTab.dataset.friendsListHtml = fl;
         rebuildFriendsTab();
@@ -1739,8 +1744,10 @@
         friendBtn.parentElement.style.position = 'relative';
         friendBtn.insertAdjacentElement('afterend', menu);
         setTimeout(function() {
-          function closeMenu(ev) { if (!menu.contains(ev.target) && ev.target !== friendBtn) { menu.remove(); document.removeEventListener('click', closeMenu); } }
+          function closeMenu(ev) { if (!menu.contains(ev.target) && ev.target !== friendBtn) { menu.remove(); document.removeEventListener('click', closeMenu); document.removeEventListener('keydown', closeOnEsc); } }
+          function closeOnEsc(ev) { if (ev.key === 'Escape') { menu.remove(); document.removeEventListener('click', closeMenu); document.removeEventListener('keydown', closeOnEsc); } }
           document.addEventListener('click', closeMenu);
+          document.addEventListener('keydown', closeOnEsc);
         }, 10);
       } else if (st === 'outgoing') {
         // Cancel the outgoing request
