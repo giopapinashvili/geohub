@@ -793,7 +793,8 @@ service cloud.firestore {
 
     match /friendRequests/{requestId} {
       allow read: if signedIn()
-        && (resource.data.get('fromUserId', '') == uid()
+        && (resource == null
+            || resource.data.get('fromUserId', '') == uid()
             || resource.data.get('toUserId', '') == uid()
             || isAdmin());
       allow create: if signedIn()

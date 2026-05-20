@@ -1611,20 +1611,19 @@
         var friendRef = doc(db, 'friends', fid);
         var reqRef = doc(db, 'friendRequests', uid + '_' + toUserId);
         var reverseReqRef = doc(db, 'friendRequests', toUserId + '_' + uid);
-        getDoc(doc(db, 'users', toUserId)).then(function(tSnap) {
-          var tData = (tSnap.exists() ? tSnap.data() : {}) || {};
+        console.log('[friends] send request', { fromUid: uid, toUid: toUserId, requestId: uid + '_' + toUserId });
+        Promise.all([
+          getDoc(doc(db, 'users', toUserId)).catch(function(){ return null; }),
+          getDoc(friendRef).catch(function(){ return null; }),
+          getDoc(reqRef).catch(function(){ return null; }),
+          getDoc(reverseReqRef).catch(function(){ return null; })
+        ]).then(function(results) {
+          var tData = (results[0] && results[0].exists() ? results[0].data() : {}) || {};
           var pref = (tData.privacy || {}).friendRequestPref || 'everyone';
           if (pref === 'nobody') { toast('This user is not accepting friend requests.', 'error'); if (callback) callback('denied'); return Promise.reject('denied'); }
-        }).then(function() {
-          return getDoc(friendRef);
-        }).then(function(friendSnap){
-          if (friendSnap.exists()) throw new Error('already-friends');
-          return getDoc(reqRef);
-        }).then(function(existing){
-          if (existing.exists()) throw new Error('already-requested');
-          return getDoc(reverseReqRef);
-        }).then(function(reverseExisting){
-          if (reverseExisting.exists() && (reverseExisting.data() || {}).status === 'pending') throw new Error('incoming-request-exists');
+          if (results[1] && results[1].exists()) throw new Error('already-friends');
+          if (results[2] && results[2].exists()) throw new Error('already-requested');
+          if (results[3] && results[3].exists() && (results[3].data() || {}).status === 'pending') throw new Error('incoming-request-exists');
           return setDoc(reqRef, {
             fromUserId: uid,
             toUserId: toUserId,
@@ -1636,6 +1635,7 @@
           var me = meData() || {};
           return createNotification(toUserId, 'friend_request', (me.name || 'GeoHub User') + ' sent you a friend request', 'Open the profile to accept or reject.', 'profile.html?id=' + uid, { fromUserId: uid });
         }).then(function () {
+          console.log('[friends] request sent OK', { fromUid: uid, toUid: toUserId });
           toast('Friend request sent');
           if (callback) callback('pending');
         }).catch(function (err) {
@@ -1644,7 +1644,7 @@
           if (msg === 'already-friends') { toast('Already friends'); if(callback) callback('friends'); return; }
           if (msg === 'already-requested') { toast('Request already sent'); if(callback) callback('pending'); return; }
           if (msg === 'incoming-request-exists') { toast('This user already sent you a request'); if(callback) callback('incoming'); return; }
-          console.error('[GeoSocial] sendFriendRequest failed', { code: err && err.code, message: err && err.message, fromUserId: uid, toUserId: toUserId });
+          console.warn('[friends] request failed', { code: err && err.code, message: err && err.message, fromUid: uid, toUid: toUserId });
           toast('Failed to send request.', 'error');
           if (callback) callback('error', err);
         });
@@ -1656,29 +1656,42 @@
       if (!uid || !targetUserId || uid === targetUserId) { callback({ state: uid === targetUserId ? 'self' : 'none' }); return function(){}; }
       var unsubs = [];
       var status = { state: 'none' };
-      function emit(){ callback(Object.assign({}, status)); }
+      // Wait for all 3 listeners to fire at least once before emitting, to avoid
+      // intermediate 'none' state flicker during initial load.
+      var allSettled = false;
+      var settledCount = 0;
+      function emit(){
+        if (!allSettled) {
+          settledCount++;
+          if (settledCount < 3) return;
+          allSettled = true;
+        }
+        console.log('[friends] status', { uid: uid, target: targetUserId, state: status.state, requestId: status.requestId });
+        callback(Object.assign({}, status));
+      }
       unsubs.push(onSnapshot(doc(db, 'friends', friendshipId(uid, targetUserId)), function(snap){
         if (snap.exists()) status = { state: 'friends', friendId: snap.id };
         else if (status.state === 'friends') status = { state: 'none' };
         emit();
-      }, function(){ emit(); }));
+      }, function(err){ console.warn('[friends] friends-doc listener err', err && err.message); emit(); }));
       unsubs.push(onSnapshot(doc(db, 'friendRequests', uid + '_' + targetUserId), function(snap){
         if (status.state === 'friends') return emit();
         if (snap.exists() && (snap.data()||{}).status === 'pending') status = { state: 'outgoing', requestId: snap.id };
         else if (status.state === 'outgoing') status = { state: 'none' };
         emit();
-      }, function(){ emit(); }));
+      }, function(err){ console.warn('[friends] outgoing-req listener err', err && err.message); emit(); }));
       unsubs.push(onSnapshot(doc(db, 'friendRequests', targetUserId + '_' + uid), function(snap){
         if (status.state === 'friends') return emit();
         if (snap.exists() && (snap.data()||{}).status === 'pending') status = { state: 'incoming', requestId: snap.id, fromUserId: targetUserId };
         else if (status.state === 'incoming') status = { state: 'none' };
         emit();
-      }, function(){ emit(); }));
+      }, function(err){ console.warn('[friends] incoming-req listener err', err && err.message); emit(); }));
       return function(){ unsubs.forEach(function(u){ try{u();}catch(e){} }); };
     }
 
     function respondFriendRequest(requestId, accept, callback) {
       requireAuth(function(user){
+        console.log('[friends] respond request', { requestId: requestId, accept: accept, byUid: user.uid });
         var reqRef = doc(db, 'friendRequests', requestId);
         getDoc(reqRef).then(function(snap){
           if (!snap.exists()) throw new Error('request-not-found');
@@ -1715,10 +1728,15 @@
     function listenFriendRequests(callback) {
       var uid = currentUid();
       if (!uid) { callback([]); return function(){}; }
-      var q = query(collection(db, 'friendRequests'), where('toUserId', '==', uid), where('status', '==', 'pending'), limit(50));
+      // Single-field query only — no composite index needed; filter pending client-side
+      var q = query(collection(db, 'friendRequests'), where('toUserId', '==', uid), limit(50));
       return onSnapshot(q, function(snap){
         var items=[];
-        snap.forEach(function(d){ items.push(Object.assign({id:d.id}, d.data())); });
+        snap.forEach(function(d){
+          var r = Object.assign({id:d.id}, d.data());
+          if ((r.status||'')==='pending') items.push(r);
+        });
+        console.log('[friends] incoming requests', { count: items.length, uid: uid });
         items.sort(function(a,b){ return tsToMillis(b.createdAt)-tsToMillis(a.createdAt); });
         if (!items.length) { callback([]); return; }
         Promise.all(items.map(function(r){
@@ -1733,7 +1751,7 @@
             });
           }).catch(function(){ return r; });
         })).then(function(enriched){ callback(enriched); });
-      }, function(err){ console.warn('[GeoSocial] listenFriendRequests', err.message); callback([]); });
+      }, function(err){ console.warn('[friends] listenFriendRequests error', err.message); callback([]); });
     }
 
     function listenFriends(uid, callback) {

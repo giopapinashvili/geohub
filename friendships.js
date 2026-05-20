@@ -190,8 +190,8 @@
         })
       ]).then(function () {
         toast('Friend request accepted!');
-        if (window.GeoSocial && window.GeoSocial._createNotification) {
-          window.GeoSocial._createNotification(fromUserId, 'friend_accepted', 'Friend Request Accepted',
+        if (window.GeoSocial && window.GeoSocial.createNotification) {
+          window.GeoSocial.createNotification(fromUserId, 'friend_accepted', 'Friend Request Accepted',
             (me.displayName || 'Someone') + ' accepted your friend request.', 'profile.html?id=' + me.uid);
         }
       }).catch(function (err) {
