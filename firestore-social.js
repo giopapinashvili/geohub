@@ -1777,14 +1777,36 @@
     function listenFriends(uid, callback) {
       uid = uid || currentUid();
       if (!uid) { callback([]); return function(){}; }
-      var q = query(collection(db, 'friends'), where('users', 'array-contains', uid), limit(100));
-      return onSnapshot(q, function(snap){
-        var ids=[];
-        snap.forEach(function(d){ var data=d.data()||{}; var other=(data.users||[]).find(function(x){ return x !== uid; }); if(other) ids.push(other); });
+      var byCollection = { friends: [], friendships: [] };
+      var settled = { friends: false, friendships: false };
+      function collectOtherIds(snap) {
+        var ids = [];
+        snap.forEach(function(d){
+          var data = d.data() || {};
+          var other = (data.users || []).find(function(x){ return x !== uid; });
+          if (other) ids.push(other);
+        });
+        return ids;
+      }
+      function emit() {
+        if (!settled.friends || !settled.friendships) return;
+        var ids = Array.from(new Set(byCollection.friends.concat(byCollection.friendships)));
         if(!ids.length){ callback([]); return; }
         Promise.all(ids.slice(0,50).map(function(id){ return getDoc(doc(db,'users',id)).then(function(us){ return us.exists()?Object.assign({id:id,uid:id},us.data()):{id:id,uid:id,fullName:'GeoHub User'}; }).catch(function(){ return null; }); }))
           .then(function(users){ callback(users.filter(Boolean)); });
-      }, function(err){ console.warn('[GeoSocial] listenFriends', err.message); callback([]); });
+      }
+      var unsubs = [];
+      unsubs.push(onSnapshot(query(collection(db, 'friends'), where('users', 'array-contains', uid), limit(100)), function(snap){
+        byCollection.friends = collectOtherIds(snap);
+        settled.friends = true;
+        emit();
+      }, function(err){ console.warn('[GeoSocial] listenFriends friends', err.message); byCollection.friends = []; settled.friends = true; emit(); }));
+      unsubs.push(onSnapshot(query(collection(db, 'friendships'), where('users', 'array-contains', uid), limit(100)), function(snap){
+        byCollection.friendships = collectOtherIds(snap);
+        settled.friendships = true;
+        emit();
+      }, function(err){ console.warn('[GeoSocial] listenFriends friendships', err.message); byCollection.friendships = []; settled.friendships = true; emit(); }));
+      return function(){ unsubs.forEach(function(u){ try{ u(); }catch(e){} }); };
     }
 
     function removeFriend(targetUserId, callback) {

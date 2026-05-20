@@ -1662,8 +1662,11 @@
           const privPref = (profile.privacy || {}).profilePref || 'public';
           if (!isOwnProfile && privPref === 'friends') {
             const fid = [fbUser.uid, profile.uid].sort().join('_');
-            const fSnap = await GF.fs.getDoc(GF.fs.doc(GF.db, 'friends', fid)).catch(() => null);
-            if (!fSnap || !fSnap.exists()) {
+            const [fSnap, legacySnap] = await Promise.all([
+              GF.fs.getDoc(GF.fs.doc(GF.db, 'friends', fid)).catch(() => null),
+              GF.fs.getDoc(GF.fs.doc(GF.db, 'friendships', fid)).catch(() => null)
+            ]);
+            if ((!fSnap || !fSnap.exists()) && (!legacySnap || !legacySnap.exists())) {
               showPrivateProfileGate(profile.fullName);
               return;
             }
