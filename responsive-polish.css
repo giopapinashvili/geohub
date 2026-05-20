@@ -2524,6 +2524,18 @@ body.gh-mobile-menu-open #gh-mobile-menu-overlay {
   }
 }
 
+/* Phase 70B: hide .mobile-menu by default — only shown via body class */
+.mobile-menu { display: none !important; }
+
+/* Phase 70B: desktop hamburger safety — prevent mobile drawer leak, show compact dropdown */
+@media (min-width: 769px) {
+  body.gh-mobile-menu-open { overflow: auto !important; }
+  body.gh-mobile-menu-open .gh-mobile-menu-overlay { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }
+  body.gh-mobile-menu-open .mobile-menu { display: none !important; visibility: hidden !important; pointer-events: none !important; }
+  body.gh-desktop-menu-open .mobile-menu { display: flex !important; position: fixed !important; top: 68px !important; right: 16px !important; left: auto !important; bottom: auto !important; width: 300px !important; max-width: calc(100vw - 32px) !important; max-height: calc(100vh - 90px) !important; overflow-y: auto !important; border-radius: 18px !important; z-index: 9999 !important; transform: none !important; }
+  body.gh-desktop-menu-open .gh-mobile-menu-overlay { display: none !important; pointer-events: none !important; }
+}
+
 /* ── Phase 69: Followed page banner in personal feed ── */
 .gh-followed-page-banner {
   display: flex;

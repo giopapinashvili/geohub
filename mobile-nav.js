@@ -289,7 +289,13 @@
       if (toggle) {
         e.preventDefault();
         e.stopPropagation();
-        toggleMobileMenu();
+        if (!isMobileViewport()) {
+          var isOpen = document.body.classList.contains('gh-desktop-menu-open');
+          setDesktopMenuOpen(!isOpen);
+        } else {
+          var m = document.querySelector('.mobile-menu');
+          setMenuOpen(!(m && m.classList.contains('open')));
+        }
         return;
       }
       if (e.target.closest('#gh-mobile-menu-overlay')) {
