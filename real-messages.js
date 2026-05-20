@@ -58,6 +58,7 @@
   let reactionState = {};
   let replyState = null;
   let allMessages = [];
+  let activePeerInfo = null;
   let searchActive = false;
   let typingTimer = null;
   let isTyping = false;
@@ -90,6 +91,7 @@
   }
   function closeMobileInfoPanel(){
     if(!isMobileMsg()) return;
+    closeMobileInfoSheet();
     const panel = document.getElementById('infoPanel');
     if(panel){
       panel.classList.remove('open', 'panel-visible');
@@ -193,13 +195,15 @@
     if(activeConversation && routeConvs.length > 0 && !routeConvs.find(c => c.id === activeConversation)){
       if(_routeMode !== 'customerBusinessChat'){ // withBiz mode always has exactly one conv; never clear it
         dbg('pane-sync','clearing stale active conv',activeConversation);
-        activeConversation = null; activeConvData = null;
+        activeConversation = null; activeConvData = null; activePeerInfo = null;
         if(unsubMsgs){ try{unsubMsgs();}catch(ex){} unsubMsgs=null; }
         if(unsubReactions){ try{unsubReactions();}catch(ex){} unsubReactions=null; }
         if(unsubConvDoc){ try{unsubConvDoc();}catch(ex){} unsubConvDoc=null; }
         if(unsubConvSettings){ try{unsubConvSettings();}catch(ex){} unsubConvSettings=null; }
         const box=$('#chatMessages');
         if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-comments"></i><p>Select a conversation</p></div>';
+        closeMobileInfoSheet();
+        renderConversationDetails();
         setChatOpen(false);
       }
     }
@@ -357,6 +361,17 @@
         duration: m.duration || 0
       });
     }
+    const pushUrl = (type, url, name, size, mime)=>{
+      if(!url || rows.some(a=>a && a.url===url)) return;
+      rows.push({ type:type||'', url, name:name||'', size:size||0, mime:mime||'', duration:m.duration||0 });
+    };
+    pushUrl('image', m.imageUrl, m.fileName || 'Image', m.fileSize, m.mime || 'image/*');
+    (Array.isArray(m.imageUrls) ? m.imageUrls : []).forEach((url,i)=>pushUrl('image', url, 'Image '+(i+1), 0, 'image/*'));
+    (Array.isArray(m.mediaUrls) ? m.mediaUrls : []).forEach((url,i)=>pushUrl(m.mediaType || '', url, m.fileName || 'Attachment '+(i+1), 0, m.mime || ''));
+    pushUrl('file', m.attachmentUrl, m.fileName || m.attachmentName || 'Attachment', m.fileSize || m.attachmentSize, m.mime || m.fileType || '');
+    pushUrl('file', m.fileUrl, m.fileName || 'File', m.fileSize, m.fileType || m.mime || '');
+    pushUrl('audio', m.audioUrl, m.fileName || 'Audio message', m.fileSize, m.mime || 'audio/*');
+    pushUrl('audio', m.voiceUrl, m.fileName || 'Voice message', m.fileSize, m.mime || 'audio/*');
     return rows.filter(a=>a && a.url);
   }
 
@@ -395,6 +410,143 @@
     box.innerHTML = '<button class="msg-lightbox-close" type="button" aria-label="Close"><i class="fas fa-times"></i></button><img src="'+esc(url)+'" alt="Message image">';
     box.addEventListener('click', e=>{ if(e.target === box || e.target.closest('.msg-lightbox-close')) box.remove(); });
     document.body.appendChild(box);
+  }
+
+  function visibleMessagesForDetails(){
+    const uid=currentUid();
+    const actorId=currentActorId();
+    return (allMessages||[]).filter(m=>{
+      if(!m || m.deleted || m.deletedForEveryone) return false;
+      if(Array.isArray(m.deletedFor) && m.deletedFor.includes(uid)) return false;
+      if(Array.isArray(m.deletedForActors) && m.deletedForActors.includes(actorId)) return false;
+      return true;
+    });
+  }
+
+  function detailAttachments(){
+    const media=[], files=[], audio=[];
+    visibleMessagesForDetails().forEach(m=>{
+      normalizeAttachments(m).forEach(a=>{
+        const type=String(a.type||'').toLowerCase();
+        const mime=String(a.mime||'').toLowerCase();
+        const url=String(a.url||'');
+        const item=Object.assign({}, a, { messageId:m.id, createdAt:m.createdAt });
+        if(type==='audio' || mime.indexOf('audio/')===0 || /\.(mp3|m4a|wav|ogg|webm)(\?|$)/i.test(url)) audio.push(item);
+        else if(type==='image' || mime.indexOf('image/')===0 || /\.(png|jpe?g|webp|gif|avif)(\?|$)/i.test(url)) media.push(item);
+        else files.push(item);
+      });
+    });
+    return { media, files, audio };
+  }
+
+  function conversationContextLabel(conv){
+    if(!conv) return 'Conversation';
+    if(_activeBizId && conv.forBusiness) return 'Business inbox';
+    if(conv.forBusiness && conv.businessId) return 'Page conversation';
+    return conv.isFriend || conv.friendshipId ? 'Friend' : 'Direct message';
+  }
+
+  function peerHref(peer, conv){
+    if(!peer) return '#';
+    if(conv && conv.forBusiness && !_activeBizId && conv.businessId) return 'business.html?id='+encodeURIComponent(conv.businessId);
+    if(peer.type==='business') return 'business.html?id='+encodeURIComponent(peer.id||'');
+    return peer.id ? 'profile.html?id='+encodeURIComponent(peer.id) : '#';
+  }
+
+  function renderDetailMedia(att){
+    const images = att.media.length
+      ? '<div class="msg-details-grid">'+att.media.slice(0,12).map(a=>'<button type="button" class="msg-detail-thumb" data-detail-image="'+esc(a.url)+'"><img src="'+esc(a.url)+'" alt="" loading="lazy" onerror="this.remove()"></button>').join('')+'</div>'
+      : '<div class="msg-detail-empty">No media shared yet</div>';
+    const files = att.files.length
+      ? '<div class="msg-detail-list">'+att.files.slice(0,10).map(a=>'<a class="msg-detail-file" href="'+esc(a.url)+'" target="_blank" rel="noopener"><i class="fas fa-file-alt"></i><span><strong>'+esc(a.name||'File')+'</strong><small>'+esc(a.size?formatFileSize(a.size):'Open file')+'</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>').join('')+'</div>'
+      : '<div class="msg-detail-empty">No files shared yet</div>';
+    const audio = att.audio.length
+      ? '<div class="msg-detail-list">'+att.audio.slice(0,10).map(a=>'<div class="msg-detail-audio"><i class="fas fa-microphone"></i><span>'+esc(a.name||'Voice message')+'</span><audio controls src="'+esc(a.url)+'"></audio></div>').join('')+'</div>'
+      : '<div class="msg-detail-empty">No voice messages yet</div>';
+    return '<div class="msg-details-section"><div class="msg-details-title"><i class="fas fa-image"></i> Media</div>'+images+'</div>'+
+      '<div class="msg-details-section"><div class="msg-details-title"><i class="fas fa-file"></i> Files</div>'+files+'</div>'+
+      '<div class="msg-details-section"><div class="msg-details-title"><i class="fas fa-microphone"></i> Voice messages</div>'+audio+'</div>';
+  }
+
+  function renderDetailsHtml(mobile){
+    const conv=activeConvData;
+    const peer=activePeerInfo || { id:'', name:'Conversation', avatar:'' };
+    const name=displayName(peer.id, peer.name || 'Conversation');
+    const href=peerHref(peer, conv);
+    const isBizPeer = !!(conv && conv.forBusiness && !_activeBizId && conv.businessId) || peer.type==='business';
+    const context=conversationContextLabel(conv);
+    const active=activeLabelFromLastSeen(peer.lastSeen);
+    const mutedUntil = convSettings && convSettings.mutedUntil;
+    const mutedMs = mutedUntil && mutedUntil.toMillis ? mutedUntil.toMillis() : Number(mutedUntil||0);
+    const muted = !!(mutedUntil && (!mutedMs || mutedMs > Date.now()));
+    const att=detailAttachments();
+    const avatar = peer.avatar ? '<img class="info-big-av" src="'+esc(peer.avatar)+'" alt="" onerror="this.style.display=\'none\'">' : '<div class="info-big-av info-av-icon">'+esc(initials(name))+'</div>';
+    return (mobile ? '<div class="msg-mobile-details-head"><button type="button" class="msg-mobile-details-close" onclick="window.__ghCloseMobileInfoSheet()"><i class="fas fa-arrow-left"></i></button><strong>Conversation details</strong></div>' : '')+
+      '<div class="info-top msg-details-top">'+avatar+
+        '<div class="info-name">'+esc(name)+'</div>'+
+        '<div class="info-type-badge">'+esc(context)+'</div>'+
+        (active?'<div class="info-online-row"><span class="active-dot"></span>'+esc(active)+'</div>':'')+
+      '</div>'+
+      '<div class="msg-details-actions">'+
+        '<a class="info-action-btn" href="'+esc(href)+'"><i class="fas '+(isBizPeer?'fa-store':'fa-user')+'"></i> '+(isBizPeer?'View Page':'View Profile')+'</a>'+
+        '<button type="button" class="info-action-btn" onclick="window.__ghToggleSearch();window.__ghCloseMobileInfoSheet&&window.__ghCloseMobileInfoSheet();"><i class="fas fa-search"></i> Search in conversation</button>'+
+        '<button type="button" class="info-action-btn" onclick="window.__ghToggleActiveMute()"><i class="fas '+(muted?'fa-bell':'fa-bell-slash')+'"></i> '+(muted?'Unmute':'Mute')+'</button>'+
+      '</div>'+
+      '<div class="msg-details-section"><div class="msg-details-title"><i class="fas fa-palette"></i> Customize chat</div>'+
+        '<button type="button" class="msg-details-row" onclick="window.__ghShowThemePicker()"><span>Theme/color</span><i class="fas fa-chevron-right"></i></button>'+
+        '<button type="button" class="msg-details-row" onclick="window.__ghShowNicknames()"><span>Nicknames</span><i class="fas fa-chevron-right"></i></button>'+
+      '</div>'+
+      renderDetailMedia(att)+
+      '<div class="msg-details-section"><div class="msg-details-title"><i class="fas fa-ellipsis-h"></i> Conversation actions</div>'+
+        '<button type="button" class="msg-details-row" onclick="window.__ghArchiveActiveConversation()"><span>Archive / Hide</span><i class="fas fa-box-archive"></i></button>'+
+        '<button type="button" class="msg-details-row danger" onclick="window.__ghDeleteActiveConversation()"><span>Delete for me</span><i class="fas fa-trash"></i></button>'+
+      '</div>';
+  }
+
+  function renderConversationDetails(){
+    const panel=$('#infoPanel');
+    if(panel){
+      const scroll=panel.querySelector('.info-scroll') || panel;
+      scroll.innerHTML=activeConversation ? renderDetailsHtml(false) : '<div style="color:var(--text-muted);text-align:center;padding:40px 16px;font-size:0.85rem">Select a conversation to see details</div>';
+      panel.hidden=false;
+    }
+    const sheet=$('#mobileInfoSheet');
+    if(sheet && document.body.classList.contains('msg-details-open') && activeConversation){
+      const body=sheet.querySelector('.msg-mobile-details-body') || sheet;
+      body.innerHTML=renderDetailsHtml(true);
+    }
+  }
+
+  function ensureMobileInfoSheet(){
+    let backdrop=$('#mobileInfoBackdrop');
+    if(!backdrop){
+      backdrop=document.createElement('div');
+      backdrop.id='mobileInfoBackdrop';
+      backdrop.className='msg-mobile-details-backdrop';
+      backdrop.onclick=closeMobileInfoSheet;
+      document.body.appendChild(backdrop);
+    }
+    let sheet=$('#mobileInfoSheet');
+    if(!sheet){
+      sheet=document.createElement('div');
+      sheet.id='mobileInfoSheet';
+      sheet.className='msg-mobile-details';
+      sheet.innerHTML='<div class="msg-mobile-details-body"></div>';
+      document.body.appendChild(sheet);
+    }
+    return sheet;
+  }
+
+  function openMobileInfoSheet(){
+    if(!activeConversation) return;
+    const sheet=ensureMobileInfoSheet();
+    const body=sheet.querySelector('.msg-mobile-details-body') || sheet;
+    body.innerHTML=renderDetailsHtml(true);
+    document.body.classList.add('msg-details-open');
+  }
+
+  function closeMobileInfoSheet(){
+    document.body.classList.remove('msg-details-open');
   }
 
   function convTime(val){
@@ -513,6 +665,7 @@
     const box=$('#chatMessages');
     if(!box) return;
     allMessages = items || [];
+    renderConversationDetails();
     const uid=currentUid();
     const _myActorId = currentActorId();
     // Exclude messages deleted-for-me: check both canonical (deletedForActors) and legacy (deletedFor)
@@ -821,7 +974,7 @@
 
   function closeChatPane(){
     if(!activeConversation) return;
-    activeConversation=null; activeConvData=null;
+    activeConversation=null; activeConvData=null; activePeerInfo=null;
     if(unsubMsgs){ try{unsubMsgs();}catch(er){} unsubMsgs=null; }
     if(unsubReactions){ try{unsubReactions();}catch(er){} unsubReactions=null; }
     if(unsubConvDoc){ try{unsubConvDoc();}catch(er){} unsubConvDoc=null; }
@@ -829,6 +982,8 @@
     const box=$('#chatMessages'), hdr=$('#chatHeader');
     if(box) box.innerHTML='<div class="chat-empty"><i class="fas fa-comment-dots"></i><p>Select a conversation</p></div>';
     if(hdr) hdr.innerHTML='';
+    closeMobileInfoSheet();
+    renderConversationDetails();
     setChatOpen(false);
   }
 
@@ -1031,11 +1186,30 @@
         panel.style.display='none';
         panel.hidden=true;
       }
+      openMobileInfoSheet();
       return;
     }
     if(panel) panel.hidden=false;
+    renderConversationDetails();
     if(panel) panel.classList.toggle('open');
   };
+  window.__ghCloseMobileInfoSheet = closeMobileInfoSheet;
+  window.__ghToggleActiveMute = function(){
+    if(!activeConversation || !window.GeoSocial?.setConversationMute) return;
+    const mutedUntil = convSettings && convSettings.mutedUntil;
+    const mutedMs = mutedUntil && mutedUntil.toMillis ? mutedUntil.toMillis() : Number(mutedUntil||0);
+    const muted = !!(mutedUntil && (!mutedMs || mutedMs > Date.now()));
+    const next = muted ? null : Date.now() + 30*24*60*60*1000;
+    window.GeoSocial.setConversationMute(activeConversation, next, ok=>{
+      if(ok){
+        convSettings = Object.assign({}, convSettings, { mutedUntil: next });
+        renderConversationDetails();
+        window.showToast && window.showToast(muted?'Conversation unmuted':'Conversation muted');
+      }
+    });
+  };
+  window.__ghArchiveActiveConversation = function(){ if(activeConversation) archiveConv(activeConversation); };
+  window.__ghDeleteActiveConversation = function(){ if(activeConversation) deleteConvForMe(activeConversation); };
 
   async function openConversation(cid){
     activeConversation=cid;
@@ -1105,7 +1279,9 @@
       oid = conv ? otherId(conv) : '';
       u = await userInfo(oid);
     }
+    activePeerInfo = Object.assign({}, u, { type: (conv && conv.forBusiness && !_activeBizId) ? 'business' : 'user' });
     buildHeader(u, conv);
+    renderConversationDetails();
 
     const GF = window.GeoFirebase;
     if(GF){
@@ -1116,12 +1292,14 @@
         applyTheme(data.theme||'');
         handleTypingIndicator(data);
         buildHeader(u, activeConvData);
+        renderConversationDetails();
       }, ()=>{});
     }
 
     if(window.GeoSocial?.listenConversationSettings){
       unsubConvSettings = window.GeoSocial.listenConversationSettings(cid, settings=>{
         convSettings = settings || {};
+        renderConversationDetails();
       });
     }
 
@@ -1480,6 +1658,12 @@
         openMessageImage(img.dataset.msgImage);
         return;
       }
+      const detailImg=e.target.closest('[data-detail-image]');
+      if(detailImg){
+        e.preventDefault();
+        openMessageImage(detailImg.dataset.detailImage);
+        return;
+      }
       const react=e.target.closest('[data-msg-reaction]');
       if(react){
         const row=react.closest('[data-message-id]');
@@ -1695,6 +1879,7 @@
           '</div>' +
           '<div class="chat-header-actions">' +
             '<button class="header-action-btn" title="Search" id="msgSearchBtn" onclick="window.__ghToggleSearch()"><i class="fas fa-search"></i></button>' +
+            '<button class="header-action-btn mobile-info-btn" title="Info" onclick="window.__ghToggleInfoPanel()"><i class="fas fa-info-circle"></i></button>' +
           '</div>';
 
         // Set composer placeholder
@@ -1752,6 +1937,8 @@
           }).catch(function(){});
           activeConversation = cid;
           activeConvData = convDoc;
+          activePeerInfo = { id: withBizParam, type:'business', name:_withBizTitle, avatar:_withBizLogo };
+          renderConversationDetails();
           setChatOpen(true);
           // Update URL to include cid so refresh goes directly to this conversation
           if(!cidParam){
@@ -1794,6 +1981,7 @@
       // Hard reset ALL stale conversation state and listeners
       activeConversation = null;
       activeConvData = null;
+      activePeerInfo = null;
       window.__geohubLastConvs = [];
       if(unsubMsgs){ try{unsubMsgs();}catch(e){} unsubMsgs=null; }
       if(unsubConvDoc){ try{unsubConvDoc();}catch(e){} unsubConvDoc=null; }
@@ -1804,6 +1992,7 @@
       const chatBox=$('#chatMessages'), chatHdr=$('#chatHeader');
       if(chatBox) chatBox.innerHTML='<div class="chat-empty"><i class="fas fa-store"></i><p>Select a conversation</p></div>';
       if(chatHdr) chatHdr.innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:16px;color:var(--text-muted);font-size:.9rem"><i class="fas fa-store" style="color:#10b981;font-size:1.1rem"></i><span>Select a conversation</span></div>';
+      renderConversationDetails();
       setBizInboxHeader(bizParam);
       syncBizActor(bizParam); // async — validates owner/admin, fires GeoActorChanged
       // Unhide for business actor if cidParam is explicitly given in the URL

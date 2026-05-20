@@ -2634,3 +2634,46 @@ body.gh-mobile-menu-open #gh-mobile-menu-overlay {
     max-width: 100% !important;
   }
 }
+
+/* Phase 71: desktop Messenger details sidebar; mobile uses separate fixed sheet. */
+@media (min-width: 1025px) {
+  body.page-messages .messages-layout,
+  body.page-messages .messages-layout.chat-open {
+    grid-template-columns: 288px minmax(0, 1fr) minmax(320px, 340px) !important;
+  }
+
+  body.page-messages #infoPanel,
+  body.page-messages .info-panel {
+    display: flex !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 360px !important;
+    height: auto !important;
+    overflow: hidden !important;
+  }
+}
+
+@media (max-width: 768px) {
+  body.page-messages #infoPanel,
+  body.page-messages .info-panel,
+  body.page-messages.chat-open #infoPanel,
+  body.page-messages.chat-open .info-panel {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    flex: 0 0 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    overflow: hidden !important;
+    z-index: -1 !important;
+  }
+}
