@@ -2893,38 +2893,206 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     '</div>';
   }
 
+  var _audienceUserCache = {};
+
+  function _audienceAvatarHtml(f) {
+    var name = f.userName || f.displayName || 'User';
+    if (f.userAvatar) return img(f.userAvatar, name);
+    return '<span class="gh-aud-initials">'+esc(initials(name))+'</span>';
+  }
+
+  function _audienceRowHtml(f) {
+    var href = 'profile.html?uid='+encodeURIComponent(f.userId||f.uid||'');
+    var name = esc(f.userName || f.displayName || 'GeoHub User');
+    var dateStr = f.createdAt ? '<span class="gh-aud-date">'+timeAgo(f.createdAt)+'</span>' : '';
+    return '<a href="'+href+'" class="gh-aud-row">'+
+      '<div class="gh-aud-av">'+_audienceAvatarHtml(f)+'</div>'+
+      '<div class="gh-aud-info"><span class="gh-aud-name">'+name+'</span>'+dateStr+'</div>'+
+    '</a>';
+  }
+
+  function _fetchAudienceProfile(uid, row) {
+    if (!uid || !row) return;
+    if (_audienceUserCache[uid]) {
+      var d = _audienceUserCache[uid];
+      if (d.userAvatar) row.querySelector('.gh-aud-av').innerHTML = img(d.userAvatar, d.userName||'');
+      if (d.userName) row.querySelector('.gh-aud-name').textContent = d.userName;
+      return;
+    }
+    _audienceUserCache[uid] = {};
+    fs().getDoc(fs().doc(db(),'users',uid)).then(function(snap){
+      if (!snap.exists()) return;
+      var d = snap.data() || {};
+      var uName = d.fullName || d.displayName || d.name || 'GeoHub User';
+      var uAv   = d.avatar || d.photoURL || '';
+      _audienceUserCache[uid] = { userName: uName, userAvatar: uAv };
+      if (uAv && row.isConnected) row.querySelector('.gh-aud-av').innerHTML = img(uAv, uName);
+      if (uName && row.isConnected) { var n=row.querySelector('.gh-aud-name'); if(n) n.textContent=uName; }
+    }).catch(function(){});
+  }
+
+  function _audienceQueryFirst(bizId) {
+    var c = fs().collection(db(),'businessFollowers');
+    try {
+      return fs().query(c, fs().where('businessId','==',bizId), fs().orderBy('createdAt','desc'), fs().limit(20));
+    } catch(_e) {
+      return fs().query(c, fs().where('businessId','==',bizId), fs().limit(20));
+    }
+  }
+
+  function _audienceQueryAfter(bizId, lastDoc) {
+    var c = fs().collection(db(),'businessFollowers');
+    try {
+      return fs().query(c, fs().where('businessId','==',bizId), fs().orderBy('createdAt','desc'), fs().startAfter(lastDoc), fs().limit(20));
+    } catch(_e) {
+      return null;
+    }
+  }
+
+  function openPageAudienceModal(bizId, totalCount) {
+    var old = document.getElementById('ghAudienceModal');
+    if (old) old.remove();
+
+    var wrap = document.createElement('div');
+    wrap.id = 'ghAudienceModal';
+    wrap.className = 'gh-modal-backdrop';
+    wrap.innerHTML =
+      '<div class="gh-modal gh-aud-modal">'+
+        '<div class="gh-modal-head">'+
+          '<h3><i class="fas fa-users" style="color:var(--gh-accent);margin-right:8px"></i>Page Audience'+
+            (totalCount ? ' <span class="gh-aud-modal-count">('+totalCount+')</span>' : '')+
+          '</h3>'+
+          '<button class="gh-modal-close" data-close-modal>✕</button>'+
+        '</div>'+
+        '<div class="gh-modal-body gh-aud-modal-body" id="ghAudienceList"></div>'+
+        '<div class="gh-modal-actions" id="ghAudienceActions" style="justify-content:center">'+
+          '<div class="gh-aud-modal-status" id="ghAudienceStatus" style="font-size:13px;color:var(--gh-muted)">Loading...</div>'+
+        '</div>'+
+      '</div>';
+
+    document.body.appendChild(wrap);
+    wrap.addEventListener('click', function(e){
+      if (e.target === wrap || e.target.closest('[data-close-modal]')) wrap.remove();
+    });
+    document.addEventListener('keydown', function onEsc(e){
+      if (e.key === 'Escape') { wrap.remove(); document.removeEventListener('keydown', onEsc); }
+    });
+
+    var list   = wrap.querySelector('#ghAudienceList');
+    var status = wrap.querySelector('#ghAudienceStatus');
+    var acts   = wrap.querySelector('#ghAudienceActions');
+    var _lastDoc = null;
+    var _done    = false;
+
+    function appendRows(snap) {
+      if (snap.empty) { _done = true; return; }
+      snap.forEach(function(d){
+        var f = d.data() || {};
+        var uid = f.userId || f.uid || '';
+        var row = document.createElement('div');
+        row.innerHTML = _audienceRowHtml(f);
+        var a = row.firstChild;
+        list.appendChild(a);
+        if (uid && (!f.userName || !f.userAvatar)) _fetchAudienceProfile(uid, a);
+      });
+      _lastDoc = snap.docs[snap.docs.length - 1];
+      if (snap.size < 20) _done = true;
+    }
+
+    function showLoadMore() {
+      status.textContent = '';
+      var existing = acts.querySelector('.gh-aud-load-more');
+      if (existing) existing.remove();
+      if (_done) {
+        status.textContent = '';
+        if (!list.children.length) status.textContent = 'No followers yet';
+        return;
+      }
+      var btn = document.createElement('button');
+      btn.className = 'gh-btn ghost gh-aud-load-more';
+      btn.textContent = 'Load more';
+      btn.onclick = function() {
+        if (!_lastDoc) return;
+        btn.disabled = true; btn.textContent = 'Loading…';
+        var q = _audienceQueryAfter(bizId, _lastDoc);
+        if (!q) { _done = true; btn.remove(); return; }
+        fs().getDocs(q).then(function(snap){
+          appendRows(snap);
+          btn.remove();
+          showLoadMore();
+        }).catch(function(err){
+          btn.disabled = false; btn.textContent = 'Load more';
+          console.warn('[GeoHub] audience load more failed', err && err.message);
+        });
+      };
+      acts.appendChild(btn);
+    }
+
+    fs().getDocs(_audienceQueryFirst(bizId)).then(function(snap){
+      status.textContent = '';
+      appendRows(snap);
+      if (!list.children.length) {
+        list.innerHTML = '<div class="gh-empty"><i class="fas fa-users"></i><h3>No followers yet</h3><p>Create posts or share your page to grow your audience.</p></div>';
+        _done = true;
+      }
+      showLoadMore();
+    }).catch(function(err){
+      status.textContent = 'Could not load followers.';
+      console.warn('[GeoHub] audience modal load failed', err && err.message);
+    });
+  }
+
   function loadPageAudienceWidget(bizId){
     if(!bizId) return;
     var slot=document.getElementById('gh-page-audience-slot');
     if(!slot) return;
-    slot.innerHTML='<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Page Audience</h3></div><div class="gh-audience-loading" style="padding:12px;color:var(--gh-muted);text-align:center;font-size:13px;">Loading...</div></div>';
+    slot.innerHTML='<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Page Audience</h3></div><div style="padding:12px;color:var(--gh-muted);text-align:center;font-size:13px;">Loading...</div></div>';
+
+    var PREVIEW = 8;
     Promise.all([
-      fs().getDocs(fs().query(fs().collection(db(),'businessFollowers'), fs().where('businessId','==',bizId), fs().limit(12))),
+      fs().getDocs(fs().query(fs().collection(db(),'businessFollowers'), fs().where('businessId','==',bizId), fs().limit(PREVIEW))),
       fs().getDoc(fs().doc(db(),'businesses',bizId))
     ]).then(function(results){
       var snap=results[0]; var bizDoc=results[1];
-      var count=(bizDoc.exists()&&bizDoc.data().followerCount)||snap.size||0;
+      var count=(bizDoc.exists()&&bizDoc.data().followerCount) || snap.size || 0;
       var followers=[]; snap.forEach(function(d){ followers.push(d.data()); });
       followers.sort(function(a,b){ return ts(b.createdAt)-ts(a.createdAt); });
-      followers=followers.slice(0,6);
-      var avatarsHtml=followers.map(function(f){
-        var href='profile.html?uid='+encodeURIComponent(f.userId||'');
-        var name=esc(f.userName||'User');
-        var av=f.userAvatar?img(f.userAvatar,name):'<span class="gh-avatar-initial">'+esc((f.userName||'U').charAt(0).toUpperCase())+'</span>';
-        return '<a href="'+href+'" title="'+name+'" class="gh-audience-avatar">'+av+'</a>';
-      }).join('');
+      followers=followers.slice(0,PREVIEW);
+
+      var rowsHtml = followers.map(function(f){ return _audienceRowHtml(f); }).join('');
+      var hasFollowers = followers.length > 0;
+      var viewAllBtn = hasFollowers
+        ? '<button class="gh-btn sm ghost gh-aud-view-all" data-biz-id="'+esc(bizId)+'" data-biz-count="'+count+'" style="width:100%;margin-top:8px"><i class="fas fa-users"></i> View All</button>'
+        : '';
+
       slot.innerHTML='<div class="gh-panel gh-right-widget">'+
-        '<div class="gh-section-title"><h3>Page Audience</h3></div>'+
-        '<div class="gh-audience-body" style="padding:12px 16px;">'+
-          '<div class="gh-audience-count" style="font-size:22px;font-weight:700;color:var(--gh-accent);">'+count+'</div>'+
-          '<div style="font-size:12px;color:var(--gh-muted);margin-bottom:10px;">followers</div>'+
-          (avatarsHtml?'<div class="gh-audience-avatars" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">'+avatarsHtml+'</div>':'<div style="font-size:13px;color:var(--gh-muted);margin-bottom:10px;">No followers yet — share your page!</div>')+
-          '<a class="gh-btn sm ghost" href="business.html?id='+encodeURIComponent(bizId)+'#audience" style="font-size:12px;">View All</a>'+
+        '<div class="gh-section-title">'+
+          '<h3>Page Audience</h3>'+
+          '<div class="gh-aud-stat"><span class="gh-aud-count">'+count+'</span><span class="gh-aud-label"> followers</span></div>'+
+        '</div>'+
+        '<div class="gh-aud-preview">'+
+          (hasFollowers
+            ? '<div class="gh-aud-list" id="ghAudiencePreviewList">'+rowsHtml+'</div>'
+            : '<div class="gh-aud-empty"><p>No followers yet</p><p class="gh-aud-hint">Create posts or share your page to grow your audience.</p></div>')+
+          viewAllBtn+
         '</div>'+
       '</div>';
+
+      slot.querySelectorAll('.gh-aud-row').forEach(function(row, i){
+        var f = followers[i] || {};
+        var uid = f.userId || f.uid || '';
+        if (uid && (!f.userName || !f.userAvatar)) _fetchAudienceProfile(uid, row);
+      });
+
+      var viewAllEl = slot.querySelector('.gh-aud-view-all');
+      if (viewAllEl) {
+        viewAllEl.addEventListener('click', function(){
+          openPageAudienceModal(bizId, count);
+        });
+      }
     }).catch(function(err){
       console.warn('[GeoHub] page audience widget failed', err && err.message);
-      slot.innerHTML='<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Page Audience</h3></div><div class="gh-audience-body" style="padding:12px 16px;"><div style="font-size:13px;color:var(--gh-muted);">No followers yet</div></div></div>';
+      slot.innerHTML='<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Page Audience</h3></div><div class="gh-aud-preview"><div class="gh-aud-empty"><p>No followers yet</p></div></div></div>';
     });
   }
 

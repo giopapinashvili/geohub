@@ -2041,3 +2041,34 @@ html[data-gh-theme="light"] .gh-cmp-tool.active{background:rgba(16,185,129,.1)}
 /* Messages page: banner is first child of .messages-page (fixed flex column) */
 body.page-messages #ghPageModeBanner{flex-shrink:0;width:100%;z-index:1}
 @media(max-width:640px){.gh-pmb-inner{padding:7px 14px;gap:6px}.gh-pmb-actions{margin-left:0}}
+
+/* ── Page Audience widget & modal ────────────────────────── */
+.gh-section-title{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px 0;margin-bottom:4px}
+.gh-section-title h3{margin:0;font-size:.9rem;font-weight:700}
+.gh-aud-stat{display:flex;align-items:baseline;gap:3px;flex-shrink:0}
+.gh-aud-count{font-size:1.15rem;font-weight:800;color:var(--gh-accent)}
+.gh-aud-label{font-size:.72rem;color:var(--gh-muted)}
+.gh-aud-preview{padding:8px 16px 14px}
+.gh-aud-list{display:flex;flex-direction:column;gap:2px;margin-bottom:4px}
+.gh-aud-row{display:flex;align-items:center;gap:10px;padding:7px 6px;border-radius:10px;text-decoration:none;color:var(--gh-text);transition:background .15s}
+.gh-aud-row:hover{background:rgba(255,255,255,.05)}
+.gh-aud-av{width:34px;height:34px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,var(--gh-green),#064e3b);display:grid;place-items:center}
+.gh-aud-av img{width:100%;height:100%;object-fit:cover}
+.gh-aud-initials{font-size:.72rem;font-weight:800;color:#fff}
+.gh-aud-info{display:flex;flex-direction:column;min-width:0}
+.gh-aud-name{font-size:.83rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gh-aud-date{font-size:.72rem;color:var(--gh-muted)}
+.gh-aud-empty{padding:6px 0 4px;color:var(--gh-muted);font-size:.82rem}
+.gh-aud-empty p{margin:0 0 4px}
+.gh-aud-hint{font-size:.75rem;color:var(--gh-muted);opacity:.7}
+/* Modal */
+.gh-aud-modal{width:min(480px,100%)}
+.gh-aud-modal-count{font-size:.78rem;font-weight:500;color:var(--gh-muted);margin-left:4px}
+.gh-aud-modal-body{padding:8px 12px;max-height:62vh;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.gh-aud-modal-body .gh-aud-row{padding:9px 8px}
+.gh-aud-modal-body .gh-aud-av{width:40px;height:40px}
+.gh-aud-modal-body .gh-aud-name{font-size:.88rem}
+@media(max-width:480px){
+  .gh-aud-modal{border-radius:24px 24px 0 0;max-height:88svh;width:100%}
+  .gh-aud-modal-body{max-height:68vh}
+}
