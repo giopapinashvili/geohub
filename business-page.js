@@ -130,6 +130,152 @@
 
   // ── SKELETON ─────────────────────────────────────────────────
 
+  function ensureBusinessPostMenuEmergencyCss() {
+    if (document.getElementById('gh-biz-post-menu-emergency-css')) return;
+    var style = document.createElement('style');
+    style.id = 'gh-biz-post-menu-emergency-css';
+    style.textContent =
+      '#ghBizPostMenuDrop{' +
+        'position:fixed!important;display:block!important;visibility:visible!important;' +
+        'opacity:1!important;pointer-events:auto!important;z-index:10080!important;' +
+        'min-width:190px;padding:6px;background:#111827;color:#f8fafc;' +
+        'border:1px solid rgba(148,163,184,.28);border-radius:12px;' +
+        'box-shadow:0 18px 40px rgba(0,0,0,.38);' +
+      '}' +
+      '#ghBizPostMenuDrop button{' +
+        'display:flex;width:100%;align-items:center;gap:10px;padding:9px 11px;' +
+        'border:0;background:transparent;color:inherit;border-radius:8px;text-align:left;' +
+        'font:600 13px/1.2 system-ui,-apple-system,Segoe UI,sans-serif;cursor:pointer;' +
+      '}' +
+      '#ghBizPostMenuDrop button:hover{background:rgba(255,255,255,.08);}' +
+      '#ghBizPostMenuDrop button[data-biz-menu-danger]{color:#fca5a5;}';
+    document.head.appendChild(style);
+  }
+
+  function closeBusinessPostMenuEmergency() {
+    var existing = document.getElementById('ghBizPostMenuDrop');
+    if (existing) existing.remove();
+  }
+
+  function callBusinessPostMenuAction(postId, actionName, arg) {
+    var actions = window._bizActions || {};
+    var fn = actions[actionName];
+    if (typeof fn !== 'function') {
+      console.warn('[biz-menu] missing action', actionName);
+      return;
+    }
+    if (typeof arg === 'undefined') fn.call(actions, postId);
+    else fn.call(actions, postId, arg);
+  }
+
+  function openBusinessPostMenuEmergency(postId, btn, card) {
+    closeBusinessPostMenuEmergency();
+    ensureBusinessPostMenuEmergencyCss();
+
+    var post = _currentPosts && _currentPosts.find(function(p) { return p.id === postId; });
+    var isPinned = card.dataset.pinned === '1' || !!(post && post.pinned);
+    var commentsDisabled = card.dataset.commentsDisabled === '1' || !!(post && post.commentsDisabled);
+    var menu = document.createElement('div');
+    menu.id = 'ghBizPostMenuDrop';
+    menu.setAttribute('role', 'menu');
+    menu.innerHTML =
+      '<button type="button" role="menuitem" data-biz-menu-action="editPost">Edit post</button>' +
+      '<button type="button" role="menuitem" data-biz-menu-action="pinPost">' + (isPinned ? 'Unpin post' : 'Pin post') + '</button>' +
+      '<button type="button" role="menuitem" data-biz-menu-action="togglePostComments">' + (commentsDisabled ? 'Enable comments' : 'Disable comments') + '</button>' +
+      '<button type="button" role="menuitem" data-biz-menu-action="setPostVisibility" data-biz-menu-vis="public">Public</button>' +
+      '<button type="button" role="menuitem" data-biz-menu-action="setPostVisibility" data-biz-menu-vis="followers">Followers</button>' +
+      '<button type="button" role="menuitem" data-biz-menu-action="setPostVisibility" data-biz-menu-vis="private">Private</button>' +
+      '<button type="button" role="menuitem" data-biz-menu-action="deletePost" data-biz-menu-danger="1">Delete post</button>';
+
+    menu.addEventListener('click', function(e) {
+      var item = e.target.closest('button[data-biz-menu-action]');
+      if (!item) return;
+      e.preventDefault();
+      e.stopPropagation();
+      closeBusinessPostMenuEmergency();
+      var actionName = item.dataset.bizMenuAction;
+      if (actionName === 'setPostVisibility') {
+        callBusinessPostMenuAction(postId, actionName, item.dataset.bizMenuVis);
+      } else {
+        callBusinessPostMenuAction(postId, actionName);
+      }
+    });
+
+    document.body.appendChild(menu);
+
+    var rect = btn.getBoundingClientRect();
+    var menuRect = menu.getBoundingClientRect();
+    var left = rect.right - menuRect.width;
+    if (left < 8) left = rect.left;
+    if (left + menuRect.width > window.innerWidth - 8) left = window.innerWidth - menuRect.width - 8;
+    left = Math.max(8, left);
+    var top = rect.bottom + 8;
+    if (top + menuRect.height > window.innerHeight - 8) top = rect.top - menuRect.height - 8;
+    top = Math.max(8, top);
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
+
+    var cleanup = function() {
+      document.removeEventListener('click', outsideClick, true);
+      document.removeEventListener('keydown', escapeClose, true);
+      window.removeEventListener('scroll', cleanup, true);
+      window.removeEventListener('resize', cleanup, true);
+      closeBusinessPostMenuEmergency();
+    };
+    var outsideClick = function(e) {
+      var current = document.getElementById('ghBizPostMenuDrop');
+      if (current && !current.contains(e.target)) cleanup();
+    };
+    var escapeClose = function(e) {
+      if (e.key === 'Escape') cleanup();
+    };
+
+    setTimeout(function() {
+      document.addEventListener('click', outsideClick, true);
+      document.addEventListener('keydown', escapeClose, true);
+      window.addEventListener('scroll', cleanup, true);
+      window.addEventListener('resize', cleanup, true);
+    }, 0);
+  }
+
+  function installBusinessPostMenuEmergencyHandler() {
+    if (window.__bizPostMenuEmergencyInstalled) return;
+    window.__bizPostMenuEmergencyInstalled = true;
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest(
+        '[data-biz-post-menu], [data-post-menu], .gh-post-more, .biz-post-menu-btn, button[title="Post options"], [aria-label="Post options"]'
+      );
+
+      if (!btn) return;
+
+      var card = btn.closest('[data-post-id]');
+      if (!card) return;
+
+      var inBizPosts =
+        card.closest('#biz-posts-overview') ||
+        card.closest('#biz-posts-all') ||
+        card.closest('.biz-posts') ||
+        document.body.classList.contains('business-page') ||
+        location.pathname.includes('business');
+
+      if (!inBizPosts) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+
+      var postId = card.dataset.postId;
+      if (!postId) {
+        console.warn('[biz-menu] no postId on card', card);
+        return;
+      }
+
+      openBusinessPostMenuEmergency(postId, btn, card);
+    }, true);
+  }
+
+  installBusinessPostMenuEmergencyHandler();
+
   function skelBox(w, h, r) {
     return '<div class="biz-skel" style="width:'+w+';height:'+h+'px;border-radius:'+(r||8)+'px"></div>';
   }
@@ -3481,6 +3627,7 @@
   // ── INIT ──────────────────────────────────────────────────────
 
   function init(fb) {
+    installBusinessPostMenuEmergencyHandler();
     _db=fb.db; _fs=fb.fs; _auth=fb.auth;
     _currentUser=_auth&&_auth.currentUser;
     var root=document.getElementById('biz-detail-root');
