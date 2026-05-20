@@ -20,10 +20,14 @@
     default:       { color: '#6c757d', icon: '📍',  label: 'სხვა' }
   };
 
-  let map, markers = [], allPlaces = [], currentFilter = '', currentSearch = '', activeMarker = null;
+  let map, markers = [], allPlaces = [];
+  let currentFilter = '', currentSearch = '';
+  let disabledCategories = new Set();
+  let activeMarker = null, activePlaceId = null;
 
   function esc(v) { return String(v == null ? '' : v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
+  /* ── Marker helpers ─────────────────────────────── */
   function getPlaceMarkerStyle(place) {
     if (place.categoryId && PLACE_MARKER_STYLES[place.categoryId]) return PLACE_MARKER_STYLES[place.categoryId];
     if (place.category) {
@@ -51,6 +55,7 @@
     });
   }
 
+  /* ── Normalize Firestore doc ────────────────────── */
   function normalize(id, data, source) {
     const lat = Number(data.lat ?? data.latitude ?? (data.location && data.location.lat));
     const lng = Number(data.lng ?? data.longitude ?? (data.location && data.location.lng));
@@ -62,22 +67,28 @@
       || PLACE_MARKER_STYLES.default;
     return {
       id, source, lat, lng,
-      name:          data.name || data.placeName || data.title || 'GeoHub Place',
-      city:          data.city || data.region || '',
-      categoryId:    catId,
-      category:      catText,
-      subcategory:   data.subcategory || '',
-      categoryLabel: catText || style.label,
-      image:         data.image || data.imageUrl || data.mediaUrl || '',
-      rating:        Number(data.rating || 0),
-      reviewCount:   Number(data.reviewCount || 0),
-      priceFrom:     data.priceFrom || '',
-      currency:      data.currency || ''
+      name:             data.name || data.placeName || data.title || 'GeoHub Place',
+      city:             data.city || data.region || '',
+      district:         data.district || '',
+      address:          data.address || '',
+      categoryId:       catId,
+      category:         catText,
+      subcategory:      data.subcategory || '',
+      categoryLabel:    catText || style.label,
+      shortDescription: data.shortDescription || data.description || '',
+      image:            data.image || data.imageUrl || data.mediaUrl || '',
+      rating:           Number(data.rating || 0),
+      reviewCount:      Number(data.reviewCount || 0),
+      priceFrom:        data.priceFrom || '',
+      currency:         data.currency || ''
     };
   }
 
+  /* ── Filter logic (chip + legend + search, all applied) */
   function filtered() {
     return allPlaces.filter(p => {
+      const catKey = p.categoryId || 'default';
+      if (disabledCategories.size > 0 && disabledCategories.has(catKey)) return false;
       if (currentFilter && p.categoryId !== currentFilter) return false;
       if (currentSearch) {
         const q = currentSearch.toLowerCase();
@@ -89,10 +100,20 @@
 
   function renderStars(r) { return r ? '⭐'.repeat(Math.max(1, Math.min(5, Math.round(r)))) : ''; }
 
+  /* ── Map render ─────────────────────────────────── */
   function renderMap() {
     markers.forEach(m => map.removeLayer(m));
-    markers = []; activeMarker = null;
+    markers = [];
+
     const list = filtered();
+
+    // If active place was filtered out, clear selection and close panels
+    if (activePlaceId && !list.find(p => p.id === activePlaceId)) {
+      activePlaceId = null; activeMarker = null;
+      const panel = document.getElementById('infoPanel'); if (panel) panel.classList.remove('open');
+      const card  = document.getElementById('mobileCard');  if (card)  card.classList.remove('open');
+    }
+
     const count = document.getElementById('mapCount'); if (count) count.textContent = list.length;
     const results = document.getElementById('mapResults');
     if (results) {
@@ -101,32 +122,48 @@
         : '<div style="padding:20px;text-align:center;color:var(--text-muted)"><i class="fas fa-map-marker-alt" style="font-size:1.4rem;margin-bottom:8px;display:block"></i>No real places added yet.</div>';
       results.querySelectorAll('.map-result-card').forEach(card => card.addEventListener('click', () => focusPlace(card.dataset.id)));
     }
+
     list.forEach(p => {
-      const style  = getPlaceMarkerStyle(p);
-      const marker = L.marker([p.lat, p.lng], { icon: buildPlaceMarkerIcon(style, false) });
+      const style    = getPlaceMarkerStyle(p);
+      const isActive = p.id === activePlaceId;
+      const marker   = L.marker([p.lat, p.lng], { icon: buildPlaceMarkerIcon(style, isActive) });
       marker.bindTooltip(p.name, { direction: 'top', offset: [0, -48], className: 'place-tooltip' });
       marker._placeId    = p.id;
       marker._placeStyle = style;
       marker.on('click', () => focusPlace(p.id, marker));
       marker.addTo(map);
       markers.push(marker);
+      if (isActive) activeMarker = marker;
     });
   }
 
+  /* ── Active marker clear helper ─────────────────── */
+  function clearActiveMarker() {
+    if (activeMarker) activeMarker.setIcon(buildPlaceMarkerIcon(activeMarker._placeStyle, false));
+    activeMarker = null; activePlaceId = null;
+  }
+
+  /* ── Focus place ────────────────────────────────── */
   function focusPlace(id, clickedMarker) {
     if (activeMarker) activeMarker.setIcon(buildPlaceMarkerIcon(activeMarker._placeStyle, false));
-    activeMarker = clickedMarker || markers.find(m => m._placeId === id) || null;
+    activePlaceId = id;
+    activeMarker  = clickedMarker || markers.find(m => m._placeId === id) || null;
     if (activeMarker) activeMarker.setIcon(buildPlaceMarkerIcon(activeMarker._placeStyle, true));
 
     const p = allPlaces.find(x => x.id === id); if (!p) return;
     map.setView([p.lat, p.lng], 13, { animate: true });
+
+    if (window.innerWidth <= 768) {
+      openMobileCard(p);
+      return;
+    }
+
     const panel = document.getElementById('infoPanel');
-    const img = document.getElementById('panelImg');
+    const img   = document.getElementById('panelImg');
     if (img) { img.src = p.image || ''; img.style.display = p.image ? '' : 'none'; }
-    const title = document.getElementById('panelTitle'); if (title) title.textContent = p.name;
-    const cat = document.getElementById('panelCat');
-    if (cat) cat.textContent = p.categoryLabel + (p.subcategory ? ' · ' + p.subcategory : '');
-    const loc = document.getElementById('panelLoc'); if (loc) loc.textContent = p.city ? p.city + ', Georgia' : 'Georgia';
+    const title  = document.getElementById('panelTitle'); if (title)  title.textContent  = p.name;
+    const cat    = document.getElementById('panelCat');   if (cat)    cat.textContent    = p.categoryLabel + (p.subcategory ? ' · ' + p.subcategory : '');
+    const loc    = document.getElementById('panelLoc');   if (loc)    loc.textContent    = p.city ? p.city + ', Georgia' : 'Georgia';
     const rating = document.getElementById('panelRating'); if (rating) rating.textContent = p.rating ? (p.rating + ' rating') : '';
     const detail = document.getElementById('panelDetailBtn');
     if (detail) detail.href = p.source === 'businesses' ? 'business.html?id=' + encodeURIComponent(p.id) : '#';
@@ -138,32 +175,114 @@
 
   window.closePanel = function () {
     const p = document.getElementById('infoPanel'); if (p) p.classList.remove('open');
-    if (activeMarker) { activeMarker.setIcon(buildPlaceMarkerIcon(activeMarker._placeStyle, false)); activeMarker = null; }
+    clearActiveMarker();
   };
 
-  function buildLegend() {
-    const legend = document.getElementById('legend');
-    if (!legend) return;
-    const items = Object.entries(PLACE_MARKER_STYLES).map(([, s]) =>
-      '<div class="legend-item"><span class="legend-dot" style="background:' + s.color + '"></span>'
-      + '<span class="legend-icon">' + s.icon + '</span>'
-      + '<span>' + s.label + '</span></div>'
-    ).join('');
-    legend.innerHTML = '<div class="legend-title">კატეგორიები</div><div class="legend-scroll">' + items + '</div>';
+  /* ── Mobile card ────────────────────────────────── */
+  function buildMobileCard() {
+    if (document.getElementById('mobileCard')) return;
+    const div = document.createElement('div');
+    div.id = 'mobileCard';
+    div.className = 'mobile-place-card';
+    div.innerHTML =
+      '<div class="mpc-drag-handle"></div>'
+      + '<button class="mpc-close" onclick="window.closeMobileCard()"><i class="fas fa-times"></i></button>'
+      + '<div id="mpcImgWrap" class="mpc-img-wrap"><img id="mpcImg" src="" alt="" onerror="this.parentElement.style.display=\'none\'"></div>'
+      + '<div id="mpcFallback" class="mpc-fallback" style="display:none"></div>'
+      + '<div class="mpc-body">'
+      + '<div id="mpcName" class="mpc-name"></div>'
+      + '<div id="mpcCat"  class="mpc-cat"></div>'
+      + '<div id="mpcAddr" class="mpc-addr"></div>'
+      + '<div id="mpcDesc" class="mpc-desc"></div>'
+      + '<div class="mpc-btns">'
+      + '<a id="mpcDirections" href="#" target="_blank" rel="noopener" class="btn btn-primary btn-sm"><i class="fas fa-directions"></i> Directions</a>'
+      + '</div></div>';
+    document.body.appendChild(div);
   }
 
+  function openMobileCard(p) {
+    const card = document.getElementById('mobileCard'); if (!card) return;
+    const style   = getPlaceMarkerStyle(p);
+    const imgWrap = document.getElementById('mpcImgWrap');
+    const img     = document.getElementById('mpcImg');
+    const fallback = document.getElementById('mpcFallback');
+    if (p.image) {
+      imgWrap.style.display = ''; img.src = p.image; fallback.style.display = 'none';
+    } else {
+      imgWrap.style.display = 'none'; fallback.style.display = 'flex';
+      fallback.style.background = style.color; fallback.textContent = style.icon;
+    }
+    const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    setTxt('mpcName', p.name);
+    setTxt('mpcCat',  p.categoryLabel + (p.subcategory ? ' · ' + p.subcategory : ''));
+    const addrParts = [p.district, p.address, p.city].filter(Boolean);
+    setTxt('mpcAddr', addrParts.join(', '));
+    setTxt('mpcDesc', p.shortDescription || '');
+    const dir = document.getElementById('mpcDirections');
+    if (dir) dir.href = 'https://www.google.com/maps/search/' + encodeURIComponent(p.name + ' ' + (p.city || '') + ' Georgia');
+    card.classList.add('open');
+  }
+
+  window.closeMobileCard = function () {
+    const card = document.getElementById('mobileCard'); if (card) card.classList.remove('open');
+    clearActiveMarker();
+  };
+
+  /* ── Legend ─────────────────────────────────────── */
+  function buildLegend() {
+    const legend = document.getElementById('legend'); if (!legend) return;
+    const items = Object.entries(PLACE_MARKER_STYLES).map(([catId, s]) =>
+      '<div class="legend-item legend-toggle" data-cat="' + catId + '">'
+      + '<span class="legend-dot" style="background:' + s.color + '"></span>'
+      + '<span class="legend-icon">' + s.icon + '</span>'
+      + '<span>' + s.label + '</span>'
+      + '</div>'
+    ).join('');
+    legend.innerHTML =
+      '<div class="legend-title">კატეგორიები</div>'
+      + '<div class="legend-all-btn" id="legendAllBtn">✓ ყველა</div>'
+      + '<div class="legend-scroll">' + items + '</div>';
+
+    document.getElementById('legendAllBtn').addEventListener('click', () => {
+      disabledCategories.clear();
+      updateLegendState();
+      renderMap();
+    });
+    legend.querySelectorAll('.legend-toggle').forEach(item => {
+      item.addEventListener('click', () => {
+        const cat = item.dataset.cat;
+        if (disabledCategories.has(cat)) disabledCategories.delete(cat);
+        else disabledCategories.add(cat);
+        updateLegendState();
+        renderMap();
+      });
+    });
+    updateLegendState();
+  }
+
+  function updateLegendState() {
+    const legend = document.getElementById('legend'); if (!legend) return;
+    legend.querySelectorAll('.legend-toggle').forEach(item => {
+      item.classList.toggle('legend-disabled', disabledCategories.has(item.dataset.cat));
+    });
+    const btn = document.getElementById('legendAllBtn');
+    if (btn) btn.classList.toggle('legend-all-active', disabledCategories.size === 0);
+  }
+
+  /* ── Filter chips ───────────────────────────────── */
   function attachFilters() {
     document.querySelectorAll('.map-chip').forEach(chip => chip.addEventListener('click', () => {
       document.querySelectorAll('.map-chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       currentFilter = chip.dataset.cat || '';
-      window.closePanel();
+      window.closePanel(); window.closeMobileCard();
       renderMap();
     }));
     const search = document.getElementById('mapSearchInput');
     if (search) search.addEventListener('input', e => { currentSearch = e.target.value || ''; renderMap(); });
   }
 
+  /* ── Firestore load ─────────────────────────────── */
   function loadCollection(name) {
     const GF = window.GeoFirebase;
     if (!GF || !GF.db || !GF.fs) return Promise.resolve([]);
@@ -181,11 +300,12 @@
     });
   }
 
+  /* ── Init ───────────────────────────────────────── */
   function init() {
     map = L.map('map', { center: [42.0, 43.5], zoom: 7, zoomControl: true });
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '©OpenStreetMap ©CartoDB', subdomains: 'abcd', maxZoom: 20 }).addTo(map);
     map.fitBounds([[41.0, 40.0], [43.5, 46.7]], { padding: [40, 40] });
-    buildLegend(); attachFilters(); renderMap();
+    buildLegend(); buildMobileCard(); attachFilters(); renderMap();
     if (window.GeoFirebase) loadRealPlaces();
     else window.addEventListener('GeoFirebaseReady', loadRealPlaces, { once: true });
   }

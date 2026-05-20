@@ -46,8 +46,37 @@ body, html { height: 100%; overflow: hidden; }
       font-size: 0.8rem; color: var(--text-secondary); box-shadow: var(--shadow-md);
     }
     .search-count-badge strong { color: var(--green); }
-    .legend-scroll { max-height: 280px; overflow-y: auto; }
+    .legend-scroll { max-height: 260px; overflow-y: auto; }
     .legend-icon { font-size: 0.88rem; width: 20px; text-align: center; flex-shrink: 0; }
+    /* Legend interactive states */
+    .legend-all-btn { cursor: pointer; font-size: 0.73rem; font-weight: 700; color: #4b5563; margin-bottom: 8px; padding: 3px 0; letter-spacing: 0.3px; transition: color 0.15s; }
+    .legend-all-btn.legend-all-active { color: var(--green, #10e0a0); }
+    .legend-all-btn:hover { opacity: 0.8; }
+    .legend-toggle { cursor: pointer; transition: opacity 0.18s; user-select: none; border-radius: 6px; padding: 2px 4px; margin: 0 -4px; }
+    .legend-toggle:hover { background: rgba(255,255,255,0.05); }
+    .legend-toggle.legend-disabled { opacity: 0.28; }
+    /* Mobile place card */
+    .mobile-place-card {
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 1200;
+      background: var(--bg-card, #0f172a); border-radius: 20px 20px 0 0;
+      border-top: 1px solid var(--border, rgba(255,255,255,.1));
+      max-height: 72vh; overflow-y: auto;
+      transform: translateY(100%); transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+      box-shadow: 0 -8px 40px rgba(0,0,0,.55);
+    }
+    .mobile-place-card.open { transform: translateY(0); }
+    .mpc-drag-handle { width: 40px; height: 4px; background: rgba(255,255,255,.18); border-radius: 2px; margin: 10px auto 0; }
+    .mpc-close { position: absolute; top: 10px; right: 14px; width: 30px; height: 30px; background: rgba(255,255,255,.08); border: none; border-radius: 50%; color: #f8fafc; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .mpc-img-wrap img { width: 100%; max-height: 160px; object-fit: cover; display: block; }
+    .mpc-fallback { width: 100%; height: 100px; display: flex; align-items: center; justify-content: center; font-size: 2.8rem; }
+    .mpc-body { padding: 14px 16px 20px; }
+    .mpc-name { font-size: 1rem; font-weight: 800; margin-bottom: 4px; color: var(--text-primary, #f8fafc); }
+    .mpc-cat  { font-size: 0.78rem; color: var(--text-secondary, #94a3b8); margin-bottom: 4px; }
+    .mpc-addr { font-size: 0.75rem; color: var(--text-muted, #64748b); margin-bottom: 8px; }
+    .mpc-desc { font-size: 0.82rem; color: var(--text-secondary, #94a3b8); line-height: 1.5; margin-bottom: 14px; }
+    .mpc-btns { display: flex; gap: 8px; }
+    @media (max-width: 768px) { .mobile-place-card { display: block; } }
     .place-marker-active { filter: drop-shadow(0 0 6px rgba(255,255,255,0.7)); }
     .place-tooltip.leaflet-tooltip {
       background: rgba(4,5,13,0.92) !important; border: 1px solid rgba(255,255,255,0.15) !important;
