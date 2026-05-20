@@ -1877,6 +1877,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           var floatingMenu = dd.cloneNode(true);
           floatingMenu.id = 'ghBizPostMenuDrop';
           floatingMenu.dataset.postId = String(bizPid0 || '');
+          floatingMenu.classList.remove('biz-post-menu-dropdown');
+          floatingMenu.classList.add('biz-post-menu-floating');
+          floatingMenu.style.setProperty('display', 'block', 'important');
+          floatingMenu.style.setProperty('visibility', 'visible', 'important');
+          floatingMenu.style.setProperty('opacity', '1', 'important');
+          floatingMenu.style.setProperty('pointer-events', 'auto', 'important');
+          floatingMenu.style.setProperty('position', 'fixed', 'important');
+          floatingMenu.style.setProperty('z-index', '10080', 'important');
           document.body.appendChild(floatingMenu);
           floatingMenu.addEventListener('click', function(ev){
             var actionBtn = ev.target.closest && ev.target.closest('[data-biz-action]');

@@ -2063,6 +2063,27 @@ body.gh-has-injected-nav #biz-detail-root {
 .biz-pmenu-sep { height: 1px; background: rgba(255,255,255,.07); margin: 5px 0; }
 .biz-pmenu-check { margin-left: auto; color: #10b981; font-size: .72rem; }
 
+/* Floating biz post menu appended to <body> — override any class-based hiding */
+#ghBizPostMenuDrop,
+.biz-post-menu-floating {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  position: fixed !important;
+  z-index: 10080 !important;
+  background: #1a2540;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 14px;
+  padding: 6px;
+  min-width: 210px;
+  max-width: calc(100vw - 16px);
+  max-height: min(280px, 60vh);
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0,0,0,.55);
+  transform: none;
+}
+
 /* Pinned badge */
 .biz-post-pinned {
   display: flex;
