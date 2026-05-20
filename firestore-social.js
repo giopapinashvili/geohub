@@ -1616,24 +1616,39 @@
           getDoc(doc(db, 'users', toUserId)).catch(function(){ return null; }),
           getDoc(friendRef).catch(function(){ return null; }),
           getDoc(reqRef).catch(function(){ return null; }),
-          getDoc(reverseReqRef).catch(function(){ return null; })
+          getDoc(reverseReqRef).catch(function(){ return null; }),
+          getDoc(doc(db, 'users', uid)).catch(function(){ return null; })
         ]).then(function(results) {
           var tData = (results[0] && results[0].exists() ? results[0].data() : {}) || {};
+          var myData = (results[4] && results[4].exists() ? results[4].data() : {}) || {};
           var pref = (tData.privacy || {}).friendRequestPref || 'everyone';
           if (pref === 'nobody') { toast('This user is not accepting friend requests.', 'error'); if (callback) callback('denied'); return Promise.reject('denied'); }
           if (results[1] && results[1].exists()) throw new Error('already-friends');
-          if (results[2] && results[2].exists()) throw new Error('already-requested');
+          // Only block if there is an active pending request; allow re-send over old accepted/rejected docs
+          if (results[2] && results[2].exists() && (results[2].data()||{}).status === 'pending') throw new Error('already-requested');
           if (results[3] && results[3].exists() && (results[3].data() || {}).status === 'pending') throw new Error('incoming-request-exists');
+          var senderName = myData.fullName || myData.displayName || myData.name || user.displayName || 'GeoHub User';
+          var senderAvatar = myData.avatar || myData.photoURL || user.photoURL || '';
+          var targetName = tData.fullName || tData.displayName || tData.name || 'GeoHub User';
+          var targetAvatar = tData.avatar || tData.photoURL || '';
           return setDoc(reqRef, {
+            fromUid: uid,
+            toUid: toUserId,
             fromUserId: uid,
             toUserId: toUserId,
             status: 'pending',
+            fromName: senderName,
+            fromAvatar: senderAvatar,
+            toName: targetName,
+            toAvatar: targetAvatar,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp()
           }, { merge: false });
         }).then(function () {
           var me = meData() || {};
-          return createNotification(toUserId, 'friend_request', (me.name || 'GeoHub User') + ' sent you a friend request', 'Open the profile to accept or reject.', 'profile.html?id=' + uid, { fromUserId: uid });
+          var senderName = me.name || 'GeoHub User';
+          // Dedup key prevents duplicate notifications if request is re-attempted
+          return createNotification(toUserId, 'friend_request', senderName + ' sent you a friend request', 'Open their profile to accept or decline.', 'profile.html?id=' + uid, { fromUserId: uid, fromUid: uid }, 'friend_req_' + uid + '_' + toUserId);
         }).then(function () {
           console.log('[friends] request sent OK', { fromUid: uid, toUid: toUserId });
           toast('Friend request sent');
@@ -1643,8 +1658,8 @@
           var msg = err && err.message;
           if (msg === 'already-friends') { toast('Already friends'); if(callback) callback('friends'); return; }
           if (msg === 'already-requested') { toast('Request already sent'); if(callback) callback('pending'); return; }
-          if (msg === 'incoming-request-exists') { toast('This user already sent you a request'); if(callback) callback('incoming'); return; }
-          console.warn('[friends] request failed', { code: err && err.code, message: err && err.message, fromUid: uid, toUid: toUserId });
+          if (msg === 'incoming-request-exists') { toast('This user already sent you a request — check your requests tab'); if(callback) callback('incoming'); return; }
+          console.warn('[friends] send failed', { code: err && err.code, message: err && err.message, fromUid: uid, toUid: toUserId });
           toast('Failed to send request.', 'error');
           if (callback) callback('error', err);
         });
@@ -1695,13 +1710,14 @@
         emit();
       }, function(err){ console.warn('[friends] friendships-doc listener err', err && err.message); emit(); }));
       unsubs.push(onSnapshot(doc(db, 'friendRequests', uid + '_' + targetUserId), function(snap){
-        if (status.state === 'friends') return emit();
+        // Use canonical friendship booleans, not status.state, to prevent race on Accept
+        if (friendDocExists || friendshipDocExists) return emit();
         if (snap.exists() && (snap.data()||{}).status === 'pending') status = { state: 'outgoing', requestId: snap.id };
         else if (status.state === 'outgoing') status = { state: 'none' };
         emit();
       }, function(err){ console.warn('[friends] outgoing-req listener err', err && err.message); emit(); }));
       unsubs.push(onSnapshot(doc(db, 'friendRequests', targetUserId + '_' + uid), function(snap){
-        if (status.state === 'friends') return emit();
+        if (friendDocExists || friendshipDocExists) return emit();
         if (snap.exists() && (snap.data()||{}).status === 'pending') status = { state: 'incoming', requestId: snap.id, fromUserId: targetUserId };
         else if (status.state === 'incoming') status = { state: 'none' };
         emit();
@@ -1716,11 +1732,11 @@
         getDoc(reqRef).then(function(snap){
           if (!snap.exists()) throw new Error('request-not-found');
           var r = snap.data() || {};
-          if ((r.toUserId || r.toId) !== user.uid && !((auth.currentUser.email||'') && false)) throw new Error('not-your-request');
+          if ((r.toUserId || r.toId || r.toUid) !== user.uid && !((auth.currentUser.email||'') && false)) throw new Error('not-your-request');
           if (!accept) {
-            return updateDoc(reqRef, { status: 'rejected', reviewedAt: serverTimestamp(), updatedAt: serverTimestamp() }).then(function(){ return {accepted:false, fromId:r.fromUserId||r.fromId}; });
+            return updateDoc(reqRef, { status: 'rejected', reviewedAt: serverTimestamp(), updatedAt: serverTimestamp() }).then(function(){ return {accepted:false, fromId:r.fromUserId||r.fromId||r.fromUid}; });
           }
-          var fromId = r.fromUserId || r.fromId;
+          var fromId = r.fromUserId || r.fromId || r.fromUid;
           var fid = friendshipId(fromId, user.uid);
           return setDoc(doc(db, 'friends', fid), {
             users: [fromId, user.uid],
@@ -1760,8 +1776,16 @@
         items.sort(function(a,b){ return tsToMillis(b.createdAt)-tsToMillis(a.createdAt); });
         if (!items.length) { callback([]); return; }
         Promise.all(items.map(function(r){
-          var fromId = r.fromUserId || r.fromId || '';
+          var fromId = r.fromUserId || r.fromId || r.fromUid || '';
           if (!fromId) return Promise.resolve(r);
+          // If sender profile fields were embedded at request creation, skip the extra read
+          if (r.fromName && r.fromAvatar !== undefined) {
+            return Promise.resolve(Object.assign({}, r, {
+              senderName: r.fromName || 'GeoHub User',
+              senderUsername: r.senderUsername || fromId,
+              senderAvatar: r.fromAvatar || ''
+            }));
+          }
           return getDoc(doc(db, 'users', fromId)).then(function(us){
             var u = us.exists() ? us.data() : {};
             return Object.assign({}, r, {
@@ -1853,7 +1877,7 @@
         items.sort(function(a,b){ return tsToMillis(b.createdAt)-tsToMillis(a.createdAt); });
         if(!items.length){ callback([]); return; }
         Promise.all(items.map(function(r){
-          var toId=r.toUserId||'';
+          var toId=r.toUserId||r.toId||r.toUid||'';
           if(!toId) return Promise.resolve(r);
           return getDoc(doc(db,'users',toId)).then(function(us){
             var u=us.exists()?us.data():{};

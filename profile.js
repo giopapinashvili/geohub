@@ -1765,15 +1765,18 @@
           });
         }
       } else {
-        // Optimistic: immediately show Cancel Request; revert only on hard error
-        friendBtn.disabled = true;
-        updateFriendButtons(target, { state: 'outgoing' });
+        // Show Sending… spinner; update to correct state from callback, listener provides final truth
+        $$('[data-friend-user="' + target + '"]').forEach(function(b){
+          b.disabled = true;
+          b.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Sending…';
+        });
         window.GeoSocial.sendFriendRequest(target, function(state) {
           $$('[data-friend-user="' + target + '"]').forEach(function(b){ b.disabled = false; });
           if (state === 'error') {
             updateFriendButtons(target, { state: 'none' });
           } else {
-            updateFriendButtons(target, { state: state === 'pending' ? 'outgoing' : (state || 'outgoing') });
+            var nextState = (state === 'friends') ? 'friends' : (state === 'incoming' ? 'incoming' : 'outgoing');
+            updateFriendButtons(target, { state: nextState });
           }
         });
       }
