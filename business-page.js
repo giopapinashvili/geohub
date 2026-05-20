@@ -1590,6 +1590,10 @@
         };
         if (overviewEl && !overviewEl._bizBound) { gs.bindPostInteractions(overviewEl, bizInteractionOptions); overviewEl._bizBound = true; }
         if (allEl && !allEl._bizBound)           { gs.bindPostInteractions(allEl, bizInteractionOptions);      allEl._bizBound = true; }
+        if (gs.hydratePostAuthorAvatars) {
+          if (overviewEl) gs.hydratePostAuthorAvatars(overviewEl);
+          if (allEl) gs.hydratePostAuthorAvatars(allEl);
+        }
       }
 
       // Set up IntersectionObserver to track post views
@@ -2761,17 +2765,39 @@
       document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){
         if (d.id !== 'biz-pmenu-'+postId) d.classList.remove('open');
       });
+      var oldFloating = document.getElementById('ghBizPostMenuDrop');
       var dd = document.getElementById('biz-pmenu-' + postId);
       if (!dd) return;
-      var isOpen = dd.classList.contains('open');
+      var isOpen = oldFloating && oldFloating.getAttribute('data-post-id') === String(postId || '');
+      if (oldFloating) oldFloating.remove();
       if (!isOpen && btnEl) {
-        // Position fixed relative to viewport to escape any overflow:hidden parent
+        dd = dd.cloneNode(true);
+        dd.id = 'ghBizPostMenuDrop';
+        dd.setAttribute('data-post-id', String(postId || ''));
+        document.body.appendChild(dd);
         var rect = btnEl.getBoundingClientRect();
-        dd.style.top = (rect.bottom + 4) + 'px';
-        dd.style.right = Math.max(0, Math.min(window.innerWidth - rect.right, window.innerWidth - 218)) + 'px';
-        dd.style.left = '';
+        var gap = 8;
+        dd.style.position = 'fixed';
+        dd.style.left = '0px';
+        dd.style.right = 'auto';
+        dd.style.top = '0px';
+        dd.style.visibility = 'hidden';
+        dd.classList.add('open');
+        var menuWidth = dd.offsetWidth || 218;
+        var menuHeight = dd.offsetHeight || 260;
+        var vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+        var vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+        var left = rect.right - menuWidth;
+        if (left < gap) left = gap;
+        if (left + menuWidth > vw - gap) left = Math.max(gap, vw - menuWidth - gap);
+        var top = rect.bottom + gap;
+        if (top + menuHeight > vh - gap) top = rect.top - menuHeight - gap;
+        if (top < gap) top = gap;
+        dd.style.left = Math.round(left) + 'px';
+        dd.style.top = Math.round(top) + 'px';
+        dd.style.visibility = '';
       }
-      dd.classList.toggle('open', !isOpen);
+      if (dd) dd.classList.toggle('open', !isOpen);
       if (!isOpen) {
         // Close on next outside click
         setTimeout(function(){
@@ -3148,6 +3174,7 @@
           } else {
             el.innerHTML = '<div class="biz-post-list">'+card+'</div>';
           }
+          if (gs2 && gs2.hydratePostAuthorAvatars) gs2.hydratePostAuthorAvatars(el);
         });
       }).catch(function(err){
         console.error('[BizPage] Post failed',err);

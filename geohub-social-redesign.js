@@ -216,6 +216,51 @@
 function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=Math.max(1, Math.floor((Date.now()-t)/1000)); if(s<60)return s+'s'; var m=Math.floor(s/60); if(m<60)return m+'m'; var h=Math.floor(m/60); if(h<24)return h+'h'; var d=Math.floor(h/24); if(d<30)return d+'d'; var mo=Math.floor(d/30); if(mo<12)return mo+'mo'; return Math.floor(mo/12)+'y'; }
   function initials(name){ name=text(name,'GeoHub'); return name.split(/\s+/).slice(0,2).map(function(x){return x[0];}).join('').toUpperCase(); }
   function img(url, alt){ return url ? '<img src="'+esc(url)+'" alt="'+esc(alt||'')+'" loading="lazy" onerror="this.remove()">' : ''; }
+  var actorAvatarCache = {};
+  function postAuthorActor(p){
+    p = p || {};
+    var uid = p.authorId || p.userId || p.uid || p.createdByUserId || p.createdBy || '';
+    if(p.authorType === 'user') return uid ? { type:'user', id:String(uid) } : null;
+    var businessId = p.businessId || (p.authorType === 'business' ? p.authorId : '') || (p.targetType === 'business' && (!uid || uid === p.targetId) ? p.targetId : '');
+    if(businessId && (p.authorType === 'business' || p.targetType === 'business' || p.businessId)){
+      return { type:'business', id:String(businessId) };
+    }
+    return uid ? { type:'user', id:String(uid) } : null;
+  }
+  function latestActorAvatar(type, id){
+    if(!type || !id || !fs() || !db()) return Promise.resolve(null);
+    var key = type + ':' + id;
+    if(actorAvatarCache[key]) return actorAvatarCache[key];
+    actorAvatarCache[key] = fs().getDoc(fs().doc(db(), type === 'business' ? 'businesses' : 'users', id)).then(function(snap){
+      if(!snap.exists()) return null;
+      var data = snap.data() || {};
+      var avatar = type === 'business'
+        ? (data.logoUrl || data.logo || data.avatar || data.photoURL || data.photoUrl || data.imageUrl || '')
+        : (data.avatar || data.photoURL || data.photoUrl || data.profilePhoto || data.profilePhotoUrl || data.imageUrl || '');
+      var name = type === 'business' ? (data.title || data.name || data.businessName || '') : (data.name || data.displayName || data.fullName || '');
+      return avatar ? { avatar:avatar, name:name } : null;
+    }).catch(function(err){
+      console.warn('[GeoHub] avatar hydration failed', type, id, err && (err.code || err.message || err));
+      return null;
+    });
+    return actorAvatarCache[key];
+  }
+  function hydratePostAuthorAvatars(root){
+    root = root || document;
+    if(!root.querySelectorAll) return;
+    $all('[data-post-author-avatar]', root).forEach(function(el){
+      var type = el.dataset.actorType || '';
+      var id = el.dataset.actorId || '';
+      if(!type || !id || el.dataset.avatarHydrating === '1') return;
+      el.dataset.avatarHydrating = '1';
+      latestActorAvatar(type, id).then(function(info){
+        el.dataset.avatarHydrating = '';
+        if(!info || !info.avatar || el.dataset.latestAvatar === info.avatar) return;
+        el.dataset.latestAvatar = info.avatar;
+        el.innerHTML = img(info.avatar, info.name || el.getAttribute('aria-label') || '');
+      });
+    });
+  }
   function readFileAsDataUrl(file){ return new Promise(function(resolve,reject){ if(!file) return resolve(''); if(!/^image\/(png|jpe?g|webp|gif)$/i.test(file.type||'')) return reject(new Error('Use a PNG, JPG, WEBP or GIF image.')); if(file.size > 8 * 1024 * 1024) return reject(new Error('Image must be under 8 MB.')); var r=new FileReader(); r.onload=function(){ resolve(r.result||''); }; r.onerror=reject; r.readAsDataURL(file); }); }
   function triggerImagePick(cb){ var input=document.createElement('input'); input.type='file'; input.accept='image/png,image/jpeg,image/webp,image/gif'; input.style.display='none'; document.body.appendChild(input); input.onchange=function(){ var f=input.files && input.files[0]; readFileAsDataUrl(f).then(function(url){ cb(url, f); }).catch(function(err){ toast(err.message || 'Image could not be read','error'); }).finally(function(){ input.remove(); }); }; input.click(); }
   function iconFor(type){ return ({post:'fa-newspaper',business:'fa-store',group:'fa-users',place:'fa-map-marker-alt',event:'fa-calendar',service:'fa-briefcase',reward:'fa-gift',challenge:'fa-trophy',learning:'fa-graduation-cap',creator:'fa-user-astronaut'})[type] || 'fa-circle'; }
@@ -1573,8 +1618,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var pid=p.id; var target='';
     var authorHref = authorLinkFor(p);
     var authorId = p.authorId || p.userId || p.createdByUserId || p.createdBy || '';
+    var authorActor = postAuthorActor(p);
     var avatarHtml = (av?img(av,name):esc(initials(name)));
     var authorAttrs = authorId ? ' data-user-profile="'+esc(authorId)+'"' : '';
+    var avatarAttrs = authorActor ? ' data-post-author-avatar data-actor-type="'+esc(authorActor.type)+'" data-actor-id="'+esc(authorActor.id)+'" aria-label="'+esc(name)+'"' : '';
     if(p.targetType && p.targetId) target='<div class="gh-post-target"><i class="fas '+iconFor(p.targetType)+'"></i>'+esc(labelFor(p.targetType))+'</div>';
     var privacyIcon = (p.visibility==='onlyme'||p.visibility==='only_me') ? 'fa-lock' : ((p.visibility==='friends'||p.visibility==='followers') ? 'fa-user-group' : 'fa-earth-europe');
 
@@ -1684,7 +1731,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     return '<article class="gh-card gh-post"'+cardAttrs+'>'+
       followedPageBanner+
       pinBanner+
-      '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+target+(p.feeling?' · '+esc(p.feeling):'')+bizPostedOnHtml+'</div></div>'+moreBtn+'</div>'+
+      '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+avatarAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+target+(p.feeling?' · '+esc(p.feeling):'')+bizPostedOnHtml+'</div></div>'+moreBtn+'</div>'+
       postTextHtml+
       mediaHtml+
       pollHtml+
@@ -1750,9 +1797,64 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
   }
 
+  function closePostMenus(except){
+    var generic = document.getElementById('ghPostMenuDrop');
+    if(generic && generic !== except) generic.remove();
+    var floatingBiz = document.getElementById('ghBizPostMenuDrop');
+    if(floatingBiz && floatingBiz !== except) floatingBiz.remove();
+    document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){
+      if(d !== except){
+        d.classList.remove('open');
+        d.style.visibility = '';
+      }
+    });
+  }
+
+  function positionFixedPostMenu(menu, anchor, fallbackWidth){
+    if(!menu || !anchor) return;
+    var rect = anchor.getBoundingClientRect();
+    var gap = 8;
+    menu.style.position = 'fixed';
+    menu.style.left = '0px';
+    menu.style.right = 'auto';
+    menu.style.top = '0px';
+    menu.style.visibility = 'hidden';
+    menu.classList.add('open');
+    var menuWidth = menu.offsetWidth || fallbackWidth || 220;
+    var menuHeight = menu.offsetHeight || 260;
+    var vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    var vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+    var left = rect.right - menuWidth;
+    if(left < gap) left = gap;
+    if(left + menuWidth > vw - gap) left = Math.max(gap, vw - menuWidth - gap);
+    var top = rect.bottom + gap;
+    if(top + menuHeight > vh - gap) top = rect.top - menuHeight - gap;
+    if(top < gap) top = gap;
+    menu.style.left = Math.round(left) + 'px';
+    menu.style.top = Math.round(top) + 'px';
+    menu.style.visibility = '';
+  }
+
+  function ensurePostMenuDismissers(){
+    if(window.__ghPostMenuDismissers) return;
+    window.__ghPostMenuDismissers = true;
+    document.addEventListener('click', function(ev){
+      var t = ev.target;
+      if(t && t.closest && (t.closest('#ghPostMenuDrop') || t.closest('#ghBizPostMenuDrop') || t.closest('.biz-post-menu-dropdown') || t.closest('[data-post-menu]') || t.closest('[data-biz-post-menu]') || t.closest('.biz-post-menu-btn'))) return;
+      closePostMenus();
+    }, true);
+    document.addEventListener('keydown', function(ev){ if(ev.key === 'Escape') closePostMenus(); });
+    window.addEventListener('scroll', function(){ closePostMenus(); }, true);
+    window.addEventListener('resize', function(){ closePostMenus(); });
+  }
+
   function bindPostInteractions(root, options){
     root = root || document;
     options = options || {};
+    hydratePostAuthorAvatars(root);
+    ensurePostMenuDismissers();
+    if(root.__ghPostInteractionsBound) return;
+    root.__ghPostInteractionsBound = true;
     root.addEventListener('click', function(e){
       // Business post menu toggle — intercept before generic card check
       var bizMenuBtn = e.target.closest('[data-biz-post-menu]');
@@ -1762,22 +1864,23 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var bizPid0 = bizCard0 ? bizCard0.dataset.postId : '';
         var dd = bizPid0 ? document.getElementById('biz-pmenu-'+bizPid0) : null;
         if (dd) {
-          var isOpen0 = dd.classList.contains('open');
-          document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
+          var currentBizMenu = document.getElementById('ghBizPostMenuDrop');
+          var isOpen0 = currentBizMenu && currentBizMenu.dataset.postId === String(bizPid0 || '');
+          closePostMenus();
           if (!isOpen0) {
-            var rect0 = bizMenuBtn.getBoundingClientRect();
-            dd.style.top = (rect0.bottom+4)+'px';
-            dd.style.right = Math.max(0, Math.min(window.innerWidth - rect0.right, window.innerWidth - 218)) + 'px';
-            dd.style.left = '';
-            dd.classList.add('open');
-            setTimeout(function(){
-              document.addEventListener('click', function _bzh(ev){
-                if (!ev.target.closest || !ev.target.closest('.biz-post-menu-wrap')) {
-                  document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
-                }
-                document.removeEventListener('click', _bzh);
-              });
-            }, 0);
+            var floatingMenu = dd.cloneNode(true);
+            floatingMenu.id = 'ghBizPostMenuDrop';
+            floatingMenu.dataset.postId = String(bizPid0 || '');
+            document.body.appendChild(floatingMenu);
+            floatingMenu.addEventListener('click', function(ev){
+              var actionBtn = ev.target.closest && ev.target.closest('[data-biz-action]');
+              if (!actionBtn) return;
+              ev.preventDefault();
+              ev.stopPropagation();
+              closePostMenus();
+              if (options.onBizAction) options.onBizAction(actionBtn.dataset.pid || bizPid0, actionBtn.dataset.bizAction, actionBtn.dataset);
+            });
+            positionFixedPostMenu(floatingMenu, bizMenuBtn, 218);
           }
         }
         return;
@@ -2353,9 +2456,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function postMenu(pid, card, anchor){
     if(!requireLogin()) return;
-    // Toggle: clicking the button again closes the existing dropdown
     var existing = document.getElementById('ghPostMenuDrop');
-    if (existing) { existing.remove(); return; }
+    if (existing) {
+      var samePost = existing.dataset.postId === String(pid || '');
+      existing.remove();
+      if (samePost) return;
+    }
+    closePostMenus();
 
     var authorId = card && card.dataset ? card.dataset.authorId : '';
     var authorName = card && card.dataset ? (card.dataset.authorName || '') : '';
@@ -2386,17 +2493,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var drop = document.createElement('div');
     drop.id = 'ghPostMenuDrop';
     drop.className = 'gh-post-menu-drop';
+    drop.dataset.postId = String(pid || '');
     drop.innerHTML = items;
     document.body.appendChild(drop);
 
-    // Position anchored to the 3-dot button
-    if (anchor) {
-      var rect = anchor.getBoundingClientRect();
-      var top = rect.bottom + window.scrollY + 4;
-      var right = Math.max(8, window.innerWidth - rect.right);
-      drop.style.top = top + 'px';
-      drop.style.right = right + 'px';
-    }
+    positionFixedPostMenu(drop, anchor, 220);
 
     function closeDrop() { var d = document.getElementById('ghPostMenuDrop'); if (d) d.remove(); }
 
@@ -2420,19 +2521,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if (e.target.closest('[data-menu-block-user]') && authorId) { closeDrop(); if(window.GeoModeration) window.GeoModeration.openBlockConfirm(authorId, authorName, function(){ if(GS().blockUser) GS().blockUser(authorId, function(){ if(card) card.remove(); }); }); else if(GS().blockUser) GS().blockUser(authorId, function(){ if(card) card.remove(); }); return; }
     });
 
-    // Close on outside click or Escape
-    setTimeout(function() {
-      function _outside(ev) {
-        if (!ev.target.closest || !ev.target.closest('#ghPostMenuDrop')) {
-          closeDrop();
-          document.removeEventListener('click', _outside, true);
-          document.removeEventListener('keydown', _esc);
-        }
-      }
-      function _esc(ev) { if (ev.key === 'Escape') { closeDrop(); document.removeEventListener('click', _outside, true); document.removeEventListener('keydown', _esc); } }
-      document.addEventListener('click', _outside, true);
-      document.addEventListener('keydown', _esc);
-    }, 0);
+    ensurePostMenuDismissers();
   }
 
   function openFocusedPost(pid) {
@@ -2506,6 +2595,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       bindPostInteractions(body, {
         onOpenPhoto: function(url) { openMediaLightbox(url); }
       });
+      hydratePostAuthorAvatars(body);
 
       // Reuse existing comment listener if active; otherwise create one
       if (state.postsUnsubs && state.postsUnsubs[pid]) {
@@ -3295,6 +3385,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           return postCard(p, isFollowedPage ? {fromFollowedPage:true} : {});
         }).join('');
         visible.forEach(function(p){ try{ hydrateReactionState(p.id); loadReactionBreakdown(p.id); }catch(e){} });
+        hydratePostAuthorAvatars(list);
         hydrateSharedPreviews(list);
         // Restore open comment sections that were visible before re-render
         Object.keys(state.openCommentPids).forEach(function(pid){
@@ -3836,6 +3927,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(!posts.length){el.innerHTML='<div class="gh-empty"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Post updates to engage with your followers.</p></div>'; return;}
       el.innerHTML=posts.map(postCard).join('');
       bindPostInteractions(el);
+      hydratePostAuthorAvatars(el);
       posts.forEach(function(p){hydrateReactionState(p.id);});
       hydrateSharedPreviews(el);
     });
@@ -4725,8 +4817,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div id="ghBusinessPosts"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>';
     box.onclick=function(e){ if(e.target.closest('[data-post-as-business]')) openPostModal({ targetType:'business',targetId:b.id,authorType:'business',businessId:b.id,authorId:b.id,authorName:bTitle,authorAvatar:b.logoUrl||b.coverUrl||'',createdByUserId:authUser()&&authUser().uid }); };
     bindPostInteractions(box);
-    setupAudienceAccess(function(){ var list=$('#ghBusinessPosts'); if(list&&list._lastPosts){ var posts=list._lastPosts.filter(canSeePost); list.innerHTML=posts.length?posts.map(postCard).join(''):'<div class="gh-card gh-empty"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Business updates will appear here.</p></div>'; hydrateSharedPreviews(list); } });
-    listenTargetPosts('business',b.id,function(posts){ var list=$('#ghBusinessPosts'); if(!list)return; list._lastPosts=posts||[]; posts=posts.filter(canSeePost); if(!posts.length){list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Business page updates will appear here.</p></div>';return;} list.innerHTML=posts.map(postCard).join(''); bindPostInteractions(list); posts.forEach(function(p){hydrateReactionState(p.id);}); hydrateSharedPreviews(list); });
+    setupAudienceAccess(function(){ var list=$('#ghBusinessPosts'); if(list&&list._lastPosts){ var posts=list._lastPosts.filter(canSeePost); list.innerHTML=posts.length?posts.map(postCard).join(''):'<div class="gh-card gh-empty"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Business updates will appear here.</p></div>'; hydratePostAuthorAvatars(list); hydrateSharedPreviews(list); } });
+    listenTargetPosts('business',b.id,function(posts){ var list=$('#ghBusinessPosts'); if(!list)return; list._lastPosts=posts||[]; posts=posts.filter(canSeePost); if(!posts.length){list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Business page updates will appear here.</p></div>';return;} list.innerHTML=posts.map(postCard).join(''); bindPostInteractions(list); hydratePostAuthorAvatars(list); posts.forEach(function(p){hydrateReactionState(p.id);}); hydrateSharedPreviews(list); });
   }
 
   function aboutRow(ic, txt){ return '<div class="gh-about-row"><i class="fas '+ic+'"></i><span>'+esc(txt)+'</span></div>'; }
@@ -5992,6 +6084,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   window.GeoSocialUI = {
     postCard: postCard,
     bindPostInteractions: bindPostInteractions,
+    hydratePostAuthorAvatars: hydratePostAuthorAvatars,
     hydrateReactionState: hydrateReactionState,
     loadReactionBreakdown: loadReactionBreakdown,
     hydratePollVote: hydratePollVote,
