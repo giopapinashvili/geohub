@@ -777,31 +777,30 @@
       var vis      = post.visibility || 'public';
       menuHtml =
         '<div class="biz-post-menu-wrap">'+
-          '<button class="biz-post-menu-btn" title="Post options" data-biz-post-menu '+
-            'onclick="event.stopPropagation();window._bizActions.openPostMenu(\''+pid+'\',this)">'+
+          '<button class="gh-post-more" data-biz-post-menu title="Post options" type="button">'+
             '<i class="fas fa-ellipsis"></i>'+
           '</button>'+
           '<div class="biz-post-menu-dropdown" id="biz-pmenu-'+pid+'">'+
-            '<button class="biz-pmenu-item" onclick="window._bizActions.editPost(\''+pid+'\')"><i class="fas fa-pen"></i> Edit post</button>'+
-            '<button class="biz-pmenu-item" onclick="window._bizActions.pinPost(\''+pid+'\')">'+
+            '<button class="biz-pmenu-item" data-biz-action="edit" data-pid="'+pid+'"><i class="fas fa-pen"></i> Edit post</button>'+
+            '<button class="biz-pmenu-item" data-biz-action="pin" data-pid="'+pid+'" data-pinned="'+(isPinned?'1':'0')+'">'+
               '<i class="fas fa-thumbtack"></i> '+(isPinned?'Unpin post':'Pin post')+
             '</button>'+
             '<div class="biz-pmenu-sep"></div>'+
-            '<button class="biz-pmenu-item" onclick="window._bizActions.togglePostComments(\''+pid+'\')">'+
+            '<button class="biz-pmenu-item" data-biz-action="toggleComments" data-pid="'+pid+'" data-cmt-off="'+(cmtOff?'1':'0')+'">'+
               '<i class="fas fa-comment-slash"></i> '+(cmtOff?'Enable comments':'Disable comments')+
             '</button>'+
             '<div class="biz-pmenu-sep"></div>'+
-            '<button class="biz-pmenu-item" onclick="window._bizActions.setPostVisibility(\''+pid+'\',\'public\')">'+
+            '<button class="biz-pmenu-item" data-biz-action="setVis" data-pid="'+pid+'" data-vis="public">'+
               '<i class="fas fa-globe"></i> Public'+(vis==='public'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+
             '</button>'+
-            '<button class="biz-pmenu-item" onclick="window._bizActions.setPostVisibility(\''+pid+'\',\'followers\')">'+
+            '<button class="biz-pmenu-item" data-biz-action="setVis" data-pid="'+pid+'" data-vis="followers">'+
               '<i class="fas fa-user-group"></i> Followers only'+(vis==='followers'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+
             '</button>'+
-            '<button class="biz-pmenu-item" onclick="window._bizActions.setPostVisibility(\''+pid+'\',\'private\')">'+
+            '<button class="biz-pmenu-item" data-biz-action="setVis" data-pid="'+pid+'" data-vis="private">'+
               '<i class="fas fa-lock"></i> Private'+(vis==='private'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+
             '</button>'+
             '<div class="biz-pmenu-sep"></div>'+
-            '<button class="biz-pmenu-item danger" onclick="window._bizActions.deletePost(\''+pid+'\')"><i class="fas fa-trash"></i> Delete post</button>'+
+            '<button class="biz-pmenu-item danger" data-biz-action="delete" data-pid="'+pid+'"><i class="fas fa-trash"></i> Delete post</button>'+
           '</div>'+
         '</div>';
     }
@@ -871,7 +870,7 @@
         '</div>';
     }
 
-    return '<div class="biz-post-card" data-post-id="'+pid+'"'+
+    return '<article class="gh-card gh-post biz-post-card" id="post-'+pid+'" data-post-id="'+pid+'" data-author-id="'+esc(post.authorId||'')+'"'+
         (post.pinned ? ' data-pinned="1"' : '')+
         ' data-vis="'+esc(post.visibility||'public')+'"'+'>'+
       (post.pinned ? '<div class="biz-post-pinned"><i class="fas fa-thumbtack"></i> Pinned post</div>' : '')+
@@ -902,7 +901,7 @@
       '<div class="biz-cmt-section" id="biz-cmt-'+pid+'" style="display:none">'+
         cmtInner+
       '</div>'+
-    '</div>';
+    '</article>';
   }
 
   // ── END LOCAL POST RENDERERS ────────────────────────────────
@@ -1559,6 +1558,8 @@
       var pre = '<div class="biz-post-list">'+posts.slice(0,3).map(function(p){ return postCardHtml(p,_biz); }).join('')+'</div>';
       if (overviewEl) overviewEl.innerHTML = pre;
       if (allEl)      allEl.innerHTML      = all;
+      bindBusinessPostMenuInteractions(overviewEl);
+      bindBusinessPostMenuInteractions(allEl);
       installBusinessPostActionDelegates();
 
       // Set up IntersectionObserver to track post views
@@ -1654,16 +1655,12 @@
       root.addEventListener('click', function(e) {
         if (!e.target || !e.target.closest) return;
 
-        var menuBtn = e.target.closest('[data-biz-post-menu], .gh-post-more, .biz-post-menu-btn, button[title="Post options"], [aria-label="Post options"]');
         var shareBtn = e.target.closest('[data-biz-post-share], .biz-post-share-btn, button');
         var saveBtn = e.target.closest('[data-biz-post-save], .biz-post-save-btn, [data-save], button');
         var action = null;
         var btn = null;
 
-        if (menuBtn) {
-          action = 'menu';
-          btn = menuBtn;
-        } else if (shareBtn && (shareBtn.matches('[data-biz-post-share], .biz-post-share-btn') || buttonText(shareBtn) === 'share')) {
+        if (shareBtn && (shareBtn.matches('[data-biz-post-share], .biz-post-share-btn') || buttonText(shareBtn) === 'share')) {
           action = 'share';
           btn = shareBtn;
         } else if (saveBtn && (saveBtn.matches('[data-biz-post-save], .biz-post-save-btn, [data-save]') || buttonText(saveBtn) === 'save' || buttonText(saveBtn) === 'saved')) {
@@ -1674,33 +1671,39 @@
 
         var card;
         var postId;
-        if (action === 'menu') {
-          var found = getBizPostIdFromButton(btn);
-          card = found.card;
-          postId = found.postId;
-          if (!card || !postId) {
-            console.warn('[biz-menu] could not resolve post id', { btn: btn, card: card });
-            return;
-          }
-        } else {
-          card = btn.closest('[data-post-id]');
-          if (!card) return;
-          postId = card.dataset.postId;
-          if (!postId) return;
-        }
+        card = btn.closest('[data-post-id]');
+        if (!card) return;
+        postId = card.dataset.postId;
+        if (!postId) return;
 
         e.preventDefault();
         e.stopPropagation();
         if (e.stopImmediatePropagation) e.stopImmediatePropagation();
 
-        if (action === 'menu') {
-          window._bizActions.openPostMenu(postId, btn);
-        } else if (action === 'share') {
+        if (action === 'share') {
           window._bizActions.openShareModal(postId);
         } else if (action === 'save') {
           window._bizActions.togglePostSave(postId, btn);
         }
       }, true);
+    });
+  }
+
+  function bindBusinessPostMenuInteractions(root) {
+    var gs = window.GeoSocialUI;
+    if (!root || !gs || !gs.bindPostInteractions) return;
+    gs.bindPostInteractions(root, {
+      onBizAction: function(pid, action, data) {
+        if (action === 'edit') window._bizActions.editPost(pid);
+        else if (action === 'pin') window._bizActions.pinPost(pid);
+        else if (action === 'toggleComments') window._bizActions.togglePostComments(pid);
+        else if (action === 'setVis') window._bizActions.setPostVisibility(pid, data.vis);
+        else if (action === 'delete') window._bizActions.deletePost(pid);
+      },
+      onOpenPhoto: function(url) {
+        if (window._bizActions && window._bizActions.openPhoto) window._bizActions.openPhoto(url);
+        else window.open(url, '_blank', 'noopener');
+      }
     });
   }
 
@@ -3313,6 +3316,7 @@
           } else {
             el.innerHTML = '<div class="biz-post-list">'+card+'</div>';
           }
+          bindBusinessPostMenuInteractions(el);
         });
         installBusinessPostActionDelegates();
       }).catch(function(err){
