@@ -74,6 +74,8 @@
       addStoryReply: noop,
       deleteStory: noop,
       listenUserNotifications: function (uid, cb) { cb([]); return function () {}; },
+      listenActorNotifications: function (actor, cb) { cb([]); return function () {}; },
+      createActorNotification: function () { return Promise.resolve(); },
       markNotificationRead: function () {},
       listenUserPosts: function (uid, cb) { cb([]); return function () {}; },
       listenUserCheckins: function (uid, cb) { cb([]); return function () {}; },
@@ -233,6 +235,8 @@
       var payload = Object.assign({
         userId: toUserId,
         toUserId: toUserId,
+        targetActorType: 'user',
+        targetActorId: toUserId,
         fromUserId: me.uid,
         fromName: me.name || 'GeoHub User',
         fromAvatar: me.avatar || '',
@@ -255,11 +259,45 @@
       });
     }
 
+    function createActorNotification(targetActorType, targetActorId, type, title, body, href, extra, dedupKey) {
+      var me = meData() || {};
+      if (!targetActorType || !targetActorId || !me.uid) return Promise.resolve();
+      var isBusiness = targetActorType === 'business';
+      var payload = Object.assign({
+        userId: isBusiness ? '' : targetActorId,
+        toUserId: isBusiness ? '' : targetActorId,
+        businessId: isBusiness ? targetActorId : '',
+        targetActorType: isBusiness ? 'business' : 'user',
+        targetActorId: targetActorId,
+        fromUserId: me.uid,
+        fromName: me.name || 'GeoHub User',
+        fromAvatar: me.avatar || '',
+        type: type || 'notification',
+        title: title || 'GeoHub',
+        body: body || '',
+        message: body || '',
+        href: href || 'feed.html',
+        read: false,
+        seen: false,
+        createdAt: serverTimestamp()
+      }, extra || {});
+      if (dedupKey) {
+        return setDoc(doc(db, 'userNotifications', dedupKey), payload).catch(function (err) {
+          console.warn('[GeoSocial] createActorNotification', err.message);
+        });
+      }
+      return addDoc(collection(db, 'userNotifications'), payload).catch(function (err) {
+        console.warn('[GeoSocial] createActorNotification', err.message);
+      });
+    }
+
     function createSystemNotification(toUserId, type, title, body, href, extra) {
       if (!toUserId) return Promise.resolve();
       var payload = Object.assign({
         userId: toUserId,
         toUserId: toUserId,
+        targetActorType: 'user',
+        targetActorId: toUserId,
         fromUserId: currentUid() || toUserId,
         fromName: 'GeoHub',
         fromAvatar: '',
@@ -947,8 +985,15 @@
           updateDoc(doc(db, 'users', user.uid), { geoPointsSpentTotal: increment(res.price), updatedAt: serverTimestamp() }).catch(function(){});
           createSystemNotification(user.uid, 'reward', 'Reward Redeemed!', 'You redeemed: ' + (res.reward.title || res.reward.name || 'a reward'), 'rewards.html').catch(function(){});
           var _ownerId = res.reward.ownerId || res.reward.createdBy || '';
-          if (_ownerId && _ownerId !== user.uid) {
+          if (false && _ownerId && _ownerId !== user.uid) {
             createSystemNotification(_ownerId, 'coupon_redeemed', 'Coupon Redeemed', 'A customer redeemed: ' + (res.reward.title || res.reward.name || 'a reward') + '. Code: ' + code, 'rewards.html').catch(function(){});
+          }
+          if (res.reward.businessId) {
+            createActorNotification('business', res.reward.businessId, 'coupon_redeemed', 'Coupon Redeemed', 'A customer redeemed: ' + (res.reward.title || res.reward.name || 'a reward') + '. Code: ' + code, 'rewards.html', {
+              businessId: res.reward.businessId,
+              rewardId: rewardId,
+              couponCode: code
+            }).catch(function(){});
           }
           toast('Coupon unlocked: ' + code);
           if(callback) callback(true, { couponId: couponRef.id, code: code, reward: res.reward });
@@ -1853,6 +1898,56 @@
       }, function (err) { console.warn('[GeoSocial] listenUserNotifications', err.message); });
     }
 
+    function listenActorNotifications(actor, callback) {
+      actor = actor || {};
+      var type = actor.targetActorType || actor.type || 'user';
+      var actorId = actor.targetActorId || actor.actorId || actor.uid || actor.businessId || currentUid();
+      if (type === 'business' && actorId && actorId.indexOf('business_') === 0) actorId = actorId.slice(9);
+      if (type !== 'business' && actorId && actorId.indexOf('user_') === 0) actorId = actorId.slice(5);
+      if (!actorId) { callback([]); return function () {}; }
+
+      var col = collection(db, 'userNotifications');
+      var byId = {};
+      var ready = { primary: false, legacy: type === 'business' };
+      var unsubs = [];
+
+      function ms(v) { return v && v.toMillis ? v.toMillis() : (v && v.seconds ? v.seconds * 1000 : 0); }
+      function emit() {
+        if (!ready.primary || !ready.legacy) return;
+        var items = Object.keys(byId).map(function (id) { return byId[id]; });
+        items.sort(function (a, b) { return ms(b.createdAt) - ms(a.createdAt); });
+        callback(items.slice(0, 50));
+      }
+      function listenSlot(slot, q) {
+        unsubs.push(onSnapshot(q, function (snap) {
+          snap.forEach(function (d) {
+            var n = Object.assign({ id: d.id }, d.data());
+            if (type === 'business') {
+              if (n.targetActorType !== 'business' || n.targetActorId !== actorId) return;
+            } else if (n.targetActorType === 'business') {
+              return;
+            }
+            byId[d.id] = n;
+          });
+          ready[slot] = true;
+          emit();
+        }, function (err) {
+          console.warn('[GeoSocial] listenActorNotifications', err.message);
+          ready[slot] = true;
+          emit();
+        }));
+      }
+
+      listenSlot('primary', query(col,
+        where('targetActorType', '==', type === 'business' ? 'business' : 'user'),
+        where('targetActorId', '==', actorId),
+        limit(50)));
+      if (type !== 'business') {
+        listenSlot('legacy', query(col, where('userId', '==', actorId), limit(50)));
+      }
+      return function () { unsubs.forEach(function (u) { try { u(); } catch(e) {} }); };
+    }
+
     function markNotificationRead(notifId) {
       if (!notifId) return Promise.resolve(false);
       return updateDoc(doc(db, 'userNotifications', notifId), {
@@ -2273,6 +2368,11 @@
                 // Customer sending to business — send owner to business inbox
                 notifTargetUid = otherId;
                 notifLink = 'messages.html?business=' + encodeURIComponent(conv.businessId) + '&cid=' + encodeURIComponent(conversationId);
+                return createActorNotification('business', conv.businessId, 'message', senderName + ' sent your page a message', preview, notifLink, {
+                  conversationId: conversationId,
+                  businessId: conv.businessId,
+                  ownerUid: conv.ownerUid || notifTargetUid || ''
+                });
               }
             } else {
               notifTargetUid = otherId;
@@ -3550,8 +3650,10 @@
       addStoryReply:           addStoryReply,
       deleteStory:             deleteStory,
       createNotification:       createNotification,
+      createActorNotification:  createActorNotification,
       createSystemNotification: createSystemNotification,
       listenUserNotifications: listenUserNotifications,
+      listenActorNotifications: listenActorNotifications,
       markNotificationRead:    markNotificationRead,
       listenUserPosts:         listenUserPosts,
       listenUserCheckins:      listenUserCheckins,

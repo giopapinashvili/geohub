@@ -947,6 +947,10 @@ service cloud.firestore {
       allow read: if signedIn()
         && (resource.data.get('userId',   '') == uid()
             || resource.data.get('toUserId','') == uid()
+            || (resource.data.get('targetActorType', '') == 'user'
+                && resource.data.get('targetActorId', '') == uid())
+            || (resource.data.get('targetActorType', '') == 'business'
+                && canManageBiz(resource.data.get('targetActorId', resource.data.get('businessId', ''))))
             || isAdmin());
       allow create: if isAdmin()
         || (signedIn()
@@ -957,7 +961,11 @@ service cloud.firestore {
       allow update: if isAdmin()
         || (signedIn()
             && (resource.data.get('userId',   '') == uid()
-                || resource.data.get('toUserId','') == uid())
+                || resource.data.get('toUserId','') == uid()
+                || (resource.data.get('targetActorType', '') == 'user'
+                    && resource.data.get('targetActorId', '') == uid())
+                || (resource.data.get('targetActorType', '') == 'business'
+                    && canManageBiz(resource.data.get('targetActorId', resource.data.get('businessId', '')))))
             && request.resource.data.diff(resource.data).affectedKeys()
                  .hasOnly(['read', 'seen', 'openedAt', 'updatedAt']));
       allow delete: if isAdmin();

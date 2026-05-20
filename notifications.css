@@ -22,6 +22,11 @@
   gap: 10px;
 }
 .np-head h2 i { color: var(--gh-green, #10b981); font-size: 1.1rem; }
+.np-context {
+  margin: 5px 0 0;
+  color: var(--gh-muted, #9ca3af);
+  font-size: 0.82rem;
+}
 
 /* filter tabs */
 .np-filters {
@@ -105,6 +110,21 @@
 .np-item-time {
   font-size: 0.75rem;
   color: var(--gh-muted, #6b7280);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.np-page-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(16,185,129,.1);
+  color: var(--gh-green, #10b981);
+  font-size: 0.68rem;
+  font-weight: 700;
 }
 
 .np-unread-dot {

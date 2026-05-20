@@ -228,6 +228,25 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function db(){ return GF() && GF().db; }
   function ready(cb){ if(window.GeoSocial && window.GeoFirebase) return cb(); window.addEventListener('GeoSocialReady', function(){ cb(); }, { once:true }); }
   function getActiveActor(){ try{ return JSON.parse(localStorage.getItem('gh_active_actor')||'null'); }catch(e){ return null; } }
+  function notificationActor(){
+    var u=authUser();
+    var actor=getActiveActor();
+    if(actor && actor.type==='business' && actor.businessId){
+      return { type:'business', targetActorType:'business', targetActorId:actor.businessId, businessId:actor.businessId, title:actor.title||actor.name||'Page' };
+    }
+    return { type:'user', targetActorType:'user', targetActorId:u?u.uid:'', uid:u?u.uid:'', title:u?(u.displayName||'Personal'):'Personal' };
+  }
+  function listenCurrentActorNotifications(cb){
+    var actor=notificationActor();
+    if(!actor.targetActorId) { cb([]); return function(){}; }
+    if(GS() && GS().listenActorNotifications) return GS().listenActorNotifications(actor, cb);
+    return GS() && GS().listenUserNotifications ? GS().listenUserNotifications(actor.targetActorId, cb) : function(){};
+  }
+  function notificationEmptyCopy(actor){
+    return actor && actor.type==='business'
+      ? { title:'No page activity yet', body:'Messages, quotes, redemptions and page engagement will appear here.' }
+      : { title:'No notifications yet', body:'Likes, comments, messages and requests will appear here.' };
+  }
   function buildActorExtra(){
     var actor=getActiveActor();
     if(!actor||actor.type!=='business') return {};
@@ -665,7 +684,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       state.badgeUnsubs = [];
       var u=authUser(); if(!u) return;
       try{
-        state.badgeUnsubs.push(GS().listenUserNotifications(u.uid, function(items){ var n=items.filter(function(x){return !x.read && !x.seen;}).length; var b=$('#ghNotifBadge'); if(b) b.textContent=n?String(n):''; }));
+        state.badgeUnsubs.push(listenCurrentActorNotifications(function(items){ var n=items.filter(function(x){return !x.read && !x.seen;}).length; var b=$('#ghNotifBadge'); if(b) b.textContent=n?String(n):''; }));
         var _msgActor=getActiveActor();
         var _msgQ;
         if(_msgActor&&_msgActor.type==='business'&&_msgActor.businessId){
@@ -756,6 +775,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     friend_accept:   { icon: 'fa-handshake',   color: '#22d3ee' },
     points_received: { icon: 'fa-coins',       color: '#eab308' },
     quote:           { icon: 'fa-file-invoice',color: '#6366f1' },
+    quote_request:   { icon: 'fa-file-invoice',color: '#6366f1' },
+    business_review: { icon: 'fa-star',        color: '#f59e0b' },
+    business_follow: { icon: 'fa-store',       color: '#10b981' },
     coupon_redeemed:     { icon: 'fa-ticket-alt',  color: '#10b981' },
     group_join_request:  { icon: 'fa-user-clock',  color: '#a855f7' },
     group_approved:      { icon: 'fa-user-check',  color: '#10b981' },
@@ -765,14 +787,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function openNotifications(){
     if(!requireLogin()) return;
     var existing=$('#ghNotifModal'); if(existing){existing.remove();return;}
-    modal('Notifications','<div id="ghNotifList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>Loading…</h3></div></div>','<button class="gh-btn ghost" id="ghMarkAllRead">Mark all read</button><a class="gh-btn ghost" href="notifications.html">View all</a><button class="gh-btn ghost" data-close-modal>Close</button>','ghNotifModal');
+    var notifActor = notificationActor();
+    var notifTitle = notifActor.type === 'business' ? (notifActor.title + ' Activity') : 'Notifications';
+    modal(notifTitle,'<div id="ghNotifList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>Loading…</h3></div></div>','<button class="gh-btn ghost" id="ghMarkAllRead">Mark all read</button><a class="gh-btn ghost" href="notifications.html">View all</a><button class="gh-btn ghost" data-close-modal>Close</button>','ghNotifModal');
     ready(function(){
-      var uid=authUser().uid;
       $('#ghMarkAllRead').onclick=function(){ markVisibleNotificationsRead(); };
-      var unsub = GS().listenUserNotifications(uid, function(items){
+      var unsub = listenCurrentActorNotifications(function(items){
         var box=$('#ghNotifList'); if(!box) return;
         var visibleNotifs=items.filter(function(n){ var actor=n.actorId||n.fromUserId||n.senderId||n.authorId||''; return !actor||state.blockedUserIds.indexOf(actor)===-1; });
-        if(!visibleNotifs.length){ box.innerHTML='<div class="gh-empty"><i class="fas fa-bell"></i><h3>No notifications</h3><p>Likes, comments, messages and requests will appear here.</p></div>'; return; }
+        if(!visibleNotifs.length){ var empty=notificationEmptyCopy(notificationActor()); box.innerHTML='<div class="gh-empty"><i class="fas fa-bell"></i><h3>'+esc(empty.title)+'</h3><p>'+esc(empty.body)+'</p></div>'; return; }
         box.innerHTML='<div class="gh-mini-list">'+visibleNotifs.slice(0,30).map(function(n){
           var ic=GH_NOTIF_ICONS[n.type]||{icon:'fa-bell',color:'#10b981'};
           var bAv=n.fromAvatar||''; var bInit=((n.fromName||'G')[0]||'G').toUpperCase();
@@ -5520,6 +5543,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     friend_accept:   { icon: 'fa-handshake',   color: '#22d3ee' },
     points_received: { icon: 'fa-coins',       color: '#eab308' },
     quote:           { icon: 'fa-file-invoice',color: '#6366f1' },
+    quote_request:   { icon: 'fa-file-invoice',color: '#6366f1' },
+    business_review: { icon: 'fa-star',        color: '#f59e0b' },
+    business_follow: { icon: 'fa-store',       color: '#10b981' },
     coupon_redeemed:     { icon: 'fa-ticket-alt',  color: '#10b981' },
     group_join_request:  { icon: 'fa-user-clock',  color: '#a855f7' },
     group_approved:      { icon: 'fa-user-check',  color: '#10b981' },
@@ -5530,10 +5556,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     { key: 'like',    label: 'Likes' },
     { key: 'comment', label: 'Comments' },
     { key: 'reply',   label: 'Replies' },
-    { key: 'follow',  label: 'Follows' },
+    { key: 'follow',  label: 'Follows', types: ['follow', 'business_follow'] },
     { key: 'message', label: 'Messages' },
     { key: 'story',   label: 'Stories',  types: ['story_reply', 'story_reaction'] },
-    { key: 'reward',  label: 'Rewards',  types: ['reward', 'badge', 'challenge', 'points_received'] }
+    { key: 'reward',  label: 'Rewards',  types: ['reward', 'badge', 'challenge', 'points_received', 'coupon_redeemed'] }
   ];
 
   function npTimeAgo(ts) {
@@ -5561,10 +5587,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function renderNotifications() {
+    var pageActor = notificationActor();
+    var pageTitle = pageActor.type === 'business' ? esc(pageActor.title + ' Activity') : 'Notifications';
+    var pageSub = pageActor.type === 'business' ? 'Using GeoHub as '+pageActor.title : '';
     shell({ active: 'notifications', right: '', center:
       '<div class="np-page">' +
         '<div class="np-head">' +
-          '<h2><i class="fas fa-bell"></i> Notifications</h2>' +
+          '<div><h2 id="npTitle"><i class="fas fa-bell"></i> '+pageTitle+'</h2><p class="np-context" id="npContext"'+(pageSub?'':' style="display:none"')+'>'+esc(pageSub)+'</p></div>' +
           '<button class="np-mark-all gh-btn ghost" id="npMarkAll"><i class="fas fa-check-double"></i> Mark all read</button>' +
         '</div>' +
         '<div class="np-filters" id="npFilters">' +
@@ -5578,6 +5607,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
     var npUnsub = null;
     var npStarted = false;
+    var npActorKey = '';
     var npFilter = 'all';
     var npItems = [];
 
@@ -5589,7 +5619,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         return n.type === npFilter;
       });
       if (!filtered.length) {
-        box.innerHTML = '<div class="np-empty"><i class="fas fa-bell"></i><h3>No notifications</h3><p>' + (npFilter === 'all' ? 'Likes, comments, follows and rewards will appear here.' : 'No ' + npFilter + ' notifications yet.') + '</p></div>';
+        var emptyActor = notificationActor();
+        var empty = notificationEmptyCopy(emptyActor);
+        var emptyBody = npFilter === 'all' ? empty.body : 'No ' + npFilter + (emptyActor.type === 'business' ? ' page activity yet.' : ' notifications yet.');
+        box.innerHTML = '<div class="np-empty"><i class="fas fa-bell"></i><h3>'+esc(empty.title)+'</h3><p>' + esc(emptyBody) + '</p></div>';
         return;
       }
       var groups = {}, order = [];
@@ -5603,6 +5636,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '<div class="np-group-label">' + esc(label) + '</div>' +
           groups[label].map(function(n) {
             var ic = NP_ICONS[n.type] || { icon: 'fa-bell', color: '#10b981' };
+            var pageBadge = n.targetActorType === 'business' ? '<span class="np-page-badge"><i class="fas fa-store"></i> Page</span>' : '';
             var npAv = n.fromAvatar || '';
             var npInit = ((n.fromName || 'G')[0] || 'G').toUpperCase();
             var npAvHtml = npAv
@@ -5615,7 +5649,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               '<div class="np-item-body">' +
                 '<div class="np-item-title">' + esc(n.title || 'GeoHub') + '</div>' +
                 '<div class="np-item-sub">' + esc(n.body || n.message || '') + '</div>' +
-                '<div class="np-item-time">' + npTimeAgo(n.createdAt) + '</div>' +
+                '<div class="np-item-time">' + npTimeAgo(n.createdAt) + pageBadge + '</div>' +
               '</div>' +
               (!n.read ? '<div class="np-unread-dot"></div>' : '') +
             '</a>';
@@ -5658,12 +5692,27 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }
 
     function _tryStartNpListen() {
-      if (npUnsub || npStarted) return;
       var u = authUser();
       if (!u) return;
+      var actor = notificationActor();
+      var nextKey = actor.type + ':' + actor.targetActorId;
+      var titleEl = $('#npTitle');
+      var ctxEl = $('#npContext');
+      if(titleEl) titleEl.innerHTML = '<i class="fas fa-bell"></i> ' + (actor.type === 'business' ? esc(actor.title + ' Activity') : 'Notifications');
+      if(ctxEl) {
+        if(actor.type === 'business') { ctxEl.style.display = ''; ctxEl.textContent = 'Using GeoHub as ' + actor.title; }
+        else { ctxEl.style.display = 'none'; ctxEl.textContent = ''; }
+      }
+      if (npUnsub && npActorKey === nextKey) return;
+      if (npUnsub) { try { npUnsub(); } catch(e) {} npUnsub = null; }
+      npActorKey = nextKey;
+      npItems = [];
+      npRender();
       npStarted = true;
-      var sub = GS() && GS().listenUserNotifications
-        ? GS().listenUserNotifications(u.uid, function(items) { npItems = items || []; npRender(); })
+      var sub = GS() && GS().listenActorNotifications
+        ? GS().listenActorNotifications(actor, function(items) { npItems = items || []; npRender(); })
+        : GS() && GS().listenUserNotifications
+          ? GS().listenUserNotifications(u.uid, function(items) { npItems = items || []; npRender(); })
         : null;
       if (sub) {
         npUnsub = sub;
@@ -5674,6 +5723,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       }
     }
     ready(function() { _tryStartNpListen(); });
+    window.addEventListener('GeoActorChanged', function(){ _tryStartNpListen(); });
     window.addEventListener('GeoAuthReady', function() {
       if (!authUser()) { npRender(); return; }
       _tryStartNpListen();

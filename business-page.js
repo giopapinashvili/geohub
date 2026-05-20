@@ -70,6 +70,13 @@
     var a = getActiveActor();
     return !!(a && a.type === 'business' && a.businessId === bizId);
   }
+  function notifyBusinessPage(type, title, body, href, extra) {
+    if (!window.GeoSocial || !window.GeoSocial.createActorNotification || !_currentUser || !BIZ_ID) return;
+    window.GeoSocial.createActorNotification('business', BIZ_ID, type, title, body, href || ('business.html?id=' + BIZ_ID), Object.assign({
+      businessId: BIZ_ID,
+      ownerUid: (_biz && _biz.ownerId) || ''
+    }, extra || {})).catch(function(){});
+  }
   function fmtPrice(p) {
     if (!p && p !== 0) return '';
     return String(p).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' ₾';
@@ -2255,6 +2262,7 @@
         _fs.setDoc(followRef,{userId:_currentUser.uid,businessId:BIZ_ID,followedAt:_fs.serverTimestamp()}).then(function(){
           _isFollowing=true;
           _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID),{followerCount:_fs.increment(1)}).catch(function(){});
+          notifyBusinessPage('business_follow', (_currentUser.displayName || 'Someone') + ' followed your page', 'Your page has a new follower.', 'business.html?id=' + BIZ_ID, { followerId: _currentUser.uid });
           if(btn){ btn.className='biz-action-btn following'; btn.innerHTML='<i class="fas fa-check"></i> Following'; }
           showToast('Following!');
         }).catch(function(){ showToast('Could not follow',false); });
@@ -2961,9 +2969,11 @@
       if(service) payload.service = service;
       _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'quoteRequests'), payload).then(function(){
         _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID),{quoteCount:_fs.increment(1)}).catch(function(){});
+        var notifBody = (service ? 'Service: ' + service + ' - ' : '') + msg.slice(0,120);
+        notifyBusinessPage('quote_request', name + ' sent your page a quote request', notifBody, 'business.html?id=' + BIZ_ID + '#quotes', { submittedBy: _currentUser.uid });
         // Notify business owner
         var ownerId = _biz && _biz.ownerId;
-        if(ownerId && ownerId !== _currentUser.uid && window.GeoSocial) {
+        if(false && ownerId && ownerId !== _currentUser.uid && window.GeoSocial) {
           var notifFn = window.GeoSocial.createNotification || window.GeoSocial.createSystemNotification;
           if(notifFn) {
             var notifBody = (service ? 'Service: ' + service + ' — ' : '') + msg.slice(0,120);
@@ -3177,6 +3187,7 @@
         rating:_reviewRating,text:text.trim(),createdAt:_fs.serverTimestamp(),
       }).then(function(){
         var ot=_biz.ratingTotal||0,oc=_biz.ratingCount||0,nc=oc+1,nt=ot+_reviewRating;
+        notifyBusinessPage('business_review', name + ' reviewed your page', text.trim().slice(0,120), 'business.html?id=' + BIZ_ID + '#reviews', { reviewerId: _currentUser.uid, rating: _reviewRating });
         return _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID),{
           ratingTotal:nt,ratingCount:nc,ratingAverage:Math.round(nt/nc*10)/10,
           reviewCount:_fs.increment(1),updatedAt:_fs.serverTimestamp(),
