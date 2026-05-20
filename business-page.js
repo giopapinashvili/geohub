@@ -786,31 +786,30 @@
       var vis      = post.visibility || 'public';
       menuHtml =
         '<div class="biz-post-menu-wrap">'+
-          '<button class="biz-post-menu-btn" title="Post options" '+
-            'onclick="event.stopPropagation();window._bizActions.openPostMenu(\''+pid+'\',this)">'+
+          '<button class="biz-post-menu-btn" title="Post options" data-biz-post-menu>'+
             '<i class="fas fa-ellipsis"></i>'+
           '</button>'+
           '<div class="biz-post-menu-dropdown" id="biz-pmenu-'+pid+'">'+
-            '<button class="biz-pmenu-item" onclick="window._bizActions.editPost(\''+pid+'\')"><i class="fas fa-pen"></i> Edit post</button>'+
-            '<button class="biz-pmenu-item" onclick="window._bizActions.pinPost(\''+pid+'\')">'+
+            '<button class="biz-pmenu-item" data-biz-action="edit"><i class="fas fa-pen"></i> Edit post</button>'+
+            '<button class="biz-pmenu-item" data-biz-action="pin">'+
               '<i class="fas fa-thumbtack"></i> '+(isPinned?'Unpin post':'Pin post')+
             '</button>'+
             '<div class="biz-pmenu-sep"></div>'+
-            '<button class="biz-pmenu-item" onclick="window._bizActions.togglePostComments(\''+pid+'\')">'+
+            '<button class="biz-pmenu-item" data-biz-action="toggleComments">'+
               '<i class="fas fa-comment-slash"></i> '+(cmtOff?'Enable comments':'Disable comments')+
             '</button>'+
             '<div class="biz-pmenu-sep"></div>'+
-            '<button class="biz-pmenu-item" onclick="window._bizActions.setPostVisibility(\''+pid+'\',\'public\')">'+
+            '<button class="biz-pmenu-item" data-biz-action="setVis" data-vis="public">'+
               '<i class="fas fa-globe"></i> Public'+(vis==='public'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+
             '</button>'+
-            '<button class="biz-pmenu-item" onclick="window._bizActions.setPostVisibility(\''+pid+'\',\'followers\')">'+
+            '<button class="biz-pmenu-item" data-biz-action="setVis" data-vis="followers">'+
               '<i class="fas fa-user-group"></i> Followers only'+(vis==='followers'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+
             '</button>'+
-            '<button class="biz-pmenu-item" onclick="window._bizActions.setPostVisibility(\''+pid+'\',\'private\')">'+
+            '<button class="biz-pmenu-item" data-biz-action="setVis" data-vis="private">'+
               '<i class="fas fa-lock"></i> Private'+(vis==='private'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+
             '</button>'+
             '<div class="biz-pmenu-sep"></div>'+
-            '<button class="biz-pmenu-item danger" onclick="window._bizActions.deletePost(\''+pid+'\')"><i class="fas fa-trash"></i> Delete post</button>'+
+            '<button class="biz-pmenu-item danger" data-biz-action="delete"><i class="fas fa-trash"></i> Delete post</button>'+
           '</div>'+
         '</div>';
     }
@@ -1590,6 +1589,7 @@
         };
         if (overviewEl && !overviewEl._bizBound) { gs.bindPostInteractions(overviewEl, bizInteractionOptions); overviewEl._bizBound = true; }
         if (allEl && !allEl._bizBound)           { gs.bindPostInteractions(allEl, bizInteractionOptions);      allEl._bizBound = true; }
+        if (!document._bizBound && window.GeoHubPostInteractions) { window.GeoHubPostInteractions.bind(document, bizInteractionOptions); document._bizBound = true; }
         if (gs.hydratePostAuthorAvatars) {
           if (overviewEl) gs.hydratePostAuthorAvatars(overviewEl);
           if (allEl) gs.hydratePostAuthorAvatars(allEl);

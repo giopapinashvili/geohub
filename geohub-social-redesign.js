@@ -6090,6 +6090,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     hydratePollVote: hydratePollVote,
     renderCommentsForPid: renderCommentsForPid
   };
+  window.GeoHubPostInteractions = { bind: bindPostInteractions };
 
   // Clean up all Firestore listeners when navigating away to avoid runaway billing
   window.addEventListener('pagehide', function() {
