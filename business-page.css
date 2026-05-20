@@ -2968,15 +2968,20 @@ body.gh-has-injected-nav .biz-right-sidebar {
   color: #f8fafc;
 }
 
+#bizCleanPostMenu,
 .biz-clean-post-menu {
-  position: fixed;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  position: fixed !important;
+  z-index: 100000 !important;
   min-width: 180px;
   background: var(--gh-card, #111827);
   border: 1px solid rgba(255,255,255,.12);
   border-radius: 14px;
   padding: 8px;
   box-shadow: 0 18px 40px rgba(0,0,0,.45);
-  z-index: 10080;
 }
 .biz-clean-post-menu button {
   width: 100%;

@@ -2242,22 +2242,10 @@
       '<button type="button" data-biz-menu-action="pin"    data-menu-post-id="'+esc(postId)+'"><i class="fas fa-thumbtack"></i> '+(isPinned ? 'Unpin post' : 'Pin post')+'</button>'+
       '<button type="button" data-biz-menu-action="delete" data-menu-post-id="'+esc(postId)+'" class="danger"><i class="fas fa-trash"></i> Delete post</button>';
 
-    var MENU_W = 190, MENU_H = 140;
-    var rect = button.getBoundingClientRect();
-    var top  = rect.bottom + 8;
-    var left = rect.right - MENU_W;
-    if (left < 8) left = 8;
-    if (left + MENU_W > window.innerWidth - 8) left = window.innerWidth - 8 - MENU_W;
-    if (top + MENU_H > window.innerHeight - 8) top = rect.top - MENU_H - 4;
-    if (top < 8) top = 8;
-
-    menu.style.top  = top  + 'px';
-    menu.style.left = left + 'px';
-
-    menu.addEventListener('click', function(e) {
-      var btn = e.target.closest('[data-biz-menu-action]');
+    menu.addEventListener('click', function(ev) {
+      var btn = ev.target.closest('[data-biz-menu-action]');
       if (!btn) return;
-      e.preventDefault(); e.stopPropagation();
+      ev.preventDefault(); ev.stopPropagation();
       var action = btn.dataset.bizMenuAction;
       var pid    = btn.dataset.menuPostId;
       closeBizCleanPostMenu();
@@ -2269,7 +2257,27 @@
       else if (action === 'delete') deleteBusinessCleanPost(targetCard, btn);
     });
 
+    // Append first so offsetWidth/offsetHeight are real
     document.body.appendChild(menu);
+
+    // Force visibility — override any cascade that could hide the menu
+    menu.style.setProperty('display',        'block', 'important');
+    menu.style.setProperty('visibility',     'visible', 'important');
+    menu.style.setProperty('opacity',        '1', 'important');
+    menu.style.setProperty('pointer-events', 'auto', 'important');
+    menu.style.setProperty('position',       'fixed', 'important');
+    menu.style.setProperty('z-index',        '100000', 'important');
+
+    // Measure real size then position
+    var rect = button.getBoundingClientRect();
+    var mw   = menu.offsetWidth  || 190;
+    var mh   = menu.offsetHeight || 140;
+    var top  = rect.bottom + 8;
+    var left = Math.min(window.innerWidth - mw - 8, Math.max(8, rect.right - mw));
+    if (top + mh > window.innerHeight - 8) top = Math.max(8, rect.top - mh - 8);
+
+    menu.style.setProperty('top',  top  + 'px', 'important');
+    menu.style.setProperty('left', left + 'px', 'important');
 
     setTimeout(function() {
       document.addEventListener('click',   closeBizCleanPostMenuOutside, true);
@@ -2281,9 +2289,11 @@
 
   function handleBusinessCleanPostClick(e, root) {
     if (!e.target || !e.target.closest) return;
-    var ownerMenuBtn = e.target.closest('[data-biz-owner-menu]');
+    var ownerMenuBtn = e.target.closest('[data-biz-owner-menu]') || e.target.closest('.biz-post-more-clean');
     if (ownerMenuBtn && root.contains(ownerMenuBtn)) {
-      e.preventDefault(); e.stopPropagation();
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
       var pid = ownerMenuBtn.dataset.postId
         || (ownerMenuBtn.closest('[data-post-id]') && ownerMenuBtn.closest('[data-post-id]').dataset.postId)
         || '';
