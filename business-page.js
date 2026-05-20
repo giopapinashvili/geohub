@@ -1558,8 +1558,6 @@
       var pre = '<div class="biz-post-list">'+posts.slice(0,3).map(function(p){ return postCardHtml(p,_biz); }).join('')+'</div>';
       if (overviewEl) overviewEl.innerHTML = pre;
       if (allEl)      allEl.innerHTML      = all;
-      bindBusinessPostMenuInteractions(overviewEl);
-      bindBusinessPostMenuInteractions(allEl);
       installBusinessPostActionDelegates();
 
       // Set up IntersectionObserver to track post views
@@ -1655,6 +1653,29 @@
       root.addEventListener('click', function(e) {
         if (!e.target || !e.target.closest) return;
 
+        var menuBtn = e.target.closest('[data-biz-post-menu], .gh-post-more, .biz-post-menu-btn, button[title="Post options"]');
+        if (menuBtn && root.contains(menuBtn)) {
+          var found = getBizPostIdFromButton(menuBtn);
+          var menuCard = found.card;
+          var menuPostId = found.postId;
+
+          if (!menuCard || !menuPostId) {
+            console.warn('[biz-menu] missing post id', { btn: menuBtn, card: menuCard });
+            return;
+          }
+
+          e.preventDefault();
+          e.stopPropagation();
+          if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+
+          if (window._bizActions && typeof window._bizActions.openPostMenu === 'function') {
+            window._bizActions.openPostMenu(menuPostId, menuBtn);
+          } else {
+            console.warn('[biz-menu] openPostMenu missing');
+          }
+          return;
+        }
+
         var shareBtn = e.target.closest('[data-biz-post-share], .biz-post-share-btn, button');
         var saveBtn = e.target.closest('[data-biz-post-save], .biz-post-save-btn, [data-save], button');
         var action = null;
@@ -1686,24 +1707,6 @@
           window._bizActions.togglePostSave(postId, btn);
         }
       }, true);
-    });
-  }
-
-  function bindBusinessPostMenuInteractions(root) {
-    var gs = window.GeoSocialUI;
-    if (!root || !gs || !gs.bindPostInteractions) return;
-    gs.bindPostInteractions(root, {
-      onBizAction: function(pid, action, data) {
-        if (action === 'edit') window._bizActions.editPost(pid);
-        else if (action === 'pin') window._bizActions.pinPost(pid);
-        else if (action === 'toggleComments') window._bizActions.togglePostComments(pid);
-        else if (action === 'setVis') window._bizActions.setPostVisibility(pid, data.vis);
-        else if (action === 'delete') window._bizActions.deletePost(pid);
-      },
-      onOpenPhoto: function(url) {
-        if (window._bizActions && window._bizActions.openPhoto) window._bizActions.openPhoto(url);
-        else window.open(url, '_blank', 'noopener');
-      }
     });
   }
 
@@ -2871,7 +2874,9 @@
       var card = found.card;
       postId = postId || found.postId;
       var oldFloating = document.getElementById('ghBizPostMenuDrop');
-      var isOpen = oldFloating && oldFloating.getAttribute('data-post-id') === String(postId || '');
+      var isOpen = oldFloating &&
+        oldFloating.getAttribute('data-post-id') === String(postId || '') &&
+        oldFloating.classList.contains('open');
       if (oldFloating) oldFloating.remove();
       document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
       if (isOpen || !btnEl) return;
@@ -2889,16 +2894,16 @@
       if (!sourceMenu) {
         menu.className = 'biz-post-menu-dropdown';
         menu.innerHTML =
-          '<button class="biz-pmenu-item" onclick="window._bizActions.editPost(\''+esc(postId)+'\')"><i class="fas fa-pen"></i> Edit post</button>'+
-          '<button class="biz-pmenu-item" onclick="window._bizActions.pinPost(\''+esc(postId)+'\')"><i class="fas fa-thumbtack"></i> '+(isPinned?'Unpin post':'Pin post')+'</button>'+
+          '<button class="biz-pmenu-item" data-biz-action="edit" data-pid="'+esc(postId)+'"><i class="fas fa-pen"></i> Edit post</button>'+
+          '<button class="biz-pmenu-item" data-biz-action="pin" data-pid="'+esc(postId)+'"><i class="fas fa-thumbtack"></i> '+(isPinned?'Unpin post':'Pin post')+'</button>'+
           '<div class="biz-pmenu-sep"></div>'+
-          '<button class="biz-pmenu-item" onclick="window._bizActions.togglePostComments(\''+esc(postId)+'\')"><i class="fas fa-comment-slash"></i> '+(commentsDisabled?'Enable comments':'Disable comments')+'</button>'+
+          '<button class="biz-pmenu-item" data-biz-action="toggleComments" data-pid="'+esc(postId)+'"><i class="fas fa-comment-slash"></i> '+(commentsDisabled?'Enable comments':'Disable comments')+'</button>'+
           '<div class="biz-pmenu-sep"></div>'+
-          '<button class="biz-pmenu-item" onclick="window._bizActions.setPostVisibility(\''+esc(postId)+'\',\'public\')"><i class="fas fa-globe"></i> Public'+(vis==='public'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+'</button>'+
-          '<button class="biz-pmenu-item" onclick="window._bizActions.setPostVisibility(\''+esc(postId)+'\',\'followers\')"><i class="fas fa-user-group"></i> Followers'+(vis==='followers'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+'</button>'+
-          '<button class="biz-pmenu-item" onclick="window._bizActions.setPostVisibility(\''+esc(postId)+'\',\'private\')"><i class="fas fa-lock"></i> Private'+(vis==='private'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+'</button>'+
+          '<button class="biz-pmenu-item" data-biz-action="setVis" data-pid="'+esc(postId)+'" data-vis="public"><i class="fas fa-globe"></i> Public'+(vis==='public'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+'</button>'+
+          '<button class="biz-pmenu-item" data-biz-action="setVis" data-pid="'+esc(postId)+'" data-vis="followers"><i class="fas fa-user-group"></i> Followers'+(vis==='followers'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+'</button>'+
+          '<button class="biz-pmenu-item" data-biz-action="setVis" data-pid="'+esc(postId)+'" data-vis="private"><i class="fas fa-lock"></i> Private'+(vis==='private'?' <span class="biz-pmenu-check"><i class="fas fa-check"></i></span>':'')+'</button>'+
           '<div class="biz-pmenu-sep"></div>'+
-          '<button class="biz-pmenu-item danger" onclick="window._bizActions.deletePost(\''+esc(postId)+'\')"><i class="fas fa-trash"></i> Delete post</button>';
+          '<button class="biz-pmenu-item danger" data-biz-action="delete" data-pid="'+esc(postId)+'"><i class="fas fa-trash"></i> Delete post</button>';
       }
       menu.style.position = 'fixed';
       menu.style.left = '0px';
@@ -2945,7 +2950,25 @@
       var escapeClose = function(e) {
         if (e.key === 'Escape') closeMenu();
       };
-      menu.addEventListener('click', function() {
+      menu.addEventListener('click', function(ev) {
+        var actionBtn = ev.target.closest('[data-biz-action]');
+        if (actionBtn) {
+          ev.preventDefault();
+          ev.stopPropagation();
+
+          var action = actionBtn.dataset.bizAction;
+          var pid = actionBtn.dataset.pid || postId;
+
+          if (action === 'edit') window._bizActions.editPost(pid);
+          else if (action === 'pin') window._bizActions.pinPost(pid);
+          else if (action === 'toggleComments') window._bizActions.togglePostComments(pid);
+          else if (action === 'setVis') window._bizActions.setPostVisibility(pid, actionBtn.dataset.vis);
+          else if (action === 'delete') window._bizActions.deletePost(pid);
+
+          setTimeout(closeMenu, 0);
+          return;
+        }
+
         setTimeout(closeMenu, 0);
       });
       setTimeout(function(){
@@ -3316,7 +3339,6 @@
           } else {
             el.innerHTML = '<div class="biz-post-list">'+card+'</div>';
           }
-          bindBusinessPostMenuInteractions(el);
         });
         installBusinessPostActionDelegates();
       }).catch(function(err){
