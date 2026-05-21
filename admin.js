@@ -1275,18 +1275,26 @@
       subSel.style.display = catSel.value ? 'block' : 'none';
       subSel.disabled = !catSel.value;
     }
+    var cats = getPlaceCategories();
+    var cat = cats.find(function(c) { return c.id === catSel.value; });
     if (textCat) {
-      var cats = getPlaceCategories();
-      var cat = cats.find(function(c) { return c.id === catSel.value; });
       textCat.value = cat ? cat.label : catSel.value;
     }
+    // Auto-fill icon only if the field is empty
+    var iconEl = document.getElementById('adminPlaceIcon');
+    if (iconEl && !iconEl.value.trim() && cat && cat.icon) {
+      iconEl.value = cat.icon;
+    }
+    var iconPreview = document.getElementById('adminPlaceIconPreview');
+    if (iconPreview) iconPreview.textContent = (iconEl && iconEl.value.trim()) || (cat && cat.icon) || '';
   }
 
   function togglePlaceCategoryUI(col) {
-    var textCat = document.getElementById('adminContentCategory');
+    var textCat  = document.getElementById('adminContentCategory');
     var placeCat = document.getElementById('adminPlaceCategory');
-    var subSel = document.getElementById('adminPlaceSubcategory');
-    var gWrap  = document.getElementById('adminGooglePlaceWrap');
+    var subSel   = document.getElementById('adminPlaceSubcategory');
+    var gWrap    = document.getElementById('adminGooglePlaceWrap');
+    var iconWrap = document.getElementById('adminPlaceIconWrap');
     var isPlaces = col === 'places';
     if (textCat) textCat.style.display = isPlaces ? 'none' : '';
     if (placeCat) {
@@ -1294,7 +1302,8 @@
       if (isPlaces) populatePlaceCategorySelect('');
     }
     if (subSel) subSel.style.display = 'none';
-    if (gWrap) gWrap.style.display = isPlaces ? 'block' : 'none';
+    if (gWrap)   gWrap.style.display   = isPlaces ? 'block' : 'none';
+    if (iconWrap) iconWrap.style.display = isPlaces ? 'flex' : 'none';
   }
 
   var _editingPlaceId = null; // null = add mode; docId string = edit mode
@@ -1478,6 +1487,10 @@
           doc.categoryId = '';
         }
         doc.subcategory = (placeSubSel && placeSubSel.value) || '';
+        var iconInputEl = document.getElementById('adminPlaceIcon');
+        var iconVal     = (iconInputEl && iconInputEl.value.trim()) || '';
+        if (!iconVal && matchedCat && matchedCat.icon) iconVal = matchedCat.icon;
+        if (iconVal) doc.icon = iconVal;
         var gPlaceIdEl  = document.getElementById('adminGooglePlaceIdInput');
         var gPlaceId    = (gPlaceIdEl && gPlaceIdEl.value.trim()) || '';
         doc.googlePlaceId = gPlaceId;
@@ -2531,6 +2544,12 @@
     var verEl = document.getElementById('adminPlaceIsVerified');
     if (verEl) verEl.value = data.isVerified ? 'true' : 'false';
 
+    // Icon field
+    var iconEl2 = document.getElementById('adminPlaceIcon');
+    if (iconEl2) iconEl2.value = data.icon || '';
+    var iconPreview2 = document.getElementById('adminPlaceIconPreview');
+    if (iconPreview2) iconPreview2.textContent = data.icon || '';
+
     // Google Place ID
     var gPlaceEl = document.getElementById('adminGooglePlaceIdInput');
     if (gPlaceEl) gPlaceEl.value = data.googlePlaceId || '';
@@ -2574,6 +2593,10 @@
     var form = document.getElementById('adminContentForm');
     if (form) { form.reset(); renderExtFields('places'); }
     adminUpdateImagePreview('');
+    var iconElC = document.getElementById('adminPlaceIcon');
+    if (iconElC) iconElC.value = '';
+    var iconPrevC = document.getElementById('adminPlaceIconPreview');
+    if (iconPrevC) iconPrevC.textContent = '';
     var gPlaceEl = document.getElementById('adminGooglePlaceIdInput');
     if (gPlaceEl) gPlaceEl.value = '';
     var gPreviewPanel = document.getElementById('adminGooglePreviewPanel');
