@@ -263,6 +263,14 @@
     };
   }
 
+  /* Strip a leading icon/emoji from a label so icon + label doesn't double-up */
+  function stripLeadingIcon(icon, label) {
+    if (!icon || !label) return label || '';
+    var stripped = label.trimStart();
+    if (stripped.startsWith(icon)) return stripped.slice(icon.length).trimStart();
+    return stripped;
+  }
+
   /* ── Filter logic (chip + legend + search, all applied) */
   function filtered() {
     return allPlaces.filter(p => {
@@ -518,7 +526,7 @@
         + '<div class="legend-item legend-toggle' + (catActive ? ' legend-active' : '') + '" data-cat="' + cat.id + '">'
         + '<span class="legend-dot" style="background:' + cat.color + '"></span>'
         + '<span class="legend-icon">' + cat.icon + '</span>'
-        + '<span class="legend-label">' + (cat.label || cat.id) + '</span>'
+        + '<span class="legend-label">' + esc(stripLeadingIcon(cat.icon, cat.label || cat.id)) + '</span>'
         + (hasSubs ? '<button class="legend-expand-btn" data-for="' + cat.id + '">' + (expanded ? '▾' : '▸') + '</button>' : '')
         + '</div>';
       if (hasSubs) {
@@ -527,7 +535,7 @@
           const subActive = currentFilter === cat.id && currentSubFilter === sub.id;
           html += '<div class="legend-subitem' + (subActive ? ' legend-active' : '') + '" data-cat="' + cat.id + '" data-sub="' + sub.id + '">'
             + '<span class="legend-sub-icon">' + (sub.icon || '') + '</span>'
-            + '<span>' + (sub.labelKa || sub.labelEn || sub.id) + '</span>'
+            + '<span>' + esc(stripLeadingIcon(sub.icon, sub.labelKa || sub.labelEn || sub.id)) + '</span>'
             + '</div>';
         });
         html += '</div>';
@@ -594,7 +602,7 @@
     let html = '<div class="map-chip' + (allActive ? ' active' : '') + '" data-cat="">ყველა</div>';
     categoryEntries().forEach(cat => {
       html += '<div class="map-chip' + (currentFilter === cat.id && !currentSubFilter ? ' active' : '') + '" data-cat="' + esc(cat.id) + '">'
-        + esc((cat.icon || '') + ' ' + (cat.label || cat.id))
+        + esc((cat.icon || '') + ' ' + stripLeadingIcon(cat.icon, cat.label || cat.id))
         + '</div>';
     });
     wrap.innerHTML = html;
