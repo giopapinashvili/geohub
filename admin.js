@@ -2610,9 +2610,7 @@
     set('adminContentCategory', data.category || '');
 
     // Extended fields (lat, lng, district, address, region, sourceUrl, etc.)
-    var extMap = { adminPlaceLat: 'lat', adminPlaceLng: 'lng', adminPlaceDistrict: 'district',
-                   adminPlaceAddress: 'address', adminPlaceRegion: 'region',
-                   adminPlaceSourceUrl: 'sourceUrl', adminPlaceShortDesc: 'shortDescription' };
+    var extMap = { csLat: 'lat', csLng: 'lng', csAddress: 'address' };
     Object.keys(extMap).forEach(function(id) {
       var el = document.getElementById(id);
       if (el && data[extMap[id]] !== undefined) el.value = data[extMap[id]];

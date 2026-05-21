@@ -219,9 +219,13 @@
           var d = doc.data() || {};
           var title = d.title || d.name || d.displayName || doc.id;
           var meta = [d.city || d.location, d.category, d.status].filter(Boolean).join(' · ');
+          var editBtn = col === 'places'
+            ? '<button class="btn btn-ghost btn-sm" type="button" style="font-size:.72rem" onclick="adminEditPlaceFromBroken(\''+esc(doc.id)+'\')"><i class="fas fa-pen"></i></button>'
+            : '';
           html += '<div class="admin-step4-row" data-col="'+esc(col)+'" data-id="'+esc(doc.id)+'">'+
             '<div class="admin-step4-thumb">'+(d.imageUrl || d.coverUrl ? '<img src="'+esc(d.imageUrl || d.coverUrl)+'" alt="" loading="lazy" decoding="async">' : '<i class="fas fa-database"></i>')+'</div>'+
-            '<div class="admin-step4-main"><strong>'+esc(title)+'</strong><span>'+esc(meta || 'Firestore item')+'</span><p>'+esc((d.description || '').slice(0,120))+'</p></div>'+
+            '<div class="admin-step4-main"><strong>'+esc(title)+'</strong><span>'+esc(meta || 'Firestore item')+'</span><p>'+esc((d.description || d.shortDescription || '').slice(0,120))+'</p></div>'+
+            editBtn+
             '<button class="btn btn-red btn-sm" type="button" data-admin-delete="'+esc(doc.id)+'"><i class="fas fa-trash"></i></button>'+
           '</div>';
         });
@@ -254,7 +258,7 @@
   function init(){
     cleanupText();
     ensureContentStudioUi();
-    bindContentStudioSubmit();
+    // bindContentStudioSubmit() removed — admin.js handles form submission with full place fields
     bindDelete();
     loadAdminCounts();
   }
