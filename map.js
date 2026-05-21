@@ -123,6 +123,7 @@
     const style       = getPlaceMarkerStyle(place);
     const markerIcon  = place.icon || style.icon || '📍';
     const markerColor = style.color || '#22c55e';
+    console.log('MARKER ICON:', markerIcon, place.name);
     const selectedClass = isActive ? ' is-selected' : '';
     return L.divIcon({
       className: 'gh-map-marker-wrap',
@@ -161,7 +162,8 @@
       reviewCount:      Number(data.reviewCount || 0),
       priceFrom:        data.priceFrom || '',
       currency:         data.currency || '',
-      googlePlaceId:    data.googlePlaceId || ''
+      googlePlaceId:    data.googlePlaceId || '',
+      icon:             data.icon || ''
     };
   }
 
