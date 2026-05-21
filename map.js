@@ -119,21 +119,17 @@
     return base;
   }
 
-  function buildPlaceMarkerIcon(style, isActive) {
-    const size = isActive ? 46 : 40;
-    const h    = isActive ? 60 : 52;
-    const ring = isActive ? '<circle cx="20" cy="20" r="19" fill="none" stroke="white" stroke-width="2.5" opacity="0.9"/>' : '';
+  function buildPlaceMarkerIcon(place, isActive) {
+    const style      = getPlaceMarkerStyle(place);
+    const markerIcon = place.icon || style.icon || '📍';
+    const markerColor = style.color || '#22c55e';
+    const selectedClass = isActive ? ' is-selected' : '';
     return L.divIcon({
-      html: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 52" width="' + size + '" height="' + h + '">'
-          + '<path d="M20 0C9 0 0 9 0 20c0 15 20 32 20 32S40 35 40 20C40 9 31 0 20 0z" fill="' + style.color + '" opacity="0.92"/>'
-          + '<circle cx="20" cy="20" r="13" fill="rgba(0,0,0,0.25)"/>'
-          + ring
-          + '<text x="20" y="26" text-anchor="middle" font-size="15">' + style.icon + '</text>'
-          + '</svg>',
-      iconSize:    [size, h],
-      iconAnchor:  [size / 2, h],
-      popupAnchor: [0, -h],
-      className: isActive ? 'place-marker-active' : ''
+      className: 'gh-map-marker-wrap',
+      html: '<div class="gh-map-emoji-marker' + selectedClass + '" style="--marker-color:' + markerColor + '"><span>' + markerIcon + '</span></div>',
+      iconSize:    [44, 44],
+      iconAnchor:  [22, 44],
+      popupAnchor: [0, -48]
     });
   }
 
@@ -207,12 +203,11 @@
     }
 
     list.forEach(p => {
-      const style    = getPlaceMarkerStyle(p);
       const isActive = p.id === activePlaceId;
-      const marker   = L.marker([p.lat, p.lng], { icon: buildPlaceMarkerIcon(style, isActive) });
+      const marker   = L.marker([p.lat, p.lng], { icon: buildPlaceMarkerIcon(p, isActive) });
       marker.bindTooltip(p.name, { direction: 'top', offset: [0, -48], className: 'place-tooltip' });
       marker._placeId    = p.id;
-      marker._placeStyle = style;
+      marker._place      = p;
       marker.on('click', () => focusPlace(p.id, marker));
       marker.addTo(map);
       markers.push(marker);
@@ -222,16 +217,16 @@
 
   /* ── Active marker clear helper ─────────────────── */
   function clearActiveMarker() {
-    if (activeMarker) activeMarker.setIcon(buildPlaceMarkerIcon(activeMarker._placeStyle, false));
+    if (activeMarker) activeMarker.setIcon(buildPlaceMarkerIcon(activeMarker._place, false));
     activeMarker = null; activePlaceId = null;
   }
 
   /* ── Focus place ────────────────────────────────── */
   function focusPlace(id, clickedMarker) {
-    if (activeMarker) activeMarker.setIcon(buildPlaceMarkerIcon(activeMarker._placeStyle, false));
+    if (activeMarker) activeMarker.setIcon(buildPlaceMarkerIcon(activeMarker._place, false));
     activePlaceId = id;
     activeMarker  = clickedMarker || markers.find(m => m._placeId === id) || null;
-    if (activeMarker) activeMarker.setIcon(buildPlaceMarkerIcon(activeMarker._placeStyle, true));
+    if (activeMarker) activeMarker.setIcon(buildPlaceMarkerIcon(activeMarker._place, true));
 
     const p = allPlaces.find(x => x.id === id); if (!p) return;
     map.setView([p.lat, p.lng], 13, { animate: true });

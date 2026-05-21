@@ -30,16 +30,24 @@ body, html { height: 100%; overflow: hidden; }
       box-shadow: var(--shadow-md); cursor: pointer; display: flex; align-items: center; gap: 6px;
     }
     .map-toggle-btn:hover { background: var(--bg-elevated); }
-    .marker-pin {
-      width: 36px; height: 36px;
-      border-radius: 50% 50% 50% 0;
-      transform: rotate(-45deg);
-      display: flex; align-items: center; justify-content: center;
-      border: 2px solid rgba(255,255,255,0.3);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    .gh-map-marker-wrap { background: transparent !important; border: 0 !important; }
+    .gh-map-emoji-marker {
+      width: 44px; height: 44px; border-radius: 999px;
+      display: grid; place-items: center;
+      background: rgba(15,23,42,0.92);
+      border: 2px solid var(--marker-color, #22c55e);
+      box-shadow: 0 0 0 4px rgba(255,255,255,.08), 0 10px 24px rgba(0,0,0,.35), 0 0 24px color-mix(in srgb, var(--marker-color, #22c55e) 55%, transparent);
+      font-size: 22px; line-height: 1;
+      transform-origin: center;
+      transition: transform .16s ease, box-shadow .16s ease;
       cursor: pointer;
     }
-    .marker-pin-inner { transform: rotate(45deg); font-size: 0.9rem; }
+    .gh-map-emoji-marker:hover { transform: scale(1.1); }
+    .gh-map-emoji-marker span { line-height: 1; display: block; }
+    .gh-map-emoji-marker.is-selected {
+      transform: scale(1.18);
+      box-shadow: 0 0 0 5px rgba(255,255,255,.14), 0 0 32px var(--marker-color, #22c55e);
+    }
     .search-count-badge {
       position: absolute; top: 88px; right: 24px; z-index: 1000;
       background: var(--bg-card); border: 1px solid var(--border);
@@ -78,7 +86,7 @@ body, html { height: 100%; overflow: hidden; }
     .mpc-desc { font-size: 0.82rem; color: var(--text-secondary, #94a3b8); line-height: 1.5; margin-bottom: 14px; }
     .mpc-btns { display: flex; gap: 8px; }
     @media (max-width: 768px) { .mobile-place-card { display: block; } }
-    .place-marker-active { filter: drop-shadow(0 0 6px rgba(255,255,255,0.7)); }
+
     .place-tooltip.leaflet-tooltip {
       background: rgba(4,5,13,0.92) !important; border: 1px solid rgba(255,255,255,0.15) !important;
       color: #f8fafc !important; border-radius: 8px !important; font-size: 0.78rem !important;
