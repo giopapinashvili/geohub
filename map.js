@@ -31,10 +31,29 @@
     default:       { color: '#6c757d', icon: '📍',  label: 'სხვა' }
   };
 
+  const TILE_LAYERS = {
+    streets: {
+      url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      label: '🗺️ Streets'
+    },
+    dark: {
+      url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      label: '🌑 Dark'
+    },
+    light: {
+      url: 'https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      label: '☀️ Light'
+    }
+  };
+
   let map, markers = [], allPlaces = [];
   let currentFilter = '', currentSearch = '', currentSubFilter = '';
   let disabledCategories = new Set();
   let activeMarker = null, activePlaceId = null;
+  let _tileLayer = null;
   const _googleDetailsCache = {};
   const _placeCatLookup = {};
   const PLACE_CATEGORY_ORDER = [
@@ -668,11 +687,49 @@
     });
   }
 
+  /* ── Map style toggle ───────────────────────────── */
+  function getMapStyle() {
+    const v = localStorage.getItem('gh_map_style');
+    return TILE_LAYERS[v] ? v : 'streets';
+  }
+
+  function applyMapStyle(styleName) {
+    const cfg = TILE_LAYERS[styleName] || TILE_LAYERS.streets;
+    if (_tileLayer) map.removeLayer(_tileLayer);
+    _tileLayer = L.tileLayer(cfg.url, { attribution: cfg.label + ' · ' + cfg.attribution, subdomains: 'abcd', maxZoom: 20 });
+    _tileLayer.addTo(map);
+    localStorage.setItem('gh_map_style', styleName);
+    // Update toggle button state
+    document.querySelectorAll('.map-style-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.style === styleName);
+    });
+  }
+
+  function buildStyleToggle() {
+    const container = document.querySelector('.map-container');
+    if (!container || document.getElementById('mapStyleToggle')) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'mapStyleToggle';
+    wrap.className = 'map-style-toggle';
+    const current = getMapStyle();
+    Object.entries(TILE_LAYERS).forEach(([key, cfg]) => {
+      const btn = document.createElement('button');
+      btn.className = 'map-style-btn' + (key === current ? ' active' : '');
+      btn.dataset.style = key;
+      btn.textContent = cfg.label;
+      btn.title = cfg.label;
+      btn.addEventListener('click', () => applyMapStyle(key));
+      wrap.appendChild(btn);
+    });
+    container.appendChild(wrap);
+  }
+
   /* ── Init ───────────────────────────────────────── */
   function init() {
     map = L.map('map', { center: [42.0, 43.5], zoom: 7, zoomControl: true });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '©OpenStreetMap ©CartoDB', subdomains: 'abcd', maxZoom: 20 }).addTo(map);
     map.fitBounds([[41.0, 40.0], [43.5, 46.7]], { padding: [40, 40] });
+    applyMapStyle(getMapStyle());
+    buildStyleToggle();
     buildLegend(); buildCategoryChips(); buildMobileCard(); renderMap();
     if (window.GeoFirebase) { loadPlaceCategoriesFromFirestore(); loadRealPlaces(); }
     else window.addEventListener('GeoFirebaseReady', () => { loadPlaceCategoriesFromFirestore(); loadRealPlaces(); }, { once: true });
