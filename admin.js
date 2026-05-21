@@ -64,6 +64,8 @@
   var _chalUnsubscribe = function () {};
   var _chalEditId    = null;
   var BADGE_RARITY_COLORS = { common: '#94a3b8', rare: '#3b82f6', epic: '#a855f7', legendary: '#f59e0b' };
+  var _firestorePlaceCats = null;
+  var _pcatEditId = null;
 
   /* ── NAVIGATION ──────────────────────────────────────────── */
   window.adminNav = function (section) {
@@ -90,6 +92,7 @@
     if (section === 'analytics')  { loadAdminAnalytics(); }
     if (section === 'errors')     { loadAdminErrors(); }
     if (section === 'businesses') { loadAdminBusinesses(); }
+    if (section === 'placecat')   { loadPlaceCategorySection(); }
   };
 
   /* ── TOAST ───────────────────────────────────────────────── */
@@ -1230,7 +1233,31 @@
   }
 
   function getPlaceCategories() {
+    if (_firestorePlaceCats !== null) return _firestorePlaceCats;
     return window.GEOHUB_PLACE_CATEGORIES || [];
+  }
+
+  function loadPlaceCatsFromFirestore(callback) {
+    var fb = window.GeoFirebase, f = fb && fb.fs;
+    if (!fb || !f) { if (callback) callback([]); return; }
+    f.getDocs(f.query(f.collection(fb.db, 'placeCategories'), f.orderBy('sortOrder', 'asc'))).then(function(snap) {
+      var cats = [];
+      snap.forEach(function(d) {
+        var data = d.data();
+        if (data.active === false) return;
+        cats.push({
+          id: d.id,
+          icon: data.icon || '📍',
+          label: data.labelKa || data.labelEn || d.id,
+          labelEn: data.labelEn || '',
+          color: data.color || '#6c757d',
+          sortOrder: data.sortOrder || 100,
+          subcategories: data.subcategories || []
+        });
+      });
+      _firestorePlaceCats = cats.length ? cats : null;
+      if (callback) callback(cats);
+    }).catch(function() { if (callback) callback([]); });
   }
 
   function populatePlaceCategorySelect(selectedValue) {
@@ -1299,7 +1326,13 @@
     if (textCat) textCat.style.display = isPlaces ? 'none' : '';
     if (placeCat) {
       placeCat.style.display = isPlaces ? 'block' : 'none';
-      if (isPlaces) populatePlaceCategorySelect('');
+      if (isPlaces) {
+        if (_firestorePlaceCats === null) {
+          loadPlaceCatsFromFirestore(function() { populatePlaceCategorySelect(''); });
+        } else {
+          populatePlaceCategorySelect('');
+        }
+      }
     }
     if (subSel) subSel.style.display = 'none';
     if (gWrap)   gWrap.style.display   = isPlaces ? 'block' : 'none';
@@ -2984,6 +3017,182 @@
       console.warn('[Admin] errors', err && err.message);
     });
   }
+
+  /* ── PLACE CATEGORY MANAGER ─────────────────────────────── */
+
+  var _PCAT_DEFAULTS = [
+    { id: 'food',          labelKa: '🍔 საკვები / რესტორნები',  labelEn: 'Food / Restaurants',       icon: '🍔', color: '#e74c3c', sortOrder: 10  },
+    { id: 'cafe',          labelKa: '☕ კაფე / ყავა / დესერტი', labelEn: 'Cafe / Coffee / Dessert',  icon: '☕', color: '#8e5a3c', sortOrder: 20  },
+    { id: 'nightlife',     labelKa: '🍸 ბარები / ღამის ცხოვრება', labelEn: 'Bars / Nightlife',       icon: '🍸', color: '#8e44ad', sortOrder: 30  },
+    { id: 'shopping',      labelKa: '🛍️ მაღაზიები / მოლები',    labelEn: 'Shopping / Malls',         icon: '🛍️', color: '#3498db', sortOrder: 40  },
+    { id: 'fitness',       labelKa: '🏋️ სპორტი / ფიტნესი',     labelEn: 'Sports / Fitness',         icon: '🏋️', color: '#f39c12', sortOrder: 50  },
+    { id: 'sports',        labelKa: '🏃 სპორტული ობიექტი',      labelEn: 'Sports Venue',             icon: '🏃', color: '#f39c12', sortOrder: 55  },
+    { id: 'park',          labelKa: '🌳 პარკები',                labelEn: 'Parks',                    icon: '🌳', color: '#27ae60', sortOrder: 60  },
+    { id: 'nature',        labelKa: '🏞️ ბუნება / ტბები',       labelEn: 'Nature / Lakes',           icon: '🏞️', color: '#2ecc71', sortOrder: 70  },
+    { id: 'transport',     labelKa: '🚇 ტრანსპორტი',            labelEn: 'Transport',                icon: '🚇', color: '#1f5fbf', sortOrder: 80  },
+    { id: 'health',        labelKa: '🏥 ჯანმრთელობა',           labelEn: 'Health / Medical',         icon: '🏥', color: '#ff5a6e', sortOrder: 90  },
+    { id: 'pharmacy',      labelKa: '💊 აფთიაქი',               labelEn: 'Pharmacy',                 icon: '💊', color: '#06b6d4', sortOrder: 100 },
+    { id: 'finance',       labelKa: '🏦 ფინანსები',             labelEn: 'Finance / Banking',        icon: '🏦', color: '#16a085', sortOrder: 110 },
+    { id: 'hotel',         labelKa: '🏨 სასტუმრო',              labelEn: 'Hotels',                   icon: '🏨', color: '#0891b2', sortOrder: 120 },
+    { id: 'education',     labelKa: '🎓 განათლება',              labelEn: 'Education',                icon: '🎓', color: '#059669', sortOrder: 130 },
+    { id: 'beauty',        labelKa: '✂️ სილამაზე / სალონი',    labelEn: 'Beauty / Salon',           icon: '✂️', color: '#ff66b3', sortOrder: 140 },
+    { id: 'auto',          labelKa: '⛽ ავტო / ბენზინი',        labelEn: 'Auto / Gas',               icon: '⛽', color: '#64748b', sortOrder: 150 },
+    { id: 'government',    labelKa: '🏛️ სახელმწიფო',           labelEn: 'Government',               icon: '🏛️', color: '#7f8c8d', sortOrder: 160 },
+    { id: 'religion',      labelKa: '⛪ რელიგიური ადგილები',    labelEn: 'Religious Sites',          icon: '⛪', color: '#7d3c98', sortOrder: 170 },
+    { id: 'animals',       labelKa: '🐾 ცხოველები / ვეტერინარი', labelEn: 'Animals / Vet',          icon: '🐾', color: '#92400e', sortOrder: 180 },
+    { id: 'culture',       labelKa: '🎭 კულტურა / თეატრი / მუზეუმი', labelEn: 'Culture / Theatre / Museum', icon: '🎭', color: '#a67c52', sortOrder: 190 },
+    { id: 'entertainment', labelKa: '🎬 გართობა',               labelEn: 'Entertainment',            icon: '🎬', color: '#f1c40f', sortOrder: 200 },
+    { id: 'work',          labelKa: '💼 სამუშაო / Coworking',   labelEn: 'Work / Coworking',         icon: '💼', color: '#475569', sortOrder: 210 },
+    { id: 'photo_spot',    labelKa: '📸 ფოტო ლოკაციები',        labelEn: 'Photo Spots',              icon: '📸', color: '#db2777', sortOrder: 220 },
+    { id: 'rooftop',       labelKa: '🌃 Rooftop / ხედები',      labelEn: 'Rooftop / Views',          icon: '🌃', color: '#4f46e5', sortOrder: 230 },
+    { id: 'service',       labelKa: '🛠️ სერვისები',            labelEn: 'Services',                 icon: '🛠️', color: '#9ca3af', sortOrder: 240 },
+    { id: 'landmark',      labelKa: '📍 ღირსშესანიშნაობა',      labelEn: 'Landmark',                 icon: '📍', color: '#b45309', sortOrder: 250 }
+  ];
+
+  window.loadPlaceCategorySection = function() {
+    var fb = window.GeoFirebase, f = fb && fb.fs;
+    if (!fb || !f) return;
+    var listEl = document.getElementById('pcatList');
+    var countEl = document.getElementById('pcatCount');
+    if (listEl) listEl.innerHTML = '<div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem"><i class="fas fa-spinner fa-spin"></i></div>';
+    f.getDocs(f.query(f.collection(fb.db, 'placeCategories'), f.orderBy('sortOrder', 'asc'))).then(function(snap) {
+      var rows = [];
+      snap.forEach(function(d) { rows.push({ id: d.id, data: d.data() }); });
+      if (countEl) countEl.textContent = '(' + rows.length + ')';
+      if (!rows.length) {
+        if (listEl) listEl.innerHTML = '<div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">No categories yet. Click "Seed 25 Defaults" to start.</div>';
+        return;
+      }
+      var html = '<div style="display:grid;gap:6px">';
+      rows.forEach(function(row) {
+        var d = row.data;
+        var inactive = d.active === false;
+        html += '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:' + (inactive ? 'rgba(255,255,255,.03)' : 'rgba(255,255,255,.06)') + ';opacity:' + (inactive ? '0.55' : '1') + '">'
+          + '<span style="font-size:1.4rem;min-width:2rem;text-align:center">' + escHtmlAdmin(d.icon || '📍') + '</span>'
+          + '<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:' + escHtmlAdmin(d.color || '#666') + ';flex-shrink:0"></span>'
+          + '<div style="flex:1;min-width:0">'
+          + '<div style="font-weight:700;font-size:.85rem;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escHtmlAdmin(d.labelKa || row.id) + '</div>'
+          + (d.labelEn ? '<div style="font-size:.72rem;color:#64748b">' + escHtmlAdmin(d.labelEn) + ' · <code style="font-size:.7rem;color:#94a3b8">' + escHtmlAdmin(row.id) + '</code></div>' : '<div style="font-size:.72rem;color:#64748b"><code style="font-size:.7rem;color:#94a3b8">' + escHtmlAdmin(row.id) + '</code></div>')
+          + '</div>'
+          + '<button type="button" onclick="togglePlaceCatActive(' + JSON.stringify(row.id) + ',' + JSON.stringify(!!d.active !== false) + ')" style="padding:3px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#94a3b8;cursor:pointer;font-size:.72rem" title="' + (inactive ? 'Enable' : 'Disable') + '">' + (inactive ? 'Off' : 'On') + '</button>'
+          + '<button type="button" onclick="editPlaceCatRow(' + JSON.stringify(row.id) + ')" style="padding:3px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#94a3b8;cursor:pointer;font-size:.72rem">Edit</button>'
+          + '<button type="button" onclick="deletePlaceCat(' + JSON.stringify(row.id) + ')" style="padding:3px 10px;border-radius:6px;border:none;background:rgba(239,68,68,.15);color:#f87171;cursor:pointer;font-size:.72rem">Del</button>'
+          + '</div>';
+      });
+      html += '</div>';
+      if (listEl) listEl.innerHTML = html;
+    }).catch(function(err) {
+      if (listEl) listEl.innerHTML = '<div style="color:#f87171;padding:16px;font-size:.82rem">Error: ' + escHtmlAdmin(err.message) + '</div>';
+    });
+  };
+
+  window.savePlaceCategory = function(e) {
+    e.preventDefault();
+    var fb = window.GeoFirebase, f = fb && fb.fs;
+    if (!fb || !f) return toast('Firebase not ready', 'rgba(239,68,68,.95)');
+    var id      = (document.getElementById('pcatId').value || '').trim().toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    var labelKa = (document.getElementById('pcatLabelKa').value || '').trim();
+    var labelEn = (document.getElementById('pcatLabelEn').value || '').trim();
+    var icon    = (document.getElementById('pcatIcon').value || '').trim();
+    var color   = (document.getElementById('pcatColor').value || '#3498db').trim();
+    var sortOrder = parseInt(document.getElementById('pcatSort').value || '100', 10);
+    var active  = document.getElementById('pcatActive').checked;
+    if (!id)      return toast('ID/slug is required', 'rgba(239,68,68,.95)');
+    if (!labelKa) return toast('Georgian label is required', 'rgba(239,68,68,.95)');
+    var docId = _pcatEditId || id;
+    var data = { labelKa: labelKa, labelEn: labelEn, icon: icon || '📍', color: color, sortOrder: isNaN(sortOrder) ? 100 : sortOrder, active: active, updatedAt: new Date() };
+    if (!_pcatEditId) data.createdAt = new Date();
+    f.setDoc(f.doc(fb.db, 'placeCategories', docId), data, { merge: true })
+      .then(function() {
+        toast(_pcatEditId ? 'Category updated' : 'Category created');
+        _firestorePlaceCats = null;
+        resetPcatForm();
+        window.loadPlaceCategorySection();
+      }).catch(function(err) { toast('Save failed: ' + err.message, 'rgba(239,68,68,.95)'); });
+  };
+
+  window.editPlaceCatRow = function(catId) {
+    var fb = window.GeoFirebase, f = fb && fb.fs;
+    if (!fb || !f) return;
+    f.getDoc(f.doc(fb.db, 'placeCategories', catId)).then(function(snap) {
+      if (!snap.exists()) return toast('Category not found', 'rgba(239,68,68,.95)');
+      var d = snap.data();
+      _pcatEditId = catId;
+      var set = function(id, v) { var el = document.getElementById(id); if (el) el.value = v || ''; };
+      set('pcatId', catId);
+      set('pcatLabelKa', d.labelKa || '');
+      set('pcatLabelEn', d.labelEn || '');
+      set('pcatIcon', d.icon || '');
+      set('pcatColor', d.color || '#3498db');
+      set('pcatSort', d.sortOrder || 100);
+      var activeEl = document.getElementById('pcatActive');
+      if (activeEl) activeEl.checked = d.active !== false;
+      var titleEl = document.getElementById('pcatFormTitle');
+      if (titleEl) titleEl.textContent = 'Edit: ' + catId;
+      var idEl = document.getElementById('pcatId');
+      if (idEl) idEl.readOnly = true;
+      var cancelBtn = document.getElementById('pcatCancelBtn');
+      if (cancelBtn) cancelBtn.style.display = '';
+      document.getElementById('pcatForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
+
+  window.deletePlaceCat = function(catId) {
+    if (!confirm('Delete category "' + catId + '"? Places using this category will keep their data but lose the icon.')) return;
+    var fb = window.GeoFirebase, f = fb && fb.fs;
+    if (!fb || !f) return;
+    f.deleteDoc(f.doc(fb.db, 'placeCategories', catId)).then(function() {
+      toast('Deleted: ' + catId);
+      _firestorePlaceCats = null;
+      window.loadPlaceCategorySection();
+    }).catch(function(err) { toast('Delete failed: ' + err.message, 'rgba(239,68,68,.95)'); });
+  };
+
+  window.togglePlaceCatActive = function(catId, currentActive) {
+    var fb = window.GeoFirebase, f = fb && fb.fs;
+    if (!fb || !f) return;
+    f.setDoc(f.doc(fb.db, 'placeCategories', catId), { active: !currentActive }, { merge: true }).then(function() {
+      _firestorePlaceCats = null;
+      window.loadPlaceCategorySection();
+    }).catch(function(err) { toast('Update failed: ' + err.message, 'rgba(239,68,68,.95)'); });
+  };
+
+  window.resetPcatForm = function() {
+    _pcatEditId = null;
+    var form = document.getElementById('pcatForm');
+    if (form) form.reset();
+    var titleEl = document.getElementById('pcatFormTitle');
+    if (titleEl) titleEl.textContent = 'Add Category';
+    var idEl = document.getElementById('pcatId');
+    if (idEl) idEl.readOnly = false;
+    var cancelBtn = document.getElementById('pcatCancelBtn');
+    if (cancelBtn) cancelBtn.style.display = 'none';
+    var colorEl = document.getElementById('pcatColor');
+    if (colorEl) colorEl.value = '#3498db';
+    var activeEl = document.getElementById('pcatActive');
+    if (activeEl) activeEl.checked = true;
+  };
+
+  window.seedDefaultPlaceCategories = function() {
+    if (!confirm('Seed 25 default place categories? Existing categories with the same ID will be merged (not overwritten).')) return;
+    var fb = window.GeoFirebase, f = fb && fb.fs;
+    if (!fb || !f) return toast('Firebase not ready', 'rgba(239,68,68,.95)');
+    var promises = _PCAT_DEFAULTS.map(function(cat) {
+      return f.setDoc(f.doc(fb.db, 'placeCategories', cat.id), {
+        labelKa:   cat.labelKa,
+        labelEn:   cat.labelEn,
+        icon:      cat.icon,
+        color:     cat.color,
+        sortOrder: cat.sortOrder,
+        active:    true
+      }, { merge: true });
+    });
+    Promise.all(promises).then(function() {
+      toast('25 default categories seeded');
+      _firestorePlaceCats = null;
+      window.loadPlaceCategorySection();
+    }).catch(function(err) { toast('Seed failed: ' + err.message, 'rgba(239,68,68,.95)'); });
+  };
 
   /* ── INIT ────────────────────────────────────────────────── */
   function init() {

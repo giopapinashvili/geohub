@@ -482,6 +482,7 @@ service cloud.firestore {
     }
     match /checkins/{checkinId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
     match /places/{placeId}     { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
+    match /placeCategories/{catId} { allow read: if true; allow create, update, delete: if isAdmin(); }
 
     // ── BUSINESSES ────────────────────────────────────────────────────────────
 

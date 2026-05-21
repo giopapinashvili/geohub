@@ -72,6 +72,7 @@
     <div class="sb-item" onclick="adminNav('businesses')"><span class="sb-ic"><i class="fas fa-store"></i></span> Businesses <span class="sb-cnt" id="sb-biz-side">0</span></div>
     <div class="sb-item" onclick="adminNav('creators')"><span class="sb-ic"><i class="fas fa-star"></i></span> Creators <span class="sb-cnt" id="sb-creators">0</span></div>
     <div class="sb-item" onclick="adminNav('content')"><span class="sb-ic"><i class="fas fa-plus-square"></i></span> Content Studio</div>
+    <div class="sb-item" onclick="adminNav('placecat')"><span class="sb-ic"><i class="fas fa-tags"></i></span> Place Categories</div>
     <div class="sb-item" onclick="adminNav('challenges')"><span class="sb-ic"><i class="fas fa-bolt"></i></span> Challenge Studio <span class="sb-cnt" id="sb-challenges">0</span></div>
     <div class="sb-item" onclick="adminNav('rewards')"><span class="sb-ic"><i class="fas fa-gift"></i></span> Rewards <span class="sb-cnt" id="sb-rewards">0</span></div>
     <div class="sb-lbl">Safety</div>
@@ -593,6 +594,58 @@
       </div>
     </section>
 
+
+    <!-- ─── PLACE CATEGORIES ─── -->
+    <section class="sec" id="sec-placecat">
+      <div class="ph">
+        <div><div class="ph-title">Place Categories</div><div class="ph-sub">Manage map place categories — icons, colours, labels. Changes apply to map markers immediately.</div></div>
+        <button class="btn-primary" onclick="seedDefaultPlaceCategories()" style="font-size:.78rem;padding:8px 16px;white-space:nowrap"><i class="fas fa-seedling" style="margin-right:6px"></i>Seed 25 Defaults</button>
+      </div>
+      <div style="display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start;max-width:1100px">
+        <!-- FORM -->
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title" id="pcatFormTitle">Add Category</div></div>
+          <form id="pcatForm" onsubmit="savePlaceCategory(event)" style="display:grid;gap:12px;padding:6px 0 2px">
+            <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">ID / Slug
+              <input id="pcatId" required placeholder="e.g. cafe" maxlength="40" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.85rem">
+            </label>
+            <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">Label (Georgian)
+              <input id="pcatLabelKa" required placeholder="e.g. კაფე / ყავა" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.85rem">
+            </label>
+            <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">Label (English)
+              <input id="pcatLabelEn" placeholder="e.g. Cafe / Coffee" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.85rem">
+            </label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">Icon (emoji)
+                <input id="pcatIcon" placeholder="☕" maxlength="8" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:1.2rem;text-align:center">
+              </label>
+              <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">Colour
+                <input id="pcatColor" type="color" value="#3498db" style="padding:4px 6px;height:42px;border-radius:9px;background:#111827;border:1px solid rgba(255,255,255,.12);cursor:pointer;width:100%">
+              </label>
+            </div>
+            <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">Sort Order
+              <input id="pcatSort" type="number" value="100" min="0" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.85rem">
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;color:var(--ts);font-size:.8rem;font-weight:700;cursor:pointer">
+              <input id="pcatActive" type="checkbox" checked style="width:16px;height:16px"> Active (visible on map)
+            </label>
+            <div style="display:flex;gap:10px;margin-top:4px">
+              <button type="submit" class="btn-primary" style="flex:1;padding:10px">Save Category</button>
+              <button type="button" id="pcatCancelBtn" onclick="resetPcatForm()" style="display:none;padding:10px 16px;border-radius:9px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#f8fafc;cursor:pointer;font-size:.82rem">Cancel</button>
+            </div>
+          </form>
+        </div>
+        <!-- LIST -->
+        <div class="panel">
+          <div class="panel-hdr" style="display:flex;justify-content:space-between;align-items:center">
+            <div class="panel-title">Categories <span id="pcatCount" style="color:var(--ts);font-weight:400;font-size:.82rem"></span></div>
+          </div>
+          <div id="pcatList" style="min-height:80px">
+            <div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">Loading…</div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- ─── CHALLENGE STUDIO ─── -->
     <section class="sec" id="sec-challenges">

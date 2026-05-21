@@ -36,6 +36,7 @@
   let disabledCategories = new Set();
   let activeMarker = null, activePlaceId = null;
   const _googleDetailsCache = {};
+  const _placeCatLookup = {};
 
   function esc(v) { return String(v == null ? '' : v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
@@ -90,14 +91,32 @@
     return html;
   }
 
+  /* ── Firestore category lookup ──────────────────── */
+  function loadPlaceCategoriesFromFirestore() {
+    const GF = window.GeoFirebase;
+    if (!GF || !GF.db || !GF.fs) return;
+    GF.fs.getDocs(GF.fs.query(GF.fs.collection(GF.db, 'placeCategories'), GF.fs.where('active', '==', true))).then(snap => {
+      let changed = false;
+      snap.forEach(d => {
+        const data = d.data();
+        _placeCatLookup[d.id] = { color: data.color || '#6c757d', icon: data.icon || '📍', label: data.labelKa || data.labelEn || d.id };
+        changed = true;
+      });
+      if (changed && allPlaces.length) renderMap();
+    }).catch(() => {});
+  }
+
   /* ── Marker helpers ─────────────────────────────── */
   function getPlaceMarkerStyle(place) {
-    if (place.categoryId && PLACE_MARKER_STYLES[place.categoryId]) return PLACE_MARKER_STYLES[place.categoryId];
-    if (place.category) {
-      const byLabel = Object.values(PLACE_MARKER_STYLES).find(s => s.label === place.category);
-      if (byLabel) return byLabel;
-    }
-    return PLACE_MARKER_STYLES.default;
+    const catId = place.categoryId;
+    const base = catId && _placeCatLookup[catId]
+      ? _placeCatLookup[catId]
+      : (catId && PLACE_MARKER_STYLES[catId])
+        ? PLACE_MARKER_STYLES[catId]
+        : (place.category && Object.values(PLACE_MARKER_STYLES).find(s => s.label === place.category))
+          || PLACE_MARKER_STYLES.default;
+    if (place.icon) return Object.assign({}, base, { icon: place.icon });
+    return base;
   }
 
   function buildPlaceMarkerIcon(style, isActive) {
@@ -463,8 +482,8 @@
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '©OpenStreetMap ©CartoDB', subdomains: 'abcd', maxZoom: 20 }).addTo(map);
     map.fitBounds([[41.0, 40.0], [43.5, 46.7]], { padding: [40, 40] });
     buildLegend(); buildMobileCard(); attachFilters(); renderMap();
-    if (window.GeoFirebase) loadRealPlaces();
-    else window.addEventListener('GeoFirebaseReady', loadRealPlaces, { once: true });
+    if (window.GeoFirebase) { loadPlaceCategoriesFromFirestore(); loadRealPlaces(); }
+    else window.addEventListener('GeoFirebaseReady', () => { loadPlaceCategoriesFromFirestore(); loadRealPlaces(); }, { once: true });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
