@@ -63,6 +63,7 @@
   window.GeoAuth = { getCurrentUser: getCurrentUser, updateUser: updateUser, logout: doLogout, isReady: function(){ return authReady; } };
 
   function ensureLangToggle(actionsEl) {
+    return;
     if (document.getElementById('geoLangToggle')) return;
     var b = document.createElement('button');
     b.id = 'geoLangToggle';
@@ -243,7 +244,7 @@
         '<a href="messages.html" class="auth-dd-item"><i class="fas fa-envelope"></i> Messages</a>' +
         '<a href="dashboard.html" class="auth-dd-item"><i class="fas fa-chart-bar"></i> Dashboard</a>' +
         '<a href="safety.html" class="auth-dd-item"><i class="fas fa-shield-alt"></i> Privacy &amp; Safety</a>' +
-        '<button class="auth-dd-item" id="authSettingsBtn"><i class="fas fa-cog"></i> Settings</button>' +
+        '<a href="settings.html" class="auth-dd-item" id="authSettingsBtn"><i class="fas fa-cog"></i> Settings</a>' +
         (isAdmin ? '<a href="admin.html" class="auth-dd-item auth-admin-link" style="color:#10b981"><i class="fas fa-shield-alt"></i> Admin Panel</a>' : '') +
         '<div class="auth-dd-sep"></div><button class="auth-dd-item auth-dd-logout" id="authLogoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button></div></div>';
       var navUser = document.getElementById('authNavUser');
@@ -252,7 +253,7 @@
       if (navUser) navUser.addEventListener('click', function (e) { e.stopPropagation(); if(navDrop) navDrop.classList.toggle('open'); });
       document.addEventListener('click', function () { if (navDrop) navDrop.classList.remove('open'); });
       var out = document.getElementById('authLogoutBtn'); if (out) out.addEventListener('click', doLogout);
-      var set = document.getElementById('authSettingsBtn'); if (set) set.addEventListener('click', function(){ showAccountSettings(); });
+      var set = document.getElementById('authSettingsBtn'); if (set) set.addEventListener('click', function(){ if(navDrop) navDrop.classList.remove('open'); });
       var bellBtn = document.getElementById('navBellBtn');
       if (bellBtn) { bellBtn.addEventListener('click', function(e) { e.stopPropagation(); var geo = fb(), f = fs(); if (geo && f) openNavNotifications(user.uid || user.id, f, geo); }); }
       var _geo = fb(), _f = fs(); if (_geo && _f) wireBadges(user.uid || user.id, _f, _geo);
@@ -272,6 +273,10 @@
     item.href = user ? 'profile.html?id=' + encodeURIComponent(user.uid || user.id || '') : 'auth.html';
     item.innerHTML = user ? '<i class="fas fa-user-circle"></i> ' + esc(user.fullName || 'Profile') : '<i class="fas fa-sign-in-alt"></i> Login / Sign Up';
     menu.appendChild(item);
+    var settings = document.createElement('a');
+    settings.href = 'settings.html';
+    settings.innerHTML = '<i class="fas fa-cog"></i> Settings';
+    menu.appendChild(settings);
   }
 
   function showLoginRequired(action) {

@@ -129,6 +129,7 @@
       '<div class="mobile-menu-group"><div class="mobile-menu-title">Account</div>' +
         '<a class="gh-mobile-menu-row" href="business.html"><i class="fas fa-store"></i><span>Businesses</span></a>' +
         '<a class="gh-mobile-menu-row" href="add-business.html"><i class="fas fa-plus-circle"></i><span>Add Page</span></a>' +
+        '<a class="gh-mobile-menu-row" href="settings.html"><i class="fas fa-gear"></i><span>Settings</span></a>' +
         '<div id="ghMobileAuthActions"></div>' +
       '</div>';
   }
@@ -143,6 +144,9 @@
       slot.innerHTML =
         '<a class="gh-mobile-menu-row" href="' + href + '">' +
           '<i class="fas fa-user"></i><span>' + name + '</span>' +
+        '</a>' +
+        '<a class="gh-mobile-menu-row" href="settings.html">' +
+          '<i class="fas fa-gear"></i><span>Settings</span>' +
         '</a>' +
         '<button type="button" class="gh-mobile-menu-row mobile-menu-danger gh-mobile-menu-danger" data-gh-mobile-logout>' +
           '<i class="fas fa-right-from-bracket"></i><span>Logout</span>' +

@@ -62,24 +62,27 @@
   var DAYS_LABELS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 
   function applyTheme(theme){
-    theme = theme === 'dark' ? 'dark' : 'light';
-    state.theme = theme;
-    document.documentElement.setAttribute('data-gh-theme', theme);
-    document.body && document.body.setAttribute('data-gh-theme', theme);
-    try { localStorage.setItem('gh_theme', theme); } catch(e) {}
+    var pref = theme === 'system' || theme === 'dark' || theme === 'light' ? theme : 'dark';
+    var effective = pref === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : pref === 'light' ? 'light' : 'dark';
+    state.theme = pref;
+    document.documentElement.setAttribute('data-gh-theme', effective);
+    document.body && document.body.setAttribute('data-gh-theme', effective);
+    try { localStorage.setItem('gh_theme', pref); } catch(e) {}
     var btn = document.getElementById('ghThemeToggle');
     if(btn){
-      btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
-      btn.innerHTML = theme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+      btn.setAttribute('aria-label', effective === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+      btn.innerHTML = effective === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
     }
   }
   function initTheme(){
-    var current = document.documentElement.getAttribute('data-gh-theme') || 'dark';
+    var current = 'dark';
+    try { current = localStorage.getItem('gh_theme') || document.documentElement.getAttribute('data-gh-theme') || 'dark'; } catch(e) { current = document.documentElement.getAttribute('data-gh-theme') || 'dark'; }
     state.theme = current;
+    var effective = current === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : current === 'light' ? 'light' : 'dark';
     var btn = document.getElementById('ghThemeToggle');
     if(btn){
-      btn.setAttribute('aria-label', current === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
-      btn.innerHTML = current === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+      btn.setAttribute('aria-label', effective === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+      btn.innerHTML = effective === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
     }
   }
 
@@ -417,6 +420,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '</nav>'+
       '<div class="gh-top-actions">'+
         '<button class="gh-icon-btn gh-sidebar-toggle" id="ghSidebarToggle" title="Collapse sidebar"><i class="fas fa-bars-staggered"></i></button>'+
+        '<a class="gh-icon-btn" href="settings.html" title="Settings" aria-label="Settings"><i class="fas fa-gear"></i></a>'+
         '<button class="gh-icon-btn gh-theme-toggle" id="ghThemeToggle" title="Toggle light/dark mode"><i class="fas fa-moon"></i></button>'+
         '<div id="ghActorBtnSlot" class="gh-actor-btn-slot"></div>'+
       '</div></header>';
@@ -426,6 +430,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var items=[
       ['feed','feed.html','fa-house','მთავარი Feed'],['places','places.html','fa-location-dot','რუკა / Places'],['business','business.html','fa-store','Businesses'],['groups','groups.html','fa-users','Groups'],['events','events.html','fa-calendar-xmark','Events'],['messages','messages.html','fa-comment-dots','Messages'],['notifications','notifications.html','fa-bell','Notifications'],['rewards','rewards.html','fa-gift','Rewards / Points'],['challenges','challenges.html','fa-trophy','Challenges'],['services','services.html','fa-grip','Services'],['realestate','real-estate.html','fa-house-chimney','Real Estate'],['learning','learning.html','fa-graduation-cap','Learning'],['creators','creators.html','fa-camera-retro','Creators'],['trust','trust.html','fa-shield-halved','Trust / Safety'],['admin','admin.html','fa-user-shield','Admin Panel']
     ];
+    items.splice(Math.max(items.length - 1, 0), 0, ['settings','settings.html','fa-gear','Settings']);
     return '<aside class="gh-left"><nav class="gh-panel">'+items.map(function(it){return '<a class="gh-nav-item '+(active===it[0]?'active':'')+'" href="'+it[1]+'"><i class="fas '+it[2]+'"></i><span>'+it[3]+'</span></a>';}).join('')+'<button class="gh-nav-tour-btn" data-start-tour><i class="fas fa-question-circle"></i><span>How GeoHub works</span></button>'+'</nav></aside>';
   }
 
@@ -453,7 +458,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function bindShell(){
     var themeBtn=$('#ghThemeToggle');
-    if(themeBtn){ themeBtn.onclick=function(e){ e.preventDefault(); e.stopPropagation(); applyTheme(state.theme==='dark' ? 'light' : 'dark'); }; applyTheme(state.theme); }
+    if(themeBtn){ themeBtn.onclick=function(e){ e.preventDefault(); e.stopPropagation(); var effective=document.documentElement.getAttribute('data-gh-theme')||'dark'; applyTheme(effective==='dark' ? 'light' : 'dark'); }; applyTheme(state.theme); }
     var sideBtn=$('#ghSidebarToggle');
     if(sideBtn){ sideBtn.onclick=function(e){ e.preventDefault(); e.stopPropagation(); state.sidebarCollapsed=!state.sidebarCollapsed; document.body.classList.toggle('gh-sidebar-collapsed', state.sidebarCollapsed); sideBtn.setAttribute('aria-pressed', state.sidebarCollapsed ? 'true' : 'false'); sideBtn.title = state.sidebarCollapsed ? 'Expand sidebars' : 'Collapse sidebars'; }; }
     if(!state._shellClickBound){

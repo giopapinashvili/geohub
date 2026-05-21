@@ -289,9 +289,9 @@
     // ── Bottom actions ──────────────────────────────────────────
     var bottomSection =
       '<div class="geo-sw-divider"></div>'+
-      '<a class="geo-sw-item" href="profile.html">'+
+      '<a class="geo-sw-item" href="settings.html">'+
         '<div class="geo-sw-item-icon settings"><i class="fas fa-gear"></i></div>'+
-        '<span class="geo-sw-item-name">Settings & Profile</span>'+
+        '<span class="geo-sw-item-name">Settings</span>'+
       '</a>'+
       '<button class="geo-sw-item" onclick="window._geoSW.signOut()" style="font-family:inherit">'+
         '<div class="geo-sw-item-icon signout"><i class="fas fa-arrow-right-from-bracket"></i></div>'+

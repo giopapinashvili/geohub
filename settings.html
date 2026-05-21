@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+  <link rel="dns-prefetch" href="https://firebase.googleapis.com">
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - GeoHub</title>
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"></noscript>
+  <link rel="stylesheet" href="geohub-social-redesign.css">
+  <link rel="stylesheet" href="navbar.css">
+  <link rel="stylesheet" href="settings.css">
+  <meta name="theme-color" content="#10b981">
+  <script>(function(){try{var p=localStorage.getItem('gh_theme')||'dark';var e=p==='system'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches?'light':p==='light'?'light':'dark';document.documentElement.setAttribute('data-gh-theme',e);document.documentElement.classList.toggle('gh-theme-light',e==='light');document.documentElement.classList.toggle('gh-theme-dark',e==='dark');}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+</head>
+<body class="settings-page" data-gh-page="settings">
+  <noscript>GeoHub Settings requires JavaScript.</noscript>
+  <nav class="navbar" id="navbar">
+    <a href="feed.html" class="navbar-brand">
+      <div class="logo-icon">GH</div>
+      <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
+    </a>
+    <ul class="navbar-links"></ul>
+    <div class="navbar-actions"></div>
+    <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-menu"></div>
+
+  <main id="settingsApp" class="settings-shell">
+    <div class="settings-loading">
+      <i class="fas fa-circle-notch fa-spin"></i>
+      <span>Loading settings...</span>
+    </div>
+  </main>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script defer src="gh-schema.js"></script>
+  <script defer src="firestore-social.js"></script>
+  <script defer src="account.js"></script>
+  <script defer src="account-switcher.js"></script>
+  <script defer src="nav-cleanup.js"></script>
+  <script defer src="mobile-nav.js"></script>
+  <script defer src="settings.js"></script>
+</body>
+</html>

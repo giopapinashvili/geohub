@@ -106,7 +106,10 @@
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   // LANG ENGINE
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  var _lang = window.GeoLang || 'en';
+  var _lang = (function(){
+    try { return localStorage.getItem('gh_lang') === 'ka' ? 'ka' : 'en'; }
+    catch(e) { return 'en'; }
+  })();
 
   function t(key) {
     return (_lang === 'ka' && KA[key]) ? KA[key] : key;
@@ -153,8 +156,14 @@
     get current() { return _lang; },
     t: t,
     apply: applyTranslations,
+    set: function(lang) {
+      _lang = lang === 'ka' ? 'ka' : 'en';
+      try { localStorage.setItem('gh_lang', _lang); } catch(e) {}
+      document.documentElement.lang = _lang;
+      window.dispatchEvent(new CustomEvent('GeoLangChange', { detail: _lang }));
+    },
     toggle: function() {
-      window.GeoLang = _lang === 'en' ? 'ka' : 'en';
+      this.set(_lang === 'en' ? 'ka' : 'en');
       window.location.reload();
     }
   };
@@ -196,6 +205,7 @@
         { label: 'Messages',   href: 'messages.html',   icon: 'fa-message' },
         { label: 'Rewards',    href: 'rewards.html',    icon: 'fa-gift' },
         { label: 'Challenges', href: 'challenges.html', icon: 'fa-trophy' },
+        { label: 'Settings',   href: 'settings.html',   icon: 'fa-gear' },
         { label: 'Trust',      href: 'trust.html',      icon: 'fa-shield-halved' }
       ]
     }
@@ -301,6 +311,7 @@
   }
 
   function addLangToggle() {
+    return;
     if (document.getElementById('geoLangToggle')) return;
     injectLangStyles();
     var btn = document.createElement('button');
@@ -314,6 +325,7 @@
 
   // Backup: observe .navbar (not just .navbar-actions) to catch any rewrite
   function watchNavActions() {
+    return;
     var nav = document.querySelector('.navbar');
     if (!nav) return;
     var observer = new MutationObserver(function() {
@@ -327,7 +339,7 @@
   function cleanupActions() {
     var actions = document.querySelector('.navbar-actions');
     if (!actions) return;
-    if (actions.querySelector('.auth-nav-user')) { addLangToggle(); return; }
+    if (actions.querySelector('.auth-nav-user')) { return; }
     actions.querySelectorAll('a').forEach(function(link) {
       var href = (link.getAttribute('href') || '').toLowerCase();
       if (href === '#' && /sign up|register|sign in/i.test(link.textContent)) link.remove();
@@ -341,7 +353,6 @@
       profile.setAttribute('aria-label', 'Profile');
       profile.classList.add('nav-profile-icon');
     }
-    addLangToggle();
   }
 
   // Global toggle so inline onclick="geoToggleMenu()" always works
@@ -399,11 +410,10 @@
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { init(); applyTranslations(); watchNavActions(); });
+    document.addEventListener('DOMContentLoaded', function() { init(); applyTranslations(); });
   } else {
     init();
     applyTranslations();
-    watchNavActions();
   }
 
 })();
