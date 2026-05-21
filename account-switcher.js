@@ -287,8 +287,13 @@
     }
 
     // ── Bottom actions ──────────────────────────────────────────
+    var profileHref = _user && _user.uid ? 'profile.html?id='+encodeURIComponent(_user.uid) : 'profile.html';
     var bottomSection =
       '<div class="geo-sw-divider"></div>'+
+      '<a class="geo-sw-item" href="'+profileHref+'">'+
+        '<div class="geo-sw-item-icon user"><i class="fas fa-user"></i></div>'+
+        '<span class="geo-sw-item-name">Profile</span>'+
+      '</a>'+
       '<a class="geo-sw-item" href="settings.html">'+
         '<div class="geo-sw-item-icon settings"><i class="fas fa-gear"></i></div>'+
         '<span class="geo-sw-item-name">Settings</span>'+
