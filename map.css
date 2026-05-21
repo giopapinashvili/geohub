@@ -39,14 +39,11 @@ body, html { height: 100%; overflow: hidden; }
       box-shadow: 0 0 0 4px rgba(255,255,255,.08), 0 10px 24px rgba(0,0,0,.35), 0 0 20px rgba(34,197,94,.45);
       overflow: visible;
       transform-origin: center;
-      transition: transform .16s ease, box-shadow .16s ease;
+      transition: transform .16s ease;
       cursor: pointer;
     }
     .gh-map-emoji-marker:hover { transform: scale(1.1); }
-    .gh-map-emoji-marker.is-selected {
-      transform: scale(1.18);
-      box-shadow: 0 0 0 5px rgba(255,255,255,.14), 0 0 32px rgba(34,197,94,.7);
-    }
+    .gh-map-emoji-marker.is-selected { transform: scale(1.18); }
     .gh-map-marker-emoji {
       font-size: 22px; line-height: 1;
       font-style: normal; font-weight: normal;

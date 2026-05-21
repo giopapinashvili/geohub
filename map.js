@@ -145,15 +145,26 @@
     return base;
   }
 
+  function hexToRgba(hex, alpha) {
+    const h = hex.replace('#', '');
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+  }
+
   function buildPlaceMarkerIcon(place, isActive) {
     const style       = getPlaceMarkerStyle(place);
     const markerIcon  = place.icon || style.icon || '📍';
     const markerColor = style.color || '#22c55e';
-    console.log('MARKER ICON:', markerIcon, place.name);
+    const glow        = hexToRgba(markerColor, 0.45);
     const selectedClass = isActive ? ' is-selected' : '';
+    const boxShadow = isActive
+      ? '0 0 0 5px rgba(255,255,255,.14),0 0 32px ' + hexToRgba(markerColor, 0.7)
+      : '0 0 0 4px rgba(255,255,255,.08),0 10px 24px rgba(0,0,0,.35),0 0 20px ' + glow;
     return L.divIcon({
       className: 'gh-map-marker-wrap',
-      html: '<div class="gh-map-emoji-marker' + selectedClass + '" style="--marker-color:' + markerColor + '">'
+      html: '<div class="gh-map-emoji-marker' + selectedClass + '" style="--marker-color:' + markerColor + ';box-shadow:' + boxShadow + '">'
           + '<span class="gh-map-marker-emoji">' + markerIcon + '</span>'
           + '</div>',
       iconSize:    [44, 44],

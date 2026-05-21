@@ -1278,13 +1278,25 @@
     var cats = getPlaceCategories();
     var cat = cats.find(function(c) { return c.id === categoryId || c.label === categoryId; });
     var subs = (cat && cat.subcategories) || [];
+    // Fallback to _PCAT_DEFAULTS when Firestore loaded but subcategories are empty
+    if (subs.length === 0 && categoryId) {
+      var defCat = _PCAT_DEFAULTS.find(function(c) { return c.id === categoryId; });
+      if (defCat && defCat.subcategories && defCat.subcategories.length) subs = defCat.subcategories;
+    }
+    // Fallback to static window.GEOHUB_PLACE_CATEGORIES strings
+    if (subs.length === 0 && categoryId && window.GEOHUB_PLACE_CATEGORIES) {
+      var staticCat = window.GEOHUB_PLACE_CATEGORIES.find(function(c) { return c.id === categoryId; });
+      if (staticCat && staticCat.subcategories) subs = staticCat.subcategories;
+    }
     sel.disabled = subs.length === 0;
     var opts = '<option value="">აირჩიე ქვეკატეგორია</option>';
     var foundSub = false;
     subs.forEach(function(s) {
-      var isSelected = selectedSub && s === selectedSub;
+      var subId    = (typeof s === 'object') ? (s.id || '') : s;
+      var subLabel = (typeof s === 'object') ? (s.labelKa || s.labelEn || s.id || '') : s;
+      var isSelected = selectedSub && subId === selectedSub;
       if (isSelected) foundSub = true;
-      opts += '<option value="' + s + '"' + (isSelected ? ' selected' : '') + '>' + s + '</option>';
+      opts += '<option value="' + subId + '"' + (isSelected ? ' selected' : '') + '>' + subLabel + '</option>';
     });
     if (selectedSub && !foundSub) {
       opts += '<option value="' + selectedSub + '" selected>' + selectedSub + '</option>';
@@ -1414,12 +1426,25 @@
     if (placeSubSel) placeSubSel.addEventListener('change', function() {
       var iconEl = document.getElementById('adminPlaceIcon');
       if (iconEl && iconEl.dataset.userEdited) return;
-      var cats = getPlaceCategories();
       var catVal = placeCatSel ? placeCatSel.value : '';
+      // Resolve subcategory from all sources (Firestore → _PCAT_DEFAULTS → static)
+      var allSubs = [];
+      var cats = getPlaceCategories();
       var cat = cats.find(function(c) { return c.id === catVal; });
-      var subs = (cat && cat.subcategories) || [];
-      var sub = subs.find(function(s) { return s.id === placeSubSel.value; });
-      var newIcon = (sub && sub.icon) || (cat && cat.icon) || '';
+      allSubs = (cat && cat.subcategories) || [];
+      if (allSubs.length === 0 && catVal) {
+        var defCat = _PCAT_DEFAULTS.find(function(c) { return c.id === catVal; });
+        if (defCat && defCat.subcategories) allSubs = defCat.subcategories;
+      }
+      var selectedId = placeSubSel.value;
+      var subIcon = '';
+      if (allSubs.length) {
+        var sub = allSubs.find(function(s) {
+          return (typeof s === 'object') ? s.id === selectedId : s === selectedId;
+        });
+        if (sub && typeof sub === 'object') subIcon = sub.icon || '';
+      }
+      var newIcon = subIcon || (cat && cat.icon) || '';
       if (newIcon && iconEl) {
         iconEl.value = newIcon;
         var prev = document.getElementById('adminPlaceIconPreview');
