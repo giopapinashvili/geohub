@@ -12,6 +12,15 @@ body.business-suite-page {
   overflow-x: hidden;
 }
 
+body.business-suite-page .mobile-menu,
+body.business-suite-page .gh-mobile-menu-overlay,
+body.business-suite-page #gh-mobile-menu-overlay,
+body.business-suite-page #app-bottom-nav {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 .bs-loading {
   min-height: 100dvh;
   display: grid;
