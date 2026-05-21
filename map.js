@@ -37,8 +37,33 @@
   let activeMarker = null, activePlaceId = null;
   const _googleDetailsCache = {};
   const _placeCatLookup = {};
+  const PLACE_CATEGORY_ORDER = [
+    'food', 'cafe', 'nightlife', 'shopping', 'fitness', 'park', 'nature', 'transport',
+    'health', 'pharmacy', 'finance', 'hotel', 'education', 'beauty', 'auto', 'government',
+    'religion', 'animals', 'culture', 'entertainment', 'work', 'photo_spot', 'rooftop',
+    'service', 'landmark'
+  ];
 
   function esc(v) { return String(v == null ? '' : v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+  function categorySortValue(id, data) {
+    const knownIndex = PLACE_CATEGORY_ORDER.indexOf(id);
+    if (knownIndex > -1) return knownIndex;
+    const sort = Number(data && data.sortOrder);
+    return PLACE_CATEGORY_ORDER.length + (Number.isFinite(sort) ? sort : 999);
+  }
+
+  function categoryEntries() {
+    const firestoreIds = Object.keys(_placeCatLookup);
+    if (firestoreIds.length > 0) {
+      return firestoreIds
+        .map(id => Object.assign({ id }, _placeCatLookup[id]))
+        .sort((a, b) => categorySortValue(a.id, a) - categorySortValue(b.id, b) || (a.label || a.id).localeCompare(b.label || b.id));
+    }
+    return PLACE_CATEGORY_ORDER
+      .filter(id => PLACE_MARKER_STYLES[id])
+      .map(id => Object.assign({ id, subcategories: [] }, PLACE_MARKER_STYLES[id]));
+  }
 
   /* ── Google Places helpers ──────────────────────── */
   function fetchGoogleDetails(googlePlaceId) {
@@ -103,11 +128,13 @@
           color: data.color || '#6c757d',
           icon: data.icon || '📍',
           label: data.labelKa || data.labelEn || d.id,
+          sortOrder: data.sortOrder,
           subcategories: (data.subcategories || []).filter(s => s.active !== false)
         };
         changed = true;
       });
       if (changed) {
+        buildCategoryChips();
         buildLegend();
         if (allPlaces.length) renderMap();
       }
@@ -476,15 +503,7 @@
   /* ── Legend ─────────────────────────────────────── */
   function buildLegend() {
     const legend = document.getElementById('legend'); if (!legend) return;
-    const firestoreIds = Object.keys(_placeCatLookup);
-    let catEntries;
-    if (firestoreIds.length > 0) {
-      catEntries = firestoreIds.map(id => Object.assign({ id }, _placeCatLookup[id]));
-    } else {
-      catEntries = Object.entries(PLACE_MARKER_STYLES)
-        .filter(([id]) => id !== 'default')
-        .map(([id, s]) => Object.assign({ id, subcategories: [] }, s));
-    }
+    const catEntries = categoryEntries();
 
     let html = '<div class="legend-title">კატეგორიები</div>'
       + '<div class="legend-all-btn' + (!currentFilter ? ' legend-all-active' : '') + '" id="legendAllBtn">✓ ყველა</div>'
@@ -521,6 +540,7 @@
     legend.querySelector('#legendAllBtn').addEventListener('click', () => {
       currentFilter = ''; currentSubFilter = '';
       disabledCategories.clear();
+      buildCategoryChips();
       buildLegend(); renderMap();
     });
     legend.querySelectorAll('.legend-item.legend-toggle').forEach(item => {
@@ -529,6 +549,7 @@
         const cat = item.dataset.cat;
         currentFilter = (currentFilter === cat && !currentSubFilter) ? '' : cat;
         currentSubFilter = '';
+        buildCategoryChips();
         buildLegend(); renderMap();
         window.closePanel(); window.closeMobileCard();
       });
@@ -554,6 +575,7 @@
         } else {
           currentFilter = cat; currentSubFilter = sub;
         }
+        buildCategoryChips();
         buildLegend(); renderMap();
         window.closePanel(); window.closeMobileCard();
       });
@@ -565,6 +587,20 @@
   }
 
   /* ── Filter chips ───────────────────────────────── */
+  function buildCategoryChips() {
+    const wrap = document.getElementById('mapChips');
+    if (!wrap) return;
+    const allActive = !currentFilter && !currentSubFilter;
+    let html = '<div class="map-chip' + (allActive ? ' active' : '') + '" data-cat="">ყველა</div>';
+    categoryEntries().forEach(cat => {
+      html += '<div class="map-chip' + (currentFilter === cat.id && !currentSubFilter ? ' active' : '') + '" data-cat="' + esc(cat.id) + '">'
+        + esc((cat.icon || '') + ' ' + (cat.label || cat.id))
+        + '</div>';
+    });
+    wrap.innerHTML = html;
+    attachFilters();
+  }
+
   function attachFilters() {
     document.querySelectorAll('.map-chip').forEach(chip => chip.addEventListener('click', () => {
       document.querySelectorAll('.map-chip').forEach(c => c.classList.remove('active'));
@@ -572,10 +608,14 @@
       currentFilter = chip.dataset.cat || '';
       currentSubFilter = '';
       window.closePanel(); window.closeMobileCard();
+      buildLegend();
       renderMap();
     }));
     const search = document.getElementById('mapSearchInput');
-    if (search) search.addEventListener('input', e => { currentSearch = e.target.value || ''; renderMap(); });
+    if (search && !search.dataset.mapSearchBound) {
+      search.dataset.mapSearchBound = '1';
+      search.addEventListener('input', e => { currentSearch = e.target.value || ''; renderMap(); });
+    }
   }
 
   /* ── Firestore load ─────────────────────────────── */
@@ -601,7 +641,7 @@
     map = L.map('map', { center: [42.0, 43.5], zoom: 7, zoomControl: true });
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '©OpenStreetMap ©CartoDB', subdomains: 'abcd', maxZoom: 20 }).addTo(map);
     map.fitBounds([[41.0, 40.0], [43.5, 46.7]], { padding: [40, 40] });
-    buildLegend(); buildMobileCard(); attachFilters(); renderMap();
+    buildLegend(); buildCategoryChips(); buildMobileCard(); renderMap();
     if (window.GeoFirebase) { loadPlaceCategoriesFromFirestore(); loadRealPlaces(); }
     else window.addEventListener('GeoFirebaseReady', () => { loadPlaceCategoriesFromFirestore(); loadRealPlaces(); }, { once: true });
   }
