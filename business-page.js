@@ -316,8 +316,8 @@
       {id:'faq',      label:'FAQ'},
       {id:'about',    label:'About'},
     ];
-    if (_isActingAsPage) tabs.push({id:'insights',  label:'Insights'});
-    if (_isActingAsPage) tabs.push({id:'dashboard', label:'Dashboard'});
+    if (_isOwner || _isPageAdmin) tabs.push({id:'insights',  label:'Insights'});
+    if (_isOwner || _isPageAdmin) tabs.push({id:'dashboard', label:'Dashboard'});
     return '<div class="biz-tabs">'+
       tabs.map(function(t,i){
         return '<button class="biz-tab'+(i===0?' active':'')+'" data-tab="'+t.id+'">'+t.label+'</button>';
@@ -1431,12 +1431,12 @@
 
   function renderOwnerDashboard(biz) {
     var stats = [
-      {val: biz.viewCount||0,      label: 'Page Views',    icon: 'fa-eye',        color: '#3b82f6'},
-      {val: biz.followerCount||0,  label: 'Followers',     icon: 'fa-users',       color: '#10b981'},
-      {val: biz.saveCount||0,      label: 'Saves',         icon: 'fa-bookmark',    color: '#f59e0b'},
-      {val: biz.quoteCount||0,     label: 'Quote Requests',icon: 'fa-paper-plane', color: '#8b5cf6'},
-      {val: biz.reviewCount||biz.ratingCount||0, label: 'Reviews', icon: 'fa-star', color: '#f43f5e'},
-      {val: (biz.ratingAverage||0).toFixed(1), label: 'Avg Rating', icon: 'fa-star-half-stroke', color: '#f59e0b'},
+      {val: compact(biz.viewCount||0),     label: 'Page Views',    icon: 'fa-eye',              color: '#3b82f6'},
+      {val: compact(biz.followerCount||0), label: 'Followers',     icon: 'fa-users',             color: '#10b981'},
+      {val: compact(biz.saveCount||0),     label: 'Saves',         icon: 'fa-bookmark',          color: '#f59e0b'},
+      {val: compact(biz.quoteCount||0),    label: 'Quote Requests',icon: 'fa-paper-plane',       color: '#8b5cf6'},
+      {val: compact(biz.reviewCount||biz.ratingCount||0), label: 'Reviews', icon: 'fa-star',     color: '#f43f5e'},
+      {val: (+(biz.ratingAverage||0)).toFixed(1), label: 'Avg Rating', icon: 'fa-star-half-stroke', color: '#f59e0b'},
     ];
     return '<div class="biz-dashboard">'+
       '<div class="biz-dash-header"><i class="fas fa-crown"></i> Owner Dashboard</div>'+
@@ -1456,6 +1456,9 @@
         '<button class="biz-owner-action-btn" onclick="window._bizActions.switchTab(\'insights\')" style="background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.3);color:#60a5fa"><i class="fas fa-chart-line"></i> View Insights</button>'+
       '</div>'+
       '<div id="biz-owner-quotes-panel" style="display:none;padding:0 16px 14px"></div>'+
+      '<div id="biz-analytics-panel" class="biz-analytics-wrap">'+
+        '<div class="biz-loading-inline"><i class="fas fa-spinner fa-spin"></i> Loading analytics…</div>'+
+      '</div>'+
       '<div class="biz-dash-section" style="padding:0 16px 14px">'+
         '<div class="biz-dash-section-title"><i class="fas fa-user-shield"></i> Page Admins</div>'+
         '<div class="biz-admin-add-form" style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">'+
@@ -1755,9 +1758,9 @@
             '<div id="biz-milestones-section"></div>'+
           '</div>'+
 
-          (_isActingAsPage?'<div class="biz-tab-panel" data-panel="insights"><div id="biz-insights-panel"><div class="biz-loading-inline"><i class="fas fa-spinner fa-spin"></i> Loading insights…</div></div></div>':'')+
+          ((_isOwner||_isPageAdmin)?'<div class="biz-tab-panel" data-panel="insights"><div id="biz-insights-panel"><div class="biz-loading-inline"><i class="fas fa-spinner fa-spin"></i> Loading insights…</div></div></div>':'')+
 
-          (_isActingAsPage?'<div class="biz-tab-panel" data-panel="dashboard">'+renderOwnerDashboard(biz)+'</div>':'')+
+          ((_isOwner||_isPageAdmin)?'<div class="biz-tab-panel" data-panel="dashboard">'+renderOwnerDashboard(biz)+'</div>':'')+
 
         '</div>'+
       '</div>'+
@@ -1794,9 +1797,10 @@
     loadFaq(BIZ_ID);
     loadMilestones(BIZ_ID);
     loadBizRewards(BIZ_ID);
-    if (_isActingAsPage) {
+    if (_isOwner || _isPageAdmin) {
       loadInsights(BIZ_ID);
-      window._bizActions.refreshAdminList();
+      loadDashboardAnalytics();
+      if (_isActingAsPage) window._bizActions.refreshAdminList();
     }
   }
 
@@ -2945,7 +2949,7 @@
 
   function loadInsights(bizId) {
     var el = document.getElementById('biz-insights-panel');
-    if (!el || !_isOwner) return;
+    if (!el || (!_isOwner && !_isPageAdmin)) return;
     Promise.all([
       _fs.getDoc(_fs.doc(_db,'businesses',bizId)),
       safeSnap(_fs.getDocs(_fs.query(
@@ -3007,6 +3011,110 @@
       '<div class="biz-insights-stat-val">'+compact(val)+'</div>'+
       '<div class="biz-insights-stat-label">'+label+'</div>'+
     '</div>';
+  }
+
+  // ── DASHBOARD ANALYTICS ───────────────────────────────────────
+
+  function loadDashboardAnalytics() {
+    var el = document.getElementById('biz-analytics-panel');
+    if (!el || (!_isOwner && !_isPageAdmin)) return;
+
+    // Engagement from already-loaded posts (no extra query)
+    var posts = _currentPosts.filter(function(p){ return p.status !== 'deleted'; });
+    var totalReactions = 0, totalComments = 0, totalShares = 0;
+    posts.forEach(function(p){
+      totalReactions += (p.likeCount || p.reactionCount || 0);
+      totalComments  += (p.commentCount || 0);
+      totalShares    += (p.shareCount || 0);
+    });
+
+    // Recent activity: followers, reviews, quotes — all limited, no orderBy to avoid index requirement
+    Promise.all([
+      safeSnap(_fs.getDocs(_fs.query(
+        _fs.collection(_db, 'businessFollowers'),
+        _fs.where('businessId', '==', BIZ_ID),
+        _fs.limit(10)
+      ))),
+      safeSnap(_fs.getDocs(_fs.query(
+        _fs.collection(_db, 'businessReviews'),
+        _fs.where('businessId', '==', BIZ_ID),
+        _fs.limit(10)
+      ))),
+      safeSnap(_fs.getDocs(_fs.query(
+        _fs.collection(_db, 'businesses', BIZ_ID, 'quoteRequests'),
+        _fs.limit(10)
+      )))
+    ]).then(function(results){
+      var followers = results[0];
+      var reviews   = results[1];
+      var quotes    = results[2];
+
+      // Merge into activity timeline, sort client-side
+      var activity = [];
+      followers.forEach(function(f){
+        activity.push({
+          icon: 'fa-user-plus', color: '#10b981',
+          text: 'New follower' + (f.displayName || f.userName ? ': ' + esc(f.displayName || f.userName) : ''),
+          time: f.createdAt || f.followedAt
+        });
+      });
+      reviews.forEach(function(r){
+        var stars = r.rating ? ' · ' + '⭐'.repeat(Math.max(1, Math.min(5, r.rating))) : '';
+        var snippet = r.text ? ': ' + esc(r.text.slice(0, 48)) + (r.text.length > 48 ? '…' : '') : '';
+        activity.push({
+          icon: 'fa-star', color: '#f59e0b',
+          text: 'New review' + stars + snippet,
+          time: r.createdAt
+        });
+      });
+      quotes.forEach(function(q){
+        var badge = q.status === 'new' ? ' <span class="biz-activity-badge">New</span>' : '';
+        activity.push({
+          icon: 'fa-paper-plane', color: '#8b5cf6',
+          text: 'Quote request' + (q.name ? ' from ' + esc(q.name) : '') + badge,
+          time: q.createdAt
+        });
+      });
+      activity.sort(function(a, b){
+        function ms(t){ return t ? (t.toMillis ? t.toMillis() : (t.seconds ? t.seconds*1000 : 0)) : 0; }
+        return ms(b.time) - ms(a.time);
+      });
+      activity = activity.slice(0, 8);
+
+      var engageHtml =
+        '<div class="biz-analytics-section">'+
+          '<div class="biz-analytics-section-title"><i class="fas fa-chart-bar"></i> Post Engagement</div>'+
+          '<div class="biz-analytics-engage-row">'+
+            '<div class="biz-analytics-engage-stat"><div class="biz-analytics-engage-val">'+compact(totalReactions)+'</div><div class="biz-analytics-engage-label">Reactions</div></div>'+
+            '<div class="biz-analytics-engage-stat"><div class="biz-analytics-engage-val">'+compact(totalComments)+'</div><div class="biz-analytics-engage-label">Comments</div></div>'+
+            '<div class="biz-analytics-engage-stat"><div class="biz-analytics-engage-val">'+compact(totalShares)+'</div><div class="biz-analytics-engage-label">Shares</div></div>'+
+          '</div>'+
+        '</div>';
+
+      var activityHtml =
+        '<div class="biz-analytics-section">'+
+          '<div class="biz-analytics-section-title"><i class="fas fa-bell"></i> Recent Activity</div>'+
+          (activity.length
+            ? '<div class="biz-activity-list">'+
+                activity.map(function(a){
+                  return '<div class="biz-activity-item">'+
+                    '<div class="biz-activity-dot" style="color:'+a.color+';background:'+a.color+'1a"><i class="fas '+a.icon+'"></i></div>'+
+                    '<div class="biz-activity-content">'+
+                      '<div class="biz-activity-text">'+a.text+'</div>'+
+                      (a.time ? '<div class="biz-activity-time">'+timeAgo(a.time)+'</div>' : '')+
+                    '</div>'+
+                  '</div>';
+                }).join('')+
+              '</div>'
+            : '<div class="biz-empty-state" style="padding:16px 0 8px"><i class="fas fa-inbox"></i><p>No recent activity yet.</p></div>'
+          )+
+        '</div>';
+
+      el.innerHTML = engageHtml + activityHtml;
+
+    }).catch(function(){
+      el.innerHTML = '<div class="biz-empty-state" style="padding:16px 0"><i class="fas fa-triangle-exclamation"></i><p>Could not load analytics.</p></div>';
+    });
   }
 
   // ── TAB RELOAD HELPERS ────────────────────────────────────────
