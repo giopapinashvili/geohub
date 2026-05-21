@@ -65,6 +65,27 @@
       .map(id => Object.assign({ id, subcategories: [] }, PLACE_MARKER_STYLES[id]));
   }
 
+  /* Categories used by at least one loaded place — drives sidebar chips.
+     Falls back to the full static list when no places are loaded yet. */
+  function usedCategoryEntries() {
+    if (!allPlaces.length) return categoryEntries();
+    const usedIds = new Set();
+    allPlaces.forEach(function(p) { if (p.categoryId) usedIds.add(p.categoryId); });
+    // Build lookup from categoryEntries() for icon/label/color
+    const allEntries = categoryEntries();
+    const entryMap = {};
+    allEntries.forEach(function(c) { entryMap[c.id] = c; });
+    // Keep ordering from allEntries, only include used ids
+    const result = allEntries.filter(function(c) { return usedIds.has(c.id); });
+    // Add any used ids missing from allEntries (old schema, keys in PLACE_MARKER_STYLES)
+    usedIds.forEach(function(id) {
+      if (!entryMap[id] && PLACE_MARKER_STYLES[id]) {
+        result.push(Object.assign({ id, subcategories: [] }, PLACE_MARKER_STYLES[id]));
+      }
+    });
+    return result;
+  }
+
   /* ── Google Places helpers ──────────────────────── */
   function fetchGoogleDetails(googlePlaceId) {
     if (_googleDetailsCache[googlePlaceId]) return Promise.resolve(_googleDetailsCache[googlePlaceId]);
@@ -600,7 +621,7 @@
     if (!wrap) return;
     const allActive = !currentFilter && !currentSubFilter;
     let html = '<div class="map-chip' + (allActive ? ' active' : '') + '" data-cat="">ყველა</div>';
-    categoryEntries().forEach(cat => {
+    usedCategoryEntries().forEach(cat => {
       html += '<div class="map-chip' + (currentFilter === cat.id && !currentSubFilter ? ' active' : '') + '" data-cat="' + esc(cat.id) + '">'
         + esc((cat.icon || '') + ' ' + stripLeadingIcon(cat.icon, cat.label || cat.id))
         + '</div>';
@@ -640,6 +661,7 @@
   function loadRealPlaces() {
     Promise.all([loadCollection('places'), loadCollection('businesses')]).then(([places, businesses]) => {
       allPlaces = places.concat(businesses);
+      buildCategoryChips();
       renderMap();
     });
   }
