@@ -120,16 +120,18 @@
   }
 
   function buildPlaceMarkerIcon(place, isActive) {
-    const style      = getPlaceMarkerStyle(place);
-    const markerIcon = place.icon || style.icon || '📍';
+    const style       = getPlaceMarkerStyle(place);
+    const markerIcon  = place.icon || style.icon || '📍';
     const markerColor = style.color || '#22c55e';
     const selectedClass = isActive ? ' is-selected' : '';
     return L.divIcon({
       className: 'gh-map-marker-wrap',
-      html: '<div class="gh-map-emoji-marker' + selectedClass + '" style="--marker-color:' + markerColor + '"><span>' + markerIcon + '</span></div>',
+      html: '<div class="gh-map-emoji-marker' + selectedClass + '" style="--marker-color:' + markerColor + '">'
+          + '<span class="gh-map-marker-emoji">' + markerIcon + '</span>'
+          + '</div>',
       iconSize:    [44, 44],
-      iconAnchor:  [22, 44],
-      popupAnchor: [0, -48]
+      iconAnchor:  [22, 22],
+      popupAnchor: [0, -26]
     });
   }
 

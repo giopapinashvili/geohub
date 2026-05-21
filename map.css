@@ -30,23 +30,30 @@ body, html { height: 100%; overflow: hidden; }
       box-shadow: var(--shadow-md); cursor: pointer; display: flex; align-items: center; gap: 6px;
     }
     .map-toggle-btn:hover { background: var(--bg-elevated); }
-    .gh-map-marker-wrap { background: transparent !important; border: 0 !important; }
+    .gh-map-marker-wrap { background: transparent !important; border: 0 !important; overflow: visible !important; }
     .gh-map-emoji-marker {
       width: 44px; height: 44px; border-radius: 999px;
-      display: grid; place-items: center;
+      display: flex; align-items: center; justify-content: center;
       background: rgba(15,23,42,0.92);
       border: 2px solid var(--marker-color, #22c55e);
-      box-shadow: 0 0 0 4px rgba(255,255,255,.08), 0 10px 24px rgba(0,0,0,.35), 0 0 24px color-mix(in srgb, var(--marker-color, #22c55e) 55%, transparent);
-      font-size: 22px; line-height: 1;
+      box-shadow: 0 0 0 4px rgba(255,255,255,.08), 0 10px 24px rgba(0,0,0,.35), 0 0 20px rgba(34,197,94,.45);
+      overflow: visible;
       transform-origin: center;
       transition: transform .16s ease, box-shadow .16s ease;
       cursor: pointer;
     }
     .gh-map-emoji-marker:hover { transform: scale(1.1); }
-    .gh-map-emoji-marker span { line-height: 1; display: block; }
     .gh-map-emoji-marker.is-selected {
       transform: scale(1.18);
-      box-shadow: 0 0 0 5px rgba(255,255,255,.14), 0 0 32px var(--marker-color, #22c55e);
+      box-shadow: 0 0 0 5px rgba(255,255,255,.14), 0 0 32px rgba(34,197,94,.7);
+    }
+    .gh-map-marker-emoji {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; height: 100%;
+      font-size: 22px; line-height: 1;
+      color: white; opacity: 1;
+      position: relative; z-index: 5;
+      pointer-events: none;
     }
     .search-count-badge {
       position: absolute; top: 88px; right: 24px; z-index: 1000;
