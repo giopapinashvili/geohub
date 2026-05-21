@@ -32,7 +32,7 @@
   };
 
   let map, markers = [], allPlaces = [];
-  let currentFilter = '', currentSearch = '';
+  let currentFilter = '', currentSearch = '', currentSubFilter = '';
   let disabledCategories = new Set();
   let activeMarker = null, activePlaceId = null;
   const _googleDetailsCache = {};
@@ -99,14 +99,38 @@
       let changed = false;
       snap.forEach(d => {
         const data = d.data();
-        _placeCatLookup[d.id] = { color: data.color || '#6c757d', icon: data.icon || '📍', label: data.labelKa || data.labelEn || d.id };
+        _placeCatLookup[d.id] = {
+          color: data.color || '#6c757d',
+          icon: data.icon || '📍',
+          label: data.labelKa || data.labelEn || d.id,
+          subcategories: (data.subcategories || []).filter(s => s.active !== false)
+        };
         changed = true;
       });
-      if (changed && allPlaces.length) renderMap();
+      if (changed) {
+        buildLegend();
+        if (allPlaces.length) renderMap();
+      }
     }).catch(() => {});
   }
 
   /* ── Marker helpers ─────────────────────────────── */
+  function getSubcategoryIcon(place) {
+    if (!place.subcategory) return '';
+    const catData = _placeCatLookup[place.categoryId];
+    if (catData && catData.subcategories) {
+      const sub = catData.subcategories.find(s => s.id === place.subcategory);
+      if (sub && sub.icon) return sub.icon;
+    }
+    const staticCats = window.GEOHUB_PLACE_CATEGORIES || [];
+    const staticCat = staticCats.find(c => c.id === place.categoryId);
+    if (staticCat && staticCat.subcategories) {
+      const sub = staticCat.subcategories.find(s => s.id === place.subcategory);
+      if (sub && sub.icon) return sub.icon;
+    }
+    return '';
+  }
+
   function getPlaceMarkerStyle(place) {
     const catId = place.categoryId;
     const base = catId && _placeCatLookup[catId]
@@ -116,6 +140,8 @@
         : (place.category && Object.values(PLACE_MARKER_STYLES).find(s => s.label === place.category))
           || PLACE_MARKER_STYLES.default;
     if (place.icon) return Object.assign({}, base, { icon: place.icon });
+    const subIcon = getSubcategoryIcon(place);
+    if (subIcon) return Object.assign({}, base, { icon: subIcon });
     return base;
   }
 
@@ -173,6 +199,7 @@
       const catKey = p.categoryId || 'default';
       if (disabledCategories.size > 0 && disabledCategories.has(catKey)) return false;
       if (currentFilter && p.categoryId !== currentFilter) return false;
+      if (currentSubFilter && p.subcategory !== currentSubFilter) return false;
       if (currentSearch) {
         const q = currentSearch.toLowerCase();
         return (p.name + ' ' + p.city + ' ' + p.categoryLabel).toLowerCase().includes(q);
@@ -406,42 +433,92 @@
   /* ── Legend ─────────────────────────────────────── */
   function buildLegend() {
     const legend = document.getElementById('legend'); if (!legend) return;
-    const items = Object.entries(PLACE_MARKER_STYLES).map(([catId, s]) =>
-      '<div class="legend-item legend-toggle" data-cat="' + catId + '">'
-      + '<span class="legend-dot" style="background:' + s.color + '"></span>'
-      + '<span class="legend-icon">' + s.icon + '</span>'
-      + '<span>' + s.label + '</span>'
-      + '</div>'
-    ).join('');
-    legend.innerHTML =
-      '<div class="legend-title">კატეგორიები</div>'
-      + '<div class="legend-all-btn" id="legendAllBtn">✓ ყველა</div>'
-      + '<div class="legend-scroll">' + items + '</div>';
+    const firestoreIds = Object.keys(_placeCatLookup);
+    let catEntries;
+    if (firestoreIds.length > 0) {
+      catEntries = firestoreIds.map(id => Object.assign({ id }, _placeCatLookup[id]));
+    } else {
+      catEntries = Object.entries(PLACE_MARKER_STYLES)
+        .filter(([id]) => id !== 'default')
+        .map(([id, s]) => Object.assign({ id, subcategories: [] }, s));
+    }
 
-    document.getElementById('legendAllBtn').addEventListener('click', () => {
-      disabledCategories.clear();
-      updateLegendState();
-      renderMap();
+    let html = '<div class="legend-title">კატეგორიები</div>'
+      + '<div class="legend-all-btn' + (!currentFilter ? ' legend-all-active' : '') + '" id="legendAllBtn">✓ ყველა</div>'
+      + '<div class="legend-scroll">';
+
+    catEntries.forEach(cat => {
+      const activeSubs = (cat.subcategories || []).filter(s => s.active !== false);
+      const hasSubs = activeSubs.length > 0;
+      const catActive = currentFilter === cat.id && !currentSubFilter;
+      const expanded = currentFilter === cat.id && hasSubs;
+      html += '<div class="legend-cat-row">'
+        + '<div class="legend-item legend-toggle' + (catActive ? ' legend-active' : '') + '" data-cat="' + cat.id + '">'
+        + '<span class="legend-dot" style="background:' + cat.color + '"></span>'
+        + '<span class="legend-icon">' + cat.icon + '</span>'
+        + '<span class="legend-label">' + (cat.label || cat.id) + '</span>'
+        + (hasSubs ? '<button class="legend-expand-btn" data-for="' + cat.id + '">' + (expanded ? '▾' : '▸') + '</button>' : '')
+        + '</div>';
+      if (hasSubs) {
+        html += '<div class="legend-subitems" id="legend-subs-' + cat.id + '"' + (expanded ? '' : ' style="display:none"') + '>';
+        activeSubs.forEach(sub => {
+          const subActive = currentFilter === cat.id && currentSubFilter === sub.id;
+          html += '<div class="legend-subitem' + (subActive ? ' legend-active' : '') + '" data-cat="' + cat.id + '" data-sub="' + sub.id + '">'
+            + '<span class="legend-sub-icon">' + (sub.icon || '') + '</span>'
+            + '<span>' + (sub.labelKa || sub.labelEn || sub.id) + '</span>'
+            + '</div>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
     });
-    legend.querySelectorAll('.legend-toggle').forEach(item => {
-      item.addEventListener('click', () => {
+    html += '</div>';
+    legend.innerHTML = html;
+
+    legend.querySelector('#legendAllBtn').addEventListener('click', () => {
+      currentFilter = ''; currentSubFilter = '';
+      disabledCategories.clear();
+      buildLegend(); renderMap();
+    });
+    legend.querySelectorAll('.legend-item.legend-toggle').forEach(item => {
+      item.addEventListener('click', e => {
+        if (e.target.classList.contains('legend-expand-btn')) return;
         const cat = item.dataset.cat;
-        if (disabledCategories.has(cat)) disabledCategories.delete(cat);
-        else disabledCategories.add(cat);
-        updateLegendState();
-        renderMap();
+        currentFilter = (currentFilter === cat && !currentSubFilter) ? '' : cat;
+        currentSubFilter = '';
+        buildLegend(); renderMap();
+        window.closePanel(); window.closeMobileCard();
       });
     });
-    updateLegendState();
+    legend.querySelectorAll('.legend-expand-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const catId = btn.getAttribute('data-for');
+        const subsList = document.getElementById('legend-subs-' + catId);
+        if (subsList) {
+          const isOpen = subsList.style.display !== 'none';
+          subsList.style.display = isOpen ? 'none' : 'block';
+          btn.textContent = isOpen ? '▸' : '▾';
+        }
+      });
+    });
+    legend.querySelectorAll('.legend-subitem').forEach(item => {
+      item.addEventListener('click', () => {
+        const cat = item.dataset.cat;
+        const sub = item.dataset.sub;
+        if (currentFilter === cat && currentSubFilter === sub) {
+          currentSubFilter = '';
+        } else {
+          currentFilter = cat; currentSubFilter = sub;
+        }
+        buildLegend(); renderMap();
+        window.closePanel(); window.closeMobileCard();
+      });
+    });
   }
 
   function updateLegendState() {
-    const legend = document.getElementById('legend'); if (!legend) return;
-    legend.querySelectorAll('.legend-toggle').forEach(item => {
-      item.classList.toggle('legend-disabled', disabledCategories.has(item.dataset.cat));
-    });
-    const btn = document.getElementById('legendAllBtn');
-    if (btn) btn.classList.toggle('legend-all-active', disabledCategories.size === 0);
+    buildLegend();
   }
 
   /* ── Filter chips ───────────────────────────────── */
@@ -450,6 +527,7 @@
       document.querySelectorAll('.map-chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       currentFilter = chip.dataset.cat || '';
+      currentSubFilter = '';
       window.closePanel(); window.closeMobileCard();
       renderMap();
     }));

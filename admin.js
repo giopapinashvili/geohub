@@ -1410,6 +1410,23 @@
     var placeCatSel = document.getElementById('adminPlaceCategory');
     if (placeCatSel) placeCatSel.addEventListener('change', syncPlaceSubcategories);
 
+    var placeSubSel = document.getElementById('adminPlaceSubcategory');
+    if (placeSubSel) placeSubSel.addEventListener('change', function() {
+      var iconEl = document.getElementById('adminPlaceIcon');
+      if (iconEl && iconEl.dataset.userEdited) return;
+      var cats = getPlaceCategories();
+      var catVal = placeCatSel ? placeCatSel.value : '';
+      var cat = cats.find(function(c) { return c.id === catVal; });
+      var subs = (cat && cat.subcategories) || [];
+      var sub = subs.find(function(s) { return s.id === placeSubSel.value; });
+      var newIcon = (sub && sub.icon) || (cat && cat.icon) || '';
+      if (newIcon && iconEl) {
+        iconEl.value = newIcon;
+        var prev = document.getElementById('adminPlaceIconPreview');
+        if (prev) prev.textContent = newIcon;
+      }
+    });
+
     // Cloudinary image upload for Content Studio cover
     var csImgFile = document.getElementById('adminCsImageFile');
     if (csImgFile) {
@@ -3028,32 +3045,122 @@
   /* ── PLACE CATEGORY MANAGER ─────────────────────────────── */
 
   var _PCAT_DEFAULTS = [
-    { id: 'food',          labelKa: '🍔 საკვები / რესტორნები',  labelEn: 'Food / Restaurants',       icon: '🍔', color: '#e74c3c', sortOrder: 10  },
-    { id: 'cafe',          labelKa: '☕ კაფე / ყავა / დესერტი', labelEn: 'Cafe / Coffee / Dessert',  icon: '☕', color: '#8e5a3c', sortOrder: 20  },
-    { id: 'nightlife',     labelKa: '🍸 ბარები / ღამის ცხოვრება', labelEn: 'Bars / Nightlife',       icon: '🍸', color: '#8e44ad', sortOrder: 30  },
-    { id: 'shopping',      labelKa: '🛍️ მაღაზიები / მოლები',    labelEn: 'Shopping / Malls',         icon: '🛍️', color: '#3498db', sortOrder: 40  },
-    { id: 'fitness',       labelKa: '🏋️ სპორტი / ფიტნესი',     labelEn: 'Sports / Fitness',         icon: '🏋️', color: '#f39c12', sortOrder: 50  },
-    { id: 'sports',        labelKa: '🏃 სპორტული ობიექტი',      labelEn: 'Sports Venue',             icon: '🏃', color: '#f39c12', sortOrder: 55  },
-    { id: 'park',          labelKa: '🌳 პარკები',                labelEn: 'Parks',                    icon: '🌳', color: '#27ae60', sortOrder: 60  },
-    { id: 'nature',        labelKa: '🏞️ ბუნება / ტბები',       labelEn: 'Nature / Lakes',           icon: '🏞️', color: '#2ecc71', sortOrder: 70  },
-    { id: 'transport',     labelKa: '🚇 ტრანსპორტი',            labelEn: 'Transport',                icon: '🚇', color: '#1f5fbf', sortOrder: 80  },
-    { id: 'health',        labelKa: '🏥 ჯანმრთელობა',           labelEn: 'Health / Medical',         icon: '🏥', color: '#ff5a6e', sortOrder: 90  },
-    { id: 'pharmacy',      labelKa: '💊 აფთიაქი',               labelEn: 'Pharmacy',                 icon: '💊', color: '#06b6d4', sortOrder: 100 },
-    { id: 'finance',       labelKa: '🏦 ფინანსები',             labelEn: 'Finance / Banking',        icon: '🏦', color: '#16a085', sortOrder: 110 },
-    { id: 'hotel',         labelKa: '🏨 სასტუმრო',              labelEn: 'Hotels',                   icon: '🏨', color: '#0891b2', sortOrder: 120 },
-    { id: 'education',     labelKa: '🎓 განათლება',              labelEn: 'Education',                icon: '🎓', color: '#059669', sortOrder: 130 },
-    { id: 'beauty',        labelKa: '✂️ სილამაზე / სალონი',    labelEn: 'Beauty / Salon',           icon: '✂️', color: '#ff66b3', sortOrder: 140 },
-    { id: 'auto',          labelKa: '⛽ ავტო / ბენზინი',        labelEn: 'Auto / Gas',               icon: '⛽', color: '#64748b', sortOrder: 150 },
-    { id: 'government',    labelKa: '🏛️ სახელმწიფო',           labelEn: 'Government',               icon: '🏛️', color: '#7f8c8d', sortOrder: 160 },
-    { id: 'religion',      labelKa: '⛪ რელიგიური ადგილები',    labelEn: 'Religious Sites',          icon: '⛪', color: '#7d3c98', sortOrder: 170 },
-    { id: 'animals',       labelKa: '🐾 ცხოველები / ვეტერინარი', labelEn: 'Animals / Vet',          icon: '🐾', color: '#92400e', sortOrder: 180 },
-    { id: 'culture',       labelKa: '🎭 კულტურა / თეატრი / მუზეუმი', labelEn: 'Culture / Theatre / Museum', icon: '🎭', color: '#a67c52', sortOrder: 190 },
-    { id: 'entertainment', labelKa: '🎬 გართობა',               labelEn: 'Entertainment',            icon: '🎬', color: '#f1c40f', sortOrder: 200 },
-    { id: 'work',          labelKa: '💼 სამუშაო / Coworking',   labelEn: 'Work / Coworking',         icon: '💼', color: '#475569', sortOrder: 210 },
-    { id: 'photo_spot',    labelKa: '📸 ფოტო ლოკაციები',        labelEn: 'Photo Spots',              icon: '📸', color: '#db2777', sortOrder: 220 },
-    { id: 'rooftop',       labelKa: '🌃 Rooftop / ხედები',      labelEn: 'Rooftop / Views',          icon: '🌃', color: '#4f46e5', sortOrder: 230 },
-    { id: 'service',       labelKa: '🛠️ სერვისები',            labelEn: 'Services',                 icon: '🛠️', color: '#9ca3af', sortOrder: 240 },
-    { id: 'landmark',      labelKa: '📍 ღირსშესანიშნაობა',      labelEn: 'Landmark',                 icon: '📍', color: '#b45309', sortOrder: 250 }
+    { id: 'food', labelKa: '🍔 საკვები / რესტორნები', labelEn: 'Food / Restaurants', icon: '🍔', color: '#e74c3c', sortOrder: 10,
+      subcategories: [
+        { id: 'restaurant', labelKa: 'რესტორანი', labelEn: 'Restaurant', icon: '🍽️', active: true },
+        { id: 'fast_food', labelKa: 'ფასტ-ფუდი', labelEn: 'Fast Food', icon: '🍟', active: true },
+        { id: 'bakery', labelKa: 'საცხობი / პური', labelEn: 'Bakery', icon: '🥐', active: true },
+        { id: 'dessert', labelKa: 'დესერტი / ტკბილეული', labelEn: 'Dessert', icon: '🍰', active: true },
+        { id: 'cafe', labelKa: 'კაფე', labelEn: 'Cafe', icon: '☕', active: true }
+      ]
+    },
+    { id: 'cafe', labelKa: '☕ კაფე / ყავა / დესერტი', labelEn: 'Cafe / Coffee / Dessert', icon: '☕', color: '#8e5a3c', sortOrder: 20 },
+    { id: 'nightlife', labelKa: '🍸 ბარები / ღამის ცხოვრება', labelEn: 'Bars / Nightlife', icon: '🍸', color: '#8e44ad', sortOrder: 30,
+      subcategories: [
+        { id: 'bar', labelKa: 'ბარი', labelEn: 'Bar', icon: '🍺', active: true },
+        { id: 'wine_bar', labelKa: 'ღვინის ბარი', labelEn: 'Wine Bar', icon: '🍷', active: true },
+        { id: 'club', labelKa: 'კლუბი', labelEn: 'Club', icon: '🎵', active: true },
+        { id: 'rooftop_bar', labelKa: 'Rooftop ბარი', labelEn: 'Rooftop Bar', icon: '🌃', active: true },
+        { id: 'lounge', labelKa: 'ლაუნჯი', labelEn: 'Lounge', icon: '🛋️', active: true }
+      ]
+    },
+    { id: 'shopping', labelKa: '🛍️ მაღაზიები / მოლები', labelEn: 'Shopping / Malls', icon: '🛍️', color: '#3498db', sortOrder: 40,
+      subcategories: [
+        { id: 'mall', labelKa: 'სავაჭრო ცენტრი', labelEn: 'Mall', icon: '🏬', active: true },
+        { id: 'supermarket', labelKa: 'სუპერმარკეტი', labelEn: 'Supermarket', icon: '🛒', active: true },
+        { id: 'electronics', labelKa: 'ელექტრონიკა', labelEn: 'Electronics', icon: '📱', active: true },
+        { id: 'clothing', labelKa: 'ტანსაცმელი', labelEn: 'Clothing', icon: '👕', active: true },
+        { id: 'market', labelKa: 'ბაზარი', labelEn: 'Market', icon: '🏪', active: true }
+      ]
+    },
+    { id: 'fitness', labelKa: '🏋️ სპორტი / ფიტნესი', labelEn: 'Sports / Fitness', icon: '🏋️', color: '#f39c12', sortOrder: 50,
+      subcategories: [
+        { id: 'gym', labelKa: 'სპორტდარბაზი', labelEn: 'Gym', icon: '🏋️', active: true },
+        { id: 'mma', labelKa: 'MMA / ბოქსი', labelEn: 'MMA / Boxing', icon: '🥊', active: true },
+        { id: 'yoga', labelKa: 'იოგა / პილატესი', labelEn: 'Yoga / Pilates', icon: '🧘', active: true },
+        { id: 'swimming', labelKa: 'საცურაო', labelEn: 'Swimming', icon: '🏊', active: true },
+        { id: 'sports_field', labelKa: 'სპორტული მოედანი', labelEn: 'Sports Field', icon: '⚽', active: true }
+      ]
+    },
+    { id: 'sports', labelKa: '🏃 სპორტული ობიექტი', labelEn: 'Sports Venue', icon: '🏃', color: '#f39c12', sortOrder: 55 },
+    { id: 'park', labelKa: '🌳 პარკები', labelEn: 'Parks', icon: '🌳', color: '#27ae60', sortOrder: 60,
+      subcategories: [
+        { id: 'urban_park', labelKa: 'სკვერი / პარკი', labelEn: 'Urban Park', icon: '🌳', active: true },
+        { id: 'garden', labelKa: 'ბოტანიკური ბაღი', labelEn: 'Garden', icon: '🌸', active: true },
+        { id: 'lake_park', labelKa: 'ტბა / ტბისპირი', labelEn: 'Lake Park', icon: '🏞️', active: true },
+        { id: 'playground', labelKa: 'სათამაშო მოედანი', labelEn: 'Playground', icon: '🎠', active: true }
+      ]
+    },
+    { id: 'nature', labelKa: '🏞️ ბუნება / ტბები', labelEn: 'Nature / Lakes', icon: '🏞️', color: '#2ecc71', sortOrder: 70 },
+    { id: 'transport', labelKa: '🚇 ტრანსპორტი', labelEn: 'Transport', icon: '🚇', color: '#1f5fbf', sortOrder: 80,
+      subcategories: [
+        { id: 'metro', labelKa: 'მეტრო', labelEn: 'Metro', icon: '🚇', active: true },
+        { id: 'bus_station', labelKa: 'ავტობუსის გაჩერება', labelEn: 'Bus Station', icon: '🚌', active: true },
+        { id: 'train_station', labelKa: 'სარკინიგზო სადგური', labelEn: 'Train Station', icon: '🚉', active: true },
+        { id: 'parking', labelKa: 'პარკინგი', labelEn: 'Parking', icon: '🅿️', active: true },
+        { id: 'gas_station', labelKa: 'ბენზინგასამართი', labelEn: 'Gas Station', icon: '⛽', active: true }
+      ]
+    },
+    { id: 'health', labelKa: '🏥 ჯანმრთელობა', labelEn: 'Health / Medical', icon: '🏥', color: '#ff5a6e', sortOrder: 90,
+      subcategories: [
+        { id: 'hospital', labelKa: 'საავადმყოფო', labelEn: 'Hospital', icon: '🏥', active: true },
+        { id: 'clinic', labelKa: 'კლინიკა', labelEn: 'Clinic', icon: '🩺', active: true },
+        { id: 'dental', labelKa: 'სტომატოლოგია', labelEn: 'Dental', icon: '🦷', active: true },
+        { id: 'vet', labelKa: 'ვეტერინარი', labelEn: 'Vet', icon: '🐾', active: true }
+      ]
+    },
+    { id: 'pharmacy', labelKa: '💊 აფთიაქი', labelEn: 'Pharmacy', icon: '💊', color: '#06b6d4', sortOrder: 100 },
+    { id: 'finance', labelKa: '🏦 ფინანსები', labelEn: 'Finance / Banking', icon: '🏦', color: '#16a085', sortOrder: 110 },
+    { id: 'hotel', labelKa: '🏨 სასტუმრო', labelEn: 'Hotels', icon: '🏨', color: '#0891b2', sortOrder: 120 },
+    { id: 'education', labelKa: '🎓 განათლება', labelEn: 'Education', icon: '🎓', color: '#059669', sortOrder: 130,
+      subcategories: [
+        { id: 'university', labelKa: 'უნივერსიტეტი', labelEn: 'University', icon: '🎓', active: true },
+        { id: 'school', labelKa: 'სკოლა', labelEn: 'School', icon: '🏫', active: true },
+        { id: 'course_center', labelKa: 'კურსები / ტრენინგი', labelEn: 'Course Center', icon: '📚', active: true },
+        { id: 'library', labelKa: 'ბიბლიოთეკა', labelEn: 'Library', icon: '📖', active: true }
+      ]
+    },
+    { id: 'beauty', labelKa: '✂️ სილამაზე / სალონი', labelEn: 'Beauty / Salon', icon: '✂️', color: '#ff66b3', sortOrder: 140,
+      subcategories: [
+        { id: 'salon', labelKa: 'სილამაზის სალონი', labelEn: 'Salon', icon: '💇', active: true },
+        { id: 'barber', labelKa: 'საბარბიეო', labelEn: 'Barber', icon: '✂️', active: true },
+        { id: 'nail_salon', labelKa: 'ნეილ სტუდია', labelEn: 'Nail Salon', icon: '💅', active: true },
+        { id: 'tattoo', labelKa: 'ტატუ სტუდია', labelEn: 'Tattoo Studio', icon: '🎨', active: true }
+      ]
+    },
+    { id: 'auto', labelKa: '⛽ ავტო / ბენზინი', labelEn: 'Auto / Gas', icon: '⛽', color: '#64748b', sortOrder: 150,
+      subcategories: [
+        { id: 'auto_gas', labelKa: 'ბენზინგასამართი', labelEn: 'Gas Station', icon: '⛽', active: true },
+        { id: 'auto_service', labelKa: 'ავტოსერვისი', labelEn: 'Auto Service', icon: '🔧', active: true },
+        { id: 'car_wash', labelKa: 'ავტოსარეცხი', labelEn: 'Car Wash', icon: '🚗', active: true },
+        { id: 'car_rental', labelKa: 'ავტოიჯარა', labelEn: 'Car Rental', icon: '🚙', active: true }
+      ]
+    },
+    { id: 'government', labelKa: '🏛️ სახელმწიფო', labelEn: 'Government', icon: '🏛️', color: '#7f8c8d', sortOrder: 160 },
+    { id: 'religion', labelKa: '⛪ რელიგიური ადგილები', labelEn: 'Religious Sites', icon: '⛪', color: '#7d3c98', sortOrder: 170 },
+    { id: 'animals', labelKa: '🐾 ცხოველები / ვეტერინარი', labelEn: 'Animals / Vet', icon: '🐾', color: '#92400e', sortOrder: 180 },
+    { id: 'culture', labelKa: '🎭 კულტურა / თეატრი / მუზეუმი', labelEn: 'Culture / Theatre / Museum', icon: '🎭', color: '#a67c52', sortOrder: 190,
+      subcategories: [
+        { id: 'museum', labelKa: 'მუზეუმი', labelEn: 'Museum', icon: '🏛️', active: true },
+        { id: 'theatre', labelKa: 'თეატრი', labelEn: 'Theatre', icon: '🎭', active: true },
+        { id: 'gallery', labelKa: 'გალერეა', labelEn: 'Gallery', icon: '🖼️', active: true },
+        { id: 'monument', labelKa: 'ძეგლი / მემორიალი', labelEn: 'Monument', icon: '🗽', active: true }
+      ]
+    },
+    { id: 'entertainment', labelKa: '🎬 გართობა', labelEn: 'Entertainment', icon: '🎬', color: '#f1c40f', sortOrder: 200 },
+    { id: 'work', labelKa: '💼 სამუშაო / Coworking', labelEn: 'Work / Coworking', icon: '💼', color: '#475569', sortOrder: 210 },
+    { id: 'photo_spot', labelKa: '📸 ფოტო ლოკაციები', labelEn: 'Photo Spots', icon: '📸', color: '#db2777', sortOrder: 220 },
+    { id: 'rooftop', labelKa: '🌃 Rooftop / ხედები', labelEn: 'Rooftop / Views', icon: '🌃', color: '#4f46e5', sortOrder: 230 },
+    { id: 'service', labelKa: '🛠️ სერვისები', labelEn: 'Services', icon: '🛠️', color: '#9ca3af', sortOrder: 240,
+      subcategories: [
+        { id: 'repair', labelKa: 'სარემონტო', labelEn: 'Repair', icon: '🔧', active: true },
+        { id: 'cleaning', labelKa: 'დასუფთავება', labelEn: 'Cleaning', icon: '🧹', active: true },
+        { id: 'printing', labelKa: 'ბეჭდვა / ქსეროქსი', labelEn: 'Printing', icon: '🖨️', active: true },
+        { id: 'delivery', labelKa: 'მიტანის სერვისი', labelEn: 'Delivery', icon: '📦', active: true },
+        { id: 'photo_studio', labelKa: 'ფოტოსტუდია', labelEn: 'Photo Studio', icon: '📷', active: true }
+      ]
+    },
+    { id: 'landmark', labelKa: '📍 ღირსშესანიშნაობა', labelEn: 'Landmark', icon: '📍', color: '#b45309', sortOrder: 250 }
   ];
 
   window.loadPlaceCategorySection = function() {
@@ -3079,7 +3186,11 @@
           + '<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:' + escHtmlAdmin(d.color || '#666') + ';flex-shrink:0"></span>'
           + '<div style="flex:1;min-width:0">'
           + '<div style="font-weight:700;font-size:.85rem;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escHtmlAdmin(d.labelKa || row.id) + '</div>'
-          + (d.labelEn ? '<div style="font-size:.72rem;color:#64748b">' + escHtmlAdmin(d.labelEn) + ' · <code style="font-size:.7rem;color:#94a3b8">' + escHtmlAdmin(row.id) + '</code></div>' : '<div style="font-size:.72rem;color:#64748b"><code style="font-size:.7rem;color:#94a3b8">' + escHtmlAdmin(row.id) + '</code></div>')
+          + '<div style="font-size:.72rem;color:#64748b;display:flex;gap:8px">'
+          + (d.labelEn ? '<span>' + escHtmlAdmin(d.labelEn) + '</span>' : '')
+          + '<code style="font-size:.7rem;color:#94a3b8">' + escHtmlAdmin(row.id) + '</code>'
+          + (d.subcategories && d.subcategories.length ? '<span style="color:#10b981">' + d.subcategories.length + ' subs</span>' : '')
+          + '</div>'
           + '</div>'
           + '<button type="button" onclick="togglePlaceCatActive(' + JSON.stringify(row.id) + ',' + JSON.stringify(!!d.active !== false) + ')" style="padding:3px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#94a3b8;cursor:pointer;font-size:.72rem" title="' + (inactive ? 'Enable' : 'Disable') + '">' + (inactive ? 'Off' : 'On') + '</button>'
           + '<button type="button" onclick="editPlaceCatRow(' + JSON.stringify(row.id) + ')" style="padding:3px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#94a3b8;cursor:pointer;font-size:.72rem">Edit</button>'
@@ -3141,6 +3252,7 @@
       var cancelBtn = document.getElementById('pcatCancelBtn');
       if (cancelBtn) cancelBtn.style.display = '';
       document.getElementById('pcatForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      renderPcatSubcatSection(catId, d.subcategories || []);
     });
   };
 
@@ -3178,27 +3290,173 @@
     if (colorEl) colorEl.value = '#3498db';
     var activeEl = document.getElementById('pcatActive');
     if (activeEl) activeEl.checked = true;
+    var subWrap = document.getElementById('pcatSubcatsWrap');
+    if (subWrap) subWrap.remove();
   };
 
   window.seedDefaultPlaceCategories = function() {
-    if (!confirm('Seed 25 default place categories? Existing categories with the same ID will be merged (not overwritten).')) return;
+    if (!confirm('Seed 25 default place categories with subcategories? Categories without existing subcategories will have default subcategories added.')) return;
     var fb = window.GeoFirebase, f = fb && fb.fs;
     if (!fb || !f) return toast('Firebase not ready', 'rgba(239,68,68,.95)');
     var promises = _PCAT_DEFAULTS.map(function(cat) {
-      return f.setDoc(f.doc(fb.db, 'placeCategories', cat.id), {
-        labelKa:   cat.labelKa,
-        labelEn:   cat.labelEn,
-        icon:      cat.icon,
-        color:     cat.color,
-        sortOrder: cat.sortOrder,
-        active:    true
-      }, { merge: true });
+      var docRef = f.doc(fb.db, 'placeCategories', cat.id);
+      return f.getDoc(docRef).then(function(snap) {
+        var existing = snap.exists() ? snap.data() : {};
+        var data = {
+          labelKa: cat.labelKa, labelEn: cat.labelEn, icon: cat.icon,
+          color: cat.color, sortOrder: cat.sortOrder, active: true
+        };
+        // Only seed subcategories if none exist yet
+        if (cat.subcategories && cat.subcategories.length && (!existing.subcategories || !existing.subcategories.length)) {
+          data.subcategories = cat.subcategories;
+        }
+        return f.setDoc(docRef, data, { merge: true });
+      });
     });
     Promise.all(promises).then(function() {
       toast('25 default categories seeded');
       _firestorePlaceCats = null;
       window.loadPlaceCategorySection();
     }).catch(function(err) { toast('Seed failed: ' + err.message, 'rgba(239,68,68,.95)'); });
+  };
+
+  /* ── PLACE SUBCATEGORY MANAGEMENT ───────────────────────── */
+
+  function renderPcatSubcatSection(catId, subs) {
+    var existingWrap = document.getElementById('pcatSubcatsWrap');
+    if (existingWrap) existingWrap.remove();
+    var form = document.getElementById('pcatForm');
+    if (!form) return;
+    var wrap = document.createElement('div');
+    wrap.id = 'pcatSubcatsWrap';
+    wrap.style.cssText = 'margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)';
+    form.parentNode.insertBefore(wrap, form.nextSibling);
+
+    var html = '<div style="font-weight:700;font-size:.8rem;color:var(--ts);margin-bottom:8px">Subcategories (' + subs.length + ')</div>';
+    if (subs.length) {
+      html += '<div style="display:grid;gap:4px;margin-bottom:10px">';
+      subs.forEach(function(sub, idx) {
+        var inactive = sub.active === false;
+        html += '<div style="display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:8px;background:rgba(255,255,255,.04);opacity:' + (inactive ? '0.5' : '1') + '">'
+          + '<span style="font-size:1.1rem;min-width:1.5rem;text-align:center">' + escHtmlAdmin(sub.icon || '') + '</span>'
+          + '<div style="flex:1;min-width:0">'
+          + '<div style="font-size:.8rem;color:#f8fafc;font-weight:600">' + escHtmlAdmin(sub.labelKa || sub.id) + '</div>'
+          + '<div style="font-size:.7rem;color:#64748b"><code>' + escHtmlAdmin(sub.id) + '</code>' + (sub.labelEn ? ' · ' + escHtmlAdmin(sub.labelEn) : '') + '</div>'
+          + '</div>'
+          + '<button type="button" onclick="editPcatSubcatItem(' + JSON.stringify(catId) + ',' + idx + ')" style="padding:2px 8px;border-radius:5px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#94a3b8;cursor:pointer;font-size:.7rem">Edit</button>'
+          + '<button type="button" onclick="togglePcatSubcatActive(' + JSON.stringify(catId) + ',' + idx + ',' + JSON.stringify(sub.active !== false) + ')" style="padding:2px 8px;border-radius:5px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#94a3b8;cursor:pointer;font-size:.7rem">' + (inactive ? 'Off' : 'On') + '</button>'
+          + '<button type="button" onclick="removePcatSubcat(' + JSON.stringify(catId) + ',' + idx + ')" style="padding:2px 8px;border-radius:5px;border:none;background:rgba(239,68,68,.12);color:#f87171;cursor:pointer;font-size:.7rem">✕</button>'
+          + '</div>';
+      });
+      html += '</div>';
+    } else {
+      html += '<div style="font-size:.78rem;color:#64748b;margin-bottom:10px">No subcategories yet.</div>';
+    }
+    html += '<div id="pcatSubcatFormTitle" style="font-size:.78rem;font-weight:700;color:var(--ts);margin-bottom:6px">Add Subcategory</div>'
+      + '<div style="display:grid;gap:6px">'
+      + '<input id="pcatSubId" placeholder="ID (e.g. restaurant)" style="padding:8px;border-radius:8px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.8rem">'
+      + '<input id="pcatSubLabelKa" placeholder="Georgian label" style="padding:8px;border-radius:8px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.8rem">'
+      + '<input id="pcatSubLabelEn" placeholder="English label (optional)" style="padding:8px;border-radius:8px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.8rem">'
+      + '<div style="display:grid;grid-template-columns:1fr auto;gap:6px">'
+      + '<input id="pcatSubIcon" placeholder="Icon emoji" style="padding:8px;border-radius:8px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:1rem;text-align:center" maxlength="8">'
+      + '<button type="button" onclick="savePcatSubcatItem(' + JSON.stringify(catId) + ')" style="padding:8px 14px;border-radius:8px;background:#10b981;border:none;color:#fff;cursor:pointer;font-size:.8rem;font-weight:700">Save</button>'
+      + '</div>'
+      + '<div style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--ts)">'
+      + '<input type="checkbox" id="pcatSubActive" checked style="width:14px;height:14px"> Active'
+      + '<input type="hidden" id="pcatSubEditIdx" value="">'
+      + '<button type="button" id="pcatSubCancelBtn" onclick="cancelPcatSubcatEdit()" style="display:none;margin-left:auto;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#94a3b8;cursor:pointer;font-size:.72rem">Cancel</button>'
+      + '</div>'
+      + '</div>';
+    wrap.innerHTML = html;
+  }
+
+  window.savePcatSubcatItem = function(catId) {
+    var fb = window.GeoFirebase, f = fb && fb.fs;
+    if (!fb || !f) return;
+    var subId = (document.getElementById('pcatSubId').value || '').trim().toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    var labelKa = (document.getElementById('pcatSubLabelKa').value || '').trim();
+    var labelEn = (document.getElementById('pcatSubLabelEn').value || '').trim();
+    var icon = (document.getElementById('pcatSubIcon').value || '').trim();
+    var active = document.getElementById('pcatSubActive').checked;
+    var editIdxEl = document.getElementById('pcatSubEditIdx');
+    var editIdx = editIdxEl ? editIdxEl.value : '';
+    if (!subId || !labelKa) return toast('ID and Georgian label required', 'rgba(239,68,68,.95)');
+    var docRef = f.doc(fb.db, 'placeCategories', catId);
+    f.getDoc(docRef).then(function(snap) {
+      var subs = snap.exists() ? (snap.data().subcategories || []).slice() : [];
+      var newSub = { id: subId, labelKa: labelKa, labelEn: labelEn, icon: icon || '📍', active: active };
+      if (editIdx !== '') {
+        subs[parseInt(editIdx, 10)] = newSub;
+      } else {
+        if (subs.some(function(s) { return s.id === subId; })) { toast('Subcategory ID already exists', 'rgba(239,68,68,.95)'); return Promise.reject('dup'); }
+        subs.push(newSub);
+      }
+      return f.setDoc(docRef, { subcategories: subs }, { merge: true }).then(function() { return subs; });
+    }).then(function(subs) {
+      if (!subs) return;
+      toast('Subcategory saved');
+      _firestorePlaceCats = null;
+      renderPcatSubcatSection(catId, subs);
+    }).catch(function(err) { if (err !== 'dup') toast('Error: ' + (err && err.message), 'rgba(239,68,68,.95)'); });
+  };
+
+  window.removePcatSubcat = function(catId, subIdx) {
+    if (!confirm('Remove this subcategory?')) return;
+    var fb = window.GeoFirebase, f = fb && fb.fs;
+    if (!fb || !f) return;
+    var docRef = f.doc(fb.db, 'placeCategories', catId);
+    f.getDoc(docRef).then(function(snap) {
+      var subs = snap.exists() ? (snap.data().subcategories || []).slice() : [];
+      subs.splice(subIdx, 1);
+      return f.setDoc(docRef, { subcategories: subs }, { merge: true }).then(function() { return subs; });
+    }).then(function(subs) {
+      _firestorePlaceCats = null;
+      renderPcatSubcatSection(catId, subs);
+      toast('Subcategory removed');
+    }).catch(function(err) { toast('Error: ' + (err && err.message), 'rgba(239,68,68,.95)'); });
+  };
+
+  window.togglePcatSubcatActive = function(catId, subIdx, currentActive) {
+    var fb = window.GeoFirebase, f = fb && fb.fs;
+    if (!fb || !f) return;
+    var docRef = f.doc(fb.db, 'placeCategories', catId);
+    f.getDoc(docRef).then(function(snap) {
+      var subs = snap.exists() ? (snap.data().subcategories || []).slice() : [];
+      if (subs[subIdx]) subs[subIdx] = Object.assign({}, subs[subIdx], { active: !currentActive });
+      return f.setDoc(docRef, { subcategories: subs }, { merge: true }).then(function() { return subs; });
+    }).then(function(subs) {
+      _firestorePlaceCats = null;
+      renderPcatSubcatSection(catId, subs);
+    }).catch(function(err) { toast('Error: ' + (err && err.message), 'rgba(239,68,68,.95)'); });
+  };
+
+  window.editPcatSubcatItem = function(catId, subIdx) {
+    var fb = window.GeoFirebase, f = fb && fb.fs;
+    if (!fb || !f) return;
+    f.getDoc(f.doc(fb.db, 'placeCategories', catId)).then(function(snap) {
+      var subs = snap.exists() ? (snap.data().subcategories || []) : [];
+      var sub = subs[subIdx];
+      if (!sub) return;
+      var set = function(id, v) { var el = document.getElementById(id); if (el) el.value = v || ''; };
+      set('pcatSubId', sub.id);
+      set('pcatSubLabelKa', sub.labelKa || '');
+      set('pcatSubLabelEn', sub.labelEn || '');
+      set('pcatSubIcon', sub.icon || '');
+      var activeEl = document.getElementById('pcatSubActive'); if (activeEl) activeEl.checked = sub.active !== false;
+      var editIdxEl = document.getElementById('pcatSubEditIdx'); if (editIdxEl) editIdxEl.value = subIdx;
+      var idEl = document.getElementById('pcatSubId'); if (idEl) idEl.readOnly = true;
+      var titleEl = document.getElementById('pcatSubcatFormTitle'); if (titleEl) titleEl.textContent = 'Edit: ' + sub.id;
+      var cancelBtn = document.getElementById('pcatSubCancelBtn'); if (cancelBtn) cancelBtn.style.display = '';
+    });
+  };
+
+  window.cancelPcatSubcatEdit = function() {
+    ['pcatSubId','pcatSubLabelKa','pcatSubLabelEn','pcatSubIcon','pcatSubEditIdx'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) { el.value = ''; el.readOnly = false; }
+    });
+    var activeEl = document.getElementById('pcatSubActive'); if (activeEl) activeEl.checked = true;
+    var titleEl = document.getElementById('pcatSubcatFormTitle'); if (titleEl) titleEl.textContent = 'Add Subcategory';
+    var cancelBtn = document.getElementById('pcatSubCancelBtn'); if (cancelBtn) cancelBtn.style.display = 'none';
   };
 
   /* ── INIT ────────────────────────────────────────────────── */
