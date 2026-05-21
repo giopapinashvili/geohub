@@ -53,7 +53,11 @@ body, html { height: 100%; overflow: hidden; }
       background: linear-gradient(135deg, #10b981, #0ea5e9);
       color: #fff; box-shadow: 0 2px 8px rgba(16,185,129,.4);
     }
-    /* Boost label brightness on dark tile so street/place names are readable */
+    /* Vivid: saturate + contrast gives 4K-like punch; Esri Topo already has 3D hillshading */
+    #map[data-map-style="vivid"] .leaflet-tile-pane {
+      filter: saturate(1.35) contrast(1.08) brightness(1.03);
+    }
+    /* Dark: brighten labels so street/place names are readable */
     #map[data-map-style="dark"] .leaflet-tile-pane {
       filter: brightness(1.35) contrast(0.92);
     }

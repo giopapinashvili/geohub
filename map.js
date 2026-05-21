@@ -32,20 +32,20 @@
   };
 
   const TILE_LAYERS = {
-    streets: {
-      url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
-      label: '🗺️ Streets'
+    vivid: {
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+      attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community',
+      label: '🏔️ Vivid'
     },
     dark: {
       url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
       label: '🌑 Dark'
     },
-    light: {
-      url: 'https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png',
+    streets: {
+      url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
-      label: '☀️ Light'
+      label: '🗺️ Streets'
     }
   };
 
@@ -690,7 +690,7 @@
   /* ── Map style toggle ───────────────────────────── */
   function getMapStyle() {
     const v = localStorage.getItem('gh_map_style');
-    return TILE_LAYERS[v] ? v : 'streets';
+    return TILE_LAYERS[v] ? v : 'vivid';
   }
 
   function applyMapStyle(styleName) {
