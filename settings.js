@@ -5,6 +5,7 @@
   var GF = null;
   var user = null;
   var managedBusinesses = [];
+  var _writeTimer = null;
 
   var dict = {
     en: {
@@ -141,6 +142,59 @@
     document.body.classList.toggle('gh-theme-dark', effective === 'dark');
   }
 
+  // ── Firestore sync ───────────────────────────────────────────
+
+  function currentPrefs() {
+    return {
+      language:           getLang(),
+      theme:              getThemePref(),
+      notifyMessages:     localStorage.getItem('gh_notify_messages')     !== 'false',
+      notifyPageActivity: localStorage.getItem('gh_notify_page_activity') !== 'false',
+      notifyEmail:        localStorage.getItem('gh_notify_email')        !== 'false'
+    };
+  }
+
+  function applyPrefs(data) {
+    var lang  = data.language === 'ka' ? 'ka' : (data.language === 'en' ? 'en' : null);
+    var theme = data.theme === 'system' || data.theme === 'light' || data.theme === 'dark' ? data.theme : null;
+    if (lang)  localStorage.setItem('gh_lang', lang);
+    if (theme) { localStorage.setItem('gh_theme', theme); applyTheme(theme); }
+    if (typeof data.notifyMessages     === 'boolean') localStorage.setItem('gh_notify_messages',      data.notifyMessages     ? 'true' : 'false');
+    if (typeof data.notifyPageActivity === 'boolean') localStorage.setItem('gh_notify_page_activity', data.notifyPageActivity ? 'true' : 'false');
+    if (typeof data.notifyEmail        === 'boolean') localStorage.setItem('gh_notify_email',         data.notifyEmail        ? 'true' : 'false');
+  }
+
+  function saveToFirestore(prefs) {
+    if (!user || !fs() || !db()) return;
+    var uid = user.uid;
+    clearTimeout(_writeTimer);
+    _writeTimer = setTimeout(function() {
+      fs().setDoc(
+        fs().doc(db(), 'users', uid, 'preferences', 'settings'),
+        Object.assign({}, prefs, { updatedAt: fs().serverTimestamp() }),
+        { merge: true }
+      ).catch(function(err) {
+        console.warn('[Settings] Firestore write failed:', err.code || err.message);
+      });
+    }, 600);
+  }
+
+  function loadFromFirestore(uid) {
+    if (!fs() || !db()) return;
+    fs().getDoc(fs().doc(db(), 'users', uid, 'preferences', 'settings'))
+      .then(function(snap) {
+        if (!snap.exists()) return;
+        var data = snap.data() || {};
+        applyPrefs(data);
+        render();
+      })
+      .catch(function(err) {
+        console.warn('[Settings] Firestore read failed:', err.code || err.message);
+      });
+  }
+
+  // ── Render helpers ───────────────────────────────────────────
+
   function optionButton(group, value, label, sub, active){
     return '<button type="button" class="settings-option'+(active?' active':'')+'" data-setting-group="'+group+'" data-setting-value="'+value+'">'+
       '<span><strong>'+esc(label)+'</strong><span>'+esc(sub || '')+'</span></span><span class="settings-check">'+(active?'<i class="fas fa-check"></i>':'')+'</span></button>';
@@ -245,6 +299,7 @@
         if(group === 'lang'){
           localStorage.setItem('gh_lang', value === 'ka' ? 'ka' : 'en');
           if(window.GeoLang && window.GeoLang.set) window.GeoLang.set(value);
+          saveToFirestore(currentPrefs());
           toast(tr('languageUpdated'));
           render();
           return;
@@ -252,6 +307,7 @@
         if(group === 'theme'){
           localStorage.setItem('gh_theme', value);
           applyTheme(value);
+          saveToFirestore(currentPrefs());
           toast(tr('themeUpdated'));
           render();
         }
@@ -260,6 +316,7 @@
     document.querySelectorAll('[data-pref-toggle]').forEach(function(input){
       input.onchange = function(){
         localStorage.setItem(input.getAttribute('data-pref-toggle'), input.checked ? 'true' : 'false');
+        saveToFirestore(currentPrefs());
         toast(tr('saved'));
       };
     });
@@ -281,6 +338,7 @@
   function addBusiness(map, d, adminDoc){
     if(!d || !d.exists()) return;
     var b = Object.assign({ id:d.id }, d.data() || {});
+    if(b.status === 'deleted' || b.deleted === true || b.deletedAt) return;
     if(adminDoc) b._adminDoc = true;
     map[b.id] = Object.assign(map[b.id] || {}, b);
   }
@@ -304,6 +362,7 @@
     }).then(function(){
       managedBusinesses = Object.keys(map).map(function(id){ return map[id]; }).sort(function(a,b){ return title(a).localeCompare(title(b)); });
       render();
+      loadFromFirestore(uid);
     }).catch(function(){ render(); });
   }
 
@@ -315,7 +374,13 @@
     }
     GF.authFns.onAuthStateChanged(auth(), function(u){
       user = u || null;
-      loadBusinesses();
+      if(user){
+        render();
+        loadFromFirestore(user.uid);
+        loadBusinesses();
+      } else {
+        render();
+      }
     });
   });
 })();
