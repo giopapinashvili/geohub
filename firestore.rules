@@ -654,6 +654,29 @@ service cloud.firestore {
 
     // ── SOCIAL GRAPH ──────────────────────────────────────────────────────────
 
+    match /businessAdCampaigns/{campaignId} {
+      allow read: if signedIn() && canManageBiz(resource.data.get('businessId', ''));
+      allow create: if signedIn()
+        && request.resource.data.get('businessId', '') is string
+        && canManageBiz(request.resource.data.get('businessId', ''))
+        && request.resource.data.get('ownerUid', '') == uid()
+        && request.resource.data.get('status', '') in ['draft', 'pending_review', 'paused', 'rejected', 'active_mock']
+        && request.resource.data.keys().hasOnly([
+          'businessId', 'ownerUid', 'postId', 'objective', 'city', 'interest',
+          'budgetGel', 'durationDays', 'status', 'createdAt', 'updatedAt'
+        ]);
+      allow update: if signedIn()
+        && canManageBiz(resource.data.get('businessId', ''))
+        && request.resource.data.get('businessId', '') == resource.data.get('businessId', '')
+        && request.resource.data.get('ownerUid', '') == resource.data.get('ownerUid', '')
+        && request.resource.data.get('status', '') in ['draft', 'pending_review', 'paused', 'rejected', 'active_mock']
+        && request.resource.data.keys().hasOnly([
+          'businessId', 'ownerUid', 'postId', 'objective', 'city', 'interest',
+          'budgetGel', 'durationDays', 'status', 'createdAt', 'updatedAt'
+        ]);
+      allow delete: if signedIn() && canManageBiz(resource.data.get('businessId', ''));
+    }
+
     match /follows/{followId} {
       allow read: if true;
       allow create: if signedIn()

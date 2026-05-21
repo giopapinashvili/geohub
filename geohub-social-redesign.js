@@ -3724,6 +3724,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             '<div class="gh-biz-actions">'+
               '<button class="gh-btn gh-follow-business-btn" data-follow-business="'+esc(b.id)+'"><i class="fas fa-plus"></i> Follow</button>'+
               '<button class="gh-btn ghost" data-message-business="'+esc(b.id)+'" data-message-owner="'+esc(owner)+'"><i class="fas fa-comment"></i> Message</button>'+
+              (isOwner?'<a class="gh-btn" href="business-suite.html?businessId='+encodeURIComponent(b.id)+'"><i class="fas fa-briefcase"></i> Business Suite</a>':'')+
               (isOwner?'<button class="gh-btn ghost" data-edit-business><i class="fas fa-gear"></i> Edit</button>':'')+
               '<button class="gh-btn ghost" aria-label="Save business" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button>'+
             '</div>'+
@@ -3935,6 +3936,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             '<div class="gh-biz-sec-head"><h3>Quick Actions</h3></div>'+
             '<div style="display:flex;flex-direction:column;gap:8px">'+
               '<button class="gh-btn full ghost" data-ov-post-as-biz><i class="fas fa-bullhorn"></i> Post an update</button>'+
+              '<a class="gh-btn full ghost" href="business-suite.html?businessId='+encodeURIComponent(b.id)+'"><i class="fas fa-briefcase"></i> Business Suite</a>'+
               '<button class="gh-btn full ghost" data-dash-section="services"><i class="fas fa-briefcase"></i> Manage services</button>'+
               '<button class="gh-btn full ghost" data-dash-section="gallery"><i class="fas fa-images"></i> Upload to gallery</button>'+
             '</div>'+
