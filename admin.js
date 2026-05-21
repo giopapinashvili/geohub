@@ -1307,9 +1307,9 @@
     if (textCat) {
       textCat.value = cat ? cat.label : catSel.value;
     }
-    // Auto-fill icon only if the field is empty
+    // Auto-fill icon unless admin manually typed their own
     var iconEl = document.getElementById('adminPlaceIcon');
-    if (iconEl && !iconEl.value.trim() && cat && cat.icon) {
+    if (iconEl && !iconEl.dataset.userEdited && cat && cat.icon) {
       iconEl.value = cat.icon;
     }
     var iconPreview = document.getElementById('adminPlaceIconPreview');
@@ -1570,6 +1570,10 @@
           window.adminCancelEditPlace();
         } else {
           form.reset();
+          var iconReset = document.getElementById('adminPlaceIcon');
+          if (iconReset) { iconReset.value = ''; delete iconReset.dataset.userEdited; }
+          var iconPrevReset = document.getElementById('adminPlaceIconPreview');
+          if (iconPrevReset) iconPrevReset.textContent = '';
           renderExtFields(col);
           toast('Created: ' + title + ' (ID: ' + (docId||'').slice(-6) + ')');
         }
@@ -2577,9 +2581,12 @@
     var verEl = document.getElementById('adminPlaceIsVerified');
     if (verEl) verEl.value = data.isVerified ? 'true' : 'false';
 
-    // Icon field
+    // Icon field — mark as user-edited only if a custom icon was explicitly saved
     var iconEl2 = document.getElementById('adminPlaceIcon');
-    if (iconEl2) iconEl2.value = data.icon || '';
+    if (iconEl2) {
+      iconEl2.value = data.icon || '';
+      if (data.icon) { iconEl2.dataset.userEdited = '1'; } else { delete iconEl2.dataset.userEdited; }
+    }
     var iconPreview2 = document.getElementById('adminPlaceIconPreview');
     if (iconPreview2) iconPreview2.textContent = data.icon || '';
 
@@ -2627,7 +2634,7 @@
     if (form) { form.reset(); renderExtFields('places'); }
     adminUpdateImagePreview('');
     var iconElC = document.getElementById('adminPlaceIcon');
-    if (iconElC) iconElC.value = '';
+    if (iconElC) { iconElC.value = ''; delete iconElC.dataset.userEdited; }
     var iconPrevC = document.getElementById('adminPlaceIconPreview');
     if (iconPrevC) iconPrevC.textContent = '';
     var gPlaceEl = document.getElementById('adminGooglePlaceIdInput');
