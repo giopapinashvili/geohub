@@ -37,6 +37,20 @@
     'Top Challenges':'საუკეთესო გამოწვევები',
     'Active Rewards':'აქტიური ჯილდოები','My wallet':'ჩემი საფულე',
     'Your Story':'ჩემი სტორი',
+    'Feed':'ფიდი','Explore / Search':'ძიება','Notifications':'შეტყობინებები','Login / Sign Up':'შესვლა / რეგისტრაცია',
+    'Logout':'გასვლა','Settings':'პარამეტრები','Settings & Profile':'პარამეტრები და პროფილი','My Profile':'ჩემი პროფილი',
+    'Business Suite':'ბიზნეს სუიტი','Page settings':'გვერდის პარამეტრები','Switch page/account':'გვერდზე / ანგარიშზე გადართვა',
+    'Add Page':'გვერდის დამატება','Businesses':'ბიზნესები','Business Page':'ბიზნეს გვერდი','Privacy & Safety':'კონფიდენციალობა და უსაფრთხოება',
+    'Blocked users':'დაბლოკილი მომხმარებლები','Muted users':'დადუმებული მომხმარებლები','Coming soon':'მალე დაემატება',
+    'Language':'ენა','Appearance / theme':'გამოსახულება / თემა','Appearance':'გამოსახულება','Theme':'თემა',
+    'System':'სისტემური','Dark':'მუქი','Light':'ღია','Message notifications':'მესიჯების შეტყობინებები',
+    'Page activity notifications':'გვერდის აქტივობის შეტყობინებები','Email notifications':'ელფოსტის შეტყობინებები',
+    'Full translation coverage is being expanded.':'სრული თარგმანის დაფარვა ეტაპობრივად ფართოვდება.',
+    'Profile, messages, friends, and post privacy':'პროფილი, მესიჯები, მეგობრები და პოსტების კონფიდენციალობა',
+    'Change password / account security':'პაროლის შეცვლა / ანგარიშის უსაფრთხოება','Rewards & wallet':'ჯილდოები და საფულე',
+    'GeoHub language, theme, notifications, privacy, and page shortcuts.':'GeoHub-ის ენა, თემა, შეტყობინებები, კონფიდენციალობა და გვერდის მალსახმობები.',
+    'Settings save instantly on this device.':'პარამეტრები ამ მოწყობილობაზე მყისიერად ინახება.',
+    'Sign in to manage account preferences and business shortcuts.':'ანგარიშის პარამეტრებისა და ბიზნეს მალსახმობების სამართავად შედით სისტემაში.',
     // ── index hero chips
     'XP for check-ins':'XP ჩაწერებისთვის','Rewards wallet':'ჯილდოების საფულე',
     'Trust score':'ნდობის ქულა','Business campaigns':'ბიზნეს კამპანიები',
@@ -110,46 +124,72 @@
     try { return localStorage.getItem('gh_lang') === 'ka' ? 'ka' : 'en'; }
     catch(e) { return 'en'; }
   })();
+  var _translating = false;
+  var _translationTimer = null;
 
   function t(key) {
     return (_lang === 'ka' && KA[key]) ? KA[key] : key;
   }
 
   function applyTranslations() {
-    if (_lang === 'en') return; // HTML is already English
-    var dict = KA;
-
-    // 1. data-i18n → textContent
-    document.querySelectorAll('[data-i18n]').forEach(function(el) {
-      var key = el.getAttribute('data-i18n');
-      if (dict[key]) el.textContent = dict[key];
-    });
-
-    // 2. data-i18n-html → innerHTML
-    document.querySelectorAll('[data-i18n-html]').forEach(function(el) {
-      var key = el.getAttribute('data-i18n-html');
-      if (dict[key]) el.innerHTML = dict[key];
-    });
-
-    // 3. Text-node walker for short UI strings
-    var skip = new Set(['SCRIPT','STYLE','INPUT','TEXTAREA','SELECT','NOSCRIPT','CODE','PRE']);
-    var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
-    var replacements = [];
-    var node;
-    while ((node = walker.nextNode())) {
-      var parent = node.parentElement;
-      if (!parent || skip.has(parent.tagName)) continue;
-      if (parent.hasAttribute('data-i18n') || parent.hasAttribute('data-i18n-html')) continue;
-      var trimmed = node.textContent.trim();
-      if (trimmed.length < 2) continue;
-      var translated = dict[trimmed];
-      if (translated && translated !== trimmed) {
-        replacements.push([node, node.textContent.replace(trimmed, translated)]);
-      }
+    if (_lang === 'en') {
+      document.documentElement.lang = 'en';
+      return; // HTML is already English
     }
-    replacements.forEach(function(r) { r[0].textContent = r[1]; });
+    if (!document.body || _translating) return;
+    _translating = true;
+    var dict = KA;
+    try {
 
-    document.documentElement.lang = 'ka';
+      // 1. data-i18n → textContent
+      document.querySelectorAll('[data-i18n]').forEach(function(el) {
+        var key = el.getAttribute('data-i18n');
+        if (dict[key]) el.textContent = dict[key];
+      });
+
+      // 2. data-i18n-html → innerHTML
+      document.querySelectorAll('[data-i18n-html]').forEach(function(el) {
+        var key = el.getAttribute('data-i18n-html');
+        if (dict[key]) el.innerHTML = dict[key];
+      });
+
+      // 3. Text-node walker for short UI strings
+      var skip = new Set(['SCRIPT','STYLE','INPUT','TEXTAREA','SELECT','NOSCRIPT','CODE','PRE']);
+      var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+      var replacements = [];
+      var node;
+      while ((node = walker.nextNode())) {
+        var parent = node.parentElement;
+        if (!parent || skip.has(parent.tagName)) continue;
+        if (parent.hasAttribute('data-i18n') || parent.hasAttribute('data-i18n-html')) continue;
+        var trimmed = node.textContent.trim();
+        if (trimmed.length < 2) continue;
+        var translated = dict[trimmed];
+        if (translated && translated !== trimmed) {
+          replacements.push([node, node.textContent.replace(trimmed, translated)]);
+        }
+      }
+      replacements.forEach(function(r) { r[0].textContent = r[1]; });
+
+      document.documentElement.lang = 'ka';
+    } finally {
+      _translating = false;
+    }
+  }
+
+  function scheduleTranslations() {
+    if (_lang !== 'ka' || _translating) return;
+    if (_translationTimer) clearTimeout(_translationTimer);
+    _translationTimer = setTimeout(function() {
+      _translationTimer = null;
+      applyTranslations();
+    }, 80);
+  }
+
+  function installTranslationObserver() {
+    if (_lang !== 'ka' || !document.body || window.__geoTranslationObserver) return;
+    window.__geoTranslationObserver = new MutationObserver(scheduleTranslations);
+    window.__geoTranslationObserver.observe(document.body, { childList: true, subtree: true });
   }
 
   window.GeoLang = {
@@ -160,6 +200,10 @@
       _lang = lang === 'ka' ? 'ka' : 'en';
       try { localStorage.setItem('gh_lang', _lang); } catch(e) {}
       document.documentElement.lang = _lang;
+      if (_lang === 'ka') {
+        applyTranslations();
+        installTranslationObserver();
+      }
       window.dispatchEvent(new CustomEvent('GeoLangChange', { detail: _lang }));
     },
     toggle: function() {
@@ -410,10 +454,11 @@
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { init(); applyTranslations(); });
+    document.addEventListener('DOMContentLoaded', function() { init(); applyTranslations(); installTranslationObserver(); });
   } else {
     init();
     applyTranslations();
+    installTranslationObserver();
   }
 
 })();

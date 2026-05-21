@@ -33,7 +33,25 @@
       noPages: 'No business pages found for this account.',
       languageUpdated: 'Language updated',
       themeUpdated: 'Theme updated',
-      saved: 'Settings saved'
+      saved: 'Settings saved',
+      feed: 'Feed',
+      signInBtn: 'Sign in',
+      privacySafety: 'Privacy & Safety',
+      privacySafetySub: 'Profile, messages, friends, and post privacy',
+      blockedUsers: 'Blocked users',
+      mutedUsers: 'Muted users',
+      comingSoon: 'Coming soon',
+      editProfile: 'Edit profile',
+      editProfileSub: 'Profile, bio, city, avatar',
+      accountSecurity: 'Change password / account security',
+      accountSecuritySub: 'Use the existing auth account flow',
+      rewardsWallet: 'Rewards & wallet',
+      rewardsWalletSub: 'GeoPoints and coupons',
+      addPage: 'Add Page',
+      businessPage: 'Business page',
+      businessSuite: 'Business Suite',
+      pageSettings: 'Page settings',
+      switchPage: 'Switch page/account'
     },
     ka: {
       settings: 'პარამეტრები',
@@ -61,7 +79,25 @@
       noPages: 'ამ ანგარიშზე ბიზნეს გვერდები არ მოიძებნა.',
       languageUpdated: 'ენა განახლდა',
       themeUpdated: 'თემა განახლდა',
-      saved: 'პარამეტრები შენახულია'
+      saved: 'პარამეტრები შენახულია',
+      feed: 'ფიდი',
+      signInBtn: 'შესვლა',
+      privacySafety: 'კონფიდენციალობა და უსაფრთხოება',
+      privacySafetySub: 'პროფილი, მესიჯები, მეგობრები და პოსტების კონფიდენციალობა',
+      blockedUsers: 'დაბლოკილი მომხმარებლები',
+      mutedUsers: 'დადუმებული მომხმარებლები',
+      comingSoon: 'მალე დაემატება',
+      editProfile: 'პროფილის რედაქტირება',
+      editProfileSub: 'პროფილი, ბიო, ქალაქი, ავატარი',
+      accountSecurity: 'პაროლის შეცვლა / ანგარიშის უსაფრთხოება',
+      accountSecuritySub: 'გამოიყენე არსებული ავტორიზაციის გვერდი',
+      rewardsWallet: 'ჯილდოები და საფულე',
+      rewardsWalletSub: 'GeoPoints და კუპონები',
+      addPage: 'გვერდის დამატება',
+      businessPage: 'ბიზნეს გვერდი',
+      businessSuite: 'ბიზნეს სუიტი',
+      pageSettings: 'გვერდის პარამეტრები',
+      switchPage: 'გვერდზე / ანგარიშზე გადართვა'
     }
   };
 
@@ -129,7 +165,7 @@
     var theme = getThemePref();
     document.documentElement.lang = lang;
     app.innerHTML =
-      '<div class="settings-head"><div><h1>'+esc(tr('settings'))+'</h1><p>'+esc(tr('subtitle'))+'</p></div><a class="gh-btn ghost" href="feed.html"><i class="fas fa-house"></i> Feed</a></div>'+
+      '<div class="settings-head"><div><h1>'+esc(tr('settings'))+'</h1><p>'+esc(tr('subtitle'))+'</p></div><a class="gh-btn ghost" href="feed.html"><i class="fas fa-house"></i> '+esc(tr('feed'))+'</a></div>'+
       '<div class="settings-grid">'+
         '<section class="settings-stack">'+
           languageCard(lang)+
@@ -147,8 +183,8 @@
 
   function languageCard(lang){
     return '<section class="settings-card"><div class="settings-card-head"><h2><i class="fas fa-language"></i> '+esc(tr('language'))+'</h2></div><div class="settings-options">'+
-      optionButton('lang','en',tr('english'),'English',lang === 'en')+
-      optionButton('lang','ka',tr('georgian'),'ქართული',lang === 'ka')+
+      optionButton('lang','en',tr('english'),tr('english'),lang === 'en')+
+      optionButton('lang','ka',tr('georgian'),tr('georgian'),lang === 'ka')+
       '</div><p class="settings-muted">'+esc(tr('translationNote'))+'</p></section>';
   }
 
@@ -170,21 +206,21 @@
 
   function privacyCard(){
     return '<section class="settings-card"><div class="settings-card-head"><h2><i class="fas fa-shield-halved"></i> '+esc(tr('privacy'))+'</h2></div><div class="settings-list">'+
-      linkRow('safety.html','fa-chevron-right','Privacy & Safety','Profile, messages, friends, and post privacy')+
-      comingRow('fa-ban','Blocked users','Coming soon')+
-      comingRow('fa-volume-xmark','Muted users','Coming soon')+
+      linkRow('safety.html','fa-chevron-right',tr('privacySafety'),tr('privacySafetySub'))+
+      comingRow('fa-ban',tr('blockedUsers'),tr('comingSoon'))+
+      comingRow('fa-volume-xmark',tr('mutedUsers'),tr('comingSoon'))+
       '</div></section>';
   }
 
   function accountCard(){
     if(!user){
-      return '<section class="settings-card"><div class="settings-card-head"><h2><i class="fas fa-user"></i> '+esc(tr('account'))+'</h2></div><div class="settings-empty"><div><i class="fas fa-lock"></i><p>'+esc(tr('signIn'))+'</p><a class="gh-btn" href="auth.html"><i class="fas fa-sign-in-alt"></i> Sign in</a></div></div></section>';
+      return '<section class="settings-card"><div class="settings-card-head"><h2><i class="fas fa-user"></i> '+esc(tr('account'))+'</h2></div><div class="settings-empty"><div><i class="fas fa-lock"></i><p>'+esc(tr('signIn'))+'</p><a class="gh-btn" href="auth.html"><i class="fas fa-sign-in-alt"></i> '+esc(tr('signInBtn'))+'</a></div></div></section>';
     }
     var profileHref = user.uid ? 'profile.html?id='+encodeURIComponent(user.uid) : 'profile.html';
     return '<section class="settings-card"><div class="settings-card-head"><h2><i class="fas fa-user"></i> '+esc(tr('account'))+'</h2></div><div class="settings-list">'+
-      linkRow(profileHref,'fa-chevron-right','Edit profile','Profile, bio, city, avatar')+
-      linkRow('auth.html','fa-chevron-right','Change password / account security','Use the existing auth account flow')+
-      linkRow('rewards.html','fa-chevron-right','Rewards & wallet','GeoPoints and coupons')+
+      linkRow(profileHref,'fa-chevron-right',tr('editProfile'),tr('editProfileSub'))+
+      linkRow('auth.html','fa-chevron-right',tr('accountSecurity'),tr('accountSecuritySub'))+
+      linkRow('rewards.html','fa-chevron-right',tr('rewardsWallet'),tr('rewardsWalletSub'))+
       '</div></section>';
   }
 
@@ -193,11 +229,11 @@
       return '<section class="settings-card"><div class="settings-card-head"><h2><i class="fas fa-store"></i> '+esc(tr('business'))+'</h2></div><div class="settings-empty">'+esc(tr('signIn'))+'</div></section>';
     }
     if(!managedBusinesses.length){
-      return '<section class="settings-card"><div class="settings-card-head"><h2><i class="fas fa-store"></i> '+esc(tr('business'))+'</h2></div><div class="settings-empty">'+esc(tr('noPages'))+'</div><div class="settings-actions"><a class="gh-btn ghost sm" href="add-business.html"><i class="fas fa-plus"></i> Add Page</a></div></section>';
+      return '<section class="settings-card"><div class="settings-card-head"><h2><i class="fas fa-store"></i> '+esc(tr('business'))+'</h2></div><div class="settings-empty">'+esc(tr('noPages'))+'</div><div class="settings-actions"><a class="gh-btn ghost sm" href="add-business.html"><i class="fas fa-plus"></i> '+esc(tr('addPage'))+'</a></div></section>';
     }
     return '<section class="settings-card"><div class="settings-card-head"><h2><i class="fas fa-store"></i> '+esc(tr('business'))+'</h2></div><div class="settings-list">'+managedBusinesses.slice(0,6).map(function(b){
       var logo = b.logoUrl ? '<img src="'+esc(b.logoUrl)+'" alt="" loading="lazy" decoding="async">' : esc(initials(title(b)));
-      return '<div class="settings-row"><div class="settings-business"><div class="settings-business-logo">'+logo+'</div><div><strong>'+esc(title(b))+'</strong><span>'+esc(b.category || 'Business page')+'</span><div class="settings-actions"><a class="gh-btn sm" href="business-suite.html?businessId='+encodeURIComponent(b.id)+'"><i class="fas fa-briefcase"></i> Business Suite</a><a class="gh-btn ghost sm" href="business.html?id='+encodeURIComponent(b.id)+'#manage"><i class="fas fa-gear"></i> Page settings</a><a class="gh-btn ghost sm" href="business.html?id='+encodeURIComponent(b.id)+'"><i class="fas fa-repeat"></i> Switch page/account</a></div></div></div></div>';
+      return '<div class="settings-row"><div class="settings-business"><div class="settings-business-logo">'+logo+'</div><div><strong>'+esc(title(b))+'</strong><span>'+esc(b.category || tr('businessPage'))+'</span><div class="settings-actions"><a class="gh-btn sm" href="business-suite.html?businessId='+encodeURIComponent(b.id)+'"><i class="fas fa-briefcase"></i> '+esc(tr('businessSuite'))+'</a><a class="gh-btn ghost sm" href="business.html?id='+encodeURIComponent(b.id)+'#manage"><i class="fas fa-gear"></i> '+esc(tr('pageSettings'))+'</a><a class="gh-btn ghost sm" href="business.html?id='+encodeURIComponent(b.id)+'"><i class="fas fa-repeat"></i> '+esc(tr('switchPage'))+'</a></div></div></div></div>';
     }).join('')+'</div></section>';
   }
 
