@@ -133,11 +133,14 @@
 
   function getPlaceMarkerStyle(place) {
     const catId = place.categoryId;
-    const base = catId && _placeCatLookup[catId]
+    const catText = place.category || '';
+    const base = (catId && _placeCatLookup[catId])
       ? _placeCatLookup[catId]
       : (catId && PLACE_MARKER_STYLES[catId])
         ? PLACE_MARKER_STYLES[catId]
-        : (place.category && Object.values(PLACE_MARKER_STYLES).find(s => s.label === place.category))
+        : PLACE_MARKER_STYLES[catText]
+          || Object.values(PLACE_MARKER_STYLES).find(s => s.label === catText)
+          || (catText && Object.values(PLACE_MARKER_STYLES).find(s => catText.includes(s.label)))
           || PLACE_MARKER_STYLES.default;
     if (place.icon) return Object.assign({}, base, { icon: place.icon });
     const subIcon = getSubcategoryIcon(place);
