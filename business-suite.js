@@ -58,6 +58,7 @@
   function isManager(b){
     var uid = state.user && state.user.uid;
     if(!uid || !b) return false;
+    if(b.status === 'deleted' || b.deleted === true || b.deletedAt) return false;
     if(b.ownerId === uid || b.createdBy === uid || b.userId === uid || b.ownerUid === uid) return true;
     var ids = [].concat(b.adminIds || [], b.managerIds || [], b.staffIds || [], b.ownerIds || []);
     return ids.indexOf(uid) > -1 || b._adminDoc === true || b._pageAdminDoc === true;

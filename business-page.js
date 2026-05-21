@@ -143,6 +143,67 @@
     clearTimeout(t._t); t._t=setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(16px)'; },2500);
   }
 
+  // ── HARD DELETE BUSINESS ────────────────────────────────────
+
+  function _deleteBatch(col, field, value, lim) {
+    return _fs.getDocs(_fs.query(_fs.collection(_db, col), _fs.where(field, '==', value), _fs.limit(lim || 100)))
+      .then(function(snap) {
+        if (snap.empty) return 0;
+        var batch = _fs.writeBatch(_db);
+        snap.forEach(function(d) { batch.delete(d.ref); });
+        return batch.commit().then(function() { return snap.size; });
+      });
+  }
+
+  function _deleteSubcollection(bizId, sub) {
+    return _fs.getDocs(_fs.collection(_db, 'businesses', bizId, sub))
+      .then(function(snap) {
+        if (snap.empty) return;
+        var batch = _fs.writeBatch(_db);
+        snap.forEach(function(d) { batch.delete(d.ref); });
+        return batch.commit();
+      });
+  }
+
+  function _hardDeleteBusiness(bizId, uid) {
+    if (!bizId || !uid) return Promise.reject(new Error('Missing id or uid'));
+    var subcols = ['services', 'products', 'priceList', 'gallery', 'quoteRequests', 'pageBlocks', 'admins', 'faq', 'faqQuestions', 'events', 'analytics'];
+    var subP = Promise.all(subcols.map(function(s) {
+      return _deleteSubcollection(bizId, s).catch(function() {});
+    }));
+    var topLevelCols = [
+      { col: 'businessFollowers',  field: 'businessId' },
+      { col: 'businessReviews',    field: 'businessId' },
+      { col: 'businessAdCampaigns',field: 'businessId' },
+      { col: 'conversations',      field: 'businessId' }
+    ];
+    var topP = subP.then(function() {
+      return Promise.all(topLevelCols.map(function(c) {
+        return _deleteBatch(c.col, c.field, bizId, 100).catch(function() {});
+      }));
+    });
+    var postsP = topP.then(function() {
+      return _deleteBatch('posts', 'businessId', bizId, 50).catch(function() {});
+    }).then(function() {
+      return _deleteBatch('posts', 'targetId', bizId, 50).catch(function() {});
+    });
+    var adminDocsP = postsP.then(function() {
+      return _fs.getDocs(_fs.query(
+        _fs.collection(_db, 'businessAdmins'),
+        _fs.where('businessId', '==', bizId),
+        _fs.limit(50)
+      )).then(function(snap) {
+        if (snap.empty) return;
+        var batch = _fs.writeBatch(_db);
+        snap.forEach(function(d) { batch.delete(d.ref); });
+        return batch.commit();
+      }).catch(function() {});
+    });
+    return adminDocsP.then(function() {
+      return _fs.deleteDoc(_fs.doc(_db, 'businesses', bizId));
+    });
+  }
+
   // ── SKELETON ─────────────────────────────────────────────────
 
   function skelBox(w, h, r) {
@@ -4021,22 +4082,53 @@
 
     deletePage: function() {
       if (!_currentUser || !_isOwner) return;
-      var pageName = _biz && _biz.title ? _biz.title : 'this page';
-      var confirmed = window.prompt('To delete this page permanently, type the page name:\n\n"' + pageName + '"');
-      if (confirmed === null) return;
-      if (confirmed.trim() !== pageName) { showToast('Name did not match. Page not deleted.', false); return; }
-      var btn = document.querySelector('.biz-admin-btn[onclick*="deletePage"]');
-      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting…'; }
-      _fs.updateDoc(_fs.doc(_db, 'businesses', BIZ_ID), {
-        status: 'deleted',
-        deletedAt: _fs.serverTimestamp(),
-        deletedBy: _currentUser.uid
-      }).then(function() {
-        showToast('Page deleted');
-        setTimeout(function() { window.location.href = 'business.html'; }, 1200);
+      var pageName = (_biz && (_biz.title || _biz.name)) || 'Business';
+      // Show confirmation modal
+      var existing = document.getElementById('biz-delete-confirm-modal');
+      if (existing) existing.remove();
+      var overlay = document.createElement('div');
+      overlay.id = 'biz-delete-confirm-modal';
+      overlay.className = 'biz-modal-overlay';
+      overlay.style.cssText = 'z-index:9999';
+      overlay.innerHTML =
+        '<div class="biz-modal-sheet" style="max-width:420px;padding:28px 24px 24px">' +
+          '<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">' +
+            '<span style="width:36px;height:36px;border-radius:50%;background:rgba(239,68,68,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="fas fa-trash" style="color:#f87171;font-size:.9rem"></i></span>' +
+            '<div class="biz-modal-title" style="margin:0;color:#f87171">Delete Business Page</div>' +
+          '</div>' +
+          '<p style="color:rgba(255,255,255,.6);font-size:.85rem;margin:12px 0 8px">This will <strong style="color:#f87171">permanently delete</strong> <strong>' + esc(pageName) + '</strong> and all its data including posts, reviews, services, and media. This cannot be undone.</p>' +
+          '<p style="color:rgba(255,255,255,.5);font-size:.82rem;margin-bottom:14px">Type <strong style="color:#fff">DELETE</strong> to confirm:</p>' +
+          '<input id="biz-delete-confirm-input" type="text" class="biz-input" placeholder="Type DELETE" autocomplete="off" style="margin-bottom:14px;border-color:rgba(239,68,68,.4)">' +
+          '<div style="display:flex;gap:8px">' +
+            '<button class="biz-admin-btn" style="flex:1;background:rgba(107,114,128,.12);border-color:rgba(107,114,128,.3);color:#9ca3af" onclick="document.getElementById(\'biz-delete-confirm-modal\').remove()">Cancel</button>' +
+            '<button id="biz-delete-confirm-btn" class="biz-admin-btn" style="flex:1;background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:#f87171" onclick="window._bizActions._confirmHardDelete()"><i class="fas fa-trash"></i> Delete Forever</button>' +
+          '</div>' +
+        '</div>';
+      overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+      document.body.appendChild(overlay);
+      var inp = document.getElementById('biz-delete-confirm-input');
+      if (inp) inp.focus();
+    },
+
+    _confirmHardDelete: function() {
+      var inp = document.getElementById('biz-delete-confirm-input');
+      if (!inp || inp.value.trim() !== 'DELETE') {
+        showToast('Type DELETE to confirm', false);
+        if (inp) { inp.style.borderColor = 'rgba(239,68,68,.8)'; inp.focus(); }
+        return;
+      }
+      var overlay = document.getElementById('biz-delete-confirm-modal');
+      var confirmBtn = document.getElementById('biz-delete-confirm-btn');
+      if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting…'; }
+      _hardDeleteBusiness(BIZ_ID, _currentUser.uid).then(function() {
+        if (overlay) overlay.remove();
+        showToast('Business page deleted');
+        try { localStorage.removeItem('gh_active_actor'); } catch(e) {}
+        try { window.dispatchEvent(new CustomEvent('GeoActorChanged', { detail: { type: 'user' } })); } catch(e) {}
+        setTimeout(function() { window.location.href = 'businesses.html'; }, 1000);
       }).catch(function(err) {
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash"></i> Delete Page'; }
-        showToast('Could not delete page: ' + (err.code || err.message), false);
+        if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.innerHTML = '<i class="fas fa-trash"></i> Delete Forever'; }
+        showToast('Delete failed: ' + (err.code || err.message), false);
       });
     },
 
