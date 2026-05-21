@@ -117,16 +117,25 @@
   /* ── Marker helpers ─────────────────────────────── */
   function getSubcategoryIcon(place) {
     if (!place.subcategory) return '';
+    const subVal = place.subcategory;
+    // Match by id (new schema) or by labelKa/labelEn (old text schema)
+    function matchSub(subs) {
+      return subs.find(s =>
+        (typeof s === 'object')
+          ? s.id === subVal || s.labelKa === subVal || s.labelEn === subVal
+          : s === subVal
+      );
+    }
     const catData = _placeCatLookup[place.categoryId];
     if (catData && catData.subcategories) {
-      const sub = catData.subcategories.find(s => s.id === place.subcategory);
-      if (sub && sub.icon) return sub.icon;
+      const sub = matchSub(catData.subcategories);
+      if (sub && typeof sub === 'object' && sub.icon) return sub.icon;
     }
     const staticCats = window.GEOHUB_PLACE_CATEGORIES || [];
     const staticCat = staticCats.find(c => c.id === place.categoryId);
     if (staticCat && staticCat.subcategories) {
-      const sub = staticCat.subcategories.find(s => s.id === place.subcategory);
-      if (sub && sub.icon) return sub.icon;
+      const sub = matchSub(staticCat.subcategories);
+      if (sub && typeof sub === 'object' && sub.icon) return sub.icon;
     }
     return '';
   }
@@ -177,12 +186,31 @@
   }
 
   /* ── Normalize Firestore doc ────────────────────── */
+  function resolveCategoryId(catId, catText) {
+    if (catId) return catId;
+    if (!catText) return '';
+    // Old JSON: category field holds the PLACE_MARKER_STYLES key directly (e.g. "food", "nightlife")
+    if (PLACE_MARKER_STYLES[catText]) return catText;
+    // Firestore categories: match by label
+    const fsKey = Object.keys(_placeCatLookup).find(k =>
+      _placeCatLookup[k].label === catText ||
+      (catText.length > 3 && catText.includes(_placeCatLookup[k].label))
+    );
+    if (fsKey) return fsKey;
+    // Static PLACE_MARKER_STYLES: match by label or partial label
+    const staticEntry = Object.entries(PLACE_MARKER_STYLES).find(([, v]) =>
+      v.label === catText || (catText.length > 3 && catText.includes(v.label))
+    );
+    return staticEntry ? staticEntry[0] : '';
+  }
+
   function normalize(id, data, source) {
     const lat = Number(data.lat ?? data.latitude ?? (data.location && data.location.lat));
     const lng = Number(data.lng ?? data.longitude ?? (data.location && data.location.lng));
     if (!isFinite(lat) || !isFinite(lng)) return null;
-    const catId   = data.categoryId || '';
     const catText = data.category || data.type || '';
+    // Support both old schema (categoryId missing) and new schema
+    const catId   = resolveCategoryId(data.categoryId || '', catText);
     const style   = PLACE_MARKER_STYLES[catId]
       || Object.values(PLACE_MARKER_STYLES).find(s => s.label === catText)
       || PLACE_MARKER_STYLES.default;
@@ -194,7 +222,8 @@
       address:          data.address || '',
       categoryId:       catId,
       category:         catText,
-      subcategory:      data.subcategory || '',
+      // Support subcategoryId (new) and subcategory (old/text)
+      subcategory:      data.subcategoryId || data.subcategory || '',
       categoryLabel:    catText || style.label,
       shortDescription: data.shortDescription || data.description || '',
       image:            data.image || data.imageUrl || data.mediaUrl || '',
