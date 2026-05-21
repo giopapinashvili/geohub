@@ -39,7 +39,7 @@
     'Your Story':'ჩემი სტორი',
     'Feed':'ფიდი','Explore / Search':'ძიება','Notifications':'შეტყობინებები','Login / Sign Up':'შესვლა / რეგისტრაცია',
     'Logout':'გასვლა','Settings':'პარამეტრები','Settings & Profile':'პარამეტრები და პროფილი','My Profile':'ჩემი პროფილი',
-    'Business Suite':'ბიზნეს სუიტი','Page settings':'გვერდის პარამეტრები','Switch page/account':'გვერდზე / ანგარიშზე გადართვა',
+    'Business Suite':'Business Suite','Page settings':'გვერდის პარამეტრები','Switch page/account':'გვერდზე / ანგარიშზე გადართვა',
     'Add Page':'გვერდის დამატება','Businesses':'ბიზნესები','Business Page':'ბიზნეს გვერდი','Privacy & Safety':'კონფიდენციალობა და უსაფრთხოება',
     'Blocked users':'დაბლოკილი მომხმარებლები','Muted users':'დადუმებული მომხმარებლები','Coming soon':'მალე დაემატება',
     'Language':'ენა','Appearance / theme':'გამოსახულება / თემა','Appearance':'გამოსახულება','Theme':'თემა',

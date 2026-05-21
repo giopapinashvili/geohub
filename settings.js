@@ -95,7 +95,7 @@
       rewardsWalletSub: 'GeoPoints და კუპონები',
       addPage: 'გვერდის დამატება',
       businessPage: 'ბიზნეს გვერდი',
-      businessSuite: 'ბიზნეს სუიტი',
+      businessSuite: 'Business Suite',
       pageSettings: 'გვერდის პარამეტრები',
       switchPage: 'გვერდზე / ანგარიშზე გადართვა'
     }
