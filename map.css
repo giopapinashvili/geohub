@@ -53,6 +53,10 @@ body, html { height: 100%; overflow: hidden; }
       background: linear-gradient(135deg, #10b981, #0ea5e9);
       color: #fff; box-shadow: 0 2px 8px rgba(16,185,129,.4);
     }
+    /* Boost label brightness on dark tile so street/place names are readable */
+    #map[data-map-style="dark"] .leaflet-tile-pane {
+      filter: brightness(1.35) contrast(0.92);
+    }
     .gh-map-marker-wrap { background: transparent !important; border: 0 !important; overflow: visible !important; }
     .gh-map-emoji-marker {
       width: 44px; height: 44px; border-radius: 999px;

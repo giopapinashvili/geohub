@@ -699,7 +699,9 @@
     _tileLayer = L.tileLayer(cfg.url, { attribution: cfg.label + ' · ' + cfg.attribution, subdomains: 'abcd', maxZoom: 20 });
     _tileLayer.addTo(map);
     localStorage.setItem('gh_map_style', styleName);
-    // Update toggle button state
+    // Mark map element so CSS can boost label brightness in dark mode
+    const mapEl = document.getElementById('map');
+    if (mapEl) mapEl.setAttribute('data-map-style', styleName);
     document.querySelectorAll('.map-style-btn').forEach(b => {
       b.classList.toggle('active', b.dataset.style === styleName);
     });
