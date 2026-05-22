@@ -32,11 +32,6 @@
   };
 
   const TILE_LAYERS = {
-    vivid: {
-      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
-      attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community',
-      label: '🏔️ Vivid'
-    },
     dark: {
       url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
@@ -49,7 +44,7 @@
     }
   };
 
-  let map, markers = [], allPlaces = [];
+  let map, clusterGroup, markers = [], allPlaces = [];
   let currentFilter = '', currentSearch = '', currentSubFilter = '';
   let disabledCategories = new Set();
   let activeMarker = null, activePlaceId = null;
@@ -330,9 +325,21 @@
 
   function renderStars(r) { return r ? '⭐'.repeat(Math.max(1, Math.min(5, Math.round(r)))) : ''; }
 
+  /* ── Cluster icon ───────────────────────────────── */
+  function createClusterIcon(cluster) {
+    const count = cluster.getChildCount();
+    const size  = count < 10 ? 38 : count < 50 ? 46 : 54;
+    return L.divIcon({
+      html: '<div class="gh-cluster-icon" style="width:' + size + 'px;height:' + size + 'px;font-size:' + (count > 99 ? '0.72rem' : '0.9rem') + '">' + count + '</div>',
+      className: 'gh-cluster-wrap',
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size / 2],
+    });
+  }
+
   /* ── Map render ─────────────────────────────────── */
   function renderMap() {
-    markers.forEach(m => map.removeLayer(m));
+    if (clusterGroup) { map.removeLayer(clusterGroup); clusterGroup.clearLayers(); }
     markers = [];
 
     const list = filtered();
@@ -348,22 +355,42 @@
     const results = document.getElementById('mapResults');
     if (results) {
       results.innerHTML = list.length
-        ? list.map(p => '<div class="map-result-card" data-id="' + esc(p.id) + '"><div class="map-result-info"><div class="map-result-name">' + esc(p.name) + '</div><div class="map-result-cat">' + esc(p.categoryLabel) + (p.city ? ' · ' + esc(p.city) : '') + '</div><div class="map-result-footer"><span class="rating-display">' + renderStars(p.rating) + '</span></div></div></div>').join('')
+        ? list.map(p => {
+            const st = getPlaceMarkerStyle(p);
+            return '<div class="map-result-card" data-id="' + esc(p.id) + '">'
+              + '<div class="map-result-icon" style="background:' + (st.color || '#22c55e') + '22;border-color:' + (st.color || '#22c55e') + '44">' + (p.icon || st.icon || '📍') + '</div>'
+              + '<div class="map-result-info">'
+              + '<div class="map-result-name">' + esc(p.name) + '</div>'
+              + '<div class="map-result-cat">' + esc(p.categoryLabel) + (p.city ? ' · ' + esc(p.city) : '') + '</div>'
+              + (p.rating ? '<div class="map-result-footer"><span class="rating-display">' + renderStars(p.rating) + '</span></div>' : '')
+              + '</div></div>';
+          }).join('')
         : '<div style="padding:20px;text-align:center;color:var(--text-muted)"><i class="fas fa-map-marker-alt" style="font-size:1.4rem;margin-bottom:8px;display:block"></i>No real places added yet.</div>';
       results.querySelectorAll('.map-result-card').forEach(card => card.addEventListener('click', () => focusPlace(card.dataset.id)));
     }
+
+    clusterGroup = L.markerClusterGroup({
+      showCoverageOnHover: false,
+      maxClusterRadius: 60,
+      disableClusteringAtZoom: 16,
+      spiderfyOnMaxZoom: true,
+      iconCreateFunction: createClusterIcon,
+      animate: true,
+    });
 
     list.forEach(p => {
       const isActive = p.id === activePlaceId;
       const marker   = L.marker([p.lat, p.lng], { icon: buildPlaceMarkerIcon(p, isActive) });
       marker.bindTooltip(p.name, { direction: 'top', offset: [0, -48], className: 'place-tooltip' });
-      marker._placeId    = p.id;
-      marker._place      = p;
+      marker._placeId = p.id;
+      marker._place   = p;
       marker.on('click', () => focusPlace(p.id, marker));
-      marker.addTo(map);
+      clusterGroup.addLayer(marker);
       markers.push(marker);
       if (isActive) activeMarker = marker;
     });
+
+    clusterGroup.addTo(map);
   }
 
   /* ── Active marker clear helper ─────────────────── */
@@ -430,7 +457,8 @@
     const title  = document.getElementById('panelTitle'); if (title)  title.textContent  = p.name;
     const cat    = document.getElementById('panelCat');   if (cat)    cat.textContent    = p.categoryLabel + (p.subcategory ? ' · ' + p.subcategory : '');
     const loc    = document.getElementById('panelLoc');   if (loc)    loc.textContent    = p.city ? p.city + ', Georgia' : 'Georgia';
-    const rating = document.getElementById('panelRating'); if (rating) rating.textContent = p.rating ? (p.rating + ' rating') : '';
+    const rating = document.getElementById('panelRating'); if (rating) rating.innerHTML  = p.rating ? renderStars(p.rating) + ' <span style="font-size:0.72rem;opacity:.7">(' + p.rating + ')</span>' : '';
+    const desc   = document.getElementById('panelDesc');  if (desc)   desc.textContent   = p.shortDescription || '';
     const detail = document.getElementById('panelDetailBtn');
     if (detail) detail.href = p.source === 'businesses' ? 'business.html?id=' + encodeURIComponent(p.id) : '#';
     const maps = document.getElementById('panelMapBtn');
@@ -662,9 +690,57 @@
       renderMap();
     }));
     const search = document.getElementById('mapSearchInput');
+    const dropdown = document.getElementById('mapSearchDropdown');
     if (search && !search.dataset.mapSearchBound) {
       search.dataset.mapSearchBound = '1';
-      search.addEventListener('input', e => { currentSearch = e.target.value || ''; renderMap(); });
+      let acIndex = -1;
+      function closeDropdown() {
+        if (dropdown) { dropdown.innerHTML = ''; dropdown.classList.remove('open'); }
+        acIndex = -1;
+      }
+      function openDropdown(q) {
+        if (!dropdown || !q) { closeDropdown(); return; }
+        const matches = allPlaces.filter(p =>
+          (p.name + ' ' + p.categoryLabel + ' ' + p.city).toLowerCase().includes(q.toLowerCase())
+        ).slice(0, 8);
+        if (!matches.length) { closeDropdown(); return; }
+        const st = s => getPlaceMarkerStyle(s);
+        dropdown.innerHTML = matches.map((p, i) =>
+          '<div class="map-search-suggestion" data-idx="' + i + '" data-id="' + esc(p.id) + '">'
+          + '<span class="sug-icon">' + (p.icon || st(p).icon || '📍') + '</span>'
+          + '<span class="sug-text"><span class="sug-name">' + esc(p.name) + '</span>'
+          + '<span class="sug-cat">' + esc(p.categoryLabel) + (p.city ? ' · ' + esc(p.city) : '') + '</span></span>'
+          + '</div>'
+        ).join('');
+        dropdown.classList.add('open');
+        dropdown.querySelectorAll('.map-search-suggestion').forEach(item => {
+          item.addEventListener('mousedown', e => {
+            e.preventDefault();
+            const place = matches[Number(item.dataset.idx)];
+            if (!place) return;
+            search.value = place.name;
+            currentSearch = '';
+            closeDropdown();
+            renderMap();
+            focusPlace(place.id);
+          });
+        });
+        acIndex = -1;
+      }
+      search.addEventListener('input', e => {
+        currentSearch = e.target.value || '';
+        renderMap();
+        openDropdown(currentSearch);
+      });
+      search.addEventListener('keydown', e => {
+        const items = dropdown ? dropdown.querySelectorAll('.map-search-suggestion') : [];
+        if (!items.length) return;
+        if (e.key === 'ArrowDown') { e.preventDefault(); acIndex = Math.min(acIndex + 1, items.length - 1); items.forEach((el, i) => el.classList.toggle('active', i === acIndex)); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); acIndex = Math.max(acIndex - 1, 0); items.forEach((el, i) => el.classList.toggle('active', i === acIndex)); }
+        else if (e.key === 'Enter' && acIndex >= 0) { items[acIndex].dispatchEvent(new MouseEvent('mousedown')); }
+        else if (e.key === 'Escape') { closeDropdown(); }
+      });
+      search.addEventListener('blur', () => { setTimeout(closeDropdown, 150); });
     }
   }
 
@@ -690,7 +766,7 @@
   /* ── Map style toggle ───────────────────────────── */
   function getMapStyle() {
     const v = localStorage.getItem('gh_map_style');
-    return TILE_LAYERS[v] ? v : 'vivid';
+    return TILE_LAYERS[v] ? v : 'dark';
   }
 
   function applyMapStyle(styleName) {

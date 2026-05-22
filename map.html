@@ -31,6 +31,8 @@
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="navbar.css">
   <link rel="stylesheet" href="map.css">
@@ -93,9 +95,10 @@
   <div class="map-sidebar">
     <div class="map-sidebar-header">
       <h3>🗺️ Explore on Map</h3>
-      <div class="map-search">
-        <input type="text" id="mapSearchInput" placeholder="Search places...">
+      <div class="map-search" style="position:relative">
+        <input type="text" id="mapSearchInput" placeholder="Search places..." autocomplete="off">
         <button><i class="fas fa-search"></i></button>
+        <div id="mapSearchDropdown" class="map-search-dropdown"></div>
       </div>
     </div>
 
@@ -137,6 +140,7 @@
           <span id="panelLoc"></span>
           <span id="panelRating"></span>
         </div>
+        <div id="panelDesc" class="panel-desc"></div>
         <div id="panelGoogleSection" style="display:none"></div>
         <div style="display:flex;gap:8px">
           <a id="panelDetailBtn" href="javascript:void(0)" aria-disabled="true" class="btn btn-primary btn-sm" style="flex:1;justify-content:center">
@@ -152,6 +156,7 @@
 </div>
 
 <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script defer src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <script type="module" src="firebase-config.js"></script>
 <script defer src="config.js"></script>
   <script defer src="api-client.js"></script>
