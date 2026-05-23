@@ -7,7 +7,7 @@
 
   var PATH = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   var PAGE = document.body && document.body.dataset ? document.body.dataset.ghPage : '';
-  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], followedBusinessIds: [], bizFeedPosts: [], bizFeedUnsub: null, audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null, openCommentPids: {}, cachedComments: {}, cachedReplies: {}, feedTab: 'foryou', feedUnsub: null, feedRenderId: 0, userCity: null };
+  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], followedBusinessIds: [], closeFriendIds: [], bizFeedPosts: [], bizFeedUnsub: null, audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null, openCommentPids: {}, cachedComments: {}, cachedReplies: {}, feedTab: 'foryou', feedUnsub: null, feedRenderId: 0, userCity: null };
 
   /* ── User cache (instant topbar, no flash) ──────────────── */
   var USER_CACHE_KEY = 'gh_uc1';
@@ -330,6 +330,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(visibility === 'onlyme' || visibility === 'only_me') return !!(u && author === u.uid);
     if(visibility === 'friends') return !!(u && (author === u.uid || state.friendIds.indexOf(author) > -1));
     if(visibility === 'followers') return !!(u && (author === u.uid || state.followingIds.indexOf(author) > -1));
+    if(visibility === 'close_friends'){
+      if(!u) return false;
+      if(author === u.uid) return true;
+      var cf = p.closeFriendIds;
+      return !!(cf && cf.indexOf(u.uid) > -1);
+    }
     return true;
   }
 
@@ -351,7 +357,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       fs().getDocs(fs().query(fs().collection(db(),'businessFollowers'), fs().where('userId','==',u.uid), fs().limit(200))).then(function(snap){
         var ids=[]; snap.forEach(function(d){ var biz=(d.data()||{}).businessId; if(biz) ids.push(biz); });
         state.followedBusinessIds = ids;
-      }).catch(function(){ state.followedBusinessIds=[]; })
+      }).catch(function(){ state.followedBusinessIds=[]; }),
+      fs().getDocs(fs().collection(db(),'users',u.uid,'closeFriends')).then(function(snap){
+        var ids=[]; snap.forEach(function(d){ ids.push(d.id); });
+        state.closeFriendIds = ids;
+      }).catch(function(){ state.closeFriendIds=[]; })
     ]).then(function(){ state.audienceLoaded = true; if(typeof onChange === 'function') onChange(); });
   }
 
@@ -431,7 +441,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       ['feed','feed.html','fa-house','მთავარი Feed'],['places','places.html','fa-location-dot','რუკა / Places'],['business','business.html','fa-store','Businesses'],['groups','groups.html','fa-users','Groups'],['events','events.html','fa-calendar-xmark','Events'],['messages','messages.html','fa-comment-dots','Messages'],['notifications','notifications.html','fa-bell','Notifications'],['rewards','rewards.html','fa-gift','Rewards / Points'],['challenges','challenges.html','fa-trophy','Challenges'],['services','services.html','fa-grip','Services'],['realestate','real-estate.html','fa-house-chimney','Real Estate'],['learning','learning.html','fa-graduation-cap','Learning'],['creators','creators.html','fa-camera-retro','Creators'],['trust','trust.html','fa-shield-halved','Trust / Safety'],['admin','admin.html','fa-user-shield','Admin Panel']
     ];
     items.splice(Math.max(items.length - 1, 0), 0, ['settings','settings.html','fa-gear','Settings']);
-    return '<aside class="gh-left"><nav class="gh-panel">'+items.map(function(it){return '<a class="gh-nav-item '+(active===it[0]?'active':'')+'" href="'+it[1]+'"><i class="fas '+it[2]+'"></i><span>'+it[3]+'</span></a>';}).join('')+'<button class="gh-nav-tour-btn" data-start-tour><i class="fas fa-question-circle"></i><span>How GeoHub works</span></button>'+'</nav></aside>';
+    return '<aside class="gh-left"><nav class="gh-panel">'+items.map(function(it){return '<a class="gh-nav-item '+(active===it[0]?'active':'')+'" href="'+it[1]+'"><i class="fas '+it[2]+'"></i><span>'+it[3]+'</span></a>';}).join('')+'<button class="gh-nav-item" onclick="window.openCloseFriendsModal&&window.openCloseFriendsModal()" style="background:none;border:none;cursor:pointer;width:100%;text-align:left"><i class="fas fa-star"></i><span>Close Friends</span></button>'+'<button class="gh-nav-tour-btn" data-start-tour><i class="fas fa-question-circle"></i><span>How GeoHub works</span></button>'+'</nav></aside>';
   }
 
   function rightRail(extra){
@@ -988,7 +998,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div id="ghCmpMediaGrid" class="gh-cmp-media-grid"></div>'+
       '</div>'+
       '<div class="gh-cmp-footer-row">'+
-        '<select class="gh-select gh-cmp-vis-select" id="ghPostVisibility"><option value="public">🌍 Public</option><option value="friends">👥 Friends</option><option value="onlyme">🔒 Only me</option></select>'+
+        '<select class="gh-select gh-cmp-vis-select" id="ghPostVisibility"><option value="public">🌍 Public</option><option value="friends">👥 Friends</option><option value="followers">👁 Followers</option><option value="close_friends">⭐ Close Friends</option><option value="onlyme">🔒 Only Me</option></select>'+
       '</div>'+
       '<div class="gh-cmp-toolbar">'+
         '<button class="gh-cmp-tool" id="ghPickPostImage" type="button" title="Add photos"><i class="fas fa-image"></i><span>Photo</span></button>'+
@@ -1628,7 +1638,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var authorAttrs = authorId ? ' data-user-profile="'+esc(authorId)+'"' : '';
     var avatarAttrs = authorActor ? ' data-post-author-avatar data-actor-type="'+esc(authorActor.type)+'" data-actor-id="'+esc(authorActor.id)+'" aria-label="'+esc(name)+'"' : '';
     if(p.targetType && p.targetId) target='<div class="gh-post-target"><i class="fas '+iconFor(p.targetType)+'"></i>'+esc(labelFor(p.targetType))+'</div>';
-    var privacyIcon = (p.visibility==='onlyme'||p.visibility==='only_me') ? 'fa-lock' : ((p.visibility==='friends'||p.visibility==='followers') ? 'fa-user-group' : 'fa-earth-europe');
+    var privacyIcon = (p.visibility==='onlyme'||p.visibility==='only_me') ? 'fa-lock' : ((p.visibility==='friends'||p.visibility==='followers') ? 'fa-user-group' : (p.visibility==='close_friends' ? 'fa-star' : 'fa-earth-europe'));
 
     // "posted on BusinessName" for visitor posts inside a biz context
     var bizPostedOnHtml = (bizCtx && biz && p.authorType==='user')
@@ -1762,6 +1772,93 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       boxes.forEach(function(box){ box.innerHTML = rxHtml; });
     }).catch(function(){});
   }
+
+  // ── CLOSE FRIENDS MODAL ────────────────────────────────────────────────
+  function openCloseFriendsModal() {
+    var u = authUser();
+    if (!u) { requireLogin(); return; }
+    if (!fs() || !db()) return;
+
+    modal('⭐ Close Friends',
+      '<p class="gh-muted" style="font-size:.82rem;margin-bottom:12px">Close Friends see posts you share with ⭐. Your list is private — they\'re not notified.</p>' +
+      '<div id="ghCfList"><i class="fas fa-circle-notch fa-spin gh-muted"></i></div>',
+      '<button class="gh-btn ghost" data-close-modal>Done</button>',
+      'ghCfModal');
+
+    // Load friends + closeFriends in parallel
+    Promise.all([
+      fs().getDocs(fs().query(fs().collection(db(),'friends'), fs().where('users','array-contains',u.uid), fs().limit(100))),
+      fs().getDocs(fs().collection(db(),'users',u.uid,'closeFriends'))
+    ]).then(function(results) {
+      var friendSnap = results[0], cfSnap = results[1];
+      var cfSet = {};
+      cfSnap.forEach(function(d) { cfSet[d.id] = true; });
+
+      var friendUids = [];
+      friendSnap.forEach(function(d) {
+        var arr = (d.data().users || []);
+        arr.forEach(function(id) { if (id !== u.uid) friendUids.push(id); });
+      });
+
+      var box = document.getElementById('ghCfList');
+      if (!box) return;
+      if (!friendUids.length) {
+        box.innerHTML = '<div class="gh-empty" style="min-height:80px"><i class="fas fa-user-friends"></i><h3>No friends yet</h3><p>Add friends first, then add them to your Close Friends list.</p></div>';
+        return;
+      }
+
+      // Fetch profiles
+      return Promise.all(friendUids.map(function(uid) {
+        return fs().getDoc(fs().doc(db(),'users',uid)).then(function(s) {
+          return s.exists() ? Object.assign({ uid: uid }, s.data()) : { uid: uid, fullName: 'GeoHub User', avatar: '' };
+        }).catch(function() { return { uid: uid, fullName: 'GeoHub User', avatar: '' }; });
+      })).then(function(profiles) {
+        // Sort: close friends first
+        profiles.sort(function(a,b) { return (cfSet[b.uid]?1:0) - (cfSet[a.uid]?1:0); });
+        box.innerHTML = '<div class="gh-cf-list">' + profiles.map(function(p) {
+          var name = p.fullName || p.displayName || p.name || 'GeoHub User';
+          var av = p.avatar || p.photoURL || '';
+          var isCf = !!cfSet[p.uid];
+          return '<div class="gh-cf-row" data-cf-uid="'+esc(p.uid)+'">' +
+            '<a href="'+esc('profile.html?id='+encodeURIComponent(p.uid))+'" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex:1;min-width:0">' +
+            '<span class="gh-avatar" style="flex-shrink:0">'+(av?img(av,name):esc(initials(name)))+'</span>' +
+            '<span style="color:var(--gh-text);font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(name)+'</span>' +
+            '</a>' +
+            '<button class="gh-cf-star-btn'+(isCf?' active':'')+'" data-cf-uid="'+esc(p.uid)+'" title="'+(isCf?'Remove from Close Friends':'Add to Close Friends')+'">' +
+            (isCf ? '⭐ Close Friend' : '☆ Add') +
+            '</button>' +
+            '</div>';
+        }).join('') + '</div>';
+
+        // Star button click handler
+        box.addEventListener('click', function(e) {
+          var btn = e.target.closest('.gh-cf-star-btn');
+          if (!btn) return;
+          var uid2 = btn.dataset.cfUid;
+          var wasActive = btn.classList.contains('active');
+          if (wasActive) {
+            GS().removeFromCloseFriends(uid2, function() {
+              cfSet[uid2] = false;
+              btn.classList.remove('active');
+              btn.innerHTML = '☆ Add';
+              btn.title = 'Add to Close Friends';
+            });
+          } else {
+            GS().addToCloseFriends(uid2, function() {
+              cfSet[uid2] = true;
+              btn.classList.add('active');
+              btn.innerHTML = '⭐ Close Friend';
+              btn.title = 'Remove from Close Friends';
+            });
+          }
+        });
+      });
+    }).catch(function(err) {
+      var box = document.getElementById('ghCfList');
+      if (box) box.innerHTML = '<div class="gh-empty" style="min-height:80px">Error loading friends.</div>';
+    });
+  }
+  window.openCloseFriendsModal = openCloseFriendsModal;
 
   function openWhoReactedModal(pid) {
     if(!fs() || !db()) return;
@@ -2083,7 +2180,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var avHtml = av
       ? '<img src="'+esc(av)+'" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.style.display=\'none\'">'
       : esc(initials(name));
-    var privacyIcon = (p.visibility==='onlyme'||p.visibility==='only_me') ? 'fa-lock' : ((p.visibility==='friends'||p.visibility==='followers') ? 'fa-user-group' : 'fa-earth-europe');
+    var privacyIcon = (p.visibility==='onlyme'||p.visibility==='only_me') ? 'fa-lock' : ((p.visibility==='friends'||p.visibility==='followers') ? 'fa-user-group' : (p.visibility==='close_friends' ? 'fa-star' : 'fa-earth-europe'));
     var imgUrl = p.imageUrl || p.mediaUrl || p.photoUrl || '';
     var authorHref = authorId ? profileLink(authorId) : '#';
     return '<div class="gh-shared-embed">'+
@@ -2412,8 +2509,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-form-grid" style="margin-top:8px">' +
         '<select class="gh-select" id="ghShareVisibility">' +
           '<option value="public">🌍 Public</option>' +
-          '<option value="friends">👥 Friends / Followers</option>' +
-          '<option value="onlyme">🔒 Only me</option>' +
+          '<option value="friends">👥 Friends</option>' +
+          '<option value="close_friends">⭐ Close Friends</option>' +
+          '<option value="onlyme">🔒 Only Me</option>' +
         '</select>' +
       '</div>' +
       '<div class="gh-shared-preview" data-shared-post="'+esc(pid)+'" style="margin-top:10px"><i class="fas fa-circle-notch fa-spin gh-muted"></i></div>';
@@ -2743,8 +2841,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var body = '<textarea class="gh-textarea" id="ghEditPostText" rows="4" style="min-height:100px">'+esc(currentText)+'</textarea>'+
         '<div style="margin-top:10px"><select class="gh-select" id="ghEditPostVis">'+
           '<option value="public"'+(currentVis==='public'?' selected':'')+'>🌍 Public</option>'+
-          '<option value="friends"'+(currentVis==='friends'?' selected':'')+'>👥 Friends / Followers</option>'+
-          '<option value="onlyme"'+(currentVis==='onlyme'?' selected':'')+'>🔒 Only me</option>'+
+          '<option value="friends"'+(currentVis==='friends'?' selected':'')+'>👥 Friends</option>'+
+          '<option value="followers"'+(currentVis==='followers'?' selected':'')+'>👁 Followers</option>'+
+          '<option value="close_friends"'+(currentVis==='close_friends'?' selected':'')+'>⭐ Close Friends</option>'+
+          '<option value="onlyme"'+(currentVis==='onlyme'?' selected':'')+'>🔒 Only Me</option>'+
         '</select></div>';
       modal('Edit post', body,
         '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSavePostEdit">Save</button>',

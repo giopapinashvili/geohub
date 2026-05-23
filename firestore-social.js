@@ -1098,7 +1098,8 @@
       if (!text && !mediaUrl) return toast('Write something or choose a photo first!', 'error');
       requireAuth(function (user) {
         var me = meData() || {};
-        addDoc(collection(db, 'posts'), {
+        var vis = (extra && extra.visibility) || 'public';
+        var postData = {
           text: text,
           mediaUrl: mediaUrl || null,
           mediaType: extra && extra.mediaType ? extra.mediaType : null,
@@ -1112,21 +1113,76 @@
           likeCount: 0,
           commentCount: 0,
           shareCount: 0,
-          visibility: (extra && extra.visibility) || 'public',
+          visibility: vis,
           status: 'active',
           sharedPostId: extra && extra.sharedPostId ? extra.sharedPostId : null,
           targetType: extra && extra.targetType ? extra.targetType : 'user',
           targetId: extra && extra.targetId ? extra.targetId : user.uid,
           createdAt: serverTimestamp()
-        }).then(function (ref) {
-          toast('Post published!');
-          awardPoints(20, 'Create post', 'post', ref.id);
-          if (callback) callback(ref.id);
-        }).catch(function (err) {
-          console.error('[GeoSocial] createPost', err);
-          toast('Failed to post. Try again.', 'error');
-        });
+        };
+        // For close_friends posts: snapshot the author's closeFriends UIDs onto the post
+        var doCreate = function(data) {
+          return addDoc(collection(db, 'posts'), data).then(function (ref) {
+            toast('Post published!');
+            awardPoints(20, 'Create post', 'post', ref.id);
+            if (callback) callback(ref.id);
+          }).catch(function (err) {
+            console.error('[GeoSocial] createPost', err);
+            toast('Failed to post. Try again.', 'error');
+          });
+        };
+        if (vis === 'close_friends') {
+          getDocs(collection(db, 'users', user.uid, 'closeFriends'))
+            .then(function(snap) {
+              var cfUids = [user.uid];
+              snap.forEach(function(d) { cfUids.push(d.id); });
+              postData.closeFriendIds = cfUids;
+              return doCreate(postData);
+            }).catch(function() { return doCreate(postData); });
+        } else {
+          doCreate(postData);
+        }
       });
+    }
+
+    // ── CLOSE FRIENDS ────────────────────────────────────────────────────
+    function addToCloseFriends(targetUid, callback) {
+      requireAuth(function(user) {
+        var ref = doc(db, 'users', user.uid, 'closeFriends', targetUid);
+        setDoc(ref, { uid: targetUid, addedAt: serverTimestamp() }, { merge: true })
+          .then(function() { toast('⭐ Added to Close Friends'); if (callback) callback(true); })
+          .catch(function(err) { toast('Error', 'error'); if (callback) callback(null, err); });
+      });
+    }
+
+    function removeFromCloseFriends(targetUid, callback) {
+      requireAuth(function(user) {
+        var ref = doc(db, 'users', user.uid, 'closeFriends', targetUid);
+        deleteDoc(ref)
+          .then(function() { toast('Removed from Close Friends'); if (callback) callback(false); })
+          .catch(function(err) { if (callback) callback(null, err); });
+      });
+    }
+
+    function listenCloseFriends(callback) {
+      var uid = currentUid();
+      if (!uid) { callback([]); return function() {}; }
+      return onSnapshot(collection(db, 'users', uid, 'closeFriends'), function(snap) {
+        var uids = [];
+        snap.forEach(function(d) { uids.push(d.id); });
+        callback(uids);
+      }, function() { callback([]); });
+    }
+
+    function getCloseFriends(callback) {
+      var uid = currentUid();
+      if (!uid) { callback([]); return; }
+      getDocs(collection(db, 'users', uid, 'closeFriends'))
+        .then(function(snap) {
+          var uids = [];
+          snap.forEach(function(d) { uids.push(d.id); });
+          callback(uids);
+        }).catch(function() { callback([]); });
     }
 
     function listenFeed(callback, limitN) {
@@ -3771,6 +3827,10 @@
       listenFriendRequests:   listenFriendRequests,
       listenFriends:          listenFriends,
       removeFriend:           removeFriend,
+      addToCloseFriends:      addToCloseFriends,
+      removeFromCloseFriends: removeFromCloseFriends,
+      listenCloseFriends:     listenCloseFriends,
+      getCloseFriends:        getCloseFriends,
       cancelFriendRequest:    cancelFriendRequest,
       listenSentFriendRequests: listenSentFriendRequests,
       addCommentReply:        addCommentReply,
