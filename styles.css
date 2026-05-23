@@ -2266,6 +2266,24 @@ textarea {
   display: flex;
   flex-direction: column;
 }
+.map-sidebar-pull {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 0 8px;
+  cursor: grab;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, #0b1120 0%, #0d1526 100%);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.map-sidebar-pull span {
+  width: 34px; height: 3px;
+  background: rgba(255,255,255,.28);
+  border-radius: 2px;
+}
 .map-sidebar-header {
   padding: 18px 20px 16px;
   border-bottom: 1px solid rgba(255,255,255,.06);
@@ -3369,14 +3387,37 @@ a, button, .btn, .card, .listing-card {
     display: none;
   }
   .map-page-layout {
-    flex-direction: column;
+    flex-direction: row;
   }
   .map-sidebar {
-    width: 100%;
-    height: 50vh;
+    position: fixed !important;
+    bottom: 0; left: 0; right: 0;
+    width: 100% !important;
+    height: 82vh;
+    z-index: 1100;
+    border-radius: 20px 20px 0 0;
+    border-right: none;
+    border-top: 1px solid rgba(255,255,255,.09);
+    box-shadow: 0 -16px 56px rgba(0,0,0,.72);
+    transform: translateY(calc(100% - 220px));
+    transition: transform 0.36s cubic-bezier(.22,.68,0,1.12);
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .map-sidebar.sb-expanded {
+    transform: translateY(0) !important;
+  }
+  .map-sidebar-pull {
+    display: flex;
+  }
+  .map-sidebar-header {
+    position: sticky;
+    top: 0;
   }
   .map-container {
-    height: 50vh;
+    width: 100%;
+    height: calc(100vh - var(--navbar-height, 68px));
+    flex: none;
   }
   .dashboard-page {
     flex-direction: column;

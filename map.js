@@ -884,6 +884,53 @@
     return TILE_LAYERS[v] ? v : 'dark';
   }
 
+  /* ── Mobile sidebar bottom sheet ────────────────── */
+  function buildMobileSidebar() {
+    if (window.innerWidth > 768) return;
+    const sidebar = document.getElementById('mapSidebar');
+    const pull    = document.getElementById('sidebarPull');
+    if (!sidebar || !pull) return;
+
+    let startY = 0, dy = 0, dragging = false, wasExpanded = false;
+
+    pull.addEventListener('touchstart', e => {
+      startY = e.touches[0].clientY;
+      dy = 0;
+      dragging = true;
+      wasExpanded = sidebar.classList.contains('sb-expanded');
+      sidebar.style.transition = 'none';
+    }, { passive: true });
+
+    document.addEventListener('touchmove', e => {
+      if (!dragging) return;
+      dy = e.touches[0].clientY - startY;
+      const h = sidebar.offsetHeight;
+      const peekOffset = 220;
+      const base = wasExpanded ? 0 : (h - peekOffset);
+      const clamped = Math.max(0, Math.min(h - peekOffset, base + dy));
+      sidebar.style.transform = 'translateY(' + clamped + 'px)';
+    }, { passive: true });
+
+    document.addEventListener('touchend', () => {
+      if (!dragging) return;
+      dragging = false;
+      sidebar.style.transition = '';
+      sidebar.style.transform = '';
+      if (wasExpanded) {
+        if (dy > 90) sidebar.classList.remove('sb-expanded');
+        else sidebar.classList.add('sb-expanded');
+      } else {
+        if (dy < -60) sidebar.classList.add('sb-expanded');
+      }
+    });
+
+    pull.addEventListener('click', () => sidebar.classList.toggle('sb-expanded'));
+
+    document.getElementById('map').addEventListener('click', () => {
+      if (sidebar.classList.contains('sb-expanded')) sidebar.classList.remove('sb-expanded');
+    });
+  }
+
   /* ── Check-ins ──────────────────────────────────── */
   function loadUserCheckins() {
     const GF = window.GeoFirebase, user = window.GeoCurrentUser;
@@ -891,6 +938,22 @@
     GF.fs.getDocs(GF.fs.collection(GF.db, 'users', user.uid, 'checkins'))
       .then(snap => snap.forEach(d => userCheckins.add(d.id)))
       .catch(() => {});
+  }
+
+  function _haversineKm(lat1, lng1, lat2, lng2) {
+    const R = 6371, toR = Math.PI / 180;
+    const dLat = (lat2 - lat1) * toR, dLng = (lng2 - lng1) * toR;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*toR)*Math.cos(lat2*toR)*Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function _doCheckin(placeId, p, GF, user) {
+    const ts = GF.fs.serverTimestamp(), inc = GF.fs.increment(1);
+    GF.fs.setDoc(GF.fs.doc(GF.db, 'placeCheckins', placeId), { count: inc, lastCheckin: ts }, { merge: true }).catch(() => {});
+    GF.fs.setDoc(GF.fs.doc(GF.db, 'users', user.uid, 'checkins', placeId), { count: inc, lastCheckin: ts, placeName: p.name, city: p.city || '' }, { merge: true }).catch(() => {});
+    userCheckins.add(placeId);
+    if (navigator.vibrate) navigator.vibrate([30, 40, 60]);
+    _syncCheckinBtn(placeId, true);
   }
 
   window.checkInToPlace = function () {
@@ -902,14 +965,22 @@
     if (!GF || !user) { alert('Please sign in to check in.'); return; }
     if (userCheckins.has(placeId)) return;
     const p = allPlaces.find(x => x.id === placeId);
-    const placeName = p ? p.name : '';
-    const city = p ? (p.city || '') : '';
-    const ts = GF.fs.serverTimestamp(), inc = GF.fs.increment(1);
-    GF.fs.setDoc(GF.fs.doc(GF.db, 'placeCheckins', placeId), { count: inc, lastCheckin: ts }, { merge: true }).catch(() => {});
-    GF.fs.setDoc(GF.fs.doc(GF.db, 'users', user.uid, 'checkins', placeId), { count: inc, lastCheckin: ts, placeName, city }, { merge: true }).catch(() => {});
-    userCheckins.add(placeId);
-    if (navigator.vibrate) navigator.vibrate([30, 40, 60]);
-    _syncCheckinBtn(placeId, true);
+    if (!p) return;
+
+    if (!navigator.geolocation) { _doCheckin(placeId, p, GF, user); return; }
+
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const dist = _haversineKm(pos.coords.latitude, pos.coords.longitude, p.lat, p.lng);
+        if (dist > 0.5) {
+          alert('You need to be within 500m of this place to check in. (You are ' + Math.round(dist * 1000) + 'm away)');
+          return;
+        }
+        _doCheckin(placeId, p, GF, user);
+      },
+      () => alert('Please enable location access to check in.'),
+      { timeout: 8000, maximumAge: 60000, enableHighAccuracy: false }
+    );
   };
 
   function _syncCheckinBtn(placeId, checkedIn) {
@@ -1367,6 +1438,7 @@
       buildRotationHint();
       buildLiveFriendsUI();
       initHeatmapLayer();
+      buildMobileSidebar();
       renderMap();
 
       // Re-cluster on viewport change
