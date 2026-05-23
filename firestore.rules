@@ -840,6 +840,16 @@ service cloud.firestore {
       allow delete: if isAdmin() || (signedIn() && uid() in resource.data.users);
     }
 
+    // ── LIVE LOCATION (GPS sharing between friends) ───────────────────────────
+    // Users write only their own doc; friends can read if sharing='friends'.
+    // Sharing 'off' docs are readable by owner only to allow cleanup.
+    match /userLocations/{userId} {
+      allow read: if isOwner(userId) || signedIn();
+      allow create, update: if isOwner(userId)
+        && request.resource.data.get('uid', '') == userId;
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
     // ── FRIENDSHIPS (new canonical collection) ────────────────────────────────
     // friendshipId = sorted([uid1, uid2]).join('_')
     match /friendships/{friendshipId} {

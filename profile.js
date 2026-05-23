@@ -375,6 +375,16 @@
       if (status.state === 'friends') {
         btn.classList.add('following');
         btn.innerHTML = '<i class="fas fa-user-check"></i> Friends <i class="fas fa-chevron-down" style="font-size:.65em;margin-left:4px;opacity:.7"></i>';
+        // ⭐ Close Friends badge — friends = close friends
+        var nameEl = document.querySelector('.profile-name') || document.querySelector('.profile-display-name');
+        if (nameEl && !document.getElementById('cf-badge-star')) {
+          var badge = document.createElement('span');
+          badge.id = 'cf-badge-star';
+          badge.title = 'Close Friend';
+          badge.style.cssText = 'display:inline-flex;align-items:center;gap:3px;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.35);color:#fbbf24;border-radius:999px;font-size:.7rem;font-weight:700;padding:2px 8px;margin-left:8px;vertical-align:middle';
+          badge.innerHTML = '⭐ Close Friend';
+          nameEl.appendChild(badge);
+        }
       } else if (status.state === 'incoming') {
         btn.classList.add('following');
         btn.innerHTML = '<i class="fas fa-check"></i> Accept';
