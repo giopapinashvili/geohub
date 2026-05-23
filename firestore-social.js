@@ -1132,10 +1132,14 @@
           });
         };
         if (vis === 'close_friends') {
-          getDocs(collection(db, 'users', user.uid, 'closeFriends'))
+          // close_friends = your friends list (friends collection)
+          getDocs(query(collection(db, 'friends'), where('users', 'array-contains', user.uid), limit(200)))
             .then(function(snap) {
               var cfUids = [user.uid];
-              snap.forEach(function(d) { cfUids.push(d.id); });
+              snap.forEach(function(d) {
+                var arr = (d.data().users || []);
+                arr.forEach(function(id) { if (id !== user.uid) cfUids.push(id); });
+              });
               postData.closeFriendIds = cfUids;
               return doCreate(postData);
             }).catch(function() { return doCreate(postData); });
@@ -1143,46 +1147,6 @@
           doCreate(postData);
         }
       });
-    }
-
-    // ── CLOSE FRIENDS ────────────────────────────────────────────────────
-    function addToCloseFriends(targetUid, callback) {
-      requireAuth(function(user) {
-        var ref = doc(db, 'users', user.uid, 'closeFriends', targetUid);
-        setDoc(ref, { uid: targetUid, addedAt: serverTimestamp() }, { merge: true })
-          .then(function() { toast('⭐ Added to Close Friends'); if (callback) callback(true); })
-          .catch(function(err) { toast('Error', 'error'); if (callback) callback(null, err); });
-      });
-    }
-
-    function removeFromCloseFriends(targetUid, callback) {
-      requireAuth(function(user) {
-        var ref = doc(db, 'users', user.uid, 'closeFriends', targetUid);
-        deleteDoc(ref)
-          .then(function() { toast('Removed from Close Friends'); if (callback) callback(false); })
-          .catch(function(err) { if (callback) callback(null, err); });
-      });
-    }
-
-    function listenCloseFriends(callback) {
-      var uid = currentUid();
-      if (!uid) { callback([]); return function() {}; }
-      return onSnapshot(collection(db, 'users', uid, 'closeFriends'), function(snap) {
-        var uids = [];
-        snap.forEach(function(d) { uids.push(d.id); });
-        callback(uids);
-      }, function() { callback([]); });
-    }
-
-    function getCloseFriends(callback) {
-      var uid = currentUid();
-      if (!uid) { callback([]); return; }
-      getDocs(collection(db, 'users', uid, 'closeFriends'))
-        .then(function(snap) {
-          var uids = [];
-          snap.forEach(function(d) { uids.push(d.id); });
-          callback(uids);
-        }).catch(function() { callback([]); });
     }
 
     function listenFeed(callback, limitN) {
@@ -3827,10 +3791,6 @@
       listenFriendRequests:   listenFriendRequests,
       listenFriends:          listenFriends,
       removeFriend:           removeFriend,
-      addToCloseFriends:      addToCloseFriends,
-      removeFromCloseFriends: removeFromCloseFriends,
-      listenCloseFriends:     listenCloseFriends,
-      getCloseFriends:        getCloseFriends,
       cancelFriendRequest:    cancelFriendRequest,
       listenSentFriendRequests: listenSentFriendRequests,
       addCommentReply:        addCommentReply,

@@ -358,10 +358,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var ids=[]; snap.forEach(function(d){ var biz=(d.data()||{}).businessId; if(biz) ids.push(biz); });
         state.followedBusinessIds = ids;
       }).catch(function(){ state.followedBusinessIds=[]; }),
-      fs().getDocs(fs().collection(db(),'users',u.uid,'closeFriends')).then(function(snap){
-        var ids=[]; snap.forEach(function(d){ ids.push(d.id); });
-        state.closeFriendIds = ids;
-      }).catch(function(){ state.closeFriendIds=[]; })
+      Promise.resolve().then(function(){ state.closeFriendIds = state.friendIds.slice(); })
     ]).then(function(){ state.audienceLoaded = true; if(typeof onChange === 'function') onChange(); });
   }
 
@@ -441,7 +438,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       ['feed','feed.html','fa-house','მთავარი Feed'],['places','places.html','fa-location-dot','რუკა / Places'],['business','business.html','fa-store','Businesses'],['groups','groups.html','fa-users','Groups'],['events','events.html','fa-calendar-xmark','Events'],['messages','messages.html','fa-comment-dots','Messages'],['notifications','notifications.html','fa-bell','Notifications'],['rewards','rewards.html','fa-gift','Rewards / Points'],['challenges','challenges.html','fa-trophy','Challenges'],['services','services.html','fa-grip','Services'],['realestate','real-estate.html','fa-house-chimney','Real Estate'],['learning','learning.html','fa-graduation-cap','Learning'],['creators','creators.html','fa-camera-retro','Creators'],['trust','trust.html','fa-shield-halved','Trust / Safety'],['admin','admin.html','fa-user-shield','Admin Panel']
     ];
     items.splice(Math.max(items.length - 1, 0), 0, ['settings','settings.html','fa-gear','Settings']);
-    return '<aside class="gh-left"><nav class="gh-panel">'+items.map(function(it){return '<a class="gh-nav-item '+(active===it[0]?'active':'')+'" href="'+it[1]+'"><i class="fas '+it[2]+'"></i><span>'+it[3]+'</span></a>';}).join('')+'<button class="gh-nav-item" onclick="window.openCloseFriendsModal&&window.openCloseFriendsModal()" style="background:none;border:none;cursor:pointer;width:100%;text-align:left"><i class="fas fa-star"></i><span>Close Friends</span></button>'+'<button class="gh-nav-tour-btn" data-start-tour><i class="fas fa-question-circle"></i><span>How GeoHub works</span></button>'+'</nav></aside>';
+    return '<aside class="gh-left"><nav class="gh-panel">'+items.map(function(it){return '<a class="gh-nav-item '+(active===it[0]?'active':'')+'" href="'+it[1]+'"><i class="fas '+it[2]+'"></i><span>'+it[3]+'</span></a>';}).join('')+'<button class="gh-nav-tour-btn" data-start-tour><i class="fas fa-question-circle"></i><span>How GeoHub works</span></button>'+'</nav></aside>';
   }
 
   function rightRail(extra){
@@ -1772,93 +1769,6 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       boxes.forEach(function(box){ box.innerHTML = rxHtml; });
     }).catch(function(){});
   }
-
-  // ── CLOSE FRIENDS MODAL ────────────────────────────────────────────────
-  function openCloseFriendsModal() {
-    var u = authUser();
-    if (!u) { requireLogin(); return; }
-    if (!fs() || !db()) return;
-
-    modal('⭐ Close Friends',
-      '<p class="gh-muted" style="font-size:.82rem;margin-bottom:12px">Close Friends see posts you share with ⭐. Your list is private — they\'re not notified.</p>' +
-      '<div id="ghCfList"><i class="fas fa-circle-notch fa-spin gh-muted"></i></div>',
-      '<button class="gh-btn ghost" data-close-modal>Done</button>',
-      'ghCfModal');
-
-    // Load friends + closeFriends in parallel
-    Promise.all([
-      fs().getDocs(fs().query(fs().collection(db(),'friends'), fs().where('users','array-contains',u.uid), fs().limit(100))),
-      fs().getDocs(fs().collection(db(),'users',u.uid,'closeFriends'))
-    ]).then(function(results) {
-      var friendSnap = results[0], cfSnap = results[1];
-      var cfSet = {};
-      cfSnap.forEach(function(d) { cfSet[d.id] = true; });
-
-      var friendUids = [];
-      friendSnap.forEach(function(d) {
-        var arr = (d.data().users || []);
-        arr.forEach(function(id) { if (id !== u.uid) friendUids.push(id); });
-      });
-
-      var box = document.getElementById('ghCfList');
-      if (!box) return;
-      if (!friendUids.length) {
-        box.innerHTML = '<div class="gh-empty" style="min-height:80px"><i class="fas fa-user-friends"></i><h3>No friends yet</h3><p>Add friends first, then add them to your Close Friends list.</p></div>';
-        return;
-      }
-
-      // Fetch profiles
-      return Promise.all(friendUids.map(function(uid) {
-        return fs().getDoc(fs().doc(db(),'users',uid)).then(function(s) {
-          return s.exists() ? Object.assign({ uid: uid }, s.data()) : { uid: uid, fullName: 'GeoHub User', avatar: '' };
-        }).catch(function() { return { uid: uid, fullName: 'GeoHub User', avatar: '' }; });
-      })).then(function(profiles) {
-        // Sort: close friends first
-        profiles.sort(function(a,b) { return (cfSet[b.uid]?1:0) - (cfSet[a.uid]?1:0); });
-        box.innerHTML = '<div class="gh-cf-list">' + profiles.map(function(p) {
-          var name = p.fullName || p.displayName || p.name || 'GeoHub User';
-          var av = p.avatar || p.photoURL || '';
-          var isCf = !!cfSet[p.uid];
-          return '<div class="gh-cf-row" data-cf-uid="'+esc(p.uid)+'">' +
-            '<a href="'+esc('profile.html?id='+encodeURIComponent(p.uid))+'" style="display:flex;align-items:center;gap:10px;text-decoration:none;flex:1;min-width:0">' +
-            '<span class="gh-avatar" style="flex-shrink:0">'+(av?img(av,name):esc(initials(name)))+'</span>' +
-            '<span style="color:var(--gh-text);font-weight:600;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(name)+'</span>' +
-            '</a>' +
-            '<button class="gh-cf-star-btn'+(isCf?' active':'')+'" data-cf-uid="'+esc(p.uid)+'" title="'+(isCf?'Remove from Close Friends':'Add to Close Friends')+'">' +
-            (isCf ? '⭐ Close Friend' : '☆ Add') +
-            '</button>' +
-            '</div>';
-        }).join('') + '</div>';
-
-        // Star button click handler
-        box.addEventListener('click', function(e) {
-          var btn = e.target.closest('.gh-cf-star-btn');
-          if (!btn) return;
-          var uid2 = btn.dataset.cfUid;
-          var wasActive = btn.classList.contains('active');
-          if (wasActive) {
-            GS().removeFromCloseFriends(uid2, function() {
-              cfSet[uid2] = false;
-              btn.classList.remove('active');
-              btn.innerHTML = '☆ Add';
-              btn.title = 'Add to Close Friends';
-            });
-          } else {
-            GS().addToCloseFriends(uid2, function() {
-              cfSet[uid2] = true;
-              btn.classList.add('active');
-              btn.innerHTML = '⭐ Close Friend';
-              btn.title = 'Remove from Close Friends';
-            });
-          }
-        });
-      });
-    }).catch(function(err) {
-      var box = document.getElementById('ghCfList');
-      if (box) box.innerHTML = '<div class="gh-empty" style="min-height:80px">Error loading friends.</div>';
-    });
-  }
-  window.openCloseFriendsModal = openCloseFriendsModal;
 
   function openWhoReactedModal(pid) {
     if(!fs() || !db()) return;
