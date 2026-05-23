@@ -1608,7 +1608,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     draw();
   }
 
-  var RX_EMOJIS = { like:'👍', love:'❤️', haha:'😂', wow:'😮', sad:'😢', angry:'😡' };
+  var RX_EMOJIS = { love:'❤️', haha:'😂', wow:'😮', sad:'😢', angry:'😡', clap:'👏' };
 
   function postCard(p, options){
     options=options||{};
@@ -1743,9 +1743,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       linkPrevHtml+
       (p.sharedPostId?'<div class="gh-shared-preview" data-shared-post="'+esc(p.sharedPostId)+'"><i class="fas fa-share"></i><div><strong>Shared post</strong><span>Loading original post...</span></div></div>':'')+
       viewCountHtml+
-      '<div class="gh-post-stats"><span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'"><i class="fas fa-thumbs-up"></i> <b data-like-count>'+totalRx+'</b>'+(totalRx?' people reacted':'')+'</button></span><span><button class="gh-stats-btn" data-open-comments-btn><b data-comment-count>'+Math.max(0,Number(p.commentCount||0))+'</b> comments</button> · <button class="gh-stats-btn" data-open-shares-btn><b data-share-count>'+Number(p.shareCount||0)+'</b> shares</button></span></div>'+
+      '<div class="gh-post-stats"><span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'">❤️ <b data-like-count>'+totalRx+'</b>'+(totalRx?' people reacted':'')+'</button></span><span><button class="gh-stats-btn" data-open-comments-btn><b data-comment-count>'+Math.max(0,Number(p.commentCount||0))+'</b> comments</button> · <button class="gh-stats-btn" data-open-shares-btn><b data-share-count>'+Number(p.shareCount||0)+'</b> shares</button></span></div>'+
       '<div class="gh-rx-breakdown" data-rx-pid="'+esc(pid)+'"></div>'+
-      '<div class="gh-post-actions"><span class="gh-like-wrap"><button class="gh-act" data-like><i class="fas fa-thumbs-up"></i> Like</button><div class="gh-reaction-strip"><button data-reaction="like">👍</button><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button></div></span><button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> Comment</button><button class="gh-act" data-share><i class="fas fa-share"></i> Share</button><button class="gh-act" data-save><i class="fas fa-bookmark"></i> Save</button></div>'+
+      '<div class="gh-post-actions"><span class="gh-like-wrap"><button class="gh-act" data-like>❤️ Like</button><div class="gh-reaction-strip"><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button><button data-reaction="clap">👏</button></div></span><button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> Comment</button><button class="gh-act" data-share><i class="fas fa-share"></i> Share</button><button class="gh-act" data-save><i class="fas fa-bookmark"></i> Save</button></div>'+
       '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+cmtFormHtml+'</div>'+
     '</article>';
   }
@@ -1926,7 +1926,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         else if (photoUrl) openMediaLightbox(photoUrl, allPhotos, photoIdx);
         return;
       }
-      if(e.target.closest('[data-like]')){ if(!requireLogin()) return; setReaction(pid,'like',card); }
+      if(e.target.closest('[data-like]') && !e.target.closest('.gh-reaction-strip')){ if(!requireLogin()) return; setReaction(pid,'love',card); }
       var ro=e.target.closest('[data-reaction]'); if(ro){ if(!requireLogin()) return; setReaction(pid,ro.dataset.reaction,card); }
       if(e.target.closest('[data-comment-toggle]')){ toggleComments(card,pid); }
       if(e.target.closest('[data-open-comments-btn]')){ openFocusedPost(pid); return; }
@@ -1938,7 +1938,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var cr=e.target.closest('[data-copy-post-link]'); if(cr && navigator.clipboard){ navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast('Post link copied');}); }
       var wrBtn=e.target.closest('[data-who-reacted]'); if(wrBtn){ openWhoReactedModal(wrBtn.dataset.whoReacted); }
       var pv=e.target.closest('[data-poll-vote]'); if(pv){ if(!requireLogin()) return; submitPollVote(pv.dataset.pid, pv.dataset.optId, card); }
-      var clBtn=e.target.closest('[data-comment-like]'); if(clBtn){ if(!requireLogin()) return; toggleCommentReaction(pid, clBtn.dataset.commentId, clBtn.dataset.commentReaction||'like', clBtn); }
+      var clBtn=e.target.closest('[data-comment-like]'); if(clBtn){ if(!requireLogin()) return; toggleCommentReaction(pid, clBtn.dataset.commentId, clBtn.dataset.commentReaction||'love', clBtn); }
       var eb=e.target.closest('[data-edit-comment]'); if(eb){ e.preventDefault(); openFeedCommentEditor(pid, eb.dataset.commentId, eb); }
       var db2=e.target.closest('[data-delete-comment]'); if(db2){ e.preventDefault();
         if(!confirm('Delete this comment?')) return;
@@ -2068,7 +2068,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var targets=pid?Array.from(document.querySelectorAll('[data-post-id="'+CSS.escape(pid)+'"]')):[card];
     targets.forEach(function(c){
       var like=c.querySelector('[data-like]');
-      if(like){ like.classList.toggle('active',!!type); like.innerHTML=(type==='love'?'❤️ Love':type==='haha'?'😂 Haha':type==='wow'?'😮 Wow':type==='sad'?'😢 Sad':type==='angry'?'😡 Angry':'<i class="fas fa-thumbs-up"></i> Like'); }
+      if(like){ like.classList.toggle('active',!!type); like.innerHTML=(type==='love'?'❤️ Love':type==='haha'?'😂 Haha':type==='wow'?'😮 Wow':type==='sad'?'😢 Sad':type==='angry'?'😡 Angry':type==='clap'?'👏 Clap':'❤️ Like'); }
       $all('[data-reaction]',c).forEach(function(b){ b.classList.toggle('active',b.dataset.reaction===type); });
     });
   }
@@ -2173,7 +2173,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       (canDelete ? ' · <button type="button" class="gh-cmt-act" data-delete-comment data-comment-id="'+esc(c.id)+'" data-post-id="'+esc(pid)+'">Delete</button>' : '');
     var rxCount = Number(c.reactionCount||0);
     var rxType = c._myRxType||'';
-    var rxLabel = rxType ? (RX_EMOJIS[rxType]+' '+(rxCount||1)) : '👍 '+(rxCount||'Like');
+    var rxLabel = rxType ? (RX_EMOJIS[rxType]+' '+(rxCount||1)) : '❤️ '+(rxCount||'Like');
     return '<div class="gh-comment-row" data-comment-id="'+esc(c.id)+'">'+
       avAnchor+
       '<div class="gh-comment-main"><div class="gh-comment-bubble"><strong>'+nameAnchor+'</strong><span class="gh-cmt-text" data-cmt-text>'+esc(c.text||'')+'</span></div>'+
@@ -2195,7 +2195,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         return f.deleteDoc(rxRef).then(function(){
           return f.updateDoc(commentRef,{reactionCount:f.increment(-1)}).catch(function(){});
         }).then(function(){
-          if(btn){ btn.classList.remove('active'); btn.dataset.commentReaction='like'; btn.textContent='👍 Like'; }
+          if(btn){ btn.classList.remove('active'); btn.dataset.commentReaction='love'; btn.textContent='❤️ Like'; }
         });
       }
       var write=f.setDoc(rxRef,{userId:u.uid,type:type,createdAt:f.serverTimestamp()},{merge:true});

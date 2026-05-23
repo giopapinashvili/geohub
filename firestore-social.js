@@ -1168,7 +1168,7 @@
         work.then(function () {
           if (nextLiked) {
             getPostOwner(postId).then(function (ownerId) {
-              return createNotification(ownerId, 'like', (meData() || {}).name + ' liked your post', 'Someone liked your post.', 'feed.html#post-' + postId, { postId: postId }, 'like_' + (meData() || {}).uid + '_' + postId);
+              return createNotification(ownerId, 'like', (meData() || {}).name + ' reacted ❤️ to your post', 'Someone reacted to your post.', 'feed.html#post-' + postId, { postId: postId }, 'like_' + (meData() || {}).uid + '_' + postId);
             });
           }
           if (callback) callback(nextLiked);
