@@ -49,6 +49,7 @@
   let activeMarkerEl = null, activePlaceId = null;
   let cameraMode = 'explore';
   let heatmapVisible = false;
+  let userCheckins = new Set();
 
   const CAMERA_MODES = {
     explore:    { label: '🔍 Explore',   pitch: 0,  bearing: 0 },
@@ -530,6 +531,7 @@
         });
       }
     }
+    _setupCheckinBtn('panelCheckinBtn', p.id);
     if (panel) panel.classList.add('open');
   }
   window.focusPlace = focusPlace;
@@ -576,6 +578,7 @@
       + '<div class="mpc-btns">'
       + '<a id="mpcDetail" href="#" class="btn btn-primary btn-sm" style="flex:1;justify-content:center"><i class="fas fa-info-circle"></i> Details</a>'
       + '<a id="mpcDirections" href="#" target="_blank" rel="noopener" class="btn btn-ghost btn-sm"><i class="fas fa-directions"></i></a>'
+      + '<button id="mpcCheckinBtn" class="map-checkin-btn map-checkin-btn--sm" onclick="checkInToPlace()"><i class="fas fa-map-pin"></i></button>'
       + '</div></div>';
     document.body.appendChild(div);
     _attachMobileCardDrag(div);
@@ -686,6 +689,7 @@
         });
       }
     }
+    _setupCheckinBtn('mpcCheckinBtn', p.id);
     card.classList.add('open');
   }
 
@@ -878,6 +882,55 @@
   function getMapStyle() {
     const v = localStorage.getItem('gh_map_style');
     return TILE_LAYERS[v] ? v : 'dark';
+  }
+
+  /* ── Check-ins ──────────────────────────────────── */
+  function loadUserCheckins() {
+    const GF = window.GeoFirebase, user = window.GeoCurrentUser;
+    if (!GF || !user) return;
+    GF.fs.getDocs(GF.fs.collection(GF.db, 'users', user.uid, 'checkins'))
+      .then(snap => snap.forEach(d => userCheckins.add(d.id)))
+      .catch(() => {});
+  }
+
+  window.checkInToPlace = function () {
+    const btn = document.getElementById('panelCheckinBtn');
+    const mBtn = document.getElementById('mpcCheckinBtn');
+    const placeId = (btn && btn.dataset.placeId) || (mBtn && mBtn.dataset.placeId);
+    if (!placeId) return;
+    const GF = window.GeoFirebase, user = window.GeoCurrentUser;
+    if (!GF || !user) { alert('Please sign in to check in.'); return; }
+    if (userCheckins.has(placeId)) return;
+    const p = allPlaces.find(x => x.id === placeId);
+    const placeName = p ? p.name : '';
+    const city = p ? (p.city || '') : '';
+    const ts = GF.fs.serverTimestamp(), inc = GF.fs.increment(1);
+    GF.fs.setDoc(GF.fs.doc(GF.db, 'placeCheckins', placeId), { count: inc, lastCheckin: ts }, { merge: true }).catch(() => {});
+    GF.fs.setDoc(GF.fs.doc(GF.db, 'users', user.uid, 'checkins', placeId), { count: inc, lastCheckin: ts, placeName, city }, { merge: true }).catch(() => {});
+    userCheckins.add(placeId);
+    if (navigator.vibrate) navigator.vibrate([30, 40, 60]);
+    _syncCheckinBtn(placeId, true);
+  };
+
+  function _syncCheckinBtn(placeId, checkedIn) {
+    [document.getElementById('panelCheckinBtn'), document.getElementById('mpcCheckinBtn')].forEach(btn => {
+      if (!btn || btn.dataset.placeId !== placeId) return;
+      btn.classList.toggle('checked-in', checkedIn);
+      btn.innerHTML = checkedIn
+        ? '<i class="fas fa-check-circle"></i> Checked In'
+        : '<i class="fas fa-map-pin"></i> Check In';
+    });
+  }
+
+  function _setupCheckinBtn(id, placeId) {
+    const btn = document.getElementById(id); if (!btn) return;
+    btn.dataset.placeId = placeId;
+    btn.style.display = '';
+    const ci = userCheckins.has(placeId);
+    btn.classList.toggle('checked-in', ci);
+    btn.innerHTML = ci
+      ? '<i class="fas fa-check-circle"></i> Checked In'
+      : '<i class="fas fa-map-pin"></i> Check In';
   }
 
   /* ── Heatmap ────────────────────────────────────── */
@@ -1323,10 +1376,12 @@
       if (window.GeoFirebase) {
         loadPlaceCategoriesFromFirestore();
         loadRealPlaces();
+        loadUserCheckins();
       } else {
         window.addEventListener('GeoFirebaseReady', () => {
           loadPlaceCategoriesFromFirestore();
           loadRealPlaces();
+          loadUserCheckins();
         }, { once: true });
       }
     });

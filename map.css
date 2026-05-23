@@ -254,6 +254,30 @@ body, html { height: 100%; overflow: hidden; }
       z-index: 10;
     }
     .gh-map-marker-wrap:hover .gh-map-tooltip { opacity: 1; }
+    /* ── Check-in button ───────────────────────────────────────── */
+    .map-checkin-btn {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      width: 100%; margin-top: 10px; padding: 10px 0;
+      background: rgba(16,185,129,.12);
+      border: 1px solid rgba(16,185,129,.35);
+      border-radius: 12px;
+      color: #10b981;
+      font-size: 0.85rem; font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .map-checkin-btn:hover { background: rgba(16,185,129,.2); }
+    .map-checkin-btn.checked-in {
+      background: rgba(16,185,129,.18);
+      border-color: rgba(16,185,129,.5);
+      color: #34d399;
+      cursor: default;
+    }
+    .map-checkin-btn--sm {
+      width: auto; min-width: 38px; height: 38px;
+      padding: 0; margin-top: 0; border-radius: 10px;
+      font-size: 0.9rem;
+    }
     /* ── Camera mode controls ──────────────────────────────────── */
     .map-camera-wrap {
       position: absolute;
