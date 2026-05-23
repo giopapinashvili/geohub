@@ -995,7 +995,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div id="ghCmpMediaGrid" class="gh-cmp-media-grid"></div>'+
       '</div>'+
       '<div class="gh-cmp-footer-row">'+
-        '<select class="gh-select gh-cmp-vis-select" id="ghPostVisibility"><option value="public">🌍 Public</option><option value="friends">👥 Friends</option><option value="followers">👁 Followers</option><option value="close_friends">⭐ Close Friends</option><option value="onlyme">🔒 Only Me</option></select>'+
+        '<select class="gh-select gh-cmp-vis-select" id="ghPostVisibility"><option value="public">🌍 Public</option><option value="followers">👁 Followers</option><option value="close_friends">⭐ Close Friends</option><option value="onlyme">🔒 Only Me</option></select>'+
       '</div>'+
       '<div class="gh-cmp-toolbar">'+
         '<button class="gh-cmp-tool" id="ghPickPostImage" type="button" title="Add photos"><i class="fas fa-image"></i><span>Photo</span></button>'+
@@ -1635,7 +1635,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var authorAttrs = authorId ? ' data-user-profile="'+esc(authorId)+'"' : '';
     var avatarAttrs = authorActor ? ' data-post-author-avatar data-actor-type="'+esc(authorActor.type)+'" data-actor-id="'+esc(authorActor.id)+'" aria-label="'+esc(name)+'"' : '';
     if(p.targetType && p.targetId) target='<div class="gh-post-target"><i class="fas '+iconFor(p.targetType)+'"></i>'+esc(labelFor(p.targetType))+'</div>';
-    var privacyIcon = (p.visibility==='onlyme'||p.visibility==='only_me') ? 'fa-lock' : ((p.visibility==='friends'||p.visibility==='followers') ? 'fa-user-group' : (p.visibility==='close_friends' ? 'fa-star' : 'fa-earth-europe'));
+    var privacyIcon = (p.visibility==='onlyme'||p.visibility==='only_me') ? 'fa-lock' : (p.visibility==='followers' ? 'fa-user-group' : ((p.visibility==='close_friends'||p.visibility==='friends') ? 'fa-star' : 'fa-earth-europe'));
 
     // "posted on BusinessName" for visitor posts inside a biz context
     var bizPostedOnHtml = (bizCtx && biz && p.authorType==='user')
@@ -2090,7 +2090,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var avHtml = av
       ? '<img src="'+esc(av)+'" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.style.display=\'none\'">'
       : esc(initials(name));
-    var privacyIcon = (p.visibility==='onlyme'||p.visibility==='only_me') ? 'fa-lock' : ((p.visibility==='friends'||p.visibility==='followers') ? 'fa-user-group' : (p.visibility==='close_friends' ? 'fa-star' : 'fa-earth-europe'));
+    var privacyIcon = (p.visibility==='onlyme'||p.visibility==='only_me') ? 'fa-lock' : (p.visibility==='followers' ? 'fa-user-group' : ((p.visibility==='close_friends'||p.visibility==='friends') ? 'fa-star' : 'fa-earth-europe'));
     var imgUrl = p.imageUrl || p.mediaUrl || p.photoUrl || '';
     var authorHref = authorId ? profileLink(authorId) : '#';
     return '<div class="gh-shared-embed">'+
@@ -2419,7 +2419,6 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-form-grid" style="margin-top:8px">' +
         '<select class="gh-select" id="ghShareVisibility">' +
           '<option value="public">🌍 Public</option>' +
-          '<option value="friends">👥 Friends</option>' +
           '<option value="close_friends">⭐ Close Friends</option>' +
           '<option value="onlyme">🔒 Only Me</option>' +
         '</select>' +
@@ -2751,9 +2750,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var body = '<textarea class="gh-textarea" id="ghEditPostText" rows="4" style="min-height:100px">'+esc(currentText)+'</textarea>'+
         '<div style="margin-top:10px"><select class="gh-select" id="ghEditPostVis">'+
           '<option value="public"'+(currentVis==='public'?' selected':'')+'>🌍 Public</option>'+
-          '<option value="friends"'+(currentVis==='friends'?' selected':'')+'>👥 Friends</option>'+
           '<option value="followers"'+(currentVis==='followers'?' selected':'')+'>👁 Followers</option>'+
-          '<option value="close_friends"'+(currentVis==='close_friends'?' selected':'')+'>⭐ Close Friends</option>'+
+          '<option value="close_friends"'+(currentVis==='close_friends'||currentVis==='friends'?' selected':'')+'>⭐ Close Friends</option>'+
           '<option value="onlyme"'+(currentVis==='onlyme'?' selected':'')+'>🔒 Only Me</option>'+
         '</select></div>';
       modal('Edit post', body,
