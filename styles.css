@@ -2254,7 +2254,7 @@ textarea {
 .map-page-layout {
   display: flex;
   height: 100vh;
-  padding-top: 68px;
+  padding-top: var(--navbar-height, 68px);
   overflow: hidden;
 }
 .map-sidebar {
