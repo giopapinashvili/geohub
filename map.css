@@ -696,3 +696,29 @@ body, html { height: 100%; overflow: hidden; }
       pointer-events: none; white-space: nowrap;
     }
     .map-checkin-toast--show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+
+/* ── Open / Closed now badges ───────────────────────────────── */
+.map-open-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: .62rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  vertical-align: middle;
+  margin-left: 5px;
+  letter-spacing: .2px;
+  text-transform: uppercase;
+}
+.map-open-badge.open {
+  background: rgba(16,185,129,.18);
+  color: #34d399;
+  border: 1px solid rgba(16,185,129,.3);
+}
+.map-open-badge.closed {
+  background: rgba(239,68,68,.12);
+  color: #f87171;
+  border: 1px solid rgba(239,68,68,.25);
+}

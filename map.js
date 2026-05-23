@@ -95,6 +95,23 @@
 
   function esc(v) { return String(v == null ? '' : v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
+  function isOpenNow(wh) {
+    if (!wh) return null;
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const h = wh[days[new Date().getDay()]];
+    if (!h || h.closed) return false;
+    const now = new Date(), cur = now.getHours() * 60 + now.getMinutes();
+    const parse = t => { const p = (t || '0:0').split(':'); return parseInt(p[0], 10) * 60 + parseInt(p[1], 10); };
+    return cur >= parse(h.open) && cur < parse(h.close);
+  }
+  function openBadgeHtml(wh) {
+    const s = isOpenNow(wh);
+    if (s === null) return '';
+    return s
+      ? '<span class="map-open-badge open">Open</span>'
+      : '<span class="map-open-badge closed">Closed</span>';
+  }
+
   function categorySortValue(id, data) {
     const knownIndex = PLACE_CATEGORY_ORDER.indexOf(id);
     if (knownIndex > -1) return knownIndex;
@@ -323,7 +340,8 @@
       priceFrom:        data.priceFrom || '',
       currency:         data.currency || '',
       googlePlaceId:    data.googlePlaceId || '',
-      icon:             data.icon || ''
+      icon:             data.icon || '',
+      workingHours:     data.workingHours || null
     };
   }
 
@@ -421,10 +439,11 @@
       results.innerHTML = list.length
         ? list.map(p => {
             const st = getPlaceMarkerStyle(p);
+            const badge = openBadgeHtml(p.workingHours);
             return '<div class="map-result-card" data-id="' + esc(p.id) + '">'
               + '<div class="map-result-icon" style="background:' + (st.color || '#22c55e') + '22;border-color:' + (st.color || '#22c55e') + '44">' + (p.icon || st.icon || '📍') + '</div>'
               + '<div class="map-result-info">'
-              + '<div class="map-result-name">' + esc(p.name) + '</div>'
+              + '<div class="map-result-name">' + esc(p.name) + (badge ? ' ' + badge : '') + '</div>'
               + '<div class="map-result-cat">' + esc(p.categoryLabel) + (p.city ? ' · ' + esc(p.city) : '') + '</div>'
               + (p.rating ? '<div class="map-result-footer"><span class="rating-display">' + renderStars(p.rating) + '</span></div>' : '')
               + '</div></div>';
@@ -532,7 +551,7 @@
       }
     }
     const title  = document.getElementById('panelTitle'); if (title)  title.textContent  = p.name;
-    const cat    = document.getElementById('panelCat');   if (cat)    cat.textContent    = p.categoryLabel + (p.subcategory ? ' · ' + p.subcategory : '');
+    const cat    = document.getElementById('panelCat');   if (cat)    cat.innerHTML      = esc(p.categoryLabel + (p.subcategory ? ' · ' + p.subcategory : '')) + openBadgeHtml(p.workingHours);
     const loc    = document.getElementById('panelLoc');   if (loc)    loc.textContent    = p.city ? p.city + ', Georgia' : 'Georgia';
     const rating = document.getElementById('panelRating'); if (rating) rating.innerHTML  = p.rating ? renderStars(p.rating) + ' <span style="font-size:0.72rem;opacity:.7">(' + p.rating + ')</span>' : '';
     const desc   = document.getElementById('panelDesc');  if (desc)   desc.textContent   = p.shortDescription || '';
