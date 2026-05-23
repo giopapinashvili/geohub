@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Place Updates — GeoHub</title>
+  <meta name="description" content="Latest posts and updates from cafes, restaurants, bars and all places on GeoHub Georgia.">
+  <link rel="canonical" href="https://geohub.pages.dev/place-feed.html">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Place Updates — GeoHub">
+  <meta property="og:description" content="Latest posts from cafes, restaurants, bars and places in Georgia.">
+  <meta property="og:url" content="https://geohub.pages.dev/place-feed.html">
+  <meta property="og:image" content="https://geohub.pages.dev/icons/icon-512.png">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css">
+  </noscript>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="navbar.css">
+  <link rel="stylesheet" href="chat-popup.css">
+  <link rel="stylesheet" href="responsive-polish.css">
+  <link rel="stylesheet" href="place-feed.css">
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+</head>
+<body data-gh-page="place-feed">
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar" style="position:fixed;top:0;left:0;right:0;z-index:1100">
+  <a href="index.html" class="navbar-brand">
+    <div class="logo-icon">🌍</div>
+    <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
+  </a>
+  <ul class="navbar-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="feed.html">Discover</a></li>
+    <li><a href="places.html">Places</a></li>
+    <li><a href="place-feed.html" class="active">Place Updates</a></li>
+    <li><a href="rewards.html">Rewards</a></li>
+    <li><a href="map.html">Map</a></li>
+    <li><a href="add-business.html">Add Business</a></li>
+    <li><a href="dashboard.html">Dashboard</a></li>
+  </ul>
+  <div class="navbar-actions">
+    <a href="profile.html" class="btn-ghost-nav"><i class="fas fa-user-circle"></i> Profile</a>
+    <a href="auth.html?tab=signup" class="btn btn-primary btn-sm">Sign Up</a>
+  </div>
+  <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html">Home</a><a href="feed.html">Discover</a><a href="places.html">Places</a><a href="place-feed.html">Place Updates</a><a href="rewards.html">Rewards</a><a href="map.html">Map</a><a href="add-business.html">Add Business</a><a href="dashboard.html">Dashboard</a>
+</div>
+
+<!-- PAGE -->
+<div class="pf-page">
+
+  <!-- Hero -->
+  <div class="pf-hero">
+    <div class="pf-hero-inner">
+      <h1 class="pf-hero-title">🗺️ Place Updates</h1>
+      <p class="pf-hero-sub">სიახლეები კაფეებიდან, რესტორნებიდან, ბარებიდან და ყველა ადგილიდან</p>
+    </div>
+  </div>
+
+  <!-- Sticky filters -->
+  <div class="pf-filter-bar" id="pfFilterBar">
+    <div class="pf-chips" id="pfChips">
+      <!-- populated by JS -->
+    </div>
+  </div>
+
+  <!-- Feed -->
+  <div class="pf-feed-wrap">
+    <div class="pf-feed" id="pfFeed">
+      <!-- populated by JS -->
+    </div>
+    <button class="pf-load-more" id="pfLoadMore" style="display:none">
+      <i class="fas fa-rotate-right"></i> Load more
+    </button>
+    <div class="pf-empty" id="pfEmpty" style="display:none">
+      <div class="pf-empty-icon">🗺️</div>
+      <div class="pf-empty-title">No posts yet</div>
+      <div class="pf-empty-sub">Be the first to post from a place</div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="pf-toast" id="pfToast"></div>
+
+<script type="module" src="firebase-config.js"></script>
+<script defer src="config.js"></script>
+<script defer src="api-client.js"></script>
+<script defer src="main.js"></script>
+<script defer src="account.js"></script>
+<script defer src="place-feed.js"></script>
+<script defer src="nav-cleanup.js"></script>
+<script defer src="mobile-nav.js"></script>
+<script defer src="chat-popup.js"></script>
+<script defer src="geohub-production-stabilization-v1.js"></script>
+<script defer src="responsive-polish.js"></script>
+</body>
+</html>
