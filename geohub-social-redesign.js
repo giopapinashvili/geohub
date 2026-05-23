@@ -3620,11 +3620,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             });
           }
         } else {
-          // foryou: merge in page posts from followed businesses not already in the main feed
-          if(state.followedBusinessIds.length && state.bizFeedPosts.length){
+          // foryou: merge in all business page posts not already in the main feed
+          if(state.bizFeedPosts.length){
             var seen={}; visible.forEach(function(p){ seen[p.id]=true; });
             state.bizFeedPosts.forEach(function(p){
-              if(!seen[p.id] && state.followedBusinessIds.indexOf(p.targetId||'')>-1 && canSeePost(p)){
+              if(!seen[p.id] && canSeePost(p)){
                 seen[p.id]=true; visible.push(p);
               }
             });
@@ -3681,16 +3681,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           if(renderId!==state.feedRenderId) return;
           lastPosts=posts;
           paint();
-        }, 20);
-        // Listen for page posts from any business so we can filter by followed businesses client-side
+        }, 50);
+        // Listen for page posts from any business so we can merge into For You feed
         if(state.bizFeedUnsub){ try{state.bizFeedUnsub();}catch(e){} state.bizFeedUnsub=null; }
         state.bizFeedUnsub=fs().onSnapshot(
-          fs().query(fs().collection(db(),'posts'), fs().where('targetType','==','business'), fs().limit(30)),
+          fs().query(fs().collection(db(),'posts'), fs().where('targetType','==','business'), fs().limit(50)),
           function(snap){
             if(renderId!==state.feedRenderId){ if(state.bizFeedUnsub){ try{state.bizFeedUnsub();}catch(e){} state.bizFeedUnsub=null; } return; }
             var arr=[]; snap.forEach(function(d){ arr.push(Object.assign({id:d.id},d.data())); });
             state.bizFeedPosts=arr;
-            if(state.followedBusinessIds.length) paint();
+            paint();
           },
           function(){ state.bizFeedPosts=[]; }
         );

@@ -1161,7 +1161,7 @@
     }
 
     function listenFeed(callback, limitN) {
-      var q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(Math.min(Number(limitN) || 20, 30)));
+      var q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(Math.min(Number(limitN) || 50, 50)));
       return onSnapshot(q, function (snap) {
         var posts = [];
         snap.forEach(function (d) { posts.push(Object.assign({ id: d.id }, d.data())); });
