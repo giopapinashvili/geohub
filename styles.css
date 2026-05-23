@@ -2366,6 +2366,29 @@ textarea {
   font-weight: 600;
   box-shadow: 0 0 10px rgba(16,185,129,.15);
 }
+.map-chip-divider {
+  width: 1px;
+  background: rgba(255,255,255,.12);
+  flex-shrink: 0;
+  margin: 4px 2px;
+  align-self: stretch;
+}
+.map-chip--mood {
+  background: rgba(139,92,246,.06);
+  border-color: rgba(139,92,246,.15);
+  color: rgba(196,181,253,.7);
+}
+.map-chip--mood:hover {
+  background: rgba(139,92,246,.16);
+  border-color: rgba(139,92,246,.4);
+  color: #c4b5fd;
+}
+.map-chip--mood.active {
+  background: linear-gradient(135deg, rgba(139,92,246,.28), rgba(167,139,250,.15));
+  border-color: rgba(139,92,246,.55);
+  color: #c4b5fd;
+  box-shadow: 0 0 10px rgba(139,92,246,.2);
+}
 .map-results {
   flex: 1;
   overflow-y: auto;
@@ -3401,14 +3424,14 @@ a, button, .btn, .card, .listing-card {
     border-right: none;
     border-top: 1px solid rgba(255,255,255,.09);
     box-shadow: 0 -16px 56px rgba(0,0,0,.72);
-    transform: translateY(calc(100% - 220px));
     transition: transform 0.36s cubic-bezier(.22,.68,0,1.12);
     overflow-y: auto;
     overflow-x: hidden;
   }
-  .map-sidebar.sb-expanded {
-    transform: translateY(0) !important;
-  }
+  /* 3 states */
+  .map-sidebar.sb-closed   { transform: translateY(calc(100% - 42px)); }
+  .map-sidebar.sb-peek     { transform: translateY(calc(100% - 220px)); }
+  .map-sidebar.sb-expanded { transform: translateY(0); }
   .map-sidebar-pull {
     display: flex;
   }

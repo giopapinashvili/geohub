@@ -51,6 +51,8 @@
   let heatmapVisible = false;
   let userCheckins = new Set();
   let userMoodVotes = {};
+  let currentMoodFilter = '';
+  let _moodTagCounts = {};   // { placeId: { tagId: count } } — cached from Firestore
 
   const MOOD_TAGS = [
     { id: 'cozy',     label: 'Cozy',             emoji: '🛋️' },
@@ -337,6 +339,10 @@
       if (disabledCategories.size > 0 && disabledCategories.has(catKey)) return false;
       if (currentFilter && p.categoryId !== currentFilter) return false;
       if (currentSubFilter && p.subcategory !== currentSubFilter) return false;
+      if (currentMoodFilter) {
+        const counts = _moodTagCounts[p.id];
+        if (!counts || !counts[currentMoodFilter] || counts[currentMoodFilter] < 1) return false;
+      }
       if (currentSearch) {
         const q = currentSearch.toLowerCase();
         return (p.name + ' ' + p.city + ' ' + p.categoryLabel).toLowerCase().includes(q);
@@ -798,11 +804,18 @@
   function buildCategoryChips() {
     const wrap = document.getElementById('mapChips');
     if (!wrap) return;
-    const allActive = !currentFilter && !currentSubFilter;
+    const allActive = !currentFilter && !currentSubFilter && !currentMoodFilter;
     let html = '<div class="map-chip' + (allActive ? ' active' : '') + '" data-cat="">ყველა</div>';
     usedCategoryEntries().forEach(cat => {
-      html += '<div class="map-chip' + (currentFilter === cat.id && !currentSubFilter ? ' active' : '') + '" data-cat="' + esc(cat.id) + '">'
+      html += '<div class="map-chip' + (currentFilter === cat.id && !currentSubFilter && !currentMoodFilter ? ' active' : '') + '" data-cat="' + esc(cat.id) + '">'
         + esc((cat.icon || '') + ' ' + stripLeadingIcon(cat.icon, cat.labelKa || cat.labelEn || cat.label || cat.id || 'Category'))
+        + '</div>';
+    });
+    // Divider before mood chips
+    html += '<div class="map-chip-divider"></div>';
+    MOOD_TAGS.forEach(tag => {
+      html += '<div class="map-chip map-chip--mood' + (currentMoodFilter === tag.id ? ' active' : '') + '" data-mood="' + esc(tag.id) + '">'
+        + esc(tag.emoji + ' ' + tag.label)
         + '</div>';
     });
     wrap.innerHTML = html;
@@ -811,10 +824,24 @@
 
   function attachFilters() {
     document.querySelectorAll('.map-chip').forEach(chip => chip.addEventListener('click', () => {
+      const moodId = chip.dataset.mood || '';
       document.querySelectorAll('.map-chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
-      currentFilter = chip.dataset.cat || '';
-      currentSubFilter = '';
+      if (moodId) {
+        // Mood tag chip — toggle mood filter, clear category filter
+        currentMoodFilter = currentMoodFilter === moodId ? '' : moodId;
+        if (currentMoodFilter) chip.classList.toggle('active', true);
+        else {
+          chip.classList.remove('active');
+          document.querySelector('.map-chip[data-cat=""]')?.classList.add('active');
+        }
+        currentFilter = '';
+        currentSubFilter = '';
+      } else {
+        currentFilter = chip.dataset.cat || '';
+        currentSubFilter = '';
+        currentMoodFilter = '';
+      }
       window.closePanel(); window.closeMobileCard();
       buildLegend();
       renderMap();
@@ -884,8 +911,16 @@
     }).catch(err => { console.warn('[Map] ' + name, err.message); return []; });
   }
 
+  function loadMoodTagCounts() {
+    const GF = window.GeoFirebase;
+    if (!GF || !GF.db || !GF.fs) return Promise.resolve();
+    return GF.fs.getDocs(GF.fs.collection(GF.db, 'placeMoodTags')).then(snap => {
+      snap.forEach(d => { _moodTagCounts[d.id] = d.data(); });
+    }).catch(() => {});
+  }
+
   function loadRealPlaces() {
-    Promise.all([loadCollection('places'), loadCollection('businesses')]).then(([places, businesses]) => {
+    Promise.all([loadCollection('places'), loadCollection('businesses'), loadMoodTagCounts()]).then(([places, businesses]) => {
       allPlaces = places.concat(businesses);
       buildCategoryChips();
       renderMap();
@@ -898,32 +933,45 @@
     return TILE_LAYERS[v] ? v : 'dark';
   }
 
-  /* ── Mobile sidebar bottom sheet ────────────────── */
+  /* ── Mobile sidebar bottom sheet (3-state: closed / peek / expanded) ── */
   function buildMobileSidebar() {
     if (window.innerWidth > 768) return;
     const sidebar = document.getElementById('mapSidebar');
     const pull    = document.getElementById('sidebarPull');
     if (!sidebar || !pull) return;
 
-    let startY = 0, dy = 0, dragging = false, wasExpanded = false;
+    // Start in peek state
+    sidebar.classList.remove('sb-closed', 'sb-peek', 'sb-expanded');
+    sidebar.classList.add('sb-peek');
+
+    function getState() {
+      if (sidebar.classList.contains('sb-expanded')) return 'expanded';
+      if (sidebar.classList.contains('sb-closed'))   return 'closed';
+      return 'peek';
+    }
+
+    function setState(state) {
+      sidebar.classList.remove('sb-expanded', 'sb-peek', 'sb-closed');
+      sidebar.classList.add('sb-' + state);
+    }
+
+    let startY = 0, dy = 0, dragging = false;
 
     pull.addEventListener('touchstart', e => {
       startY = e.touches[0].clientY;
       dy = 0;
       dragging = true;
-      wasExpanded = sidebar.classList.contains('sb-expanded');
       sidebar.style.transition = 'none';
     }, { passive: true });
 
-    // Attach to pull (not document) so we can preventDefault and stop sidebar scroll
     pull.addEventListener('touchmove', e => {
       if (!dragging) return;
       e.preventDefault();
       dy = e.touches[0].clientY - startY;
       const h = sidebar.offsetHeight;
-      const peekOffset = 220;
-      const base = wasExpanded ? 0 : (h - peekOffset);
-      const clamped = Math.max(0, Math.min(h - peekOffset, base + dy));
+      const state = getState();
+      const base = state === 'expanded' ? 0 : state === 'peek' ? (h - 220) : (h - 42);
+      const clamped = Math.max(0, Math.min(h - 42, base + dy));
       sidebar.style.transform = 'translateY(' + clamped + 'px)';
     }, { passive: false });
 
@@ -932,19 +980,23 @@
       dragging = false;
       sidebar.style.transition = '';
       sidebar.style.transform = '';
-      if (wasExpanded) {
-        if (dy > 90) sidebar.classList.remove('sb-expanded');
-        else sidebar.classList.add('sb-expanded');
-      } else {
-        if (dy < -60) sidebar.classList.add('sb-expanded');
-      }
+      const state = getState();
+      let next = state;
+      if      (state === 'expanded' && dy >  80) next = 'peek';
+      else if (state === 'peek'     && dy < -80) next = 'expanded';
+      else if (state === 'peek'     && dy >  80) next = 'closed';
+      else if (state === 'closed'   && dy < -60) next = 'peek';
+      setState(next);
     });
 
-    pull.addEventListener('click', () => sidebar.classList.toggle('sb-expanded'));
+    pull.addEventListener('click', () => {
+      const s = getState();
+      setState(s === 'closed' ? 'peek' : s === 'peek' ? 'expanded' : 'peek');
+    });
 
     const mapEl = document.getElementById('map');
     if (mapEl) mapEl.addEventListener('click', () => {
-      if (sidebar.classList.contains('sb-expanded')) sidebar.classList.remove('sb-expanded');
+      if (getState() === 'expanded') setState('peek');
     });
   }
 
@@ -1072,6 +1124,10 @@
       if (next > 0) { if (ce) ce.textContent = next; else { const s = document.createElement('span'); s.className = 'mood-tag-count'; s.textContent = next; b.appendChild(s); } }
       else if (ce) ce.remove();
     });
+
+    // Keep local cache in sync for mood filter
+    if (!_moodTagCounts[placeId]) _moodTagCounts[placeId] = {};
+    _moodTagCounts[placeId][tagId] = Math.max(0, (_moodTagCounts[placeId][tagId] || 0) + delta);
 
     const tagUpd = {}; tagUpd[tagId] = GF.fs.increment(delta);
     GF.fs.setDoc(GF.fs.doc(GF.db, 'placeMoodTags', placeId), tagUpd, { merge: true }).catch(() => {});
