@@ -1099,6 +1099,7 @@
       requireAuth(function (user) {
         var me = meData() || {};
         var vis = (extra && extra.visibility) || 'public';
+        var isBizPost = !!(extra && extra.authorType === 'business' && extra.businessId);
         var postData = {
           text: text,
           mediaUrl: mediaUrl || null,
@@ -1108,8 +1109,11 @@
           feeling: extra && extra.feeling ? extra.feeling : '',
           authorId: user.uid,
           userId: user.uid,
-          authorName: me.name || user.displayName || 'GeoHub User',
-          authorAvatar: me.avatar || user.photoURL || '',
+          createdByUid: user.uid,
+          authorName: isBizPost ? (extra.authorName || 'Business') : (me.name || user.displayName || 'GeoHub User'),
+          authorAvatar: isBizPost ? (extra.authorAvatar || '') : (me.avatar || user.photoURL || ''),
+          authorType: isBizPost ? 'business' : 'user',
+          businessId: isBizPost ? extra.businessId : null,
           likeCount: 0,
           commentCount: 0,
           shareCount: 0,
@@ -1118,6 +1122,13 @@
           sharedPostId: extra && extra.sharedPostId ? extra.sharedPostId : null,
           targetType: extra && extra.targetType ? extra.targetType : 'user',
           targetId: extra && extra.targetId ? extra.targetId : user.uid,
+          bgGradient: extra && extra.bgGradient ? extra.bgGradient : null,
+          linkPreview: extra && extra.linkPreview ? extra.linkPreview : null,
+          mentions: extra && extra.mentions ? extra.mentions : [],
+          mediaUrls: extra && extra.mediaUrls && extra.mediaUrls.length ? extra.mediaUrls : (mediaUrl ? [mediaUrl] : []),
+          groupId: extra && extra.groupId ? extra.groupId : null,
+          type: extra && extra.type ? extra.type : null,
+          poll: extra && extra.poll ? extra.poll : null,
           createdAt: serverTimestamp()
         };
         // For close_friends posts: snapshot the author's closeFriends UIDs onto the post
