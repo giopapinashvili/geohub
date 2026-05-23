@@ -93,6 +93,7 @@
     if (section === 'errors')     { loadAdminErrors(); }
     if (section === 'businesses') { loadAdminBusinesses(); }
     if (section === 'placecat')   { loadPlaceCategorySection(); }
+    if (section === 'placeedit')  { _pePopulateCatFilter(); }
     if (section === 'ownership')  { _ownershipEntity = null; _ownershipUser = null; _updateOwnershipSummary(); }
   };
 
@@ -3667,6 +3668,214 @@
   }
 
   /* ── INIT ────────────────────────────────────────────────── */
+  /* ── PLACE EDITING ─────────────────────────────────────── */
+  var _pePlaces    = [];
+  var _peEditingId = null;
+
+  function _pePopulateCatFilter() {
+    var sel = document.getElementById('peFilterCat');
+    if (!sel || sel.children.length > 1) return;
+    var cats = getPlaceCategories();
+    cats.forEach(function(c) {
+      var opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = (c.icon ? c.icon + ' ' : '') + c.label;
+      sel.appendChild(opt);
+    });
+  }
+
+  function _pePopulateEditCatSelect(selectedCatId) {
+    var sel = document.getElementById('peEditCat');
+    if (!sel) return;
+    var cats = getPlaceCategories();
+    sel.innerHTML = '<option value="">— select —</option>';
+    cats.forEach(function(c) {
+      var opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = (c.icon ? c.icon + ' ' : '') + c.label;
+      if (c.id === selectedCatId) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+
+  window.peLoadSubcats = function() {
+    var catSel = document.getElementById('peEditCat');
+    var subSel = document.getElementById('peEditSubcat');
+    if (!catSel || !subSel) return;
+    var catId = catSel.value;
+    subSel.innerHTML = '<option value="">— none —</option>';
+    if (!catId) return;
+    var cats = getPlaceCategories();
+    var cat = cats.find(function(c) { return c.id === catId; });
+    var subs = (cat && cat.subcategories) || [];
+    subs.forEach(function(s) {
+      var opt = document.createElement('option');
+      opt.value = (typeof s === 'object') ? (s.id || '') : s;
+      opt.textContent = (typeof s === 'object') ? (s.labelKa || s.labelEn || s.id || s) : s;
+      subSel.appendChild(opt);
+    });
+  };
+
+  function _renderPlacesForEdit(places) {
+    var el = document.getElementById('pePlacesList');
+    if (!el) return;
+    if (!places.length) {
+      el.innerHTML = '<div style="text-align:center;padding:32px;color:#64748b;font-size:.85rem">No places found. Try different filters.</div>';
+      return;
+    }
+    el.innerHTML = places.map(function(p) {
+      var img = p.imageUrl || p.image || '';
+      var thumb = img
+        ? '<img src="' + escHtmlAdmin(img) + '" style="width:52px;height:38px;object-fit:cover;border-radius:6px;flex-shrink:0" onerror="this.style.display=\'none\'">'
+        : '<div style="width:52px;height:38px;border-radius:6px;background:#1e293b;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">' + escHtmlAdmin(p.icon || '📍') + '</div>';
+      var catLabel  = p.category  || p.categoryId || '—';
+      var cityLabel = p.city || '—';
+      return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)">'
+        + thumb
+        + '<div style="flex:1;min-width:0">'
+        + '<div style="font-weight:700;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escHtmlAdmin(p.name || '(no name)') + '</div>'
+        + '<div style="font-size:.74rem;color:#64748b">' + escHtmlAdmin(cityLabel) + ' · ' + escHtmlAdmin(catLabel) + (p.subcategory ? ' · ' + escHtmlAdmin(p.subcategory) : '') + '</div>'
+        + '</div>'
+        + '<button class="btn btn-ghost btn-sm" onclick=\'openPlaceEditPanel(' + JSON.stringify(p._id) + ')\' style="white-space:nowrap"><i class="fas fa-pen"></i> Edit</button>'
+        + '</div>';
+    }).join('');
+  }
+
+  window.loadPlacesForEdit = function() {
+    var fb = window.GeoFirebase, f = fb && fb.fs;
+    if (!fb || !f) { toast('Firebase not ready', 'rgba(239,68,68,.95)'); return; }
+    var db         = fb.db;
+    var cityFilter = (document.getElementById('peFilterCity')   || {}).value || '';
+    var catFilter  = (document.getElementById('peFilterCat')    || {}).value || '';
+    var search     = ((document.getElementById('peFilterSearch') || {}).value || '').trim().toLowerCase();
+    var statusEl   = document.getElementById('peStatus');
+    var listEl     = document.getElementById('pePlacesList');
+    if (statusEl) statusEl.textContent = 'Loading…';
+    if (listEl)   listEl.innerHTML = '<div style="text-align:center;padding:24px"><i class="fas fa-spinner fa-spin"></i></div>';
+    _pePopulateCatFilter();
+    var constraints = [];
+    if (cityFilter) constraints.push(f.where('city', '==', cityFilter));
+    if (catFilter)  constraints.push(f.where('categoryId', '==', catFilter));
+    constraints.push(f.orderBy('name', 'asc'));
+    f.getDocs(f.query(f.collection(db, 'places'), ...constraints)).then(function(snap) {
+      var places = [];
+      snap.forEach(function(d) { places.push(Object.assign({ _id: d.id }, d.data())); });
+      if (search) places = places.filter(function(p) { return (p.name || '').toLowerCase().indexOf(search) !== -1; });
+      _pePlaces = places;
+      if (statusEl) statusEl.textContent = places.length + ' place(s) found';
+      _renderPlacesForEdit(places);
+    }).catch(function(err) {
+      if (statusEl) statusEl.textContent = 'Error: ' + err.message;
+      if (listEl) listEl.innerHTML = '<div style="color:#f87171;padding:16px">' + escHtmlAdmin(err.message) + '</div>';
+    });
+  };
+
+  window.openPlaceEditPanel = function(placeId) {
+    var p = _pePlaces.find(function(x) { return x._id === placeId; });
+    if (!p) return;
+    _peEditingId = placeId;
+    var panel   = document.getElementById('pePlaceEditPanel');
+    var titleEl = document.getElementById('pePanelTitle');
+    if (titleEl) titleEl.textContent = 'Edit: ' + (p.name || placeId);
+    document.getElementById('peEditId').value   = placeId;
+    document.getElementById('peEditName').value = p.name || '';
+    document.getElementById('peEditDesc').value = p.description || '';
+    var cityEl = document.getElementById('peEditCity');
+    if (cityEl) cityEl.value = p.city || '';
+    _pePopulateEditCatSelect(p.categoryId || '');
+    window.peLoadSubcats();
+    setTimeout(function() {
+      var subSel = document.getElementById('peEditSubcat');
+      if (subSel && p.subcategory) subSel.value = p.subcategory;
+    }, 50);
+    document.getElementById('peEditImage').value   = p.imageUrl || p.image || '';
+    document.getElementById('peEditIcon').value    = p.icon || '';
+    var lat = p.lat || (p.coords && p.coords.lat) || (p._geoloc && p._geoloc.lat) || '';
+    var lng = p.lng || (p.coords && p.coords.lng) || (p._geoloc && p._geoloc.lng) || '';
+    document.getElementById('peEditLat').value     = lat;
+    document.getElementById('peEditLng').value     = lng;
+    document.getElementById('peEditWebsite').value = p.website || '';
+    document.getElementById('peEditAddress').value = p.address || '';
+    document.getElementById('peEditHours').value   = p.workingHours || p.hours || '';
+    var statusEl = document.getElementById('peEditStatus');
+    if (statusEl) statusEl.textContent = '';
+    if (panel) { panel.style.display = 'block'; panel.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  };
+
+  window.closePlaceEditPanel = function() {
+    _peEditingId = null;
+    var panel = document.getElementById('pePlaceEditPanel');
+    if (panel) panel.style.display = 'none';
+  };
+
+  window.savePlaceEditPanel = function() {
+    var fb = window.GeoFirebase, f = fb && fb.fs;
+    if (!fb || !f) { toast('Firebase not ready', 'rgba(239,68,68,.95)'); return; }
+    var id = _peEditingId || document.getElementById('peEditId').value;
+    if (!id) return;
+    var catSel   = document.getElementById('peEditCat');
+    var subSel   = document.getElementById('peEditSubcat');
+    var catId    = catSel ? catSel.value : '';
+    var cats     = getPlaceCategories();
+    var matchCat = cats.find(function(c) { return c.id === catId; });
+    var lat = parseFloat(document.getElementById('peEditLat').value);
+    var lng = parseFloat(document.getElementById('peEditLng').value);
+    var doc = {
+      name:         document.getElementById('peEditName').value.trim(),
+      title:        document.getElementById('peEditName').value.trim(),
+      description:  document.getElementById('peEditDesc').value.trim(),
+      city:         document.getElementById('peEditCity').value,
+      location:     document.getElementById('peEditCity').value,
+      categoryId:   catId,
+      category:     matchCat ? matchCat.label : (catId || ''),
+      subcategory:  subSel ? subSel.value : '',
+      icon:         document.getElementById('peEditIcon').value.trim(),
+      imageUrl:     document.getElementById('peEditImage').value.trim(),
+      image:        document.getElementById('peEditImage').value.trim(),
+      website:      document.getElementById('peEditWebsite').value.trim(),
+      address:      document.getElementById('peEditAddress').value.trim(),
+      workingHours: document.getElementById('peEditHours').value.trim(),
+      updatedAt:    f.serverTimestamp()
+    };
+    if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+      doc.lat = lat; doc.lng = lng;
+      doc._geoloc = { lat: lat, lng: lng };
+    }
+    var statusEl = document.getElementById('peEditStatus');
+    if (statusEl) statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
+    f.setDoc(f.doc(fb.db, 'places', id), doc, { merge: true })
+      .then(function() {
+        if (statusEl) statusEl.innerHTML = '<span style="color:#10b981"><i class="fas fa-check"></i> Saved!</span>';
+        toast('Place updated');
+        var idx = _pePlaces.findIndex(function(p) { return p._id === id; });
+        if (idx !== -1) Object.assign(_pePlaces[idx], doc);
+        _renderPlacesForEdit(_pePlaces);
+      })
+      .catch(function(err) {
+        if (statusEl) statusEl.innerHTML = '<span style="color:#f87171"><i class="fas fa-times"></i> ' + escHtmlAdmin(err.message) + '</span>';
+      });
+  };
+
+  window.deletePlaceFromEditPanel = function() {
+    var fb = window.GeoFirebase, f = fb && fb.fs;
+    if (!fb || !f) return;
+    var id = _peEditingId;
+    if (!id) return;
+    var p    = _pePlaces.find(function(x) { return x._id === id; });
+    var name = p ? (p.name || id) : id;
+    if (!confirm('Delete "' + name + '"? This cannot be undone.')) return;
+    f.deleteDoc(f.doc(fb.db, 'places', id))
+      .then(function() {
+        toast('Place deleted');
+        _pePlaces = _pePlaces.filter(function(x) { return x._id !== id; });
+        _renderPlacesForEdit(_pePlaces);
+        window.closePlaceEditPanel();
+        var statusEl = document.getElementById('peStatus');
+        if (statusEl) statusEl.textContent = _pePlaces.length + ' place(s) found';
+      })
+      .catch(function(err) { toast('Delete failed: ' + err.message, 'rgba(239,68,68,.95)'); });
+  };
+
   function init() {
     loadRealStats();
     buildSparklines();

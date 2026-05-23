@@ -72,6 +72,7 @@
     <div class="sb-item" onclick="adminNav('businesses')"><span class="sb-ic"><i class="fas fa-store"></i></span> Businesses <span class="sb-cnt" id="sb-biz-side">0</span></div>
     <div class="sb-item" onclick="adminNav('creators')"><span class="sb-ic"><i class="fas fa-star"></i></span> Creators <span class="sb-cnt" id="sb-creators">0</span></div>
     <div class="sb-item" onclick="adminNav('content')"><span class="sb-ic"><i class="fas fa-plus-square"></i></span> Content Studio</div>
+    <div class="sb-item" onclick="adminNav('placeedit')"><span class="sb-ic"><i class="fas fa-pencil-alt"></i></span> Place Editing</div>
     <div class="sb-item" onclick="adminNav('placecat')"><span class="sb-ic"><i class="fas fa-tags"></i></span> Place Categories</div>
     <div class="sb-item" onclick="adminNav('ownership')"><span class="sb-ic"><i class="fas fa-handshake"></i></span> Transfer Ownership</div>
     <div class="sb-item" onclick="adminNav('challenges')"><span class="sb-ic"><i class="fas fa-bolt"></i></span> Challenge Studio <span class="sb-cnt" id="sb-challenges">0</span></div>
@@ -595,6 +596,116 @@
       </div>
     </section>
 
+    <!-- ─── PLACE EDITING ─── -->
+    <section class="sec" id="sec-placeedit">
+      <div class="ph">
+        <div><div class="ph-title">Place Editing</div><div class="ph-sub">Browse, filter and edit all uploaded map places.</div></div>
+      </div>
+      <div class="panel" style="max-width:960px">
+        <div class="panel-hdr">
+          <div><div class="panel-title">Filters</div></div>
+          <button class="btn btn-primary btn-sm" onclick="loadPlacesForEdit()"><i class="fas fa-sync-alt"></i> Load / Refresh</button>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;padding:8px 0 4px;align-items:center">
+          <select id="peFilterCity" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);min-width:140px">
+            <option value="">All Cities</option>
+            <option value="Tbilisi">Tbilisi</option>
+            <option value="Batumi">Batumi</option>
+            <option value="Kutaisi">Kutaisi</option>
+            <option value="Mestia">Mestia</option>
+            <option value="Sighnaghi">Sighnaghi</option>
+            <option value="Kazbegi">Kazbegi</option>
+            <option value="Borjomi">Borjomi</option>
+            <option value="Telavi">Telavi</option>
+          </select>
+          <select id="peFilterCat" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);min-width:160px">
+            <option value="">All Categories</option>
+          </select>
+          <input id="peFilterSearch" type="text" placeholder="Search by name…" style="flex:1;min-width:160px;padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)" onkeydown="if(event.key==='Enter')loadPlacesForEdit()">
+          <button class="btn btn-primary btn-sm" onclick="loadPlacesForEdit()"><i class="fas fa-search"></i> Load</button>
+        </div>
+        <div id="peStatus" style="font-size:.8rem;color:#64748b;padding:4px 0 8px;min-height:1.4em"></div>
+        <div id="pePlacesList" style="min-height:80px">
+          <div style="text-align:center;padding:32px;color:#64748b;font-size:.85rem">Set filters and click Load.</div>
+        </div>
+      </div>
+      <!-- Inline edit panel -->
+      <div id="pePlaceEditPanel" style="display:none;max-width:960px;margin-top:14px" class="panel">
+        <div class="panel-hdr">
+          <div><div class="panel-title" id="pePanelTitle">Edit Place</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="closePlaceEditPanel()"><i class="fas fa-times"></i> Close</button>
+        </div>
+        <div style="display:grid;gap:14px;padding:4px 0 8px">
+          <input type="hidden" id="peEditId">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Name
+              <input id="peEditName" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">City
+              <select id="peEditCity" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+                <option value="">— select —</option>
+                <option value="Tbilisi">Tbilisi</option>
+                <option value="Batumi">Batumi</option>
+                <option value="Kutaisi">Kutaisi</option>
+                <option value="Mestia">Mestia</option>
+                <option value="Sighnaghi">Sighnaghi</option>
+                <option value="Kazbegi">Kazbegi</option>
+                <option value="Borjomi">Borjomi</option>
+                <option value="Telavi">Telavi</option>
+              </select>
+            </label>
+          </div>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Description
+            <textarea id="peEditDesc" rows="3" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);resize:vertical"></textarea>
+          </label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Category
+              <select id="peEditCat" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)" onchange="peLoadSubcats()">
+                <option value="">— select —</option>
+              </select>
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Subcategory
+              <select id="peEditSubcat" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+                <option value="">— none —</option>
+              </select>
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;align-items:end">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Image URL
+              <input id="peEditImage" placeholder="https://…" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Icon Emoji
+              <input id="peEditIcon" placeholder="🏛️" maxlength="4" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);text-align:center;font-size:1.3rem">
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Latitude
+              <input id="peEditLat" type="number" step="any" placeholder="41.693…" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Longitude
+              <input id="peEditLng" type="number" step="any" placeholder="44.801…" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Website
+              <input id="peEditWebsite" placeholder="https://…" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Address
+              <input id="peEditAddress" placeholder="Street, City" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+          </div>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Working Hours
+            <input id="peEditHours" placeholder="Mon–Sun 10:00–22:00" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+          </label>
+          <div style="display:flex;gap:10px;padding-top:4px;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-primary btn-sm" onclick="savePlaceEditPanel()"><i class="fas fa-save"></i> Save Changes</button>
+            <button class="btn btn-ghost btn-sm" onclick="closePlaceEditPanel()"><i class="fas fa-times"></i> Cancel</button>
+            <button class="btn btn-sm" onclick="deletePlaceFromEditPanel()" style="margin-left:auto;background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.35)"><i class="fas fa-trash-alt"></i> Delete Place</button>
+          </div>
+          <div id="peEditStatus" style="font-size:.82rem;min-height:1.2em"></div>
+        </div>
+      </div>
+    </section>
 
     <!-- ─── PLACE CATEGORIES ─── -->
     <section class="sec" id="sec-placecat">
