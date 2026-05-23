@@ -31,7 +31,7 @@
   function getActiveTab() {
     var p = currentPage;
     if (!p || p === 'index.html') return 'home';
-    if (['feed.html','places.html','events.html','groups.html','explore.html'].includes(p)) return 'explore';
+    if (['feed.html','places.html','events.html','groups.html','explore.html','place-feed.html'].includes(p)) return 'explore';
     if (['live.html'].includes(p)) return 'live';
     if (['map.html'].includes(p)) return 'map';
     if (['rewards.html','challenges.html'].includes(p)) return 'rewards';
@@ -122,6 +122,8 @@
         '<a class="gh-mobile-menu-row" data-gh-actor-messages href="' + mobileMessagesHref() + '"><i class="fas fa-comment-dots"></i><span>Messages</span></a>' +
         '<a class="gh-mobile-menu-row" href="notifications.html"><i class="fas fa-bell"></i><span>Notifications</span></a>' +
         '<a class="gh-mobile-menu-row" href="places.html"><i class="fas fa-location-dot"></i><span>Places</span></a>' +
+        '<a class="gh-mobile-menu-row" href="map.html"><i class="fas fa-map"></i><span>Map</span></a>' +
+        '<a class="gh-mobile-menu-row" href="place-feed.html"><i class="fas fa-store"></i><span>Place Updates</span></a>' +
         '<a class="gh-mobile-menu-row" href="groups.html"><i class="fas fa-users"></i><span>Groups</span></a>' +
         '<a class="gh-mobile-menu-row" href="events.html"><i class="fas fa-calendar"></i><span>Events</span></a>' +
         '<a class="gh-mobile-menu-row" href="rewards.html"><i class="fas fa-gift"></i><span>Rewards</span></a>' +
