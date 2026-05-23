@@ -47,6 +47,13 @@
   let currentFilter = '', currentSearch = '', currentSubFilter = '';
   let disabledCategories = new Set();
   let activeMarkerEl = null, activePlaceId = null;
+  let cameraMode = 'explore';
+
+  const CAMERA_MODES = {
+    explore:    { label: '🔍 Explore',   pitch: 0,  bearing: 0 },
+    cinematic:  { label: '🎬 Cinematic', pitch: 55, bearing: null },
+    navigation: { label: '🧭 Navigate',  pitch: 30, bearing: null }
+  };
   const _googleDetailsCache = {};
 
   // ── Live Friend Locations state ───────────────────────
@@ -426,17 +433,34 @@
   function focusPlace(id, clickedEl) {
     if (activeMarkerEl) {
       const inner = activeMarkerEl.querySelector('.gh-map-emoji-marker');
-      if (inner) inner.classList.remove('is-selected');
+      if (inner) { inner.classList.remove('is-selected'); inner.classList.remove('just-selected'); }
     }
     activePlaceId = id;
     activeMarkerEl = clickedEl || null;
     if (activeMarkerEl) {
       const inner = activeMarkerEl.querySelector('.gh-map-emoji-marker');
-      if (inner) inner.classList.add('is-selected');
+      if (inner) {
+        inner.classList.add('is-selected');
+        inner.classList.remove('just-selected');
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => { inner.classList.add('just-selected'); });
+        });
+        setTimeout(() => inner.classList.remove('just-selected'), 650);
+      }
     }
 
     const p = allPlaces.find(x => x.id === id); if (!p) return;
-    map.flyTo({ center: [p.lng, p.lat], zoom: Math.max(map.getZoom(), 13), duration: 800 });
+    const cm = CAMERA_MODES[cameraMode] || CAMERA_MODES.explore;
+    const targetZoom = Math.max(map.getZoom(), cameraMode === 'cinematic' ? 14 : 13);
+    const flyOpts = {
+      center: [p.lng, p.lat],
+      zoom: targetZoom,
+      pitch: cm.pitch,
+      duration: cameraMode === 'cinematic' ? 1100 : 750,
+      essential: true
+    };
+    if (cameraMode === 'explore') flyOpts.bearing = 0;
+    map.flyTo(flyOpts);
 
     if (window.innerWidth <= 768) {
       openMobileCard(p);
@@ -511,6 +535,20 @@
   window.closePanel = function () {
     const p = document.getElementById('infoPanel'); if (p) p.classList.remove('open');
     clearActiveMarker();
+  };
+
+  window.setCameraMode = function (mode) {
+    if (!CAMERA_MODES[mode]) return;
+    cameraMode = mode;
+    document.querySelectorAll('.map-camera-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.mode === mode);
+    });
+    const cm = CAMERA_MODES[mode];
+    if (map) {
+      const opts = { pitch: cm.pitch, duration: 600 };
+      if (cm.bearing !== null) opts.bearing = cm.bearing;
+      map.easeTo(opts);
+    }
   };
 
   /* ── Mobile card ────────────────────────────────── */

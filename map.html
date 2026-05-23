@@ -114,6 +114,13 @@
   <div class="map-container" style="position:relative">
     <div id="map"></div>
 
+    <!-- Camera mode buttons -->
+    <div class="map-camera-wrap">
+      <button class="map-camera-btn active" data-mode="explore" onclick="setCameraMode('explore')">🔍 Explore</button>
+      <button class="map-camera-btn" data-mode="navigation" onclick="setCameraMode('navigation')">🧭 Navigate</button>
+      <button class="map-camera-btn" data-mode="cinematic" onclick="setCameraMode('cinematic')">🎬 Cinematic</button>
+    </div>
+
     <!-- Floating buttons -->
     <button class="map-toggle-btn" id="legendBtn" onclick="document.getElementById('legend').classList.toggle('open')">
       <i class="fas fa-layer-group"></i> Legend
