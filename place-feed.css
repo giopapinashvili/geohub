@@ -55,6 +55,40 @@
   -ms-overflow-style: none;
 }
 .pf-chips::-webkit-scrollbar { display: none; }
+
+/* ── Sort bar ────────────────────────────────────────────────── */
+.pf-sort-bar {
+  display: flex;
+  gap: 6px;
+  padding: 6px 16px 10px;
+  border-top: 1px solid rgba(255,255,255,.04);
+}
+.pf-sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 13px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
+  font-size: .73rem;
+  font-weight: 600;
+  color: rgba(226,232,240,.5);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.14s;
+}
+.pf-sort-btn:hover {
+  background: rgba(16,185,129,.08);
+  border-color: rgba(16,185,129,.2);
+  color: #10e0a0;
+}
+.pf-sort-btn.active {
+  background: rgba(16,185,129,.15);
+  border-color: rgba(16,185,129,.4);
+  color: #6ee7b7;
+}
+
 .pf-chip {
   display: inline-flex;
   align-items: center;

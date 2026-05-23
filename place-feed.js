@@ -30,6 +30,7 @@
   let _allPosts = [];       // all loaded posts (raw)
   let _userLikes = {};      // { postId: 'love'|'' }
   let _currentCat = '';
+  let _currentSort = 'latest'; // latest | popular | week
   let _lastDoc = null;
   let _loading = false;
 
@@ -244,11 +245,25 @@
       return biz && biz.category === _currentCat;
     });
 
-    // Also filter to only posts from businesses in our place map
+    // Filter to only posts from businesses in our place map
     posts = posts.filter(function(p) {
       var bizId = p.businessId || p.authorId || p.actorId || '';
-      return !!_bizMap[bizId] || !bizId; // include if bizId is in map or unknown
+      return !!_bizMap[bizId] || !bizId;
     });
+
+    // Sort
+    if (_currentSort === 'popular') {
+      posts = posts.slice().sort(function(a, b) {
+        return (Number(b.likeCount || b.reactionCount || 0)) - (Number(a.likeCount || a.reactionCount || 0));
+      });
+    } else if (_currentSort === 'week') {
+      var weekAgo = Date.now() - 7 * 24 * 3600 * 1000;
+      posts = posts.filter(function(p) {
+        var ms = p.createdAt ? (p.createdAt.seconds ? p.createdAt.seconds * 1000 : new Date(p.createdAt).getTime()) : 0;
+        return ms >= weekAgo;
+      });
+    }
+    // 'latest' keeps the default desc order from Firestore
 
     if (reset) feed.innerHTML = '';
 
@@ -590,9 +605,22 @@
     });
   }
 
+  // ── Sort bar ───────────────────────────────────────────────────
+  function initSortBar() {
+    document.querySelectorAll('[data-sort]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('[data-sort]').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        _currentSort = btn.dataset.sort;
+        renderFeed(true);
+      });
+    });
+  }
+
   // ── Boot ───────────────────────────────────────────────────────
   function init() {
     initLoadMore();
+    initSortBar();
   }
 
   if (document.readyState === 'loading') {
