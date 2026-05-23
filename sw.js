@@ -90,7 +90,7 @@ self.addEventListener('pushsubscriptionchange', function(event) {
 });
 
 /* ── Cache names ────────────────────────────────────────────────────────── */
-var VER   = 'v4';
+var VER   = 'v5';
 var SHELL = 'gh-shell-' + VER;
 var IMG   = 'gh-img-'   + VER;
 var CDN   = 'gh-cdn-'   + VER;
@@ -100,6 +100,8 @@ var ALL   = [SHELL, IMG, CDN];
 var SHELL_URLS = [
   '/offline.html',
   '/manifest.json',
+  '/styles.css',
+  '/navbar.css',
   '/geohub-social-redesign.css',
   '/responsive-polish.css',
   '/mobile-nav.css',
@@ -218,7 +220,8 @@ function isCDN(url) {
   return h === 'cdnjs.cloudflare.com'  ||
          h === 'fonts.googleapis.com'  ||
          h === 'fonts.gstatic.com'     ||
-         h === 'www.gstatic.com';
+         h === 'www.gstatic.com'       ||
+         h === 'unpkg.com';
 }
 
 /* ── STRATEGIES ──────────────────────────────────────────────────────────── */
