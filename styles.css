@@ -2270,8 +2270,8 @@ textarea {
   display: none;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 12px 0 8px;
+  gap: 5px;
+  padding: 14px 0 12px;
   cursor: grab;
   touch-action: none;
   flex-shrink: 0;
@@ -2279,11 +2279,17 @@ textarea {
   position: sticky;
   top: 0;
   z-index: 20;
+  width: 100%;
+  min-height: 44px;
 }
 .map-sidebar-pull span {
-  width: 34px; height: 3px;
-  background: rgba(255,255,255,.28);
+  width: 38px; height: 4px;
+  background: rgba(255,255,255,.32);
   border-radius: 2px;
+  transition: background 0.2s;
+}
+.map-sidebar-pull:active span {
+  background: rgba(16,185,129,.6);
 }
 .map-sidebar-header {
   padding: 18px 20px 16px;
@@ -3425,13 +3431,13 @@ a, button, .btn, .card, .listing-card {
     border-top: 1px solid rgba(255,255,255,.09);
     box-shadow: 0 -16px 56px rgba(0,0,0,.72);
     transition: transform 0.36s cubic-bezier(.22,.68,0,1.12);
-    overflow-y: auto;
+    overflow-y: hidden;
     overflow-x: hidden;
   }
   /* 3 states */
-  .map-sidebar.sb-closed   { transform: translateY(calc(100% - 42px)); }
-  .map-sidebar.sb-peek     { transform: translateY(calc(100% - 220px)); }
-  .map-sidebar.sb-expanded { transform: translateY(0); }
+  .map-sidebar.sb-closed   { transform: translateY(calc(100% - 42px)); overflow-y: hidden; }
+  .map-sidebar.sb-peek     { transform: translateY(calc(100% - 220px)); overflow-y: hidden; }
+  .map-sidebar.sb-expanded { transform: translateY(0); overflow-y: auto; }
   .map-sidebar-pull {
     display: flex;
   }

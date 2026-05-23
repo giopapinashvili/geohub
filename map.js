@@ -1067,20 +1067,21 @@
     const pull    = document.getElementById('sidebarPull');
     if (!sidebar || !pull) return;
 
-    // Start in peek state
-    sidebar.classList.remove('sb-closed', 'sb-peek', 'sb-expanded');
-    sidebar.classList.add('sb-peek');
-
     function getState() {
       if (sidebar.classList.contains('sb-expanded')) return 'expanded';
-      if (sidebar.classList.contains('sb-closed'))   return 'closed';
-      return 'peek';
+      if (sidebar.classList.contains('sb-peek'))     return 'peek';
+      return 'closed';
     }
 
     function setState(state) {
       sidebar.classList.remove('sb-expanded', 'sb-peek', 'sb-closed');
       sidebar.classList.add('sb-' + state);
+      // Only allow scroll when fully expanded — prevents scroll interfering with drag
+      sidebar.style.overflowY = state === 'expanded' ? 'auto' : 'hidden';
     }
+
+    // Start collapsed — only 3 bars visible
+    setState('closed');
 
     let startY = 0, dy = 0, dragging = false;
 
@@ -1109,18 +1110,20 @@
       sidebar.style.transform = '';
       const state = getState();
       let next = state;
-      if      (state === 'expanded' && dy >  80) next = 'peek';
-      else if (state === 'peek'     && dy < -80) next = 'expanded';
-      else if (state === 'peek'     && dy >  80) next = 'closed';
-      else if (state === 'closed'   && dy < -60) next = 'peek';
+      if      (state === 'expanded' && dy >  50) next = 'peek';
+      else if (state === 'peek'     && dy < -50) next = 'expanded';
+      else if (state === 'peek'     && dy >  50) next = 'closed';
+      else if (state === 'closed'   && dy < -40) next = 'peek';
       setState(next);
     });
 
+    // Tap the handle to cycle states
     pull.addEventListener('click', () => {
       const s = getState();
       setState(s === 'closed' ? 'peek' : s === 'peek' ? 'expanded' : 'peek');
     });
 
+    // Tap map → collapse to peek if expanded
     const mapEl = document.getElementById('map');
     if (mapEl) mapEl.addEventListener('click', () => {
       if (getState() === 'expanded') setState('peek');
