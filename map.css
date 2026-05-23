@@ -618,3 +618,73 @@ body, html { height: 100%; overflow: hidden; }
       white-space: nowrap;
       pointer-events: none;
     }
+    /* ── Review modal ──────────────────────────────────────────── */
+    .map-review-overlay {
+      position: fixed; inset: 0; z-index: 9900;
+      background: rgba(4,5,13,0.75);
+      display: flex; align-items: flex-end; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.28s ease;
+      backdrop-filter: blur(4px);
+    }
+    .map-review-overlay.open { opacity: 1; pointer-events: auto; }
+    .map-review-modal {
+      position: relative;
+      background: rgba(11,17,32,0.98);
+      border: 1px solid rgba(16,185,129,.22);
+      border-radius: 20px 20px 0 0;
+      padding: 24px 20px 32px;
+      width: 100%; max-width: 480px;
+      transform: translateY(60px);
+      transition: transform 0.32s cubic-bezier(.22,.68,0,1.12);
+      box-shadow: 0 -8px 40px rgba(0,0,0,.6);
+    }
+    .map-review-overlay.open .map-review-modal { transform: translateY(0); }
+    .map-review-close {
+      position: absolute; top: 14px; right: 14px;
+      background: rgba(255,255,255,.06); border: none;
+      border-radius: 50%; width: 30px; height: 30px;
+      color: #94a3b8; cursor: pointer; font-size: .85rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .map-review-title { font-size: 1.05rem; font-weight: 800; color: #f1f5f9; margin-bottom: 4px; }
+    .map-review-place { font-size: .82rem; color: #64748b; margin-bottom: 16px; }
+    .map-review-stars { display: flex; gap: 6px; margin-bottom: 16px; }
+    .map-review-star {
+      font-size: 2rem; background: none; border: none;
+      color: rgba(255,255,255,.15); cursor: pointer;
+      transition: color 0.12s, transform 0.12s;
+      line-height: 1;
+    }
+    .map-review-star.active { color: #f59e0b; }
+    .map-review-star:hover { transform: scale(1.2); }
+    .map-review-text {
+      width: 100%; box-sizing: border-box;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 12px; padding: 10px 12px;
+      color: #e2e8f0; font-size: .85rem;
+      resize: none; outline: none; margin-bottom: 14px;
+      font-family: inherit;
+    }
+    .map-review-text:focus { border-color: rgba(16,185,129,.4); }
+    .map-review-submit {
+      width: 100%; padding: 12px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border: none; border-radius: 12px;
+      color: #fff; font-size: .9rem; font-weight: 700;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .map-review-submit:disabled { opacity: .5; cursor: default; }
+    /* ── Check-in toast ────────────────────────────────────────── */
+    .map-checkin-toast {
+      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: rgba(16,185,129,.92); color: #fff;
+      padding: 10px 20px; border-radius: 999px;
+      font-size: .88rem; font-weight: 700;
+      box-shadow: 0 4px 20px rgba(0,0,0,.4);
+      z-index: 9999; opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none; white-space: nowrap;
+    }
+    .map-checkin-toast--show { opacity: 1; transform: translateX(-50%) translateY(0); }

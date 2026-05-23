@@ -1023,6 +1023,118 @@
     userCheckins.add(placeId);
     if (navigator.vibrate) navigator.vibrate([30, 40, 60]);
     _syncCheckinBtn(placeId, true);
+    _updateStreak(placeId, p, GF, user);
+    setTimeout(() => _openReviewModal(placeId, p, GF, user), 800);
+  }
+
+  function _updateStreak(placeId, p, GF, user) {
+    const userRef = GF.fs.doc(GF.db, 'users', user.uid);
+    GF.fs.getDoc(userRef).then(snap => {
+      const d = snap.data() || {};
+      const today = new Date().toISOString().slice(0, 10);
+      const last = d.lastCheckinDate || '';
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      let streak = Number(d.streakDays) || 0;
+      if (last === today) return; // already counted today
+      streak = last === yesterday ? streak + 1 : 1;
+      const xp = (Number(d.xp) || 0) + 10 + (streak > 1 ? Math.min(streak, 10) : 0);
+      GF.fs.updateDoc(userRef, {
+        lastCheckinDate: today,
+        streakDays: streak,
+        totalCheckins: GF.fs.increment(1),
+        xp
+      }).catch(() => {});
+      _showStreakToast(streak, xp - ((Number(d.xp) || 0)));
+    }).catch(() => {});
+  }
+
+  function _showStreakToast(streak, xpGained) {
+    const msg = streak > 1
+      ? '🔥 ' + streak + '-day streak! +' + xpGained + ' XP'
+      : '✅ Checked in! +' + xpGained + ' XP';
+    if (window.GeoSocial && window.GeoSocial.toast) { window.GeoSocial.toast(msg); return; }
+    const el = document.createElement('div');
+    el.className = 'map-checkin-toast';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.classList.add('map-checkin-toast--show'), 10);
+    setTimeout(() => { el.classList.remove('map-checkin-toast--show'); setTimeout(() => el.remove(), 400); }, 3000);
+  }
+
+  function _openReviewModal(placeId, p, GF, user) {
+    const existing = document.getElementById('mapReviewModal');
+    if (existing) existing.remove();
+
+    let rating = 0;
+    const modal = document.createElement('div');
+    modal.id = 'mapReviewModal';
+    modal.className = 'map-review-overlay';
+    modal.innerHTML = `
+      <div class="map-review-modal">
+        <button class="map-review-close" id="reviewClose"><i class="fas fa-times"></i></button>
+        <div class="map-review-title">Rate your visit</div>
+        <div class="map-review-place">${esc(p.name)}</div>
+        <div class="map-review-stars" id="reviewStars">
+          ${[1,2,3,4,5].map(i => `<button class="map-review-star" data-star="${i}">★</button>`).join('')}
+        </div>
+        <textarea class="map-review-text" id="reviewText" placeholder="Share your experience… (optional)" rows="3"></textarea>
+        <button class="map-review-submit" id="reviewSubmit" disabled>Skip</button>
+      </div>`;
+    document.body.appendChild(modal);
+    setTimeout(() => modal.classList.add('open'), 10);
+
+    const submitBtn = document.getElementById('reviewSubmit');
+    const stars = modal.querySelectorAll('.map-review-star');
+
+    stars.forEach(btn => btn.addEventListener('click', () => {
+      rating = Number(btn.dataset.star);
+      stars.forEach(s => s.classList.toggle('active', Number(s.dataset.star) <= rating));
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit review';
+    }));
+
+    function close() { modal.classList.remove('open'); setTimeout(() => modal.remove(), 280); }
+    document.getElementById('reviewClose').onclick = close;
+    modal.addEventListener('click', e => { if (e.target === modal) close(); });
+
+    submitBtn.onclick = () => {
+      if (submitBtn.textContent === 'Skip') { close(); return; }
+      const text = (document.getElementById('reviewText') || {}).value || '';
+      submitBtn.disabled = true; submitBtn.textContent = 'Saving…';
+      const reviewData = {
+        userId: user.uid,
+        userName: user.displayName || user.email || 'GeoHub User',
+        userAvatar: user.photoURL || '',
+        rating,
+        text,
+        placeId,
+        placeName: p.name,
+        createdAt: GF.fs.serverTimestamp()
+      };
+      GF.fs.setDoc(GF.fs.doc(GF.db, 'placeReviews', placeId, 'reviews', user.uid), reviewData, { merge: true })
+        .then(() => {
+          // Update aggregate rating on place doc
+          return GF.fs.getDoc(GF.fs.doc(GF.db, 'placeReviews', placeId)).then(snap => {
+            const d2 = snap.data() || {};
+            const count = (d2.reviewCount || 0) + (snap.exists() ? 0 : 1);
+            const sum = (d2.ratingSum || 0) + rating;
+            return GF.fs.setDoc(GF.fs.doc(GF.db, 'placeReviews', placeId), { reviewCount: GF.fs.increment(1), ratingSum: GF.fs.increment(rating), avgRating: sum / Math.max(count, 1) }, { merge: true });
+          });
+        })
+        .then(() => { close(); _showStreakToast && _showReviewThanks(); })
+        .catch(() => { close(); });
+    };
+  }
+
+  function _showReviewThanks() {
+    const msg = '⭐ Review saved — thanks!';
+    if (window.GeoSocial && window.GeoSocial.toast) { window.GeoSocial.toast(msg); return; }
+    const el = document.createElement('div');
+    el.className = 'map-checkin-toast';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.classList.add('map-checkin-toast--show'), 10);
+    setTimeout(() => { el.classList.remove('map-checkin-toast--show'); setTimeout(() => el.remove(), 400); }, 2500);
   }
 
   window.checkInToPlace = function () {
