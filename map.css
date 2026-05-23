@@ -236,3 +236,251 @@ body, html { height: 100%; overflow: hidden; }
       transition: opacity 1.2s ease;
     }
     .rotation-hint.fade-out { opacity: 0; }
+
+    /* ═══ LIVE FRIENDS LOCATION ════════════════════════ */
+    /* Floating button */
+    .map-live-btn {
+      position: absolute;
+      bottom: 130px;
+      right: 14px;
+      z-index: 1001;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(15,23,42,0.92);
+      border: 1px solid rgba(255,255,255,.14);
+      color: #94a3b8;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(12px);
+      transition: all 0.18s;
+      box-shadow: 0 4px 16px rgba(0,0,0,.4);
+    }
+    .map-live-btn:hover, .map-live-btn.active {
+      background: rgba(16,185,129,.2);
+      border-color: rgba(16,185,129,.4);
+      color: #10b981;
+    }
+
+    /* Side panel */
+    .map-live-panel {
+      position: absolute;
+      top: 90px;
+      right: 64px;
+      z-index: 1002;
+      width: 280px;
+      background: rgba(9,14,26,0.97);
+      border: 1px solid rgba(16,185,129,.2);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(0,0,0,.7);
+      backdrop-filter: blur(20px);
+      display: none;
+      flex-direction: column;
+    }
+    .map-live-panel.open { display: flex; }
+
+    .live-panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+    .live-panel-head i { color: #10b981; margin-right: 7px; }
+    .live-panel-head button {
+      background: rgba(255,255,255,.07);
+      border: none;
+      color: #94a3b8;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .live-panel-head button:hover { background: rgba(255,255,255,.14); color: #f1f5f9; }
+
+    /* Location share toggle */
+    .live-toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      gap: 12px;
+    }
+    .live-toggle-label { font-size: 0.82rem; font-weight: 600; color: #e2e8f0; }
+    .live-toggle-sub   { font-size: 0.73rem; color: #64748b; margin-top: 2px; }
+    .live-toggle-switch { position: relative; flex-shrink: 0; width: 42px; height: 24px; }
+    .live-toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .live-toggle-slider {
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,.12);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .live-toggle-slider::after {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      top: 3px; left: 3px;
+      transition: transform 0.2s;
+    }
+    .live-toggle-switch input:checked + .live-toggle-slider { background: #10b981; }
+    .live-toggle-switch input:checked + .live-toggle-slider::after { transform: translateX(18px); }
+
+    /* Friends list */
+    .live-friends-list { overflow-y: auto; max-height: 240px; padding: 6px 0; }
+    .live-friends-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 24px 16px;
+      color: #475569;
+      font-size: 0.8rem;
+    }
+    .live-friends-empty i { font-size: 1.4rem; }
+
+    .live-friend-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .live-friend-row:hover { background: rgba(255,255,255,.05); }
+
+    .live-friend-av {
+      position: relative;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      overflow: visible;
+      flex-shrink: 0;
+    }
+    .live-friend-av img, .live-friend-av span {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(16,185,129,.2);
+      color: #10b981;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .live-friend-dot {
+      position: absolute;
+      bottom: 1px; right: 1px;
+      width: 10px; height: 10px;
+      background: #10b981;
+      border: 2px solid #090e1a;
+      border-radius: 50%;
+    }
+    .live-friend-info { flex: 1; min-width: 0; }
+    .live-friend-name { font-size: 0.83rem; font-weight: 600; color: #e2e8f0; truncate: true; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .live-friend-dist { font-size: 0.73rem; color: #64748b; margin-top: 1px; }
+    .live-friend-nav {
+      flex-shrink: 0;
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      background: rgba(16,185,129,.12);
+      border: 1px solid rgba(16,185,129,.25);
+      color: #10b981;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .live-friend-nav:hover { background: rgba(16,185,129,.25); }
+
+    /* My location blue dot */
+    .my-loc-marker { position: relative; width: 16px; height: 16px; }
+    .my-loc-dot {
+      width: 16px; height: 16px;
+      background: #2563eb;
+      border: 2.5px solid #fff;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(37,99,235,.6);
+      position: relative;
+      z-index: 1;
+    }
+    .my-loc-pulse {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: rgba(37,99,235,.25);
+      animation: locPulse 2s ease-out infinite;
+    }
+    @keyframes locPulse {
+      0%   { transform: translate(-50%,-50%) scale(0.6); opacity: 0.8; }
+      100% { transform: translate(-50%,-50%) scale(2);   opacity: 0; }
+    }
+
+    /* Friend marker */
+    .friend-loc-marker {
+      position: relative;
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: rgba(16,185,129,.2);
+      border: 2.5px solid #10b981;
+      overflow: visible;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(16,185,129,.35);
+    }
+    .friend-loc-marker img {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .friend-loc-marker > span {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #10b981;
+    }
+    .friend-loc-pulse {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: rgba(16,185,129,.18);
+      animation: locPulse 2.4s ease-out infinite;
+      z-index: -1;
+    }
+    .friend-loc-label {
+      position: absolute;
+      bottom: calc(100% + 4px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(9,14,26,.92);
+      border: 1px solid rgba(16,185,129,.3);
+      color: #e2e8f0;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+      pointer-events: none;
+    }

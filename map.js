@@ -48,6 +48,17 @@
   let disabledCategories = new Set();
   let activeMarkerEl = null, activePlaceId = null;
   const _googleDetailsCache = {};
+
+  // ── Live Friend Locations state ───────────────────────
+  let _locWatchId   = null;
+  let _myLocMarker  = null;
+  let _friendMarkers = {};     // { uid: maplibregl.Marker }
+  let _friendData    = {};     // { uid: friendData }
+  let _friendsListUnsub = null;
+  let _friendLocUnsub   = null;
+  let _locSharing    = false;
+  let _myLatLng      = null;   // [lng, lat]
+  let _writeThrottle = null;
   const _placeCatLookup = {};
   const PLACE_CATEGORY_ORDER = [
     'food', 'cafe', 'nightlife', 'shopping', 'fitness', 'park', 'nature', 'transport',
@@ -828,6 +839,313 @@
     setTimeout(() => hint.remove(), 6200);
   }
 
+  /* ── Live Friend Locations ──────────────────────── */
+
+  function buildLiveFriendsUI() {
+    const container = document.querySelector('.map-container');
+    if (!container || document.getElementById('liveFriendsBtn')) return;
+
+    // Floating button
+    const btn = document.createElement('button');
+    btn.id = 'liveFriendsBtn';
+    btn.className = 'map-live-btn';
+    btn.title = 'Live friends';
+    btn.innerHTML = '<i class="fas fa-user-friends"></i>';
+    btn.onclick = window.openLivePanel;
+    container.appendChild(btn);
+
+    // Side panel
+    const panel = document.createElement('div');
+    panel.id = 'livePanel';
+    panel.className = 'map-live-panel';
+    panel.innerHTML =
+      '<div class="live-panel-head">' +
+        '<span><i class="fas fa-satellite-dish"></i> Live Friends</span>' +
+        '<button onclick="window.closeLivePanel()"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="live-toggle-row">' +
+        '<div class="live-toggle-text">' +
+          '<div class="live-toggle-label">Share my location</div>' +
+          '<div class="live-toggle-sub">Visible to friends only</div>' +
+        '</div>' +
+        '<label class="live-toggle-switch">' +
+          '<input type="checkbox" id="locShareToggle">' +
+          '<span class="live-toggle-slider"></span>' +
+        '</label>' +
+      '</div>' +
+      '<div class="live-friends-list" id="liveFriendsList">' +
+        '<div class="live-friends-empty"><i class="fas fa-user-slash"></i><span>No friends sharing location</span></div>' +
+      '</div>';
+    container.appendChild(panel);
+
+    document.getElementById('locShareToggle').addEventListener('change', function () {
+      if (this.checked) startSharingLocation(); else stopSharingLocation();
+    });
+  }
+
+  window.openLivePanel = function () {
+    const user = window.GeoCurrentUser;
+    if (!user || !user.uid) {
+      if (window.GeoAccount && window.GeoAccount.requireLogin)
+        window.GeoAccount.requireLogin('see live friend locations');
+      else window.location.href = 'auth.html';
+      return;
+    }
+    const panel = document.getElementById('livePanel');
+    if (panel) panel.classList.toggle('open');
+    if (panel && panel.classList.contains('open')) startWatchingFriendLocations();
+  };
+
+  window.closeLivePanel = function () {
+    const panel = document.getElementById('livePanel');
+    if (panel) panel.classList.remove('open');
+  };
+
+  // ── My location ──────────────────────────────────
+  function startSharingLocation() {
+    if (!navigator.geolocation) { alert('GPS not available on this device.'); return; }
+    const geo = window.GeoFirebase, user = window.GeoCurrentUser;
+    if (!geo || !user) return;
+    _locSharing = true;
+
+    _locWatchId = navigator.geolocation.watchPosition(function (pos) {
+      _myLatLng = [pos.coords.longitude, pos.coords.latitude];
+      updateMyMarker(_myLatLng);
+      if (_writeThrottle) return;
+      _writeThrottle = setTimeout(function () {
+        _writeThrottle = null;
+        geo.fs.setDoc(geo.fs.doc(geo.db, 'userLocations', user.uid), {
+          uid: user.uid,
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          heading: pos.coords.heading || null,
+          accuracy: Math.round(pos.coords.accuracy || 0),
+          updatedAt: geo.fs.serverTimestamp(),
+          sharing: 'friends',
+          displayName: user.fullName || user.username || 'GeoHub User',
+          photoURL: user.avatar || ''
+        }, { merge: true });
+      }, 5000);
+    }, function () {
+      _locSharing = false;
+      const tog = document.getElementById('locShareToggle');
+      if (tog) tog.checked = false;
+    }, { enableHighAccuracy: true, maximumAge: 10000, timeout: 30000 });
+  }
+
+  function stopSharingLocation() {
+    _locSharing = false;
+    if (_locWatchId !== null) { navigator.geolocation.clearWatch(_locWatchId); _locWatchId = null; }
+    if (_myLocMarker) { _myLocMarker.remove(); _myLocMarker = null; }
+    _myLatLng = null;
+    if (_writeThrottle) { clearTimeout(_writeThrottle); _writeThrottle = null; }
+    const geo = window.GeoFirebase, user = window.GeoCurrentUser;
+    if (geo && user)
+      geo.fs.updateDoc(geo.fs.doc(geo.db, 'userLocations', user.uid), { sharing: 'off' }).catch(function () {});
+  }
+
+  function updateMyMarker(lngLat) {
+    if (!_myLocMarker) {
+      const el = document.createElement('div');
+      el.className = 'my-loc-marker';
+      el.innerHTML = '<div class="my-loc-pulse"></div><div class="my-loc-dot"></div>';
+      _myLocMarker = new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(lngLat).addTo(map);
+    } else {
+      _myLocMarker.setLngLat(lngLat);
+    }
+  }
+
+  // ── Friend location subscription ─────────────────
+  function startWatchingFriendLocations() {
+    const geo = window.GeoFirebase, user = window.GeoCurrentUser;
+    if (!geo || !user) return;
+    const { collection, query, where, onSnapshot, limit: fsLimit } = geo.fs;
+
+    if (_friendsListUnsub) { _friendsListUnsub(); _friendsListUnsub = null; }
+
+    _friendsListUnsub = onSnapshot(
+      query(collection(geo.db, 'friends'), where('users', 'array-contains', user.uid), fsLimit(50)),
+      function (snap) {
+        const friendUids = [];
+        snap.forEach(function (d) {
+          (d.data().users || []).forEach(function (u) { if (u !== user.uid) friendUids.push(u); });
+        });
+        watchFriendLocations(friendUids);
+      }
+    );
+  }
+
+  function watchFriendLocations(uids) {
+    const geo = window.GeoFirebase;
+    if (!geo) return;
+    if (_friendLocUnsub) { _friendLocUnsub(); _friendLocUnsub = null; }
+    if (!uids.length) { updateFriendMarkers([]); renderFriendsList([]); return; }
+
+    const { collection, query, where, onSnapshot } = geo.fs;
+    const batch = uids.slice(0, 10); // Firestore 'in' limit
+
+    _friendLocUnsub = onSnapshot(
+      query(collection(geo.db, 'userLocations'), where('uid', 'in', batch), where('sharing', '==', 'friends')),
+      function (snap) {
+        const now = Date.now();
+        const active = [];
+        snap.forEach(function (d) {
+          const data = d.data();
+          const age = now - (data.updatedAt && data.updatedAt.toMillis ? data.updatedAt.toMillis() : 0);
+          if (age < 10 * 60 * 1000) active.push(data); // only last 10 min
+        });
+        updateFriendMarkers(active);
+        renderFriendsList(active);
+      }
+    );
+  }
+
+  // ── Friend markers ───────────────────────────────
+  function updateFriendMarkers(friends) {
+    const activeUids = friends.map(function (f) { return f.uid; });
+    Object.keys(_friendMarkers).forEach(function (uid) {
+      if (!activeUids.includes(uid)) { _friendMarkers[uid].remove(); delete _friendMarkers[uid]; }
+    });
+    friends.forEach(function (f) {
+      _friendData[f.uid] = f;
+      const lngLat = [f.lng, f.lat];
+      if (!_friendMarkers[f.uid]) {
+        const el = buildFriendMarkerEl(f);
+        el.addEventListener('click', function () { showFriendCard(f.uid); });
+        _friendMarkers[f.uid] = new maplibregl.Marker({ element: el, anchor: 'center' }).setLngLat(lngLat).addTo(map);
+      } else {
+        _friendMarkers[f.uid].setLngLat(lngLat);
+        _friendData[f.uid] = f;
+      }
+    });
+  }
+
+  function buildFriendMarkerEl(f) {
+    const el = document.createElement('div');
+    el.className = 'friend-loc-marker';
+    const initials = (f.displayName || '?').split(' ').map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+    if (f.photoURL) {
+      const img = document.createElement('img');
+      img.src = f.photoURL;
+      img.alt = initials;
+      el.appendChild(img);
+    } else {
+      el.textContent = initials;
+    }
+    const pulse = document.createElement('div');
+    pulse.className = 'friend-loc-pulse';
+    el.appendChild(pulse);
+    const label = document.createElement('div');
+    label.className = 'friend-loc-label';
+    label.textContent = (f.displayName || '').split(' ')[0];
+    el.appendChild(label);
+    return el;
+  }
+
+  // ── Friend info card ─────────────────────────────
+  function showFriendCard(uid) {
+    const f = _friendData[uid];
+    if (!f) return;
+    const initials = (f.displayName || '?').split(' ').map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+    let distText = '', etaStr = '';
+    if (_myLatLng) {
+      const dist = haversine(_myLatLng, [f.lng, f.lat]);
+      distText = dist < 1 ? Math.round(dist * 1000) + ' m away' : dist.toFixed(1) + ' km away';
+      etaStr = dist < 0.3 ? 'On foot: ~' + Math.round(dist / 0.08) + ' min'
+             : dist < 5   ? 'On foot: ~' + Math.round(dist / 0.067) + ' min'
+             : 'By car: ~' + Math.round(dist / 0.42) + ' min';
+    }
+
+    const imgEl      = document.getElementById('panelImg');
+    const fallbackEl = document.getElementById('panelImgFallback');
+    if (f.photoURL) {
+      imgEl.src = f.photoURL; imgEl.style.display = '';
+      if (fallbackEl) fallbackEl.style.display = 'none';
+    } else {
+      imgEl.style.display = 'none';
+      if (fallbackEl) { fallbackEl.style.display = 'flex'; fallbackEl.textContent = initials; }
+    }
+    document.getElementById('panelTitle').textContent = f.displayName || 'Friend';
+    document.getElementById('panelCat').innerHTML   = '<span style="color:#10b981">🟢 Live Now</span>';
+    document.getElementById('panelLoc').textContent  = distText;
+    document.getElementById('panelRating').textContent = etaStr;
+    document.getElementById('panelDesc').textContent = 'Live location — updates every 5 seconds';
+
+    const detailBtn = document.getElementById('panelDetailBtn');
+    detailBtn.href = 'profile.html?id=' + encodeURIComponent(uid);
+    detailBtn.innerHTML = '<i class="fas fa-user"></i> Profile';
+    detailBtn.removeAttribute('aria-disabled');
+
+    const navBtn = document.getElementById('panelMapBtn');
+    navBtn.href = 'javascript:void(0)';
+    navBtn.innerHTML = '<i class="fas fa-route"></i>';
+    navBtn.onclick = function () { window.goToFriend(uid); };
+
+    const panel = document.getElementById('infoPanel');
+    if (panel) panel.classList.add('open');
+    map.flyTo({ center: [f.lng, f.lat], zoom: Math.max(map.getZoom(), 14), duration: 600 });
+  }
+
+  window.goToFriend = function (uid) {
+    const f = _friendData[uid];
+    if (!f) return;
+    if (_myLatLng) drawRouteLine(_myLatLng, [f.lng, f.lat]);
+    const dest   = f.lat + ',' + f.lng;
+    const origin = _myLatLng ? _myLatLng[1] + ',' + _myLatLng[0] : '';
+    window.open('https://www.google.com/maps/dir/' + origin + '/' + dest, '_blank');
+  };
+
+  function drawRouteLine(from, to) {
+    if (map.getLayer('friend-route-line')) map.removeLayer('friend-route-line');
+    if (map.getSource('friend-route'))     map.removeSource('friend-route');
+    map.addSource('friend-route', {
+      type: 'geojson',
+      data: { type: 'Feature', geometry: { type: 'LineString', coordinates: [from, to] } }
+    });
+    map.addLayer({
+      id: 'friend-route-line', type: 'line', source: 'friend-route',
+      paint: { 'line-color': '#10b981', 'line-width': 3, 'line-dasharray': [3, 2], 'line-opacity': 0.85 }
+    });
+  }
+
+  // ── Friends sidebar list ─────────────────────────
+  function renderFriendsList(friends) {
+    const list = document.getElementById('liveFriendsList');
+    if (!list) return;
+    if (!friends.length) {
+      list.innerHTML = '<div class="live-friends-empty"><i class="fas fa-user-slash"></i><span>No friends sharing location right now</span></div>';
+      return;
+    }
+    list.innerHTML = friends.map(function (f) {
+      const initials = (f.displayName || '?').split(' ').map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
+      let distText = '';
+      if (_myLatLng) {
+        const dist = haversine(_myLatLng, [f.lng, f.lat]);
+        distText = dist < 1 ? Math.round(dist * 1000) + ' m' : dist.toFixed(1) + ' km';
+      }
+      return '<div class="live-friend-row" onclick="window._ghShowFriend(\'' + f.uid + '\')">' +
+        '<div class="live-friend-av">' +
+        (f.photoURL ? '<img src="' + esc(f.photoURL) + '" alt="' + esc(initials) + '">' : '<span>' + esc(initials) + '</span>') +
+        '<div class="live-friend-dot"></div></div>' +
+        '<div class="live-friend-info"><div class="live-friend-name">' + esc(f.displayName || 'Friend') + '</div>' +
+        '<div class="live-friend-dist">' + (distText ? distText + ' away' : '🟢 Live') + '</div></div>' +
+        '<button class="live-friend-nav" onclick="event.stopPropagation();window.goToFriend(\'' + f.uid + '\')" title="Navigate"><i class="fas fa-route"></i></button>' +
+        '</div>';
+    }).join('');
+  }
+
+  window._ghShowFriend = function (uid) { showFriendCard(uid); };
+
+  // ── Haversine distance (km) ──────────────────────
+  function haversine(lngLat1, lngLat2) {
+    const R = 6371;
+    const [lng1, lat1] = lngLat1, [lng2, lat2] = lngLat2;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
   /* ── Init ───────────────────────────────────────── */
   function init() {
     const currentStyle = getMapStyle();
@@ -856,6 +1174,7 @@
       buildCategoryChips();
       buildMobileCard();
       buildRotationHint();
+      buildLiveFriendsUI();
       renderMap();
 
       // Re-cluster on viewport change
