@@ -1098,23 +1098,24 @@
       dy = e.touches[0].clientY - startY;
       const h = sidebar.offsetHeight;
       const state = getState();
-      const base = state === 'expanded' ? 0 : state === 'peek' ? (h - 220) : (h - 42);
-      const clamped = Math.max(0, Math.min(h - 42, base + dy));
+      const base = state === 'expanded' ? 0 : state === 'peek' ? (h - 220) : (h - 48);
+      const clamped = Math.max(0, Math.min(h - 48, base + dy));
       sidebar.style.transform = 'translateY(' + clamped + 'px)';
     }, { passive: false });
 
     pull.addEventListener('touchend', () => {
       if (!dragging) return;
       dragging = false;
-      sidebar.style.transition = '';
-      sidebar.style.transform = '';
       const state = getState();
       let next = state;
       if      (state === 'expanded' && dy >  50) next = 'peek';
       else if (state === 'peek'     && dy < -50) next = 'expanded';
       else if (state === 'peek'     && dy >  50) next = 'closed';
       else if (state === 'closed'   && dy < -40) next = 'peek';
+      // Set class FIRST so CSS target is correct before inline styles are cleared
       setState(next);
+      sidebar.style.transition = '';
+      sidebar.style.transform = '';
     });
 
     // Tap the handle to cycle states
@@ -1557,19 +1558,27 @@
           accuracy: Math.round(pos.coords.accuracy || 0),
           updatedAt: geo.fs.serverTimestamp(),
           sharing: 'friends',
-          displayName: user.fullName || user.username || 'GeoHub User',
-          photoURL: user.avatar || ''
+          displayName: user.displayName || user.fullName || user.username || 'GeoHub User',
+          photoURL: user.photoURL || user.avatar || ''
         }, { merge: true });
       }, 5000);
-    }, function () {
+      // Highlight sidebar button when sharing is on
+      const sBtn = document.getElementById('sidebarLocBtn');
+      if (sBtn) sBtn.classList.add('active');
+    }, function (err) {
       _locSharing = false;
       const tog = document.getElementById('locShareToggle');
       if (tog) tog.checked = false;
+      const sBtn = document.getElementById('sidebarLocBtn');
+      if (sBtn) sBtn.classList.remove('active');
+      if (err && err.code === 1) alert('Location permission denied. Please allow location access in your browser settings.');
     }, { enableHighAccuracy: true, maximumAge: 10000, timeout: 30000 });
   }
 
   function stopSharingLocation() {
     _locSharing = false;
+    const sBtn = document.getElementById('sidebarLocBtn');
+    if (sBtn) sBtn.classList.remove('active');
     if (_locWatchId !== null) { navigator.geolocation.clearWatch(_locWatchId); _locWatchId = null; }
     if (_myLocMarker) { _myLocMarker.remove(); _myLocMarker = null; }
     _myLatLng = null;

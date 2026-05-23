@@ -2299,10 +2299,37 @@ textarea {
   background: linear-gradient(180deg, #0b1120 0%, #0d1526 100%);
   z-index: 10;
 }
+.map-sidebar-toprow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.map-sidebar-toprow h3 { margin-bottom: 0; }
+.map-loc-share-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  color: #64748b;
+  font-size: .85rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.map-loc-share-btn:hover,
+.map-loc-share-btn.active {
+  background: rgba(16,185,129,.15);
+  border-color: rgba(16,185,129,.35);
+  color: #10b981;
+}
 .map-sidebar-header h3 {
   font-size: 0.95rem;
   font-weight: 700;
-  margin-bottom: 12px;
   color: #e2e8f0;
   letter-spacing: 0.2px;
 }
@@ -3430,14 +3457,16 @@ a, button, .btn, .card, .listing-card {
     border-right: none;
     border-top: 1px solid rgba(255,255,255,.09);
     box-shadow: 0 -16px 56px rgba(0,0,0,.72);
-    transition: transform 0.36s cubic-bezier(.22,.68,0,1.12);
+    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
     overflow-y: hidden;
     overflow-x: hidden;
   }
-  /* 3 states */
-  .map-sidebar.sb-closed   { transform: translateY(calc(100% - 42px)); overflow-y: hidden; }
+  /* 3 states — translateY values are percentage of sidebar's own height */
+  .map-sidebar.sb-closed   { transform: translateY(calc(100% - 48px)); overflow-y: hidden; }
   .map-sidebar.sb-peek     { transform: translateY(calc(100% - 220px)); overflow-y: hidden; }
   .map-sidebar.sb-expanded { transform: translateY(0); overflow-y: auto; }
+  /* Show loc share button inside sidebar header on mobile */
+  .map-loc-share-btn { display: flex; }
   .map-sidebar-pull {
     display: flex;
   }

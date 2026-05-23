@@ -95,7 +95,13 @@
   <div class="map-sidebar" id="mapSidebar">
     <div class="map-sidebar-pull" id="sidebarPull"><span></span><span></span><span></span></div>
     <div class="map-sidebar-header">
-      <h3>🗺️ Explore on Map</h3>
+      <div class="map-sidebar-toprow">
+        <h3>🗺️ Explore on Map</h3>
+        <!-- Mobile location sharing toggle (desktop uses the floating button) -->
+        <button class="map-loc-share-btn" id="sidebarLocBtn" onclick="window.openLivePanel()" title="Live Friends & Location">
+          <i class="fas fa-satellite-dish"></i>
+        </button>
+      </div>
       <div class="map-search" style="position:relative">
         <input type="text" id="mapSearchInput" placeholder="Search places..." autocomplete="off">
         <button><i class="fas fa-search"></i></button>
