@@ -50,6 +50,17 @@
   let cameraMode = 'explore';
   let heatmapVisible = false;
   let userCheckins = new Set();
+  let userMoodVotes = {};
+
+  const MOOD_TAGS = [
+    { id: 'cozy',     label: 'Cozy',             emoji: '🛋️' },
+    { id: 'work',     label: 'Good for work',    emoji: '💻' },
+    { id: 'family',   label: 'Family friendly',  emoji: '👨‍👩‍👧' },
+    { id: 'cheap',    label: 'Cheap',            emoji: '💰' },
+    { id: 'romantic', label: 'Romantic',         emoji: '🌹' },
+    { id: 'crowded',  label: 'Crowded',          emoji: '👥' },
+    { id: 'quiet',    label: 'Quiet',            emoji: '🔇' },
+  ];
 
   const CAMERA_MODES = {
     explore:    { label: '🔍 Explore',   pitch: 0,  bearing: 0 },
@@ -532,6 +543,7 @@
       }
     }
     _setupCheckinBtn('panelCheckinBtn', p.id);
+    _loadMoodTags(p.id);
     if (panel) panel.classList.add('open');
   }
   window.focusPlace = focusPlace;
@@ -574,6 +586,7 @@
       + '</div>'
       + '<div id="mpcAddr" class="mpc-addr"></div>'
       + '<div id="mpcDesc" class="mpc-desc"></div>'
+      + '<div id="mpcMoodTags" class="panel-mood-tags"></div>'
       + '<div id="mpcGoogleSection" style="display:none"></div>'
       + '<div class="mpc-btns">'
       + '<a id="mpcDetail" href="#" class="btn btn-primary btn-sm" style="flex:1;justify-content:center"><i class="fas fa-info-circle"></i> Details</a>'
@@ -690,6 +703,7 @@
       }
     }
     _setupCheckinBtn('mpcCheckinBtn', p.id);
+    _loadMoodTags(p.id);
     card.classList.add('open');
   }
 
@@ -972,8 +986,8 @@
     navigator.geolocation.getCurrentPosition(
       pos => {
         const dist = _haversineKm(pos.coords.latitude, pos.coords.longitude, p.lat, p.lng);
-        if (dist > 0.5) {
-          alert('You need to be within 500m of this place to check in. (You are ' + Math.round(dist * 1000) + 'm away)');
+        if (dist > 0.01) {
+          alert('You need to be within 10m of this place to check in. (You are ' + Math.round(dist * 1000) + 'm away)');
           return;
         }
         _doCheckin(placeId, p, GF, user);
@@ -1003,6 +1017,64 @@
       ? '<i class="fas fa-check-circle"></i> Checked In'
       : '<i class="fas fa-map-pin"></i> Check In';
   }
+
+  /* ── Mood Tags ──────────────────────────────────── */
+  function _moodTagsHtml(placeId, counts, votes) {
+    return '<div class="mood-tags-title">Vibes</div><div class="mood-tags-list">'
+      + MOOD_TAGS.map(t => {
+          const c = counts[t.id] || 0;
+          const v = votes[t.id] === true;
+          return '<button class="mood-tag' + (v ? ' voted' : '') + '" onclick="toggleMoodTag(\'' + placeId + '\',\'' + t.id + '\',this)">'
+            + t.emoji + ' ' + t.label
+            + (c > 0 ? ' <span class="mood-tag-count">' + c + '</span>' : '')
+            + '</button>';
+        }).join('')
+      + '</div>';
+  }
+
+  function _loadMoodTags(placeId) {
+    const GF = window.GeoFirebase, user = window.GeoCurrentUser;
+    const render = (counts, votes) => {
+      const html = _moodTagsHtml(placeId, counts, votes);
+      ['panelMoodTags', 'mpcMoodTags'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = html; });
+    };
+    if (!GF) { render({}, {}); return; }
+    GF.fs.getDoc(GF.fs.doc(GF.db, 'placeMoodTags', placeId)).then(snap => {
+      const counts = snap.exists() ? snap.data() : {};
+      if (!user) { render(counts, {}); return; }
+      if (userMoodVotes[placeId] !== undefined) { render(counts, userMoodVotes[placeId]); return; }
+      GF.fs.getDoc(GF.fs.doc(GF.db, 'users', user.uid, 'moodTagVotes', placeId))
+        .then(vs => { const votes = vs.exists() ? vs.data() : {}; userMoodVotes[placeId] = votes; render(counts, votes); })
+        .catch(() => render(counts, {}));
+    }).catch(() => render({}, {}));
+  }
+
+  window.toggleMoodTag = function(placeId, tagId, btn) {
+    const GF = window.GeoFirebase, user = window.GeoCurrentUser;
+    if (!GF || !user) { alert('Sign in to vote on vibes'); return; }
+    if (!userMoodVotes[placeId]) userMoodVotes[placeId] = {};
+    const wasVoted = userMoodVotes[placeId][tagId] === true;
+    const newVoted = !wasVoted;
+    userMoodVotes[placeId][tagId] = newVoted;
+    const delta = newVoted ? 1 : -1;
+
+    // Update every mood-tag button with this tagId in all containers
+    ['panelMoodTags', 'mpcMoodTags'].forEach(id => {
+      const wrap = document.getElementById(id); if (!wrap) return;
+      const b = wrap.querySelector('[onclick*="\'' + tagId + '\'"]'); if (!b) return;
+      b.classList.toggle('voted', newVoted);
+      const ce = b.querySelector('.mood-tag-count');
+      const cur = ce ? (parseInt(ce.textContent) || 0) : 0;
+      const next = Math.max(0, cur + delta);
+      if (next > 0) { if (ce) ce.textContent = next; else { const s = document.createElement('span'); s.className = 'mood-tag-count'; s.textContent = next; b.appendChild(s); } }
+      else if (ce) ce.remove();
+    });
+
+    const tagUpd = {}; tagUpd[tagId] = GF.fs.increment(delta);
+    GF.fs.setDoc(GF.fs.doc(GF.db, 'placeMoodTags', placeId), tagUpd, { merge: true }).catch(() => {});
+    const voteUpd = {}; voteUpd[tagId] = newVoted;
+    GF.fs.setDoc(GF.fs.doc(GF.db, 'users', user.uid, 'moodTagVotes', placeId), voteUpd, { merge: true }).catch(() => {});
+  };
 
   /* ── Heatmap ────────────────────────────────────── */
   function initHeatmapLayer() {
