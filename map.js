@@ -556,7 +556,11 @@
     const rating = document.getElementById('panelRating'); if (rating) rating.innerHTML  = p.rating ? renderStars(p.rating) + ' <span style="font-size:0.72rem;opacity:.7">(' + p.rating + ')</span>' : '';
     const desc   = document.getElementById('panelDesc');  if (desc)   desc.textContent   = p.shortDescription || '';
     const detail = document.getElementById('panelDetailBtn');
-    if (detail) detail.href = p.source === 'businesses' ? 'business.html?id=' + encodeURIComponent(p.id) : '#';
+    if (detail) {
+      detail.href = 'javascript:void(0)';
+      detail.innerHTML = '<i class="fas fa-expand-alt"></i> ვრცლად';
+      detail.onclick = () => openPlaceDrawer(p.id, p);
+    }
     const maps = document.getElementById('panelMapBtn');
     if (maps) maps.href = 'https://www.google.com/maps/search/' + encodeURIComponent(p.name + ' ' + (p.city || '') + ' Georgia');
     const gSection = document.getElementById('panelGoogleSection');
@@ -1861,4 +1865,251 @@
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+
+  /* ═══════════════════════════════════════════════════════════════
+     PLACE DETAIL DRAWER
+     4 tabs: Info · Reviews · Photos · Stories 24h
+  ═══════════════════════════════════════════════════════════════ */
+  let _drawerPid = null;
+  let _drawerPlace = null;
+
+  function _mpdTimeAgo(v) {
+    if (!v) return '';
+    const ms = typeof v.toMillis === 'function' ? v.toMillis() : (v.seconds ? v.seconds * 1000 : new Date(v).getTime());
+    const d = Date.now() - ms;
+    if (d < 60000)  return 'just now';
+    if (d < 3600000) return Math.floor(d / 60000) + 'm ago';
+    if (d < 86400000) return Math.floor(d / 3600000) + 'h ago';
+    return Math.floor(d / 86400000) + 'd ago';
+  }
+
+  window.openPlaceDrawer = function (placeId, p) {
+    _drawerPid   = placeId;
+    _drawerPlace = p;
+    const drawer  = document.getElementById('placeDrawer');
+    const backdrop = document.getElementById('mpdBackdrop');
+    if (!drawer) return;
+
+    const pStyle = getPlaceMarkerStyle(p);
+
+    // Cover image
+    const cImg = document.getElementById('mpdCoverImg');
+    const cFb  = document.getElementById('mpdCoverFallback');
+    if (p.image) {
+      cImg.src = p.image; cImg.style.display = '';
+      if (cFb) cFb.style.display = 'none';
+    } else {
+      cImg.style.display = 'none';
+      if (cFb) { cFb.style.display = 'flex'; cFb.textContent = pStyle.icon || '📍'; cFb.style.background = pStyle.color + '33'; }
+    }
+
+    // Header text
+    const mpdTitle = document.getElementById('mpdTitle');
+    const mpdSub   = document.getElementById('mpdSubtitle');
+    if (mpdTitle) mpdTitle.textContent = p.name;
+    if (mpdSub)   mpdSub.innerHTML =
+      '<span>' + esc(pStyle.icon + ' ' + p.categoryLabel) + '</span>' +
+      (p.city ? '<span> · ' + esc(p.city) + ', Georgia</span>' : '') +
+      openBadgeHtml(p.workingHours);
+
+    // Quick actions
+    const qa = document.getElementById('mpdQuickActions');
+    if (qa) {
+      const bizHref  = p.source === 'businesses' ? 'business.html?id=' + encodeURIComponent(p.id) : null;
+      const mapsHref = 'https://www.google.com/maps/search/' + encodeURIComponent(p.name + ' ' + (p.city || '') + ' Georgia');
+      qa.innerHTML =
+        (bizHref ? '<a href="' + bizHref + '" class="mpd-qa-btn primary"><i class="fas fa-store"></i> Business Page</a>' : '') +
+        '<a href="' + mapsHref + '" target="_blank" rel="noopener" class="mpd-qa-btn ghost"><i class="fas fa-route"></i> Directions</a>' +
+        '<button class="mpd-qa-btn ghost" onclick="checkInToPlace()"><i class="fas fa-map-pin"></i> Check In</button>';
+    }
+
+    // Reset to Info tab
+    document.querySelectorAll('[data-mpd-tab]').forEach(t => t.classList.toggle('active', t.dataset.mpdTab === 'info'));
+    _mpdLoadTab('info');
+
+    // Tab listeners (rebind each open to avoid leaks via replacing node)
+    const tabsEl = document.getElementById('mpdTabs');
+    if (tabsEl && !tabsEl._mpdBound) {
+      tabsEl._mpdBound = true;
+      tabsEl.addEventListener('click', e => {
+        const btn = e.target.closest('[data-mpd-tab]');
+        if (!btn) return;
+        document.querySelectorAll('[data-mpd-tab]').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        _mpdLoadTab(btn.dataset.mpdTab);
+      });
+    }
+
+    drawer.classList.add('open');
+    if (backdrop) backdrop.classList.add('open');
+  };
+
+  window.closePlaceDrawer = function () {
+    const el = document.getElementById('placeDrawer');
+    const bd = document.getElementById('mpdBackdrop');
+    if (el) el.classList.remove('open');
+    if (bd) bd.classList.remove('open');
+  };
+
+  function _mpdLoadTab(tab) {
+    const box = document.getElementById('mpdTabContent');
+    if (!box) return;
+    box.innerHTML = '<div class="mpd-loading"><i class="fas fa-circle-notch fa-spin"></i></div>';
+    const GF = window.GeoFirebase;
+    if (tab === 'info')    { _mpdInfo(box); }
+    else if (tab === 'reviews') { _mpdReviews(box, GF); }
+    else if (tab === 'photos')  { _mpdPhotos(box, GF); }
+    else if (tab === 'stories') { _mpdStories(box, GF); }
+  }
+
+  function _mpdInfo(box) {
+    const p = _drawerPlace;
+    const pStyle = getPlaceMarkerStyle(p);
+    let h = '';
+
+    if (p.rating) {
+      h += '<div class="mpd-row"><span class="mpd-lbl">Rating</span><span class="mpd-val">' +
+        renderStars(p.rating) + ' <b>' + p.rating + '</b>' + (p.reviewCount ? ' (' + p.reviewCount + ' reviews)' : '') + '</span></div>';
+    }
+    h += '<div class="mpd-row"><span class="mpd-lbl">Category</span><span class="mpd-val">' + esc(pStyle.icon + ' ' + p.categoryLabel) + '</span></div>';
+    if (p.city || p.address) {
+      h += '<div class="mpd-row"><span class="mpd-lbl"><i class="fas fa-location-dot"></i> Location</span><span class="mpd-val">' +
+        esc((p.address ? p.address + (p.city ? ', ' : '') : '') + (p.city || '')) + '</span></div>';
+    }
+    if (p.shortDescription) {
+      h += '<div class="mpd-desc">' + esc(p.shortDescription) + '</div>';
+    }
+
+    // Working hours
+    if (p.workingHours) {
+      const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      const today = new Date().getDay();
+      h += '<div class="mpd-section-title"><i class="fas fa-clock"></i> Working Hours</div><div class="mpd-hours">';
+      days.forEach((day, i) => {
+        const wh = p.workingHours[day];
+        const isToday = i === today;
+        h += '<div class="mpd-hours-row' + (isToday ? ' today' : '') + '">' +
+          '<span class="mpd-hours-day">' + day.slice(0, 3) + '</span>' +
+          '<span class="mpd-hours-time">' + (wh ? (wh.closed ? 'Closed' : (wh.open || '?') + ' – ' + (wh.close || '?')) : '—') + '</span>' +
+          '</div>';
+      });
+      h += '</div>';
+    }
+
+    // Mood tags
+    const counts = _moodTagCounts[p.id];
+    if (counts) {
+      const active = MOOD_TAGS.filter(t => counts[t.id] >= 1);
+      if (active.length) {
+        h += '<div class="mpd-section-title">Vibes</div><div class="mpd-mood-row">' +
+          active.map(t => '<span class="mpd-mood-chip">' + t.emoji + ' ' + t.label + ' <b>' + counts[t.id] + '</b></span>').join('') +
+          '</div>';
+      }
+    }
+
+    box.innerHTML = h || '<p class="mpd-empty">No additional info available.</p>';
+  }
+
+  function _mpdReviews(box, GF) {
+    if (!GF || !GF.db || !GF.fs) { box.innerHTML = '<p class="mpd-empty">Firebase not ready</p>'; return; }
+    GF.fs.getDocs(GF.fs.query(
+      GF.fs.collection(GF.db, 'placeReviews', _drawerPid, 'reviews'),
+      GF.fs.orderBy('createdAt', 'desc'),
+      GF.fs.limit(25)
+    )).then(snap => {
+      if (snap.empty) { box.innerHTML = '<p class="mpd-empty">⭐ No reviews yet — be the first after checking in!</p>'; return; }
+      let h = '<div class="mpd-reviews">';
+      snap.forEach(d => {
+        const r = d.data();
+        const av = r.authorAvatar
+          ? '<img src="' + esc(r.authorAvatar) + '" class="mpd-rev-av" onerror="this.style.display=\'none\'">'
+          : '<div class="mpd-rev-av mpd-rev-init">' + esc((r.authorName || 'U')[0]) + '</div>';
+        h += '<div class="mpd-review-card">' +
+          '<div class="mpd-rev-head">' + av +
+            '<div><div class="mpd-rev-name">' + esc(r.authorName || 'User') + '</div>' +
+            '<div class="mpd-rev-stars">' + renderStars(r.rating || 0) + '</div></div>' +
+            '<span class="mpd-rev-time">' + _mpdTimeAgo(r.createdAt) + '</span>' +
+          '</div>' +
+          (r.text ? '<p class="mpd-rev-text">' + esc(r.text) + '</p>' : '') +
+          '</div>';
+      });
+      h += '</div>';
+      box.innerHTML = h;
+    }).catch(() => { box.innerHTML = '<p class="mpd-empty">Could not load reviews</p>'; });
+  }
+
+  function _mpdPhotos(box, GF) {
+    if (!GF || !GF.db || !GF.fs) { box.innerHTML = '<p class="mpd-empty">Firebase not ready</p>'; return; }
+    GF.fs.getDocs(GF.fs.query(
+      GF.fs.collection(GF.db, 'placeCheckins'),
+      GF.fs.where('placeId', '==', _drawerPid),
+      GF.fs.orderBy('checkedInAt', 'desc'),
+      GF.fs.limit(40)
+    )).then(snap => {
+      const photos = [];
+      snap.forEach(d => { const c = d.data(); if (c.photoUrl) photos.push(c); });
+      if (!photos.length) { box.innerHTML = '<p class="mpd-empty">📸 No check-in photos yet. Check in and share a photo!</p>'; return; }
+      box.innerHTML = '<div class="mpd-photo-grid">' +
+        photos.map(c =>
+          '<div class="mpd-photo-item">' +
+            '<img src="' + esc(c.photoUrl) + '" alt="" loading="lazy" onerror="this.parentElement.remove()">' +
+            '<span class="mpd-photo-name">' + esc(c.userName || 'User') + '</span>' +
+          '</div>'
+        ).join('') + '</div>';
+    }).catch(() => { box.innerHTML = '<p class="mpd-empty">Could not load photos</p>'; });
+  }
+
+  function _mpdStories(box, GF) {
+    if (!GF || !GF.db || !GF.fs) { box.innerHTML = '<p class="mpd-empty">Firebase not ready</p>'; return; }
+    const since = GF.fs.Timestamp
+      ? GF.fs.Timestamp.fromDate(new Date(Date.now() - 86400000))
+      : new Date(Date.now() - 86400000);
+    GF.fs.getDocs(GF.fs.query(
+      GF.fs.collection(GF.db, 'placeCheckins'),
+      GF.fs.where('placeId', '==', _drawerPid),
+      GF.fs.where('checkedInAt', '>=', since),
+      GF.fs.orderBy('checkedInAt', 'desc'),
+      GF.fs.limit(24)
+    )).then(snap => {
+      if (snap.empty) { box.innerHTML = '<p class="mpd-empty">🔥 No one checked in here in the last 24h. Be the first!</p>'; return; }
+      let h = '<div class="mpd-stories-bar"><i class="fas fa-fire"></i> ' + snap.size + ' check-in' + (snap.size !== 1 ? 's' : '') + ' in the last 24h</div>';
+      h += '<div class="mpd-stories-grid">';
+      snap.forEach(d => {
+        const c = d.data();
+        const av = c.userAvatar
+          ? '<img class="mpd-st-av" src="' + esc(c.userAvatar) + '" onerror="this.style.display=\'none\'">'
+          : '<div class="mpd-st-av mpd-st-av-init">' + esc((c.userName || '?')[0]) + '</div>';
+        h += '<div class="mpd-story-card">' +
+          (c.photoUrl
+            ? '<img class="mpd-story-img" src="' + esc(c.photoUrl) + '" loading="lazy" onerror="this.style.display=\'none\'">'
+            : '<div class="mpd-story-noimg">' + (c.emoji || '📍') + '</div>') +
+          '<div class="mpd-story-foot">' + av +
+            '<span class="mpd-st-name">' + esc(c.userName || 'Someone') + '</span>' +
+            '<span class="mpd-st-time">' + _mpdTimeAgo(c.checkedInAt) + '</span>' +
+          '</div></div>';
+      });
+      h += '</div>';
+      box.innerHTML = h;
+    }).catch(() => {
+      // index not built yet — fallback without date filter
+      GF.fs.getDocs(GF.fs.query(
+        GF.fs.collection(GF.db, 'placeCheckins'),
+        GF.fs.where('placeId', '==', _drawerPid),
+        GF.fs.orderBy('checkedInAt', 'desc'),
+        GF.fs.limit(12)
+      )).then(snap2 => {
+        if (snap2.empty) { box.innerHTML = '<p class="mpd-empty">🔥 No check-ins yet. Be the first!</p>'; return; }
+        let h = '<div class="mpd-stories-bar"><i class="fas fa-fire"></i> Recent check-ins</div><div class="mpd-stories-grid">';
+        snap2.forEach(d => {
+          const c = d.data();
+          const av = c.userAvatar ? '<img class="mpd-st-av" src="' + esc(c.userAvatar) + '" onerror="this.style.display=\'none\'">' : '<div class="mpd-st-av mpd-st-av-init">' + esc((c.userName || '?')[0]) + '</div>';
+          h += '<div class="mpd-story-card">' +
+            (c.photoUrl ? '<img class="mpd-story-img" src="' + esc(c.photoUrl) + '" loading="lazy" onerror="this.style.display=\'none\'">' : '<div class="mpd-story-noimg">' + (c.emoji || '📍') + '</div>') +
+            '<div class="mpd-story-foot">' + av + '<span class="mpd-st-name">' + esc(c.userName || 'Someone') + '</span><span class="mpd-st-time">' + _mpdTimeAgo(c.checkedInAt) + '</span></div></div>';
+        });
+        box.innerHTML = h + '</div>';
+      }).catch(() => { box.innerHTML = '<p class="mpd-empty">Could not load stories</p>'; });
+    });
+  }
+
 })();

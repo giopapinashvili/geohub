@@ -153,6 +153,28 @@
       Showing <strong id="mapCount">0</strong> places
     </div>
 
+    <!-- Place Detail Drawer -->
+    <div class="mpd-backdrop" id="mpdBackdrop" onclick="window.closePlaceDrawer()"></div>
+    <div class="map-place-drawer" id="placeDrawer">
+      <button class="mpd-close-btn" onclick="window.closePlaceDrawer()"><i class="fas fa-times"></i></button>
+      <div class="mpd-cover-wrap" id="mpdCoverWrap">
+        <img class="mpd-cover-img" id="mpdCoverImg" src="" alt="">
+        <div class="mpd-cover-fallback" id="mpdCoverFallback"></div>
+        <div class="mpd-cover-overlay">
+          <h2 class="mpd-title" id="mpdTitle"></h2>
+          <div class="mpd-subtitle" id="mpdSubtitle"></div>
+        </div>
+      </div>
+      <div class="mpd-quick-actions" id="mpdQuickActions"></div>
+      <div class="mpd-tabs" id="mpdTabs">
+        <button class="mpd-tab active" data-mpd-tab="info">ℹ️ Info</button>
+        <button class="mpd-tab" data-mpd-tab="reviews">⭐ Reviews</button>
+        <button class="mpd-tab" data-mpd-tab="photos">📸 Photos</button>
+        <button class="mpd-tab" data-mpd-tab="stories">🔥 Stories 24h</button>
+      </div>
+      <div class="mpd-tab-content" id="mpdTabContent"></div>
+    </div>
+
     <!-- Place Info Panel -->
     <div class="map-info-panel" id="infoPanel">
       <div class="panel-close" onclick="closePanel()"><i class="fas fa-times"></i></div>
