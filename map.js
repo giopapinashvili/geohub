@@ -53,6 +53,10 @@
   let userMoodVotes = {};
   let currentMoodFilter = '';
   let _moodTagCounts = {};   // { placeId: { tagId: count } } — cached from Firestore
+  let allEvents = [];
+  let eventMarkers = [];
+  let showEvents = false;
+  let showThisWeekend = false;
 
   const MOOD_TAGS = [
     { id: 'cozy',     label: 'Cozy',             emoji: '🛋️' },
@@ -926,6 +930,129 @@
       renderMap();
     });
   }
+
+  /* ── Events on Map ─────────────────────────────── */
+  function tsToMs(v) {
+    if (!v) return 0;
+    if (typeof v.toMillis === 'function') return v.toMillis();
+    if (v.seconds) return v.seconds * 1000;
+    if (v instanceof Date) return v.getTime();
+    return new Date(v).getTime() || 0;
+  }
+
+  function isThisWeekend(v) {
+    const ms = tsToMs(v);
+    if (!ms) return false;
+    const now = new Date(), d = new Date(ms);
+    const dayOfWeek = now.getDay(); // 0=Sun, 6=Sat
+    const daysUntilFri = (5 - dayOfWeek + 7) % 7;
+    const daysUntilSun = (7 - dayOfWeek) % 7 || 7;
+    const fri = new Date(now); fri.setDate(now.getDate() + (daysUntilFri === 0 ? 0 : daysUntilFri));
+    fri.setHours(0,0,0,0);
+    const sun = new Date(now); sun.setDate(now.getDate() + daysUntilSun);
+    sun.setHours(23,59,59,999);
+    return d >= fri && d <= sun;
+  }
+
+  function loadEvents() {
+    const GF = window.GeoFirebase;
+    if (!GF || !GF.db || !GF.fs) return;
+    GF.fs.getDocs(GF.fs.query(GF.fs.collection(GF.db, 'events'), GF.fs.limit(200))).then(snap => {
+      allEvents = [];
+      snap.forEach(d => {
+        const ev = Object.assign({ id: d.id }, d.data());
+        const lat = Number(ev.lat || ev.latitude || 0);
+        const lng = Number(ev.lng || ev.longitude || ev.lon || 0);
+        if (lat && lng) { ev.lat = lat; ev.lng = lng; allEvents.push(ev); }
+      });
+      if (showEvents) renderEventMarkers();
+    }).catch(() => {});
+  }
+
+  function renderEventMarkers() {
+    eventMarkers.forEach(m => m.remove());
+    eventMarkers = [];
+    if (!showEvents || !map) return;
+    const now = Date.now();
+    const eventsToShow = allEvents.filter(ev => {
+      const ms = tsToMs(ev.date || ev.startDate);
+      if (ms && ms < now) return false; // past event
+      if (showThisWeekend && !isThisWeekend(ev.date || ev.startDate)) return false;
+      return true;
+    });
+    eventsToShow.forEach(ev => {
+      const el = document.createElement('div');
+      el.className = 'gh-event-marker';
+      el.textContent = '🎉';
+      el.title = ev.title || ev.name || 'Event';
+      el.addEventListener('click', () => _openEventPanel(ev));
+      const marker = new maplibregl.Marker({ element: el })
+        .setLngLat([ev.lng, ev.lat])
+        .addTo(map);
+      eventMarkers.push(marker);
+    });
+  }
+
+  function _openEventPanel(ev) {
+    const dateVal = ev.date || ev.startDate;
+    const ms = tsToMs(dateVal);
+    const dateStr = ms ? new Date(ms).toLocaleDateString('ka-GE', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+    const panel = document.getElementById('infoPanel');
+    if (!panel) return;
+
+    const img = ev.imageUrl || ev.image || ev.coverImage || ev.coverImageUrl || '';
+    const panelImg = document.getElementById('panelImg');
+    const panelImgFb = document.getElementById('panelImgFallback');
+    if (img) {
+      panelImg.src = img; panelImg.style.display = '';
+      if (panelImgFb) panelImgFb.style.display = 'none';
+    } else {
+      panelImg.style.display = 'none';
+      if (panelImgFb) { panelImgFb.style.display = ''; panelImgFb.textContent = '🎉'; }
+    }
+
+    const panelTitle = document.getElementById('panelTitle');
+    const panelCat   = document.getElementById('panelCat');
+    const panelLoc   = document.getElementById('panelLoc');
+    const panelDesc  = document.getElementById('panelDesc');
+    const panelRating = document.getElementById('panelRating');
+    if (panelTitle) panelTitle.textContent = ev.title || ev.name || 'Event';
+    if (panelCat)   panelCat.textContent   = '🎉 Event' + (ev.category ? ' · ' + ev.category : '');
+    if (panelLoc)   panelLoc.textContent   = (dateStr ? '📅 ' + dateStr : '') + (ev.location || ev.venue ? '  📍 ' + (ev.location || ev.venue) : '');
+    if (panelDesc)  panelDesc.textContent  = ev.description || '';
+    if (panelRating) panelRating.textContent = ev.rsvpCount ? '👥 ' + ev.rsvpCount + ' going' : '';
+
+    const detailBtn = document.getElementById('panelDetailBtn');
+    if (detailBtn) { detailBtn.href = 'events.html'; detailBtn.removeAttribute('aria-disabled'); }
+    const mapBtn = document.getElementById('panelMapBtn');
+    if (mapBtn && ev.lat && ev.lng) mapBtn.href = 'https://maps.google.com/?q=' + ev.lat + ',' + ev.lng;
+
+    const checkinBtn = document.getElementById('panelCheckinBtn');
+    if (checkinBtn) checkinBtn.style.display = 'none';
+    const moodTags = document.getElementById('panelMoodTags');
+    if (moodTags) moodTags.innerHTML = '';
+
+    panel.classList.add('open');
+    map.flyTo({ center: [ev.lng, ev.lat], zoom: Math.max(map.getZoom(), 14) });
+  }
+
+  window.toggleEventsLayer = function() {
+    showEvents = !showEvents;
+    const btn = document.getElementById('eventsToggleBtn');
+    if (btn) btn.classList.toggle('active', showEvents);
+    const wkBtn = document.getElementById('weekendToggleBtn');
+    if (wkBtn) wkBtn.style.display = showEvents ? '' : 'none';
+    if (!showEvents) { showThisWeekend = false; if (wkBtn) wkBtn.classList.remove('active'); }
+    if (showEvents) loadEvents();
+    else { eventMarkers.forEach(m => m.remove()); eventMarkers = []; }
+  };
+
+  window.toggleThisWeekend = function() {
+    showThisWeekend = !showThisWeekend;
+    const btn = document.getElementById('weekendToggleBtn');
+    if (btn) btn.classList.toggle('active', showThisWeekend);
+    if (showEvents) renderEventMarkers();
+  };
 
   /* ── Map style toggle ───────────────────────────── */
   function getMapStyle() {
