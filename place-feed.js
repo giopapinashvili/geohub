@@ -359,15 +359,22 @@
         + '</div>'
         + '<div class="pf-act-divider"></div>'
         + '<button class="pf-act" data-comment-btn="' + p.id + '">'
-          + '<i class="far fa-comment"></i> Comment'
+          + '<i class="far fa-comment"></i> <span data-cmt-label>' + (comms || 'Comment') + '</span>'
         + '</button>'
         + '<div class="pf-act-divider"></div>'
         + '<a class="pf-act pf-act-view" href="' + viewBizHref + '">'
           + '<i class="fas fa-arrow-up-right-from-square"></i> View'
         + '</a>'
+      + '</div>'
+      + '<div class="pf-comments-panel" data-comments-panel="' + p.id + '" hidden>'
+        + '<div class="pf-cmt-list" data-cmt-list></div>'
+        + '<div class="pf-cmt-form">'
+          + '<div class="pf-cmt-me" data-cmt-avatar></div>'
+          + '<input class="pf-cmt-input" placeholder="კომენტარი..." maxlength="500" data-cmt-input>'
+          + '<button class="pf-cmt-submit" data-cmt-submit><i class="fas fa-paper-plane"></i></button>'
+        + '</div>'
       + '</div>';
 
-    // Events
     // Expand long text
     var expandBtn = card.querySelector('[data-expand]');
     if (expandBtn) {
@@ -387,15 +394,136 @@
       btn.addEventListener('click', function() { toggleLike(p.id, btn.dataset.reaction, card); });
     });
 
-    // Comment → link to business page
+    // Comment → toggle inline panel
     var commentBtn = card.querySelector('[data-comment-btn]');
     if (commentBtn) {
       commentBtn.addEventListener('click', function() {
-        if (bizId) window.location.href = viewBizHref + '#post-' + p.id;
+        toggleCommentPanel(p.id, card);
+      });
+    }
+
+    // Set up avatar in comment form
+    _fillCommentAvatar(card.querySelector('[data-cmt-avatar]'));
+
+    // Comment submit
+    var submitBtn = card.querySelector('[data-cmt-submit]');
+    var cmtInput  = card.querySelector('[data-cmt-input]');
+    if (submitBtn && cmtInput) {
+      function doSubmit() { submitComment(p.id, card); }
+      submitBtn.addEventListener('click', doSubmit);
+      cmtInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSubmit(); }
       });
     }
 
     return card;
+  }
+
+  function _fillCommentAvatar(el) {
+    if (!el) return;
+    if (_user && _user.photoURL) {
+      el.innerHTML = '<img src="' + esc(_user.photoURL) + '" alt="" onerror="this.style.display=\'none\'">';
+    } else if (_user && _user.displayName) {
+      el.textContent = _user.displayName[0].toUpperCase();
+    } else {
+      el.innerHTML = '<i class="fas fa-user"></i>';
+    }
+  }
+
+  function toggleCommentPanel(postId, card) {
+    var panel = card.querySelector('[data-comments-panel]');
+    if (!panel) return;
+    var isHidden = panel.hasAttribute('hidden');
+    if (isHidden) {
+      panel.removeAttribute('hidden');
+      _fillCommentAvatar(card.querySelector('[data-cmt-avatar]'));
+      loadComments(postId, card);
+      var inp = card.querySelector('[data-cmt-input]');
+      if (inp) setTimeout(function() { inp.focus(); }, 100);
+    } else {
+      panel.setAttribute('hidden', '');
+    }
+  }
+
+  function loadComments(postId, card) {
+    var list = card.querySelector('[data-cmt-list]');
+    if (!list) return;
+    list.innerHTML = '<div class="pf-cmt-loading"><i class="fas fa-circle-notch fa-spin"></i></div>';
+    _fs.getDocs(_fs.query(
+      _fs.collection(_db, 'posts', postId, 'comments'),
+      _fs.orderBy('createdAt', 'asc'),
+      _fs.limit(20)
+    )).then(function(snap) {
+      if (snap.empty) {
+        list.innerHTML = '<p class="pf-no-cmt">პირველი კომენტარი შენია!</p>';
+        return;
+      }
+      list.innerHTML = '';
+      snap.forEach(function(d) {
+        list.appendChild(buildCommentEl(d.id, d.data()));
+      });
+    }).catch(function() {
+      list.innerHTML = '<p class="pf-no-cmt">კომენტარები ვერ ჩაიტვირთა</p>';
+    });
+  }
+
+  function buildCommentEl(cid, c) {
+    var wrap = document.createElement('div');
+    wrap.className = 'pf-cmt-item';
+    wrap.dataset.commentId = cid;
+    var avatarHtml = c.authorAvatar
+      ? '<img src="' + esc(c.authorAvatar) + '" class="pf-cmt-av" alt="" onerror="this.style.display=\'none\'">'
+      : '<div class="pf-cmt-av pf-cmt-init">' + esc((c.authorName || 'U')[0].toUpperCase()) + '</div>';
+    wrap.innerHTML = avatarHtml
+      + '<div class="pf-cmt-bubble">'
+        + '<span class="pf-cmt-name">' + esc(c.authorName || 'User') + '</span>'
+        + '<span class="pf-cmt-txt">' + esc(c.text || '') + '</span>'
+      + '</div>';
+    return wrap;
+  }
+
+  function submitComment(postId, card) {
+    if (!_user) { toast('გთხოვთ გაიაროთ ავტორიზაცია'); return; }
+    var input = card.querySelector('[data-cmt-input]');
+    var btn   = card.querySelector('[data-cmt-submit]');
+    var text  = input ? input.value.trim() : '';
+    if (!text) return;
+
+    if (input) input.value = '';
+    if (btn) btn.disabled = true;
+
+    _fs.addDoc(_fs.collection(_db, 'posts', postId, 'comments'), {
+      authorId:     _user.uid,
+      authorName:   _user.displayName || 'User',
+      authorAvatar: _user.photoURL || '',
+      text:         text,
+      createdAt:    _fs.serverTimestamp()
+    }).then(function(ref) {
+      if (btn) btn.disabled = false;
+      // Append optimistically
+      var list = card.querySelector('[data-cmt-list]');
+      var p = list ? list.querySelector('.pf-no-cmt') : null;
+      if (p) p.remove();
+      if (list) list.appendChild(buildCommentEl(ref.id, {
+        authorId:     _user.uid,
+        authorName:   _user.displayName || 'User',
+        authorAvatar: _user.photoURL || '',
+        text:         text
+      }));
+      // Update counter
+      _fs.updateDoc(_fs.doc(_db, 'posts', postId), {
+        commentCount: _fs.increment(1)
+      }).catch(function() {});
+      // Update badge label
+      var lbl = card.querySelector('[data-cmt-label]');
+      if (lbl) {
+        var n = (parseInt(lbl.textContent, 10) || 0) + 1;
+        lbl.textContent = n;
+      }
+    }).catch(function() {
+      if (btn) btn.disabled = false;
+      toast('კომენტარი ვერ დაემატა');
+    });
   }
 
   // ── Toggle like ────────────────────────────────────────────────
