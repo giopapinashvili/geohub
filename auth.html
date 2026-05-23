@@ -324,8 +324,9 @@
                 <input type="text" id="signupFullName" placeholder="Your full name" autocomplete="name" />
               </div>
               <div class="auth-form-group">
-                <label>Username</label>
-                <input type="text" id="signupUsername" placeholder="your.username" autocomplete="username" />
+                <label>Username <span style="font-weight:400;color:#64748b">(unique nickname)</span></label>
+                <input type="text" id="signupUsername" placeholder="your.username" autocomplete="username" maxlength="20" />
+                <div id="signupUsernameHint" style="font-size:.73rem;margin-top:3px;min-height:1.1em"></div>
               </div>
             </div>
 

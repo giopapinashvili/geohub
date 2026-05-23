@@ -97,30 +97,63 @@
       + '</div>';
   }
 
+  var _unCheckTimer = null;
+  var _unStatus = ''; // 'ok' | 'taken' | 'checking' | ''
+
+  function initUsernameCheck() {
+    var input = document.getElementById('signupUsername'); if (!input) return;
+    var hint = document.getElementById('signupUsernameHint');
+    function setHint(msg, color) { if (hint) { hint.textContent = msg; hint.style.color = color || '#94a3b8'; } }
+    input.addEventListener('input', function() {
+      _unStatus = '';
+      clearTimeout(_unCheckTimer);
+      var val = input.value.trim().toLowerCase().replace(/[^a-z0-9_.]/g, '');
+      if (input.value !== val) input.value = val;
+      if (val.length < 3)  { setHint(val.length ? 'Minimum 3 characters' : '', '#f87171'); return; }
+      if (val.length > 20) { setHint('Maximum 20 characters', '#f87171'); _unStatus = 'invalid'; return; }
+      setHint('Checking…', '#94a3b8'); _unStatus = 'checking';
+      _unCheckTimer = setTimeout(function() {
+        if (!window.GeoFirebaseAuth || !window.GeoFirebaseAuth.isUsernameAvailable) {
+          setHint('', ''); _unStatus = 'ok'; return;
+        }
+        window.GeoFirebaseAuth.isUsernameAvailable(val).then(function(avail) {
+          if (avail) { setHint('✓ @' + val + ' is available', '#10b981'); _unStatus = 'ok'; }
+          else       { setHint('✗ @' + val + ' is taken', '#f87171'); _unStatus = 'taken'; }
+        }).catch(function() { setHint('', ''); _unStatus = 'ok'; });
+      }, 500);
+    });
+  }
+
   function initSignupForm() {
     var form = document.getElementById('signupForm'); if (!form) return;
     var errEl = document.getElementById('signupError'); var btn = document.getElementById('signupBtn');
+    initUsernameCheck();
     form.addEventListener('submit', function (e) {
       e.preventDefault(); errEl.textContent = '';
       var fullName = document.getElementById('signupFullName').value.trim();
-      var username = document.getElementById('signupUsername').value.trim().toLowerCase();
+      var rawUsername = (document.getElementById('signupUsername').value || '').trim().toLowerCase().replace(/[^a-z0-9_.]/g, '');
       var email = document.getElementById('signupEmail').value.trim().toLowerCase();
       var password = document.getElementById('signupPassword').value;
-      var acctType = document.getElementById('signupType').value;
-      var city = document.getElementById('signupCity').value;
+      var acctType = (document.getElementById('signupType') || {}).value || 'Explorer';
+      var city = (document.getElementById('signupCity') || {}).value || 'all_georgia';
       var terms = document.getElementById('termsCheck').checked;
       var interests = []; document.querySelectorAll('#signupInterests .ob-interest-chip.selected').forEach(function (c) { interests.push(c.dataset.interest); });
-      if (!fullName || !username || !email || !password) { errEl.textContent = 'Please fill in all required fields.'; return; }
+      if (!fullName || !rawUsername || !email || !password) { errEl.textContent = 'Please fill in all required fields.'; return; }
+      if (rawUsername.length < 3) { errEl.textContent = 'Username must be at least 3 characters.'; return; }
+      if (rawUsername.length > 20) { errEl.textContent = 'Username must be at most 20 characters.'; return; }
+      if (_unStatus === 'taken') { errEl.textContent = 'That username is already taken. Please choose another.'; return; }
       if (!terms) { errEl.textContent = 'Please accept the terms.'; return; }
       if (!window.GeoFirebaseAuth) { errEl.textContent = 'Firebase Auth is not ready. Refresh and try again.'; return; }
       btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating…';
-      window.GeoFirebaseAuth.signUp(email, password, fullName).then(function (result) {
-        if (result && result.emailVerificationSent) {
-          var fb = window.GeoFirebase, f = fb && fb.fs;
-          showVerificationSent(email);
-          return;
-        }
-      }).catch(function (err) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-user-plus"></i> Sign Up'; errEl.textContent = fbErrMsg(err); });
+      window.GeoFirebaseAuth.signUp(email, password, fullName, {
+        username: rawUsername, city: city, accountType: acctType, interests: interests
+      }).then(function (result) {
+        if (result && result.emailVerificationSent) { showVerificationSent(email); }
+      }).catch(function (err) {
+        btn.disabled = false; btn.innerHTML = '<i class="fas fa-user-plus"></i> Sign Up';
+        if (err && err.code === 'username-taken') { errEl.textContent = err.message; }
+        else { errEl.textContent = fbErrMsg(err); }
+      });
     });
   }
 

@@ -35,6 +35,52 @@ function fbUserToGeoUser(fbUser) {
   };
 }
 
+/* ── USERNAME & GEOID HELPERS ──────────────────────────────── */
+
+async function generateUniqueGeoId(uid) {
+  var fb = window.GeoFirebase;
+  if (!fb || !fb.db || !fb.fs) return Math.floor(10000 + Math.random() * 90000);
+  for (var i = 0; i < 12; i++) {
+    var id = String(Math.floor(10000 + Math.random() * 90000));
+    var ref = fb.fs.doc(fb.db, 'geoIds', id);
+    var snap = await fb.fs.getDoc(ref);
+    if (!snap.exists()) {
+      try {
+        await fb.fs.setDoc(ref, { uid: uid, assignedAt: Date.now() });
+        return Number(id);
+      } catch(e) { /* race — retry */ }
+    }
+  }
+  return Math.floor(10000 + Math.random() * 90000);
+}
+
+async function reserveUsername(username, uid) {
+  var fb = window.GeoFirebase;
+  if (!fb || !fb.db || !fb.fs || !username) return;
+  try {
+    await fb.fs.setDoc(fb.fs.doc(fb.db, 'usernames', username), { uid: uid, createdAt: Date.now() });
+  } catch(e) { console.warn('[GeoAuth] reserveUsername failed:', e && e.message); }
+}
+
+async function releaseUsername(username) {
+  var fb = window.GeoFirebase;
+  if (!fb || !fb.db || !fb.fs || !username) return;
+  try {
+    await fb.fs.deleteDoc(fb.fs.doc(fb.db, 'usernames', username));
+  } catch(e) {}
+}
+
+async function isUsernameAvailable(username) {
+  var fb = window.GeoFirebase;
+  if (!fb || !fb.db || !fb.fs || !username) return false;
+  try {
+    var snap = await fb.fs.getDoc(fb.fs.doc(fb.db, 'usernames', username));
+    return !snap.exists();
+  } catch(e) { return false; }
+}
+
+window.GeoAuthHelpers = { isUsernameAvailable, reserveUsername, releaseUsername };
+
 async function saveUserToFirestore(geoUser) {
   var fb = window.GeoFirebase;
   if (!fb || !fb.db || !fb.fs || !geoUser || !geoUser.uid) return;
@@ -57,17 +103,61 @@ async function loadUserFromFirestore(uid) {
 async function mergeWithFirestore(geoUser) {
   var stored = await loadUserFromFirestore(geoUser.uid);
   if (stored) Object.assign(geoUser, stored, { uid: geoUser.uid, id: geoUser.uid, email: geoUser.email || stored.email, isFirebaseUser: true });
+  // Assign geoId to users who don't have one yet (Google login, old accounts)
+  if (!geoUser.geoId) {
+    try {
+      var geoId = await generateUniqueGeoId(geoUser.uid);
+      geoUser.geoId = geoId;
+      var fb = window.GeoFirebase;
+      if (fb && fb.fs && fb.db) {
+        await fb.fs.setDoc(fb.fs.doc(fb.db, 'users', geoUser.uid), { geoId: geoId }, { merge: true });
+      }
+    } catch(e) {}
+  }
+  // Reserve username if not reserved yet
+  if (geoUser.username && !stored) {
+    try { await reserveUsername(geoUser.username, geoUser.uid); } catch(e) {}
+  }
   return geoUser;
 }
 
-async function fbSignUp(email, password, fullName) {
+async function fbSignUp(email, password, fullName, extraData) {
   var auth = window.GeoFirebase && window.GeoFirebase.auth;
   if (!auth) throw new Error('Firebase not available');
+
+  // Username uniqueness pre-check (best-effort before account creation)
+  var username = (extraData && extraData.username) || '';
+  if (username) {
+    var available = await isUsernameAvailable(username);
+    if (!available) {
+      var err = new Error('Username @' + username + ' is already taken. Choose a different one.');
+      err.code = 'username-taken';
+      throw err;
+    }
+  }
+
   var cred = await createUserWithEmailAndPassword(auth, email, password);
   if (fullName) await updateProfile(cred.user, { displayName: fullName });
   var geoUser = fbUserToGeoUser(cred.user);
-  if (fullName) geoUser.fullName = fullName;
+  if (fullName) geoUser.fullName = geoUser.displayName = fullName;
+
+  // Generate unique 5-digit geoId
+  var geoId = await generateUniqueGeoId(cred.user.uid);
+  geoUser.geoId = geoId;
+
+  // Apply extra signup data
+  if (extraData) {
+    if (extraData.username) geoUser.username = extraData.username;
+    if (extraData.city)     { geoUser.city = extraData.city; geoUser.cityScope = extraData.city; }
+    if (extraData.accountType) geoUser.accountType = extraData.accountType;
+    if (extraData.interests)   geoUser.interests = extraData.interests;
+  }
+
   await saveUserToFirestore(geoUser);
+
+  // Reserve username in /usernames/{username} collection
+  if (geoUser.username) await reserveUsername(geoUser.username, cred.user.uid);
+
   await sendEmailVerification(cred.user);
   await signOut(auth);
   window.GeoCurrentUser = null;
@@ -156,4 +246,4 @@ async function fbResendVerification(email, password) {
   return { sent: true };
 }
 
-window.GeoFirebaseAuth = { signUp: fbSignUp, signIn: fbSignIn, googleLogin: fbGoogleLogin, logout: fbLogout, onAuthChange: onAuthChange, saveUserToFirestore: saveUserToFirestore, loadUserFromFirestore: loadUserFromFirestore, resetPassword: fbResetPassword, resendVerification: fbResendVerification };
+window.GeoFirebaseAuth = { signUp: fbSignUp, signIn: fbSignIn, googleLogin: fbGoogleLogin, logout: fbLogout, onAuthChange: onAuthChange, saveUserToFirestore: saveUserToFirestore, loadUserFromFirestore: loadUserFromFirestore, resetPassword: fbResetPassword, resendVerification: fbResendVerification, isUsernameAvailable: isUsernameAvailable, reserveUsername: reserveUsername, releaseUsername: releaseUsername };

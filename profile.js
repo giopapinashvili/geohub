@@ -105,8 +105,18 @@
       website: data.website || '',
       createdAt: data.createdAt || data.joinedAt || null,
       privacy: data.privacy || null,
+      geoId: data.geoId || null,
+      nameVisibility: data.nameVisibility || 'everyone',
       initials
     };
+  }
+
+  function resolveDisplayName(user, isOwn) {
+    if (isOwn) return user.fullName;
+    var vis = user.nameVisibility || 'everyone';
+    if (vis === 'me')       return '@' + (user.username || 'user');
+    if (vis === 'friends')  return '@' + (user.username || 'user'); // simplified: full check needs friendship query
+    return user.fullName;
   }
 
   async function ensureOwnProfile(GF, fbUser) {
@@ -132,13 +142,28 @@
     const params = new URLSearchParams(location.search);
     const uid = params.get('id') || params.get('uid');
     const username = params.get('user') || (location.pathname.match(/@([^/?#]+)/) || [])[1];
+    const geoIdParam = params.get('geoId') || params.get('geoid');
 
-    if (!uid && !username) return ensureOwnProfile(GF, fbUser);
+    if (!uid && !username && !geoIdParam) return ensureOwnProfile(GF, fbUser);
 
     if (uid) {
       const snap = await GF.fs.getDoc(GF.fs.doc(GF.db, 'users', uid));
       if (!snap.exists()) return null;
       return normalizeProfile(null, Object.assign({ uid }, snap.data()));
+    }
+
+    // Search by 5-digit numeric geoId
+    if (geoIdParam) {
+      const numId = Number(geoIdParam);
+      if (!isNaN(numId)) {
+        const q = GF.fs.query(GF.fs.collection(GF.db, 'users'), GF.fs.where('geoId', '==', numId), GF.fs.limit(1));
+        const res = await GF.fs.getDocs(q);
+        if (!res.empty) {
+          const doc = res.docs[0];
+          return normalizeProfile(null, Object.assign({ uid: doc.id }, doc.data()));
+        }
+      }
+      return null;
     }
 
     const q = GF.fs.query(GF.fs.collection(GF.db, 'users'), GF.fs.where('username', '==', username), GF.fs.limit(1));
@@ -197,8 +222,8 @@
     if (cover) cover.style.backgroundImage = user.coverImage ? `linear-gradient(180deg, rgba(4,5,13,0.08), rgba(4,5,13,0.72)), url('${user.coverImage}')` : 'linear-gradient(135deg, rgba(16,185,129,0.20), rgba(77,166,255,0.12), rgba(123,97,255,0.12))';
     const av = $('.profile-avatar'); if (av) { av.src = user.avatar; av.alt = user.fullName; av.onerror = function(){ this.onerror=null; this.src=initialsSvg(user.initials||'GH'); }; }
     const lvl = $('.avatar-level'); if (lvl) lvl.textContent = level(user);
-    const name = $('.profile-name'); if (name) name.textContent = user.fullName;
-    const handle = $('.profile-handle'); if (handle) handle.textContent = '@' + (user.username || 'user') + (user.city ? ' · ' + user.city : '');
+    const name = $('.profile-name');
+    const handle = $('.profile-handle');
     const bio = $('.profile-bio'); if (bio) bio.textContent = user.bio || 'No bio yet.';
     const badges = $('.trust-badges');
     if (badges) {
@@ -208,6 +233,26 @@
       badges.innerHTML = _badgeHtml;
     }
     const own = fbUser && user.uid === fbUser.uid;
+    const displayedName = resolveDisplayName(user, own);
+    if (name) name.textContent = displayedName;
+    if (handle) {
+      var handleParts = '@' + (user.username || 'user') + (user.city ? ' · ' + user.city : '');
+      if (own && user.geoId) handleParts += ' · #' + user.geoId;
+      handle.textContent = handleParts;
+    }
+    // Show geoId badge on own profile
+    var geoIdBadge = document.getElementById('profileGeoId');
+    if (own && user.geoId) {
+      if (!geoIdBadge) {
+        geoIdBadge = document.createElement('span');
+        geoIdBadge.id = 'profileGeoId';
+        geoIdBadge.title = 'Your GeoHub ID — share this for others to find you';
+        geoIdBadge.style.cssText = 'display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;background:rgba(77,166,255,.13);border:1px solid rgba(77,166,255,.25);color:#4da6ff;font-size:.73rem;font-weight:700;cursor:default;letter-spacing:.03em;margin-left:6px';
+        geoIdBadge.innerHTML = '<i class="fas fa-hashtag" style="font-size:.65rem"></i>' + user.geoId;
+        var nameEl = document.querySelector('.profile-name');
+        if (nameEl && nameEl.parentNode) nameEl.parentNode.appendChild(geoIdBadge);
+      } else { geoIdBadge.textContent = '#' + user.geoId; }
+    }
     if (!own) {
       var _savedTabEl = document.querySelector('.ptab[data-tab="saved"]');
       if (_savedTabEl) _savedTabEl.style.display = 'none';
@@ -1411,11 +1456,13 @@
     const currentName     = u.fullName || u.displayName || '';
     const currentUsername = u.username || '';
     const currentBio      = u.bio || '';
-    const currentCityScope = u.cityScope || 'all_georgia';
-    const currentCities   = Array.isArray(u.cities) ? u.cities.filter(c => c !== 'all_georgia').join(', ') : '';
-    const currentWebsite  = u.website || '';
-    const sl = u.socialLinks || {};
-    const currentInterests = Array.isArray(u.interests) ? u.interests : [];
+    const currentCityScope    = u.cityScope || 'all_georgia';
+    const currentCities       = Array.isArray(u.cities) ? u.cities.filter(c => c !== 'all_georgia').join(', ') : '';
+    const currentWebsite      = u.website || '';
+    const sl                  = u.socialLinks || {};
+    const currentInterests    = Array.isArray(u.interests) ? u.interests : [];
+    const currentGeoId        = u.geoId || null;
+    const currentNameVis      = u.nameVisibility || 'everyone';
 
     const INTERESTS = ['Hiking','Cafés','Food','History','Arts','Nature','Sports','Nightlife','Shopping','Music','Photography','Travel','Adventure','Culture','Architecture'];
 
@@ -1452,7 +1499,14 @@
       + '<div class="profile-edit-section">'
       + '<div class="profile-edit-section-title"><i class="fas fa-user"></i> Basic Info</div>'
       + '<div class="profile-edit-field"><label>Full Name</label><input class="profile-edit-input" id="peName" placeholder="Your full name" value="' + esc(currentName) + '"></div>'
-      + '<div class="profile-edit-field"><label>Username</label><input class="profile-edit-input" id="peUsername" placeholder="your_username" value="' + esc(currentUsername) + '"></div>'
+      + '<div class="profile-edit-field"><label>Username <span style="font-weight:400;font-size:.75rem;color:#64748b">(unique · only a-z 0-9 . _)</span></label><input class="profile-edit-input" id="peUsername" placeholder="your_username" maxlength="20" value="' + esc(currentUsername) + '"><div id="peUsernameHint" style="font-size:.73rem;margin-top:3px;min-height:1.1em"></div></div>'
+      + (currentGeoId ? '<div class="profile-edit-field"><label>GeoHub ID <span style="font-weight:400;font-size:.75rem;color:#64748b">(cannot be changed)</span></label><input class="profile-edit-input" value="#' + esc(String(currentGeoId)) + '" readonly style="color:#4da6ff;letter-spacing:.06em;cursor:default"></div>' : '')
+      + '<div class="profile-edit-field"><label>Name Visibility <span style="font-weight:400;font-size:.75rem;color:#64748b">(who sees your full name)</span></label>'
+      + '<select class="profile-edit-input" id="peNameVis">'
+      + '<option value="everyone"' + (currentNameVis === 'everyone' ? ' selected' : '') + '>Everyone — ყველა ხედავს</option>'
+      + '<option value="friends"'  + (currentNameVis === 'friends'  ? ' selected' : '') + '>Friends only — მხოლოდ მეგობრები</option>'
+      + '<option value="me"'       + (currentNameVis === 'me'       ? ' selected' : '') + '>Only me — მხოლოდ მე (სხვები ნიკნეიმს ხედავენ)</option>'
+      + '</select></div>'
       + '<div class="profile-edit-field"><label>Bio</label><textarea class="profile-edit-textarea" id="peBio" placeholder="Tell people about yourself…">' + esc(currentBio) + '</textarea></div>'
       + '</div>'
 
@@ -1493,6 +1547,30 @@
       const cf = document.getElementById('peCitiesField');
       if (cf) cf.style.display = this.value === 'all_georgia' ? 'none' : '';
     });
+
+    // Username uniqueness live check
+    var _peUnTimer = null, _peUnStatus = 'ok';
+    var peUnInput = overlay.querySelector('#peUsername');
+    var peUnHint  = overlay.querySelector('#peUsernameHint');
+    if (peUnInput && peUnHint) {
+      peUnInput.addEventListener('input', function() {
+        clearTimeout(_peUnTimer);
+        var val = peUnInput.value.trim().toLowerCase().replace(/[^a-z0-9_.]/g, '');
+        if (peUnInput.value !== val) peUnInput.value = val;
+        if (val === currentUsername) { peUnHint.textContent = ''; _peUnStatus = 'ok'; return; }
+        if (val.length < 3)  { peUnHint.textContent = 'Minimum 3 characters'; peUnHint.style.color = '#f87171'; _peUnStatus = 'invalid'; return; }
+        if (val.length > 20) { peUnHint.textContent = 'Maximum 20 characters'; peUnHint.style.color = '#f87171'; _peUnStatus = 'invalid'; return; }
+        peUnHint.textContent = 'Checking…'; peUnHint.style.color = '#94a3b8'; _peUnStatus = 'checking';
+        _peUnTimer = setTimeout(function() {
+          var auth = window.GeoFirebaseAuth;
+          if (!auth || !auth.isUsernameAvailable) { peUnHint.textContent = ''; _peUnStatus = 'ok'; return; }
+          auth.isUsernameAvailable(val).then(function(avail) {
+            if (avail) { peUnHint.textContent = '✓ @' + val + ' is available'; peUnHint.style.color = '#10b981'; _peUnStatus = 'ok'; }
+            else       { peUnHint.textContent = '✗ @' + val + ' is taken'; peUnHint.style.color = '#f87171'; _peUnStatus = 'taken'; }
+          }).catch(function() { peUnHint.textContent = ''; _peUnStatus = 'ok'; });
+        }, 500);
+      });
+    }
 
     overlay.querySelector('#peInterests').addEventListener('click', function(e) {
       const chip = e.target.closest('.interest-chip');
@@ -1558,6 +1636,23 @@
     overlay.querySelector('#peSaveBtn').addEventListener('click', async function() {
       if (!GF || !GF.fs || !fbUser) return;
       const saveBtn = this;
+
+      const newUsername = (document.getElementById('peUsername').value || '').trim().toLowerCase().replace(/[^a-z0-9_.]/g, '');
+      const usernameChanged = newUsername && newUsername !== currentUsername;
+
+      if (_peUnStatus === 'taken') { toast('That username is already taken. Choose a different one.', 'error'); return; }
+      if (_peUnStatus === 'invalid') { toast('Username must be 3–20 characters (letters, numbers, . _)', 'error'); return; }
+      if (_peUnStatus === 'checking') { toast('Still checking username… wait a moment and try again.', 'error'); return; }
+
+      if (usernameChanged) {
+        // Final availability check before saving
+        const auth = window.GeoFirebaseAuth;
+        if (auth && auth.isUsernameAvailable) {
+          const avail = await auth.isUsernameAvailable(newUsername).catch(() => true);
+          if (!avail) { toast('@' + newUsername + ' was just taken. Choose a different one.', 'error'); return; }
+        }
+      }
+
       saveBtn.disabled = true; saveBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Saving…';
 
       const scope    = document.getElementById('peScope').value;
@@ -1567,15 +1662,18 @@
       const selectedInterests = [];
       overlay.querySelectorAll('.interest-chip.selected').forEach(function(el) { selectedInterests.push(el.dataset.interest); });
 
+      const nameVisEl = document.getElementById('peNameVis');
+
       const updates = {
-        fullName:    (document.getElementById('peName').value || '').trim(),
-        displayName: (document.getElementById('peName').value || '').trim(),
-        username:    (document.getElementById('peUsername').value || '').trim().toLowerCase().replace(/[^a-z0-9_.]/g,''),
-        bio:         (document.getElementById('peBio').value || '').trim(),
-        cityScope:   scope,
-        city:        scope === 'all_georgia' ? 'all_georgia' : (cities[0] || ''),
-        cities:      cities,
-        website:     (document.getElementById('peWebsite').value || '').trim(),
+        fullName:        (document.getElementById('peName').value || '').trim(),
+        displayName:     (document.getElementById('peName').value || '').trim(),
+        username:        newUsername,
+        bio:             (document.getElementById('peBio').value || '').trim(),
+        cityScope:       scope,
+        city:            scope === 'all_georgia' ? 'all_georgia' : (cities[0] || ''),
+        cities:          cities,
+        website:         (document.getElementById('peWebsite').value || '').trim(),
+        nameVisibility:  nameVisEl ? nameVisEl.value : 'everyone',
         socialLinks: {
           instagram: (document.getElementById('peInstagram').value || '').trim(),
           facebook:  (document.getElementById('peFacebook').value || '').trim(),
@@ -1590,6 +1688,16 @@
 
       try {
         await GF.fs.updateDoc(GF.fs.doc(GF.db, 'users', fbUser.uid), updates);
+
+        // Handle username reservation transfer
+        if (usernameChanged) {
+          const auth = window.GeoFirebaseAuth;
+          if (auth) {
+            if (currentUsername) await auth.releaseUsername(currentUsername).catch(() => {});
+            await auth.reserveUsername(newUsername, fbUser.uid).catch(() => {});
+          }
+        }
+
         if (window.GeoCurrentUser) Object.assign(window.GeoCurrentUser, updates);
         if (window.GeoAuth && window.GeoAuth.updateUser) window.GeoAuth.updateUser(updates);
         overlay.remove();

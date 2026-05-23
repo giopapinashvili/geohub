@@ -494,6 +494,24 @@ service cloud.firestore {
     match /checkins/{checkinId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
     match /places/{placeId}     { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
     match /placeCategories/{catId} { allow read: if true; allow create, update, delete: if isAdmin(); }
+
+    // Username reservation — each doc ID is the username (lowercase).
+    // Any signed-in user may read (for availability check).
+    // Only the owner may create (doc.uid must match caller).
+    // Only the owner or admin may delete (to free up the username on change).
+    match /usernames/{username} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.get('uid', '') == uid();
+      allow update: if isAdmin();
+      allow delete: if isAdmin() || (signedIn() && resource.data.get('uid', '') == uid());
+    }
+
+    // 5-digit numeric GeoHub IDs — claimed on signup, immutable after.
+    match /geoIds/{geoId} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.get('uid', '') == uid();
+      allow update, delete: if isAdmin();
+    }
     match /placeCheckins/{placeId} {
       allow read: if true;
       allow write: if signedIn();
