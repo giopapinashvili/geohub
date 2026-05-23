@@ -3245,12 +3245,18 @@
     var docId = _pcatEditId || id;
     var data = { labelKa: labelKa, labelEn: labelEn, icon: icon || '📍', color: color, sortOrder: isNaN(sortOrder) ? 100 : sortOrder, active: active, updatedAt: new Date() };
     if (!_pcatEditId) data.createdAt = new Date();
+    var wasNew = !_pcatEditId;
     f.setDoc(f.doc(fb.db, 'placeCategories', docId), data, { merge: true })
       .then(function() {
-        toast(_pcatEditId ? 'Category updated' : 'Category created');
+        toast(wasNew ? 'Category created — now you can add subcategories' : 'Category updated');
         _firestorePlaceCats = null;
-        resetPcatForm();
         window.loadPlaceCategorySection();
+        if (wasNew) {
+          // Auto-open edit mode so subcategory section is immediately visible
+          setTimeout(function() { window.editPlaceCatRow(docId); }, 350);
+        } else {
+          resetPcatForm();
+        }
       }).catch(function(err) { toast('Save failed: ' + err.message, 'rgba(239,68,68,.95)'); });
   };
 
@@ -3266,6 +3272,8 @@
       set('pcatLabelKa', d.labelKa || '');
       set('pcatLabelEn', d.labelEn || '');
       set('pcatIcon', d.icon || '');
+      var iconPrev = document.getElementById('pcatIconPreview');
+      if (iconPrev) iconPrev.textContent = d.icon || '📍';
       set('pcatColor', d.color || '#3498db');
       set('pcatSort', d.sortOrder || 100);
       var activeEl = document.getElementById('pcatActive');
@@ -3315,6 +3323,8 @@
     if (colorEl) colorEl.value = '#3498db';
     var activeEl = document.getElementById('pcatActive');
     if (activeEl) activeEl.checked = true;
+    var iconPrev = document.getElementById('pcatIconPreview');
+    if (iconPrev) iconPrev.textContent = '📍';
     var subWrap = document.getElementById('pcatSubcatsWrap');
     if (subWrap) subWrap.remove();
   };
@@ -3382,9 +3392,10 @@
       + '<input id="pcatSubId" placeholder="ID (e.g. restaurant)" style="padding:8px;border-radius:8px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.8rem">'
       + '<input id="pcatSubLabelKa" placeholder="Georgian label" style="padding:8px;border-radius:8px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.8rem">'
       + '<input id="pcatSubLabelEn" placeholder="English label (optional)" style="padding:8px;border-radius:8px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.8rem">'
-      + '<div style="display:grid;grid-template-columns:1fr auto;gap:6px">'
-      + '<input id="pcatSubIcon" placeholder="Icon emoji" style="padding:8px;border-radius:8px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:1rem;text-align:center" maxlength="8">'
-      + '<button type="button" onclick=\'savePcatSubcatItem(' + JSON.stringify(catId) + ')\' style="padding:8px 14px;border-radius:8px;background:#10b981;border:none;color:#fff;cursor:pointer;font-size:.8rem;font-weight:700">Save</button>'
+      + '<div style="display:flex;gap:7px;align-items:center">'
+      + '<div id="pcatSubIconPreview" style="font-size:1.5rem;width:40px;height:36px;display:flex;align-items:center;justify-content:center;background:#0f172a;border-radius:8px;border:1px solid rgba(255,255,255,.12);flex-shrink:0">📍</div>'
+      + '<input id="pcatSubIcon" placeholder="emoji ჩასვით" maxlength="20" oninput="var p=document.getElementById(\'pcatSubIconPreview\');p.textContent=this.value.trim()||\'📍\'" style="flex:1;padding:8px;border-radius:8px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:1.1rem;text-align:center">'
+      + '<button type="button" onclick=\'savePcatSubcatItem(' + JSON.stringify(catId) + ')\' style="padding:8px 14px;border-radius:8px;background:#10b981;border:none;color:#fff;cursor:pointer;font-size:.8rem;font-weight:700;white-space:nowrap">Save</button>'
       + '</div>'
       + '<div style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--ts)">'
       + '<input type="checkbox" id="pcatSubActive" checked style="width:14px;height:14px"> Active'
@@ -3467,6 +3478,7 @@
       set('pcatSubLabelKa', sub.labelKa || '');
       set('pcatSubLabelEn', sub.labelEn || '');
       set('pcatSubIcon', sub.icon || '');
+      var subIconPrev = document.getElementById('pcatSubIconPreview'); if (subIconPrev) subIconPrev.textContent = sub.icon || '📍';
       var activeEl = document.getElementById('pcatSubActive'); if (activeEl) activeEl.checked = sub.active !== false;
       var editIdxEl = document.getElementById('pcatSubEditIdx'); if (editIdxEl) editIdxEl.value = subIdx;
       var idEl = document.getElementById('pcatSubId'); if (idEl) idEl.readOnly = true;
@@ -3482,6 +3494,7 @@
     var activeEl = document.getElementById('pcatSubActive'); if (activeEl) activeEl.checked = true;
     var titleEl = document.getElementById('pcatSubcatFormTitle'); if (titleEl) titleEl.textContent = 'Add Subcategory';
     var cancelBtn = document.getElementById('pcatSubCancelBtn'); if (cancelBtn) cancelBtn.style.display = 'none';
+    var subIconPrev = document.getElementById('pcatSubIconPreview'); if (subIconPrev) subIconPrev.textContent = '📍';
   };
 
   /* ── TRANSFER OWNERSHIP ─────────────────────────────────── */

@@ -729,10 +729,14 @@
             </label>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
               <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">Icon (emoji)
-                <input id="pcatIcon" placeholder="☕" maxlength="8" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:1.2rem;text-align:center">
+                <div style="display:flex;gap:8px;align-items:center">
+                  <div id="pcatIconPreview" style="font-size:2rem;width:52px;height:44px;display:flex;align-items:center;justify-content:center;background:#0f172a;border-radius:9px;border:1px solid rgba(255,255,255,.15);flex-shrink:0">📍</div>
+                  <input id="pcatIcon" placeholder="emoji ჩასვით…" maxlength="20" oninput="var p=document.getElementById('pcatIconPreview');p.textContent=this.value.trim()||'📍'" style="flex:1;padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:1.3rem;text-align:center">
+                </div>
+                <span style="font-size:.7rem;color:#64748b">Google-ზე მოძებნეთ emoji → დააკოპირეთ → ჩასვით</span>
               </label>
               <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">Colour
-                <input id="pcatColor" type="color" value="#3498db" style="padding:4px 6px;height:42px;border-radius:9px;background:#111827;border:1px solid rgba(255,255,255,.12);cursor:pointer;width:100%">
+                <input id="pcatColor" type="color" value="#3498db" style="padding:4px 6px;height:44px;border-radius:9px;background:#111827;border:1px solid rgba(255,255,255,.12);cursor:pointer;width:100%">
               </label>
             </div>
             <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">Sort Order
