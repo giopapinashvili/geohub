@@ -2668,10 +2668,10 @@
       var _storedActor = getActiveActor();
       _isActingAsPage = !!(_storedActor && _storedActor.type === 'business' && _storedActor.businessId === BIZ_ID);
 
-      var loadServices  = safeSnap(_fs.getDocs(_fs.query(_fs.collection(_db,'businesses',BIZ_ID,'services'),  _fs.orderBy('order','asc'))));
-      var loadPriceList = safeSnap(_fs.getDocs(_fs.query(_fs.collection(_db,'businesses',BIZ_ID,'priceList'), _fs.orderBy('order','asc'))));
-      var loadGallery   = safeSnap(_fs.getDocs(_fs.query(_fs.collection(_db,'businesses',BIZ_ID,'gallery'),   _fs.orderBy('order','asc'))));
-      var loadProducts  = safeSnap(_fs.getDocs(_fs.query(_fs.collection(_db,'businesses',BIZ_ID,'products'),  _fs.orderBy('order','asc'))));
+      var loadServices  = safeSnap(_fs.getDocs(_fs.collection(_db,'businesses',BIZ_ID,'services')));
+      var loadPriceList = safeSnap(_fs.getDocs(_fs.collection(_db,'businesses',BIZ_ID,'priceList')));
+      var loadGallery   = safeSnap(_fs.getDocs(_fs.collection(_db,'businesses',BIZ_ID,'gallery')));
+      var loadProducts  = safeSnap(_fs.getDocs(_fs.collection(_db,'businesses',BIZ_ID,'products')));
       var loadReviews   = safeSnap(_fs.getDocs(_fs.query(
         _fs.collection(_db,'businessReviews'),
         _fs.where('businessId','==',BIZ_ID),
@@ -5038,7 +5038,7 @@
       var data = { title:title, description:desc, price:price, duration:dur, updatedAt:_fs.serverTimestamp() };
       var op = editId
         ? _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID,'services',editId), data)
-        : _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'services'), Object.assign({createdAt:_fs.serverTimestamp()}, data));
+        : _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'services'), Object.assign({createdAt:_fs.serverTimestamp(), order: Date.now()}, data));
       op.then(function(){
         var m = document.getElementById('biz-add-service-modal'); if(m) m.remove();
         showToast(editId ? 'Service updated!' : 'Service added!');
@@ -5106,7 +5106,7 @@
       if (!name) { showToast('Product name is required', false); return; }
       if (btn) { btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving…'; }
       _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'products'), {
-        name:name, description:desc, price:price, createdAt:_fs.serverTimestamp(), updatedAt:_fs.serverTimestamp()
+        name:name, description:desc, price:price, order:Date.now(), createdAt:_fs.serverTimestamp(), updatedAt:_fs.serverTimestamp()
       }).then(function(){
         var m = document.getElementById('biz-add-product-modal'); if(m) m.remove();
         showToast('Product added!');
@@ -5153,7 +5153,7 @@
       if (!label || !price) { showToast('Name and price are required', false); return; }
       if (btn) { btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving…'; }
       _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'priceList'), {
-        label:label, price:price, createdAt:_fs.serverTimestamp()
+        label:label, price:price, order:Date.now(), createdAt:_fs.serverTimestamp()
       }).then(function(){
         var m = document.getElementById('biz-add-price-modal'); if(m) m.remove();
         showToast('Price item added!');
