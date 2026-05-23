@@ -367,6 +367,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     String(textVal||'').replace(/@([A-Za-z0-9_.-]{2,32})/g,function(_,u){ if(mentions.indexOf(u)===-1) mentions.push(u); });
     return mentions;
   }
+  window.ghToggleReadMore = function(btn) {
+    var wrap  = btn.parentElement;
+    var short = wrap && wrap.querySelector('.gh-post-short');
+    var full  = wrap && wrap.querySelector('.gh-post-full');
+    if (!short || !full) return;
+    var expanding = full.style.display === 'none';
+    short.style.display = expanding ? 'none' : '';
+    full.style.display  = expanding ? ''     : 'none';
+    btn.textContent = expanding ? 'ნაკლები ▴' : 'წაიკითხე მეტი ▾';
+  };
+
   function docLink(type, id){ if(type==='business') return 'business.html?id='+encodeURIComponent(id); if(type==='group') return 'groups.html?id='+encodeURIComponent(id); if(type==='place') return 'places.html?id='+encodeURIComponent(id); if(type==='event') return 'events.html?id='+encodeURIComponent(id); if(type==='creator') return 'profile.html?id='+encodeURIComponent(id); return 'feed.html#post-'+encodeURIComponent(id); }
   function profileLink(uid){ return uid ? 'profile.html?id='+encodeURIComponent(uid) : 'profile.html'; }
   function authorLinkFor(item){
@@ -1643,9 +1654,25 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       : '';
 
     var bgStyle = (p.bgGradient && (p.text||'').length < 150) ? ' style="background:'+esc(p.bgGradient)+';border-radius:18px;padding:32px 20px;text-align:center;min-height:180px;display:flex;align-items:center;justify-content:center"' : '';
-    var postTextHtml = p.text ? (p.bgGradient && (p.text||'').length < 150
-      ? '<div class="gh-post-bg-text"'+bgStyle+'><span>'+esc(p.text)+'</span></div>'
-      : '<div class="gh-post-text">'+esc(p.text)+'</div>') : '';
+    var postTextHtml = '';
+    if (p.text) {
+      if (p.bgGradient && p.text.length < 150) {
+        postTextHtml = '<div class="gh-post-bg-text"'+bgStyle+'><span>'+esc(p.text)+'</span></div>';
+      } else {
+        var _MAX_POST = 300;
+        if (p.text.length > _MAX_POST) {
+          var _cut = p.text.lastIndexOf(' ', _MAX_POST);
+          if (_cut < _MAX_POST * 0.7) _cut = _MAX_POST;
+          postTextHtml = '<div class="gh-post-text">'
+            + '<span class="gh-post-short">'+esc(p.text.slice(0,_cut))+'…</span>'
+            + '<span class="gh-post-full" style="display:none">'+esc(p.text)+'</span>'
+            + '<button type="button" class="gh-read-more" onclick="ghToggleReadMore(this)">წაიკითხე მეტი ▾</button>'
+            + '</div>';
+        } else {
+          postTextHtml = '<div class="gh-post-text">'+esc(p.text)+'</div>';
+        }
+      }
+    }
 
     // Media: multi-image grid or single image
     var multiUrls = (p.mediaUrls && p.mediaUrls.length > 1) ? p.mediaUrls : [];
