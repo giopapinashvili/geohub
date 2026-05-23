@@ -2377,6 +2377,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '<span class="gh-share-opt-icon"><i class="fas fa-share-nodes"></i></span>' +
           '<span class="gh-share-opt-text"><strong>Share to GeoHub</strong><em>Post to your feed with a caption</em></span>' +
         '</button>' +
+        '<button class="gh-share-opt" id="ghShareToStory">' +
+          '<span class="gh-share-opt-icon"><i class="fas fa-film"></i></span>' +
+          '<span class="gh-share-opt-text"><strong>Share to Story</strong><em>Add this post to your 24h story</em></span>' +
+        '</button>' +
         '<button class="gh-share-opt" id="ghShareCopyLink">' +
           '<span class="gh-share-opt-icon"><i class="fas fa-link"></i></span>' +
           '<span class="gh-share-opt-text"><strong>Copy link</strong><em>Copy post link to clipboard</em></span>' +
@@ -2397,6 +2401,40 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }
 
     document.getElementById('ghShareToFeed').onclick = function() { closeSheet(); openShareCompose(pid); };
+    document.getElementById('ghShareToStory').onclick = function() {
+      closeSheet();
+      if (typeof openStoryModal === 'function') { openStoryModal(pid); return; }
+      // Fallback: open story composer prefilled with post link
+      var url = location.origin + location.pathname + '#post-' + pid;
+      var body =
+        '<textarea class="gh-cmp-textarea" id="ghStoryTextShare" placeholder="What\'s your story?…" rows="3"></textarea>'+
+        '<p style="font-size:.75rem;color:#94a3b8;margin:6px 0 0"><i class="fas fa-link"></i> ' + url + '</p>';
+      var m = modal('Add to your story', body,
+        '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitStoryShare">Share story</button>',
+        'ghStoryShareModal');
+      var btn = document.getElementById('ghSubmitStoryShare');
+      if (btn) btn.onclick = function() {
+        btn.disabled = true; btn.textContent = 'Sharing…';
+        var text = (document.getElementById('ghStoryTextShare') || {}).value || '';
+        var u2 = requireLogin() && window.GeoCurrentUser;
+        if (!u2) { toast('Please sign in', 'error'); return; }
+        var f = fs(), d = db();
+        f.addDoc(f.collection(d, 'stories'), {
+          authorId: u2.uid,
+          authorName: u2.displayName || u2.email || 'GeoHub User',
+          authorAvatar: u2.photoURL || '',
+          text: text,
+          sharedPostId: pid,
+          postLink: url,
+          type: 'shared_post',
+          expiresAt: new Date(Date.now() + 24*3600*1000),
+          createdAt: f.serverTimestamp()
+        }).then(function() {
+          if (m && m.remove) m.remove(); else document.getElementById('ghStoryShareModal') && document.getElementById('ghStoryShareModal').remove();
+          toast('Added to your story!');
+        }).catch(function(e) { toast('Failed: ' + e.message, 'error'); btn.disabled = false; btn.textContent = 'Share story'; });
+      };
+    };
     document.getElementById('ghShareCopyLink').onclick = function() {
       if (navigator.clipboard) { navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){ toast('Post link copied'); }); }
       closeSheet();
