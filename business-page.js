@@ -299,6 +299,10 @@
         '<button class="biz-action-btn" onclick="window._bizActions.openMessage()"><i class="fas fa-comment-dots"></i> Message</button>'+
         '<button class="biz-action-btn '+ (_isSaved?'saved':'')+'" id="biz-save-btn" onclick="window._bizActions.toggleSave()"><i class="'+(_isSaved?'fas':'far')+' fa-bookmark"></i> '+(_isSaved?'Saved':'Save')+'</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.share()"><i class="fas fa-share-nodes"></i> Share</button>';
+      if (biz.bookingUrl) {
+        var bkUrl = biz.bookingUrl.startsWith('http') ? biz.bookingUrl : 'https://' + biz.bookingUrl;
+        actions = '<a href="'+esc(bkUrl)+'" target="_blank" rel="noopener noreferrer" class="biz-action-btn biz-book-btn primary"><i class="fas fa-calendar-check"></i> Book Now</a>' + actions;
+      }
       if (biz.phone) actions+='<a href="tel:'+esc(biz.phone)+'" class="biz-action-btn"><i class="fas fa-phone"></i> Call</a>';
       if (biz.website) {
         var ws=biz.website.startsWith('http')?biz.website:'https://'+biz.website;
@@ -346,6 +350,7 @@
   function renderContact(biz) {
     var sl = biz.socialLinks || {};
     var btns = [];
+    if (biz.bookingUrl) { var bkUrl2 = biz.bookingUrl.startsWith('http') ? biz.bookingUrl : 'https://' + biz.bookingUrl; btns.push('<a href="'+esc(bkUrl2)+'" target="_blank" rel="noopener noreferrer" class="biz-contact-btn green biz-book-btn"><i class="fas fa-calendar-check"></i><span>Book</span></a>'); }
     if (biz.phone)    btns.push('<a href="tel:'+esc(biz.phone)+'" class="biz-contact-btn green"><i class="fas fa-phone"></i><span>Call</span></a>');
     if (biz.email)    btns.push('<a href="mailto:'+esc(biz.email)+'" class="biz-contact-btn blue"><i class="fas fa-envelope"></i><span>Email</span></a>');
     if (biz.website) { var ws=biz.website.startsWith('http')?biz.website:'https://'+biz.website; btns.push('<a href="'+esc(ws)+'" target="_blank" rel="noopener noreferrer" class="biz-contact-btn sky"><i class="fas fa-globe"></i><span>Website</span></a>'); }

@@ -356,6 +356,9 @@ body.gh-has-injected-nav #biz-detail-root {
 .biz-action-btn.saved      { color: #fbbf24; border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.08); }
 .biz-action-btn.owner-edit { color: #fbbf24; border-color: rgba(245,158,11,.25); background: rgba(245,158,11,.07); }
 .biz-action-btn.disabled   { opacity: .45; cursor: not-allowed; pointer-events: none; }
+.biz-book-btn { order: -1; }
+.biz-contact-btn.biz-book-btn i { color: #34d399 !important; }
+.biz-contact-btn.biz-book-btn span { color: #34d399; }
 
 /* ── CONTACT STRIP ───────────────────────────────────────────── */
 .biz-contact-strip {
