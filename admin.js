@@ -3756,10 +3756,11 @@
     var constraints = [];
     if (cityFilter) constraints.push(f.where('city', '==', cityFilter));
     if (catFilter)  constraints.push(f.where('categoryId', '==', catFilter));
-    constraints.push(f.orderBy('name', 'asc'));
-    f.getDocs(f.query(f.collection(db, 'places'), ...constraints)).then(function(snap) {
+    var q = constraints.length ? f.query(f.collection(db, 'places'), ...constraints) : f.collection(db, 'places');
+    f.getDocs(q).then(function(snap) {
       var places = [];
       snap.forEach(function(d) { places.push(Object.assign({ _id: d.id }, d.data())); });
+      places.sort(function(a, b) { return (a.name || '').localeCompare(b.name || ''); });
       if (search) places = places.filter(function(p) { return (p.name || '').toLowerCase().indexOf(search) !== -1; });
       _pePlaces = places;
       if (statusEl) statusEl.textContent = places.length + ' place(s) found';
