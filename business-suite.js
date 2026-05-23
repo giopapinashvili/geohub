@@ -9,6 +9,7 @@
     selectedId: new URLSearchParams(location.search).get('businessId') || new URLSearchParams(location.search).get('id') || '',
     selected: null,
     tab: (location.hash || '#overview').replace('#','') || 'overview',
+    analyticsPeriod: 7,
     data: {},
     unsubs: []
   };
@@ -433,11 +434,137 @@
     return followers.slice(0,12).map(function(f){ return '<div class="bs-list-item compact"><div><strong>'+esc(f.userName || f.displayName || f.userId || tr('Follower'))+'</strong><p>'+esc(date(f.createdAt))+'</p></div></div>'; }).join('');
   }
 
+  window.bsSetAnalyticsPeriod = function(p){
+    state.analyticsPeriod = Number(p);
+    renderAnalytics();
+  };
+
+  function buildDayArray(analyticsDocs, period) {
+    var map = {};
+    analyticsDocs.forEach(function(d) {
+      var dateKey = d.id || d.date || '';
+      if (dateKey) map[dateKey] = d;
+    });
+    var result = [];
+    var now = new Date();
+    var count = period > 0 ? period : Math.max(analyticsDocs.length, 14);
+    for (var i = count - 1; i >= 0; i--) {
+      var dt = new Date(now.getTime() - i * 86400000);
+      var key = dt.toISOString().slice(0, 10);
+      var doc = map[key] || {};
+      result.push({ date: key, views: n(doc.views), phoneClicks: n(doc.phoneClicks), label: dt.toLocaleDateString(undefined, { month:'short', day:'numeric' }) });
+    }
+    return result;
+  }
+
+  function svgBarChart(dayArray, key, color) {
+    if (!dayArray.length) return '<div class="bs-chart-empty"><i class="fas fa-chart-bar"></i><span>No data yet</span></div>';
+    var vals = dayArray.map(function(d) { return d[key] || 0; });
+    var maxVal = Math.max.apply(null, vals) || 1;
+    var W = 600, H = 72, barW = Math.max(4, Math.floor((W - dayArray.length * 2) / dayArray.length));
+    var gap = Math.floor((W - dayArray.length * barW) / (dayArray.length + 1));
+    var bars = dayArray.map(function(d, i) {
+      var val = d[key] || 0;
+      var bh = Math.max(2, Math.round((val / maxVal) * (H - 8)));
+      var x = gap + i * (barW + gap);
+      var y = H - bh;
+      return '<rect x="'+x+'" y="'+y+'" width="'+barW+'" height="'+bh+'" rx="2" fill="'+color+'" opacity="'+(val ? '.85' : '.18')+'"><title>'+esc(d.label)+': '+val+'</title></rect>';
+    }).join('');
+    return '<svg class="bs-chart-svg" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">'+
+      '<line x1="0" y1="'+(H-1)+'" x2="'+W+'" y2="'+(H-1)+'" stroke="rgba(148,163,184,.18)" stroke-width="1"/>'+
+      bars+'</svg>';
+  }
+
+  function ratingDistribution() {
+    var reviews = state.data.reviews || [];
+    if (!reviews.length) return '<p class="bs-muted" style="padding:8px 0">'+esc(tr('No reviews yet'))+'</p>';
+    var counts = {5:0,4:0,3:0,2:0,1:0};
+    reviews.forEach(function(r){ var s = Math.round(n(r.rating)); if(s>=1&&s<=5) counts[s]++; });
+    var total = reviews.length || 1;
+    return [5,4,3,2,1].map(function(s){
+      var pct = Math.round(counts[s] / total * 100);
+      return '<div class="bs-rating-row"><span>'+s+' <i class="fas fa-star" style="color:#fbbf24;font-size:.7rem"></i></span>'+
+        '<div class="bs-rating-track"><div class="bs-rating-fill" style="width:'+pct+'%"></div></div>'+
+        '<span class="bs-small">'+counts[s]+'</span></div>';
+    }).join('');
+  }
+
+  function topPostsTable(posts) {
+    if (!posts || !posts.length) return iconEmpty('fa-newspaper','No posts yet','Posts for this business page will appear here.');
+    var sorted = posts.slice().sort(function(a,b){
+      return (n(b.reactionCount||b.likeCount)+n(b.commentCount)+n(b.shareCount)) - (n(a.reactionCount||a.likeCount)+n(a.commentCount)+n(a.shareCount));
+    });
+    return '<table class="bs-posts-table"><thead><tr><th>Post</th><th>❤️</th><th>💬</th><th>🔗</th><th>Total</th><th>Date</th></tr></thead><tbody>'+
+      sorted.slice(0,8).map(function(p){
+        var txt = esc((p.text||p.content||p.caption||tr('Post')).slice(0,60));
+        var rx = n(p.reactionCount||p.likeCount), cm = n(p.commentCount), sh = n(p.shareCount);
+        return '<tr><td class="bs-pt-text">'+txt+'</td><td>'+rx+'</td><td>'+cm+'</td><td>'+sh+'</td><td><strong>'+(rx+cm+sh)+'</strong></td><td class="bs-small">'+esc(date(p.createdAt||p.updatedAt))+'</td></tr>';
+      }).join('')+'</tbody></table>';
+  }
+
   function renderAnalytics(){
-    var days = state.data.analytics || [];
-    var sum = { views:0, phones:0, messages:unreadConvs().length, quotes:(state.data.quotes||[]).length, engagement:postEngagement(state.data.posts || []) };
-    days.forEach(function(d){ sum.views += n(d.views); sum.phones += n(d.phoneClicks); });
-    document.getElementById('bsContent').innerHTML = '<div class="bs-section"><div class="bs-section-head"><div><h1>'+esc(tr('Analytics'))+'</h1><p>'+esc(tr('Simple summary from existing page analytics and engagement data.'))+'</p></div></div><div class="bs-stats-grid">'+stat('fa-eye','Views',sum.views || '-')+stat('fa-phone','Phone clicks',sum.phones || '-')+stat('fa-heart','Post engagement',sum.engagement)+stat('fa-users','Followers',(state.data.followers||[]).length)+stat('fa-star','Reviews',(state.data.reviews||[]).length)+stat('fa-file-signature','Quotes',sum.quotes)+'</div><div class="bs-card"><h3>'+esc(tr('Recent activity'))+'</h3><div class="bs-list">'+activityList()+'</div></div></div>';
+    var period = state.analyticsPeriod;
+    var allDocs = state.data.analytics || [];
+    var biz = state.selected || {};
+    var cutoff = period > 0 ? Date.now() - period * 86400000 : 0;
+    var dayArr = buildDayArray(allDocs, period);
+    var totalViews = dayArr.reduce(function(s,d){ return s+d.views; },0) || n(biz.viewCount);
+    var totalPhones = dayArr.reduce(function(s,d){ return s+d.phoneClicks; },0);
+    var eng = postEngagement(state.data.posts || []);
+    var followers = state.data.followers || [];
+    var followersGained = period > 0 ? followers.filter(function(f){ return ts(f.createdAt) >= cutoff; }).length : followers.length;
+    var r = rating();
+    var quotesInPeriod = period > 0
+      ? (state.data.quotes||[]).filter(function(q){ return ts(q.createdAt) >= cutoff; }).length
+      : (state.data.quotes||[]).length;
+
+    var periodTabs = [['7','7d'],['30','30d'],['0','All']].map(function(p){
+      return '<button class="bs-period-tab'+(period===Number(p[0])?' active':'')+'" onclick="window.bsSetAnalyticsPeriod(\''+p[0]+'\')">'+p[1]+'</button>';
+    }).join('');
+
+    var deltaLabel = period > 0 ? ' / '+period+'d' : ' total';
+
+    document.getElementById('bsContent').innerHTML =
+      '<div class="bs-section">'+
+        '<div class="bs-section-head"><div><h1>'+esc(tr('Analytics'))+'</h1><p>'+esc('Tracking views, phone clicks, and engagement for this business page.')+'</p></div>'+
+          '<div class="bs-period-tabs">'+periodTabs+'</div>'+
+        '</div>'+
+
+        '<div class="bs-stats-grid">'+
+          stat('fa-eye','Views', totalViews || '—', deltaLabel)+
+          stat('fa-phone','Phone clicks', totalPhones || '—', deltaLabel)+
+          stat('fa-heart','Post engagement', eng)+
+          stat('fa-user-plus','Followers gained', followersGained, deltaLabel)+
+          stat('fa-star','Avg rating', r.avg, r.count+' '+tr('Reviews'))+
+          stat('fa-file-signature','Quotes', quotesInPeriod, deltaLabel)+
+        '</div>'+
+
+        '<div class="bs-card"><div class="bs-chart-head"><h3><i class="fas fa-eye" style="color:var(--gh-green)"></i> '+esc(tr('Views'))+'</h3></div>'+
+          '<div class="bs-chart-wrap">'+svgBarChart(dayArr,'views','#10b981')+'</div>'+
+          '<div class="bs-chart-labels">'+buildChartLabels(dayArr)+'</div>'+
+        '</div>'+
+
+        '<div class="bs-two-grid">'+
+          '<div class="bs-card"><div class="bs-chart-head"><h3><i class="fas fa-phone" style="color:#3b82f6"></i> '+esc(tr('Phone clicks'))+'</h3></div>'+
+            '<div class="bs-chart-wrap">'+svgBarChart(dayArr,'phoneClicks','#3b82f6')+'</div>'+
+            '<div class="bs-chart-labels">'+buildChartLabels(dayArr)+'</div>'+
+          '</div>'+
+          '<div class="bs-card"><h3>'+esc(tr('Reviews'))+'</h3>'+ratingDistribution()+'</div>'+
+        '</div>'+
+
+        '<div class="bs-card"><h3>'+esc('Top posts by engagement')+'</h3>'+topPostsTable(state.data.posts)+'</div>'+
+
+      '</div>';
+  }
+
+  function buildChartLabels(dayArr) {
+    if (!dayArr.length) return '';
+    var step = Math.ceil(dayArr.length / 7);
+    return '<div class="bs-chart-label-row">'+dayArr.map(function(d, i){
+      return (i % step === 0 || i === dayArr.length - 1)
+        ? '<span>'+esc(d.label)+'</span>'
+        : '<span></span>';
+    }).join('')+'</div>';
   }
 
   function renderAds(){

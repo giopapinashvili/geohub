@@ -2713,6 +2713,7 @@
             if (!sessionStorage.getItem(pvKey)) {
               sessionStorage.setItem(pvKey, '1');
               _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID),{viewCount:_fs.increment(1)}).catch(function(){});
+              _trackBizAnalytics(BIZ_ID, 'view');
             }
           }
         });
@@ -5518,6 +5519,21 @@
       location.reload(); // page already rendered; reload for consistent UI
     }
     // if _biz not loaded yet, renderPage() will call isActingAsBusiness() defensively on entry
+  });
+
+  function _trackBizAnalytics(bizId, type) {
+    if (!_db || !_fs || !bizId) return;
+    var today = new Date().toISOString().slice(0, 10);
+    var ref = _fs.doc(_db, 'businesses', bizId, 'analytics', today);
+    var upd = { updatedAt: _fs.serverTimestamp() };
+    if (type === 'view') upd.views = _fs.increment(1);
+    if (type === 'phone') upd.phoneClicks = _fs.increment(1);
+    _fs.setDoc(ref, upd, { merge: true }).catch(function(){});
+  }
+
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a[href^="tel:"]');
+    if (a && BIZ_ID) _trackBizAnalytics(BIZ_ID, 'phone');
   });
 
   if(window.GeoFirebase&&window.GeoFirebase.db) init(window.GeoFirebase);
