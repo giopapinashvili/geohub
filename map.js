@@ -48,6 +48,7 @@
   let disabledCategories = new Set();
   let activeMarkerEl = null, activePlaceId = null;
   let cameraMode = 'explore';
+  let heatmapVisible = false;
 
   const CAMERA_MODES = {
     explore:    { label: '🔍 Explore',   pitch: 0,  bearing: 0 },
@@ -418,6 +419,7 @@
     superclusterInst = new Supercluster({ radius: 60, maxZoom: 15, minPoints: 2 });
     superclusterInst.load(features);
     updateClusters();
+    updateHeatmapData();
   }
 
   /* ── Active marker clear helper ─────────────────── */
@@ -831,13 +833,64 @@
     return TILE_LAYERS[v] ? v : 'dark';
   }
 
+  /* ── Heatmap ────────────────────────────────────── */
+  function initHeatmapLayer() {
+    if (map.getSource('gh-heat-src')) return;
+    map.addSource('gh-heat-src', {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] }
+    });
+    map.addLayer({
+      id: 'gh-heat-layer',
+      type: 'heatmap',
+      source: 'gh-heat-src',
+      maxzoom: 17,
+      layout: { visibility: heatmapVisible ? 'visible' : 'none' },
+      paint: {
+        'heatmap-weight': ['interpolate', ['linear'], ['get', 'w'], 0, 0.4, 5, 1],
+        'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 5, 0.6, 10, 1.6, 15, 2.2],
+        'heatmap-color': [
+          'interpolate', ['linear'], ['heatmap-density'],
+          0,    'rgba(16,185,129,0)',
+          0.15, 'rgba(16,185,129,0.35)',
+          0.35, 'rgba(14,165,233,0.55)',
+          0.55, 'rgba(139,92,246,0.7)',
+          0.75, 'rgba(245,158,11,0.82)',
+          1,    'rgba(239,68,68,0.92)'
+        ],
+        'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 4, 16, 9, 30, 14, 55],
+        'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 14, 0.8, 16, 0.2]
+      }
+    });
+  }
+
+  function updateHeatmapData() {
+    const src = map && map.getSource('gh-heat-src');
+    if (!src) return;
+    const features = allPlaces.map(p => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
+      properties: { w: p.rating ? Math.max(0.4, p.rating) : 1 }
+    }));
+    src.setData({ type: 'FeatureCollection', features });
+  }
+
+  window.toggleHeatmap = function () {
+    heatmapVisible = !heatmapVisible;
+    if (map && map.getLayer('gh-heat-layer')) {
+      map.setLayoutProperty('gh-heat-layer', 'visibility', heatmapVisible ? 'visible' : 'none');
+    }
+    const btn = document.getElementById('heatmapBtn');
+    if (btn) btn.classList.toggle('active', heatmapVisible);
+  };
+
   function applyMapStyle(styleName) {
     const cfg = TILE_LAYERS[styleName] || TILE_LAYERS.dark;
     // Remove HTML markers before style change (they'd be dangling otherwise)
     clusterMarkers.forEach(m => m.remove());
     clusterMarkers = [];
     map.setStyle(cfg.style);
-    map.once('style.load', updateClusters);
+    map.once('style.load', () => { initHeatmapLayer(); updateHeatmapData(); updateClusters(); });
     localStorage.setItem('gh_map_style', styleName);
     const mapEl = document.getElementById('map');
     if (mapEl) mapEl.setAttribute('data-map-style', styleName);
@@ -1213,6 +1266,7 @@
       buildMobileCard();
       buildRotationHint();
       buildLiveFriendsUI();
+      initHeatmapLayer();
       renderMap();
 
       // Re-cluster on viewport change
