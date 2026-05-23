@@ -3813,6 +3813,8 @@
     document.getElementById('peEditHours').value   = p.workingHours || p.hours || '';
     var statusEl = document.getElementById('peEditStatus');
     if (statusEl) statusEl.textContent = '';
+    window.peUpdateImagePreview();
+    _peBindImageUpload();
     if (panel) { panel.style.display = 'block'; panel.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   };
 
@@ -3889,6 +3891,61 @@
       })
       .catch(function(err) { toast('Delete failed: ' + err.message, 'rgba(239,68,68,.95)'); });
   };
+
+  window.peUpdateImagePreview = function() {
+    var url  = (document.getElementById('peEditImage') || {}).value || '';
+    var wrap = document.getElementById('peImagePreviewWrap');
+    var img  = document.getElementById('peImagePreview');
+    if (!wrap || !img) return;
+    if (!url.trim()) { wrap.style.display = 'none'; return; }
+    img.src = url.trim();
+    img.onerror = function() { wrap.style.display = 'none'; };
+    img.onload  = function() { wrap.style.display = 'block'; };
+  };
+
+  function _peBindImageUpload() {
+    var fileInput = document.getElementById('peImageFile');
+    if (!fileInput || fileInput._bound) return;
+    fileInput._bound = true;
+    fileInput.addEventListener('change', function() {
+      var file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      var lbl = document.getElementById('peUploadLabel');
+      if (lbl) lbl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> იტვირთება…';
+      var cfg = (window.GeoConfig && window.GeoConfig.CLOUDINARY) || { cloudName: 'dw5dqk2w7', uploadPreset: 'geohub_unsigned', rootFolder: 'geohub' };
+      var fd = new FormData();
+      fd.append('file', file);
+      fd.append('upload_preset', cfg.uploadPreset);
+      fd.append('folder', (cfg.rootFolder || 'geohub') + '/places');
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', 'https://api.cloudinary.com/v1_1/' + cfg.cloudName + '/image/upload');
+      xhr.onload = function() {
+        fileInput.value = '';
+        try {
+          var r = JSON.parse(xhr.responseText);
+          var url = r.secure_url || null;
+          if (url) {
+            var imgInput = document.getElementById('peEditImage');
+            if (imgInput) { imgInput.value = url; window.peUpdateImagePreview(); }
+            if (lbl) lbl.innerHTML = '<i class="fas fa-check"></i> ატვირთულია';
+            setTimeout(function() { if (lbl) lbl.innerHTML = '<i class="fas fa-upload"></i> ატვირთვა'; }, 2500);
+          } else {
+            if (lbl) lbl.innerHTML = '<i class="fas fa-upload"></i> ატვირთვა';
+            toast('Upload failed: no URL returned', 'rgba(239,68,68,.95)');
+          }
+        } catch(e) {
+          if (lbl) lbl.innerHTML = '<i class="fas fa-upload"></i> ატვირთვა';
+          toast('Upload error', 'rgba(239,68,68,.95)');
+        }
+      };
+      xhr.onerror = function() {
+        fileInput.value = '';
+        if (lbl) lbl.innerHTML = '<i class="fas fa-upload"></i> ატვირთვა';
+        toast('Upload network error', 'rgba(239,68,68,.95)');
+      };
+      xhr.send(fd);
+    });
+  }
 
   function init() {
     loadRealStats();

@@ -670,12 +670,19 @@
               </select>
             </label>
           </div>
-          <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;align-items:end">
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Image URL
-              <input id="peEditImage" placeholder="https://…" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;align-items:start">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Image
+              <div style="display:flex;gap:7px;align-items:center">
+                <input id="peEditImage" placeholder="https://… ან ატვირთეთ →" oninput="peUpdateImagePreview()" style="flex:1;padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+                <label id="peUploadLabel" for="peImageFile" class="btn btn-ghost btn-sm" style="cursor:pointer;white-space:nowrap;padding:10px 13px;flex-shrink:0"><i class="fas fa-upload"></i> ატვირთვა</label>
+                <input type="file" id="peImageFile" accept="image/*" style="display:none">
+              </div>
+              <div id="peImagePreviewWrap" style="display:none;margin-top:6px">
+                <img id="peImagePreview" style="max-height:90px;max-width:100%;border-radius:8px;object-fit:cover;display:block">
+              </div>
             </label>
             <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Icon Emoji
-              <input id="peEditIcon" placeholder="🏛️" maxlength="4" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);text-align:center;font-size:1.3rem">
+              <input id="peEditIcon" placeholder="🏛️" maxlength="8" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);text-align:center;font-size:1.3rem">
             </label>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
