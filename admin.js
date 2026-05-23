@@ -3810,7 +3810,6 @@
     document.getElementById('peEditLng').value     = lng;
     document.getElementById('peEditWebsite').value = p.website || '';
     document.getElementById('peEditAddress').value = p.address || '';
-    document.getElementById('peEditHours').value   = p.workingHours || p.hours || '';
     var statusEl = document.getElementById('peEditStatus');
     if (statusEl) statusEl.textContent = '';
     window.peUpdateImagePreview();
