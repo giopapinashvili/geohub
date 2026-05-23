@@ -73,6 +73,7 @@
     <div class="sb-item" onclick="adminNav('creators')"><span class="sb-ic"><i class="fas fa-star"></i></span> Creators <span class="sb-cnt" id="sb-creators">0</span></div>
     <div class="sb-item" onclick="adminNav('content')"><span class="sb-ic"><i class="fas fa-plus-square"></i></span> Content Studio</div>
     <div class="sb-item" onclick="adminNav('placecat')"><span class="sb-ic"><i class="fas fa-tags"></i></span> Place Categories</div>
+    <div class="sb-item" onclick="adminNav('ownership')"><span class="sb-ic"><i class="fas fa-handshake"></i></span> Transfer Ownership</div>
     <div class="sb-item" onclick="adminNav('challenges')"><span class="sb-ic"><i class="fas fa-bolt"></i></span> Challenge Studio <span class="sb-cnt" id="sb-challenges">0</span></div>
     <div class="sb-item" onclick="adminNav('rewards')"><span class="sb-ic"><i class="fas fa-gift"></i></span> Rewards <span class="sb-cnt" id="sb-rewards">0</span></div>
     <div class="sb-lbl">Safety</div>
@@ -643,6 +644,68 @@
           <div id="pcatList" style="min-height:80px">
             <div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">Loading…</div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── TRANSFER OWNERSHIP ─── -->
+    <section class="sec" id="sec-ownership">
+      <div class="ph">
+        <div><div class="ph-title">Transfer Ownership</div><div class="ph-sub">Assign a business or place to a user so they can manage posts, description, logo, photos, and story moderation.</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;max-width:1100px">
+
+        <!-- LEFT: Find entity -->
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">1. Select Business or Place</div></div>
+          <div style="display:grid;gap:10px;padding:4px 0">
+            <div style="display:grid;grid-template-columns:1fr auto;gap:8px">
+              <input id="ownershipSearchInput" placeholder="Search by name…" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.85rem" oninput="ownershipSearchEntity(this.value)">
+              <select id="ownershipEntityType" onchange="ownershipSearchEntity(document.getElementById('ownershipSearchInput').value)" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.82rem">
+                <option value="business">Businesses</option>
+                <option value="place">Places</option>
+              </select>
+            </div>
+            <div id="ownershipEntityResults" style="display:grid;gap:6px;max-height:360px;overflow-y:auto">
+              <div style="text-align:center;padding:20px;color:#64748b;font-size:.82rem">Type a name to search…</div>
+            </div>
+            <div id="ownershipSelectedEntity" style="display:none;padding:10px;border-radius:9px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3)">
+              <div style="font-size:.72rem;color:#10b981;font-weight:700;margin-bottom:4px">SELECTED</div>
+              <div id="ownershipSelectedEntityName" style="font-weight:700;color:#f8fafc;font-size:.88rem"></div>
+              <div id="ownershipSelectedEntityMeta" style="font-size:.72rem;color:#94a3b8;margin-top:2px"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Find user + transfer -->
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">2. Select New Owner</div></div>
+          <div style="display:grid;gap:10px;padding:4px 0">
+            <input id="ownershipUserSearch" placeholder="Search user by name or email…" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.85rem" oninput="ownershipSearchUser(this.value)">
+            <div id="ownershipUserResults" style="display:grid;gap:6px;max-height:280px;overflow-y:auto">
+              <div style="text-align:center;padding:20px;color:#64748b;font-size:.82rem">Type a name or email to search…</div>
+            </div>
+            <div id="ownershipSelectedUser" style="display:none;padding:10px;border-radius:9px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3)">
+              <div style="font-size:.72rem;color:#3b82f6;font-weight:700;margin-bottom:4px">SELECTED USER</div>
+              <div id="ownershipSelectedUserName" style="font-weight:700;color:#f8fafc;font-size:.88rem"></div>
+              <div id="ownershipSelectedUserEmail" style="font-size:.72rem;color:#94a3b8;margin-top:2px"></div>
+            </div>
+            <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:12px;margin-top:4px">
+              <div id="ownershipSummary" style="font-size:.78rem;color:#64748b;margin-bottom:10px">Select a business/place and a user to continue.</div>
+              <button class="btn-primary" id="ownershipTransferBtn" onclick="executeOwnershipTransfer()" disabled style="width:100%;padding:11px;opacity:.5;cursor:not-allowed">
+                <i class="fas fa-handshake" style="margin-right:8px"></i> Transfer Ownership
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Transfer log -->
+      <div class="panel" style="max-width:1100px;margin-top:16px">
+        <div class="panel-hdr"><div class="panel-title">Recent Transfers</div></div>
+        <div id="ownershipLog" style="padding:4px 0">
+          <div style="text-align:center;padding:20px;color:#64748b;font-size:.82rem">No transfers yet this session.</div>
         </div>
       </div>
     </section>

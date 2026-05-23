@@ -93,6 +93,7 @@
     if (section === 'errors')     { loadAdminErrors(); }
     if (section === 'businesses') { loadAdminBusinesses(); }
     if (section === 'placecat')   { loadPlaceCategorySection(); }
+    if (section === 'ownership')  { _ownershipEntity = null; _ownershipUser = null; _updateOwnershipSummary(); }
   };
 
   /* ── TOAST ───────────────────────────────────────────────── */
@@ -3215,9 +3216,9 @@
           + (d.subcategories && d.subcategories.length ? '<span style="color:#10b981">' + d.subcategories.length + ' subs</span>' : '')
           + '</div>'
           + '</div>'
-          + '<button type="button" onclick="togglePlaceCatActive(' + JSON.stringify(row.id) + ',' + JSON.stringify(!!d.active !== false) + ')" style="padding:3px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#94a3b8;cursor:pointer;font-size:.72rem" title="' + (inactive ? 'Enable' : 'Disable') + '">' + (inactive ? 'Off' : 'On') + '</button>'
-          + '<button type="button" onclick="editPlaceCatRow(' + JSON.stringify(row.id) + ')" style="padding:3px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#94a3b8;cursor:pointer;font-size:.72rem">Edit</button>'
-          + '<button type="button" onclick="deletePlaceCat(' + JSON.stringify(row.id) + ')" style="padding:3px 10px;border-radius:6px;border:none;background:rgba(239,68,68,.15);color:#f87171;cursor:pointer;font-size:.72rem">Del</button>'
+          + '<button type="button" onclick=\'togglePlaceCatActive(' + JSON.stringify(row.id) + ',' + JSON.stringify(d.active !== false) + ')\' style="padding:3px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#94a3b8;cursor:pointer;font-size:.72rem" title="' + (inactive ? 'Enable' : 'Disable') + '">' + (inactive ? 'Off' : 'On') + '</button>'
+          + '<button type="button" onclick=\'editPlaceCatRow(' + JSON.stringify(row.id) + ')\' style="padding:3px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#94a3b8;cursor:pointer;font-size:.72rem">Edit</button>'
+          + '<button type="button" onclick=\'deletePlaceCat(' + JSON.stringify(row.id) + ')\' style="padding:3px 10px;border-radius:6px;border:none;background:rgba(239,68,68,.15);color:#f87171;cursor:pointer;font-size:.72rem">Del</button>'
           + '</div>';
       });
       html += '</div>';
@@ -3366,9 +3367,9 @@
           + '<div style="font-size:.8rem;color:#f8fafc;font-weight:600">' + escHtmlAdmin(sub.labelKa || sub.id) + '</div>'
           + '<div style="font-size:.7rem;color:#64748b"><code>' + escHtmlAdmin(sub.id) + '</code>' + (sub.labelEn ? ' · ' + escHtmlAdmin(sub.labelEn) : '') + '</div>'
           + '</div>'
-          + '<button type="button" onclick="editPcatSubcatItem(' + JSON.stringify(catId) + ',' + idx + ')" style="padding:2px 8px;border-radius:5px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#94a3b8;cursor:pointer;font-size:.7rem">Edit</button>'
-          + '<button type="button" onclick="togglePcatSubcatActive(' + JSON.stringify(catId) + ',' + idx + ',' + JSON.stringify(sub.active !== false) + ')" style="padding:2px 8px;border-radius:5px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#94a3b8;cursor:pointer;font-size:.7rem">' + (inactive ? 'Off' : 'On') + '</button>'
-          + '<button type="button" onclick="removePcatSubcat(' + JSON.stringify(catId) + ',' + idx + ')" style="padding:2px 8px;border-radius:5px;border:none;background:rgba(239,68,68,.12);color:#f87171;cursor:pointer;font-size:.7rem">✕</button>'
+          + '<button type="button" onclick=\'editPcatSubcatItem(' + JSON.stringify(catId) + ',' + idx + ')\' style="padding:2px 8px;border-radius:5px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#94a3b8;cursor:pointer;font-size:.7rem">Edit</button>'
+          + '<button type="button" onclick=\'togglePcatSubcatActive(' + JSON.stringify(catId) + ',' + idx + ',' + JSON.stringify(sub.active !== false) + ')\' style="padding:2px 8px;border-radius:5px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#94a3b8;cursor:pointer;font-size:.7rem">' + (inactive ? 'Off' : 'On') + '</button>'
+          + '<button type="button" onclick=\'removePcatSubcat(' + JSON.stringify(catId) + ',' + idx + ')\' style="padding:2px 8px;border-radius:5px;border:none;background:rgba(239,68,68,.12);color:#f87171;cursor:pointer;font-size:.7rem">✕</button>'
           + '</div>';
       });
       html += '</div>';
@@ -3382,7 +3383,7 @@
       + '<input id="pcatSubLabelEn" placeholder="English label (optional)" style="padding:8px;border-radius:8px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.8rem">'
       + '<div style="display:grid;grid-template-columns:1fr auto;gap:6px">'
       + '<input id="pcatSubIcon" placeholder="Icon emoji" style="padding:8px;border-radius:8px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:1rem;text-align:center" maxlength="8">'
-      + '<button type="button" onclick="savePcatSubcatItem(' + JSON.stringify(catId) + ')" style="padding:8px 14px;border-radius:8px;background:#10b981;border:none;color:#fff;cursor:pointer;font-size:.8rem;font-weight:700">Save</button>'
+      + '<button type="button" onclick=\'savePcatSubcatItem(' + JSON.stringify(catId) + ')\' style="padding:8px 14px;border-radius:8px;background:#10b981;border:none;color:#fff;cursor:pointer;font-size:.8rem;font-weight:700">Save</button>'
       + '</div>'
       + '<div style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--ts)">'
       + '<input type="checkbox" id="pcatSubActive" checked style="width:14px;height:14px"> Active'
@@ -3481,6 +3482,189 @@
     var titleEl = document.getElementById('pcatSubcatFormTitle'); if (titleEl) titleEl.textContent = 'Add Subcategory';
     var cancelBtn = document.getElementById('pcatSubCancelBtn'); if (cancelBtn) cancelBtn.style.display = 'none';
   };
+
+  /* ── TRANSFER OWNERSHIP ─────────────────────────────────── */
+
+  var _ownershipEntity = null; // { id, name, type: 'business'|'place', currentOwnerId }
+  var _ownershipUser   = null; // { uid, displayName, email }
+  var _ownershipTimer  = null;
+  var _ownershipUserTimer = null;
+
+  window.ownershipSearchEntity = function(query) {
+    clearTimeout(_ownershipTimer);
+    var type = (document.getElementById('ownershipEntityType') || {}).value || 'business';
+    var resultEl = document.getElementById('ownershipEntityResults');
+    if (!query || query.length < 2) {
+      if (resultEl) resultEl.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;font-size:.82rem">Type a name to search…</div>';
+      return;
+    }
+    _ownershipTimer = setTimeout(function() {
+      var fb = window.GeoFirebase, f = fb && fb.fs;
+      if (!fb || !f) return;
+      if (resultEl) resultEl.innerHTML = '<div style="text-align:center;padding:16px;color:#64748b;font-size:.82rem"><i class="fas fa-spinner fa-spin"></i></div>';
+      var col = type === 'business' ? 'businesses' : 'places';
+      var q = f.query(f.collection(fb.db, col), f.orderBy('name'), f.startAt(query), f.endAt(query + ''), f.limit(20));
+      f.getDocs(q).then(function(snap) {
+        if (!snap.size) {
+          if (resultEl) resultEl.innerHTML = '<div style="text-align:center;padding:16px;color:#64748b;font-size:.82rem">No results found.</div>';
+          return;
+        }
+        var html = '';
+        snap.forEach(function(d) {
+          var data = d.data();
+          var name = escHtmlAdmin(data.name || d.id);
+          var meta = escHtmlAdmin(data.category || data.city || data.ownerId || '');
+          html += '<div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;background:rgba(255,255,255,.04);cursor:pointer;border:1px solid transparent" '
+            + 'onmouseover="this.style.borderColor=\'rgba(255,255,255,.12)\'" onmouseout="this.style.borderColor=\'transparent\'" '
+            + 'onclick=\'ownershipSelectEntity(' + JSON.stringify(d.id) + ',' + JSON.stringify(data.name || d.id) + ',' + JSON.stringify(type) + ',' + JSON.stringify(data.ownerId || '') + ')\'>'
+            + '<div style="flex:1;min-width:0">'
+            + '<div style="font-weight:700;font-size:.84rem;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + name + '</div>'
+            + '<div style="font-size:.71rem;color:#64748b">' + meta + '</div>'
+            + '</div>'
+            + '<span style="font-size:.7rem;padding:2px 8px;border-radius:5px;background:rgba(255,255,255,.07);color:#94a3b8">' + escHtmlAdmin(type) + '</span>'
+            + '</div>';
+        });
+        if (resultEl) resultEl.innerHTML = html;
+      }).catch(function(err) {
+        if (resultEl) resultEl.innerHTML = '<div style="color:#f87171;padding:12px;font-size:.8rem">Error: ' + escHtmlAdmin(err.message) + '</div>';
+      });
+    }, 350);
+  };
+
+  window.ownershipSelectEntity = function(id, name, type, currentOwnerId) {
+    _ownershipEntity = { id: id, name: name, type: type, currentOwnerId: currentOwnerId };
+    var sel = document.getElementById('ownershipSelectedEntity');
+    var nameEl = document.getElementById('ownershipSelectedEntityName');
+    var metaEl = document.getElementById('ownershipSelectedEntityMeta');
+    if (sel) sel.style.display = '';
+    if (nameEl) nameEl.textContent = name;
+    if (metaEl) metaEl.textContent = type.charAt(0).toUpperCase() + type.slice(1) + ' · ID: ' + id + (currentOwnerId ? ' · Owner: ' + currentOwnerId : ' · No owner');
+    _updateOwnershipSummary();
+  };
+
+  window.ownershipSearchUser = function(query) {
+    clearTimeout(_ownershipUserTimer);
+    var resultEl = document.getElementById('ownershipUserResults');
+    if (!query || query.length < 2) {
+      if (resultEl) resultEl.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;font-size:.82rem">Type a name or email to search…</div>';
+      return;
+    }
+    _ownershipUserTimer = setTimeout(function() {
+      var fb = window.GeoFirebase, f = fb && fb.fs;
+      if (!fb || !f) return;
+      if (resultEl) resultEl.innerHTML = '<div style="text-align:center;padding:16px;color:#64748b;font-size:.82rem"><i class="fas fa-spinner fa-spin"></i></div>';
+      var q = f.query(f.collection(fb.db, 'users'), f.orderBy('displayName'), f.startAt(query), f.endAt(query + ''), f.limit(15));
+      f.getDocs(q).then(function(snap) {
+        var rows = [];
+        snap.forEach(function(d) { rows.push({ uid: d.id, data: d.data() }); });
+        if (!rows.length) {
+          if (resultEl) resultEl.innerHTML = '<div style="text-align:center;padding:16px;color:#64748b;font-size:.82rem">No users found. Try a different name.</div>';
+          return;
+        }
+        var html = '';
+        rows.forEach(function(r) {
+          var d = r.data;
+          var nameStr = escHtmlAdmin(d.displayName || d.name || r.uid);
+          var emailStr = escHtmlAdmin(d.email || '');
+          var av = (d.displayName || 'U').charAt(0).toUpperCase();
+          html += '<div style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;background:rgba(255,255,255,.04);cursor:pointer;border:1px solid transparent" '
+            + 'onmouseover="this.style.borderColor=\'rgba(255,255,255,.12)\'" onmouseout="this.style.borderColor=\'transparent\'" '
+            + 'onclick=\'ownershipSelectUser(' + JSON.stringify(r.uid) + ',' + JSON.stringify(d.displayName || d.name || r.uid) + ',' + JSON.stringify(d.email || '') + ')\'>'
+            + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0">' + av + '</div>'
+            + '<div style="flex:1;min-width:0">'
+            + '<div style="font-weight:700;font-size:.84rem;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + nameStr + '</div>'
+            + '<div style="font-size:.71rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + emailStr + '</div>'
+            + '</div>'
+            + '</div>';
+        });
+        if (resultEl) resultEl.innerHTML = html;
+      }).catch(function() {
+        if (resultEl) resultEl.innerHTML = '<div style="color:#f87171;padding:12px;font-size:.8rem">Search failed. Try searching by display name.</div>';
+      });
+    }, 350);
+  };
+
+  window.ownershipSelectUser = function(uid, displayName, email) {
+    _ownershipUser = { uid: uid, displayName: displayName, email: email };
+    var sel = document.getElementById('ownershipSelectedUser');
+    var nameEl = document.getElementById('ownershipSelectedUserName');
+    var emailEl = document.getElementById('ownershipSelectedUserEmail');
+    if (sel) sel.style.display = '';
+    if (nameEl) nameEl.textContent = displayName;
+    if (emailEl) emailEl.textContent = email || uid;
+    _updateOwnershipSummary();
+  };
+
+  function _updateOwnershipSummary() {
+    var sumEl = document.getElementById('ownershipSummary');
+    var btn   = document.getElementById('ownershipTransferBtn');
+    if (_ownershipEntity && _ownershipUser) {
+      if (sumEl) sumEl.innerHTML = 'Transfer <strong>' + escHtmlAdmin(_ownershipEntity.name) + '</strong> (' + escHtmlAdmin(_ownershipEntity.type) + ') to <strong>' + escHtmlAdmin(_ownershipUser.displayName) + '</strong> (' + escHtmlAdmin(_ownershipUser.email || _ownershipUser.uid) + ')';
+      if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; }
+    } else {
+      if (sumEl) sumEl.innerHTML = 'Select a business/place and a user to continue.';
+      if (btn) { btn.disabled = true; btn.style.opacity = '.5'; btn.style.cursor = 'not-allowed'; }
+    }
+  }
+
+  window.executeOwnershipTransfer = function() {
+    if (!_ownershipEntity || !_ownershipUser) return;
+    if (!confirm('Transfer "' + _ownershipEntity.name + '" (' + _ownershipEntity.type + ') to ' + _ownershipUser.displayName + ' (' + (_ownershipUser.email || _ownershipUser.uid) + ')?\n\nThis will update the owner on the document and grant them full management access.')) return;
+    var fb = window.GeoFirebase, f = fb && fb.fs;
+    if (!fb || !f) return toast('Firebase not ready', 'rgba(239,68,68,.95)');
+
+    var entity = _ownershipEntity, user = _ownershipUser;
+    var col = entity.type === 'business' ? 'businesses' : 'places';
+    var docRef = f.doc(fb.db, col, entity.id);
+    var promises = [f.setDoc(docRef, { ownerId: user.uid, updatedAt: new Date() }, { merge: true })];
+
+    if (entity.type === 'business') {
+      var bizAdminId = entity.id + '_' + user.uid;
+      var bizAdminRef = f.doc(fb.db, 'businessAdmins', bizAdminId);
+      promises.push(f.setDoc(bizAdminRef, {
+        businessId: entity.id, userId: user.uid, role: 'owner',
+        grantedBy: 'admin', grantedAt: new Date()
+      }, { merge: true }));
+    }
+
+    var btn = document.getElementById('ownershipTransferBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Transferring…'; }
+
+    Promise.all(promises).then(function() {
+      toast('Ownership transferred to ' + user.displayName);
+      _appendOwnershipLog(entity, user);
+      _ownershipEntity = null;
+      _ownershipUser   = null;
+      var fields = ['ownershipSearchInput','ownershipUserSearch'];
+      fields.forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
+      ['ownershipSelectedEntity','ownershipSelectedUser'].forEach(function(id) { var el = document.getElementById(id); if (el) el.style.display = 'none'; });
+      ['ownershipEntityResults','ownershipUserResults'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;font-size:.82rem">Type to search…</div>';
+      });
+      _updateOwnershipSummary();
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-handshake" style="margin-right:8px"></i> Transfer Ownership'; }
+    }).catch(function(err) {
+      toast('Transfer failed: ' + err.message, 'rgba(239,68,68,.95)');
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-handshake" style="margin-right:8px"></i> Transfer Ownership'; }
+    });
+  };
+
+  function _appendOwnershipLog(entity, user) {
+    var logEl = document.getElementById('ownershipLog');
+    if (!logEl) return;
+    var existingEmpty = logEl.querySelector('div[style*="No transfers"]');
+    if (existingEmpty) logEl.innerHTML = '';
+    var now = new Date().toLocaleTimeString();
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:9px;background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2);margin-bottom:8px';
+    row.innerHTML = '<i class="fas fa-check-circle" style="color:#10b981;font-size:1rem;flex-shrink:0"></i>'
+      + '<div style="flex:1;min-width:0">'
+      + '<div style="font-size:.83rem;color:#f8fafc;font-weight:600">' + escHtmlAdmin(entity.name) + ' <span style="color:#64748b;font-weight:400">→</span> ' + escHtmlAdmin(user.displayName) + '</div>'
+      + '<div style="font-size:.71rem;color:#64748b">' + escHtmlAdmin(entity.type) + ' · ' + escHtmlAdmin(user.email || user.uid) + ' · ' + now + '</div>'
+      + '</div>';
+    logEl.insertBefore(row, logEl.firstChild);
+  }
 
   /* ── INIT ────────────────────────────────────────────────── */
   function init() {
