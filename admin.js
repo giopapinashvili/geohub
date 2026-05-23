@@ -3815,6 +3815,8 @@
     if (statusEl) statusEl.textContent = '';
     window.peUpdateImagePreview();
     _peBindImageUpload();
+    peInitHoursUI();
+    peSetHoursData(p);
     if (panel) { panel.style.display = 'block'; panel.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   };
 
@@ -3848,10 +3850,11 @@
       icon:         document.getElementById('peEditIcon').value.trim(),
       imageUrl:     document.getElementById('peEditImage').value.trim(),
       image:        document.getElementById('peEditImage').value.trim(),
-      website:      document.getElementById('peEditWebsite').value.trim(),
-      address:      document.getElementById('peEditAddress').value.trim(),
-      workingHours: document.getElementById('peEditHours').value.trim(),
-      updatedAt:    f.serverTimestamp()
+      website:               document.getElementById('peEditWebsite').value.trim(),
+      address:               document.getElementById('peEditAddress').value.trim(),
+      workingHours:          peGetHoursData().text,
+      workingHoursSchedule:  peGetHoursData().schedule,
+      updatedAt:             f.serverTimestamp()
     };
     if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
       doc.lat = lat; doc.lng = lng;
@@ -3871,6 +3874,103 @@
         if (statusEl) statusEl.innerHTML = '<span style="color:#f87171"><i class="fas fa-times"></i> ' + escHtmlAdmin(err.message) + '</span>';
       });
   };
+
+  /* ── WORKING HOURS WIDGET ──────────────────────────────── */
+  var PE_DAYS = [
+    { key: 'mon', ka: 'ორშაბათი'  },
+    { key: 'tue', ka: 'სამშაბათი' },
+    { key: 'wed', ka: 'ოთხშაბათი' },
+    { key: 'thu', ka: 'ხუთშაბათი' },
+    { key: 'fri', ka: 'პარასკევი'  },
+    { key: 'sat', ka: 'შაბათი'     },
+    { key: 'sun', ka: 'კვირა'      }
+  ];
+
+  function peInitHoursUI() {
+    var wrap = document.getElementById('peHoursWidget');
+    if (!wrap) return;
+    var S = 'padding:5px 9px;border-radius:7px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.82rem';
+    var html = '<div style="font-size:.82rem;font-weight:700;color:var(--ts);margin-bottom:8px">სამუშაო საათები</div>'
+      + '<div style="display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:10px;padding:8px 10px;background:rgba(255,255,255,.04);border-radius:9px">'
+      + '<span style="font-size:.75rem;color:#94a3b8;white-space:nowrap">ყველა დღე:</span>'
+      + '<input id="peHoursQFrom" type="time" value="09:00" style="' + S + '">'
+      + '<span style="color:#64748b">—</span>'
+      + '<input id="peHoursQTo" type="time" value="22:00" style="' + S + '">'
+      + '<button type="button" onclick="peApplyAllHours()" style="padding:5px 13px;border-radius:7px;background:#3b82f6;border:none;color:#fff;font-size:.75rem;cursor:pointer;white-space:nowrap;font-weight:600">ყველაზე</button>'
+      + '</div>'
+      + '<div style="display:grid;gap:5px">';
+    PE_DAYS.forEach(function(d) {
+      html += '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:rgba(255,255,255,.03)">'
+        + '<input type="checkbox" id="peDay_' + d.key + '" checked onchange="peDayToggle(\'' + d.key + '\')" style="width:15px;height:15px;cursor:pointer;flex-shrink:0">'
+        + '<span style="font-size:.8rem;font-weight:600;min-width:90px;color:#e2e8f0">' + d.ka + '</span>'
+        + '<input type="time" id="peFrom_' + d.key + '" value="09:00" style="' + S + '">'
+        + '<span style="color:#64748b;font-size:.85rem">—</span>'
+        + '<input type="time" id="peTo_' + d.key + '" value="22:00" style="' + S + '">'
+        + '<span id="peDaySt_' + d.key + '" style="font-size:.72rem;color:#f87171;margin-left:2px"></span>'
+        + '</div>';
+    });
+    html += '</div>';
+    wrap.innerHTML = html;
+  }
+
+  window.peDayToggle = function(key) {
+    var open = !!(document.getElementById('peDay_' + key) || {}).checked;
+    ['peFrom_', 'peTo_'].forEach(function(pre) {
+      var el = document.getElementById(pre + key);
+      if (el) { el.disabled = !open; el.style.opacity = open ? '1' : '0.3'; }
+    });
+    var st = document.getElementById('peDaySt_' + key);
+    if (st) st.textContent = open ? '' : 'დაკეტილია';
+  };
+
+  window.peApplyAllHours = function() {
+    var from = (document.getElementById('peHoursQFrom') || {}).value || '09:00';
+    var to   = (document.getElementById('peHoursQTo')   || {}).value || '22:00';
+    PE_DAYS.forEach(function(d) {
+      var cb = document.getElementById('peDay_' + d.key); if (cb) cb.checked = true;
+      var f  = document.getElementById('peFrom_' + d.key); if (f) { f.value = from; f.disabled = false; f.style.opacity = '1'; }
+      var t  = document.getElementById('peTo_' + d.key);   if (t) { t.value = to;   t.disabled = false; t.style.opacity = '1'; }
+      var st = document.getElementById('peDaySt_' + d.key); if (st) st.textContent = '';
+    });
+  };
+
+  function peGetHoursData() {
+    var schedule = {};
+    PE_DAYS.forEach(function(d) {
+      var open = !!(document.getElementById('peDay_' + d.key) || {}).checked;
+      var from = (document.getElementById('peFrom_' + d.key) || {}).value || '';
+      var to   = (document.getElementById('peTo_'   + d.key) || {}).value || '';
+      schedule[d.key] = open ? { open: true, from: from, to: to } : { open: false };
+    });
+    var parts = [], i = 0;
+    var KA = { mon:'ორშ', tue:'სამ', wed:'ოთხ', thu:'ხუთ', fri:'პარ', sat:'შაბ', sun:'კვი' };
+    while (i < PE_DAYS.length) {
+      var d = schedule[PE_DAYS[i].key];
+      if (!d || !d.open) { parts.push(KA[PE_DAYS[i].key] + ': დაკ.'); i++; continue; }
+      var j = i + 1;
+      while (j < PE_DAYS.length) {
+        var nd = schedule[PE_DAYS[j].key];
+        if (nd && nd.open && nd.from === d.from && nd.to === d.to) j++; else break;
+      }
+      var label = j - i > 1 ? KA[PE_DAYS[i].key] + '-' + KA[PE_DAYS[j-1].key] : KA[PE_DAYS[i].key];
+      parts.push(label + ' ' + d.from + '-' + d.to);
+      i = j;
+    }
+    return { schedule: schedule, text: parts.join(', ') };
+  }
+
+  function peSetHoursData(place) {
+    if (!document.getElementById('peDay_mon')) return;
+    var schedule = place.workingHoursSchedule;
+    PE_DAYS.forEach(function(d) {
+      var s    = schedule && schedule[d.key];
+      var open = s ? s.open !== false : true;
+      var cb   = document.getElementById('peDay_' + d.key); if (cb) cb.checked = open;
+      var fEl  = document.getElementById('peFrom_' + d.key); if (fEl) fEl.value = (s && s.from) || '09:00';
+      var tEl  = document.getElementById('peTo_'   + d.key); if (tEl) tEl.value = (s && s.to)   || '22:00';
+      window.peDayToggle(d.key);
+    });
+  }
 
   window.deletePlaceFromEditPanel = function() {
     var fb = window.GeoFirebase, f = fb && fb.fs;
