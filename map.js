@@ -560,20 +560,53 @@
     div.id = 'mobileCard';
     div.className = 'mobile-place-card';
     div.innerHTML =
-      '<div class="mpc-drag-handle"></div>'
+      '<div class="mpc-drag-handle" id="mpcDragHandle"></div>'
       + '<button class="mpc-close" onclick="window.closeMobileCard()"><i class="fas fa-times"></i></button>'
       + '<div id="mpcImgWrap" class="mpc-img-wrap"><img id="mpcImg" src="" alt=""></div>'
       + '<div id="mpcFallback" class="mpc-fallback" style="display:none"></div>'
       + '<div class="mpc-body">'
       + '<div id="mpcName" class="mpc-name"></div>'
-      + '<div id="mpcCat"  class="mpc-cat"></div>'
+      + '<div class="mpc-meta-row">'
+      + '<div id="mpcCat" class="mpc-cat"></div>'
+      + '<div id="mpcRating" class="mpc-rating"></div>'
+      + '</div>'
       + '<div id="mpcAddr" class="mpc-addr"></div>'
       + '<div id="mpcDesc" class="mpc-desc"></div>'
       + '<div id="mpcGoogleSection" style="display:none"></div>'
       + '<div class="mpc-btns">'
-      + '<a id="mpcDirections" href="#" target="_blank" rel="noopener" class="btn btn-primary btn-sm"><i class="fas fa-directions"></i> Directions</a>'
+      + '<a id="mpcDetail" href="#" class="btn btn-primary btn-sm" style="flex:1;justify-content:center"><i class="fas fa-info-circle"></i> Details</a>'
+      + '<a id="mpcDirections" href="#" target="_blank" rel="noopener" class="btn btn-ghost btn-sm"><i class="fas fa-directions"></i></a>'
       + '</div></div>';
     document.body.appendChild(div);
+    _attachMobileCardDrag(div);
+  }
+
+  function _attachMobileCardDrag(card) {
+    const handle = document.getElementById('mpcDragHandle');
+    if (!handle) return;
+    let startY = 0, dy = 0, dragging = false;
+    handle.addEventListener('touchstart', function(e) {
+      startY = e.touches[0].clientY;
+      dy = 0;
+      dragging = true;
+      card.style.transition = 'none';
+    }, { passive: true });
+    document.addEventListener('touchmove', function(e) {
+      if (!dragging) return;
+      dy = Math.max(0, e.touches[0].clientY - startY);
+      card.style.transform = 'translateY(' + dy + 'px)';
+    }, { passive: true });
+    document.addEventListener('touchend', function() {
+      if (!dragging) return;
+      dragging = false;
+      card.style.transition = '';
+      if (dy > 110) {
+        card.style.transform = '';
+        window.closeMobileCard();
+      } else {
+        card.style.transform = 'translateY(0)';
+      }
+    });
   }
 
   function openMobileCard(p) {
@@ -619,14 +652,28 @@
       if (imgWrap) imgWrap.style.display = 'none';
       if (fallback) { fallback.style.display = 'flex'; fallback.style.background = style.color; fallback.textContent = style.icon; }
     }
+    if (navigator.vibrate) navigator.vibrate(12);
     const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
     setTxt('mpcName', p.name);
     setTxt('mpcCat',  p.categoryLabel + (p.subcategory ? ' · ' + p.subcategory : ''));
     const addrParts = [p.district, p.address, p.city].filter(Boolean);
     setTxt('mpcAddr', addrParts.join(', '));
     setTxt('mpcDesc', p.shortDescription || '');
+    const ratingEl = document.getElementById('mpcRating');
+    if (ratingEl) ratingEl.innerHTML = p.rating
+      ? renderStars(p.rating) + ' <span class="mpc-rating-num">(' + p.rating + ')</span>'
+      : '';
     const dir = document.getElementById('mpcDirections');
     if (dir) dir.href = 'https://www.google.com/maps/search/' + encodeURIComponent(p.name + ' ' + (p.city || '') + ' Georgia');
+    const det = document.getElementById('mpcDetail');
+    if (det) {
+      if (p.source === 'businesses') {
+        det.href = 'business.html?id=' + encodeURIComponent(p.id);
+        det.style.display = '';
+      } else {
+        det.style.display = 'none';
+      }
+    }
     const gSection = document.getElementById('mpcGoogleSection');
     if (gSection) {
       gSection.innerHTML = '';
