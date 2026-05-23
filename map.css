@@ -54,10 +54,9 @@ body, html { height: 100%; overflow: hidden; }
       background: linear-gradient(135deg, #10b981, #0ea5e9);
       color: #fff; box-shadow: 0 2px 8px rgba(16,185,129,.4);
     }
-    /* Dark: brighten labels so street/place names are readable */
-    #map[data-map-style="dark"] .leaflet-tile-pane {
-      filter: brightness(1.35) contrast(0.92);
-    }
+    /* MapLibre overrides */
+    .maplibregl-ctrl-attrib, .maplibregl-ctrl-logo { opacity: 0.45 !important; font-size: 0.62rem !important; }
+    .maplibregl-ctrl-group { border-radius: 10px !important; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,.45) !important; }
     .gh-map-marker-wrap { background: transparent !important; border: 0 !important; overflow: visible !important; }
     .gh-map-emoji-marker {
       width: 44px; height: 44px; border-radius: 999px;
@@ -197,3 +196,43 @@ body, html { height: 100%; overflow: hidden; }
     .sug-text { display: flex; flex-direction: column; min-width: 0; }
     .sug-name { font-size: 0.83rem; font-weight: 700; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sug-cat { font-size: 0.71rem; color: #475569; }
+    /* CSS tooltip on marker hover */
+    .gh-map-tooltip {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(4,5,13,0.94);
+      border: 1px solid rgba(255,255,255,.15);
+      color: #f8fafc;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      padding: 4px 10px;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,.5);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 10;
+    }
+    .gh-map-marker-wrap:hover .gh-map-tooltip { opacity: 1; }
+    /* Rotation hint */
+    .rotation-hint {
+      position: absolute;
+      bottom: 72px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1001;
+      background: rgba(10,15,28,0.85);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 999px;
+      padding: 7px 16px;
+      font-size: 0.73rem;
+      color: #94a3b8;
+      white-space: nowrap;
+      backdrop-filter: blur(10px);
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 1.2s ease;
+    }
+    .rotation-hint.fade-out { opacity: 0; }

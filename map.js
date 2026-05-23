@@ -31,24 +31,22 @@
     default:       { color: '#6c757d', icon: '📍',  label: 'სხვა' }
   };
 
+  // OpenFreeMap vector tiles — includes building fills + house numbers at zoom 17+
   const TILE_LAYERS = {
     dark: {
-      url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      style: 'https://tiles.openfreemap.org/styles/dark',
       label: '🌑 Dark'
     },
     streets: {
-      url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+      style: 'https://tiles.openfreemap.org/styles/bright',
       label: '🗺️ Streets'
     }
   };
 
-  let map, clusterGroup, markers = [], allPlaces = [];
+  let map, superclusterInst, clusterMarkers = [], allPlaces = [];
   let currentFilter = '', currentSearch = '', currentSubFilter = '';
   let disabledCategories = new Set();
-  let activeMarker = null, activePlaceId = null;
-  let _tileLayer = null;
+  let activeMarkerEl = null, activePlaceId = null;
   const _googleDetailsCache = {};
   const _placeCatLookup = {};
   const PLACE_CATEGORY_ORDER = [
@@ -79,19 +77,14 @@
       .map(id => Object.assign({ id, subcategories: [] }, PLACE_MARKER_STYLES[id]));
   }
 
-  /* Categories used by at least one loaded place — drives sidebar chips.
-     Falls back to the full static list when no places are loaded yet. */
   function usedCategoryEntries() {
     if (!allPlaces.length) return categoryEntries();
     const usedIds = new Set();
     allPlaces.forEach(function(p) { if (p.categoryId) usedIds.add(p.categoryId); });
-    // Build lookup from categoryEntries() for icon/label/color
     const allEntries = categoryEntries();
     const entryMap = {};
     allEntries.forEach(function(c) { entryMap[c.id] = c; });
-    // Keep ordering from allEntries, only include used ids
     const result = allEntries.filter(function(c) { return usedIds.has(c.id); });
-    // Add any used ids missing from allEntries (old schema, keys in PLACE_MARKER_STYLES)
     usedIds.forEach(function(id) {
       if (!entryMap[id] && PLACE_MARKER_STYLES[id]) {
         result.push(Object.assign({ id, subcategories: [] }, PLACE_MARKER_STYLES[id]));
@@ -180,7 +173,6 @@
   function getSubcategoryIcon(place) {
     if (!place.subcategory) return '';
     const subVal = place.subcategory;
-    // Match by id (new schema) or by labelKa/labelEn (old text schema)
     function matchSub(subs) {
       return subs.find(s =>
         (typeof s === 'object')
@@ -227,39 +219,41 @@
     return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
   }
 
-  function buildPlaceMarkerIcon(place, isActive) {
+  function buildPlaceMarkerElement(place, isActive) {
     const style       = getPlaceMarkerStyle(place);
     const markerIcon  = place.icon || style.icon || '📍';
     const markerColor = style.color || '#22c55e';
     const glow        = hexToRgba(markerColor, 0.45);
-    const selectedClass = isActive ? ' is-selected' : '';
-    const boxShadow = isActive
+    const boxShadow   = isActive
       ? '0 0 0 5px rgba(255,255,255,.14),0 0 32px ' + hexToRgba(markerColor, 0.7)
       : '0 0 0 4px rgba(255,255,255,.08),0 10px 24px rgba(0,0,0,.35),0 0 20px ' + glow;
-    return L.divIcon({
-      className: 'gh-map-marker-wrap',
-      html: '<div class="gh-map-emoji-marker' + selectedClass + '" style="--marker-color:' + markerColor + ';box-shadow:' + boxShadow + '">'
-          + '<span class="gh-map-marker-emoji">' + markerIcon + '</span>'
-          + '</div>',
-      iconSize:    [44, 44],
-      iconAnchor:  [22, 22],
-      popupAnchor: [0, -26]
-    });
+    const wrap = document.createElement('div');
+    wrap.className = 'gh-map-marker-wrap';
+    const inner = document.createElement('div');
+    inner.className = 'gh-map-emoji-marker' + (isActive ? ' is-selected' : '');
+    inner.style.cssText = '--marker-color:' + markerColor + ';box-shadow:' + boxShadow;
+    const span = document.createElement('span');
+    span.className = 'gh-map-marker-emoji';
+    span.textContent = markerIcon;
+    inner.appendChild(span);
+    const tooltip = document.createElement('div');
+    tooltip.className = 'gh-map-tooltip';
+    tooltip.textContent = place.name;
+    wrap.appendChild(inner);
+    wrap.appendChild(tooltip);
+    return wrap;
   }
 
   /* ── Normalize Firestore doc ────────────────────── */
   function resolveCategoryId(catId, catText) {
     if (catId) return catId;
     if (!catText) return '';
-    // Old JSON: category field holds the PLACE_MARKER_STYLES key directly (e.g. "food", "nightlife")
     if (PLACE_MARKER_STYLES[catText]) return catText;
-    // Firestore categories: match by label
     const fsKey = Object.keys(_placeCatLookup).find(k =>
       _placeCatLookup[k].label === catText ||
       (catText.length > 3 && catText.includes(_placeCatLookup[k].label))
     );
     if (fsKey) return fsKey;
-    // Static PLACE_MARKER_STYLES: match by label or partial label
     const staticEntry = Object.entries(PLACE_MARKER_STYLES).find(([, v]) =>
       v.label === catText || (catText.length > 3 && catText.includes(v.label))
     );
@@ -271,7 +265,6 @@
     const lng = Number(data.lng ?? data.longitude ?? (data.location && data.location.lng));
     if (!isFinite(lat) || !isFinite(lng)) return null;
     const catText = data.category || data.type || '';
-    // Support both old schema (categoryId missing) and new schema
     const catId   = resolveCategoryId(data.categoryId || '', catText);
     const style   = PLACE_MARKER_STYLES[catId]
       || Object.values(PLACE_MARKER_STYLES).find(s => s.label === catText)
@@ -284,7 +277,6 @@
       address:          data.address || '',
       categoryId:       catId,
       category:         catText,
-      // Support subcategoryId (new) and subcategory (old/text)
       subcategory:      data.subcategoryId || data.subcategory || '',
       categoryLabel:    catText || style.label,
       shortDescription: data.shortDescription || data.description || '',
@@ -298,7 +290,6 @@
     };
   }
 
-  /* Strip a leading icon/emoji from a label so icon + label doesn't double-up */
   function stripLeadingIcon(icon, label) {
     const safeLabel = String(label || '').trim();
     const safeIcon  = String(icon  || '').trim();
@@ -308,7 +299,7 @@
     return safeLabel;
   }
 
-  /* ── Filter logic (chip + legend + search, all applied) */
+  /* ── Filter logic ───────────────────────────────── */
   function filtered() {
     return allPlaces.filter(p => {
       const catKey = p.categoryId || 'default';
@@ -325,30 +316,62 @@
 
   function renderStars(r) { return r ? '⭐'.repeat(Math.max(1, Math.min(5, Math.round(r)))) : ''; }
 
-  /* ── Cluster icon ───────────────────────────────── */
-  function createClusterIcon(cluster) {
-    const count = cluster.getChildCount();
-    const size  = count < 10 ? 38 : count < 50 ? 46 : 54;
-    return L.divIcon({
-      html: '<div class="gh-cluster-icon" style="width:' + size + 'px;height:' + size + 'px;font-size:' + (count > 99 ? '0.72rem' : '0.9rem') + '">' + count + '</div>',
-      className: 'gh-cluster-wrap',
-      iconSize: [size, size],
-      iconAnchor: [size / 2, size / 2],
+  /* ── Cluster rendering ──────────────────────────── */
+  function updateClusters() {
+    if (!map || !superclusterInst) return;
+    clusterMarkers.forEach(m => m.remove());
+    clusterMarkers = [];
+
+    const bounds = map.getBounds();
+    const zoom   = Math.floor(map.getZoom());
+    let clusters;
+    try {
+      clusters = superclusterInst.getClusters(
+        [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()],
+        zoom
+      );
+    } catch (e) { return; }
+
+    clusters.forEach(feature => {
+      const [lng, lat] = feature.geometry.coordinates;
+
+      if (feature.properties.cluster) {
+        const count = feature.properties.point_count;
+        const size  = count < 10 ? 38 : count < 50 ? 46 : 54;
+        const el = document.createElement('div');
+        el.className = 'gh-cluster-icon';
+        el.style.cssText = 'width:' + size + 'px;height:' + size + 'px;font-size:' + (count > 99 ? '0.72rem' : '0.9rem');
+        el.textContent = count;
+        const m = new maplibregl.Marker({ element: el, anchor: 'center' })
+          .setLngLat([lng, lat]).addTo(map);
+        el.addEventListener('click', () => {
+          try {
+            const z = superclusterInst.getClusterExpansionZoom(feature.properties.cluster_id);
+            map.flyTo({ center: [lng, lat], zoom: Math.min(z + 0.5, 20), duration: 500 });
+          } catch (e) {}
+        });
+        clusterMarkers.push(m);
+      } else {
+        const place = feature.properties.place;
+        const isActive = place.id === activePlaceId;
+        const el = buildPlaceMarkerElement(place, isActive);
+        if (isActive) activeMarkerEl = el;
+        const m = new maplibregl.Marker({ element: el, anchor: 'center' })
+          .setLngLat([lng, lat]).addTo(map);
+        el.querySelector('.gh-map-emoji-marker').addEventListener('click', () => focusPlace(place.id, el));
+        clusterMarkers.push(m);
+      }
     });
   }
 
   /* ── Map render ─────────────────────────────────── */
   function renderMap() {
-    if (clusterGroup) { map.removeLayer(clusterGroup); clusterGroup.clearLayers(); }
-    markers = [];
-
     const list = filtered();
 
-    // If active place was filtered out, clear selection and close panels
     if (activePlaceId && !list.find(p => p.id === activePlaceId)) {
-      activePlaceId = null; activeMarker = null;
+      activePlaceId = null; activeMarkerEl = null;
       const panel = document.getElementById('infoPanel'); if (panel) panel.classList.remove('open');
-      const card  = document.getElementById('mobileCard');  if (card)  card.classList.remove('open');
+      const card  = document.getElementById('mobileCard'); if (card)  card.classList.remove('open');
     }
 
     const count = document.getElementById('mapCount'); if (count) count.textContent = list.length;
@@ -369,55 +392,50 @@
       results.querySelectorAll('.map-result-card').forEach(card => card.addEventListener('click', () => focusPlace(card.dataset.id)));
     }
 
-    clusterGroup = L.markerClusterGroup({
-      showCoverageOnHover: false,
-      maxClusterRadius: 60,
-      disableClusteringAtZoom: 16,
-      spiderfyOnMaxZoom: true,
-      iconCreateFunction: createClusterIcon,
-      animate: true,
-    });
-
-    list.forEach(p => {
-      const isActive = p.id === activePlaceId;
-      const marker   = L.marker([p.lat, p.lng], { icon: buildPlaceMarkerIcon(p, isActive) });
-      marker.bindTooltip(p.name, { direction: 'top', offset: [0, -48], className: 'place-tooltip' });
-      marker._placeId = p.id;
-      marker._place   = p;
-      marker.on('click', () => focusPlace(p.id, marker));
-      clusterGroup.addLayer(marker);
-      markers.push(marker);
-      if (isActive) activeMarker = marker;
-    });
-
-    clusterGroup.addTo(map);
+    const features = list.map(p => ({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
+      properties: { place: p }
+    }));
+    superclusterInst = new Supercluster({ radius: 60, maxZoom: 15, minPoints: 2 });
+    superclusterInst.load(features);
+    updateClusters();
   }
 
   /* ── Active marker clear helper ─────────────────── */
   function clearActiveMarker() {
-    if (activeMarker) activeMarker.setIcon(buildPlaceMarkerIcon(activeMarker._place, false));
-    activeMarker = null; activePlaceId = null;
+    if (activeMarkerEl) {
+      const inner = activeMarkerEl.querySelector('.gh-map-emoji-marker');
+      if (inner) inner.classList.remove('is-selected');
+    }
+    activeMarkerEl = null; activePlaceId = null;
   }
 
   /* ── Focus place ────────────────────────────────── */
-  function focusPlace(id, clickedMarker) {
-    if (activeMarker) activeMarker.setIcon(buildPlaceMarkerIcon(activeMarker._place, false));
+  function focusPlace(id, clickedEl) {
+    if (activeMarkerEl) {
+      const inner = activeMarkerEl.querySelector('.gh-map-emoji-marker');
+      if (inner) inner.classList.remove('is-selected');
+    }
     activePlaceId = id;
-    activeMarker  = clickedMarker || markers.find(m => m._placeId === id) || null;
-    if (activeMarker) activeMarker.setIcon(buildPlaceMarkerIcon(activeMarker._place, true));
+    activeMarkerEl = clickedEl || null;
+    if (activeMarkerEl) {
+      const inner = activeMarkerEl.querySelector('.gh-map-emoji-marker');
+      if (inner) inner.classList.add('is-selected');
+    }
 
     const p = allPlaces.find(x => x.id === id); if (!p) return;
-    map.setView([p.lat, p.lng], 13, { animate: true });
+    map.flyTo({ center: [p.lng, p.lat], zoom: Math.max(map.getZoom(), 13), duration: 800 });
 
     if (window.innerWidth <= 768) {
       openMobileCard(p);
       return;
     }
 
-    const panel    = document.getElementById('infoPanel');
-    const img      = document.getElementById('panelImg');
-    const imgFb    = document.getElementById('panelImgFallback');
-    const pStyle   = getPlaceMarkerStyle(p);
+    const panel  = document.getElementById('infoPanel');
+    const img    = document.getElementById('panelImg');
+    const imgFb  = document.getElementById('panelImgFallback');
+    const pStyle = getPlaceMarkerStyle(p);
     if (img) {
       img._googleTried = false;
       img.onerror = function() {
@@ -660,10 +678,6 @@
     });
   }
 
-  function updateLegendState() {
-    buildLegend();
-  }
-
   /* ── Filter chips ───────────────────────────────── */
   function buildCategoryChips() {
     const wrap = document.getElementById('mapChips');
@@ -689,7 +703,7 @@
       buildLegend();
       renderMap();
     }));
-    const search = document.getElementById('mapSearchInput');
+    const search   = document.getElementById('mapSearchInput');
     const dropdown = document.getElementById('mapSearchDropdown');
     if (search && !search.dataset.mapSearchBound) {
       search.dataset.mapSearchBound = '1';
@@ -704,10 +718,9 @@
           (p.name + ' ' + p.categoryLabel + ' ' + p.city).toLowerCase().includes(q.toLowerCase())
         ).slice(0, 8);
         if (!matches.length) { closeDropdown(); return; }
-        const st = s => getPlaceMarkerStyle(s);
         dropdown.innerHTML = matches.map((p, i) =>
           '<div class="map-search-suggestion" data-idx="' + i + '" data-id="' + esc(p.id) + '">'
-          + '<span class="sug-icon">' + (p.icon || st(p).icon || '📍') + '</span>'
+          + '<span class="sug-icon">' + (p.icon || getPlaceMarkerStyle(p).icon || '📍') + '</span>'
           + '<span class="sug-text"><span class="sug-name">' + esc(p.name) + '</span>'
           + '<span class="sug-cat">' + esc(p.categoryLabel) + (p.city ? ' · ' + esc(p.city) : '') + '</span></span>'
           + '</div>'
@@ -770,12 +783,13 @@
   }
 
   function applyMapStyle(styleName) {
-    const cfg = TILE_LAYERS[styleName] || TILE_LAYERS.streets;
-    if (_tileLayer) map.removeLayer(_tileLayer);
-    _tileLayer = L.tileLayer(cfg.url, { attribution: cfg.label + ' · ' + cfg.attribution, subdomains: 'abcd', maxZoom: 20 });
-    _tileLayer.addTo(map);
+    const cfg = TILE_LAYERS[styleName] || TILE_LAYERS.dark;
+    // Remove HTML markers before style change (they'd be dangling otherwise)
+    clusterMarkers.forEach(m => m.remove());
+    clusterMarkers = [];
+    map.setStyle(cfg.style);
+    map.once('style.load', updateClusters);
     localStorage.setItem('gh_map_style', styleName);
-    // Mark map element so CSS can boost label brightness in dark mode
     const mapEl = document.getElementById('map');
     if (mapEl) mapEl.setAttribute('data-map-style', styleName);
     document.querySelectorAll('.map-style-btn').forEach(b => {
@@ -795,22 +809,70 @@
       btn.className = 'map-style-btn' + (key === current ? ' active' : '');
       btn.dataset.style = key;
       btn.textContent = cfg.label;
-      btn.title = cfg.label;
       btn.addEventListener('click', () => applyMapStyle(key));
       wrap.appendChild(btn);
     });
     container.appendChild(wrap);
   }
 
+  /* ── Rotation hint overlay ──────────────────────── */
+  function buildRotationHint() {
+    const container = document.querySelector('.map-container');
+    if (!container || document.getElementById('rotationHint')) return;
+    const hint = document.createElement('div');
+    hint.id = 'rotationHint';
+    hint.className = 'rotation-hint';
+    hint.innerHTML = '<span>🖱️ Right-drag: rotate &nbsp;|&nbsp; Ctrl+drag: tilt &nbsp;|&nbsp; Two-finger twist on mobile</span>';
+    container.appendChild(hint);
+    setTimeout(() => hint.classList.add('fade-out'), 5000);
+    setTimeout(() => hint.remove(), 6200);
+  }
+
   /* ── Init ───────────────────────────────────────── */
   function init() {
-    map = L.map('map', { center: [42.0, 43.5], zoom: 7, zoomControl: true });
-    map.fitBounds([[41.0, 40.0], [43.5, 46.7]], { padding: [40, 40] });
-    applyMapStyle(getMapStyle());
-    buildStyleToggle();
-    buildLegend(); buildCategoryChips(); buildMobileCard(); renderMap();
-    if (window.GeoFirebase) { loadPlaceCategoriesFromFirestore(); loadRealPlaces(); }
-    else window.addEventListener('GeoFirebaseReady', () => { loadPlaceCategoriesFromFirestore(); loadRealPlaces(); }, { once: true });
+    const currentStyle = getMapStyle();
+    map = new maplibregl.Map({
+      container:       'map',
+      style:           TILE_LAYERS[currentStyle].style,
+      center:          [43.5, 42.0],
+      zoom:            7,
+      maxPitch:        85,
+      pitchWithRotate: true,
+      attributionControl: false,
+    });
+
+    map.fitBounds([[40.0, 41.0], [46.7, 43.5]], { padding: 40, duration: 0 });
+
+    // Navigation control (zoom + compass + pitch visualizer)
+    map.addControl(new maplibregl.NavigationControl({
+      showCompass:    true,
+      showZoom:       true,
+      visualizePitch: true,
+    }), 'top-right');
+
+    map.on('load', () => {
+      buildStyleToggle();
+      buildLegend();
+      buildCategoryChips();
+      buildMobileCard();
+      buildRotationHint();
+      renderMap();
+
+      // Re-cluster on viewport change
+      map.on('moveend', updateClusters);
+      map.on('zoomend', updateClusters);
+
+      if (window.GeoFirebase) {
+        loadPlaceCategoriesFromFirestore();
+        loadRealPlaces();
+      } else {
+        window.addEventListener('GeoFirebaseReady', () => {
+          loadPlaceCategoriesFromFirestore();
+          loadRealPlaces();
+        }, { once: true });
+      }
+    });
   }
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
