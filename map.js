@@ -915,17 +915,19 @@
       sidebar.style.transition = 'none';
     }, { passive: true });
 
-    document.addEventListener('touchmove', e => {
+    // Attach to pull (not document) so we can preventDefault and stop sidebar scroll
+    pull.addEventListener('touchmove', e => {
       if (!dragging) return;
+      e.preventDefault();
       dy = e.touches[0].clientY - startY;
       const h = sidebar.offsetHeight;
       const peekOffset = 220;
       const base = wasExpanded ? 0 : (h - peekOffset);
       const clamped = Math.max(0, Math.min(h - peekOffset, base + dy));
       sidebar.style.transform = 'translateY(' + clamped + 'px)';
-    }, { passive: true });
+    }, { passive: false });
 
-    document.addEventListener('touchend', () => {
+    pull.addEventListener('touchend', () => {
       if (!dragging) return;
       dragging = false;
       sidebar.style.transition = '';
@@ -940,7 +942,8 @@
 
     pull.addEventListener('click', () => sidebar.classList.toggle('sb-expanded'));
 
-    document.getElementById('map').addEventListener('click', () => {
+    const mapEl = document.getElementById('map');
+    if (mapEl) mapEl.addEventListener('click', () => {
       if (sidebar.classList.contains('sb-expanded')) sidebar.classList.remove('sb-expanded');
     });
   }

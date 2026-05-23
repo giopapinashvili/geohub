@@ -2273,6 +2273,7 @@ textarea {
   gap: 4px;
   padding: 12px 0 8px;
   cursor: grab;
+  touch-action: none;
   flex-shrink: 0;
   background: linear-gradient(180deg, #0b1120 0%, #0d1526 100%);
   position: sticky;
@@ -3388,6 +3389,7 @@ a, button, .btn, .card, .listing-card {
   }
   .map-page-layout {
     flex-direction: row;
+    padding-top: 56px;
   }
   .map-sidebar {
     position: fixed !important;
@@ -3416,7 +3418,7 @@ a, button, .btn, .card, .listing-card {
   }
   .map-container {
     width: 100%;
-    height: calc(100vh - var(--navbar-height, 68px));
+    height: calc(100vh - 56px);
     flex: none;
   }
   .dashboard-page {
