@@ -6366,6 +6366,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(PAGE==='search' || PATH==='search.html') return renderSearch();
     if(PAGE==='messages' || PATH==='messages.html'){ injectShellNav('messages'); return; }
     if(PAGE==='profile' || PATH==='profile.html'){ injectShellNav('profile'); return; } // profile.js renders profile content
+    if(PAGE==='videos'  || PATH==='videos.html')  { injectShellNav('videos');  return; }
+    if(PAGE==='watch'   || PATH==='watch.html')   { injectShellNav('watch');   return; }
+    if(PAGE==='reels'   || PATH==='reels.html')   { injectShellNav('reels');   return; }
+    if(PAGE==='map'     || PATH==='map.html')     { injectShellNav('map');     return; }
+    if(PAGE==='places'  || PATH==='places.html')  { injectShellNav('places');  return; }
+    if(PAGE==='admin-videos' || PATH==='admin-videos.html') { injectShellNav('admin-videos'); return; }
     return renderComingSoon();
   }
 
