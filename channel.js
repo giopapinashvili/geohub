@@ -156,6 +156,8 @@
     fetchVideos(ch._id).then(function(all){
       var regular = all.filter(function(v){ return !v.isShort; });
       var shorts  = all.filter(function(v){ return v.isShort; });
+      var countEl = document.getElementById('chVidCount');
+      if(countEl) countEl.textContent = fmtNum(all.length) + ' ვიდეო';
       var html = '';
 
       /* Featured video */
@@ -232,6 +234,8 @@
   function renderVideosTab(ch, el){
     fetchVideos(ch._id).then(function(all){
       var vids = all.filter(function(v){ return !v.isShort; });
+      var countEl = document.getElementById('chVidCount');
+      if(countEl) countEl.textContent = fmtNum(all.length) + ' ვიდეო';
       if(!vids.length){ el.innerHTML='<div class="vid-empty"><i class="fas fa-film"></i><h3>ვიდეო არ არის</h3></div>'; return; }
       el.innerHTML='<div class="vid-grid" id="chVideoGrid">'+vids.map(function(v){ return renderCard(v,'grid'); }).join('')+'</div>';
       if(_manageMode) injectDelBtns(ch);
@@ -409,7 +413,7 @@
     var cls = isShortCard ? 'vid-short-card' : (mode==='tv'?'vid-tv-card':'vid-card');
     return '<a class="'+cls+'" href="watch.html?v='+esc(v.id)+'">' +
       '<div class="'+(isShortCard?'vid-short-thumb':'vid-thumb-wrap')+'">' +
-        '<img src="'+esc(thumb)+'" alt="" loading="lazy">' +
+        '<img src="'+esc(thumb)+'" alt="" loading="lazy" onerror="if(this.src.indexOf(\'maxresdefault\')>-1)this.src=this.src.replace(\'maxresdefault\',\'hqdefault\')">' +
         '<div class="vid-play-overlay"><div class="vid-play-btn"><i class="fas fa-play"></i></div></div>' +
       '</div>' +
       (isShortCard
