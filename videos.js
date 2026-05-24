@@ -1448,6 +1448,10 @@
           '</div>' +
         '</div>' +
         '<div id="vccPreview"></div>' +
+        '<div class="vid-form-group" id="vccImportRow" style="display:none;align-items:center;gap:10px">' +
+          '<input type="checkbox" id="vccImportVideos" style="width:16px;height:16px;accent-color:var(--green);cursor:pointer" checked>' +
+          '<label for="vccImportVideos" style="font-size:.85rem;color:var(--text-secondary);cursor:pointer"><i class="fas fa-download" style="color:var(--green);margin-right:4px"></i>არხის ყველა ვიდეო ავტომატურად გადმოვიდეს</label>' +
+        '</div>' +
         '<div class="vid-modal-footer">' +
           '<button class="vid-btn ghost" id="vccCancel"><i class="fas fa-times"></i> გაუქმება</button>' +
           '<button class="vid-btn primary" id="vccSubmit" disabled><i class="fas fa-plus"></i> შექმნა</button>' +
@@ -1492,6 +1496,9 @@
               '<div><div class="vid-ch-preview-name">' + esc(sn.title) + '</div>' +
               (sn.customUrl ? '<div class="vid-ch-preview-sub">' + esc(sn.customUrl) + '</div>' : '') + '</div>' +
             '</div>';
+          /* show import checkbox when YouTube URL is filled */
+          var importRow = document.getElementById('vccImportRow');
+          if (importRow) importRow.style.display = 'flex';
           checkReady();
         })
         .catch(function (e) { toast(e.message || 'შეცდომა', 'error'); })
@@ -1505,28 +1512,93 @@
       submitEl.disabled = true;
       submitEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> იქმნება...';
       if (!fs() || !db()) { toast('Firebase unavailable', 'error'); submitEl.disabled = false; return; }
+      var ytUrl = document.getElementById('vccYtUrl').value.trim();
+      var doImport = !!(document.getElementById('vccImportVideos') || {}).checked && ytUrl;
       fs().addDoc(fs().collection(db(), 'channels'), {
-        name:            name,
-        description:     document.getElementById('vccDesc').value.trim(),
-        avatar:          document.getElementById('vccAvatar').value.trim(),
-        banner:          '',
-        customUrl:       '',
-        youtubeUrl:      document.getElementById('vccYtUrl').value.trim(),
+        name:             name,
+        description:      document.getElementById('vccDesc').value.trim(),
+        avatar:           document.getElementById('vccAvatar').value.trim(),
+        banner:           '',
+        customUrl:        '',
+        youtubeUrl:       ytUrl,
         youtubeChannelId: '',
-        subscriberCount: 0,
-        videoCount:      0,
-        ownerId:         u.uid,
-        createdAt:       fs().serverTimestamp()
+        subscriberCount:  0,
+        videoCount:       0,
+        ownerId:          u.uid,
+        createdAt:        fs().serverTimestamp()
       }).then(function (ref) {
         toast('არხი შეიქმნა! ✓');
         ov.remove();
-        window.location.href = 'channel.html?id=' + ref.id;
+        if (doImport) {
+          /* import all videos then redirect */
+          _importChannelVideos(ytUrl, ref.id, u, function () {
+            window.location.href = 'channel.html?id=' + ref.id;
+          });
+        } else {
+          window.location.href = 'channel.html?id=' + ref.id;
+        }
       }).catch(function (e) {
         toast('შეცდომა: ' + e.message, 'error');
         submitEl.disabled = false;
         submitEl.innerHTML = '<i class="fas fa-plus"></i> შექმნა';
       });
     };
+  }
+
+  /* ── Helper: import all videos from YT channel URL into a GeoHub channel ── */
+  function _importChannelVideos(ytUrl, geoChannelId, u, onDone) {
+    var YT_KEY = 'AIzaSyAglbv5RL5LqRturGbqHaNrh8AH8KlLQ0I';
+    function ytApi(path) {
+      return fetch('https://www.googleapis.com/youtube/v3/' + path + '&key=' + YT_KEY).then(function (r) { return r.json(); });
+    }
+    function resolveId(url) {
+      var m = url.match(/youtube\.com\/channel\/(UC[\w-]{20,})/);
+      if (m) return Promise.resolve(m[1]);
+      m = url.match(/youtube\.com\/@([\w.-]+)/);
+      if (m) return ytApi('channels?part=id&forHandle=' + encodeURIComponent(m[1])).then(function (d) { return d.items && d.items[0] && d.items[0].id; });
+      return Promise.resolve(null);
+    }
+    resolveId(ytUrl).then(function (cid) {
+      if (!cid) { onDone(); return; }
+      return ytApi('channels?part=contentDetails,snippet&id=' + cid).then(function (d) {
+        if (!d.items || !d.items[0]) { onDone(); return; }
+        var item = d.items[0];
+        var uploadsId = item.contentDetails.relatedPlaylists.uploads;
+        var chName = item.snippet.title;
+        var chUrl  = 'https://www.youtube.com/channel/' + cid;
+        var videos = [];
+        function fetchPage(pt) {
+          var path = 'playlistItems?part=snippet&playlistId=' + uploadsId + '&maxResults=50' + (pt ? '&pageToken=' + pt : '');
+          return ytApi(path).then(function (d2) {
+            (d2.items || []).forEach(function (item2) {
+              var sn = item2.snippet;
+              var vid = sn.resourceId && sn.resourceId.videoId;
+              if (!vid || sn.title === 'Private video' || sn.title === 'Deleted video') return;
+              videos.push({ youtubeId: vid, title: sn.title || '', channelName: chName, channelUrl: chUrl });
+            });
+            if (d2.nextPageToken) return fetchPage(d2.nextPageToken);
+          });
+        }
+        return fetchPage(null).then(function () {
+          var done = 0; var errors = 0;
+          function next() {
+            if (!videos.length) {
+              if (fs() && db()) fs().updateDoc(fs().doc(db(), 'channels', geoChannelId), { videoCount: fs().increment(done) }).catch(function(){});
+              toast(done + ' ვიდეო დაემატა ✓'); onDone(); return;
+            }
+            var v = videos.shift();
+            saveVideo({ youtubeId: v.youtubeId, youtubeUrl: 'https://www.youtube.com/watch?v=' + v.youtubeId,
+              title: v.title, thumbnail: ytMaxThumb(v.youtubeId), channelId: geoChannelId,
+              channelName: v.channelName, channelUrl: v.channelUrl,
+              authorId: u.uid, authorName: u.displayName || 'GeoHub User', authorAvatar: u.photoURL || '',
+              category: '', city: '', description: '', isShort: false, tags: [],
+              placeId: null, placeName: null, businessId: null, businessName: null
+            }, function (err) { if (err) errors++; else done++; next(); });
+          }
+          next();
+        });
+      });
+    }).catch(function () { onDone(); });
   }
 
   /* ── Add Video Modal ──────────────────────────────────── */
@@ -1754,7 +1826,7 @@
                 title:       sn.title || '',
                 channelName: info.name,
                 channelUrl:  info.youtubeUrl,
-                thumbnail:   (sn.thumbnails && (sn.thumbnails.high || sn.thumbnails.medium || sn.thumbnails.default) || {}).url || ytThumb(vid)
+                thumbnail:   ytMaxThumb(vid)
               });
             });
             if (res) res.innerHTML = '<div class="vid-ch-loading"><i class="fas fa-spinner fa-spin"></i> ' + videos.length + ' ვიდეო ჩაიტვირთა...</div>';
