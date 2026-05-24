@@ -1786,3 +1786,100 @@ body.watch-cinematic .related-thumb {
   text-transform: uppercase;
   letter-spacing: .04em;
 }
+
+/* ── Phase 9: Card footer + menu button ─────────────────── */
+.vid-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+.vid-card-footer .vid-card-stats {
+  flex: 1;
+  min-width: 0;
+}
+.vid-card-menu-btn {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  font-size: .78rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .15s, background .15s, color .15s;
+}
+.vid-card:hover .vid-card-menu-btn { opacity: 1; }
+.vid-card-menu-btn:hover { background: rgba(255,255,255,.09); color: var(--text-primary, #f1f5f9); }
+
+/* ── Phase 9: Card context menu ─────────────────────────── */
+.vid-card-context-menu {
+  position: absolute;
+  z-index: 2600;
+  background: var(--gh-card, #1e2535);
+  border: 1px solid var(--gh-border, rgba(255,255,255,.12));
+  border-radius: 10px;
+  padding: 5px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.55);
+  min-width: 160px;
+  animation: vidMenuIn .12s ease;
+}
+.vid-card-ctx-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 11px;
+  border-radius: 7px;
+  font-size: .83rem;
+  color: var(--gh-text, #f1f5f9);
+  cursor: pointer;
+  user-select: none;
+  transition: background .1s;
+}
+.vid-card-ctx-item:hover { background: rgba(255,255,255,.07); }
+.vid-card-ctx-item i { width: 14px; text-align: center; font-size: .82rem; color: var(--text-muted, #94a3b8); }
+.vid-card-ctx-item.danger { color: #ef4444; }
+.vid-card-ctx-item.danger i { color: #ef4444; }
+
+/* ── Phase 9: Report modal reasons ──────────────────────── */
+.vid-report-reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.vid-report-reason {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: .85rem;
+  color: var(--text-secondary, #cbd5e1);
+  cursor: pointer;
+  transition: background .12s;
+  user-select: none;
+}
+.vid-report-reason:hover { background: rgba(255,255,255,.05); }
+.vid-report-reason input[type="radio"] { accent-color: #ef4444; cursor: pointer; }
+
+/* ── Phase 9: Comment delete button ─────────────────────── */
+.watch-comment-del {
+  background: none;
+  border: none;
+  color: var(--text-muted, #94a3b8);
+  font-size: .72rem;
+  cursor: pointer;
+  padding: 0 4px;
+  margin-left: 4px;
+  opacity: 0;
+  transition: color .15s, opacity .15s;
+  vertical-align: middle;
+}
+.watch-comment:hover .watch-comment-del { opacity: 1; }
+.watch-comment-del:hover { color: #ef4444; }
+.watch-comment-del:disabled { opacity: .4; cursor: default; }

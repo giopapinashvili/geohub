@@ -122,6 +122,8 @@
         '<button class="reel-action reel-comment-btn" data-vid-id="' + v.id + '" data-idx="' + idx + '" title="Comments"><i class="fas fa-comment-dots"></i><span class="reel-comment-cnt">' + fmtNum(v.commentCount) + '</span></button>' +
         '<button class="reel-action reel-share-btn" data-vid-id="' + v.id + '" data-title="' + esc(v.title || '') + '" title="Share"><i class="fas fa-share-nodes"></i><span>Share</span></button>' +
         '<button class="reel-action reel-save-btn" data-save-reel="' + esc(v.id) + '" title="Save"><i class="far fa-bookmark"></i><span>Save</span></button>' +
+        '<button class="reel-action reel-ni-btn" data-ni-reel="' + esc(v.id) + '" title="Not interested"><i class="fas fa-ban"></i><span>Skip</span></button>' +
+        '<button class="reel-action reel-report-btn" data-report-reel="' + esc(v.id) + '" title="Report"><i class="fas fa-flag"></i><span>Report</span></button>' +
         '<a class="reel-action" href="watch.html?v=' + v.id + '" title="Watch full"><i class="fas fa-expand"></i><span>Watch</span></a>' +
       '</div>' +
       /* Bottom info */
@@ -421,6 +423,39 @@
           if (ico) ico.className = nowSaved ? 'fas fa-bookmark' : 'far fa-bookmark';
           toast(nowSaved ? 'შეინახა!' : 'შენახვიდან წაიშალა');
         });
+        return;
+      }
+
+      /* Not interested button */
+      var niBtn = e.target.closest('.reel-ni-btn[data-ni-reel]');
+      if (niBtn) {
+        e.stopPropagation();
+        var niId = niBtn.dataset.niReel;
+        var gvNi = window.GeoVideos;
+        if (gvNi && gvNi.openReportModal === undefined) {} /* ensure module loaded */
+        try { localStorage.setItem('gh_not_interested', JSON.stringify((function(){ try { var a=JSON.parse(localStorage.getItem('gh_not_interested')||'[]'); if(a.indexOf(niId)===-1) a.push(niId); if(a.length>200) a=a.slice(-200); return a; } catch(e){ return [niId]; } }()))); } catch(e){}
+        var niCard = niBtn.closest('.reel-card');
+        if (niCard) {
+          niCard.style.transition = 'opacity .22s, transform .22s';
+          niCard.style.opacity = '0';
+          niCard.style.transform = 'scale(.95)';
+          setTimeout(function () { if (niCard.parentNode) niCard.parentNode.removeChild(niCard); }, 230);
+        }
+        toast('ამ Reel-ს აღარ ნახავ');
+        return;
+      }
+
+      /* Report button */
+      var reportBtn = e.target.closest('.reel-report-btn[data-report-reel]');
+      if (reportBtn) {
+        e.stopPropagation();
+        var repId = reportBtn.dataset.reportReel;
+        var gvRep = window.GeoVideos;
+        if (gvRep && gvRep.openReportModal) {
+          var repVid = null;
+          for (var ri = 0; ri < state.reels.length; ri++) { if (state.reels[ri].id === repId) { repVid = state.reels[ri]; break; } }
+          gvRep.openReportModal(repId, repVid || { id: repId });
+        }
         return;
       }
 

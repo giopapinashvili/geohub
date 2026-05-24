@@ -161,14 +161,18 @@
   /* ── Load videos feed ─────────────────────────────────── */
   function loadVideos(opts, callback) {
     if (!fs() || !db()) { callback([]); return; }
-    var constraints = [fs().where('status', '==', 'active'), fs().orderBy('createdAt', 'desc'), fs().limit(60)];
+    /* No status filter in query so legacy docs (no status field) still show.
+       Hidden/removed filtered client-side. */
+    var constraints = [fs().orderBy('createdAt', 'desc'), fs().limit(60)];
     if (opts && opts.category && opts.category !== 'all') {
-      constraints = [fs().where('status', '==', 'active'), fs().where('category', '==', opts.category), fs().orderBy('createdAt', 'desc'), fs().limit(60)];
+      constraints = [fs().where('category', '==', opts.category), fs().orderBy('createdAt', 'desc'), fs().limit(60)];
     }
     var q = fs().query.apply(null, [videosCol()].concat(constraints));
     return fs().onSnapshot(q, function (snap) {
       var vids = [];
       snap.forEach(function (d) { vids.push(Object.assign({ id: d.id }, d.data())); });
+      /* Allow: no status (legacy) or active. Exclude: hidden, removed. */
+      vids = vids.filter(function (v) { return v.status !== 'hidden' && v.status !== 'removed'; });
       callback(vids);
     }, function () { callback([]); });
   }
@@ -228,10 +232,13 @@
           (v.city ? '<span class="vid-card-city"><i class="fas fa-location-dot"></i>' + esc(v.city) + '</span>' : '') +
         '</div>' +
         (locBadges ? '<div class="vid-loc-badges">' + locBadges + '</div>' : '') +
-        '<div class="vid-card-stats">' +
-          '<span class="vid-card-stat"><i class="fas fa-eye"></i>' + fmtNum(v.viewCount) + '</span>' +
-          '<span class="vid-card-stat"><i class="fas fa-heart"></i>' + fmtNum(v.likeCount) + '</span>' +
-          '<span class="vid-card-stat"><i class="fas fa-clock"></i>' + timeAgo(v.createdAt) + '</span>' +
+        '<div class="vid-card-footer">' +
+          '<div class="vid-card-stats">' +
+            '<span class="vid-card-stat"><i class="fas fa-eye"></i>' + fmtNum(v.viewCount) + '</span>' +
+            '<span class="vid-card-stat"><i class="fas fa-heart"></i>' + fmtNum(v.likeCount) + '</span>' +
+            '<span class="vid-card-stat"><i class="fas fa-clock"></i>' + timeAgo(v.createdAt) + '</span>' +
+          '</div>' +
+          '<button class="vid-card-menu-btn" data-vid-menu="' + esc(v.id) + '" title="More options" onclick="event.preventDefault();event.stopPropagation()"><i class="fas fa-ellipsis-vertical"></i></button>' +
         '</div>' +
         (v.authorId ? '<a class="vid-creator-link" href="profile.html?id=' + esc(v.authorId) + '" onclick="event.stopPropagation()">' +
           '<div class="vid-creator-av">' + (v.authorAvatar ? '<img src="' + esc(v.authorAvatar) + '" alt="">' : '<span>' + (v.authorName || 'U').charAt(0) + '</span>') + '</div>' +
@@ -833,6 +840,149 @@
     }, 0);
   }
 
+  /* ── Phase 9: Report Video ───────────────────────────────── */
+  function reportVideo(videoId, videoData, reason, note, callback) {
+    var u = authUser();
+    if (!u || !fs() || !db()) { callback && callback('error'); return; }
+    var docId = u.uid + '_' + videoId;
+    var ref = fs().doc(db(), 'videoReports', docId);
+    fs().getDoc(ref).then(function (snap) {
+      if (snap.exists()) { callback && callback('already'); return; }
+      return fs().setDoc(ref, {
+        videoId: videoId,
+        videoTitle: videoData.title || '',
+        videoAuthorId: videoData.authorId || '',
+        videoAuthorName: videoData.authorName || '',
+        reporterUid: u.uid,
+        reporterName: u.displayName || 'GeoHub User',
+        reason: reason,
+        note: note || '',
+        status: 'pending',
+        createdAt: fs().serverTimestamp()
+      }).then(function () { callback && callback(null); });
+    }).catch(function () { callback && callback('error'); });
+  }
+
+  function openReportModal(videoId, videoData) {
+    var u = authUser();
+    if (!u) { toast('Report-ისთვის გაიარე ავტორიზაცია', 'error'); return; }
+    if (document.getElementById('vidReportModal')) return;
+
+    var REASONS = [
+      { val: 'spam',         label: 'Spam' },
+      { val: 'inappropriate',label: 'Inappropriate content' },
+      { val: 'misleading',   label: 'Misleading / fake' },
+      { val: 'copyright',    label: 'Copyright violation' },
+      { val: 'other',        label: 'Other' }
+    ];
+
+    var ov = document.createElement('div');
+    ov.className = 'vid-modal-overlay';
+    ov.id = 'vidReportModal';
+    ov.innerHTML =
+      '<div class="vid-modal" style="max-width:400px">' +
+        '<h2 style="color:#ef4444"><i class="fas fa-flag"></i> Report Video<button class="vid-modal-close" id="vidRepClose"><i class="fas fa-times"></i></button></h2>' +
+        '<p style="font-size:.83rem;color:var(--text-muted);margin:0 0 12px">' + esc(videoData.title || 'Video') + '</p>' +
+        '<div class="vid-report-reasons">' +
+          REASONS.map(function (r) {
+            return '<label class="vid-report-reason"><input type="radio" name="vidRepReason" value="' + r.val + '"> ' + r.label + '</label>';
+          }).join('') +
+        '</div>' +
+        '<textarea id="vidRepNote" class="vid-form-textarea" style="margin-top:10px;height:56px" placeholder="დამატებითი ინფო (არასავალდებულო)..."></textarea>' +
+        '<div class="vid-modal-footer">' +
+          '<button class="vid-btn ghost" id="vidRepCancel"><i class="fas fa-times"></i> გაუქმება</button>' +
+          '<button class="vid-btn primary" id="vidRepSubmit" style="background:#ef4444;border-color:#ef4444"><i class="fas fa-flag"></i> გაგზავნა</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(ov);
+
+    document.getElementById('vidRepClose').onclick = function () { ov.remove(); };
+    document.getElementById('vidRepCancel').onclick = function () { ov.remove(); };
+    ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
+
+    document.getElementById('vidRepSubmit').addEventListener('click', function () {
+      var checked = ov.querySelector('input[name="vidRepReason"]:checked');
+      if (!checked) { toast('მიზეზი აირჩიე', 'error'); return; }
+      var btn = document.getElementById('vidRepSubmit');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+      var note = (document.getElementById('vidRepNote') || {}).value || '';
+      reportVideo(videoId, videoData, checked.value, note.trim(), function (err) {
+        btn.disabled = false;
+        if (err === 'already') { toast('ეს ვიდეო უკვე გაქვს reported', 'error'); ov.remove(); }
+        else if (err) { toast('შეცდომა — სცადე თავიდან', 'error'); btn.innerHTML = '<i class="fas fa-flag"></i> გაგზავნა'; }
+        else { toast('Report გაიგზავნა. მადლობა! 🙏'); ov.remove(); }
+      });
+    });
+  }
+
+  /* ── Phase 9: Not Interested ─────────────────────────────── */
+  var NI_KEY = 'gh_not_interested';
+
+  function addNotInterested(videoId) {
+    try {
+      var list = getNotInterested();
+      if (list.indexOf(videoId) === -1) list.push(videoId);
+      if (list.length > 200) list = list.slice(-200);
+      localStorage.setItem(NI_KEY, JSON.stringify(list));
+    } catch (e) {}
+  }
+
+  function getNotInterested() {
+    try { return JSON.parse(localStorage.getItem(NI_KEY) || '[]'); } catch (e) { return []; }
+  }
+
+  /* ── Phase 9: Delete comment ─────────────────────────────── */
+  function deleteVideoComment(videoId, commentId, commentAuthorId, videoAuthorId, callback) {
+    var u = authUser();
+    if (!u || !fs() || !db()) { callback && callback('auth'); return; }
+    if (u.uid !== commentAuthorId && u.uid !== videoAuthorId) { callback && callback('perm'); return; }
+    fs().deleteDoc(fs().doc(db(), 'videos', videoId, 'comments', commentId))
+      .then(function () {
+        fs().updateDoc(fs().doc(db(), 'videos', videoId), { commentCount: fs().increment(-1) }).catch(function () {});
+        callback && callback(null);
+      })
+      .catch(function () { callback && callback('error'); });
+  }
+
+  /* ── Phase 9: Card context menu ──────────────────────────── */
+  function openCardContextMenu(videoId, videoData, anchorEl) {
+    var existing = document.getElementById('vidCtxMenu');
+    if (existing) { existing.remove(); return; }
+    var menu = document.createElement('div');
+    menu.className = 'vid-card-context-menu';
+    menu.id = 'vidCtxMenu';
+    menu.innerHTML =
+      '<div class="vid-card-ctx-item" id="vctx-ni"><i class="fas fa-ban"></i>Not interested</div>' +
+      '<div class="vid-card-ctx-item danger" id="vctx-rep"><i class="fas fa-flag"></i>Report</div>';
+    var rect = anchorEl.getBoundingClientRect();
+    menu.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+    menu.style.left = Math.max(8, rect.right + window.scrollX - 170) + 'px';
+    document.body.appendChild(menu);
+
+    menu.querySelector('#vctx-ni').addEventListener('click', function () {
+      addNotInterested(videoId);
+      var card = document.querySelector('[data-vid-id="' + videoId + '"]');
+      if (card) {
+        card.style.transition = 'opacity .25s, transform .25s';
+        card.style.opacity = '0';
+        card.style.transform = 'scale(.95)';
+        setTimeout(function () { if (card.parentNode) card.parentNode.removeChild(card); }, 260);
+      }
+      toast('ამ ვიდეოს აღარ ნახავ');
+      menu.remove();
+    });
+    menu.querySelector('#vctx-rep').addEventListener('click', function () {
+      openReportModal(videoId, videoData);
+      menu.remove();
+    });
+    setTimeout(function () {
+      document.addEventListener('click', function rmCtx(e) {
+        if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', rmCtx); }
+      });
+    }, 0);
+  }
+
   /* ── Phase 8: Live Activity Feed ────────────────────────── */
   var _actTimer = null;
   var _actIdx = 0;
@@ -1098,7 +1248,8 @@
   function renderGrid() {
     var grid = document.getElementById('vidGrid');
     if (!grid) return;
-    var vids = applySort(applySearch(applyCity(state.videos)));
+    var ni = getNotInterested();
+    var vids = applySort(applySearch(applyCity(state.videos))).filter(function (v) { return ni.indexOf(v.id) === -1; });
     if (!vids.length) {
       grid.innerHTML = '<div class="vid-empty"><i class="fas fa-film"></i><h3>ვიდეო არ მოიძებნა</h3><p>სხვა ფილტრი სცადე ან დაამატე ახალი ვიდეო</p></div>';
       return;
@@ -1110,7 +1261,8 @@
     var strip = document.getElementById('vidShortsStrip');
     var section = document.getElementById('vidShortsSection');
     if (!strip) return;
-    var shorts = applyCity(state.shorts);
+    var ni = getNotInterested();
+    var shorts = applyCity(state.shorts).filter(function (v) { return ni.indexOf(v.id) === -1; });
     if (!shorts.length) {
       if (section) section.style.display = 'none';
       return;
@@ -1408,6 +1560,9 @@
 
     loadVideoById(docId, function (video) {
       if (!video) { showWatchError('ვიდეო წაშლილია ან არ არსებობს'); return; }
+      if (video.status === 'hidden' || video.status === 'removed') {
+        showWatchError('ეს ვიდეო აღარ არის ხელმისაწვდომი. 🚫'); return;
+      }
       addToHistory(video);
       renderWatchPage(video);
       try {
@@ -1474,10 +1629,13 @@
         '<a href="videos.html" class="watch-action-btn ghost">' +
           '<i class="fas fa-arrow-left"></i>ვიდეოები</a>' +
         (v.placeId ? '<a href="map.html?mode=videos&place=' + esc(v.placeId) + '" class="watch-action-btn ghost">' +
-          '<i class="fas fa-map"></i>Map</a>' : '');
+          '<i class="fas fa-map"></i>Map</a>' : '') +
+        '<button class="watch-action-btn ghost" id="watchReportBtn" style="color:#ef4444"><i class="fas fa-flag"></i>Report</button>';
       bindWatchLike(v);
       bindWatchSave(v);
       bindWatchShare(v);
+      var repBtn = document.getElementById('watchReportBtn');
+      if (repBtn) repBtn.addEventListener('click', function () { openReportModal(v.id, v); });
     }
 
     initWatchReactions(v);
@@ -1587,6 +1745,7 @@
     var inputEl = document.getElementById('watchCommentInput');
     var submitEl = document.getElementById('watchCommentSubmit');
 
+    var u = authUser();
     var unsub = listenVideoComments(v.id, function (comments) {
       if (countEl) countEl.textContent = comments.length;
       if (!listEl) return;
@@ -1598,14 +1757,30 @@
         var av = c.authorAvatar ?
           '<img src="' + esc(c.authorAvatar) + '" alt="">' :
           '<span style="font-size:.7rem;font-weight:700">' + (c.authorName || 'U').charAt(0) + '</span>';
-        return '<div class="watch-comment">' +
+        var canDel = u && (u.uid === c.authorId || u.uid === v.authorId);
+        return '<div class="watch-comment" data-cid="' + esc(c.id) + '">' +
           '<div class="watch-comment-av">' + av + '</div>' +
           '<div class="watch-comment-body">' +
-            '<div class="watch-comment-name">' + esc(c.authorName || 'GeoHub User') + ' <span class="watch-comment-time">' + timeAgo(c.createdAt) + '</span></div>' +
+            '<div class="watch-comment-name">' + esc(c.authorName || 'GeoHub User') + ' <span class="watch-comment-time">' + timeAgo(c.createdAt) + '</span>' +
+              (canDel ? '<button class="watch-comment-del" data-cid="' + esc(c.id) + '" data-cauth="' + esc(c.authorId) + '" title="Delete"><i class="fas fa-trash-can"></i></button>' : '') +
+            '</div>' +
             '<div class="watch-comment-text">' + esc(c.text) + '</div>' +
           '</div>' +
         '</div>';
       }).join('');
+
+      listEl.addEventListener('click', function (e) {
+        var delBtn = e.target.closest('.watch-comment-del');
+        if (!delBtn) return;
+        var cid = delBtn.dataset.cid;
+        var cauth = delBtn.dataset.cauth;
+        delBtn.disabled = true;
+        deleteVideoComment(v.id, cid, cauth, v.authorId, function (err) {
+          if (err === 'perm') { toast('უფლება არ გაქვს', 'error'); delBtn.disabled = false; }
+          else if (err) { toast('შეცდომა', 'error'); delBtn.disabled = false; }
+          else { toast('კომენტარი წაიშალა'); }
+        });
+      }, { once: true });
     });
 
     if (submitEl && inputEl) {
@@ -1649,6 +1824,19 @@
     }
     if (document.getElementById('vidPage')) initVideosPage();
     if (document.getElementById('watchPage')) initWatchPage();
+
+    /* Phase 9: global card menu-button delegation */
+    document.addEventListener('click', function (e) {
+      var menuBtn = e.target.closest('.vid-card-menu-btn[data-vid-menu]');
+      if (!menuBtn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var vidId = menuBtn.dataset.vidMenu;
+      var all = state.videos.concat(state.shorts);
+      var found = null;
+      for (var i = 0; i < all.length; i++) { if (all[i].id === vidId) { found = all[i]; break; } }
+      openCardContextMenu(vidId, found || { id: vidId }, menuBtn);
+    });
 
     /* Phase 7: global save-button delegation */
     document.addEventListener('click', function (e) {
@@ -1701,6 +1889,8 @@
     getHistory: getHistory,
     toggleVideoReaction: toggleVideoReaction,
     listenVideoReactions: listenVideoReactions,
+    reportVideo: reportVideo,
+    openReportModal: openReportModal,
     timeAgo: timeAgo,
     fmtNum: fmtNum,
     ytThumb: ytThumb,
