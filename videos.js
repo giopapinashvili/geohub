@@ -1234,6 +1234,7 @@
     renderCategoryPills();
     loadAndRender();
     bindUI();
+    initMyChannelBar();
   }
 
   function renderCategoryPills() {
@@ -1363,6 +1364,165 @@
     });
 
     initNearbyBtn();
+  }
+
+  /* ── My Channel bar on videos page ───────────────────── */
+  function initMyChannelBar() {
+    var bar = document.getElementById('vidMyChannelBar');
+    if (!bar) return;
+
+    function render(u) {
+      if (!u) { bar.innerHTML = ''; return; }
+      if (!fs() || !db()) { window.addEventListener('GeoFirebaseReady', function () { render(u); }, { once: true }); return; }
+      fs().getDocs(fs().query(fs().collection(db(), 'channels'), fs().where('ownerId', '==', u.uid), fs().limit(1)))
+        .then(function (snap) {
+          if (snap.empty) {
+            bar.innerHTML =
+              '<div class="vid-mychannel-bar">' +
+                '<span class="vid-mychannel-hint"><i class="fas fa-tv"></i> არხი არ გაქვს</span>' +
+                '<button class="vid-btn-outline" id="vidCreateChBtn"><i class="fas fa-plus"></i> შექმენი არხი</button>' +
+              '</div>';
+            var btn = document.getElementById('vidCreateChBtn');
+            if (btn) btn.onclick = function () { openCreateChannelModal(u); };
+          } else {
+            var ch = Object.assign({ _id: snap.docs[0].id }, snap.docs[0].data());
+            bar.innerHTML =
+              '<div class="vid-mychannel-bar">' +
+                (ch.avatar
+                  ? '<img class="vid-mychannel-av" src="' + esc(ch.avatar) + '" alt="">'
+                  : '<div class="vid-mychannel-av-ph"><i class="fas fa-tv"></i></div>') +
+                '<div class="vid-mychannel-info">' +
+                  '<span class="vid-mychannel-name">' + esc(ch.name) + '</span>' +
+                  '<span class="vid-mychannel-sub">' + fmtNum(ch.subscriberCount || 0) + ' გამომწერი · ' + fmtNum(ch.videoCount || 0) + ' ვიდეო</span>' +
+                '</div>' +
+                '<a class="vid-btn-outline" href="channel.html?id=' + esc(ch._id) + '"><i class="fas fa-tv"></i> ჩემი არხი</a>' +
+              '</div>';
+          }
+        })
+        .catch(function () { bar.innerHTML = ''; });
+    }
+
+    if (auth()) {
+      fb().authFns.onAuthStateChanged(auth(), render);
+    } else {
+      window.addEventListener('GeoFirebaseReady', function () {
+        fb().authFns.onAuthStateChanged(auth(), render);
+      }, { once: true });
+    }
+  }
+
+  /* ── Create Channel Modal ─────────────────────────────── */
+  function openCreateChannelModal(u) {
+    if (document.getElementById('vidCreateChModal')) return;
+    if (!u) { toast('ავტორიზაცია საჭიროა', 'error'); return; }
+
+    var ov = document.createElement('div');
+    ov.className = 'vid-modal-overlay';
+    ov.id = 'vidCreateChModal';
+    ov.innerHTML =
+      '<div class="vid-modal" style="max-width:480px">' +
+        '<h2><i class="fas fa-tv"></i> GeoHub არხის შექმნა' +
+          '<button class="vid-modal-close" id="vccClose"><i class="fas fa-times"></i></button>' +
+        '</h2>' +
+        '<div class="vid-form-group">' +
+          '<label class="vid-form-label">არხის სახელი <span>*</span></label>' +
+          '<input id="vccName" class="vid-form-input" type="text" placeholder="ჩემი GeoHub არხი" maxlength="80">' +
+        '</div>' +
+        '<div class="vid-form-group">' +
+          '<label class="vid-form-label">აღწერა</label>' +
+          '<textarea id="vccDesc" class="vid-form-textarea" placeholder="არხის მოკლე აღწერა..." maxlength="500"></textarea>' +
+        '</div>' +
+        '<div class="vid-form-group">' +
+          '<label class="vid-form-label">Avatar URL <span style="color:var(--text-muted);font-weight:400">(არასავალდებულო)</span></label>' +
+          '<input id="vccAvatar" class="vid-form-input" type="url" placeholder="https://...">' +
+        '</div>' +
+        '<div class="vid-form-group">' +
+          '<label class="vid-form-label">YouTube Channel URL <span style="color:var(--text-muted);font-weight:400">(ავტო-შევსება)</span></label>' +
+          '<div class="vid-url-group">' +
+            '<input id="vccYtUrl" class="vid-form-input" type="url" placeholder="https://www.youtube.com/@channel">' +
+            '<button class="vid-fetch-btn" id="vccYtFetch"><i class="fas fa-wand-magic-sparkles"></i> Auto-fill</button>' +
+          '</div>' +
+        '</div>' +
+        '<div id="vccPreview"></div>' +
+        '<div class="vid-modal-footer">' +
+          '<button class="vid-btn ghost" id="vccCancel"><i class="fas fa-times"></i> გაუქმება</button>' +
+          '<button class="vid-btn primary" id="vccSubmit" disabled><i class="fas fa-plus"></i> შექმნა</button>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(ov);
+
+    var nameEl   = document.getElementById('vccName');
+    var submitEl = document.getElementById('vccSubmit');
+
+    function checkReady() { submitEl.disabled = !nameEl.value.trim(); }
+    nameEl.addEventListener('input', checkReady);
+
+    document.getElementById('vccClose').onclick =
+    document.getElementById('vccCancel').onclick = function () { ov.remove(); };
+    ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
+
+    /* YouTube auto-fill */
+    var YT_KEY = 'AIzaSyAglbv5RL5LqRturGbqHaNrh8AH8KlLQ0I';
+    document.getElementById('vccYtFetch').onclick = function () {
+      var url = (document.getElementById('vccYtUrl').value || '').trim();
+      if (!url) return;
+      var btn = document.getElementById('vccYtFetch');
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+      var m = url.match(/youtube\.com\/@([\w.-]+)/) || url.match(/youtube\.com\/channel\/(UC[\w-]{20,})/);
+      var apiPath = m && url.includes('/channel/')
+        ? 'channels?part=snippet&id=' + encodeURIComponent(m[1])
+        : m ? 'channels?part=snippet&forHandle=' + encodeURIComponent(m[1]) : null;
+      if (!apiPath) { toast('YouTube URL ვერ ამოვიცანი', 'error'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> Auto-fill'; return; }
+      fetch('https://www.googleapis.com/youtube/v3/' + apiPath + '&key=' + YT_KEY)
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d.items || !d.items[0]) throw new Error('Channel ვერ მოიძებნა');
+          var sn = d.items[0].snippet;
+          nameEl.value   = sn.title || '';
+          document.getElementById('vccDesc').value   = (sn.description || '').slice(0, 500);
+          document.getElementById('vccAvatar').value = (sn.thumbnails && (sn.thumbnails.high || sn.thumbnails.default) || {}).url || '';
+          document.getElementById('vccPreview').innerHTML =
+            '<div class="vid-ch-preview">' +
+              (document.getElementById('vccAvatar').value ? '<img class="vid-ch-av" src="' + esc(document.getElementById('vccAvatar').value) + '" alt="">' : '') +
+              '<div><div class="vid-ch-preview-name">' + esc(sn.title) + '</div>' +
+              (sn.customUrl ? '<div class="vid-ch-preview-sub">' + esc(sn.customUrl) + '</div>' : '') + '</div>' +
+            '</div>';
+          checkReady();
+        })
+        .catch(function (e) { toast(e.message || 'შეცდომა', 'error'); })
+        .finally(function () { btn.disabled = false; btn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> Auto-fill'; });
+    };
+
+    /* Submit */
+    document.getElementById('vccSubmit').onclick = function () {
+      var name = nameEl.value.trim();
+      if (!name) return;
+      submitEl.disabled = true;
+      submitEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> იქმნება...';
+      if (!fs() || !db()) { toast('Firebase unavailable', 'error'); submitEl.disabled = false; return; }
+      fs().addDoc(fs().collection(db(), 'channels'), {
+        name:            name,
+        description:     document.getElementById('vccDesc').value.trim(),
+        avatar:          document.getElementById('vccAvatar').value.trim(),
+        banner:          '',
+        customUrl:       '',
+        youtubeUrl:      document.getElementById('vccYtUrl').value.trim(),
+        youtubeChannelId: '',
+        subscriberCount: 0,
+        videoCount:      0,
+        ownerId:         u.uid,
+        createdAt:       fs().serverTimestamp()
+      }).then(function (ref) {
+        toast('არხი შეიქმნა! ✓');
+        ov.remove();
+        window.location.href = 'channel.html?id=' + ref.id;
+      }).catch(function (e) {
+        toast('შეცდომა: ' + e.message, 'error');
+        submitEl.disabled = false;
+        submitEl.innerHTML = '<i class="fas fa-plus"></i> შექმნა';
+      });
+    };
   }
 
   /* ── Add Video Modal ──────────────────────────────────── */

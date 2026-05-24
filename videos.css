@@ -2213,6 +2213,108 @@ body.watch-cinematic .related-thumb {
   gap: 8px;
 }
 
+/* ── My Channel bar on videos page ─────────────────────── */
+.vid-mychannel-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 10px 16px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+.vid-mychannel-av {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.vid-mychannel-av-ph {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--green-muted);
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .85rem;
+  flex-shrink: 0;
+}
+.vid-mychannel-info { flex: 1; min-width: 120px; }
+.vid-mychannel-name { display: block; font-size: .9rem; font-weight: 700; color: var(--text-primary); }
+.vid-mychannel-sub  { display: block; font-size: .72rem; color: var(--text-muted); }
+.vid-mychannel-hint { font-size: .82rem; color: var(--text-muted); }
+.vid-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border-emphasis);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.vid-btn-outline:hover { border-color: var(--green); color: var(--green); }
+
+/* ── Channel owner management bar ──────────────────────── */
+.ch-owner-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(16,185,129,.08);
+  border: 1px solid rgba(16,185,129,.2);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.ch-owner-label {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--green);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: auto;
+}
+.ch-owner-btn {
+  font-size: .8rem !important;
+  padding: 6px 14px !important;
+}
+.ch-owner-btn.active {
+  background: var(--green-muted) !important;
+  color: var(--green) !important;
+  border-color: var(--green) !important;
+}
+
+/* ── Per-video delete button (manage mode) ──────────────── */
+.ch-vid-del {
+  display: none;
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 10;
+  background: rgba(239,68,68,.9);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: .78rem;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.ch-vid-del:hover { opacity: .8; }
+
 @media (max-width: 600px) {
   .ch-banner { height: 120px; margin-bottom: -40px; }
   .ch-avatar, .ch-avatar-placeholder { width: 72px; height: 72px; }

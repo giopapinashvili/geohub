@@ -76,8 +76,17 @@
             ? '<a class="ch-yt-link" href="' + esc(ch.youtubeUrl) + '" target="_blank" rel="noopener"><i class="fab fa-youtube"></i> YouTube-ზე ნახვა</a>'
             : '') +
         '</div>' +
-        '<div class="ch-actions">' +
+        '<div class="ch-actions" id="chActions">' +
           '<button class="ch-sub-btn" id="chSubBtn"><i class="fas fa-plus"></i> გამოწერა</button>' +
+        '</div>' +
+      '</div>' +
+
+      /* Owner management bar (shown after auth check) */
+      '<div id="chOwnerBar" style="display:none" class="ch-owner-bar">' +
+        '<span class="ch-owner-label"><i class="fas fa-shield-halved"></i> ჩემი არხი</span>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+          '<button class="vid-btn ghost ch-owner-btn" id="chEditBtn"><i class="fas fa-pen"></i> რედაქტირება</button>' +
+          '<button class="vid-btn ghost ch-owner-btn" id="chManageBtn"><i class="fas fa-sliders"></i> ვიდეოების მართვა</button>' +
         '</div>' +
       '</div>' +
 
@@ -89,8 +98,9 @@
         '<div id="chVideoGrid" class="vid-grid"><div class="ch-init-loading"><i class="fas fa-spinner fa-spin"></i></div></div>' +
       '</div>';
 
-    /* Subscribe button state */
+    /* Subscribe button + owner controls */
     initSubBtn(ch);
+    initOwnerControls(ch);
 
     /* Load videos */
     loadChannelVideos(ch._id);
@@ -161,7 +171,140 @@
     if (m) el.innerHTML = '<i class="fas fa-users"></i> ' + fmtNum(Math.max(0, (parseFloat(m[0]) || 1) - 1)) + ' გამომწერი';
   }
 
-  /* ── Load channel videos ────────────────────────────────── */
+  /* ── Owner controls ─────────────────────────────────────── */
+  var _manageMode = false;
+
+  function initOwnerControls(ch) {
+    var u = authUser();
+    if (!u || u.uid !== ch.ownerId) return;
+
+    var bar = document.getElementById('chOwnerBar');
+    if (bar) bar.style.display = 'flex';
+
+    /* Replace subscribe btn with "owner" label */
+    var subBtn = document.getElementById('chSubBtn');
+    if (subBtn) {
+      subBtn.outerHTML = '<a class="ch-sub-btn subscribed" href="videos.html"><i class="fas fa-plus"></i> ვიდეოს დამატება</a>';
+    }
+
+    var editBtn   = document.getElementById('chEditBtn');
+    var manageBtn = document.getElementById('chManageBtn');
+
+    if (editBtn)   editBtn.onclick   = function () { openEditChannelModal(ch); };
+    if (manageBtn) manageBtn.onclick = function () { toggleManageMode(ch); };
+  }
+
+  function toggleManageMode(ch) {
+    _manageMode = !_manageMode;
+    var manageBtn = document.getElementById('chManageBtn');
+    if (manageBtn) {
+      manageBtn.innerHTML = _manageMode
+        ? '<i class="fas fa-check"></i> მართვა დასრულდა'
+        : '<i class="fas fa-sliders"></i> ვიდეოების მართვა';
+      manageBtn.classList.toggle('active', _manageMode);
+    }
+    /* toggle delete buttons on all video cards */
+    document.querySelectorAll('.ch-vid-del').forEach(function (btn) {
+      btn.style.display = _manageMode ? '' : 'none';
+    });
+    if (_manageMode) {
+      /* add delete buttons to any cards that don't have them yet */
+      document.querySelectorAll('#chVideoGrid .vid-card').forEach(function (card) {
+        if (!card.querySelector('.ch-vid-del')) {
+          var vidId = card.getAttribute('href') && card.getAttribute('href').replace('watch.html?v=', '');
+          if (!vidId) return;
+          var btn = document.createElement('button');
+          btn.className = 'ch-vid-del';
+          btn.title = 'წაშლა არხიდან';
+          btn.innerHTML = '<i class="fas fa-trash-can"></i>';
+          btn.onclick = function (e) {
+            e.preventDefault(); e.stopPropagation();
+            if (!confirm('ვიდეო წაიშლება GeoHub-დან. გააგრძელო?')) return;
+            btn.disabled = true;
+            if (!fs() || !db()) return;
+            fs().deleteDoc(fs().doc(db(), 'videos', vidId))
+              .then(function () {
+                card.style.opacity = '0';
+                card.style.pointerEvents = 'none';
+                setTimeout(function () { card.remove(); }, 300);
+                if (ch && ch._id) {
+                  fs().updateDoc(fs().doc(db(), 'channels', ch._id), {
+                    videoCount: fs().increment(-1)
+                  }).catch(function () {});
+                }
+              })
+              .catch(function () { btn.disabled = false; });
+          };
+          card.style.position = 'relative';
+          card.appendChild(btn);
+        }
+        document.querySelectorAll('.ch-vid-del').forEach(function (b) {
+          b.style.display = _manageMode ? '' : 'none';
+        });
+      });
+    }
+  }
+
+  function openEditChannelModal(ch) {
+    if (document.getElementById('chEditModal')) return;
+    var ov = document.createElement('div');
+    ov.className = 'vid-modal-overlay';
+    ov.id = 'chEditModal';
+    ov.innerHTML =
+      '<div class="vid-modal" style="max-width:480px">' +
+        '<h2><i class="fas fa-pen"></i> არხის რედაქტირება' +
+          '<button class="vid-modal-close" id="cheClose"><i class="fas fa-times"></i></button>' +
+        '</h2>' +
+        '<div class="vid-form-group">' +
+          '<label class="vid-form-label">სახელი <span>*</span></label>' +
+          '<input id="cheName" class="vid-form-input" type="text" maxlength="80" value="' + esc(ch.name || '') + '">' +
+        '</div>' +
+        '<div class="vid-form-group">' +
+          '<label class="vid-form-label">აღწერა</label>' +
+          '<textarea id="cheDesc" class="vid-form-textarea" maxlength="500">' + esc(ch.description || '') + '</textarea>' +
+        '</div>' +
+        '<div class="vid-form-group">' +
+          '<label class="vid-form-label">Avatar URL</label>' +
+          '<input id="cheAvatar" class="vid-form-input" type="url" value="' + esc(ch.avatar || '') + '">' +
+        '</div>' +
+        '<div class="vid-form-group">' +
+          '<label class="vid-form-label">Banner URL</label>' +
+          '<input id="cheBanner" class="vid-form-input" type="url" value="' + esc(ch.banner || '') + '">' +
+        '</div>' +
+        '<div class="vid-modal-footer">' +
+          '<button class="vid-btn ghost" id="cheCancel"><i class="fas fa-times"></i> გაუქმება</button>' +
+          '<button class="vid-btn primary" id="cheSave"><i class="fas fa-floppy-disk"></i> შენახვა</button>' +
+        '</div>' +
+      '</div>';
+
+    document.body.appendChild(ov);
+    document.getElementById('cheClose').onclick =
+    document.getElementById('cheCancel').onclick = function () { ov.remove(); };
+    ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
+
+    document.getElementById('cheSave').onclick = function () {
+      var name = document.getElementById('cheName').value.trim();
+      if (!name) { return; }
+      var btn = document.getElementById('cheSave');
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+      fs().updateDoc(fs().doc(db(), 'channels', ch._id), {
+        name:        name,
+        description: document.getElementById('cheDesc').value.trim(),
+        avatar:      document.getElementById('cheAvatar').value.trim(),
+        banner:      document.getElementById('cheBanner').value.trim()
+      }).then(function () {
+        toast('შეინახა ✓');
+        ov.remove();
+        /* refresh page so changes show */
+        location.reload();
+      }).catch(function (e) {
+        toast('შეცდომა: ' + e.message, 'error');
+        btn.disabled = false; btn.innerHTML = '<i class="fas fa-floppy-disk"></i> შენახვა';
+      });
+    };
+  }
+
+  /* ── Load channel videos ─────────────────────────────────── */
   function loadChannelVideos(channelId) {
     var grid = document.getElementById('chVideoGrid');
     if (!grid || !fs() || !db()) return;
