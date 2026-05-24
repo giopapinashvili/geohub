@@ -1366,6 +1366,29 @@
     initNearbyBtn();
   }
 
+  /* ── Delete all videos belonging to current user ─────── */
+  function deleteAllMyVideos(u) {
+    if (!u) return;
+    if (!confirm('წაიშლება ყველა ვიდეო, რომელიც შენ ატვირთე. დარწმუნებული ხარ?')) return;
+    if (!fs() || !db()) { toast('Firebase მიუწვდომელია', 'error'); return; }
+    var col = fs().collection(db(), 'videos');
+    var btn = document.getElementById('vidDelAllMyVids');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> იშლება...'; }
+    fs().getDocs(fs().query(col, fs().where('authorId', '==', u.uid)))
+      .then(function (snap) {
+        if (snap.empty) { toast('წასაშლელი ვიდეო არ მოიძებნა'); if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash"></i> ყველა ვიდეოს წაშლა'; } return; }
+        var dels = snap.docs.map(function (d) { return fs().deleteDoc(fs().doc(db(), 'videos', d.id)); });
+        return Promise.all(dels).then(function () {
+          toast('წაიშალა ' + snap.docs.length + ' ვიდეო', 'success');
+          setTimeout(function () { window.location.reload(); }, 1000);
+        });
+      })
+      .catch(function (e) {
+        toast('შეცდომა: ' + e.message, 'error');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash"></i> ყველა ვიდეოს წაშლა'; }
+      });
+  }
+
   /* ── My Channel bar on videos page ───────────────────── */
   function initMyChannelBar() {
     var bar = document.getElementById('vidMyChannelBar');
@@ -1384,8 +1407,11 @@
                   '<span class="vid-mychannel-name">GeoHub არხი</span>' +
                   '<span class="vid-mychannel-sub">შექმენი შენი პირადი არხი და ატვირთე ვიდეოები</span>' +
                 '</div>' +
+                '<button class="vid-btn-outline" id="vidDelAllMyVids" style="color:#ef4444;border-color:rgba(239,68,68,.3);font-size:.8rem"><i class="fas fa-trash"></i> ყველა ვიდეოს წაშლა</button>' +
                 '<button class="vid-add-btn" id="vidCreateChBtn" style="font-size:.85rem"><i class="fas fa-plus"></i> შექმენი არხი</button>' +
               '</div>';
+            var delAllBtn = document.getElementById('vidDelAllMyVids');
+            if (delAllBtn) delAllBtn.onclick = function () { deleteAllMyVideos(u); };
             var btn = document.getElementById('vidCreateChBtn');
             if (btn) btn.onclick = function () { openCreateChannelModal(u); };
           } else {
@@ -1791,7 +1817,18 @@
         var col = fs().collection(db(), 'channels');
         return fs().getDocs(fs().query(col, fs().where('youtubeChannelId', '==', info.ytChannelId), fs().limit(1)))
           .then(function (snap) {
-            if (!snap.empty) return snap.docs[0].id;
+            if (!snap.empty) {
+              var docId = snap.docs[0].id;
+              var updates = {};
+              if (info.banner)    updates.banner    = info.banner;
+              if (info.avatar)    updates.avatar    = info.avatar;
+              if (info.name)      updates.name      = info.name;
+              if (info.description) updates.description = info.description;
+              if (Object.keys(updates).length) {
+                fs().updateDoc(fs().doc(db(), 'channels', docId), updates).catch(function(){});
+              }
+              return docId;
+            }
             return fs().addDoc(col, {
               youtubeChannelId: info.ytChannelId,
               name:            info.name,
