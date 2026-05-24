@@ -2247,6 +2247,71 @@ html[data-gh-theme="dark"] .gh-live-stats { border-color: rgba(59,130,246,.18) !
   border-color: rgba(59,130,246,.35) !important;
 }
 
+/* ── LAYOUT: narrower feed, fix sidebars ─────────────── */
+
+/* Feed center column — narrower */
+.gh-layout {
+  grid-template-columns: 250px minmax(0, 560px) 280px !important;
+  gap: 14px !important;
+}
+
+/* Sidebars sticky — follow scroll properly */
+.gh-left, .gh-right {
+  position: sticky !important;
+  top: 82px !important;
+  align-self: start !important;
+  max-height: calc(100vh - 94px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* Stronger bg on sidebars so they don't look "floating" */
+.gh-left .gh-panel,
+.gh-right .gh-panel,
+.gh-right .gh-card {
+  background: rgba(8,14,30,.65) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-color: rgba(59,130,246,.12) !important;
+}
+
+/* ── NAV ICONS: box style (like design preview) ─────── */
+.gh-nav-item {
+  gap: 10px !important;
+  padding: 8px 10px !important;
+}
+.gh-nav-item i {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  border-radius: 8px !important;
+  background: rgba(255,255,255,.05) !important;
+  border: 1px solid rgba(255,255,255,.06) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: .88rem !important;
+  color: var(--gh-muted) !important;
+  transition: background .18s, color .18s !important;
+}
+.gh-nav-item:hover i {
+  background: rgba(59,130,246,.12) !important;
+  color: #93C5FD !important;
+  border-color: rgba(59,130,246,.2) !important;
+}
+.gh-nav-item.active i {
+  background: rgba(59,130,246,.18) !important;
+  color: #60A5FA !important;
+  border-color: rgba(59,130,246,.3) !important;
+  box-shadow: 0 0 10px rgba(59,130,246,.2) !important;
+}
+
+/* 1180px breakpoint fix — keep icons boxed */
+@media(max-width:1180px){
+  .gh-layout { grid-template-columns: 72px minmax(0,1fr) 260px !important; }
+  .gh-nav-item i { width:30px!important;height:30px!important;min-width:30px!important; }
+}
+
 /* — Right sidebar widget titles: blue accent — */
 .gh-widget-title i, .gh-panel h3 i { color: #60A5FA !important; }
 
