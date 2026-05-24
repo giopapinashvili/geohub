@@ -1854,6 +1854,37 @@
           });
       }
 
+      /* Parse ISO 8601 duration (PT1M30S) → total seconds */
+      function parseDurSecs(s) {
+        if (!s) return 0;
+        var m = s.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+        if (!m) return 0;
+        return (parseInt(m[1] || 0) * 3600) + (parseInt(m[2] || 0) * 60) + parseInt(m[3] || 0);
+      }
+
+      /* Mark videos as isShort:true by batch-fetching durations */
+      function enrichWithDurations(videos) {
+        if (!videos.length) return Promise.resolve(videos);
+        var idMap = {};
+        videos.forEach(function (v) { idMap[v.youtubeId] = v; });
+        var ids = videos.map(function (v) { return v.youtubeId; });
+        var batches = [];
+        for (var i = 0; i < ids.length; i += 50) batches.push(ids.slice(i, i + 50));
+        return batches.reduce(function (p, batch) {
+          return p.then(function () {
+            return ytApi('videos?part=contentDetails&id=' + batch.join(','))
+              .then(function (d) {
+                (d.items || []).forEach(function (item) {
+                  var v = idMap[item.id];
+                  if (!v) return;
+                  var secs = parseDurSecs((item.contentDetails || {}).duration || '');
+                  if (secs > 0 && secs <= 60) v.isShort = true;
+                });
+              }).catch(function () {});
+          });
+        }, Promise.resolve()).then(function () { return videos; });
+      }
+
       /* Fetch all videos from uploads playlist with pagination */
       function fetchAllVideos(info) {
         var videos = [];
@@ -1870,6 +1901,7 @@
               videos.push({
                 youtubeId:   vid,
                 title:       sn.title || '',
+                description: sn.description || '',
                 channelName: info.name,
                 channelUrl:  info.youtubeUrl,
                 thumbnail:   ytMaxThumb(vid)
@@ -1877,7 +1909,8 @@
             });
             if (res) res.innerHTML = '<div class="vid-ch-loading"><i class="fas fa-spinner fa-spin"></i> ' + videos.length + ' ვიდეო ჩაიტვირთა...</div>';
             if (d.nextPageToken) return fetchPage(d.nextPageToken);
-            return videos;
+            if (res) res.innerHTML = '<div class="vid-ch-loading"><i class="fas fa-spinner fa-spin"></i> ხანგრძლივობა მოწმდება...</div>';
+            return enrichWithDurations(videos);
           });
         }
         return fetchPage(null);
