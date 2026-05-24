@@ -2090,119 +2090,150 @@ body.page-messages #ghPageModeBanner{flex-shrink:0;width:100%;z-index:1}
    GeoHub Blue Glass Theme Override
    ═══════════════════════════════════════════════════════════ */
 
-/* — Dark theme: swap green → electric blue — */
-html[data-gh-theme="dark"],
-:root {
-  --gh-green:   #3B82F6;
-  --gh-green-2: #60A5FA;
-  --gh-blue:    #818CF8;
-  --gh-bg:      #05080F;
-  --gh-bg-2:    #080D1A;
-  --gh-panel:   rgba(8,13,26,.80);
-  --gh-card:    rgba(11,18,36,.82);
-  --gh-card-soft:rgba(14,24,46,.68);
-  --gh-border:  rgba(59,130,246,.12);
-  --gh-border-strong: rgba(96,165,250,.35);
-  --gh-text:    #E8EDF8;
-  --gh-muted:   #7B91B8;
-  --gh-dim:     #4A5A78;
-  --gh-shadow:  0 18px 55px rgba(0,0,0,.50);
+/* — CSS Variables: blue palette — */
+html[data-gh-theme="dark"], :root {
+  --gh-green:        #3B82F6;
+  --gh-green-2:      #60A5FA;
+  --gh-blue:         #818CF8;
+  --gh-bg:           #05080F;
+  --gh-bg-2:         #080D1A;
+  --gh-panel:        rgba(8,13,26,.45);
+  --gh-card:         rgba(11,18,36,.42);
+  --gh-card-soft:    rgba(14,24,46,.35);
+  --gh-border:       rgba(59,130,246,.12);
+  --gh-border-strong:rgba(96,165,250,.30);
+  --gh-text:         #E2E8F8;
+  --gh-muted:        #7B91B8;
+  --gh-dim:          #4A5A78;
+  --gh-shadow:       0 12px 40px rgba(0,0,0,.55);
 }
 
-/* — Body background: blue radial glows — */
+/* — Body background — */
 body.gh-social-body,
 html[data-gh-theme="dark"] body.gh-social-body {
   background:
-    radial-gradient(ellipse 700px 500px at 10% 0%, rgba(37,99,235,.18), transparent 60%),
-    radial-gradient(ellipse 500px 400px at 88% 12%, rgba(99,102,241,.13), transparent 55%),
-    radial-gradient(ellipse 400px 300px at 55% 80%, rgba(14,165,233,.07), transparent 50%),
-    linear-gradient(160deg, #05080F, #080D1A) !important;
+    radial-gradient(ellipse 900px 600px at 10% 0%,  rgba(29,78,216,.22),  transparent 60%),
+    radial-gradient(ellipse 600px 500px at 90% 10%, rgba(99,102,241,.16),  transparent 55%),
+    radial-gradient(ellipse 500px 400px at 50% 90%, rgba(14,165,233,.09),  transparent 55%),
+    #05080F !important;
 }
 
-/* — Topbar: frosted glass blue tint — */
+/* — Topbar: frosted glass — */
 .gh-topbar {
-  background: rgba(5,8,15,.78) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
-  border-bottom: 1px solid rgba(59,130,246,.14) !important;
-  box-shadow: 0 1px 0 rgba(59,130,246,.06) !important;
+  background: rgba(5,8,15,.65) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border-bottom: 1px solid rgba(59,130,246,.15) !important;
+  box-shadow: 0 1px 30px rgba(0,0,0,.4) !important;
 }
 
-/* — Brand mark: blue gradient — */
+/* — Brand mark — */
 .gh-brand-mark {
   background: linear-gradient(135deg,#1D4ED8,#3B82F6) !important;
-  box-shadow: 0 0 20px rgba(59,130,246,.4), 0 8px 24px rgba(0,0,0,.4) !important;
+  box-shadow: 0 0 22px rgba(59,130,246,.45), 0 8px 24px rgba(0,0,0,.4) !important;
 }
 .gh-brand span span { color: #60A5FA !important; }
 
-/* — Create button: blue gradient — */
-.gh-create-btn {
+/* — Create / primary button — */
+.gh-create-btn, .gh-btn {
   background: linear-gradient(135deg,#1D4ED8,#2563EB) !important;
   border-color: rgba(59,130,246,.4) !important;
-  box-shadow: 0 6px 20px rgba(37,99,235,.35) !important;
+  box-shadow: 0 6px 20px rgba(29,78,216,.4) !important;
+}
+.gh-create-btn:hover, .gh-btn:hover {
+  background: linear-gradient(135deg,#2563EB,#3B82F6) !important;
 }
 
-/* — Search focus glow: blue — */
+/* — Search — */
+.gh-top-search input {
+  background: rgba(255,255,255,.04) !important;
+  border-color: rgba(59,130,246,.12) !important;
+}
 .gh-top-search input:focus {
-  border-color: rgba(59,130,246,.5) !important;
-  box-shadow: 0 0 0 4px rgba(59,130,246,.12) !important;
+  border-color: rgba(59,130,246,.45) !important;
+  box-shadow: 0 0 0 4px rgba(59,130,246,.10) !important;
 }
 
-/* — Icon buttons hover: blue tint — */
+/* — Icon btns — */
+.gh-icon-btn, .gh-user-btn {
+  background: rgba(255,255,255,.04) !important;
+  border-color: rgba(255,255,255,.07) !important;
+}
 .gh-icon-btn:hover, .gh-user-btn:hover {
   background: rgba(59,130,246,.12) !important;
   border-color: rgba(59,130,246,.35) !important;
 }
 
-/* — Cards & panels: glass morphism — */
+/* — Cards & panels: transparent glass — */
 .gh-panel, .gh-card {
-  background: rgba(11,18,36,.75) !important;
-  border-color: rgba(59,130,246,.10) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-}
-
-/* — Left sidebar panel — */
-.gh-left .gh-panel {
-  background: rgba(8,13,26,.70) !important;
+  background: rgba(11,18,36,.38) !important;
+  border: 1px solid rgba(59,130,246,.10) !important;
   backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04) !important;
+  transition: background .25s, border-color .25s, transform .25s !important;
+}
+.gh-panel:hover, .gh-card:hover {
+  background: rgba(11,18,36,.50) !important;
+  border-color: rgba(59,130,246,.18) !important;
+  transform: translateY(-1px) !important;
 }
 
-/* — Nav items: active state blue — */
+/* — Left sidebar — */
+.gh-left .gh-panel {
+  background: rgba(5,8,15,.50) !important;
+  backdrop-filter: blur(24px) !important;
+}
+
+/* — Nav items — */
+.gh-nav-item {
+  border-radius: 10px !important;
+  transition: all .18s !important;
+}
+.gh-nav-item:hover {
+  background: rgba(59,130,246,.08) !important;
+  color: #E2E8F8 !important;
+}
 .gh-nav-item.active {
-  background: linear-gradient(135deg,rgba(37,99,235,.20),rgba(59,130,246,.08)) !important;
-  box-shadow: inset 0 0 0 1px rgba(59,130,246,.22) !important;
+  background: linear-gradient(90deg, rgba(29,78,216,.22), rgba(59,130,246,.06)) !important;
+  border-left: 2px solid #3B82F6 !important;
+  box-shadow: inset 0 0 20px rgba(59,130,246,.06) !important;
 }
-.gh-nav-item.active i { color: #60A5FA !important; }
-.gh-nav-item:hover { background: rgba(59,130,246,.07) !important; }
+.gh-nav-item.active i, .gh-nav-item.active span { color: #60A5FA !important; }
 
-/* — Badge count: blue — */
-.gh-badge-count { background: #3B82F6 !important; }
+/* — Badge count — */
+.gh-badge-count {
+  background: #3B82F6 !important;
+  box-shadow: 0 0 10px rgba(59,130,246,.5) !important;
+}
 
-/* — Buttons primary: blue — */
-.gh-btn { background: linear-gradient(135deg,#1D4ED8,#2563EB) !important; }
-.gh-btn:hover { background: linear-gradient(135deg,#2563EB,#3B82F6) !important; }
-
-/* — Feed tabs / pills: blue active — */
-.gh-feed-tab.active, [class*="feed-tab"].active {
+/* — Feed tabs — */
+.gh-feed-tab.active, [class*="tab"].active, button.active {
   background: linear-gradient(135deg,#1D4ED8,#2563EB) !important;
-  border-color: #3B82F6 !important;
-  box-shadow: 0 4px 16px rgba(37,99,235,.4) !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 16px rgba(29,78,216,.4) !important;
+  color: #fff !important;
 }
 
-/* — Post action hover: blue — */
+/* — Post actions hover — */
 .gh-post-action:hover { color: #60A5FA !important; background: rgba(59,130,246,.08) !important; }
 
-/* — Story ring: blue — */
+/* — Stories — */
 .gh-story-card { border-color: #3B82F6 !important; }
-.gh-story-count { background: #3B82F6 !important; color: #fff !important; }
+.gh-story-count { background: #3B82F6 !important; color: #fff !important; box-shadow: 0 0 10px rgba(59,130,246,.5) !important; }
 .gh-story-avatar-mini { border-color: #3B82F6 !important; }
 
-/* — Progress / XP bars: blue — */
-.gh-xp-bar, [class*="upload-bar"], [class*="progress-fill"] {
+/* — Progress bars — */
+.gh-upload-bar, [class*="progress-fill"], [class*="xp-bar-fill"] {
   background: linear-gradient(90deg,#1D4ED8,#60A5FA,#818CF8) !important;
-  box-shadow: 0 0 10px rgba(96,165,250,.4) !important;
+  box-shadow: 0 0 12px rgba(96,165,250,.4) !important;
 }
+
+/* — Scrollbar — */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(59,130,246,.25); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(59,130,246,.45); }
 
 /* — Live map dots: blue/indigo — */
 .gh-map-dot-a { background: linear-gradient(135deg,#3B82F6,#1D4ED8) !important; }
