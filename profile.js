@@ -463,6 +463,7 @@
     renderBadgeTab(user);
     renderBusinessesTab(user);
     loadCheckinsTab(user);
+    loadVideosTab(user);
     if (window.GeoSocial && window.GeoSocial.listenSavedPosts) {
       function updateSavedEmpty() {
         var ps = $('#saved-posts-section'), pl = $('#saved-places-section'), em = $('#saved-empty-state');
@@ -835,6 +836,37 @@
       + media
       + '<div class="pfc-footer"><span class="pfc-stat"><i class="fas fa-heart"></i> ' + (post.likeCount || 0) + '</span><span class="pfc-stat"><i class="fas fa-comment"></i> ' + (post.commentCount || 0) + '</span></div>'
       + '</div>';
+  }
+
+  function loadVideosTab(user) {
+    var tab = $('#tab-videos');
+    if (!tab) return;
+    var GF = window.GeoFirebase;
+    if (!GF || !GF.fs || !GF.db) return;
+    GF.fs.getDocs(GF.fs.query(
+      GF.fs.collection(GF.db, 'videos'),
+      GF.fs.where('authorId', '==', user.uid),
+      GF.fs.where('status', '==', 'active'),
+      GF.fs.orderBy('createdAt', 'desc'),
+      GF.fs.limit(24)
+    )).then(function (snap) {
+      var cnt = $('.ptab[data-tab="videos"] .tab-count');
+      if (snap.empty) { if (cnt) cnt.textContent = ''; return; }
+      if (cnt) cnt.textContent = snap.size || '';
+      var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;padding:4px 0">';
+      snap.forEach(function (d) {
+        var v = Object.assign({ id: d.id }, d.data());
+        var tid = v.youtubeId || '';
+        var thumb = v.thumbnail || ('https://i.ytimg.com/vi/' + tid + '/hqdefault.jpg');
+        html += '<a href="watch.html?v=' + esc(v.id) + '" style="display:block;border-radius:10px;overflow:hidden;background:var(--bg-elevated,#1e2535);border:1px solid var(--border,rgba(255,255,255,.08));text-decoration:none">' +
+          '<div style="position:relative;padding-top:56.25%;background:#000"><img src="' + esc(thumb) + '" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" loading="lazy">' +
+          '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25)"><div style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem"><i class="fas fa-play"></i></div></div></div>' +
+          '<div style="padding:7px 9px"><div style="font-size:.78rem;font-weight:700;color:var(--text-primary,#f1f5f9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(v.title || 'Video') + '</div>' +
+          '<div style="font-size:.7rem;color:var(--text-muted,#94a3b8);margin-top:2px"><i class="fas fa-eye" style="margin-right:3px"></i>' + compact(v.viewCount) + ' · <i class="fas fa-heart" style="margin-right:3px"></i>' + compact(v.likeCount) + '</div></div></a>';
+      });
+      html += '</div>';
+      tab.innerHTML = html;
+    }).catch(function () {});
   }
 
   function renderGalleryTab(posts) {

@@ -11,6 +11,8 @@
     observer: null,
     tapTimer: null,
     tapVidId: null,
+    _lastTap: 0,
+    _muted: false,
     booted: false
   };
 
@@ -40,7 +42,11 @@
     return String(n);
   }
   function ytThumb(id) { return id ? 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg' : ''; }
-  function ytEmbed(id) { return 'https://www.youtube.com/embed/' + id + '?autoplay=1&mute=0&rel=0&modestbranding=1&playsinline=1'; }
+  function ytEmbed(id) { return 'https://www.youtube.com/embed/' + id + '?autoplay=1&mute=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1'; }
+  function ytCmd(iframe, cmd) {
+    if (!iframe || !iframe.contentWindow) return;
+    try { iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: cmd, args: [] }), '*'); } catch (e) {}
+  }
 
   function toast(msg, type) {
     var el = document.querySelector('.gh-toast');
@@ -85,7 +91,13 @@
       ? '<img src="' + esc(v.authorAvatar) + '" alt="">'
       : '<span style="font-size:.75rem;font-weight:700">' + (v.authorName || 'U').charAt(0) + '</span>';
 
-    return '<div class="reel-card" data-reel-idx="' + idx + '" data-vid-id="' + v.id + '" data-yt-id="' + esc(v.youtubeId || '') + '">' +
+    var u = authUser();
+    var isOwn = u && v.authorId && u.uid === v.authorId;
+    var followBtn = v.authorId && !isOwn
+      ? '<button class="reel-follow-btn" data-follow-creator="' + esc(v.authorId) + '">Follow</button>'
+      : '';
+
+    return '<div class="reel-card" data-reel-idx="' + idx + '" data-vid-id="' + v.id + '" data-yt-id="' + esc(v.youtubeId || '') + '" data-author-id="' + esc(v.authorId || '') + '">' +
       /* Blurred bg */
       '<div class="reel-bg"><img src="' + thumb + '" alt="" loading="lazy"></div>' +
       /* Gradient overlays */
@@ -112,8 +124,9 @@
       /* Bottom info */
       '<div class="reel-info">' +
         '<div class="reel-info-author">' +
-          '<div class="reel-info-av">' + avHtml + '</div>' +
+          '<a class="reel-info-av" href="' + (v.authorId ? 'profile.html?id=' + esc(v.authorId) : '#') + '" onclick="event.stopPropagation()">' + avHtml + '</a>' +
           '<span class="reel-info-name">' + esc(v.authorName || 'GeoHub User') + '</span>' +
+          followBtn +
         '</div>' +
         '<div class="reel-info-title">' + esc(v.title || 'GeoHub Reel') + '</div>' +
         '<div class="reel-info-tags">' +
@@ -160,6 +173,9 @@
     var downBtn = document.getElementById('reelNavDown');
     if (upBtn) upBtn.disabled = (idx === 0);
     if (downBtn) downBtn.disabled = (idx === state.reels.length - 1);
+
+    /* Update follow state for the new reel's creator */
+    updateReelFollowState(idx);
 
     /* Track view (debounced - only after 1.5s continuous view) */
     clearTimeout(state._viewTimer);
@@ -214,6 +230,45 @@
 
     wrap.querySelectorAll('.reel-card').forEach(function (card) {
       state.observer.observe(card);
+    });
+  }
+
+  /* ── Phase 5: Mute button ───────────────────────────────── */
+  function initMuteBtn() {
+    if (document.getElementById('reelMuteBtn')) return;
+    var btn = document.createElement('button');
+    btn.id = 'reelMuteBtn';
+    btn.className = 'reel-mute-global';
+    btn.setAttribute('aria-label', 'Mute/unmute');
+    btn.innerHTML = '<i class="fas fa-volume-up"></i>';
+    document.body.appendChild(btn);
+    btn.addEventListener('click', function () {
+      state._muted = !state._muted;
+      btn.innerHTML = state._muted ? '<i class="fas fa-volume-xmark"></i>' : '<i class="fas fa-volume-up"></i>';
+      var card = document.querySelector('[data-reel-idx="' + state.activeIdx + '"]');
+      if (card) {
+        var iframe = card.querySelector('iframe');
+        ytCmd(iframe, state._muted ? 'mute' : 'unMute');
+      }
+    });
+  }
+
+  /* ── Phase 5: Update follow state on active reel ────────── */
+  function updateReelFollowState(idx) {
+    var v = state.reels[idx];
+    if (!v || !v.authorId) return;
+    var gs = window.GeoSocial;
+    var u = authUser();
+    if (!gs || !gs.checkFollowing || !u || u.uid === v.authorId) return;
+    var card = document.querySelector('[data-reel-idx="' + idx + '"]');
+    if (!card) return;
+    var btn = card.querySelector('[data-follow-creator]');
+    if (!btn) return;
+    gs.checkFollowing(v.authorId, function (isFollowing) {
+      if (btn) {
+        btn.classList.toggle('following', !!isFollowing);
+        btn.textContent = isFollowing ? 'Following' : 'Follow';
+      }
     });
   }
 
@@ -307,6 +362,25 @@
         } else if (navigator.clipboard) {
           navigator.clipboard.writeText(url).then(function () { toast('ლინკი დაკოპირდა!'); }).catch(function () {});
         }
+        return;
+      }
+
+      /* Follow creator button */
+      var followBtn2 = e.target.closest('[data-follow-creator]');
+      if (followBtn2) {
+        e.stopPropagation();
+        var gs = window.GeoSocial;
+        var u2 = authUser();
+        var creatorId = followBtn2.dataset.followCreator;
+        if (!gs || !gs.toggleFollow || !u2 || !creatorId) {
+          if (!u2) toast('Follow-ისთვის გაიარე ავტორიზაცია', 'error');
+          return;
+        }
+        gs.toggleFollow(creatorId, function (nowFollowing) {
+          followBtn2.classList.toggle('following', !!nowFollowing);
+          followBtn2.textContent = nowFollowing ? 'Following' : 'Follow';
+          toast(nowFollowing ? 'Creator-ს დაუფოლოუე!' : 'Unfollowed');
+        });
         return;
       }
 
@@ -478,6 +552,7 @@
       initObserver();
       initNavArrows();
       initKeyboard();
+      initMuteBtn();
       /* Activate first reel after a tick */
       setTimeout(function () {
         activateReel(0);

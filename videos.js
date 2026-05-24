@@ -231,6 +231,10 @@
           '<span class="vid-card-stat"><i class="fas fa-heart"></i>' + fmtNum(v.likeCount) + '</span>' +
           '<span class="vid-card-stat"><i class="fas fa-clock"></i>' + timeAgo(v.createdAt) + '</span>' +
         '</div>' +
+        (v.authorId ? '<a class="vid-creator-link" href="profile.html?id=' + esc(v.authorId) + '" onclick="event.stopPropagation()">' +
+          '<div class="vid-creator-av">' + (v.authorAvatar ? '<img src="' + esc(v.authorAvatar) + '" alt="">' : '<span>' + (v.authorName || 'U').charAt(0) + '</span>') + '</div>' +
+          esc(v.authorName || 'GeoHub User') +
+        '</a>' : '') +
       '</div>' +
     '</a>';
   }
@@ -259,6 +263,82 @@
 
   function esc(s) {
     return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── Phase 5: Watch follow button ───────────────────────── */
+  function initWatchFollow(v) {
+    var btn = document.getElementById('watchFollowBtn');
+    if (!btn || !v.authorId) return;
+    var gs = window.GeoSocial;
+    var u = authUser();
+    if (!gs || !u) { btn.style.display = 'none'; return; }
+
+    if (gs.checkFollowing) {
+      gs.checkFollowing(v.authorId, function (isFollowing) {
+        btn.classList.toggle('following', !!isFollowing);
+        btn.innerHTML = isFollowing
+          ? '<i class="fas fa-user-check"></i> Following'
+          : '<i class="fas fa-user-plus"></i> Follow';
+      });
+    }
+
+    btn.addEventListener('click', function () {
+      if (!gs.toggleFollow) return;
+      gs.toggleFollow(v.authorId, function (nowFollowing) {
+        btn.classList.toggle('following', !!nowFollowing);
+        btn.innerHTML = nowFollowing
+          ? '<i class="fas fa-user-check"></i> Following'
+          : '<i class="fas fa-user-plus"></i> Follow';
+        toast(nowFollowing ? 'Creator-ს დაუფოლოუე!' : 'Unfollowed');
+      });
+    });
+  }
+
+  /* ── Phase 5: Top Creators section ───────────────────────── */
+  function renderTopCreators(allVids) {
+    var el = document.getElementById('vidTopCreators');
+    if (!el) return;
+
+    var map = {};
+    allVids.forEach(function (v) {
+      if (!v.authorId) return;
+      if (!map[v.authorId]) {
+        map[v.authorId] = { uid: v.authorId, name: v.authorName || 'GeoHub User', avatar: v.authorAvatar || '', videos: 0, likes: 0, views: 0 };
+      }
+      map[v.authorId].videos++;
+      map[v.authorId].likes += v.likeCount || 0;
+      map[v.authorId].views += v.viewCount || 0;
+    });
+
+    var creators = Object.keys(map).map(function (k) { return map[k]; });
+    if (creators.length < 2) { el.style.display = 'none'; return; }
+
+    creators.forEach(function (c) { c._score = c.likes * 3 + c.views * 0.2 + c.videos * 10; });
+    creators.sort(function (a, b) { return b._score - a._score; });
+    var top = creators.slice(0, 8);
+
+    el.style.display = '';
+    el.innerHTML =
+      '<div class="vid-tv-section">' +
+        '<div class="vid-tv-head">' +
+          '<span class="vid-tv-icon" style="color:#f59e0b"><i class="fas fa-crown"></i></span>' +
+          '<h3>Top Creators</h3>' +
+        '</div>' +
+        '<div class="vid-creator-row">' +
+          top.map(function (c) {
+            var av = c.avatar
+              ? '<img src="' + esc(c.avatar) + '" alt="" onerror="this.style.display=\'none\'">'
+              : '<span>' + (c.name || 'U').charAt(0) + '</span>';
+            return '<a class="vid-creator-chip" href="profile.html?id=' + esc(c.uid) + '">' +
+              '<div class="vid-creator-chip-av">' + av + '</div>' +
+              '<div class="vid-creator-chip-info">' +
+                '<div class="vid-creator-chip-name">' + esc(c.name) + '</div>' +
+                '<div class="vid-creator-chip-stats">' + c.videos + ' vids · ' + fmtNum(c.likes) + ' likes</div>' +
+              '</div>' +
+            '</a>';
+          }).join('') +
+        '</div>' +
+      '</div>';
   }
 
   /* ── Phase 4: Trending score ────────────────────────────── */
@@ -462,7 +542,10 @@
     state.unsub = loadVideos({ category: state.filter }, function (vids) {
       state.videos = vids.filter(function (v) { return !v.isShort; });
       state.shorts = vids.filter(function (v) { return v.isShort; });
-      if (state.filter === 'all') renderTVSections(vids);
+      if (state.filter === 'all') {
+        renderTVSections(vids);
+        renderTopCreators(vids);
+      }
       renderGrid();
       renderShorts();
     });
@@ -871,14 +954,22 @@
     }
 
     if (addedByEl) {
+      var u = authUser();
+      var isOwn = u && u.uid === v.authorId;
       addedByEl.innerHTML =
         '<div class="watch-added-by">' +
-          '<span class="watch-channel-av">' +
-            (v.authorAvatar ? '<img src="' + esc(v.authorAvatar) + '" alt="">' : (v.authorName || 'U').charAt(0)) +
-          '</span>' +
-          '<div><div class="watch-channel-name">' + esc(v.authorName || 'GeoHub User') + '</div>' +
-          '<div class="watch-channel-sub">დამატებულია GeoHub-ზე</div></div>' +
+          '<div class="watch-creator-row">' +
+            '<a class="watch-creator-left" href="' + (v.authorId ? 'profile.html?id=' + esc(v.authorId) : '#') + '">' +
+              '<span class="watch-channel-av">' +
+                (v.authorAvatar ? '<img src="' + esc(v.authorAvatar) + '" alt="">' : (v.authorName || 'U').charAt(0)) +
+              '</span>' +
+              '<div><div class="watch-channel-name">' + esc(v.authorName || 'GeoHub User') + '</div>' +
+              '<div class="watch-channel-sub">Creator on GeoHub</div></div>' +
+            '</a>' +
+            (!isOwn && v.authorId ? '<button class="watch-follow-btn" id="watchFollowBtn" data-author-id="' + esc(v.authorId) + '"><i class="fas fa-user-plus"></i> Follow</button>' : '') +
+          '</div>' +
         '</div>';
+      initWatchFollow(v);
     }
   }
 

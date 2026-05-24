@@ -1180,6 +1180,167 @@ body.watch-cinematic .related-thumb {
 }
 .watch-city-row i { color: var(--green); }
 
+/* ── Phase 5: Creator badge on video cards ───────────────── */
+.vid-creator-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: .72rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-top: 5px;
+  transition: color .12s;
+}
+.vid-creator-link:hover { color: var(--text-primary); }
+.vid-creator-av {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--green-muted);
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .6rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.vid-creator-av img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ── Phase 5: Watch page follow button ───────────────────── */
+.watch-creator-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.watch-creator-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex: 1;
+  min-width: 0;
+}
+.watch-follow-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .78rem;
+  font-weight: 700;
+  padding: 5px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all .15s;
+  border: 1px solid rgba(16,185,129,.4);
+  background: rgba(16,185,129,.1);
+  color: var(--green);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.watch-follow-btn:hover { background: rgba(16,185,129,.2); }
+.watch-follow-btn.following {
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.15);
+  color: var(--text-muted);
+}
+
+/* ── Phase 5: Reel creator follow button ─────────────────── */
+.reel-follow-btn {
+  font-size: .7rem;
+  font-weight: 700;
+  padding: 3px 11px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all .15s;
+  border: 1px solid rgba(16,185,129,.5);
+  background: rgba(16,185,129,.15);
+  color: #10b981;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.5;
+}
+.reel-follow-btn:hover { background: rgba(16,185,129,.3); }
+.reel-follow-btn.following {
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.2);
+  color: rgba(255,255,255,.6);
+}
+
+/* ── Phase 5: Global mute button (fixed, top-right on reels) */
+.reel-mute-global {
+  position: fixed;
+  top: 68px;
+  right: 16px;
+  z-index: 200;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.55);
+  border: 1px solid rgba(255,255,255,.15);
+  color: #fff;
+  font-size: .85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .15s;
+}
+.reel-mute-global:hover { background: rgba(0,0,0,.8); }
+
+/* ── Phase 5: Top Creators section ───────────────────────── */
+.vid-creator-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 4px;
+}
+.vid-creator-row::-webkit-scrollbar { display: none; }
+.vid-creator-chip {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 6px 14px 6px 6px;
+  text-decoration: none;
+  transition: background .15s, border-color .15s;
+}
+.vid-creator-chip:hover {
+  border-color: rgba(16,185,129,.3);
+  background: rgba(16,185,129,.05);
+}
+.vid-creator-chip-av {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--green-muted);
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .78rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.vid-creator-chip-av img { width: 100%; height: 100%; object-fit: cover; }
+.vid-creator-chip-info { min-width: 0; }
+.vid-creator-chip-name {
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 110px;
+}
+.vid-creator-chip-stats { font-size: .68rem; color: var(--text-muted); margin-top: 1px; }
+
 /* ── Phase 4: GeoHub TV sections ────────────────────────── */
 .vid-tv-wrap {
   margin-bottom: 8px;
