@@ -18,19 +18,73 @@
   };
 
   var CAT_META = {
-    all:      { label: 'ყველა',       icon: 'fa-film' },
-    travel:   { label: 'Travel',      icon: 'fa-plane' },
-    hiking:   { label: 'Hiking',      icon: 'fa-person-hiking' },
-    food:     { label: 'Food',        icon: 'fa-utensils' },
-    nightlife:{ label: 'Nightlife',   icon: 'fa-martini-glass' },
-    culture:  { label: 'Culture',     icon: 'fa-landmark' },
-    nature:   { label: 'Nature',      icon: 'fa-leaf' },
-    city:     { label: 'City',        icon: 'fa-city' },
-    beach:    { label: 'Beach',       icon: 'fa-umbrella-beach' },
-    winter:   { label: 'Winter',      icon: 'fa-snowflake' },
-    events:   { label: 'Events',      icon: 'fa-calendar-star' },
-    local:    { label: 'Local',       icon: 'fa-map-pin' }
+    all:          { label: 'ყველა',         icon: 'fa-film' },
+    /* ── Georgian / local ───────────────────────── */
+    travel:       { label: 'Travel',         icon: 'fa-plane' },
+    hiking:       { label: 'Hiking',         icon: 'fa-person-hiking' },
+    food:         { label: 'Food',           icon: 'fa-utensils' },
+    nightlife:    { label: 'Nightlife',      icon: 'fa-martini-glass' },
+    culture:      { label: 'Culture',        icon: 'fa-landmark' },
+    nature:       { label: 'Nature',         icon: 'fa-leaf' },
+    city:         { label: 'City',           icon: 'fa-city' },
+    beach:        { label: 'Beach',          icon: 'fa-umbrella-beach' },
+    winter:       { label: 'Winter',         icon: 'fa-snowflake' },
+    events:       { label: 'Events',         icon: 'fa-calendar-star' },
+    local:        { label: 'Local',          icon: 'fa-map-pin' },
+    /* ── YouTube categories ──────────────────────── */
+    music:        { label: 'Music',          icon: 'fa-music' },
+    gaming:       { label: 'Gaming',         icon: 'fa-gamepad' },
+    sports:       { label: 'Sports',         icon: 'fa-futbol' },
+    comedy:       { label: 'Comedy',         icon: 'fa-face-laugh' },
+    entertainment:{ label: 'Entertainment',  icon: 'fa-star' },
+    education:    { label: 'Education',      icon: 'fa-graduation-cap' },
+    tech:         { label: 'Tech',           icon: 'fa-microchip' },
+    film:         { label: 'Film',           icon: 'fa-clapperboard' },
+    news:         { label: 'News',           icon: 'fa-newspaper' },
+    howto:        { label: 'How-to',         icon: 'fa-screwdriver-wrench' },
+    vlog:         { label: 'Vlog',           icon: 'fa-video' },
+    pets:         { label: 'Animals',        icon: 'fa-paw' },
+    autos:        { label: 'Autos',          icon: 'fa-car' },
+    science:      { label: 'Science',        icon: 'fa-flask' },
+    fashion:      { label: 'Fashion',        icon: 'fa-shirt' }
   };
+
+  /* YouTube categoryId → GeoHub category key */
+  var YT_CAT_MAP = {
+    '1':'film','2':'autos','10':'music','15':'pets','17':'sports',
+    '19':'travel','20':'gaming','22':'vlog','23':'comedy','24':'entertainment',
+    '25':'news','26':'howto','27':'education','28':'tech','29':'science'
+  };
+
+  /* Keyword-based fallback categorisation (title + description + tags) */
+  function detectCategory(title, description, tags, ytCategoryId) {
+    if (ytCategoryId && YT_CAT_MAP[ytCategoryId]) return YT_CAT_MAP[ytCategoryId];
+    var text = ((title||'') + ' ' + (description||'') + ' ' + (Array.isArray(tags)?tags.join(' '):'')).toLowerCase();
+    if (/travel|trip|tour|explore|adventure|journey|road.?trip|overland/.test(text)) return 'travel';
+    if (/hiking|hike|trek|mountain|trail|climb/.test(text)) return 'hiking';
+    if (/food|eat|restaurant|cuisine|recipe|cook|meal|dinner|lunch/.test(text)) return 'food';
+    if (/nightlife|bar|club|party|night.?out|cocktail|pub/.test(text)) return 'nightlife';
+    if (/culture|history|museum|tradition|heritage|ancient/.test(text)) return 'culture';
+    if (/beach|sea|ocean|swim|surf|coast|island/.test(text)) return 'beach';
+    if (/ski|skiing|snowboard|snow|winter|ice/.test(text)) return 'winter';
+    if (/nature|wildlife|forest|animal|bird|jungle|waterfall/.test(text)) return 'nature';
+    if (/city|urban|street|downtown|architecture/.test(text)) return 'city';
+    if (/music|song|concert|singer|band|album|rap|rock/.test(text)) return 'music';
+    if (/game|gaming|gameplay|gamer|esport/.test(text)) return 'gaming';
+    if (/sport|football|basketball|soccer|tennis|gym|fitness/.test(text)) return 'sports';
+    if (/comedy|funny|humor|laugh|joke|prank/.test(text)) return 'comedy';
+    if (/tutorial|how.?to|diy|guide|learn/.test(text)) return 'howto';
+    if (/education|course|lesson|study|university/.test(text)) return 'education';
+    if (/tech|technology|review|gadget|phone|software|app|ai|robot/.test(text)) return 'tech';
+    if (/film|movie|cinema|series|episode|documentary/.test(text)) return 'film';
+    if (/news|politics|report|breaking/.test(text)) return 'news';
+    if (/vlog|day.?in|routine|life|daily/.test(text)) return 'vlog';
+    if (/science|experiment|chemistry|physics|biology/.test(text)) return 'science';
+    if (/fashion|style|outfit|clothing|model/.test(text)) return 'fashion';
+    if (/car|auto|drive|motor|vehicle/.test(text)) return 'autos';
+    if (/pet|dog|cat|animal/.test(text)) return 'pets';
+    return '';
+  }
 
   /* ── Firebase helpers ─────────────────────────────────── */
   function fb() { return window.GeoFirebase || null; }
@@ -1394,11 +1448,6 @@
     var bar = document.getElementById('vidMyChannelBar');
     if (!bar) return;
 
-    function wireDelBtn(u) {
-      var b = document.getElementById('vidDelAllMyVids');
-      if (b) b.onclick = function () { deleteAllMyVideos(u); };
-    }
-
     function renderNoChannel(u) {
       bar.innerHTML =
         '<div class="vid-mychannel-bar">' +
@@ -1407,10 +1456,8 @@
             '<span class="vid-mychannel-name">GeoHub არხი</span>' +
             '<span class="vid-mychannel-sub">შექმენი შენი პირადი არხი და ატვირთე ვიდეოები</span>' +
           '</div>' +
-          '<button class="vid-btn-outline" id="vidDelAllMyVids" style="color:#ef4444;border-color:rgba(239,68,68,.3);font-size:.8rem"><i class="fas fa-trash"></i> ყველა ვიდეოს წაშლა</button>' +
           '<button class="vid-add-btn" id="vidCreateChBtn" style="font-size:.85rem"><i class="fas fa-plus"></i> შექმენი არხი</button>' +
         '</div>';
-      wireDelBtn(u);
       var btn = document.getElementById('vidCreateChBtn');
       if (btn) btn.onclick = function () { openCreateChannelModal(u); };
     }
@@ -1433,10 +1480,8 @@
                 '<span class="vid-mychannel-name">' + esc(ch.name) + '</span>' +
                 '<span class="vid-mychannel-sub"><i class="fas fa-users"></i> ' + fmtNum(ch.subscriberCount || 0) + ' გამომწერი &nbsp;·&nbsp; <i class="fas fa-film"></i> ' + fmtNum(ch.videoCount || 0) + ' ვიდეო</span>' +
               '</div>' +
-              '<button class="vid-btn-outline" id="vidDelAllMyVids" style="color:#ef4444;border-color:rgba(239,68,68,.3);font-size:.8rem"><i class="fas fa-trash"></i> ყველა ვიდეო</button>' +
               '<a class="vid-add-btn" href="channel.html?id=' + esc(ch._id) + '" style="font-size:.85rem;text-decoration:none"><i class="fas fa-tv"></i> ჩემი არხი</a>' +
             '</div>';
-          wireDelBtn(u);
         })
         .catch(function () { /* bar already shows renderNoChannel, keep it */ });
     }
@@ -1610,11 +1655,15 @@
       for (var i = 0; i < ids.length; i += 50) batches.push(ids.slice(i, i + 50));
       return batches.reduce(function (p, batch) {
         return p.then(function () {
-          return impApi('videos?part=contentDetails&id=' + batch.join(','))
+          return impApi('videos?part=contentDetails,snippet&id=' + batch.join(','))
             .then(function (d) {
               (d.items || []).forEach(function (item) {
                 var v = idMap[item.id];
-                if (v && impParseDur((item.contentDetails || {}).duration || '') <= 60) v.isShort = true;
+                if (!v) return;
+                var secs = impParseDur((item.contentDetails || {}).duration || '');
+                if (secs > 0 && secs <= 60) v.isShort = true;
+                var sn = item.snippet || {};
+                if (!v.category) v.category = detectCategory(sn.title, sn.description, sn.tags, sn.categoryId);
               });
             }).catch(function () {});
         });
@@ -1653,7 +1702,7 @@
                   title: v.title, description: v.description || '', thumbnail: ytMaxThumb(v.youtubeId),
                   channelId: geoChannelId, channelName: v.channelName, channelUrl: v.channelUrl,
                   authorId: u.uid, authorName: u.displayName || 'GeoHub User', authorAvatar: u.photoURL || '',
-                  category: '', city: '', isShort: v.isShort || false, tags: [],
+                  category: v.category || '', city: '', isShort: v.isShort || false, tags: [],
                   placeId: null, placeName: null, businessId: null, businessName: null
                 }, function (err) { if (!err) done++; res(); });
               });
@@ -1965,13 +2014,19 @@
         for (var i = 0; i < ids.length; i += 50) batches.push(ids.slice(i, i + 50));
         return batches.reduce(function (p, batch) {
           return p.then(function () {
-            return ytApi('videos?part=contentDetails&id=' + batch.join(','))
+            return ytApi('videos?part=contentDetails,snippet&id=' + batch.join(','))
               .then(function (d) {
                 (d.items || []).forEach(function (item) {
                   var v = idMap[item.id];
                   if (!v) return;
+                  /* Duration → isShort */
                   var secs = parseDurSecs((item.contentDetails || {}).duration || '');
                   if (secs > 0 && secs <= 60) v.isShort = true;
+                  /* Category from YouTube categoryId + keywords */
+                  var sn = item.snippet || {};
+                  if (!v.category) {
+                    v.category = detectCategory(sn.title, sn.description, sn.tags, sn.categoryId);
+                  }
                 });
               }).catch(function () {});
           });
