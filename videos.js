@@ -143,7 +143,7 @@
     return fs().collection(db(), 'videos');
   }
 
-  function saveVideo(data, callback) {
+  function saveVideo(data, callback, _fromImport) {
     var col = videosCol();
     if (!col) { callback(new Error('Firebase unavailable')); return; }
     fs().addDoc(col, Object.assign({}, data, {
@@ -152,8 +152,27 @@
       commentCount: 0,
       status: 'active',
       createdAt: fs().serverTimestamp()
-    })).then(function (ref) { callback(null, ref.id); })
-       .catch(function (e) { callback(e); });
+    })).then(function (ref) {
+      /* Create a feed post for manually-added videos (not bulk imports) */
+      if (!_fromImport && fs() && db()) {
+        fs().addDoc(fs().collection(db(), 'posts'), {
+          type:        'video',
+          authorId:    data.authorId    || '',
+          authorName:  data.authorName  || '',
+          authorAvatar:data.authorAvatar|| '',
+          videoId:     ref.id,
+          youtubeId:   data.youtubeId   || '',
+          title:       data.title       || '',
+          thumbnail:   data.thumbnail   || '',
+          channelId:   data.channelId   || null,
+          channelName: data.channelName || '',
+          category:    data.category    || '',
+          isShort:     data.isShort     || false,
+          createdAt:   fs().serverTimestamp()
+        }).catch(function () {});
+      }
+      callback(null, ref.id);
+    }).catch(function (e) { callback(e); });
   }
 
   function incrementViewCount(docId) {
@@ -1704,7 +1723,7 @@
                   authorId: u.uid, authorName: u.displayName || 'GeoHub User', authorAvatar: u.photoURL || '',
                   category: v.category || '', city: '', isShort: v.isShort || false, tags: [],
                   placeId: null, placeName: null, businessId: null, businessName: null
-                }, function (err) { if (!err) done++; res(); });
+                }, function (err) { if (!err) done++; res(); }, true /* fromImport */);
               });
             }));
           }
@@ -2209,7 +2228,7 @@
               }, function (err) {
                 if (err) errors++; else done++;
                 next();
-              });
+              }, true /* fromImport */);
             }
             next();
           })

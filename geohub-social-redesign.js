@@ -1678,7 +1678,32 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   var RX_EMOJIS = { love:'❤️', haha:'😂', wow:'😮', sad:'😢', angry:'😡', clap:'👏' };
 
+  function videoPostCard(p){
+    var thumb = p.thumbnail || (p.youtubeId ? 'https://i.ytimg.com/vi/'+p.youtubeId+'/hqdefault.jpg' : '');
+    var href  = p.videoId ? 'watch.html?v='+encodeURIComponent(p.videoId) : (p.youtubeId ? 'watch.html?v='+encodeURIComponent(p.videoId||p.youtubeId) : '#');
+    var chHref = p.channelId ? 'channel.html?id='+encodeURIComponent(p.channelId) : 'profile.html?id='+encodeURIComponent(p.authorId||'');
+    var ts = p.createdAt && p.createdAt.toMillis ? timeAgo2(p.createdAt.toMillis()) : '';
+    return '<article class="gh-card gh-video-post-card" data-post-id="'+esc(p.id||'')+'">' +
+      '<div class="gh-post-header">' +
+        '<span class="gh-avatar" style="flex-shrink:0">'+(p.authorAvatar?'<img src="'+esc(p.authorAvatar)+'" alt="" loading="lazy" onerror="this.remove()">':esc(initials(p.authorName||'U')))+'</span>' +
+        '<div class="gh-post-meta">' +
+          '<a class="gh-post-author" href="'+esc(chHref)+'">'+(p.channelName||p.authorName||'GeoHub')+'</a>' +
+          (ts?'<span class="gh-post-time">'+ts+'</span>':'') +
+        '</div>' +
+        '<span class="gh-video-post-badge"><i class="fas fa-film"></i> Video</span>' +
+      '</div>' +
+      '<a class="gh-video-post-thumb" href="'+esc(href)+'">' +
+        (thumb?'<img src="'+esc(thumb)+'" alt="" loading="lazy">':'<div class="gh-video-post-thumb-ph"><i class="fas fa-play-circle"></i></div>') +
+        '<div class="gh-video-play-btn"><i class="fas fa-play"></i></div>' +
+      '</a>' +
+      '<div class="gh-video-post-title"><a href="'+esc(href)+'">'+esc((p.title||'').slice(0,100))+'</a></div>' +
+      (p.category?'<div class="gh-video-post-cat"><i class="fas fa-tag"></i>'+esc(p.category)+'</div>':'') +
+    '</article>';
+  }
+  function timeAgo2(ms){ var s=Math.floor((Date.now()-ms)/1000); if(s<60) return 'ახლახანს'; if(s<3600) return Math.floor(s/60)+' წ. წინ'; if(s<86400) return Math.floor(s/3600)+' სთ. წინ'; return Math.floor(s/86400)+' დ. წინ'; }
+
   function postCard(p, options){
+    if(p.type==='video') return videoPostCard(p);
     options=options||{};
     // Business context flags
     var bizCtx = !!(options.biz);
