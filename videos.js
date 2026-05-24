@@ -545,6 +545,14 @@
     var descEl = document.getElementById('watchDesc');
     var addedByEl = document.getElementById('watchAddedBy');
 
+    /* Set cinematic blurred background */
+    var cinBg = document.getElementById('watchCinBg');
+    if (cinBg) {
+      var bgThumb = v.thumbnail || ytMaxThumb(v.youtubeId);
+      cinBg.style.backgroundImage = 'url(' + bgThumb + ')';
+    }
+    document.body.classList.add('watch-cinematic');
+
     if (playerWrap) {
       playerWrap.innerHTML = '<iframe src="' + ytEmbed(v.youtubeId) + '" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>';
     }
@@ -726,7 +734,19 @@
   window.GeoVideos = {
     openAddModal: openAddVideoModal,
     parseYTId: parseYTId,
-    loadVideoById: loadVideoById
+    loadVideoById: loadVideoById,
+    loadVideos: loadVideos,
+    toggleVideoLike: toggleVideoLike,
+    checkVideoLiked: checkVideoLiked,
+    addVideoComment: addVideoComment,
+    listenVideoComments: listenVideoComments,
+    incrementViewCount: incrementViewCount,
+    timeAgo: timeAgo,
+    fmtNum: fmtNum,
+    ytThumb: ytThumb,
+    ytEmbed: ytEmbed,
+    catMeta: catMeta,
+    esc: esc
   };
 
 })();

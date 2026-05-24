@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reels — GeoHub</title>
+  <meta name="description" content="GeoHub Reels — fullscreen vertical video experience">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css">
+  </noscript>
+  <link rel="stylesheet" href="geohub-social-redesign.css">
+  <link rel="stylesheet" href="account-switcher.css">
+  <link rel="stylesheet" href="chat-popup.css">
+  <link rel="stylesheet" href="responsive-polish.css">
+  <link rel="stylesheet" href="videos.css">
+  <link rel="stylesheet" href="reels.css">
+  <meta name="theme-color" content="#000000">
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+</head>
+<body data-gh-page="reels">
+  <noscript>GeoHub requires JavaScript.</noscript>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script defer src="gh-schema.js"></script>
+  <script defer src="account.js"></script>
+  <script defer src="nav-cleanup.js"></script>
+  <script defer src="mobile-nav.js"></script>
+  <script defer src="firestore-social.js"></script>
+  <script defer src="chat-popup.js"></script>
+  <script defer src="geohub-social-redesign.js"></script>
+  <script defer src="account-switcher.js"></script>
+  <script defer src="geohub-production-stabilization-v1.js"></script>
+  <script defer src="responsive-polish.js"></script>
+  <script defer src="videos.js"></script>
+  <script defer src="reels.js"></script>
+
+  <!-- Desktop nav arrows (outside the scroll wrap) -->
+  <div class="reels-nav-arrows" id="reelsNavArrows">
+    <button class="reel-nav-btn" id="reelNavUp" title="წინა"><i class="fas fa-chevron-up"></i></button>
+    <button class="reel-nav-btn" id="reelNavDown" title="შემდეგი"><i class="fas fa-chevron-down"></i></button>
+  </div>
+
+  <div class="reels-page" id="reelsPage">
+    <div class="reels-wrap" id="reelsWrap">
+      <!-- Reel cards injected by reels.js -->
+      <div class="reels-loading">
+        <i class="fas fa-spinner fa-spin" style="font-size:2rem;color:rgba(255,255,255,.4)"></i>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
