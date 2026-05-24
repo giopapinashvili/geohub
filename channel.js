@@ -47,8 +47,10 @@
 
     page.innerHTML =
       /* Banner */
-      '<div class="ch-banner">' +
-        (ch.banner ? '<img class="ch-banner-img" src="'+esc(ch.banner)+'" alt="" onerror="this.style.display=\'none\'">' : '') +
+      '<div class="ch-banner" id="chBannerWrap">' +
+        (ch.banner
+          ? '<img class="ch-banner-img" src="'+esc(ch.banner)+'" alt="" onerror="this.style.display=\'none\'">'
+          : '<div class="ch-banner-empty" id="chBannerEmpty"></div>') +
       '</div>' +
 
       /* Meta row */
@@ -502,6 +504,12 @@
     if(!u||u.uid!==ch.ownerId) return;
     var bar=document.getElementById('chOwnerBar');
     if(bar) bar.style.display='flex';
+    /* "Add Banner" overlay on empty banner */
+    var emptyBanner=document.getElementById('chBannerEmpty');
+    if(emptyBanner){
+      emptyBanner.innerHTML='<button class="ch-add-banner-btn" id="chAddBannerBtn"><i class="fas fa-image"></i> Banner-ის დამატება</button>';
+      document.getElementById('chAddBannerBtn').onclick=function(){ openEditChannelModal(ch); };
+    }
     var subBtn=document.getElementById('chSubBtn');
     if(subBtn) subBtn.outerHTML='<a class="ch-sub-btn subscribed" href="videos.html" style="text-decoration:none"><i class="fas fa-plus"></i> ვიდეოს დამატება</a>';
     var editBtn=document.getElementById('chEditBtn');
@@ -574,8 +582,11 @@
           '<input id="cheAvatar" class="vid-form-input" type="url" value="'+esc(ch.avatar||'')+'">' +
         '</div>' +
         '<div class="vid-form-group">' +
-          '<label class="vid-form-label">Banner URL</label>' +
-          '<input id="cheBanner" class="vid-form-input" type="url" value="'+esc(ch.banner||'')+'">' +
+          '<label class="vid-form-label"><i class="fas fa-image" style="color:#60a5fa;margin-right:4px"></i>Banner URL' +
+            '<span style="font-size:.75rem;color:#94a3b8;font-weight:400;margin-left:6px">(YouTube Studio → Customization → Branding → Banner image → copy URL)</span>' +
+          '</label>' +
+          '<input id="cheBanner" class="vid-form-input" type="url" placeholder="https://yt3.googleusercontent.com/..." value="'+esc(ch.banner||'')+'">' +
+          (ch.banner?'<div style="margin-top:6px"><img src="'+esc(ch.banner)+'" style="width:100%;height:60px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,.1)" alt="Banner preview" onerror="this.remove()"></div>':'') +
         '</div>' +
         '<div class="vid-form-group">' +
           '<label class="vid-form-label"><i class="fas fa-star" style="color:#f59e0b;margin-right:4px"></i>Featured Video ID (Firestore ID)</label>' +

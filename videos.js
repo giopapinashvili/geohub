@@ -1716,7 +1716,7 @@
         if (fs() && db()) {
           var meta = { youtubeChannelId: cid, subscriberCount: chSubs };
           if (chAvatar) meta.avatar = chAvatar;
-          if (chBanner) meta.banner = chBanner;
+          if (chBanner) { meta.banner = chBanner; } else { toast('Banner ხელით დაამატე: არხი → Edit → Banner URL'); }
           fs().updateDoc(fs().doc(db(), 'channels', geoChannelId), meta).catch(function(){});
         }
 
