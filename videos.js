@@ -1394,45 +1394,51 @@
     var bar = document.getElementById('vidMyChannelBar');
     if (!bar) return;
 
+    function wireDelBtn(u) {
+      var b = document.getElementById('vidDelAllMyVids');
+      if (b) b.onclick = function () { deleteAllMyVideos(u); };
+    }
+
+    function renderNoChannel(u) {
+      bar.innerHTML =
+        '<div class="vid-mychannel-bar">' +
+          '<div class="vid-mychannel-av-ph"><i class="fas fa-tv"></i></div>' +
+          '<div class="vid-mychannel-info">' +
+            '<span class="vid-mychannel-name">GeoHub არხი</span>' +
+            '<span class="vid-mychannel-sub">შექმენი შენი პირადი არხი და ატვირთე ვიდეოები</span>' +
+          '</div>' +
+          '<button class="vid-btn-outline" id="vidDelAllMyVids" style="color:#ef4444;border-color:rgba(239,68,68,.3);font-size:.8rem"><i class="fas fa-trash"></i> ყველა ვიდეოს წაშლა</button>' +
+          '<button class="vid-add-btn" id="vidCreateChBtn" style="font-size:.85rem"><i class="fas fa-plus"></i> შექმენი არხი</button>' +
+        '</div>';
+      wireDelBtn(u);
+      var btn = document.getElementById('vidCreateChBtn');
+      if (btn) btn.onclick = function () { openCreateChannelModal(u); };
+    }
+
     function render(u) {
       if (!u) { bar.innerHTML = ''; return; }
+      /* Show bar immediately so the delete button is always visible */
+      renderNoChannel(u);
       if (!fs() || !db()) { window.addEventListener('GeoFirebaseReady', function () { render(u); }, { once: true }); return; }
       fs().getDocs(fs().query(fs().collection(db(), 'channels'), fs().where('ownerId', '==', u.uid), fs().limit(1)))
         .then(function (snap) {
-          if (snap.empty) {
-            bar.innerHTML =
-              '<div class="vid-mychannel-bar">' +
-                '<div class="vid-mychannel-av-ph"><i class="fas fa-tv"></i></div>' +
-                '<div class="vid-mychannel-info">' +
-                  '<span class="vid-mychannel-name">GeoHub არხი</span>' +
-                  '<span class="vid-mychannel-sub">შექმენი შენი პირადი არხი და ატვირთე ვიდეოები</span>' +
-                '</div>' +
-                '<button class="vid-btn-outline" id="vidDelAllMyVids" style="color:#ef4444;border-color:rgba(239,68,68,.3);font-size:.8rem"><i class="fas fa-trash"></i> ყველა ვიდეოს წაშლა</button>' +
-                '<button class="vid-add-btn" id="vidCreateChBtn" style="font-size:.85rem"><i class="fas fa-plus"></i> შექმენი არხი</button>' +
-              '</div>';
-            var delAllBtn = document.getElementById('vidDelAllMyVids');
-            if (delAllBtn) delAllBtn.onclick = function () { deleteAllMyVideos(u); };
-            var btn = document.getElementById('vidCreateChBtn');
-            if (btn) btn.onclick = function () { openCreateChannelModal(u); };
-          } else {
-            var ch = Object.assign({ _id: snap.docs[0].id }, snap.docs[0].data());
-            bar.innerHTML =
-              '<div class="vid-mychannel-bar">' +
-                (ch.avatar
-                  ? '<img class="vid-mychannel-av" src="' + esc(ch.avatar) + '" alt="">'
-                  : '<div class="vid-mychannel-av-ph"><i class="fas fa-tv"></i></div>') +
-                '<div class="vid-mychannel-info">' +
-                  '<span class="vid-mychannel-name">' + esc(ch.name) + '</span>' +
-                  '<span class="vid-mychannel-sub"><i class="fas fa-users"></i> ' + fmtNum(ch.subscriberCount || 0) + ' გამომწერი &nbsp;·&nbsp; <i class="fas fa-film"></i> ' + fmtNum(ch.videoCount || 0) + ' ვიდეო</span>' +
-                '</div>' +
-                '<button class="vid-btn-outline" id="vidDelAllMyVids" style="color:#ef4444;border-color:rgba(239,68,68,.3);font-size:.8rem"><i class="fas fa-trash"></i> ყველა ვიდეო</button>' +
-                '<a class="vid-add-btn" href="channel.html?id=' + esc(ch._id) + '" style="font-size:.85rem;text-decoration:none"><i class="fas fa-tv"></i> ჩემი არხი</a>' +
-              '</div>';
-            var delAllBtn2 = document.getElementById('vidDelAllMyVids');
-            if (delAllBtn2) delAllBtn2.onclick = function () { deleteAllMyVideos(u); };
-          }
+          if (snap.empty) return; /* already showing renderNoChannel */
+          var ch = Object.assign({ _id: snap.docs[0].id }, snap.docs[0].data());
+          bar.innerHTML =
+            '<div class="vid-mychannel-bar">' +
+              (ch.avatar
+                ? '<img class="vid-mychannel-av" src="' + esc(ch.avatar) + '" alt="">'
+                : '<div class="vid-mychannel-av-ph"><i class="fas fa-tv"></i></div>') +
+              '<div class="vid-mychannel-info">' +
+                '<span class="vid-mychannel-name">' + esc(ch.name) + '</span>' +
+                '<span class="vid-mychannel-sub"><i class="fas fa-users"></i> ' + fmtNum(ch.subscriberCount || 0) + ' გამომწერი &nbsp;·&nbsp; <i class="fas fa-film"></i> ' + fmtNum(ch.videoCount || 0) + ' ვიდეო</span>' +
+              '</div>' +
+              '<button class="vid-btn-outline" id="vidDelAllMyVids" style="color:#ef4444;border-color:rgba(239,68,68,.3);font-size:.8rem"><i class="fas fa-trash"></i> ყველა ვიდეო</button>' +
+              '<a class="vid-add-btn" href="channel.html?id=' + esc(ch._id) + '" style="font-size:.85rem;text-decoration:none"><i class="fas fa-tv"></i> ჩემი არხი</a>' +
+            '</div>';
+          wireDelBtn(u);
         })
-        .catch(function () { bar.innerHTML = ''; });
+        .catch(function () { /* bar already shows renderNoChannel, keep it */ });
     }
 
     if (auth()) {
