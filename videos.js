@@ -206,6 +206,13 @@
   function vidCardHTML(v) {
     var m = catMeta(v.category);
     var thumb = v.thumbnail || ytThumb(v.youtubeId);
+    var locBadges = '';
+    if (v.placeName && v.placeId) {
+      locBadges += '<a class="vid-loc-badge place" href="places.html?id=' + esc(v.placeId) + '" onclick="event.stopPropagation()"><i class="fas fa-map-pin"></i>' + esc(v.placeName) + '</a>';
+    }
+    if (v.businessName && v.businessId) {
+      locBadges += '<a class="vid-loc-badge business" href="business.html?id=' + esc(v.businessId) + '" onclick="event.stopPropagation()"><i class="fas fa-store"></i>' + esc(v.businessName) + '</a>';
+    }
     return '<a class="vid-card" href="watch.html?v=' + v.id + '" data-vid-id="' + v.id + '">' +
       '<div class="vid-thumb-wrap">' +
         '<img src="' + thumb + '" alt="" loading="lazy" onerror="this.src=\'' + ytThumb(v.youtubeId) + '\'">' +
@@ -218,6 +225,7 @@
           '<span class="vid-card-channel"><i class="fab fa-youtube"></i>' + esc(v.channelName || '') + '</span>' +
           (v.city ? '<span class="vid-card-city"><i class="fas fa-location-dot"></i>' + esc(v.city) + '</span>' : '') +
         '</div>' +
+        (locBadges ? '<div class="vid-loc-badges">' + locBadges + '</div>' : '') +
         '<div class="vid-card-stats">' +
           '<span class="vid-card-stat"><i class="fas fa-eye"></i>' + fmtNum(v.viewCount) + '</span>' +
           '<span class="vid-card-stat"><i class="fas fa-heart"></i>' + fmtNum(v.likeCount) + '</span>' +
@@ -251,6 +259,75 @@
 
   function esc(s) {
     return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── Phase 3: Firestore prefix search ───────────────────── */
+  function searchCollection(colName, query, limit, callback) {
+    if (!fs() || !db() || !query.trim()) { callback([]); return; }
+    var q = query.trim();
+    var col = fs().collection(db(), colName);
+    var fq = fs().query(col,
+      fs().orderBy('name'),
+      fs().startAt(q),
+      fs().endAt(q + ''),
+      fs().limit(limit || 5)
+    );
+    fs().getDocs(fq)
+      .then(function (snap) {
+        var items = [];
+        snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        callback(items);
+      })
+      .catch(function () { callback([]); });
+  }
+
+  function searchPlaces(q, cb) { searchCollection('places', q, 5, cb); }
+  function searchBusinesses(q, cb) { searchCollection('businesses', q, 5, cb); }
+
+  /* ── Phase 3: Watch page location panel ─────────────────── */
+  function loadWatchLocation(v) {
+    var panel = document.getElementById('watchLocation');
+    if (!panel) return;
+    var hasCity = !!v.city;
+    var hasPlace = !!(v.placeId && v.placeName);
+    var hasBusiness = !!(v.businessId && v.businessName);
+    if (!hasCity && !hasPlace && !hasBusiness) { panel.style.display = 'none'; return; }
+
+    var cityRow = hasCity
+      ? '<div class="watch-city-row"><i class="fas fa-location-dot"></i>გადაღებულია ' + esc(v.city) + '-ში</div>'
+      : '';
+
+    var cards = '';
+    if (hasPlace) {
+      var placeHref = 'places.html?id=' + esc(v.placeId);
+      cards += '<a class="watch-loc-card" href="' + placeHref + '">' +
+        '<div class="watch-loc-icon place"><i class="fas fa-map-pin"></i></div>' +
+        '<div class="watch-loc-info">' +
+          '<div class="watch-loc-name">' + esc(v.placeName) + '</div>' +
+          '<div class="watch-loc-type">ადგილი</div>' +
+        '</div>' +
+        '<span class="watch-loc-map-btn"><i class="fas fa-map"></i>რუკა</span>' +
+      '</a>';
+    }
+    if (hasBusiness) {
+      var bizHref = 'business.html?id=' + esc(v.businessId);
+      cards += '<a class="watch-loc-card" href="' + bizHref + '">' +
+        '<div class="watch-loc-icon business"><i class="fas fa-store"></i></div>' +
+        '<div class="watch-loc-info">' +
+          '<div class="watch-loc-name">' + esc(v.businessName) + '</div>' +
+          '<div class="watch-loc-type">ბიზნესი</div>' +
+        '</div>' +
+        '<span class="watch-loc-map-btn"><i class="fas fa-arrow-right"></i>გვერდი</span>' +
+      '</a>';
+    }
+
+    panel.style.display = '';
+    panel.innerHTML =
+      '<div class="watch-location-panel">' +
+        '<h4><i class="fas fa-location-dot"></i>მდებარეობა</h4>' +
+        cityRow +
+        (cards ? '<div class="watch-loc-cards">' + cards + '</div>' : '') +
+      '</div>';
   }
 
   /* ── Videos page init ─────────────────────────────────── */
@@ -412,6 +489,26 @@
             '<select id="vidCityInput" class="vid-form-select"><option value="">-- ქალაქი --</option>' + cityOpts + '</select>' +
           '</div>' +
         '</div>' +
+        '<div class="vid-form-row">' +
+          '<div class="vid-form-group">' +
+            '<label class="vid-form-label"><i class="fas fa-map-pin" style="color:var(--green);margin-right:4px"></i>ადგილი (არასავალდებულო)</label>' +
+            '<div class="vid-search-wrap">' +
+              '<input id="vidPlaceSearch" class="vid-form-input" type="text" placeholder="ადგილის ძიება..." autocomplete="off">' +
+              '<button class="vid-search-clear" id="vidPlaceClear" type="button"><i class="fas fa-times"></i></button>' +
+              '<div class="vid-search-dropdown" id="vidPlaceDd"></div>' +
+            '</div>' +
+            '<div class="vid-search-selected" id="vidPlaceSelected"><i class="fas fa-map-pin"></i><span class="vid-search-selected-name" id="vidPlaceSelectedName"></span><button class="vid-search-selected-remove" id="vidPlaceRemove" type="button"><i class="fas fa-times"></i></button></div>' +
+          '</div>' +
+          '<div class="vid-form-group">' +
+            '<label class="vid-form-label"><i class="fas fa-store" style="color:#60a5fa;margin-right:4px"></i>ბიზნესი (არასავალდებულო)</label>' +
+            '<div class="vid-search-wrap">' +
+              '<input id="vidBizSearch" class="vid-form-input" type="text" placeholder="ბიზნესის ძიება..." autocomplete="off">' +
+              '<button class="vid-search-clear" id="vidBizClear" type="button"><i class="fas fa-times"></i></button>' +
+              '<div class="vid-search-dropdown" id="vidBizDd"></div>' +
+            '</div>' +
+            '<div class="vid-search-selected" id="vidBizSelected" style="border-color:rgba(59,130,246,.2);background:rgba(59,130,246,.08)"><i class="fas fa-store" style="color:#60a5fa"></i><span class="vid-search-selected-name" id="vidBizSelectedName" style="color:#60a5fa"></span><button class="vid-search-selected-remove" id="vidBizRemove" type="button"><i class="fas fa-times"></i></button></div>' +
+          '</div>' +
+        '</div>' +
         '<div class="vid-form-group">' +
           '<label class="vid-form-label">აღწერა</label>' +
           '<textarea id="vidDescInput" class="vid-form-textarea" placeholder="ვიდეოზე მოკლე აღწერა..."></textarea>' +
@@ -429,6 +526,8 @@
     document.body.appendChild(ov);
 
     var _fetched = null;
+    var _selectedPlace = null;
+    var _selectedBiz = null;
 
     document.getElementById('vidModalClose').onclick = closeAddVideoModal;
     document.getElementById('vidCancelBtn').onclick = closeAddVideoModal;
@@ -443,6 +542,78 @@
     }
     urlInput.addEventListener('input', checkReady);
     titleInput.addEventListener('input', checkReady);
+
+    /* ── Search field wiring ─────────────────────────────── */
+    function makeSearchField(inputId, clearId, ddId, selectedId, selectedNameId, removeId, searchFn, type, onSelect) {
+      var inp = document.getElementById(inputId);
+      var clr = document.getElementById(clearId);
+      var dd  = document.getElementById(ddId);
+      var sel = document.getElementById(selectedId);
+      var selName = document.getElementById(selectedNameId);
+      var rem = document.getElementById(removeId);
+      if (!inp) return;
+      var debounceT = null;
+
+      function showDd(items) {
+        if (!items.length) { dd.classList.remove('open'); dd.innerHTML = ''; return; }
+        dd.innerHTML = items.map(function (it) {
+          return '<div class="vid-search-item" data-id="' + esc(it.id) + '" data-name="' + esc(it.name || '') + '">' +
+            '<div class="vid-search-item-icon ' + type + '"><i class="fas ' + (type === 'place' ? 'fa-map-pin' : 'fa-store') + '"></i></div>' +
+            '<div class="vid-search-item-name">' + esc(it.name || '') + '</div>' +
+            (it.city ? '<div class="vid-search-item-sub">' + esc(it.city) + '</div>' : '') +
+          '</div>';
+        }).join('');
+        dd.classList.add('open');
+      }
+
+      inp.addEventListener('input', function () {
+        var q = inp.value.trim();
+        clr.classList.toggle('visible', !!q);
+        clearTimeout(debounceT);
+        if (!q) { dd.classList.remove('open'); dd.innerHTML = ''; return; }
+        debounceT = setTimeout(function () {
+          searchFn(q, function (items) { showDd(items); });
+        }, 280);
+      });
+
+      dd.addEventListener('click', function (e) {
+        var item = e.target.closest('[data-id]');
+        if (!item) return;
+        var id = item.dataset.id;
+        var name = item.dataset.name;
+        inp.value = '';
+        clr.classList.remove('visible');
+        dd.classList.remove('open');
+        dd.innerHTML = '';
+        selName.textContent = name;
+        sel.classList.add('visible');
+        onSelect({ id: id, name: name });
+      });
+
+      rem.addEventListener('click', function () {
+        sel.classList.remove('visible');
+        onSelect(null);
+      });
+
+      clr.addEventListener('click', function () {
+        inp.value = '';
+        clr.classList.remove('visible');
+        dd.classList.remove('open');
+        dd.innerHTML = '';
+      });
+
+      document.addEventListener('click', function hideDd(e) {
+        if (!inp.closest('.vid-search-wrap').contains(e.target)) {
+          dd.classList.remove('open');
+          if (!inp.closest('#vidAddModal')) document.removeEventListener('click', hideDd);
+        }
+      });
+    }
+
+    makeSearchField('vidPlaceSearch','vidPlaceClear','vidPlaceDd','vidPlaceSelected','vidPlaceSelectedName','vidPlaceRemove',
+      searchPlaces, 'place', function (v) { _selectedPlace = v; });
+    makeSearchField('vidBizSearch','vidBizClear','vidBizDd','vidBizSelected','vidBizSelectedName','vidBizRemove',
+      searchBusinesses, 'business', function (v) { _selectedBiz = v; });
 
     document.getElementById('vidFetchBtn').addEventListener('click', function () {
       var url = urlInput.value.trim();
@@ -486,15 +657,15 @@
         authorId:    u.uid,
         authorName:  u.displayName || 'GeoHub User',
         authorAvatar: u.photoURL || '',
-        category:    (document.getElementById('vidCatInput') || {}).value || '',
-        city:        (document.getElementById('vidCityInput') || {}).value || '',
-        description: (document.getElementById('vidDescInput') || {}).value.trim() || '',
-        isShort:     !!(document.getElementById('vidIsShort') || {}).checked,
-        tags:        [],
-        lat:         null,
-        lng:         null,
-        placeId:     null,
-        bizId:       null
+        category:      (document.getElementById('vidCatInput') || {}).value || '',
+        city:          (document.getElementById('vidCityInput') || {}).value || '',
+        description:   (document.getElementById('vidDescInput') || {}).value.trim() || '',
+        isShort:       !!(document.getElementById('vidIsShort') || {}).checked,
+        tags:          [],
+        placeId:       _selectedPlace ? _selectedPlace.id : null,
+        placeName:     _selectedPlace ? _selectedPlace.name : null,
+        businessId:    _selectedBiz ? _selectedBiz.id : null,
+        businessName:  _selectedBiz ? _selectedBiz.name : null
       }, function (err, id) {
         if (err) {
           toast('შეცდომა: ' + err.message, 'error');
@@ -582,6 +753,8 @@
       bindWatchLike(v);
       bindWatchShare(v);
     }
+
+    loadWatchLocation(v);
 
     if (descEl && v.description) {
       descEl.innerHTML = '<div class="watch-desc-wrap"><p>' + esc(v.description) + '</p></div>';

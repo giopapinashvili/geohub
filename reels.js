@@ -117,8 +117,11 @@
         '</div>' +
         '<div class="reel-info-title">' + esc(v.title || 'GeoHub Reel') + '</div>' +
         '<div class="reel-info-tags">' +
-          (v.city ? '<span class="reel-info-tag"><i class="fas fa-location-dot"></i>' + esc(v.city) + '</span>' : '') +
+          (v.city && v.placeId
+            ? '<a class="reel-info-tag" href="places.html?id=' + esc(v.placeId) + '" style="text-decoration:none;color:inherit" onclick="event.stopPropagation()"><i class="fas fa-location-dot"></i>' + esc(v.city) + '</a>'
+            : (v.city ? '<span class="reel-info-tag"><i class="fas fa-location-dot"></i>' + esc(v.city) + '</span>' : '')) +
           (v.channelName ? '<span class="reel-info-tag"><i class="fab fa-youtube"></i>' + esc(v.channelName) + '</span>' : '') +
+          (v.businessName && v.businessId ? '<a class="reel-info-tag" href="business.html?id=' + esc(v.businessId) + '" style="text-decoration:none;color:inherit;opacity:.85" onclick="event.stopPropagation()"><i class="fas fa-store"></i>' + esc(v.businessName) + '</a>' : '') +
         '</div>' +
       '</div>' +
     '</div>';

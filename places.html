@@ -577,10 +577,50 @@
           '<div class="pl-checkins-head"><i class="fas fa-map-pin"></i> Recent Check-ins</div>'+
           '<div id="plCheckinsList"><div style="padding:8px 0;color:#4b5563;font-size:.8rem"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div></div>'+
         '</div>'+
+        '<div id="plVideosSection" style="margin-top:18px">'+
+          '<div style="font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b;margin-bottom:10px"><i class="fas fa-film" style="margin-right:5px"></i>Videos</div>'+
+          '<div id="plVideosList" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none"><div style="color:#64748b;font-size:.8rem;padding:8px 0"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div></div>'+
+        '</div>'+
       '</div>';
     initReviewStars();
     loadReviews(p.id);
     loadPlaceCheckins(p.id);
+    loadPlaceVideos(p.id);
+  }
+
+  function loadPlaceVideos(placeId){
+    var list = document.getElementById('plVideosList');
+    if(!list) return;
+    var gf = window.GeoFirebase;
+    if(!gf||!gf.fs||!gf.db){ list.innerHTML=''; return; }
+    var q = gf.fs.query(
+      gf.fs.collection(gf.db,'videos'),
+      gf.fs.where('placeId','==',placeId),
+      gf.fs.where('status','==','active'),
+      gf.fs.orderBy('createdAt','desc'),
+      gf.fs.limit(8)
+    );
+    gf.fs.getDocs(q).then(function(snap){
+      if(!list) return;
+      if(snap.empty){
+        document.getElementById('plVideosSection').style.display='none';
+        return;
+      }
+      var html='';
+      snap.forEach(function(d){
+        var v=Object.assign({id:d.id},d.data());
+        var tid=v.youtubeId||'';
+        var thumb=v.thumbnail||('https://i.ytimg.com/vi/'+tid+'/hqdefault.jpg');
+        html+='<a href="watch.html?v='+esc(v.id)+'" style="flex-shrink:0;width:150px;display:block;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.08);border:1px solid rgba(0,0,0,.1);text-decoration:none">'+
+          '<div style="position:relative;padding-top:56.25%;background:#000"><img src="'+esc(thumb)+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" loading="lazy">'+
+          '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.65rem"><i class="fas fa-play"></i></div></div></div>'+
+          '<div style="padding:5px 7px;font-size:.72rem;font-weight:600;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(v.title||'Video')+'</div>'+
+          '</a>';
+      });
+      list.innerHTML=html;
+    }).catch(function(){
+      document.getElementById('plVideosSection').style.display='none';
+    });
   }
 
   function openPlaceDetail(placeId){

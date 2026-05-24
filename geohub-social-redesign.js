@@ -3778,7 +3778,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       : (b.ratingAverage > 0 ? Number(b.ratingAverage).toFixed(1) : null);
     var ratingDisplay = ratingAvg ? ratingAvg+' ★' : '—';
 
-    var tabs=[{id:'overview',l:'Overview'},{id:'posts',l:'Posts'},{id:'services',l:'Services'},{id:'photos',l:'Photos'},{id:'reviews',l:'Reviews'},{id:'about',l:'About'}];
+    var tabs=[{id:'overview',l:'Overview'},{id:'posts',l:'Posts'},{id:'services',l:'Services'},{id:'photos',l:'Photos'},{id:'videos',l:'Videos'},{id:'reviews',l:'Reviews'},{id:'about',l:'About'}];
     if(isOwner) tabs.push({id:'manage',l:'Dashboard'});
     var tabsHtml=tabs.map(function(t){
       return '<button class="gh-biz-tab'+(t.id==='overview'?' active':'')+'" data-biz-tab="'+t.id+'">'+t.l+'</button>';
@@ -5063,6 +5063,33 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     $('#boSubmit').onclick=function(){ if(!GS().createBusinessOffer) return toast('Offers unavailable','error'); GS().createBusinessOffer(b.id,{ title:$('#boTitle').value, description:$('#boDesc').value, startsAt:$('#boStarts').value, endsAt:$('#boEnds').value },function(){ var m=$('#ghOfferModal'); if(m)m.remove(); renderBusinessManageTab(b); }); };
   }
 
+  function renderBizVideos(b){
+    var box=$('#ghBusinessTabContent'); if(!box)return;
+    box.innerHTML='<div id="ghBizVideoList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;padding:4px 0"><div style="color:var(--text-muted,#888);font-size:.85rem;grid-column:1/-1;padding:20px 0;text-align:center"><i class="fas fa-circle-notch fa-spin"></i></div></div>';
+    var _fs=window.GeoFirebase&&window.GeoFirebase.fs?window.GeoFirebase.fs:null;
+    var _db=window.GeoFirebase&&window.GeoFirebase.db?window.GeoFirebase.db:null;
+    if(!_fs||!_db){box.querySelector('#ghBizVideoList').innerHTML='<div style="color:var(--text-muted,#888);font-size:.85rem;grid-column:1/-1;padding:20px 0;text-align:center"><i class="fas fa-film"></i> ვიდეო არ არის</div>';return;}
+    var q=_fs.query(_fs.collection(_db,'videos'),_fs.where('businessId','==',b.id),_fs.where('status','==','active'),_fs.orderBy('createdAt','desc'),_fs.limit(12));
+    _fs.getDocs(q).then(function(snap){
+      var list=box.querySelector('#ghBizVideoList'); if(!list)return;
+      if(snap.empty){list.innerHTML='<div style="color:var(--text-muted,#888);font-size:.85rem;grid-column:1/-1;padding:40px 0;text-align:center"><i class="fas fa-film" style="font-size:2rem;display:block;margin-bottom:8px;opacity:.4"></i>ვიდეო ჯერ არ არის</div>';return;}
+      var html='';
+      snap.forEach(function(d){
+        var v=Object.assign({id:d.id},d.data());
+        var thumb=v.thumbnail||('https://i.ytimg.com/vi/'+(v.youtubeId||'')+'/'+'hqdefault.jpg');
+        html+='<a href="watch.html?v='+esc(v.id)+'" style="display:block;border-radius:10px;overflow:hidden;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);text-decoration:none;transition:transform .15s" onmouseover="this.style.transform=\'scale(1.02)\'" onmouseout="this.style.transform=\'\'">'+
+          '<div style="position:relative;padding-top:56.25%;background:#000"><img src="'+esc(thumb)+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" loading="lazy">'+
+          '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25)"><div style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem"><i class="fas fa-play"></i></div></div></div>'+
+          '<div style="padding:8px 10px"><div style="font-size:.8rem;font-weight:600;color:var(--text-primary,#f1f5f9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(v.title||'Video')+'</div>'+
+          (v.city?'<div style="font-size:.7rem;color:var(--text-muted,#888);margin-top:2px"><i class="fas fa-location-dot" style="margin-right:3px"></i>'+esc(v.city)+'</div>':'')+
+          '</div></a>';
+      });
+      list.innerHTML=html;
+    }).catch(function(){
+      var list=box.querySelector('#ghBizVideoList'); if(list)list.innerHTML='<div style="color:var(--text-muted,#888);font-size:.85rem;grid-column:1/-1;padding:20px 0;text-align:center"><i class="fas fa-film"></i> ვიდეო ვერ ჩაიტვირთა</div>';
+    });
+  }
+
   function renderBusinessTab(b){
     var box=$('#ghBusinessTabContent'); if(!box)return;
     var tab=state.currentBusinessTab||'overview';
@@ -5072,6 +5099,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(tab==='manage')    return renderBusinessManageTab(b);
     if(tab==='services')  return renderBusinessServices(b);
     if(tab==='photos')  { renderBusinessPhotos(b); return; }
+    if(tab==='videos')  { renderBizVideos(b); return; }
     // posts tab
     var bTitle=b.title||b.name||'Business';
     var isOwner=!!(authUser() && authUser().uid && (b.ownerId===authUser().uid || b.createdBy===authUser().uid || b.userId===authUser().uid));
