@@ -1425,8 +1425,11 @@
                   '<span class="vid-mychannel-name">' + esc(ch.name) + '</span>' +
                   '<span class="vid-mychannel-sub"><i class="fas fa-users"></i> ' + fmtNum(ch.subscriberCount || 0) + ' გამომწერი &nbsp;·&nbsp; <i class="fas fa-film"></i> ' + fmtNum(ch.videoCount || 0) + ' ვიდეო</span>' +
                 '</div>' +
+                '<button class="vid-btn-outline" id="vidDelAllMyVids" style="color:#ef4444;border-color:rgba(239,68,68,.3);font-size:.8rem"><i class="fas fa-trash"></i> ყველა ვიდეო</button>' +
                 '<a class="vid-add-btn" href="channel.html?id=' + esc(ch._id) + '" style="font-size:.85rem;text-decoration:none"><i class="fas fa-tv"></i> ჩემი არხი</a>' +
               '</div>';
+            var delAllBtn2 = document.getElementById('vidDelAllMyVids');
+            if (delAllBtn2) delAllBtn2.onclick = function () { deleteAllMyVideos(u); };
           }
         })
         .catch(function () { bar.innerHTML = ''; });
