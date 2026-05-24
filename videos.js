@@ -1379,8 +1379,12 @@
           if (snap.empty) {
             bar.innerHTML =
               '<div class="vid-mychannel-bar">' +
-                '<span class="vid-mychannel-hint"><i class="fas fa-tv"></i> არხი არ გაქვს</span>' +
-                '<button class="vid-btn-outline" id="vidCreateChBtn"><i class="fas fa-plus"></i> შექმენი არხი</button>' +
+                '<div class="vid-mychannel-av-ph"><i class="fas fa-tv"></i></div>' +
+                '<div class="vid-mychannel-info">' +
+                  '<span class="vid-mychannel-name">GeoHub არხი</span>' +
+                  '<span class="vid-mychannel-sub">შექმენი შენი პირადი არხი და ატვირთე ვიდეოები</span>' +
+                '</div>' +
+                '<button class="vid-add-btn" id="vidCreateChBtn" style="font-size:.85rem"><i class="fas fa-plus"></i> შექმენი არხი</button>' +
               '</div>';
             var btn = document.getElementById('vidCreateChBtn');
             if (btn) btn.onclick = function () { openCreateChannelModal(u); };
@@ -1393,9 +1397,9 @@
                   : '<div class="vid-mychannel-av-ph"><i class="fas fa-tv"></i></div>') +
                 '<div class="vid-mychannel-info">' +
                   '<span class="vid-mychannel-name">' + esc(ch.name) + '</span>' +
-                  '<span class="vid-mychannel-sub">' + fmtNum(ch.subscriberCount || 0) + ' გამომწერი · ' + fmtNum(ch.videoCount || 0) + ' ვიდეო</span>' +
+                  '<span class="vid-mychannel-sub"><i class="fas fa-users"></i> ' + fmtNum(ch.subscriberCount || 0) + ' გამომწერი &nbsp;·&nbsp; <i class="fas fa-film"></i> ' + fmtNum(ch.videoCount || 0) + ' ვიდეო</span>' +
                 '</div>' +
-                '<a class="vid-btn-outline" href="channel.html?id=' + esc(ch._id) + '"><i class="fas fa-tv"></i> ჩემი არხი</a>' +
+                '<a class="vid-add-btn" href="channel.html?id=' + esc(ch._id) + '" style="font-size:.85rem;text-decoration:none"><i class="fas fa-tv"></i> ჩემი არხი</a>' +
               '</div>';
           }
         })

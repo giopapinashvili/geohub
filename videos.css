@@ -2214,15 +2214,15 @@ body.watch-cinematic .related-thumb {
 }
 
 /* ── My Channel bar on videos page ─────────────────────── */
+#vidMyChannelBar { margin-bottom: 20px; }
 .vid-mychannel-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 14px;
-  padding: 10px 16px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  gap: 14px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, rgba(16,185,129,.1), rgba(59,130,246,.07));
+  border: 1px solid rgba(16,185,129,.25);
+  border-radius: 16px;
   flex-wrap: wrap;
 }
 .vid-mychannel-av {
