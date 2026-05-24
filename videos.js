@@ -122,7 +122,7 @@
   }
 
   function ytMaxThumb(id) {
-    return 'https://i.ytimg.com/vi/' + id + '/maxresdefault.jpg';
+    return 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
   }
 
   function ytEmbed(id) {
@@ -1540,13 +1540,16 @@
           '<input id="vccAvatar" class="vid-form-input" type="url" placeholder="https://...">' +
         '</div>' +
         '<div class="vid-form-group">' +
+          '<label class="vid-form-label">Banner URL <span style="color:var(--text-muted);font-weight:400">(არასავალდებულო)</span></label>' +
+          '<input id="vccBanner" class="vid-form-input" type="url" placeholder="https://...">' +
+        '</div>' +
+        '<div class="vid-form-group">' +
           '<label class="vid-form-label">YouTube Channel URL <span style="color:var(--text-muted);font-weight:400">(ავტო-შევსება)</span></label>' +
           '<div class="vid-url-group">' +
             '<input id="vccYtUrl" class="vid-form-input" type="url" placeholder="https://www.youtube.com/@channel">' +
             '<button class="vid-fetch-btn" id="vccYtFetch"><i class="fas fa-wand-magic-sparkles"></i> Auto-fill</button>' +
           '</div>' +
         '</div>' +
-        '<input type="hidden" id="vccBanner">' +
         '<input type="hidden" id="vccSubCount">' +
         '<input type="hidden" id="vccYtChId">' +
         '<div id="vccPreview"></div>' +
