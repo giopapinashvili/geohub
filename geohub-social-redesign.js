@@ -6372,6 +6372,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(PAGE==='map'     || PATH==='map.html')     { injectShellNav('map');     return; }
     if(PAGE==='places'  || PATH==='places.html')  { injectShellNav('places');  return; }
     if(PAGE==='admin-videos' || PATH==='admin-videos.html') { injectShellNav('admin-videos'); return; }
+    if(PAGE==='channel'     || PATH==='channel.html')     { injectShellNav('channel');     return; }
     return renderComingSoon();
   }
 

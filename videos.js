@@ -240,10 +240,15 @@
           '</div>' +
           '<button class="vid-card-menu-btn" data-vid-menu="' + esc(v.id) + '" title="More options" onclick="event.preventDefault();event.stopPropagation()"><i class="fas fa-ellipsis-vertical"></i></button>' +
         '</div>' +
-        (v.authorId ? '<a class="vid-creator-link" href="profile.html?id=' + esc(v.authorId) + '" onclick="event.stopPropagation()">' +
-          '<div class="vid-creator-av">' + (v.authorAvatar ? '<img src="' + esc(v.authorAvatar) + '" alt="">' : '<span>' + (v.authorName || 'U').charAt(0) + '</span>') + '</div>' +
-          esc(v.authorName || 'GeoHub User') +
-        '</a>' : '') +
+        (v.channelId
+          ? '<a class="vid-creator-link" href="channel.html?id=' + esc(v.channelId) + '" onclick="event.stopPropagation()">' +
+              '<div class="vid-creator-av ch-av"><i class="fas fa-tv"></i></div>' +
+              esc(v.channelName || 'GeoHub Channel') +
+            '</a>'
+          : (v.authorId ? '<a class="vid-creator-link" href="profile.html?id=' + esc(v.authorId) + '" onclick="event.stopPropagation()">' +
+              '<div class="vid-creator-av">' + (v.authorAvatar ? '<img src="' + esc(v.authorAvatar) + '" alt="">' : '<span>' + (v.authorName || 'U').charAt(0) + '</span>') + '</div>' +
+              esc(v.authorName || 'GeoHub User') +
+            '</a>' : '')) +
       '</div>' +
     '</a>';
   }
@@ -1523,38 +1528,68 @@
         throw new Error('YouTube channel URL ვერ ამოვიცანი. სცადე @handle ან /channel/UC... ფორმატი.');
       }
 
-      /* Get uploads playlist ID for a channel */
-      function getUploadsPlaylistId(channelId) {
-        return ytApi('channels?part=contentDetails,snippet&id=' + channelId)
+      /* Fetch full channel details from YouTube API */
+      function getChannelInfo(ytChannelId) {
+        return ytApi('channels?part=contentDetails,snippet,brandingSettings&id=' + ytChannelId)
           .then(function (d) {
             if (!d.items || !d.items[0]) throw new Error('Channel ვერ მოიძებნა');
             var item = d.items[0];
+            var sn = item.snippet;
+            var bs = (item.brandingSettings || {}).image || {};
             return {
-              uploadsId:   item.contentDetails.relatedPlaylists.uploads,
-              channelName: item.snippet.title,
-              channelUrl:  'https://www.youtube.com/channel/' + channelId
+              ytChannelId:  ytChannelId,
+              uploadsId:    item.contentDetails.relatedPlaylists.uploads,
+              name:         sn.title || '',
+              description:  sn.description || '',
+              avatar:       (sn.thumbnails && (sn.thumbnails.high || sn.thumbnails.medium || sn.thumbnails.default) || {}).url || '',
+              banner:       bs.bannerExternalUrl || '',
+              customUrl:    sn.customUrl || '',
+              youtubeUrl:   'https://www.youtube.com/channel/' + ytChannelId
             };
           });
       }
 
+      /* Create or find existing GeoHub channel doc */
+      function createOrGetGeoChannel(info, userId) {
+        if (!fs() || !db()) return Promise.reject(new Error('Firebase unavailable'));
+        var col = fs().collection(db(), 'channels');
+        return fs().getDocs(fs().query(col, fs().where('youtubeChannelId', '==', info.ytChannelId), fs().limit(1)))
+          .then(function (snap) {
+            if (!snap.empty) return snap.docs[0].id;
+            return fs().addDoc(col, {
+              youtubeChannelId: info.ytChannelId,
+              name:            info.name,
+              description:     info.description,
+              avatar:          info.avatar,
+              banner:          info.banner,
+              customUrl:       info.customUrl,
+              youtubeUrl:      info.youtubeUrl,
+              subscriberCount: 0,
+              videoCount:      0,
+              ownerId:         userId,
+              createdAt:       fs().serverTimestamp()
+            }).then(function (ref) { return ref.id; });
+          });
+      }
+
       /* Fetch all videos from uploads playlist with pagination */
-      function fetchAllVideos(uploadsId, channelName, channelUrl) {
+      function fetchAllVideos(info) {
         var videos = [];
         var res = document.getElementById('vidChResult');
 
         function fetchPage(pageToken) {
-          var path = 'playlistItems?part=snippet&playlistId=' + uploadsId +
+          var path = 'playlistItems?part=snippet&playlistId=' + info.uploadsId +
             '&maxResults=50' + (pageToken ? '&pageToken=' + pageToken : '');
           return ytApi(path).then(function (d) {
             (d.items || []).forEach(function (item) {
               var sn = item.snippet;
               var vid = sn.resourceId && sn.resourceId.videoId;
-              if (!vid || vid === 'Private video') return;
+              if (!vid || sn.title === 'Private video' || sn.title === 'Deleted video') return;
               videos.push({
                 youtubeId:   vid,
                 title:       sn.title || '',
-                channelName: channelName,
-                channelUrl:  channelUrl,
+                channelName: info.name,
+                channelUrl:  info.youtubeUrl,
                 thumbnail:   (sn.thumbnails && (sn.thumbnails.high || sn.thumbnails.medium || sn.thumbnails.default) || {}).url || ytThumb(vid)
               });
             });
@@ -1564,6 +1599,21 @@
           });
         }
         return fetchPage(null);
+      }
+
+      var _chInfo = null; /* full channel info from YouTube API */
+
+      function renderChannelPreview(info) {
+        var res = document.getElementById('vidChResult');
+        res.innerHTML =
+          '<div class="vid-ch-preview">' +
+            (info.avatar ? '<img class="vid-ch-av" src="' + esc(info.avatar) + '" alt="">' : '<div class="vid-ch-av-placeholder"><i class="fas fa-tv"></i></div>') +
+            '<div>' +
+              '<div class="vid-ch-preview-name">' + esc(info.name) + '</div>' +
+              (info.customUrl ? '<div class="vid-ch-preview-sub">' + esc(info.customUrl) + '</div>' : '') +
+            '</div>' +
+            '<span class="vid-ch-preview-badge"><i class="fas fa-spinner fa-spin"></i> ვიდეოები იტვირთება...</span>' +
+          '</div>';
       }
 
       function renderImportList(videos) {
@@ -1577,8 +1627,18 @@
           return;
         }
         _chVideos = videos;
+        var preview = _chInfo
+          ? '<div class="vid-ch-preview">' +
+              (_chInfo.avatar ? '<img class="vid-ch-av" src="' + esc(_chInfo.avatar) + '" alt="">' : '<div class="vid-ch-av-placeholder"><i class="fas fa-tv"></i></div>') +
+              '<div>' +
+                '<div class="vid-ch-preview-name">' + esc(_chInfo.name) + '</div>' +
+                (_chInfo.customUrl ? '<div class="vid-ch-preview-sub">' + esc(_chInfo.customUrl) + '</div>' : '') +
+              '</div>' +
+              '<span class="vid-ch-preview-badge vid-ch-preview-badge-ok"><i class="fas fa-check"></i> GeoHub Channel შეიქმნება</span>' +
+            '</div>'
+          : '';
         if (countLabel) countLabel.textContent = 'სულ ' + videos.length + ' ვიდეო';
-        res.innerHTML = '<div class="vid-import-list">' +
+        res.innerHTML = preview + '<div class="vid-import-list">' +
           videos.map(function (v, i) {
             return '<label class="vid-import-item">' +
               '<input type="checkbox" class="vid-import-cb" data-i="' + i + '" checked>' +
@@ -1602,13 +1662,18 @@
         if (!url) return;
         var res = document.getElementById('vidChResult');
         var btn = document.getElementById('vidChFetchBtn');
+        _chInfo = null;
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
         res.innerHTML = '<div class="vid-ch-loading"><i class="fas fa-spinner fa-spin"></i> Channel იტვირთება...</div>';
         document.getElementById('vidChFooter').style.display = 'none';
         resolveChannelId(url)
-          .then(function (cid) { return getUploadsPlaylistId(cid); })
-          .then(function (info) { return fetchAllVideos(info.uploadsId, info.channelName, info.channelUrl); })
+          .then(function (cid) { return getChannelInfo(cid); })
+          .then(function (info) {
+            _chInfo = info;
+            renderChannelPreview(info);
+            return fetchAllVideos(info);
+          })
           .then(function (vids) { renderImportList(vids); })
           .catch(function (err) {
             res.innerHTML = '<div class="vid-ch-error"><i class="fas fa-exclamation-circle"></i> ' + esc(err.message || 'შეცდომა') + '</div>';
@@ -1635,44 +1700,61 @@
         var city = (document.getElementById('vidChCity') || {}).value || '';
         var importBtn = document.getElementById('vidChImportBtn');
         importBtn.disabled = true;
+        importBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Channel იქმნება...';
         var indices = Array.prototype.map.call(checked, function (cb) { return parseInt(cb.dataset.i, 10); });
         var total = indices.length;
-        var done = 0;
-        var errors = 0;
-        function next() {
-          if (!indices.length) {
-            toast(done + ' ვიდეო დაემატა' + (errors ? ' (' + errors + ' შეცდომა)' : '') + ' ✓');
-            closeAddVideoModal();
-            return;
-          }
-          importBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + done + '/' + total;
-          var idx = indices.shift();
-          var v = _chVideos[idx];
-          saveVideo({
-            youtubeId:    v.youtubeId,
-            youtubeUrl:   'https://www.youtube.com/watch?v=' + v.youtubeId,
-            title:        v.title,
-            thumbnail:    v.thumbnail,
-            channelName:  v.channelName,
-            channelUrl:   v.channelUrl,
-            authorId:     u.uid,
-            authorName:   u.displayName || 'GeoHub User',
-            authorAvatar: u.photoURL || '',
-            category:     cat,
-            city:         city,
-            description:  '',
-            isShort:      false,
-            tags:         [],
-            placeId:      null,
-            placeName:    null,
-            businessId:   null,
-            businessName: null
-          }, function (err) {
-            if (err) errors++; else done++;
+        /* First create/get the GeoHub channel doc, then import videos */
+        createOrGetGeoChannel(_chInfo, u.uid)
+          .then(function (geoChannelId) {
+            var done = 0;
+            var errors = 0;
+            function next() {
+              if (!indices.length) {
+                /* update videoCount */
+                if (fs() && db()) {
+                  fs().updateDoc(fs().doc(db(), 'channels', geoChannelId), {
+                    videoCount: fs().increment(done)
+                  }).catch(function () {});
+                }
+                toast(done + ' ვიდეო დაემატა' + (errors ? ' (' + errors + ' შეცდომა)' : '') + ' ✓');
+                closeAddVideoModal();
+                return;
+              }
+              importBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + done + '/' + total;
+              var idx = indices.shift();
+              var v = _chVideos[idx];
+              saveVideo({
+                youtubeId:    v.youtubeId,
+                youtubeUrl:   'https://www.youtube.com/watch?v=' + v.youtubeId,
+                title:        v.title,
+                thumbnail:    v.thumbnail,
+                channelId:    geoChannelId,
+                channelName:  v.channelName,
+                channelUrl:   v.channelUrl,
+                authorId:     u.uid,
+                authorName:   u.displayName || 'GeoHub User',
+                authorAvatar: u.photoURL || '',
+                category:     cat,
+                city:         city,
+                description:  '',
+                isShort:      false,
+                tags:         [],
+                placeId:      null,
+                placeName:    null,
+                businessId:   null,
+                businessName: null
+              }, function (err) {
+                if (err) errors++; else done++;
+                next();
+              });
+            }
             next();
+          })
+          .catch(function (err) {
+            toast('Channel შექმნა ვერ მოხერხდა: ' + (err.message || ''), 'error');
+            importBtn.disabled = false;
+            importBtn.innerHTML = '<i class="fas fa-download"></i> Import (' + indices.length + ')';
           });
-        }
-        next();
       };
     }());
 
@@ -2198,7 +2280,8 @@
     ytThumb: ytThumb,
     ytEmbed: ytEmbed,
     catMeta: catMeta,
-    esc: esc
+    esc: esc,
+    cardHTML: vidCardHTML
   };
 
 })();

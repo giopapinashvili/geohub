@@ -113,6 +113,11 @@ service cloud.firestore {
           'viewCount', 'saveCount', 'quoteCount', 'updatedAt'
         ]);
     }
+    function onlyChannelCountersChanged() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'subscriberCount', 'videoCount'
+      ]);
+    }
 
     // Returns true when the requesting user owns the business at bizId.
     // Uses exists() on businessAdmins rather than a get() to keep cost low.
@@ -1472,6 +1477,26 @@ service cloud.firestore {
     match /adminConfig/{docId} {
       allow read:                   if signedIn();
       allow create, update, delete: if isAdmin();
+    }
+
+    // ── CHANNELS ──────────────────────────────────────────────────────────────
+    // Any signed-in user can create a channel (ownerId must match their uid).
+    // Anyone can read. Only the owner or admin can update/delete the channel doc.
+    match /channels/{channelId} {
+      allow read:   if true;
+      allow create: if signedIn()
+        && request.resource.data.get('ownerId', '') == uid()
+        && request.resource.data.get('name', '').size() > 0;
+      allow update: if isOwner(resource.data.get('ownerId', ''))
+        || isAdmin()
+        || (signedIn() && onlyChannelCountersChanged());
+      allow delete: if isOwner(resource.data.get('ownerId', '')) || isAdmin();
+
+      // Subscriber sub-collection: signed-in users write only their own doc.
+      match /subscribers/{subUid} {
+        allow read:             if true;
+        allow create, delete:   if isOwner(subUid);
+      }
     }
 
     // ── DENY-ALL FALLBACK ─────────────────────────────────────────────────────

@@ -2039,3 +2039,184 @@ body.watch-cinematic .related-thumb {
   color: var(--text-muted);
 }
 .vid-ch-error { color: #ef4444; }
+
+/* ── Channel import preview card ────────────────────────── */
+.vid-ch-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+.vid-ch-av {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.vid-ch-av-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--bg-input);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.vid-ch-preview-name { font-size: .9rem; font-weight: 700; color: var(--text-primary); }
+.vid-ch-preview-sub  { font-size: .75rem; color: var(--text-muted); margin-top: 2px; }
+.vid-ch-preview-badge {
+  margin-left: auto;
+  font-size: .72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--bg-input);
+  color: var(--text-muted);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.vid-ch-preview-badge-ok { background: var(--green-muted); color: var(--green); }
+
+/* ── vid-creator-link channel variant ───────────────────── */
+.vid-creator-link .ch-av {
+  background: var(--green-muted);
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .7rem;
+}
+
+/* ── Channel page ───────────────────────────────────────── */
+.ch-init-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--text-muted);
+  font-size: 2rem;
+}
+.ch-banner {
+  height: 200px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(16,185,129,.15), rgba(59,130,246,.1));
+  margin-bottom: -56px;
+  position: relative;
+}
+.ch-banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ch-meta {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 0 20px 20px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 2;
+}
+.ch-avatar-wrap { flex-shrink: 0; }
+.ch-avatar,
+.ch-avatar-placeholder {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 3px solid var(--bg-card, #141b2d);
+  object-fit: cover;
+  display: block;
+}
+.ch-avatar-placeholder {
+  background: var(--bg-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 2.2rem;
+}
+.ch-info { flex: 1; min-width: 200px; padding-top: 60px; }
+.ch-name {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+.ch-stats {
+  font-size: .82rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.ch-description {
+  font-size: .82rem;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+  max-width: 600px;
+  line-height: 1.5;
+}
+.ch-yt-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: .78rem;
+  color: #ef4444;
+  text-decoration: none;
+}
+.ch-yt-link:hover { text-decoration: underline; }
+.ch-actions { display: flex; gap: 8px; padding-top: 60px; flex-shrink: 0; }
+.ch-sub-btn {
+  padding: 9px 22px;
+  border-radius: 20px;
+  background: var(--green);
+  color: #000;
+  border: none;
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.ch-sub-btn:hover  { opacity: .85; }
+.ch-sub-btn:disabled { opacity: .5; cursor: default; }
+.ch-sub-btn.subscribed {
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.ch-videos-section { margin-top: 24px; }
+.ch-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.ch-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 600px) {
+  .ch-banner { height: 120px; margin-bottom: -40px; }
+  .ch-avatar, .ch-avatar-placeholder { width: 72px; height: 72px; }
+  .ch-info { padding-top: 44px; }
+  .ch-actions { padding-top: 44px; }
+  .ch-name { font-size: 1.2rem; }
+}
