@@ -1582,20 +1582,47 @@
 
   /* ── Helper: import all videos from YT channel URL into a GeoHub channel ── */
   function _importChannelVideos(ytUrl, geoChannelId, u, onDone) {
-    var YT_KEY = 'AIzaSyAglbv5RL5LqRturGbqHaNrh8AH8KlLQ0I';
-    function ytApi(path) {
-      return fetch('https://www.googleapis.com/youtube/v3/' + path + '&key=' + YT_KEY).then(function (r) { return r.json(); });
+    var IMP_KEY = 'AIzaSyAglbv5RL5LqRturGbqHaNrh8AH8KlLQ0I';
+    function impApi(path) {
+      return fetch('https://www.googleapis.com/youtube/v3/' + path + '&key=' + IMP_KEY).then(function (r) { return r.json(); });
+    }
+    function impParseDur(s) {
+      if (!s) return 0;
+      var m = s.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+      if (!m) return 0;
+      return (parseInt(m[1]||0)*3600)+(parseInt(m[2]||0)*60)+parseInt(m[3]||0);
     }
     function resolveId(url) {
       var m = url.match(/youtube\.com\/channel\/(UC[\w-]{20,})/);
       if (m) return Promise.resolve(m[1]);
       m = url.match(/youtube\.com\/@([\w.-]+)/);
-      if (m) return ytApi('channels?part=id&forHandle=' + encodeURIComponent(m[1])).then(function (d) { return d.items && d.items[0] && d.items[0].id; });
+      if (m) return impApi('channels?part=id&forHandle=' + encodeURIComponent(m[1])).then(function (d) { return d.items && d.items[0] && d.items[0].id; });
+      m = url.match(/youtube\.com\/user\/([\w.-]+)/);
+      if (m) return impApi('channels?part=id&forUsername=' + encodeURIComponent(m[1])).then(function (d) { return d.items && d.items[0] && d.items[0].id; });
       return Promise.resolve(null);
+    }
+    function markShorts(videos) {
+      if (!videos.length) return Promise.resolve(videos);
+      var idMap = {};
+      videos.forEach(function (v) { idMap[v.youtubeId] = v; });
+      var ids = videos.map(function (v) { return v.youtubeId; });
+      var batches = [];
+      for (var i = 0; i < ids.length; i += 50) batches.push(ids.slice(i, i + 50));
+      return batches.reduce(function (p, batch) {
+        return p.then(function () {
+          return impApi('videos?part=contentDetails&id=' + batch.join(','))
+            .then(function (d) {
+              (d.items || []).forEach(function (item) {
+                var v = idMap[item.id];
+                if (v && impParseDur((item.contentDetails || {}).duration || '') <= 60) v.isShort = true;
+              });
+            }).catch(function () {});
+        });
+      }, Promise.resolve()).then(function () { return videos; });
     }
     resolveId(ytUrl).then(function (cid) {
       if (!cid) { onDone(); return; }
-      return ytApi('channels?part=contentDetails,snippet&id=' + cid).then(function (d) {
+      return impApi('channels?part=contentDetails,snippet&id=' + cid).then(function (d) {
         if (!d.items || !d.items[0]) { onDone(); return; }
         var item = d.items[0];
         var uploadsId = item.contentDetails.relatedPlaylists.uploads;
@@ -1604,36 +1631,45 @@
         var videos = [];
         function fetchPage(pt) {
           var path = 'playlistItems?part=snippet&playlistId=' + uploadsId + '&maxResults=50' + (pt ? '&pageToken=' + pt : '');
-          return ytApi(path).then(function (d2) {
+          return impApi(path).then(function (d2) {
             (d2.items || []).forEach(function (item2) {
               var sn = item2.snippet;
               var vid = sn.resourceId && sn.resourceId.videoId;
               if (!vid || sn.title === 'Private video' || sn.title === 'Deleted video') return;
-              videos.push({ youtubeId: vid, title: sn.title || '', channelName: chName, channelUrl: chUrl });
+              videos.push({ youtubeId: vid, title: sn.title || '', description: sn.description || '', channelName: chName, channelUrl: chUrl });
             });
             if (d2.nextPageToken) return fetchPage(d2.nextPageToken);
+            return markShorts(videos);
           });
         }
-        return fetchPage(null).then(function () {
-          var done = 0; var errors = 0;
-          function next() {
-            if (!videos.length) {
-              if (fs() && db()) fs().updateDoc(fs().doc(db(), 'channels', geoChannelId), { videoCount: fs().increment(done) }).catch(function(){});
-              toast(done + ' ვიდეო დაემატა ✓'); onDone(); return;
-            }
-            var v = videos.shift();
-            saveVideo({ youtubeId: v.youtubeId, youtubeUrl: 'https://www.youtube.com/watch?v=' + v.youtubeId,
-              title: v.title, thumbnail: ytMaxThumb(v.youtubeId), channelId: geoChannelId,
-              channelName: v.channelName, channelUrl: v.channelUrl,
-              authorId: u.uid, authorName: u.displayName || 'GeoHub User', authorAvatar: u.photoURL || '',
-              category: '', city: '', description: '', isShort: false, tags: [],
-              placeId: null, placeName: null, businessId: null, businessName: null
-            }, function (err) { if (err) errors++; else done++; next(); });
+        return fetchPage(null).then(function (vids) {
+          /* Parallel batch saves: 10 concurrent writes at a time */
+          var done = 0;
+          function saveBatch(batch) {
+            return Promise.all(batch.map(function (v) {
+              return new Promise(function (res) {
+                saveVideo({
+                  youtubeId: v.youtubeId, youtubeUrl: 'https://www.youtube.com/watch?v=' + v.youtubeId,
+                  title: v.title, description: v.description || '', thumbnail: ytMaxThumb(v.youtubeId),
+                  channelId: geoChannelId, channelName: v.channelName, channelUrl: v.channelUrl,
+                  authorId: u.uid, authorName: u.displayName || 'GeoHub User', authorAvatar: u.photoURL || '',
+                  category: '', city: '', isShort: v.isShort || false, tags: [],
+                  placeId: null, placeName: null, businessId: null, businessName: null
+                }, function (err) { if (!err) done++; res(); });
+              });
+            }));
           }
-          next();
+          var chunks = [];
+          for (var i = 0; i < vids.length; i += 10) chunks.push(vids.slice(i, i + 10));
+          return chunks.reduce(function (p, chunk) { return p.then(function () { return saveBatch(chunk); }); }, Promise.resolve())
+            .then(function () {
+              if (fs() && db()) fs().updateDoc(fs().doc(db(), 'channels', geoChannelId), { videoCount: fs().increment(done) }).catch(function(){});
+              toast(done + ' ვიდეო დაემატა ✓');
+              onDone();
+            });
         });
       });
-    }).catch(function () { onDone(); });
+    }).catch(function (e) { toast('Import შეცდომა: ' + (e.message || e), 'error'); onDone(); });
   }
 
   /* ── Add Video Modal ──────────────────────────────────── */
