@@ -1,4 +1,4 @@
-/* GeoHub Admin — Video Reports Moderation (Phase 9)
+/* GeoHub Admin — Video Reports Moderation (Phase 10 polish)
    Frontend-only; admin UIDs stored in Firestore adminConfig/videoMods
 */
 (function () {
@@ -6,7 +6,9 @@
 
   var state = {
     tab: 'pending',
-    reports: []
+    reports: [],
+    search: '',
+    reasonFilter: ''
   };
 
   function fb()  { return window.GeoFirebase || null; }
@@ -30,7 +32,7 @@
     setTimeout(function () { el.classList.remove('show'); setTimeout(function () { el.remove(); }, 250); }, 2800);
   }
 
-  /* ── Admin check: reads adminConfig/videoMods.uids array ── */
+  /* ── Admin check ─────────────────────────────────────────── */
   function checkAdmin(uid, callback) {
     if (!fs() || !db() || !uid) { callback(false); return; }
     fs().getDoc(fs().doc(db(), 'adminConfig', 'videoMods'))
@@ -61,7 +63,7 @@
       .catch(function () { callback([]); });
   }
 
-  /* ── Update report status ────────────────────────────────── */
+  /* ── Update report / video status ───────────────────────── */
   function updateReportStatus(docId, newStatus, callback) {
     if (!fs() || !db()) { callback && callback('error'); return; }
     fs().updateDoc(fs().doc(db(), 'videoReports', docId), { status: newStatus })
@@ -69,7 +71,6 @@
       .catch(function () { callback && callback('error'); });
   }
 
-  /* ── Update video status ─────────────────────────────────── */
   function updateVideoStatus(videoId, newStatus, callback) {
     if (!fs() || !db() || !videoId) { callback && callback('error'); return; }
     fs().updateDoc(fs().doc(db(), 'videos', videoId), { status: newStatus })
@@ -82,21 +83,42 @@
     return id ? 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg' : '';
   }
 
+  /* ── Filter reports client-side ──────────────────────────── */
+  function applyFilters(reports) {
+    var q = state.search.toLowerCase().trim();
+    var r = state.reasonFilter;
+    return reports.filter(function (rep) {
+      if (r && rep.reason !== r) return false;
+      if (q) {
+        var haystack = (rep.videoTitle || '') + ' ' + (rep.videoAuthorName || '') + ' ' + (rep.reporterName || '');
+        if (haystack.toLowerCase().indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+  }
+
   /* ── Render table ────────────────────────────────────────── */
   function renderTable(reports) {
     var body = document.getElementById('admTableBody');
     if (!body) return;
-    if (!reports.length) {
-      body.innerHTML = '<tr><td colspan="6"><div class="adm-empty"><i class="fas fa-check-circle"></i>Report არ არის ამ კატეგორიაში</div></td></tr>';
+
+    var filtered = applyFilters(reports);
+
+    if (!filtered.length) {
+      body.innerHTML = '<tr><td colspan="7"><div class="adm-empty"><i class="fas fa-check-circle"></i>' +
+        (state.search || state.reasonFilter ? 'ფილტრით Report ვერ მოიძებნა' : 'Report არ არის ამ კატეგორიაში') +
+        '</div></td></tr>';
       return;
     }
-    body.innerHTML = reports.map(function (r) {
+
+    body.innerHTML = filtered.map(function (r) {
       var thumb = ytThumb(r.videoYoutubeId || '');
       var statusClass = r.status === 'resolved' ? 'resolved' : r.status === 'dismissed' ? 'dismissed' : 'pending';
+
       var actionsHtml =
         (r.status === 'pending'
-          ? '<button class="adm-btn hide" onclick="window.adminAct(\'hide\',\'' + esc(r._docId) + '\',\'' + esc(r.videoId) + '\')"><i class="fas fa-eye-slash"></i> Hide</button>' +
-            '<button class="adm-btn remove" onclick="window.adminAct(\'remove\',\'' + esc(r._docId) + '\',\'' + esc(r.videoId) + '\')"><i class="fas fa-ban"></i> Remove</button>' +
+          ? '<button class="adm-btn hide"    onclick="window.adminAct(\'hide\',\''    + esc(r._docId) + '\',\'' + esc(r.videoId) + '\')"><i class="fas fa-eye-slash"></i> Hide</button>' +
+            '<button class="adm-btn remove"  onclick="window.adminAct(\'remove\',\'' + esc(r._docId) + '\',\'' + esc(r.videoId) + '\')"><i class="fas fa-ban"></i> Remove</button>' +
             '<button class="adm-btn dismiss" onclick="window.adminAct(\'dismiss\',\'' + esc(r._docId) + '\',\'\')"><i class="fas fa-times"></i> Dismiss</button>'
           : '') +
         (r.status === 'resolved'
@@ -104,14 +126,38 @@
           : '');
 
       return '<tr>' +
-        '<td>' +
-          (thumb ? '<a href="watch.html?v=' + esc(r.videoId) + '" target="_blank"><img class="adm-vid-thumb" src="' + thumb + '" alt="" onerror="this.style.display=\'none\'"></a>' : '') +
-          '<div style="font-size:.75rem;color:var(--text-muted,#94a3b8);max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px">' + esc(r.videoTitle || r.videoId) + '</div>' +
+        /* Video thumbnail + title */
+        '<td style="min-width:160px">' +
+          (thumb
+            ? '<img class="adm-vid-thumb" src="' + esc(thumb) + '" alt="" onerror="this.style.display=\'none\'">'
+            : '<div style="width:64px;height:36px;background:rgba(255,255,255,.05);border-radius:5px;display:inline-block"></div>') +
+          '<div class="adm-note-col" style="max-width:150px;margin-top:3px">' + esc(r.videoTitle || r.videoId || '—') + '</div>' +
         '</td>' +
-        '<td><span class="adm-reason-badge">' + esc(r.reason || '—') + '</span></td>' +
-        '<td style="font-size:.75rem;color:var(--text-muted,#94a3b8)">' + esc(r.reporterName || r.reporterUid || '—') + '</td>' +
+        /* Creator */
+        '<td>' +
+          (r.videoAuthorId
+            ? '<a class="adm-creator-link" href="profile.html?id=' + esc(r.videoAuthorId) + '" target="_blank">' + esc(r.videoAuthorName || r.videoAuthorId) + '</a>'
+            : '<span style="color:var(--text-muted,#94a3b8);font-size:.75rem">—</span>') +
+        '</td>' +
+        /* Reason + reporter */
+        '<td>' +
+          '<span class="adm-reason-badge">' + esc(r.reason || '—') + '</span>' +
+          '<div style="font-size:.7rem;color:var(--text-muted,#94a3b8);margin-top:4px">' + esc(r.reporterName || r.reporterUid || '—') + '</div>' +
+        '</td>' +
+        /* Note */
         '<td class="adm-note-col">' + esc(r.note || '') + '</td>' +
+        /* Links */
+        '<td style="white-space:nowrap">' +
+          (r.videoId
+            ? '<a class="adm-action-link" href="watch.html?v=' + esc(r.videoId) + '" target="_blank"><i class="fas fa-play"></i> Watch</a>'
+            : '') +
+          (r.videoAuthorId
+            ? '<br><a class="adm-action-link" href="profile.html?id=' + esc(r.videoAuthorId) + '" target="_blank"><i class="fas fa-user"></i> Profile</a>'
+            : '') +
+        '</td>' +
+        /* Status */
         '<td><span class="adm-status-badge ' + statusClass + '">' + esc(r.status || 'pending') + '</span></td>' +
+        /* Actions */
         '<td><div class="adm-actions">' + actionsHtml + '</div></td>' +
       '</tr>';
     }).join('');
@@ -128,7 +174,7 @@
         });
       });
     } else if (action === 'remove') {
-      if (!confirm('ნამდვილად წაიშლება ვიდეო?')) return;
+      if (!confirm('ნამდვილად წაიშლება ვიდეო? ეს ქმედება სტატუსს "removed"-ზე დააყენებს.')) return;
       updateVideoStatus(videoId, 'removed', function (err) {
         if (err) { toast('შეცდომა', 'error'); return; }
         updateReportStatus(reportDocId, 'resolved', function () {
@@ -157,9 +203,9 @@
     loadReports(state.tab, function (reports) {
       state.reports = reports;
       renderTable(reports);
-      var pendingCount = reports.filter(function (r) { return r.status === 'pending'; }).length;
+      var pendingAll = reports.filter(function (r) { return r.status === 'pending'; }).length;
       var badge = document.getElementById('admPendingCount');
-      if (badge) badge.textContent = pendingCount + ' pending';
+      if (badge) badge.textContent = pendingAll + ' pending';
     });
   }
 
@@ -170,14 +216,31 @@
     tabs.addEventListener('click', function (e) {
       var btn = e.target.closest('[data-adm-tab]');
       if (!btn) return;
-      var tab = btn.dataset.admTab;
-      state.tab = tab;
-      tabs.querySelectorAll('.adm-tab').forEach(function (t) { t.classList.toggle('active', t.dataset.admTab === tab); });
+      state.tab = btn.dataset.admTab;
+      tabs.querySelectorAll('.adm-tab').forEach(function (t) { t.classList.toggle('active', t.dataset.admTab === state.tab); });
       refresh();
     });
   }
 
-  /* ── Access denied message ───────────────────────────────── */
+  /* ── Search + reason filter ──────────────────────────────── */
+  function bindSearch() {
+    var searchEl = document.getElementById('admSearch');
+    var reasonEl = document.getElementById('admReasonFilter');
+    if (searchEl) {
+      searchEl.addEventListener('input', function () {
+        state.search = searchEl.value;
+        renderTable(state.reports);
+      });
+    }
+    if (reasonEl) {
+      reasonEl.addEventListener('change', function () {
+        state.reasonFilter = reasonEl.value;
+        renderTable(state.reports);
+      });
+    }
+  }
+
+  /* ── Access denied ───────────────────────────────────────── */
   function showDenied() {
     var wrap = document.getElementById('admWrap');
     if (wrap) wrap.innerHTML = '<div class="adm-access-denied"><i class="fas fa-lock"></i><h2>Access Denied</h2><p>Admin უფლება საჭიროა ამ გვერდზე.</p><a href="videos.html" style="color:var(--green)">← Videos-ზე დაბრუნება</a></div>';
@@ -187,32 +250,24 @@
   function boot() {
     if (!document.getElementById('admWrap')) return;
     bindTabs();
+    bindSearch();
 
-    function tryInit() {
-      var u = authUser();
-      if (!u) {
-        setTimeout(tryInit, 600);
-        return;
-      }
-      checkAdmin(u.uid, function (isAdmin) {
-        if (!isAdmin) { showDenied(); return; }
+    function initWithUser(u) {
+      if (!u) { showDenied(); return; }
+      checkAdmin(u.uid, function (isAdm) {
+        if (!isAdm) { showDenied(); return; }
         refresh();
       });
     }
 
     if (auth()) {
-      fb().authFns.onAuthStateChanged(auth(), function (u) {
-        if (u) {
-          checkAdmin(u.uid, function (isAdmin) {
-            if (!isAdmin) { showDenied(); return; }
-            refresh();
-          });
-        } else {
-          showDenied();
-        }
-      });
+      fb().authFns.onAuthStateChanged(auth(), initWithUser);
     } else {
-      setTimeout(tryInit, 800);
+      var tries = 0;
+      var poll = setInterval(function () {
+        var u = authUser();
+        if (u || ++tries > 10) { clearInterval(poll); initWithUser(u); }
+      }, 600);
     }
   }
 

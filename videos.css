@@ -1867,6 +1867,41 @@ body.watch-cinematic .related-thumb {
 .vid-report-reason:hover { background: rgba(255,255,255,.05); }
 .vid-report-reason input[type="radio"] { accent-color: #ef4444; cursor: pointer; }
 
+/* ── Phase 10: Undo toast ───────────────────────────────── */
+.gh-undo-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #1e293b;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: .84rem;
+  color: #f1f5f9;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5);
+  z-index: 3000;
+  opacity: 0;
+  transition: opacity .2s, transform .2s;
+  white-space: nowrap;
+}
+.gh-undo-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.gh-undo-btn {
+  background: var(--green, #10b981);
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: .78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .12s;
+}
+.gh-undo-btn:hover { opacity: .8; }
+
 /* ── Phase 9: Comment delete button ─────────────────────── */
 .watch-comment-del {
   background: none;

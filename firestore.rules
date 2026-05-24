@@ -1348,6 +1348,132 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ── VIDEO PLATFORM ───────────────────────────────────────────────────────
+
+    // True when caller is a full admin OR listed in adminConfig/videoMods.uids.
+    function isVideoMod() {
+      return isAdmin()
+        || (signedIn()
+            && exists(/databases/$(database)/documents/adminConfig/videoMods)
+            && uid() in get(/databases/$(database)/documents/adminConfig/videoMods).data.get('uids', []));
+    }
+
+    // Any signed-in user may update video engagement counters (client-side MVP).
+    function onlyVideoCountersChanged() {
+      return signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['likeCount', 'viewCount', 'commentCount', 'updatedAt']);
+    }
+
+    // Fields a creator may safely edit after publishing.
+    function onlySafeVideoFieldsChanged() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'title', 'description', 'category', 'city', 'tags',
+        'placeId', 'placeName', 'businessId', 'businessName', 'updatedAt'
+      ]);
+    }
+
+    // Status transitions allowed to video moderators.
+    function onlyVideoStatusChanged() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['status', 'updatedAt'])
+        && request.resource.data.get('status', '') in ['active', 'hidden', 'removed'];
+    }
+
+    match /videos/{videoId} {
+      // Public read: watch page needs to load hidden/removed docs to show
+      // the "unavailable" message; client-side code filters the feed.
+      allow read: if true;
+
+      // Create: must claim own authorId; status must start 'active'.
+      allow create: if signedIn()
+        && request.resource.data.get('authorId', '') == uid()
+        && request.resource.data.get('status', 'active') == 'active';
+
+      // Update: counters (any signed-in), safe edits (creator), status (mod), all (admin).
+      allow update: if isAdmin()
+        || onlyVideoCountersChanged()
+        || (existingOwnerMatches() && onlySafeVideoFieldsChanged())
+        || (isVideoMod() && onlyVideoStatusChanged());
+
+      // Hard delete: creator or admin (soft-delete via status preferred).
+      allow delete: if isAdmin() || existingOwnerMatches();
+
+      // Likes: doc ID = liker's UID.
+      match /likes/{likeUserId} {
+        allow read: if true;
+        allow create, update: if isOwner(likeUserId);
+        allow delete: if isAdmin() || isOwner(likeUserId);
+      }
+
+      // Comments: signed-in users create; authors edit; video owner/admin delete.
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if signedIn()
+          && request.resource.data.get('authorId', '') == uid()
+          && request.resource.data.get('text', '') is string
+          && request.resource.data.get('text', '').size() > 0;
+        allow update: if isAdmin()
+          || (existingOwnerMatches() && onlyCommentTextChanged())
+          || onlyCommentCountersChanged();
+        // Comment author OR video owner OR admin.
+        allow delete: if isAdmin()
+          || existingOwnerMatches()
+          || (signedIn()
+              && get(/databases/$(database)/documents/videos/$(videoId))
+                   .data.get('authorId', '') == uid());
+      }
+
+      // Reactions: doc ID = reactor's UID.
+      match /reactions/{rxUserId} {
+        allow read: if true;
+        allow create, update: if isOwner(rxUserId)
+          && request.resource.data.get('uid', rxUserId) == uid();
+        allow delete: if isAdmin() || isOwner(rxUserId);
+      }
+    }
+
+    // ── VIDEO REPORTS ─────────────────────────────────────────────────────────
+    // Doc ID: {reporterUid}_{videoId} — one report per user per video.
+    match /videoReports/{reportId} {
+      // Only video mods and admins may read reports.
+      allow read: if isVideoMod();
+      // Any signed-in user may file a report; reporterUid must match caller.
+      allow create: if signedIn()
+        && request.resource.data.get('reporterUid', '') == uid()
+        && request.resource.data.get('status',      '') == 'pending'
+        && request.resource.data.get('videoId',     '') is string
+        && request.resource.data.get('reason',      '') is string;
+      // Mods may update status only; reporters cannot edit.
+      allow update: if isVideoMod()
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['status', 'updatedAt', 'resolvedBy', 'resolvedAt']);
+      // Only admins may delete (audit trail).
+      allow delete: if isAdmin();
+    }
+
+    // ── SAVED VIDEOS ──────────────────────────────────────────────────────────
+    // Doc ID: {uid}_video_{videoId}
+    match /savedVideos/{saveId} {
+      allow read: if signedIn()
+        && (resource.data.get('userId', '') == uid() || isAdmin());
+      allow create: if signedIn()
+        && request.resource.data.get('userId',  '') == uid()
+        && request.resource.data.get('videoId', '') is string;
+      allow update: if false;
+      allow delete: if isAdmin()
+        || (signedIn() && resource.data.get('userId', '') == uid());
+    }
+
+    // ── ADMIN CONFIG ──────────────────────────────────────────────────────────
+    // Contains documents like videoMods.uids for video moderator UIDs.
+    // Signed-in users may read (needed for client-side isVideoMod checks).
+    // Only admins may write.
+    match /adminConfig/{docId} {
+      allow read:                   if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
     // ── DENY-ALL FALLBACK ─────────────────────────────────────────────────────
     // Any collection not explicitly listed above is blocked.
     // This prevents accidental exposure when new collections are added without

@@ -44,6 +44,14 @@
     .adm-note-col { max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted, #94a3b8); font-size: .75rem; }
     .adm-access-denied { text-align: center; padding: 80px 16px; color: var(--text-muted, #94a3b8); }
     .adm-access-denied i { display: block; font-size: 3rem; margin-bottom: 16px; color: #ef4444; }
+    .adm-search-row { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+    .adm-search-input { flex: 1; min-width: 180px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--gh-border, rgba(255,255,255,.12)); background: var(--gh-card, #1e2535); color: var(--text-primary, #f1f5f9); font-size: .84rem; }
+    .adm-search-input::placeholder { color: var(--text-muted, #94a3b8); }
+    .adm-filter-select { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--gh-border, rgba(255,255,255,.12)); background: var(--gh-card, #1e2535); color: var(--text-secondary, #cbd5e1); font-size: .82rem; cursor: pointer; }
+    .adm-creator-link { color: var(--green, #10b981); text-decoration: none; font-size: .75rem; }
+    .adm-creator-link:hover { text-decoration: underline; }
+    .adm-action-link { color: var(--green, #10b981); text-decoration: none; font-size: .72rem; display: inline-flex; align-items: center; gap: 3px; }
+    .adm-action-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body data-gh-page="admin-videos">
@@ -58,6 +66,17 @@
       <h1><i class="fas fa-shield-halved"></i>Video Reports</h1>
       <span class="adm-badge" id="admPendingCount">—</span>
     </div>
+    <div class="adm-search-row">
+      <input class="adm-search-input" id="admSearch" type="search" placeholder="ძიება სათაური, creator...">
+      <select class="adm-filter-select" id="admReasonFilter">
+        <option value="">ყველა მიზეზი</option>
+        <option value="spam">Spam</option>
+        <option value="inappropriate">Inappropriate</option>
+        <option value="misleading">Misleading</option>
+        <option value="copyright">Copyright</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
     <div class="adm-tabs" id="admTabs">
       <button class="adm-tab active" data-adm-tab="pending">Pending</button>
       <button class="adm-tab" data-adm-tab="resolved">Resolved</button>
@@ -69,9 +88,10 @@
         <thead>
           <tr>
             <th>Video</th>
-            <th>Reason</th>
-            <th>Reporter</th>
+            <th>Creator</th>
+            <th>Reason / Reporter</th>
             <th>Note</th>
+            <th>Links</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>

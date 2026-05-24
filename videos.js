@@ -840,6 +840,32 @@
     }, 0);
   }
 
+  /* ── Phase 10: Undo toast ───────────────────────────────── */
+  function showUndoToast(msg, onUndo, onCommit) {
+    var prev = document.querySelector('.gh-undo-toast');
+    if (prev) prev.remove();
+    var el = document.createElement('div');
+    el.className = 'gh-undo-toast';
+    el.innerHTML = '<span>' + esc(msg) + '</span><button class="gh-undo-btn">Undo</button>';
+    document.body.appendChild(el);
+    requestAnimationFrame(function () { el.classList.add('show'); });
+    var committed = false;
+    var t = setTimeout(function () {
+      committed = true;
+      el.classList.remove('show');
+      setTimeout(function () { el.remove(); }, 250);
+      onCommit && onCommit();
+    }, 3200);
+    el.querySelector('.gh-undo-btn').addEventListener('click', function () {
+      if (committed) return;
+      committed = true;
+      clearTimeout(t);
+      el.classList.remove('show');
+      setTimeout(function () { el.remove(); }, 250);
+      onUndo && onUndo();
+    });
+  }
+
   /* ── Phase 9: Report Video ───────────────────────────────── */
   function reportVideo(videoId, videoData, reason, note, callback) {
     var u = authUser();
@@ -851,6 +877,7 @@
       return fs().setDoc(ref, {
         videoId: videoId,
         videoTitle: videoData.title || '',
+        videoYoutubeId: videoData.youtubeId || '',
         videoAuthorId: videoData.authorId || '',
         videoAuthorName: videoData.authorName || '',
         reporterUid: u.uid,
@@ -863,10 +890,25 @@
     }).catch(function () { callback && callback('error'); });
   }
 
+  function checkAlreadyReported(videoId, callback) {
+    var u = authUser();
+    if (!u || !fs() || !db()) { callback(false); return; }
+    fs().getDoc(fs().doc(db(), 'videoReports', u.uid + '_' + videoId))
+      .then(function (snap) { callback(snap.exists()); })
+      .catch(function () { callback(false); });
+  }
+
   function openReportModal(videoId, videoData) {
     var u = authUser();
     if (!u) { toast('Report-ისთვის გაიარე ავტორიზაცია', 'error'); return; }
     if (document.getElementById('vidReportModal')) return;
+    checkAlreadyReported(videoId, function (already) {
+      if (already) { toast('ეს ვიდეო უკვე გაქვს reported ✓'); return; }
+      _openReportModalInner(videoId, videoData);
+    });
+  }
+
+  function _openReportModalInner(videoId, videoData) {
 
     var REASONS = [
       { val: 'spam',         label: 'Spam' },
@@ -963,13 +1005,25 @@
     menu.querySelector('#vctx-ni').addEventListener('click', function () {
       addNotInterested(videoId);
       var card = document.querySelector('[data-vid-id="' + videoId + '"]');
+      var undone = false;
       if (card) {
         card.style.transition = 'opacity .25s, transform .25s';
         card.style.opacity = '0';
         card.style.transform = 'scale(.95)';
-        setTimeout(function () { if (card.parentNode) card.parentNode.removeChild(card); }, 260);
+        card.style.pointerEvents = 'none';
       }
-      toast('ამ ვიდეოს აღარ ნახავ');
+      showUndoToast('ამ ვიდეოს აღარ ნახავ', function () {
+        undone = true;
+        var ni = getNotInterested().filter(function (id) { return id !== videoId; });
+        try { localStorage.setItem(NI_KEY, JSON.stringify(ni)); } catch (e) {}
+        if (card) {
+          card.style.opacity = '1';
+          card.style.transform = '';
+          card.style.pointerEvents = '';
+        }
+      }, function () {
+        if (!undone && card && card.parentNode) card.parentNode.removeChild(card);
+      });
       menu.remove();
     });
     menu.querySelector('#vctx-rep').addEventListener('click', function () {
@@ -1635,7 +1689,16 @@
       bindWatchSave(v);
       bindWatchShare(v);
       var repBtn = document.getElementById('watchReportBtn');
-      if (repBtn) repBtn.addEventListener('click', function () { openReportModal(v.id, v); });
+      if (repBtn) {
+        repBtn.addEventListener('click', function () { openReportModal(v.id, v); });
+        checkAlreadyReported(v.id, function (already) {
+          if (already) {
+            repBtn.innerHTML = '<i class="fas fa-flag"></i>Reported';
+            repBtn.style.color = '#94a3b8';
+            repBtn.disabled = true;
+          }
+        });
+      }
     }
 
     initWatchReactions(v);
