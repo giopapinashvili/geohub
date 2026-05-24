@@ -1007,7 +1007,7 @@ body.watch-cinematic .related-thumb {
 }
 
 /* ── Phase 3: Searchable place/business field in modal ───── */
-.vid-search-wrap {
+.vid-field-wrap {
   position: relative;
 }
 .vid-search-clear {
@@ -1179,6 +1179,167 @@ body.watch-cinematic .related-thumb {
   margin-bottom: 10px;
 }
 .watch-city-row i { color: var(--green); }
+
+/* ── Phase 4: GeoHub TV sections ────────────────────────── */
+.vid-tv-wrap {
+  margin-bottom: 8px;
+}
+.vid-tv-section {
+  margin-bottom: 28px;
+}
+.vid-tv-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 12px;
+}
+.vid-tv-head h3 {
+  font-size: .95rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+}
+.vid-tv-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+.vid-tv-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 6px;
+  scroll-snap-type: x mandatory;
+}
+.vid-tv-row::-webkit-scrollbar { display: none; }
+
+/* regular TV cards */
+.vid-tv-card {
+  flex-shrink: 0;
+  width: 210px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  scroll-snap-align: start;
+  transition: transform .15s, box-shadow .15s;
+}
+.vid-tv-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+.vid-tv-thumb {
+  position: relative;
+  padding-top: 56.25%;
+  background: #000;
+  overflow: hidden;
+}
+.vid-tv-thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .3s;
+}
+.vid-tv-card:hover .vid-tv-thumb img { transform: scale(1.05); }
+.vid-tv-play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.28);
+  opacity: 0;
+  transition: opacity .15s;
+}
+.vid-tv-card:hover .vid-tv-play { opacity: 1; }
+.vid-tv-play i {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: .85rem;
+}
+.vid-tv-badge {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  background: rgba(249,115,22,.9);
+  color: #fff;
+  font-size: .65rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.vid-tv-rank {
+  position: absolute;
+  bottom: 6px;
+  right: 7px;
+  font-size: .68rem;
+  font-weight: 700;
+  color: rgba(255,255,255,.8);
+  background: rgba(0,0,0,.5);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.vid-tv-info {
+  padding: 9px 10px 10px;
+}
+.vid-tv-title {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 4px;
+}
+.vid-tv-meta {
+  display: flex;
+  gap: 8px;
+  font-size: .7rem;
+  color: var(--text-muted);
+}
+.vid-tv-meta span { display: flex; align-items: center; gap: 3px; }
+
+/* Reel TV cards (portrait) */
+.vid-tv-reel {
+  flex-shrink: 0;
+  width: 130px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  scroll-snap-align: start;
+  transition: transform .15s, box-shadow .15s;
+}
+.vid-tv-reel:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+.vid-tv-reel-thumb {
+  position: relative;
+  padding-top: 177%;
+  background: #000;
+  overflow: hidden;
+}
+.vid-tv-reel-thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .3s;
+}
+.vid-tv-reel:hover .vid-tv-reel-thumb img { transform: scale(1.05); }
+.vid-tv-reel-thumb .vid-tv-play { opacity: 1; }
+
+/* Trending "sort" option */
+.vid-sort-select option[value="trending"] { font-weight: 700; }
 
 /* ── Responsive ─────────────────────────────────────────── */
 @media(max-width:640px){

@@ -261,6 +261,98 @@
     return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
+  /* ── Phase 4: Trending score ────────────────────────────── */
+  function trendScore(v) {
+    var now = Date.now();
+    var created = v.createdAt
+      ? (v.createdAt.toMillis ? v.createdAt.toMillis() : (typeof v.createdAt === 'number' ? v.createdAt : now))
+      : now;
+    var ageHours = (now - created) / 3600000;
+    var recency = Math.max(0, 1 - ageHours / 168) * 100;
+    return (v.likeCount || 0) * 3 + (v.commentCount || 0) * 5 + (v.viewCount || 0) * 0.2 + recency;
+  }
+
+  /* ── Phase 4: TV section card HTML ──────────────────────── */
+  function tvCardHTML(v, rank) {
+    var thumb = v.thumbnail || ytThumb(v.youtubeId);
+    return '<a class="vid-tv-card" href="watch.html?v=' + esc(v.id) + '">' +
+      '<div class="vid-tv-thumb">' +
+        '<img src="' + thumb + '" alt="" loading="lazy" onerror="this.src=\'' + ytThumb(v.youtubeId) + '\'">' +
+        '<div class="vid-tv-play"><i class="fas fa-play"></i></div>' +
+        (rank <= 3 ? '<div class="vid-tv-badge"><i class="fas fa-fire"></i>#' + rank + '</div>' : '') +
+        '<div class="vid-tv-rank"><i class="fas fa-fire" style="color:#f97316;margin-right:2px"></i>' + Math.round(v._score || 0) + '</div>' +
+      '</div>' +
+      '<div class="vid-tv-info">' +
+        '<div class="vid-tv-title">' + esc(v.title || 'Video') + '</div>' +
+        '<div class="vid-tv-meta">' +
+          (v.city ? '<span><i class="fas fa-location-dot"></i>' + esc(v.city) + '</span>' : '') +
+          '<span><i class="fas fa-heart"></i>' + fmtNum(v.likeCount) + '</span>' +
+          '<span><i class="fas fa-eye"></i>' + fmtNum(v.viewCount) + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</a>';
+  }
+
+  function tvReelCardHTML(v) {
+    var thumb = v.thumbnail || ytThumb(v.youtubeId);
+    return '<a class="vid-tv-reel" href="reels.html?v=' + esc(v.id) + '">' +
+      '<div class="vid-tv-reel-thumb">' +
+        '<img src="' + thumb + '" alt="" loading="lazy" onerror="this.src=\'' + ytThumb(v.youtubeId) + '\'">' +
+        '<div class="vid-tv-play"><i class="fas fa-play"></i></div>' +
+      '</div>' +
+      '<div class="vid-tv-info">' +
+        '<div class="vid-tv-title">' + esc(v.title || 'Reel') + '</div>' +
+        '<div class="vid-tv-meta">' +
+          (v.city ? '<span><i class="fas fa-location-dot"></i>' + esc(v.city) + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+    '</a>';
+  }
+
+  var TV_SECTIONS = [
+    { id: 'trending',  icon: 'fa-fire',           color: '#f97316', label: 'Trending Today',
+      filter: function(v) { return !v.isShort; }, n: 12 },
+    { id: 'reels',     icon: 'fa-bolt',            color: '#a855f7', label: 'Viral Reels',
+      filter: function(v) { return !!v.isShort; },  n: 10, reels: true },
+    { id: 'tbilisi',   icon: 'fa-city',            color: '#60a5fa', label: 'Trending in Tbilisi',
+      filter: function(v) { return !v.isShort && v.city === 'თბილისი'; }, n: 8 },
+    { id: 'batumi',    icon: 'fa-umbrella-beach',  color: '#34d399', label: 'Batumi Vibes',
+      filter: function(v) { return !v.isShort && v.city === 'ბათუმი'; }, n: 8 },
+    { id: 'food',      icon: 'fa-utensils',        color: '#fb923c', label: 'Food & Nightlife',
+      filter: function(v) { return !v.isShort && (v.category === 'food' || v.category === 'nightlife'); }, n: 8 },
+    { id: 'nature',    icon: 'fa-mountain',        color: '#4ade80', label: 'Nature & Hiking',
+      filter: function(v) { return !v.isShort && (v.category === 'nature' || v.category === 'hiking' || v.category === 'winter' || v.category === 'beach'); }, n: 8 },
+    { id: 'culture',   icon: 'fa-landmark',        color: '#facc15', label: 'Culture & History',
+      filter: function(v) { return !v.isShort && (v.category === 'culture' || v.category === 'events'); }, n: 8 }
+  ];
+
+  function renderTVSections(allVids) {
+    var el = document.getElementById('vidTVSections');
+    if (!el) return;
+
+    var scored = allVids.map(function(v) {
+      return Object.assign({}, v, { _score: trendScore(v) });
+    });
+    scored.sort(function(a, b) { return b._score - a._score; });
+
+    var html = TV_SECTIONS.map(function(sec) {
+      var items = scored.filter(sec.filter).slice(0, sec.n);
+      if (!items.length) return '';
+      var cards = items.map(function(v, i) {
+        return sec.reels ? tvReelCardHTML(v) : tvCardHTML(v, i + 1);
+      }).join('');
+      return '<div class="vid-tv-section">' +
+        '<div class="vid-tv-head">' +
+          '<span class="vid-tv-icon" style="color:' + sec.color + '"><i class="fas ' + sec.icon + '"></i></span>' +
+          '<h3>' + sec.label + '</h3>' +
+        '</div>' +
+        '<div class="vid-tv-row">' + cards + '</div>' +
+      '</div>';
+    }).join('');
+
+    el.innerHTML = html;
+  }
+
   /* ── Phase 3: Firestore prefix search ───────────────────── */
   function searchCollection(colName, query, limit, callback) {
     if (!fs() || !db() || !query.trim()) { callback([]); return; }
@@ -370,6 +462,7 @@
     state.unsub = loadVideos({ category: state.filter }, function (vids) {
       state.videos = vids.filter(function (v) { return !v.isShort; });
       state.shorts = vids.filter(function (v) { return v.isShort; });
+      if (state.filter === 'all') renderTVSections(vids);
       renderGrid();
       renderShorts();
     });
@@ -391,10 +484,20 @@
     return vids.filter(function (v) { return (v.city || '').toLowerCase() === state.city.toLowerCase(); });
   }
 
+  function applySort(vids) {
+    if (state.sort === 'popular') {
+      return vids.slice().sort(function(a, b) { return (b.viewCount || 0) - (a.viewCount || 0); });
+    }
+    if (state.sort === 'trending') {
+      return vids.slice().sort(function(a, b) { return trendScore(b) - trendScore(a); });
+    }
+    return vids;
+  }
+
   function renderGrid() {
     var grid = document.getElementById('vidGrid');
     if (!grid) return;
-    var vids = applySearch(applyCity(state.videos));
+    var vids = applySort(applySearch(applyCity(state.videos)));
     if (!vids.length) {
       grid.innerHTML = '<div class="vid-empty"><i class="fas fa-film"></i><h3>ვიდეო არ მოიძებნა</h3><p>სხვა ფილტრი სცადე ან დაამატე ახალი ვიდეო</p></div>';
       return;
@@ -492,7 +595,7 @@
         '<div class="vid-form-row">' +
           '<div class="vid-form-group">' +
             '<label class="vid-form-label"><i class="fas fa-map-pin" style="color:var(--green);margin-right:4px"></i>ადგილი (არასავალდებულო)</label>' +
-            '<div class="vid-search-wrap">' +
+            '<div class="vid-field-wrap">' +
               '<input id="vidPlaceSearch" class="vid-form-input" type="text" placeholder="ადგილის ძიება..." autocomplete="off">' +
               '<button class="vid-search-clear" id="vidPlaceClear" type="button"><i class="fas fa-times"></i></button>' +
               '<div class="vid-search-dropdown" id="vidPlaceDd"></div>' +
@@ -501,7 +604,7 @@
           '</div>' +
           '<div class="vid-form-group">' +
             '<label class="vid-form-label"><i class="fas fa-store" style="color:#60a5fa;margin-right:4px"></i>ბიზნესი (არასავალდებულო)</label>' +
-            '<div class="vid-search-wrap">' +
+            '<div class="vid-field-wrap">' +
               '<input id="vidBizSearch" class="vid-form-input" type="text" placeholder="ბიზნესის ძიება..." autocomplete="off">' +
               '<button class="vid-search-clear" id="vidBizClear" type="button"><i class="fas fa-times"></i></button>' +
               '<div class="vid-search-dropdown" id="vidBizDd"></div>' +
@@ -540,7 +643,14 @@
     function checkReady() {
       submitBtn.disabled = !(urlInput.value.trim() && titleInput.value.trim() && parseYTId(urlInput.value));
     }
-    urlInput.addEventListener('input', checkReady);
+    urlInput.addEventListener('input', function () {
+      checkReady();
+      var url = urlInput.value.trim();
+      if (url.includes('youtube.com/shorts/') || url.includes('youtu.be/') && url.length < 35) {
+        var shortCb = document.getElementById('vidIsShort');
+        if (shortCb && !shortCb.checked) shortCb.checked = true;
+      }
+    });
     titleInput.addEventListener('input', checkReady);
 
     /* ── Search field wiring ─────────────────────────────── */
@@ -603,7 +713,7 @@
       });
 
       document.addEventListener('click', function hideDd(e) {
-        if (!inp.closest('.vid-search-wrap').contains(e.target)) {
+        if (!inp.closest('.vid-field-wrap').contains(e.target)) {
           dd.classList.remove('open');
           if (!inp.closest('#vidAddModal')) document.removeEventListener('click', hideDd);
         }
