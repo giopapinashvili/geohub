@@ -1459,7 +1459,6 @@
           '</div>' +
           '<div id="vidChResult"></div>' +
           '<div id="vidChFooter" style="display:none" class="vid-modal-footer">' +
-            '<span id="vidChCountLabel" style="font-size:.78rem;color:var(--text-muted);margin-right:auto"></span>' +
             '<button class="vid-btn ghost" id="vidChSelectAllBtn"><i class="fas fa-check-double"></i> ყველა</button>' +
             '<button class="vid-btn primary" id="vidChImportBtn" disabled><i class="fas fa-download"></i> Import (0)</button>' +
           '</div>' +
@@ -1480,104 +1479,63 @@
       document.getElementById('vidChannelPanel').style.display = tab === 'channel' ? '' : 'none';
     });
 
-    /* ── Channel import logic (YouTube Data API v3) ────────── */
+    /* ── Channel import logic ───────────────────────────── */
     (function () {
-      var YT_KEY = 'AIzaSyAglbv5RL5LqRturGbqHaNrh8AH8KlLQ0I';
       var _chVideos = [];
 
-      function ytApi(path) {
-        return fetch('https://www.googleapis.com/youtube/v3/' + path + '&key=' + YT_KEY)
-          .then(function (r) {
-            if (!r.ok) return r.json().then(function (e) { throw new Error((e.error && e.error.message) || ('HTTP ' + r.status)); });
-            return r.json();
-          });
-      }
-
-      /* Resolve any channel URL format → channel ID */
       function resolveChannelId(url) {
-        var m;
-        m = url.match(/youtube\.com\/channel\/(UC[\w-]{20,})/);
+        var m = url.match(/youtube\.com\/channel\/(UC[\w-]{20,})/);
         if (m) return Promise.resolve(m[1]);
-
-        m = url.match(/youtube\.com\/@([\w.-]+)/);
-        if (m) return ytApi('channels?part=id&forHandle=' + encodeURIComponent(m[1]))
+        var proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+        return fetch(proxy)
+          .then(function (r) { return r.json(); })
           .then(function (d) {
-            if (d.items && d.items[0]) return d.items[0].id;
-            throw new Error('Channel ვერ მოიძებნა: @' + m[1]);
-          });
-
-        m = url.match(/youtube\.com\/user\/([\w-]+)/);
-        if (m) return ytApi('channels?part=id&forUsername=' + encodeURIComponent(m[1]))
-          .then(function (d) {
-            if (d.items && d.items[0]) return d.items[0].id;
-            throw new Error('Channel ვერ მოიძებნა: ' + m[1]);
-          });
-
-        m = url.match(/youtube\.com\/c\/([\w-]+)/);
-        if (m) return ytApi('channels?part=id&forHandle=' + encodeURIComponent(m[1]))
-          .then(function (d) {
-            if (d.items && d.items[0]) return d.items[0].id;
-            throw new Error('Channel ვერ მოიძებნა: ' + m[1]);
-          });
-
-        throw new Error('YouTube channel URL ვერ ამოვიცანი. სცადე @handle ან /channel/UC... ფორმატი.');
-      }
-
-      /* Get uploads playlist ID for a channel */
-      function getUploadsPlaylistId(channelId) {
-        return ytApi('channels?part=contentDetails,snippet&id=' + channelId)
-          .then(function (d) {
-            if (!d.items || !d.items[0]) throw new Error('Channel ვერ მოიძებნა');
-            var item = d.items[0];
-            return {
-              uploadsId:   item.contentDetails.relatedPlaylists.uploads,
-              channelName: item.snippet.title,
-              channelUrl:  'https://www.youtube.com/channel/' + channelId
-            };
+            var html = d.contents || '';
+            var cm = html.match(/"channelId":"(UC[\w-]{20,})"/);
+            if (!cm) cm = html.match(/channel_id=(UC[\w-]{20,})/);
+            if (cm) return cm[1];
+            throw new Error('Channel ID ვერ მოიძებნა. სცადე /channel/UC... ფორმატი.');
           });
       }
 
-      /* Fetch all videos from uploads playlist with pagination */
-      function fetchAllVideos(uploadsId, channelName, channelUrl) {
-        var videos = [];
-        var res = document.getElementById('vidChResult');
-
-        function fetchPage(pageToken) {
-          var path = 'playlistItems?part=snippet&playlistId=' + uploadsId +
-            '&maxResults=50' + (pageToken ? '&pageToken=' + pageToken : '');
-          return ytApi(path).then(function (d) {
-            (d.items || []).forEach(function (item) {
-              var sn = item.snippet;
-              var vid = sn.resourceId && sn.resourceId.videoId;
-              if (!vid || vid === 'Private video') return;
+      function fetchChannelFeed(channelId) {
+        var rss = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + channelId;
+        var proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(rss);
+        return fetch(proxy)
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            var xml = new window.DOMParser().parseFromString(d.contents || '', 'text/xml');
+            var entries = xml.querySelectorAll('entry');
+            var videos = [];
+            entries.forEach(function (e) {
+              var idEl = e.querySelector('videoId');
+              var titleEl = e.querySelector('title');
+              var authorEl = e.querySelector('author name');
+              var authorUriEl = e.querySelector('author uri');
+              var thumbEl = e.querySelector('thumbnail');
+              if (!idEl) return;
               videos.push({
-                youtubeId:   vid,
-                title:       sn.title || '',
-                channelName: channelName,
-                channelUrl:  channelUrl,
-                thumbnail:   (sn.thumbnails && (sn.thumbnails.high || sn.thumbnails.medium || sn.thumbnails.default) || {}).url || ytThumb(vid)
+                youtubeId:   idEl.textContent.trim(),
+                title:       titleEl ? titleEl.textContent.trim() : '',
+                channelName: authorEl ? authorEl.textContent.trim() : '',
+                channelUrl:  authorUriEl ? authorUriEl.textContent.trim() : '',
+                thumbnail:   thumbEl ? (thumbEl.getAttribute('url') || ytThumb(idEl.textContent.trim())) : ytThumb(idEl.textContent.trim())
               });
             });
-            if (res) res.innerHTML = '<div class="vid-ch-loading"><i class="fas fa-spinner fa-spin"></i> ' + videos.length + ' ვიდეო ჩაიტვირთა...</div>';
-            if (d.nextPageToken) return fetchPage(d.nextPageToken);
             return videos;
           });
-        }
-        return fetchPage(null);
       }
 
       function renderImportList(videos) {
         var res = document.getElementById('vidChResult');
         var footer = document.getElementById('vidChFooter');
         var importBtn = document.getElementById('vidChImportBtn');
-        var countLabel = document.getElementById('vidChCountLabel');
         if (!videos.length) {
           res.innerHTML = '<div class="vid-empty" style="padding:24px 0"><i class="fas fa-video-slash"></i>ვიდეო ვერ მოიძებნა</div>';
           footer.style.display = 'none';
           return;
         }
         _chVideos = videos;
-        if (countLabel) countLabel.textContent = 'სულ ' + videos.length + ' ვიდეო';
         res.innerHTML = '<div class="vid-import-list">' +
           videos.map(function (v, i) {
             return '<label class="vid-import-item">' +
@@ -1604,11 +1562,10 @@
         var btn = document.getElementById('vidChFetchBtn');
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        res.innerHTML = '<div class="vid-ch-loading"><i class="fas fa-spinner fa-spin"></i> Channel იტვირთება...</div>';
+        res.innerHTML = '<div class="vid-ch-loading"><i class="fas fa-spinner fa-spin"></i> იტვირთება...</div>';
         document.getElementById('vidChFooter').style.display = 'none';
         resolveChannelId(url)
-          .then(function (cid) { return getUploadsPlaylistId(cid); })
-          .then(function (info) { return fetchAllVideos(info.uploadsId, info.channelName, info.channelUrl); })
+          .then(function (cid) { return fetchChannelFeed(cid); })
           .then(function (vids) { renderImportList(vids); })
           .catch(function (err) {
             res.innerHTML = '<div class="vid-ch-error"><i class="fas fa-exclamation-circle"></i> ' + esc(err.message || 'შეცდომა') + '</div>';
@@ -1635,6 +1592,7 @@
         var city = (document.getElementById('vidChCity') || {}).value || '';
         var importBtn = document.getElementById('vidChImportBtn');
         importBtn.disabled = true;
+        importBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ინახება...';
         var indices = Array.prototype.map.call(checked, function (cb) { return parseInt(cb.dataset.i, 10); });
         var total = indices.length;
         var done = 0;
@@ -1645,7 +1603,6 @@
             closeAddVideoModal();
             return;
           }
-          importBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + done + '/' + total;
           var idx = indices.shift();
           var v = _chVideos[idx];
           saveVideo({
