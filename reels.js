@@ -98,6 +98,8 @@
       : '';
 
     return '<div class="reel-card" data-reel-idx="' + idx + '" data-vid-id="' + v.id + '" data-yt-id="' + esc(v.youtubeId || '') + '" data-author-id="' + esc(v.authorId || '') + '">' +
+      /* Phase 7: progress bar */
+      '<div class="reel-progress" id="reelProg' + idx + '"><div class="reel-progress-fill"></div></div>' +
       /* Blurred bg */
       '<div class="reel-bg"><img src="' + thumb + '" alt="" loading="lazy"></div>' +
       /* Gradient overlays */
@@ -119,6 +121,7 @@
         '<button class="reel-action reel-like-btn" data-vid-id="' + v.id + '" title="Like"><i class="fas fa-heart"></i><span class="reel-like-cnt">' + fmtNum(v.likeCount) + '</span></button>' +
         '<button class="reel-action reel-comment-btn" data-vid-id="' + v.id + '" data-idx="' + idx + '" title="Comments"><i class="fas fa-comment-dots"></i><span class="reel-comment-cnt">' + fmtNum(v.commentCount) + '</span></button>' +
         '<button class="reel-action reel-share-btn" data-vid-id="' + v.id + '" data-title="' + esc(v.title || '') + '" title="Share"><i class="fas fa-share-nodes"></i><span>Share</span></button>' +
+        '<button class="reel-action reel-save-btn" data-save-reel="' + esc(v.id) + '" title="Save"><i class="far fa-bookmark"></i><span>Save</span></button>' +
         '<a class="reel-action" href="watch.html?v=' + v.id + '" title="Watch full"><i class="fas fa-expand"></i><span>Watch</span></a>' +
       '</div>' +
       /* Bottom info */
@@ -154,13 +157,24 @@
   function activateReel(idx) {
     if (state.activeIdx === idx) return;
 
-    /* Pause previous */
+    /* Pause previous + reset progress */
     if (state.activeIdx >= 0) {
       var prevCard = document.querySelector('[data-reel-idx="' + state.activeIdx + '"]');
       if (prevCard) stopReelPlay(prevCard);
+      resetProgressBar(state.activeIdx);
     }
 
     state.activeIdx = idx;
+
+    /* Start progress bar */
+    startProgressBar(idx);
+
+    /* Preload next reel thumbnail */
+    var next = state.reels[idx + 1];
+    if (next && next.youtubeId) {
+      var preloadImg = new Image();
+      preloadImg.src = ytThumb(next.youtubeId);
+    }
 
     /* On desktop: autoload iframe */
     if (_isDesktop) {
@@ -231,6 +245,30 @@
     wrap.querySelectorAll('.reel-card').forEach(function (card) {
       state.observer.observe(card);
     });
+  }
+
+  /* ── Phase 7: Reel progress bar ────────────────────────── */
+  function startProgressBar(idx) {
+    var v = state.reels[idx];
+    var prog = document.getElementById('reelProg' + idx);
+    if (!prog) return;
+    var fill = prog.querySelector('.reel-progress-fill');
+    if (!fill) return;
+    var dur = (v && v.isShort ? 30 : 75);
+    fill.style.transition = 'none';
+    fill.style.width = '0%';
+    fill.offsetWidth; /* force reflow */
+    fill.style.transition = 'width ' + dur + 's linear';
+    fill.style.width = '100%';
+  }
+
+  function resetProgressBar(idx) {
+    var prog = document.getElementById('reelProg' + idx);
+    if (!prog) return;
+    var fill = prog.querySelector('.reel-progress-fill');
+    if (!fill) return;
+    fill.style.transition = 'none';
+    fill.style.width = '0%';
   }
 
   /* ── Phase 5: Mute button ───────────────────────────────── */
@@ -362,6 +400,27 @@
         } else if (navigator.clipboard) {
           navigator.clipboard.writeText(url).then(function () { toast('ლინკი დაკოპირდა!'); }).catch(function () {});
         }
+        return;
+      }
+
+      /* Save reel button */
+      var saveBtn = e.target.closest('.reel-save-btn[data-save-reel]');
+      if (saveBtn) {
+        e.stopPropagation();
+        var uSave = authUser();
+        var vidIdSave = saveBtn.dataset.saveReel;
+        if (!uSave) { toast('შენახვისთვის გაიარე ავტორიზაცია', 'error'); return; }
+        var gv = window.GeoVideos;
+        if (!gv || !gv.toggleVideoSave) return;
+        var vSave = null;
+        for (var si = 0; si < state.reels.length; si++) { if (state.reels[si].id === vidIdSave) { vSave = state.reels[si]; break; } }
+        gv.toggleVideoSave(vidIdSave, vSave || { id: vidIdSave }, function (nowSaved) {
+          if (nowSaved === null) return;
+          saveBtn.classList.toggle('saved', nowSaved);
+          var ico = saveBtn.querySelector('i');
+          if (ico) ico.className = nowSaved ? 'fas fa-bookmark' : 'far fa-bookmark';
+          toast(nowSaved ? 'შეინახა!' : 'შენახვიდან წაიშალა');
+        });
         return;
       }
 

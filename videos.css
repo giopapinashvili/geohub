@@ -1511,3 +1511,121 @@ body.watch-cinematic .related-thumb {
   .vid-form-row { grid-template-columns: 1fr; }
   .watch-title { font-size: 1.05rem; }
 }
+
+/* ── Phase 7: Status Badges ─────────────────────────────── */
+.vid-badge-row {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  z-index: 2;
+  pointer-events: none;
+}
+.vid-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: .6rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 6px;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+.vid-status-badge.trending { background: rgba(249,115,22,.92); color: #fff; }
+.vid-status-badge.viral    { background: rgba(168,85,247,.92); color: #fff; }
+.vid-status-badge.new      { background: rgba(16,185,129,.92); color: #000; }
+
+/* ── Phase 7: Save/bookmark button on cards ─────────────── */
+.vid-save-btn {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.55);
+  border: none;
+  color: rgba(255,255,255,.75);
+  font-size: .73rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 3;
+  opacity: 0;
+  transition: background .15s, color .15s, opacity .15s;
+  backdrop-filter: blur(4px);
+}
+.vid-card:hover .vid-save-btn,
+.vid-tv-card:hover .vid-save-btn { opacity: 1; }
+.vid-save-btn.saved,
+.vid-save-btn:hover { opacity: 1 !important; background: var(--green, #10b981); color: #000; }
+
+/* ── Phase 7: Share mini-menu popup ─────────────────────── */
+.vid-share-menu {
+  position: fixed;
+  z-index: 2500;
+  background: var(--gh-card, #1e2535);
+  border: 1px solid var(--gh-border, rgba(255,255,255,.12));
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.55);
+  min-width: 180px;
+  animation: vidMenuIn .12s ease;
+}
+@keyframes vidMenuIn {
+  from { opacity: 0; transform: scale(.92) translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+.vid-share-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: .84rem;
+  color: var(--gh-text, #f1f5f9);
+  cursor: pointer;
+  user-select: none;
+  transition: background .1s;
+}
+.vid-share-menu-item:hover { background: rgba(255,255,255,.07); }
+.vid-share-menu-item i { width: 16px; text-align: center; color: var(--green, #10b981); font-size: .85rem; }
+
+/* ── Phase 7: Continue Watching & Saved rows ────────────── */
+.vid-continue-section,
+.vid-saved-section {
+  margin-bottom: 28px;
+}
+
+/* ── Phase 7: Profile videos stats row ─────────────────── */
+.vid-tab-stats {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 10px 0 16px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  margin-bottom: 14px;
+}
+.vid-tab-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-width: 64px;
+}
+.vid-tab-stat-val {
+  font-size: .95rem;
+  font-weight: 800;
+  color: var(--text-primary, #f1f5f9);
+}
+.vid-tab-stat-lbl {
+  font-size: .68rem;
+  color: var(--text-muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}

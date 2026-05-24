@@ -520,3 +520,24 @@ body[data-gh-page="reels"] .gh-center {
   .reels-nav-arrows { display: none !important; }
   .reel-cat-badge { display: none; }
 }
+
+/* ── Phase 7: Reel progress bar ─────────────────────────── */
+.reel-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255,255,255,.18);
+  z-index: 12;
+}
+.reel-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #10b981;
+  border-radius: 0 2px 2px 0;
+}
+.reel-progress-fill.animate {
+  transition: width var(--prog-dur, 75s) linear;
+  width: 100%;
+}

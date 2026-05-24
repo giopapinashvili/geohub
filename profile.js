@@ -853,7 +853,24 @@
       var cnt = $('.ptab[data-tab="videos"] .tab-count');
       if (snap.empty) { if (cnt) cnt.textContent = ''; return; }
       if (cnt) cnt.textContent = snap.size || '';
-      var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;padding:4px 0">';
+
+      var totalViews = 0, totalLikes = 0, topReel = null, topReelScore = 0;
+      snap.forEach(function (d) {
+        var v = d.data();
+        totalViews += Number(v.viewCount || 0);
+        totalLikes += Number(v.likeCount || 0);
+        var score = (v.likeCount || 0) * 3 + (v.viewCount || 0) * 0.2;
+        if (v.isShort && score > topReelScore) { topReelScore = score; topReel = Object.assign({ id: d.id }, v); }
+      });
+
+      var statsRow = '<div class="vid-tab-stats">' +
+        '<div class="vid-tab-stat"><div class="vid-tab-stat-val">' + compact(totalViews) + '</div><div class="vid-tab-stat-lbl">Views</div></div>' +
+        '<div class="vid-tab-stat"><div class="vid-tab-stat-val">' + compact(totalLikes) + '</div><div class="vid-tab-stat-lbl">Likes</div></div>' +
+        '<div class="vid-tab-stat"><div class="vid-tab-stat-val">' + (snap.size || 0) + '</div><div class="vid-tab-stat-lbl">Videos</div></div>' +
+        (topReel ? '<div class="vid-tab-stat"><a href="watch.html?v=' + esc(topReel.id) + '" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;align-items:center;gap:1px"><div class="vid-tab-stat-val" style="color:#a855f7"><i class="fas fa-bolt" style="font-size:.8rem"></i></div><div class="vid-tab-stat-lbl">Top Reel</div></a></div>' : '') +
+      '</div>';
+
+      var html = statsRow + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;padding:4px 0">';
       snap.forEach(function (d) {
         var v = Object.assign({ id: d.id }, d.data());
         var tid = v.youtubeId || '';

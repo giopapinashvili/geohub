@@ -218,6 +218,8 @@
         '<img src="' + thumb + '" alt="" loading="lazy" onerror="this.src=\'' + ytThumb(v.youtubeId) + '\'">' +
         '<div class="vid-play-overlay"><div class="vid-play-btn"><i class="fas fa-play"></i></div></div>' +
         (v.category ? '<div class="vid-card-cat-badge"><i class="fas ' + m.icon + '"></i>' + m.label + '</div>' : '') +
+        videoBadgesHTML(v) +
+        '<button class="vid-save-btn" data-save-vid="' + esc(v.id) + '" title="Save" onclick="event.preventDefault();event.stopPropagation()"><i class="far fa-bookmark"></i></button>' +
       '</div>' +
       '<div class="vid-card-body">' +
         '<div class="vid-card-title">' + esc(v.title || 'Untitled') + '</div>' +
@@ -361,6 +363,8 @@
         '<div class="vid-tv-play"><i class="fas fa-play"></i></div>' +
         (rank <= 3 ? '<div class="vid-tv-badge"><i class="fas fa-fire"></i>#' + rank + '</div>' : '') +
         '<div class="vid-tv-rank"><i class="fas fa-fire" style="color:#f97316;margin-right:2px"></i>' + Math.round(v._score || 0) + '</div>' +
+        videoBadgesHTML(v) +
+        '<button class="vid-save-btn" data-save-vid="' + esc(v.id) + '" title="Save" onclick="event.preventDefault();event.stopPropagation()"><i class="far fa-bookmark"></i></button>' +
       '</div>' +
       '<div class="vid-tv-info">' +
         '<div class="vid-tv-title">' + esc(v.title || 'Video') + '</div>' +
@@ -602,6 +606,204 @@
     }).join('');
   }
 
+  /* ── Phase 7: Watch history ──────────────────────────────── */
+  var HIST_KEY = 'gh_watch_history';
+
+  function addToHistory(v) {
+    try {
+      var hist = getHistory();
+      hist = hist.filter(function (h) { return h.id !== v.id; });
+      hist.unshift({ id: v.id, title: v.title || '', thumb: v.thumbnail || ytThumb(v.youtubeId), city: v.city || '', ts: Date.now() });
+      if (hist.length > 20) hist = hist.slice(0, 20);
+      localStorage.setItem(HIST_KEY, JSON.stringify(hist));
+    } catch (e) {}
+  }
+
+  function getHistory() {
+    try { return JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); } catch (e) { return []; }
+  }
+
+  /* ── Phase 7: Video save ─────────────────────────────────── */
+  function toggleVideoSave(videoId, videoData, callback) {
+    var u = authUser();
+    if (!u || !fs() || !db()) { callback && callback(null); return; }
+    var docId = u.uid + '_video_' + videoId;
+    var ref = fs().doc(db(), 'savedVideos', docId);
+    fs().getDoc(ref).then(function (snap) {
+      if (snap.exists()) {
+        return fs().deleteDoc(ref).then(function () { callback && callback(false); });
+      } else {
+        return fs().setDoc(ref, {
+          userId: u.uid,
+          videoId: videoId,
+          title: videoData.title || '',
+          thumbnail: videoData.thumbnail || ytThumb(videoData.youtubeId || ''),
+          city: videoData.city || '',
+          authorName: videoData.authorName || '',
+          createdAt: Date.now()
+        }).then(function () { callback && callback(true); });
+      }
+    }).catch(function () { callback && callback(null); });
+  }
+
+  function checkVideoSaved(videoId, callback) {
+    var u = authUser();
+    if (!u || !fs() || !db()) { callback(false); return; }
+    var docId = u.uid + '_video_' + videoId;
+    fs().getDoc(fs().doc(db(), 'savedVideos', docId))
+      .then(function (snap) { callback(snap.exists()); })
+      .catch(function () { callback(false); });
+  }
+
+  function loadSavedVideos(uid, callback) {
+    if (!fs() || !db() || !uid) { callback([]); return; }
+    var q = fs().query(
+      fs().collection(db(), 'savedVideos'),
+      fs().where('userId', '==', uid),
+      fs().limit(20)
+    );
+    fs().getDocs(q)
+      .then(function (snap) {
+        var items = [];
+        snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+        items.sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+        callback(items);
+      })
+      .catch(function () { callback([]); });
+  }
+
+  /* ── Phase 7: Video badges ───────────────────────────────── */
+  function videoBadgesHTML(v) {
+    var html = '';
+    if (trendScore(v) >= 60) {
+      html += '<span class="vid-status-badge trending"><i class="fas fa-fire"></i>Trending</span>';
+    }
+    if ((v.viewCount || 0) >= 1000) {
+      html += '<span class="vid-status-badge viral"><i class="fas fa-bolt"></i>Viral</span>';
+    }
+    var now = Date.now();
+    var created = v.createdAt
+      ? (v.createdAt.toMillis ? v.createdAt.toMillis() : (typeof v.createdAt === 'number' ? v.createdAt : 0))
+      : 0;
+    if (created && now - created < 86400000) {
+      html += '<span class="vid-status-badge new"><i class="fas fa-sparkles"></i>New</span>';
+    }
+    return html ? '<div class="vid-badge-row">' + html + '</div>' : '';
+  }
+
+  /* ── Phase 7: Continue Watching row ─────────────────────── */
+  function renderContinueWatching() {
+    var section = document.getElementById('vidContinueSection');
+    var strip = document.getElementById('vidContinueStrip');
+    if (!section || !strip) return;
+    var hist = getHistory();
+    if (!hist.length) { section.style.display = 'none'; return; }
+    section.style.display = '';
+    strip.innerHTML = hist.map(function (h) {
+      return '<a class="vid-tv-card" href="watch.html?v=' + esc(h.id) + '">' +
+        '<div class="vid-tv-thumb">' +
+          '<img src="' + esc(h.thumb) + '" alt="" loading="lazy">' +
+          '<div class="vid-tv-play"><i class="fas fa-play"></i></div>' +
+        '</div>' +
+        '<div class="vid-tv-info">' +
+          '<div class="vid-tv-title">' + esc(h.title) + '</div>' +
+          '<div class="vid-tv-meta">' + (h.city ? '<span><i class="fas fa-location-dot"></i>' + esc(h.city) + '</span>' : '') + '</div>' +
+        '</div>' +
+      '</a>';
+    }).join('');
+  }
+
+  /* ── Phase 7: Saved Videos row ──────────────────────────── */
+  function renderSavedSection() {
+    var section = document.getElementById('vidSavedSection');
+    var strip = document.getElementById('vidSavedStrip');
+    if (!section || !strip) return;
+    var u = authUser();
+    if (!u) { section.style.display = 'none'; return; }
+    loadSavedVideos(u.uid, function (items) {
+      if (!items.length) { section.style.display = 'none'; return; }
+      section.style.display = '';
+      strip.innerHTML = items.map(function (h) {
+        return '<a class="vid-tv-card" href="watch.html?v=' + esc(h.videoId) + '">' +
+          '<div class="vid-tv-thumb">' +
+            '<img src="' + esc(h.thumbnail) + '" alt="" loading="lazy">' +
+            '<div class="vid-tv-play"><i class="fas fa-play"></i></div>' +
+          '</div>' +
+          '<div class="vid-tv-info">' +
+            '<div class="vid-tv-title">' + esc(h.title) + '</div>' +
+            '<div class="vid-tv-meta">' + (h.city ? '<span><i class="fas fa-location-dot"></i>' + esc(h.city) + '</span>' : '') + '</div>' +
+          '</div>' +
+        '</a>';
+      }).join('');
+    });
+  }
+
+  /* ── Phase 7: Watch page save button ────────────────────── */
+  function bindWatchSave(v) {
+    var btn = document.getElementById('watchSaveBtn');
+    if (!btn) return;
+    var u = authUser();
+    if (!u) { btn.style.display = 'none'; return; }
+    checkVideoSaved(v.id, function (isSaved) {
+      btn.classList.toggle('saved', isSaved);
+      var ico = btn.querySelector('i');
+      if (ico) ico.className = isSaved ? 'fas fa-bookmark' : 'far fa-bookmark';
+    });
+    btn.addEventListener('click', function () {
+      toggleVideoSave(v.id, v, function (nowSaved) {
+        if (nowSaved === null) return;
+        btn.classList.toggle('saved', nowSaved);
+        var ico = btn.querySelector('i');
+        if (ico) ico.className = nowSaved ? 'fas fa-bookmark' : 'far fa-bookmark';
+        toast(nowSaved ? 'ვიდეო შეინახა!' : 'შენახვიდან წაიშალა');
+      });
+    });
+  }
+
+  /* ── Phase 7: Share mini-menu ───────────────────────────── */
+  function openShareMenu(v, btn) {
+    var existing = document.getElementById('vidShareMenu');
+    if (existing) { existing.remove(); return; }
+    var url = location.origin + '/watch.html?v=' + v.id;
+    var menu = document.createElement('div');
+    menu.className = 'vid-share-menu';
+    menu.id = 'vidShareMenu';
+    menu.innerHTML =
+      '<div class="vid-share-menu-item" id="vsm-copy"><i class="fas fa-link"></i>ლინკის კოპირება</div>' +
+      (navigator.share ? '<div class="vid-share-menu-item" id="vsm-native"><i class="fas fa-share-nodes"></i>გაზიარება</div>' : '') +
+      '<div class="vid-share-menu-item" id="vsm-post"><i class="fas fa-pen-to-square"></i>Share to Post</div>';
+
+    var rect = btn.getBoundingClientRect();
+    menu.style.top = (rect.bottom + window.scrollY + 6) + 'px';
+    menu.style.left = Math.max(8, rect.left + window.scrollX - 60) + 'px';
+    document.body.appendChild(menu);
+
+    menu.querySelector('#vsm-copy').addEventListener('click', function () {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(function () { toast('ლინკი დაკოპირდა!'); }).catch(function () {});
+      }
+      menu.remove();
+    });
+    if (navigator.share) {
+      var nativeBtn = menu.querySelector('#vsm-native');
+      if (nativeBtn) nativeBtn.addEventListener('click', function () {
+        navigator.share({ title: v.title, url: url }).catch(function () {});
+        menu.remove();
+      });
+    }
+    var postBtn = menu.querySelector('#vsm-post');
+    if (postBtn) postBtn.addEventListener('click', function () {
+      window.location.href = 'feed.html?share=video&id=' + esc(v.id) + '&title=' + encodeURIComponent(v.title || '');
+      menu.remove();
+    });
+
+    setTimeout(function () {
+      document.addEventListener('click', function rmMenu(e) {
+        if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', rmMenu); }
+      });
+    }, 0);
+  }
+
   /* ── Videos page init ─────────────────────────────────── */
   function initVideosPage() {
     var page = document.getElementById('vidPage');
@@ -645,6 +847,8 @@
       if (state.filter === 'all') {
         renderTVSections(vids);
         renderTopCreators(vids);
+        renderContinueWatching();
+        renderSavedSection();
       }
       renderGrid();
       renderShorts();
@@ -990,8 +1194,15 @@
 
     loadVideoById(docId, function (video) {
       if (!video) { showWatchError('ვიდეო წაშლილია ან არ არსებობს'); return; }
+      addToHistory(video);
       renderWatchPage(video);
-      incrementViewCount(docId);
+      try {
+        var sessKey = 'gh_viewed_' + docId;
+        if (!sessionStorage.getItem(sessKey)) {
+          incrementViewCount(docId);
+          sessionStorage.setItem(sessKey, '1');
+        }
+      } catch (e) { incrementViewCount(docId); }
       loadRelated(video);
       initWatchComments(video);
     });
@@ -1038,6 +1249,9 @@
         '<button class="watch-action-btn" id="watchLikeBtn" data-vid-id="' + v.id + '">' +
           '<i class="fas fa-heart"></i><span id="watchLikeCount">' + fmtNum(v.likeCount) + '</span>' +
         '</button>' +
+        '<button class="watch-action-btn" id="watchSaveBtn">' +
+          '<i class="far fa-bookmark"></i>შენახვა' +
+        '</button>' +
         '<button class="watch-action-btn" id="watchShareBtn">' +
           '<i class="fas fa-share-nodes"></i>გაზიარება' +
         '</button>' +
@@ -1048,6 +1262,7 @@
         (v.placeId ? '<a href="map.html?mode=videos&place=' + esc(v.placeId) + '" class="watch-action-btn ghost">' +
           '<i class="fas fa-map"></i>Map</a>' : '');
       bindWatchLike(v);
+      bindWatchSave(v);
       bindWatchShare(v);
     }
 
@@ -1100,6 +1315,19 @@
         var el = document.getElementById('watchLikeCount');
         if (el) el.textContent = fmtNum(newCount);
         toast(liked ? 'მოიწონე!' : 'Like მოხსნილია');
+        if (nowLiked && v.authorId && v.authorId !== u.uid) {
+          var gs = window.GeoSocial;
+          if (gs && gs.createNotification) {
+            gs.createNotification(
+              v.authorId, 'video_like',
+              (u.displayName || 'Someone') + ' liked your video',
+              v.title || '',
+              'watch.html?v=' + v.id,
+              { videoId: v.id, likerAvatar: u.photoURL || '' },
+              'vlike_' + u.uid + '_' + v.id
+            );
+          }
+        }
       });
     });
   }
@@ -1108,12 +1336,7 @@
     var btn = document.getElementById('watchShareBtn');
     if (!btn) return;
     btn.addEventListener('click', function () {
-      var url = location.origin + '/watch.html?v=' + v.id;
-      if (navigator.share) {
-        navigator.share({ title: v.title, url: url }).catch(function () {});
-      } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(url).then(function () { toast('ლინკი დაკოპირდა!'); }).catch(function () {});
-      }
+      openShareMenu(v, btn);
     });
   }
 
@@ -1178,7 +1401,21 @@
         submitEl.disabled = true;
         addVideoComment(v.id, text, u, function (err) {
           submitEl.disabled = false;
-          if (err) { toast('შეცდომა', 'error'); } else { inputEl.value = ''; }
+          if (err) { toast('შეცდომა', 'error'); } else {
+            inputEl.value = '';
+            if (v.authorId && v.authorId !== u.uid) {
+              var gs = window.GeoSocial;
+              if (gs && gs.createNotification) {
+                gs.createNotification(
+                  v.authorId, 'video_comment',
+                  (u.displayName || 'Someone') + ' commented on your video',
+                  text.substring(0, 80),
+                  'watch.html?v=' + v.id,
+                  { videoId: v.id }, null
+                );
+              }
+            }
+          }
         });
       });
       inputEl.addEventListener('keydown', function (e) {
@@ -1196,6 +1433,28 @@
     }
     if (document.getElementById('vidPage')) initVideosPage();
     if (document.getElementById('watchPage')) initWatchPage();
+
+    /* Phase 7: global save-button delegation */
+    document.addEventListener('click', function (e) {
+      var saveBtn = e.target.closest('.vid-save-btn[data-save-vid]');
+      if (!saveBtn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var vidId = saveBtn.dataset.saveVid;
+      var u = authUser();
+      if (!u) { toast('შენახვისთვის გაიარე ავტორიზაცია', 'error'); return; }
+      var all = state.videos.concat(state.shorts);
+      var found = null;
+      for (var i = 0; i < all.length; i++) { if (all[i].id === vidId) { found = all[i]; break; } }
+      var vidData = found || { id: vidId };
+      toggleVideoSave(vidId, vidData, function (nowSaved) {
+        if (nowSaved === null) return;
+        saveBtn.classList.toggle('saved', nowSaved);
+        var ico = saveBtn.querySelector('i');
+        if (ico) ico.className = nowSaved ? 'fas fa-bookmark' : 'far fa-bookmark';
+        toast(nowSaved ? 'შეინახა!' : 'შენახვიდან წაიშალა');
+      });
+    });
   }
 
   if (document.readyState === 'loading') {
@@ -1219,6 +1478,11 @@
     addVideoComment: addVideoComment,
     listenVideoComments: listenVideoComments,
     incrementViewCount: incrementViewCount,
+    toggleVideoSave: toggleVideoSave,
+    checkVideoSaved: checkVideoSaved,
+    loadSavedVideos: loadSavedVideos,
+    addToHistory: addToHistory,
+    getHistory: getHistory,
     timeAgo: timeAgo,
     fmtNum: fmtNum,
     ytThumb: ytThumb,
