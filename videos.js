@@ -502,6 +502,106 @@
       '</div>';
   }
 
+  /* ── Phase 6: Nearby Videos ─────────────────────────────── */
+  function haversineDist(lat1, lng1, lat2, lng2) {
+    var R = 6371;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLng = (lng2 - lng1) * Math.PI / 180;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function initNearbyBtn() {
+    var btn = document.getElementById('vidNearbyBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      if (!navigator.geolocation) { toast('გეოლოკაცია მხარდაჭერილი არ არის', 'error'); return; }
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+      btn.disabled = true;
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          btn.innerHTML = '<i class="fas fa-location-dot"></i> Near Me';
+          btn.disabled = false;
+          computeNearby(pos.coords.latitude, pos.coords.longitude);
+        },
+        function () {
+          btn.innerHTML = '<i class="fas fa-location-dot"></i> Near Me';
+          btn.disabled = false;
+          toast('Location permission denied', 'error');
+        },
+        { timeout: 6000 }
+      );
+    });
+  }
+
+  function computeNearby(userLat, userLng) {
+    var allVids = state.videos.concat(state.shorts).filter(function (v) { return v.placeId; });
+    if (!allVids.length) { toast('ახლომდებარე ვიდეო არ არის', 'error'); return; }
+
+    var seen = {}, placeIds = [];
+    allVids.forEach(function (v) {
+      if (!seen[v.placeId]) { seen[v.placeId] = true; placeIds.push(v.placeId); }
+    });
+
+    if (!fs() || !db()) { toast('Firebase unavailable', 'error'); return; }
+
+    var placeCoords = {};
+    var pending = placeIds.length;
+
+    function done() {
+      var withDist = allVids.map(function (v) {
+        var c = placeCoords[v.placeId];
+        if (!c) return null;
+        return Object.assign({}, v, { _dist: haversineDist(userLat, userLng, c.lat, c.lng) });
+      }).filter(Boolean);
+      withDist.sort(function (a, b) { return a._dist - b._dist; });
+      var nearby = withDist.slice(0, 8);
+      if (!nearby.length) { toast('ახლომდებარე ვიდეო არ არის', 'error'); return; }
+      renderNearbySection(nearby);
+    }
+
+    placeIds.forEach(function (pid) {
+      fs().getDoc(fs().doc(db(), 'places', pid))
+        .then(function (snap) {
+          if (snap.exists()) {
+            var d = snap.data();
+            var lat = d.lat || d.latitude || (d.location && d.location.lat);
+            var lng = d.lng || d.longitude || (d.location && d.location.lng);
+            if (lat && lng) placeCoords[pid] = { lat: Number(lat), lng: Number(lng) };
+          }
+        })
+        .catch(function () {})
+        .finally(function () { if (--pending === 0) done(); });
+    });
+  }
+
+  function renderNearbySection(vids) {
+    var section = document.getElementById('vidNearbySection');
+    var strip   = document.getElementById('vidNearbyStrip');
+    if (!section || !strip) return;
+    section.style.display = '';
+    strip.innerHTML = vids.map(function (v) {
+      var distKm = v._dist;
+      var distStr = distKm < 1 ? Math.round(distKm * 1000) + 'm' : distKm.toFixed(1) + 'km';
+      var thumb = v.thumbnail || ytThumb(v.youtubeId);
+      return '<a class="vid-tv-card" href="watch.html?v=' + esc(v.id) + '">' +
+        '<div class="vid-tv-thumb">' +
+          '<img src="' + thumb + '" alt="" loading="lazy" onerror="this.src=\'' + ytThumb(v.youtubeId) + '\'">' +
+          '<div class="vid-tv-play"><i class="fas fa-play"></i></div>' +
+        '</div>' +
+        '<div class="vid-tv-info">' +
+          '<div class="vid-tv-title">' + esc(v.title || 'Video') + '</div>' +
+          '<div class="vid-tv-meta">' +
+            '<span style="color:var(--green)"><i class="fas fa-location-dot"></i>' + distStr + '</span>' +
+            (v.city ? '<span>' + esc(v.city) + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+      '</a>';
+    }).join('');
+  }
+
   /* ── Videos page init ─────────────────────────────────── */
   function initVideosPage() {
     var page = document.getElementById('vidPage');
@@ -632,6 +732,8 @@
     [addBtn, addBtn2].forEach(function (btn) {
       if (btn) btn.addEventListener('click', function () { openAddVideoModal(); });
     });
+
+    initNearbyBtn();
   }
 
   /* ── Add Video Modal ──────────────────────────────────── */
@@ -942,7 +1044,9 @@
         (v.channelUrl ? '<a href="' + esc(v.channelUrl) + '" target="_blank" rel="noopener" class="watch-action-btn">' +
           '<i class="fab fa-youtube"></i>Channel</a>' : '') +
         '<a href="videos.html" class="watch-action-btn ghost">' +
-          '<i class="fas fa-arrow-left"></i>ვიდეოები</a>';
+          '<i class="fas fa-arrow-left"></i>ვიდეოები</a>' +
+        (v.placeId ? '<a href="map.html?mode=videos&place=' + esc(v.placeId) + '" class="watch-action-btn ghost">' +
+          '<i class="fas fa-map"></i>Map</a>' : '');
       bindWatchLike(v);
       bindWatchShare(v);
     }

@@ -578,7 +578,10 @@
           '<div id="plCheckinsList"><div style="padding:8px 0;color:#4b5563;font-size:.8rem"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div></div>'+
         '</div>'+
         '<div id="plVideosSection" style="margin-top:18px">'+
-          '<div style="font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b;margin-bottom:10px"><i class="fas fa-film" style="margin-right:5px"></i>Videos</div>'+
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'+
+            '<div style="font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b"><i class="fas fa-film" style="margin-right:5px"></i>Videos</div>'+
+            '<a href="map.html?mode=videos&place='+esc(p.id)+'" style="font-size:.72rem;color:#10b981;text-decoration:none;display:flex;align-items:center;gap:4px"><i class="fas fa-map"></i>View on Map</a>'+
+          '</div>'+
           '<div id="plVideosList" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none"><div style="color:#64748b;font-size:.8rem;padding:8px 0"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div></div>'+
         '</div>'+
       '</div>';

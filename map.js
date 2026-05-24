@@ -1827,6 +1827,7 @@
     });
 
     map.fitBounds([[40.0, 41.0], [46.7, 43.5]], { padding: 40, duration: 0 });
+    window._ghMap = map;
 
     // Navigation control (zoom + compass + pitch visualizer)
     map.addControl(new maplibregl.NavigationControl({
@@ -1861,6 +1862,12 @@
           loadUserCheckins();
         }, { once: true });
       }
+
+      /* Video map mode */
+      if (window.GeoVideoMap) window.GeoVideoMap.init();
+      else window.addEventListener('load', function () {
+        if (window.GeoVideoMap) window.GeoVideoMap.init();
+      }, { once: true });
     });
   }
 

@@ -143,7 +143,13 @@
       <button class="map-toggle-btn" id="weekendToggleBtn" onclick="toggleThisWeekend()" style="display:none">
         📅 This Weekend
       </button>
+      <button class="map-toggle-btn" id="vidMapToggle">
+        🎬 Videos
+      </button>
     </div>
+
+    <!-- Video map popup card -->
+    <div class="vid-map-card" id="vidMapCard"></div>
 
     <!-- Legend — populated dynamically by map.js -->
     <div class="map-legend" id="legend"></div>
@@ -215,6 +221,7 @@
   <script defer src="main.js"></script>
   <script defer src="account.js"></script>
   <script defer src="map.js"></script>
+  <script defer src="video-map.js"></script>
 <script defer src="nav-cleanup.js"></script>
 <script defer src="mobile-nav.js"></script>
 <script defer src="chat-popup.js"></script>
