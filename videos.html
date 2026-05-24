@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Videos — GeoHub</title>
+  <meta name="description" content="აღმოაჩინე საუკეთესო ვიდეოები საქართველოდან — Travel, Hiking, Food, Culture და სხვა.">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css">
+  </noscript>
+  <link rel="stylesheet" href="geohub-social-redesign.css">
+  <link rel="stylesheet" href="account-switcher.css">
+  <link rel="stylesheet" href="chat-popup.css">
+  <link rel="stylesheet" href="responsive-polish.css">
+  <link rel="stylesheet" href="videos.css">
+  <meta name="theme-color" content="#10b981">
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+</head>
+<body data-gh-page="videos">
+  <noscript>GeoHub requires JavaScript.</noscript>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script defer src="gh-schema.js"></script>
+  <script defer src="account.js"></script>
+  <script defer src="nav-cleanup.js"></script>
+  <script defer src="mobile-nav.js"></script>
+  <script defer src="firestore-social.js"></script>
+  <script defer src="chat-popup.js"></script>
+  <script defer src="geohub-social-redesign.js"></script>
+  <script defer src="account-switcher.js"></script>
+  <script defer src="geohub-production-stabilization-v1.js"></script>
+  <script defer src="responsive-polish.js"></script>
+  <script defer src="videos.js"></script>
+
+  <div class="vid-page" id="vidPage">
+
+    <!-- Hero -->
+    <div class="vid-hero">
+      <div class="vid-hero-badge"><i class="fas fa-film"></i> VIDEO PLATFORM</div>
+      <h1>GeoHub Videos</h1>
+      <p>აღმოაჩინე საქართველოს ყველაზე ლამაზი ადგილები — Travel, Hiking, Food, Culture და სხვა</p>
+      <div class="vid-hero-actions">
+        <button class="vid-add-btn" id="vidAddBtn"><i class="fas fa-plus"></i> ვიდეოს დამატება</button>
+        <div class="vid-search-wrap">
+          <i class="fas fa-search"></i>
+          <input class="vid-search" id="vidSearch" type="search" placeholder="მოძებნე ვიდეოები...">
+        </div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="vid-toolbar">
+      <!-- Category pills -->
+      <div class="vid-pill-row" id="vidCatRow">
+        <!-- Rendered by videos.js -->
+      </div>
+      <!-- Sort + City row -->
+      <div class="vid-sort-row">
+        <span>ვიდეოების ჩვენება</span>
+        <div style="display:flex;gap:10px;align-items:center">
+          <select class="vid-sort-select" id="vidCityFilter">
+            <option value="">ყველა ქალაქი</option>
+            <option value="თბილისი">თბილისი</option>
+            <option value="ბათუმი">ბათუმი</option>
+            <option value="ქუთაისი">ქუთაისი</option>
+            <option value="სვანეთი">სვანეთი</option>
+            <option value="სიღნაღი">სიღნაღი</option>
+            <option value="ბაკურიანი">ბაკურიანი</option>
+            <option value="გუდაური">გუდაური</option>
+            <option value="ბორჯომი">ბორჯომი</option>
+            <option value="გორი">გორი</option>
+            <option value="ანაკლია">ანაკლია</option>
+            <option value="თელავი">თელავი</option>
+            <option value="მარტვილი">მარტვილი</option>
+          </select>
+          <select class="vid-sort-select" id="vidSort">
+            <option value="newest">უახლესი</option>
+            <option value="popular">პოპულარული</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shorts Section -->
+    <section class="vid-shorts-section" id="vidShortsSection" style="display:none">
+      <div class="vid-section-head">
+        <h2><i class="fas fa-bolt" style="color:var(--green)"></i> Shorts</h2>
+      </div>
+      <div class="vid-shorts-strip" id="vidShortsStrip">
+        <!-- Rendered by videos.js -->
+      </div>
+    </section>
+
+    <!-- Main Grid Section -->
+    <section class="vid-grid-section">
+      <div class="vid-section-head">
+        <h2><i class="fas fa-film" style="color:var(--green)"></i> ვიდეოები</h2>
+        <button class="vid-add-btn" id="vidAddBtn2" style="font-size:.8rem;padding:8px 16px">
+          <i class="fas fa-plus"></i> დამატება
+        </button>
+      </div>
+      <div class="vid-grid" id="vidGrid">
+        <!-- Skeleton rendered immediately by videos.js -->
+        <div class="vid-skel"><div class="vid-skel-thumb"></div><div class="vid-skel-body"><div class="vid-skel-line"></div><div class="vid-skel-line short"></div></div></div>
+        <div class="vid-skel"><div class="vid-skel-thumb"></div><div class="vid-skel-body"><div class="vid-skel-line"></div><div class="vid-skel-line short"></div></div></div>
+        <div class="vid-skel"><div class="vid-skel-thumb"></div><div class="vid-skel-body"><div class="vid-skel-line"></div><div class="vid-skel-line short"></div></div></div>
+        <div class="vid-skel"><div class="vid-skel-thumb"></div><div class="vid-skel-body"><div class="vid-skel-line"></div><div class="vid-skel-line short"></div></div></div>
+        <div class="vid-skel"><div class="vid-skel-thumb"></div><div class="vid-skel-body"><div class="vid-skel-line"></div><div class="vid-skel-line short"></div></div></div>
+        <div class="vid-skel"><div class="vid-skel-thumb"></div><div class="vid-skel-body"><div class="vid-skel-line"></div><div class="vid-skel-line short"></div></div></div>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>

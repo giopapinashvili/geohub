@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Watch — GeoHub</title>
+  <meta name="description" content="GeoHub Video Watch Page">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css">
+  </noscript>
+  <link rel="stylesheet" href="geohub-social-redesign.css">
+  <link rel="stylesheet" href="account-switcher.css">
+  <link rel="stylesheet" href="chat-popup.css">
+  <link rel="stylesheet" href="responsive-polish.css">
+  <link rel="stylesheet" href="videos.css">
+  <meta name="theme-color" content="#10b981">
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+</head>
+<body data-gh-page="videos">
+  <noscript>GeoHub requires JavaScript.</noscript>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script defer src="gh-schema.js"></script>
+  <script defer src="account.js"></script>
+  <script defer src="nav-cleanup.js"></script>
+  <script defer src="mobile-nav.js"></script>
+  <script defer src="firestore-social.js"></script>
+  <script defer src="chat-popup.js"></script>
+  <script defer src="geohub-social-redesign.js"></script>
+  <script defer src="account-switcher.js"></script>
+  <script defer src="geohub-production-stabilization-v1.js"></script>
+  <script defer src="responsive-polish.js"></script>
+  <script defer src="videos.js"></script>
+
+  <div class="watch-page" id="watchPage">
+    <div id="watchMain">
+      <div class="watch-layout">
+
+        <!-- Left: Player + info + comments -->
+        <div class="watch-left">
+
+          <!-- Player -->
+          <div class="watch-player-wrap" id="watchPlayer">
+            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#000;border-radius:16px">
+              <i class="fas fa-spinner fa-spin" style="color:#fff;font-size:2rem"></i>
+            </div>
+          </div>
+
+          <!-- Info -->
+          <div class="watch-info">
+            <h1 class="watch-title" id="watchTitle">იტვირთება...</h1>
+
+            <div class="watch-meta-row" id="watchMeta">
+              <!-- Badges: category, city, YouTube link -->
+            </div>
+
+            <!-- Action bar -->
+            <div class="watch-actions" id="watchActions">
+              <!-- Like, Share, Channel, Back -->
+            </div>
+
+            <!-- Added by -->
+            <div id="watchAddedBy" style="margin-top:16px"></div>
+
+            <!-- Description -->
+            <div id="watchDesc"></div>
+          </div>
+
+          <!-- Comments -->
+          <div class="watch-comments" id="watchCommentsSection">
+            <div class="watch-comments-header">
+              <h3><i class="fas fa-comments"></i> კომენტარები <span id="watchCommentCount" style="color:var(--text-muted);font-weight:400;font-size:.9rem">0</span></h3>
+            </div>
+
+            <!-- Comment input -->
+            <div class="watch-comment-form">
+              <div class="watch-comment-av" id="watchCommentAv">
+                <i class="fas fa-user"></i>
+              </div>
+              <div style="flex:1;display:flex;gap:8px">
+                <input class="watch-comment-input" id="watchCommentInput" type="text" placeholder="კომენტარი დაწერე...">
+                <button class="watch-action-btn" id="watchCommentSubmit" style="flex-shrink:0"><i class="fas fa-paper-plane"></i></button>
+              </div>
+            </div>
+
+            <div id="watchCommentsList">
+              <div style="color:var(--text-muted);font-size:.85rem;padding:12px 0">
+                <i class="fas fa-spinner fa-spin"></i> კომენტარები იტვირთება...
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right: Related videos sidebar -->
+        <aside class="watch-sidebar">
+          <div class="watch-sidebar-head">
+            <h3><i class="fas fa-film"></i> მსგავსი ვიდეოები</h3>
+          </div>
+          <div id="watchSidebar">
+            <div style="color:var(--text-muted);font-size:.85rem;padding:8px 0">
+              <i class="fas fa-spinner fa-spin"></i> იტვირთება...
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>
