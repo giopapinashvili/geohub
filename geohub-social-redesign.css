@@ -2085,3 +2085,142 @@ body.page-messages #ghPageModeBanner{flex-shrink:0;width:100%;z-index:1}
   .gh-aud-modal{border-radius:24px 24px 0 0;max-height:88svh;width:100%}
   .gh-aud-modal-body{max-height:68vh}
 }
+
+/* ═══════════════════════════════════════════════════════════
+   GeoHub Blue Glass Theme Override
+   ═══════════════════════════════════════════════════════════ */
+
+/* — Dark theme: swap green → electric blue — */
+html[data-gh-theme="dark"],
+:root {
+  --gh-green:   #3B82F6;
+  --gh-green-2: #60A5FA;
+  --gh-blue:    #818CF8;
+  --gh-bg:      #05080F;
+  --gh-bg-2:    #080D1A;
+  --gh-panel:   rgba(8,13,26,.80);
+  --gh-card:    rgba(11,18,36,.82);
+  --gh-card-soft:rgba(14,24,46,.68);
+  --gh-border:  rgba(59,130,246,.12);
+  --gh-border-strong: rgba(96,165,250,.35);
+  --gh-text:    #E8EDF8;
+  --gh-muted:   #7B91B8;
+  --gh-dim:     #4A5A78;
+  --gh-shadow:  0 18px 55px rgba(0,0,0,.50);
+}
+
+/* — Body background: blue radial glows — */
+body.gh-social-body,
+html[data-gh-theme="dark"] body.gh-social-body {
+  background:
+    radial-gradient(ellipse 700px 500px at 10% 0%, rgba(37,99,235,.18), transparent 60%),
+    radial-gradient(ellipse 500px 400px at 88% 12%, rgba(99,102,241,.13), transparent 55%),
+    radial-gradient(ellipse 400px 300px at 55% 80%, rgba(14,165,233,.07), transparent 50%),
+    linear-gradient(160deg, #05080F, #080D1A) !important;
+}
+
+/* — Topbar: frosted glass blue tint — */
+.gh-topbar {
+  background: rgba(5,8,15,.78) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border-bottom: 1px solid rgba(59,130,246,.14) !important;
+  box-shadow: 0 1px 0 rgba(59,130,246,.06) !important;
+}
+
+/* — Brand mark: blue gradient — */
+.gh-brand-mark {
+  background: linear-gradient(135deg,#1D4ED8,#3B82F6) !important;
+  box-shadow: 0 0 20px rgba(59,130,246,.4), 0 8px 24px rgba(0,0,0,.4) !important;
+}
+.gh-brand span span { color: #60A5FA !important; }
+
+/* — Create button: blue gradient — */
+.gh-create-btn {
+  background: linear-gradient(135deg,#1D4ED8,#2563EB) !important;
+  border-color: rgba(59,130,246,.4) !important;
+  box-shadow: 0 6px 20px rgba(37,99,235,.35) !important;
+}
+
+/* — Search focus glow: blue — */
+.gh-top-search input:focus {
+  border-color: rgba(59,130,246,.5) !important;
+  box-shadow: 0 0 0 4px rgba(59,130,246,.12) !important;
+}
+
+/* — Icon buttons hover: blue tint — */
+.gh-icon-btn:hover, .gh-user-btn:hover {
+  background: rgba(59,130,246,.12) !important;
+  border-color: rgba(59,130,246,.35) !important;
+}
+
+/* — Cards & panels: glass morphism — */
+.gh-panel, .gh-card {
+  background: rgba(11,18,36,.75) !important;
+  border-color: rgba(59,130,246,.10) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+
+/* — Left sidebar panel — */
+.gh-left .gh-panel {
+  background: rgba(8,13,26,.70) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+/* — Nav items: active state blue — */
+.gh-nav-item.active {
+  background: linear-gradient(135deg,rgba(37,99,235,.20),rgba(59,130,246,.08)) !important;
+  box-shadow: inset 0 0 0 1px rgba(59,130,246,.22) !important;
+}
+.gh-nav-item.active i { color: #60A5FA !important; }
+.gh-nav-item:hover { background: rgba(59,130,246,.07) !important; }
+
+/* — Badge count: blue — */
+.gh-badge-count { background: #3B82F6 !important; }
+
+/* — Buttons primary: blue — */
+.gh-btn { background: linear-gradient(135deg,#1D4ED8,#2563EB) !important; }
+.gh-btn:hover { background: linear-gradient(135deg,#2563EB,#3B82F6) !important; }
+
+/* — Feed tabs / pills: blue active — */
+.gh-feed-tab.active, [class*="feed-tab"].active {
+  background: linear-gradient(135deg,#1D4ED8,#2563EB) !important;
+  border-color: #3B82F6 !important;
+  box-shadow: 0 4px 16px rgba(37,99,235,.4) !important;
+}
+
+/* — Post action hover: blue — */
+.gh-post-action:hover { color: #60A5FA !important; background: rgba(59,130,246,.08) !important; }
+
+/* — Story ring: blue — */
+.gh-story-card { border-color: #3B82F6 !important; }
+.gh-story-count { background: #3B82F6 !important; color: #fff !important; }
+.gh-story-avatar-mini { border-color: #3B82F6 !important; }
+
+/* — Progress / XP bars: blue — */
+.gh-xp-bar, [class*="upload-bar"], [class*="progress-fill"] {
+  background: linear-gradient(90deg,#1D4ED8,#60A5FA,#818CF8) !important;
+  box-shadow: 0 0 10px rgba(96,165,250,.4) !important;
+}
+
+/* — Live map dots: blue/indigo — */
+.gh-map-dot-a { background: linear-gradient(135deg,#3B82F6,#1D4ED8) !important; }
+.gh-map-dot-c { background: linear-gradient(135deg,#6366F1,#4338CA) !important; }
+
+/* — Dark live stats panel border: blue — */
+html[data-gh-theme="dark"] .gh-live-stats { border-color: rgba(59,130,246,.18) !important; }
+
+/* — Post composer input focus: blue — */
+.gh-post-input:focus-within, .gh-composer:focus-within {
+  border-color: rgba(59,130,246,.35) !important;
+}
+
+/* — Right sidebar widget titles: blue accent — */
+.gh-widget-title i, .gh-panel h3 i { color: #60A5FA !important; }
+
+/* — Scrollbar: blue tint — */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(59,130,246,.25); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(59,130,246,.45); }
