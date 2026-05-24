@@ -1381,61 +1381,257 @@
     ov.innerHTML =
       '<div class="vid-modal" id="vidModalBox">' +
         '<h2><i class="fab fa-youtube"></i> ვიდეოს დამატება<button class="vid-modal-close" id="vidModalClose"><i class="fas fa-times"></i></button></h2>' +
-        '<div id="vidPreviewCard" class="vid-preview-card"></div>' +
-        '<div class="vid-form-group vid-url-group">' +
-          '<label class="vid-form-label">YouTube URL <span>*</span></label>' +
-          '<input id="vidUrlInput" class="vid-form-input" type="url" placeholder="https://www.youtube.com/watch?v=...">' +
-          '<button class="vid-fetch-btn" id="vidFetchBtn"><i class="fas fa-wand-magic-sparkles"></i> Auto-fill</button>' +
+        '<div class="vid-modal-tabs" id="vidModalTabs">' +
+          '<button class="vid-modal-tab active" data-vtab="single"><i class="fas fa-video"></i> ვიდეო</button>' +
+          '<button class="vid-modal-tab" data-vtab="channel"><i class="fas fa-list"></i> არხის Import</button>' +
         '</div>' +
-        '<div class="vid-form-group">' +
-          '<label class="vid-form-label">სათაური <span>*</span></label>' +
-          '<input id="vidTitleInput" class="vid-form-input" type="text" placeholder="ვიდეოს სათაური">' +
-        '</div>' +
-        '<div class="vid-form-row">' +
-          '<div class="vid-form-group">' +
-            '<label class="vid-form-label">კატეგორია</label>' +
-            '<select id="vidCatInput" class="vid-form-select"><option value="">-- კატეგორია --</option>' + catOpts + '</select>' +
+        /* ── Single video panel ── */
+        '<div id="vidSinglePanel">' +
+          '<div id="vidPreviewCard" class="vid-preview-card"></div>' +
+          '<div class="vid-form-group vid-url-group">' +
+            '<label class="vid-form-label">YouTube URL <span>*</span></label>' +
+            '<input id="vidUrlInput" class="vid-form-input" type="url" placeholder="https://www.youtube.com/watch?v=...">' +
+            '<button class="vid-fetch-btn" id="vidFetchBtn"><i class="fas fa-wand-magic-sparkles"></i> Auto-fill</button>' +
           '</div>' +
           '<div class="vid-form-group">' +
-            '<label class="vid-form-label">ქალაქი</label>' +
-            '<select id="vidCityInput" class="vid-form-select"><option value="">-- ქალაქი --</option>' + cityOpts + '</select>' +
+            '<label class="vid-form-label">სათაური <span>*</span></label>' +
+            '<input id="vidTitleInput" class="vid-form-input" type="text" placeholder="ვიდეოს სათაური">' +
           '</div>' +
-        '</div>' +
-        '<div class="vid-form-row">' +
-          '<div class="vid-form-group">' +
-            '<label class="vid-form-label"><i class="fas fa-map-pin" style="color:var(--green);margin-right:4px"></i>ადგილი (არასავალდებულო)</label>' +
-            '<div class="vid-field-wrap">' +
-              '<input id="vidPlaceSearch" class="vid-form-input" type="text" placeholder="ადგილის ძიება..." autocomplete="off">' +
-              '<button class="vid-search-clear" id="vidPlaceClear" type="button"><i class="fas fa-times"></i></button>' +
-              '<div class="vid-search-dropdown" id="vidPlaceDd"></div>' +
+          '<div class="vid-form-row">' +
+            '<div class="vid-form-group">' +
+              '<label class="vid-form-label">კატეგორია</label>' +
+              '<select id="vidCatInput" class="vid-form-select"><option value="">-- კატეგორია --</option>' + catOpts + '</select>' +
             '</div>' +
-            '<div class="vid-search-selected" id="vidPlaceSelected"><i class="fas fa-map-pin"></i><span class="vid-search-selected-name" id="vidPlaceSelectedName"></span><button class="vid-search-selected-remove" id="vidPlaceRemove" type="button"><i class="fas fa-times"></i></button></div>' +
+            '<div class="vid-form-group">' +
+              '<label class="vid-form-label">ქალაქი</label>' +
+              '<select id="vidCityInput" class="vid-form-select"><option value="">-- ქალაქი --</option>' + cityOpts + '</select>' +
+            '</div>' +
+          '</div>' +
+          '<div class="vid-form-row">' +
+            '<div class="vid-form-group">' +
+              '<label class="vid-form-label"><i class="fas fa-map-pin" style="color:var(--green);margin-right:4px"></i>ადგილი (არასავალდებულო)</label>' +
+              '<div class="vid-field-wrap">' +
+                '<input id="vidPlaceSearch" class="vid-form-input" type="text" placeholder="ადგილის ძიება..." autocomplete="off">' +
+                '<button class="vid-search-clear" id="vidPlaceClear" type="button"><i class="fas fa-times"></i></button>' +
+                '<div class="vid-search-dropdown" id="vidPlaceDd"></div>' +
+              '</div>' +
+              '<div class="vid-search-selected" id="vidPlaceSelected"><i class="fas fa-map-pin"></i><span class="vid-search-selected-name" id="vidPlaceSelectedName"></span><button class="vid-search-selected-remove" id="vidPlaceRemove" type="button"><i class="fas fa-times"></i></button></div>' +
+            '</div>' +
+            '<div class="vid-form-group">' +
+              '<label class="vid-form-label"><i class="fas fa-store" style="color:#60a5fa;margin-right:4px"></i>ბიზნესი (არასავალდებულო)</label>' +
+              '<div class="vid-field-wrap">' +
+                '<input id="vidBizSearch" class="vid-form-input" type="text" placeholder="ბიზნესის ძიება..." autocomplete="off">' +
+                '<button class="vid-search-clear" id="vidBizClear" type="button"><i class="fas fa-times"></i></button>' +
+                '<div class="vid-search-dropdown" id="vidBizDd"></div>' +
+              '</div>' +
+              '<div class="vid-search-selected" id="vidBizSelected" style="border-color:rgba(59,130,246,.2);background:rgba(59,130,246,.08)"><i class="fas fa-store" style="color:#60a5fa"></i><span class="vid-search-selected-name" id="vidBizSelectedName" style="color:#60a5fa"></span><button class="vid-search-selected-remove" id="vidBizRemove" type="button"><i class="fas fa-times"></i></button></div>' +
+            '</div>' +
           '</div>' +
           '<div class="vid-form-group">' +
-            '<label class="vid-form-label"><i class="fas fa-store" style="color:#60a5fa;margin-right:4px"></i>ბიზნესი (არასავალდებულო)</label>' +
-            '<div class="vid-field-wrap">' +
-              '<input id="vidBizSearch" class="vid-form-input" type="text" placeholder="ბიზნესის ძიება..." autocomplete="off">' +
-              '<button class="vid-search-clear" id="vidBizClear" type="button"><i class="fas fa-times"></i></button>' +
-              '<div class="vid-search-dropdown" id="vidBizDd"></div>' +
-            '</div>' +
-            '<div class="vid-search-selected" id="vidBizSelected" style="border-color:rgba(59,130,246,.2);background:rgba(59,130,246,.08)"><i class="fas fa-store" style="color:#60a5fa"></i><span class="vid-search-selected-name" id="vidBizSelectedName" style="color:#60a5fa"></span><button class="vid-search-selected-remove" id="vidBizRemove" type="button"><i class="fas fa-times"></i></button></div>' +
+            '<label class="vid-form-label">აღწერა</label>' +
+            '<textarea id="vidDescInput" class="vid-form-textarea" placeholder="ვიდეოზე მოკლე აღწერა..."></textarea>' +
+          '</div>' +
+          '<div class="vid-form-group" style="display:flex;align-items:center;gap:10px">' +
+            '<input type="checkbox" id="vidIsShort" style="width:16px;height:16px;cursor:pointer">' +
+            '<label for="vidIsShort" style="font-size:.85rem;color:var(--text-secondary);cursor:pointer">ეს არის Short (ვერტიკალური ვიდეო)</label>' +
+          '</div>' +
+          '<div class="vid-modal-footer">' +
+            '<button class="vid-btn ghost" id="vidCancelBtn"><i class="fas fa-times"></i> გაუქმება</button>' +
+            '<button class="vid-btn primary" id="vidSubmitBtn" disabled><i class="fas fa-plus"></i> დამატება</button>' +
           '</div>' +
         '</div>' +
-        '<div class="vid-form-group">' +
-          '<label class="vid-form-label">აღწერა</label>' +
-          '<textarea id="vidDescInput" class="vid-form-textarea" placeholder="ვიდეოზე მოკლე აღწერა..."></textarea>' +
-        '</div>' +
-        '<div class="vid-form-group" style="display:flex;align-items:center;gap:10px">' +
-          '<input type="checkbox" id="vidIsShort" style="width:16px;height:16px;cursor:pointer">' +
-          '<label for="vidIsShort" style="font-size:.85rem;color:var(--text-secondary);cursor:pointer">ეს არის Short (ვერტიკალური ვიდეო)</label>' +
-        '</div>' +
-        '<div class="vid-modal-footer">' +
-          '<button class="vid-btn ghost" id="vidCancelBtn"><i class="fas fa-times"></i> გაუქმება</button>' +
-          '<button class="vid-btn primary" id="vidSubmitBtn" disabled><i class="fas fa-plus"></i> დამატება</button>' +
+        /* ── Channel import panel ── */
+        '<div id="vidChannelPanel" style="display:none">' +
+          '<div class="vid-form-group vid-url-group">' +
+            '<label class="vid-form-label">YouTube Channel URL</label>' +
+            '<input id="vidChInput" class="vid-form-input" type="url" placeholder="https://www.youtube.com/@channelname">' +
+            '<button class="vid-fetch-btn" id="vidChFetchBtn"><i class="fas fa-search"></i> ძებნა</button>' +
+          '</div>' +
+          '<div class="vid-form-row" style="margin-bottom:12px">' +
+            '<div class="vid-form-group" style="margin:0">' +
+              '<label class="vid-form-label">კატეგორია (ყველასთვის)</label>' +
+              '<select id="vidChCat" class="vid-form-select"><option value="">-- კატეგორია --</option>' + catOpts + '</select>' +
+            '</div>' +
+            '<div class="vid-form-group" style="margin:0">' +
+              '<label class="vid-form-label">ქალაქი (ყველასთვის)</label>' +
+              '<select id="vidChCity" class="vid-form-select"><option value="">-- ქალაქი --</option>' + cityOpts + '</select>' +
+            '</div>' +
+          '</div>' +
+          '<div id="vidChResult"></div>' +
+          '<div id="vidChFooter" style="display:none" class="vid-modal-footer">' +
+            '<button class="vid-btn ghost" id="vidChSelectAllBtn"><i class="fas fa-check-double"></i> ყველა</button>' +
+            '<button class="vid-btn primary" id="vidChImportBtn" disabled><i class="fas fa-download"></i> Import (0)</button>' +
+          '</div>' +
         '</div>' +
       '</div>';
 
     document.body.appendChild(ov);
+
+    /* ── Tab switcher ───────────────────────────────────── */
+    document.getElementById('vidModalTabs').addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-vtab]');
+      if (!btn) return;
+      var tab = btn.dataset.vtab;
+      document.querySelectorAll('#vidModalTabs .vid-modal-tab').forEach(function (t) {
+        t.classList.toggle('active', t.dataset.vtab === tab);
+      });
+      document.getElementById('vidSinglePanel').style.display = tab === 'single' ? '' : 'none';
+      document.getElementById('vidChannelPanel').style.display = tab === 'channel' ? '' : 'none';
+    });
+
+    /* ── Channel import logic ───────────────────────────── */
+    (function () {
+      var _chVideos = [];
+
+      function resolveChannelId(url) {
+        var m = url.match(/youtube\.com\/channel\/(UC[\w-]{20,})/);
+        if (m) return Promise.resolve(m[1]);
+        var proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+        return fetch(proxy)
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            var html = d.contents || '';
+            var cm = html.match(/"channelId":"(UC[\w-]{20,})"/);
+            if (!cm) cm = html.match(/channel_id=(UC[\w-]{20,})/);
+            if (cm) return cm[1];
+            throw new Error('Channel ID ვერ მოიძებნა. სცადე /channel/UC... ფორმატი.');
+          });
+      }
+
+      function fetchChannelFeed(channelId) {
+        var rss = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + channelId;
+        var proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(rss);
+        return fetch(proxy)
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            var xml = new window.DOMParser().parseFromString(d.contents || '', 'text/xml');
+            var entries = xml.querySelectorAll('entry');
+            var videos = [];
+            entries.forEach(function (e) {
+              var idEl = e.querySelector('videoId');
+              var titleEl = e.querySelector('title');
+              var authorEl = e.querySelector('author name');
+              var authorUriEl = e.querySelector('author uri');
+              var thumbEl = e.querySelector('thumbnail');
+              if (!idEl) return;
+              videos.push({
+                youtubeId:   idEl.textContent.trim(),
+                title:       titleEl ? titleEl.textContent.trim() : '',
+                channelName: authorEl ? authorEl.textContent.trim() : '',
+                channelUrl:  authorUriEl ? authorUriEl.textContent.trim() : '',
+                thumbnail:   thumbEl ? (thumbEl.getAttribute('url') || ytThumb(idEl.textContent.trim())) : ytThumb(idEl.textContent.trim())
+              });
+            });
+            return videos;
+          });
+      }
+
+      function renderImportList(videos) {
+        var res = document.getElementById('vidChResult');
+        var footer = document.getElementById('vidChFooter');
+        var importBtn = document.getElementById('vidChImportBtn');
+        if (!videos.length) {
+          res.innerHTML = '<div class="vid-empty" style="padding:24px 0"><i class="fas fa-video-slash"></i>ვიდეო ვერ მოიძებნა</div>';
+          footer.style.display = 'none';
+          return;
+        }
+        _chVideos = videos;
+        res.innerHTML = '<div class="vid-import-list">' +
+          videos.map(function (v, i) {
+            return '<label class="vid-import-item">' +
+              '<input type="checkbox" class="vid-import-cb" data-i="' + i + '" checked>' +
+              '<img class="vid-import-thumb" src="' + esc(v.thumbnail) + '" alt="" onerror="this.src=\'\';">' +
+              '<div class="vid-import-title">' + esc(v.title) + '</div>' +
+            '</label>';
+          }).join('') +
+        '</div>';
+        footer.style.display = 'flex';
+        function updateCount() {
+          var n = res.querySelectorAll('.vid-import-cb:checked').length;
+          importBtn.disabled = n === 0;
+          importBtn.innerHTML = '<i class="fas fa-download"></i> Import (' + n + ')';
+        }
+        res.addEventListener('change', updateCount);
+        updateCount();
+      }
+
+      document.getElementById('vidChFetchBtn').onclick = function () {
+        var url = (document.getElementById('vidChInput').value || '').trim();
+        if (!url) return;
+        var res = document.getElementById('vidChResult');
+        var btn = document.getElementById('vidChFetchBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        res.innerHTML = '<div class="vid-ch-loading"><i class="fas fa-spinner fa-spin"></i> იტვირთება...</div>';
+        document.getElementById('vidChFooter').style.display = 'none';
+        resolveChannelId(url)
+          .then(function (cid) { return fetchChannelFeed(cid); })
+          .then(function (vids) { renderImportList(vids); })
+          .catch(function (err) {
+            res.innerHTML = '<div class="vid-ch-error"><i class="fas fa-exclamation-circle"></i> ' + esc(err.message || 'შეცდომა') + '</div>';
+          })
+          .finally(function () {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-search"></i> ძებნა';
+          });
+      };
+
+      document.getElementById('vidChSelectAllBtn').onclick = function () {
+        var cbs = document.querySelectorAll('#vidChResult .vid-import-cb');
+        var allChecked = Array.prototype.every.call(cbs, function (cb) { return cb.checked; });
+        cbs.forEach(function (cb) { cb.checked = !allChecked; });
+        cbs.length && cbs[0].dispatchEvent(new Event('change', { bubbles: true }));
+      };
+
+      document.getElementById('vidChImportBtn').onclick = function () {
+        var checked = document.querySelectorAll('#vidChResult .vid-import-cb:checked');
+        if (!checked.length) return;
+        var u = authUser();
+        if (!u) { toast('ავტორიზაცია საჭიროა', 'error'); return; }
+        var cat  = (document.getElementById('vidChCat')  || {}).value || '';
+        var city = (document.getElementById('vidChCity') || {}).value || '';
+        var importBtn = document.getElementById('vidChImportBtn');
+        importBtn.disabled = true;
+        importBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ინახება...';
+        var indices = Array.prototype.map.call(checked, function (cb) { return parseInt(cb.dataset.i, 10); });
+        var total = indices.length;
+        var done = 0;
+        var errors = 0;
+        function next() {
+          if (!indices.length) {
+            toast(done + ' ვიდეო დაემატა' + (errors ? ' (' + errors + ' შეცდომა)' : '') + ' ✓');
+            closeAddVideoModal();
+            return;
+          }
+          var idx = indices.shift();
+          var v = _chVideos[idx];
+          saveVideo({
+            youtubeId:    v.youtubeId,
+            youtubeUrl:   'https://www.youtube.com/watch?v=' + v.youtubeId,
+            title:        v.title,
+            thumbnail:    v.thumbnail,
+            channelName:  v.channelName,
+            channelUrl:   v.channelUrl,
+            authorId:     u.uid,
+            authorName:   u.displayName || 'GeoHub User',
+            authorAvatar: u.photoURL || '',
+            category:     cat,
+            city:         city,
+            description:  '',
+            isShort:      false,
+            tags:         [],
+            placeId:      null,
+            placeName:    null,
+            businessId:   null,
+            businessName: null
+          }, function (err) {
+            if (err) errors++; else done++;
+            next();
+          });
+        }
+        next();
+      };
+    }());
 
     var _fetched = null;
     var _selectedPlace = null;
