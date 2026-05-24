@@ -89,6 +89,7 @@
         '<button class="ch-tab" data-tab="videos"><i class="fas fa-film"></i> Videos</button>' +
         '<button class="ch-tab" data-tab="shorts"><i class="fas fa-bolt"></i> Shorts</button>' +
         '<button class="ch-tab" data-tab="playlists"><i class="fas fa-list"></i> Playlists</button>' +
+        '<button class="ch-tab" data-tab="posts"><i class="fas fa-newspaper"></i> Posts</button>' +
       '</nav>' +
 
       /* Tab content area */
@@ -120,6 +121,7 @@
     else if(tab==='videos')    renderVideosTab(ch, el);
     else if(tab==='shorts')    renderShortsTab(ch, el);
     else if(tab==='playlists') renderPlaylistsTab(ch, el);
+    else if(tab==='posts')     renderPostsTab(ch, el);
   }
 
   /* ─────────────────────── Fetch all videos (cached) ─────── */
@@ -189,20 +191,29 @@
         '</div>';
       }
 
-      /* Playlists preview */
-      fetchPlaylists(ch._id).then(function(pls){
+      /* Playlists + Posts preview */
+      Promise.all([fetchPlaylists(ch._id), fetchChannelPosts(ch._id)]).then(function(res){
+        var pls = res[0], posts = res[1];
+        var extra = '';
+        if(posts.length){
+          extra += '<div class="ch-home-section">' +
+            '<div class="ch-section-header">' +
+              '<h2 class="ch-section-title"><i class="fas fa-newspaper"></i> Posts</h2>' +
+              (posts.length>3?'<button class="vid-btn ghost" data-tab-switch="posts" style="font-size:.8rem">ყველა →</button>':'') +
+            '</div>' +
+            '<div class="ch-posts-preview">'+posts.slice(0,3).map(function(p){ return renderLocalPostCard(p,ch); }).join('')+'</div>' +
+          '</div>';
+        }
         if(pls.length){
-          var plHtml = '<div class="ch-home-section">' +
+          extra += '<div class="ch-home-section">' +
             '<div class="ch-section-header">' +
               '<h2 class="ch-section-title"><i class="fas fa-list"></i> Playlists</h2>' +
               (pls.length>4?'<button class="vid-btn ghost" data-tab-switch="playlists" style="font-size:.8rem">ყველა →</button>':'') +
             '</div>' +
             '<div class="vid-tv-row">'+pls.slice(0,4).map(renderPlaylistCard).join('')+'</div>' +
           '</div>';
-          el.innerHTML = (html||'<div class="vid-empty"><i class="fas fa-video-slash"></i><h3>ვიდეო არ არის</h3></div>') + plHtml;
-        } else {
-          el.innerHTML = html||'<div class="vid-empty"><i class="fas fa-video-slash"></i><h3>ვიდეო არ არის</h3></div>';
         }
+        el.innerHTML = (html||'<div class="vid-empty"><i class="fas fa-video-slash"></i><h3>ვიდეო არ არის</h3></div>') + extra;
         el.querySelectorAll('[data-tab-switch]').forEach(function(b){
           b.addEventListener('click',function(){ switchTabByName(b.dataset.tabSwitch); });
         });
@@ -232,6 +243,122 @@
       if(!shorts.length){ el.innerHTML='<div class="vid-empty"><i class="fas fa-bolt"></i><h3>Shorts არ არის</h3></div>'; return; }
       el.innerHTML='<div class="ch-shorts-grid">'+shorts.map(function(v){ return renderCard(v,'short'); }).join('')+'</div>';
     });
+  }
+
+  /* ─────────────────────────── Posts tab ─────────────────── */
+  function renderPostsTab(ch, el){
+    var isOw = authUser() && authUser().uid === ch.ownerId;
+    fetchChannelPosts(ch._id).then(function(posts){
+      var ownerBtn = isOw
+        ? '<div style="margin-bottom:16px"><button class="vid-btn primary" id="chNewPostBtn"><i class="fas fa-plus"></i> ახალი პოსტი</button></div>'
+        : '';
+      if(!posts.length){
+        el.innerHTML = ownerBtn + '<div class="vid-empty"><i class="fas fa-newspaper"></i><h3>პოსტი არ არის</h3></div>';
+      } else {
+        el.innerHTML = ownerBtn + '<div class="ch-posts-list">'+posts.map(function(p){ return renderLocalPostCard(p,ch); }).join('')+'</div>';
+      }
+      var nb = document.getElementById('chNewPostBtn');
+      if(nb) nb.onclick = function(){ openNewPostModal(ch); };
+      wirePostDelBtns(ch, el);
+    });
+  }
+
+  function wirePostDelBtns(ch, el){
+    el.querySelectorAll('[data-del-post]').forEach(function(b){
+      b.onclick = function(e){
+        e.preventDefault(); e.stopPropagation();
+        if(!confirm('პოსტი წაიშლება?')) return;
+        b.disabled = true;
+        fs().deleteDoc(fs().doc(db(),'channels',ch._id,'posts',b.dataset.delPost))
+          .then(function(){ b.closest('.ch-post-card').remove(); })
+          .catch(function(){ b.disabled = false; });
+      };
+    });
+  }
+
+  function renderLocalPostCard(post, ch){
+    var isOw = authUser() && authUser().uid === ch.ownerId;
+    var ts = timeAgo(post.createdAt);
+    return '<div class="ch-post-card">' +
+      '<div class="ch-post-header">' +
+        '<div class="ch-post-avatar">'+(ch.avatar?'<img src="'+esc(ch.avatar)+'" alt="" loading="lazy">':'<i class="fas fa-tv"></i>')+'</div>' +
+        '<div>' +
+          '<div class="ch-post-chname">'+esc(ch.name||'Channel')+'</div>' +
+          '<div class="ch-post-time">'+ts+'</div>' +
+        '</div>' +
+        (isOw?'<button class="ch-post-del" data-del-post="'+esc(post._id)+'" title="წაშლა"><i class="fas fa-trash-can"></i></button>':'') +
+      '</div>' +
+      (post.text?'<div class="ch-post-text">'+esc(post.text).replace(/\n/g,'<br>')+'</div>':'') +
+      (post.imageUrl?'<div class="ch-post-img"><img src="'+esc(post.imageUrl)+'" alt="" loading="lazy"></div>':'') +
+      '<div class="ch-post-footer">' +
+        '<span><i class="far fa-heart"></i> '+(post.likeCount||0)+'</span>' +
+        '<span><i class="far fa-comment"></i> '+(post.commentCount||0)+'</span>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function openNewPostModal(ch){
+    if(document.getElementById('chNpModal')) return;
+    var ov = document.createElement('div');
+    ov.className = 'vid-modal-overlay'; ov.id = 'chNpModal';
+    ov.innerHTML =
+      '<div class="vid-modal" style="max-width:520px">' +
+        '<h2><i class="fas fa-newspaper"></i> ახალი პოსტი' +
+          '<button class="vid-modal-close" id="chNpClose"><i class="fas fa-times"></i></button>' +
+        '</h2>' +
+        '<div class="vid-form-group">' +
+          '<label class="vid-form-label">ტექსტი <span>*</span></label>' +
+          '<textarea id="chNpText" class="vid-form-textarea" rows="5" maxlength="2000" placeholder="რას ფიქრობ?…"></textarea>' +
+        '</div>' +
+        '<div class="vid-form-group">' +
+          '<label class="vid-form-label">სურათის URL (სურვილისამებრ)</label>' +
+          '<input id="chNpImage" class="vid-form-input" type="url" placeholder="https://...">' +
+        '</div>' +
+        '<div class="vid-modal-footer">' +
+          '<button class="vid-btn ghost" id="chNpCancel">გაუქმება</button>' +
+          '<button class="vid-btn primary" id="chNpSave"><i class="fas fa-paper-plane"></i> გამოქვეყნება</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(ov);
+    function close(){ ov.remove(); }
+    document.getElementById('chNpClose').onclick = close;
+    document.getElementById('chNpCancel').onclick = close;
+    ov.addEventListener('click', function(e){ if(e.target===ov) close(); });
+    document.getElementById('chNpSave').onclick = function(){
+      var text = document.getElementById('chNpText').value.trim();
+      if(!text){ toast('ტექსტი სავალდებულოა'); return; }
+      var imageUrl = document.getElementById('chNpImage').value.trim();
+      var btn = document.getElementById('chNpSave');
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+      var u = authUser();
+      var data = {
+        text: text, imageUrl: imageUrl||'',
+        authorId: u.uid, authorName: u.displayName||'', authorAvatar: u.photoURL||'',
+        channelId: ch._id, channelName: ch.name||'',
+        likeCount: 0, commentCount: 0,
+        createdAt: fs().serverTimestamp()
+      };
+      fs().addDoc(fs().collection(db(),'channels',ch._id,'posts'), data)
+        .then(function(){
+          return fs().addDoc(fs().collection(db(),'posts'), Object.assign({},data,{type:'channelPost'})).catch(function(){});
+        })
+        .then(function(){ toast('პოსტი გამოქვეყნდა ✓'); close(); switchTabByName('posts'); })
+        .catch(function(e){ toast('შეცდომა: '+e.message); btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i> გამოქვეყნება'; });
+    };
+  }
+
+  /* ─────────────────────────── Fetch channel posts ───────── */
+  function fetchChannelPosts(channelId){
+    if(!fs()||!db()) return Promise.resolve([]);
+    return fs().getDocs(fs().query(
+      fs().collection(db(),'channels',channelId,'posts'),
+      fs().orderBy('createdAt','desc'),
+      fs().limit(50)
+    )).then(function(snap){
+      var posts=[];
+      snap.forEach(function(d){ posts.push(Object.assign({_id:d.id},d.data())); });
+      return posts;
+    }).catch(function(){ return []; });
   }
 
   /* ─────────────────────────── Playlists tab ─────────────── */

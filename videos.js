@@ -1732,11 +1732,11 @@
           return chunks.reduce(function (p, chunk) { return p.then(function () { return saveBatch(chunk); }); }, Promise.resolve())
             .then(function () {
               if (fs() && db()) fs().updateDoc(fs().doc(db(), 'channels', geoChannelId), { videoCount: fs().increment(done) }).catch(function(){});
-              toast(done + ' ვიდეო დაემატა — Playlists იტვირთება...');
-              /* Import playlists */
+              toast(done + ' ვიდეო დაემატა — Playlists და Posts იტვირთება...');
               return importPlaylists(cid, geoChannelId, vids);
             })
-            .then(function () { toast(done + ' ვიდეო + Playlists დაემატა ✓'); onDone(); });
+            .then(function () { return importCommunityPosts(cid, geoChannelId, chName, u); })
+            .then(function () { toast(done + ' ვიდეო + Playlists + Posts დაემატა ✓'); onDone(); });
         });
       });
     }).catch(function (e) { toast('Import შეცდომა: ' + (e.message || e), 'error'); onDone(); });
@@ -1770,6 +1770,40 @@
                   itemYoutubeIds:  ytIds,
                   createdAt:       fs().serverTimestamp()
                 });
+              }).catch(function () {});
+          });
+        }, Promise.resolve());
+      }).catch(function () {});
+  }
+
+  function importCommunityPosts(ytChannelId, geoChannelId, channelName, u) {
+    /* YouTube deprecated bulletin activity type in 2021 — try anyway, skip silently if empty */
+    return impApi('activities?part=snippet,contentDetails&channelId=' + ytChannelId + '&maxResults=50')
+      .then(function (d) {
+        var bulletins = (d.items || []).filter(function (item) {
+          return item.snippet && item.snippet.type === 'bulletin';
+        });
+        if (!bulletins.length || !fs() || !db()) return;
+        var posCol  = fs().collection(db(), 'channels', geoChannelId, 'posts');
+        var feedCol = fs().collection(db(), 'posts');
+        return bulletins.reduce(function (p, item) {
+          return p.then(function () {
+            var sn   = item.snippet || {};
+            var text = (sn.description || '').slice(0, 2000);
+            if (!text) return;
+            var thumb = sn.thumbnails
+              ? ((sn.thumbnails.high || sn.thumbnails.medium || sn.thumbnails.default) || {}).url || ''
+              : '';
+            var data = {
+              text: text, imageUrl: thumb,
+              authorId: u.uid, authorName: u.displayName || '', authorAvatar: u.photoURL || '',
+              channelId: geoChannelId, channelName: channelName || '',
+              likeCount: 0, commentCount: 0,
+              createdAt: fs().serverTimestamp()
+            };
+            return fs().addDoc(posCol, data)
+              .then(function () {
+                return fs().addDoc(feedCol, Object.assign({}, data, { type: 'channelPost' })).catch(function () {});
               }).catch(function () {});
           });
         }, Promise.resolve());

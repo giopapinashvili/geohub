@@ -1702,8 +1702,32 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
   function timeAgo2(ms){ var s=Math.floor((Date.now()-ms)/1000); if(s<60) return 'ახლახანს'; if(s<3600) return Math.floor(s/60)+' წ. წინ'; if(s<86400) return Math.floor(s/3600)+' სთ. წინ'; return Math.floor(s/86400)+' დ. წინ'; }
 
+  function channelPostCard(p){
+    var chHref = p.channelId ? 'channel.html?id='+encodeURIComponent(p.channelId) : '#';
+    var ts = p.createdAt && p.createdAt.toMillis ? timeAgo2(p.createdAt.toMillis()) : '';
+    var av = p.authorAvatar || '';
+    var name = p.channelName || p.authorName || 'GeoHub';
+    return '<article class="gh-card gh-ch-post-card" data-post-id="'+esc(p.id||'')+'">' +
+      '<div class="gh-post-header">' +
+        '<span class="gh-avatar" style="flex-shrink:0">'+(av?'<img src="'+esc(av)+'" alt="" loading="lazy" onerror="this.remove()">':esc(initials(name)))+'</span>' +
+        '<div class="gh-post-meta">' +
+          '<a class="gh-post-author" href="'+esc(chHref)+'">'+esc(name)+'</a>' +
+          (ts?'<span class="gh-post-time">'+ts+'</span>':'') +
+        '</div>' +
+        '<span class="gh-ch-post-badge"><i class="fas fa-newspaper"></i> Post</span>' +
+      '</div>' +
+      (p.text?'<div class="gh-post-body" style="white-space:pre-wrap">'+esc((p.text||'').slice(0,500))+((p.text||'').length>500?'…':'')+'</div>':'') +
+      (p.imageUrl?'<div class="gh-ch-post-img"><img src="'+esc(p.imageUrl)+'" alt="" loading="lazy" style="width:100%;border-radius:12px;margin-top:10px;max-height:400px;object-fit:cover"></div>':'') +
+      '<div class="gh-post-footer" style="margin-top:10px">' +
+        '<span class="gh-post-stat"><i class="far fa-heart"></i> '+(p.likeCount||0)+'</span>' +
+        '<span class="gh-post-stat"><i class="far fa-comment"></i> '+(p.commentCount||0)+'</span>' +
+      '</div>' +
+    '</article>';
+  }
+
   function postCard(p, options){
     if(p.type==='video') return videoPostCard(p);
+    if(p.type==='channelPost') return channelPostCard(p);
     options=options||{};
     // Business context flags
     var bizCtx = !!(options.biz);
