@@ -1664,12 +1664,49 @@
           return chunks.reduce(function (p, chunk) { return p.then(function () { return saveBatch(chunk); }); }, Promise.resolve())
             .then(function () {
               if (fs() && db()) fs().updateDoc(fs().doc(db(), 'channels', geoChannelId), { videoCount: fs().increment(done) }).catch(function(){});
-              toast(done + ' ვიდეო დაემატა ✓');
-              onDone();
-            });
+              toast(done + ' ვიდეო დაემატა — Playlists იტვირთება...');
+              /* Import playlists */
+              return importPlaylists(cid, geoChannelId, vids);
+            })
+            .then(function () { toast(done + ' ვიდეო + Playlists დაემატა ✓'); onDone(); });
         });
       });
     }).catch(function (e) { toast('Import შეცდომა: ' + (e.message || e), 'error'); onDone(); });
+
+  function importPlaylists(ytChannelId, geoChannelId, allVids) {
+    return impApi('playlists?part=snippet,contentDetails&channelId=' + ytChannelId + '&maxResults=50')
+      .then(function (d) {
+        var pls = (d.items || []).filter(function (pl) {
+          /* skip auto-generated lists */
+          var t = (pl.snippet||{}).title||'';
+          return t !== 'Liked videos' && t !== 'Favorites';
+        });
+        if (!pls.length) return;
+        var col = fs().collection(db(), 'channels', geoChannelId, 'playlists');
+        return pls.reduce(function (p, pl) {
+          return p.then(function () {
+            var sn = pl.snippet || {};
+            var thumb = (sn.thumbnails && (sn.thumbnails.high || sn.thumbnails.medium || sn.thumbnails.default) || {}).url || '';
+            /* fetch playlist items to get video IDs */
+            return impApi('playlistItems?part=snippet&playlistId=' + pl.id + '&maxResults=50')
+              .then(function (d2) {
+                var ytIds = (d2.items || []).map(function (item) {
+                  return item.snippet && item.snippet.resourceId && item.snippet.resourceId.videoId;
+                }).filter(Boolean);
+                return fs().addDoc(col, {
+                  ytPlaylistId:    pl.id,
+                  title:           sn.title || '',
+                  description:     (sn.description || '').slice(0, 500),
+                  thumbnail:       thumb,
+                  videoCount:      ytIds.length,
+                  itemYoutubeIds:  ytIds,
+                  createdAt:       fs().serverTimestamp()
+                });
+              }).catch(function () {});
+          });
+        }, Promise.resolve());
+      }).catch(function () {});
+  }
   }
 
   /* ── Add Video Modal ──────────────────────────────────── */
@@ -2652,7 +2689,8 @@
     ytEmbed: ytEmbed,
     catMeta: catMeta,
     esc: esc,
-    cardHTML: vidCardHTML
+    cardHTML: vidCardHTML,
+    importChannelVideos: _importChannelVideos
   };
 
 })();

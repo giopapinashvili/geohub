@@ -2217,6 +2217,89 @@ body.watch-cinematic .related-thumb {
   gap: 8px;
 }
 
+/* ── Channel tabs ───────────────────────────────────────── */
+.ch-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--border-subtle);
+  margin: 24px 0 0;
+  padding: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ch-tabs::-webkit-scrollbar { display: none; }
+.ch-tab {
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  color: var(--text-muted);
+  font-size: .88rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: color .15s;
+}
+.ch-tab:hover { color: var(--text-primary); }
+.ch-tab.active { color: var(--text-primary); border-bottom-color: var(--green); }
+.ch-tab-content { padding-top: 24px; min-height: 200px; }
+
+/* ── Home tab sections ──────────────────────────────────── */
+.ch-home-section { margin-bottom: 36px; }
+.ch-featured-section { margin-bottom: 32px; }
+.ch-featured-section .vid-card { max-width: 560px; }
+
+/* ── Shorts grid ────────────────────────────────────────── */
+.ch-shorts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+/* ── Playlist grid ──────────────────────────────────────── */
+.ch-playlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+.ch-playlist-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform .15s, border-color .15s;
+}
+.ch-playlist-card:hover { transform: translateY(-3px); border-color: var(--green); }
+.ch-pl-thumb {
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: var(--bg-elevated);
+}
+.ch-pl-count {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0,0,0,.7);
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.ch-pl-info { padding: 10px 12px; }
+.ch-pl-title { font-size: .88rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.ch-pl-desc { font-size: .75rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 /* ── My Channel bar on videos page ─────────────────────── */
 #vidMyChannelBar { margin-bottom: 20px; }
 .vid-mychannel-bar {

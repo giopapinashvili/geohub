@@ -1,455 +1,598 @@
 (function () {
   'use strict';
 
-  function fb()    { return window.GeoFirebase || null; }
-  function fs()    { return fb() && fb().fs   ? fb().fs   : null; }
-  function db()    { return fb() && fb().db   ? fb().db   : null; }
-  function auth()  { return fb() && fb().auth ? fb().auth : null; }
-  function authUser() { return auth() && auth().currentUser ? auth().currentUser : null; }
+  function fb()  { return window.GeoFirebase || null; }
+  function fs()  { return fb() && fb().fs   ? fb().fs   : null; }
+  function db()  { return fb() && fb().db   ? fb().db   : null; }
+  function auth(){ return fb() && fb().auth ? fb().auth : null; }
+  function authUser(){ return auth() && auth().currentUser ? auth().currentUser : null; }
 
-  function esc(s) {
-    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-  function fmtNum(n) {
-    n = Number(n) || 0;
-    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
-    if (n >= 1000)    return (n / 1000).toFixed(1) + 'K';
-    return String(n);
-  }
-  function timeAgo(ts) {
-    if (!ts) return '';
-    var ms = ts.toMillis ? ts.toMillis() : ts;
-    var s = Math.floor((Date.now() - ms) / 1000);
-    if (s < 60)   return 'ახლახანს';
-    if (s < 3600) return Math.floor(s/60) + ' წ. წინ';
-    if (s < 86400) return Math.floor(s/3600) + ' სთ. წინ';
-    return Math.floor(s/86400) + ' დღის წინ';
-  }
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function fmtNum(n){ n=Number(n)||0; if(n>=1000000) return (n/1000000).toFixed(1)+'M'; if(n>=1000) return (n/1000).toFixed(1)+'K'; return String(n); }
+  function timeAgo(ts){ if(!ts) return ''; var ms=ts.toMillis?ts.toMillis():ts; var s=Math.floor((Date.now()-ms)/1000); if(s<60) return 'ახლახანს'; if(s<3600) return Math.floor(s/60)+' წ. წინ'; if(s<86400) return Math.floor(s/3600)+' სთ. წინ'; return Math.floor(s/86400)+' დ. წინ'; }
 
   var CHANNEL_ID = new URLSearchParams(location.search).get('id');
+  var _ch = null;        /* current channel data */
+  var _activeTab = 'home';
+  var _allVideos = null; /* cached after first load */
+  var _manageMode = false;
 
-  /* ── Load & render channel ──────────────────────────────── */
-  function loadChannel() {
-    if (!CHANNEL_ID) { showError('Channel ID არ არის'); return; }
-    if (!fs() || !db()) { window.addEventListener('GeoFirebaseReady', loadChannel, { once: true }); return; }
+  /* ─────────────────────────────── Boot ─────────────────── */
+  function boot(){
+    if(!document.getElementById('channelPage')) return;
+    if(fs()&&db()) loadChannel();
+    else window.addEventListener('GeoFirebaseReady', loadChannel, {once:true});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot);
+  else boot();
 
-    fs().getDoc(fs().doc(db(), 'channels', CHANNEL_ID))
-      .then(function (snap) {
-        if (!snap.exists()) { showError('Channel ვერ მოიძებნა'); return; }
-        renderChannel(Object.assign({ _id: snap.id }, snap.data()));
+  /* ─────────────────────────── Load channel ─────────────── */
+  function loadChannel(){
+    if(!CHANNEL_ID){ showError('Channel ID არ არის'); return; }
+    if(!fs()||!db()){ window.addEventListener('GeoFirebaseReady',loadChannel,{once:true}); return; }
+    fs().getDoc(fs().doc(db(),'channels',CHANNEL_ID))
+      .then(function(snap){
+        if(!snap.exists()){ showError('Channel ვერ მოიძებნა'); return; }
+        _ch = Object.assign({_id:snap.id}, snap.data());
+        renderShell(_ch);
       })
-      .catch(function (e) { showError(e.message); });
+      .catch(function(e){ showError(e.message); });
   }
 
-  function renderChannel(ch) {
-    document.title = esc(ch.name) + ' — GeoHub';
-
-    var page = document.getElementById('channelPage');
-    if (!page) return;
+  /* ─────────────────────────── Shell render ──────────────── */
+  function renderShell(ch){
+    document.title = esc(ch.name)+' — GeoHub';
+    var page=document.getElementById('channelPage');
+    if(!page) return;
 
     page.innerHTML =
       /* Banner */
       '<div class="ch-banner">' +
-        (ch.banner
-          ? '<img class="ch-banner-img" src="' + esc(ch.banner) + '" alt="" onerror="this.style.display=\'none\'">'
-          : '') +
+        (ch.banner ? '<img class="ch-banner-img" src="'+esc(ch.banner)+'" alt="" onerror="this.style.display=\'none\'">' : '') +
       '</div>' +
 
       /* Meta row */
       '<div class="ch-meta">' +
         '<div class="ch-avatar-wrap">' +
-          (ch.avatar
-            ? '<img class="ch-avatar" src="' + esc(ch.avatar) + '" alt="">'
-            : '<div class="ch-avatar-placeholder"><i class="fas fa-tv"></i></div>') +
+          (ch.avatar ? '<img class="ch-avatar" src="'+esc(ch.avatar)+'" alt="">' : '<div class="ch-avatar-placeholder"><i class="fas fa-tv"></i></div>') +
         '</div>' +
         '<div class="ch-info">' +
-          '<h1 class="ch-name">' + esc(ch.name || 'Channel') + '</h1>' +
+          '<h1 class="ch-name">'+esc(ch.name||'Channel')+'</h1>' +
           '<div class="ch-stats">' +
-            '<span id="chSubCount"><i class="fas fa-users"></i> ' + fmtNum(ch.subscriberCount) + ' გამომწერი</span>' +
-            ' &middot; <span>' + fmtNum(ch.videoCount) + ' ვიდეო</span>' +
-            (ch.customUrl ? ' &middot; <span>' + esc(ch.customUrl) + '</span>' : '') +
+            '<span id="chSubCount"><i class="fas fa-users"></i> '+fmtNum(ch.subscriberCount)+' გამომწერი</span>' +
+            ' &middot; <span id="chVidCount">'+fmtNum(ch.videoCount)+' ვიდეო</span>' +
+            (ch.customUrl?' &middot; <span>'+esc(ch.customUrl)+'</span>':'') +
           '</div>' +
-          (ch.description
-            ? '<p class="ch-description">' + esc(ch.description.slice(0, 200)) + (ch.description.length > 200 ? '…' : '') + '</p>'
-            : '') +
-          (ch.youtubeUrl
-            ? '<a class="ch-yt-link" href="' + esc(ch.youtubeUrl) + '" target="_blank" rel="noopener"><i class="fab fa-youtube"></i> YouTube-ზე ნახვა</a>'
-            : '') +
+          (ch.description ? '<p class="ch-description" id="chDesc">'+esc(ch.description.slice(0,200))+(ch.description.length>200?'…':'')+'</p>' : '') +
+          (ch.youtubeUrl ? '<a class="ch-yt-link" href="'+esc(ch.youtubeUrl)+'" target="_blank" rel="noopener"><i class="fab fa-youtube"></i> YouTube-ზე ნახვა</a>' : '') +
         '</div>' +
         '<div class="ch-actions" id="chActions">' +
           '<button class="ch-sub-btn" id="chSubBtn"><i class="fas fa-plus"></i> გამოწერა</button>' +
         '</div>' +
       '</div>' +
 
-      /* Owner management bar (shown after auth check) */
+      /* Owner bar */
       '<div id="chOwnerBar" style="display:none" class="ch-owner-bar">' +
         '<span class="ch-owner-label"><i class="fas fa-shield-halved"></i> ჩემი არხი</span>' +
         '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
           '<button class="vid-btn ghost ch-owner-btn" id="chEditBtn"><i class="fas fa-pen"></i> რედაქტირება</button>' +
           '<button class="vid-btn ghost ch-owner-btn" id="chManageBtn"><i class="fas fa-sliders"></i> ვიდეოების მართვა</button>' +
+          '<button class="vid-btn ghost ch-owner-btn" id="chImportBtn" style="color:#3b82f6;border-color:rgba(59,130,246,.3)"><i class="fab fa-youtube"></i> Re-Import</button>' +
           '<button class="vid-btn ghost ch-owner-btn" id="chDeleteAllVideosBtn" style="color:#f59e0b;border-color:rgba(245,158,11,.3)"><i class="fas fa-trash"></i> ყველა ვიდეო</button>' +
           '<button class="vid-btn ghost ch-owner-btn" id="chDeleteChannelBtn" style="color:#ef4444;border-color:rgba(239,68,68,.3)"><i class="fas fa-ban"></i> არხის წაშლა</button>' +
         '</div>' +
       '</div>' +
 
-      /* Videos section */
-      '<div class="ch-videos-section">' +
-        '<div class="ch-section-header">' +
-          '<h2 class="ch-section-title"><i class="fas fa-video"></i> ვიდეოები</h2>' +
-        '</div>' +
-        '<div id="chVideoGrid" class="vid-grid"><div class="ch-init-loading"><i class="fas fa-spinner fa-spin"></i></div></div>' +
-      '</div>';
+      /* Tab nav */
+      '<nav class="ch-tabs" id="chTabs">' +
+        '<button class="ch-tab active" data-tab="home"><i class="fas fa-house"></i> Home</button>' +
+        '<button class="ch-tab" data-tab="videos"><i class="fas fa-film"></i> Videos</button>' +
+        '<button class="ch-tab" data-tab="shorts"><i class="fas fa-bolt"></i> Shorts</button>' +
+        '<button class="ch-tab" data-tab="playlists"><i class="fas fa-list"></i> Playlists</button>' +
+      '</nav>' +
 
-    /* Subscribe button + owner controls */
+      /* Tab content area */
+      '<div id="chTabContent" class="ch-tab-content"></div>';
+
     initSubBtn(ch);
     initOwnerControls(ch);
-
-    /* Load videos */
-    loadChannelVideos(ch._id);
+    initTabs(ch);
+    switchTab('home', ch);
   }
 
-  /* ── Subscribe / Unsubscribe ────────────────────────────── */
-  function initSubBtn(ch) {
-    var btn = document.getElementById('chSubBtn');
-    if (!btn) return;
-
-    var u = authUser();
-    if (!u) {
-      btn.onclick = function () { window.location.href = 'auth.html'; };
-      return;
-    }
-
-    /* Check current state */
-    fs().getDoc(fs().doc(db(), 'channels', ch._id, 'subscribers', u.uid))
-      .then(function (d) { setSubBtn(btn, d.exists()); })
-      .catch(function () {});
-
-    btn.onclick = function () {
-      var u2 = authUser();
-      if (!u2) { window.location.href = 'auth.html'; return; }
-      btn.disabled = true;
-      var subRef = fs().doc(db(), 'channels', ch._id, 'subscribers', u2.uid);
-      var chRef  = fs().doc(db(), 'channels', ch._id);
-      fs().getDoc(subRef).then(function (d) {
-        if (d.exists()) {
-          return fs().deleteDoc(subRef)
-            .then(function () { return fs().updateDoc(chRef, { subscriberCount: fs().increment(-1) }); })
-            .then(function () {
-              setSubBtn(btn, false);
-              decrementSubDisplay();
-            });
-        } else {
-          return fs().setDoc(subRef, { subscribedAt: fs().serverTimestamp() })
-            .then(function () { return fs().updateDoc(chRef, { subscriberCount: fs().increment(1) }); })
-            .then(function () {
-              setSubBtn(btn, true);
-              incrementSubDisplay();
-            });
-        }
-      }).finally(function () { btn.disabled = false; });
-    };
-  }
-
-  function setSubBtn(btn, subscribed) {
-    if (subscribed) {
-      btn.innerHTML = '<i class="fas fa-check"></i> გამოწერილია';
-      btn.classList.add('subscribed');
-    } else {
-      btn.innerHTML = '<i class="fas fa-plus"></i> გამოწერა';
-      btn.classList.remove('subscribed');
-    }
-  }
-
-  function incrementSubDisplay() {
-    var el = document.getElementById('chSubCount');
-    if (!el) return;
-    var m = el.textContent.match(/[\d.,KM]+/);
-    if (m) el.innerHTML = '<i class="fas fa-users"></i> ' + fmtNum((parseFloat(m[0]) || 0) + 1) + ' გამომწერი';
-  }
-  function decrementSubDisplay() {
-    var el = document.getElementById('chSubCount');
-    if (!el) return;
-    var m = el.textContent.match(/[\d.,KM]+/);
-    if (m) el.innerHTML = '<i class="fas fa-users"></i> ' + fmtNum(Math.max(0, (parseFloat(m[0]) || 1) - 1)) + ' გამომწერი';
-  }
-
-  /* ── Owner controls ─────────────────────────────────────── */
-  var _manageMode = false;
-
-  function initOwnerControls(ch) {
-    var u = authUser();
-    if (!u || u.uid !== ch.ownerId) return;
-
-    var bar = document.getElementById('chOwnerBar');
-    if (bar) bar.style.display = 'flex';
-
-    /* Replace subscribe btn with "owner" label */
-    var subBtn = document.getElementById('chSubBtn');
-    if (subBtn) {
-      subBtn.outerHTML = '<a class="ch-sub-btn subscribed" href="videos.html"><i class="fas fa-plus"></i> ვიდეოს დამატება</a>';
-    }
-
-    var editBtn          = document.getElementById('chEditBtn');
-    var manageBtn        = document.getElementById('chManageBtn');
-    var deleteAllVidsBtn = document.getElementById('chDeleteAllVideosBtn');
-    var deleteChBtn      = document.getElementById('chDeleteChannelBtn');
-
-    if (editBtn)          editBtn.onclick          = function () { openEditChannelModal(ch); };
-    if (manageBtn)        manageBtn.onclick        = function () { toggleManageMode(ch); };
-    if (deleteAllVidsBtn) deleteAllVidsBtn.onclick = function () { deleteAllChannelVideos(ch); };
-    if (deleteChBtn)      deleteChBtn.onclick      = function () { deleteChannel(ch); };
-  }
-
-  function toggleManageMode(ch) {
-    _manageMode = !_manageMode;
-    var manageBtn = document.getElementById('chManageBtn');
-    if (manageBtn) {
-      manageBtn.innerHTML = _manageMode
-        ? '<i class="fas fa-check"></i> მართვა დასრულდა'
-        : '<i class="fas fa-sliders"></i> ვიდეოების მართვა';
-      manageBtn.classList.toggle('active', _manageMode);
-    }
-    /* toggle delete buttons on all video cards */
-    document.querySelectorAll('.ch-vid-del').forEach(function (btn) {
-      btn.style.display = _manageMode ? '' : 'none';
+  /* ─────────────────────────── Tabs ──────────────────────── */
+  function initTabs(ch){
+    document.getElementById('chTabs').addEventListener('click', function(e){
+      var btn = e.target.closest('[data-tab]');
+      if(!btn) return;
+      document.querySelectorAll('.ch-tab').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      switchTab(btn.dataset.tab, ch);
     });
-    if (_manageMode) {
-      /* add delete buttons to any cards that don't have them yet */
-      document.querySelectorAll('#chVideoGrid .vid-card').forEach(function (card) {
-        if (!card.querySelector('.ch-vid-del')) {
-          var vidId = card.getAttribute('href') && card.getAttribute('href').replace('watch.html?v=', '');
-          if (!vidId) return;
-          var btn = document.createElement('button');
-          btn.className = 'ch-vid-del';
-          btn.title = 'წაშლა არხიდან';
-          btn.innerHTML = '<i class="fas fa-trash-can"></i>';
-          btn.onclick = function (e) {
-            e.preventDefault(); e.stopPropagation();
-            if (!confirm('ვიდეო წაიშლება GeoHub-დან. გააგრძელო?')) return;
-            btn.disabled = true;
-            if (!fs() || !db()) return;
-            fs().deleteDoc(fs().doc(db(), 'videos', vidId))
-              .then(function () {
-                card.style.opacity = '0';
-                card.style.pointerEvents = 'none';
-                setTimeout(function () { card.remove(); }, 300);
-                if (ch && ch._id) {
-                  fs().updateDoc(fs().doc(db(), 'channels', ch._id), {
-                    videoCount: fs().increment(-1)
-                  }).catch(function () {});
-                }
-              })
-              .catch(function () { btn.disabled = false; });
-          };
-          card.style.position = 'relative';
-          card.appendChild(btn);
+  }
+
+  function switchTab(tab, ch){
+    _activeTab = tab;
+    var el = document.getElementById('chTabContent');
+    if(!el) return;
+    el.innerHTML = '<div class="ch-init-loading"><i class="fas fa-spinner fa-spin"></i></div>';
+    if(tab==='home')      renderHomeTab(ch, el);
+    else if(tab==='videos')    renderVideosTab(ch, el);
+    else if(tab==='shorts')    renderShortsTab(ch, el);
+    else if(tab==='playlists') renderPlaylistsTab(ch, el);
+  }
+
+  /* ─────────────────────── Fetch all videos (cached) ─────── */
+  function fetchVideos(channelId){
+    if(_allVideos) return Promise.resolve(_allVideos);
+    if(!fs()||!db()) return Promise.resolve([]);
+    return fs().getDocs(fs().query(
+      fs().collection(db(),'videos'),
+      fs().where('channelId','==',channelId),
+      fs().limit(500)
+    )).then(function(snap){
+      var vids=[];
+      snap.forEach(function(d){
+        var v=d.data();
+        if(v.status==='hidden'||v.status==='removed') return;
+        vids.push(Object.assign({id:d.id},v));
+      });
+      vids.sort(function(a,b){
+        var ta=a.createdAt&&a.createdAt.toMillis?a.createdAt.toMillis():0;
+        var tb=b.createdAt&&b.createdAt.toMillis?b.createdAt.toMillis():0;
+        return tb-ta;
+      });
+      _allVideos=vids;
+      return vids;
+    });
+  }
+
+  /* ─────────────────────────── Home tab ──────────────────── */
+  function renderHomeTab(ch, el){
+    fetchVideos(ch._id).then(function(all){
+      var regular = all.filter(function(v){ return !v.isShort; });
+      var shorts  = all.filter(function(v){ return v.isShort; });
+      var html = '';
+
+      /* Featured video */
+      if(ch.featuredVideoId){
+        var fv = all.find(function(v){ return v.id===ch.featuredVideoId; });
+        if(fv){
+          html += '<div class="ch-featured-section">' +
+            '<h2 class="ch-section-title"><i class="fas fa-star"></i> Featured</h2>' +
+            renderCard(fv,'featured') +
+          '</div>';
         }
-        document.querySelectorAll('.ch-vid-del').forEach(function (b) {
-          b.style.display = _manageMode ? '' : 'none';
+      }
+
+      /* Latest uploads */
+      if(regular.length){
+        var latest = regular.slice(0,8);
+        html += '<div class="ch-home-section">' +
+          '<div class="ch-section-header">' +
+            '<h2 class="ch-section-title"><i class="fas fa-film"></i> Latest Videos</h2>' +
+            (regular.length>8?'<button class="vid-btn ghost" data-tab-switch="videos" style="font-size:.8rem">ყველა →</button>':'') +
+          '</div>' +
+          '<div class="vid-tv-row">'+latest.map(function(v){ return renderCard(v,'tv'); }).join('')+'</div>' +
+        '</div>';
+      }
+
+      /* Shorts row */
+      if(shorts.length){
+        var topShorts = shorts.slice(0,8);
+        html += '<div class="ch-home-section">' +
+          '<div class="ch-section-header">' +
+            '<h2 class="ch-section-title"><i class="fas fa-bolt"></i> Shorts</h2>' +
+            (shorts.length>8?'<button class="vid-btn ghost" data-tab-switch="shorts" style="font-size:.8rem">ყველა →</button>':'') +
+          '</div>' +
+          '<div class="vid-shorts-strip">'+topShorts.map(function(v){ return renderCard(v,'short'); }).join('')+'</div>' +
+        '</div>';
+      }
+
+      /* Playlists preview */
+      fetchPlaylists(ch._id).then(function(pls){
+        if(pls.length){
+          var plHtml = '<div class="ch-home-section">' +
+            '<div class="ch-section-header">' +
+              '<h2 class="ch-section-title"><i class="fas fa-list"></i> Playlists</h2>' +
+              (pls.length>4?'<button class="vid-btn ghost" data-tab-switch="playlists" style="font-size:.8rem">ყველა →</button>':'') +
+            '</div>' +
+            '<div class="vid-tv-row">'+pls.slice(0,4).map(renderPlaylistCard).join('')+'</div>' +
+          '</div>';
+          el.innerHTML = (html||'<div class="vid-empty"><i class="fas fa-video-slash"></i><h3>ვიდეო არ არის</h3></div>') + plHtml;
+        } else {
+          el.innerHTML = html||'<div class="vid-empty"><i class="fas fa-video-slash"></i><h3>ვიდეო არ არის</h3></div>';
+        }
+        el.querySelectorAll('[data-tab-switch]').forEach(function(b){
+          b.addEventListener('click',function(){ switchTabByName(b.dataset.tabSwitch); });
         });
       });
-    }
+    });
   }
 
-  function openEditChannelModal(ch) {
-    if (document.getElementById('chEditModal')) return;
-    var ov = document.createElement('div');
-    ov.className = 'vid-modal-overlay';
-    ov.id = 'chEditModal';
-    ov.innerHTML =
-      '<div class="vid-modal" style="max-width:480px">' +
+  function switchTabByName(tab){
+    document.querySelectorAll('.ch-tab').forEach(function(b){ b.classList.toggle('active', b.dataset.tab===tab); });
+    switchTab(tab, _ch);
+  }
+
+  /* ─────────────────────────── Videos tab ────────────────── */
+  function renderVideosTab(ch, el){
+    fetchVideos(ch._id).then(function(all){
+      var vids = all.filter(function(v){ return !v.isShort; });
+      if(!vids.length){ el.innerHTML='<div class="vid-empty"><i class="fas fa-film"></i><h3>ვიდეო არ არის</h3></div>'; return; }
+      el.innerHTML='<div class="vid-grid" id="chVideoGrid">'+vids.map(function(v){ return renderCard(v,'grid'); }).join('')+'</div>';
+      if(_manageMode) injectDelBtns(ch);
+    });
+  }
+
+  /* ─────────────────────────── Shorts tab ────────────────── */
+  function renderShortsTab(ch, el){
+    fetchVideos(ch._id).then(function(all){
+      var shorts = all.filter(function(v){ return v.isShort; });
+      if(!shorts.length){ el.innerHTML='<div class="vid-empty"><i class="fas fa-bolt"></i><h3>Shorts არ არის</h3></div>'; return; }
+      el.innerHTML='<div class="ch-shorts-grid">'+shorts.map(function(v){ return renderCard(v,'short'); }).join('')+'</div>';
+    });
+  }
+
+  /* ─────────────────────────── Playlists tab ─────────────── */
+  function renderPlaylistsTab(ch, el){
+    fetchPlaylists(ch._id).then(function(pls){
+      if(!pls.length){
+        el.innerHTML='<div class="vid-empty"><i class="fas fa-list"></i><h3>Playlist არ არის</h3>'+
+          (authUser()&&authUser().uid===ch.ownerId?'<button class="vid-btn primary" id="chAddPlBtn" style="margin-top:12px"><i class="fas fa-plus"></i> Playlist-ის შექმნა</button>':'')+
+          '</div>';
+        var addBtn=document.getElementById('chAddPlBtn');
+        if(addBtn) addBtn.onclick=function(){ openPlaylistModal(ch); };
+        return;
+      }
+      var ownerBtns = (authUser()&&authUser().uid===ch.ownerId)
+        ? '<div style="display:flex;gap:8px;margin-bottom:16px"><button class="vid-btn primary" id="chAddPlBtn"><i class="fas fa-plus"></i> ახალი Playlist</button></div>'
+        : '';
+      el.innerHTML=ownerBtns+'<div class="ch-playlist-grid">'+pls.map(renderPlaylistCard).join('')+'</div>';
+      var addBtn=document.getElementById('chAddPlBtn');
+      if(addBtn) addBtn.onclick=function(){ openPlaylistModal(ch); };
+      el.querySelectorAll('[data-playlist-id]').forEach(function(card){
+        card.addEventListener('click',function(e){
+          e.preventDefault();
+          openPlaylistView(card.dataset.playlistId, card.dataset.playlistName, ch);
+        });
+      });
+    });
+  }
+
+  /* ─────────────────────────── Fetch playlists ───────────── */
+  function fetchPlaylists(channelId){
+    if(!fs()||!db()) return Promise.resolve([]);
+    return fs().getDocs(fs().collection(db(),'channels',channelId,'playlists'))
+      .then(function(snap){
+        var pls=[];
+        snap.forEach(function(d){ pls.push(Object.assign({_id:d.id},d.data())); });
+        pls.sort(function(a,b){ return (b.createdAt&&b.createdAt.toMillis?b.createdAt.toMillis():0)-(a.createdAt&&a.createdAt.toMillis?a.createdAt.toMillis():0); });
+        return pls;
+      }).catch(function(){ return []; });
+  }
+
+  /* ─────────────────────────── Card renderers ─────────────── */
+  function renderCard(v, mode){
+    if(window.GeoVideos&&window.GeoVideos.cardHTML&&mode==='grid') return window.GeoVideos.cardHTML(v);
+    var thumb = v.thumbnail||('https://i.ytimg.com/vi/'+(v.youtubeId||'')+'/hqdefault.jpg');
+    var isShortCard = mode==='short';
+    var cls = isShortCard ? 'vid-short-card' : (mode==='tv'?'vid-tv-card':'vid-card');
+    return '<a class="'+cls+'" href="watch.html?v='+esc(v.id)+'">' +
+      '<div class="'+(isShortCard?'vid-short-thumb':'vid-thumb-wrap')+'">' +
+        '<img src="'+esc(thumb)+'" alt="" loading="lazy">' +
+        '<div class="vid-play-overlay"><div class="vid-play-btn"><i class="fas fa-play"></i></div></div>' +
+      '</div>' +
+      (isShortCard
+        ? '<div class="vid-short-title">'+esc((v.title||'').slice(0,60))+'</div>'
+        : '<div class="vid-card-body">' +
+            '<div class="vid-card-title">'+esc((v.title||'').slice(0,80))+'</div>' +
+            '<div class="vid-card-meta">' +
+              '<span class="vid-card-stat"><i class="fas fa-eye"></i>'+fmtNum(v.viewCount)+'</span>' +
+              '<span class="vid-card-stat"><i class="fas fa-clock"></i>'+timeAgo(v.createdAt)+'</span>' +
+            '</div>' +
+          '</div>'
+      ) +
+    '</a>';
+  }
+
+  function renderPlaylistCard(pl){
+    var thumb = pl.thumbnail||'';
+    return '<div class="ch-playlist-card" data-playlist-id="'+esc(pl._id)+'" data-playlist-name="'+esc(pl.title||'Playlist')+'" style="cursor:pointer">' +
+      '<div class="ch-pl-thumb" style="'+(thumb?'background-image:url('+esc(thumb)+');background-size:cover;background-position:center':'background:#1a2133')+'">' +
+        (!thumb?'<i class="fas fa-list" style="font-size:2rem;color:#94a3b8"></i>':'') +
+        '<div class="ch-pl-count"><i class="fas fa-film"></i> '+(pl.videoCount||0)+'</div>' +
+      '</div>' +
+      '<div class="ch-pl-info">' +
+        '<div class="ch-pl-title">'+esc(pl.title||'Playlist')+'</div>' +
+        (pl.description?'<div class="ch-pl-desc">'+esc(pl.description.slice(0,80))+'</div>':'') +
+      '</div>' +
+    '</div>';
+  }
+
+  /* ─────────────────────────── Playlist view ─────────────── */
+  function openPlaylistView(plId, plName, ch){
+    var el=document.getElementById('chTabContent');
+    if(!el) return;
+    el.innerHTML='<div style="margin-bottom:12px"><button class="vid-btn ghost" id="chPlBack"><i class="fas fa-arrow-left"></i> Playlists</button></div>' +
+      '<h2 class="ch-section-title" style="margin-bottom:16px"><i class="fas fa-list"></i> '+esc(plName)+'</h2>' +
+      '<div id="chPlVideos" class="vid-grid"><div class="ch-init-loading"><i class="fas fa-spinner fa-spin"></i></div></div>';
+    document.getElementById('chPlBack').onclick=function(){ switchTabByName('playlists'); };
+    if(!fs()||!db()){ document.getElementById('chPlVideos').innerHTML='<div class="vid-empty">Firebase unavailable</div>'; return; }
+    fs().getDoc(fs().doc(db(),'channels',ch._id,'playlists',plId))
+      .then(function(snap){
+        if(!snap.exists()){ document.getElementById('chPlVideos').innerHTML='<div class="vid-empty">Playlist ვერ მოიძებნა</div>'; return; }
+        var pl=snap.data();
+        var itemIds=(pl.itemYoutubeIds||[]);
+        if(!itemIds.length){ document.getElementById('chPlVideos').innerHTML='<div class="vid-empty"><i class="fas fa-film"></i><h3>Playlist ცარიელია</h3></div>'; return; }
+        fetchVideos(ch._id).then(function(all){
+          var plVids=itemIds.map(function(ytId){ return all.find(function(v){ return v.youtubeId===ytId; }); }).filter(Boolean);
+          var grid=document.getElementById('chPlVideos');
+          if(!grid) return;
+          if(!plVids.length){ grid.innerHTML='<div class="vid-empty"><i class="fas fa-film"></i><h3>ვიდეოები ჯერ არ არის</h3></div>'; return; }
+          grid.innerHTML=plVids.map(function(v){ return renderCard(v,'grid'); }).join('');
+        });
+      });
+  }
+
+  /* ─────────────────────────── Subscribe ─────────────────── */
+  function initSubBtn(ch){
+    var btn=document.getElementById('chSubBtn');
+    if(!btn) return;
+    var u=authUser();
+    if(!u){ btn.onclick=function(){ window.location.href='auth.html'; }; return; }
+    fs().getDoc(fs().doc(db(),'channels',ch._id,'subscribers',u.uid))
+      .then(function(d){ setSubBtn(btn,d.exists()); }).catch(function(){});
+    btn.onclick=function(){
+      var u2=authUser(); if(!u2){ window.location.href='auth.html'; return; }
+      btn.disabled=true;
+      var subRef=fs().doc(db(),'channels',ch._id,'subscribers',u2.uid);
+      var chRef=fs().doc(db(),'channels',ch._id);
+      fs().getDoc(subRef).then(function(d){
+        if(d.exists()){
+          return fs().deleteDoc(subRef).then(function(){ return fs().updateDoc(chRef,{subscriberCount:fs().increment(-1)}); })
+            .then(function(){ setSubBtn(btn,false); updateSubDisplay(-1); });
+        } else {
+          return fs().setDoc(subRef,{subscribedAt:fs().serverTimestamp()}).then(function(){ return fs().updateDoc(chRef,{subscriberCount:fs().increment(1)}); })
+            .then(function(){ setSubBtn(btn,true); updateSubDisplay(1); });
+        }
+      }).finally(function(){ btn.disabled=false; });
+    };
+  }
+  function setSubBtn(btn,sub){
+    btn.innerHTML=sub?'<i class="fas fa-check"></i> გამოწერილია':'<i class="fas fa-plus"></i> გამოწერა';
+    btn.classList.toggle('subscribed',sub);
+  }
+  function updateSubDisplay(delta){
+    var el=document.getElementById('chSubCount'); if(!el) return;
+    var m=(el.textContent||'').match(/[\d.]+[KM]?/);
+    if(m) el.innerHTML='<i class="fas fa-users"></i> '+fmtNum((parseFloat(m[0])||0)+delta)+' გამომწერი';
+  }
+
+  /* ─────────────────────────── Owner controls ─────────────── */
+  function initOwnerControls(ch){
+    var u=authUser();
+    if(!u||u.uid!==ch.ownerId) return;
+    var bar=document.getElementById('chOwnerBar');
+    if(bar) bar.style.display='flex';
+    var subBtn=document.getElementById('chSubBtn');
+    if(subBtn) subBtn.outerHTML='<a class="ch-sub-btn subscribed" href="videos.html" style="text-decoration:none"><i class="fas fa-plus"></i> ვიდეოს დამატება</a>';
+    var editBtn=document.getElementById('chEditBtn');
+    var manageBtn=document.getElementById('chManageBtn');
+    var importBtn=document.getElementById('chImportBtn');
+    var delAllBtn=document.getElementById('chDeleteAllVideosBtn');
+    var delChBtn=document.getElementById('chDeleteChannelBtn');
+    if(editBtn)    editBtn.onclick    = function(){ openEditChannelModal(ch); };
+    if(manageBtn)  manageBtn.onclick  = function(){ toggleManageMode(ch); };
+    if(importBtn)  importBtn.onclick  = function(){ openReImportModal(ch); };
+    if(delAllBtn)  delAllBtn.onclick  = function(){ deleteAllChannelVideos(ch); };
+    if(delChBtn)   delChBtn.onclick   = function(){ deleteChannel(ch); };
+  }
+
+  function toggleManageMode(ch){
+    _manageMode=!_manageMode;
+    var btn=document.getElementById('chManageBtn');
+    if(btn){ btn.innerHTML=_manageMode?'<i class="fas fa-check"></i> დასრულება':'<i class="fas fa-sliders"></i> ვიდეოების მართვა'; btn.classList.toggle('active',_manageMode); }
+    if(_manageMode) injectDelBtns(ch);
+    else document.querySelectorAll('.ch-vid-del').forEach(function(b){ b.style.display='none'; });
+  }
+
+  function injectDelBtns(ch){
+    document.querySelectorAll('#chTabContent .vid-card, #chTabContent .vid-tv-card, #chTabContent .vid-short-card').forEach(function(card){
+      if(card.querySelector('.ch-vid-del')) { card.querySelector('.ch-vid-del').style.display=''; return; }
+      var href=card.getAttribute('href')||'';
+      var vidId=href.replace(/.*\?v=/,'');
+      if(!vidId) return;
+      var b=document.createElement('button');
+      b.className='ch-vid-del';
+      b.title='წაშლა';
+      b.innerHTML='<i class="fas fa-trash-can"></i>';
+      b.style.display='';
+      b.onclick=function(e){
+        e.preventDefault(); e.stopPropagation();
+        if(!confirm('ვიდეო წაიშლება. გააგრძელო?')) return;
+        b.disabled=true;
+        fs().deleteDoc(fs().doc(db(),'videos',vidId)).then(function(){
+          card.style.opacity='0'; card.style.pointerEvents='none';
+          setTimeout(function(){ card.remove(); },300);
+          _allVideos=_allVideos&&_allVideos.filter(function(v){ return v.id!==vidId; });
+          if(ch._id) fs().updateDoc(fs().doc(db(),'channels',ch._id),{videoCount:fs().increment(-1)}).catch(function(){});
+        }).catch(function(){ b.disabled=false; });
+      };
+      card.style.position='relative';
+      card.appendChild(b);
+    });
+  }
+
+  /* ─────────────────────────── Edit channel modal ─────────── */
+  function openEditChannelModal(ch){
+    if(document.getElementById('chEditModal')) return;
+    var ov=document.createElement('div');
+    ov.className='vid-modal-overlay'; ov.id='chEditModal';
+    ov.innerHTML=
+      '<div class="vid-modal" style="max-width:520px">' +
         '<h2><i class="fas fa-pen"></i> არხის რედაქტირება' +
           '<button class="vid-modal-close" id="cheClose"><i class="fas fa-times"></i></button>' +
         '</h2>' +
         '<div class="vid-form-group">' +
           '<label class="vid-form-label">სახელი <span>*</span></label>' +
-          '<input id="cheName" class="vid-form-input" type="text" maxlength="80" value="' + esc(ch.name || '') + '">' +
+          '<input id="cheName" class="vid-form-input" type="text" maxlength="80" value="'+esc(ch.name||'')+'">' +
         '</div>' +
         '<div class="vid-form-group">' +
           '<label class="vid-form-label">აღწერა</label>' +
-          '<textarea id="cheDesc" class="vid-form-textarea" maxlength="500">' + esc(ch.description || '') + '</textarea>' +
+          '<textarea id="cheDesc" class="vid-form-textarea" maxlength="1000" rows="4">'+esc(ch.description||'')+'</textarea>' +
         '</div>' +
         '<div class="vid-form-group">' +
           '<label class="vid-form-label">Avatar URL</label>' +
-          '<input id="cheAvatar" class="vid-form-input" type="url" value="' + esc(ch.avatar || '') + '">' +
+          '<input id="cheAvatar" class="vid-form-input" type="url" value="'+esc(ch.avatar||'')+'">' +
         '</div>' +
         '<div class="vid-form-group">' +
           '<label class="vid-form-label">Banner URL</label>' +
-          '<input id="cheBanner" class="vid-form-input" type="url" value="' + esc(ch.banner || '') + '">' +
+          '<input id="cheBanner" class="vid-form-input" type="url" value="'+esc(ch.banner||'')+'">' +
+        '</div>' +
+        '<div class="vid-form-group">' +
+          '<label class="vid-form-label"><i class="fas fa-star" style="color:#f59e0b;margin-right:4px"></i>Featured Video ID (Firestore ID)</label>' +
+          '<input id="cheFeatured" class="vid-form-input" type="text" placeholder="ვიდეოს ID (სურვილისამებრ)" value="'+esc(ch.featuredVideoId||'')+'">' +
         '</div>' +
         '<div class="vid-modal-footer">' +
           '<button class="vid-btn ghost" id="cheCancel"><i class="fas fa-times"></i> გაუქმება</button>' +
           '<button class="vid-btn primary" id="cheSave"><i class="fas fa-floppy-disk"></i> შენახვა</button>' +
         '</div>' +
       '</div>';
-
     document.body.appendChild(ov);
-    document.getElementById('cheClose').onclick =
-    document.getElementById('cheCancel').onclick = function () { ov.remove(); };
-    ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
-
-    document.getElementById('cheSave').onclick = function () {
-      var name = document.getElementById('cheName').value.trim();
-      if (!name) { return; }
-      var btn = document.getElementById('cheSave');
-      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-      fs().updateDoc(fs().doc(db(), 'channels', ch._id), {
+    function close(){ ov.remove(); }
+    document.getElementById('cheClose').onclick=close;
+    document.getElementById('cheCancel').onclick=close;
+    ov.addEventListener('click',function(e){ if(e.target===ov) close(); });
+    document.getElementById('cheSave').onclick=function(){
+      var name=document.getElementById('cheName').value.trim();
+      if(!name){ toast('სახელი სავალდებულოა','error'); return; }
+      var saveBtn=document.getElementById('cheSave');
+      saveBtn.disabled=true; saveBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+      var updates={
         name:        name,
         description: document.getElementById('cheDesc').value.trim(),
         avatar:      document.getElementById('cheAvatar').value.trim(),
-        banner:      document.getElementById('cheBanner').value.trim()
-      }).then(function () {
-        toast('შეინახა ✓');
-        ov.remove();
-        /* refresh page so changes show */
-        location.reload();
-      }).catch(function (e) {
-        toast('შეცდომა: ' + e.message, 'error');
-        btn.disabled = false; btn.innerHTML = '<i class="fas fa-floppy-disk"></i> შენახვა';
-      });
+        banner:      document.getElementById('cheBanner').value.trim(),
+        featuredVideoId: document.getElementById('cheFeatured').value.trim()||null
+      };
+      fs().updateDoc(fs().doc(db(),'channels',ch._id),updates)
+        .then(function(){ toast('შეინახა ✓'); close(); location.reload(); })
+        .catch(function(e){ toast('შეცდომა: '+e.message,'error'); saveBtn.disabled=false; saveBtn.innerHTML='<i class="fas fa-floppy-disk"></i> შენახვა'; });
     };
   }
 
-  /* ── Delete all channel videos ──────────────────────────── */
-  function deleteAllChannelVideos(ch) {
-    if (!confirm('არხის ყველა ვიდეო წაიშლება GeoHub-დან. გააგრძელო?')) return;
-    var btn = document.getElementById('chDeleteAllVideosBtn');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
-    fs().getDocs(fs().query(
-      fs().collection(db(), 'videos'),
-      fs().where('channelId', '==', ch._id),
-      fs().limit(500)
-    )).then(function (snap) {
-      var dels = [];
-      snap.forEach(function (d) { dels.push(fs().deleteDoc(d.ref)); });
-      return Promise.all(dels).then(function () {
-        return fs().updateDoc(fs().doc(db(), 'channels', ch._id), { videoCount: 0 });
+  /* ─────────────────────────── Playlist modal ─────────────── */
+  function openPlaylistModal(ch, existing){
+    if(document.getElementById('chPlModal')) return;
+    var ov=document.createElement('div');
+    ov.className='vid-modal-overlay'; ov.id='chPlModal';
+    ov.innerHTML=
+      '<div class="vid-modal" style="max-width:460px">' +
+        '<h2><i class="fas fa-list"></i> '+(existing?'Playlist-ის რედაქტირება':'Playlist-ის შექმნა')+
+          '<button class="vid-modal-close" id="chPlClose"><i class="fas fa-times"></i></button>' +
+        '</h2>' +
+        '<div class="vid-form-group">' +
+          '<label class="vid-form-label">სათაური <span>*</span></label>' +
+          '<input id="chPlTitle" class="vid-form-input" type="text" maxlength="100" value="'+esc(existing&&existing.title||'')+'">' +
+        '</div>' +
+        '<div class="vid-form-group">' +
+          '<label class="vid-form-label">აღწერა</label>' +
+          '<textarea id="chPlDesc" class="vid-form-textarea" maxlength="500">'+esc(existing&&existing.description||'')+'</textarea>' +
+        '</div>' +
+        '<div class="vid-form-group">' +
+          '<label class="vid-form-label">Thumbnail URL (სურვილისამებრ)</label>' +
+          '<input id="chPlThumb" class="vid-form-input" type="url" value="'+esc(existing&&existing.thumbnail||'')+'">' +
+        '</div>' +
+        '<div class="vid-modal-footer">' +
+          '<button class="vid-btn ghost" id="chPlCancel">გაუქმება</button>' +
+          '<button class="vid-btn primary" id="chPlSave"><i class="fas fa-floppy-disk"></i> შენახვა</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(ov);
+    function close(){ ov.remove(); }
+    document.getElementById('chPlClose').onclick=close;
+    document.getElementById('chPlCancel').onclick=close;
+    ov.addEventListener('click',function(e){ if(e.target===ov) close(); });
+    document.getElementById('chPlSave').onclick=function(){
+      var title=document.getElementById('chPlTitle').value.trim();
+      if(!title){ toast('სათაური სავალდებულოა','error'); return; }
+      var btn=document.getElementById('chPlSave');
+      btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>';
+      var data={
+        title:       title,
+        description: document.getElementById('chPlDesc').value.trim(),
+        thumbnail:   document.getElementById('chPlThumb').value.trim(),
+        videoCount:  existing&&existing.videoCount||0,
+        itemYoutubeIds: existing&&existing.itemYoutubeIds||[],
+        createdAt:   fs().serverTimestamp()
+      };
+      var p = existing
+        ? fs().updateDoc(fs().doc(db(),'channels',ch._id,'playlists',existing._id), data)
+        : fs().addDoc(fs().collection(db(),'channels',ch._id,'playlists'), data);
+      p.then(function(){ toast('Playlist შეინახა ✓'); close(); switchTabByName('playlists'); })
+       .catch(function(e){ toast('შეცდომა: '+e.message,'error'); btn.disabled=false; btn.innerHTML='<i class="fas fa-floppy-disk"></i> შენახვა'; });
+    };
+  }
+
+  /* ─────────────────────────── Re-import modal ─────────────── */
+  function openReImportModal(ch){
+    if(!ch.youtubeUrl){ toast('ამ არხს YouTube URL არ აქვს','error'); return; }
+    if(!confirm('YouTube-დან კვლავ გადმოვიტანო ყველა ვიდეო, Shorts და Playlist? (დუბლიკატები გამოტოვდება)')) return;
+    toast('Import დაიწყო...');
+    var u=authUser();
+    if(!u){ toast('ავტორიზაცია საჭიროა','error'); return; }
+    if(window.GeoVideos&&window.GeoVideos.importChannelVideos){
+      window.GeoVideos.importChannelVideos(ch.youtubeUrl, ch._id, u, function(){
+        _allVideos=null;
+        toast('Import დასრულდა ✓');
+        switchTab(_activeTab, _ch);
       });
-    }).then(function () {
-      toast(typeof toast !== 'undefined' ? 'ყველა ვიდეო წაიშალა ✓' : '');
-      if (typeof toast === 'function') toast('ყველა ვიდეო წაიშალა ✓');
-      var grid = document.getElementById('chVideoGrid');
-      if (grid) grid.innerHTML = '<div class="vid-empty"><i class="fas fa-video-slash"></i><h3>ვიდეო არ არის</h3><p>ჯერ ვიდეო არ დამატებულა</p></div>';
-      var subCount = document.querySelector('.ch-stats');
-      location.reload();
-    }).catch(function (e) {
-      alert('შეცდომა: ' + (e.message || e));
-      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash"></i> ყველა ვიდეო'; }
-    });
+    } else { toast('videos.js ვერ მოიძებნა','error'); }
   }
 
-  /* ── Delete channel ──────────────────────────────────────── */
-  function deleteChannel(ch) {
-    var name = ch.name || 'ეს არხი';
-    if (!confirm('"' + name + '" — არხი და მისი ყველა ვიდეო საბოლოოდ წაიშლება. გააგრძელო?')) return;
-    var btn = document.getElementById('chDeleteChannelBtn');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
-    /* delete all videos first, then the channel doc */
-    fs().getDocs(fs().query(
-      fs().collection(db(), 'videos'),
-      fs().where('channelId', '==', ch._id),
-      fs().limit(500)
-    )).then(function (snap) {
-      var dels = [];
-      snap.forEach(function (d) { dels.push(fs().deleteDoc(d.ref)); });
-      return Promise.all(dels);
-    }).then(function () {
-      return fs().deleteDoc(fs().doc(db(), 'channels', ch._id));
-    }).then(function () {
-      window.location.href = 'videos.html';
-    }).catch(function (e) {
-      alert('შეცდომა: ' + (e.message || e));
-      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-ban"></i> არხის წაშლა'; }
-    });
+  /* ─────────────────────────── Delete all videos ─────────── */
+  function deleteAllChannelVideos(ch){
+    if(!confirm('ყველა ვიდეო წაიშლება. გააგრძელო?')) return;
+    var btn=document.getElementById('chDeleteAllVideosBtn');
+    if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>'; }
+    fs().getDocs(fs().query(fs().collection(db(),'videos'),fs().where('channelId','==',ch._id),fs().limit(500)))
+      .then(function(snap){
+        return Promise.all(snap.docs.map(function(d){ return fs().deleteDoc(d.ref); }))
+          .then(function(){ return fs().updateDoc(fs().doc(db(),'channels',ch._id),{videoCount:0}); });
+      })
+      .then(function(){
+        _allVideos=null;
+        toast('ყველა ვიდეო წაიშალა ✓');
+        setTimeout(function(){ location.reload(); },800);
+      })
+      .catch(function(e){ toast('შეცდომა: '+e.message,'error'); if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-trash"></i> ყველა ვიდეო'; } });
   }
 
-  function toast(msg) {
-    var el = document.querySelector('.gh-toast');
-    if (el) el.remove();
-    el = document.createElement('div');
-    el.className = 'gh-toast show';
-    el.textContent = msg;
+  /* ─────────────────────────── Delete channel ─────────────── */
+  function deleteChannel(ch){
+    if(!confirm('"'+ch.name+'" წაიშლება საბოლოოდ. გააგრძელო?')) return;
+    var btn=document.getElementById('chDeleteChannelBtn');
+    if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>'; }
+    fs().getDocs(fs().query(fs().collection(db(),'videos'),fs().where('channelId','==',ch._id),fs().limit(500)))
+      .then(function(snap){ return Promise.all(snap.docs.map(function(d){ return fs().deleteDoc(d.ref); })); })
+      .then(function(){ return fs().deleteDoc(fs().doc(db(),'channels',ch._id)); })
+      .then(function(){ window.location.href='videos.html'; })
+      .catch(function(e){ toast('შეცდომა: '+e.message,'error'); if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-ban"></i> არხის წაშლა'; } });
+  }
+
+  /* ─────────────────────────── Toast ─────────────────────── */
+  function toast(msg){
+    var el=document.querySelector('.gh-toast'); if(el) el.remove();
+    el=document.createElement('div'); el.className='gh-toast show'; el.textContent=msg;
     document.body.appendChild(el);
-    setTimeout(function () { el.classList.remove('show'); setTimeout(function () { el.remove(); }, 250); }, 2800);
+    setTimeout(function(){ el.classList.remove('show'); setTimeout(function(){ el.remove(); },250); },2800);
   }
 
-  /* ── Load channel videos ─────────────────────────────────── */
-  function loadChannelVideos(channelId) {
-    var grid = document.getElementById('chVideoGrid');
-    if (!grid || !fs() || !db()) return;
-
-    fs().getDocs(fs().query(
-      fs().collection(db(), 'videos'),
-      fs().where('channelId', '==', channelId),
-      fs().limit(200)
-    )).then(function (snap) {
-      var vids = [];
-      snap.forEach(function (d) {
-        var v = d.data();
-        if (v.status === 'hidden' || v.status === 'removed') return;
-        vids.push(Object.assign({ id: d.id }, v));
-      });
-
-      /* sort newest first client-side */
-      vids.sort(function (a, b) {
-        var ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
-        var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
-        return tb - ta;
-      });
-
-      if (!vids.length) {
-        grid.innerHTML = '<div class="vid-empty"><i class="fas fa-video-slash"></i><h3>ვიდეო არ არის</h3><p>ჯერ ვიდეო არ დამატებულა</p></div>';
-        return;
-      }
-
-      /* Use GeoVideos card renderer if videos.js is loaded */
-      if (window.GeoVideos && window.GeoVideos.cardHTML) {
-        grid.innerHTML = vids.map(function (v) { return window.GeoVideos.cardHTML(v); }).join('');
-        /* re-init save buttons */
-        if (window.GeoVideos.initSaveButtons) window.GeoVideos.initSaveButtons();
-      } else {
-        grid.innerHTML = vids.map(function (v) {
-          var thumb = v.thumbnail || ('https://i.ytimg.com/vi/' + (v.youtubeId || '') + '/hqdefault.jpg');
-          return '<a class="vid-card" href="watch.html?v=' + esc(v.id) + '">' +
-            '<div class="vid-thumb-wrap">' +
-              '<img src="' + esc(thumb) + '" alt="" loading="lazy">' +
-              '<div class="vid-play-overlay"><div class="vid-play-btn"><i class="fas fa-play"></i></div></div>' +
-            '</div>' +
-            '<div class="vid-card-body">' +
-              '<div class="vid-card-title">' + esc(v.title || 'Untitled') + '</div>' +
-              '<div class="vid-card-meta">' +
-                '<span class="vid-card-stat"><i class="fas fa-eye"></i>' + fmtNum(v.viewCount) + '</span>' +
-                '<span class="vid-card-stat"><i class="fas fa-clock"></i>' + timeAgo(v.createdAt) + '</span>' +
-              '</div>' +
-            '</div>' +
-          '</a>';
-        }).join('');
-      }
-    }).catch(function () {
-      grid.innerHTML = '<div class="vid-empty"><i class="fas fa-exclamation-circle"></i><h3>ჩატვირთვის შეცდომა</h3></div>';
-    });
-  }
-
-  /* ── Error state ────────────────────────────────────────── */
-  function showError(msg) {
-    var page = document.getElementById('channelPage');
-    if (page) page.innerHTML = '<div class="vid-empty" style="padding:100px 0"><i class="fas fa-exclamation-circle" style="font-size:3rem;color:#ef4444;display:block;margin-bottom:16px"></i><h3>' + esc(msg) + '</h3><a href="videos.html" style="color:var(--green)">← Videos-ზე დაბრუნება</a></div>';
-  }
-
-  /* ── Boot ───────────────────────────────────────────────── */
-  function boot() {
-    if (!document.getElementById('channelPage')) return;
-    if (fs() && db()) {
-      loadChannel();
-    } else {
-      window.addEventListener('GeoFirebaseReady', loadChannel, { once: true });
-    }
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
-  } else {
-    boot();
+  /* ─────────────────────────── Error ─────────────────────── */
+  function showError(msg){
+    var page=document.getElementById('channelPage');
+    if(page) page.innerHTML='<div class="vid-empty" style="padding:100px 0"><i class="fas fa-exclamation-circle" style="font-size:3rem;color:#ef4444;display:block;margin-bottom:16px"></i><h3>'+esc(msg)+'</h3><a href="videos.html" style="color:var(--green)">← Videos-ზე დაბრუნება</a></div>';
   }
 
 })();
