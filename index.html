@@ -46,6 +46,37 @@
 </head>
 <body data-gh-page="feed">
   <noscript>GeoHub requires JavaScript.</noscript>
+  <script>
+  (function(){
+    var c=document.createElement('canvas');
+    c.id='gh-particles';
+    Object.assign(c.style,{position:'fixed',top:0,left:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:9999,opacity:.55});
+    document.body.prepend(c);
+    var ctx=c.getContext('2d'),W,H,pts=[],mx=-999,my=-999;
+    function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+    function mkPts(){pts=[];for(var i=0;i<130;i++)pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4,r:Math.random()*1.5+.5});}
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      for(var i=0;i<pts.length;i++){
+        var p=pts[i],dx=p.x-mx,dy=p.y-my,d=Math.sqrt(dx*dx+dy*dy);
+        if(d<90&&d>0){var f=(90-d)/90*1.2;p.vx+=(dx/d)*f*.06;p.vy+=(dy/d)*f*.06;}
+        p.vx*=.99;p.vy*=.99;p.x+=p.vx;p.y+=p.vy;
+        if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+        ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fillStyle='rgba(59,130,246,'+(Math.random()*.25+.35)+')';ctx.fill();
+        for(var j=i+1;j<pts.length;j++){
+          var q=pts[j],ld=Math.sqrt((p.x-q.x)*(p.x-q.x)+(p.y-q.y)*(p.y-q.y));
+          if(ld<120){ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.strokeStyle='rgba(59,130,246,'+((1-ld/120)*.14)+')';ctx.lineWidth=.6;ctx.stroke();}
+        }
+      }
+      requestAnimationFrame(draw);
+    }
+    window.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY;});
+    window.addEventListener('mouseleave',function(){mx=-999;my=-999;});
+    window.addEventListener('resize',function(){resize();mkPts();});
+    resize();mkPts();draw();
+  })();
+  </script>
   <script type="module" src="firebase-config.js"></script>
   <script defer src="gh-schema.js"></script>
   <script defer src="account.js"></script>
