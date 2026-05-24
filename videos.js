@@ -641,7 +641,22 @@
           city: videoData.city || '',
           authorName: videoData.authorName || '',
           createdAt: Date.now()
-        }).then(function () { callback && callback(true); });
+        }).then(function () {
+          callback && callback(true);
+          if (videoData.authorId && videoData.authorId !== u.uid) {
+            var gs = window.GeoSocial;
+            if (gs && gs.createNotification) {
+              gs.createNotification(
+                videoData.authorId, 'video_save',
+                (u.displayName || 'Someone') + ' saved your video',
+                videoData.title || '',
+                'watch.html?v=' + videoId,
+                { videoId: videoId },
+                'vsave_' + u.uid + '_' + videoId
+              );
+            }
+          }
+        });
       }
     }).catch(function () { callback && callback(null); });
   }
@@ -771,6 +786,7 @@
     menu.innerHTML =
       '<div class="vid-share-menu-item" id="vsm-copy"><i class="fas fa-link"></i>ლინკის კოპირება</div>' +
       (navigator.share ? '<div class="vid-share-menu-item" id="vsm-native"><i class="fas fa-share-nodes"></i>გაზიარება</div>' : '') +
+      '<div class="vid-share-menu-item" id="vsm-story"><i class="fas fa-circle-play"></i>Share to Story</div>' +
       '<div class="vid-share-menu-item" id="vsm-post"><i class="fas fa-pen-to-square"></i>Share to Post</div>';
 
     var rect = btn.getBoundingClientRect();
@@ -791,6 +807,19 @@
         menu.remove();
       });
     }
+    var storyBtn = menu.querySelector('#vsm-story');
+    if (storyBtn) storyBtn.addEventListener('click', function () {
+      var gs = window.GeoSocial;
+      if (!gs || !gs.createStory) { toast('Story system unavailable', 'error'); menu.remove(); return; }
+      var storyText = '▶ ' + (v.title || 'GeoHub Video');
+      var storyMedia = v.thumbnail || ytThumb(v.youtubeId);
+      gs.createStory(storyText, storyMedia, function (err) {
+        if (!err) toast('Story-ში გაზიარდა! 🎬');
+        else toast('გაზიარება ვერ მოხდა', 'error');
+      });
+      menu.remove();
+    });
+
     var postBtn = menu.querySelector('#vsm-post');
     if (postBtn) postBtn.addEventListener('click', function () {
       window.location.href = 'feed.html?share=video&id=' + esc(v.id) + '&title=' + encodeURIComponent(v.title || '');
@@ -802,6 +831,190 @@
         if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('click', rmMenu); }
       });
     }, 0);
+  }
+
+  /* ── Phase 8: Live Activity Feed ────────────────────────── */
+  var _actTimer = null;
+  var _actIdx = 0;
+  var _actItems = [];
+
+  function getTs(ts) {
+    if (!ts) return 0;
+    return ts.toMillis ? ts.toMillis() : (typeof ts === 'number' ? ts : 0);
+  }
+
+  function generateActivityItems(vids) {
+    var items = [];
+    var now = Date.now();
+
+    /* Recent uploads (last 48h) */
+    var recent = vids.filter(function (v) { return getTs(v.createdAt) > now - 172800000; });
+    recent.slice(0, 3).forEach(function (v) {
+      var type = v.isShort ? 'reel' : 'video';
+      var icon = v.isShort ? '⚡' : '🎬';
+      items.push({
+        icon: icon,
+        html: '<strong>' + esc(v.authorName || 'Someone') + '</strong> uploaded a new ' + type + (v.city ? ' in <strong>' + esc(v.city) + '</strong>' : ''),
+        href: 'watch.html?v=' + v.id,
+        ts: getTs(v.createdAt)
+      });
+    });
+
+    /* Trending videos */
+    vids.filter(function (v) { return trendScore(v) >= 60; }).slice(0, 2).forEach(function (v) {
+      items.push({
+        icon: '🔥',
+        html: '"<strong>' + esc(v.title || 'Video') + '</strong>" is trending',
+        href: 'watch.html?v=' + v.id,
+        ts: 0
+      });
+    });
+
+    /* City hotspots */
+    var cityMap = {};
+    vids.forEach(function (v) { if (v.city) cityMap[v.city] = (cityMap[v.city] || 0) + 1; });
+    var topCities = Object.keys(cityMap).sort(function (a, b) { return cityMap[b] - cityMap[a]; }).slice(0, 2);
+    topCities.forEach(function (city) {
+      items.push({
+        icon: '📍',
+        html: '<strong>' + cityMap[city] + '</strong> videos in <strong>' + esc(city) + '</strong>',
+        href: 'videos.html',
+        ts: 0
+      });
+    });
+
+    /* Viral */
+    vids.filter(function (v) { return (v.viewCount || 0) >= 1000; }).slice(0, 1).forEach(function (v) {
+      items.push({
+        icon: '🚀',
+        html: '"<strong>' + esc(v.title || 'Video') + '</strong>" — ' + fmtNum(v.viewCount) + ' views',
+        href: 'watch.html?v=' + v.id,
+        ts: 0
+      });
+    });
+
+    items.sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); });
+    return items.slice(0, 8);
+  }
+
+  function showActivityItem(idx) {
+    var ticker = document.getElementById('vidActivityTicker');
+    if (!ticker || !_actItems[idx]) return;
+    var item = _actItems[idx];
+    ticker.style.animation = 'none';
+    ticker.offsetWidth;
+    ticker.style.animation = '';
+    ticker.innerHTML =
+      '<span style="margin-right:6px">' + item.icon + '</span>' +
+      item.html +
+      '<span class="vid-activity-count" style="margin-left:8px">' + (idx + 1) + '/' + _actItems.length + '</span>';
+    var wrap = document.getElementById('vidActivityWrap');
+    if (wrap && item.href) {
+      wrap.onclick = function () { window.location.href = item.href; };
+    }
+  }
+
+  function renderActivityFeed(vids) {
+    var wrap = document.getElementById('vidActivityWrap');
+    if (!wrap) return;
+    _actItems = generateActivityItems(vids);
+    if (!_actItems.length) { wrap.style.display = 'none'; return; }
+    wrap.style.display = '';
+    _actIdx = 0;
+    showActivityItem(0);
+    if (_actTimer) clearInterval(_actTimer);
+    _actTimer = setInterval(function () {
+      _actIdx = (_actIdx + 1) % _actItems.length;
+      showActivityItem(_actIdx);
+    }, 4000);
+  }
+
+  /* ── Phase 8: Video Reactions ────────────────────────────── */
+  var REACTION_EMOJIS = ['❤️', '🔥', '😮', '😂', '😍'];
+
+  function toggleVideoReaction(videoId, uid, emoji, callback) {
+    if (!fs() || !db() || !videoId || !uid) { callback && callback(null); return; }
+    var ref = fs().doc(db(), 'videos', videoId, 'reactions', uid);
+    fs().getDoc(ref).then(function (snap) {
+      if (snap.exists() && snap.data().emoji === emoji) {
+        return fs().deleteDoc(ref).then(function () { callback && callback(null); });
+      } else {
+        return fs().setDoc(ref, { emoji: emoji, uid: uid, createdAt: fs().serverTimestamp() })
+          .then(function () { callback && callback(emoji); });
+      }
+    }).catch(function () { callback && callback(null); });
+  }
+
+  function listenVideoReactions(videoId, callback) {
+    if (!fs() || !db() || !videoId) return function () {};
+    var col = fs().collection(db(), 'videos', videoId, 'reactions');
+    return fs().onSnapshot(col, function (snap) {
+      var counts = {};
+      snap.forEach(function (d) {
+        var e = d.data().emoji;
+        if (e) counts[e] = (counts[e] || 0) + 1;
+      });
+      callback(counts);
+    }, function () {});
+  }
+
+  function initWatchReactions(v) {
+    var el = document.getElementById('watchReactions');
+    if (!el) return;
+    var u = authUser();
+    var userReaction = null;
+    var unsubReact = null;
+
+    if (u) {
+      fs() && db() && fs().getDoc(fs().doc(db(), 'videos', v.id, 'reactions', u.uid))
+        .then(function (snap) { if (snap.exists()) userReaction = snap.data().emoji; })
+        .catch(function () {});
+    }
+
+    function render(counts) {
+      el.innerHTML = '<div class="vid-reactions">' +
+        REACTION_EMOJIS.map(function (emoji) {
+          var cnt = counts[emoji] || 0;
+          var active = userReaction === emoji;
+          return '<button class="vid-reaction-btn' + (active ? ' active' : '') + '" data-reaction-emoji="' + esc(emoji) + '">' +
+            emoji + (cnt ? '<span>' + fmtNum(cnt) + '</span>' : '') +
+          '</button>';
+        }).join('') +
+      '</div>';
+
+      el.querySelectorAll('.vid-reaction-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          if (!u) { toast('Reaction-ისთვის გაიარე ავტორიზაცია', 'error'); return; }
+          var emoji = btn.dataset.reactionEmoji;
+          btn.classList.add('vid-reaction-pop');
+          setTimeout(function () { btn.classList.remove('vid-reaction-pop'); }, 250);
+          toggleVideoReaction(v.id, u.uid, emoji, function (newEmoji) {
+            userReaction = newEmoji;
+          });
+        });
+      });
+    }
+
+    unsubReact = listenVideoReactions(v.id, render);
+
+    /* Clean up listener when navigating away */
+    window.addEventListener('beforeunload', function () { if (unsubReact) unsubReact(); }, { once: true });
+  }
+
+  /* ── Phase 8: Creator presence dot ──────────────────────── */
+  function checkCreatorPresence(authorId) {
+    if (!authorId || !fs() || !db()) return;
+    fs().getDoc(fs().doc(db(), 'users', authorId))
+      .then(function (snap) {
+        if (!snap.exists()) return;
+        var d = snap.data();
+        var ts = d.lastSeen ? (d.lastSeen.toMillis ? d.lastSeen.toMillis() : (d.lastSeen.seconds ? d.lastSeen.seconds * 1000 : 0)) : 0;
+        if (ts && Date.now() - ts < 300000) {
+          var dot = document.getElementById('watchOnlineDot');
+          if (dot) dot.style.display = '';
+        }
+      })
+      .catch(function () {});
   }
 
   /* ── Videos page init ─────────────────────────────────── */
@@ -849,6 +1062,7 @@
         renderTopCreators(vids);
         renderContinueWatching();
         renderSavedSection();
+        renderActivityFeed(vids);
       }
       renderGrid();
       renderShorts();
@@ -1266,6 +1480,7 @@
       bindWatchShare(v);
     }
 
+    initWatchReactions(v);
     loadWatchLocation(v);
 
     if (descEl && v.description) {
@@ -1282,13 +1497,14 @@
               '<span class="watch-channel-av">' +
                 (v.authorAvatar ? '<img src="' + esc(v.authorAvatar) + '" alt="">' : (v.authorName || 'U').charAt(0)) +
               '</span>' +
-              '<div><div class="watch-channel-name">' + esc(v.authorName || 'GeoHub User') + '</div>' +
+              '<div><div class="watch-channel-name">' + esc(v.authorName || 'GeoHub User') + '<span class="watch-online-dot" id="watchOnlineDot" style="display:none" title="Online now"></span></div>' +
               '<div class="watch-channel-sub">Creator on GeoHub</div></div>' +
             '</a>' +
             (!isOwn && v.authorId ? '<button class="watch-follow-btn" id="watchFollowBtn" data-author-id="' + esc(v.authorId) + '"><i class="fas fa-user-plus"></i> Follow</button>' : '') +
           '</div>' +
         '</div>';
       initWatchFollow(v);
+      checkCreatorPresence(v.authorId);
     }
   }
 
@@ -1483,6 +1699,8 @@
     loadSavedVideos: loadSavedVideos,
     addToHistory: addToHistory,
     getHistory: getHistory,
+    toggleVideoReaction: toggleVideoReaction,
+    listenVideoReactions: listenVideoReactions,
     timeAgo: timeAgo,
     fmtNum: fmtNum,
     ytThumb: ytThumb,
