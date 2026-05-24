@@ -1680,6 +1680,26 @@
       return;
     }
     if (document.getElementById('vidAddModal')) return;
+    /* Require a channel before uploading */
+    var u = authUser();
+    if (fs() && db()) {
+      fs().getDocs(fs().query(fs().collection(db(), 'channels'), fs().where('ownerId', '==', u.uid), fs().limit(1)))
+        .then(function (snap) {
+          if (snap.empty) {
+            toast('ვიდეოს ასატვირთად ჯერ შექმენი GeoHub არხი', 'error');
+            setTimeout(function () { openCreateChannelModal(u); }, 600);
+          } else {
+            _doOpenAddVideoModal();
+          }
+        })
+        .catch(function () { _doOpenAddVideoModal(); }); /* if check fails, allow */
+      return;
+    }
+    _doOpenAddVideoModal();
+  }
+
+  function _doOpenAddVideoModal() {
+    if (document.getElementById('vidAddModal')) return;
 
     var cities = ['თბილისი', 'ბათუმი', 'ქუთაისი', 'რუსთავი', 'ზუგდიდი', 'გორი', 'ფოთი', 'ახალციხე', 'ხაშური', 'სამტრედია', 'სენაკი', 'ზესტაფონი', 'მარტვილი', 'ობიჯვარი', 'ახმეტა', 'თელავი', 'სიღნაღი', 'დუშეთი', 'ბორჯომი', 'ბაკურიანი', 'გუდაური', 'სვანეთი', 'ანაკლია'];
     var catOpts = Object.keys(CAT_META).filter(function (k) { return k !== 'all'; }).map(function (k) {

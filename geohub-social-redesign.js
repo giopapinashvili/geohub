@@ -446,10 +446,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function leftNav(active){
     var items=[
-      ['feed','feed.html','fa-house','მთავარი Feed'],['places','places.html','fa-location-dot','Places'],['map','map.html','fa-map','Map'],['videos','videos.html','fa-film','Videos'],['reels','reels.html','fa-bolt','Reels'],['place-feed','place-feed.html','fa-store','Place Updates'],['business','business.html','fa-store','Businesses'],['groups','groups.html','fa-users','Groups'],['events','events.html','fa-calendar-xmark','Events'],['messages','messages.html','fa-comment-dots','Messages'],['notifications','notifications.html','fa-bell','Notifications'],['rewards','rewards.html','fa-gift','Rewards / Points'],['challenges','challenges.html','fa-trophy','Challenges'],['services','services.html','fa-grip','Services'],['realestate','real-estate.html','fa-house-chimney','Real Estate'],['learning','learning.html','fa-graduation-cap','Learning'],['creators','creators.html','fa-camera-retro','Creators'],['trust','trust.html','fa-shield-halved','Trust / Safety'],['admin','admin.html','fa-user-shield','Admin Panel']
+      ['feed','feed.html','fa-house','მთავარი Feed'],['places','places.html','fa-location-dot','Places'],['map','map.html','fa-map','Map'],['videos','videos.html','fa-film','Videos'],['my-channel','#','fa-tv','ჩემი არხი'],['reels','reels.html','fa-bolt','Reels'],['place-feed','place-feed.html','fa-store','Place Updates'],['business','business.html','fa-store','Businesses'],['groups','groups.html','fa-users','Groups'],['events','events.html','fa-calendar-xmark','Events'],['messages','messages.html','fa-comment-dots','Messages'],['notifications','notifications.html','fa-bell','Notifications'],['rewards','rewards.html','fa-gift','Rewards / Points'],['challenges','challenges.html','fa-trophy','Challenges'],['services','services.html','fa-grip','Services'],['realestate','real-estate.html','fa-house-chimney','Real Estate'],['learning','learning.html','fa-graduation-cap','Learning'],['creators','creators.html','fa-camera-retro','Creators'],['trust','trust.html','fa-shield-halved','Trust / Safety'],['admin','admin.html','fa-user-shield','Admin Panel']
     ];
     items.splice(Math.max(items.length - 1, 0), 0, ['settings','settings.html','fa-gear','Settings']);
-    return '<aside class="gh-left"><nav class="gh-panel">'+items.map(function(it){return '<a class="gh-nav-item '+(active===it[0]?'active':'')+'" href="'+it[1]+'"><i class="fas '+it[2]+'"></i><span>'+it[3]+'</span></a>';}).join('')+'<button class="gh-nav-tour-btn" data-start-tour><i class="fas fa-question-circle"></i><span>How GeoHub works</span></button>'+'</nav></aside>';
+    return '<aside class="gh-left"><nav class="gh-panel">'+items.map(function(it){
+      var extra = it[0]==='my-channel' ? ' data-my-channel="1"' : '';
+      return '<a class="gh-nav-item '+(active===it[0]?'active':'')+'"'+extra+' href="'+it[1]+'"><i class="fas '+it[2]+'"></i><span>'+it[3]+'</span></a>';
+    }).join('')+'<button class="gh-nav-tour-btn" data-start-tour><i class="fas fa-question-circle"></i><span>How GeoHub works</span></button>'+'</nav></aside>';
   }
 
   function rightRail(extra){
@@ -484,10 +487,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       document.addEventListener('click', function(e){
         if(e.target.closest('[data-create-post]')){ e.preventDefault(); e.stopPropagation(); openPostModal(buildActorExtra()); return; }
         if(e.target.closest('[data-create-story]')){ e.preventDefault(); e.stopPropagation(); openStoryModal(); return; }
+        if(e.target.closest('[data-my-channel]')){ e.preventDefault(); e.stopPropagation(); openMyChannelPicker(e.target.closest('[data-my-channel]')); return; }
         if(e.target.closest('#ghNotifBtn')) openNotifications();
         if(e.target.closest('[data-start-tour]')){ var _tu=authUser(); startTour(_tu?_tu.uid:null); }
         var notif=e.target.closest('[data-notif]');
         if(notif && GS() && GS().markNotificationRead) GS().markNotificationRead(notif.dataset.notif);
+        /* close channel picker on outside click */
+        if(!e.target.closest('#ghChPicker') && !e.target.closest('[data-my-channel]')){
+          var pk=document.getElementById('ghChPicker'); if(pk) pk.remove();
+        }
       });
     }
     var gs=$('#ghGlobalSearch');
@@ -631,6 +639,48 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         }
       });
     }
+  }
+
+  /* ── My Channel picker (sidebar nav item) ──────────────── */
+  function openMyChannelPicker(anchor){
+    var existing=document.getElementById('ghChPicker');
+    if(existing){ existing.remove(); return; }
+    var u=authUser();
+    if(!u){ window.location.href='auth.html'; return; }
+    var pk=document.createElement('div');
+    pk.id='ghChPicker';
+    pk.style.cssText='position:fixed;z-index:9999;background:var(--gh-surface,#1a2133);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:8px;min-width:220px;box-shadow:0 8px 32px rgba(0,0,0,.5);';
+    /* position near anchor */
+    if(anchor){
+      var r=anchor.getBoundingClientRect();
+      pk.style.top=(r.top)+'px';
+      pk.style.left=(r.right+8)+'px';
+    } else { pk.style.top='200px'; pk.style.left='260px'; }
+    pk.innerHTML='<div style="padding:6px 10px 10px;font-size:.78rem;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.06em">ჩემი არხები</div><div id="ghChPickerList"><i class="fas fa-spinner fa-spin" style="margin:10px 14px;color:#94a3b8"></i></div>'+
+      '<div style="border-top:1px solid rgba(255,255,255,.08);margin-top:6px;padding-top:6px;">'+
+        '<a href="videos.html" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;color:#10b981;font-size:.84rem;font-weight:600;text-decoration:none;transition:background .15s" onmouseover="this.style.background=\'rgba(16,185,129,.1)\'" onmouseout="this.style.background=\'\'">'+
+          '<i class="fas fa-plus-circle"></i> ახალი არხი</a>'+
+      '</div>';
+    document.body.appendChild(pk);
+    if(!fs()||!db()){ document.getElementById('ghChPickerList').innerHTML='<div style="padding:10px 14px;font-size:.82rem;color:#94a3b8">Firebase არ არის მზად</div>'; return; }
+    fs().getDocs(fs().query(fs().collection(db(),'channels'),fs().where('ownerId','==',u.uid)))
+      .then(function(snap){
+        var list=document.getElementById('ghChPickerList');
+        if(!list) return;
+        if(snap.empty){
+          list.innerHTML='<div style="padding:10px 14px;font-size:.82rem;color:#94a3b8"><i class="fas fa-tv" style="margin-right:6px"></i>არხი ჯერ არ გაქვს</div>';
+          return;
+        }
+        list.innerHTML=snap.docs.map(function(d){
+          var ch=d.data();
+          var av=ch.avatar?'<img src="'+ch.avatar+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.style.display=\'none\'">'
+            :'<div style="width:32px;height:32px;border-radius:50%;background:rgba(16,185,129,.15);color:#10b981;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0"><i class="fas fa-tv"></i></div>';
+          return '<a href="channel.html?id='+d.id+'" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;color:var(--gh-text,#f1f5f9);font-size:.84rem;text-decoration:none;transition:background .15s" onmouseover="this.style.background=\'rgba(255,255,255,.06)\'" onmouseout="this.style.background=\'\'">'+
+            av+'<div style="min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">'+(ch.name||'არხი')+'</div>'+
+            '<div style="font-size:.72rem;color:#94a3b8">'+(ch.videoCount||0)+' ვიდეო</div></div></a>';
+        }).join('');
+      })
+      .catch(function(){ var l=document.getElementById('ghChPickerList'); if(l) l.innerHTML='<div style="padding:10px 14px;font-size:.82rem;color:#ef4444">ვერ ჩაიტვირთა</div>'; });
   }
 
   function updateTopUser(){
