@@ -256,11 +256,11 @@
 
   /* ── Load videos feed ─────────────────────────────────── */
   function loadVideos(opts, callback) {
-    if (!fs() || !db()) { callback([]); return; }
-    /* Always load without category constraint (avoids composite index requirement).
-       Category filtering is done client-side in the callback. */
+    if (!fs() || !db()) { callback([]); return function(){}; }
+    /* getDocs (one-shot) instead of onSnapshot to avoid double-fire
+       (cache → network) which causes the page to jump twice. */
     var q = fs().query(videosCol(), fs().orderBy('createdAt', 'desc'), fs().limit(120));
-    return fs().onSnapshot(q, function (snap) {
+    fs().getDocs(q).then(function (snap) {
       var vids = [];
       snap.forEach(function (d) { vids.push(Object.assign({ id: d.id }, d.data())); });
       vids = vids.filter(function (v) { return v.status !== 'hidden' && v.status !== 'removed'; });
@@ -268,7 +268,8 @@
         vids = vids.filter(function (v) { return videoMatchesCat(v, opts.category); });
       }
       callback(vids);
-    }, function () { callback([]); });
+    }).catch(function () { callback([]); });
+    return function () {}; /* no-op — no subscription to cancel */
   }
 
   function loadVideoById(docId, callback) {
