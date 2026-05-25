@@ -1184,22 +1184,33 @@
         var result = [], pi = 0, vi = 0, postSince = 0, lastChId = null;
         var postsPerVideo = 4;
         function pickVideo() {
-          // Prefer a video from a different channel than the last one shown
+          // Swap forward up to 8 slots to find a video from a different channel
           for (var j = vi; j < Math.min(vi + 8, vs.length); j++) {
             if ((vs[j].channelId || vs[j].channelName || '') !== lastChId) {
               var tmp = vs[vi]; vs[vi] = vs[j]; vs[j] = tmp; break;
             }
           }
-          lastChId = vs[vi].channelId || vs[vi].channelName || '';
+          var nextCh = vs[vi].channelId || vs[vi].channelName || '';
+          // If the best available video is still same-channel and we haven't had enough
+          // posts between videos, refuse — prevents same-channel run when posts are exhausted
+          if (nextCh === lastChId && postSince < postsPerVideo) return false;
+          lastChId = nextCh;
           result.push(vs[vi++]); postSince = 0;
-          // Vary the posts-per-video ratio (3,4,5) to feel less mechanical
           postsPerVideo = 3 + (result.length % 3);
+          return true;
         }
         while (result.length < n * 2 && (pi < ps.length || vi < vs.length)) {
-          if (vi < vs.length && pi >= ps.length) { pickVideo(); }
-          else if (pi < ps.length && postSince < postsPerVideo) { result.push(ps[pi++]); postSince++; }
-          else if (vi < vs.length) { pickVideo(); }
-          else { result.push(ps[pi++]); postSince++; }
+          if (vi < vs.length && pi >= ps.length) {
+            // Posts exhausted: enforce same-channel gap; if can't, stop
+            if (!pickVideo()) break;
+          } else if (pi < ps.length && postSince < postsPerVideo) {
+            result.push(ps[pi++]); postSince++;
+          } else if (vi < vs.length) {
+            // Time for a video; if same-channel rule blocks it, add a post instead
+            if (!pickVideo() && pi < ps.length) { result.push(ps[pi++]); postSince++; }
+          } else {
+            result.push(ps[pi++]); postSince++;
+          }
         }
         callback(result);
       }

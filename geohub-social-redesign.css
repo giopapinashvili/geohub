@@ -594,7 +594,9 @@ body.gh-fb-inspired .gh-icon-btn,body.gh-fb-inspired .gh-user-btn,body.gh-fb-ins
 body.gh-fb-inspired .gh-create-btn{background:linear-gradient(135deg,#1264ff,#2d7dff);box-shadow:0 16px 38px rgba(45,125,255,.27)}
 body.gh-fb-inspired .gh-shell{padding-top:72px}
 body.gh-fb-inspired .gh-layout{
-  width:100%;max-width:1380px;margin:0 auto;grid-template-columns:252px minmax(0,600px) 340px;gap:18px;padding:18px 18px 44px;
+  width:100%;max-width:1400px;margin:0 auto;
+  grid-template-columns:260px minmax(0,590px) 340px;
+  gap:26px;padding:20px 40px 48px;
 }
 body.gh-fb-inspired .gh-left{position:sticky;top:88px;align-self:start;scrollbar-width:none}
 body.gh-fb-inspired .gh-left::-webkit-scrollbar{display:none}
