@@ -369,6 +369,18 @@
     return html;
   }
 
+  function skelTVSections() {
+    var skelRow = '';
+    for (var i = 0; i < 6; i++) {
+      skelRow += '<div class="vid-skel vid-skel-tv"><div class="vid-skel-thumb"></div><div class="vid-skel-body"><div class="vid-skel-line"></div><div class="vid-skel-line short"></div></div></div>';
+    }
+    var section = '<div class="vid-tv-section vid-tv-section-skel">' +
+      '<div class="vid-tv-head"><div class="vid-skel-line" style="width:160px;height:20px;border-radius:6px"></div></div>' +
+      '<div class="vid-tv-row">' + skelRow + '</div>' +
+    '</div>';
+    return section + section + section;
+  }
+
   function esc(s) {
     return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -1327,6 +1339,10 @@
     var page = document.getElementById('vidPage');
     if (!page) return;
 
+    /* Pre-fill TV sections with skeletons so page height is reserved (no jump) */
+    var tvEl = document.getElementById('vidTVSections');
+    if (tvEl) tvEl.innerHTML = skelTVSections();
+
     renderCategoryPills();
     loadAndRender();
     bindUI();
@@ -1357,6 +1373,10 @@
     var grid = document.getElementById('vidGrid');
     var shortsStrip = document.getElementById('vidShortsStrip');
     if (grid) grid.innerHTML = skelCards(8);
+    if (state.filter === 'all') {
+      var tvEl2 = document.getElementById('vidTVSections');
+      if (tvEl2 && !tvEl2.querySelector('.vid-tv-section:not(.vid-tv-section-skel)')) tvEl2.innerHTML = skelTVSections();
+    }
 
     if (state.unsub) { state.unsub(); state.unsub = null; }
 

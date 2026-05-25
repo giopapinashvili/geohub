@@ -426,8 +426,10 @@ html[data-gh-theme="light"] {
 .vid-skel { background: var(--bg-elevated); border-radius: 14px; overflow: hidden; }
 .vid-skel-thumb { aspect-ratio: 16/9; background: linear-gradient(90deg,var(--bg-elevated) 25%,var(--bg-hover) 50%,var(--bg-elevated) 75%); background-size: 200% 100%; animation: vidSkelShimmer 1.5s infinite; }
 .vid-skel-body { padding: 12px 14px; }
-.vid-skel-line { height: 12px; background: var(--bg-elevated); border-radius: 6px; margin-bottom: 8px; }
+.vid-skel-line { height: 12px; background: linear-gradient(90deg,var(--bg-elevated) 25%,var(--bg-hover) 50%,var(--bg-elevated) 75%); background-size:200% 100%; animation: vidSkelShimmer 1.5s infinite; border-radius: 6px; margin-bottom: 8px; }
 .vid-skel-line.short { width: 60%; }
+.vid-skel-tv { min-width: 220px; max-width: 260px; flex-shrink: 0; }
+.vid-tv-section-skel .vid-tv-head { padding: 8px 0 14px; }
 @keyframes vidSkelShimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
 /* ── Add Video Modal ────────────────────────────────────── */
