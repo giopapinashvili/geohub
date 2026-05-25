@@ -1167,20 +1167,39 @@
       function ts(x) { return x && x.toMillis ? x.toMillis() : (typeof x === 'number' ? x : 0); }
       function emit() {
         if (!settled.posts || !settled.videos) return;
-        var ps = postsArr.slice().sort(function (a, b) { return ts(b.createdAt) - ts(a.createdAt); });
+        // Deterministic hash — same post always gets same jitter so order is stable
+        function idHash(s) {
+          var h = 0x9e3779b9;
+          for (var i = 0; i < (s || '').length; i++) { h ^= s.charCodeAt(i) * 2654435761; h = ((h << 5) | (h >>> 27)) ^ h; }
+          return (h >>> 0) / 4294967295; // 0..1
+        }
+        // Sort posts with ±3h jitter so nearby posts don't stay strictly chronological
+        var ps = postsArr.slice().sort(function (a, b) {
+          var sa = ts(a.createdAt) + idHash(a.id||'') * 10800000 - 5400000;
+          var sb = ts(b.createdAt) + idHash(b.id||'') * 10800000 - 5400000;
+          return sb - sa;
+        });
         var vs = videosArr.slice().sort(function (a, b) { return ts(b.createdAt) - ts(a.createdAt); });
-        // Interleave: 1 video every 4 posts (posts-heavy; prevents one channel flooding)
-        var result = [], pi = 0, vi = 0, postSince = 0;
-        while (result.length < n * 2 && (pi < ps.length || vi < vs.length)) {
-          if (vi < vs.length && pi >= ps.length) {
-            result.push(vs[vi++]); postSince = 0;
-          } else if (pi < ps.length && postSince < 4) {
-            result.push(ps[pi++]); postSince++;
-          } else if (vi < vs.length) {
-            result.push(vs[vi++]); postSince = 0;
-          } else {
-            result.push(ps[pi++]); postSince++;
+        // Interleave: 1 video every 3-5 posts; never two consecutive videos from same channel
+        var result = [], pi = 0, vi = 0, postSince = 0, lastChId = null;
+        var postsPerVideo = 4;
+        function pickVideo() {
+          // Prefer a video from a different channel than the last one shown
+          for (var j = vi; j < Math.min(vi + 8, vs.length); j++) {
+            if ((vs[j].channelId || vs[j].channelName || '') !== lastChId) {
+              var tmp = vs[vi]; vs[vi] = vs[j]; vs[j] = tmp; break;
+            }
           }
+          lastChId = vs[vi].channelId || vs[vi].channelName || '';
+          result.push(vs[vi++]); postSince = 0;
+          // Vary the posts-per-video ratio (3,4,5) to feel less mechanical
+          postsPerVideo = 3 + (result.length % 3);
+        }
+        while (result.length < n * 2 && (pi < ps.length || vi < vs.length)) {
+          if (vi < vs.length && pi >= ps.length) { pickVideo(); }
+          else if (pi < ps.length && postSince < postsPerVideo) { result.push(ps[pi++]); postSince++; }
+          else if (vi < vs.length) { pickVideo(); }
+          else { result.push(ps[pi++]); postSince++; }
         }
         callback(result);
       }

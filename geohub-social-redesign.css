@@ -596,8 +596,9 @@ body.gh-fb-inspired .gh-shell{padding-top:72px}
 body.gh-fb-inspired .gh-layout{
   width:100%;max-width:1380px;margin:0 auto;grid-template-columns:252px minmax(0,600px) 340px;gap:18px;padding:18px 18px 44px;
 }
-body.gh-fb-inspired .gh-left{position:sticky;top:88px;align-self:start}
-body.gh-fb-inspired .gh-left .gh-panel{padding:10px;background:rgba(7,17,31,.66);border-color:rgba(148,163,184,.10);box-shadow:none}
+body.gh-fb-inspired .gh-left{position:sticky;top:88px;align-self:start;scrollbar-width:none}
+body.gh-fb-inspired .gh-left::-webkit-scrollbar{display:none}
+body.gh-fb-inspired .gh-left .gh-panel{padding:10px;background:transparent;border:none;box-shadow:none}
 body.gh-fb-inspired .gh-nav-item{height:48px;padding:0 14px;border-radius:10px;color:#e5edf8;font-weight:800}
 body.gh-fb-inspired .gh-nav-item i{width:25px;text-align:center;color:#97a8bd;font-size:1.08rem}
 body.gh-fb-inspired .gh-nav-item.active{background:linear-gradient(90deg,rgba(36,117,255,.30),rgba(36,117,255,.10));box-shadow:inset 3px 0 0 #2678ff;color:#eaf2ff}
@@ -655,7 +656,8 @@ body.gh-fb-inspired .gh-act[data-like].active{color:#2d83ff}
 body.gh-fb-inspired .gh-act[data-save].active{color:#10b981}
 /* Divider line between stats and actions */
 body.gh-fb-inspired .gh-post .gh-post-stats{border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:4px}
-body.gh-fb-inspired .gh-right{position:sticky;top:88px;align-self:start;max-height:calc(100vh - 104px);overflow:auto;padding-right:2px}
+body.gh-fb-inspired .gh-right{position:sticky;top:88px;align-self:start;max-height:calc(100vh - 104px);overflow:auto;padding-right:2px;scrollbar-width:none}
+body.gh-fb-inspired .gh-right::-webkit-scrollbar{display:none}
 body.gh-fb-inspired .gh-right-widget{padding:14px;margin-bottom:14px;border-radius:12px}
 body.gh-fb-inspired .gh-section-title h2,body.gh-fb-inspired .gh-section-title h3{color:#f4f8ff;font-size:1rem;letter-spacing:-.02em}
 body.gh-fb-inspired .gh-small{color:#4c91ff;font-weight:900}
