@@ -616,11 +616,45 @@ body.gh-fb-inspired .gh-composer-fake{height:48px;border-radius:24px;background:
 body.gh-fb-inspired .gh-composer-actions{border-top:1px solid rgba(148,163,184,.10);padding-top:10px;margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 body.gh-fb-inspired .gh-composer-action{height:42px;border-radius:10px;background:transparent;color:#c6d2e3;border:1px solid transparent}
 body.gh-fb-inspired .gh-composer-action:hover{background:rgba(45,125,255,.10);border-color:rgba(45,125,255,.18)}
-body.gh-fb-inspired .gh-post{border-radius:12px;margin-bottom:12px;overflow:hidden}
-body.gh-fb-inspired .gh-post-img{border-radius:8px;max-height:520px;width:100%;object-fit:cover}
-body.gh-fb-inspired .gh-post-actions{border-top:1px solid rgba(148,163,184,.10);padding-top:6px}
-body.gh-fb-inspired .gh-act{border-radius:8px;color:#c4cede}
-body.gh-fb-inspired .gh-act:hover,body.gh-fb-inspired .gh-act.active{background:rgba(45,125,255,.11);color:#eaf2ff;border-color:transparent}
+/* ── Facebook-style post cards ────────────────────────────── */
+body.gh-fb-inspired .gh-post{
+  padding:0;border-radius:10px;margin-bottom:10px;overflow:hidden;
+  background:rgba(10,22,38,.9);border:1px solid rgba(255,255,255,.07);
+}
+/* Section-level padding (like FB) */
+body.gh-fb-inspired .gh-post .gh-post-head{padding:14px 16px 6px}
+body.gh-fb-inspired .gh-post .gh-post-text{padding:4px 16px 10px;font-size:.96rem;line-height:1.6}
+body.gh-fb-inspired .gh-post .gh-post-stats{padding:6px 16px;font-size:.82rem}
+body.gh-fb-inspired .gh-post .gh-rx-breakdown{padding:0 16px}
+body.gh-fb-inspired .gh-post .gh-comments{padding:0 16px 12px}
+body.gh-fb-inspired .gh-post .gh-poll-opt{margin:0 16px 8px}
+/* Avatar size: 40px like Facebook */
+body.gh-fb-inspired .gh-post .gh-avatar{width:40px;height:40px;font-size:.85rem}
+/* Post image: full-bleed, no inner border-radius */
+body.gh-fb-inspired .gh-post-img{border-radius:0;max-height:620px;width:100%;object-fit:cover;margin:8px 0 0}
+body.gh-fb-inspired .gh-post-img:last-child{margin-bottom:0}
+/* Multi-photo grid: keep it intact but remove inner radius */
+body.gh-fb-inspired .gh-media-grid img{border-radius:0}
+/* Remove default post-head bottom margin in fb mode */
+body.gh-fb-inspired .gh-post .gh-post-head{margin-bottom:0}
+/* Action buttons: full-width equal columns like Facebook */
+body.gh-fb-inspired .gh-post-actions{
+  display:flex;gap:0;padding:4px 6px;
+  border-top:1px solid rgba(255,255,255,.07);border-bottom:none;margin-top:2px;
+}
+body.gh-fb-inspired .gh-post .gh-like-wrap{flex:1;position:relative}
+body.gh-fb-inspired .gh-post .gh-like-wrap>[data-like]{width:100%;justify-content:center}
+body.gh-fb-inspired .gh-act{
+  flex:1;justify-content:center;height:40px;border-radius:8px;
+  color:#b0bdce;font-size:.88rem;font-weight:700;gap:7px;
+}
+body.gh-fb-inspired .gh-act:hover,body.gh-fb-inspired .gh-act.active{
+  background:rgba(255,255,255,.07);color:#eaf2ff;border-color:transparent;
+}
+body.gh-fb-inspired .gh-act[data-like].active{color:#2d83ff}
+body.gh-fb-inspired .gh-act[data-save].active{color:#10b981}
+/* Divider line between stats and actions */
+body.gh-fb-inspired .gh-post .gh-post-stats{border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:4px}
 body.gh-fb-inspired .gh-right{position:sticky;top:88px;align-self:start;max-height:calc(100vh - 104px);overflow:auto;padding-right:2px}
 body.gh-fb-inspired .gh-right-widget{padding:14px;margin-bottom:14px;border-radius:12px}
 body.gh-fb-inspired .gh-section-title h2,body.gh-fb-inspired .gh-section-title h3{color:#f4f8ff;font-size:1rem;letter-spacing:-.02em}
@@ -743,6 +777,8 @@ html[data-gh-theme="light"] body.gh-fb-inspired .gh-section-title h3{
 html[data-gh-theme="light"] body.gh-fb-inspired .gh-post-meta,
 html[data-gh-theme="light"] body.gh-fb-inspired .gh-mini-item span,
 html[data-gh-theme="light"] body.gh-fb-inspired .gh-empty.mini p{color:#64748b !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-post{background:rgba(255,255,255,.97) !important;border-color:rgba(15,23,42,.07) !important;}
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-post-img{border-radius:0 !important;}
 html[data-gh-theme="light"] body.gh-fb-inspired .gh-act{color:#475569 !important;}
 html[data-gh-theme="light"] body.gh-fb-inspired .gh-act:hover,
 html[data-gh-theme="light"] body.gh-fb-inspired .gh-act.active{background:rgba(37,99,235,.08) !important;color:#1d4ed8 !important;}
