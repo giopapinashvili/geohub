@@ -485,6 +485,24 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(!state._shellClickBound){
       state._shellClickBound=true;
       document.addEventListener('click', function(e){
+        /* Inline video playback — only expand button navigates to video page */
+        var playThumb = e.target.closest('[data-play-video]');
+        if(playThumb && !e.target.closest('.gh-video-expand-btn')){
+          e.preventDefault(); e.stopPropagation();
+          var ytId = playThumb.dataset.youtubeId;
+          var vHref = playThumb.dataset.videoHref;
+          if(ytId){
+            var ifr = document.createElement('iframe');
+            ifr.src = 'https://www.youtube.com/embed/'+ytId+'?autoplay=1&rel=0';
+            ifr.setAttribute('allow','autoplay; encrypted-media; fullscreen');
+            ifr.setAttribute('allowfullscreen','');
+            ifr.style.cssText = 'width:100%;aspect-ratio:16/9;border:none;border-radius:12px;display:block';
+            playThumb.innerHTML = '';
+            playThumb.appendChild(ifr);
+            playThumb.removeAttribute('data-play-video');
+          } else if(vHref){ window.location.href = vHref; }
+          return;
+        }
         if(e.target.closest('[data-create-post]')){ e.preventDefault(); e.stopPropagation(); openPostModal(buildActorExtra()); return; }
         if(e.target.closest('[data-create-story]')){ e.preventDefault(); e.stopPropagation(); openStoryModal(); return; }
         if(e.target.closest('[data-my-channel]')){ e.preventDefault(); e.stopPropagation(); openMyChannelPicker(e.target.closest('[data-my-channel]')); return; }
@@ -1679,10 +1697,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   var RX_EMOJIS = { love:'❤️', haha:'😂', wow:'😮', sad:'😢', angry:'😡', clap:'👏' };
 
   function videoPostCard(p){
-    var thumb = p.thumbnail || (p.youtubeId ? 'https://i.ytimg.com/vi/'+p.youtubeId+'/hqdefault.jpg' : '');
-    var href  = p.videoId ? 'watch.html?v='+encodeURIComponent(p.videoId) : (p.youtubeId ? 'watch.html?v='+encodeURIComponent(p.videoId||p.youtubeId) : '#');
+    var thumb  = p.thumbnail || (p.youtubeId ? 'https://i.ytimg.com/vi/'+p.youtubeId+'/hqdefault.jpg' : '');
+    var href   = p.videoId ? 'watch.html?v='+encodeURIComponent(p.videoId) : (p.youtubeId ? 'watch.html?v='+encodeURIComponent(p.videoId||p.youtubeId) : '#');
     var chHref = p.channelId ? 'channel.html?id='+encodeURIComponent(p.channelId) : 'profile.html?id='+encodeURIComponent(p.authorId||'');
-    var ts = p.createdAt && p.createdAt.toMillis ? timeAgo2(p.createdAt.toMillis()) : '';
+    var ts     = p.createdAt && p.createdAt.toMillis ? timeAgo2(p.createdAt.toMillis()) : '';
+    var ytId   = p.youtubeId || '';
     return '<article class="gh-card gh-video-post-card" data-post-id="'+esc(p.id||'')+'">' +
       '<div class="gh-post-header">' +
         '<span class="gh-avatar" style="flex-shrink:0">'+(p.authorAvatar?'<img src="'+esc(p.authorAvatar)+'" alt="" loading="lazy" onerror="this.remove()">':esc(initials(p.authorName||'U')))+'</span>' +
@@ -1692,10 +1711,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '</div>' +
         '<span class="gh-video-post-badge"><i class="fas fa-film"></i> Video</span>' +
       '</div>' +
-      '<a class="gh-video-post-thumb" href="'+esc(href)+'">' +
+      /* Thumbnail: click plays inline; expand button navigates to video page */
+      '<div class="gh-video-post-thumb" data-play-video data-youtube-id="'+esc(ytId)+'" data-video-href="'+esc(href)+'">' +
         (thumb?'<img src="'+esc(thumb)+'" alt="" loading="lazy">':'<div class="gh-video-post-thumb-ph"><i class="fas fa-play-circle"></i></div>') +
         '<div class="gh-video-play-btn"><i class="fas fa-play"></i></div>' +
-      '</a>' +
+        '<a class="gh-video-expand-btn" href="'+esc(href)+'" title="ვიდეოს გვერდი"><i class="fas fa-expand-alt"></i></a>' +
+      '</div>' +
       '<div class="gh-video-post-title"><a href="'+esc(href)+'">'+esc((p.title||'').slice(0,100))+'</a></div>' +
       (p.category?'<div class="gh-video-post-cat"><i class="fas fa-tag"></i>'+esc(p.category)+'</div>':'') +
     '</article>';
