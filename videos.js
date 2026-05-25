@@ -234,18 +234,16 @@
   /* ── Load videos feed ─────────────────────────────────── */
   function loadVideos(opts, callback) {
     if (!fs() || !db()) { callback([]); return; }
-    /* No status filter in query so legacy docs (no status field) still show.
-       Hidden/removed filtered client-side. */
-    var constraints = [fs().orderBy('createdAt', 'desc'), fs().limit(60)];
-    if (opts && opts.category && opts.category !== 'all') {
-      constraints = [fs().where('category', '==', opts.category), fs().orderBy('createdAt', 'desc'), fs().limit(60)];
-    }
-    var q = fs().query.apply(null, [videosCol()].concat(constraints));
+    /* Always load without category constraint (avoids composite index requirement).
+       Category filtering is done client-side in the callback. */
+    var q = fs().query(videosCol(), fs().orderBy('createdAt', 'desc'), fs().limit(120));
     return fs().onSnapshot(q, function (snap) {
       var vids = [];
       snap.forEach(function (d) { vids.push(Object.assign({ id: d.id }, d.data())); });
-      /* Allow: no status (legacy) or active. Exclude: hidden, removed. */
       vids = vids.filter(function (v) { return v.status !== 'hidden' && v.status !== 'removed'; });
+      if (opts && opts.category && opts.category !== 'all') {
+        vids = vids.filter(function (v) { return v.category === opts.category; });
+      }
       callback(vids);
     }, function () { callback([]); });
   }
