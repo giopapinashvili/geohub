@@ -1417,7 +1417,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       box.dataset.storiesBound = '1';
       var groups=[];
       function buildCreateCard(){
-        var me=currentUserInfo(); var av=me.avatar||''; var name=me.name||'';
+        var ga=window.GeoAuth&&window.GeoAuth.getCurrentUser&&window.GeoAuth.getCurrentUser();
+        var me=currentUserInfo();
+        var av=(ga&&(ga.avatar||ga.photoURL))||me.avatar||'';
+        var name=(ga&&(ga.fullName||ga.displayName||ga.name))||me.name||'';
         return '<button type="button" class="gh-story-card gh-story-add" data-create-story>'+
           (av?'<span class="gh-story-add-avatar"><img src="'+esc(av)+'" alt="'+esc(name)+'"></span>':
               '<div class="gh-story-add-icon"><i class="fas fa-plus-circle"></i></div>')+
@@ -1697,27 +1700,32 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   var RX_EMOJIS = { love:'❤️', haha:'😂', wow:'😮', sad:'😢', angry:'😡', clap:'👏' };
 
   function videoPostCard(p){
-    var thumb  = p.thumbnail || (p.youtubeId ? 'https://i.ytimg.com/vi/'+p.youtubeId+'/hqdefault.jpg' : '');
-    var href   = p.videoId ? 'watch.html?v='+encodeURIComponent(p.videoId) : (p.youtubeId ? 'watch.html?v='+encodeURIComponent(p.videoId||p.youtubeId) : '#');
-    var chHref = p.channelId ? 'channel.html?id='+encodeURIComponent(p.channelId) : 'profile.html?id='+encodeURIComponent(p.authorId||'');
-    var ts     = p.createdAt && p.createdAt.toMillis ? timeAgo2(p.createdAt.toMillis()) : '';
-    var ytId   = p.youtubeId || '';
+    var thumb   = p.thumbnail || (p.youtubeId ? 'https://i.ytimg.com/vi/'+p.youtubeId+'/hqdefault.jpg' : '');
+    var href    = p.videoId ? 'watch.html?v='+encodeURIComponent(p.videoId) : (p.youtubeId ? 'watch.html?v='+encodeURIComponent(p.videoId||p.youtubeId) : '#');
+    var chHref  = p.channelId ? 'channel.html?id='+encodeURIComponent(p.channelId) : '#';
+    var ts      = p.createdAt && p.createdAt.toMillis ? timeAgo2(p.createdAt.toMillis()) : '';
+    var ytId    = p.youtubeId || '';
+    var chName  = p.channelName || p.authorName || 'GeoHub';
+    var chAv    = p.channelAvatar || '';
+    var desc    = (p.description || '').slice(0, 120);
     return '<article class="gh-card gh-video-post-card" data-post-id="'+esc(p.id||'')+'">' +
       '<div class="gh-post-header">' +
-        '<span class="gh-avatar" style="flex-shrink:0">'+(p.authorAvatar?'<img src="'+esc(p.authorAvatar)+'" alt="" loading="lazy" onerror="this.remove()">':esc(initials(p.authorName||'U')))+'</span>' +
+        '<a href="'+esc(chHref)+'" class="gh-avatar" style="flex-shrink:0;text-decoration:none">' +
+          (chAv ? '<img src="'+esc(chAv)+'" alt="" loading="lazy" onerror="this.remove()">' : esc(initials(chName))) +
+        '</a>' +
         '<div class="gh-post-meta">' +
-          '<a class="gh-post-author" href="'+esc(chHref)+'">'+(p.channelName||p.authorName||'GeoHub')+'</a>' +
+          '<a class="gh-post-author" href="'+esc(chHref)+'">'+esc(chName)+'</a>' +
           (ts?'<span class="gh-post-time">'+ts+'</span>':'') +
         '</div>' +
         '<span class="gh-video-post-badge"><i class="fas fa-film"></i> Video</span>' +
       '</div>' +
-      /* Thumbnail: click plays inline; expand button navigates to video page */
       '<div class="gh-video-post-thumb" data-play-video data-youtube-id="'+esc(ytId)+'" data-video-href="'+esc(href)+'">' +
         (thumb?'<img src="'+esc(thumb)+'" alt="" loading="lazy">':'<div class="gh-video-post-thumb-ph"><i class="fas fa-play-circle"></i></div>') +
         '<div class="gh-video-play-btn"><i class="fas fa-play"></i></div>' +
         '<a class="gh-video-expand-btn" href="'+esc(href)+'" title="ვიდეოს გვერდი"><i class="fas fa-expand-alt"></i></a>' +
       '</div>' +
       '<div class="gh-video-post-title"><a href="'+esc(href)+'">'+esc((p.title||'').slice(0,100))+'</a></div>' +
+      (desc ? '<div class="gh-video-post-desc">'+esc(desc)+(p.description&&p.description.length>120?'…':'')+'</div>' : '') +
       (p.category?'<div class="gh-video-post-cat"><i class="fas fa-tag"></i>'+esc(p.category)+'</div>':'') +
     '</article>';
   }

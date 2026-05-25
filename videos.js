@@ -1781,7 +1781,7 @@
               var vsn = item2.snippet;
               var vid = vsn.resourceId && vsn.resourceId.videoId;
               if (!vid || vsn.title === 'Private video' || vsn.title === 'Deleted video') return;
-              videos.push({ youtubeId: vid, title: vsn.title || '', description: vsn.description || '', channelName: chName, channelUrl: chUrl });
+              videos.push({ youtubeId: vid, title: vsn.title || '', description: vsn.description || '', channelName: chName, channelUrl: chUrl, channelAvatar: chAvatar });
             });
             if (d2.nextPageToken) return fetchPage(d2.nextPageToken);
             return markShorts(videos);
@@ -1820,6 +1820,7 @@
               if (v.categories && v.categories.length) patch.categories = v.categories;
               if (v.tags && v.tags.length) patch.tags = v.tags;
               if (v.description) patch.description = v.description;
+              if (v.channelAvatar) patch.channelAvatar = v.channelAvatar;
               if (Object.keys(patch).length) {
                 fs().updateDoc(fs().doc(db(), 'videos', docMap[v.youtubeId].docId), patch).catch(function(){});
               }
@@ -1833,7 +1834,7 @@
                 saveVideo({
                   youtubeId: v.youtubeId, youtubeUrl: 'https://www.youtube.com/watch?v=' + v.youtubeId,
                   title: v.title, description: v.description || '', thumbnail: ytMaxThumb(v.youtubeId),
-                  channelId: geoChannelId, channelName: v.channelName, channelUrl: v.channelUrl,
+                  channelId: geoChannelId, channelName: v.channelName, channelUrl: v.channelUrl, channelAvatar: v.channelAvatar || '',
                   authorId: u.uid, authorName: u.displayName || 'GeoHub User', authorAvatar: u.photoURL || '',
                   category: v.category || '', categories: v.categories || [], city: '', isShort: v.isShort || false, tags: v.tags || [],
                   placeId: null, placeName: null, businessId: null, businessName: null
