@@ -1338,6 +1338,16 @@
     if (state.unsub) { state.unsub(); state.unsub = null; }
 
     state.unsub = loadVideos({ category: state.filter }, function (vids) {
+      /* Background: patch empty categories using stored title/description */
+      if (fs() && db()) {
+        vids.filter(function (v) { return !v.category && v.title; }).forEach(function (v) {
+          var cat = detectCategory(v.title, v.description || '', null, null);
+          if (cat) {
+            v.category = cat;
+            fs().updateDoc(fs().doc(db(), 'videos', v.id), { category: cat }).catch(function () {});
+          }
+        });
+      }
       state.videos = vids.filter(function (v) { return !v.isShort; });
       state.shorts = vids.filter(function (v) { return v.isShort; });
       if (state.filter === 'all') {

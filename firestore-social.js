@@ -1161,14 +1161,33 @@
     }
 
     function listenFeed(callback, limitN) {
-      var q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(Math.min(Number(limitN) || 50, 50)));
-      return onSnapshot(q, function (snap) {
-        var posts = [];
-        snap.forEach(function (d) { posts.push(Object.assign({ id: d.id }, d.data())); });
-        callback(posts);
-      }, function (err) {
-        console.warn('[GeoSocial] listenFeed', err.message);
-      });
+      var n = Math.min(Number(limitN) || 50, 50);
+      var postsArr = [], videosArr = [];
+      var settled = { posts: false, videos: false };
+      function ts(x) { return x && x.toMillis ? x.toMillis() : (typeof x === 'number' ? x : 0); }
+      function emit() {
+        if (!settled.posts || !settled.videos) return;
+        var merged = postsArr.concat(videosArr);
+        merged.sort(function (a, b) { return ts(b.createdAt) - ts(a.createdAt); });
+        callback(merged.slice(0, n * 2));
+      }
+      var q1 = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(n));
+      var unsub1 = onSnapshot(q1, function (snap) {
+        postsArr = [];
+        snap.forEach(function (d) { postsArr.push(Object.assign({ id: d.id }, d.data())); });
+        settled.posts = true; emit();
+      }, function (err) { console.warn('[GeoSocial] listenFeed posts', err.message); settled.posts = true; emit(); });
+      var q2 = query(collection(db, 'videos'), orderBy('createdAt', 'desc'), limit(n));
+      var unsub2 = onSnapshot(q2, function (snap) {
+        videosArr = [];
+        snap.forEach(function (d) {
+          var v = d.data();
+          if (v.status === 'hidden' || v.status === 'removed') return;
+          videosArr.push(Object.assign({ id: d.id }, v, { type: 'video', videoId: d.id }));
+        });
+        settled.videos = true; emit();
+      }, function () { settled.videos = true; emit(); });
+      return function () { unsub1(); unsub2(); };
     }
 
     // ── LIKES ────────────────────────────────────────────────────────────
