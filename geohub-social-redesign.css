@@ -2259,16 +2259,16 @@ html[data-gh-theme="dark"] .gh-live-stats { border-color: rgba(59,130,246,.18) !
 /* ── Video post card in feed ────────────────────────────── */
 .gh-video-post-card { overflow: hidden; }
 .gh-video-post-badge {
-  margin-left: auto;
-  font-size: .72rem;
+  font-size: .7rem;
   font-weight: 700;
   color: #10b981;
   background: rgba(16,185,129,.12);
-  padding: 3px 9px;
+  padding: 2px 7px;
   border-radius: 20px;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
+  vertical-align: middle;
 }
 .gh-video-post-thumb {
   display: block;
@@ -2312,11 +2312,11 @@ html[data-gh-theme="dark"] .gh-live-stats { border-color: rgba(59,130,246,.18) !
 }
 .gh-video-post-thumb:hover .gh-video-expand-btn { opacity: 1; }
 .gh-video-expand-btn:hover { background: rgba(16,185,129,.8); color: #fff; }
-.gh-video-post-title { font-size: 1rem; font-weight: 700; color: var(--gh-text, #f1f5f9); line-height: 1.35; margin: 8px 0 0; padding: 0 16px; }
+.gh-video-post-title { font-size: 1rem; font-weight: 700; color: var(--gh-text, #f1f5f9); line-height: 1.35; margin: 10px 0 0; }
 .gh-video-post-title a { color: inherit; text-decoration: none; }
 .gh-video-post-title a:hover { color: #10b981; }
+.gh-video-post-desc { font-size: .82rem; color: var(--gh-text-secondary, #94a3b8); line-height: 1.5; margin: 5px 0 0; }
 .gh-video-post-thumb { margin-top: 10px; }
-.gh-video-post-desc { font-size: .82rem; color: var(--gh-text-secondary, #94a3b8); line-height: 1.5; margin: 6px 0 4px; padding: 0 16px; }
-.gh-video-post-card .gh-post-stats { padding: 0 16px 4px; border-bottom: 1px solid rgba(255,255,255,.06); }
+.gh-video-post-card .gh-post-stats { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
 .gh-video-post-card .gh-post-actions { padding: 2px 8px 4px; }
 .gh-video-post-cat { font-size: .75rem; color: #94a3b8; display: flex; align-items: center; gap: 5px; }
