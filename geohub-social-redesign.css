@@ -2256,26 +2256,16 @@ html[data-gh-theme="dark"] .gh-live-stats { border-color: rgba(59,130,246,.18) !
 ::-webkit-scrollbar-thumb { background: rgba(59,130,246,.25); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(59,130,246,.45); }
 
-/* ── Video post card in feed ────────────────────────────── */
-.gh-video-post-card { overflow: hidden; }
-.gh-video-post-badge {
-  font-size: .7rem;
-  font-weight: 700;
-  color: #10b981;
-  background: rgba(16,185,129,.12);
-  padding: 2px 7px;
-  border-radius: 20px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  vertical-align: middle;
+/* ── Video post card in feed (overlay style) ────────────── */
+.gh-video-post-card { padding: 0; overflow: hidden; }
+.gh-video-post-card .gh-video-post-thumb {
+  border-radius: 0;
+  margin: 0;
 }
 .gh-video-post-thumb {
   display: block;
   position: relative;
-  border-radius: 0;
   overflow: hidden;
-  margin: 10px 0 0;
   aspect-ratio: 16/9;
   background: #0a1628;
   cursor: pointer;
@@ -2289,16 +2279,17 @@ html[data-gh-theme="dark"] .gh-live-stats { border-color: rgba(59,130,246,.18) !
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,.25);
+  background: rgba(0,0,0,.2);
   opacity: 0;
   transition: opacity .15s;
   pointer-events: none;
+  z-index: 1;
 }
 .gh-video-post-thumb:hover .gh-video-play-btn { opacity: 1; }
-.gh-video-play-btn i { font-size: 2.5rem; color: #fff; filter: drop-shadow(0 2px 6px rgba(0,0,0,.5)); }
+.gh-video-play-btn i { font-size: 2.8rem; color: #fff; filter: drop-shadow(0 2px 8px rgba(0,0,0,.6)); }
 .gh-video-expand-btn {
   position: absolute;
-  top: 8px; right: 8px;
+  top: 10px; right: 10px;
   width: 32px; height: 32px;
   background: rgba(0,0,0,.55);
   border-radius: 8px;
@@ -2307,16 +2298,56 @@ html[data-gh-theme="dark"] .gh-live-stats { border-color: rgba(59,130,246,.18) !
   opacity: 0;
   transition: opacity .15s;
   text-decoration: none;
-  pointer-events: all;
-  z-index: 2;
+  z-index: 3;
 }
 .gh-video-post-thumb:hover .gh-video-expand-btn { opacity: 1; }
-.gh-video-expand-btn:hover { background: rgba(16,185,129,.8); color: #fff; }
-.gh-video-post-title { font-size: 1rem; font-weight: 700; color: var(--gh-text, #f1f5f9); line-height: 1.35; margin: 10px 0 0; }
+.gh-video-expand-btn:hover { background: rgba(16,185,129,.8); }
+/* Overlay: channel info at bottom of thumbnail */
+.gh-video-overlay {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 44px 14px 14px;
+  background: linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,0) 100%);
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: none;
+  z-index: 2;
+}
+.gh-video-overlay > * { pointer-events: all; }
+.gh-video-av { width: 38px; height: 38px; flex-shrink: 0; border: 2px solid rgba(255,255,255,.25); }
+.gh-video-overlay-meta { flex: 1; min-width: 0; }
+.gh-video-overlay-ch {
+  display: block;
+  font-size: .88rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 4px rgba(0,0,0,.7);
+}
+.gh-video-overlay-ch:hover { color: #6ee7b7; }
+.gh-video-overlay-time { font-size: .72rem; color: rgba(255,255,255,.72); margin-top: 3px; }
+.gh-video-post-badge {
+  font-size: .68rem;
+  font-weight: 700;
+  color: #10b981;
+  background: rgba(16,185,129,.18);
+  padding: 2px 7px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  vertical-align: middle;
+}
+/* Title + desc below thumbnail */
+.gh-video-post-body { padding: 12px 16px 4px; }
+.gh-video-post-title { font-size: 1rem; font-weight: 700; color: var(--gh-text, #f1f5f9); line-height: 1.35; margin: 0; }
 .gh-video-post-title a { color: inherit; text-decoration: none; }
 .gh-video-post-title a:hover { color: #10b981; }
 .gh-video-post-desc { font-size: .82rem; color: var(--gh-text-secondary, #94a3b8); line-height: 1.5; margin: 5px 0 0; }
-.gh-video-post-thumb { margin-top: 10px; }
-.gh-video-post-card .gh-post-stats { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+.gh-video-post-card .gh-post-stats { padding: 4px 16px; border-bottom: 1px solid rgba(255,255,255,.06); }
 .gh-video-post-card .gh-post-actions { padding: 2px 8px 4px; }
 .gh-video-post-cat { font-size: .75rem; color: #94a3b8; display: flex; align-items: center; gap: 5px; }

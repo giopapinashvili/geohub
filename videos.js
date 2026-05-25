@@ -169,12 +169,13 @@
   function saveVideo(data, callback, _fromImport) {
     var col = videosCol();
     if (!col) { callback(new Error('Firebase unavailable')); return; }
+    var ytDate = data.publishedAt ? new Date(data.publishedAt) : null;
     fs().addDoc(col, Object.assign({}, data, {
       likeCount: 0,
       viewCount: 0,
       commentCount: 0,
       status: 'active',
-      createdAt: fs().serverTimestamp()
+      createdAt: ytDate || fs().serverTimestamp()
     })).then(function (ref) {
       /* Create a feed post for manually-added videos (not bulk imports) */
       if (!_fromImport && fs() && db()) {
@@ -1802,7 +1803,7 @@
               var vsn = item2.snippet;
               var vid = vsn.resourceId && vsn.resourceId.videoId;
               if (!vid || vsn.title === 'Private video' || vsn.title === 'Deleted video') return;
-              videos.push({ youtubeId: vid, title: vsn.title || '', description: vsn.description || '', channelName: chName, channelUrl: chUrl, channelAvatar: chAvatar });
+              videos.push({ youtubeId: vid, title: vsn.title || '', description: vsn.description || '', channelName: chName, channelUrl: chUrl, channelAvatar: chAvatar, publishedAt: vsn.publishedAt || '' });
             });
             if (d2.nextPageToken) return fetchPage(d2.nextPageToken);
             return markShorts(videos);
@@ -1858,7 +1859,8 @@
                   channelId: geoChannelId, channelName: v.channelName, channelUrl: v.channelUrl, channelAvatar: v.channelAvatar || '',
                   authorId: u.uid, authorName: u.displayName || 'GeoHub User', authorAvatar: u.photoURL || '',
                   category: v.category || '', categories: v.categories || [], city: '', isShort: v.isShort || false, tags: v.tags || [],
-                  placeId: null, placeName: null, businessId: null, businessName: null
+                  placeId: null, placeName: null, businessId: null, businessName: null,
+                  publishedAt: v.publishedAt || ''
                 }, function (err) { if (!err) done++; resv(); }, true /* fromImport */);
               });
             }));

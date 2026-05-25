@@ -1714,19 +1714,21 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       ? '<img src="'+esc(chAv)+'" alt="" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'\'"><span style="display:none">'+esc(chInit)+'</span>'
       : '<span>'+esc(chInit)+'</span>';
     return '<article class="gh-card gh-video-post-card" data-post-id="'+esc(pid)+'">' +
-      '<div class="gh-post-head">' +
-        '<a href="'+esc(chHref)+'" class="gh-avatar" style="text-decoration:none">'+avHtml+'</a>' +
-        '<div class="gh-post-meta">' +
-          '<a class="gh-post-name" href="'+esc(chHref)+'" style="text-decoration:none;color:inherit">'+esc(chName)+'</a>' +
-          '<div class="gh-post-time">'+(tsStr ? esc(tsStr)+' · ' : '')+'<span class="gh-video-post-badge"><i class="fas fa-film"></i> Video</span></div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="gh-video-post-title"><a href="'+esc(href)+'">'+esc((p.title||'').slice(0,100))+'</a></div>' +
-      (desc ? '<div class="gh-video-post-desc">'+esc(desc)+(p.description && p.description.length>160 ? '…' : '')+'</div>' : '') +
       '<div class="gh-video-post-thumb" data-play-video data-youtube-id="'+esc(ytId)+'" data-video-href="'+esc(href)+'">' +
         (thumb ? '<img src="'+esc(thumb)+'" alt="" loading="lazy">' : '<div class="gh-video-post-thumb-ph"><i class="fas fa-play-circle"></i></div>') +
         '<div class="gh-video-play-btn"><i class="fas fa-play"></i></div>' +
         '<a class="gh-video-expand-btn" href="'+esc(href)+'" title="ვიდეოს გვერდი"><i class="fas fa-expand-alt"></i></a>' +
+        '<div class="gh-video-overlay">' +
+          '<a href="'+esc(chHref)+'" class="gh-avatar gh-video-av">'+avHtml+'</a>' +
+          '<div class="gh-video-overlay-meta">' +
+            '<a href="'+esc(chHref)+'" class="gh-video-overlay-ch">'+esc(chName)+'</a>' +
+            '<div class="gh-video-overlay-time">'+(tsStr ? esc(tsStr)+' · ' : '')+'<span class="gh-video-post-badge"><i class="fas fa-film"></i> Video</span></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="gh-video-post-body">' +
+        '<div class="gh-video-post-title"><a href="'+esc(href)+'">'+esc((p.title||'').slice(0,100))+'</a></div>' +
+        (desc ? '<div class="gh-video-post-desc">'+esc(desc)+(p.description && p.description.length>160 ? '…' : '')+'</div>' : '') +
       '</div>' +
       '<div class="gh-post-stats"><span></span><span><button class="gh-stats-btn" data-open-comments-btn><b data-comment-count>0</b> comments</button></span></div>' +
       '<div class="gh-rx-breakdown" data-rx-pid="'+esc(pid)+'"></div>' +

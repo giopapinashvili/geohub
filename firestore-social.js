@@ -1167,9 +1167,20 @@
       function ts(x) { return x && x.toMillis ? x.toMillis() : (typeof x === 'number' ? x : 0); }
       function emit() {
         if (!settled.posts || !settled.videos) return;
-        var merged = postsArr.concat(videosArr);
-        merged.sort(function (a, b) { return ts(b.createdAt) - ts(a.createdAt); });
-        callback(merged.slice(0, n * 2));
+        var ps = postsArr.slice().sort(function (a, b) { return ts(b.createdAt) - ts(a.createdAt); });
+        var vs = videosArr.slice().sort(function (a, b) { return ts(b.createdAt) - ts(a.createdAt); });
+        // Interleave: 1 video every 3 posts to prevent one channel flooding the feed
+        var result = [], pi = 0, vi = 0, postSince = 0;
+        while (result.length < n * 2 && (pi < ps.length || vi < vs.length)) {
+          if (vi < vs.length && (pi >= ps.length || postSince >= 3)) {
+            result.push(vs[vi++]); postSince = 0;
+          } else if (pi < ps.length) {
+            result.push(ps[pi++]); postSince++;
+          } else {
+            result.push(vs[vi++]);
+          }
+        }
+        callback(result);
       }
       var q1 = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(n));
       var unsub1 = onSnapshot(q1, function (snap) {
@@ -1177,15 +1188,35 @@
         snap.forEach(function (d) { postsArr.push(Object.assign({ id: d.id }, d.data())); });
         settled.posts = true; emit();
       }, function (err) { console.warn('[GeoSocial] listenFeed posts', err.message); settled.posts = true; emit(); });
+      var _chAvatarCache = {};
       var q2 = query(collection(db, 'videos'), orderBy('createdAt', 'desc'), limit(n));
       var unsub2 = onSnapshot(q2, function (snap) {
-        videosArr = [];
+        var raw = [];
         snap.forEach(function (d) {
           var v = d.data();
           if (v.status === 'hidden' || v.status === 'removed') return;
-          videosArr.push(Object.assign({ id: d.id }, v, { type: 'video', videoId: d.id }));
+          raw.push(Object.assign({ id: d.id }, v, { type: 'video', videoId: d.id }));
         });
-        settled.videos = true; emit();
+        var needIds = [];
+        raw.forEach(function (v) {
+          if (!v.channelAvatar && v.channelId && !_chAvatarCache[v.channelId]) needIds.push(v.channelId);
+        });
+        needIds = needIds.filter(function (id, i, a) { return a.indexOf(id) === i; });
+        function applyAndEmit() {
+          videosArr = raw.map(function (v) {
+            if (!v.channelAvatar && v.channelId && _chAvatarCache[v.channelId]) {
+              return Object.assign({}, v, { channelAvatar: _chAvatarCache[v.channelId] });
+            }
+            return v;
+          });
+          settled.videos = true; emit();
+        }
+        if (!needIds.length) { applyAndEmit(); return; }
+        Promise.all(needIds.map(function (cid) {
+          return getDoc(doc(db, 'channels', cid)).then(function (d) {
+            if (d.exists()) _chAvatarCache[cid] = (d.data().avatar || '');
+          }).catch(function () {});
+        })).then(applyAndEmit);
       }, function () { settled.videos = true; emit(); });
       return function () { unsub1(); unsub2(); };
     }
