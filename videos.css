@@ -540,6 +540,53 @@ html[data-gh-theme="light"] {
    WATCH PAGE
    ══════════════════════════════════════════════════════════ */
 .watch-page { max-width: 1400px; margin: 0 auto; padding: 24px 16px 60px; }
+
+/* When navbar+sidebar are injected by geohub-social-redesign.js */
+body.gh-has-injected-nav .watch-page {
+  padding-top: 88px;
+  padding-left: 276px;
+}
+@media(max-width:960px){
+  body.gh-has-injected-nav .watch-page { padding-left: 100px; }
+}
+@media(max-width:680px){
+  body.gh-has-injected-nav .watch-page { padding-left: 16px; padding-top: 80px; }
+}
+
+/* Channel row above title */
+.watch-channel-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 14px 0 10px;
+}
+.watch-channel-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex: 1;
+  min-width: 0;
+}
+.watch-sub-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-size: .82rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity .15s;
+  flex-shrink: 0;
+}
+.watch-sub-btn:hover { opacity: .85; }
 .watch-layout {
   display: grid;
   grid-template-columns: 1fr 360px;

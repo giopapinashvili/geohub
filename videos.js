@@ -2667,6 +2667,33 @@
     }
     if (titleEl) titleEl.textContent = v.title || 'Untitled';
 
+    /* Channel row — shown above meta badges */
+    var chName = v.channelName || v.authorName || 'GeoHub';
+    var chAv   = v.channelAvatar || v.authorAvatar || '';
+    var chHref = v.channelId ? 'channel.html?id=' + encodeURIComponent(v.channelId) : '#';
+    var chAvHtml = chAv
+      ? '<img src="' + esc(chAv) + '" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'\'">' +
+        '<span style="display:none">' + esc((chName||'C').charAt(0)) + '</span>'
+      : '<span>' + esc((chName||'C').charAt(0)) + '</span>';
+    var metaBefore = document.getElementById('watchChannelRow');
+    if (!metaBefore) {
+      var chRow = document.createElement('div');
+      chRow.id = 'watchChannelRow';
+      chRow.className = 'watch-channel-row';
+      chRow.innerHTML =
+        '<a href="' + esc(chHref) + '" class="watch-channel-link">' +
+          '<span class="watch-channel-av">' + chAvHtml + '</span>' +
+          '<div>' +
+            '<div class="watch-channel-name">' + esc(chName) + '</div>' +
+            '<div class="watch-channel-sub">' + fmtNum(v.videoCount || 0) + ' videos</div>' +
+          '</div>' +
+        '</a>' +
+        (v.channelId ? '<a href="' + esc(chHref) + '" class="watch-sub-btn">გამოწერა</a>' : '');
+      if (titleEl && titleEl.parentNode) {
+        titleEl.parentNode.insertBefore(chRow, titleEl.nextSibling);
+      }
+    }
+
     var m = catMeta(v.category);
     if (metaEl) {
       metaEl.innerHTML =

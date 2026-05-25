@@ -489,18 +489,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var playThumb = e.target.closest('[data-play-video]');
         if(playThumb && !e.target.closest('.gh-video-expand-btn')){
           e.preventDefault(); e.stopPropagation();
-          var ytId = playThumb.dataset.youtubeId;
           var vHref = playThumb.dataset.videoHref;
-          if(ytId){
-            var ifr = document.createElement('iframe');
-            ifr.src = 'https://www.youtube.com/embed/'+ytId+'?autoplay=1&rel=0';
-            ifr.setAttribute('allow','autoplay; encrypted-media; fullscreen');
-            ifr.setAttribute('allowfullscreen','');
-            ifr.style.cssText = 'width:100%;aspect-ratio:16/9;border:none;border-radius:12px;display:block';
-            playThumb.innerHTML = '';
-            playThumb.appendChild(ifr);
-            playThumb.removeAttribute('data-play-video');
-          } else if(vHref){ window.location.href = vHref; }
+          if(vHref) window.location.href = vHref;
           return;
         }
         if(e.target.closest('[data-create-post]')){ e.preventDefault(); e.stopPropagation(); openPostModal(buildActorExtra()); return; }
