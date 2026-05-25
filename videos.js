@@ -62,38 +62,51 @@
     return matches.map(function (h) { return h.slice(1).toLowerCase(); });
   }
 
-  /* Category detection: keywords first (title+description+hashtags), YouTube ID as fallback */
-  function detectCategory(title, description, tags, ytCategoryId) {
+  /* Returns ALL matching category keys for a video (multi-category support) */
+  function detectCategories(title, description, tags, ytCategoryId) {
     var base = ((title||'') + ' ' + (description||'') + ' ' + (Array.isArray(tags)?tags.join(' '):'')).toLowerCase();
-    var hashText = extractHashtags(base).join(' ');
-    var text = base + ' ' + hashText;
-    /* Specific keyword matches take priority over generic YouTube category IDs */
-    if (/travel|trip|tour|explore|adventure|journey|road.?trip|overland|მოგზაურობ|ტური/.test(text)) return 'travel';
-    if (/hiking|hike|trek|mountain|trail|climb|ლაშქრობ/.test(text)) return 'hiking';
-    if (/food|eat|restaurant|cuisine|recipe|cook|meal|dinner|lunch|საჭმელ|რესტორან/.test(text)) return 'food';
-    if (/nightlife|bar|club|party|night.?out|cocktail|pub/.test(text)) return 'nightlife';
-    if (/beach|sea|ocean|swim|surf|coast|island|ზღვ|სანაპირ/.test(text)) return 'beach';
-    if (/ski|skiing|snowboard|snow|winter|ice|თოვლ|სათხილამურ/.test(text)) return 'winter';
-    if (/nature|wildlife|forest|waterfall|ბუნებ|ჩანჩქერ/.test(text)) return 'nature';
-    if (/culture|history|museum|tradition|heritage|ancient|ისტორი|მუზეუმ/.test(text)) return 'culture';
-    if (/music|song|concert|singer|band|album|rap|rock|მუსიკ|კონცერტ/.test(text)) return 'music';
-    if (/game|gaming|gameplay|gamer|esport/.test(text)) return 'gaming';
-    if (/sport|football|basketball|soccer|tennis|gym|fitness|სპორტ|ფეხბურთ/.test(text)) return 'sports';
-    if (/comedy|funny|humor|laugh|joke|prank|სიცილ/.test(text)) return 'comedy';
-    if (/tech|technology|review|gadget|phone|software|app|ai|robot/.test(text)) return 'tech';
-    if (/tutorial|how.?to|diy|guide|learn/.test(text)) return 'howto';
-    if (/education|course|lesson|study|university|განათლებ/.test(text)) return 'education';
-    if (/film|movie|cinema|series|episode|documentary/.test(text)) return 'film';
-    if (/news|politics|report|breaking/.test(text)) return 'news';
-    if (/science|experiment|chemistry|physics|biology/.test(text)) return 'science';
-    if (/fashion|style|outfit|clothing|model|მოდ/.test(text)) return 'fashion';
-    if (/car|auto|drive|motor|vehicle|მანქან/.test(text)) return 'autos';
-    if (/pet|dog|cat|animal|ძაღლ|კატ/.test(text)) return 'pets';
-    if (/city|urban|street|downtown|architecture/.test(text)) return 'city';
-    if (/vlog|day.?in|routine|life|daily/.test(text)) return 'vlog';
-    /* Fall back to YouTube's own category ID only if no keyword matched */
-    if (ytCategoryId && YT_CAT_MAP[ytCategoryId]) return YT_CAT_MAP[ytCategoryId];
-    return '';
+    var text = base + ' ' + extractHashtags(base).join(' ');
+    var cats = [];
+    if (/travel|trip|tour|explore|adventure|journey|road.?trip|overland|მოგზაურობ|ტური/.test(text)) cats.push('travel');
+    if (/hiking|hike|trek|mountain|trail|climb|ლაშქრობ/.test(text)) cats.push('hiking');
+    if (/food|eat|restaurant|cuisine|recipe|cook|meal|dinner|lunch|საჭმელ|რესტორან/.test(text)) cats.push('food');
+    if (/nightlife|bar|club|party|night.?out|cocktail|pub/.test(text)) cats.push('nightlife');
+    if (/beach|sea|ocean|swim|surf|coast|island|ზღვ|სანაპირ/.test(text)) cats.push('beach');
+    if (/ski|skiing|snowboard|snow|winter|ice|თოვლ|სათხილამურ/.test(text)) cats.push('winter');
+    if (/nature|wildlife|forest|waterfall|ბუნებ|ჩანჩქერ/.test(text)) cats.push('nature');
+    if (/culture|history|museum|tradition|heritage|ancient|ისტორი|მუზეუმ/.test(text)) cats.push('culture');
+    if (/music|song|concert|singer|band|album|rap|rock|მუსიკ|კონცერტ/.test(text)) cats.push('music');
+    if (/game|gaming|gameplay|gamer|esport/.test(text)) cats.push('gaming');
+    if (/sport|football|basketball|soccer|tennis|gym|fitness|სპორტ|ფეხბურთ/.test(text)) cats.push('sports');
+    if (/comedy|funny|humor|laugh|joke|prank|სიცილ/.test(text)) cats.push('comedy');
+    if (/tech|technology|review|gadget|phone|software|app|ai|robot/.test(text)) cats.push('tech');
+    if (/tutorial|how.?to|diy|guide|learn/.test(text)) cats.push('howto');
+    if (/education|course|lesson|study|university|განათლებ/.test(text)) cats.push('education');
+    if (/film|movie|cinema|series|episode|documentary/.test(text)) cats.push('film');
+    if (/news|politics|report|breaking/.test(text)) cats.push('news');
+    if (/science|experiment|chemistry|physics|biology/.test(text)) cats.push('science');
+    if (/fashion|style|outfit|clothing|model|მოდ/.test(text)) cats.push('fashion');
+    if (/car|auto|drive|motor|vehicle|მანქან/.test(text)) cats.push('autos');
+    if (/pet|dog|cat|animal|ძაღლ|კატ/.test(text)) cats.push('pets');
+    if (/city|urban|street|downtown|architecture/.test(text)) cats.push('city');
+    if (/vlog|day.?in|routine|life|daily/.test(text)) cats.push('vlog');
+    /* Add YouTube category if not already matched */
+    var ytCat = ytCategoryId && YT_CAT_MAP[ytCategoryId];
+    if (ytCat && cats.indexOf(ytCat) === -1) cats.push(ytCat);
+    return cats;
+  }
+
+  /* Primary category (first match) — kept for backward compat */
+  function detectCategory(title, description, tags, ytCategoryId) {
+    var cats = detectCategories(title, description, tags, ytCategoryId);
+    return cats[0] || '';
+  }
+
+  /* Check if video belongs to a category (multi-category aware) */
+  function videoMatchesCat(v, cat) {
+    if (cat === 'all') return true;
+    if (Array.isArray(v.categories) && v.categories.length) return v.categories.indexOf(cat) > -1;
+    return v.category === cat;
   }
 
   /* ── Firebase helpers ─────────────────────────────────── */
@@ -252,7 +265,7 @@
       snap.forEach(function (d) { vids.push(Object.assign({ id: d.id }, d.data())); });
       vids = vids.filter(function (v) { return v.status !== 'hidden' && v.status !== 'removed'; });
       if (opts && opts.category && opts.category !== 'all') {
-        vids = vids.filter(function (v) { return v.category === opts.category; });
+        vids = vids.filter(function (v) { return videoMatchesCat(v, opts.category); });
       }
       callback(vids);
     }, function () { callback([]); });
@@ -492,17 +505,17 @@
     { id: 'reels',     icon: 'fa-bolt',            color: '#a855f7', label: 'Viral Reels',
       filter: function(v) { return !!v.isShort; },  n: 10, reels: true },
     { id: 'travel',    icon: 'fa-plane',           color: '#38bdf8', label: 'Travel & Adventure',
-      filter: function(v) { return !v.isShort && v.category === 'travel'; }, n: 8 },
+      filter: function(v) { return !v.isShort && videoMatchesCat(v, 'travel'); }, n: 8 },
     { id: 'tbilisi',   icon: 'fa-city',            color: '#60a5fa', label: 'Trending in Tbilisi',
       filter: function(v) { return !v.isShort && v.city === 'თბილისი'; }, n: 8 },
     { id: 'batumi',    icon: 'fa-umbrella-beach',  color: '#34d399', label: 'Batumi Vibes',
       filter: function(v) { return !v.isShort && v.city === 'ბათუმი'; }, n: 8 },
     { id: 'food',      icon: 'fa-utensils',        color: '#fb923c', label: 'Food & Nightlife',
-      filter: function(v) { return !v.isShort && (v.category === 'food' || v.category === 'nightlife'); }, n: 8 },
+      filter: function(v) { return !v.isShort && (videoMatchesCat(v, 'food') || videoMatchesCat(v, 'nightlife')); }, n: 8 },
     { id: 'nature',    icon: 'fa-mountain',        color: '#4ade80', label: 'Nature & Hiking',
-      filter: function(v) { return !v.isShort && (v.category === 'nature' || v.category === 'hiking' || v.category === 'winter' || v.category === 'beach'); }, n: 8 },
+      filter: function(v) { return !v.isShort && (videoMatchesCat(v, 'nature') || videoMatchesCat(v, 'hiking') || videoMatchesCat(v, 'winter') || videoMatchesCat(v, 'beach')); }, n: 8 },
     { id: 'culture',   icon: 'fa-landmark',        color: '#facc15', label: 'Culture & History',
-      filter: function(v) { return !v.isShort && (v.category === 'culture' || v.category === 'events'); }, n: 8 }
+      filter: function(v) { return !v.isShort && (videoMatchesCat(v, 'culture') || videoMatchesCat(v, 'events')); }, n: 8 }
   ];
 
   function renderTVSections(allVids) {
@@ -1348,13 +1361,14 @@
     if (state.unsub) { state.unsub(); state.unsub = null; }
 
     state.unsub = loadVideos({ category: state.filter }, function (vids) {
-      /* Background: patch empty categories + tags using stored title/description */
+      /* Background: patch categories + tags using stored title/description */
       if (fs() && db()) {
-        vids.filter(function (v) { return (!v.category || !v.tags || !v.tags.length) && v.title; }).forEach(function (v) {
+        vids.filter(function (v) { return v.title && (!v.categories || !v.categories.length); }).forEach(function (v) {
+          var cats = detectCategories(v.title, v.description || '', null, null);
           var patch = {};
-          if (!v.category) {
-            var cat = detectCategory(v.title, v.description || '', null, null);
-            if (cat) { v.category = cat; patch.category = cat; }
+          if (cats.length) {
+            v.categories = cats; patch.categories = cats;
+            if (!v.category) { v.category = cats[0]; patch.category = cats[0]; }
           }
           if (!v.tags || !v.tags.length) {
             var ht = extractHashtags((v.description || '') + ' ' + (v.title || ''));
@@ -1728,7 +1742,9 @@
                 var hashTags = extractHashtags((sn.description||'') + ' ' + (sn.title||''));
                 var merged = ytTags.concat(hashTags).filter(function(t,i,a){ return t && a.indexOf(t)===i; });
                 if (merged.length) v.tags = merged;
-                v.category = detectCategory(sn.title, sn.description, sn.tags, sn.categoryId);
+                var cats = detectCategories(sn.title, sn.description, sn.tags, sn.categoryId);
+                v.categories = cats;
+                v.category = cats[0] || '';
               });
             }).catch(function () {});
         });
@@ -1800,7 +1816,8 @@
           vids.forEach(function (v) {
             if (existingIds.has(v.youtubeId) && docMap[v.youtubeId]) {
               var patch = {};
-              if (v.category && !docMap[v.youtubeId].hasCategory) patch.category = v.category;
+              if (v.category) patch.category = v.category;
+              if (v.categories && v.categories.length) patch.categories = v.categories;
               if (v.tags && v.tags.length) patch.tags = v.tags;
               if (v.description) patch.description = v.description;
               if (Object.keys(patch).length) {
@@ -1818,7 +1835,7 @@
                   title: v.title, description: v.description || '', thumbnail: ytMaxThumb(v.youtubeId),
                   channelId: geoChannelId, channelName: v.channelName, channelUrl: v.channelUrl,
                   authorId: u.uid, authorName: u.displayName || 'GeoHub User', authorAvatar: u.photoURL || '',
-                  category: v.category || '', city: '', isShort: v.isShort || false, tags: v.tags || [],
+                  category: v.category || '', categories: v.categories || [], city: '', isShort: v.isShort || false, tags: v.tags || [],
                   placeId: null, placeName: null, businessId: null, businessName: null
                 }, function (err) { if (!err) done++; resv(); }, true /* fromImport */);
               });
@@ -2197,9 +2214,9 @@
                   if (secs > 0 && secs <= 60) v.isShort = true;
                   /* Category from YouTube categoryId + keywords */
                   var sn = item.snippet || {};
-                  if (!v.category) {
-                    v.category = detectCategory(sn.title, sn.description, sn.tags, sn.categoryId);
-                  }
+                  var cats2 = detectCategories(sn.title, sn.description, sn.tags, sn.categoryId);
+                  v.categories = cats2;
+                  v.category = cats2[0] || '';
                 });
               }).catch(function () {});
           });
