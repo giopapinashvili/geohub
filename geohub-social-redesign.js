@@ -676,7 +676,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     } else { pk.style.top='200px'; pk.style.left='260px'; }
     pk.innerHTML='<div style="padding:6px 10px 10px;font-size:.78rem;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.06em">ჩემი არხები</div><div id="ghChPickerList"><i class="fas fa-spinner fa-spin" style="margin:10px 14px;color:#94a3b8"></i></div>'+
       '<div style="border-top:1px solid rgba(255,255,255,.08);margin-top:6px;padding-top:6px;">'+
-        '<a href="videos.html" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;color:#10b981;font-size:.84rem;font-weight:600;text-decoration:none;transition:background .15s" onmouseover="this.style.background=\'rgba(16,185,129,.1)\'" onmouseout="this.style.background=\'\'">'+
+        '<a href="videos.html?action=createCh" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;color:#10b981;font-size:.84rem;font-weight:600;text-decoration:none;transition:background .15s" onmouseover="this.style.background=\'rgba(16,185,129,.1)\'" onmouseout="this.style.background=\'\'">'+
           '<i class="fas fa-plus-circle"></i> ახალი არხი</a>'+
       '</div>';
     document.body.appendChild(pk);

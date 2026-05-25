@@ -1169,15 +1169,17 @@
         if (!settled.posts || !settled.videos) return;
         var ps = postsArr.slice().sort(function (a, b) { return ts(b.createdAt) - ts(a.createdAt); });
         var vs = videosArr.slice().sort(function (a, b) { return ts(b.createdAt) - ts(a.createdAt); });
-        // Interleave: 1 video every 3 posts to prevent one channel flooding the feed
+        // Interleave: 1 video every 4 posts (posts-heavy; prevents one channel flooding)
         var result = [], pi = 0, vi = 0, postSince = 0;
         while (result.length < n * 2 && (pi < ps.length || vi < vs.length)) {
-          if (vi < vs.length && (pi >= ps.length || postSince >= 3)) {
+          if (vi < vs.length && pi >= ps.length) {
             result.push(vs[vi++]); postSince = 0;
-          } else if (pi < ps.length) {
+          } else if (pi < ps.length && postSince < 4) {
             result.push(ps[pi++]); postSince++;
+          } else if (vi < vs.length) {
+            result.push(vs[vi++]); postSince = 0;
           } else {
-            result.push(vs[vi++]);
+            result.push(ps[pi++]); postSince++;
           }
         }
         callback(result);
@@ -1189,7 +1191,7 @@
         settled.posts = true; emit();
       }, function (err) { console.warn('[GeoSocial] listenFeed posts', err.message); settled.posts = true; emit(); });
       var _chAvatarCache = {};
-      var q2 = query(collection(db, 'videos'), orderBy('createdAt', 'desc'), limit(n));
+      var q2 = query(collection(db, 'videos'), orderBy('createdAt', 'desc'), limit(Math.min(n, 20)));
       var unsub2 = onSnapshot(q2, function (snap) {
         var raw = [];
         snap.forEach(function (d) {

@@ -1349,6 +1349,17 @@
     loadAndRender();
     bindUI();
     initMyChannelBar();
+
+    /* Auto-open Create Channel modal when navigated here with ?action=createCh */
+    if (new URLSearchParams(location.search).get('action') === 'createCh') {
+      var u = authUser();
+      if (u) { setTimeout(function () { openCreateChannelModal(u); }, 350); }
+      else {
+        window.addEventListener('GeoAuthReady', function () {
+          var u2 = authUser(); if (u2) openCreateChannelModal(u2);
+        }, { once: true });
+      }
+    }
   }
 
   function renderCategoryPills() {
