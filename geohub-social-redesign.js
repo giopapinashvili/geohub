@@ -1703,30 +1703,45 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var thumb   = p.thumbnail || (p.youtubeId ? 'https://i.ytimg.com/vi/'+p.youtubeId+'/hqdefault.jpg' : '');
     var href    = p.videoId ? 'watch.html?v='+encodeURIComponent(p.videoId) : (p.youtubeId ? 'watch.html?v='+encodeURIComponent(p.videoId||p.youtubeId) : '#');
     var chHref  = p.channelId ? 'channel.html?id='+encodeURIComponent(p.channelId) : '#';
-    var ts      = p.createdAt && p.createdAt.toMillis ? timeAgo2(p.createdAt.toMillis()) : '';
+    var tsStr   = p.createdAt && p.createdAt.toMillis ? timeAgo2(p.createdAt.toMillis()) : '';
     var ytId    = p.youtubeId || '';
     var chName  = p.channelName || p.authorName || 'GeoHub';
     var chAv    = p.channelAvatar || '';
-    var desc    = (p.description || '').slice(0, 120);
-    return '<article class="gh-card gh-video-post-card" data-post-id="'+esc(p.id||'')+'">' +
+    var chInit  = initials(chName);
+    var pid     = p.id || '';
+    var desc    = (p.description || '').slice(0, 160);
+    var avHtml  = chAv
+      ? '<img src="'+esc(chAv)+'" alt="" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'\'"><span style="display:none">'+esc(chInit)+'</span>'
+      : '<span>'+esc(chInit)+'</span>';
+    return '<article class="gh-card gh-video-post-card" data-post-id="'+esc(pid)+'">' +
       '<div class="gh-post-header">' +
-        '<a href="'+esc(chHref)+'" class="gh-avatar" style="flex-shrink:0;text-decoration:none">' +
-          (chAv ? '<img src="'+esc(chAv)+'" alt="" loading="lazy" onerror="this.remove()">' : esc(initials(chName))) +
-        '</a>' +
+        '<a href="'+esc(chHref)+'" class="gh-avatar" style="flex-shrink:0;text-decoration:none">'+avHtml+'</a>' +
         '<div class="gh-post-meta">' +
           '<a class="gh-post-author" href="'+esc(chHref)+'">'+esc(chName)+'</a>' +
-          (ts?'<span class="gh-post-time">'+ts+'</span>':'') +
+          (tsStr ? '<span class="gh-post-time">'+tsStr+'</span>' : '') +
         '</div>' +
         '<span class="gh-video-post-badge"><i class="fas fa-film"></i> Video</span>' +
       '</div>' +
+      '<div class="gh-video-post-title"><a href="'+esc(href)+'">'+esc((p.title||'').slice(0,100))+'</a></div>' +
       '<div class="gh-video-post-thumb" data-play-video data-youtube-id="'+esc(ytId)+'" data-video-href="'+esc(href)+'">' +
-        (thumb?'<img src="'+esc(thumb)+'" alt="" loading="lazy">':'<div class="gh-video-post-thumb-ph"><i class="fas fa-play-circle"></i></div>') +
+        (thumb ? '<img src="'+esc(thumb)+'" alt="" loading="lazy">' : '<div class="gh-video-post-thumb-ph"><i class="fas fa-play-circle"></i></div>') +
         '<div class="gh-video-play-btn"><i class="fas fa-play"></i></div>' +
         '<a class="gh-video-expand-btn" href="'+esc(href)+'" title="ვიდეოს გვერდი"><i class="fas fa-expand-alt"></i></a>' +
       '</div>' +
-      '<div class="gh-video-post-title"><a href="'+esc(href)+'">'+esc((p.title||'').slice(0,100))+'</a></div>' +
-      (desc ? '<div class="gh-video-post-desc">'+esc(desc)+(p.description&&p.description.length>120?'…':'')+'</div>' : '') +
-      (p.category?'<div class="gh-video-post-cat"><i class="fas fa-tag"></i>'+esc(p.category)+'</div>':'') +
+      (desc ? '<div class="gh-video-post-desc">'+esc(desc)+(p.description && p.description.length>160 ? '…' : '')+'</div>' : '') +
+      '<div class="gh-post-stats"><span></span><span><button class="gh-stats-btn" data-open-comments-btn><b data-comment-count>0</b> comments</button></span></div>' +
+      '<div class="gh-rx-breakdown" data-rx-pid="'+esc(pid)+'"></div>' +
+      '<div class="gh-post-actions">'+
+        '<span class="gh-like-wrap"><button class="gh-act" data-like>❤️ Like</button>'+
+          '<div class="gh-reaction-strip"><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button><button data-reaction="clap">👏</button></div>'+
+        '</span>'+
+        '<button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> Comment</button>'+
+        '<button class="gh-act" data-share><i class="fas fa-share"></i> Share</button>'+
+        '<button class="gh-act" data-save><i class="fas fa-bookmark"></i> Save</button>'+
+      '</div>'+
+      '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+
+        '<form class="gh-comment-form" data-comment-form><input class="gh-input" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
+      '</div>'+
     '</article>';
   }
   function timeAgo2(ms){ var s=Math.floor((Date.now()-ms)/1000); if(s<60) return 'ახლახანს'; if(s<3600) return Math.floor(s/60)+' წ. წინ'; if(s<86400) return Math.floor(s/3600)+' სთ. წინ'; return Math.floor(s/86400)+' დ. წინ'; }
