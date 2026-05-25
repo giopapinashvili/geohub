@@ -3767,12 +3767,18 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           // foryou: merge in all business page posts not already in the main feed
           if(state.bizFeedPosts.length){
             var seen={}; visible.forEach(function(p){ seen[p.id]=true; });
+            var toInsert=[];
             state.bizFeedPosts.forEach(function(p){
-              if(!seen[p.id] && canSeePost(p)){
-                seen[p.id]=true; visible.push(p);
-              }
+              if(!seen[p.id] && canSeePost(p)){ seen[p.id]=true; toInsert.push(p); }
             });
-            visible.sort(function(a,b){ return ts(b.createdAt)-ts(a.createdAt); });
+            // Insert biz posts at chronologically correct positions without
+            // re-sorting the whole array (re-sorting would destroy emit()'s interleaving)
+            toInsert.sort(function(a,b){ return ts(b.createdAt)-ts(a.createdAt); });
+            toInsert.forEach(function(bp){
+              var t=ts(bp.createdAt), idx=visible.length;
+              for(var i=0;i<visible.length;i++){ if(ts(visible[i].createdAt)<t){ idx=i; break; } }
+              visible.splice(idx,0,bp);
+            });
           }
         }
         if(!visible.length){

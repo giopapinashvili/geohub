@@ -1180,9 +1180,20 @@
           return sb - sa;
         });
         var vs = videosArr.slice().sort(function (a, b) { return ts(b.createdAt) - ts(a.createdAt); });
-        // Interleave: 1 video every 3-5 posts; never two consecutive videos from same channel
-        var result = [], pi = 0, vi = 0, postSince = 0, lastChId = null;
+        // Interleave: 1 video every 3-5 posts; never consecutive same-channel videos or same-user posts
+        var result = [], pi = 0, vi = 0, postSince = 0, lastChId = null, lastUid = null;
         var postsPerVideo = 4;
+        function pickPost() {
+          // Prefer a post from a different user than the last post
+          for (var k = pi; k < Math.min(pi + 5, ps.length); k++) {
+            if ((ps[k].authorId || ps[k].userId || '') !== lastUid) {
+              if (k !== pi) { var tmp = ps[pi]; ps[pi] = ps[k]; ps[k] = tmp; }
+              break;
+            }
+          }
+          lastUid = ps[pi].authorId || ps[pi].userId || '';
+          result.push(ps[pi++]); postSince++;
+        }
         function pickVideo() {
           // Swap forward up to 8 slots to find a video from a different channel
           for (var j = vi; j < Math.min(vi + 8, vs.length); j++) {
@@ -1204,12 +1215,12 @@
             // Posts exhausted: enforce same-channel gap; if can't, stop
             if (!pickVideo()) break;
           } else if (pi < ps.length && postSince < postsPerVideo) {
-            result.push(ps[pi++]); postSince++;
+            pickPost();
           } else if (vi < vs.length) {
             // Time for a video; if same-channel rule blocks it, add a post instead
-            if (!pickVideo() && pi < ps.length) { result.push(ps[pi++]); postSince++; }
+            if (!pickVideo() && pi < ps.length) { pickPost(); }
           } else {
-            result.push(ps[pi++]); postSince++;
+            pickPost();
           }
         }
         callback(result);
