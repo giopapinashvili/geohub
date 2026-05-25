@@ -56,33 +56,43 @@
     '25':'news','26':'howto','27':'education','28':'tech','29':'science'
   };
 
-  /* Keyword-based fallback categorisation (title + description + tags) */
+  /* Extract #hashtags from any text (supports Latin + Georgian) */
+  function extractHashtags(text) {
+    var matches = (text || '').match(/#[\wა-ჿ]+/g) || [];
+    return matches.map(function (h) { return h.slice(1).toLowerCase(); });
+  }
+
+  /* Category detection: keywords first (title+description+hashtags), YouTube ID as fallback */
   function detectCategory(title, description, tags, ytCategoryId) {
-    if (ytCategoryId && YT_CAT_MAP[ytCategoryId]) return YT_CAT_MAP[ytCategoryId];
-    var text = ((title||'') + ' ' + (description||'') + ' ' + (Array.isArray(tags)?tags.join(' '):'')).toLowerCase();
-    if (/travel|trip|tour|explore|adventure|journey|road.?trip|overland/.test(text)) return 'travel';
-    if (/hiking|hike|trek|mountain|trail|climb/.test(text)) return 'hiking';
-    if (/food|eat|restaurant|cuisine|recipe|cook|meal|dinner|lunch/.test(text)) return 'food';
+    var base = ((title||'') + ' ' + (description||'') + ' ' + (Array.isArray(tags)?tags.join(' '):'')).toLowerCase();
+    var hashText = extractHashtags(base).join(' ');
+    var text = base + ' ' + hashText;
+    /* Specific keyword matches take priority over generic YouTube category IDs */
+    if (/travel|trip|tour|explore|adventure|journey|road.?trip|overland|მოგზაურობ|ტური/.test(text)) return 'travel';
+    if (/hiking|hike|trek|mountain|trail|climb|ლაშქრობ/.test(text)) return 'hiking';
+    if (/food|eat|restaurant|cuisine|recipe|cook|meal|dinner|lunch|საჭმელ|რესტორან/.test(text)) return 'food';
     if (/nightlife|bar|club|party|night.?out|cocktail|pub/.test(text)) return 'nightlife';
-    if (/culture|history|museum|tradition|heritage|ancient/.test(text)) return 'culture';
-    if (/beach|sea|ocean|swim|surf|coast|island/.test(text)) return 'beach';
-    if (/ski|skiing|snowboard|snow|winter|ice/.test(text)) return 'winter';
-    if (/nature|wildlife|forest|animal|bird|jungle|waterfall/.test(text)) return 'nature';
-    if (/city|urban|street|downtown|architecture/.test(text)) return 'city';
-    if (/music|song|concert|singer|band|album|rap|rock/.test(text)) return 'music';
+    if (/beach|sea|ocean|swim|surf|coast|island|ზღვ|სანაპირ/.test(text)) return 'beach';
+    if (/ski|skiing|snowboard|snow|winter|ice|თოვლ|სათხილამურ/.test(text)) return 'winter';
+    if (/nature|wildlife|forest|waterfall|ბუნებ|ჩანჩქერ/.test(text)) return 'nature';
+    if (/culture|history|museum|tradition|heritage|ancient|ისტორი|მუზეუმ/.test(text)) return 'culture';
+    if (/music|song|concert|singer|band|album|rap|rock|მუსიკ|კონცერტ/.test(text)) return 'music';
     if (/game|gaming|gameplay|gamer|esport/.test(text)) return 'gaming';
-    if (/sport|football|basketball|soccer|tennis|gym|fitness/.test(text)) return 'sports';
-    if (/comedy|funny|humor|laugh|joke|prank/.test(text)) return 'comedy';
-    if (/tutorial|how.?to|diy|guide|learn/.test(text)) return 'howto';
-    if (/education|course|lesson|study|university/.test(text)) return 'education';
+    if (/sport|football|basketball|soccer|tennis|gym|fitness|სპორტ|ფეხბურთ/.test(text)) return 'sports';
+    if (/comedy|funny|humor|laugh|joke|prank|სიცილ/.test(text)) return 'comedy';
     if (/tech|technology|review|gadget|phone|software|app|ai|robot/.test(text)) return 'tech';
+    if (/tutorial|how.?to|diy|guide|learn/.test(text)) return 'howto';
+    if (/education|course|lesson|study|university|განათლებ/.test(text)) return 'education';
     if (/film|movie|cinema|series|episode|documentary/.test(text)) return 'film';
     if (/news|politics|report|breaking/.test(text)) return 'news';
-    if (/vlog|day.?in|routine|life|daily/.test(text)) return 'vlog';
     if (/science|experiment|chemistry|physics|biology/.test(text)) return 'science';
-    if (/fashion|style|outfit|clothing|model/.test(text)) return 'fashion';
-    if (/car|auto|drive|motor|vehicle/.test(text)) return 'autos';
-    if (/pet|dog|cat|animal/.test(text)) return 'pets';
+    if (/fashion|style|outfit|clothing|model|მოდ/.test(text)) return 'fashion';
+    if (/car|auto|drive|motor|vehicle|მანქან/.test(text)) return 'autos';
+    if (/pet|dog|cat|animal|ძაღლ|კატ/.test(text)) return 'pets';
+    if (/city|urban|street|downtown|architecture/.test(text)) return 'city';
+    if (/vlog|day.?in|routine|life|daily/.test(text)) return 'vlog';
+    /* Fall back to YouTube's own category ID only if no keyword matched */
+    if (ytCategoryId && YT_CAT_MAP[ytCategoryId]) return YT_CAT_MAP[ytCategoryId];
     return '';
   }
 
@@ -1338,13 +1348,20 @@
     if (state.unsub) { state.unsub(); state.unsub = null; }
 
     state.unsub = loadVideos({ category: state.filter }, function (vids) {
-      /* Background: patch empty categories using stored title/description */
+      /* Background: patch empty categories + tags using stored title/description */
       if (fs() && db()) {
-        vids.filter(function (v) { return !v.category && v.title; }).forEach(function (v) {
-          var cat = detectCategory(v.title, v.description || '', null, null);
-          if (cat) {
-            v.category = cat;
-            fs().updateDoc(fs().doc(db(), 'videos', v.id), { category: cat }).catch(function () {});
+        vids.filter(function (v) { return (!v.category || !v.tags || !v.tags.length) && v.title; }).forEach(function (v) {
+          var patch = {};
+          if (!v.category) {
+            var cat = detectCategory(v.title, v.description || '', null, null);
+            if (cat) { v.category = cat; patch.category = cat; }
+          }
+          if (!v.tags || !v.tags.length) {
+            var ht = extractHashtags((v.description || '') + ' ' + (v.title || ''));
+            if (ht.length) { v.tags = ht; patch.tags = ht; }
+          }
+          if (Object.keys(patch).length) {
+            fs().updateDoc(fs().doc(db(), 'videos', v.id), patch).catch(function () {});
           }
         });
       }
@@ -1704,7 +1721,14 @@
                 var secs = impParseDur((item.contentDetails || {}).duration || '');
                 if (secs > 0 && secs <= 60) v.isShort = true;
                 var sn = item.snippet || {};
-                if (!v.category) v.category = detectCategory(sn.title, sn.description, sn.tags, sn.categoryId);
+                /* Overwrite with full description from videos API (playlistItems gives truncated) */
+                if (sn.description) v.description = sn.description;
+                /* Merge YouTube official tags + hashtags from description+title */
+                var ytTags = Array.isArray(sn.tags) ? sn.tags.map(function(t){ return t.toLowerCase(); }) : [];
+                var hashTags = extractHashtags((sn.description||'') + ' ' + (sn.title||''));
+                var merged = ytTags.concat(hashTags).filter(function(t,i,a){ return t && a.indexOf(t)===i; });
+                if (merged.length) v.tags = merged;
+                v.category = detectCategory(sn.title, sn.description, sn.tags, sn.categoryId);
               });
             }).catch(function () {});
         });
@@ -1774,8 +1798,14 @@
 
           /* Patch category on already-existing videos that have none */
           vids.forEach(function (v) {
-            if (existingIds.has(v.youtubeId) && v.category && docMap[v.youtubeId] && !docMap[v.youtubeId].hasCategory) {
-              fs().updateDoc(fs().doc(db(), 'videos', docMap[v.youtubeId].docId), { category: v.category }).catch(function(){});
+            if (existingIds.has(v.youtubeId) && docMap[v.youtubeId]) {
+              var patch = {};
+              if (v.category && !docMap[v.youtubeId].hasCategory) patch.category = v.category;
+              if (v.tags && v.tags.length) patch.tags = v.tags;
+              if (v.description) patch.description = v.description;
+              if (Object.keys(patch).length) {
+                fs().updateDoc(fs().doc(db(), 'videos', docMap[v.youtubeId].docId), patch).catch(function(){});
+              }
             }
           });
 
@@ -1788,7 +1818,7 @@
                   title: v.title, description: v.description || '', thumbnail: ytMaxThumb(v.youtubeId),
                   channelId: geoChannelId, channelName: v.channelName, channelUrl: v.channelUrl,
                   authorId: u.uid, authorName: u.displayName || 'GeoHub User', authorAvatar: u.photoURL || '',
-                  category: v.category || '', city: '', isShort: v.isShort || false, tags: [],
+                  category: v.category || '', city: '', isShort: v.isShort || false, tags: v.tags || [],
                   placeId: null, placeName: null, businessId: null, businessName: null
                 }, function (err) { if (!err) done++; resv(); }, true /* fromImport */);
               });
