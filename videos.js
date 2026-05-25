@@ -483,6 +483,8 @@
       filter: function(v) { return !v.isShort; }, n: 12 },
     { id: 'reels',     icon: 'fa-bolt',            color: '#a855f7', label: 'Viral Reels',
       filter: function(v) { return !!v.isShort; },  n: 10, reels: true },
+    { id: 'travel',    icon: 'fa-plane',           color: '#38bdf8', label: 'Travel & Adventure',
+      filter: function(v) { return !v.isShort && v.category === 'travel'; }, n: 8 },
     { id: 'tbilisi',   icon: 'fa-city',            color: '#60a5fa', label: 'Trending in Tbilisi',
       filter: function(v) { return !v.isShort && v.city === 'თბილისი'; }, n: 8 },
     { id: 'batumi',    icon: 'fa-umbrella-beach',  color: '#34d399', label: 'Batumi Vibes',
@@ -1740,21 +1742,34 @@
 
         /* Load existing YouTube IDs so we can skip duplicates on re-import */
         function loadExistingYtIds() {
-          if (!fs() || !db()) return Promise.resolve(new Set());
+          if (!fs() || !db()) return Promise.resolve({ ids: new Set(), docMap: {} });
           return fs().getDocs(fs().query(
             fs().collection(db(), 'videos'),
             fs().where('channelId', '==', geoChannelId),
             fs().limit(2000)
           )).then(function (snap) {
             var ids = new Set();
-            snap.forEach(function (d3) { var id = d3.data().youtubeId; if (id) ids.add(id); });
-            return ids;
-          }).catch(function () { return new Set(); });
+            var docMap = {};
+            snap.forEach(function (d3) {
+              var data = d3.data();
+              var id = data.youtubeId;
+              if (id) { ids.add(id); docMap[id] = { docId: d3.id, hasCategory: !!data.category }; }
+            });
+            return { ids: ids, docMap: docMap };
+          }).catch(function () { return { ids: new Set(), docMap: {} }; });
         }
 
         return Promise.all([fetchPage(null), loadExistingYtIds()]).then(function (res) {
-          var vids = res[0], existingIds = res[1];
+          var vids = res[0], existing = res[1];
+          var existingIds = existing.ids, docMap = existing.docMap;
           var newVids = vids.filter(function (v) { return !existingIds.has(v.youtubeId); });
+
+          /* Patch category on already-existing videos that have none */
+          vids.forEach(function (v) {
+            if (existingIds.has(v.youtubeId) && v.category && docMap[v.youtubeId] && !docMap[v.youtubeId].hasCategory) {
+              fs().updateDoc(fs().doc(db(), 'videos', docMap[v.youtubeId].docId), { category: v.category }).catch(function(){});
+            }
+          });
 
           var done = 0;
           function saveBatch(batch) {
