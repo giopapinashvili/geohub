@@ -594,7 +594,7 @@ body.gh-fb-inspired .gh-icon-btn,body.gh-fb-inspired .gh-user-btn,body.gh-fb-ins
 body.gh-fb-inspired .gh-create-btn{background:linear-gradient(135deg,#1264ff,#2d7dff);box-shadow:0 16px 38px rgba(45,125,255,.27)}
 body.gh-fb-inspired .gh-shell{padding-top:72px}
 body.gh-fb-inspired .gh-layout{
-  width:100%;max-width:1760px;margin:0 auto;grid-template-columns:252px minmax(0,860px) 330px;gap:18px;padding:18px 18px 44px;
+  width:100%;max-width:1380px;margin:0 auto;grid-template-columns:252px minmax(0,600px) 340px;gap:18px;padding:18px 18px 44px;
 }
 body.gh-fb-inspired .gh-left{position:sticky;top:88px;align-self:start}
 body.gh-fb-inspired .gh-left .gh-panel{padding:10px;background:rgba(7,17,31,.66);border-color:rgba(148,163,184,.10);box-shadow:none}
@@ -666,7 +666,7 @@ body.gh-fb-inspired .gh-empty.mini{min-height:92px;padding:16px;text-align:left;
 body.gh-fb-inspired .gh-empty.mini i{font-size:1.2rem;margin:0 0 8px;color:#4c91ff}
 body.gh-fb-inspired .gh-empty.mini h3{font-size:.9rem;margin:0 0 4px;color:#eaf2ff}
 body.gh-fb-inspired .gh-empty.mini p{font-size:.78rem;margin:0;color:#94a3b8}
-@media(max-width:1120px){body.gh-fb-inspired .gh-layout{grid-template-columns:86px minmax(0,1fr) 310px}body.gh-fb-inspired .gh-nav-item span{display:none}body.gh-fb-inspired .gh-nav-item{justify-content:center}body.gh-fb-inspired .gh-topbar{grid-template-columns:220px minmax(220px,380px) 1fr auto}.gh-center-tabs{gap:8px}}
+@media(max-width:1060px){body.gh-fb-inspired .gh-layout{grid-template-columns:82px minmax(0,1fr) 300px}body.gh-fb-inspired .gh-nav-item span{display:none}body.gh-fb-inspired .gh-nav-item{justify-content:center}body.gh-fb-inspired .gh-topbar{grid-template-columns:180px minmax(200px,360px) 1fr auto}.gh-center-tabs{gap:8px}}
 @media(max-width:980px){body.gh-fb-inspired .gh-topbar{grid-template-columns:1fr auto}body.gh-fb-inspired .gh-top-search,body.gh-fb-inspired .gh-center-tabs{display:none}body.gh-fb-inspired .gh-layout{grid-template-columns:1fr;padding:12px}body.gh-fb-inspired .gh-left,body.gh-fb-inspired .gh-right{position:static;max-height:none}body.gh-fb-inspired .gh-left{display:none}body.gh-fb-inspired .gh-story-card{height:180px;min-width:105px}body.gh-fb-inspired .gh-composer-actions{grid-template-columns:repeat(2,1fr)}}
 
 /* REAL Day/Night theme fix v2 — proper premium light theme, not dark-mode inversion */
