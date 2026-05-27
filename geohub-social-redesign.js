@@ -7,7 +7,7 @@
 
   var PATH = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   var PAGE = document.body && document.body.dataset ? document.body.dataset.ghPage : '';
-  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], followedBusinessIds: [], closeFriendIds: [], bizFeedPosts: [], bizFeedUnsub: null, audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null, openCommentPids: {}, cachedComments: {}, cachedReplies: {}, feedTab: 'foryou', feedUnsub: null, feedRenderId: 0, userCity: null };
+  var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], followedBusinessIds: [], closeFriendIds: [], bizFeedPosts: [], bizFeedUnsub: null, audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null, openCommentPids: {}, cachedComments: {}, cachedReplies: {}, feedTab: 'foryou', feedTag: '', feedUnsub: null, feedRenderId: 0, userCity: null };
 
   /* ── User cache (instant topbar, no flash) ──────────────── */
   var USER_CACHE_KEY = 'gh_uc1';
@@ -104,6 +104,12 @@
   function $(s, root){ return (root || document).querySelector(s); }
   function $all(s, root){ return Array.prototype.slice.call((root || document).querySelectorAll(s)); }
   function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  /* Phase 21: linkify hashtags in post text */
+  function linkifyText(v){
+    return esc(v).replace(/#([\wა-ჿ]+)/g,function(_,tag){
+      return '<a class="gh-hashtag" href="feed.html?tag='+encodeURIComponent(tag.toLowerCase())+'" onclick="event.stopPropagation()">#'+tag+'</a>';
+    });
+  }
   function text(v, fallback){ v = String(v == null ? '' : v).trim(); return v || fallback || ''; }
   function ts(v){ if(!v) return 0; if(typeof v.toMillis === 'function') return v.toMillis(); if(v.seconds) return v.seconds * 1000; if(v instanceof Date) return v.getTime(); if(typeof v === 'number') return v; return Date.parse(v) || 0; }
   function getItemImage(x){ return x.imageUrl||x.image||x.coverImage||x.coverImageUrl||x.coverUrl||x.photoUrl||x.mediaUrl||x.logoUrl||x.thumbnail||''; }
@@ -1987,19 +1993,19 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var postTextHtml = '';
     if (p.text) {
       if (p.bgGradient && p.text.length < 150) {
-        postTextHtml = '<div class="gh-post-bg-text"'+bgStyle+'><span>'+esc(p.text)+'</span></div>';
+        postTextHtml = '<div class="gh-post-bg-text"'+bgStyle+'><span>'+linkifyText(p.text)+'</span></div>';
       } else {
         var _MAX_POST = 300;
         if (p.text.length > _MAX_POST) {
           var _cut = p.text.lastIndexOf(' ', _MAX_POST);
           if (_cut < _MAX_POST * 0.7) _cut = _MAX_POST;
           postTextHtml = '<div class="gh-post-text">'
-            + '<span class="gh-post-short">'+esc(p.text.slice(0,_cut))+'…</span>'
-            + '<span class="gh-post-full" style="display:none">'+esc(p.text)+'</span>'
+            + '<span class="gh-post-short">'+linkifyText(p.text.slice(0,_cut))+'…</span>'
+            + '<span class="gh-post-full" style="display:none">'+linkifyText(p.text)+'</span>'
             + '<button type="button" class="gh-read-more" onclick="ghToggleReadMore(this)">წაიკითხე მეტი ▾</button>'
             + '</div>';
         } else {
-          postTextHtml = '<div class="gh-post-text">'+esc(p.text)+'</div>';
+          postTextHtml = '<div class="gh-post-text">'+linkifyText(p.text)+'</div>';
         }
       }
     }
@@ -3367,6 +3373,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-panel gh-right-widget" id="ghOnlineFriendsPanel"><div class="gh-section-title"><h3><i class="fas fa-circle" style="color:#22c55e;font-size:.55rem"></i> Online Friends</h3></div><div id="ghOnlineFriendsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget" id="ghPymkPanel"><div class="gh-section-title"><h3>People You May Know</h3><a class="gh-small" href="search.html">Find people</a></div><div id="ghPymkList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget" id="ghCreatorPanel"><div class="gh-section-title"><h3>Featured Creators</h3><a class="gh-small" href="creators.html">All</a></div><div id="ghCreatorList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghTrendingPanel">'+
+        '<div class="gh-section-title"><h3>🔥 Trending Hashtags</h3></div>'+
+        '<div id="ghTrendingList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div>'+
+      '</div>'+
       '<div class="gh-panel gh-right-widget" id="ghLeaderPanel">'+
         '<div class="gh-section-title"><h3>🏆 Top Creators</h3><a class="gh-small" href="creators.html">ყველა</a></div>'+
         '<div class="gh-ldr-cities" id="ghLdrCities">'+
@@ -3661,7 +3671,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var ob=$('#ghOnlineFriendsList'); if(ob) ob.innerHTML='<div class="gh-muted" style="font-size:.82rem">Unavailable</div>';
         var pb=$('#ghSuggestedPages'); if(pb) pb.innerHTML='<div class="gh-muted" style="font-size:.82rem">Unavailable</div>';
         var cb=$('#ghContactsList'); if(cb) cb.innerHTML='<div class="gh-muted" style="font-size:.82rem">Unavailable</div>';
-        loadLeaderboardWidget(''); loadFeedGroupsWidget(); loadFeedEventsWidget(null); loadFeedCheckinsWidget();
+        loadLeaderboardWidget(''); loadTrendingHashtags(); loadFeedGroupsWidget(); loadFeedEventsWidget(null); loadFeedCheckinsWidget();
         return;
       }
       // onAuthStateChanged fires once auth is resolved (currentUser may still be null even if ready() fired)
@@ -3676,7 +3686,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           if(contactsBox) contactsBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see contacts</div>';
           var pymkBox=$('#ghPymkList'); if(pymkBox) pymkBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see suggestions</div>';
           var crBox=$('#ghCreatorList'); if(crBox) crBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see creators</div>';
-          loadLeaderboardWidget(''); loadFeedGroupsWidget(); loadFeedEventsWidget(null); loadFeedCheckinsWidget();
+          loadLeaderboardWidget(''); loadTrendingHashtags(); loadFeedGroupsWidget(); loadFeedEventsWidget(null); loadFeedCheckinsWidget();
           return;
         }
 
@@ -3713,6 +3723,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         loadPymkWidget(u.uid);
         loadCreatorWidget(u.uid);
         loadLeaderboardWidget(u.uid);
+        loadTrendingHashtags();
         loadFeedGroupsWidget();
         loadFeedEventsWidget(u.uid);
         loadFeedCheckinsWidget();
@@ -4036,6 +4047,41 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         _showXpToast({xpGained:xpGained,streak:newStreak,milestone:milestoneLabel});
       },1800);
     });
+  }
+
+  /* ── Phase 21: Trending Hashtags ────────────────────────────────────── */
+  function loadTrendingHashtags(){
+    var panel=document.getElementById('ghTrendingPanel');
+    var box=document.getElementById('ghTrendingList');
+    if(!box||!panel) return;
+    if(!fs()||!db()){ panel.style.display='none'; return; }
+    fs().getDocs(
+      fs().query(
+        fs().collection(db(),'hashtagCounts'),
+        fs().orderBy('count','desc'),
+        fs().limit(12)
+      )
+    ).then(function(snap){
+      if(snap.empty){ panel.style.display='none'; return; }
+      panel.style.display='';
+      var html='<div class="gh-trending-chips">';
+      snap.docs.forEach(function(d,i){
+        var tag=d.data().tag||d.id;
+        var cnt=d.data().count||0;
+        html+='<a class="gh-trending-chip" href="feed.html?tag='+encodeURIComponent(tag)+'">'
+          +'<span class="gh-tc-tag">#'+esc(tag)+'</span>'
+          +'<span class="gh-tc-count">'+_fmtCount(cnt)+'</span>'
+          +'</a>';
+      });
+      html+='</div>';
+      box.innerHTML=html;
+    }).catch(function(){ panel.style.display='none'; });
+  }
+  function _fmtCount(n){
+    n=Number(n)||0;
+    if(n>=1000000) return (n/1000000).toFixed(1)+'M';
+    if(n>=1000) return (n/1000).toFixed(1)+'K';
+    return String(n);
   }
 
   /* ── Phase 19: Georgia Wrapped ────────────────────────────────────────── */
@@ -4706,6 +4752,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               return isFollowedBizPost || (author && (author===u.uid || state.followingIds.indexOf(author)>-1));
             });
           }
+        } else if(state.feedTag){
+          /* hashtag filter: show posts whose text contains #tag */
+          var _htag=state.feedTag.toLowerCase();
+          visible=visible.filter(function(p){
+            return p.text && p.text.toLowerCase().indexOf('#'+_htag)>-1;
+          });
         } else {
           // foryou: merge in all business page posts not already in the main feed
           if(state.bizFeedPosts.length){
@@ -4729,6 +4781,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             list.innerHTML=pageFeedEmptyHtml();
           } else if(state.feedTab === 'following'){
             list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-user-group"></i><h3>Nothing from people you follow</h3><p>Follow people and creators to see their posts here.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="gh-btn ghost" href="search.html"><i class="fas fa-search"></i>Find people</a><a class="gh-btn ghost" href="creators.html"><i class="fas fa-star"></i>Discover creators</a></div></div>';
+          } else if(state.feedTag){
+            list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-hashtag"></i><h3>#'+esc(state.feedTag)+'</h3><p>ამ ჰეშთეგით პოსტები ვერ მოიძებნა. პირველი იყავი!</p><button class="gh-btn" data-create-post><i class="fas fa-plus"></i> პოსტის გაზიარება</button></div>';
           } else {
             list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-seedling"></i><h3>Feed is empty</h3><p>Start connecting with people, groups, and businesses to fill your feed.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="gh-btn" data-create-post><i class="fas fa-plus"></i>Create post</button><a class="gh-btn ghost" href="search.html"><i class="fas fa-search"></i>Find people</a><a class="gh-btn ghost" href="groups.html"><i class="fas fa-users"></i>Join groups</a><a class="gh-btn ghost" href="business.html"><i class="fas fa-store"></i>Businesses</a><a class="gh-btn ghost" href="creators.html"><i class="fas fa-star"></i>Creators</a></div></div>';
           }
@@ -4750,9 +4804,40 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           _doPaint(visible);
         }
       }
+      /* ── Phase 21: ?tag= URL param → auto-activate hashtag tab ── */
+      if(!pageMode){
+        var _urlTag=(new URLSearchParams(location.search)).get('tag');
+        if(_urlTag){
+          _urlTag=_urlTag.toLowerCase().replace(/[^a-z0-9_ა-ჿ]/g,'');
+          if(_urlTag){
+            state.feedTag=_urlTag;
+            state.feedTab='hashtag';
+            var tabsElHt=$('#ghFeedTabs');
+            if(tabsElHt){
+              $all('.gh-pill',tabsElHt).forEach(function(p){ p.classList.remove('active'); });
+              var htBtn=document.createElement('button');
+              htBtn.className='gh-pill active gh-hashtag-tab';
+              htBtn.dataset.feedTab='hashtag';
+              htBtn.innerHTML='<i class="fas fa-hashtag" style="font-size:.75rem"></i> #'+esc(_urlTag)+' <span class="gh-htab-close" title="ფილტრის გასუფთავება">×</span>';
+              tabsElHt.appendChild(htBtn);
+              htBtn.querySelector('.gh-htab-close').addEventListener('click',function(ev){
+                ev.stopPropagation();
+                state.feedTag=''; state.feedTab='foryou'; _renderedIds={};
+                htBtn.remove();
+                var firstPill=$('.gh-pill',tabsElHt); if(firstPill) firstPill.classList.add('active');
+                history.replaceState(null,'',location.pathname);
+                paint();
+              });
+            }
+          }
+        } else {
+          state.feedTag='';
+        }
+      }
       var tabsEl=$('#ghFeedTabs');
       if(tabsEl) tabsEl.addEventListener('click',function(e){
         var btn=e.target.closest('[data-feed-tab]'); if(!btn) return;
+        if(btn.dataset.feedTab!=='hashtag') state.feedTag='';
         state.feedTab=btn.dataset.feedTab;
         $all('.gh-pill',tabsEl).forEach(function(p){p.classList.toggle('active',p===btn);});
         _dismissNewPill();

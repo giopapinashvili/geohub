@@ -3464,3 +3464,67 @@ html[data-gh-theme="dark"] .gh-live-stats { border-color: rgba(59,130,246,.18) !
   color: var(--gh-muted, #9ca3af);
   font-style: italic;
 }
+
+/* ── Phase 21: Trending Hashtags & Hashtag Links ────────── */
+a.gh-hashtag {
+  color: var(--gh-blue, #38bdf8);
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 4px;
+  padding: 0 1px;
+  transition: background .15s, color .15s;
+}
+a.gh-hashtag:hover {
+  color: #fff;
+  background: rgba(56,189,248,.18);
+  text-decoration: none;
+}
+/* Trending chips */
+.gh-trending-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 2px 0;
+}
+a.gh-trending-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px 5px 9px;
+  border-radius: 20px;
+  background: var(--gh-card-soft, rgba(17,30,25,.72));
+  border: 1px solid var(--gh-border, rgba(148,163,184,.14));
+  text-decoration: none;
+  transition: background .15s, border-color .15s, transform .12s;
+}
+a.gh-trending-chip:hover {
+  background: rgba(16,185,129,.12);
+  border-color: var(--gh-green, #10b981);
+  transform: translateY(-1px);
+}
+.gh-tc-tag {
+  color: var(--gh-blue, #38bdf8);
+  font-size: .82rem;
+  font-weight: 600;
+}
+.gh-tc-count {
+  color: var(--gh-muted, #8aa69a);
+  font-size: .72rem;
+}
+/* Hashtag tab close button */
+.gh-htab-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  font-size: .7rem;
+  margin-left: 2px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.gh-htab-close:hover {
+  background: rgba(255,255,255,.3);
+}

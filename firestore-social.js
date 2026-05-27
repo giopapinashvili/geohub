@@ -1136,6 +1136,12 @@
           return addDoc(collection(db, 'posts'), data).then(function (ref) {
             toast('Post published!');
             awardPoints(20, 'Create post', 'post', ref.id);
+            /* Phase 21: extract & count hashtags */
+            var htags=(text.match(/#[\wა-ჰა-ჿ]+/g)||[]).map(function(t){ return t.slice(1).toLowerCase(); });
+            htags.forEach(function(tag){
+              if(!tag||tag.length>50) return;
+              setDoc(doc(db,'hashtagCounts',tag),{tag:tag,count:increment(1),lastUsed:serverTimestamp()},{merge:true}).catch(function(){});
+            });
             if (callback) callback(ref.id);
           }).catch(function (err) {
             console.error('[GeoSocial] createPost', err);
