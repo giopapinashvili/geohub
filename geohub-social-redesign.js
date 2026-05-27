@@ -3669,57 +3669,139 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     gf.fs.setDoc(gf.fs.doc(gf.db,'userUiState',uid), updates, {merge:true}).catch(function(){});
   }
 
+  /* ── Phase 8: Onboarding interests list ───────────────────────────────── */
+  var OB_INTERESTS=[
+    {id:'travel',    icon:'✈️',  label:'Travel'},
+    {id:'food',      icon:'🍽️', label:'Food'},
+    {id:'nature',    icon:'🏔️', label:'Nature'},
+    {id:'culture',   icon:'🏛️', label:'Culture'},
+    {id:'sports',    icon:'⚽',  label:'Sports'},
+    {id:'music',     icon:'🎵',  label:'Music'},
+    {id:'art',       icon:'🎨',  label:'Art'},
+    {id:'business',  icon:'💼',  label:'Business'},
+    {id:'tech',      icon:'💻',  label:'Tech'},
+    {id:'nightlife', icon:'🌙',  label:'Nightlife'},
+    {id:'family',    icon:'👨‍👩‍👧', label:'Family'},
+    {id:'fashion',   icon:'👗',  label:'Fashion'}
+  ];
+
+  function _showOnboardingModal(uid, fbUser){
+    if(document.getElementById('ghObOverlay')) return;
+    var step=0;
+    var selected={};
+
+    function render(){
+      var ov=document.getElementById('ghObOverlay');
+      if(!ov){
+        ov=document.createElement('div');
+        ov.id='ghObOverlay';
+        ov.className='gh-ob-overlay';
+        document.body.appendChild(ov);
+      }
+      var dots=[0,1,2].map(function(i){ return '<div class="gh-ob-dot'+(i===step?' active':'')+'"></div>'; }).join('');
+      var panels=[_obStepWelcome(), _obStepInterests(selected), _obStepDone()];
+      ov.innerHTML='<div class="gh-ob-modal" id="ghObModal"><div class="gh-ob-progress">'+dots+'</div>'+panels[step]+'</div>';
+
+      if(step===0){
+        ov.querySelector('.gh-ob-start-btn').onclick=function(){ step=1; render(); };
+        ov.querySelector('.gh-ob-skip-link').onclick=function(){ _obDismiss(uid, selected); };
+      }
+      if(step===1){
+        ov.querySelectorAll('.gh-ob-chip').forEach(function(chip){
+          chip.onclick=function(){
+            var id=chip.dataset.id;
+            if(selected[id]){ delete selected[id]; chip.classList.remove('active'); }
+            else{ selected[id]=true; chip.classList.add('active'); }
+          };
+        });
+        ov.querySelector('.gh-ob-back-btn').onclick=function(){ step=0; render(); };
+        ov.querySelector('.gh-ob-next-btn').onclick=function(){ step=2; render(); };
+      }
+      if(step===2){
+        ov.querySelector('.gh-ob-done-btn').onclick=function(){ _obDismiss(uid, selected); };
+      }
+    }
+    render();
+  }
+
+  function _obDismiss(uid, selected){
+    _saveUiState(uid,{onboardingDismissed:true, interests:Object.keys(selected)});
+    var ov=document.getElementById('ghObOverlay');
+    if(ov){ ov.classList.add('closing'); setTimeout(function(){ ov.remove(); },350); }
+  }
+
+  function _obStepWelcome(){
+    return '<div class="gh-ob-panel">'+
+      '<div class="gh-ob-icon-hero">🌍</div>'+
+      '<h2 class="gh-ob-heading">Welcome to GeoHub!</h2>'+
+      '<p class="gh-ob-subheading">საქართველოს რეალური კომიუნიტი — ადგილები, ადამიანები და ისტორიები.</p>'+
+      '<button class="gh-ob-start-btn gh-ob-btn-primary">დაწყება <i class="fas fa-arrow-right"></i></button>'+
+      '<button class="gh-ob-skip-link">Skip</button>'+
+    '</div>';
+  }
+
+  function _obStepInterests(sel){
+    return '<div class="gh-ob-panel">'+
+      '<h2 class="gh-ob-heading">რა გაინტერესებს?</h2>'+
+      '<p class="gh-ob-subheading">აირჩიე ინტერესები — ჩვენ შენს ფიდს მოვარგებთ.</p>'+
+      '<div class="gh-ob-chips">'+
+        OB_INTERESTS.map(function(it){
+          return '<button class="gh-ob-chip'+(sel[it.id]?' active':'')+'" data-id="'+esc(it.id)+'">'+
+            '<span class="gh-ob-chip-icon">'+it.icon+'</span>'+esc(it.label)+
+          '</button>';
+        }).join('')+
+      '</div>'+
+      '<div class="gh-ob-nav">'+
+        '<button class="gh-ob-back-btn gh-ob-btn-ghost"><i class="fas fa-arrow-left"></i> უკან</button>'+
+        '<button class="gh-ob-next-btn gh-ob-btn-primary">გაგრძელება <i class="fas fa-arrow-right"></i></button>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function _obStepDone(){
+    return '<div class="gh-ob-panel">'+
+      '<div class="gh-ob-icon-hero">🎉</div>'+
+      '<h2 class="gh-ob-heading">მზად ხარ!</h2>'+
+      '<p class="gh-ob-subheading">GeoHub-ი ახლა შენს ინტერესებს მოარგებს.</p>'+
+      '<div class="gh-ob-done-links">'+
+        '<a class="gh-ob-done-item" href="profile.html"><i class="fas fa-user-circle"></i>პროფილის დასრულება</a>'+
+        '<a class="gh-ob-done-item" href="places.html"><i class="fas fa-map-marker-alt"></i>ადგილების გამოკვლევა</a>'+
+        '<a class="gh-ob-done-item" href="videos.html"><i class="fas fa-film"></i>ვიდეოების ყურება</a>'+
+      '</div>'+
+      '<button class="gh-ob-done-btn gh-ob-btn-primary">აღმოჩენის დაწყება 🚀</button>'+
+    '</div>';
+  }
+
   function maybeShowOnboarding(slot){
-    if(!slot) return;
     var gf=GF(); if(!gf||!gf.auth||!gf.authFns) return;
     var unsub=gf.authFns.onAuthStateChanged(gf.auth, function(fbUser){
       unsub();
       if(!fbUser) return;
       var uid=fbUser.uid;
       _loadUiState(uid, function(st){
-        var html='';
+        /* Profile completion prompt (inline in slot) */
+        if(slot){
+          var missingPhoto=!fbUser.photoURL;
+          var missingName=!fbUser.displayName||fbUser.displayName.trim()==='';
+          if(!st.profilePromptDismissed && (missingPhoto||missingName)){
+            var missing=missingPhoto&&missingName?'photo and display name':missingPhoto?'profile photo':'display name';
+            slot.innerHTML='<div class="gh-profile-prompt" id="ghProfilePrompt">'+
+              '<i class="fas fa-user-circle"></i>'+
+              '<div class="gh-profile-prompt-body">'+
+                '<strong>Finish setting up your profile</strong>'+
+                '<span>Add your '+esc(missing)+' so others can find you.</span>'+
+              '</div>'+
+              '<a class="gh-profile-prompt-btn" href="profile.html">Update</a>'+
+              '<button class="gh-profile-prompt-btn" style="margin-left:6px;background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);color:var(--gh-muted)" onclick="(function(){'+
+                'var e=document.getElementById(\'ghProfilePrompt\');if(e)e.remove();'+
+                'window._ghSaveUiState&&window._ghSaveUiState(\''+esc(uid)+'\',{profilePromptDismissed:true});'+
+              '})()">Dismiss</button>'+
+            '</div>';
+          }
+        }
+        /* Full-screen onboarding modal (Phase 8) */
         if(!st.onboardingDismissed){
-          html+='<div class="gh-onboard-card" id="ghOnboardCard">'+
-            '<button class="gh-onboard-x" onclick="(function(){'+
-              'var c=document.getElementById(\'ghOnboardCard\');'+
-              'if(c){c.classList.add(\'dismissing\');setTimeout(function(){c.remove();},310);}'+
-              'window._ghSaveUiState&&window._ghSaveUiState(\''+esc(uid)+'\',{onboardingDismissed:true});'+
-            '})()"><i class="fas fa-times"></i></button>'+
-            '<div class="gh-onboard-hero"><span class="gh-onboard-globe">🌍</span><div>'+
-              '<p class="gh-onboard-title">Welcome to GeoHub!</p>'+
-              '<p class="gh-onboard-desc">Georgia\'s real community platform — discover, share, connect.</p>'+
-            '</div></div>'+
-            '<div class="gh-onboard-steps">'+
-              '<a class="gh-onboard-step" href="profile.html"><i class="fas fa-user"></i>Complete your profile<i class="fas fa-chevron-right gh-onboard-arrow"></i></a>'+
-              '<a class="gh-onboard-step" href="places.html"><i class="fas fa-map-marker-alt"></i>Explore real places in Georgia<i class="fas fa-chevron-right gh-onboard-arrow"></i></a>'+
-              '<a class="gh-onboard-step" href="groups.html"><i class="fas fa-users"></i>Join or create a group<i class="fas fa-chevron-right gh-onboard-arrow"></i></a>'+
-              '<a class="gh-onboard-step" href="events.html"><i class="fas fa-calendar-alt"></i>Find upcoming events<i class="fas fa-chevron-right gh-onboard-arrow"></i></a>'+
-              '<button class="gh-onboard-step" data-create-post><i class="fas fa-pen"></i>Share your first post<i class="fas fa-chevron-right gh-onboard-arrow"></i></button>'+
-              '<button class="gh-onboard-step" style="border-color:rgba(16,185,129,.2);background:rgba(16,185,129,.06)" onclick="window._ghStartTour&&window._ghStartTour(\''+esc(uid)+'\')"><i class="fas fa-compass"></i>Take a quick tour of GeoHub<i class="fas fa-chevron-right gh-onboard-arrow"></i></button>'+
-            '</div>'+
-          '</div>';
-        }
-        var missingPhoto=!fbUser.photoURL;
-        var missingName=!fbUser.displayName||fbUser.displayName.trim()==='';
-        if(!st.profilePromptDismissed && (missingPhoto||missingName)){
-          var missing=missingPhoto&&missingName?'photo and display name':missingPhoto?'profile photo':'display name';
-          html+='<div class="gh-profile-prompt" id="ghProfilePrompt">'+
-            '<i class="fas fa-user-circle"></i>'+
-            '<div class="gh-profile-prompt-body">'+
-              '<strong>Finish setting up your profile</strong>'+
-              '<span>Add your '+esc(missing)+' so others can find you.</span>'+
-            '</div>'+
-            '<a class="gh-profile-prompt-btn" href="profile.html">Update</a>'+
-            '<button class="gh-profile-prompt-btn" style="margin-left:6px;background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);color:var(--gh-muted)" onclick="(function(){'+
-              'var e=document.getElementById(\'ghProfilePrompt\');if(e)e.remove();'+
-              'window._ghSaveUiState&&window._ghSaveUiState(\''+esc(uid)+'\',{profilePromptDismissed:true});'+
-            '})()">Dismiss</button>'+
-          '</div>';
-        }
-        if(html){
-          slot.innerHTML=html;
-          var btn=slot.querySelector('[data-create-post]');
-          if(btn) btn.onclick=function(){ openCreatePostModal&&openCreatePostModal(); };
+          _showOnboardingModal(uid, fbUser);
         }
       });
     });
