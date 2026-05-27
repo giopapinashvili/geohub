@@ -1265,6 +1265,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button class="gh-cmp-tool" id="ghToggleEmoji" type="button" title="Emoji"><i class="fas fa-face-grin"></i><span>Emoji</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleGif" type="button" title="Add GIF"><i class="fas fa-film"></i><span>GIF</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleCoAuthor" type="button" title="Tag co-author"><i class="fas fa-user-plus"></i><span>Tag</span></button>'+
+        '<button class="gh-cmp-tool" id="ghToggleCategory" type="button" title="Post category"><i class="fas fa-tag"></i><span>Topic</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleSchedule" type="button" title="Schedule post"><i class="fas fa-clock"></i><span>Schedule</span></button>'+
       '</div>'+
       '<div class="gh-gif-panel" id="ghGifPanel" style="display:none">'+
@@ -1275,6 +1276,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<img id="ghGifPreviewImg" src="" alt="Selected GIF" style="max-height:180px;border-radius:10px;max-width:100%">'+
         '<button type="button" class="gh-gif-remove-btn" id="ghGifRemoveBtn" title="Remove GIF"><i class="fas fa-times"></i></button>'+
       '</div>'+
+      '<div class="gh-category-panel" id="ghCategoryPanel" style="display:none">'+
+        '<div class="gh-cat-label"><i class="fas fa-tag"></i> Choose a topic</div>'+
+        '<div class="gh-cat-grid">'+
+          ['Travel ✈️','Food 🍕','Business 💼','Nature 🌿','Tech 💻','Sport ⚽','Music 🎵','Art 🎨','News 📰','Humor 😂'].map(function(c){
+            var id=c.split(' ')[0].toLowerCase();
+            return '<button type="button" class="gh-cat-btn" data-cat="'+id+'">'+c+'</button>';
+          }).join('')+
+        '</div>'+
+      '</div>'+
+      '<div id="ghCategoryChip" class="gh-cat-chip-wrap" style="display:none"><span class="gh-cat-chip" id="ghCatChipLabel"></span><button type="button" id="ghClearCategory" title="Remove">×</button></div>'+
       '<div class="gh-coauthor-panel" id="ghCoAuthorPanel" style="display:none">'+
         '<div class="gh-coa-search-row">'+
           '<i class="fas fa-user-plus" style="color:var(--gh-green,#2d6a4f);flex-shrink:0"></i>'+
@@ -1437,6 +1448,33 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         });
       },300);
     });
+
+    // Phase 46: Category
+    var selectedCategory='';
+    var _catBtn=document.getElementById('ghToggleCategory');
+    var _catPanel=document.getElementById('ghCategoryPanel');
+    var _catChipWrap=document.getElementById('ghCategoryChip');
+    var _catChipLabel=document.getElementById('ghCatChipLabel');
+    var _clearCat=document.getElementById('ghClearCategory');
+    function _setCategory(cat){
+      selectedCategory=cat;
+      if(_catChipLabel) _catChipLabel.textContent=cat;
+      if(_catChipWrap) _catChipWrap.style.display=cat?'flex':'none';
+      if(_catBtn) _catBtn.classList.toggle('active',!!cat);
+      if(_catPanel) _catPanel.style.display='none';
+    }
+    if(_catBtn) _catBtn.addEventListener('click',function(){
+      if(!_catPanel) return;
+      var open=_catPanel.style.display!=='none';
+      _catPanel.style.display=open?'none':'block';
+    });
+    if(_catPanel) _catPanel.addEventListener('click',function(e){
+      var b=e.target.closest('.gh-cat-btn'); if(!b) return;
+      _setCategory(b.dataset.cat===selectedCategory?'':b.dataset.cat);
+      // Highlight selected
+      _catPanel.querySelectorAll('.gh-cat-btn').forEach(function(btn){ btn.classList.toggle('active',btn.dataset.cat===selectedCategory); });
+    });
+    if(_clearCat) _clearCat.addEventListener('click',function(){ _setCategory(''); });
 
     // Phase 39: Schedule
     function _updateScheduleIndicator(){
@@ -1686,7 +1724,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         linkPreview: state._lpData||null,
         mentions: extractMentions(txt),
         gifUrl: pickedGifUrl||null,
-        coAuthors: coAuthors.length ? coAuthors : null
+        coAuthors: coAuthors.length ? coAuthors : null,
+        category: selectedCategory||null
       }, extra||{});
       // Phase 39: scheduled post
       if(scheduledAt && scheduledAt>new Date()){ payload.status='scheduled'; payload.scheduledAt=scheduledAt; }
@@ -2301,6 +2340,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       ? ' · <a href="business.html?id='+encodeURIComponent(biz.id||'')+'" class="gh-biz-posted-on">on '+esc(biz.title||'Business')+'</a>'
       : '';
 
+    // Phase 46: category badge
+    var CAT_ICONS={travel:'✈️',food:'🍕',business:'💼',nature:'🌿',tech:'💻',sport:'⚽',music:'🎵',art:'🎨',news:'📰',humor:'😂'};
+    var categoryBadge = p.category ? '<a class="gh-cat-badge" href="feed.html?cat='+encodeURIComponent(p.category)+'" onclick="event.stopPropagation()">'+(CAT_ICONS[p.category]||'🏷️')+' '+esc(p.category.charAt(0).toUpperCase()+p.category.slice(1))+'</a>' : '';
+
     // Phase 45: co-authors "with X, Y"
     var coAuthorHtml = '';
     if(p.coAuthors && p.coAuthors.length){
@@ -2442,7 +2485,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       repostBanner+
       followedPageBanner+
       pinBanner+
-      '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+avatarAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><div class="gh-post-name-row"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a>'+coAuthorHtml+'</div><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+target+(p.feeling?' · '+esc(p.feeling):'')+bizPostedOnHtml+(readTimeBadge?' · '+readTimeBadge:'')+'</div></div>'+moreBtn+'</div>'+
+      '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+avatarAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><div class="gh-post-name-row"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a>'+coAuthorHtml+'</div><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+target+(p.feeling?' · '+esc(p.feeling):'')+(categoryBadge?' · '+categoryBadge:'')+bizPostedOnHtml+(readTimeBadge?' · '+readTimeBadge:'')+'</div></div>'+moreBtn+'</div>'+
       postTextHtml+
       translateHtml+
       mediaHtml+

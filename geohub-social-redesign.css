@@ -3921,6 +3921,79 @@ a.gh-trending-chip:hover {
   margin: 8px 0;
 }
 
+/* ── Phase 46: Post Categories ──────────────────────── */
+.gh-category-panel {
+  margin: 0 12px 8px;
+  background: var(--gh-panel, #1c2b26);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.gh-cat-label {
+  font-size: .78rem;
+  color: var(--gh-muted, #8aa69a);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.gh-cat-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.gh-cat-btn {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  color: var(--gh-text, #e0ede8);
+  font-size: .8rem;
+  cursor: pointer;
+  transition: background .12s, border-color .12s;
+}
+.gh-cat-btn:hover, .gh-cat-btn.active {
+  background: rgba(45,106,79,.35);
+  border-color: var(--gh-green, #2d6a4f);
+  color: #d1fae5;
+}
+.gh-cat-chip-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 12px 6px;
+}
+.gh-cat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(45,106,79,.25);
+  border: 1px solid rgba(45,106,79,.5);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: .78rem;
+  color: #d1fae5;
+}
+.gh-cat-chip-wrap button {
+  background: none; border: none; cursor: pointer;
+  color: var(--gh-muted, #8aa69a); font-size: 1rem; line-height: 1; padding: 0;
+}
+/* In post card */
+.gh-cat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: .72rem;
+  padding: 1px 8px;
+  border-radius: 12px;
+  background: rgba(45,106,79,.2);
+  color: #a7f3d0;
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.gh-cat-badge:hover { background: rgba(45,106,79,.4); }
+
 /* ── Phase 45: Co-Authors ────────────────────────────── */
 .gh-coauthor-panel {
   margin: 0 12px 8px;
