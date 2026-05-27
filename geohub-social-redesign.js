@@ -542,6 +542,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-nav-sec-list'+(exp?' open':'') +'" id="ghNavSecList">'+
         SECONDARY.map(function(it){ return navItem(it,true); }).join('')+
       '</div>'+
+      '<button class="gh-nav-item gh-live-nav-btn" data-go-live onclick="if(window.ghOpenGoLive)ghOpenGoLive()"><i class="fas fa-video"></i><span>Go Live</span></button>'+
       '<button class="gh-nav-tour-btn" data-start-tour><i class="fas fa-question-circle"></i><span>How GeoHub works</span></button>'+
     '</nav></aside>';
   }
@@ -1266,6 +1267,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button class="gh-cmp-tool" id="ghToggleGif" type="button" title="Add GIF"><i class="fas fa-film"></i><span>GIF</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleCoAuthor" type="button" title="Tag co-author"><i class="fas fa-user-plus"></i><span>Tag</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleCategory" type="button" title="Post category"><i class="fas fa-tag"></i><span>Topic</span></button>'+
+        '<button class="gh-cmp-tool" id="ghAiCaption" type="button" title="AI Caption suggestions"><i class="fas fa-wand-magic-sparkles"></i><span>AI</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleSchedule" type="button" title="Schedule post"><i class="fas fa-clock"></i><span>Schedule</span></button>'+
       '</div>'+
       '<div class="gh-gif-panel" id="ghGifPanel" style="display:none">'+
@@ -1275,6 +1277,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-gif-selected-preview" id="ghGifPreview" style="display:none">'+
         '<img id="ghGifPreviewImg" src="" alt="Selected GIF" style="max-height:180px;border-radius:10px;max-width:100%">'+
         '<button type="button" class="gh-gif-remove-btn" id="ghGifRemoveBtn" title="Remove GIF"><i class="fas fa-times"></i></button>'+
+      '</div>'+
+      '<div class="gh-ai-panel" id="ghAiPanel" style="display:none">'+
+        '<div class="gh-ai-panel-header"><i class="fas fa-wand-magic-sparkles" style="color:#a78bfa"></i> AI Caption Suggestions</div>'+
+        '<div id="ghAiSuggestions" class="gh-ai-suggestions"><div class="gh-ai-loading"><i class="fas fa-circle-notch fa-spin"></i> Generating…</div></div>'+
       '</div>'+
       '<div class="gh-category-panel" id="ghCategoryPanel" style="display:none">'+
         '<div class="gh-cat-label"><i class="fas fa-tag"></i> Choose a topic</div>'+
@@ -1475,6 +1481,69 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       _catPanel.querySelectorAll('.gh-cat-btn').forEach(function(btn){ btn.classList.toggle('active',btn.dataset.cat===selectedCategory); });
     });
     if(_clearCat) _clearCat.addEventListener('click',function(){ _setCategory(''); });
+
+    // Phase 50: AI Caption
+    var _aiBtn=document.getElementById('ghAiCaption');
+    var _aiPanel=document.getElementById('ghAiPanel');
+    var _aiSugg=document.getElementById('ghAiSuggestions');
+    var _AI_CAPTIONS={
+      travel:['კვლავ გზაში ✈️ სამყარო ველოდება ჩვენს აღმოჩენას','ყოველი ახალი ადგილი — ახალი ამბავი 🌍','მგზავრობა ეს ცხოვრება. ყველა დანარჩენი უბრალოდ დეტალებია 🗺️'],
+      food:['ჭამა ეს ხელოვნებაა, მხოლოდ სრულყოფილი ინგრედიენტებია საჭირო 🍽️','გემო, რომელიც სიტყვებით ვერ გამოიხატება 😍','ყველაზე კარგი საუბრები — საჭმლის გვერდით ხდება ☕'],
+      business:['წარმატება ეს სამსახური, არა საიდუმლო 💼','ყოველი დიდი სტარტაპი ერთი იდეიდან დაიწყო 🚀','ბიზნესი = ადამიანები. ყველა სხვა — სტრატეგია 🎯'],
+      nature:['ბუნება ყველაზე კარგი არქიტექტორია 🌿','ამ სიჩუმეში მოვისმინე ყველაზე ლამაზი მუსიკა 🌲','ყოველი გამთენია ახალი შანსია 🌅'],
+      tech:['კოდი ეს ახალი ენაა — ვისაუბრებ ყველასთვის 💻','ტექნოლოგია ცვლის სამყაროს, ჩვენ ვცვლით ტექნოლოგიას ⚡','ინოვაცია — ბუნდოვანი მომავლის ერთადერთი სარკმელი 🔭'],
+      sport:['ლიმიტი მხოლოდ შენს თავშია 💪','ყოველი ვარჯიში — ნაბიჯი მიზნისკენ 🏆','სიმძიმე, ოფლი, გამარჯვება. ეს ჩემი ფორმულაა ⚽'],
+      music:['მუსიკა ეს სული, რომელიც ყოველთვის ესმის 🎵','ამ სიმღერაში ჩემი მთელი ამბავია 🎸','ახლა ვუსმენ — ყველა სხვა ითვლება 🎶'],
+      art:['ხელოვნება = გამბედაობა + სიყვარული 🎨','ეს ნახატი 1000 სიტყვად ლაპარაკობს ✨','შემოქმედება ჩვენი ენაა, ვინც ვისი გამოხატვა ვეცდება 🖌️'],
+      news:['რეალობა ხანდახან ყველა ფიქციიდან სიურელია 📰','ვამახინჯებ? ვჩვენ? ვახმახინჯებ ▸ ვიდეო ბმული ბიოში','დღეს ყველა ამბობს — მხოლოდ ფაქტებს ვიტყვი 📢'],
+      humor:['ჩემი ჰიუმორი — ჩემი სუფთა ოქრო 😂','ცხოვრება ძალიან მოკლეა სერიოზულობისთვის 🤣','ვინც არ სეირი — ლინქი ბიოში 😏']
+    };
+    var _AI_DEFAULT=['GeoHub-ზე ყოველი მომენტი ისტორიაა ✨','გაიზიარე შენი სამყარო 🌍','დღეს ეს, ხვალ — რა მოვა 🔥'];
+    var _AI_GEO=['დღეს საქართველოში ყველაზე ლამაზ ადგილას ვარ 🇬🇪','ჩვენი ქვეყნის ყოველი კუთხე — ულამაზესი ამბავია 🏔️','GeoHub — ქართულ სიამაყეს ვუზიარებ სამყაროს 🌟'];
+    function _genAiCaptions(){
+      var cat=selectedCategory||'';
+      var feel=selectedFeeling||'';
+      var txt=(ta&&ta.value)||'';
+      var kaCount=(txt.match(/[ა-ჿ]/g)||[]).length;
+      var isGeoText=txt.length>0&&kaCount/txt.length>0.3;
+      var pool=_AI_CAPTIONS[cat]||(isGeoText?_AI_GEO:_AI_DEFAULT);
+      // Shuffle + take 3
+      var shuffled=pool.slice().sort(function(){return Math.random()-.5;});
+      return shuffled.slice(0,3);
+    }
+    if(_aiBtn) _aiBtn.addEventListener('click',function(){
+      if(!_aiPanel) return;
+      var open=_aiPanel.style.display!=='none';
+      _aiPanel.style.display=open?'none':'block';
+      _aiBtn.classList.toggle('active',!open);
+      if(open) return;
+      if(_aiSugg) _aiSugg.innerHTML='<div class="gh-ai-loading"><i class="fas fa-circle-notch fa-spin"></i> Generating…</div>';
+      setTimeout(function(){
+        var captions=_genAiCaptions();
+        if(!_aiSugg) return;
+        _aiSugg.innerHTML=captions.map(function(c,i){
+          return '<button type="button" class="gh-ai-opt" data-ai-caption="'+esc(c)+'">'+
+            '<span class="gh-ai-num">'+(i+1)+'</span>'+
+            '<span>'+esc(c)+'</span>'+
+            '<span class="gh-ai-use">Use</span>'+
+          '</button>';
+        }).join('');
+        _aiSugg.addEventListener('click',function(e){
+          var btn=e.target.closest('.gh-ai-opt'); if(!btn) return;
+          var cap=btn.dataset.aiCaption||'';
+          if(ta){
+            var v=ta.value; var cur=ta.selectionStart||v.length;
+            ta.value=(v?v+'\n':'')+cap;
+            ta.selectionStart=ta.selectionEnd=ta.value.length;
+            ta.dispatchEvent(new Event('input',{bubbles:true}));
+          }
+          _aiPanel.style.display='none';
+          _aiBtn.classList.remove('active');
+          ta&&ta.focus();
+          toast('✨ Caption added!');
+        });
+      },600);
+    });
 
     // Phase 39: Schedule
     function _updateScheduleIndicator(){
@@ -2493,7 +2562,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       linkPrevHtml+
       (p.sharedPostId?'<div class="gh-shared-preview" data-shared-post="'+esc(p.sharedPostId)+'"><i class="fas fa-share"></i><div><strong>Shared post</strong><span>Loading original post...</span></div></div>':'')+
       viewCountHtml+
-      '<div class="gh-post-stats"><span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'">❤️ <b data-like-count>'+totalRx+'</b>'+(totalRx?' people reacted':'')+'</button></span><span><button class="gh-stats-btn" data-open-comments-btn><b data-comment-count>'+Math.max(0,Number(p.commentCount||0))+'</b> comments</button> · <button class="gh-stats-btn" data-open-shares-btn><b data-share-count>'+Number(p.shareCount||0)+'</b> shares</button></span></div>'+
+      '<div class="gh-post-stats"><span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'">❤️ <b data-like-count>'+totalRx+'</b>'+(totalRx?' people reacted':'')+'</button></span><span><button class="gh-stats-btn" data-open-comments-btn><b data-comment-count>'+Math.max(0,Number(p.commentCount||0))+'</b> comments</button> · <button class="gh-stats-btn" data-open-shares-btn><b data-share-count>'+Number(p.shareCount||0)+'</b> shares</button>'+(Number(p.viewCount||0)>0?' · <span class="gh-view-count"><i class="fas fa-eye"></i> <span data-view-count>'+Number(p.viewCount||0)+'</span></span>':'')+'</span></div>'+
       '<div class="gh-rx-breakdown" data-rx-pid="'+esc(pid)+'"></div>'+
       '<div class="gh-post-actions"><span class="gh-like-wrap"><button class="gh-act" data-like>❤️ Like</button><div class="gh-reaction-strip"><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button><button data-reaction="clap">👏</button></div></span><button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> Comment</button><button class="gh-act" data-share><i class="fas fa-share"></i> Share</button><button class="gh-act" data-save><i class="fas fa-bookmark"></i> Save</button></div>'+
       '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+cmtFormHtml+'</div>'+
@@ -2831,6 +2900,18 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       });
     });
     cards.forEach(function(card){ if(card.querySelector('[data-poll-pid]')){ hydratePollVote(postId); hydratePollLive(card,postId); } });
+    // Phase 49: track view once per session using IntersectionObserver
+    var firstCard=cards[0];
+    if(firstCard&&!firstCard._viewTracked&&u&&fs()&&db()){
+      var _obs=new IntersectionObserver(function(entries,obs){
+        if(entries[0]&&entries[0].isIntersecting){
+          firstCard._viewTracked=true;
+          obs.disconnect();
+          fs().updateDoc(fs().doc(db(),'posts',postId),{viewCount:fs().increment(1)}).catch(function(){});
+        }
+      },{threshold:0.6});
+      _obs.observe(firstCard);
+    }
   }
 
   function setReaction(postId, type, card){
@@ -3485,8 +3566,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var items = '<div class="gh-pmenu-list">';
     if (isOwn) {
       items += '<button class="gh-pmenu-item" data-menu-edit-post><i class="fas fa-pen"></i> Edit post</button>';
-      items += '<button class="gh-pmenu-item danger" data-menu-delete-post><i class="fas fa-trash"></i> Delete post</button>';
+      items += '<button class="gh-pmenu-item" data-menu-analytics><i class="fas fa-chart-bar"></i> View Analytics</button>';
       items += '<button class="gh-pmenu-item" data-menu-pin><i class="fas fa-thumbtack"></i> Pin to profile</button>';
+      items += '<button class="gh-pmenu-item danger" data-menu-delete-post><i class="fas fa-trash"></i> Delete post</button>';
       items += '<div class="gh-pmenu-sep"></div>';
     }
     items += '<button class="gh-pmenu-item" data-copy-post-link><i class="fas fa-link"></i> Copy link</button>';
@@ -3530,6 +3612,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if (e.target.closest('[data-copy-post-link]')) { navigator.clipboard && navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast('Link copied!');}); closeDrop(); return; }
       if (e.target.closest('[data-menu-save]')) { if(GS().toggleSavePost) GS().toggleSavePost(pid); closeDrop(); return; }
       if (e.target.closest('[data-menu-save-col]')) { closeDrop(); openSaveToCollection(pid); return; }
+      if (e.target.closest('[data-menu-analytics]') && isOwn) { closeDrop(); _openPostAnalytics(pid, card); return; }
       if (e.target.closest('[data-menu-pin]') && isOwn) { closeDrop(); _pinPostToProfile(pid); return; }
       if (e.target.closest('[data-menu-hide]')) { if(GS().hidePost) GS().hidePost(pid, function(){ if(card) card.remove(); }); closeDrop(); return; }
       if (e.target.closest('[data-menu-report]')) { closeDrop(); if(window.GeoModeration) window.GeoModeration.openReportModal('post', pid, ''); else if(GS().reportTarget) GS().reportTarget('post', pid, 'Reported'); return; }
@@ -4446,6 +4529,157 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       })
       .catch(function(){toast('Translation failed','error');btn.innerHTML='🌐 Translate';btn.disabled=false;});
   }
+
+  /* ── Phase 49: Post Analytics Dashboard ─────────────────── */
+  function _openPostAnalytics(pid, card){
+    if(!fs()||!db()) return;
+    var m=modal('📊 Post Analytics',
+      '<div class="gh-analytics-wrap" id="ghAnalyticsWrap">'+
+        '<div class="gh-analytics-loading"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>'+
+      '</div>',
+      '<button class="gh-btn ghost" data-close-modal>Close</button>',
+      'ghPostAnalyticsModal'
+    );
+    var box=document.getElementById('ghAnalyticsWrap');
+
+    // Fetch post doc + reactions subcollection in parallel
+    Promise.all([
+      fs().getDoc(fs().doc(db(),'posts',pid)),
+      fs().getDocs(fs().query(fs().collection(db(),'posts',pid,'reactions'),fs().limit(200)))
+    ]).then(function(results){
+      var postSnap=results[0], rxSnap=results[1];
+      var p=postSnap.data()||{};
+      var views=Number(p.viewCount||0);
+      var likes=Number(p.likeCount||p.reactionCount||0);
+      var comments=Number(p.commentCount||0);
+      var shares=Number(p.shareCount||0);
+      var saves=Number(p.saveCount||0);
+      var reshares=Number(p.reshareCount||0);
+
+      // Reaction breakdown
+      var rxCounts={};
+      rxSnap.forEach(function(d){ var t=(d.data()||{}).type||'love'; rxCounts[t]=(rxCounts[t]||0)+1; });
+      var rxTotal=rxSnap.size;
+      var rxTypes=Object.keys(rxCounts).sort(function(a,b){return rxCounts[b]-rxCounts[a];});
+
+      // Engagement rate = (likes + comments + shares) / max(views, 1)
+      var eng=views>0?Math.round((likes+comments+shares)/views*100):0;
+
+      var statRow=function(icon,label,val,color){
+        return '<div class="gh-anl-row"><span class="gh-anl-icon" style="color:'+color+'"><i class="fas '+icon+'"></i></span>'+
+          '<span class="gh-anl-label">'+label+'</span>'+
+          '<span class="gh-anl-val">'+val+'</span></div>';
+      };
+
+      // SVG bar chart for reactions
+      var chartHtml='';
+      if(rxTypes.length){
+        var maxRx=rxCounts[rxTypes[0]]||1;
+        chartHtml='<div class="gh-anl-chart-title">Reaction Breakdown</div>'+
+          '<div class="gh-anl-chart">'+
+            rxTypes.map(function(t){
+              var pct=Math.round(rxCounts[t]/maxRx*100);
+              var totalPct=rxTotal?Math.round(rxCounts[t]/rxTotal*100):0;
+              return '<div class="gh-anl-bar-row">'+
+                '<span class="gh-anl-bar-emoji">'+(RX_EMOJIS[t]||'❤️')+'</span>'+
+                '<div class="gh-anl-bar-wrap"><div class="gh-anl-bar-fill" style="width:'+pct+'%"></div></div>'+
+                '<span class="gh-anl-bar-num">'+rxCounts[t]+' <span class="gh-anl-bar-pct">('+totalPct+'%)</span></span>'+
+              '</div>';
+            }).join('')+
+            '<div class="gh-anl-total">'+rxTotal+' total reactions</div>'+
+          '</div>';
+      }
+
+      if(box) box.innerHTML=
+        '<div class="gh-anl-stats">'+
+          statRow('fa-eye','Views',views,'#60a5fa')+
+          statRow('fa-heart','Reactions',likes,'#f87171')+
+          statRow('fa-comment','Comments',comments,'#34d399')+
+          statRow('fa-share','Shares',shares,'#a78bfa')+
+          (reshares?statRow('fa-retweet','Reposts',reshares,'#fb923c'):'')+
+          (saves?statRow('fa-bookmark','Saves',saves,'#fbbf24'):'')+
+          statRow('fa-chart-line','Engagement',eng+'%','#2d6a4f')+
+        '</div>'+chartHtml;
+    }).catch(function(e){
+      if(box) box.innerHTML='<div class="gh-muted" style="padding:16px;text-align:center">Could not load analytics.</div>';
+    });
+
+    // Increment viewCount on the post each time analytics is opened (owner only)
+    fs().updateDoc(fs().doc(db(),'posts',pid),{viewCount:fs().increment(1)}).catch(function(){});
+    // Also update card display
+    if(card){
+      var vcEl=card.querySelector('[data-view-count]');
+      if(vcEl) vcEl.textContent=Number(vcEl.textContent||0)+1;
+    }
+  }
+
+  /* ── Phase 48: Live Streaming Indicator ─────────────────── */
+  function _openGoLiveModal(){
+    var u=authUser(); if(!u) return requireLogin();
+    var f=fs(), d=db(); if(!f||!d) return;
+    // Check current live status
+    f.getDoc(f.doc(d,'users',u.uid)).then(function(snap){
+      var userData=snap.data()||{};
+      var isLive=!!userData.isLive;
+      var liveUrl=userData.liveUrl||'';
+
+      var body=
+        '<div class="gh-live-modal-body">'+
+          (isLive
+            ? '<div class="gh-live-indicator-big"><span class="gh-live-dot"></span><strong>You are LIVE</strong></div>'+
+              '<p class="gh-muted" style="font-size:.82rem;text-align:center">Click "End Live" to stop your broadcast.</p>'+
+              (liveUrl?'<div class="gh-live-url-display"><i class="fas fa-link"></i> <a href="'+esc(liveUrl)+'" target="_blank" rel="noopener">'+esc(liveUrl)+'</a></div>':'')
+            : '<div class="gh-live-pre-desc"><i class="fas fa-video" style="font-size:2rem;color:var(--gh-green,#2d6a4f)"></i><p>Start a live broadcast. Share a stream link (YouTube Live, Zoom, etc.) or just go live without a link.</p></div>'+
+              '<input class="gh-input" id="ghLiveUrlInput" placeholder="Stream URL (optional — YouTube, Zoom, Meet…)" value="'+esc(liveUrl)+'" style="margin-top:10px">')+
+        '</div>';
+
+      var footerBtns=isLive
+        ? '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn danger" id="ghEndLiveBtn">🔴 End Live</button>'
+        : '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghStartLiveBtn" style="background:#ef4444;border-color:#ef4444">🔴 Go Live!</button>';
+
+      var m=modal(isLive?'🔴 You\'re Live':'🔴 Go Live', body, footerBtns, 'ghGoLiveModal');
+
+      if(!isLive){
+        var startBtn=document.getElementById('ghStartLiveBtn');
+        if(startBtn) startBtn.addEventListener('click',function(){
+          var url=(document.getElementById('ghLiveUrlInput')||{}).value||'';
+          startBtn.disabled=true; startBtn.textContent='Starting…';
+          f.updateDoc(f.doc(d,'users',u.uid),{isLive:true,liveUrl:url.trim(),liveStartedAt:f.serverTimestamp()})
+            .then(function(){
+              if(m) m.remove();
+              toast('🔴 You are now LIVE!');
+              _updateLiveBadge(true);
+            }).catch(function(e){ toast('Could not start live: '+(e.message||e.code),'error'); startBtn.disabled=false; startBtn.textContent='🔴 Go Live!'; });
+        });
+      } else {
+        var endBtn=document.getElementById('ghEndLiveBtn');
+        if(endBtn) endBtn.addEventListener('click',function(){
+          endBtn.disabled=true; endBtn.textContent='Ending…';
+          f.updateDoc(f.doc(d,'users',u.uid),{isLive:false,liveUrl:'',liveStartedAt:null})
+            .then(function(){
+              if(m) m.remove();
+              toast('Live ended');
+              _updateLiveBadge(false);
+            }).catch(function(e){ toast('Could not end live','error'); endBtn.disabled=false; endBtn.textContent='🔴 End Live'; });
+        });
+      }
+    }).catch(function(){ toast('Could not load live status','error'); });
+  }
+
+  function _updateLiveBadge(isLive){
+    $all('[data-live-badge]').forEach(function(b){
+      b.style.display=isLive?'flex':'none';
+      b.textContent=isLive?'LIVE':'';
+    });
+    var goLiveBtns=$all('[data-go-live]');
+    goLiveBtns.forEach(function(btn){
+      btn.classList.toggle('active',isLive);
+      btn.innerHTML=isLive?'<i class="fas fa-circle-dot" style="color:#ef4444"></i> Live':'<i class="fas fa-video"></i> Go Live';
+    });
+  }
+
+  // Expose so external pages can call it
+  window.ghOpenGoLive = _openGoLiveModal;
 
   /* ── Phase 32: Emoji Picker ──────────────────────────────── */
   var _EMOJIS = '😀 😂 🥹 😊 😍 🤩 😎 😢 😭 🤯 😤 😠 🥺 😴 🤗 🥰 😏 🙄 😬 🫡 👍 👎 👋 🤝 ✌️ 🤞 🤟 👏 🙏 💪 🫶 🤜 🤛 ☝️ 👌 ❤️ 🧡 💛 💚 💙 💜 🖤 🤍 💕 💞 💓 💗 💖 💝 💘 💔 🎉 🎊 🎁 🎈 🎂 🏆 🥇 🎯 🎮 🎸 🎵 🎶 🔥 ⭐ ✨ 🌟 💫 🌍 🌈 ☀️ 🌙 ❄️ 🌊 🌺 🌸 🌻 🍀 🌿 🍕 🍔 🌮 🍜 🍣 🍩 🍦 🍰 🍷 🍺 ☕ 🧃 🍎 🍓 🐱 🐶 🐻 🦊 🐼 🐸 🦁 🐯 🐷 🐮 🐙 🦋 🐝'.split(' ');

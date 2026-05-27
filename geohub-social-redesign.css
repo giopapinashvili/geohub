@@ -3921,6 +3921,148 @@ a.gh-trending-chip:hover {
   margin: 8px 0;
 }
 
+/* ── Phase 50: AI Caption Suggestions ───────────────── */
+.gh-ai-panel {
+  margin: 0 12px 8px;
+  background: linear-gradient(135deg, rgba(167,139,250,.12), rgba(109,40,217,.08));
+  border: 1px solid rgba(167,139,250,.25);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.gh-ai-panel-header {
+  padding: 8px 12px 4px;
+  font-size: .78rem;
+  font-weight: 700;
+  color: #c4b5fd;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.gh-ai-suggestions { display: flex; flex-direction: column; gap: 2px; padding: 4px 8px 8px; }
+.gh-ai-loading { text-align: center; padding: 12px; font-size: .8rem; color: #c4b5fd; }
+.gh-ai-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(167,139,250,.15);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--gh-text, #e0ede8);
+  font-size: .83rem;
+  text-align: left;
+  transition: background .12s, border-color .12s;
+}
+.gh-ai-opt:hover { background: rgba(167,139,250,.15); border-color: rgba(167,139,250,.4); }
+.gh-ai-num {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(167,139,250,.25);
+  color: #c4b5fd;
+  font-size: .65rem;
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.gh-ai-use {
+  margin-left: auto;
+  font-size: .7rem;
+  color: #a78bfa;
+  font-weight: 700;
+  white-space: nowrap;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(167,139,250,.15);
+}
+.gh-ai-opt span:nth-child(2) { flex: 1; }
+
+/* ── Phase 49: Post Analytics Dashboard ─────────────── */
+.gh-analytics-wrap { padding: 4px 0; }
+.gh-analytics-loading { text-align: center; padding: 24px; color: var(--gh-muted, #8aa69a); }
+.gh-anl-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.gh-anl-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,.04);
+  border-radius: 10px;
+}
+.gh-anl-icon { width: 28px; text-align: center; font-size: 1rem; flex-shrink: 0; }
+.gh-anl-label { flex: 1; font-size: .85rem; color: var(--gh-text, #e0ede8); }
+.gh-anl-val { font-size: 1.1rem; font-weight: 800; color: var(--gh-text, #e0ede8); min-width: 40px; text-align: right; }
+.gh-anl-chart-title {
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--gh-muted, #8aa69a);
+  margin-bottom: 8px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.gh-anl-chart { display: flex; flex-direction: column; gap: 8px; }
+.gh-anl-bar-row { display: flex; align-items: center; gap: 8px; }
+.gh-anl-bar-emoji { font-size: 1rem; flex-shrink: 0; }
+.gh-anl-bar-wrap { flex: 1; height: 8px; background: rgba(255,255,255,.08); border-radius: 4px; overflow: hidden; }
+.gh-anl-bar-fill { height: 100%; background: var(--gh-green, #2d6a4f); border-radius: 4px; transition: width .5s cubic-bezier(.4,0,.2,1); }
+.gh-anl-bar-num { font-size: .78rem; min-width: 60px; text-align: right; color: var(--gh-text, #e0ede8); }
+.gh-anl-bar-pct { color: var(--gh-muted, #8aa69a); }
+.gh-anl-total { margin-top: 4px; font-size: .72rem; color: var(--gh-muted, #8aa69a); text-align: right; }
+/* View count in post stats */
+.gh-view-count { font-size: .78rem; color: var(--gh-muted, #8aa69a); display: inline-flex; align-items: center; gap: 3px; }
+.gh-view-count i { font-size: .65rem; }
+
+/* ── Phase 48: Live Streaming ────────────────────────── */
+.gh-live-nav-btn { color: #ef4444 !important; }
+.gh-live-nav-btn i { color: #ef4444; }
+.gh-live-nav-btn.active { background: rgba(239,68,68,.15) !important; }
+.gh-live-indicator-big {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ef4444;
+}
+.gh-live-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: #ef4444;
+  animation: gh-live-pulse 1.2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes gh-live-pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .5; transform: scale(1.3); }
+}
+.gh-live-pre-desc {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+  text-align: center;
+  color: var(--gh-text, #e0ede8);
+  font-size: .88rem;
+}
+.gh-live-url-display {
+  padding: 8px 12px;
+  background: rgba(255,255,255,.06);
+  border-radius: 8px;
+  font-size: .8rem;
+  color: var(--gh-muted, #8aa69a);
+  word-break: break-all;
+}
+.gh-live-url-display a { color: var(--gh-green, #2d6a4f); }
+.gh-btn.danger { background: #ef4444 !important; border-color: #ef4444 !important; }
+
 /* ── Phase 46: Post Categories ──────────────────────── */
 .gh-category-panel {
   margin: 0 12px 8px;
