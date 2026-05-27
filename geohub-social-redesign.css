@@ -3921,6 +3921,18 @@ a.gh-trending-chip:hover {
   margin: 8px 0;
 }
 
+/* ── Phase 44: Repost ────────────────────────────────── */
+.gh-repost-banner {
+  padding: 6px 16px;
+  font-size: .78rem;
+  color: var(--gh-muted, #8aa69a);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.gh-repost-banner i { color: var(--gh-green, #2d6a4f); }
+.gh-repost-icon { color: var(--gh-green, #2d6a4f) !important; }
+
 /* ── Phase 43: GIF Picker ────────────────────────────── */
 .gh-gif-panel {
   margin: 0 12px 8px;

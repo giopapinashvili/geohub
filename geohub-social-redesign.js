@@ -2310,6 +2310,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     // Phase 41: translate button (only when post has text)
     var translateHtml = p.text ? '<div class="gh-post-translate"><button class="gh-translate-btn" data-translate data-translate-text="'+esc((p.text||'').slice(0,500))+'">🌐 Translate</button><div class="gh-translate-result" data-translate-result hidden></div></div>' : '';
 
+    // Phase 44: Repost banner
+    var repostBanner = p.isRepost ? '<div class="gh-repost-banner"><i class="fas fa-retweet"></i> <strong>'+esc(name)+'</strong> reposted</div>' : '';
+
     // Business context extras
     var pinBanner = (bizCtx && p.pinned) ? '<div class="gh-post-pinned-banner"><i class="fas fa-thumbtack"></i> Pinned post</div>' : '';
     var followedPageBanner = options.fromFollowedPage ? '<a class="gh-followed-page-banner" href="business.html?id='+esc(p.targetId||p.businessId||'')+'"><i class="fas fa-store"></i> From a page you follow</a>' : '';
@@ -2353,6 +2356,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if (bizCtx && isAdmin) cardAttrs += ' data-biz-admin="1"';
 
     return '<article class="gh-card gh-post"'+cardAttrs+'>'+
+      repostBanner+
       followedPageBanner+
       pinBanner+
       '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+avatarAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+target+(p.feeling?' · '+esc(p.feeling):'')+bizPostedOnHtml+(readTimeBadge?' · '+readTimeBadge:'')+'</div></div>'+moreBtn+'</div>'+
@@ -3143,6 +3147,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-share-sheet">' +
         '<div class="gh-share-sheet-handle"></div>' +
         '<div class="gh-share-sheet-title">Share</div>' +
+        '<button class="gh-share-opt" id="ghQuickRepost">' +
+          '<span class="gh-share-opt-icon gh-repost-icon"><i class="fas fa-retweet"></i></span>' +
+          '<span class="gh-share-opt-text"><strong>Repost</strong><em>Instantly share to your feed</em></span>' +
+        '</button>' +
         '<button class="gh-share-opt" id="ghShareToFeed">' +
           '<span class="gh-share-opt-icon"><i class="fas fa-share-nodes"></i></span>' +
           '<span class="gh-share-opt-text"><strong>Share to GeoHub</strong><em>Post to your feed with a caption</em></span>' +
@@ -3170,6 +3178,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if (s) { s.classList.add('gh-share-sheet-out'); setTimeout(function() { if (s.parentNode) s.remove(); }, 220); }
     }
 
+    document.getElementById('ghQuickRepost').onclick = function() { closeSheet(); _quickRepost(pid); };
     document.getElementById('ghShareToFeed').onclick = function() { closeSheet(); openShareCompose(pid); };
     document.getElementById('ghShareToStory').onclick = function() {
       closeSheet();
@@ -3218,6 +3227,49 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     document.getElementById('ghShareCancel').onclick = closeSheet;
     sheet.addEventListener('click', function(e) { if (e.target === sheet) closeSheet(); });
     setTimeout(function() { sheet.classList.add('gh-share-sheet-in'); }, 10);
+  }
+
+  /* ── Phase 44: Quick Repost ─────────────────────────────── */
+  function _quickRepost(pid){
+    var u=authUser(); if(!u) return requireLogin();
+    var f=fs(), d=db(); if(!f||!d) return;
+    // Check if already reposted
+    f.getDocs(f.query(
+      f.collection(d,'posts'),
+      f.where('authorId','==',u.uid),
+      f.where('sharedPostId','==',pid),
+      f.where('isRepost','==',true),
+      f.limit(1)
+    )).then(function(snap){
+      if(!snap.empty){
+        // Already reposted → undo
+        if(!confirm('Remove your repost?')) return;
+        var repostDoc=snap.docs[0];
+        return f.deleteDoc(f.doc(d,'posts',repostDoc.id)).then(function(){
+          f.updateDoc(f.doc(d,'posts',pid),{reshareCount:f.increment(-1)}).catch(function(){});
+          toast('Repost removed');
+        });
+      }
+      // Create repost
+      var me=window.GeoCurrentUser||{};
+      return f.addDoc(f.collection(d,'posts'),{
+        text:'',
+        authorId:u.uid,
+        userId:u.uid,
+        authorName:me.displayName||u.displayName||'GeoHub User',
+        authorAvatar:me.photoURL||u.photoURL||'',
+        authorType:'user',
+        isRepost:true,
+        sharedPostId:pid,
+        visibility:'public',
+        status:'active',
+        likeCount:0, commentCount:0, shareCount:0, reshareCount:0,
+        createdAt:f.serverTimestamp()
+      }).then(function(){
+        f.updateDoc(f.doc(d,'posts',pid),{reshareCount:f.increment(1)}).catch(function(){});
+        toast('🔁 Reposted!');
+      });
+    }).catch(function(e){ toast('Repost failed: '+(e.message||e.code),'error'); });
   }
 
   function openShareCompose(pid) {
