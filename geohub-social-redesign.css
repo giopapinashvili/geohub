@@ -2756,3 +2756,48 @@ html[data-gh-theme="dark"] .gh-live-stats { border-color: rgba(59,130,246,.18) !
 @media (max-width: 500px) {
   .gh-xp-toast { right: 10px; bottom: 72px; }
 }
+
+/* ── Phase 14: Feed Video Autoplay ──────────────────────── */
+.gh-feed-vid-el {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  z-index: 1;
+  background: #000;
+}
+.gh-feed-vid-hidden {
+  display: none !important;
+}
+/* when video is playing, hide play button entirely */
+.gh-video-post-thumb:has(.gh-feed-vid-el) .gh-video-play-btn {
+  display: none !important;
+}
+.gh-feed-vid-mute {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 12;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(0,0,0,.55);
+  border: 1.5px solid rgba(255,255,255,.25);
+  color: #fff;
+  font-size: .82rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .18s, transform .15s;
+  backdrop-filter: blur(4px);
+}
+.gh-feed-vid-mute:hover {
+  background: rgba(0,0,0,.75);
+  transform: scale(1.1);
+}
+/* keep overlay above video */
+.gh-video-overlay { z-index: 5; }
+.gh-video-expand-btn { z-index: 6; }

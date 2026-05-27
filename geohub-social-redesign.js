@@ -1795,7 +1795,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var avHtml  = chAv
       ? '<img src="'+esc(chAv)+'" alt="" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'\'"><span style="display:none">'+esc(chInit)+'</span>'
       : '<span>'+esc(chInit)+'</span>';
-    return '<article class="gh-card gh-video-post-card" data-post-id="'+esc(pid)+'">' +
+    var cloudUrl = p.videoUrl || '';
+    return '<article class="gh-card gh-video-post-card" data-post-id="'+esc(pid)+'"'+(cloudUrl?' data-video-url="'+esc(cloudUrl)+'"':'')+' data-video-thumb="'+esc(thumb)+'">' +
       '<div class="gh-video-post-thumb" data-play-video data-youtube-id="'+esc(ytId)+'" data-video-href="'+esc(href)+'">' +
         (thumb ? '<img src="'+esc(thumb)+'" alt="" loading="lazy">' : '<div class="gh-video-post-thumb-ph"><i class="fas fa-play-circle"></i></div>') +
         '<div class="gh-video-play-btn"><i class="fas fa-play"></i></div>' +
@@ -4014,6 +4015,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var _renderedIds={};
       var _pendingVisible=null;
       var _newPillTimer=null;
+      var _feedVideoObs=null;
+      var _activeInlineFeedVid=null;
 
       function _dismissNewPill(){
         var pill=document.getElementById('ghNewPostsPill');
@@ -4049,6 +4052,62 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           if(state.cachedComments[pid]) renderCommentsForPid(pid, state.cachedComments[pid]);
         });
         setTimeout(openDeepLinkedPost, 350);
+        _bindFeedVideoAutoplay();
+      }
+
+      /* ── Phase 14: Video autoplay in feed ───────────────────── */
+      function _stopInlineFeedVid(card){
+        var vid=card.querySelector('.gh-feed-vid-el');
+        if(vid) vid.pause();
+        if(_activeInlineFeedVid===card) _activeInlineFeedVid=null;
+      }
+      function _startInlineFeedVid(card){
+        var videoUrl=card.dataset.videoUrl; if(!videoUrl) return;
+        if(_activeInlineFeedVid && _activeInlineFeedVid!==card) _stopInlineFeedVid(_activeInlineFeedVid);
+        var vid=card.querySelector('.gh-feed-vid-el');
+        if(vid){ vid.play().catch(function(){}); _activeInlineFeedVid=card; return; }
+        var thumb=card.querySelector('.gh-video-post-thumb'); if(!thumb) return;
+        // create <video>
+        vid=document.createElement('video');
+        vid.className='gh-feed-vid-el';
+        vid.src=videoUrl;
+        vid.muted=true; vid.autoplay=true; vid.loop=true;
+        vid.setAttribute('playsinline',''); vid.setAttribute('webkit-playsinline','');
+        // hide static thumbnail image and play button
+        var img=thumb.querySelector('img, .gh-video-post-thumb-ph');
+        if(img) img.classList.add('gh-feed-vid-hidden');
+        var playBtn=thumb.querySelector('.gh-video-play-btn');
+        if(playBtn) playBtn.classList.add('gh-feed-vid-hidden');
+        // mute toggle
+        var muteBtn=document.createElement('button');
+        muteBtn.className='gh-feed-vid-mute'; muteBtn.title='Unmute';
+        muteBtn.innerHTML='<i class="fas fa-volume-xmark"></i>';
+        muteBtn.onclick=function(e){
+          e.preventDefault(); e.stopPropagation();
+          vid.muted=!vid.muted;
+          muteBtn.innerHTML=vid.muted?'<i class="fas fa-volume-xmark"></i>':'<i class="fas fa-volume-high"></i>';
+          muteBtn.title=vid.muted?'Unmute':'Mute';
+        };
+        thumb.insertBefore(vid,thumb.firstChild);
+        thumb.appendChild(muteBtn);
+        vid.play().catch(function(){});
+        _activeInlineFeedVid=card;
+      }
+      function _bindFeedVideoAutoplay(){
+        if(_feedVideoObs){ _feedVideoObs.disconnect(); _feedVideoObs=null; }
+        if(!window.IntersectionObserver) return;
+        var cards=list.querySelectorAll('.gh-video-post-card[data-video-url]');
+        if(!cards.length) return;
+        _feedVideoObs=new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            if(entry.isIntersecting && entry.intersectionRatio>=0.5){
+              _startInlineFeedVid(entry.target);
+            } else {
+              _stopInlineFeedVid(entry.target);
+            }
+          });
+        },{threshold:[0.5]});
+        cards.forEach(function(card){ _feedVideoObs.observe(card); });
       }
 
       function paint(){
