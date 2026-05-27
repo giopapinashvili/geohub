@@ -2083,8 +2083,9 @@
       '<div class="vid-modal" id="vidModalBox">' +
         '<h2><i class="fab fa-youtube"></i> ვიდეოს დამატება<button class="vid-modal-close" id="vidModalClose"><i class="fas fa-times"></i></button></h2>' +
         '<div class="vid-modal-tabs" id="vidModalTabs">' +
-          '<button class="vid-modal-tab active" data-vtab="single"><i class="fas fa-video"></i> ვიდეო</button>' +
-          '<button class="vid-modal-tab" data-vtab="channel"><i class="fas fa-list"></i> არხის Import</button>' +
+          '<button class="vid-modal-tab active" data-vtab="single"><i class="fas fa-video"></i> YouTube</button>' +
+          '<button class="vid-modal-tab" data-vtab="upload"><i class="fas fa-cloud-arrow-up"></i> ატვირთვა</button>' +
+          '<button class="vid-modal-tab" data-vtab="channel"><i class="fas fa-list"></i> Import</button>' +
         '</div>' +
         /* ── Single video panel ── */
         '<div id="vidSinglePanel">' +
@@ -2141,6 +2142,49 @@
             '<button class="vid-btn primary" id="vidSubmitBtn" disabled><i class="fas fa-plus"></i> დამატება</button>' +
           '</div>' +
         '</div>' +
+        /* ── Direct upload panel (Phase 9) ── */
+        '<div id="vidUploadPanel" style="display:none">' +
+          '<div class="vid-drop-zone" id="vidDropZone" tabindex="0">' +
+            '<input type="file" id="vidFileInput" accept="video/*" style="display:none">' +
+            '<div class="vid-drop-inner" id="vidDropInner">' +
+              '<i class="fas fa-cloud-arrow-up vid-drop-icon"></i>' +
+              '<p class="vid-drop-label">ვიდეო ჩამოაგდე ან <button class="vid-drop-pick" id="vidDropPick">აირჩიე ფაილი</button></p>' +
+              '<p class="vid-drop-hint">MP4, MOV, WebM · მაქს. 200 MB</p>' +
+            '</div>' +
+            '<div class="vid-up-file-info" id="vidUpFileInfo" style="display:none"></div>' +
+          '</div>' +
+          '<div class="vid-up-progress" id="vidUpProgressWrap" style="display:none">' +
+            '<div class="vid-up-bar-track"><div class="vid-up-bar" id="vidUpBar" style="width:0%"></div></div>' +
+            '<span class="vid-up-pct" id="vidUpPct">0%</span>' +
+          '</div>' +
+          '<div class="vid-form-group" style="margin-top:14px">' +
+            '<label class="vid-form-label">სათაური <span>*</span></label>' +
+            '<input id="vidUpTitleInput" class="vid-form-input" type="text" placeholder="ვიდეოს სათაური">' +
+          '</div>' +
+          '<div class="vid-form-row">' +
+            '<div class="vid-form-group">' +
+              '<label class="vid-form-label">კატეგორია</label>' +
+              '<select id="vidUpCatInput" class="vid-form-select"><option value="">-- კატეგორია --</option>' + catOpts + '</select>' +
+            '</div>' +
+            '<div class="vid-form-group">' +
+              '<label class="vid-form-label">ქალაქი</label>' +
+              '<select id="vidUpCityInput" class="vid-form-select"><option value="">-- ქალაქი --</option>' + cityOpts + '</select>' +
+            '</div>' +
+          '</div>' +
+          '<div class="vid-form-group">' +
+            '<label class="vid-form-label">აღწერა</label>' +
+            '<textarea id="vidUpDescInput" class="vid-form-textarea" placeholder="ვიდეოზე მოკლე აღწერა..."></textarea>' +
+          '</div>' +
+          '<div class="vid-form-group" style="display:flex;align-items:center;gap:10px">' +
+            '<input type="checkbox" id="vidUpIsShort" style="width:16px;height:16px;cursor:pointer">' +
+            '<label for="vidUpIsShort" style="font-size:.85rem;color:var(--text-secondary);cursor:pointer">ეს არის Short (ვერტიკალური ვიდეო)</label>' +
+          '</div>' +
+          '<div class="vid-modal-footer">' +
+            '<button class="vid-btn ghost" id="vidUpCancelBtn"><i class="fas fa-times"></i> გაუქმება</button>' +
+            '<button class="vid-btn primary" id="vidUpSubmitBtn" disabled><i class="fas fa-cloud-arrow-up"></i> ატვირთვა</button>' +
+          '</div>' +
+        '</div>' +
+
         /* ── Channel import panel ── */
         '<div id="vidChannelPanel" style="display:none">' +
           '<div class="vid-form-group vid-url-group">' +
@@ -2177,7 +2221,8 @@
       document.querySelectorAll('#vidModalTabs .vid-modal-tab').forEach(function (t) {
         t.classList.toggle('active', t.dataset.vtab === tab);
       });
-      document.getElementById('vidSinglePanel').style.display = tab === 'single' ? '' : 'none';
+      document.getElementById('vidSinglePanel').style.display  = tab === 'single'  ? '' : 'none';
+      document.getElementById('vidUploadPanel').style.display  = tab === 'upload'  ? '' : 'none';
       document.getElementById('vidChannelPanel').style.display = tab === 'channel' ? '' : 'none';
     });
 
@@ -2504,6 +2549,147 @@
       };
     }());
 
+    /* ── Phase 9: Direct upload to Cloudinary ─────────────────── */
+    (function () {
+      var CL = (window.GeoConfig && window.GeoConfig.CLOUDINARY) || { cloudName: 'dw5dqk2w7', uploadPreset: 'geohub_unsigned', rootFolder: 'geohub' };
+      var _upFile = null;
+      var _upXhr  = null;
+
+      var dropZone    = document.getElementById('vidDropZone');
+      var fileInput   = document.getElementById('vidFileInput');
+      var dropPick    = document.getElementById('vidDropPick');
+      var dropInner   = document.getElementById('vidDropInner');
+      var fileInfo    = document.getElementById('vidUpFileInfo');
+      var progressWrap= document.getElementById('vidUpProgressWrap');
+      var bar         = document.getElementById('vidUpBar');
+      var pct         = document.getElementById('vidUpPct');
+      var upTitle     = document.getElementById('vidUpTitleInput');
+      var upSubmit    = document.getElementById('vidUpSubmitBtn');
+      var upCancel    = document.getElementById('vidUpCancelBtn');
+
+      function fmtSize(bytes) {
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+      }
+
+      function setFile(f) {
+        if (!f || !f.type.startsWith('video/')) { toast('ვიდეო ფაილი აირჩიე', 'error'); return; }
+        var maxBytes = 200 * 1024 * 1024;
+        if (f.size > maxBytes) { toast('ფაილი 200 MB-ზე მეტია', 'error'); return; }
+        _upFile = f;
+        dropInner.style.display = 'none';
+        fileInfo.style.display  = 'flex';
+        fileInfo.innerHTML =
+          '<i class="fas fa-film vid-up-file-icon"></i>' +
+          '<div class="vid-up-file-meta"><strong>' + esc(f.name) + '</strong><span>' + fmtSize(f.size) + ' · ' + f.type.split('/')[1].toUpperCase() + '</span></div>' +
+          '<button class="vid-up-file-rm" id="vidUpFileRm"><i class="fas fa-times"></i></button>';
+        document.getElementById('vidUpFileRm').onclick = function () {
+          _upFile = null; fileInput.value = '';
+          fileInfo.style.display = 'none';
+          dropInner.style.display = '';
+          checkUpReady();
+        };
+        checkUpReady();
+      }
+
+      function checkUpReady() {
+        upSubmit.disabled = !(_upFile && upTitle.value.trim());
+      }
+
+      dropPick.onclick = function (e) { e.preventDefault(); fileInput.click(); };
+      fileInput.onchange = function () { if (fileInput.files[0]) setFile(fileInput.files[0]); };
+
+      dropZone.addEventListener('dragover', function (e) { e.preventDefault(); dropZone.classList.add('drag-over'); });
+      dropZone.addEventListener('dragleave', function () { dropZone.classList.remove('drag-over'); });
+      dropZone.addEventListener('drop', function (e) {
+        e.preventDefault(); dropZone.classList.remove('drag-over');
+        var f = e.dataTransfer.files && e.dataTransfer.files[0];
+        if (f) setFile(f);
+      });
+      upTitle.addEventListener('input', checkUpReady);
+      upCancel.onclick = closeAddVideoModal;
+
+      upSubmit.addEventListener('click', function () {
+        if (!_upFile || !upTitle.value.trim()) return;
+        var u = authUser();
+        if (!u) { toast('ავტორიზაცია საჭიროა', 'error'); return; }
+
+        upSubmit.disabled = true;
+        fileInfo.style.display  = 'none';
+        progressWrap.style.display = 'flex';
+        bar.style.width = '0%'; pct.textContent = '0%';
+
+        var fd = new FormData();
+        fd.append('file', _upFile);
+        fd.append('upload_preset', CL.uploadPreset);
+        fd.append('folder', (CL.rootFolder || 'geohub') + '/videos/' + u.uid);
+
+        var xhr = new XMLHttpRequest();
+        _upXhr = xhr;
+        xhr.open('POST', 'https://api.cloudinary.com/v1_1/' + CL.cloudName + '/video/upload');
+
+        xhr.upload.onprogress = function (e) {
+          if (!e.lengthComputable) return;
+          var p = Math.round(e.loaded / e.total * 100);
+          bar.style.width = p + '%';
+          pct.textContent = p + '%';
+        };
+
+        xhr.onload = function () {
+          _upXhr = null;
+          var data;
+          try { data = JSON.parse(xhr.responseText); } catch(err) { data = {}; }
+          if (xhr.status !== 200 || !data.secure_url) {
+            toast('ატვირთვა ვერ მოხდა: ' + (data.error && data.error.message || 'შეცდომა'), 'error');
+            progressWrap.style.display = 'none';
+            fileInfo.style.display = 'flex';
+            upSubmit.disabled = false;
+            return;
+          }
+          pct.textContent = '100%'; bar.style.width = '100%';
+          /* Build thumbnail URL: first frame of video */
+          var thumb = data.secure_url.replace('/video/upload/', '/video/upload/so_0,w_640,q_auto/').replace(/\.[^.]+$/, '.jpg');
+          saveVideo({
+            videoUrl:     data.secure_url,
+            thumbnail:    thumb,
+            youtubeId:    '',
+            youtubeUrl:   '',
+            title:        upTitle.value.trim(),
+            channelName:  u.displayName || '',
+            authorId:     u.uid,
+            authorName:   u.displayName || 'GeoHub User',
+            authorAvatar: u.photoURL || '',
+            category:     (document.getElementById('vidUpCatInput')  || {}).value || '',
+            city:         (document.getElementById('vidUpCityInput') || {}).value || '',
+            description:  (document.getElementById('vidUpDescInput') || {}).value.trim() || '',
+            isShort:      !!(document.getElementById('vidUpIsShort') || {}).checked,
+            source:       'cloudinary',
+            tags:         [],
+            placeId:      null, placeName:    null,
+            businessId:   null, businessName: null
+          }, function (err) {
+            if (err) {
+              toast('შეცდომა: ' + err.message, 'error');
+              progressWrap.style.display = 'none';
+              upSubmit.disabled = false;
+            } else {
+              toast('ვიდეო ატვირთულია! 🎉');
+              closeAddVideoModal();
+            }
+          });
+        };
+
+        xhr.onerror = function () {
+          _upXhr = null;
+          toast('ატვირთვა ვერ მოხდა', 'error');
+          progressWrap.style.display = 'none'; fileInfo.style.display = 'flex';
+          upSubmit.disabled = false;
+        };
+
+        xhr.send(fd);
+      });
+    }());
+
     var _fetched = null;
     var _selectedPlace = null;
     var _selectedBiz = null;
@@ -2738,7 +2924,11 @@
     document.body.classList.add('watch-cinematic');
 
     if (playerWrap) {
-      playerWrap.innerHTML = '<iframe src="' + ytEmbed(v.youtubeId) + '" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>';
+      if (v.videoUrl) {
+        playerWrap.innerHTML = '<video src="' + esc(v.videoUrl) + '" controls autoplay playsinline style="width:100%;height:100%;background:#000;border-radius:inherit"></video>';
+      } else {
+        playerWrap.innerHTML = '<iframe src="' + ytEmbed(v.youtubeId) + '" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>';
+      }
     }
     if (titleEl) titleEl.textContent = v.title || 'Untitled';
 
@@ -2774,7 +2964,8 @@
       metaEl.innerHTML =
         (v.category ? '<span class="watch-badge cat"><i class="fas ' + m.icon + '"></i>' + m.label + '</span>' : '') +
         (v.city ? '<span class="watch-badge city"><i class="fas fa-location-dot"></i>' + esc(v.city) + '</span>' : '') +
-        '<a href="https://www.youtube.com/watch?v=' + esc(v.youtubeId) + '" target="_blank" rel="noopener" class="watch-badge yt"><i class="fab fa-youtube"></i>YouTube-ზე ნახვა</a>' +
+        (v.youtubeId ? '<a href="https://www.youtube.com/watch?v=' + esc(v.youtubeId) + '" target="_blank" rel="noopener" class="watch-badge yt"><i class="fab fa-youtube"></i>YouTube-ზე ნახვა</a>' : '') +
+        (v.videoUrl && !v.youtubeId ? '<span class="watch-badge yt" style="background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.3);color:var(--green)"><i class="fas fa-cloud"></i>GeoHub Upload</span>' : '') +
         '<span style="font-size:.8rem;color:var(--text-muted)">' + timeAgo(v.createdAt) + '</span>';
     }
 
