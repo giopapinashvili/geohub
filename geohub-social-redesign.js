@@ -3987,7 +3987,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         (pageMode ? pageHomeContext(actor) : '<section class="gh-card gh-story-strip-card"><div class="gh-stories" id="ghStories"></div></section>')+
         '<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="'+compAvClass+'" id="ghComposerAvatar">'+compAvContent+'</span><button class="gh-composer-fake" data-create-post>რას აზიარებ დღეს?</button></div><div class="gh-composer-actions"><button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Place</button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:#38bdf8"></i> Business</button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:#f59e0b"></i> Event</button></div></section>'+
         (pageMode ? '' : '<div id="ghWelcomeSlot"></div>')+
-        (pageMode ? '<div class="gh-pill-row gh-page-feed-tabs" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="page"><i class="fas fa-store" style="font-size:.75rem"></i> Page Activity</button></div>' : '<div class="gh-pill-row" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="foryou"><i class="fas fa-house" style="font-size:.75rem"></i> For You</button><button class="gh-pill" data-feed-tab="following"><i class="fas fa-user-group" style="font-size:.75rem"></i> Following</button></div>')+
+        (pageMode ? '<div class="gh-pill-row gh-page-feed-tabs" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="page"><i class="fas fa-store" style="font-size:.75rem"></i> Page Activity</button></div>' : '<div class="gh-pill-row" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="foryou"><i class="fas fa-house" style="font-size:.75rem"></i> For You</button><button class="gh-pill" data-feed-tab="following"><i class="fas fa-user-group" style="font-size:.75rem"></i> Following</button><button class="gh-pill" data-feed-tab="nearme"><i class="fas fa-location-dot" style="font-size:.75rem"></i> Near Me</button></div>')+
         '<div id="ghFeedList">'+skelPostCard()+skelVideoCard()+skelPostCard()+skelVideoCard()+skelPostCard()+'</div>'+
         '<div id="ghFeedLoadMore" style="text-align:center;padding:16px 0 8px"></div>'
     });
@@ -4110,9 +4110,116 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         cards.forEach(function(card){ _feedVideoObs.observe(card); });
       }
 
+      /* ── Phase 15: Near Me Live Feed ────────────────────────── */
+      var _nm={ status:'idle', items:[], userLat:null, userLng:null };
+
+      function _haversineM(lat1,lng1,lat2,lng2){
+        var R=6371000,dLat=(lat2-lat1)*Math.PI/180,dLng=(lng2-lng1)*Math.PI/180;
+        var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)*Math.sin(dLng/2);
+        return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+      }
+      function _distLabel(m){ return m<1000 ? Math.round(m)+' მ' : (m/1000).toFixed(1)+' კმ'; }
+
+      function _nearCard(item){
+        var type=item._type||'place';
+        var icon=iconFor(type); var label=labelFor(type);
+        var title=item.title||item.name||''; var photo=getItemImage(item);
+        var dist=item._distM!=null?_distLabel(item._distM):'';
+        var href=docLink(type,item.id);
+        var city=item.city||item.address||''; var cat=item.category||item.subcategory||'';
+        return '<article class="gh-near-card">'+
+          '<div class="gh-near-media">'+
+            (photo?'<img src="'+esc(photo)+'" alt="" loading="lazy">':'<div class="gh-near-ph"><i class="fas '+esc(icon)+'"></i></div>')+
+            '<span class="gh-near-type"><i class="fas '+esc(icon)+'"></i> '+esc(label)+'</span>'+
+            (dist?'<span class="gh-near-dist"><i class="fas fa-location-dot"></i> '+esc(dist)+'</span>':'')+
+          '</div>'+
+          '<div class="gh-near-body">'+
+            '<h3><a href="'+esc(href)+'">'+esc(title)+'</a></h3>'+
+            ((city||cat)?'<div class="gh-near-meta">'+(cat?'<span>'+esc(cat)+'</span>':'')+(city?'<span><i class="fas fa-map-pin" style="color:var(--gh-green)"></i> '+esc(city)+'</span>':'')+'</div>':'')+
+            '<a class="gh-btn sm" href="'+esc(href)+'">ნახვა <i class="fas fa-arrow-right"></i></a>'+
+          '</div>'+
+        '</article>';
+      }
+
+      function _renderNearMe(){
+        if(_nm.status==='idle'){
+          list.innerHTML='<div class="gh-near-prompt">'+
+            '<div class="gh-near-prompt-icon">📍</div>'+
+            '<h3>Near Me</h3>'+
+            '<p>ნახე ახლოს მდებარე ადგილები, ბიზნესები — 2 კმ-ის რადიუსში</p>'+
+            '<button class="gh-btn gh-near-grant-btn" id="ghNearGrant"><i class="fas fa-location-dot"></i> ლოკაციის ნებართვა</button>'+
+          '</div>';
+          var gBtn=document.getElementById('ghNearGrant');
+          if(gBtn) gBtn.onclick=function(){ _loadNearMe(); };
+          return;
+        }
+        if(_nm.status==='loading'){
+          list.innerHTML='<div class="gh-near-prompt"><div class="gh-feed-dots" style="margin:0 auto 12px"><span></span><span></span><span></span></div><p style="text-align:center;color:var(--gh-muted);font-size:.85rem">ლოკაციის დამუშავება…</p></div>';
+          return;
+        }
+        if(_nm.status==='denied'){
+          list.innerHTML='<div class="gh-near-prompt"><div class="gh-near-prompt-icon">🚫</div><h3>ლოკაცია გათიშულია</h3><p>ბრაუზერის პარამეტრებში დაუშვი ლოკაციის წვდომა და გვერდი განახლე.</p></div>';
+          return;
+        }
+        if(_nm.status==='error'){
+          list.innerHTML='<div class="gh-near-prompt"><div class="gh-near-prompt-icon">⚠️</div><h3>ლოკაცია ვერ დაიდგინა</h3><p>სცადე ხელახლა.</p><button class="gh-btn ghost" id="ghNearRetry"><i class="fas fa-rotate-right"></i> სცადე</button></div>';
+          var rBtn=document.getElementById('ghNearRetry');
+          if(rBtn) rBtn.onclick=function(){ _nm.status='idle'; _loadNearMe(); };
+          return;
+        }
+        if(!_nm.items.length){
+          list.innerHTML='<div class="gh-near-prompt"><div class="gh-near-prompt-icon">🗺️</div><h3>ახლოს არაფერია</h3><p>2 კმ-ის რადიუსში ვერ ვიპოვე ადგილები.</p><a class="gh-btn ghost" href="map.html"><i class="fas fa-map"></i> რუქა გახსნა</a></div>';
+          return;
+        }
+        list.innerHTML=
+          '<div class="gh-near-header"><i class="fas fa-location-dot"></i> შენ ახლოს — <b>'+_nm.items.length+'</b> ადგილი</div>'+
+          '<div class="gh-near-grid">'+_nm.items.map(_nearCard).join('')+'</div>';
+      }
+
+      function _loadNearMe(){
+        if(!navigator.geolocation){ _nm.status='error'; paint(); return; }
+        _nm.status='loading'; paint();
+        navigator.geolocation.getCurrentPosition(function(pos){
+          var uLat=pos.coords.latitude, uLng=pos.coords.longitude;
+          _nm.userLat=uLat; _nm.userLng=uLng;
+          var gf=GF(); if(!gf||!gf.fs||!gf.db){ _nm.status='error'; paint(); return; }
+          var RADIUS=2000;
+          var latD=RADIUS/111000;
+          var minLat=uLat-latD, maxLat=uLat+latD;
+          var cols=['places','businesses']; var allItems=[]; var done=0;
+          cols.forEach(function(col){
+            gf.fs.getDocs(gf.fs.query(
+              gf.fs.collection(gf.db,col),
+              gf.fs.where('lat','>=',minLat),
+              gf.fs.where('lat','<=',maxLat),
+              gf.fs.limit(80)
+            )).then(function(snap){
+              snap.forEach(function(d){
+                var item=Object.assign({id:d.id,_type:col==='businesses'?'business':'place'},d.data());
+                var co=getPlaceCoords(item); if(!co) return;
+                var dist=_haversineM(uLat,uLng,co.lat,co.lng);
+                if(dist<=RADIUS){ item._distM=dist; allItems.push(item); }
+              });
+            }).catch(function(){}).then(function(){
+              done++;
+              if(done===cols.length){
+                allItems.sort(function(a,b){ return (a._distM||9999)-(b._distM||9999); });
+                _nm.items=allItems.slice(0,40);
+                _nm.status='loaded';
+                paint();
+              }
+            });
+          });
+        },function(err){
+          _nm.status=(err.code===1)?'denied':'error'; paint();
+        },{timeout:10000,enableHighAccuracy:true});
+      }
+
       function paint(){
         if(renderId!==state.feedRenderId) return;
         if(!list) return;
+        /* Near Me: own rendering path */
+        if(state.feedTab==='nearme'){ _renderNearMe(); return; }
         var visible=lastPosts.filter(canSeePost);
         if(pageMode){
           visible=visible.filter(function(p){ return isPageFeedPost(p, actor.businessId); });
@@ -4176,7 +4283,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         $all('.gh-pill',tabsEl).forEach(function(p){p.classList.toggle('active',p===btn);});
         _dismissNewPill();
         _renderedIds={};
-        paint();
+        if(state.feedTab==='nearme' && _nm.status==='idle') _loadNearMe();
+        else paint();
       });
       setupSafetyListener(paint);
       setupAudienceAccess(paint);
