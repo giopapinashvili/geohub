@@ -3121,3 +3121,102 @@ html[data-gh-theme="dark"] .gh-live-stats { border-color: rgba(59,130,246,.18) !
   color: var(--gh-text, #f9fafb);
   line-height: 1.5;
 }
+
+/* ── Phase 18: Creator Leaderboard Widget ────────────────── */
+.gh-ldr-cities {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.gh-ldr-city {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+  color: var(--gh-muted, #9ca3af);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: .7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .18s;
+  white-space: nowrap;
+}
+.gh-ldr-city:hover {
+  background: rgba(16,185,129,.12);
+  color: var(--gh-text, #f9fafb);
+}
+.gh-ldr-city.active {
+  background: var(--gh-green, #10b981);
+  color: #fff;
+  border-color: var(--gh-green, #10b981);
+}
+.gh-ldr-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  text-decoration: none;
+  color: inherit;
+  transition: background .15s;
+  border-radius: 8px;
+  margin: 0 -4px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.gh-ldr-row:last-child { border-bottom: none; }
+.gh-ldr-row:hover { background: rgba(255,255,255,.04); }
+.gh-ldr-medal {
+  font-size: 1.1rem;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.gh-ldr-rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.08);
+  font-size: .65rem;
+  font-weight: 800;
+  color: var(--gh-muted, #9ca3af);
+}
+.gh-ldr-av {
+  width: 36px !important;
+  height: 36px !important;
+  font-size: .72rem !important;
+  flex-shrink: 0;
+}
+.gh-ldr-info { flex: 1; min-width: 0; }
+.gh-ldr-name {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--gh-text, #f9fafb);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.gh-ldr-lv {
+  font-size: .6rem;
+  font-weight: 700;
+  background: linear-gradient(135deg,#f59e0b,#ef4444);
+  color: #fff;
+  border-radius: 6px;
+  padding: 1px 5px;
+  flex-shrink: 0;
+}
+.gh-ldr-sub {
+  font-size: .7rem;
+  color: var(--gh-muted, #9ca3af);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

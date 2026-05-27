@@ -3252,6 +3252,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-panel gh-right-widget" id="ghOnlineFriendsPanel"><div class="gh-section-title"><h3><i class="fas fa-circle" style="color:#22c55e;font-size:.55rem"></i> Online Friends</h3></div><div id="ghOnlineFriendsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget" id="ghPymkPanel"><div class="gh-section-title"><h3>People You May Know</h3><a class="gh-small" href="search.html">Find people</a></div><div id="ghPymkList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget" id="ghCreatorPanel"><div class="gh-section-title"><h3>Featured Creators</h3><a class="gh-small" href="creators.html">All</a></div><div id="ghCreatorList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghLeaderPanel">'+
+        '<div class="gh-section-title"><h3>🏆 Top Creators</h3><a class="gh-small" href="creators.html">ყველა</a></div>'+
+        '<div class="gh-ldr-cities" id="ghLdrCities">'+
+          '<button class="gh-ldr-city active" data-ldr-city="">🌍 Georgia</button>'+
+          '<button class="gh-ldr-city" data-ldr-city="თბილისი">🏙️ თბილისი</button>'+
+          '<button class="gh-ldr-city" data-ldr-city="ბათუმი">🌊 ბათუმი</button>'+
+          '<button class="gh-ldr-city" data-ldr-city="ქუთაისი">🏔️ ქუთაისი</button>'+
+        '</div>'+
+        '<div id="ghLeaderList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div>'+
+      '</div>'+
       '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Suggested Pages</h3><a class="gh-small" href="business.html">All</a></div><div id="ghSuggestedPages"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget" id="ghFeedGroupsPanel"><div class="gh-section-title"><h3>Suggested Groups</h3><a class="gh-small" href="groups.html">All</a></div><div id="ghFeedGroupsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget" id="ghFeedEventsPanel"><div class="gh-section-title"><h3>Upcoming Events</h3><a class="gh-small" href="events.html">All</a></div><div id="ghFeedEventsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
@@ -3525,7 +3535,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var ob=$('#ghOnlineFriendsList'); if(ob) ob.innerHTML='<div class="gh-muted" style="font-size:.82rem">Unavailable</div>';
         var pb=$('#ghSuggestedPages'); if(pb) pb.innerHTML='<div class="gh-muted" style="font-size:.82rem">Unavailable</div>';
         var cb=$('#ghContactsList'); if(cb) cb.innerHTML='<div class="gh-muted" style="font-size:.82rem">Unavailable</div>';
-        loadFeedGroupsWidget(); loadFeedEventsWidget(null); loadFeedCheckinsWidget();
+        loadLeaderboardWidget(''); loadFeedGroupsWidget(); loadFeedEventsWidget(null); loadFeedCheckinsWidget();
         return;
       }
       // onAuthStateChanged fires once auth is resolved (currentUser may still be null even if ready() fired)
@@ -3540,7 +3550,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           if(contactsBox) contactsBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see contacts</div>';
           var pymkBox=$('#ghPymkList'); if(pymkBox) pymkBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see suggestions</div>';
           var crBox=$('#ghCreatorList'); if(crBox) crBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see creators</div>';
-          loadFeedGroupsWidget(); loadFeedEventsWidget(null); loadFeedCheckinsWidget();
+          loadLeaderboardWidget(''); loadFeedGroupsWidget(); loadFeedEventsWidget(null); loadFeedCheckinsWidget();
           return;
         }
 
@@ -3576,6 +3586,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         loadContactsList(u.uid);
         loadPymkWidget(u.uid);
         loadCreatorWidget(u.uid);
+        loadLeaderboardWidget(u.uid);
         loadFeedGroupsWidget();
         loadFeedEventsWidget(u.uid);
         loadFeedCheckinsWidget();
@@ -3632,6 +3643,88 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '</div>';
       }).join('')+'</div>';
     }).catch(function(){ var p=$('#ghCreatorPanel'); if(p) p.style.display='none'; });
+  }
+
+  /* ── Phase 18: Creator Leaderboard by City ───────────────────────────── */
+  function loadLeaderboardWidget(uid){
+    var panel=document.getElementById('ghLeaderPanel');
+    var box=document.getElementById('ghLeaderList');
+    var citiesEl=document.getElementById('ghLdrCities');
+    if(!box||!panel) return;
+    if(!fs()||!db()){ panel.style.display='none'; return; }
+
+    var MEDALS=['🥇','🥈','🥉'];
+    var _allCreators=[];
+    var _cityFilter='';
+
+    function _score(u){ return (Number(u.followerCount||0)*3)+(Number(u.postCount||0)*2)+(Number(u.xp||0)); }
+
+    function _renderList(){
+      var data=_cityFilter
+        ? _allCreators.filter(function(u){ return (u.city||'').toLowerCase()===_cityFilter.toLowerCase(); })
+        : _allCreators;
+      data=data.slice(0,5);
+      if(!data.length){
+        box.innerHTML='<div class="gh-muted" style="font-size:.78rem;padding:8px 0">ამ ქალაქიდან creator-ები ვერ მოიძებნა</div>';
+        return;
+      }
+      box.innerHTML=data.map(function(u,i){
+        var rank=i<3?MEDALS[i]:'<span class="gh-ldr-rank">'+(i+1)+'</span>';
+        var av=u.avatar?'<img src="'+esc(u.avatar)+'" alt="" loading="lazy" onerror="this.remove()">':esc(initials(u.fullName||''));
+        var followers=Number(u.followerCount||0);
+        var fLabel=followers>=1000?(followers/1000).toFixed(1)+'K':String(followers);
+        var xpLv=u.xp?_xpLvl(Number(u.xp)):0;
+        var lvBadge=xpLv>0?'<span class="gh-ldr-lv">Lv '+xpLv+'</span>':'';
+        return '<a class="gh-ldr-row" href="profile.html?id='+esc(u.id)+'" data-user-profile="'+esc(u.id)+'">'+
+          '<div class="gh-ldr-medal">'+rank+'</div>'+
+          '<span class="gh-avatar gh-ldr-av">'+av+'</span>'+
+          '<div class="gh-ldr-info">'+
+            '<div class="gh-ldr-name">'+esc(u.fullName||'GeoHub User')+lvBadge+'</div>'+
+            '<div class="gh-ldr-sub">'+(u.city?esc(u.city)+' · ':'')+fLabel+' followers</div>'+
+          '</div>'+
+        '</a>';
+      }).join('');
+    }
+
+    function _xpLvl(xp){ if(xp<100)return 1;if(xp<300)return 2;if(xp<700)return 3;if(xp<1500)return 4;return 5; }
+
+    /* Firestore: top 40 users by followerCount */
+    box.innerHTML='<div class="gh-muted" style="font-size:.82rem">Loading…</div>';
+    fs().getDocs(fs().query(
+      fs().collection(db(),'users'),
+      fs().orderBy('followerCount','desc'),
+      fs().limit(40)
+    )).then(function(snap){
+      _allCreators=[];
+      snap.forEach(function(d){
+        if(d.id===uid) return;
+        var u=d.data()||{};
+        _allCreators.push({
+          id:d.id,
+          fullName:u.fullName||u.displayName||u.name||'GeoHub User',
+          avatar:u.avatar||u.photoURL||'',
+          city:u.city||'',
+          followerCount:u.followerCount||0,
+          postCount:u.postCount||0,
+          xp:u.xp||0
+        });
+      });
+      /* sort by composite score */
+      _allCreators.sort(function(a,b){ return _score(b)-_score(a); });
+      if(!_allCreators.length){ panel.style.display='none'; return; }
+      _renderList();
+    }).catch(function(){ panel.style.display='none'; });
+
+    /* City tab clicks */
+    if(citiesEl && !citiesEl.dataset.ldrBound){
+      citiesEl.dataset.ldrBound='1';
+      citiesEl.addEventListener('click',function(e){
+        var btn=e.target.closest('[data-ldr-city]'); if(!btn) return;
+        _cityFilter=btn.dataset.ldrCity||'';
+        Array.from(citiesEl.querySelectorAll('.gh-ldr-city')).forEach(function(b){ b.classList.toggle('active',b===btn); });
+        _renderList();
+      });
+    }
   }
 
   function loadFeedGroupsWidget(){
