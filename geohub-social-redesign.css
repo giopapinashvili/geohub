@@ -2391,3 +2391,185 @@ html[data-gh-theme="dark"] .gh-live-stats { border-color: rgba(59,130,246,.18) !
 .gh-video-post-card .gh-post-stats { padding: 4px 16px; border-bottom: 1px solid rgba(255,255,255,.06); }
 .gh-video-post-card .gh-post-actions { padding: 2px 8px 4px; }
 .gh-video-post-cat { font-size: .75rem; color: #94a3b8; display: flex; align-items: center; gap: 5px; }
+
+/* ══════════════════════════════════════════════════════════
+   Phase 2 — Mobile Bottom Navigation Bar
+   Phase 3 — Sidebar Secondary Items Collapse + Load More
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Bottom Nav: hidden on desktop, shown on mobile ────── */
+.gh-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 58px;
+  background: var(--gh-panel, rgba(12,18,16,.96));
+  border-top: 1px solid var(--gh-border, rgba(148,163,184,.14));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 9980;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: space-around;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.gh-bnav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 3px;
+  color: var(--gh-muted, #8aa69a);
+  text-decoration: none;
+  font-size: .62rem;
+  font-weight: 600;
+  letter-spacing: .01em;
+  transition: color .15s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+}
+.gh-bnav-item.active { color: var(--gh-green, #10b981); }
+.gh-bnav-item:hover  { color: var(--gh-green, #10b981); }
+.gh-bnav-icon {
+  position: relative;
+  font-size: 1.15rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gh-bnav-lbl {
+  font-size: .57rem;
+  font-weight: 600;
+  line-height: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 52px;
+  text-overflow: ellipsis;
+}
+/* Post/create button — green circle */
+.gh-bnav-post .gh-bnav-icon {
+  width: 42px; height: 42px;
+  background: linear-gradient(135deg, #22c55e, #009444);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  font-size: 1.05rem;
+  box-shadow: 0 4px 14px rgba(16,185,129,.36);
+}
+.gh-bnav-post:hover .gh-bnav-icon { filter: brightness(1.12); }
+.gh-bnav-post .gh-bnav-lbl { display: none; }
+
+/* Notification badge inside bottom nav */
+.gh-bottom-nav .gh-badge-count {
+  position: absolute;
+  top: -4px; right: -6px;
+  min-width: 14px; height: 14px;
+  border-radius: 7px;
+  background: var(--gh-red, #ef4444);
+  font-size: .58rem;
+  font-weight: 800;
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 3px;
+  pointer-events: none;
+}
+
+/* Reveal bottom nav + add body padding when sidebar is gone */
+@media(max-width:980px) {
+  .gh-bottom-nav { display: flex; }
+  .gh-shell { padding-bottom: 66px; }
+  body.gh-has-injected-nav { padding-bottom: 66px; }
+  /* watch page specific */
+  body[data-gh-page="watch"] { padding-bottom: 66px; }
+}
+
+
+/* ── Sidebar: Secondary items collapse ───────────────────── */
+.gh-nav-more {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  border-radius: 16px;
+  border: none;
+  background: none;
+  color: var(--gh-muted, #8aa69a);
+  font-size: .88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+.gh-nav-more:hover {
+  background: rgba(16,185,129,.08);
+  color: var(--gh-text, #eefcf6);
+}
+.gh-nav-more i {
+  font-size: .85rem;
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+}
+
+/* Secondary items container: collapsed by default */
+.gh-nav-sec-list {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height .35s ease, opacity .22s ease;
+}
+.gh-nav-sec-list.open {
+  max-height: 900px;
+  opacity: 1;
+}
+.gh-nav-sec-list .gh-nav-item {
+  font-size: .84rem;
+  opacity: .85;
+}
+.gh-nav-sec-list .gh-nav-item:hover { opacity: 1; }
+
+/* At narrow desktop (icon-only): center the "more" toggle too */
+@media(max-width:1060px) {
+  body.gh-fb-inspired .gh-nav-more { justify-content: center; }
+  body.gh-fb-inspired .gh-nav-more span { display: none; }
+}
+@media(max-width:1120px) {
+  body.gh-has-injected-nav .gh-nav-more { justify-content: center; }
+  body.gh-has-injected-nav .gh-nav-more span { display: none; }
+}
+
+
+/* ── Load More button ────────────────────────────────────── */
+.gh-load-more-btn {
+  min-width: 180px;
+  padding: 11px 24px;
+  font-size: .88rem;
+  font-weight: 700;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.gh-load-more-btn:hover:not(:disabled) {
+  background: rgba(16,185,129,.12);
+  color: var(--gh-green, #10b981);
+  border-color: rgba(16,185,129,.35);
+  transform: translateY(-1px);
+}
+.gh-load-more-btn:disabled {
+  opacity: .55;
+  cursor: default;
+  pointer-events: none;
+}

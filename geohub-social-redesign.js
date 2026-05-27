@@ -395,13 +395,37 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     return '<a class="'+esc(cls||'')+'" href="'+profileLink(uid)+'" data-user-profile="'+esc(uid)+'"'+label+'>'+html+'</a>';
   }
 
+  function bottomNav(active){
+    var tabs=[
+      {k:'feed',   href:'feed.html',          icon:'fa-house',     lbl:'Feed'},
+      {k:'search', href:'search.html',         icon:'fa-search',    lbl:'ძებნა'},
+      {k:'_post',  href:'#',                   icon:'fa-plus',      lbl:'პოსტი',  isPost:true},
+      {k:'notifs', href:'notifications.html',  icon:'fa-bell',      lbl:'შეტყობინება', badge:true},
+      {k:'profile',href:'profile.html',        icon:'fa-user',      lbl:'პროფილი'}
+    ];
+    return '<nav class="gh-bottom-nav" id="ghBottomNav">'+
+      tabs.map(function(t){
+        if(t.isPost) return '<button class="gh-bnav-item gh-bnav-post" data-create-post>'+
+          '<span class="gh-bnav-icon"><i class="fas fa-plus"></i></span>'+
+          '<span class="gh-bnav-lbl">'+t.lbl+'</span></button>';
+        return '<a class="gh-bnav-item'+(active===t.k?' active':'')+'" href="'+t.href+'">'+
+          '<span class="gh-bnav-icon"><i class="fas '+t.icon+'"></i>'+
+          (t.badge?'<b class="gh-badge-count" id="ghBNavNotifBadge" style="top:-4px;right:-6px"></b>':'')+
+          '</span>'+
+          '<span class="gh-bnav-lbl">'+t.lbl+'</span></a>';
+      }).join('')+
+    '</nav>';
+  }
+
   function shell(opts){
     opts = opts || {};
     document.body.classList.add('gh-social-body','gh-fb-inspired');
     initTheme();
     var _ctMap={feed:'feed',groups:'groups',messages:'messages',notifications:'notifications'};
+    var bnavKey = opts.active==='notifications'?'notifs':(opts.active||'');
     document.body.innerHTML = '<div class="gh-shell">'+topbar(_ctMap[opts.active]||'')+
-      '<div class="gh-layout">'+leftNav(opts.active||'')+'<main class="gh-center" id="ghCenter"></main>'+rightRail(opts.right||'')+'</div></div>';
+      '<div class="gh-layout">'+leftNav(opts.active||'')+'<main class="gh-center" id="ghCenter"></main>'+rightRail(opts.right||'')+'</div></div>'+
+      bottomNav(bnavKey);
     $('#ghCenter').innerHTML = opts.center || '';
     bindShell();
     updateTopUser();
@@ -419,6 +443,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var lvDiv=document.createElement('div');
     lvDiv.innerHTML=leftNav(activePage);
     document.body.insertBefore(lvDiv.firstChild, document.body.children[1]||null);
+    var bnDiv=document.createElement('div');
+    var bnavKey=activePage==='notifications'?'notifs':activePage;
+    bnDiv.innerHTML=bottomNav(bnavKey);
+    document.body.appendChild(bnDiv.firstChild);
     bindShell();
     updateTopUser();
     bindAuthState();
@@ -445,14 +473,49 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function leftNav(active){
-    var items=[
-      ['feed','feed.html','fa-house','მთავარი Feed'],['places','places.html','fa-location-dot','Places'],['map','map.html','fa-map','Map'],['videos','videos.html','fa-film','Videos'],['my-channel','#','fa-tv','ჩემი არხი'],['reels','reels.html','fa-bolt','Reels'],['place-feed','place-feed.html','fa-store','Place Updates'],['business','business.html','fa-store','Businesses'],['groups','groups.html','fa-users','Groups'],['events','events.html','fa-calendar-xmark','Events'],['messages','messages.html','fa-comment-dots','Messages'],['notifications','notifications.html','fa-bell','Notifications'],['rewards','rewards.html','fa-gift','Rewards / Points'],['challenges','challenges.html','fa-trophy','Challenges'],['services','services.html','fa-grip','Services'],['realestate','real-estate.html','fa-house-chimney','Real Estate'],['learning','learning.html','fa-graduation-cap','Learning'],['creators','creators.html','fa-camera-retro','Creators'],['trust','trust.html','fa-shield-halved','Trust / Safety'],['admin','admin.html','fa-user-shield','Admin Panel']
+    var PRIMARY=[
+      ['feed','feed.html','fa-house','მთავარი'],
+      ['videos','videos.html','fa-film','Videos'],
+      ['map','map.html','fa-map','Map'],
+      ['groups','groups.html','fa-users','Groups'],
+      ['places','places.html','fa-location-dot','Places']
     ];
-    items.splice(Math.max(items.length - 1, 0), 0, ['settings','settings.html','fa-gear','Settings']);
-    return '<aside class="gh-left"><nav class="gh-panel">'+items.map(function(it){
-      var extra = it[0]==='my-channel' ? ' data-my-channel="1"' : '';
-      return '<a class="gh-nav-item '+(active===it[0]?'active':'')+'"'+extra+' href="'+it[1]+'"><i class="fas '+it[2]+'"></i><span>'+it[3]+'</span></a>';
-    }).join('')+'<button class="gh-nav-tour-btn" data-start-tour><i class="fas fa-question-circle"></i><span>How GeoHub works</span></button>'+'</nav></aside>';
+    var SECONDARY=[
+      ['my-channel','#','fa-tv','ჩემი არხი'],
+      ['reels','reels.html','fa-bolt','Reels'],
+      ['business','business.html','fa-store','Businesses'],
+      ['events','events.html','fa-calendar-xmark','Events'],
+      ['messages','messages.html','fa-comment-dots','Messages'],
+      ['notifications','notifications.html','fa-bell','Notifications'],
+      ['creators','creators.html','fa-camera-retro','Creators'],
+      ['rewards','rewards.html','fa-gift','Rewards'],
+      ['challenges','challenges.html','fa-trophy','Challenges'],
+      ['services','services.html','fa-grip','Services'],
+      ['realestate','real-estate.html','fa-house-chimney','Real Estate'],
+      ['learning','learning.html','fa-graduation-cap','Learning'],
+      ['trust','trust.html','fa-shield-halved','Trust / Safety'],
+      ['settings','settings.html','fa-gear','Settings'],
+      ['admin','admin.html','fa-user-shield','Admin Panel']
+    ];
+    var exp=false; try{ exp=localStorage.getItem('gh_nav_exp')==='1'; }catch(e){}
+    function navItem(it,sec){
+      var extra=it[0]==='my-channel'?' data-my-channel="1"':'';
+      var cls='gh-nav-item'+(active===it[0]?' active':'')+(sec?' gh-nav-sec':'');
+      var tag=it[1]==='#'?'button':'a';
+      var href=it[1]==='#'?'':' href="'+it[1]+'"';
+      return '<'+tag+' class="'+cls+'"'+extra+href+'><i class="fas '+it[2]+'"></i><span>'+it[3]+'</span></'+tag+'>';
+    }
+    return '<aside class="gh-left"><nav class="gh-panel">'+
+      PRIMARY.map(function(it){ return navItem(it,false); }).join('')+
+      '<button class="gh-nav-item gh-nav-more" id="ghNavMore" data-nav-more>'+
+        '<i class="fas fa-chevron-'+(exp?'up':'down')+'" id="ghNavMoreIcon"></i>'+
+        '<span id="ghNavMoreTxt">'+(exp?'ნაკლები':'მეტი')+'</span>'+
+      '</button>'+
+      '<div class="gh-nav-sec-list'+(exp?' open':'') +'" id="ghNavSecList">'+
+        SECONDARY.map(function(it){ return navItem(it,true); }).join('')+
+      '</div>'+
+      '<button class="gh-nav-tour-btn" data-start-tour><i class="fas fa-question-circle"></i><span>How GeoHub works</span></button>'+
+    '</nav></aside>';
   }
 
   function rightRail(extra){
@@ -485,6 +548,18 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(!state._shellClickBound){
       state._shellClickBound=true;
       document.addEventListener('click', function(e){
+        /* Sidebar "მეტი/ნაკლები" toggle */
+        if(e.target.closest('[data-nav-more]')){
+          var sec=document.getElementById('ghNavSecList');
+          var icon=document.getElementById('ghNavMoreIcon');
+          var txt=document.getElementById('ghNavMoreTxt');
+          if(!sec) return;
+          var open=sec.classList.toggle('open');
+          if(icon){ icon.className='fas fa-chevron-'+(open?'up':'down'); }
+          if(txt){ txt.textContent=open?'ნაკლები':'მეტი'; }
+          try{ localStorage.setItem('gh_nav_exp', open?'1':'0'); }catch(e2){}
+          return;
+        }
         /* Inline video playback — only expand button navigates to video page */
         var playThumb = e.target.closest('[data-play-video]');
         if(playThumb && !e.target.closest('.gh-video-expand-btn')){
@@ -3716,7 +3791,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="'+compAvClass+'" id="ghComposerAvatar">'+compAvContent+'</span><button class="gh-composer-fake" data-create-post>რას აზიარებ დღეს?</button></div><div class="gh-composer-actions"><button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Place</button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:#38bdf8"></i> Business</button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:#f59e0b"></i> Event</button></div></section>'+
         (pageMode ? '' : '<div id="ghWelcomeSlot"></div>')+
         (pageMode ? '<div class="gh-pill-row gh-page-feed-tabs" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="page"><i class="fas fa-store" style="font-size:.75rem"></i> Page Activity</button></div>' : '<div class="gh-pill-row" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="foryou"><i class="fas fa-house" style="font-size:.75rem"></i> For You</button><button class="gh-pill" data-feed-tab="following"><i class="fas fa-user-group" style="font-size:.75rem"></i> Following</button></div>')+
-        '<div id="ghFeedList">'+skelPostCard()+skelPostCard()+skelPostCard()+'</div>'
+        '<div id="ghFeedList">'+skelPostCard()+skelPostCard()+skelPostCard()+'</div>'+
+        '<div id="ghFeedLoadMore" style="text-align:center;padding:16px 0 8px"></div>'
     });
     if(pageMode){
       var fake=$('.gh-composer-fake');
@@ -3817,11 +3893,29 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           paint();
         });
       } else {
-        state.feedUnsub=GS().listenFeed(function(posts){
-          if(renderId!==state.feedRenderId) return;
-          lastPosts=posts;
-          paint();
-        }, 50);
+        var feedN = state.feedN || 20;
+        var lmBtn = document.getElementById('ghFeedLoadMore');
+        function startFeedListen(n){
+          if(state.feedUnsub){ try{state.feedUnsub();}catch(e){} state.feedUnsub=null; }
+          if(lmBtn) lmBtn.innerHTML='<button class="gh-btn ghost gh-load-more-btn" disabled><i class="fas fa-spinner fa-spin"></i> იტვირთება…</button>';
+          state.feedUnsub=GS().listenFeed(function(posts){
+            if(renderId!==state.feedRenderId) return;
+            lastPosts=posts;
+            paint();
+            if(lmBtn){
+              var hasMore=posts.length>=n;
+              lmBtn.innerHTML=hasMore
+                ? '<button class="gh-btn ghost gh-load-more-btn" id="ghFeedLoadMoreBtn">მეტის ჩვენება <i class="fas fa-chevron-down"></i></button>'
+                : '<span style="font-size:.78rem;color:var(--text-muted)">ყველა პოსტი ნანახია ✓</span>';
+              var btn=document.getElementById('ghFeedLoadMoreBtn');
+              if(btn) btn.onclick=function(){
+                state.feedN=(state.feedN||20)+20;
+                startFeedListen(state.feedN);
+              };
+            }
+          }, n);
+        }
+        startFeedListen(feedN);
         // Listen for page posts from any business so we can merge into For You feed
         if(state.bizFeedUnsub){ try{state.bizFeedUnsub();}catch(e){} state.bizFeedUnsub=null; }
         state.bizFeedUnsub=fs().onSnapshot(

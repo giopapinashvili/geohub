@@ -2647,6 +2647,23 @@
 
   function renderWatchPage(v) {
     document.title = (v.title || 'Video') + ' — GeoHub';
+    /* Dynamic SEO meta tags */
+    var thumb = v.thumbnail || ytMaxThumb(v.youtubeId);
+    var desc = (v.description || '').slice(0, 200) || 'Watch on GeoHub';
+    function setMeta(prop, val, isName) {
+      var sel = isName ? 'meta[name="'+prop+'"]' : 'meta[property="'+prop+'"]';
+      var el = document.querySelector(sel);
+      if (!el) { el = document.createElement('meta'); el[isName?'name':'setAttribute'](isName?'name':prop, isName?prop:prop); document.head.appendChild(el); if(!isName) el.setAttribute('property', prop); }
+      el.setAttribute('content', val);
+    }
+    setMeta('og:title', (v.title||'Video')+' — GeoHub');
+    setMeta('og:description', desc);
+    setMeta('og:image', thumb);
+    setMeta('og:url', location.href);
+    setMeta('description', desc, true);
+    setMeta('twitter:title', (v.title||'Video')+' — GeoHub', true);
+    setMeta('twitter:description', desc, true);
+    setMeta('twitter:image', thumb, true);
     var playerWrap = document.getElementById('watchPlayer');
     var titleEl = document.getElementById('watchTitle');
     var metaEl = document.getElementById('watchMeta');
@@ -2716,8 +2733,8 @@
         '</button>' +
         (v.channelUrl ? '<a href="' + esc(v.channelUrl) + '" target="_blank" rel="noopener" class="watch-action-btn">' +
           '<i class="fab fa-youtube"></i>Channel</a>' : '') +
-        '<a href="videos.html" class="watch-action-btn ghost">' +
-          '<i class="fas fa-arrow-left"></i>ვიდეოები</a>' +
+        '<button class="watch-action-btn ghost" onclick="history.length>1?history.back():location.href=\'feed.html\'">' +
+          '<i class="fas fa-arrow-left"></i>უკან</button>' +
         (v.placeId ? '<a href="map.html?mode=videos&place=' + esc(v.placeId) + '" class="watch-action-btn ghost">' +
           '<i class="fas fa-map"></i>Map</a>' : '') +
         '<button class="watch-action-btn ghost" id="watchReportBtn" style="color:#ef4444"><i class="fas fa-flag"></i>Report</button>';
