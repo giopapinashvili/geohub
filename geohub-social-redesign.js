@@ -1212,7 +1212,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-upload-progress" id="ghPostUploadBar" style="display:none"><div class="gh-upload-track"><div class="gh-upload-bar" id="ghPostUploadFill"></div></div><span id="ghPostUploadPct">0%</span></div>';
 
     var m = modal('Create post', body,
-      '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitPost" disabled><i class="fas fa-paper-plane"></i> Post</button>',
+      '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn ghost" id="ghSaveDraft" title="Save draft"><i class="fas fa-floppy-disk"></i></button><button class="gh-btn" id="ghSubmitPost" disabled><i class="fas fa-paper-plane"></i> Post</button>',
       'ghPostModal');
 
     var pickedFiles=[], selectedFeeling='', selectedBg='', pollMode=false, feelingRowVisible=false, bgVisible=false;
@@ -1226,6 +1226,59 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     // Phase 32: emoji picker for composer
     var _emojiToolBtn=document.getElementById('ghToggleEmoji');
     if(_emojiToolBtn && ta) _emojiToolBtn.addEventListener('click',function(){ _openEmojiPicker(ta,_emojiToolBtn); });
+
+    // Phase 36: Draft save/restore
+    var _DRAFT_KEY='gh_draft';
+    var _saveDraftBtn=document.getElementById('ghSaveDraft');
+    if(_saveDraftBtn) _saveDraftBtn.addEventListener('click',function(){
+      var txt=ta?ta.value:'';
+      if(txt.trim()){ try{ localStorage.setItem(_DRAFT_KEY, JSON.stringify({ text:txt, feeling:selectedFeeling, visibility:($('#ghPostVisibility')||{}).value||'public', savedAt:Date.now() })); }catch(e){} }
+      toast('✏️ Draft saved');
+      var m2=$('#ghPostModal'); if(m2) m2.remove();
+    });
+    // Auto-save on input (debounced 1.5s)
+    var _draftAutoTimer=null;
+    if(ta) ta.addEventListener('input',function(){
+      clearTimeout(_draftAutoTimer);
+      _draftAutoTimer=setTimeout(function(){
+        var txt2=ta.value||'';
+        if(!txt2.trim()){ try{ localStorage.removeItem(_DRAFT_KEY); }catch(e){} return; }
+        try{ localStorage.setItem(_DRAFT_KEY, JSON.stringify({ text:txt2, feeling:selectedFeeling, visibility:($('#ghPostVisibility')||{}).value||'public', savedAt:Date.now() })); }catch(e){}
+      },1500);
+    });
+    // Restore existing draft
+    try{
+      var _draftRaw=localStorage.getItem(_DRAFT_KEY);
+      if(_draftRaw && !pollMode){
+        var _draft=JSON.parse(_draftRaw);
+        if(_draft&&_draft.text&&_draft.text.trim()){
+          var _draftAge=Math.round((Date.now()-(_draft.savedAt||0))/60000);
+          var _draftAgeStr=_draftAge<2?'just now':(_draftAge<60?_draftAge+'m ago':Math.round(_draftAge/60)+'h ago');
+          var _db=document.createElement('div');
+          _db.className='gh-draft-banner';
+          _db.innerHTML=
+            '<i class="fas fa-floppy-disk" style="color:#10b981"></i>'+
+            '<span>Draft from '+esc(_draftAgeStr)+'</span>'+
+            '<button class="gh-btn sm" id="ghRestoreDraft">Restore</button>'+
+            '<button class="gh-draft-discard" id="ghDiscardDraft" title="Discard draft"><i class="fas fa-times"></i></button>';
+          var _mbody=document.querySelector('#ghPostModal .gh-modal-body');
+          if(_mbody) _mbody.insertBefore(_db,_mbody.firstChild);
+          var _rBtn=document.getElementById('ghRestoreDraft');
+          var _xBtn=document.getElementById('ghDiscardDraft');
+          if(_rBtn) _rBtn.onclick=function(){
+            if(ta) ta.value=_draft.text||'';
+            if(_draft.feeling){ selectedFeeling=_draft.feeling; var sfe=$('#ghSelectedFeeling'); if(sfe){ sfe.textContent=_draft.feeling; sfe.style.display='block'; } }
+            var vis=$('#ghPostVisibility'); if(vis&&_draft.visibility) vis.value=_draft.visibility;
+            _db.remove(); updateSubmit();
+            if(ta){ ta.focus(); ta.dispatchEvent(new Event('input',{bubbles:true})); }
+          };
+          if(_xBtn) _xBtn.onclick=function(){
+            try{ localStorage.removeItem(_DRAFT_KEY); }catch(e){}
+            _db.remove();
+          };
+        }
+      }
+    }catch(e){}
 
     // Validate: enable/disable Post button
     function updateSubmit(){
@@ -1243,13 +1296,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var pqEl=$('#ghPollQuestion');
     if(pqEl) pqEl.addEventListener('input', updateSubmit);
 
-    // Dirty-state close confirmation (capture phase fires before the modal's bubble-phase close handler)
+    // Phase 36: auto-save draft on close instead of confirm-discard
     m.addEventListener('click', function(e){
       if(e.target===m || e.target.closest('[data-close-modal]')){
-        var textVal = pollMode ? (($('#ghPollQuestion')||{}).value||'') : (ta ? ta.value : '');
-        if((textVal.trim() || pickedFiles.length) && !confirm('Discard your post?')){
-          e.stopPropagation();
-          e.preventDefault();
+        var textVal = pollMode ? '' : (ta ? ta.value : '');
+        if(textVal.trim()){
+          try{ localStorage.setItem('gh_draft', JSON.stringify({ text:textVal, feeling:selectedFeeling, visibility:($('#ghPostVisibility')||{}).value||'public', savedAt:Date.now() })); }catch(_ec){}
+          setTimeout(function(){ toast('✏️ Draft saved'); },100);
         }
       }
     }, true);
@@ -1369,7 +1422,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var pollPayload=Object.assign({ type:'poll', poll:{question:question,options:opts,endsAt:endsAt,totalVotes:0}, visibility:($('#ghPostVisibility')||{}).value||'public' }, extra||{});
         submitBtn.disabled=true;
         submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
-        GS().createPost(question, '', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); }, pollPayload);
+        GS().createPost(question, '', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); try{localStorage.removeItem('gh_draft');}catch(_e){} }, pollPayload);
         return;
       }
 
@@ -1403,7 +1456,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           if(!validUrls.length && pickedFiles.length) throw new Error('All uploads failed');
           payload.mediaUrls=validUrls;
           submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
-          GS().createPost(txt, validUrls[0]||'', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); var _u=authUser(); if(_u) setTimeout(function(){ checkAndAwardBadges(_u.uid); },2000); }, payload);
+          GS().createPost(txt, validUrls[0]||'', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); try{localStorage.removeItem('gh_draft');}catch(_e){} var _u=authUser(); if(_u) setTimeout(function(){ checkAndAwardBadges(_u.uid); },2000); }, payload);
         }).catch(function(err){
           console.error('[GeoHub] multi-image upload',err);
           toast('Image upload failed. Check Cloudinary settings.','error');
@@ -1413,7 +1466,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         });
       } else {
         submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
-        GS().createPost(txt, '', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); var _u=authUser(); if(_u) setTimeout(function(){ checkAndAwardBadges(_u.uid); },2000); }, payload);
+        GS().createPost(txt, '', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); try{localStorage.removeItem('gh_draft');}catch(_e){} var _u=authUser(); if(_u) setTimeout(function(){ checkAndAwardBadges(_u.uid); },2000); }, payload);
       }
     };
   }
@@ -5110,6 +5163,22 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div id="ghFeedList">'+skelPostCard()+skelVideoCard()+skelPostCard()+skelVideoCard()+skelPostCard()+'</div>'+
         '<div id="ghFeedLoadMore" style="text-align:center;padding:16px 0 8px"></div>'
     });
+    // Phase 36: Draft chip in composer area
+    try{
+      var _feedDraftRaw=localStorage.getItem('gh_draft');
+      if(_feedDraftRaw&&!pageMode){
+        var _feedDraft=JSON.parse(_feedDraftRaw);
+        if(_feedDraft&&_feedDraft.text&&_feedDraft.text.trim()){
+          var _compSec=document.querySelector('.gh-composer');
+          if(_compSec){
+            var _dc=document.createElement('div');
+            _dc.className='gh-draft-chip';
+            _dc.innerHTML='<i class="fas fa-floppy-disk"></i> Unpublished draft — <button class="gh-draft-chip-resume" data-create-post>Continue writing</button>';
+            _compSec.appendChild(_dc);
+          }
+        }
+      }
+    }catch(e){}
     if(pageMode){
       var fake=$('.gh-composer-fake');
       var actions=$('.gh-composer-actions');

@@ -3789,6 +3789,53 @@ a.gh-trending-chip:hover {
   color: var(--gh-muted, #8aa69a);
 }
 
+/* ── Phase 36: Post Drafts ───────────────────────────── */
+.gh-draft-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(16,185,129,.1);
+  border: 1px solid rgba(16,185,129,.25);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  font-size: .82rem;
+  color: var(--gh-text, #eefcf6);
+}
+.gh-draft-banner span { flex: 1; color: var(--gh-muted, #8aa69a); }
+.gh-draft-discard {
+  background: none;
+  border: none;
+  color: var(--gh-muted, #8aa69a);
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: .8rem;
+  border-radius: 4px;
+  transition: color .15s;
+}
+.gh-draft-discard:hover { color: var(--gh-red, #ef4444); }
+.gh-draft-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: rgba(16,185,129,.07);
+  border-top: 1px solid rgba(16,185,129,.15);
+  font-size: .8rem;
+  color: var(--gh-muted, #8aa69a);
+}
+.gh-draft-chip i { color: #10b981; }
+.gh-draft-chip-resume {
+  background: none;
+  border: none;
+  color: #10b981;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  font-size: .8rem;
+  text-decoration: underline;
+}
+
 /* ── Phase 32: Emoji Picker ─────────────────────────── */
 .gh-emoji-picker {
   position: fixed;
