@@ -2758,7 +2758,30 @@
     loadWatchLocation(v);
 
     if (descEl && v.description) {
-      descEl.innerHTML = '<div class="watch-desc-wrap"><p>' + esc(v.description) + '</p></div>';
+      var fullDesc = v.description;
+      var SHORT_LEN = 220;
+      var needsToggle = fullDesc.length > SHORT_LEN;
+      descEl.innerHTML =
+        '<div class="watch-desc-wrap">' +
+          '<p class="watch-desc-text' + (needsToggle ? ' collapsed' : '') + '" id="watchDescText">' +
+            esc(fullDesc) +
+          '</p>' +
+          (needsToggle
+            ? '<button class="watch-desc-toggle" id="watchDescToggle">მეტის ჩვენება <i class="fas fa-chevron-down"></i></button>'
+            : '') +
+        '</div>';
+      if (needsToggle) {
+        var dToggle = document.getElementById('watchDescToggle');
+        var dText   = document.getElementById('watchDescText');
+        if (dToggle && dText) {
+          dToggle.addEventListener('click', function () {
+            var nowCollapsed = dText.classList.toggle('collapsed');
+            dToggle.innerHTML = nowCollapsed
+              ? 'მეტის ჩვენება <i class="fas fa-chevron-down"></i>'
+              : 'ნაკლები <i class="fas fa-chevron-up"></i>';
+          });
+        }
+      }
     }
 
     if (addedByEl) {
@@ -2834,22 +2857,66 @@
     var sidebar = document.getElementById('watchSidebar');
     if (!sidebar) return;
     sidebar.innerHTML = '<div style="color:var(--text-muted);font-size:.85rem;padding:8px 0"><i class="fas fa-spinner fa-spin"></i> იტვირთება...</div>';
-    loadVideos({ category: v.category }, function (vids) {
-      var rel = vids.filter(function (r) { return r.id !== v.id && !r.isShort; }).slice(0, 10);
+    loadVideos({}, function (vids) {
+      var myId    = v.id;
+      var myChId  = v.channelId || '';
+      var myCat   = v.category  || '';
+
+      /* Split into 3 priority buckets */
+      var sameCh  = vids.filter(function (r) {
+        return r.id !== myId && !r.isShort && myChId && (r.channelId || '') === myChId;
+      });
+      var sameCat = vids.filter(function (r) {
+        return r.id !== myId && !r.isShort && (r.channelId || '') !== myChId && (r.category || '') === myCat;
+      });
+      var other   = vids.filter(function (r) {
+        return r.id !== myId && !r.isShort && (r.channelId || '') !== myChId && (r.category || '') !== myCat;
+      });
+
+      /* Up to 5 same-channel first, then fill to 14 */
+      var rel = sameCh.slice(0, 5).concat(sameCat).concat(other).slice(0, 14);
+
       if (!rel.length) {
         sidebar.innerHTML = '<div style="color:var(--text-muted);font-size:.85rem;padding:8px 0">მსგავსი ვიდეო არ არის</div>';
         return;
       }
-      sidebar.innerHTML = rel.map(function (r) {
-        var thumb = r.thumbnail || ytThumb(r.youtubeId);
-        var rm = catMeta(r.category);
-        return '<a class="related-vid" href="watch.html?v=' + r.id + '">' +
-          '<div class="related-thumb"><img src="' + thumb + '" alt="" loading="lazy" onerror="this.src=\'' + ytThumb(r.youtubeId) + '\'"><div class="related-play"><i class="fas fa-play"></i></div></div>' +
-          '<div class="related-info"><div class="related-title">' + esc(r.title || 'Untitled') + '</div>' +
-            '<div class="related-meta"><i class="fas ' + rm.icon + '"></i>' + rm.label + (r.city ? ' · ' + esc(r.city) : '') + '</div>' +
-          '</div>' +
-        '</a>';
-      }).join('');
+
+      var sameChCount = Math.min(sameCh.length, 5);
+      var html = '';
+      if (sameChCount > 0) {
+        html += '<div class="related-section-head"><i class="fas fa-layer-group"></i> ამ არხის ვიდეოები</div>';
+      }
+
+      rel.forEach(function (r, idx) {
+        /* Insert "Other videos" header after same-channel block */
+        if (sameChCount > 0 && idx === sameChCount) {
+          html += '<div class="related-section-head" style="margin-top:14px"><i class="fas fa-film"></i> სხვა ვიდეოები</div>';
+        }
+        var thumb  = r.thumbnail || ytThumb(r.youtubeId);
+        var rm     = catMeta(r.category);
+        var rChName = r.channelName || r.authorName || '';
+        var rChAv   = r.channelAvatar || r.authorAvatar || '';
+        var chHtml  = rChName
+          ? '<div class="related-ch">' +
+              (rChAv ? '<img src="' + esc(rChAv) + '" alt="" class="related-ch-av" onerror="this.style.display=\'none\'">' : '') +
+              '<span>' + esc(rChName) + '</span>' +
+            '</div>'
+          : '';
+        html +=
+          '<a class="related-vid" href="watch.html?v=' + esc(r.id) + '">' +
+            '<div class="related-thumb">' +
+              '<img src="' + esc(thumb) + '" alt="" loading="lazy" onerror="this.src=\'' + esc(ytThumb(r.youtubeId)) + '\'">' +
+              '<div class="related-play"><i class="fas fa-play"></i></div>' +
+            '</div>' +
+            '<div class="related-info">' +
+              '<div class="related-title">' + esc(r.title || 'Untitled') + '</div>' +
+              chHtml +
+              '<div class="related-meta"><i class="fas ' + rm.icon + '"></i>' + rm.label + (r.city ? ' · ' + esc(r.city) : '') + '</div>' +
+            '</div>' +
+          '</a>';
+      });
+
+      sidebar.innerHTML = html;
     });
   }
 
