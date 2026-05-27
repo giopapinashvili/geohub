@@ -2105,6 +2105,53 @@
               xpAwarded: xp
             }), docRef.id);
           }
+          /* ── Phase 17: Viral Loop ─────────────────────────────────────────
+             1. Auto-create a public feed post so followers see the check-in
+             2. Notify the business owner                                      */
+          var checkinText = data.caption
+            ? data.caption
+            : ('📍 '+(data.placeName||'a place')+' — checked in'+(data.city?' in '+data.city:''));
+          addDoc(collection(db,'posts'),{
+            type:               'checkin',
+            authorId:           user.uid,
+            userId:             user.uid,
+            authorName:         me.name||user.displayName||'GeoHub User',
+            authorAvatar:       me.avatar||user.photoURL||'',
+            placeId:            data.placeId||'',
+            placeName:          data.placeName||'',
+            businessId:         data.businessId||null,
+            lat:                data.lat||null,
+            lng:                data.lng||null,
+            city:               data.city||'',
+            country:            data.country||'Georgia',
+            checkinId:          docRef.id,
+            imageUrl:           data.photoUrl||null,
+            text:               checkinText,
+            caption:            data.caption||'',
+            verified:           data.verified===true,
+            verificationMethod: data.verificationMethod||'none',
+            xpAwarded:          xp,
+            visibility:         'public',
+            likeCount:          0,
+            commentCount:       0,
+            createdAt:          serverTimestamp()
+          }).catch(function(){});
+          /* Notify business owner */
+          if(data.businessId){
+            getDoc(doc(db,'businesses',data.businessId)).then(function(bizSnap){
+              if(!bizSnap.exists()) return;
+              var biz=bizSnap.data();
+              var ownerId=biz.createdByUserId||biz.ownerUid||biz.userId||'';
+              if(!ownerId||ownerId===user.uid) return;
+              createSystemNotification(
+                ownerId,'checkin',
+                '📍 '+(me.name||'Someone')+' checked in',
+                (me.name||'Someone')+' checked in at '+(data.placeName||'your business'),
+                'places.html?id='+(data.placeId||''),
+                {checkinId:docRef.id,placeId:data.placeId||'',visitorId:user.uid}
+              ).catch(function(){});
+            }).catch(function(){});
+          }
           if (callback) callback({ success: true, xpAwarded: xp, checkinId: docRef.id });
         }).catch(function (err) {
           console.error('[GeoSocial] createCheckinFull', err);

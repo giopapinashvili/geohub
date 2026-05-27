@@ -3013,3 +3013,111 @@ html[data-gh-theme="dark"] .gh-live-stats { border-color: rgba(59,130,246,.18) !
   .gh-near-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
   .gh-near-media { height: 120px; }
 }
+
+/* ── Phase 17: Check-in Post Card ───────────────────────── */
+.gh-checkin-card {
+  border-left: 3px solid var(--gh-green, #10b981);
+}
+.gh-ci-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px 0;
+}
+.gh-ci-meta { flex: 1; min-width: 0; }
+.gh-ci-who {
+  display: block;
+  font-size: .88rem;
+  color: var(--gh-text, #f9fafb);
+  margin-bottom: 2px;
+}
+.gh-ci-where {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: .8rem;
+  color: var(--gh-green, #10b981);
+  font-weight: 600;
+  text-decoration: none;
+  margin-bottom: 2px;
+}
+.gh-ci-where:hover { text-decoration: underline; }
+.gh-ci-badges {
+  display: flex;
+  gap: 6px;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+.gh-ci-verified {
+  font-size: .68rem;
+  font-weight: 700;
+  color: var(--gh-green, #10b981);
+  background: rgba(16,185,129,.12);
+  border-radius: 20px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+.gh-ci-xp {
+  font-size: .68rem;
+  font-weight: 700;
+  color: #f59e0b;
+  background: rgba(245,158,11,.12);
+  border-radius: 20px;
+  padding: 2px 8px;
+}
+.gh-ci-map-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg,rgba(16,185,129,.1),rgba(59,130,246,.07));
+  border: 1px solid rgba(16,185,129,.18);
+  border-radius: 12px;
+  margin: 10px 16px;
+  padding: 12px 14px;
+}
+.gh-ci-map-pin {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--gh-green, #10b981);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 6px rgba(16,185,129,.15);
+}
+.gh-ci-map-info { flex: 1; min-width: 0; }
+.gh-ci-map-info strong {
+  display: block;
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--gh-text, #f9fafb);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gh-ci-map-info span {
+  font-size: .74rem;
+  color: var(--gh-muted, #9ca3af);
+}
+.gh-ci-checkin-btn { flex-shrink: 0; font-size: .76rem !important; }
+.gh-ci-photo {
+  margin: 0 16px 10px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.gh-ci-photo img {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  display: block;
+}
+.gh-ci-caption {
+  margin: 0 16px 10px;
+  font-size: .86rem;
+  color: var(--gh-text, #f9fafb);
+  line-height: 1.5;
+}

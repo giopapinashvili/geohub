@@ -1893,9 +1893,62 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     '</article>';
   }
 
+  /* ── Phase 17: Check-in post card ─────────────────────────────────────── */
+  function checkinPostCard(p){
+    var name=p.authorName||'GeoHub User';
+    var av=p.authorAvatar||'';
+    var ts=p.createdAt&&p.createdAt.toMillis?timeAgo2(p.createdAt.toMillis()):'';
+    var pid=p.id||'';
+    var placeName=p.placeName||'ადგილი';
+    var city=p.city||'';
+    var placeHref=p.placeId?'places.html?id='+encodeURIComponent(p.placeId):'#';
+    var bizHref=p.businessId?'business.html?id='+encodeURIComponent(p.businessId):placeHref;
+    var checkinHref='checkin.html'+(p.placeId?'?place='+encodeURIComponent(p.placeId):'');
+    var caption=p.caption||'';
+    var photo=p.imageUrl||p.photoUrl||'';
+    var verBadge=p.verified?'<span class="gh-ci-verified"><i class="fas fa-circle-check"></i> Verified</span>':'';
+    var xpBadge=p.xpAwarded?'<span class="gh-ci-xp">+'+p.xpAwarded+' XP</span>':'';
+    return '<article class="gh-card gh-checkin-card" data-post-id="'+esc(pid)+'">'+
+      '<div class="gh-ci-header">'+
+        '<span class="gh-avatar" style="flex-shrink:0">'+(av?'<img src="'+esc(av)+'" alt="" loading="lazy" onerror="this.remove()">':esc(initials(name)))+'</span>'+
+        '<div class="gh-ci-meta">'+
+          '<span class="gh-ci-who"><b>'+esc(name)+'</b> checked in</span>'+
+          '<a class="gh-ci-where" href="'+esc(bizHref)+'"><i class="fas fa-location-dot"></i> '+esc(placeName)+(city?' · '+esc(city):'')+'</a>'+
+          (ts?'<span class="gh-post-time">'+esc(ts)+'</span>':'')+
+        '</div>'+
+        '<div class="gh-ci-badges">'+verBadge+xpBadge+'</div>'+
+      '</div>'+
+      '<div class="gh-ci-map-banner">'+
+        '<div class="gh-ci-map-pin"><i class="fas fa-location-dot"></i></div>'+
+        '<div class="gh-ci-map-info">'+
+          '<strong>'+esc(placeName)+'</strong>'+
+          (city?'<span>'+esc(city)+'</span>':'')+
+        '</div>'+
+        '<a class="gh-btn sm ghost gh-ci-checkin-btn" href="'+esc(checkinHref)+'"><i class="fas fa-plus"></i> Check in here</a>'+
+      '</div>'+
+      (photo?'<div class="gh-ci-photo"><img src="'+esc(photo)+'" alt="" loading="lazy"></div>':'')+
+      (caption?'<div class="gh-ci-caption">'+esc(caption)+'</div>':'')+
+      '<div class="gh-post-stats">'+
+        '<span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'">❤️ <b data-like-count>'+(p.likeCount||0)+'</b></button></span>'+
+        '<span><b data-comment-count>'+(p.commentCount||0)+'</b> comments</span>'+
+      '</div>'+
+      '<div class="gh-post-actions">'+
+        '<span class="gh-like-wrap"><button class="gh-act" data-like>❤️ Like</button>'+
+          '<div class="gh-reaction-strip"><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button><button data-reaction="clap">👏</button></div>'+
+        '</span>'+
+        '<button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> Comment</button>'+
+        '<button class="gh-act" data-share><i class="fas fa-share"></i> Share</button>'+
+      '</div>'+
+      '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+
+        '<form class="gh-comment-form" data-comment-form><input class="gh-input" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
+      '</div>'+
+    '</article>';
+  }
+
   function postCard(p, options){
     if(p.type==='video') return videoPostCard(p);
     if(p.type==='channelPost') return channelPostCard(p);
+    if(p.type==='checkin') return checkinPostCard(p);
     options=options||{};
     // Business context flags
     var bizCtx = !!(options.biz);
