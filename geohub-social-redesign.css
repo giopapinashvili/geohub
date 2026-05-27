@@ -2667,3 +2667,92 @@ html[data-gh-theme="dark"] .gh-live-stats { border-color: rgba(59,130,246,.18) !
   pointer-events: none;
 }
 .gh-new-posts-pill i { font-size: .8rem; }
+
+/* ── Phase 13: Streak Badge ─────────────────────────────── */
+.gh-streak-btn {
+  position: relative;
+  font-size: 1rem !important;
+  gap: 3px;
+  padding: 6px 8px !important;
+}
+.gh-streak-fire {
+  font-size: 1rem;
+  line-height: 1;
+}
+.gh-streak-count {
+  font-size: .72rem;
+  font-weight: 800;
+  color: var(--gh-text, #f9fafb);
+  min-width: 14px;
+  text-align: center;
+  font-style: normal;
+  line-height: 1;
+}
+.gh-streak-count.gh-streak-hot {
+  color: #f59e0b;
+  text-shadow: 0 0 8px rgba(245,158,11,.6);
+}
+
+/* ── Phase 13: XP Toast ─────────────────────────────────── */
+.gh-xp-toast {
+  position: fixed;
+  bottom: 88px;
+  right: 20px;
+  z-index: 9950;
+  transform: translateX(120%);
+  opacity: 0;
+  transition: transform .38s cubic-bezier(.34,1.35,.64,1), opacity .28s;
+  pointer-events: none;
+}
+.gh-xp-toast.show {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: all;
+}
+.gh-xp-toast.hide {
+  transform: translateX(120%);
+  opacity: 0;
+}
+.gh-xp-toast-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--gh-panel, #1e293b);
+  border: 1px solid rgba(245,158,11,.3);
+  border-radius: 16px;
+  padding: 12px 16px;
+  min-width: 220px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.35);
+}
+.gh-xp-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.gh-xp-body { flex: 1; }
+.gh-xp-main {
+  font-size: .84rem;
+  font-weight: 600;
+  color: var(--gh-text, #f9fafb);
+}
+.gh-xp-sub {
+  font-size: .75rem;
+  color: #f59e0b;
+  font-weight: 700;
+  margin-top: 2px;
+}
+.gh-xp-close {
+  background: none;
+  border: none;
+  color: var(--gh-muted, #9ca3af);
+  cursor: pointer;
+  font-size: .75rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  transition: color .15s;
+}
+.gh-xp-close:hover { color: var(--gh-text, #f9fafb); }
+@media (max-width: 500px) {
+  .gh-xp-toast { right: 10px; bottom: 72px; }
+}

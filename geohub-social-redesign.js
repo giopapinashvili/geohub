@@ -481,6 +481,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '</nav>'+
       '<div class="gh-top-actions">'+
         '<button class="gh-icon-btn gh-sidebar-toggle" id="ghSidebarToggle" title="Collapse sidebar"><i class="fas fa-bars-staggered"></i></button>'+
+        '<button class="gh-icon-btn gh-streak-btn" id="ghStreakBtn" title="Streak" style="display:none"><span class="gh-streak-fire">🔥</span><b class="gh-streak-count" id="ghStreakBadge">0</b></button>'+
         '<a class="gh-icon-btn" href="settings.html" title="Settings" aria-label="Settings"><i class="fas fa-gear"></i></a>'+
         '<button class="gh-icon-btn gh-theme-toggle" id="ghThemeToggle" title="Toggle light/dark mode"><i class="fas fa-moon"></i></button>'+
         '<div id="ghActorBtnSlot" class="gh-actor-btn-slot"></div>'+
@@ -912,7 +913,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(!fbUser){ clearCachedUser(); try{localStorage.removeItem('gh_active_actor');}catch(e){} }
       updateTopUser();
       listenBadges();
-      if(fbUser) validateActorOnLoad();
+      if(fbUser){ validateActorOnLoad(); maybeUpdateStreak(fbUser.uid); }
+      if(!fbUser){ var sb=document.getElementById('ghStreakBtn'); if(sb) sb.style.display='none'; }
       var bid = new URLSearchParams(location.search).get('id');
       if((state.page === 'business' || PAGE === 'business') && bid) updateBusinessFollowButton(bid);
     });
@@ -3667,6 +3669,73 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function _saveUiState(uid, updates){
     var gf=GF(); if(!gf||!gf.fs||!gf.db) return;
     gf.fs.setDoc(gf.fs.doc(gf.db,'userUiState',uid), updates, {merge:true}).catch(function(){});
+  }
+
+  /* ── Phase 13: Daily Streak + XP System ──────────────────────────────────── */
+  var STREAK_MILESTONES=[3,7,14,30,60,100];
+  var XP_PER_LOGIN=10;
+  var XP_MILESTONE_BONUS={3:20,7:50,14:100,30:300,60:500,100:1000};
+  function _dateStr(d){ d=d||new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  function _xpLevel(xp){ if(xp<100)return 1; if(xp<300)return 2; if(xp<700)return 3; if(xp<1500)return 4; return 5; }
+  function _xpToNextLevel(xp){ var t=[0,100,300,700,1500,99999]; var lv=_xpLevel(xp); return t[lv]-xp; }
+
+  function _updateStreakBadge(streak){
+    var badge=document.getElementById('ghStreakBadge');
+    if(!badge) return;
+    badge.textContent=streak||0;
+    var btn=document.getElementById('ghStreakBtn');
+    if(btn){
+      btn.title=(streak||0)+' დღის ზოლი';
+      btn.style.display=(streak&&streak>0)?'':'none';
+    }
+    if((streak||0)>=3) badge.classList.add('gh-streak-hot');
+    else badge.classList.remove('gh-streak-hot');
+  }
+
+  function _showXpToast(opts){
+    var existing=document.getElementById('ghXpToast'); if(existing) existing.remove();
+    var toast=document.createElement('div');
+    toast.id='ghXpToast'; toast.className='gh-xp-toast';
+    var milIcon=opts.milestone?'🎉':'🔥';
+    var mainHtml=opts.milestone
+      ? '<strong>'+opts.milestone+'</strong>'
+      : '<strong>🔥 '+opts.streak+' დღე ზედიზედ!</strong>';
+    toast.innerHTML=
+      '<div class="gh-xp-toast-inner">'+
+        '<div class="gh-xp-icon">'+milIcon+'</div>'+
+        '<div class="gh-xp-body">'+
+          '<div class="gh-xp-main">'+mainHtml+'</div>'+
+          '<div class="gh-xp-sub">+'+opts.xpGained+' XP</div>'+
+        '</div>'+
+        '<button class="gh-xp-close" onclick="this.closest(\'#ghXpToast\').remove()">✕</button>'+
+      '</div>';
+    document.body.appendChild(toast);
+    requestAnimationFrame(function(){ toast.classList.add('show'); });
+    var ttl=opts.milestone?5500:3200;
+    setTimeout(function(){ toast.classList.remove('show'); toast.classList.add('hide'); setTimeout(function(){ if(toast.parentNode) toast.remove(); },450); }, ttl);
+  }
+
+  function maybeUpdateStreak(uid){
+    _loadUiState(uid, function(data){
+      var today=_dateStr();
+      var yesterday=_dateStr(new Date(Date.now()-86400000));
+      var lastDate=data.lastStreakDate||'';
+      if(lastDate===today){ _updateStreakBadge(data.streak||0); return; }
+      var prevStreak=data.streak||0;
+      var newStreak=(lastDate===yesterday) ? prevStreak+1 : 1;
+      var xpGained=XP_PER_LOGIN;
+      var milestoneLabel=null;
+      STREAK_MILESTONES.forEach(function(m){
+        if(newStreak===m){ milestoneLabel=m+' დღის ზოლი! 🎉'; xpGained+=(XP_MILESTONE_BONUS[m]||0); }
+      });
+      var newXp=(data.xp||0)+xpGained;
+      var newLongest=Math.max(data.longestStreak||0,newStreak);
+      _saveUiState(uid,{streak:newStreak,lastStreakDate:today,xp:newXp,longestStreak:newLongest});
+      _updateStreakBadge(newStreak);
+      setTimeout(function(){
+        _showXpToast({xpGained:xpGained,streak:newStreak,milestone:milestoneLabel});
+      },1800);
+    });
   }
 
   /* ── Phase 8: Onboarding interests list ───────────────────────────────── */
