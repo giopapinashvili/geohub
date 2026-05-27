@@ -1130,6 +1130,7 @@
           groupId: extra && extra.groupId ? extra.groupId : null,
           type: extra && extra.type ? extra.type : null,
           poll: extra && extra.poll ? extra.poll : null,
+          gifUrl: extra && extra.gifUrl ? extra.gifUrl : null,
           createdAt: serverTimestamp()
         };
         // For close_friends posts: snapshot the author's closeFriends UIDs onto the post

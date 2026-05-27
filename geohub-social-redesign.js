@@ -1263,7 +1263,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button class="gh-cmp-tool" id="ghToggleFeeling" type="button" title="Feeling or activity"><i class="fas fa-face-smile"></i><span>Feeling</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleBg" type="button" title="Background color"><i class="fas fa-palette"></i><span>Background</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleEmoji" type="button" title="Emoji"><i class="fas fa-face-grin"></i><span>Emoji</span></button>'+
+        '<button class="gh-cmp-tool" id="ghToggleGif" type="button" title="Add GIF"><i class="fas fa-film"></i><span>GIF</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleSchedule" type="button" title="Schedule post"><i class="fas fa-clock"></i><span>Schedule</span></button>'+
+      '</div>'+
+      '<div class="gh-gif-panel" id="ghGifPanel" style="display:none">'+
+        '<div class="gh-gif-search-row"><input class="gh-input" id="ghGifSearch" placeholder="Search GIFs…" autocomplete="off"><button type="button" class="gh-btn sm ghost" id="ghClearGif" title="Remove GIF" style="display:none"><i class="fas fa-times"></i> Remove</button></div>'+
+        '<div class="gh-gif-grid" id="ghGifGrid"><div class="gh-gif-loading"><i class="fas fa-circle-notch fa-spin"></i> Loading trending…</div></div>'+
+      '</div>'+
+      '<div class="gh-gif-selected-preview" id="ghGifPreview" style="display:none">'+
+        '<img id="ghGifPreviewImg" src="" alt="Selected GIF" style="max-height:180px;border-radius:10px;max-width:100%">'+
+        '<button type="button" class="gh-gif-remove-btn" id="ghGifRemoveBtn" title="Remove GIF"><i class="fas fa-times"></i></button>'+
       '</div>'+
       '<div class="gh-schedule-panel" id="ghSchedulePanel" style="display:none">'+
         '<i class="fas fa-calendar-alt" style="color:#f59e0b;flex-shrink:0"></i>'+
@@ -1292,6 +1301,68 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     // Phase 32: emoji picker for composer
     var _emojiToolBtn=document.getElementById('ghToggleEmoji');
     if(_emojiToolBtn && ta) _emojiToolBtn.addEventListener('click',function(){ _openEmojiPicker(ta,_emojiToolBtn); });
+
+    // Phase 43: GIF picker
+    var pickedGifUrl='';
+    var _gifBtn=document.getElementById('ghToggleGif');
+    var _gifPanel=document.getElementById('ghGifPanel');
+    var _gifSearch=document.getElementById('ghGifSearch');
+    var _gifGrid=document.getElementById('ghGifGrid');
+    var _gifPreview=document.getElementById('ghGifPreview');
+    var _gifPreviewImg=document.getElementById('ghGifPreviewImg');
+    var _gifRemoveBtn=document.getElementById('ghGifRemoveBtn');
+    var _gifTimer=null;
+    var _GIPHY_KEY='dc6zaTOxFJmzC';
+    function _loadGifs(q){
+      if(!_gifGrid) return;
+      _gifGrid.innerHTML='<div class="gh-gif-loading"><i class="fas fa-circle-notch fa-spin"></i></div>';
+      var url=q
+        ?'https://api.giphy.com/v1/gifs/search?api_key='+_GIPHY_KEY+'&q='+encodeURIComponent(q)+'&limit=24&rating=g'
+        :'https://api.giphy.com/v1/gifs/trending?api_key='+_GIPHY_KEY+'&limit=24&rating=g';
+      fetch(url).then(function(r){return r.json();}).then(function(data){
+        var gifs=(data.data||[]);
+        if(!gifs.length){_gifGrid.innerHTML='<div class="gh-gif-loading">No GIFs found</div>';return;}
+        _gifGrid.innerHTML=gifs.map(function(g){
+          var preview=g.images&&g.images.fixed_width_small&&g.images.fixed_width_small.url||'';
+          var full=g.images&&g.images.downsized&&g.images.downsized.url||preview;
+          return '<button type="button" class="gh-gif-item" data-gif-url="'+esc(full)+'" data-gif-preview="'+esc(preview)+'"><img src="'+esc(preview)+'" alt="" loading="lazy"></button>';
+        }).join('');
+      }).catch(function(){_gifGrid.innerHTML='<div class="gh-gif-loading" style="color:var(--gh-muted)">Could not load GIFs</div>';});
+    }
+    function _selectGif(url){
+      pickedGifUrl=url;
+      if(_gifPreviewImg) _gifPreviewImg.src=url;
+      if(_gifPreview) _gifPreview.style.display='block';
+      if(_gifPanel) _gifPanel.style.display='none';
+      if(_gifBtn) _gifBtn.classList.add('active');
+      if(document.getElementById('ghClearGif')) document.getElementById('ghClearGif').style.display='';
+      updateSubmit();
+    }
+    function _clearGif(){
+      pickedGifUrl='';
+      if(_gifPreviewImg) _gifPreviewImg.src='';
+      if(_gifPreview) _gifPreview.style.display='none';
+      if(_gifBtn) _gifBtn.classList.remove('active');
+      if(document.getElementById('ghClearGif')) document.getElementById('ghClearGif').style.display='none';
+      updateSubmit();
+    }
+    if(_gifBtn) _gifBtn.addEventListener('click',function(){
+      if(!_gifPanel) return;
+      var open=_gifPanel.style.display!=='none';
+      _gifPanel.style.display=open?'none':'block';
+      if(!open){ _loadGifs(''); if(_gifSearch) _gifSearch.focus(); }
+    });
+    if(_gifSearch) _gifSearch.addEventListener('input',function(){
+      clearTimeout(_gifTimer);
+      var q=this.value.trim();
+      _gifTimer=setTimeout(function(){_loadGifs(q);},400);
+    });
+    if(_gifGrid) _gifGrid.addEventListener('click',function(e){
+      var btn=e.target.closest('.gh-gif-item'); if(!btn) return;
+      _selectGif(btn.dataset.gifUrl||'');
+    });
+    if(_gifRemoveBtn) _gifRemoveBtn.addEventListener('click',function(){ _clearGif(); });
+    if(document.getElementById('ghClearGif')) document.getElementById('ghClearGif').addEventListener('click',function(){ _clearGif(); });
 
     // Phase 39: Schedule
     function _updateScheduleIndicator(){
@@ -1391,7 +1462,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var hasText = pollMode
         ? !!(($('#ghPollQuestion')||{}).value||'').trim()
         : !!(ta && ta.value.trim());
-      btn.disabled = !(hasText || pickedFiles.length);
+      btn.disabled = !(hasText || pickedFiles.length || pickedGifUrl);
     }
     if(ta) ta.addEventListener('input', function(){
       updateSubmit();
@@ -1532,14 +1603,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       }
 
       var txt=(ta&&ta.value)||'';
-      if(!txt.trim() && !pickedFiles.length) return toast('Write something or add a photo','error');
+      if(!txt.trim() && !pickedFiles.length && !pickedGifUrl) return toast('Write something or add a photo/GIF','error');
 
       var payload=Object.assign({
         visibility: ($('#ghPostVisibility')||{}).value||'public',
         feeling: selectedFeeling,
         bgGradient: selectedBg,
         linkPreview: state._lpData||null,
-        mentions: extractMentions(txt)
+        mentions: extractMentions(txt),
+        gifUrl: pickedGifUrl||null
       }, extra||{});
       // Phase 39: scheduled post
       if(scheduledAt && scheduledAt>new Date()){ payload.status='scheduled'; payload.scheduledAt=scheduledAt; }
@@ -2192,6 +2264,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         }).join('')+'</div>';
     } else if (singleImgUrl) {
       mediaHtml = '<div class="gh-post-img-wrap" data-open-photo="'+esc(singleImgUrl)+'"><img class="gh-post-img" src="'+esc(singleImgUrl)+'" alt="post image" loading="lazy" onerror="this.parentElement.style.display=\'none\'"></div>';
+    }
+    // Phase 43: GIF
+    if(!mediaHtml && p.gifUrl) {
+      mediaHtml = '<div class="gh-post-gif-wrap"><img class="gh-post-gif" src="'+esc(p.gifUrl)+'" alt="GIF" loading="lazy"><span class="gh-gif-badge">GIF</span></div>';
     }
 
     var pollHtml = '';
