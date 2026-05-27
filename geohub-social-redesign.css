@@ -3921,6 +3921,29 @@ a.gh-trending-chip:hover {
   margin: 8px 0;
 }
 
+/* ── Phase 39: Post Scheduling ──────────────────────── */
+.gh-schedule-panel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(245,158,11,.08);
+  border: 1px solid rgba(245,158,11,.22);
+  border-radius: 10px;
+  margin: 6px 0 2px;
+}
+.gh-schedule-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .8rem;
+  color: #f59e0b;
+  font-weight: 600;
+  padding: 4px 2px;
+  margin-bottom: 4px;
+}
+.gh-schedule-indicator i { font-size: .78rem; }
+
 /* ── Phase 36: Post Drafts ───────────────────────────── */
 .gh-draft-banner {
   display: flex;

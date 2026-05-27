@@ -1118,7 +1118,8 @@
           commentCount: 0,
           shareCount: 0,
           visibility: vis,
-          status: 'active',
+          status: (extra && extra.status && extra.status !== 'active') ? extra.status : 'active',
+          scheduledAt: (extra && extra.scheduledAt) ? extra.scheduledAt : null,
           sharedPostId: extra && extra.sharedPostId ? extra.sharedPostId : null,
           targetType: extra && extra.targetType ? extra.targetType : 'user',
           targetId: extra && extra.targetId ? extra.targetId : user.uid,
@@ -1134,7 +1135,8 @@
         // For close_friends posts: snapshot the author's closeFriends UIDs onto the post
         var doCreate = function(data) {
           return addDoc(collection(db, 'posts'), data).then(function (ref) {
-            toast('Post published!');
+            if(data.status === 'scheduled') toast('📅 Post scheduled!');
+            else toast('Post published!');
             awardPoints(20, 'Create post', 'post', ref.id);
             /* Phase 21: extract & count hashtags */
             var htags=(text.match(/#[\wა-ჰა-ჿ]+/g)||[]).map(function(t){ return t.slice(1).toLowerCase(); });

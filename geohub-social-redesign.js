@@ -958,7 +958,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(!fbUser){ clearCachedUser(); try{localStorage.removeItem('gh_active_actor');}catch(e){} }
       updateTopUser();
       listenBadges();
-      if(fbUser){ validateActorOnLoad(); maybeUpdateStreak(fbUser.uid); _initWrapped(fbUser.uid); setTimeout(function(){ checkAndAwardBadges(fbUser.uid); }, 3000); setTimeout(function(){ loadOnThisDay(fbUser.uid); }, 1500); setTimeout(function(){ _loadBirthdayFeedCards(fbUser.uid); _loadWeeklyDigest(fbUser.uid); }, 2500); }
+      if(fbUser){ validateActorOnLoad(); maybeUpdateStreak(fbUser.uid); _initWrapped(fbUser.uid); setTimeout(function(){ checkAndAwardBadges(fbUser.uid); }, 3000); setTimeout(function(){ loadOnThisDay(fbUser.uid); }, 1500); setTimeout(function(){ _loadBirthdayFeedCards(fbUser.uid); _loadWeeklyDigest(fbUser.uid); }, 2500); setTimeout(function(){ checkAndPublishScheduledPosts(fbUser.uid); }, 4000); }
       if(!fbUser){ var sb=document.getElementById('ghStreakBtn'); if(sb) sb.style.display='none'; }
       var bid = new URLSearchParams(location.search).get('id');
       if((state.page === 'business' || PAGE === 'business') && bid) updateBusinessFollowButton(bid);
@@ -1259,6 +1259,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button class="gh-cmp-tool" id="ghToggleFeeling" type="button" title="Feeling or activity"><i class="fas fa-face-smile"></i><span>Feeling</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleBg" type="button" title="Background color"><i class="fas fa-palette"></i><span>Background</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleEmoji" type="button" title="Emoji"><i class="fas fa-face-grin"></i><span>Emoji</span></button>'+
+        '<button class="gh-cmp-tool" id="ghToggleSchedule" type="button" title="Schedule post"><i class="fas fa-clock"></i><span>Schedule</span></button>'+
+      '</div>'+
+      '<div class="gh-schedule-panel" id="ghSchedulePanel" style="display:none">'+
+        '<i class="fas fa-calendar-alt" style="color:#f59e0b;flex-shrink:0"></i>'+
+        '<input type="datetime-local" class="gh-input" id="ghScheduleAt" style="flex:1;font-size:.82rem">'+
+        '<button type="button" class="gh-btn sm ghost" id="ghClearSchedule" title="Clear"><i class="fas fa-times"></i></button>'+
+      '</div>'+
+      '<div class="gh-schedule-indicator" id="ghScheduleIndicator" style="display:none">'+
+        '<i class="fas fa-clock"></i><span id="ghScheduleLabel"></span>'+
       '</div>'+
       '<input type="file" id="ghPostFileInput" accept="image/*" multiple style="display:none">'+
       '<div class="gh-upload-progress" id="ghPostUploadBar" style="display:none"><div class="gh-upload-track"><div class="gh-upload-bar" id="ghPostUploadFill"></div></div><span id="ghPostUploadPct">0%</span></div>';
@@ -1267,7 +1276,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn ghost" id="ghSaveDraft" title="Save draft"><i class="fas fa-floppy-disk"></i></button><button class="gh-btn" id="ghSubmitPost" disabled><i class="fas fa-paper-plane"></i> Post</button>',
       'ghPostModal');
 
-    var pickedFiles=[], selectedFeeling='', selectedBg='', pollMode=false, feelingRowVisible=false, bgVisible=false;
+    var pickedFiles=[], selectedFeeling='', selectedBg='', pollMode=false, feelingRowVisible=false, bgVisible=false, scheduledAt=null;
     var _lpTimer=null, _lpUrl='';
 
     var ta=$('#ghPostText');
@@ -1278,6 +1287,45 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     // Phase 32: emoji picker for composer
     var _emojiToolBtn=document.getElementById('ghToggleEmoji');
     if(_emojiToolBtn && ta) _emojiToolBtn.addEventListener('click',function(){ _openEmojiPicker(ta,_emojiToolBtn); });
+
+    // Phase 39: Schedule
+    function _updateScheduleIndicator(){
+      var ind=$('#ghScheduleIndicator'), lbl=$('#ghScheduleLabel'), sb=$('#ghSubmitPost');
+      if(scheduledAt && scheduledAt>new Date()){
+        var fmt=scheduledAt.toLocaleDateString('ka-GE',{month:'short',day:'numeric'})+' '+scheduledAt.toLocaleTimeString('ka-GE',{hour:'2-digit',minute:'2-digit'});
+        if(ind) ind.style.display='flex';
+        if(lbl) lbl.textContent='Scheduled for '+fmt;
+        if(sb&&!sb.disabled) sb.innerHTML='<i class="fas fa-clock"></i> Schedule';
+      } else {
+        scheduledAt=null;
+        if(ind) ind.style.display='none';
+        if(sb&&!sb.disabled) sb.innerHTML='<i class="fas fa-paper-plane"></i> Post';
+      }
+    }
+    var _schedBtn=document.getElementById('ghToggleSchedule');
+    if(_schedBtn) _schedBtn.addEventListener('click',function(){
+      var panel=$('#ghSchedulePanel');
+      var visible=panel&&panel.style.display!=='none';
+      if(visible){ panel.style.display='none'; this.classList.remove('active'); scheduledAt=null; _updateScheduleIndicator(); return; }
+      if(panel) panel.style.display='flex';
+      this.classList.add('active');
+      // Default: 1 hour from now, rounded to nearest 15min
+      var d=new Date(Date.now()+3600000); d.setMinutes(Math.ceil(d.getMinutes()/15)*15,0,0);
+      var local=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+      var inp=$('#ghScheduleAt'); if(inp){ inp.value=local; inp.min=new Date(Date.now()+120000-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16); }
+      scheduledAt=d; _updateScheduleIndicator();
+    });
+    var _schedInput=document.getElementById('ghScheduleAt');
+    if(_schedInput) _schedInput.addEventListener('change',function(){
+      scheduledAt=this.value?new Date(this.value):null; _updateScheduleIndicator();
+    });
+    var _clearSched=document.getElementById('ghClearSchedule');
+    if(_clearSched) _clearSched.addEventListener('click',function(){
+      scheduledAt=null;
+      var panel=$('#ghSchedulePanel'); if(panel) panel.style.display='none';
+      var sb=$('#ghToggleSchedule'); if(sb) sb.classList.remove('active');
+      _updateScheduleIndicator();
+    });
 
     // Phase 36: Draft save/restore
     var _DRAFT_KEY='gh_draft';
@@ -1488,6 +1536,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         linkPreview: state._lpData||null,
         mentions: extractMentions(txt)
       }, extra||{});
+      // Phase 39: scheduled post
+      if(scheduledAt && scheduledAt>new Date()){ payload.status='scheduled'; payload.scheduledAt=scheduledAt; }
 
       submitBtn.disabled=true;
 
@@ -3967,6 +4017,30 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         });
       };
     });
+  }
+
+  /* ── Phase 39: Scheduled Posts — auto-publish ───────────── */
+  function checkAndPublishScheduledPosts(uid){
+    if(!uid||!fs()||!db()) return;
+    var now=new Date();
+    fs().getDocs(
+      fs().query(
+        fs().collection(db(),'posts'),
+        fs().where('authorId','==',uid),
+        fs().where('status','==','scheduled'),
+        fs().where('scheduledAt','<=',now),
+        fs().limit(15)
+      )
+    ).then(function(snap){
+      if(!snap.size) return;
+      var batch=fs().writeBatch(db());
+      snap.forEach(function(d){
+        batch.update(fs().doc(db(),'posts',d.id),{status:'active',publishedAt:fs().serverTimestamp()});
+      });
+      return batch.commit().then(function(){
+        toast('📅 '+snap.size+' scheduled post'+(snap.size>1?'s':'')+' published!');
+      });
+    }).catch(function(){});
   }
 
   /* ── Phase 32: Emoji Picker ──────────────────────────────── */
