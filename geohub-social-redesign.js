@@ -2227,6 +2227,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
     var totalRx = Number(p.likeCount||p.reactionCount||0);
 
+    // Phase 41: translate button (only when post has text)
+    var translateHtml = p.text ? '<div class="gh-post-translate"><button class="gh-translate-btn" data-translate data-translate-text="'+esc((p.text||'').slice(0,500))+'">🌐 Translate</button><div class="gh-translate-result" data-translate-result hidden></div></div>' : '';
+
     // Business context extras
     var pinBanner = (bizCtx && p.pinned) ? '<div class="gh-post-pinned-banner"><i class="fas fa-thumbtack"></i> Pinned post</div>' : '';
     var followedPageBanner = options.fromFollowedPage ? '<a class="gh-followed-page-banner" href="business.html?id='+esc(p.targetId||p.businessId||'')+'"><i class="fas fa-store"></i> From a page you follow</a>' : '';
@@ -2274,6 +2277,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       pinBanner+
       '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+avatarAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+target+(p.feeling?' · '+esc(p.feeling):'')+bizPostedOnHtml+'</div></div>'+moreBtn+'</div>'+
       postTextHtml+
+      translateHtml+
       mediaHtml+
       pollHtml+
       linkPrevHtml+
@@ -2498,6 +2502,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(e.target.closest('[data-share]')){ sharePost(pid); if(window.ghPwaEngage) window.ghPwaEngage(2); }
       if(e.target.closest('[data-save]')){ if(!requireLogin()) return; GS().toggleSavePost(pid,function(saved){ var b=card.querySelector('[data-save]'); if(b) b.classList.toggle('active',!!saved); }); if(window.ghPwaEngage) window.ghPwaEngage(1); }
       var menuBtn=e.target.closest('[data-post-menu]'); if(menuBtn){ postMenu(pid,card,menuBtn); }
+      var trBtn=e.target.closest('[data-translate]'); if(trBtn){ e.stopPropagation(); _translatePost(trBtn); return; }
       var rb=e.target.closest('[data-comment-reply]'); if(rb){ e.preventDefault(); openReplyForm(card,pid,rb.dataset.commentId); }
       var cr=e.target.closest('[data-copy-post-link]'); if(cr && navigator.clipboard){ navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast('Post link copied');}); }
       var wrBtn=e.target.closest('[data-who-reacted]'); if(wrBtn){ openWhoReactedModal(wrBtn.dataset.whoReacted); }
@@ -4140,6 +4145,48 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     el.addEventListener('blur',function(){
       setTimeout(function(){ if(_mDrop&&!_mDrop.contains(document.activeElement)) _closeMDrop(); },160);
     });
+  }
+
+  /* ── Phase 41: Post Translation ──────────────────────────── */
+  function _translatePost(btn){
+    var card=btn.closest('[data-post-id]'); if(!card) return;
+    var resultDiv=card.querySelector('[data-translate-result]'); if(!resultDiv) return;
+    // Toggle off
+    if(!resultDiv.hidden){
+      resultDiv.hidden=true;
+      btn.innerHTML='🌐 Translate';
+      btn.classList.remove('active');
+      return;
+    }
+    // Show cached
+    if(resultDiv.dataset.translated){
+      resultDiv.hidden=false;
+      btn.innerHTML='✕ Original';
+      btn.classList.add('active');
+      return;
+    }
+    var text=(btn.dataset.translateText||'').trim();
+    if(!text) return;
+    // Detect language: >20% Georgian chars → translate to English, else → Georgian
+    var kaCount=(text.match(/[ა-ჿ]/g)||[]).length;
+    var isGeo=text.length>0 && kaCount/text.length>0.2;
+    var langpair=isGeo?'ka|en':'en|ka';
+    var targetLabel=isGeo?'🇬🇧 English':'🇬🇪 Georgian';
+    btn.innerHTML='<i class="fas fa-circle-notch fa-spin" style="font-size:.75rem"></i>';
+    btn.disabled=true;
+    fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text.slice(0,500))+'&langpair='+langpair)
+      .then(function(r){return r.json();})
+      .then(function(data){
+        var tr=data.responseData&&data.responseData.translatedText;
+        if(!tr||tr===text){toast('Translation not available','error');btn.innerHTML='🌐 Translate';btn.disabled=false;return;}
+        resultDiv.dataset.translated='1';
+        resultDiv.innerHTML='<div class="gh-translate-box"><span class="gh-translate-lang">'+targetLabel+'</span><p>'+esc(tr)+'</p></div>';
+        resultDiv.hidden=false;
+        btn.innerHTML='✕ Original';
+        btn.classList.add('active');
+        btn.disabled=false;
+      })
+      .catch(function(){toast('Translation failed','error');btn.innerHTML='🌐 Translate';btn.disabled=false;});
   }
 
   /* ── Phase 32: Emoji Picker ──────────────────────────────── */
