@@ -3789,6 +3789,79 @@ a.gh-trending-chip:hover {
   color: var(--gh-muted, #8aa69a);
 }
 
+/* ── Phase 38: Smart Notifications Badge ─────────────── */
+@keyframes gh-badge-pulse-kf {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.6); box-shadow: 0 0 0 4px rgba(239,68,68,.25); }
+  65%  { transform: scale(.85); }
+  100% { transform: scale(1); }
+}
+.gh-badge-pulse {
+  animation: gh-badge-pulse-kf .65s ease forwards;
+}
+.gh-notif-preview-toast {
+  position: fixed;
+  bottom: 78px;
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: #1c2430;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px;
+  padding: 10px 14px 10px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 10px 36px rgba(0,0,0,.55);
+  z-index: 9998;
+  max-width: 340px;
+  width: calc(100vw - 32px);
+  opacity: 0;
+  transition: opacity .25s ease, transform .25s ease;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.gh-notif-preview-toast.gh-npt-show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.gh-npt-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-size: .88rem;
+  color: #fff;
+}
+.gh-npt-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.gh-npt-name { font-size: .83rem; font-weight: 700; color: var(--gh-text, #eefcf6); }
+.gh-npt-text {
+  font-size: .76rem;
+  color: var(--gh-muted, #8aa69a);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gh-npt-link { position: absolute; inset: 0; border-radius: 14px; }
+@media (min-width: 768px) {
+  .gh-notif-preview-toast {
+    bottom: 20px;
+    left: auto;
+    right: 20px;
+    transform: translateY(16px);
+    max-width: 320px;
+    width: 320px;
+  }
+  .gh-notif-preview-toast.gh-npt-show { transform: translateY(0); }
+}
+
 /* ── Phase 37: Reaction Analytics ───────────────────── */
 .gh-rx-analytics {
   padding: 4px 0 8px;

@@ -525,7 +525,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var cls='gh-nav-item'+(active===it[0]?' active':'')+(sec?' gh-nav-sec':'');
       var tag=it[1]==='#'?'button':'a';
       var href=it[1]==='#'?'':' href="'+it[1]+'"';
-      return '<'+tag+' class="'+cls+'"'+extra+href+'><i class="fas '+it[2]+'"></i><span>'+it[3]+'</span></'+tag+'>';
+      var badgeHtml=it[0]==='notifications'?'<b class="gh-badge-count gh-lnav-notif-badge" id="ghLeftNavNotifBadge" style="position:absolute;top:6px;right:8px"></b>':'';
+      var posStyle=it[0]==='notifications'?' style="position:relative"':'';
+      return '<'+tag+' class="'+cls+'"'+extra+href+posStyle+'><i class="fas '+it[2]+'"></i><span>'+it[3]+'</span>'+badgeHtml+'</'+tag+'>';
     }
     return '<aside class="gh-left"><nav class="gh-panel">'+
       PRIMARY.map(function(it){ return navItem(it,false); }).join('')+
@@ -963,16 +965,66 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
   }
 
+  /* ── Phase 38: Smart Notifications Badge ────────────────── */
+  function _showNotifPreviewToast(n){
+    if(!n) return;
+    var ic=GH_NOTIF_ICONS[n.type]||{icon:'fa-bell',color:'#10b981'};
+    var bodyText=n.body||n.message||n.text||'New notification';
+    var existing=document.getElementById('ghNotifPreviewToast');
+    if(existing) existing.remove();
+    var el=document.createElement('div');
+    el.id='ghNotifPreviewToast';
+    el.className='gh-notif-preview-toast';
+    el.innerHTML=
+      '<div class="gh-npt-icon" style="background:'+esc(ic.color)+'"><i class="fas '+esc(ic.icon)+'"></i></div>'+
+      '<div class="gh-npt-body">'+
+        '<strong class="gh-npt-name">'+esc(n.senderName||n.actorName||'Notification')+'</strong>'+
+        '<span class="gh-npt-text">'+esc((bodyText).slice(0,90))+'</span>'+
+      '</div>'+
+      '<a class="gh-npt-link" href="'+esc(n.href||'notifications.html')+'"></a>';
+    document.body.appendChild(el);
+    requestAnimationFrame(function(){ el.classList.add('gh-npt-show'); });
+    var _nptTimer=setTimeout(function(){ el.classList.remove('gh-npt-show'); setTimeout(function(){ if(el.parentNode) el.remove(); },300); },4500);
+    el.addEventListener('click',function(){ clearTimeout(_nptTimer); el.remove(); });
+  }
+
+  function _pulseBadge(el){
+    if(!el) return;
+    el.classList.remove('gh-badge-pulse');
+    void el.offsetWidth; // reflow to restart animation
+    el.classList.add('gh-badge-pulse');
+    setTimeout(function(){ el.classList.remove('gh-badge-pulse'); },700);
+  }
+
+  function _setAllNotifBadges(n){
+    [$('#ghNotifBadge'),$('#ghBNavNotifBadge'),$('#ghLeftNavNotifBadge')].forEach(function(b){ if(b) b.textContent=n?String(n):''; });
+  }
+
   function listenBadges(){
     ready(function(){
       var nb=$('#ghNotifBadge'), mb=$('#ghMsgBadge');
       if(nb) nb.textContent='';
       if(mb) mb.textContent='';
+      _setAllNotifBadges(0);
       (state.badgeUnsubs || []).forEach(function(u){ try{ if(u) u(); }catch(e){} });
       state.badgeUnsubs = [];
       var u=authUser(); if(!u) return;
       try{
-        state.badgeUnsubs.push(listenCurrentActorNotifications(function(items){ var n=items.filter(function(x){return !x.read && !x.seen;}).length; var b=$('#ghNotifBadge'); if(b) b.textContent=n?String(n):''; }));
+        var _prevNotifCount=-1;
+        var _prevNotifIds={};
+        state.badgeUnsubs.push(listenCurrentActorNotifications(function(items){
+          var unread=items.filter(function(x){return !x.read&&!x.seen;});
+          var n=unread.length;
+          _setAllNotifBadges(n);
+          // Pulse + preview toast on new notification
+          if(_prevNotifCount>=0 && n>_prevNotifCount){
+            _pulseBadge($('#ghNotifBadge')); _pulseBadge($('#ghBNavNotifBadge'));
+            var newest=unread.filter(function(x){ return !_prevNotifIds[x.id||x.uid||'']; })[0];
+            if(newest) _showNotifPreviewToast(newest);
+          }
+          _prevNotifCount=n;
+          _prevNotifIds={}; unread.forEach(function(x){ if(x.id) _prevNotifIds[x.id]=1; });
+        }));
         var _msgActor=getActiveActor();
         var _msgQ;
         if(_msgActor&&_msgActor.type==='business'&&_msgActor.businessId){
