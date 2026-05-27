@@ -1134,6 +1134,7 @@
           coAuthors: extra && extra.coAuthors && extra.coAuthors.length ? extra.coAuthors : null,
           category: extra && extra.category ? extra.category : null,
           voiceUrl: extra && extra.voiceUrl ? extra.voiceUrl : null,
+          authorVerified: (me.verified || me.isVerified) ? true : false,
           createdAt: serverTimestamp()
         };
         // For close_friends posts: snapshot the author's closeFriends UIDs onto the post

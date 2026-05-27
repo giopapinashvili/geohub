@@ -5,6 +5,60 @@
 (function(){
   'use strict';
 
+  /* ── Phase 60: Multi-Language UI ──────────────────────────── */
+  var _GH_LANGS={
+    ka:{
+      writePost:'რას აზიარებ დღეს?', comment:'დაწერე კომენტარი…',
+      like:'Like', comment_btn:'Comment', share:'Share', save:'Save',
+      follow:'Follow', following:'Following', unfollow:'Unfollow',
+      post:'Post', cancel:'Cancel', delete:'Delete', edit:'Edit',
+      translate:'🌐 Translate', readMore:'წაიკითხე მეტი ▾',
+      noFeed:'Feed ცარიელია', findPeople:'ადამიანების პოვნა',
+      voiceNote:'🎙️ Voice Note', gifLabel:'GIF',
+      sponsored:'სპონსორირებული', trending:'ტრენდული',
+      schedulePost:'Post-ის დაგეგმვა', draftSaved:'✏️ Draft შენახულია',
+      repost:'Repost', coAuthor:'Co-Author',
+    },
+    en:{
+      writePost:"What's on your mind?", comment:'Write a comment…',
+      like:'Like', comment_btn:'Comment', share:'Share', save:'Save',
+      follow:'Follow', following:'Following', unfollow:'Unfollow',
+      post:'Post', cancel:'Cancel', delete:'Delete', edit:'Edit',
+      translate:'🌐 Translate', readMore:'Read more ▾',
+      noFeed:'Feed is empty', findPeople:'Find people',
+      voiceNote:'🎙️ Voice Note', gifLabel:'GIF',
+      sponsored:'Sponsored', trending:'Trending',
+      schedulePost:'Schedule post', draftSaved:'✏️ Draft saved',
+      repost:'Repost', coAuthor:'Co-Author',
+    },
+    ru:{
+      writePost:'Что у вас нового?', comment:'Написать комментарий…',
+      like:'Нравится', comment_btn:'Комментарий', share:'Поделиться', save:'Сохранить',
+      follow:'Подписаться', following:'Вы подписаны', unfollow:'Отписаться',
+      post:'Опубликовать', cancel:'Отмена', delete:'Удалить', edit:'Редактировать',
+      translate:'🌐 Перевести', readMore:'Читать далее ▾',
+      noFeed:'Лента пуста', findPeople:'Найти людей',
+      voiceNote:'🎙️ Голосовое', gifLabel:'GIF',
+      sponsored:'Реклама', trending:'В тренде',
+      schedulePost:'Запланировать', draftSaved:'✏️ Черновик сохранён',
+      repost:'Репост', coAuthor:'Соавтор',
+    }
+  };
+  var _ghLang='ka';
+  try{ _ghLang=localStorage.getItem('gh_lang')||'ka'; }catch(e){}
+  if(!_GH_LANGS[_ghLang]) _ghLang='ka';
+  function t(key){ return (_GH_LANGS[_ghLang]||_GH_LANGS.ka)[key]||key; }
+  function setLang(lang){
+    if(!_GH_LANGS[lang]) return;
+    _ghLang=lang;
+    try{ localStorage.setItem('gh_lang',lang); }catch(e){}
+    // Update dynamic placeholders
+    $all('[data-i18n]').forEach(function(el){ var k=el.dataset.i18n; if(k) el.textContent=t(k); });
+    $all('[data-i18n-ph]').forEach(function(el){ var k=el.dataset.i18nPh; if(k) el.placeholder=t(k); });
+  }
+  window.ghSetLang=setLang;
+  window.ghT=t;
+
   var PATH = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   var PAGE = document.body && document.body.dataset ? document.body.dataset.ghPage : '';
   var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], followedBusinessIds: [], closeFriendIds: [], bizFeedPosts: [], bizFeedUnsub: null, audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null, openCommentPids: {}, cachedComments: {}, cachedReplies: {}, feedTab: 'foryou', feedTag: '', feedUnsub: null, feedRenderId: 0, userCity: null };
@@ -99,6 +153,35 @@
       btn.setAttribute('aria-label', effective === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
       btn.innerHTML = effective === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
     }
+  }
+
+  /* ── Phase 60: Language Picker init ──────────────────────── */
+  function initLangPicker(){
+    var btn=document.getElementById('ghLangBtn');
+    var drop=document.getElementById('ghLangDrop');
+    var label=document.getElementById('ghLangLabel');
+    if(!btn||!drop) return;
+    // Reflect current lang
+    var _labels={ka:'KA',en:'EN',ru:'RU'};
+    if(label) label.textContent=_labels[_ghLang]||'KA';
+    drop.querySelectorAll('.gh-lang-opt').forEach(function(opt){
+      opt.classList.toggle('active', opt.dataset.setLang===_ghLang);
+    });
+    // Toggle dropdown
+    btn.onclick=function(e){ e.stopPropagation(); drop.classList.toggle('open'); };
+    // Option click
+    drop.querySelectorAll('.gh-lang-opt').forEach(function(opt){
+      opt.onclick=function(e){
+        e.stopPropagation();
+        var lang=opt.dataset.setLang;
+        setLang(lang);
+        if(label) label.textContent=_labels[lang]||'KA';
+        drop.querySelectorAll('.gh-lang-opt').forEach(function(o){ o.classList.toggle('active', o.dataset.setLang===lang); });
+        drop.classList.remove('open');
+      };
+    });
+    // Close on outside click
+    document.addEventListener('click',function(){ drop.classList.remove('open'); });
   }
 
   function $(s, root){ return (root || document).querySelector(s); }
@@ -452,6 +535,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-layout">'+leftNav(opts.active||'')+'<main class="gh-center" id="ghCenter"></main>'+rightRail(opts.right||'')+'</div></div>'+
       bottomNav(bnavKey);
     $('#ghCenter').innerHTML = opts.center || '';
+    initLangPicker();
     bindShell();
     updateTopUser();
     bindAuthState();
@@ -472,6 +556,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var bnavKey=activePage==='notifications'?'notifs':activePage;
     bnDiv.innerHTML=bottomNav(bnavKey);
     document.body.appendChild(bnDiv.firstChild);
+    initLangPicker();
     bindShell();
     updateTopUser();
     bindAuthState();
@@ -494,6 +579,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button class="gh-icon-btn gh-streak-btn" id="ghStreakBtn" title="Streak" style="display:none"><span class="gh-streak-fire">🔥</span><b class="gh-streak-count" id="ghStreakBadge">0</b></button>'+
         '<a class="gh-icon-btn" href="settings.html" title="Settings" aria-label="Settings"><i class="fas fa-gear"></i></a>'+
         '<button class="gh-icon-btn gh-theme-toggle" id="ghThemeToggle" title="Toggle light/dark mode"><i class="fas fa-moon"></i></button>'+
+        '<div class="gh-lang-picker" id="ghLangPicker">'+
+          '<button class="gh-lang-btn" id="ghLangBtn" title="Language / ენა"><i class="fas fa-globe"></i> <span id="ghLangLabel">KA</span></button>'+
+          '<div class="gh-lang-drop" id="ghLangDrop">'+
+            '<div class="gh-lang-opt" data-set-lang="ka"><span class="gh-lang-flag">🇬🇪</span> ქართული</div>'+
+            '<div class="gh-lang-opt" data-set-lang="en"><span class="gh-lang-flag">🇬🇧</span> English</div>'+
+            '<div class="gh-lang-opt" data-set-lang="ru"><span class="gh-lang-flag">🇷🇺</span> Русский</div>'+
+          '</div>'+
+        '</div>'+
         '<div id="ghActorBtnSlot" class="gh-actor-btn-slot"></div>'+
       '</div></header>';
   }
@@ -963,7 +1056,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(!fbUser){ clearCachedUser(); try{localStorage.removeItem('gh_active_actor');}catch(e){} }
       updateTopUser();
       listenBadges();
-      if(fbUser){ validateActorOnLoad(); maybeUpdateStreak(fbUser.uid); _initWrapped(fbUser.uid); setTimeout(function(){ checkAndAwardBadges(fbUser.uid); }, 3000); setTimeout(function(){ loadOnThisDay(fbUser.uid); }, 1500); setTimeout(function(){ _loadBirthdayFeedCards(fbUser.uid); _loadWeeklyDigest(fbUser.uid); }, 2500); setTimeout(function(){ checkAndPublishScheduledPosts(fbUser.uid); }, 4000); }
+      if(fbUser){ validateActorOnLoad(); maybeUpdateStreak(fbUser.uid); _initWrapped(fbUser.uid); setTimeout(function(){ checkAndAwardBadges(fbUser.uid); }, 3000); setTimeout(function(){ loadOnThisDay(fbUser.uid); }, 1500); setTimeout(function(){ _loadBirthdayFeedCards(fbUser.uid); _loadWeeklyDigest(fbUser.uid); }, 2500); setTimeout(function(){ checkAndPublishScheduledPosts(fbUser.uid); }, 4000); setTimeout(function(){ startPostInsightsListener(fbUser.uid); }, 6000); }
       if(!fbUser){ var sb=document.getElementById('ghStreakBtn'); if(sb) sb.style.display='none'; }
       var bid = new URLSearchParams(location.search).get('id');
       if((state.page === 'business' || PAGE === 'business') && bid) updateBusinessFollowButton(bid);
@@ -2523,6 +2616,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var CAT_ICONS={travel:'✈️',food:'🍕',business:'💼',nature:'🌿',tech:'💻',sport:'⚽',music:'🎵',art:'🎨',news:'📰',humor:'😂'};
     var categoryBadge = p.category ? '<a class="gh-cat-badge" href="feed.html?cat='+encodeURIComponent(p.category)+'" onclick="event.stopPropagation()">'+(CAT_ICONS[p.category]||'🏷️')+' '+esc(p.category.charAt(0).toUpperCase()+p.category.slice(1))+'</a>' : '';
 
+    // Phase 59: Verification badge
+    var verifiedBadge = p.authorVerified ? '<span class="gh-verified-badge" title="Verified account"><i class="fas fa-circle-check"></i></span>' : (p.authorType==='business' && p.authorBizVerified ? '<span class="gh-verified-badge gh-verified-biz" title="Verified business"><i class="fas fa-store"></i></span>' : '');
+
+    // Phase 54: Sponsored/Boosted label
+    var _now54=Date.now();
+    var _boostActive=p.boosted && (!p.boostExpiresAt || ts(p.boostExpiresAt)>_now54);
+    var sponsoredHtml=_boostActive?'<span class="gh-sponsored-label"><i class="fas fa-bolt-lightning"></i>'+t('sponsored')+'</span>':'';
+
     // Phase 45: co-authors "with X, Y"
     var coAuthorHtml = '';
     if(p.coAuthors && p.coAuthors.length){
@@ -2667,7 +2768,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       repostBanner+
       followedPageBanner+
       pinBanner+
-      '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+avatarAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><div class="gh-post-name-row"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a>'+coAuthorHtml+'</div><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+target+(p.feeling?' · '+esc(p.feeling):'')+(categoryBadge?' · '+categoryBadge:'')+bizPostedOnHtml+(readTimeBadge?' · '+readTimeBadge:'')+'</div></div>'+moreBtn+'</div>'+
+      '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+avatarAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><div class="gh-post-name-row"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a>'+verifiedBadge+coAuthorHtml+sponsoredHtml+'</div><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+target+(p.feeling?' · '+esc(p.feeling):'')+(categoryBadge?' · '+categoryBadge:'')+bizPostedOnHtml+(readTimeBadge?' · '+readTimeBadge:'')+'</div></div>'+moreBtn+'</div>'+
       postTextHtml+
       translateHtml+
       voiceHtml+
@@ -3683,6 +3784,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       items += '<button class="gh-pmenu-item" data-menu-edit-post><i class="fas fa-pen"></i> Edit post</button>';
       items += '<button class="gh-pmenu-item" data-menu-analytics><i class="fas fa-chart-bar"></i> View Analytics</button>';
       items += '<button class="gh-pmenu-item" data-menu-pin><i class="fas fa-thumbtack"></i> Pin to profile</button>';
+      items += '<button class="gh-pmenu-item" data-menu-boost><i class="fas fa-bolt-lightning"></i> Boost post</button>';
       items += '<button class="gh-pmenu-item danger" data-menu-delete-post><i class="fas fa-trash"></i> Delete post</button>';
       items += '<div class="gh-pmenu-sep"></div>';
     }
@@ -3729,6 +3831,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if (e.target.closest('[data-menu-save-col]')) { closeDrop(); openSaveToCollection(pid); return; }
       if (e.target.closest('[data-menu-analytics]') && isOwn) { closeDrop(); _openPostAnalytics(pid, card); return; }
       if (e.target.closest('[data-menu-pin]') && isOwn) { closeDrop(); _pinPostToProfile(pid); return; }
+      if (e.target.closest('[data-menu-boost]') && isOwn) { closeDrop(); _openBoostModal(pid, card); return; }
       if (e.target.closest('[data-menu-hide]')) { if(GS().hidePost) GS().hidePost(pid, function(){ if(card) card.remove(); }); closeDrop(); return; }
       if (e.target.closest('[data-menu-report]')) { closeDrop(); if(window.GeoModeration) window.GeoModeration.openReportModal('post', pid, ''); else if(GS().reportTarget) GS().reportTarget('post', pid, 'Reported'); return; }
       if (e.target.closest('[data-menu-report-user]') && authorId) { closeDrop(); if(window.GeoModeration) window.GeoModeration.openReportModal('user', authorId, authorName); else if(GS().reportTarget) GS().reportTarget('user', authorId, 'Reported'); return; }
@@ -3737,6 +3840,75 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
 
     ensurePostMenuDismissers();
+  }
+
+  /* ── Phase 54: Post Boost Modal ─────────────────────────── */
+  function _openBoostModal(pid, card){
+    if(!requireLogin()) return;
+    if(!fs()||!db()) return;
+    // Check current boost state
+    fs().getDoc(fs().doc(db(),'posts',pid)).then(function(snap){
+      var p=snap.exists()?snap.data():{};
+      var isActive=p.boosted && (!p.boostExpiresAt || ts(p.boostExpiresAt)>Date.now());
+      var boostInfo='';
+      if(isActive && p.boostExpiresAt){
+        var rem=Math.max(0,Math.round((ts(p.boostExpiresAt)-Date.now())/3600000));
+        boostInfo='<div class="gh-boost-badge" style="margin-bottom:10px"><i class="fas fa-bolt-lightning"></i> Boosted — '+rem+'h remaining</div>';
+      }
+      var body='<div class="gh-boost-panel">'+
+        '<h4><i class="fas fa-bolt-lightning"></i> Boost this Post</h4>'+
+        '<p class="gh-boost-info">Boosted posts appear higher in the feed and are labelled as Sponsored. Other users will see your post more often.</p>'+
+        boostInfo+
+        '<div style="margin-bottom:4px;font-size:.82rem;font-weight:600;color:var(--gh-muted)">Duration</div>'+
+        '<div class="gh-boost-actions">'+
+          '<button class="gh-btn sm ghost" data-boost-h="6">6 hours</button>'+
+          '<button class="gh-btn sm ghost" data-boost-h="24">24 hours</button>'+
+          '<button class="gh-btn sm ghost" data-boost-h="72">3 days</button>'+
+          '<button class="gh-btn sm ghost" data-boost-h="168">7 days</button>'+
+        '</div>'+
+      '</div>'+
+      (isActive?'<button class="gh-btn ghost danger" id="ghBoostStop" style="margin-top:8px;width:100%"><i class="fas fa-stop"></i> Stop Boost</button>':'');
+      modal('Boost Post',body,'<button class="gh-btn ghost" data-close-modal>Cancel</button>','ghBoostModal');
+      // Attach listeners after modal renders
+      setTimeout(function(){
+        var m=document.getElementById('ghBoostModal');
+        if(!m) return;
+        m.querySelectorAll('[data-boost-h]').forEach(function(btn){
+          btn.onclick=function(){
+            var hours=Number(btn.dataset.boostH)||24;
+            var exp=new Date(Date.now()+hours*3600000);
+            fs().updateDoc(fs().doc(db(),'posts',pid),{
+              boosted:true,
+              boostExpiresAt:fs().Timestamp.fromDate(exp),
+              boostStartedAt:fs().serverTimestamp()
+            }).then(function(){
+              toast('🚀 Post boosted for '+hours+' hours!');
+              m.remove();
+              // Update card badge visually
+              if(card){
+                var nameRow=card.querySelector('.gh-post-name-row');
+                if(nameRow && !nameRow.querySelector('.gh-sponsored-label')){
+                  nameRow.insertAdjacentHTML('beforeend','<span class="gh-sponsored-label"><i class="fas fa-bolt-lightning"></i>'+t('sponsored')+'</span>');
+                }
+              }
+            }).catch(function(err){ toast('Failed: '+(err.message||err.code),'error'); });
+          };
+        });
+        var stopBtn=document.getElementById('ghBoostStop');
+        if(stopBtn){
+          stopBtn.onclick=function(){
+            fs().updateDoc(fs().doc(db(),'posts',pid),{
+              boosted:false,
+              boostExpiresAt:null
+            }).then(function(){
+              toast('Boost stopped.');
+              m.remove();
+              if(card){ var sl=card.querySelector('.gh-sponsored-label'); if(sl) sl.remove(); }
+            }).catch(function(err){ toast('Failed: '+(err.message||err.code),'error'); });
+          };
+        }
+      },50);
+    }).catch(function(err){ toast('Error: '+(err.message||err.code),'error'); });
   }
 
   function openFocusedPost(pid) {
@@ -4512,6 +4684,47 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         toast('📅 '+snap.size+' scheduled post'+(snap.size>1?'s':'')+' published!');
       });
     }).catch(function(){});
+  }
+
+  /* ── Phase 57: Post Insights Notifications ──────────────── */
+  var _insightUnsubs=[];
+  var _INSIGHT_MILESTONES=[
+    {field:'likeCount',   vals:[5,10,25,50,100,250,500], icon:'🔥', msg:function(n){ return 'Your post got '+n+' reactions!'; }},
+    {field:'viewCount',   vals:[50,100,250,500,1000],     icon:'👁️', msg:function(n){ return n+' people viewed your post'; }},
+    {field:'commentCount',vals:[5,10,25,50],              icon:'💬', msg:function(n){ return 'Your post has '+n+' comments!'; }},
+    {field:'shareCount',  vals:[3,5,10,25],               icon:'🔁', msg:function(n){ return 'Your post was shared '+n+' times!'; }}
+  ];
+  function startPostInsightsListener(uid){
+    if(!uid||!fs()||!db()) return;
+    _insightUnsubs.forEach(function(u){ try{u();}catch(e){} }); _insightUnsubs=[];
+    var _milestoneKey='gh_insight_ms';
+    var _seen={};
+    try{ _seen=JSON.parse(localStorage.getItem(_milestoneKey)||'{}'); }catch(e){}
+    function _saveSeen(){ try{ localStorage.setItem(_milestoneKey, JSON.stringify(_seen)); }catch(e){} }
+    // Listen to user's recent posts (last 10)
+    var q=fs().query(fs().collection(db(),'posts'),fs().where('authorId','==',uid),fs().orderBy('createdAt','desc'),fs().limit(10));
+    var unsub=fs().onSnapshot(q,function(snap){
+      snap.forEach(function(d){
+        var p=d.data()||{}, pid=d.id;
+        _INSIGHT_MILESTONES.forEach(function(m){
+          var val=Number(p[m.field]||0);
+          m.vals.forEach(function(threshold){
+            var key=pid+'_'+m.field+'_'+threshold;
+            if(val>=threshold && !_seen[key]){
+              _seen[key]=1; _saveSeen();
+              toast(m.icon+' '+m.msg(threshold),'');
+              // Write to user's notifications
+              if(fs()&&db()) fs().setDoc(fs().doc(db(),'users',uid,'notifications','insight_'+key),{
+                type:'insight', message:m.msg(threshold), icon:m.icon,
+                postId:pid, field:m.field, threshold:threshold,
+                read:false, createdAt:fs().serverTimestamp()
+              }).catch(function(){});
+            }
+          });
+        });
+      });
+    },function(){});
+    _insightUnsubs.push(unsub);
   }
 
   /* ── Phase 40: @Mention Autocomplete ────────────────────── */
@@ -6150,6 +6363,130 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var _feedVideoObs=null;
       var _activeInlineFeedVid=null;
 
+      /* ── Phase 55: Events Feed Integration ───────────────── */
+      var _feedEvents=[]; var _myEvRsvps={};
+      function _efcCountdown(ev){
+        var target=ts(ev.startDate||ev.date||ev.dateTime||ev.startAt);
+        if(!target) return '';
+        var diff=target-Date.now();
+        if(diff<=0) return '<span class="gh-efc-countdown"><i class="fas fa-circle-dot"></i> Live Now</span>';
+        var d=Math.floor(diff/86400000), h=Math.floor((diff%86400000)/3600000), m=Math.floor((diff%3600000)/60000);
+        var str=d>0?d+'d '+h+'h':h>0?h+'h '+m+'m':m+'m';
+        return '<span class="gh-efc-countdown"><i class="fas fa-clock"></i> '+str+' left</span>';
+      }
+      function _buildEventFeedCard(ev){
+        var cover=ev.imageUrl||ev.image||ev.coverImage||ev.coverImageUrl||ev.coverUrl||ev.photoUrl||ev.thumbnail||'';
+        var name=ev.name||ev.title||'Event';
+        var loc=ev.location||ev.locationName||'';
+        var cat=ev.category||'';
+        var catColors={music:'#a855f7',sports:'#3b82f6',tech:'#06b6d4',food:'#f59e0b',art:'#ec4899',outdoor:'#10b981',gaming:'#8b5cf6',business:'#64748b'};
+        var cc=catColors[(cat||'').toLowerCase()]||'#10b981';
+        var catBadge=cat?'<span class="gh-efc-category" style="color:'+cc+'">'+esc(cat.charAt(0).toUpperCase()+cat.slice(1))+'</span>':'';
+        var countdown=_efcCountdown(ev);
+        var target=ts(ev.startDate||ev.date||ev.dateTime||ev.startAt);
+        var dateStr=target?new Date(target).toLocaleDateString('ka-GE',{weekday:'long',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+        var going=Number(ev.going||ev.goingCount||ev.attendeeCount||0);
+        var interested=Number(ev.interested||ev.interestedCount||0);
+        var myStatus=_myEvRsvps[ev.id]||'';
+        return '<div class="gh-event-feed-card" data-event-feed-card="'+esc(ev.id)+'">'+
+          (cover?'<img class="gh-efc-cover" src="'+esc(cover)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">':'')+
+          '<div class="gh-efc-body">'+
+            catBadge+
+            '<h3 class="gh-efc-title">'+esc(name)+'</h3>'+
+            '<div class="gh-efc-meta">'+
+              (dateStr?'<span><i class="fas fa-calendar"></i> '+esc(dateStr)+'</span>':'')+
+              (loc?'<span><i class="fas fa-location-dot"></i> '+esc(loc)+'</span>':'')+
+            '</div>'+
+            (ev.description?'<div style="font-size:.82rem;color:var(--gh-muted);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">'+esc((ev.description||'').slice(0,200))+'</div>':'')+
+            '<div class="gh-efc-actions">'+
+              '<button class="gh-efc-rsvp-going'+(myStatus==='going'?' active':'')+'" data-event-rsvp="'+esc(ev.id)+'" data-rsvp-status="going"><i class="fas fa-'+(myStatus==='going'?'check':'thumbs-up')+'"></i> '+(myStatus==='going'?'Going ✓':'Going')+'</button>'+
+              '<button class="gh-efc-rsvp-interested'+(myStatus==='interested'?' active':'')+'" data-event-rsvp="'+esc(ev.id)+'" data-rsvp-status="interested"><i class="fas fa-star'+(myStatus==='interested'?'':'-regular')+'"></i> Interested</button>'+
+              '<a class="gh-efc-attendees" href="events.html?id='+esc(ev.id)+'">'+
+                (going?'<span>'+going+' going</span>':'')+
+                (interested&&!going?'<span>'+interested+' interested</span>':'')+
+              '</a>'+
+              countdown+
+            '</div>'+
+          '</div>'+
+        '</div>';
+      }
+      function _injectEventCards(inject_positions){
+        if(!_feedEvents.length||pageMode) return;
+        var cards=list.querySelectorAll('.gh-post');
+        inject_positions.forEach(function(idx,i){
+          var ev=_feedEvents[i%_feedEvents.length]; if(!ev) return;
+          var refCard=cards[idx]; if(!refCard) return;
+          // Prevent duplicates
+          if(list.querySelector('[data-event-feed-card="'+ev.id+'"]')) return;
+          var div=document.createElement('div');
+          div.innerHTML=_buildEventFeedCard(ev);
+          refCard.parentNode.insertBefore(div.firstChild,refCard);
+        });
+        list.querySelectorAll('[data-event-rsvp]').forEach(function(btn){
+          btn.addEventListener('click',function(e){
+            e.stopPropagation();
+            if(!requireLogin()) return;
+            var eid=btn.dataset.eventRsvp, status=btn.dataset.rsvpStatus;
+            if(!eid||!status||!fs()||!db()) return;
+            var u=authUser(); if(!u) return;
+            var prev=_myEvRsvps[eid]||'';
+            // Toggle off if same status
+            if(prev===status){
+              // Remove RSVP
+              fs().getDocs(fs().query(fs().collection(db(),'eventParticipants'),
+                fs().where('userId','==',u.uid),fs().where('eventId','==',eid),fs().limit(1)))
+                .then(function(snap){ snap.forEach(function(d){ fs().deleteDoc(d.ref); }); });
+              delete _myEvRsvps[eid];
+              _updateEvRsvpBtns(eid,'');
+              return;
+            }
+            // Add/update RSVP
+            _myEvRsvps[eid]=status;
+            _updateEvRsvpBtns(eid,status);
+            fs().addDoc(fs().collection(db(),'eventParticipants'),{
+              userId:u.uid, eventId:eid, status:status, createdAt:fs().serverTimestamp()
+            }).catch(function(){});
+          });
+        });
+      }
+      function _updateEvRsvpBtns(eid,status){
+        list.querySelectorAll('[data-event-feed-card="'+eid+'"]').forEach(function(card){
+          var gb=card.querySelector('[data-rsvp-status="going"]');
+          var ib=card.querySelector('[data-rsvp-status="interested"]');
+          if(gb){ gb.classList.toggle('active',status==='going'); gb.innerHTML='<i class="fas fa-'+(status==='going'?'check':'thumbs-up')+'"></i> '+(status==='going'?'Going ✓':'Going'); }
+          if(ib){ ib.classList.toggle('active',status==='interested'); }
+        });
+      }
+      function _loadFeedEvents(){
+        if(!fs()||!db()) return;
+        var now=new Date();
+        try{
+          fs().getDocs(fs().query(
+            fs().collection(db(),'events'),
+            fs().where('status','==','active'),
+            fs().orderBy('startDate','asc'),
+            fs().limit(6)
+          )).then(function(snap){
+            _feedEvents=[];
+            snap.forEach(function(d){ var ev=Object.assign({},d.data(),{id:d.id}); if(ts(ev.startDate||ev.date||ev.dateTime)>Date.now()) _feedEvents.push(ev); });
+          }).catch(function(){
+            // Fallback without where clause
+            fs().getDocs(fs().query(fs().collection(db(),'events'),fs().orderBy('startDate','asc'),fs().limit(6))).then(function(snap){
+              _feedEvents=[]; snap.forEach(function(d){ var ev=Object.assign({},d.data(),{id:d.id}); if(ts(ev.startDate||ev.date||ev.dateTime)>Date.now()) _feedEvents.push(ev); });
+            }).catch(function(){});
+          });
+        }catch(e){}
+        // Also load my RSVPs
+        var u=authUser(); if(!u) return;
+        try{
+          fs().getDocs(fs().query(fs().collection(db(),'eventParticipants'),
+            fs().where('userId','==',u.uid),fs().limit(50))).then(function(snap){
+            _myEvRsvps={};
+            snap.forEach(function(d){ var r=d.data()||{}; if(r.eventId) _myEvRsvps[r.eventId]=r.status; });
+          }).catch(function(){});
+        }catch(e){}
+      }
+
       function _dismissNewPill(){
         var pill=document.getElementById('ghNewPostsPill');
         if(pill){ pill.classList.add('hiding'); setTimeout(function(){ pill&&pill.remove(); },350); }
@@ -6183,6 +6520,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         Object.keys(state.openCommentPids).forEach(function(pid){
           if(state.cachedComments[pid]) renderCommentsForPid(pid, state.cachedComments[pid]);
         });
+        // Phase 55: inject event feed cards at positions 3, 8 (For You tab only)
+        if(!pageMode && (state.feedTab==='foryou'||!state.feedTab)){
+          _injectEventCards([3,8]);
+        }
         setTimeout(openDeepLinkedPost, 350);
         _bindFeedVideoAutoplay();
       }
@@ -6370,7 +6711,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           visible=visible.filter(function(p){
             return p.text && p.text.toLowerCase().indexOf('#'+_htag)>-1;
           });
-        } else {
+        } else if(state.feedTab==='foryou'||!state.feedTab){
+          // Phase 58: Smart Feed — score-based ranking for For You tab
           // foryou: merge in all business page posts not already in the main feed
           if(state.bizFeedPosts.length){
             var seen={}; visible.forEach(function(p){ seen[p.id]=true; });
@@ -6387,6 +6729,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               visible.splice(idx,0,bp);
             });
           }
+          // Phase 58: score-based sort — only after initial merge
+          function _postScore(p){
+            var now=Date.now(), age=(now-ts(p.createdAt))/3600000; // hours
+            var decay=age<1?1:age<6?1.5:age<24?3:age<72?8:20;
+            var eng=(Number(p.likeCount||p.reactionCount||0)*3)+(Number(p.commentCount||0)*5)+(Number(p.shareCount||0)*4)+(Number(p.reshareCount||0)*2)+(Number(p.viewCount||0)*0.1);
+            return eng/decay;
+          }
+          visible.sort(function(a,b){ return _postScore(b)-_postScore(a); });
         }
         if(!visible.length){
           if(pageMode){
@@ -6508,6 +6858,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           }, n);
         }
         startFeedListen(feedN);
+        // Phase 55: preload upcoming events for feed cards (2s delay so feed loads first)
+        setTimeout(_loadFeedEvents, 2500);
         // Listen for page posts from any business so we can merge into For You feed
         if(state.bizFeedUnsub){ try{state.bizFeedUnsub();}catch(e){} state.bizFeedUnsub=null; }
         state.bizFeedUnsub=fs().onSnapshot(
