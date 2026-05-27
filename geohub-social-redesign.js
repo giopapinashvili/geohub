@@ -609,7 +609,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       ['notifications','notifications.html','fa-bell','Notifications'],
       ['creators','creators.html','fa-camera-retro','Creators'],
       ['rewards','rewards.html','fa-gift','Rewards'],
-      ['challenges','challenges.html','fa-trophy','Challenges'],
+      ['gamification','gamification.html','fa-trophy','XP & Badges'],
+      ['assistant','assistant.html','fa-robot','GeoAI'],
+      ['challenges','challenges.html','fa-flag-checkered','Challenges'],
       ['services','services.html','fa-grip','Services'],
       ['realestate','real-estate.html','fa-house-chimney','Real Estate'],
       ['learning','learning.html','fa-graduation-cap','Learning'],
@@ -10253,8 +10255,874 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(PAGE==='places'  || PATH==='places.html')  { injectShellNav('places');  return; }
     if(PAGE==='admin-videos' || PATH==='admin-videos.html') { injectShellNav('admin-videos'); return; }
     if(PAGE==='channel'     || PATH==='channel.html')     { injectShellNav('channel');     return; }
+    if(PAGE==='events'      || PATH==='events.html')      return renderEvents();
+    if(PAGE==='assistant'   || PATH==='assistant.html')   return renderAssistant();
+    if(PAGE==='map'         || PATH==='map.html')         return renderMapPage();
+    if(PAGE==='reels'       || PATH==='reels.html')       return renderReels();
+    if(PAGE==='gamification'|| PATH==='gamification.html')return renderGamification();
     return renderComingSoon();
   }
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 72 — Events Full Page
+  ══════════════════════════════════════════════════════════════ */
+  var _EV_CATS=['All','Music','Sports','Art','Food & Drink','Business','Technology','Outdoor','Social','Education'];
+  function renderEvents(){
+    var _idParam=new URLSearchParams(location.search).get('id');
+    if(_idParam) return _renderEventDetail(_idParam);
+    shell({ active:'events',
+      center:
+        '<div class="gh-card" style="padding:16px 16px 10px">'+
+          '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">'+
+            '<h2 style="margin:0;font-size:1.05rem"><i class="fas fa-calendar-days"></i> Events in Georgia</h2>'+
+            '<button class="gh-btn" id="ghCreateEvtBtn"><i class="fas fa-plus"></i> Create Event</button>'+
+          '</div>'+
+          '<div class="gh-top-search" style="max-width:100%;margin-bottom:10px"><i class="fas fa-search"></i><input id="ghEvtSearch" placeholder="Search events…" autocomplete="off"></div>'+
+          '<div class="gh-pill-row" style="flex-wrap:wrap" id="ghEvtCatPills">'+
+            _EV_CATS.map(function(c,i){ return '<button class="gh-pill'+(i===0?' active':'')+'" data-evt-cat="'+esc(i===0?'':c)+'">'+esc(c)+'</button>'; }).join('')+
+          '</div>'+
+        '</div>'+
+        '<div class="gh-pill-row" style="padding:0 16px;gap:6px" id="ghEvtTimePills">'+
+          '<button class="gh-pill active" data-evt-time="upcoming">Upcoming</button>'+
+          '<button class="gh-pill" data-evt-time="today">Today</button>'+
+          '<button class="gh-pill" data-evt-time="weekend">This weekend</button>'+
+          '<button class="gh-pill" data-evt-time="past">Past</button>'+
+        '</div>'+
+        '<div style="height:12px"></div>'+
+        '<div id="ghEvtList"><div class="gh-card gh-empty" style="min-height:120px"><i class="fas fa-circle-notch fa-spin"></i></div></div>'
+    });
+    ready(function(){
+      var _cat='', _time='upcoming', _q='', _timer=null;
+      var catPills=document.getElementById('ghEvtCatPills');
+      var timePills=document.getElementById('ghEvtTimePills');
+      var srchIn=document.getElementById('ghEvtSearch');
+      var createBtn=document.getElementById('ghCreateEvtBtn');
+      if(createBtn) createBtn.onclick=function(){ if(!requireLogin()) return; _openCreateEventModal(); };
+      if(catPills) catPills.addEventListener('click',function(e){ var b=e.target.closest('[data-evt-cat]'); if(!b) return; _cat=b.dataset.evtCat||''; catPills.querySelectorAll('.gh-pill').forEach(function(p){ p.classList.toggle('active',p===b); }); _loadEvents(); });
+      if(timePills) timePills.addEventListener('click',function(e){ var b=e.target.closest('[data-evt-time]'); if(!b) return; _time=b.dataset.evtTime||'upcoming'; timePills.querySelectorAll('.gh-pill').forEach(function(p){ p.classList.toggle('active',p===b); }); _loadEvents(); });
+      if(srchIn) srchIn.oninput=function(){ clearTimeout(_timer); _q=this.value.trim(); _timer=setTimeout(_loadEvents,350); };
+      function _loadEvents(){
+        var box=document.getElementById('ghEvtList'); if(!box) return;
+        if(!fs()||!db()){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Unavailable</h3></div>'; return; }
+        box.innerHTML='<div class="gh-card gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div>';
+        var now=new Date();
+        var todayStart=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+        var todayEnd=new Date(todayStart.getTime()+86400000);
+        var weekendStart=new Date(todayStart);
+        weekendStart.setDate(todayStart.getDate()+(6-todayStart.getDay()));
+        var weekendEnd=new Date(weekendStart.getTime()+172800000);
+        var constraints=[fs().where('status','!=','deleted'),fs().orderBy('status'),fs().orderBy('startDate','asc')];
+        if(_cat) constraints.push(fs().where('category','==',_cat));
+        var q=fs().query.apply(null,[fs().collection(db(),'events')].concat(constraints).concat([fs().limit(30)]));
+        fs().getDocs(q).then(function(snap){
+          var items=[]; snap.forEach(function(d){ items.push(Object.assign({id:d.id},d.data())); });
+          if(_q) items=items.filter(function(x){ return JSON.stringify(x).toLowerCase().indexOf(_q.toLowerCase())>-1; });
+          if(_time==='upcoming') items=items.filter(function(x){ var d=ts(x.startDate); return !d||d>=now.getTime(); });
+          else if(_time==='today') items=items.filter(function(x){ var d=ts(x.startDate); return d&&d>=todayStart.getTime()&&d<todayEnd.getTime(); });
+          else if(_time==='weekend') items=items.filter(function(x){ var d=ts(x.startDate); return d&&d>=weekendStart.getTime()&&d<weekendEnd.getTime(); });
+          else if(_time==='past') items=items.filter(function(x){ var d=ts(x.startDate); return d&&d<now.getTime(); });
+          if(!items.length){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-calendar-xmark"></i><h3>No events found</h3><p>Try a different category or create your own!</p></div>'; return; }
+          box.innerHTML=items.map(function(ev){
+            var name=ev.name||ev.title||'Event';
+            var evDate=ev.startDate?new Date(ts(ev.startDate)):null;
+            var dateStr=evDate?evDate.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'TBA';
+            var img72=ev.coverUrl||ev.imageUrl||ev.thumbnail||'';
+            var rsvp=ev.rsvpCount||ev.attendeeCount||0;
+            var isPast=evDate&&evDate<now;
+            return '<div class="gh-evt-card" data-evt-id="'+esc(ev.id)+'">'+
+              (img72?'<div class="gh-evt-cover"><img src="'+esc(img72)+'" alt="'+esc(name)+'" loading="lazy"></div>':'')+
+              '<div class="gh-evt-body">'+
+                '<div class="gh-evt-date-badge">'+
+                  (evDate?'<span class="gh-evt-day">'+evDate.getDate()+'</span><span class="gh-evt-mon">'+evDate.toLocaleString('default',{month:'short'})+'</span>':'<span class="gh-evt-day">?</span><span class="gh-evt-mon">TBA</span>')+
+                '</div>'+
+                '<div class="gh-evt-info">'+
+                  '<div class="gh-evt-name">'+esc(name)+'</div>'+
+                  '<div class="gh-evt-meta"><i class="fas fa-clock"></i> '+esc(dateStr)+'</div>'+
+                  (ev.location||ev.city?'<div class="gh-evt-meta"><i class="fas fa-map-marker-alt"></i> '+esc(ev.location||ev.city)+'</div>':'')+
+                  (rsvp?'<div class="gh-evt-meta"><i class="fas fa-users"></i> '+rsvp+' going</div>':'')+
+                  (ev.category?'<span class="gh-chip" style="margin-top:6px">'+esc(ev.category)+'</span>':'')+
+                  '<div class="gh-evt-actions">'+
+                    '<button class="gh-btn sm" data-evt-view="'+esc(ev.id)+'">View</button>'+
+                    (!isPast?'<button class="gh-btn sm ghost" data-evt-rsvp="'+esc(ev.id)+'" data-evt-name="'+esc(name)+'"><i class="fas fa-check"></i> RSVP</button>':'')+
+                  '</div>'+
+                '</div>'+
+              '</div>'+
+            '</div>';
+          }).join('');
+          // Bind clicks
+          box.querySelectorAll('[data-evt-view]').forEach(function(b){
+            b.addEventListener('click',function(){ location.href='events.html?id='+encodeURIComponent(b.dataset.evtView); });
+          });
+          box.querySelectorAll('[data-evt-rsvp]').forEach(function(b){
+            b.addEventListener('click',function(){ if(!requireLogin()) return; _doRsvp(b.dataset.evtRsvp,b.dataset.evtName,b); });
+          });
+          box.querySelectorAll('.gh-evt-card').forEach(function(card){
+            card.style.cursor='pointer';
+            card.addEventListener('click',function(e){ if(e.target.closest('button')) return; location.href='events.html?id='+encodeURIComponent(card.dataset.evtId); });
+          });
+        }).catch(function(err){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Failed</h3><p>'+esc(err&&err.message||'')+'</p></div>'; });
+      }
+      _loadEvents();
+    });
+  }
+
+  function _doRsvp(evId, evName, btn){
+    var u=authUser(); if(!u) return;
+    var going=btn.classList.contains('rsvp-active');
+    var op=going?fs().arrayRemove(u.uid):fs().arrayUnion(u.uid);
+    fs().updateDoc(fs().doc(db(),'events',evId),{ attendees:op, rsvpCount:fs().increment(going?-1:1) }).then(function(){
+      btn.classList.toggle('rsvp-active',!going);
+      btn.innerHTML=(!going?'<i class="fas fa-check-circle"></i> Going':'<i class="fas fa-check"></i> RSVP');
+      toast(!going?'🎉 You\'re going to '+evName+'!':'RSVP removed');
+    }).catch(function(err){ toast('Failed: '+(err.message||err.code),'error'); });
+  }
+
+  function _renderEventDetail(evId){
+    shell({ active:'events', center:'<div id="ghEvtDetail"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>Loading event…</h3></div></div>' });
+    ready(function(){
+      if(!fs()||!db()){ document.getElementById('ghEvtDetail').innerHTML='<div class="gh-card gh-empty"><h3>Unavailable</h3></div>'; return; }
+      fs().getDoc(fs().doc(db(),'events',evId)).then(function(snap){
+        if(!snap.exists()){ document.getElementById('ghEvtDetail').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-calendar-xmark"></i><h3>Event not found</h3><a class="gh-btn" href="events.html">Back</a></div>'; return; }
+        var ev=Object.assign({id:evId},snap.data());
+        var name=ev.name||ev.title||'Event';
+        var evDate=ev.startDate?new Date(ts(ev.startDate)):null;
+        var dateStr=evDate?evDate.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}):'TBA';
+        var endStr=ev.endDate?new Date(ts(ev.endDate)).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):'';
+        var img72=ev.coverUrl||ev.imageUrl||ev.thumbnail||'';
+        var rsvp=ev.rsvpCount||ev.attendeeCount||0;
+        var u=authUser();
+        var isOrg=u&&(ev.organizerId===u.uid||ev.createdBy===u.uid||ev.userId===u.uid);
+        var isGoing=u&&ev.attendees&&(Array.isArray(ev.attendees)?ev.attendees.indexOf(u.uid)>-1:false);
+        document.getElementById('ghEvtDetail').innerHTML=
+          '<div class="gh-card" style="padding:0;overflow:hidden">'+
+            (img72?'<img src="'+esc(img72)+'" alt="'+esc(name)+'" style="width:100%;max-height:280px;object-fit:cover">':'')+
+            '<div style="padding:20px">'+
+              '<div style="display:flex;gap:16px;align-items:flex-start">'+
+                '<div class="gh-evt-date-badge" style="flex-shrink:0">'+
+                  (evDate?'<span class="gh-evt-day">'+evDate.getDate()+'</span><span class="gh-evt-mon">'+evDate.toLocaleString('default',{month:'short'})+'</span>':'<span class="gh-evt-day">?</span><span class="gh-evt-mon">TBA</span>')+
+                '</div>'+
+                '<div style="flex:1">'+
+                  '<h1 style="margin:0 0 8px;font-size:1.3rem">'+esc(name)+'</h1>'+
+                  '<div class="gh-evt-meta" style="margin-bottom:6px"><i class="fas fa-clock"></i> '+esc(dateStr)+(endStr?' – '+esc(endStr):'')+'</div>'+
+                  (ev.location?'<div class="gh-evt-meta" style="margin-bottom:6px"><i class="fas fa-map-marker-alt"></i> '+esc(ev.location)+'</div>':'')+
+                  (ev.organizer||ev.organizerName?'<div class="gh-evt-meta" style="margin-bottom:6px"><i class="fas fa-user"></i> Organized by '+esc(ev.organizer||ev.organizerName)+'</div>':'')+
+                  '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">'+
+                    '<button class="gh-btn'+(isGoing?' active':'')+'" id="ghEvtRsvpBtn" data-ev-id="'+esc(evId)+'" data-ev-name="'+esc(name)+'">'+
+                      (isGoing?'<i class="fas fa-check-circle"></i> Going':'<i class="fas fa-check"></i> RSVP')+
+                    '</button>'+
+                    '<button class="gh-btn ghost" id="ghEvtShareBtn"><i class="fas fa-share"></i> Share</button>'+
+                    (isOrg?'<button class="gh-btn ghost" id="ghEvtEditBtn"><i class="fas fa-pen"></i> Edit</button>':'')+
+                  '</div>'+
+                  '<div class="gh-evt-meta" style="margin-top:8px"><i class="fas fa-users"></i> <strong>'+rsvp+'</strong> people going</div>'+
+                '</div>'+
+              '</div>'+
+              (ev.description?'<div class="gh-evt-desc" style="margin-top:16px;line-height:1.6;color:var(--gh-text)">'+esc(ev.description)+'</div>':'')+
+              (ev.ticketUrl?'<a class="gh-btn" style="margin-top:16px;display:inline-block" href="'+esc(ev.ticketUrl)+'" target="_blank" rel="noopener"><i class="fas fa-ticket"></i> Get Tickets</a>':'')+
+            '</div>'+
+          '</div>'+
+          '<a class="gh-btn ghost" href="events.html" style="margin-top:10px;display:block;text-align:center"><i class="fas fa-arrow-left"></i> Back to Events</a>';
+        var rsvpBtn=document.getElementById('ghEvtRsvpBtn');
+        if(rsvpBtn) rsvpBtn.onclick=function(){ if(!requireLogin()) return; _doRsvp(evId,name,rsvpBtn); };
+        var shareBtn=document.getElementById('ghEvtShareBtn');
+        if(shareBtn) shareBtn.onclick=function(){
+          if(navigator.share) navigator.share({title:name,url:location.href}).catch(function(){});
+          else{ try{navigator.clipboard.writeText(location.href);}catch(e){} toast('Link copied!'); }
+        };
+      }).catch(function(err){ document.getElementById('ghEvtDetail').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Failed</h3><p>'+esc(err.message||'')+'</p></div>'; });
+    });
+  }
+
+  function _openCreateEventModal(){
+    var body=
+      '<input class="gh-input" id="ghEvtName" placeholder="Event name *" maxlength="100" style="margin-bottom:8px">'+
+      '<div style="display:flex;gap:8px;margin-bottom:8px">'+
+        '<input class="gh-input" type="datetime-local" id="ghEvtStart" style="flex:1" title="Start date & time">'+
+        '<input class="gh-input" type="datetime-local" id="ghEvtEnd" style="flex:1" title="End date & time">'+
+      '</div>'+
+      '<input class="gh-input" id="ghEvtLocation" placeholder="Location / Address" style="margin-bottom:8px">'+
+      '<select class="gh-select" id="ghEvtCat" style="margin-bottom:8px">'+
+        _EV_CATS.filter(function(c){ return c!=='All'; }).map(function(c){ return '<option value="'+esc(c)+'">'+esc(c)+'</option>'; }).join('')+
+      '</select>'+
+      '<textarea class="gh-textarea" id="ghEvtDesc" placeholder="About this event…" rows="3" style="margin-bottom:8px"></textarea>'+
+      '<input class="gh-input" id="ghEvtCover" placeholder="Cover image URL (optional)" style="margin-bottom:8px">'+
+      '<input class="gh-input" id="ghEvtTicket" placeholder="Ticket link (optional)">';
+    modal('Create Event',body,
+      '<button class="gh-btn ghost" data-close-modal>Cancel</button>'+
+      '<button class="gh-btn" id="ghEvtSubmitBtn"><i class="fas fa-calendar-plus"></i> Create</button>',
+      'ghCreateEvtModal');
+    var sbtn=document.getElementById('ghEvtSubmitBtn');
+    if(sbtn) sbtn.onclick=function(){
+      var name=(document.getElementById('ghEvtName').value||'').trim();
+      if(!name) return toast('Enter event name','error');
+      var u=authUser(); if(!u) return toast('Sign in required','error');
+      sbtn.disabled=true; sbtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';
+      var startVal=document.getElementById('ghEvtStart').value;
+      var endVal=document.getElementById('ghEvtEnd').value;
+      fs().addDoc(fs().collection(db(),'events'),{
+        name:name,
+        category:(document.getElementById('ghEvtCat').value)||'Social',
+        description:(document.getElementById('ghEvtDesc').value||'').trim(),
+        location:(document.getElementById('ghEvtLocation').value||'').trim(),
+        coverUrl:(document.getElementById('ghEvtCover').value||'').trim(),
+        ticketUrl:(document.getElementById('ghEvtTicket').value||'').trim(),
+        startDate:startVal?fs().Timestamp.fromDate(new Date(startVal)):fs().serverTimestamp(),
+        endDate:endVal?fs().Timestamp.fromDate(new Date(endVal)):null,
+        organizerId:u.uid,
+        organizerName:u.displayName||'',
+        status:'active',
+        rsvpCount:0,
+        attendees:[],
+        createdAt:fs().serverTimestamp()
+      }).then(function(ref){
+        toast('Event created! 🎉');
+        var m=document.getElementById('ghCreateEvtModal'); if(m) m.remove();
+        if(ref&&ref.id) setTimeout(function(){ location.href='events.html?id='+encodeURIComponent(ref.id); },400);
+      }).catch(function(err){ toast('Failed: '+(err.message||err.code),'error'); sbtn.disabled=false; sbtn.innerHTML='Create'; });
+    };
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 73 — Business Analytics Dashboard (enhance manage tab)
+  ══════════════════════════════════════════════════════════════ */
+  window.ghRenderBizAnalytics = function(bizId, container){
+    if(!container) return;
+    container.innerHTML='<div class="gh-biz-analytics"><div class="gh-card gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div></div>';
+    if(!fs()||!db()){ container.innerHTML='<div class="gh-card gh-empty"><h3>Unavailable</h3></div>'; return; }
+    Promise.all([
+      fs().getDocs(fs().query(fs().collection(db(),'posts'),fs().where('bizId','==',bizId),fs().where('status','!=','deleted'),fs().orderBy('status'),fs().orderBy('createdAt','desc'),fs().limit(20))).catch(function(){ return {docs:[]}; }),
+      fs().getDoc(fs().doc(db(),'businesses',bizId)).catch(function(){ return null; })
+    ]).then(function(results){
+      var postSnap=results[0]; var bizSnap=results[1];
+      var posts=[]; postSnap.docs.forEach(function(d){ posts.push(Object.assign({id:d.id},d.data())); });
+      var biz=bizSnap&&bizSnap.exists()?bizSnap.data():{};
+      var totalViews=posts.reduce(function(s,p){ return s+(p.viewCount||p.views||0); },0);
+      var totalReactions=posts.reduce(function(s,p){ var r=p.reactions||{}; return s+Object.values(r).reduce(function(a,b){ return a+(b||0); },0); },0);
+      var totalComments=posts.reduce(function(s,p){ return s+(p.commentCount||p.comments||0); },0);
+      var followers=biz.followerCount||biz.followers||0;
+      var topPost=posts.sort(function(a,b){ return (_postScore(b))-(_postScore(a)); })[0];
+      container.innerHTML=
+        '<div class="gh-biz-analytics">'+
+          '<h3 style="margin:0 0 16px;font-size:1rem"><i class="fas fa-chart-line"></i> Page Analytics</h3>'+
+          '<div class="gh-analytics-grid">'+
+            '<div class="gh-analytics-stat"><div class="gh-analytics-val">'+_fmtCount(followers)+'</div><div class="gh-analytics-lbl">Followers</div></div>'+
+            '<div class="gh-analytics-stat"><div class="gh-analytics-val">'+_fmtCount(totalViews)+'</div><div class="gh-analytics-lbl">Total Views</div></div>'+
+            '<div class="gh-analytics-stat"><div class="gh-analytics-val">'+_fmtCount(totalReactions)+'</div><div class="gh-analytics-lbl">Reactions</div></div>'+
+            '<div class="gh-analytics-stat"><div class="gh-analytics-val">'+_fmtCount(totalComments)+'</div><div class="gh-analytics-lbl">Comments</div></div>'+
+            '<div class="gh-analytics-stat"><div class="gh-analytics-val">'+posts.length+'</div><div class="gh-analytics-lbl">Posts (last 20)</div></div>'+
+            '<div class="gh-analytics-stat"><div class="gh-analytics-val">'+(posts.length?Math.round((totalViews+totalReactions*3)/posts.length):0)+'</div><div class="gh-analytics-lbl">Avg. Engagement</div></div>'+
+          '</div>'+
+          (topPost?
+            '<div style="margin-top:16px"><strong style="font-size:.85rem;color:var(--gh-muted)">⭐ Top performing post</strong>'+
+            '<div class="gh-analytics-top-post" onclick="location.href=\'feed.html#post-'+esc(topPost.id)+'\'" style="cursor:pointer;margin-top:8px;padding:12px;background:var(--gh-surface);border-radius:10px;border:1px solid var(--gh-border)">'+
+              '<div style="font-size:.9rem;margin-bottom:6px">'+esc((topPost.text||'').slice(0,120)+(topPost.text&&topPost.text.length>120?'…':''))+'</div>'+
+              '<div style="display:flex;gap:12px;font-size:.8rem;color:var(--gh-muted)">'+
+                '<span><i class="fas fa-eye"></i> '+(topPost.viewCount||topPost.views||0)+'</span>'+
+                '<span><i class="fas fa-heart"></i> '+(topPost.reactionCount||0)+'</span>'+
+                '<span><i class="fas fa-comment"></i> '+(topPost.commentCount||0)+'</span>'+
+              '</div>'+
+            '</div></div>':'')+
+          '<div style="margin-top:16px"><button class="gh-btn ghost" onclick="this.closest(\'.gh-biz-analytics\').querySelector(\'.gh-boost-panel\')&&this.closest(\'.gh-biz-analytics\').querySelector(\'.gh-boost-panel\').remove();window.ghPromotePage&&window.ghPromotePage(\''+esc(bizId)+'\')"><i class="fas fa-rocket"></i> Promote Page</button></div>'+
+        '</div>';
+    }).catch(function(err){ container.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Analytics failed</h3><p>'+esc(err.message||'')+'</p></div>'; });
+  };
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 74 — Reels / Short Video Feed
+  ══════════════════════════════════════════════════════════════ */
+  function renderReels(){
+    shell({ active:'reels',
+      center:
+        '<div id="ghReelsFeed" class="gh-reels-feed">'+
+          '<div class="gh-reels-loading"><i class="fas fa-circle-notch fa-spin"></i><span>Loading Reels…</span></div>'+
+        '</div>'
+    });
+    ready(function(){
+      var feed=document.getElementById('ghReelsFeed'); if(!feed) return;
+      if(!fs()||!db()){ feed.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-video-slash"></i><h3>Reels unavailable</h3></div>'; return; }
+      var _currentIdx=0; var _reels=[]; var _obs=null;
+      fs().getDocs(fs().query(
+        fs().collection(db(),'posts'),
+        fs().where('mediaType','==','video'),
+        fs().where('status','!=','deleted'),
+        fs().orderBy('status'),
+        fs().orderBy('createdAt','desc'),
+        fs().limit(20)
+      )).then(function(snap){
+        snap.forEach(function(d){ _reels.push(Object.assign({id:d.id},d.data())); });
+        if(!_reels.length){
+          feed.innerHTML='<div class="gh-card gh-empty" style="min-height:400px"><i class="fas fa-film"></i><h3>No reels yet</h3><p>Post a short video to be featured here!</p></div>';
+          return;
+        }
+        feed.innerHTML='';
+        _reels.forEach(function(r,idx){
+          var name=r.authorName||'Creator'; var av=r.authorAvatar||r.photoURL||''; var txt=(r.text||'').slice(0,100);
+          var rx=r.reactionCount||0; var cm=r.commentCount||0;
+          var div=document.createElement('div');
+          div.className='gh-reel-item'; div.dataset.reelIdx=idx;
+          div.innerHTML=
+            '<video class="gh-reel-video" src="'+esc(r.mediaUrl||r.videoUrl||'')+'" playsinline muted loop preload="metadata"></video>'+
+            '<div class="gh-reel-overlay">'+
+              '<div class="gh-reel-author">'+
+                '<span class="gh-avatar sm">'+(av?'<img src="'+esc(av)+'" alt="">':esc((name[0]||'U').toUpperCase()))+'</span>'+
+                '<strong>'+esc(name)+'</strong>'+
+              '</div>'+
+              (txt?'<div class="gh-reel-caption">'+esc(txt)+'</div>':'')+
+            '</div>'+
+            '<div class="gh-reel-actions">'+
+              '<button class="gh-reel-action" data-reel-like="'+esc(r.id)+'"><i class="fas fa-heart"></i><span>'+_fmtCount(rx)+'</span></button>'+
+              '<button class="gh-reel-action" data-reel-comment="'+esc(r.id)+'"><i class="fas fa-comment"></i><span>'+_fmtCount(cm)+'</span></button>'+
+              '<button class="gh-reel-action" data-reel-share="'+esc(r.id)+'"><i class="fas fa-share"></i></button>'+
+              '<button class="gh-reel-action" data-reel-mute><i class="fas fa-volume-xmark"></i></button>'+
+            '</div>';
+          feed.appendChild(div);
+          // Mute toggle
+          div.querySelector('[data-reel-mute]').onclick=function(){
+            var vid=div.querySelector('video'); if(!vid) return;
+            vid.muted=!vid.muted;
+            this.innerHTML=vid.muted?'<i class="fas fa-volume-xmark"></i>':'<i class="fas fa-volume-high"></i>';
+          };
+          // Like
+          div.querySelector('[data-reel-like]').onclick=function(){ if(!requireLogin()) return; var pid=this.dataset.reelLike; if(GS()&&GS().reactToPost) GS().reactToPost(pid,'love',function(){}); };
+          // Comment
+          div.querySelector('[data-reel-comment]').onclick=function(){ if(!requireLogin()) return; var pid=this.dataset.reelComment; openFocusedPost(pid); };
+          // Share
+          div.querySelector('[data-reel-share]').onclick=function(){
+            if(navigator.share) navigator.share({url:location.origin+'/feed.html#post-'+this.dataset.reelShare}).catch(function(){});
+            else toast('Link copied!');
+          };
+        });
+        // IntersectionObserver for autoplay
+        _obs=new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            var vid=entry.target.querySelector('video');
+            if(!vid) return;
+            if(entry.isIntersecting && entry.intersectionRatio>0.6){
+              vid.play().catch(function(){});
+            } else {
+              vid.pause();
+            }
+          });
+        },{ threshold:[0,0.6,1] });
+        feed.querySelectorAll('.gh-reel-item').forEach(function(item){ _obs.observe(item); });
+        state.pageUnsubs.push(function(){ if(_obs){ _obs.disconnect(); _obs=null; } });
+      }).catch(function(err){
+        feed.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Failed to load reels</h3><p>'+esc(err.message||'')+'</p></div>';
+      });
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 75 — DM Voice Messages (injected into messages page)
+  ══════════════════════════════════════════════════════════════ */
+  window.ghInitVoiceDM = function(inputRow){
+    if(!inputRow) return;
+    if(inputRow.querySelector('.gh-voice-dm-btn')) return; // already injected
+    var btn=document.createElement('button');
+    btn.className='gh-voice-dm-btn gh-btn ghost sm';
+    btn.title='Voice message'; btn.innerHTML='<i class="fas fa-microphone"></i>';
+    var _mr=null; var _chunks=[]; var _recording=false;
+    btn.onclick=function(){
+      if(!_recording){
+        if(!navigator.mediaDevices||!window.MediaRecorder){ return toast('Mic not supported','error'); }
+        navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+          _mr=new MediaRecorder(stream,{mimeType:MediaRecorder.isTypeSupported('audio/webm')?'audio/webm':'audio/ogg'}); _chunks=[];
+          _mr.ondataavailable=function(e){ if(e.data&&e.data.size>0) _chunks.push(e.data); };
+          _mr.onstop=function(){
+            stream.getTracks().forEach(function(t){ t.stop(); });
+            var blob=new Blob(_chunks,{type:_mr.mimeType||'audio/webm'});
+            var file=new File([blob],'voice-'+Date.now()+'.webm',{type:blob.type});
+            btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>'; btn.disabled=true;
+            prepareMedia(file,'voice-dm',function(pct){ btn.title=pct+'%'; }).then(function(url){
+              btn.innerHTML='<i class="fas fa-microphone"></i>'; btn.disabled=false; btn.title='Voice message';
+              if(url && window.ghSendMessage) window.ghSendMessage({type:'voice',audioUrl:url,duration:Math.round(_chunks.length*100/10)});
+              else toast('Voice message ready');
+            }).catch(function(){ btn.innerHTML='<i class="fas fa-microphone"></i>'; btn.disabled=false; toast('Upload failed','error'); });
+          };
+          _mr.start(100); _recording=true;
+          btn.innerHTML='<i class="fas fa-stop" style="color:#ef4444"></i>'; btn.title='Stop recording';
+        }).catch(function(){ toast('Microphone access denied','error'); });
+      } else {
+        if(_mr&&_mr.state!=='inactive') _mr.stop();
+        _recording=false;
+        btn.innerHTML='<i class="fas fa-microphone"></i>'; btn.title='Voice message';
+      }
+    };
+    inputRow.appendChild(btn);
+  };
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 76 — Post Impression Tracker (view count via IntersectionObserver)
+  ══════════════════════════════════════════════════════════════ */
+  (function _initImpressionTracker(){
+    var _tracked={};
+    var _obs76=null;
+    function _startTracking(){
+      if(_obs76) return;
+      _obs76=new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(!entry.isIntersecting||entry.intersectionRatio<0.5) return;
+          var card=entry.target; var pid=card.dataset.postId||card.id&&card.id.replace('post-','');
+          if(!pid||_tracked[pid]) return;
+          _tracked[pid]=true;
+          _obs76.unobserve(card);
+          setTimeout(function(){
+            if(!fs()||!db()) return;
+            fs().updateDoc(fs().doc(db(),'posts',pid),{ viewCount:fs().increment(1) }).catch(function(){});
+          },2000);
+        });
+      },{ threshold:0.5 });
+    }
+    // Observe new post cards as they're painted
+    var _mutObs=new MutationObserver(function(muts){
+      if(!_obs76) _startTracking();
+      muts.forEach(function(mut){
+        mut.addedNodes.forEach(function(node){
+          if(node.nodeType!==1) return;
+          var cards=node.classList&&node.classList.contains('gh-post')?[node]:[].slice.call(node.querySelectorAll&&node.querySelectorAll('.gh-post')||[]);
+          cards.forEach(function(card){
+            var pid=card.dataset.postId||card.id&&card.id.replace('post-','');
+            if(pid&&!_tracked[pid]) _obs76.observe(card);
+          });
+        });
+      });
+    });
+    if(document.readyState==='loading'){
+      document.addEventListener('DOMContentLoaded',function(){ _mutObs.observe(document.body,{childList:true,subtree:true}); });
+    } else { _mutObs.observe(document.body,{childList:true,subtree:true}); }
+  })();
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 77 — GeoAI Assistant
+  ══════════════════════════════════════════════════════════════ */
+  function renderAssistant(){
+    shell({ active:'assistant',
+      center:
+        '<div class="gh-ai-chat" id="ghAiChat">'+
+          '<div class="gh-ai-header">'+
+            '<div class="gh-ai-avatar"><i class="fas fa-robot"></i></div>'+
+            '<div><strong>GeoAI</strong><div class="gh-muted" style="font-size:.8rem">Your Georgian travel & lifestyle assistant</div></div>'+
+            '<button class="gh-btn ghost sm" id="ghAiClear"><i class="fas fa-trash"></i></button>'+
+          '</div>'+
+          '<div class="gh-ai-messages" id="ghAiMessages">'+
+            '<div class="gh-ai-msg bot">'+
+              '<div class="gh-ai-bubble">👋 გამარჯობა! მე GeoAI ვარ — GeoHub-ის ინტელექტუალური ასისტენტი. შემიძლია:<br><br>'+
+              '• 📍 <strong>ადგილები</strong> — Georgia-ს საუკეთესო სათვალთვალო წერტილები<br>'+
+              '• 🗓️ <strong>ივენთები</strong> — ახლო ღონისძიებები<br>'+
+              '• ✍️ <strong>Caption</strong> — post-ისთვის კარგი ტექსტი<br>'+
+              '• 🏷️ <strong>Hashtags</strong> — ვირუსული ჰეშთეგები<br>'+
+              '• 📅 <strong>გეგმა</strong> — კვირის მარშრუტი<br><br>'+
+              'რა შემიძლია დაგეხმარო?</div>'+
+            '</div>'+
+          '</div>'+
+          '<div class="gh-ai-quick-btns" id="ghAiQuick">'+
+            '<button class="gh-pill" data-ai-q="საუკეთესო ადგილები Tbilisi-ში?">📍 Tbilisi spots</button>'+
+            '<button class="gh-pill" data-ai-q="დამიწერე Instagram caption ფოტოსთვის">✍️ Caption</button>'+
+            '<button class="gh-pill" data-ai-q="ვირუსული hashtag-ები Georgia-სთვის">🏷️ Hashtags</button>'+
+            '<button class="gh-pill" data-ai-q="კვირის trip plan Kazbegi-ში">🗓️ Trip plan</button>'+
+          '</div>'+
+          '<div class="gh-ai-input-row">'+
+            '<textarea class="gh-ai-input" id="ghAiInput" placeholder="Ask GeoAI anything…" rows="1"></textarea>'+
+            '<button class="gh-btn" id="ghAiSend"><i class="fas fa-paper-plane"></i></button>'+
+          '</div>'+
+        '</div>'
+    });
+    ready(function(){
+      var msgs=document.getElementById('ghAiMessages');
+      var inp=document.getElementById('ghAiInput');
+      var sendBtn=document.getElementById('ghAiSend');
+      var clearBtn=document.getElementById('ghAiClear');
+      var quickBtns=document.getElementById('ghAiQuick');
+      if(!msgs||!inp||!sendBtn) return;
+      var _history=[];
+      try{ var saved=JSON.parse(localStorage.getItem('gh_ai_history')||'null'); if(Array.isArray(saved)) _history=saved; }catch(e){}
+      if(_history.length){
+        _history.forEach(function(m){
+          var d=document.createElement('div');
+          d.className='gh-ai-msg '+(m.role==='user'?'user':'bot');
+          d.innerHTML='<div class="gh-ai-bubble">'+esc(m.content)+'</div>';
+          msgs.appendChild(d);
+        });
+        msgs.scrollTop=msgs.scrollHeight;
+      }
+      if(clearBtn) clearBtn.onclick=function(){
+        _history=[]; try{localStorage.removeItem('gh_ai_history');}catch(e){}
+        msgs.innerHTML='<div class="gh-ai-msg bot"><div class="gh-ai-bubble">Chat cleared! How can I help?</div></div>';
+      };
+      if(quickBtns) quickBtns.addEventListener('click',function(e){
+        var b=e.target.closest('[data-ai-q]'); if(!b) return;
+        inp.value=b.dataset.aiQ; _sendMsg();
+      });
+      sendBtn.onclick=_sendMsg;
+      inp.addEventListener('keydown',function(e){
+        if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); _sendMsg(); }
+      });
+      inp.oninput=function(){ this.style.height='auto'; this.style.height=Math.min(this.scrollHeight,120)+'px'; };
+
+      function _addMsg(role,text){
+        var d=document.createElement('div');
+        d.className='gh-ai-msg '+(role==='user'?'user':'bot');
+        d.innerHTML='<div class="gh-ai-bubble">'+(role==='bot'?text:esc(text))+'</div>';
+        msgs.appendChild(d);
+        msgs.scrollTop=msgs.scrollHeight;
+        return d;
+      }
+      function _sendMsg(){
+        var q=(inp.value||'').trim(); if(!q) return;
+        inp.value=''; inp.style.height='auto';
+        _addMsg('user',q);
+        _history.push({role:'user',content:q});
+        var thinkDiv=_addMsg('bot','<i class="fas fa-circle-notch fa-spin"></i> Thinking…');
+        // GeoAI local smart responses (no API key needed)
+        setTimeout(function(){
+          var resp=_geoAIRespond(q);
+          thinkDiv.querySelector('.gh-ai-bubble').innerHTML=resp;
+          _history.push({role:'assistant',content:resp});
+          if(_history.length>30) _history=_history.slice(-30);
+          try{ localStorage.setItem('gh_ai_history',JSON.stringify(_history)); }catch(e){}
+          msgs.scrollTop=msgs.scrollHeight;
+        },800+Math.random()*700);
+      }
+      function _geoAIRespond(q){
+        var ql=q.toLowerCase();
+        if(ql.indexOf('caption')>-1||ql.indexOf('კაპციონ')>-1){
+          var caps=['✨ Living my best life in Georgia 🇬🇪 #GeoHub #Georgia','🌿 გული ივსება ამ ხედებით 😍 #Tbilisi #DiscoverGeorgia','🏔️ Mountains are calling and I must go! Kazbegi never disappoints. #Adventure #Georgia','☕ Tbilisi vibes hit differently when it rains. #OldTown #TbilisiCity','🌸 Every street in Old Tbilisi tells a story ✨ #GeoHub #ExploreGeorgia'];
+          return '📝 <strong>Caption ideas for you:</strong><br><br>'+caps.map(function(c,i){ return (i+1)+'. '+c; }).join('<br><br>');
+        }
+        if(ql.indexOf('hashtag')>-1||ql.indexOf('ჰეშთეგ')>-1){
+          return '🏷️ <strong>Top hashtags for Georgia content:</strong><br><br>#GeoHub #Georgia #DiscoverGeorgia #Tbilisi #VisitGeorgia #TbilisiCity #GeorgianWine #Kazbegi #OldTown #GeoTravel<br><br><em>For reels:</em> #GeorgiaReels #TbilisiLife #GeorgianCuisine #HikingGeorgia #ExploreGeorgia';
+        }
+        if(ql.indexOf('tbilisi')>-1||ql.indexOf('თბილის')>-1){
+          return '📍 <strong>Top Tbilisi spots:</strong><br><br>1. 🏰 Narikala Fortress — panoramic city views<br>2. 🛁 Abanotubani — sulfur baths district<br>3. 🏛️ Rustaveli Avenue — culture & shopping<br>4. 🍷 Fabrika — trendy creative hub<br>5. ⛪ Metekhi Church — iconic riverside<br>6. 🌿 Mtatsminda Park — cable car & views<br>7. 🌉 Peace Bridge — night photography<br><br>Best time: Spring (April-June) or Fall (Sept-Oct) 🍂';
+        }
+        if(ql.indexOf('kazbegi')>-1||ql.indexOf('ყაზბეგ')>-1){
+          return '🏔️ <strong>Kazbegi Trip Plan:</strong><br><br>📅 <strong>Day 1:</strong> Tbilisi → Gudauri (stop for views) → Kazbegi village<br>🏠 Stay: Rooms Hotel Kazbegi or guesthouse<br><br>📅 <strong>Day 2:</strong> 🌄 Early morning hike to Gergeti Trinity Church (2h)<br>Afternoon: Truso Valley or Dariali Gorge<br><br>📅 <strong>Day 3:</strong> Return via Military Highway, stop at Ananuri Castle<br><br>💡 Tips: Take marshrutka from Didube station. Bring warm layers even in summer!';
+        }
+        if(ql.indexOf('wine')>-1||ql.indexOf('ღვინო')>-1||ql.indexOf('kakheti')>-1){
+          return '🍷 <strong>Georgia Wine Guide:</strong><br><br>🏆 Must-try regions: Kakheti (Telavi, Sighnaghi)<br><br>🍇 Best varieties: Rkatsiteli, Saperavi, Mtsvane<br><br>📍 Top wineries: Château Mukhrani, Twins Wine House, Pheasant\'s Tears<br><br>🎉 Wine festivals: Rtveli harvest (October) — don\'t miss it!<br><br>#GeorgianWine #Kakheti #Saperavi';
+        }
+        if(ql.indexOf('plan')>-1||ql.indexOf('trip')>-1||ql.indexOf('გეგმ')>-1){
+          return '🗺️ <strong>7-Day Georgia Highlights:</strong><br><br>Day 1-2: Tbilisi — Old Town, Narikala, sulfur baths<br>Day 3: Day trip to Mtskheta (UNESCO site)<br>Day 4-5: Kazbegi — mountains, Gergeti Church<br>Day 6: Kakheti — wine, vineyards, Sighnaghi<br>Day 7: Back to Tbilisi, Rustaveli, Black Lion Square<br><br>🚌 Transport: Marshrutka + car rental for mountains<br>💰 Budget: ~50-80 GEL/day';
+        }
+        if(ql.indexOf('food')>-1||ql.indexOf('eat')>-1||ql.indexOf('კვება')>-1||ql.indexOf('საჭმელ')>-1){
+          return '🍽️ <strong>Must-try Georgian Foods:</strong><br><br>🥟 Khinkali — soup dumplings (twist & sip!)<br>🧀 Khachapuri — cheese bread (Adjarian has egg on top)<br>🫕 Ojakhuri — family-style pork & potatoes<br>🌿 Pkhali — vegetable balls with walnut sauce<br>🍢 Mtsvadi — Georgian BBQ skewers<br>🍮 Churchkhela — grape+walnut candy<br><br>Best restaurant streets: Leselidze, Erekle II, Atoneli (Tbilisi)';
+        }
+        // Default
+        var defaults=[
+          '🇬🇪 Georgia is one of the world\'s oldest wine-making countries — 8,000 years of tradition! Check out Kakheti region for wine tasting.',
+          '💡 Pro tip: Follow local GeoHub creators for real-time insider recommendations in your city!',
+          '📱 Use GeoHub\'s "Local Feed" tab to see posts from your city only — great for discovering nearby events!',
+          '🌟 Did you know? GeoHub has a rewards system — earn XP by posting, commenting, and exploring!'
+        ];
+        return defaults[Math.floor(Math.random()*defaults.length)];
+      }
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 78 — Map / Discover Page (Leaflet.js)
+  ══════════════════════════════════════════════════════════════ */
+  function renderMapPage(){
+    shell({ active:'map',
+      center:
+        '<div class="gh-map-page" id="ghMapPage">'+
+          '<div class="gh-card" style="padding:12px 16px">'+
+            '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">'+
+              '<h2 style="margin:0;font-size:1rem"><i class="fas fa-map"></i> Discover on Map</h2>'+
+              '<div class="gh-pill-row" id="ghMapFilter" style="gap:6px">'+
+                '<button class="gh-pill active" data-map-layer="posts"><i class="fas fa-newspaper"></i> Posts</button>'+
+                '<button class="gh-pill" data-map-layer="events"><i class="fas fa-calendar"></i> Events</button>'+
+                '<button class="gh-pill" data-map-layer="businesses"><i class="fas fa-store"></i> Biz</button>'+
+              '</div>'+
+            '</div>'+
+          '</div>'+
+          '<div id="ghLeafletMap" class="gh-leaflet-map"></div>'+
+          '<div id="ghMapSidebar" class="gh-map-sidebar"></div>'+
+        '</div>'
+    });
+    ready(function(){
+      var mapEl=document.getElementById('ghLeafletMap');
+      if(!mapEl){ return; }
+      // Dynamically load Leaflet CSS + JS
+      if(!window.L){
+        var lcss=document.createElement('link');
+        lcss.rel='stylesheet'; lcss.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        document.head.appendChild(lcss);
+        var ljs=document.createElement('script');
+        ljs.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        ljs.onload=function(){ _initLeafletMap(); };
+        document.head.appendChild(ljs);
+      } else { _initLeafletMap(); }
+
+      var _map=null; var _markers=[]; var _layer='posts';
+      function _initLeafletMap(){
+        if(!window.L||_map) return;
+        _map=L.map('ghLeafletMap').setView([41.6941,44.8337],12); // Tbilisi center
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+          attribution:'© OpenStreetMap contributors',maxZoom:19
+        }).addTo(_map);
+        _loadLayer('posts');
+        // Filter buttons
+        var filterBar=document.getElementById('ghMapFilter');
+        if(filterBar) filterBar.addEventListener('click',function(e){
+          var b=e.target.closest('[data-map-layer]'); if(!b) return;
+          _layer=b.dataset.mapLayer;
+          filterBar.querySelectorAll('.gh-pill').forEach(function(p){ p.classList.toggle('active',p===b); });
+          _loadLayer(_layer);
+        });
+        // My location
+        if(navigator.geolocation){
+          navigator.geolocation.getCurrentPosition(function(pos){
+            var lat=pos.coords.latitude, lng=pos.coords.longitude;
+            _map.setView([lat,lng],14);
+            L.circleMarker([lat,lng],{radius:8,fillColor:'#10b981',color:'#fff',weight:2,fillOpacity:1}).addTo(_map).bindPopup('📍 You are here');
+          },function(){});
+        }
+      }
+
+      function _loadLayer(layer){
+        if(!_map||!fs()||!db()) return;
+        _markers.forEach(function(m){ _map.removeLayer(m); }); _markers=[];
+        var sidebar=document.getElementById('ghMapSidebar');
+        if(sidebar) sidebar.innerHTML='<div class="gh-muted" style="font-size:.82rem;padding:8px"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>';
+        var col,q;
+        if(layer==='posts'){
+          q=fs().query(fs().collection(db(),'posts'),fs().where('status','!=','deleted'),fs().where('location','!=',null),fs().orderBy('location'),fs().orderBy('createdAt','desc'),fs().limit(30));
+        } else if(layer==='events'){
+          q=fs().query(fs().collection(db(),'events'),fs().where('status','!=','deleted'),fs().orderBy('status'),fs().orderBy('startDate','desc'),fs().limit(20));
+        } else {
+          q=fs().query(fs().collection(db(),'businesses'),fs().orderBy('createdAt','desc'),fs().limit(25));
+        }
+        fs().getDocs(q).then(function(snap){
+          var items=[]; snap.forEach(function(d){ items.push(Object.assign({id:d.id},d.data())); });
+          var sideHtml='';
+          items.forEach(function(item){
+            var lat=null,lng=null;
+            if(item.location&&item.location.lat&&item.location.lng){ lat=item.location.lat; lng=item.location.lng; }
+            else if(item.lat&&item.lng){ lat=item.lat; lng=item.lng; }
+            else if(item.geopoint){ lat=item.geopoint.latitude; lng=item.geopoint.longitude; }
+            // Fallback to rough city coords for demo
+            if(!lat){ lat=41.69+(Math.random()-0.5)*0.1; lng=44.83+(Math.random()-0.5)*0.1; }
+            var label=item.name||item.title||item.text||'Item';
+            var icon=layer==='posts'?'📝':layer==='events'?'🗓️':'🏪';
+            var m=L.marker([lat,lng]).addTo(_map);
+            m.bindPopup('<strong>'+esc(label.slice(0,50))+'</strong>'+
+              (layer==='events'&&item.startDate?'<br><small>'+new Date(ts(item.startDate)).toLocaleDateString()+'</small>':'')+
+              '<br><a href="'+(layer==='businesses'?'business.html?id=':layer==='events'?'events.html?id=':'feed.html#post-')+esc(item.id)+'" style="color:#10b981">View →</a>');
+            _markers.push(m);
+            sideHtml+='<div class="gh-map-side-item" onclick="location.href=\''+(layer==='businesses'?'business.html?id=':layer==='events'?'events.html?id=':'feed.html#post-')+esc(item.id)+'\'">'+
+              '<span style="font-size:1.2rem">'+icon+'</span>'+
+              '<div><strong>'+esc(label.slice(0,40))+'</strong>'+
+              (item.city||item.location?'<div class="gh-muted" style="font-size:.78rem">'+esc((item.city||item.location||'').slice(0,30))+'</div>':'')+
+              '</div></div>';
+          });
+          if(sidebar) sidebar.innerHTML=sideHtml||'<div class="gh-muted" style="padding:8px;font-size:.82rem">Nothing to show</div>';
+        }).catch(function(err){
+          if(sidebar) sidebar.innerHTML='<div class="gh-muted" style="font-size:.82rem;padding:8px">Failed: '+esc(err.message||'')+'</div>';
+        });
+      }
+      state.pageUnsubs.push(function(){ if(_map){ _map.remove(); _map=null; } });
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 79 — Gamification Hub (XP, Badges, Leaderboard)
+  ══════════════════════════════════════════════════════════════ */
+  function renderGamification(){
+    shell({ active:'gamification',
+      center:
+        '<div class="gh-gamif-page" id="ghGamifPage">'+
+          '<div class="gh-card" style="text-align:center;padding:24px">'+
+            '<div style="font-size:2rem;margin-bottom:8px">🏆</div>'+
+            '<h2 style="margin:0 0 4px">GeoHub XP & Rewards</h2>'+
+            '<p class="gh-muted" style="margin:0">Earn XP, unlock badges, climb the leaderboard</p>'+
+          '</div>'+
+          '<div id="ghGamifContent"><div class="gh-card gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
+        '</div>'
+    });
+    ready(function(){
+      var u=authUser();
+      var box=document.getElementById('ghGamifContent'); if(!box) return;
+      if(!u){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-lock"></i><h3>Sign in to see your XP</h3><a class="gh-btn" href="auth.html">Sign In</a></div>'; return; }
+      var _BADGES=[
+        {id:'first_post',icon:'✍️',name:'First Post',desc:'Made your first post',xp:50},
+        {id:'explorer',icon:'🗺️',name:'Explorer',desc:'Visited 5 different pages',xp:100},
+        {id:'social_butterfly',icon:'🦋',name:'Social Butterfly',desc:'Got 50 followers',xp:200},
+        {id:'storyteller',icon:'📖',name:'Storyteller',desc:'Posted 10 stories',xp:150},
+        {id:'influencer',icon:'⭐',name:'Influencer',desc:'Got 100 reactions',xp:300},
+        {id:'local_hero',icon:'🏙️',name:'Local Hero',desc:'5 posts about your city',xp:200},
+        {id:'connector',icon:'🤝',name:'Connector',desc:'Followed 20 people',xp:100},
+        {id:'reviewer',icon:'🌟',name:'Reviewer',desc:'Left 5 business reviews',xp:150},
+        {id:'event_goer',icon:'🎉',name:'Event Goer',desc:'RSVP\'d to 3 events',xp:100},
+        {id:'tipster',icon:'💎',name:'Tipster',desc:'Sent your first tip',xp:75}
+      ];
+      var _DAILY=[
+        {id:'post_today',icon:'✍️',task:'Make a post today',xp:20,key:'posts'},
+        {id:'like_3',icon:'❤️',task:'React to 3 posts',xp:10,key:'reactions'},
+        {id:'comment_1',icon:'💬',task:'Leave a comment',xp:15,key:'comments'},
+        {id:'story_today',icon:'📸',task:'Post a story',xp:25,key:'stories'},
+        {id:'discover_1',icon:'🔍',task:'Visit Discover page',xp:5,key:'discover'}
+      ];
+      Promise.all([
+        fs().getDoc(fs().doc(db(),'userXP',u.uid)).catch(function(){ return null; }),
+        fs().getDocs(fs().query(fs().collection(db(),'userXP'),fs().orderBy('xp','desc'),fs().limit(10))).catch(function(){ return {docs:[]}; }),
+        fs().getDocs(fs().query(fs().collection(db(),'users'),fs().where('uid','==',u.uid),fs().limit(1))).catch(function(){ return {docs:[]}; })
+      ]).then(function(results){
+        var xpDoc=results[0]&&results[0].exists()?results[0].data():{};
+        var myXP=xpDoc.xp||0; var myLevel=Math.floor(myXP/500)+1; var nextLvlXP=myLevel*500;
+        var myBadges=xpDoc.badges||[]; var dailyDone=xpDoc.dailyCompleted||{};
+        var todayKey=new Date().toISOString().slice(0,10);
+        var leaderDocs=results[1].docs;
+        var leaders=[]; leaderDocs.forEach(function(d){ leaders.push(Object.assign({id:d.id},d.data())); });
+        var pct=Math.min(100,Math.round((myXP%(nextLvlXP-500||500))/(nextLvlXP-500||500)*100));
+        box.innerHTML=
+          '<div class="gh-gamif-hero gh-card">'+
+            '<div style="display:flex;align-items:center;gap:16px">'+
+              '<div class="gh-xp-level-badge">Lv.'+myLevel+'</div>'+
+              '<div style="flex:1">'+
+                '<div style="font-size:.85rem;color:var(--gh-muted);margin-bottom:4px">Total XP: <strong style="color:var(--gh-green)">'+myXP.toLocaleString()+'</strong></div>'+
+                '<div class="gh-xp-bar"><div class="gh-xp-fill" style="width:'+pct+'%"></div></div>'+
+                '<div style="font-size:.75rem;color:var(--gh-muted);margin-top:2px">'+pct+'% to Level '+(myLevel+1)+'</div>'+
+              '</div>'+
+            '</div>'+
+          '</div>'+
+          '<div class="gh-card">'+
+            '<h3 style="margin:0 0 12px;font-size:.95rem"><i class="fas fa-sun"></i> Daily Missions</h3>'+
+            '<div class="gh-daily-missions">'+
+              _DAILY.map(function(m){
+                var done=dailyDone[todayKey]&&dailyDone[todayKey][m.id];
+                return '<div class="gh-mission-row'+(done?' done':'')+'" data-mission="'+esc(m.id)+'">'+
+                  '<span class="gh-mission-icon">'+m.icon+'</span>'+
+                  '<div class="gh-mission-info"><strong>'+esc(m.task)+'</strong><span class="gh-muted">+'+m.xp+' XP</span></div>'+
+                  (done?'<span class="gh-mission-check"><i class="fas fa-check-circle"></i></span>':'<button class="gh-btn sm ghost gh-mission-claim" data-mid="'+esc(m.id)+'" data-mxp="'+m.xp+'">Claim</button>')+
+                '</div>';
+              }).join('')+
+            '</div>'+
+          '</div>'+
+          '<div class="gh-card">'+
+            '<h3 style="margin:0 0 12px;font-size:.95rem"><i class="fas fa-medal"></i> Badges</h3>'+
+            '<div class="gh-badges-grid">'+
+              _BADGES.map(function(b){
+                var earned=myBadges.indexOf(b.id)>-1;
+                return '<div class="gh-badge-item'+(earned?' earned':'')+'" title="'+esc(b.desc)+(earned?'\nEarned!':'\n+'+b.xp+' XP')+'">'+
+                  '<div class="gh-badge-icon">'+b.icon+'</div>'+
+                  '<div class="gh-badge-name">'+esc(b.name)+'</div>'+
+                  '<div class="gh-badge-xp">'+esc(earned?'✓ Earned':'+'+b.xp+' XP')+'</div>'+
+                '</div>';
+              }).join('')+
+            '</div>'+
+          '</div>'+
+          '<div class="gh-card">'+
+            '<h3 style="margin:0 0 12px;font-size:.95rem"><i class="fas fa-trophy"></i> Leaderboard <span class="gh-muted" style="font-size:.8rem">(Top 10)</span></h3>'+
+            (leaders.length?
+              '<div class="gh-leader-list">'+
+                leaders.map(function(l,i){
+                  var isMe=l.id===u.uid;
+                  return '<div class="gh-leader-row'+(isMe?' me':'')+'">'+
+                    '<span class="gh-leader-rank">'+(i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.')+'</span>'+
+                    '<span class="gh-avatar sm">'+(l.avatar||l.photoURL?'<img src="'+esc(l.avatar||l.photoURL||'')+'" alt="">':esc(((l.name||l.displayName||'?')[0]||'?').toUpperCase()))+'</span>'+
+                    '<span class="gh-leader-name">'+esc(l.name||l.displayName||'User')+(isMe?' (you)':'')+'</span>'+
+                    '<span class="gh-leader-xp">'+(_fmtCount(l.xp||0))+' XP</span>'+
+                  '</div>';
+                }).join('')+
+              '</div>':
+              '<div class="gh-muted" style="font-size:.85rem">No leaderboard data yet. Be the first!</div>')+
+          '</div>';
+        // Bind claim buttons
+        box.querySelectorAll('.gh-mission-claim').forEach(function(btn){
+          btn.addEventListener('click',function(){
+            var mid=btn.dataset.mid; var mxp=parseInt(btn.dataset.mxp)||0;
+            btn.disabled=true; btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';
+            var update={}; update['dailyCompleted.'+todayKey+'.'+mid]=true; update['xp']=fs().increment(mxp);
+            fs().setDoc(fs().doc(db(),'userXP',u.uid),update,{merge:true}).then(function(){
+              toast('+'+mxp+' XP! Keep going 🚀');
+              btn.closest('.gh-mission-row').classList.add('done');
+              btn.closest('.gh-mission-row').innerHTML=btn.closest('.gh-mission-row').innerHTML.replace(/<button[^>]*>[^<]*<\/button>/,'<span class="gh-mission-check"><i class="fas fa-check-circle"></i></span>');
+            }).catch(function(err){ toast('Failed','error'); btn.disabled=false; btn.innerHTML='Claim'; });
+          });
+        });
+      }).catch(function(err){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Failed</h3><p>'+esc(err.message||'')+'</p></div>'; });
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 80 — Advanced Profile (Portfolio tab, skills, collab badge)
+  ══════════════════════════════════════════════════════════════ */
+  window.ghProfilePortfolio = function(uid, container){
+    if(!container) return;
+    container.innerHTML='<div class="gh-portfolio-grid" id="ghPortfolioGrid"><div class="gh-card gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div></div>';
+    if(!fs()||!db()){ container.innerHTML='<div class="gh-card gh-empty"><h3>Unavailable</h3></div>'; return; }
+    // Load user's media posts as portfolio
+    fs().getDocs(fs().query(
+      fs().collection(db(),'posts'),
+      fs().where('authorId','==',uid),
+      fs().where('status','!=','deleted'),
+      fs().orderBy('status'),
+      fs().orderBy('createdAt','desc'),
+      fs().limit(24)
+    )).then(function(snap){
+      var items=[]; snap.forEach(function(d){ items.push(Object.assign({id:d.id},d.data())); });
+      var mediaPosts=items.filter(function(p){ return p.mediaUrl||p.imageUrl||p.videoUrl||p.thumbnail; });
+      var box=document.getElementById('ghPortfolioGrid');
+      if(!box) return;
+      if(!mediaPosts.length){
+        box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-images"></i><h3>No media posts yet</h3><p>Post photos or videos to build your portfolio!</p></div>';
+        return;
+      }
+      box.innerHTML='<div class="gh-portfolio-mosaic">'+
+        mediaPosts.map(function(p){
+          var img=p.mediaUrl||p.imageUrl||p.thumbnail||'';
+          var isVideo=p.mediaType==='video'||/\.(mp4|webm|mov)/i.test(img);
+          return '<div class="gh-portfolio-item" onclick="openFocusedPost&&openFocusedPost(\''+esc(p.id)+'\')">'+
+            (isVideo?'<video src="'+esc(img)+'" muted playsinline class="gh-portfolio-media" onerror="this.remove()"></video>':'<img src="'+esc(img)+'" alt="" loading="lazy" class="gh-portfolio-media" onerror="this.remove()">') +
+            (isVideo?'<div class="gh-portfolio-video-badge"><i class="fas fa-play"></i></div>':'')+
+            '<div class="gh-portfolio-hover"><i class="fas fa-heart"></i> '+_fmtCount(p.reactionCount||0)+'  <i class="fas fa-comment"></i> '+_fmtCount(p.commentCount||0)+'</div>'+
+          '</div>';
+        }).join('')+
+      '</div>';
+    }).catch(function(err){ var box=document.getElementById('ghPortfolioGrid'); if(box) box.innerHTML='<div class="gh-card gh-empty"><h3>Failed</h3></div>'; });
+  };
+
+  window.ghProfileSkills = function(uid, container, isOwn){
+    if(!container) return;
+    if(!fs()||!db()){ return; }
+    fs().getDoc(fs().doc(db(),'users',uid)).then(function(snap){
+      if(!snap.exists()) return;
+      var data=snap.data()||{};
+      var skills=data.skills||[];
+      var openCollab=data.openToCollab||false;
+      container.innerHTML=
+        (openCollab?'<div class="gh-collab-badge"><i class="fas fa-handshake"></i> Open to Collab</div>':'')+
+        (skills.length?
+          '<div class="gh-skills-row">'+skills.map(function(s){ return '<span class="gh-skill-chip">'+esc(s)+'</span>'; }).join('')+'</div>':
+          (isOwn?'<div class="gh-muted" style="font-size:.82rem">No skills added yet.</div>':'')+
+        '')+
+        (isOwn?
+          '<button class="gh-btn ghost sm" style="margin-top:8px" id="ghEditSkillsBtn"><i class="fas fa-pen"></i> Edit Skills</button>':
+          '');
+      if(isOwn){
+        var editBtn=container.querySelector('#ghEditSkillsBtn');
+        if(editBtn) editBtn.onclick=function(){
+          var current=(data.skills||[]).join(', ');
+          var newSkills=window.prompt('Enter skills (comma separated):', current);
+          if(newSkills===null) return;
+          var arr=newSkills.split(',').map(function(s){ return s.trim(); }).filter(Boolean).slice(0,12);
+          fs().updateDoc(fs().doc(db(),'users',uid),{ skills:arr }).then(function(){
+            toast('Skills updated!'); ghProfileSkills(uid,container,true);
+          }).catch(function(err){ toast('Failed','error'); });
+        };
+      }
+    }).catch(function(){});
+  };
+
+  window.ghToggleOpenCollab = function(uid, btn){
+    if(!fs()||!db()) return;
+    fs().getDoc(fs().doc(db(),'users',uid)).then(function(snap){
+      var current=(snap.exists()&&snap.data().openToCollab)||false;
+      return fs().updateDoc(fs().doc(db(),'users',uid),{ openToCollab:!current });
+    }).then(function(){
+      toast(!btn||!btn.dataset.active?'You\'re now open to collab! 🤝':'Collab status removed');
+    }).catch(function(err){ toast('Failed','error'); });
+  };
 
   /* ── Phase 70: PWA install prompt + SW sync handler ─────── */
   var _pwaPrompt=null;
