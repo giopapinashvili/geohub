@@ -956,7 +956,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(!fbUser){ clearCachedUser(); try{localStorage.removeItem('gh_active_actor');}catch(e){} }
       updateTopUser();
       listenBadges();
-      if(fbUser){ validateActorOnLoad(); maybeUpdateStreak(fbUser.uid); _initWrapped(fbUser.uid); }
+      if(fbUser){ validateActorOnLoad(); maybeUpdateStreak(fbUser.uid); _initWrapped(fbUser.uid); setTimeout(function(){ checkAndAwardBadges(fbUser.uid); }, 3000); }
       if(!fbUser){ var sb=document.getElementById('ghStreakBtn'); if(sb) sb.style.display='none'; }
       var bid = new URLSearchParams(location.search).get('id');
       if((state.page === 'business' || PAGE === 'business') && bid) updateBusinessFollowButton(bid);
@@ -1398,7 +1398,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           if(!validUrls.length && pickedFiles.length) throw new Error('All uploads failed');
           payload.mediaUrls=validUrls;
           submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
-          GS().createPost(txt, validUrls[0]||'', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); }, payload);
+          GS().createPost(txt, validUrls[0]||'', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); var _u=authUser(); if(_u) setTimeout(function(){ checkAndAwardBadges(_u.uid); },2000); }, payload);
         }).catch(function(err){
           console.error('[GeoHub] multi-image upload',err);
           toast('Image upload failed. Check Cloudinary settings.','error');
@@ -1408,7 +1408,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         });
       } else {
         submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
-        GS().createPost(txt, '', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); }, payload);
+        GS().createPost(txt, '', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); var _u=authUser(); if(_u) setTimeout(function(){ checkAndAwardBadges(_u.uid); },2000); }, payload);
       }
     };
   }
@@ -4082,6 +4082,104 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(n>=1000000) return (n/1000000).toFixed(1)+'M';
     if(n>=1000) return (n/1000).toFixed(1)+'K';
     return String(n);
+  }
+
+  /* ── Phase 22: Badges & Achievements ────────────────────────────────── */
+  var BADGE_CATALOG = [
+    { id:'first_post',    emoji:'📝', icon:'fa-pen-to-square', title:'პირველი პოსტი',   desc:'გამოაქვეყნე პირველი პოსტი',    rarity:'common',    check:function(s){ return s.postCount>=1; } },
+    { id:'post_10',       emoji:'✍️',  icon:'fa-feather',       title:'აქტიური ავტორი', desc:'10 პოსტი გამოქვეყნებული',      rarity:'common',    check:function(s){ return s.postCount>=10; } },
+    { id:'post_50',       emoji:'💬',  icon:'fa-comments',      title:'დიდი მწერალი',   desc:'50 პოსტი გამოქვეყნებული',      rarity:'rare',      check:function(s){ return s.postCount>=50; } },
+    { id:'post_100',      emoji:'📚',  icon:'fa-book',          title:'კონტენტ კრეატორი','desc':'100 პოსტი გამოქვეყნებული', rarity:'epic',      check:function(s){ return s.postCount>=100; } },
+    { id:'streak_7',      emoji:'🔥',  icon:'fa-fire',          title:'კვირის სტრიქი',  desc:'7 დღიანი სტრიქი',              rarity:'common',    check:function(s){ return s.streak>=7; } },
+    { id:'streak_30',     emoji:'🌟',  icon:'fa-fire-flame-curved','title':'თვის სტრიქი','desc':'30 დღიანი სტრიქი',           rarity:'rare',      check:function(s){ return s.streak>=30; } },
+    { id:'streak_100',    emoji:'⚡',  icon:'fa-bolt',          title:'ლეგენდა',        desc:'100 დღიანი სტრიქი',            rarity:'legendary', check:function(s){ return s.streak>=100; } },
+    { id:'first_checkin', emoji:'📍',  icon:'fa-location-dot',  title:'მოგზაური',       desc:'პირველი check-in',             rarity:'common',    check:function(s){ return s.checkins>=1; } },
+    { id:'checkin_10',    emoji:'🗺️',  icon:'fa-map',           title:'მკვლევარი',      desc:'10 check-in',                  rarity:'rare',      check:function(s){ return s.checkins>=10; } },
+    { id:'checkin_50',    emoji:'🌍',  icon:'fa-earth-europe',  title:'გლობტროტერი',    desc:'50 check-in',                  rarity:'epic',      check:function(s){ return s.checkins>=50; } },
+    { id:'social_10',     emoji:'🤝',  icon:'fa-users',         title:'სოციალური',      desc:'10 მიმდევარი',                 rarity:'common',    check:function(s){ return s.followers>=10; } },
+    { id:'popular',       emoji:'⭐',  icon:'fa-star',          title:'პოპულარული',     desc:'100 მიმდევარი',                rarity:'rare',      check:function(s){ return s.followers>=100; } },
+    { id:'influencer',    emoji:'🎯',  icon:'fa-bullseye',      title:'ინფლუენსერი',    desc:'500 მიმდევარი',                rarity:'epic',      check:function(s){ return s.followers>=500; } },
+    { id:'verified',      emoji:'✅',  icon:'fa-circle-check',  title:'ვერიფიცირებული', desc:'GeoHub-ის ვერიფიცირებული ანგარიში','rarity':'legendary', check:function(s){ return s.verified===true; } }
+  ];
+
+  function checkAndAwardBadges(uid){
+    if(!fs()||!db()||!uid) return;
+    Promise.all([
+      fs().getDoc(fs().doc(db(),'users',uid)),
+      fs().getDoc(fs().doc(db(),'userUiState',uid)),
+      fs().getDocs(fs().collection(db(),'users',uid,'badges'))
+    ]).then(function(results){
+      var userData=results[0].exists()?results[0].data():{};
+      var uiData=results[1].exists()?results[1].data():{};
+      var existingBadges={};
+      results[2].forEach(function(d){ existingBadges[d.id]=true; });
+      // Count checkins separately (use stored count if available, else fetch)
+      var ciCount=Number(userData.checkinCount||uiData.checkinCount||0);
+      function _run(checkins){
+        var stats={
+          postCount:Number(userData.postCount||userData.postsCount||0),
+          streak:Number(uiData.streak||0),
+          checkins:checkins,
+          followers:Number(userData.followerCount||userData.followers||0),
+          verified:userData.verified===true
+        };
+        var newBadges=[];
+        BADGE_CATALOG.forEach(function(b){
+          if(!existingBadges[b.id] && b.check(stats)) newBadges.push(b);
+        });
+        if(!newBadges.length) return;
+        newBadges.forEach(function(b){
+          fs().setDoc(fs().doc(db(),'users',uid,'badges',b.id),{
+            badgeId:b.id, title:b.title, description:b.desc,
+            icon:b.icon, emoji:b.emoji, rarity:b.rarity,
+            awardedAt:fs().serverTimestamp()
+          },{merge:true}).catch(function(){});
+        });
+        // Show toast for first new badge only (avoid spam)
+        setTimeout(function(){ _showBadgeToast(newBadges[0]); }, 1200);
+        if(newBadges.length>1){
+          setTimeout(function(){ _showBadgeToast(newBadges[1]); }, 3500);
+        }
+      }
+      if(ciCount){
+        _run(ciCount);
+      } else {
+        fs().getDocs(fs().query(
+          fs().collection(db(),'checkins'),
+          fs().where('userId','==',uid),
+          fs().limit(100)
+        )).then(function(s){ _run(s.size); }).catch(function(){ _run(0); });
+      }
+    }).catch(function(){});
+  }
+
+  var RARITY_COLOR={ common:'#94a3b8', rare:'#3b82f6', epic:'#a855f7', legendary:'#f59e0b' };
+
+  function _showBadgeToast(badge){
+    var rc=RARITY_COLOR[badge.rarity]||'#94a3b8';
+    var el=document.createElement('div');
+    el.className='gh-badge-toast';
+    el.setAttribute('role','alert');
+    el.innerHTML=
+      '<div class="gh-bt-inner">'+
+        '<div class="gh-bt-emoji">'+badge.emoji+'</div>'+
+        '<div class="gh-bt-body">'+
+          '<div class="gh-bt-label">🏅 ბეჯი მიღებულია!</div>'+
+          '<div class="gh-bt-name" style="color:'+rc+'">'+esc(badge.title)+'</div>'+
+          '<div class="gh-bt-desc">'+esc(badge.desc)+'</div>'+
+        '</div>'+
+        '<button class="gh-bt-close" aria-label="Close">×</button>'+
+      '</div>';
+    document.body.appendChild(el);
+    requestAnimationFrame(function(){ el.classList.add('visible'); });
+    el.querySelector('.gh-bt-close').onclick=function(){
+      el.classList.remove('visible');
+      setTimeout(function(){ if(el.parentNode) el.remove(); },400);
+    };
+    setTimeout(function(){
+      el.classList.remove('visible');
+      setTimeout(function(){ if(el.parentNode) el.remove(); },400);
+    }, 6000);
   }
 
   /* ── Phase 19: Georgia Wrapped ────────────────────────────────────────── */

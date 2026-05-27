@@ -3528,3 +3528,69 @@ a.gh-trending-chip:hover {
 .gh-htab-close:hover {
   background: rgba(255,255,255,.3);
 }
+
+/* ── Phase 22: Badge Toast & Achievement Strip ──────────── */
+/* Badge awarded toast */
+.gh-badge-toast {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  z-index: 9999;
+  transform: translateX(calc(100% + 30px));
+  opacity: 0;
+  transition: transform .4s cubic-bezier(.22,1,.36,1), opacity .3s;
+  pointer-events: none;
+}
+.gh-badge-toast.visible {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+.gh-bt-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--gh-card, rgba(13,22,19,.96));
+  border: 1px solid rgba(245,158,11,.35);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.5);
+  min-width: 240px;
+  max-width: 300px;
+}
+.gh-bt-emoji {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.gh-bt-body {
+  flex: 1;
+  min-width: 0;
+}
+.gh-bt-label {
+  font-size: .7rem;
+  color: var(--gh-muted, #8aa69a);
+  margin-bottom: 2px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.gh-bt-name {
+  font-size: .92rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.gh-bt-desc {
+  font-size: .75rem;
+  color: var(--gh-muted, #8aa69a);
+}
+.gh-bt-close {
+  background: none;
+  border: none;
+  color: var(--gh-muted, #8aa69a);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.gh-bt-close:hover { color: var(--gh-text, #eefcf6); }

@@ -308,6 +308,8 @@
       if (Number(user.xp) > 0) _badgeHtml += '<span class="trust-badge gold"><i class="fas fa-bolt"></i> ' + compact(user.xp) + ' XP</span>';
       badges.innerHTML = _badgeHtml;
     }
+    // Phase 22: Achievement badge strip
+    _renderAchievementStrip(user.uid);
     const own = fbUser && user.uid === fbUser.uid;
     const displayedName = resolveDisplayName(user, own);
     if (name) name.textContent = displayedName;
@@ -804,7 +806,42 @@
     });
   }
 
+  /* Phase 22: Achievement badge strip in profile header */
   var BADGE_RARITY_COLOR = { common: '#94a3b8', rare: '#3b82f6', epic: '#a855f7', legendary: '#f59e0b' };
+
+  function _renderAchievementStrip(uid) {
+    if (!uid) return;
+    // Remove old strip if re-rendering
+    var old = document.getElementById('profileAchievementStrip');
+    if (old) old.remove();
+    var GF = window.GeoFirebase;
+    if (!GF || !GF.db || !GF.fs) return;
+    GF.fs.getDocs(GF.fs.collection(GF.db, 'users', uid, 'badges')).then(function(snap) {
+      if (snap.empty) return;
+      var earned = [];
+      snap.forEach(function(d) { earned.push(Object.assign({ id: d.id }, d.data())); });
+      // Sort: legendary first
+      var order = { legendary: 0, epic: 1, rare: 2, common: 3 };
+      earned.sort(function(a, b) { return (order[a.rarity] || 3) - (order[b.rarity] || 3); });
+      var strip = document.createElement('div');
+      strip.id = 'profileAchievementStrip';
+      strip.className = 'profile-achievement-strip';
+      strip.innerHTML = earned.slice(0, 8).map(function(b) {
+        var rc = BADGE_RARITY_COLOR[b.rarity] || '#94a3b8';
+        var emoji = b.emoji || '🏅';
+        return '<span class="pach-badge" title="' + esc(b.title || b.badgeId || 'Badge') + '" style="border-color:' + rc + '">' +
+          emoji +
+        '</span>';
+      }).join('');
+      if (earned.length > 8) {
+        strip.innerHTML += '<span class="pach-more">+' + (earned.length - 8) + '</span>';
+      }
+      var trustBadges = document.querySelector('.trust-badges');
+      if (trustBadges && trustBadges.parentNode) {
+        trustBadges.parentNode.insertBefore(strip, trustBadges.nextSibling);
+      }
+    }).catch(function() {});
+  }
 
   function paintBadges(tab, badges) {
     const cnt = $('.ptab[data-tab="badges"] .tab-count');
