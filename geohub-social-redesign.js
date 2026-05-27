@@ -1206,6 +1206,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button class="gh-cmp-tool" id="ghTogglePoll" type="button" title="Create poll"><i class="fas fa-chart-bar"></i><span>Poll</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleFeeling" type="button" title="Feeling or activity"><i class="fas fa-face-smile"></i><span>Feeling</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleBg" type="button" title="Background color"><i class="fas fa-palette"></i><span>Background</span></button>'+
+        '<button class="gh-cmp-tool" id="ghToggleEmoji" type="button" title="Emoji"><i class="fas fa-face-grin"></i><span>Emoji</span></button>'+
       '</div>'+
       '<input type="file" id="ghPostFileInput" accept="image/*" multiple style="display:none">'+
       '<div class="gh-upload-progress" id="ghPostUploadBar" style="display:none"><div class="gh-upload-track"><div class="gh-upload-bar" id="ghPostUploadFill"></div></div><span id="ghPostUploadPct">0%</span></div>';
@@ -1221,6 +1222,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
     // Auto-focus
     if(ta) { ta.focus(); }
+
+    // Phase 32: emoji picker for composer
+    var _emojiToolBtn=document.getElementById('ghToggleEmoji');
+    if(_emojiToolBtn && ta) _emojiToolBtn.addEventListener('click',function(){ _openEmojiPicker(ta,_emojiToolBtn); });
 
     // Validate: enable/disable Post button
     function updateSubmit(){
@@ -1870,7 +1875,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button class="gh-act" data-save><i class="fas fa-bookmark"></i> Save</button>'+
       '</div>'+
       '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+
-        '<form class="gh-comment-form" data-comment-form><input class="gh-input" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
+        '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
       '</div>'+
     '</article>';
   }
@@ -1904,7 +1909,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button class="gh-act" data-share><i class="fas fa-share"></i> Share</button>'+
       '</div>'+
       '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+
-        '<form class="gh-comment-form" data-comment-form><input class="gh-input" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
+        '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
       '</div>'+
     '</article>';
   }
@@ -1956,7 +1961,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button class="gh-act" data-share><i class="fas fa-share"></i> Share</button>'+
       '</div>'+
       '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+
-        '<form class="gh-comment-form" data-comment-form><input class="gh-input" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
+        '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
       '</div>'+
     '</article>';
   }
@@ -2096,7 +2101,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     // Comment form — hide when commentsDisabled in biz context
     var cmtFormHtml = (bizCtx && p.commentsDisabled)
       ? '<div class="gh-comments-disabled"><i class="fas fa-comment-slash"></i> Comments are turned off.</div>'
-      : '<form class="gh-comment-form" data-comment-form><input class="gh-input" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>';
+      : '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>';
 
     // Card element data attributes
     var cardAttrs = ' id="post-'+esc(pid)+'" data-post-id="'+esc(pid)+'" data-author-id="'+esc(authorId)+'"';
@@ -2310,6 +2315,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var wrBtn=e.target.closest('[data-who-reacted]'); if(wrBtn){ openWhoReactedModal(wrBtn.dataset.whoReacted); }
       var pv=e.target.closest('[data-poll-vote]'); if(pv){ if(!requireLogin()) return; submitPollVote(pv.dataset.pid, pv.dataset.optId, card); }
       var clBtn=e.target.closest('[data-comment-like]'); if(clBtn){ if(!requireLogin()) return; toggleCommentReaction(pid, clBtn.dataset.commentId, clBtn.dataset.commentReaction||'love', clBtn); }
+      var emojBtn=e.target.closest('.gh-comment-emoji'); if(emojBtn){ var frm=emojBtn.closest('.gh-comment-form,.gh-reply-form'); var inp=frm&&frm.querySelector('.gh-input'); if(inp) _openEmojiPicker(inp,emojBtn); return; }
       var eb=e.target.closest('[data-edit-comment]'); if(eb){ e.preventDefault(); openFeedCommentEditor(pid, eb.dataset.commentId, eb); }
       var db2=e.target.closest('[data-delete-comment]'); if(db2){ e.preventDefault();
         if(!confirm('Delete this comment?')) return;
@@ -2674,7 +2680,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       ' · <span class="gh-cmt-rx-wrap"><button type="button" class="gh-cmt-act gh-cmt-rx-btn'+(rxType?' active':'')+'" data-comment-like data-comment-id="'+esc(c.id)+'" data-comment-reaction="'+esc(rxType||'like')+'">'+rxLabel+'</button>'+
       '<span class="gh-cmt-rx-picker" data-rx-picker="'+esc(c.id)+'">'+Object.keys(RX_EMOJIS).map(function(t){ return '<button type="button" class="gh-cmt-rx-pick" data-comment-like data-comment-id="'+esc(c.id)+'" data-comment-reaction="'+t+'">'+RX_EMOJIS[t]+'</button>'; }).join('')+'</span></span>'+
       ownerBtns+'</div>'+
-      '<form class="gh-reply-form" data-reply-form data-comment-id="'+esc(c.id)+'" hidden><input class="gh-input" placeholder="Write a reply…"><button class="gh-btn sm"><i class="fas fa-paper-plane"></i></button></form>'+
+      '<form class="gh-reply-form" data-reply-form data-comment-id="'+esc(c.id)+'" hidden><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" placeholder="Write a reply…"><button class="gh-btn sm"><i class="fas fa-paper-plane"></i></button></form>'+
       '<div class="gh-replies" data-replies-for="'+esc(c.id)+'"></div></div></div>';
   }
 
@@ -3024,10 +3030,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if (isOwn) {
       items += '<button class="gh-pmenu-item" data-menu-edit-post><i class="fas fa-pen"></i> Edit post</button>';
       items += '<button class="gh-pmenu-item danger" data-menu-delete-post><i class="fas fa-trash"></i> Delete post</button>';
+      items += '<button class="gh-pmenu-item" data-menu-pin><i class="fas fa-thumbtack"></i> Pin to profile</button>';
       items += '<div class="gh-pmenu-sep"></div>';
     }
     items += '<button class="gh-pmenu-item" data-copy-post-link><i class="fas fa-link"></i> Copy link</button>';
     items += '<button class="gh-pmenu-item" data-menu-save><i class="fas fa-bookmark"></i> Save post</button>';
+    items += '<button class="gh-pmenu-item" data-menu-save-col><i class="fas fa-folder-plus"></i> Save to Collection</button>';
     if (!isOwn) {
       items += '<div class="gh-pmenu-sep"></div>';
       items += '<button class="gh-pmenu-item" data-menu-hide><i class="fas fa-eye-slash"></i> Hide post</button>';
@@ -3065,6 +3073,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       }
       if (e.target.closest('[data-copy-post-link]')) { navigator.clipboard && navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast('Link copied!');}); closeDrop(); return; }
       if (e.target.closest('[data-menu-save]')) { if(GS().toggleSavePost) GS().toggleSavePost(pid); closeDrop(); return; }
+      if (e.target.closest('[data-menu-save-col]')) { closeDrop(); openSaveToCollection(pid); return; }
+      if (e.target.closest('[data-menu-pin]') && isOwn) { closeDrop(); _pinPostToProfile(pid); return; }
       if (e.target.closest('[data-menu-hide]')) { if(GS().hidePost) GS().hidePost(pid, function(){ if(card) card.remove(); }); closeDrop(); return; }
       if (e.target.closest('[data-menu-report]')) { closeDrop(); if(window.GeoModeration) window.GeoModeration.openReportModal('post', pid, ''); else if(GS().reportTarget) GS().reportTarget('post', pid, 'Reported'); return; }
       if (e.target.closest('[data-menu-report-user]') && authorId) { closeDrop(); if(window.GeoModeration) window.GeoModeration.openReportModal('user', authorId, authorName); else if(GS().reportTarget) GS().reportTarget('user', authorId, 'Reported'); return; }
@@ -3824,6 +3834,112 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         });
       };
     });
+  }
+
+  /* ── Phase 32: Emoji Picker ──────────────────────────────── */
+  var _EMOJIS = '😀 😂 🥹 😊 😍 🤩 😎 😢 😭 🤯 😤 😠 🥺 😴 🤗 🥰 😏 🙄 😬 🫡 👍 👎 👋 🤝 ✌️ 🤞 🤟 👏 🙏 💪 🫶 🤜 🤛 ☝️ 👌 ❤️ 🧡 💛 💚 💙 💜 🖤 🤍 💕 💞 💓 💗 💖 💝 💘 💔 🎉 🎊 🎁 🎈 🎂 🏆 🥇 🎯 🎮 🎸 🎵 🎶 🔥 ⭐ ✨ 🌟 💫 🌍 🌈 ☀️ 🌙 ❄️ 🌊 🌺 🌸 🌻 🍀 🌿 🍕 🍔 🌮 🍜 🍣 🍩 🍦 🍰 🍷 🍺 ☕ 🧃 🍎 🍓 🐱 🐶 🐻 🦊 🐼 🐸 🦁 🐯 🐷 🐮 🐙 🦋 🐝'.split(' ');
+
+  function _insertAtCursor(el, text){
+    if(el.tagName==='TEXTAREA'||el.tagName==='INPUT'){
+      var s=el.selectionStart||0, e2=el.selectionEnd||0, v=el.value;
+      el.value=v.slice(0,s)+text+v.slice(e2);
+      el.selectionStart=el.selectionEnd=s+text.length;
+    }
+  }
+
+  function _openEmojiPicker(targetEl, anchorEl){
+    var existing=document.getElementById('ghEmojiPicker');
+    if(existing){ existing.remove(); return; }
+    var picker=document.createElement('div');
+    picker.id='ghEmojiPicker';
+    picker.className='gh-emoji-picker';
+    picker.innerHTML='<div class="gh-ep-grid">'+_EMOJIS.map(function(e){ return '<button type="button" class="gh-ep-btn" data-emoji="'+e+'">'+e+'</button>'; }).join('')+'</div>';
+    document.body.appendChild(picker);
+    // Fixed position near anchor
+    var rect=anchorEl.getBoundingClientRect();
+    var pw=268, ph=216;
+    var top=rect.top-ph-6; if(top<8) top=rect.bottom+6;
+    var left=Math.max(8,Math.min(rect.left,window.innerWidth-pw-8));
+    picker.style.top=top+'px'; picker.style.left=left+'px';
+    picker.addEventListener('click',function(e){
+      var btn=e.target.closest('[data-emoji]'); if(!btn) return;
+      e.stopPropagation();
+      _insertAtCursor(targetEl,btn.dataset.emoji);
+      targetEl.dispatchEvent(new Event('input',{bubbles:true}));
+      picker.remove(); targetEl.focus();
+    });
+    setTimeout(function(){
+      function _closeOut(ev){ if(!picker.contains(ev.target)&&ev.target!==anchorEl){ picker.remove(); document.removeEventListener('click',_closeOut,true); } }
+      document.addEventListener('click',_closeOut,true);
+    },10);
+  }
+
+  /* ── Phase 34: Save to Collection ───────────────────────── */
+  function openSaveToCollection(pid){
+    var u=authUser(); if(!u){ requireLogin(); return; }
+    if(!fs()||!db()) return;
+    var uid=u.uid;
+    var body=
+      '<div id="ghColList" style="min-height:60px"><div class="gh-empty" style="min-height:60px"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
+      '<div style="margin-top:12px;display:flex;gap:8px">'+
+        '<input class="gh-input" id="ghNewColName" placeholder="New collection name…" maxlength="40" style="flex:1">'+
+        '<button class="gh-btn" id="ghCreateCol" title="Create"><i class="fas fa-plus"></i></button>'+
+      '</div>';
+    var m=modal('Save to Collection',body,'<button class="gh-btn ghost" data-close-modal>Done</button>','ghSaveColModal');
+    function loadCols(){
+      var list=document.getElementById('ghColList'); if(!list) return;
+      fs().getDocs(fs().query(fs().collection(db(),'users',uid,'collections'),fs().orderBy('createdAt','desc'),fs().limit(20))).then(function(snap){
+        if(!snap.size){ list.innerHTML='<p class="gh-muted" style="font-size:.82rem;padding:4px 0">No collections yet. Create one below.</p>'; return; }
+        list.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+
+          snap.docs.map(function(d){
+            var col=d.data(), ids=col.postIds||[], saved=ids.indexOf(pid)>-1;
+            return '<div class="gh-col-row">'+
+              '<i class="fas fa-folder gh-col-icon"></i>'+
+              '<div style="flex:1;min-width:0">'+
+                '<strong style="font-size:.85rem">'+esc(col.name||'Untitled')+'</strong>'+
+                '<span class="gh-muted" style="font-size:.72rem;margin-left:6px">'+ids.length+' posts</span>'+
+              '</div>'+
+              '<button class="gh-btn sm'+(saved?' gh-col-saved':'')+'" data-col-id="'+esc(d.id)+'" data-col-saved="'+(saved?'1':'0')+'">'+
+                (saved?'<i class="fas fa-check"></i> Saved':'Save')+
+              '</button>'+
+            '</div>';
+          }).join('')+
+        '</div>';
+        list.querySelectorAll('[data-col-id]').forEach(function(btn){
+          btn.onclick=function(){
+            var colId=btn.dataset.colId, isSaved=btn.dataset.colSaved==='1';
+            var ref=fs().doc(db(),'users',uid,'collections',colId);
+            (isSaved?fs().updateDoc(ref,{postIds:fs().arrayRemove(pid)}):fs().updateDoc(ref,{postIds:fs().arrayUnion(pid)}))
+              .then(function(){ loadCols(); toast(isSaved?'Removed from collection':'Saved to collection ✓'); })
+              .catch(function(){});
+          };
+        });
+      }).catch(function(){});
+    }
+    loadCols();
+    var createBtn=document.getElementById('ghCreateCol');
+    if(createBtn) createBtn.onclick=function(){
+      var nameEl=document.getElementById('ghNewColName');
+      var name=(nameEl&&nameEl.value||'').trim(); if(!name) return;
+      createBtn.disabled=true;
+      fs().addDoc(fs().collection(db(),'users',uid,'collections'),{name:name,postIds:[pid],createdAt:fs().serverTimestamp()})
+        .then(function(){ if(nameEl) nameEl.value=''; createBtn.disabled=false; loadCols(); toast('Collection created ✓'); })
+        .catch(function(){ createBtn.disabled=false; toast('Error creating collection','error'); });
+    };
+    var nameEl2=document.getElementById('ghNewColName');
+    if(nameEl2) nameEl2.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); createBtn&&createBtn.click(); } });
+  }
+
+  /* ── Phase 35: Pin Post to Profile ──────────────────────── */
+  function _pinPostToProfile(pid){
+    var u=authUser(); if(!u||!fs()||!db()) return;
+    var ref=fs().doc(db(),'users',u.uid);
+    fs().getDoc(ref).then(function(snap){
+      var d=snap.data()||{}, alreadyPinned=d.pinnedPostId===pid;
+      return fs().updateDoc(ref,{pinnedPostId:alreadyPinned?'':pid}).then(function(){
+        toast(alreadyPinned?'Post unpinned from profile':'📌 Pinned to your profile!');
+      });
+    }).catch(function(err){ toast('Could not pin: '+(err.message||err.code),'error'); });
   }
 
   function loadCreatorWidget(uid){

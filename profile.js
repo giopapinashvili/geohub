@@ -767,7 +767,12 @@
         if (!tab) return;
         if (window.GeoSocialUI && window.GeoSocialUI.postCard && window.GeoSocialUI.bindPostInteractions) {
           // Use the full interactive post card from the social engine
-          tab.innerHTML = '<div class="post-feed-list" id="profile-posts-list">' + posts.map(function(p) { return window.GeoSocialUI.postCard(p); }).join('') + '</div>';
+          // Phase 35: sort pinned post to top
+          var _pinnedId = user.pinnedPostId || '';
+          var _sorted = _pinnedId ? posts.slice().sort(function(a,b){ return (b.id===_pinnedId?1:0)-(a.id===_pinnedId?1:0); }) : posts;
+          var _pinLabel = (_pinnedId && _sorted.length && _sorted[0].id===_pinnedId)
+            ? '<div class="gh-pin-label"><i class="fas fa-thumbtack"></i> Pinned Post</div>' : '';
+          tab.innerHTML = '<div class="post-feed-list" id="profile-posts-list">' + _pinLabel + _sorted.map(function(p) { return window.GeoSocialUI.postCard(p); }).join('') + '</div>';
           var list = tab.querySelector('#profile-posts-list');
           if (list) {
             window.GeoSocialUI.bindPostInteractions(list);

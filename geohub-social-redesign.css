@@ -3788,3 +3788,80 @@ a.gh-trending-chip:hover {
   font-size: .73rem;
   color: var(--gh-muted, #8aa69a);
 }
+
+/* ── Phase 32: Emoji Picker ─────────────────────────── */
+.gh-emoji-picker {
+  position: fixed;
+  background: #1e2730;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.6);
+  z-index: 9999;
+  width: 268px;
+}
+.gh-ep-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 1px;
+}
+.gh-ep-btn {
+  background: none;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.18rem;
+  padding: 4px 2px;
+  cursor: pointer;
+  line-height: 1;
+  transition: background .1s, transform .08s;
+}
+.gh-ep-btn:hover {
+  background: rgba(255,255,255,.12);
+  transform: scale(1.18);
+}
+.gh-comment-emoji {
+  background: none;
+  border: none;
+  color: var(--gh-muted, #8aa69a);
+  font-size: .9rem;
+  padding: 0 5px;
+  cursor: pointer;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: color .15s;
+}
+.gh-comment-emoji:hover { color: var(--gh-green, #10b981); }
+.gh-comment-form,
+.gh-reply-form {
+  display: flex;
+  align-items: center;
+}
+
+/* ── Phase 34: Save Collections ─────────────────────── */
+.gh-col-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 10px;
+  transition: border-color .15s;
+}
+.gh-col-row:hover { border-color: rgba(16,185,129,.3); }
+.gh-col-icon { color: #10b981; font-size: .9rem; flex-shrink: 0; }
+.gh-col-saved { background: rgba(16,185,129,.18); color: #10b981; border-color: rgba(16,185,129,.4); }
+
+/* ── Phase 35: Pin Post Label ────────────────────────── */
+.gh-pin-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .75rem;
+  font-weight: 700;
+  color: var(--gh-muted, #8aa69a);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  padding: 8px 0 4px;
+}
+.gh-pin-label i { color: #f59e0b; font-size: .78rem; }
