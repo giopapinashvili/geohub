@@ -2192,13 +2192,41 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }).catch(function(){});
   }
 
+  /* ── Phase 37: Reaction Analytics ───────────────────────── */
+  function _renderRxAnalytics(reactions){
+    var box=document.getElementById('ghRxAnalytics'); if(!box) return;
+    if(!reactions.length){ box.innerHTML=''; return; }
+    var counts={}, total=reactions.length;
+    reactions.forEach(function(r){ var t=r.type||'love'; counts[t]=(counts[t]||0)+1; });
+    var sorted=Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; });
+    box.innerHTML=
+      '<div class="gh-rx-chart">'+
+        sorted.map(function(t){
+          var c=counts[t], pct=Math.round(c/total*100);
+          return '<div class="gh-rx-bar-row">'+
+            '<span class="gh-rx-bar-emoji">'+(RX_EMOJIS[t]||'❤️')+'</span>'+
+            '<div class="gh-rx-bar-wrap"><div class="gh-rx-bar-fill" style="width:'+pct+'%"></div></div>'+
+            '<span class="gh-rx-bar-stat">'+c+' <span class="gh-muted gh-rx-pct">('+pct+'%)</span></span>'+
+          '</div>';
+        }).join('')+
+        '<div class="gh-rx-total">'+total+' total reaction'+(total===1?'':'s')+'</div>'+
+      '</div>';
+  }
+
   function openWhoReactedModal(pid) {
     if(!fs() || !db()) return;
-    modal('Who Reacted', '<div class="gh-who-rx-tabs" id="ghWhoRxTabs"><button class="gh-who-rx-tab active" data-rx-tab="all">All</button>'+Object.keys(RX_EMOJIS).map(function(t){ return '<button class="gh-who-rx-tab" data-rx-tab="'+t+'">'+RX_EMOJIS[t]+'</button>'; }).join('')+'</div><div id="ghWhoRxList"><i class="fas fa-circle-notch fa-spin gh-muted"></i></div>', '<button class="gh-btn ghost" data-close-modal>Close</button>', 'ghWhoRxModal');
+    var body=
+      '<div class="gh-rx-analytics" id="ghRxAnalytics"><div class="gh-muted" style="text-align:center;padding:8px"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
+      '<div class="gh-who-rx-divider"></div>'+
+      '<div class="gh-who-rx-tabs" id="ghWhoRxTabs"><button class="gh-who-rx-tab active" data-rx-tab="all">All</button>'+Object.keys(RX_EMOJIS).map(function(t){ return '<button class="gh-who-rx-tab" data-rx-tab="'+t+'">'+RX_EMOJIS[t]+'</button>'; }).join('')+'</div>'+
+      '<div id="ghWhoRxList"><i class="fas fa-circle-notch fa-spin gh-muted"></i></div>';
+    modal('Reactions', body, '<button class="gh-btn ghost" data-close-modal>Close</button>', 'ghWhoRxModal');
     var allReactions = [];
-    fs().getDocs(fs().query(fs().collection(db(),'posts',pid,'reactions'), fs().limit(50))).then(function(snap){
+    fs().getDocs(fs().query(fs().collection(db(),'posts',pid,'reactions'), fs().limit(100))).then(function(snap){
       snap.forEach(function(d){ allReactions.push(Object.assign({id:d.id}, d.data())); });
-      // Fetch real user profiles so we display accurate names/avatars
+      // Render analytics bar chart immediately from counts
+      _renderRxAnalytics(allReactions);
+      // Fetch real user profiles
       return Promise.all(allReactions.map(function(r){
         var uid = r.userId || r.id || '';
         if(!uid) return Promise.resolve();
@@ -2220,7 +2248,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       box.innerHTML = '<div class="gh-mini-list">'+items.map(function(r){
         var name = r.displayName || 'GeoHub User';
         var av = r.photoURL ? img(r.photoURL, name) : esc(initials(name));
-        return '<a class="gh-mini-item" href="'+profileLink(r.userId||r.id||'')+'"><span class="gh-avatar" style="width:36px;height:36px">'+av+'</span><div><strong>'+esc(name)+'</strong><span>'+RX_EMOJIS[r.type||'like']+'</span></div></a>';
+        return '<a class="gh-mini-item" href="'+profileLink(r.userId||r.id||'')+'"><span class="gh-avatar" style="width:36px;height:36px">'+av+'</span><div><strong>'+esc(name)+'</strong><span>'+(RX_EMOJIS[r.type||'love']||'❤️')+'</span></div></a>';
       }).join('')+'</div>';
     }
     var tabBar=$('#ghWhoRxTabs');

@@ -3789,6 +3789,65 @@ a.gh-trending-chip:hover {
   color: var(--gh-muted, #8aa69a);
 }
 
+/* ── Phase 37: Reaction Analytics ───────────────────── */
+.gh-rx-analytics {
+  padding: 4px 0 8px;
+}
+.gh-rx-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.gh-rx-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gh-rx-bar-emoji {
+  font-size: 1.15rem;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.gh-rx-bar-wrap {
+  flex: 1;
+  height: 8px;
+  background: rgba(255,255,255,.08);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.gh-rx-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #38bdf8);
+  border-radius: 99px;
+  transition: width .4s ease;
+  min-width: 4px;
+}
+.gh-rx-bar-stat {
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--gh-text, #eefcf6);
+  min-width: 56px;
+  text-align: right;
+}
+.gh-rx-pct {
+  font-weight: 400;
+  font-size: .72rem;
+}
+.gh-rx-total {
+  font-size: .74rem;
+  color: var(--gh-muted, #8aa69a);
+  text-align: right;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.gh-who-rx-divider {
+  height: 1px;
+  background: rgba(255,255,255,.07);
+  margin: 8px 0;
+}
+
 /* ── Phase 36: Post Drafts ───────────────────────────── */
 .gh-draft-banner {
   display: flex;
