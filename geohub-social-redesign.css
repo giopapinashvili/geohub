@@ -3701,3 +3701,90 @@ a.gh-trending-chip:hover {
   display: flex;
   gap: 8px;
 }
+
+/* ── Phase 29: Birthday Feed Card ───────────────────────── */
+.gh-birthday-card {
+  border: 1px solid rgba(245,158,11,.3) !important;
+  background: linear-gradient(135deg, rgba(245,158,11,.07) 0%, var(--gh-card, rgba(13,22,19,.92)) 55%) !important;
+}
+.gh-bday-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.gh-bday-emoji { font-size: 1.7rem; flex-shrink: 0; }
+.gh-bday-head > div { flex: 1; min-width: 0; }
+.gh-bday-head strong { display: block; font-size: .9rem; color: #f59e0b; }
+.gh-bday-head span   { font-size: .75rem; color: var(--gh-muted, #8aa69a); }
+.gh-bday-close {
+  background: none; border: none;
+  color: var(--gh-muted, #8aa69a);
+  font-size: 1.3rem; cursor: pointer;
+  padding: 0; line-height: 1; flex-shrink: 0;
+}
+.gh-bday-close:hover { color: var(--gh-text, #eefcf6); }
+.gh-bday-people {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.gh-bday-person {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  color: var(--gh-text, #eefcf6);
+  font-size: .72rem;
+  font-weight: 600;
+  transition: transform .15s;
+}
+.gh-bday-person:hover { transform: translateY(-2px); }
+.gh-bday-person img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #f59e0b; }
+.gh-bday-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── Phase 30: Weekly Digest Card ───────────────────────── */
+.gh-weekly-digest {
+  border: 1px solid rgba(56,189,248,.25) !important;
+  background: linear-gradient(135deg, rgba(56,189,248,.06) 0%, var(--gh-card, rgba(13,22,19,.92)) 60%) !important;
+}
+.gh-wd-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.gh-wd-head > span { font-size: 1.5rem; flex-shrink: 0; }
+.gh-wd-head > div { flex: 1; min-width: 0; }
+.gh-wd-head strong { display: block; font-size: .9rem; color: #38bdf8; }
+.gh-wd-head span   { font-size: .75rem; color: var(--gh-muted, #8aa69a); }
+.gh-wd-close {
+  background: none; border: none;
+  color: var(--gh-muted, #8aa69a);
+  font-size: 1.3rem; cursor: pointer;
+  padding: 0; line-height: 1; flex-shrink: 0;
+}
+.gh-wd-close:hover { color: var(--gh-text, #eefcf6); }
+.gh-wd-stats {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.gh-wd-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.gh-wd-n {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #38bdf8;
+  line-height: 1;
+}
+.gh-wd-l {
+  font-size: .73rem;
+  color: var(--gh-muted, #8aa69a);
+}

@@ -533,10 +533,113 @@
     el.innerHTML = '<div class="empty-profile-state"><i class="fas ' + icon + '"></i><h3>' + title + '</h3><p>' + text + '</p>' + (href ? '<a href="' + href + '" class="btn btn-primary btn-sm" style="margin-top:12px">' + cta + '</a>' : '') + '</div>';
   }
 
+  /* Phase 28: Story Highlights */
+  function loadHighlights(user, fbUser) {
+    var row = document.querySelector('.profile-highlights');
+    if (!row) return;
+    var GF = window.GeoFirebase;
+    var isOwn = fbUser && user.uid === fbUser.uid;
+    var addBtn = '<div class="highlight-item highlight-add" data-add-highlight><div class="highlight-ring add-ring"><i class="fas fa-plus"></i></div><div class="highlight-label">New</div></div>';
+    if (!GF || !GF.db || !GF.fs) { row.innerHTML = isOwn ? addBtn : ''; return; }
+    GF.fs.getDocs(
+      GF.fs.query(GF.fs.collection(GF.db, 'users', user.uid, 'highlights'), GF.fs.orderBy('createdAt', 'desc'), GF.fs.limit(10))
+    ).then(function(snap) {
+      var html = isOwn ? addBtn : '';
+      if (snap.empty && !isOwn) { row.innerHTML = ''; return; }
+      snap.forEach(function(d) {
+        var h = Object.assign({ id: d.id }, d.data());
+        var coverStyle = h.coverUrl ? 'background-image:url("' + esc(h.coverUrl) + '");background-size:cover;background-position:center' : 'background:linear-gradient(135deg,#10b981,#3b82f6)';
+        html += '<div class="highlight-item" data-open-highlight="' + esc(d.id) + '" data-highlight-uid="' + esc(user.uid) + '">' +
+          '<div class="highlight-ring" style="' + coverStyle + '"></div>' +
+          '<div class="highlight-label">' + esc(h.title || 'Highlight') + '</div>' +
+          (isOwn ? '<button class="hl-del-btn" data-del-highlight="' + esc(d.id) + '" data-hl-uid="' + esc(user.uid) + '" title="Delete">×</button>' : '') +
+        '</div>';
+      });
+      row.innerHTML = html;
+      // Delete handler
+      row.querySelectorAll('[data-del-highlight]').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (!confirm('Delete this highlight?')) return;
+          var hid = btn.dataset.delHighlight, huid = btn.dataset.hlUid;
+          GF.fs.deleteDoc(GF.fs.doc(GF.db, 'users', huid, 'highlights', hid)).then(function() {
+            loadHighlights(user, fbUser);
+          }).catch(function() {});
+        });
+      });
+      // Open handler
+      row.querySelectorAll('[data-open-highlight]').forEach(function(item) {
+        item.addEventListener('click', function() {
+          var hid = item.dataset.openHighlight, huid = item.dataset.highlightUid;
+          GF.fs.getDoc(GF.fs.doc(GF.db, 'users', huid, 'highlights', hid)).then(function(s) {
+            if (!s.exists()) return;
+            var h = s.data();
+            var stories = Array.isArray(h.stories) ? h.stories : [];
+            if (!stories.length) return;
+            _openHighlightViewer(h.title || 'Highlight', stories);
+          }).catch(function() {});
+        });
+      });
+    }).catch(function() { row.innerHTML = isOwn ? addBtn : ''; });
+  }
+
+  function _openHighlightViewer(title, storyUrls) {
+    var idx = 0;
+    var ov = document.createElement('div');
+    ov.className = 'gh-hl-viewer';
+    function render() {
+      var url = storyUrls[idx];
+      ov.innerHTML =
+        '<div class="gh-hl-backdrop" data-hl-close></div>'+
+        '<div class="gh-hl-card">'+
+          '<div class="gh-hl-topbar">'+
+            '<div class="gh-hl-dots">' + storyUrls.map(function(_, i){ return '<span class="gh-hl-dot' + (i===idx?' active':'') + '"></span>'; }).join('') + '</div>'+
+            '<div class="gh-hl-title">' + esc(title) + '</div>'+
+            '<button class="gh-hl-close" data-hl-close>×</button>'+
+          '</div>'+
+          (url.match(/\.(mp4|webm|mov)/i) ? '<video class="gh-hl-media" src="'+esc(url)+'" autoplay muted loop playsinline></video>' : '<img class="gh-hl-media" src="'+esc(url)+'" alt="">') +
+          '<button class="gh-hl-prev"' + (idx===0?'disabled':'') + '><i class="fas fa-chevron-left"></i></button>'+
+          '<button class="gh-hl-next"' + (idx===storyUrls.length-1?'disabled':'') + '><i class="fas fa-chevron-right"></i></button>'+
+        '</div>';
+      ov.querySelector('[data-hl-close]').onclick = function() { ov.remove(); };
+      var prev = ov.querySelector('.gh-hl-prev');
+      var next = ov.querySelector('.gh-hl-next');
+      if (prev) prev.onclick = function() { if (idx > 0) { idx--; render(); } };
+      if (next) next.onclick = function() { if (idx < storyUrls.length - 1) { idx++; render(); } };
+    }
+    render();
+    document.body.appendChild(ov);
+  }
+
+  // Add highlight when "+" clicked: pick story from last 30 days
+  window._createHighlight = function(uid, GF) {
+    var title = prompt('Highlight-ის სახელი:');
+    if (!title) return;
+    GF.fs.getDocs(GF.fs.query(
+      GF.fs.collection(GF.db, 'stories'),
+      GF.fs.where('userId', '==', uid),
+      GF.fs.orderBy('createdAt', 'desc'),
+      GF.fs.limit(20)
+    )).then(function(snap) {
+      var stories = [];
+      snap.forEach(function(d) {
+        var s = d.data();
+        var url = s.mediaUrl || s.imageUrl || s.videoUrl || '';
+        if (url) stories.push(url);
+      });
+      if (!stories.length) { alert('Stories ვერ მოიძებნა. ჯერ დაამატე story.'); return; }
+      GF.fs.addDoc(GF.fs.collection(GF.db, 'users', uid, 'highlights'), {
+        title: title, coverUrl: stories[0], stories: stories,
+        createdAt: GF.fs.serverTimestamp()
+      }).then(function() { location.reload(); }).catch(function(e) { alert('Error: ' + e.message); });
+    }).catch(function() { alert('Stories ვერ ჩაიტვირთა.'); });
+  };
+
   function renderTabs(user, fbUser) {
     emptyTab('#tab-posts', 'fa-seedling', 'No posts yet', 'Real posts from Firestore will appear here.', 'feed.html?compose=1', 'Create Post');
     emptyTab('#tab-checkins', 'fa-location-dot', 'No check-ins yet', 'Real check-ins will appear here.', 'checkin.html', 'Check in');
     emptyTab('#tab-friends', 'fa-user-group', 'No friends yet', 'Friends and requests will appear here.', null, '');
+    loadHighlights(user, fbUser);
     renderAboutTab(user);
     renderBadgeTab(user);
     renderBusinessesTab(user);
@@ -2273,7 +2376,10 @@
     }
     if (e.target.closest('[data-add-highlight]')) {
       e.preventDefault();
-      location.href = 'feed.html';
+      var GF = window.GeoFirebase;
+      var fb = GF && GF.auth && GF.auth.currentUser;
+      if (!fb) { location.href = 'feed.html'; return; }
+      if (window._createHighlight) window._createHighlight(fb.uid, GF);
     }
     if (e.target.closest('[data-share-profile]')) {
       e.preventDefault();
@@ -2287,7 +2393,7 @@
 
 // profile-dead-button-fix-v5
 document.addEventListener('click', function(e){
-  if(e.target.closest('[data-add-highlight], .highlight-add, .empty-profile-state .btn[href="feed.html"], .empty-profile-state .btn[href="feed.html?compose=1"]')){
+  if(e.target.closest('.empty-profile-state .btn[href="feed.html"], .empty-profile-state .btn[href="feed.html?compose=1"]')){
     e.preventDefault(); window.location.href='feed.html?compose=1';
   }
 });

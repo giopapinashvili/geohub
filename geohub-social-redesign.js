@@ -956,7 +956,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(!fbUser){ clearCachedUser(); try{localStorage.removeItem('gh_active_actor');}catch(e){} }
       updateTopUser();
       listenBadges();
-      if(fbUser){ validateActorOnLoad(); maybeUpdateStreak(fbUser.uid); _initWrapped(fbUser.uid); setTimeout(function(){ checkAndAwardBadges(fbUser.uid); }, 3000); setTimeout(function(){ loadOnThisDay(fbUser.uid); }, 1500); }
+      if(fbUser){ validateActorOnLoad(); maybeUpdateStreak(fbUser.uid); _initWrapped(fbUser.uid); setTimeout(function(){ checkAndAwardBadges(fbUser.uid); }, 3000); setTimeout(function(){ loadOnThisDay(fbUser.uid); }, 1500); setTimeout(function(){ _loadBirthdayFeedCards(fbUser.uid); _loadWeeklyDigest(fbUser.uid); }, 2500); }
       if(!fbUser){ var sb=document.getElementById('ghStreakBtn'); if(sb) sb.style.display='none'; }
       var bid = new URLSearchParams(location.search).get('id');
       if((state.page === 'business' || PAGE === 'business') && bid) updateBusinessFollowButton(bid);
@@ -3740,32 +3740,90 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function loadPymkWidget(uid){
     var box=$('#ghPymkList'); if(!box) return;
     if(!fs()||!db()){ box.innerHTML=''; var p=$('#ghPymkPanel'); if(p) p.style.display='none'; return; }
-    fs().getDocs(fs().query(fs().collection(db(),'users'), fs().orderBy('followerCount','desc'), fs().limit(12))).then(function(snap){
-      var people=[];
-      snap.forEach(function(d){ if(d.id===uid) return; var data=d.data()||{}; people.push({id:d.id, fullName:data.fullName||data.displayName||data.name||'GeoHub User', avatar:data.avatar||data.photoURL||'', city:data.city||'', accountType:data.accountType||''}); });
-      if(!people.length){ var p=$('#ghPymkPanel'); if(p) p.style.display='none'; return; }
-      var shown=people.slice(0,5);
-      box.innerHTML='<div class="gh-mini-list">'+shown.map(function(p){
-        var name=esc(p.fullName);
-        var avHtml=p.avatar ? '<img src="'+esc(p.avatar)+'" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.onerror=null;this.parentNode.innerHTML=\'<span style=&quot;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6d3fd9,#10b981);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:700;flex-shrink:0&quot;>'+esc(initials(p.fullName))+'</span>\'">' : '<span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6d3fd9,#10b981);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:700;flex-shrink:0">'+esc(initials(p.fullName))+'</span>';
-        var creatorChip=p.accountType==='creator'?'<span style="font-size:.62rem;color:#10b981;font-weight:700;margin-left:4px">● Creator</span>':'';
-        return '<div class="gh-mini-item" style="gap:8px">'+
-          '<a href="profile.html?id='+esc(p.id)+'" style="flex-shrink:0;line-height:0">'+avHtml+'</a>'+
-          '<div style="flex:1;min-width:0;overflow:hidden"><div style="font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+name+creatorChip+'</div><div style="font-size:.72rem;color:var(--gh-muted)">'+esc(p.city||'Georgia')+'</div></div>'+
-          '<button class="gh-btn sm ghost gh-pymk-btn" data-pymk-uid="'+esc(p.id)+'" style="flex-shrink:0;padding:4px 8px;font-size:.72rem">Follow</button>'+
-          '</div>';
-      }).join('')+'</div>';
-      Array.from(box.querySelectorAll('.gh-pymk-btn')).forEach(function(btn){
-        btn.onclick=function(){
-          var tid=btn.dataset.pymkUid;
-          if(!GS()||!GS().toggleFollow){ return; }
-          GS().toggleFollow(tid,function(isNow){
-            btn.textContent=isNow?'Following':'Follow';
-            btn.classList.toggle('gh-btn-active',!!isNow);
+    // Phase 31: Smart PYMK v2 — friends-of-friends + social proof
+    var alreadyFollowing=new Set(state.followingIds||[]);
+    alreadyFollowing.add(uid);
+    // Step 1: get current user profile for city/interests
+    fs().getDoc(fs().doc(db(),'users',uid)).then(function(meSnap){
+      var meData=meSnap.exists()?meSnap.data():{};
+      var myCity=(meData.city||'').toLowerCase();
+      // Step 2: if following someone, get one person they follow (FOF)
+      var fofPromise=Promise.resolve([]);
+      if(state.followingIds&&state.followingIds.length){
+        var sampleFollowing=state.followingIds[Math.floor(Math.random()*state.followingIds.length)];
+        fofPromise=fs().getDocs(fs().query(
+          fs().collection(db(),'follows'),
+          fs().where('followerId','==',sampleFollowing),
+          fs().limit(10)
+        )).then(function(snap){
+          var fofIds=[];
+          snap.forEach(function(d){ var fid=d.data().followedId||d.id; if(!alreadyFollowing.has(fid)) fofIds.push({uid:fid,referrer:sampleFollowing}); });
+          return fofIds;
+        }).catch(function(){ return []; });
+      }
+      // Step 3: get popular users from same city
+      var cityPromise=myCity?
+        fs().getDocs(fs().query(fs().collection(db(),'users'),fs().where('city','==',meData.city),fs().orderBy('followerCount','desc'),fs().limit(8))).then(function(snap){
+          var arr=[]; snap.forEach(function(d){ if(!alreadyFollowing.has(d.id)){ var x=d.data(); arr.push({id:d.id,fullName:x.fullName||x.displayName||'User',avatar:x.avatar||x.photoURL||'',city:x.city||'',accountType:x.accountType||'',followerCount:Number(x.followerCount||0),_reason:'📍 '+esc(meData.city)}); } }); return arr;
+        }).catch(function(){ return []; })
+        : Promise.resolve([]);
+      Promise.all([fofPromise, cityPromise]).then(function(results){
+        var fofList=results[0]||[], cityList=results[1]||[];
+        // Resolve FOF user docs
+        var fofDocPromises=fofList.slice(0,4).map(function(item){
+          return fs().getDoc(fs().doc(db(),'users',item.uid)).then(function(s){
+            if(!s.exists()) return null;
+            var d=s.data();
+            return {id:s.id,fullName:d.fullName||d.displayName||'User',avatar:d.avatar||d.photoURL||'',city:d.city||'',accountType:d.accountType||'',followerCount:Number(d.followerCount||0),_reason:'👥 Followed by someone you follow'};
+          }).catch(function(){ return null; });
+        });
+        Promise.all(fofDocPromises).then(function(fofDocs){
+          // Merge: FOF first, then city, then dedupe
+          var seen=new Set(alreadyFollowing);
+          var merged=[];
+          fofDocs.concat(cityList).forEach(function(p){
+            if(!p||seen.has(p.id)) return;
+            seen.add(p.id);
+            merged.push(p);
           });
-        };
+          // Fallback: if still empty, get top followers
+          if(!merged.length){
+            return fs().getDocs(fs().query(fs().collection(db(),'users'),fs().orderBy('followerCount','desc'),fs().limit(10))).then(function(snap){
+              var arr=[]; snap.forEach(function(d){ if(!alreadyFollowing.has(d.id)){ var x=d.data(); arr.push({id:d.id,fullName:x.fullName||x.displayName||'User',avatar:x.avatar||x.photoURL||'',city:x.city||'',accountType:x.accountType||'',followerCount:Number(x.followerCount||0),_reason:'⭐ Popular on GeoHub'}); } }); _renderPymk(box,arr.slice(0,5));
+            }).catch(function(){ var p=$('#ghPymkPanel'); if(p) p.style.display='none'; });
+          }
+          _renderPymk(box, merged.slice(0,5));
+        });
       });
     }).catch(function(){ var p=$('#ghPymkPanel'); if(p) p.style.display='none'; });
+  }
+
+  function _renderPymk(box, people){
+    if(!people.length){ var p=$('#ghPymkPanel'); if(p) p.style.display='none'; return; }
+    box.innerHTML='<div class="gh-mini-list">'+people.map(function(p){
+      var avHtml=p.avatar?'<img src="'+esc(p.avatar)+'" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.onerror=null;this.parentNode.innerHTML=\'<span style=&quot;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6d3fd9,#10b981);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:700;flex-shrink:0&quot;>'+esc(initials(p.fullName))+'</span>\'">':'<span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6d3fd9,#10b981);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:700;flex-shrink:0">'+esc(initials(p.fullName))+'</span>';
+      var creatorChip=p.accountType==='creator'?'<span style="font-size:.62rem;color:#10b981;font-weight:700;margin-left:2px">✦Creator</span>':'';
+      var followerStr=p.followerCount?_fmtCount(p.followerCount)+' followers':'';
+      var reason=p._reason||'';
+      return '<div class="gh-mini-item" style="gap:8px">'+
+        '<a href="profile.html?id='+esc(p.id)+'" style="flex-shrink:0;line-height:0">'+avHtml+'</a>'+
+        '<div style="flex:1;min-width:0;overflow:hidden">'+
+          '<div style="font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(p.fullName)+creatorChip+'</div>'+
+          '<div style="font-size:.68rem;color:var(--gh-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+reason+(followerStr&&reason?' · ':'')+followerStr+'</div>'+
+        '</div>'+
+        '<button class="gh-btn sm ghost gh-pymk-btn" data-pymk-uid="'+esc(p.id)+'" style="flex-shrink:0;padding:4px 8px;font-size:.72rem">Follow</button>'+
+      '</div>';
+    }).join('')+'</div>';
+    Array.from(box.querySelectorAll('.gh-pymk-btn')).forEach(function(btn){
+      btn.onclick=function(){
+        var tid=btn.dataset.pymkUid;
+        if(!GS()||!GS().toggleFollow) return;
+        GS().toggleFollow(tid,function(isNow){
+          btn.textContent=isNow?'Following':'Follow';
+          btn.classList.toggle('gh-btn-active',!!isNow);
+        });
+      };
+    });
   }
 
   function loadCreatorWidget(uid){
@@ -4088,6 +4146,130 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(n>=1000000) return (n/1000000).toFixed(1)+'M';
     if(n>=1000) return (n/1000).toFixed(1)+'K';
     return String(n);
+  }
+
+  /* ── Phase 29: Birthday Feed Cards ──────────────────────────────────── */
+  function _loadBirthdayFeedCards(uid){
+    if(!uid||!fs()||!db()) return;
+    var slot=document.getElementById('ghWelcomeSlot'); if(!slot) return;
+    var today=new Date();
+    var todayStr=String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+    var dismissKey='gh_bday_'+todayStr;
+    try{ if(localStorage.getItem(dismissKey)) return; }catch(e){}
+    // Get following list
+    fs().getDocs(fs().query(fs().collection(db(),'follows'),fs().where('followerId','==',uid),fs().limit(100))).then(function(snap){
+      var followingIds=[];
+      snap.forEach(function(d){ followingIds.push(d.data().followedId||d.id); });
+      if(!followingIds.length) return;
+      // Check each followed user's birthday (batch check first 20)
+      var toCheck=followingIds.slice(0,20);
+      var birthdays=[];
+      var done=0;
+      toCheck.forEach(function(fid){
+        fs().getDoc(fs().doc(db(),'users',fid)).then(function(s){
+          if(s.exists()){
+            var d=s.data();
+            if(d.birthday===todayStr) birthdays.push({uid:fid,name:d.fullName||d.displayName||'Friend',avatar:d.avatar||d.photoURL||''});
+          }
+          done++;
+          if(done===toCheck.length && birthdays.length) _renderBirthdayCard(slot,birthdays,dismissKey);
+        }).catch(function(){ done++; if(done===toCheck.length && birthdays.length) _renderBirthdayCard(slot,birthdays,dismissKey); });
+      });
+    }).catch(function(){});
+  }
+
+  function _renderBirthdayCard(slot, people, dismissKey){
+    var first=people[0];
+    var av=first.avatar?'<img src="'+esc(first.avatar)+'" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0">'
+      :'<span style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#ef4444);display:inline-flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0">🎂</span>';
+    var names=people.map(function(p){ return esc(p.name); }).join(', ');
+    var card=document.createElement('section');
+    card.className='gh-card gh-birthday-card';
+    card.innerHTML=
+      '<div class="gh-bday-head">'+
+        '<span class="gh-bday-emoji">🎂</span>'+
+        '<div>'+
+          '<strong>დღეს '+(people.length>1?people.length+' ადამიანს':esc(first.name)+'-ს')+' აქვს დაბადების დღე!</strong>'+
+          (people.length>1?'<span>'+names+'</span>':'<span>გაუგზავნე სურვილი</span>')+
+        '</div>'+
+        '<button class="gh-bday-close">×</button>'+
+      '</div>'+
+      '<div class="gh-bday-people">'+
+        people.slice(0,4).map(function(p){
+          var a=p.avatar?'<img src="'+esc(p.avatar)+'" alt="" loading="lazy">':'<span class="gh-avatar" style="width:36px;height:36px;font-size:.75rem">'+esc(initials(p.name))+'</span>';
+          return '<a class="gh-bday-person" href="messages.html?with='+esc(p.uid)+'">'+a+'<span>'+esc(p.name)+'</span></a>';
+        }).join('')+
+      '</div>'+
+      '<div class="gh-bday-actions">'+
+        people.slice(0,2).map(function(p){
+          return '<a class="gh-btn sm" href="messages.html?with='+esc(p.uid)+'"><i class="fas fa-birthday-cake"></i> '+esc(p.name.split(' ')[0])+'-ს სურვილი</a>';
+        }).join('')+
+      '</div>';
+    card.querySelector('.gh-bday-close').onclick=function(){
+      card.style.opacity='0'; card.style.transform='scale(.97)'; card.style.transition='all .25s';
+      setTimeout(function(){ if(card.parentNode) card.remove(); },250);
+      try{ localStorage.setItem(dismissKey,'1'); }catch(e){}
+    };
+    slot.insertBefore(card, slot.firstChild);
+  }
+
+  /* ── Phase 30: Weekly Digest Card ────────────────────────────────────── */
+  function _loadWeeklyDigest(uid){
+    if(!uid||!fs()||!db()) return;
+    var slot=document.getElementById('ghWelcomeSlot'); if(!slot) return;
+    // Show only on Monday or if not seen this week
+    var now=new Date();
+    var weekKey='gh_digest_'+now.getFullYear()+'_'+_getWeekNumber(now);
+    try{ if(localStorage.getItem(weekKey)) return; }catch(e){}
+    // Only show on Monday (day 1) or if it's been forced
+    if(now.getDay()!==1 && !new URLSearchParams(location.search).has('digest')) return;
+    // Query user's stats for this week
+    var weekAgo=new Date(now.getTime()-7*86400000);
+    Promise.all([
+      fs().getDocs(fs().query(fs().collection(db(),'posts'),fs().where('authorId','==',uid),fs().where('createdAt','>=',weekAgo),fs().limit(50))),
+      fs().getDocs(fs().query(fs().collection(db(),'follows'),fs().where('followedId','==',uid),fs().where('createdAt','>=',weekAgo),fs().limit(50))),
+      fs().getDocs(fs().collection(db(),'users',uid,'badges'))
+    ]).then(function(results){
+      var postCount=results[0].size;
+      var newFollowers=results[1].size;
+      var totalBadges=results[2].size;
+      if(!postCount && !newFollowers && !totalBadges) return; // nothing to show
+      _renderWeeklyDigest(slot, weekKey, {postCount:postCount, newFollowers:newFollowers, totalBadges:totalBadges});
+    }).catch(function(){});
+  }
+
+  function _getWeekNumber(d){
+    var start=new Date(d.getFullYear(),0,1);
+    return Math.ceil(((d-start)/86400000+start.getDay()+1)/7);
+  }
+
+  function _renderWeeklyDigest(slot, weekKey, stats){
+    var items=[];
+    if(stats.postCount) items.push('<div class="gh-wd-stat"><span class="gh-wd-n">'+stats.postCount+'</span><span class="gh-wd-l">📝 პოსტი</span></div>');
+    if(stats.newFollowers) items.push('<div class="gh-wd-stat"><span class="gh-wd-n">+'+stats.newFollowers+'</span><span class="gh-wd-l">👥 მიმდევარი</span></div>');
+    if(stats.totalBadges) items.push('<div class="gh-wd-stat"><span class="gh-wd-n">'+stats.totalBadges+'</span><span class="gh-wd-l">🏅 ბეჯი</span></div>');
+    var card=document.createElement('section');
+    card.className='gh-card gh-weekly-digest';
+    card.innerHTML=
+      '<div class="gh-wd-head">'+
+        '<span>🗓️</span>'+
+        '<div>'+
+          '<strong>კვირის შეჯამება</strong>'+
+          '<span>'+new Date().toLocaleDateString('ka-GE',{month:'long',day:'numeric'})+' — შენი პროგრესი</span>'+
+        '</div>'+
+        '<button class="gh-wd-close">×</button>'+
+      '</div>'+
+      '<div class="gh-wd-stats">'+items.join('')+'</div>'+
+      '<a class="gh-btn sm ghost" href="profile.html" style="margin-top:10px;display:inline-flex"><i class="fas fa-chart-line"></i> ჩემი პროფილი</a>';
+    card.querySelector('.gh-wd-close').onclick=function(){
+      card.style.opacity='0'; card.style.transform='scale(.97)'; card.style.transition='all .25s';
+      setTimeout(function(){ if(card.parentNode) card.remove(); },250);
+      try{ localStorage.setItem(weekKey,'1'); }catch(e){}
+    };
+    // Insert after birthday card if it exists
+    var birthdayCard=slot.querySelector('.gh-birthday-card');
+    if(birthdayCard) birthdayCard.insertAdjacentElement('afterend',card);
+    else slot.insertBefore(card, slot.firstChild);
   }
 
   /* ── Phase 24: Live Activity Ticker ─────────────────────────────────── */
