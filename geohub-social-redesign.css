@@ -3419,3 +3419,48 @@ html[data-gh-theme="dark"] .gh-live-stats { border-color: rgba(59,130,246,.18) !
   .gh-wrapped-value { font-size: 3rem; }
   .gh-wrapped-emoji { font-size: 2.5rem; }
 }
+
+/* ── Phase 20: Live Comments ────────────────────────────── */
+@keyframes ghCmtSlideIn {
+  from { opacity: 0; transform: translateY(-8px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);   }
+}
+@keyframes ghCmtSlideOut {
+  from { opacity: 1; transform: translateY(0);    max-height: 200px; }
+  to   { opacity: 0; transform: translateY(-6px); max-height: 0; padding: 0; margin: 0; }
+}
+.gh-cmt-enter {
+  animation: ghCmtSlideIn .28s cubic-bezier(.22,1,.36,1);
+}
+.gh-cmt-exit {
+  animation: ghCmtSlideOut .28s ease forwards;
+  overflow: hidden;
+  pointer-events: none;
+}
+/* Typing indicator */
+.gh-typing-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 4px 2px;
+  min-height: 28px;
+}
+.gh-typing-dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.gh-typing-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gh-muted, #9ca3af);
+  animation: ghDotBounce 1.2s ease-in-out infinite;
+}
+.gh-typing-dots span:nth-child(2) { animation-delay: .2s; }
+.gh-typing-dots span:nth-child(3) { animation-delay: .4s; }
+.gh-typing-label {
+  font-size: .72rem;
+  color: var(--gh-muted, #9ca3af);
+  font-style: italic;
+}

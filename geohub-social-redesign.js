@@ -561,6 +561,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(themeBtn){ themeBtn.onclick=function(e){ e.preventDefault(); e.stopPropagation(); var effective=document.documentElement.getAttribute('data-gh-theme')||'dark'; applyTheme(effective==='dark' ? 'light' : 'dark'); }; applyTheme(state.theme); }
     var sideBtn=$('#ghSidebarToggle');
     if(sideBtn){ sideBtn.onclick=function(e){ e.preventDefault(); e.stopPropagation(); state.sidebarCollapsed=!state.sidebarCollapsed; document.body.classList.toggle('gh-sidebar-collapsed', state.sidebarCollapsed); sideBtn.setAttribute('aria-pressed', state.sidebarCollapsed ? 'true' : 'false'); sideBtn.title = state.sidebarCollapsed ? 'Expand sidebars' : 'Collapse sidebars'; }; }
+    /* ── Phase 20: Auto-updating timestamps (60s tick) ───── */
+    if(!state._tsTickerBound){
+      state._tsTickerBound=true;
+      setInterval(function(){
+        document.querySelectorAll('[data-cmt-time]').forEach(function(el){
+          var ms=Number(el.dataset.cmtTime||0); if(!ms) return;
+          el.textContent=timeAgo({toMillis:function(){ return ms; }});
+        });
+      },60000);
+    }
     /* ── Phase 16: In-app push notification toast ──────────── */
     if(!state._pushToastBound){
       state._pushToastBound=true;
@@ -2489,6 +2499,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
   }
 
+  /* Phase 20: track rendered comment IDs per-pid for diff render */
+  var _cmtRendered={};
+
   function renderCommentsForPid(pid, items){
     var cards=document.querySelectorAll('[data-post-id="'+CSS.escape(pid)+'"]');
     if(!cards.length) return;
@@ -2497,32 +2510,134 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var uid=c.authorId||c.userId||'';
       return !uid||(state.blockedUserIds.indexOf(uid)===-1&&state.mutedUserIds.indexOf(uid)===-1);
     });
-    var html=visible.length
-      ? visible.map(function(c){ return commentCard(pid,c); }).join('')
-      : '<div class="gh-small" style="padding:10px 6px">No comments yet.</div>';
+    /* Live comment count update on button + stat */
+    var cnt=visible.length;
+    cards.forEach(function(card){
+      var cb=card.querySelector('[data-comment-count]'); if(cb) cb.textContent=cnt;
+    });
+    /* Diff: find new IDs not yet in DOM */
+    var prev=_cmtRendered[pid]||{};
+    var newIds={};
+    visible.forEach(function(c){ newIds[c.id]=true; });
+    /* Full re-render if list was empty before, else diff */
+    var wasEmpty=!Object.keys(prev).length;
     cards.forEach(function(card){
       var list=card.querySelector('[data-comments-list]'); if(!list) return;
       var box=card.querySelector('[data-comments]');
       if(box && state.openCommentPids[pid]) box.hidden=false;
-      list.innerHTML=html;
+      if(!visible.length){
+        list.innerHTML='<div class="gh-small" style="padding:10px 6px">No comments yet.</div>';
+        return;
+      }
+      if(wasEmpty){
+        list.innerHTML=visible.map(function(c){ return commentCard(pid,c); }).join('');
+        return;
+      }
+      /* Remove deleted */
+      list.querySelectorAll('[data-comment-id]').forEach(function(el){
+        if(!newIds[el.dataset.commentId]){ el.classList.add('gh-cmt-exit'); setTimeout(function(){ el.remove(); },300); }
+      });
+      /* Add new */
+      visible.forEach(function(c){
+        if(prev[c.id]) return; /* already in DOM */
+        var tmp=document.createElement('div');
+        tmp.innerHTML=commentCard(pid,c);
+        var newEl=tmp.firstElementChild;
+        newEl.classList.add('gh-cmt-enter');
+        list.appendChild(newEl);
+        loadReplies(pid,c.id);
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){ newEl.classList.remove('gh-cmt-enter'); }); });
+      });
     });
-    visible.forEach(function(c){ loadReplies(pid,c.id); });
+    _cmtRendered[pid]=newIds;
+    if(wasEmpty) visible.forEach(function(c){ loadReplies(pid,c.id); });
   }
 
   function toggleComments(card,pid){
     var box=card.querySelector('[data-comments]'); if(!box) return;
     box.hidden=!box.hidden;
-    if(box.hidden){ delete state.openCommentPids[pid]; return; }
+    if(box.hidden){
+      delete state.openCommentPids[pid];
+      delete _cmtRendered[pid]; /* reset diff state */
+      _stopTypingIndicator(pid);
+      return;
+    }
     state.openCommentPids[pid]=true;
+    delete _cmtRendered[pid]; /* reset on open so first load is a clean render */
     // If listener already active, render from cache and return
     if(state.postsUnsubs[pid]){
       if(state.cachedComments[pid]) renderCommentsForPid(pid, state.cachedComments[pid]);
+      _startTypingIndicator(pid, box);
       return;
     }
     state.postsUnsubs[pid]=GS().listenComments(pid,function(items){
       state.cachedComments[pid]=items;
       renderCommentsForPid(pid, items);
     });
+    _startTypingIndicator(pid, box);
+  }
+
+  /* ── Phase 20: Typing indicator ─────────────────────── */
+  var _typingUnsubs={};
+  var _myTypingTimer={};
+
+  function _startTypingIndicator(pid, commentBox){
+    if(!commentBox||!fs()||!db()) return;
+    /* ensure typing-row slot exists */
+    var slot=commentBox.querySelector('[data-typing-row]');
+    if(!slot){ slot=document.createElement('div'); slot.setAttribute('data-typing-row',''); commentBox.insertBefore(slot,commentBox.querySelector('[data-comment-form]')); }
+    /* listen to typing/{uid} docs under this post */
+    if(_typingUnsubs[pid]) return;
+    var u=authUser();
+    _typingUnsubs[pid]=fs().onSnapshot(
+      fs().collection(db(),'posts',pid,'typing'),
+      function(snap){
+        var names=[];
+        var now=Date.now();
+        snap.forEach(function(d){
+          var data=d.data()||{};
+          if(u&&d.id===u.uid) return; /* skip self */
+          var ms=data.at&&data.at.toMillis?data.at.toMillis():(typeof data.at==='number'?data.at:0);
+          if(now-ms<8000) names.push(data.name||'Someone');
+        });
+        var rows=document.querySelectorAll('[data-post-id="'+CSS.escape(pid)+'"] [data-typing-row]');
+        rows.forEach(function(r){
+          if(!names.length){ r.innerHTML=''; return; }
+          var label=names.length===1?names[0]+' is typing…':names.length+' people are typing…';
+          r.innerHTML='<div class="gh-typing-row"><span class="gh-typing-dots"><span></span><span></span><span></span></span><span class="gh-typing-label">'+esc(label)+'</span></div>';
+        });
+      },
+      function(){ /* ignore errors — typing is nice-to-have */ }
+    );
+
+    /* Write own typing status on input */
+    var form=commentBox.querySelector('[data-comment-form]');
+    if(form && !form.dataset.typingBound){
+      form.dataset.typingBound='1';
+      var inp=form.querySelector('input,textarea');
+      if(inp){
+        inp.addEventListener('input',function(){
+          var u2=authUser(); if(!u2||!fs()||!db()) return;
+          var me=u2.displayName||u2.email||'Someone';
+          clearTimeout(_myTypingTimer[pid]);
+          fs().setDoc(fs().doc(db(),'posts',pid,'typing',u2.uid),{name:me,at:fs().serverTimestamp()},{merge:true}).catch(function(){});
+          _myTypingTimer[pid]=setTimeout(function(){ _clearMyTyping(pid); },5000);
+        });
+        inp.addEventListener('blur',function(){ _clearMyTyping(pid); });
+        form.addEventListener('submit',function(){ _clearMyTyping(pid); });
+      }
+    }
+  }
+
+  function _stopTypingIndicator(pid){
+    if(_typingUnsubs[pid]){ try{_typingUnsubs[pid]();}catch(e){} delete _typingUnsubs[pid]; }
+    _clearMyTyping(pid);
+  }
+
+  function _clearMyTyping(pid){
+    clearTimeout(_myTypingTimer[pid]);
+    var u=authUser(); if(!u||!fs()||!db()) return;
+    fs().deleteDoc(fs().doc(db(),'posts',pid,'typing',u.uid)).catch(function(){});
   }
 
   function commentCard(pid,c){
@@ -2548,7 +2663,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     return '<div class="gh-comment-row" data-comment-id="'+esc(c.id)+'">'+
       avAnchor+
       '<div class="gh-comment-main"><div class="gh-comment-bubble"><strong>'+nameAnchor+'</strong><span class="gh-cmt-text" data-cmt-text>'+esc(c.text||'')+'</span></div>'+
-      '<div class="gh-small gh-comment-actions">'+timeAgo(c.createdAt)+' · <button type="button" data-comment-reply data-comment-id="'+esc(c.id)+'">Reply</button>'+
+      '<div class="gh-small gh-comment-actions"><span data-cmt-time="'+(c.createdAt&&c.createdAt.toMillis?c.createdAt.toMillis():0)+'">'+timeAgo(c.createdAt)+'</span> · <button type="button" data-comment-reply data-comment-id="'+esc(c.id)+'">Reply</button>'+
       ' · <span class="gh-cmt-rx-wrap"><button type="button" class="gh-cmt-act gh-cmt-rx-btn'+(rxType?' active':'')+'" data-comment-like data-comment-id="'+esc(c.id)+'" data-comment-reaction="'+esc(rxType||'like')+'">'+rxLabel+'</button>'+
       '<span class="gh-cmt-rx-picker" data-rx-picker="'+esc(c.id)+'">'+Object.keys(RX_EMOJIS).map(function(t){ return '<button type="button" class="gh-cmt-rx-pick" data-comment-like data-comment-id="'+esc(c.id)+'" data-comment-reaction="'+t+'">'+RX_EMOJIS[t]+'</button>'; }).join('')+'</span></span>'+
       ownerBtns+'</div>'+
