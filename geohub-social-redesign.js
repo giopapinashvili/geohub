@@ -561,6 +561,33 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(themeBtn){ themeBtn.onclick=function(e){ e.preventDefault(); e.stopPropagation(); var effective=document.documentElement.getAttribute('data-gh-theme')||'dark'; applyTheme(effective==='dark' ? 'light' : 'dark'); }; applyTheme(state.theme); }
     var sideBtn=$('#ghSidebarToggle');
     if(sideBtn){ sideBtn.onclick=function(e){ e.preventDefault(); e.stopPropagation(); state.sidebarCollapsed=!state.sidebarCollapsed; document.body.classList.toggle('gh-sidebar-collapsed', state.sidebarCollapsed); sideBtn.setAttribute('aria-pressed', state.sidebarCollapsed ? 'true' : 'false'); sideBtn.title = state.sidebarCollapsed ? 'Expand sidebars' : 'Collapse sidebars'; }; }
+    /* ── Phase 16: In-app push notification toast ──────────── */
+    if(!state._pushToastBound){
+      state._pushToastBound=true;
+      var NOTIF_ICONS={message:'💬',like:'❤️',comment:'💬',follow:'👤',friend_request:'🤝',event_reminder:'🎉',general:'🔔'};
+      window.addEventListener('GeoNotification',function(e){
+        var d=e.detail||{}; if(!d.title) return;
+        var existing=document.getElementById('ghInAppNotifToast'); if(existing) existing.remove();
+        var toast=document.createElement('div');
+        toast.id='ghInAppNotifToast'; toast.className='gh-inapp-notif';
+        var icon=NOTIF_ICONS[d.type]||'🔔';
+        var url=d.url||'';
+        toast.innerHTML=
+          '<div class="gh-ian-inner">'+
+            '<div class="gh-ian-icon">'+icon+'</div>'+
+            '<div class="gh-ian-body">'+
+              '<div class="gh-ian-title">'+esc(d.title)+'</div>'+
+              (d.body?'<div class="gh-ian-body-txt">'+esc(d.body)+'</div>':'')+
+            '</div>'+
+            (url?'<a class="gh-ian-action" href="'+esc(url)+'"><i class="fas fa-arrow-right"></i></a>':'')+
+            '<button class="gh-ian-close" onclick="this.closest(\'#ghInAppNotifToast\').remove()">✕</button>'+
+          '</div>';
+        document.body.appendChild(toast);
+        requestAnimationFrame(function(){ toast.classList.add('show'); });
+        setTimeout(function(){ toast.classList.remove('show'); toast.classList.add('hide'); setTimeout(function(){ if(toast.parentNode) toast.remove(); },400); },5000);
+        if(url){ toast.querySelector('.gh-ian-inner').style.cursor='pointer'; toast.querySelector('.gh-ian-inner').addEventListener('click',function(ev){ if(!ev.target.closest('.gh-ian-close') && !ev.target.closest('.gh-ian-action')) window.location.href=url; }); }
+      });
+    }
     if(!state._shellClickBound){
       state._shellClickBound=true;
       document.addEventListener('click', function(e){

@@ -110,10 +110,23 @@
         if (type === 'follow'         && !prefs.follows)         return;
         if (type === 'event_reminder' && !prefs.event_reminders) return;
 
-        sendLocalNotification(n.title || 'GeoHub', n.body || '', {
-          tag:  type + '-' + (data.targetId || String(Date.now())),
-          data: Object.assign({ url: data.url || '/feed.html', type: type }, data)
-        });
+        /* Dispatch in-app toast event for geohub-social-redesign.js */
+        window.dispatchEvent(new CustomEvent('GeoNotification', {
+          detail: {
+            title: n.title || 'GeoHub',
+            body:  n.body  || '',
+            type:  type,
+            url:   data.url || '/feed.html',
+            data:  data
+          }
+        }));
+        /* Also fire a real browser notification if app is backgrounded */
+        if (!document.hasFocus()) {
+          sendLocalNotification(n.title || 'GeoHub', n.body || '', {
+            tag:  type + '-' + (data.targetId || String(Date.now())),
+            data: Object.assign({ url: data.url || '/feed.html', type: type }, data)
+          });
+        }
       });
     }).catch(function () {});
   }
