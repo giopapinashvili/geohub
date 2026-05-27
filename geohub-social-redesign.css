@@ -2606,3 +2606,39 @@ html[data-gh-theme="dark"] .gh-live-stats { border-color: rgba(59,130,246,.18) !
   cursor: default;
   pointer-events: none;
 }
+
+/* ── Phase 11: New Posts Pill ─────────────────────────────── */
+.gh-new-posts-pill {
+  position: fixed;
+  top: calc(var(--gh-topbar-h, 60px) + 12px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-80px);
+  z-index: 9900;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 20px;
+  background: var(--gh-green, #10b981);
+  color: #fff;
+  font-size: .84rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 6px 24px rgba(16,185,129,.45);
+  transition: transform .32s cubic-bezier(.34,1.4,.64,1), opacity .25s;
+  opacity: 0;
+  pointer-events: none;
+}
+.gh-new-posts-pill.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: all;
+}
+.gh-new-posts-pill.hiding {
+  transform: translateX(-50%) translateY(-80px);
+  opacity: 0;
+  pointer-events: none;
+}
+.gh-new-posts-pill i { font-size: .8rem; }

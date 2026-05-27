@@ -3941,6 +3941,47 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       function pageFeedEmptyHtml(){
         return '<div class="gh-card gh-empty gh-page-feed-empty"><i class="fas fa-store"></i><h3>No page posts yet</h3><p>Create a post as '+esc(actor.title||'your page')+' to start building your audience.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="gh-btn" data-create-post><i class="fas fa-plus"></i>Create Page Post</button><a class="gh-btn ghost" href="business.html?id='+encodeURIComponent(actor.businessId)+'"><i class="fas fa-arrow-up-right-from-square"></i>View Page</a><a class="gh-btn ghost" href="'+actorMessagesHref(actor)+'"><i class="fas fa-comment-dots"></i>Page Inbox</a></div></div>';
       }
+      /* ── "New posts available" pill (Phase 11) ─────────────── */
+      var _renderedIds={};
+      var _pendingVisible=null;
+      var _newPillTimer=null;
+
+      function _dismissNewPill(){
+        var pill=document.getElementById('ghNewPostsPill');
+        if(pill){ pill.classList.add('hiding'); setTimeout(function(){ pill&&pill.remove(); },350); }
+        _pendingVisible=null;
+      }
+      function _showNewPill(n){
+        var existing=document.getElementById('ghNewPostsPill');
+        if(existing){ existing.querySelector('.gh-npp-count').textContent=n; return; }
+        var pill=document.createElement('button');
+        pill.id='ghNewPostsPill';
+        pill.className='gh-new-posts-pill';
+        pill.innerHTML='<i class="fas fa-arrow-up"></i> <span class="gh-npp-count">'+n+'</span> ახალი პოსტი';
+        document.body.appendChild(pill);
+        requestAnimationFrame(function(){ pill.classList.add('visible'); });
+        pill.addEventListener('click',function(){
+          _dismissNewPill();
+          window.scrollTo({top:0,behavior:'smooth'});
+          if(_pendingVisible!==null){ _doPaint(_pendingVisible); _pendingVisible=null; }
+        });
+      }
+
+      function _doPaint(visible){
+        list.innerHTML=visible.map(function(p){
+          var isFollowedPage=!pageMode && p.targetType==='business' && p.targetId && state.followedBusinessIds.indexOf(p.targetId)>-1;
+          return postCard(p, isFollowedPage ? {fromFollowedPage:true} : {});
+        }).join('');
+        visible.forEach(function(p){ _renderedIds[p.id]=true; });
+        visible.forEach(function(p){ try{ hydrateReactionState(p.id); loadReactionBreakdown(p.id); }catch(e){} });
+        hydratePostAuthorAvatars(list);
+        hydrateSharedPreviews(list);
+        Object.keys(state.openCommentPids).forEach(function(pid){
+          if(state.cachedComments[pid]) renderCommentsForPid(pid, state.cachedComments[pid]);
+        });
+        setTimeout(openDeepLinkedPost, 350);
+      }
+
       function paint(){
         if(renderId!==state.feedRenderId) return;
         if(!list) return;
@@ -3984,24 +4025,29 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           }
           return;
         }
-        list.innerHTML=visible.map(function(p){
-          var isFollowedPage=!pageMode && p.targetType==='business' && p.targetId && state.followedBusinessIds.indexOf(p.targetId)>-1;
-          return postCard(p, isFollowedPage ? {fromFollowedPage:true} : {});
-        }).join('');
-        visible.forEach(function(p){ try{ hydrateReactionState(p.id); loadReactionBreakdown(p.id); }catch(e){} });
-        hydratePostAuthorAvatars(list);
-        hydrateSharedPreviews(list);
-        // Restore open comment sections that were visible before re-render
-        Object.keys(state.openCommentPids).forEach(function(pid){
-          if(state.cachedComments[pid]) renderCommentsForPid(pid, state.cachedComments[pid]);
-        });
-        setTimeout(openDeepLinkedPost, 350);
+        /* Check for genuinely new posts (not yet rendered) */
+        var newCount=0;
+        visible.forEach(function(p){ if(!_renderedIds[p.id]) newCount++; });
+        var isScrolledDown = window.scrollY > 220;
+        var isFirstRender = Object.keys(_renderedIds).length === 0;
+
+        if(!isFirstRender && newCount > 0 && isScrolledDown && !pageMode){
+          /* User is reading — buffer new render, show pill */
+          _pendingVisible = visible;
+          _showNewPill(newCount);
+        } else {
+          /* At top or first render — paint immediately */
+          _dismissNewPill();
+          _doPaint(visible);
+        }
       }
       var tabsEl=$('#ghFeedTabs');
       if(tabsEl) tabsEl.addEventListener('click',function(e){
         var btn=e.target.closest('[data-feed-tab]'); if(!btn) return;
         state.feedTab=btn.dataset.feedTab;
         $all('.gh-pill',tabsEl).forEach(function(p){p.classList.toggle('active',p===btn);});
+        _dismissNewPill();
+        _renderedIds={};
         paint();
       });
       setupSafetyListener(paint);
@@ -4036,6 +4082,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                 : '<span style="font-size:.78rem;color:var(--text-muted)">ყველა პოსტი ნანახია ✓</span>';
               var btn=document.getElementById('ghFeedLoadMoreBtn');
               if(btn) btn.onclick=function(){
+                _dismissNewPill();
+                _renderedIds={};
                 state.feedN=(state.feedN||20)+20;
                 startFeedListen(state.feedN);
               };
