@@ -2296,13 +2296,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         else if (photoUrl) openMediaLightbox(photoUrl, allPhotos, photoIdx);
         return;
       }
-      if(e.target.closest('[data-like]') && !e.target.closest('.gh-reaction-strip')){ if(!requireLogin()) return; setReaction(pid,'love',card); }
-      var ro=e.target.closest('[data-reaction]'); if(ro){ if(!requireLogin()) return; setReaction(pid,ro.dataset.reaction,card); }
-      if(e.target.closest('[data-comment-toggle]')){ toggleComments(card,pid); }
+      if(e.target.closest('[data-like]') && !e.target.closest('.gh-reaction-strip')){ if(!requireLogin()) return; setReaction(pid,'love',card); if(window.ghPwaEngage) window.ghPwaEngage(1); }
+      var ro=e.target.closest('[data-reaction]'); if(ro){ if(!requireLogin()) return; setReaction(pid,ro.dataset.reaction,card); if(window.ghPwaEngage) window.ghPwaEngage(1); }
+      if(e.target.closest('[data-comment-toggle]')){ toggleComments(card,pid); if(window.ghPwaEngage) window.ghPwaEngage(1); }
       if(e.target.closest('[data-open-comments-btn]')){ openFocusedPost(pid); return; }
       if(e.target.closest('[data-open-shares-btn]')){ var scEl=card.querySelector('[data-share-count]'); openWhoSharedModal(pid, scEl ? Number(scEl.textContent||0) : 0); return; }
-      if(e.target.closest('[data-share]')){ sharePost(pid); }
-      if(e.target.closest('[data-save]')){ if(!requireLogin()) return; GS().toggleSavePost(pid,function(saved){ var b=card.querySelector('[data-save]'); if(b) b.classList.toggle('active',!!saved); }); }
+      if(e.target.closest('[data-share]')){ sharePost(pid); if(window.ghPwaEngage) window.ghPwaEngage(2); }
+      if(e.target.closest('[data-save]')){ if(!requireLogin()) return; GS().toggleSavePost(pid,function(saved){ var b=card.querySelector('[data-save]'); if(b) b.classList.toggle('active',!!saved); }); if(window.ghPwaEngage) window.ghPwaEngage(1); }
       var menuBtn=e.target.closest('[data-post-menu]'); if(menuBtn){ postMenu(pid,card,menuBtn); }
       var rb=e.target.closest('[data-comment-reply]'); if(rb){ e.preventDefault(); openReplyForm(card,pid,rb.dataset.commentId); }
       var cr=e.target.closest('[data-copy-post-link]'); if(cr && navigator.clipboard){ navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast('Post link copied');}); }
@@ -2340,7 +2340,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
     root.addEventListener('submit', function(e){
       var form=e.target.closest('[data-comment-form]');
-      if(form){ e.preventDefault(); var card=form.closest('[data-post-id]'), pid=card.dataset.postId; var input=form.querySelector('input,textarea'); var val=input.value.trim(); if(!val) return; if(!requireLogin()) return; state.openCommentPids[pid]=true; GS().addComment(pid,val,function(){ input.value=''; },buildActorExtra()); return; }
+      if(form){ e.preventDefault(); var card=form.closest('[data-post-id]'), pid=card.dataset.postId; var input=form.querySelector('input,textarea'); var val=input.value.trim(); if(!val) return; if(!requireLogin()) return; state.openCommentPids[pid]=true; GS().addComment(pid,val,function(){ input.value=''; if(window.ghPwaEngage) window.ghPwaEngage(2); },buildActorExtra()); return; }
       var rform=e.target.closest('[data-reply-form]');
       if(rform){ e.preventDefault(); var card2=rform.closest('[data-post-id]'), pid2=card2.dataset.postId, cid=rform.dataset.commentId; var rin=rform.querySelector('input'); var rv=rin.value.trim(); if(!rv) return; if(!requireLogin()) return; if(GS().addCommentReply) GS().addCommentReply(pid2,cid,rv,function(){ rin.value=''; rform.hidden=true; },buildActorExtra()); else toast('Replies are not available','error'); }
     });

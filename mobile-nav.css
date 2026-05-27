@@ -737,3 +737,125 @@ img { content-visibility: auto; }
 /* Suppress account.js-injected raw <a> at bottom of .mobile-menu
    (we handle auth links ourselves via #ghMobileAuthActions) */
 .mobile-menu > a { display: none !important; }
+
+/* ── Phase 23: Smart PWA Install Banner ── */
+.app-install-prompt.gh-smart-install {
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+.gh-sip-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.08);
+  border: none;
+  color: #94a3b8;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 2;
+  transition: background .15s;
+}
+.gh-sip-close:hover { background: rgba(255,255,255,.15); color: #fff; }
+.gh-smart-install .gh-sip-left {
+  display: none; /* hide on mobile, show on wider screens */
+}
+.gh-sip-body {
+  padding: 16px 16px 10px;
+  flex: 1;
+}
+.gh-sip-title {
+  font-size: .94rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  margin-bottom: 3px;
+}
+.gh-sip-sub {
+  font-size: .72rem;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+.gh-sip-feats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.gh-sip-feats span {
+  font-size: .7rem;
+  color: #10b981;
+  background: rgba(16,185,129,.1);
+  border: 1px solid rgba(16,185,129,.22);
+  border-radius: 20px;
+  padding: 3px 9px;
+  font-weight: 600;
+}
+.gh-sip-actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 16px;
+  justify-content: flex-end;
+}
+.gh-sip-later {
+  padding: 9px 14px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  color: #94a3b8;
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+}
+.gh-sip-later:hover { background: rgba(255,255,255,.12); }
+.gh-sip-install {
+  padding: 9px 18px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #10b981, #3b82f6);
+  border: none;
+  color: #fff;
+  font-size: .8rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  box-shadow: 0 2px 12px rgba(16,185,129,.35);
+  transition: transform .15s, box-shadow .15s;
+}
+.gh-sip-install:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(16,185,129,.45); }
+/* iOS instructions icon */
+.gh-ish-icon {
+  width: 56px; height: 56px;
+  border-radius: 14px;
+  margin: 0 auto 10px;
+  display: block;
+  object-fit: cover;
+}
+@media (min-width: 520px) {
+  .app-install-prompt.gh-smart-install {
+    flex-direction: row;
+    align-items: stretch;
+    padding: 0;
+  }
+  .gh-smart-install .gh-sip-left {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(16,185,129,.08);
+    border-right: 1px solid rgba(16,185,129,.15);
+  }
+  .gh-sip-logo {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: linear-gradient(135deg,#10b981,#3b82f6);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .gh-sip-logo img { width: 52px; height: 52px; object-fit: cover; }
+  .gh-sip-body { padding: 14px 14px 8px; }
+  .gh-sip-actions { padding: 0 14px 14px; }
+}

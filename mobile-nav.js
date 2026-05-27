@@ -450,48 +450,97 @@
     });
   };
 
-  // ── INSTALL PROMPT ────────────────────────────────────────────
+  // ── SMART INSTALL PROMPT (Phase 23) ──────────────────────────
 
   var deferredInstall = null;
   window.addEventListener('beforeinstallprompt', function (e) {
     e.preventDefault();
     deferredInstall = e;
+    // Try to show banner if engagement already met
+    _pwaCheckShow();
   });
 
-  function injectInstallPrompt() {
-    var isPWA = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-    if (isPWA) return;
-    if (window.safeStorage && window.safeStorage.get('gh_install_dismissed', false)) return;
-    if (document.getElementById('app-install-prompt')) return;
+  // Engagement tracker
+  var _pwaEng = { score: 0, shown: false, timer: null };
+  var _PWA_THRESHOLD = 3;          // engagement points needed
+  var _PWA_SNOOZE_MS = 7 * 86400000; // 7 days
+
+  function _pwaGetSnooze() {
+    try { return parseInt(localStorage.getItem('gh_pwa_snooze') || '0', 10); } catch(e){ return 0; }
+  }
+  function _pwaSetSnooze() {
+    try { localStorage.setItem('gh_pwa_snooze', String(Date.now() + _PWA_SNOOZE_MS)); } catch(e){}
+  }
+  function _pwaIsInstalled() {
+    return window.matchMedia('(display-mode: standalone)').matches || !!navigator.standalone;
+  }
+  function _pwaCanShow() {
+    if (_pwaIsInstalled()) return false;
+    if (_pwaEng.shown) return false;
+    if (document.getElementById('app-install-prompt')) return false;
+    if (_pwaGetSnooze() > Date.now()) return false;
+    return true;
+  }
+
+  function _pwaAddScore(n) {
+    _pwaEng.score += (n || 1);
+    _pwaCheckShow();
+  }
+
+  function _pwaCheckShow() {
+    if (!_pwaCanShow()) return;
+    if (_pwaEng.score < _PWA_THRESHOLD) return;
+    _showSmartInstallBanner();
+  }
+
+  function _showSmartInstallBanner() {
+    if (!_pwaCanShow()) return;
+    _pwaEng.shown = true;
+    var ios = isIOS();
 
     var el = document.createElement('div');
     el.id = 'app-install-prompt';
-    el.className = 'app-install-prompt';
+    el.className = 'app-install-prompt gh-smart-install';
+    el.setAttribute('role', 'complementary');
+    el.setAttribute('aria-label', 'Install GeoHub');
     el.innerHTML =
-      '<div class="install-icon">GH</div>' +
-      '<div class="install-text">' +
-        '<strong>Install GeoHub App</strong>' +
-        '<span>Add to home screen — works offline too</span>' +
-      '</div>' +
-      '<div class="install-actions">' +
-        '<button class="install-later" onclick="window.ghDismissInstall()">Later</button>' +
-        '<button class="install-now" onclick="window.ghInstall()">Install</button>' +
+      '<button class="gh-sip-close" aria-label="Close" onclick="window.ghDismissInstall()">×</button>'+
+      '<div class="gh-sip-left">'+
+        '<div class="gh-sip-logo"><img src="icons/icon-192.png" alt="GeoHub" onerror="this.outerHTML=\'<span style=&quot;font-size:1.6rem;font-weight:900;color:#10b981&quot;>GH</span>\'"></div>'+
+      '</div>'+
+      '<div class="gh-sip-body">'+
+        '<div class="gh-sip-title">GeoHub დააინსტალირე</div>'+
+        '<div class="gh-sip-sub">სწრაფი წვდომა · offline-ი · შეტყობინებები</div>'+
+        '<div class="gh-sip-feats">'+
+          '<span>🚀 მომენტალური გახსნა</span>'+
+          '<span>📴 Offline-ი</span>'+
+          '<span>🔔 Push-ი</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="gh-sip-actions">'+
+        (ios
+          ? '<button class="install-later gh-sip-later" onclick="window.ghDismissInstall()">მოგვიანებით</button>'+
+            '<button class="install-now gh-sip-install" onclick="window.ghInstall()"><i class="fas fa-share-from-square"></i> დამატება</button>'
+          : '<button class="install-later gh-sip-later" onclick="window.ghDismissInstall()">მოგვიანებით</button>'+
+            '<button class="install-now gh-sip-install" onclick="window.ghInstall()"><i class="fas fa-download"></i> ინსტალაცია</button>'
+        )+
       '</div>';
     document.body.appendChild(el);
-
-    setTimeout(function () { el.classList.add('visible'); document.body.classList.add('gh-install-visible'); }, 5000);
-    setTimeout(function () { if (el.parentNode) window.ghDismissInstall(); }, 18000);
+    requestAnimationFrame(function(){ el.classList.add('visible'); document.body.classList.add('gh-install-visible'); });
+    // Auto-dismiss after 25s
+    setTimeout(function(){ if(el.parentNode) window.ghDismissInstall(); }, 25000);
   }
+
+  // Expose engagement hook for geohub-social-redesign.js
+  window.ghPwaEngage = _pwaAddScore;
 
   window.ghDismissInstall = function () {
     var el = document.getElementById('app-install-prompt');
     if (!el) return;
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(24px)';
-    el.style.transition = 'opacity 0.3s, transform 0.3s';
+    el.classList.remove('visible');
     document.body.classList.remove('gh-install-visible');
-    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 320);
-    window.safeStorage && window.safeStorage.set('gh_install_dismissed', true);
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 350);
+    _pwaSetSnooze();
   };
 
   function isIOS() {
@@ -508,11 +557,15 @@
     modal.innerHTML =
       '<div class="gh-install-sheet" role="dialog" aria-label="Install GeoHub">' +
         '<button type="button" class="gh-install-close" aria-label="Close">&times;</button>' +
-        '<div class="install-icon">GH</div>' +
-        '<h3>Install GeoHub</h3>' +
-        '<p>On iPhone, tap Share, then choose Add to Home Screen.</p>' +
-        '<ol><li>Tap the Share button in Safari.</li><li>Choose Add to Home Screen.</li><li>Tap Add.</li></ol>' +
-        '<button type="button" class="install-now gh-install-ok">Got it</button>' +
+        '<img src="icons/icon-192.png" alt="" class="gh-ish-icon" onerror="this.remove()">' +
+        '<h3>GeoHub-ის დამატება</h3>' +
+        '<p>iPhone-ზე მენიუდან "Add to Home Screen" აირჩიე:</p>' +
+        '<ol>'+
+          '<li>Safari-ში გახსენი Share (<i class="fas fa-share-from-square"></i>)</li>'+
+          '<li>«Add to Home Screen» დააჭირე</li>'+
+          '<li>«Add» / «დამატება» დაადასტურე</li>'+
+        '</ol>' +
+        '<button type="button" class="install-now gh-install-ok">გასაგებია!</button>' +
       '</div>';
     document.body.appendChild(modal);
     modal.addEventListener('click', function(e){
@@ -523,19 +576,39 @@
   window.ghInstall = function () {
     if (deferredInstall) {
       deferredInstall.prompt();
-      deferredInstall.userChoice.then(function () { deferredInstall = null; });
+      deferredInstall.userChoice.then(function(choice){
+        deferredInstall = null;
+        if (choice && choice.outcome === 'accepted') {
+          // Thank-you toast
+          setTimeout(function(){
+            if(window.GeoSocial && window.GeoSocial.toast)
+              window.GeoSocial.toast('🎉 GeoHub წარმატებით დაინსტალირდა!', 'success');
+          }, 800);
+        }
+      });
       window.ghDismissInstall();
       return;
     }
+    if (isIOS()) { showInstallInstructions(); return; }
     showInstallInstructions();
-    if (isIOS()) return;
-    pushNotif({
-      emoji: 'ℹ️', bg: 'rgba(59,130,246,0.15)', color: '#60a5fa',
-      title: 'Install GeoHub',
-      text: 'Use your browser menu to add GeoHub to your home screen.',
-      link: null,
-    });
   };
+
+  // ── Engagement scoring: time on page ─────────────────────────
+  function injectInstallPrompt() {
+    if (_pwaIsInstalled()) return;
+    if (_pwaGetSnooze() > Date.now()) return;
+
+    // 1. Score: time on page (30s = +2 pts, triggers alone; 15s = +1)
+    setTimeout(function(){ _pwaAddScore(1); }, 15000);
+    setTimeout(function(){ _pwaAddScore(2); }, 30000);
+
+    // 2. Score: page-view counter (cross-page, stored in sessionStorage)
+    try {
+      var pv = parseInt(sessionStorage.getItem('gh_pv') || '0', 10) + 1;
+      sessionStorage.setItem('gh_pv', String(pv));
+      if (pv >= 3) _pwaEng.score += 2; // already explored several pages
+    } catch(e){}
+  }
 
   // ── NOTIFICATION TOASTS ───────────────────────────────────────
 
