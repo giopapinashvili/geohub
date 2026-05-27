@@ -1030,3 +1030,15 @@
   font-weight: 600;
   padding: 0 4px;
 }
+
+/* Phase 27: Profile view counter */
+.profile-view-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .75rem;
+  color: var(--text-muted, #94a3b8);
+  margin-top: 6px;
+}
+.profile-view-count i { color: #38bdf8; }
+.profile-view-count b { color: #f1f5f9; font-weight: 700; }

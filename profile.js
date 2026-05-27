@@ -806,6 +806,40 @@
     });
   }
 
+  /* Phase 27: Profile View Tracking */
+  function _trackProfileView(GF, profileUid, viewerUid, isOwn) {
+    if (!GF || !GF.db || !GF.fs || !profileUid) return;
+    if (isOwn) {
+      // On own profile: show view count for last 7 days
+      var weekAgo = new Date(Date.now() - 7 * 86400000);
+      GF.fs.getDocs(
+        GF.fs.query(
+          GF.fs.collection(GF.db, 'users', profileUid, 'profileViews'),
+          GF.fs.where('viewedAt', '>=', weekAgo)
+        )
+      ).then(function(snap) {
+        var count = snap.size;
+        if (!count) return;
+        // Insert view counter near trust-badges
+        var existing = document.getElementById('profileViewCount');
+        if (existing) { existing.textContent = count + ' ადამიანმა ნახა ამ კვირაში'; return; }
+        var el = document.createElement('div');
+        el.id = 'profileViewCount';
+        el.className = 'profile-view-count';
+        el.innerHTML = '<i class="fas fa-eye"></i> <b>' + count + '</b> ადამიანმა ნახა ამ კვირაში';
+        var trustBadges = document.querySelector('.trust-badges');
+        if (trustBadges) trustBadges.parentNode.insertBefore(el, trustBadges);
+      }).catch(function() {});
+      return;
+    }
+    // Viewer: record the view (throttle: once per session per profile)
+    var key = 'gh_pv_' + profileUid;
+    try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, '1'); } catch(e) {}
+    if (!viewerUid) return; // don't record anonymous views
+    var viewRef = GF.fs.doc(GF.db, 'users', profileUid, 'profileViews', viewerUid);
+    GF.fs.setDoc(viewRef, { viewedAt: GF.fs.serverTimestamp(), viewerUid: viewerUid }, { merge: true }).catch(function() {});
+  }
+
   /* Phase 22: Achievement badge strip in profile header */
   var BADGE_RARITY_COLOR = { common: '#94a3b8', rare: '#3b82f6', epic: '#a855f7', legendary: '#f59e0b' };
 
@@ -1963,6 +1997,9 @@
           }
           if (window.GeoSocial) renderTabs(profile, fbUser);
           else window.addEventListener('GeoSocialReady', () => renderTabs(profile, fbUser), { once: true });
+
+          // Phase 27: Profile View Tracking
+          _trackProfileView(GF, profile.uid, fbUser.uid, isOwnProfile);
 
           // People You May Know sidebar
           renderPymkSidebar();

@@ -956,7 +956,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(!fbUser){ clearCachedUser(); try{localStorage.removeItem('gh_active_actor');}catch(e){} }
       updateTopUser();
       listenBadges();
-      if(fbUser){ validateActorOnLoad(); maybeUpdateStreak(fbUser.uid); _initWrapped(fbUser.uid); setTimeout(function(){ checkAndAwardBadges(fbUser.uid); }, 3000); }
+      if(fbUser){ validateActorOnLoad(); maybeUpdateStreak(fbUser.uid); _initWrapped(fbUser.uid); setTimeout(function(){ checkAndAwardBadges(fbUser.uid); }, 3000); setTimeout(function(){ loadOnThisDay(fbUser.uid); }, 1500); }
       if(!fbUser){ var sb=document.getElementById('ghStreakBtn'); if(sb) sb.style.display='none'; }
       var bid = new URLSearchParams(location.search).get('id');
       if((state.page === 'business' || PAGE === 'business') && bid) updateBusinessFollowButton(bid);
@@ -2036,13 +2036,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           var pct = totalV > 0 ? Math.round(Math.max(0,Number(opt.votes||0))/totalV*100) : 0;
           return '<button class="gh-poll-opt'+(pollExpired?' expired':'')+'" '+
             (pollExpired?'disabled ':'data-poll-vote ')+
-            'data-pid="'+esc(pid)+'" data-opt-id="'+esc(opt.id)+'">' +
-            '<div class="gh-poll-bar" style="width:'+pct+'%"></div>' +
+            'data-pid="'+esc(pid)+'" data-opt-id="'+esc(opt.id)+'" data-poll-opt="'+esc(opt.id)+'">' +
+            '<div class="gh-poll-bar" style="width:'+pct+'%;transition:width .6s cubic-bezier(.4,0,.2,1)"></div>' +
             '<span class="gh-poll-label">'+esc(opt.text)+'</span>' +
             '<span class="gh-poll-pct">'+pct+'%</span>' +
+            '<span class="gh-poll-votes" style="font-size:.65rem;color:var(--gh-muted);margin-left:4px">'+Number(opt.votes||0)+' ხმა</span>'+
           '</button>';
         }).join('') +
-        '<div class="gh-poll-footer">'+totalV+' vote'+(totalV===1?'':'s')+(pollExpired?' · <em>Poll ended</em>':'')+'</div>' +
+        '<div class="gh-poll-footer" data-poll-total>'+totalV+' vote'+(totalV===1?'':'s')+(pollExpired?' · <em>Poll ended</em>':'')+'</div>' +
       '</div>';
     }
 
@@ -2415,7 +2416,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         cards.forEach(function(card){ if(liked) updateReactionUi(card,'like'); });
       });
     });
-    cards.forEach(function(card){ if(card.querySelector('[data-poll-pid]')) hydratePollVote(postId); });
+    cards.forEach(function(card){ if(card.querySelector('[data-poll-pid]')){ hydratePollVote(postId); hydratePollLive(card,postId); } });
   }
 
   function setReaction(postId, type, card){
@@ -3372,6 +3373,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     return '<div id="ghFeedRight">'+
       '<div class="gh-panel gh-right-widget" id="ghOnlineFriendsPanel"><div class="gh-section-title"><h3><i class="fas fa-circle" style="color:#22c55e;font-size:.55rem"></i> Online Friends</h3></div><div id="ghOnlineFriendsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget" id="ghPymkPanel"><div class="gh-section-title"><h3>People You May Know</h3><a class="gh-small" href="search.html">Find people</a></div><div id="ghPymkList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghLiveActivityPanel">'+
+        '<div class="gh-section-title"><h3><span class="gh-live-dot"></span> Live Activity</h3></div>'+
+        '<div id="ghLiveActivityList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div>'+
+      '</div>'+
       '<div class="gh-panel gh-right-widget" id="ghCreatorPanel"><div class="gh-section-title"><h3>Featured Creators</h3><a class="gh-small" href="creators.html">All</a></div><div id="ghCreatorList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget" id="ghTrendingPanel">'+
         '<div class="gh-section-title"><h3>🔥 Trending Hashtags</h3></div>'+
@@ -3671,7 +3676,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var ob=$('#ghOnlineFriendsList'); if(ob) ob.innerHTML='<div class="gh-muted" style="font-size:.82rem">Unavailable</div>';
         var pb=$('#ghSuggestedPages'); if(pb) pb.innerHTML='<div class="gh-muted" style="font-size:.82rem">Unavailable</div>';
         var cb=$('#ghContactsList'); if(cb) cb.innerHTML='<div class="gh-muted" style="font-size:.82rem">Unavailable</div>';
-        loadLeaderboardWidget(''); loadTrendingHashtags(); loadFeedGroupsWidget(); loadFeedEventsWidget(null); loadFeedCheckinsWidget();
+        loadLeaderboardWidget(''); loadTrendingHashtags(); startLiveActivityTicker(); loadFeedGroupsWidget(); loadFeedEventsWidget(null); loadFeedCheckinsWidget();
         return;
       }
       // onAuthStateChanged fires once auth is resolved (currentUser may still be null even if ready() fired)
@@ -3686,7 +3691,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           if(contactsBox) contactsBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see contacts</div>';
           var pymkBox=$('#ghPymkList'); if(pymkBox) pymkBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see suggestions</div>';
           var crBox=$('#ghCreatorList'); if(crBox) crBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see creators</div>';
-          loadLeaderboardWidget(''); loadTrendingHashtags(); loadFeedGroupsWidget(); loadFeedEventsWidget(null); loadFeedCheckinsWidget();
+          loadLeaderboardWidget(''); loadTrendingHashtags(); startLiveActivityTicker(); loadFeedGroupsWidget(); loadFeedEventsWidget(null); loadFeedCheckinsWidget();
           return;
         }
 
@@ -3724,6 +3729,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         loadCreatorWidget(u.uid);
         loadLeaderboardWidget(u.uid);
         loadTrendingHashtags();
+        startLiveActivityTicker();
         loadFeedGroupsWidget();
         loadFeedEventsWidget(u.uid);
         loadFeedCheckinsWidget();
@@ -4082,6 +4088,203 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(n>=1000000) return (n/1000000).toFixed(1)+'M';
     if(n>=1000) return (n/1000).toFixed(1)+'K';
     return String(n);
+  }
+
+  /* ── Phase 24: Live Activity Ticker ─────────────────────────────────── */
+  var _latUnsub = null;
+  var _latItems = [];
+  var _LAT_MAX = 8;
+
+  var _LAT_VERBS = {
+    post:    function(d){ return 'გამოაქვეყნა პოსტი'+(d.text?' — "'+d.text.slice(0,40)+(d.text.length>40?'…':'')+'"':''); },
+    video:   function(d){ return 'ვიდეო გამოაქვეყნა'+(d.title?' — "'+d.title.slice(0,35)+'"':''); },
+    checkin: function(d){ return 'checked in'+(d.placeName?' → '+d.placeName.slice(0,30):''); },
+    story:   function(){ return 'story გამოაქვეყნა'; },
+    poll:    function(d){ return 'poll-ი შექმნა'+(d.text?' — "'+d.text.slice(0,35)+(d.text.length>35?'…':'')+'"':''); }
+  };
+
+  function _latVerb(d){ return (_LAT_VERBS[d.type]||_LAT_VERBS.post)(d); }
+
+  function _latCard(item){
+    var av=item.avatar
+      ? '<img src="'+esc(item.avatar)+'" alt="" loading="lazy" onerror="this.outerHTML=\''+esc('<span class=\'gh-avatar\' style=\'width:26px;height:26px;font-size:.6rem\'>'+(initials(item.name||'')||'?')+'</span>')+'\'">'
+      : esc(initials(item.name||'')||'?');
+    return '<div class="gh-lat-row gh-lat-enter">'+
+      '<a class="gh-avatar" href="'+esc(profileLink(item.uid||''))+'" style="width:26px;height:26px;flex-shrink:0;font-size:.6rem">'+av+'</a>'+
+      '<div class="gh-lat-body">'+
+        '<a class="gh-lat-name" href="'+esc(profileLink(item.uid||''))+'">'+esc(item.name||'User')+'</a>'+
+        ' <span class="gh-lat-verb">'+esc(_latVerb(item))+'</span>'+
+      '</div>'+
+      '<span class="gh-lat-time" title="'+esc(new Date(item._ms).toLocaleString())+'">'+_latAgo(item._ms)+'</span>'+
+    '</div>';
+  }
+
+  function _latAgo(ms){
+    var diff=Date.now()-ms;
+    if(diff<60000) return 'ახლა';
+    if(diff<3600000) return Math.floor(diff/60000)+'წ';
+    return Math.floor(diff/3600000)+'სთ';
+  }
+
+  function _latRender(){
+    var box=document.getElementById('ghLiveActivityList'); if(!box) return;
+    if(!_latItems.length){ box.innerHTML='<div class="gh-muted" style="font-size:.78rem">აქტიურობა ჯერ არ ჩანს</div>'; return; }
+    box.innerHTML=_latItems.map(_latCard).join('');
+  }
+
+  function _latPush(item){
+    // Remove duplicate
+    _latItems=_latItems.filter(function(x){ return x._id!==item._id; });
+    _latItems.unshift(item);
+    if(_latItems.length>_LAT_MAX) _latItems=_latItems.slice(0,_LAT_MAX);
+    var box=document.getElementById('ghLiveActivityList'); if(!box) return;
+    // Prepend with animation instead of full re-render
+    var row=document.createElement('div');
+    row.innerHTML=_latCard(item);
+    var el=row.firstElementChild;
+    box.insertBefore(el,box.firstChild);
+    // Remove extras
+    while(box.children.length>_LAT_MAX) box.removeChild(box.lastChild);
+    // Remove enter class after animation
+    requestAnimationFrame(function(){ el.classList.remove('gh-lat-enter'); });
+  }
+
+  function startLiveActivityTicker(){
+    var panel=document.getElementById('ghLiveActivityPanel');
+    var box=document.getElementById('ghLiveActivityList');
+    if(!box||!panel) return;
+    if(!fs()||!db()){ panel.style.display='none'; return; }
+    if(_latUnsub){ _latUnsub(); _latUnsub=null; }
+    _latItems=[];
+    // Listen to recent posts (last 2h)
+    var since=new Date(Date.now()-2*3600000);
+    _latUnsub=fs().onSnapshot(
+      fs().query(
+        fs().collection(db(),'posts'),
+        fs().where('createdAt','>=',since),
+        fs().orderBy('createdAt','desc'),
+        fs().limit(20)
+      ),
+      function(snap){
+        snap.docChanges().forEach(function(ch){
+          if(ch.type==='added'){
+            var d=ch.doc.data(); var id=ch.doc.id;
+            var ms=d.createdAt?(d.createdAt.toMillis?d.createdAt.toMillis():d.createdAt.seconds*1000||Date.now()):Date.now();
+            // Don't show items older than what we already have on initial load
+            if(Math.abs(Date.now()-ms)<5000){ // only truly new (<5s old)
+              _latPush({ _id:id, _ms:ms, uid:d.authorId||d.userId||'', name:d.authorName||d.userName||'User', avatar:d.authorAvatar||d.userAvatar||'', type:d.type||'post', text:d.text||'', title:d.title||'' });
+            } else {
+              // Seed initial items
+              _latItems.push({ _id:id, _ms:ms, uid:d.authorId||d.userId||'', name:d.authorName||d.userName||'User', avatar:d.authorAvatar||d.userAvatar||'', type:d.type||'post', text:d.text||'', title:d.title||'' });
+            }
+          }
+        });
+        _latItems.sort(function(a,b){ return b._ms-a._ms; });
+        _latItems=_latItems.slice(0,_LAT_MAX);
+        _latRender();
+      },
+      function(){ panel.style.display='none'; }
+    );
+    state.pageUnsubs.push(function(){ if(_latUnsub){ _latUnsub(); _latUnsub=null; } });
+  }
+
+  /* ── Phase 25: "On This Day" Memories ───────────────────────────────── */
+  var _OTD_KEY = 'gh_otd_dismissed';
+
+  function loadOnThisDay(uid){
+    if(!uid||!fs()||!db()) return;
+    var slot=document.getElementById('ghWelcomeSlot'); if(!slot) return;
+    // Check if dismissed today
+    try{
+      var dismissed=localStorage.getItem(_OTD_KEY);
+      if(dismissed===_dateStr()) return;
+    }catch(e){}
+    // Query posts from 1 year ago ± 4 days
+    var yearAgo=Date.now()-365*86400000;
+    var rangeStart=new Date(yearAgo-4*86400000);
+    var rangeEnd=new Date(yearAgo+4*86400000);
+    fs().getDocs(
+      fs().query(
+        fs().collection(db(),'posts'),
+        fs().where('authorId','==',uid),
+        fs().where('createdAt','>=',rangeStart),
+        fs().where('createdAt','<=',rangeEnd),
+        fs().orderBy('createdAt','desc'),
+        fs().limit(3)
+      )
+    ).then(function(snap){
+      if(snap.empty) return;
+      var posts=[]; snap.forEach(function(d){ posts.push(Object.assign({id:d.id},d.data())); });
+      _renderOnThisDay(slot, posts);
+    }).catch(function(){});
+  }
+
+  function _renderOnThisDay(slot, posts){
+    var p=posts[0];
+    var yearAgo=new Date(Date.now()-365*86400000);
+    var dateLabel=yearAgo.toLocaleDateString('ka-GE',{month:'long',day:'numeric'});
+    var preview='';
+    if(p.mediaUrls&&p.mediaUrls[0]) preview='<img class="gh-otd-img" src="'+esc(p.mediaUrls[0])+'" alt="" loading="lazy">';
+    else if(p.text) preview='<p class="gh-otd-text">'+esc(p.text.slice(0,160))+(p.text.length>160?'…':'')+'</p>';
+    var card=document.createElement('section');
+    card.className='gh-card gh-otd-card';
+    card.innerHTML=
+      '<div class="gh-otd-head">'+
+        '<span class="gh-otd-icon">📅</span>'+
+        '<div>'+
+          '<strong>ახსოვს ეს?</strong>'+
+          '<span>'+dateLabel+', ზუსტად ერთი წლის წინ</span>'+
+        '</div>'+
+        '<button class="gh-otd-dismiss" aria-label="Dismiss">×</button>'+
+      '</div>'+
+      preview+
+      (posts.length>1?'<div class="gh-otd-more">და კიდევ '+(posts.length-1)+' პოსტი ამ დღეს</div>':'')+
+      '<div class="gh-otd-actions">'+
+        '<a class="gh-btn sm ghost" href="feed.html#post-'+esc(p.id)+'"><i class="fas fa-eye"></i> ნახვა</a>'+
+        '<button class="gh-btn sm gh-otd-share-btn" data-share-memory="'+esc(p.id)+'"><i class="fas fa-share"></i> გაზიარება</button>'+
+      '</div>';
+    // Dismiss handler
+    card.querySelector('.gh-otd-dismiss').onclick=function(){
+      card.style.opacity='0'; card.style.transform='scale(.96)'; card.style.transition='all .3s';
+      setTimeout(function(){ if(card.parentNode) card.remove(); },300);
+      try{ localStorage.setItem(_OTD_KEY, _dateStr()); }catch(e){}
+    };
+    // Share handler
+    card.querySelector('.gh-otd-share-btn').onclick=function(){
+      if(navigator.share){ navigator.share({ title:'GeoHub Memories', text:'📅 ერთი წლის წინ: '+esc(p.text||''), url:location.origin+'/feed.html#post-'+p.id }).catch(function(){}); }
+      else { try{ navigator.clipboard.writeText(location.origin+'/feed.html#post-'+p.id); toast('ბმული დაკოპირდა'); }catch(e){} }
+    };
+    slot.insertBefore(card, slot.firstChild);
+  }
+
+  /* ── Phase 26: Real-time Poll Vote Updates ───────────────────────────── */
+  var _pollListeners = {};  // pid → unsub
+
+  function hydratePollLive(card, pid){
+    if(!pid||!fs()||!db()) return;
+    if(_pollListeners[pid]) return; // already listening
+    _pollListeners[pid]=fs().onSnapshot(
+      fs().doc(db(),'posts',pid),
+      function(snap){
+        if(!snap.exists()) return;
+        var data=snap.data();
+        var poll=data.poll; if(!poll||!poll.options) return;
+        var total=poll.options.reduce(function(s,o){ return s+Number(o.votes||0); },0)||1;
+        var pollEl=card.querySelector('[data-poll-pid="'+CSS.escape(pid)+'"]'); if(!pollEl) return;
+        poll.options.forEach(function(o){
+          var pct=Math.round((Number(o.votes||0)/total)*100);
+          var row=pollEl.querySelector('[data-poll-opt="'+CSS.escape(o.id||o.text)+'"]'); if(!row) return;
+          var bar=row.querySelector('.gh-poll-bar');
+          var pctEl=row.querySelector('.gh-poll-pct');
+          var votesEl=row.querySelector('.gh-poll-votes');
+          if(bar){ bar.style.width=pct+'%'; bar.style.transition='width .6s cubic-bezier(.4,0,.2,1)'; }
+          if(pctEl) pctEl.textContent=pct+'%';
+          if(votesEl) votesEl.textContent=Number(o.votes||0)+' ხმა';
+        });
+        var totalEl=pollEl.querySelector('[data-poll-total]'); if(totalEl) totalEl.textContent=(total===1&&poll.options.reduce(function(s,o){return s+Number(o.votes||0);},0)===0?0:total)+' ხმა';
+      },
+      function(){}
+    );
   }
 
   /* ── Phase 22: Badges & Achievements ────────────────────────────────── */
