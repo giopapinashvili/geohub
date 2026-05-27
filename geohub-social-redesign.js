@@ -1264,11 +1264,31 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button class="gh-cmp-tool" id="ghToggleFeeling" type="button" title="Feeling or activity"><i class="fas fa-face-smile"></i><span>Feeling</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleBg" type="button" title="Background color"><i class="fas fa-palette"></i><span>Background</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleEmoji" type="button" title="Emoji"><i class="fas fa-face-grin"></i><span>Emoji</span></button>'+
+        '<button class="gh-cmp-tool" id="ghVoiceRecord" type="button" title="Record voice note"><i class="fas fa-microphone"></i><span>Voice</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleGif" type="button" title="Add GIF"><i class="fas fa-film"></i><span>GIF</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleCoAuthor" type="button" title="Tag co-author"><i class="fas fa-user-plus"></i><span>Tag</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleCategory" type="button" title="Post category"><i class="fas fa-tag"></i><span>Topic</span></button>'+
         '<button class="gh-cmp-tool" id="ghAiCaption" type="button" title="AI Caption suggestions"><i class="fas fa-wand-magic-sparkles"></i><span>AI</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleSchedule" type="button" title="Schedule post"><i class="fas fa-clock"></i><span>Schedule</span></button>'+
+      '</div>'+
+      '<div class="gh-voice-panel" id="ghVoicePanel" style="display:none">'+
+        '<div class="gh-voice-ui">'+
+          '<div class="gh-voice-waves" id="ghVoiceWaves"><span></span><span></span><span></span><span></span><span></span></div>'+
+          '<span class="gh-voice-timer" id="ghVoiceTimer">0:00</span>'+
+          '<div class="gh-voice-btns">'+
+            '<button type="button" class="gh-voice-rec-btn" id="ghVoiceStart"><i class="fas fa-microphone"></i> Start Recording</button>'+
+            '<button type="button" class="gh-voice-stop-btn" id="ghVoiceStop" style="display:none"><i class="fas fa-stop"></i> Stop</button>'+
+            '<button type="button" class="gh-voice-discard-btn" id="ghVoiceDiscard" style="display:none"><i class="fas fa-trash"></i></button>'+
+          '</div>'+
+        '</div>'+
+        '<div class="gh-voice-preview" id="ghVoicePreview" style="display:none">'+
+          '<div class="gh-voice-player">'+
+            '<button type="button" class="gh-vp-play" id="ghVoicePlay"><i class="fas fa-play"></i></button>'+
+            '<div class="gh-vp-bar"><div class="gh-vp-fill" id="ghVoiceFill"></div></div>'+
+            '<span class="gh-vp-dur" id="ghVoiceDur">0:00</span>'+
+          '</div>'+
+          '<button type="button" class="gh-voice-discard-btn" id="ghVoiceRemove"><i class="fas fa-times"></i> Remove</button>'+
+        '</div>'+
       '</div>'+
       '<div class="gh-gif-panel" id="ghGifPanel" style="display:none">'+
         '<div class="gh-gif-search-row"><input class="gh-input" id="ghGifSearch" placeholder="Search GIFs…" autocomplete="off"><button type="button" class="gh-btn sm ghost" id="ghClearGif" title="Remove GIF" style="display:none"><i class="fas fa-times"></i> Remove</button></div>'+
@@ -1327,6 +1347,90 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     // Phase 32: emoji picker for composer
     var _emojiToolBtn=document.getElementById('ghToggleEmoji');
     if(_emojiToolBtn && ta) _emojiToolBtn.addEventListener('click',function(){ _openEmojiPicker(ta,_emojiToolBtn); });
+
+    // Phase 52: Voice Note recorder
+    var voiceBlob=null, voiceUrl='', voiceAudio=null;
+    var _voiceBtn=document.getElementById('ghVoiceRecord');
+    var _voicePanel=document.getElementById('ghVoicePanel');
+    var _voiceStart=document.getElementById('ghVoiceStart');
+    var _voiceStop=document.getElementById('ghVoiceStop');
+    var _voiceDiscard=document.getElementById('ghVoiceDiscard');
+    var _voicePreview=document.getElementById('ghVoicePreview');
+    var _voiceRemove=document.getElementById('ghVoiceRemove');
+    var _voiceTimer=document.getElementById('ghVoiceTimer');
+    var _voiceDur=document.getElementById('ghVoiceDur');
+    var _voiceFill=document.getElementById('ghVoiceFill');
+    var _voicePlayBtn=document.getElementById('ghVoicePlay');
+    var _mediaRec=null, _recChunks=[], _recTimer=null, _recSec=0;
+    var MAX_VOICE_SEC=60;
+    function _fmtSec(s){ return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60; }
+    function _stopTimer(){ clearInterval(_recTimer); _recTimer=null; }
+    function _resetVoice(){
+      voiceBlob=null; voiceUrl='';
+      if(voiceAudio){ voiceAudio.pause(); voiceAudio=null; }
+      if(_mediaRec&&_mediaRec.state!=='inactive'){ try{_mediaRec.stop();}catch(e){} }
+      _stopTimer(); _recSec=0;
+      if(_voiceTimer) _voiceTimer.textContent='0:00';
+      if(_voiceStart){ _voiceStart.style.display=''; }
+      if(_voiceStop) _voiceStop.style.display='none';
+      if(_voiceDiscard) _voiceDiscard.style.display='none';
+      if(_voicePreview) _voicePreview.style.display='none';
+      document.getElementById('ghVoiceWaves') && document.getElementById('ghVoiceWaves').classList.remove('active');
+      if(_voiceBtn) _voiceBtn.classList.remove('active');
+      updateSubmit();
+    }
+    if(_voiceBtn) _voiceBtn.addEventListener('click',function(){
+      if(!_voicePanel) return;
+      var open=_voicePanel.style.display!=='none';
+      _voicePanel.style.display=open?'none':'block';
+    });
+    if(_voiceStart) _voiceStart.addEventListener('click',function(){
+      if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ toast('Microphone not supported','error'); return; }
+      navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+        _recChunks=[];
+        _mediaRec=new MediaRecorder(stream,{mimeType:MediaRecorder.isTypeSupported('audio/webm')?'audio/webm':'audio/ogg'});
+        _mediaRec.ondataavailable=function(e){ if(e.data&&e.data.size>0) _recChunks.push(e.data); };
+        _mediaRec.onstop=function(){
+          stream.getTracks().forEach(function(t){ t.stop(); });
+          voiceBlob=new Blob(_recChunks,{type:_mediaRec.mimeType||'audio/webm'});
+          voiceUrl=URL.createObjectURL(voiceBlob);
+          voiceAudio=new Audio(voiceUrl);
+          var dur=_recSec;
+          if(_voiceDur) _voiceDur.textContent=_fmtSec(dur);
+          if(_voicePreview) _voicePreview.style.display='block';
+          var wavEl=document.getElementById('ghVoiceWaves'); if(wavEl) wavEl.classList.remove('active');
+          if(_voiceStart) _voiceStart.style.display='none';
+          if(_voiceStop) _voiceStop.style.display='none';
+          if(_voiceDiscard) _voiceDiscard.style.display='none';
+          if(_voiceBtn) _voiceBtn.classList.add('active');
+          updateSubmit();
+        };
+        _mediaRec.start(250);
+        if(_voiceStart) _voiceStart.style.display='none';
+        if(_voiceStop) _voiceStop.style.display='';
+        if(_voiceDiscard) _voiceDiscard.style.display='';
+        var wavEl=document.getElementById('ghVoiceWaves'); if(wavEl) wavEl.classList.add('active');
+        _recSec=0; if(_voiceTimer) _voiceTimer.textContent='0:00';
+        _recTimer=setInterval(function(){
+          _recSec++;
+          if(_voiceTimer) _voiceTimer.textContent=_fmtSec(_recSec);
+          if(_recSec>=MAX_VOICE_SEC&&_mediaRec&&_mediaRec.state==='recording'){ _mediaRec.stop(); _stopTimer(); toast('Max 60s reached'); }
+        },1000);
+      }).catch(function(){ toast('Microphone access denied','error'); });
+    });
+    if(_voiceStop) _voiceStop.addEventListener('click',function(){ if(_mediaRec&&_mediaRec.state==='recording'){ _mediaRec.stop(); _stopTimer(); } });
+    if(_voiceDiscard) _voiceDiscard.addEventListener('click',function(){ _resetVoice(); });
+    if(_voiceRemove) _voiceRemove.addEventListener('click',function(){ _resetVoice(); });
+    if(_voicePlayBtn) _voicePlayBtn.addEventListener('click',function(){
+      if(!voiceAudio) return;
+      if(voiceAudio.paused){ voiceAudio.play(); _voicePlayBtn.innerHTML='<i class="fas fa-pause"></i>'; }
+      else { voiceAudio.pause(); _voicePlayBtn.innerHTML='<i class="fas fa-play"></i>'; }
+      voiceAudio.ontimeupdate=function(){
+        var pct=voiceAudio.duration?voiceAudio.currentTime/voiceAudio.duration*100:0;
+        if(_voiceFill) _voiceFill.style.width=pct+'%';
+      };
+      voiceAudio.onended=function(){ _voicePlayBtn.innerHTML='<i class="fas fa-play"></i>'; if(_voiceFill) _voiceFill.style.width='0%'; };
+    });
 
     // Phase 43: GIF picker
     var pickedGifUrl='';
@@ -1643,7 +1747,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var hasText = pollMode
         ? !!(($('#ghPollQuestion')||{}).value||'').trim()
         : !!(ta && ta.value.trim());
-      btn.disabled = !(hasText || pickedFiles.length || pickedGifUrl);
+      btn.disabled = !(hasText || pickedFiles.length || pickedGifUrl || voiceBlob);
     }
     if(ta) ta.addEventListener('input', function(){
       updateSubmit();
@@ -1784,7 +1888,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       }
 
       var txt=(ta&&ta.value)||'';
-      if(!txt.trim() && !pickedFiles.length && !pickedGifUrl) return toast('Write something or add a photo/GIF','error');
+      if(!txt.trim() && !pickedFiles.length && !pickedGifUrl && !voiceBlob) return toast('Write something or add a photo/GIF/voice','error');
 
       var payload=Object.assign({
         visibility: ($('#ghPostVisibility')||{}).value||'public',
@@ -1794,42 +1898,48 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         mentions: extractMentions(txt),
         gifUrl: pickedGifUrl||null,
         coAuthors: coAuthors.length ? coAuthors : null,
-        category: selectedCategory||null
+        category: selectedCategory||null,
+        voiceUrl: null  // filled below if voice blob exists
       }, extra||{});
       // Phase 39: scheduled post
       if(scheduledAt && scheduledAt>new Date()){ payload.status='scheduled'; payload.scheduledAt=scheduledAt; }
 
       submitBtn.disabled=true;
 
-      if(pickedFiles.length){
-        if(bar) bar.style.display='flex';
-        submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Uploading…';
-        var total=pickedFiles.length, done=0;
-        Promise.all(pickedFiles.map(function(f){
-          return prepareMedia(f,'posts',function(pct){
-            var overall=Math.round((done/total)*100+pct/total);
-            if(fill) fill.style.width=overall+'%';
-            if(pctEl) pctEl.textContent=overall+'%';
-            submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> '+overall+'%';
-          }).then(function(url){ done++; return url; });
-        })).then(function(urls){
-          var validUrls=urls.filter(Boolean);
-          if(bar) bar.style.display='none';
-          if(!validUrls.length && pickedFiles.length) throw new Error('All uploads failed');
-          payload.mediaUrls=validUrls;
+      // Phase 52: upload voice blob first if present
+      function _doSubmit(finalPayload){
+        if(pickedFiles.length){
+          if(bar) bar.style.display='flex';
+          submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Uploading…';
+          var total=pickedFiles.length, done=0;
+          Promise.all(pickedFiles.map(function(f){
+            return prepareMedia(f,'posts',function(pct){
+              var overall=Math.round((done/total)*100+pct/total);
+              if(fill) fill.style.width=overall+'%'; if(pctEl) pctEl.textContent=overall+'%';
+              submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> '+overall+'%';
+            }).then(function(url){ done++; return url; });
+          })).then(function(urls){
+            var validUrls=urls.filter(Boolean); if(bar) bar.style.display='none';
+            if(!validUrls.length && pickedFiles.length) throw new Error('All uploads failed');
+            finalPayload.mediaUrls=validUrls; submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
+            GS().createPost(txt, validUrls[0]||'', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); try{localStorage.removeItem('gh_draft');}catch(_e){} var _u=authUser(); if(_u) setTimeout(function(){ checkAndAwardBadges(_u.uid); },2000); }, finalPayload);
+          }).catch(function(err){ console.error('[GeoHub] upload',err); toast('Image upload failed.','error'); if(bar) bar.style.display='none'; submitBtn.disabled=false; submitBtn.innerHTML='<i class="fas fa-paper-plane"></i> Post'; });
+        } else {
           submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
-          GS().createPost(txt, validUrls[0]||'', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); try{localStorage.removeItem('gh_draft');}catch(_e){} var _u=authUser(); if(_u) setTimeout(function(){ checkAndAwardBadges(_u.uid); },2000); }, payload);
-        }).catch(function(err){
-          console.error('[GeoHub] multi-image upload',err);
-          toast('Image upload failed. Check Cloudinary settings.','error');
-          if(bar) bar.style.display='none';
-          submitBtn.disabled=false;
-          submitBtn.innerHTML='<i class="fas fa-paper-plane"></i> Post';
+          GS().createPost(txt, '', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); try{localStorage.removeItem('gh_draft');}catch(_e){} var _u=authUser(); if(_u) setTimeout(function(){ checkAndAwardBadges(_u.uid); },2000); }, finalPayload);
+        }
+      }
+
+      if(voiceBlob){
+        submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Uploading voice…';
+        var _u2=authUser();
+        GS().uploadAudioBlob(voiceBlob, _u2&&_u2.uid, function(url){
+          payload.voiceUrl=url||''; _doSubmit(payload);
         });
       } else {
-        submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
-        GS().createPost(txt, '', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); try{localStorage.removeItem('gh_draft');}catch(_e){} var _u=authUser(); if(_u) setTimeout(function(){ checkAndAwardBadges(_u.uid); },2000); }, payload);
+        _doSubmit(payload);
       }
+
     };
   }
 
@@ -2460,6 +2570,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     } else if (singleImgUrl) {
       mediaHtml = '<div class="gh-post-img-wrap" data-open-photo="'+esc(singleImgUrl)+'"><img class="gh-post-img" src="'+esc(singleImgUrl)+'" alt="post image" loading="lazy" onerror="this.parentElement.style.display=\'none\'"></div>';
     }
+    // Phase 52: Voice Note player
+    var voiceHtml = p.voiceUrl ? '<div class="gh-voice-note-card"><div class="gh-vnc-icon"><i class="fas fa-microphone"></i></div><div class="gh-vnc-player"><button class="gh-vnc-play" data-voice-play data-voice-src="'+esc(p.voiceUrl)+'"><i class="fas fa-play"></i></button><div class="gh-vnc-bar"><div class="gh-vnc-fill" data-voice-fill></div></div><span class="gh-vnc-dur" data-voice-dur>🎙️ Voice Note</span></div></div>' : '';
+
     // Phase 43: GIF
     if(!mediaHtml && p.gifUrl) {
       mediaHtml = '<div class="gh-post-gif-wrap"><img class="gh-post-gif" src="'+esc(p.gifUrl)+'" alt="GIF" loading="lazy"><span class="gh-gif-badge">GIF</span></div>';
@@ -2557,6 +2670,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+avatarAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><div class="gh-post-name-row"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a>'+coAuthorHtml+'</div><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+target+(p.feeling?' · '+esc(p.feeling):'')+(categoryBadge?' · '+categoryBadge:'')+bizPostedOnHtml+(readTimeBadge?' · '+readTimeBadge:'')+'</div></div>'+moreBtn+'</div>'+
       postTextHtml+
       translateHtml+
+      voiceHtml+
       mediaHtml+
       pollHtml+
       linkPrevHtml+
@@ -2782,6 +2896,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(e.target.closest('[data-save]')){ if(!requireLogin()) return; GS().toggleSavePost(pid,function(saved){ var b=card.querySelector('[data-save]'); if(b) b.classList.toggle('active',!!saved); }); if(window.ghPwaEngage) window.ghPwaEngage(1); }
       var menuBtn=e.target.closest('[data-post-menu]'); if(menuBtn){ postMenu(pid,card,menuBtn); }
       var trBtn=e.target.closest('[data-translate]'); if(trBtn){ e.stopPropagation(); _translatePost(trBtn); return; }
+      var vpBtn=e.target.closest('[data-voice-play]'); if(vpBtn){ e.stopPropagation(); _toggleVoicePlay(vpBtn); return; }
       var rb=e.target.closest('[data-comment-reply]'); if(rb){ e.preventDefault(); openReplyForm(card,pid,rb.dataset.commentId); }
       var cr=e.target.closest('[data-copy-post-link]'); if(cr && navigator.clipboard){ navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast('Post link copied');}); }
       var wrBtn=e.target.closest('[data-who-reacted]'); if(wrBtn){ openWhoReactedModal(wrBtn.dataset.whoReacted); }
@@ -4680,6 +4795,43 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   // Expose so external pages can call it
   window.ghOpenGoLive = _openGoLiveModal;
+
+  /* ── Phase 52: Voice Note player ─────────────────────────── */
+  var _currentVoiceAudio=null, _currentVoiceBtn=null;
+  function _toggleVoicePlay(btn){
+    var src=btn.dataset.voiceSrc||''; if(!src) return;
+    var card=btn.closest('[data-post-id]');
+    var fillEl=card&&card.querySelector('[data-voice-fill]');
+    var durEl=card&&card.querySelector('[data-voice-dur]');
+    // Stop any currently playing voice
+    if(_currentVoiceAudio&&_currentVoiceAudio!==btn._vAudio){
+      _currentVoiceAudio.pause();
+      if(_currentVoiceBtn) _currentVoiceBtn.innerHTML='<i class="fas fa-play"></i>';
+      _currentVoiceAudio=null; _currentVoiceBtn=null;
+    }
+    if(!btn._vAudio) btn._vAudio=new Audio(src);
+    var au=btn._vAudio;
+    if(au.paused){
+      au.play().catch(function(){});
+      btn.innerHTML='<i class="fas fa-pause"></i>';
+      _currentVoiceAudio=au; _currentVoiceBtn=btn;
+      au.ontimeupdate=function(){
+        var pct=au.duration?au.currentTime/au.duration*100:0;
+        if(fillEl) fillEl.style.width=pct+'%';
+        if(durEl) durEl.textContent=_fmtVoiceSec(au.currentTime)+' / '+_fmtVoiceSec(au.duration||0);
+      };
+      au.onended=function(){
+        btn.innerHTML='<i class="fas fa-play"></i>';
+        if(fillEl) fillEl.style.width='0%';
+        _currentVoiceAudio=null; _currentVoiceBtn=null;
+      };
+      au.onloadedmetadata=function(){ if(durEl) durEl.textContent='0:00 / '+_fmtVoiceSec(au.duration||0); };
+    } else {
+      au.pause(); btn.innerHTML='<i class="fas fa-play"></i>';
+      _currentVoiceAudio=null; _currentVoiceBtn=null;
+    }
+  }
+  function _fmtVoiceSec(s){ s=Math.floor(s||0); return Math.floor(s/60)+':'+(s%60<10?'0':'')+s%60; }
 
   /* ── Phase 32: Emoji Picker ──────────────────────────────── */
   var _EMOJIS = '😀 😂 🥹 😊 😍 🤩 😎 😢 😭 🤯 😤 😠 🥺 😴 🤗 🥰 😏 🙄 😬 🫡 👍 👎 👋 🤝 ✌️ 🤞 🤟 👏 🙏 💪 🫶 🤜 🤛 ☝️ 👌 ❤️ 🧡 💛 💚 💙 💜 🖤 🤍 💕 💞 💓 💗 💖 💝 💘 💔 🎉 🎊 🎁 🎈 🎂 🏆 🥇 🎯 🎮 🎸 🎵 🎶 🔥 ⭐ ✨ 🌟 💫 🌍 🌈 ☀️ 🌙 ❄️ 🌊 🌺 🌸 🌻 🍀 🌿 🍕 🍔 🌮 🍜 🍣 🍩 🍦 🍰 🍷 🍺 ☕ 🧃 🍎 🍓 🐱 🐶 🐻 🦊 🐼 🐸 🦁 🐯 🐷 🐮 🐙 🦋 🐝'.split(' ');
