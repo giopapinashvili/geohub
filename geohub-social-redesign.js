@@ -106,9 +106,13 @@
   function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
   /* Phase 21: linkify hashtags in post text */
   function linkifyText(v){
-    return esc(v).replace(/#([\wა-ჿ]+)/g,function(_,tag){
-      return '<a class="gh-hashtag" href="feed.html?tag='+encodeURIComponent(tag.toLowerCase())+'" onclick="event.stopPropagation()">#'+tag+'</a>';
-    });
+    return esc(v)
+      .replace(/#([\wა-ჿ]+)/g,function(_,tag){
+        return '<a class="gh-hashtag" href="feed.html?tag='+encodeURIComponent(tag.toLowerCase())+'" onclick="event.stopPropagation()">#'+tag+'</a>';
+      })
+      .replace(/@([A-Za-z0-9_.ა-ჿ]{2,32})/g,function(_,u){
+        return '<a class="gh-mention" href="profile.html?user='+encodeURIComponent(u)+'" onclick="event.stopPropagation()">@'+u+'</a>';
+      });
   }
   function text(v, fallback){ v = String(v == null ? '' : v).trim(); return v || fallback || ''; }
   function ts(v){ if(!v) return 0; if(typeof v.toMillis === 'function') return v.toMillis(); if(v.seconds) return v.seconds * 1000; if(v instanceof Date) return v.getTime(); if(typeof v === 'number') return v; return Date.parse(v) || 0; }
@@ -1280,6 +1284,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var _lpTimer=null, _lpUrl='';
 
     var ta=$('#ghPostText');
+    if(ta) _bindMentionAutocomplete(ta);
 
     // Auto-focus
     if(ta) { ta.focus(); }
@@ -2587,6 +2592,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         strip4._rxt = setTimeout(function(){ strip4.classList.remove('visible'); }, 3000);
       }
     }, { passive: true });
+    // Phase 40: bind @mention autocomplete on comment/reply inputs
+    root.addEventListener('focusin', function(e){
+      var inp = e.target.closest('.gh-comment-form .gh-input, .gh-reply-form .gh-input');
+      if(inp) _bindMentionAutocomplete(inp);
+    });
   }
 
 
@@ -4041,6 +4051,95 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         toast('📅 '+snap.size+' scheduled post'+(snap.size>1?'s':'')+' published!');
       });
     }).catch(function(){});
+  }
+
+  /* ── Phase 40: @Mention Autocomplete ────────────────────── */
+  function _bindMentionAutocomplete(el){
+    if(!el||el._mentionBound) return;
+    el._mentionBound=true;
+    var _mTimer=null, _mDrop=null, _mStart=-1;
+
+    function _closeMDrop(){
+      if(_mDrop){ _mDrop.remove(); _mDrop=null; }
+      _mStart=-1;
+    }
+
+    function _insertMention(username){
+      var s=el.selectionStart||0, v=el.value;
+      el.value=v.slice(0,_mStart)+'@'+username+' '+v.slice(s);
+      el.selectionStart=el.selectionEnd=_mStart+username.length+2;
+      el.dispatchEvent(new Event('input',{bubbles:true}));
+      _closeMDrop(); el.focus();
+    }
+
+    function _showMDrop(users){
+      _closeMDrop();
+      if(!users.length) return;
+      var drop=document.createElement('div');
+      drop.className='gh-mention-drop';
+      drop.innerHTML=users.map(function(u){
+        var avHtml=u.avatar
+          ?'<img src="'+esc(u.avatar)+'" alt="" onerror="this.onerror=null;this.remove()">'
+          :'<span style="color:#fff;font-size:.62rem;font-weight:700">'+esc(initials(u.name))+'</span>';
+        return '<button type="button" class="gh-mention-opt" data-mu="'+esc(u.slug)+'">'+
+          '<span class="gh-mention-av">'+avHtml+'</span>'+
+          '<span class="gh-mention-info">'+
+            '<strong>'+esc(u.name)+'</strong>'+
+            '<span>'+(u.slug?'@'+esc(u.slug):'')+'</span>'+
+          '</span>'+
+        '</button>';
+      }).join('');
+      document.body.appendChild(drop);
+      _mDrop=drop;
+      // Position below the input
+      var rect=el.getBoundingClientRect();
+      var dw=220, left=Math.max(8,Math.min(rect.left,window.innerWidth-dw-8));
+      drop.style.cssText='top:'+(rect.bottom+4)+'px;left:'+left+'px;width:'+dw+'px';
+      drop.addEventListener('mousedown',function(e){
+        var btn=e.target.closest('[data-mu]'); if(!btn) return;
+        e.preventDefault(); _insertMention(btn.dataset.mu);
+      });
+    }
+
+    el.addEventListener('input',function(){
+      clearTimeout(_mTimer);
+      var v=el.value, cur=el.selectionStart||0;
+      // Find @ before cursor (no whitespace between)
+      var at=-1;
+      for(var i=cur-1;i>=Math.max(0,cur-30);i--){
+        if(v[i]==='@'){ at=i; break; }
+        if(/[\s\n]/.test(v[i])) break;
+      }
+      if(at<0||at===cur-1){ _closeMDrop(); return; }
+      var typed=v.slice(at+1,cur);
+      if(typed.length<1||/[\s@#]/.test(typed)){ _closeMDrop(); return; }
+      _mStart=at;
+      _mTimer=setTimeout(function(){
+        if(!GS()||!GS().searchFirestore) return;
+        GS().searchFirestore(typed,function(res){
+          if((el.value.slice(at+1,el.selectionStart||0))!==typed) return;
+          var users=(res.users||[]).slice(0,5).map(function(u){
+            var slug=u.username||(u.displayName||u.fullName||'').replace(/\s+/g,'').toLowerCase();
+            return { name:u.fullName||u.displayName||u.name||'User', slug:slug||u.id||u.uid||'', avatar:u.photoURL||u.avatar||'' };
+          });
+          _showMDrop(users);
+        });
+      },260);
+    });
+
+    el.addEventListener('keydown',function(e){
+      if(!_mDrop) return;
+      var opts=[].slice.call(_mDrop.querySelectorAll('.gh-mention-opt'));
+      var idx=opts.indexOf(document.activeElement);
+      if(e.key==='ArrowDown'){ e.preventDefault(); var n=opts[Math.min(idx+1,opts.length-1)]; if(n) n.focus(); }
+      else if(e.key==='ArrowUp'){ e.preventDefault(); if(idx>0) opts[idx-1].focus(); else el.focus(); }
+      else if(e.key==='Escape'){ _closeMDrop(); }
+      else if(e.key==='Enter'&&idx>=0){ e.preventDefault(); _insertMention(opts[idx].dataset.mu); }
+    });
+
+    el.addEventListener('blur',function(){
+      setTimeout(function(){ if(_mDrop&&!_mDrop.contains(document.activeElement)) _closeMDrop(); },160);
+    });
   }
 
   /* ── Phase 32: Emoji Picker ──────────────────────────────── */
