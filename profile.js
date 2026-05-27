@@ -184,6 +184,74 @@
     const vals = [user.visitedPlaces, user.friendsCount || 0, user.followers, user.following, user.pointsBalance || Math.floor(user.xp / 10), user.trustScore];
     $$('.profile-stats-bar .pstat-value').forEach((el, i) => { el.textContent = compact(vals[i] || 0); });
     $$('.ptab .tab-count').forEach(c => { c.textContent = '0'; });
+    // Make followers + following pstats clickable
+    $$('.profile-stats-bar .pstat').forEach(function(el) {
+      var lbl = (el.querySelector('.pstat-label') || {}).textContent || '';
+      if (lbl === 'Followers') { el.style.cursor = 'pointer'; el.dataset.pfModal = 'followers'; el.title = 'ვინ მოგყვება'; }
+      if (lbl === 'Following') { el.style.cursor = 'pointer'; el.dataset.pfModal = 'following'; el.title = 'ვის მოჰყვები'; }
+    });
+  }
+
+  /* ── Followers / Following modal ────────────────────────── */
+  function openFollowModal(type, userId) {
+    var GF = window.GeoFirebase;
+    if (!GF || !GF.fs || !GF.db) return;
+    var title = type === 'followers' ? 'მომყოლები' : 'მოჰყვები';
+    // Build modal
+    var overlay = document.createElement('div');
+    overlay.className = 'pf-modal-overlay';
+    overlay.innerHTML =
+      '<div class="pf-modal">' +
+        '<div class="pf-modal-head">' +
+          '<h3>' + title + '</h3>' +
+          '<button class="pf-modal-close" id="pfModalClose"><i class="fas fa-times"></i></button>' +
+        '</div>' +
+        '<div class="pf-modal-list" id="pfModalList">' +
+          '<div class="pf-modal-loading"><i class="fas fa-spinner fa-spin"></i></div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    overlay.querySelector('#pfModalClose').addEventListener('click', function() { overlay.remove(); });
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+
+    // Query
+    var field = type === 'followers' ? 'followingId' : 'followerId';
+    var nameField = type === 'followers' ? 'followerId' : 'followingId';
+    GF.fs.getDocs(GF.fs.query(
+      GF.fs.collection(GF.db, 'follows'),
+      GF.fs.where(field, '==', userId),
+      GF.fs.limit(100)
+    )).then(function(snap) {
+      var list = document.getElementById('pfModalList');
+      if (!list) return;
+      if (snap.empty) { list.innerHTML = '<div class="pf-modal-empty"><i class="fas fa-user-slash"></i><span>' + (type === 'followers' ? 'მომყოლი არ არის' : 'არავის მოჰყვები') + '</span></div>'; return; }
+      var uids = [];
+      snap.forEach(function(d) { var uid = (d.data() || {})[nameField]; if (uid) uids.push(uid); });
+      // Fetch user docs (up to 10 at a time)
+      var fetches = uids.map(function(uid) {
+        return GF.fs.getDoc(GF.fs.doc(GF.db, 'users', uid)).then(function(d) {
+          var data = d.exists() ? d.data() : {};
+          return { uid: uid, name: data.fullName || data.displayName || data.name || 'GeoHub User', avatar: data.avatar || data.photoURL || '' };
+        }).catch(function() { return { uid: uid, name: 'User', avatar: '' }; });
+      });
+      Promise.all(fetches).then(function(users) {
+        if (!list) return;
+        list.innerHTML = users.map(function(u) {
+          var av = u.avatar
+            ? '<img src="' + esc(u.avatar) + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'\'">' +
+              '<span style="display:none">' + esc((u.name||'U').charAt(0)) + '</span>'
+            : '<span>' + esc((u.name||'U').charAt(0)) + '</span>';
+          return '<a class="pf-modal-user" href="profile.html?id=' + esc(u.uid) + '">' +
+            '<span class="pf-modal-av">' + av + '</span>' +
+            '<span class="pf-modal-name">' + esc(u.name) + '</span>' +
+            '<i class="fas fa-chevron-right pf-modal-arr"></i>' +
+          '</a>';
+        }).join('');
+      });
+    }).catch(function() {
+      var list = document.getElementById('pfModalList');
+      if (list) list.innerHTML = '<div class="pf-modal-empty"><i class="fas fa-triangle-exclamation"></i><span>ჩატვირთვა ვერ მოხერხდა</span></div>';
+    });
   }
 
   async function refreshRealStats(user) {
@@ -219,7 +287,15 @@
   function renderIdentity(user, fbUser) {
     document.title = user.fullName + ' — GeoHub';
     const cover = $('.profile-cover');
-    if (cover) cover.style.backgroundImage = user.coverImage ? `linear-gradient(180deg, rgba(4,5,13,0.08), rgba(4,5,13,0.72)), url('${user.coverImage}')` : 'linear-gradient(135deg, rgba(16,185,129,0.20), rgba(77,166,255,0.12), rgba(123,97,255,0.12))';
+    if (cover) {
+      if (user.coverImage) {
+        cover.classList.add('dynamic-cover');
+        cover.style.backgroundImage = `url('${user.coverImage}')`;
+      } else {
+        cover.classList.remove('dynamic-cover');
+        cover.style.backgroundImage = 'linear-gradient(135deg, rgba(16,185,129,0.20), rgba(77,166,255,0.12), rgba(123,97,255,0.12))';
+      }
+    }
     const av = $('.profile-avatar'); if (av) { av.src = user.avatar; av.alt = user.fullName; av.onerror = function(){ this.onerror=null; this.src=initialsSvg(user.initials||'GH'); }; }
     const lvl = $('.avatar-level'); if (lvl) lvl.textContent = level(user);
     const name = $('.profile-name');
@@ -870,19 +946,24 @@
         (topReel ? '<div class="vid-tab-stat"><a href="watch.html?v=' + esc(topReel.id) + '" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;align-items:center;gap:1px"><div class="vid-tab-stat-val" style="color:#a855f7"><i class="fas fa-bolt" style="font-size:.8rem"></i></div><div class="vid-tab-stat-lbl">Top Reel</div></a></div>' : '') +
       '</div>';
 
-      var html = statsRow + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;padding:4px 0">';
+      var cards = '';
       snap.forEach(function (d) {
         var v = Object.assign({ id: d.id }, d.data());
         var tid = v.youtubeId || '';
         var thumb = v.thumbnail || ('https://i.ytimg.com/vi/' + tid + '/hqdefault.jpg');
-        html += '<a href="watch.html?v=' + esc(v.id) + '" style="display:block;border-radius:10px;overflow:hidden;background:var(--bg-elevated,#1e2535);border:1px solid var(--border,rgba(255,255,255,.08));text-decoration:none">' +
-          '<div style="position:relative;padding-top:56.25%;background:#000"><img src="' + esc(thumb) + '" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" loading="lazy">' +
-          '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25)"><div style="width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem"><i class="fas fa-play"></i></div></div></div>' +
-          '<div style="padding:7px 9px"><div style="font-size:.78rem;font-weight:700;color:var(--text-primary,#f1f5f9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(v.title || 'Video') + '</div>' +
-          '<div style="font-size:.7rem;color:var(--text-muted,#94a3b8);margin-top:2px"><i class="fas fa-eye" style="margin-right:3px"></i>' + compact(v.viewCount) + ' · <i class="fas fa-heart" style="margin-right:3px"></i>' + compact(v.likeCount) + '</div></div></a>';
+        cards += '<a href="watch.html?v=' + esc(v.id) + '" class="pv-card">' +
+          '<div class="pv-thumb">' +
+            '<img src="' + esc(thumb) + '" alt="" loading="lazy">' +
+            '<div class="pv-play"><i class="fas fa-play"></i></div>' +
+            (v.isShort ? '<span class="pv-badge">Short</span>' : '') +
+          '</div>' +
+          '<div class="pv-info">' +
+            '<div class="pv-title">' + esc(v.title || 'Video') + '</div>' +
+            '<div class="pv-meta"><i class="fas fa-eye"></i>' + compact(v.viewCount) + ' · <i class="fas fa-heart"></i>' + compact(v.likeCount) + '</div>' +
+          '</div>' +
+        '</a>';
       });
-      html += '</div>';
-      tab.innerHTML = html;
+      tab.innerHTML = statsRow + '<div class="pv-grid">' + cards + '</div>';
     }).catch(function () {});
   }
 
@@ -1868,6 +1949,14 @@
       e.preventDefault();
       try { if (window.GeoFirebase && window.GeoFirebase.auth) await window.GeoFirebase.auth.signOut(); } catch (err) {}
       location.href = 'auth.html';
+    }
+    // Followers / Following modal trigger
+    var pfStat = e.target.closest('[data-pf-modal]');
+    if (pfStat) {
+      var profileUserId = new URLSearchParams(location.search).get('id') ||
+        (window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser && window.GeoFirebase.auth.currentUser.uid) || '';
+      if (profileUserId) openFollowModal(pfStat.dataset.pfModal, profileUserId);
+      return;
     }
     const followBtn = e.target.closest('[data-follow-user]');
     if (followBtn) {
