@@ -532,6 +532,63 @@
       filter: function(v) { return !v.isShort && (videoMatchesCat(v, 'culture') || videoMatchesCat(v, 'events')); }, n: 8 }
   ];
 
+  /* ── Channel sections: one row per channel with ≥2 videos ── */
+  function renderChannelSections(allVids) {
+    var el = document.getElementById('vidChannelSections');
+    if (!el) return;
+
+    /* Group non-short videos by channelId (fallback: channelName) */
+    var map = {};
+    allVids.filter(function(v){ return !v.isShort; }).forEach(function(v){
+      var key = v.channelId || v.channelName || '';
+      if (!key) return;
+      if (!map[key]) {
+        map[key] = {
+          id:     v.channelId  || '',
+          name:   v.channelName || v.authorName || key,
+          avatar: v.channelAvatar || v.authorAvatar || '',
+          videos: []
+        };
+      }
+      map[key].videos.push(v);
+    });
+
+    /* Only channels with ≥2 videos, sorted by count desc, max 10 channels */
+    var chList = Object.keys(map).map(function(k){ return map[k]; })
+      .filter(function(ch){ return ch.videos.length >= 2; })
+      .sort(function(a, b){ return b.videos.length - a.videos.length; })
+      .slice(0, 10);
+
+    if (!chList.length) { el.innerHTML = ''; return; }
+
+    var html = chList.map(function(ch) {
+      var chLink  = ch.id ? 'channel.html?id=' + encodeURIComponent(ch.id) : '#';
+      var initial = (ch.name || 'C').charAt(0).toUpperCase();
+      var avHtml  = ch.avatar
+        ? '<img src="' + esc(ch.avatar) + '" alt="" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'\'"><span style="display:none">' + esc(initial) + '</span>'
+        : '<span>' + esc(initial) + '</span>';
+      var cards = ch.videos.slice(0, 10).map(function(v, i){
+        return tvCardHTML(v, i + 1);
+      }).join('');
+
+      return '<div class="vid-tv-section">' +
+        '<div class="vid-tv-head vid-ch-sec-head">' +
+          '<a href="' + esc(chLink) + '" class="vid-ch-sec-link">' +
+            '<span class="vid-ch-sec-av">' + avHtml + '</span>' +
+            '<div class="vid-ch-sec-info">' +
+              '<h3>' + esc(ch.name) + '</h3>' +
+              '<span class="vid-ch-sec-count">' + ch.videos.length + ' ვიდეო</span>' +
+            '</div>' +
+          '</a>' +
+          '<a href="' + esc(chLink) + '" class="vid-ch-sec-all">ყველა <i class="fas fa-arrow-right"></i></a>' +
+        '</div>' +
+        '<div class="vid-tv-row">' + cards + '</div>' +
+      '</div>';
+    }).join('');
+
+    el.innerHTML = html;
+  }
+
   function renderTVSections(allVids) {
     var el = document.getElementById('vidTVSections');
     if (!el) return;
@@ -1416,6 +1473,7 @@
       state.shorts = vids.filter(function (v) { return v.isShort; });
       if (state.filter === 'all') {
         renderTVSections(vids);
+        renderChannelSections(vids);
         renderTopCreators(vids);
         renderContinueWatching();
         renderSavedSection();

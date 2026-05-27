@@ -1512,6 +1512,83 @@ body.watch-cinematic .related-thumb {
 }
 .vid-tv-row::-webkit-scrollbar { display: none; }
 
+/* ── Channel section header ─────────────────────────────── */
+.vid-ch-sec-head {
+  justify-content: space-between;
+}
+.vid-ch-sec-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  flex: 1;
+  min-width: 0;
+}
+.vid-ch-sec-link:hover h3 { color: var(--green, #10b981); }
+.vid-ch-sec-av {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(16,185,129,.18);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800;
+  font-size: .9rem;
+  color: var(--green, #10b981);
+  border: 2px solid rgba(16,185,129,.25);
+}
+.vid-ch-sec-av img { width: 100%; height: 100%; object-fit: cover; }
+.vid-ch-sec-info { flex: 1; min-width: 0; }
+.vid-ch-sec-info h3 {
+  font-size: .95rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color .15s;
+}
+.vid-ch-sec-count {
+  font-size: .72rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.vid-ch-sec-all {
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--green, #10b981);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color .15s;
+}
+.vid-ch-sec-all:hover { color: var(--green-2, #22c55e); }
+
+/* ── Sticky category pill row ───────────────────────────── */
+.vid-toolbar {
+  position: sticky;
+  top: var(--gh-topbar-h, 78px);
+  z-index: 100;
+  background: var(--bg-base, #050807);
+  padding: 8px 0 4px;
+  margin-bottom: 4px;
+}
+@supports (backdrop-filter: blur(12px)) {
+  .vid-toolbar {
+    background: rgba(5,8,7,.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+body.gh-has-injected-nav .vid-toolbar {
+  top: 78px;
+}
+
 /* regular TV cards */
 .vid-tv-card {
   flex-shrink: 0;
