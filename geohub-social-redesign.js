@@ -56,6 +56,21 @@
         '<div class="gh-skel-line" style="width:58px;height:11px"></div></div>'+
     '</div>';
   }
+  /* ── Skeleton video card (looks like a videoPostCard placeholder) ── */
+  function skelVideoCard(){
+    return '<div class="gh-skel-post">'+
+      '<div class="gh-skel-img" style="height:220px;border-radius:12px;margin-bottom:12px"></div>'+
+      '<div class="gh-skel-post-head" style="margin-bottom:8px">'+
+        '<div class="gh-avatar gh-skel" style="width:34px;height:34px"></div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div class="gh-skel-line" style="width:120px;height:12px;margin-bottom:5px"></div>'+
+          '<div class="gh-skel-line" style="width:65px;height:10px"></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="gh-skel-line" style="width:88%;height:13px;margin-bottom:5px"></div>'+
+      '<div class="gh-skel-line" style="width:62%;height:11px"></div>'+
+    '</div>';
+  }
 
   /* ── Working hours constants ────────────────────────────── */
   var DAYS_KEYS   = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
@@ -1795,7 +1810,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div class="gh-video-post-title"><a href="'+esc(href)+'">'+esc((p.title||'').slice(0,100))+'</a></div>' +
         (desc ? '<div class="gh-video-post-desc">'+esc(desc)+(p.description && p.description.length>160 ? '…' : '')+'</div>' : '') +
       '</div>' +
-      '<div class="gh-post-stats"><span></span><span><button class="gh-stats-btn" data-open-comments-btn><b data-comment-count>0</b> comments</button></span></div>' +
+      '<div class="gh-post-stats">'+
+        '<span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'">❤️ <b data-like-count>'+(p.likeCount||0)+'</b>'+(p.likeCount?' people reacted':'')+'</button></span>'+
+        '<span><button class="gh-stats-btn" data-open-comments-btn><b data-comment-count>'+(p.commentCount||0)+'</b> comments</button></span>'+
+      '</div>'+
       '<div class="gh-rx-breakdown" data-rx-pid="'+esc(pid)+'"></div>' +
       '<div class="gh-post-actions">'+
         '<span class="gh-like-wrap"><button class="gh-act" data-like>❤️ Like</button>'+
@@ -1828,10 +1846,20 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '</div>' +
       (p.text?'<div class="gh-post-body" style="white-space:pre-wrap">'+esc((p.text||'').slice(0,500))+((p.text||'').length>500?'…':'')+'</div>':'') +
       (p.imageUrl?'<div class="gh-ch-post-img"><img src="'+esc(p.imageUrl)+'" alt="" loading="lazy" style="width:100%;border-radius:12px;margin-top:10px;max-height:400px;object-fit:cover"></div>':'') +
-      '<div class="gh-post-footer" style="margin-top:10px">' +
-        '<span class="gh-post-stat"><i class="far fa-heart"></i> '+(p.likeCount||0)+'</span>' +
-        '<span class="gh-post-stat"><i class="far fa-comment"></i> '+(p.commentCount||0)+'</span>' +
-      '</div>' +
+      '<div class="gh-post-stats" style="margin-top:8px">'+
+        '<span><button class="gh-rx-who-btn" data-who-reacted="'+esc(p.id||'')+'">❤️ <b data-like-count>'+(p.likeCount||0)+'</b>'+(p.likeCount?' people reacted':'')+'</button></span>'+
+        '<span><b data-comment-count>'+(p.commentCount||0)+'</b> comments</span>'+
+      '</div>'+
+      '<div class="gh-post-actions">'+
+        '<span class="gh-like-wrap"><button class="gh-act" data-like>❤️ Like</button>'+
+          '<div class="gh-reaction-strip"><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button><button data-reaction="clap">👏</button></div>'+
+        '</span>'+
+        '<button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> Comment</button>'+
+        '<button class="gh-act" data-share><i class="fas fa-share"></i> Share</button>'+
+      '</div>'+
+      '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+
+        '<form class="gh-comment-form" data-comment-form><input class="gh-input" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
+      '</div>'+
     '</article>';
   }
 
@@ -2297,22 +2325,39 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     f.getDoc(reactionRef).then(function(snap){
       var exists=snap.exists(), prev=exists ? (snap.data().type||'like') : '';
       if(exists && prev===type){
-        return f.deleteDoc(reactionRef).then(function(){ return f.updateDoc(postRef,{likeCount:f.increment(-1), reactionCount:f.increment(-1)}).catch(function(){}); }).then(function(){ updateReactionUi(card,''); });
+        // Same reaction clicked again → remove it (delta = -1)
+        return f.deleteDoc(reactionRef).then(function(){ return f.updateDoc(postRef,{likeCount:f.increment(-1), reactionCount:f.increment(-1)}).catch(function(){}); }).then(function(){ updateReactionUi(card,'',-1); });
       }
       var write=f.setDoc(reactionRef,{userId:u.uid,type:type,createdAt:f.serverTimestamp(),updatedAt:f.serverTimestamp()},{merge:true});
+      // New reaction → +1; changing type → 0 (count unchanged)
+      var delta=exists?0:1;
       if(!exists) write=write.then(function(){ return f.updateDoc(postRef,{likeCount:f.increment(1), reactionCount:f.increment(1)}).catch(function(){}); });
-      return write.then(function(){ updateReactionUi(card,type); });
+      return write.then(function(){ updateReactionUi(card,type,delta); });
     }).catch(function(err){ console.error('setReaction',err); toast('Reaction failed','error'); });
   }
 
-  function updateReactionUi(card,type){
+  function updateReactionUi(card,type,delta){
     if(!card) return;
     var pid=card.dataset&&card.dataset.postId;
     var targets=pid?Array.from(document.querySelectorAll('[data-post-id="'+CSS.escape(pid)+'"]')):[card];
     targets.forEach(function(c){
+      // Update like button label + active state
       var like=c.querySelector('[data-like]');
       if(like){ like.classList.toggle('active',!!type); like.innerHTML=(type==='love'?'❤️ Love':type==='haha'?'😂 Haha':type==='wow'?'😮 Wow':type==='sad'?'😢 Sad':type==='angry'?'😡 Angry':type==='clap'?'👏 Clap':'❤️ Like'); }
       $all('[data-reaction]',c).forEach(function(b){ b.classList.toggle('active',b.dataset.reaction===type); });
+      // Update like count display immediately (no Firestore re-read needed)
+      if(delta){
+        var countEl=c.querySelector('[data-like-count]');
+        if(countEl){
+          var n=Math.max(0,(parseInt(countEl.textContent,10)||0)+delta);
+          countEl.textContent=n;
+          // Update sibling text node "X people reacted"
+          var btn=countEl.parentElement;
+          if(btn && btn.lastChild && btn.lastChild.nodeType===3){
+            btn.lastChild.textContent=n?' people reacted':'';
+          }
+        }
+      }
     });
   }
 
@@ -3791,7 +3836,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="'+compAvClass+'" id="ghComposerAvatar">'+compAvContent+'</span><button class="gh-composer-fake" data-create-post>რას აზიარებ დღეს?</button></div><div class="gh-composer-actions"><button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Place</button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:#38bdf8"></i> Business</button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:#f59e0b"></i> Event</button></div></section>'+
         (pageMode ? '' : '<div id="ghWelcomeSlot"></div>')+
         (pageMode ? '<div class="gh-pill-row gh-page-feed-tabs" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="page"><i class="fas fa-store" style="font-size:.75rem"></i> Page Activity</button></div>' : '<div class="gh-pill-row" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="foryou"><i class="fas fa-house" style="font-size:.75rem"></i> For You</button><button class="gh-pill" data-feed-tab="following"><i class="fas fa-user-group" style="font-size:.75rem"></i> Following</button></div>')+
-        '<div id="ghFeedList">'+skelPostCard()+skelPostCard()+skelPostCard()+'</div>'+
+        '<div id="ghFeedList">'+skelPostCard()+skelVideoCard()+skelPostCard()+skelVideoCard()+skelPostCard()+'</div>'+
         '<div id="ghFeedLoadMore" style="text-align:center;padding:16px 0 8px"></div>'
     });
     if(pageMode){
