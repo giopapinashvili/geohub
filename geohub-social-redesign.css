@@ -3921,6 +3921,16 @@ a.gh-trending-chip:hover {
   margin: 8px 0;
 }
 
+/* ── Phase 42: Read Time Badge ───────────────────────── */
+.gh-read-time {
+  font-size: .72rem;
+  color: var(--gh-muted, #8aa69a);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.gh-read-time i { font-size: .65rem; }
+
 /* ── Phase 41: Post Translation ─────────────────────── */
 .gh-post-translate {
   padding: 0 16px 4px;
