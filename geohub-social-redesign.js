@@ -4068,25 +4068,35 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       } else {
         var feedN = state.feedN || 20;
         var lmBtn = document.getElementById('ghFeedLoadMore');
+        var _lmObserver = null;
+        function _disconnectLmObs(){ if(_lmObserver){ _lmObserver.disconnect(); _lmObserver=null; } }
         function startFeedListen(n){
           if(state.feedUnsub){ try{state.feedUnsub();}catch(e){} state.feedUnsub=null; }
-          if(lmBtn) lmBtn.innerHTML='<button class="gh-btn ghost gh-load-more-btn" disabled><i class="fas fa-spinner fa-spin"></i> იტვირთება…</button>';
+          _disconnectLmObs();
+          if(lmBtn) lmBtn.innerHTML='<div class="gh-feed-dots"><span></span><span></span><span></span></div>';
           state.feedUnsub=GS().listenFeed(function(posts){
             if(renderId!==state.feedRenderId) return;
             lastPosts=posts;
             paint();
+            _disconnectLmObs();
             if(lmBtn){
               var hasMore=posts.length>=n;
-              lmBtn.innerHTML=hasMore
-                ? '<button class="gh-btn ghost gh-load-more-btn" id="ghFeedLoadMoreBtn">მეტის ჩვენება <i class="fas fa-chevron-down"></i></button>'
-                : '<span style="font-size:.78rem;color:var(--text-muted)">ყველა პოსტი ნანახია ✓</span>';
-              var btn=document.getElementById('ghFeedLoadMoreBtn');
-              if(btn) btn.onclick=function(){
-                _dismissNewPill();
-                _renderedIds={};
-                state.feedN=(state.feedN||20)+20;
-                startFeedListen(state.feedN);
-              };
+              if(hasMore){
+                lmBtn.innerHTML='<div class="gh-feed-sentinel"></div>';
+                var sentinel=lmBtn.querySelector('.gh-feed-sentinel');
+                _lmObserver=new IntersectionObserver(function(entries){
+                  if(!entries[0].isIntersecting) return;
+                  _disconnectLmObs();
+                  lmBtn.innerHTML='<div class="gh-feed-dots"><span></span><span></span><span></span></div>';
+                  _dismissNewPill();
+                  _renderedIds={};
+                  state.feedN=(state.feedN||20)+20;
+                  startFeedListen(state.feedN);
+                },{rootMargin:'300px'});
+                _lmObserver.observe(sentinel);
+              } else {
+                lmBtn.innerHTML='<div class="gh-feed-end"><span>✓</span> ყველა პოსტი ნანახია</div>';
+              }
             }
           }, n);
         }
