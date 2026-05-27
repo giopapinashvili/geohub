@@ -1131,6 +1131,7 @@
           type: extra && extra.type ? extra.type : null,
           poll: extra && extra.poll ? extra.poll : null,
           gifUrl: extra && extra.gifUrl ? extra.gifUrl : null,
+          coAuthors: extra && extra.coAuthors && extra.coAuthors.length ? extra.coAuthors : null,
           createdAt: serverTimestamp()
         };
         // For close_friends posts: snapshot the author's closeFriends UIDs onto the post
@@ -1139,6 +1140,23 @@
             if(data.status === 'scheduled') toast('📅 Post scheduled!');
             else toast('Post published!');
             awardPoints(20, 'Create post', 'post', ref.id);
+            /* Phase 45: notify co-authors */
+            if(data.coAuthors && data.coAuthors.length){
+              var me2=meData()||{};
+              data.coAuthors.forEach(function(ca){
+                if(!ca||!ca.uid||ca.uid===user.uid) return;
+                setDoc(doc(db,'users',ca.uid,'notifications',ref.id+'_coauthor'),{
+                  type:'coauthor',
+                  fromUid:user.uid,
+                  fromName:me2.name||user.displayName||'Someone',
+                  fromAvatar:me2.avatar||user.photoURL||'',
+                  postId:ref.id,
+                  message:'tagged you as co-author in a post',
+                  read:false,
+                  createdAt:serverTimestamp()
+                }).catch(function(){});
+              });
+            }
             /* Phase 21: extract & count hashtags */
             var htags=(text.match(/#[\wა-ჰა-ჿ]+/g)||[]).map(function(t){ return t.slice(1).toLowerCase(); });
             htags.forEach(function(tag){

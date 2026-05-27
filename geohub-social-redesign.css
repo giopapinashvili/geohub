@@ -3921,6 +3921,102 @@ a.gh-trending-chip:hover {
   margin: 8px 0;
 }
 
+/* ── Phase 45: Co-Authors ────────────────────────────── */
+.gh-coauthor-panel {
+  margin: 0 12px 8px;
+  background: var(--gh-panel, #1c2b26);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 10px;
+}
+.gh-coa-search-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gh-coa-search-row .gh-input { flex: 1; font-size: .82rem; }
+.gh-coa-results {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 6px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+.gh-coa-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--gh-text, #e0ede8);
+  font-size: .85rem;
+  transition: background .12s;
+  text-align: left;
+}
+.gh-coa-opt:hover { background: rgba(255,255,255,.07); }
+.gh-coa-opt img, .gh-coa-opt-init {
+  width: 28px; height: 28px; border-radius: 50%;
+  object-fit: cover; flex-shrink: 0;
+  background: var(--gh-green, #2d6a4f);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .62rem; font-weight: 700; color: #fff;
+}
+.gh-coa-no-result { font-size: .78rem; color: var(--gh-muted, #8aa69a); padding: 8px; }
+.gh-coa-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.gh-coa-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(45,106,79,.25);
+  border: 1px solid rgba(45,106,79,.4);
+  border-radius: 20px;
+  padding: 3px 8px 3px 4px;
+  font-size: .78rem;
+  color: var(--gh-text, #e0ede8);
+}
+.gh-coa-chip img, .gh-coa-chip-init {
+  width: 20px; height: 20px; border-radius: 50%; object-fit: cover;
+}
+.gh-coa-chip button {
+  background: none; border: none; cursor: pointer;
+  color: var(--gh-muted, #8aa69a); font-size: .9rem; padding: 0 2px;
+  line-height: 1;
+}
+/* Post card co-author display */
+.gh-post-name-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.gh-coauthor-with {
+  font-size: .82rem;
+  color: var(--gh-muted, #8aa69a);
+}
+.gh-coauthor-link {
+  color: var(--gh-text, #e0ede8);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.gh-coauthor-link img {
+  width: 18px; height: 18px; border-radius: 50%; object-fit: cover;
+}
+.gh-coauthor-link:hover { text-decoration: underline; }
+
 /* ── Phase 44: Repost ────────────────────────────────── */
 .gh-repost-banner {
   padding: 6px 16px;
