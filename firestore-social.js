@@ -3776,7 +3776,7 @@
 
     // ── SEARCH ───────────────────────────────────────────────────────────
     function searchFirestore(q_str, callback) {
-      var empty = { users:[], groups:[], places:[], posts:[], businesses:[], events:[], services:[], rewards:[], creators:[], learningItems:[] };
+      var empty = { users:[], groups:[], places:[], posts:[], businesses:[], events:[], services:[], rewards:[], creators:[], learningItems:[], videos:[] };
       if (!q_str || !q_str.trim()) { callback(empty); return; }
       var needle   = q_str.trim();
       var nLow     = needle.toLowerCase();
@@ -3842,6 +3842,7 @@
         { key:'rewards',       col:'rewards',       fields:['title','name'] },
         { key:'creators',      col:'creators',      fields:['name','username'] },
         { key:'learningItems', col:'learningItems', fields:['title','name'] },
+        { key:'videos',        col:'videos',        fields:['title'] },
         { key:'posts',         col:'posts',         fields:[] }
       ];
       var pending = jobs.length;

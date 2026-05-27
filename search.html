@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ka">
 <head>
   <meta charset="UTF-8">
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
@@ -35,6 +35,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css">
   </noscript>
   <link rel="stylesheet" href="geohub-social-redesign.css">
+  <link rel="stylesheet" href="account-switcher.css">
   <link rel="stylesheet" href="search.css">
   <link rel="stylesheet" href="chat-popup.css">
   <link rel="stylesheet" href="responsive-polish.css">
@@ -49,12 +50,14 @@
 <body data-gh-page="search">
   <noscript>GeoHub requires JavaScript.</noscript>
   <script type="module" src="firebase-config.js"></script>
+  <script defer src="gh-schema.js"></script>
   <script defer src="account.js"></script>
   <script defer src="nav-cleanup.js"></script>
   <script defer src="mobile-nav.js"></script>
   <script defer src="firestore-social.js"></script>
-  <script defer src="geohub-social-redesign.js"></script>
   <script defer src="chat-popup.js"></script>
+  <script defer src="geohub-social-redesign.js"></script>
+  <script defer src="account-switcher.js"></script>
   <script defer src="geohub-production-stabilization-v1.js"></script>
   <script defer src="responsive-polish.js"></script>
 
@@ -92,20 +95,21 @@
     var _defaultTabCache = {};
 
     var TABS = [
-      { id:'all',        label:'All',        icon:'fas fa-th' },
-      { id:'people',     label:'People',     icon:'fas fa-user' },
-      { id:'businesses', label:'Businesses', icon:'fas fa-store' },
-      { id:'places',     label:'Places',     icon:'fas fa-map-marker-alt' },
-      { id:'events',     label:'Events',     icon:'fas fa-calendar' },
-      { id:'groups',     label:'Groups',     icon:'fas fa-users' },
-      { id:'posts',      label:'Posts',      icon:'fas fa-newspaper' },
-      { id:'services',   label:'Services',   icon:'fas fa-grip' },
+      { id:'all',        label:'ყველა',      icon:'fas fa-th' },
+      { id:'people',     label:'ადამიანები', icon:'fas fa-user' },
+      { id:'videos',     label:'ვიდეოები',   icon:'fas fa-film' },
+      { id:'businesses', label:'ბიზნესი',    icon:'fas fa-store' },
+      { id:'places',     label:'ადგილები',   icon:'fas fa-map-marker-alt' },
+      { id:'events',     label:'ივენთები',   icon:'fas fa-calendar' },
+      { id:'groups',     label:'ჯგუფები',    icon:'fas fa-users' },
+      { id:'posts',      label:'პოსტები',    icon:'fas fa-newspaper' },
+      { id:'services',   label:'სერვისები',  icon:'fas fa-grip' },
       { id:'creators',   label:'Creators',   icon:'fas fa-camera-retro' },
       { id:'learning',   label:'Learning',   icon:'fas fa-graduation-cap' }
     ];
 
     var TAB_KEY = {
-      all:null, people:'users', businesses:'businesses', places:'places',
+      all:null, people:'users', videos:'videos', businesses:'businesses', places:'places',
       events:'events', groups:'groups', posts:'posts', services:'services',
       creators:'creators', learning:'learningItems'
     };
@@ -190,7 +194,7 @@
 
     function updateCounts(results) {
       var keyMap = {
-        people:'users', businesses:'businesses', places:'places', events:'events',
+        people:'users', videos:'videos', businesses:'businesses', places:'places', events:'events',
         groups:'groups', posts:'posts', services:'services', creators:'creators', learning:'learningItems'
       };
       var total = 0;
@@ -205,15 +209,63 @@
     }
 
     /* ── Discover state ── */
+    var TRENDING_TOPICS = [
+      { q:'თბილისი',  icon:'🏙️' }, { q:'ბათუმი',   icon:'🌊' },
+      { q:'სვანეთი',  icon:'🏔️' }, { q:'Travel',    icon:'✈️'  },
+      { q:'Food',     icon:'🍽️'  }, { q:'Hiking',    icon:'🥾'  },
+      { q:'Culture',  icon:'🏛️' }, { q:'ღვინო',     icon:'🍷'  },
+      { q:'Coffee',   icon:'☕'  }, { q:'ბუნება',    icon:'🌿'  },
+      { q:'Music',    icon:'🎵'  }, { q:'Sports',    icon:'⚽'  }
+    ];
+
+    var QUICK_LINKS = [
+      { label:'ადამიანები',  icon:'fas fa-user',           tab:'people',     color:'#60a5fa' },
+      { label:'ვიდეოები',    icon:'fas fa-film',           tab:'videos',     color:'#10b981' },
+      { label:'ბიზნესი',     icon:'fas fa-store',          tab:'businesses', color:'#34d399' },
+      { label:'ადგილები',    icon:'fas fa-map-marker-alt', tab:'places',     color:'#fbbf24' },
+      { label:'ივენთები',    icon:'fas fa-calendar',       tab:'events',     color:'#f87171' },
+      { label:'ჯგუფები',     icon:'fas fa-users',          tab:'groups',     color:'#c084fc' }
+    ];
+
     function showDiscover() {
       var body = document.getElementById('srchBody');
       if (!body) return;
       var recent = getRecent();
       var html = '';
+
+      /* Quick browse links */
+      html += '<div class="sr-discover-section">' +
+        '<div class="sr-section-title"><i class="fas fa-compass"></i> Browse</div>' +
+        '<div class="sr-quick-links">' +
+        QUICK_LINKS.map(function(l) {
+          return '<button class="sr-quick-link" onclick="window._srSetTab(\'' + l.tab + '\')" style="--ql-color:' + l.color + '">' +
+            '<span class="sr-ql-icon"><i class="' + l.icon + '"></i></span>' +
+            '<span>' + l.label + '</span>' +
+          '</button>';
+        }).join('') +
+        '</div>' +
+      '</div>';
+
+      /* Trending topics */
+      html += '<div class="sr-discover-section">' +
+        '<div class="sr-section-title"><i class="fas fa-fire-flame-curved"></i> ტრენდული</div>' +
+        '<div class="sr-trending-chips">' +
+        TRENDING_TOPICS.map(function(t) {
+          var qj = JSON.stringify(t.q);
+          return '<button class="sr-trend-chip" onclick="window._srRunRecent(' + qj + ')">' +
+            t.icon + ' ' + esc(t.q) +
+          '</button>';
+        }).join('') +
+        '</div>' +
+      '</div>';
+
+      /* Recent searches */
       if (recent.length) {
-        html = '<div class="sr-section-title" style="display:flex;align-items:center;gap:6px;margin-bottom:10px">' +
-          '<i class="fas fa-history" style="color:#10b981"></i> Recent searches' +
-          '<button class="sr-recent-clear-all" onclick="window._srClearAll()">Clear all</button></div>' +
+        html += '<div class="sr-discover-section">' +
+          '<div class="sr-section-title" style="display:flex;align-items:center;gap:6px">' +
+            '<i class="fas fa-history"></i> ბოლო ძიებები' +
+            '<button class="sr-recent-clear-all" onclick="window._srClearAll()">Clear all</button>' +
+          '</div>' +
           '<div class="sr-recent-list">' +
           recent.map(function(q) {
             var qe = esc(q), qj = JSON.stringify(q);
@@ -221,15 +273,12 @@
               '<div class="sr-recent-icon"><i class="fas fa-clock"></i></div>' +
               '<span class="sr-recent-text">' + qe + '</span>' +
               '<button class="sr-recent-del" onclick="event.stopPropagation();window._srDelRecent(' + qj + ')" title="Remove"><i class="fas fa-times"></i></button>' +
-              '</div>';
+            '</div>';
           }).join('') +
-          '</div>';
-      } else {
-        html = '<div class="sr-no-results">' +
-          '<i class="fas fa-search"></i>' +
-          '<p>Search for <span>people, places, businesses,</span><br>groups, events and more.</p>' +
-          '</div>';
+          '</div>' +
+        '</div>';
       }
+
       body.innerHTML = html;
     }
 
@@ -316,6 +365,17 @@
         name = item.name || item.title || 'Service';
         sub  = item.category || item.description || 'Service';
         badge = 'Service'; badgeClass = 'sr-badge-service';
+      } else if (type === 'video') {
+        href = 'watch.html?v=' + encodeURIComponent(item.id || '');
+        av   = item.thumbnail || (item.youtubeId ? 'https://i.ytimg.com/vi/' + item.youtubeId + '/mqdefault.jpg' : '');
+        name = item.title || 'Video';
+        var _vt = [];
+        if (item.channelName) _vt.push(item.channelName);
+        if (item.category)    _vt.push(item.category);
+        if (item.city)        _vt.push(item.city);
+        sub = _vt.join(' · ') || (item.isShort ? 'Short' : 'Video');
+        extra = item.description ? item.description.trim().substring(0, 70) : '';
+        badge = item.isShort ? 'Short' : 'Video'; badgeClass = 'sr-badge-video';
       } else if (type === 'creator') {
         href = 'profile.html?id=' + encodeURIComponent(item.uid || item.id || '');
         av   = item.avatar || item.photoURL || '';
@@ -330,13 +390,19 @@
         badge = 'Learning'; badgeClass = 'sr-badge-learning';
       }
       var initial = esc((name || '?').charAt(0).toUpperCase());
-      var avHtml = av
-        ? '<img src="' + esc(av) + '" alt="" loading="lazy" decoding="async" onerror="this.outerHTML=\'<span>' + initial + '</span>\'">'
-        : '<span>' + initial + '</span>';
+      var avHtml;
+      if (type === 'video' && av) {
+        avHtml = '<img src="' + esc(av) + '" alt="" loading="lazy" decoding="async" style="object-fit:cover;width:100%;height:100%" onerror="this.style.display=\'none\'">' +
+                 '<span class="sr-vid-play"><i class="fas fa-play"></i></span>';
+      } else {
+        avHtml = av
+          ? '<img src="' + esc(av) + '" alt="" loading="lazy" decoding="async" onerror="this.outerHTML=\'<span>' + initial + '</span>\'">'
+          : '<span>' + initial + '</span>';
+      }
       var verBadge = verified ? ' <i class="fas fa-circle-check sr-verified" title="Verified"></i>' : '';
       var extraHtml = extra ? '<div class="sr-item-extra">' + esc(extra) + '</div>' : '';
-      return '<a class="sr-item" href="' + esc(href) + '">' +
-        '<div class="sr-item-av sr-av-' + type + '">' + avHtml + '</div>' +
+      return '<a class="sr-item' + (type === 'video' ? ' sr-item-video' : '') + '" href="' + esc(href) + '">' +
+        '<div class="sr-item-av sr-av-' + type + (type === 'video' ? ' sr-av-vid' : '') + '">' + avHtml + '</div>' +
         '<div class="sr-item-body">' +
           '<div class="sr-item-name">' + esc(name) + verBadge + '</div>' +
           '<div class="sr-item-sub">' + esc(sub) + '</div>' +
@@ -374,15 +440,16 @@
       var isAll = tab === 'all';
       var html = '';
       var sections = [
-        { tabId:'people',     key:'users',        title:'People',     icon:'fas fa-user',            type:'user' },
-        { tabId:'businesses', key:'businesses',    title:'Businesses', icon:'fas fa-store',           type:'business' },
-        { tabId:'places',     key:'places',        title:'Places',     icon:'fas fa-map-marker-alt',  type:'place' },
-        { tabId:'events',     key:'events',        title:'Events',     icon:'fas fa-calendar',        type:'event' },
-        { tabId:'groups',     key:'groups',        title:'Groups',     icon:'fas fa-users',           type:'group' },
-        { tabId:'posts',      key:'posts',         title:'Posts',      icon:'fas fa-newspaper',       type:'post' },
-        { tabId:'services',   key:'services',      title:'Services',   icon:'fas fa-grip',            type:'service' },
-        { tabId:'creators',   key:'creators',      title:'Creators',   icon:'fas fa-camera-retro',   type:'creator' },
-        { tabId:'learning',   key:'learningItems', title:'Learning',   icon:'fas fa-graduation-cap',  type:'learning' }
+        { tabId:'people',     key:'users',        title:'ადამიანები', icon:'fas fa-user',            type:'user' },
+        { tabId:'videos',     key:'videos',       title:'ვიდეოები',   icon:'fas fa-film',            type:'video' },
+        { tabId:'businesses', key:'businesses',   title:'ბიზნესი',    icon:'fas fa-store',           type:'business' },
+        { tabId:'places',     key:'places',       title:'ადგილები',   icon:'fas fa-map-marker-alt',  type:'place' },
+        { tabId:'events',     key:'events',       title:'ივენთები',   icon:'fas fa-calendar',        type:'event' },
+        { tabId:'groups',     key:'groups',       title:'ჯგუფები',    icon:'fas fa-users',           type:'group' },
+        { tabId:'posts',      key:'posts',        title:'პოსტები',    icon:'fas fa-newspaper',       type:'post' },
+        { tabId:'services',   key:'services',     title:'სერვისები',  icon:'fas fa-grip',            type:'service' },
+        { tabId:'creators',   key:'creators',     title:'Creators',   icon:'fas fa-camera-retro',    type:'creator' },
+        { tabId:'learning',   key:'learningItems',title:'Learning',   icon:'fas fa-graduation-cap',  type:'learning' }
       ];
       sections.forEach(function(sec) {
         if (isAll || tab === sec.tabId) {
@@ -408,8 +475,13 @@
     window._srRunRecent = function(q) {
       var inp = document.getElementById('srchInput');
       var gs = document.getElementById('ghGlobalSearch');
-      if (inp) { inp.value = q; inp.dispatchEvent(new Event('input')); }
+      if (inp) { inp.value = q; if (clearBtn) clearBtn.classList.add('visible'); inp.dispatchEvent(new Event('input')); }
       if (gs) gs.value = q;
+    };
+    window._srSetTab = function(tabId) {
+      setTab(tabId);
+      var inp = document.getElementById('srchInput');
+      if (inp && !inp.value.trim()) loadDefaultTab(tabId);
     };
 
     /* ── Error state ── */
@@ -425,7 +497,7 @@
 
     /* ── Default tab browse (no query) — real Firestore data ── */
     var _DEFAULT_TYPE_MAP = {
-      people:'user', businesses:'business', places:'place', events:'event',
+      people:'user', videos:'video', businesses:'business', places:'place', events:'event',
       groups:'group', posts:'post', services:'service', creators:'creator',
       learning:'learning'
     };
