@@ -2192,10 +2192,10 @@
     }
 
     // ── STORIES ─────────────────────────────────────────────────────────
-    function createStory(text, mediaUrl, callback) {
+    function createStory(text, mediaUrl, callback, extra) {
       requireAuth(function (user) {
         var me = meData() || {};
-        addDoc(collection(db, 'stories'), {
+        var storyData = {
           text: text || '',
           mediaUrl: mediaUrl || null,
           authorId: user.uid,
@@ -2204,7 +2204,11 @@
           authorAvatar: me.avatar || user.photoURL || '',
           createdAt: serverTimestamp(),
           expiresAt: new Date(Date.now() + 86400000)
-        }).then(function () {
+        };
+        // Phase 62: poll + link stickers
+        if (extra && extra.poll) storyData.poll = extra.poll;
+        if (extra && extra.link) storyData.link = extra.link;
+        addDoc(collection(db, 'stories'), storyData).then(function () {
           toast('Story posted!');
           if (callback) callback();
         }).catch(function (err) {

@@ -4974,3 +4974,275 @@ a.gh-trending-chip:hover {
 }
 .gh-efc-attendees .gh-avatar-xs:first-child { margin-left: 0; }
 .gh-efc-attendees .gh-avatar-xs img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ── Phase 61: Trending Posts Widget ────────────────────── */
+.gh-trpost-row {
+  display: flex;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--gh-border, rgba(148,163,184,.1));
+  align-items: flex-start;
+}
+.gh-trpost-row:last-child { border-bottom: none; }
+.gh-trpost-rank {
+  font-size: .7rem;
+  font-weight: 900;
+  color: var(--gh-green, #10b981);
+  min-width: 16px;
+  padding-top: 2px;
+}
+.gh-trpost-body { flex: 1; min-width: 0; }
+.gh-trpost-author {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 2px;
+}
+.gh-trpost-name { font-size: .78rem; font-weight: 600; color: var(--gh-text, #eefcf6); }
+.gh-trpost-text { font-size: .75rem; color: var(--gh-muted, #8aa69a); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.gh-trpost-meta { font-size: .7rem; color: var(--gh-dim, #60766d); margin-top: 2px; }
+
+/* ── Phase 61: Advanced Search Results ──────────────────── */
+.gh-search-results-list { display: flex; flex-direction: column; gap: 4px; }
+.gh-sr-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--gh-card, rgba(13,22,19,.92));
+  border-radius: var(--gh-radius-md, 12px);
+  border: 1px solid var(--gh-border, rgba(148,163,184,.1));
+  transition: border-color .15s;
+}
+.gh-sr-item:hover { border-color: rgba(16,185,129,.25); }
+.gh-sr-main { display: flex; align-items: center; gap: 10px; flex: 1; text-decoration: none; color: inherit; }
+.gh-sr-icon {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(16,185,129,.1);
+  border-radius: 10px;
+  color: var(--gh-green, #10b981);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.gh-sr-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.gh-sr-info strong { font-size: .88rem; color: var(--gh-text, #eefcf6); }
+.gh-sr-info span { font-size: .78rem; color: var(--gh-muted, #8aa69a); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* ── Phase 62: Story Poll Builder ───────────────────────── */
+.gh-story-poll-builder { background: rgba(255,255,255,.05); border: 1px solid var(--gh-border); border-radius: 12px; padding: 12px; }
+.gh-story-owner-hl {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,.75);
+  font-size: .95rem;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: background .15s;
+}
+.gh-story-owner-hl:hover { background: rgba(255,255,255,.15); color: #f59e0b; }
+
+/* ── Phase 63: Profile Highlights Strip ─────────────────── */
+.gh-hl-strip {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 12px 0;
+  scrollbar-width: none;
+}
+.gh-hl-strip::-webkit-scrollbar { display: none; }
+.gh-hl-item { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; flex-shrink: 0; }
+.gh-hl-thumb {
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  border: 2px solid var(--gh-green, #10b981);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--gh-card, rgba(13,22,19,.92));
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.gh-hl-thumb:hover { border-color: #22c55e; }
+.gh-hl-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.gh-hl-thumb i { color: var(--gh-green, #10b981); font-size: 1.3rem; }
+.gh-hl-label { font-size: .7rem; color: var(--gh-text, #eefcf6); font-weight: 600; max-width: 58px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gh-hl-pick-btn {
+  display: block; width: 100%;
+  background: rgba(255,255,255,.05);
+  border: 1px solid var(--gh-border);
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: var(--gh-text, #eefcf6);
+  font-size: .84rem;
+  cursor: pointer;
+  text-align: left;
+  margin-bottom: 6px;
+  transition: background .12s;
+}
+.gh-hl-pick-btn:hover { background: rgba(16,185,129,.1); border-color: var(--gh-green); }
+.gh-sv-list { display: flex; flex-direction: column; gap: 8px; }
+.gh-sv-row { padding: 6px 0; border-bottom: 1px solid var(--gh-border); }
+.gh-sv-row:last-child { border-bottom: none; }
+
+/* ── Phase 64: GeoCoins & Tips ──────────────────────────── */
+.gh-tip-modal { display: flex; flex-direction: column; gap: 10px; }
+.gh-tip-balance {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(245,158,11,.08);
+  border: 1px solid rgba(245,158,11,.25);
+  border-radius: 10px;
+  font-size: .88rem;
+}
+.gh-tip-amounts { display: flex; flex-wrap: wrap; gap: 8px; }
+.gh-tip-amt {
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--gh-border);
+  border-radius: var(--gh-radius-full);
+  padding: 6px 14px;
+  font-size: .84rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--gh-text, #eefcf6);
+  transition: background .12s, border-color .12s;
+}
+.gh-tip-amt:hover:not(.disabled) { background: rgba(245,158,11,.15); border-color: #f59e0b; color: #f59e0b; }
+.gh-tip-amt.active { background: rgba(245,158,11,.2); border-color: #f59e0b; color: #f59e0b; }
+.gh-tip-amt.disabled { opacity: .4; cursor: not-allowed; }
+
+/* ── Phase 65: Notification Preferences ─────────────────── */
+.gh-notif-prefs { display: flex; flex-direction: column; gap: 8px; }
+.gh-np-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--gh-border, rgba(148,163,184,.1));
+  gap: 12px;
+}
+.gh-np-row:last-child { border-bottom: none; }
+.gh-np-dnd { background: rgba(245,158,11,.06); border-radius: 10px; padding: 10px 12px !important; border: 1px solid rgba(245,158,11,.2); border-bottom: 1px solid rgba(245,158,11,.2) !important; }
+.gh-toggle { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+.gh-toggle input { opacity: 0; width: 0; height: 0; }
+.gh-toggle span {
+  position: absolute; inset: 0;
+  background: var(--gh-border, rgba(148,163,184,.2));
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.gh-toggle span::before {
+  content: '';
+  position: absolute;
+  left: 3px; top: 3px;
+  width: 18px; height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform .2s;
+}
+.gh-toggle input:checked + span { background: var(--gh-green, #10b981); }
+.gh-toggle input:checked + span::before { transform: translateX(20px); }
+
+/* ── Phase 66: Live Chat + Viewer Count ─────────────────── */
+.gh-live-vc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: .78rem;
+  font-weight: 700;
+  color: #ef4444;
+  background: rgba(239,68,68,.1);
+  border: 1px solid rgba(239,68,68,.3);
+  border-radius: var(--gh-radius-full);
+  padding: 2px 8px;
+  margin-left: 10px;
+}
+.gh-live-chat-wrap {
+  margin-top: 10px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--gh-border);
+  border-radius: 10px;
+  padding: 8px;
+}
+.gh-live-chat-msgs { font-size: .78rem; color: var(--gh-muted); min-height: 40px; }
+
+/* ── Phase 67: Marketplace ───────────────────────────────── */
+.gh-mkt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  padding: 4px;
+}
+.gh-mkt-card {
+  background: var(--gh-card, rgba(13,22,19,.92));
+  border: 1px solid var(--gh-border);
+  border-radius: var(--gh-radius-md, 12px);
+  overflow: hidden;
+  transition: border-color .2s, transform .15s;
+  cursor: pointer;
+}
+.gh-mkt-card:hover { border-color: rgba(16,185,129,.3); transform: translateY(-2px); }
+.gh-mkt-card.sold { opacity: .65; }
+.gh-mkt-img { position: relative; height: 160px; overflow: hidden; }
+.gh-mkt-img img { width: 100%; height: 100%; object-fit: cover; }
+.gh-mkt-img-ph { height: 140px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.04); color: var(--gh-muted); font-size: 2rem; }
+.gh-mkt-sold-badge {
+  position: absolute; top: 8px; left: 8px;
+  background: rgba(239,68,68,.9);
+  color: #fff;
+  font-size: .7rem;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 6px;
+  letter-spacing: .5px;
+}
+.gh-mkt-body { padding: 10px 12px 12px; }
+.gh-mkt-price { font-size: 1rem; font-weight: 900; color: var(--gh-green, #10b981); margin-bottom: 3px; }
+.gh-mkt-title { font-size: .88rem; font-weight: 600; color: var(--gh-text, #eefcf6); margin-bottom: 4px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.gh-mkt-loc { font-size: .75rem; color: var(--gh-muted); margin-bottom: 8px; }
+.gh-mkt-actions { display: flex; gap: 6px; }
+@media (max-width: 540px) { .gh-mkt-grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* ── Phase 69: Advanced Post Format Panel ───────────────── */
+.gh-format-types { display: flex; flex-wrap: wrap; gap: 6px; }
+.gh-fmt-btn {
+  background: rgba(255,255,255,.05);
+  border: 1px solid var(--gh-border);
+  border-radius: var(--gh-radius-full);
+  padding: 5px 12px;
+  font-size: .8rem;
+  cursor: pointer;
+  color: var(--gh-muted, #8aa69a);
+  transition: background .12s, border-color .12s, color .12s;
+}
+.gh-fmt-btn:hover { background: rgba(255,255,255,.09); color: var(--gh-text, #eefcf6); }
+.gh-fmt-btn.active { background: rgba(16,185,129,.12); border-color: var(--gh-green, #10b981); color: var(--gh-green, #10b981); font-weight: 700; }
+.gh-star-row { user-select: none; }
+.gh-star-row span { transition: transform .1s; display: inline-block; }
+.gh-star-row span:hover { transform: scale(1.25); }
+
+/* ── Phase 70: PWA Install Banner ───────────────────────── */
+.gh-pwa-banner {
+  position: fixed;
+  bottom: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gh-panel, rgba(12,18,16,.97));
+  border: 1px solid var(--gh-green, #10b981);
+  border-radius: var(--gh-radius, 18px);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  z-index: 9999;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5);
+  transition: bottom .4s cubic-bezier(.34,1.56,.64,1);
+  white-space: nowrap;
+  font-size: .88rem;
+  color: var(--gh-text, #eefcf6);
+  max-width: 92vw;
+}
+.gh-pwa-banner.visible { bottom: 20px; }
+@media (max-width: 540px) { .gh-pwa-banner { bottom: -100px; padding: 10px 14px; } .gh-pwa-banner.visible { bottom: 70px; } }

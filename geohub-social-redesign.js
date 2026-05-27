@@ -603,6 +603,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       ['my-channel','#','fa-tv','ჩემი არხი'],
       ['reels','reels.html','fa-bolt','Reels'],
       ['business','business.html','fa-store','Businesses'],
+      ['marketplace','marketplace.html','fa-store-alt','Marketplace'],
       ['events','events.html','fa-calendar-xmark','Events'],
       ['messages','messages.html','fa-comment-dots','Messages'],
       ['notifications','notifications.html','fa-bell','Notifications'],
@@ -1363,6 +1364,40 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button class="gh-cmp-tool" id="ghToggleCategory" type="button" title="Post category"><i class="fas fa-tag"></i><span>Topic</span></button>'+
         '<button class="gh-cmp-tool" id="ghAiCaption" type="button" title="AI Caption suggestions"><i class="fas fa-wand-magic-sparkles"></i><span>AI</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleSchedule" type="button" title="Schedule post"><i class="fas fa-clock"></i><span>Schedule</span></button>'+
+        '<button class="gh-cmp-tool" id="ghToggleFormat" type="button" title="Advanced post format"><i class="fas fa-newspaper"></i><span>Format</span></button>'+
+      '</div>'+
+      '<div id="ghFormatPanel" style="display:none;margin:8px 0;padding:10px;background:rgba(255,255,255,.04);border:1px solid var(--gh-border);border-radius:12px">'+
+        '<div style="font-size:.82rem;font-weight:700;margin-bottom:8px;color:var(--gh-muted)">Post Format</div>'+
+        '<div class="gh-format-types">'+
+          '<button type="button" class="gh-fmt-btn" data-fmt="">📝 Regular</button>'+
+          '<button type="button" class="gh-fmt-btn" data-fmt="article">📰 Article</button>'+
+          '<button type="button" class="gh-fmt-btn" data-fmt="review">⭐ Review</button>'+
+          '<button type="button" class="gh-fmt-btn" data-fmt="recipe">🍽️ Recipe</button>'+
+          '<button type="button" class="gh-fmt-btn" data-fmt="job">💼 Job</button>'+
+          '<button type="button" class="gh-fmt-btn" data-fmt="question">❓ Question</button>'+
+        '</div>'+
+        '<div id="ghFmtArticle" style="display:none;margin-top:10px">'+
+          '<input class="gh-input" id="ghArtTitle" placeholder="Article title *" maxlength="120" style="margin-bottom:6px">'+
+          '<input class="gh-input" id="ghArtSubtitle" placeholder="Subtitle (optional)" maxlength="200">'+
+        '</div>'+
+        '<div id="ghFmtReview" style="display:none;margin-top:10px">'+
+          '<input class="gh-input" id="ghRevTarget" placeholder="What are you reviewing? (business, product…)" maxlength="80" style="margin-bottom:6px">'+
+          '<div class="gh-star-row" id="ghRevStars" style="display:flex;gap:6px;font-size:1.5rem;margin-bottom:6px;cursor:pointer">'+
+            [1,2,3,4,5].map(function(i){ return '<span data-star="'+i+'">☆</span>'; }).join('')+
+          '</div>'+
+          '<input type="hidden" id="ghRevScore" value="0">'+
+        '</div>'+
+        '<div id="ghFmtRecipe" style="display:none;margin-top:10px">'+
+          '<input class="gh-input" id="ghRecName" placeholder="Recipe name *" maxlength="80" style="margin-bottom:6px">'+
+          '<input class="gh-input" id="ghRecIngredients" placeholder="Ingredients (comma separated)" style="margin-bottom:6px">'+
+          '<input class="gh-input" id="ghRecTime" placeholder="Prep time (e.g. 30 min)" maxlength="30">'+
+        '</div>'+
+        '<div id="ghFmtJob" style="display:none;margin-top:10px">'+
+          '<input class="gh-input" id="ghJobTitle" placeholder="Job title *" maxlength="80" style="margin-bottom:6px">'+
+          '<input class="gh-input" id="ghJobCompany" placeholder="Company name" maxlength="80" style="margin-bottom:6px">'+
+          '<input class="gh-input" id="ghJobCity" placeholder="Location / City" maxlength="60" style="margin-bottom:6px">'+
+          '<input class="gh-input" id="ghJobSalary" placeholder="Salary range (optional)" maxlength="60">'+
+        '</div>'+
       '</div>'+
       '<div class="gh-voice-panel" id="ghVoicePanel" style="display:none">'+
         '<div class="gh-voice-ui">'+
@@ -1781,6 +1816,50 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       _updateScheduleIndicator();
     });
 
+    // Phase 69: Advanced Format panel toggle + star rating
+    var _fmtToggle=document.getElementById('ghToggleFormat');
+    var _fmtPanel=document.getElementById('ghFormatPanel');
+    if(_fmtToggle&&_fmtPanel){
+      _fmtToggle.onclick=function(){
+        var open=_fmtPanel.style.display!=='none';
+        _fmtPanel.style.display=open?'none':'block';
+        _fmtToggle.classList.toggle('active',!open);
+      };
+      _fmtPanel.querySelectorAll('.gh-fmt-btn').forEach(function(btn){
+        btn.onclick=function(){
+          _fmtPanel.querySelectorAll('.gh-fmt-btn').forEach(function(b){ b.classList.remove('active'); });
+          btn.classList.add('active');
+          var fmt=btn.dataset.fmt||'';
+          ['ghFmtArticle','ghFmtReview','ghFmtRecipe','ghFmtJob'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+          if(fmt==='article') { var el=document.getElementById('ghFmtArticle'); if(el) el.style.display='block'; }
+          else if(fmt==='review') { var el=document.getElementById('ghFmtReview'); if(el) el.style.display='block'; }
+          else if(fmt==='recipe') { var el=document.getElementById('ghFmtRecipe'); if(el) el.style.display='block'; }
+          else if(fmt==='job') { var el=document.getElementById('ghFmtJob'); if(el) el.style.display='block'; }
+          // 'question' and '' need no extra fields
+        };
+      });
+      // Star rating
+      var starsEl=document.getElementById('ghRevStars');
+      var scoreEl=document.getElementById('ghRevScore');
+      if(starsEl&&scoreEl){
+        starsEl.querySelectorAll('[data-star]').forEach(function(star){
+          star.onclick=function(){
+            var val=Number(star.dataset.star);
+            scoreEl.value=val;
+            starsEl.querySelectorAll('[data-star]').forEach(function(s){ s.textContent=Number(s.dataset.star)<=val?'⭐':'☆'; });
+          };
+          star.onmouseover=function(){
+            var val=Number(star.dataset.star);
+            starsEl.querySelectorAll('[data-star]').forEach(function(s){ s.textContent=Number(s.dataset.star)<=val?'⭐':'☆'; });
+          };
+          star.onmouseout=function(){
+            var cur=Number(scoreEl.value||0);
+            starsEl.querySelectorAll('[data-star]').forEach(function(s){ s.textContent=Number(s.dataset.star)<=cur?'⭐':'☆'; });
+          };
+        });
+      }
+    }
+
     // Phase 36: Draft save/restore
     var _DRAFT_KEY='gh_draft';
     var _saveDraftBtn=document.getElementById('ghSaveDraft');
@@ -1983,6 +2062,27 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var txt=(ta&&ta.value)||'';
       if(!txt.trim() && !pickedFiles.length && !pickedGifUrl && !voiceBlob) return toast('Write something or add a photo/GIF/voice','error');
 
+      // Phase 69: collect advanced format data
+      var _fmtData=null, _activeFmt=document.getElementById('ghFormatPanel')&&document.querySelector('.gh-fmt-btn.active');
+      var _fmtKey=_activeFmt?(_activeFmt.dataset.fmt||''):'';
+      if(_fmtKey==='article'){
+        var _artT=($('#ghArtTitle')||{}).value||''; if(!_artT.trim()) return toast('Add article title','error');
+        _fmtData={format:'article',articleTitle:_artT.trim(),articleSubtitle:($('#ghArtSubtitle')||{}).value||''};
+      } else if(_fmtKey==='review'){
+        var _revT=($('#ghRevTarget')||{}).value||''; var _revS=Number(($('#ghRevScore')||{}).value||0);
+        if(!_revT.trim()) return toast('Add what you are reviewing','error');
+        if(!_revS) return toast('Add star rating','error');
+        _fmtData={format:'review',reviewTarget:_revT.trim(),reviewScore:_revS};
+      } else if(_fmtKey==='recipe'){
+        var _recN=($('#ghRecName')||{}).value||''; if(!_recN.trim()) return toast('Add recipe name','error');
+        _fmtData={format:'recipe',recipeName:_recN.trim(),recipeIngredients:($('#ghRecIngredients')||{}).value||'',recipeTime:($('#ghRecTime')||{}).value||''};
+      } else if(_fmtKey==='job'){
+        var _jobT=($('#ghJobTitle')||{}).value||''; if(!_jobT.trim()) return toast('Add job title','error');
+        _fmtData={format:'job',jobTitle:_jobT.trim(),jobCompany:($('#ghJobCompany')||{}).value||'',jobCity:($('#ghJobCity')||{}).value||'',jobSalary:($('#ghJobSalary')||{}).value||''};
+      } else if(_fmtKey==='question'){
+        _fmtData={format:'question'};
+      }
+
       var payload=Object.assign({
         visibility: ($('#ghPostVisibility')||{}).value||'public',
         feeling: selectedFeeling,
@@ -1992,7 +2092,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         gifUrl: pickedGifUrl||null,
         coAuthors: coAuthors.length ? coAuthors : null,
         category: selectedCategory||null,
-        voiceUrl: null  // filled below if voice blob exists
+        voiceUrl: null,  // filled below if voice blob exists
+        postFormat: _fmtData||null
       }, extra||{});
       // Phase 39: scheduled post
       if(scheduledAt && scheduledAt>new Date()){ payload.status='scheduled'; payload.scheduledAt=scheduledAt; }
@@ -2036,6 +2137,77 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     };
   }
 
+  /* ── Phase 63: Story Highlights ─────────────────────────── */
+  function _openSaveToHighlightModal(st, onClose){
+    if(!requireLogin()) return onClose&&onClose();
+    var uid=(authUser()||{}).uid; if(!uid) return onClose&&onClose();
+    if(!fs()||!db()) return onClose&&onClose();
+    // Load existing highlights
+    fs().getDocs(fs().query(fs().collection(db(),'users',uid,'storyHighlights'),fs().orderBy('createdAt','desc'),fs().limit(20))).then(function(snap){
+      var hls=[]; snap.forEach(function(d){ hls.push(Object.assign({id:d.id},d.data())); });
+      var existHtml=hls.length?hls.map(function(h){
+        return '<button class="gh-hl-pick-btn" data-hl-id="'+esc(h.id)+'" data-hl-name="'+esc(h.name||'Highlight')+'"><i class="fas fa-star"></i> '+esc(h.name||'Highlight')+'</button>';
+      }).join(''):'<div class="gh-muted" style="font-size:.82rem;padding:4px 0">No highlights yet</div>';
+      var body='<div style="margin-bottom:12px"><div class="gh-bold" style="font-size:.88rem;margin-bottom:6px">Add to existing highlight</div>'+existHtml+'</div>'+
+        '<hr style="border-color:var(--gh-border);margin:10px 0">'+
+        '<div class="gh-bold" style="font-size:.88rem;margin-bottom:6px">Create new highlight</div>'+
+        '<input class="gh-input" id="ghNewHlName" placeholder="Highlight name…" maxlength="40">';
+      modal('Save to Highlight',body,'<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSaveHl">Save</button>','ghHlModal');
+      var hlModal=document.getElementById('ghHlModal');
+      if(hlModal){
+        hlModal.querySelectorAll('.gh-hl-pick-btn').forEach(function(btn){
+          btn.onclick=function(){
+            var hlId=btn.dataset.hlId;
+            fs().updateDoc(fs().doc(db(),'users',uid,'storyHighlights',hlId),{
+              stories:fs().arrayUnion({id:st.id,mediaUrl:st.mediaUrl||'',text:st.text||'',createdAt:st.createdAt||null})
+            }).then(function(){ toast('Added to highlight!'); hlModal.remove(); onClose&&onClose(); }).catch(function(){ toast('Failed','error'); });
+          };
+        });
+        var saveBtn=document.getElementById('ghSaveHl');
+        if(saveBtn){
+          saveBtn.onclick=function(){
+            var name=(document.getElementById('ghNewHlName').value||'').trim();
+            if(!name) return toast('Enter a name','error');
+            fs().addDoc(fs().collection(db(),'users',uid,'storyHighlights'),{
+              name:name, coverUrl:st.mediaUrl||'', createdAt:fs().serverTimestamp(),
+              stories:[{id:st.id,mediaUrl:st.mediaUrl||'',text:st.text||'',createdAt:st.createdAt||null}]
+            }).then(function(){ toast('Highlight "'+name+'" created!'); hlModal.remove(); onClose&&onClose(); }).catch(function(){ toast('Failed','error'); });
+          };
+        }
+      }
+    }).catch(function(){ onClose&&onClose(); });
+  }
+
+  /* ── Phase 63: Highlights Strip on profile (injected by profile.js integration) */
+  window.ghLoadHighlights=function(uid, container){
+    if(!fs()||!db()||!uid||!container) return;
+    fs().getDocs(fs().query(fs().collection(db(),'users',uid,'storyHighlights'),fs().orderBy('createdAt','desc'),fs().limit(15))).then(function(snap){
+      if(snap.empty) return;
+      var html='<div class="gh-hl-strip">';
+      snap.forEach(function(d){
+        var h=Object.assign({id:d.id},d.data());
+        var cover=h.coverUrl||'';
+        html+='<div class="gh-hl-item" data-hl-open="'+esc(d.id)+'" data-hl-uid="'+esc(uid)+'" title="'+esc(h.name||'Highlight')+'">'+
+          '<div class="gh-hl-thumb">'+(cover?'<img src="'+esc(cover)+'" alt="">':'<i class="fas fa-star"></i>')+'</div>'+
+          '<div class="gh-hl-label">'+esc((h.name||'Highlight').slice(0,10))+'</div>'+
+        '</div>';
+      });
+      html+='</div>';
+      container.innerHTML=html;
+      container.querySelectorAll('[data-hl-open]').forEach(function(el){
+        el.onclick=function(){
+          var hlId=el.dataset.hlOpen, hlUid=el.dataset.hlUid;
+          fs().getDoc(fs().doc(db(),'users',hlUid,'storyHighlights',hlId)).then(function(snap){
+            if(!snap.exists()) return;
+            var h=snap.data();
+            var stories=(h.stories||[]).map(function(s){ return Object.assign({authorId:hlUid},s); });
+            if(stories.length) openStoryViewer(buildStoryGroups(stories),0,0);
+          }).catch(function(){});
+        };
+      });
+    }).catch(function(){});
+  };
+
   function openStoryModal(){
     if(!requireLogin()) return;
     var me=currentUserInfo();
@@ -2053,8 +2225,27 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div id="ghStoryPreview" style="margin-top:10px"></div>'+
       '<div class="gh-upload-progress" id="ghStoryUploadBar" style="display:none"><div class="gh-upload-track"><div class="gh-upload-bar" id="ghStoryUploadFill"></div></div><span id="ghStoryUploadPct">0%</span></div>'+
       '<input type="file" id="ghStoryFilePick" accept="image/*,video/*" style="display:none">'+
+      '<div id="ghStoryPollWrap" style="display:none;margin-top:10px">'+
+        '<div class="gh-story-poll-builder">'+
+          '<input class="gh-input" id="ghStoryPollQ" placeholder="Poll question…" maxlength="80">'+
+          '<div style="display:flex;gap:8px;margin-top:6px">'+
+            '<input class="gh-input" id="ghStoryPollA" placeholder="Option A (Yes)" maxlength="40" value="">'+
+            '<input class="gh-input" id="ghStoryPollB" placeholder="Option B (No)" maxlength="40" value="">'+
+          '</div>'+
+          '<button type="button" class="gh-btn ghost sm" id="ghStoryPollRemove" style="margin-top:6px"><i class="fas fa-times"></i> Remove poll</button>'+
+        '</div>'+
+      '</div>'+
+      '<div id="ghStoryLinkWrap" style="display:none;margin-top:8px">'+
+        '<div style="display:flex;align-items:center;gap:6px">'+
+          '<input class="gh-input" id="ghStoryLinkUrl" placeholder="Link URL (https://…)" maxlength="200" style="flex:1">'+
+          '<input class="gh-input" id="ghStoryLinkLabel" placeholder="Button label" maxlength="30" style="width:130px">'+
+          '<button type="button" class="gh-btn ghost sm" id="ghStoryLinkRemove"><i class="fas fa-times"></i></button>'+
+        '</div>'+
+      '</div>'+
       '<div class="gh-cmp-toolbar" style="margin-top:10px">'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryPhotoBtn"><i class="fas fa-image"></i><span> Photo/Video</span></button>'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryPollBtn"><i class="fas fa-check-to-slot"></i><span> Poll</span></button>'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryLinkBtn"><i class="fas fa-link"></i><span> Link</span></button>'+
       '</div>';
     var m=modal('Add to your story', body,
       '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitStory" disabled>Share story</button>',
@@ -2070,6 +2261,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var ta=$('#ghStoryText');
     if(ta){ ta.addEventListener('input', updateSubmit); setTimeout(function(){ ta.focus(); }, 60); }
     $('#ghStoryPhotoBtn').onclick=function(){ var fp=$('#ghStoryFilePick'); if(fp) fp.click(); };
+    // Phase 62: Poll toggle
+    var _pollVisible=false, _linkVisible=false;
+    var pollBtn=$('#ghStoryPollBtn'); var pollWrap=$('#ghStoryPollWrap');
+    var linkBtn=$('#ghStoryLinkBtn'); var linkWrap=$('#ghStoryLinkWrap');
+    if(pollBtn&&pollWrap){ pollBtn.onclick=function(){ _pollVisible=!_pollVisible; pollWrap.style.display=_pollVisible?'':'none'; pollBtn.classList.toggle('active',_pollVisible); }; }
+    if(linkBtn&&linkWrap){ linkBtn.onclick=function(){ _linkVisible=!_linkVisible; linkWrap.style.display=_linkVisible?'':'none'; linkBtn.classList.toggle('active',_linkVisible); }; }
+    var pollRm=$('#ghStoryPollRemove'); if(pollRm) pollRm.onclick=function(){ _pollVisible=false; pollWrap.style.display='none'; pollBtn&&pollBtn.classList.remove('active'); };
+    var linkRm=$('#ghStoryLinkRemove'); if(linkRm) linkRm.onclick=function(){ _linkVisible=false; linkWrap.style.display='none'; linkBtn&&linkBtn.classList.remove('active'); };
     $('#ghStoryFilePick').onchange=function(){
       var file=this.files&&this.files[0]; if(!file) return;
       pickedFile=file;
@@ -2088,6 +2287,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var t=($('#ghStoryText')||{}).value||'';
       if(!t.trim()&&!pickedFile) return toast('Story needs text or image','error');
       if(!GS().createStory) return toast('Stories unavailable','error');
+      // Phase 62: collect poll + link data
+      var _pollData=null;
+      if(_pollVisible){
+        var pq=($('#ghStoryPollQ')||{}).value||''; var pa=($('#ghStoryPollA')||{}).value||'Yes'; var pb=($('#ghStoryPollB')||{}).value||'No';
+        if(pq.trim()) _pollData={question:pq.trim(),optionA:pa.trim()||'Yes',optionB:pb.trim()||'No',votes:{}};
+      }
+      var _linkData=null;
+      if(_linkVisible){
+        var lu=($('#ghStoryLinkUrl')||{}).value||''; var ll=($('#ghStoryLinkLabel')||{}).value||'Visit';
+        if(lu.trim()&&(lu.startsWith('http://')||lu.startsWith('https://'))) _linkData={url:lu.trim(),label:ll.trim()||'Visit'};
+      }
       var submitBtn=$('#ghSubmitStory');
       if(submitBtn.disabled) return;
       submitBtn.disabled=true;
@@ -2101,7 +2311,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       }).then(function(finalUrl){
         if(pickedFile&&!finalUrl) throw new Error('Image upload failed');
         if(bar) bar.style.display='none';
-        GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); });
+        var _extra={}; if(_pollData) _extra.poll=_pollData; if(_linkData) _extra.link=_linkData;
+        GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); },_extra);
       }).catch(function(err){
         console.error('[GeoHub] story upload failed',err);
         toast('Image upload failed. Check Cloudinary settings.','error');
@@ -2284,9 +2495,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         ? '<div class="gh-story-seen-row"><i class="fas fa-eye"></i> Seen by '+seenCount+'</div>'
         : '';
 
-      // Owner delete button
+      // Owner delete button + Phase 63: Save to Highlight
       var ownerDeleteHtml = isOwner
-        ? '<button type="button" class="gh-story-owner-del" id="ghStoryDelete" aria-label="Delete story"><i class="fas fa-trash-alt"></i></button>'
+        ? '<button type="button" class="gh-story-owner-del" id="ghStoryDelete" aria-label="Delete story"><i class="fas fa-trash-alt"></i></button>'+
+          '<button type="button" class="gh-story-owner-hl" id="ghStorySaveHL" title="Save to Highlights"><i class="fas fa-star"></i></button>'
         : '';
 
       var footerHtml = (reactHtml||replyHtml||seenHtml)
@@ -2355,6 +2567,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           });
         }
       };
+      // Phase 63: Save to Highlight
+      var hlBtn=overlay.querySelector('#ghStorySaveHL');
+      if(hlBtn && st.id && isOwner){
+        hlBtn.onclick=function(e){
+          e.stopPropagation();
+          clearTimer();
+          _openSaveToHighlightModal(st, function(){ scheduleAdvance(); });
+        };
+      }
 
       // Reaction buttons — update only buttons on click, no full redraw
       overlay.querySelectorAll('[data-story-react]').forEach(function(btn){
@@ -2428,6 +2649,54 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         shell.addEventListener('mouseleave', function(){
           _paused=false; shell.classList.remove('gh-story-paused'); if(!_inputFocused) scheduleAdvance();
         });
+      }
+
+      // Phase 62: Views list — click "Seen by X" opens modal with viewer names
+      var seenRow=overlay.querySelector('.gh-story-seen-row');
+      if(seenRow && st.id && isOwner){
+        seenRow.style.cursor='pointer';
+        seenRow.title='See who viewed';
+        seenRow.onclick=function(e){
+          e.stopPropagation();
+          clearTimer();
+          if(!fs()||!db()) return;
+          fs().getDoc(fs().doc(db(),'stories',st.id)).then(function(snap){
+            var data=snap.exists()?snap.data():{};
+            var viewedBy=data.viewedBy||[];
+            if(!viewedBy.length){ toast('No views yet'); scheduleAdvance(); return; }
+            var docsP=viewedBy.slice(0,30).map(function(uid){ return fs().getDoc(fs().doc(db(),'users',uid)).then(function(s){ return s.exists()?Object.assign({id:s.id},s.data()):null; }).catch(function(){ return null; }); });
+            Promise.all(docsP).then(function(users){
+              users=users.filter(Boolean);
+              var html='<div class="gh-sv-list">'+users.map(function(u){
+                var n=u.fullName||u.displayName||u.name||'User'; var av=u.avatar||u.photoURL||'';
+                return '<div class="gh-sv-row"><a href="profile.html?user='+esc(u.id)+'" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit"><span class="gh-avatar" style="width:36px;height:36px">'+(av?'<img src="'+esc(av)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':esc(initials(n)))+'</span><strong>'+esc(n)+'</strong></a></div>';
+              }).join('')+'</div>';
+              modal('Viewed by '+users.length,html,'<button class="gh-btn ghost" data-close-modal>Close</button>','ghStoryViewsModal');
+              scheduleAdvance();
+            });
+          }).catch(function(){ scheduleAdvance(); });
+        };
+      }
+
+      // Phase 62: Poll voting in story viewer
+      if(st.poll && st.poll.question){
+        var pollEl=overlay.querySelector('[data-story-poll]');
+        if(pollEl){
+          var _u=authUser();
+          var hasVoted=st.poll.votes&&_u&&st.poll.votes[_u.uid];
+          pollEl.querySelectorAll('[data-poll-opt]').forEach(function(btn){
+            btn.onclick=function(e){
+              e.stopPropagation();
+              if(!requireLogin()) return;
+              if(hasVoted) return toast('You already voted');
+              var opt=btn.dataset.pollOpt;
+              hasVoted=true;
+              btn.classList.add('voted');
+              var upd={}; upd['poll.votes.'+_u.uid]=opt;
+              if(fs()&&db()) fs().updateDoc(fs().doc(db(),'stories',st.id),upd).catch(function(){});
+            };
+          });
+        }
       }
 
       scheduleAdvance();
@@ -3790,6 +4059,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }
     items += '<button class="gh-pmenu-item" data-copy-post-link><i class="fas fa-link"></i> Copy link</button>';
     items += '<button class="gh-pmenu-item" data-menu-save><i class="fas fa-bookmark"></i> Save post</button>';
+    if(!isOwn && authorId){ items += '<button class="gh-pmenu-item" data-menu-tip><i class="fas fa-coins" style="color:#f59e0b"></i> Send tip</button>'; }
     items += '<button class="gh-pmenu-item" data-menu-save-col><i class="fas fa-folder-plus"></i> Save to Collection</button>';
     if (!isOwn) {
       items += '<div class="gh-pmenu-sep"></div>';
@@ -3832,6 +4102,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if (e.target.closest('[data-menu-analytics]') && isOwn) { closeDrop(); _openPostAnalytics(pid, card); return; }
       if (e.target.closest('[data-menu-pin]') && isOwn) { closeDrop(); _pinPostToProfile(pid); return; }
       if (e.target.closest('[data-menu-boost]') && isOwn) { closeDrop(); _openBoostModal(pid, card); return; }
+      if (e.target.closest('[data-menu-tip]') && !isOwn && authorId) { closeDrop(); _openTipModal(authorId, authorName||'Creator'); return; }
       if (e.target.closest('[data-menu-hide]')) { if(GS().hidePost) GS().hidePost(pid, function(){ if(card) card.remove(); }); closeDrop(); return; }
       if (e.target.closest('[data-menu-report]')) { closeDrop(); if(window.GeoModeration) window.GeoModeration.openReportModal('post', pid, ''); else if(GS().reportTarget) GS().reportTarget('post', pid, 'Reported'); return; }
       if (e.target.closest('[data-menu-report-user]') && authorId) { closeDrop(); if(window.GeoModeration) window.GeoModeration.openReportModal('user', authorId, authorName); else if(GS().reportTarget) GS().reportTarget('user', authorId, 'Reported'); return; }
@@ -4218,6 +4489,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div class="gh-section-title"><h3>🔥 Trending Hashtags</h3></div>'+
         '<div id="ghTrendingList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div>'+
       '</div>'+
+      '<div class="gh-panel gh-right-widget" id="ghTrendingPostsPanel">'+
+        '<div class="gh-section-title"><h3>⚡ Trending Posts</h3></div>'+
+        '<div id="ghTrendingPostsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div>'+
+      '</div>'+
       '<div class="gh-panel gh-right-widget" id="ghLeaderPanel">'+
         '<div class="gh-section-title"><h3>🏆 Top Creators</h3><a class="gh-small" href="creators.html">ყველა</a></div>'+
         '<div class="gh-ldr-cities" id="ghLdrCities">'+
@@ -4512,7 +4787,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var ob=$('#ghOnlineFriendsList'); if(ob) ob.innerHTML='<div class="gh-muted" style="font-size:.82rem">Unavailable</div>';
         var pb=$('#ghSuggestedPages'); if(pb) pb.innerHTML='<div class="gh-muted" style="font-size:.82rem">Unavailable</div>';
         var cb=$('#ghContactsList'); if(cb) cb.innerHTML='<div class="gh-muted" style="font-size:.82rem">Unavailable</div>';
-        loadLeaderboardWidget(''); loadTrendingHashtags(); startLiveActivityTicker(); loadFeedGroupsWidget(); loadFeedEventsWidget(null); loadFeedCheckinsWidget();
+        loadLeaderboardWidget(''); loadTrendingHashtags(); loadTrendingPostsWidget(); startLiveActivityTicker(); loadFeedGroupsWidget(); loadFeedEventsWidget(null); loadFeedCheckinsWidget();
         return;
       }
       // onAuthStateChanged fires once auth is resolved (currentUser may still be null even if ready() fired)
@@ -4527,7 +4802,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           if(contactsBox) contactsBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see contacts</div>';
           var pymkBox=$('#ghPymkList'); if(pymkBox) pymkBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see suggestions</div>';
           var crBox=$('#ghCreatorList'); if(crBox) crBox.innerHTML='<div class="gh-muted" style="font-size:.82rem">Sign in to see creators</div>';
-          loadLeaderboardWidget(''); loadTrendingHashtags(); startLiveActivityTicker(); loadFeedGroupsWidget(); loadFeedEventsWidget(null); loadFeedCheckinsWidget();
+          loadLeaderboardWidget(''); loadTrendingHashtags(); loadTrendingPostsWidget(); startLiveActivityTicker(); loadFeedGroupsWidget(); loadFeedEventsWidget(null); loadFeedCheckinsWidget();
           return;
         }
 
@@ -4565,6 +4840,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         loadCreatorWidget(u.uid);
         loadLeaderboardWidget(u.uid);
         loadTrendingHashtags();
+        loadTrendingPostsWidget();
         startLiveActivityTicker();
         loadFeedGroupsWidget();
         loadFeedEventsWidget(u.uid);
@@ -4858,6 +5134,67 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       .catch(function(){toast('Translation failed','error');btn.innerHTML='🌐 Translate';btn.disabled=false;});
   }
 
+  /* ── Phase 64: GeoHub Coins & Creator Tips ──────────────── */
+  var _COIN_AMOUNTS=[10,25,50,100,250];
+  function _openTipModal(targetUid, targetName){
+    if(!requireLogin()) return;
+    var u=authUser(); if(!u) return;
+    if(u.uid===targetUid) return toast('You cannot tip yourself');
+    if(!fs()||!db()) return;
+    // Load tipper's coin balance
+    fs().getDoc(fs().doc(db(),'userCoins',u.uid)).then(function(snap){
+      var bal=snap.exists()?(snap.data().balance||0):0;
+      var body='<div class="gh-tip-modal">'+
+        '<div class="gh-tip-balance"><i class="fas fa-coins" style="color:#f59e0b"></i> Your balance: <strong>'+bal+' GeoCoins</strong></div>'+
+        '<div style="margin:12px 0 6px;font-size:.88rem;font-weight:600">Select amount</div>'+
+        '<div class="gh-tip-amounts">'+
+          _COIN_AMOUNTS.map(function(a){ return '<button class="gh-tip-amt'+(bal<a?' disabled':'')+'" data-tip-amt="'+a+'" '+(bal<a?'disabled':'')+'>'+a+' 🪙</button>'; }).join('')+
+        '</div>'+
+        '<div style="margin:10px 0 4px;font-size:.82rem;color:var(--gh-muted)">Or enter custom amount</div>'+
+        '<input class="gh-input" id="ghTipCustom" type="number" min="1" max="'+bal+'" placeholder="Custom coins…">'+
+        '<div id="ghTipFeedback" style="margin-top:8px;font-size:.82rem;color:var(--gh-muted)">Tipping <strong>'+esc(targetName)+'</strong></div>'+
+      '</div>';
+      modal('💰 Send GeoCoins',body,'<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSendTipBtn">Send Tip</button>','ghTipModal');
+      var tipModal=document.getElementById('ghTipModal');
+      var selectedAmt=0;
+      if(tipModal){
+        tipModal.querySelectorAll('[data-tip-amt]').forEach(function(btn){
+          btn.onclick=function(){
+            if(btn.disabled) return;
+            selectedAmt=Number(btn.dataset.tipAmt);
+            tipModal.querySelectorAll('[data-tip-amt]').forEach(function(b){ b.classList.toggle('active',b===btn); });
+            var ci=document.getElementById('ghTipCustom'); if(ci) ci.value='';
+          };
+        });
+        var stBtn=document.getElementById('ghSendTipBtn');
+        if(stBtn){
+          stBtn.onclick=function(){
+            var ci=document.getElementById('ghTipCustom'); var custom=ci&&Number(ci.value||0);
+            var amt=custom||selectedAmt;
+            if(!amt||amt<1) return toast('Pick an amount','error');
+            if(amt>bal) return toast('Not enough GeoCoins','error');
+            stBtn.disabled=true; stBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';
+            var batch=fs().writeBatch(db());
+            // Debit tipper
+            batch.set(fs().doc(db(),'userCoins',u.uid),{balance:fs().increment(-amt),updatedAt:fs().serverTimestamp()},{merge:true});
+            // Credit recipient
+            batch.set(fs().doc(db(),'userCoins',targetUid),{balance:fs().increment(amt),totalReceived:fs().increment(amt),updatedAt:fs().serverTimestamp()},{merge:true});
+            // Record transaction
+            batch.set(fs().doc(fs().collection(db(),'coinTransactions')),{
+              from:u.uid, to:targetUid, amount:amt, type:'tip', createdAt:fs().serverTimestamp()
+            });
+            batch.commit().then(function(){
+              toast('💰 Sent '+amt+' GeoCoins to '+targetName+'!');
+              tipModal.remove();
+            }).catch(function(err){ toast('Failed: '+(err.message||err.code),'error'); stBtn.disabled=false; stBtn.innerHTML='Send Tip'; });
+          };
+        }
+      }
+    }).catch(function(){ toast('Could not load balance','error'); });
+  }
+  // Expose so profile pages can use it
+  window.ghOpenTip=_openTipModal;
+
   /* ── Phase 49: Post Analytics Dashboard ─────────────────── */
   function _openPostAnalytics(pid, card){
     if(!fs()||!db()) return;
@@ -4951,14 +5288,23 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var isLive=!!userData.isLive;
       var liveUrl=userData.liveUrl||'';
 
+      // Phase 66: viewer count from liveStreams doc
+      var _liveVcUnsub=null;
       var body=
         '<div class="gh-live-modal-body">'+
           (isLive
-            ? '<div class="gh-live-indicator-big"><span class="gh-live-dot"></span><strong>You are LIVE</strong></div>'+
+            ? '<div class="gh-live-indicator-big"><span class="gh-live-dot"></span><strong>You are LIVE</strong>'+
+                '<span class="gh-live-vc-badge" id="ghLiveVcBadge"><i class="fas fa-eye"></i> <span id="ghLiveVcNum">0</span></span>'+
+              '</div>'+
               '<p class="gh-muted" style="font-size:.82rem;text-align:center">Click "End Live" to stop your broadcast.</p>'+
-              (liveUrl?'<div class="gh-live-url-display"><i class="fas fa-link"></i> <a href="'+esc(liveUrl)+'" target="_blank" rel="noopener">'+esc(liveUrl)+'</a></div>':'')
+              (liveUrl?'<div class="gh-live-url-display"><i class="fas fa-link"></i> <a href="'+esc(liveUrl)+'" target="_blank" rel="noopener">'+esc(liveUrl)+'</a></div>':'')+
+              '<div class="gh-live-chat-wrap">'+
+                '<div class="gh-live-chat-msgs" id="ghLiveChatMsgs" style="max-height:120px;overflow-y:auto;font-size:.8rem"></div>'+
+                '<div style="display:flex;gap:6px;margin-top:6px"><input class="gh-input" id="ghLiveChatInput" placeholder="Chat…" maxlength="200" style="flex:1"><button class="gh-btn sm" id="ghLiveChatSend"><i class="fas fa-paper-plane"></i></button></div>'+
+              '</div>'
             : '<div class="gh-live-pre-desc"><i class="fas fa-video" style="font-size:2rem;color:var(--gh-green,#2d6a4f)"></i><p>Start a live broadcast. Share a stream link (YouTube Live, Zoom, etc.) or just go live without a link.</p></div>'+
-              '<input class="gh-input" id="ghLiveUrlInput" placeholder="Stream URL (optional — YouTube, Zoom, Meet…)" value="'+esc(liveUrl)+'" style="margin-top:10px">')+
+              '<input class="gh-input" id="ghLiveUrlInput" placeholder="Stream URL (optional — YouTube, Zoom, Meet…)" value="'+esc(liveUrl)+'" style="margin-top:10px">'+
+              '<input class="gh-input" id="ghLiveTitleInput" placeholder="Stream title (optional)" style="margin-top:8px">')+
         '</div>';
 
       var footerBtns=isLive
@@ -4971,8 +5317,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var startBtn=document.getElementById('ghStartLiveBtn');
         if(startBtn) startBtn.addEventListener('click',function(){
           var url=(document.getElementById('ghLiveUrlInput')||{}).value||'';
+          var title=(document.getElementById('ghLiveTitleInput')||{}).value||'';
           startBtn.disabled=true; startBtn.textContent='Starting…';
-          f.updateDoc(f.doc(d,'users',u.uid),{isLive:true,liveUrl:url.trim(),liveStartedAt:f.serverTimestamp()})
+          // Phase 66: create liveStreams doc for viewer count + chat
+          f.setDoc(f.doc(d,'liveStreams',u.uid),{
+            uid:u.uid, authorName:userData.fullName||userData.displayName||'User',
+            title:title.trim()||'', streamUrl:url.trim(), viewerCount:0,
+            startedAt:f.serverTimestamp(), active:true
+          },{merge:true});
+          f.updateDoc(f.doc(d,'users',u.uid),{isLive:true,liveUrl:url.trim(),liveTitle:title.trim(),liveStartedAt:f.serverTimestamp()})
             .then(function(){
               if(m) m.remove();
               toast('🔴 You are now LIVE!');
@@ -4980,13 +5333,44 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             }).catch(function(e){ toast('Could not start live: '+(e.message||e.code),'error'); startBtn.disabled=false; startBtn.textContent='🔴 Go Live!'; });
         });
       } else {
+        // Phase 66: real-time viewer count
+        _liveVcUnsub=f.onSnapshot(f.doc(d,'liveStreams',u.uid),function(snap){
+          if(!snap.exists()) return;
+          var vcNum=document.getElementById('ghLiveVcNum');
+          if(vcNum) vcNum.textContent=Number(snap.data().viewerCount||0);
+        });
+        // Phase 66: live chat
+        var _chatUnsub=f.onSnapshot(
+          f.query(f.collection(d,'liveStreams',u.uid,'messages'),f.orderBy('t','desc'),f.limit(20)),
+          function(snap){
+            var box=document.getElementById('ghLiveChatMsgs'); if(!box) return;
+            var msgs=[]; snap.forEach(function(dd){ msgs.unshift(dd.data()); });
+            box.innerHTML=msgs.map(function(msg){ return '<div style="padding:2px 0"><strong>'+esc(msg.name||'User')+'</strong>: '+esc(msg.text||'')+'</div>'; }).join('');
+            box.scrollTop=box.scrollHeight;
+          });
+        var chatSend=document.getElementById('ghLiveChatSend');
+        var chatInp=document.getElementById('ghLiveChatInput');
+        if(chatSend&&chatInp){
+          var _sendChat=function(){ var txt=chatInp.value.trim(); if(!txt) return; chatInp.value=''; f.addDoc(f.collection(d,'liveStreams',u.uid,'messages'),{name:userData.fullName||'Host',text:txt,t:f.serverTimestamp()}); };
+          chatSend.onclick=_sendChat;
+          chatInp.onkeydown=function(e){ if(e.key==='Enter'){ e.preventDefault(); _sendChat(); } };
+        }
         var endBtn=document.getElementById('ghEndLiveBtn');
         if(endBtn) endBtn.addEventListener('click',function(){
           endBtn.disabled=true; endBtn.textContent='Ending…';
+          if(_liveVcUnsub){ try{_liveVcUnsub();}catch(e){} _liveVcUnsub=null; }
+          if(_chatUnsub){ try{_chatUnsub();}catch(e){} }
           f.updateDoc(f.doc(d,'users',u.uid),{isLive:false,liveUrl:'',liveStartedAt:null})
             .then(function(){
+              f.updateDoc(f.doc(d,'liveStreams',u.uid),{active:false,endedAt:f.serverTimestamp()}).catch(function(){});
               if(m) m.remove();
-              toast('Live ended');
+              // Phase 66: prompt to save as video post
+              if(liveUrl && confirm('Live ended! Save your stream URL as a video post?')){
+                var GeoSoc=window.GeoSocial||GS();
+                if(GeoSoc&&GeoSoc.createPost) GeoSoc.createPost({text:'🔴 Watch my live recording!',videoUrl:liveUrl,type:'video'},null,function(){toast('Video post created!');});
+              } else {
+                toast('Live ended');
+              }
               _updateLiveBadge(false);
             }).catch(function(e){ toast('Could not end live','error'); endBtn.disabled=false; endBtn.textContent='🔴 End Live'; });
         });
@@ -5467,6 +5851,46 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       box.innerHTML=html;
     }).catch(function(){ panel.style.display='none'; });
   }
+  /* ── Phase 61: Trending Posts Widget ────────────────────── */
+  function loadTrendingPostsWidget(){
+    var panel=document.getElementById('ghTrendingPostsPanel');
+    var box=document.getElementById('ghTrendingPostsList');
+    if(!box||!panel) return;
+    if(!fs()||!db()){ panel.style.display='none'; return; }
+    var since=new Date(Date.now()-48*3600000); // last 48h
+    fs().getDocs(fs().query(
+      fs().collection(db(),'posts'),
+      fs().where('createdAt','>',fs().Timestamp.fromDate(since)),
+      fs().where('status','!=','deleted'),
+      fs().limit(30)
+    )).then(function(snap){
+      if(snap.empty){ panel.style.display='none'; return; }
+      var arr=[]; snap.forEach(function(d){ arr.push(Object.assign({id:d.id},d.data())); });
+      // Score each post
+      function score(p){ var r=Number(p.likeCount||p.reactionCount||0)*3,c=Number(p.commentCount||0)*5,s=Number(p.shareCount||0)*4; return r+c+s; }
+      arr.sort(function(a,b){ return score(b)-score(a); });
+      var top=arr.filter(function(p){ return score(p)>0; }).slice(0,5);
+      if(!top.length){ panel.style.display='none'; return; }
+      box.innerHTML=top.map(function(p,i){
+        var name=p.authorName||p.userName||'User';
+        var av=p.authorAvatar||p.userPhotoURL||'';
+        var txt=(p.text||'').slice(0,80)+(p.text&&p.text.length>80?'…':'');
+        var eng=score(p);
+        return '<div class="gh-trpost-row" onclick="document.getElementById(\'post-'+esc(p.id)+'\')&&document.getElementById(\'post-'+esc(p.id)+'\').scrollIntoView({behavior:\'smooth\'})" style="cursor:pointer">'+
+          '<span class="gh-trpost-rank">'+(i+1)+'</span>'+
+          '<div class="gh-trpost-body">'+
+            '<div class="gh-trpost-author">'+
+              '<span class="gh-avatar" style="width:22px;height:22px;font-size:.55rem">'+(av?'<img src="'+esc(av)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':esc(initials(name)))+'</span>'+
+              '<span class="gh-trpost-name">'+esc(name)+'</span>'+
+            '</div>'+
+            (txt?'<div class="gh-trpost-text">'+esc(txt)+'</div>':'')+
+            '<div class="gh-trpost-meta"><i class="fas fa-fire"></i> '+eng+' engagements</div>'+
+          '</div>'+
+        '</div>';
+      }).join('');
+    }).catch(function(){ panel.style.display='none'; });
+  }
+
   function _fmtCount(n){
     n=Number(n)||0;
     if(n>=1000000) return (n/1000000).toFixed(1)+'M';
@@ -6316,7 +6740,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         (pageMode ? pageHomeContext(actor) : '<section class="gh-card gh-story-strip-card"><div class="gh-stories" id="ghStories"></div></section>')+
         '<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="'+compAvClass+'" id="ghComposerAvatar">'+compAvContent+'</span><button class="gh-composer-fake" data-create-post>რას აზიარებ დღეს?</button></div><div class="gh-composer-actions"><button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Place</button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:#38bdf8"></i> Business</button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:#f59e0b"></i> Event</button></div></section>'+
         (pageMode ? '' : '<div id="ghWelcomeSlot"></div>')+
-        (pageMode ? '<div class="gh-pill-row gh-page-feed-tabs" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="page"><i class="fas fa-store" style="font-size:.75rem"></i> Page Activity</button></div>' : '<div class="gh-pill-row" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="foryou"><i class="fas fa-house" style="font-size:.75rem"></i> For You</button><button class="gh-pill" data-feed-tab="following"><i class="fas fa-user-group" style="font-size:.75rem"></i> Following</button><button class="gh-pill" data-feed-tab="nearme"><i class="fas fa-location-dot" style="font-size:.75rem"></i> Near Me</button></div>')+
+        (pageMode ? '<div class="gh-pill-row gh-page-feed-tabs" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="page"><i class="fas fa-store" style="font-size:.75rem"></i> Page Activity</button></div>' : '<div class="gh-pill-row" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="foryou"><i class="fas fa-house" style="font-size:.75rem"></i> For You</button><button class="gh-pill" data-feed-tab="following"><i class="fas fa-user-group" style="font-size:.75rem"></i> Following</button><button class="gh-pill" data-feed-tab="local"><i class="fas fa-city" style="font-size:.75rem"></i> Local</button><button class="gh-pill" data-feed-tab="nearme"><i class="fas fa-location-dot" style="font-size:.75rem"></i> Near Me</button></div>')+
         '<div id="ghFeedList">'+skelPostCard()+skelVideoCard()+skelPostCard()+skelVideoCard()+skelPostCard()+'</div>'+
         '<div id="ghFeedLoadMore" style="text-align:center;padding:16px 0 8px"></div>'
     });
@@ -6705,6 +7129,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               return isFollowedBizPost || (author && (author===u.uid || state.followingIds.indexOf(author)>-1));
             });
           }
+        } else if(state.feedTab==='local'){
+          // Phase 68: Local Community Feed — filter by user's city
+          var _localUsr=authUser();
+          var _myCity=''; try{ _myCity=(JSON.parse(localStorage.getItem('gh_me_data')||'{}')||{}).city||''; }catch(e){}
+          if(_myCity){
+            visible=visible.filter(function(p){
+              return (p.city||'').toLowerCase()===_myCity.toLowerCase();
+            });
+          }
         } else if(state.feedTag){
           /* hashtag filter: show posts whose text contains #tag */
           var _htag=state.feedTag.toLowerCase();
@@ -6743,6 +7176,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             list.innerHTML=pageFeedEmptyHtml();
           } else if(state.feedTab === 'following'){
             list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-user-group"></i><h3>Nothing from people you follow</h3><p>Follow people and creators to see their posts here.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><a class="gh-btn ghost" href="search.html"><i class="fas fa-search"></i>Find people</a><a class="gh-btn ghost" href="creators.html"><i class="fas fa-star"></i>Discover creators</a></div></div>';
+          } else if(state.feedTab==='local'){
+            list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-city"></i><h3>No local posts yet</h3><p>Be the first to share something in your city!</p><button class="gh-btn" data-create-post><i class="fas fa-plus"></i> Share locally</button></div>';
           } else if(state.feedTag){
             list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-hashtag"></i><h3>#'+esc(state.feedTag)+'</h3><p>ამ ჰეშთეგით პოსტები ვერ მოიძებნა. პირველი იყავი!</p><button class="gh-btn" data-create-post><i class="fas fa-plus"></i> პოსტის გაზიარება</button></div>';
           } else {
@@ -9368,6 +9803,79 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     return 'Older';
   }
 
+  /* ── Phase 65: Notification Preferences + DND + Web Push ── */
+  var _NOTIF_CATS=[
+    {key:'reactions',label:'Reactions',icon:'fas fa-heart',default:true},
+    {key:'comments',label:'Comments',icon:'fas fa-comment',default:true},
+    {key:'follows',label:'Follows',icon:'fas fa-user-plus',default:true},
+    {key:'mentions',label:'Mentions',icon:'fas fa-at',default:true},
+    {key:'messages',label:'Messages',icon:'fas fa-comment-dots',default:true},
+    {key:'events',label:'Events',icon:'fas fa-calendar',default:true},
+    {key:'insights',label:'Post Insights',icon:'fas fa-chart-bar',default:false},
+    {key:'reposts',label:'Reposts',icon:'fas fa-retweet',default:true}
+  ];
+  function _getNotifPrefs(){
+    try{ var s=localStorage.getItem('gh_notif_prefs'); return s?JSON.parse(s):null; }catch(e){ return null; }
+  }
+  function _setNotifPrefs(prefs){
+    try{ localStorage.setItem('gh_notif_prefs',JSON.stringify(prefs)); }catch(e){}
+  }
+  function _isNotifEnabled(type){
+    var prefs=_getNotifPrefs(); if(!prefs) return true; // default all on
+    if(prefs.dnd) return false;
+    var cat=_NOTIF_CATS.find(function(c){ return c.key===type||type.indexOf(c.key)>-1; });
+    if(!cat) return true;
+    return prefs[cat.key]!==false;
+  }
+  function _openNotifSettings(){
+    var prefs=_getNotifPrefs()||{};
+    var dnd=!!prefs.dnd;
+    var pushEnabled='Notification' in window && Notification.permission==='granted';
+    var body='<div class="gh-notif-prefs">'+
+      '<div class="gh-np-row gh-np-dnd">'+
+        '<div><strong><i class="fas fa-moon"></i> Do Not Disturb</strong><div class="gh-muted" style="font-size:.78rem">Silence all alerts temporarily</div></div>'+
+        '<label class="gh-toggle"><input type="checkbox" id="ghDndToggle"'+(dnd?' checked':'')+"><span></span></label>"+
+      '</div>'+
+      '<hr style="border-color:var(--gh-border);margin:10px 0">'+
+      '<div class="gh-np-row">'+
+        '<div><strong><i class="fas fa-bell"></i> Browser Push Notifications</strong><div class="gh-muted" style="font-size:.78rem">'+(pushEnabled?'Enabled':'Click to enable')+'</div></div>'+
+        '<button class="gh-btn sm ghost" id="ghEnablePush">'+(pushEnabled?'<i class="fas fa-check"></i> Enabled':'Enable')+'</button>'+
+      '</div>'+
+      '<hr style="border-color:var(--gh-border);margin:10px 0">'+
+      '<div style="font-weight:700;font-size:.85rem;margin-bottom:8px">Notification Categories</div>'+
+      _NOTIF_CATS.map(function(cat){
+        var on=prefs[cat.key]!==false;
+        return '<div class="gh-np-row">'+
+          '<div><i class="'+cat.icon+'" style="width:16px;text-align:center;margin-right:6px"></i>'+cat.label+'</div>'+
+          '<label class="gh-toggle"><input type="checkbox" data-nc="'+cat.key+'"'+(on?' checked':'')+"><span></span></label>"+
+        '</div>';
+      }).join('')+
+    '</div>';
+    modal('Notification Settings',body,'<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSaveNotifPrefs">Save</button>','ghNotifPrefsModal');
+    // Web Push
+    var pushBtn=document.getElementById('ghEnablePush');
+    if(pushBtn&&!pushEnabled&&'Notification' in window){
+      pushBtn.onclick=function(){
+        Notification.requestPermission().then(function(perm){
+          if(perm==='granted'){ pushBtn.innerHTML='<i class="fas fa-check"></i> Enabled'; toast('Push notifications enabled!'); }
+          else toast('Permission denied','error');
+        });
+      };
+    }
+    // Save prefs
+    var saveBtn=document.getElementById('ghSaveNotifPrefs');
+    if(saveBtn){
+      saveBtn.onclick=function(){
+        var newPrefs={dnd:(document.getElementById('ghDndToggle')||{}).checked||false};
+        document.querySelectorAll('[data-nc]').forEach(function(inp){ newPrefs[inp.dataset.nc]=inp.checked; });
+        _setNotifPrefs(newPrefs);
+        toast('Preferences saved');
+        var m=document.getElementById('ghNotifPrefsModal'); if(m) m.remove();
+      };
+    }
+  }
+  window.ghOpenNotifSettings=_openNotifSettings;
+
   function renderNotifications() {
     var pageActor = notificationActor();
     var pageTitle = pageActor.type === 'business' ? esc(pageActor.title + ' Activity') : 'Notifications';
@@ -9376,7 +9884,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="np-page">' +
         '<div class="np-head">' +
           '<div><h2 id="npTitle"><i class="fas fa-bell"></i> '+pageTitle+'</h2><p class="np-context" id="npContext"'+(pageSub?'':' style="display:none"')+'>'+esc(pageSub)+'</p></div>' +
-          '<button class="np-mark-all gh-btn ghost" id="npMarkAll"><i class="fas fa-check-double"></i> Mark all read</button>' +
+          '<div style="display:flex;gap:8px"><button class="np-mark-all gh-btn ghost" id="npMarkAll"><i class="fas fa-check-double"></i> Mark all read</button><button class="gh-btn ghost" onclick="if(window.ghOpenNotifSettings)ghOpenNotifSettings()" title="Notification settings"><i class="fas fa-gear"></i></button></div>' +
         '</div>' +
         '<div class="np-filters" id="npFilters">' +
           NP_FILTERS.map(function(f,i){ return '<button class="np-filter-btn'+(i===0?' active':'')+'" data-np-filter="'+f.key+'">'+f.label+'</button>'; }).join('') +
@@ -9512,12 +10020,205 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }, { once: true });
   }
 
+  /* ── Phase 61: Advanced Search Page ────────────────────── */
+  /* ── Phase 67: Marketplace Lite ─────────────────────────── */
+  var _MKT_CATS=['All','Electronics','Clothing','Furniture','Vehicles','Books','Sports','Food','Services','Other'];
+  function renderMarketplace(){
+    shell({ active:'marketplace',
+      center:
+        '<div class="gh-card" style="padding:16px 16px 10px">'+
+          '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">'+
+            '<h2 style="margin:0;font-size:1.05rem"><i class="fas fa-store"></i> Marketplace</h2>'+
+            '<button class="gh-btn" id="ghSellBtn"><i class="fas fa-plus"></i> Sell item</button>'+
+          '</div>'+
+          '<div class="gh-top-search" style="max-width:100%;margin-bottom:10px"><i class="fas fa-search"></i><input id="ghMktSearch" placeholder="Search listings…" autocomplete="off"></div>'+
+          '<div class="gh-pill-row" id="ghMktCats" style="flex-wrap:wrap">'+
+            _MKT_CATS.map(function(c,i){ return '<button class="gh-pill'+(i===0?' active':'')+'" data-mkt-cat="'+esc(i===0?'':c)+'">'+esc(c)+'</button>'; }).join('')+
+          '</div>'+
+        '</div>'+
+        '<div id="ghMktList"><div class="gh-card gh-empty" style="min-height:120px"><i class="fas fa-circle-notch fa-spin"></i></div></div>'
+    });
+    ready(function(){
+      var _cat='', _q='', _items=[], _timer=null;
+      var sellBtn=document.getElementById('ghSellBtn');
+      if(sellBtn) sellBtn.onclick=function(){ if(!requireLogin()) return; _openSellModal(); };
+      var cats=document.getElementById('ghMktCats');
+      if(cats) cats.addEventListener('click',function(e){ var b=e.target.closest('[data-mkt-cat]'); if(!b) return; _cat=b.dataset.mktCat||''; cats.querySelectorAll('.gh-pill').forEach(function(p){ p.classList.toggle('active',p===b); }); _loadMkt(); });
+      var srch=document.getElementById('ghMktSearch');
+      if(srch) srch.oninput=function(){ clearTimeout(_timer); _q=this.value.trim(); _timer=setTimeout(_loadMkt,350); };
+      function _loadMkt(){
+        var box=document.getElementById('ghMktList'); if(!box) return;
+        if(!fs()||!db()){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Unavailable</h3></div>'; return; }
+        box.innerHTML='<div class="gh-card gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div>';
+        var constraints=[fs().where('status','==','active')];
+        if(_cat) constraints.push(fs().where('category','==',_cat));
+        var q=fs().query.apply(null,[fs().collection(db(),'marketplace')].concat(constraints).concat([fs().orderBy('createdAt','desc'),fs().limit(24)]));
+        fs().getDocs(q).then(function(snap){
+          var items=[]; snap.forEach(function(d){ items.push(Object.assign({id:d.id},d.data())); });
+          if(_q) items=items.filter(function(x){ return (x.title||x.name||'').toLowerCase().indexOf(_q.toLowerCase())>-1; });
+          if(!items.length){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-store"></i><h3>No listings found</h3><p>Be the first to list something!</p></div>'; return; }
+          box.innerHTML='<div class="gh-mkt-grid">'+items.map(function(x){
+            var title=x.title||x.name||'Item'; var price=x.price?Number(x.price).toLocaleString()+' ₾':'Free';
+            var img2=x.imageUrl||x.photos&&x.photos[0]||'';
+            var sold=x.sold||x.status==='sold';
+            return '<div class="gh-mkt-card'+(sold?' sold':'')+'" data-mkt-id="'+esc(x.id)+'">'+
+              (img2?'<div class="gh-mkt-img"><img src="'+esc(img2)+'" alt="'+esc(title)+'" loading="lazy">'+(sold?'<div class="gh-mkt-sold-badge">SOLD</div>':'')+'</div>':'<div class="gh-mkt-img-ph"><i class="fas fa-box-open"></i></div>')+
+              '<div class="gh-mkt-body">'+
+                '<div class="gh-mkt-price">'+esc(price)+'</div>'+
+                '<div class="gh-mkt-title">'+esc(title)+'</div>'+
+                (x.city?'<div class="gh-mkt-loc"><i class="fas fa-location-dot"></i> '+esc(x.city)+'</div>':'')+
+                '<div class="gh-mkt-actions">'+
+                  (!sold?'<button class="gh-btn sm" data-mkt-contact="'+esc(x.sellerId||x.authorId||x.userId||'')+'" data-mkt-title="'+esc(title)+'"><i class="fas fa-comment-dots"></i> Contact</button>':'<span class="gh-chip">Sold</span>')+
+                  '<button class="gh-btn sm ghost" data-mkt-save="'+esc(x.id)+'"><i class="fas fa-bookmark"></i></button>'+
+                '</div>'+
+              '</div>'+
+            '</div>';
+          }).join('')+'</div>';
+          // Bind contact buttons
+          box.querySelectorAll('[data-mkt-contact]').forEach(function(btn){
+            btn.addEventListener('click',function(){ if(!requireLogin()) return; var sid=btn.dataset.mktContact; if(sid) location.href='messages.html?with='+encodeURIComponent(sid)+'&ref=marketplace&item='+encodeURIComponent(btn.dataset.mktTitle||''); });
+          });
+        }).catch(function(err){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Failed to load</h3><p>'+esc(err.message||'')+'</p></div>'; });
+      }
+      _loadMkt();
+    });
+  }
+  function _openSellModal(){
+    var body=
+      '<div class="gh-upload-progress" id="ghMktUploadBar" style="display:none"><div class="gh-upload-track"><div class="gh-upload-bar" id="ghMktUploadFill"></div></div><span id="ghMktUploadPct">0%</span></div>'+
+      '<div id="ghMktImgPreview" style="margin-bottom:10px"></div>'+
+      '<input class="gh-input" id="ghMktTitle" placeholder="Item title *" maxlength="80" style="margin-bottom:8px">'+
+      '<div style="display:flex;gap:8px;margin-bottom:8px">'+
+        '<input class="gh-input" id="ghMktPrice" type="number" min="0" placeholder="Price (₾, 0=free)" style="flex:1">'+
+        '<select class="gh-select" id="ghMktCat" style="flex:1">'+
+          _MKT_CATS.filter(function(c){ return c!=='All'; }).map(function(c){ return '<option value="'+esc(c)+'">'+esc(c)+'</option>'; }).join('')+
+        '</select>'+
+      '</div>'+
+      '<textarea class="gh-textarea" id="ghMktDesc" placeholder="Description (optional)" rows="3" style="margin-bottom:8px"></textarea>'+
+      '<input class="gh-input" id="ghMktCity" placeholder="City / Location (optional)" style="margin-bottom:8px">'+
+      '<input type="file" id="ghMktFilePick" accept="image/*" style="display:none">'+
+      '<button type="button" class="gh-btn ghost" id="ghMktPhotoBtn"><i class="fas fa-image"></i> Add Photo</button>';
+    modal('Sell an Item',body,'<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghMktSubmitBtn">List Item</button>','ghSellModal');
+    var mktModal=document.getElementById('ghSellModal');
+    if(!mktModal) return;
+    var pickedMktFile=null;
+    mktModal.querySelector('#ghMktPhotoBtn').onclick=function(){ mktModal.querySelector('#ghMktFilePick').click(); };
+    mktModal.querySelector('#ghMktFilePick').onchange=function(){
+      var file=this.files&&this.files[0]; if(!file) return;
+      pickedMktFile=file;
+      var prev=document.getElementById('ghMktImgPreview');
+      if(prev) prev.innerHTML='<img src="'+esc(URL.createObjectURL(file))+'" style="width:100%;max-height:200px;object-fit:cover;border-radius:10px">';
+    };
+    var sbtn=document.getElementById('ghMktSubmitBtn');
+    if(sbtn) sbtn.onclick=function(){
+      var title=(document.getElementById('ghMktTitle').value||'').trim();
+      if(!title) return toast('Enter a title','error');
+      sbtn.disabled=true; sbtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';
+      var u=authUser(); if(!u){ sbtn.disabled=false; return toast('Sign in required','error'); }
+      prepareMedia(pickedMktFile||null,'marketplace',function(pct){
+        var fill=document.getElementById('ghMktUploadFill'); if(fill) fill.style.width=pct+'%';
+        var bar=document.getElementById('ghMktUploadBar'); if(bar) bar.style.display='flex';
+      }).then(function(imgUrl){
+        return fs().addDoc(fs().collection(db(),'marketplace'),{
+          title:title,
+          price:Number((document.getElementById('ghMktPrice').value)||0)||0,
+          category:(document.getElementById('ghMktCat').value)||'Other',
+          description:(document.getElementById('ghMktDesc').value||'').trim(),
+          city:(document.getElementById('ghMktCity').value||'').trim(),
+          imageUrl:imgUrl||'',
+          status:'active', sold:false,
+          sellerId:u.uid,
+          authorId:u.uid,
+          createdAt:fs().serverTimestamp()
+        });
+      }).then(function(){
+        toast('Item listed!');
+        if(mktModal) mktModal.remove();
+      }).catch(function(err){ toast('Failed: '+(err.message||err.code),'error'); sbtn.disabled=false; sbtn.innerHTML='List Item'; });
+    };
+  }
+
   function renderSearch(){
-    injectShellNav('search');
-    // Sync URL query into topbar search so it stays consistent
-    var sri=document.getElementById('srchInput');
-    var gs2=document.getElementById('ghGlobalSearch');
-    if(sri && gs2 && sri.value) gs2.value=sri.value;
+    var _qParam=new URLSearchParams(location.search).get('q')||'';
+    shell({ active:'search',
+      center:
+        '<div class="gh-card" style="padding:16px 16px 8px">'+
+          '<h2 style="margin:0 0 12px;font-size:1.05rem"><i class="fas fa-search"></i> Search GeoHub</h2>'+
+          '<div class="gh-top-search" style="max-width:100%;margin-bottom:10px"><i class="fas fa-search"></i><input id="ghSearchMain" placeholder="Search people, posts, businesses, groups…" value="'+esc(_qParam)+'" autocomplete="off"></div>'+
+          '<div class="gh-pill-row" id="ghSearchTabs">'+
+            '<button class="gh-pill active" data-stab="all">All</button>'+
+            '<button class="gh-pill" data-stab="people"><i class="fas fa-user"></i> People</button>'+
+            '<button class="gh-pill" data-stab="posts"><i class="fas fa-newspaper"></i> Posts</button>'+
+            '<button class="gh-pill" data-stab="businesses"><i class="fas fa-store"></i> Businesses</button>'+
+            '<button class="gh-pill" data-stab="groups"><i class="fas fa-users"></i> Groups</button>'+
+            '<button class="gh-pill" data-stab="events"><i class="fas fa-calendar"></i> Events</button>'+
+          '</div>'+
+        '</div>'+
+        '<div id="ghSearchResults"><div class="gh-card gh-empty" style="min-height:180px"><i class="fas fa-search"></i><h3>Type to search</h3><p>Search for people, posts, businesses and more</p></div></div>'
+    });
+    ready(function(){
+      var inp=document.getElementById('ghSearchMain');
+      var res=document.getElementById('ghSearchResults');
+      var tabs=document.getElementById('ghSearchTabs');
+      if(!inp||!res||!tabs) return;
+      var _tab='all', _q='', _timer=null;
+      // Reflect initial query
+      if(_qParam){ _q=_qParam; _doSearch(); }
+      inp.oninput=function(){ clearTimeout(_timer); _q=this.value.trim(); _timer=setTimeout(_doSearch,350); };
+      inp.onkeydown=function(e){ if(e.key==='Enter'){ clearTimeout(_timer); _q=this.value.trim(); _doSearch(); } };
+      tabs.addEventListener('click',function(e){ var b=e.target.closest('[data-stab]'); if(!b) return; _tab=b.dataset.stab; tabs.querySelectorAll('.gh-pill').forEach(function(p){ p.classList.toggle('active',p===b); }); _doSearch(); });
+      function _doSearch(){
+        if(!_q){ res.innerHTML='<div class="gh-card gh-empty" style="min-height:180px"><i class="fas fa-search"></i><h3>Type to search</h3></div>'; return; }
+        res.innerHTML='<div class="gh-card gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div>';
+        history.replaceState(null,'',location.pathname+'?q='+encodeURIComponent(_q));
+        var ps=[];
+        if((_tab==='all'||_tab==='people')&&fs()&&db()){
+          ps.push(fs().getDocs(fs().query(fs().collection(db(),'users'),fs().orderBy('fullName'),fs().startAt(_q),fs().endAt(_q+''),fs().limit(8))).then(function(s){ var a=[]; s.forEach(function(d){ a.push(Object.assign({_type:'user',id:d.id},d.data())); }); return a; }).catch(function(){ return []; }));
+        } else ps.push(Promise.resolve([]));
+        if((_tab==='all'||_tab==='posts')&&fs()&&db()){
+          ps.push(fs().getDocs(fs().query(fs().collection(db(),'posts'),fs().where('status','!=','deleted'),fs().orderBy('createdAt','desc'),fs().limit(12))).then(function(s){ var a=[]; s.forEach(function(d){ var p=d.data(); if(p.text&&p.text.toLowerCase().indexOf(_q.toLowerCase())>-1) a.push(Object.assign({_type:'post',id:d.id},p)); }); return a; }).catch(function(){ return []; }));
+        } else ps.push(Promise.resolve([]));
+        if((_tab==='all'||_tab==='businesses')&&fs()&&db()){
+          ps.push(fs().getDocs(fs().query(fs().collection(db(),'businesses'),fs().orderBy('title'),fs().startAt(_q),fs().endAt(_q+''),fs().limit(6))).then(function(s){ var a=[]; s.forEach(function(d){ a.push(Object.assign({_type:'business',id:d.id},d.data())); }); return a; }).catch(function(){ return []; }));
+        } else ps.push(Promise.resolve([]));
+        if((_tab==='all'||_tab==='groups')&&fs()&&db()){
+          ps.push(fs().getDocs(fs().query(fs().collection(db(),'groups'),fs().orderBy('name'),fs().startAt(_q),fs().endAt(_q+''),fs().limit(6))).then(function(s){ var a=[]; s.forEach(function(d){ a.push(Object.assign({_type:'group',id:d.id},d.data())); }); return a; }).catch(function(){ return []; }));
+        } else ps.push(Promise.resolve([]));
+        if((_tab==='all'||_tab==='events')&&fs()&&db()){
+          ps.push(fs().getDocs(fs().query(fs().collection(db(),'events'),fs().orderBy('name'),fs().startAt(_q),fs().endAt(_q+''),fs().limit(6))).then(function(s){ var a=[]; s.forEach(function(d){ a.push(Object.assign({_type:'event',id:d.id},d.data())); }); return a; }).catch(function(){ return []; }));
+        } else ps.push(Promise.resolve([]));
+        Promise.all(ps).then(function(results){
+          var users=results[0]||[], posts=results[1]||[], bizs=results[2]||[], groups=results[3]||[], events=results[4]||[];
+          var all=[]; if(_tab==='all'){ all=users.concat(posts).concat(bizs).concat(groups).concat(events); } else if(_tab==='people') all=users; else if(_tab==='posts') all=posts; else if(_tab==='businesses') all=bizs; else if(_tab==='groups') all=groups; else if(_tab==='events') all=events;
+          if(!all.length){ res.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-search"></i><h3>No results for "'+esc(_q)+'"</h3><p>Try different keywords or broaden your search.</p></div>'; return; }
+          var html='<div class="gh-search-results-list">';
+          all.forEach(function(x){
+            if(x._type==='user'){
+              var uname=x.fullName||x.displayName||x.name||'User'; var uav=x.avatar||x.photoURL||''; var ufc=x.followerCount||0;
+              html+='<div class="gh-sr-item"><a href="profile.html?user='+esc(x.id||'')+'" class="gh-sr-main"><span class="gh-avatar" style="width:40px;height:40px">'+(uav?'<img src="'+esc(uav)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':esc(initials(uname)))+'</span><div class="gh-sr-info"><strong>'+esc(uname)+'</strong><span>'+esc(x.city||x.tagline||'GeoHub User')+(ufc?' · '+_fmtCount(ufc)+' followers':'')+'</span></div></a><button class="gh-btn sm" data-follow-user="'+esc(x.id||'')+'">Follow</button></div>';
+            } else if(x._type==='post'){
+              var pname=x.authorName||'User'; var ptxt=(x.text||'').slice(0,100);
+              html+='<div class="gh-sr-item"><div class="gh-sr-main" style="cursor:pointer" onclick="location.href=\'feed.html#post-'+esc(x.id)+'\'"><span class="gh-sr-icon"><i class="fas fa-newspaper"></i></span><div class="gh-sr-info"><strong>'+esc(pname)+'</strong><span>'+esc(ptxt)+'</span></div></div></div>';
+            } else if(x._type==='business'){
+              var btitle=x.title||x.name||'Business'; var bcat=x.category||'';
+              html+='<div class="gh-sr-item"><a href="business.html?id='+esc(x.id||'')+'" class="gh-sr-main"><span class="gh-avatar" style="width:40px;height:40px;border-radius:10px">'+(x.logoUrl?'<img src="'+esc(x.logoUrl)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:10px">':'<i class="fas fa-store"></i>')+'</span><div class="gh-sr-info"><strong>'+esc(btitle)+'</strong><span>'+esc(bcat||'Business')+'</span></div></a><a class="gh-btn sm ghost" href="business.html?id='+esc(x.id||'')+'">View</a></div>';
+            } else if(x._type==='group'){
+              var gname=x.name||'Group'; var gmc=x.memberCount||0;
+              html+='<div class="gh-sr-item"><a href="groups.html?id='+esc(x.id||'')+'" class="gh-sr-main"><span class="gh-sr-icon"><i class="fas fa-users"></i></span><div class="gh-sr-info"><strong>'+esc(gname)+'</strong><span>'+esc(x.privacy||'Public')+' · '+gmc+' members</span></div></a><a class="gh-btn sm ghost" href="groups.html?id='+esc(x.id||'')+'">Join</a></div>';
+            } else if(x._type==='event'){
+              var ename=x.name||x.title||'Event';
+              html+='<div class="gh-sr-item"><a href="events.html?id='+esc(x.id||'')+'" class="gh-sr-main"><span class="gh-sr-icon"><i class="fas fa-calendar"></i></span><div class="gh-sr-info"><strong>'+esc(ename)+'</strong><span>'+esc(x.location||x.category||'Event')+'</span></div></a><a class="gh-btn sm ghost" href="events.html?id='+esc(x.id||'')+'">View</a></div>';
+            }
+          });
+          html+='</div>';
+          res.innerHTML=html;
+          // Bind follow buttons
+          res.querySelectorAll('[data-follow-user]').forEach(function(btn){
+            btn.addEventListener('click',function(e){ e.preventDefault(); if(!requireLogin()) return; var uid2=btn.dataset.followUser; if(GS().toggleFollow) GS().toggleFollow(uid2,function(){ btn.textContent='Following'; btn.classList.add('ghost'); }); });
+          });
+        }).catch(function(){ res.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Search failed</h3><p>Please try again.</p></div>'; });
+      }
+    });
   }
 
   function renderComingSoon(){
@@ -9542,6 +10243,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(PAGE==='add-business' || PATH==='add-business.html') return patchAddBusinessPage();
     if(PAGE==='notifications' || PATH==='notifications.html') return renderNotifications();
     if(PAGE==='search' || PATH==='search.html') return renderSearch();
+    if(PAGE==='marketplace' || PATH==='marketplace.html') return renderMarketplace();
     if(PAGE==='messages' || PATH==='messages.html'){ injectShellNav('messages'); return; }
     if(PAGE==='profile' || PATH==='profile.html'){ injectShellNav('profile'); return; } // profile.js renders profile content
     if(PAGE==='videos'  || PATH==='videos.html')  { injectShellNav('videos');  return; }
@@ -9552,6 +10254,50 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(PAGE==='admin-videos' || PATH==='admin-videos.html') { injectShellNav('admin-videos'); return; }
     if(PAGE==='channel'     || PATH==='channel.html')     { injectShellNav('channel');     return; }
     return renderComingSoon();
+  }
+
+  /* ── Phase 70: PWA install prompt + SW sync handler ─────── */
+  var _pwaPrompt=null;
+  window.addEventListener('beforeinstallprompt',function(e){
+    e.preventDefault(); _pwaPrompt=e;
+    // Show install banner after 30s if user hasn't dismissed it
+    setTimeout(function(){
+      if(!_pwaPrompt) return;
+      try{ if(localStorage.getItem('gh_pwa_dismissed')) return; }catch(e2){}
+      var banner=document.createElement('div');
+      banner.id='ghPwaBanner';
+      banner.className='gh-pwa-banner';
+      banner.innerHTML='<span><i class="fas fa-mobile-screen"></i> Add GeoHub to Home Screen</span>'+
+        '<div style="display:flex;gap:6px">'+
+          '<button class="gh-btn sm" id="ghPwaInstall">Install</button>'+
+          '<button class="gh-btn sm ghost" id="ghPwaDismiss">Not now</button>'+
+        '</div>';
+      document.body.appendChild(banner);
+      requestAnimationFrame(function(){ banner.classList.add('visible'); });
+      document.getElementById('ghPwaInstall').onclick=function(){
+        if(_pwaPrompt){ _pwaPrompt.prompt(); _pwaPrompt.userChoice.then(function(){ _pwaPrompt=null; banner.remove(); }); }
+      };
+      document.getElementById('ghPwaDismiss').onclick=function(){
+        try{ localStorage.setItem('gh_pwa_dismissed','1'); }catch(e2){}
+        banner.remove(); _pwaPrompt=null;
+      };
+    },30000);
+  });
+  // Background sync draft listener
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.addEventListener('message',function(e){
+      if(e.data&&e.data.type==='GH_SYNC_DRAFTS'){
+        try{
+          var draft=JSON.parse(localStorage.getItem('gh_draft')||'null');
+          if(draft&&draft.text&&window.GeoSocial&&window.GeoSocial.createPost){
+            toast('🔄 Syncing draft…');
+          }
+        }catch(se){}
+      }
+      if(e.data&&e.data.type==='SW_UPDATED'){
+        toast('✅ GeoHub updated to latest version!');
+      }
+    });
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();

@@ -90,7 +90,7 @@ self.addEventListener('pushsubscriptionchange', function(event) {
 });
 
 /* ── Cache names ────────────────────────────────────────────────────────── */
-var VER   = 'v5';
+var VER   = 'v6';
 var SHELL = 'gh-shell-' + VER;
 var IMG   = 'gh-img-'   + VER;
 var CDN   = 'gh-cdn-'   + VER;
@@ -106,6 +106,10 @@ var SHELL_URLS = [
   '/responsive-polish.css',
   '/mobile-nav.css',
   '/safety.css',
+  '/feed.html',
+  '/marketplace.html',
+  '/events.html',
+  '/notifications.html',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/icon-96.png',
@@ -336,9 +340,13 @@ self.addEventListener('sync', function(event) {
 });
 
 function processPendingSync() {
-  /* Placeholder — will drain IndexedDB pending queue when offline-first
-     writes are implemented (check-ins, likes, comments). */
-  return Promise.resolve();
+  /* Phase 70: drain localStorage pending-drafts queue when back online.
+     Sends a message to active tab(s) so the app can re-attempt the post. */
+  return clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(tabs) {
+    tabs.forEach(function(tab) {
+      tab.postMessage({ type: 'GH_SYNC_DRAFTS' });
+    });
+  });
 }
 
 /* ── PUSH fallback (Firebase handles it first via messaging.onBackgroundMessage) */
