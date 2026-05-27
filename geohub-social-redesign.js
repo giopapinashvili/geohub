@@ -940,7 +940,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(!fbUser){ clearCachedUser(); try{localStorage.removeItem('gh_active_actor');}catch(e){} }
       updateTopUser();
       listenBadges();
-      if(fbUser){ validateActorOnLoad(); maybeUpdateStreak(fbUser.uid); }
+      if(fbUser){ validateActorOnLoad(); maybeUpdateStreak(fbUser.uid); _initWrapped(fbUser.uid); }
       if(!fbUser){ var sb=document.getElementById('ghStreakBtn'); if(sb) sb.style.display='none'; }
       var bid = new URLSearchParams(location.search).get('id');
       if((state.page === 'business' || PAGE === 'business') && bid) updateBusinessFollowButton(bid);
@@ -3262,6 +3262,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '</div>'+
         '<div id="ghLeaderList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div>'+
       '</div>'+
+      '<div class="gh-panel gh-wrapped-teaser" id="ghWrappedTeaser" style="display:none">'+
+        '<div class="gh-wt-glow"></div>'+
+        '<div class="gh-wt-content">'+
+          '<div class="gh-wt-icon">🇬🇪</div>'+
+          '<div class="gh-wt-text">'+
+            '<strong>GeoHub Wrapped '+(new Date().getFullYear())+'</strong>'+
+            '<span>შენი წლის სტატისტიკა</span>'+
+          '</div>'+
+          '<button class="gh-btn sm gh-wt-open-btn" id="ghWrappedOpenBtn"><i class="fas fa-play"></i></button>'+
+        '</div>'+
+      '</div>'+
       '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Suggested Pages</h3><a class="gh-small" href="business.html">All</a></div><div id="ghSuggestedPages"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget" id="ghFeedGroupsPanel"><div class="gh-section-title"><h3>Suggested Groups</h3><a class="gh-small" href="groups.html">All</a></div><div id="ghFeedGroupsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget" id="ghFeedEventsPanel"><div class="gh-section-title"><h3>Upcoming Events</h3><a class="gh-small" href="events.html">All</a></div><div id="ghFeedEventsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
@@ -3910,6 +3921,181 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         _showXpToast({xpGained:xpGained,streak:newStreak,milestone:milestoneLabel});
       },1800);
     });
+  }
+
+  /* ── Phase 19: Georgia Wrapped ────────────────────────────────────────── */
+  var WRAPPED_YEAR = new Date().getFullYear();
+
+  function _initWrapped(uid){
+    var teaser=document.getElementById('ghWrappedTeaser'); if(!teaser) return;
+    teaser.style.display='';
+    var btn=document.getElementById('ghWrappedOpenBtn');
+    if(btn && !btn.dataset.wrappedBound){
+      btn.dataset.wrappedBound='1';
+      btn.onclick=function(){ _openWrapped(uid); };
+    }
+  }
+
+  function _openWrapped(uid){
+    if(document.getElementById('ghWrappedOverlay')) return;
+    var gf=GF(); if(!gf||!gf.fs||!gf.db) return;
+    var u=authUser(); if(!u) return;
+
+    /* Show loading state */
+    var ov=document.createElement('div');
+    ov.id='ghWrappedOverlay'; ov.className='gh-wrapped-ov';
+    ov.innerHTML='<div class="gh-wrapped-card"><div class="gh-wrapped-loading"><div class="gh-feed-dots"><span></span><span></span><span></span></div><p>მომზადება…</p></div></div>';
+    document.body.appendChild(ov);
+    requestAnimationFrame(function(){ ov.classList.add('show'); });
+
+    var yearStart=new Date(WRAPPED_YEAR,0,1);
+    Promise.all([
+      gf.fs.getDoc(gf.fs.doc(gf.db,'users',uid)),
+      gf.fs.getDoc(gf.fs.doc(gf.db,'userUiState',uid)),
+      gf.fs.getDocs(gf.fs.query(
+        gf.fs.collection(gf.db,'posts'),
+        gf.fs.where('authorId','==',uid),
+        gf.fs.where('createdAt','>=',yearStart),
+        gf.fs.limit(300)
+      )),
+      gf.fs.getDocs(gf.fs.query(
+        gf.fs.collection(gf.db,'checkins'),
+        gf.fs.where('userId','==',uid),
+        gf.fs.where('createdAt','>=',yearStart),
+        gf.fs.limit(300)
+      ))
+    ]).then(function(res){
+      var userData=res[0].exists()?res[0].data():{};
+      var uiData=res[1].exists()?res[1].data():{};
+      var postsSnap=res[2]; var checkinsSnap=res[3];
+
+      /* Aggregate */
+      var totalPosts=postsSnap.size;
+      var totalCheckins=checkinsSnap.size;
+      var xp=Number(uiData.xp||0);
+      var streak=Number(uiData.streak||0);
+      var longestStreak=Number(uiData.longestStreak||0);
+      var followers=Number(userData.followerCount||0);
+      var likesReceived=0;
+      postsSnap.forEach(function(d){ likesReceived+=Number(d.data().likeCount||0); });
+      var cityCounts={};
+      checkinsSnap.forEach(function(d){ var c=d.data().city||''; if(c) cityCounts[c]=(cityCounts[c]||0)+1; });
+      var topCity=''; var topCityCount=0;
+      Object.keys(cityCounts).forEach(function(c){ if(cityCounts[c]>topCityCount){ topCityCount=cityCounts[c]; topCity=c; } });
+      var xpLevel=_xpLevel(xp);
+      var name=userData.fullName||userData.displayName||u.displayName||'მომხმარებელი';
+
+      /* Build slides */
+      var slides=[
+        {
+          gradient:'linear-gradient(135deg,#1a1f35 0%,#10b981 100%)',
+          emoji:'🇬🇪',
+          label:'GeoHub Wrapped',
+          value:String(WRAPPED_YEAR),
+          sub:esc(name)+' — შენი '+WRAPPED_YEAR+' წელი GeoHub-ზე',
+          countUp:false
+        },
+        {
+          gradient:'linear-gradient(135deg,#1e3a5f,#3b82f6)',
+          emoji:'📝',
+          label:'გაგზავნილი პოსტები',
+          value:totalPosts,
+          sub:totalPosts===0?'დროა პირველი პოსტი!':totalPosts>20?'შენ ერთ-ერთი ყველაზე აქტიური ხარ!':'კარგი დასაწყისი!',
+          countUp:true
+        },
+        {
+          gradient:'linear-gradient(135deg,#1a2c1a,#22c55e)',
+          emoji:'📍',
+          label:'Check-in'+( totalCheckins!==1?'-ები':''),
+          value:totalCheckins,
+          sub:topCity?'ყველაზე ხშირი: <b>'+esc(topCity)+'</b> ('+topCityCount+'x)':'სცადე Check-in ახლომდებარე ადგილებში!',
+          countUp:true
+        },
+        {
+          gradient:'linear-gradient(135deg,#2d1a00,#f59e0b)',
+          emoji:'🔥',
+          label:'ყველაზე გრძელი ზოლი',
+          value:longestStreak,
+          sub:'ამჟამინდელი ზოლი: <b>'+streak+'</b> დღე',
+          countUp:true
+        },
+        {
+          gradient:'linear-gradient(135deg,#1a0a2e,#a855f7)',
+          emoji:'⚡',
+          label:'XP მოპოვებული',
+          value:xp,
+          sub:'დონე <b>'+xpLevel+'</b> · ❤️ <b>'+likesReceived+'</b> reaction · 👥 <b>'+followers+'</b> follower',
+          countUp:true,
+          isLast:true,
+          shareText:'GeoHub Wrapped '+WRAPPED_YEAR+' ✨\n'+
+            '📝 '+totalPosts+' posts  📍 '+totalCheckins+' check-ins\n'+
+            '🔥 '+longestStreak+' day streak  ⚡ '+xp+' XP\n'+
+            '🌍 geohub.pages.dev'
+        }
+      ];
+
+      _renderWrapped(ov, slides, 0);
+    }).catch(function(){
+      var card=ov.querySelector('.gh-wrapped-card');
+      if(card) card.innerHTML='<div style="padding:32px;text-align:center"><div style="font-size:2rem">⚠️</div><p style="color:var(--gh-muted)">მონაცემები ვერ ჩაიტვირთა</p><button class="gh-btn ghost" onclick="document.getElementById(\'ghWrappedOverlay\').remove()">დახურვა</button></div>';
+    });
+  }
+
+  function _renderWrapped(ov, slides, idx){
+    var slide=slides[idx];
+    var isLast=!!slide.isLast;
+    var card=ov.querySelector('.gh-wrapped-card');
+    if(!card) return;
+
+    card.style.background=slide.gradient;
+    card.innerHTML=
+      '<button class="gh-wrapped-close" onclick="document.getElementById(\'ghWrappedOverlay\').remove()"><i class="fas fa-times"></i></button>'+
+      '<div class="gh-wrapped-slide">'+
+        '<div class="gh-wrapped-emoji">'+slide.emoji+'</div>'+
+        '<div class="gh-wrapped-label">'+esc(slide.label)+'</div>'+
+        '<div class="gh-wrapped-value" id="ghWrVal">'+(slide.countUp?'0':esc(String(slide.value)))+'</div>'+
+        '<div class="gh-wrapped-sub">'+slide.sub+'</div>'+
+        (isLast?
+          '<div class="gh-wrapped-actions">'+
+            '<button class="gh-btn gh-wra-share" id="ghWrShare"><i class="fas fa-share-nodes"></i> გაზიარება</button>'+
+            '<button class="gh-btn ghost gh-wra-close" onclick="document.getElementById(\'ghWrappedOverlay\').remove()">დახურვა</button>'+
+          '</div>'
+          :'<button class="gh-btn gh-wrapped-next" id="ghWrNext">'+
+            (idx===slides.length-2?'🎉 დასრულება':'შემდეგი <i class="fas fa-arrow-right"></i>')+
+          '</button>'
+        )+
+        '<div class="gh-wrapped-dots">'+slides.map(function(_,i){ return '<span class="gh-wd'+(i===idx?' active':'')+'"></span>'; }).join('')+'</div>'+
+      '</div>';
+
+    /* Count up animation */
+    if(slide.countUp && typeof slide.value==='number'){
+      var el=document.getElementById('ghWrVal');
+      if(el) _countUp(el, 0, slide.value, 900);
+    }
+
+    /* Next button */
+    var nxt=document.getElementById('ghWrNext');
+    if(nxt) nxt.onclick=function(){ _renderWrapped(ov, slides, idx+1); };
+
+    /* Share button */
+    var shr=document.getElementById('ghWrShare');
+    if(shr) shr.onclick=function(){
+      var txt=slide.shareText||'GeoHub Wrapped '+WRAPPED_YEAR+'\n🌍 geohub.pages.dev';
+      if(navigator.share){ navigator.share({title:'GeoHub Wrapped '+WRAPPED_YEAR, text:txt, url:'https://geohub.pages.dev/feed.html'}); }
+      else { try{ navigator.clipboard.writeText(txt); shr.textContent='✓ კოპირებულია!'; setTimeout(function(){ shr.innerHTML='<i class="fas fa-share-nodes"></i> გაზიარება'; },2000); }catch(e){} }
+    };
+  }
+
+  function _countUp(el, from, to, duration){
+    if(to===0){ el.textContent='0'; return; }
+    var start=performance.now();
+    function step(t){
+      var p=Math.min((t-start)/duration,1);
+      var e=1-Math.pow(1-p,3);
+      el.textContent=Math.round(from+(to-from)*e).toLocaleString();
+      if(p<1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
   }
 
   /* ── Phase 8: Onboarding interests list ───────────────────────────────── */

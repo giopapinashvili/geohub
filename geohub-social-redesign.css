@@ -3220,3 +3220,202 @@ html[data-gh-theme="dark"] .gh-live-stats { border-color: rgba(59,130,246,.18) !
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* ── Phase 19: Georgia Wrapped ──────────────────────────── */
+.gh-wrapped-teaser {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg,#1a1f35,#10b981 150%);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(16,185,129,.3);
+}
+.gh-wt-glow {
+  position: absolute;
+  top: -20px; right: -20px;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(16,185,129,.5) 0%, transparent 70%);
+  pointer-events: none;
+}
+.gh-wt-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+.gh-wt-icon { font-size: 1.6rem; line-height: 1; }
+.gh-wt-text { flex: 1; }
+.gh-wt-text strong {
+  display: block;
+  font-size: .84rem;
+  font-weight: 800;
+  color: #fff;
+}
+.gh-wt-text span {
+  font-size: .72rem;
+  color: rgba(255,255,255,.7);
+}
+.gh-wt-open-btn {
+  background: rgba(255,255,255,.15) !important;
+  border-color: rgba(255,255,255,.25) !important;
+  color: #fff !important;
+  border-radius: 50% !important;
+  width: 34px !important;
+  height: 34px !important;
+  padding: 0 !important;
+  flex-shrink: 0;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  transition: background .18s !important;
+}
+.gh-wt-open-btn:hover { background: rgba(255,255,255,.28) !important; }
+
+/* Overlay */
+.gh-wrapped-ov {
+  position: fixed;
+  inset: 0;
+  z-index: 10100;
+  background: rgba(0,0,0,.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity .3s;
+  backdrop-filter: blur(8px);
+}
+.gh-wrapped-ov.show { opacity: 1; }
+.gh-wrapped-card {
+  position: relative;
+  width: min(380px, 94vw);
+  min-height: 520px;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0,0,0,.6);
+  transition: background 0.5s ease;
+}
+.gh-wrapped-close {
+  position: absolute;
+  top: 14px; right: 14px;
+  z-index: 10;
+  background: rgba(0,0,0,.3);
+  border: none;
+  color: #fff;
+  border-radius: 50%;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: .8rem;
+  transition: background .18s;
+  backdrop-filter: blur(4px);
+}
+.gh-wrapped-close:hover { background: rgba(0,0,0,.55); }
+.gh-wrapped-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 520px;
+  gap: 12px;
+  color: rgba(255,255,255,.7);
+  font-size: .85rem;
+}
+.gh-wrapped-slide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 520px;
+  padding: 48px 28px 32px;
+  text-align: center;
+  gap: 12px;
+}
+.gh-wrapped-emoji {
+  font-size: 3.5rem;
+  animation: ghWrPop .4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes ghWrPop {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.gh-wrapped-label {
+  font-size: .82rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.7);
+}
+.gh-wrapped-value {
+  font-size: 4.5rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 4px 24px rgba(0,0,0,.3);
+  animation: ghWrSlideUp .45s cubic-bezier(.22,1,.36,1);
+}
+@keyframes ghWrSlideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.gh-wrapped-sub {
+  font-size: .84rem;
+  color: rgba(255,255,255,.75);
+  line-height: 1.55;
+  max-width: 260px;
+}
+.gh-wrapped-sub b { color: #fff; }
+.gh-wrapped-next {
+  background: rgba(255,255,255,.15) !important;
+  border-color: rgba(255,255,255,.2) !important;
+  color: #fff !important;
+  border-radius: 999px !important;
+  padding: 10px 28px !important;
+  font-size: .86rem !important;
+  font-weight: 700 !important;
+  transition: background .18s !important;
+}
+.gh-wrapped-next:hover { background: rgba(255,255,255,.28) !important; }
+.gh-wrapped-dots {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+.gh-wd {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.3);
+  transition: all .25s;
+}
+.gh-wd.active {
+  background: #fff;
+  width: 22px;
+  border-radius: 4px;
+}
+.gh-wrapped-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.gh-wra-share {
+  background: #fff !important;
+  color: #1a1f35 !important;
+  border-radius: 999px !important;
+  padding: 10px 24px !important;
+  font-weight: 700 !important;
+  font-size: .86rem !important;
+}
+.gh-wra-close {
+  border-color: rgba(255,255,255,.3) !important;
+  color: rgba(255,255,255,.8) !important;
+  border-radius: 999px !important;
+}
+@media (max-height: 600px) {
+  .gh-wrapped-slide { padding: 32px 20px 20px; gap: 8px; min-height: 420px; }
+  .gh-wrapped-value { font-size: 3rem; }
+  .gh-wrapped-emoji { font-size: 2.5rem; }
+}
