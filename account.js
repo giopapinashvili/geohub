@@ -383,10 +383,67 @@
     if (window.GeoPush) window.GeoPush.bindSettingsEvents();
   }
 
+  function showProfileCompleteModal(user) {
+    if (document.getElementById('profileCompleteModal')) return;
+    var page = window.location.pathname;
+    if (page.indexOf('auth.html') !== -1 || page.indexOf('onboarding.html') !== -1) return;
+    var maxDate = new Date(Date.now() - 13 * 365.25 * 24 * 3600 * 1000).toISOString().slice(0, 10);
+    var m = document.createElement('div');
+    m.id = 'profileCompleteModal';
+    m.className = 'auth-modal-overlay open';
+    m.innerHTML = '<div class="auth-modal-card" style="max-width:440px">'
+      + '<div class="auth-modal-icon"><i class="fas fa-user-edit"></i></div>'
+      + '<h3>Complete Your Profile</h3>'
+      + '<p style="color:#94a3b8;font-size:.875rem;margin:0 0 20px">Fill in these details to continue using GeoHub.</p>'
+      + '<label style="display:block;font-size:.8rem;color:#94a3b8;margin-bottom:4px">Date of Birth / დაბადების თარიღი</label>'
+      + '<input type="date" id="pcBirthday" class="form-input" style="margin-bottom:12px" max="' + maxDate + '" value="' + esc(user.birthday || '') + '">'
+      + '<label style="display:block;font-size:.8rem;color:#94a3b8;margin-bottom:4px">Gender / სქესი</label>'
+      + '<select id="pcGender" class="form-input" style="margin-bottom:12px">'
+      + '<option value="">Select / აირჩიეთ</option>'
+      + '<option value="male"' + (user.gender === 'male' ? ' selected' : '') + '>Male / მამრობითი</option>'
+      + '<option value="female"' + (user.gender === 'female' ? ' selected' : '') + '>Female / მდედრობითი</option>'
+      + '<option value="other"' + (user.gender === 'other' ? ' selected' : '') + '>Other / სხვა</option>'
+      + '</select>'
+      + '<label style="display:block;font-size:.8rem;color:#94a3b8;margin-bottom:4px">City / Village — საცხოვრებელი ადგილი</label>'
+      + '<input type="text" id="pcCity" class="form-input" style="margin-bottom:20px" placeholder="e.g. Tbilisi / თბილისი" value="' + esc(user.city || '') + '">'
+      + '<button class="btn-primary auth-modal-btn" id="pcSave" disabled>Continue <i class="fas fa-arrow-right"></i></button>'
+      + '</div>';
+    document.body.appendChild(m);
+    var bdEl = m.querySelector('#pcBirthday');
+    var gnEl = m.querySelector('#pcGender');
+    var ctEl = m.querySelector('#pcCity');
+    var saveBtn = m.querySelector('#pcSave');
+    function checkValid() {
+      saveBtn.disabled = !(bdEl.value && gnEl.value && ctEl.value.trim().length > 0);
+    }
+    [bdEl, gnEl, ctEl].forEach(function(inp) { inp.addEventListener('input', checkValid); inp.addEventListener('change', checkValid); });
+    checkValid();
+    saveBtn.addEventListener('click', function() {
+      var birthday = bdEl.value, gender = gnEl.value, city = ctEl.value.trim();
+      if (!birthday || !gender || !city) return;
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Saving…';
+      updateUser({ birthday: birthday, gender: gender, city: city }).then(function() {
+        m.remove();
+      }).catch(function() {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = 'Continue <i class="fas fa-arrow-right"></i>';
+      });
+    });
+  }
+
+  function checkProfileCompletion(user) {
+    if (!user || !user.uid) return;
+    var page = window.location.pathname;
+    if (page.indexOf('auth.html') !== -1 || page.indexOf('onboarding.html') !== -1) return;
+    if (user.birthday && user.gender && user.city) return;
+    showProfileCompleteModal(user);
+  }
+
   function startAuthListener() {
     var geo = fb();
     if (!geo || !geo.auth || !geo.authFns || !geo.authFns.onAuthStateChanged) { authReady = true; initAuthNav(); initMobileMenuAuth(); return; }
-    geo.authFns.onAuthStateChanged(geo.auth, function(fbUser){ loadProfile(fbUser).then(function(profile){ authReady = true; initAuthNav(); initMobileMenuAuth(); window.dispatchEvent(new CustomEvent('GeoAuthReady', { detail: profile })); }); });
+    geo.authFns.onAuthStateChanged(geo.auth, function(fbUser){ loadProfile(fbUser).then(function(profile){ authReady = true; initAuthNav(); initMobileMenuAuth(); if (profile) checkProfileCompletion(profile); window.dispatchEvent(new CustomEvent('GeoAuthReady', { detail: profile })); }); });
   }
 
   document.addEventListener('DOMContentLoaded', function(){ initAuthNav(); initMobileMenuAuth(); initProtectedActions(); });
