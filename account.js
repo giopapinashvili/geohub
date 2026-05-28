@@ -390,6 +390,13 @@
     if (user.onboardingComplete) return;
     // Legacy users who filled key fields before onboardingComplete flag existed
     if (user.birthday && user.gender && user.city && user.accountType) return;
+    // Legacy users who completed old onboarding (localStorage check)
+    try {
+      var stored = window.safeStorage
+        ? window.safeStorage.get('geohub_onboarding', null)
+        : JSON.parse(localStorage.getItem('geohub_onboarding') || 'null');
+      if (stored && stored.accountType) return;
+    } catch (e) {}
     window.location.href = 'onboarding.html';
   }
 

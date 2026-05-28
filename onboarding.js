@@ -842,6 +842,15 @@ function renderResult() {
 // ── WELCOME BACK ──────────────────────────────────────────────────
 
 function renderWelcomeBack(data) {
+  // User completed old onboarding — mark as complete in Firestore so redirect loop doesn't occur
+  function doMark(fb) {
+    var user = fb.auth && fb.auth.currentUser;
+    if (!user) return;
+    fb.fs.updateDoc(fb.fs.doc(fb.db, 'users', user.uid), { onboardingComplete: true }).catch(function(){});
+  }
+  if (window.GeoFirebase && window.GeoFirebase.auth) doMark(window.GeoFirebase);
+  else window.addEventListener('GeoFirebaseReady', function() { if (window.GeoFirebase) doMark(window.GeoFirebase); }, { once: true });
+
   var header = document.getElementById('ob-step-label');
   if (header) header.textContent = '';
   var fill = document.getElementById('ob-progress-fill');
