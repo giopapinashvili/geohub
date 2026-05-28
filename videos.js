@@ -395,12 +395,13 @@
     var u = authUser();
     if (!gs || !u) { btn.style.display = 'none'; return; }
 
+    var _vt=typeof GHt==='function'?GHt:function(k){return k;};
     if (gs.checkFollowing) {
       gs.checkFollowing(v.authorId, function (isFollowing) {
         btn.classList.toggle('following', !!isFollowing);
         btn.innerHTML = isFollowing
-          ? '<i class="fas fa-user-check"></i> Following'
-          : '<i class="fas fa-user-plus"></i> Follow';
+          ? '<i class="fas fa-user-check"></i> '+_vt('following')
+          : '<i class="fas fa-user-plus"></i> '+_vt('follow');
       });
     }
 
@@ -409,9 +410,9 @@
       gs.toggleFollow(v.authorId, function (nowFollowing) {
         btn.classList.toggle('following', !!nowFollowing);
         btn.innerHTML = nowFollowing
-          ? '<i class="fas fa-user-check"></i> Following'
-          : '<i class="fas fa-user-plus"></i> Follow';
-        toast(nowFollowing ? 'Creator-ს დაუფოლოუე!' : 'Unfollowed');
+          ? '<i class="fas fa-user-check"></i> '+_vt('following')
+          : '<i class="fas fa-user-plus"></i> '+_vt('follow');
+        toast(nowFollowing ? 'Creator-ს დაუფოლოუე!' : _vt('unfollow'));
       });
     });
   }

@@ -87,6 +87,7 @@
     delete:           { ka: 'წაშლა',         en: 'Delete',      ru: 'Удалить'       },
     edit:             { ka: 'რედაქტირება',   en: 'Edit',        ru: 'Редактировать' },
     follow:           { ka: 'გამოწერა',      en: 'Follow',      ru: 'Подписаться'   },
+    following:        { ka: 'გამოწერილია',   en: 'Following',   ru: 'Подписан'      },
     unfollow:         { ka: 'გამოუწერა',     en: 'Unfollow',    ru: 'Отписаться'    },
     send_message:     { ka: 'შეტყობ. გაგზ.',en: 'Message',     ru: 'Написать'      },
     search:           { ka: 'ძებნა',         en: 'Search',      ru: 'Поиск'         },
@@ -303,6 +304,20 @@
     cr_filter_by_cat: { ka: 'კატეგორიით ფილტრი',   en: 'Filter by Category',ru: 'Фильтр по категории' },
     cr_all:           { ka: 'ყველა კრეატორი',       en: 'All Creators',   ru: 'Все авторы'      },
     cr_loading:       { ka: 'კრეატ. იტვირთება…',   en: 'Loading creators…',ru: 'Загрузка авторов…' },
+
+    /* ── Rewards JS strings ─────────────────────────────────── */
+    rw_redeem:        { ka: 'გამოყენება',          en: 'Redeem',         ru: 'Использовать'    },
+    rw_expired:       { ka: 'ვადა გავიდა',         en: 'Expired',        ru: 'Истёк'           },
+    rw_unavailable:   { ka: 'მიუწვდომელია',        en: 'Unavailable',    ru: 'Недоступно'      },
+    rw_out_of_stock:  { ka: 'ამოიწურა',            en: 'Out of Stock',   ru: 'Нет в наличии'   },
+    rw_need_more:     { ka: 'საჭირო pts',           en: 'Need more pts',  ru: 'Нужно больше pts'},
+    rw_claimed_before:{ ka: 'უკვე გამოყენებული',  en: 'Claimed before', ru: 'Уже использовано'},
+    rw_no_category:   { ka: 'ამ კატეგ. ჯილდო არ არის',en: 'No rewards in this category',ru: 'Нет наград в этой категории' },
+    rw_send_modal:    { ka: 'GeoPoints-ის გაგზავნა',en: 'Send GeoPoints', ru: 'Отправить GeoPoints' },
+    rw_send_btn:      { ka: 'გაგზავნა',            en: 'Send Points',    ru: 'Отправить'       },
+    rw_earned:        { ka: 'მიღებული',            en: 'Earned',         ru: 'Заработано'      },
+    rw_received:      { ka: 'მიღ. გამოგზ.',        en: 'Received',       ru: 'Получено'        },
+    rw_redeemed:      { ka: 'გამოყენებული',        en: 'Redeemed',       ru: 'Использовано'    },
 
     /* ── Rewards page ───────────────────────────────────────── */
     rw_balance:       { ka: 'GeoPoints-ის ბალანსი',en: 'GeoPoints Balance',ru: 'Баланс GeoPoints' },

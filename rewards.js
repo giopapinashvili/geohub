@@ -126,10 +126,11 @@
     if (sub) {
       var w = state.wallet;
       var remaining = Math.max(0, 2000 - state.dailyTransferred);
+      var _bt=typeof GHt==='function'?GHt:function(k){return k;};
       var parts = [];
-      if ((w.earned || 0) > 0) parts.push('Earned: <strong>' + compact(w.earned) + '</strong>');
-      if ((w.received || 0) > 0) parts.push('Received: <strong>' + compact(w.received) + '</strong>');
-      if ((w.redeemed || 0) > 0) parts.push('Redeemed: <strong>' + compact(w.redeemed) + '</strong>');
+      if ((w.earned || 0) > 0) parts.push(_bt('rw_earned')+': <strong>' + compact(w.earned) + '</strong>');
+      if ((w.received || 0) > 0) parts.push(_bt('rw_received')+': <strong>' + compact(w.received) + '</strong>');
+      if ((w.redeemed || 0) > 0) parts.push(_bt('rw_redeemed')+': <strong>' + compact(w.redeemed) + '</strong>');
       parts.push('Transfer limit: <strong>' + compact(remaining) + ' pts</strong> today');
       sub.innerHTML = parts.join(' &nbsp;·&nbsp; ');
     }
@@ -206,14 +207,15 @@
       ? '<div class="rw-card-img"><img src="' + esc(r.imageUrl) + '" alt="' + esc(r.title || 'Reward') + '" loading="lazy" onerror="this.style.display=\'none\'"></div>'
       : '<div class="rw-card-img rw-card-img-placeholder"><i class="fas ' + icon + '"></i></div>';
 
+    var _rwt=typeof GHt==='function'?GHt:function(k){return k;};
     var btnDisabled = !canAfford || outOfStock || unavailable;
     var btnText = unavailable
-      ? (isExpired ? 'Expired' : 'Unavailable')
+      ? (isExpired ? _rwt('rw_expired') : _rwt('rw_unavailable'))
       : outOfStock
-        ? 'Out of Stock'
+        ? _rwt('rw_out_of_stock')
         : !canAfford
-          ? 'Need ' + compact(cost - state.balance) + ' more pts'
-          : 'Redeem';
+          ? _rwt('rw_need_more')+': '+compact(cost - state.balance)+' pts'
+          : _rwt('rw_redeem');
 
     return '<div class="rw-card' + (outOfStock || unavailable ? ' rw-card-oos' : '') + '" data-reward-id="' + esc(r.id) + '">' +
       imgHtml +
@@ -228,7 +230,7 @@
           '<div class="rw-card-cost"><i class="fas fa-coins"></i>' + compact(cost) + ' pts</div>' +
           '<div class="rw-card-stock">' + stockHtml + '</div>' +
         '</div>' +
-        (claimed ? '<div class="rw-claimed-badge"><i class="fas fa-check"></i> Claimed before</div>' : '') +
+        (claimed ? '<div class="rw-claimed-badge"><i class="fas fa-check"></i> '+_rwt('rw_claimed_before')+'</div>' : '') +
         '<button class="rw-btn-redeem' + (btnDisabled ? ' disabled' : '') + '" data-redeem="' + esc(r.id) + '"' + (btnDisabled ? ' disabled' : '') + '>' + btnText + '</button>' +
       '</div>' +
     '</div>';
@@ -249,7 +251,8 @@
     if (!grid) return;
     var rows = filteredRewards();
     if (!rows.length) {
-      grid.innerHTML = '<div class="rw-empty"><i class="fas fa-gift"></i><h3>No rewards in this category</h3><p>New rewards are added regularly. Check back soon.</p></div>';
+      var _rc=typeof GHt==='function'?GHt:function(k){return k;};
+      grid.innerHTML = '<div class="rw-empty"><i class="fas fa-gift"></i><h3>'+_rc('rw_no_category')+'</h3></div>';
       return;
     }
     grid.innerHTML = rows.map(cardHtml).join('');
