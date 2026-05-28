@@ -93,6 +93,18 @@
     view_more:        { ka: 'მეტის ნახვა',   en: 'View more',   ru: 'Показать ещё'  },
     all_caught_up:    { ka: 'ყველა პოსტი ნანახია',en: 'All caught up',ru: 'Всё просмотрено' },
     no_results:       { ka: 'შედეგი არ მოიძებნა',en: 'No results',ru: 'Нет результатов' },
+
+    /* ── Profile tabs ───────────────────────────────────────── */
+    profile_posts:    { ka: 'პოსტები',       en: 'Posts',       ru: 'Посты'         },
+    profile_about:    { ka: 'ინფო',           en: 'About',       ru: 'О себе'        },
+    profile_gallery:  { ka: 'გალერეა',        en: 'Gallery',     ru: 'Галерея'       },
+    profile_friends:  { ka: 'მეგობრები',      en: 'Friends',     ru: 'Друзья'        },
+    profile_checkins: { ka: 'ჩეკ-ინები',      en: 'Check-ins',   ru: 'Отметки'       },
+    profile_badges:   { ka: 'ნიშნები',        en: 'Badges',      ru: 'Значки'        },
+    profile_saved:    { ka: 'შენახული',        en: 'Saved',       ru: 'Сохранённое'   },
+    profile_edit:     { ka: 'პროფილის რედ.',  en: 'Edit Profile',ru: 'Ред. профиль'  },
+    profile_add_friend:{ ka: 'მეგობრად დამატება',en: 'Add Friend',ru: 'Добавить друга'},
+    profile_message:  { ka: 'შეტყობინება',    en: 'Message',     ru: 'Написать'      },
   };
 
   /* ── Core t() function ───────────────────────────────────── */

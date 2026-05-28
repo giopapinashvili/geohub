@@ -337,10 +337,11 @@
       var _savedPanelEl = document.getElementById('tab-saved');
       if (_savedPanelEl) _savedPanelEl.style.display = 'none';
     }
+    var _t = typeof GHt === 'function' ? GHt : function(k){ return k; };
     const coverActions = $('.cover-actions');
     if (coverActions) coverActions.innerHTML = own
-      ? '<button class="cover-btn" data-edit-cover><i class="fas fa-camera"></i> Edit Cover</button><button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button>'
-      : '<button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> Share</button><button class="cover-btn primary" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> Add Friend</button>';
+      ? '<button class="cover-btn" data-edit-cover><i class="fas fa-camera"></i> Edit Cover</button><button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="cover-btn primary" data-edit-profile><i class="fas fa-pen"></i> '+_t('profile_edit')+'</button>'
+      : '<button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="cover-btn primary" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> '+_t('profile_add_friend')+'</button>';
     if (own) {
       const avatarWrap = $('.profile-avatar-wrap');
       if (avatarWrap && !avatarWrap.querySelector('.profile-avatar-edit')) {
@@ -353,12 +354,12 @@
       }
     }
     const actions = $('.profile-actions');
-    if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i> Share</button><button class="btn btn-ghost btn-sm profile-body-logout" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> Message</button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> Add Friend</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> Follow</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-mute-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-volume-mute"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-ban"></i></button>';
+    if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> '+_t('profile_edit')+'</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="btn btn-ghost btn-sm profile-body-logout" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> '+_t('profile_message')+'</button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> '+_t('profile_add_friend')+'</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> '+_t('follow')+'</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-mute-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-volume-mute"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-ban"></i></button>';
     if (!own && window.GeoSocial && window.GeoSocial.checkFollowing) {
       window.GeoSocial.checkFollowing(user.uid, isFollowing => {
         $$('[data-follow-user="' + user.uid + '"]').forEach(btn => {
           btn.classList.toggle('following', !!isFollowing);
-          btn.innerHTML = isFollowing ? '<i class="fas fa-user-check"></i> Following' : '<i class="fas fa-user-plus"></i> Follow';
+          btn.innerHTML = isFollowing ? '<i class="fas fa-user-check"></i> '+(typeof GHt==='function'?GHt('unfollow'):'Following') : '<i class="fas fa-user-plus"></i> '+(typeof GHt==='function'?GHt('follow'):'Follow');
         });
       });
     }
@@ -759,32 +760,54 @@
     }
 
     if (window.GeoSocial && window.GeoSocial.listenUserPosts) {
+      var _lastProfilePostsKey = '';
+      var _profilePostsTimer = null;
       window.GeoSocial.listenUserPosts(user.uid, function(posts) {
-        var count = $('.ptab[data-tab="posts"] .tab-count'); if (count) count.textContent = posts.length || '0';
-        renderGalleryTab(posts);
-        if (!posts.length) { emptyTab('#tab-posts', 'fa-seedling', 'No posts yet', 'Real posts from Firestore will appear here.', 'feed.html?compose=1', 'Create Post'); return; }
-        var tab = $('#tab-posts');
-        if (!tab) return;
-        if (window.GeoSocialUI && window.GeoSocialUI.postCard && window.GeoSocialUI.bindPostInteractions) {
-          // Use the full interactive post card from the social engine
-          // Phase 35: sort pinned post to top
-          var _pinnedId = user.pinnedPostId || '';
-          var _sorted = _pinnedId ? posts.slice().sort(function(a,b){ return (b.id===_pinnedId?1:0)-(a.id===_pinnedId?1:0); }) : posts;
-          var _pinLabel = (_pinnedId && _sorted.length && _sorted[0].id===_pinnedId)
-            ? '<div class="gh-pin-label"><i class="fas fa-thumbtack"></i> Pinned Post</div>' : '';
-          tab.innerHTML = '<div class="post-feed-list" id="profile-posts-list">' + _pinLabel + _sorted.map(function(p) { return window.GeoSocialUI.postCard(p); }).join('') + '</div>';
-          var list = tab.querySelector('#profile-posts-list');
-          if (list) {
-            window.GeoSocialUI.bindPostInteractions(list);
-            posts.forEach(function(p) {
-              try { if (window.GeoSocialUI.hydrateReactionState) window.GeoSocialUI.hydrateReactionState(p.id); } catch(e) {}
-              try { if (window.GeoSocialUI.loadReactionBreakdown) window.GeoSocialUI.loadReactionBreakdown(p.id); } catch(e) {}
-            });
+        // Debounce: rapid Firestore updates collapse into one render
+        if (_profilePostsTimer) clearTimeout(_profilePostsTimer);
+        _profilePostsTimer = setTimeout(function() {
+          _profilePostsTimer = null;
+          var count = $('.ptab[data-tab="posts"] .tab-count'); if (count) count.textContent = posts.length || '0';
+          renderGalleryTab(posts);
+          if (!posts.length) {
+            _lastProfilePostsKey = '';
+            emptyTab('#tab-posts', 'fa-seedling', 'No posts yet', 'Real posts from Firestore will appear here.', 'feed.html?compose=1', 'Create Post');
+            return;
           }
-        } else {
-          // Fallback: social engine unavailable
-          tab.innerHTML = '<div class="post-feed-list" style="padding:32px;text-align:center;color:var(--gh-muted)"><i class="fas fa-rotate-right" style="font-size:1.5rem"></i><p style="margin-top:8px">Refresh the page to load posts.</p></div>';
-        }
+          var tab = $('#tab-posts');
+          if (!tab) return;
+          if (window.GeoSocialUI && window.GeoSocialUI.postCard && window.GeoSocialUI.bindPostInteractions) {
+            // Phase 35: sort pinned post to top
+            var _pinnedId = user.pinnedPostId || '';
+            var _sorted = _pinnedId ? posts.slice().sort(function(a,b){ return (b.id===_pinnedId?1:0)-(a.id===_pinnedId?1:0); }) : posts;
+            // Same-order skip: only patch counts if IDs unchanged
+            var newKey = _sorted.map(function(p){ return p.id; }).join(',');
+            if (newKey && newKey === _lastProfilePostsKey && tab.querySelector('#profile-posts-list')) {
+              _sorted.forEach(function(p){
+                var card = document.getElementById('post-'+p.id); if (!card) return;
+                var lc = card.querySelector('[data-like-count]'); if (lc) lc.textContent = String(Number(p.likeCount||p.reactionCount||0));
+                var cc = card.querySelector('[data-comment-count]'); if (cc) cc.textContent = String(Number(p.commentCount||0));
+                var sc = card.querySelector('[data-share-count]'); if (sc) sc.textContent = String(Number(p.shareCount||0));
+              });
+              return; // skip full re-render — prevents scroll jump
+            }
+            _lastProfilePostsKey = newKey;
+            var _pinLabel = (_pinnedId && _sorted.length && _sorted[0].id===_pinnedId)
+              ? '<div class="gh-pin-label"><i class="fas fa-thumbtack"></i> Pinned Post</div>' : '';
+            tab.innerHTML = '<div class="post-feed-list" id="profile-posts-list">' + _pinLabel + _sorted.map(function(p) { return window.GeoSocialUI.postCard(p); }).join('') + '</div>';
+            var list = tab.querySelector('#profile-posts-list');
+            if (list) {
+              window.GeoSocialUI.bindPostInteractions(list);
+              posts.forEach(function(p) {
+                try { if (window.GeoSocialUI.hydrateReactionState) window.GeoSocialUI.hydrateReactionState(p.id); } catch(e) {}
+                try { if (window.GeoSocialUI.loadReactionBreakdown) window.GeoSocialUI.loadReactionBreakdown(p.id); } catch(e) {}
+              });
+            }
+          } else {
+            // Fallback: social engine unavailable
+            tab.innerHTML = '<div class="post-feed-list" style="padding:32px;text-align:center;color:var(--gh-muted)"><i class="fas fa-rotate-right" style="font-size:1.5rem"></i><p style="margin-top:8px">Refresh the page to load posts.</p></div>';
+          }
+        }, 80);
       });
     }
   }
@@ -2148,7 +2171,7 @@
       window.GeoSocial.toggleFollow(target, isFollowing => {
         $$('[data-follow-user="' + target + '"]').forEach(btn => {
           btn.classList.toggle('following', !!isFollowing);
-          btn.innerHTML = isFollowing ? '<i class="fas fa-user-check"></i> Following' : '<i class="fas fa-user-plus"></i> Follow';
+          btn.innerHTML = isFollowing ? '<i class="fas fa-user-check"></i> '+(typeof GHt==='function'?GHt('unfollow'):'Following') : '<i class="fas fa-user-plus"></i> '+(typeof GHt==='function'?GHt('follow'):'Follow');
         });
       });
     }
