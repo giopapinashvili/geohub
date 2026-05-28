@@ -66,7 +66,7 @@ const obState = {
   goals: [],
 };
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 8;
 
 // ── PERSONALIZATION MAPS ─────────────────────────────────────────
 
@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function () {
 function obNext() {
   if (!validateStep(obState.step)) return;
   if (obState.step === TOTAL_STEPS - 1) {
-    const profile = computeProfile();
+    var profile = computeProfile();
     saveToStorage(profile);
     renderStep(TOTAL_STEPS);
   } else if (obState.step < TOTAL_STEPS) {
@@ -165,27 +165,29 @@ function obBack() {
 }
 
 function obSkip() {
-  if (obState.step === 3) { obState.interests = []; }
-  if (obState.step === 5) { obState.goals = []; }
+  if (obState.step === 2) { /* skip photo */ }
+  if (obState.step === 4) { obState.interests = []; }
+  if (obState.step === 6) { obState.goals = []; }
+  if (obState.step === 7) { /* skip notifications */ }
   obNext();
 }
 
 // ── VALIDATION ───────────────────────────────────────────────────
 
 function validateStep(step) {
-  if (step === 2 && !obState.accountType) {
+  if (step === 3 && !obState.accountType) {
     showToast('Choose an account type to continue.');
     return false;
   }
-  if (step === 3 && obState.interests.length < 3) {
+  if (step === 4 && obState.interests.length < 3) {
     showToast('Pick at least 3 interests.');
     return false;
   }
-  if (step === 4 && (!obState.cities || !obState.cities.length)) {
+  if (step === 5 && (!obState.cities || !obState.cities.length)) {
     showToast('Choose at least one area, or select All Georgia.');
     return false;
   }
-  if (step === 5 && obState.goals.length < 2) {
+  if (step === 6 && obState.goals.length < 2) {
     showToast('Pick at least 2 goals.');
     return false;
   }
@@ -205,11 +207,13 @@ function renderStep(n) {
   setTimeout(function () {
     switch (n) {
       case 1: content.innerHTML = renderWelcome(); break;
-      case 2: content.innerHTML = renderAccountType(); break;
-      case 3: content.innerHTML = renderInterests(); break;
-      case 4: content.innerHTML = renderCity(); break;
-      case 5: content.innerHTML = renderGoals(); break;
-      case 6: content.innerHTML = renderResult(); break;
+      case 2: content.innerHTML = renderPhoto(); break;
+      case 3: content.innerHTML = renderAccountType(); break;
+      case 4: content.innerHTML = renderInterests(); break;
+      case 5: content.innerHTML = renderCity(); break;
+      case 6: content.innerHTML = renderGoals(); break;
+      case 7: content.innerHTML = renderNotifPermission(); break;
+      case 8: content.innerHTML = renderResult(); break;
     }
     content.style.transition = 'opacity 0.26s ease, transform 0.26s ease';
     content.style.opacity = '1';
@@ -231,7 +235,6 @@ function updateHeader(step) {
   var pct = Math.round(((step - 1) / (TOTAL_STEPS - 1)) * 100);
   fill.style.width = pct + '%';
 
-  var stepNames = ['', 'Welcome', 'Profile', 'Interests', 'City', 'Goals', 'Ready!'];
   label.textContent = step > 1 && step < TOTAL_STEPS ? ('Step ' + (step - 1) + ' of ' + (TOTAL_STEPS - 2)) : '';
 
   if (step === 1 || step === TOTAL_STEPS) {
@@ -239,8 +242,7 @@ function updateHeader(step) {
   } else {
     nav.style.display = 'flex';
     back.style.display = step === 2 ? 'none' : 'inline-flex';
-    skip.style.display = (step === 3 || step === 5) ? 'block' : 'none';
-    next.textContent = step === TOTAL_STEPS - 1 ? '' : 'Continue ';
+    skip.style.display = (step === 2 || step === 4 || step === 6 || step === 7) ? 'block' : 'none';
     next.innerHTML = step === TOTAL_STEPS - 1
       ? '<i class="fas fa-wand-magic-sparkles" style="margin-right:6px"></i> Build My Profile'
       : 'Continue <i class="fas fa-arrow-right" style="margin-left:6px"></i>';
@@ -251,7 +253,7 @@ function updateHeader(step) {
 
 function renderWelcome() {
   return '<div class="ob-welcome">' +
-    '<div class="ob-welcome-logo">GH</div>' +
+    '<img src="icons/icon-192.png" alt="GeoHub" style="width:80px;height:80px;border-radius:22px;object-fit:cover;box-shadow:0 8px 32px rgba(16,185,129,.3);margin-bottom:16px">' +
     '<h1>Welcome to <span class="hl">GeoHub</span></h1>' +
     '<p>Set up your profile in 2 minutes and get a personalized feed, starter challenges, and real rewards — tailored to your lifestyle.</p>' +
     '<div class="ob-feature-chips">' +
@@ -270,7 +272,55 @@ function renderWelcome() {
   '</div>';
 }
 
-// ── STEP 2: ACCOUNT TYPE ──────────────────────────────────────────
+// ── STEP 2: PROFILE PHOTO ─────────────────────────────────────────
+
+function renderPhoto() {
+  var preview = obState.photoURL || '';
+  return '<div class="ob-step-header">' +
+    '<div class="ob-step-kicker">Step 1 — Your Photo</div>' +
+    '<h2>Add a profile photo</h2>' +
+    '<p>Help people recognise you. You can always change it later.</p>' +
+  '</div>' +
+  '<div style="display:flex;flex-direction:column;align-items:center;gap:20px;padding:20px 0">' +
+    '<div id="ob-photo-preview" style="width:110px;height:110px;border-radius:50%;background:rgba(16,185,129,.12);border:3px dashed rgba(16,185,129,.4);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer" onclick="document.getElementById(\'ob-photo-input\').click()">' +
+      (preview
+        ? '<img src="' + preview + '" style="width:100%;height:100%;object-fit:cover">'
+        : '<i class="fas fa-camera" style="font-size:2rem;color:rgba(16,185,129,.6)"></i>') +
+    '</div>' +
+    '<input type="file" id="ob-photo-input" accept="image/*" style="display:none" onchange="obHandlePhoto(this)">' +
+    '<button type="button" onclick="document.getElementById(\'ob-photo-input\').click()" style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:#10e0a0;border-radius:12px;padding:10px 24px;font-weight:700;cursor:pointer;font-size:.9rem">' +
+      '<i class="fas fa-upload" style="margin-right:8px"></i>' + (preview ? 'Change Photo' : 'Choose Photo') +
+    '</button>' +
+    (preview ? '<p style="color:#10b981;font-size:.85rem"><i class="fas fa-check-circle"></i> Photo selected</p>' : '') +
+  '</div>';
+}
+
+function obHandlePhoto(input) {
+  var file = input.files && input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    obState.photoFile = file;
+    obState.photoURL = e.target.result;
+    var preview = document.getElementById('ob-photo-preview');
+    if (preview) preview.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover">';
+    var btn = preview && preview.nextElementSibling && preview.nextElementSibling.nextElementSibling;
+    if (btn) btn.innerHTML = '<i class="fas fa-upload" style="margin-right:8px"></i> Change Photo';
+  };
+  reader.readAsDataURL(file);
+
+  // Upload to Cloudinary in background
+  var formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', 'geohub_unsigned');
+  formData.append('folder', 'geohub/avatars');
+  fetch('https://api.cloudinary.com/v1_1/dw5dqk2w7/image/upload', { method: 'POST', body: formData })
+    .then(function(r){ return r.json(); })
+    .then(function(data){ if (data.secure_url) obState.photoCloudinaryURL = data.secure_url; })
+    .catch(function(){});
+}
+
+// ── STEP 3: ACCOUNT TYPE ──────────────────────────────────────────
 
 function renderAccountType() {
   var cards = OB_DATA.accountTypes.map(function (t) {
@@ -419,7 +469,49 @@ function toggleGoal(id) {
   });
 }
 
-// ── STEP 6: RESULT ────────────────────────────────────────────────
+// ── STEP 7: NOTIFICATIONS ─────────────────────────────────────────
+
+function renderNotifPermission() {
+  var granted = Notification && Notification.permission === 'granted';
+  return '<div class="ob-step-header">' +
+    '<div class="ob-step-kicker">Step 6 — Notifications</div>' +
+    '<h2>Stay in the loop</h2>' +
+    '<p>Get notified when someone follows you, comments on your post, or a nearby deal drops.</p>' +
+  '</div>' +
+  '<div style="display:flex;flex-direction:column;align-items:center;gap:20px;padding:20px 0">' +
+    '<div style="font-size:4rem">🔔</div>' +
+    '<div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:360px">' +
+      '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,255,255,.04);border-radius:14px;border:1px solid rgba(255,255,255,.07)">' +
+        '<i class="fas fa-heart" style="color:#f43f5e;width:20px"></i><span style="font-size:.88rem">New followers & reactions</span>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,255,255,.04);border-radius:14px;border:1px solid rgba(255,255,255,.07)">' +
+        '<i class="fas fa-tag" style="color:#f59e0b;width:20px"></i><span style="font-size:.88rem">Exclusive local deals</span>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,255,255,.04);border-radius:14px;border:1px solid rgba(255,255,255,.07)">' +
+        '<i class="fas fa-trophy" style="color:#10b981;width:20px"></i><span style="font-size:.88rem">XP milestones & challenges</span>' +
+      '</div>' +
+    '</div>' +
+    (granted
+      ? '<div style="color:#10b981;font-weight:700;font-size:.95rem"><i class="fas fa-check-circle"></i> Notifications already enabled!</div>'
+      : '<button type="button" id="ob-notif-btn" onclick="obRequestNotif()" style="background:linear-gradient(135deg,#10b981,#3b82f6);border:none;color:#fff;border-radius:14px;padding:14px 32px;font-weight:800;font-size:1rem;cursor:pointer;width:100%;max-width:360px"><i class="fas fa-bell" style="margin-right:8px"></i> Enable Notifications</button>') +
+  '</div>';
+}
+
+function obRequestNotif() {
+  var btn = document.getElementById('ob-notif-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enabling…'; }
+  if (!('Notification' in window)) { obNext(); return; }
+  Notification.requestPermission().then(function(result) {
+    if (result === 'granted') {
+      if (btn) btn.innerHTML = '<i class="fas fa-check-circle"></i> Notifications enabled!';
+      setTimeout(obNext, 800);
+    } else {
+      obNext();
+    }
+  }).catch(obNext);
+}
+
+// ── STEP 8: RESULT ────────────────────────────────────────────────
 
 function computeProfile() {
   var typeId = obState.accountType || 'explorer';
@@ -585,6 +677,7 @@ function saveToStorage(profile) {
     cities:      obState.cities || [obState.city || 'all_georgia'],
     cityScope:   obState.cityScope || 'all_georgia',
     goals:       obState.goals,
+    photoURL:    obState.photoCloudinaryURL || obState.photoURL || '',
     profile:     profile,
     completedAt: new Date().toISOString(),
   };
@@ -605,6 +698,7 @@ function saveOnboardingToFirestore(data) {
       cities:      data.cities      || [data.city || 'all_georgia'],
       goals:       data.goals       || [],
     };
+    if (data.photoURL) { update.photoURL = data.photoURL; update.avatar = data.photoURL; }
     fb.fs.updateDoc(fb.fs.doc(fb.db, 'users', user.uid), update).catch(function () {});
   }
   if (window.GeoFirebase && window.GeoFirebase.auth) {
