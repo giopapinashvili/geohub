@@ -172,6 +172,26 @@
     });
   }
 
+  var FBSVG = '<i class="fab fa-facebook" style="font-size:1.1rem"></i>';
+
+  function initFacebookButtons() {
+    ['facebookLoginBtn', 'facebookSignupBtn'].forEach(function (id) {
+      var btn = document.getElementById(id); if (!btn) return;
+      var label = (id === 'facebookLoginBtn') ? 'Continue with Facebook' : 'Sign up with Facebook';
+      if (!window.GeoFirebaseAuth || !window.GeoFirebaseAuth.facebookLogin) { btn.style.display = 'none'; return; }
+      btn.addEventListener('click', function () {
+        btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting…';
+        window.GeoFirebaseAuth.facebookLogin()
+          .then(function () { btn.innerHTML = '<i class="fas fa-check"></i> Signed in!'; setTimeout(goAfterAuth, 500); })
+          .catch(function (err) {
+            btn.disabled = false; btn.innerHTML = FBSVG + ' ' + label;
+            var errEl = document.getElementById(id === 'facebookLoginBtn' ? 'loginError' : 'signupError');
+            if (errEl) errEl.textContent = fbErrMsg(err);
+          });
+      });
+    });
+  }
+
   function initForgotModal() {
     var link = document.getElementById('forgotLink'); var modal = document.getElementById('forgotModal'); var closeBtn = document.getElementById('closeForgotModal'); var sendBtn = document.getElementById('forgotSendBtn'); var success = document.getElementById('forgotSuccess');
     if (!link || !modal) return;
@@ -187,7 +207,7 @@
     });
   }
 
-  function startForms() { initTabs(); renderDemoPicks(); renderSignupInterests(); initEyeToggles(); initLoginForm(); initSignupForm(); initForgotModal(); initGoogleButtons(); }
+  function startForms() { initTabs(); renderDemoPicks(); renderSignupInterests(); initEyeToggles(); initLoginForm(); initSignupForm(); initForgotModal(); initGoogleButtons(); initFacebookButtons(); }
 
   document.addEventListener('DOMContentLoaded', function () {
     function begin() {

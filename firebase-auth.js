@@ -2,6 +2,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   GoogleAuthProvider,
+  FacebookAuthProvider,
   signInWithPopup,
   signOut,
   onAuthStateChanged,
@@ -191,9 +192,31 @@ async function fbGoogleLogin() {
   try {
     cred = await signInWithPopup(auth, provider);
   } catch (err) {
-    // User closed popup or blocked — not an app error
     if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
       throw Object.assign(new Error('Google sign-in was cancelled.'), { code: err.code });
+    }
+    throw err;
+  }
+  var geoUser = await mergeWithFirestore(fbUserToGeoUser(cred.user));
+  geoUser.lastSeen = Date.now();
+  await saveUserToFirestore(geoUser);
+  window.GeoCurrentUser = geoUser;
+  window.dispatchEvent(new CustomEvent('GeoAuthReady', { detail: geoUser }));
+  return geoUser;
+}
+
+async function fbFacebookLogin() {
+  var auth = window.GeoFirebase && window.GeoFirebase.auth;
+  if (!auth) throw new Error('Firebase not available');
+  var provider = new FacebookAuthProvider();
+  provider.addScope('email');
+  provider.addScope('public_profile');
+  var cred;
+  try {
+    cred = await signInWithPopup(auth, provider);
+  } catch (err) {
+    if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+      throw Object.assign(new Error('Facebook sign-in was cancelled.'), { code: err.code });
     }
     throw err;
   }
@@ -246,4 +269,4 @@ async function fbResendVerification(email, password) {
   return { sent: true };
 }
 
-window.GeoFirebaseAuth = { signUp: fbSignUp, signIn: fbSignIn, googleLogin: fbGoogleLogin, logout: fbLogout, onAuthChange: onAuthChange, saveUserToFirestore: saveUserToFirestore, loadUserFromFirestore: loadUserFromFirestore, resetPassword: fbResetPassword, resendVerification: fbResendVerification, isUsernameAvailable: isUsernameAvailable, reserveUsername: reserveUsername, releaseUsername: releaseUsername };
+window.GeoFirebaseAuth = { signUp: fbSignUp, signIn: fbSignIn, googleLogin: fbGoogleLogin, facebookLogin: fbFacebookLogin, logout: fbLogout, onAuthChange: onAuthChange, saveUserToFirestore: saveUserToFirestore, loadUserFromFirestore: loadUserFromFirestore, resetPassword: fbResetPassword, resendVerification: fbResendVerification, isUsernameAvailable: isUsernameAvailable, reserveUsername: reserveUsername, releaseUsername: releaseUsername };
