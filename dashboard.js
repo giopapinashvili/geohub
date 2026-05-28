@@ -38,8 +38,8 @@
       </div>
       <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:12px">${r.text}</p>
       <div style="display:flex;gap:8px">
-        <button class="btn btn-ghost btn-sm"><i class="fas fa-reply"></i> Reply</button>
-        <button class="btn btn-ghost btn-sm"><i class="fas fa-flag"></i> Report</button>
+        <button class="btn btn-ghost btn-sm"><i class="fas fa-reply"></i> ${typeof GHt==='function'?GHt('dash_reply'):'Reply'}</button>
+        <button class="btn btn-ghost btn-sm"><i class="fas fa-flag"></i> ${typeof GHt==='function'?GHt('dash_report'):'Report'}</button>
       </div>
     </div>`).join('');
 
@@ -174,7 +174,8 @@
     const name = card.querySelector('.influencer-name').textContent;
     const handle = card.querySelector('.influencer-handle').textContent;
     const actDiv = card.querySelector('.inf-actions');
-    actDiv.innerHTML = `<div class="sent-badge"><i class="fas fa-check-circle"></i> Offer Sent</div>`;
+    var _t=typeof GHt==='function'?GHt:function(k){return k;};
+    actDiv.innerHTML = `<div class="sent-badge"><i class="fas fa-check-circle"></i> ${_t('dash_offer_sent')}</div>`;
 
     const sentList = document.getElementById('sentOffersList');
     if (sentList.querySelector('[style*="text-align:center"]')) sentList.innerHTML = '';
@@ -197,8 +198,9 @@
   function updatePostPreview() {
     const t = document.getElementById('postTitle').value;
     const c = document.getElementById('postContent').value;
-    document.getElementById('previewTitle').textContent = t || 'Your post title here...';
-    document.getElementById('previewContent').textContent = c || 'Start typing your post content...';
+    var _t=typeof GHt==='function'?GHt:function(k){return k;};
+    document.getElementById('previewTitle').textContent = t || _t('dash_post_title_ph');
+    document.getElementById('previewContent').textContent = c || _t('dash_post_body_ph');
   }
   function publishPost() {
     const title = document.getElementById('postTitle').value.trim();
@@ -220,9 +222,9 @@
       ${title ? `<div style="font-size:0.875rem;font-weight:700;margin-bottom:6px">${title}</div>` : ''}
       ${content ? `<div style="font-size:0.8rem;color:var(--text-secondary)">${content}</div>` : ''}
       <div style="display:flex;gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border-subtle)">
-        <span style="font-size:0.72rem;color:var(--text-muted)"><i class="fas fa-eye"></i> 0 views</span>
-        <span style="font-size:0.72rem;color:var(--text-muted)"><i class="fas fa-heart"></i> 0 likes</span>
-        <span style="font-size:0.72rem;color:var(--green-light);font-size:0.72rem;margin-left:auto"><i class="fas fa-check-circle"></i> Published</span>
+        <span style="font-size:0.72rem;color:var(--text-muted)"><i class="fas fa-eye"></i> 0 ${typeof GHt==='function'?GHt('dash_views'):'views'}</span>
+        <span style="font-size:0.72rem;color:var(--text-muted)"><i class="fas fa-heart"></i> 0 ${typeof GHt==='function'?GHt('dash_likes'):'likes'}</span>
+        <span style="font-size:0.72rem;color:var(--green-light);font-size:0.72rem;margin-left:auto"><i class="fas fa-check-circle"></i> ${typeof GHt==='function'?GHt('dash_published'):'✓ Published'}</span>
       </div>`;
     list.prepend(item);
     document.getElementById('postTitle').value = '';
@@ -230,9 +232,10 @@
     updatePostPreview();
   }
   function savePostDraft(btn) {
-    btn.innerHTML = '<i class="fas fa-check"></i> Draft Saved!';
+    var _t=typeof GHt==='function'?GHt:function(k){return k;};
+    btn.innerHTML = '<i class="fas fa-check"></i> ' + _t('dash_draft_saved');
     btn.style.color = 'var(--green)';
-    setTimeout(() => { btn.innerHTML = '<i class="fas fa-save"></i> Save Draft'; btn.style.color = ''; }, 2000);
+    setTimeout(() => { btn.innerHTML = '<i class="fas fa-save"></i> ' + _t('dash_save_draft'); btn.style.color = ''; }, 2000);
   }
 
 function saveDashProfile() {
@@ -288,10 +291,11 @@ function saveDashProfile() {
 
   var btn = document.getElementById('profSaveBtn');
   if (btn) {
-    btn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+    var _t=typeof GHt==='function'?GHt:function(k){return k;};
+    btn.innerHTML = '<i class="fas fa-check"></i> ' + _t('dash_saved');
     btn.style.background = 'var(--green)';
     setTimeout(function () {
-      btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+      btn.innerHTML = '<i class="fas fa-save"></i> ' + _t('dash_save_changes');
       btn.style.background = '';
     }, 2500);
   }
@@ -385,8 +389,9 @@ function saveDashProfile() {
   if (urlEl) urlEl.textContent = 'geohub.ge/' + bizSlug;
 
   // Clear demo Published Posts for real users
+  var _dt = typeof GHt === 'function' ? GHt : function(k){return k;};
   var pubList = document.getElementById('publishedPostsList');
-  if (pubList) pubList.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--text-muted);font-size:0.85rem"><i class="fas fa-edit" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>No posts yet — compose your first post above</div>';
+  if (pubList) pubList.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--text-muted);font-size:0.85rem"><i class="fas fa-edit" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>' + _dt('dash_no_posts') + '</div>';
 
   // Zero stats and clear demo data for new business with no activity
   if (!biz.hasActivity) {
@@ -395,13 +400,13 @@ function saveDashProfile() {
     });
     document.querySelectorAll('.dash-nav-badge').forEach(function (el) { el.style.display = 'none'; });
     var chart = document.getElementById('viewsChart');
-    if (chart) chart.innerHTML = '<div style="width:100%;text-align:center;padding:32px 0;color:var(--text-muted);font-size:0.85rem"><i class="fas fa-chart-bar" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>No views yet — activity will appear here</div>';
+    if (chart) chart.innerHTML = '<div style="width:100%;text-align:center;padding:32px 0;color:var(--text-muted);font-size:0.85rem"><i class="fas fa-chart-bar" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>' + _dt('dash_no_views') + '</div>';
     var rev = document.getElementById('dashReviews');
-    if (rev) rev.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--text-muted);font-size:0.85rem"><i class="fas fa-star" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>No reviews yet</div>';
+    if (rev) rev.innerHTML = '<div style="text-align:center;padding:32px 0;color:var(--text-muted);font-size:0.85rem"><i class="fas fa-star" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>' + _dt('dash_no_reviews') + '</div>';
     var bookTab = document.getElementById('tab-bookings');
     if (bookTab) {
       var bookTable = bookTab.querySelector('.booking-table');
-      if (bookTable) bookTable.innerHTML = '<tbody><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted);font-size:0.85rem"><i class="fas fa-calendar" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>No bookings yet</td></tr></tbody>';
+      if (bookTable) bookTable.innerHTML = '<tbody><tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted);font-size:0.85rem"><i class="fas fa-calendar" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>' + _dt('dash_no_bookings') + '</td></tr></tbody>';
     }
   }
 
@@ -410,11 +415,12 @@ function saveDashProfile() {
     var container = document.getElementById('premiumUpgradeSection');
     if (!container) return;
 
+    var _pt = typeof GHt === 'function' ? GHt : function(k){return k;};
     if (currentStatus === 'active') {
       container.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:16px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:14px">'
         + '<i class="fas fa-crown" style="color:#10e0a0;font-size:1.3rem"></i>'
-        + '<div><div style="font-weight:700;color:#10e0a0">GeoHub Premium Active</div>'
-        + '<div style="font-size:0.78rem;color:#64748b;margin-top:2px">Verified badge, priority placement &amp; analytics unlocked</div></div></div>';
+        + '<div><div style="font-weight:700;color:#10e0a0">' + _pt('dash_prem_active') + '</div>'
+        + '<div style="font-size:0.78rem;color:#64748b;margin-top:2px">' + _pt('dash_prem_benefits') + '</div></div></div>';
       return;
     }
 
@@ -425,20 +431,20 @@ function saveDashProfile() {
         + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
         + '<i class="fas fa-crown" style="color:#f59e0b"></i>'
         + '<span style="font-weight:700;font-size:.9rem">GeoHub Premium</span></div>'
-        + '<p style="font-size:.75rem;color:#64748b;margin:0">Verified badge, priority placement &amp; full analytics. Available soon.</p></div>';
+        + '<p style="font-size:.75rem;color:#64748b;margin:0">' + _pt('dash_prem_soon') + '</p></div>';
       return;
     }
 
     container.innerHTML = '<div style="padding:20px;background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.2);border-radius:16px">'
       + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
       + '<i class="fas fa-crown" style="color:#f59e0b;font-size:1.4rem"></i>'
-      + '<div><div style="font-weight:800;font-size:1rem">Upgrade to Premium</div>'
-      + '<div style="font-size:0.78rem;color:#64748b">Verified badge · Priority placement · Full analytics</div></div></div>'
+      + '<div><div style="font-weight:800;font-size:1rem">' + _pt('dash_upgrade') + '</div>'
+      + '<div style="font-size:0.78rem;color:#64748b">' + _pt('dash_prem_benefits') + '</div></div></div>'
       + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
       + '<button class="geo-premium-btn" data-plan="monthly" style="padding:12px;border:1px solid rgba(59,130,246,.35);border-radius:12px;background:rgba(59,130,246,.1);color:#f8fafc;font-weight:700;cursor:pointer">'
-      + '<div style="font-size:1.1rem;color:#3b82f6">29 ₾</div><div style="font-size:0.72rem;color:#94a3b8">per month</div></button>'
+      + '<div style="font-size:1.1rem;color:#3b82f6">29 ₾</div><div style="font-size:0.72rem;color:#94a3b8">' + _pt('dash_per_month') + '</div></button>'
       + '<button class="geo-premium-btn" data-plan="yearly" style="padding:12px;border:1px solid rgba(16,185,129,.35);border-radius:12px;background:rgba(16,185,129,.1);color:#f8fafc;font-weight:700;cursor:pointer">'
-      + '<div style="font-size:1.1rem;color:#10e0a0">249 ₾</div><div style="font-size:0.72rem;color:#94a3b8">per year · save 30%</div></button>'
+      + '<div style="font-size:1.1rem;color:#10e0a0">249 ₾</div><div style="font-size:0.72rem;color:#94a3b8">' + _pt('dash_per_year_save') + '</div></button>'
       + '</div></div>';
 
     container.querySelectorAll('.geo-premium-btn').forEach(function (btn) {
