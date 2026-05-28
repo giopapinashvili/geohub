@@ -275,64 +275,148 @@
       margin-top: 4px;
     }
 
-    /* ── ACCOUNT TYPE GRID ────────────────────────────────── */
-    .ob-type-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+    /* ── LANG SWITCHER ───────────────────────────────────────── */
+    .ob-lang-switcher {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+      margin-left: auto;
     }
-    .ob-type-card {
-      padding: 20px 18px;
-      border-radius: 10px;
-      border: 1.5px solid var(--border);
-      background: linear-gradient(145deg, #111827, #14202f);
+    .ob-lang-btn {
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 4px 9px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: none;
+      color: var(--text-muted);
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.15s;
+      letter-spacing: 0.3px;
+    }
+    .ob-lang-btn:hover { border-color: var(--green); color: var(--green); background: rgba(16,185,129,0.07); }
+    .ob-lang-btn.active { border-color: var(--green); color: var(--green); background: rgba(16,185,129,0.1); }
+
+    /* ── ACCOUNT TYPE DUO ────────────────────────────────────── */
+    .ob-type-duo {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .ob-type-big {
+      padding: 28px 22px 24px;
+      border-radius: 16px;
+      border: 2px solid rgba(255,255,255,0.07);
+      background: linear-gradient(145deg, #0d1117, #14202f);
+      cursor: pointer;
+      transition: all 0.22s;
       position: relative;
       overflow: hidden;
+      text-align: center;
     }
-    .ob-type-card:hover {
-      border-color: rgba(255,255,255,0.15);
-      transform: translateY(-2px);
-    }
-    .ob-type-card.selected {
+    .ob-type-big:hover {
       border-color: var(--ob-color, var(--green));
-      box-shadow: 0 0 0 1px var(--ob-color, var(--green)), 0 8px 24px rgba(0,0,0,0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
     }
-    .ob-type-card.selected::before {
+    .ob-type-big.selected {
+      border-color: var(--ob-color, var(--green));
+      box-shadow: 0 0 0 1px var(--ob-color, var(--green)), 0 12px 40px rgba(0,0,0,0.5);
+    }
+    .ob-type-big.selected::before {
       content: '';
       position: absolute;
       inset: 0;
       background: var(--ob-color, var(--green));
       opacity: 0.06;
     }
-    .ob-type-check {
+    .ob-type-big-check {
       position: absolute;
-      top: 12px; right: 12px;
-      width: 22px; height: 22px;
+      top: 14px; right: 14px;
+      width: 26px; height: 26px;
       border-radius: 50%;
       background: var(--ob-color, var(--green));
       color: white;
       display: none;
       align-items: center;
       justify-content: center;
-      font-size: 0.66rem;
+      font-size: 0.7rem;
     }
-    .ob-type-card.selected .ob-type-check { display: flex; }
-    .ob-type-icon {
-      width: 42px; height: 42px;
-      border-radius: 9px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem;
-      margin-bottom: 14px;
+    .ob-type-big.selected .ob-type-big-check { display: flex; }
+    .ob-type-big-icon {
+      width: 66px; height: 66px;
+      border-radius: 17px;
       background: rgba(255,255,255,0.06);
       color: var(--ob-color, var(--green));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.7rem;
+      margin: 0 auto 18px;
+      transition: all 0.22s;
     }
-    .ob-type-card.selected .ob-type-icon {
-      background: color-mix(in srgb, var(--ob-color, var(--green)) 15%, transparent);
+    .ob-type-big.selected .ob-type-big-icon {
+      background: color-mix(in srgb, var(--ob-color, var(--green)) 16%, transparent);
     }
-    .ob-type-card h3 { font-size: 0.92rem; font-weight: 700; margin-bottom: 5px; }
-    .ob-type-card p  { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5; }
+    .ob-type-big h3 { font-size: 1.08rem; font-weight: 800; margin-bottom: 10px; }
+    .ob-type-big p  { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.55; margin-bottom: 18px; }
+    .ob-type-big-features { display: flex; flex-direction: column; gap: 7px; text-align: left; }
+    .ob-type-big-features span {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .ob-type-big.selected .ob-type-big-features span { color: var(--text-primary); }
+    .ob-type-big-features i { color: var(--ob-color, var(--green)); font-size: 0.66rem; flex-shrink: 0; }
+    @media (max-width: 480px) { .ob-type-duo { grid-template-columns: 1fr; } }
+
+    /* ── ABOUT YOU CARDS ─────────────────────────────────────── */
+    .ob-about-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 18px 20px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      transition: border-color 0.2s;
+    }
+    .ob-about-card:focus-within { border-color: rgba(255,255,255,0.14); }
+    .ob-about-icon {
+      width: 46px; height: 46px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.05rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .ob-about-field { flex: 1; }
+    .ob-about-field label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .ob-date-input { color: var(--text-primary); }
+    .ob-gender-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+    .ob-gender-pill {
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: 1.5px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .ob-gender-pill:hover { border-color: rgba(168,85,247,0.4); color: #c084fc; }
+    .ob-gender-pill.selected {
+      border-color: #a855f7;
+      background: rgba(168,85,247,0.12);
+      color: #c084fc;
+    }
 
     /* ── INTEREST GRID ────────────────────────────────────── */
     .ob-interest-grid {
