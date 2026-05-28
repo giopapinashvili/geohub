@@ -30,14 +30,14 @@
       <div class="tb-logo-icon">G</div>
       <div>
         <div class="tb-logo-name">GeoHub OS</div>
-        <div class="tb-logo-sub">Admin Console</div>
+        <div class="tb-logo-sub" data-i18n="adm_console">Admin Console</div>
       </div>
     </div>
     <div class="tb-search-wrap">
       <i class="fas fa-search tb-search-ic"></i>
       <input class="tb-search" id="globalSearch" placeholder="Search users, businesses, content…" autocomplete="off" oninput="handleGlobalSearch(this.value)">
     </div>
-    <div class="tb-live"><span class="tb-live-dot"></span> Live</div>
+    <div class="tb-live"><span class="tb-live-dot"></span> <span data-i18n="adm_live">Live</span></div>
     <div class="tb-right">
       <button class="tb-btn" title="Alerts" onclick="adminNav('notifications')">
         <i class="fas fa-bell"></i>
@@ -62,33 +62,33 @@
 
   <!-- ═══ SIDEBAR ═══ -->
   <aside class="sidebar" id="adminSidebar">
-    <div class="sb-lbl">Platform</div>
-    <div class="sb-item active" onclick="adminNav('overview')"><span class="sb-ic"><i class="fas fa-th-large"></i></span> Overview</div>
-    <div class="sb-item" onclick="adminNav('live')"><span class="sb-ic"><i class="fas fa-circle" style="color:var(--green);font-size:0.55rem"></i></span> Live Monitor <span class="sb-cnt" id="sb-live">0</span></div>
-    <div class="sb-item" onclick="adminNav('notifications')"><span class="sb-ic"><i class="fas fa-bell"></i></span> Notifications <span class="sb-cnt danger" id="sb-notif">0</span></div>
-    <div class="sb-lbl">Management</div>
-    <div class="sb-item" onclick="adminNav('users')"><span class="sb-ic"><i class="fas fa-users"></i></span> Users <span class="sb-cnt" id="sb-users">—</span></div>
-    <div class="sb-item" onclick="adminNav('activity')"><span class="sb-ic"><i class="fas fa-stream"></i></span> Activity <span class="sb-cnt" id="sb-activity">0</span></div>
-    <div class="sb-item" onclick="adminNav('businesses')"><span class="sb-ic"><i class="fas fa-store"></i></span> Businesses <span class="sb-cnt" id="sb-biz-side">0</span></div>
-    <div class="sb-item" onclick="adminNav('creators')"><span class="sb-ic"><i class="fas fa-star"></i></span> Creators <span class="sb-cnt" id="sb-creators">0</span></div>
-    <div class="sb-item" onclick="adminNav('content')"><span class="sb-ic"><i class="fas fa-plus-square"></i></span> Content Studio</div>
-    <div class="sb-item" onclick="adminNav('placeedit')"><span class="sb-ic"><i class="fas fa-pencil-alt"></i></span> Place Editing</div>
-    <div class="sb-item" onclick="adminNav('placecat')"><span class="sb-ic"><i class="fas fa-tags"></i></span> Place Categories</div>
-    <div class="sb-item" onclick="adminNav('ownership')"><span class="sb-ic"><i class="fas fa-handshake"></i></span> Transfer Ownership</div>
-    <div class="sb-item" onclick="adminNav('challenges')"><span class="sb-ic"><i class="fas fa-bolt"></i></span> Challenge Studio <span class="sb-cnt" id="sb-challenges">0</span></div>
-    <div class="sb-item" onclick="adminNav('rewards')"><span class="sb-ic"><i class="fas fa-gift"></i></span> Rewards <span class="sb-cnt" id="sb-rewards">0</span></div>
-    <div class="sb-lbl">Safety</div>
-    <div class="sb-item" onclick="adminNav('moderation')"><span class="sb-ic"><i class="fas fa-flag"></i></span> Moderation <span class="sb-cnt danger" id="sb-mod">0</span></div>
-    <div class="sb-item" onclick="adminNav('trust')"><span class="sb-ic"><i class="fas fa-check-circle"></i></span> Trust & Safety</div>
-    <div class="sb-lbl">Analytics</div>
-    <div class="sb-item" onclick="adminNav('revenue')"><span class="sb-ic"><i class="fas fa-chart-line"></i></span> Revenue</div>
-    <div class="sb-item" onclick="adminNav('city')"><span class="sb-ic"><i class="fas fa-map"></i></span> City Analytics</div>
-    <div class="sb-item" onclick="adminNav('analytics')"><span class="sb-ic"><i class="fas fa-chart-bar"></i></span> Site Analytics <span class="sb-cnt" id="sb-analytics">—</span></div>
-    <div class="sb-item" onclick="adminNav('errors')"><span class="sb-ic"><i class="fas fa-exclamation-triangle"></i></span> Error Monitor <span class="sb-cnt danger" id="sb-errors">0</span></div>
-    <div class="sb-lbl">System</div>
-    <div class="sb-item" onclick="adminNav('controls')"><span class="sb-ic"><i class="fas fa-sliders-h"></i></span> Platform Controls</div>
+    <div class="sb-lbl" data-i18n="adm_lbl_platform">Platform</div>
+    <div class="sb-item active" onclick="adminNav('overview')"><span class="sb-ic"><i class="fas fa-th-large"></i></span> <span data-i18n="adm_nav_overview">Overview</span></div>
+    <div class="sb-item" onclick="adminNav('live')"><span class="sb-ic"><i class="fas fa-circle" style="color:var(--green);font-size:0.55rem"></i></span> <span data-i18n="adm_nav_live">Live Monitor</span> <span class="sb-cnt" id="sb-live">0</span></div>
+    <div class="sb-item" onclick="adminNav('notifications')"><span class="sb-ic"><i class="fas fa-bell"></i></span> <span data-i18n="adm_nav_notifs">Notifications</span> <span class="sb-cnt danger" id="sb-notif">0</span></div>
+    <div class="sb-lbl" data-i18n="adm_lbl_management">Management</div>
+    <div class="sb-item" onclick="adminNav('users')"><span class="sb-ic"><i class="fas fa-users"></i></span> <span data-i18n="adm_nav_users">Users</span> <span class="sb-cnt" id="sb-users">—</span></div>
+    <div class="sb-item" onclick="adminNav('activity')"><span class="sb-ic"><i class="fas fa-stream"></i></span> <span data-i18n="adm_nav_activity">Activity</span> <span class="sb-cnt" id="sb-activity">0</span></div>
+    <div class="sb-item" onclick="adminNav('businesses')"><span class="sb-ic"><i class="fas fa-store"></i></span> <span data-i18n="adm_nav_biz">Businesses</span> <span class="sb-cnt" id="sb-biz-side">0</span></div>
+    <div class="sb-item" onclick="adminNav('creators')"><span class="sb-ic"><i class="fas fa-star"></i></span> <span data-i18n="adm_nav_creators">Creators</span> <span class="sb-cnt" id="sb-creators">0</span></div>
+    <div class="sb-item" onclick="adminNav('content')"><span class="sb-ic"><i class="fas fa-plus-square"></i></span> <span data-i18n="adm_nav_content">Content Studio</span></div>
+    <div class="sb-item" onclick="adminNav('placeedit')"><span class="sb-ic"><i class="fas fa-pencil-alt"></i></span> <span data-i18n="adm_nav_placeedit">Place Editing</span></div>
+    <div class="sb-item" onclick="adminNav('placecat')"><span class="sb-ic"><i class="fas fa-tags"></i></span> <span data-i18n="adm_nav_placecat">Place Categories</span></div>
+    <div class="sb-item" onclick="adminNav('ownership')"><span class="sb-ic"><i class="fas fa-handshake"></i></span> <span data-i18n="adm_nav_ownership">Transfer Ownership</span></div>
+    <div class="sb-item" onclick="adminNav('challenges')"><span class="sb-ic"><i class="fas fa-bolt"></i></span> <span data-i18n="adm_nav_challenges">Challenge Studio</span> <span class="sb-cnt" id="sb-challenges">0</span></div>
+    <div class="sb-item" onclick="adminNav('rewards')"><span class="sb-ic"><i class="fas fa-gift"></i></span> <span data-i18n="adm_nav_rewards">Rewards</span> <span class="sb-cnt" id="sb-rewards">0</span></div>
+    <div class="sb-lbl" data-i18n="adm_lbl_safety">Safety</div>
+    <div class="sb-item" onclick="adminNav('moderation')"><span class="sb-ic"><i class="fas fa-flag"></i></span> <span data-i18n="adm_nav_moderation">Moderation</span> <span class="sb-cnt danger" id="sb-mod">0</span></div>
+    <div class="sb-item" onclick="adminNav('trust')"><span class="sb-ic"><i class="fas fa-check-circle"></i></span> <span data-i18n="adm_nav_trust">Trust &amp; Safety</span></div>
+    <div class="sb-lbl" data-i18n="adm_lbl_analytics">Analytics</div>
+    <div class="sb-item" onclick="adminNav('revenue')"><span class="sb-ic"><i class="fas fa-chart-line"></i></span> <span data-i18n="adm_nav_revenue">Revenue</span></div>
+    <div class="sb-item" onclick="adminNav('city')"><span class="sb-ic"><i class="fas fa-map"></i></span> <span data-i18n="adm_nav_city">City Analytics</span></div>
+    <div class="sb-item" onclick="adminNav('analytics')"><span class="sb-ic"><i class="fas fa-chart-bar"></i></span> <span data-i18n="adm_nav_site">Site Analytics</span> <span class="sb-cnt" id="sb-analytics">—</span></div>
+    <div class="sb-item" onclick="adminNav('errors')"><span class="sb-ic"><i class="fas fa-exclamation-triangle"></i></span> <span data-i18n="adm_nav_errors">Error Monitor</span> <span class="sb-cnt danger" id="sb-errors">0</span></div>
+    <div class="sb-lbl" data-i18n="adm_lbl_system">System</div>
+    <div class="sb-item" onclick="adminNav('controls')"><span class="sb-ic"><i class="fas fa-sliders-h"></i></span> <span data-i18n="adm_nav_controls">Platform Controls</span></div>
     <div class="sb-div"></div>
-    <div class="sb-item" onclick="location.href='index.html'"><span class="sb-ic"><i class="fas fa-arrow-left"></i></span> Back to GeoHub</div>
+    <div class="sb-item" onclick="location.href='index.html'"><span class="sb-ic"><i class="fas fa-arrow-left"></i></span> <span data-i18n="adm_nav_back">Back to GeoHub</span></div>
   </aside>
 
   <!-- ═══ MAIN ═══ -->
@@ -97,7 +97,7 @@
     <!-- ─── OVERVIEW ─── -->
     <section class="sec active" id="sec-overview">
       <div class="ph">
-        <div><div class="ph-title">Platform Overview</div><div class="ph-sub">GeoHub OS · Real-time snapshot</div></div>
+        <div><div class="ph-title" data-i18n="adm_ov_title">Platform Overview</div><div class="ph-sub">GeoHub OS · Real-time snapshot</div></div>
         <div class="ph-actions">
           <button class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> Export</button>
           <button class="btn btn-primary btn-sm" onclick="animateBars()"><i class="fas fa-sync-alt"></i> Refresh</button>
@@ -106,25 +106,25 @@
 
       <div class="g4 mb12">
         <div class="sc green">
-          <div class="sc-ico">👥</div><div class="sc-val" id="stat-users">—</div><div class="sc-lbl">Total Users</div>
+          <div class="sc-ico">👥</div><div class="sc-val" id="stat-users">—</div><div class="sc-lbl" data-i18n="adm_ov_users">Total Users</div>
           <div class="sc-delta" id="delta-users" style="color:var(--ts);font-size:0.72rem">Firebase · live count</div>
           <div class="sparkrow" id="sp-users"></div>
           <div class="sc-glow" style="background:radial-gradient(#10b981,transparent)"></div>
         </div>
         <div class="sc blue">
-          <div class="sc-ico">🏢</div><div class="sc-val" id="stat-biz">0</div><div class="sc-lbl">Businesses</div>
+          <div class="sc-ico">🏢</div><div class="sc-val" id="stat-biz">0</div><div class="sc-lbl" data-i18n="adm_ov_biz">Businesses</div>
           <div class="sc-delta" id="delta-biz" style="color:var(--ts);font-size:0.72rem">registered via dashboard</div>
           <div class="sparkrow" id="sp-biz"></div>
           <div class="sc-glow" style="background:radial-gradient(#3b82f6,transparent)"></div>
         </div>
         <div class="sc gold">
-          <div class="sc-ico">📅</div><div class="sc-val" id="stat-events">0</div><div class="sc-lbl">Active Events</div>
+          <div class="sc-ico">📅</div><div class="sc-val" id="stat-events">0</div><div class="sc-lbl" data-i18n="adm_ov_events">Active Events</div>
           <div class="sc-delta" style="color:var(--ts);font-size:0.72rem">Firestore · live count</div>
           <div class="sparkrow" id="sp-ev"></div>
           <div class="sc-glow" style="background:radial-gradient(#f59e0b,transparent)"></div>
         </div>
         <div class="sc purple">
-          <div class="sc-ico">💰</div><div class="sc-val" id="stat-rev">₾0</div><div class="sc-lbl">Monthly Revenue</div>
+          <div class="sc-ico">💰</div><div class="sc-val" id="stat-rev">₾0</div><div class="sc-lbl" data-i18n="adm_ov_revenue">Monthly Revenue</div>
           <div class="sc-delta" style="color:var(--ts);font-size:0.72rem">Beta — no payments yet</div>
           <div class="sparkrow" id="sp-rev"></div>
           <div class="sc-glow" style="background:radial-gradient(#a855f7,transparent)"></div>
@@ -132,12 +132,12 @@
       </div>
 
       <div class="g6 mb20">
-        <div class="sc"><div class="sc-ico" style="font-size:1rem">📍</div><div class="sc-val" id="stat-checkins" style="font-size:1.1rem;color:var(--green)">0</div><div class="sc-lbl">Check-ins</div></div>
-        <div class="sc"><div class="sc-ico" style="font-size:1rem">⭐</div><div class="sc-val" id="stat-reviews" style="font-size:1.1rem;color:var(--gold)">0</div><div class="sc-lbl">Reviews</div></div>
-        <div class="sc"><div class="sc-ico" style="font-size:1rem">🎁</div><div class="sc-val" id="stat-rewards" style="font-size:1.1rem;color:var(--blue)">0</div><div class="sc-lbl">Rewards Claimed</div></div>
-        <div class="sc"><div class="sc-ico" style="font-size:1rem">🛡️</div><div class="sc-val" id="stat-missions" style="font-size:1.1rem;color:var(--orange)">0</div><div class="sc-lbl">Patriot Missions</div></div>
-        <div class="sc"><div class="sc-ico" style="font-size:1rem">🚩</div><div class="sc-val" id="stat-reports" style="font-size:1.1rem;color:var(--red)">0</div><div class="sc-lbl">Open Reports</div></div>
-        <div class="sc"><div class="sc-ico" style="font-size:1rem">🏆</div><div class="sc-val" id="stat-trust" style="font-size:1.1rem;color:var(--purple)">—</div><div class="sc-lbl">Avg Trust Score</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">📍</div><div class="sc-val" id="stat-checkins" style="font-size:1.1rem;color:var(--green)">0</div><div class="sc-lbl" data-i18n="adm_ov_checkins">Check-ins</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">⭐</div><div class="sc-val" id="stat-reviews" style="font-size:1.1rem;color:var(--gold)">0</div><div class="sc-lbl" data-i18n="adm_ov_reviews">Reviews</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">🎁</div><div class="sc-val" id="stat-rewards" style="font-size:1.1rem;color:var(--blue)">0</div><div class="sc-lbl" data-i18n="adm_ov_rewards">Rewards Claimed</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">🛡️</div><div class="sc-val" id="stat-missions" style="font-size:1.1rem;color:var(--orange)">0</div><div class="sc-lbl" data-i18n="adm_ov_missions">Patriot Missions</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">🚩</div><div class="sc-val" id="stat-reports" style="font-size:1.1rem;color:var(--red)">0</div><div class="sc-lbl" data-i18n="adm_ov_reports">Open Reports</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">🏆</div><div class="sc-val" id="stat-trust" style="font-size:1.1rem;color:var(--purple)">—</div><div class="sc-lbl" data-i18n="adm_ov_trust">Avg Trust Score</div></div>
       </div>
 
       <div class="g2 mb12">
@@ -201,7 +201,7 @@
     <!-- ─── USERS ─── -->
     <section class="sec" id="sec-users">
       <div class="ph">
-        <div><div class="ph-title">User Management</div><div class="ph-sub" id="usersSubtitle">Registered users</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_users">User Management</div><div class="ph-sub" id="usersSubtitle">Registered users</div></div>
       </div>
       <div class="asearch">
         <input class="asearch-inp" id="userSearch" placeholder="Search by name, handle, email…" oninput="filterUsers(this.value)">
@@ -228,7 +228,7 @@
     <!-- ─── BUSINESSES ─── -->
     <section class="sec" id="sec-businesses">
       <div class="ph">
-        <div><div class="ph-title">Business Management</div><div class="ph-sub" id="bizSubtitle">Verify, feature, approve</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_biz">Business Management</div><div class="ph-sub" id="bizSubtitle">Verify, feature, approve</div></div>
         <div class="ph-actions"><button class="btn btn-ghost btn-sm"><i class="fas fa-filter"></i> Filter</button></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px" id="bizList"></div>
@@ -240,10 +240,10 @@
         <div><div class="ph-title">Creator Management</div><div class="ph-sub">0 creators · Feature, verify, track performance</div></div>
       </div>
       <div class="g4 mb20">
-        <div class="sc purple"><div class="sc-ico" style="font-size:1rem">🌟</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl">Total Creators</div></div>
-        <div class="sc green"><div class="sc-ico" style="font-size:1rem">✅</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl">Verified</div></div>
-        <div class="sc gold"><div class="sc-ico" style="font-size:1rem">📈</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl">Total Followers</div></div>
-        <div class="sc blue"><div class="sc-ico" style="font-size:1rem">🤝</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl">Active Collabs</div></div>
+        <div class="sc purple"><div class="sc-ico" style="font-size:1rem">🌟</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_tr_total">Total Creators</div></div>
+        <div class="sc green"><div class="sc-ico" style="font-size:1rem">✅</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_tr_verified">Verified</div></div>
+        <div class="sc gold"><div class="sc-ico" style="font-size:1rem">📈</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_tr_followers">Total Followers</div></div>
+        <div class="sc blue"><div class="sc-ico" style="font-size:1rem">🤝</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_tr_collabs">Active Collabs</div></div>
       </div>
       <div class="g3" id="creatorGrid"></div>
     </section>
@@ -251,7 +251,7 @@
     <!-- ─── MODERATION ─── -->
     <section class="sec" id="sec-moderation">
       <div class="ph">
-        <div><div class="ph-title">Content Moderation</div><div class="ph-sub" id="modSub">0 items in queue</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_moderation">Content Moderation</div><div class="ph-sub" id="modSub">0 items in queue</div></div>
       </div>
       <!-- Status filter -->
       <div class="mod-filters-bar" id="modStatusBar">
@@ -282,12 +282,12 @@
 
     <!-- ─── TRUST & SAFETY ─── -->
     <section class="sec" id="sec-trust">
-      <div class="ph"><div><div class="ph-title">Trust &amp; Safety Center</div><div class="ph-sub">Platform integrity monitoring and AI moderation</div></div></div>
+      <div class="ph"><div><div class="ph-title" data-i18n="adm_sec_trust">Trust &amp; Safety Center</div><div class="ph-sub">Platform integrity monitoring and AI moderation</div></div></div>
       <div class="g4 mb20">
-        <div class="sc green"><div class="sc-ico" style="font-size:1rem">🏆</div><div class="sc-val" style="font-size:1.1rem">—</div><div class="sc-lbl">Avg Trust Score</div><div class="sc-delta" style="color:var(--ts);font-size:0.72rem">no data yet</div></div>
-        <div class="sc blue"><div class="sc-ico" style="font-size:1rem">📸</div><div class="sc-val" style="font-size:1.1rem">—</div><div class="sc-lbl">Camera Proof Rate</div></div>
-        <div class="sc red"><div class="sc-ico" style="font-size:1rem">🚨</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl">Suspicious Accounts</div></div>
-        <div class="sc gold"><div class="sc-ico" style="font-size:1rem">✅</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl">Verified Users</div></div>
+        <div class="sc green"><div class="sc-ico" style="font-size:1rem">🏆</div><div class="sc-val" style="font-size:1.1rem">—</div><div class="sc-lbl" data-i18n="adm_ts_avg">Avg Trust Score</div><div class="sc-delta" style="color:var(--ts);font-size:0.72rem">no data yet</div></div>
+        <div class="sc blue"><div class="sc-ico" style="font-size:1rem">📸</div><div class="sc-val" style="font-size:1.1rem">—</div><div class="sc-lbl" data-i18n="adm_ts_camera">Camera Proof Rate</div></div>
+        <div class="sc red"><div class="sc-ico" style="font-size:1rem">🚨</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_ts_suspicious">Suspicious Accounts</div></div>
+        <div class="sc gold"><div class="sc-ico" style="font-size:1rem">✅</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_ts_verified">Verified Users</div></div>
       </div>
       <div class="g2 mb16">
         <div class="panel">
@@ -317,7 +317,7 @@
 
     <!-- ─── REVENUE ─── -->
     <section class="sec" id="sec-revenue">
-      <div class="ph"><div><div class="ph-title">Revenue Dashboard</div><div class="ph-sub">Platform monetization · Beta — no payments yet</div></div></div>
+      <div class="ph"><div><div class="ph-title" data-i18n="adm_sec_revenue">Revenue Dashboard</div><div class="ph-sub">Platform monetization · Beta — no payments yet</div></div></div>
       <div class="g4 mb20">
         <div class="rev-card"><div class="rev-lbl">Monthly Revenue</div><div class="rev-val" style="color:var(--green)">₾0</div><div class="rev-delta" style="color:var(--ts);font-size:0.72rem">Beta — no payments yet</div></div>
         <div class="rev-card"><div class="rev-lbl">ARR Projection</div><div class="rev-val" style="color:var(--blue)">—</div><div class="rev-delta" style="color:var(--ts);font-size:0.72rem">no data</div></div>
@@ -348,7 +348,7 @@
 
     <!-- ─── CITY ANALYTICS ─── -->
     <section class="sec" id="sec-city">
-      <div class="ph"><div><div class="ph-title">City Analytics</div><div class="ph-sub">Geographic activity, density, and engagement by city</div></div></div>
+      <div class="ph"><div><div class="ph-title" data-i18n="adm_sec_city">City Analytics</div><div class="ph-sub">Geographic activity, density, and engagement by city</div></div></div>
       <div class="g3 mb16">
         <div class="zone"><div class="zone-name">🏙 Tbilisi</div><span class="zone-badge" style="background:var(--gd);color:var(--green);border:1px solid rgba(16,185,129,0.25)">🟢 Active</span><div class="bl"><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Check-ins</span><span class="bi-val">0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Reviews</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Events</span><span class="bi-val">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div></div></div>
         <div class="zone"><div class="zone-name">🌊 Batumi</div><span class="zone-badge" style="background:var(--bd);color:var(--blue);border:1px solid rgba(59,130,246,0.25)">No live data</span><div class="bl"><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Check-ins</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Reviews</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Events</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div></div></div>
@@ -375,7 +375,7 @@
 
     <!-- ─── PLATFORM CONTROLS ─── -->
     <section class="sec" id="sec-controls">
-      <div class="ph"><div><div class="ph-title">Platform Controls</div><div class="ph-sub">Feature flags · Changes apply immediately to all users</div></div></div>
+      <div class="ph"><div><div class="ph-title" data-i18n="adm_sec_controls">Platform Controls</div><div class="ph-sub">Feature flags · Changes apply immediately to all users</div></div></div>
       <div class="alert warn mb20"><i class="fas fa-exclamation-triangle"></i> Changes here affect all users in real-time. Use with caution.</div>
       <div class="g2 mb20">
         <div>
@@ -420,7 +420,7 @@
     <section class="sec" id="sec-activity">
       <div class="ph">
         <div>
-          <div class="ph-title">Platform Activity</div>
+          <div class="ph-title" data-i18n="adm_sec_activity">Platform Activity</div>
           <div class="ph-sub" id="activitySub">Loading…</div>
         </div>
         <div class="ph-actions">
@@ -442,7 +442,7 @@
     <!-- ─── NOTIFICATIONS ─── -->
     <section class="sec" id="sec-notifications">
       <div class="ph">
-        <div><div class="ph-title">Admin Notifications</div><div class="ph-sub" id="notifSub">0 alerts</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_notifs">Admin Notifications</div><div class="ph-sub" id="notifSub">0 alerts</div></div>
         <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark all read</button></div>
       </div>
       <div id="notifList">
@@ -456,7 +456,7 @@
     <!-- ─── CONTENT STUDIO ─── -->
     <section class="sec" id="sec-content">
       <div class="ph">
-        <div><div class="ph-title">Content Studio</div><div class="ph-sub">Add real places, groups, events, rewards, challenges and marketplace items. No demo data.</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_content">Content Studio</div><div class="ph-sub">Add real places, groups, events, rewards, challenges and marketplace items. No demo data.</div></div>
       </div>
       <div class="panel" style="max-width:860px">
         <div class="panel-hdr"><div class="panel-title">Create Real Firestore Content</div></div>
@@ -599,7 +599,7 @@
     <!-- ─── PLACE EDITING ─── -->
     <section class="sec" id="sec-placeedit">
       <div class="ph">
-        <div><div class="ph-title">Place Editing</div><div class="ph-sub">Browse, filter and edit all uploaded map places.</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_placeedit">Place Editing</div><div class="ph-sub">Browse, filter and edit all uploaded map places.</div></div>
       </div>
       <div class="panel" style="max-width:960px">
         <div class="panel-hdr">
@@ -715,7 +715,7 @@
     <!-- ─── PLACE CATEGORIES ─── -->
     <section class="sec" id="sec-placecat">
       <div class="ph">
-        <div><div class="ph-title">Place Categories</div><div class="ph-sub">Manage map place categories — icons, colours, labels. Changes apply to map markers immediately.</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_placecat">Place Categories</div><div class="ph-sub">Manage map place categories — icons, colours, labels. Changes apply to map markers immediately.</div></div>
         <button class="btn-primary" onclick="seedDefaultPlaceCategories()" style="font-size:.78rem;padding:8px 16px;white-space:nowrap"><i class="fas fa-seedling" style="margin-right:6px"></i>Seed 25 Defaults</button>
       </div>
       <div style="display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start;max-width:1100px">
@@ -771,7 +771,7 @@
     <!-- ─── TRANSFER OWNERSHIP ─── -->
     <section class="sec" id="sec-ownership">
       <div class="ph">
-        <div><div class="ph-title">Transfer Ownership</div><div class="ph-sub">Assign a business or place to a user so they can manage posts, description, logo, photos, and story moderation.</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_ownership">Transfer Ownership</div><div class="ph-sub">Assign a business or place to a user so they can manage posts, description, logo, photos, and story moderation.</div></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;max-width:1100px">
 
@@ -833,7 +833,7 @@
     <!-- ─── CHALLENGE STUDIO ─── -->
     <section class="sec" id="sec-challenges">
       <div class="ph">
-        <div><div class="ph-title">Challenge &amp; Badge Studio</div><div class="ph-sub" id="chalStudioSub">Loading challenges…</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_challenges">Challenge &amp; Badge Studio</div><div class="ph-sub" id="chalStudioSub">Loading challenges…</div></div>
         <div class="ph-actions">
           <button class="btn btn-primary btn-sm" onclick="chalFormMode('create')"><i class="fas fa-plus"></i> New Challenge</button>
         </div>
@@ -965,7 +965,7 @@
     <!-- ─── REWARDS ─── -->
     <section class="sec" id="sec-rewards">
       <div class="ph">
-        <div><div class="ph-title">Rewards Management</div><div class="ph-sub" id="rewardsSubtitle">Manage the GeoPoints rewards store</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_rewards">Rewards Management</div><div class="ph-sub" id="rewardsSubtitle">Manage the GeoPoints rewards store</div></div>
         <div class="ph-actions">
           <button class="btn btn-primary btn-sm" onclick="rwFormMode('create')"><i class="fas fa-plus"></i> New Reward</button>
         </div>
@@ -1075,24 +1075,24 @@
     <!-- ─── SITE ANALYTICS ─── -->
     <section class="sec" id="sec-analytics">
       <div class="ph">
-        <div><div class="ph-title">Site Analytics</div><div class="ph-sub" id="analyticsSub">Loading…</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_site">Site Analytics</div><div class="ph-sub" id="analyticsSub">Loading…</div></div>
         <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="loadAdminAnalytics()"><i class="fas fa-sync-alt"></i> Refresh</button></div>
       </div>
       <div class="g4 mb12">
         <div class="sc green">
-          <div class="sc-ico">👁</div><div class="sc-val" id="an-pv">—</div><div class="sc-lbl">Page Views Today</div>
+          <div class="sc-ico">👁</div><div class="sc-val" id="an-pv">—</div><div class="sc-lbl" data-i18n="adm_an_pv">Page Views Today</div>
           <div class="sc-glow" style="background:radial-gradient(#10b981,transparent)"></div>
         </div>
         <div class="sc blue">
-          <div class="sc-ico">🟢</div><div class="sc-val" id="an-online">—</div><div class="sc-lbl">Online Now</div>
+          <div class="sc-ico">🟢</div><div class="sc-val" id="an-online">—</div><div class="sc-lbl" data-i18n="adm_an_online">Online Now</div>
           <div class="sc-glow" style="background:radial-gradient(#3b82f6,transparent)"></div>
         </div>
         <div class="sc gold">
-          <div class="sc-ico">🔍</div><div class="sc-val" id="an-searches">—</div><div class="sc-lbl">Searches Today</div>
+          <div class="sc-ico">🔍</div><div class="sc-val" id="an-searches">—</div><div class="sc-lbl" data-i18n="adm_an_searches">Searches Today</div>
           <div class="sc-glow" style="background:radial-gradient(#f59e0b,transparent)"></div>
         </div>
         <div class="sc purple">
-          <div class="sc-ico">⚡</div><div class="sc-val" id="an-events">—</div><div class="sc-lbl">Events Today</div>
+          <div class="sc-ico">⚡</div><div class="sc-val" id="an-events">—</div><div class="sc-lbl" data-i18n="adm_an_events">Events Today</div>
           <div class="sc-glow" style="background:radial-gradient(#a855f7,transparent)"></div>
         </div>
       </div>
@@ -1121,18 +1121,18 @@
     <!-- ─── ERROR MONITOR ─── -->
     <section class="sec" id="sec-errors">
       <div class="ph">
-        <div><div class="ph-title">Error Monitor</div><div class="ph-sub" id="errorsSub">Loading…</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_errors">Error Monitor</div><div class="ph-sub" id="errorsSub">Loading…</div></div>
         <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="loadAdminErrors()"><i class="fas fa-sync-alt"></i> Refresh</button></div>
       </div>
       <div class="g3 mb12">
         <div class="sc" style="border-color:rgba(239,68,68,.3)">
-          <div class="sc-ico">🔴</div><div class="sc-val" id="err-today">—</div><div class="sc-lbl">JS Errors Today</div>
+          <div class="sc-ico">🔴</div><div class="sc-val" id="err-today">—</div><div class="sc-lbl" data-i18n="adm_err_today">JS Errors Today</div>
         </div>
         <div class="sc" style="border-color:rgba(245,158,11,.3)">
-          <div class="sc-ico">📤</div><div class="sc-val" id="err-uploads">—</div><div class="sc-lbl">Failed Uploads</div>
+          <div class="sc-ico">📤</div><div class="sc-val" id="err-uploads">—</div><div class="sc-lbl" data-i18n="adm_err_uploads">Failed Uploads</div>
         </div>
         <div class="sc" style="border-color:rgba(59,130,246,.3)">
-          <div class="sc-ico">📄</div><div class="sc-val" id="err-pages">—</div><div class="sc-lbl">Pages Affected</div>
+          <div class="sc-ico">📄</div><div class="sc-val" id="err-pages">—</div><div class="sc-lbl" data-i18n="adm_err_pages">Pages Affected</div>
         </div>
       </div>
       <div class="panel mb12">
