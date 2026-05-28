@@ -505,22 +505,22 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function bottomNav(active){
     var tabs=[
-      {k:'feed',   href:'feed.html',          icon:'fa-house',     lbl:'Feed'},
-      {k:'search', href:'search.html',         icon:'fa-search',    lbl:'ძებნა'},
-      {k:'_post',  href:'#',                   icon:'fa-plus',      lbl:'პოსტი',  isPost:true},
-      {k:'notifs', href:'notifications.html',  icon:'fa-bell',      lbl:'შეტყობინება', badge:true},
-      {k:'profile',href:'profile.html',        icon:'fa-user',      lbl:'პროფილი'}
+      {k:'feed',   href:'feed.html',          icon:'fa-house',     lbl:'Feed',          i18n:'nav_feed'},
+      {k:'search', href:'search.html',         icon:'fa-search',    lbl:'ძებნა',         i18n:'nav_search'},
+      {k:'_post',  href:'#',                   icon:'fa-plus',      lbl:'პოსტი',         i18n:'nav_post',  isPost:true},
+      {k:'notifs', href:'notifications.html',  icon:'fa-bell',      lbl:'შეტყობინება',   i18n:'nav_notifications', badge:true},
+      {k:'profile',href:'profile.html',        icon:'fa-user',      lbl:'პროფილი',       i18n:'nav_profile'}
     ];
     return '<nav class="gh-bottom-nav" id="ghBottomNav">'+
       tabs.map(function(t){
         if(t.isPost) return '<button class="gh-bnav-item gh-bnav-post" data-create-post>'+
           '<span class="gh-bnav-icon"><i class="fas fa-plus"></i></span>'+
-          '<span class="gh-bnav-lbl">'+t.lbl+'</span></button>';
+          '<span class="gh-bnav-lbl" data-i18n="'+t.i18n+'">'+t.lbl+'</span></button>';
         return '<a class="gh-bnav-item'+(active===t.k?' active':'')+'" href="'+t.href+'">'+
           '<span class="gh-bnav-icon"><i class="fas '+t.icon+'"></i>'+
           (t.badge?'<b class="gh-badge-count" id="ghBNavNotifBadge" style="top:-4px;right:-6px"></b>':'')+
           '</span>'+
-          '<span class="gh-bnav-lbl">'+t.lbl+'</span></a>';
+          '<span class="gh-bnav-lbl" data-i18n="'+t.i18n+'">'+t.lbl+'</span></a>';
       }).join('')+
     '</nav>';
   }
@@ -567,7 +567,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     function ca(t){ return centerActive===t?' class="active"':''; }
     return '<header class="gh-topbar gh-hub-topbar">'+
       '<a class="gh-brand" href="feed.html"><div class="gh-brand-mark">GH</div><span>Geo<span>Hub</span></span></a>'+
-      '<div class="gh-top-search"><i class="fas fa-search"></i><input id="ghGlobalSearch" placeholder="მოძებნე ადგილები, ადამიანები, ჯგუფები…"></div>'+
+      '<div class="gh-top-search"><i class="fas fa-search"></i><input id="ghGlobalSearch" data-i18n-placeholder="search_placeholder" placeholder="მოძებნე ადგილები, ადამიანები, ჯგუფები…"></div>'+
       '<nav class="gh-center-tabs" aria-label="Primary navigation">'+
         '<a'+ca('feed')+' href="feed.html" title="Feed"><i class="fas fa-house"></i></a>'+
         '<a'+ca('groups')+' href="groups.html" title="Groups"><i class="fas fa-user-group"></i></a>'+
@@ -593,32 +593,32 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function leftNav(active){
     var PRIMARY=[
-      ['feed','feed.html','fa-house','მთავარი'],
-      ['videos','videos.html','fa-film','Videos'],
-      ['map','map.html','fa-map','Map'],
-      ['groups','groups.html','fa-users','Groups'],
-      ['places','places.html','fa-location-dot','Places']
+      ['feed','feed.html','fa-house','მთავარი','nav_feed'],
+      ['videos','videos.html','fa-film','Videos','nav_videos'],
+      ['map','map.html','fa-map','Map','nav_map'],
+      ['groups','groups.html','fa-users','Groups','nav_groups'],
+      ['places','places.html','fa-location-dot','Places','nav_places']
     ];
     var SECONDARY=[
-      ['my-channel','#','fa-tv','ჩემი არხი'],
-      ['reels','reels.html','fa-bolt','Reels'],
-      ['business','business.html','fa-store','Businesses'],
-      ['marketplace','marketplace.html','fa-store-alt','Marketplace'],
-      ['events','events.html','fa-calendar-xmark','Events'],
-      ['messages','messages.html','fa-comment-dots','Messages'],
-      ['notifications','notifications.html','fa-bell','Notifications'],
-      ['creators','creators.html','fa-camera-retro','Creators'],
-      ['rewards','rewards.html','fa-gift','Rewards'],
-      ['gamification','gamification.html','fa-trophy','XP & Badges'],
-      ['assistant','assistant.html','fa-robot','GeoAI'],
-      ['premium','premium.html','fa-crown','Premium 👑'],
-      ['challenges','challenges.html','fa-flag-checkered','Challenges'],
-      ['services','services.html','fa-grip','Services'],
-      ['realestate','real-estate.html','fa-house-chimney','Real Estate'],
-      ['learning','learning.html','fa-graduation-cap','Learning'],
-      ['trust','trust.html','fa-shield-halved','Trust / Safety'],
-      ['settings','settings.html','fa-gear','Settings'],
-      ['admin','admin.html','fa-user-shield','Admin Panel']
+      ['my-channel','#','fa-tv','ჩემი არხი','nav_my_channel'],
+      ['reels','reels.html','fa-bolt','Reels','nav_reels'],
+      ['business','business.html','fa-store','Businesses','nav_business'],
+      ['marketplace','marketplace.html','fa-store-alt','Marketplace','nav_marketplace'],
+      ['events','events.html','fa-calendar-xmark','Events','nav_events'],
+      ['messages','messages.html','fa-comment-dots','Messages','nav_messages'],
+      ['notifications','notifications.html','fa-bell','Notifications','nav_notifications'],
+      ['creators','creators.html','fa-camera-retro','Creators','nav_creators'],
+      ['rewards','rewards.html','fa-gift','Rewards','nav_rewards'],
+      ['gamification','gamification.html','fa-trophy','XP & Badges','nav_gamification'],
+      ['assistant','assistant.html','fa-robot','GeoAI','nav_assistant'],
+      ['premium','premium.html','fa-crown','Premium 👑','nav_premium'],
+      ['challenges','challenges.html','fa-flag-checkered','Challenges','nav_challenges'],
+      ['services','services.html','fa-grip','Services','nav_services'],
+      ['realestate','real-estate.html','fa-house-chimney','Real Estate','nav_realestate'],
+      ['learning','learning.html','fa-graduation-cap','Learning','nav_learning'],
+      ['trust','trust.html','fa-shield-halved','Trust / Safety','nav_trust'],
+      ['settings','settings.html','fa-gear','Settings','settings'],
+      ['admin','admin.html','fa-user-shield','Admin Panel','nav_admin']
     ];
     var exp=false; try{ exp=localStorage.getItem('gh_nav_exp')==='1'; }catch(e){}
     function navItem(it,sec){
@@ -628,19 +628,20 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var href=it[1]==='#'?'':' href="'+it[1]+'"';
       var badgeHtml=it[0]==='notifications'?'<b class="gh-badge-count gh-lnav-notif-badge" id="ghLeftNavNotifBadge" style="position:absolute;top:6px;right:8px"></b>':'';
       var posStyle=it[0]==='notifications'?' style="position:relative"':'';
-      return '<'+tag+' class="'+cls+'"'+extra+href+posStyle+'><i class="fas '+it[2]+'"></i><span>'+it[3]+'</span>'+badgeHtml+'</'+tag+'>';
+      var i18nAttr=it[4]?' data-i18n="'+it[4]+'"':'';
+      return '<'+tag+' class="'+cls+'"'+extra+href+posStyle+'><i class="fas '+it[2]+'"></i><span'+i18nAttr+'>'+it[3]+'</span>'+badgeHtml+'</'+tag+'>';
     }
     return '<aside class="gh-left"><nav class="gh-panel">'+
       PRIMARY.map(function(it){ return navItem(it,false); }).join('')+
       '<button class="gh-nav-item gh-nav-more" id="ghNavMore" data-nav-more>'+
         '<i class="fas fa-chevron-'+(exp?'up':'down')+'" id="ghNavMoreIcon"></i>'+
-        '<span id="ghNavMoreTxt">'+(exp?'ნაკლები':'მეტი')+'</span>'+
+        '<span id="ghNavMoreTxt" data-i18n="'+(exp?'nav_less':'nav_more')+'">'+(exp?'ნაკლები':'მეტი')+'</span>'+
       '</button>'+
       '<div class="gh-nav-sec-list'+(exp?' open':'') +'" id="ghNavSecList">'+
         SECONDARY.map(function(it){ return navItem(it,true); }).join('')+
       '</div>'+
-      '<button class="gh-nav-item gh-live-nav-btn" data-go-live onclick="if(window.ghOpenGoLive)ghOpenGoLive()"><i class="fas fa-video"></i><span>Go Live</span></button>'+
-      '<button class="gh-nav-tour-btn" data-start-tour><i class="fas fa-question-circle"></i><span>How GeoHub works</span></button>'+
+      '<button class="gh-nav-item gh-live-nav-btn" data-go-live onclick="if(window.ghOpenGoLive)ghOpenGoLive()"><i class="fas fa-video"></i><span data-i18n="nav_go_live">Go Live</span></button>'+
+      '<button class="gh-nav-tour-btn" data-start-tour><i class="fas fa-question-circle"></i><span data-i18n="nav_how_works">How GeoHub works</span></button>'+
     '</nav></aside>';
   }
 
@@ -6761,9 +6762,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       right: pageMode ? pageFeedRightSidebar(actor) : feedRightSidebar(),
       center:
         (pageMode ? pageHomeContext(actor) : '<section class="gh-card gh-story-strip-card"><div class="gh-stories" id="ghStories"></div></section>')+
-        '<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="'+compAvClass+'" id="ghComposerAvatar">'+compAvContent+'</span><button class="gh-composer-fake" data-create-post>რას აზიარებ დღეს?</button></div><div class="gh-composer-actions"><button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Place</button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:#38bdf8"></i> Business</button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:#f59e0b"></i> Event</button></div></section>'+
+        '<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="'+compAvClass+'" id="ghComposerAvatar">'+compAvContent+'</span><button class="gh-composer-fake" data-create-post data-i18n="composer_placeholder">რას აზიარებ დღეს?</button></div><div class="gh-composer-actions"><button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> <span data-i18n="photo">Photo</span></button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> <span data-i18n="place">Place</span></button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:#38bdf8"></i> <span data-i18n="business">Business</span></button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:#f59e0b"></i> <span data-i18n="event">Event</span></button></div></section>'+
         (pageMode ? '' : '<div id="ghWelcomeSlot"></div>')+
-        (pageMode ? '<div class="gh-pill-row gh-page-feed-tabs" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="page"><i class="fas fa-store" style="font-size:.75rem"></i> Page Activity</button></div>' : '<div class="gh-pill-row" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="foryou"><i class="fas fa-house" style="font-size:.75rem"></i> For You</button><button class="gh-pill" data-feed-tab="following"><i class="fas fa-user-group" style="font-size:.75rem"></i> Following</button><button class="gh-pill" data-feed-tab="local"><i class="fas fa-city" style="font-size:.75rem"></i> Local</button><button class="gh-pill" data-feed-tab="nearme"><i class="fas fa-location-dot" style="font-size:.75rem"></i> Near Me</button></div>')+
+        (pageMode ? '<div class="gh-pill-row gh-page-feed-tabs" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="page"><i class="fas fa-store" style="font-size:.75rem"></i> Page Activity</button></div>' : '<div class="gh-pill-row" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="foryou"><i class="fas fa-house" style="font-size:.75rem"></i> <span data-i18n="feed_foryou">For You</span></button><button class="gh-pill" data-feed-tab="following"><i class="fas fa-user-group" style="font-size:.75rem"></i> <span data-i18n="feed_following">Following</span></button><button class="gh-pill" data-feed-tab="local"><i class="fas fa-city" style="font-size:.75rem"></i> <span data-i18n="feed_local">Local</span></button><button class="gh-pill" data-feed-tab="nearme"><i class="fas fa-location-dot" style="font-size:.75rem"></i> <span data-i18n="feed_nearme">Near Me</span></button></div>')+
         '<div id="ghFeedList">'+skelPostCard()+skelVideoCard()+skelPostCard()+skelVideoCard()+skelPostCard()+'</div>'+
         '<div id="ghFeedLoadMore" style="text-align:center;padding:16px 0 8px"></div>'
     });
