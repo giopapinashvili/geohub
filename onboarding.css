@@ -1,5 +1,16 @@
+/* ── CSS VARIABLES (standalone — styles.css not loaded here) ── */
+:root {
+  --text-primary:   #f0f4ff;
+  --text-secondary: #94a3b8;
+  --text-muted:     #64748b;
+  --green:          #10b981;
+  --gold:           #f59e0b;
+  --gradient-brand: linear-gradient(135deg, #10b981, #3b82f6);
+  --bg-elevated:    #1a1d2e;
+}
+
 /* ── LAYOUT ───────────────────────────────────────────── */
-    body { overflow-x: hidden; }
+    body { overflow-x: hidden; color: var(--text-primary); }
     .ob-page {
       min-height: 100vh;
       display: flex;
