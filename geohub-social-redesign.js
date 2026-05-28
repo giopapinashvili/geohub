@@ -580,14 +580,6 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button class="gh-icon-btn gh-streak-btn" id="ghStreakBtn" title="Streak" style="display:none"><span class="gh-streak-fire">🔥</span><b class="gh-streak-count" id="ghStreakBadge">0</b></button>'+
         '<a class="gh-icon-btn" href="settings.html" title="Settings" aria-label="Settings"><i class="fas fa-gear"></i></a>'+
         '<button class="gh-icon-btn gh-theme-toggle" id="ghThemeToggle" title="Toggle light/dark mode"><i class="fas fa-moon"></i></button>'+
-        '<div class="gh-lang-picker" id="ghLangPicker">'+
-          '<button class="gh-lang-btn" id="ghLangBtn" title="Language / ენა"><i class="fas fa-globe"></i> <span id="ghLangLabel">KA</span></button>'+
-          '<div class="gh-lang-drop" id="ghLangDrop">'+
-            '<div class="gh-lang-opt" data-set-lang="ka"><span class="gh-lang-flag">🇬🇪</span> ქართული</div>'+
-            '<div class="gh-lang-opt" data-set-lang="en"><span class="gh-lang-flag">🇬🇧</span> English</div>'+
-            '<div class="gh-lang-opt" data-set-lang="ru"><span class="gh-lang-flag">🇷🇺</span> Русский</div>'+
-          '</div>'+
-        '</div>'+
         '<div id="ghActorBtnSlot" class="gh-actor-btn-slot"></div>'+
       '</div></header>';
   }
