@@ -1346,7 +1346,8 @@
     // ── COMMENTS ────────────────────────────────────────────────────────
     function addComment(postId, text, callback, extra) {
       extra = extra || {};
-      if (!text || !text.trim()) return;
+      var _voiceUrl = extra.voiceUrl || '';
+      if ((!text || !text.trim()) && !_voiceUrl) return;
       requireAuth(function (user) {
         var me = meData() || {};
         var cleanText = text.trim();
@@ -1381,6 +1382,7 @@
             }
             return addDoc(collection(db, 'posts', postId, 'comments'), {
               text: cleanText,
+              voiceUrl:     _voiceUrl || '',
               authorId:     cAuthorId,
               userId:       user.uid,     // always real Firebase UID — satisfies Firestore newOwnerMatches()
               createdByUid: user.uid,

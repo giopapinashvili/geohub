@@ -4690,10 +4690,42 @@ a.gh-trending-chip:hover {
   transition: color .15s;
 }
 .gh-comment-emoji:hover { color: var(--gh-green, #10b981); }
+.gh-comment-mic {
+  background: none;
+  border: none;
+  color: var(--gh-muted, #8aa69a);
+  font-size: .9rem;
+  padding: 0 5px;
+  cursor: pointer;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: color .15s, background .15s;
+  border-radius: 50%;
+}
+.gh-comment-mic:hover { color: var(--gh-green, #10b981); }
+.gh-comment-mic.recording {
+  color: #ef4444;
+  animation: gh-mic-pulse 1s infinite;
+}
+@keyframes gh-mic-pulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.gh-cmt-voice-preview {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.gh-cmt-voice-note {
+  margin-top: 4px;
+}
 .gh-comment-form,
 .gh-reply-form {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
 }
 
 /* ── Phase 34: Save Collections ─────────────────────── */

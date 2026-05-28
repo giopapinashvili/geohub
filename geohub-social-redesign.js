@@ -1385,6 +1385,28 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div class="gh-feeling-row" id="ghFeelingRow">'+FEELINGS.map(function(f){ return '<button type="button" class="gh-feeling-chip" data-feeling="'+esc(f)+'">'+esc(f)+'</button>'; }).join('')+'</div>'+
         '<div id="ghSelectedFeeling" style="display:none;font-size:.84rem;color:var(--gh-green);margin:4px 0 8px;padding:4px 10px;background:rgba(16,185,129,.08);border-radius:10px"></div>'+
         '<div class="gh-bg-picker" id="ghBgPicker" style="display:none">'+BG_GRADIENTS.map(function(g,i){ return '<button type="button" class="gh-bg-swatch" data-bg-gradient="'+esc(g)+'" style="background:'+esc(g)+'"'+(i===0?' title="No color"':'')+' aria-label="Color '+i+'"></button>'; }).join('')+'<button type="button" class="gh-bg-swatch gh-bg-none" data-bg-gradient="" title="No color"><i class="fas fa-times"></i></button></div>'+
+        '<div id="ghBgTextStyle" style="display:none;margin:8px 0;padding:8px 10px;background:rgba(255,255,255,.04);border:1px solid var(--gh-border);border-radius:10px;display:none">'+
+          '<div style="font-size:.75rem;font-weight:700;color:var(--gh-muted);margin-bottom:6px">Text style</div>'+
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">'+
+            '<button type="button" class="gh-bgts-color active" data-text-color="#ffffff" style="background:#fff;width:22px;height:22px;border-radius:50%;border:2px solid var(--gh-green)" title="White"></button>'+
+            '<button type="button" class="gh-bgts-color" data-text-color="#000000" style="background:#000;width:22px;height:22px;border-radius:50%;border:2px solid transparent" title="Black"></button>'+
+            '<button type="button" class="gh-bgts-color" data-text-color="#fbbf24" style="background:#fbbf24;width:22px;height:22px;border-radius:50%;border:2px solid transparent" title="Gold"></button>'+
+            '<button type="button" class="gh-bgts-color" data-text-color="#f472b6" style="background:#f472b6;width:22px;height:22px;border-radius:50%;border:2px solid transparent" title="Pink"></button>'+
+            '<button type="button" class="gh-bgts-color" data-text-color="#4ade80" style="background:#4ade80;width:22px;height:22px;border-radius:50%;border:2px solid transparent" title="Green"></button>'+
+          '</div>'+
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">'+
+            '<button type="button" class="gh-bgts-size" data-text-size="0.85rem" style="font-size:.75rem;padding:2px 8px;border-radius:8px;border:1px solid var(--gh-border);background:transparent;color:var(--gh-muted);cursor:pointer">S</button>'+
+            '<button type="button" class="gh-bgts-size active" data-text-size="1.1rem" style="font-size:.85rem;padding:2px 8px;border-radius:8px;border:1px solid var(--gh-green);background:rgba(16,185,129,.1);color:var(--gh-green);cursor:pointer">M</button>'+
+            '<button type="button" class="gh-bgts-size" data-text-size="1.4rem" style="font-size:.95rem;padding:2px 8px;border-radius:8px;border:1px solid var(--gh-border);background:transparent;color:var(--gh-muted);cursor:pointer">L</button>'+
+            '<button type="button" class="gh-bgts-size" data-text-size="1.8rem" style="font-size:1rem;padding:2px 8px;border-radius:8px;border:1px solid var(--gh-border);background:transparent;color:var(--gh-muted);cursor:pointer">XL</button>'+
+          '</div>'+
+          '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
+            '<button type="button" class="gh-bgts-style active" data-text-bold="0" data-text-italic="0" style="padding:2px 8px;border-radius:8px;border:1px solid var(--gh-green);background:rgba(16,185,129,.1);color:var(--gh-green);cursor:pointer;font-size:.78rem">Normal</button>'+
+            '<button type="button" class="gh-bgts-style" data-text-bold="1" data-text-italic="0" style="padding:2px 8px;border-radius:8px;border:1px solid var(--gh-border);background:transparent;color:var(--gh-muted);cursor:pointer;font-size:.78rem;font-weight:700">Bold</button>'+
+            '<button type="button" class="gh-bgts-style" data-text-bold="0" data-text-italic="1" style="padding:2px 8px;border-radius:8px;border:1px solid var(--gh-border);background:transparent;color:var(--gh-muted);cursor:pointer;font-size:.78rem;font-style:italic">Italic</button>'+
+            '<button type="button" class="gh-bgts-style" data-text-bold="1" data-text-italic="1" style="padding:2px 8px;border-radius:8px;border:1px solid var(--gh-border);background:transparent;color:var(--gh-muted);cursor:pointer;font-size:.78rem;font-weight:700;font-style:italic">Bold Italic</button>'+
+          '</div>'+
+        '</div>'+
         '<div id="ghCmpMediaGrid" class="gh-cmp-media-grid"></div>'+
       '</div>'+
       '<div class="gh-cmp-footer-row">'+
@@ -1543,6 +1565,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       'ghPostModal');
 
     var pickedFiles=[], selectedFeeling='', selectedBg='', pollMode=false, feelingRowVisible=false, bgVisible=false, scheduledAt=null;
+    var bgTextStyle={color:'#ffffff', size:'1.1rem', bold:false, italic:false};
     var _lpTimer=null, _lpUrl='';
 
     // ── Audience Picker ──────────────────────────────────────────────
@@ -2182,6 +2205,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     $('#ghToggleBg').onclick=function(){
       bgVisible=!bgVisible;
       $('#ghBgPicker').style.display=bgVisible?'flex':'none';
+      if(!bgVisible){ selectedBg=''; var _tp=$('#ghBgTextStyle'); if(_tp) _tp.style.display='none'; _applyBgPreview(''); }
       this.classList.toggle('active',bgVisible);
     };
 
@@ -2200,11 +2224,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(!ta) return;
       if(grad){
         ta.style.background=grad;
-        ta.style.color='#fff';
+        ta.style.color=bgTextStyle.color||'#fff';
         ta.style.borderRadius='14px';
         ta.style.textAlign='center';
-        ta.style.fontWeight='900';
-        ta.style.fontSize='1.1rem';
+        ta.style.fontWeight=bgTextStyle.bold?'900':'700';
+        ta.style.fontStyle=bgTextStyle.italic?'italic':'normal';
+        ta.style.fontSize=bgTextStyle.size||'1.1rem';
         ta.style.minHeight='140px';
       } else {
         ta.style.background='';
@@ -2212,6 +2237,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         ta.style.borderRadius='';
         ta.style.textAlign='';
         ta.style.fontWeight='';
+        ta.style.fontStyle='';
         ta.style.fontSize='';
         ta.style.minHeight='';
       }
@@ -2220,8 +2246,21 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var sw=e.target.closest('[data-bg-gradient]'); if(!sw) return;
       selectedBg=sw.dataset.bgGradient;
       bgPicker.querySelectorAll('.gh-bg-swatch').forEach(function(b){ b.classList.toggle('active', b===sw); });
+      var tsPanel=$('#ghBgTextStyle');
+      if(tsPanel) tsPanel.style.display=selectedBg?'block':'none';
       _applyBgPreview(selectedBg);
     });
+    var _bgtsPanel=$('#ghBgTextStyle');
+    if(_bgtsPanel){
+      _bgtsPanel.addEventListener('click',function(e){
+        var cb=e.target.closest('.gh-bgts-color');
+        if(cb){ bgTextStyle.color=cb.dataset.textColor||'#fff'; _bgtsPanel.querySelectorAll('.gh-bgts-color').forEach(function(b){b.style.border=b===cb?'2px solid var(--gh-green)':'2px solid transparent';}); _applyBgPreview(selectedBg); }
+        var sb=e.target.closest('.gh-bgts-size');
+        if(sb){ bgTextStyle.size=sb.dataset.textSize||'1.1rem'; _bgtsPanel.querySelectorAll('.gh-bgts-size').forEach(function(b){b.style.border=b===sb?'1px solid var(--gh-green)':'1px solid var(--gh-border)';b.style.color=b===sb?'var(--gh-green)':'var(--gh-muted)';b.style.background=b===sb?'rgba(16,185,129,.1)':'transparent';}); _applyBgPreview(selectedBg); }
+        var stb=e.target.closest('.gh-bgts-style');
+        if(stb){ bgTextStyle.bold=stb.dataset.textBold==='1'; bgTextStyle.italic=stb.dataset.textItalic==='1'; _bgtsPanel.querySelectorAll('.gh-bgts-style').forEach(function(b){b.style.border=b===stb?'1px solid var(--gh-green)':'1px solid var(--gh-border)';b.style.color=b===stb?'var(--gh-green)':'var(--gh-muted)';b.style.background=b===stb?'rgba(16,185,129,.1)':'transparent';}); _applyBgPreview(selectedBg); }
+      });
+    }
 
     if($('#ghPollAddOpt')) $('#ghPollAddOpt').onclick=function(){
       var pollOptsEl=$('#ghPollOpts'); if(!pollOptsEl) return;
@@ -2303,6 +2342,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         audience: _getAudienceData(),
         feeling: selectedFeeling,
         bgGradient: selectedBg,
+        bgTextStyle: selectedBg ? Object.assign({}, bgTextStyle) : null,
         linkPreview: state._lpData||null,
         mentions: extractMentions(txt),
         gifUrl: pickedGifUrl||null,
@@ -2978,7 +3018,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button class="gh-act" data-save><i class="fas fa-bookmark"></i> <span data-i18n="post_action_save">Save</span></button>'+
       '</div>'+
       '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+
-        '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" data-i18n-placeholder="comment_placeholder" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
+        '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><button class="gh-comment-mic" type="button" title="Voice comment"><i class="fas fa-microphone"></i></button><div class="gh-cmt-voice-preview" style="display:none"></div><input class="gh-input gh-cmt-text-input" data-i18n-placeholder="comment_placeholder" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
       '</div>'+
     '</article>';
   }
@@ -3012,7 +3052,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button class="gh-act" data-share><i class="fas fa-share"></i> <span data-i18n="post_action_share">Share</span></button>'+
       '</div>'+
       '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+
-        '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" data-i18n-placeholder="comment_placeholder" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
+        '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><button class="gh-comment-mic" type="button" title="Voice comment"><i class="fas fa-microphone"></i></button><div class="gh-cmt-voice-preview" style="display:none"></div><input class="gh-input gh-cmt-text-input" data-i18n-placeholder="comment_placeholder" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
       '</div>'+
     '</article>';
   }
@@ -3064,7 +3104,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button class="gh-act" data-share><i class="fas fa-share"></i> <span data-i18n="post_action_share">Share</span></button>'+
       '</div>'+
       '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+
-        '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" data-i18n-placeholder="comment_placeholder" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
+        '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><button class="gh-comment-mic" type="button" title="Voice comment"><i class="fas fa-microphone"></i></button><div class="gh-cmt-voice-preview" style="display:none"></div><input class="gh-input gh-cmt-text-input" data-i18n-placeholder="comment_placeholder" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
       '</div>'+
     '</article>';
   }
@@ -3117,7 +3157,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       }).join(', ')+'</span>';
     }
 
-    var bgStyle = (p.bgGradient && (p.text||'').length < 150) ? ' style="background:'+esc(p.bgGradient)+';border-radius:18px;padding:32px 20px;text-align:center;min-height:180px;display:flex;align-items:center;justify-content:center"' : '';
+    var _bts = p.bgTextStyle || {};
+    var bgStyle = (p.bgGradient && (p.text||'').length < 150) ? ' style="background:'+esc(p.bgGradient)+';border-radius:18px;padding:32px 20px;text-align:center;min-height:180px;display:flex;align-items:center;justify-content:center;color:'+esc(_bts.color||'#fff')+';font-size:'+esc(_bts.size||'1.1rem')+';font-weight:'+(_bts.bold?'900':'700')+';font-style:'+(_bts.italic?'italic':'normal')+'"' : '';
     // Phase 42: read time — show only for long posts (>120 words)
     var _wordCount = p.text ? p.text.trim().split(/\s+/).length : 0;
     var _readTimeMins = Math.ceil(_wordCount / 200);
@@ -3251,7 +3292,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     // Comment form — hide when commentsDisabled in biz context
     var cmtFormHtml = (bizCtx && p.commentsDisabled)
       ? '<div class="gh-comments-disabled"><i class="fas fa-comment-slash"></i> Comments are turned off.</div>'
-      : '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" data-i18n-placeholder="comment_placeholder" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>';
+      : '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><button class="gh-comment-mic" type="button" title="Voice comment"><i class="fas fa-microphone"></i></button><div class="gh-cmt-voice-preview" style="display:none"></div><input class="gh-input gh-cmt-text-input" data-i18n-placeholder="comment_placeholder" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>';
 
     // Card element data attributes
     var cardAttrs = ' id="post-'+esc(pid)+'" data-post-id="'+esc(pid)+'" data-author-id="'+esc(authorId)+'"';
@@ -3501,6 +3542,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var pv=e.target.closest('[data-poll-vote]'); if(pv){ if(!requireLogin()) return; submitPollVote(pv.dataset.pid, pv.dataset.optId, card); }
       var clBtn=e.target.closest('[data-comment-like]'); if(clBtn){ if(!requireLogin()) return; toggleCommentReaction(pid, clBtn.dataset.commentId, clBtn.dataset.commentReaction||'love', clBtn); }
       var emojBtn=e.target.closest('.gh-comment-emoji'); if(emojBtn){ var frm=emojBtn.closest('.gh-comment-form,.gh-reply-form'); var inp=frm&&frm.querySelector('.gh-input'); if(inp) _openEmojiPicker(inp,emojBtn); return; }
+      var micBtn=e.target.closest('.gh-comment-mic'); if(micBtn){ _handleCommentMic(micBtn); return; }
       var eb=e.target.closest('[data-edit-comment]'); if(eb){ e.preventDefault(); openFeedCommentEditor(pid, eb.dataset.commentId, eb); }
       var db2=e.target.closest('[data-delete-comment]'); if(db2){ e.preventDefault();
         if(!confirm('Delete this comment?')) return;
@@ -3532,7 +3574,19 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
     root.addEventListener('submit', function(e){
       var form=e.target.closest('[data-comment-form]');
-      if(form){ e.preventDefault(); var card=form.closest('[data-post-id]'), pid=card.dataset.postId; var input=form.querySelector('input,textarea'); var val=input.value.trim(); if(!val) return; if(!requireLogin()) return; state.openCommentPids[pid]=true; GS().addComment(pid,val,function(){ input.value=''; if(window.ghPwaEngage) window.ghPwaEngage(2); },buildActorExtra()); return; }
+      if(form){ e.preventDefault(); var card=form.closest('[data-post-id]'), pid=card.dataset.postId; var input=form.querySelector('.gh-cmt-text-input'); var val=input?input.value.trim():''; var cmtVBlob=form._cmt_voice_blob||null; if(!val && !cmtVBlob) return; if(!requireLogin()) return; state.openCommentPids[pid]=true;
+        if(cmtVBlob){
+          var _previewEl=form.querySelector('.gh-cmt-voice-preview');
+          var _micBtn2=form.querySelector('.gh-comment-mic');
+          if(_micBtn2){_micBtn2.disabled=true;_micBtn2.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';}
+          GS().uploadAudioBlob(cmtVBlob, authUser()&&authUser().uid, function(uploadedUrl){
+            var extra2=Object.assign(buildActorExtra(),{voiceUrl:uploadedUrl||''});
+            GS().addComment(pid, val, function(){ if(input) input.value=''; form._cmt_voice_blob=null; if(_previewEl) _previewEl.style.display='none'; if(_micBtn2){_micBtn2.disabled=false;_micBtn2.innerHTML='<i class="fas fa-microphone"></i>';} if(window.ghPwaEngage) window.ghPwaEngage(2); }, extra2);
+          });
+        } else {
+          GS().addComment(pid, val, function(){ if(input) input.value=''; if(window.ghPwaEngage) window.ghPwaEngage(2); }, buildActorExtra());
+        }
+        return; }
       var rform=e.target.closest('[data-reply-form]');
       if(rform){ e.preventDefault(); var card2=rform.closest('[data-post-id]'), pid2=card2.dataset.postId, cid=rform.dataset.commentId; var rin=rform.querySelector('input'); var rv=rin.value.trim(); if(!rv) return; if(!requireLogin()) return; if(GS().addCommentReply) GS().addCommentReply(pid2,cid,rv,function(){ rin.value=''; rform.hidden=true; },buildActorExtra()); else toast('Replies are not available','error'); }
     });
@@ -3875,9 +3929,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var rxCount = Number(c.reactionCount||0);
     var rxType = c._myRxType||'';
     var rxLabel = rxType ? (RX_EMOJIS[rxType]+' '+(rxCount||1)) : '❤️ '+(rxCount||'Like');
+    var cmtVoiceHtml = c.voiceUrl ? '<div class="gh-cmt-voice-note"><audio controls src="'+esc(c.voiceUrl)+'" preload="none" style="height:32px;max-width:220px;border-radius:20px;margin-top:4px"></audio></div>' : '';
     return '<div class="gh-comment-row" data-comment-id="'+esc(c.id)+'">'+
       avAnchor+
-      '<div class="gh-comment-main"><div class="gh-comment-bubble"><strong>'+nameAnchor+'</strong><span class="gh-cmt-text" data-cmt-text>'+esc(c.text||'')+'</span></div>'+
+      '<div class="gh-comment-main"><div class="gh-comment-bubble"><strong>'+nameAnchor+'</strong>'+(c.text?'<span class="gh-cmt-text" data-cmt-text>'+esc(c.text)+'</span>':'')+cmtVoiceHtml+'</div>'+
       '<div class="gh-small gh-comment-actions"><span data-cmt-time="'+(c.createdAt&&c.createdAt.toMillis?c.createdAt.toMillis():0)+'">'+timeAgo(c.createdAt)+'</span> · <button type="button" data-comment-reply data-comment-id="'+esc(c.id)+'">Reply</button>'+
       ' · <span class="gh-cmt-rx-wrap"><button type="button" class="gh-cmt-act gh-cmt-rx-btn'+(rxType?' active':'')+'" data-comment-like data-comment-id="'+esc(c.id)+'" data-comment-reaction="'+esc(rxType||'like')+'">'+rxLabel+'</button>'+
       '<span class="gh-cmt-rx-picker" data-rx-picker="'+esc(c.id)+'">'+Object.keys(RX_EMOJIS).map(function(t){ return '<button type="button" class="gh-cmt-rx-pick" data-comment-like data-comment-id="'+esc(c.id)+'" data-comment-reaction="'+t+'">'+RX_EMOJIS[t]+'</button>'; }).join('')+'</span></span>'+
@@ -3905,6 +3960,57 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(btn){ btn.classList.add('active'); btn.dataset.commentReaction=type; btn.textContent=RX_EMOJIS[type]+' 1'; }
       });
     }).catch(function(err){ toast('Reaction failed','error'); });
+  }
+
+  // Voice comment recording state machine
+  var _cmtMicRec=null, _cmtMicChunks=[], _cmtMicActive=null;
+  function _handleCommentMic(btn){
+    if(!requireLogin()) return;
+    var form=btn.closest('.gh-comment-form'); if(!form) return;
+    var preview=form.querySelector('.gh-cmt-voice-preview');
+
+    // If already recording on this button — stop
+    if(btn._cmtRecording){
+      btn._cmtRecording=false;
+      if(_cmtMicRec && _cmtMicRec.state==='recording') _cmtMicRec.stop();
+      return;
+    }
+
+    // If another button is recording — stop it first
+    if(_cmtMicActive && _cmtMicActive!==btn){
+      _cmtMicActive._cmtRecording=false;
+      if(_cmtMicRec && _cmtMicRec.state==='recording') _cmtMicRec.stop();
+    }
+
+    navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+      _cmtMicChunks=[];
+      _cmtMicRec=new MediaRecorder(stream);
+      _cmtMicActive=btn;
+      btn._cmtRecording=true;
+      btn.classList.add('recording');
+      btn.innerHTML='<i class="fas fa-stop-circle"></i>';
+
+      _cmtMicRec.ondataavailable=function(ev){ if(ev.data&&ev.data.size>0) _cmtMicChunks.push(ev.data); };
+      _cmtMicRec.onstop=function(){
+        stream.getTracks().forEach(function(t){t.stop();});
+        btn.classList.remove('recording');
+        btn.innerHTML='<i class="fas fa-microphone"></i>';
+        btn._cmtRecording=false;
+        _cmtMicActive=null;
+        if(!_cmtMicChunks.length) return;
+        var blob=new Blob(_cmtMicChunks,{type:_cmtMicRec.mimeType||'audio/webm'});
+        form._cmt_voice_blob=blob;
+        var objUrl=URL.createObjectURL(blob);
+        if(preview){
+          preview.style.display='flex';
+          preview.innerHTML='<audio controls src="'+objUrl+'" preload="none" style="height:32px;max-width:180px;border-radius:20px"></audio>'+
+            '<button type="button" class="gh-cmt-voice-del" title="Remove" style="background:none;border:none;color:var(--gh-muted);cursor:pointer;padding:0 4px"><i class="fas fa-times"></i></button>';
+          var delBtn=preview.querySelector('.gh-cmt-voice-del');
+          if(delBtn) delBtn.onclick=function(){ preview.style.display='none'; preview.innerHTML=''; form._cmt_voice_blob=null; };
+        }
+      };
+      _cmtMicRec.start();
+    }).catch(function(){ toast('Microphone access denied','error'); });
   }
 
   function updatePollUi(pid, opts, totalVotes, myOptId, card){
