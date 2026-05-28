@@ -251,3 +251,64 @@ html[data-gh-theme="light"] .geo-sw-account-type { color: #64748b; }
 html[data-gh-theme="light"] .geo-sw-switch-btn { background: rgba(15,23,42,.06); border-color: rgba(15,23,42,.12); color: #64748b; }
 html[data-gh-theme="light"] .geo-sw-switch-btn:hover { background: rgba(16,185,129,.1); color: #059669; border-color: rgba(16,185,129,.25); }
 html[data-gh-theme="light"] .geo-sw-unread-dot { border-color: #fff; }
+
+/* ── Preferences section (theme + language) ─────────────────── */
+.geo-sw-pref-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px;
+  min-height: 40px;
+}
+.geo-sw-pref-left {
+  display: flex; align-items: center; gap: 10px;
+}
+.geo-sw-pref-icon {
+  width: 18px; text-align: center;
+  color: var(--gh-muted, #94a3b8); font-size: .85rem;
+}
+.geo-sw-pref-label {
+  font-size: .84rem; color: var(--gh-text, #f1f5f9); font-weight: 500;
+}
+
+/* ── Theme toggle switch ─────────────────────────────────────── */
+.geo-sw-theme-toggle {
+  position: relative; width: 40px; height: 22px;
+  border-radius: 999px; border: none; cursor: pointer;
+  transition: background .22s;
+  background: #334155;
+  flex-shrink: 0;
+}
+.geo-sw-theme-toggle.dark  { background: #10b981; }
+.geo-sw-theme-toggle.light { background: #f59e0b; }
+.geo-sw-toggle-thumb {
+  position: absolute; top: 3px; left: 3px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #fff;
+  transition: transform .22s;
+  display: block;
+}
+.geo-sw-theme-toggle.dark  .geo-sw-toggle-thumb { transform: translateX(18px); }
+.geo-sw-theme-toggle.light .geo-sw-toggle-thumb { transform: translateX(0); }
+
+/* ── Language buttons ───────────────────────────────────────── */
+.geo-sw-lang-btns {
+  display: flex; gap: 4px;
+}
+.geo-sw-lang-btn {
+  padding: 3px 9px; border-radius: 6px; border: 1px solid rgba(255,255,255,.12);
+  background: transparent; color: var(--gh-muted, #94a3b8);
+  font-size: .75rem; font-weight: 700; cursor: pointer;
+  transition: all .15s; letter-spacing: .04em;
+}
+.geo-sw-lang-btn:hover { background: rgba(255,255,255,.08); color: #f1f5f9; }
+.geo-sw-lang-btn.active {
+  background: #10b981; color: #fff;
+  border-color: #10b981;
+}
+
+/* Light theme overrides */
+html[data-gh-theme="light"] .geo-sw-theme-toggle { background: #e2e8f0; }
+html[data-gh-theme="light"] .geo-sw-theme-toggle.light { background: #f59e0b; }
+html[data-gh-theme="light"] .geo-sw-lang-btn {
+  border-color: rgba(0,0,0,.15); color: #475569;
+}
+html[data-gh-theme="light"] .geo-sw-lang-btn:hover { background: rgba(0,0,0,.06); }

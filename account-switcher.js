@@ -288,22 +288,52 @@
 
     // ── Bottom actions ──────────────────────────────────────────
     var profileHref = _user && _user.uid ? 'profile.html?id='+encodeURIComponent(_user.uid) : 'profile.html';
+
+    // ── Preferences: Theme + Language ──────────────────────────
+    var _curTheme = 'dark'; try { _curTheme = localStorage.getItem('gh_theme') || 'dark'; } catch(e) {}
+    var _curLang  = 'ka';   try { _curLang  = localStorage.getItem('gh_lang')  || 'ka';   } catch(e) {}
+    var isDark = _curTheme !== 'light';
+    var prefSection =
+      '<div class="geo-sw-divider"></div>'+
+      // Theme toggle row
+      '<div class="geo-sw-pref-row">'+
+        '<div class="geo-sw-pref-left">'+
+          '<i class="fas '+(isDark?'fa-moon':'fa-sun')+' geo-sw-pref-icon"></i>'+
+          '<span class="geo-sw-pref-label">'+(isDark?'Dark Mode':'Light Mode')+'</span>'+
+        '</div>'+
+        '<button class="geo-sw-theme-toggle '+(isDark?'dark':'light')+'" id="geoSwThemeBtn" title="Toggle theme">'+
+          '<span class="geo-sw-toggle-thumb"></span>'+
+        '</button>'+
+      '</div>'+
+      // Language selector row
+      '<div class="geo-sw-pref-row">'+
+        '<div class="geo-sw-pref-left">'+
+          '<i class="fas fa-globe geo-sw-pref-icon"></i>'+
+          '<span class="geo-sw-pref-label">Language</span>'+
+        '</div>'+
+        '<div class="geo-sw-lang-btns">'+
+          '<button class="geo-sw-lang-btn'+(_curLang==='ka'?' active':'')+'" data-geo-lang="ka">KA</button>'+
+          '<button class="geo-sw-lang-btn'+(_curLang==='en'?' active':'')+'" data-geo-lang="en">EN</button>'+
+          '<button class="geo-sw-lang-btn'+(_curLang==='ru'?' active':'')+'" data-geo-lang="ru">RU</button>'+
+        '</div>'+
+      '</div>';
+
     var bottomSection =
       '<div class="geo-sw-divider"></div>'+
       '<a class="geo-sw-item" href="'+profileHref+'">'+
         '<div class="geo-sw-item-icon user"><i class="fas fa-user"></i></div>'+
-        '<span class="geo-sw-item-name">Profile</span>'+
+        '<span class="geo-sw-item-name geo-sw-i18n" data-i18n="profile">Profile</span>'+
       '</a>'+
       '<a class="geo-sw-item" href="settings.html">'+
         '<div class="geo-sw-item-icon settings"><i class="fas fa-gear"></i></div>'+
-        '<span class="geo-sw-item-name">Settings</span>'+
+        '<span class="geo-sw-item-name geo-sw-i18n" data-i18n="settings">Settings</span>'+
       '</a>'+
       '<button class="geo-sw-item" onclick="window._geoSW.signOut()" style="font-family:inherit">'+
         '<div class="geo-sw-item-icon signout"><i class="fas fa-arrow-right-from-bracket"></i></div>'+
-        '<span class="geo-sw-item-name" style="color:#f87171">Sign Out</span>'+
+        '<span class="geo-sw-item-name" style="color:#f87171"><span class="geo-sw-i18n" data-i18n="signout">Sign Out</span></span>'+
       '</button>';
 
-    return topCard + friendReqSection + switchSection + groupSection + bottomSection;
+    return topCard + friendReqSection + switchSection + groupSection + prefSection + bottomSection;
   }
 
   /* ── button label HTML ─────────────────────────────────────── */
@@ -350,8 +380,34 @@
         dropdown.style.left = 'auto';
       }
       dropdown.classList.add('open');
-      // Wire friend request accept/decline buttons
+      // Wire all dropdown interactions
       dropdown.addEventListener('click', function(e) {
+        // ── Theme toggle ──────────────────────────────────────
+        var themeBtn = e.target.closest('#geoSwThemeBtn');
+        if (themeBtn) {
+          e.stopPropagation();
+          var cur = 'dark'; try { cur = localStorage.getItem('gh_theme') || 'dark'; } catch(_){}
+          var next = cur === 'light' ? 'dark' : 'light';
+          try { localStorage.setItem('gh_theme', next); } catch(_){}
+          document.documentElement.setAttribute('data-gh-theme', next);
+          if (window.GeoSocial && window.GeoSocial.setTheme) window.GeoSocial.setTheme(next);
+          dropdown.innerHTML = renderDropdown();
+          return;
+        }
+        // ── Language selector ─────────────────────────────────
+        var langBtn = e.target.closest('[data-geo-lang]');
+        if (langBtn) {
+          e.stopPropagation();
+          var lang = langBtn.dataset.geoLang;
+          try { localStorage.setItem('gh_lang', lang); } catch(_){}
+          // Apply translations immediately then re-render panel
+          if (window.GHI18N && window.GHI18N.apply) window.GHI18N.apply(lang);
+          dropdown.innerHTML = renderDropdown();
+          // Reload page so all server-rendered strings update
+          setTimeout(function(){ location.reload(); }, 300);
+          return;
+        }
+        // ── Friend request accept/decline ─────────────────────
         var acceptBtn = e.target.closest('.geo-sw-req-accept');
         if (acceptBtn) {
           e.stopPropagation();
