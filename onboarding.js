@@ -58,6 +58,8 @@ const OB_DATA = {
 
 const obState = {
   step: 1,
+  firstName: '', lastName: '', username: '', usernameStatus: '',
+  birthday: '', gender: '', residentialCity: '', password: '',
   accountType: null,
   interests: [],
   city: 'all_georgia',
@@ -66,7 +68,7 @@ const obState = {
   goals: [],
 };
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 11;
 
 // ── PERSONALIZATION MAPS ─────────────────────────────────────────
 
@@ -144,6 +146,20 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     } catch (e) { /* ignore corrupt data */ }
   }
+  // Pre-fill obState from existing user profile (Google/Facebook users already have some fields)
+  var u = window.GeoCurrentUser;
+  if (u) {
+    var np = (u.fullName || '').trim().split(/\s+/);
+    if (!obState.firstName && np[0]) obState.firstName = np[0];
+    if (!obState.lastName && np.length > 1) obState.lastName = np.slice(1).join(' ');
+    if (!obState.username && u.username) { obState.username = u.username; obState.usernameStatus = 'available'; }
+    if (!obState.birthday && u.birthday) obState.birthday = u.birthday;
+    if (!obState.gender && u.gender)     obState.gender = u.gender;
+    if (!obState.residentialCity && u.city) obState.residentialCity = u.city;
+    if (!obState.accountType && u.accountType) obState.accountType = u.accountType;
+    if (!obState.interests.length && u.interests && u.interests.length) obState.interests = u.interests.slice();
+    if (u.cities && u.cities.length) obState.cities = u.cities.slice();
+  }
   renderStep(1);
 });
 
@@ -165,29 +181,66 @@ function obBack() {
 }
 
 function obSkip() {
-  if (obState.step === 2) { /* skip photo */ }
-  if (obState.step === 4) { obState.interests = []; }
-  if (obState.step === 6) { obState.goals = []; }
-  if (obState.step === 7) { /* skip notifications */ }
-  obNext();
+  if (obState.step === 5) { obState.password = ''; }
+  if (obState.step === 7) { obState.interests = []; }
+  if (obState.step === 9) { obState.goals = []; }
+  // Advance directly, bypassing validation
+  if (obState.step === TOTAL_STEPS - 1) {
+    var profile = computeProfile();
+    saveToStorage(profile);
+    renderStep(TOTAL_STEPS);
+  } else if (obState.step < TOTAL_STEPS) {
+    renderStep(obState.step + 1);
+  }
 }
 
 // ── VALIDATION ───────────────────────────────────────────────────
 
 function validateStep(step) {
-  if (step === 3 && !obState.accountType) {
+  if (step === 3) {
+    var fn = ((document.getElementById('ob-firstname') || {}).value || obState.firstName || '').trim();
+    var ln = ((document.getElementById('ob-lastname')  || {}).value || obState.lastName  || '').trim();
+    var un = obState.username || '';
+    if (!fn) { showToast('Enter your first name.'); return false; }
+    if (!ln) { showToast('Enter your last name.'); return false; }
+    if (un.length < 3) { showToast('Username must be at least 3 characters.'); return false; }
+    if (obState.usernameStatus === 'taken')    { showToast('That username is taken — choose another.'); return false; }
+    if (obState.usernameStatus === 'checking') { showToast('Checking username — please wait.'); return false; }
+    obState.firstName = fn; obState.lastName = ln;
+    return true;
+  }
+  if (step === 4) {
+    var bd = document.getElementById('ob-birthday'); if (bd) obState.birthday = bd.value;
+    var gn = document.getElementById('ob-gender');   if (gn) obState.gender = gn.value;
+    var rc = document.getElementById('ob-rescity');  if (rc) obState.residentialCity = rc.value.trim();
+    if (!obState.birthday)        { showToast('Please enter your date of birth.'); return false; }
+    if (!obState.gender)          { showToast('Please select your gender.'); return false; }
+    if (!obState.residentialCity) { showToast('Please enter your city or village.'); return false; }
+    return true;
+  }
+  if (step === 5) {
+    var pw1 = document.getElementById('ob-password');
+    var pw2 = document.getElementById('ob-password2');
+    if (pw1 && pw1.value) {
+      if (pw1.value.length < 8) { showToast('Password must be at least 8 characters.'); return false; }
+      if (pw2 && pw1.value !== pw2.value) { showToast('Passwords do not match.'); return false; }
+      obState.password = pw1.value;
+    }
+    return true;
+  }
+  if (step === 6 && !obState.accountType) {
     showToast('Choose an account type to continue.');
     return false;
   }
-  if (step === 4 && obState.interests.length < 3) {
-    showToast('Pick at least 3 interests.');
+  if (step === 7 && obState.interests.length < 1) {
+    showToast('Pick at least 1 interest.');
     return false;
   }
-  if (step === 5 && (!obState.cities || !obState.cities.length)) {
+  if (step === 8 && (!obState.cities || !obState.cities.length)) {
     showToast('Choose at least one area, or select All Georgia.');
     return false;
   }
-  if (step === 6 && obState.goals.length < 2) {
+  if (step === 9 && obState.goals.length < 2) {
     showToast('Pick at least 2 goals.');
     return false;
   }
@@ -206,14 +259,17 @@ function renderStep(n) {
 
   setTimeout(function () {
     switch (n) {
-      case 1: content.innerHTML = renderWelcome(); break;
-      case 2: content.innerHTML = renderPhoto(); break;
-      case 3: content.innerHTML = renderAccountType(); break;
-      case 4: content.innerHTML = renderInterests(); break;
-      case 5: content.innerHTML = renderCity(); break;
-      case 6: content.innerHTML = renderGoals(); break;
-      case 7: content.innerHTML = renderNotifPermission(); break;
-      case 8: content.innerHTML = renderResult(); break;
+      case 1:  content.innerHTML = renderWelcome(); break;
+      case 2:  content.innerHTML = renderPhoto(); break;
+      case 3:  content.innerHTML = renderIdentity(); break;
+      case 4:  content.innerHTML = renderAboutYou(); break;
+      case 5:  content.innerHTML = renderAccountInfo(); break;
+      case 6:  content.innerHTML = renderAccountType(); break;
+      case 7:  content.innerHTML = renderInterests(); break;
+      case 8:  content.innerHTML = renderCity(); break;
+      case 9:  content.innerHTML = renderGoals(); break;
+      case 10: content.innerHTML = renderNotifPermission(); break;
+      case 11: content.innerHTML = renderResult(); break;
     }
     content.style.transition = 'opacity 0.26s ease, transform 0.26s ease';
     content.style.opacity = '1';
@@ -242,7 +298,7 @@ function updateHeader(step) {
   } else {
     nav.style.display = 'flex';
     back.style.display = step === 2 ? 'none' : 'inline-flex';
-    skip.style.display = (step === 2 || step === 4 || step === 6 || step === 7) ? 'block' : 'none';
+    skip.style.display = (step === 2 || step === 5 || step === 7 || step === 9 || step === 10) ? 'block' : 'none';
     next.innerHTML = step === TOTAL_STEPS - 1
       ? '<i class="fas fa-wand-magic-sparkles" style="margin-right:6px"></i> Build My Profile'
       : 'Continue <i class="fas fa-arrow-right" style="margin-left:6px"></i>';
@@ -320,7 +376,163 @@ function obHandlePhoto(input) {
     .catch(function(){});
 }
 
-// ── STEP 3: ACCOUNT TYPE ──────────────────────────────────────────
+// ── STEP 3: IDENTITY ─────────────────────────────────────────────
+
+var _unCheckTimer = null;
+
+function obCheckUsername(val) {
+  var clean = val.toLowerCase().replace(/[^a-z0-9_.]/g, '').slice(0, 30);
+  obState.username = clean;
+  var inp = document.getElementById('ob-username');
+  if (inp && inp.value !== clean) inp.value = clean;
+  var status = document.getElementById('ob-username-status');
+  if (!status) return;
+  clearTimeout(_unCheckTimer);
+  if (clean.length < 3) {
+    obState.usernameStatus = 'invalid';
+    status.innerHTML = clean.length > 0 ? '<span style="color:#ef4444"><i class="fas fa-times-circle"></i> At least 3 characters required</span>' : '';
+    return;
+  }
+  obState.usernameStatus = 'checking';
+  status.innerHTML = '<span style="color:#94a3b8"><i class="fas fa-circle-notch fa-spin"></i> Checking…</span>';
+  _unCheckTimer = setTimeout(function () {
+    var geo = window.GeoFirebase, f = geo && geo.fs;
+    if (!geo || !f) {
+      obState.usernameStatus = 'available';
+      status.innerHTML = '<span style="color:#10b981"><i class="fas fa-check-circle"></i> @' + clean + ' looks good</span>';
+      return;
+    }
+    var q = f.query(f.collection(geo.db, 'users'), f.where('username', '==', clean), f.limit(2));
+    f.getDocs(q).then(function (snap) {
+      var currentUid = window.GeoCurrentUser && window.GeoCurrentUser.uid;
+      var taken = false;
+      snap.forEach(function (d) { if (d.id !== currentUid) taken = true; });
+      if (taken) {
+        obState.usernameStatus = 'taken';
+        status.innerHTML = '<span style="color:#ef4444"><i class="fas fa-times-circle"></i> This username is taken — try another</span>';
+      } else {
+        obState.usernameStatus = 'available';
+        status.innerHTML = '<span style="color:#10b981"><i class="fas fa-check-circle"></i> @' + clean + ' is available</span>';
+      }
+    }).catch(function () {
+      obState.usernameStatus = 'available';
+      status.innerHTML = '<span style="color:#10b981"><i class="fas fa-check-circle"></i> @' + clean + ' looks good</span>';
+    });
+  }, 600);
+}
+
+function obCheckPasswords() {
+  var pw1 = document.getElementById('ob-password');
+  var pw2 = document.getElementById('ob-password2');
+  var st  = document.getElementById('ob-pw-status');
+  if (!pw1 || !pw2 || !st) return;
+  if (!pw1.value && !pw2.value) { st.innerHTML = ''; return; }
+  if (pw1.value.length < 8) { st.innerHTML = '<span style="color:#f59e0b">At least 8 characters</span>'; return; }
+  if (pw1.value !== pw2.value) { st.innerHTML = '<span style="color:#ef4444">Passwords do not match</span>'; return; }
+  st.innerHTML = '<span style="color:#10b981"><i class="fas fa-check-circle"></i> Passwords match</span>';
+}
+
+function renderIdentity() {
+  var user = window.GeoCurrentUser || {};
+  var fn = obState.firstName || '';
+  var ln = obState.lastName  || '';
+  var un = obState.username  || '';
+  return '<div class="ob-step-header">' +
+    '<div class="ob-step-kicker">Step 2 — Identity</div>' +
+    '<h2>Create your profile</h2>' +
+    '<p>Set your name and a unique username for GeoHub.</p>' +
+  '</div>' +
+  '<div style="display:flex;flex-direction:column;gap:14px;max-width:440px;margin:0 auto">' +
+    '<div style="display:flex;gap:12px">' +
+      '<div style="flex:1">' +
+        '<label style="display:block;font-size:.78rem;color:#94a3b8;margin-bottom:5px">First Name</label>' +
+        '<input type="text" id="ob-firstname" class="form-input" placeholder="e.g. Giorgi" value="' + fn + '" oninput="obState.firstName=this.value.trim()">' +
+      '</div>' +
+      '<div style="flex:1">' +
+        '<label style="display:block;font-size:.78rem;color:#94a3b8;margin-bottom:5px">Last Name</label>' +
+        '<input type="text" id="ob-lastname" class="form-input" placeholder="e.g. Beridze" value="' + ln + '" oninput="obState.lastName=this.value.trim()">' +
+      '</div>' +
+    '</div>' +
+    '<div>' +
+      '<label style="display:block;font-size:.78rem;color:#94a3b8;margin-bottom:5px">Username <span style="color:#64748b;font-weight:400;font-size:.75rem">— unique @handle</span></label>' +
+      '<div style="position:relative">' +
+        '<span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#64748b;pointer-events:none">@</span>' +
+        '<input type="text" id="ob-username" class="form-input" style="padding-left:28px" placeholder="your_handle" value="' + un + '" oninput="obCheckUsername(this.value)" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">' +
+      '</div>' +
+      '<div id="ob-username-status" style="margin-top:5px;font-size:.78rem;min-height:18px">' +
+        (un.length >= 3 ? '<span style="color:#10b981"><i class="fas fa-check-circle"></i> @' + un + ' is available</span>' : '') +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+// ── STEP 4: ABOUT YOU ─────────────────────────────────────────────
+
+function renderAboutYou() {
+  var maxDate = new Date(Date.now() - 13 * 365.25 * 24 * 3600 * 1000).toISOString().slice(0, 10);
+  return '<div class="ob-step-header">' +
+    '<div class="ob-step-kicker">Step 3 — About You</div>' +
+    '<h2>A bit about you</h2>' +
+    '<p>Helps personalize your experience. Only you control who sees this.</p>' +
+  '</div>' +
+  '<div style="display:flex;flex-direction:column;gap:14px;max-width:440px;margin:0 auto">' +
+    '<div>' +
+      '<label style="display:block;font-size:.78rem;color:#94a3b8;margin-bottom:5px">Date of Birth / დაბადების თარიღი</label>' +
+      '<input type="date" id="ob-birthday" class="form-input" max="' + maxDate + '" value="' + (obState.birthday || '') + '">' +
+    '</div>' +
+    '<div>' +
+      '<label style="display:block;font-size:.78rem;color:#94a3b8;margin-bottom:5px">Gender / სქესი</label>' +
+      '<select id="ob-gender" class="form-input">' +
+        '<option value="">Select / აირჩიეთ</option>' +
+        '<option value="male"'   + (obState.gender === 'male'   ? ' selected' : '') + '>Male / მამრობითი</option>' +
+        '<option value="female"' + (obState.gender === 'female' ? ' selected' : '') + '>Female / მდედრობითი</option>' +
+        '<option value="other"'  + (obState.gender === 'other'  ? ' selected' : '') + '>Other / სხვა</option>' +
+      '</select>' +
+    '</div>' +
+    '<div>' +
+      '<label style="display:block;font-size:.78rem;color:#94a3b8;margin-bottom:5px">City / Village — საცხოვრებელი ადგილი</label>' +
+      '<input type="text" id="ob-rescity" class="form-input" placeholder="e.g. Tbilisi / თბილისი" value="' + (obState.residentialCity || '') + '">' +
+    '</div>' +
+  '</div>';
+}
+
+// ── STEP 5: ACCOUNT INFO ──────────────────────────────────────────
+
+function renderAccountInfo() {
+  var fbUser = window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser;
+  var email = (fbUser && fbUser.email) || (window.GeoCurrentUser && window.GeoCurrentUser.email) || '';
+  var hasPwd = false;
+  if (fbUser && fbUser.providerData) {
+    fbUser.providerData.forEach(function (p) { if (p.providerId === 'password') hasPwd = true; });
+  }
+  return '<div class="ob-step-header">' +
+    '<div class="ob-step-kicker">Step 4 — Account</div>' +
+    '<h2>Your account</h2>' +
+    '<p>Confirm your email' + (hasPwd ? '.' : ' and optionally add a password to also log in with email.') + '</p>' +
+  '</div>' +
+  '<div style="display:flex;flex-direction:column;gap:14px;max-width:440px;margin:0 auto">' +
+    '<div>' +
+      '<label style="display:block;font-size:.78rem;color:#94a3b8;margin-bottom:5px">Email address</label>' +
+      '<input type="email" class="form-input" value="' + email + '" readonly style="opacity:.6;cursor:default;background:rgba(255,255,255,.04)">' +
+    '</div>' +
+    (hasPwd
+      ? '<div style="background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px">' +
+          '<i class="fas fa-lock" style="color:#10b981"></i>' +
+          '<span style="font-size:.85rem;color:#94a3b8">Password is already set for this account.</span>' +
+        '</div>'
+      : '<div>' +
+          '<label style="display:block;font-size:.78rem;color:#94a3b8;margin-bottom:5px">Password <span style="color:#64748b;font-weight:400;font-size:.75rem">(optional — lets you also log in with email)</span></label>' +
+          '<input type="password" id="ob-password" class="form-input" placeholder="Min. 8 characters" oninput="obCheckPasswords()">' +
+        '</div>' +
+        '<div>' +
+          '<label style="display:block;font-size:.78rem;color:#94a3b8;margin-bottom:5px">Confirm password</label>' +
+          '<input type="password" id="ob-password2" class="form-input" placeholder="Repeat password" oninput="obCheckPasswords()">' +
+          '<div id="ob-pw-status" style="margin-top:5px;font-size:.78rem;min-height:18px"></div>' +
+        '</div>') +
+  '</div>';
+}
+
+// ── STEP 6: ACCOUNT TYPE ──────────────────────────────────────────
 
 function renderAccountType() {
   var cards = OB_DATA.accountTypes.map(function (t) {
@@ -336,7 +548,7 @@ function renderAccountType() {
   }).join('');
 
   return '<div class="ob-step-header">' +
-    '<div class="ob-step-kicker">Step 1 — Your Profile</div>' +
+    '<div class="ob-step-kicker">Step 5 — Account Type</div>' +
     '<h2>What describes you best?</h2>' +
     '<p>GeoHub will tailor your feed, challenges, and tools to your role.</p>' +
   '</div>' +
@@ -365,10 +577,10 @@ function renderInterests() {
   }).join('');
 
   return '<div class="ob-step-header">' +
-    '<div class="ob-step-kicker">Step 2 — Interests</div>' +
+    '<div class="ob-step-kicker">Step 6 — Interests</div>' +
     '<h2>What are you into?</h2>' +
     '<p>Your feed, AI suggestions, challenges, and groups will be built around your interests.</p>' +
-    '<p class="ob-min-note">Pick at least 3</p>' +
+    '<p class="ob-min-note">Pick at least 1</p>' +
   '</div>' +
   '<div class="ob-interest-grid">' + chips + '</div>' +
   '<div class="ob-select-count" id="ob-interest-count">' + interestCountText() + '</div>';
@@ -376,9 +588,8 @@ function renderInterests() {
 
 function interestCountText() {
   var n = obState.interests.length;
-  if (n === 0) return 'Nothing selected yet';
-  if (n < 3)   return '<strong>' + n + '</strong> selected — pick ' + (3 - n) + ' more';
-  return '<strong>' + n + '</strong> interests selected ✓';
+  if (n === 0) return 'Nothing selected yet — pick at least 1';
+  return '<strong>' + n + '</strong> interest' + (n > 1 ? 's' : '') + ' selected ✓';
 }
 
 function toggleInterest(id) {
@@ -411,7 +622,7 @@ function renderCity() {
   }).join('');
 
   return '<div class="ob-step-header">' +
-    '<div class="ob-step-kicker">Step 3 — Areas</div>' +
+    '<div class="ob-step-kicker">Step 7 — Areas</div>' +
     '<h2>Which parts of Georgia interest you?</h2>' +
     '<p>Georgia is small and people move between cities often. Choose <strong>All Georgia</strong> for a nationwide feed, or select several cities/regions.</p>' +
   '</div>' +
@@ -433,7 +644,7 @@ function selectCity(id) {
     obState.city = obState.cities[0];
     obState.cityScope = obState.cities.indexOf('all_georgia') !== -1 ? 'all_georgia' : 'multi_city';
   }
-  renderStep(4);
+  renderStep(obState.step);
 }
 
 // ── STEP 5: GOALS ─────────────────────────────────────────────────
@@ -449,7 +660,7 @@ function renderGoals() {
   }).join('');
 
   return '<div class="ob-step-header">' +
-    '<div class="ob-step-kicker">Step 4 — Goals</div>' +
+    '<div class="ob-step-kicker">Step 8 — Goals</div>' +
     '<h2>What do you want to achieve?</h2>' +
     '<p>Your challenges, rewards, and recommendations will be optimized for your goals.</p>' +
     '<p class="ob-min-note">Pick at least 2</p>' +
@@ -474,7 +685,7 @@ function toggleGoal(id) {
 function renderNotifPermission() {
   var granted = Notification && Notification.permission === 'granted';
   return '<div class="ob-step-header">' +
-    '<div class="ob-step-kicker">Step 6 — Notifications</div>' +
+    '<div class="ob-step-kicker">Step 9 — Notifications</div>' +
     '<h2>Stay in the loop</h2>' +
     '<p>Get notified when someone follows you, comments on your post, or a nearby deal drops.</p>' +
   '</div>' +
@@ -658,6 +869,8 @@ function renderWelcomeBack(data) {
 
 function restartOnboarding() {
   if (window.safeStorage) window.safeStorage.remove('geohub_onboarding');
+  obState.firstName = ''; obState.lastName = ''; obState.username = ''; obState.usernameStatus = '';
+  obState.birthday = ''; obState.gender = ''; obState.residentialCity = ''; obState.password = '';
   obState.accountType = null;
   obState.interests = [];
   obState.city = 'all_georgia';
@@ -671,6 +884,12 @@ function restartOnboarding() {
 
 function saveToStorage(profile) {
   var data = {
+    firstName:       obState.firstName || '',
+    lastName:        obState.lastName  || '',
+    username:        obState.username  || '',
+    birthday:        obState.birthday  || '',
+    gender:          obState.gender    || '',
+    residentialCity: obState.residentialCity || '',
     accountType: obState.accountType,
     interests:   obState.interests,
     city:        obState.city,
@@ -689,17 +908,37 @@ function saveOnboardingToFirestore(data) {
   function doSave(fb) {
     var user = fb.auth && fb.auth.currentUser;
     if (!user) return;
+    var fullName = ((data.firstName || '') + ' ' + (data.lastName || '')).trim();
     var update = {
-      onboardingComplete: true,
+      onboardingComplete:    true,
       onboardingCompletedAt: fb.fs.serverTimestamp(),
+      firstName:   data.firstName || '',
+      lastName:    data.lastName  || '',
+      username:    data.username  || '',
+      birthday:    data.birthday  || '',
+      gender:      data.gender    || '',
+      city:        data.residentialCity || data.city || '',
       accountType: data.accountType || 'explorer',
       interests:   data.interests   || [],
-      city:        data.city        || 'all_georgia',
+      feedCity:    data.city        || 'all_georgia',
       cities:      data.cities      || [data.city || 'all_georgia'],
       goals:       data.goals       || [],
     };
+    if (fullName) update.fullName = fullName;
     if (data.photoURL) { update.photoURL = data.photoURL; update.avatar = data.photoURL; }
     fb.fs.updateDoc(fb.fs.doc(fb.db, 'users', user.uid), update).catch(function () {});
+    // Optionally set password for social-login users
+    if (obState.password && obState.password.length >= 8) {
+      try {
+        var hasPwd = user.providerData && user.providerData.some(function(p){ return p.providerId === 'password'; });
+        if (!hasPwd && fb.authFns && fb.authFns.EmailAuthProvider && fb.authFns.linkWithCredential) {
+          var cred = fb.authFns.EmailAuthProvider.credential(user.email, obState.password);
+          fb.authFns.linkWithCredential(user, cred).catch(function(){});
+        } else if (hasPwd && fb.authFns && fb.authFns.updatePassword) {
+          fb.authFns.updatePassword(user, obState.password).catch(function(){});
+        }
+      } catch(e) {}
+    }
   }
   if (window.GeoFirebase && window.GeoFirebase.auth) {
     doSave(window.GeoFirebase);
