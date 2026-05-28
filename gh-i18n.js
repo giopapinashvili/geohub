@@ -219,6 +219,16 @@
     ai_placeholder:   { ka: 'GeoAI-ს ჰკითხე…',  en: 'Ask GeoAI anything…',ru: 'Спросите GeoAI…'  },
     ai_cleared:       { ka: 'ჩატი გასუფთავდა!', en: 'Chat cleared! How can I help?',ru: 'Чат очищен! Чем помочь?' },
 
+    /* ── Discover / misc ────────────────────────────────────── */
+    disc_title:       { ka: 'აღმოაჩინე',           en: 'Discover',        ru: 'Открыть'          },
+    disc_sub:         { ka: 'ყველა GeoHub კონტენტი ერთ ადგილას.',en: 'All real GeoHub content in one social feed.',ru: 'Весь контент GeoHub в одной ленте.' },
+    disc_add_biz:     { ka: 'ბიზნესის დამატება',   en: 'Add business',    ru: 'Добавить бизнес'  },
+    disc_search:      { ka: 'პოსტი, ბიზნ., ჯგ., ადგ…',en: 'Search posts, businesses, groups, places…',ru: 'Поиск постов, бизнесов, групп, мест…' },
+    disc_loading:     { ka: 'იტვირთება…',           en: 'Loading Discover…',ru: 'Загрузка…'        },
+    disc_nothing:     { ka: 'ვერ მოიძებნა',         en: 'Nothing found',   ru: 'Ничего не найдено'},
+    coming_soon:      { ka: 'მალე…',               en: 'Coming soon',     ru: 'Скоро'            },
+    back_to_feed:     { ka: 'ფიდზე დაბრუნება',     en: 'Back to Feed',    ru: 'Вернуться в ленту'},
+
     /* ── Messages page ──────────────────────────────────────── */
     msg_title:        { ka: 'შეტყობინებები',       en: 'Messages',        ru: 'Сообщения'       },
     msg_new:          { ka: 'ახალი შეტყობინება',   en: 'New message',     ru: 'Новое сообщение' },

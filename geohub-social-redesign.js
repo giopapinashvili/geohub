@@ -7367,7 +7367,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function renderDiscover(){
-    shell({ active:'discover', center:'<div class="gh-card"><div class="gh-section-title"><div><h1>Discover</h1><p class="gh-muted" style="margin:.25rem 0 0">All real GeoHub content in one social feed.</p></div><a href="add-business.html" class="gh-btn"><i class="fas fa-plus"></i>Add business</a></div><input class="gh-input" id="ghDiscoverSearch" placeholder="Search posts, businesses, groups, places…"><div style="height:12px"></div><div class="gh-pill-row" id="ghDiscoverTabs"></div></div><div id="ghDiscoverList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>Loading Discover…</h3></div></div>' });
+    var _dt=typeof GHt==='function'?GHt:function(k){return k;};
+    shell({ active:'discover', center:'<div class="gh-card"><div class="gh-section-title"><div><h1>'+_dt('disc_title')+'</h1><p class="gh-muted" style="margin:.25rem 0 0">'+_dt('disc_sub')+'</p></div><a href="add-business.html" class="gh-btn"><i class="fas fa-plus"></i>'+_dt('disc_add_biz')+'</a></div><input class="gh-input" id="ghDiscoverSearch" placeholder="'+_dt('disc_search')+'"><div style="height:12px"></div><div class="gh-pill-row" id="ghDiscoverTabs"></div></div><div id="ghDiscoverList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>'+_dt('disc_loading')+'</h3></div></div>' });
     var tabs=['all','post','business','group','place','event','service','learning','reward','challenge','creator'];
     $('#ghDiscoverTabs').innerHTML=tabs.map(function(t){return '<button class="gh-pill '+(t==='all'?'active':'')+'" data-filter="'+t+'">'+(t==='all'?'All':labelFor(t))+'</button>';}).join('');
     var items=[];
@@ -10283,9 +10284,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function renderComingSoon(){
+    var _ct=typeof GHt==='function'?GHt:function(k){return k;};
     var title = (PAGE || PATH.replace('.html','') || 'section').replace(/[-_]/g,' ');
     title = title.charAt(0).toUpperCase() + title.slice(1);
-    shell({ active: PAGE, center: '<div class="gh-card gh-empty" style="min-height:360px"><i class="fas fa-tools"></i><h3>'+esc(title)+' is admin-controlled</h3><p>This section is not ready yet. No fake demo content is shown.</p><a class="gh-btn" href="feed.html">Back to Feed</a></div>' });
+    shell({ active: PAGE, center: '<div class="gh-card gh-empty" style="min-height:360px"><i class="fas fa-tools"></i><h3>'+esc(title)+' — '+_ct('coming_soon')+'</h3><p>This section is not ready yet. No fake demo content is shown.</p><a class="gh-btn" href="feed.html">'+_ct('back_to_feed')+'</a></div>' });
   }
 
   function init(){
