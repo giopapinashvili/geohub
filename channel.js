@@ -86,13 +86,14 @@
       '</div>' +
 
       /* Tab nav */
-      '<nav class="ch-tabs" id="chTabs">' +
-        '<button class="ch-tab active" data-tab="home"><i class="fas fa-house"></i> Home</button>' +
-        '<button class="ch-tab" data-tab="videos"><i class="fas fa-film"></i> Videos</button>' +
-        '<button class="ch-tab" data-tab="shorts"><i class="fas fa-bolt"></i> Shorts</button>' +
-        '<button class="ch-tab" data-tab="playlists"><i class="fas fa-list"></i> Playlists</button>' +
-        '<button class="ch-tab" data-tab="posts"><i class="fas fa-newspaper"></i> Posts</button>' +
-      '</nav>' +
+      (function(){ var _t=typeof GHt==='function'?GHt:function(k){return k;};
+      return '<nav class="ch-tabs" id="chTabs">' +
+        '<button class="ch-tab active" data-tab="home"><i class="fas fa-house"></i> '+_t('ch_home')+'</button>' +
+        '<button class="ch-tab" data-tab="videos"><i class="fas fa-film"></i> '+_t('ch_videos')+'</button>' +
+        '<button class="ch-tab" data-tab="shorts"><i class="fas fa-bolt"></i> '+_t('ch_shorts')+'</button>' +
+        '<button class="ch-tab" data-tab="playlists"><i class="fas fa-list"></i> '+_t('ch_playlists')+'</button>' +
+        '<button class="ch-tab" data-tab="posts"><i class="fas fa-newspaper"></i> '+_t('ch_posts')+'</button>' +
+      '</nav>'; })() +
 
       /* Tab content area */
       '<div id="chTabContent" class="ch-tab-content"></div>';
@@ -176,7 +177,7 @@
         var latest = regular.slice(0,8);
         html += '<div class="ch-home-section">' +
           '<div class="ch-section-header">' +
-            '<h2 class="ch-section-title"><i class="fas fa-film"></i> Latest Videos</h2>' +
+            '<h2 class="ch-section-title"><i class="fas fa-film"></i> '+(typeof GHt==='function'?GHt('ch_latest_videos'):'Latest Videos')+'</h2>' +
             (regular.length>8?'<button class="vid-btn ghost" data-tab-switch="videos" style="font-size:.8rem">ყველა →</button>':'') +
           '</div>' +
           '<div class="vid-tv-row">'+latest.map(function(v){ return renderCard(v,'tv'); }).join('')+'</div>' +
@@ -493,7 +494,8 @@
     };
   }
   function setSubBtn(btn,sub){
-    btn.innerHTML=sub?'<i class="fas fa-check"></i> გამოწერილია':'<i class="fas fa-plus"></i> გამოწერა';
+    var _t=typeof GHt==='function'?GHt:function(k){return k;};
+    btn.innerHTML=sub?'<i class="fas fa-check"></i> '+_t('ch_subscribed'):'<i class="fas fa-plus"></i> '+_t('ch_subscribe');
     btn.classList.toggle('subscribed',sub);
   }
   function updateSubDisplay(delta){

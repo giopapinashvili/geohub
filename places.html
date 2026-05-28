@@ -246,7 +246,7 @@
 <!-- MAIN -->
 <main class="pl-main">
   <div class="pl-section-head">
-    <h2>Discover Places</h2>
+    <h2 data-i18n="pl_discover">Discover Places</h2>
     <span class="pl-count" id="plCount"></span>
   </div>
   <div class="pl-grid" id="plGrid">
@@ -258,16 +258,16 @@
 <div class="pl-modal-overlay" id="plAddModal">
   <div class="pl-modal">
     <div class="pl-modal-head">
-      <h3>Add a Place</h3>
+      <h3 data-i18n="pl_add">Add a Place</h3>
       <button class="pl-modal-close" onclick="closeAddModal()">✕</button>
     </div>
     <div class="pl-modal-body">
       <div class="pl-field">
-        <label>Place Name *</label>
-        <input type="text" id="plName" placeholder="e.g. Fabrika Tbilisi">
+        <label data-i18n="pl_name">Place Name *</label>
+        <input type="text" id="plName" data-i18n-placeholder="pl_name" placeholder="e.g. Fabrika Tbilisi">
       </div>
       <div class="pl-field">
-        <label>Category</label>
+        <label data-i18n="pl_category">Category</label>
         <select id="plCatSel">
           <option value="other">Other</option>
           <option value="cafe">Café</option>
@@ -281,22 +281,22 @@
         </select>
       </div>
       <div class="pl-field">
-        <label>Description</label>
-        <textarea id="plDesc" placeholder="Describe this place…"></textarea>
+        <label data-i18n="pl_description">Description</label>
+        <textarea id="plDesc" data-i18n-placeholder="pl_description" placeholder="Describe this place…"></textarea>
       </div>
       <div class="pl-field">
-        <label>Address</label>
-        <input type="text" id="plAddress" placeholder="Street, City, Country">
+        <label data-i18n="pl_address">Address</label>
+        <input type="text" id="plAddress" data-i18n-placeholder="pl_address" placeholder="Street, City, Country">
       </div>
       <div class="pl-field">
-        <label>Coordinates (optional)</label>
+        <label data-i18n="pl_coords">Coordinates (optional)</label>
         <div class="pl-coords-row">
           <input type="number" id="plLat" placeholder="Latitude" step="any">
           <input type="number" id="plLng" placeholder="Longitude" step="any">
         </div>
       </div>
       <div class="pl-field">
-        <label>Photo (optional)</label>
+        <label data-i18n="pl_photo">Photo (optional)</label>
         <div style="display:flex;gap:8px;align-items:center">
           <input type="url" id="plPhoto" placeholder="https://… or upload below" oninput="previewPhoto(this.value)" style="flex:1">
           <button type="button" id="plPhotoUploadBtn" onclick="plPickPhoto()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#f0f4ff;border-radius:10px;padding:9px 12px;cursor:pointer;font-size:.82rem;white-space:nowrap;flex-shrink:0"><i class="fas fa-upload"></i> Upload</button>
@@ -305,7 +305,7 @@
         <img id="plPhotoPreview" class="pl-photo-preview" alt="" loading="lazy" decoding="async">
       </div>
       <button class="pl-modal-submit" id="plSubmitBtn" onclick="submitAddPlace()">
-        <i class="fas fa-map-pin"></i> Add Place
+        <i class="fas fa-map-pin"></i> <span data-i18n="pl_add_btn">Add Place</span>
       </button>
     </div>
   </div>

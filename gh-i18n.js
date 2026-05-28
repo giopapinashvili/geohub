@@ -219,6 +219,27 @@
     ai_placeholder:   { ka: 'GeoAI-ს ჰკითხე…',  en: 'Ask GeoAI anything…',ru: 'Спросите GeoAI…'  },
     ai_cleared:       { ka: 'ჩატი გასუფთავდა!', en: 'Chat cleared! How can I help?',ru: 'Чат очищен! Чем помочь?' },
 
+    /* ── Places page ────────────────────────────────────────── */
+    pl_discover:      { ka: 'ადგილების აღმოჩენა',  en: 'Discover Places', ru: 'Открыть места'    },
+    pl_add:           { ka: 'ადგილის დამატება',    en: 'Add a Place',     ru: 'Добавить место'   },
+    pl_name:          { ka: 'სახელი *',             en: 'Place Name *',    ru: 'Название *'       },
+    pl_category:      { ka: 'კატეგორია',            en: 'Category',        ru: 'Категория'        },
+    pl_description:   { ka: 'აღწერა',              en: 'Description',     ru: 'Описание'         },
+    pl_address:       { ka: 'მისამართი',            en: 'Address',         ru: 'Адрес'            },
+    pl_coords:        { ka: 'კოორდინატები (სურ.)',  en: 'Coordinates (optional)',ru: 'Координаты (необяз.)' },
+    pl_photo:         { ka: 'ფოტო (სურ.)',          en: 'Photo (optional)', ru: 'Фото (необяз.)'  },
+    pl_add_btn:       { ka: 'ადგილის დამატება',    en: 'Add Place',        ru: 'Добавить'         },
+
+    /* ── Channel page ───────────────────────────────────────── */
+    ch_home:          { ka: 'მთავარი',              en: 'Home',            ru: 'Главная'          },
+    ch_videos:        { ka: 'ვიდეოები',            en: 'Videos',          ru: 'Видео'            },
+    ch_shorts:        { ka: 'Shorts',              en: 'Shorts',          ru: 'Shorts'            },
+    ch_playlists:     { ka: 'Playlist-ები',        en: 'Playlists',       ru: 'Плейлисты'        },
+    ch_posts:         { ka: 'პოსტები',             en: 'Posts',           ru: 'Посты'             },
+    ch_latest_videos: { ka: 'უახლესი ვიდეოები',   en: 'Latest Videos',   ru: 'Последние видео'   },
+    ch_subscribe:     { ka: 'გამოწერა',            en: 'Subscribe',       ru: 'Подписаться'       },
+    ch_subscribed:    { ka: 'გამოწერილია',          en: 'Subscribed',      ru: 'Подписан'          },
+
     /* ── Check-in page ──────────────────────────────────────── */
     ci_title:         { ka: 'ჩეკ-ინი',           en: 'Check In',       ru: 'Отметка'        },
     ci_subtitle:      { ka: 'დაადასტურე ვიზიტი და მიიღე XP',en: 'Verify your visit and earn XP',ru: 'Подтвердите визит и получите XP' },
