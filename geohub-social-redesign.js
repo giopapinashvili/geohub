@@ -10250,8 +10250,6 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(PAGE==='profile' || PATH==='profile.html'){ injectShellNav('profile'); return; } // profile.js renders profile content
     if(PAGE==='videos'  || PATH==='videos.html')  { injectShellNav('videos');  return; }
     if(PAGE==='watch'   || PATH==='watch.html')   { injectShellNav('watch');   return; }
-    if(PAGE==='reels'   || PATH==='reels.html')   { injectShellNav('reels');   return; }
-    if(PAGE==='map'     || PATH==='map.html')     { injectShellNav('map');     return; }
     if(PAGE==='places'  || PATH==='places.html')  { injectShellNav('places');  return; }
     if(PAGE==='admin-videos' || PATH==='admin-videos.html') { injectShellNav('admin-videos'); return; }
     if(PAGE==='channel'     || PATH==='channel.html')     { injectShellNav('channel');     return; }
@@ -10260,6 +10258,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(PAGE==='map'         || PATH==='map.html')         return renderMapPage();
     if(PAGE==='reels'       || PATH==='reels.html')       return renderReels();
     if(PAGE==='gamification'|| PATH==='gamification.html')return renderGamification();
+    if(PAGE==='admin'       || PATH==='admin.html')       return renderAdmin();
     return renderComingSoon();
   }
 
@@ -11165,6 +11164,767 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(e.data&&e.data.type==='SW_UPDATED'){
         toast('✅ GeoHub updated to latest version!');
       }
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 82 — Story Music Sticker
+  ══════════════════════════════════════════════════════════════ */
+  // Music button injected into story toolbar via openStoryModal patch
+  var _STORY_TRACKS=[
+    {id:'tb1',label:'Tbilisi Nights',url:'https://res.cloudinary.com/dw5dqk2w7/video/upload/v1/geohub/audio/tbilisi_nights.mp3',emoji:'🌙'},
+    {id:'vb1',label:'Vibrant Georgia',url:'https://res.cloudinary.com/dw5dqk2w7/video/upload/v1/geohub/audio/vibrant_georgia.mp3',emoji:'🇬🇪'},
+    {id:'ch1',label:'Chill Vibes',url:'https://res.cloudinary.com/dw5dqk2w7/video/upload/v1/geohub/audio/chill_vibes.mp3',emoji:'🎶'},
+    {id:'up1',label:'Upbeat Morning',url:'https://res.cloudinary.com/dw5dqk2w7/video/upload/v1/geohub/audio/upbeat_morning.mp3',emoji:'☀️'},
+    {id:'dr1',label:'Deep Feels',url:'https://res.cloudinary.com/dw5dqk2w7/video/upload/v1/geohub/audio/deep_feels.mp3',emoji:'💙'},
+    {id:'hype',label:'Hype Energy',url:'https://res.cloudinary.com/dw5dqk2w7/video/upload/v1/geohub/audio/hype_energy.mp3',emoji:'🔥'}
+  ];
+  window.ghOpenStoryMusic = function(onSelect){
+    var body='<div class="gh-music-list">'+
+      _STORY_TRACKS.map(function(t){
+        return '<button class="gh-music-item" data-track-id="'+esc(t.id)+'" data-track-url="'+esc(t.url)+'" data-track-label="'+esc(t.label)+'">'+
+          '<span class="gh-music-emoji">'+t.emoji+'</span>'+
+          '<div class="gh-music-info"><strong>'+esc(t.label)+'</strong><span class="gh-muted">GeoHub Music</span></div>'+
+          '<button type="button" class="gh-music-preview gh-btn ghost sm" data-preview-url="'+esc(t.url)+'"><i class="fas fa-play"></i></button>'+
+          '<button type="button" class="gh-music-pick gh-btn sm" data-pick-url="'+esc(t.url)+'" data-pick-label="'+esc(t.label)+'">Use</button>'+
+        '</button>';
+      }).join('')+
+    '</div>';
+    var m=modal('Add Music 🎵',body,'<button class="gh-btn ghost" data-close-modal>Cancel</button>','ghMusicPickerModal');
+    var _previewAudio=null;
+    if(m) m.addEventListener('click',function(e){
+      var prev=e.target.closest('[data-preview-url]');
+      if(prev){
+        e.stopPropagation();
+        if(_previewAudio){ _previewAudio.pause(); _previewAudio=null; prev.innerHTML='<i class="fas fa-play"></i>'; return; }
+        _previewAudio=new Audio(prev.dataset.previewUrl);
+        _previewAudio.volume=0.5; _previewAudio.play().catch(function(){});
+        _previewAudio.onended=function(){ prev.innerHTML='<i class="fas fa-play"></i>'; _previewAudio=null; };
+        prev.innerHTML='<i class="fas fa-stop"></i>';
+        return;
+      }
+      var pick=e.target.closest('[data-pick-url]');
+      if(pick){
+        if(_previewAudio){ _previewAudio.pause(); _previewAudio=null; }
+        if(m) m.remove();
+        if(onSelect) onSelect({url:pick.dataset.pickUrl, label:pick.dataset.pickLabel});
+        return;
+      }
+    });
+  };
+
+  /* Patch openStoryModal to inject Music button after story modal opens */
+  var _origOpenStoryModal=window.openStoryModal||null;
+  function _patchStoryModalMusic(){
+    var toolbar=document.querySelector('#ghStoryModal .gh-cmp-toolbar');
+    if(!toolbar||toolbar.querySelector('#ghStoryMusicBtn')) return;
+    var musicBtn=document.createElement('button');
+    musicBtn.type='button'; musicBtn.id='ghStoryMusicBtn'; musicBtn.className='gh-cmp-tool';
+    musicBtn.innerHTML='<i class="fas fa-music"></i><span> Music</span>';
+    toolbar.appendChild(musicBtn);
+    var _selectedMusic=null;
+    var indicator=document.createElement('div');
+    indicator.id='ghStoryMusicIndicator'; indicator.className='gh-music-indicator'; indicator.style.display='none';
+    toolbar.parentNode.insertBefore(indicator,toolbar.nextSibling);
+    musicBtn.onclick=function(){
+      window.ghOpenStoryMusic(function(track){
+        _selectedMusic=track; musicBtn.classList.add('active');
+        indicator.style.display='flex'; indicator.innerHTML='<i class="fas fa-music"></i> <strong>'+esc(track.label)+'</strong> <button type="button" id="ghRemoveMusic" style="background:none;border:none;color:var(--gh-muted);cursor:pointer;font-size:1rem;margin-left:4px">×</button>';
+        document.getElementById('ghRemoveMusic').onclick=function(){ _selectedMusic=null; musicBtn.classList.remove('active'); indicator.style.display='none'; };
+      });
+    };
+    // Expose for story submit
+    window._getStoryMusic=function(){ return _selectedMusic; };
+  }
+  // Observer to patch after modal opens
+  (function(){
+    var _mobs=new MutationObserver(function(muts){
+      if(document.getElementById('ghStoryModal')) _patchStoryModalMusic();
+    });
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ _mobs.observe(document.body,{childList:true,subtree:false}); });
+    else _mobs.observe(document.body,{childList:true,subtree:false});
+  })();
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 83 — Creator Subscriptions
+  ══════════════════════════════════════════════════════════════ */
+  var _SUB_TIERS=[
+    {id:'fan',label:'Fan',price:2,emoji:'⭐',perks:['Early access to posts','Fan badge on comments']},
+    {id:'vip',label:'VIP',price:5,emoji:'💎',perks:['All Fan perks','Exclusive VIP-only posts','Direct message priority','Monthly shoutout']},
+    {id:'super',label:'Super Fan',price:15,emoji:'👑',perks:['All VIP perks','Monthly 1-on-1 Q&A','Name in creator bio','Co-create one post/month']}
+  ];
+  window.ghOpenSubscribeModal = function(creatorUid, creatorName){
+    if(!requireLogin()) return;
+    var u=authUser(); if(!u) return;
+    var body=
+      '<div style="text-align:center;margin-bottom:16px">'+
+        '<div style="font-size:1.5rem;margin-bottom:4px">'+esc(creatorName||'Creator')+'</div>'+
+        '<div class="gh-muted" style="font-size:.85rem">Choose a subscription tier</div>'+
+      '</div>'+
+      '<div class="gh-sub-tiers">'+
+      _SUB_TIERS.map(function(t){
+        return '<div class="gh-sub-tier" data-tier-id="'+esc(t.id)+'" data-tier-price="'+t.price+'">'+
+          '<div class="gh-sub-tier-header">'+
+            '<span class="gh-sub-emoji">'+t.emoji+'</span>'+
+            '<strong>'+esc(t.label)+'</strong>'+
+            '<span class="gh-sub-price">'+t.price+' GEL/mo</span>'+
+          '</div>'+
+          '<ul class="gh-sub-perks">'+t.perks.map(function(p){ return '<li><i class="fas fa-check" style="color:var(--gh-green);margin-right:6px"></i>'+esc(p)+'</li>'; }).join('')+'</ul>'+
+          '<button class="gh-btn" style="width:100%;margin-top:10px" data-sub-tier="'+esc(t.id)+'" data-sub-price="'+t.price+'" data-sub-label="'+esc(t.label)+'">Subscribe — '+t.price+' GEL/mo</button>'+
+        '</div>';
+      }).join('')+
+      '</div>';
+    var m=modal('Subscribe to '+esc(creatorName||'Creator'),body,'<button class="gh-btn ghost" data-close-modal>Maybe later</button>','ghSubModal');
+    if(!m) return;
+    m.addEventListener('click',function(e){
+      var btn=e.target.closest('[data-sub-tier]'); if(!btn) return;
+      var tier=btn.dataset.subTier; var price=parseInt(btn.dataset.subPrice)||0; var label=btn.dataset.subLabel;
+      btn.disabled=true; btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';
+      // Write subscription to Firestore
+      var myCoins=0;
+      fs().getDoc(fs().doc(db(),'userCoins',u.uid)).then(function(snap){
+        myCoins=(snap.exists()?snap.data().coins:0)||0;
+        if(myCoins<price){ throw new Error('Not enough GeoCoins. You have '+myCoins+' coins, need '+price+'.'); }
+        var batch=fs().writeBatch(db());
+        // Debit subscriber
+        batch.set(fs().doc(db(),'userCoins',u.uid),{coins:fs().increment(-price)},{merge:true});
+        // Credit creator
+        batch.set(fs().doc(db(),'userCoins',creatorUid),{coins:fs().increment(price)},{merge:true});
+        // Record subscription
+        var subRef=fs().doc(db(),'creatorSubscriptions',creatorUid+'_'+u.uid+'_'+tier);
+        batch.set(subRef,{
+          creatorUid:creatorUid, subscriberUid:u.uid,
+          tier:tier, tierLabel:label, priceGEL:price,
+          subscribedAt:fs().serverTimestamp(),
+          expiresAt:fs().Timestamp.fromDate(new Date(Date.now()+30*86400000)),
+          active:true
+        },{merge:true});
+        return batch.commit();
+      }).then(function(){
+        toast('🎉 Subscribed as '+label+'!');
+        if(m) m.remove();
+      }).catch(function(err){ toast((err&&err.message)||'Subscription failed','error'); btn.disabled=false; btn.innerHTML='Subscribe — '+price+' GEL/mo'; });
+    });
+  };
+  window.ghCheckSubscription = function(creatorUid, cb){
+    var u=authUser(); if(!u||!fs()||!db()){ if(cb) cb(null); return; }
+    fs().getDocs(fs().query(
+      fs().collection(db(),'creatorSubscriptions'),
+      fs().where('creatorUid','==',creatorUid),
+      fs().where('subscriberUid','==',u.uid),
+      fs().where('active','==',true),
+      fs().limit(1)
+    )).then(function(snap){ if(cb) cb(snap.empty?null:snap.docs[0].data()); }).catch(function(){ if(cb) cb(null); });
+  };
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 84 — Business Flash Sale Posts
+  ══════════════════════════════════════════════════════════════ */
+  window.ghOpenFlashSaleModal = function(bizId, bizName){
+    if(!requireLogin()) return;
+    var body=
+      '<input class="gh-input" id="ghFsTitle" placeholder="Sale title *" maxlength="80" style="margin-bottom:8px">'+
+      '<div style="display:flex;gap:8px;margin-bottom:8px">'+
+        '<input class="gh-input" id="ghFsOrigPrice" type="number" min="0" placeholder="Original price (₾)" style="flex:1">'+
+        '<input class="gh-input" id="ghFsSalePrice" type="number" min="0" placeholder="Sale price (₾)" style="flex:1">'+
+      '</div>'+
+      '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">'+
+        '<label style="font-size:.85rem;white-space:nowrap">Ends at:</label>'+
+        '<input type="datetime-local" class="gh-input" id="ghFsEndsAt" style="flex:1">'+
+      '</div>'+
+      '<textarea class="gh-textarea" id="ghFsDesc" placeholder="What\'s on sale? (optional)" rows="3" style="margin-bottom:8px"></textarea>'+
+      '<input class="gh-input" id="ghFsCoupon" placeholder="Coupon code (optional, e.g. SUMMER20)">';
+    modal('⚡ Flash Sale',body,
+      '<button class="gh-btn ghost" data-close-modal>Cancel</button>'+
+      '<button class="gh-btn" id="ghFsSubmit" style="background:linear-gradient(135deg,#f59e0b,#ef4444)"><i class="fas fa-bolt-lightning"></i> Publish Sale</button>',
+      'ghFlashSaleModal');
+    var sbtn=document.getElementById('ghFsSubmit'); if(!sbtn) return;
+    sbtn.onclick=function(){
+      var title=(document.getElementById('ghFsTitle').value||'').trim(); if(!title) return toast('Enter a title','error');
+      var orig=parseFloat(document.getElementById('ghFsOrigPrice').value)||0;
+      var sale=parseFloat(document.getElementById('ghFsSalePrice').value)||0;
+      var endsVal=document.getElementById('ghFsEndsAt').value;
+      var discount=orig>0&&sale<orig?Math.round((1-sale/orig)*100):0;
+      sbtn.disabled=true; sbtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';
+      var u=authUser(); if(!u){ sbtn.disabled=false; return toast('Sign in required','error'); }
+      fs().addDoc(fs().collection(db(),'posts'),{
+        text:'⚡ '+title+(discount?' — -'+discount+'% OFF!':''),
+        postFormat:{type:'flash_sale',origPrice:orig,salePrice:sale,discount:discount,coupon:(document.getElementById('ghFsCoupon').value||'').trim(),description:(document.getElementById('ghFsDesc').value||'').trim(),endsAt:endsVal?fs().Timestamp.fromDate(new Date(endsVal)):null,title:title},
+        authorId:u.uid, authorName:u.displayName||'',
+        bizId:bizId, bizName:bizName||'',
+        status:'published', type:'flash_sale',
+        reactionCount:0, commentCount:0, viewCount:0,
+        createdAt:fs().serverTimestamp()
+      }).then(function(){
+        toast('⚡ Flash Sale live!');
+        var m=document.getElementById('ghFlashSaleModal'); if(m) m.remove();
+      }).catch(function(err){ toast('Failed: '+(err.message||err.code),'error'); sbtn.disabled=false; sbtn.innerHTML='Publish Sale'; });
+    };
+  };
+
+  // Flash sale post card renderer (called from postCard if postFormat.type==='flash_sale')
+  window.ghRenderFlashSale = function(pf){
+    if(!pf||pf.type!=='flash_sale') return '';
+    var now=Date.now();
+    var ends=pf.endsAt?ts(pf.endsAt):0;
+    var msLeft=ends?ends-now:0;
+    var expired=ends&&now>ends;
+    var timeStr='';
+    if(msLeft>0){
+      var hrs=Math.floor(msLeft/3600000); var mins=Math.floor((msLeft%3600000)/60000);
+      timeStr=hrs>0?hrs+'h '+mins+'m left':mins+'m left';
+    }
+    return '<div class="gh-flash-sale'+(expired?' expired':'')+'">'+
+      '<div class="gh-fs-badge"><i class="fas fa-bolt-lightning"></i> FLASH SALE'+(expired?' — ENDED':'')+'</div>'+
+      '<div class="gh-fs-body">'+
+        (pf.origPrice&&pf.salePrice?
+          '<div class="gh-fs-prices">'+
+            '<span class="gh-fs-orig">'+Number(pf.origPrice).toLocaleString()+' ₾</span>'+
+            '<span class="gh-fs-sale">'+Number(pf.salePrice).toLocaleString()+' ₾</span>'+
+            (pf.discount?'<span class="gh-fs-disc">-'+pf.discount+'%</span>':'')+
+          '</div>':'')+
+        (pf.description?'<div class="gh-fs-desc">'+esc(pf.description)+'</div>':'')+
+        (pf.coupon?'<div class="gh-fs-coupon"><span>Code:</span> <strong>'+esc(pf.coupon)+'</strong> <button class="gh-btn sm ghost" onclick="try{navigator.clipboard.writeText(\''+esc(pf.coupon)+'\');}catch(e){} window.toast&&toast(\'Copied!\')"><i class="fas fa-copy"></i></button></div>':'')+
+        (timeStr&&!expired?'<div class="gh-fs-timer"><i class="fas fa-clock"></i> '+esc(timeStr)+'</div>':'')+
+      '</div>'+
+    '</div>';
+  };
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 85 — Verification Request System
+  ══════════════════════════════════════════════════════════════ */
+  window.ghOpenVerificationRequest = function(){
+    if(!requireLogin()) return;
+    var u=authUser(); if(!u) return;
+    var body=
+      '<div class="gh-verify-intro">'+
+        '<i class="fas fa-circle-check" style="font-size:2rem;color:var(--gh-green);display:block;text-align:center;margin-bottom:10px"></i>'+
+        '<p style="text-align:center;color:var(--gh-muted);font-size:.88rem;margin-bottom:14px">Apply to get a verified badge on your profile. We review all requests manually.</p>'+
+      '</div>'+
+      '<input class="gh-input" id="ghVrFullName" placeholder="Full legal name *" style="margin-bottom:8px">'+
+      '<select class="gh-select" id="ghVrIdType" style="margin-bottom:8px">'+
+        '<option value="">ID type *</option>'+
+        '<option value="national_id">National ID Card</option>'+
+        '<option value="passport">Passport</option>'+
+        '<option value="driving_licence">Driving Licence</option>'+
+        '<option value="business_reg">Business Registration</option>'+
+      '</select>'+
+      '<input class="gh-input" id="ghVrLinks" placeholder="Instagram/Twitter/website URL (optional)" style="margin-bottom:8px">'+
+      '<select class="gh-select" id="ghVrCategory" style="margin-bottom:8px">'+
+        '<option value="">Account category *</option>'+
+        '<option value="creator">Creator / Influencer</option>'+
+        '<option value="business">Business / Brand</option>'+
+        '<option value="journalist">Journalist / Media</option>'+
+        '<option value="public_figure">Public Figure</option>'+
+        '<option value="nonprofit">Non-profit / Government</option>'+
+      '</select>'+
+      '<textarea class="gh-textarea" id="ghVrReason" placeholder="Why should you be verified? (explain your notability, audience size, etc.)" rows="3"></textarea>';
+    modal('Apply for Verification',body,
+      '<button class="gh-btn ghost" data-close-modal>Cancel</button>'+
+      '<button class="gh-btn" id="ghVrSubmit"><i class="fas fa-paper-plane"></i> Submit Request</button>',
+      'ghVerifyModal');
+    var sbtn=document.getElementById('ghVrSubmit'); if(!sbtn) return;
+    sbtn.onclick=function(){
+      var name=(document.getElementById('ghVrFullName').value||'').trim();
+      var idType=document.getElementById('ghVrIdType').value;
+      var cat=document.getElementById('ghVrCategory').value;
+      if(!name||!idType||!cat) return toast('Fill in all required fields','error');
+      sbtn.disabled=true; sbtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';
+      fs().addDoc(fs().collection(db(),'verificationRequests'),{
+        uid:u.uid, displayName:u.displayName||'', email:u.email||'',
+        fullName:name, idType:idType, category:cat,
+        links:(document.getElementById('ghVrLinks').value||'').trim(),
+        reason:(document.getElementById('ghVrReason').value||'').trim(),
+        status:'pending', createdAt:fs().serverTimestamp()
+      }).then(function(){
+        toast('✅ Request submitted! We\'ll review within 7 days.');
+        var m=document.getElementById('ghVerifyModal'); if(m) m.remove();
+      }).catch(function(err){ toast('Failed: '+(err.message||err.code),'error'); sbtn.disabled=false; sbtn.innerHTML='Submit Request'; });
+    };
+  };
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 87 — Group DM / Chat Rooms
+  ══════════════════════════════════════════════════════════════ */
+  window.ghOpenGroupChatModal = function(){
+    if(!requireLogin()) return;
+    var u=authUser(); if(!u) return;
+    var body=
+      '<input class="gh-input" id="ghGcName" placeholder="Chat room name (e.g. Kazbegi Hikers) *" maxlength="60" style="margin-bottom:8px">'+
+      '<div id="ghGcMemberSearch" style="margin-bottom:8px">'+
+        '<div class="gh-coa-search-row">'+
+          '<i class="fas fa-user-plus" style="color:var(--gh-green);flex-shrink:0"></i>'+
+          '<input class="gh-input" id="ghGcMembersInp" placeholder="Search people to add…" autocomplete="off">'+
+        '</div>'+
+        '<div id="ghGcSearchResults" class="gh-coa-results"></div>'+
+        '<div id="ghGcSelectedChips" class="gh-coa-chips"></div>'+
+      '</div>'+
+      '<input class="gh-input" id="ghGcAvatar" placeholder="Group icon URL (optional)">';
+    modal('New Group Chat',body,
+      '<button class="gh-btn ghost" data-close-modal>Cancel</button>'+
+      '<button class="gh-btn" id="ghGcSubmit"><i class="fas fa-users"></i> Create Chat</button>',
+      'ghGroupChatModal');
+    var _members={}; // uid → {uid,name,avatar}
+    var inp=document.getElementById('ghGcMembersInp');
+    var resultsBox=document.getElementById('ghGcSearchResults');
+    var chipsBox=document.getElementById('ghGcSelectedChips');
+    if(inp&&resultsBox){
+      var _gctimer=null;
+      inp.oninput=function(){
+        clearTimeout(_gctimer); var q=this.value.trim(); if(!q){ resultsBox.innerHTML=''; return; }
+        _gctimer=setTimeout(function(){
+          if(!fs()||!db()){ return; }
+          fs().getDocs(fs().query(fs().collection(db(),'users'),fs().orderBy('fullName'),fs().startAt(q),fs().endAt(q+''),fs().limit(6))).then(function(snap){
+            var html=''; snap.forEach(function(d){
+              if(d.id===u.uid||_members[d.id]) return;
+              var data=d.data(); var name=data.fullName||data.displayName||'User'; var av=data.avatar||data.photoURL||'';
+              html+='<div class="gh-coa-item" data-add-uid="'+esc(d.id)+'" data-add-name="'+esc(name)+'" data-add-av="'+esc(av)+'">'+
+                '<span class="gh-avatar sm">'+(av?'<img src="'+esc(av)+'" alt="">':esc((name[0]||'U').toUpperCase()))+'</span>'+
+                '<span>'+esc(name)+'</span>'+
+              '</div>';
+            });
+            resultsBox.innerHTML=html||'<div class="gh-coa-item gh-muted">No results</div>';
+          }).catch(function(){});
+        },300);
+      };
+      resultsBox.addEventListener('click',function(e){
+        var item=e.target.closest('[data-add-uid]'); if(!item) return;
+        var uid2=item.dataset.addUid, name=item.dataset.addName, av=item.dataset.addAv;
+        _members[uid2]={uid:uid2,name:name,avatar:av};
+        _renderGcChips(); resultsBox.innerHTML=''; inp.value='';
+      });
+    }
+    function _renderGcChips(){
+      if(!chipsBox) return;
+      chipsBox.innerHTML=Object.values(_members).map(function(m){
+        return '<span class="gh-coa-chip">'+esc(m.name)+'<button type="button" data-remove-uid="'+esc(m.uid)+'">×</button></span>';
+      }).join('');
+      chipsBox.querySelectorAll('[data-remove-uid]').forEach(function(b){
+        b.onclick=function(){ delete _members[b.dataset.removeUid]; _renderGcChips(); };
+      });
+    }
+    var sbtn=document.getElementById('ghGcSubmit'); if(!sbtn) return;
+    sbtn.onclick=function(){
+      var name=(document.getElementById('ghGcName').value||'').trim(); if(!name) return toast('Enter a chat name','error');
+      var memberIds=Object.keys(_members); if(!memberIds.length) return toast('Add at least one member','error');
+      sbtn.disabled=true; sbtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';
+      var allMembers=[u.uid].concat(memberIds);
+      fs().addDoc(fs().collection(db(),'groupChats'),{
+        name:name, members:allMembers,
+        adminUid:u.uid, adminName:u.displayName||'',
+        avatarUrl:(document.getElementById('ghGcAvatar').value||'').trim(),
+        lastMessage:'', lastMessageAt:fs().serverTimestamp(),
+        createdAt:fs().serverTimestamp()
+      }).then(function(ref){
+        toast('💬 Group chat created!');
+        var m=document.getElementById('ghGroupChatModal'); if(m) m.remove();
+        if(ref&&ref.id) setTimeout(function(){ location.href='messages.html?group='+encodeURIComponent(ref.id); },400);
+      }).catch(function(err){ toast('Failed: '+(err.message||err.code),'error'); sbtn.disabled=false; sbtn.innerHTML='Create Chat'; });
+    };
+  };
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 88 — Check-ins & Location Tags
+  ══════════════════════════════════════════════════════════════ */
+  window.ghOpenLocationPicker = function(onSelect){
+    var body=
+      '<div id="ghLocPermRow" style="text-align:center;padding:8px 0;margin-bottom:8px">'+
+        '<button class="gh-btn" id="ghLocGpsBtn"><i class="fas fa-location-crosshairs"></i> Use my location</button>'+
+        '<div class="gh-muted" style="font-size:.8rem;margin-top:6px">or type a place name below</div>'+
+      '</div>'+
+      '<div class="gh-coa-search-row" style="margin-bottom:8px">'+
+        '<i class="fas fa-search" style="color:var(--gh-muted)"></i>'+
+        '<input class="gh-input" id="ghLocSearch" placeholder="Search Georgia places…" autocomplete="off">'+
+      '</div>'+
+      '<div id="ghLocResults" class="gh-loc-results"></div>';
+    var m=modal('📍 Tag Location',body,'<button class="gh-btn ghost" data-close-modal>Cancel</button>','ghLocPickerModal');
+    var _GEO_PLACES=[
+      {name:'Tbilisi',city:'Tbilisi',lat:41.6941,lng:44.8337,icon:'🏙️'},
+      {name:'Narikala Fortress, Tbilisi',city:'Tbilisi',lat:41.6842,lng:44.8103,icon:'🏰'},
+      {name:'Rustaveli Avenue',city:'Tbilisi',lat:41.6941,lng:44.8001,icon:'🛍️'},
+      {name:'Old Town (Kala)',city:'Tbilisi',lat:41.6888,lng:44.8094,icon:'🕌'},
+      {name:'Fabrika, Tbilisi',city:'Tbilisi',lat:41.7026,lng:44.7906,icon:'☕'},
+      {name:'Kazbegi (Stepantsminda)',city:'Kazbegi',lat:42.6590,lng:44.6355,icon:'🏔️'},
+      {name:'Gergeti Trinity Church',city:'Kazbegi',lat:42.6573,lng:44.6355,icon:'⛪'},
+      {name:'Batumi',city:'Batumi',lat:41.6168,lng:41.6367,icon:'🌊'},
+      {name:'Kutaisi',city:'Kutaisi',lat:42.2679,lng:42.6972,icon:'🏛️'},
+      {name:'Mtskheta',city:'Mtskheta',lat:41.8454,lng:44.7202,icon:'🙏'},
+      {name:'Sighnaghi',city:'Kakheti',lat:41.6169,lng:45.9211,icon:'🍷'},
+      {name:'Vardzia Cave Monastery',city:'Samtskhe',lat:41.3782,lng:43.2797,icon:'⛏️'},
+      {name:'Svaneti, Mestia',city:'Svaneti',lat:43.0485,lng:42.7220,icon:'🗻'},
+      {name:'Borjomi',city:'Samtskhe-Javakheti',lat:41.8361,lng:43.3823,icon:'💧'},
+      {name:'Anaklia',city:'Samegrelo',lat:42.3756,lng:41.5611,icon:'🏖️'}
+    ];
+    var gpsBtn=document.getElementById('ghLocGpsBtn');
+    var searchInp=document.getElementById('ghLocSearch');
+    var results=document.getElementById('ghLocResults');
+    function _renderPlaces(places){
+      if(!results) return;
+      results.innerHTML=places.map(function(p){
+        return '<div class="gh-loc-item" data-loc-name="'+esc(p.name)+'" data-loc-city="'+esc(p.city||'')+'" data-loc-lat="'+p.lat+'" data-loc-lng="'+p.lng+'">'+
+          '<span class="gh-loc-icon">'+p.icon+'</span>'+
+          '<div><strong>'+esc(p.name)+'</strong><div class="gh-muted" style="font-size:.78rem">'+esc(p.city||'')+'</div></div>'+
+        '</div>';
+      }).join('')||'<div class="gh-muted" style="font-size:.82rem;padding:8px">No places found</div>';
+      results.querySelectorAll('.gh-loc-item').forEach(function(item){
+        item.addEventListener('click',function(){
+          if(m) m.remove();
+          if(onSelect) onSelect({name:item.dataset.locName,city:item.dataset.locCity,lat:parseFloat(item.dataset.locLat)||0,lng:parseFloat(item.dataset.locLng)||0});
+        });
+      });
+    }
+    _renderPlaces(_GEO_PLACES.slice(0,8));
+    if(searchInp) searchInp.oninput=function(){
+      var q=this.value.trim().toLowerCase();
+      if(!q){ _renderPlaces(_GEO_PLACES.slice(0,8)); return; }
+      _renderPlaces(_GEO_PLACES.filter(function(p){ return p.name.toLowerCase().indexOf(q)>-1||p.city.toLowerCase().indexOf(q)>-1; }));
+    };
+    if(gpsBtn) gpsBtn.onclick=function(){
+      gpsBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Detecting…'; gpsBtn.disabled=true;
+      navigator.geolocation.getCurrentPosition(function(pos){
+        var lat=pos.coords.latitude, lng=pos.coords.longitude;
+        if(m) m.remove();
+        if(onSelect) onSelect({name:'My Location',city:'',lat:lat,lng:lng});
+      },function(){ gpsBtn.innerHTML='<i class="fas fa-location-crosshairs"></i> Use my location'; gpsBtn.disabled=false; toast('Location access denied','error'); });
+    };
+  };
+
+  // Inject location tag button into post composer
+  (function _injectLocTagButton(){
+    var _mobs2=new MutationObserver(function(){
+      var toolbar=document.querySelector('#ghPostModal .gh-cmp-toolbar');
+      if(!toolbar||toolbar.querySelector('#ghLocTagBtn')) return;
+      var btn=document.createElement('button');
+      btn.type='button'; btn.id='ghLocTagBtn'; btn.className='gh-cmp-tool';
+      btn.innerHTML='<i class="fas fa-location-dot"></i><span> Location</span>';
+      toolbar.appendChild(btn);
+      var indicator=document.createElement('div');
+      indicator.id='ghLocIndicator'; indicator.className='gh-loc-indicator'; indicator.style.display='none';
+      toolbar.parentNode.insertBefore(indicator,toolbar.nextSibling);
+      btn.onclick=function(){
+        window.ghOpenLocationPicker(function(loc){
+          window._composerLocation=loc;
+          btn.classList.add('active');
+          indicator.style.display='flex';
+          indicator.innerHTML='<i class="fas fa-location-dot"></i> '+esc(loc.name)+
+            ' <button type="button" id="ghRemoveLoc" style="background:none;border:none;color:var(--gh-muted);cursor:pointer;margin-left:4px;font-size:1rem">×</button>';
+          document.getElementById('ghRemoveLoc').onclick=function(){ window._composerLocation=null; btn.classList.remove('active'); indicator.style.display='none'; };
+        });
+      };
+    });
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ _mobs2.observe(document.body,{childList:true,subtree:false}); });
+    else _mobs2.observe(document.body,{childList:true,subtree:false});
+  })();
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 89 — Fundraiser / Donation Posts
+  ══════════════════════════════════════════════════════════════ */
+  window.ghOpenFundraiserModal = function(){
+    if(!requireLogin()) return;
+    var u=authUser(); if(!u) return;
+    var body=
+      '<input class="gh-input" id="ghFrTitle" placeholder="Fundraiser title *" maxlength="100" style="margin-bottom:8px">'+
+      '<textarea class="gh-textarea" id="ghFrStory" placeholder="Tell your story — why are you raising funds?" rows="4" style="margin-bottom:8px"></textarea>'+
+      '<div style="display:flex;gap:8px;margin-bottom:8px">'+
+        '<input class="gh-input" id="ghFrGoal" type="number" min="1" placeholder="Goal amount (₾) *" style="flex:1">'+
+        '<select class="gh-select" id="ghFrCategory" style="flex:1">'+
+          '<option value="personal">Personal emergency</option>'+
+          '<option value="medical">Medical</option>'+
+          '<option value="education">Education</option>'+
+          '<option value="community">Community project</option>'+
+          '<option value="animal">Animal rescue</option>'+
+          '<option value="environment">Environment</option>'+
+          '<option value="business">Small business</option>'+
+        '</select>'+
+      '</div>'+
+      '<input class="gh-input" id="ghFrCoverUrl" placeholder="Cover image URL (optional)">';
+    modal('💝 Create Fundraiser',body,
+      '<button class="gh-btn ghost" data-close-modal>Cancel</button>'+
+      '<button class="gh-btn" id="ghFrSubmit" style="background:linear-gradient(135deg,#ec4899,#8b5cf6)"><i class="fas fa-hand-holding-heart"></i> Start Fundraiser</button>',
+      'ghFundraiserModal');
+    var sbtn=document.getElementById('ghFrSubmit'); if(!sbtn) return;
+    sbtn.onclick=function(){
+      var title=(document.getElementById('ghFrTitle').value||'').trim(); if(!title) return toast('Enter a title','error');
+      var goal=parseFloat(document.getElementById('ghFrGoal').value)||0; if(!goal) return toast('Enter a goal amount','error');
+      var story=(document.getElementById('ghFrStory').value||'').trim();
+      sbtn.disabled=true; sbtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';
+      fs().addDoc(fs().collection(db(),'posts'),{
+        text:'💝 '+title+(story?'\n\n'+story:''),
+        postFormat:{type:'fundraiser',title:title,goal:goal,raised:0,category:(document.getElementById('ghFrCategory').value)||'personal',coverUrl:(document.getElementById('ghFrCoverUrl').value||'').trim()},
+        authorId:u.uid, authorName:u.displayName||'',
+        status:'published', type:'fundraiser',
+        reactionCount:0, commentCount:0, viewCount:0,
+        createdAt:fs().serverTimestamp()
+      }).then(function(){
+        toast('💝 Fundraiser is live!');
+        var m=document.getElementById('ghFundraiserModal'); if(m) m.remove();
+      }).catch(function(err){ toast('Failed: '+(err.message||err.code),'error'); sbtn.disabled=false; sbtn.innerHTML='Start Fundraiser'; });
+    };
+  };
+
+  window.ghRenderFundraiser = function(pf, postId){
+    if(!pf||pf.type!=='fundraiser') return '';
+    var goal=pf.goal||0; var raised=pf.raised||0;
+    var pct=goal>0?Math.min(100,Math.round(raised/goal*100)):0;
+    return '<div class="gh-fundraiser">'+
+      '<div class="gh-fr-header"><i class="fas fa-hand-holding-heart" style="color:#ec4899"></i> <strong>Fundraiser</strong><span class="gh-chip" style="font-size:.7rem;margin-left:6px">'+esc(pf.category||'')+'</span></div>'+
+      (pf.coverUrl?'<img src="'+esc(pf.coverUrl)+'" alt="" style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;margin:8px 0">':'')+
+      '<div class="gh-fr-amounts">'+
+        '<span class="gh-fr-raised">'+Number(raised).toLocaleString()+' ₾ raised</span>'+
+        '<span class="gh-fr-goal"> of '+Number(goal).toLocaleString()+' ₾ goal</span>'+
+      '</div>'+
+      '<div class="gh-fr-bar"><div class="gh-fr-fill" style="width:'+pct+'%"></div></div>'+
+      '<div class="gh-fr-meta">'+pct+'% funded</div>'+
+      '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">'+
+        '<button class="gh-btn" style="background:linear-gradient(135deg,#ec4899,#8b5cf6);flex:1" data-donate-post="'+esc(postId||'')+'"><i class="fas fa-heart"></i> Donate</button>'+
+        '<button class="gh-btn ghost sm" onclick="if(navigator.share)navigator.share({url:location.href});else{try{navigator.clipboard.writeText(location.href);}catch(e){} window.toast&&toast(\'Copied!\');}"><i class="fas fa-share"></i></button>'+
+      '</div>'+
+    '</div>';
+  };
+
+  // Donate to fundraiser
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('[data-donate-post]'); if(!btn) return;
+    if(!requireLogin()) return;
+    var postId=btn.dataset.donatePost; if(!postId) return;
+    var amt=window.prompt('Donate amount (₾):'); if(!amt) return;
+    var amount=parseInt(amt)||0; if(amount<1) return toast('Enter valid amount','error');
+    var u=authUser(); if(!u) return;
+    fs().getDoc(fs().doc(db(),'userCoins',u.uid)).then(function(snap){
+      var coins=(snap.exists()?snap.data().coins:0)||0;
+      if(coins<amount) throw new Error('Not enough coins ('+coins+' available)');
+      var batch=fs().writeBatch(db());
+      batch.set(fs().doc(db(),'userCoins',u.uid),{coins:fs().increment(-amount)},{merge:true});
+      batch.update(fs().doc(db(),'posts',postId),{
+        'postFormat.raised':fs().increment(amount),
+        donationCount:fs().increment(1)
+      });
+      batch.set(fs().doc(db(),'donations',postId+'_'+u.uid+'_'+Date.now()),{
+        postId:postId, donorUid:u.uid, amount:amount, createdAt:fs().serverTimestamp()
+      });
+      return batch.commit();
+    }).then(function(){ toast('💝 Thank you for donating '+amount+' GEL!'); })
+    .catch(function(err){ toast((err&&err.message)||'Donation failed','error'); });
+  });
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 90 — Admin Dashboard Enhancement
+  ══════════════════════════════════════════════════════════════ */
+  function renderAdmin(){
+    var u=authUser();
+    shell({ active:'admin',
+      center:
+        '<div class="gh-admin-page" id="ghAdminPage">'+
+          '<div class="gh-card" style="padding:16px">'+
+            '<h2 style="margin:0 0 4px;font-size:1.05rem"><i class="fas fa-user-shield"></i> Admin Dashboard</h2>'+
+            '<p class="gh-muted" style="font-size:.82rem;margin:0">Platform management & moderation</p>'+
+          '</div>'+
+          '<div class="gh-admin-tabs gh-pill-row" id="ghAdminTabs">'+
+            '<button class="gh-pill active" data-atab="overview">Overview</button>'+
+            '<button class="gh-pill" data-atab="users">Users</button>'+
+            '<button class="gh-pill" data-atab="reports">Reports</button>'+
+            '<button class="gh-pill" data-atab="verifications">Verifications</button>'+
+            '<button class="gh-pill" data-atab="posts">Posts</button>'+
+          '</div>'+
+          '<div id="ghAdminContent"><div class="gh-card gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
+        '</div>'
+    });
+    ready(function(){
+      var tabs=document.getElementById('ghAdminTabs');
+      var content=document.getElementById('ghAdminContent');
+      if(!tabs||!content) return;
+      var _tab='overview';
+      function _loadTab(t){
+        _tab=t; content.innerHTML='<div class="gh-card gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div>';
+        if(t==='overview') _renderOverview();
+        else if(t==='users') _renderUsers();
+        else if(t==='reports') _renderReports();
+        else if(t==='verifications') _renderVerifications();
+        else if(t==='posts') _renderAdminPosts();
+      }
+      tabs.addEventListener('click',function(e){
+        var b=e.target.closest('[data-atab]'); if(!b) return;
+        tabs.querySelectorAll('.gh-pill').forEach(function(p){ p.classList.toggle('active',p===b); });
+        _loadTab(b.dataset.atab);
+      });
+      function _renderOverview(){
+        Promise.all([
+          fs().getDoc(fs().doc(db(),'platformStats','main')).catch(function(){ return null; }),
+          fs().getDocs(fs().query(fs().collection(db(),'posts'),fs().where('status','!=','deleted'),fs().orderBy('status'),fs().orderBy('createdAt','desc'),fs().limit(1))).catch(function(){ return {docs:[]}; }),
+          fs().getDocs(fs().query(fs().collection(db(),'verificationRequests'),fs().where('status','==','pending'),fs().limit(1))).catch(function(){ return {docs:[]}; }),
+          fs().getDocs(fs().query(fs().collection(db(),'reportedContent'),fs().where('status','==','open'),fs().limit(1))).catch(function(){ return {docs:[]}; })
+        ]).then(function(res){
+          var stats=(res[0]&&res[0].exists()?res[0].data():{})||{};
+          var pendingVr=res[2].docs.length; var openReports=res[3].docs.length;
+          content.innerHTML=
+            '<div class="gh-admin-stats">'+
+              '<div class="gh-admin-stat"><div class="gh-analytics-val">'+_fmtCount(stats.totalUsers||0)+'</div><div class="gh-analytics-lbl"><i class="fas fa-users"></i> Total Users</div></div>'+
+              '<div class="gh-admin-stat"><div class="gh-analytics-val">'+_fmtCount(stats.totalPosts||0)+'</div><div class="gh-analytics-lbl"><i class="fas fa-newspaper"></i> Posts</div></div>'+
+              '<div class="gh-admin-stat"><div class="gh-analytics-val">'+_fmtCount(stats.totalBusinesses||0)+'</div><div class="gh-analytics-lbl"><i class="fas fa-store"></i> Businesses</div></div>'+
+              '<div class="gh-admin-stat"><div class="gh-analytics-val">'+_fmtCount(stats.totalGroups||0)+'</div><div class="gh-analytics-lbl"><i class="fas fa-users-rectangle"></i> Groups</div></div>'+
+              '<div class="gh-admin-stat'+(pendingVr?' urgent':'')+'"><div class="gh-analytics-val" style="color:'+(pendingVr?'#f59e0b':'var(--gh-green)')+'">'+pendingVr+'</div><div class="gh-analytics-lbl"><i class="fas fa-circle-check"></i> Pending Verifications</div></div>'+
+              '<div class="gh-admin-stat'+(openReports?' urgent':'')+'"><div class="gh-analytics-val" style="color:'+(openReports?'#ef4444':'var(--gh-green)')+'">'+openReports+'</div><div class="gh-analytics-lbl"><i class="fas fa-flag"></i> Open Reports</div></div>'+
+            '</div>'+
+            '<div class="gh-card" style="margin-top:10px">'+
+              '<h3 style="font-size:.9rem;margin:0 0 10px"><i class="fas fa-bolt-lightning" style="color:#f59e0b"></i> Quick Actions</h3>'+
+              '<div style="display:flex;flex-wrap:wrap;gap:8px">'+
+                '<button class="gh-btn ghost sm" onclick="document.querySelector(\'[data-atab=reports]\').click()"><i class="fas fa-flag"></i> Review Reports</button>'+
+                '<button class="gh-btn ghost sm" onclick="document.querySelector(\'[data-atab=verifications]\').click()"><i class="fas fa-circle-check"></i> Verifications</button>'+
+                '<button class="gh-btn ghost sm" onclick="document.querySelector(\'[data-atab=users]\').click()"><i class="fas fa-users"></i> Manage Users</button>'+
+                '<button class="gh-btn ghost sm" onclick="document.querySelector(\'[data-atab=posts]\').click()"><i class="fas fa-newspaper"></i> Moderate Posts</button>'+
+              '</div>'+
+            '</div>';
+        }).catch(function(err){ content.innerHTML='<div class="gh-card gh-empty"><h3>Failed</h3><p>'+esc(err.message||'Check admin permissions')+'</p></div>'; });
+      }
+      function _renderUsers(){
+        fs().getDocs(fs().query(fs().collection(db(),'users'),fs().orderBy('createdAt','desc'),fs().limit(20))).then(function(snap){
+          var users=[]; snap.forEach(function(d){ users.push(Object.assign({id:d.id},d.data())); });
+          content.innerHTML=
+            '<div class="gh-card"><h3 style="font-size:.9rem;margin:0 0 10px">Recent Users</h3>'+
+            '<div class="gh-admin-user-list">'+
+            users.map(function(u2){
+              var name=u2.fullName||u2.displayName||'User'; var av=u2.avatar||u2.photoURL||'';
+              var banned=u2.banned||u2.disabled||false;
+              return '<div class="gh-admin-user-row">'+
+                '<span class="gh-avatar sm">'+(av?'<img src="'+esc(av)+'" alt="">':esc((name[0]||'U').toUpperCase()))+'</span>'+
+                '<div class="gh-admin-user-info"><strong>'+esc(name)+'</strong><span class="gh-muted" style="font-size:.75rem">'+esc(u2.email||u2.id)+'</span></div>'+
+                '<div style="display:flex;gap:6px;flex-shrink:0">'+
+                  (u2.verified?'<span class="gh-chip" style="font-size:.72rem;color:var(--gh-green)"><i class="fas fa-circle-check"></i></span>':'')+
+                  '<button class="gh-btn sm '+(banned?'':'ghost')+'" data-admin-ban="'+esc(u2.id)+'" data-ban-state="'+banned+'" style="'+(banned?'color:#ef4444':'')+'">'+
+                    (banned?'Unban':'Ban')+
+                  '</button>'+
+                  '<button class="gh-btn sm ghost" data-admin-verify-user="'+esc(u2.id)+'" title="Toggle verified">'+
+                    '<i class="fas fa-'+(u2.verified?'check-circle':'circle")+'"></i>'+
+                  '</button>'+
+                '</div>'+
+              '</div>';
+            }).join('')+
+            '</div></div>';
+          content.querySelectorAll('[data-admin-ban]').forEach(function(btn){
+            btn.onclick=function(){
+              var uid2=btn.dataset.adminBan; var currentBanned=btn.dataset.banState==='true';
+              if(!confirm((currentBanned?'Unban':'Ban')+' this user?')) return;
+              btn.disabled=true;
+              fs().updateDoc(fs().doc(db(),'users',uid2),{banned:!currentBanned}).then(function(){
+                toast((currentBanned?'User unbanned':'User banned'));
+                _renderUsers();
+              }).catch(function(err){ toast('Failed: '+(err.message||err.code),'error'); btn.disabled=false; });
+            };
+          });
+          content.querySelectorAll('[data-admin-verify-user]').forEach(function(btn){
+            btn.onclick=function(){
+              var uid2=btn.dataset.adminVerifyUser;
+              fs().getDoc(fs().doc(db(),'users',uid2)).then(function(snap){
+                var current=(snap.exists()&&snap.data().verified)||false;
+                return fs().updateDoc(fs().doc(db(),'users',uid2),{verified:!current,verifiedAt:!current?fs().serverTimestamp():null});
+              }).then(function(){ toast('Verification status updated'); _renderUsers(); }).catch(function(err){ toast('Failed','error'); });
+            };
+          });
+        }).catch(function(err){ content.innerHTML='<div class="gh-card gh-empty"><h3>Failed to load users</h3><p>'+esc(err.message||'Check permissions')+'</p></div>'; });
+      }
+      function _renderReports(){
+        fs().getDocs(fs().query(fs().collection(db(),'reportedContent'),fs().where('status','==','open'),fs().orderBy('status'),fs().orderBy('createdAt','desc'),fs().limit(15))).then(function(snap){
+          var reports=[]; snap.forEach(function(d){ reports.push(Object.assign({id:d.id},d.data())); });
+          if(!reports.length){ content.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-flag"></i><h3>No open reports</h3><p>All clear!</p></div>'; return; }
+          content.innerHTML='<div class="gh-card"><h3 style="font-size:.9rem;margin:0 0 10px">Open Reports ('+reports.length+')</h3>'+
+            '<div class="gh-admin-report-list">'+
+            reports.map(function(r){
+              return '<div class="gh-admin-report-row" data-report-id="'+esc(r.id)+'">'+
+                '<div class="gh-admin-report-info">'+
+                  '<strong>'+esc(r.reason||'No reason')+'</strong>'+
+                  '<div class="gh-muted" style="font-size:.75rem">Type: '+esc(r.contentType||'post')+' · '+esc(r.contentId||'')+'</div>'+
+                  (r.reporterNote?'<div style="font-size:.8rem;margin-top:2px">'+esc(r.reporterNote.slice(0,80))+'</div>':'')+
+                '</div>'+
+                '<div style="display:flex;gap:6px;flex-shrink:0">'+
+                  '<a class="gh-btn sm ghost" href="feed.html#post-'+esc(r.contentId||'')+'" target="_blank">View</a>'+
+                  '<button class="gh-btn sm" data-resolve-report="'+esc(r.id)+'" style="background:#10b981">Resolve</button>'+
+                  '<button class="gh-btn sm ghost" data-delete-content="'+esc(r.contentId||'')+'" data-content-type="'+esc(r.contentType||'post')+'" style="color:#ef4444">Delete</button>'+
+                '</div>'+
+              '</div>';
+            }).join('')+
+            '</div></div>';
+          content.querySelectorAll('[data-resolve-report]').forEach(function(btn){
+            btn.onclick=function(){
+              fs().updateDoc(fs().doc(db(),'reportedContent',btn.dataset.resolveReport),{status:'resolved',resolvedAt:fs().serverTimestamp()}).then(function(){ _renderReports(); }).catch(function(){});
+            };
+          });
+          content.querySelectorAll('[data-delete-content]').forEach(function(btn){
+            btn.onclick=function(){
+              if(!confirm('Delete this content? This is irreversible.')) return;
+              var type=btn.dataset.contentType||'post'; var id=btn.dataset.deleteContent;
+              var col=type==='post'?'posts':type==='comment'?'comments':type;
+              fs().updateDoc(fs().doc(db(),col,id),{status:'deleted'}).then(function(){ toast('Content deleted'); _renderReports(); }).catch(function(err){ toast('Failed: '+(err.message||''),'error'); });
+            };
+          });
+        }).catch(function(err){ content.innerHTML='<div class="gh-card gh-empty"><h3>Failed</h3><p>'+esc(err.message||'Check admin permissions')+'</p></div>'; });
+      }
+      function _renderVerifications(){
+        fs().getDocs(fs().query(fs().collection(db(),'verificationRequests'),fs().where('status','==','pending'),fs().orderBy('status'),fs().orderBy('createdAt','desc'),fs().limit(15))).then(function(snap){
+          var reqs=[]; snap.forEach(function(d){ reqs.push(Object.assign({id:d.id},d.data())); });
+          if(!reqs.length){ content.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-circle-check"></i><h3>No pending verifications</h3></div>'; return; }
+          content.innerHTML='<div class="gh-card"><h3 style="font-size:.9rem;margin:0 0 10px">Pending Verifications ('+reqs.length+')</h3>'+
+            '<div class="gh-admin-report-list">'+
+            reqs.map(function(r){
+              return '<div class="gh-admin-report-row">'+
+                '<div class="gh-admin-report-info">'+
+                  '<strong>'+esc(r.fullName||r.displayName||'User')+'</strong>'+
+                  '<div class="gh-muted" style="font-size:.75rem">'+esc(r.category||'')+' · ID: '+esc(r.idType||'')+'</div>'+
+                  (r.reason?'<div style="font-size:.8rem;margin-top:2px">'+esc(r.reason.slice(0,100))+'</div>':'')+
+                  (r.links?'<div style="font-size:.78rem"><a href="'+esc(r.links)+'" target="_blank" rel="noopener" style="color:var(--gh-green)">'+esc(r.links.slice(0,40))+'</a></div>':'')+
+                '</div>'+
+                '<div style="display:flex;gap:6px;flex-shrink:0">'+
+                  '<button class="gh-btn sm" data-approve-vr="'+esc(r.id)+'" data-vr-uid="'+esc(r.uid||'')+'" style="background:#10b981"><i class="fas fa-check"></i> Approve</button>'+
+                  '<button class="gh-btn sm ghost" data-reject-vr="'+esc(r.id)+'" style="color:#ef4444">Reject</button>'+
+                '</div>'+
+              '</div>';
+            }).join('')+
+            '</div></div>';
+          content.querySelectorAll('[data-approve-vr]').forEach(function(btn){
+            btn.onclick=function(){
+              var reqId=btn.dataset.approveVr; var uid2=btn.dataset.vrUid;
+              btn.disabled=true;
+              var batch=fs().writeBatch(db());
+              batch.update(fs().doc(db(),'verificationRequests',reqId),{status:'approved',reviewedAt:fs().serverTimestamp()});
+              if(uid2) batch.update(fs().doc(db(),'users',uid2),{verified:true,verifiedAt:fs().serverTimestamp()});
+              batch.commit().then(function(){ toast('✅ User verified!'); _renderVerifications(); }).catch(function(err){ toast('Failed','error'); btn.disabled=false; });
+            };
+          });
+          content.querySelectorAll('[data-reject-vr]').forEach(function(btn){
+            btn.onclick=function(){
+              var reqId=btn.dataset.rejectVr;
+              fs().updateDoc(fs().doc(db(),'verificationRequests',reqId),{status:'rejected',reviewedAt:fs().serverTimestamp()}).then(function(){ _renderVerifications(); }).catch(function(){});
+            };
+          });
+        }).catch(function(err){ content.innerHTML='<div class="gh-card gh-empty"><h3>Failed</h3><p>'+esc(err.message||'Check permissions')+'</p></div>'; });
+      }
+      function _renderAdminPosts(){
+        fs().getDocs(fs().query(fs().collection(db(),'posts'),fs().where('status','==','published'),fs().orderBy('createdAt','desc'),fs().limit(15))).then(function(snap){
+          var posts=[]; snap.forEach(function(d){ posts.push(Object.assign({id:d.id},d.data())); });
+          content.innerHTML='<div class="gh-card"><h3 style="font-size:.9rem;margin:0 0 10px">Recent Posts</h3>'+
+            '<div class="gh-admin-post-list">'+
+            posts.map(function(p){
+              var txt=(p.text||'').slice(0,80); var author=p.authorName||'User';
+              return '<div class="gh-admin-report-row">'+
+                '<div class="gh-admin-report-info">'+
+                  '<strong>'+esc(author)+'</strong>'+
+                  '<div style="font-size:.82rem;margin-top:2px;color:var(--gh-muted)">'+esc(txt||'[media post]')+'</div>'+
+                '</div>'+
+                '<div style="display:flex;gap:6px;flex-shrink:0">'+
+                  '<a class="gh-btn sm ghost" href="feed.html#post-'+esc(p.id)+'" target="_blank">View</a>'+
+                  '<button class="gh-btn sm ghost" data-admin-del-post="'+esc(p.id)+'" style="color:#ef4444">Delete</button>'+
+                '</div>'+
+              '</div>';
+            }).join('')+
+            '</div></div>';
+          content.querySelectorAll('[data-admin-del-post]').forEach(function(btn){
+            btn.onclick=function(){
+              if(!confirm('Delete post? Irreversible.')) return;
+              fs().updateDoc(fs().doc(db(),'posts',btn.dataset.adminDelPost),{status:'deleted'}).then(function(){ toast('Post deleted'); _renderAdminPosts(); }).catch(function(err){ toast('Failed','error'); });
+            };
+          });
+        }).catch(function(err){ content.innerHTML='<div class="gh-card gh-empty"><h3>Failed</h3><p>'+esc(err.message||'Check permissions')+'</p></div>'; });
+      }
+      _loadTab('overview');
     });
   }
 
