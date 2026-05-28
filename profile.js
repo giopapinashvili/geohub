@@ -105,6 +105,7 @@
       website: data.website || '',
       createdAt: data.createdAt || data.joinedAt || null,
       privacy: data.privacy || null,
+      isPrivate: data.isPrivate === true,
       geoId: data.geoId || null,
       nameVisibility: data.nameVisibility || 'everyone',
       initials
@@ -2070,13 +2071,20 @@
     main.innerHTML = '<div class="empty-profile-state" style="max-width:720px;margin:120px auto;text-align:center"><i class="fas fa-user-slash"></i><h2>User not found</h2><p>This profile does not exist or was removed.</p><a class="btn btn-primary btn-sm" href="feed.html">Back to Feed</a></div>';
   }
 
-  function showPrivateProfileGate(name) {
+  function showPrivateProfileGate(name, isPrivateAccount) {
     $$('#profileTabs, .profile-tabs, .profile-sidebar, .tab-panel').forEach(el => { el.style.display = 'none'; });
-    $$('[data-follow-user],[data-friend-user],[data-message-user]').forEach(el => { el.style.display = 'none'; });
     const main = $('.profile-layout') || document.body;
     const gate = document.createElement('div');
     gate.className = 'private-profile-gate';
-    gate.innerHTML = '<i class="fas fa-lock"></i><h3>This profile is private</h3><p>' + (name ? name + ' only shares' : 'This account only shares') + ' their profile with friends.</p>';
+    if (isPrivateAccount) {
+      gate.innerHTML = '<i class="fas fa-lock"></i><h3>Private Account</h3><p>' +
+        (name ? esc(name) + ' has' : 'This account has') +
+        ' a private profile.<br>Follow them to see their posts and content.</p>';
+    } else {
+      gate.innerHTML = '<i class="fas fa-lock"></i><h3>Friends Only</h3><p>' +
+        (name ? esc(name) + ' only shares' : 'This account only shares') +
+        ' their profile with friends.</p>';
+    }
     main.appendChild(gate);
   }
 
@@ -2116,15 +2124,33 @@
             }
           }
           const privPref = (profile.privacy || {}).profilePref || 'public';
-          if (!isOwnProfile && privPref === 'friends') {
+          const profileIsPrivate = profile.isPrivate;
+          if (!isOwnProfile && (profileIsPrivate || privPref === 'friends')) {
             const fid = [fbUser.uid, profile.uid].sort().join('_');
             const [fSnap, legacySnap] = await Promise.all([
               GF.fs.getDoc(GF.fs.doc(GF.db, 'friends', fid)).catch(() => null),
               GF.fs.getDoc(GF.fs.doc(GF.db, 'friendships', fid)).catch(() => null)
             ]);
-            if ((!fSnap || !fSnap.exists()) && (!legacySnap || !legacySnap.exists())) {
-              showPrivateProfileGate(profile.fullName);
-              return;
+            const isFriend = (fSnap && fSnap.exists()) || (legacySnap && legacySnap.exists());
+            if (!isFriend) {
+              if (profileIsPrivate) {
+                // პირადი ანგარიში: ფოლოვერებს ჩვეულებრივ ხედავენ, უცნობები ვერ
+                const followSnap = await GF.fs.getDocs(GF.fs.query(
+                  GF.fs.collection(GF.db, 'follows'),
+                  GF.fs.where('followerId', '==', fbUser.uid),
+                  GF.fs.where('followingId', '==', profile.uid),
+                  GF.fs.limit(1)
+                )).catch(() => null);
+                const isFollower = followSnap && !followSnap.empty;
+                if (!isFollower) {
+                  showPrivateProfileGate(profile.fullName, true);
+                  return;
+                }
+              } else {
+                // friends-only პრეფერენცია
+                showPrivateProfileGate(profile.fullName, false);
+                return;
+              }
             }
           }
           if (window.GeoSocial) renderTabs(profile, fbUser);

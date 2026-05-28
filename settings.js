@@ -6,7 +6,7 @@
   var user = null;
   var managedBusinesses = [];
   var _writeTimer = null;
-  var _ppPrivacy = { showFullName: 'everyone', showBio: 'everyone', showStories: 'everyone', showHighlights: 'everyone' };
+  var _ppPrivacy = { isPrivate: false, showFullName: 'everyone', showBio: 'everyone', showStories: 'everyone', showHighlights: 'everyone' };
   var _ppTimer = null;
 
   var dict = {
@@ -65,7 +65,9 @@
       ppFriends: 'Friends',
       ppFollowers: 'Followers',
       ppNobody: 'Only me',
-      ppSaved: 'Privacy settings saved'
+      ppSaved: 'Privacy settings saved',
+      privateAccount: 'Private Account',
+      privateAccountSub: 'Strangers can only find you by GeoHub ID. Followers and friends see your profile normally.'
     },
     ka: {
       settings: 'პარამეტრები',
@@ -122,7 +124,9 @@
       ppFriends: 'მეგობრები',
       ppFollowers: 'ფოლოვერები',
       ppNobody: 'მხოლოდ მე',
-      ppSaved: 'კონფიდენციალობის პარამეტრები შენახულია'
+      ppSaved: 'კონფიდენციალობის პარამეტრები შენახულია',
+      privateAccount: 'პირადი ანგარიში',
+      privateAccountSub: 'უცნობები მხოლოდ GeoHub ID-ით გპოულობენ. ფოლოვერები და მეგობრები ჩვეულებრივ ხედავენ პროფილს.'
     }
   };
 
@@ -223,10 +227,10 @@
       .then(function(snap) {
         if (!snap.exists()) return;
         var d = snap.data() || {};
-        if (d.privacy) {
-          _ppPrivacy = Object.assign({}, _ppPrivacy, d.privacy);
-          render();
-        }
+        var changed = false;
+        if (d.privacy) { _ppPrivacy = Object.assign({}, _ppPrivacy, d.privacy); changed = true; }
+        if (typeof d.isPrivate === 'boolean') { _ppPrivacy.isPrivate = d.isPrivate; changed = true; }
+        if (changed) render();
       })
       .catch(function() {});
   }
@@ -235,9 +239,13 @@
     if (!user || !fs() || !db()) return;
     clearTimeout(_ppTimer);
     _ppTimer = setTimeout(function() {
+      var privacyObj = {};
+      Object.keys(_ppPrivacy).forEach(function(k) {
+        if (k !== 'isPrivate') privacyObj[k] = _ppPrivacy[k];
+      });
       fs().setDoc(
         fs().doc(db(), 'users', user.uid),
-        { privacy: _ppPrivacy },
+        { privacy: privacyObj, isPrivate: !!_ppPrivacy.isPrivate },
         { merge: true }
       ).catch(function() {});
     }, 600);
@@ -329,7 +337,9 @@
   }
   function profilePrivacyCard() {
     if (!user) return '';
+    var privChecked = !!_ppPrivacy.isPrivate;
     return '<section class="settings-card"><div class="settings-card-head"><h2><i class="fas fa-eye"></i> '+esc(tr('profilePrivacy'))+'</h2><p class="settings-card-sub">'+esc(tr('profilePrivacySub'))+'</p></div><div class="settings-list">'+
+      '<label class="settings-row"><span><strong>'+esc(tr('privateAccount'))+'</strong><span>'+esc(tr('privateAccountSub'))+'</span></span><span class="settings-switch"><input type="checkbox" data-pp-field="isPrivate"'+(privChecked?' checked':'')+'><span class="settings-slider"></span></span></label>'+
       ppRow('showFullName','ppShowName')+
       ppRow('showBio','ppShowBio')+
       ppRow('showStories','ppShowStories')+
@@ -391,11 +401,11 @@
         toast(tr('saved'));
       };
     });
-    document.querySelectorAll('[data-pp-field]').forEach(function(sel){
-      sel.onchange = function(){
-        var field = sel.getAttribute('data-pp-field');
-        var val = sel.value;
-        if(PP_OPTS.indexOf(val) === -1) return;
+    document.querySelectorAll('[data-pp-field]').forEach(function(el){
+      el.onchange = function(){
+        var field = el.getAttribute('data-pp-field');
+        var val = el.type === 'checkbox' ? el.checked : el.value;
+        if(el.type !== 'checkbox' && PP_OPTS.indexOf(val) === -1) return;
         _ppPrivacy[field] = val;
         savePrivacyToFirestore();
         toast(tr('ppSaved'));

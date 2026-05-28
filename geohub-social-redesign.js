@@ -875,7 +875,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           geo.searchFirestore(q,function(res){
             if(gs.value.trim()!==q) return;
             var items=[];
-            (res.users||[]).slice(0,3).forEach(function(u){items.push({type:'user',icon:'fa-user',avatar:u.photoURL||u.avatar||u.avatarUrl||u.photo||'',label:u.fullName||u.displayName||u.name||'User',sub:'@'+(u.username||u.id||''),href:'profile.html?id='+encodeURIComponent(u.id||u.uid||'')});});
+            var _meUid=(authUser()||{}).uid;
+            var _visUsers=(res.users||[]).filter(function(u){
+              if(!u.isPrivate) return true;
+              if(_meUid && (u.id===_meUid||u.uid===_meUid)) return true;
+              var _gid=u.geoId&&String(u.geoId);
+              if(q===u.id||q===u.uid||(_gid&&q===_gid)) return true;
+              return state.friendIds.indexOf(u.id||u.uid)>-1||state.followingIds.indexOf(u.id||u.uid)>-1;
+            });
+            _visUsers.slice(0,3).forEach(function(u){items.push({type:'user',icon:'fa-user',avatar:u.photoURL||u.avatar||u.avatarUrl||u.photo||'',label:(u.isPrivate?'🔒 ':''+(u.fullName||u.displayName||u.name||'User')),sub:'@'+(u.username||u.id||''),href:'profile.html?id='+encodeURIComponent(u.id||u.uid||'')});});
             (res.businesses||[]).filter(function(b){return !isDeletedBiz(b);}).slice(0,3).forEach(function(b){items.push({type:'business',icon:'fa-store',avatar:b.logoUrl||b.coverImageUrl||b.coverUrl||b.imageUrl||b.photoUrl||'',label:b.name||'Business',sub:b.city||b.category||'Business',href:'business.html?id='+encodeURIComponent(b.id||'')});});
             (res.places||[]).slice(0,2).forEach(function(p){items.push({type:'place',icon:'fa-map-marker-alt',avatar:p.imageUrl||p.photoUrl||p.coverUrl||p.coverImageUrl||'',label:p.name||'Place',sub:p.address||p.category||p.city||'Place',href:'places.html?id='+encodeURIComponent(p.id||'')});});
             (res.groups||[]).slice(0,1).forEach(function(g){items.push({type:'group',icon:'fa-users',avatar:g.logoUrl||g.coverImageUrl||g.coverUrl||g.imageUrl||g.photoUrl||'',label:g.name||'Group',sub:(g.memberCount||0)+' members',href:'groups.html?id='+encodeURIComponent(g.id||'')});});
@@ -10453,14 +10461,28 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           ps.push(fs().getDocs(fs().query(fs().collection(db(),'events'),fs().orderBy('name'),fs().startAt(_q),fs().endAt(_q+''),fs().limit(6))).then(function(s){ var a=[]; s.forEach(function(d){ a.push(Object.assign({_type:'event',id:d.id},d.data())); }); return a; }).catch(function(){ return []; }));
         } else ps.push(Promise.resolve([]));
         Promise.all(ps).then(function(results){
+          var _srMeUid=(authUser()||{}).uid;
           var users=results[0]||[], posts=results[1]||[], bizs=results[2]||[], groups=results[3]||[], events=results[4]||[];
+          // private account filter
+          users=users.filter(function(u){
+            if(!u.isPrivate) return true;
+            if(_srMeUid && (u.id===_srMeUid||u.uid===_srMeUid)) return true;
+            var _gid=u.geoId&&String(u.geoId);
+            if(_q===u.id||_q===u.uid||(_gid&&_q===_gid)) return true;
+            return state.friendIds.indexOf(u.id||u.uid)>-1||state.followingIds.indexOf(u.id||u.uid)>-1;
+          });
           var all=[]; if(_tab==='all'){ all=users.concat(posts).concat(bizs).concat(groups).concat(events); } else if(_tab==='people') all=users; else if(_tab==='posts') all=posts; else if(_tab==='businesses') all=bizs; else if(_tab==='groups') all=groups; else if(_tab==='events') all=events;
           if(!all.length){ res.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-search"></i><h3>No results for "'+esc(_q)+'"</h3><p>Try different keywords or broaden your search.</p></div>'; return; }
           var html='<div class="gh-search-results-list">';
           all.forEach(function(x){
             if(x._type==='user'){
               var uname=x.fullName||x.displayName||x.name||'User'; var uav=x.avatar||x.photoURL||''; var ufc=x.followerCount||0;
-              html+='<div class="gh-sr-item"><a href="profile.html?user='+esc(x.id||'')+'" class="gh-sr-main"><span class="gh-avatar" style="width:40px;height:40px">'+(uav?'<img src="'+esc(uav)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':esc(initials(uname)))+'</span><div class="gh-sr-info"><strong>'+esc(uname)+'</strong><span>'+esc(x.city||x.tagline||'GeoHub User')+(ufc?' · '+_fmtCount(ufc)+' followers':'')+'</span></div></a><button class="gh-btn sm" data-follow-user="'+esc(x.id||'')+'">Follow</button></div>';
+              var _isKnown=state.friendIds.indexOf(x.id||x.uid)>-1||state.followingIds.indexOf(x.id||x.uid)>-1;
+              var _privBadge=x.isPrivate?'<i class="fas fa-lock" style="font-size:.65rem;opacity:.55;margin-left:4px" title="Private account"></i>':'';
+              // name: სახელი/გვარი ჩანს მხოლოდ მეგობრებისთვის (showFullName პარამ), სხვებს username
+              var _dispName = uname;
+              if(x.isPrivate && !_isKnown && (x.privacy&&x.privacy.showFullName)!=='everyone') _dispName='@'+(x.username||x.id||'user');
+              html+='<div class="gh-sr-item"><a href="profile.html?id='+esc(x.id||'')+'" class="gh-sr-main"><span class="gh-avatar" style="width:40px;height:40px">'+(uav?'<img src="'+esc(uav)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':esc(initials(_dispName)))+'</span><div class="gh-sr-info"><strong>'+esc(_dispName)+_privBadge+'</strong><span>'+esc(x.city||x.tagline||'GeoHub User')+(ufc&&_isKnown?' · '+_fmtCount(ufc)+' followers':'')+'</span></div></a><button class="gh-btn sm" data-follow-user="'+esc(x.id||'')+'">Follow</button></div>';
             } else if(x._type==='post'){
               var pname=x.authorName||'User'; var ptxt=(x.text||'').slice(0,100);
               html+='<div class="gh-sr-item"><div class="gh-sr-main" style="cursor:pointer" onclick="location.href=\'feed.html#post-'+esc(x.id)+'\'"><span class="gh-sr-icon"><i class="fas fa-newspaper"></i></span><div class="gh-sr-info"><strong>'+esc(pname)+'</strong><span>'+esc(ptxt)+'</span></div></div></div>';
