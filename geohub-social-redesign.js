@@ -10871,6 +10871,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var ljs=document.createElement('script');
         ljs.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
         ljs.onload=function(){ _initLeafletMap(); };
+        ljs.onerror=function(){ if(mapEl) mapEl.innerHTML='<div class="gh-card gh-empty" style="height:100%;display:flex;align-items:center;justify-content:center"><div><i class="fas fa-triangle-exclamation" style="font-size:2rem;color:#f59e0b"></i><p style="margin-top:8px">Map library failed to load. Check your connection.</p></div></div>'; };
         document.head.appendChild(ljs);
       } else { _initLeafletMap(); }
 
@@ -11054,11 +11055,18 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           btn.addEventListener('click',function(){
             var mid=btn.dataset.mid; var mxp=parseInt(btn.dataset.mxp)||0;
             btn.disabled=true; btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';
-            var update={}; update['dailyCompleted.'+todayKey+'.'+mid]=true; update['xp']=fs().increment(mxp);
-            fs().setDoc(fs().doc(db(),'userXP',u.uid),update,{merge:true}).then(function(){
+            // Use updateDoc (supports dotted nested paths); fall back to setDoc for first-time users
+            var _ref=fs().doc(db(),'userXP',u.uid);
+            // Also store name+avatar so leaderboard can display them
+            var _meData=window.GeoCurrentUser||{}; var _myName=_meData.displayName||_meData.name||u.displayName||'User'; var _myAv=_meData.photoURL||_meData.avatar||u.photoURL||'';
+            var _upd={}; _upd['dailyCompleted.'+todayKey+'.'+mid]=true; _upd['xp']=fs().increment(mxp); _upd['name']=_myName; _upd['avatar']=_myAv;
+            fs().updateDoc(_ref,_upd).catch(function(){
+              // Document doesn't exist yet — create it with correct nested structure
+              var init={xp:mxp,name:_myName,avatar:_myAv,dailyCompleted:{}}; init.dailyCompleted[todayKey]={}; init.dailyCompleted[todayKey][mid]=true;
+              return fs().setDoc(_ref,init,{merge:true});
+            }).then(function(){
               toast('+'+mxp+' XP! Keep going 🚀');
-              btn.closest('.gh-mission-row').classList.add('done');
-              btn.closest('.gh-mission-row').innerHTML=btn.closest('.gh-mission-row').innerHTML.replace(/<button[^>]*>[^<]*<\/button>/,'<span class="gh-mission-check"><i class="fas fa-check-circle"></i></span>');
+              var row=btn.closest('.gh-mission-row'); if(row){ row.classList.add('done'); var check=document.createElement('span'); check.className='gh-mission-check'; check.innerHTML='<i class="fas fa-check-circle"></i>'; btn.replaceWith(check); }
             }).catch(function(err){ toast('Failed','error'); btn.disabled=false; btn.innerHTML='Claim'; });
           });
         });
