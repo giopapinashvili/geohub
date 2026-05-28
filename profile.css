@@ -1026,7 +1026,7 @@
 .pach-badge:hover::after { opacity: 1; }
 .pach-more {
   font-size: .72rem;
-  color: #64748b;
+  color: var(--gh-muted, #8aa69a);
   font-weight: 600;
   padding: 0 4px;
 }
@@ -1135,7 +1135,7 @@
   gap: 6px;
   font-size: .74rem;
   font-weight: 700;
-  color: #64748b;
+  color: var(--gh-muted, #8aa69a);
   text-transform: uppercase;
   letter-spacing: .5px;
   padding: 8px 0 4px;

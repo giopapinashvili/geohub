@@ -1095,7 +1095,7 @@ body.gh-has-injected-nav #biz-detail-root {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #334155;
+  color: var(--gh-muted, #8aa69a);
   font-size: 2.2rem;
 }
 
@@ -1268,7 +1268,7 @@ body.gh-has-injected-nav #biz-detail-root {
 .biz-review-form          { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07); border-radius: 14px; padding: 14px; margin-bottom: 14px; }
 .biz-review-form-title    { font-size: .83rem; font-weight: 700; color: #f1f5f9; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
 .biz-star-select          { display: flex; gap: 6px; margin-bottom: 10px; }
-.biz-star-btn             { background: none; border: none; font-size: 1.6rem; color: #334155; cursor: pointer; padding: 2px; transition: color .1s, transform .1s; line-height: 1; }
+.biz-star-btn             { background: none; border: none; font-size: 1.6rem; color: var(--gh-muted, #8aa69a); cursor: pointer; padding: 2px; transition: color .1s, transform .1s; line-height: 1; }
 .biz-star-btn.active      { color: #f59e0b; }
 .biz-star-btn:hover       { transform: scale(1.2); }
 .biz-review-input         { width: 100%; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 10px; padding: 10px 12px; color: #f1f5f9; font-size: .85rem; resize: vertical; min-height: 72px; font-family: inherit; margin-bottom: 10px; box-sizing: border-box; }
