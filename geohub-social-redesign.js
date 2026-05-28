@@ -2986,6 +2986,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '</a>';
     }
 
+    // Phase 84/87: postFormat renderers (Flash Sale + Fundraiser)
+    var flashSaleHtml = '';
+    if(p.postFormat && p.postFormat.type === 'flash_sale' && typeof window.ghRenderFlashSale === 'function') {
+      try { flashSaleHtml = window.ghRenderFlashSale(p.postFormat) || ''; } catch(e) {}
+    }
+    var fundraiserHtml = '';
+    if(p.postFormat && p.postFormat.type === 'fundraiser' && typeof window.ghRenderFundraiser === 'function') {
+      try { fundraiserHtml = window.ghRenderFundraiser(p.postFormat, pid) || ''; } catch(e) {}
+    }
+
     var totalRx = Number(p.likeCount||p.reactionCount||0);
 
     // Phase 41: translate button (only when post has text)
@@ -3046,6 +3056,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       voiceHtml+
       mediaHtml+
       pollHtml+
+      flashSaleHtml+
+      fundraiserHtml+
       linkPrevHtml+
       (p.sharedPostId?'<div class="gh-shared-preview" data-shared-post="'+esc(p.sharedPostId)+'"><i class="fas fa-share"></i><div><strong>Shared post</strong><span>Loading original post...</span></div></div>':'')+
       viewCountHtml+
@@ -5899,6 +5911,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(n>=1000000) return (n/1000000).toFixed(1)+'M';
     if(n>=1000) return (n/1000).toFixed(1)+'K';
     return String(n);
+  }
+
+  // Module-level post score utility (used by feed + business analytics)
+  function _postScore(p){
+    var now=Date.now(), age=(now-ts(p.createdAt))/3600000; // hours old
+    var decay=age<1?1:age<6?1.5:age<24?3:age<72?8:20;
+    var eng=(Number(p.likeCount||p.reactionCount||0)*3)+(Number(p.commentCount||0)*5)+(Number(p.shareCount||0)*4)+(Number(p.reshareCount||0)*2)+(Number(p.viewCount||0)*0.1);
+    return eng/decay;
   }
 
   /* ── Phase 29: Birthday Feed Cards ──────────────────────────────────── */
@@ -10887,7 +10907,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(sidebar) sidebar.innerHTML='<div class="gh-muted" style="font-size:.82rem;padding:8px"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>';
         var col,q;
         if(layer==='posts'){
-          q=fs().query(fs().collection(db(),'posts'),fs().where('status','!=','deleted'),fs().where('location','!=',null),fs().orderBy('location'),fs().orderBy('createdAt','desc'),fs().limit(30));
+          // Only ONE inequality filter allowed per Firestore query — filter location client-side
+          q=fs().query(fs().collection(db(),'posts'),fs().where('status','!=','deleted'),fs().orderBy('status'),fs().orderBy('createdAt','desc'),fs().limit(60));
         } else if(layer==='events'){
           q=fs().query(fs().collection(db(),'events'),fs().where('status','!=','deleted'),fs().orderBy('status'),fs().orderBy('startDate','desc'),fs().limit(20));
         } else {
@@ -11714,6 +11735,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   ══════════════════════════════════════════════════════════════ */
   function renderAdmin(){
     var u=authUser();
+    // Auth gate — must be logged in
+    if(!u){ requireLogin(); return; }
+    // Render shell immediately, then verify admin role via Firestore
     shell({ active:'admin',
       center:
         '<div class="gh-admin-page" id="ghAdminPage">'+
@@ -11721,7 +11745,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             '<h2 style="margin:0 0 4px;font-size:1.05rem"><i class="fas fa-user-shield"></i> Admin Dashboard</h2>'+
             '<p class="gh-muted" style="font-size:.82rem;margin:0">Platform management & moderation</p>'+
           '</div>'+
-          '<div class="gh-admin-tabs gh-pill-row" id="ghAdminTabs">'+
+          '<div class="gh-admin-tabs gh-pill-row" id="ghAdminTabs" hidden>'+
             '<button class="gh-pill active" data-atab="overview">Overview</button>'+
             '<button class="gh-pill" data-atab="users">Users</button>'+
             '<button class="gh-pill" data-atab="reports">Reports</button>'+
@@ -11732,6 +11756,21 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '</div>'
     });
     ready(function(){
+      // Verify admin role in Firestore before showing anything
+      if(!fs()||!db()){ document.getElementById('ghAdminContent').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-lock"></i><p>Firebase not available.</p></div>'; return; }
+      fs().getDoc(fs().doc(db(),'users',u.uid)).then(function(snap){
+        var role=(snap.exists()&&snap.data().role)||'user';
+        if(role!=='admin'&&role!=='moderator'){
+          document.getElementById('ghAdminContent').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-ban" style="color:#ef4444;font-size:2rem"></i><p style="margin-top:8px;font-weight:600">Access Denied</p><p class="gh-muted" style="font-size:.85rem">You do not have permission to view this page.</p></div>';
+          return;
+        }
+        var tabsEl=document.getElementById('ghAdminTabs');
+        if(tabsEl) tabsEl.removeAttribute('hidden');
+        _startAdmin();
+      }).catch(function(){
+        document.getElementById('ghAdminContent').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i><p>Could not verify admin role.</p></div>';
+      });
+      function _startAdmin(){
       var tabs=document.getElementById('ghAdminTabs');
       var content=document.getElementById('ghAdminContent');
       if(!tabs||!content) return;
@@ -11927,6 +11966,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         }).catch(function(err){ content.innerHTML='<div class="gh-card gh-empty"><h3>Failed</h3><p>'+esc(err.message||'Check permissions')+'</p></div>'; });
       }
       _loadTab('overview');
+      } // end _startAdmin
     });
   }
 

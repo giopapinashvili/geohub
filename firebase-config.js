@@ -5,7 +5,9 @@ import {
   doc, setDoc, getDoc, getDocs, updateDoc, addDoc,
   collection, query, orderBy, where, limit,
   onSnapshot, deleteDoc, serverTimestamp, increment,
-  writeBatch, runTransaction, arrayUnion, arrayRemove
+  writeBatch, runTransaction, arrayUnion, arrayRemove,
+  Timestamp, startAt, endAt, startAfter, endBefore,
+  limitToLast, getCountFromServer, collectionGroup
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
 import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js';
 import { getAnalytics, isSupported } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js';
@@ -28,7 +30,7 @@ try {
   const functions = getFunctions(app);
   window.GeoFirebase = {
     app, auth, db,
-    fs: { doc, setDoc, getDoc, getDocs, updateDoc, addDoc, collection, query, orderBy, where, limit, onSnapshot, deleteDoc, serverTimestamp, increment, writeBatch, runTransaction, arrayUnion, arrayRemove },
+    fs: { doc, setDoc, getDoc, getDocs, updateDoc, addDoc, collection, query, orderBy, where, limit, onSnapshot, deleteDoc, serverTimestamp, increment, writeBatch, runTransaction, arrayUnion, arrayRemove, Timestamp, startAt, endAt, startAfter, endBefore, limitToLast, getCountFromServer, collectionGroup },
     authFns: { signOut, onAuthStateChanged },
     functions,
     httpsCallable
