@@ -567,7 +567,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function topbar(centerActive){
     function ca(t){ return centerActive===t?' class="active"':''; }
     return '<header class="gh-topbar gh-hub-topbar">'+
-      '<a class="gh-brand" href="feed.html"><div class="gh-brand-mark">GH</div><span>Geo<span>Hub</span></span></a>'+
+      '<a class="gh-brand" href="feed.html"><img src="icons/icon-96.png" alt="GeoHub" style="width:36px;height:36px;border-radius:10px;object-fit:cover;flex-shrink:0"><span>Geo<span>Hub</span></span></a>'+
       '<div class="gh-top-search"><i class="fas fa-search"></i><input id="ghGlobalSearch" data-i18n-placeholder="search_placeholder" placeholder="მოძებნე ადგილები, ადამიანები, ჯგუფები…"></div>'+
       '<nav class="gh-center-tabs" aria-label="Primary navigation">'+
         '<a'+ca('feed')+' href="feed.html" title="Feed"><i class="fas fa-house"></i></a>'+
