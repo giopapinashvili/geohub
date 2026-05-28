@@ -1095,7 +1095,8 @@
     // ── POSTS ────────────────────────────────────────────────────────────
     function createPost(text, mediaUrl, callback, extra) {
       text = (text || '').trim();
-      if (!text && !mediaUrl) return toast('Write something or choose a photo first!', 'error');
+      var hasVoice = !!(extra && extra.voiceUrl);
+      if (!text && !mediaUrl && !hasVoice) return toast('Write something or choose a photo first!', 'error');
       requireAuth(function (user) {
         var me = meData() || {};
         var vis = (extra && extra.visibility) || 'public';
@@ -1256,7 +1257,7 @@
         }
         callback(result);
       }
-      var q1 = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(n));
+      var q1 = query(collection(db, 'posts'), where('status', '==', 'active'), orderBy('createdAt', 'desc'), limit(n));
       var unsub1 = onSnapshot(q1, function (snap) {
         postsArr = [];
         snap.forEach(function (d) { postsArr.push(Object.assign({ id: d.id }, d.data())); });

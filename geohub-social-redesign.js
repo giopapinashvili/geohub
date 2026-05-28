@@ -1339,7 +1339,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   ];
   var FEELINGS = [
     '😊 Happy','😂 Laughing','😍 Loved','😢 Sad','😠 Angry',
-    '🎉 Celebrating','💪 Motivated','🙏 Grateful','🎂 Birthday','🏖️ Traveling'
+    '🎉 Celebrating','💪 Motivated','🙏 Grateful','🎂 Birthday','🏖️ Traveling',
+    '😴 Tired','🤔 Thinking','😎 Cool','🥰 In Love','😤 Frustrated',
+    '🤩 Excited','😌 Relaxed','💔 Heartbroken','🥳 Partying','😬 Nervous',
+    '🏃 Active','🍀 Lucky','☕ Cozy','🌙 Sleepy','🔥 On Fire'
   ];
 
   function openPostModal(extra){
@@ -1447,6 +1450,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '<button type="button" class="gh-fmt-btn" data-fmt="recipe">🍽️ Recipe</button>'+
           '<button type="button" class="gh-fmt-btn" data-fmt="job">💼 Job</button>'+
           '<button type="button" class="gh-fmt-btn" data-fmt="question">❓ Question</button>'+
+          '<button type="button" class="gh-fmt-btn" data-fmt="tip">💡 Tip</button>'+
+          '<button type="button" class="gh-fmt-btn" data-fmt="event">📅 Event</button>'+
+          '<button type="button" class="gh-fmt-btn" data-fmt="quote">💬 Quote</button>'+
+          '<button type="button" class="gh-fmt-btn" data-fmt="announcement">📢 Announcement</button>'+
         '</div>'+
         '<div id="ghFmtArticle" style="display:none;margin-top:10px">'+
           '<input class="gh-input" id="ghArtTitle" placeholder="Article title *" maxlength="120" style="margin-bottom:6px">'+
@@ -1505,7 +1512,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-category-panel" id="ghCategoryPanel" style="display:none">'+
         '<div class="gh-cat-label"><i class="fas fa-tag"></i> Choose a topic</div>'+
         '<div class="gh-cat-grid">'+
-          ['Travel ✈️','Food 🍕','Business 💼','Nature 🌿','Tech 💻','Sport ⚽','Music 🎵','Art 🎨','News 📰','Humor 😂'].map(function(c){
+          ['Travel ✈️','Food 🍕','Business 💼','Nature 🌿','Tech 💻','Sport ⚽','Music 🎵','Art 🎨','News 📰','Humor 😂','Health 💊','Fashion 👗','Cars 🚗','Education 📚','Finance 💰','Gaming 🎮','Film 🎬','Pets 🐾','DIY 🔧','Events 📅','Real Estate 🏠','Politics 🏛️','Science 🔬','Religion ✝️','Relationships 💑'].map(function(c){
             var id=c.split(' ')[0].toLowerCase();
             return '<button type="button" class="gh-cat-btn" data-cat="'+id+'">'+c+'</button>';
           }).join('')+
@@ -1741,21 +1748,24 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var _gifPreviewImg=document.getElementById('ghGifPreviewImg');
     var _gifRemoveBtn=document.getElementById('ghGifRemoveBtn');
     var _gifTimer=null;
-    var _GIPHY_KEY='dc6zaTOxFJmzC';
+    var _TENOR_KEY='AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCY4';
     function _loadGifs(q){
       if(!_gifGrid) return;
       _gifGrid.innerHTML='<div class="gh-gif-loading"><i class="fas fa-circle-notch fa-spin"></i></div>';
       var url=q
-        ?'https://api.giphy.com/v1/gifs/search?api_key='+_GIPHY_KEY+'&q='+encodeURIComponent(q)+'&limit=24&rating=g'
-        :'https://api.giphy.com/v1/gifs/trending?api_key='+_GIPHY_KEY+'&limit=24&rating=g';
+        ?'https://tenor.googleapis.com/v2/search?q='+encodeURIComponent(q)+'&key='+_TENOR_KEY+'&limit=24&media_filter=gif&contentfilter=high&locale=en_US'
+        :'https://tenor.googleapis.com/v2/featured?key='+_TENOR_KEY+'&limit=24&media_filter=gif&contentfilter=high&locale=en_US';
       fetch(url).then(function(r){return r.json();}).then(function(data){
-        var gifs=(data.data||[]);
+        var gifs=(data.results||[]);
         if(!gifs.length){_gifGrid.innerHTML='<div class="gh-gif-loading">No GIFs found</div>';return;}
         _gifGrid.innerHTML=gifs.map(function(g){
-          var preview=g.images&&g.images.fixed_width_small&&g.images.fixed_width_small.url||'';
-          var full=g.images&&g.images.downsized&&g.images.downsized.url||preview;
-          return '<button type="button" class="gh-gif-item" data-gif-url="'+esc(full)+'" data-gif-preview="'+esc(preview)+'"><img src="'+esc(preview)+'" alt="" loading="lazy"></button>';
-        }).join('');
+          var mf=g.media_formats||{};
+          var preview=(mf.tinygif&&mf.tinygif.url)||(mf.gif&&mf.gif.url)||'';
+          var full=(mf.gif&&mf.gif.url)||preview;
+          if(!preview) return '';
+          return '<button type="button" class="gh-gif-item" data-gif-url="'+esc(full)+'" data-gif-preview="'+esc(preview)+'"><img src="'+esc(preview)+'" alt="'+esc(g.content_description||'')+'" loading="lazy"></button>';
+        }).filter(Boolean).join('');
+        if(!_gifGrid.children.length) _gifGrid.innerHTML='<div class="gh-gif-loading">No GIFs found</div>';
       }).catch(function(){_gifGrid.innerHTML='<div class="gh-gif-loading" style="color:var(--gh-muted)">Could not load GIFs</div>';});
     }
     function _selectGif(url){
@@ -2160,12 +2170,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       updateSubmit();
     };
 
-    $('#ghToggleFeeling').onclick=function(){
+    var _feelBtn=document.getElementById('ghToggleFeeling');
+    var _feelRow=document.getElementById('ghFeelingRow');
+    if(_feelRow) _feelRow.style.display='none';
+    if(_feelBtn) _feelBtn.addEventListener('click',function(){
       feelingRowVisible=!feelingRowVisible;
-      $('#ghFeelingRow').style.display=feelingRowVisible?'flex':'none';
-      this.classList.toggle('active',feelingRowVisible);
-    };
-    $('#ghFeelingRow').style.display='none';
+      if(_feelRow) _feelRow.style.display=feelingRowVisible?'flex':'none';
+      _feelBtn.classList.toggle('active',feelingRowVisible);
+    });
 
     $('#ghToggleBg').onclick=function(){
       bgVisible=!bgVisible;
@@ -2183,10 +2195,32 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
 
     var bgPicker=$('#ghBgPicker');
+    var _bgPreviewWrap=document.getElementById('ghRegularComposer');
+    function _applyBgPreview(grad){
+      if(!ta) return;
+      if(grad){
+        ta.style.background=grad;
+        ta.style.color='#fff';
+        ta.style.borderRadius='14px';
+        ta.style.textAlign='center';
+        ta.style.fontWeight='900';
+        ta.style.fontSize='1.1rem';
+        ta.style.minHeight='140px';
+      } else {
+        ta.style.background='';
+        ta.style.color='';
+        ta.style.borderRadius='';
+        ta.style.textAlign='';
+        ta.style.fontWeight='';
+        ta.style.fontSize='';
+        ta.style.minHeight='';
+      }
+    }
     if(bgPicker) bgPicker.addEventListener('click',function(e){
       var sw=e.target.closest('[data-bg-gradient]'); if(!sw) return;
       selectedBg=sw.dataset.bgGradient;
       bgPicker.querySelectorAll('.gh-bg-swatch').forEach(function(b){ b.classList.toggle('active', b===sw); });
+      _applyBgPreview(selectedBg);
     });
 
     if($('#ghPollAddOpt')) $('#ghPollAddOpt').onclick=function(){

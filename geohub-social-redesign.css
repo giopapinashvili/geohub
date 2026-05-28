@@ -658,6 +658,12 @@ body.gh-fb-inspired .gh-act[data-like].active{color:#2d83ff}
 body.gh-fb-inspired .gh-act[data-save].active{color:#10b981}
 /* Divider line between stats and actions */
 body.gh-fb-inspired .gh-post .gh-post-stats{border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:4px}
+/* Remove blue body-background bleed between post cards */
+body.gh-fb-inspired #ghFeedList{background:rgba(8,17,33,.96);border-radius:10px;overflow:hidden}
+body.gh-fb-inspired .gh-post{margin-bottom:0;border-radius:0;border-left:none;border-right:none;border-top:none}
+body.gh-fb-inspired .gh-post:first-child{border-radius:10px 10px 0 0}
+body.gh-fb-inspired .gh-post:last-child{border-radius:0 0 10px 10px;border-bottom:none}
+body.gh-fb-inspired .gh-post + .gh-post{border-top:8px solid rgba(0,0,0,.35)}
 body.gh-fb-inspired .gh-right{position:sticky;top:88px;align-self:start;max-height:calc(100vh - 104px);overflow:auto;padding-right:2px;scrollbar-width:none}
 body.gh-fb-inspired .gh-right::-webkit-scrollbar{display:none}
 body.gh-fb-inspired .gh-right-widget{padding:14px;margin-bottom:14px;border-radius:12px}
@@ -4650,7 +4656,7 @@ a.gh-trending-chip:hover {
   border-radius: 14px;
   padding: 10px;
   box-shadow: 0 12px 40px rgba(0,0,0,.6);
-  z-index: 9999;
+  z-index: 200000;
   width: 268px;
 }
 .gh-ep-grid {
