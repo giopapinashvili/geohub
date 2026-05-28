@@ -6809,6 +6809,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var _newPillTimer=null;
       var _feedVideoObs=null;
       var _activeInlineFeedVid=null;
+      var _lastRenderedKey='';   // joined post IDs of last _doPaint — skip if unchanged
+      var _paintDebounceTimer=null; // debounce rapid consecutive paint() calls
 
       /* ── Phase 55: Events Feed Integration ───────────────── */
       var _feedEvents=[]; var _myEvRsvps={};
@@ -6956,6 +6958,23 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       }
 
       function _doPaint(visible){
+        // Skip full re-render if the same posts in the same order are already shown
+        var newKey=visible.map(function(p){ return p.id; }).join(',');
+        if(newKey && newKey===_lastRenderedKey && list.children.length>0){
+          // Same order — only refresh dynamic counters in-place (no scroll jump)
+          visible.forEach(function(p){
+            try{
+              var card=document.getElementById('post-'+p.id);
+              if(!card) return;
+              var lc=card.querySelector('[data-like-count]'); if(lc) lc.textContent=Number(p.likeCount||p.reactionCount||0)||0;
+              var cc=card.querySelector('[data-comment-count]'); if(cc) cc.textContent=Math.max(0,Number(p.commentCount||0));
+              var sc=card.querySelector('[data-share-count]'); if(sc) sc.textContent=Number(p.shareCount||0);
+              var vc=card.querySelector('[data-view-count]'); if(vc) vc.textContent=Number(p.viewCount||0);
+            }catch(e){}
+          });
+          return;
+        }
+        _lastRenderedKey=newKey;
         list.innerHTML=visible.map(function(p){
           var isFollowedPage=!pageMode && p.targetType==='business' && p.targetId && state.followedBusinessIds.indexOf(p.targetId)>-1;
           return postCard(p, isFollowedPage ? {fromFollowedPage:true} : {});
@@ -7136,6 +7155,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       }
 
       function paint(){
+        // Debounce: collapse rapid successive paint() calls (bizFeed + listenFeed firing together)
+        if(_paintDebounceTimer) clearTimeout(_paintDebounceTimer);
+        _paintDebounceTimer=setTimeout(_doPaintCycle, 80);
+      }
+      function _doPaintCycle(){
+        _paintDebounceTimer=null;
         if(renderId!==state.feedRenderId) return;
         if(!list) return;
         /* Near Me: own rendering path */

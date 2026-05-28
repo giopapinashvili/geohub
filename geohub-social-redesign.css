@@ -5525,3 +5525,40 @@ html[data-gh-motion="reduced"] * { animation-duration:0.001ms !important; transi
 .gh-tour-title{font-size:1rem;font-weight:800;margin-bottom:8px;color:var(--gh-text)}
 .gh-tour-body{font-size:.85rem;color:var(--gh-muted);line-height:1.5;margin-bottom:14px}
 .gh-tour-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+
+/* ── Scroll stability: prevent layout shifts from lazy-loading images ── */
+.gh-post-img-wrap{
+  min-height:120px;
+  background:var(--gh-surface,rgba(255,255,255,.04));
+}
+.gh-post-img-wrap .gh-post-img{
+  aspect-ratio:16/9;
+  object-fit:cover;
+  width:100%;
+  display:block;
+}
+.gh-post-grid-item img{
+  aspect-ratio:1/1;
+  object-fit:cover;
+  width:100%;
+  height:100%;
+  display:block;
+}
+/* Prevent feed post cards from collapsing before content loads */
+.gh-post{
+  contain:layout style;
+  min-height:80px;
+}
+/* Avatar images — fixed size, no reflow */
+.gh-avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+/* Story thumbnails */
+.gh-story-card img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
