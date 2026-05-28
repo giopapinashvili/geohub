@@ -219,6 +219,23 @@
     ai_placeholder:   { ka: 'GeoAI-ს ჰკითხე…',  en: 'Ask GeoAI anything…',ru: 'Спросите GeoAI…'  },
     ai_cleared:       { ka: 'ჩატი გასუფთავდა!', en: 'Chat cleared! How can I help?',ru: 'Чат очищен! Чем помочь?' },
 
+    /* ── Messages page ──────────────────────────────────────── */
+    msg_title:        { ka: 'შეტყობინებები',       en: 'Messages',        ru: 'Сообщения'       },
+    msg_new:          { ka: 'ახალი შეტყობინება',   en: 'New message',     ru: 'Новое сообщение' },
+    msg_search_convs: { ka: 'ჩეტის ძებნა…',        en: 'Search conversations…',ru: 'Поиск чатов…'  },
+    msg_all:          { ka: 'ყველა',               en: 'All',             ru: 'Все'              },
+    msg_unread:       { ka: 'წაუკითხავი',           en: 'Unread',          ru: 'Непрочитанные'   },
+    msg_select_conv:  { ka: 'ჩეტი აარჩიე',         en: 'Select a conversation',ru: 'Выберите чат' },
+    msg_search_msgs:  { ka: 'შეტყობინებების ძ…',   en: 'Search messages…',ru: 'Поиск сообщений…' },
+    msg_photo:        { ka: 'ფოტო',                en: 'Photo',           ru: 'Фото'             },
+    msg_file:         { ka: 'ფაილი',               en: 'File',            ru: 'Файл'             },
+    msg_voice:        { ka: 'ხმა',                 en: 'Voice',           ru: 'Голос'            },
+    msg_type_msg:     { ka: 'შეტყობინება…',         en: 'Type a message…', ru: 'Написать…'        },
+    msg_start_conv:   { ka: 'ჩეტი დაიწყე',         en: 'Start a conversation',ru: 'Начать чат'   },
+    msg_start_sub:    { ka: 'მოძებნე მომხმარებელი.',en: 'Search real users and open a chat.',ru: 'Найдите пользователя и откройте чат.' },
+    msg_search_user:  { ka: 'სახელი ან ელ-ფოსტა…', en: 'Search by name or email…',ru: 'Имя или email…' },
+    msg_conv_details: { ka: 'ჩეტის დეტალები',      en: 'Select a conversation to see details',ru: 'Выберите чат для просмотра деталей' },
+
     /* ── Places page ────────────────────────────────────────── */
     pl_discover:      { ka: 'ადგილების აღმოჩენა',  en: 'Discover Places', ru: 'Открыть места'    },
     pl_add:           { ka: 'ადგილის დამატება',    en: 'Add a Place',     ru: 'Добавить место'   },

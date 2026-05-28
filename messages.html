@@ -65,19 +65,19 @@
       <div class="msg-sidebar">
         <div class="sidebar-top">
           <div class="sidebar-title">
-            Messages
+            <span data-i18n="msg_title">Messages</span>
             <div class="sidebar-title-actions">
-              <button class="sidebar-icon-btn" title="New message" onclick="openNewConversationSearch()"><i class="fas fa-edit"></i></button>
+              <button class="sidebar-icon-btn" data-i18n-title="msg_new" title="New message" onclick="openNewConversationSearch()"><i class="fas fa-edit"></i></button>
               <button class="sidebar-icon-btn" title="Filter"><i class="fas fa-sliders-h"></i></button>
             </div>
           </div>
           <div class="conv-search-wrap">
             <i class="fas fa-search"></i>
-            <input type="text" class="conv-search" placeholder="Search conversations…" oninput="searchConvs(this.value)">
+            <input type="text" class="conv-search" data-i18n-placeholder="msg_search_convs" placeholder="Search conversations…" oninput="searchConvs(this.value)">
           </div>
           <div class="filter-tabs">
-            <button class="filter-tab active" onclick="setFilter('all',this)">All</button>
-            <button class="filter-tab" onclick="setFilter('unread',this)">Unread</button>
+            <button class="filter-tab active" onclick="setFilter('all',this)" data-i18n="msg_all">All</button>
+            <button class="filter-tab" onclick="setFilter('unread',this)" data-i18n="msg_unread">Unread</button>
           </div>
         </div>
         <div class="conv-list" id="convList"></div>
@@ -86,7 +86,7 @@
       <!-- ===== CHAT WINDOW ===== -->
       <div class="chat-window">
         <div class="chat-header" id="chatHeader">
-          <div style="color:var(--text-muted);font-size:0.85rem;padding:0 16px">Select a conversation</div>
+          <div style="color:var(--text-muted);font-size:0.85rem;padding:0 16px" data-i18n="msg_select_conv">Select a conversation</div>
         </div>
         <div class="chat-messages" id="chatMessages"></div>
 
@@ -105,7 +105,7 @@
         <!-- Message search bar -->
         <div class="msg-search-wrap" id="msgSearchWrap" style="display:none">
           <i class="fas fa-search"></i>
-          <input type="text" id="msgSearchInput" class="msg-search-input" placeholder="Search messages…">
+          <input type="text" id="msgSearchInput" class="msg-search-input" data-i18n-placeholder="msg_search_msgs" placeholder="Search messages…">
           <button class="msg-search-close" type="button" onclick="window.__ghToggleSearch()"><i class="fas fa-times"></i></button>
         </div>
 
@@ -118,13 +118,13 @@
         <!-- Input bar -->
         <div class="chat-input-bar">
           <button class="input-btn attach-menu-btn" id="attachmentMenuBtn" title="Attachments" aria-label="Attachments" aria-expanded="false" onclick="window.__ghToggleAttachSheet&&window.__ghToggleAttachSheet(event)"><i class="fas fa-plus"></i></button>
-          <input type="text" id="msgInput" class="msg-input" placeholder="Type a message…">
+          <input type="text" id="msgInput" class="msg-input" data-i18n-placeholder="msg_type_msg" placeholder="Type a message…">
           <button class="input-btn" id="emojiBtn" title="Emoji" onclick="toggleEmojiPicker()"><i class="fas fa-smile"></i></button>
           <button class="send-btn" onclick="sendMsg()" title="Send"><i class="fas fa-paper-plane"></i></button>
           <div class="msg-attach-sheet" id="msgAttachSheet" aria-hidden="true">
-            <button type="button" data-pick-image><i class="fas fa-image"></i><span>Photo</span></button>
-            <button type="button" id="fileAttachBtn"><i class="fas fa-file-alt"></i><span>File</span></button>
-            <button type="button" id="voiceBtn"><i class="fas fa-microphone"></i><span>Voice</span></button>
+            <button type="button" data-pick-image><i class="fas fa-image"></i><span data-i18n="msg_photo">Photo</span></button>
+            <button type="button" id="fileAttachBtn"><i class="fas fa-file-alt"></i><span data-i18n="msg_file">File</span></button>
+            <button type="button" id="voiceBtn"><i class="fas fa-microphone"></i><span data-i18n="msg_voice">Voice</span></button>
           </div>
           <div class="emoji-picker-wrap" id="emojiPicker"></div>
           <input id="messageImageInput" type="file" accept="image/*" hidden>
@@ -135,7 +135,7 @@
       <!-- ===== INFO PANEL ===== -->
       <div class="info-panel" id="infoPanel">
         <div class="info-scroll">
-          <div style="color:var(--text-muted);text-align:center;padding:40px 16px;font-size:0.85rem">Select a conversation to see details</div>
+          <div style="color:var(--text-muted);text-align:center;padding:40px 16px;font-size:0.85rem" data-i18n="msg_conv_details">Select a conversation to see details</div>
         </div>
       </div>
 
@@ -146,9 +146,9 @@
   <div id="newConversationModal" class="msg-modal" hidden>
     <div class="msg-modal-card">
       <button class="msg-modal-close" type="button" onclick="closeNewConversationSearch()">×</button>
-      <h3>Start a conversation</h3>
-      <p>Search real users and open a chat.</p>
-      <input id="newConversationSearch" class="msg-input" placeholder="Search by name or email…" oninput="searchNewConversationUsers(this.value)">
+      <h3 data-i18n="msg_start_conv">Start a conversation</h3>
+      <p data-i18n="msg_start_sub">Search real users and open a chat.</p>
+      <input id="newConversationSearch" class="msg-input" data-i18n-placeholder="msg_search_user" placeholder="Search by name or email…" oninput="searchNewConversationUsers(this.value)">
       <div id="newConversationResults" class="new-conversation-results"></div>
     </div>
   </div>
