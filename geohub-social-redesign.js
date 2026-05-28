@@ -283,7 +283,8 @@
     if(!wh||typeof wh!=='object') return '';
     var nh=normWorkingHours(wh); if(!nh) return '';
     var s=isOpenNow(nh); if(!s) return '';
-    var label=s.open?'Open now':'Closed';
+    var _osbt=typeof GHt==='function'?GHt:function(k){return k;};
+    var label=s.open?_osbt('biz_ov_open_now'):_osbt('biz_ov_closed');
     var extra=(!s.open&&s.nextOpen)?'<span class="gh-hours-next"> · '+esc(s.nextOpen)+'</span>':'';
     return '<span class="gh-hours-status '+(s.open?'open':'closed')+'"><i class="fas fa-circle"></i> '+label+'</span>'+extra;
   }
@@ -8796,47 +8797,48 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function renderBusinessOverview(b){
     var box=$('#ghBusinessTabContent'); if(!box)return;
+    var _ovt=typeof GHt==='function'?GHt:function(k){return k;};
     var sLinks=b.socialLinks||{};
     var ratingAvg = b.ratingCount>0 ? (b.ratingTotal/b.ratingCount).toFixed(1) : (b.ratingAverage>0 ? Number(b.ratingAverage).toFixed(1) : null);
     var infoCards='';
-    if(b.phone)    infoCards+=bizInfoCard('fa-phone','Phone',b.phone,'tel:'+b.phone);
-    if(b.email)    infoCards+=bizInfoCard('fa-envelope','Email',b.email,'mailto:'+b.email);
-    if(b.website)  infoCards+=bizInfoCard('fa-globe','Website',b.website,b.website);
-    if(!isOnlineBusiness(b)&&b.city) infoCards+=bizInfoCard('fa-location-dot','Location',b.address?b.address+', '+b.city:b.city,'');
-    if(isOnlineBusiness(b))          infoCards+=bizInfoCard('fa-globe','Service area',b.serviceAreaText||businessAreaLabel(b),'');
+    if(b.phone)    infoCards+=bizInfoCard('fa-phone',_ovt('biz_ov_phone'),b.phone,'tel:'+b.phone);
+    if(b.email)    infoCards+=bizInfoCard('fa-envelope',_ovt('biz_ov_email'),b.email,'mailto:'+b.email);
+    if(b.website)  infoCards+=bizInfoCard('fa-globe',_ovt('biz_ov_website'),b.website,b.website);
+    if(!isOnlineBusiness(b)&&b.city) infoCards+=bizInfoCard('fa-location-dot',_ovt('biz_ov_location'),b.address?b.address+', '+b.city:b.city,'');
+    if(isOnlineBusiness(b))          infoCards+=bizInfoCard('fa-globe',_ovt('biz_ov_service_area'),b.serviceAreaText||businessAreaLabel(b),'');
     if(b.workingHours){
       var nhOv=normWorkingHours(b.workingHours);
       var ovS=nhOv?isOpenNow(nhOv):null;
-      var ovBadge=ovS?'<span class="gh-hours-status '+(ovS.open?'open':'closed')+'" style="margin-left:6px;font-size:.7rem"><i class="fas fa-circle" style="font-size:.5rem;vertical-align:middle"></i> '+(ovS.open?'Open now':'Closed')+'</span>':'';
-      infoCards+=bizInfoCardHtml('fa-clock','Today',esc(formatWorkingHours(b.workingHours))+ovBadge);
+      var ovBadge=ovS?'<span class="gh-hours-status '+(ovS.open?'open':'closed')+'" style="margin-left:6px;font-size:.7rem"><i class="fas fa-circle" style="font-size:.5rem;vertical-align:middle"></i> '+(ovS.open?_ovt('biz_ov_open_now'):_ovt('biz_ov_closed'))+'</span>':'';
+      infoCards+=bizInfoCardHtml('fa-clock',_ovt('biz_ov_today'),esc(formatWorkingHours(b.workingHours))+ovBadge);
     }
-    if(b.priceRange||b.startingPrice) infoCards+=bizInfoCard('fa-tag','Pricing',(b.startingPrice?'From '+b.startingPrice+' · ':'')+esc(b.priceRange||''));
+    if(b.priceRange||b.startingPrice) infoCards+=bizInfoCard('fa-tag',_ovt('biz_ov_pricing'),(b.startingPrice?_ovt('biz_ov_from')+b.startingPrice+' · ':'')+esc(b.priceRange||''));
     var sIg=sLinks.instagram||b.instagram||''; var sFb=sLinks.facebook||b.facebook||''; var sWa=sLinks.whatsapp||b.whatsapp||'';
-    if(sIg) infoCards+=bizInfoCard('fa-brands fa-instagram','Instagram',sIg,'https://instagram.com/'+sIg.replace(/^@/,''));
-    if(sFb) infoCards+=bizInfoCard('fa-brands fa-facebook','Facebook',sFb,sFb.startsWith('http')?sFb:'https://facebook.com/'+sFb);
-    if(sWa) infoCards+=bizInfoCard('fa-brands fa-whatsapp','WhatsApp',sWa,'https://wa.me/'+sWa.replace(/\D/g,''));
+    if(sIg) infoCards+=bizInfoCard('fa-brands fa-instagram',_ovt('biz_ov_instagram'),sIg,'https://instagram.com/'+sIg.replace(/^@/,''));
+    if(sFb) infoCards+=bizInfoCard('fa-brands fa-facebook',_ovt('biz_ov_facebook'),sFb,sFb.startsWith('http')?sFb:'https://facebook.com/'+sFb);
+    if(sWa) infoCards+=bizInfoCard('fa-brands fa-whatsapp',_ovt('biz_ov_whatsapp'),sWa,'https://wa.me/'+sWa.replace(/\D/g,''));
 
     var ratingSection = ratingAvg ?
       '<div class="gh-card" style="margin-bottom:0">'+
-        '<div class="gh-biz-sec-head"><h3>Rating</h3><button class="gh-btn sm ghost" data-switch-tab="reviews">All reviews</button></div>'+
+        '<div class="gh-biz-sec-head"><h3>'+_ovt('biz_ov_rating')+'</h3><button class="gh-btn sm ghost" data-switch-tab="reviews">'+_ovt('biz_ov_all_reviews')+'</button></div>'+
         '<div class="gh-biz-rating-row">'+
           '<div class="gh-biz-rating-big">'+ratingAvg+'</div>'+
-          '<div><span class="gh-biz-rating-stars">'+starsHtml(ratingAvg)+'</span><span class="gh-biz-rating-sub">'+Number(b.ratingCount||b.reviewCount||0)+' reviews</span></div>'+
+          '<div><span class="gh-biz-rating-stars">'+starsHtml(ratingAvg)+'</span><span class="gh-biz-rating-sub">'+Number(b.ratingCount||b.reviewCount||0)+' '+_ovt('biz_ov_reviews')+'</span></div>'+
         '</div>'+
       '</div>' : '';
 
     box.innerHTML=
       '<div style="display:grid;gap:14px">'+
       (b.description ? '<div class="gh-card" style="margin-bottom:0"><p style="margin:0;line-height:1.65;color:var(--gh-text)">'+esc(b.description)+'</p></div>' : '')+
-      (infoCards ? '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Contact & Info</h3></div><div class="gh-biz-info-grid">'+infoCards+'</div></div>' : '')+
+      (infoCards ? '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>'+_ovt('biz_ov_contact_info')+'</h3></div><div class="gh-biz-info-grid">'+infoCards+'</div></div>' : '')+
       ratingSection+
-      '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Latest Posts</h3><button class="gh-btn sm ghost" data-switch-tab="posts">All posts</button></div><div id="ghOvPosts"><div class="gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>'+
-      '<div class="gh-card" style="margin-bottom:0" id="ghOvSvcWrap"><div class="gh-biz-sec-head"><h3>Services</h3><button class="gh-btn sm ghost" data-switch-tab="services">All services</button></div><div id="ghOvSvc"><div class="gh-empty" style="min-height:60px"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>'+
+      '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>'+_ovt('biz_ov_latest_posts')+'</h3><button class="gh-btn sm ghost" data-switch-tab="posts">'+_ovt('biz_ov_all_posts')+'</button></div><div id="ghOvPosts"><div class="gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>'+
+      '<div class="gh-card" style="margin-bottom:0" id="ghOvSvcWrap"><div class="gh-biz-sec-head"><h3>'+_ovt('biz_ov_services')+'</h3><button class="gh-btn sm ghost" data-switch-tab="services">'+_ovt('biz_ov_all_services')+'</button></div><div id="ghOvSvc"><div class="gh-empty" style="min-height:60px"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>'+
       '</div>';
 
     box.onclick=function(e){ var sw=e.target.closest('[data-switch-tab]'); if(sw){ state.currentBusinessTab=sw.dataset.switchTab; $all('[data-biz-tab]').forEach(function(x){x.classList.toggle('active',x.dataset.bizTab===state.currentBusinessTab);}); renderBusinessTab(b); } };
 
-    listenTargetPosts('business',b.id,function(posts){ var el=$('#ghOvPosts'); if(!el)return; posts=posts.filter(canSeePost).slice(0,3); if(!posts.length){el.innerHTML='<div class="gh-empty" style="min-height:60px"><i class="fas fa-newspaper"></i><p>No posts yet</p></div>'; return;} el.innerHTML='<div class="gh-biz-preview-posts">'+posts.map(function(p){ return '<div class="gh-biz-preview-post">'+esc((p.text||'').slice(0,160))+'</div>'; }).join('')+'</div>'; });
+    listenTargetPosts('business',b.id,function(posts){ var el=$('#ghOvPosts'); if(!el)return; posts=posts.filter(canSeePost).slice(0,3); if(!posts.length){el.innerHTML='<div class="gh-empty" style="min-height:60px"><i class="fas fa-newspaper"></i><p>'+_ovt('biz_ov_no_posts')+'</p></div>'; return;} el.innerHTML='<div class="gh-biz-preview-posts">'+posts.map(function(p){ return '<div class="gh-biz-preview-post">'+esc((p.text||'').slice(0,160))+'</div>'; }).join('')+'</div>'; });
 
     loadServices(b.id,function(items){
       var el=$('#ghOvSvc'); if(!el)return;
@@ -8852,6 +8854,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function renderBusinessAbout(b){
     var box=$('#ghBusinessTabContent'); if(!box)return;
+    var _abt=typeof GHt==='function'?GHt:function(k){return k;};
     var sLinks=b.socialLinks||{};
     var ig=sLinks.instagram||b.instagram||'';
     var fb=sLinks.facebook||b.facebook||'';
@@ -8870,32 +8873,32 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var hoursStatusHtml='';
     if(openStatus){
       hoursStatusHtml='<div class="gh-hours-status-row">'+
-        '<span class="gh-hours-status '+(openStatus.open?'open':'closed')+'"><i class="fas fa-circle"></i> '+(openStatus.open?'Open now':'Closed')+'</span>'+
+        '<span class="gh-hours-status '+(openStatus.open?'open':'closed')+'"><i class="fas fa-circle"></i> '+(openStatus.open?_abt('biz_ov_open_now'):_abt('biz_ov_closed'))+'</span>'+
         (openStatus.hours?'<span class="gh-hours-today-label">'+esc(openStatus.hours)+'</span>':'')+
-        (!openStatus.open&&openStatus.nextOpen?'<span class="gh-hours-next">Opens '+esc(openStatus.nextOpen)+'</span>':'')+
+        (!openStatus.open&&openStatus.nextOpen?'<span class="gh-hours-next">'+_abt('biz_ab_opens')+esc(openStatus.nextOpen)+'</span>':'')+
       '</div>';
     }
     var hoursHtml='';
     if(nh){
       hoursHtml=hoursStatusHtml+'<div class="gh-hours-grid">'+DAYS_KEYS.map(function(k,i){
         var h=nh[k]; var isToday=DAYS_LABELS[i]===todayLabel;
-        var label=h?(h.closed?'<em class="gh-hours-closed-label">Closed</em>':esc((h.open||'09:00')+' – '+(h.close||'18:00'))):'—';
+        var label=h?(h.closed?'<em class="gh-hours-closed-label">'+_abt('biz_ov_closed')+'</em>':esc((h.open||'09:00')+' – '+(h.close||'18:00'))):'—';
         return '<div class="gh-hours-row'+(isToday?' today':'')+'"><span>'+DAYS_LABELS[i].slice(0,3)+'</span><span>'+label+'</span></div>';
       }).join('')+'</div>';
     } else if(b.workingHours&&typeof b.workingHours==='string'){
       hoursHtml='<p style="margin:0;font-size:.88rem;color:var(--gh-text)">'+esc(b.workingHours)+'</p>';
     } else {
-      hoursHtml='<p class="gh-muted" style="margin:0;font-size:.85rem">Working hours not added yet.</p>';
+      hoursHtml='<p class="gh-muted" style="margin:0;font-size:.85rem">'+_abt('biz_ab_no_hours')+'</p>';
     }
 
     // Contact CTA buttons — only for real data
     var ctaBtns=[];
-    if(b.phone)      ctaBtns.push('<a href="tel:'+esc(b.phone)+'" class="gh-contact-cta-btn" data-track-cta="phoneClicks"><i class="fas fa-phone"></i> Call</a>');
-    if(wa)           ctaBtns.push('<a href="https://wa.me/'+esc(wa.replace(/\D/g,''))+'" target="_blank" rel="noopener" class="gh-contact-cta-btn" data-track-cta="whatsappClicks"><i class="fab fa-whatsapp"></i> WhatsApp</a>');
-    if(b.email)      ctaBtns.push('<a href="mailto:'+esc(b.email)+'" class="gh-contact-cta-btn" data-track-cta="emailClicks"><i class="fas fa-envelope"></i> Email</a>');
-    if(bookingUrl)   ctaBtns.push('<a href="'+esc(bookingUrl)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn primary" data-track-cta="bookingClicks"><i class="fas fa-calendar-check"></i> Book</a>');
-    if(b.website)    ctaBtns.push('<a href="'+esc(b.website)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn" data-track-cta="websiteClicks"><i class="fas fa-globe"></i> Website</a>');
-    if(!isOnlineBusiness(b)&&_mapsUrl) ctaBtns.push('<a href="'+esc(_mapsUrl)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn" data-track-cta="directionsClicks"><i class="fas fa-map-location-dot"></i> Directions</a>');
+    if(b.phone)      ctaBtns.push('<a href="tel:'+esc(b.phone)+'" class="gh-contact-cta-btn" data-track-cta="phoneClicks"><i class="fas fa-phone"></i> '+_abt('biz_ab_call')+'</a>');
+    if(wa)           ctaBtns.push('<a href="https://wa.me/'+esc(wa.replace(/\D/g,''))+'" target="_blank" rel="noopener" class="gh-contact-cta-btn" data-track-cta="whatsappClicks"><i class="fab fa-whatsapp"></i> '+_abt('biz_ov_whatsapp')+'</a>');
+    if(b.email)      ctaBtns.push('<a href="mailto:'+esc(b.email)+'" class="gh-contact-cta-btn" data-track-cta="emailClicks"><i class="fas fa-envelope"></i> '+_abt('biz_ov_email')+'</a>');
+    if(bookingUrl)   ctaBtns.push('<a href="'+esc(bookingUrl)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn primary" data-track-cta="bookingClicks"><i class="fas fa-calendar-check"></i> '+_abt('biz_ab_book')+'</a>');
+    if(b.website)    ctaBtns.push('<a href="'+esc(b.website)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn" data-track-cta="websiteClicks"><i class="fas fa-globe"></i> '+_abt('biz_ov_website')+'</a>');
+    if(!isOnlineBusiness(b)&&_mapsUrl) ctaBtns.push('<a href="'+esc(_mapsUrl)+'" target="_blank" rel="noopener" class="gh-contact-cta-btn" data-track-cta="directionsClicks"><i class="fas fa-map-location-dot"></i> '+_abt('biz_ab_directions')+'</a>');
     var ctaHtml=ctaBtns.length?'<div class="gh-contact-ctas">'+ctaBtns.join('')+'</div>':'';
     var hasContact=b.phone||b.email||b.website||ig||fb||wa||tk||li||bookingUrl;
 
@@ -8903,8 +8906,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div id="ghBizInviteBanner"></div>'+
       '<div class="gh-biz-about-grid">'+
         '<div style="display:grid;gap:12px">'+
-          (b.description?'<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>About</h3></div><p style="margin:0;line-height:1.65;font-size:.9rem;color:var(--gh-text)">'+esc(b.description)+'</p></div>':'')+
-          '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Contact</h3></div>'+
+          (b.description?'<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>'+_abt('biz_ab_about')+'</h3></div><p style="margin:0;line-height:1.65;font-size:.9rem;color:var(--gh-text)">'+esc(b.description)+'</p></div>':'')+
+          '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>'+_abt('biz_ab_contact')+'</h3></div>'+
             ctaHtml+
             '<div class="gh-about-list">'+
               (b.phone?aboutRow('fa-phone',b.phone):'')+
@@ -8915,28 +8918,28 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               (wa?aboutRow('fa-brands fa-whatsapp',wa):'')+
               (tk?aboutRow('fa-brands fa-tiktok','@'+tk.replace(/^@/,'')):'')+
               (li?aboutRow('fa-brands fa-linkedin',li):'')+
-              (!hasContact?'<p class="gh-muted" style="font-size:.85rem;margin:0">No contact info added yet.</p>':'')+
+              (!hasContact?'<p class="gh-muted" style="font-size:.85rem;margin:0">'+_abt('biz_ab_no_contact')+'</p>':'')+
             '</div>'+
           '</div>'+
           (!isOnlineBusiness(b)&&(b.city||b.address)?
-            '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Location</h3></div><div class="gh-about-list">'+
+            '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>'+_abt('biz_ov_location')+'</h3></div><div class="gh-about-list">'+
               aboutRow('fa-location-dot',b.address?b.address+', '+b.city:b.city)+
-              (_mapsUrl?'<a href="'+esc(_mapsUrl)+'" target="_blank" rel="noopener" class="gh-btn sm ghost" style="margin-top:8px"><i class="fas fa-map-location-dot"></i> Directions</a>':'')+
-              (!_placeCoords&&!isOnlineBusiness(b)?'<p style="margin:8px 0 0;font-size:.78rem;color:#f59e0b"><i class="fas fa-triangle-exclamation"></i> GPS coordinates not set — check-in distance verification unavailable</p>':'')+
+              (_mapsUrl?'<a href="'+esc(_mapsUrl)+'" target="_blank" rel="noopener" class="gh-btn sm ghost" style="margin-top:8px"><i class="fas fa-map-location-dot"></i> '+_abt('biz_ab_directions')+'</a>':'')+
+              (!_placeCoords&&!isOnlineBusiness(b)?'<p style="margin:8px 0 0;font-size:.78rem;color:#f59e0b"><i class="fas fa-triangle-exclamation"></i> '+_abt('biz_ab_no_gps')+'</p>':'')+
             '</div></div>':'')+
-          (isOnlineBusiness(b)?'<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Service Area</h3></div>'+aboutRow('fa-globe',b.serviceAreaText||businessAreaLabel(b))+'</div>':'')+
+          (isOnlineBusiness(b)?'<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>'+_abt('biz_ab_service_area')+'</h3></div>'+aboutRow('fa-globe',b.serviceAreaText||businessAreaLabel(b))+'</div>':'')+
         '</div>'+
         '<div style="display:grid;gap:12px">'+
-          '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Working Hours</h3></div>'+hoursHtml+'</div>'+
+          '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>'+_abt('biz_ab_working_hrs')+'</h3></div>'+hoursHtml+'</div>'+
           ((b.priceRange||b.startingPrice)?
-            '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Pricing</h3></div><div class="gh-about-list">'+
-              (b.priceRange?aboutRow('fa-tag','Range: '+b.priceRange):'')+
-              (b.startingPrice?aboutRow('fa-tag','Starting from: '+b.startingPrice):'')+
+            '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>'+_abt('biz_ov_pricing')+'</h3></div><div class="gh-about-list">'+
+              (b.priceRange?aboutRow('fa-tag',_abt('biz_ab_range')+b.priceRange):'')+
+              (b.startingPrice?aboutRow('fa-tag',_abt('biz_ab_starting_from')+b.startingPrice):'')+
             '</div></div>':'')+
-          '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>Details</h3></div><div class="gh-about-list">'+
+          '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>'+_abt('biz_ab_details')+'</h3></div><div class="gh-about-list">'+
             aboutRow('fa-store',b.category||'Business')+
-            aboutRow(isOnlineBusiness(b)?'fa-globe':'fa-location-dot',isOnlineBusiness(b)?'Online service':'Physical business')+
-            (b.plan&&b.plan!=='free'?aboutRow('fa-crown','Pro plan'):aboutRow('fa-circle-check','Free listing'))+
+            aboutRow(isOnlineBusiness(b)?'fa-globe':'fa-location-dot',isOnlineBusiness(b)?_abt('biz_ab_online'):_abt('biz_ab_physical'))+
+            (b.plan&&b.plan!=='free'?aboutRow('fa-crown',_abt('biz_ab_pro')):aboutRow('fa-circle-check',_abt('biz_ab_free_listing')))+
           '</div></div>'+
         '</div>'+
       '</div>'+
@@ -8947,15 +8950,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function loadPublicTeam(b){
     var el=$('#ghBizTeamSection'); if(!el) return;
+    var _tmt=typeof GHt==='function'?GHt:function(k){return k;};
     loadBizStaff(b.id,function(staff){
       if(!staff.length){return;}
       el.innerHTML='<div class="gh-card" style="margin-bottom:0">'+
-        '<div class="gh-biz-sec-head"><h3>Team</h3></div>'+
+        '<div class="gh-biz-sec-head"><h3>'+_tmt('biz_ab_team')+'</h3></div>'+
         '<div class="gh-team-grid">'+
         staff.map(function(s){
           return '<div class="gh-team-card">'+
             '<div class="gh-team-avatar">'+esc(initials(s.displayName||s.email||'?'))+'</div>'+
-            '<div class="gh-team-name">'+esc(s.displayName||s.email||'Team member')+'</div>'+
+            '<div class="gh-team-name">'+esc(s.displayName||s.email||_tmt('biz_ab_team_member'))+'</div>'+
             (s.roleTitle?'<div class="gh-team-role">'+esc(s.roleTitle)+'</div>':'')+
             (s.employmentType?'<div class="gh-team-type">'+esc(empTypeLabel(s.employmentType))+'</div>':'')+
           '</div>';
