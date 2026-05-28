@@ -270,10 +270,11 @@
     var list = document.getElementById('cleanList');
     if (!list) return;
     if (!items || items.length === 0) {
+      var _t = typeof GHt === 'function' ? GHt : function(k){return k;};
       list.innerHTML = '<div class="clean-empty">' +
         '<i class="fa fa-inbox fa-3x" style="margin-bottom:16px;color:#374151"></i>' +
-        '<h3>Nothing here yet</h3>' +
-        '<p>Check back soon for new content.</p>' +
+        '<h3>' + _t('cp_nothing_yet') + '</h3>' +
+        '<p>' + _t('cp_check_back') + '</p>' +
       '</div>';
       return;
     }

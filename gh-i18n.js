@@ -311,6 +311,20 @@
     ci_err_timeout:   { ka: 'დრო ამოიწურა — სცადე თავიდან',en: 'Location request timed out. Please try again.',ru: 'Время ожидания геолокации истекло. Попробуйте снова.' },
     ci_err_generic:   { ka: 'GPS შეცდომა — სცადე თავიდან', en: 'GPS error. Please try again.',ru: 'Ошибка GPS. Попробуйте снова.'                        },
 
+    /* ── Offline page ──────────────────────────────────────── */
+    off_title:        { ka: 'ინტ. კავშირი არ არის',  en: 'You\'re offline',  ru: 'Нет подключения'  },
+    off_desc:         { ka: 'შეამოწმე კავშირი და სცადე თავიდან. ბოლო ვიზიტის გვერდები შეიძლება ხელმისაწვდომი იყოს.',en: 'Check your connection and try again. Some pages you visited recently may still be available.',ru: 'Проверьте соединение и повторите. Недавно посещённые страницы могут быть доступны.' },
+    off_try_btn:      { ka: 'სცადე თავიდან',         en: 'Try again',       ru: 'Попробовать снова'},
+    off_cached:       { ka: 'ქეშირ. გვ. მუშაობს',   en: 'Cached pages still work.',ru: 'Кэшированные страницы работают.' },
+    off_checking:     { ka: 'კავშირის შემოწმება…',  en: 'Checking connection…',ru: 'Проверка соединения…' },
+    off_back_online:  { ka: '✓ კავ. აღდგა — განახლება…',en: '✓ Back online — reloading…',ru: '✓ Связь восстановлена — перезагрузка…' },
+    off_still_offline:{ ka: 'კვლავ ოფლაინ.',        en: 'Still offline.',   ru: 'Всё ещё нет связи.'},
+    off_conn_detected:{ ka: 'კავ. გამოვლინდა — სცადე',en: 'Connection detected — tap Try again.',ru: 'Соединение обнаружено — нажмите «Попробовать».' },
+
+    /* ── Content pages (empty/error state) ─────────────────── */
+    cp_nothing_yet:   { ka: 'ჯერ არ არის',           en: 'Nothing here yet', ru: 'Пока ничего'     },
+    cp_check_back:    { ka: 'ახალი კონტ. მალე გამოჩნდება',en: 'Check back soon for new content.',ru: 'Скоро появится новый контент.' },
+
     /* ── Map page ───────────────────────────────────────────── */
     map_title:        { ka: 'რუქაზე აღმოჩენა',   en: 'Discover on Map',ru: 'Открыть на карте'},
     map_biz:          { ka: 'ბიზნესი',            en: 'Biz',         ru: 'Бизнес'         },
