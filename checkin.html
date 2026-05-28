@@ -548,10 +548,10 @@
     <!-- Auth gate (shown when not logged in) -->
     <div class="ci-auth-gate" id="ciAuthGate">
       <i class="fas fa-location-dot"></i>
-      <h2>Sign in to Check In</h2>
-      <p>You need a GeoHub account to check in at places and earn XP.</p>
+      <h2 data-i18n="ci_sign_in_title">Sign in to Check In</h2>
+      <p data-i18n="ci_sign_in_sub">You need a GeoHub account to check in at places and earn XP.</p>
       <a href="auth.html?redirect=checkin.html" class="ci-btn-primary" style="display:inline-block;max-width:260px;margin:0 auto">
-        <i class="fas fa-sign-in-alt"></i> Log In / Sign Up
+        <i class="fas fa-sign-in-alt"></i> <span data-i18n="ci_login_btn">Log In / Sign Up</span>
       </a>
     </div>
 
@@ -562,8 +562,8 @@
       <div class="ci-head">
         <div class="ci-head-icon">📍</div>
         <div>
-          <h1>Check In</h1>
-          <p>Verify your visit and earn XP</p>
+          <h1 data-i18n="ci_title">Check In</h1>
+          <p data-i18n="ci_subtitle">Verify your visit and earn XP</p>
         </div>
       </div>
 
@@ -576,7 +576,7 @@
             <p id="ciPlaceMeta">Tap "Change" to search for a place</p>
           </div>
           <button class="ci-change-btn" id="ciChangePlaceBtn">
-            <i class="fas fa-search"></i> Change
+            <i class="fas fa-search"></i> <span data-i18n="ci_change_btn">Change</span>
           </button>
         </div>
       </div>
@@ -585,7 +585,7 @@
       <div class="ci-card">
         <div class="ci-card-header">
           <i class="fas fa-location-crosshairs"></i>
-          <h3>Verify Location</h3>
+          <h3 data-i18n="ci_verify_loc">Verify Location</h3>
           <span id="ciGpsStatusBadge" style="font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,0.06);color:#64748b">Not verified</span>
         </div>
         <div class="ci-gps-body">
@@ -635,10 +635,10 @@
       <div class="ci-card">
         <div class="ci-card-header">
           <i class="fas fa-pen-to-square"></i>
-          <h3>Caption <span class="ci-opt">optional</span></h3>
+          <h3 data-i18n="ci_caption">Caption <span class="ci-opt">optional</span></h3>
         </div>
         <div class="ci-caption-area">
-          <textarea class="ci-caption" id="ciCaption" placeholder="What's happening here? Share a note…" maxlength="200" rows="3"></textarea>
+          <textarea class="ci-caption" id="ciCaption" data-i18n-placeholder="ci_caption_ph" placeholder="What's happening here? Share a note…" maxlength="200" rows="3"></textarea>
           <div class="ci-caption-count"><span id="ciCaptionCount">0</span>/200</div>
         </div>
       </div>
@@ -655,16 +655,16 @@
           <i class="fas fa-bolt"></i>
           <span id="ciXpVal">50</span> XP
         </div>
-        <div class="ci-xp-label">for this check-in</div>
+        <div class="ci-xp-label" data-i18n="ci_for_checkin">for this check-in</div>
       </div>
-      <div class="ci-xp-unverified-note" id="ciUnverifiedNote">
+      <div class="ci-xp-unverified-note" id="ciUnverifiedNote" data-i18n="ci_verify_gps">
         Verify your GPS location to earn full XP
       </div>
 
       <!-- Submit -->
       <button class="ci-submit" id="ciSubmitBtn">
         <i class="fas fa-location-dot"></i>
-        Check In Now
+        <span data-i18n="ci_submit_btn">Check In Now</span>
       </button>
 
     </div><!-- /ciMain -->
@@ -674,18 +674,18 @@
   <div class="ci-modal-overlay" id="ciModalOverlay">
     <div class="ci-modal" id="ciModal">
       <div class="ci-modal-handle"></div>
-      <div class="ci-modal-title">Search for a Place</div>
+      <div class="ci-modal-title" data-i18n="ci_search_place">Search for a Place</div>
       <div class="ci-modal-search-row">
         <div class="ci-modal-search-wrap">
           <i class="fas fa-search"></i>
           <input type="text" class="ci-modal-search" id="ciModalSearch"
-                 placeholder="Restaurant, café, attraction…" autocomplete="off" spellcheck="false">
+                 data-i18n-placeholder="ci_place_ph" placeholder="Restaurant, café, attraction…" autocomplete="off" spellcheck="false">
         </div>
       </div>
       <div class="ci-modal-results" id="ciModalResults">
         <div class="ci-modal-empty">
           <i class="fas fa-location-dot"></i>
-          Start typing to search nearby places
+          <span data-i18n="ci_start_typing">Start typing to search nearby places</span>
         </div>
       </div>
     </div>
@@ -694,7 +694,7 @@
   <!-- Success overlay -->
   <div class="ci-success-overlay" id="ciSuccessOverlay">
     <div class="ci-success-ring">✓</div>
-    <h2>Checked In!</h2>
+    <h2 data-i18n="ci_checked_in">Checked In!</h2>
     <p id="ciSuccessPlace">at your location</p>
     <div class="ci-xp-awarded">
       <i class="fas fa-bolt"></i>

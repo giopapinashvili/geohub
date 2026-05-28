@@ -50,16 +50,16 @@
   <!-- Balance Hero -->
   <div class="rw-hero">
     <div class="rw-hero-left">
-      <div class="rw-hero-label"><i class="fas fa-coins" style="margin-right:5px;color:#10b981"></i>GeoPoints Balance</div>
+      <div class="rw-hero-label"><i class="fas fa-coins" style="margin-right:5px;color:#10b981"></i><span data-i18n="rw_balance">GeoPoints Balance</span></div>
       <div class="rw-hero-balance" id="rwBalance">— pts</div>
-      <div class="rw-hero-sub" id="rwBalanceSub">Loading your balance…</div>
+      <div class="rw-hero-sub" id="rwBalanceSub" data-i18n="loading">Loading your balance…</div>
     </div>
     <div class="rw-hero-actions">
       <button class="rw-btn-primary" data-send-points>
-        <i class="fas fa-paper-plane"></i> Send Points
+        <i class="fas fa-paper-plane"></i> <span data-i18n="rw_send">Send Points</span>
       </button>
       <a href="profile.html#tab-rewards" class="rw-btn-ghost">
-        <i class="fas fa-history"></i> History
+        <i class="fas fa-history"></i> <span data-i18n="rw_history">History</span>
       </a>
     </div>
   </div>
@@ -67,45 +67,45 @@
   <!-- Info strip -->
   <div style="font-size:.75rem;color:#64748b;margin-bottom:20px;display:flex;align-items:center;gap:6px">
     <i class="fas fa-info-circle" style="color:#3b82f6"></i>
-    GeoPoints are non-cash loyalty rewards. They cannot be withdrawn or exchanged for real money.
+    <span data-i18n="rw_info">GeoPoints are non-cash loyalty rewards. They cannot be withdrawn or exchanged for real money.</span>
   </div>
 
   <!-- Category Filters -->
   <div class="rw-filters">
-    <button class="rw-filter-btn active" data-rw-filter="all">All Rewards</button>
-    <button class="rw-filter-btn" data-rw-filter="food_drink">Food &amp; Drink</button>
-    <button class="rw-filter-btn" data-rw-filter="experience">Experience</button>
-    <button class="rw-filter-btn" data-rw-filter="shopping">Shopping</button>
-    <button class="rw-filter-btn" data-rw-filter="entertainment">Entertainment</button>
-    <button class="rw-filter-btn" data-rw-filter="travel">Travel</button>
+    <button class="rw-filter-btn active" data-rw-filter="all" data-i18n="rw_all">All Rewards</button>
+    <button class="rw-filter-btn" data-rw-filter="food_drink" data-i18n="rw_food">Food &amp; Drink</button>
+    <button class="rw-filter-btn" data-rw-filter="experience" data-i18n="rw_experience">Experience</button>
+    <button class="rw-filter-btn" data-rw-filter="shopping" data-i18n="rw_shopping">Shopping</button>
+    <button class="rw-filter-btn" data-rw-filter="entertainment" data-i18n="rw_entertainment">Entertainment</button>
+    <button class="rw-filter-btn" data-rw-filter="travel" data-i18n="rw_travel">Travel</button>
   </div>
 
   <!-- Rewards Grid -->
-  <div class="rw-section-title"><i class="fas fa-gift" style="margin-right:5px"></i>Available Rewards</div>
+  <div class="rw-section-title"><i class="fas fa-gift" style="margin-right:5px"></i><span data-i18n="rw_available">Available Rewards</span></div>
   <div class="rw-grid" id="rwGrid">
     <div class="rw-empty">
       <i class="fas fa-spinner fa-spin"></i>
-      <h3>Loading rewards…</h3>
-      <p>Fetching the latest rewards from GeoHub.</p>
+      <h3 data-i18n="rw_loading">Loading rewards…</h3>
+      <p data-i18n="loading">Fetching the latest rewards from GeoHub.</p>
     </div>
   </div>
 
 
   <!-- Pending Gifts -->
   <div id="rwGiftsPanel" style="display:none;margin-top:32px">
-    <div class="rw-section-title"><i class="fas fa-envelope-open-text" style="margin-right:5px;color:#10b981"></i>Pending Gifts</div>
+    <div class="rw-section-title"><i class="fas fa-envelope-open-text" style="margin-right:5px;color:#10b981"></i><span data-i18n="rw_pending_gifts">Pending Gifts</span></div>
     <div class="rw-gift-list" id="rwGiftsList"></div>
   </div>
 
   <!-- My Coupons -->
   <div id="rwCouponsPanel" style="display:none;margin-top:32px">
-    <div class="rw-section-title"><i class="fas fa-ticket-alt" style="margin-right:5px;color:#3b82f6"></i>My Coupons</div>
+    <div class="rw-section-title"><i class="fas fa-ticket-alt" style="margin-right:5px;color:#3b82f6"></i><span data-i18n="rw_my_coupons">My Coupons</span></div>
     <div class="rw-coupon-list" id="rwCouponsList"></div>
   </div>
 
   <!-- Business Coupons (visible only to business owners) -->
   <div id="rwBizCouponsPanel" style="display:none;margin-top:32px">
-    <div class="rw-section-title"><i class="fas fa-store" style="margin-right:5px;color:#f59e0b"></i>Coupons at My Business</div>
+    <div class="rw-section-title"><i class="fas fa-store" style="margin-right:5px;color:#f59e0b"></i><span data-i18n="rw_biz_coupons">Coupons at My Business</span></div>
     <div id="rwBizCouponsList"></div>
   </div>
 
