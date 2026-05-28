@@ -1346,7 +1346,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<select class="gh-select" id="ghPollDuration"><option value="1">1 day</option><option value="3" selected>3 days</option><option value="7">7 days</option></select>'+
       '</div>'+
       '<div id="ghRegularComposer">'+
-        '<textarea class="gh-textarea gh-cmp-textarea" id="ghPostText" placeholder="What\'s on your mind?" rows="4"></textarea>'+
+        '<textarea class="gh-textarea gh-cmp-textarea" id="ghPostText" data-i18n-placeholder="composer_placeholder" placeholder="What\'s on your mind?" rows="4"></textarea>'+
         '<div id="ghLinkPreviewCard" style="display:none" class="gh-lp-composer-preview"></div>'+
         '<div class="gh-feeling-row" id="ghFeelingRow">'+FEELINGS.map(function(f){ return '<button type="button" class="gh-feeling-chip" data-feeling="'+esc(f)+'">'+esc(f)+'</button>'; }).join('')+'</div>'+
         '<div id="ghSelectedFeeling" style="display:none;font-size:.84rem;color:var(--gh-green);margin:4px 0 8px;padding:4px 10px;background:rgba(16,185,129,.08);border-radius:10px"></div>'+
@@ -1463,8 +1463,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<input type="file" id="ghPostFileInput" accept="image/*" multiple style="display:none">'+
       '<div class="gh-upload-progress" id="ghPostUploadBar" style="display:none"><div class="gh-upload-track"><div class="gh-upload-bar" id="ghPostUploadFill"></div></div><span id="ghPostUploadPct">0%</span></div>';
 
-    var m = modal('Create post', body,
-      '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn ghost" id="ghSaveDraft" title="Save draft"><i class="fas fa-floppy-disk"></i></button><button class="gh-btn" id="ghSubmitPost" disabled><i class="fas fa-paper-plane"></i> Post</button>',
+    var m = modal((typeof GHt==='function'?GHt('create_post'):'Create post'), body,
+      '<button class="gh-btn ghost" data-close-modal>'+(typeof GHt==='function'?GHt('cancel'):'Cancel')+'</button><button class="gh-btn ghost" id="ghSaveDraft" title="Save draft"><i class="fas fa-floppy-disk"></i></button><button class="gh-btn" id="ghSubmitPost" disabled><i class="fas fa-paper-plane"></i> '+(typeof GHt==='function'?GHt('submit'):'Post')+'</button>',
       'ghPostModal');
 
     var pickedFiles=[], selectedFeeling='', selectedBg='', pollMode=false, feelingRowVisible=false, bgVisible=false, scheduledAt=null;
@@ -2758,15 +2758,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '</div>'+
       '<div class="gh-rx-breakdown" data-rx-pid="'+esc(pid)+'"></div>' +
       '<div class="gh-post-actions">'+
-        '<span class="gh-like-wrap"><button class="gh-act" data-like>❤️ Like</button>'+
+        '<span class="gh-like-wrap"><button class="gh-act" data-like>❤️ <span data-i18n="post_action_like">Like</span></button>'+
           '<div class="gh-reaction-strip"><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button><button data-reaction="clap">👏</button></div>'+
         '</span>'+
-        '<button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> Comment</button>'+
-        '<button class="gh-act" data-share><i class="fas fa-share"></i> Share</button>'+
-        '<button class="gh-act" data-save><i class="fas fa-bookmark"></i> Save</button>'+
+        '<button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> <span data-i18n="post_action_comment">Comment</span></button>'+
+        '<button class="gh-act" data-share><i class="fas fa-share"></i> <span data-i18n="post_action_share">Share</span></button>'+
+        '<button class="gh-act" data-save><i class="fas fa-bookmark"></i> <span data-i18n="post_action_save">Save</span></button>'+
       '</div>'+
       '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+
-        '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
+        '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" data-i18n-placeholder="comment_placeholder" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
       '</div>'+
     '</article>';
   }
@@ -2793,14 +2793,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<span><b data-comment-count>'+(p.commentCount||0)+'</b> comments</span>'+
       '</div>'+
       '<div class="gh-post-actions">'+
-        '<span class="gh-like-wrap"><button class="gh-act" data-like>❤️ Like</button>'+
+        '<span class="gh-like-wrap"><button class="gh-act" data-like>❤️ <span data-i18n="post_action_like">Like</span></button>'+
           '<div class="gh-reaction-strip"><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button><button data-reaction="clap">👏</button></div>'+
         '</span>'+
-        '<button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> Comment</button>'+
-        '<button class="gh-act" data-share><i class="fas fa-share"></i> Share</button>'+
+        '<button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> <span data-i18n="post_action_comment">Comment</span></button>'+
+        '<button class="gh-act" data-share><i class="fas fa-share"></i> <span data-i18n="post_action_share">Share</span></button>'+
       '</div>'+
       '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+
-        '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
+        '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" data-i18n-placeholder="comment_placeholder" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
       '</div>'+
     '</article>';
   }
@@ -2845,14 +2845,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<span><b data-comment-count>'+(p.commentCount||0)+'</b> comments</span>'+
       '</div>'+
       '<div class="gh-post-actions">'+
-        '<span class="gh-like-wrap"><button class="gh-act" data-like>❤️ Like</button>'+
+        '<span class="gh-like-wrap"><button class="gh-act" data-like>❤️ <span data-i18n="post_action_like">Like</span></button>'+
           '<div class="gh-reaction-strip"><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button><button data-reaction="clap">👏</button></div>'+
         '</span>'+
-        '<button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> Comment</button>'+
-        '<button class="gh-act" data-share><i class="fas fa-share"></i> Share</button>'+
+        '<button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> <span data-i18n="post_action_comment">Comment</span></button>'+
+        '<button class="gh-act" data-share><i class="fas fa-share"></i> <span data-i18n="post_action_share">Share</span></button>'+
       '</div>'+
       '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+
-        '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
+        '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" data-i18n-placeholder="comment_placeholder" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>'+
       '</div>'+
     '</article>';
   }
@@ -3000,7 +3000,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var totalRx = Number(p.likeCount||p.reactionCount||0);
 
     // Phase 41: translate button (only when post has text)
-    var translateHtml = p.text ? '<div class="gh-post-translate"><button class="gh-translate-btn" data-translate data-translate-text="'+esc((p.text||'').slice(0,500))+'">🌐 Translate</button><div class="gh-translate-result" data-translate-result hidden></div></div>' : '';
+    var translateHtml = p.text ? '<div class="gh-post-translate"><button class="gh-translate-btn" data-translate data-translate-text="'+esc((p.text||'').slice(0,500))+'" data-i18n="translate_btn">🌐 Translate</button><div class="gh-translate-result" data-translate-result hidden></div></div>' : '';
 
     // Phase 44: Repost banner
     var repostBanner = p.isRepost ? '<div class="gh-repost-banner"><i class="fas fa-retweet"></i> <strong>'+esc(name)+'</strong> reposted</div>' : '';
@@ -3039,7 +3039,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     // Comment form — hide when commentsDisabled in biz context
     var cmtFormHtml = (bizCtx && p.commentsDisabled)
       ? '<div class="gh-comments-disabled"><i class="fas fa-comment-slash"></i> Comments are turned off.</div>'
-      : '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>';
+      : '<form class="gh-comment-form" data-comment-form><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" data-i18n-placeholder="comment_placeholder" placeholder="Write a comment…"><button class="gh-btn"><i class="fas fa-paper-plane"></i></button></form>';
 
     // Card element data attributes
     var cardAttrs = ' id="post-'+esc(pid)+'" data-post-id="'+esc(pid)+'" data-author-id="'+esc(authorId)+'"';
@@ -3064,7 +3064,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       viewCountHtml+
       '<div class="gh-post-stats"><span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'">❤️ <b data-like-count>'+totalRx+'</b>'+(totalRx?' people reacted':'')+'</button></span><span><button class="gh-stats-btn" data-open-comments-btn><b data-comment-count>'+Math.max(0,Number(p.commentCount||0))+'</b> comments</button> · <button class="gh-stats-btn" data-open-shares-btn><b data-share-count>'+Number(p.shareCount||0)+'</b> shares</button>'+(Number(p.viewCount||0)>0?' · <span class="gh-view-count"><i class="fas fa-eye"></i> <span data-view-count>'+Number(p.viewCount||0)+'</span></span>':'')+'</span></div>'+
       '<div class="gh-rx-breakdown" data-rx-pid="'+esc(pid)+'"></div>'+
-      '<div class="gh-post-actions"><span class="gh-like-wrap"><button class="gh-act" data-like>❤️ Like</button><div class="gh-reaction-strip"><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button><button data-reaction="clap">👏</button></div></span><button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> Comment</button><button class="gh-act" data-share><i class="fas fa-share"></i> Share</button><button class="gh-act" data-save><i class="fas fa-bookmark"></i> Save</button></div>'+
+      '<div class="gh-post-actions"><span class="gh-like-wrap"><button class="gh-act" data-like>❤️ <span data-i18n="post_action_like">Like</span></button><div class="gh-reaction-strip"><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button><button data-reaction="clap">👏</button></div></span><button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> <span data-i18n="post_action_comment">Comment</span></button><button class="gh-act" data-share><i class="fas fa-share"></i> <span data-i18n="post_action_share">Share</span></button><button class="gh-act" data-save><i class="fas fa-bookmark"></i> <span data-i18n="post_action_save">Save</span></button></div>'+
       '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+cmtFormHtml+'</div>'+
     '</article>';
   }
@@ -4939,7 +4939,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '<div style="font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(p.fullName)+creatorChip+'</div>'+
           '<div style="font-size:.68rem;color:var(--gh-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+reason+(followerStr&&reason?' · ':'')+followerStr+'</div>'+
         '</div>'+
-        '<button class="gh-btn sm ghost gh-pymk-btn" data-pymk-uid="'+esc(p.id)+'" style="flex-shrink:0;padding:4px 8px;font-size:.72rem">Follow</button>'+
+        '<button class="gh-btn sm ghost gh-pymk-btn" data-pymk-uid="'+esc(p.id)+'" style="flex-shrink:0;padding:4px 8px;font-size:.72rem">'+(typeof GHt==='function'?GHt('follow'):'Follow')+'</button>'+
       '</div>';
     }).join('')+'</div>';
     Array.from(box.querySelectorAll('.gh-pymk-btn')).forEach(function(btn){
@@ -4947,7 +4947,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var tid=btn.dataset.pymkUid;
         if(!GS()||!GS().toggleFollow) return;
         GS().toggleFollow(tid,function(isNow){
-          btn.textContent=isNow?'Following':'Follow';
+          btn.textContent=isNow?(typeof GHt==='function'?GHt('unfollow'):'Following'):(typeof GHt==='function'?GHt('follow'):'Follow');
           btn.classList.toggle('gh-btn-active',!!isNow);
         });
       };
@@ -7336,7 +7336,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                 },{rootMargin:'300px'});
                 _lmObserver.observe(sentinel);
               } else {
-                lmBtn.innerHTML='<div class="gh-feed-end"><span>✓</span> ყველა პოსტი ნანახია</div>';
+                lmBtn.innerHTML='<div class="gh-feed-end"><span>✓</span> <span data-i18n="all_caught_up">ყველა პოსტი ნანახია</span></div>';
               }
             }
           }, n);
@@ -9266,22 +9266,23 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var btn=document.querySelector('[data-follow-business="'+businessId+'"]');
     if(!btn) return;
     var user=authUser();
-    if(!user){ btn.classList.remove('is-following'); btn.innerHTML='<i class="fas fa-plus"></i> Follow'; return; }
-    if(!fs() || !db()){ btn.innerHTML='<i class="fas fa-plus"></i> Follow'; return; }
+    var _t=typeof GHt==='function'?GHt:function(k){return k;};
+    if(!user){ btn.classList.remove('is-following'); btn.innerHTML='<i class="fas fa-plus"></i> '+_t('follow'); return; }
+    if(!fs() || !db()){ btn.innerHTML='<i class="fas fa-plus"></i> '+_t('follow'); return; }
     var id=businessId+'_'+user.uid;
     fs().getDoc(fs().doc(db(),'businessFollowers',id)).then(function(d){
       if(d.exists()){
         btn.classList.add('is-following');
-        btn.innerHTML='<i class="fas fa-check"></i> Following';
+        btn.innerHTML='<i class="fas fa-check"></i> '+_t('unfollow');
         btn.title='Click to unfollow';
       }else{
         btn.classList.remove('is-following');
-        btn.innerHTML='<i class="fas fa-plus"></i> Follow';
+        btn.innerHTML='<i class="fas fa-plus"></i> '+_t('follow');
         btn.title='Follow this business';
       }
     }).catch(function(){
       btn.classList.remove('is-following');
-      btn.innerHTML='<i class="fas fa-plus"></i> Follow';
+      btn.innerHTML='<i class="fas fa-plus"></i> '+_t('follow');
     });
   }
 
