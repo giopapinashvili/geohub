@@ -388,15 +388,8 @@
     var page = window.location.pathname;
     if (page.indexOf('auth.html') !== -1 || page.indexOf('onboarding.html') !== -1) return;
     if (user.onboardingComplete) return;
-    // Legacy users who filled key fields before onboardingComplete flag existed
-    if (user.birthday && user.gender && user.city && user.accountType) return;
-    // Legacy users who completed old onboarding (localStorage check)
-    try {
-      var stored = window.safeStorage
-        ? window.safeStorage.get('geohub_onboarding', null)
-        : JSON.parse(localStorage.getItem('geohub_onboarding') || 'null');
-      if (stored && stored.accountType) return;
-    } catch (e) {}
+    // Users who completed old onboarding have accountType set in Firestore
+    if (user.accountType) return;
     window.location.href = 'onboarding.html';
   }
 
