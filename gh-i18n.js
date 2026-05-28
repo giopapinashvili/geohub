@@ -132,6 +132,19 @@
     evt_past:         { ka: 'გასული',           en: 'Past',        ru: 'Прошедшие'     },
     evt_view:         { ka: 'ნახვა',            en: 'View',        ru: 'Смотреть'      },
     evt_rsvp:         { ka: 'დადასტ.',          en: 'RSVP',        ru: 'Пойду'         },
+    evt_going:        { ka: 'მივდივარ',         en: 'Going',       ru: 'Пойду'         },
+    evt_going_check:  { ka: 'მივდივარ ✓',       en: 'Going ✓',     ru: 'Пойду ✓'       },
+    evt_going_count:  { ka: 'მიდის',            en: 'going',       ru: 'идут'          },
+    evt_organized_by: { ka: 'ორგ.:',            en: 'Organized by',ru: 'Организатор:'  },
+    evt_get_tickets:  { ka: 'ბილეთები',         en: 'Get Tickets', ru: 'Купить билеты' },
+    evt_back:         { ka: '← ივენთები',       en: 'Back to Events',ru: '← Назад'      },
+    evt_loading:      { ka: 'ივ. იტვირთება…',   en: 'Loading event…',ru: 'Загрузка…'    },
+    evt_not_found:    { ka: 'ივენთი ვერ მოიძებნა',en: 'Event not found',ru: 'Событие не найдено' },
+    evt_no_results:   { ka: 'ივენთები ვერ მოიძებნა',en: 'No events found',ru: 'Событий не найдено' },
+    evt_no_results_tip:{ ka: 'სხვა კატეგ. სცადე ან შექმენი საკუთარი!',en: 'Try a different category or create your own!',ru: 'Попробуйте другую категорию или создайте событие!' },
+    evt_share:        { ka: 'გაზიარება',        en: 'Share',       ru: 'Поделиться'    },
+    evt_edit:         { ka: 'რედაქტ.',          en: 'Edit',        ru: 'Редактировать' },
+    evt_in_georgia:   { ka: 'ივენთები საქართველოში',en: 'Events in Georgia',ru: 'События в Грузии' },
 
     /* ── Business page ──────────────────────────────────────── */
     biz_overview:     { ka: 'მიმოხილვა',        en: 'Overview',    ru: 'Обзор'         },
@@ -173,6 +186,10 @@
     xp_rewards_title: { ka: 'XP & ჯილდოები',     en: 'XP & Rewards',ru: 'XP и Награды'  },
     xp_claim:         { ka: 'დამიბრუნე',          en: 'Claim',       ru: 'Получить'      },
     xp_claimed:       { ka: 'მიღებული',           en: 'Claimed ✓',   ru: 'Получено ✓'    },
+    xp_earn_desc:     { ka: 'მოიგე XP, გახსენი ნიშნები, ადექი ლიდ. ბორდში',en: 'Earn XP, unlock badges, climb the leaderboard',ru: 'Зарабатывайте XP, открывайте значки, поднимайтесь в рейтинге' },
+    xp_total:         { ka: 'სულ XP:',            en: 'Total XP:',   ru: 'Всего XP:'     },
+    xp_no_leaders:    { ka: 'ლიდ. ბ. ცარიელია — იყავი პირველი!',en: 'No leaderboard data yet. Be the first!',ru: 'Рейтинг пуст — будьте первым!' },
+    xp_earned:        { ka: '✓ მიღებული',         en: '✓ Earned',    ru: '✓ Получено'    },
 
     /* ── Auth page ──────────────────────────────────────────── */
     auth_back:        { ka: '← მთავარი',          en: '← Back to Home', ru: '← Главная'    },
@@ -339,6 +356,7 @@
     cr_filter_by_cat: { ka: 'კატეგორიით ფილტრი',   en: 'Filter by Category',ru: 'Фильтр по категории' },
     cr_all:           { ka: 'ყველა კრეატორი',       en: 'All Creators',   ru: 'Все авторы'      },
     cr_loading:       { ka: 'კრეატ. იტვირთება…',   en: 'Loading creators…',ru: 'Загрузка авторов…' },
+    cr_desc:          { ka: 'კრეატორთა პროფილები და სტატისტიკა — მხოლოდ რეალური მონაცემები.',en: 'Creator profiles and marketplace stats — real data only.',ru: 'Профили авторов и статистика — только реальные данные.' },
 
     /* ── Rewards JS strings ─────────────────────────────────── */
     rw_redeem:        { ka: 'გამოყენება',          en: 'Redeem',         ru: 'Использовать'    },

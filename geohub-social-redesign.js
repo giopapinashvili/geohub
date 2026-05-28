@@ -10335,7 +10335,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       center:
         '<div class="gh-card" style="padding:16px 16px 10px">'+
           '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">'+
-            '<h2 style="margin:0;font-size:1.05rem"><i class="fas fa-calendar-days"></i> Events in Georgia</h2>'+
+            '<h2 style="margin:0;font-size:1.05rem"><i class="fas fa-calendar-days"></i> '+(typeof GHt==='function'?GHt('evt_in_georgia'):'Events in Georgia')+'</h2>'+
             '<button class="gh-btn" id="ghCreateEvtBtn"><i class="fas fa-plus"></i> '+(typeof GHt==='function'?GHt('create_event'):'Create Event')+'</button>'+
           '</div>'+
           '<div class="gh-top-search" style="max-width:100%;margin-bottom:10px"><i class="fas fa-search"></i><input id="ghEvtSearch" placeholder="Search events…" autocomplete="off"></div>'+
@@ -10382,7 +10382,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           else if(_time==='today') items=items.filter(function(x){ var d=ts(x.startDate); return d&&d>=todayStart.getTime()&&d<todayEnd.getTime(); });
           else if(_time==='weekend') items=items.filter(function(x){ var d=ts(x.startDate); return d&&d>=weekendStart.getTime()&&d<weekendEnd.getTime(); });
           else if(_time==='past') items=items.filter(function(x){ var d=ts(x.startDate); return d&&d<now.getTime(); });
-          if(!items.length){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-calendar-xmark"></i><h3>No events found</h3><p>Try a different category or create your own!</p></div>'; return; }
+          if(!items.length){ var _et=typeof GHt==='function'?GHt:function(k){return k;}; box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-calendar-xmark"></i><h3>'+_et('evt_no_results')+'</h3><p>'+_et('evt_no_results_tip')+'</p></div>'; return; }
           box.innerHTML=items.map(function(ev){
             var name=ev.name||ev.title||'Event';
             var evDate=ev.startDate?new Date(ts(ev.startDate)):null;
@@ -10400,7 +10400,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                   '<div class="gh-evt-name">'+esc(name)+'</div>'+
                   '<div class="gh-evt-meta"><i class="fas fa-clock"></i> '+esc(dateStr)+'</div>'+
                   (ev.location||ev.city?'<div class="gh-evt-meta"><i class="fas fa-map-marker-alt"></i> '+esc(ev.location||ev.city)+'</div>':'')+
-                  (rsvp?'<div class="gh-evt-meta"><i class="fas fa-users"></i> '+rsvp+' going</div>':'')+
+                  (rsvp?'<div class="gh-evt-meta"><i class="fas fa-users"></i> '+rsvp+' '+(typeof GHt==='function'?GHt('evt_going_count'):'going')+'</div>':'')+
                   (ev.category?'<span class="gh-chip" style="margin-top:6px">'+esc(ev.category)+'</span>':'')+
                   '<div class="gh-evt-actions">'+
                     '<button class="gh-btn sm" data-evt-view="'+esc(ev.id)+'">'+(typeof GHt==='function'?GHt('evt_view'):'View')+'</button>'+
@@ -10433,17 +10433,19 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var op=going?fs().arrayRemove(u.uid):fs().arrayUnion(u.uid);
     fs().updateDoc(fs().doc(db(),'events',evId),{ attendees:op, rsvpCount:fs().increment(going?-1:1) }).then(function(){
       btn.classList.toggle('rsvp-active',!going);
-      btn.innerHTML=(!going?'<i class="fas fa-check-circle"></i> Going':'<i class="fas fa-check"></i> RSVP');
-      toast(!going?'🎉 You\'re going to '+evName+'!':'RSVP removed');
+      var _et=typeof GHt==='function'?GHt:function(k){return k;};
+      btn.innerHTML=(!going?'<i class="fas fa-check-circle"></i> '+_et('evt_going_check'):'<i class="fas fa-check"></i> '+_et('evt_rsvp'));
+      toast(!going?'🎉 '+evName:'RSVP removed');
     }).catch(function(err){ toast('Failed: '+(err.message||err.code),'error'); });
   }
 
   function _renderEventDetail(evId){
-    shell({ active:'events', center:'<div id="ghEvtDetail"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>Loading event…</h3></div></div>' });
+    shell({ active:'events', center:'<div id="ghEvtDetail"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>'+(typeof GHt==='function'?GHt('evt_loading'):'Loading event…')+'</h3></div></div>' });
     ready(function(){
-      if(!fs()||!db()){ document.getElementById('ghEvtDetail').innerHTML='<div class="gh-card gh-empty"><h3>Unavailable</h3></div>'; return; }
+      var _et=typeof GHt==='function'?GHt:function(k){return k;};
+      if(!fs()||!db()){ document.getElementById('ghEvtDetail').innerHTML='<div class="gh-card gh-empty"><h3>'+_et('rw_unavailable')+'</h3></div>'; return; }
       fs().getDoc(fs().doc(db(),'events',evId)).then(function(snap){
-        if(!snap.exists()){ document.getElementById('ghEvtDetail').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-calendar-xmark"></i><h3>Event not found</h3><a class="gh-btn" href="events.html">Back</a></div>'; return; }
+        if(!snap.exists()){ document.getElementById('ghEvtDetail').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-calendar-xmark"></i><h3>'+_et('evt_not_found')+'</h3><a class="gh-btn" href="events.html">'+_et('evt_back')+'</a></div>'; return; }
         var ev=Object.assign({id:evId},snap.data());
         var name=ev.name||ev.title||'Event';
         var evDate=ev.startDate?new Date(ts(ev.startDate)):null;
@@ -10466,22 +10468,22 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                   '<h1 style="margin:0 0 8px;font-size:1.3rem">'+esc(name)+'</h1>'+
                   '<div class="gh-evt-meta" style="margin-bottom:6px"><i class="fas fa-clock"></i> '+esc(dateStr)+(endStr?' – '+esc(endStr):'')+'</div>'+
                   (ev.location?'<div class="gh-evt-meta" style="margin-bottom:6px"><i class="fas fa-map-marker-alt"></i> '+esc(ev.location)+'</div>':'')+
-                  (ev.organizer||ev.organizerName?'<div class="gh-evt-meta" style="margin-bottom:6px"><i class="fas fa-user"></i> Organized by '+esc(ev.organizer||ev.organizerName)+'</div>':'')+
+                  (ev.organizer||ev.organizerName?'<div class="gh-evt-meta" style="margin-bottom:6px"><i class="fas fa-user"></i> '+_et('evt_organized_by')+' '+esc(ev.organizer||ev.organizerName)+'</div>':'')+
                   '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">'+
                     '<button class="gh-btn'+(isGoing?' active':'')+'" id="ghEvtRsvpBtn" data-ev-id="'+esc(evId)+'" data-ev-name="'+esc(name)+'">'+
-                      (isGoing?'<i class="fas fa-check-circle"></i> Going':'<i class="fas fa-check"></i> RSVP')+
+                      (isGoing?'<i class="fas fa-check-circle"></i> '+_et('evt_going_check'):'<i class="fas fa-check"></i> '+_et('evt_rsvp'))+
                     '</button>'+
-                    '<button class="gh-btn ghost" id="ghEvtShareBtn"><i class="fas fa-share"></i> Share</button>'+
-                    (isOrg?'<button class="gh-btn ghost" id="ghEvtEditBtn"><i class="fas fa-pen"></i> Edit</button>':'')+
+                    '<button class="gh-btn ghost" id="ghEvtShareBtn"><i class="fas fa-share"></i> '+_et('evt_share')+'</button>'+
+                    (isOrg?'<button class="gh-btn ghost" id="ghEvtEditBtn"><i class="fas fa-pen"></i> '+_et('evt_edit')+'</button>':'')+
                   '</div>'+
-                  '<div class="gh-evt-meta" style="margin-top:8px"><i class="fas fa-users"></i> <strong>'+rsvp+'</strong> people going</div>'+
+                  '<div class="gh-evt-meta" style="margin-top:8px"><i class="fas fa-users"></i> <strong>'+rsvp+'</strong> '+_et('evt_going_count')+'</div>'+
                 '</div>'+
               '</div>'+
               (ev.description?'<div class="gh-evt-desc" style="margin-top:16px;line-height:1.6;color:var(--gh-text)">'+esc(ev.description)+'</div>':'')+
-              (ev.ticketUrl?'<a class="gh-btn" style="margin-top:16px;display:inline-block" href="'+esc(ev.ticketUrl)+'" target="_blank" rel="noopener"><i class="fas fa-ticket"></i> Get Tickets</a>':'')+
+              (ev.ticketUrl?'<a class="gh-btn" style="margin-top:16px;display:inline-block" href="'+esc(ev.ticketUrl)+'" target="_blank" rel="noopener"><i class="fas fa-ticket"></i> '+_et('evt_get_tickets')+'</a>':'')+
             '</div>'+
           '</div>'+
-          '<a class="gh-btn ghost" href="events.html" style="margin-top:10px;display:block;text-align:center"><i class="fas fa-arrow-left"></i> Back to Events</a>';
+          '<a class="gh-btn ghost" href="events.html" style="margin-top:10px;display:block;text-align:center"><i class="fas fa-arrow-left"></i> '+_et('evt_back')+'</a>';
         var rsvpBtn=document.getElementById('ghEvtRsvpBtn');
         if(rsvpBtn) rsvpBtn.onclick=function(){ if(!requireLogin()) return; _doRsvp(evId,name,rsvpBtn); };
         var shareBtn=document.getElementById('ghEvtShareBtn');
@@ -11004,7 +11006,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '<div class="gh-card" style="text-align:center;padding:24px">'+
             '<div style="font-size:2rem;margin-bottom:8px">🏆</div>'+
             '<h2 style="margin:0 0 4px" data-i18n="xp_rewards_title">GeoHub XP & Rewards</h2>'+
-            '<p class="gh-muted" style="margin:0">Earn XP, unlock badges, climb the leaderboard</p>'+
+            '<p class="gh-muted" style="margin:0">'+(typeof GHt==='function'?GHt('xp_earn_desc'):'Earn XP, unlock badges, climb the leaderboard')+'</p>'+
           '</div>'+
           '<div id="ghGamifContent"><div class="gh-card gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
         '</div>'
@@ -11049,7 +11051,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             '<div style="display:flex;align-items:center;gap:16px">'+
               '<div class="gh-xp-level-badge">Lv.'+myLevel+'</div>'+
               '<div style="flex:1">'+
-                '<div style="font-size:.85rem;color:var(--gh-muted);margin-bottom:4px">Total XP: <strong style="color:var(--gh-green)">'+myXP.toLocaleString()+'</strong></div>'+
+                '<div style="font-size:.85rem;color:var(--gh-muted);margin-bottom:4px">'+_xt('xp_total')+' <strong style="color:var(--gh-green)">'+myXP.toLocaleString()+'</strong></div>'+
                 '<div class="gh-xp-bar"><div class="gh-xp-fill" style="width:'+pct+'%"></div></div>'+
                 '<div style="font-size:.75rem;color:var(--gh-muted);margin-top:2px">'+pct+'% to Level '+(myLevel+1)+'</div>'+
               '</div>'+
@@ -11076,7 +11078,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                 return '<div class="gh-badge-item'+(earned?' earned':'')+'" title="'+esc(b.desc)+(earned?'\nEarned!':'\n+'+b.xp+' XP')+'">'+
                   '<div class="gh-badge-icon">'+b.icon+'</div>'+
                   '<div class="gh-badge-name">'+esc(b.name)+'</div>'+
-                  '<div class="gh-badge-xp">'+esc(earned?'✓ Earned':'+'+b.xp+' XP')+'</div>'+
+                  '<div class="gh-badge-xp">'+esc(earned?_xt('xp_earned'):'+'+b.xp+' XP')+'</div>'+
                 '</div>';
               }).join('')+
             '</div>'+
@@ -11095,7 +11097,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                   '</div>';
                 }).join('')+
               '</div>':
-              '<div class="gh-muted" style="font-size:.85rem">No leaderboard data yet. Be the first!</div>')+
+              '<div class="gh-muted" style="font-size:.85rem">'+_xt('xp_no_leaders')+'</div>')+
           '</div>';
         // Bind claim buttons
         box.querySelectorAll('.gh-mission-claim').forEach(function(btn){
