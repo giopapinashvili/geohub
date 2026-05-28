@@ -524,7 +524,7 @@
         btn.innerHTML = '<i class="fas fa-clock"></i> Cancel Request';
       } else {
         btn.classList.remove('following');
-        btn.innerHTML = '<i class="fas fa-user-plus"></i> Add Friend';
+        btn.innerHTML = '<i class="fas fa-user-plus"></i> '+(typeof GHt==='function'?GHt('profile_add_friend'):'Add Friend');
       }
     });
   }
@@ -637,9 +637,10 @@
   };
 
   function renderTabs(user, fbUser) {
-    emptyTab('#tab-posts', 'fa-seedling', 'No posts yet', 'Real posts from Firestore will appear here.', 'feed.html?compose=1', 'Create Post');
-    emptyTab('#tab-checkins', 'fa-location-dot', 'No check-ins yet', 'Real check-ins will appear here.', 'checkin.html', 'Check in');
-    emptyTab('#tab-friends', 'fa-user-group', 'No friends yet', 'Friends and requests will appear here.', null, '');
+    var _pt=typeof GHt==='function'?GHt:function(k){return k;};
+    emptyTab('#tab-posts', 'fa-seedling', _pt('profile_posts')+': '+_pt('no_results'), 'Real posts from Firestore will appear here.', 'feed.html?compose=1', _pt('create_post'));
+    emptyTab('#tab-checkins', 'fa-location-dot', _pt('profile_checkins')+': '+_pt('no_results'), 'Real check-ins will appear here.', 'checkin.html', _pt('ci_title'));
+    emptyTab('#tab-friends', 'fa-user-group', _pt('profile_friends')+': '+_pt('no_results'), 'Friends and requests will appear here.', null, '');
     loadHighlights(user, fbUser);
     renderAboutTab(user);
     renderBadgeTab(user);
