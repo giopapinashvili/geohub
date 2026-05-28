@@ -10199,22 +10199,23 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function renderSearch(){
+    var _st=typeof GHt==='function'?GHt:function(k){return k;};
     var _qParam=new URLSearchParams(location.search).get('q')||'';
     shell({ active:'search',
       center:
         '<div class="gh-card" style="padding:16px 16px 8px">'+
-          '<h2 style="margin:0 0 12px;font-size:1.05rem"><i class="fas fa-search"></i> Search GeoHub</h2>'+
-          '<div class="gh-top-search" style="max-width:100%;margin-bottom:10px"><i class="fas fa-search"></i><input id="ghSearchMain" placeholder="Search people, posts, businesses, groups…" value="'+esc(_qParam)+'" autocomplete="off"></div>'+
+          '<h2 style="margin:0 0 12px;font-size:1.05rem"><i class="fas fa-search"></i> '+_st('srch_title')+'</h2>'+
+          '<div class="gh-top-search" style="max-width:100%;margin-bottom:10px"><i class="fas fa-search"></i><input id="ghSearchMain" placeholder="'+_st('search_placeholder')+'" value="'+esc(_qParam)+'" autocomplete="off"></div>'+
           '<div class="gh-pill-row" id="ghSearchTabs">'+
-            '<button class="gh-pill active" data-stab="all">All</button>'+
-            '<button class="gh-pill" data-stab="people"><i class="fas fa-user"></i> People</button>'+
-            '<button class="gh-pill" data-stab="posts"><i class="fas fa-newspaper"></i> Posts</button>'+
-            '<button class="gh-pill" data-stab="businesses"><i class="fas fa-store"></i> Businesses</button>'+
-            '<button class="gh-pill" data-stab="groups"><i class="fas fa-users"></i> Groups</button>'+
-            '<button class="gh-pill" data-stab="events"><i class="fas fa-calendar"></i> Events</button>'+
+            '<button class="gh-pill active" data-stab="all">'+_st('notif_all')+'</button>'+
+            '<button class="gh-pill" data-stab="people"><i class="fas fa-user"></i> '+_st('srch_people')+'</button>'+
+            '<button class="gh-pill" data-stab="posts"><i class="fas fa-newspaper"></i> '+_st('profile_posts')+'</button>'+
+            '<button class="gh-pill" data-stab="businesses"><i class="fas fa-store"></i> '+_st('nav_business')+'</button>'+
+            '<button class="gh-pill" data-stab="groups"><i class="fas fa-users"></i> '+_st('nav_groups')+'</button>'+
+            '<button class="gh-pill" data-stab="events"><i class="fas fa-calendar"></i> '+_st('nav_events')+'</button>'+
           '</div>'+
         '</div>'+
-        '<div id="ghSearchResults"><div class="gh-card gh-empty" style="min-height:180px"><i class="fas fa-search"></i><h3>Type to search</h3><p>Search for people, posts, businesses and more</p></div></div>'
+        '<div id="ghSearchResults"><div class="gh-card gh-empty" style="min-height:180px"><i class="fas fa-search"></i><h3>'+_st('srch_type_to_search')+'</h3><p>'+_st('search_placeholder')+'</p></div></div>'
     });
     ready(function(){
       var inp=document.getElementById('ghSearchMain');
@@ -10228,7 +10229,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       inp.onkeydown=function(e){ if(e.key==='Enter'){ clearTimeout(_timer); _q=this.value.trim(); _doSearch(); } };
       tabs.addEventListener('click',function(e){ var b=e.target.closest('[data-stab]'); if(!b) return; _tab=b.dataset.stab; tabs.querySelectorAll('.gh-pill').forEach(function(p){ p.classList.toggle('active',p===b); }); _doSearch(); });
       function _doSearch(){
-        if(!_q){ res.innerHTML='<div class="gh-card gh-empty" style="min-height:180px"><i class="fas fa-search"></i><h3>Type to search</h3></div>'; return; }
+        if(!_q){ res.innerHTML='<div class="gh-card gh-empty" style="min-height:180px"><i class="fas fa-search"></i><h3>'+(typeof GHt==='function'?GHt('srch_type_to_search'):'Type to search')+'</h3></div>'; return; }
         res.innerHTML='<div class="gh-card gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div>';
         history.replaceState(null,'',location.pathname+'?q='+encodeURIComponent(_q));
         var ps=[];
@@ -10588,15 +10589,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
      PHASE 74 — Reels / Short Video Feed
   ══════════════════════════════════════════════════════════════ */
   function renderReels(){
+    var _rt=typeof GHt==='function'?GHt:function(k){return k;};
     shell({ active:'reels',
       center:
         '<div id="ghReelsFeed" class="gh-reels-feed">'+
-          '<div class="gh-reels-loading"><i class="fas fa-circle-notch fa-spin"></i><span>Loading Reels…</span></div>'+
+          '<div class="gh-reels-loading"><i class="fas fa-circle-notch fa-spin"></i><span>'+_rt('reels_loading')+'</span></div>'+
         '</div>'
     });
     ready(function(){
       var feed=document.getElementById('ghReelsFeed'); if(!feed) return;
-      if(!fs()||!db()){ feed.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-video-slash"></i><h3>Reels unavailable</h3></div>'; return; }
+      var _rt2=typeof GHt==='function'?GHt:function(k){return k;};
+      if(!fs()||!db()){ feed.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-video-slash"></i><h3>'+_rt2('reels_unavailable')+'</h3></div>'; return; }
       var _currentIdx=0; var _reels=[]; var _obs=null;
       fs().getDocs(fs().query(
         fs().collection(db(),'posts'),
@@ -10608,7 +10611,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       )).then(function(snap){
         snap.forEach(function(d){ _reels.push(Object.assign({id:d.id},d.data())); });
         if(!_reels.length){
-          feed.innerHTML='<div class="gh-card gh-empty" style="min-height:400px"><i class="fas fa-film"></i><h3>No reels yet</h3><p>Post a short video to be featured here!</p></div>';
+          var _rt3=typeof GHt==='function'?GHt:function(k){return k;};
+          feed.innerHTML='<div class="gh-card gh-empty" style="min-height:400px"><i class="fas fa-film"></i><h3>'+_rt3('reels_empty')+'</h3><p>'+_rt3('reels_empty_sub')+'</p></div>';
           return;
         }
         feed.innerHTML='';
@@ -10753,12 +10757,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
      PHASE 77 — GeoAI Assistant
   ══════════════════════════════════════════════════════════════ */
   function renderAssistant(){
+    var _at=typeof GHt==='function'?GHt:function(k){return k;};
     shell({ active:'assistant',
       center:
         '<div class="gh-ai-chat" id="ghAiChat">'+
           '<div class="gh-ai-header">'+
             '<div class="gh-ai-avatar"><i class="fas fa-robot"></i></div>'+
-            '<div><strong>GeoAI</strong><div class="gh-muted" style="font-size:.8rem">Your Georgian travel & lifestyle assistant</div></div>'+
+            '<div><strong>GeoAI</strong><div class="gh-muted" style="font-size:.8rem">'+_at('ai_subtitle')+'</div></div>'+
             '<button class="gh-btn ghost sm" id="ghAiClear"><i class="fas fa-trash"></i></button>'+
           '</div>'+
           '<div class="gh-ai-messages" id="ghAiMessages">'+
@@ -10779,7 +10784,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             '<button class="gh-pill" data-ai-q="კვირის trip plan Kazbegi-ში">🗓️ Trip plan</button>'+
           '</div>'+
           '<div class="gh-ai-input-row">'+
-            '<textarea class="gh-ai-input" id="ghAiInput" placeholder="Ask GeoAI anything…" rows="1"></textarea>'+
+            '<textarea class="gh-ai-input" id="ghAiInput" placeholder="'+_at('ai_placeholder')+'" rows="1"></textarea>'+
             '<button class="gh-btn" id="ghAiSend"><i class="fas fa-paper-plane"></i></button>'+
           '</div>'+
         '</div>'
@@ -10804,7 +10809,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       }
       if(clearBtn) clearBtn.onclick=function(){
         _history=[]; try{localStorage.removeItem('gh_ai_history');}catch(e){}
-        msgs.innerHTML='<div class="gh-ai-msg bot"><div class="gh-ai-bubble">Chat cleared! How can I help?</div></div>';
+        var _atc=typeof GHt==='function'?GHt:function(k){return k;};
+        msgs.innerHTML='<div class="gh-ai-msg bot"><div class="gh-ai-bubble">'+_atc('ai_cleared')+'</div></div>';
       };
       if(quickBtns) quickBtns.addEventListener('click',function(e){
         var b=e.target.closest('[data-ai-q]'); if(!b) return;
@@ -10880,16 +10886,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
      PHASE 78 — Map / Discover Page (Leaflet.js)
   ══════════════════════════════════════════════════════════════ */
   function renderMapPage(){
+    var _mt=typeof GHt==='function'?GHt:function(k){return k;};
     shell({ active:'map',
       center:
         '<div class="gh-map-page" id="ghMapPage">'+
           '<div class="gh-card" style="padding:12px 16px">'+
             '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">'+
-              '<h2 style="margin:0;font-size:1rem"><i class="fas fa-map"></i> Discover on Map</h2>'+
+              '<h2 style="margin:0;font-size:1rem"><i class="fas fa-map"></i> '+_mt('map_title')+'</h2>'+
               '<div class="gh-pill-row" id="ghMapFilter" style="gap:6px">'+
-                '<button class="gh-pill active" data-map-layer="posts"><i class="fas fa-newspaper"></i> Posts</button>'+
-                '<button class="gh-pill" data-map-layer="events"><i class="fas fa-calendar"></i> Events</button>'+
-                '<button class="gh-pill" data-map-layer="businesses"><i class="fas fa-store"></i> Biz</button>'+
+                '<button class="gh-pill active" data-map-layer="posts"><i class="fas fa-newspaper"></i> '+_mt('profile_posts')+'</button>'+
+                '<button class="gh-pill" data-map-layer="events"><i class="fas fa-calendar"></i> '+_mt('nav_events')+'</button>'+
+                '<button class="gh-pill" data-map-layer="businesses"><i class="fas fa-store"></i> '+_mt('map_biz')+'</button>'+
               '</div>'+
             '</div>'+
           '</div>'+
@@ -12133,6 +12140,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     {icon:'🔕',title:'Ad-free experience',desc:'No sponsored content in your feed'}
   ];
   function renderPremium(){
+    var _pt=typeof GHt==='function'?GHt:function(k){return k;};
     shell({ active:'premium',
       center:
         '<div class="gh-premium-page">'+
@@ -12143,20 +12151,20 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '</div>'+
           '<div class="gh-premium-plans">'+
             '<div class="gh-premium-plan">'+
-              '<div class="gh-premium-plan-name">Monthly</div>'+
-              '<div class="gh-premium-price">9.99 <span>GEL/month</span></div>'+
-              '<button class="gh-btn" id="ghPremMonthly" style="width:100%;background:linear-gradient(135deg,#f59e0b,#ec4899)">Start Monthly</button>'+
+              '<div class="gh-premium-plan-name">'+_pt('prem_monthly')+'</div>'+
+              '<div class="gh-premium-price">9.99 <span>'+_pt('prem_per_month')+'</span></div>'+
+              '<button class="gh-btn" id="ghPremMonthly" style="width:100%;background:linear-gradient(135deg,#f59e0b,#ec4899)">'+_pt('prem_start_monthly')+'</button>'+
             '</div>'+
             '<div class="gh-premium-plan featured">'+
-              '<div class="gh-premium-badge">Best value</div>'+
-              '<div class="gh-premium-plan-name">Yearly</div>'+
-              '<div class="gh-premium-price">79 <span>GEL/year</span></div>'+
-              '<div class="gh-muted" style="font-size:.75rem;margin-bottom:10px">Save 34% vs monthly</div>'+
-              '<button class="gh-btn" id="ghPremYearly" style="width:100%;background:linear-gradient(135deg,#f59e0b,#ec4899)">Start Yearly</button>'+
+              '<div class="gh-premium-badge">'+_pt('prem_best_value')+'</div>'+
+              '<div class="gh-premium-plan-name">'+_pt('prem_yearly')+'</div>'+
+              '<div class="gh-premium-price">79 <span>'+_pt('prem_per_year')+'</span></div>'+
+              '<div class="gh-muted" style="font-size:.75rem;margin-bottom:10px">'+_pt('prem_save')+'</div>'+
+              '<button class="gh-btn" id="ghPremYearly" style="width:100%;background:linear-gradient(135deg,#f59e0b,#ec4899)">'+_pt('prem_start_yearly')+'</button>'+
             '</div>'+
           '</div>'+
           '<div class="gh-premium-features">'+
-            '<h3 style="margin:0 0 14px;font-size:.95rem">Everything included:</h3>'+
+            '<h3 style="margin:0 0 14px;font-size:.95rem">'+_pt('prem_included')+'</h3>'+
             '<div class="gh-premium-feature-grid">'+
               _PREMIUM_FEATURES.map(function(f){
                 return '<div class="gh-premium-feature">'+
@@ -12166,7 +12174,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               }).join('')+
             '</div>'+
           '</div>'+
-          '<p class="gh-muted" style="font-size:.78rem;text-align:center;margin-top:16px">Cancel anytime. Payment via GeoCoins or card integration (coming soon).</p>'+
+          '<p class="gh-muted" style="font-size:.78rem;text-align:center;margin-top:16px">'+_pt('prem_cancel')+' Payment via GeoCoins or card integration (coming soon).</p>'+
         '</div>'
     });
     ready(function(){

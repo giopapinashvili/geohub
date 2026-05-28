@@ -172,6 +172,39 @@
     xp_rewards_title: { ka: 'XP & ჯილდოები',     en: 'XP & Rewards',ru: 'XP и Награды'  },
     xp_claim:         { ka: 'დამიბრუნე',          en: 'Claim',       ru: 'Получить'      },
     xp_claimed:       { ka: 'მიღებული',           en: 'Claimed ✓',   ru: 'Получено ✓'    },
+
+    /* ── Search page ────────────────────────────────────────── */
+    srch_title:       { ka: 'GeoHub-ში ძებნა',   en: 'Search GeoHub',ru: 'Поиск в GeoHub'},
+    srch_people:      { ka: 'ადამიანები',          en: 'People',      ru: 'Люди'          },
+    srch_type_to_search:{ ka: 'მოძებნე…',         en: 'Type to search',ru: 'Введите запрос'},
+    srch_no_results:  { ka: 'შედეგი არ მოიძებნა', en: 'No results',  ru: 'Нет результатов'},
+
+    /* ── Reels ──────────────────────────────────────────────── */
+    reels_loading:    { ka: 'Reels იტვირთება…',  en: 'Loading Reels…',ru: 'Загрузка Reels…'},
+    reels_unavailable:{ ka: 'Reels მიუწვდომელია',en: 'Reels unavailable',ru: 'Reels недоступны'},
+    reels_empty:      { ka: 'Reels ჯერ არ არის', en: 'No reels yet', ru: 'Пока нет Reels' },
+    reels_empty_sub:  { ka: 'გამოაქვეყნე ვიდეო აქ!',en: 'Post a short video to be featured here!',ru: 'Опубликуйте видео здесь!' },
+
+    /* ── AI Assistant ───────────────────────────────────────── */
+    ai_subtitle:      { ka: 'შენი Georgian ასისტენტი',en: 'Your Georgian travel & lifestyle assistant',ru: 'Ваш грузинский ассистент' },
+    ai_placeholder:   { ka: 'GeoAI-ს ჰკითხე…',  en: 'Ask GeoAI anything…',ru: 'Спросите GeoAI…'  },
+    ai_cleared:       { ka: 'ჩატი გასუფთავდა!', en: 'Chat cleared! How can I help?',ru: 'Чат очищен! Чем помочь?' },
+
+    /* ── Map page ───────────────────────────────────────────── */
+    map_title:        { ka: 'რუქაზე აღმოჩენა',   en: 'Discover on Map',ru: 'Открыть на карте'},
+    map_biz:          { ka: 'ბიზნესი',            en: 'Biz',         ru: 'Бизнес'         },
+
+    /* ── Premium ────────────────────────────────────────────── */
+    prem_monthly:     { ka: 'ყოველთვიური',        en: 'Monthly',     ru: 'Ежемесячно'     },
+    prem_yearly:      { ka: 'ყოველწლიური',        en: 'Yearly',      ru: 'Ежегодно'       },
+    prem_best_value:  { ka: 'საუკეთესო',          en: 'Best value',  ru: 'Выгоднее'       },
+    prem_per_month:   { ka: 'ლარი/თვე',           en: 'GEL/month',   ru: 'GEL/мес'        },
+    prem_per_year:    { ka: 'ლარი/წელი',          en: 'GEL/year',    ru: 'GEL/год'        },
+    prem_save:        { ka: '34%-ით დაზოგვა',     en: 'Save 34% vs monthly',ru: 'Экономия 34%' },
+    prem_start_monthly:{ ka: 'ყოველთვ. გამოწ.',   en: 'Start Monthly',ru: 'Подписаться (мес)'},
+    prem_start_yearly:{ ka: 'ყოველწ. გამოწ.',     en: 'Start Yearly', ru: 'Подписаться (год)'},
+    prem_included:    { ka: 'ყველაფერი შედის:',   en: 'Everything included:',ru: 'Всё включено:'},
+    prem_cancel:      { ka: 'გაუქმება ნებისმიერ დროს.',en: 'Cancel anytime.',ru: 'Отмена в любое время.'},
   };
 
   /* ── Core t() function ───────────────────────────────────── */
