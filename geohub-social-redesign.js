@@ -7600,26 +7600,27 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var box=$('#ghBusinessTabContent'); if(!box) return;
     // Hard ownership guard — re-validated in JS before any UI renders
     var u=authUser();
+    var _dt=typeof GHt==='function'?GHt:function(k){return k;};
     if(!u||!u.uid||(b.ownerId!==u.uid&&b.createdBy!==u.uid&&b.userId!==u.uid)){
-      box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-lock"></i><h3>Access Denied</h3><p>You do not have permission to manage this business.</p></div>';
+      box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-lock"></i><h3>'+_dt('bd_access_denied')+'</h3><p>'+_dt('bd_access_denied_msg')+'</p></div>';
       return;
     }
     if(!state.bizDashSection) state.bizDashSection='overview';
     var sections=[
-      {id:'overview', icon:'fa-chart-line',  l:'Overview'},
-      {id:'settings', icon:'fa-gear',        l:'Settings'},
-      {id:'posts',    icon:'fa-newspaper',   l:'Posts'},
-      {id:'services', icon:'fa-briefcase',   l:'Services'},
-      {id:'gallery',  icon:'fa-images',      l:'Gallery'},
-      {id:'reviews',  icon:'fa-star',        l:'Reviews'},
-      {id:'employees',icon:'fa-user-group',  l:'Employees'},
-      {id:'analytics',icon:'fa-chart-bar',   l:'Analytics'},
-      {id:'qr',       icon:'fa-qrcode',      l:'QR Check-in'},
+      {id:'overview', icon:'fa-chart-line',  l:_dt('bd_nav_overview')},
+      {id:'settings', icon:'fa-gear',        l:_dt('bd_nav_settings')},
+      {id:'posts',    icon:'fa-newspaper',   l:_dt('bd_nav_posts')},
+      {id:'services', icon:'fa-briefcase',   l:_dt('bd_nav_services')},
+      {id:'gallery',  icon:'fa-images',      l:_dt('bd_nav_gallery')},
+      {id:'reviews',  icon:'fa-star',        l:_dt('bd_nav_reviews')},
+      {id:'employees',icon:'fa-user-group',  l:_dt('bd_nav_employees')},
+      {id:'analytics',icon:'fa-chart-bar',   l:_dt('bd_nav_analytics')},
+      {id:'qr',       icon:'fa-qrcode',      l:_dt('bd_nav_qr')},
     ];
     var sideNav='<nav class="gh-dash-sidebar-nav">'+
       sections.map(function(s){ return '<button class="gh-dash-nav-item'+(state.bizDashSection===s.id?' active':'')+'" data-dash-section="'+s.id+'"><i class="fas '+s.icon+'"></i><span>'+s.l+'</span></button>'; }).join('')+
       '<hr class="gh-dash-divider">'+
-      '<button class="gh-dash-nav-item" data-edit-business-direct><i class="fas fa-pen"></i><span>Edit Page</span></button>'+
+      '<button class="gh-dash-nav-item" data-edit-business-direct><i class="fas fa-pen"></i><span>'+_dt('bd_edit_page')+'</span></button>'+
     '</nav>';
     box.innerHTML=
       '<div class="gh-dash-wrap">'+
@@ -7658,34 +7659,35 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function renderBizDashOverview(b){
     var cont=$('#ghDashContent'); if(!cont) return;
+    var _ovdt=typeof GHt==='function'?GHt:function(k){return k;};
     var ratingAvg=b.ratingCount>0?(b.ratingTotal/b.ratingCount).toFixed(1):(b.ratingAverage>0?Number(b.ratingAverage).toFixed(1):null);
     var statusColor=b.status==='active'?'#10b981':b.status==='suspended'?'#ef4444':'#f59e0b';
     cont.innerHTML=
       '<div class="gh-dash-section">'+
-        '<h2 class="gh-dash-section-title">Overview</h2>'+
+        '<h2 class="gh-dash-section-title">'+_ovdt('bd_nav_overview')+'</h2>'+
         '<div class="gh-dash-stats-grid">'+
-          '<div class="gh-dash-stat-card"><i class="fas fa-users"></i><strong>'+Number(b.followerCount||0)+'</strong><span>Followers</span></div>'+
-          '<div class="gh-dash-stat-card"><i class="fas fa-newspaper"></i><strong>'+Number(b.postCount||0)+'</strong><span>Posts</span></div>'+
-          '<div class="gh-dash-stat-card"><i class="fas fa-star" style="color:#facc15"></i><strong>'+(ratingAvg||'—')+'</strong><span>Rating</span></div>'+
-          '<div class="gh-dash-stat-card"><i class="fas fa-comments"></i><strong>'+Number(b.reviewCount||0)+'</strong><span>Reviews</span></div>'+
+          '<div class="gh-dash-stat-card"><i class="fas fa-users"></i><strong>'+Number(b.followerCount||0)+'</strong><span>'+_ovdt('bd_ov_followers')+'</span></div>'+
+          '<div class="gh-dash-stat-card"><i class="fas fa-newspaper"></i><strong>'+Number(b.postCount||0)+'</strong><span>'+_ovdt('bd_nav_posts')+'</span></div>'+
+          '<div class="gh-dash-stat-card"><i class="fas fa-star" style="color:#facc15"></i><strong>'+(ratingAvg||'—')+'</strong><span>'+_ovdt('biz_ov_rating')+'</span></div>'+
+          '<div class="gh-dash-stat-card"><i class="fas fa-comments"></i><strong>'+Number(b.reviewCount||0)+'</strong><span>'+_ovdt('bd_nav_reviews')+'</span></div>'+
         '</div>'+
         '<div class="gh-dash-info-grid">'+
           '<div class="gh-card" style="margin-bottom:0">'+
-            '<div class="gh-biz-sec-head"><h3>Business Info</h3><button class="gh-btn sm ghost" data-dash-section="settings"><i class="fas fa-pencil"></i> Edit</button></div>'+
+            '<div class="gh-biz-sec-head"><h3>'+_ovdt('bd_ov_biz_info')+'</h3><button class="gh-btn sm ghost" data-dash-section="settings"><i class="fas fa-pencil"></i> '+_ovdt('bd_edit_page')+'</button></div>'+
             '<div class="gh-about-list">'+
               aboutRow('fa-store',b.title||b.name||'Untitled')+
-              aboutRow('fa-tag',b.category||'No category')+
+              aboutRow('fa-tag',b.category||_ovdt('bd_ov_no_cat'))+
               '<div class="gh-about-row"><i class="fas fa-circle-dot" style="color:'+statusColor+'"></i><span style="color:'+statusColor+';font-weight:700;text-transform:capitalize">'+esc(b.status||'active')+'</span></div>'+
-              (b.plan&&b.plan!=='free'?aboutRow('fa-crown','Pro plan'):aboutRow('fa-circle-check','Free listing'))+
+              (b.plan&&b.plan!=='free'?aboutRow('fa-crown',_ovdt('biz_ab_pro')):aboutRow('fa-circle-check',_ovdt('biz_ab_free_listing')))+
             '</div>'+
           '</div>'+
           '<div class="gh-card" style="margin-bottom:0">'+
-            '<div class="gh-biz-sec-head"><h3>Quick Actions</h3></div>'+
+            '<div class="gh-biz-sec-head"><h3>'+_ovdt('bd_ov_quick')+'</h3></div>'+
             '<div style="display:flex;flex-direction:column;gap:8px">'+
-              '<button class="gh-btn full ghost" data-ov-post-as-biz><i class="fas fa-bullhorn"></i> Post an update</button>'+
-              '<a class="gh-btn full ghost" href="business-suite.html?businessId='+encodeURIComponent(b.id)+'"><i class="fas fa-briefcase"></i> Business Suite</a>'+
-              '<button class="gh-btn full ghost" data-dash-section="services"><i class="fas fa-briefcase"></i> Manage services</button>'+
-              '<button class="gh-btn full ghost" data-dash-section="gallery"><i class="fas fa-images"></i> Upload to gallery</button>'+
+              '<button class="gh-btn full ghost" data-ov-post-as-biz><i class="fas fa-bullhorn"></i> '+_ovdt('bd_ov_post_update')+'</button>'+
+              '<a class="gh-btn full ghost" href="business-suite.html?businessId='+encodeURIComponent(b.id)+'"><i class="fas fa-briefcase"></i> '+_ovdt('biz_suite')+'</a>'+
+              '<button class="gh-btn full ghost" data-dash-section="services"><i class="fas fa-briefcase"></i> '+_ovdt('bd_ov_manage_svc')+'</button>'+
+              '<button class="gh-btn full ghost" data-dash-section="gallery"><i class="fas fa-images"></i> '+_ovdt('bd_ov_gallery_upload')+'</button>'+
             '</div>'+
           '</div>'+
         '</div>'+
@@ -7699,27 +7701,28 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function renderBizDashSettings(b){
     var cont=$('#ghDashContent'); if(!cont) return;
+    var _st=typeof GHt==='function'?GHt:function(k){return k;};
     var sLinks=b.socialLinks||{};
     cont.innerHTML=
       '<div class="gh-dash-section">'+
-        '<h2 class="gh-dash-section-title">Settings</h2>'+
+        '<h2 class="gh-dash-section-title">'+_st('bd_nav_settings')+'</h2>'+
         '<div class="gh-card">'+
-          '<div class="gh-biz-sec-head"><h3>Basic Info</h3></div>'+
+          '<div class="gh-biz-sec-head"><h3>'+_st('bd_set_basic')+'</h3></div>'+
           '<div class="gh-form-rows">'+
-            '<label class="gh-form-label" for="dsTitle">Business Name<input class="gh-input" id="dsTitle" value="'+esc(b.title||b.name||'')+'"></label>'+
+            '<label class="gh-form-label" for="dsTitle">'+_st('bd_set_biz_name')+'<input class="gh-input" id="dsTitle" value="'+esc(b.title||b.name||'')+'"></label>'+
             '<label class="gh-form-label" for="dsDesc">Description<textarea class="gh-textarea" id="dsDesc" rows="3">'+esc(b.description||'')+'</textarea></label>'+
             '<label class="gh-form-label" for="dsCat">Category<input class="gh-input" id="dsCat" value="'+esc(b.category||'')+'" placeholder="e.g. Restaurant, Salon, Tech"></label>'+
           '</div>'+
         '</div>'+
         '<div class="gh-card">'+
-          '<div class="gh-biz-sec-head"><h3>Contact & Links</h3></div>'+
+          '<div class="gh-biz-sec-head"><h3>'+_st('bd_set_contact')+'</h3></div>'+
           '<div class="gh-form-rows">'+
             '<div class="gh-form-grid">'+
-              '<label class="gh-form-label" for="dsPhone">Phone<input class="gh-input" id="dsPhone" value="'+esc(b.phone||'')+'" placeholder="+995 5XX XXX XXX"></label>'+
-              '<label class="gh-form-label" for="dsEmail">Email<input class="gh-input" id="dsEmail" value="'+esc(b.email||'')+'" placeholder="contact@yourbusiness.com"></label>'+
+              '<label class="gh-form-label" for="dsPhone">'+_st('biz_ov_phone')+'<input class="gh-input" id="dsPhone" value="'+esc(b.phone||'')+'" placeholder="+995 5XX XXX XXX"></label>'+
+              '<label class="gh-form-label" for="dsEmail">'+_st('biz_ov_email')+'<input class="gh-input" id="dsEmail" value="'+esc(b.email||'')+'" placeholder="contact@yourbusiness.com"></label>'+
             '</div>'+
-            '<label class="gh-form-label" for="dsWebsite">Website<input class="gh-input" id="dsWebsite" value="'+esc(b.website||'')+'" placeholder="https://yourbusiness.com"></label>'+
-            '<label class="gh-form-label" for="dsBooking">Booking / Appointment URL<input class="gh-input" id="dsBooking" value="'+esc(b.bookingUrl||'')+'" placeholder="https://..."></label>'+
+            '<label class="gh-form-label" for="dsWebsite">'+_st('biz_ov_website')+'<input class="gh-input" id="dsWebsite" value="'+esc(b.website||'')+'" placeholder="https://yourbusiness.com"></label>'+
+            '<label class="gh-form-label" for="dsBooking">'+_st('bd_set_booking')+'<input class="gh-input" id="dsBooking" value="'+esc(b.bookingUrl||'')+'" placeholder="https://..."></label>'+
             '<div class="gh-form-grid">'+
               '<label class="gh-form-label" for="dsIg"><i class="fab fa-instagram"></i> Instagram<input class="gh-input" id="dsIg" value="'+esc(sLinks.instagram||'')+'" placeholder="@handle"></label>'+
               '<label class="gh-form-label" for="dsFb"><i class="fab fa-facebook"></i> Facebook<input class="gh-input" id="dsFb" value="'+esc(sLinks.facebook||'')+'" placeholder="page name or URL"></label>'+
@@ -7732,45 +7735,46 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '</div>'+
         '</div>'+
         '<div class="gh-card">'+
-          '<div class="gh-biz-sec-head"><h3>Working Hours</h3><span class="gh-form-hint">Customers see when you\'re open</span></div>'+
+          '<div class="gh-biz-sec-head"><h3>'+_st('biz_ab_working_hrs')+'</h3><span class="gh-form-hint">'+_st('bd_set_hours_hint')+'</span></div>'+
           workingHoursEditorHtml(b.workingHours)+
         '</div>'+
         (!isOnlineBusiness(b)?
         '<div class="gh-card">'+
-          '<div class="gh-biz-sec-head"><h3>Location Coordinates</h3><span class="gh-form-hint">Required for GPS check-in verification</span></div>'+
+          '<div class="gh-biz-sec-head"><h3>'+_st('bd_set_loc')+'</h3><span class="gh-form-hint">'+_st('bd_set_loc_hint')+'</span></div>'+
           '<div class="gh-form-rows">'+
-            (!getPlaceCoords(b)?'<div style="padding:6px 0 10px;color:#f59e0b;font-size:.82rem"><i class="fas fa-triangle-exclamation"></i> No coordinates saved — customers cannot GPS-verify check-ins at this place.</div>':'')+
+            (!getPlaceCoords(b)?'<div style="padding:6px 0 10px;color:#f59e0b;font-size:.82rem"><i class="fas fa-triangle-exclamation"></i> '+_st('bd_set_no_coords')+'</div>':'')+
             '<div class="gh-form-grid">'+
               '<label class="gh-form-label" for="dsLat">Latitude<input class="gh-input" id="dsLat" type="number" step="any" min="-90" max="90" value="'+(getPlaceCoords(b)?getPlaceCoords(b).lat:esc(b.lat||b.latitude||''))+'" placeholder="e.g. 41.6938"></label>'+
               '<label class="gh-form-label" for="dsLng">Longitude<input class="gh-input" id="dsLng" type="number" step="any" min="-180" max="180" value="'+(getPlaceCoords(b)?getPlaceCoords(b).lng:esc(b.lng||b.longitude||''))+'" placeholder="e.g. 44.8015"></label>'+
             '</div>'+
-            '<button type="button" class="gh-btn sm ghost" id="dsGetLocBtn" style="margin-top:4px"><i class="fas fa-location-crosshairs"></i> Use My Current Location</button>'+
+            '<button type="button" class="gh-btn sm ghost" id="dsGetLocBtn" style="margin-top:4px"><i class="fas fa-location-crosshairs"></i> '+_st('bd_set_use_loc')+'</button>'+
           '</div>'+
         '</div>':'')+
         '<div class="gh-card">'+
-          '<div class="gh-biz-sec-head"><h3>Branding</h3></div>'+
+          '<div class="gh-biz-sec-head"><h3>'+_st('bd_set_branding')+'</h3></div>'+
           '<div class="gh-form-rows">'+
-            '<label class="gh-form-label" for="dsCover">Cover Image URL<input class="gh-input" id="dsCover" value="'+esc(b.coverUrl||'')+'" placeholder="https://..."></label>'+
-            '<label class="gh-form-label" for="dsLogo">Logo URL<input class="gh-input" id="dsLogo" value="'+esc(b.logoUrl||'')+'" placeholder="https://..."></label>'+
+            '<label class="gh-form-label" for="dsCover">'+_st('bd_set_cover')+'<input class="gh-input" id="dsCover" value="'+esc(b.coverUrl||'')+'" placeholder="https://..."></label>'+
+            '<label class="gh-form-label" for="dsLogo">'+_st('bd_set_logo')+'<input class="gh-input" id="dsLogo" value="'+esc(b.logoUrl||'')+'" placeholder="https://..."></label>'+
           '</div>'+
         '</div>'+
-        '<div class="gh-dash-actions"><button class="gh-btn" id="dsSaveBtn"><i class="fas fa-check"></i> Save changes</button></div>'+
+        '<div class="gh-dash-actions"><button class="gh-btn" id="dsSaveBtn"><i class="fas fa-check"></i> '+_st('bd_set_save')+'</button></div>'+
       '</div>';
     $('#dsSaveBtn').onclick=function(){ saveBizSettings(b); };
     var dsLocBtn=$('#dsGetLocBtn');
     if(dsLocBtn) dsLocBtn.onclick=function(){
       if(!navigator.geolocation){ toast('GPS not available on this device','error'); return; }
-      dsLocBtn.disabled=true; dsLocBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Getting location…';
+      var _glbt=typeof GHt==='function'?GHt:function(k){return k;};
+      dsLocBtn.disabled=true; dsLocBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> '+_glbt('bd_set_getting_loc');
       navigator.geolocation.getCurrentPosition(function(pos){
         var lat=pos.coords.latitude.toFixed(6);
         var lng=pos.coords.longitude.toFixed(6);
         var latEl=$('#dsLat'); var lngEl=$('#dsLng');
         if(latEl) latEl.value=lat;
         if(lngEl) lngEl.value=lng;
-        dsLocBtn.disabled=false; dsLocBtn.innerHTML='<i class="fas fa-location-crosshairs"></i> Use My Current Location';
+        dsLocBtn.disabled=false; dsLocBtn.innerHTML='<i class="fas fa-location-crosshairs"></i> '+_glbt('bd_set_use_loc');
         toast('Location filled: '+lat+', '+lng);
       },function(err){
-        dsLocBtn.disabled=false; dsLocBtn.innerHTML='<i class="fas fa-location-crosshairs"></i> Use My Current Location';
+        dsLocBtn.disabled=false; dsLocBtn.innerHTML='<i class="fas fa-location-crosshairs"></i> '+_glbt('bd_set_use_loc');
         var msgs={1:'Location permission denied.',2:'Signal unavailable.',3:'Request timed out.'};
         toast(msgs[err.code]||'GPS error','error');
       },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
@@ -7832,23 +7836,25 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(lat!=null&&lng!=null){ fields.lat=lat; fields.lng=lng; }
     if(wh) fields.workingHours=wh;
     var btn=$('#dsSaveBtn');
-    if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Saving…';}
+    var _svbt=typeof GHt==='function'?GHt:function(k){return k;};
+    if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> '+_svbt('bd_set_saving');}
     fs().updateDoc(fs().doc(db(),'businesses',b.id),fields).then(function(){
-      toast('Settings saved');
-      if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-check"></i> Save changes';}
+      toast(_svbt('bd_set_saved'));
+      if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-check"></i> '+_svbt('bd_set_save');}
     }).catch(function(err){
       toast('Save failed: '+(err.message||err),'error');
-      if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-check"></i> Save changes';}
+      if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-check"></i> '+_svbt('bd_set_save');}
     });
   }
 
   function renderBizDashPosts(b){
     var cont=$('#ghDashContent'); if(!cont) return;
+    var _pst=typeof GHt==='function'?GHt:function(k){return k;};
     var bTitle=b.title||b.name||'Business';
     cont.innerHTML=
       '<div class="gh-dash-section">'+
-        '<div class="gh-biz-sec-head"><h2 class="gh-dash-section-title">Posts</h2>'+
-          '<button class="gh-btn" data-dp-post-as-biz><i class="fas fa-bullhorn"></i> Post update</button>'+
+        '<div class="gh-biz-sec-head"><h2 class="gh-dash-section-title">'+_pst('bd_nav_posts')+'</h2>'+
+          '<button class="gh-btn" data-dp-post-as-biz><i class="fas fa-bullhorn"></i> '+_pst('bd_posts_btn')+'</button>'+
         '</div>'+
         '<div id="ghDashPostsList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
       '</div>';
@@ -7856,7 +7862,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     listenTargetPosts('business',b.id,function(posts){
       var el=$('#ghDashPostsList'); if(!el) return;
       posts=posts.filter(canSeePost);
-      if(!posts.length){el.innerHTML='<div class="gh-empty"><i class="fas fa-newspaper"></i><h3>No posts yet</h3><p>Post updates to engage with your followers.</p></div>'; return;}
+      if(!posts.length){el.innerHTML='<div class="gh-empty"><i class="fas fa-newspaper"></i><h3>'+_pst('bd_posts_empty')+'</h3><p>'+_pst('bd_posts_empty_hint')+'</p></div>'; return;}
       el.innerHTML=posts.map(postCard).join('');
       bindPostInteractions(el);
       hydratePostAuthorAvatars(el);
@@ -7871,42 +7877,43 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   ─────────────────────────────────────────────────────────────────── */
   function renderBizDashQr(b){
     var cont=$('#ghDashContent'); if(!cont) return;
+    var _qrt=typeof GHt==='function'?GHt:function(k){return k;};
     cont.innerHTML=
       '<div class="gh-dash-section">'+
-        '<h2 class="gh-dash-section-title">QR Check-in</h2>'+
-        '<div id="ghQrBody"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i><p>Loading QR code…</p></div></div>'+
+        '<h2 class="gh-dash-section-title">'+_qrt('bd_nav_qr')+'</h2>'+
+        '<div id="ghQrBody"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i><p>'+_qrt('bd_qr_loading')+'</p></div></div>'+
       '</div>';
 
     var GQ=window.GeoQr;
     if(!GQ){
-      var el2=$('#ghQrBody'); if(el2) el2.innerHTML='<div class="gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>QR engine not loaded</h3><p>Please reload the page.</p></div>';
+      var el2=$('#ghQrBody'); if(el2) el2.innerHTML='<div class="gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>'+_qrt('bd_qr_no_engine')+'</h3><p>'+_qrt('bd_qr_no_engine_hint')+'</p></div>';
       return;
     }
 
     GQ.ensureBusinessQr(b.id, function(res){
       var el=$('#ghQrBody'); if(!el) return;
       if(!res){
-        el.innerHTML='<div class="gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Could not generate QR</h3><p>Make sure you own this business and try again.</p></div>';
+        el.innerHTML='<div class="gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>'+_qrt('bd_qr_error')+'</h3><p>'+_qrt('bd_qr_error_hint')+'</p></div>';
         return;
       }
       var scanUrl=location.origin+'/scan.html?code='+encodeURIComponent(res.qrCode);
       el.innerHTML=
         '<div class="gh-card" style="text-align:center">'+
-          '<div class="gh-biz-sec-head" style="justify-content:center"><h3>Your Business QR Code</h3></div>'+
-          '<p style="font-size:0.82rem;color:var(--gh-muted,#64748b);margin:0 0 16px">Customers scan this code to check in instantly and earn 60 XP.</p>'+
+          '<div class="gh-biz-sec-head" style="justify-content:center"><h3>'+_qrt('bd_qr_card_title')+'</h3></div>'+
+          '<p style="font-size:0.82rem;color:var(--gh-muted,#64748b);margin:0 0 16px">'+_qrt('bd_qr_desc')+'</p>'+
           '<div id="ghQrCanvas" style="display:inline-block;background:#fff;padding:16px;border-radius:16px;margin-bottom:16px"></div>'+
           '<div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px">'+
-            '<button class="gh-btn ghost sm" id="ghQrCopy"><i class="fas fa-copy"></i> Copy Code</button>'+
-            '<button class="gh-btn sm" id="ghQrDownload"><i class="fas fa-download"></i> Download PNG</button>'+
+            '<button class="gh-btn ghost sm" id="ghQrCopy"><i class="fas fa-copy"></i> '+_qrt('bd_qr_copy')+'</button>'+
+            '<button class="gh-btn sm" id="ghQrDownload"><i class="fas fa-download"></i> '+_qrt('bd_qr_download')+'</button>'+
           '</div>'+
           '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:0.8rem;margin-bottom:16px">'+
             '<i class="fas fa-qrcode" style="color:#10b981;flex-shrink:0"></i>'+
             '<code style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;color:#94a3b8" title="'+esc(res.qrCode)+'">'+esc(res.qrCode)+'</code>'+
           '</div>'+
-          '<div style="font-size:0.78rem;color:var(--gh-muted,#64748b)">QR check-ins: <strong id="ghQrScanCount">…</strong></div>'+
+          '<div style="font-size:0.78rem;color:var(--gh-muted,#64748b)">'+_qrt('bd_qr_scan_count')+' <strong id="ghQrScanCount">…</strong></div>'+
         '</div>'+
         '<div class="gh-card" style="background:rgba(99,102,241,0.05);border-color:rgba(99,102,241,0.15)">'+
-          '<div class="gh-biz-sec-head"><h3>How to use</h3></div>'+
+          '<div class="gh-biz-sec-head"><h3>'+_qrt('bd_qr_how_to')+'</h3></div>'+
           '<ol style="padding-left:18px;font-size:0.85rem;line-height:2;color:var(--gh-muted,#64748b)">'+
             '<li>Download and print the QR code, or display it on a screen.</li>'+
             '<li>Place it at your entrance, counter, or table.</li>'+
@@ -7969,10 +7976,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function renderBizDashServices(b){
     var cont=$('#ghDashContent'); if(!cont) return;
+    var _svct=typeof GHt==='function'?GHt:function(k){return k;};
     cont.innerHTML=
       '<div class="gh-dash-section">'+
-        '<div class="gh-biz-sec-head"><h2 class="gh-dash-section-title">Services</h2>'+
-          '<button class="gh-btn" data-ds-add-svc><i class="fas fa-plus"></i> Add service</button>'+
+        '<div class="gh-biz-sec-head"><h2 class="gh-dash-section-title">'+_svct('bd_nav_services')+'</h2>'+
+          '<button class="gh-btn" data-ds-add-svc><i class="fas fa-plus"></i> '+_svct('bd_svc_add')+'</button>'+
         '</div>'+
         '<div id="ghDashSvcList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
       '</div>';
@@ -7991,7 +7999,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     el.innerHTML='<div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div>';
     loadServices(b.id,function(items){
       var el2=$('#ghDashSvcList'); if(!el2) return;
-      if(!items.length){ el2.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>No services yet</h3><p>Add your first service to show clients what you offer.</p><button class="gh-btn" data-ds-add-svc>Add service</button></div>'; return; }
+      var _lsvt=typeof GHt==='function'?GHt:function(k){return k;};
+      if(!items.length){ el2.innerHTML='<div class="gh-empty"><i class="fas fa-briefcase"></i><h3>'+_lsvt('bd_svc_empty')+'</h3><p>'+_lsvt('bd_svc_empty_hint')+'</p><button class="gh-btn" data-ds-add-svc>'+_lsvt('bd_svc_add')+'</button></div>'; return; }
       el2.innerHTML='<div class="gh-svc-dash-list">'+items.map(function(s){
         return '<div class="gh-svc-dash-item'+(s.active?'':' gh-svc-inactive')+'">'+
           (s.imageUrl?'<img class="gh-svc-dash-thumb" src="'+esc(s.imageUrl)+'" alt="'+esc(s.title)+'" loading="lazy" decoding="async" onerror="this.style.display=\'none\'">':'')+
@@ -7999,14 +8008,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             '<div class="gh-svc-dash-badges">'+
               (s.featured?'<span class="gh-svc-badge featured"><i class="fas fa-star"></i></span>':'')+
               '<span class="gh-svc-badge type">'+esc(s.type||'service')+'</span>'+
-              (!s.active?'<span class="gh-svc-badge inactive">Inactive</span>':'')+
+              (!s.active?'<span class="gh-svc-badge inactive">'+_lsvt('bd_svc_inactive')+'</span>':'')+
             '</div>'+
             '<strong>'+esc(s.title)+'</strong>'+(s.price?'<span class="gh-svc-dash-price">'+esc(s.price)+' '+esc(s.currency||'GEL')+'</span>':'')+
             (s.description?'<p>'+esc(s.description.slice(0,80))+(s.description.length>80?'…':'')+'</p>':'')+
           '</div>'+
           '<div class="gh-svc-mgmt-row">'+
-            '<button class="gh-gallery-feat-btn" data-toggle-svc-feat="'+esc(s.id)+'" data-is-svc-feat="'+!!s.featured+'" title="'+(s.featured?'Unmark featured':'Mark featured')+'">'+(s.featured?'<i class="fas fa-star" style="color:#facc15"></i>':'<i class="far fa-star"></i>')+'</button>'+
-            '<button class="gh-btn sm ghost" data-toggle-svc-active="'+esc(s.id)+'" data-is-svc-active="'+!!s.active+'" title="'+(s.active?'Deactivate':'Activate')+'">'+(s.active?'<i class="fas fa-eye"></i>':'<i class="fas fa-eye-slash"></i>')+'</button>'+
+            '<button class="gh-gallery-feat-btn" data-toggle-svc-feat="'+esc(s.id)+'" data-is-svc-feat="'+!!s.featured+'" title="'+(s.featured?_lsvt('bd_svc_feat_unmark'):_lsvt('bd_svc_feat_mark'))+'">'+(s.featured?'<i class="fas fa-star" style="color:#facc15"></i>':'<i class="far fa-star"></i>')+'</button>'+
+            '<button class="gh-btn sm ghost" data-toggle-svc-active="'+esc(s.id)+'" data-is-svc-active="'+!!s.active+'" title="'+(s.active?_lsvt('bd_svc_deactivate'):_lsvt('bd_svc_activate'))+'">'+(s.active?'<i class="fas fa-eye"></i>':'<i class="fas fa-eye-slash"></i>')+'</button>'+
             '<button class="gh-btn sm ghost" data-edit-service="'+esc(s.id)+'"><i class="fas fa-pencil"></i></button>'+
             '<button class="gh-btn sm ghost" data-delete-service="'+esc(s.id)+'"><i class="fas fa-trash"></i></button>'+
           '</div>'+
@@ -8016,19 +8025,21 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function deleteService(b, serviceId){
+    var _dsct=typeof GHt==='function'?GHt:function(k){return k;};
     if(!serviceId||!fs()||!db()) return;
-    if(!confirm('Delete this service?')) return;
+    if(!confirm(_dsct('bd_svc_delete_cfm'))) return;
     fs().deleteDoc(fs().doc(db(),'businesses',b.id,'services',serviceId)).then(function(){
-      toast('Service deleted'); loadDashServices(b);
+      toast(_dsct('bd_svc_deleted')); loadDashServices(b);
     }).catch(function(err){ toast('Failed: '+(err.message||err),'error'); });
   }
 
   function renderBizDashGallery(b){
     var cont=$('#ghDashContent'); if(!cont) return;
+    var _galt=typeof GHt==='function'?GHt:function(k){return k;};
     cont.innerHTML=
       '<div class="gh-dash-section">'+
-        '<div class="gh-biz-sec-head"><h2 class="gh-dash-section-title">Gallery</h2>'+
-          '<button class="gh-btn" data-dg-add><i class="fas fa-plus"></i> Add photo</button>'+
+        '<div class="gh-biz-sec-head"><h2 class="gh-dash-section-title">'+_galt('bd_nav_gallery')+'</h2>'+
+          '<button class="gh-btn" data-dg-add><i class="fas fa-plus"></i> '+_galt('bd_gal_add')+'</button>'+
         '</div>'+
         '<div id="ghDashGallery"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
       '</div>';
@@ -8045,14 +8056,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     el.innerHTML='<div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div>';
     loadGalleryPhotos(b.id,function(photos){
       var el2=$('#ghDashGallery'); if(!el2) return;
-      if(!photos.length){ el2.innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>No photos yet</h3><p>Upload photos to showcase your business.</p><button class="gh-btn" data-dg-add>Add first photo</button></div>'; return; }
+      var _lgalt=typeof GHt==='function'?GHt:function(k){return k;};
+      if(!photos.length){ el2.innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>'+_lgalt('bd_gal_empty')+'</h3><p>'+_lgalt('bd_gal_empty_hint')+'</p><button class="gh-btn" data-dg-add>'+_lgalt('bd_gal_add_first')+'</button></div>'; return; }
       el2.innerHTML='<div class="gh-gallery-grid">'+photos.map(function(p){
         return '<div class="gh-gallery-item gh-gallery-item-mgmt'+(p.featured?' gh-gallery-item-featured':'')+'" data-ph-id="'+esc(p.id)+'">'+
           '<img src="'+esc(p.url||p.imageUrl||'')+'" alt="'+esc(p.caption||'')+'" loading="lazy" onerror="this.closest(\'.gh-gallery-item\').style.display=\'none\'">'+
           (p.featured?'<span class="gh-gallery-featured-badge"><i class="fas fa-star"></i></span>':'')+
           (p.caption?'<div class="gh-gallery-caption">'+esc(p.caption)+'</div>':'')+
           '<div class="gh-gallery-mgmt-bar">'+
-            '<button class="gh-gallery-feat-btn" data-toggle-featured="'+esc(p.id)+'" data-is-featured="'+!!p.featured+'" title="'+(p.featured?'Unmark featured':'Mark as featured')+'">'+(p.featured?'<i class="fas fa-star" style="color:#facc15"></i>':'<i class="far fa-star"></i>')+'</button>'+
+            '<button class="gh-gallery-feat-btn" data-toggle-featured="'+esc(p.id)+'" data-is-featured="'+!!p.featured+'" title="'+(p.featured?_lgalt('bd_gal_feat_unmark'):_lgalt('bd_gal_feat_mark'))+'">'+(p.featured?'<i class="fas fa-star" style="color:#facc15"></i>':'<i class="far fa-star"></i>')+'</button>'+
             '<button class="gh-gallery-delete-btn" data-delete-photo="'+esc(p.id)+'"><i class="fas fa-trash"></i></button>'+
           '</div>'+
         '</div>';
@@ -8061,29 +8073,31 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function deleteGalleryPhoto(b, photoId){
+    var _dgpt=typeof GHt==='function'?GHt:function(k){return k;};
     if(!photoId||!fs()||!db()) return;
-    if(!confirm('Delete this photo?')) return;
+    if(!confirm(_dgpt('bd_gal_delete_cfm'))) return;
     fs().deleteDoc(fs().doc(db(),'businesses',b.id,'gallery',photoId)).then(function(){
-      toast('Photo deleted'); loadDashGallery(b);
+      toast(_dgpt('bd_gal_deleted')); loadDashGallery(b);
     }).catch(function(err){ toast('Failed: '+(err.message||err),'error'); });
   }
 
   function renderBizDashReviews(b){
     var cont=$('#ghDashContent'); if(!cont) return;
+    var _revt=typeof GHt==='function'?GHt:function(k){return k;};
     var ratingAvg=b.ratingCount>0?(b.ratingTotal/b.ratingCount).toFixed(1):(b.ratingAverage>0?Number(b.ratingAverage).toFixed(1):null);
     cont.innerHTML=
       '<div class="gh-dash-section">'+
-        '<h2 class="gh-dash-section-title">Reviews</h2>'+
+        '<h2 class="gh-dash-section-title">'+_revt('bd_nav_reviews')+'</h2>'+
         (ratingAvg?
           '<div class="gh-card" style="margin-bottom:0">'+
             '<div class="gh-biz-rating-row"><div class="gh-biz-rating-big">'+ratingAvg+'</div>'+
-            '<div><span class="gh-biz-rating-stars">'+starsHtml(ratingAvg)+'</span><span class="gh-biz-rating-sub">'+Number(b.ratingCount||b.reviewCount||0)+' reviews</span></div></div>'+
+            '<div><span class="gh-biz-rating-stars">'+starsHtml(ratingAvg)+'</span><span class="gh-biz-rating-sub">'+Number(b.ratingCount||b.reviewCount||0)+' '+_revt('biz_ov_reviews')+'</span></div></div>'+
           '</div>' : '')+
         '<div class="gh-card" style="margin-bottom:0"><div id="ghDashRevList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>'+
       '</div>';
     listenBusinessReviews(b.id,function(items){
       var el=$('#ghDashRevList'); if(!el) return;
-      if(!items.length){el.innerHTML='<div class="gh-empty"><i class="fas fa-star"></i><h3>No reviews yet</h3><p>Customer reviews will appear here.</p></div>'; return;}
+      if(!items.length){el.innerHTML='<div class="gh-empty"><i class="fas fa-star"></i><h3>'+_revt('bd_rev_empty')+'</h3><p>'+_revt('bd_rev_empty_hint')+'</p></div>'; return;}
       el.innerHTML='<div class="gh-reviews-wrap">'+items.map(function(r){
         var normR=window.GH&&window.GH.normReview?window.GH.normReview(r,r.id):r;
         var rating=Number(normR.rating||r.rating||0); var name=normR.userName||'User';
@@ -8096,7 +8110,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '<p class="gh-review-text">'+esc(normR.text||r.text||'')+'</p>'+
           '<div class="gh-review-footer">'+
             '<span class="gh-review-date">'+(normR.createdAt?new Date(ts(normR.createdAt)).toLocaleDateString():'')+'</span>'+
-            '<button class="gh-btn sm ghost" disabled title="Reply feature coming in a future update"><i class="fas fa-reply"></i> Reply</button>'+
+            '<button class="gh-btn sm ghost" disabled title="Reply feature coming in a future update"><i class="fas fa-reply"></i> '+_revt('bd_rev_reply')+'</button>'+
           '</div>'+
         '</div>';
       }).join('')+'</div>';
@@ -8105,7 +8119,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   /* ── Employee invite helpers ─────────────────────────────── */
   function empTypeLabel(t){
-    var m={full_time:'Full-time',part_time:'Part-time',freelance:'Freelance',temporary:'Temporary',internship:'Internship'};
+    var _et=typeof GHt==='function'?GHt:function(k){return k;};
+    var m={full_time:_et('bd_inv_full_time'),part_time:_et('bd_inv_part_time'),freelance:_et('bd_inv_freelance'),temporary:_et('bd_inv_temporary'),internship:_et('bd_inv_internship')};
     return m[t]||t||'';
   }
   function empStatusBadge(s){
@@ -8130,26 +8145,27 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
   function openInviteModal(b){
     if(!requireLogin()) return;
-    modal('Invite Employee',
-      '<label class="gh-form-label">Email address *</label>'+
+    var _imt=typeof GHt==='function'?GHt:function(k){return k;};
+    modal(_imt('bd_inv_title'),
+      '<label class="gh-form-label">'+_imt('bd_inv_email')+'</label>'+
       '<input class="gh-input" id="ghInvEmail" type="email" placeholder="employee@example.com">'+
       '<div style="height:10px"></div>'+
-      '<label class="gh-form-label">Role / Job title *</label>'+
+      '<label class="gh-form-label">'+_imt('bd_inv_role')+'</label>'+
       '<input class="gh-input" id="ghInvRole" placeholder="e.g. Sales Manager, Developer…" maxlength="60">'+
       '<div style="height:10px"></div>'+
-      '<label class="gh-form-label">Employment type</label>'+
+      '<label class="gh-form-label">'+_imt('bd_inv_type')+'</label>'+
       '<select class="gh-select" id="ghInvType">'+
-        '<option value="full_time">Full-time</option>'+
-        '<option value="part_time">Part-time</option>'+
-        '<option value="freelance">Freelance</option>'+
-        '<option value="temporary">Temporary</option>'+
-        '<option value="internship">Internship</option>'+
+        '<option value="full_time">'+_imt('bd_inv_full_time')+'</option>'+
+        '<option value="part_time">'+_imt('bd_inv_part_time')+'</option>'+
+        '<option value="freelance">'+_imt('bd_inv_freelance')+'</option>'+
+        '<option value="temporary">'+_imt('bd_inv_temporary')+'</option>'+
+        '<option value="internship">'+_imt('bd_inv_internship')+'</option>'+
       '</select>'+
       '<div style="height:10px"></div>'+
-      '<label class="gh-form-label">Personal message (optional)</label>'+
-      '<textarea class="gh-textarea" id="ghInvMsg" placeholder="Add a note to your invitation…" rows="3" maxlength="300"></textarea>'+
+      '<label class="gh-form-label">'+_imt('bd_inv_msg')+'</label>'+
+      '<textarea class="gh-textarea" id="ghInvMsg" placeholder="'+_imt('bd_inv_msg_ph')+'" rows="3" maxlength="300"></textarea>'+
       '<div id="ghInvError" style="display:none" class="gh-form-hint error"></div>',
-      '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSendInvite"><i class="fas fa-paper-plane"></i> Send Invitation</button>',
+      '<button class="gh-btn ghost" data-close-modal>'+_imt('cancel')+'</button><button class="gh-btn" id="ghSendInvite"><i class="fas fa-paper-plane"></i> '+_imt('bd_inv_send')+'</button>',
       'ghInviteModal');
     $('#ghSendInvite').onclick=function(){
       var email=($('#ghInvEmail').value||'').trim().toLowerCase();
@@ -8160,10 +8176,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(!email||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){errEl.textContent='Valid email required.';errEl.style.display='';return;}
       if(!role){errEl.textContent='Role / job title required.';errEl.style.display='';return;}
       errEl.style.display='none';
-      var btn=$('#ghSendInvite');btn.disabled=true;btn.textContent='Sending…';
+      var _isbt=typeof GHt==='function'?GHt:function(k){return k;};
+      var btn=$('#ghSendInvite');btn.disabled=true;btn.textContent=_isbt('bd_inv_sending');
       sendEmpInvite(b,{email:email,roleTitle:role,employmentType:type,message:msg},function(ok){
         if(ok){closeModal('ghInviteModal');renderBizDashEmployees(b);}
-        else{btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i> Send Invitation';errEl.textContent='Failed. Try again.';errEl.style.display='';}
+        else{btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i> '+_isbt('bd_inv_send');errEl.textContent='Failed. Try again.';errEl.style.display='';}
       });
     };
   }
@@ -8227,11 +8244,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function renderBizDashEmployees(b){
     var cont=$('#ghDashContent'); if(!cont) return;
+    var _empt=typeof GHt==='function'?GHt:function(k){return k;};
     cont.innerHTML=
       '<div class="gh-dash-section">'+
         '<div class="gh-emp-header">'+
-          '<h2 class="gh-dash-section-title" style="margin:0">Employees</h2>'+
-          '<button class="gh-btn sm" id="ghEmpInviteBtn"><i class="fas fa-paper-plane"></i> Invite</button>'+
+          '<h2 class="gh-dash-section-title" style="margin:0">'+_empt('bd_nav_employees')+'</h2>'+
+          '<button class="gh-btn sm" id="ghEmpInviteBtn"><i class="fas fa-paper-plane"></i> '+_empt('bd_emp_invite_btn')+'</button>'+
         '</div>'+
         '<div id="ghEmpBody"><div class="gh-empty" style="padding:24px 0"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
       '</div>';
@@ -8245,8 +8263,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           var html='';
           // Active team members
           html+='<div class="gh-emp-section">'+
-            '<div class="gh-emp-sec-title"><i class="fas fa-user-check"></i> Team Members ('+staff.length+')</div>';
-          if(!staff.length){html+='<div class="gh-emp-empty">No team members yet. Send your first invitation.</div>';}
+            '<div class="gh-emp-sec-title"><i class="fas fa-user-check"></i> '+_empt('bd_emp_members')+' ('+staff.length+')</div>';
+          if(!staff.length){html+='<div class="gh-emp-empty">'+_empt('bd_emp_no_members')+'</div>';}
           else{html+='<div class="gh-emp-list">'+staff.map(function(s){
             var sid=s.userId||s.id;
             return '<div class="gh-emp-card">'+
@@ -8256,21 +8274,21 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                 '<div class="gh-emp-meta">'+
                   (s.roleTitle?'<span class="gh-emp-role">'+esc(s.roleTitle)+'</span>':'')+
                   (s.employmentType?'<span class="gh-emp-type">'+esc(empTypeLabel(s.employmentType))+'</span>':'')+
-                  '<span class="gh-emp-badge accepted">Active</span>'+
+                  '<span class="gh-emp-badge accepted">'+_empt('bd_emp_active')+'</span>'+
                 '</div>'+
               '</div>'+
               '<select class="gh-emp-vis-select" data-staff-vis="'+esc(sid)+'" title="Profile visibility">'+
-                '<option value="public"'+(s.visibility==='public'?' selected':'')+'>Public</option>'+
-                '<option value="companies_only"'+(s.visibility==='companies_only'?' selected':'')+'>Companies only</option>'+
-                '<option value="hidden"'+(s.visibility==='hidden'?' selected':'')+'>Hidden</option>'+
+                '<option value="public"'+(s.visibility==='public'?' selected':'')+'>'+_empt('bd_emp_public')+'</option>'+
+                '<option value="companies_only"'+(s.visibility==='companies_only'?' selected':'')+'>'+_empt('bd_emp_companies')+'</option>'+
+                '<option value="hidden"'+(s.visibility==='hidden'?' selected':'')+'>'+_empt('bd_emp_hidden')+'</option>'+
               '</select>'+
             '</div>';
           }).join('')+'</div>';}
           html+='</div>';
           // Pending invites
           html+='<div class="gh-emp-section">'+
-            '<div class="gh-emp-sec-title"><i class="fas fa-clock"></i> Pending Invites ('+pending.length+')</div>';
-          if(!pending.length){html+='<div class="gh-emp-empty">No pending invites.</div>';}
+            '<div class="gh-emp-sec-title"><i class="fas fa-clock"></i> '+_empt('bd_emp_pending')+' ('+pending.length+')</div>';
+          if(!pending.length){html+='<div class="gh-emp-empty">'+_empt('bd_emp_no_pending')+'</div>';}
           else{html+='<div class="gh-emp-list">'+pending.map(function(inv){
             return '<div class="gh-emp-card">'+
               '<div class="gh-avatar" style="flex-shrink:0;color:var(--gh-muted);font-size:.85rem"><i class="fas fa-envelope"></i></div>'+
@@ -8279,18 +8297,18 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                 '<div class="gh-emp-meta">'+
                   (inv.roleTitle?'<span class="gh-emp-role">'+esc(inv.roleTitle)+'</span>':'')+
                   (inv.employmentType?'<span class="gh-emp-type">'+esc(empTypeLabel(inv.employmentType))+'</span>':'')+
-                  '<span class="gh-emp-badge pending">Pending</span>'+
+                  '<span class="gh-emp-badge pending">'+_empt('bd_emp_pending_badge')+'</span>'+
                 '</div>'+
                 (inv.message?'<div class="gh-emp-msg">"'+esc(inv.message)+'"</div>':'')+
               '</div>'+
-              '<button class="gh-btn xs danger" data-cancel-invite="'+esc(inv.id)+'"><i class="fas fa-xmark"></i> Cancel</button>'+
+              '<button class="gh-btn xs danger" data-cancel-invite="'+esc(inv.id)+'"><i class="fas fa-xmark"></i> '+_empt('bd_emp_cancel')+'</button>'+
             '</div>';
           }).join('')+'</div>';}
           html+='</div>';
           // Declined/cancelled — collapsible
           if(declined.length){
             html+='<details class="gh-emp-section">'+
-              '<summary class="gh-emp-sec-title" style="cursor:pointer;user-select:none"><i class="fas fa-ban"></i> Declined / Cancelled ('+declined.length+')</summary>'+
+              '<summary class="gh-emp-sec-title" style="cursor:pointer;user-select:none"><i class="fas fa-ban"></i> '+_empt('bd_emp_declined')+' ('+declined.length+')</summary>'+
               '<div class="gh-emp-list" style="margin-top:10px">'+declined.map(function(inv){
                 return '<div class="gh-emp-card muted">'+
                   '<div class="gh-emp-info">'+
@@ -8305,11 +8323,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           // Bind cancel buttons
           el.querySelectorAll('[data-cancel-invite]').forEach(function(btn){
             btn.onclick=function(){
-              if(!confirm('Cancel this invitation?')) return;
+              var _cit=typeof GHt==='function'?GHt:function(k){return k;};
+              if(!confirm(_cit('bd_emp_cancel_cfm'))) return;
               btn.disabled=true;btn.innerHTML='…';
               cancelEmpInvite(b,btn.dataset.cancelInvite,function(ok){
-                if(ok){toast('Invitation cancelled.');paint();}
-                else{btn.disabled=false;btn.innerHTML='<i class="fas fa-xmark"></i> Cancel';toast('Failed','error');}
+                if(ok){toast(_cit('bd_emp_cancelled'));paint();}
+                else{btn.disabled=false;btn.innerHTML='<i class="fas fa-xmark"></i> '+_cit('bd_emp_cancel');toast('Failed','error');}
               });
             };
           });
@@ -8325,7 +8344,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function renderBizDashAnalytics(b){
     var cont=$('#ghDashContent'); if(!cont) return;
-    cont.innerHTML='<div class="gh-dash-section"><h2 class="gh-dash-section-title">Analytics</h2><div id="ghDaBody"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
+    var _ant=typeof GHt==='function'?GHt:function(k){return k;};
+    cont.innerHTML='<div class="gh-dash-section"><h2 class="gh-dash-section-title">'+_ant('bd_nav_analytics')+'</h2><div id="ghDaBody"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
     if(!fs()||!db()) return;
     fs().getDocs(fs().query(fs().collection(db(),'businesses',b.id,'analytics'),fs().orderBy('date','desc'),fs().limit(30))).then(function(snap){
       var days=[]; snap.forEach(function(d){days.push(Object.assign({id:d.id},d.data()));});
@@ -8344,18 +8364,18 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       });
       var viewsToday=Number(todayData.views)||0;
       var interactions=[
-        {icon:'fa-phone',label:'Calls',val:sum30.phones},
-        {icon:'fa-brands fa-whatsapp',label:'WhatsApp',val:sum30.wa},
-        {icon:'fa-envelope',label:'Emails',val:sum30.email},
-        {icon:'fa-calendar-check',label:'Bookings',val:sum30.booking},
-        {icon:'fa-globe',label:'Website',val:sum30.website},
-        {icon:'fa-map-location-dot',label:'Directions',val:sum30.directions},
-        {icon:'fa-briefcase',label:'Services',val:sum30.service},
+        {icon:'fa-phone',label:_ant('bd_an_calls'),val:sum30.phones},
+        {icon:'fa-brands fa-whatsapp',label:_ant('biz_ov_whatsapp'),val:sum30.wa},
+        {icon:'fa-envelope',label:_ant('bd_an_emails'),val:sum30.email},
+        {icon:'fa-calendar-check',label:_ant('bd_an_bookings'),val:sum30.booking},
+        {icon:'fa-globe',label:_ant('biz_ov_website'),val:sum30.website},
+        {icon:'fa-map-location-dot',label:_ant('biz_ab_directions'),val:sum30.directions},
+        {icon:'fa-briefcase',label:_ant('bd_nav_services'),val:sum30.service},
       ];
       var maxIA=Math.max.apply(null,interactions.map(function(x){return x.val;}))||1;
       var hasData=days.length>0&&(sum30.views>0||interactions.some(function(x){return x.val>0;}));
       if(!hasData){
-        el.innerHTML='<div class="gh-card"><div class="gh-empty"><i class="fas fa-chart-bar"></i><h3>No analytics data yet</h3><p>Activity will appear after people visit or contact this business.</p></div></div>';
+        el.innerHTML='<div class="gh-card"><div class="gh-empty"><i class="fas fa-chart-bar"></i><h3>'+_ant('bd_an_no_data')+'</h3><p>'+_ant('bd_an_no_data_hint')+'</p></div></div>';
         return;
       }
       function daKpiCard(icon,label,val){
@@ -8364,21 +8384,21 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var ratingAvg=b.ratingCount>0?(b.ratingTotal/b.ratingCount).toFixed(1):(b.ratingAverage>0?Number(b.ratingAverage).toFixed(1):'—');
       el.innerHTML=
         '<div class="gh-da-section">'+
-          '<h3 class="gh-da-section-title">Overview</h3>'+
+          '<h3 class="gh-da-section-title">'+_ant('bd_nav_overview')+'</h3>'+
           '<div class="gh-da-kpi-grid">'+
-            daKpiCard('fa-eye','Views Today',viewsToday||'—')+
-            daKpiCard('fa-calendar-week','Views 7d',sum7.views||'—')+
-            daKpiCard('fa-calendar','Views 30d',sum30.views||'—')+
-            daKpiCard('fa-users','Followers',Number(b.followerCount||0))+
-            daKpiCard('fa-star','Rating',ratingAvg)+
-            daKpiCard('fa-comment-dots','Reviews',Number(b.reviewCount||0))+
-            daKpiCard('fa-newspaper','Posts',Number(b.postCount||0))+
-            daKpiCard('fa-heart','Follows 30d',sum30.follows||'—')+
+            daKpiCard('fa-eye',_ant('bd_an_views_today'),viewsToday||'—')+
+            daKpiCard('fa-calendar-week',_ant('bd_an_views_7d'),sum7.views||'—')+
+            daKpiCard('fa-calendar',_ant('bd_an_views_30d'),sum30.views||'—')+
+            daKpiCard('fa-users',_ant('bd_ov_followers'),Number(b.followerCount||0))+
+            daKpiCard('fa-star',_ant('biz_ov_rating'),ratingAvg)+
+            daKpiCard('fa-comment-dots',_ant('bd_nav_reviews'),Number(b.reviewCount||0))+
+            daKpiCard('fa-newspaper',_ant('bd_nav_posts'),Number(b.postCount||0))+
+            daKpiCard('fa-heart',_ant('bd_an_follows_30d'),sum30.follows||'—')+
           '</div>'+
         '</div>'+
         (interactions.some(function(x){return x.val>0;})?
           '<div class="gh-da-section">'+
-            '<h3 class="gh-da-section-title">Contact Interactions <span class="gh-muted" style="font-size:.78rem;font-weight:400">(last 30 days)</span></h3>'+
+            '<h3 class="gh-da-section-title">'+_ant('bd_an_interactions')+' <span class="gh-muted" style="font-size:.78rem;font-weight:400">('+_ant('bd_an_30d_note')+')</span></h3>'+
             '<div class="gh-da-actions">'+
               interactions.map(function(x){
                 var pct=Math.round((x.val/maxIA)*100);
@@ -8393,14 +8413,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '</div>':'')+
         (days.slice(0,7).length>0?
           '<div class="gh-da-section">'+
-            '<h3 class="gh-da-section-title">Last 7 days</h3>'+
+            '<h3 class="gh-da-section-title">'+_ant('bd_an_last7')+'</h3>'+
             '<div class="gh-da-days">'+
-              '<div class="gh-da-day-head"><span>Date</span><span>Views</span><span>Contacts</span><span>Follows</span></div>'+
+              '<div class="gh-da-day-head"><span>'+_ant('bd_an_date')+'</span><span>'+_ant('bd_an_views')+'</span><span>'+_ant('bd_an_contacts')+'</span><span>'+_ant('bd_an_follows')+'</span></div>'+
               days.slice(0,7).map(function(d){
                 var contacts=(Number(d.phoneClicks)||0)+(Number(d.whatsappClicks)||0)+(Number(d.emailClicks)||0)+(Number(d.bookingClicks)||0)+(Number(d.websiteClicks)||0)+(Number(d.directionsClicks)||0)+(Number(d.serviceClicks)||0);
                 var isToday=d.date===today;
                 return '<div class="gh-da-day-row'+(isToday?' gh-da-today':'')+'">'+
-                  '<span>'+(isToday?'Today':esc(d.date||''))+'</span>'+
+                  '<span>'+(isToday?_ant('biz_ov_today'):esc(d.date||''))+'</span>'+
                   '<span>'+(Number(d.views)||0)+'</span>'+
                   '<span>'+contacts+'</span>'+
                   '<span>'+(Number(d.follows)||0)+'</span>'+
@@ -8408,7 +8428,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               }).join('')+
             '</div>'+
           '</div>':'');
-    }).catch(function(){var el=$('#ghDaBody');if(el)el.innerHTML='<div class="gh-card"><div class="gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Failed to load analytics</h3></div></div>';});
+    }).catch(function(){var _anft=typeof GHt==='function'?GHt:function(k){return k;};var el=$('#ghDaBody');if(el)el.innerHTML='<div class="gh-card"><div class="gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>'+_anft('bd_an_fail')+'</h3></div></div>';});
   }
 
 
