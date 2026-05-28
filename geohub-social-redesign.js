@@ -10101,7 +10101,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '</div>'+
           '<div class="gh-top-search" style="max-width:100%;margin-bottom:10px"><i class="fas fa-search"></i><input id="ghMktSearch" data-i18n-placeholder="search" placeholder="Search listings…" autocomplete="off"></div>'+
           '<div class="gh-pill-row" id="ghMktCats" style="flex-wrap:wrap">'+
-            _MKT_CATS.map(function(c,i){ return '<button class="gh-pill'+(i===0?' active':'')+'" data-mkt-cat="'+esc(i===0?'':c)+'">'+esc(c)+'</button>'; }).join('')+
+            (function(){var _ml={'All':_mt('mkt_cat_all'),'Electronics':_mt('mkt_cat_electronics'),'Clothing':_mt('mkt_cat_clothing'),'Furniture':_mt('mkt_cat_furniture'),'Vehicles':_mt('mkt_cat_vehicles'),'Books':_mt('mkt_cat_books'),'Sports':_mt('mkt_cat_sports'),'Food':_mt('mkt_cat_food'),'Services':_mt('mkt_cat_services'),'Other':_mt('mkt_cat_other')};return _MKT_CATS.map(function(c,i){return '<button class="gh-pill'+(i===0?' active':'')+'" data-mkt-cat="'+esc(i===0?'':c)+'">'+esc(_ml[c]||c)+'</button>';}).join('');})() +
           '</div>'+
         '</div>'+
         '<div id="ghMktList"><div class="gh-card gh-empty" style="min-height:120px"><i class="fas fa-circle-notch fa-spin"></i></div></div>'
@@ -10116,7 +10116,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(srch) srch.oninput=function(){ clearTimeout(_timer); _q=this.value.trim(); _timer=setTimeout(_loadMkt,350); };
       function _loadMkt(){
         var box=document.getElementById('ghMktList'); if(!box) return;
-        if(!fs()||!db()){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Unavailable</h3></div>'; return; }
+        var _mlt=typeof GHt==='function'?GHt:function(k){return k;};
+        if(!fs()||!db()){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>'+_mlt('rw_unavailable')+'</h3></div>'; return; }
         box.innerHTML='<div class="gh-card gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div>';
         var constraints=[fs().where('status','==','active')];
         if(_cat) constraints.push(fs().where('category','==',_cat));
@@ -10124,9 +10125,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         fs().getDocs(q).then(function(snap){
           var items=[]; snap.forEach(function(d){ items.push(Object.assign({id:d.id},d.data())); });
           if(_q) items=items.filter(function(x){ return (x.title||x.name||'').toLowerCase().indexOf(_q.toLowerCase())>-1; });
-          if(!items.length){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-store"></i><h3>No listings found</h3><p>Be the first to list something!</p></div>'; return; }
+          if(!items.length){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-store"></i><h3>'+_mlt('mkt_no_listings')+'</h3><p>'+_mlt('mkt_no_hint')+'</p></div>'; return; }
           box.innerHTML='<div class="gh-mkt-grid">'+items.map(function(x){
-            var title=x.title||x.name||'Item'; var price=x.price?Number(x.price).toLocaleString()+' ₾':'Free';
+            var _mct=typeof GHt==='function'?GHt:function(k){return k;}; var title=x.title||x.name||'Item'; var price=x.price?Number(x.price).toLocaleString()+' ₾':_mct('mkt_free');
             var img2=x.imageUrl||x.photos&&x.photos[0]||'';
             var sold=x.sold||x.status==='sold';
             return '<div class="gh-mkt-card'+(sold?' sold':'')+'" data-mkt-id="'+esc(x.id)+'">'+
@@ -10146,7 +10147,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           box.querySelectorAll('[data-mkt-contact]').forEach(function(btn){
             btn.addEventListener('click',function(){ if(!requireLogin()) return; var sid=btn.dataset.mktContact; if(sid) location.href='messages.html?with='+encodeURIComponent(sid)+'&ref=marketplace&item='+encodeURIComponent(btn.dataset.mktTitle||''); });
           });
-        }).catch(function(err){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Failed to load</h3><p>'+esc(err.message||'')+'</p></div>'; });
+        }).catch(function(err){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>'+_mlt('mkt_load_fail')+'</h3><p>'+esc(err.message||'')+'</p></div>'; });
       }
       _loadMkt();
     });
@@ -10155,17 +10156,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var body=
       '<div class="gh-upload-progress" id="ghMktUploadBar" style="display:none"><div class="gh-upload-track"><div class="gh-upload-bar" id="ghMktUploadFill"></div></div><span id="ghMktUploadPct">0%</span></div>'+
       '<div id="ghMktImgPreview" style="margin-bottom:10px"></div>'+
-      '<input class="gh-input" id="ghMktTitle" placeholder="Item title *" maxlength="80" style="margin-bottom:8px">'+
+      '<input class="gh-input" id="ghMktTitle" placeholder="'+(typeof GHt==='function'?GHt('mkt_title_ph'):'Item title *')+'" maxlength="80" style="margin-bottom:8px">'+
       '<div style="display:flex;gap:8px;margin-bottom:8px">'+
-        '<input class="gh-input" id="ghMktPrice" type="number" min="0" placeholder="Price (₾, 0=free)" style="flex:1">'+
+        '<input class="gh-input" id="ghMktPrice" type="number" min="0" placeholder="'+(typeof GHt==='function'?GHt('mkt_price_ph'):'Price (₾, 0=free)')+'" style="flex:1">'+
         '<select class="gh-select" id="ghMktCat" style="flex:1">'+
           _MKT_CATS.filter(function(c){ return c!=='All'; }).map(function(c){ return '<option value="'+esc(c)+'">'+esc(c)+'</option>'; }).join('')+
         '</select>'+
       '</div>'+
-      '<textarea class="gh-textarea" id="ghMktDesc" placeholder="Description (optional)" rows="3" style="margin-bottom:8px"></textarea>'+
-      '<input class="gh-input" id="ghMktCity" placeholder="City / Location (optional)" style="margin-bottom:8px">'+
+      '<textarea class="gh-textarea" id="ghMktDesc" placeholder="'+(typeof GHt==='function'?GHt('mkt_desc_ph'):'Description (optional)')+'" rows="3" style="margin-bottom:8px"></textarea>'+
+      '<input class="gh-input" id="ghMktCity" placeholder="'+(typeof GHt==='function'?GHt('mkt_city_ph'):'City / Location (optional)')+'" style="margin-bottom:8px">'+
       '<input type="file" id="ghMktFilePick" accept="image/*" style="display:none">'+
-      '<button type="button" class="gh-btn ghost" id="ghMktPhotoBtn"><i class="fas fa-image"></i> Add Photo</button>';
+      '<button type="button" class="gh-btn ghost" id="ghMktPhotoBtn"><i class="fas fa-image"></i> '+(typeof GHt==='function'?GHt('mkt_add_photo'):'Add Photo')+'</button>';
     modal((typeof GHt==='function'?GHt('mkt_sell_modal'):'Sell an Item'),body,'<button class="gh-btn ghost" data-close-modal>'+(typeof GHt==='function'?GHt('cancel'):'Cancel')+'</button><button class="gh-btn" id="ghMktSubmitBtn">'+(typeof GHt==='function'?GHt('mkt_list_item'):'List Item')+'</button>','ghSellModal');
     var mktModal=document.getElementById('ghSellModal');
     if(!mktModal) return;
@@ -10180,9 +10181,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var sbtn=document.getElementById('ghMktSubmitBtn');
     if(sbtn) sbtn.onclick=function(){
       var title=(document.getElementById('ghMktTitle').value||'').trim();
-      if(!title) return toast('Enter a title','error');
+      var _mst=typeof GHt==='function'?GHt:function(k){return k;};
+      if(!title) return toast(_mst('mkt_enter_title'),'error');
       sbtn.disabled=true; sbtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';
-      var u=authUser(); if(!u){ sbtn.disabled=false; return toast('Sign in required','error'); }
+      var u=authUser(); if(!u){ sbtn.disabled=false; return toast(_mst('sign_in'),'error'); }
       prepareMedia(pickedMktFile||null,'marketplace',function(pct){
         var fill=document.getElementById('ghMktUploadFill'); if(fill) fill.style.width=pct+'%';
         var bar=document.getElementById('ghMktUploadBar'); if(bar) bar.style.display='flex';
@@ -10200,9 +10202,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           createdAt:fs().serverTimestamp()
         });
       }).then(function(){
-        toast('Item listed!');
+        var _mft=typeof GHt==='function'?GHt:function(k){return k;};
+        toast(_mft('mkt_listed'));
         if(mktModal) mktModal.remove();
-      }).catch(function(err){ toast('Failed: '+(err.message||err.code),'error'); sbtn.disabled=false; sbtn.innerHTML='List Item'; });
+      }).catch(function(err){ var _mft=typeof GHt==='function'?GHt:function(k){return k;}; toast('Failed: '+(err.message||err.code),'error'); sbtn.disabled=false; sbtn.innerHTML=_mft('mkt_list_item'); });
     };
   }
 
