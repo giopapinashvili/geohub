@@ -296,3 +296,22 @@ body.settings-page {
     align-items: flex-start;
   }
 }
+
+/* ── Profile Privacy section ─────────────────────────────── */
+.settings-card-sub { margin: 2px 0 0; font-size: .78rem; color: var(--gh-muted, #8aa69a); }
+.settings-pp-row { flex-wrap: wrap; gap: 8px; }
+.settings-pp-select {
+  flex-shrink: 0;
+  padding: 5px 10px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--gh-border, rgba(148,163,184,.14));
+  border-radius: 8px;
+  color: var(--gh-text, #eefcf6);
+  font-size: .8rem;
+  cursor: pointer;
+  max-width: 140px;
+}
+.settings-pp-select:focus { outline: none; border-color: var(--gh-green, #10b981); }
+@media (max-width: 420px) {
+  .settings-pp-select { max-width: 100%; width: 100%; }
+}

@@ -6,6 +6,8 @@
   var user = null;
   var managedBusinesses = [];
   var _writeTimer = null;
+  var _ppPrivacy = { showFullName: 'everyone', showBio: 'everyone', showStories: 'everyone', showHighlights: 'everyone' };
+  var _ppTimer = null;
 
   var dict = {
     en: {
@@ -52,7 +54,18 @@
       businessPage: 'Business page',
       businessSuite: 'Business Suite',
       pageSettings: 'Page settings',
-      switchPage: 'Switch page/account'
+      switchPage: 'Switch page/account',
+      profilePrivacy: 'Profile Visibility',
+      profilePrivacySub: 'Who can see your name, bio, stories and highlights',
+      ppShowName: 'Full name visible to',
+      ppShowBio: 'Bio visible to',
+      ppShowStories: 'Stories visible to',
+      ppShowHighlights: 'Highlights visible to',
+      ppEveryone: 'Everyone',
+      ppFriends: 'Friends',
+      ppFollowers: 'Followers',
+      ppNobody: 'Only me',
+      ppSaved: 'Privacy settings saved'
     },
     ka: {
       settings: 'პარამეტრები',
@@ -98,7 +111,18 @@
       businessPage: 'ბიზნეს გვერდი',
       businessSuite: 'Business Suite',
       pageSettings: 'გვერდის პარამეტრები',
-      switchPage: 'გვერდზე / ანგარიშზე გადართვა'
+      switchPage: 'გვერდზე / ანგარიშზე გადართვა',
+      profilePrivacy: 'პროფილის ხილვადობა',
+      profilePrivacySub: 'ვინ ნახავს შენს სახელს, ბიოს, სთორებს და ჰაილაითებს',
+      ppShowName: 'სახელი/გვარი ჩანს',
+      ppShowBio: 'ბიო ჩანს',
+      ppShowStories: 'სთორები ჩანს',
+      ppShowHighlights: 'ჰაილაითები ჩანს',
+      ppEveryone: 'ყველასთვის',
+      ppFriends: 'მეგობრები',
+      ppFollowers: 'ფოლოვერები',
+      ppNobody: 'მხოლოდ მე',
+      ppSaved: 'კონფიდენციალობის პარამეტრები შენახულია'
     }
   };
 
@@ -193,6 +217,32 @@
       });
   }
 
+  function loadPrivacyFromFirestore(uid) {
+    if (!fs() || !db()) return;
+    fs().getDoc(fs().doc(db(), 'users', uid))
+      .then(function(snap) {
+        if (!snap.exists()) return;
+        var d = snap.data() || {};
+        if (d.privacy) {
+          _ppPrivacy = Object.assign({}, _ppPrivacy, d.privacy);
+          render();
+        }
+      })
+      .catch(function() {});
+  }
+
+  function savePrivacyToFirestore() {
+    if (!user || !fs() || !db()) return;
+    clearTimeout(_ppTimer);
+    _ppTimer = setTimeout(function() {
+      fs().setDoc(
+        fs().doc(db(), 'users', user.uid),
+        { privacy: _ppPrivacy },
+        { merge: true }
+      ).catch(function() {});
+    }, 600);
+  }
+
   // ── Render helpers ───────────────────────────────────────────
 
   function optionButton(group, value, label, sub, active){
@@ -226,6 +276,7 @@
           appearanceCard(theme)+
           notificationCard()+
           privacyCard()+
+          profilePrivacyCard()+
         '</section>'+
         '<aside class="settings-stack">'+
           accountCard()+
@@ -263,6 +314,26 @@
       linkRow('safety.html','fa-chevron-right',tr('privacySafety'),tr('privacySafetySub'))+
       comingRow('fa-ban',tr('blockedUsers'),tr('comingSoon'))+
       comingRow('fa-volume-xmark',tr('mutedUsers'),tr('comingSoon'))+
+      '</div></section>';
+  }
+
+  var PP_OPTS = ['everyone','friends','followers','nobody'];
+  function ppSelect(field, value) {
+    var opts = PP_OPTS.map(function(v) {
+      return '<option value="'+v+'"'+(v===value?' selected':'')+'>'+esc(tr('pp'+v.charAt(0).toUpperCase()+v.slice(1)))+'</option>';
+    }).join('');
+    return '<select class="settings-pp-select" data-pp-field="'+esc(field)+'">'+opts+'</select>';
+  }
+  function ppRow(field, labelKey) {
+    return '<div class="settings-row settings-pp-row"><span><strong>'+esc(tr(labelKey))+'</strong></span>'+ppSelect(field, _ppPrivacy[field] || 'everyone')+'</div>';
+  }
+  function profilePrivacyCard() {
+    if (!user) return '';
+    return '<section class="settings-card"><div class="settings-card-head"><h2><i class="fas fa-eye"></i> '+esc(tr('profilePrivacy'))+'</h2><p class="settings-card-sub">'+esc(tr('profilePrivacySub'))+'</p></div><div class="settings-list">'+
+      ppRow('showFullName','ppShowName')+
+      ppRow('showBio','ppShowBio')+
+      ppRow('showStories','ppShowStories')+
+      ppRow('showHighlights','ppShowHighlights')+
       '</div></section>';
   }
 
@@ -318,6 +389,16 @@
         localStorage.setItem(input.getAttribute('data-pref-toggle'), input.checked ? 'true' : 'false');
         saveToFirestore(currentPrefs());
         toast(tr('saved'));
+      };
+    });
+    document.querySelectorAll('[data-pp-field]').forEach(function(sel){
+      sel.onchange = function(){
+        var field = sel.getAttribute('data-pp-field');
+        var val = sel.value;
+        if(PP_OPTS.indexOf(val) === -1) return;
+        _ppPrivacy[field] = val;
+        savePrivacyToFirestore();
+        toast(tr('ppSaved'));
       };
     });
   }
@@ -377,6 +458,7 @@
       if(user){
         render();
         loadFromFirestore(user.uid);
+        loadPrivacyFromFirestore(user.uid);
         loadBusinesses();
       } else {
         render();

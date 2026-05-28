@@ -435,6 +435,36 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(p.id && state.hiddenPostIds.indexOf(p.id) > -1) return false;
     if(author && state.blockedUserIds.indexOf(author) > -1) return false;
     if(author && state.mutedUserIds.indexOf(author) > -1) return false;
+    // New audience-based check
+    if(p.audience && p.audience.types && p.audience.types.length) {
+      var aud = p.audience;
+      var types = aud.types;
+      if(types.indexOf('onlyme') > -1) return !!(u && author === u.uid);
+      if(u && author === u.uid) return true;
+      var viewerIsFriend   = !!(u && state.friendIds.indexOf(author) > -1);
+      var viewerIsFollower = !!(u && state.followingIds.indexOf(author) > -1);
+      var typeOK = false;
+      if(types.indexOf('friends')   > -1 && viewerIsFriend)   typeOK = true;
+      if(types.indexOf('followers') > -1 && viewerIsFollower) typeOK = true;
+      if(types.indexOf('strangers') > -1) typeOK = true;
+      if(!typeOK) return false;
+      // Gender filter
+      if(aud.gender && aud.gender !== 'all') {
+        var vg = window.GeoCurrentUser && window.GeoCurrentUser.gender;
+        if(vg && vg !== aud.gender) return false;
+      }
+      // Age filter
+      if(aud.ageMin || aud.ageMax) {
+        var vbd = window.GeoCurrentUser && window.GeoCurrentUser.birthday;
+        if(vbd) {
+          var vAge = Math.floor((Date.now() - new Date(vbd).getTime()) / (365.25*24*3600*1000));
+          if(aud.ageMin && vAge < aud.ageMin) return false;
+          if(aud.ageMax && vAge > aud.ageMax) return false;
+        }
+      }
+      return true;
+    }
+    // Legacy visibility check
     var visibility = (p.visibility || 'public').toLowerCase();
     if(visibility === 'onlyme' || visibility === 'only_me') return !!(u && author === u.uid);
     if(visibility === 'friends') return !!(u && (author === u.uid || state.friendIds.indexOf(author) > -1));
@@ -1347,7 +1377,44 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div id="ghCmpMediaGrid" class="gh-cmp-media-grid"></div>'+
       '</div>'+
       '<div class="gh-cmp-footer-row">'+
-        '<select class="gh-select gh-cmp-vis-select" id="ghPostVisibility"><option value="public">🌍 Public</option><option value="followers">👁 Followers</option><option value="close_friends">⭐ Close Friends</option><option value="onlyme">🔒 Only Me</option></select>'+
+        '<button type="button" class="gh-audience-btn" id="ghAudienceToggle">'+
+          '<i class="fas fa-earth-europe gh-aud-icon-i" id="ghAudienceIcon"></i>'+
+          '<span id="ghAudienceLbl">Everyone</span>'+
+          '<i class="fas fa-chevron-down gh-aud-caret" id="ghAudienceCaret"></i>'+
+        '</button>'+
+      '</div>'+
+      '<div class="gh-cmp-aud-panel" id="ghAudiencePanel">'+
+        '<div class="gh-cmp-aud-section">'+
+          '<div class="gh-cmp-aud-hd"><i class="fas fa-eye"></i> Who can see?</div>'+
+          '<div class="gh-cmp-aud-checks">'+
+            '<label class="gh-cmp-aud-check"><input type="checkbox" id="ghAudFriends" value="friends" checked><i class="fas fa-user-group"></i> Friends</label>'+
+            '<label class="gh-cmp-aud-check"><input type="checkbox" id="ghAudFollowers" value="followers" checked><i class="fas fa-rss"></i> Followers</label>'+
+            '<label class="gh-cmp-aud-check"><input type="checkbox" id="ghAudStrangers" value="strangers" checked><i class="fas fa-earth-europe"></i> Everyone</label>'+
+            '<label class="gh-cmp-aud-check"><input type="checkbox" id="ghAudOnlyMe" value="onlyme"><i class="fas fa-lock"></i> Only me</label>'+
+          '</div>'+
+        '</div>'+
+        '<div class="gh-cmp-aud-section">'+
+          '<div class="gh-cmp-aud-hd"><i class="fas fa-venus-mars"></i> Gender filter</div>'+
+          '<div class="gh-cmp-aud-radios">'+
+            '<label class="gh-cmp-aud-radio"><input type="radio" name="ghAudGender" value="all" checked> All</label>'+
+            '<label class="gh-cmp-aud-radio"><input type="radio" name="ghAudGender" value="male"> Men only</label>'+
+            '<label class="gh-cmp-aud-radio"><input type="radio" name="ghAudGender" value="female"> Women only</label>'+
+          '</div>'+
+        '</div>'+
+        '<div class="gh-cmp-aud-section">'+
+          '<div class="gh-cmp-aud-hd"><i class="fas fa-calendar-alt"></i> Age filter</div>'+
+          '<select class="gh-select" id="ghAudAgeMode" style="width:100%;font-size:.82rem">'+
+            '<option value="all">All ages</option>'+
+            '<option value="18plus">18+</option>'+
+            '<option value="25to45">25–45</option>'+
+            '<option value="custom">Custom range</option>'+
+          '</select>'+
+          '<div class="gh-cmp-aud-custom-age" id="ghAudAgeCustom">'+
+            '<input type="number" class="gh-input" id="ghAudAgeMin" placeholder="Min" min="13" max="99">'+
+            '<span style="flex-shrink:0;color:var(--gh-muted)">–</span>'+
+            '<input type="number" class="gh-input" id="ghAudAgeMax" placeholder="Max" min="13" max="99">'+
+          '</div>'+
+        '</div>'+
       '</div>'+
       '<div class="gh-cmp-toolbar">'+
         '<button class="gh-cmp-tool" id="ghPickPostImage" type="button" title="Add photos"><i class="fas fa-image"></i><span>Photo</span></button>'+
@@ -1462,6 +1529,105 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
     var pickedFiles=[], selectedFeeling='', selectedBg='', pollMode=false, feelingRowVisible=false, bgVisible=false, scheduledAt=null;
     var _lpTimer=null, _lpUrl='';
+
+    // ── Audience Picker ──────────────────────────────────────────────
+    var _audPanel  = document.getElementById('ghAudiencePanel');
+    var _audToggle = document.getElementById('ghAudienceToggle');
+    var _audCaret  = document.getElementById('ghAudienceCaret');
+    var _audLbl    = document.getElementById('ghAudienceLbl');
+    var _audIcon   = document.getElementById('ghAudienceIcon');
+
+    function _getAudienceTypes() {
+      var onlyMeCb = document.getElementById('ghAudOnlyMe');
+      if (onlyMeCb && onlyMeCb.checked) return ['onlyme'];
+      var types = [];
+      ['ghAudFriends','ghAudFollowers','ghAudStrangers'].forEach(function(id) {
+        var cb = document.getElementById(id);
+        if (cb && cb.checked) types.push(cb.value);
+      });
+      return types.length ? types : ['friends','followers','strangers'];
+    }
+    function _getAudienceGender() {
+      var els = document.querySelectorAll('input[name="ghAudGender"]');
+      for (var gi = 0; gi < els.length; gi++) { if (els[gi].checked) return els[gi].value; }
+      return 'all';
+    }
+    function _getAudienceAgeData() {
+      var mode = (document.getElementById('ghAudAgeMode') || {}).value || 'all';
+      if (mode === '18plus') return { ageMin: 18, ageMax: null };
+      if (mode === '25to45') return { ageMin: 25, ageMax: 45 };
+      if (mode === 'custom') {
+        var mn = document.getElementById('ghAudAgeMin');
+        var mx = document.getElementById('ghAudAgeMax');
+        return { ageMin: mn && mn.value ? Number(mn.value) : null, ageMax: mx && mx.value ? Number(mx.value) : null };
+      }
+      return { ageMin: null, ageMax: null };
+    }
+    function _getAudienceData() {
+      var ad = _getAudienceAgeData();
+      return { types: _getAudienceTypes(), gender: _getAudienceGender(), ageMin: ad.ageMin, ageMax: ad.ageMax };
+    }
+    function _getAudienceVis() {
+      var types = _getAudienceTypes();
+      if (types.indexOf('onlyme') > -1) return 'onlyme';
+      if (types.indexOf('strangers') > -1 && types.indexOf('followers') > -1 && types.indexOf('friends') > -1) return 'public';
+      if (types.length === 1 && types[0] === 'friends') return 'friends';
+      if (types.length === 1 && types[0] === 'followers') return 'followers';
+      return 'public';
+    }
+    function _syncAudienceLabel() {
+      if (!_audLbl || !_audIcon) return;
+      var types = _getAudienceTypes();
+      var gender = _getAudienceGender();
+      var ad = _getAudienceAgeData();
+      var label, icon;
+      if (types.indexOf('onlyme') > -1) { label = 'Only me'; icon = 'fas fa-lock'; }
+      else if (types.length >= 3 || types.indexOf('strangers') > -1) { label = 'Everyone'; icon = 'fas fa-earth-europe'; }
+      else if (types.length === 2) { label = types.map(function(t){ return t[0].toUpperCase()+t.slice(1); }).join(' & '); icon = 'fas fa-users'; }
+      else if (types[0] === 'friends') { label = 'Friends'; icon = 'fas fa-user-group'; }
+      else if (types[0] === 'followers') { label = 'Followers'; icon = 'fas fa-rss'; }
+      else { label = 'Everyone'; icon = 'fas fa-earth-europe'; }
+      var extras = [];
+      if (gender === 'male') extras.push('♂');
+      else if (gender === 'female') extras.push('♀');
+      if (ad.ageMin && ad.ageMax) extras.push(ad.ageMin+'–'+ad.ageMax);
+      else if (ad.ageMin) extras.push(ad.ageMin+'+');
+      if (extras.length) label += ' · ' + extras.join(' ');
+      _audLbl.textContent = label;
+      _audIcon.className = icon + ' gh-aud-icon-i';
+    }
+    if (_audToggle) _audToggle.addEventListener('click', function() {
+      var open = _audPanel && _audPanel.classList.contains('open');
+      if (_audPanel) _audPanel.classList.toggle('open');
+      if (_audCaret) _audCaret.style.transform = open ? '' : 'rotate(180deg)';
+    });
+    var _onlyMeCb = document.getElementById('ghAudOnlyMe');
+    var _typeCbIds = ['ghAudFriends','ghAudFollowers','ghAudStrangers'];
+    if (_onlyMeCb) _onlyMeCb.addEventListener('change', function() {
+      var dis = this.checked;
+      _typeCbIds.forEach(function(id) { var cb = document.getElementById(id); if (cb) { cb.disabled = dis; if (dis) cb.checked = false; } });
+      _syncAudienceLabel();
+    });
+    _typeCbIds.forEach(function(id) {
+      var cb = document.getElementById(id);
+      if (cb) cb.addEventListener('change', function() {
+        if (this.checked && _onlyMeCb) _onlyMeCb.checked = false;
+        _syncAudienceLabel();
+      });
+    });
+    document.querySelectorAll('input[name="ghAudGender"]').forEach(function(r) {
+      r.addEventListener('change', _syncAudienceLabel);
+    });
+    var _audAgeMode   = document.getElementById('ghAudAgeMode');
+    var _audAgeCustom = document.getElementById('ghAudAgeCustom');
+    if (_audAgeMode) _audAgeMode.addEventListener('change', function() {
+      if (_audAgeCustom) _audAgeCustom.style.display = this.value === 'custom' ? 'flex' : 'none';
+      _syncAudienceLabel();
+    });
+    ['ghAudAgeMin','ghAudAgeMax'].forEach(function(id) {
+      var el = document.getElementById(id); if (el) el.addEventListener('input', _syncAudienceLabel);
+    });
+    // ──────────────────────────────────────────────────────────────────
 
     var ta=$('#ghPostText');
     if(ta) _bindMentionAutocomplete(ta);
@@ -1862,7 +2028,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var _saveDraftBtn=document.getElementById('ghSaveDraft');
     if(_saveDraftBtn) _saveDraftBtn.addEventListener('click',function(){
       var txt=ta?ta.value:'';
-      if(txt.trim()){ try{ localStorage.setItem(_DRAFT_KEY, JSON.stringify({ text:txt, feeling:selectedFeeling, visibility:($('#ghPostVisibility')||{}).value||'public', savedAt:Date.now() })); }catch(e){} }
+      if(txt.trim()){ try{ localStorage.setItem(_DRAFT_KEY, JSON.stringify({ text:txt, feeling:selectedFeeling, visibility:_getAudienceVis(), savedAt:Date.now() })); }catch(e){} }
       toast('✏️ Draft saved');
       var m2=$('#ghPostModal'); if(m2) m2.remove();
     });
@@ -1873,7 +2039,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       _draftAutoTimer=setTimeout(function(){
         var txt2=ta.value||'';
         if(!txt2.trim()){ try{ localStorage.removeItem(_DRAFT_KEY); }catch(e){} return; }
-        try{ localStorage.setItem(_DRAFT_KEY, JSON.stringify({ text:txt2, feeling:selectedFeeling, visibility:($('#ghPostVisibility')||{}).value||'public', savedAt:Date.now() })); }catch(e){}
+        try{ localStorage.setItem(_DRAFT_KEY, JSON.stringify({ text:txt2, feeling:selectedFeeling, visibility:_getAudienceVis(), savedAt:Date.now() })); }catch(e){}
       },1500);
     });
     // Restore existing draft
@@ -1898,7 +2064,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           if(_rBtn) _rBtn.onclick=function(){
             if(ta) ta.value=_draft.text||'';
             if(_draft.feeling){ selectedFeeling=_draft.feeling; var sfe=$('#ghSelectedFeeling'); if(sfe){ sfe.textContent=_draft.feeling; sfe.style.display='block'; } }
-            var vis=$('#ghPostVisibility'); if(vis&&_draft.visibility) vis.value=_draft.visibility;
+            // Restore audience from draft visibility (legacy compat)
+            if(_draft.visibility === 'onlyme') {
+              var _dmo=document.getElementById('ghAudOnlyMe'); if(_dmo){_dmo.checked=true;_dmo.dispatchEvent(new Event('change'));}
+            } else if(_draft.visibility === 'followers') {
+              var _dmf=document.getElementById('ghAudFriends'); if(_dmf) _dmf.checked=false;
+              var _dms=document.getElementById('ghAudStrangers'); if(_dms) _dms.checked=false;
+            } else if(_draft.visibility === 'friends') {
+              var _dmfl=document.getElementById('ghAudFollowers'); if(_dmfl) _dmfl.checked=false;
+              var _dms2=document.getElementById('ghAudStrangers'); if(_dms2) _dms2.checked=false;
+            }
+            _syncAudienceLabel();
             _db.remove(); updateSubmit();
             if(ta){ ta.focus(); ta.dispatchEvent(new Event('input',{bubbles:true})); }
           };
@@ -1931,7 +2107,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(e.target===m || e.target.closest('[data-close-modal]')){
         var textVal = pollMode ? '' : (ta ? ta.value : '');
         if(textVal.trim()){
-          try{ localStorage.setItem('gh_draft', JSON.stringify({ text:textVal, feeling:selectedFeeling, visibility:($('#ghPostVisibility')||{}).value||'public', savedAt:Date.now() })); }catch(_ec){}
+          try{ localStorage.setItem('gh_draft', JSON.stringify({ text:textVal, feeling:selectedFeeling, visibility:_getAudienceVis(), savedAt:Date.now() })); }catch(_ec){}
           setTimeout(function(){ toast('✏️ Draft saved'); },100);
         }
       }
@@ -2049,7 +2225,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(opts.length<2) return toast('Add at least 2 poll options','error');
         var durDays=Number(($('#ghPollDuration')||{}).value||3);
         var endsAt=new Date(Date.now()+durDays*86400000);
-        var pollPayload=Object.assign({ type:'poll', poll:{question:question,options:opts,endsAt:endsAt,totalVotes:0}, visibility:($('#ghPostVisibility')||{}).value||'public' }, extra||{});
+        var pollPayload=Object.assign({ type:'poll', poll:{question:question,options:opts,endsAt:endsAt,totalVotes:0}, visibility:_getAudienceVis(), audience:_getAudienceData() }, extra||{});
         submitBtn.disabled=true;
         submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
         GS().createPost(question, '', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); try{localStorage.removeItem('gh_draft');}catch(_e){} }, pollPayload);
@@ -2081,7 +2257,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       }
 
       var payload=Object.assign({
-        visibility: ($('#ghPostVisibility')||{}).value||'public',
+        visibility: _getAudienceVis(),
+        audience: _getAudienceData(),
         feeling: selectedFeeling,
         bgGradient: selectedBg,
         linkPreview: state._lpData||null,
