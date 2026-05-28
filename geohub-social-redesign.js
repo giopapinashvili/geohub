@@ -10622,7 +10622,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               // name: სახელი/გვარი ჩანს მხოლოდ მეგობრებისთვის (showFullName პარამ), სხვებს username
               var _dispName = uname;
               if(x.isPrivate && !_isKnown && (x.privacy&&x.privacy.showFullName)!=='everyone') _dispName='@'+(x.username||x.id||'user');
-              html+='<div class="gh-sr-item"><a href="profile.html?id='+esc(x.id||'')+'" class="gh-sr-main"><span class="gh-avatar" style="width:40px;height:40px">'+(uav?'<img src="'+esc(uav)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':esc(initials(_dispName)))+'</span><div class="gh-sr-info"><strong>'+esc(_dispName)+_privBadge+'</strong><span>'+esc(x.city||x.tagline||'GeoHub User')+(ufc&&_isKnown?' · '+_fmtCount(ufc)+' followers':'')+'</span></div></a><button class="gh-btn sm" data-follow-user="'+esc(x.id||'')+'">Follow</button></div>';
+              var _srFollowing=state.followingIds.indexOf(x.id||x.uid)>-1;
+              var _srFriend=state.friendIds.indexOf(x.id||x.uid)>-1;
+              var _srFollowLabel=_srFollowing?'<i class="fas fa-user-check"></i> Following':'<i class="fas fa-rss"></i> Follow';
+              var _srFollowCls='gh-btn sm'+(_srFollowing?' ghost':'');
+              html+='<div class="gh-sr-item"><a href="profile.html?id='+esc(x.id||'')+'" class="gh-sr-main"><span class="gh-avatar" style="width:40px;height:40px">'+(uav?'<img src="'+esc(uav)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':esc(initials(_dispName)))+'</span><div class="gh-sr-info"><strong>'+esc(_dispName)+_privBadge+'</strong><span>'+esc(x.city||x.tagline||'GeoHub User')+(ufc&&_isKnown?' · '+_fmtCount(ufc)+' followers':'')+'</span></div></a><button class="'+_srFollowCls+'" data-follow-user="'+esc(x.id||'')+'" data-following="'+(_srFollowing?'1':'0')+'">'+_srFollowLabel+'</button></div>';
             } else if(x._type==='post'){
               var pname=x.authorName||'User'; var ptxt=(x.text||'').slice(0,100);
               html+='<div class="gh-sr-item"><div class="gh-sr-main" style="cursor:pointer" onclick="location.href=\'feed.html#post-'+esc(x.id)+'\'"><span class="gh-sr-icon"><i class="fas fa-newspaper"></i></span><div class="gh-sr-info"><strong>'+esc(pname)+'</strong><span>'+esc(ptxt)+'</span></div></div></div>';
@@ -10641,7 +10645,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           res.innerHTML=html;
           // Bind follow buttons
           res.querySelectorAll('[data-follow-user]').forEach(function(btn){
-            btn.addEventListener('click',function(e){ e.preventDefault(); if(!requireLogin()) return; var uid2=btn.dataset.followUser; if(GS().toggleFollow) GS().toggleFollow(uid2,function(){ btn.textContent='Following'; btn.classList.add('ghost'); }); });
+            btn.addEventListener('click',function(e){ e.preventDefault(); if(!requireLogin()) return; var uid2=btn.dataset.followUser; if(GS().toggleFollow) GS().toggleFollow(uid2,function(isNowFollowing){ btn.dataset.following=isNowFollowing?'1':'0'; btn.innerHTML=isNowFollowing?'<i class="fas fa-user-check"></i> Following':'<i class="fas fa-rss"></i> Follow'; btn.classList.toggle('ghost',!!isNowFollowing); }); });
           });
         }).catch(function(){ res.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Search failed</h3><p>Please try again.</p></div>'; });
       }

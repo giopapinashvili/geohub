@@ -356,16 +356,33 @@
     }
     const actions = $('.profile-actions');
     if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> '+_t('profile_edit')+'</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="btn btn-ghost btn-sm profile-body-logout" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> '+_t('profile_message')+'</button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> '+_t('profile_add_friend')+'</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> '+_t('follow')+'</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-mute-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-volume-mute"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-ban"></i></button>';
-    if (!own && window.GeoSocial && window.GeoSocial.checkFollowing) {
-      window.GeoSocial.checkFollowing(user.uid, isFollowing => {
-        $$('[data-follow-user="' + user.uid + '"]').forEach(btn => {
-          btn.classList.toggle('following', !!isFollowing);
-          btn.innerHTML = isFollowing ? '<i class="fas fa-user-check"></i> '+(typeof GHt==='function'?GHt('unfollow'):'Following') : '<i class="fas fa-user-plus"></i> '+(typeof GHt==='function'?GHt('follow'):'Follow');
-        });
-      });
-    }
-    if (!own && window.GeoSocial && window.GeoSocial.listenFriendshipStatus) {
-      window.GeoSocial.listenFriendshipStatus(user.uid, status => updateFriendButtons(user.uid, status));
+    if (!own) {
+      var _socialStateSetup = false;
+      var _setupSocialBtnState = function() {
+        if (_socialStateSetup) return;
+        if (!window.GeoSocial) return;
+        _socialStateSetup = true;
+        if (window.GeoSocial.checkFollowing) {
+          window.GeoSocial.checkFollowing(user.uid, function(isFollowing) {
+            $$('[data-follow-user="' + user.uid + '"]').forEach(function(btn) {
+              btn.classList.toggle('following', !!isFollowing);
+              btn.innerHTML = isFollowing
+                ? '<i class="fas fa-user-check"></i> '+(typeof GHt==='function'?GHt('unfollow'):'Following')
+                : '<i class="fas fa-rss"></i> '+(typeof GHt==='function'?GHt('follow'):'Follow');
+            });
+          });
+        }
+        if (window.GeoSocial.listenFriendshipStatus) {
+          window.GeoSocial.listenFriendshipStatus(user.uid, function(status) {
+            updateFriendButtons(user.uid, status);
+          });
+        }
+      };
+      if (window.GeoSocial) {
+        _setupSocialBtnState();
+      } else {
+        window.addEventListener('GeoSocialReady', _setupSocialBtnState, { once: true });
+      }
     }
     // Online status display
     if (!own) {
