@@ -11843,7 +11843,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                     (banned?'Unban':'Ban')+
                   '</button>'+
                   '<button class="gh-btn sm ghost" data-admin-verify-user="'+esc(u2.id)+'" title="Toggle verified">'+
-                    '<i class="fas fa-'+(u2.verified?'check-circle':'circle")+'"></i>'+
+                    '<i class="fas fa-'+(u2.verified?'check-circle':'circle')+'"></i>'+
                   '</button>'+
                 '</div>'+
               '</div>';
