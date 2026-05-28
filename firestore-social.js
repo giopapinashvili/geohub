@@ -1257,10 +1257,16 @@
         }
         callback(result);
       }
-      var q1 = query(collection(db, 'posts'), where('status', '==', 'active'), orderBy('createdAt', 'desc'), limit(n));
+      var q1 = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(n));
       var unsub1 = onSnapshot(q1, function (snap) {
         postsArr = [];
-        snap.forEach(function (d) { postsArr.push(Object.assign({ id: d.id }, d.data())); });
+        snap.forEach(function (d) {
+          var _pd = d.data();
+          var _st = _pd.status;
+          // Filter out deleted and scheduled posts at snapshot level (handles old posts without a status field too)
+          if (_st && _st !== 'active') return;
+          postsArr.push(Object.assign({ id: d.id }, _pd));
+        });
         settled.posts = true; emit();
       }, function (err) { console.warn('[GeoSocial] listenFeed posts', err.message); settled.posts = true; emit(); });
       var _chAvatarCache = {};
@@ -2312,11 +2318,11 @@
       var qa = query(collection(db, 'posts'), where('authorId', '==', uid), limit(50));
       var qu = query(collection(db, 'posts'), where('userId', '==', uid), limit(50));
       var unsubA = onSnapshot(qa, function(snap){
-        snap.forEach(function(d){ postsById[d.id] = Object.assign({id:d.id}, d.data()); });
+        snap.forEach(function(d){ var _s=d.data().status; if(_s&&_s!=='active') { delete postsById[d.id]; return; } postsById[d.id] = Object.assign({id:d.id}, d.data()); });
         ready.a = true; emit();
       }, function(err){ console.warn('[GeoSocial] listenUserPosts authorId', err.message); ready.a=true; emit(); });
       var unsubU = onSnapshot(qu, function(snap){
-        snap.forEach(function(d){ postsById[d.id] = Object.assign({id:d.id}, d.data()); });
+        snap.forEach(function(d){ var _s=d.data().status; if(_s&&_s!=='active') { delete postsById[d.id]; return; } postsById[d.id] = Object.assign({id:d.id}, d.data()); });
         ready.u = true; emit();
       }, function(err){ console.warn('[GeoSocial] listenUserPosts userId', err.message); ready.u=true; emit(); });
       return function(){ try{unsubA();}catch(e){} try{unsubU();}catch(e){} };
