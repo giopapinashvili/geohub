@@ -1499,6 +1499,24 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '<input class="gh-input" id="ghJobCity" placeholder="Location / City" maxlength="60" style="margin-bottom:6px">'+
           '<input class="gh-input" id="ghJobSalary" placeholder="Salary range (optional)" maxlength="60">'+
         '</div>'+
+        '<div id="ghFmtQuestion" style="display:none;margin-top:10px">'+
+          '<div style="font-size:.82rem;color:var(--gh-muted);padding:6px 0">❓ Write your question in the text area above. Followers can reply in comments.</div>'+
+        '</div>'+
+        '<div id="ghFmtTip" style="display:none;margin-top:10px">'+
+          '<input class="gh-input" id="ghTipTitle" placeholder="Tip headline *" maxlength="100">'+
+        '</div>'+
+        '<div id="ghFmtEvent" style="display:none;margin-top:10px">'+
+          '<input class="gh-input" id="ghEvtTitle" placeholder="Event name *" maxlength="100" style="margin-bottom:6px">'+
+          '<input type="datetime-local" class="gh-input" id="ghEvtDate" style="margin-bottom:6px;font-size:.82rem">'+
+          '<input class="gh-input" id="ghEvtPlace" placeholder="Venue / Location (optional)" maxlength="100">'+
+        '</div>'+
+        '<div id="ghFmtQuote" style="display:none;margin-top:10px">'+
+          '<div style="font-size:.82rem;color:var(--gh-muted);padding:4px 0 6px">💬 Put the quote text in the main text area above.</div>'+
+          '<input class="gh-input" id="ghQuoteAuthor" placeholder="Quote source / author (optional)" maxlength="80">'+
+        '</div>'+
+        '<div id="ghFmtAnnouncement" style="display:none;margin-top:10px">'+
+          '<input class="gh-input" id="ghAnnTitle" placeholder="Announcement title *" maxlength="120">'+
+        '</div>'+
       '</div>'+
       '<div class="gh-voice-panel" id="ghVoicePanel" style="display:none">'+
         '<div class="gh-voice-ui">'+
@@ -2034,11 +2052,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           _fmtPanel.querySelectorAll('.gh-fmt-btn').forEach(function(b){ b.classList.remove('active'); });
           btn.classList.add('active');
           var fmt=btn.dataset.fmt||'';
-          ['ghFmtArticle','ghFmtReview','ghFmtRecipe','ghFmtJob'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+          ['ghFmtArticle','ghFmtReview','ghFmtRecipe','ghFmtJob','ghFmtQuestion','ghFmtTip','ghFmtEvent','ghFmtQuote','ghFmtAnnouncement'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
           if(fmt==='article') { var el=document.getElementById('ghFmtArticle'); if(el) el.style.display='block'; }
           else if(fmt==='review') { var el=document.getElementById('ghFmtReview'); if(el) el.style.display='block'; }
           else if(fmt==='recipe') { var el=document.getElementById('ghFmtRecipe'); if(el) el.style.display='block'; }
           else if(fmt==='job') { var el=document.getElementById('ghFmtJob'); if(el) el.style.display='block'; }
+          else if(fmt==='question') { var el=document.getElementById('ghFmtQuestion'); if(el) el.style.display='block'; }
+          else if(fmt==='tip') { var el=document.getElementById('ghFmtTip'); if(el) el.style.display='block'; }
+          else if(fmt==='event') { var el=document.getElementById('ghFmtEvent'); if(el) el.style.display='block'; }
+          else if(fmt==='quote') { var el=document.getElementById('ghFmtQuote'); if(el) el.style.display='block'; }
+          else if(fmt==='announcement') { var el=document.getElementById('ghFmtAnnouncement'); if(el) el.style.display='block'; }
           // 'question' and '' need no extra fields
         };
       });
@@ -2335,6 +2358,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         _fmtData={format:'job',jobTitle:_jobT.trim(),jobCompany:($('#ghJobCompany')||{}).value||'',jobCity:($('#ghJobCity')||{}).value||'',jobSalary:($('#ghJobSalary')||{}).value||''};
       } else if(_fmtKey==='question'){
         _fmtData={format:'question'};
+      } else if(_fmtKey==='tip'){
+        var _tipT=($('#ghTipTitle')||{}).value||''; if(!_tipT.trim()) return toast('Add tip headline','error');
+        _fmtData={format:'tip',tipTitle:_tipT.trim()};
+      } else if(_fmtKey==='event'){
+        var _evtT=($('#ghEvtTitle')||{}).value||''; if(!_evtT.trim()) return toast('Add event name','error');
+        _fmtData={format:'event',eventTitle:_evtT.trim(),eventDate:($('#ghEvtDate')||{}).value||'',eventPlace:($('#ghEvtPlace')||{}).value||''};
+      } else if(_fmtKey==='quote'){
+        _fmtData={format:'quote',quoteAuthor:($('#ghQuoteAuthor')||{}).value||''};
+      } else if(_fmtKey==='announcement'){
+        var _annT=($('#ghAnnTitle')||{}).value||''; if(!_annT.trim()) return toast('Add announcement title','error');
+        _fmtData={format:'announcement',announcementTitle:_annT.trim()};
       }
 
       var payload=Object.assign({
@@ -3162,6 +3196,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         fmtDetailHtml='<div class="gh-fmt-recipe"><span>🍽️ <strong>'+esc(pf.recipeName)+'</strong></span>'+(pf.recipeTime?'<span class="gh-fmt-recipe-time">⏱ '+esc(pf.recipeTime)+'</span>':'')+'</div>';
       } else if(pfmt==='job' && pf.jobTitle){
         fmtDetailHtml='<div class="gh-fmt-job"><strong class="gh-fmt-job-title">'+esc(pf.jobTitle)+'</strong>'+(pf.jobCompany?'<span> · '+esc(pf.jobCompany)+'</span>':'')+(pf.jobCity?'<span> · 📍'+esc(pf.jobCity)+'</span>':'')+(pf.jobSalary?'<span class="gh-fmt-salary">💵 '+esc(pf.jobSalary)+'</span>':'')+'</div>';
+      } else if(pfmt==='question'){
+        fmtDetailHtml='<div class="gh-fmt-question"><i class="fas fa-question-circle"></i> Community Question</div>';
+      } else if(pfmt==='tip' && pf.tipTitle){
+        fmtDetailHtml='<div class="gh-fmt-tip"><i class="fas fa-lightbulb"></i> <strong>'+esc(pf.tipTitle)+'</strong></div>';
+      } else if(pfmt==='event' && pf.eventTitle){
+        var _evtDateStr=''; try{ if(pf.eventDate) _evtDateStr=new Date(pf.eventDate).toLocaleString('ka-GE',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}); }catch(e){}
+        fmtDetailHtml='<div class="gh-fmt-event"><strong class="gh-fmt-evt-title">📅 '+esc(pf.eventTitle)+'</strong>'+(_evtDateStr?'<span class="gh-fmt-evt-date"> · '+esc(_evtDateStr)+'</span>':'')+(pf.eventPlace?'<span class="gh-fmt-evt-place"> · 📍'+esc(pf.eventPlace)+'</span>':'')+'</div>';
+      } else if(pfmt==='quote'){
+        fmtDetailHtml='<div class="gh-fmt-quote">'+(pf.quoteAuthor?'<span class="gh-fmt-quote-author">— '+esc(pf.quoteAuthor)+'</span>':'')+'</div>';
+      } else if(pfmt==='announcement' && pf.announcementTitle){
+        fmtDetailHtml='<div class="gh-fmt-announcement"><i class="fas fa-bullhorn"></i> <strong>'+esc(pf.announcementTitle)+'</strong></div>';
       }
     }
 
