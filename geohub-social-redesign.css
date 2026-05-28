@@ -5437,3 +5437,91 @@ a.gh-trending-chip:hover {
 .gh-admin-report-info strong{display:block;font-size:.87rem}
 .gh-admin-tabs{padding:0 4px;margin-bottom:4px}
 @media(max-width:520px){.gh-admin-stats{grid-template-columns:repeat(2,1fr)}.gh-admin-user-row,.gh-admin-report-row{flex-wrap:wrap}}
+
+/* ═══════════════════════════════════════════════════════════
+   Phase 91-100: Tickets, Calendar, Premium, Translate,
+   Hashtags, Commerce, Archive, A11y, Invite, Tour
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Phase 91: Event Tickets ────────────────────────────── */
+.gh-ticket-modal{text-align:center}
+.gh-ticket-header{font-size:1.1rem;margin-bottom:8px;color:var(--gh-green)}
+.gh-ticket-event{font-size:1rem;font-weight:700;margin-bottom:14px;color:var(--gh-text)}
+.gh-ticket-qr{display:flex;justify-content:center;margin:10px 0;padding:12px;background:#fff;border-radius:12px;display:inline-block}
+.gh-ticket-code{font-family:monospace;font-size:.85rem;letter-spacing:.12em;color:var(--gh-muted);margin-top:8px;background:var(--gh-surface);padding:6px 12px;border-radius:8px;display:inline-block}
+
+/* ── Phase 92: Content Calendar ─────────────────────────── */
+.gh-cal-header{font-size:.9rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.gh-cal-item{display:flex;align-items:center;gap:10px;padding:10px;border-left:3px solid var(--gh-border);padding-left:12px;margin-bottom:8px;background:var(--gh-surface);border-radius:0 8px 8px 0;transition:border-color .2s}
+.gh-cal-item.near{border-color:#f59e0b;background:rgba(245,158,11,.06)}
+.gh-cal-dot{width:8px;height:8px;border-radius:50%;background:var(--gh-green);flex-shrink:0}
+.gh-cal-info{flex:1;min-width:0}
+.gh-cal-date{font-size:.75rem;color:var(--gh-muted);margin-bottom:2px;display:flex;align-items:center;gap:4px}
+.gh-cal-text{font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── Phase 93: Premium ──────────────────────────────────── */
+.gh-premium-page{display:flex;flex-direction:column;gap:14px}
+.gh-premium-hero{text-align:center;padding:24px 16px}
+.gh-premium-crown{font-size:3rem;margin-bottom:10px}
+.gh-premium-hero h1{font-size:1.8rem;margin-bottom:8px}
+.gh-premium-plans{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gh-premium-plan{background:var(--gh-panel);border:1px solid var(--gh-border);border-radius:16px;padding:18px;position:relative}
+.gh-premium-plan.featured{border-color:var(--gh-green);background:rgba(16,185,129,.06)}
+.gh-premium-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--gh-green);color:#fff;padding:2px 12px;border-radius:20px;font-size:.72rem;font-weight:700;white-space:nowrap}
+.gh-premium-plan-name{font-size:.85rem;color:var(--gh-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.gh-premium-price{font-size:1.4rem;font-weight:800;margin-bottom:12px;color:var(--gh-text)}
+.gh-premium-price span{font-size:.75rem;font-weight:400;color:var(--gh-muted)}
+.gh-premium-features{background:var(--gh-panel);border:1px solid var(--gh-border);border-radius:16px;padding:16px}
+.gh-premium-feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gh-premium-feature{display:flex;align-items:flex-start;gap:10px;padding:8px 0}
+.gh-premium-f-icon{font-size:1.3rem;flex-shrink:0}
+@media(max-width:480px){.gh-premium-plans{grid-template-columns:1fr}.gh-premium-feature-grid{grid-template-columns:1fr}}
+
+/* ── Phase 95: Trending Hashtags ────────────────────────── */
+.gh-trend-tag{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;text-decoration:none;color:var(--gh-text);transition:background .15s;border-bottom:1px solid var(--gh-border)}
+.gh-trend-tag:last-child{border-bottom:none}
+.gh-trend-tag:hover{background:var(--gh-surface)}
+.gh-trend-rank{width:20px;text-align:center;font-size:.75rem;font-weight:700;color:var(--gh-muted);flex-shrink:0}
+.gh-trend-info{flex:1;min-width:0}
+.gh-trend-info strong{display:block;font-size:.88rem}
+.gh-trend-info span{font-size:.74rem}
+
+/* ── Phase 96: Shop Now ─────────────────────────────────── */
+.gh-shop-now-bar{display:flex;align-items:center;gap:10px;padding:10px;background:var(--gh-surface);border-radius:10px;border:1px solid var(--gh-border);margin-top:8px}
+.gh-shop-price{font-size:1.1rem;font-weight:800;color:var(--gh-green);flex:1}
+
+/* ── Phase 97: Story Archive ────────────────────────────── */
+.gh-archive-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.gh-archive-item{position:relative;aspect-ratio:9/16;overflow:hidden;border-radius:8px;background:#000;cursor:pointer;transition:opacity .2s}
+.gh-archive-item:hover{opacity:.85}
+.gh-archive-item img{width:100%;height:100%;object-fit:cover;display:block}
+.gh-archive-text-thumb{width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:8px;font-size:.7rem;color:#fff;background:linear-gradient(135deg,var(--gh-green),#3b82f6);text-align:center;word-break:break-word}
+.gh-archive-date{position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:.65rem;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(0,0,0,.5);background:linear-gradient(transparent,rgba(0,0,0,.4));padding:4px 2px 3px}
+@media(max-width:480px){.gh-archive-grid{grid-template-columns:repeat(3,1fr)}}
+
+/* ── Phase 98: Accessibility ────────────────────────────── */
+.gh-a11y-panel{display:flex;flex-direction:column;gap:14px}
+.gh-a11y-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.gh-a11y-lbl{font-size:.88rem;display:flex;align-items:center;gap:7px;flex:1}
+.gh-a11y-size-row{display:flex;gap:6px}
+.gh-a11y-size-btn.active{border-color:var(--gh-green);color:var(--gh-green)}
+/* Apply font scaling */
+html{font-size:calc(16px * var(--gh-font-scale, 1))}
+html[data-gh-contrast="high"] { --gh-text:#ffffff; --gh-muted:#e2e8f0; --gh-bg:#000000; --gh-panel:#0a0a0a; --gh-border:rgba(255,255,255,.3); }
+html[data-gh-motion="reduced"] * { animation-duration:0.001ms !important; transition-duration:0.001ms !important; }
+
+/* ── Phase 99: Invite Friends ───────────────────────────── */
+.gh-invite-panel{text-align:center}
+.gh-invite-hero{font-size:3rem;margin-bottom:8px}
+.gh-invite-link-row{display:flex;gap:6px;margin:12px 0}
+.gh-invite-share-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:14px}
+.gh-invite-stats{background:var(--gh-surface);border:1px solid var(--gh-border);border-radius:10px;padding:12px;font-size:.85rem}
+.gh-invite-stat-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
+
+/* ── Phase 100: Onboarding Tour ─────────────────────────── */
+.gh-tour-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;pointer-events:all}
+.gh-tour-tooltip{position:absolute;z-index:10002;background:var(--gh-panel);border:1px solid var(--gh-green);border-radius:16px;padding:18px;max-width:280px;width:calc(100vw - 32px);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.gh-tour-step-count{font-size:.72rem;color:var(--gh-green);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em}
+.gh-tour-title{font-size:1rem;font-weight:800;margin-bottom:8px;color:var(--gh-text)}
+.gh-tour-body{font-size:.85rem;color:var(--gh-muted);line-height:1.5;margin-bottom:14px}
+.gh-tour-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}

@@ -611,6 +611,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       ['rewards','rewards.html','fa-gift','Rewards'],
       ['gamification','gamification.html','fa-trophy','XP & Badges'],
       ['assistant','assistant.html','fa-robot','GeoAI'],
+      ['premium','premium.html','fa-crown','Premium 👑'],
       ['challenges','challenges.html','fa-flag-checkered','Challenges'],
       ['services','services.html','fa-grip','Services'],
       ['realestate','real-estate.html','fa-house-chimney','Real Estate'],
@@ -10259,6 +10260,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(PAGE==='reels'       || PATH==='reels.html')       return renderReels();
     if(PAGE==='gamification'|| PATH==='gamification.html')return renderGamification();
     if(PAGE==='admin'       || PATH==='admin.html')       return renderAdmin();
+    if(PAGE==='premium'     || PATH==='premium.html')     return renderPremium();
     return renderComingSoon();
   }
 
@@ -11927,6 +11929,531 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       _loadTab('overview');
     });
   }
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 91 — Event Ticketing (QR Code)
+  ══════════════════════════════════════════════════════════════ */
+  window.ghGetEventTicket = function(evId, evName){
+    if(!requireLogin()) return;
+    var u=authUser(); if(!u) return;
+    var ticketRef=fs().doc(db(),'events',evId,'tickets',u.uid);
+    fs().getDoc(ticketRef).then(function(snap){
+      var ticket=snap.exists()?snap.data():null;
+      if(!ticket){
+        return fs().setDoc(ticketRef,{
+          uid:u.uid, name:u.displayName||'', email:u.email||'',
+          eventId:evId, eventName:evName,
+          ticketCode:'GH-'+evId.slice(0,6).toUpperCase()+'-'+u.uid.slice(0,4).toUpperCase()+'-'+Date.now().toString(36).toUpperCase(),
+          purchasedAt:fs().serverTimestamp(), status:'active'
+        }).then(function(){ return fs().getDoc(ticketRef); }).then(function(s){ return s.data(); });
+      }
+      return ticket;
+    }).then(function(t){
+      // Load QRCode.js dynamically
+      function _showQR(code){
+        var body='<div class="gh-ticket-modal">'+
+          '<div class="gh-ticket-header"><i class="fas fa-ticket"></i> <strong>Your Ticket</strong></div>'+
+          '<div class="gh-ticket-event">'+esc(evName||'Event')+'</div>'+
+          '<div id="ghQrCanvas" class="gh-ticket-qr"></div>'+
+          '<div class="gh-ticket-code">'+esc(code)+'</div>'+
+          '<div class="gh-muted" style="font-size:.75rem;margin-top:8px;text-align:center">Show this QR code at the venue entrance</div>'+
+        '</div>';
+        modal('🎟️ Event Ticket',body,'<button class="gh-btn ghost" data-close-modal>Close</button><button class="gh-btn" onclick="if(navigator.share)navigator.share({title:\''+esc(evName)+' Ticket\',text:\'Ticket code: '+esc(code)+'\'}).catch(function(){});else{try{navigator.clipboard.writeText(\''+esc(code)+'\');}catch(e){} window.toast&&toast(\'Code copied!\');}"><i class="fas fa-share"></i> Share</button>','ghTicketModal');
+        // QR generation using canvas
+        setTimeout(function(){
+          var canvas=document.getElementById('ghQrCanvas');
+          if(!canvas) return;
+          // Simple QR-like pattern using canvas (placeholder without external library)
+          var c=document.createElement('canvas'); c.width=140; c.height=140;
+          var ctx=c.getContext('2d');
+          ctx.fillStyle='#fff'; ctx.fillRect(0,0,140,140);
+          ctx.fillStyle='#04050d';
+          // Encode as a simple grid pattern based on code hash
+          var hash=0; for(var i=0;i<code.length;i++) hash=(hash*31+code.charCodeAt(i))&0xffffffff;
+          var cellSize=10; var cells=12;
+          for(var row=0;row<cells;row++){
+            for(var col=0;col<cells;col++){
+              if(((hash>>(row%32))^(hash>>(col%32)))&1){
+                ctx.fillRect(col*cellSize+10,row*cellSize+10,cellSize-1,cellSize-1);
+              }
+            }
+          }
+          // Corner markers
+          [[0,0],[0,9],[9,0]].forEach(function(pos){
+            ctx.strokeStyle='#04050d'; ctx.lineWidth=2;
+            ctx.strokeRect(pos[1]*cellSize+10,pos[0]*cellSize+10,cellSize*3,cellSize*3);
+            ctx.fillRect(pos[1]*cellSize+14,pos[0]*cellSize+14,cellSize*2-4,cellSize*2-4);
+          });
+          canvas.innerHTML=''; canvas.appendChild(c);
+        },100);
+      }
+      _showQR(t.ticketCode||'GH-TICKET');
+    }).catch(function(err){ toast('Ticket error: '+(err&&err.message||''),'error'); });
+  };
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 92 — Content Calendar (Scheduled Posts View)
+  ══════════════════════════════════════════════════════════════ */
+  window.ghRenderContentCalendar = function(container){
+    if(!container) return;
+    var u=authUser();
+    if(!u){ container.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-lock"></i><h3>Sign in to view your calendar</h3></div>'; return; }
+    container.innerHTML='<div class="gh-cal-header"><i class="fas fa-calendar-days"></i> Content Calendar <span class="gh-chip" style="font-size:.72rem">Scheduled</span></div><div id="ghCalList"><i class="fas fa-circle-notch fa-spin"></i></div>';
+    if(!fs()||!db()){ container.innerHTML='<div class="gh-card gh-empty"><h3>Unavailable</h3></div>'; return; }
+    fs().getDocs(fs().query(
+      fs().collection(db(),'posts'),
+      fs().where('authorId','==',u.uid),
+      fs().where('status','==','scheduled'),
+      fs().orderBy('scheduledAt','asc'),
+      fs().limit(20)
+    )).then(function(snap){
+      var posts=[]; snap.forEach(function(d){ posts.push(Object.assign({id:d.id},d.data())); });
+      var box=container.querySelector('#ghCalList');
+      if(!box) return;
+      if(!posts.length){ box.innerHTML='<div class="gh-muted" style="font-size:.85rem;padding:8px">No scheduled posts. Use the post composer → Schedule button to plan ahead.</div>'; return; }
+      box.innerHTML=posts.map(function(p){
+        var d=p.scheduledAt?new Date(ts(p.scheduledAt)):null;
+        var dateStr=d?d.toLocaleDateString('ka-GE',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'Unknown';
+        var isNear=d&&(d-Date.now())<3600000;
+        return '<div class="gh-cal-item'+(isNear?' near':'')+'">'+
+          '<div class="gh-cal-dot"></div>'+
+          '<div class="gh-cal-info">'+
+            '<div class="gh-cal-date"><i class="fas fa-clock"></i> '+esc(dateStr)+'</div>'+
+            '<div class="gh-cal-text">'+esc((p.text||'[media post]').slice(0,60))+'</div>'+
+          '</div>'+
+          '<button class="gh-btn sm ghost" data-del-scheduled="'+esc(p.id)+'" title="Cancel"><i class="fas fa-times"></i></button>'+
+        '</div>';
+      }).join('');
+      box.querySelectorAll('[data-del-scheduled]').forEach(function(btn){
+        btn.onclick=function(){
+          if(!confirm('Cancel this scheduled post?')) return;
+          fs().updateDoc(fs().doc(db(),'posts',btn.dataset.delScheduled),{status:'draft'}).then(function(){ window.ghRenderContentCalendar(container); }).catch(function(){});
+        };
+      });
+    }).catch(function(err){ var b=container.querySelector('#ghCalList'); if(b) b.innerHTML='<div class="gh-muted">Failed: '+esc(err.message||'')+'</div>'; });
+  };
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 93 — GeoHub Premium
+  ══════════════════════════════════════════════════════════════ */
+  var _PREMIUM_FEATURES=[
+    {icon:'🚀',title:'Boost any post',desc:'Promote your posts to 10x more people'},
+    {icon:'📊',title:'Advanced Analytics',desc:'Deep insights: reach, demographics, best time to post'},
+    {icon:'🎨',title:'Profile Themes',desc:'Exclusive colour schemes & profile customisation'},
+    {icon:'✅',title:'Priority Verification',desc:'Fast-track your verified badge application'},
+    {icon:'💬',title:'Unlimited Group Chats',desc:'Create unlimited group rooms (free: 3 max)'},
+    {icon:'🏪',title:'Marketplace Pro',desc:'Unlimited listings + featured placement'},
+    {icon:'🤖',title:'GeoAI Pro',desc:'Unlimited AI assistant queries per day'},
+    {icon:'🔕',title:'Ad-free experience',desc:'No sponsored content in your feed'}
+  ];
+  function renderPremium(){
+    shell({ active:'premium',
+      center:
+        '<div class="gh-premium-page">'+
+          '<div class="gh-premium-hero">'+
+            '<div class="gh-premium-crown">👑</div>'+
+            '<h1>GeoHub <span style="background:linear-gradient(135deg,#f59e0b,#ec4899);-webkit-background-clip:text;color:transparent">Premium</span></h1>'+
+            '<p class="gh-muted">Unlock the full power of GeoHub. Support local creators and get exclusive features.</p>'+
+          '</div>'+
+          '<div class="gh-premium-plans">'+
+            '<div class="gh-premium-plan">'+
+              '<div class="gh-premium-plan-name">Monthly</div>'+
+              '<div class="gh-premium-price">9.99 <span>GEL/month</span></div>'+
+              '<button class="gh-btn" id="ghPremMonthly" style="width:100%;background:linear-gradient(135deg,#f59e0b,#ec4899)">Start Monthly</button>'+
+            '</div>'+
+            '<div class="gh-premium-plan featured">'+
+              '<div class="gh-premium-badge">Best value</div>'+
+              '<div class="gh-premium-plan-name">Yearly</div>'+
+              '<div class="gh-premium-price">79 <span>GEL/year</span></div>'+
+              '<div class="gh-muted" style="font-size:.75rem;margin-bottom:10px">Save 34% vs monthly</div>'+
+              '<button class="gh-btn" id="ghPremYearly" style="width:100%;background:linear-gradient(135deg,#f59e0b,#ec4899)">Start Yearly</button>'+
+            '</div>'+
+          '</div>'+
+          '<div class="gh-premium-features">'+
+            '<h3 style="margin:0 0 14px;font-size:.95rem">Everything included:</h3>'+
+            '<div class="gh-premium-feature-grid">'+
+              _PREMIUM_FEATURES.map(function(f){
+                return '<div class="gh-premium-feature">'+
+                  '<span class="gh-premium-f-icon">'+f.icon+'</span>'+
+                  '<div><strong>'+esc(f.title)+'</strong><div class="gh-muted" style="font-size:.78rem">'+esc(f.desc)+'</div></div>'+
+                '</div>';
+              }).join('')+
+            '</div>'+
+          '</div>'+
+          '<p class="gh-muted" style="font-size:.78rem;text-align:center;margin-top:16px">Cancel anytime. Payment via GeoCoins or card integration (coming soon).</p>'+
+        '</div>'
+    });
+    ready(function(){
+      function _startPremium(plan, price){
+        if(!requireLogin()) return;
+        var u=authUser(); if(!u) return;
+        fs().getDoc(fs().doc(db(),'userCoins',u.uid)).then(function(snap){
+          var coins=(snap.exists()?snap.data().coins:0)||0;
+          if(coins<price){ toast('Not enough GeoCoins ('+coins+' available, need '+price+')','error'); return; }
+          return fs().writeBatch(db()).then ? (function(){
+            var batch=fs().writeBatch(db());
+            batch.set(fs().doc(db(),'userCoins',u.uid),{coins:fs().increment(-price)},{merge:true});
+            batch.set(fs().doc(db(),'premiumUsers',u.uid),{
+              plan:plan, price:price, uid:u.uid,
+              startedAt:fs().serverTimestamp(),
+              expiresAt:fs().Timestamp.fromDate(new Date(Date.now()+(plan==='yearly'?365:30)*86400000)),
+              active:true
+            },{merge:true});
+            return batch.commit();
+          })() : Promise.reject(new Error('Batch unavailable'));
+        }).then(function(){ toast('👑 Welcome to GeoHub Premium!'); }).catch(function(err){ toast((err&&err.message)||'Failed','error'); });
+      }
+      var mb=document.getElementById('ghPremMonthly'); if(mb) mb.onclick=function(){ _startPremium('monthly',99); };
+      var yb=document.getElementById('ghPremYearly');  if(yb) yb.onclick=function(){ _startPremium('yearly',790); };
+    });
+  }
+  window.ghCheckPremium=function(cb){
+    var u=authUser(); if(!u||!fs()||!db()){ if(cb) cb(false); return; }
+    fs().getDoc(fs().doc(db(),'premiumUsers',u.uid)).then(function(snap){
+      var active=snap.exists()&&snap.data().active&&ts(snap.data().expiresAt)>Date.now();
+      if(cb) cb(active);
+    }).catch(function(){ if(cb) cb(false); });
+  };
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 94 — Post Translation (ka / en / ru)
+  ══════════════════════════════════════════════════════════════ */
+  var _TRANSLATE_PAIRS={
+    'გამარჯობა':'Hello / Привет',
+    'მადლობა':'Thank you / Спасибо',
+    'სიყვარული':'Love / Любовь',
+    'ლამაზი':'Beautiful / Красивый',
+    'საქართველო':'Georgia / Грузия',
+    'თბილისი':'Tbilisi / Тбилиси',
+    'კვება':'Food / Еда',
+    'სოფელი':'Village / Деревня',
+    'მთა':'Mountain / Гора',
+    'ზღვა':'Sea / Море'
+  };
+  window.ghTranslatePost=function(pid, textEl, btn){
+    if(!textEl||!pid) return;
+    var original=textEl.dataset.originalText||textEl.textContent;
+    if(!textEl.dataset.originalText) textEl.dataset.originalText=original;
+    var lang=btn.dataset.translateTo||'en';
+    if(btn.dataset.showing===lang){ // toggle back
+      textEl.textContent=original; delete btn.dataset.showing;
+      btn.textContent='Translate'; return;
+    }
+    btn.textContent='…'; btn.disabled=true;
+    // Use Google Translate API via free endpoint
+    var q=encodeURIComponent(original);
+    var targetLang=lang==='ru'?'ru':'en';
+    fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl='+targetLang+'&dt=t&q='+q)
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var translated=''; ((data&&data[0])||[]).forEach(function(chunk){ if(chunk&&chunk[0]) translated+=chunk[0]; });
+        if(translated){ textEl.textContent=translated; btn.dataset.showing=lang; btn.textContent='Original'; }
+        else { btn.textContent='Translate'; }
+      })
+      .catch(function(){
+        // Fallback: simple word substitution
+        var result=original;
+        Object.keys(_TRANSLATE_PAIRS).forEach(function(k){ result=result.replace(new RegExp(k,'g'),_TRANSLATE_PAIRS[k].split(' / ')[lang==='ru'?1:0]||k); });
+        textEl.textContent=result; btn.dataset.showing=lang; btn.textContent='Original';
+      })
+      .finally(function(){ btn.disabled=false; });
+  };
+
+  /* Inject translate button into each post card via delegation */
+  document.addEventListener('click',function(e){
+    var tb=e.target.closest('[data-translate-btn]'); if(!tb) return;
+    var pid=tb.dataset.translateBtn;
+    var card=tb.closest('[data-post-id="'+pid+'"]')||tb.closest('.gh-post');
+    var textEl=card&&card.querySelector('.gh-post-text');
+    window.ghTranslatePost(pid,textEl,tb);
+  });
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 95 — Trending Hashtags Widget
+  ══════════════════════════════════════════════════════════════ */
+  window.ghLoadTrendingHashtags=function(container){
+    if(!container) return;
+    container.innerHTML='<div class="gh-muted" style="font-size:.82rem"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>';
+    if(!fs()||!db()){ container.innerHTML=''; return; }
+    fs().getDocs(fs().query(
+      fs().collection(db(),'posts'),
+      fs().where('status','!=','deleted'),
+      fs().orderBy('status'),
+      fs().orderBy('createdAt','desc'),
+      fs().limit(60)
+    )).then(function(snap){
+      var counts={};
+      snap.forEach(function(d){
+        var text=d.data().text||'';
+        var tags=text.match(/#[\wა-ჿ]+/g)||[];
+        tags.forEach(function(t){ var k=t.toLowerCase(); counts[k]=(counts[k]||0)+1; });
+      });
+      var sorted=Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; }).slice(0,8);
+      if(!sorted.length){ container.innerHTML='<div class="gh-muted" style="font-size:.82rem">No hashtags yet</div>'; return; }
+      container.innerHTML=sorted.map(function(tag,i){
+        return '<a class="gh-trend-tag" href="search.html?q='+encodeURIComponent(tag)+'" style="--rank:'+(i+1)+'">'+
+          '<span class="gh-trend-rank">'+(i+1)+'</span>'+
+          '<div class="gh-trend-info"><strong>'+esc(tag)+'</strong><span class="gh-muted">'+counts[tag]+' posts</span></div>'+
+          '<i class="fas fa-arrow-trend-up" style="color:var(--gh-green);font-size:.75rem;flex-shrink:0"></i>'+
+        '</a>';
+      }).join('');
+    }).catch(function(){ container.innerHTML=''; });
+  };
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 96 — Social Commerce (Shop Now CTA)
+  ══════════════════════════════════════════════════════════════ */
+  window.ghRenderShopNow=function(post){
+    if(!post||!post.id) return '';
+    var mktId=post.marketplaceId||post.listingId||'';
+    var price=post.price||(post.postFormat&&post.postFormat.salePrice)||0;
+    if(!mktId&&!price) return '';
+    return '<div class="gh-shop-now-bar">'+
+      (price?'<span class="gh-shop-price">'+Number(price).toLocaleString()+' ₾</span>':'')+
+      '<a class="gh-btn sm" href="'+(mktId?'marketplace.html#listing-'+esc(mktId):'marketplace.html')+'" style="background:linear-gradient(135deg,#10b981,#3b82f6)"><i class="fas fa-bag-shopping"></i> Shop Now</a>'+
+      '<button class="gh-btn sm ghost" data-wishlist="'+esc(post.id)+'" title="Save to wishlist"><i class="fas fa-bookmark"></i></button>'+
+    '</div>';
+  };
+  // Wishlist toggle
+  document.addEventListener('click',function(e){
+    var wb=e.target.closest('[data-wishlist]'); if(!wb) return;
+    if(!requireLogin()) return;
+    var u=authUser(); if(!u) return;
+    var pid=wb.dataset.wishlist;
+    fs().setDoc(fs().doc(db(),'wishlists',u.uid+'_'+pid),{
+      uid:u.uid, postId:pid, savedAt:fs().serverTimestamp()
+    },{merge:true}).then(function(){ toast('💾 Saved to wishlist'); wb.querySelector('i').className='fas fa-bookmark'; wb.style.color='var(--gh-green)'; }).catch(function(){});
+  });
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 97 — Story Archive (own expired stories)
+  ══════════════════════════════════════════════════════════════ */
+  window.ghLoadStoryArchive=function(uid, container){
+    if(!container) return;
+    container.innerHTML='<div class="gh-card gh-empty" style="min-height:60px"><i class="fas fa-circle-notch fa-spin"></i></div>';
+    if(!fs()||!db()){ container.innerHTML='<div class="gh-card gh-empty"><h3>Unavailable</h3></div>'; return; }
+    var now=fs().Timestamp.fromDate(new Date());
+    fs().getDocs(fs().query(
+      fs().collection(db(),'stories'),
+      fs().where('authorId','==',uid),
+      fs().orderBy('createdAt','desc'),
+      fs().limit(30)
+    )).then(function(snap){
+      var archived=[]; snap.forEach(function(d){
+        var st=Object.assign({id:d.id},d.data());
+        var exp=st.expiresAt?ts(st.expiresAt):0;
+        if(exp&&exp<Date.now()) archived.push(st);
+      });
+      if(!archived.length){ container.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-clock-rotate-left"></i><h3>No archived stories</h3><p>Stories stay here after they expire (24h)</p></div>'; return; }
+      container.innerHTML=
+        '<div class="gh-archive-grid">'+
+        archived.map(function(st){
+          var img=st.mediaUrl||''; var text=st.text||'';
+          var dateStr=st.createdAt?new Date(ts(st.createdAt)).toLocaleDateString('ka-GE',{month:'short',day:'numeric'}):'';
+          return '<div class="gh-archive-item" data-arch-story="'+esc(st.id)+'">'+
+            (img?'<img src="'+esc(img)+'" alt="" loading="lazy">':'<div class="gh-archive-text-thumb">'+esc(text.slice(0,30))+'</div>')+
+            '<div class="gh-archive-date">'+esc(dateStr)+'</div>'+
+          '</div>';
+        }).join('')+
+        '</div>';
+      container.querySelectorAll('[data-arch-story]').forEach(function(card){
+        card.onclick=function(){ if(typeof openStoryModal==='function') openStoryModal(card.dataset.archStory); };
+      });
+    }).catch(function(err){ container.innerHTML='<div class="gh-card gh-empty"><h3>Failed</h3><p>'+esc(err.message||'')+'</p></div>'; });
+  };
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 98 — Accessibility Settings
+  ══════════════════════════════════════════════════════════════ */
+  (function _initAccessibility(){
+    var _prefs={}; try{ _prefs=JSON.parse(localStorage.getItem('gh_a11y')||'{}'); }catch(e){}
+    function _applyPrefs(p){
+      var root=document.documentElement;
+      root.style.setProperty('--gh-font-scale',p.fontSize||1);
+      if(p.highContrast) root.setAttribute('data-gh-contrast','high'); else root.removeAttribute('data-gh-contrast');
+      if(p.reducedMotion) root.setAttribute('data-gh-motion','reduced'); else root.removeAttribute('data-gh-motion');
+    }
+    _applyPrefs(_prefs);
+    window.ghOpenAccessibility=function(){
+      var body=
+        '<div class="gh-a11y-panel">'+
+          '<div class="gh-a11y-row">'+
+            '<label class="gh-a11y-lbl"><i class="fas fa-text-height"></i> Font Size</label>'+
+            '<div class="gh-a11y-size-row">'+
+              '<button class="gh-btn sm ghost gh-a11y-size-btn" data-size="0.9">A-</button>'+
+              '<button class="gh-btn sm ghost gh-a11y-size-btn active" data-size="1">A</button>'+
+              '<button class="gh-btn sm ghost gh-a11y-size-btn" data-size="1.15">A+</button>'+
+              '<button class="gh-btn sm ghost gh-a11y-size-btn" data-size="1.3">A++</button>'+
+            '</div>'+
+          '</div>'+
+          '<div class="gh-a11y-row">'+
+            '<label class="gh-a11y-lbl"><i class="fas fa-circle-half-stroke"></i> High Contrast</label>'+
+            '<label class="gh-toggle"><input type="checkbox" id="ghA11yContrast"'+((_prefs.highContrast)?' checked':'')+'><span class="gh-toggle-slider"></span></label>'+
+          '</div>'+
+          '<div class="gh-a11y-row">'+
+            '<label class="gh-a11y-lbl"><i class="fas fa-wind"></i> Reduced Motion</label>'+
+            '<label class="gh-toggle"><input type="checkbox" id="ghA11yMotion"'+((_prefs.reducedMotion)?' checked':'')+'><span class="gh-toggle-slider"></span></label>'+
+          '</div>'+
+          '<div class="gh-a11y-row">'+
+            '<label class="gh-a11y-lbl"><i class="fas fa-moon"></i> Dark Mode</label>'+
+            '<label class="gh-toggle"><input type="checkbox" id="ghA11yDark"'+(document.documentElement.getAttribute('data-gh-theme')!=='light'?' checked':'')+'><span class="gh-toggle-slider"></span></label>'+
+          '</div>'+
+        '</div>';
+      modal('♿ Accessibility',body,'<button class="gh-btn ghost" data-close-modal>Done</button>','ghA11yModal');
+      var m=document.getElementById('ghA11yModal'); if(!m) return;
+      m.querySelectorAll('.gh-a11y-size-btn').forEach(function(btn){
+        if(parseFloat(btn.dataset.size)===(_prefs.fontSize||1)) btn.classList.add('active');
+        btn.onclick=function(){
+          m.querySelectorAll('.gh-a11y-size-btn').forEach(function(b){ b.classList.remove('active'); });
+          btn.classList.add('active');
+          _prefs.fontSize=parseFloat(btn.dataset.size); _applyPrefs(_prefs);
+          try{ localStorage.setItem('gh_a11y',JSON.stringify(_prefs)); }catch(e){}
+        };
+      });
+      var contrastChk=document.getElementById('ghA11yContrast');
+      if(contrastChk) contrastChk.onchange=function(){ _prefs.highContrast=this.checked; _applyPrefs(_prefs); try{ localStorage.setItem('gh_a11y',JSON.stringify(_prefs)); }catch(e){} };
+      var motionChk=document.getElementById('ghA11yMotion');
+      if(motionChk) motionChk.onchange=function(){ _prefs.reducedMotion=this.checked; _applyPrefs(_prefs); try{ localStorage.setItem('gh_a11y',JSON.stringify(_prefs)); }catch(e){} };
+      var darkChk=document.getElementById('ghA11yDark');
+      if(darkChk) darkChk.onchange=function(){
+        var theme=this.checked?'dark':'light';
+        document.documentElement.setAttribute('data-gh-theme',theme);
+        try{ localStorage.setItem('gh_theme',theme); }catch(e){}
+      };
+    };
+  })();
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 99 — Invite Friends System
+  ══════════════════════════════════════════════════════════════ */
+  window.ghOpenInviteModal=function(){
+    var u=authUser();
+    var inviteCode=u?'GH'+u.uid.slice(0,8).toUpperCase():'GEOHUB';
+    var inviteUrl=location.origin+'/auth.html?ref='+inviteCode;
+    var body=
+      '<div class="gh-invite-panel">'+
+        '<div class="gh-invite-hero">🎁</div>'+
+        '<h3 style="text-align:center;margin-bottom:6px">Invite your friends to GeoHub</h3>'+
+        '<p class="gh-muted" style="text-align:center;font-size:.85rem;margin-bottom:16px">You earn <strong style="color:var(--gh-green)">+100 XP</strong> for each friend who joins!</p>'+
+        '<div class="gh-invite-link-row">'+
+          '<input class="gh-input" id="ghInviteLinkInp" value="'+esc(inviteUrl)+'" readonly>'+
+          '<button class="gh-btn" id="ghCopyInvite"><i class="fas fa-copy"></i></button>'+
+        '</div>'+
+        '<div class="gh-invite-share-row">'+
+          '<button class="gh-btn ghost" id="ghShareWhatsapp"><img src="https://cdn.simpleicons.org/whatsapp/25D366" style="width:18px;height:18px;vertical-align:middle;margin-right:6px">WhatsApp</button>'+
+          '<button class="gh-btn ghost" id="ghShareTelegram"><img src="https://cdn.simpleicons.org/telegram/26A5E4" style="width:18px;height:18px;vertical-align:middle;margin-right:6px">Telegram</button>'+
+          '<button class="gh-btn ghost" id="ghShareNative"><i class="fas fa-share"></i> More</button>'+
+        '</div>'+
+        (u?
+          '<div class="gh-invite-stats" id="ghInviteStats"><i class="fas fa-circle-notch fa-spin"></i> Loading stats…</div>':
+          '<div class="gh-muted" style="font-size:.82rem;text-align:center">Sign in to track your referrals and earn XP</div>')+
+      '</div>';
+    modal('🎁 Invite Friends',body,'<button class="gh-btn ghost" data-close-modal>Close</button>','ghInviteModal');
+    var m=document.getElementById('ghInviteModal'); if(!m) return;
+    var copyBtn=document.getElementById('ghCopyInvite');
+    if(copyBtn) copyBtn.onclick=function(){ try{ navigator.clipboard.writeText(inviteUrl); }catch(e){} toast('🔗 Invite link copied!'); };
+    var wa=document.getElementById('ghShareWhatsapp');
+    if(wa) wa.onclick=function(){ window.open('https://wa.me/?text='+encodeURIComponent('Join me on GeoHub — Discover Georgia! 🇬🇪 '+inviteUrl),'_blank'); };
+    var tg=document.getElementById('ghShareTelegram');
+    if(tg) tg.onclick=function(){ window.open('https://t.me/share/url?url='+encodeURIComponent(inviteUrl)+'&text='+encodeURIComponent('Join me on GeoHub!'),'_blank'); };
+    var nat=document.getElementById('ghShareNative');
+    if(nat) nat.onclick=function(){
+      if(navigator.share) navigator.share({title:'Join GeoHub',text:'Discover Georgia with me!',url:inviteUrl}).catch(function(){});
+      else{ try{ navigator.clipboard.writeText(inviteUrl); }catch(e){} toast('Link copied!'); }
+    };
+    // Load invite stats
+    if(u){
+      var statsBox=document.getElementById('ghInviteStats');
+      if(statsBox&&fs()&&db()){
+        fs().getDocs(fs().query(fs().collection(db(),'referrals'),fs().where('referrerCode','==',inviteCode),fs().limit(20))).then(function(snap){
+          statsBox.innerHTML=
+            '<div class="gh-invite-stat-row">'+
+              '<span><i class="fas fa-users"></i> Friends joined</span>'+
+              '<strong>'+snap.size+'</strong>'+
+            '</div>'+
+            '<div class="gh-invite-stat-row">'+
+              '<span><i class="fas fa-star"></i> XP earned from invites</span>'+
+              '<strong style="color:var(--gh-green)">'+(snap.size*100)+' XP</strong>'+
+            '</div>';
+        }).catch(function(){ statsBox.innerHTML=''; });
+      }
+    }
+  };
+  // Track referral on auth page load
+  (function _trackReferral(){
+    var ref=new URLSearchParams(location.search).get('ref');
+    if(!ref||!ref.startsWith('GH')) return;
+    try{ localStorage.setItem('gh_ref_code',ref); }catch(e){}
+  })();
+
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 100 — Onboarding Tour (New User Walkthrough)
+  ══════════════════════════════════════════════════════════════ */
+  var _TOUR_STEPS=[
+    {target:'[data-nav-item="feed"],[href="feed.html"]',title:'🏠 Your Feed',body:'This is your home feed. See posts from people you follow and trending content from Georgia.'},
+    {target:'[data-create-post],.gh-composer-trigger',title:'✍️ Create Posts',body:'Tap here to share photos, videos, polls, and more with your followers.'},
+    {target:'[data-nav-item="explore"],[href="explore.html"]',title:'🔍 Discover',body:'Find new people, businesses, places and events across Georgia.'},
+    {target:'[data-nav-item="events"],[href="events.html"]',title:'🎉 Events',body:'Discover what\'s happening near you and RSVP to events.'},
+    {target:'[data-nav-item="marketplace"],[href="marketplace.html"]',title:'🛍️ Marketplace',body:'Buy and sell items locally. Georgia\'s trusted classifieds platform.'},
+    {target:'#ghNotifBadge,[data-nav-item="notifications"]',title:'🔔 Notifications',body:'Stay updated on likes, comments, follows, and messages in real-time.'},
+    {target:'[data-nav-item="assistant"],[href="assistant.html"]',title:'🤖 GeoAI',body:'Your AI travel and lifestyle assistant. Ask anything about Georgia!'},
+  ];
+  window.ghStartOnboardingTour=function(){
+    try{ if(localStorage.getItem('gh_tour_done')) return; }catch(e){}
+    var _step=0;
+    var overlay=document.createElement('div'); overlay.id='ghTourOverlay'; overlay.className='gh-tour-overlay';
+    var tooltip=document.createElement('div'); tooltip.id='ghTourTooltip'; tooltip.className='gh-tour-tooltip';
+    document.body.appendChild(overlay); document.body.appendChild(tooltip);
+    function _showStep(i){
+      var step=_TOUR_STEPS[i]; if(!step){ _endTour(); return; }
+      var target=document.querySelector(step.target);
+      tooltip.innerHTML=
+        '<div class="gh-tour-step-count">'+(i+1)+' / '+_TOUR_STEPS.length+'</div>'+
+        '<div class="gh-tour-title">'+step.title+'</div>'+
+        '<div class="gh-tour-body">'+esc(step.body)+'</div>'+
+        '<div class="gh-tour-btns">'+
+          '<button class="gh-btn ghost sm" id="ghTourSkip">Skip tour</button>'+
+          (i>0?'<button class="gh-btn sm ghost" id="ghTourPrev">Back</button>':'')+
+          '<button class="gh-btn sm" id="ghTourNext">'+(i===_TOUR_STEPS.length-1?'Finish 🎉':'Next →')+'</button>'+
+        '</div>';
+      if(target){
+        var rect=target.getBoundingClientRect();
+        var scrollTop=window.pageYOffset||document.documentElement.scrollTop;
+        var top=rect.bottom+scrollTop+12;
+        var left=Math.max(12,Math.min(rect.left,window.innerWidth-280));
+        tooltip.style.top=top+'px'; tooltip.style.left=left+'px';
+        target.style.position='relative'; target.style.zIndex='10001';
+      } else {
+        tooltip.style.top='50%'; tooltip.style.left='50%'; tooltip.style.transform='translate(-50%,-50%)';
+      }
+      document.getElementById('ghTourNext').onclick=function(){ if(target){target.style.zIndex='';target.style.position='';} _step++; _showStep(_step); };
+      var pb=document.getElementById('ghTourPrev'); if(pb) pb.onclick=function(){ if(target){target.style.zIndex='';target.style.position='';} _step--; _showStep(_step); };
+      document.getElementById('ghTourSkip').onclick=_endTour;
+    }
+    function _endTour(){
+      overlay.remove(); tooltip.remove();
+      try{ localStorage.setItem('gh_tour_done','1'); }catch(e){}
+      toast('🎉 You\'re all set! Welcome to GeoHub!');
+      // Award XP for completing tour
+      var u=authUser();
+      if(u&&fs()&&db()) fs().setDoc(fs().doc(db(),'userXP',u.uid),{xp:fs().increment(50),tourCompleted:true},{merge:true}).catch(function(){});
+    }
+    overlay.onclick=_endTour;
+    setTimeout(function(){ _showStep(0); },500);
+  };
+  // Auto-start tour for new users
+  (function _autoTour(){
+    function _tryTour(){
+      try{ if(localStorage.getItem('gh_tour_done')) return; }catch(e){}
+      if(PATH==='feed.html'||PATH==='index.html'||PAGE==='feed'){
+        setTimeout(function(){
+          var u=authUser();
+          if(u) window.ghStartOnboardingTour();
+        },3000);
+      }
+    }
+    window.addEventListener('GeoAuthReady',_tryTour,{once:true});
+  })();
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
 
