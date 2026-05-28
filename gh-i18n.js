@@ -105,6 +105,44 @@
     profile_edit:     { ka: 'პროფილის რედ.',  en: 'Edit Profile',ru: 'Ред. профиль'  },
     profile_add_friend:{ ka: 'მეგობრად დამატება',en: 'Add Friend',ru: 'Добавить друга'},
     profile_message:  { ka: 'შეტყობინება',    en: 'Message',     ru: 'Написать'      },
+
+    /* ── Groups ─────────────────────────────────────────────── */
+    groups_discover:  { ka: 'აღმოჩენა',       en: 'Discover',    ru: 'Открыть'       },
+    groups_mine:      { ka: 'ჩემი ჯგუფები',   en: 'Your groups', ru: 'Мои группы'    },
+    groups_requests:  { ka: 'მოთხოვნები',      en: 'Requests',    ru: 'Запросы'       },
+    create_group:     { ka: 'ჯგუფის შექმნა',  en: 'Create Group',ru: 'Создать группу'},
+    group_join:       { ka: 'გაწევრება',       en: 'Join',        ru: 'Вступить'      },
+    group_leave:      { ka: 'გასვლა',          en: 'Leave',       ru: 'Выйти'         },
+    group_request_join:{ ka: 'შეერთების მოთხ.',en: 'Request to Join',ru: 'Запросить вступление' },
+    group_pending:    { ka: 'მოლოდინში…',      en: 'Request Pending',ru: 'Запрос отправлен' },
+    group_manage:     { ka: 'მართვა',           en: 'Manage',      ru: 'Управление'    },
+    group_discussion: { ka: 'დისკუსია',         en: 'Discussion',  ru: 'Обсуждение'    },
+    group_members:    { ka: 'წევრები',          en: 'Members',     ru: 'Участники'     },
+    group_media:      { ka: 'მედია',            en: 'Media',       ru: 'Медиа'         },
+    group_files:      { ka: 'ფაილები',          en: 'Files',       ru: 'Файлы'         },
+    group_chat:       { ka: 'ჩატი',             en: 'Chat',        ru: 'Чат'           },
+    group_admin:      { ka: 'ადმინი',           en: 'Admin',       ru: 'Админ'         },
+
+    /* ── Events ─────────────────────────────────────────────── */
+    create_event:     { ka: 'ივენთის შექმნა',  en: 'Create Event',ru: 'Создать событие'},
+    evt_upcoming:     { ka: 'მომავალი',         en: 'Upcoming',    ru: 'Предстоящие'   },
+    evt_today:        { ka: 'დღეს',             en: 'Today',       ru: 'Сегодня'       },
+    evt_weekend:      { ka: 'ეს შაბათ-კვირა',  en: 'This weekend',ru: 'Эти выходные'  },
+    evt_past:         { ka: 'გასული',           en: 'Past',        ru: 'Прошедшие'     },
+    evt_view:         { ka: 'ნახვა',            en: 'View',        ru: 'Смотреть'      },
+    evt_rsvp:         { ka: 'დადასტ.',          en: 'RSVP',        ru: 'Пойду'         },
+
+    /* ── Business page ──────────────────────────────────────── */
+    biz_overview:     { ka: 'მიმოხილვა',        en: 'Overview',    ru: 'Обзор'         },
+    biz_services:     { ka: 'სერვისები',        en: 'Services',    ru: 'Услуги'        },
+    biz_photos:       { ka: 'ფოტოები',          en: 'Photos',      ru: 'Фото'          },
+    biz_reviews:      { ka: 'მიმოხილვები',      en: 'Reviews',     ru: 'Отзывы'        },
+    biz_dashboard:    { ka: 'დაშბორდი',         en: 'Dashboard',   ru: 'Дашборд'       },
+    biz_followers:    { ka: 'გამომწერი',         en: 'Followers',   ru: 'Подписчики'    },
+    biz_rating:       { ka: 'რეიტინგი',         en: 'Rating',      ru: 'Рейтинг'       },
+    biz_reviews_lbl:  { ka: 'მიმოხილვა',        en: 'Reviews',     ru: 'Отзывы'        },
+    biz_add_business: { ka: 'ბიზნესის დამატება',en: 'Add Business',ru: 'Добавить бизнес'},
+    biz_message:      { ka: 'შეტყობინება',       en: 'Message',     ru: 'Написать'      },
   };
 
   /* ── Core t() function ───────────────────────────────────── */
