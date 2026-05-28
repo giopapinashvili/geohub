@@ -586,22 +586,22 @@
         <div class="ci-card-header">
           <i class="fas fa-location-crosshairs"></i>
           <h3 data-i18n="ci_verify_loc">Verify Location</h3>
-          <span id="ciGpsStatusBadge" style="font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,0.06);color:#64748b">Not verified</span>
+          <span id="ciGpsStatusBadge" data-i18n="ci_not_verified" style="font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,0.06);color:#64748b">Not verified</span>
         </div>
         <div class="ci-gps-body">
           <div class="ci-dist-ring" id="ciDistRing">
             <div class="ci-dist-ring-outer" id="ciDistRingOuter">
               <div class="ci-dist-ring-inner">
                 <div class="ci-dist-val" id="ciDistVal">--</div>
-                <div class="ci-dist-unit" id="ciDistUnit">meters</div>
+                <div class="ci-dist-unit" id="ciDistUnit" data-i18n="ci_meters">meters</div>
               </div>
             </div>
-            <div class="ci-dist-status" id="ciDistStatus">Checking…</div>
+            <div class="ci-dist-status" id="ciDistStatus" data-i18n="ci_checking">Checking…</div>
           </div>
           <p class="ci-accuracy" id="ciAccuracy"></p>
           <button class="ci-gps-btn" id="ciGetLocBtn">
             <i class="fas fa-location-crosshairs"></i>
-            <span id="ciGetLocLabel">Get My Location</span>
+            <span id="ciGetLocLabel" data-i18n="ci_get_loc_btn">Get My Location</span>
           </button>
           <div class="ci-gps-error" id="ciGpsError"></div>
         </div>
@@ -828,12 +828,14 @@
     }
 
     /* ── GPS UI ─────────────────────────────────────────────────────── */
+    var _t=typeof GHt==='function'?GHt:function(k){return k;};
     function resetGpsUI() {
+      var _t=typeof GHt==='function'?GHt:function(k){return k;};
       $id('ciDistRing').classList.remove('visible');
-      $id('ciGpsStatusBadge').textContent = 'Not verified';
+      $id('ciGpsStatusBadge').textContent = _t('ci_not_verified');
       $id('ciGpsStatusBadge').style.cssText = 'font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(255,255,255,0.06);color:#64748b';
       $id('ciGetLocBtn').classList.remove('verified');
-      $id('ciGetLocLabel').textContent = 'Get My Location';
+      $id('ciGetLocLabel').textContent = _t('ci_get_loc_btn');
       $id('ciAccuracy').classList.remove('show');
       $id('ciGpsError').classList.remove('show');
       $id('ciGpsError').textContent = '';
@@ -852,10 +854,10 @@
         $id('ciDistVal').textContent  = '✓';
         $id('ciDistUnit').textContent = '';
         $id('ciDistStatus').className = 'ci-dist-status ok';
-        $id('ciDistStatus').textContent = 'Location ready — select a place';
-        $id('ciGpsStatusBadge').textContent = 'Location ready';
+        $id('ciDistStatus').textContent = _t('ci_loc_ready_msg');
+        $id('ciGpsStatusBadge').textContent = _t('ci_loc_ready');
         $id('ciGpsStatusBadge').style.cssText = 'font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(16,185,129,0.12);color:#34d399';
-        $id('ciGetLocLabel').textContent = 'Location Ready';
+        $id('ciGetLocLabel').textContent = _t('ci_loc_ready');
         updateXp();
         updateSubmitBtn();
         return;
@@ -883,18 +885,18 @@
         ring.classList.add('visible');
         var outer = $id('ciDistRingOuter');
         $id('ciDistVal').textContent  = dist < 1000 ? dist : (dist / 1000).toFixed(1);
-        $id('ciDistUnit').textContent = dist < 1000 ? 'meters' : 'km';
+        $id('ciDistUnit').textContent = dist < 1000 ? _t('ci_meters') : _t('ci_km');
         var statusEl = $id('ciDistStatus');
         if (state.verified) {
           outer.className = 'ci-dist-ring-outer ok';
           statusEl.className = 'ci-dist-status ok';
-          statusEl.textContent = '✓ Within range';
+          statusEl.textContent = _t('ci_within_range');
         } else {
           outer.className = 'ci-dist-ring-outer far';
           statusEl.className = 'ci-dist-status far';
           statusEl.textContent = dist > RADIUS
-            ? '⚠ You are too far from this place to verify check-in.'
-            : '⚠ GPS signal weak (±' + loc.accuracy + ' m) — move to a clearer area';
+            ? _t('ci_too_far')
+            : _t('ci_gps_weak');
         }
       } else {
         state.verified = false;
@@ -904,19 +906,19 @@
         $id('ciDistVal').textContent  = '?';
         $id('ciDistUnit').textContent = '';
         $id('ciDistStatus').className = 'ci-dist-status far';
-        $id('ciDistStatus').textContent = 'This place has no coordinates yet';
+        $id('ciDistStatus').textContent = _t('ci_no_coords');
       }
 
       var badge = $id('ciGpsStatusBadge');
       if (state.verified) {
-        badge.textContent = '✓ Verified';
+        badge.textContent = _t('ci_verified');
         badge.style.cssText = 'font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(16,185,129,0.12);color:#34d399';
         $id('ciGetLocBtn').classList.add('verified');
-        $id('ciGetLocLabel').textContent = '✓ Location Verified';
+        $id('ciGetLocLabel').textContent = _t('ci_loc_verified');
       } else {
-        badge.textContent = 'Unverified';
+        badge.textContent = _t('ci_unverified');
         badge.style.cssText = 'font-size:0.72rem;font-weight:800;padding:3px 10px;border-radius:99px;background:rgba(245,158,11,0.1);color:#fbbf24';
-        $id('ciGetLocLabel').textContent = 'Retry Location';
+        $id('ciGetLocLabel').textContent = _t('ci_retry_loc');
       }
       updateXp();
       updateSubmitBtn();
@@ -926,15 +928,16 @@
       console.log('[GeoHub] location button clicked');
       var btn = $id('ciGetLocBtn');
       btn.disabled = true;
-      $id('ciGetLocLabel').textContent = 'Getting location…';
+      var _t=typeof GHt==='function'?GHt:function(k){return k;};
+      $id('ciGetLocLabel').textContent = _t('ci_getting_loc');
       $id('ciGpsError').classList.remove('show');
 
       if (!navigator.geolocation) {
         console.warn('[GeoHub] navigator.geolocation not available');
         btn.disabled = false;
-        $id('ciGetLocLabel').textContent = 'GPS not supported';
+        $id('ciGetLocLabel').textContent = _t('ci_gps_no_support');
         var errUnsupported = $id('ciGpsError');
-        errUnsupported.textContent = 'Your browser does not support geolocation. Try Chrome or Safari on HTTPS.';
+        errUnsupported.textContent = _t('ci_gps_no_support');
         errUnsupported.classList.add('show');
         return;
       }
@@ -954,15 +957,16 @@
         },
         function (err) {
           console.error('[GeoHub] geolocation error', err.code, err.message);
+          var _t=typeof GHt==='function'?GHt:function(k){return k;};
           btn.disabled = false;
           var msgs = {
-            1: 'Location permission denied. Allow location access in browser settings.',
-            2: 'Location signal unavailable. Move near a window or outdoors.',
-            3: 'Location request timed out. Please try again.'
+            1: _t('ci_err_denied'),
+            2: _t('ci_err_unavail'),
+            3: _t('ci_err_timeout')
           };
-          $id('ciGetLocLabel').textContent = 'Retry Location';
+          $id('ciGetLocLabel').textContent = _t('ci_retry_loc');
           var errEl = $id('ciGpsError');
-          errEl.textContent = msgs[err.code] || 'GPS error (' + err.code + '). Please try again.';
+          errEl.textContent = msgs[err.code] || _t('ci_err_generic');
           errEl.classList.add('show');
           state.verified = false;
           updateXp();

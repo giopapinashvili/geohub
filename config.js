@@ -23,24 +23,23 @@ const GeoConfig = Object.freeze({
 
   /* ── Demo / environment ──────────────────────────────────── */
   DEMO_MODE: false,   // production Firebase mode
-  ENV: 'development', // 'development' | 'staging' | 'production'
+  ENV: 'production', // 'development' | 'staging' | 'production'
 
   /* ── Feature flags ───────────────────────────────────────── */
-  // Set to true progressively as each backend service goes live
   FEATURE_FLAGS: {
-    realAuth:        true,   // Firebase Auth
-    realFeed:        true,   // Firestore feed
-    realRewards:     false,  // Rewards engine with QR codes
-    realPayments:    false,  // Stripe/BOG payments — paused (Georgia not directly supported by Stripe)
-    realPush:        false,  // Web push via FCM/VAPID
-    realSearch:      false,  // Algolia / PostgreSQL full-text
-    realMaps:        false,  // Mapbox / Google Maps API
-    fileUpload:      true,   // Cloudinary unsigned media upload
-    socialLogin:     true,   // Google OAuth
-    liveWebSocket:   false,  // Real-time Live City feed
-    emailVerify:     false,  // Email confirmation on sign-up
-    adminPanel:      true,   // Firestore admin dashboard
-    analytics:       false,  // PostHog / Mixpanel event tracking
+    realAuth:        true,   // Firebase Auth ✅
+    realFeed:        true,   // Firestore feed ✅
+    realRewards:     true,   // Rewards engine — Firestore-based ✅
+    realPayments:    false,  // Stripe/BOG — Georgia not directly supported by Stripe
+    realPush:        true,   // Web push via FCM/VAPID ✅ (VAPID key set)
+    realSearch:      false,  // Full-text — using Firestore prefix queries
+    realMaps:        false,  // Using Leaflet + OpenStreetMap (free tier)
+    fileUpload:      true,   // Cloudinary unsigned upload ✅
+    socialLogin:     true,   // Google OAuth ✅
+    liveWebSocket:   false,  // WebSocket Live City — future
+    emailVerify:     false,  // Email confirmation — future
+    adminPanel:      true,   // Firestore admin dashboard ✅
+    analytics:       false,  // PostHog / Mixpanel — future
   },
 
 
