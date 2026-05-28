@@ -497,6 +497,27 @@
     xp_total:         { ka: 'სულ XP:',            en: 'Total XP:',   ru: 'Всего XP:'     },
     xp_no_leaders:    { ka: 'ლიდ. ბ. ცარიელია — იყავი პირველი!',en: 'No leaderboard data yet. Be the first!',ru: 'Рейтинг пуст — будьте первым!' },
     xp_earned:        { ka: '✓ მიღებული',         en: '✓ Earned',    ru: '✓ Получено'    },
+    xp_you:           { ka: '(შენ)',               en: '(you)',        ru: '(вы)'           },
+    xp_keep_going:    { ka: 'XP! გააგრძელე 🚀',    en: 'XP! Keep going 🚀',ru: 'XP! Продолжайте 🚀'},
+
+    /* ── Daily Missions ─────────────────────────────────────────── */
+    dm_post_today:    { ka: 'გააკეთე პოსტი დღეს',   en: 'Make a post today',      ru: 'Сделайте пост сегодня'    },
+    dm_like_3:        { ka: '3 პოსტზე რეაქ.',        en: 'React to 3 posts',        ru: 'Отреагируйте на 3 поста'  },
+    dm_comment_1:     { ka: 'დატოვე კომენტარი',      en: 'Leave a comment',         ru: 'Оставьте комментарий'     },
+    dm_story_today:   { ka: 'გამოქვეყნე სტორი',      en: 'Post a story',            ru: 'Опубликуйте историю'      },
+    dm_discover_1:    { ka: 'Discover გვ. ეწვიე',    en: 'Visit Discover page',     ru: 'Откройте Discover'        },
+
+    /* ── Badges ─────────────────────────────────────────────────── */
+    badge_first_post: { ka: 'პირველი პოსტი',         en: 'First Post',      ru: 'Первый пост'       },
+    badge_explorer:   { ka: 'მოსამხედ.',             en: 'Explorer',        ru: 'Исследователь'     },
+    badge_social:     { ka: 'სოც. პეპელა',           en: 'Social Butterfly',ru: 'Социальный'        },
+    badge_storyteller:{ ka: 'მთხრობელი',             en: 'Storyteller',     ru: 'Рассказчик'        },
+    badge_influencer: { ka: 'ინფლ.',                 en: 'Influencer',      ru: 'Инфлюенсер'        },
+    badge_local_hero: { ka: 'ლ. გმ.',                en: 'Local Hero',      ru: 'Местный герой'     },
+    badge_connector:  { ka: 'კავ.',                  en: 'Connector',       ru: 'Коннектор'         },
+    badge_reviewer:   { ka: 'რეცენ.',                en: 'Reviewer',        ru: 'Рецензент'         },
+    badge_event_goer: { ka: 'ღ. ს.',                 en: 'Event Goer',      ru: 'Участник событий'  },
+    badge_tipster:    { ka: 'ტიფ.',                  en: 'Tipster',         ru: 'Советчик'          },
 
     /* ── Auth page ──────────────────────────────────────────── */
     auth_back:        { ka: '← მთავარი',          en: '← Back to Home', ru: '← Главная'    },

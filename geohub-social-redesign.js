@@ -11050,23 +11050,23 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var box=document.getElementById('ghGamifContent'); if(!box) return;
       if(!u){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-lock"></i><h3>'+_xt('xp_sign_in')+'</h3><a class="gh-btn" href="auth.html">'+_xt('sign_in')+'</a></div>'; return; }
       var _BADGES=[
-        {id:'first_post',icon:'✍️',name:'First Post',desc:'Made your first post',xp:50},
-        {id:'explorer',icon:'🗺️',name:'Explorer',desc:'Visited 5 different pages',xp:100},
-        {id:'social_butterfly',icon:'🦋',name:'Social Butterfly',desc:'Got 50 followers',xp:200},
-        {id:'storyteller',icon:'📖',name:'Storyteller',desc:'Posted 10 stories',xp:150},
-        {id:'influencer',icon:'⭐',name:'Influencer',desc:'Got 100 reactions',xp:300},
-        {id:'local_hero',icon:'🏙️',name:'Local Hero',desc:'5 posts about your city',xp:200},
-        {id:'connector',icon:'🤝',name:'Connector',desc:'Followed 20 people',xp:100},
-        {id:'reviewer',icon:'🌟',name:'Reviewer',desc:'Left 5 business reviews',xp:150},
-        {id:'event_goer',icon:'🎉',name:'Event Goer',desc:'RSVP\'d to 3 events',xp:100},
-        {id:'tipster',icon:'💎',name:'Tipster',desc:'Sent your first tip',xp:75}
+        {id:'first_post',icon:'✍️',name:'First Post',nkey:'badge_first_post',desc:'Made your first post',xp:50},
+        {id:'explorer',icon:'🗺️',name:'Explorer',nkey:'badge_explorer',desc:'Visited 5 different pages',xp:100},
+        {id:'social_butterfly',icon:'🦋',name:'Social Butterfly',nkey:'badge_social',desc:'Got 50 followers',xp:200},
+        {id:'storyteller',icon:'📖',name:'Storyteller',nkey:'badge_storyteller',desc:'Posted 10 stories',xp:150},
+        {id:'influencer',icon:'⭐',name:'Influencer',nkey:'badge_influencer',desc:'Got 100 reactions',xp:300},
+        {id:'local_hero',icon:'🏙️',name:'Local Hero',nkey:'badge_local_hero',desc:'5 posts about your city',xp:200},
+        {id:'connector',icon:'🤝',name:'Connector',nkey:'badge_connector',desc:'Followed 20 people',xp:100},
+        {id:'reviewer',icon:'🌟',name:'Reviewer',nkey:'badge_reviewer',desc:'Left 5 business reviews',xp:150},
+        {id:'event_goer',icon:'🎉',name:'Event Goer',nkey:'badge_event_goer',desc:'RSVP\'d to 3 events',xp:100},
+        {id:'tipster',icon:'💎',name:'Tipster',nkey:'badge_tipster',desc:'Sent your first tip',xp:75}
       ];
       var _DAILY=[
-        {id:'post_today',icon:'✍️',task:'Make a post today',xp:20,key:'posts'},
-        {id:'like_3',icon:'❤️',task:'React to 3 posts',xp:10,key:'reactions'},
-        {id:'comment_1',icon:'💬',task:'Leave a comment',xp:15,key:'comments'},
-        {id:'story_today',icon:'📸',task:'Post a story',xp:25,key:'stories'},
-        {id:'discover_1',icon:'🔍',task:'Visit Discover page',xp:5,key:'discover'}
+        {id:'post_today',icon:'✍️',task:'Make a post today',tkey:'dm_post_today',xp:20,key:'posts'},
+        {id:'like_3',icon:'❤️',task:'React to 3 posts',tkey:'dm_like_3',xp:10,key:'reactions'},
+        {id:'comment_1',icon:'💬',task:'Leave a comment',tkey:'dm_comment_1',xp:15,key:'comments'},
+        {id:'story_today',icon:'📸',task:'Post a story',tkey:'dm_story_today',xp:25,key:'stories'},
+        {id:'discover_1',icon:'🔍',task:'Visit Discover page',tkey:'dm_discover_1',xp:5,key:'discover'}
       ];
       Promise.all([
         fs().getDoc(fs().doc(db(),'userXP',u.uid)).catch(function(){ return null; }),
@@ -11098,7 +11098,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                 var done=dailyDone[todayKey]&&dailyDone[todayKey][m.id];
                 return '<div class="gh-mission-row'+(done?' done':'')+'" data-mission="'+esc(m.id)+'">'+
                   '<span class="gh-mission-icon">'+m.icon+'</span>'+
-                  '<div class="gh-mission-info"><strong>'+esc(m.task)+'</strong><span class="gh-muted">+'+m.xp+' XP</span></div>'+
+                  '<div class="gh-mission-info"><strong>'+esc(_xt(m.tkey)||m.task)+'</strong><span class="gh-muted">+'+m.xp+' XP</span></div>'+
                   (done?'<span class="gh-mission-check"><i class="fas fa-check-circle"></i></span>':'<button class="gh-btn sm ghost gh-mission-claim" data-mid="'+esc(m.id)+'" data-mxp="'+m.xp+'">'+_xt('xp_claim')+'</button>')+
                 '</div>';
               }).join('')+
@@ -11111,7 +11111,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                 var earned=myBadges.indexOf(b.id)>-1;
                 return '<div class="gh-badge-item'+(earned?' earned':'')+'" title="'+esc(b.desc)+(earned?'\nEarned!':'\n+'+b.xp+' XP')+'">'+
                   '<div class="gh-badge-icon">'+b.icon+'</div>'+
-                  '<div class="gh-badge-name">'+esc(b.name)+'</div>'+
+                  '<div class="gh-badge-name">'+esc(_xt(b.nkey)||b.name)+'</div>'+
                   '<div class="gh-badge-xp">'+esc(earned?_xt('xp_earned'):'+'+b.xp+' XP')+'</div>'+
                 '</div>';
               }).join('')+
@@ -11126,7 +11126,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                   return '<div class="gh-leader-row'+(isMe?' me':'')+'">'+
                     '<span class="gh-leader-rank">'+(i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.')+'</span>'+
                     '<span class="gh-avatar sm">'+(l.avatar||l.photoURL?'<img src="'+esc(l.avatar||l.photoURL||'')+'" alt="">':esc(((l.name||l.displayName||'?')[0]||'?').toUpperCase()))+'</span>'+
-                    '<span class="gh-leader-name">'+esc(l.name||l.displayName||'User')+(isMe?' (you)':'')+'</span>'+
+                    '<span class="gh-leader-name">'+esc(l.name||l.displayName||'User')+(isMe?' '+_xt('xp_you'):'')+'</span>'+
                     '<span class="gh-leader-xp">'+(_fmtCount(l.xp||0))+' XP</span>'+
                   '</div>';
                 }).join('')+
@@ -11148,7 +11148,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               var init={xp:mxp,name:_myName,avatar:_myAv,dailyCompleted:{}}; init.dailyCompleted[todayKey]={}; init.dailyCompleted[todayKey][mid]=true;
               return fs().setDoc(_ref,init,{merge:true});
             }).then(function(){
-              toast('+'+mxp+' XP! Keep going 🚀');
+              toast('+'+mxp+' '+_xt('xp_keep_going'));
               var row=btn.closest('.gh-mission-row'); if(row){ row.classList.add('done'); var check=document.createElement('span'); check.className='gh-mission-check'; check.innerHTML='<i class="fas fa-check-circle"></i>'; btn.replaceWith(check); }
             }).catch(function(err){ toast('Failed','error'); btn.disabled=false; btn.innerHTML=_xt('xp_claim'); });
           });
