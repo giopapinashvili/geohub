@@ -2349,7 +2349,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         coAuthors: coAuthors.length ? coAuthors : null,
         category: selectedCategory||null,
         voiceUrl: null,  // filled below if voice blob exists
-        postFormat: _fmtData||null
+        postFormat: _fmtData||null,
+        location: window._composerLocation || null
       }, extra||{});
       // Phase 39: scheduled post
       if(scheduledAt && scheduledAt>new Date()){ payload.status='scheduled'; payload.scheduledAt=scheduledAt; }
@@ -2372,11 +2373,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             var validUrls=urls.filter(Boolean); if(bar) bar.style.display='none';
             if(!validUrls.length && pickedFiles.length) throw new Error('All uploads failed');
             finalPayload.mediaUrls=validUrls; submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
-            GS().createPost(txt, validUrls[0]||'', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); try{localStorage.removeItem('gh_draft');}catch(_e){} var _u=authUser(); if(_u) setTimeout(function(){ checkAndAwardBadges(_u.uid); },2000); }, finalPayload);
+            GS().createPost(txt, validUrls[0]||'', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); window._composerLocation=null; try{localStorage.removeItem('gh_draft');}catch(_e){} var _u=authUser(); if(_u) setTimeout(function(){ checkAndAwardBadges(_u.uid); },2000); }, finalPayload);
           }).catch(function(err){ console.error('[GeoHub] upload',err); toast('Image upload failed.','error'); if(bar) bar.style.display='none'; submitBtn.disabled=false; submitBtn.innerHTML='<i class="fas fa-paper-plane"></i> Post'; });
         } else {
           submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
-          GS().createPost(txt, '', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); try{localStorage.removeItem('gh_draft');}catch(_e){} var _u=authUser(); if(_u) setTimeout(function(){ checkAndAwardBadges(_u.uid); },2000); }, finalPayload);
+          GS().createPost(txt, '', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); window._composerLocation=null; try{localStorage.removeItem('gh_draft');}catch(_e){} var _u=authUser(); if(_u) setTimeout(function(){ checkAndAwardBadges(_u.uid); },2000); }, finalPayload);
         }
       }
 
@@ -3138,8 +3139,37 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       : '';
 
     // Phase 46: category badge
-    var CAT_ICONS={travel:'✈️',food:'🍕',business:'💼',nature:'🌿',tech:'💻',sport:'⚽',music:'🎵',art:'🎨',news:'📰',humor:'😂'};
+    var CAT_ICONS={travel:'✈️',food:'🍕',business:'💼',nature:'🌿',tech:'💻',sport:'⚽',music:'🎵',art:'🎨',news:'📰',humor:'😂',health:'🏥',fashion:'👗',cars:'🚗',education:'📚',finance:'💰',gaming:'🎮',film:'🎬',pets:'🐾',diy:'🔧',events:'📅',realestate:'🏠',politics:'🏛️',science:'🔬',religion:'🕌',relationships:'💞'};
     var categoryBadge = p.category ? '<a class="gh-cat-badge" href="feed.html?cat='+encodeURIComponent(p.category)+'" onclick="event.stopPropagation()">'+(CAT_ICONS[p.category]||'🏷️')+' '+esc(p.category.charAt(0).toUpperCase()+p.category.slice(1))+'</a>' : '';
+
+    // Post format badge (article, review, recipe, job, question, tip, event, quote, announcement)
+    var FMT_ICONS={article:'📰',review:'⭐',recipe:'🍽️',job:'💼',question:'❓',tip:'💡',event:'📅',quote:'💬',announcement:'📢'};
+    var fmtBadge='';
+    if(p.postFormat && p.postFormat.format && FMT_ICONS[p.postFormat.format]){
+      fmtBadge='<span class="gh-fmt-badge">'+FMT_ICONS[p.postFormat.format]+' '+esc(p.postFormat.format.charAt(0).toUpperCase()+p.postFormat.format.slice(1))+'</span>';
+    }
+
+    // Post format detail block (article title, review stars, recipe name, job details)
+    var fmtDetailHtml='';
+    if(p.postFormat){
+      var pf=p.postFormat, pfmt=pf.format||pf.type||'';
+      if(pfmt==='article' && pf.articleTitle){
+        fmtDetailHtml='<div class="gh-fmt-article"><div class="gh-fmt-art-title">'+esc(pf.articleTitle)+'</div>'+(pf.articleSubtitle?'<div class="gh-fmt-art-sub">'+esc(pf.articleSubtitle)+'</div>':'')+'</div>';
+      } else if(pfmt==='review' && pf.reviewTarget){
+        var _stars=''; for(var _si=1;_si<=5;_si++) _stars+='<span style="color:'+(_si<=(pf.reviewScore||0)?'#fbbf24':'rgba(255,255,255,.2)')+'">★</span>';
+        fmtDetailHtml='<div class="gh-fmt-review"><span class="gh-fmt-rev-target">'+esc(pf.reviewTarget)+'</span><span class="gh-fmt-rev-stars">'+_stars+'</span></div>';
+      } else if(pfmt==='recipe' && pf.recipeName){
+        fmtDetailHtml='<div class="gh-fmt-recipe"><span>🍽️ <strong>'+esc(pf.recipeName)+'</strong></span>'+(pf.recipeTime?'<span class="gh-fmt-recipe-time">⏱ '+esc(pf.recipeTime)+'</span>':'')+'</div>';
+      } else if(pfmt==='job' && pf.jobTitle){
+        fmtDetailHtml='<div class="gh-fmt-job"><strong class="gh-fmt-job-title">'+esc(pf.jobTitle)+'</strong>'+(pf.jobCompany?'<span> · '+esc(pf.jobCompany)+'</span>':'')+(pf.jobCity?'<span> · 📍'+esc(pf.jobCity)+'</span>':'')+(pf.jobSalary?'<span class="gh-fmt-salary">💵 '+esc(pf.jobSalary)+'</span>':'')+'</div>';
+      }
+    }
+
+    // Location
+    var locationHtml='';
+    if(p.location && p.location.name){
+      locationHtml='<div class="gh-post-location"><i class="fas fa-map-marker-alt"></i> '+esc(p.location.name)+'</div>';
+    }
 
     // Phase 59: Verification badge
     var verifiedBadge = p.authorVerified ? '<span class="gh-verified-badge" title="Verified account"><i class="fas fa-circle-check"></i></span>' : (p.authorType==='business' && p.authorBizVerified ? '<span class="gh-verified-badge gh-verified-biz" title="Verified business"><i class="fas fa-store"></i></span>' : '');
@@ -3304,7 +3334,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       repostBanner+
       followedPageBanner+
       pinBanner+
-      '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+avatarAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><div class="gh-post-name-row"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a>'+verifiedBadge+coAuthorHtml+sponsoredHtml+'</div><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+target+(p.feeling?' · '+esc(p.feeling):'')+(categoryBadge?' · '+categoryBadge:'')+bizPostedOnHtml+(readTimeBadge?' · '+readTimeBadge:'')+'</div></div>'+moreBtn+'</div>'+
+      '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+avatarAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><div class="gh-post-name-row"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a>'+verifiedBadge+coAuthorHtml+sponsoredHtml+'</div><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+target+(p.feeling?' · '+esc(p.feeling):'')+(categoryBadge?' · '+categoryBadge:'')+(fmtBadge?' · '+fmtBadge:'')+bizPostedOnHtml+(readTimeBadge?' · '+readTimeBadge:'')+'</div></div>'+moreBtn+'</div>'+
+      locationHtml+
+      fmtDetailHtml+
       postTextHtml+
       translateHtml+
       voiceHtml+

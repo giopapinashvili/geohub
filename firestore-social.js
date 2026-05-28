@@ -1136,6 +1136,9 @@
           category: extra && extra.category ? extra.category : null,
           voiceUrl: extra && extra.voiceUrl ? extra.voiceUrl : null,
           audience: (extra && extra.audience) ? extra.audience : null,
+          location: (extra && extra.location) ? extra.location : null,
+          bgTextStyle: (extra && extra.bgTextStyle) ? extra.bgTextStyle : null,
+          postFormat: (extra && extra.postFormat) ? extra.postFormat : null,
           authorVerified: (me.verified || me.isVerified) ? true : false,
           createdAt: serverTimestamp()
         };
