@@ -9822,16 +9822,19 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     group_approved:      { icon: 'fa-user-check',  color: '#10b981' },
     group_declined:      { icon: 'fa-user-times',  color: '#ef4444' }
   };
-  var NP_FILTERS = [
-    { key: 'all',     label: 'All' },
-    { key: 'like',    label: 'Likes' },
-    { key: 'comment', label: 'Comments' },
-    { key: 'reply',   label: 'Replies' },
-    { key: 'follow',  label: 'Follows', types: ['follow', 'business_follow'] },
-    { key: 'message', label: 'Messages' },
-    { key: 'story',   label: 'Stories',  types: ['story_reply', 'story_reaction'] },
-    { key: 'reward',  label: 'Rewards',  types: ['reward', 'badge', 'challenge', 'points_received', 'coupon_redeemed'] }
-  ];
+  var NP_FILTERS = (function(){
+    var _g=typeof GHt==='function'?GHt:function(k){return k;};
+    return [
+      { key: 'all',     label: _g('notif_all') },
+      { key: 'like',    label: _g('notif_likes') },
+      { key: 'comment', label: _g('notif_comments') },
+      { key: 'reply',   label: _g('notif_replies') },
+      { key: 'follow',  label: _g('notif_follows'), types: ['follow', 'business_follow'] },
+      { key: 'message', label: _g('nav_messages') },
+      { key: 'story',   label: _g('notif_stories'),  types: ['story_reply', 'story_reaction'] },
+      { key: 'reward',  label: _g('notif_rewards'),  types: ['reward', 'badge', 'challenge', 'points_received', 'coupon_redeemed'] }
+    ];
+  })();
 
   function npTimeAgo(ts) {
     if (!ts) return '';
@@ -9847,14 +9850,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function npDayLabel(ts) {
     if (!ts) return 'Older';
     var ms = ts.toMillis ? ts.toMillis() : (ts.seconds ? ts.seconds * 1000 : 0);
-    if (!ms) return 'Older';
+    var _nt=typeof GHt==='function'?GHt:function(k){return k;};
+    if (!ms) return _nt('notif_older');
     var now = Date.now(), diff = now - ms;
     var today = new Date(); today.setHours(0,0,0,0);
     var itemDate = new Date(ms); itemDate.setHours(0,0,0,0);
-    if (itemDate.getTime() === today.getTime()) return 'Today';
-    if (today.getTime() - itemDate.getTime() === 86400000) return 'Yesterday';
+    if (itemDate.getTime() === today.getTime()) return _nt('notif_today');
+    if (today.getTime() - itemDate.getTime() === 86400000) return _nt('notif_yesterday');
     if (diff < 7 * 86400000) return 'This week';
-    return 'Older';
+    return _nt('notif_older');
   }
 
   /* ── Phase 65: Notification Preferences + DND + Web Push ── */
@@ -9932,13 +9936,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function renderNotifications() {
     var pageActor = notificationActor();
-    var pageTitle = pageActor.type === 'business' ? esc(pageActor.title + ' Activity') : 'Notifications';
+    var _nt=typeof GHt==='function'?GHt:function(k){return k;};
+    var pageTitle = pageActor.type === 'business' ? esc(pageActor.title + ' Activity') : _nt('nav_notifications');
     var pageSub = pageActor.type === 'business' ? 'Using GeoHub as '+pageActor.title : '';
     shell({ active: 'notifications', right: '', center:
       '<div class="np-page">' +
         '<div class="np-head">' +
           '<div><h2 id="npTitle"><i class="fas fa-bell"></i> '+pageTitle+'</h2><p class="np-context" id="npContext"'+(pageSub?'':' style="display:none"')+'>'+esc(pageSub)+'</p></div>' +
-          '<div style="display:flex;gap:8px"><button class="np-mark-all gh-btn ghost" id="npMarkAll"><i class="fas fa-check-double"></i> Mark all read</button><button class="gh-btn ghost" onclick="if(window.ghOpenNotifSettings)ghOpenNotifSettings()" title="Notification settings"><i class="fas fa-gear"></i></button></div>' +
+          '<div style="display:flex;gap:8px"><button class="np-mark-all gh-btn ghost" id="npMarkAll"><i class="fas fa-check-double"></i> '+_nt('notif_mark_all')+'</button><button class="gh-btn ghost" onclick="if(window.ghOpenNotifSettings)ghOpenNotifSettings()" title="Notification settings"><i class="fas fa-gear"></i></button></div>' +
         '</div>' +
         '<div class="np-filters" id="npFilters">' +
           NP_FILTERS.map(function(f,i){ return '<button class="np-filter-btn'+(i===0?' active':'')+'" data-np-filter="'+f.key+'">'+f.label+'</button>'; }).join('') +
@@ -10078,14 +10083,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   /* ── Phase 67: Marketplace Lite ─────────────────────────── */
   var _MKT_CATS=['All','Electronics','Clothing','Furniture','Vehicles','Books','Sports','Food','Services','Other'];
   function renderMarketplace(){
+    var _mt=typeof GHt==='function'?GHt:function(k){return k;};
     shell({ active:'marketplace',
       center:
         '<div class="gh-card" style="padding:16px 16px 10px">'+
           '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">'+
-            '<h2 style="margin:0;font-size:1.05rem"><i class="fas fa-store"></i> Marketplace</h2>'+
-            '<button class="gh-btn" id="ghSellBtn"><i class="fas fa-plus"></i> Sell item</button>'+
+            '<h2 style="margin:0;font-size:1.05rem" data-i18n="nav_marketplace"><i class="fas fa-store"></i> Marketplace</h2>'+
+            '<button class="gh-btn" id="ghSellBtn"><i class="fas fa-plus"></i> '+_mt('mkt_sell')+'</button>'+
           '</div>'+
-          '<div class="gh-top-search" style="max-width:100%;margin-bottom:10px"><i class="fas fa-search"></i><input id="ghMktSearch" placeholder="Search listings…" autocomplete="off"></div>'+
+          '<div class="gh-top-search" style="max-width:100%;margin-bottom:10px"><i class="fas fa-search"></i><input id="ghMktSearch" data-i18n-placeholder="search" placeholder="Search listings…" autocomplete="off"></div>'+
           '<div class="gh-pill-row" id="ghMktCats" style="flex-wrap:wrap">'+
             _MKT_CATS.map(function(c,i){ return '<button class="gh-pill'+(i===0?' active':'')+'" data-mkt-cat="'+esc(i===0?'':c)+'">'+esc(c)+'</button>'; }).join('')+
           '</div>'+
@@ -10122,7 +10128,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                 '<div class="gh-mkt-title">'+esc(title)+'</div>'+
                 (x.city?'<div class="gh-mkt-loc"><i class="fas fa-location-dot"></i> '+esc(x.city)+'</div>':'')+
                 '<div class="gh-mkt-actions">'+
-                  (!sold?'<button class="gh-btn sm" data-mkt-contact="'+esc(x.sellerId||x.authorId||x.userId||'')+'" data-mkt-title="'+esc(title)+'"><i class="fas fa-comment-dots"></i> Contact</button>':'<span class="gh-chip">Sold</span>')+
+                  (!sold?'<button class="gh-btn sm" data-mkt-contact="'+esc(x.sellerId||x.authorId||x.userId||'')+'" data-mkt-title="'+esc(title)+'"><i class="fas fa-comment-dots"></i> '+(typeof GHt==='function'?GHt('mkt_contact'):'Contact')+'</button>':'<span class="gh-chip">'+(typeof GHt==='function'?GHt('mkt_sold'):'Sold')+'</span>')+
                   '<button class="gh-btn sm ghost" data-mkt-save="'+esc(x.id)+'"><i class="fas fa-bookmark"></i></button>'+
                 '</div>'+
               '</div>'+
@@ -10152,7 +10158,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<input class="gh-input" id="ghMktCity" placeholder="City / Location (optional)" style="margin-bottom:8px">'+
       '<input type="file" id="ghMktFilePick" accept="image/*" style="display:none">'+
       '<button type="button" class="gh-btn ghost" id="ghMktPhotoBtn"><i class="fas fa-image"></i> Add Photo</button>';
-    modal('Sell an Item',body,'<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghMktSubmitBtn">List Item</button>','ghSellModal');
+    modal((typeof GHt==='function'?GHt('mkt_sell_modal'):'Sell an Item'),body,'<button class="gh-btn ghost" data-close-modal>'+(typeof GHt==='function'?GHt('cancel'):'Cancel')+'</button><button class="gh-btn" id="ghMktSubmitBtn">'+(typeof GHt==='function'?GHt('mkt_list_item'):'List Item')+'</button>','ghSellModal');
     var mktModal=document.getElementById('ghSellModal');
     if(!mktModal) return;
     var pickedMktFile=null;
@@ -10982,12 +10988,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
      PHASE 79 — Gamification Hub (XP, Badges, Leaderboard)
   ══════════════════════════════════════════════════════════════ */
   function renderGamification(){
+    var _xt=typeof GHt==='function'?GHt:function(k){return k;};
     shell({ active:'gamification',
       center:
         '<div class="gh-gamif-page" id="ghGamifPage">'+
           '<div class="gh-card" style="text-align:center;padding:24px">'+
             '<div style="font-size:2rem;margin-bottom:8px">🏆</div>'+
-            '<h2 style="margin:0 0 4px">GeoHub XP & Rewards</h2>'+
+            '<h2 style="margin:0 0 4px" data-i18n="xp_rewards_title">GeoHub XP & Rewards</h2>'+
             '<p class="gh-muted" style="margin:0">Earn XP, unlock badges, climb the leaderboard</p>'+
           '</div>'+
           '<div id="ghGamifContent"><div class="gh-card gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
@@ -10996,7 +11003,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     ready(function(){
       var u=authUser();
       var box=document.getElementById('ghGamifContent'); if(!box) return;
-      if(!u){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-lock"></i><h3>Sign in to see your XP</h3><a class="gh-btn" href="auth.html">Sign In</a></div>'; return; }
+      if(!u){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-lock"></i><h3>'+_xt('xp_sign_in')+'</h3><a class="gh-btn" href="auth.html">'+_xt('sign_in')+'</a></div>'; return; }
       var _BADGES=[
         {id:'first_post',icon:'✍️',name:'First Post',desc:'Made your first post',xp:50},
         {id:'explorer',icon:'🗺️',name:'Explorer',desc:'Visited 5 different pages',xp:100},
@@ -11040,20 +11047,20 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             '</div>'+
           '</div>'+
           '<div class="gh-card">'+
-            '<h3 style="margin:0 0 12px;font-size:.95rem"><i class="fas fa-sun"></i> Daily Missions</h3>'+
+            '<h3 style="margin:0 0 12px;font-size:.95rem"><i class="fas fa-sun"></i> '+_xt('xp_daily')+'</h3>'+
             '<div class="gh-daily-missions">'+
               _DAILY.map(function(m){
                 var done=dailyDone[todayKey]&&dailyDone[todayKey][m.id];
                 return '<div class="gh-mission-row'+(done?' done':'')+'" data-mission="'+esc(m.id)+'">'+
                   '<span class="gh-mission-icon">'+m.icon+'</span>'+
                   '<div class="gh-mission-info"><strong>'+esc(m.task)+'</strong><span class="gh-muted">+'+m.xp+' XP</span></div>'+
-                  (done?'<span class="gh-mission-check"><i class="fas fa-check-circle"></i></span>':'<button class="gh-btn sm ghost gh-mission-claim" data-mid="'+esc(m.id)+'" data-mxp="'+m.xp+'">Claim</button>')+
+                  (done?'<span class="gh-mission-check"><i class="fas fa-check-circle"></i></span>':'<button class="gh-btn sm ghost gh-mission-claim" data-mid="'+esc(m.id)+'" data-mxp="'+m.xp+'">'+_xt('xp_claim')+'</button>')+
                 '</div>';
               }).join('')+
             '</div>'+
           '</div>'+
           '<div class="gh-card">'+
-            '<h3 style="margin:0 0 12px;font-size:.95rem"><i class="fas fa-medal"></i> Badges</h3>'+
+            '<h3 style="margin:0 0 12px;font-size:.95rem"><i class="fas fa-medal"></i> '+_xt('xp_badges')+'</h3>'+
             '<div class="gh-badges-grid">'+
               _BADGES.map(function(b){
                 var earned=myBadges.indexOf(b.id)>-1;
@@ -11066,7 +11073,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             '</div>'+
           '</div>'+
           '<div class="gh-card">'+
-            '<h3 style="margin:0 0 12px;font-size:.95rem"><i class="fas fa-trophy"></i> Leaderboard <span class="gh-muted" style="font-size:.8rem">(Top 10)</span></h3>'+
+            '<h3 style="margin:0 0 12px;font-size:.95rem"><i class="fas fa-trophy"></i> '+_xt('xp_leaderboard')+' <span class="gh-muted" style="font-size:.8rem">(Top 10)</span></h3>'+
             (leaders.length?
               '<div class="gh-leader-list">'+
                 leaders.map(function(l,i){
@@ -11098,7 +11105,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             }).then(function(){
               toast('+'+mxp+' XP! Keep going 🚀');
               var row=btn.closest('.gh-mission-row'); if(row){ row.classList.add('done'); var check=document.createElement('span'); check.className='gh-mission-check'; check.innerHTML='<i class="fas fa-check-circle"></i>'; btn.replaceWith(check); }
-            }).catch(function(err){ toast('Failed','error'); btn.disabled=false; btn.innerHTML='Claim'; });
+            }).catch(function(err){ toast('Failed','error'); btn.disabled=false; btn.innerHTML=_xt('xp_claim'); });
           });
         });
       }).catch(function(err){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Failed</h3><p>'+esc(err.message||'')+'</p></div>'; });

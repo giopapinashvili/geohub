@@ -143,6 +143,35 @@
     biz_reviews_lbl:  { ka: 'მიმოხილვა',        en: 'Reviews',     ru: 'Отзывы'        },
     biz_add_business: { ka: 'ბიზნესის დამატება',en: 'Add Business',ru: 'Добавить бизнес'},
     biz_message:      { ka: 'შეტყობინება',       en: 'Message',     ru: 'Написать'      },
+
+    /* ── Notifications ──────────────────────────────────────── */
+    notif_mark_all:   { ka: 'ყველა წაკითხულია', en: 'Mark all read',ru: 'Всё прочитано' },
+    notif_all:        { ka: 'ყველა',             en: 'All',         ru: 'Все'           },
+    notif_likes:      { ka: 'მოწონებები',        en: 'Likes',       ru: 'Лайки'         },
+    notif_comments:   { ka: 'კომენტარები',       en: 'Comments',    ru: 'Комментарии'   },
+    notif_replies:    { ka: 'პასუხები',           en: 'Replies',     ru: 'Ответы'        },
+    notif_follows:    { ka: 'გამოწერები',         en: 'Follows',     ru: 'Подписки'      },
+    notif_stories:    { ka: 'სტორები',            en: 'Stories',     ru: 'Истории'       },
+    notif_rewards:    { ka: 'ჯილდოები',           en: 'Rewards',     ru: 'Награды'       },
+    notif_today:      { ka: 'დღეს',              en: 'Today',       ru: 'Сегодня'       },
+    notif_yesterday:  { ka: 'გუშინ',             en: 'Yesterday',   ru: 'Вчера'         },
+    notif_older:      { ka: 'ძველი',             en: 'Older',       ru: 'Ранее'         },
+
+    /* ── Marketplace ────────────────────────────────────────── */
+    mkt_sell:         { ka: 'გაყიდვა',           en: 'Sell item',   ru: 'Продать'       },
+    mkt_contact:      { ka: 'კონტაქტი',          en: 'Contact',     ru: 'Написать'      },
+    mkt_list_item:    { ka: 'განცხადება',         en: 'List Item',   ru: 'Опубликовать'  },
+    mkt_sell_modal:   { ka: 'ნივთის გაყიდვა',    en: 'Sell an Item',ru: 'Продать товар' },
+    mkt_sold:         { ka: 'გაიყიდა',           en: 'Sold',        ru: 'Продано'       },
+
+    /* ── Gamification ───────────────────────────────────────── */
+    xp_daily:         { ka: 'დღის დავალებები',    en: 'Daily Missions',ru: 'Ежедневные задания' },
+    xp_badges:        { ka: 'ნიშნები',            en: 'Badges',      ru: 'Значки'        },
+    xp_leaderboard:   { ka: 'ლიდერბორდი',         en: 'Leaderboard', ru: 'Рейтинг'       },
+    xp_sign_in:       { ka: 'შედი XP-ის სანახავად',en: 'Sign in to see your XP',ru: 'Войдите, чтобы видеть XP' },
+    xp_rewards_title: { ka: 'XP & ჯილდოები',     en: 'XP & Rewards',ru: 'XP и Награды'  },
+    xp_claim:         { ka: 'დამიბრუნე',          en: 'Claim',       ru: 'Получить'      },
+    xp_claimed:       { ka: 'მიღებული',           en: 'Claimed ✓',   ru: 'Получено ✓'    },
   };
 
   /* ── Core t() function ───────────────────────────────────── */
