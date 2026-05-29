@@ -802,14 +802,16 @@
   };
 
   window.cancelSub = function () {
-    if (!confirm('Cancel subscription? You\'ll revert to the Free plan at end of billing period.')) return;
-    try { if (window.safeStorage) window.safeStorage.remove('geohub_subscription'); } catch (_) {}
-    loadCurrentPlan();
-    renderPlans();
-    var dash = document.getElementById('subDash');
-    if (dash) dash.style.display = 'none';
-    var banner = document.getElementById('cpBanner');
-    if (banner) banner.style.display = 'none';
+    var msg = typeof window.GHt === 'function' ? window.GHt('sub_cancel_cfm') : "Cancel subscription? You'll revert to the Free plan at end of billing period.";
+    window.ghConfirm(msg, function() {
+      try { if (window.safeStorage) window.safeStorage.remove('geohub_subscription'); } catch (_) {}
+      loadCurrentPlan();
+      renderPlans();
+      var dash = document.getElementById('subDash');
+      if (dash) dash.style.display = 'none';
+      var banner = document.getElementById('cpBanner');
+      if (banner) banner.style.display = 'none';
+    });
   };
 
   /* ── INIT ────────────────────────────────────────────────── */

@@ -2587,7 +2587,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     function updateSubmit(){ var btn=$('#ghSubmitStory'); if(btn) btn.disabled=!isDirty(); }
     m.addEventListener('click', function(e){
       if(e.target===m||e.target.closest('[data-close-modal]')){
-        if(isDirty()&&!confirm('Discard your story?')){ e.stopPropagation(); e.preventDefault(); }
+        if(isDirty()){ e.stopPropagation(); e.preventDefault();
+          window.ghConfirm(typeof GHt==='function'?GHt('discard_story_cfm'):'Discard your story?', function(){ m.remove(); });
+        }
       }
     }, true);
     var ta=$('#ghStoryText');
@@ -2891,13 +2893,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var delBtn = overlay.querySelector('#ghStoryDelete');
       if(delBtn) delBtn.onclick = function(e){
         e.stopPropagation();
-        if(!confirm('Delete this story?')) return;
-        if(GS().deleteStory){
-          GS().deleteStory(st.id, function(err){
-            if(!err){ toast('Story deleted'); close(); }
-            else toast('Could not delete story.','error');
-          });
-        }
+        window.ghConfirm(typeof GHt==='function'?GHt('story_delete_cfm'):'Delete this story?', function() {
+          if(GS().deleteStory){
+            GS().deleteStory(st.id, function(err){
+              if(!err){ toast('Story deleted'); close(); }
+              else toast('Could not delete story.','error');
+            });
+          }
+        });
       };
       // Phase 63: Save to Highlight
       var hlBtn=overlay.querySelector('#ghStorySaveHL');
@@ -3663,31 +3666,32 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var micBtn=e.target.closest('.gh-comment-mic'); if(micBtn){ _handleCommentMic(micBtn); return; }
       var eb=e.target.closest('[data-edit-comment]'); if(eb){ e.preventDefault(); openFeedCommentEditor(pid, eb.dataset.commentId, eb); }
       var db2=e.target.closest('[data-delete-comment]'); if(db2){ e.preventDefault();
-        if(!confirm('Delete this comment?')) return;
-        var cid2=db2.dataset.commentId;
-        db2.disabled=true;
-        fs().deleteDoc(fs().doc(db(),'posts',pid,'comments',cid2))
-          .then(function(){
-            var row=card.querySelector('[data-comment-id="'+CSS.escape(cid2)+'"]');
-            if(row){row.style.transition='opacity .2s';row.style.opacity='0';setTimeout(function(){row.remove();},220);}
-            fs().updateDoc(fs().doc(db(),'posts',pid),{commentCount:fs().increment(-1)}).catch(function(){});
-            toast('Comment deleted');
-          }).catch(function(err){db2.disabled=false;toast('Could not delete: '+(err.code||err.message),'error');});
+        window.ghConfirm(typeof GHt==='function'?GHt('comment_delete_cfm'):'Delete this comment?', function() {
+          var cid2=db2.dataset.commentId;
+          db2.disabled=true;
+          fs().deleteDoc(fs().doc(db(),'posts',pid,'comments',cid2))
+            .then(function(){
+              var row=card.querySelector('[data-comment-id="'+CSS.escape(cid2)+'"]');
+              if(row){row.style.transition='opacity .2s';row.style.opacity='0';setTimeout(function(){row.remove();},220);}
+              fs().updateDoc(fs().doc(db(),'posts',pid),{commentCount:fs().increment(-1)}).catch(function(){});
+              toast('Comment deleted');
+            }).catch(function(err){db2.disabled=false;toast('Could not delete: '+(err.code||err.message),'error');});
+        });
       }
       var drBtn=e.target.closest('[data-delete-reply]'); if(drBtn){ e.preventDefault();
-        if(!confirm('Delete this reply?')) return;
-        var rid=drBtn.dataset.replyId, rcid=drBtn.dataset.commentId;
-        drBtn.disabled=true;
-        fs().deleteDoc(fs().doc(db(),'posts',pid,'comments',rcid,'replies',rid))
-          .then(function(){
-            var rrow=card.querySelector('[data-reply-id="'+CSS.escape(rid)+'"]');
-            if(rrow){rrow.style.transition='opacity .2s';rrow.style.opacity='0';setTimeout(function(){rrow.remove();},220);}
-            fs().updateDoc(fs().doc(db(),'posts',pid,'comments',rcid),{replyCount:fs().increment(-1)}).catch(function(){});
-            // Update cache to prevent deleted reply reappearing on next paint
-            var rkey=pid+'_'+rcid;
-            if(state.cachedReplies[rkey]) state.cachedReplies[rkey]=state.cachedReplies[rkey].filter(function(r){return r.id!==rid;});
-            toast('Reply deleted');
-          }).catch(function(err){drBtn.disabled=false;toast('Could not delete: '+(err.code||err.message),'error');});
+        window.ghConfirm(typeof GHt==='function'?GHt('reply_delete_cfm'):'Delete this reply?', function() {
+          var rid=drBtn.dataset.replyId, rcid=drBtn.dataset.commentId;
+          drBtn.disabled=true;
+          fs().deleteDoc(fs().doc(db(),'posts',pid,'comments',rcid,'replies',rid))
+            .then(function(){
+              var rrow=card.querySelector('[data-reply-id="'+CSS.escape(rid)+'"]');
+              if(rrow){rrow.style.transition='opacity .2s';rrow.style.opacity='0';setTimeout(function(){rrow.remove();},220);}
+              fs().updateDoc(fs().doc(db(),'posts',pid,'comments',rcid),{replyCount:fs().increment(-1)}).catch(function(){});
+              var rkey=pid+'_'+rcid;
+              if(state.cachedReplies[rkey]) state.cachedReplies[rkey]=state.cachedReplies[rkey].filter(function(r){return r.id!==rid;});
+              toast('Reply deleted');
+            }).catch(function(err){drBtn.disabled=false;toast('Could not delete: '+(err.code||err.message),'error');});
+        });
       }
     });
     root.addEventListener('submit', function(e){
@@ -4387,12 +4391,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     )).then(function(snap){
       if(!snap.empty){
         // Already reposted → undo
-        if(!confirm('Remove your repost?')) return;
-        var repostDoc=snap.docs[0];
-        return f.deleteDoc(f.doc(d,'posts',repostDoc.id)).then(function(){
-          f.updateDoc(f.doc(d,'posts',pid),{reshareCount:f.increment(-1)}).catch(function(){});
-          toast('Repost removed');
+        window.ghConfirm(typeof GHt==='function'?GHt('repost_remove_cfm'):'Remove your repost?', function() {
+          var repostDoc=snap.docs[0];
+          f.deleteDoc(f.doc(d,'posts',repostDoc.id)).then(function(){
+            f.updateDoc(f.doc(d,'posts',pid),{reshareCount:f.increment(-1)}).catch(function(){});
+            toast('Repost removed');
+          });
         });
+        return;
       }
       // Create repost
       var me=window.GeoCurrentUser||{};
@@ -4542,10 +4548,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if (e.target.closest('[data-menu-edit-post]') && isOwn) { closeDrop(); openFeedPostEditor(pid, card); return; }
       if (e.target.closest('[data-menu-delete-post]') && isOwn) {
         closeDrop();
-        if (!confirm('Delete this post? This cannot be undone.')) return;
-        fs().updateDoc(fs().doc(db(),'posts',pid), { status:'deleted', updatedAt:fs().serverTimestamp() })
-          .then(function(){ if(card){ card.style.transition='opacity .25s'; card.style.opacity='0'; setTimeout(function(){ card.remove(); },260); } toast('Post deleted'); })
-          .catch(function(err){ toast('Could not delete: '+(err.code||err.message),'error'); });
+        window.ghConfirm(typeof GHt==='function'?GHt('post_delete_cfm'):'Delete this post? This cannot be undone.', function() {
+          fs().updateDoc(fs().doc(db(),'posts',pid), { status:'deleted', updatedAt:fs().serverTimestamp() })
+            .then(function(){ if(card){ card.style.transition='opacity .25s'; card.style.opacity='0'; setTimeout(function(){ card.remove(); },260); } toast('Post deleted'); })
+            .catch(function(err){ toast('Could not delete: '+(err.code||err.message),'error'); });
+        });
         return;
       }
       if (e.target.closest('[data-copy-post-link]')) { navigator.clipboard && navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast('Link copied!');}); closeDrop(); return; }
@@ -5817,9 +5824,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               f.updateDoc(f.doc(d,'liveStreams',u.uid),{active:false,endedAt:f.serverTimestamp()}).catch(function(){});
               if(m) m.remove();
               // Phase 66: prompt to save as video post
-              if(liveUrl && confirm('Live ended! Save your stream URL as a video post?')){
-                var GeoSoc=window.GeoSocial||GS();
-                if(GeoSoc&&GeoSoc.createPost) GeoSoc.createPost({text:'🔴 Watch my live recording!',videoUrl:liveUrl,type:'video'},null,function(){toast('Video post created!');});
+              if(liveUrl){
+                window.ghConfirm(typeof GHt==='function'?GHt('live_save_cfm'):'Live ended! Save your stream URL as a video post?', function(){
+                  var GeoSoc=window.GeoSocial||GS();
+                  if(GeoSoc&&GeoSoc.createPost) GeoSoc.createPost({text:'🔴 Watch my live recording!',videoUrl:liveUrl,type:'video'},null,function(){toast('Video post created!');});
+                }, function(){ toast('Live ended'); });
               } else {
                 toast('Live ended');
               }
@@ -9457,7 +9466,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '</div>'+
         '</div>';
       $('#ghAcceptInvite').onclick=function(){acceptEmpInvite(b,inv);};
-      $('#ghDeclineInvite').onclick=function(){if(confirm('Decline this invitation?'))declineEmpInvite(b,inv.id);};
+      $('#ghDeclineInvite').onclick=function(){window.ghConfirm(typeof GHt==='function'?GHt('invite_decline_cfm'):'Decline this invitation?',function(){declineEmpInvite(b,inv.id);});};
     }).catch(function(){});
   }
 
@@ -9673,11 +9682,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function deleteBusinessReview(reviewId, bizId, oldRating){
-    if(!confirm('Delete your review? This cannot be undone.')) return;
-    fs().deleteDoc(fs().doc(db(),'businessReviews',reviewId))
-      .then(function(){return fs().updateDoc(fs().doc(db(),'businesses',bizId),{reviewCount:fs().increment(-1),ratingTotal:fs().increment(-oldRating),ratingCount:fs().increment(-1)}).catch(function(){});})
-      .then(function(){toast('Review deleted');})
-      .catch(function(err){toast('Delete failed: '+(err.code||err.message),'error');});
+    window.ghConfirm(typeof GHt==='function'?GHt('review_delete_cfm'):'Delete your review? This cannot be undone.', function(){
+      fs().deleteDoc(fs().doc(db(),'businessReviews',reviewId))
+        .then(function(){return fs().updateDoc(fs().doc(db(),'businesses',bizId),{reviewCount:fs().increment(-1),ratingTotal:fs().increment(-oldRating),ratingCount:fs().increment(-1)}).catch(function(){});})
+        .then(function(){toast('Review deleted');})
+        .catch(function(err){toast('Delete failed: '+(err.code||err.message),'error');});
+    });
   }
 
   function openOwnerReplyModal(reviewId, isEdit, existingText){
@@ -9702,10 +9712,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function deleteOwnerReply(reviewId){
-    if(!confirm('Delete your reply?')) return;
-    fs().updateDoc(fs().doc(db(),'businessReviews',reviewId),{ownerReply:null})
-      .then(function(){toast('Reply deleted');})
-      .catch(function(err){toast('Failed: '+(err.code||err.message),'error');});
+    window.ghConfirm(typeof GHt==='function'?GHt('reply_delete_cfm'):'Delete your reply?', function(){
+      fs().updateDoc(fs().doc(db(),'businessReviews',reviewId),{ownerReply:null})
+        .then(function(){toast('Reply deleted');})
+        .catch(function(err){toast('Failed: '+(err.code||err.message),'error');});
+    });
   }
 
   function openReportReviewModal(reviewId, bizId){
@@ -10037,7 +10048,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     box.innerHTML='<div class="gh-card"><div class="gh-section-title"><h2>Files</h2>'+(isMember?'<button class="gh-btn sm" id="ghUploadGroupFile"><i class="fas fa-upload"></i> Upload</button>':'')+'</div><div id="ghGroupFilesList"><div class="gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
     if(isMember){var ub=$('#ghUploadGroupFile');if(ub)ub.onclick=function(){var inp=document.createElement('input');inp.type='file';inp.onchange=function(){var file=inp.files&&inp.files[0];if(!file)return;GS().uploadGroupFile(g.id,file,function(){});};inp.click();};}
     var myUid=authUser()&&authUser().uid;
-    var _u=GS().listenGroupFiles(g.id,function(items){var list=$('#ghGroupFilesList');if(!list)return;if(!items.length){list.innerHTML='<div class="gh-empty" style="min-height:80px"><i class="fas fa-folder-open"></i><h3>No files yet</h3></div>';return;}list.innerHTML=items.map(function(f){var canDelete=isAdmin||(f.uploaderId===myUid);return '<div class="gr-file-card"><div class="gr-file-icon"><i class="fas fa-file'+(f.type&&f.type.startsWith('image')?'-image':(f.type&&f.type.includes('pdf')?'-pdf':''))+'"></i></div><div class="gr-file-body"><strong>'+esc(f.name||'File')+'</strong><span class="gh-muted" style="font-size:.8rem">'+esc(grFormatBytes(f.size))+(f.uploaderName?' · '+esc(f.uploaderName):'')+' · '+grTimeAgo(f.createdAt)+'</span></div><div class="gr-file-actions"><a class="gh-btn sm" href="'+esc(f.url||'#')+'" target="_blank" rel="noopener"><i class="fas fa-download"></i></a>'+(canDelete?'<button class="gh-btn sm ghost danger" data-delete-file="'+esc(f.id)+'"><i class="fas fa-trash"></i></button>':'')+'</div></div>';}).join('');list.querySelectorAll('[data-delete-file]').forEach(function(btn){btn.onclick=function(){if(!confirm('Delete this file?'))return;GS().deleteGroupFile(g.id,btn.dataset.deleteFile,function(){});};});});
+    var _u=GS().listenGroupFiles(g.id,function(items){var list=$('#ghGroupFilesList');if(!list)return;if(!items.length){list.innerHTML='<div class="gh-empty" style="min-height:80px"><i class="fas fa-folder-open"></i><h3>No files yet</h3></div>';return;}list.innerHTML=items.map(function(f){var canDelete=isAdmin||(f.uploaderId===myUid);return '<div class="gr-file-card"><div class="gr-file-icon"><i class="fas fa-file'+(f.type&&f.type.startsWith('image')?'-image':(f.type&&f.type.includes('pdf')?'-pdf':''))+'"></i></div><div class="gr-file-body"><strong>'+esc(f.name||'File')+'</strong><span class="gh-muted" style="font-size:.8rem">'+esc(grFormatBytes(f.size))+(f.uploaderName?' · '+esc(f.uploaderName):'')+' · '+grTimeAgo(f.createdAt)+'</span></div><div class="gr-file-actions"><a class="gh-btn sm" href="'+esc(f.url||'#')+'" target="_blank" rel="noopener"><i class="fas fa-download"></i></a>'+(canDelete?'<button class="gh-btn sm ghost danger" data-delete-file="'+esc(f.id)+'"><i class="fas fa-trash"></i></button>':'')+'</div></div>';}).join('');list.querySelectorAll('[data-delete-file]').forEach(function(btn){btn.onclick=function(){var fid=btn.dataset.deleteFile;window.ghConfirm(typeof GHt==='function'?GHt('file_delete_cfm'):'Delete this file?',function(){GS().deleteGroupFile(g.id,fid,function(){});});};});});
     state.pageUnsubs.push(_u); state.grTabUnsubs.push(_u);
   }
 
@@ -10120,8 +10131,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     // Dirty-state close confirmation
     m.addEventListener('click', function(e){
       if(e.target===m || e.target.closest('[data-close-modal]')){
-        if(((ta&&ta.value.trim())||pickedFile) && !confirm('Discard your post?')){
+        if((ta&&ta.value.trim())||pickedFile){
           e.stopPropagation(); e.preventDefault();
+          window.ghConfirm(typeof GHt==='function'?GHt('discard_post_cfm'):'Discard your post?', function(){ m.remove(); });
         }
       }
     }, true);
@@ -12443,10 +12455,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           });
           content.querySelectorAll('[data-delete-content]').forEach(function(btn){
             btn.onclick=function(){
-              if(!confirm('Delete this content? This is irreversible.')) return;
-              var type=btn.dataset.contentType||'post'; var id=btn.dataset.deleteContent;
-              var col=type==='post'?'posts':type==='comment'?'comments':type;
-              fs().updateDoc(fs().doc(db(),col,id),{status:'deleted'}).then(function(){ toast('Content deleted'); _renderReports(); }).catch(function(err){ toast('Failed: '+(err.message||''),'error'); });
+              window.ghConfirm('Delete this content? This is irreversible.', function(){
+                var type=btn.dataset.contentType||'post'; var id=btn.dataset.deleteContent;
+                var col=type==='post'?'posts':type==='comment'?'comments':type;
+                fs().updateDoc(fs().doc(db(),col,id),{status:'deleted'}).then(function(){ toast('Content deleted'); _renderReports(); }).catch(function(err){ toast('Failed: '+(err.message||''),'error'); });
+              });
             };
           });
         }).catch(function(err){ content.innerHTML='<div class="gh-card gh-empty"><h3>Failed</h3><p>'+esc(err.message||'Check admin permissions')+'</p></div>'; });
@@ -12511,8 +12524,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             '</div></div>';
           content.querySelectorAll('[data-admin-del-post]').forEach(function(btn){
             btn.onclick=function(){
-              if(!confirm('Delete post? Irreversible.')) return;
-              fs().updateDoc(fs().doc(db(),'posts',btn.dataset.adminDelPost),{status:'deleted'}).then(function(){ toast('Post deleted'); _renderAdminPosts(); }).catch(function(err){ toast('Failed','error'); });
+              var pid2=btn.dataset.adminDelPost;
+              window.ghConfirm('Delete post? Irreversible.', function(){
+                fs().updateDoc(fs().doc(db(),'posts',pid2),{status:'deleted'}).then(function(){ toast('Post deleted'); _renderAdminPosts(); }).catch(function(err){ toast('Failed','error'); });
+              });
             };
           });
         }).catch(function(err){ content.innerHTML='<div class="gh-card gh-empty"><h3>Failed</h3><p>'+esc(err.message||'Check permissions')+'</p></div>'; });
@@ -12618,8 +12633,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       }).join('');
       box.querySelectorAll('[data-del-scheduled]').forEach(function(btn){
         btn.onclick=function(){
-          if(!confirm('Cancel this scheduled post?')) return;
-          fs().updateDoc(fs().doc(db(),'posts',btn.dataset.delScheduled),{status:'draft'}).then(function(){ window.ghRenderContentCalendar(container); }).catch(function(){});
+          var sid=btn.dataset.delScheduled;
+          window.ghConfirm(typeof GHt==='function'?GHt('scheduled_cancel_cfm'):'Cancel this scheduled post?', function(){
+            fs().updateDoc(fs().doc(db(),'posts',sid),{status:'draft'}).then(function(){ window.ghRenderContentCalendar(container); }).catch(function(){});
+          });
         };
       });
     }).catch(function(err){ var b=container.querySelector('#ghCalList'); if(b) b.innerHTML='<div class="gh-muted">Failed: '+esc(err.message||'')+'</div>'; });
