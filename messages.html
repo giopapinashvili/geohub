@@ -69,7 +69,7 @@
             <span data-i18n="msg_title">Messages</span>
             <div class="sidebar-title-actions">
               <button class="sidebar-icon-btn" data-i18n-title="msg_new" title="New message" onclick="openNewConversationSearch()"><i class="fas fa-edit"></i></button>
-              <button class="sidebar-icon-btn" title="Filter"><i class="fas fa-sliders-h"></i></button>
+              <button class="sidebar-icon-btn" title="Filter" data-i18n-title="msg_filter"><i class="fas fa-sliders-h"></i></button>
             </div>
           </div>
           <div class="conv-search-wrap">
@@ -118,10 +118,10 @@
 
         <!-- Input bar -->
         <div class="chat-input-bar">
-          <button class="input-btn attach-menu-btn" id="attachmentMenuBtn" title="Attachments" aria-label="Attachments" aria-expanded="false" onclick="window.__ghToggleAttachSheet&&window.__ghToggleAttachSheet(event)"><i class="fas fa-plus"></i></button>
+          <button class="input-btn attach-menu-btn" id="attachmentMenuBtn" title="Attachments" data-i18n-title="msg_attachments" aria-label="Attachments" aria-expanded="false" onclick="window.__ghToggleAttachSheet&&window.__ghToggleAttachSheet(event)"><i class="fas fa-plus"></i></button>
           <input type="text" id="msgInput" class="msg-input" data-i18n-placeholder="msg_type_msg" placeholder="Type a message…">
-          <button class="input-btn" id="emojiBtn" title="Emoji" onclick="toggleEmojiPicker()"><i class="fas fa-smile"></i></button>
-          <button class="send-btn" onclick="sendMsg()" title="Send"><i class="fas fa-paper-plane"></i></button>
+          <button class="input-btn" id="emojiBtn" title="Emoji" data-i18n-title="msg_emoji" onclick="toggleEmojiPicker()"><i class="fas fa-smile"></i></button>
+          <button class="send-btn" onclick="sendMsg()" title="Send" data-i18n-title="msg_send"><i class="fas fa-paper-plane"></i></button>
           <div class="msg-attach-sheet" id="msgAttachSheet" aria-hidden="true">
             <button type="button" data-pick-image><i class="fas fa-image"></i><span data-i18n="msg_photo">Photo</span></button>
             <button type="button" id="fileAttachBtn"><i class="fas fa-file-alt"></i><span data-i18n="msg_file">File</span></button>

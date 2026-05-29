@@ -117,7 +117,16 @@ function updateSelectedUserBox(user) {
     box.textContent = "No explorer selected.";
     return;
   }
-  box.innerHTML = `<strong>${user.fullName}</strong> · ${user.bio} <br><span class="assistant-note">Interests: ${user.interests.join(", ")} · XP ${user.xp} · Rank ${user.rank}</span>`;
+  var nameEl = document.createElement('strong');
+  nameEl.textContent = user.fullName;
+  var noteEl = document.createElement('span');
+  noteEl.className = 'assistant-note';
+  noteEl.textContent = 'Interests: ' + user.interests.join(', ') + ' · XP ' + user.xp + ' · Rank ' + user.rank;
+  box.innerHTML = '';
+  box.appendChild(nameEl);
+  box.appendChild(document.createTextNode(' · ' + (user.bio || '') + ' '));
+  box.appendChild(document.createElement('br'));
+  box.appendChild(noteEl);
 }
 
 function buildRecommendationCards(user) {
@@ -148,7 +157,13 @@ function buildRecommendationCards(user) {
     .forEach((item) => {
       const card = document.createElement("div");
       card.className = "assistant-recommendation-card";
-      card.innerHTML = `<strong>${item}</strong><br><small>Because ${user.fullName} loves ${user.interests[0] || "local discovery"}.</small>`;
+      var cardTitle = document.createElement('strong');
+      cardTitle.textContent = item;
+      var cardNote = document.createElement('small');
+      cardNote.textContent = 'Because ' + user.fullName + ' loves ' + (user.interests[0] || 'local discovery') + '.';
+      card.appendChild(cardTitle);
+      card.appendChild(document.createElement('br'));
+      card.appendChild(cardNote);
       cards.appendChild(card);
     });
 }

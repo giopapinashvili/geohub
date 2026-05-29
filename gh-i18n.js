@@ -711,6 +711,10 @@
     msg_start_sub:    { ka: 'მოძებნე მომხმარებელი.',en: 'Search real users and open a chat.',ru: 'Найдите пользователя и откройте чат.' },
     msg_search_user:  { ka: 'სახელი ან ელ-ფოსტა…', en: 'Search by name or email…',ru: 'Имя или email…' },
     msg_conv_details: { ka: 'ჩეტის დეტალები',      en: 'Select a conversation to see details',ru: 'Выберите чат для просмотра деталей' },
+    msg_attachments:  { ka: 'მიმაგრება',           en: 'Attachments',     ru: 'Вложения'         },
+    msg_emoji:        { ka: 'ემოჯი',               en: 'Emoji',           ru: 'Эмодзи'           },
+    msg_send:         { ka: 'გაგზავნა',             en: 'Send',            ru: 'Отправить'        },
+    msg_filter:       { ka: 'ფილტრი',              en: 'Filter',          ru: 'Фильтр'           },
 
     /* ── Places page ────────────────────────────────────────── */
     pl_discover:      { ka: 'ადგილების აღმოჩენა',  en: 'Discover Places', ru: 'Открыть места'    },
@@ -1018,6 +1022,54 @@
     profile_photo:    { ka: 'პროფ. ფოტო',              en: 'profile photo',                    ru: 'фото профиля'              },
     profile_interests:{ ka: 'ინტერესები',              en: 'interests',                        ru: 'интересы'                  },
     edit_profile:     { ka: 'რედ. პროფ.',              en: 'Edit Profile',                     ru: 'Редактировать'             },
+
+    /* ── Auth / Login / Signup ───────────────────────────────── */
+    auth_email_taken:  { ka: 'ელ.ფ. უკვე დ.რ. — შ.სისტ.',   en: 'Email already registered. Try logging in.',   ru: 'Email уже зарегистрирован.' },
+    auth_invalid_email:{ ka: 'შეიყვ. სწ. ელ.ფ.',              en: 'Enter a valid email address.',                ru: 'Введите корректный email.'  },
+    auth_wrong_pwd:    { ka: 'ელ.ფ. ან პ-ლი არასწ.',          en: 'Incorrect email or password.',                ru: 'Неверный email или пароль.' },
+    auth_no_account:   { ka: 'ანგ. ვ.მ. ამ ელ.ფ-ით.',        en: 'No account found with this email.',           ru: 'Аккаунт не найден.'         },
+    auth_weak_pwd:     { ka: 'პ-ლი — მინ. 6 სიმ.',            en: 'Password must be at least 6 characters.',    ru: 'Пароль — минимум 6 символов.'},
+    auth_popup_closed: { ka: 'Google შ. გ.',                   en: 'Google sign-in cancelled.',                   ru: 'Вход через Google отменён.' },
+    auth_network_err:  { ka: 'ქ. შეცდ. — შ. კ-ს.',           en: 'Network error. Check your connection.',       ru: 'Ошибка сети. Проверьте соединение.' },
+    auth_too_many:     { ka: 'ბ. ც. — ც.შ. მ.',              en: 'Too many attempts. Try again later.',         ru: 'Слишком много попыток.'     },
+    auth_verify_first: { ka: 'ელ.ფ. გ. შ. სისტ-ში.',         en: 'Verify your email before logging in.',        ru: 'Подтвердите email перед входом.' },
+    auth_failed:       { ka: 'ა.შ. ვ.მ. — ს.მ.',             en: 'Authentication failed. Please try again.',    ru: 'Ошибка авторизации.'        },
+    auth_fill_fields:  { ka: 'შ. ორივე ველი.',                en: 'Please fill in both fields.',                 ru: 'Заполните оба поля.'        },
+    auth_use_email:    { ka: 'გ. ელ.ფ. შ-სთ.',               en: 'Use your email address to log in.',           ru: 'Используйте email для входа.'},
+    auth_not_ready:    { ka: 'Firebase მ. — გ.ა.',            en: 'Firebase not ready. Refresh and try again.',  ru: 'Firebase не готов. Обновите страницу.' },
+    auth_logging_in:   { ka: 'შ. სისტ-ში…',                   en: 'Logging in…',                                 ru: 'Вход…'                      },
+    auth_welcome_back: { ka: '✓ კეთილი მ.!',                  en: '✓ Welcome back!',                             ru: '✓ Добро пожаловать!'        },
+    auth_resend:       { ka: 'ხ-ა გ-ა გ.',                    en: 'Resend email',                                ru: 'Отправить повторно'          },
+    auth_sending:      { ka: 'ი-ა…',                           en: 'Sending…',                                    ru: 'Отправка…'                  },
+    auth_already_ver:  { ka: 'ელ.ფ. გ-ა — შ. სისტ-ში!',      en: 'Email already verified — try logging in!',   ru: 'Email уже подтверждён.'     },
+    auth_ver_sent:     { ka: 'ა-ო გ.! შ. ი-ა.',              en: 'Verification email sent! Check your inbox.',  ru: 'Письмо отправлено! Проверьте почту.' },
+    auth_fill_all:     { ka: 'შ. ყ. ველები.',                 en: 'Please fill in all required fields.',         ru: 'Заполните все поля.'        },
+    auth_un_min:       { ka: 'სახ. — მინ. 3 სიმ.',            en: 'Username must be at least 3 characters.',    ru: 'Имя — минимум 3 символа.'   },
+    auth_un_max:       { ka: 'სახ. — მაქს. 20 სიმ.',          en: 'Username must be at most 20 characters.',    ru: 'Имя — максимум 20 символов.'},
+    auth_un_taken_err: { ka: 'სახ. დ. — ს. სხ. ა-ო.',        en: 'That username is already taken.',             ru: 'Имя занято. Выберите другое.'},
+    auth_accept_terms: { ka: 'მ. პ-ი ი-ე.',                   en: 'Please accept the terms.',                    ru: 'Примите условия.'           },
+    auth_creating:     { ka: 'ი-ა…',                           en: 'Creating…',                                   ru: 'Создание…'                  },
+    auth_un_min3:      { ka: 'მინ. 3 სიმ.',                    en: 'Minimum 3 characters',                        ru: 'Минимум 3 символа'          },
+    auth_un_max20:     { ka: 'მაქს. 20 სიმ.',                  en: 'Maximum 20 characters',                       ru: 'Максимум 20 символов'       },
+    auth_checking:     { ka: 'მ-ა…',                           en: 'Checking…',                                   ru: 'Проверка…'                  },
+    auth_connecting:   { ka: 'ი-ბ…',                           en: 'Connecting…',                                 ru: 'Подключение…'               },
+    auth_signed_in:    { ka: '✓ შ.!',                          en: '✓ Signed in!',                                ru: '✓ Вошли!'                   },
+    auth_ver_title:    { ka: 'გ. ელ.ფ-ა',                     en: 'Verify your email',                           ru: 'Подтвердите email'          },
+    auth_ver_msg:      { ka: 'ვ.ბ. გ. ელ.ფ-ზე:',             en: 'We sent a verification link to',              ru: 'Мы отправили ссылку на'    },
+    auth_ver_click:    { ka: 'ი-ზე დ-ი, შ. გ.',               en: 'Click the link, then come back to log in.',  ru: 'Нажмите ссылку, затем войдите.' },
+    auth_go_login:     { ka: '← შ. სისტ-ში',                  en: '← Go to Login',                               ru: '← Перейти ко входу'        },
+    auth_forgot_send:  { ka: 'გ. ბ. ბ.',                      en: 'Send Reset Link',                             ru: 'Отправить ссылку'           },
+    auth_demo_off:     { ka: 'Demo ანგ. გ-ა.',                 en: 'Demo accounts are disabled.',                 ru: 'Демо-аккаунты отключены.'  },
+    auth_with_google:  { ka: 'Google-ით შ.',                   en: 'Continue with Google',                        ru: 'Войти через Google'         },
+    auth_reg_google:   { ka: 'Google-ით რ.',                   en: 'Sign up with Google',                         ru: 'Регистрация через Google'   },
+    auth_with_fb:      { ka: 'Facebook-ით შ.',                 en: 'Continue with Facebook',                      ru: 'Войти через Facebook'       },
+    auth_reg_fb:       { ka: 'Facebook-ით რ.',                 en: 'Sign up with Facebook',                       ru: 'Регистрация через Facebook' },
+    auth_un_avail_sfx: { ka: 'ხელ-ია',                        en: 'is available',                                ru: 'свободно'                   },
+    auth_un_taken_sfx: { ka: 'დ-ია',                          en: 'is taken',                                    ru: 'занято'                     },
+
+    /* ── Map ────────────────────────────────────────────────── */
+    map_search_ph:     { ka: 'ადგილის ძებნა…',                en: 'Search places…',                              ru: 'Поиск мест…'                },
+    map_live_title:    { ka: 'ლაივ მეგობრები',                en: 'Live Friends & Location',                     ru: 'Друзья рядом'               },
   };
 
   /* ── Core t() function ───────────────────────────────────── */
@@ -1045,6 +1097,13 @@
       var key = el.getAttribute('data-i18n-placeholder');
       var translated = t(key, _lang);
       if (translated && translated !== key) el.placeholder = translated;
+    });
+    // Update title attributes
+    var tls = document.querySelectorAll('[data-i18n-title]');
+    tls.forEach(function(el) {
+      var key = el.getAttribute('data-i18n-title');
+      var translated = t(key, _lang);
+      if (translated && translated !== key) el.title = translated;
     });
   }
 

@@ -680,12 +680,12 @@
         var url = s.mediaUrl || s.imageUrl || s.videoUrl || '';
         if (url) stories.push(url);
       });
-      if (!stories.length) { alert('Stories ვერ მოიძებნა. ჯერ დაამატე story.'); return; }
+      if (!stories.length) { toast('Stories ვერ მოიძებნა. ჯერ დაამატე story.', 'error'); return; }
       GF.fs.addDoc(GF.fs.collection(GF.db, 'users', uid, 'highlights'), {
         title: title, coverUrl: stories[0], stories: stories,
         createdAt: GF.fs.serverTimestamp()
-      }).then(function() { location.reload(); }).catch(function(e) { alert('Error: ' + e.message); });
-    }).catch(function() { alert('Stories ვერ ჩაიტვირთა.'); });
+      }).then(function() { location.reload(); }).catch(function(e) { toast((e && e.message) || 'Error', 'error'); });
+    }).catch(function() { toast('Stories ვერ ჩაიტვირთა.', 'error'); });
   };
 
   function renderTabs(user, fbUser) {
