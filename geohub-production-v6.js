@@ -138,7 +138,7 @@
         const q=prompt('Enter user email, username or name to tag:');
         if(!q) return;
         const u=await findUserByInput(q);
-        if(!u){ alert('User not found. Try exact email or username.'); return; }
+        if(!u){ if(window.GeoSocial&&window.GeoSocial.toast) window.GeoSocial.toast('User not found. Try exact email or username.'); return; }
         if(!taggedUsers.some(x=>(x.uid||x.id)===(u.uid||u.id))) taggedUsers.push(u);
         renderPreview();
       });

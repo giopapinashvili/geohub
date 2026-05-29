@@ -1297,7 +1297,7 @@
     const placeId = (btn && btn.dataset.placeId) || (mBtn && mBtn.dataset.placeId);
     if (!placeId) return;
     const GF = window.GeoFirebase, user = window.GeoCurrentUser;
-    if (!GF || !user) { alert('Please sign in to check in.'); return; }
+    if (!GF || !user) { if (window.GeoSocial && window.GeoSocial.requireAuth) window.GeoSocial.requireAuth(); return; }
     if (userCheckins.has(placeId)) return;
     const p = allPlaces.find(x => x.id === placeId);
     if (!p) return;
@@ -1308,12 +1308,12 @@
       pos => {
         const dist = _haversineKm(pos.coords.latitude, pos.coords.longitude, p.lat, p.lng);
         if (dist > 0.01) {
-          alert('You need to be within 10m of this place to check in. (You are ' + Math.round(dist * 1000) + 'm away)');
+          if (window.GeoSocial && window.GeoSocial.toast) window.GeoSocial.toast('You need to be within 10m of this place to check in. (You are ' + Math.round(dist * 1000) + 'm away)');
           return;
         }
         _doCheckin(placeId, p, GF, user);
       },
-      () => alert('Please enable location access to check in.'),
+      () => { if (window.GeoSocial && window.GeoSocial.toast) window.GeoSocial.toast('Please enable location access to check in.'); },
       { timeout: 8000, maximumAge: 60000, enableHighAccuracy: false }
     );
   };
@@ -1372,7 +1372,7 @@
 
   window.toggleMoodTag = function(placeId, tagId, btn) {
     const GF = window.GeoFirebase, user = window.GeoCurrentUser;
-    if (!GF || !user) { alert('Sign in to vote on vibes'); return; }
+    if (!GF || !user) { if (window.GeoSocial && window.GeoSocial.requireAuth) window.GeoSocial.requireAuth(); return; }
     if (!userMoodVotes[placeId]) userMoodVotes[placeId] = {};
     const wasVoted = userMoodVotes[placeId][tagId] === true;
     const newVoted = !wasVoted;
@@ -1562,7 +1562,7 @@
 
   // ── My location ──────────────────────────────────
   function startSharingLocation() {
-    if (!navigator.geolocation) { alert('GPS not available on this device.'); return; }
+    if (!navigator.geolocation) { if (window.GeoSocial && window.GeoSocial.toast) window.GeoSocial.toast('GPS not available on this device.'); return; }
     const geo = window.GeoFirebase, user = window.GeoCurrentUser;
     if (!geo || !user) return;
     _locSharing = true;
@@ -1594,7 +1594,7 @@
       if (tog) tog.checked = false;
       const sBtn = document.getElementById('sidebarLocBtn');
       if (sBtn) sBtn.classList.remove('active');
-      if (err && err.code === 1) alert('Location permission denied. Please allow location access in your browser settings.');
+      if (err && err.code === 1 && window.GeoSocial && window.GeoSocial.toast) window.GeoSocial.toast('Location permission denied. Please allow location access in your browser settings.');
     }, { enableHighAccuracy: true, maximumAge: 10000, timeout: 30000 });
   }
 
