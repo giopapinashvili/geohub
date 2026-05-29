@@ -23,6 +23,10 @@
   var _myRole = null;
   var _callType = null;
   var _callState = null;
+  var _calleeId = null;
+  var _calleeName = null;
+  var _callerName = null;
+  var _callerAvatar = null;
   var _unsubCall = null;
   var _unsubCandidates = null;
   var _incomingUnsub = null;
@@ -369,6 +373,7 @@
 
     type = type || 'audio';
     _callType = type; _myRole = 'caller'; _callState = 'ringing';
+    _calleeId = targetUid; _calleeName = targetName;
 
     // Caller profile
     var callerName = me.displayName || me.email || 'User';
@@ -381,6 +386,7 @@
         callerAvatar = d.avatar || callerAvatar;
       }
     } catch (e) {}
+    _callerName = callerName; _callerAvatar = callerAvatar;
 
     // Get media
     try {
@@ -516,6 +522,12 @@
     _stopRing(); _stopTimer();
     var id = _callId;
     var dur = _callStartMs ? Math.floor((Date.now() - _callStartMs) / 1000) : 0;
+    var wasCaller    = _myRole === 'caller';
+    var missedCallee = (reason === 'missed' && wasCaller) ? _calleeId   : null;
+    var missedName   = (reason === 'missed' && wasCaller) ? _calleeName : null;
+    var senderName   = _callerName || '';
+    var senderAvatar = _callerAvatar || '';
+    var callType     = _callType || 'audio';
     _cleanupLocal();
     if (_fb() && id) {
       try {
@@ -524,6 +536,29 @@
           endedAt: _fs.serverTimestamp(),
           duration: dur
         });
+      } catch (e) {}
+    }
+    // Write missed-call notification to callee's feed
+    if (missedCallee && _fb()) {
+      try {
+        var me = _me();
+        var fromUid = me ? me.uid : '';
+        _fs.addDoc(_fs.collection(_db, 'userNotifications'), {
+          userId:          missedCallee,
+          toUserId:        missedCallee,
+          fromUserId:      fromUid,
+          fromName:        senderName,
+          fromAvatar:      senderAvatar,
+          type:            'missed_call',
+          title:           _t('notif_missed_call', 'Missed call'),
+          body:            senderName + _t('notif_missed_call_body', '-სგან გამოტოვებული ') + (callType === 'video' ? _t('call_video_label', 'ვიდეო ზარი') : _t('call_voice_label', 'ხმოვანი ზარი')),
+          href:            'messages.html',
+          callId:          id,
+          callType:        callType,
+          read:            false,
+          seen:            false,
+          createdAt:       _fs.serverTimestamp()
+        }).catch(function () {});
       } catch (e) {}
     }
   };
@@ -695,6 +730,7 @@
     if (_chatUnsub) { _chatUnsub(); _chatUnsub = null; }
     _remoteStream = null;
     _callId = null; _myRole = null; _callType = null; _callState = null;
+    _calleeId = null; _calleeName = null; _callerName = null; _callerAvatar = null;
     _pendingCandidates = []; _facingMode = 'user'; _chatOpen = false; _callStartMs = 0;
     _stopTimer(); _stopRing(); _stopQuality(); _hideOverlay();
   }

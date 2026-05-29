@@ -356,7 +356,7 @@
       }
     }
     const actions = $('.profile-actions');
-    if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> '+_t('profile_edit')+'</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="btn btn-ghost btn-sm profile-body-logout" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> '+_t('profile_message')+'</button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> '+_t('profile_add_friend')+'</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> '+_t('follow')+'</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-mute-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-volume-mute"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-ban"></i></button>';
+    if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> '+_t('profile_edit')+'</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="btn btn-ghost btn-sm profile-body-logout" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> '+_t('profile_message')+'</button><button class="btn btn-ghost btn-sm" data-call-user="' + esc(user.uid) + '" data-call-type="audio" data-call-name="' + esc(user.fullName) + '" data-call-avatar="' + esc(user.avatar || '') + '" title="'+_t('call_voice','Voice call')+'"><i class="fas fa-phone"></i></button><button class="btn btn-ghost btn-sm" data-call-user="' + esc(user.uid) + '" data-call-type="video" data-call-name="' + esc(user.fullName) + '" data-call-avatar="' + esc(user.avatar || '') + '" title="'+_t('call_video','Video call')+'"><i class="fas fa-video"></i></button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> '+_t('profile_add_friend')+'</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> '+_t('follow')+'</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-mute-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-volume-mute"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-ban"></i></button>';
     // Profile visibility helpers
     var _privRel = own ? 'own' : 'stranger';
     var _privIsFollower = false;
@@ -2392,6 +2392,17 @@
       const target = msgBtn.dataset.messageUser;
       if (!window.GeoSocial || !target) return toast(_pt('msg_loading'), 'error');
       window.GeoSocial.startConversation(target, () => { location.href = 'messages.html?with=' + encodeURIComponent(target); });
+    }
+    const callBtn = e.target.closest('[data-call-user]');
+    if (callBtn) {
+      e.preventDefault();
+      if (!window.GhCalls || !window.GhCalls.startCall) return toast(_pt('call_not_ready', 'System not ready'), 'error');
+      window.GhCalls.startCall(
+        callBtn.dataset.callUser,
+        callBtn.dataset.callName || 'User',
+        callBtn.dataset.callAvatar || '',
+        callBtn.dataset.callType || 'audio'
+      );
     }
     if (e.target.closest('[data-edit-profile]')) {
       e.preventDefault();

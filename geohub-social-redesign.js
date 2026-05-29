@@ -1256,7 +1256,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     coupon_redeemed:     { icon: 'fa-ticket-alt',  color: '#10b981' },
     group_join_request:  { icon: 'fa-user-clock',  color: '#a855f7' },
     group_approved:      { icon: 'fa-user-check',  color: '#10b981' },
-    group_declined:      { icon: 'fa-user-times',  color: '#ef4444' }
+    group_declined:      { icon: 'fa-user-times',  color: '#ef4444' },
+    missed_call:         { icon: 'fa-phone-missed', color: '#ef4444' }
   };
 
   function openNotifications(){
@@ -10311,7 +10312,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     coupon_redeemed:     { icon: 'fa-ticket-alt',  color: '#10b981' },
     group_join_request:  { icon: 'fa-user-clock',  color: '#a855f7' },
     group_approved:      { icon: 'fa-user-check',  color: '#10b981' },
-    group_declined:      { icon: 'fa-user-times',  color: '#ef4444' }
+    group_declined:      { icon: 'fa-user-times',  color: '#ef4444' },
+    missed_call:         { icon: 'fa-phone-missed', color: '#ef4444' }
   };
   var NP_FILTERS = (function(){
     var _g=typeof GHt==='function'?GHt:function(k){return k;};
