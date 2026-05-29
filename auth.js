@@ -43,8 +43,17 @@
     var el = document.getElementById('signupInterests');
     if (!el) return;
     var list = ['cafes','hiking','events','photography','restaurants','nightlife','museums','fitness','music','travel','coworking','wine'];
-    el.innerHTML = list.map(function (i) { return '<button type="button" class="ob-interest-chip" data-interest="' + i + '">' + i + '</button>'; }).join('');
-    el.querySelectorAll('.ob-interest-chip').forEach(function (c) { c.addEventListener('click', function () { c.classList.toggle('selected'); }); });
+    el.innerHTML = '';
+    list.forEach(function(i) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ob-interest-chip';
+      btn.dataset.interest = i;
+      var label = typeof window.GHt === 'function' ? window.GHt('int_' + i) : null;
+      btn.textContent = (label && label !== 'int_' + i) ? label : i;
+      btn.addEventListener('click', function() { btn.classList.toggle('selected'); });
+      el.appendChild(btn);
+    });
   }
 
   function initEyeToggles() {

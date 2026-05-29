@@ -7,6 +7,16 @@ let currentStep = 1;
   let editingBusinessId = new URLSearchParams(location.search).get('edit') || '';
   let editingBusinessData = null;
 
+  function _bizToast(msg, isError) {
+    if (window.GeoSocial && window.GeoSocial.toast) { window.GeoSocial.toast(msg, isError ? 'error' : ''); return; }
+    var el = document.createElement('div');
+    el.className = 'gh-toast' + (isError ? ' error' : '');
+    el.textContent = msg;
+    document.body.appendChild(el);
+    requestAnimationFrame(function(){ el.classList.add('show'); });
+    setTimeout(function(){ el.classList.remove('show'); setTimeout(function(){ el.remove(); }, 250); }, 2800);
+  }
+
   // Hours inputs
   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   document.getElementById('hoursInputs').innerHTML = days.map(d => `
@@ -119,7 +129,7 @@ let currentStep = 1;
     var f = geo.fs;
     f.getDoc(f.doc(geo.db, 'businesses', editingBusinessId)).then(function(snap) {
       if (!snap.exists()) {
-        alert('Business not found.');
+        _bizToast('Business not found.', true);
         return;
       }
       var data = snap.data() || {};
@@ -155,7 +165,7 @@ let currentStep = 1;
       if (btn) btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
     }).catch(function(err) {
       console.error('[AddBusiness] edit load failed', err);
-      alert('Could not load business for editing: ' + (err.code || err.message));
+      _bizToast('Could not load business for editing: ' + (err.code || err.message), true);
     });
   }
   if (document.readyState === 'loading') {
@@ -331,7 +341,7 @@ let currentStep = 1;
   function fillMyLocation() {
     var btn = document.getElementById('useMyLocBtn');
     if (!navigator.geolocation) {
-      alert('GPS is not available on this device or browser.');
+      _bizToast('GPS is not available on this device or browser.', true);
       return;
     }
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting location…'; }
@@ -345,7 +355,7 @@ let currentStep = 1;
       if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-location-crosshairs"></i> Use My Current Location'; }
     }, function (err) {
       var msgs = { 1: 'Location permission denied.', 2: 'Signal unavailable.', 3: 'Request timed out.' };
-      alert(msgs[err.code] || 'GPS error. Please try again.');
+      _bizToast(msgs[err.code] || 'GPS error. Please try again.', true);
       if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-location-crosshairs"></i> Use My Current Location'; }
     }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
   }
@@ -370,7 +380,7 @@ let currentStep = 1;
     var serviceAreaText = businessType === 'online' ? serviceAreaLabel(serviceArea) : (city ? city + ', Georgia' : 'Local business');
     var catEl = document.querySelector('.cat-option.selected');
     var cat = catEl ? catEl.dataset.cat : selectedCategory;
-    if (_pendingUploads > 0) { alert('Please wait for images to finish uploading.'); return; }
+    if (_pendingUploads > 0) { _bizToast('Please wait for images to finish uploading.', true); return; }
     var cover = (function(){ var img = document.querySelector('#coverUpload img[data-cloud-url]') || document.querySelector('#coverUpload img'); return img ? (img.dataset.cloudUrl || '') : ''; })();
     var gallery = Array.from(document.querySelectorAll('#uploadedPhotos img[data-cloud-url]')).map(function(img){ return img.dataset.cloudUrl || ''; }).filter(Boolean).slice(0, 10);
 
@@ -378,11 +388,11 @@ let currentStep = 1;
     var latRaw = (document.getElementById('bizLatInput') || {}).value || '';
     var lngRaw = (document.getElementById('bizLngInput') || {}).value || '';
     if (latRaw || lngRaw) {
-      if ((latRaw && !lngRaw) || (!latRaw && lngRaw)) { alert('Both latitude and longitude are required.'); return; }
+      if ((latRaw && !lngRaw) || (!latRaw && lngRaw)) { _bizToast('Both latitude and longitude are required.', true); return; }
       var latNum = parseFloat(latRaw), lngNum = parseFloat(lngRaw);
-      if (isNaN(latNum) || isNaN(lngNum)) { alert('Latitude and longitude must be valid numbers.'); return; }
-      if (latNum < -90 || latNum > 90) { alert('Latitude must be between -90 and 90.'); return; }
-      if (lngNum < -180 || lngNum > 180) { alert('Longitude must be between -180 and 180.'); return; }
+      if (isNaN(latNum) || isNaN(lngNum)) { _bizToast('Latitude and longitude must be valid numbers.', true); return; }
+      if (latNum < -90 || latNum > 90) { _bizToast('Latitude must be between -90 and 90.', true); return; }
+      if (lngNum < -180 || lngNum > 180) { _bizToast('Longitude must be between -180 and 180.', true); return; }
     }
 
     var submitBtn = document.querySelector('button[onclick="submitForm()"]');
@@ -477,7 +487,7 @@ let currentStep = 1;
       setTimeout(function(){ window.location.href = 'business.html?id=' + encodeURIComponent(ref.id); }, 900);
     }).catch(function(err) {
       console.error('[AddBusiness] Firestore create failed', err);
-      alert('Business could not be created: ' + (err.code || err.message));
+      _bizToast('Business could not be created: ' + (err.code || err.message), true);
       if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = oldHtml; }
     });
   }

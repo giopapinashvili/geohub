@@ -158,6 +158,23 @@
     all_caught_up:    { ka: 'ყველა პოსტი ნანახია',en: 'All caught up',ru: 'Всё просмотрено' },
     no_results:       { ka: 'შედეგი არ მოიძებნა',en: 'No results',ru: 'Нет результатов' },
 
+    /* ── Interest labels (data value stays English, label is translated) */
+    int_cafes:        { ka: 'კაფეები',          en: 'Cafes',       ru: 'Кафе'           },
+    int_hiking:       { ka: 'ლაშქრობა',         en: 'Hiking',      ru: 'Походы'         },
+    int_events:       { ka: 'ღონისძიებები',     en: 'Events',      ru: 'Мероприятия'    },
+    int_photography:  { ka: 'ფოტოგრაფია',       en: 'Photography', ru: 'Фотография'     },
+    int_restaurants:  { ka: 'რესტორნები',        en: 'Restaurants', ru: 'Рестораны'      },
+    int_nightlife:    { ka: 'ღამის ცხოვრება',   en: 'Nightlife',   ru: 'Ночная жизнь'   },
+    int_museums:      { ka: 'მუზეუმები',         en: 'Museums',     ru: 'Музеи'          },
+    int_fitness:      { ka: 'სპორტი',            en: 'Fitness',     ru: 'Фитнес'         },
+    int_music:        { ka: 'მუსიკა',            en: 'Music',       ru: 'Музыка'         },
+    int_travel:       { ka: 'მოგზაურობა',       en: 'Travel',      ru: 'Путешествия'    },
+    int_coworking:    { ka: 'კოვორქინგი',        en: 'Coworking',   ru: 'Коворкинг'      },
+    int_wine:         { ka: 'ღვინო',             en: 'Wine',        ru: 'Вино'           },
+    int_food:         { ka: 'საკვები',           en: 'Food',        ru: 'Еда'            },
+    int_wellness:     { ka: 'სვეტქმნელობა',      en: 'Wellness',    ru: 'Оздоровление'   },
+    int_budget:       { ka: 'ბიუჯეტური',         en: 'Budget',      ru: 'Бюджетное'      },
+
     /* ── Profile tabs ───────────────────────────────────────── */
     profile_posts:    { ka: 'პოსტები',       en: 'Posts',       ru: 'Посты'         },
     profile_about:    { ka: 'ინფო',           en: 'About',       ru: 'О себе'        },
