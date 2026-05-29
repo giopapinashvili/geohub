@@ -6,7 +6,7 @@
   var user = null;
   var managedBusinesses = [];
   var _writeTimer = null;
-  var _ppPrivacy = { isPrivate: false, showFullName: 'everyone', showBio: 'everyone', showStories: 'everyone', showHighlights: 'everyone' };
+  var _ppPrivacy = { isPrivate: false, showFullName: 'everyone', showBio: 'everyone', showStories: 'everyone', showHighlights: 'everyone', defaultPostAudience: 'everyone', defaultPostGender: 'all', defaultPostAgeMode: 'all' };
   var _ppTimer = null;
 
   var dict = {
@@ -67,7 +67,21 @@
       ppNobody: 'Only me',
       ppSaved: 'Privacy settings saved',
       privateAccount: 'Private Account',
-      privateAccountSub: 'Strangers can only find you by GeoHub ID. Followers and friends see your profile normally.'
+      privateAccountSub: 'Strangers can only find you by GeoHub ID. Followers and friends see your profile normally.',
+      defaultPostAud: 'Default post audience',
+      defaultPostAudSub: 'Pre-selected when you open the composer',
+      defaultPostGenderLbl: 'Default gender filter',
+      defaultPostAgeLbl: 'Default age filter',
+      audEveryone: 'Everyone',
+      audFriends: 'Friends only',
+      audFollowers: 'Followers only',
+      audOnlyMe: 'Only me',
+      genAll: 'All genders',
+      genMale: 'Men only',
+      genFemale: 'Women only',
+      ageAll: 'All ages',
+      age18plus: '18+',
+      age25to45: '25–45'
     },
     ka: {
       settings: 'პარამეტრები',
@@ -126,7 +140,21 @@
       ppNobody: 'მხოლოდ მე',
       ppSaved: 'კონფიდენციალობის პარამეტრები შენახულია',
       privateAccount: 'პირადი ანგარიში',
-      privateAccountSub: 'უცნობები მხოლოდ GeoHub ID-ით გპოულობენ. ფოლოვერები და მეგობრები ჩვეულებრივ ხედავენ პროფილს.'
+      privateAccountSub: 'უცნობები მხოლოდ GeoHub ID-ით გპოულობენ. ფოლოვერები და მეგობრები ჩვეულებრივ ხედავენ პროფილს.',
+      defaultPostAud: 'პოსტის default აუდიტორია',
+      defaultPostAudSub: 'კომპოზერი ამ მნიშვნელობით გახსნება',
+      defaultPostGenderLbl: 'სქესის default ფილტრი',
+      defaultPostAgeLbl: 'ასაკის default ფილტრი',
+      audEveryone: 'ყველა',
+      audFriends: 'მხოლოდ მეგობრები',
+      audFollowers: 'მხოლოდ ფოლოვერები',
+      audOnlyMe: 'მხოლოდ მე',
+      genAll: 'ყველა სქესი',
+      genMale: 'მხოლოდ კაცები',
+      genFemale: 'მხოლოდ ქალები',
+      ageAll: 'ყველა ასაკი',
+      age18plus: '18+',
+      age25to45: '25–45'
     }
   };
 
@@ -335,6 +363,31 @@
   function ppRow(field, labelKey) {
     return '<div class="settings-row settings-pp-row"><span><strong>'+esc(tr(labelKey))+'</strong></span>'+ppSelect(field, _ppPrivacy[field] || 'everyone')+'</div>';
   }
+  function ppAudSelect(field, value) {
+    var opts = [
+      ['everyone', tr('audEveryone')],
+      ['followers', tr('audFollowers')],
+      ['friends', tr('audFriends')],
+      ['onlyme', tr('audOnlyMe')]
+    ].map(function(pair) {
+      return '<option value="'+pair[0]+'"'+(pair[0]===value?' selected':'')+'>'+esc(pair[1])+'</option>';
+    }).join('');
+    return '<select class="settings-pp-select" data-pp-field="'+esc(field)+'">'+opts+'</select>';
+  }
+  function ppGenderSelect(value) {
+    return '<select class="settings-pp-select" data-pp-field="defaultPostGender">'+
+      '<option value="all"'+(value==='all'?' selected':'')+'>'+esc(tr('genAll'))+'</option>'+
+      '<option value="male"'+(value==='male'?' selected':'')+'>'+esc(tr('genMale'))+'</option>'+
+      '<option value="female"'+(value==='female'?' selected':'')+'>'+esc(tr('genFemale'))+'</option>'+
+    '</select>';
+  }
+  function ppAgeSelect(value) {
+    return '<select class="settings-pp-select" data-pp-field="defaultPostAgeMode">'+
+      '<option value="all"'+(value==='all'?' selected':'')+'>'+esc(tr('ageAll'))+'</option>'+
+      '<option value="18plus"'+(value==='18plus'?' selected':'')+'>'+esc(tr('age18plus'))+'</option>'+
+      '<option value="25to45"'+(value==='25to45'?' selected':'')+'>'+esc(tr('age25to45'))+'</option>'+
+    '</select>';
+  }
   function profilePrivacyCard() {
     if (!user) return '';
     var privChecked = !!_ppPrivacy.isPrivate;
@@ -344,6 +397,10 @@
       ppRow('showBio','ppShowBio')+
       ppRow('showStories','ppShowStories')+
       ppRow('showHighlights','ppShowHighlights')+
+      '<div class="settings-section-label"><i class="fas fa-users"></i> Default Post Audience</div>'+
+      '<div class="settings-row settings-pp-row"><span><strong>'+esc(tr('defaultPostAud'))+'</strong><span>'+esc(tr('defaultPostAudSub'))+'</span></span>'+ppAudSelect('defaultPostAudience', _ppPrivacy.defaultPostAudience||'everyone')+'</div>'+
+      '<div class="settings-row settings-pp-row"><span><strong>'+esc(tr('defaultPostGenderLbl'))+'</strong></span>'+ppGenderSelect(_ppPrivacy.defaultPostGender||'all')+'</div>'+
+      '<div class="settings-row settings-pp-row"><span><strong>'+esc(tr('defaultPostAgeLbl'))+'</strong></span>'+ppAgeSelect(_ppPrivacy.defaultPostAgeMode||'all')+'</div>'+
       '</div></section>';
   }
 
@@ -405,7 +462,8 @@
       el.onchange = function(){
         var field = el.getAttribute('data-pp-field');
         var val = el.type === 'checkbox' ? el.checked : el.value;
-        if(el.type !== 'checkbox' && PP_OPTS.indexOf(val) === -1) return;
+        var ALL_PP_VALS = PP_OPTS.concat(['onlyme','male','female','all','18plus','25to45']);
+        if(el.type !== 'checkbox' && ALL_PP_VALS.indexOf(val) === -1) return;
         _ppPrivacy[field] = val;
         savePrivacyToFirestore();
         toast(tr('ppSaved'));

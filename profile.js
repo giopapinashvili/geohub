@@ -356,6 +356,32 @@
     }
     const actions = $('.profile-actions');
     if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> '+_t('profile_edit')+'</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="btn btn-ghost btn-sm profile-body-logout" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> '+_t('profile_message')+'</button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> '+_t('profile_add_friend')+'</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> '+_t('follow')+'</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-mute-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-volume-mute"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-ban"></i></button>';
+    // Profile visibility helpers
+    var _privRel = own ? 'own' : 'stranger';
+    var _privIsFollower = false;
+    function _ppAllowed(setting, rel) {
+      if (!setting || setting === 'everyone') return true;
+      if (setting === 'nobody') return false;
+      if (setting === 'friends') return rel === 'friend';
+      if (setting === 'followers') return rel === 'follower' || rel === 'friend';
+      return true;
+    }
+    function _applyProfileVisibility(rel) {
+      if (own) return;
+      var priv = user.privacy || {};
+      var nameEl = document.querySelector('.profile-name');
+      var bioEl = document.querySelector('.profile-bio');
+      if (nameEl) {
+        var showName = _ppAllowed(priv.showFullName, rel);
+        nameEl.textContent = showName ? user.fullName : ('@' + (user.username || 'user'));
+      }
+      if (bioEl) {
+        var showBio = _ppAllowed(priv.showBio, rel);
+        bioEl.textContent = showBio ? (user.bio || 'No bio yet.') : '🔒 Bio is private';
+      }
+    }
+    if (!own) _applyProfileVisibility('stranger');
+
     if (!own) {
       var _socialStateSetup = false;
       var _setupSocialBtnState = function() {
@@ -370,11 +396,18 @@
                 ? '<i class="fas fa-user-check"></i> '+(typeof GHt==='function'?GHt('unfollow'):'Following')
                 : '<i class="fas fa-rss"></i> '+(typeof GHt==='function'?GHt('follow'):'Follow');
             });
+            _privIsFollower = !!isFollowing;
+            if (_privRel !== 'friend') {
+              _privRel = _privIsFollower ? 'follower' : 'stranger';
+              _applyProfileVisibility(_privRel);
+            }
           });
         }
         if (window.GeoSocial.listenFriendshipStatus) {
           window.GeoSocial.listenFriendshipStatus(user.uid, function(status) {
             updateFriendButtons(user.uid, status);
+            var newRel = status === 'friends' ? 'friend' : (_privIsFollower ? 'follower' : 'stranger');
+            if (newRel !== _privRel) { _privRel = newRel; _applyProfileVisibility(_privRel); }
           });
         }
       };

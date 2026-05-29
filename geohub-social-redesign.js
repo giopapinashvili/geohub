@@ -1683,6 +1683,30 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     ['ghAudAgeMin','ghAudAgeMax'].forEach(function(id) {
       var el = document.getElementById(id); if (el) el.addEventListener('input', _syncAudienceLabel);
     });
+    // Apply user's default post audience from privacy settings
+    (function _applyComposerDefaults(){
+      var defs = window._userPrivacyDefaults || {};
+      var dAud = defs.defaultPostAudience || 'everyone';
+      var dGen = defs.defaultPostGender || 'all';
+      var dAge = defs.defaultPostAgeMode || 'all';
+      var onlyMe = document.getElementById('ghAudOnlyMe');
+      var friends = document.getElementById('ghAudFriends');
+      var followers = document.getElementById('ghAudFollowers');
+      var strangers = document.getElementById('ghAudStrangers');
+      if (dAud === 'onlyme') {
+        if (onlyMe) onlyMe.checked = true;
+        [friends, followers, strangers].forEach(function(cb) { if (cb) { cb.checked = false; cb.disabled = true; } });
+      } else {
+        if (onlyMe) onlyMe.checked = false;
+        if (friends) { friends.checked = dAud === 'everyone' || dAud === 'friends'; friends.disabled = false; }
+        if (followers) { followers.checked = dAud === 'everyone' || dAud === 'followers'; followers.disabled = false; }
+        if (strangers) { strangers.checked = dAud === 'everyone'; strangers.disabled = false; }
+      }
+      document.querySelectorAll('input[name="ghAudGender"]').forEach(function(r) { r.checked = r.value === dGen; });
+      var ageEl = document.getElementById('ghAudAgeMode');
+      if (ageEl) ageEl.value = dAge;
+      _syncAudienceLabel();
+    })();
     // ──────────────────────────────────────────────────────────────────
 
     var ta=$('#ghPostText');
@@ -7688,6 +7712,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       });
       setupSafetyListener(paint);
       setupAudienceAccess(paint);
+      // Load user's default audience prefs for composer pre-fill
+      (function _loadUserPrivacyDefaults(){
+        var _u = authUser();
+        if (!_u || !fs() || !db()) return;
+        fs().getDoc(fs().doc(db(), 'users', _u.uid)).then(function(snap){
+          if (snap.exists()) { window._userPrivacyDefaults = (snap.data() || {}).privacy || {}; }
+        }).catch(function(){});
+      })();
       if(pageMode){
         setTimeout(function(){
           if(renderId===state.feedRenderId && !pageFeedLoaded && list){
