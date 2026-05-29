@@ -274,11 +274,13 @@
     el.querySelectorAll('[data-del-post]').forEach(function(b){
       b.onclick = function(e){
         e.preventDefault(); e.stopPropagation();
-        if(!confirm('პოსტი წაიშლება?')) return;
-        b.disabled = true;
-        fs().deleteDoc(fs().doc(db(),'channels',ch._id,'posts',b.dataset.delPost))
-          .then(function(){ b.closest('.ch-post-card').remove(); })
-          .catch(function(){ b.disabled = false; });
+        var _delPost = b.dataset.delPost;
+        window.ghConfirm('პოსტი წაიშლება?', function(){
+          b.disabled = true;
+          fs().deleteDoc(fs().doc(db(),'channels',ch._id,'posts',_delPost))
+            .then(function(){ b.closest('.ch-post-card').remove(); })
+            .catch(function(){ b.disabled = false; });
+        });
       };
     });
   }
@@ -551,14 +553,15 @@
       b.style.display='';
       b.onclick=function(e){
         e.preventDefault(); e.stopPropagation();
-        if(!confirm('ვიდეო წაიშლება. გააგრძელო?')) return;
-        b.disabled=true;
-        fs().deleteDoc(fs().doc(db(),'videos',vidId)).then(function(){
-          card.style.opacity='0'; card.style.pointerEvents='none';
-          setTimeout(function(){ card.remove(); },300);
-          _allVideos=_allVideos&&_allVideos.filter(function(v){ return v.id!==vidId; });
-          if(ch._id) fs().updateDoc(fs().doc(db(),'channels',ch._id),{videoCount:fs().increment(-1)}).catch(function(){});
-        }).catch(function(){ b.disabled=false; });
+        window.ghConfirm('ვიდეო წაიშლება. გააგრძელო?', function(){
+          b.disabled=true;
+          fs().deleteDoc(fs().doc(db(),'videos',vidId)).then(function(){
+            card.style.opacity='0'; card.style.pointerEvents='none';
+            setTimeout(function(){ card.remove(); },300);
+            _allVideos=_allVideos&&_allVideos.filter(function(v){ return v.id!==vidId; });
+            if(ch._id) fs().updateDoc(fs().doc(db(),'channels',ch._id),{videoCount:fs().increment(-1)}).catch(function(){});
+          }).catch(function(){ b.disabled=false; });
+        });
       };
       card.style.position='relative';
       card.appendChild(b);
@@ -682,47 +685,50 @@
   /* ─────────────────────────── Re-import modal ─────────────── */
   function openReImportModal(ch){
     if(!ch.youtubeUrl){ toast('ამ არხს YouTube URL არ აქვს','error'); return; }
-    if(!confirm('YouTube-დან კვლავ გადმოვიტანო ყველა ვიდეო, Shorts და Playlist? (დუბლიკატები გამოტოვდება)')) return;
-    toast('Import დაიწყო...');
-    var u=authUser();
-    if(!u){ toast('ავტორიზაცია საჭიროა','error'); return; }
-    if(window.GeoVideos&&window.GeoVideos.importChannelVideos){
-      window.GeoVideos.importChannelVideos(ch.youtubeUrl, ch._id, u, function(){
-        _allVideos=null;
-        toast('Import დასრულდა ✓');
-        switchTab(_activeTab, _ch);
-      });
-    } else { toast('videos.js ვერ მოიძებნა','error'); }
+    window.ghConfirm('YouTube-დან კვლავ გადმოვიტანო ყველა ვიდეო, Shorts და Playlist? (დუბლიკატები გამოტოვდება)', function(){
+      toast('Import დაიწყო...');
+      var u=authUser();
+      if(!u){ toast('ავტორიზაცია საჭიროა','error'); return; }
+      if(window.GeoVideos&&window.GeoVideos.importChannelVideos){
+        window.GeoVideos.importChannelVideos(ch.youtubeUrl, ch._id, u, function(){
+          _allVideos=null;
+          toast('Import დასრულდა ✓');
+          switchTab(_activeTab, _ch);
+        });
+      } else { toast('videos.js ვერ მოიძებნა','error'); }
+    });
   }
 
   /* ─────────────────────────── Delete all videos ─────────── */
   function deleteAllChannelVideos(ch){
-    if(!confirm('ყველა ვიდეო წაიშლება. გააგრძელო?')) return;
-    var btn=document.getElementById('chDeleteAllVideosBtn');
-    if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>'; }
-    fs().getDocs(fs().query(fs().collection(db(),'videos'),fs().where('channelId','==',ch._id),fs().limit(500)))
-      .then(function(snap){
-        return Promise.all(snap.docs.map(function(d){ return fs().deleteDoc(d.ref); }))
-          .then(function(){ return fs().updateDoc(fs().doc(db(),'channels',ch._id),{videoCount:0}); });
-      })
-      .then(function(){
-        _allVideos=null;
-        toast('ყველა ვიდეო წაიშალა ✓');
-        setTimeout(function(){ location.reload(); },800);
-      })
-      .catch(function(e){ toast('შეცდომა: '+e.message,'error'); if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-trash"></i> ყველა ვიდეო'; } });
+    window.ghConfirm('ყველა ვიდეო წაიშლება. გააგრძელო?', function(){
+      var btn=document.getElementById('chDeleteAllVideosBtn');
+      if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>'; }
+      fs().getDocs(fs().query(fs().collection(db(),'videos'),fs().where('channelId','==',ch._id),fs().limit(500)))
+        .then(function(snap){
+          return Promise.all(snap.docs.map(function(d){ return fs().deleteDoc(d.ref); }))
+            .then(function(){ return fs().updateDoc(fs().doc(db(),'channels',ch._id),{videoCount:0}); });
+        })
+        .then(function(){
+          _allVideos=null;
+          toast('ყველა ვიდეო წაიშალა ✓');
+          setTimeout(function(){ location.reload(); },800);
+        })
+        .catch(function(e){ toast('შეცდომა: '+e.message,'error'); if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-trash"></i> ყველა ვიდეო'; } });
+    });
   }
 
   /* ─────────────────────────── Delete channel ─────────────── */
   function deleteChannel(ch){
-    if(!confirm('"'+ch.name+'" წაიშლება საბოლოოდ. გააგრძელო?')) return;
-    var btn=document.getElementById('chDeleteChannelBtn');
-    if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>'; }
-    fs().getDocs(fs().query(fs().collection(db(),'videos'),fs().where('channelId','==',ch._id),fs().limit(500)))
-      .then(function(snap){ return Promise.all(snap.docs.map(function(d){ return fs().deleteDoc(d.ref); })); })
-      .then(function(){ return fs().deleteDoc(fs().doc(db(),'channels',ch._id)); })
-      .then(function(){ window.location.href='videos.html'; })
-      .catch(function(e){ toast('შეცდომა: '+e.message,'error'); if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-ban"></i> არხის წაშლა'; } });
+    window.ghConfirm('"'+ch.name+'" წაიშლება საბოლოოდ. გააგრძელო?', function(){
+      var btn=document.getElementById('chDeleteChannelBtn');
+      if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>'; }
+      fs().getDocs(fs().query(fs().collection(db(),'videos'),fs().where('channelId','==',ch._id),fs().limit(500)))
+        .then(function(snap){ return Promise.all(snap.docs.map(function(d){ return fs().deleteDoc(d.ref); })); })
+        .then(function(){ return fs().deleteDoc(fs().doc(db(),'channels',ch._id)); })
+        .then(function(){ window.location.href='videos.html'; })
+        .catch(function(e){ toast('შეცდომა: '+e.message,'error'); if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-ban"></i> არხის წაშლა'; } });
+    });
   }
 
   /* ─────────────────────────── Toast ─────────────────────── */

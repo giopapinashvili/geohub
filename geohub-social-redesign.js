@@ -8479,10 +8479,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function deleteService(b, serviceId){
     var _dsct=typeof GHt==='function'?GHt:function(k){return k;};
     if(!serviceId||!fs()||!db()) return;
-    if(!confirm(_dsct('bd_svc_delete_cfm'))) return;
-    fs().deleteDoc(fs().doc(db(),'businesses',b.id,'services',serviceId)).then(function(){
-      toast(_dsct('bd_svc_deleted')); loadDashServices(b);
-    }).catch(function(err){ toast('Failed: '+(err.message||err),'error'); });
+    window.ghConfirm(_dsct('bd_svc_delete_cfm'), function(){
+      fs().deleteDoc(fs().doc(db(),'businesses',b.id,'services',serviceId)).then(function(){
+        toast(_dsct('bd_svc_deleted')); loadDashServices(b);
+      }).catch(function(err){ toast('Failed: '+(err.message||err),'error'); });
+    });
   }
 
   function renderBizDashGallery(b){
@@ -8527,10 +8528,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function deleteGalleryPhoto(b, photoId){
     var _dgpt=typeof GHt==='function'?GHt:function(k){return k;};
     if(!photoId||!fs()||!db()) return;
-    if(!confirm(_dgpt('bd_gal_delete_cfm'))) return;
-    fs().deleteDoc(fs().doc(db(),'businesses',b.id,'gallery',photoId)).then(function(){
-      toast(_dgpt('bd_gal_deleted')); loadDashGallery(b);
-    }).catch(function(err){ toast('Failed: '+(err.message||err),'error'); });
+    window.ghConfirm(_dgpt('bd_gal_delete_cfm'), function(){
+      fs().deleteDoc(fs().doc(db(),'businesses',b.id,'gallery',photoId)).then(function(){
+        toast(_dgpt('bd_gal_deleted')); loadDashGallery(b);
+      }).catch(function(err){ toast('Failed: '+(err.message||err),'error'); });
+    });
   }
 
   function renderBizDashReviews(b){
@@ -8776,11 +8778,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           el.querySelectorAll('[data-cancel-invite]').forEach(function(btn){
             btn.onclick=function(){
               var _cit=typeof GHt==='function'?GHt:function(k){return k;};
-              if(!confirm(_cit('bd_emp_cancel_cfm'))) return;
-              btn.disabled=true;btn.innerHTML='…';
-              cancelEmpInvite(b,btn.dataset.cancelInvite,function(ok){
-                if(ok){toast(_cit('bd_emp_cancelled'));paint();}
-                else{btn.disabled=false;btn.innerHTML='<i class="fas fa-xmark"></i> '+_cit('bd_emp_cancel');toast('Failed','error');}
+              window.ghConfirm(_cit('bd_emp_cancel_cfm'), function(){
+                btn.disabled=true;btn.innerHTML='…';
+                cancelEmpInvite(b,btn.dataset.cancelInvite,function(ok){
+                  if(ok){toast(_cit('bd_emp_cancelled'));paint();}
+                  else{btn.disabled=false;btn.innerHTML='<i class="fas fa-xmark"></i> '+_cit('bd_emp_cancel');toast('Failed','error');}
+                });
               });
             };
           });
@@ -9927,7 +9930,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(e.target.closest('[data-group-join]')){ if(!requireLogin())return; GS().toggleGroupMember(g.id,title,function(){GS().getGroupMemberRole(g.id,function(r){state.currentGroupRole=r;}); paintGroupDetail(g);}); return; }
       if(e.target.closest('[data-group-join-request]')){ if(!requireLogin())return; openGroupJoinRequestModal(g); return; }
       if(e.target.closest('[data-group-cancel-request]')){ if(!requireLogin())return; GS().requestJoinGroup(g.id,function(){ state.currentGroupJoinRequested=false; paintGroupDetail(g); }); return; }
-      if(e.target.closest('[data-group-leave]')){ var _glt=typeof GHt==='function'?GHt:function(k){return k;}; if(!confirm(_glt('grp_leave_confirm')))return; GS().leaveGroup(g.id,function(ok){if(ok){state.currentGroupRole=null;paintGroupDetail(g);}}); return; }
+      if(e.target.closest('[data-group-leave]')){ var _glt=typeof GHt==='function'?GHt:function(k){return k;}; window.ghConfirm(_glt('grp_leave_confirm'),function(){GS().leaveGroup(g.id,function(ok){if(ok){state.currentGroupRole=null;paintGroupDetail(g);}});}); return; }
       if(e.target.closest('[data-group-mute]')){ if(!requireLogin())return; var newMuted=!state.currentGroupMuted; GS().setGroupMute(g.id,newMuted,function(ok){if(ok){state.currentGroupMuted=newMuted;paintGroupDetail(g);}}); return; }
       if(e.target.closest('[data-group-admin-panel]')){ state.currentGroupTab='admin'; $all('[data-group-detail-tab]').forEach(function(x){x.classList.toggle('active',x.dataset.groupDetailTab==='admin');}); renderGroupTab(g); return; }
       if(e.target.closest('[data-group-cover-upload]')){ openGroupCoverUpload(g); return; }
@@ -10019,7 +10022,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     box.innerHTML='<div class="gh-card"><div class="gh-section-title"><h2>Members <span class="gh-chip">'+Number(g.memberCount||0)+'</span></h2></div><input class="gh-input" id="ghMemberSearch" placeholder="Search members…" style="margin-bottom:12px"><div id="ghGroupMembersList"><div class="gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
     var allMembers=[]; var myUid=authUser()&&authUser().uid;
     function paintMembers(){ var q=($('#ghMemberSearch').value||'').toLowerCase(); var list=$('#ghGroupMembersList'); if(!list)return; var filtered=allMembers.filter(function(m){var u=m.profile||{};var name=u.fullName||u.displayName||u.name||m.userName||'';return !q||name.toLowerCase().includes(q);}); if(!filtered.length){list.innerHTML='<div class="gh-empty" style="min-height:80px"><i class="fas fa-users"></i><h3>No members found</h3></div>';return;} list.innerHTML=filtered.map(function(m){var u=m.profile||{};var name=u.fullName||u.displayName||u.name||m.userName||'GeoHub User';var avatar=u.avatar||u.photoURL||'';var muid=u.uid||u.id||m.userId||m.uid||'';var role=m.role||'member';var isSelf=muid===myUid;var adminControls=isAdmin&&!isSelf?'<div class="gr-member-controls"><select class="gh-select sm gr-role-select" data-member-role-uid="'+esc(muid)+'">'+['owner','admin','moderator','member'].map(function(r){return '<option value="'+r+'"'+(r===role?' selected':'')+'>'+r+'</option>';}).join('')+'</select><button class="gh-btn sm ghost danger" data-remove-member="'+esc(muid)+'">Remove</button><button class="gh-btn sm ghost danger" data-ban-member="'+esc(muid)+'" data-ban-name="'+esc(name)+'">Ban</button></div>':'';return '<div class="gh-friend-card gr-member-row"><a href="'+profileLink(muid)+'" style="text-decoration:none;display:flex;gap:10px;align-items:center;min-width:0"><span class="gh-avatar">'+(avatar?img(avatar,name):esc(initials(name)))+'</span><div style="min-width:0"><strong>'+esc(name)+'</strong><span class="gr-role-label">'+grRoleBadge(role)+' '+esc(role)+'</span></div></a>'+adminControls+'</div>';}).join('');
-    if(isAdmin){list.querySelectorAll('[data-remove-member]').forEach(function(btn){btn.onclick=function(){if(!confirm('Remove this member?'))return;GS().removeGroupMember(g.id,btn.dataset.removeMember,function(){});};});list.querySelectorAll('[data-ban-member]').forEach(function(btn){btn.onclick=function(){openBanMemberModal(g,btn.dataset.banMember,btn.dataset.banName);};});list.querySelectorAll('[data-member-role-uid]').forEach(function(sel){sel.onchange=function(){GS().setGroupMemberRole(g.id,sel.dataset.memberRoleUid,sel.value,function(){});};});} }
+    if(isAdmin){list.querySelectorAll('[data-remove-member]').forEach(function(btn){btn.onclick=function(){window.ghConfirm('Remove this member?',function(){GS().removeGroupMember(g.id,btn.dataset.removeMember,function(){});});};});list.querySelectorAll('[data-ban-member]').forEach(function(btn){btn.onclick=function(){openBanMemberModal(g,btn.dataset.banMember,btn.dataset.banName);};});list.querySelectorAll('[data-member-role-uid]').forEach(function(sel){sel.onchange=function(){GS().setGroupMemberRole(g.id,sel.dataset.memberRoleUid,sel.value,function(){});};});} }
     var ms=$('#ghMemberSearch'); if(ms)ms.oninput=paintMembers;
     var _um=GS().listenGroupMembers(g.id,function(items){allMembers=items;paintMembers();});
     if(_um){state.pageUnsubs.push(_um);state.grTabUnsubs.push(_um);}
@@ -12408,12 +12411,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           content.querySelectorAll('[data-admin-ban]').forEach(function(btn){
             btn.onclick=function(){
               var uid2=btn.dataset.adminBan; var currentBanned=btn.dataset.banState==='true';
-              if(!confirm((currentBanned?'Unban':'Ban')+' this user?')) return;
-              btn.disabled=true;
-              fs().updateDoc(fs().doc(db(),'users',uid2),{banned:!currentBanned}).then(function(){
-                toast((currentBanned?'User unbanned':'User banned'));
-                _renderUsers();
-              }).catch(function(err){ toast('Failed: '+(err.message||err.code),'error'); btn.disabled=false; });
+              window.ghConfirm((currentBanned?'Unban':'Ban')+' this user?', function(){
+                btn.disabled=true;
+                fs().updateDoc(fs().doc(db(),'users',uid2),{banned:!currentBanned}).then(function(){
+                  toast((currentBanned?'User unbanned':'User banned'));
+                  _renderUsers();
+                }).catch(function(err){ toast('Failed: '+(err.message||err.code),'error'); btn.disabled=false; });
+              });
             };
           });
           content.querySelectorAll('[data-admin-verify-user]').forEach(function(btn){

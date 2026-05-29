@@ -1575,7 +1575,7 @@
   /* ── Delete all videos belonging to current user ─────── */
   function deleteAllMyVideos(u) {
     if (!u) return;
-    if (!confirm('წაიშლება ყველა ვიდეო, რომელიც შენ ატვირთე. დარწმუნებული ხარ?')) return;
+    window.ghConfirm('წაიშლება ყველა ვიდეო, რომელიც შენ ატვირთე. დარწმუნებული ხარ?', function(){
     if (!fs() || !db()) { toast('Firebase მიუწვდომელია', 'error'); return; }
     var col = fs().collection(db(), 'videos');
     var btn = document.getElementById('vidDelAllMyVids');
@@ -1593,6 +1593,7 @@
         toast('შეცდომა: ' + e.message, 'error');
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash"></i> ყველა ვიდეოს წაშლა'; }
       });
+    });
   }
 
   /* ── My Channel bar on videos page ───────────────────── */
