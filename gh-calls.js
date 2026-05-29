@@ -424,6 +424,23 @@
     var me = _me(); if (!me) return;
     if (_incomingUnsub) { _incomingUnsub(); _incomingUnsub = null; }
 
+    function handleSnap(snap) {
+      snap.docChanges().forEach(function (ch) {
+        if (ch.type !== 'added') return;
+        var data = ch.doc.data();
+        var cid = ch.doc.id;
+        if (data.status !== 'ringing') return;
+        if (_callId) return;
+        if (data.createdAt) {
+          var ms = data.createdAt.toMillis ? data.createdAt.toMillis() : data.createdAt.seconds * 1000;
+          if (Date.now() - ms > 30000) return;
+        }
+        _showIncoming(data.callerName || 'Unknown', data.callerAvatar || '', data.type || 'audio', cid);
+        _ring(false);
+      });
+    }
+
+    // Try full query first (needs composite index); fall back to simple query if index missing
     _incomingUnsub = _fs.onSnapshot(
       _fs.query(
         _fs.collection(_db, 'calls'),
@@ -432,20 +449,20 @@
         _fs.orderBy('createdAt', 'desc'),
         _fs.limit(1)
       ),
-      function (snap) {
-        snap.docChanges().forEach(function (ch) {
-          if (ch.type !== 'added') return;
-          var data = ch.doc.data();
-          var cid = ch.doc.id;
-          if (_callId) return; // already in call
-          // Ignore stale calls (>30 s old)
-          if (data.createdAt) {
-            var ms = data.createdAt.toMillis ? data.createdAt.toMillis() : data.createdAt.seconds * 1000;
-            if (Date.now() - ms > 30000) return;
-          }
-          _showIncoming(data.callerName || 'Unknown', data.callerAvatar || '', data.type || 'audio', cid);
-          _ring(false);
-        });
+      handleSnap,
+      function (err) {
+        // Index not ready yet — use simple single-field query, filter in JS
+        console.warn('[GhCalls] index missing, using fallback query:', err && err.message);
+        if (_incomingUnsub) { _incomingUnsub(); }
+        _incomingUnsub = _fs.onSnapshot(
+          _fs.query(
+            _fs.collection(_db, 'calls'),
+            _fs.where('calleeId', '==', me.uid),
+            _fs.limit(10)
+          ),
+          handleSnap,
+          function (e) { console.warn('[GhCalls] incoming listen error:', e && e.message); }
+        );
       }
     );
   };
@@ -463,5 +480,10 @@
     document.addEventListener('DOMContentLoaded', function () { setTimeout(_init, 1200); });
   } else { setTimeout(_init, 1200); }
   window.addEventListener('GeoFirebaseReady', function () { if (_fb()) setTimeout(_init, 300); });
+  // Re-listen whenever auth state changes (sign-in after page load)
+  window.addEventListener('GeoAuthReady', function (e) {
+    if (e.detail) { GC.startListening(); }
+    else { if (_incomingUnsub) { _incomingUnsub(); _incomingUnsub = null; } }
+  });
 
 })();
