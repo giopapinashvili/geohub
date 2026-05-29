@@ -13,9 +13,6 @@ import {
   sendEmailVerification
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 
-function isMobileBrowser() {
-  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
 
 function fbUserToGeoUser(fbUser) {
   return {
@@ -194,23 +191,25 @@ async function fbGoogleLogin() {
   var auth = window.GeoFirebase && window.GeoFirebase.auth;
   if (!auth) throw new Error('Firebase not available');
   var provider = new GoogleAuthProvider();
-  if (isMobileBrowser()) {
-    sessionStorage.setItem('gh_pending_social', 'google');
-    await signInWithRedirect(auth, provider);
-    return; // browser will navigate away
-  }
   var cred;
   try {
     cred = await signInWithPopup(auth, provider);
   } catch (err) {
+    if (err.code === 'auth/popup-blocked') {
+      // Popup blocked (some mobile browsers) — fall back to redirect
+      sessionStorage.setItem('gh_pending_social', 'google');
+      await signInWithRedirect(auth, provider);
+      return;
+    }
     if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
       throw Object.assign(new Error('Google sign-in was cancelled.'), { code: err.code });
     }
     throw err;
   }
-  var geoUser = await mergeWithFirestore(fbUserToGeoUser(cred.user));
+  var geoUser = fbUserToGeoUser(cred.user);
+  try { geoUser = await mergeWithFirestore(geoUser); } catch(e) {}
   geoUser.lastSeen = Date.now();
-  await saveUserToFirestore(geoUser);
+  try { await saveUserToFirestore(geoUser); } catch(e) {}
   window.GeoCurrentUser = geoUser;
   window.dispatchEvent(new CustomEvent('GeoAuthReady', { detail: geoUser }));
   return geoUser;
@@ -222,23 +221,24 @@ async function fbFacebookLogin() {
   var provider = new FacebookAuthProvider();
   provider.addScope('email');
   provider.addScope('public_profile');
-  if (isMobileBrowser()) {
-    sessionStorage.setItem('gh_pending_social', 'facebook');
-    await signInWithRedirect(auth, provider);
-    return; // browser will navigate away
-  }
   var cred;
   try {
     cred = await signInWithPopup(auth, provider);
   } catch (err) {
+    if (err.code === 'auth/popup-blocked') {
+      sessionStorage.setItem('gh_pending_social', 'facebook');
+      await signInWithRedirect(auth, provider);
+      return;
+    }
     if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
       throw Object.assign(new Error('Facebook sign-in was cancelled.'), { code: err.code });
     }
     throw err;
   }
-  var geoUser = await mergeWithFirestore(fbUserToGeoUser(cred.user));
+  var geoUser = fbUserToGeoUser(cred.user);
+  try { geoUser = await mergeWithFirestore(geoUser); } catch(e) {}
   geoUser.lastSeen = Date.now();
-  await saveUserToFirestore(geoUser);
+  try { await saveUserToFirestore(geoUser); } catch(e) {}
   window.GeoCurrentUser = geoUser;
   window.dispatchEvent(new CustomEvent('GeoAuthReady', { detail: geoUser }));
   return geoUser;
