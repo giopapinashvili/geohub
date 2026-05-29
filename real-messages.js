@@ -1197,6 +1197,10 @@
       +'<div><div class="chat-header-name">'+esc(displayName(u.id, u.name))+'</div>'+bizCtx+'</div>'
       +'</div>'
       +'<div class="chat-header-actions">'
+      +(!_activeBizId && u.id ? ''
+        +'<button class="header-action-btn gh-call-header-btn" title="'+_t('call_voice','Voice call')+'" onclick="window.GhCalls&&window.GhCalls.startCall(\''+esc(u.id)+'\',\''+esc(u.name||'')+'\',\''+esc(u.avatar||'')+'\',\'audio\')"><i class="fas fa-phone"></i></button>'
+        +'<button class="header-action-btn gh-call-header-btn" title="'+_t('call_video','Video call')+'" onclick="window.GhCalls&&window.GhCalls.startCall(\''+esc(u.id)+'\',\''+esc(u.name||'')+'\',\''+esc(u.avatar||'')+'\',\'video\')"><i class="fas fa-video"></i></button>'
+        : '')
       +'<button class="header-action-btn" title="Search" id="msgSearchBtn" onclick="window.__ghToggleSearch()"><i class="fas fa-search"></i></button>'
       +'<button class="header-action-btn" title="Theme" onclick="window.__ghShowThemePicker(this)"><i class="fas fa-palette"></i></button>'
       +'<button class="header-action-btn" title="Nicknames" onclick="window.__ghShowNicknames()"><i class="fas fa-user-tag"></i></button>'

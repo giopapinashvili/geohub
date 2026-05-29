@@ -932,6 +932,26 @@
     msg_conv_start_fail:{ka:'საუბარი ვერ დაიწყო',  en: 'Could not start conversation', ru: 'Не удалось начать чат' },
     msg_conv_archived:{ ka: 'საუბარი დაარქივდა',  en: 'Conversation archived', ru: 'Чат архивирован'    },
 
+    /* ── Calls ──────────────────────────────────────────────── */
+    call_voice:       { ka: 'ხმოვანი ზარი',          en: 'Voice call',             ru: 'Голосовой звонок'    },
+    call_video:       { ka: 'ვიდეო ზარი',             en: 'Video call',             ru: 'Видеозвонок'         },
+    call_calling:     { ka: 'ირეკება…',               en: 'Calling…',          ru: 'Вызов…'         },
+    call_connected:   { ka: 'დაკავშირებულია',          en: 'Connected',              ru: 'Соединено'           },
+    call_declined:    { ka: 'ზარი უარყოფილია',         en: 'Call declined',          ru: 'Звонок отклонён'     },
+    call_no_answer:   { ka: 'პასუხი არ მოვიდა',        en: 'No answer',              ru: 'Нет ответа'          },
+    call_voice_in:    { ka: 'შემომავალი ხმოვანი ზარი', en: 'Incoming voice call',    ru: 'Входящий звонок'     },
+    call_video_in:    { ka: 'შემომავალი ვიდეო ზარი',  en: 'Incoming video call',    ru: 'Входящий видеозвонок'},
+    call_wants_voice: { ka: 'გირეკავს',               en: 'is calling you',         ru: 'звонит вам'          },
+    call_wants_video: { ka: 'გვინდა ვიდეო ზარი',      en: 'wants to video call',    ru: 'хочет видеозвонок'   },
+    call_accept:      { ka: 'მიღება',                  en: 'Accept',                 ru: 'Принять'             },
+    call_decline:     { ka: 'უარყოფა',                 en: 'Decline',                ru: 'Отклонить'           },
+    call_end:         { ka: 'ზარის დასრულება',          en: 'End call',               ru: 'Завершить'           },
+    call_toggle_mute: { ka: 'მიკროფ. ჩართ/გამ.',       en: 'Toggle mute',            ru: 'Вкл/выкл микрофон'   },
+    call_toggle_cam:  { ka: 'კამ. ჩართ/გამ.',          en: 'Toggle camera',          ru: 'Вкл/выкл камеру'     },
+    call_media_denied:{ ka: 'მიკ/კამ. წვდ. უარყ.',    en: 'Microphone/camera access denied', ru: 'Доступ к микрофону/камере запрещён' },
+    call_not_ready:   { ka: 'სისტ. მზად არ არის',      en: 'System not ready',       ru: 'Система не готова'   },
+    call_already_active:{ ka: 'ზარი უკვე მიმდ.',       en: 'Already in a call',      ru: 'Уже в звонке'        },
+
     /* ── Places page ────────────────────────────────────────── */
     pl_discover:      { ka: 'ადგილების აღმოჩენა',  en: 'Discover Places', ru: 'Открыть места'    },
     pl_add:           { ka: 'ადგილის დამატება',    en: 'Add a Place',     ru: 'Добавить место'   },

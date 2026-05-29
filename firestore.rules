@@ -1511,6 +1511,27 @@ service cloud.firestore {
       }
     }
 
+    // ── CALLS (WebRTC signaling) ──────────────────────────────────────────────
+    match /calls/{callId} {
+      allow create: if signedIn() && request.resource.data.callerId == uid();
+      allow read:   if signedIn() && (resource.data.callerId == uid() || resource.data.calleeId == uid());
+      allow update: if signedIn() && (resource.data.callerId == uid() || resource.data.calleeId == uid());
+      allow delete: if false;
+
+      match /callerCandidates/{cid} {
+        allow read:   if signedIn() && (get(/databases/$(database)/documents/calls/$(callId)).data.callerId == uid()
+                                     || get(/databases/$(database)/documents/calls/$(callId)).data.calleeId == uid());
+        allow create: if signedIn() && get(/databases/$(database)/documents/calls/$(callId)).data.callerId == uid();
+        allow delete: if false;
+      }
+      match /calleeCandidates/{cid} {
+        allow read:   if signedIn() && (get(/databases/$(database)/documents/calls/$(callId)).data.callerId == uid()
+                                     || get(/databases/$(database)/documents/calls/$(callId)).data.calleeId == uid());
+        allow create: if signedIn() && get(/databases/$(database)/documents/calls/$(callId)).data.calleeId == uid();
+        allow delete: if false;
+      }
+    }
+
     // ── DENY-ALL FALLBACK ─────────────────────────────────────────────────────
     // Any collection not explicitly listed above is blocked.
     // This prevents accidental exposure when new collections are added without
