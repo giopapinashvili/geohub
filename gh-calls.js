@@ -45,7 +45,7 @@
     if (_cachedIce && (now - _cachedIceAt < 23 * 3600 * 1000)) return _cachedIce;
     try {
       var workerUrl = (window.GeoConfig && window.GeoConfig.PAYMENTS && window.GeoConfig.PAYMENTS.WORKER_URL)
-                      || 'https://geohub-payments.geohub.workers.dev';
+                      || 'https://geohub-payments.gio-papinashvili20-bd3.workers.dev';
       var res = await fetch(workerUrl + '/api/turn-credentials');
       if (res.ok) {
         var data = await res.json();

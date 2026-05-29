@@ -111,7 +111,7 @@ const GeoConfig = Object.freeze({
   /* ── Payments ────────────────────────────────────────────────── */
   PAYMENTS: {
     // Cloudflare Worker URL — set after `wrangler deploy`
-    WORKER_URL: 'https://geohub-payments.geohub.workers.dev',
+    WORKER_URL: 'https://geohub-payments.gio-papinashvili20-bd3.workers.dev',
     // Stripe publishable key — safe to expose in frontend
     STRIPE_PUBLISHABLE_KEY: 'pk_live_REPLACE_WITH_YOUR_KEY',
   },
