@@ -117,12 +117,12 @@
 
       var actionsHtml =
         (r.status === 'pending'
-          ? '<button class="adm-btn hide"    onclick="window.adminAct(\'hide\',\''    + esc(r._docId) + '\',\'' + esc(r.videoId) + '\')"><i class="fas fa-eye-slash"></i> Hide</button>' +
-            '<button class="adm-btn remove"  onclick="window.adminAct(\'remove\',\'' + esc(r._docId) + '\',\'' + esc(r.videoId) + '\')"><i class="fas fa-ban"></i> Remove</button>' +
-            '<button class="adm-btn dismiss" onclick="window.adminAct(\'dismiss\',\'' + esc(r._docId) + '\',\'\')"><i class="fas fa-times"></i> Dismiss</button>'
+          ? '<button class="adm-btn hide"    onclick="window.adminAct(\'hide\',\''    + esc(r._docId) + '\',\'' + esc(r.videoId) + '\')"><i class="fas fa-eye-slash"></i> დამალვა</button>' +
+            '<button class="adm-btn remove"  onclick="window.adminAct(\'remove\',\'' + esc(r._docId) + '\',\'' + esc(r.videoId) + '\')"><i class="fas fa-ban"></i> წაშლა</button>' +
+            '<button class="adm-btn dismiss" onclick="window.adminAct(\'dismiss\',\'' + esc(r._docId) + '\',\'\')"><i class="fas fa-times"></i> უარყოფა</button>'
           : '') +
         (r.status === 'resolved'
-          ? '<button class="adm-btn restore" onclick="window.adminAct(\'restore\',\'' + esc(r._docId) + '\',\'' + esc(r.videoId) + '\')"><i class="fas fa-rotate-left"></i> Restore</button>'
+          ? '<button class="adm-btn restore" onclick="window.adminAct(\'restore\',\'' + esc(r._docId) + '\',\'' + esc(r.videoId) + '\')"><i class="fas fa-rotate-left"></i> აღდგენა</button>'
           : '');
 
       return '<tr>' +
@@ -149,14 +149,14 @@
         /* Links */
         '<td style="white-space:nowrap">' +
           (r.videoId
-            ? '<a class="adm-action-link" href="watch.html?v=' + esc(r.videoId) + '" target="_blank"><i class="fas fa-play"></i> Watch</a>'
+            ? '<a class="adm-action-link" href="watch.html?v=' + esc(r.videoId) + '" target="_blank"><i class="fas fa-play"></i> ნახვა</a>'
             : '') +
           (r.videoAuthorId
-            ? '<br><a class="adm-action-link" href="profile.html?id=' + esc(r.videoAuthorId) + '" target="_blank"><i class="fas fa-user"></i> Profile</a>'
+            ? '<br><a class="adm-action-link" href="profile.html?id=' + esc(r.videoAuthorId) + '" target="_blank"><i class="fas fa-user"></i> პროფილი</a>'
             : '') +
         '</td>' +
         /* Status */
-        '<td><span class="adm-status-badge ' + statusClass + '">' + esc(r.status || 'pending') + '</span></td>' +
+        '<td><span class="adm-status-badge ' + statusClass + '">' + ({pending:'განხილვაში',resolved:'გადაწყდა',dismissed:'უარყოფილი'}[r.status] || esc(r.status || 'pending')) + '</span></td>' +
         /* Actions */
         '<td><div class="adm-actions">' + actionsHtml + '</div></td>' +
       '</tr>';
@@ -205,7 +205,7 @@
       renderTable(reports);
       var pendingAll = reports.filter(function (r) { return r.status === 'pending'; }).length;
       var badge = document.getElementById('admPendingCount');
-      if (badge) badge.textContent = pendingAll + ' pending';
+      if (badge) badge.textContent = pendingAll + ' განხილვაში';
     });
   }
 
@@ -243,7 +243,7 @@
   /* ── Access denied ───────────────────────────────────────── */
   function showDenied() {
     var wrap = document.getElementById('admWrap');
-    if (wrap) wrap.innerHTML = '<div class="adm-access-denied"><i class="fas fa-lock"></i><h2>Access Denied</h2><p>Admin უფლება საჭიროა ამ გვერდზე.</p><a href="videos.html" style="color:var(--green)">← Videos-ზე დაბრუნება</a></div>';
+    if (wrap) wrap.innerHTML = '<div class="adm-access-denied"><i class="fas fa-lock"></i><h2>წვდომა აკრძალულია</h2><p>ადმინის უფლება საჭიროა ამ გვერდზე.</p><a href="videos.html" style="color:var(--green)">← ვიდეოებზე დაბრუნება</a></div>';
   }
 
   /* ── Boot ────────────────────────────────────────────────── */

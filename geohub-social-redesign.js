@@ -2366,8 +2366,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var question=(($('#ghPollQuestion')||{}).value||'').trim();
         var pollOptsEl=$('#ghPollOpts');
         var opts=$all('[data-poll-opt]', pollOptsEl).map(function(inp,idx){ return {id:String(idx),text:(inp.value||'').trim(),votes:0}; }).filter(function(o){ return o.text; });
-        if(!question) return toast('Poll needs a question','error');
-        if(opts.length<2) return toast('Add at least 2 poll options','error');
+        if(!question) return toast(typeof GHt==='function'?GHt('post_poll_q_req'):'Poll needs a question','error');
+        if(opts.length<2) return toast(typeof GHt==='function'?GHt('post_poll_opts'):'Add at least 2 poll options','error');
         var durDays=Number(($('#ghPollDuration')||{}).value||3);
         var endsAt=new Date(Date.now()+durDays*86400000);
         var pollPayload=Object.assign({ type:'poll', poll:{question:question,options:opts,endsAt:endsAt,totalVotes:0}, visibility:_getAudienceVis(), audience:_getAudienceData() }, extra||{});
@@ -2378,37 +2378,37 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       }
 
       var txt=(ta&&ta.value)||'';
-      if(!txt.trim() && !pickedFiles.length && !pickedGifUrl && !voiceBlob) return toast('Write something or add a photo/GIF/voice','error');
+      if(!txt.trim() && !pickedFiles.length && !pickedGifUrl && !voiceBlob) return toast(typeof GHt==='function'?GHt('post_content_req'):'Write something or add a photo/GIF/voice','error');
 
       // Phase 69: collect advanced format data
       var _fmtData=null, _activeFmt=document.getElementById('ghFormatPanel')&&document.querySelector('.gh-fmt-btn.active');
       var _fmtKey=_activeFmt?(_activeFmt.dataset.fmt||''):'';
       if(_fmtKey==='article'){
-        var _artT=($('#ghArtTitle')||{}).value||''; if(!_artT.trim()) return toast('Add article title','error');
+        var _artT=($('#ghArtTitle')||{}).value||''; if(!_artT.trim()) return toast(typeof GHt==='function'?GHt('post_article_req'):'Add article title','error');
         _fmtData={format:'article',articleTitle:_artT.trim(),articleSubtitle:($('#ghArtSubtitle')||{}).value||''};
       } else if(_fmtKey==='review'){
         var _revT=($('#ghRevTarget')||{}).value||''; var _revS=Number(($('#ghRevScore')||{}).value||0);
-        if(!_revT.trim()) return toast('Add what you are reviewing','error');
-        if(!_revS) return toast('Add star rating','error');
+        if(!_revT.trim()) return toast(typeof GHt==='function'?GHt('post_review_req'):'Add what you are reviewing','error');
+        if(!_revS) return toast(typeof GHt==='function'?GHt('post_rating_req'):'Add star rating','error');
         _fmtData={format:'review',reviewTarget:_revT.trim(),reviewScore:_revS};
       } else if(_fmtKey==='recipe'){
-        var _recN=($('#ghRecName')||{}).value||''; if(!_recN.trim()) return toast('Add recipe name','error');
+        var _recN=($('#ghRecName')||{}).value||''; if(!_recN.trim()) return toast(typeof GHt==='function'?GHt('post_recipe_req'):'Add recipe name','error');
         _fmtData={format:'recipe',recipeName:_recN.trim(),recipeIngredients:($('#ghRecIngredients')||{}).value||'',recipeTime:($('#ghRecTime')||{}).value||''};
       } else if(_fmtKey==='job'){
-        var _jobT=($('#ghJobTitle')||{}).value||''; if(!_jobT.trim()) return toast('Add job title','error');
+        var _jobT=($('#ghJobTitle')||{}).value||''; if(!_jobT.trim()) return toast(typeof GHt==='function'?GHt('post_job_req'):'Add job title','error');
         _fmtData={format:'job',jobTitle:_jobT.trim(),jobCompany:($('#ghJobCompany')||{}).value||'',jobCity:($('#ghJobCity')||{}).value||'',jobSalary:($('#ghJobSalary')||{}).value||''};
       } else if(_fmtKey==='question'){
         _fmtData={format:'question'};
       } else if(_fmtKey==='tip'){
-        var _tipT=($('#ghTipTitle')||{}).value||''; if(!_tipT.trim()) return toast('Add tip headline','error');
+        var _tipT=($('#ghTipTitle')||{}).value||''; if(!_tipT.trim()) return toast(typeof GHt==='function'?GHt('post_tip_req'):'Add tip headline','error');
         _fmtData={format:'tip',tipTitle:_tipT.trim()};
       } else if(_fmtKey==='event'){
-        var _evtT=($('#ghEvtTitle')||{}).value||''; if(!_evtT.trim()) return toast('Add event name','error');
+        var _evtT=($('#ghEvtTitle')||{}).value||''; if(!_evtT.trim()) return toast(typeof GHt==='function'?GHt('post_event_req'):'Add event name','error');
         _fmtData={format:'event',eventTitle:_evtT.trim(),eventDate:($('#ghEvtDate')||{}).value||'',eventPlace:($('#ghEvtPlace')||{}).value||''};
       } else if(_fmtKey==='quote'){
         _fmtData={format:'quote',quoteAuthor:($('#ghQuoteAuthor')||{}).value||''};
       } else if(_fmtKey==='announcement'){
-        var _annT=($('#ghAnnTitle')||{}).value||''; if(!_annT.trim()) return toast('Add announcement title','error');
+        var _annT=($('#ghAnnTitle')||{}).value||''; if(!_annT.trim()) return toast(typeof GHt==='function'?GHt('post_ann_req'):'Add announcement title','error');
         _fmtData={format:'announcement',announcementTitle:_annT.trim()};
       }
 

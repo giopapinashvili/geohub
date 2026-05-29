@@ -1404,6 +1404,7 @@
   }
 
   function openWorkModal(user, idx) {
+    var _t = function(k){ return typeof window.GHt === 'function' ? window.GHt(k) : k; };
     var work = Array.isArray(user.work) ? user.work : [];
     var entry = idx >= 0 ? (work[idx] || {}) : {};
     var isNew = idx < 0;
@@ -1412,16 +1413,16 @@
     ov.id = 'gh-work-modal';
     ov.className = 'profile-edit-overlay';
     ov.innerHTML = '<div class="profile-edit-sheet" style="max-width:500px">'
-      + '<div class="profile-edit-head"><h3>' + (isNew ? 'Add Work' : 'Edit Work') + '</h3><button class="profile-edit-close" id="gwClose"><i class="fas fa-times"></i></button></div>'
+      + '<div class="profile-edit-head"><h3>' + (isNew ? _t('work_modal_add') : _t('work_modal_edit')) + '</h3><button class="profile-edit-close" id="gwClose"><i class="fas fa-times"></i></button></div>'
       + '<div class="profile-edit-body">'
-      + '<div class="profile-edit-field"><label>Company</label><input class="profile-edit-input" id="gwCompany" placeholder="Company name" value="' + esc(entry.company || '') + '"></div>'
-      + '<div class="profile-edit-field"><label>Position / Title</label><input class="profile-edit-input" id="gwPosition" placeholder="Software Engineer" value="' + esc(entry.position || '') + '"></div>'
-      + '<div class="profile-edit-field"><label>From (year)</label><input class="profile-edit-input" id="gwFrom" placeholder="2020" value="' + esc(entry.from || '') + '"></div>'
-      + '<div class="profile-edit-field"><label>To (year or leave blank)</label><input class="profile-edit-input" id="gwTo" placeholder="2023 or leave blank for current" value="' + esc(entry.to || '') + '"></div>'
-      + '<div class="profile-edit-field"><label><input type="checkbox" id="gwCurrent"' + (entry.current ? ' checked' : '') + '> Currently work here</label></div>'
-      + (idx >= 0 ? '<div style="margin-top:8px"><button class="btn btn-ghost btn-sm" id="gwDelete" style="color:#f87171"><i class="fas fa-trash"></i> Remove</button></div>' : '')
+      + '<div class="profile-edit-field"><label>' + _t('work_company_lbl') + '</label><input class="profile-edit-input" id="gwCompany" placeholder="Company name" value="' + esc(entry.company || '') + '"></div>'
+      + '<div class="profile-edit-field"><label>' + _t('work_position_lbl') + '</label><input class="profile-edit-input" id="gwPosition" placeholder="Software Engineer" value="' + esc(entry.position || '') + '"></div>'
+      + '<div class="profile-edit-field"><label>' + _t('work_from_lbl') + '</label><input class="profile-edit-input" id="gwFrom" placeholder="2020" value="' + esc(entry.from || '') + '"></div>'
+      + '<div class="profile-edit-field"><label>' + _t('work_to_lbl') + '</label><input class="profile-edit-input" id="gwTo" placeholder="2023" value="' + esc(entry.to || '') + '"></div>'
+      + '<div class="profile-edit-field"><label><input type="checkbox" id="gwCurrent"' + (entry.current ? ' checked' : '') + '> ' + _t('work_currently') + '</label></div>'
+      + (idx >= 0 ? '<div style="margin-top:8px"><button class="btn btn-ghost btn-sm" id="gwDelete" style="color:#f87171"><i class="fas fa-trash"></i> ' + _t('remove') + '</button></div>' : '')
       + '</div>'
-      + '<div class="profile-edit-footer"><button class="btn btn-ghost btn-sm" id="gwCancel">Cancel</button><button class="btn btn-primary btn-sm" id="gwSave"><i class="fas fa-check"></i> Save</button></div>'
+      + '<div class="profile-edit-footer"><button class="btn btn-ghost btn-sm" id="gwCancel">' + _t('cancel') + '</button><button class="btn btn-primary btn-sm" id="gwSave"><i class="fas fa-check"></i> ' + _t('save') + '</button></div>'
       + '</div>';
     document.body.appendChild(ov);
     requestAnimationFrame(function() { ov.classList.add('open'); });
@@ -1437,41 +1438,42 @@
         to: (document.getElementById('gwTo').value || '').trim(),
         current: document.getElementById('gwCurrent').checked
       };
-      if (!newEntry.company) { toast('Company name is required.', 'error'); return; }
+      if (!newEntry.company) { toast(_t('work_company_req'), 'error'); return; }
       var newWork = work.slice();
       if (isNew) newWork.push(newEntry);
       else newWork[idx] = newEntry;
       var GF = window.GeoFirebase;
       var fbUser = GF && GF.auth && GF.auth.currentUser;
-      if (!GF || !GF.db || !GF.fs || !fbUser) { toast('Not signed in.', 'error'); return; }
+      if (!GF || !GF.db || !GF.fs || !fbUser) { toast(_t('not_signed_in'), 'error'); return; }
       GF.fs.updateDoc(GF.fs.doc(GF.db, 'users', fbUser.uid), { work: newWork }).then(function() {
-        toast('Work history saved.');
+        toast(_t('work_saved'));
         user.work = newWork;
         renderAboutTab(user);
         ov.remove();
-      }).catch(function(err) { toast('Save failed: ' + (err && err.message), 'error'); });
+      }).catch(function(err) { toast(_t('save_failed') + ': ' + (err && err.message), 'error'); });
     }
 
     ov.querySelector('#gwSave').addEventListener('click', saveWork);
     var delBtn = ov.querySelector('#gwDelete');
     if (delBtn) {
       delBtn.addEventListener('click', function() {
-        if (!confirm('Remove this work entry?')) return;
+        if (!confirm(_t('work_remove_cfm'))) return;
         var newWork = work.filter(function(_, i) { return i !== idx; });
         var GF = window.GeoFirebase;
         var fbUser = GF && GF.auth && GF.auth.currentUser;
         if (!GF || !GF.db || !GF.fs || !fbUser) return;
         GF.fs.updateDoc(GF.fs.doc(GF.db, 'users', fbUser.uid), { work: newWork }).then(function() {
-          toast('Work entry removed.');
+          toast(_t('work_removed'));
           user.work = newWork;
           renderAboutTab(user);
           ov.remove();
-        }).catch(function(err) { toast('Remove failed: ' + (err && err.message), 'error'); });
+        }).catch(function(err) { toast(_t('remove_failed') + ': ' + (err && err.message), 'error'); });
       });
     }
   }
 
   function openEduModal(user, idx) {
+    var _t = function(k){ return typeof window.GHt === 'function' ? window.GHt(k) : k; };
     var edu = Array.isArray(user.education) ? user.education : [];
     var entry = idx >= 0 ? (edu[idx] || {}) : {};
     var isNew = idx < 0;
@@ -1480,15 +1482,15 @@
     ov.id = 'gh-edu-modal';
     ov.className = 'profile-edit-overlay';
     ov.innerHTML = '<div class="profile-edit-sheet" style="max-width:500px">'
-      + '<div class="profile-edit-head"><h3>' + (isNew ? 'Add Education' : 'Edit Education') + '</h3><button class="profile-edit-close" id="geClose"><i class="fas fa-times"></i></button></div>'
+      + '<div class="profile-edit-head"><h3>' + (isNew ? _t('edu_modal_add') : _t('edu_modal_edit')) + '</h3><button class="profile-edit-close" id="geClose"><i class="fas fa-times"></i></button></div>'
       + '<div class="profile-edit-body">'
-      + '<div class="profile-edit-field"><label>School / University</label><input class="profile-edit-input" id="geSchool" placeholder="University name" value="' + esc(entry.school || '') + '"></div>'
-      + '<div class="profile-edit-field"><label>Degree</label><input class="profile-edit-input" id="geDegree" placeholder="Bachelor\'s, Master\'s…" value="' + esc(entry.degree || '') + '"></div>'
-      + '<div class="profile-edit-field"><label>From (year)</label><input class="profile-edit-input" id="geFrom" placeholder="2018" value="' + esc(entry.from || '') + '"></div>'
-      + '<div class="profile-edit-field"><label>To (year)</label><input class="profile-edit-input" id="geTo" placeholder="2022" value="' + esc(entry.to || '') + '"></div>'
-      + (idx >= 0 ? '<div style="margin-top:8px"><button class="btn btn-ghost btn-sm" id="geDelete" style="color:#f87171"><i class="fas fa-trash"></i> Remove</button></div>' : '')
+      + '<div class="profile-edit-field"><label>' + _t('edu_school_lbl') + '</label><input class="profile-edit-input" id="geSchool" placeholder="University name" value="' + esc(entry.school || '') + '"></div>'
+      + '<div class="profile-edit-field"><label>' + _t('edu_degree_lbl') + '</label><input class="profile-edit-input" id="geDegree" placeholder="Bachelor\'s, Master\'s…" value="' + esc(entry.degree || '') + '"></div>'
+      + '<div class="profile-edit-field"><label>' + _t('work_from_lbl') + '</label><input class="profile-edit-input" id="geFrom" placeholder="2018" value="' + esc(entry.from || '') + '"></div>'
+      + '<div class="profile-edit-field"><label>' + _t('work_to_lbl') + '</label><input class="profile-edit-input" id="geTo" placeholder="2022" value="' + esc(entry.to || '') + '"></div>'
+      + (idx >= 0 ? '<div style="margin-top:8px"><button class="btn btn-ghost btn-sm" id="geDelete" style="color:#f87171"><i class="fas fa-trash"></i> ' + _t('remove') + '</button></div>' : '')
       + '</div>'
-      + '<div class="profile-edit-footer"><button class="btn btn-ghost btn-sm" id="geCancel">Cancel</button><button class="btn btn-primary btn-sm" id="geSave"><i class="fas fa-check"></i> Save</button></div>'
+      + '<div class="profile-edit-footer"><button class="btn btn-ghost btn-sm" id="geCancel">' + _t('cancel') + '</button><button class="btn btn-primary btn-sm" id="geSave"><i class="fas fa-check"></i> ' + _t('save') + '</button></div>'
       + '</div>';
     document.body.appendChild(ov);
     requestAnimationFrame(function() { ov.classList.add('open'); });
@@ -1503,53 +1505,54 @@
         from: (document.getElementById('geFrom').value || '').trim(),
         to: (document.getElementById('geTo').value || '').trim()
       };
-      if (!newEntry.school) { toast('School name is required.', 'error'); return; }
+      if (!newEntry.school) { toast(_t('edu_school_req'), 'error'); return; }
       var newEdu = edu.slice();
       if (isNew) newEdu.push(newEntry);
       else newEdu[idx] = newEntry;
       var GF = window.GeoFirebase;
       var fbUser = GF && GF.auth && GF.auth.currentUser;
-      if (!GF || !GF.db || !GF.fs || !fbUser) { toast('Not signed in.', 'error'); return; }
+      if (!GF || !GF.db || !GF.fs || !fbUser) { toast(_t('not_signed_in'), 'error'); return; }
       GF.fs.updateDoc(GF.fs.doc(GF.db, 'users', fbUser.uid), { education: newEdu }).then(function() {
-        toast('Education saved.');
+        toast(_t('edu_saved'));
         user.education = newEdu;
         renderAboutTab(user);
         ov.remove();
-      }).catch(function(err) { toast('Save failed: ' + (err && err.message), 'error'); });
+      }).catch(function(err) { toast(_t('save_failed') + ': ' + (err && err.message), 'error'); });
     }
 
     ov.querySelector('#geSave').addEventListener('click', saveEdu);
     var delBtn = ov.querySelector('#geDelete');
     if (delBtn) {
       delBtn.addEventListener('click', function() {
-        if (!confirm('Remove this education entry?')) return;
+        if (!confirm(_t('edu_remove_cfm'))) return;
         var newEdu = edu.filter(function(_, i) { return i !== idx; });
         var GF = window.GeoFirebase;
         var fbUser = GF && GF.auth && GF.auth.currentUser;
         if (!GF || !GF.db || !GF.fs || !fbUser) return;
         GF.fs.updateDoc(GF.fs.doc(GF.db, 'users', fbUser.uid), { education: newEdu }).then(function() {
-          toast('Education entry removed.');
+          toast(_t('edu_removed'));
           user.education = newEdu;
           renderAboutTab(user);
           ov.remove();
-        }).catch(function(err) { toast('Remove failed: ' + (err && err.message), 'error'); });
+        }).catch(function(err) { toast(_t('remove_failed') + ': ' + (err && err.message), 'error'); });
       });
     }
   }
 
   function openLifeEventModal(user) {
+    var _t = function(k){ return typeof window.GHt === 'function' ? window.GHt(k) : k; };
     var old = document.getElementById('gh-life-event-modal'); if (old) old.remove();
     var ov = document.createElement('div');
     ov.id = 'gh-life-event-modal';
     ov.className = 'profile-edit-overlay';
     ov.innerHTML = '<div class="profile-edit-sheet" style="max-width:480px">'
-      + '<div class="profile-edit-head"><h3>Add Life Event</h3><button class="profile-edit-close" id="gleClose"><i class="fas fa-times"></i></button></div>'
+      + '<div class="profile-edit-head"><h3>' + _t('life_event_add') + '</h3><button class="profile-edit-close" id="gleClose"><i class="fas fa-times"></i></button></div>'
       + '<div class="profile-edit-body">'
-      + '<div class="profile-edit-field"><label>Event Description</label><input class="profile-edit-input" id="gleLabel" placeholder="e.g. Moved to Tbilisi, Started a new chapter…"></div>'
-      + '<div class="profile-edit-field"><label>Year</label><input class="profile-edit-input" id="gleYear" placeholder="2023" type="number" min="1900" max="2099"></div>'
-      + '<div class="profile-edit-field"><label>Icon</label><select class="profile-edit-input" id="gleIcon"><option value="fa-star">⭐ Milestone</option><option value="fa-map-marker-alt">📍 Moved</option><option value="fa-heart">❤️ Relationship</option><option value="fa-baby">👶 New family</option><option value="fa-plane">✈️ Travel</option><option value="fa-trophy">🏆 Achievement</option></select></div>'
+      + '<div class="profile-edit-field"><label>' + _t('life_event_desc') + '</label><input class="profile-edit-input" id="gleLabel" placeholder="მაგ. გადავედი თბილისში…"></div>'
+      + '<div class="profile-edit-field"><label>' + _t('work_from_lbl') + '</label><input class="profile-edit-input" id="gleYear" placeholder="2023" type="number" min="1900" max="2099"></div>'
+      + '<div class="profile-edit-field"><label>' + _t('life_event_icon') + '</label><select class="profile-edit-input" id="gleIcon"><option value="fa-star">⭐ Milestone</option><option value="fa-map-marker-alt">📍 Moved</option><option value="fa-heart">❤️ Relationship</option><option value="fa-baby">👶 New family</option><option value="fa-plane">✈️ Travel</option><option value="fa-trophy">🏆 Achievement</option></select></div>'
       + '</div>'
-      + '<div class="profile-edit-footer"><button class="btn btn-ghost btn-sm" id="gleCancel">Cancel</button><button class="btn btn-primary btn-sm" id="gleSave"><i class="fas fa-check"></i> Add Event</button></div>'
+      + '<div class="profile-edit-footer"><button class="btn btn-ghost btn-sm" id="gleCancel">' + _t('cancel') + '</button><button class="btn btn-primary btn-sm" id="gleSave"><i class="fas fa-check"></i> ' + _t('life_event_add') + '</button></div>'
       + '</div>';
     document.body.appendChild(ov);
     requestAnimationFrame(function() { ov.classList.add('open'); });
@@ -1560,17 +1563,17 @@
       var label = (document.getElementById('gleLabel').value || '').trim();
       var year  = (document.getElementById('gleYear').value || '').trim();
       var icon  = document.getElementById('gleIcon').value || 'fa-star';
-      if (!label) { toast('Please describe the event.', 'error'); return; }
+      if (!label) { toast(_t('life_event_req'), 'error'); return; }
       var GF = window.GeoFirebase;
       var fbUser = GF && GF.auth && GF.auth.currentUser;
-      if (!GF || !GF.db || !GF.fs || !fbUser) { toast('Not signed in.', 'error'); return; }
+      if (!GF || !GF.db || !GF.fs || !fbUser) { toast(_t('not_signed_in'), 'error'); return; }
       GF.fs.addDoc(GF.fs.collection(GF.db, 'users', fbUser.uid, 'lifeEvents'), {
         label: label, year: year, icon: icon, createdAt: GF.fs.serverTimestamp()
       }).then(function() {
-        toast('Life event added!');
+        toast(_t('life_event_added'));
         renderAboutTab(user);
         ov.remove();
-      }).catch(function(err) { toast('Save failed: ' + (err && err.message), 'error'); });
+      }).catch(function(err) { toast(_t('save_failed') + ': ' + (err && err.message), 'error'); });
     });
   }
 
@@ -2028,16 +2031,17 @@
       const newUsername = (document.getElementById('peUsername').value || '').trim().toLowerCase().replace(/[^a-z0-9_.]/g, '');
       const usernameChanged = newUsername && newUsername !== currentUsername;
 
-      if (_peUnStatus === 'taken') { toast('That username is already taken. Choose a different one.', 'error'); return; }
-      if (_peUnStatus === 'invalid') { toast('Username must be 3–20 characters (letters, numbers, . _)', 'error'); return; }
-      if (_peUnStatus === 'checking') { toast('Still checking username… wait a moment and try again.', 'error'); return; }
+      var _t2 = function(k){ return typeof window.GHt === 'function' ? window.GHt(k) : k; };
+      if (_peUnStatus === 'taken') { toast(_t2('username_taken'), 'error'); return; }
+      if (_peUnStatus === 'invalid') { toast(_t2('username_invalid'), 'error'); return; }
+      if (_peUnStatus === 'checking') { toast(_t2('username_checking'), 'error'); return; }
 
       if (usernameChanged) {
         // Final availability check before saving
         const auth = window.GeoFirebaseAuth;
         if (auth && auth.isUsernameAvailable) {
           const avail = await auth.isUsernameAvailable(newUsername).catch(() => true);
-          if (!avail) { toast('@' + newUsername + ' was just taken. Choose a different one.', 'error'); return; }
+          if (!avail) { toast('@' + newUsername + ' — ' + (_t2('username_taken') || 'was just taken. Choose a different one.'), 'error'); return; }
         }
       }
 
@@ -2101,9 +2105,9 @@
         if (updates.fullName) { const nm = $('.profile-name'); if (nm) nm.textContent = updates.fullName; }
         if ('bio' in updates) { const bioEl = $('.profile-bio'); if (bioEl) bioEl.textContent = updates.bio || (typeof window.GHt==='function'?window.GHt('profile_no_bio'):'No bio yet.'); }
         if (updates.username || updates.city) { const hnd = $('.profile-handle'); if (hnd) hnd.textContent = '@' + (updates.username || (window.GeoCurrentUser && window.GeoCurrentUser.username) || 'user') + (updates.city && updates.city !== 'all_georgia' ? ' · ' + updates.city : ''); }
-        toast('Profile saved');
+        toast(_t2('profile_saved_ok'));
       } catch (err) {
-        toast('Save failed: ' + (err && err.message ? err.message : 'Unknown error'), 'error');
+        toast(_t2('save_failed') + ': ' + (err && err.message ? err.message : 'Unknown error'), 'error');
         saveBtn.disabled = false; saveBtn.innerHTML = '<i class="fas fa-check"></i> Save Changes';
       }
     });
@@ -2400,13 +2404,14 @@
         var fbU = GF2.auth.currentUser;
         try {
           var url = await GS.uploadFile(file, 'avatars', function(){});
-          if (!url) { toast('Upload failed', 'error'); return; }
+          var _tu = function(k){ return typeof window.GHt === 'function' ? window.GHt(k) : k; };
+          if (!url) { toast(_tu('upload_failed'), 'error'); return; }
           await GF2.fs.updateDoc(GF2.fs.doc(GF2.db, 'users', fbU.uid), { avatar: url, updatedAt: GF2.fs.serverTimestamp() });
           var avEl = $('.profile-avatar'); if (avEl) avEl.src = url;
           $$('.gh-avatar-img,.nav-avatar,[data-nav-avatar]').forEach(function(el){ el.src = url; });
           if (window.GeoCurrentUser) window.GeoCurrentUser.avatar = url;
-          toast('Profile photo updated');
-        } catch(err) { toast('Photo update failed', 'error'); }
+          toast(_tu('photo_updated'));
+        } catch(err) { toast((typeof window.GHt === 'function' ? window.GHt('photo_failed') : 'Photo update failed'), 'error'); }
       };
       inp.click();
     }
@@ -2422,13 +2427,14 @@
         var fbU = GF2.auth.currentUser;
         try {
           var url = await GS.uploadFile(file, 'covers', function(){});
-          if (!url) { toast('Upload failed', 'error'); return; }
+          var _tc = function(k){ return typeof window.GHt === 'function' ? window.GHt(k) : k; };
+          if (!url) { toast(_tc('upload_failed'), 'error'); return; }
           await GF2.fs.updateDoc(GF2.fs.doc(GF2.db, 'users', fbU.uid), { coverImage: url, updatedAt: GF2.fs.serverTimestamp() });
           var coverEl = $('.profile-cover');
           if (coverEl) coverEl.style.backgroundImage = 'linear-gradient(180deg,rgba(4,5,13,0.08),rgba(4,5,13,0.72)),url(\'' + url + '\')';
           if (window.GeoCurrentUser) window.GeoCurrentUser.coverImage = url;
-          toast('Cover photo updated');
-        } catch(err) { toast('Cover update failed', 'error'); }
+          toast(_tc('cover_updated'));
+        } catch(err) { toast((typeof window.GHt === 'function' ? window.GHt('cover_failed') : 'Cover update failed'), 'error'); }
       };
       inp2.click();
     }
@@ -2494,7 +2500,7 @@
     }
     if (e.target.closest('[data-share-profile]')) {
       e.preventDefault();
-      navigator.clipboard && navigator.clipboard.writeText(location.href).then(() => toast('Profile link copied'));
+      navigator.clipboard && navigator.clipboard.writeText(location.href).then(() => toast(typeof window.GHt==='function'?window.GHt('link_copied'):'Profile link copied'));
     }
   });
 

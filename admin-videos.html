@@ -59,46 +59,47 @@
   <noscript>GeoHub requires JavaScript.</noscript>
 
   <script type="module" src="firebase-config.js"></script>
+  <script defer src="gh-i18n.js"></script>
   <script defer src="account.js"></script>
   <script defer src="admin-videos.js"></script>
 
   <div class="adm-wrap" id="admWrap">
     <div class="adm-header">
-      <h1><i class="fas fa-shield-halved"></i>Video Reports</h1>
+      <h1><i class="fas fa-shield-halved"></i>ვიდეო საჩივრები</h1>
       <span class="adm-badge" id="admPendingCount">—</span>
     </div>
     <div class="adm-search-row">
-      <input class="adm-search-input" id="admSearch" type="search" placeholder="ძიება სათაური, creator...">
+      <input class="adm-search-input" id="admSearch" type="search" placeholder="ძიება სათაური, კრეატორი…">
       <select class="adm-filter-select" id="admReasonFilter">
         <option value="">ყველა მიზეზი</option>
-        <option value="spam">Spam</option>
-        <option value="inappropriate">Inappropriate</option>
-        <option value="misleading">Misleading</option>
-        <option value="copyright">Copyright</option>
-        <option value="other">Other</option>
+        <option value="spam">სპამი</option>
+        <option value="inappropriate">შეუფერებელი</option>
+        <option value="misleading">შეცდომაში შემყვანი</option>
+        <option value="copyright">საავტ. უფლება</option>
+        <option value="other">სხვა</option>
       </select>
     </div>
     <div class="adm-tabs" id="admTabs">
-      <button class="adm-tab active" data-adm-tab="pending">Pending</button>
-      <button class="adm-tab" data-adm-tab="resolved">Resolved</button>
-      <button class="adm-tab" data-adm-tab="dismissed">Dismissed</button>
-      <button class="adm-tab" data-adm-tab="all">All</button>
+      <button class="adm-tab active" data-adm-tab="pending">განხილვაში</button>
+      <button class="adm-tab" data-adm-tab="resolved">გადაწყვეტილი</button>
+      <button class="adm-tab" data-adm-tab="dismissed">უარყოფილი</button>
+      <button class="adm-tab" data-adm-tab="all">ყველა</button>
     </div>
     <div class="adm-table-wrap">
       <table class="adm-table">
         <thead>
           <tr>
-            <th>Video</th>
-            <th>Creator</th>
-            <th>Reason / Reporter</th>
-            <th>Note</th>
-            <th>Links</th>
-            <th>Status</th>
-            <th>Actions</th>
+            <th>ვიდეო</th>
+            <th>კრეატორი</th>
+            <th>მიზეზი / მომხმარებელი</th>
+            <th>შენიშვნა</th>
+            <th>ბმულები</th>
+            <th>სტატუსი</th>
+            <th>მოქმედება</th>
           </tr>
         </thead>
         <tbody id="admTableBody">
-          <tr><td colspan="6"><div class="adm-empty"><i class="fas fa-spinner fa-spin"></i>იტვირთება...</div></td></tr>
+          <tr><td colspan="7"><div class="adm-empty"><i class="fas fa-spinner fa-spin"></i>იტვირთება...</div></td></tr>
         </tbody>
       </table>
     </div>
