@@ -247,20 +247,24 @@ async function fbFacebookLogin() {
 async function handleRedirectResult() {
   var auth = window.GeoFirebase && window.GeoFirebase.auth;
   if (!auth) return null;
+  var cred;
   try {
-    var cred = await getRedirectResult(auth);
-    if (!cred || !cred.user) return null;
-    sessionStorage.removeItem('gh_pending_social');
-    var geoUser = await mergeWithFirestore(fbUserToGeoUser(cred.user));
-    geoUser.lastSeen = Date.now();
-    await saveUserToFirestore(geoUser);
-    window.GeoCurrentUser = geoUser;
-    window.dispatchEvent(new CustomEvent('GeoAuthReady', { detail: geoUser }));
-    return geoUser;
+    cred = await getRedirectResult(auth);
   } catch (err) {
-    console.warn('[GeoAuth] getRedirectResult:', err && err.code, err && err.message);
-    return null;
+    console.warn('[GeoAuth] getRedirectResult error:', err && err.code, err && err.message);
+    throw err;
   }
+  if (!cred || !cred.user) return null;
+  sessionStorage.removeItem('gh_pending_social');
+  var geoUser = fbUserToGeoUser(cred.user);
+  try {
+    geoUser = await mergeWithFirestore(geoUser);
+  } catch(e) {}
+  geoUser.lastSeen = Date.now();
+  try { await saveUserToFirestore(geoUser); } catch(e) {}
+  window.GeoCurrentUser = geoUser;
+  window.dispatchEvent(new CustomEvent('GeoAuthReady', { detail: geoUser }));
+  return geoUser;
 }
 
 async function fbLogout() {
@@ -282,7 +286,14 @@ function onAuthChange(callback) {
   if (!auth) return;
   onAuthStateChanged(auth, async function (fbUser) {
     if (fbUser) {
-      var geoUser = await mergeWithFirestore(fbUserToGeoUser(fbUser));
+      var geoUser;
+      try {
+        geoUser = await mergeWithFirestore(fbUserToGeoUser(fbUser));
+      } catch (e) {
+        geoUser = fbUserToGeoUser(fbUser);
+      }
+      geoUser.lastSeen = Date.now();
+      try { await saveUserToFirestore(geoUser); } catch(e) {}
       window.GeoCurrentUser = geoUser;
       callback(geoUser);
       window.dispatchEvent(new CustomEvent('GeoAuthReady', { detail: geoUser }));

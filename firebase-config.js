@@ -16,7 +16,7 @@ import { getMessaging, isSupported as isMsgSupported } from 'https://www.gstatic
 // IMPORTANT: Restrict this Firebase Web API key in Google Cloud Console → APIs & Services → Credentials → HTTP referrers to your production domains only.
 const firebaseConfig = {
   apiKey: "AIzaSyBFjplTgrv7SGLagXzppoUXmSp60PMO_HI",
-  authDomain: "geohub-main.firebaseapp.com",
+  authDomain: "geohub.pages.dev",
   projectId: "geohub-main",
   messagingSenderId: "18115935679",
   appId: "1:18115935679:web:b17b3f3814256cd97e750a",
