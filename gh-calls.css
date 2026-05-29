@@ -1,260 +1,273 @@
-/* ── GeoHub Call Overlay ────────────────────────────────────── */
+/* ── GeoHub Call Overlay — Messenger Style ─────────────────────── */
 
 .gco {
   display: none;
   position: fixed;
   inset: 0;
   z-index: 10000;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  background: rgba(0,0,0,.72);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: #000;
   animation: gco-fadein .22s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
-@keyframes gco-fadein { from { opacity:0; } to { opacity:1; } }
+@keyframes gco-fadein { from { opacity: 0; } to { opacity: 1; } }
 
+/* ── Card becomes full-screen canvas ───────────────────────────── */
 .gco-card {
   position: relative;
-  background: var(--gh-card, #1c1c2e);
-  border: 1px solid var(--gh-border, #2e2e44);
-  border-radius: 24px;
-  padding: 32px 28px 24px;
   width: 100%;
-  max-width: 360px;
-  text-align: center;
-  box-shadow: 0 24px 80px rgba(0,0,0,.6);
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  overflow: hidden;
 }
 
-/* ── Avatar ────────────────────────────────────────────────── */
+/* ── Video elements ─────────────────────────────────────────────── */
+.gco-remote-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #111;
+  z-index: 0;
+}
+.gco-local-video {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 90px;
+  aspect-ratio: 3/4;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 2px solid rgba(255,255,255,.25);
+  background: #222;
+  z-index: 4;
+  box-shadow: 0 4px 16px rgba(0,0,0,.5);
+}
+
+/* ── Audio-call background ──────────────────────────────────────── */
+.gco-audio-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(170deg, #1c1c2e 0%, #0f172a 60%, #0f3460 100%);
+  z-index: 0;
+}
+
+/* ── Top overlay (name + status + timer) ───────────────────────── */
+.gco-top {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  padding: max(env(safe-area-inset-top, 0px) + 20px, 20px) 20px 48px;
+  background: linear-gradient(to bottom, rgba(0,0,0,.65) 0%, transparent 100%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-align: center;
+}
+
+/* ── Middle (audio calls — avatar + info) ──────────────────────── */
+.gco-middle {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-top: -40px;
+}
+
+/* ── Bottom overlay (controls) ─────────────────────────────────── */
+.gco-bottom {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 48px 20px max(env(safe-area-inset-bottom, 0px) + 28px, 28px);
+  background: linear-gradient(to top, rgba(0,0,0,.65) 0%, transparent 100%);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── Text ───────────────────────────────────────────────────────── */
+.gco-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 6px rgba(0,0,0,.6);
+  letter-spacing: -.01em;
+}
+.gco-status {
+  font-size: .82rem;
+  color: rgba(255,255,255,.72);
+  text-shadow: 0 1px 4px rgba(0,0,0,.4);
+}
+.gco-timer {
+  font-size: .88rem;
+  font-weight: 500;
+  color: rgba(255,255,255,.85);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .05em;
+}
+
+/* ── Avatar ─────────────────────────────────────────────────────── */
 .gco-av-wrap {
   position: relative;
-  width: 96px;
-  height: 96px;
-  margin-bottom: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .gco-av {
-  width: 96px;
-  height: 96px;
+  width: 110px; height: 110px;
   border-radius: 50%;
   overflow: hidden;
+  border: 3px solid rgba(255,255,255,.18);
   position: relative;
   z-index: 1;
 }
 .gco-av img {
   width: 100%; height: 100%;
-  object-fit: cover;
-  display: block;
+  object-fit: cover; display: block;
 }
 .gco-av-init {
   width: 100%; height: 100%;
   display: flex; align-items: center; justify-content: center;
-  background: var(--gh-primary, #6c63ff);
+  background: #6c63ff;
   color: #fff;
-  font-size: 2rem;
+  font-size: 2.4rem;
   font-weight: 700;
-  border-radius: 50%;
 }
 
-/* Pulse ring for incoming */
+/* Pulse ring — incoming */
 .gco-av-pulse {
   position: absolute;
-  inset: -12px;
+  inset: -18px;
   border-radius: 50%;
-  background: transparent;
-  border: 2px solid var(--gh-success, #22c55e);
-  animation: gco-pulse 1.4s ease-out infinite;
+  border: 2px solid rgba(34,197,94,.55);
+  animation: gco-pulse 1.5s ease-out infinite;
   z-index: 0;
 }
 .gco-av-pulse::after {
   content: '';
   position: absolute;
-  inset: -10px;
+  inset: -14px;
   border-radius: 50%;
-  border: 2px solid var(--gh-success, #22c55e);
-  opacity: .4;
-  animation: gco-pulse 1.4s ease-out infinite .4s;
+  border: 2px solid rgba(34,197,94,.3);
+  animation: gco-pulse 1.5s ease-out .45s infinite;
 }
 @keyframes gco-pulse {
-  0%   { transform: scale(1); opacity: .8; }
-  100% { transform: scale(1.5); opacity: 0; }
+  0%   { transform: scale(1); opacity: .9; }
+  100% { transform: scale(1.55); opacity: 0; }
 }
 
-/* Ringing ring for outgoing */
+/* Spin ring — outgoing ringing */
 .gco-av-ring {
   position: absolute;
-  inset: -8px;
+  inset: -10px;
   border-radius: 50%;
-  border: 2px solid rgba(108,99,255,.5);
-  animation: gco-spin-ring 2s linear infinite;
+  border: 2px solid rgba(255,255,255,.25);
+  border-top-color: rgba(255,255,255,.7);
+  animation: gco-spin 1.4s linear infinite;
+  z-index: 0;
 }
-@keyframes gco-spin-ring {
-  0%   { transform: rotate(0deg)  scale(1);   opacity: .6; }
-  50%  { transform: rotate(180deg) scale(1.08); opacity: 1;  }
-  100% { transform: rotate(360deg) scale(1);   opacity: .6; }
-}
+@keyframes gco-spin { to { transform: rotate(360deg); } }
 
-/* ── Type badge ────────────────────────────────────────────── */
-.gco-type-badge {
-  font-size: .72rem;
-  font-weight: 600;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  color: var(--gh-muted, #94a3b8);
-  background: var(--gh-bg, #0f0f1a);
-  border: 1px solid var(--gh-border, #2e2e44);
-  border-radius: 20px;
-  padding: 4px 12px;
-}
-
-/* ── Name / Status / Timer ──────────────────────────────────── */
-.gco-name {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--gh-text, #e2e8f0);
-  line-height: 1.2;
-}
-.gco-status {
-  font-size: .85rem;
-  color: var(--gh-muted, #94a3b8);
-}
-.gco-timer {
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: .08em;
-  color: var(--gh-success, #22c55e);
-  font-variant-numeric: tabular-nums;
-}
-
-/* ── Audio icon (no video) ──────────────────────────────────── */
-.gco-audio-icon {
-  font-size: 2.5rem;
-  color: var(--gh-primary, #6c63ff);
-  animation: gco-audio-pulse 1.5s ease-in-out infinite;
-}
-@keyframes gco-audio-pulse {
-  0%,100% { opacity: 1; transform: scale(1); }
-  50%     { opacity: .6; transform: scale(1.1); }
-}
-
-/* ── Video elements ─────────────────────────────────────────── */
-.gco-video-wrap {
-  width: 100%;
-  border-radius: 14px;
-  overflow: hidden;
-  background: #000;
-  position: relative;
-  aspect-ratio: 4/3;
-}
-.gco-remote-video {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  display: block;
-  background: #000;
-}
-.gco-local-video {
-  position: absolute;
-  bottom: 8px; right: 8px;
-  width: 28%; aspect-ratio: 3/4;
-  border-radius: 10px;
-  object-fit: cover;
-  border: 2px solid rgba(255,255,255,.2);
-  background: #111;
-}
-
-/* ── Controls ────────────────────────────────────────────────── */
+/* ── Controls row ───────────────────────────────────────────────── */
 .gco-controls {
   display: flex;
-  gap: 14px;
+  gap: 20px;
   align-items: center;
   justify-content: center;
-  margin-top: 4px;
-}
-.gco-incoming-row {
-  display: flex;
-  gap: 24px;
-  margin-top: 8px;
 }
 
-.gco-btn {
-  width: 58px; height: 58px;
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  font-size: 1.1rem;
-  transition: transform .15s, box-shadow .15s;
-  gap: 4px;
+/* ── Incoming layout ────────────────────────────────────────────── */
+.gco-incoming .gco-card {
+  background: linear-gradient(170deg, #1c1c2e 0%, #0f172a 60%, #0f3460 100%);
+  justify-content: space-between;
+  padding: max(env(safe-area-inset-top, 0px) + 60px, 60px) 0 max(env(safe-area-inset-bottom, 0px) + 48px, 48px);
 }
-.gco-btn:hover { transform: scale(1.08); }
-.gco-btn span {
-  font-size: .62rem;
-  font-weight: 600;
+.gco-incoming-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.gco-incoming-label {
+  font-size: .78rem;
+  color: rgba(255,255,255,.55);
   letter-spacing: .04em;
   text-transform: uppercase;
 }
-
-.gco-btn-sec {
-  background: rgba(255,255,255,.1);
-  color: var(--gh-text, #e2e8f0);
-}
-.gco-btn-sec:hover { background: rgba(255,255,255,.18); }
-.gco-btn-muted {
-  background: var(--gh-warning, #f59e0b) !important;
-  color: #000 !important;
-}
-
-.gco-btn-end {
-  background: #ef4444;
-  color: #fff;
-  box-shadow: 0 4px 16px rgba(239,68,68,.4);
-}
-.gco-btn-end:hover { background: #dc2626; }
-
-.gco-btn-accept {
-  background: #22c55e;
-  color: #fff;
-  box-shadow: 0 4px 16px rgba(34,197,94,.4);
-}
-.gco-btn-accept:hover { background: #16a34a; }
-
-/* ── Full-screen video active layout ────────────────────────── */
-.gco.gco-active .gco-card {
-  max-width: 500px;
-}
-
-/* ── Call buttons in chat header ────────────────────────────── */
-.gh-call-header-btns {
+.gco-incoming-row {
   display: flex;
-  gap: 2px;
+  gap: 56px;
+  align-items: center;
 }
-.gh-call-header-btn {
-  width: 36px; height: 36px;
+.gco-btn-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+}
+.gco-btn-wrap span {
+  font-size: .75rem;
+  color: rgba(255,255,255,.65);
+  font-weight: 500;
+}
+
+/* ── Ringing layout (outgoing, waiting) ─────────────────────────── */
+.gco-ringing .gco-card {
+  background: linear-gradient(170deg, #1c1c2e 0%, #0f172a 60%, #0f3460 100%);
+}
+
+/* ── Buttons ────────────────────────────────────────────────────── */
+.gco-btn {
+  width: 62px; height: 62px;
   border-radius: 50%;
   border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center; justify-content: center;
+  font-size: 1.15rem;
+  color: #fff;
+  transition: transform .12s, opacity .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.gco-btn:active { transform: scale(.9); opacity: .85; }
+
+.gco-btn-sec {
+  background: rgba(255,255,255,.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.gco-btn-muted {
+  background: rgba(255,255,255,.88) !important;
+  color: #111 !important;
+}
+.gco-btn-end {
+  background: #ef4444;
+  box-shadow: 0 4px 20px rgba(239,68,68,.4);
+}
+.gco-btn-accept {
+  background: #22c55e;
+  box-shadow: 0 4px 20px rgba(34,197,94,.4);
+}
+
+/* ── Call buttons in chat header ────────────────────────────────── */
+.gh-call-header-btns { display: flex; gap: 2px; }
+.gh-call-header-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%; border: none;
   background: transparent;
   color: var(--text-secondary, #94a3b8);
-  font-size: .9rem;
-  cursor: pointer;
+  font-size: .9rem; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: background .15s, color .15s;
 }
 .gh-call-header-btn:hover {
   background: rgba(108,99,255,.15);
   color: var(--gh-primary, #6c63ff);
-}
-
-/* ── Responsive ─────────────────────────────────────────────── */
-@media (max-width: 480px) {
-  .gco-card {
-    border-radius: 18px;
-    padding: 24px 18px 20px;
-  }
-  .gco-btn { width: 52px; height: 52px; }
 }

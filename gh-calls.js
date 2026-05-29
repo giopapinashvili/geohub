@@ -136,20 +136,28 @@
     ov.className = 'gco gco-ringing';
     ov.innerHTML =
       '<div class="gco-card">' +
-        '<div class="gco-av-wrap"><div class="gco-av-ring"></div><div class="gco-av">' + _avatarHtml(avatar, name) + '</div></div>' +
-        '<div class="gco-name">' + _esc(name) + '</div>' +
-        '<div class="gco-status" id="ghCallStatus">' + _t('call_calling', 'Calling…') + '</div>' +
-        '<div class="gco-timer" id="ghCallTimer" style="display:none">00:00</div>' +
         (type === 'video'
-          ? '<div class="gco-video-wrap"><video id="ghRemoteVideo" autoplay playsinline class="gco-remote-video"></video><video id="ghLocalVideo" autoplay muted playsinline class="gco-local-video"></video></div>'
-          : '<div class="gco-audio-icon"><i class="fas fa-phone-volume"></i></div><audio id="ghCallAudio" autoplay style="display:none"></audio>') +
-        '<div class="gco-controls">' +
-          (type === 'video' ? '<button class="gco-btn gco-btn-sec" id="ghCamBtn" onclick="GhCalls.toggleCamera()" title="' + _t('call_toggle_cam', 'Toggle camera') + '"><i class="fas fa-video"></i></button>' : '') +
-          '<button class="gco-btn gco-btn-sec" id="ghMuteBtn" onclick="GhCalls.toggleMute()" title="' + _t('call_toggle_mute', 'Toggle mute') + '"><i class="fas fa-microphone"></i></button>' +
-          '<button class="gco-btn gco-btn-end" onclick="GhCalls.endCall()" title="' + _t('call_end', 'End call') + '"><i class="fas fa-phone-slash"></i></button>' +
+          ? '<video id="ghRemoteVideo" autoplay playsinline class="gco-remote-video"></video>' +
+            '<video id="ghLocalVideo" autoplay muted playsinline class="gco-local-video"></video>'
+          : '<div class="gco-audio-bg"></div>' +
+            '<audio id="ghCallAudio" autoplay style="display:none"></audio>') +
+        '<div class="gco-top">' +
+          '<div class="gco-name">' + _esc(name) + '</div>' +
+          '<div class="gco-status" id="ghCallStatus">' + _t('call_calling', 'Calling…') + '</div>' +
+          '<div class="gco-timer" id="ghCallTimer" style="display:none">00:00</div>' +
         '</div>' +
+        (type !== 'video'
+          ? '<div class="gco-middle">' +
+              '<div class="gco-av-wrap"><div class="gco-av-ring"></div><div class="gco-av">' + _avatarHtml(avatar, name) + '</div></div>' +
+            '</div>'
+          : '') +
+        '<div class="gco-bottom"><div class="gco-controls">' +
+          (type === 'video' ? '<button class="gco-btn gco-btn-sec" id="ghCamBtn" onclick="GhCalls.toggleCamera()"><i class="fas fa-video"></i></button>' : '') +
+          '<button class="gco-btn gco-btn-sec" id="ghMuteBtn" onclick="GhCalls.toggleMute()"><i class="fas fa-microphone"></i></button>' +
+          '<button class="gco-btn gco-btn-end" onclick="GhCalls.endCall()"><i class="fas fa-phone-slash"></i></button>' +
+        '</div></div>' +
       '</div>';
-    ov.style.display = 'flex';
+    ov.style.display = 'block';
   }
 
   function _showIncoming(name, avatar, type, callId) {
@@ -157,38 +165,28 @@
     ov.className = 'gco gco-incoming';
     ov.innerHTML =
       '<div class="gco-card">' +
-        '<div class="gco-type-badge"><i class="fas fa-' + (type === 'video' ? 'video' : 'phone') + '"></i> ' + _t(type === 'video' ? 'call_video_in' : 'call_voice_in', type === 'video' ? 'Incoming video call' : 'Incoming voice call') + '</div>' +
-        '<div class="gco-av-wrap"><div class="gco-av-pulse"></div><div class="gco-av">' + _avatarHtml(avatar, name) + '</div></div>' +
-        '<div class="gco-name">' + _esc(name) + '</div>' +
-        '<div class="gco-status">' + _t(type === 'video' ? 'call_wants_video' : 'call_wants_voice', type === 'video' ? 'wants to video call' : 'is calling you') + '</div>' +
+        '<div class="gco-incoming-info">' +
+          '<div class="gco-incoming-label"><i class="fas fa-' + (type === 'video' ? 'video' : 'phone') + '"></i> ' + _t(type === 'video' ? 'call_video_in' : 'call_voice_in', type === 'video' ? 'Incoming video call' : 'Incoming voice call') + '</div>' +
+          '<div class="gco-av-wrap"><div class="gco-av-pulse"></div><div class="gco-av">' + _avatarHtml(avatar, name) + '</div></div>' +
+          '<div class="gco-name">' + _esc(name) + '</div>' +
+        '</div>' +
         '<div class="gco-incoming-row">' +
-          '<button class="gco-btn gco-btn-end" onclick="GhCalls.declineCall(\'' + _esc(callId) + '\')">' +
-            '<i class="fas fa-phone-slash"></i><span>' + _t('call_decline', 'Decline') + '</span>' +
-          '</button>' +
-          '<button class="gco-btn gco-btn-accept" onclick="GhCalls.acceptCall(\'' + _esc(callId) + '\',\'' + _esc(type) + '\')">' +
-            '<i class="fas fa-phone"></i><span>' + _t('call_accept', 'Accept') + '</span>' +
-          '</button>' +
+          '<div class="gco-btn-wrap">' +
+            '<button class="gco-btn gco-btn-end" onclick="GhCalls.declineCall(\'' + _esc(callId) + '\')"><i class="fas fa-phone-slash"></i></button>' +
+            '<span>' + _t('call_decline', 'Decline') + '</span>' +
+          '</div>' +
+          '<div class="gco-btn-wrap">' +
+            '<button class="gco-btn gco-btn-accept" onclick="GhCalls.acceptCall(\'' + _esc(callId) + '\',\'' + _esc(type) + '\')"><i class="fas fa-phone"></i></button>' +
+            '<span>' + _t('call_accept', 'Accept') + '</span>' +
+          '</div>' +
         '</div>' +
       '</div>';
-    ov.style.display = 'flex';
+    ov.style.display = 'block';
   }
 
   function _transitionToActive(name, avatar, type) {
     _callState = 'active';
-    var statusEl = document.getElementById('ghCallStatus');
-    if (statusEl) statusEl.textContent = _t('call_connected', 'Connected');
-    var timerEl = document.getElementById('ghCallTimer');
-    if (timerEl) timerEl.style.display = '';
-    var ov = _overlay();
-    ov.classList.remove('gco-ringing', 'gco-incoming');
-    ov.classList.add('gco-active');
-    if (type === 'video') {
-      var lv = document.getElementById('ghLocalVideo');
-      var rv = document.getElementById('ghRemoteVideo');
-      if (lv && _localStream) lv.srcObject = _localStream;
-      if (rv && _remoteStream) rv.srcObject = _remoteStream;
-    }
-    _startTimer();
+    _buildActiveUI(name, avatar, type);
   }
 
   function _buildActiveUI(name, avatar, type) {
@@ -197,19 +195,25 @@
     ov.innerHTML =
       '<div class="gco-card">' +
         (type === 'video'
-          ? '<div class="gco-video-wrap"><video id="ghRemoteVideo" autoplay playsinline class="gco-remote-video"></video><video id="ghLocalVideo" autoplay muted playsinline class="gco-local-video"></video></div>'
-          : '<div class="gco-audio-icon"><i class="fas fa-phone-volume"></i></div><audio id="ghCallAudio" autoplay style="display:none"></audio>') +
-        '<div class="gco-av-wrap"><div class="gco-av">' + _avatarHtml(avatar, name) + '</div></div>' +
-        '<div class="gco-name">' + _esc(name) + '</div>' +
-        '<div class="gco-status" id="ghCallStatus">' + _t('call_connected', 'Connected') + '</div>' +
-        '<div class="gco-timer" id="ghCallTimer">00:00</div>' +
-        '<div class="gco-controls">' +
-          (type === 'video' ? '<button class="gco-btn gco-btn-sec" id="ghCamBtn" onclick="GhCalls.toggleCamera()" title="' + _t('call_toggle_cam', 'Toggle camera') + '"><i class="fas fa-video"></i></button>' : '') +
-          '<button class="gco-btn gco-btn-sec" id="ghMuteBtn" onclick="GhCalls.toggleMute()" title="' + _t('call_toggle_mute', 'Toggle mute') + '"><i class="fas fa-microphone"></i></button>' +
-          '<button class="gco-btn gco-btn-end" onclick="GhCalls.endCall()" title="' + _t('call_end', 'End call') + '"><i class="fas fa-phone-slash"></i></button>' +
+          ? '<video id="ghRemoteVideo" autoplay playsinline class="gco-remote-video"></video>' +
+            '<video id="ghLocalVideo" autoplay muted playsinline class="gco-local-video"></video>'
+          : '<div class="gco-audio-bg"></div>' +
+            '<audio id="ghCallAudio" autoplay style="display:none"></audio>') +
+        '<div class="gco-top">' +
+          '<div class="gco-name">' + _esc(name) + '</div>' +
+          '<div class="gco-status" id="ghCallStatus">' + _t('call_connected', 'Connected') + '</div>' +
+          '<div class="gco-timer" id="ghCallTimer">00:00</div>' +
         '</div>' +
+        (type !== 'video'
+          ? '<div class="gco-middle"><div class="gco-av-wrap"><div class="gco-av">' + _avatarHtml(avatar, name) + '</div></div></div>'
+          : '') +
+        '<div class="gco-bottom"><div class="gco-controls">' +
+          (type === 'video' ? '<button class="gco-btn gco-btn-sec" id="ghCamBtn" onclick="GhCalls.toggleCamera()"><i class="fas fa-video"></i></button>' : '') +
+          '<button class="gco-btn gco-btn-sec" id="ghMuteBtn" onclick="GhCalls.toggleMute()"><i class="fas fa-microphone"></i></button>' +
+          '<button class="gco-btn gco-btn-end" onclick="GhCalls.endCall()"><i class="fas fa-phone-slash"></i></button>' +
+        '</div></div>' +
       '</div>';
-    ov.style.display = 'flex';
+    ov.style.display = 'block';
     var lv = document.getElementById('ghLocalVideo');
     var rv = document.getElementById('ghRemoteVideo');
     if (lv && _localStream) lv.srcObject = _localStream;
