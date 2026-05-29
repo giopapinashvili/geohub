@@ -18,9 +18,9 @@
   var _localStream = null;
   var _remoteStream = null;
   var _callId = null;
-  var _myRole = null;       // 'caller' | 'callee'
-  var _callType = null;     // 'audio' | 'video'
-  var _callState = null;    // 'ringing' | 'active' | 'ended'
+  var _myRole = null;
+  var _callType = null;
+  var _callState = null;
   var _unsubCall = null;
   var _unsubCandidates = null;
   var _incomingUnsub = null;
@@ -28,11 +28,14 @@
   var _timerIv = null;
   var _timerSec = 0;
   var _audioCtx = null;
+  var _pendingCandidates = [];
 
   var ICE = { iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' }
+    { urls: 'turn:openrelay.metered.ca:80',    username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443',   username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
   ]};
 
   /* ── Helpers ─────────────────────────────────────────────────── */
@@ -116,7 +119,9 @@
         '<div class="gco-name">' + _esc(name) + '</div>' +
         '<div class="gco-status" id="ghCallStatus">' + _t('call_calling', 'Calling…') + '</div>' +
         '<div class="gco-timer" id="ghCallTimer" style="display:none">00:00</div>' +
-        (type === 'video' ? '<div class="gco-video-wrap"><video id="ghRemoteVideo" autoplay playsinline class="gco-remote-video"></video><video id="ghLocalVideo" autoplay muted playsinline class="gco-local-video"></video></div>' : '<div class="gco-audio-icon"><i class="fas fa-phone-volume"></i></div>') +
+        (type === 'video'
+          ? '<div class="gco-video-wrap"><video id="ghRemoteVideo" autoplay playsinline class="gco-remote-video"></video><video id="ghLocalVideo" autoplay muted playsinline class="gco-local-video"></video></div>'
+          : '<div class="gco-audio-icon"><i class="fas fa-phone-volume"></i></div><audio id="ghCallAudio" autoplay style="display:none"></audio>') +
         '<div class="gco-controls">' +
           (type === 'video' ? '<button class="gco-btn gco-btn-sec" id="ghCamBtn" onclick="GhCalls.toggleCamera()" title="' + _t('call_toggle_cam', 'Toggle camera') + '"><i class="fas fa-video"></i></button>' : '') +
           '<button class="gco-btn gco-btn-sec" id="ghMuteBtn" onclick="GhCalls.toggleMute()" title="' + _t('call_toggle_mute', 'Toggle mute') + '"><i class="fas fa-microphone"></i></button>' +
@@ -170,7 +175,9 @@
     ov.className = 'gco gco-active';
     ov.innerHTML =
       '<div class="gco-card">' +
-        (type === 'video' ? '<div class="gco-video-wrap"><video id="ghRemoteVideo" autoplay playsinline class="gco-remote-video"></video><video id="ghLocalVideo" autoplay muted playsinline class="gco-local-video"></video></div>' : '<div class="gco-audio-icon"><i class="fas fa-phone-volume"></i></div>') +
+        (type === 'video'
+          ? '<div class="gco-video-wrap"><video id="ghRemoteVideo" autoplay playsinline class="gco-remote-video"></video><video id="ghLocalVideo" autoplay muted playsinline class="gco-local-video"></video></div>'
+          : '<div class="gco-audio-icon"><i class="fas fa-phone-volume"></i></div><audio id="ghCallAudio" autoplay style="display:none"></audio>') +
         '<div class="gco-av-wrap"><div class="gco-av">' + _avatarHtml(avatar, name) + '</div></div>' +
         '<div class="gco-name">' + _esc(name) + '</div>' +
         '<div class="gco-status" id="ghCallStatus">' + _t('call_connected', 'Connected') + '</div>' +
@@ -207,8 +214,11 @@
 
     _pc.ontrack = function (e) {
       (e.streams[0] ? e.streams[0].getTracks() : [e.track]).forEach(function (t) { _remoteStream.addTrack(t); });
+      // Attach to video element (video calls) or audio element (audio calls)
       var rv = document.getElementById('ghRemoteVideo');
-      if (rv) rv.srcObject = _remoteStream;
+      if (rv) { rv.srcObject = _remoteStream; }
+      var au = document.getElementById('ghCallAudio');
+      if (au) { au.srcObject = _remoteStream; }
     };
 
     _pc.onconnectionstatechange = function () {
@@ -220,14 +230,25 @@
     return _pc;
   }
 
+  function _flushCandidates() {
+    if (!_pc || !_pc.remoteDescription) return;
+    var q = _pendingCandidates.splice(0);
+    q.forEach(function (c) { _pc.addIceCandidate(c).catch(function () {}); });
+  }
+
   function _listenCandidates(callId, col) {
     if (_unsubCandidates) { _unsubCandidates(); _unsubCandidates = null; }
+    _pendingCandidates = [];
     _unsubCandidates = _fs.onSnapshot(
       _fs.collection(_db, 'calls', callId, col),
       function (snap) {
         snap.docChanges().forEach(function (ch) {
-          if (ch.type === 'added' && _pc && _pc.remoteDescription) {
-            _pc.addIceCandidate(new RTCIceCandidate(ch.doc.data())).catch(function () {});
+          if (ch.type !== 'added') return;
+          var candidate = new RTCIceCandidate(ch.doc.data());
+          if (_pc && _pc.remoteDescription) {
+            _pc.addIceCandidate(candidate).catch(function () {});
+          } else {
+            _pendingCandidates.push(candidate);
           }
         });
       }
@@ -297,6 +318,7 @@
       if (!data) return;
       if (data.status === 'active' && data.answer && _pc && !_pc.currentRemoteDescription) {
         await _pc.setRemoteDescription(new RTCSessionDescription(data.answer)).catch(function () {});
+        _flushCandidates();
         _listenCandidates(_callId, 'calleeCandidates');
         _stopRing();
         _transitionToActive(targetName, targetAvatar, type);
@@ -350,6 +372,7 @@
     _localStream.getTracks().forEach(function (t) { _pc.addTrack(t, _localStream); });
 
     await _pc.setRemoteDescription(new RTCSessionDescription(data.offer)).catch(function () {});
+    _flushCandidates();
     var answer = await _pc.createAnswer();
     await _pc.setLocalDescription(answer);
     await _fs.updateDoc(ref, { answer: { type: answer.type, sdp: answer.sdp }, status: 'active' });
@@ -415,6 +438,7 @@
     if (_localStream) { _localStream.getTracks().forEach(function (t) { t.stop(); }); _localStream = null; }
     _remoteStream = null;
     _callId = null; _myRole = null; _callType = null; _callState = null;
+    _pendingCandidates = [];
     _stopTimer(); _stopRing(); _hideOverlay();
   }
 
