@@ -338,7 +338,7 @@
       var _savedPanelEl = document.getElementById('tab-saved');
       if (_savedPanelEl) _savedPanelEl.style.display = 'none';
     }
-    var _t = typeof GHt === 'function' ? GHt : function(k){ return k; };
+    var _t = function(k){ return typeof window.GHt === 'function' ? window.GHt(k) : k; };
     const coverActions = $('.cover-actions');
     if (coverActions) coverActions.innerHTML = own
       ? '<button class="cover-btn" data-edit-cover><i class="fas fa-camera"></i> Edit Cover</button><button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="cover-btn primary" data-edit-profile><i class="fas fa-pen"></i> '+_t('profile_edit')+'</button>'
@@ -2279,7 +2279,9 @@
         menu.innerHTML = '<button class="fd-item" data-message-user="' + esc(target) + '" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 16px;background:none;border:none;color:var(--gh-text,#f0f4ff);cursor:pointer;font-size:.87rem;text-align:left"><i class="fas fa-comment" style="width:14px"></i> Message</button>'
           + '<button class="fd-item" data-unfriend-user="' + esc(target) + '" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 16px;background:none;border:none;color:#f87171;cursor:pointer;font-size:.87rem;text-align:left"><i class="fas fa-user-minus" style="width:14px"></i> Unfriend</button>';
         friendBtn.style.position = 'relative';
-        friendBtn.parentElement.style.position = 'relative';
+        var _fbPar = friendBtn.parentElement;
+        var _fbParPos = window.getComputedStyle(_fbPar).position;
+        if (_fbParPos !== 'absolute' && _fbParPos !== 'fixed') _fbPar.style.position = 'relative';
         friendBtn.insertAdjacentElement('afterend', menu);
         setTimeout(function() {
           function closeMenu(ev) { if (!menu.contains(ev.target) && ev.target !== friendBtn) { menu.remove(); document.removeEventListener('click', closeMenu); document.removeEventListener('keydown', closeOnEsc); } }

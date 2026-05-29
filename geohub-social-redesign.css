@@ -2311,11 +2311,11 @@ html[data-gh-theme="dark"] body.gh-social-body {
   box-shadow: 0 0 10px rgba(59,130,246,.5) !important;
 }
 
-/* — Feed tabs — */
-.gh-feed-tab.active, [class*="tab"].active, button.active {
+/* — Feed tabs (only tab pills, NOT reaction/action buttons) — */
+.gh-feed-tab.active, .gh-pill.active, [class*="feed-tab"].active, .gh-tab.active {
   background: linear-gradient(135deg,#1D4ED8,#2563EB) !important;
   border-color: transparent !important;
-  box-shadow: 0 4px 16px rgba(29,78,216,.4) !important;
+  box-shadow: 0 2px 8px rgba(29,78,216,.25) !important;
   color: #fff !important;
 }
 
