@@ -1,4 +1,4 @@
-/* GeoHub — Firestore Social Layer  (window.GeoSocial)
+﻿/* GeoHub — Firestore Social Layer  (window.GeoSocial)
    All persistent social actions: posts, likes, comments, follows,
    saved posts, groups, events, friend requests, check-ins, stories.
 */
@@ -400,11 +400,11 @@
       return new Promise(function(resolve) {
         requireAuth(function(user) {
           if (!/^image\/(png|jpe?g|webp|gif)$/i.test(file.type || '')) {
-            toast('Use a PNG, JPG, WEBP or GIF image.', 'error');
+            toast(_gt('img_type_error')||'Use a PNG, JPG, WEBP or GIF image.', 'error');
             return resolve('');
           }
           if (file.size > 8 * 1024 * 1024) {
-            toast('Image is too large. Choose a file under 8 MB.', 'error');
+            toast(_gt('img_size_error')||'Image is too large. Choose a file under 8 MB.', 'error');
             return resolve('');
           }
           compressImageBlob(file).then(function(compressed) {
@@ -413,7 +413,7 @@
             resolve(url);
           }).catch(function(err) {
             console.error('[GeoSocial] uploadFile failed:', err && err.message ? err.message : err);
-            toast('Image upload failed. Check your connection and try again.', 'error');
+            toast(_gt('img_upload_failed')||'Image upload failed.', 'error');
             resolve('');
           });
         });
@@ -450,19 +450,19 @@
         requireAuth(function(user){
           var blob = dataUrlToBlob(dataUrl);
           if (!blob) {
-            toast('Invalid image data', 'error');
+            toast(_gt('img_invalid')||'Invalid image data', 'error');
             if (callback) callback('');
             resolve('');
             return;
           }
           if (!/^image\/(png|jpe?g|webp|gif)$/i.test(blob.type || '')) {
-            toast('Use a PNG, JPG, WEBP or GIF image.', 'error');
+            toast(_gt('img_type_error')||'Use a PNG, JPG, WEBP or GIF image.', 'error');
             if (callback) callback('');
             resolve('');
             return;
           }
           if (blob.size > 8 * 1024 * 1024) {
-            toast('Image is too large. Choose a file under 8 MB.', 'error');
+            toast(_gt('img_size_error')||'Image is too large. Choose a file under 8 MB.', 'error');
             if (callback) callback('');
             resolve('');
             return;
@@ -474,7 +474,7 @@
             resolve(url);
           }).catch(function(err){
             console.error('[GeoSocial] Cloudinary upload failed:', err && err.message ? err.message : err);
-            toast('Image upload failed. Check Cloudinary unsigned preset.', 'error');
+            toast(_gt('img_upload_failed')||'Image upload failed.', 'error');
             if (callback) callback('');
             resolve('');
           });
@@ -486,8 +486,8 @@
       requireAuth(function(user){
         setDoc(doc(db, 'hiddenPosts', user.uid + '_' + postId), {
           userId: user.uid, postId: postId, createdAt: serverTimestamp()
-        }).then(function(){ toast('Post hidden'); if(callback) callback(true); })
-          .catch(function(err){ console.error('[GeoSocial] hidePost', err); toast('Could not hide post.', 'error'); if(callback) callback(false, err); });
+        }).then(function(){ toast(_gt('post_hidden')||'Post hidden'); if(callback) callback(true); })
+          .catch(function(err){ console.error('[GeoSocial] hidePost', err); toast(_gt('post_hidden_fail')||'Could not hide post.', 'error'); if(callback) callback(false, err); });
       });
     }
 
@@ -496,16 +496,16 @@
         if (!targetUserId || targetUserId === user.uid) return;
         setDoc(doc(db, 'blockedUsers', user.uid + '_' + targetUserId), {
           blockerId: user.uid, blockedId: targetUserId, createdAt: serverTimestamp()
-        }).then(function(){ toast('User blocked'); if(callback) callback(true); })
-          .catch(function(err){ console.error('[GeoSocial] blockUser', err); toast('Could not block user.', 'error'); if(callback) callback(false, err); });
+        }).then(function(){ toast(_gt('user_blocked')||'User blocked'); if(callback) callback(true); })
+          .catch(function(err){ console.error('[GeoSocial] blockUser', err); toast(_gt('action_failed')||'Could not block user.', 'error'); if(callback) callback(false, err); });
       });
     }
 
     function unblockUser(targetUserId, callback) {
       requireAuth(function(user){
         deleteDoc(doc(db, 'blockedUsers', user.uid + '_' + targetUserId))
-          .then(function(){ toast('User unblocked'); if(callback) callback(false); })
-          .catch(function(err){ console.error('[GeoSocial] unblockUser', err); toast('Could not unblock user.', 'error'); });
+          .then(function(){ toast(_gt('user_unblocked')||'User unblocked'); if(callback) callback(false); })
+          .catch(function(err){ console.error('[GeoSocial] unblockUser', err); toast(_gt('action_failed')||'Action failed.', 'error'); });
       });
     }
 
@@ -514,16 +514,16 @@
         if (!targetUserId || targetUserId === user.uid) return;
         setDoc(doc(db, 'mutedUsers', user.uid + '_' + targetUserId), {
           muterId: user.uid, mutedId: targetUserId, createdAt: serverTimestamp()
-        }).then(function(){ toast('User muted'); if(callback) callback(true); })
-          .catch(function(err){ console.error('[GeoSocial] muteUser', err); toast('Could not mute user.', 'error'); if(callback) callback(false, err); });
+        }).then(function(){ toast(_gt('user_muted')||'User muted'); if(callback) callback(true); })
+          .catch(function(err){ console.error('[GeoSocial] muteUser', err); toast(_gt('action_failed')||'Action failed.', 'error'); if(callback) callback(false, err); });
       });
     }
 
     function unmuteUser(targetUserId, callback) {
       requireAuth(function(user){
         deleteDoc(doc(db, 'mutedUsers', user.uid + '_' + targetUserId))
-          .then(function(){ toast('User unmuted'); if(callback) callback(true); })
-          .catch(function(err){ console.error('[GeoSocial] unmuteUser', err); toast('Could not unmute user.', 'error'); });
+          .then(function(){ toast(_gt('user_unmuted')||'User unmuted'); if(callback) callback(true); })
+          .catch(function(err){ console.error('[GeoSocial] unmuteUser', err); toast(_gt('action_failed')||'Action failed.', 'error'); });
       });
     }
 
@@ -586,7 +586,7 @@
       requireAuth(function(user) {
         updateDoc(doc(db, 'users', user.uid), { privacy: settings })
           .then(function() { if (callback) callback(true); })
-          .catch(function(err) { console.error('[GeoSocial] updatePrivacySettings', err); toast('Could not save settings.', 'error'); if (callback) callback(false); });
+          .catch(function(err) { console.error('[GeoSocial] updatePrivacySettings', err); toast(_gt('settings_fail')||'Could not save settings.', 'error'); if (callback) callback(false); });
       });
     }
 
@@ -635,8 +635,8 @@
         addDoc(collection(db, 'reports'), {
           reporterId: user.uid, targetType: type, targetId: id,
           reason: reason || 'report', details: details || '', status: 'pending', createdAt: serverTimestamp()
-        }).then(function(){ toast('Report submitted'); if(callback) callback(true); })
-          .catch(function(err){ console.error('[GeoSocial] reportTarget', err); toast('Report failed.', 'error'); if(callback) callback(false, err); });
+        }).then(function(){ toast(_gt('report_sent')||'Report submitted'); if(callback) callback(true); })
+          .catch(function(err){ console.error('[GeoSocial] reportTarget', err); toast(_gt('report_fail')||'Report failed.', 'error'); if(callback) callback(false, err); });
       });
     }
 
@@ -692,7 +692,7 @@
     function createBusinessOffer(businessId, data, callback) {
       requireAuth(function(user){
         data = data || {};
-        if (!(data.title || '').trim()) return toast('Offer title is required', 'error');
+        if (!(data.title || '').trim()) return toast(_gt('offer_title_req')||'Offer title is required', 'error');
         addDoc(collection(db,'businessOffers'), {
           businessId: businessId,
           title: (data.title || '').trim(),
@@ -704,8 +704,8 @@
           status: 'active',
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
-        }).then(function(ref){ toast('Offer created'); if(callback) callback(ref.id); })
-          .catch(function(err){ console.error('[GeoSocial] createBusinessOffer', err); toast('Offer failed.', 'error'); if(callback) callback(null, err); });
+        }).then(function(ref){ toast(_gt('offer_created')||'Offer created'); if(callback) callback(ref.id); })
+          .catch(function(err){ console.error('[GeoSocial] createBusinessOffer', err); toast(_gt('offer_fail')||'Offer failed.', 'error'); if(callback) callback(null, err); });
       });
     }
 
@@ -839,7 +839,7 @@
 
     function sendPoints(recipientInput, amount, message, callback) {
       var n = normalAmount(amount);
-      if (!n) { toast('Enter a valid GeoPoints amount', 'error'); if(callback) callback(false); return; }
+      if (!n) { toast(_gt('points_invalid')||'Enter a valid GeoPoints amount', 'error'); if(callback) callback(false); return; }
       requireAuth(function(user){
         var me = meData() || {};
         var targetPromise = (typeof recipientInput === 'object' && recipientInput && (recipientInput.uid || recipientInput.id))
@@ -875,7 +875,7 @@
         }).then(function(targetId){
           updateDoc(doc(db, 'users', user.uid), { geoPointsSentTotal: increment(n), updatedAt: serverTimestamp() }).catch(function(){});
           createNotification(targetId, 'points_received', (me.name || 'GeoHub User') + ' ' + (_gt('notif_points_action') || 'sent you ' + n + ' GeoPoints'), message || _gt('notif_points_body') || 'Tap to claim your GeoPoints.', 'rewards.html?tab=wallet', { amount: n });
-          toast('GeoPoints sent — recipient must claim'); if(callback) callback(true);
+          toast(_gt('points_sent_ok')||'GeoPoints sent'); if(callback) callback(true);
         }).catch(function(err){
           var msg = err.message === 'recipient-not-found' ? 'Recipient not found' : err.message === 'self-transfer' ? 'You cannot send points to yourself' : err.message === 'insufficient-points' ? 'Not enough GeoPoints' : 'Could not send GeoPoints';
           toast(msg, 'error'); if(callback) callback(false, err);
@@ -885,7 +885,7 @@
 
     function spendPoints(amount, reason, targetType, targetId, callback) {
       var n = normalAmount(amount);
-      if (!n) { toast('Invalid GeoPoints amount', 'error'); if(callback) callback(false); return; }
+      if (!n) { toast(_gt('points_invalid')||'Invalid GeoPoints amount', 'error'); if(callback) callback(false); return; }
       requireAuth(function(user){
         runTransaction(db, function(tx){
           return tx.get(walletRef(user.uid)).then(function(walletSnap){
@@ -900,7 +900,7 @@
               updatedAt: serverTimestamp()
             }, { merge: true });
           });
-        }).then(function(){ updateDoc(doc(db, 'users', user.uid), { geoPointsSpentTotal: increment(n), updatedAt: serverTimestamp() }).catch(function(){}); toast('GeoPoints spent'); if(callback) callback(true); })
+        }).then(function(){ updateDoc(doc(db, 'users', user.uid), { geoPointsSpentTotal: increment(n), updatedAt: serverTimestamp() }).catch(function(){}); toast(_gt('points_spent')||'GeoPoints spent'); if(callback) callback(true); })
           .catch(function(err){ toast(err.message === 'insufficient-points' ? 'Not enough GeoPoints' : 'Could not spend GeoPoints', 'error'); if(callback) callback(false, err); });
       });
     }
@@ -910,8 +910,8 @@
         data = data || {};
         var title = String(data.title || '').trim();
         var price = normalAmount(data.pointPrice || data.price || data.points);
-        if (!title) { toast('Reward title is required', 'error'); if(callback) callback(null); return; }
-        if (!price) { toast('Point price is required', 'error'); if(callback) callback(null); return; }
+        if (!title) { toast(_gt('reward_title_req')||'Reward title is required', 'error'); if(callback) callback(null); return; }
+        if (!price) { toast(_gt('reward_price_req')||'Point price is required', 'error'); if(callback) callback(null); return; }
         addDoc(collection(db, 'rewards'), {
           title: title, name: title,
           description: String(data.description || '').trim(),
@@ -924,8 +924,8 @@
           imageUrl: data.imageUrl || '', status: data.status || 'active',
           createdBy: user.uid, ownerId: user.uid, userId: user.uid,
           createdAt: serverTimestamp(), updatedAt: serverTimestamp()
-        }).then(function(ref){ toast('Reward created'); if(callback) callback(ref.id); })
-          .catch(function(err){ console.error('[GeoSocial] createReward', err); toast('Reward create failed', 'error'); if(callback) callback(null, err); });
+        }).then(function(ref){ toast(_gt('reward_created')||'Reward created'); if(callback) callback(ref.id); })
+          .catch(function(err){ console.error('[GeoSocial] createReward', err); toast(_gt('reward_fail')||'Reward create failed', 'error'); if(callback) callback(null, err); });
       });
     }
 
@@ -999,7 +999,7 @@
               couponCode: code
             }).catch(function(){});
           }
-          toast('Coupon unlocked: ' + code);
+          toast((_gt('coupon_redeemed')||'Coupon unlocked')+': ' + code);
           if(callback) callback(true, { couponId: couponRef.id, code: code, reward: res.reward });
         }).catch(function(err){
           var msg = err.message === 'insufficient-points' ? 'Not enough GeoPoints' : err.message === 'sold-out' ? 'Reward sold out' : err.message === 'reward-not-found' ? 'Reward not found' : err.message === 'not-active' ? 'This reward is no longer available' : err.message === 'expired' ? 'This reward has expired' : 'Could not redeem reward';
@@ -1021,7 +1021,7 @@
 
     function redeemCoupon(code, businessId, callback) {
       code = String(code || '').trim().toUpperCase();
-      if (!code) { toast('Enter coupon code', 'error'); if(callback) callback(false); return; }
+      if (!code) { toast(_gt('coupon_enter')||'Enter coupon code', 'error'); if(callback) callback(false); return; }
       requireAuth(function(user){
         getDocs(query(collection(db, 'rewardCoupons'), where('code', '==', code), limit(1))).then(function(snap){
           if (snap.empty) throw new Error('not-found');
@@ -1029,7 +1029,7 @@
           if (c.status !== 'active') throw new Error('not-active');
           if (businessId && c.businessId && c.businessId !== businessId) throw new Error('wrong-business');
           return updateDoc(doc(db, 'rewardCoupons', d.id), { status:'used', usedAt: serverTimestamp(), usedBy: user.uid, updatedAt: serverTimestamp() });
-        }).then(function(){ toast('Coupon redeemed'); if(callback) callback(true); })
+        }).then(function(){ toast(_gt('coupon_redeemed')||'Coupon redeemed'); if(callback) callback(true); })
           .catch(function(err){ var msg = err.message === 'not-found' ? 'Coupon not found' : err.message === 'not-active' ? 'Coupon already used/expired' : err.message === 'wrong-business' ? 'This coupon belongs to another business' : 'Could not redeem coupon'; toast(msg, 'error'); if(callback) callback(false, err); });
       });
     }
@@ -1098,7 +1098,7 @@
     function createPost(text, mediaUrl, callback, extra) {
       text = (text || '').trim();
       var hasVoice = !!(extra && extra.voiceUrl);
-      if (!text && !mediaUrl && !hasVoice) return toast('Write something or choose a photo first!', 'error');
+      if (!text && !mediaUrl && !hasVoice) return toast(_gt('post_write_first')||'Write something or choose a photo first!', 'error');
       requireAuth(function (user) {
         var me = meData() || {};
         var vis = (extra && extra.visibility) || 'public';
@@ -1148,7 +1148,7 @@
         var doCreate = function(data) {
           return addDoc(collection(db, 'posts'), data).then(function (ref) {
             if(data.status === 'scheduled') toast('📅 Post scheduled!');
-            else toast('Post published!');
+            else toast(_gt('post_published')||'Post published!');
             awardPoints(20, 'Create post', 'post', ref.id);
             /* Phase 45: notify co-authors */
             if(data.coAuthors && data.coAuthors.length){
@@ -1176,7 +1176,7 @@
             if (callback) callback(ref.id);
           }).catch(function (err) {
             console.error('[GeoSocial] createPost', err);
-            toast('Failed to post. Try again.', 'error');
+            toast(_gt('post_failed')||'Failed to post. Try again.', 'error');
           });
         };
         if (vis === 'close_friends') {
@@ -1341,7 +1341,7 @@
           if (callback) callback(nextLiked);
         }).catch(function (err) {
           console.error('[GeoSocial] toggleLike', err);
-          toast('Like failed. Try again.', 'error');
+          toast(_gt('action_failed')||'Like failed.', 'error');
         });
       });
     }
@@ -1387,7 +1387,7 @@
           })
           .then(function(blockSnap) {
             if (blockSnap && blockSnap.exists && blockSnap.exists()) {
-              toast('You cannot comment on this post.', 'error');
+              toast(_gt('comment_no_perm')||'You cannot comment on this post.', 'error');
               if (callback) callback(new Error('blocked'));
               return null;
             }
@@ -1413,7 +1413,7 @@
             if (!ref) return;
 
             // UI success immediately after the comment document exists.
-            toast('Comment posted');
+            toast(_gt('comment_posted')||'Comment posted');
             if (callback) callback(null, ref.id);
 
             // Non-critical side effects: never roll back the visible comment.
@@ -1433,7 +1433,7 @@
           })
           .catch(function (err) {
             console.error('[GeoSocial] addComment', err);
-            toast('Failed to comment.', 'error');
+            toast(_gt('comment_failed')||'Failed to comment.', 'error');
             if (callback) callback(err);
           });
       });
@@ -1487,12 +1487,12 @@
             return createNotification(ownerId, 'reply', rAuthorName + ' ' + (_gt('notif_reply_action') || 'replied to your comment'), replyText, 'feed.html?post=' + postId + '&comment=' + commentId, { postId: postId, commentId: commentId });
           });
         }).then(function () {
-          toast('Reply posted');
+          toast(_gt('reply_posted')||'Reply posted');
           awardPoints(3, 'Reply to comment', 'post', postId);
           if (callback) callback();
         }).catch(function (err) {
           console.error('[GeoSocial] addCommentReply', err);
-          toast('Failed to reply.', 'error');
+          toast(_gt('reply_failed')||'Failed to reply.', 'error');
           if (callback) callback(null, err);
         });
       });
@@ -1522,14 +1522,14 @@
               return updateDoc(doc(db, 'users', targetUserId), { followers: increment(-1) }).catch(function(){})
                 .then(function(){ return updateDoc(doc(db, 'users', uid), { following: increment(-1) }).catch(function(){}); });
             }).then(function () {
-              toast('Unfollowed');
+              toast(_gt('unfollowed')||'Unfollowed');
               if (callback) callback(false);
             });
           } else {
           return getDoc(doc(db, 'users', targetUserId)).then(function(tSnap) {
             var tData = (tSnap.exists() ? tSnap.data() : {}) || {};
             var pref = (tData.privacy || {}).followPref || 'everyone';
-            if (pref === 'nobody') { toast('This user does not accept followers.', 'error'); if (callback) callback(false); return Promise.resolve(null); }
+            if (pref === 'nobody') { toast(_gt('follow_private')||'This user does not accept followers.', 'error'); if (callback) callback(false); return Promise.resolve(null); }
             return setDoc(ref, { followerId: uid, followingId: targetUserId, createdAt: serverTimestamp() })
               .then(function () {
                 return updateDoc(doc(db, 'users', targetUserId), { followers: increment(1) }).catch(function(){})
@@ -1537,14 +1537,14 @@
                   .then(function(){ return createNotification(targetUserId, 'follow', (meData() || {}).name + ' ' + (_gt('notif_follow_action') || 'followed you'), _gt('notif_follow_body') || 'You have a new follower.', 'profile.html?id=' + uid, { followerId: uid }, 'follow_' + uid + '_' + targetUserId); });
               })
               .then(function () {
-                toast('Following');
+                toast(_gt('following_ok')||'Following');
                 if (callback) callback(true);
               });
           });
           }
         }).catch(function (err) {
           console.error('[GeoSocial] toggleFollow', err);
-          toast('Action failed.', 'error');
+          toast(_gt('action_failed')||'Action failed.', 'error');
         });
       });
     }
@@ -1582,7 +1582,7 @@
           }
         }).catch(function (err) {
           console.error('[GeoSocial] toggleSavePost', err);
-          toast('Action failed.', 'error');
+          toast(_gt('action_failed')||'Action failed.', 'error');
         });
       });
     }
@@ -1598,7 +1598,7 @@
             return deleteDoc(ref).then(function () {
               return updateDoc(groupRef, { memberCount: increment(-1) }).catch(function(){});
             }).then(function () {
-              toast('Left group');
+              toast(_gt('group_left')||'Left group');
               if (callback) callback(false);
             });
           } else {
@@ -1606,13 +1606,13 @@
               .then(function () {
                 return updateDoc(groupRef, { memberCount: increment(1) }).catch(function(){});
               }).then(function () {
-                toast('Joined ' + (groupName || 'group') + '!');
+                toast(_gt('group_joined')||'Joined ' + (groupName || 'group') + '!');
                 if (callback) callback(true);
               });
           }
         }).catch(function (err) {
           console.error('[GeoSocial] toggleGroupMember', err);
-          toast('Action failed.', 'error');
+          toast(_gt('action_failed')||'Action failed.', 'error');
         });
       });
     }
@@ -1621,7 +1621,7 @@
       requireAuth(function (user) {
         var me = meData() || {};
         var name = (data.name || '').trim();
-        if (!name) return toast('Group name is required', 'error');
+        if (!name) return toast(_gt('group_name_req')||'Group name is required', 'error');
         addDoc(collection(db, 'groups'), {
           name: name,
           description: (data.description || '').trim(),
@@ -1647,10 +1647,10 @@
           return setDoc(doc(db, 'groupMembers', ref.id + '_' + user.uid), {
             groupId: ref.id, groupName: name, uid: user.uid, userId: user.uid,
             role: 'admin', status: 'joined', joinedAt: serverTimestamp(), createdAt: serverTimestamp()
-          }).then(function () { toast('Group created!'); if (callback) callback(ref.id); });
+          }).then(function () { toast(_gt('group_created')||'Group created!'); if (callback) callback(ref.id); });
         }).catch(function (err) {
           console.error('[GeoSocial] createGroup', err);
-          toast('Failed to create group: ' + (err.code || err.message), 'error');
+          toast((_gt('group_create_fail')||'Failed to create group')+': '+(err.code||err.message), 'error');
           if (callback) callback(null);
         });
       });
@@ -1726,8 +1726,8 @@
           });
         }).then(function () {
           return updateDoc(doc(db, 'groups', groupId), { postCount: increment(1) }).catch(function(){});
-        }).then(function () { toast('Posted!'); if (callback) callback(); })
-          .catch(function (err) { console.error('[GeoSocial] createGroupPost', err); toast('Failed to post.', 'error'); });
+        }).then(function () { toast(_gt('post_posted')||'Posted!'); if (callback) callback(); })
+          .catch(function (err) { console.error('[GeoSocial] createGroupPost', err); toast(_gt('group_post_fail')||'Failed to post.', 'error'); });
       });
     }
 
@@ -1755,7 +1755,7 @@
         getDoc(ref).then(function (d) {
           if (d.exists()) {
             return deleteDoc(ref).then(function () {
-              toast('Removed from event');
+              toast(_gt('rsvp_removed')||'Removed from event');
               if (callback) callback(false);
             });
           } else {
@@ -1767,7 +1767,7 @@
           }
         }).catch(function (err) {
           console.error('[GeoSocial] toggleEventParticipant', err);
-          toast('Action failed.', 'error');
+          toast(_gt('action_failed')||'Action failed.', 'error');
         });
       });
     }
@@ -1780,7 +1780,7 @@
     function sendFriendRequest(toUserId, callback) {
       requireAuth(function (user) {
         var uid = user.uid;
-        if (!toUserId || uid === toUserId) { toast('You cannot send a friend request to yourself.', 'error'); if(callback) callback('self'); return; }
+        if (!toUserId || uid === toUserId) { toast(_gt('fr_self')||'You cannot send a friend request to yourself.', 'error'); if(callback) callback('self'); return; }
         var fid = friendshipId(uid, toUserId);
         var friendRef = doc(db, 'friends', fid);
         var reqRef = doc(db, 'friendRequests', uid + '_' + toUserId);
@@ -1796,7 +1796,7 @@
           var tData = (results[0] && results[0].exists() ? results[0].data() : {}) || {};
           var myData = (results[4] && results[4].exists() ? results[4].data() : {}) || {};
           var pref = (tData.privacy || {}).friendRequestPref || 'everyone';
-          if (pref === 'nobody') { toast('This user is not accepting friend requests.', 'error'); if (callback) callback('denied'); return Promise.reject('denied'); }
+          if (pref === 'nobody') { toast(_gt('fr_private')||'This user is not accepting friend requests.', 'error'); if (callback) callback('denied'); return Promise.reject('denied'); }
           if (results[1] && results[1].exists()) throw new Error('already-friends');
           // Only block if there is an active pending request; allow re-send over old accepted/rejected docs
           if (results[2] && results[2].exists() && (results[2].data()||{}).status === 'pending') throw new Error('already-requested');
@@ -1825,16 +1825,16 @@
           return createNotification(toUserId, 'friend_request', senderName + ' ' + (_gt('notif_fr_action') || 'sent you a friend request'), _gt('notif_fr_body') || 'Open their profile to accept or decline.', 'profile.html?id=' + uid, { fromUserId: uid, fromUid: uid }, 'friend_req_' + uid + '_' + toUserId);
         }).then(function () {
           console.log('[friends] request sent OK', { fromUid: uid, toUid: toUserId });
-          toast('Friend request sent');
+          toast(_gt('fr_sent')||'Friend request sent');
           if (callback) callback('pending');
         }).catch(function (err) {
           if (err === 'denied') return;
           var msg = err && err.message;
-          if (msg === 'already-friends') { toast('Already friends'); if(callback) callback('friends'); return; }
-          if (msg === 'already-requested') { toast('Request already sent'); if(callback) callback('pending'); return; }
-          if (msg === 'incoming-request-exists') { toast('This user already sent you a request — check your requests tab'); if(callback) callback('incoming'); return; }
+          if (msg === 'already-friends') { toast(_gt('fr_already')||'Already friends'); if(callback) callback('friends'); return; }
+          if (msg === 'already-requested') { toast(_gt('fr_already_sent')||'Request already sent'); if(callback) callback('pending'); return; }
+          if (msg === 'incoming-request-exists') { toast(_gt('fr_incoming')||'This user already sent you a request'); if(callback) callback('incoming'); return; }
           console.warn('[friends] send failed', { code: err && err.code, message: err && err.message, fromUid: uid, toUid: toUserId });
-          toast('Failed to send request.', 'error');
+          toast(_gt('fr_send_fail')||'Failed to send request.', 'error');
           if (callback) callback('error', err);
         });
       });
@@ -1929,7 +1929,7 @@
           if(callback) callback(res);
         }).catch(function(err){
           console.error('[GeoSocial] respondFriendRequest', err);
-          toast('Could not update request.', 'error');
+          toast(_gt('action_failed')||'Could not update request.', 'error');
           if(callback) callback(null, err);
         });
       });
@@ -2016,9 +2016,9 @@
         ]).then(function(){
           updateDoc(doc(db, 'users', targetUserId), { friendsCount: increment(-1) }).catch(function(){});
           updateDoc(doc(db, 'users', user.uid), { friendsCount: increment(-1) }).catch(function(){});
-          toast('Friend removed');
+          toast(_gt('fr_removed')||'Friend removed');
           if(callback) callback(false);
-        }).catch(function(err){ console.error('[GeoSocial] removeFriend', err); toast('Could not remove friend.', 'error'); });
+        }).catch(function(err){ console.error('[GeoSocial] removeFriend', err); toast(_gt('fr_remove_fail')||'Could not remove friend.', 'error'); });
       });
     }
 
@@ -2026,12 +2026,12 @@
       requireAuth(function(user){
         var reqRef = doc(db, 'friendRequests', user.uid + '_' + toUserId);
         deleteDoc(reqRef).then(function(){
-          toast('Friend request cancelled');
+          toast(_gt('fr_cancelled')||'Friend request cancelled');
           if(callback) callback();
         }).catch(function(err){
           if(err && err.code === 'not-found'){ if(callback) callback(); return; }
           console.error('[GeoSocial] cancelFriendRequest', err);
-          toast('Could not cancel request.', 'error');
+          toast(_gt('fr_cancel_fail')||'Could not cancel request.', 'error');
           if(callback) callback(err);
         });
       });
@@ -2089,7 +2089,7 @@
           }, { merge: true }).then(function(){
             createSystemNotification(user.uid, 'badge', 'Badge Earned: First Check-in!', 'You earned the First Check-in badge.', 'profile.html', { badgeId: 'first_checkin' }).catch(function(){});
           }).catch(function(){});
-          toast('Checked in at ' + (placeName || 'place') + '! +' + (xpAwarded || 50) + ' XP');
+          toast((_gt('checkin_ok')||'Checked in: ')+(placeName||'place')+'! +'+( xpAwarded||50)+' XP');
           awardPoints(Number(xpAwarded || 50), 'Check-in', 'checkin', placeId || '').catch(function(){});
           if (window.GeoChallenges && window.GeoChallenges.evaluateCheckin) {
             window.GeoChallenges.evaluateCheckin({
@@ -2105,7 +2105,7 @@
           if (callback) callback();
         }).catch(function (err) {
           console.error('[GeoSocial] createCheckin', err);
-          toast('Check-in failed.', 'error');
+          toast(_gt('checkin_fail')||'Check-in failed.', 'error');
         });
       });
     }
@@ -2205,7 +2205,7 @@
           if (callback) callback({ success: true, xpAwarded: xp, checkinId: docRef.id });
         }).catch(function (err) {
           console.error('[GeoSocial] createCheckinFull', err);
-          toast('Check-in failed. Please try again.', 'error');
+          toast(_gt('checkin_fail')||'Check-in failed. Please try again.', 'error');
           if (callback) callback({ success: false, error: err.message });
         });
       });
@@ -2229,11 +2229,11 @@
         if (extra && extra.poll) storyData.poll = extra.poll;
         if (extra && extra.link) storyData.link = extra.link;
         addDoc(collection(db, 'stories'), storyData).then(function () {
-          toast('Story posted!');
+          toast(_gt('story_posted')||'Story posted!');
           if (callback) callback();
         }).catch(function (err) {
           console.error('[GeoSocial] createStory', err);
-          toast('Failed to post story.', 'error');
+          toast(_gt('story_fail')||'Failed to post story.', 'error');
           if (callback) callback(null, err);
         });
       });
@@ -2433,7 +2433,7 @@
             ).catch(function(){});
           }
           if(callback) callback();
-        }).catch(function(err){ console.warn('[GeoSocial] addStoryReply', err.message); toast('Could not send reply.', 'error'); if(callback) callback(null, err); });
+        }).catch(function(err){ console.warn('[GeoSocial] addStoryReply', err.message); toast(_gt('action_failed')||'Could not send reply.', 'error'); if(callback) callback(null, err); });
       });
     }
 
@@ -2478,7 +2478,7 @@
         getDoc(docRef).then(function (snap) {
           if (snap.exists()) {
             return deleteDoc(docRef).then(function () {
-              toast('RSVP removed');
+              toast(_gt('rsvp_removed')||'RSVP removed');
               if (callback) callback('removed');
             });
           }
@@ -2490,12 +2490,12 @@
             photoURL: user.photoURL || '',
             createdAt: serverTimestamp()
           }).then(function () {
-            toast('RSVP saved!');
+            toast(_gt('rsvp_saved')||'RSVP saved!');
             if (callback) callback(true);
           });
         }).catch(function (err) {
           console.error('[GeoSocial] rsvpEvent', err);
-          toast('RSVP failed', 'error');
+          toast(_gt('rsvp_fail')||'RSVP failed', 'error');
           if (callback) callback(false);
         });
       });
@@ -2517,14 +2517,14 @@
           getDoc(doc(db, 'blockedUsers', targetUserId + '_' + user.uid)),
           getDoc(doc(db, 'users', targetUserId))
         ]).then(function(snaps) {
-          if (snaps[0].exists()) { toast('Unblock this user to send messages.', 'error'); return; }
-          if (snaps[1].exists()) { toast('You cannot message this user.', 'error'); return; }
+          if (snaps[0].exists()) { toast(_gt('msg_unblock')||'Unblock this user to send messages.', 'error'); return; }
+          if (snaps[1].exists()) { toast(_gt('action_failed')||'You cannot message this user.', 'error'); return; }
           var tData = (snaps[2].exists() ? snaps[2].data() : {}) || {};
           var msgPref = (tData.privacy || {}).messagingPref || 'everyone';
-          if (msgPref === 'nobody') { toast('This user is not accepting messages.', 'error'); return; }
+          if (msgPref === 'nobody') { toast(_gt('action_failed')||'This user is not accepting messages.', 'error'); return; }
           if (msgPref === 'friends') {
             return getDoc(doc(db, 'friends', friendshipId(user.uid, targetUserId))).then(function(fSnap) {
-              if (!fSnap.exists()) { toast('This user only accepts messages from friends.', 'error'); return; }
+              if (!fSnap.exists()) { toast(_gt('action_failed')||'This user only accepts messages from friends.', 'error'); return; }
               var cid = conversationIdFor(user.uid, targetUserId);
               return setDoc(doc(db, 'conversations', cid), {
                 participants: [user.uid, targetUserId],
@@ -2557,7 +2557,7 @@
           });
         }).catch(function (err) {
           console.error('[GeoSocial] startConversation', err);
-          toast('Could not open messages.', 'error');
+          toast(_gt('action_failed')||'Could not open messages.', 'error');
         });
       });
     }
@@ -2565,7 +2565,7 @@
     function startBusinessConversation(businessId, ownerUid, callback) {
       requireAuth(function (user) {
         if (!businessId || !ownerUid) return;
-        if (ownerUid === user.uid) { toast('You own this business.', 'error'); return; }
+        if (ownerUid === user.uid) { toast(_gt('action_failed')||'You own this business.', 'error'); return; }
         var cid = 'biz_' + businessId + '_' + user.uid;
         setDoc(doc(db, 'conversations', cid), {
           participants: [user.uid, ownerUid],
@@ -2587,7 +2587,7 @@
           if (callback) callback(cid);
         }).catch(function (err) {
           console.error('[GeoSocial] startBusinessConversation', err);
-          toast('Could not open business messages.', 'error');
+          toast(_gt('action_failed')||'Could not open business messages.', 'error');
         });
       });
     }
@@ -2743,7 +2743,7 @@
           if (callback) callback(true);
         }).catch(function (err) {
           console.error('[GeoSocial] sendMessage', err);
-          toast('Message failed.', 'error');
+          toast(_gt('action_failed')||'Message failed.', 'error');
           if (callback) callback(false, err);
         });
       });
@@ -2964,7 +2964,7 @@
         });
       }).catch(function(err){
         console.warn('[GeoSocial] toggleMessageReaction', err.message);
-        toast('Reaction failed: ' + (err.code || err.message || 'permission'), 'error');
+        toast((_gt('action_failed')||'Reaction failed')+': '+(err.code||err.message||'permission'), 'error');
         if(callback) callback(false, err);
         return false;
       });
@@ -3048,7 +3048,7 @@
         };
       }
       updateDoc(ref, patch).then(function(){ if(callback) callback(true); })
-        .catch(function(err){ console.warn('[GeoSocial] deleteMessage', err.message); toast('Delete failed.', 'error'); if(callback) callback(false, err); });
+        .catch(function(err){ console.warn('[GeoSocial] deleteMessage', err.message); toast(_gt('action_failed')||'Delete failed.', 'error'); if(callback) callback(false, err); });
     }
 
     function editMessage(conversationId, messageId, newText, callback) {
@@ -3057,7 +3057,7 @@
       var ref = doc(db, 'conversations', conversationId, 'messages', messageId);
       updateDoc(ref, { text: String(newText || '').trim(), edited: true, updatedAt: serverTimestamp() })
         .then(function(){ if(callback) callback(true); })
-        .catch(function(err){ console.warn('[GeoSocial] editMessage', err.message); toast('Edit failed.', 'error'); if(callback) callback(false, err); });
+        .catch(function(err){ console.warn('[GeoSocial] editMessage', err.message); toast(_gt('action_failed')||'Edit failed.', 'error'); if(callback) callback(false, err); });
     }
 
     function setTyping(conversationId, isTyping, options) {
@@ -3197,7 +3197,7 @@
       requireAuth(function (user) {
         var me = meData() || {};
         var name = (data.name || '').trim();
-        if (!name) return toast('Place name is required', 'error');
+        if (!name) return toast(_gt('group_name_req')||'Place name is required', 'error');
         addDoc(collection(db, 'places'), {
           name: name,
           description: (data.description || '').trim(),
@@ -3213,11 +3213,11 @@
           rating: 0, reviewCount: 0, saveCount: 0,
           createdAt: serverTimestamp()
         }).then(function (ref) {
-          toast('Place added!');
+          toast(_gt('checkin_ok')+' Place'||'Place added!');
           if (callback) callback(ref.id);
         }).catch(function (err) {
           console.error('[GeoSocial] createPlace', err);
-          toast('Failed to add place: ' + (err.code || err.message), 'error');
+          toast((_gt('action_failed')||'Failed to add place')+': '+(err.code||err.message), 'error');
           if (callback) callback(null);
         });
       });
@@ -3250,14 +3250,14 @@
         var ref = doc(db, 'savedItems', uid + '_' + type + '_' + itemId);
         getDoc(ref).then(function (d) {
           if (d.exists()) {
-            return deleteDoc(ref).then(function () { toast('Removed from saved'); if (callback) callback(false); });
+            return deleteDoc(ref).then(function () { toast(_gt('action_failed')||'Removed from saved'); if (callback) callback(false); });
           } else {
             return setDoc(ref, { userId: uid, uid: uid, type: type, itemId: itemId, createdAt: serverTimestamp() })
-              .then(function () { toast('Saved!'); if (callback) callback(true); });
+              .then(function () { toast(_gt('rsvp_saved')||'Saved!'); if (callback) callback(true); });
           }
         }).catch(function (err) {
           console.error('[GeoSocial] toggleSaveItem', err);
-          toast('Action failed.', 'error');
+          toast(_gt('action_failed')||'Action failed.', 'error');
         });
       });
     }
@@ -3333,7 +3333,7 @@
       requireAuth(function (user) {
         var cfg = window.GEOHUB_CLOUDINARY;
         if (!cfg || !cfg.cloudName || !cfg.uploadPreset) {
-          toast('Cloudinary not configured', 'error');
+          toast(_gt('cloudinary_na')||'Cloudinary not configured', 'error');
           if (callback) callback(null);
           return;
         }
@@ -3346,8 +3346,8 @@
           .then(function (data) {
             if (!data.secure_url) throw new Error('No URL from Cloudinary');
             return updateDoc(doc(db, 'groups', groupId), { coverUrl: data.secure_url, updatedAt: serverTimestamp() })
-              .then(function () { toast('Cover photo updated!'); if (callback) callback(data.secure_url); });
-          }).catch(function (err) { console.error('[GeoSocial] uploadGroupCover', err); toast('Cover upload failed', 'error'); if (callback) callback(null); });
+              .then(function () { toast(_gt('settings_saved')||'Cover photo updated!'); if (callback) callback(data.secure_url); });
+          }).catch(function (err) { console.error('[GeoSocial] uploadGroupCover', err); toast(_gt('action_failed')||'Cover upload failed', 'error'); if (callback) callback(null); });
       });
     }
 
@@ -3355,8 +3355,8 @@
     function updateGroupRules(groupId, rules, callback) {
       requireAuth(function () {
         updateDoc(doc(db, 'groups', groupId), { rules: rules, updatedAt: serverTimestamp() })
-          .then(function () { toast('Rules updated!'); if (callback) callback(true); })
-          .catch(function (err) { toast('Failed to update rules', 'error'); if (callback) callback(false); });
+          .then(function () { toast(_gt('settings_saved')||'Rules updated!'); if (callback) callback(true); })
+          .catch(function (err) { toast(_gt('action_failed')||'Failed to update rules', 'error'); if (callback) callback(false); });
       });
     }
 
@@ -3365,15 +3365,15 @@
       requireAuth(function () {
         var token = Math.random().toString(36).substr(2, 8);
         updateDoc(doc(db, 'groups', groupId), { inviteToken: token, inviteEnabled: true, updatedAt: serverTimestamp() })
-          .then(function () { toast('Invite link generated!'); if (callback) callback(token); })
-          .catch(function (err) { toast('Failed', 'error'); if (callback) callback(null); });
+          .then(function () { toast(_gt('group_created')||'Invite link generated!'); if (callback) callback(token); })
+          .catch(function (err) { toast(_gt('action_failed')||'Failed', 'error'); if (callback) callback(null); });
       });
     }
 
     function disableGroupInviteToken(groupId, callback) {
       requireAuth(function () {
         updateDoc(doc(db, 'groups', groupId), { inviteEnabled: false, updatedAt: serverTimestamp() })
-          .then(function () { toast('Invite link disabled'); if (callback) callback(true); })
+          .then(function () { toast(_gt('action_failed')||'Invite link disabled'); if (callback) callback(true); })
           .catch(function () { if (callback) callback(false); });
       });
     }
@@ -3399,9 +3399,9 @@
         }).then(function () {
           return updateDoc(doc(db, 'groups', groupId), { memberCount: increment(1) }).catch(function(){});
         }).then(function () {
-          toast('Joined ' + (groupName || 'group') + '!');
+          toast(_gt('group_joined')||'Joined '+(groupName||'group')+'!');
           if (callback) callback(true);
-        }).catch(function (err) { toast('Failed to join', 'error'); if (callback) callback(false); });
+        }).catch(function (err) { toast(_gt('action_failed')||'Failed to join', 'error'); if (callback) callback(false); });
       });
     }
 
@@ -3409,8 +3409,8 @@
     function updateGroupJoinQuestions(groupId, questions, callback) {
       requireAuth(function () {
         updateDoc(doc(db, 'groups', groupId), { joinQuestions: questions, updatedAt: serverTimestamp() })
-          .then(function () { toast('Questions saved!'); if (callback) callback(true); })
-          .catch(function () { toast('Failed', 'error'); if (callback) callback(false); });
+          .then(function () { toast(_gt('settings_saved')||'Questions saved!'); if (callback) callback(true); })
+          .catch(function () { toast(_gt('action_failed')||'Failed', 'error'); if (callback) callback(false); });
       });
     }
 
@@ -3427,7 +3427,7 @@
           status: 'pending',
           createdAt: serverTimestamp()
         }).then(function () {
-          toast('Join request sent!');
+          toast(_gt('group_req_sent')||'Join request sent!');
           if (callback) callback('pending');
           getDoc(doc(db, 'groups', groupId)).then(function (gSnap) {
             if (!gSnap.exists()) return;
@@ -3439,7 +3439,7 @@
                 'groups.html?id=' + groupId).catch(function () {});
             }
           }).catch(function () {});
-        }).catch(function () { toast('Failed to send request', 'error'); if (callback) callback('error'); });
+        }).catch(function () { toast(_gt('action_failed')||'Failed to send request', 'error'); if (callback) callback('error'); });
       });
     }
 
@@ -3469,7 +3469,7 @@
           }).then(function () {
             return updateDoc(doc(db, 'groups', groupId), { memberCount: increment(1) }).catch(function(){});
           }).then(function () {
-            toast('Member approved!');
+            toast(_gt('group_approved')||'Member approved!');
             if (callback) callback(true);
             getDoc(doc(db, 'groups', groupId)).then(function (gSnap) {
               var gName = gSnap.exists() ? (gSnap.data().name || 'the group') : 'the group';
@@ -3478,7 +3478,7 @@
                 'groups.html?id=' + groupId).catch(function () {});
             }).catch(function () {});
           })
-          .catch(function () { toast('Failed', 'error'); if (callback) callback(false); });
+          .catch(function () { toast(_gt('action_failed')||'Failed', 'error'); if (callback) callback(false); });
       });
     }
 
@@ -3490,7 +3490,7 @@
           if (reqSnap.exists()) { _tuid = reqSnap.data().userId || ''; _gid = reqSnap.data().groupId || ''; }
           return deleteDoc(reqRef);
         }).then(function () {
-          toast('Request declined');
+          toast(_gt('group_post_dec')||'Request declined');
           if (callback) callback(true);
           if (_tuid && _gid) {
             getDoc(doc(db, 'groups', _gid)).then(function (gSnap) {
@@ -3500,7 +3500,7 @@
                 'groups.html').catch(function () {});
             }).catch(function () {});
           }
-        }).catch(function () { toast('Failed', 'error'); if (callback) callback(false); });
+        }).catch(function () { toast(_gt('action_failed')||'Failed', 'error'); if (callback) callback(false); });
       });
     }
 
@@ -3508,10 +3508,10 @@
     function setGroupMemberRole(groupId, targetUserId, role, callback) {
       requireAuth(function () {
         var validRoles = ['owner', 'admin', 'moderator', 'member'];
-        if (validRoles.indexOf(role) === -1) { toast('Invalid role', 'error'); return; }
+        if (validRoles.indexOf(role) === -1) { toast(_gt('action_failed')||'Invalid role', 'error'); return; }
         updateDoc(doc(db, 'groupMembers', groupId + '_' + targetUserId), { role: role, updatedAt: serverTimestamp() })
-          .then(function () { toast('Role updated to ' + role); if (callback) callback(true); })
-          .catch(function () { toast('Failed to update role', 'error'); if (callback) callback(false); });
+          .then(function () { toast((_gt('settings_saved')||'Role updated')+': '+role); if (callback) callback(true); })
+          .catch(function () { toast(_gt('action_failed')||'Failed to update role', 'error'); if (callback) callback(false); });
       });
     }
 
@@ -3537,8 +3537,8 @@
           return deleteDoc(doc(db, 'groupMembers', groupId + '_' + targetUserId)).catch(function(){});
         }).then(function () {
           return updateDoc(doc(db, 'groups', groupId), { memberCount: increment(-1) }).catch(function(){});
-        }).then(function () { toast('Member banned'); if (callback) callback(true); })
-          .catch(function () { toast('Failed to ban', 'error'); if (callback) callback(false); });
+        }).then(function () { toast(_gt('group_banned')||'Member banned'); if (callback) callback(true); })
+          .catch(function () { toast(_gt('action_failed')||'Failed to ban', 'error'); if (callback) callback(false); });
       });
     }
 
@@ -3548,8 +3548,8 @@
         deleteDoc(doc(db, 'groupMembers', groupId + '_' + targetUserId))
           .then(function () {
             return updateDoc(doc(db, 'groups', groupId), { memberCount: increment(-1) }).catch(function(){});
-          }).then(function () { toast('Member removed'); if (callback) callback(true); })
-          .catch(function () { toast('Failed to remove', 'error'); if (callback) callback(false); });
+          }).then(function () { toast(_gt('group_removed_m')||'Member removed'); if (callback) callback(true); })
+          .catch(function () { toast(_gt('action_failed')||'Failed to remove', 'error'); if (callback) callback(false); });
       });
     }
 
@@ -3559,8 +3559,8 @@
         var ref = doc(db, 'groupMembers', groupId + '_' + user.uid);
         deleteDoc(ref).then(function () {
           return updateDoc(doc(db, 'groups', groupId), { memberCount: increment(-1) }).catch(function(){});
-        }).then(function () { toast('You left the group'); if (callback) callback(true); })
-          .catch(function () { toast('Failed to leave', 'error'); if (callback) callback(false); });
+        }).then(function () { toast(_gt('group_you_left')||'You left the group'); if (callback) callback(true); })
+          .catch(function () { toast(_gt('action_failed')||'Failed to leave', 'error'); if (callback) callback(false); });
       });
     }
 
@@ -3568,7 +3568,7 @@
     function updateGroupPostApproval(groupId, enabled, callback) {
       requireAuth(function () {
         updateDoc(doc(db, 'groups', groupId), { postApproval: enabled, updatedAt: serverTimestamp() })
-          .then(function () { toast('Post approval ' + (enabled ? 'enabled' : 'disabled')); if (callback) callback(true); })
+          .then(function () { toast(_gt('settings_saved')||'Post approval '+(enabled?'enabled':'disabled')); if (callback) callback(true); })
           .catch(function () { if (callback) callback(false); });
       });
     }
@@ -3585,16 +3585,16 @@
     function approveGroupPost(postId, callback) {
       requireAuth(function () {
         updateDoc(doc(db, 'posts', postId), { status: 'active', approvedAt: serverTimestamp() })
-          .then(function () { toast('Post approved!'); if (callback) callback(true); })
-          .catch(function () { toast('Failed', 'error'); if (callback) callback(false); });
+          .then(function () { toast(_gt('group_post_ok')||'Post approved!'); if (callback) callback(true); })
+          .catch(function () { toast(_gt('action_failed')||'Failed', 'error'); if (callback) callback(false); });
       });
     }
 
     function declineGroupPost(postId, callback) {
       requireAuth(function () {
         updateDoc(doc(db, 'posts', postId), { status: 'declined', declinedAt: serverTimestamp() })
-          .then(function () { toast('Post declined'); if (callback) callback(true); })
-          .catch(function () { toast('Failed', 'error'); if (callback) callback(false); });
+          .then(function () { toast(_gt('group_post_dec')||'Post declined'); if (callback) callback(true); })
+          .catch(function () { toast(_gt('action_failed')||'Failed', 'error'); if (callback) callback(false); });
       });
     }
 
@@ -3609,8 +3609,8 @@
           return updateDoc(doc(db, 'groups', groupId), { pinnedPostIds: pinned, updatedAt: serverTimestamp() });
         }).then(function () {
           return updateDoc(doc(db, 'posts', postId), { pinned: true, updatedAt: serverTimestamp() }).catch(function(){});
-        }).then(function () { toast('Post pinned!'); if (callback) callback(true); })
-          .catch(function () { toast('Failed to pin', 'error'); if (callback) callback(false); });
+        }).then(function () { toast(_gt('group_pinned')||'Post pinned!'); if (callback) callback(true); })
+          .catch(function () { toast(_gt('action_failed')||'Failed to pin', 'error'); if (callback) callback(false); });
       });
     }
 
@@ -3622,8 +3622,8 @@
           return updateDoc(doc(db, 'groups', groupId), { pinnedPostIds: pinned, updatedAt: serverTimestamp() });
         }).then(function () {
           return updateDoc(doc(db, 'posts', postId), { pinned: false, updatedAt: serverTimestamp() }).catch(function(){});
-        }).then(function () { toast('Post unpinned'); if (callback) callback(true); })
-          .catch(function () { toast('Failed', 'error'); if (callback) callback(false); });
+        }).then(function () { toast(_gt('group_unpinned')||'Post unpinned'); if (callback) callback(true); })
+          .catch(function () { toast(_gt('action_failed')||'Failed', 'error'); if (callback) callback(false); });
       });
     }
 
@@ -3642,8 +3642,8 @@
           rsvpCount: 0,
           groupId: groupId,
           createdAt: serverTimestamp()
-        }).then(function (ref) { toast('Event created!'); if (callback) callback(ref.id); })
-          .catch(function (err) { console.error('[GeoSocial] createGroupEvent', err); toast('Failed to create event', 'error'); if (callback) callback(null); });
+        }).then(function (ref) { toast(_gt('group_evt_created')||'Event created!'); if (callback) callback(ref.id); })
+          .catch(function (err) { console.error('[GeoSocial] createGroupEvent', err); toast(_gt('action_failed')||'Failed to create event', 'error'); if (callback) callback(null); });
       });
     }
 
@@ -3664,8 +3664,8 @@
         setDoc(rsvpRef, {
           userId: user.uid, userName: me.name || user.displayName || 'User',
           status: status || 'going', createdAt: serverTimestamp()
-        }).then(function () { toast('RSVP: ' + (status || 'going')); if (callback) callback(true); })
-          .catch(function () { toast('RSVP failed', 'error'); if (callback) callback(false); });
+        }).then(function () { toast(_gt('rsvp_saved')||'RSVP: '+(status||'going')); if (callback) callback(true); })
+          .catch(function () { toast(_gt('rsvp_fail')||'RSVP failed', 'error'); if (callback) callback(false); });
       });
     }
 
@@ -3675,7 +3675,7 @@
         var me = meData() || {};
         var cfg = window.GEOHUB_CLOUDINARY;
         if (!cfg || !cfg.cloudName || !cfg.uploadPreset) {
-          toast('Cloudinary not configured', 'error');
+          toast(_gt('cloudinary_na')||'Cloudinary not configured', 'error');
           if (callback) callback(null);
           return;
         }
@@ -3694,8 +3694,8 @@
               uploaderName: me.name || user.displayName || 'User',
               createdAt: serverTimestamp()
             });
-          }).then(function (ref) { toast('File uploaded!'); if (callback) callback(ref.id); })
-          .catch(function (err) { console.error('[GeoSocial] uploadGroupFile', err); toast('Upload failed', 'error'); if (callback) callback(null); });
+          }).then(function (ref) { toast(_gt('group_file_ok')||'File uploaded!'); if (callback) callback(ref.id); })
+          .catch(function (err) { console.error('[GeoSocial] uploadGroupFile', err); toast(_gt('action_failed')||'Upload failed', 'error'); if (callback) callback(null); });
       });
     }
 
@@ -3712,8 +3712,8 @@
     function deleteGroupFile(groupId, fileId, callback) {
       requireAuth(function () {
         deleteDoc(doc(db, 'groups', groupId, 'files', fileId))
-          .then(function () { toast('File deleted'); if (callback) callback(true); })
-          .catch(function () { toast('Failed to delete', 'error'); if (callback) callback(false); });
+          .then(function () { toast(_gt('group_file_del')||'File deleted'); if (callback) callback(true); })
+          .catch(function () { toast(_gt('action_failed')||'Failed to delete', 'error'); if (callback) callback(false); });
       });
     }
 
@@ -3728,7 +3728,7 @@
           senderAvatar: me.avatar || user.photoURL || '',
           createdAt: serverTimestamp()
         }).then(function (ref) { if (callback) callback(ref.id); })
-          .catch(function (err) { console.error('[GeoSocial] sendGroupChatMessage', err); toast('Failed to send', 'error'); });
+          .catch(function (err) { console.error('[GeoSocial] sendGroupChatMessage', err); toast(_gt('action_failed')||'Failed to send', 'error'); });
       });
     }
 
@@ -3800,8 +3800,8 @@
         var upd = { updatedAt: serverTimestamp() };
         Object.keys(settings).forEach(function (k) { if (allowed.indexOf(k) !== -1) upd[k] = settings[k]; });
         updateDoc(doc(db, 'groups', groupId), upd)
-          .then(function () { toast('Settings saved!'); if (callback) callback(true); })
-          .catch(function (err) { toast('Failed to save: ' + (err.code || err.message), 'error'); if (callback) callback(false); });
+          .then(function () { toast(_gt('settings_saved')||'Settings saved!'); if (callback) callback(true); })
+          .catch(function (err) { toast((_gt('action_failed')||'Failed to save')+': '+(err.code||err.message), 'error'); if (callback) callback(false); });
       });
     }
 
@@ -3812,7 +3812,7 @@
         getDoc(reqRef).then(function (d) {
           if (d.exists()) {
             deleteDoc(reqRef).then(function () {
-              toast('Join request cancelled');
+              toast(_gt('group_req_cancel')||'Join request cancelled');
               if (callback) callback('cancelled');
             });
           } else {
@@ -3824,12 +3824,12 @@
               status: 'pending',
               createdAt: serverTimestamp()
             }).then(function () {
-              toast('Join request sent!');
+              toast(_gt('group_req_sent')||'Join request sent!');
               if (callback) callback('pending');
             });
           }
         }).catch(function () {
-          toast('Failed to send request', 'error');
+          toast(_gt('action_failed')||'Failed to send request', 'error');
           if (callback) callback('error');
         });
       });
@@ -3866,11 +3866,11 @@
         comment: (comment || '').trim(),
         createdAt: serverTimestamp()
       }).then(function () {
-        toast('Review submitted!');
+        toast(_gt('report_sent')||'Review submitted!');
         updateDoc(doc(db, 'places', placeId), { reviewCount: increment(1), updatedAt: serverTimestamp() }).catch(function(){});
         if (callback) callback(true);
       }).catch(function (err) {
-        toast('Failed to submit review', 'error');
+        toast(_gt('action_failed')||'Failed to submit review', 'error');
         if (callback) callback(false);
       });
     }

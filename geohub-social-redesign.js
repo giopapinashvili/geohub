@@ -1773,7 +1773,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       _voicePanel.style.display=open?'none':'block';
     });
     if(_voiceStart) _voiceStart.addEventListener('click',function(){
-      if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ toast('Microphone not supported','error'); return; }
+      if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ toast(typeof GHt==='function'?GHt('mic_not_supported'):'Microphone not supported','error'); return; }
       navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
         _recChunks=[];
         _mediaRec=new MediaRecorder(stream,{mimeType:MediaRecorder.isTypeSupported('audio/webm')?'audio/webm':'audio/ogg'});
@@ -1802,9 +1802,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         _recTimer=setInterval(function(){
           _recSec++;
           if(_voiceTimer) _voiceTimer.textContent=_fmtSec(_recSec);
-          if(_recSec>=MAX_VOICE_SEC&&_mediaRec&&_mediaRec.state==='recording'){ _mediaRec.stop(); _stopTimer(); toast('Max 60s reached'); }
+          if(_recSec>=MAX_VOICE_SEC&&_mediaRec&&_mediaRec.state==='recording'){ _mediaRec.stop(); _stopTimer(); toast(typeof GHt==='function'?GHt('voice_max_60'):'Max 60s reached'); }
         },1000);
-      }).catch(function(){ toast('Microphone access denied','error'); });
+      }).catch(function(){ toast(typeof GHt==='function'?GHt('mic_denied'):'Microphone access denied','error'); });
     });
     if(_voiceStop) _voiceStop.addEventListener('click',function(){ if(_mediaRec&&_mediaRec.state==='recording'){ _mediaRec.stop(); _stopTimer(); } });
     if(_voiceDiscard) _voiceDiscard.addEventListener('click',function(){ _resetVoice(); });
@@ -2035,7 +2035,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           _aiPanel.style.display='none';
           _aiBtn.classList.remove('active');
           ta&&ta.focus();
-          toast('✨ Caption added!');
+          toast(typeof GHt==='function'?GHt('caption_added'):'✨ Caption added!');
         });
       },600);
     });
@@ -2046,7 +2046,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(scheduledAt && scheduledAt>new Date()){
         var fmt=scheduledAt.toLocaleDateString('ka-GE',{month:'short',day:'numeric'})+' '+scheduledAt.toLocaleTimeString('ka-GE',{hour:'2-digit',minute:'2-digit'});
         if(ind) ind.style.display='flex';
-        if(lbl) lbl.textContent='Scheduled for '+fmt;
+        if(lbl) lbl.textContent=(typeof GHt==='function'?GHt('scheduled_for'):'Scheduled for ')+fmt;
         if(sb&&!sb.disabled) sb.innerHTML='<i class="fas fa-clock"></i> Schedule';
       } else {
         scheduledAt=null;
@@ -2134,7 +2134,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(_saveDraftBtn) _saveDraftBtn.addEventListener('click',function(){
       var txt=ta?ta.value:'';
       if(txt.trim()){ try{ localStorage.setItem(_DRAFT_KEY, JSON.stringify({ text:txt, feeling:selectedFeeling, visibility:_getAudienceVis(), savedAt:Date.now() })); }catch(e){} }
-      toast('✏️ Draft saved');
+      toast(typeof GHt==='function'?GHt('draft_saved'):'✏️ Draft saved');
       var m2=$('#ghPostModal'); if(m2) m2.remove();
     });
     // Auto-save on input (debounced 1.5s)
@@ -2492,7 +2492,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             var hlId=btn.dataset.hlId;
             fs().updateDoc(fs().doc(db(),'users',uid,'storyHighlights',hlId),{
               stories:fs().arrayUnion({id:st.id,mediaUrl:st.mediaUrl||'',text:st.text||'',createdAt:st.createdAt||null})
-            }).then(function(){ toast('Added to highlight!'); hlModal.remove(); onClose&&onClose(); }).catch(function(){ toast('Failed','error'); });
+            }).then(function(){ toast(typeof GHt==='function'?GHt('highlight_added'):'Added to highlight!'); hlModal.remove(); onClose&&onClose(); }).catch(function(){ toast('Failed','error'); });
           };
         });
         var saveBtn=document.getElementById('ghSaveHl');
@@ -2503,7 +2503,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             fs().addDoc(fs().collection(db(),'users',uid,'storyHighlights'),{
               name:name, coverUrl:st.mediaUrl||'', createdAt:fs().serverTimestamp(),
               stories:[{id:st.id,mediaUrl:st.mediaUrl||'',text:st.text||'',createdAt:st.createdAt||null}]
-            }).then(function(){ toast('Highlight "'+name+'" created!'); hlModal.remove(); onClose&&onClose(); }).catch(function(){ toast('Failed','error'); });
+            }).then(function(){ toast((typeof GHt==='function'?GHt('highlight_created'):'Highlight')+' "'+name+'"'); hlModal.remove(); onClose&&onClose(); }).catch(function(){ toast('Failed','error'); });
           };
         }
       }
@@ -4340,7 +4340,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         btn.disabled = true; btn.textContent = (typeof GHt==='function'?GHt('story_sharing'):'Sharing…');
         var text = (document.getElementById('ghStoryTextShare') || {}).value || '';
         var u2 = requireLogin() && window.GeoCurrentUser;
-        if (!u2) { toast('Please sign in', 'error'); return; }
+        if (!u2) { toast(typeof GHt==='function'?GHt('please_sign_in'):'Please sign in', 'error'); return; }
         var f = fs(), d = db();
         f.addDoc(f.collection(d, 'stories'), {
           authorId: u2.uid,
@@ -5770,7 +5770,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(startBtn) startBtn.addEventListener('click',function(){
           var url=(document.getElementById('ghLiveUrlInput')||{}).value||'';
           var title=(document.getElementById('ghLiveTitleInput')||{}).value||'';
-          startBtn.disabled=true; startBtn.textContent='Starting…';
+          startBtn.disabled=true; startBtn.textContent=typeof GHt==='function'?GHt('live_starting'):'Starting…';
           // Phase 66: create liveStreams doc for viewer count + chat
           f.setDoc(f.doc(d,'liveStreams',u.uid),{
             uid:u.uid, authorName:userData.fullName||userData.displayName||'User',
@@ -5809,7 +5809,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         }
         var endBtn=document.getElementById('ghEndLiveBtn');
         if(endBtn) endBtn.addEventListener('click',function(){
-          endBtn.disabled=true; endBtn.textContent='Ending…';
+          endBtn.disabled=true; endBtn.textContent=typeof GHt==='function'?GHt('live_ending'):'Ending…';
           if(_liveVcUnsub){ try{_liveVcUnsub();}catch(e){} _liveVcUnsub=null; }
           if(_chatUnsub){ try{_chatUnsub();}catch(e){} }
           f.updateDoc(f.doc(d,'users',u.uid),{isLive:false,liveUrl:'',liveStartedAt:null})
@@ -5970,7 +5970,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       createBtn.disabled=true;
       fs().addDoc(fs().collection(db(),'users',uid,'collections'),{name:name,postIds:[pid],createdAt:fs().serverTimestamp()})
         .then(function(){ if(nameEl) nameEl.value=''; createBtn.disabled=false; loadCols(); toast('Collection created ✓'); })
-        .catch(function(){ createBtn.disabled=false; toast('Error creating collection','error'); });
+        .catch(function(){ createBtn.disabled=false; toast(typeof GHt==='function'?GHt('error_creating'):'Error creating collection','error'); });
     };
     var nameEl2=document.getElementById('ghNewColName');
     if(nameEl2) nameEl2.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); createBtn&&createBtn.click(); } });
@@ -6118,7 +6118,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var shown=filtered.slice(0,3);
         if(!shown.length){ var p=$('#ghFeedEventsPanel'); if(p) p.style.display='none'; return; }
         var panel=$('#ghFeedEventsPanel');
-        if(panel&&city){ var h3=panel.querySelector('h3'); if(h3) h3.textContent='Upcoming Events in '+city; }
+        if(panel&&city){ var h3=panel.querySelector('h3'); if(h3) h3.textContent=(typeof GHt==='function'?GHt('upcoming_events'):'Upcoming Events in ')+city; }
         box.innerHTML='<div class="gh-mini-list">'+shown.map(function(e){
           var title=e.name||e.title||'Event';
           var when=e.startDate||e.date;
@@ -8617,7 +8617,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var msg=($('#ghInvMsg').value||'').trim();
       var errEl=$('#ghInvError');
       if(!email||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){errEl.textContent='Valid email required.';errEl.style.display='';return;}
-      if(!role){errEl.textContent='Role / job title required.';errEl.style.display='';return;}
+      if(!role){errEl.textContent=typeof GHt==='function'?GHt('role_required'):'Role / job title required.';errEl.style.display='';return;}
       errEl.style.display='none';
       var _isbt=typeof GHt==='function'?GHt:function(k){return k;};
       var btn=$('#ghSendInvite');btn.disabled=true;btn.textContent=_isbt('bd_inv_sending');
@@ -10773,7 +10773,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           res.querySelectorAll('[data-follow-user]').forEach(function(btn){
             btn.addEventListener('click',function(e){ e.preventDefault(); if(!requireLogin()) return; var uid2=btn.dataset.followUser; if(GS().toggleFollow) GS().toggleFollow(uid2,function(isNowFollowing){ btn.dataset.following=isNowFollowing?'1':'0'; btn.innerHTML=isNowFollowing?'<i class="fas fa-user-check"></i> Following':'<i class="fas fa-rss"></i> Follow'; btn.classList.toggle('ghost',!!isNowFollowing); }); });
           });
-        }).catch(function(){ res.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Search failed</h3><p>Please try again.</p></div>'; });
+        }).catch(function(){ res.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>'+(typeof GHt==='function'?GHt('search_failed'):'Search failed — try again.')+'</h3></div>'; });
       }
     });
   }
@@ -11167,7 +11167,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         feed.querySelectorAll('.gh-reel-item').forEach(function(item){ _obs.observe(item); });
         state.pageUnsubs.push(function(){ if(_obs){ _obs.disconnect(); _obs=null; } });
       }).catch(function(err){
-        feed.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Failed to load reels</h3><p>'+esc(err.message||'')+'</p></div>';
+        feed.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>'+(typeof GHt==='function'?GHt('reels_fail'):'Failed to load reels')+'</h3><p>'+esc(err.message||'')+'</p></div>';
       });
     });
   }
@@ -11201,7 +11201,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           };
           _mr.start(100); _recording=true;
           btn.innerHTML='<i class="fas fa-stop" style="color:#ef4444"></i>'; btn.title='Stop recording';
-        }).catch(function(){ toast('Microphone access denied','error'); });
+        }).catch(function(){ toast(typeof GHt==='function'?GHt('mic_denied'):'Microphone access denied','error'); });
       } else {
         if(_mr&&_mr.state!=='inactive') _mr.stop();
         _recording=false;
@@ -12413,7 +12413,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               }).then(function(){ toast('Verification status updated'); _renderUsers(); }).catch(function(err){ toast('Failed','error'); });
             };
           });
-        }).catch(function(err){ content.innerHTML='<div class="gh-card gh-empty"><h3>Failed to load users</h3><p>'+esc(err.message||'Check permissions')+'</p></div>'; });
+        }).catch(function(err){ content.innerHTML='<div class="gh-card gh-empty"><h3>'+(typeof GHt==='function'?GHt('users_fail'):'Failed to load users')+'</h3><p>'+esc(err.message||'Check permissions')+'</p></div>'; });
       }
       function _renderReports(){
         fs().getDocs(fs().query(fs().collection(db(),'reportedContent'),fs().where('status','==','open'),fs().orderBy('status'),fs().orderBy('createdAt','desc'),fs().limit(15))).then(function(snap){

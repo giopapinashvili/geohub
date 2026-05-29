@@ -1580,17 +1580,17 @@
   function maybeShowCompletionHint(user) {
     var old = document.getElementById('profile-completion-hint');
     if (old) old.remove();
+    var _t2 = typeof window.GHt === 'function' ? window.GHt : function(k){return k;};
     var missing = [];
-    if (!user.bio) missing.push('bio');
-    if (!user.avatar || user.avatar.indexOf('data:') === 0) missing.push('profile photo');
-    if (!user.interests || !user.interests.length) missing.push('interests');
+    if (!user.bio) missing.push(_t2('profile_bio') || 'bio');
+    if (!user.avatar || user.avatar.indexOf('data:') === 0) missing.push(_t2('profile_photo') || 'profile photo');
+    if (!user.interests || !user.interests.length) missing.push(_t2('profile_interests') || 'interests');
     if (!missing.length) return;
     var hint = document.createElement('div');
     hint.id = 'profile-completion-hint';
     hint.className = 'profile-completion-hint';
-    hint.innerHTML = '<i class="fas fa-circle-info"></i> Complete your profile — add your '
-      + missing.join(', ')
-      + '. <button class="hint-edit-btn" data-edit-profile><i class="fas fa-pen"></i> Edit Profile</button>'
+    hint.innerHTML = '<i class="fas fa-circle-info"></i> ' + (_t2('complete_profile') || 'Complete your profile') + ' — ' + missing.join(', ')
+      + '. <button class="hint-edit-btn" data-edit-profile><i class="fas fa-pen"></i> ' + (_t2('edit_profile') || 'Edit Profile') + '</button>'
       + '<button class="hint-close-btn" onclick="document.getElementById(\'profile-completion-hint\').remove()" aria-label="Dismiss">&times;</button>';
     var nameBlock = document.querySelector('.profile-name-block');
     if (nameBlock) nameBlock.insertAdjacentElement('beforebegin', hint);
