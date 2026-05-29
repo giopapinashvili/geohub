@@ -31,6 +31,8 @@
   var _pendingCandidates = [];
   var _cachedIce = null;
   var _cachedIceAt = 0;
+  var _screenStream = null;
+  var _facingMode = 'user';
 
   // Static fallback — used if the worker fetch fails
   var ICE = { iceServers: [
@@ -151,11 +153,7 @@
               '<div class="gco-av-wrap"><div class="gco-av-ring"></div><div class="gco-av">' + _avatarHtml(avatar, name) + '</div></div>' +
             '</div>'
           : '') +
-        '<div class="gco-bottom"><div class="gco-controls">' +
-          (type === 'video' ? '<button class="gco-btn gco-btn-sec" id="ghCamBtn" onclick="GhCalls.toggleCamera()"><i class="fas fa-video"></i></button>' : '') +
-          '<button class="gco-btn gco-btn-sec" id="ghMuteBtn" onclick="GhCalls.toggleMute()"><i class="fas fa-microphone"></i></button>' +
-          '<button class="gco-btn gco-btn-end" onclick="GhCalls.endCall()"><i class="fas fa-phone-slash"></i></button>' +
-        '</div></div>' +
+        '<div class="gco-bottom">' + _controlsHtml(type) + '</div>' +
       '</div>';
     ov.style.display = 'block';
   }
@@ -207,16 +205,12 @@
         (type !== 'video'
           ? '<div class="gco-middle"><div class="gco-av-wrap"><div class="gco-av">' + _avatarHtml(avatar, name) + '</div></div></div>'
           : '') +
-        '<div class="gco-bottom"><div class="gco-controls">' +
-          (type === 'video' ? '<button class="gco-btn gco-btn-sec" id="ghCamBtn" onclick="GhCalls.toggleCamera()"><i class="fas fa-video"></i></button>' : '') +
-          '<button class="gco-btn gco-btn-sec" id="ghMuteBtn" onclick="GhCalls.toggleMute()"><i class="fas fa-microphone"></i></button>' +
-          '<button class="gco-btn gco-btn-end" onclick="GhCalls.endCall()"><i class="fas fa-phone-slash"></i></button>' +
-        '</div></div>' +
+        '<div class="gco-bottom">' + _controlsHtml(type) + '</div>' +
       '</div>';
     ov.style.display = 'block';
     var lv = document.getElementById('ghLocalVideo');
     var rv = document.getElementById('ghRemoteVideo');
-    if (lv && _localStream) lv.srcObject = _localStream;
+    if (lv && _localStream) { lv.srcObject = _localStream; _makeDraggable(lv); }
     if (rv && _remoteStream) rv.srcObject = _remoteStream;
     _startTimer();
   }
@@ -224,6 +218,47 @@
   function _hideOverlay() {
     var ov = document.getElementById('ghCallOverlay');
     if (ov) { ov.style.display = 'none'; ov.innerHTML = ''; ov.className = ''; }
+  }
+
+  /* ── Draggable PiP ──────────────────────────────────────────── */
+  function _makeDraggable(el) {
+    var sx, sy, sl, st, dragging = false;
+    function start(cx, cy) {
+      dragging = true; sx = cx; sy = cy;
+      var r = el.getBoundingClientRect(); sl = r.left; st = r.top;
+      el.style.transition = 'none'; el.style.cursor = 'grabbing';
+    }
+    function move(cx, cy) {
+      if (!dragging) return;
+      var nl = sl + cx - sx, nt = st + cy - sy;
+      nl = Math.max(8, Math.min(window.innerWidth  - el.offsetWidth  - 8, nl));
+      nt = Math.max(8, Math.min(window.innerHeight - el.offsetHeight - 8, nt));
+      el.style.left = nl + 'px'; el.style.top = nt + 'px';
+      el.style.right = 'auto'; el.style.bottom = 'auto';
+    }
+    function end() { dragging = false; el.style.cursor = 'grab'; }
+    el.addEventListener('mousedown',  function(e) { e.preventDefault(); start(e.clientX, e.clientY); });
+    document.addEventListener('mousemove', function(e) { move(e.clientX, e.clientY); });
+    document.addEventListener('mouseup',   end);
+    el.addEventListener('touchstart', function(e) { start(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+    document.addEventListener('touchmove', function(e) { if (dragging) { e.preventDefault(); move(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: false });
+    document.addEventListener('touchend', end);
+  }
+
+  /* ── Controls HTML builder ───────────────────────────────────── */
+  function _controlsHtml(type) {
+    var canScreen = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
+    var isMobile  = /Mobi|Android/i.test(navigator.userAgent);
+    var html = '<div class="gco-controls">';
+    if (type === 'video') {
+      html += '<button class="gco-btn gco-btn-sec" id="ghCamBtn"    onclick="GhCalls.toggleCamera()"><i class="fas fa-video"></i></button>';
+      if (isMobile)    html += '<button class="gco-btn gco-btn-sec" id="ghFlipBtn"   onclick="GhCalls.flipCamera()"><i class="fas fa-camera-rotate"></i></button>';
+      if (canScreen)   html += '<button class="gco-btn gco-btn-sec" id="ghScreenBtn" onclick="GhCalls.toggleScreenShare()"><i class="fas fa-desktop"></i></button>';
+    }
+    html += '<button class="gco-btn gco-btn-sec" id="ghMuteBtn" onclick="GhCalls.toggleMute()"><i class="fas fa-microphone"></i></button>';
+    html += '<button class="gco-btn gco-btn-end" onclick="GhCalls.endCall()"><i class="fas fa-phone-slash"></i></button>';
+    html += '</div>';
+    return html;
   }
 
   /* ── RTCPeerConnection ───────────────────────────────────────── */
@@ -462,15 +497,64 @@
     }
   };
 
+  /* ── Public: toggleScreenShare ───────────────────────────────── */
+  GC.toggleScreenShare = async function () {
+    if (!_pc) return;
+    var btn = document.getElementById('ghScreenBtn');
+    if (_screenStream) {
+      _screenStream.getTracks().forEach(function (t) { t.stop(); });
+      _screenStream = null;
+      var camTrack = _localStream && _localStream.getVideoTracks()[0];
+      if (camTrack) {
+        var sender = _pc.getSenders().find(function (s) { return s.track && s.track.kind === 'video'; });
+        if (sender) await sender.replaceTrack(camTrack).catch(function () {});
+      }
+      var lv = document.getElementById('ghLocalVideo');
+      if (lv && _localStream) lv.srcObject = _localStream;
+      if (btn) { btn.innerHTML = '<i class="fas fa-desktop"></i>'; btn.classList.remove('gco-btn-muted'); }
+    } else {
+      try {
+        _screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+        var screenTrack = _screenStream.getVideoTracks()[0];
+        var sender = _pc.getSenders().find(function (s) { return s.track && s.track.kind === 'video'; });
+        if (sender) await sender.replaceTrack(screenTrack).catch(function () {});
+        var lv = document.getElementById('ghLocalVideo');
+        if (lv) lv.srcObject = _screenStream;
+        if (btn) { btn.innerHTML = '<i class="fas fa-desktop"></i>'; btn.classList.add('gco-btn-muted'); }
+        screenTrack.onended = function () { GC.toggleScreenShare(); };
+      } catch (e) {
+        _toast(_t('call_screen_denied', 'Screen sharing not available'), 'error');
+      }
+    }
+  };
+
+  /* ── Public: flipCamera ──────────────────────────────────────── */
+  GC.flipCamera = async function () {
+    if (!_localStream || _callType !== 'video') return;
+    _facingMode = _facingMode === 'user' ? 'environment' : 'user';
+    try {
+      var newStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: _facingMode }, audio: false });
+      var newTrack = newStream.getVideoTracks()[0];
+      var oldTrack = _localStream.getVideoTracks()[0];
+      if (oldTrack) { _localStream.removeTrack(oldTrack); oldTrack.stop(); }
+      _localStream.addTrack(newTrack);
+      var sender = _pc && _pc.getSenders().find(function (s) { return s.track && s.track.kind === 'video'; });
+      if (sender) await sender.replaceTrack(newTrack).catch(function () {});
+      var lv = document.getElementById('ghLocalVideo');
+      if (lv) lv.srcObject = _localStream;
+    } catch (e) { _facingMode = _facingMode === 'user' ? 'environment' : 'user'; }
+  };
+
   /* ── Cleanup ─────────────────────────────────────────────────── */
   function _cleanupLocal() {
     if (_unsubCall) { _unsubCall(); _unsubCall = null; }
     if (_unsubCandidates) { _unsubCandidates(); _unsubCandidates = null; }
     if (_pc) { _pc.close(); _pc = null; }
     if (_localStream) { _localStream.getTracks().forEach(function (t) { t.stop(); }); _localStream = null; }
+    if (_screenStream) { _screenStream.getTracks().forEach(function (t) { t.stop(); }); _screenStream = null; }
     _remoteStream = null;
     _callId = null; _myRole = null; _callType = null; _callState = null;
-    _pendingCandidates = [];
+    _pendingCandidates = []; _facingMode = 'user';
     _stopTimer(); _stopRing(); _hideOverlay();
   }
 
