@@ -86,6 +86,17 @@
   }
   function _me() { return _auth && _auth.currentUser; }
   function _toast(msg, type) { if (window.GeoSocial && window.GeoSocial.toast) window.GeoSocial.toast(msg, type); }
+  function _workerUrl() {
+    return ((window.GeoConfig && window.GeoConfig.PAYMENTS && window.GeoConfig.PAYMENTS.WORKER_URL)
+      || 'https://geohub-payments.gio-papinashvili20-bd3.workers.dev').replace(/\/$/, '');
+  }
+  function _sendCallNotification(calleeUid, callerName, callerAvatar, callType, callId) {
+    fetch(_workerUrl() + '/api/notify-call', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ calleeUid, callerName, callerAvatar, callType, callId })
+    }).catch(function () {});
+  }
 
   /* ── Ringtone (Web Audio) ────────────────────────────────────── */
   function _ring(outgoing) {
@@ -398,6 +409,9 @@
       type: type, status: 'ringing',
       createdAt: _fs.serverTimestamp()
     });
+
+    // Push notification for callee (fire-and-forget)
+    _sendCallNotification(targetUid, callerName, callerAvatar, type, _callId);
 
     // Now set up WebRTC (ICE candidates will write to existing doc's subcollection)
     var iceConfig = await _getIceConfig();
@@ -734,12 +748,37 @@
     );
   };
 
+  /* ── Pending call from push notification tap ────────────────── */
+  async function _checkPendingCallFromUrl(callId) {
+    if (!_fb()) return;
+    var me = _me(); if (!me) return;
+    try {
+      var snap = await _fs.getDoc(_fs.doc(_db, 'calls', callId));
+      if (!snap.exists()) return;
+      var data = snap.data();
+      if (data.calleeId !== me.uid) return;
+      if (data.status !== 'ringing') return;
+      var ageMs = data.createdAt && data.createdAt.toMillis ? Date.now() - data.createdAt.toMillis() : 0;
+      if (ageMs > 45000) return;
+      if (!_callId) {
+        _showIncoming(data.callerName || 'Unknown', data.callerAvatar || '', data.type || 'audio', callId);
+        _ring(false);
+      }
+    } catch (e) {}
+  }
+
   /* ── Init ────────────────────────────────────────────────────── */
   function _init() {
+    var pendingCallId = new URLSearchParams(window.location.search).get('call');
     var tries = 0;
     var iv = setInterval(function () {
       tries++;
-      if (_fb() && _me()) { clearInterval(iv); GC.startListening(); return; }
+      if (_fb() && _me()) {
+        clearInterval(iv);
+        GC.startListening();
+        if (pendingCallId) _checkPendingCallFromUrl(pendingCallId);
+        return;
+      }
       if (tries > 60) clearInterval(iv);
     }, 500);
   }

@@ -80,6 +80,9 @@ export default {
       if (pathname === '/api/turn-credentials' && request.method === 'GET') {
         return await handleTurnCredentials(request, env, cors);
       }
+      if (pathname === '/api/notify-call' && request.method === 'POST') {
+        return await handleNotifyCall(request, env, cors);
+      }
       return json({ error: 'Not found' }, 404, cors);
     } catch (err) {
       console.error('[GeoHub Worker]', err.message);
@@ -481,7 +484,7 @@ async function getFirestoreToken(env) {
   return access_token;
 }
 
-async function buildServiceAccountJWT(email, privateKeyPem) {
+async function buildServiceAccountJWT(email, privateKeyPem, scope = 'https://www.googleapis.com/auth/datastore') {
   const now     = Math.floor(Date.now() / 1000);
   const b64url  = obj => btoa(JSON.stringify(obj)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
 
@@ -490,7 +493,7 @@ async function buildServiceAccountJWT(email, privateKeyPem) {
     iss:   email, sub: email,
     aud:   'https://oauth2.googleapis.com/token',
     iat:   now,   exp: now + 3600,
-    scope: 'https://www.googleapis.com/auth/datastore',
+    scope,
   });
 
   const sigInput = `${header}.${payload}`;
@@ -537,6 +540,14 @@ async function firestoreSet(env, path, data) {
   });
 }
 
+async function firestoreDelete(env, path) {
+  const token = await getFirestoreToken(env);
+  return fetch(fsUrl(env, path), {
+    method:  'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+}
+
 // PATCH with updateMask so only provided fields are written
 async function firestoreUpdate(env, path, data) {
   const token  = await getFirestoreToken(env);
@@ -574,6 +585,125 @@ function fromFsFields(fields) {
     else if ('arrayValue'   in v) obj[k] = (v.arrayValue.values || []).map(i => fromFsFields({ _: i })._);
   }
   return obj;
+}
+
+// ── Call push notifications ───────────────────────────────────────────────────
+
+async function getFCMToken(env) {
+  const jwt = await buildServiceAccountJWT(
+    env.FIREBASE_CLIENT_EMAIL,
+    env.FIREBASE_PRIVATE_KEY,
+    'https://www.googleapis.com/auth/firebase.messaging',
+  );
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body:    `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`,
+  });
+  const { access_token } = await res.json();
+  if (!access_token) throw new Error('Could not obtain FCM access token');
+  return access_token;
+}
+
+async function getCalleeFCMTokens(env, uid) {
+  try {
+    const token = await getFirestoreToken(env);
+    const res = await fetch(
+      `https://firestore.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/databases/(default)/documents/users/${uid}/fcmTokens?pageSize=5`,
+      { headers: { 'Authorization': `Bearer ${token}` } },
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.documents || []).map(doc => {
+      const fields = doc.fields || {};
+      return (fields.token && fields.token.stringValue) || '';
+    }).filter(Boolean);
+  } catch { return []; }
+}
+
+async function handleNotifyCall(request, env, cors) {
+  if (!env.FIREBASE_CLIENT_EMAIL || !env.FIREBASE_PRIVATE_KEY) {
+    return json({ error: 'FCM not configured' }, 503, cors);
+  }
+
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400, cors); }
+
+  const { calleeUid, callerName, callerAvatar, callType, callId } = body || {};
+  if (!calleeUid || !callId) return json({ error: 'Missing calleeUid or callId' }, 400, cors);
+
+  const tokens = await getCalleeFCMTokens(env, calleeUid);
+  if (!tokens.length) return json({ sent: 0, reason: 'no-tokens' }, 200, cors);
+
+  let fcmToken;
+  try { fcmToken = await getFCMToken(env); } catch (e) {
+    console.error('[notify-call] FCM auth failed:', e.message);
+    return json({ error: 'FCM auth failed' }, 500, cors);
+  }
+
+  const siteUrl = (env.SITE_URL || 'https://geohub-main.pages.dev').replace(/\/$/, '');
+  const callUrl = `/messages.html?call=${callId}`;
+  const title   = `📞 ${callerName || 'GeoHub'} გირეკავს`;
+  const bodyTxt = callType === 'video' ? '🎥 ვიდეო ზარი' : '📞 ხმოვანი ზარი';
+
+  let sent = 0;
+  const stale = [];
+
+  for (const token of tokens) {
+    try {
+      const res = await fetch(
+        `https://fcm.googleapis.com/v1/projects/${env.FIREBASE_PROJECT_ID}/messages:send`,
+        {
+          method:  'POST',
+          headers: { 'Authorization': `Bearer ${fcmToken}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: {
+              token,
+              notification: { title, body: bodyTxt },
+              data: {
+                type:         'incoming_call',
+                callId,
+                callerName:   callerName   || '',
+                callerAvatar: callerAvatar || '',
+                callType:     callType     || 'audio',
+                url:          callUrl,
+              },
+              webpush: {
+                fcmOptions: { link: siteUrl + callUrl },
+                notification: {
+                  requireInteraction: true,
+                  tag:     `incoming-call-${callId}`,
+                  icon:    callerAvatar || `${siteUrl}/icons/icon-192.png`,
+                  badge:   `${siteUrl}/icons/icon-72.png`,
+                  vibrate: [300, 200, 300, 200, 300],
+                  actions: [
+                    { action: 'answer',  title: '📞 პასუხი' },
+                    { action: 'decline', title: '❌ უარი' },
+                  ],
+                },
+              },
+            },
+          }),
+        },
+      );
+
+      if (res.ok) {
+        sent++;
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        const errCode = (errData.error && errData.error.details && errData.error.details[0] && errData.error.details[0].errorCode) || '';
+        if (errCode === 'UNREGISTERED' || res.status === 404) stale.push(token);
+      }
+    } catch (e) {
+      console.error('[notify-call] FCM send error:', e.message);
+    }
+  }
+
+  if (stale.length) {
+    Promise.all(stale.map(t => firestoreDelete(env, `users/${calleeUid}/fcmTokens/${encodeURIComponent(t)}`))).catch(() => {});
+  }
+
+  return json({ sent }, 200, cors);
 }
 
 // ── TURN credentials (Cloudflare Calls) ──────────────────────────────────────
