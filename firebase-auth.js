@@ -4,12 +4,18 @@ import {
   GoogleAuthProvider,
   FacebookAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signOut,
   onAuthStateChanged,
   updateProfile,
   sendPasswordResetEmail,
   sendEmailVerification
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+
+function isMobileBrowser() {
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
 
 function fbUserToGeoUser(fbUser) {
   return {
@@ -188,6 +194,11 @@ async function fbGoogleLogin() {
   var auth = window.GeoFirebase && window.GeoFirebase.auth;
   if (!auth) throw new Error('Firebase not available');
   var provider = new GoogleAuthProvider();
+  if (isMobileBrowser()) {
+    sessionStorage.setItem('gh_pending_social', 'google');
+    await signInWithRedirect(auth, provider);
+    return; // browser will navigate away
+  }
   var cred;
   try {
     cred = await signInWithPopup(auth, provider);
@@ -211,6 +222,11 @@ async function fbFacebookLogin() {
   var provider = new FacebookAuthProvider();
   provider.addScope('email');
   provider.addScope('public_profile');
+  if (isMobileBrowser()) {
+    sessionStorage.setItem('gh_pending_social', 'facebook');
+    await signInWithRedirect(auth, provider);
+    return; // browser will navigate away
+  }
   var cred;
   try {
     cred = await signInWithPopup(auth, provider);
@@ -226,6 +242,25 @@ async function fbFacebookLogin() {
   window.GeoCurrentUser = geoUser;
   window.dispatchEvent(new CustomEvent('GeoAuthReady', { detail: geoUser }));
   return geoUser;
+}
+
+async function handleRedirectResult() {
+  var auth = window.GeoFirebase && window.GeoFirebase.auth;
+  if (!auth) return null;
+  try {
+    var cred = await getRedirectResult(auth);
+    if (!cred || !cred.user) return null;
+    sessionStorage.removeItem('gh_pending_social');
+    var geoUser = await mergeWithFirestore(fbUserToGeoUser(cred.user));
+    geoUser.lastSeen = Date.now();
+    await saveUserToFirestore(geoUser);
+    window.GeoCurrentUser = geoUser;
+    window.dispatchEvent(new CustomEvent('GeoAuthReady', { detail: geoUser }));
+    return geoUser;
+  } catch (err) {
+    console.warn('[GeoAuth] getRedirectResult:', err && err.code, err && err.message);
+    return null;
+  }
 }
 
 async function fbLogout() {
@@ -269,4 +304,4 @@ async function fbResendVerification(email, password) {
   return { sent: true };
 }
 
-window.GeoFirebaseAuth = { signUp: fbSignUp, signIn: fbSignIn, googleLogin: fbGoogleLogin, facebookLogin: fbFacebookLogin, logout: fbLogout, onAuthChange: onAuthChange, saveUserToFirestore: saveUserToFirestore, loadUserFromFirestore: loadUserFromFirestore, resetPassword: fbResetPassword, resendVerification: fbResendVerification, isUsernameAvailable: isUsernameAvailable, reserveUsername: reserveUsername, releaseUsername: releaseUsername };
+window.GeoFirebaseAuth = { signUp: fbSignUp, signIn: fbSignIn, googleLogin: fbGoogleLogin, facebookLogin: fbFacebookLogin, logout: fbLogout, onAuthChange: onAuthChange, handleRedirectResult: handleRedirectResult, saveUserToFirestore: saveUserToFirestore, loadUserFromFirestore: loadUserFromFirestore, resetPassword: fbResetPassword, resendVerification: fbResendVerification, isUsernameAvailable: isUsernameAvailable, reserveUsername: reserveUsername, releaseUsername: releaseUsername };

@@ -234,6 +234,15 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     function begin() {
+      // Handle return from signInWithRedirect (mobile OAuth flow)
+      if (window.GeoFirebaseAuth && window.GeoFirebaseAuth.handleRedirectResult) {
+        window.GeoFirebaseAuth.handleRedirectResult().then(function (user) {
+          if (user) goAfterAuth();
+        }).catch(function (err) {
+          var errEl = document.getElementById('loginError') || document.getElementById('signupError');
+          if (errEl) errEl.textContent = fbErrMsg(err);
+        });
+      }
       if (window.GeoFirebaseAuth) {
         var settled = false;
         window.GeoFirebaseAuth.onAuthChange(function (user) { if (settled) return; settled = true; if (user) goAfterAuth(); else startForms(); });
