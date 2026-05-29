@@ -1,4 +1,4 @@
-/* ================================================================
+﻿/* ================================================================
    GeoHub — Business Page (Premium Social Business Page)
    business.html?id=BUSINESS_ID
    ================================================================ */
@@ -135,6 +135,7 @@
     var parse = function(t){ var p=(t||'0:0').split(':'); return parseInt(p[0],10)*60+parseInt(p[1],10); };
     return cur >= parse(h.open) && cur < parse(h.close);
   }
+  function _bpt(key,fallback){ if(typeof window.GHt==='function'){var v=window.GHt(key);if(v&&v!==key)return v;} return fallback||key; }
   function showToast(msg, ok) {
     if (window.pushNotif) { window.pushNotif({emoji:ok!==false?'✅':'⚠️',title:ok!==false?'Done':'Note',text:msg,link:null}); return; }
     var t = document.getElementById('biz-toast');
@@ -2114,7 +2115,7 @@
   }
 
   function toggleBusinessCleanReaction(postId, btn) {
-    if (!_currentUser) { showToast('Sign in to react', false); return; }
+    if (!_currentUser) { showToast(_bpt('sign_in_to_react'), false); return; }
     if (btn) btn.disabled = true;
     var reactionRef = _fs.doc(_db, 'posts', postId, 'reactions', _currentUser.uid);
     var postRef = _fs.doc(_db, 'posts', postId);
@@ -2143,7 +2144,7 @@
         .then(function(){ setBusinessCleanReactionUi(postId, 'like'); if (!exists) adjustBusinessCleanCount(postId, 'like', 1); });
     }).catch(function(err) {
       console.error('[BizPage] clean reaction failed:', err.code || err.message);
-      showToast('Reaction failed', false);
+      showToast(_bpt('soc_reaction_fail'), false);
     }).finally(function() {
       if (btn) btn.disabled = false;
     });
@@ -2189,8 +2190,8 @@
     var input = form.querySelector('[data-biz-comment-input]');
     var text = input ? input.value.trim() : '';
     if (!text) return;
-    if (!_currentUser) { showToast('Sign in to comment', false); return; }
-    if (!window.GeoSocial || !window.GeoSocial.addComment) { showToast('Comments not available', false); return; }
+    if (!_currentUser) { showToast(_bpt('sign_in_to_comment'), false); return; }
+    if (!window.GeoSocial || !window.GeoSocial.addComment) { showToast(_bpt('comments_unavail'), false); return; }
     var btn = form.querySelector('.biz-cmt-send-btn');
     if (input) input.disabled = true;
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
@@ -2210,7 +2211,7 @@
         }
       }
       if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i>'; }
-      if (err) showToast('Could not post comment', false);
+      if (err) showToast(_bpt('comment_post_fail'), false);
       else toggleBusinessCleanComments(card, true);
     }, extra || undefined);
   }
@@ -2244,7 +2245,7 @@
     if (action === 'copy') {
       var url = businessCleanPostUrl(postId);
       if (navigator.clipboard) {
-        navigator.clipboard.writeText(url).then(function(){ showToast('Link copied'); }).catch(function(){ showToast('Could not copy link', false); });
+        navigator.clipboard.writeText(url).then(function(){ showToast(_bpt('link_copied')); }).catch(function(){ showToast(_bpt('copy_link_fail'), false); });
       }
       closeBusinessCleanSharePanel(card);
       return;
@@ -2254,20 +2255,20 @@
       if (navigator.share) {
         navigator.share({ title: (_biz && (_biz.title || _biz.name)) || 'GeoHub post', url: shareUrl }).catch(function(){});
       } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(shareUrl).then(function(){ showToast('Link copied'); }).catch(function(){});
+        navigator.clipboard.writeText(shareUrl).then(function(){ showToast(_bpt('link_copied')); }).catch(function(){});
       }
       closeBusinessCleanSharePanel(card);
       return;
     }
     if (action === 'feed') {
-      if (!_currentUser) { showToast('Sign in to share', false); return; }
+      if (!_currentUser) { showToast(_bpt('sign_in_to_share'), false); return; }
       if (btn) btn.disabled = true;
       var extra = { type:'share', sharedPostId: postId, sharedBusinessId: BIZ_ID, visibility: 'public', targetType: 'user', targetId: _currentUser.uid };
       var done = function(ok) {
         if (btn) btn.disabled = false;
-        if (!ok) { showToast('Could not share', false); return; }
+        if (!ok) { showToast(_bpt('share_fail'), false); return; }
         closeBusinessCleanSharePanel(card);
-        showToast('Shared');
+        showToast(_bpt('shared'));
         _fs.updateDoc(_fs.doc(_db, 'posts', postId), { shareCount:_fs.increment(1), updatedAt:_fs.serverTimestamp() }).catch(function(){});
         adjustBusinessCleanCount(postId, 'share', 1);
       };
@@ -2294,7 +2295,7 @@
   }
 
   function toggleBusinessCleanSave(postId, btn) {
-    if (!_currentUser) { showToast('Sign in to save', false); return; }
+    if (!_currentUser) { showToast(_bpt('sign_in_to_save'), false); return; }
     if (btn) btn.disabled = true;
     var finish = function(saved) {
       setBusinessCleanSaveUi(postId, !!saved);
@@ -2306,13 +2307,13 @@
     }
     var saveRef = _fs.doc(_db, 'savedPosts', _currentUser.uid + '_' + postId);
     _fs.getDoc(saveRef).then(function(snap) {
-      if (snap.exists()) return _fs.deleteDoc(saveRef).then(function(){ finish(false); showToast('Removed from saved'); });
+      if (snap.exists()) return _fs.deleteDoc(saveRef).then(function(){ finish(false); showToast(_bpt('saved_removed')); });
       return _fs.setDoc(saveRef, { uid:_currentUser.uid, userId:_currentUser.uid, postId:postId, createdAt:_fs.serverTimestamp() })
-        .then(function(){ finish(true); showToast('Post saved'); });
+        .then(function(){ finish(true); showToast(_bpt('post_saved')); });
     }).catch(function(err) {
       if (btn) btn.disabled = false;
       console.error('[BizPage] clean save failed:', err.code || err.message);
-      showToast('Could not save post', false);
+      showToast(_bpt('post_save_fail'), false);
     });
   }
 
@@ -2335,17 +2336,17 @@
     var visEl = panel && panel.querySelector('[data-biz-edit-vis]');
     var text = ta ? ta.value.trim() : '';
     var vis = visEl ? visEl.value : (card.dataset.vis || 'public');
-    if (!text) { showToast('Post text cannot be empty', false); return; }
+    if (!text) { showToast(_bpt('post_save_content_req'), false); return; }
     if (btn) btn.disabled = true;
     _fs.updateDoc(_fs.doc(_db, 'posts', postId), {
       text: text,
       visibility: vis,
       updatedAt: _fs.serverTimestamp()
     }).then(function() {
-      showToast('Post updated');
+      showToast(_bpt('post_updated'));
       loadBizPosts();
     }).catch(function(err) {
-      showToast('Could not save: ' + (err.code || err.message), false);
+      showToast(_bpt('post_save_fail')+': '+(err.code||err.message), false);
     }).finally(function() {
       if (btn) btn.disabled = false;
     });
@@ -2363,7 +2364,7 @@
       showToast(nextPinned ? 'Post pinned' : 'Post unpinned');
       loadBizPosts();
     }).catch(function(err) {
-      showToast('Could not update: ' + (err.code || err.message), false);
+      showToast(_bpt('update_fail')+': '+(err.code||err.message), false);
     }).finally(function() {
       if (btn) btn.disabled = false;
     });
@@ -2378,7 +2379,7 @@
         status: 'deleted',
         updatedAt: _fs.serverTimestamp()
       }).then(function() {
-        showToast('Post deleted');
+        showToast(_bpt('post_deleted'));
         _currentPosts = _currentPosts.filter(function(p){ return p.id !== postId; });
         businessCleanPostCards(postId).forEach(function(el) {
           el.style.transition = 'opacity .2s';
@@ -2387,7 +2388,7 @@
         });
       }).catch(function(err) {
         if (btn) btn.disabled = false;
-        showToast('Could not delete: ' + (err.code || err.message), false);
+        showToast(_bpt('post_del_fail')+': '+(err.code||err.message), false);
       });
     });
   }
@@ -2404,7 +2405,7 @@
       showToast(newVal ? 'Comments disabled' : 'Comments enabled');
       loadBizPosts();
     }).catch(function(err) {
-      showToast('Could not update: ' + (err.code || err.message), false);
+      showToast(_bpt('update_fail')+': '+(err.code||err.message), false);
     }).finally(function() {
       if (btn) btn.disabled = false;
     });
@@ -2420,10 +2421,10 @@
       visibility: vis, updatedAt: _fs.serverTimestamp()
     }).then(function() {
       var labels = { public: 'Public', followers: 'Followers only', private: 'Private' };
-      showToast('Visibility: ' + (labels[vis] || vis));
+      showToast(_bpt('visibility','Visibility')+': ' + (labels[vis] || vis));
       loadBizPosts();
     }).catch(function(err) {
-      showToast('Could not update: ' + (err.code || err.message), false);
+      showToast(_bpt('update_fail')+': '+(err.code||err.message), false);
     }).finally(function() {
       if (btn) btn.disabled = false;
     });
@@ -3350,7 +3351,7 @@
     },
 
     toggleFollow: function() {
-      if (!_currentUser) { showToast('Sign in to follow','false'); window.location.href='auth.html'; return; }
+      if (!_currentUser) { showToast(_bpt('sign_in_to_follow'),'false'); window.location.href='auth.html'; return; }
       var followId=BIZ_ID+'_'+_currentUser.uid;
       var followRef=_fs.doc(_db,'businessFollowers',followId);
       var btn=document.getElementById('biz-follow-btn');
@@ -3359,21 +3360,21 @@
           _isFollowing=false;
           _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID),{followerCount:_fs.increment(-1)}).catch(function(){});
           if(btn){ btn.className='biz-action-btn primary'; btn.innerHTML='<i class="fas fa-plus"></i> Follow'; }
-          showToast('Unfollowed');
-        }).catch(function(){ showToast('Could not unfollow',false); });
+          showToast(_bpt('unfollowed'));
+        }).catch(function(){ showToast(_bpt('unfollow_fail'),false); });
       } else {
         _fs.setDoc(followRef,{userId:_currentUser.uid,businessId:BIZ_ID,followedAt:_fs.serverTimestamp(),userName:_currentUser.displayName||'',userAvatar:_currentUser.photoURL||''}).then(function(){
           _isFollowing=true;
           _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID),{followerCount:_fs.increment(1)}).catch(function(){});
           notifyBusinessPage('page_follow', (_currentUser.displayName || 'Someone') + ' followed your page', 'Your page has a new follower.', 'business.html?id=' + BIZ_ID, { followerId: _currentUser.uid, followerName: _currentUser.displayName||'', followerAvatar: _currentUser.photoURL||'' });
           if(btn){ btn.className='biz-action-btn following'; btn.innerHTML='<i class="fas fa-check"></i> Following'; }
-          showToast('Following!');
-        }).catch(function(){ showToast('Could not follow',false); });
+          showToast(_bpt('following_done'));
+        }).catch(function(){ showToast(_bpt('follow_fail'),false); });
       }
     },
 
     toggleSave: function() {
-      if (!_currentUser) { showToast('Sign in to save',false); window.location.href='auth.html'; return; }
+      if (!_currentUser) { showToast(_bpt('sign_in_to_save'),false); window.location.href='auth.html'; return; }
       var saveId=_currentUser.uid+'_'+BIZ_ID;
       var saveRef=_fs.doc(_db,'savedBusinesses',saveId);
       var btn=document.getElementById('biz-save-btn');
@@ -3382,15 +3383,15 @@
           _isSaved=false;
           _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID),{saveCount:_fs.increment(-1)}).catch(function(){});
           if(btn){ btn.className='biz-action-btn'; btn.innerHTML='<i class="far fa-bookmark"></i> Save'; }
-          showToast('Removed from saved');
-        }).catch(function(){ showToast('Could not remove',false); });
+          showToast(_bpt('saved_removed'));
+        }).catch(function(){ showToast(_bpt('share_fail'),false); });
       } else {
         _fs.setDoc(saveRef,{userId:_currentUser.uid,businessId:BIZ_ID,savedAt:_fs.serverTimestamp()}).then(function(){
           _isSaved=true;
           _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID),{saveCount:_fs.increment(1)}).catch(function(){});
           if(btn){ btn.className='biz-action-btn saved'; btn.innerHTML='<i class="fas fa-bookmark"></i> Saved'; }
-          showToast('Saved!');
-        }).catch(function(){ showToast('Could not save',false); });
+          showToast(_bpt('saved_done'));
+        }).catch(function(){ showToast(_bpt('post_save_fail'),false); });
       }
     },
 
@@ -3398,11 +3399,11 @@
       var url=window.location.href;
       if(window.GeoShare){ window.GeoShare.sharePlace(BIZ_ID,_biz&&_biz.title,_biz&&_biz.city); return; }
       if(navigator.share){ navigator.share({title:(_biz&&_biz.title)||'GeoHub Business',url:url}).catch(function(){}); return; }
-      if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ showToast('Link copied!'); }).catch(function(){}); }
+      if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ showToast(_bpt('link_copied')); }).catch(function(){}); }
     },
 
     openMessage: function() {
-      if (!_currentUser) { showToast('Sign in to message this page', false); window.location.href='auth.html'; return; }
+      if (!_currentUser) { showToast(_bpt('sign_in_to_msg'), false); window.location.href='auth.html'; return; }
       window.location.href = _isActingAsPage
         ? 'messages.html?business=' + encodeURIComponent(BIZ_ID)
         : 'messages.html?withBusiness=' + encodeURIComponent(BIZ_ID);
@@ -3477,16 +3478,16 @@
       if (!ta) return;
       var val = ta.value.trim();
       if (!val) return;
-      if (!_currentUser) { showToast('Sign in to comment', false); return; }
+      if (!_currentUser) { showToast(_bpt('sign_in_to_comment'), false); return; }
       var GeoSocial = window.GeoSocial;
-      if (!GeoSocial || !GeoSocial.addComment) { showToast('Comments not available', false); return; }
+      if (!GeoSocial || !GeoSocial.addComment) { showToast(_bpt('comments_unavail'), false); return; }
       ta.disabled = true;
       var sendBtn = ta.parentNode && ta.parentNode.querySelector('.biz-cmt-send-btn');
       if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
       GeoSocial.addComment(postId, val, function(err) {
         ta.disabled = false;
         if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>'; }
-        if (err) { showToast('Could not post comment', false); return; }
+        if (err) { showToast(_bpt('comment_post_fail'), false); return; }
         ta.value = '';
         ta.style.height = 'auto';
       });
@@ -3526,10 +3527,10 @@
           text: newText, updatedAt: _fs.serverTimestamp()
         }).then(function() {
           textEl.innerHTML = esc(newText);
-          showToast('Comment updated');
+          showToast(_bpt('comment_updated'));
         }).catch(function(err) {
           textEl.innerHTML = esc(current);
-          showToast('Could not edit: '+(err.code||err.message), false);
+          showToast(_bpt('comment_edit_fail')+': '+(err.code||err.message), false);
         });
       };
     },
@@ -3543,8 +3544,8 @@
           var wrap = document.querySelector('[data-cid="'+CSS.escape(commentId)+'"]');
           if (wrap) { wrap.style.transition='opacity .2s'; wrap.style.opacity='0'; setTimeout(function(){ wrap.remove(); },220); }
           _fs.updateDoc(_fs.doc(_db,'posts',postId),{commentCount:_fs.increment(-1)}).catch(function(){});
-          showToast('Comment deleted');
-        }).catch(function(err) { showToast('Could not delete: '+(err.code||err.message), false); });
+          showToast(_bpt('comment_deleted'));
+        }).catch(function(err) { showToast(_bpt('post_del_fail')+': '+(err.code||err.message), false); });
       });
     },
 
@@ -3570,19 +3571,19 @@
       if (!ta) return;
       var val = ta.value.trim();
       if (!val) return;
-      if (!_currentUser) { showToast('Sign in to reply', false); return; }
+      if (!_currentUser) { showToast(_bpt('sign_in_to_reply'), false); return; }
       ta.disabled = true;
       var sendBtn = ta.parentNode && ta.parentNode.querySelector('.biz-cmt-send-btn');
       if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
       var done = function(err) {
         ta.disabled = false;
         if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>'; }
-        if (err) { showToast('Could not post reply', false); return; }
+        if (err) { showToast(_bpt('reply_post_fail'), false); return; }
         ta.value = ''; ta.style.height = 'auto';
         var composer = document.getElementById('biz-rpl-'+postId+'-'+commentId);
         if (composer) composer.style.display = 'none';
         _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId), {replyCount: _fs.increment(1)}).catch(function(){});
-        showToast('Reply posted!');
+        showToast(_bpt('reply_posted'));
         window._bizActions.toggleReplies(postId, commentId, null, true);
       };
       var GeoSocial = window.GeoSocial;
@@ -3679,8 +3680,8 @@
           text: newText, updatedAt: _fs.serverTimestamp()
         }).then(function() {
           textEl.innerHTML = esc(newText);
-          showToast('Reply updated');
-        }).catch(function() { textEl.innerHTML = esc(current); showToast('Could not edit reply', false); });
+          showToast(_bpt('reply_updated_done'));
+        }).catch(function() { textEl.innerHTML = esc(current); showToast(_bpt('reply_edit_fail'), false); });
       };
     },
 
@@ -3693,14 +3694,14 @@
           var wrap = document.querySelector('[data-rid="'+CSS.escape(replyId)+'"]');
           if (wrap) { wrap.style.transition='opacity .2s'; wrap.style.opacity='0'; setTimeout(function(){ wrap.remove(); },220); }
           _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId), {replyCount: _fs.increment(-1)}).catch(function(){});
-          showToast('Reply deleted');
-        }).catch(function() { showToast('Could not delete reply', false); });
+          showToast(_bpt('reply_del_done'));
+        }).catch(function() { showToast(_bpt('reply_del_fail2'), false); });
       });
     },
 
     // ── Reactions ─────────────────────────────────────────────────
     setReaction: function(postId, key) {
-      if (!_currentUser) { showToast('Sign in to react', false); return; }
+      if (!_currentUser) { showToast(_bpt('sign_in_to_react'), false); return; }
       window._bizActions.closeAllPickers();
       var pr = _postReactions[postId] || {};
       var prevKey = pr.key || null;
@@ -3732,7 +3733,7 @@
     },
 
     toggleReaction: function(postId) {
-      if (!_currentUser) { showToast('Sign in to react', false); return; }
+      if (!_currentUser) { showToast(_bpt('sign_in_to_react'), false); return; }
       var pr = _postReactions[postId];
       if (pr && pr.loaded) {
         window._bizActions.setReaction(postId, pr.key || 'like');
@@ -3787,7 +3788,7 @@
 
     // ── Share modal ───────────────────────────────────────────────
     openShareModal: function(postId) {
-      if (!_currentUser) { showToast('Sign in to share', false); return; }
+      if (!_currentUser) { showToast(_bpt('sign_in_to_share'), false); return; }
       _sharePostId = postId;
       var overlay = document.getElementById('biz-share-overlay');
       if (!overlay) return;
@@ -3812,9 +3813,9 @@
       if (GeoSocial && GeoSocial.createPost) {
         GeoSocial.createPost(caption, '', function(newId) {
           if (newId) {
-            showToast('Shared!');
+            showToast(_bpt('shared_done'));
             _fs.updateDoc(_fs.doc(_db,'posts',postId),{shareCount:_fs.increment(1)}).catch(function(){});
-          } else { showToast('Could not share', false); }
+          } else { showToast(_bpt('share_fail'), false); }
         }, extra);
       } else {
         var authorName = _currentUser.displayName || (_currentUser.email||'').split('@')[0] || 'User';
@@ -3825,9 +3826,9 @@
           createdAt:_fs.serverTimestamp(), updatedAt:_fs.serverTimestamp(),
         }, extra))
         .then(function(){
-          showToast('Shared!');
+          showToast(_bpt('shared_done'));
           _fs.updateDoc(_fs.doc(_db,'posts',postId),{shareCount:_fs.increment(1)}).catch(function(){});
-        }).catch(function(){ showToast('Could not share', false); });
+        }).catch(function(){ showToast(_bpt('share_fail'), false); });
       }
     },
 
@@ -3836,12 +3837,12 @@
       window._bizActions.closeShareModal();
       var url = window.location.origin + window.location.pathname + '?id=' + encodeURIComponent(BIZ_ID) + '#post-' + (postId||'');
       if (navigator.clipboard) {
-        navigator.clipboard.writeText(url).then(function(){ showToast('Link copied!'); }).catch(function(){ showToast('Could not copy', false); });
+        navigator.clipboard.writeText(url).then(function(){ showToast(_bpt('link_copied')); }).catch(function(){ showToast(_bpt('could_not_copy'), false); });
       } else {
         var ta = document.createElement('textarea');
         ta.value = url; ta.style.cssText = 'position:fixed;opacity:0';
         document.body.appendChild(ta); ta.select();
-        try { document.execCommand('copy'); showToast('Link copied!'); } catch(e){ showToast('Could not copy', false); }
+        try { document.execCommand('copy'); showToast(_bpt('link_copied')); } catch(e){ showToast(_bpt('could_not_copy'), false); }
         document.body.removeChild(ta);
       }
     },
@@ -3853,12 +3854,12 @@
       if (navigator.share) {
         navigator.share({ title: (_biz&&_biz.title)||'GeoHub Post', url: url }).catch(function(){});
       } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(url).then(function(){ showToast('Link copied!'); }).catch(function(){});
+        navigator.clipboard.writeText(url).then(function(){ showToast(_bpt('link_copied')); }).catch(function(){});
       }
     },
 
     togglePostSave: function(postId, btnEl) {
-      if (!_currentUser) { showToast('Sign in to save', false); return; }
+      if (!_currentUser) { showToast(_bpt('sign_in_to_save'), false); return; }
       var setSavedUi = function(saved) {
         _postSaves[postId] = !!saved;
         document.querySelectorAll('[data-post-id="'+CSS.escape(postId)+'"] [data-biz-post-save], [data-post-id="'+CSS.escape(postId)+'"] .biz-post-save-btn').forEach(function(btn) {
@@ -3882,7 +3883,7 @@
         if (snap.exists()) {
           return _fs.deleteDoc(saveRef).then(function() {
             setSavedUi(false);
-            showToast('Removed from saved');
+            showToast(_bpt('saved_removed'));
           });
         }
         return _fs.setDoc(saveRef, {
@@ -3892,11 +3893,11 @@
           createdAt: _fs.serverTimestamp()
         }).then(function() {
           setSavedUi(true);
-          showToast('Post saved');
+          showToast(_bpt('post_saved'));
         });
       }).catch(function(err) {
         console.error('[BizPage] togglePostSave failed:', err.code || err.message);
-        showToast('Could not save post', false);
+        showToast(_bpt('post_save_fail'), false);
       }).finally(function() {
         if (btnEl) btnEl.disabled = false;
       });
@@ -4049,14 +4050,14 @@
       if (!ta) return;
       var newText = ta.value.trim();
       var newVis  = sel ? sel.value : 'public';
-      if (!newText) { showToast('Post text cannot be empty', false); return; }
+      if (!newText) { showToast(_bpt('post_save_content_req'), false); return; }
       if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
       var postId = _editPostId;
       _fs.updateDoc(_fs.doc(_db,'posts',postId), {
         text: newText, visibility: newVis, updatedAt: _fs.serverTimestamp()
       }).then(function(){
         window._bizActions.closeEditModal();
-        showToast('Post updated');
+        showToast(_bpt('post_updated'));
         // Update card in place
         var card = document.querySelector('[data-post-id="'+CSS.escape(postId)+'"]');
         if (card) {
@@ -4065,7 +4066,7 @@
           card.dataset.vis = newVis;
         }
       }).catch(function(err){
-        showToast('Could not save: '+(err.code||err.message), false);
+        showToast(_bpt('post_save_fail')+': '+(err.code||err.message), false);
       }).finally(function(){
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Save'; }
       });
@@ -4079,13 +4080,13 @@
         _fs.updateDoc(_fs.doc(_db,'posts',postId), {
           status: 'deleted', updatedAt: _fs.serverTimestamp()
         }).then(function(){
-          showToast('Post deleted');
+          showToast(_bpt('post_deleted'));
           document.querySelectorAll('[data-post-id="'+CSS.escape(postId)+'"]').forEach(function(el){
             el.style.transition = 'opacity .25s';
             el.style.opacity = '0';
             setTimeout(function(){ el.remove(); }, 260);
           });
-        }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+        }).catch(function(err){ showToast(_bpt('post_del_fail')+': '+(err.code||err.message), false); });
       });
     },
 
@@ -4122,7 +4123,7 @@
     _confirmHardDelete: function() {
       var inp = document.getElementById('biz-delete-confirm-input');
       if (!inp || inp.value.trim() !== 'DELETE') {
-        showToast('Type DELETE to confirm', false);
+        showToast(_bpt('type_delete_cfm'), false);
         if (inp) { inp.style.borderColor = 'rgba(239,68,68,.8)'; inp.focus(); }
         return;
       }
@@ -4131,13 +4132,13 @@
       if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting…'; }
       _hardDeleteBusiness(BIZ_ID, _currentUser.uid).then(function() {
         if (overlay) overlay.remove();
-        showToast('Business page deleted');
+        showToast(_bpt('biz_deleted'));
         try { localStorage.removeItem('gh_active_actor'); } catch(e) {}
         try { window.dispatchEvent(new CustomEvent('GeoActorChanged', { detail: { type: 'user' } })); } catch(e) {}
         setTimeout(function() { window.location.href = 'businesses.html'; }, 1000);
       }).catch(function(err) {
         if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.innerHTML = '<i class="fas fa-trash"></i> Delete Forever'; }
-        showToast('Delete failed: ' + (err.code || err.message), false);
+        showToast(_bpt('post_del_fail')+': '+(err.code||err.message), false);
       });
     },
 
@@ -4155,7 +4156,7 @@
         showToast(newVal ? 'Comments disabled' : 'Comments enabled');
         // Reload posts to reflect new state
         loadBizPosts();
-      }).catch(function(err){ showToast('Could not update: '+(err.code||err.message), false); });
+      }).catch(function(err){ showToast(_bpt('update_fail')+': '+(err.code||err.message), false); });
     },
 
     // ── Pin / unpin ───────────────────────────────────────────────
@@ -4169,7 +4170,7 @@
       }).then(function(){
         showToast(isPinned ? 'Post unpinned' : 'Post pinned');
         loadBizPosts();
-      }).catch(function(err){ showToast('Could not update: '+(err.code||err.message), false); });
+      }).catch(function(err){ showToast(_bpt('update_fail')+': '+(err.code||err.message), false); });
     },
 
     // ── Set visibility ────────────────────────────────────────────
@@ -4180,13 +4181,13 @@
         visibility: vis, updatedAt: _fs.serverTimestamp()
       }).then(function(){
         var labels = { public:'Public', followers:'Followers only', private:'Private' };
-        showToast('Visibility: '+(labels[vis]||vis));
+        showToast(_bpt('visibility','Visibility')+': '+(labels[vis]||vis));
         loadBizPosts();
-      }).catch(function(err){ showToast('Could not update: '+(err.code||err.message), false); });
+      }).catch(function(err){ showToast(_bpt('update_fail')+': '+(err.code||err.message), false); });
     },
 
     openQuote: function(serviceTitle, serviceId, mode) {
-      if (!_currentUser) { showToast('Sign in to request a quote', false); window.location.href='auth.html'; return; }
+      if (!_currentUser) { showToast(_bpt('sign_in_to_quote'), false); window.location.href='auth.html'; return; }
       var m = document.getElementById('biz-quote-modal'); if (!m) return;
       var sf = document.getElementById('q-service');
       if (sf) sf.value = serviceTitle ? String(serviceTitle) : '';
@@ -4219,8 +4220,8 @@
       var service = ((document.getElementById('q-service')||{}).value||'').trim();
       var msg     = ((document.getElementById('q-message')||{}).value||'').trim();
       var btn     = document.getElementById('q-submit-btn');
-      if(!name||!email||!msg){ showToast('Please fill in name, email, and message',false); return; }
-      if(!_currentUser){ showToast('Please sign in',false); return; }
+      if(!name||!email||!msg){ showToast(_bpt('please_fill_contact'),false); return; }
+      if(!_currentUser){ showToast(_bpt('please_sign_in'),false); return; }
       if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Sending…'; }
       var payload = {
         name: name, email: email, phone: phone, message: msg,
@@ -4253,11 +4254,11 @@
         ['q-name','q-email','q-phone','q-service','q-message'].forEach(function(id){
           var el=document.getElementById(id); if(el) el.value='';
         });
-        showToast('Quote request sent!');
+        showToast(_bpt('quote_sent'));
         if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i> Send Request'; }
       }).catch(function(err){
         console.error('[BizPage] Quote submit failed',err);
-        showToast('Could not send. Try again.',false);
+        showToast(_bpt('send_fail'),false);
         if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i> Send Request'; }
       });
     },
@@ -4276,7 +4277,7 @@
 
     openCompose: function(){
       if (BUSINESS_PAGE_POSTS_DISABLED || !BUSINESS_PAGE_POST_COMPOSER_ENABLED) {
-        showToast('Business page post composer is being rebuilt.', false);
+        showToast(_bpt('biz_rebuild'), false);
         return;
       }
       var m=document.getElementById('biz-compose-modal'); if(!m) return;
@@ -4355,13 +4356,13 @@
 
     submitBizPost: function() {
       if (BUSINESS_PAGE_POSTS_DISABLED || !BUSINESS_PAGE_POST_COMPOSER_ENABLED) {
-        showToast('Business page post composer is being rebuilt.', false);
+        showToast(_bpt('biz_rebuild'), false);
         return;
       }
-      if(!_currentUser){ showToast('Sign in to post',false); window.location.href='auth.html'; return; }
+      if(!_currentUser){ showToast(_bpt('sign_in_to_post'),false); window.location.href='auth.html'; return; }
       var textVal=(document.getElementById('biz-compose-text')||{}).value||'';
       var files=window._composePendingFiles||[];
-      if(!textVal.trim()&&!files.length){ showToast('Write something or add a photo',false); return; }
+      if(!textVal.trim()&&!files.length){ showToast(_bpt('write_something'),false); return; }
       var btn=document.getElementById('biz-compose-btn');
       if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Posting…'; }
 
@@ -4405,7 +4406,7 @@
         });
       }).then(function(docRef){
         window._bizActions.closeCompose(true);
-        showToast('Posted!');
+        showToast(_bpt('posted_done'));
         if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-paper-plane"></i> Post'; }
         // Optimistic UI: prepend post immediately without waiting for re-fetch
         var nowTs = { toMillis: function(){ return Date.now(); } };
@@ -4432,19 +4433,19 @@
         installCleanBusinessPostInteractions();
       }).catch(function(err){
         console.error('[BizPage] Post failed',err);
-        showToast('Post failed: '+(err.code||err.message||'check console'),false);
+        showToast(_bpt('post_save_fail')+': '+(err.code||err.message||'?'),false);
         if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i> Post'; }
       });
     },
 
     likePost: function(postId, btn) {
-      if(!_currentUser){ showToast('Sign in to like posts',false); return; }
+      if(!_currentUser){ showToast(_bpt('sign_in_to_like'),false); return; }
       if(btn && btn.classList.contains('liked')) return; // already liked this session
       _fs.setDoc(_fs.doc(_db,'posts',postId,'likes',_currentUser.uid),{userId:_currentUser.uid,createdAt:_fs.serverTimestamp()},{merge:true})
         .then(function(){
           if(btn){ btn.classList.add('liked'); btn.innerHTML='<i class="fas fa-thumbs-up"></i> Liked'; }
           _fs.updateDoc(_fs.doc(_db,'posts',postId),{likeCount:_fs.increment(1)}).catch(function(){});
-        }).catch(function(){ showToast('Could not like',false); });
+        }).catch(function(){ showToast(_bpt('soc_reaction_fail'),false); });
     },
 
     openPhoto:  function(url){ var lb=document.getElementById('biz-lightbox'),img=document.getElementById('biz-lightbox-img'); if(lb&&img){ img.src=url; lb.classList.add('open'); } },
@@ -4469,10 +4470,10 @@
     },
 
     submitReview: function() {
-      if(!_currentUser){ showToast('Sign in to review',false); return; }
-      if(!_reviewRating){ showToast('Please select a star rating',false); return; }
+      if(!_currentUser){ showToast(_bpt('sign_in_to_review'),false); return; }
+      if(!_reviewRating){ showToast(_bpt('please_rate'),false); return; }
       var text=(document.getElementById('biz-review-text')||{}).value||'';
-      if(!text.trim()){ showToast('Please write a review',false); return; }
+      if(!text.trim()){ showToast(_bpt('please_write_review'),false); return; }
       var btn=document.getElementById('biz-review-submit-btn');
       if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Posting…'; }
       var name=_currentUser.displayName||(_currentUser.email||'').split('@')[0]||'User';
@@ -4492,8 +4493,8 @@
           _biz.reviewCount=(_biz.reviewCount||0)+1;
           _reviewRating=0;
         });
-      }).then(function(){ showToast('Review posted!'); reloadReviewsTab(); })
-        .catch(function(err){ console.error('[BizPage] Review failed',err); showToast('Could not post review',false); if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i> Submit Review'; } });
+      }).then(function(){ showToast(_bpt('review_posted')); reloadReviewsTab(); })
+        .catch(function(err){ console.error('[BizPage] Review failed',err); showToast(_bpt('review_post_fail'),false); if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i> Submit Review'; } });
     },
 
     ownerAddPhoto: function(){ var inp=document.getElementById('biz-owner-photo-input'); if(inp) inp.click(); },
@@ -4505,20 +4506,20 @@
         var file = input.files && input.files[0]; if (!file) return;
         var btn = document.querySelector('.biz-cover-edit-btn');
         if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>'; }
-        showToast('Uploading cover…');
+        showToast(_bpt('uploading_cover'));
         function onDone(url) {
-          if (!url) { showToast('Upload failed', false); if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> Edit Cover'; } return; }
+          if (!url) { showToast(_bpt('upload_failed'), false); if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> Edit Cover'; } return; }
           _fs.updateDoc(_fs.doc(_db, 'businesses', BIZ_ID), { coverUrl: url }).then(function() {
             var cover = document.querySelector('.biz-cover');
             if (cover) { cover.style.backgroundImage = 'url('+url+')'; cover.style.backgroundSize = 'cover'; cover.style.backgroundPosition = 'center'; }
             if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> Edit Cover'; }
-            showToast('Cover photo updated!');
-          }).catch(function() { showToast('Could not save', false); if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> Edit Cover'; } });
+            showToast(_bpt('cover_updated'));
+          }).catch(function() { showToast(_bpt('post_save_fail'), false); if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> Edit Cover'; } });
         }
         if (window.GeoSocial && window.GeoSocial.uploadFile) {
-          window.GeoSocial.uploadFile(file, 'business-covers', function(pct) { if (pct < 100) showToast('Uploading… '+pct+'%'); }).then(onDone).catch(function() { onDone(null); });
+          window.GeoSocial.uploadFile(file, 'business-covers', function(pct) { if (pct < 100) showToast(_bpt('uploading')+' '+pct+'%'); }).then(onDone).catch(function() { onDone(null); });
         } else {
-          directCloudinaryUpload(file, onDone, function(pct) { if (pct < 100) showToast('Uploading… '+pct+'%'); });
+          directCloudinaryUpload(file, onDone, function(pct) { if (pct < 100) showToast(_bpt('uploading')+' '+pct+'%'); });
         }
       };
       input.click();
@@ -4530,18 +4531,18 @@
       input.onchange = function() {
         var file = input.files && input.files[0]; if (!file) return;
         var logoEl = document.querySelector('.biz-logo'); if (logoEl) logoEl.style.opacity = '0.5';
-        showToast('Uploading logo…');
+        showToast(_bpt('uploading_logo'));
         function onDone(url) {
-          if (!url) { showToast('Upload failed', false); if (logoEl) logoEl.style.opacity = ''; return; }
+          if (!url) { showToast(_bpt('upload_failed'), false); if (logoEl) logoEl.style.opacity = ''; return; }
           _fs.updateDoc(_fs.doc(_db, 'businesses', BIZ_ID), { logoUrl: url }).then(function() {
             if (logoEl) { logoEl.style.opacity = ''; logoEl.innerHTML = '<img src="'+url+'" alt="logo"><div class="biz-logo-edit-overlay"><i class="fas fa-camera"></i></div>'; }
-            showToast('Logo updated!');
-          }).catch(function() { showToast('Could not save', false); if (logoEl) logoEl.style.opacity = ''; });
+            showToast(_bpt('logo_updated'));
+          }).catch(function() { showToast(_bpt('post_save_fail'), false); if (logoEl) logoEl.style.opacity = ''; });
         }
         if (window.GeoSocial && window.GeoSocial.uploadFile) {
-          window.GeoSocial.uploadFile(file, 'business-logos', function(pct) { if (pct < 100) showToast('Uploading… '+pct+'%'); }).then(onDone).catch(function() { onDone(null); });
+          window.GeoSocial.uploadFile(file, 'business-logos', function(pct) { if (pct < 100) showToast(_bpt('uploading')+' '+pct+'%'); }).then(onDone).catch(function() { onDone(null); });
         } else {
-          directCloudinaryUpload(file, onDone, function(pct) { if (pct < 100) showToast('Uploading… '+pct+'%'); });
+          directCloudinaryUpload(file, onDone, function(pct) { if (pct < 100) showToast(_bpt('uploading')+' '+pct+'%'); });
         }
       };
       input.click();
@@ -4553,14 +4554,14 @@
       var up=(window.GeoSocial&&window.GeoSocial.uploadFile)
         ? function(f,cb,op){ return window.GeoSocial.uploadFile(f,'business-gallery',op).then(cb); }
         : directCloudinaryUpload;
-      showToast('Uploading…');
+      showToast(_bpt('uploading'));
       up(file,function(url){
-        if(!url){ showToast('Upload failed',false); return; }
+        if(!url){ showToast(_bpt('upload_failed'),false); return; }
         _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'gallery'),{
           url:url,caption:'',order:Date.now(),
           uploadedBy:_currentUser&&_currentUser.uid,createdAt:_fs.serverTimestamp(),
-        }).then(function(){ showToast('Photo added!'); load(); }).catch(function(){ showToast('Could not save',false); });
-      },function(pct){ if(pct<100) showToast('Uploading… '+pct+'%'); });
+        }).then(function(){ showToast(_bpt('photo_added')); load(); }).catch(function(){ showToast(_bpt('post_save_fail'),false); });
+      },function(pct){ if(pct<100) showToast(_bpt('uploading')+' '+pct+'%'); });
       input.value='';
     },
 
@@ -4599,7 +4600,7 @@
       var type    = ((document.getElementById('biz-block-type-val')||{}).value || 'text').trim();
       var title   = ((document.getElementById('biz-block-title-inp')||{}).value || '').trim();
       var content = ((document.getElementById('biz-block-content-inp')||{}).value || '').trim();
-      if (!content && !title) { showToast('Add a title or content', false); return; }
+      if (!content && !title) { showToast(_bpt('add_title_content'), false); return; }
       var btn = document.getElementById('biz-add-block-btn');
       if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding…'; }
       _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'pageBlocks'), {
@@ -4607,7 +4608,7 @@
         enabled: true, order: Date.now(),
         createdBy: _currentUser.uid, createdAt: _fs.serverTimestamp(),
       }).then(function() {
-        showToast('Block added!');
+        showToast(_bpt('block_added'));
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Add Block'; }
         var ti = document.getElementById('biz-block-title-inp');
         var ci = document.getElementById('biz-block-content-inp');
@@ -4617,7 +4618,7 @@
         loadPageBlocks();
       }).catch(function(err) {
         console.error('[BizPage] addBlock failed', err);
-        showToast('Could not add block', false);
+        showToast(_bpt('block_add_fail'), false);
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-plus"></i> Add Block'; }
       });
     },
@@ -4627,10 +4628,10 @@
       window.ghConfirm('Delete this block?', function() {
         _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'pageBlocks',blockId))
           .then(function() {
-            showToast('Block deleted');
+            showToast(_bpt('block_deleted_done'));
             loadPageBlocks();
             window._bizActions.refreshBlockManagerList();
-          }).catch(function() { showToast('Could not delete', false); });
+          }).catch(function() { showToast(_bpt('post_del_fail'), false); });
       });
     },
 
@@ -4666,7 +4667,7 @@
           _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID,'pageBlocks',a.id), {order: bOrder}),
           _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID,'pageBlocks',b2.id), {order: aOrder}),
         ]);
-      }).then(function() { loadPageBlocks(); }).catch(function() { showToast('Could not reorder', false); });
+      }).then(function() { loadPageBlocks(); }).catch(function() { showToast(_bpt('reorder_fail'), false); });
     },
 
     refreshBlockManagerList: function() {
@@ -4728,10 +4729,10 @@
       _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID,'pageBlocks',blockId), {
         title: ti.value.trim(), content: ci.value.trim(), updatedAt: _fs.serverTimestamp(),
       }).then(function() {
-        showToast('Block updated!');
+        showToast(_bpt('block_updated_done'));
         loadPageBlocks();
         window._bizActions.refreshBlockManagerList();
-      }).catch(function() { showToast('Could not save', false); });
+      }).catch(function() { showToast(_bpt('post_save_fail'), false); });
     },
 
     // ── Notification toggle ───────────────────────────────────────
@@ -4784,7 +4785,7 @@
       var loc   = ((document.getElementById('ev-loc')||{}).value||'').trim();
       var cover = ((document.getElementById('ev-cover')||{}).value||'').trim();
       var maxA  = parseInt(((document.getElementById('ev-max')||{}).value||''),10)||0;
-      if (!name || !date) { showToast('Event name and date are required', false); return; }
+      if (!name || !date) { showToast(_bpt('event_date_req'), false); return; }
       var btn = document.getElementById('ev-submit-btn');
       if (btn) { btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>'; }
       _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'events'), {
@@ -4794,28 +4795,28 @@
         maxAttendees: maxA||null, createdBy: _currentUser.uid,
         createdAt: _fs.serverTimestamp(), attendeeCount: 0
       }).then(function() {
-        showToast('Event created!');
+        showToast(_bpt('event_created'));
         window._bizActions.closeCreateEvent();
         loadEvents(BIZ_ID);
       }).catch(function(err) {
-        showToast('Could not create event: '+(err.code||err.message), false);
+        showToast(_bpt('event_create_fail')+': '+(err.code||err.message), false);
         if (btn) { btn.disabled=false; btn.innerHTML='<i class="fas fa-calendar-plus"></i> Create Event'; }
       });
     },
 
     rsvpEvent: function(eventId, status) {
-      if (!_currentUser) { showToast('Sign in to RSVP', false); return; }
+      if (!_currentUser) { showToast(_bpt('sign_in_to_rsvp'), false); return; }
       _fs.setDoc(
         _fs.doc(_db,'businesses',BIZ_ID,'events',eventId,'rsvps',_currentUser.uid),
         {userId:_currentUser.uid, status:status, updatedAt:_fs.serverTimestamp()},
         {merge:true}
       ).then(function() {
-        showToast('RSVP saved: '+status.replace('_',' '));
+        showToast(_bpt('rsvp_saved')+': '+status.replace('_',' '));
         var wrap = document.getElementById('biz-ersvp-'+CSS.escape(eventId));
         if (wrap) wrap.querySelectorAll('.biz-rsvp-btn').forEach(function(b){
           b.classList.toggle('active', b.dataset.status === status);
         });
-      }).catch(function(){ showToast('Could not save RSVP', false); });
+      }).catch(function(){ showToast(_bpt('rsvp_save_fail'), false); });
     },
 
     // ── FAQ ───────────────────────────────────────────────────────
@@ -4845,17 +4846,17 @@
       if (!isAdminOrOwner()) return;
       var q = ((document.getElementById('faq-q-inp')||{}).value||'').trim();
       var a = ((document.getElementById('faq-a-inp')||{}).value||'').trim();
-      if (!q || !a) { showToast('Question and answer are required', false); return; }
+      if (!q || !a) { showToast(_bpt('q_and_a_req'), false); return; }
       var btn = document.getElementById('faq-submit-btn');
       if (btn) { btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>'; }
       _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'faq'), {
         question: q, answer: a, createdBy: _currentUser.uid, createdAt: _fs.serverTimestamp()
       }).then(function() {
-        showToast('FAQ item added!');
+        showToast(_bpt('faq_added'));
         window._bizActions.closeAddFaq();
         loadFaq(BIZ_ID);
       }).catch(function(err) {
-        showToast('Could not add FAQ: '+(err.code||err.message), false);
+        showToast(_bpt('faq_add_fail')+': '+(err.code||err.message), false);
         if (btn) { btn.disabled=false; btn.innerHTML='<i class="fas fa-plus"></i> Add FAQ'; }
       });
     },
@@ -4864,9 +4865,9 @@
       if (!isAdminOrOwner()) return;
       window.ghConfirm('Delete this FAQ item?', function() {
         _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'faq',faqId)).then(function() {
-          showToast('FAQ item deleted');
+          showToast(_bpt('faq_deleted_done'));
           loadFaq(BIZ_ID);
-        }).catch(function(){ showToast('Could not delete', false); });
+        }).catch(function(){ showToast(_bpt('post_del_fail'), false); });
       });
     },
 
@@ -4892,26 +4893,26 @@
         _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID,'faq',faqId), {
           answer: ans, updatedAt: _fs.serverTimestamp()
         }).then(function() {
-          showToast('Answer saved');
+          showToast(_bpt('answer_saved'));
           loadFaq(BIZ_ID);
-        }).catch(function(){ showToast('Could not save', false); });
+        }).catch(function(){ showToast(_bpt('post_save_fail'), false); });
       };
     },
 
     submitQuestion: function() {
-      if (!_currentUser) { showToast('Sign in to ask a question', false); return; }
+      if (!_currentUser) { showToast(_bpt('sign_in_to_ask'), false); return; }
       var inp = document.getElementById('biz-faq-question-inp');
       var q = inp ? inp.value.trim() : '';
-      if (!q) { showToast('Please enter a question', false); return; }
+      if (!q) { showToast(_bpt('please_enter_q'), false); return; }
       _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'faqQuestions'), {
         question: q,
         authorId: _currentUser.uid,
         authorName: _currentUser.displayName || (_currentUser.email||'').split('@')[0] || 'User',
         createdAt: _fs.serverTimestamp(), answered: false
       }).then(function() {
-        showToast('Question submitted!');
+        showToast(_bpt('question_submitted'));
         if (inp) inp.value = '';
-      }).catch(function(){ showToast('Could not submit question', false); });
+      }).catch(function(){ showToast(_bpt('question_sub_fail'), false); });
     },
 
     promoteQuestion: function(questionId, questionText) {
@@ -4924,9 +4925,9 @@
       }).then(function() {
         return _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID,'faqQuestions',questionId), {answered:true});
       }).then(function() {
-        showToast('Added to FAQ!');
+        showToast(_bpt('faq_added'));
         loadFaq(BIZ_ID);
-      }).catch(function(){ showToast('Could not add to FAQ', false); });
+      }).catch(function(){ showToast(_bpt('faq_add_fail'), false); });
     },
 
     // ── Milestones ────────────────────────────────────────────────
@@ -4958,7 +4959,7 @@
       var title = ((document.getElementById('ms-title')||{}).value||'').trim();
       var date  = (document.getElementById('ms-date')||{}).value;
       var desc  = ((document.getElementById('ms-desc')||{}).value||'').trim();
-      if (!title || !date) { showToast('Title and date are required', false); return; }
+      if (!title || !date) { showToast(_bpt('title_date_req'), false); return; }
       var btn = document.getElementById('ms-submit-btn');
       if (btn) { btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>'; }
       _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'milestones'), {
@@ -4966,11 +4967,11 @@
         date: new Date(date),
         createdBy: _currentUser.uid, createdAt: _fs.serverTimestamp()
       }).then(function() {
-        showToast('Milestone added!');
+        showToast(_bpt('milestone_added'));
         window._bizActions.closeAddMilestone();
         loadMilestones(BIZ_ID);
       }).catch(function(err) {
-        showToast('Could not add milestone: '+(err.code||err.message), false);
+        showToast(_bpt('milestone_add_fail')+': '+(err.code||err.message), false);
         if (btn) { btn.disabled=false; btn.innerHTML='<i class="fas fa-flag"></i> Add Milestone'; }
       });
     },
@@ -4979,31 +4980,31 @@
       if (!isAdminOrOwner()) return;
       window.ghConfirm('Delete this milestone?', function() {
         _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'milestones',milestoneId)).then(function() {
-          showToast('Milestone deleted');
+          showToast(_bpt('milestone_deleted_done'));
           loadMilestones(BIZ_ID);
-        }).catch(function(){ showToast('Could not delete', false); });
+        }).catch(function(){ showToast(_bpt('post_del_fail'), false); });
       });
     },
 
     // ── Page Admin Roles ──────────────────────────────────────────
     addPageAdmin: function(userId, role) {
       if (!_isOwner) return;
-      if (!userId || !role) { showToast('User ID and role are required', false); return; }
+      if (!userId || !role) { showToast(_bpt('uid_role_req'), false); return; }
       _fs.setDoc(_fs.doc(_db,'businesses',BIZ_ID,'admins',userId), {
         role: role, addedBy: _currentUser.uid, addedAt: _fs.serverTimestamp()
       }).then(function() {
-        showToast('Admin added!');
+        showToast(_bpt('admin_added'));
         window._bizActions.refreshAdminList();
-      }).catch(function(err){ showToast('Could not add admin: '+(err.code||err.message), false); });
+      }).catch(function(err){ showToast(_bpt('admin_add_fail')+': '+(err.code||err.message), false); });
     },
 
     removePageAdmin: function(userId) {
       if (!_isOwner) return;
       window.ghConfirm('Remove this admin?', function() {
         _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'admins',userId)).then(function() {
-          showToast('Admin removed');
+          showToast(_bpt('admin_removed_done'));
           window._bizActions.refreshAdminList();
-        }).catch(function(){ showToast('Could not remove admin', false); });
+        }).catch(function(){ showToast(_bpt('admin_remove_fail'), false); });
       });
     },
 
@@ -5053,7 +5054,7 @@
       var dur   = ((document.getElementById('svc-duration')||{}).value||'').trim();
       var btn   = document.getElementById('svc-save-btn');
       var editId = btn && btn.dataset.editId;
-      if (!title) { showToast('Service name is required', false); return; }
+      if (!title) { showToast(_bpt('service_name_req'), false); return; }
       if (btn) { btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving…'; }
       var data = { title:title, description:desc, price:price, duration:dur, updatedAt:_fs.serverTimestamp() };
       var op = editId
@@ -5064,7 +5065,7 @@
         showToast(editId ? 'Service updated!' : 'Service added!');
         reloadServicesTab();
       }).catch(function(err){
-        showToast('Could not save: '+(err.code||err.message), false);
+        showToast(_bpt('post_save_fail')+': '+(err.code||err.message), false);
         if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-check"></i> Save Service'; }
       });
     },
@@ -5072,7 +5073,7 @@
     editService: function(id) {
       if (!isAdminOrOwner() || !id) return;
       _fs.getDoc(_fs.doc(_db,'businesses',BIZ_ID,'services',id)).then(function(snap){
-        if (!snap.exists()) { showToast('Service not found', false); return; }
+        if (!snap.exists()) { showToast(_bpt('service_not_found'), false); return; }
         var s = snap.data();
         window._bizActions.openAddService();
         setTimeout(function(){
@@ -5085,16 +5086,16 @@
           var lbl=document.getElementById('svc-modal-title');
           if(lbl) lbl.innerHTML='<i class="fas fa-pencil"></i> Edit Service';
         }, 80);
-      }).catch(function(){ showToast('Could not load service', false); });
+      }).catch(function(){ showToast(_bpt('could_not_load_svc'), false); });
     },
 
     deleteService: function(id) {
       if (!isAdminOrOwner() || !id) return;
       window.ghConfirm('Delete this service?', function() {
         _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'services',id)).then(function(){
-          showToast('Service deleted');
+          showToast(_bpt('service_deleted_done'));
           reloadServicesTab();
-        }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+        }).catch(function(err){ showToast(_bpt('post_del_fail')+': '+(err.code||err.message), false); });
       });
     },
 
@@ -5124,16 +5125,16 @@
       var desc  = ((document.getElementById('prd-desc')||{}).value||'').trim();
       var price = ((document.getElementById('prd-price')||{}).value||'').trim();
       var btn   = document.getElementById('prd-save-btn');
-      if (!name) { showToast('Product name is required', false); return; }
+      if (!name) { showToast(_bpt('product_name_req'), false); return; }
       if (btn) { btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving…'; }
       _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'products'), {
         name:name, description:desc, price:price, order:Date.now(), createdAt:_fs.serverTimestamp(), updatedAt:_fs.serverTimestamp()
       }).then(function(){
         var m = document.getElementById('biz-add-product-modal'); if(m) m.remove();
-        showToast('Product added!');
+        showToast(_bpt('product_added'));
         reloadProductsTab();
       }).catch(function(err){
-        showToast('Could not save: '+(err.code||err.message), false);
+        showToast(_bpt('post_save_fail')+': '+(err.code||err.message), false);
         if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-check"></i> Save Product'; }
       });
     },
@@ -5142,9 +5143,9 @@
       if (!isAdminOrOwner() || !id) return;
       window.ghConfirm('Delete this product?', function() {
         _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'products',id)).then(function(){
-          showToast('Product deleted');
+          showToast(_bpt('product_deleted_done'));
           reloadProductsTab();
-        }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+        }).catch(function(err){ showToast(_bpt('post_del_fail')+': '+(err.code||err.message), false); });
       });
     },
 
@@ -5172,16 +5173,16 @@
       var label = ((document.getElementById('pri-label')||{}).value||'').trim();
       var price = ((document.getElementById('pri-price')||{}).value||'').trim();
       var btn   = document.getElementById('pri-save-btn');
-      if (!label || !price) { showToast('Name and price are required', false); return; }
+      if (!label || !price) { showToast(_bpt('name_price_req'), false); return; }
       if (btn) { btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Saving…'; }
       _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'priceList'), {
         label:label, price:price, order:Date.now(), createdAt:_fs.serverTimestamp()
       }).then(function(){
         var m = document.getElementById('biz-add-price-modal'); if(m) m.remove();
-        showToast('Price item added!');
+        showToast(_bpt('price_added'));
         reloadServicesTab();
       }).catch(function(err){
-        showToast('Could not save: '+(err.code||err.message), false);
+        showToast(_bpt('post_save_fail')+': '+(err.code||err.message), false);
         if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-check"></i> Add to Price List'; }
       });
     },
@@ -5190,9 +5191,9 @@
       if (!isAdminOrOwner() || !id) return;
       window.ghConfirm('Remove this price item?', function() {
         _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'priceList',id)).then(function(){
-          showToast('Price item removed');
+          showToast(_bpt('price_removed'));
           reloadServicesTab();
-        }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+        }).catch(function(err){ showToast(_bpt('post_del_fail')+': '+(err.code||err.message), false); });
       });
     },
 
@@ -5207,17 +5208,17 @@
       if (!isAdminOrOwner() || !input.files || !input.files.length) return;
       var file = input.files[0];
       input.value = '';
-      showToast('Uploading photo…');
+      showToast(_bpt('uploading_photo'));
       directCloudinaryUpload(file, function(url) {
-        if (!url) { showToast('Upload failed', false); return; }
+        if (!url) { showToast(_bpt('upload_failed'), false); return; }
         _fs.addDoc(_fs.collection(_db,'businesses',BIZ_ID,'gallery'), {
           url:url, caption:'', order:Date.now(),
           uploadedBy:_currentUser ? _currentUser.uid : '',
           createdAt:_fs.serverTimestamp()
         }).then(function(){
-          showToast('Photo added!');
+          showToast(_bpt('photo_added'));
           reloadGalleryTab();
-        }).catch(function(err){ showToast('Could not save: '+(err.code||err.message), false); });
+        }).catch(function(err){ showToast(_bpt('post_save_fail')+': '+(err.code||err.message), false); });
       });
     },
 
@@ -5225,9 +5226,9 @@
       if (!isAdminOrOwner() || !id) return;
       window.ghConfirm('Delete this photo?', function() {
         _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'gallery',id)).then(function(){
-          showToast('Photo deleted');
+          showToast(_bpt('photo_deleted'));
           reloadGalleryTab();
-        }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+        }).catch(function(err){ showToast(_bpt('post_del_fail')+': '+(err.code||err.message), false); });
       });
     },
 
@@ -5260,15 +5261,15 @@
     saveReviewReply: function(reviewId, ta) {
       if (!_isOwner || !reviewId) return;
       var text = ta ? ta.value.trim() : '';
-      if (!text) { showToast('Reply cannot be empty', false); return; }
+      if (!text) { showToast(_bpt('reply_empty'), false); return; }
       if (ta) ta.disabled = true;
       _fs.updateDoc(_fs.doc(_db,'businessReviews',reviewId), {
         ownerReply: text, updatedAt: _fs.serverTimestamp()
       }).then(function(){
-        showToast('Reply posted!');
+        showToast(_bpt('reply_posted'));
         reloadReviewsTab();
       }).catch(function(err){
-        showToast('Could not post reply: '+(err.code||err.message), false);
+        showToast(_bpt('reply_post_fail')+': '+(err.code||err.message), false);
         if (ta) ta.disabled = false;
       });
     },
@@ -5286,10 +5287,10 @@
         _fs.updateDoc(_fs.doc(_db,'businessReviews',reviewId), {
           ownerReply: '', updatedAt: _fs.serverTimestamp()
         }).then(function(){
-          showToast('Reply deleted');
+          showToast(_bpt('reply_del_done'));
           reloadReviewsTab();
         }).catch(function(err){
-          showToast('Could not delete reply: '+(err.code||err.message), false);
+          showToast(_bpt('reply_del_fail2')+': '+(err.code||err.message), false);
         });
       });
     },
@@ -5335,10 +5336,10 @@
             ratingCount:_fs.increment(-1), ratingTotal:_fs.increment(-(rating||0)),
             ratingAverage: newAvg, reviewCount:_fs.increment(-1), updatedAt:_fs.serverTimestamp()
           }).catch(function(){});
-          showToast('Review deleted');
+          showToast(_bpt('review_deleted_done'));
           reloadReviewsTab();
         }).catch(function(err){
-          showToast('Could not delete: '+(err.code||err.message), false);
+          showToast(_bpt('post_del_fail')+': '+(err.code||err.message), false);
         });
       });
     },
@@ -5394,8 +5395,8 @@
         var q = _qAll.find(function(q){ return q._id === reqId; });
         if (q) q.status = newStatus;
         _qRender();
-        showToast('Status: ' + newStatus);
-      }).catch(function(){ showToast('Could not update status', false); });
+        showToast(_bpt('status_label','Status')+': ' + newStatus);
+      }).catch(function(){ showToast(_bpt('status_fail'), false); });
     },
 
     // ── Service / Product detail modals ──────────────────────────
@@ -5486,8 +5487,8 @@
         var q = _qAll.find(function(q){ return q._id === reqId; });
         if (q) q.ownerNote = note;
         _qRender();
-        showToast('Note saved');
-      }).catch(function(){ showToast('Could not save note', false); });
+        showToast(_bpt('note_saved'));
+      }).catch(function(){ showToast(_bpt('note_save_fail'), false); });
     },
 
     qTogglePriority: function(reqId, current) {
@@ -5499,7 +5500,7 @@
         var q = _qAll.find(function(q){ return q._id === reqId; });
         if (q) q.priority = newPrio;
         _qRender();
-      }).catch(function(){ showToast('Could not update priority', false); });
+      }).catch(function(){ showToast(_bpt('priority_fail'), false); });
     },
   };
 

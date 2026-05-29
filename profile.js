@@ -49,6 +49,7 @@
     if (window.GeoSocial && window.GeoSocial.toast) return window.GeoSocial.toast(msg, type);
     console[type === 'error' ? 'error' : 'log']('[Profile]', msg);
   }
+  function _pt(key,fallback){ if(typeof window.GHt==='function'){var v=window.GHt(key);if(v&&v!==key)return v;} return fallback||key; }
 
   function whenFirebase(cb) {
     if (window.GeoFirebase) return cb(window.GeoFirebase);
@@ -1652,18 +1653,18 @@
 
   window._supportCreator = function (targetUid, targetName) {
     var GS = window.GeoSocial;
-    if (!GS || !GS.sendPoints) { toast('Points system is still loading. Try again in a moment.', 'error'); return; }
+    if (!GS || !GS.sendPoints) { toast(_pt('points_loading'), 'error'); return; }
     var raw = (prompt('Send GeoPoints to ' + esc(targetName) + ':\nEnter amount (1–500):') || '').trim();
     if (!raw) return;
-    if (!/^\d+$/.test(raw)) { toast('Enter a whole number between 1 and 500.', 'error'); return; }
+    if (!/^\d+$/.test(raw)) { toast(_pt('enter_points_1_500'), 'error'); return; }
     var amount = parseInt(raw, 10);
-    if (amount <= 0 || amount > 500) { toast('Enter a number between 1 and 500.', 'error'); return; }
+    if (amount <= 0 || amount > 500) { toast(_pt('enter_points_1_500'), 'error'); return; }
     GS.sendPoints(targetUid, amount, 'Support for creator ' + targetName);
   };
 
   window._activateCreatorMode = function () {
     var fb = window.GeoFirebase;
-    if (!fb || !fb.auth || !fb.db || !fb.fs) { toast('Loading — please try again.', 'error'); return; }
+    if (!fb || !fb.auth || !fb.db || !fb.fs) { toast(_pt('app_loading'), 'error'); return; }
     var u = fb.auth.currentUser;
     if (!u) { window.location.href = 'auth.html'; return; }
     window.ghConfirm(typeof window.GHt === 'function' ? window.GHt('creator_activate_cfm') : 'Activate Creator Mode? Your profile will be listed on the Creators page.', function() {
@@ -2256,7 +2257,7 @@
     if (followBtn) {
       e.preventDefault();
       const target = followBtn.dataset.followUser;
-      if (!window.GeoSocial || !target) return toast('Social system is still loading', 'error');
+      if (!window.GeoSocial || !target) return toast(_pt('social_loading'), 'error');
       window.GeoSocial.toggleFollow(target, isFollowing => {
         $$('[data-follow-user="' + target + '"]').forEach(btn => {
           btn.classList.toggle('following', !!isFollowing);
@@ -2269,7 +2270,7 @@
       e.preventDefault();
       const target = friendBtn.dataset.friendUser;
       const st = friendBtn.dataset.friendState || 'none';
-      if (!window.GeoSocial) { toast('Friends system is still loading', 'error'); return; }
+      if (!window.GeoSocial) { toast(_pt('friends_loading'), 'error'); return; }
       if (st === 'incoming') {
         // Accept directly (Decline is a sibling button handled separately)
         const reqId = friendBtn.dataset.requestId;
@@ -2389,7 +2390,7 @@
     if (msgBtn) {
       e.preventDefault();
       const target = msgBtn.dataset.messageUser;
-      if (!window.GeoSocial || !target) return toast('Messages are still loading', 'error');
+      if (!window.GeoSocial || !target) return toast(_pt('msg_loading'), 'error');
       window.GeoSocial.startConversation(target, () => { location.href = 'messages.html?with=' + encodeURIComponent(target); });
     }
     if (e.target.closest('[data-edit-profile]')) {
