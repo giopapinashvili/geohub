@@ -173,9 +173,15 @@
   function initGoogleButtons() {
     ['googleLoginBtn', 'googleSignupBtn'].forEach(function (id) {
       var btn = document.getElementById(id); if (!btn) return;
+      if (btn.dataset.ghWired) return;
+      btn.dataset.ghWired = '1';
       var label = (id === 'googleLoginBtn') ? _t('auth_with_google', 'Continue with Google') : _t('auth_reg_google', 'Sign up with Google');
-      if (!window.GeoFirebaseAuth) { btn.style.display = 'none'; return; }
       btn.addEventListener('click', function () {
+        if (!window.GeoFirebaseAuth) {
+          var errEl = document.getElementById(id === 'googleLoginBtn' ? 'loginError' : 'signupError');
+          if (errEl) errEl.textContent = _t('auth_not_ready', 'Firebase not ready. Refresh and try again.');
+          return;
+        }
         btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + _t('auth_connecting', 'Connecting…');
         window.GeoFirebaseAuth.googleLogin().then(function () { btn.innerHTML = '<i class="fas fa-check"></i> ' + _t('auth_signed_in', 'Signed in!'); setTimeout(goAfterAuth, 500); })
           .catch(function (err) { btn.disabled = false; btn.innerHTML = GSVG + ' ' + label; var errEl = document.getElementById(id === 'googleLoginBtn' ? 'loginError' : 'signupError'); if (errEl) errEl.textContent = fbErrMsg(err); });
@@ -188,9 +194,15 @@
   function initFacebookButtons() {
     ['facebookLoginBtn', 'facebookSignupBtn'].forEach(function (id) {
       var btn = document.getElementById(id); if (!btn) return;
+      if (btn.dataset.ghWired) return;
+      btn.dataset.ghWired = '1';
       var label = (id === 'facebookLoginBtn') ? _t('auth_with_fb', 'Continue with Facebook') : _t('auth_reg_fb', 'Sign up with Facebook');
-      if (!window.GeoFirebaseAuth || !window.GeoFirebaseAuth.facebookLogin) { btn.style.display = 'none'; return; }
       btn.addEventListener('click', function () {
+        if (!window.GeoFirebaseAuth || !window.GeoFirebaseAuth.facebookLogin) {
+          var errEl = document.getElementById(id === 'facebookLoginBtn' ? 'loginError' : 'signupError');
+          if (errEl) errEl.textContent = _t('auth_not_ready', 'Firebase not ready. Refresh and try again.');
+          return;
+        }
         btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + _t('auth_connecting', 'Connecting…');
         window.GeoFirebaseAuth.facebookLogin()
           .then(function () { btn.innerHTML = '<i class="fas fa-check"></i> ' + _t('auth_signed_in', 'Signed in!'); setTimeout(goAfterAuth, 500); })

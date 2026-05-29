@@ -213,6 +213,7 @@
 
     var hamburger = document.getElementById('geoHamburger');
     if (hamburger) {
+      hamburger.removeAttribute('onclick'); // prevent double-toggle with inline onclick attr
       hamburger.type = 'button';
       hamburger.setAttribute('data-gh-mobile-menu-toggle', '');
       if (!hamburger._ghMenuBound) {
