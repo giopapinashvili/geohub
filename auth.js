@@ -234,57 +234,36 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     function begin() {
-      var pendingSocial = sessionStorage.getItem('gh_pending_social');
+      if (!window.GeoFirebaseAuth) { startForms(); return; }
 
-      if (pendingSocial) {
-        // Coming back from signInWithRedirect — show overlay spinner, preserve form HTML
-        sessionStorage.removeItem('gh_pending_social');
-        var overlay = document.createElement('div');
-        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(5,7,15,.85);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px';
-        overlay.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size:2.5rem;color:#10b981"></i><p style="color:#94a3b8;margin:0">Signing in…</p>';
-        document.body.appendChild(overlay);
-
-        var done = false;
-        function finishRedirect(user, err) {
-          if (done) return;
-          done = true;
-          overlay.remove();
+      // Always check for a pending redirect result first (signInWithRedirect return).
+      // Resolves quickly with null when no redirect is pending.
+      window.GeoFirebaseAuth.handleRedirectResult()
+        .then(function (user) {
           if (user) { goAfterAuth(); return; }
-          startForms();
-          if (err) {
-            var errEl = document.getElementById('loginError') || document.getElementById('signupError');
-            if (errEl) errEl.textContent = fbErrMsg(err);
-          }
-        }
-
-        // Primary: listen to auth state — Firebase fires this after redirect is processed
-        if (window.GeoFirebaseAuth && window.GeoFirebaseAuth.onAuthChange) {
-          window.GeoFirebaseAuth.onAuthChange(function (user) {
-            if (user) finishRedirect(user, null);
-            // Don't finishRedirect(null) here — wait for timeout/getRedirectResult
-          });
-        }
-
-        // Secondary: explicit getRedirectResult
-        if (window.GeoFirebaseAuth && window.GeoFirebaseAuth.handleRedirectResult) {
-          window.GeoFirebaseAuth.handleRedirectResult()
-            .then(function (user) { if (user) finishRedirect(user, null); })
-            .catch(function (err) { finishRedirect(null, err); });
-        }
-
-        // Fallback timeout — if nothing resolves in 6s, show forms
-        setTimeout(function () { finishRedirect(null, null); }, 6000);
-        return;
-      }
-
-      // Normal (non-redirect) flow
-      if (window.GeoFirebaseAuth) {
-        var settled = false;
-        window.GeoFirebaseAuth.onAuthChange(function (user) { if (settled) return; settled = true; if (user) goAfterAuth(); else startForms(); });
-        setTimeout(function () { if (!settled) { settled = true; startForms(); } }, 900);
-      } else startForms();
+          // No redirect result — run normal auth-state check
+          normalFlow();
+        })
+        .catch(function (err) {
+          // getRedirectResult threw — show error then run normal flow
+          normalFlow();
+          var errEl = document.getElementById('loginError') || document.getElementById('signupError');
+          if (errEl) errEl.textContent = fbErrMsg(err);
+        });
     }
+
+    function normalFlow() {
+      if (!window.GeoFirebaseAuth) { startForms(); return; }
+      var settled = false;
+      window.GeoFirebaseAuth.onAuthChange(function (user) {
+        if (settled) return;
+        settled = true;
+        if (user) goAfterAuth(); else startForms();
+      });
+      setTimeout(function () { if (!settled) { settled = true; startForms(); } }, 900);
+    }
+
     if (window.GeoFirebaseAuth) begin(); else window.addEventListener('GeoFirebaseReady', begin, { once: true });
-    setTimeout(function(){ if(!window.GeoFirebaseAuth) startForms(); }, 1000);
+    setTimeout(function () { if (!window.GeoFirebaseAuth) startForms(); }, 1000);
   });
 })();
