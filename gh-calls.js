@@ -31,12 +31,13 @@
   var _pendingCandidates = [];
 
   var ICE = { iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'turn:openrelay.metered.ca:80',    username: 'openrelayproject', credential: 'openrelayproject' },
-    { urls: 'turn:openrelay.metered.ca:443',   username: 'openrelayproject', credential: 'openrelayproject' },
-    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
-  ]};
+    { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] },
+    { urls: ['turn:openrelay.metered.ca:80', 'turn:openrelay.metered.ca:443', 'turns:openrelay.metered.ca:443'],
+      username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:relay.metered.ca:80',   username: 'e8dd65f10e0b67a00bdb7a06', credential: 'uYrHNTjsQAlDFaEb' },
+    { urls: 'turn:relay.metered.ca:443',  username: 'e8dd65f10e0b67a00bdb7a06', credential: 'uYrHNTjsQAlDFaEb' },
+    { urls: 'turns:relay.metered.ca:443', username: 'e8dd65f10e0b67a00bdb7a06', credential: 'uYrHNTjsQAlDFaEb' }
+  ], iceCandidatePoolSize: 10 };
 
   /* ── Helpers ─────────────────────────────────────────────────── */
   function _t(k, fb) {
@@ -294,23 +295,26 @@
     }
     _ring(true);
 
-    // Firestore call doc
+    // Create Firestore doc FIRST so ICE candidate subcollection writes are allowed
     var ref = _fs.doc(_fs.collection(_db, 'calls'));
     _callId = ref.id;
+    await _fs.setDoc(ref, {
+      callerId: me.uid, calleeId: targetUid,
+      callerName: callerName, callerAvatar: callerAvatar,
+      calleeName: targetName, calleeAvatar: targetAvatar || '',
+      type: type, status: 'ringing',
+      createdAt: _fs.serverTimestamp()
+    });
+
+    // Now set up WebRTC (ICE candidates will write to existing doc's subcollection)
     _createPC(_callId, 'caller');
     _localStream.getTracks().forEach(function (t) { _pc.addTrack(t, _localStream); });
 
     var offer = await _pc.createOffer();
     await _pc.setLocalDescription(offer);
 
-    await _fs.setDoc(ref, {
-      callerId: me.uid, calleeId: targetUid,
-      callerName: callerName, callerAvatar: callerAvatar,
-      calleeName: targetName, calleeAvatar: targetAvatar || '',
-      type: type, status: 'ringing',
-      offer: { type: offer.type, sdp: offer.sdp },
-      createdAt: _fs.serverTimestamp()
-    });
+    // Update doc with offer SDP
+    await _fs.updateDoc(ref, { offer: { type: offer.type, sdp: offer.sdp } });
 
     // Listen for answer / status
     _unsubCall = _fs.onSnapshot(_fs.doc(_db, 'calls', _callId), async function (snap) {
@@ -371,13 +375,15 @@
     _createPC(callId, 'callee');
     _localStream.getTracks().forEach(function (t) { _pc.addTrack(t, _localStream); });
 
+    // Start collecting remote candidates early (before setRemoteDescription)
+    // so none are missed; they queue in _pendingCandidates until remoteDescription is set
+    _listenCandidates(callId, 'callerCandidates');
+
     await _pc.setRemoteDescription(new RTCSessionDescription(data.offer)).catch(function () {});
     _flushCandidates();
     var answer = await _pc.createAnswer();
     await _pc.setLocalDescription(answer);
     await _fs.updateDoc(ref, { answer: { type: answer.type, sdp: answer.sdp }, status: 'active' });
-
-    _listenCandidates(callId, 'callerCandidates');
 
     _unsubCall = _fs.onSnapshot(ref, function (s2) {
       var d = s2.data();
