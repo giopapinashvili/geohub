@@ -1380,7 +1380,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<select class="gh-select" id="ghPollDuration"><option value="1">1 day</option><option value="3" selected>3 days</option><option value="7">7 days</option></select>'+
       '</div>'+
       '<div id="ghRegularComposer">'+
-        '<textarea class="gh-textarea gh-cmp-textarea" id="ghPostText" data-i18n-placeholder="composer_placeholder" placeholder="What\'s on your mind?" rows="4"></textarea>'+
+        '<textarea class="gh-textarea gh-cmp-textarea" id="ghPostText" data-i18n-placeholder="composer_placeholder" placeholder="What\'s on your mind?" rows="4" maxlength="2000"></textarea>'+
+        '<div class="gh-char-count"><span id="ghCharUsed">0</span>/2000</div>'+
         '<div id="ghLinkPreviewCard" style="display:none" class="gh-lp-composer-preview"></div>'+
         '<div class="gh-feeling-row" id="ghFeelingRow">'+FEELINGS.map(function(f){ return '<button type="button" class="gh-feeling-chip" data-feeling="'+esc(f)+'">'+esc(f)+'</button>'; }).join('')+'</div>'+
         '<div id="ghSelectedFeeling" style="display:none;font-size:.84rem;color:var(--gh-green);margin:4px 0 8px;padding:4px 10px;background:rgba(16,185,129,.08);border-radius:10px"></div>'+
@@ -1711,6 +1712,22 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
     var ta=$('#ghPostText');
     if(ta) _bindMentionAutocomplete(ta);
+
+    // Character counter
+    var _charUsedEl=document.getElementById('ghCharUsed');
+    var _charCountEl=_charUsedEl&&_charUsedEl.parentElement;
+    var _MAX_CHARS=2000;
+    if(ta && _charUsedEl){
+      function _updateCharCount(){
+        var n=ta.value.length;
+        _charUsedEl.textContent=n;
+        var pct=n/_MAX_CHARS;
+        _charUsedEl.style.color=pct>=1?'#ef4444':pct>=0.85?'#f59e0b':'';
+        if(_charCountEl) _charCountEl.style.color=pct>=1?'#ef4444':pct>=0.85?'#f59e0b':'var(--gh-muted,#8aa69a)';
+      }
+      ta.addEventListener('input',_updateCharCount);
+      _updateCharCount();
+    }
 
     // Auto-focus
     if(ta) { ta.focus(); }
