@@ -961,6 +961,35 @@
     notif_missed_call:     { ka: 'გამოტოვებული ზარი',      en: 'Missed call',                  ru: 'Пропущенный звонок'            },
     notif_missed_call_body:{ ka: '-სგან გამოტოვებული ',   en: ' — missed ',                   ru: ' — пропущен '                  },
 
+    /* ── Group calls ────────────────────────────────────────── */
+    group_call_new:        { ka: 'ახალი ჯგუფური ზარი',     en: 'New Group Call',               ru: 'Новый групповой звонок'        },
+    group_call_type:       { ka: 'ზარის ტიპი',             en: 'Call type',                    ru: 'Тип звонка'                    },
+    group_call_start:      { ka: 'ზარის დაწყება',          en: 'Start Call',                   ru: 'Начать звонок'                 },
+    group_call_share:      { ka: 'გაუზიარე ID მონაწილეებს:', en: 'Share this call ID:',       ru: 'Поделитесь ID звонка:'         },
+    group_call_enter_id:   { ka: 'შეიყვანე ჯგუფური ზარის ID:', en: 'Enter group call ID:', ru: 'Введите ID группового звонка:' },
+    group_call_not_found:  { ka: 'ჯგუფური ზარი ვერ მოიძებნა', en: 'Group call not found', ru: 'Групповой звонок не найден'     },
+    group_call_ended:      { ka: 'ეს ჯგუფური ზარი უკვე დასრულდა', en: 'This group call has ended', ru: 'Звонок уже завершён'    },
+    group_call_full:       { ka: 'ჯგუფური ზარი სავსეა (მაქს. 5)', en: 'Group call is full (max 5)', ru: 'Звонок заполнен (макс. 5)' },
+    group_call_participants:{ ka: 'მონაწილეები',           en: 'Participants',                 ru: 'Участники'                     },
+    group_video_call:      { ka: 'ჯგუფური ვიდეო ზარი',    en: 'Group Video Call',             ru: 'Групповой видеозвонок'         },
+    group_audio_call:      { ka: 'ჯგუფური ხმოვანი ზარი',  en: 'Group Voice Call',             ru: 'Групповой голосовой звонок'    },
+    group_call_btn:        { ka: 'ჯგუფური ზარი',           en: 'Group Call',                   ru: 'Групповой звонок'              },
+    group_call_join:       { ka: 'ზარზე შეერთება',         en: 'Join Call',                    ru: 'Присоединиться'                },
+
+    /* ── Live streaming ─────────────────────────────────────── */
+    live_go_live:          { ka: 'ეთერში გასვლა',          en: 'Go Live',                      ru: 'Начать трансляцию'             },
+    live_start:            { ka: 'სტრიმინგის დაწყება',     en: 'Start Streaming',              ru: 'Начать стриминг'               },
+    live_stop:             { ka: 'დასრულება',               en: 'End',                          ru: 'Завершить'                     },
+    live_title_label:      { ka: 'ეთერის სათაური',         en: 'Stream title',                 ru: 'Название трансляции'           },
+    live_title_placeholder:{ ka: 'რას ასტრიმობ?',          en: 'What are you streaming?',      ru: 'О чём будет трансляция?'       },
+    live_viewers:          { ka: 'მაყურებელი',             en: 'viewers',                      ru: 'зрителей'                      },
+    live_watch:            { ka: 'ყურება',                  en: 'Watch',                        ru: 'Смотреть'                      },
+    live_loading:          { ka: 'იტვირთება…',             en: 'Loading…',                     ru: 'Загрузка…'                     },
+    live_no_streams:       { ka: 'ახლა ეთერი არ არის',     en: 'No live streams right now',    ru: 'Нет активных трансляций'       },
+    live_not_found:        { ka: 'ეთერი ვერ მოიძებნა',     en: 'Stream not found',             ru: 'Трансляция не найдена'         },
+    live_stream_ended:     { ka: 'ეთერი დასრულდა',         en: 'Stream ended',                 ru: 'Трансляция завершена'          },
+    live_streams_tab:      { ka: 'ეთერები',                en: 'Live Streams',                 ru: 'Трансляции'                    },
+
     /* ── Places page ────────────────────────────────────────── */
     pl_discover:      { ka: 'ადგილების აღმოჩენა',  en: 'Discover Places', ru: 'Открыть места'    },
     pl_add:           { ka: 'ადგილის დამატება',    en: 'Add a Place',     ru: 'Добавить место'   },

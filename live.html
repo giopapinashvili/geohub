@@ -39,13 +39,34 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}.clean-
   <div class="navbar-actions"></div>
   <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
 </nav>
-<div class="mobile-menu"></div><main class="clean-page"><section class="clean-hero"><div class="clean-badge"><i class="fas fa-circle"></i>Live City</div><h1 class="clean-title">GeoHub Live — <span>Real Activity</span></h1><p class="clean-desc">Live city data now comes only from real check-ins, events, groups and alerts. Demo simulation counters are removed.</p><div class="clean-search"><input placeholder="Search real liveActivity..."><button><i class="fas fa-search"></i> Search</button></div><div class="clean-stats"><div class="clean-stat"><strong id="stat-total">0</strong><span>Real items</span></div><div class="clean-stat"><strong>0</strong><span>Added today</span></div><div class="clean-stat"><strong>0</strong><span>Verified</span></div><div class="clean-stat"><strong>0</strong><span>Pending review</span></div></div></section><div class="clean-tabs"><button class="clean-tab active">Activity</button><button class="clean-tab ">Map</button><button class="clean-tab ">Alerts</button></div><section class="clean-content"><aside class="clean-card"><strong>Filters</strong><p style="color:#64748b;line-height:1.6">No fake categories are shown. Real filters will appear after admins add content.</p><span class="clean-admin"><i class="fas fa-clock"></i> Admin-controlled</span></aside><div class="clean-empty" id="cleanList"><div><i class="fas fa-database"></i><h3>No real liveActivity yet</h3><p>Add real content from the Admin Panel. Demo data has been removed.</p></div></div></section></main><script type="module" src="firebase-config.js"></script>
+<div class="mobile-menu"></div><main class="clean-page" id="glive-container">
+<section class="clean-hero">
+  <div class="clean-badge"><i class="fas fa-broadcast-tower"></i> Live</div>
+  <h1 class="clean-title">GeoHub <span>Live Streams</span></h1>
+  <p class="clean-desc" data-i18n="live_no_streams">Watch real-time broadcasts from people around Georgia. Start your own live stream directly from your browser.</p>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:20px">
+    <button class="glive-golive-btn" onclick="GhLivestream.openGoLiveModal()">
+      <i class="fas fa-broadcast-tower"></i> <span data-i18n="live_go_live">Go Live</span>
+    </button>
+    <button class="clean-admin" onclick="GhLivestream.reload()" style="background:rgba(255,255,255,.08);color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+      <i class="fas fa-sync-alt"></i> <span data-i18n="refresh">Refresh</span>
+    </button>
+  </div>
+</section>
+<section class="clean-content" style="grid-template-columns:1fr;padding-top:24px">
+  <div class="glive-list" id="glive-list">
+    <p class="glive-loading"><i class="fas fa-spinner fa-spin"></i> Loading…</p>
+  </div>
+</section>
+</main><script type="module" src="firebase-config.js"></script>
 <script defer src="account.js"></script>
 <script defer src="nav-cleanup.js"></script>
 <script defer src="mobile-nav.js"></script>
 <script defer src="chat-popup.js"></script>
 <script defer src="gh-calls.js"></script>
   <script defer src="gh-call-history.js"></script>
+  <script defer src="gh-group-calls.js"></script>
+  <script defer src="gh-livestream.js"></script>
 <script defer src="content-pages.js"></script>
 <script defer src="geo-actors.js"></script>
 <script defer src="account-switcher.js"></script>

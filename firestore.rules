@@ -1540,6 +1540,77 @@ service cloud.firestore {
       }
     }
 
+    // ── GROUP CALLS (WebRTC mesh signaling) ──────────────────────────────────
+
+    // True when the caller is listed in a group call's participantIds.
+    function isGroupCallParticipant(callId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/groupCalls/$(callId))
+        && uid() in get(/databases/$(database)/documents/groupCalls/$(callId))
+                      .data.get('participantIds', []);
+    }
+
+    match /groupCalls/{callId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.get('hostUid', '') == uid();
+      allow update: if isGroupCallParticipant(callId)
+        || (signedIn() && resource.data.get('hostUid', '') == uid());
+      allow delete: if false;
+
+      match /members/{memberUid} {
+        allow read: if signedIn();
+        allow create, update: if isOwner(memberUid);
+        allow delete: if false;
+      }
+      match /signals/{pairId} {
+        allow read: if signedIn();
+        allow create, update: if isGroupCallParticipant(callId);
+        allow delete: if false;
+      }
+      match /ice/{pairDoc}/candidates/{candId} {
+        allow read: if isGroupCallParticipant(callId);
+        allow create: if isGroupCallParticipant(callId);
+        allow delete: if false;
+      }
+    }
+
+    // ── LIVE STREAMING (WebRTC P2P broadcast) ────────────────────────────────
+
+    match /livestreams/{streamId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.get('hostUid', '') == uid();
+      allow update: if signedIn()
+        && (resource.data.get('hostUid', '') == uid()
+            || request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['viewerCount']));
+      allow delete: if false;
+
+      match /viewers/{viewerUid} {
+        allow read: if signedIn();
+        allow create: if isOwner(viewerUid);
+        allow update: if isOwner(viewerUid)
+          || (signedIn() && get(/databases/$(database)/documents/livestreams/$(streamId))
+                              .data.get('hostUid', '') == uid());
+        allow delete: if false;
+      }
+      match /bcCandidates/{viewerUid}/candidates/{candId} {
+        allow read: if isOwner(viewerUid);
+        allow create: if signedIn()
+          && get(/databases/$(database)/documents/livestreams/$(streamId))
+               .data.get('hostUid', '') == uid();
+        allow delete: if false;
+      }
+      match /vcCandidates/{viewerUid}/candidates/{candId} {
+        allow read: if signedIn()
+          && get(/databases/$(database)/documents/livestreams/$(streamId))
+               .data.get('hostUid', '') == uid();
+        allow create: if isOwner(viewerUid);
+        allow delete: if false;
+      }
+    }
+
     // ── DENY-ALL FALLBACK ─────────────────────────────────────────────────────
     // Any collection not explicitly listed above is blocked.
     // This prevents accidental exposure when new collections are added without
