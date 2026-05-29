@@ -613,11 +613,12 @@
       row.querySelectorAll('[data-del-highlight]').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
           e.stopPropagation();
-          if (!confirm('Delete this highlight?')) return;
           var hid = btn.dataset.delHighlight, huid = btn.dataset.hlUid;
-          GF.fs.deleteDoc(GF.fs.doc(GF.db, 'users', huid, 'highlights', hid)).then(function() {
-            loadHighlights(user, fbUser);
-          }).catch(function() {});
+          window.ghConfirm(typeof window.GHt === 'function' ? window.GHt('highlight_delete_cfm') : 'Delete this highlight?', function() {
+            GF.fs.deleteDoc(GF.fs.doc(GF.db, 'users', huid, 'highlights', hid)).then(function() {
+              loadHighlights(user, fbUser);
+            }).catch(function() {});
+          });
         });
       });
       // Open handler
@@ -1457,17 +1458,18 @@
     var delBtn = ov.querySelector('#gwDelete');
     if (delBtn) {
       delBtn.addEventListener('click', function() {
-        if (!confirm(_t('work_remove_cfm'))) return;
-        var newWork = work.filter(function(_, i) { return i !== idx; });
-        var GF = window.GeoFirebase;
-        var fbUser = GF && GF.auth && GF.auth.currentUser;
-        if (!GF || !GF.db || !GF.fs || !fbUser) return;
-        GF.fs.updateDoc(GF.fs.doc(GF.db, 'users', fbUser.uid), { work: newWork }).then(function() {
-          toast(_t('work_removed'));
-          user.work = newWork;
-          renderAboutTab(user);
-          ov.remove();
-        }).catch(function(err) { toast(_t('remove_failed') + ': ' + (err && err.message), 'error'); });
+        window.ghConfirm(_t('work_remove_cfm'), function() {
+          var newWork = work.filter(function(_, i) { return i !== idx; });
+          var GF = window.GeoFirebase;
+          var fbUser = GF && GF.auth && GF.auth.currentUser;
+          if (!GF || !GF.db || !GF.fs || !fbUser) return;
+          GF.fs.updateDoc(GF.fs.doc(GF.db, 'users', fbUser.uid), { work: newWork }).then(function() {
+            toast(_t('work_removed'));
+            user.work = newWork;
+            renderAboutTab(user);
+            ov.remove();
+          }).catch(function(err) { toast(_t('remove_failed') + ': ' + (err && err.message), 'error'); });
+        });
       });
     }
   }
@@ -1524,17 +1526,18 @@
     var delBtn = ov.querySelector('#geDelete');
     if (delBtn) {
       delBtn.addEventListener('click', function() {
-        if (!confirm(_t('edu_remove_cfm'))) return;
-        var newEdu = edu.filter(function(_, i) { return i !== idx; });
-        var GF = window.GeoFirebase;
-        var fbUser = GF && GF.auth && GF.auth.currentUser;
-        if (!GF || !GF.db || !GF.fs || !fbUser) return;
-        GF.fs.updateDoc(GF.fs.doc(GF.db, 'users', fbUser.uid), { education: newEdu }).then(function() {
-          toast(_t('edu_removed'));
-          user.education = newEdu;
-          renderAboutTab(user);
-          ov.remove();
-        }).catch(function(err) { toast(_t('remove_failed') + ': ' + (err && err.message), 'error'); });
+        window.ghConfirm(_t('edu_remove_cfm'), function() {
+          var newEdu = edu.filter(function(_, i) { return i !== idx; });
+          var GF = window.GeoFirebase;
+          var fbUser = GF && GF.auth && GF.auth.currentUser;
+          if (!GF || !GF.db || !GF.fs || !fbUser) return;
+          GF.fs.updateDoc(GF.fs.doc(GF.db, 'users', fbUser.uid), { education: newEdu }).then(function() {
+            toast(_t('edu_removed'));
+            user.education = newEdu;
+            renderAboutTab(user);
+            ov.remove();
+          }).catch(function(err) { toast(_t('remove_failed') + ': ' + (err && err.message), 'error'); });
+        });
       });
     }
   }
@@ -1649,24 +1652,25 @@
 
   window._supportCreator = function (targetUid, targetName) {
     var GS = window.GeoSocial;
-    if (!GS || !GS.sendPoints) { alert('Points system is still loading. Try again in a moment.'); return; }
+    if (!GS || !GS.sendPoints) { toast('Points system is still loading. Try again in a moment.', 'error'); return; }
     var raw = (prompt('Send GeoPoints to ' + esc(targetName) + ':\nEnter amount (1–500):') || '').trim();
     if (!raw) return;
-    if (!/^\d+$/.test(raw)) { alert('Enter a whole number between 1 and 500.'); return; }
+    if (!/^\d+$/.test(raw)) { toast('Enter a whole number between 1 and 500.', 'error'); return; }
     var amount = parseInt(raw, 10);
-    if (amount <= 0 || amount > 500) { alert('Enter a number between 1 and 500.'); return; }
+    if (amount <= 0 || amount > 500) { toast('Enter a number between 1 and 500.', 'error'); return; }
     GS.sendPoints(targetUid, amount, 'Support for creator ' + targetName);
   };
 
   window._activateCreatorMode = function () {
     var fb = window.GeoFirebase;
-    if (!fb || !fb.auth || !fb.db || !fb.fs) { alert('Loading — please try again.'); return; }
+    if (!fb || !fb.auth || !fb.db || !fb.fs) { toast('Loading — please try again.', 'error'); return; }
     var u = fb.auth.currentUser;
     if (!u) { window.location.href = 'auth.html'; return; }
-    if (!confirm('Activate Creator Mode? Your profile will be listed on the Creators page.')) return;
-    fb.fs.updateDoc(fb.fs.doc(fb.db, 'users', u.uid), { accountType: 'creator' })
-      .then(function () { window.location.reload(); })
-      .catch(function (err) { alert('Could not activate: ' + (err && err.message || 'unknown error')); });
+    window.ghConfirm(typeof window.GHt === 'function' ? window.GHt('creator_activate_cfm') : 'Activate Creator Mode? Your profile will be listed on the Creators page.', function() {
+      fb.fs.updateDoc(fb.fs.doc(fb.db, 'users', u.uid), { accountType: 'creator' })
+        .then(function () { window.location.reload(); })
+        .catch(function (err) { toast((err && err.message) || 'Could not activate', 'error'); });
+    });
   };
 
   function loadBizMode(bizId, GF, fbUser) {
@@ -2487,8 +2491,10 @@
       const uname = blockBtn.dataset.userName || '';
       if (window.GeoModeration) {
         window.GeoModeration.openBlockConfirm(target, uname, function(){ if(window.GeoSocial && window.GeoSocial.blockUser) window.GeoSocial.blockUser(target, () => { location.href='feed.html'; }); });
-      } else if (target && confirm('Block this user? Their posts will be hidden from your feed.')) {
-        if (window.GeoSocial && window.GeoSocial.blockUser) window.GeoSocial.blockUser(target, () => { location.href='feed.html'; });
+      } else if (target) {
+        window.ghConfirm(typeof window.GHt === 'function' ? window.GHt('block_user_cfm') : 'Block this user? Their posts will be hidden from your feed.', function() {
+          if (window.GeoSocial && window.GeoSocial.blockUser) window.GeoSocial.blockUser(target, () => { location.href='feed.html'; });
+        });
       }
     }
     if (e.target.closest('[data-add-highlight]')) {

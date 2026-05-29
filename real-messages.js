@@ -1,4 +1,4 @@
-(function(){
+﻿(function(){
   'use strict';
 
   // ── Synchronous pre-redirect ──────────────────────────────────────────────
@@ -20,6 +20,8 @@
       } catch(_se) {}
     }
   }
+
+  function _t(key, fallback) { return typeof window.GHt === 'function' ? window.GHt(key) : (fallback || key); }
 
   const REACTIONS = ['👍','❤️','😂','😮','😢','😡'];
   const EMOJIS = ['😀','😁','😂','🤣','😊','😍','😘','😎','😢','😭','😡','👍','👎','👏','🙏','💪','🔥','❤️','💚','💯','🎉','✨','🇬🇪'];
@@ -778,7 +780,7 @@
     try{
       await window.GeoSocial.toggleMessageReaction(activeConversation, messageId, emoji || '❤️');
     }catch(err){
-      window.showToast && window.showToast('Reaction failed');
+      window.showToast&&window.showToast(_t('msg_reaction_fail','Reaction failed'));
     }
   }
 
@@ -794,7 +796,7 @@
       await window.GeoSocial.toggleMessageReaction(activeConversation, messageId, emoji || '❤️', null, { actorId });
     }catch(err){
       console.error('[GeoHub Msg] Reaction failed', err);
-      window.showToast && window.showToast('Reaction failed');
+      window.showToast&&window.showToast(_t('msg_reaction_fail','Reaction failed'));
     }
   }
 
@@ -911,8 +913,8 @@
 
     // Copy text
     if(hasText) opts.push({icon:'fa-copy',label:'Copy text',action:()=>{
-      try{ navigator.clipboard.writeText(msg.text); window.showToast&&window.showToast('Copied'); }
-      catch(err){ window.showToast&&window.showToast('Could not copy'); }
+      try{ navigator.clipboard.writeText(msg.text); window.showToast&&window.showToast(_t('msg_copied','Copied')); }
+      catch(err){ window.showToast&&window.showToast(_t('msg_copy_fail','Could not copy')); }
     }});
 
     // Edit (mine, non-deleted, has text)
@@ -927,8 +929,9 @@
 
     // Delete for everyone — only sender may do this
     if(mine&&!isDeleted) opts.push({icon:'fa-trash-alt',label:'Delete for everyone',danger:true,action:()=>{
-      if(!confirm('Delete this message for everyone? This cannot be undone.')) return;
-      window.GeoSocial?.deleteMessage(activeConversation,msgId,'everyone',null,{actorId:currentActorId()});
+      window.ghConfirm(typeof window.GHt==='function'?window.GHt('msg_delete_cfm'):'Delete this message for everyone? This cannot be undone.', ()=>{
+        window.GeoSocial?.deleteMessage(activeConversation,msgId,'everyone',null,{actorId:currentActorId()});
+      });
     }});
 
     showContextMenu(e.clientX,e.clientY,opts);
@@ -1014,8 +1017,8 @@
         deletedForActors:  GF.fs.arrayRemove(actorKeyNew||actorKeyOld)
       };
       GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId), patch)
-        .then(()=>window.showToast&&window.showToast('Conversation restored'))
-        .catch(()=>window.showToast&&window.showToast('Could not undo'));
+        .then(()=>window.showToast&&window.showToast(_t('msg_conv_restored','Conversation restored')))
+        .catch(()=>window.showToast&&window.showToast(_t('msg_undo_fail','Could not undo')));
     };
   }
 
@@ -1030,25 +1033,24 @@
       hiddenForActors:   GF.fs.arrayUnion(actorKeyOld, actorKeyNew)
     }).then(()=>{
       if(activeConversation===convId) closeChatPane();
-      showConvActionToast(convId,'Conversation archived',actorKeyOld,actorKeyNew,true);
-    }).catch(()=>window.showToast&&window.showToast('Could not archive'));
+      showConvActionToast(convId,_t('msg_conv_archived','Conversation archived'),actorKeyOld,actorKeyNew,true);
+    }).catch(()=>window.showToast&&window.showToast(_t('msg_archive_fail','Could not archive')));
   }
 
   function deleteConvForMe(convId){
-    if(!confirm('Delete this conversation for you?\n\nThe other person may still see the chat history.')) return;
     const actorKeyOld = _activeBizId ? 'business:' + _activeBizId : 'user:' + currentUid();
     const actorKeyNew = currentActorId();
     const GF=window.GeoFirebase;
     if(!GF||!GF.fs||!GF.db) return;
-    // deletedForActors: listener will exclude this conv for current actor
-    // hiddenForActors: belt-and-suspenders so renderConvs also filters it
-    GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId),{
-      deletedForActors:  GF.fs.arrayUnion(actorKeyNew),
-      hiddenForActors:   GF.fs.arrayUnion(actorKeyOld, actorKeyNew)
-    }).then(()=>{
-      if(activeConversation===convId) closeChatPane();
-      showConvActionToast(convId,'Conversation deleted for you',actorKeyOld,actorKeyNew,false);
-    }).catch(()=>window.showToast&&window.showToast('Could not delete conversation'));
+    window.ghConfirm(typeof window.GHt==='function'?window.GHt('conv_delete_cfm'):'Delete this conversation for you? The other person may still see the chat history.', ()=>{
+      GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId),{
+        deletedForActors:  GF.fs.arrayUnion(actorKeyNew),
+        hiddenForActors:   GF.fs.arrayUnion(actorKeyOld, actorKeyNew)
+      }).then(()=>{
+        if(activeConversation===convId) closeChatPane();
+        showConvActionToast(convId,_t('conv_delete_cfm','Conversation deleted for you'),actorKeyOld,actorKeyNew,false);
+      }).catch(()=>window.showToast&&window.showToast(_t('msg_conv_del_fail','Could not delete conversation')));
+    });
   }
 
   function markConvUnread(convId, isCurrentlyUnread){
@@ -1057,7 +1059,7 @@
     const actorKeyNew=currentActorId();
     GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId),{
       unreadActors: isCurrentlyUnread ? GF.fs.arrayRemove(actorKeyNew) : GF.fs.arrayUnion(actorKeyNew)
-    }).then(()=>window.showToast&&window.showToast(isCurrentlyUnread?'Marked as read':'Marked as unread'))
+    }).then(()=>window.showToast&&window.showToast(isCurrentlyUnread?_t('msg_marked_read','Marked as read'):_t('msg_marked_unread','Marked as unread')))
       .catch(()=>{});
   }
 
@@ -1067,14 +1069,14 @@
     const actorKeyNew=currentActorId();
     GF.fs.updateDoc(GF.fs.doc(GF.db,'conversations',convId),{
       pinnedForActors: isPinned ? GF.fs.arrayRemove(actorKeyNew) : GF.fs.arrayUnion(actorKeyNew)
-    }).then(()=>window.showToast&&window.showToast(isPinned?'Unpinned':'Conversation pinned'))
+    }).then(()=>window.showToast&&window.showToast(isPinned?_t('msg_unpinned','Unpinned'):_t('msg_pinned','Conversation pinned')))
       .catch(()=>{});
   }
 
   function muteConv(convId, duration){
     const label=duration>=28800000?'8 hours':'1 hour';
     window.GeoSocial?.setConversationMute&&window.GeoSocial.setConversationMute(convId,Date.now()+duration,
-      ()=>window.showToast&&window.showToast('Muted '+label));
+      ()=>window.showToast&&window.showToast(_t('msg_muted','Muted')+' '+label));
   }
 
   // 3-dot menu on conv rows (also used as right-click handler)
@@ -1143,7 +1145,7 @@
             applyTheme(prevTheme);
             activeConvData = Object.assign({}, activeConvData || {}, { theme: prevTheme });
             renderConversationDetails();
-            window.showToast && window.showToast('Theme update failed');
+            window.showToast&&window.showToast(_t('msg_theme_fail','Theme update failed'));
           }
         });
       };
@@ -1177,7 +1179,7 @@
         window.GeoSocial?.setConversationNickname(activeConversation, inp.dataset.nickUid, inp.value.trim());
       });
       modal.remove();
-      window.showToast&&window.showToast('Nicknames saved');
+      window.showToast&&window.showToast(_t('msg_nicknames_saved','Nicknames saved'));
     };
     document.body.appendChild(modal);
   }
@@ -1231,7 +1233,7 @@
       if(ok){
         convSettings = Object.assign({}, convSettings, { mutedUntil: next });
         renderConversationDetails();
-        window.showToast && window.showToast(muted?'Conversation unmuted':'Conversation muted');
+        window.showToast&&window.showToast(muted?_t('msg_unmuted','Conversation unmuted'):_t('msg_muted','Conversation muted'));
       }
     });
   };
@@ -1372,11 +1374,11 @@
   async function uploadSelectedImage(file){
     if(!file) return '';
     if(!file.type || !file.type.startsWith('image/')){
-      window.showToast && window.showToast('Only image upload is supported');
+      window.showToast&&window.showToast(_t('msg_img_only','Only image upload is supported'));
       return '';
     }
     if(file.size > 8 * 1024 * 1024){
-      window.showToast && window.showToast('Image must be under 8 MB');
+      window.showToast&&window.showToast(_t('msg_img_size','Image must be under 8 MB'));
       return '';
     }
     const dataUrl = await new Promise((resolve,reject)=>{
@@ -1416,17 +1418,17 @@
     if(!file) return null;
     const allowed = /\.(pdf|doc|docx|txt|xls|xlsx|csv)$/i;
     if(!allowed.test(file.name)){
-      window.showToast&&window.showToast('Allowed: PDF, DOC, TXT, XLS, CSV');
+      window.showToast&&window.showToast(_t('msg_file_types','Allowed: PDF, DOC, TXT, XLS, CSV'));
       return null;
     }
     if(file.size > 10*1024*1024){
-      window.showToast&&window.showToast('File must be under 10 MB');
+      window.showToast&&window.showToast(_t('msg_file_size','File must be under 10 MB'));
       return null;
     }
     const uid=currentUid();
-    window.showToast&&window.showToast('Uploading file…');
+    window.showToast&&window.showToast(_t('msg_uploading_file','Uploading file…'));
     const url = await window.GeoSocial.uploadDocumentBlob(file, file.name, uid);
-    if(!url){ window.showToast&&window.showToast('Upload failed'); return null; }
+    if(!url){ window.showToast&&window.showToast(_t('msg_upload_fail','Upload failed')); return null; }
     const attachment = attachmentFromUpload('file', url, file);
     return { mediaUrl:url, type:'file', fileName:file.name, fileSize:file.size, attachments:[attachment] };
   }
@@ -1442,16 +1444,16 @@
         const duration = (Date.now()-recordingStart)/1000;
         const blob = new Blob(audioChunks, {type:'audio/webm'});
         if(!activeConversation) return;
-        window.showToast&&window.showToast('Uploading voice…');
+        window.showToast&&window.showToast(_t('msg_uploading_voice','Uploading voice…'));
         setAttachmentBusy(true, 'Uploading voice...');
         const uid=currentUid();
         try{
           const url = await window.GeoSocial.uploadAudioBlob(blob, uid);
           setAttachmentBusy(false);
           if(url) await sendCurrentMsg({ mediaUrl:url, type:'audio', duration, attachments:[attachmentFromUpload('audio', url, { name:'voice.webm', size:blob.size, type:blob.type }, { duration })] });
-          else window.showToast&&window.showToast('Voice upload failed');
+          else window.showToast&&window.showToast(_t('msg_voice_fail','Voice upload failed'));
         }catch(err){
-          window.showToast&&window.showToast('Voice upload failed');
+          window.showToast&&window.showToast(_t('msg_voice_fail','Voice upload failed'));
         }finally{
           setAttachmentBusy(false);
         }
@@ -1460,7 +1462,7 @@
       mediaRecorder.start();
       updateVoiceBtn(true);
       recordingTimer=setTimeout(()=>stopVoiceRecording(), 120000);
-    }).catch(()=>window.showToast&&window.showToast('Microphone access denied'));
+    }).catch(()=>window.showToast&&window.showToast(_t('mic_denied','Microphone access denied')));
   }
 
   function stopVoiceRecording(){
@@ -1626,12 +1628,12 @@
         if(!file || !activeConversation) return;
         try{
           setAttachmentBusy(true, 'Uploading photo...');
-          window.showToast && window.showToast('Uploading photo...');
+          window.showToast&&window.showToast(_t('msg_uploading_photo','Uploading photo' + [char]0x2026));
           const url=await uploadSelectedImage(file);
           setAttachmentBusy(false);
           if(url) await doSend({ mediaUrl:url, mediaType:'image', attachments:[attachmentFromUpload('image', url, file)] });
         }catch(err){
-          window.showToast && window.showToast('Image upload failed');
+          window.showToast&&window.showToast(_t('msg_photo_fail','Image upload failed'));
         }finally{
           setAttachmentBusy(false);
         }
@@ -1647,12 +1649,12 @@
         if(!file || !activeConversation) return;
         try{
           setAttachmentBusy(true, 'Uploading file...');
-          window.showToast && window.showToast('Uploading file...');
+          window.showToast&&window.showToast(_t('msg_uploading_file','Uploading file' + [char]0x2026));
           const extra=await uploadSelectedFile(file);
           setAttachmentBusy(false);
           if(extra) await doSend(extra);
         }catch(err){
-          window.showToast && window.showToast('File upload failed');
+          window.showToast&&window.showToast(_t('msg_upload_fail','File upload failed'));
         }finally{
           setAttachmentBusy(false);
         }
@@ -2168,7 +2170,7 @@
         window.closeNewConversationSearch();
         if(convId) openConversation(convId);
       });
-    }catch(err){ window.showToast&&window.showToast('Could not start conversation'); }
+    }catch(err){ window.showToast&&window.showToast(_t('msg_conv_start_fail','Could not start conversation')); }
     finally{ btn.disabled=false; }
   });
 

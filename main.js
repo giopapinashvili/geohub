@@ -386,3 +386,33 @@ document.addEventListener("DOMContentLoaded", () => {
   initSearchBar();
   initCounters();
 });
+
+// ======================== CONFIRM MODAL ========================
+window.ghConfirm = function(message, onConfirm, onCancel) {
+  var _t = typeof window.GHt === 'function' ? window.GHt : function(k){ return k; };
+  var backdrop = document.createElement('div');
+  backdrop.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px';
+  var card = document.createElement('div');
+  card.style.cssText = 'background:var(--gh-card,#1e1e2e);border:1px solid var(--gh-border,#2e2e42);border-radius:14px;padding:24px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)';
+  var p = document.createElement('p');
+  p.style.cssText = 'margin:0 0 20px;color:var(--gh-text,#e0e0f0);line-height:1.5;font-size:.95rem';
+  p.textContent = message;
+  var row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:10px;justify-content:flex-end';
+  var cancelBtn = document.createElement('button');
+  cancelBtn.className = 'btn btn-ghost btn-sm';
+  cancelBtn.textContent = _t('cancel') || 'Cancel';
+  var confirmBtn = document.createElement('button');
+  confirmBtn.className = 'btn btn-primary btn-sm';
+  confirmBtn.textContent = _t('confirm') || 'Confirm';
+  row.appendChild(cancelBtn);
+  row.appendChild(confirmBtn);
+  card.appendChild(p);
+  card.appendChild(row);
+  backdrop.appendChild(card);
+  document.body.appendChild(backdrop);
+  function close() { backdrop.remove(); }
+  cancelBtn.addEventListener('click', function() { close(); if (onCancel) onCancel(); });
+  confirmBtn.addEventListener('click', function() { close(); if (onConfirm) onConfirm(); });
+  backdrop.addEventListener('click', function(e) { if (e.target === backdrop) { close(); if (onCancel) onCancel(); } });
+};
