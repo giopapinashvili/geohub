@@ -1,4 +1,4 @@
-/* GeoHub Social Redesign v2
+﻿/* GeoHub Social Redesign v2
    Self-contained app shell for feed/discover/groups/business pages.
    Uses Firebase Auth + Firestore through window.GeoFirebase and window.GeoSocial.
 */
@@ -58,6 +58,7 @@
   }
   window.ghSetLang=setLang;
   window.ghT=t;
+  function _srt(key,fallback){ if(typeof window.GHt==='function'){var v=window.GHt(key);if(v&&v!==key)return v;} return fallback||key; }
 
   var PATH = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
   var PAGE = document.body && document.body.dataset ? document.body.dataset.ghPage : '';
@@ -2213,7 +2214,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var textVal = pollMode ? '' : (ta ? ta.value : '');
         if(textVal.trim()){
           try{ localStorage.setItem('gh_draft', JSON.stringify({ text:textVal, feeling:selectedFeeling, visibility:_getAudienceVis(), savedAt:Date.now() })); }catch(_ec){}
-          setTimeout(function(){ toast('✏️ Draft saved'); },100);
+          setTimeout(function(){ toast(t('draftSaved')); },100);
         }
       }
     }, true);
@@ -2449,7 +2450,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             if(!validUrls.length && pickedFiles.length) throw new Error('All uploads failed');
             finalPayload.mediaUrls=validUrls; submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
             GS().createPost(txt, validUrls[0]||'', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); window._composerLocation=null; try{localStorage.removeItem('gh_draft');}catch(_e){} var _u=authUser(); if(_u) setTimeout(function(){ checkAndAwardBadges(_u.uid); },2000); }, finalPayload);
-          }).catch(function(err){ console.error('[GeoHub] upload',err); toast('Image upload failed.','error'); if(bar) bar.style.display='none'; submitBtn.disabled=false; submitBtn.innerHTML='<i class="fas fa-paper-plane"></i> Post'; });
+          }).catch(function(err){ console.error('[GeoHub] upload',err); toast(_srt('upload_failed'),'error'); if(bar) bar.style.display='none'; submitBtn.disabled=false; submitBtn.innerHTML='<i class="fas fa-paper-plane"></i> Post'; });
         } else {
           submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
           GS().createPost(txt, '', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); window._composerLocation=null; try{localStorage.removeItem('gh_draft');}catch(_e){} var _u=authUser(); if(_u) setTimeout(function(){ checkAndAwardBadges(_u.uid); },2000); }, finalPayload);
@@ -2499,7 +2500,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(saveBtn){
           saveBtn.onclick=function(){
             var name=(document.getElementById('ghNewHlName').value||'').trim();
-            if(!name) return toast('Enter a name','error');
+            if(!name) return toast(_srt('enter_name'),'error');
             fs().addDoc(fs().collection(db(),'users',uid,'storyHighlights'),{
               name:name, coverUrl:st.mediaUrl||'', createdAt:fs().serverTimestamp(),
               stories:[{id:st.id,mediaUrl:st.mediaUrl||'',text:st.text||'',createdAt:st.createdAt||null}]
@@ -2619,8 +2620,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     };
     $('#ghSubmitStory').onclick=function(){
       var t=($('#ghStoryText')||{}).value||'';
-      if(!t.trim()&&!pickedFile) return toast('Story needs text or image','error');
-      if(!GS().createStory) return toast('Stories unavailable','error');
+      if(!t.trim()&&!pickedFile) return toast(_srt('story_needs_content'),'error');
+      if(!GS().createStory) return toast(_srt('story_unavail'),'error');
       // Phase 62: collect poll + link data
       var _pollData=null;
       if(_pollVisible){
@@ -2649,7 +2650,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); },_extra);
       }).catch(function(err){
         console.error('[GeoHub] story upload failed',err);
-        toast('Image upload failed. Check Cloudinary settings.','error');
+        toast(_srt('img_upload_cl_fail'),'error');
         if(bar) bar.style.display='none';
       }).finally(function(){ var b=$('#ghSubmitStory'); if(b){ b.disabled=false; b.innerHTML=origHtml; } });
     };
@@ -2896,8 +2897,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         window.ghConfirm(typeof GHt==='function'?GHt('story_delete_cfm'):'Delete this story?', function() {
           if(GS().deleteStory){
             GS().deleteStory(st.id, function(err){
-              if(!err){ toast('Story deleted'); close(); }
-              else toast('Could not delete story.','error');
+              if(!err){ toast(_srt('story_deleted')); close(); }
+              else toast(_srt('story_del_fail'),'error');
             });
           }
         });
@@ -2951,7 +2952,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             GS().addStoryReply(st.id, st.authorId, text, function(err){
               var btn = overlay.querySelector('#ghStRpSend');
               if(btn){ btn.disabled = false; btn.innerHTML = origIcon; }
-              if(!err){ toast('Reply sent'); if(replyInput) replyInput.blur(); }
+              if(!err){ toast(_srt('reply_sent')); if(replyInput) replyInput.blur(); }
               else if(replyInput){ replyInput.value = text; replyInput.focus(); }
             });
           } else {
@@ -2998,7 +2999,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           fs().getDoc(fs().doc(db(),'stories',st.id)).then(function(snap){
             var data=snap.exists()?snap.data():{};
             var viewedBy=data.viewedBy||[];
-            if(!viewedBy.length){ toast('No views yet'); scheduleAdvance(); return; }
+            if(!viewedBy.length){ toast(_srt('no_views')); scheduleAdvance(); return; }
             var docsP=viewedBy.slice(0,30).map(function(uid){ return fs().getDoc(fs().doc(db(),'users',uid)).then(function(s){ return s.exists()?Object.assign({id:s.id},s.data()):null; }).catch(function(){ return null; }); });
             Promise.all(docsP).then(function(users){
               users=users.filter(Boolean);
@@ -3023,7 +3024,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             btn.onclick=function(e){
               e.stopPropagation();
               if(!requireLogin()) return;
-              if(hasVoted) return toast('You already voted');
+              if(hasVoted) return toast(_srt('voted_already'));
               var opt=btn.dataset.pollOpt;
               hasVoted=true;
               btn.classList.add('voted');
@@ -3658,7 +3659,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var trBtn=e.target.closest('[data-translate]'); if(trBtn){ e.stopPropagation(); _translatePost(trBtn); return; }
       var vpBtn=e.target.closest('[data-voice-play]'); if(vpBtn){ e.stopPropagation(); _toggleVoicePlay(vpBtn); return; }
       var rb=e.target.closest('[data-comment-reply]'); if(rb){ e.preventDefault(); openReplyForm(card,pid,rb.dataset.commentId); }
-      var cr=e.target.closest('[data-copy-post-link]'); if(cr && navigator.clipboard){ navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast('Post link copied');}); }
+      var cr=e.target.closest('[data-copy-post-link]'); if(cr && navigator.clipboard){ navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast(_srt('post_link_copied'));}); }
       var wrBtn=e.target.closest('[data-who-reacted]'); if(wrBtn){ openWhoReactedModal(wrBtn.dataset.whoReacted); }
       var pv=e.target.closest('[data-poll-vote]'); if(pv){ if(!requireLogin()) return; submitPollVote(pv.dataset.pid, pv.dataset.optId, card); }
       var clBtn=e.target.closest('[data-comment-like]'); if(clBtn){ if(!requireLogin()) return; toggleCommentReaction(pid, clBtn.dataset.commentId, clBtn.dataset.commentReaction||'love', clBtn); }
@@ -3674,8 +3675,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               var row=card.querySelector('[data-comment-id="'+CSS.escape(cid2)+'"]');
               if(row){row.style.transition='opacity .2s';row.style.opacity='0';setTimeout(function(){row.remove();},220);}
               fs().updateDoc(fs().doc(db(),'posts',pid),{commentCount:fs().increment(-1)}).catch(function(){});
-              toast('Comment deleted');
-            }).catch(function(err){db2.disabled=false;toast('Could not delete: '+(err.code||err.message),'error');});
+              toast(_srt('comment_deleted'));
+            }).catch(function(err){db2.disabled=false;toast(_srt('comment_del_fail')+': '+(err.code||err.message),'error');});
         });
       }
       var drBtn=e.target.closest('[data-delete-reply]'); if(drBtn){ e.preventDefault();
@@ -3689,8 +3690,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               fs().updateDoc(fs().doc(db(),'posts',pid,'comments',rcid),{replyCount:fs().increment(-1)}).catch(function(){});
               var rkey=pid+'_'+rcid;
               if(state.cachedReplies[rkey]) state.cachedReplies[rkey]=state.cachedReplies[rkey].filter(function(r){return r.id!==rid;});
-              toast('Reply deleted');
-            }).catch(function(err){drBtn.disabled=false;toast('Could not delete: '+(err.code||err.message),'error');});
+              toast(_srt('reply_deleted'));
+            }).catch(function(err){drBtn.disabled=false;toast(_srt('comment_del_fail')+': '+(err.code||err.message),'error');});
         });
       }
     });
@@ -3710,7 +3711,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         }
         return; }
       var rform=e.target.closest('[data-reply-form]');
-      if(rform){ e.preventDefault(); var card2=rform.closest('[data-post-id]'), pid2=card2.dataset.postId, cid=rform.dataset.commentId; var rin=rform.querySelector('input'); var rv=rin.value.trim(); if(!rv) return; if(!requireLogin()) return; if(GS().addCommentReply) GS().addCommentReply(pid2,cid,rv,function(){ rin.value=''; rform.hidden=true; },buildActorExtra()); else toast('Replies are not available','error'); }
+      if(rform){ e.preventDefault(); var card2=rform.closest('[data-post-id]'), pid2=card2.dataset.postId, cid=rform.dataset.commentId; var rin=rform.querySelector('input'); var rv=rin.value.trim(); if(!rv) return; if(!requireLogin()) return; if(GS().addCommentReply) GS().addCommentReply(pid2,cid,rv,function(){ rin.value=''; rform.hidden=true; },buildActorExtra()); else toast(_srt('reply_unavail'),'error'); }
     });
 
     // Reaction strip: show on Like hover, hide after 1.5s delay
@@ -3817,7 +3818,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var delta=exists?0:1;
       if(!exists) write=write.then(function(){ return f.updateDoc(postRef,{likeCount:f.increment(1), reactionCount:f.increment(1)}).catch(function(){}); });
       return write.then(function(){ updateReactionUi(card,type,delta); });
-    }).catch(function(err){ console.error('setReaction',err); toast('Reaction failed','error'); });
+    }).catch(function(err){ console.error('setReaction',err); toast(_srt('soc_reaction_fail'),'error'); });
   }
 
   function updateReactionUi(card,type,delta){
@@ -4081,7 +4082,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       return write.then(function(){
         if(btn){ btn.classList.add('active'); btn.dataset.commentReaction=type; btn.textContent=RX_EMOJIS[type]+' 1'; }
       });
-    }).catch(function(err){ toast('Reaction failed','error'); });
+    }).catch(function(err){ toast(_srt('soc_reaction_fail'),'error'); });
   }
 
   // Voice comment recording state machine
@@ -4132,7 +4133,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         }
       };
       _cmtMicRec.start();
-    }).catch(function(){ toast('Microphone access denied','error'); });
+    }).catch(function(){ toast(_srt('mic_denied'),'error'); });
   }
 
   function updatePollUi(pid, opts, totalVotes, myOptId, card){
@@ -4220,16 +4221,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           // TODO: move to Cloud Function for true atomicity (Blaze plan required)
           return f.updateDoc(postRef,{'poll.options':newOpts,'poll.totalVotes':newTotal}).catch(function(){});
         })
-        .then(function(){ enableOpts(); toast('Vote recorded'); })
+        .then(function(){ enableOpts(); toast(_srt('vote_recorded')); })
         .catch(function(err){
           // Revert optimistic UI to original state
           updatePollUi(pid,origOpts,origTotal,prevOptId,card);
           enableOpts();
-          toast('Vote failed: '+(err.code||err.message),'error');
+          toast(_srt('vote_fail')+': '+(err.code||err.message),'error');
         });
     }).catch(function(err){
       enableOpts();
-      toast('Vote failed: '+(err.code||err.message),'error');
+      toast(_srt('vote_fail')+': '+(err.code||err.message),'error');
     });
   }
 
@@ -4358,12 +4359,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           createdAt: f.serverTimestamp()
         }).then(function() {
           if (m && m.remove) m.remove(); else document.getElementById('ghStoryShareModal') && document.getElementById('ghStoryShareModal').remove();
-          toast('Added to your story!');
-        }).catch(function(e) { toast('Failed: ' + e.message, 'error'); btn.disabled = false; btn.textContent = 'Share story'; });
+          toast(_srt('story_added'));
+        }).catch(function(e) { toast('Failed: ' + e.message, 'error'); btn.disabled = false; btn.textContent = _srt('story_added','Share story'); });
       };
     };
     document.getElementById('ghShareCopyLink').onclick = function() {
-      if (navigator.clipboard) { navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){ toast('Post link copied'); }); }
+      if (navigator.clipboard) { navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){ toast(_srt('post_link_copied')); }); }
       closeSheet();
     };
     if (navigator.share) {
@@ -4395,7 +4396,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           var repostDoc=snap.docs[0];
           f.deleteDoc(f.doc(d,'posts',repostDoc.id)).then(function(){
             f.updateDoc(f.doc(d,'posts',pid),{reshareCount:f.increment(-1)}).catch(function(){});
-            toast('Repost removed');
+            toast(_srt('repost_removed'));
           });
         });
         return;
@@ -4417,9 +4418,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         createdAt:f.serverTimestamp()
       }).then(function(){
         f.updateDoc(f.doc(d,'posts',pid),{reshareCount:f.increment(1)}).catch(function(){});
-        toast('🔁 Reposted!');
+        toast(_srt('repost_done'));
       });
-    }).catch(function(e){ toast('Repost failed: '+(e.message||e.code),'error'); });
+    }).catch(function(e){ toast(_srt('repost_fail')+': '+(e.message||e.code),'error'); });
   }
 
   function openShareCompose(pid) {
@@ -4444,13 +4445,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       GS().createPost($('#ghShareText').value, '', function() {
         if ($('#ghShareModal')) $('#ghShareModal').remove();
         if (GS().trackShare) GS().trackShare(pid);
-        toast('Shared to your feed!');
+        toast(_srt('shared_to_feed'));
       }, Object.assign({ sharedPostId: pid, visibility: $('#ghShareVisibility').value }, buildActorExtra()));
     };
   }
 
   function openWhoSharedModal(pid, count) {
-    if (!count || count <= 0) { toast('No shares yet'); return; }
+    if (!count || count <= 0) { toast(_srt('no_shares')); return; }
     if (!fs() || !db()) return;
     modal('Who Shared', '<div id="ghWhoSharedList" class="gh-who-rx-list"><i class="fas fa-circle-notch fa-spin gh-muted"></i></div>',
       '<button class="gh-btn ghost" data-close-modal>Close</button>', 'ghWhoSharedModal');
@@ -4550,12 +4551,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         closeDrop();
         window.ghConfirm(typeof GHt==='function'?GHt('post_delete_cfm'):'Delete this post? This cannot be undone.', function() {
           fs().updateDoc(fs().doc(db(),'posts',pid), { status:'deleted', updatedAt:fs().serverTimestamp() })
-            .then(function(){ if(card){ card.style.transition='opacity .25s'; card.style.opacity='0'; setTimeout(function(){ card.remove(); },260); } toast('Post deleted'); })
-            .catch(function(err){ toast('Could not delete: '+(err.code||err.message),'error'); });
+            .then(function(){ if(card){ card.style.transition='opacity .25s'; card.style.opacity='0'; setTimeout(function(){ card.remove(); },260); } toast(_srt('post_deleted')); })
+            .catch(function(err){ toast(_srt('post_del_fail')+': '+(err.code||err.message),'error'); });
         });
         return;
       }
-      if (e.target.closest('[data-copy-post-link]')) { navigator.clipboard && navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast('Link copied!');}); closeDrop(); return; }
+      if (e.target.closest('[data-copy-post-link]')) { navigator.clipboard && navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast(_srt('link_copied'));}); closeDrop(); return; }
       if (e.target.closest('[data-menu-save]')) { if(GS().toggleSavePost) GS().toggleSavePost(pid); closeDrop(); return; }
       if (e.target.closest('[data-menu-save-col]')) { closeDrop(); openSaveToCollection(pid); return; }
       if (e.target.closest('[data-menu-analytics]') && isOwn) { closeDrop(); _openPostAnalytics(pid, card); return; }
@@ -4631,7 +4632,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               boosted:false,
               boostExpiresAt:null
             }).then(function(){
-              toast('Boost stopped.');
+              toast(_srt('boost_stopped'));
               m.remove();
               if(card){ var sl=card.querySelector('.gh-sponsored-label'); if(sl) sl.remove(); }
             }).catch(function(err){ toast('Failed: '+(err.message||err.code),'error'); });
@@ -4826,8 +4827,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if (!newText || newText === current) { textEl.innerHTML = esc(current); return; }
       saveBtn.disabled = true; saveBtn.textContent = '…';
       fs().updateDoc(fs().doc(db(),'posts',pid,'comments',cid), { text:newText, updatedAt:fs().serverTimestamp() })
-        .then(function(){ textEl.innerHTML = esc(newText); toast('Comment updated'); })
-        .catch(function(){ textEl.innerHTML = esc(current); toast('Could not edit','error'); });
+        .then(function(){ textEl.innerHTML = esc(newText); toast(_srt('comment_updated')); })
+        .catch(function(){ textEl.innerHTML = esc(current); toast(_srt('comment_edit_fail'),'error'); });
     };
   }
 
@@ -4859,11 +4860,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               var textEl = card.querySelector('.gh-post-text');
               if(textEl) textEl.textContent = newText;
             }
-            toast('Post updated');
+            toast(_srt('post_updated'));
           })
-          .catch(function(err){ toast('Could not save: '+(err.code||err.message),'error'); });
+          .catch(function(err){ toast(_srt('post_save_fail')+': '+(err.code||err.message),'error'); });
       };
-    }).catch(function(){ toast('Could not load post','error'); });
+    }).catch(function(){ toast(_srt('post_load_fail'),'error'); });
   }
 
   function createReport(type,id,reason){
@@ -4871,7 +4872,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(window.GeoModeration) { window.GeoModeration.openReportModal(type, id, ''); return; }
     if(GS() && GS().reportTarget) return GS().reportTarget(type, id, reason);
     var u=authUser();
-    fs().addDoc(fs().collection(db(),'reports'), { reporterId:u.uid, targetType:type, targetId:id, reason:reason||'report', status:'pending', createdAt:fs().serverTimestamp() }).then(function(){toast('Report sent');}).catch(function(){toast('Report failed','error');});
+    fs().addDoc(fs().collection(db(),'reports'), { reporterId:u.uid, targetType:type, targetId:id, reason:reason||'report', status:'pending', createdAt:fs().serverTimestamp() }).then(function(){toast(_srt('report_sent'));}).catch(function(){toast(_srt('report_fail'),'error');});
   }
 
 
@@ -4920,14 +4921,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(!GF || !GF.fs || !GF.db) return;
     GF.fs.getDoc(GF.fs.doc(GF.db, 'stories', sid)).then(function(snap){
       if(!snap.exists || !snap.exists()){
-        toast('Story not found or has expired.');
+        toast(_srt('story_not_found'));
         return;
       }
       var data = snap.data() || {};
       var tsVal = data.createdAt;
       var ms = tsVal && tsVal.toMillis ? tsVal.toMillis() : (tsVal && tsVal.seconds ? tsVal.seconds*1000 : 0);
       if(ms && (Date.now() - ms) > 24 * 3600 * 1000){
-        toast('This story has expired.');
+        toast(_srt('story_expired'));
         return;
       }
       var story = normalizeStoryItem(Object.assign({ id: snap.id }, data));
@@ -9717,7 +9718,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function deleteOwnerReply(reviewId){
     window.ghConfirm(typeof GHt==='function'?GHt('reply_delete_cfm'):'Delete your reply?', function(){
       fs().updateDoc(fs().doc(db(),'businessReviews',reviewId),{ownerReply:null})
-        .then(function(){toast('Reply deleted');})
+        .then(function(){toast(_srt('reply_deleted'));})
         .catch(function(err){toast('Failed: '+(err.code||err.message),'error');});
     });
   }
@@ -10999,7 +11000,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var shareBtn=document.getElementById('ghEvtShareBtn');
         if(shareBtn) shareBtn.onclick=function(){
           if(navigator.share) navigator.share({title:name,url:location.href}).catch(function(){});
-          else{ try{navigator.clipboard.writeText(location.href);}catch(e){} toast('Link copied!'); }
+          else{ try{navigator.clipboard.writeText(location.href);}catch(e){} toast(_srt('link_copied')); }
         };
       }).catch(function(err){ document.getElementById('ghEvtDetail').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>Failed</h3><p>'+esc(err.message||'')+'</p></div>'; });
     });
@@ -11164,7 +11165,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           // Share
           div.querySelector('[data-reel-share]').onclick=function(){
             if(navigator.share) navigator.share({url:location.origin+'/feed.html#post-'+this.dataset.reelShare}).catch(function(){});
-            else toast('Link copied!');
+            else toast(_srt('link_copied'));
           };
         });
         // IntersectionObserver for autoplay
@@ -12530,7 +12531,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             btn.onclick=function(){
               var pid2=btn.dataset.adminDelPost;
               window.ghConfirm('Delete post? Irreversible.', function(){
-                fs().updateDoc(fs().doc(db(),'posts',pid2),{status:'deleted'}).then(function(){ toast('Post deleted'); _renderAdminPosts(); }).catch(function(err){ toast('Failed','error'); });
+                fs().updateDoc(fs().doc(db(),'posts',pid2),{status:'deleted'}).then(function(){ toast(_srt('post_deleted')); _renderAdminPosts(); }).catch(function(err){ toast('Failed','error'); });
               });
             };
           });
@@ -12973,7 +12974,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var nat=document.getElementById('ghShareNative');
     if(nat) nat.onclick=function(){
       if(navigator.share) navigator.share({title:'Join GeoHub',text:'Discover Georgia with me!',url:inviteUrl}).catch(function(){});
-      else{ try{ navigator.clipboard.writeText(inviteUrl); }catch(e){} toast('Link copied!'); }
+      else{ try{ navigator.clipboard.writeText(inviteUrl); }catch(e){} toast(_srt('link_copied')); }
     };
     // Load invite stats
     if(u){
