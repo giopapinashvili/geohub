@@ -2372,22 +2372,23 @@
   function deleteBusinessCleanPost(card, btn) {
     if (!isBusinessPostOwnerMode() || !card) return;
     var postId = card.dataset.postId;
-    if (!confirm('Delete this post?')) return;
-    if (btn) btn.disabled = true;
-    _fs.updateDoc(_fs.doc(_db, 'posts', postId), {
-      status: 'deleted',
-      updatedAt: _fs.serverTimestamp()
-    }).then(function() {
-      showToast('Post deleted');
-      _currentPosts = _currentPosts.filter(function(p){ return p.id !== postId; });
-      businessCleanPostCards(postId).forEach(function(el) {
-        el.style.transition = 'opacity .2s';
-        el.style.opacity = '0';
-        setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 220);
+    window.ghConfirm('Delete this post?', function() {
+      if (btn) btn.disabled = true;
+      _fs.updateDoc(_fs.doc(_db, 'posts', postId), {
+        status: 'deleted',
+        updatedAt: _fs.serverTimestamp()
+      }).then(function() {
+        showToast('Post deleted');
+        _currentPosts = _currentPosts.filter(function(p){ return p.id !== postId; });
+        businessCleanPostCards(postId).forEach(function(el) {
+          el.style.transition = 'opacity .2s';
+          el.style.opacity = '0';
+          setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 220);
+        });
+      }).catch(function(err) {
+        if (btn) btn.disabled = false;
+        showToast('Could not delete: ' + (err.code || err.message), false);
       });
-    }).catch(function(err) {
-      if (btn) btn.disabled = false;
-      showToast('Could not delete: ' + (err.code || err.message), false);
     });
   }
 
@@ -3535,15 +3536,16 @@
 
     deleteComment: function(postId, commentId, btnEl) {
       if (!_currentUser) return;
-      if (!confirm('Delete this comment?')) return;
-      _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId), {
-        status: 'deleted', updatedAt: _fs.serverTimestamp()
-      }).then(function() {
-        var wrap = document.querySelector('[data-cid="'+CSS.escape(commentId)+'"]');
-        if (wrap) { wrap.style.transition='opacity .2s'; wrap.style.opacity='0'; setTimeout(function(){ wrap.remove(); },220); }
-        _fs.updateDoc(_fs.doc(_db,'posts',postId),{commentCount:_fs.increment(-1)}).catch(function(){});
-        showToast('Comment deleted');
-      }).catch(function(err) { showToast('Could not delete: '+(err.code||err.message), false); });
+      window.ghConfirm('Delete this comment?', function() {
+        _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId), {
+          status: 'deleted', updatedAt: _fs.serverTimestamp()
+        }).then(function() {
+          var wrap = document.querySelector('[data-cid="'+CSS.escape(commentId)+'"]');
+          if (wrap) { wrap.style.transition='opacity .2s'; wrap.style.opacity='0'; setTimeout(function(){ wrap.remove(); },220); }
+          _fs.updateDoc(_fs.doc(_db,'posts',postId),{commentCount:_fs.increment(-1)}).catch(function(){});
+          showToast('Comment deleted');
+        }).catch(function(err) { showToast('Could not delete: '+(err.code||err.message), false); });
+      });
     },
 
     replyToComment: function(postId, commentId, authorName) {
@@ -3684,15 +3686,16 @@
 
     deleteReply: function(postId, commentId, replyId, btnEl) {
       if (!_currentUser) return;
-      if (!confirm('Delete this reply?')) return;
-      _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId,'replies',replyId), {
-        status: 'deleted', updatedAt: _fs.serverTimestamp()
-      }).then(function() {
-        var wrap = document.querySelector('[data-rid="'+CSS.escape(replyId)+'"]');
-        if (wrap) { wrap.style.transition='opacity .2s'; wrap.style.opacity='0'; setTimeout(function(){ wrap.remove(); },220); }
-        _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId), {replyCount: _fs.increment(-1)}).catch(function(){});
-        showToast('Reply deleted');
-      }).catch(function() { showToast('Could not delete reply', false); });
+      window.ghConfirm('Delete this reply?', function() {
+        _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId,'replies',replyId), {
+          status: 'deleted', updatedAt: _fs.serverTimestamp()
+        }).then(function() {
+          var wrap = document.querySelector('[data-rid="'+CSS.escape(replyId)+'"]');
+          if (wrap) { wrap.style.transition='opacity .2s'; wrap.style.opacity='0'; setTimeout(function(){ wrap.remove(); },220); }
+          _fs.updateDoc(_fs.doc(_db,'posts',postId,'comments',commentId), {replyCount: _fs.increment(-1)}).catch(function(){});
+          showToast('Reply deleted');
+        }).catch(function() { showToast('Could not delete reply', false); });
+      });
     },
 
     // ── Reactions ─────────────────────────────────────────────────
@@ -4072,18 +4075,18 @@
     deletePost: function(postId) {
       document.querySelectorAll('.biz-post-menu-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
       if (!_currentUser) return;
-      if (!confirm('Delete this post? This cannot be undone.')) return;
-      _fs.updateDoc(_fs.doc(_db,'posts',postId), {
-        status: 'deleted', updatedAt: _fs.serverTimestamp()
-      }).then(function(){
-        showToast('Post deleted');
-        // Remove card from all lists
-        document.querySelectorAll('[data-post-id="'+CSS.escape(postId)+'"]').forEach(function(el){
-          el.style.transition = 'opacity .25s';
-          el.style.opacity = '0';
-          setTimeout(function(){ el.remove(); }, 260);
-        });
-      }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+      window.ghConfirm('Delete this post? This cannot be undone.', function() {
+        _fs.updateDoc(_fs.doc(_db,'posts',postId), {
+          status: 'deleted', updatedAt: _fs.serverTimestamp()
+        }).then(function(){
+          showToast('Post deleted');
+          document.querySelectorAll('[data-post-id="'+CSS.escape(postId)+'"]').forEach(function(el){
+            el.style.transition = 'opacity .25s';
+            el.style.opacity = '0';
+            setTimeout(function(){ el.remove(); }, 260);
+          });
+        }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+      });
     },
 
     deletePage: function() {
@@ -4296,7 +4299,17 @@
       var ta=document.getElementById('biz-compose-text');
       var hasText=!!(ta&&ta.value.trim());
       var hasFiles=!!(window._composePendingFiles&&window._composePendingFiles.length);
-      if(!force && (hasText||hasFiles) && !confirm('Discard your post?')) return;
+      if(!force && (hasText||hasFiles)) {
+        window.ghConfirm('Discard your post?', function() {
+          m.classList.remove('open');
+          if(ta) ta.value='';
+          window._composePendingFiles=[];
+          var pr=document.getElementById('biz-compose-photos'); if(pr) pr.innerHTML='';
+          var btn=document.getElementById('biz-compose-btn'); if(btn) btn.disabled=true;
+          window._bizComposeValidate=null;
+        });
+        return;
+      }
       m.classList.remove('open');
       if(ta) ta.value='';
       window._composePendingFiles=[];
@@ -4611,13 +4624,14 @@
 
     deleteBlock: function(blockId) {
       if (!_currentUser || !_isOwner) return;
-      if (!confirm('Delete this block?')) return;
-      _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'pageBlocks',blockId))
-        .then(function() {
-          showToast('Block deleted');
-          loadPageBlocks();
-          window._bizActions.refreshBlockManagerList();
-        }).catch(function() { showToast('Could not delete', false); });
+      window.ghConfirm('Delete this block?', function() {
+        _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'pageBlocks',blockId))
+          .then(function() {
+            showToast('Block deleted');
+            loadPageBlocks();
+            window._bizActions.refreshBlockManagerList();
+          }).catch(function() { showToast('Could not delete', false); });
+      });
     },
 
     editBlock: function(blockId) {
@@ -4847,11 +4861,13 @@
     },
 
     deleteFaqItem: function(faqId) {
-      if (!isAdminOrOwner() || !confirm('Delete this FAQ item?')) return;
-      _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'faq',faqId)).then(function() {
-        showToast('FAQ item deleted');
-        loadFaq(BIZ_ID);
-      }).catch(function(){ showToast('Could not delete', false); });
+      if (!isAdminOrOwner()) return;
+      window.ghConfirm('Delete this FAQ item?', function() {
+        _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'faq',faqId)).then(function() {
+          showToast('FAQ item deleted');
+          loadFaq(BIZ_ID);
+        }).catch(function(){ showToast('Could not delete', false); });
+      });
     },
 
     openAnswerFaq: function(faqId) {
@@ -4960,11 +4976,13 @@
     },
 
     deleteMilestone: function(milestoneId) {
-      if (!isAdminOrOwner() || !confirm('Delete this milestone?')) return;
-      _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'milestones',milestoneId)).then(function() {
-        showToast('Milestone deleted');
-        loadMilestones(BIZ_ID);
-      }).catch(function(){ showToast('Could not delete', false); });
+      if (!isAdminOrOwner()) return;
+      window.ghConfirm('Delete this milestone?', function() {
+        _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'milestones',milestoneId)).then(function() {
+          showToast('Milestone deleted');
+          loadMilestones(BIZ_ID);
+        }).catch(function(){ showToast('Could not delete', false); });
+      });
     },
 
     // ── Page Admin Roles ──────────────────────────────────────────
@@ -4980,11 +4998,13 @@
     },
 
     removePageAdmin: function(userId) {
-      if (!_isOwner || !confirm('Remove this admin?')) return;
-      _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'admins',userId)).then(function() {
-        showToast('Admin removed');
-        window._bizActions.refreshAdminList();
-      }).catch(function(){ showToast('Could not remove admin', false); });
+      if (!_isOwner) return;
+      window.ghConfirm('Remove this admin?', function() {
+        _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'admins',userId)).then(function() {
+          showToast('Admin removed');
+          window._bizActions.refreshAdminList();
+        }).catch(function(){ showToast('Could not remove admin', false); });
+      });
     },
 
     refreshAdminList: function() {
@@ -5070,11 +5090,12 @@
 
     deleteService: function(id) {
       if (!isAdminOrOwner() || !id) return;
-      if (!confirm('Delete this service?')) return;
-      _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'services',id)).then(function(){
-        showToast('Service deleted');
-        reloadServicesTab();
-      }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+      window.ghConfirm('Delete this service?', function() {
+        _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'services',id)).then(function(){
+          showToast('Service deleted');
+          reloadServicesTab();
+        }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+      });
     },
 
     // ── Product CRUD ──────────────────────────────────────────────
@@ -5119,11 +5140,12 @@
 
     deleteProduct: function(id) {
       if (!isAdminOrOwner() || !id) return;
-      if (!confirm('Delete this product?')) return;
-      _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'products',id)).then(function(){
-        showToast('Product deleted');
-        reloadProductsTab();
-      }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+      window.ghConfirm('Delete this product?', function() {
+        _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'products',id)).then(function(){
+          showToast('Product deleted');
+          reloadProductsTab();
+        }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+      });
     },
 
     // ── Price List CRUD ───────────────────────────────────────────
@@ -5166,11 +5188,12 @@
 
     deletePriceItem: function(id) {
       if (!isAdminOrOwner() || !id) return;
-      if (!confirm('Remove this price item?')) return;
-      _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'priceList',id)).then(function(){
-        showToast('Price item removed');
-        reloadServicesTab();
-      }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+      window.ghConfirm('Remove this price item?', function() {
+        _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'priceList',id)).then(function(){
+          showToast('Price item removed');
+          reloadServicesTab();
+        }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+      });
     },
 
     // ── Gallery owner actions ─────────────────────────────────────
@@ -5200,11 +5223,12 @@
 
     deleteGalleryPhoto: function(id) {
       if (!isAdminOrOwner() || !id) return;
-      if (!confirm('Delete this photo?')) return;
-      _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'gallery',id)).then(function(){
-        showToast('Photo deleted');
-        reloadGalleryTab();
-      }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+      window.ghConfirm('Delete this photo?', function() {
+        _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'gallery',id)).then(function(){
+          showToast('Photo deleted');
+          reloadGalleryTab();
+        }).catch(function(err){ showToast('Could not delete: '+(err.code||err.message), false); });
+      });
     },
 
     // ── Review owner reply ────────────────────────────────────────
@@ -5258,14 +5282,15 @@
     // ── Owner delete reply ────────────────────────────────────────
     deleteReviewReply: function(reviewId) {
       if (!_isOwner || !reviewId) return;
-      if (!confirm('Delete your reply?')) return;
-      _fs.updateDoc(_fs.doc(_db,'businessReviews',reviewId), {
-        ownerReply: '', updatedAt: _fs.serverTimestamp()
-      }).then(function(){
-        showToast('Reply deleted');
-        reloadReviewsTab();
-      }).catch(function(err){
-        showToast('Could not delete reply: '+(err.code||err.message), false);
+      window.ghConfirm('Delete your reply?', function() {
+        _fs.updateDoc(_fs.doc(_db,'businessReviews',reviewId), {
+          ownerReply: '', updatedAt: _fs.serverTimestamp()
+        }).then(function(){
+          showToast('Reply deleted');
+          reloadReviewsTab();
+        }).catch(function(err){
+          showToast('Could not delete reply: '+(err.code||err.message), false);
+        });
       });
     },
 
@@ -5299,21 +5324,22 @@
     // ── Delete review (owner or reviewer) ────────────────────────
     deleteReview: function(reviewId, rating) {
       if (!_currentUser || !reviewId) return;
-      if (!confirm('Delete this review?')) return;
-      _fs.deleteDoc(_fs.doc(_db,'businessReviews',reviewId)).then(function(){
-        var oc = Math.max(0, (_biz.ratingCount || 1) - 1);
-        var ot = Math.max(0, (_biz.ratingTotal || 0) - (rating || 0));
-        var newAvg = oc > 0 ? Math.round(ot/oc*10)/10 : 0;
-        _biz.ratingCount = oc; _biz.ratingTotal = ot; _biz.ratingAverage = newAvg;
-        _biz.reviewCount = Math.max(0, (_biz.reviewCount || 1) - 1);
-        _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID),{
-          ratingCount:_fs.increment(-1), ratingTotal:_fs.increment(-(rating||0)),
-          ratingAverage: newAvg, reviewCount:_fs.increment(-1), updatedAt:_fs.serverTimestamp()
-        }).catch(function(){});
-        showToast('Review deleted');
-        reloadReviewsTab();
-      }).catch(function(err){
-        showToast('Could not delete: '+(err.code||err.message), false);
+      window.ghConfirm('Delete this review?', function() {
+        _fs.deleteDoc(_fs.doc(_db,'businessReviews',reviewId)).then(function(){
+          var oc = Math.max(0, (_biz.ratingCount || 1) - 1);
+          var ot = Math.max(0, (_biz.ratingTotal || 0) - (rating || 0));
+          var newAvg = oc > 0 ? Math.round(ot/oc*10)/10 : 0;
+          _biz.ratingCount = oc; _biz.ratingTotal = ot; _biz.ratingAverage = newAvg;
+          _biz.reviewCount = Math.max(0, (_biz.reviewCount || 1) - 1);
+          _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID),{
+            ratingCount:_fs.increment(-1), ratingTotal:_fs.increment(-(rating||0)),
+            ratingAverage: newAvg, reviewCount:_fs.increment(-1), updatedAt:_fs.serverTimestamp()
+          }).catch(function(){});
+          showToast('Review deleted');
+          reloadReviewsTab();
+        }).catch(function(err){
+          showToast('Could not delete: '+(err.code||err.message), false);
+        });
       });
     },
 
