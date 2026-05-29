@@ -2,9 +2,11 @@
    Signaling via Firestore  |  Media via WebRTC
    Firestore schema:
      calls/{callId}: { callerId, calleeId, callerName, callerAvatar,
-                       calleeName, calleeAvatar, type, status, offer, answer, createdAt }
+                       calleeName, calleeAvatar, type, status, offer, answer,
+                       createdAt, endedAt, duration }
      calls/{callId}/callerCandidates/{id}: ICE candidate JSON
      calls/{callId}/calleeCandidates/{id}: ICE candidate JSON
+     calls/{callId}/messages/{id}: { uid, text, createdAt }
 */
 (function () {
   'use strict';
@@ -33,6 +35,10 @@
   var _cachedIceAt = 0;
   var _screenStream = null;
   var _facingMode = 'user';
+  var _chatUnsub = null;
+  var _chatOpen = false;
+  var _qualityIv = null;
+  var _callStartMs = 0;
 
   // Static fallback — used if the worker fetch fails
   var ICE = { iceServers: [
@@ -200,7 +206,7 @@
         '<div class="gco-top">' +
           '<div class="gco-name">' + _esc(name) + '</div>' +
           '<div class="gco-status" id="ghCallStatus">' + _t('call_connected', 'Connected') + '</div>' +
-          '<div class="gco-timer" id="ghCallTimer">00:00</div>' +
+          '<div class="gco-timer-row"><div class="gco-timer" id="ghCallTimer">00:00</div><i class="fas fa-signal gco-quality" id="ghCallQuality" style="color:rgba(255,255,255,.4)"></i></div>' +
         '</div>' +
         (type !== 'video'
           ? '<div class="gco-middle"><div class="gco-av-wrap"><div class="gco-av">' + _avatarHtml(avatar, name) + '</div></div></div>'
@@ -212,7 +218,9 @@
     var rv = document.getElementById('ghRemoteVideo');
     if (lv && _localStream) { lv.srcObject = _localStream; _makeDraggable(lv); }
     if (rv && _remoteStream) rv.srcObject = _remoteStream;
+    _callStartMs = Date.now();
     _startTimer();
+    _startQuality();
   }
 
   function _hideOverlay() {
@@ -248,18 +256,44 @@
   /* ── Controls HTML builder ───────────────────────────────────── */
   function _controlsHtml(type) {
     var canScreen = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
+    var canPiP    = !!(document.pictureInPictureEnabled);
     var isMobile  = /Mobi|Android/i.test(navigator.userAgent);
     var html = '<div class="gco-controls">';
     if (type === 'video') {
       html += '<button class="gco-btn gco-btn-sec" id="ghCamBtn"    onclick="GhCalls.toggleCamera()"><i class="fas fa-video"></i></button>';
-      if (isMobile)    html += '<button class="gco-btn gco-btn-sec" id="ghFlipBtn"   onclick="GhCalls.flipCamera()"><i class="fas fa-camera-rotate"></i></button>';
-      if (canScreen)   html += '<button class="gco-btn gco-btn-sec" id="ghScreenBtn" onclick="GhCalls.toggleScreenShare()"><i class="fas fa-desktop"></i></button>';
+      if (isMobile)  html += '<button class="gco-btn gco-btn-sec" id="ghFlipBtn"   onclick="GhCalls.flipCamera()"><i class="fas fa-camera-rotate"></i></button>';
+      if (canScreen) html += '<button class="gco-btn gco-btn-sec" id="ghScreenBtn" onclick="GhCalls.toggleScreenShare()"><i class="fas fa-desktop"></i></button>';
+      if (canPiP)    html += '<button class="gco-btn gco-btn-sec" id="ghPiPBtn"    onclick="GhCalls.togglePiP()"><i class="fas fa-compress-alt"></i></button>';
     }
+    html += '<button class="gco-btn gco-btn-sec" id="ghChatBtn" onclick="GhCalls.toggleChat()"><i class="fas fa-comment"></i></button>';
     html += '<button class="gco-btn gco-btn-sec" id="ghMuteBtn" onclick="GhCalls.toggleMute()"><i class="fas fa-microphone"></i></button>';
     html += '<button class="gco-btn gco-btn-end" onclick="GhCalls.endCall()"><i class="fas fa-phone-slash"></i></button>';
     html += '</div>';
     return html;
   }
+
+  /* ── Quality indicator ───────────────────────────────────────── */
+  function _startQuality() {
+    _stopQuality();
+    _qualityIv = setInterval(async function () {
+      if (!_pc) { _stopQuality(); return; }
+      try {
+        var stats = await _pc.getStats();
+        var rtt = null;
+        stats.forEach(function (r) {
+          if (r.type === 'candidate-pair' && r.state === 'succeeded' && r.currentRoundTripTime != null)
+            rtt = r.currentRoundTripTime * 1000;
+        });
+        var el = document.getElementById('ghCallQuality');
+        if (!el) return;
+        if (rtt === null)  { el.title = ''; el.style.color = 'rgba(255,255,255,.4)'; return; }
+        if (rtt < 120)     { el.title = 'კარგი'; el.style.color = '#22c55e'; }
+        else if (rtt < 280){ el.title = 'საშუალო'; el.style.color = '#f59e0b'; }
+        else               { el.title = 'ცუდი';  el.style.color = '#ef4444'; }
+      } catch (e) {}
+    }, 3000);
+  }
+  function _stopQuality() { clearInterval(_qualityIv); _qualityIv = null; }
 
   /* ── RTCPeerConnection ───────────────────────────────────────── */
   function _createPC(callId, role, iceConfig) {
@@ -467,9 +501,16 @@
   GC.endCall = async function (reason) {
     _stopRing(); _stopTimer();
     var id = _callId;
+    var dur = _callStartMs ? Math.floor((Date.now() - _callStartMs) / 1000) : 0;
     _cleanupLocal();
     if (_fb() && id) {
-      try { await _fs.updateDoc(_fs.doc(_db, 'calls', id), { status: reason || 'ended' }); } catch (e) {}
+      try {
+        await _fs.updateDoc(_fs.doc(_db, 'calls', id), {
+          status: reason || 'ended',
+          endedAt: _fs.serverTimestamp(),
+          duration: dur
+        });
+      } catch (e) {}
     }
   };
 
@@ -528,6 +569,91 @@
     }
   };
 
+  /* ── Public: togglePiP ───────────────────────────────────────── */
+  GC.togglePiP = async function () {
+    var rv = document.getElementById('ghRemoteVideo');
+    if (!rv) return;
+    try {
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+      } else {
+        await rv.requestPictureInPicture();
+      }
+    } catch (e) {}
+  };
+
+  /* ── Public: toggleChat ──────────────────────────────────────── */
+  GC.toggleChat = function () {
+    _chatOpen = !_chatOpen;
+    var panel = document.getElementById('ghChatPanel');
+    var btn   = document.getElementById('ghChatBtn');
+    if (!panel) { _buildChatPanel(); return; }
+    panel.style.display = _chatOpen ? 'flex' : 'none';
+    if (btn) btn.classList.toggle('gco-btn-active', _chatOpen);
+  };
+
+  function _buildChatPanel() {
+    var existing = document.getElementById('ghChatPanel');
+    if (existing) { existing.remove(); }
+    var panel = document.createElement('div');
+    panel.id = 'ghChatPanel';
+    panel.className = 'gco-chat-panel';
+    panel.innerHTML =
+      '<div class="gco-chat-msgs" id="ghChatMsgs"></div>' +
+      '<div class="gco-chat-input-row">' +
+        '<input id="ghChatInput" class="gco-chat-input" type="text" placeholder="' + _t('call_chat_placeholder', 'შეტყობინება…') + '" maxlength="300">' +
+        '<button class="gco-chat-send" onclick="GhCalls.sendChatMsg()"><i class="fas fa-paper-plane"></i></button>' +
+      '</div>';
+    var ov = document.getElementById('ghCallOverlay');
+    if (ov) ov.appendChild(panel);
+
+    // Send on Enter
+    panel.querySelector('#ghChatInput').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') GC.sendChatMsg();
+    });
+
+    // Listen for messages
+    if (_fb() && _callId) {
+      _chatUnsub = _fs.onSnapshot(
+        _fs.query(_fs.collection(_db, 'calls', _callId, 'messages'), _fs.orderBy('createdAt', 'asc')),
+        function (snap) {
+          snap.docChanges().forEach(function (ch) {
+            if (ch.type !== 'added') return;
+            var d = ch.doc.data();
+            var me = _me();
+            var mine = me && d.uid === me.uid;
+            var el = document.getElementById('ghChatMsgs');
+            if (!el) return;
+            var msg = document.createElement('div');
+            msg.className = 'gco-chat-msg' + (mine ? ' gco-chat-msg-mine' : '');
+            msg.textContent = d.text;
+            el.appendChild(msg);
+            el.scrollTop = el.scrollHeight;
+          });
+        },
+        function () {}
+      );
+    }
+
+    var btn = document.getElementById('ghChatBtn');
+    if (btn) btn.classList.add('gco-btn-active');
+  }
+
+  /* ── Public: sendChatMsg ─────────────────────────────────────── */
+  GC.sendChatMsg = async function () {
+    if (!_fb() || !_callId) return;
+    var inp = document.getElementById('ghChatInput');
+    if (!inp || !inp.value.trim()) return;
+    var me = _me(); if (!me) return;
+    var text = inp.value.trim();
+    inp.value = '';
+    try {
+      await _fs.addDoc(_fs.collection(_db, 'calls', _callId, 'messages'), {
+        uid: me.uid, text: text, createdAt: _fs.serverTimestamp()
+      });
+    } catch (e) {}
+  };
+
   /* ── Public: flipCamera ──────────────────────────────────────── */
   GC.flipCamera = async function () {
     if (!_localStream || _callType !== 'video') return;
@@ -552,10 +678,11 @@
     if (_pc) { _pc.close(); _pc = null; }
     if (_localStream) { _localStream.getTracks().forEach(function (t) { t.stop(); }); _localStream = null; }
     if (_screenStream) { _screenStream.getTracks().forEach(function (t) { t.stop(); }); _screenStream = null; }
+    if (_chatUnsub) { _chatUnsub(); _chatUnsub = null; }
     _remoteStream = null;
     _callId = null; _myRole = null; _callType = null; _callState = null;
-    _pendingCandidates = []; _facingMode = 'user';
-    _stopTimer(); _stopRing(); _hideOverlay();
+    _pendingCandidates = []; _facingMode = 'user'; _chatOpen = false; _callStartMs = 0;
+    _stopTimer(); _stopRing(); _stopQuality(); _hideOverlay();
   }
 
   /* ── Listen for incoming calls ───────────────────────────────── */

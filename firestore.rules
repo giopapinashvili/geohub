@@ -1530,6 +1530,14 @@ service cloud.firestore {
         allow create: if signedIn() && get(/databases/$(database)/documents/calls/$(callId)).data.calleeId == uid();
         allow delete: if false;
       }
+      match /messages/{msgId} {
+        allow read:   if signedIn() && (get(/databases/$(database)/documents/calls/$(callId)).data.callerId == uid()
+                                     || get(/databases/$(database)/documents/calls/$(callId)).data.calleeId == uid());
+        allow create: if signedIn() && request.resource.data.uid == uid()
+                                    && (get(/databases/$(database)/documents/calls/$(callId)).data.callerId == uid()
+                                     || get(/databases/$(database)/documents/calls/$(callId)).data.calleeId == uid());
+        allow delete: if false;
+      }
     }
 
     // ── DENY-ALL FALLBACK ─────────────────────────────────────────────────────
