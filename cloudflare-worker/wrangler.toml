@@ -5,7 +5,7 @@ workers_dev      = true
 
 [vars]
 FIREBASE_PROJECT_ID = "geohub-main"
-SITE_URL            = "https://geohub.pages.dev"
+SITE_URL            = "https://geohub-main.pages.dev"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Set all secrets below via CLI — NEVER commit real values here:

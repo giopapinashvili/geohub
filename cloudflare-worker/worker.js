@@ -23,7 +23,7 @@
 // ── CORS ──────────────────────────────────────────────────────────────────────
 
 const ALLOWED_ORIGINS = [
-  'https://geohub.pages.dev',
+  'https://geohub-main.pages.dev',
   'https://geohub.ge',
   'https://www.geohub.ge',
 ];
