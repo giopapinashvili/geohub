@@ -1632,7 +1632,7 @@
         if(!file || !activeConversation) return;
         try{
           setAttachmentBusy(true, 'Uploading photo...');
-          window.showToast&&window.showToast(_t('msg_uploading_photo','Uploading photo' + [char]0x2026));
+          window.showToast&&window.showToast(_t('msg_uploading_photo','Uploading photo…'));
           const url=await uploadSelectedImage(file);
           setAttachmentBusy(false);
           if(url) await doSend({ mediaUrl:url, mediaType:'image', attachments:[attachmentFromUpload('image', url, file)] });
@@ -1653,7 +1653,7 @@
         if(!file || !activeConversation) return;
         try{
           setAttachmentBusy(true, 'Uploading file...');
-          window.showToast&&window.showToast(_t('msg_uploading_file','Uploading file' + [char]0x2026));
+          window.showToast&&window.showToast(_t('msg_uploading_file','Uploading file…'));
           const extra=await uploadSelectedFile(file);
           setAttachmentBusy(false);
           if(extra) await doSend(extra);
