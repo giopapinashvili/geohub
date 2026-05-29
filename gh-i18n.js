@@ -950,7 +950,16 @@
     call_toggle_cam:  { ka: 'კამ. ჩართ/გამ.',          en: 'Toggle camera',          ru: 'Вкл/выкл камеру'     },
     call_media_denied:{ ka: 'მიკ/კამ. წვდ. უარყ.',    en: 'Microphone/camera access denied', ru: 'Доступ к микрофону/камере запрещён' },
     call_not_ready:   { ka: 'სისტ. მზად არ არის',      en: 'System not ready',       ru: 'Система не готова'   },
-    call_already_active:{ ka: 'ზარი უკვე მიმდ.',       en: 'Already in a call',      ru: 'Уже в звонке'        },
+    call_already_active:   { ka: 'ზარი უკვე მიმდინარეობს', en: 'Already in a call',            ru: 'Уже в звонке'                  },
+    call_voice_label:      { ka: 'ხმოვანი ზარი',           en: 'Voice call',                   ru: 'Голосовой звонок'              },
+    call_video_label:      { ka: 'ვიდეო ზარი',             en: 'Video call',                   ru: 'Видеозвонок'                   },
+    call_back:             { ka: 'გამოძახება',              en: 'Call back',                    ru: 'Перезвонить'                   },
+    call_history:          { ka: 'ზარების ისტორია',        en: 'Call history',                 ru: 'История звонков'               },
+    call_history_empty:    { ka: 'ზარების ისტორია ცარიელია',en: 'No calls yet',                ru: 'История звонков пуста'         },
+    call_chat_placeholder: { ka: 'შეტყობინება…',           en: 'Message…',                     ru: 'Сообщение…'                    },
+    call_screen_denied:    { ka: 'ეკ. გაზიარება მიუწვდ.', en: 'Screen sharing not available', ru: 'Общий экран недоступен'        },
+    notif_missed_call:     { ka: 'გამოტოვებული ზარი',      en: 'Missed call',                  ru: 'Пропущенный звонок'            },
+    notif_missed_call_body:{ ka: '-სგან გამოტოვებული ',   en: ' — missed ',                   ru: ' — пропущен '                  },
 
     /* ── Places page ────────────────────────────────────────── */
     pl_discover:      { ka: 'ადგილების აღმოჩენა',  en: 'Discover Places', ru: 'Открыть места'    },
