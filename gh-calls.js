@@ -350,7 +350,7 @@
     _showRinging(targetName, targetAvatar, type);
     if (type === 'video') {
       var lv = document.getElementById('ghLocalVideo');
-      if (lv && _localStream) lv.srcObject = _localStream;
+      if (lv && _localStream) { lv.srcObject = _localStream; _makeDraggable(lv); }
     }
     _ring(true);
 
