@@ -7,10 +7,10 @@
   "scope": "/",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
-  "background_color": "#04050d",
-  "theme_color": "#10b981",
+  "background_color": "#05080F",
+  "theme_color": "#3B82F6",
   "orientation": "portrait-primary",
-  "lang": "en",
+  "lang": "ka",
   "prefer_related_applications": false,
   "categories": ["lifestyle", "social", "travel"],
   "icons": [
@@ -23,35 +23,32 @@
   ],
   "shortcuts": [
     {
-      "name": "Explore",
-      "short_name": "Explore",
-      "description": "Discover places, events, and creators",
+      "name": "ფიდი",
+      "short_name": "ფიდი",
+      "description": "ადგილები, ღონისძიებები, პოსტები",
       "url": "/feed.html",
       "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
     },
     {
-      "name": "Live City",
-      "short_name": "Live",
-      "description": "See what is happening around you right now",
-      "url": "/live.html",
-      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Rewards",
-      "short_name": "Rewards",
-      "description": "Check your XP and unlock rewards",
+      "name": "ჯილდოები",
+      "short_name": "ჯილდოები",
+      "description": "XP ქულები და ჯილდოების მაღაზია",
       "url": "/rewards.html",
       "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
     },
     {
-      "name": "AI Assistant",
-      "short_name": "GeoAI",
-      "description": "Plan your day with GeoHub AI",
-      "url": "/assistant.html",
+      "name": "შეტყობინებები",
+      "short_name": "შეტყობ.",
+      "description": "შეტყობინებები და DM",
+      "url": "/messages.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "პროფილი",
+      "short_name": "პროფილი",
+      "description": "ჩემი GeoHub პროფილი",
+      "url": "/profile.html",
       "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
     }
-  ],
-  "screenshots": [
-    { "src": "icons/screenshot-mobile.png", "sizes": "390x844", "type": "image/png", "form_factor": "narrow" }
   ]
 }

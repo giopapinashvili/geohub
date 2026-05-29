@@ -498,18 +498,19 @@
   }
 
   function renderStaticEmptyStates(user) {
+    var _t = function(k){ return typeof window.GHt === 'function' ? window.GHt(k) : k; };
     const l = level(user), xp = Number(user.xp || 0), inLvl = xp % 1000;
     const pill = $('.xp-level-pill'); if (pill) pill.innerHTML = '<i class="fas fa-bolt"></i> Level ' + l;
     const title = $('.xp-title-text'); if (title) title.textContent = user.explorerLevel || 'New Explorer';
     const fill = $('.xp-bar-fill'); if (fill) fill.style.width = Math.min(100, inLvl / 10) + '%';
     const nums = $('.xp-bar-numbers'); if (nums) nums.textContent = xp + ' / ' + (l * 1000) + ' XP';
-    const next = $('.xp-to-next'); if (next) next.textContent = (1000 - inLvl) + ' XP to Level ' + (l + 1);
+    const next = $('.xp-to-next'); if (next) next.textContent = (1000 - inLvl) + (_t('profile_xp_to_level') || ' XP to Level ') + (l + 1);
     const intro = $$('.intro-item');
-    if (intro[0]) intro[0].innerHTML = '<i class="fas fa-map-marker-alt"></i> ' + (user.cityScope === 'all_georgia' ? 'Interested in all Georgia' : (user.city ? esc(user.city) : 'No location set'));
+    if (intro[0]) intro[0].innerHTML = '<i class="fas fa-map-marker-alt"></i> ' + (user.cityScope === 'all_georgia' ? _t('profile_all_georgia') : (user.city ? esc(user.city) : _t('profile_no_location')));
     if (intro[1]) intro[1].innerHTML = '<i class="fas fa-hiking"></i> ' + esc(user.accountType || 'Explorer');
-    if (intro[2]) intro[2].innerHTML = '<i class="fas fa-calendar-alt"></i> Join date not set';
-    if (intro[3]) intro[3].innerHTML = '<i class="fas fa-globe"></i> ' + (user.username ? 'geohub.ge/@' + esc(user.username) : 'No public username set');
-    const lifestyle = $('.lifestyle-scores'); if (lifestyle) lifestyle.innerHTML = '<div style="color:var(--text-muted);font-size:.85rem;padding:8px 0">Activity scores will appear after real check-ins and posts.</div>';
+    if (intro[2]) intro[2].innerHTML = '<i class="fas fa-calendar-alt"></i> ' + _t('profile_join_date_na');
+    if (intro[3]) intro[3].innerHTML = '<i class="fas fa-globe"></i> ' + (user.username ? 'geohub.ge/@' + esc(user.username) : _t('profile_no_username'));
+    const lifestyle = $('.lifestyle-scores'); if (lifestyle) lifestyle.innerHTML = '<div style="color:var(--text-muted);font-size:.85rem;padding:8px 0">' + _t('trust_activity_hint') + '</div>';
     const trustList = $('#trustItemsList');
     if (trustList) {
       var checkins = Number(user.checkinCount || user.checkinsCount || 0);
@@ -518,22 +519,22 @@
       var idOk = !!user.idVerified;
       var cities = Number(user.citiesVisited || user.visitedCities || 0);
       trustList.innerHTML = [
-        '<div class="trust-item ok"><i class="fas fa-check-circle"></i> Real account</div>',
-        cameraProofs > 0 ? '<div class="trust-item ok"><i class="fas fa-camera"></i> ' + cameraProofs + ' camera proof' + (cameraProofs !== 1 ? 's' : '') + '</div>' : '<div class="trust-item warn"><i class="fas fa-camera"></i> No camera proofs yet</div>',
-        checkins > 0 ? '<div class="trust-item ok"><i class="fas fa-map-marker-alt"></i> ' + checkins + ' real check-in' + (checkins !== 1 ? 's' : '') + '</div>' : '<div class="trust-item warn"><i class="fas fa-map-marker-alt"></i> No check-ins yet</div>',
-        phoneOk ? '<div class="trust-item ok"><i class="fas fa-phone"></i> Phone verified</div>' : '<div class="trust-item warn"><i class="fas fa-phone"></i> Phone not verified</div>',
-        idOk ? '<div class="trust-item ok"><i class="fas fa-id-card"></i> Identity verified</div>' : '<div class="trust-item warn"><i class="fas fa-id-card"></i> ID not verified yet</div>'
+        '<div class="trust-item ok"><i class="fas fa-check-circle"></i> ' + _t('trust_real_account') + '</div>',
+        cameraProofs > 0 ? '<div class="trust-item ok"><i class="fas fa-camera"></i> ' + cameraProofs + ' ' + _t('trust_camera_proof') + (cameraProofs !== 1 ? 's' : '') + '</div>' : '<div class="trust-item warn"><i class="fas fa-camera"></i> ' + _t('trust_no_camera') + '</div>',
+        checkins > 0 ? '<div class="trust-item ok"><i class="fas fa-map-marker-alt"></i> ' + checkins + ' ' + _t('trust_checkin') + (checkins !== 1 ? 's' : '') + '</div>' : '<div class="trust-item warn"><i class="fas fa-map-marker-alt"></i> ' + _t('trust_no_checkin') + '</div>',
+        phoneOk ? '<div class="trust-item ok"><i class="fas fa-phone"></i> ' + _t('trust_phone_ok') + '</div>' : '<div class="trust-item warn"><i class="fas fa-phone"></i> ' + _t('trust_phone_no') + '</div>',
+        idOk ? '<div class="trust-item ok"><i class="fas fa-id-card"></i> ' + _t('trust_id_ok') + '</div>' : '<div class="trust-item warn"><i class="fas fa-id-card"></i> ' + _t('trust_id_no') + '</div>'
       ].join('');
-      const citiesEl = document.getElementById('citiesVisited'); if (citiesEl) citiesEl.textContent = cities + ' cities';
+      const citiesEl = document.getElementById('citiesVisited'); if (citiesEl) citiesEl.textContent = cities + (_t('trust_cities') || ' cities');
     }
-    const fav = $('.fav-cats'); if (fav) fav.innerHTML = user.interests.length ? user.interests.map(i => '<div class="fav-cat-chip">' + esc(i) + '</div>').join('') : '<div style="color:var(--text-muted);font-size:.85rem">No interests set yet</div>';
+    const fav = $('.fav-cats'); if (fav) fav.innerHTML = user.interests.length ? user.interests.map(i => '<div class="fav-cat-chip">' + esc(i) + '</div>').join('') : '<div style="color:var(--text-muted);font-size:.85rem">' + _t('profile_no_interests') + '</div>';
     ['spCitiesVal','spFriendsVal','spLikesVal','spGroupsVal'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '0'; });
     const miniPts = $('.mini-wallet-pts'); if (miniPts) miniPts.textContent = compact(user.pointsBalance || 0) + ' pts';
     const miniSub = $('.mini-wallet-sub'); if (miniSub) miniSub.innerHTML = '<strong>' + compact(user.pointsBalance || 0) + ' pts</strong> earned · <a href="rewards.html" style="color:var(--green);text-decoration:none">Open store</a>';
-    const review = $('#mostLikedReviewCard'); if (review) review.innerHTML = '<div class="sidebar-card-title">Most Helpful Review</div><div style="color:var(--text-muted);font-size:.85rem">No reviews yet</div>';
-    const activity = $('.activity-feed .activity-feed-list'); if (activity) activity.innerHTML = '<div style="color:var(--text-muted);font-size:.85rem;padding:12px 0">No real activity yet</div>';
+    const review = $('#mostLikedReviewCard'); if (review) review.innerHTML = '<div class="sidebar-card-title">' + _t('trust_most_review') + '</div><div style="color:var(--text-muted);font-size:.85rem">' + _t('profile_no_reviews') + '</div>';
+    const activity = $('.activity-feed .activity-feed-list'); if (activity) activity.innerHTML = '<div style="color:var(--text-muted);font-size:.85rem;padding:12px 0">' + _t('profile_no_activity') + '</div>';
     const thumbs = $('.followers-thumbs'); if (thumbs) thumbs.innerHTML = '';
-    const ftxt = $('.followers-preview-text'); if (ftxt) ftxt.textContent = 'No followers yet';
+    const ftxt = $('.followers-preview-text'); if (ftxt) ftxt.textContent = _t('profile_no_followers');
     const highlights = $('.profile-highlights'); if (highlights) highlights.innerHTML = '<div class="highlight-item highlight-add" data-add-highlight><div class="highlight-ring add-ring"><i class="fas fa-plus"></i></div><div class="highlight-label">New</div></div>';
   }
 
@@ -689,9 +690,9 @@
 
   function renderTabs(user, fbUser) {
     var _pt=typeof GHt==='function'?GHt:function(k){return k;};
-    emptyTab('#tab-posts', 'fa-seedling', _pt('profile_posts')+': '+_pt('no_results'), 'Real posts from Firestore will appear here.', 'feed.html?compose=1', _pt('create_post'));
-    emptyTab('#tab-checkins', 'fa-location-dot', _pt('profile_checkins')+': '+_pt('no_results'), 'Real check-ins will appear here.', 'checkin.html', _pt('ci_title'));
-    emptyTab('#tab-friends', 'fa-user-group', _pt('profile_friends')+': '+_pt('no_results'), 'Friends and requests will appear here.', null, '');
+    emptyTab('#tab-posts', 'fa-seedling', _pt('profile_posts')+': '+_pt('no_results'), _pt('profile_no_posts_hint'), 'feed.html?compose=1', _pt('create_post'));
+    emptyTab('#tab-checkins', 'fa-location-dot', _pt('profile_checkins')+': '+_pt('no_results'), _pt('profile_no_checkins'), 'checkin.html', _pt('ci_title'));
+    emptyTab('#tab-friends', 'fa-user-group', _pt('profile_friends')+': '+_pt('no_results'), _pt('profile_no_friends_hint'), null, '');
     loadHighlights(user, fbUser);
     renderAboutTab(user);
     renderBadgeTab(user);
@@ -1233,6 +1234,7 @@
   }
 
   function renderAboutTab(user) {
+    var _t = function(k){ return typeof window.GHt === 'function' ? window.GHt(k) : k; };
     var tab = $('#tab-about'); if (!tab) return;
     var sl = user.socialLinks || {};
     var ICONS = { instagram:'fa-instagram', facebook:'fa-facebook', linkedin:'fa-linkedin', tiktok:'fa-tiktok', twitter:'fa-twitter', youtube:'fa-youtube' };
@@ -1242,12 +1244,12 @@
 
     var html = '<div class="about-card">';
     if (user.bio) html += '<div class="about-bio">' + esc(user.bio) + '</div>';
-    html += '<div class="about-section-title">Location</div>';
-    html += '<div class="about-item"><i class="fas fa-map-marker-alt"></i> ' + (user.cityScope === 'all_georgia' ? 'Interested in all Georgia' : esc(user.city || 'No location set')) + '</div>';
-    if (user.hometown) html += '<div class="about-item"><i class="fas fa-home"></i> From ' + esc(user.hometown) + '</div>';
-    if (user.currentCity) html += '<div class="about-item"><i class="fas fa-city"></i> Lives in ' + esc(user.currentCity) + '</div>';
+    html += '<div class="about-section-title">' + _t('about_location') + '</div>';
+    html += '<div class="about-item"><i class="fas fa-map-marker-alt"></i> ' + (user.cityScope === 'all_georgia' ? _t('profile_all_georgia') : esc(user.city || _t('profile_no_location'))) + '</div>';
+    if (user.hometown) html += '<div class="about-item"><i class="fas fa-home"></i> ' + _t('about_from') + esc(user.hometown) + '</div>';
+    if (user.currentCity) html += '<div class="about-item"><i class="fas fa-city"></i> ' + _t('about_lives_in') + esc(user.currentCity) + '</div>';
     if (user.relationshipStatus) html += '<div class="about-item"><i class="fas fa-heart"></i> ' + esc(user.relationshipStatus) + '</div>';
-    if (user.birthday) html += '<div class="about-item"><i class="fas fa-birthday-cake"></i> Birthday: ' + esc(user.birthday) + '</div>';
+    if (user.birthday) html += '<div class="about-item"><i class="fas fa-birthday-cake"></i> ' + _t('about_birthday') + esc(user.birthday) + '</div>';
     if (user.website) html += '<div class="about-item"><i class="fas fa-globe"></i> <a href="' + esc(user.website) + '" target="_blank" rel="noopener noreferrer">' + esc(user.website) + '</a></div>';
     var joinYear = '';
     if (user.createdAt) {
@@ -1257,27 +1259,27 @@
         else if (typeof user.createdAt === 'number') joinYear = new Date(user.createdAt).getFullYear();
       } catch(e) {}
     }
-    if (joinYear) html += '<div class="about-item"><i class="fas fa-calendar-alt"></i> Member since ' + joinYear + '</div>';
+    if (joinYear) html += '<div class="about-item"><i class="fas fa-calendar-alt"></i> ' + _t('profile_member_since') + joinYear + '</div>';
 
     // ── Work History ──
-    html += '<div class="about-section-title">Work' + (isOwn ? '<button class="about-add-btn" data-work-add>+ Add</button>' : '') + '</div>';
+    html += '<div class="about-section-title">' + _t('about_work') + (isOwn ? '<button class="about-add-btn" data-work-add>+ Add</button>' : '') + '</div>';
     var work = Array.isArray(user.work) ? user.work : [];
     if (work.length) {
       work.forEach(function(w, idx) {
         html += '<div class="about-item about-work-item" data-work-idx="' + idx + '">'
           + '<i class="fas fa-briefcase" style="color:#10b981"></i> '
           + '<div style="flex:1"><strong>' + esc(w.position || 'Employee') + '</strong> at <strong>' + esc(w.company || '') + '</strong>'
-          + (w.from ? '<div style="font-size:.75rem;color:var(--gh-muted,#64748b);margin-top:2px">' + esc(w.from) + ' – ' + (w.current ? 'Present' : esc(w.to || '')) + '</div>' : '')
+          + (w.from ? '<div style="font-size:.75rem;color:var(--gh-muted,#64748b);margin-top:2px">' + esc(w.from) + ' – ' + (w.current ? _t('about_work_present') : esc(w.to || '')) + '</div>' : '')
           + '</div>'
           + (isOwn ? '<button class="about-edit-btn" data-work-edit="' + idx + '" title="Edit"><i class="fas fa-pen"></i></button>' : '')
           + '</div>';
       });
     } else {
-      html += '<div class="about-item" style="color:var(--gh-muted,#64748b)"><i class="fas fa-briefcase"></i> ' + (isOwn ? 'Add your work history' : 'No work info') + '</div>';
+      html += '<div class="about-item" style="color:var(--gh-muted,#64748b)"><i class="fas fa-briefcase"></i> ' + (isOwn ? _t('about_work_add') : _t('about_work_none')) + '</div>';
     }
 
     // ── Education ──
-    html += '<div class="about-section-title">Education' + (isOwn ? '<button class="about-add-btn" data-edu-add>+ Add</button>' : '') + '</div>';
+    html += '<div class="about-section-title">' + _t('about_edu') + (isOwn ? '<button class="about-add-btn" data-edu-add>+ Add</button>' : '') + '</div>';
     var edu = Array.isArray(user.education) ? user.education : [];
     if (edu.length) {
       edu.forEach(function(e, idx) {
@@ -1285,28 +1287,28 @@
           + '<i class="fas fa-graduation-cap" style="color:#3b82f6"></i> '
           + '<div style="flex:1"><strong>' + esc(e.school || '') + '</strong>'
           + (e.degree ? ' · ' + esc(e.degree) : '')
-          + (e.from ? '<div style="font-size:.75rem;color:var(--gh-muted,#64748b);margin-top:2px">' + esc(e.from) + ' – ' + esc(e.to || 'Present') + '</div>' : '')
+          + (e.from ? '<div style="font-size:.75rem;color:var(--gh-muted,#64748b);margin-top:2px">' + esc(e.from) + ' – ' + esc(e.to || _t('about_work_present')) + '</div>' : '')
           + '</div>'
           + (isOwn ? '<button class="about-edit-btn" data-edu-edit="' + idx + '" title="Edit"><i class="fas fa-pen"></i></button>' : '')
           + '</div>';
       });
     } else {
-      html += '<div class="about-item" style="color:var(--gh-muted,#64748b)"><i class="fas fa-graduation-cap"></i> ' + (isOwn ? 'Add your education' : 'No education info') + '</div>';
+      html += '<div class="about-item" style="color:var(--gh-muted,#64748b)"><i class="fas fa-graduation-cap"></i> ' + (isOwn ? _t('about_edu_add') : _t('about_edu_none')) + '</div>';
     }
 
     // ── Languages ──
     if (Array.isArray(user.languages) && user.languages.length) {
-      html += '<div class="about-section-title">Languages</div>';
+      html += '<div class="about-section-title">' + _t('about_languages') + '</div>';
       html += '<div class="about-interests">' + user.languages.map(function(l) { return '<span class="about-interest-chip">' + esc(l) + '</span>'; }).join('') + '</div>';
     }
 
     if (user.interests && user.interests.length) {
-      html += '<div class="about-section-title">Interests</div>';
+      html += '<div class="about-section-title">' + _t('about_interests') + '</div>';
       html += '<div class="about-interests">' + user.interests.map(function(i) { return '<span class="about-interest-chip">' + esc(i) + '</span>'; }).join('') + '</div>';
     }
     var links = Object.entries(sl).filter(function(e) { return !!e[1]; });
     if (links.length) {
-      html += '<div class="about-section-title">Social Links</div>';
+      html += '<div class="about-section-title">' + _t('about_social_links') + '</div>';
       html += '<div class="about-links">' + links.map(function(pair) {
         var platform = pair[0], val = String(pair[1] || '');
         var handle = val.replace(/^@/, '');
@@ -1351,14 +1353,15 @@
     if (!container) return;
     var GF = window.GeoFirebase;
     if (!GF || !GF.db || !GF.fs) return;
+    var _t = function(k){ return typeof window.GHt === 'function' ? window.GHt(k) : k; };
 
     // Auto-generate events from work/education
     var events = [];
     (Array.isArray(user.work) ? user.work : []).forEach(function(w) {
-      if (w.from && w.company) events.push({ type: 'work', year: w.from, label: 'Started working at ' + w.company, icon: 'fa-briefcase', color: '#10b981' });
+      if (w.from && w.company) events.push({ type: 'work', year: w.from, label: (_t('about_work_started') || 'Started working at ') + w.company, icon: 'fa-briefcase', color: '#10b981' });
     });
     (Array.isArray(user.education) ? user.education : []).forEach(function(e) {
-      if (e.to && e.school) events.push({ type: 'edu', year: e.to, label: 'Graduated from ' + e.school, icon: 'fa-graduation-cap', color: '#3b82f6' });
+      if (e.to && e.school) events.push({ type: 'edu', year: e.to, label: (_t('about_edu_graduated') || 'Graduated from ') + e.school, icon: 'fa-graduation-cap', color: '#3b82f6' });
     });
 
     // Load custom life events from Firestore

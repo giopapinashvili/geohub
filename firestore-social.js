@@ -5,6 +5,8 @@
 (function GeoSocialInit() {
   'use strict';
 
+  function _gt(key) { return typeof window.GHt === 'function' ? window.GHt(key) : null; }
+
   // ── Toast helper (standalone so fallback can use it too) ──────────────
   function toast(msg, type) {
     var el = document.querySelector('.gh-toast');
@@ -872,7 +874,7 @@
           });
         }).then(function(targetId){
           updateDoc(doc(db, 'users', user.uid), { geoPointsSentTotal: increment(n), updatedAt: serverTimestamp() }).catch(function(){});
-          createNotification(targetId, 'points_received', (me.name || 'GeoHub User') + ' sent you ' + n + ' GeoPoints', message || 'Tap to claim your GeoPoints.', 'rewards.html?tab=wallet', { amount: n });
+          createNotification(targetId, 'points_received', (me.name || 'GeoHub User') + ' ' + (_gt('notif_points_action') || 'sent you ' + n + ' GeoPoints'), message || _gt('notif_points_body') || 'Tap to claim your GeoPoints.', 'rewards.html?tab=wallet', { amount: n });
           toast('GeoPoints sent — recipient must claim'); if(callback) callback(true);
         }).catch(function(err){
           var msg = err.message === 'recipient-not-found' ? 'Recipient not found' : err.message === 'self-transfer' ? 'You cannot send points to yourself' : err.message === 'insufficient-points' ? 'Not enough GeoPoints' : 'Could not send GeoPoints';
@@ -1333,7 +1335,7 @@
         work.then(function () {
           if (nextLiked) {
             getPostOwner(postId).then(function (ownerId) {
-              return createNotification(ownerId, 'like', (meData() || {}).name + ' reacted ❤️ to your post', 'Someone reacted to your post.', 'feed.html#post-' + postId, { postId: postId }, 'like_' + (meData() || {}).uid + '_' + postId);
+              return createNotification(ownerId, 'like', (meData() || {}).name + ' ' + (_gt('notif_like_action') || 'reacted ❤️ to your post'), _gt('notif_like_body') || 'Someone reacted to your post.', 'feed.html#post-' + postId, { postId: postId }, 'like_' + (meData() || {}).uid + '_' + postId);
             });
           }
           if (callback) callback(nextLiked);
@@ -1421,7 +1423,7 @@
             createNotification(
               postOwnerId,
               'comment',
-              (me.name || 'GeoHub User') + ' commented on your post',
+              (me.name || 'GeoHub User') + ' ' + (_gt('notif_comment_action') || 'commented on your post'),
               cleanText,
               'feed.html?post=' + postId + '&comment=' + ref.id,
               { postId: postId, commentId: ref.id }
@@ -1482,7 +1484,7 @@
           return getDoc(doc(db, 'posts', postId, 'comments', commentId)).then(function (snap) {
             var c = snap.exists() ? snap.data() : {};
             var ownerId = c.authorId || c.userId || null;
-            return createNotification(ownerId, 'reply', rAuthorName + ' replied to your comment', replyText, 'feed.html?post=' + postId + '&comment=' + commentId, { postId: postId, commentId: commentId });
+            return createNotification(ownerId, 'reply', rAuthorName + ' ' + (_gt('notif_reply_action') || 'replied to your comment'), replyText, 'feed.html?post=' + postId + '&comment=' + commentId, { postId: postId, commentId: commentId });
           });
         }).then(function () {
           toast('Reply posted');
@@ -1532,7 +1534,7 @@
               .then(function () {
                 return updateDoc(doc(db, 'users', targetUserId), { followers: increment(1) }).catch(function(){})
                   .then(function(){ return updateDoc(doc(db, 'users', uid), { following: increment(1) }).catch(function(){}); })
-                  .then(function(){ return createNotification(targetUserId, 'follow', (meData() || {}).name + ' followed you', 'You have a new follower.', 'profile.html?id=' + uid, { followerId: uid }, 'follow_' + uid + '_' + targetUserId); });
+                  .then(function(){ return createNotification(targetUserId, 'follow', (meData() || {}).name + ' ' + (_gt('notif_follow_action') || 'followed you'), _gt('notif_follow_body') || 'You have a new follower.', 'profile.html?id=' + uid, { followerId: uid }, 'follow_' + uid + '_' + targetUserId); });
               })
               .then(function () {
                 toast('Following');
@@ -1559,19 +1561,24 @@
     function toggleSavePost(postId, callback) {
       requireAuth(function (user) {
         var uid = user.uid;
-        var ref = doc(db, 'savedPosts', uid + '_' + postId);
-        getDoc(ref).then(function (d) {
-          if (d.exists()) {
-            return deleteDoc(ref).then(function () {
-              toast('Removed from saved');
+        var refNew = doc(db, 'savedItems', uid + '_post_' + postId);
+        var refLeg = doc(db, 'savedPosts', uid + '_' + postId);
+        Promise.all([getDoc(refNew), getDoc(refLeg)]).then(function (snaps) {
+          var exists = snaps[0].exists() || snaps[1].exists();
+          if (exists) {
+            return Promise.all([
+              snaps[0].exists() ? deleteDoc(refNew) : Promise.resolve(),
+              snaps[1].exists() ? deleteDoc(refLeg) : Promise.resolve()
+            ]).then(function () {
+              toast(_gt('saved_remove') || 'Removed from saved');
               if (callback) callback(false);
             });
           } else {
-            return setDoc(ref, { uid: uid, userId: uid, postId: postId, createdAt: serverTimestamp() })
-              .then(function () {
-                toast('Post saved');
-                if (callback) callback(true);
-              });
+            var data = { uid: uid, userId: uid, type: 'post', itemId: postId, postId: postId, createdAt: serverTimestamp() };
+            return setDoc(refNew, data).then(function () {
+              toast(_gt('saved_add') || 'Post saved');
+              if (callback) callback(true);
+            });
           }
         }).catch(function (err) {
           console.error('[GeoSocial] toggleSavePost', err);
@@ -1815,7 +1822,7 @@
           var me = meData() || {};
           var senderName = me.name || 'GeoHub User';
           // Dedup key prevents duplicate notifications if request is re-attempted
-          return createNotification(toUserId, 'friend_request', senderName + ' sent you a friend request', 'Open their profile to accept or decline.', 'profile.html?id=' + uid, { fromUserId: uid, fromUid: uid }, 'friend_req_' + uid + '_' + toUserId);
+          return createNotification(toUserId, 'friend_request', senderName + ' ' + (_gt('notif_fr_action') || 'sent you a friend request'), _gt('notif_fr_body') || 'Open their profile to accept or decline.', 'profile.html?id=' + uid, { fromUserId: uid, fromUid: uid }, 'friend_req_' + uid + '_' + toUserId);
         }).then(function () {
           console.log('[friends] request sent OK', { fromUid: uid, toUid: toUserId });
           toast('Friend request sent');
@@ -1915,7 +1922,7 @@
           }).then(function(){
             updateDoc(doc(db, 'users', fromId), { friendsCount: increment(1) }).catch(function(){});
             updateDoc(doc(db, 'users', user.uid), { friendsCount: increment(1) }).catch(function(){});
-            return createNotification(fromId, 'friend_accept', (meData()||{}).name + ' accepted your friend request', 'You are now friends on GeoHub.', 'profile.html?id=' + user.uid, { friendId: user.uid });
+            return createNotification(fromId, 'friend_accept', (meData()||{}).name + ' ' + (_gt('notif_fa_action') || 'accepted your friend request'), _gt('notif_fa_body') || 'You are now friends on GeoHub.', 'profile.html?id=' + user.uid, { friendId: user.uid });
           }).then(function(){ return {accepted:true, fromId:fromId}; });
         }).then(function(res){
           toast(res.accepted ? 'Friend request accepted' : 'Friend request rejected');
@@ -2730,7 +2737,7 @@
             }
             // Skip self-notification (same uid on both sides, e.g. owner messaging own page as customer)
             if(!notifTargetUid || notifTargetUid === user.uid) return Promise.resolve();
-            return createNotification(notifTargetUid, 'message', senderName + ' sent you a message', preview, notifLink, { conversationId: conversationId });
+            return createNotification(notifTargetUid, 'message', senderName + ' ' + (_gt('notif_msg_action') || 'sent you a message'), preview, notifLink, { conversationId: conversationId });
           });
         }).then(function () {
           if (callback) callback(true);
@@ -3277,17 +3284,31 @@
 
     function listenSavedPosts(uid, callback) {
       if (!uid) { callback([]); return function () {}; }
-      var q = query(collection(db, 'savedPosts'), where('userId', '==', uid), limit(50));
-      return onSnapshot(q, function (snap) {
+      var unsubs = [];
+      var newItems = [], legItems = [], newDone = false, legDone = false;
+      function merge() {
+        if (!newDone || !legDone) return;
+        var seen = {};
         var ids = [];
-        snap.forEach(function (d) { var data = d.data(); if (data.postId) ids.push(data.postId); });
+        newItems.concat(legItems).forEach(function(id) { if (!seen[id]) { seen[id] = true; ids.push(id); } });
         if (!ids.length) { callback([]); return; }
-        Promise.all(ids.slice(0, 20).map(function (pid) {
+        Promise.all(ids.slice(0, 30).map(function(pid) {
           return getDoc(doc(db, 'posts', pid))
-            .then(function (d) { return d.exists() ? Object.assign({ id: d.id }, d.data()) : null; })
-            .catch(function () { return null; });
-        })).then(function (posts) { callback(posts.filter(Boolean)); });
-      }, function (err) { console.warn('[GeoSocial] listenSavedPosts', err.message); callback([]); });
+            .then(function(d) { return d.exists() ? Object.assign({ id: d.id }, d.data()) : null; })
+            .catch(function() { return null; });
+        })).then(function(posts) { callback(posts.filter(Boolean)); });
+      }
+      var qNew = query(collection(db, 'savedItems'), where('userId', '==', uid), where('type', '==', 'post'), limit(50));
+      unsubs.push(onSnapshot(qNew, function(snap) {
+        newItems = []; snap.forEach(function(d) { var x = d.data(); if (x.itemId || x.postId) newItems.push(x.itemId || x.postId); });
+        newDone = true; merge();
+      }, function() { newDone = true; merge(); }));
+      var qLeg = query(collection(db, 'savedPosts'), where('userId', '==', uid), limit(50));
+      unsubs.push(onSnapshot(qLeg, function(snap) {
+        legItems = []; snap.forEach(function(d) { var x = d.data(); if (x.postId) legItems.push(x.postId); });
+        legDone = true; merge();
+      }, function() { legDone = true; merge(); }));
+      return function() { unsubs.forEach(function(u) { try { u(); } catch(e) {} }); };
     }
 
     function listenSavedPlaces(uid, callback) {

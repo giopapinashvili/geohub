@@ -4332,12 +4332,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var body =
         '<textarea class="gh-cmp-textarea" id="ghStoryTextShare" placeholder="What\'s your story?…" rows="3"></textarea>'+
         '<p style="font-size:.75rem;color:#94a3b8;margin:6px 0 0"><i class="fas fa-link"></i> ' + url + '</p>';
-      var m = modal('Add to your story', body,
-        '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitStoryShare">Share story</button>',
+      var m = modal((typeof GHt==='function'?GHt('story_share_modal'):'Add to your story'), body,
+        '<button class="gh-btn ghost" data-close-modal>'+(typeof GHt==='function'?GHt('cancel'):'Cancel')+'</button><button class="gh-btn" id="ghSubmitStoryShare">'+(typeof GHt==='function'?GHt('story_share_btn'):'Share story')+'</button>',
         'ghStoryShareModal');
       var btn = document.getElementById('ghSubmitStoryShare');
       if (btn) btn.onclick = function() {
-        btn.disabled = true; btn.textContent = 'Sharing…';
+        btn.disabled = true; btn.textContent = (typeof GHt==='function'?GHt('story_sharing'):'Sharing…');
         var text = (document.getElementById('ghStoryTextShare') || {}).value || '';
         var u2 = requireLogin() && window.GeoCurrentUser;
         if (!u2) { toast('Please sign in', 'error'); return; }
@@ -4803,10 +4803,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     ta.value = current;
     var saveBtn = document.createElement('button');
     saveBtn.style.cssText = 'margin-top:4px;background:#10b981;color:#fff;border:none;border-radius:10px;padding:4px 14px;font-size:.8rem;cursor:pointer;font-family:inherit';
-    saveBtn.textContent = 'Save';
+    saveBtn.textContent = (typeof GHt==='function'?GHt('save'):'Save');
     var cancelBtn = document.createElement('button');
     cancelBtn.style.cssText = 'margin-top:4px;margin-left:6px;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:.8rem;padding:4px 8px;font-family:inherit';
-    cancelBtn.textContent = 'Cancel';
+    cancelBtn.textContent = (typeof GHt==='function'?GHt('cancel'):'Cancel');
     textEl.innerHTML = '';
     textEl.appendChild(ta);
     textEl.appendChild(document.createElement('br'));
@@ -5134,15 +5134,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if (existing) existing.remove();
       if (_done) {
         status.textContent = '';
-        if (!list.children.length) status.textContent = 'No followers yet';
+        if (!list.children.length) status.textContent = (typeof GHt==='function'?GHt('profile_no_followers'):'No followers yet');
         return;
       }
       var btn = document.createElement('button');
       btn.className = 'gh-btn ghost gh-aud-load-more';
-      btn.textContent = 'Load more';
+      btn.textContent = (typeof GHt==='function'?GHt('load_more'):'Load more');
       btn.onclick = function() {
         if (!_lastDoc) return;
-        btn.disabled = true; btn.textContent = 'Loading…';
+        btn.disabled = true; btn.textContent = (typeof GHt==='function'?GHt('loading'):'Loading…');
         var q = _audienceQueryAfter(bizId, _lastDoc);
         if (!q) { _done = true; btn.remove(); return; }
         fs().getDocs(q).then(function(snap){
@@ -5150,7 +5150,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           btn.remove();
           showLoadMore();
         }).catch(function(err){
-          btn.disabled = false; btn.textContent = 'Load more';
+          btn.disabled = false; btn.textContent = (typeof GHt==='function'?GHt('load_more'):'Load more');
           console.warn('[GeoHub] audience load more failed', err && err.message);
         });
       };

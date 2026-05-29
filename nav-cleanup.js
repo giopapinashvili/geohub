@@ -443,11 +443,26 @@
     });
   }
 
+  function fixNavbarLogo() {
+    var logoIcon = document.querySelector('.navbar-brand .logo-icon');
+    if (!logoIcon) return;
+    logoIcon.innerHTML = '';
+    var img = document.createElement('img');
+    img.src = 'icons/icon-96.png';
+    img.alt = 'GeoHub';
+    img.width = 32;
+    img.height = 32;
+    img.style.cssText = 'width:32px;height:32px;border-radius:8px;object-fit:cover;flex-shrink:0;display:block';
+    logoIcon.appendChild(img);
+    logoIcon.style.cssText = 'display:flex;align-items:center;width:32px;height:32px;font-size:0';
+  }
+
   function init() {
     var navbarLinks = document.querySelector('.navbar-links');
     var mobileMenu  = document.querySelector('.mobile-menu');
     if (navbarLinks) navbarLinks.innerHTML = renderDesktopNav();
     if (mobileMenu)  mobileMenu.innerHTML  = renderMobileNav();
+    fixNavbarLogo();
     cleanupActions();
     wireDropdowns();
     wireHamburger();
