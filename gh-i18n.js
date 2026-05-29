@@ -106,6 +106,13 @@
     profile_edit:     { ka: 'პროფილის რედ.',  en: 'Edit Profile',ru: 'Ред. профиль'  },
     profile_add_friend:{ ka: 'მეგობრად დამატება',en: 'Add Friend',ru: 'Добавить друга'},
     profile_message:  { ka: 'შეტყობინება',    en: 'Message',     ru: 'Написать'      },
+    profile_no_bio:       { ka: 'ბიო ჯერ არ არის',     en: 'No bio yet.',           ru: 'Биографии пока нет.' },
+    profile_bio_private:  { ka: '🔒 ბიო დაფარულია',    en: '🔒 Bio is private',     ru: '🔒 Биография скрыта' },
+    profile_real_account: { ka: 'ნამდვილი ანგარიში',   en: 'Real account',          ru: 'Реальный аккаунт'    },
+    profile_no_friends:   { ka: 'მეგობრები ჯერ არ არის', en: 'No friends yet',      ru: 'Друзей пока нет'     },
+    profile_no_friends_hint: { ka: 'გაგზავნე მეგობრობის მოთხოვნა პროფილებიდან.', en: 'Send friend requests from profiles.', ru: 'Отправляйте заявки с профилей.' },
+    profile_no_posts:     { ka: 'პოსტები ჯერ არ არის', en: 'No posts yet',          ru: 'Постов пока нет'     },
+    profile_no_posts_hint:{ ka: 'შექმენი პირველი პოსტი!', en: 'Create your first post!', ru: 'Создайте первый пост!' },
 
     /* ── Groups ─────────────────────────────────────────────── */
     groups_discover:  { ka: 'აღმოჩენა',       en: 'Discover',    ru: 'Открыть'       },

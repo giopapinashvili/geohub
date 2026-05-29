@@ -301,10 +301,10 @@
     const lvl = $('.avatar-level'); if (lvl) lvl.textContent = level(user);
     const name = $('.profile-name');
     const handle = $('.profile-handle');
-    const bio = $('.profile-bio'); if (bio) bio.textContent = user.bio || 'No bio yet.';
+    const bio = $('.profile-bio'); if (bio) bio.textContent = user.bio || _t('profile_no_bio');
     const badges = $('.trust-badges');
     if (badges) {
-      var _badgeHtml = '<span class="trust-badge green"><i class="fas fa-check-circle"></i> Real account</span>';
+      var _badgeHtml = '<span class="trust-badge green"><i class="fas fa-check-circle"></i> ' + _t('profile_real_account') + '</span>';
       if (user.verified === true) _badgeHtml += '<span class="trust-badge blue"><i class="fas fa-circle-check"></i> Verified</span>';
       if (Number(user.xp) > 0) _badgeHtml += '<span class="trust-badge gold"><i class="fas fa-bolt"></i> ' + compact(user.xp) + ' XP</span>';
       badges.innerHTML = _badgeHtml;
@@ -377,7 +377,7 @@
       }
       if (bioEl) {
         var showBio = _ppAllowed(priv.showBio, rel);
-        bioEl.textContent = showBio ? (user.bio || 'No bio yet.') : '🔒 Bio is private';
+        bioEl.textContent = showBio ? (user.bio || _t('profile_no_bio')) : _t('profile_bio_private');
       }
     }
     if (!own) _applyProfileVisibility('stranger');
@@ -748,7 +748,7 @@
         const friendsListHtml = friendsTab.dataset.friendsListHtml || '';
         const isEmpty = !incomingHtml && !sentHtml && !friendsListHtml;
         if (isEmpty) {
-          friendsTab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-user-group"></i><h3>No friends yet</h3><p>Send friend requests from profiles.</p></div>';
+          friendsTab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-user-group"></i><h3>' + _t('profile_no_friends') + '</h3><p>' + _t('profile_no_friends_hint') + '</p></div>';
         } else {
           friendsTab.innerHTML = incomingHtml + sentHtml + friendsListHtml;
         }
@@ -823,7 +823,8 @@
           renderGalleryTab(posts);
           if (!posts.length) {
             _lastProfilePostsKey = '';
-            emptyTab('#tab-posts', 'fa-seedling', 'No posts yet', 'Real posts from Firestore will appear here.', 'feed.html?compose=1', 'Create Post');
+            var _et=typeof window.GHt==='function'?window.GHt:function(k){return k;};
+            emptyTab('#tab-posts', 'fa-seedling', _et('profile_no_posts'), _et('profile_no_posts_hint'), 'feed.html?compose=1', _et('create_post'));
             return;
           }
           var tab = $('#tab-posts');
@@ -2095,7 +2096,7 @@
           $$('.gh-avatar-img,.nav-avatar,[data-nav-avatar]').forEach(function(el) { el.src = _pendingAvatar; });
         }
         if (updates.fullName) { const nm = $('.profile-name'); if (nm) nm.textContent = updates.fullName; }
-        if ('bio' in updates) { const bioEl = $('.profile-bio'); if (bioEl) bioEl.textContent = updates.bio || 'No bio yet.'; }
+        if ('bio' in updates) { const bioEl = $('.profile-bio'); if (bioEl) bioEl.textContent = updates.bio || (typeof window.GHt==='function'?window.GHt('profile_no_bio'):'No bio yet.'); }
         if (updates.username || updates.city) { const hnd = $('.profile-handle'); if (hnd) hnd.textContent = '@' + (updates.username || (window.GeoCurrentUser && window.GeoCurrentUser.username) || 'user') + (updates.city && updates.city !== 'all_georgia' ? ' · ' + updates.city : ''); }
         toast('Profile saved');
       } catch (err) {
