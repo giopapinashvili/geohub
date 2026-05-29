@@ -29,15 +29,35 @@
   var _timerSec = 0;
   var _audioCtx = null;
   var _pendingCandidates = [];
+  var _cachedIce = null;
+  var _cachedIceAt = 0;
 
+  // Static fallback — used if the worker fetch fails
   var ICE = { iceServers: [
-    { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] },
+    { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] },
     { urls: ['turn:openrelay.metered.ca:80', 'turn:openrelay.metered.ca:443', 'turns:openrelay.metered.ca:443'],
-      username: 'openrelayproject', credential: 'openrelayproject' },
-    { urls: 'turn:relay.metered.ca:80',   username: 'e8dd65f10e0b67a00bdb7a06', credential: 'uYrHNTjsQAlDFaEb' },
-    { urls: 'turn:relay.metered.ca:443',  username: 'e8dd65f10e0b67a00bdb7a06', credential: 'uYrHNTjsQAlDFaEb' },
-    { urls: 'turns:relay.metered.ca:443', username: 'e8dd65f10e0b67a00bdb7a06', credential: 'uYrHNTjsQAlDFaEb' }
+      username: 'openrelayproject', credential: 'openrelayproject' }
   ], iceCandidatePoolSize: 10 };
+
+  async function _getIceConfig() {
+    var now = Date.now();
+    // Reuse cached credentials for up to 23 hours (TTL is 24 h)
+    if (_cachedIce && (now - _cachedIceAt < 23 * 3600 * 1000)) return _cachedIce;
+    try {
+      var workerUrl = (window.GeoConfig && window.GeoConfig.PAYMENTS && window.GeoConfig.PAYMENTS.WORKER_URL)
+                      || 'https://geohub-payments.geohub.workers.dev';
+      var res = await fetch(workerUrl + '/api/turn-credentials');
+      if (res.ok) {
+        var data = await res.json();
+        if (data && data.iceServers && data.iceServers.length) {
+          _cachedIce = { iceServers: data.iceServers, iceCandidatePoolSize: 10 };
+          _cachedIceAt = now;
+          return _cachedIce;
+        }
+      }
+    } catch (e) {}
+    return ICE;
+  }
 
   /* ── Helpers ─────────────────────────────────────────────────── */
   function _t(k, fb) {
@@ -203,8 +223,8 @@
   }
 
   /* ── RTCPeerConnection ───────────────────────────────────────── */
-  function _createPC(callId, role) {
-    _pc = new RTCPeerConnection(ICE);
+  function _createPC(callId, role, iceConfig) {
+    _pc = new RTCPeerConnection(iceConfig || ICE);
     _remoteStream = new MediaStream();
 
     _pc.onicecandidate = function (e) {
@@ -307,7 +327,8 @@
     });
 
     // Now set up WebRTC (ICE candidates will write to existing doc's subcollection)
-    _createPC(_callId, 'caller');
+    var iceConfig = await _getIceConfig();
+    _createPC(_callId, 'caller', iceConfig);
     _localStream.getTracks().forEach(function (t) { _pc.addTrack(t, _localStream); });
 
     var offer = await _pc.createOffer();
@@ -372,7 +393,8 @@
 
     _buildActiveUI(data.callerName || 'Unknown', data.callerAvatar || '', type);
 
-    _createPC(callId, 'callee');
+    var iceConfig = await _getIceConfig();
+    _createPC(callId, 'callee', iceConfig);
     _localStream.getTracks().forEach(function (t) { _pc.addTrack(t, _localStream); });
 
     // Start collecting remote candidates early (before setRemoteDescription)

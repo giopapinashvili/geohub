@@ -77,6 +77,9 @@ export default {
       if (pathname === '/api/google-place-search' && request.method === 'GET') {
         return await handleGooglePlaceSearch(request, env, cors);
       }
+      if (pathname === '/api/turn-credentials' && request.method === 'GET') {
+        return await handleTurnCredentials(request, env, cors);
+      }
       return json({ error: 'Not found' }, 404, cors);
     } catch (err) {
       console.error('[GeoHub Worker]', err.message);
@@ -571,6 +574,55 @@ function fromFsFields(fields) {
     else if ('arrayValue'   in v) obj[k] = (v.arrayValue.values || []).map(i => fromFsFields({ _: i })._);
   }
   return obj;
+}
+
+// ── TURN credentials (Cloudflare Calls) ──────────────────────────────────────
+// Required secrets (optional — falls back to openrelay if not set):
+//   wrangler secret put CLOUDFLARE_TURN_KEY_ID
+//   wrangler secret put CLOUDFLARE_TURN_KEY_TOKEN
+// Setup: Cloudflare Dashboard → Calls → Manage TURN keys → Create key
+// This endpoint is safe to expose publicly — credentials are time-limited (24 h).
+
+async function handleTurnCredentials(request, env, cors) {
+  if (env.CLOUDFLARE_TURN_KEY_ID && env.CLOUDFLARE_TURN_KEY_TOKEN) {
+    try {
+      const res = await fetch(
+        `https://rtc.live.cloudflare.com/v1/turn/keys/${env.CLOUDFLARE_TURN_KEY_ID}/credentials/generate`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${env.CLOUDFLARE_TURN_KEY_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ttl: 86400 }),
+        },
+      );
+      if (res.ok) {
+        const data = await res.json();
+        // Cloudflare Calls returns { iceServers: { urls, username, credential } }
+        const cfServer = data.iceServers;
+        return json({
+          iceServers: [
+            { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] },
+            cfServer,
+          ],
+        }, 200, cors);
+      }
+    } catch (e) {
+      console.error('[TURN] Cloudflare TURN error:', e.message);
+    }
+  }
+  // Fallback: openrelay free public TURN
+  return json({
+    iceServers: [
+      { urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] },
+      {
+        urls: ['turn:openrelay.metered.ca:80', 'turn:openrelay.metered.ca:443', 'turns:openrelay.metered.ca:443'],
+        username: 'openrelayproject',
+        credential: 'openrelayproject',
+      },
+    ],
+  }, 200, cors);
 }
 
 // ── Utilities ─────────────────────────────────────────────────────────────────

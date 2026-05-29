@@ -18,6 +18,13 @@ SITE_URL            = "https://geohub.pages.dev"
 #   wrangler secret put FIREBASE_CLIENT_EMAIL
 #   wrangler secret put FIREBASE_PRIVATE_KEY
 #   wrangler secret put GOOGLE_MAPS_API_KEY   (Places API New — enable in Google Cloud Console)
+#   wrangler secret put CLOUDFLARE_TURN_KEY_ID     (optional — Cloudflare Calls TURN; see below)
+#   wrangler secret put CLOUDFLARE_TURN_KEY_TOKEN  (optional — Cloudflare Calls TURN; see below)
+#
+# CLOUDFLARE_TURN_KEY_ID + CLOUDFLARE_TURN_KEY_TOKEN:
+#   Cloudflare Dashboard → Calls → Manage TURN keys → Create key
+#   Copy the Key ID and Token from the key detail page.
+#   Without these the worker falls back to the free openrelay.metered.ca TURN server.
 #
 # STRIPE_PRICE_PREMIUM_MONTHLY / YEARLY:
 #   Create a Product + recurring Price in Stripe Dashboard → Products
