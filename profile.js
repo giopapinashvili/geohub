@@ -920,6 +920,16 @@
       const friendsTab = $('#tab-friends');
       const countEl = $('.ptab[data-tab="friends"] .tab-count');
       const ownProfile = window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser && window.GeoFirebase.auth.currentUser.uid === user.uid;
+      window._ghCfSet = {};
+      if (ownProfile && window.GeoSocial && window.GeoSocial.getMyCloseFriendIds) {
+        window.GeoSocial.getMyCloseFriendIds(function(ids) {
+          (ids || []).forEach(function(uid) {
+            window._ghCfSet[uid] = true;
+            var btn = document.querySelector('[data-cf-toggle="' + uid + '"]');
+            if (btn) btn.classList.add('active');
+          });
+        });
+      }
       function rebuildFriendsTab() {
         if (!friendsTab) return;
         const incomingHtml = friendsTab.dataset.incomingHtml || '';
@@ -982,6 +992,7 @@
             + '<span class="gh-avatar">' + (f.avatar||f.photoURL ? '<img src="'+esc(f.avatar||f.photoURL)+'" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.style.display=\'none\'">' : esc(initialLetters(f.fullName||f.displayName||f.name||'GeoHub User',f.email||''))) + '</span>'
             + '<div style="flex:1;min-width:0"><strong>' + esc(f.fullName||f.displayName||f.name||'GeoHub User') + '</strong><span>@' + esc(f.username||'user') + '</span></div>'
             + '</a>'
+            + (ownProfile ? '<button class="gh-cf-star-btn'+(window._ghCfSet&&window._ghCfSet[fuid]?' active':'')+'" data-cf-toggle="'+esc(fuid)+'" title="'+(window._ghCfSet&&window._ghCfSet[fuid]?'Close Friend ⭐':'Close Friends-ში დამატება')+'"><i class="fas fa-star"></i></button>' : '')
             + (ownProfile ? '<button class="btn btn-ghost btn-sm" data-unfriend-user="' + esc(fuid) + '" title="Unfriend" style="flex-shrink:0;padding:5px 9px;font-size:.75rem"><i class="fas fa-user-minus"></i></button>' : '')
             + '</div>';
         }).join('') + '</div>' : '';
@@ -2632,6 +2643,27 @@
       else if (window.GeoFriendships) { window.GeoFriendships.decline(reqId); }
     }
 
+    const cfStarBtn = e.target.closest('[data-cf-toggle]');
+    if (cfStarBtn) {
+      e.preventDefault();
+      var _cftUid = cfStarBtn.dataset.cfToggle;
+      var _isCf = cfStarBtn.classList.contains('active');
+      var _gs2 = window.GeoSocial;
+      if (_isCf) {
+        if (_gs2 && _gs2.removeCloseFriend) _gs2.removeCloseFriend(_cftUid);
+        if (window._ghCfSet) window._ghCfSet[_cftUid] = false;
+        cfStarBtn.classList.remove('active');
+        cfStarBtn.title = 'Close Friends-ში დამატება';
+        toast('Close Friends-დან ამოიღეთ');
+      } else {
+        if (_gs2 && _gs2.addCloseFriend) _gs2.addCloseFriend(_cftUid);
+        if (window._ghCfSet) window._ghCfSet[_cftUid] = true;
+        cfStarBtn.classList.add('active');
+        cfStarBtn.title = 'Close Friend ⭐';
+        toast('Close Friends-ში დაემატა ⭐');
+      }
+      return;
+    }
     const msgBtn = e.target.closest('[data-message-user]');
     if (msgBtn) {
       e.preventDefault();

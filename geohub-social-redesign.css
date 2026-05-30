@@ -6004,3 +6004,7 @@ html[data-gh-motion="reduced"] * { animation-duration:0.001ms !important; transi
 .gh-story-tpl-label{font-size:.7rem;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.4);white-space:nowrap}
 .gh-story-tpl-badge{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border-radius:20px;padding:4px 10px;margin-bottom:6px;font-size:.82rem;color:#e2e8f0}
 .gh-story-tpl-badge-rm{background:none;border:none;color:#94a3b8;font-size:1.1rem;cursor:pointer;line-height:1;padding:0 0 0 4px}
+/* ── Close Friends Star Button (Session 17) ── */
+.gh-cf-star-btn{background:none;border:1.5px solid var(--gh-border,rgba(255,255,255,.12));border-radius:8px;width:32px;height:32px;display:grid;place-items:center;cursor:pointer;color:var(--text-muted,#64748b);font-size:.85rem;flex-shrink:0;transition:color .15s,border-color .15s,background .15s}
+.gh-cf-star-btn:hover{color:#fbbf24;border-color:#fbbf24;background:rgba(251,191,36,.08)}
+.gh-cf-star-btn.active{color:#fbbf24;border-color:#fbbf24;background:rgba(251,191,36,.15)}
