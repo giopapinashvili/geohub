@@ -356,7 +356,7 @@
       }
     }
     const actions = $('.profile-actions');
-    if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> '+_t('profile_edit')+'</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="btn btn-ghost btn-sm" id="cfManageBtn" style="color:#22c55e" title="Close Friends"><i class="fas fa-star"></i> Close Friends</button><button class="btn btn-ghost btn-sm profile-body-logout" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> '+_t('profile_message')+'</button><button class="btn btn-ghost btn-sm" data-call-user="' + esc(user.uid) + '" data-call-type="audio" data-call-name="' + esc(user.fullName) + '" data-call-avatar="' + esc(user.avatar || '') + '" title="'+_t('call_voice','Voice call')+'"><i class="fas fa-phone"></i></button><button class="btn btn-ghost btn-sm" data-call-user="' + esc(user.uid) + '" data-call-type="video" data-call-name="' + esc(user.fullName) + '" data-call-avatar="' + esc(user.avatar || '') + '" title="'+_t('call_video','Video call')+'"><i class="fas fa-video"></i></button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> '+_t('profile_add_friend')+'</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> '+_t('follow')+'</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-mute-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-volume-mute"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-ban"></i></button>';
+    if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> '+_t('profile_edit')+'</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="btn btn-ghost btn-sm" data-qr-profile="'+esc(user.uid)+'" title="QR Code"><i class="fas fa-qrcode"></i></button><button class="btn btn-ghost btn-sm" id="cfManageBtn" style="color:#22c55e" title="Close Friends"><i class="fas fa-star"></i> Close Friends</button><button class="btn btn-ghost btn-sm profile-body-logout" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> '+_t('profile_message')+'</button><button class="btn btn-ghost btn-sm" data-call-user="' + esc(user.uid) + '" data-call-type="audio" data-call-name="' + esc(user.fullName) + '" data-call-avatar="' + esc(user.avatar || '') + '" title="'+_t('call_voice','Voice call')+'"><i class="fas fa-phone"></i></button><button class="btn btn-ghost btn-sm" data-call-user="' + esc(user.uid) + '" data-call-type="video" data-call-name="' + esc(user.fullName) + '" data-call-avatar="' + esc(user.avatar || '') + '" title="'+_t('call_video','Video call')+'"><i class="fas fa-video"></i></button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> '+_t('profile_add_friend')+'</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> '+_t('follow')+'</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-mute-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-volume-mute"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-ban"></i></button><button class="btn btn-ghost btn-sm" data-qr-profile="' + esc(user.uid) + '" title="QR Code"><i class="fas fa-qrcode"></i></button>';
     if (own) {
       var cfMBtn = document.getElementById('cfManageBtn');
       if (cfMBtn) cfMBtn.onclick = function(){ _openCFModal(user.uid); };
@@ -2798,7 +2798,55 @@
       e.preventDefault();
       navigator.clipboard && navigator.clipboard.writeText(location.href).then(() => toast(typeof window.GHt==='function'?window.GHt('link_copied'):'Profile link copied'));
     }
+
+    var qrBtn = e.target.closest('[data-qr-profile]');
+    if (qrBtn) {
+      e.preventDefault();
+      var qrUid = qrBtn.dataset.qrProfile;
+      var qrName = (document.querySelector('.profile-name, .pf-name, [data-profile-name]') || {}).textContent || 'GeoHub';
+      _openQRModal(qrUid, qrName.trim());
+    }
   });
+
+  function _openQRModal(uid, name) {
+    var profileUrl = window.location.origin + '/profile.html?uid=' + encodeURIComponent(uid);
+    var qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=260x260&color=0f172a&bgcolor=ffffff&data=' + encodeURIComponent(profileUrl);
+    var ov = document.createElement('div');
+    ov.className = 'pf-modal-overlay';
+    ov.id = 'ghQrOverlay';
+    ov.innerHTML =
+      '<div class="pf-modal gh-qr-modal">' +
+        '<div class="pf-modal-head">' +
+          '<h3><i class="fas fa-qrcode" style="margin-right:6px"></i> QR Code</h3>' +
+          '<button class="pf-modal-close" id="ghQrClose"><i class="fas fa-times"></i></button>' +
+        '</div>' +
+        '<div class="gh-qr-body">' +
+          '<div class="gh-qr-frame">' +
+            '<img id="ghQrImg" src="' + qrSrc + '" alt="QR Code" class="gh-qr-img" width="260" height="260" onerror="this.alt=\'QR ვერ ჩაიტვირთა\'">' +
+          '</div>' +
+          '<p class="gh-qr-name">@' + (name || 'GeoHub') + '</p>' +
+          '<p class="gh-qr-hint">სხვა მომხმარებელს QR-ის სკანირებით შეუძლია პროფილზე გადასვლა</p>' +
+          '<div class="gh-qr-actions">' +
+            '<button class="btn btn-ghost btn-sm" id="ghQrCopyLink"><i class="fas fa-link"></i> ლინკის კოპირება</button>' +
+            '<a class="btn btn-primary btn-sm" id="ghQrDownload" href="' + qrSrc + '" download="geohub-qr-' + uid + '.png" target="_blank"><i class="fas fa-download"></i> შენახვა</a>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(ov);
+    ov.querySelector('#ghQrClose').onclick = function() { ov.remove(); };
+    ov.addEventListener('click', function(e2) { if (e2.target === ov) ov.remove(); });
+    var copyBtn = ov.querySelector('#ghQrCopyLink');
+    if (copyBtn) {
+      copyBtn.onclick = function() {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(profileUrl).then(function() {
+            copyBtn.innerHTML = '<i class="fas fa-check"></i> გაკოპირდა!';
+            setTimeout(function() { copyBtn.innerHTML = '<i class="fas fa-link"></i> ლინკის კოპირება'; }, 2000);
+          });
+        }
+      };
+    }
+  }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();
