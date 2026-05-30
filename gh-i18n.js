@@ -35,6 +35,7 @@
     nav_realestate:   { ka: 'უძრავი ქ.',  en: 'Real Estate', ru: 'Недвижимость'  },
     nav_jobs:         { ka: 'სამუშაო',   en: 'Jobs',        ru: 'Вакансии'      },
     nav_invite:       { ka: 'მოიწვიე',   en: 'Invite',      ru: 'Пригласить'    },
+    nav_early_adopter:{ ka: 'Early Adopter', en: 'Early Adopter', ru: 'Early Adopter' },
     nav_learning:     { ka: 'სწავლა',     en: 'Learning',    ru: 'Обучение'      },
     nav_trust:        { ka: 'უსაფრთხოება',en: 'Trust/Safety',ru: 'Безопасность'  },
     nav_admin:        { ka: 'ადმინ პანელი',en: 'Admin Panel', ru: 'Администратор' },

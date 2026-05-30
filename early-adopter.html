@@ -21,6 +21,7 @@
   <link rel="stylesheet" href="account-switcher.css">
   <link rel="stylesheet" href="chat-popup.css">
   <link rel="stylesheet" href="responsive-polish.css">
+  <link rel="stylesheet" href="navbar.css">
   <meta name="theme-color" content="#10b981">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="icons/icon-96.png">
@@ -80,6 +81,15 @@
 </head>
 <body data-gh-page="early-adopter">
   <noscript>GeoHub requires JavaScript.</noscript>
+
+  <nav class="navbar" id="navbar" style="display:none">
+    <a href="index.html" class="navbar-brand">
+      <img src="icons/icon-96.png" alt="GeoHub" style="height:32px;width:32px;border-radius:6px;margin-right:8px">
+      <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
+    </a>
+    <ul class="navbar-links"></ul>
+    <div class="navbar-actions"></div>
+  </nav>
 
   <div id="ea-root" style="padding-top:80px">
 
@@ -294,7 +304,13 @@
       var fs  = GF.fs;
 
       GF.auth.onAuthStateChanged(function (fbUser) {
-        if (!fbUser) { show('eaNoAuth'); return; }
+        var nav = document.getElementById('navbar');
+        if (!fbUser) {
+          if (nav) nav.style.display = 'none';
+          show('eaNoAuth');
+          return;
+        }
+        if (nav) nav.style.display = '';
         _uid = fbUser.uid;
 
         // Load meta + businesses in parallel
