@@ -257,32 +257,72 @@ body, html { height: 100%; overflow: hidden; }
     /* ── Mood Tags ─────────────────────────────────────────────── */
     .panel-mood-tags { margin: 10px 0 12px; }
     .mood-tags-title {
-      font-size: 0.65rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.6px;
-      color: #475569; margin-bottom: 7px;
+      font-size: 0.7rem; font-weight: 800;
+      letter-spacing: 0.04em;
+      color: #94a3b8; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 5px;
     }
-    .mood-tags-list { display: flex; flex-wrap: wrap; gap: 5px; }
+    .mood-tags-title i { color: #f97316; }
+    .mood-tags-list { display: flex; flex-wrap: wrap; gap: 6px; }
     .mood-tag {
+      --tag-color: #10b981;
       display: inline-flex; align-items: center; gap: 4px;
-      padding: 5px 10px; border-radius: 999px;
-      background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.09);
-      color: #64748b; font-size: 0.72rem; font-weight: 600;
-      cursor: pointer; transition: all 0.13s;
+      padding: 6px 11px; border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      color: #64748b; font-size: 0.74rem; font-weight: 700;
+      cursor: pointer; transition: all 0.15s;
       white-space: nowrap;
     }
-    .mood-tag:hover { background: rgba(255,255,255,.09); color: #cbd5e1; border-color: rgba(255,255,255,.18); }
+    .mood-tag:hover {
+      background: rgba(255,255,255,.09);
+      color: var(--tag-color);
+      border-color: rgba(255,255,255,.2);
+      transform: translateY(-1px);
+    }
     .mood-tag.voted {
-      background: rgba(16,185,129,.13);
-      border-color: rgba(16,185,129,.38);
-      color: #34d399;
+      background: color-mix(in srgb, var(--tag-color) 14%, transparent);
+      border-color: color-mix(in srgb, var(--tag-color) 45%, transparent);
+      color: var(--tag-color);
+      box-shadow: 0 0 10px color-mix(in srgb, var(--tag-color) 20%, transparent);
     }
+    .mood-tag.zero { opacity: 0.45; }
     .mood-tag-count {
-      font-size: 0.62rem; opacity: 0.75;
-      background: rgba(255,255,255,.08);
-      border-radius: 999px; padding: 1px 5px;
+      font-size: 0.63rem; font-weight: 900;
+      background: rgba(255,255,255,.1);
+      border-radius: 999px; padding: 1px 6px;
+      min-width: 16px; text-align: center;
     }
-    .mood-tag.voted .mood-tag-count { background: rgba(16,185,129,.2); }
+    .mood-tag.voted .mood-tag-count {
+      background: color-mix(in srgb, var(--tag-color) 22%, transparent);
+    }
+
+    /* Vibe badge on map marker */
+    .gh-map-marker-wrap { position: relative; }
+    .gh-marker-vibe-badge {
+      --vibe-color: #10b981;
+      position: absolute;
+      bottom: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(8,14,26,.88);
+      border: 1px solid color-mix(in srgb, var(--vibe-color) 50%, transparent);
+      border-radius: 999px;
+      color: var(--vibe-color);
+      font-size: 0.6rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      white-space: nowrap;
+      pointer-events: none;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 2px 8px rgba(0,0,0,.5);
+      max-width: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      letter-spacing: .01em;
+    }
+    /* Hide badge on small zoom to avoid clutter */
+    @media (max-width: 500px) { .gh-marker-vibe-badge { display: none; } }
     /* ── Check-in button ───────────────────────────────────────── */
     .map-checkin-btn {
       display: flex; align-items: center; justify-content: center; gap: 7px;

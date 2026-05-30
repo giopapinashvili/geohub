@@ -60,13 +60,18 @@
   let showThisWeekend = false;
 
   const MOOD_TAGS = [
-    { id: 'cozy',     label: 'Cozy',             emoji: '🛋️' },
-    { id: 'work',     label: 'Good for work',    emoji: '💻' },
-    { id: 'family',   label: 'Family friendly',  emoji: '👨‍👩‍👧' },
-    { id: 'cheap',    label: 'Cheap',            emoji: '💰' },
-    { id: 'romantic', label: 'Romantic',         emoji: '🌹' },
-    { id: 'crowded',  label: 'Crowded',          emoji: '👥' },
-    { id: 'quiet',    label: 'Quiet',            emoji: '🔇' },
+    { id: 'cozy',     label: 'Cozy',             emoji: '🛋️', color: '#f59e0b' },
+    { id: 'work',     label: 'Good for work',    emoji: '💻', color: '#3b82f6' },
+    { id: 'family',   label: 'Family friendly',  emoji: '👨‍👩‍👧', color: '#10b981' },
+    { id: 'cheap',    label: 'Budget friendly',  emoji: '💸', color: '#22c55e' },
+    { id: 'romantic', label: 'Romantic',         emoji: '🌹', color: '#ec4899' },
+    { id: 'crowded',  label: 'Lively & busy',    emoji: '👥', color: '#8b5cf6' },
+    { id: 'quiet',    label: 'Quiet & calm',     emoji: '🔇', color: '#64748b' },
+    { id: 'night',    label: 'Night vibe',        emoji: '🌃', color: '#6366f1' },
+    { id: 'loud',     label: 'Loud music',        emoji: '🎵', color: '#f43f5e' },
+    { id: 'instagrammable', label: 'Instagram spot', emoji: '📸', color: '#e879f9' },
+    { id: 'outdoor',  label: 'Outdoor seating',  emoji: '🌿', color: '#16a34a' },
+    { id: 'trending', label: 'Trending now',      emoji: '🔥', color: '#ef4444' },
   ];
 
   const CAMERA_MODES = {
@@ -296,6 +301,22 @@
     tooltip.textContent = place.name;
     wrap.appendChild(inner);
     wrap.appendChild(tooltip);
+
+    // Top vibe badge — show most-voted vibe directly on the marker
+    const counts = _moodTagCounts[place.id];
+    if (counts) {
+      const top = MOOD_TAGS
+        .filter(t => (counts[t.id] || 0) >= 1)
+        .sort((a, b) => (counts[b.id] || 0) - (counts[a.id] || 0))[0];
+      if (top) {
+        const badge = document.createElement('div');
+        badge.className = 'gh-marker-vibe-badge';
+        badge.style.cssText = '--vibe-color:' + (top.color || '#10b981');
+        badge.textContent = top.emoji + ' ' + top.label;
+        wrap.appendChild(badge);
+      }
+    }
+
     return wrap;
   }
 
@@ -842,9 +863,10 @@
     // Divider before mood chips
     html += '<div class="map-chip-divider"></div>';
     MOOD_TAGS.forEach(tag => {
-      html += '<div class="map-chip map-chip--mood' + (currentMoodFilter === tag.id ? ' active' : '') + '" data-mood="' + esc(tag.id) + '">'
-        + esc(tag.emoji + ' ' + tag.label)
-        + '</div>';
+      html += '<div class="map-chip map-chip--mood' + (currentMoodFilter === tag.id ? ' active' : '') + '"' +
+        ' data-mood="' + esc(tag.id) + '"' +
+        ' style="--mood-chip-color:' + (tag.color || '#10b981') + '">' +
+        esc(tag.emoji + ' ' + tag.label) + '</div>';
     });
     wrap.innerHTML = html;
     attachFilters();
@@ -1342,16 +1364,26 @@
 
   /* ── Mood Tags ──────────────────────────────────── */
   function _moodTagsHtml(placeId, counts, votes) {
-    return '<div class="mood-tags-title">Vibes</div><div class="mood-tags-list">'
-      + MOOD_TAGS.map(t => {
-          const c = counts[t.id] || 0;
-          const v = votes[t.id] === true;
-          return '<button class="mood-tag' + (v ? ' voted' : '') + '" onclick="toggleMoodTag(\'' + placeId + '\',\'' + t.id + '\',this)">'
-            + t.emoji + ' ' + t.label
-            + (c > 0 ? ' <span class="mood-tag-count">' + c + '</span>' : '')
-            + '</button>';
-        }).join('')
-      + '</div>';
+    // Sort: voted first, then by count descending
+    const sorted = [...MOOD_TAGS].sort((a, b) => {
+      const va = votes[a.id] === true ? 1 : 0;
+      const vb = votes[b.id] === true ? 1 : 0;
+      if (vb !== va) return vb - va;
+      return (counts[b.id] || 0) - (counts[a.id] || 0);
+    });
+    return '<div class="mood-tags-title"><i class="fas fa-fire-alt"></i> Vibes — tap to vote</div>' +
+      '<div class="mood-tags-list">' +
+      sorted.map(t => {
+        const c = counts[t.id] || 0;
+        const v = votes[t.id] === true;
+        return '<button class="mood-tag' + (v ? ' voted' : '') + (c === 0 && !v ? ' zero' : '') + '"' +
+          ' style="--tag-color:' + (t.color || '#10b981') + '"' +
+          ' onclick="toggleMoodTag(\'' + placeId + '\',\'' + t.id + '\',this)">' +
+          t.emoji + ' ' + t.label +
+          (c > 0 ? ' <span class="mood-tag-count">' + c + '</span>' : '') +
+          '</button>';
+      }).join('') +
+      '</div>';
   }
 
   function _loadMoodTags(placeId) {

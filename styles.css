@@ -2407,20 +2407,24 @@ textarea {
   align-self: stretch;
 }
 .map-chip--mood {
-  background: rgba(139,92,246,.06);
-  border-color: rgba(139,92,246,.15);
-  color: rgba(196,181,253,.7);
+  --mood-chip-color: #a78bfa;
+  background: color-mix(in srgb, var(--mood-chip-color) 7%, transparent);
+  border-color: color-mix(in srgb, var(--mood-chip-color) 18%, transparent);
+  color: color-mix(in srgb, var(--mood-chip-color) 75%, white);
+  font-weight: 600;
 }
 .map-chip--mood:hover {
-  background: rgba(139,92,246,.16);
-  border-color: rgba(139,92,246,.4);
-  color: #c4b5fd;
+  background: color-mix(in srgb, var(--mood-chip-color) 18%, transparent);
+  border-color: color-mix(in srgb, var(--mood-chip-color) 45%, transparent);
+  color: var(--mood-chip-color);
+  transform: translateY(-1px);
 }
 .map-chip--mood.active {
-  background: linear-gradient(135deg, rgba(139,92,246,.28), rgba(167,139,250,.15));
-  border-color: rgba(139,92,246,.55);
-  color: #c4b5fd;
-  box-shadow: 0 0 10px rgba(139,92,246,.2);
+  background: color-mix(in srgb, var(--mood-chip-color) 22%, transparent);
+  border-color: color-mix(in srgb, var(--mood-chip-color) 60%, transparent);
+  color: var(--mood-chip-color);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--mood-chip-color) 25%, transparent);
+  font-weight: 700;
 }
 .map-results {
   flex: 1;
