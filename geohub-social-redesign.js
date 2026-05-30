@@ -2728,6 +2728,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button type="button" class="gh-cmp-tool" id="ghStoryDrawBtn"><i class="fas fa-pen-nib"></i><span> Draw</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryGroupBtn"><i class="fas fa-users"></i><span> Group</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryHashtagBtn"><i class="fas fa-hashtag"></i><span> Tags</span></button>'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryTemplateBtn"><i class="fas fa-layer-group"></i><span> Template</span></button>'+
       '</div>'+
       '<div id="ghStoryHashtagWrap" style="display:none;margin-top:8px">'+
         '<div style="display:flex;align-items:center;gap:6px">'+
@@ -2784,6 +2785,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<input class="gh-input" id="ghStoryAyPrompt" placeholder="Add Yours prompt… (e.g. Show your view)" maxlength="80">'+
         '<input type="hidden" id="ghStoryAyChainId" value="">'+
         '<p style="font-size:.75rem;color:var(--gh-muted,#94a3b8);margin:4px 0 0">Others can tap and add their own story to this chain</p>'+
+      '</div>'+
+      '<div id="ghStoryTemplateWrap" style="display:none;margin-top:8px">'+
+        '<div class="gh-story-tpl-badge" id="ghStoryTplBadge" style="display:none">'+
+          '<span id="ghStoryTplBadgeLabel"></span>'+
+          '<button type="button" class="gh-story-tpl-badge-rm" id="ghStoryTplBadgeRm">×</button>'+
+        '</div>'+
+        '<div class="gh-story-tpl-grid" id="ghStoryTplGrid"></div>'+
       '</div>'+
       '<div id="ghStoryLocBadge" style="margin-top:6px;min-height:18px"></div>';
     var m=modal('Add to your story', body,
@@ -3129,6 +3137,68 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       });
     }
 
+    // ── Templates ────────────────────────────────────────────────
+    var _TEMPLATES=[
+      {id:'travel',    emoji:'✈️',  label:'Travel',      bg:'linear-gradient(135deg,#0ea5e9,#38bdf8)', ph:'Where to next? ✈️'},
+      {id:'food',      emoji:'🍽️', label:'Food',   bg:'linear-gradient(135deg,#f59e0b,#fbbf24)', ph:'Tastes amazing! 🍽️'},
+      {id:'celebrate', emoji:'🎉', label:'Celebration',  bg:'linear-gradient(135deg,#a855f7,#ec4899)', ph:"Let's celebrate! 🎉"},
+      {id:'quote',     emoji:'💬', label:'Quote',        bg:'linear-gradient(135deg,#1e293b,#334155)', ph:'Drop your quote… 💬'},
+      {id:'news',      emoji:'📢', label:'News',         bg:'linear-gradient(135deg,#ef4444,#f97316)', ph:'Breaking news! 📢'},
+      {id:'business',  emoji:'💼', label:'Business',     bg:'linear-gradient(135deg,#1e40af,#3b82f6)', ph:'Professional update 💼'},
+      {id:'nature',    emoji:'🌿', label:'Nature',       bg:'linear-gradient(135deg,#16a34a,#4ade80)', ph:'Into the wild 🌿'},
+      {id:'night',     emoji:'🌙', label:'Night',        bg:'linear-gradient(135deg,#0f172a,#1e293b)', ph:'Good night, world 🌙'},
+      {id:'love',      emoji:'❤️',  label:'Love',        bg:'linear-gradient(135deg,#f43f5e,#fb7185)', ph:'Spread the love ❤️'},
+      {id:'sports',    emoji:'⚽',        label:'Sports',      bg:'linear-gradient(135deg,#059669,#10b981)', ph:'Game on! ⚽'},
+      {id:'georgia',   emoji:'🇬🇪', label:'Georgia', bg:'linear-gradient(135deg,#dc2626,#b91c1c)', ph:'საქართველო 🇬🇪'},
+      {id:'minimal',   emoji:'⬜',        label:'Minimal',     bg:'linear-gradient(135deg,#f8fafc,#e2e8f0)', ph:'Simple and clean ⬜'}
+    ];
+    var _selectedTemplate=null, _templateVisible=false;
+    var tplBtn=$('#ghStoryTemplateBtn');
+    var tplWrap=$('#ghStoryTemplateWrap');
+    var tplBadge=$('#ghStoryTplBadge');
+    var tplBadgeLabel=$('#ghStoryTplBadgeLabel');
+    var tplBadgeRm=$('#ghStoryTplBadgeRm');
+    var tplGrid=$('#ghStoryTplGrid');
+    function _applyTemplate(tpl){
+      _selectedTemplate=tpl;
+      _selectedBg=tpl.bg; _bgVisible=true;
+      var taEl=$('#ghStoryText'); if(taEl) taEl.placeholder=tpl.ph;
+      if(tplBadge) tplBadge.style.display='flex';
+      if(tplBadgeLabel) tplBadgeLabel.textContent=tpl.emoji+' '+tpl.label;
+      if(tplGrid) tplGrid.querySelectorAll('[data-tpl]').forEach(function(b){ b.classList.toggle('selected',b.dataset.tpl===tpl.id); });
+      if(tplBtn) tplBtn.classList.add('active');
+    }
+    function _clearTemplate(){
+      _selectedTemplate=null; _selectedBg=null; _bgVisible=false;
+      var bgWrapEl=$('#ghStoryBgWrap'); if(bgWrapEl){ bgWrapEl.style.display='none'; bgWrapEl.querySelectorAll('[data-bg]').forEach(function(s){ s.classList.remove('selected'); }); }
+      var taEl=$('#ghStoryText'); if(taEl) taEl.placeholder="What's on your mind?…";
+      if(tplBadge) tplBadge.style.display='none';
+      if(tplGrid) tplGrid.querySelectorAll('[data-tpl]').forEach(function(b){ b.classList.remove('selected'); });
+      if(tplBtn) tplBtn.classList.remove('active');
+    }
+    if(tplGrid){
+      tplGrid.innerHTML=_TEMPLATES.map(function(tpl){
+        return '<button type="button" class="gh-story-tpl-item" data-tpl="'+esc(tpl.id)+'" style="background:'+tpl.bg+'">'+
+          '<span class="gh-story-tpl-emoji">'+tpl.emoji+'</span>'+
+          '<span class="gh-story-tpl-label">'+esc(tpl.label)+'</span>'+
+        '</button>';
+      }).join('');
+      tplGrid.querySelectorAll('[data-tpl]').forEach(function(btn){
+        btn.onclick=function(){
+          var tpl=_TEMPLATES.filter(function(t){ return t.id===btn.dataset.tpl; })[0];
+          if(tpl) _applyTemplate(tpl);
+        };
+      });
+    }
+    if(tplBtn){
+      tplBtn.onclick=function(){
+        _templateVisible=!_templateVisible;
+        if(tplWrap) tplWrap.style.display=_templateVisible?'':'none';
+        tplBtn.classList.toggle('active',_templateVisible||!!_selectedTemplate);
+      };
+    }
+    if(tplBadgeRm){ tplBadgeRm.onclick=function(){ _clearTemplate(); }; }
+
     // ── Draw mode ────────────────────────────────────────────────
     function _openDrawMode(){
       var ex=document.getElementById('ghDrawOverlay'); if(ex) ex.remove();
@@ -3300,6 +3370,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(_cfEnabled){ _extra.closeFriends=true; _extra.closeFriendsList=_cfList.slice(); }
         if(_selectedGroupId) _extra.groupId=_selectedGroupId;
         if(_hashtags&&_hashtags.length) _extra.hashtags=_hashtags.slice();
+        if(_selectedTemplate) _extra.template={id:_selectedTemplate.id, label:_selectedTemplate.label};
         var _musicTrack=typeof window._getStoryMusic==='function'?window._getStoryMusic():null;
         if(_musicTrack&&_musicTrack.label) _extra.music={label:_musicTrack.label, url:_musicTrack.url||''};
         GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); try{ localStorage.removeItem(_DRAFT_KEY); }catch(_e){} },_extra);

@@ -2255,6 +2255,7 @@
         if (extra && extra.eventId) storyData.eventId = extra.eventId;
         if (extra && extra.music && extra.music.label) storyData.music = { label: extra.music.label, url: extra.music.url || '' };
         if (extra && Array.isArray(extra.hashtags) && extra.hashtags.length) storyData.hashtags = extra.hashtags.slice(0, 8);
+        if (extra && extra.template && extra.template.id) storyData.template = { id: extra.template.id, label: extra.template.label || '' };
         var _ayPrompt = extra && extra.addYours && extra.addYours.prompt ? extra.addYours.prompt : null;
         var _ayChainId = extra && extra.addYours && extra.addYours.chainId ? extra.addYours.chainId : null;
         if (_ayPrompt) storyData.addYours = { prompt: _ayPrompt, chainId: _ayChainId || '' };
