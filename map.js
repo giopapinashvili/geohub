@@ -1994,6 +1994,208 @@
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
+  /* ── "What's happening NOW" panel ──────────────── */
+  let _nowPanelOpen = false;
+  let _nowLastLoad = 0;
+
+  window.toggleNowPanel = function() {
+    _nowPanelOpen = !_nowPanelOpen;
+    const panel = document.getElementById('nowPanel');
+    const btn   = document.getElementById('nowBtn');
+    if (!panel) return;
+    panel.classList.toggle('open', _nowPanelOpen);
+    panel.setAttribute('aria-hidden', String(!_nowPanelOpen));
+    if (btn) btn.classList.toggle('active', _nowPanelOpen);
+    if (_nowPanelOpen && (Date.now() - _nowLastLoad > 5 * 60 * 1000)) {
+      window.loadNowPanel(false);
+    }
+  };
+
+  window.loadNowPanel = function(force) {
+    const GF = window.GeoFirebase;
+    const body = document.getElementById('nowPanelBody');
+    const badge = document.getElementById('nowBadge');
+    const lastUpdated = document.getElementById('nowLastUpdated');
+    if (!body) return;
+    if (!GF || !GF.fs || !GF.db) {
+      body.innerHTML = '<div class="now-empty"><i class="fas fa-wifi-slash"></i><p>Loading data…</p></div>';
+      return;
+    }
+    if (!force && Date.now() - _nowLastLoad < 60000) return;
+    _nowLastLoad = Date.now();
+    body.innerHTML = '<div class="now-loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
+    if (lastUpdated) lastUpdated.textContent = '';
+
+    const fs = GF.fs, db = GF.db;
+    const since2h  = new Date(Date.now() - 2  * 60 * 60 * 1000);
+    const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const now = new Date();
+
+    const pTrending = fs.getDocs(
+      fs.query(fs.collection(db, 'checkins'), fs.where('createdAt','>=',since2h), fs.orderBy('createdAt','desc'), fs.limit(200))
+    ).then(function(snap) {
+      const counts = {};
+      const names  = {};
+      const lats   = {};
+      const lngs   = {};
+      snap.forEach(function(d) {
+        const c = d.data();
+        if (!c.placeId) return;
+        counts[c.placeId] = (counts[c.placeId] || 0) + 1;
+        if (!names[c.placeId]) { names[c.placeId] = c.placeName || 'Unknown'; lats[c.placeId] = c.lat; lngs[c.placeId] = c.lng; }
+      });
+      return Object.keys(counts)
+        .sort(function(a,b){ return counts[b]-counts[a]; })
+        .slice(0, 5)
+        .map(function(id){ return { id, name: names[id], count: counts[id], lat: lats[id], lng: lngs[id] }; });
+    }).catch(function(){ return []; });
+
+    const pEvents = fs.getDocs(
+      fs.query(fs.collection(db, 'events'), fs.where('startDate','<=',now), fs.orderBy('startDate','desc'), fs.limit(20))
+    ).then(function(snap) {
+      const active = [];
+      snap.forEach(function(d) {
+        const e = Object.assign({ id: d.id }, d.data());
+        const end = e.endDate ? (e.endDate.toDate ? e.endDate.toDate() : new Date(e.endDate)) : null;
+        if (!end || end >= now) active.push(e);
+      });
+      return active.slice(0, 4);
+    }).catch(function(){ return []; });
+
+    const pFriends = (function() {
+      const user = window.GeoCurrentUser;
+      if (!user) return Promise.resolve([]);
+      return fs.getDocs(
+        fs.query(fs.collection(db, 'userLocations'), fs.where('sharing','==','friends'), fs.limit(30))
+      ).then(function(snap) {
+        const out = [];
+        snap.forEach(function(d) {
+          if (d.id === user.uid) return;
+          const data = d.data();
+          const ms = data.updatedAt && data.updatedAt.toMillis ? data.updatedAt.toMillis() : 0;
+          if (Date.now() - ms < 10 * 60 * 1000) out.push(Object.assign({ uid: d.id }, data));
+        });
+        return out.slice(0, 4);
+      }).catch(function(){ return []; });
+    })();
+
+    const pRecent = fs.getDocs(
+      fs.query(fs.collection(db, 'checkins'), fs.where('createdAt','>=',since24h), fs.orderBy('createdAt','desc'), fs.limit(8))
+    ).then(function(snap) {
+      const out = [];
+      snap.forEach(function(d) { out.push(Object.assign({ id: d.id }, d.data())); });
+      return out;
+    }).catch(function(){ return []; });
+
+    Promise.all([pTrending, pEvents, pFriends, pRecent]).then(function(results) {
+      const trending = results[0];
+      const events   = results[1];
+      const friends  = results[2];
+      const recent   = results[3];
+
+      let totalItems = trending.length + events.length + friends.length;
+      if (badge) { badge.textContent = totalItems > 99 ? '99+' : String(totalItems); badge.style.display = totalItems > 0 ? '' : 'none'; }
+      if (lastUpdated) lastUpdated.textContent = 'Updated ' + _nowTimeAgo(Date.now());
+
+      let html = '';
+
+      // ── Trending spots ────────────────────────────
+      html += '<div class="now-section">';
+      html += '<div class="now-section-head"><span class="now-sec-icon">🔥</span><span>Trending spots</span><small>last 2h</small></div>';
+      if (trending.length) {
+        html += '<div class="now-rows">';
+        trending.forEach(function(t, i) {
+          const heat = i === 0 ? 'now-row--hot' : (i === 1 ? 'now-row--warm' : '');
+          const bar  = Math.round((t.count / trending[0].count) * 100);
+          html += '<div class="now-row ' + heat + '" onclick="' +
+            (t.lat && t.lng ? 'window._ghMap&&window._ghMap.flyTo({center:[' + t.lng + ',' + t.lat + '],zoom:15,duration:800})' : '') +
+            ';window.toggleNowPanel()">' +
+            '<span class="now-row-rank">' + (i+1) + '</span>' +
+            '<div class="now-row-info"><div class="now-row-name">' + esc(t.name) + '</div>' +
+            '<div class="now-row-bar"><div class="now-row-fill" style="width:' + bar + '%"></div></div></div>' +
+            '<span class="now-row-count">' + t.count + ' <i class="fas fa-map-pin"></i></span>' +
+            '</div>';
+        });
+        html += '</div>';
+      } else {
+        html += '<div class="now-empty-row"><i class="fas fa-map-marker-alt"></i> No check-ins in last 2h</div>';
+      }
+      html += '</div>';
+
+      // ── Active events ─────────────────────────────
+      html += '<div class="now-section">';
+      html += '<div class="now-section-head"><span class="now-sec-icon">🎉</span><span>Active events</span><small>happening now</small></div>';
+      if (events.length) {
+        html += '<div class="now-rows">';
+        events.forEach(function(e) {
+          html += '<div class="now-row" onclick="location.href=\'events.html?id=' + esc(e.id) + '\'">' +
+            '<span class="now-row-event-dot"></span>' +
+            '<div class="now-row-info"><div class="now-row-name">' + esc(e.title || e.name || 'Event') + '</div>' +
+            '<div class="now-row-sub">' + esc(e.city || e.location || '') + '</div></div>' +
+            '<span class="now-row-live-badge">LIVE</span>' +
+            '</div>';
+        });
+        html += '</div>';
+      } else {
+        html += '<div class="now-empty-row"><i class="fas fa-calendar-times"></i> No active events right now</div>';
+      }
+      html += '</div>';
+
+      // ── Friends active ────────────────────────────
+      if (window.GeoCurrentUser) {
+        html += '<div class="now-section">';
+        html += '<div class="now-section-head"><span class="now-sec-icon">👥</span><span>Friends active</span><small>sharing location</small></div>';
+        if (friends.length) {
+          html += '<div class="now-rows">';
+          friends.forEach(function(f) {
+            const init = (f.displayName||'?').split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
+            html += '<div class="now-row" onclick="window._ghShowFriend&&window._ghShowFriend(\'' + esc(f.uid) + '\');window.toggleNowPanel()">' +
+              '<div class="now-friend-av">' + (f.photoURL ? '<img src="'+esc(f.photoURL)+'" alt="">' : '<span>'+esc(init)+'</span>') + '</div>' +
+              '<div class="now-row-info"><div class="now-row-name">' + esc(f.displayName||'Friend') + '</div>' +
+              '<div class="now-row-sub">🟢 Online now</div></div>' +
+              '</div>';
+          });
+          html += '</div>';
+        } else {
+          html += '<div class="now-empty-row"><i class="fas fa-user-slash"></i> No friends sharing location</div>';
+        }
+        html += '</div>';
+      }
+
+      // ── Recent activity feed ──────────────────────
+      if (recent.length) {
+        html += '<div class="now-section">';
+        html += '<div class="now-section-head"><span class="now-sec-icon">⚡</span><span>Recent activity</span><small>last 24h</small></div>';
+        html += '<div class="now-rows">';
+        recent.forEach(function(c) {
+          html += '<div class="now-row">' +
+            '<div class="now-friend-av">' + (c.authorAvatar ? '<img src="'+esc(c.authorAvatar)+'" alt="">' : '<span>'+(c.authorName||'U')[0]+'</span>') + '</div>' +
+            '<div class="now-row-info"><div class="now-row-name">' + esc(c.authorName||'Someone') + '</div>' +
+            '<div class="now-row-sub">checked in at <b>' + esc(c.placeName||'a place') + '</b> · ' + _nowTimeAgo(c.createdAt) + '</div></div>' +
+            '</div>';
+        });
+        html += '</div></div>';
+      }
+
+      body.innerHTML = html || '<div class="now-empty"><i class="fas fa-moon"></i><p>Quiet right now</p></div>';
+    }).catch(function() {
+      body.innerHTML = '<div class="now-empty"><i class="fas fa-exclamation-triangle"></i><p>Could not load data</p></div>';
+    });
+  };
+
+  function _nowTimeAgo(v) {
+    var ms = 0;
+    if (!v) return 'now';
+    if (typeof v === 'number') ms = v;
+    else if (v.toMillis) ms = v.toMillis();
+    else if (v.seconds) ms = v.seconds * 1000;
+    else if (v instanceof Date) ms = v.getTime();
+    var m = Math.max(1, Math.floor((Date.now() - ms) / 60000));
+    if (m < 60) return m + 'm ago';
+    if (m < 1440) return Math.floor(m/60) + 'h ago';
+    return Math.floor(m/1440) + 'd ago';
+  }
+
   /* ── Init ───────────────────────────────────────── */
   function init() {
     const currentStyle = getMapStyle();
@@ -2038,12 +2240,14 @@
         loadRealPlaces();
         loadUserCheckins();
         loadHeatmapCheckins();
+        setTimeout(function() { window.loadNowPanel(false); }, 2000);
       } else {
         window.addEventListener('GeoFirebaseReady', () => {
           loadPlaceCategoriesFromFirestore();
           loadRealPlaces();
           loadUserCheckins();
           loadHeatmapCheckins();
+          setTimeout(function() { window.loadNowPanel(false); }, 2000);
         }, { once: true });
       }
 
