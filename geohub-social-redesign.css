@@ -6008,3 +6008,11 @@ html[data-gh-motion="reduced"] * { animation-duration:0.001ms !important; transi
 .gh-cf-star-btn{background:none;border:1.5px solid var(--gh-border,rgba(255,255,255,.12));border-radius:8px;width:32px;height:32px;display:grid;place-items:center;cursor:pointer;color:var(--text-muted,#64748b);font-size:.85rem;flex-shrink:0;transition:color .15s,border-color .15s,background .15s}
 .gh-cf-star-btn:hover{color:#fbbf24;border-color:#fbbf24;background:rgba(251,191,36,.08)}
 .gh-cf-star-btn.active{color:#fbbf24;border-color:#fbbf24;background:rgba(251,191,36,.15)}
+/* ── Story Emoji Sticker (Session 18) ── */
+.gh-story-emoji-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.gh-story-emoji-item{width:42px;height:42px;border-radius:10px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);font-size:1.4rem;cursor:pointer;display:grid;place-items:center;transition:transform .1s,background .1s}
+.gh-story-emoji-item:hover{background:rgba(255,255,255,.16);transform:scale(1.12)}
+.gh-story-emoji-item.selected{outline:2px solid #10b981;outline-offset:2px}
+.gh-story-emoji-badge{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border-radius:16px;padding:4px 10px;margin-bottom:6px;font-size:.82rem;color:#e2e8f0}
+.gh-story-emoji-sticker{position:absolute;top:22%;left:50%;transform:translateX(-50%);font-size:5rem;line-height:1;filter:drop-shadow(0 4px 12px rgba(0,0,0,.4));animation:gh-emoji-pop .35s cubic-bezier(.34,1.56,.64,1) both;pointer-events:none;z-index:6;user-select:none}
+@keyframes gh-emoji-pop{from{transform:translateX(-50%) scale(.4);opacity:0}to{transform:translateX(-50%) scale(1);opacity:1}}

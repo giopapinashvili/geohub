@@ -2729,6 +2729,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button type="button" class="gh-cmp-tool" id="ghStoryGroupBtn"><i class="fas fa-users"></i><span> Group</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryHashtagBtn"><i class="fas fa-hashtag"></i><span> Tags</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryTemplateBtn"><i class="fas fa-layer-group"></i><span> Template</span></button>'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryEmojiBtn"><i class="fas fa-face-smile"></i><span> Emoji</span></button>'+
       '</div>'+
       '<div id="ghStoryHashtagWrap" style="display:none;margin-top:8px">'+
         '<div style="display:flex;align-items:center;gap:6px">'+
@@ -2785,6 +2786,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<input class="gh-input" id="ghStoryAyPrompt" placeholder="Add Yours prompt… (e.g. Show your view)" maxlength="80">'+
         '<input type="hidden" id="ghStoryAyChainId" value="">'+
         '<p style="font-size:.75rem;color:var(--gh-muted,#94a3b8);margin:4px 0 0">Others can tap and add their own story to this chain</p>'+
+      '</div>'+
+      '<div id="ghStoryEmojiWrap" style="display:none;margin-top:8px">'+
+        '<div class="gh-story-emoji-badge" id="ghStoryEmojiBadge" style="display:none">'+
+          '<span id="ghStoryEmojiSelected" style="font-size:1.5rem"></span>'+
+          '<button type="button" class="gh-story-tpl-badge-rm" id="ghStoryEmojiClear">×</button>'+
+        '</div>'+
+        '<div class="gh-story-emoji-grid" id="ghStoryEmojiGrid"></div>'+
       '</div>'+
       '<div id="ghStoryTemplateWrap" style="display:none;margin-top:8px">'+
         '<div class="gh-story-tpl-badge" id="ghStoryTplBadge" style="display:none">'+
@@ -3199,6 +3207,45 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }
     if(tplBadgeRm){ tplBadgeRm.onclick=function(){ _clearTemplate(); }; }
 
+    // ── Emoji sticker ─────────────────────────────────────────────
+    var _STORY_EMOJIS=['❤️','🔥','😂','😍','🎉','👏','💯','😮','🙌','✨','💪','😎','🤩','💔','😢','🤔','👀','🎶','🍀','🌟','🇬🇪','⚡','🏆','🌈','💫'];
+    var _selectedEmoji=null, _emojiVisible=false;
+    var emojiBtn=$('#ghStoryEmojiBtn');
+    var emojiWrap=$('#ghStoryEmojiWrap');
+    var emojiBadge=$('#ghStoryEmojiBadge');
+    var emojiSelected=$('#ghStoryEmojiSelected');
+    var emojiClear=$('#ghStoryEmojiClear');
+    var emojiGrid=$('#ghStoryEmojiGrid');
+    if(emojiGrid){
+      emojiGrid.innerHTML=_STORY_EMOJIS.map(function(em){
+        return '<button type="button" class="gh-story-emoji-item" data-pick-emoji="'+esc(em)+'">'+em+'</button>';
+      }).join('');
+      emojiGrid.querySelectorAll('[data-pick-emoji]').forEach(function(btn){
+        btn.onclick=function(){
+          _selectedEmoji=btn.dataset.pickEmoji;
+          if(emojiSelected) emojiSelected.textContent=_selectedEmoji;
+          if(emojiBadge) emojiBadge.style.display='flex';
+          emojiGrid.querySelectorAll('[data-pick-emoji]').forEach(function(b){ b.classList.toggle('selected',b===btn); });
+          if(emojiBtn) emojiBtn.classList.add('active');
+        };
+      });
+    }
+    if(emojiBtn){
+      emojiBtn.onclick=function(){
+        _emojiVisible=!_emojiVisible;
+        if(emojiWrap) emojiWrap.style.display=_emojiVisible?'':'none';
+        emojiBtn.classList.toggle('active',_emojiVisible||!!_selectedEmoji);
+      };
+    }
+    if(emojiClear){
+      emojiClear.onclick=function(){
+        _selectedEmoji=null;
+        if(emojiBadge) emojiBadge.style.display='none';
+        if(emojiGrid) emojiGrid.querySelectorAll('[data-pick-emoji]').forEach(function(b){ b.classList.remove('selected'); });
+        if(emojiBtn) emojiBtn.classList.remove('active');
+      };
+    }
+
     // ── Draw mode ────────────────────────────────────────────────
     function _openDrawMode(){
       var ex=document.getElementById('ghDrawOverlay'); if(ex) ex.remove();
@@ -3371,6 +3418,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(_selectedGroupId) _extra.groupId=_selectedGroupId;
         if(_hashtags&&_hashtags.length) _extra.hashtags=_hashtags.slice();
         if(_selectedTemplate) _extra.template={id:_selectedTemplate.id, label:_selectedTemplate.label};
+        if(_selectedEmoji) _extra.emoji=_selectedEmoji;
         var _musicTrack=typeof window._getStoryMusic==='function'?window._getStoryMusic():null;
         if(_musicTrack&&_musicTrack.label) _extra.music={label:_musicTrack.label, url:_musicTrack.url||''};
         GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); try{ localStorage.removeItem(_DRAFT_KEY); }catch(_e){} },_extra);
@@ -3717,6 +3765,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           )+
           quizHtml+
           addYoursHtml+
+          (st.emoji
+            ? '<div class="gh-story-emoji-sticker" id="ghEmSt_'+esc(st.id||'')+'">'+st.emoji+'</div>'
+            : ''
+          )+
           (st.hashtags&&st.hashtags.length
             ? '<div class="gh-story-hashtag-strip">'+st.hashtags.map(function(t){ return '<button type="button" class="gh-story-ht-pill" data-ht="'+esc(t)+'">#'+esc(t)+'</button>'; }).join('')+'</div>'
             : ''
