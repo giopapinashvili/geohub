@@ -136,6 +136,18 @@
     .se-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
     .se-pill{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;background:rgba(16,185,129,.2);border:1px solid rgba(16,185,129,.35);border-radius:20px;color:#10b981;font-size:.8rem}
     .se-pill button{background:none;border:none;color:#10b981;cursor:pointer;font-size:.9rem;padding:0;line-height:1}
+    /* Draggable sticker elements */
+    .se-el-sticker{background:rgba(15,23,42,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:10px 14px;color:#fff;max-width:240px;text-align:center;line-height:1.4}
+    .se-el-hashtag,.se-el-mention{font-weight:800;font-size:1.1rem;text-shadow:0 2px 8px rgba(0,0,0,.7);padding:6px 12px;border-radius:20px}
+    .se-el-hashtag{color:#10b981;background:rgba(16,185,129,.18);border:1px solid rgba(16,185,129,.35)}
+    .se-el-mention{color:#60a5fa;background:rgba(96,165,250,.15);border:1px solid rgba(96,165,250,.3)}
+    /* Mention search */
+    .se-user-res{margin-top:8px;display:flex;flex-direction:column;gap:5px;max-height:180px;overflow-y:auto}
+    .se-user-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(255,255,255,.07);border-radius:10px;cursor:pointer;border:1px solid rgba(255,255,255,.08)}
+    .se-user-row:hover,.se-user-row:active{background:rgba(255,255,255,.14)}
+    .se-user-av{width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;background:#374151;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;color:#fff}
+    .se-user-name{color:#fff;font-size:.88rem;font-weight:600}
+    .se-user-dn{color:#9ca3af;font-size:.75rem}
     `;
     document.head.appendChild(s);
   }
@@ -390,13 +402,12 @@
       '<button class="se-btn-g" id="seAddPoll">დამატება</button>'+
       (S.poll?'<button class="se-btn-ghost" id="seRmPoll">წაშლა</button>':''));
     p.querySelector('#seAddPoll').addEventListener('click',function(){
-      var qv=(q('#sePQ').value||'').trim();
-      if(!qv)return;
+      var qv=(q('#sePQ').value||'').trim(); if(!qv)return;
       S.poll={q:qv,a:(q('#sePA').value||'კი').trim(),b:(q('#sePB').value||'არა').trim()};
-      updateStickers(); closePanel(); toast('📊 გამოკითხვა დამატებულია');
+      upsertStickerEl('poll',pollHtml(S.poll)); closePanel(); toast('📊 გამოკითხვა დამატებულია');
     });
     var rm=p.querySelector('#seRmPoll');
-    if(rm)rm.addEventListener('click',function(){S.poll=null;updateStickers();closePanel();});
+    if(rm)rm.addEventListener('click',function(){S.poll=null;removeStickerEl('poll');closePanel();});
   }
 
   // ─── Question panel ──────────────────────────────────────────────────────
@@ -408,10 +419,10 @@
       (S.question?'<button class="se-btn-ghost" id="seRmQA">წაშლა</button>':''));
     p.querySelector('#seAddQA').addEventListener('click',function(){
       var v=(q('#seQAIn').value||'').trim(); if(!v)return;
-      S.question=v; updateStickers(); closePanel(); toast('❓ კითხვა დამატებულია');
+      S.question=v; upsertStickerEl('question',qaHtml(v)); closePanel(); toast('❓ კითხვა დამატებულია');
     });
     var rm=p.querySelector('#seRmQA');
-    if(rm)rm.addEventListener('click',function(){S.question=null;updateStickers();closePanel();});
+    if(rm)rm.addEventListener('click',function(){S.question=null;removeStickerEl('question');closePanel();});
   }
 
   // ─── Link panel ──────────────────────────────────────────────────────────
@@ -426,10 +437,10 @@
       var u=(q('#seLUrl').value||'').trim();
       if(!u.startsWith('http'))return toast('URL უნდა იწყებოდეს https://-ით');
       S.link={url:u,label:(q('#seLLbl').value||'გახსნა').trim()};
-      updateStickers(); closePanel(); toast('🔗 ლინკი დამატებულია');
+      upsertStickerEl('link',linkHtml(S.link)); closePanel(); toast('🔗 ლინკი დამატებულია');
     });
     var rm=p.querySelector('#seRmLnk');
-    if(rm)rm.addEventListener('click',function(){S.link=null;updateStickers();closePanel();});
+    if(rm)rm.addEventListener('click',function(){S.link=null;removeStickerEl('link');closePanel();});
   }
 
   // ─── Hashtag panel ───────────────────────────────────────────────────────
@@ -440,7 +451,10 @@
     q('#seHashIn').addEventListener('keydown',function(e){
       if(e.key!=='Enter')return; e.preventDefault();
       var v=this.value.replace(/^#/,'').trim(); if(!v)return;
-      if(S.hashtags.indexOf(v)<0)S.hashtags.push(v);
+      if(S.hashtags.indexOf(v)<0){
+        S.hashtags.push(v);
+        addEl({type:'hashtag',content:'#'+v,x:50,y:60,fontSize:20,color:'#10b981',scale:1});
+      }
       this.value=''; q('#seHashPills').innerHTML=renderPills(); bindPillDel();
     });
     bindPillDel();
@@ -452,7 +466,14 @@
     function bindPillDel(){
       document.querySelectorAll('[data-rh]').forEach(function(b){
         b.addEventListener('click',function(){
-          S.hashtags=S.hashtags.filter(function(x){return x!==b.dataset.rh;});
+          var h=b.dataset.rh;
+          S.hashtags=S.hashtags.filter(function(x){return x!==h;});
+          // remove canvas element
+          S.elements=S.elements.filter(function(x){
+            if(x.type==='hashtag'&&x.content==='#'+h){
+              var el=document.querySelector('[data-eid="'+x.id+'"]');if(el)el.remove();return false;
+            }return true;
+          });
           q('#seHashPills').innerHTML=renderPills(); bindPillDel();
         });
       });
@@ -461,18 +482,72 @@
 
   // ─── Mention panel ───────────────────────────────────────────────────────
   function showMentionPanel(){
-    var p=panel('stMention','<div class="se-ph">@მენშენი</div>'+
-      '<input class="se-inp" id="seMenIn" placeholder="@username (Enter-ით)" maxlength="50">'+
+    var p=panel('stMention',
+      '<div class="se-ph">@მენშენი</div>'+
+      '<input class="se-inp" id="seMenIn" placeholder="სახელი ან @nickname…" maxlength="50" autocomplete="off">'+
+      '<div class="se-user-res" id="seMenRes"></div>'+
       '<div class="se-pills" id="seMenPills">'+rMen()+'</div>');
-    q('#seMenIn').addEventListener('keydown',function(e){
-      if(e.key!=='Enter')return; e.preventDefault();
-      var v=this.value.replace(/^@/,'').trim(); if(!v)return;
-      if(S.mentions.indexOf(v)<0)S.mentions.push(v);
-      this.value=''; q('#seMenPills').innerHTML=rMen(); bMen();
+
+    var timer;
+    q('#seMenIn').addEventListener('input',function(){
+      clearTimeout(timer);
+      var v=this.value.replace(/^@/,'').trim();
+      q('#seMenRes').innerHTML='';
+      if(v.length<2)return;
+      timer=setTimeout(function(){searchMentions(v);},280);
     });
+
     bMen();
+
+    function searchMentions(v){
+      var db=window.GeoFirebase&&window.GeoFirebase.db; if(!db)return;
+      var vl=v.toLowerCase(), vEnd=vl+'', res=[];
+      var done=function(){
+        res=res.slice(0,8);
+        var el=q('#seMenRes'); if(!el)return;
+        if(!res.length){el.innerHTML='<div style="color:#6b7280;font-size:.8rem;padding:4px">ვერ მოიძებნა</div>';return;}
+        el.innerHTML=res.map(function(u){
+          var av=u.photoURL?'<img class="se-user-av" src="'+esc(u.photoURL)+'" alt="">':'<div class="se-user-av">'+esc((u.displayName||u.name||'?')[0].toUpperCase())+'</div>';
+          return '<div class="se-user-row" data-uid="'+esc(u.uid||u.id||'')+'" data-handle="'+esc(u.username||u.nickname||u.displayName||u.name||'')+'">'+av+'<div><div class="se-user-name">'+esc(u.displayName||u.name||'')+'</div><div class="se-user-dn">@'+esc(u.username||u.nickname||u.uid||'')+(u._biz?' · ბიზნესი':'')+'</div></div></div>';
+        }).join('');
+        el.querySelectorAll('.se-user-row').forEach(function(row){
+          row.addEventListener('click',function(){
+            var handle=row.dataset.handle||row.dataset.uid;
+            if(S.mentions.indexOf(handle)<0){
+              S.mentions.push(handle);
+              addEl({type:'mention',content:'@'+handle,x:50,y:70,fontSize:18,color:'#60a5fa',scale:1});
+              q('#seMenPills').innerHTML=rMen(); bMen();
+            }
+            q('#seMenIn').value=''; q('#seMenRes').innerHTML='';
+          });
+        });
+      };
+      // search users
+      db.collection('users').orderBy('displayNameLower').startAt(vl).endAt(vEnd).limit(5).get()
+        .then(function(s){s.forEach(function(d){var u=d.data();u.uid=d.id;res.push(u);})})
+        .catch(function(){})
+        .finally(function(){
+          // search businesses
+          db.collection('businesses').orderBy('name').startAt(v).endAt(v+'').limit(4).get()
+            .then(function(s){s.forEach(function(d){var u=d.data();u.uid=d.id;u._biz=true;res.push(u);})})
+            .catch(function(){})
+            .finally(done);
+        });
+    }
+
     function rMen(){return S.mentions.map(function(m){return '<span class="se-pill">@'+esc(m)+'<button data-rm="'+esc(m)+'">×</button></span>';}).join('');}
-    function bMen(){document.querySelectorAll('[data-rm]').forEach(function(b){b.addEventListener('click',function(){S.mentions=S.mentions.filter(function(x){return x!==b.dataset.rm;});q('#seMenPills').innerHTML=rMen();bMen();});});}
+    function bMen(){
+      document.querySelectorAll('[data-rm]').forEach(function(b){
+        b.addEventListener('click',function(){
+          var m=b.dataset.rm;
+          S.mentions=S.mentions.filter(function(x){return x!==m;});
+          S.elements=S.elements.filter(function(x){
+            if(x.type==='mention'&&x.content==='@'+m){var el=document.querySelector('[data-eid="'+x.id+'"]');if(el)el.remove();return false;}return true;
+          });
+          q('#seMenPills').innerHTML=rMen(); bMen();
+        });
+      });
+    }
   }
 
   // ─── Countdown panel ─────────────────────────────────────────────────────
@@ -486,10 +561,10 @@
     p.querySelector('#seAddCd').addEventListener('click',function(){
       var d=(q('#seCdDate').value||'').trim(); if(!d)return toast('თარიღი მიუთითე');
       S.countdown={label:(q('#seCdLbl').value||'Countdown').trim(),date:d};
-      updateStickers(); closePanel(); toast('⏳ ტაიმერი დამატებულია');
+      upsertStickerEl('countdown',cdHtml(S.countdown)); closePanel(); toast('⏳ ტაიმერი დამატებულია');
     });
     var rm=p.querySelector('#seRmCd');
-    if(rm)rm.addEventListener('click',function(){S.countdown=null;updateStickers();closePanel();});
+    if(rm)rm.addEventListener('click',function(){S.countdown=null;removeStickerEl('countdown');closePanel();});
   }
 
   // ─── Duration panel ──────────────────────────────────────────────────────
@@ -505,26 +580,42 @@
     });
   }
 
-  // ─── Sticker overlay (poll/link/question/countdown) ──────────────────────
-  function updateStickers(){
-    var cv=q('#seCv'); if(!cv)return;
-    cv.querySelectorAll('.se-sticker').forEach(function(s){s.remove();});
-    var y=12;
-    function addStk(html, cls){
-      var d=document.createElement('div');
-      d.className='se-sticker '+(cls||'');
-      d.style.cssText='left:50%;transform:translateX(-50%);top:'+y+'px;position:absolute;z-index:3';
-      d.innerHTML=html; cv.appendChild(d);
-      y+=d.offsetHeight+8;
-    }
-    if(S.poll){addStk('<div style="font-weight:700;margin-bottom:6px">'+esc(S.poll.q)+'</div><div style="display:flex;gap:6px"><span style="flex:1;background:rgba(255,255,255,.25);padding:5px;border-radius:8px;text-align:center">'+esc(S.poll.a)+'</span><span style="flex:1;background:rgba(255,255,255,.25);padding:5px;border-radius:8px;text-align:center">'+esc(S.poll.b)+'</span></div>');}
-    if(S.question){addStk('<div style="font-size:.75rem;color:#a5b4fc;margin-bottom:3px">კითხვა</div><div style="font-weight:600">'+esc(S.question)+'</div><div style="margin-top:6px;background:rgba(255,255,255,.15);border-radius:8px;padding:6px 10px;font-size:.8rem;color:#c7d2fe">პასუხი…</div>');}
-    if(S.link){addStk('<a href="'+esc(S.link.url)+'" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(255,255,255,.9);border-radius:20px;color:#1e293b;font-weight:700;font-size:.82rem;text-decoration:none"><i class="fas fa-external-link-alt"></i>'+esc(S.link.label)+'</a>');}
-    if(S.countdown){
-      var ms=new Date(S.countdown.date)-Date.now();
-      var rem=ms>0?Math.floor(ms/86400000)+'დ '+Math.floor((ms%86400000)/3600000)+'სთ':'დასრულდა';
-      addStk('<div style="font-size:.75rem;color:#fde68a;margin-bottom:3px">'+esc(S.countdown.label)+'</div><div style="font-size:1.2rem;font-weight:800;color:#fbbf24">'+rem+'</div>');
-    }
+  // ─── Sticker HTML helpers ────────────────────────────────────────────────
+  function pollHtml(d){return '<div style="font-size:.78rem;color:#a5b4fc;margin-bottom:5px">📊 '+esc(d.q)+'</div><div style="display:flex;gap:5px"><span style="flex:1;background:rgba(255,255,255,.22);padding:5px 6px;border-radius:8px;text-align:center;font-size:.75rem">'+esc(d.a)+'</span><span style="flex:1;background:rgba(255,255,255,.22);padding:5px 6px;border-radius:8px;text-align:center;font-size:.75rem">'+esc(d.b)+'</span></div>';}
+  function qaHtml(v){return '<div style="font-size:.7rem;color:#a5b4fc;margin-bottom:4px">❓ კითხვა</div><div style="font-weight:700;font-size:.85rem">'+esc(v)+'</div><div style="margin-top:6px;background:rgba(255,255,255,.1);border-radius:8px;padding:5px 8px;font-size:.75rem;color:#c7d2fe">პასუხი…</div>';}
+  function linkHtml(d){return '<div style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:rgba(255,255,255,.92);border-radius:20px;color:#1e293b;font-weight:700;font-size:.82rem"><i class="fas fa-external-link-alt" style="font-size:.75rem"></i>'+esc(d.label)+'</div>';}
+  function cdHtml(d){var ms=new Date(d.date)-Date.now();var rem=ms>0?Math.floor(ms/86400000)+'დ '+Math.floor((ms%86400000)/3600000)+'სთ':'დასრულდა';return '<div style="font-size:.7rem;color:#fde68a;margin-bottom:3px">⏳ '+esc(d.label)+'</div><div style="font-size:1.1rem;font-weight:800;color:#fbbf24">'+rem+'</div>';}
+
+  // ─── Draggable sticker element ────────────────────────────────────────────
+  function removeStickerEl(subtype){
+    S.elements=S.elements.filter(function(x){
+      if(x.type==='sticker'&&x.subtype===subtype){
+        var el=document.querySelector('[data-eid="'+x.id+'"]'); if(el)el.remove(); return false;
+      }
+      return true;
+    });
+  }
+
+  function upsertStickerEl(subtype, innerHtml){
+    removeStickerEl(subtype);
+    var opts={id:uid(),type:'sticker',subtype:subtype,content:subtype,x:50,y:30,scale:1};
+    var el=document.createElement('div');
+    el.className='se-el se-el-sticker'; el.dataset.eid=opts.id; el.dataset.subtype=subtype;
+    el.style.left=opts.x+'%'; el.style.top=opts.y+'%';
+    el.style.transform='scale(1)';
+    var inner=document.createElement('div'); inner.innerHTML=innerHtml; el.appendChild(inner);
+    var del=document.createElement('button'); del.className='se-el-del'; del.innerHTML='&times;';
+    del.addEventListener('pointerdown',function(e){
+      e.stopPropagation(); el.remove();
+      S.elements=S.elements.filter(function(x){return x.id!==opts.id;});
+      S[subtype]=null; if(_selEl===el)_selEl=null;
+    });
+    el.appendChild(del);
+    var scl=document.createElement('button'); scl.className='se-el-scale'; scl.innerHTML='⤡';
+    wireScaleHandle(scl,el,opts); el.appendChild(scl);
+    makeDrag(el,opts);
+    var cv=q('#seCv'); if(cv)cv.appendChild(el);
+    S.elements.push(opts); selEl(el);
   }
 
   // ─── Elements ────────────────────────────────────────────────────────────
@@ -538,6 +629,10 @@
 
     if(opts.type==='emoji'){
       el.style.fontSize=(opts.fontSize||52)+'px';
+      el.textContent=opts.content;
+    } else if(opts.type==='hashtag'||opts.type==='mention'){
+      el.className+=' se-el-'+opts.type;
+      el.style.fontSize=(opts.fontSize||20)+'px';
       el.textContent=opts.content;
     } else {
       var sp=document.createElement('span');
@@ -679,9 +774,14 @@
     if(S.mediaUrl&&S.mediaType==='image'){
       var img=new Image(); img.crossOrigin='anonymous';
       img.onload=function(){
+        // object-fit:cover — scale to fill canvas preserving aspect ratio
+        var iw=img.naturalWidth||w, ih=img.naturalHeight||h;
+        var sc=Math.max(w/iw, h/ih);
+        var dw=iw*sc, dh=ih*sc;
         ctx.save();
-        ctx.translate(w/2+S.imgX,h/2+S.imgY);ctx.scale(S.imgScale,S.imgScale);
-        ctx.drawImage(img,-w/2,-h/2,w,h);
+        ctx.translate(w/2+S.imgX, h/2+S.imgY);
+        ctx.scale(S.imgScale, S.imgScale);
+        ctx.drawImage(img, -dw/2, -dh/2, dw, dh);
         ctx.restore(); layers();
       };
       img.onerror=function(){fillBg(ctx,w,h);layers();};
