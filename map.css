@@ -1253,3 +1253,88 @@ body, html { height: 100%; overflow: hidden; }
   align-self: flex-start;
   margin-top: 0;
 }
+
+/* ── Discovery Section ─────────────────────────────── */
+.discover-section {
+  padding: 12px 14px 8px;
+  border-bottom: 1px solid var(--gh-border);
+}
+.discover-heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gh-text);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.discover-heading-sub {
+  font-weight: 400;
+  color: var(--gh-muted);
+  font-size: 11px;
+}
+.discover-cards-row {
+  display: flex;
+  gap: 8px;
+}
+.disc-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 6px;
+  background: var(--gh-card-soft);
+  border: 1.5px solid var(--gh-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  color: var(--gh-text);
+  min-width: 0;
+}
+.disc-card:hover {
+  border-color: var(--gh-green);
+  background: color-mix(in srgb, var(--gh-green) 8%, var(--gh-card-soft));
+}
+.disc-card.active {
+  border-color: var(--gh-green);
+  background: color-mix(in srgb, var(--gh-green) 14%, var(--gh-card-soft));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gh-green) 20%, transparent);
+}
+.disc-card-icon { font-size: 20px; line-height: 1; }
+.disc-card-title { font-size: 12px; font-weight: 700; }
+.disc-card-sub {
+  font-size: 10px;
+  color: var(--gh-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.disc-card.active .disc-card-sub { color: var(--gh-green); }
+
+/* Discovery result badges */
+.disc-dist {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gh-blue, #3b82f6);
+  background: color-mix(in srgb, var(--gh-blue, #3b82f6) 12%, transparent);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.disc-hot {
+  font-size: 11px;
+  font-weight: 600;
+  color: #ef4444;
+  background: color-mix(in srgb, #ef4444 12%, transparent);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.disc-gem {
+  font-size: 11px;
+  font-weight: 600;
+  color: #a855f7;
+  background: color-mix(in srgb, #a855f7 12%, transparent);
+  padding: 2px 6px;
+  border-radius: 6px;
+}

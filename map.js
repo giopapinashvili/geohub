@@ -2241,6 +2241,7 @@
         loadUserCheckins();
         loadHeatmapCheckins();
         setTimeout(function() { window.loadNowPanel(false); }, 2000);
+        setTimeout(function() { initDiscovery(); }, 1500);
       } else {
         window.addEventListener('GeoFirebaseReady', () => {
           loadPlaceCategoriesFromFirestore();
@@ -2248,6 +2249,7 @@
           loadUserCheckins();
           loadHeatmapCheckins();
           setTimeout(function() { window.loadNowPanel(false); }, 2000);
+          setTimeout(function() { initDiscovery(); }, 1500);
         }, { once: true });
       }
 
@@ -2612,6 +2614,113 @@
         box.innerHTML = h + '</div>';
       }).catch(() => { box.innerHTML = '<p class="mpd-empty">Could not load stories</p>'; });
     });
+  }
+
+  /* ── Discovery: "სად წავიდე?" ──────────────────────── */
+  let _discMode = '';   // 'nearme' | 'trending' | 'gems' | ''
+
+  function initDiscovery() {
+    const GF = window.GeoFirebase;
+    if (!GF || !GF.db || !GF.fs) return;
+    const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0);
+    const since = GF.fs.Timestamp ? GF.fs.Timestamp.fromDate(todayMidnight) : todayMidnight;
+    GF.fs.getDocs(GF.fs.query(
+      GF.fs.collection(GF.db, 'placeCheckins'),
+      GF.fs.where('checkedInAt', '>=', since),
+      GF.fs.limit(200)
+    )).then(snap => {
+      const counts = {};
+      snap.forEach(d => { const pid = d.data().placeId; counts[pid] = (counts[pid] || 0) + 1; });
+      const n = Object.keys(counts).length;
+      const sub = document.getElementById('discTrendSub');
+      if (sub && n > 0) sub.textContent = n + ' ადგილი';
+      _trendCounts = counts;
+    }).catch(() => {});
+  }
+
+  let _trendCounts = {};
+
+  function _discReset() {
+    ['discNearMe', 'discTrending', 'discGems'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('active');
+    });
+  }
+
+  window.discoverNearMe = function() {
+    if (_discMode === 'nearme') {
+      _discMode = ''; _discReset(); renderMap(); return;
+    }
+    if (!navigator.geolocation) { return; }
+    _discReset(); _discMode = 'nearme';
+    const btn = document.getElementById('discNearMe');
+    if (btn) btn.classList.add('active');
+    navigator.geolocation.getCurrentPosition(pos => {
+      const ulat = pos.coords.latitude, ulng = pos.coords.longitude;
+      allPlaces.forEach(p => {
+        const dlat = (p.lat - ulat) * 111000;
+        const dlng = (p.lng - ulng) * 111000 * Math.cos(ulat * Math.PI / 180);
+        p._dist = Math.sqrt(dlat * dlat + dlng * dlng);
+      });
+      const nearest = allPlaces.slice().sort((a, b) => (a._dist || 9e9) - (b._dist || 9e9)).slice(0, 10);
+      const sub = document.getElementById('discNearSub');
+      if (sub && nearest[0]) sub.textContent = 'ახლოს ' + _distLabel(nearest[0]._dist);
+      _showDiscoverResults(nearest, 'nearme');
+    }, () => { _discMode = ''; _discReset(); });
+  };
+
+  window.discoverTrending = function() {
+    if (_discMode === 'trending') {
+      _discMode = ''; _discReset(); renderMap(); return;
+    }
+    _discReset(); _discMode = 'trending';
+    const btn = document.getElementById('discTrending');
+    if (btn) btn.classList.add('active');
+    const sorted = allPlaces.slice().sort((a, b) => (_trendCounts[b.id] || 0) - (_trendCounts[a.id] || 0));
+    const top = sorted.filter(p => _trendCounts[p.id] > 0).slice(0, 10);
+    _showDiscoverResults(top.length ? top : sorted.slice(0, 8), 'trending');
+  };
+
+  window.discoverGems = function() {
+    if (_discMode === 'gems') {
+      _discMode = ''; _discReset(); renderMap(); return;
+    }
+    _discReset(); _discMode = 'gems';
+    const btn = document.getElementById('discGems');
+    if (btn) btn.classList.add('active');
+    const gems = allPlaces.filter(p => (p.rating || 0) >= 4.0 && (p.reviewCount || 0) <= 5 && !_trendCounts[p.id]);
+    const fallback = allPlaces.filter(p => (p.rating || 0) >= 4.0).sort((a, b) => (a.reviewCount || 0) - (b.reviewCount || 0));
+    _showDiscoverResults(gems.length >= 3 ? gems.slice(0, 10) : fallback.slice(0, 10), 'gems');
+  };
+
+  function _distLabel(m) {
+    if (!m && m !== 0) return '';
+    return m < 1000 ? Math.round(m) + 'm' : (m / 1000).toFixed(1) + 'km';
+  }
+
+  function _showDiscoverResults(places, mode) {
+    const results = document.getElementById('mapResults');
+    if (!results) return;
+    if (!places.length) {
+      results.innerHTML = '<div style="padding:20px;text-align:center;color:var(--gh-muted)">ვერ მოიძებნა</div>';
+      return;
+    }
+    results.innerHTML = places.map(p => {
+      const st = getPlaceMarkerStyle(p);
+      const badge = openBadgeHtml(p.workingHours);
+      let meta = '';
+      if (mode === 'nearme' && p._dist != null) meta = '<span class="disc-dist">📍 ' + _distLabel(p._dist) + '</span>';
+      else if (mode === 'trending' && _trendCounts[p.id]) meta = '<span class="disc-hot">🔥 ' + _trendCounts[p.id] + ' დღეს</span>';
+      else if (mode === 'gems') meta = '<span class="disc-gem">💎 Hidden gem</span>';
+      return '<div class="map-result-card" data-id="' + esc(p.id) + '">'
+        + '<div class="map-result-icon" style="background:' + (st.color||'#22c55e') + '22;border-color:' + (st.color||'#22c55e') + '44">' + (p.icon||st.icon||'📍') + '</div>'
+        + '<div class="map-result-info">'
+        + '<div class="map-result-name">' + esc(p.name) + (badge ? ' ' + badge : '') + '</div>'
+        + '<div class="map-result-cat">' + esc(p.categoryLabel) + (p.city ? ' · ' + esc(p.city) : '') + '</div>'
+        + '<div class="map-result-footer">' + (meta || (p.rating ? '<span class="rating-display">' + renderStars(p.rating) + '</span>' : '')) + '</div>'
+        + '</div></div>';
+    }).join('');
+    results.querySelectorAll('.map-result-card').forEach(card => card.addEventListener('click', () => focusPlace(card.dataset.id)));
   }
 
 })();

@@ -116,6 +116,28 @@
       <div class="map-chip active" data-cat="">ყველა</div>
     </div>
 
+    <!-- Discovery section -->
+    <div id="discoverSection" class="discover-section">
+      <div class="discover-heading">სად წავიდე? <span class="discover-heading-sub">აირჩიე კატეგორია</span></div>
+      <div class="discover-cards-row" id="discoverCardsRow">
+        <button class="disc-card" id="discNearMe" onclick="window.discoverNearMe()">
+          <span class="disc-card-icon">📍</span>
+          <span class="disc-card-title">ახლოს</span>
+          <span class="disc-card-sub" id="discNearSub">მიმდებარე</span>
+        </button>
+        <button class="disc-card" id="discTrending" onclick="window.discoverTrending()">
+          <span class="disc-card-icon">🔥</span>
+          <span class="disc-card-title">Trending</span>
+          <span class="disc-card-sub" id="discTrendSub">დღეს</span>
+        </button>
+        <button class="disc-card" id="discGems" onclick="window.discoverGems()">
+          <span class="disc-card-icon">💎</span>
+          <span class="disc-card-title">Hidden</span>
+          <span class="disc-card-sub">Gems</span>
+        </button>
+      </div>
+    </div>
+
     <!-- Results list -->
     <div class="map-results" id="mapResults"></div>
   </div>
