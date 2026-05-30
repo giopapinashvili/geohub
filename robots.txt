@@ -1,10 +1,10 @@
 User-agent: *
 Allow: /
 
-# Private & account-only pages
+# Private pages — require login
 Disallow: /admin.html
+Disallow: /admin-videos.html
 Disallow: /auth.html
-Disallow: /safety.html
 Disallow: /messages.html
 Disallow: /profile.html
 Disallow: /onboarding.html
@@ -17,7 +17,6 @@ Disallow: /payment-cancel.html
 Disallow: /payment-success.html
 Disallow: /notifications.html
 Disallow: /offline.html
-Disallow: /stories.html
-Disallow: /assistant.html
+Disallow: /node_modules/
 
-Sitemap: https://geohub.pages.dev/sitemap.xml
+Sitemap: https://geohub.ge/sitemap.xml

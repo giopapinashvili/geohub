@@ -2130,6 +2130,7 @@
     const currentInterests    = Array.isArray(u.interests) ? u.interests : [];
     const currentGeoId        = u.geoId || null;
     const currentNameVis      = u.nameVisibility || 'everyone';
+    const cp                  = u.privacy || {};
 
     const INTERESTS = ['Hiking','Cafés','Food','History','Arts','Nature','Sports','Nightlife','Shopping','Music','Photography','Travel','Adventure','Culture','Architecture'];
 
@@ -2199,6 +2200,7 @@
       + '</div></div>'
       + '</div>'
 
+      + '<div class="profile-edit-section">'+ '<div class="profile-edit-section-title"><i class="fas fa-shield-alt"></i> კონფიდენციალურობა</div>'+ '<div class="profile-edit-field"><label>მესიჯები — ვინ შეიძლება მოგწეროს?</label><select class="profile-edit-input" id="pePrivMsg">'+ '<option value="everyone"'+(cp.messagingPref!=='friends'&&cp.messagingPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="friends"'+(cp.messagingPref==='friends'?' selected':'')+'>მხოლოდ მეგობრები</option>'+ '<option value="nobody"'+(cp.messagingPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>ფოლოუ — ვინ შეიძლება გამოგყვეს?</label><select class="profile-edit-input" id="pePrivFollow">'+ '<option value="everyone"'+(cp.followPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="nobody"'+(cp.followPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>მეგობრობა — ვინ გამოგიგზავნოს მოთხოვნა?</label><select class="profile-edit-input" id="pePrivFriend">'+ '<option value="everyone"'+(cp.friendRequestPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="nobody"'+(cp.friendRequestPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>პოსტები — ვინ ხედავს შენს პოსტებს?</label><select class="profile-edit-input" id="pePrivPosts">'+ '<option value="public"'+(cp.postsPref!=='friends'?' selected':'')+'>ყველა (Public)</option>'+ '<option value="friends"'+(cp.postsPref==='friends'?' selected':'')+'>მხოლოდ მეგობრები</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>სტორები — ვინ ხედავს?</label><select class="profile-edit-input" id="pePrivStory">'+ '<option value="everyone"'+(cp.storyPref!=='close_friends'&&cp.storyPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="close_friends"'+(cp.storyPref==='close_friends'?' selected':'')+'>Close Friends</option>'+ '<option value="nobody"'+(cp.storyPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'+ '</div>'
       + '</div>'/* end body */
       + '<div class="profile-edit-footer"><button class="btn btn-ghost btn-sm" id="peCancel">Cancel</button><button class="btn btn-primary btn-sm" id="peSaveBtn"><i class="fas fa-check"></i> Save Changes</button></div>'
       + '</div>';/* end sheet */
@@ -2349,6 +2351,13 @@
           tiktok:    (document.getElementById('peTiktok').value || '').trim()
         },
         interests:   selectedInterests,
+        privacy: {
+          messagingPref:     (document.getElementById('pePrivMsg')    || {}).value || 'everyone',
+          followPref:        (document.getElementById('pePrivFollow') || {}).value || 'everyone',
+          friendRequestPref: (document.getElementById('pePrivFriend') || {}).value || 'everyone',
+          postsPref:         (document.getElementById('pePrivPosts')  || {}).value || 'public',
+          storyPref:         (document.getElementById('pePrivStory')  || {}).value || 'everyone'
+        },
         updatedAt:   GF.fs.serverTimestamp()
       };
       if (_pendingAvatar) updates.avatar = _pendingAvatar;
