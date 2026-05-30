@@ -6679,6 +6679,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         }).catch(function(){ var box=$('#ghSuggestedPages'); if(box) box.innerHTML='<div class="gh-muted" style="font-size:.82rem">Suggested pages unavailable</div>'; });
 
         loadContactsList(u.uid);
+        // Process pending referral (new user arrived via invite link)
+        try {
+          var _pendingRef = localStorage.getItem('gh_ref_code');
+          if (_pendingRef && GS() && GS().claimReferral) {
+            GS().claimReferral(_pendingRef, function(){});
+          }
+        } catch(_refErr) {}
         loadPymkWidget(u.uid);
         loadCreatorWidget(u.uid);
         // Scheduled posts manage button
@@ -14551,7 +14558,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-invite-panel">'+
         '<div class="gh-invite-hero">🎁</div>'+
         '<h3 style="text-align:center;margin-bottom:6px">Invite your friends to GeoHub</h3>'+
-        '<p class="gh-muted" style="text-align:center;font-size:.85rem;margin-bottom:16px">You earn <strong style="color:var(--gh-green)">+100 XP</strong> for each friend who joins!</p>'+
+        '<p class="gh-muted" style="text-align:center;font-size:.85rem;margin-bottom:16px">თითოეული მოწვეული მეგობრისთვის იღებ <strong style="color:var(--gh-green)">+500 XP</strong> + <strong style="color:#f59e0b">1 თვე Premium</strong> უფასოდ!</p>'+
         '<div class="gh-invite-link-row">'+
           '<input class="gh-input" id="ghInviteLinkInp" value="'+esc(inviteUrl)+'" readonly>'+
           '<button class="gh-btn" id="ghCopyInvite"><i class="fas fa-copy"></i></button>'+
@@ -14565,7 +14572,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '<div class="gh-invite-stats" id="ghInviteStats"><i class="fas fa-circle-notch fa-spin"></i> Loading stats…</div>':
           '<div class="gh-muted" style="font-size:.82rem;text-align:center">Sign in to track your referrals and earn XP</div>')+
       '</div>';
-    modal('🎁 Invite Friends',body,'<button class="gh-btn ghost" data-close-modal>Close</button>','ghInviteModal');
+    if(u && GS() && GS().ensureReferralCode) GS().ensureReferralCode(u.uid, null);
+    modal('🎁 მეგობრების მოწვევა',body,'<button class="gh-btn ghost" data-close-modal>Close</button>','ghInviteModal');
     var m=document.getElementById('ghInviteModal'); if(!m) return;
     var copyBtn=document.getElementById('ghCopyInvite');
     if(copyBtn) copyBtn.onclick=function(){ try{ navigator.clipboard.writeText(inviteUrl); }catch(e){} toast('🔗 Invite link copied!'); };
@@ -14589,8 +14597,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               '<strong>'+snap.size+'</strong>'+
             '</div>'+
             '<div class="gh-invite-stat-row">'+
-              '<span><i class="fas fa-star"></i> XP earned from invites</span>'+
-              '<strong style="color:var(--gh-green)">'+(snap.size*100)+' XP</strong>'+
+              '<span><i class="fas fa-star"></i> მიღებული XP</span>'+
+              '<strong style="color:var(--gh-green)">'+(snap.size*500)+' XP</strong>'+
             '</div>';
         }).catch(function(){ statsBox.innerHTML=''; });
       }

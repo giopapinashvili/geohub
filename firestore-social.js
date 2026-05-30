@@ -4208,6 +4208,94 @@
       });
     }
 
+    // ── Referral System ───────────────────────────────────────────────────
+    // Code format: 'GH' + uid.slice(0,8).toUpperCase()
+    // Referrer gets: 500 XP + 1-month Premium extension
+    // New user gets: 100 XP welcome bonus
+
+    function ensureReferralCode(uid, callback) {
+      if (!uid) { if (callback) callback(null); return; }
+      var code = 'GH' + uid.slice(0, 8).toUpperCase();
+      updateDoc(doc(db, 'users', uid), { referralCode: code })
+        .then(function () { if (callback) callback(code); })
+        .catch(function () { if (callback) callback(code); });
+    }
+
+    function claimReferral(code, callback) {
+      var user = auth.currentUser;
+      if (!user || !code) { if (callback) callback({ error: 'invalid' }); return; }
+
+      var cleanCode = String(code).trim().toUpperCase();
+      var q = query(collection(db, 'users'), where('referralCode', '==', cleanCode), limit(1));
+
+      getDocs(q).then(function (snap) {
+        if (snap.empty) { if (callback) callback({ error: 'invalid-code' }); return; }
+        var referrerId = snap.docs[0].id;
+        if (referrerId === user.uid) {
+          try { localStorage.removeItem('gh_ref_code'); } catch(e) {}
+          if (callback) callback({ error: 'self-referral' });
+          return;
+        }
+
+        var userRef     = doc(db, 'users', user.uid);
+        var referrerRef = doc(db, 'users', referrerId);
+
+        runTransaction(db, function (tx) {
+          return Promise.all([tx.get(userRef), tx.get(referrerRef)]).then(function (results) {
+            var userSnap = results[0];
+            var refSnap  = results[1];
+
+            var userData = userSnap.exists() ? userSnap.data() : {};
+            if (userData.referralProcessed) throw new Error('already-claimed');
+
+            var refData  = refSnap.exists() ? refSnap.data() : {};
+            var now      = new Date();
+            var base     = (refData.premiumUntil && new Date(refData.premiumUntil) > now)
+                            ? new Date(refData.premiumUntil) : now;
+            var until    = new Date(base);
+            until.setMonth(until.getMonth() + 1);
+
+            var refRecordRef = doc(collection(db, 'referrals'));
+
+            tx.update(referrerRef, {
+              xp:             increment(500),
+              isPremium:      true,
+              premiumUntil:   until.toISOString(),
+              referralCount:  increment(1),
+            });
+
+            tx.set(refRecordRef, {
+              referrerId:       referrerId,
+              referrerCode:     cleanCode,
+              referredUid:      user.uid,
+              xpAwarded:        500,
+              premiumDaysAdded: 30,
+              claimedAt:        serverTimestamp(),
+            });
+
+            tx.update(userRef, {
+              referralProcessed: true,
+              referredBy:        referrerId,
+              xp:                increment(100),
+            });
+
+            return { referrerId: referrerId, premiumUntil: until.toISOString() };
+          });
+        }).then(function (result) {
+          try { localStorage.removeItem('gh_ref_code'); } catch(e) {}
+          toast('🎁 +100 XP მიღებული! GeoHub-ში კეთილი იყოს შენი მობრძანება!');
+          if (callback) callback({ success: true, referrerId: result.referrerId });
+        }).catch(function (e) {
+          if (e.message === 'already-claimed') {
+            try { localStorage.removeItem('gh_ref_code'); } catch(ee) {}
+          }
+          if (callback) callback({ error: e.message });
+        });
+      }).catch(function (e) {
+        if (callback) callback({ error: e.message });
+      });
+    }
+
     // ── Early Adopter Program ─────────────────────────────────────────────
     // Grants 3-month free business premium to the first 100 businesses.
     // Firestore: meta/earlyAdopter { count, limit:100 }
@@ -4443,6 +4531,8 @@
       searchFirestore:         searchFirestore,
       findUserByInput:         findUserByInput,
       claimEarlyAdopter:       claimEarlyAdopter,
+      ensureReferralCode:      ensureReferralCode,
+      claimReferral:           claimReferral,
       requireAuth:             requireAuth,
       toast:                   toast
     };
