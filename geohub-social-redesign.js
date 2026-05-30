@@ -4677,6 +4677,24 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     root.__postInteractionsOptions = options;
     if(root.__ghPostInteractionsBound) return;
     root.__ghPostInteractionsBound = true;
+
+    // Reaction strip: long-press (mobile) to show; auto-close on outside click
+    var _rxLpTimer=null;
+    root.addEventListener('pointerdown',function(e){
+      var likeBtn=e.target.closest('[data-like]');
+      if(!likeBtn) return;
+      var strip=likeBtn.closest('.gh-like-wrap') && likeBtn.closest('.gh-like-wrap').querySelector('.gh-reaction-strip');
+      if(!strip) return;
+      _rxLpTimer=setTimeout(function(){ _rxLpTimer=null; strip.classList.add('visible'); likeBtn._lpFired=true; },400);
+    });
+    function _clearLp(){ if(_rxLpTimer){ clearTimeout(_rxLpTimer); _rxLpTimer=null; } }
+    root.addEventListener('pointerup',_clearLp);
+    root.addEventListener('pointercancel',_clearLp);
+    // Close any visible reaction strip on outside click
+    document.addEventListener('click',function(e){
+      if(!e.target.closest('.gh-like-wrap')) root.querySelectorAll('.gh-reaction-strip.visible').forEach(function(s){ s.classList.remove('visible'); });
+    });
+
     root.addEventListener('click', function(e){
       var opts = root.__postInteractionsOptions || {};
       // Business post menu toggle — intercept before generic card check
@@ -4741,8 +4759,18 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         else if (photoUrl) openMediaLightbox(photoUrl, allPhotos, photoIdx);
         return;
       }
-      if(e.target.closest('[data-like]') && !e.target.closest('.gh-reaction-strip')){ if(!requireLogin()) return; setReaction(pid,'love',card); if(window.ghPwaEngage) window.ghPwaEngage(1); }
-      var ro=e.target.closest('[data-reaction]'); if(ro){ if(!requireLogin()) return; setReaction(pid,ro.dataset.reaction,card); if(window.ghPwaEngage) window.ghPwaEngage(1); }
+      var _likeBtn=e.target.closest('[data-like]');
+      if(_likeBtn && !e.target.closest('.gh-reaction-strip')){
+        if(!requireLogin()) return;
+        if(_likeBtn._lpFired){ _likeBtn._lpFired=false; } else { setReaction(pid,'love',card); if(window.ghPwaEngage) window.ghPwaEngage(1); }
+      }
+      var ro=e.target.closest('[data-reaction]');
+      if(ro){
+        if(!requireLogin()) return;
+        setReaction(pid,ro.dataset.reaction,card);
+        var _rxStrip=ro.closest('.gh-reaction-strip'); if(_rxStrip) _rxStrip.classList.remove('visible');
+        if(window.ghPwaEngage) window.ghPwaEngage(1);
+      }
       if(e.target.closest('[data-comment-toggle]')){ toggleComments(card,pid); if(window.ghPwaEngage) window.ghPwaEngage(1); }
       if(e.target.closest('[data-open-comments-btn]')){ openFocusedPost(pid); return; }
       if(e.target.closest('[data-open-shares-btn]')){ var scEl=card.querySelector('[data-share-count]'); openWhoSharedModal(pid, scEl ? Number(scEl.textContent||0) : 0); return; }
