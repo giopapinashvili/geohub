@@ -2726,6 +2726,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button type="button" class="gh-cmp-tool" id="ghStoryAyBtn"><i class="fas fa-circle-plus"></i><span> Add Yours</span></button>'+
         '<button type="button" class="gh-cmp-tool gh-cmp-tool-cf" id="ghStoryCfBtn" title="Close Friends only"><i class="fas fa-star"></i><span> CF Only</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryDrawBtn"><i class="fas fa-pen-nib"></i><span> Draw</span></button>'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryGroupBtn"><i class="fas fa-users"></i><span> Group</span></button>'+
+      '</div>'+
+      '<div id="ghStoryGroupWrap" style="display:none;margin-top:8px">'+
+        '<div class="gh-story-group-picker" id="ghStoryGroupPicker">'+
+          '<div class="gh-story-group-loading"><i class="fas fa-circle-notch fa-spin"></i> იტვირთება…</div>'+
+        '</div>'+
+        '<button type="button" class="gh-btn ghost sm" id="ghStoryGroupRemove" style="margin-top:6px"><i class="fas fa-times"></i> გაუქმება</button>'+
       '</div>'+
       '<div id="ghStoryMentionWrap" style="display:none;margin-top:8px">'+
         '<div style="position:relative">'+
@@ -2962,6 +2969,52 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       };
     }
 
+    // ── Group picker ─────────────────────────────────────────────
+    var _selectedGroupId=null, _selectedGroupName='', _groupPickerVisible=false;
+    var groupBtn=$('#ghStoryGroupBtn');
+    var groupWrap=$('#ghStoryGroupWrap');
+    var groupRemoveBtn=$('#ghStoryGroupRemove');
+    var destSpan=document.querySelector('#ghStoryModal .gh-cmp-destination');
+    if(groupBtn){
+      groupBtn.onclick=function(){
+        _groupPickerVisible=!_groupPickerVisible;
+        if(groupWrap) groupWrap.style.display=_groupPickerVisible?'block':'none';
+        groupBtn.classList.toggle('active',_groupPickerVisible);
+        if(_groupPickerVisible){
+          var picker=$('#ghStoryGroupPicker');
+          if(picker){
+            picker.innerHTML='<div class="gh-story-group-loading"><i class="fas fa-circle-notch fa-spin"></i></div>';
+            var _cu2=window.GeoFirebase&&window.GeoFirebase.auth&&window.GeoFirebase.auth.currentUser;
+            if(_cu2&&GS().listenMyGroups){
+              GS().listenMyGroups(_cu2.uid, function(grps){
+                if(!picker.isConnected) return;
+                if(!grps||!grps.length){ picker.innerHTML='<p class="gh-muted" style="font-size:.85rem;margin:0">თქვენ ჯერ არ ხართ არც ერთ ჯგუფში.</p>'; return; }
+                picker.innerHTML=grps.map(function(g){ var gid=g.id||g.gid||''; var gnm=g.name||'Group'; var gcov=g.coverUrl||g.imageUrl||''; return '<button type="button" class="gh-story-group-item'+(gid===_selectedGroupId?' selected':'')+'" data-gid="'+esc(gid)+'" data-gnm="'+esc(gnm)+'">'+(gcov?'<img src="'+esc(gcov)+'" class="gh-story-group-av" alt="">':'<span class="gh-story-group-av-icon"><i class="fas fa-users"></i></span>')+esc(gnm)+'</button>'; }).join('');
+                picker.querySelectorAll('[data-gid]').forEach(function(btn){
+                  btn.onclick=function(){
+                    _selectedGroupId=btn.dataset.gid;
+                    _selectedGroupName=btn.dataset.gnm;
+                    picker.querySelectorAll('[data-gid]').forEach(function(b){ b.classList.toggle('selected', b===btn); });
+                    if(destSpan) destSpan.textContent=_selectedGroupName+'-ში სტორი';
+                    groupBtn.classList.add('active');
+                  };
+                });
+              });
+            } else { picker.innerHTML='<p class="gh-muted" style="font-size:.85rem;margin:0">ჯგუფები მიუწვდომელია.</p>'; }
+          }
+        }
+      };
+    }
+    if(groupRemoveBtn){
+      groupRemoveBtn.onclick=function(){
+        _selectedGroupId=null; _selectedGroupName='';
+        _groupPickerVisible=false;
+        if(groupWrap) groupWrap.style.display='none';
+        if(groupBtn) groupBtn.classList.remove('active');
+        if(destSpan) destSpan.textContent='Adding to your story';
+      };
+    }
+
     // ── Draw mode ────────────────────────────────────────────────
     function _openDrawMode(){
       var ex=document.getElementById('ghDrawOverlay'); if(ex) ex.remove();
@@ -3131,6 +3184,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           if(_ayP2.trim()) _extra.addYours={prompt:_ayP2.trim(),chainId:_ayC2||null};
         }
         if(_cfEnabled){ _extra.closeFriends=true; _extra.closeFriendsList=_cfList.slice(); }
+        if(_selectedGroupId) _extra.groupId=_selectedGroupId;
         GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); },_extra);
       }).catch(function(err){
         console.error('[GeoHub] story upload failed',err);
@@ -10722,12 +10776,31 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     // Discussion
     var canPost=isMember||(g.privacy==='public');
     var composerHtml=canPost?'<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="gh-avatar"><i class="fas fa-users"></i></span><button class="gh-composer-fake" data-create-group-post>Post in '+esc(g.name||'group')+'…</button></div></section>':'<div class="gh-card gh-empty" style="padding:20px"><i class="fas fa-lock"></i><h3>Members only</h3><p>Join this group to post.</p></div>';
-    box.innerHTML=composerHtml+'<div id="ghGroupPosts"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>';
+    box.innerHTML=
+      '<div id="ghGroupStoriesStrip" class="gh-group-stories-strip" style="display:none">'+
+        '<div class="gh-stories-bar" id="ghGroupStoriesBar">'+
+          (isMember?'<button class="gh-story-add-card" id="ghGroupAddStory"><span class="gh-story-add-icon">+</span><span class="gh-story-add-lbl">სტორი</span></button>':'')+
+          '<div id="ghGroupStoriesItems" style="display:contents"></div>'+
+        '</div>'+
+      '</div>'+
+      composerHtml+
+      '<div id="ghGroupPosts"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>';
     box.onclick=function(e){
       if(e.target.closest('[data-create-group-post]')) openGroupPostModal(g);
+      if(e.target.closest('#ghGroupAddStory')){ openStoryModal&&openStoryModal(); setTimeout(function(){ var grpBtn=document.getElementById('ghStoryGroupBtn'); if(grpBtn) grpBtn.click(); var picker=document.getElementById('ghStoryGroupPicker'); if(picker){ var myBtn=picker.querySelector('[data-gid="'+esc(g.id)+'"]'); if(myBtn) myBtn.click(); } }, 400); return; }
       var pinBtn=e.target.closest('[data-pin-post]'); if(pinBtn&&isAdmin) GS().pinGroupPost(g.id,pinBtn.dataset.pinPost,function(){});
       var unpinBtn=e.target.closest('[data-unpin-post]'); if(unpinBtn&&isAdmin) GS().unpinGroupPost(g.id,unpinBtn.dataset.unpinPost,function(){});
     };
+    // Group stories strip
+    var _uGStories=GS().listenGroupStories(g.id, function(sts){
+      var strip=$('#ghGroupStoriesStrip'); var itemsEl=$('#ghGroupStoriesItems'); if(!strip||!itemsEl) return;
+      if(!sts||!sts.length){ strip.style.display='none'; return; }
+      strip.style.display='block';
+      var groups=typeof buildStoryGroups==='function'?buildStoryGroups(sts):[];
+      itemsEl.innerHTML=groups.map(function(grp,i){ return typeof renderStoryCard==='function'?renderStoryCard(grp,i):''; }).join('');
+      itemsEl.querySelectorAll('[data-story-group-idx]').forEach(function(card){ card.onclick=function(){ var idx=parseInt(card.dataset.storyGroupIdx||'0',10); if(typeof openStoryViewer==='function') openStoryViewer(groups,idx); }; });
+    });
+    if(_uGStories) state.grTabUnsubs.push(_uGStories);
     var _uDisc=listenTargetPosts('group', g.id, function(items){
       var list=$('#ghGroupPosts'); if(!list) return;
       if((g.privacy==='private'||g.privacy==='secret')&&!isMember&&!isAdmin){ list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-lock"></i><h3>Join to see posts</h3></div>'; return; }

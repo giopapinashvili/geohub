@@ -79,6 +79,8 @@
       getStoryAnalytics: function(id, cb) { if(cb) cb(null); },
       getStoryChain: function(id, cb) { if(cb) cb(null); },
       listenStories: function () { return function () {}; },
+      listenGroupStories: function (gid, cb) { cb([]); return function(){}; },
+      listenEventStories: function (eid, cb) { cb([]); return function(){}; },
       addStoryReaction: noop,
       removeStoryReaction: noop,
       addStoryReply: noop,
@@ -2247,6 +2249,8 @@
         if (extra && extra.countdown) storyData.countdown = extra.countdown;
         if (extra && extra.quiz) storyData.quiz = extra.quiz;
         if (extra && extra.closeFriends) { storyData.closeFriends = true; storyData.closeFriendsList = Array.isArray(extra.closeFriendsList) ? extra.closeFriendsList : []; }
+        if (extra && extra.groupId) storyData.groupId = extra.groupId;
+        if (extra && extra.eventId) storyData.eventId = extra.eventId;
         var _ayPrompt = extra && extra.addYours && extra.addYours.prompt ? extra.addYours.prompt : null;
         var _ayChainId = extra && extra.addYours && extra.addYours.chainId ? extra.addYours.chainId : null;
         if (_ayPrompt) storyData.addYours = { prompt: _ayPrompt, chainId: _ayChainId || '' };
@@ -2475,6 +2479,34 @@
         console.warn('[GeoSocial] listenStories', err.message);
         callback([]);
       });
+    }
+
+    function listenGroupStories(groupId, callback) {
+      if (!groupId) { callback([]); return function(){}; }
+      var q = query(collection(db, 'stories'), where('groupId', '==', groupId), orderBy('createdAt', 'desc'), limit(20));
+      return onSnapshot(q, function(snap) {
+        var now = Date.now();
+        var stories = [];
+        snap.forEach(function(d) {
+          var data = Object.assign({ id: d.id }, d.data());
+          if (!data.expiresAt || tsToMillis(data.expiresAt) > now) stories.push(data);
+        });
+        callback(stories);
+      }, function(err) { console.warn('[GeoSocial] listenGroupStories', err.message); callback([]); });
+    }
+
+    function listenEventStories(eventId, callback) {
+      if (!eventId) { callback([]); return function(){}; }
+      var q = query(collection(db, 'stories'), where('eventId', '==', eventId), orderBy('createdAt', 'desc'), limit(20));
+      return onSnapshot(q, function(snap) {
+        var now = Date.now();
+        var stories = [];
+        snap.forEach(function(d) {
+          var data = Object.assign({ id: d.id }, d.data());
+          if (!data.expiresAt || tsToMillis(data.expiresAt) > now) stories.push(data);
+        });
+        callback(stories);
+      }, function(err) { console.warn('[GeoSocial] listenEventStories', err.message); callback([]); });
     }
 
     function addStoryReaction(storyId, ownerId, reactionEmoji, callback) {
@@ -4154,6 +4186,8 @@
       getStoryAnalytics:       getStoryAnalytics,
       getStoryChain:           getStoryChain,
       listenStories:           listenStories,
+      listenGroupStories:      listenGroupStories,
+      listenEventStories:      listenEventStories,
       addStoryReaction:        addStoryReaction,
       removeStoryReaction:     removeStoryReaction,
       addStoryReply:           addStoryReply,

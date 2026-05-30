@@ -506,6 +506,12 @@
           + (ev.groupId ? '<span><i class="fas fa-users-cog" style="width:16px;text-align:center;color:#a855f7;margin-right:7px"></i><a href="groups.html?id=' + esc(ev.groupId) + '" style="color:#a855f7;text-decoration:none">View Group</a></span>' : '')
         + '</div>'
         + (ev.description ? '<p style="font-size:.88rem;color:#94a3b8;line-height:1.65;margin:0 0 16px">' + esc(ev.description) + '</p>' : '')
+        + '<div id="evStoriesStrip" style="margin-bottom:14px;display:none">'
+          + '<div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px"><i class="fas fa-circle-play" style="color:#10b981;margin-right:5px"></i>ღონისძიების სტორიები</div>'
+          + '<div class="gh-stories-bar" id="evStoriesBar">'
+            + '<div id="evStoriesItems" style="display:contents"></div>'
+          + '</div>'
+        + '</div>'
         + '<div id="evRsvpAdminList"></div>'
         // RSVP + ticket row
         + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px">'
@@ -521,6 +527,42 @@
           + (mapsUrl ? '<a style="' + detBtn + '" href="' + mapsUrl + '" target="_blank" rel="noopener"><i class="fas fa-directions"></i> Directions</a>' : '')
         + '</div>'
       + '</div>';
+
+    // Load event stories
+    (function loadEvStories() {
+      var gs2 = GS();
+      if (!gs2 || !gs2.listenEventStories) return;
+      var _evStoriesUnsub = gs2.listenEventStories(ev.id, function(sts) {
+        var strip = document.getElementById('evStoriesStrip');
+        var itemsEl = document.getElementById('evStoriesItems');
+        if (!strip || !itemsEl) { if(_evStoriesUnsub) _evStoriesUnsub(); return; }
+        if (!sts || !sts.length) { strip.style.display = 'none'; return; }
+        strip.style.display = 'block';
+        var bsg = window.GeoHub && window.GeoHub.buildStoryGroups;
+        var rsc = window.GeoHub && window.GeoHub.renderStoryCard;
+        var osv = window.GeoHub && window.GeoHub.openStoryViewer;
+        if (typeof bsg !== 'function') {
+          itemsEl.innerHTML = sts.map(function(s) {
+            var av = s.authorAvatar || '';
+            return '<div class="gh-story-card" style="flex-shrink:0;width:56px;text-align:center;cursor:pointer">'
+              + '<div class="gh-story-ring" style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#10b981,#3b82f6);padding:2px;margin:0 auto">'
+              + '<div style="width:100%;height:100%;border-radius:50%;overflow:hidden;background:#1a1f35;display:flex;align-items:center;justify-content:center">'
+              + (av ? '<img src="' + s.authorAvatar + '" style="width:100%;height:100%;object-fit:cover" alt="">' : '<i class="fas fa-user" style="color:#94a3b8;font-size:.9rem"></i>')
+              + '</div></div>'
+              + '<span style="font-size:.65rem;color:#94a3b8;display:block;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:56px">' + (s.authorName || '').substring(0, 8) + '</span>'
+              + '</div>';
+          }).join('');
+          return;
+        }
+        var groups = bsg(sts);
+        itemsEl.innerHTML = groups.map(function(grp, i) { return typeof rsc === 'function' ? rsc(grp, i) : ''; }).join('');
+        if (typeof osv === 'function') {
+          itemsEl.querySelectorAll('[data-story-group-idx]').forEach(function(card) {
+            card.onclick = function() { osv(groups, parseInt(card.dataset.storyGroupIdx || '0', 10)); };
+          });
+        }
+      });
+    })();
 
     // Async verify RSVP if not already cached
     var gs = GS();
