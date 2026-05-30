@@ -1,35 +1,72 @@
-﻿<!DOCTYPE html><html lang="ka"><head><meta charset="UTF-8">
+<!DOCTYPE html><html lang="ka"><head><meta charset="UTF-8">
   <link rel="icon" type="image/png" href="icons/icon-96.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="dns-prefetch" href="https://firestore.googleapis.com">
   <link rel="dns-prefetch" href="https://firebase.googleapis.com">
-  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
-  <title>Real Estate in Georgia — GeoHub</title>
-  <!-- SEO ─────────────────────────────────────────────── -->
-  <meta name="description" content="Find your perfect home or investment property in Georgia. Browse verified real estate listings from trusted local agents on GeoHub.">
+  <title>უძრავი ქონება საქართველოში — GeoHub</title>
+  <!-- SEO -->
+  <meta name="description" content="იპოვე შენი სახლი საქართველოში. GeoHub-ზე განათავსე ან მოძებნე ბინა, სახლი, კომერციული ფართი.">
   <link rel="canonical" href="https://geohub.ge/real-estate.html">
   <meta name="robots" content="index, follow">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GeoHub">
-  <meta property="og:title" content="Real Estate in Georgia — GeoHub">
-  <meta property="og:description" content="Find your perfect home or investment property in Georgia. Browse verified real estate listings from trusted local agents on GeoHub.">
+  <meta property="og:title" content="უძრავი ქონება — GeoHub">
+  <meta property="og:description" content="იპოვე შენი სახლი საქართველოში.">
   <meta property="og:url" content="https://geohub.ge/real-estate.html">
   <meta property="og:image" content="https://geohub.ge/icons/icon-512.png">
   <meta property="og:image:width" content="512">
   <meta property="og:image:height" content="512">
   <meta property="og:image:alt" content="GeoHub — Discover Georgia">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Real Estate in Georgia — GeoHub">
-  <meta name="twitter:description" content="Find your perfect home or investment property in Georgia. Browse verified real estate listings from trusted local agents on GeoHub.">
+  <meta name="twitter:title" content="უძრავი ქონება — GeoHub">
+  <meta name="twitter:description" content="იპოვე შენი სახლი საქართველოში.">
   <meta name="twitter:image" content="https://geohub.ge/icons/icon-512.png">
-
 <style>
-body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}.clean-page{padding-top:90px;min-height:100vh;background:radial-gradient(circle at top left,rgba(16,185,129,.16),transparent 35%),#05070f}.clean-hero{max-width:1180px;margin:0 auto;padding:70px 24px 42px}.clean-badge{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border:1px solid rgba(16,185,129,.3);border-radius:999px;color:#10e0a0;background:rgba(16,185,129,.08);font-weight:800;text-transform:uppercase;font-size:.72rem;letter-spacing:.04em}.clean-title{font-size:clamp(2.4rem,5vw,4.8rem);line-height:1.05;margin:22px 0 16px;font-weight:950;max-width:760px}.clean-title span{background:linear-gradient(135deg,#10e0a0,#3b82f6);-webkit-background-clip:text;color:transparent}.clean-desc{max-width:640px;color:#9aa6bd;font-size:1.05rem;line-height:1.7}.clean-search{margin-top:30px;display:flex;gap:12px;max-width:620px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:10px}.clean-search input{flex:1;background:transparent;border:0;color:#fff;outline:0;padding:8px 10px;font-size:1rem}.clean-search button,.clean-admin{border:0;border-radius:14px;padding:12px 20px;background:linear-gradient(135deg,#10b981,#3b82f6);color:white;font-weight:800;text-decoration:none;display:inline-flex;align-items:center;gap:8px}.clean-stats{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:14px;max-width:740px;margin-top:28px}.clean-stat{padding:18px;border:1px solid rgba(255,255,255,.07);border-radius:18px;background:rgba(255,255,255,.035)}.clean-stat strong{display:block;font-size:1.7rem}.clean-stat span{color:#64748b;font-size:.78rem}.clean-tabs{border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);padding:0 24px;display:flex;gap:24px;max-width:100%;overflow-x:auto;background:rgba(255,255,255,.03)}.clean-tab{background:transparent;border:0;color:#94a3b8;padding:18px 0;font-weight:800}.clean-tab.active{color:#10e0a0;border-bottom:2px solid #10e0a0}.clean-content{max-width:1180px;margin:0 auto;padding:34px 24px 90px;display:grid;grid-template-columns:280px 1fr;gap:24px}.clean-card{border:1px solid rgba(255,255,255,.07);border-radius:20px;background:rgba(255,255,255,.045);padding:22px}.clean-empty{min-height:260px;display:flex;align-items:center;justify-content:center;text-align:center;color:#94a3b8;border:1px dashed rgba(255,255,255,.14);border-radius:22px;background:rgba(255,255,255,.02)}.clean-empty i{font-size:2rem;color:#10e0a0;margin-bottom:12px}.clean-empty h3{color:#f8fafc;margin:0 0 8px}@media(max-width:900px){.clean-page{padding-top:72px}.clean-hero{padding:42px 18px 28px}.clean-content{grid-template-columns:1fr;padding:22px 18px 120px}.clean-stats{grid-template-columns:repeat(2,1fr)}}
+body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}
+.re-page{padding-top:90px;min-height:100vh;background:radial-gradient(circle at top left,rgba(16,185,129,.14),transparent 35%),#05070f}
+.re-hero{max-width:1180px;margin:0 auto;padding:60px 24px 36px}
+.re-badge{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border:1px solid rgba(16,185,129,.3);border-radius:999px;color:#10e0a0;background:rgba(16,185,129,.08);font-weight:800;text-transform:uppercase;font-size:.72rem;letter-spacing:.04em}
+.re-title{font-size:clamp(2rem,5vw,3.8rem);line-height:1.08;margin:18px 0 12px;font-weight:950;max-width:700px}
+.re-title span{background:linear-gradient(135deg,#10e0a0,#3b82f6);-webkit-background-clip:text;color:transparent}
+.re-desc{max-width:600px;color:#9aa6bd;font-size:1rem;line-height:1.7;margin-bottom:24px}
+.re-search{display:flex;gap:10px;max-width:580px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:8px}
+.re-search input{flex:1;background:transparent;border:0;color:#fff;outline:0;padding:8px 10px;font-size:.95rem}
+.re-search button{border:0;border-radius:12px;padding:10px 18px;background:linear-gradient(135deg,#10b981,#3b82f6);color:white;font-weight:800;cursor:pointer;white-space:nowrap;font-size:.85rem}
+.re-stat{padding:14px 20px;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:rgba(255,255,255,.035);display:inline-flex;flex-direction:column;gap:2px;margin-top:20px}
+.re-stat strong{font-size:1.6rem}
+.re-stat span{color:#64748b;font-size:.75rem}
+.re-body{max-width:1180px;margin:0 auto;padding:24px 24px 100px;display:grid;grid-template-columns:260px 1fr;gap:20px}
+.re-aside{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:18px;height:fit-content}
+.re-aside strong{font-size:.85rem;color:#f8fafc;display:block;margin-bottom:10px}
+.sv-filter-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#94a3b8;padding:5px 11px;border-radius:8px;font-size:.73rem;font-weight:700;cursor:pointer;transition:all .15s;white-space:nowrap}
+.sv-filter-btn.active{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.3);color:#6ee7b7}
+.sv-filter-btn:hover:not(.active){background:rgba(255,255,255,.09);color:#f0f4ff}
+.sv-card{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:18px;overflow:hidden;transition:all .2s;display:flex;flex-direction:column}
+.sv-card:hover{border-color:rgba(16,185,129,.3);transform:translateY(-2px);background:rgba(255,255,255,.06)}
+.sv-card-body{padding:14px;display:flex;flex-direction:column;flex:1}
+.sv-card-title{font-size:.92rem;font-weight:800;color:#f0f4ff;margin-bottom:5px}
+.sv-card-city{font-size:.75rem;color:#64748b;display:flex;align-items:center;gap:5px;margin-bottom:3px}
+.sv-card-city i{color:#10b981;font-size:.7rem}
+.sv-card-desc{font-size:.78rem;color:#94a3b8;line-height:1.5;margin:6px 0 10px;flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sv-card-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:auto}
+.sv-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:9px;font-size:.75rem;font-weight:700;text-decoration:none;transition:all .15s;flex-shrink:0;cursor:pointer;border:none}
+.sv-btn-primary{background:linear-gradient(135deg,#10b981,#3b82f6);color:#fff}.sv-btn-primary:hover{opacity:.9}
+.re-city-select{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#f0f4ff;padding:8px 10px;border-radius:10px;font-size:.82rem;outline:none;margin-top:8px}
+.re-city-select option{background:#1a1d2e}
+.clean-empty{min-height:240px;display:flex;align-items:center;justify-content:center;text-align:center;color:#94a3b8;border:1px dashed rgba(255,255,255,.12);border-radius:18px;background:rgba(255,255,255,.02)}
+.clean-empty h3{color:#f8fafc;margin:0 0 8px}
+@media(max-width:880px){
+  .re-page{padding-top:70px}
+  .re-hero{padding:36px 16px 24px}
+  .re-body{grid-template-columns:1fr;padding:16px 16px 120px}
+}
 </style>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="navbar.css">
@@ -37,22 +74,58 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}.clean-
   <link rel="stylesheet" href="chat-popup.css">
   <link rel="stylesheet" href="responsive-polish.css">
   <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
-</head><body class="clean-body page-real-estate"><nav class="navbar" id="navbar">
-  <a href="index.html" class="navbar-brand"><div class="logo-icon">🌍</div><span class="logo-text">Geo<span class="logo-geo">Hub</span></span></a>
+</head>
+<body class="clean-body page-real-estate">
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="navbar-brand"><div class="logo-icon">GH</div><span class="logo-text">Geo<span class="logo-geo">Hub</span></span></a>
   <ul class="navbar-links"></ul>
   <div class="navbar-actions"></div>
   <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
 </nav>
-<div class="mobile-menu"></div><main class="clean-page"><section class="clean-hero"><div class="clean-badge"><i class="fas fa-circle"></i>Real Estate</div><h1 class="clean-title">Find Your <span>Perfect Home</span><br>in Georgia</h1><p class="clean-desc">Real estate listings will appear only after admins or verified agents add them. Fake listings and stats are removed.</p><div class="clean-search"><input placeholder="Search real realEstateListings..."><button><i class="fas fa-search"></i> Search</button></div><div class="clean-stats"><div class="clean-stat"><strong id="stat-total">0</strong><span>Real items</span></div><div class="clean-stat"><strong>0</strong><span>Added today</span></div><div class="clean-stat"><strong>0</strong><span>Verified</span></div><div class="clean-stat"><strong>0</strong><span>Pending review</span></div></div></section><div class="clean-tabs"><button class="clean-tab active">Listings</button><button class="clean-tab ">Agents</button><button class="clean-tab ">Saved</button></div><section class="clean-content"><aside class="clean-card"><strong>Filters</strong><p style="color:#64748b;line-height:1.6">No fake categories are shown. Real filters will appear after admins add content.</p><span class="clean-admin"><i class="fas fa-clock"></i> Admin-controlled</span></aside><div class="clean-empty" id="cleanList"><div><i class="fas fa-database"></i><h3>No real realEstateListings yet</h3><p>Add real content from the Admin Panel. Demo data has been removed.</p></div></div></section></main><script type="module" src="firebase-config.js"></script>
+<div class="mobile-menu"></div>
+
+<main class="re-page">
+  <section class="re-hero">
+    <div class="re-badge"><i class="fas fa-home"></i> Real Estate</div>
+    <h1 class="re-title">იპოვე <span>სრულყოფილი სახლი</span><br>საქართველოში</h1>
+    <p class="re-desc">გაქირავება, გაყიდვა, კომერციული ფართი — ყველა განცხადება ერთ ადგილას. განათავსე შენი განცხადება უფასოდ.</p>
+    <div class="re-search">
+      <input id="reSearchInput" placeholder="მოძებნე ქალაქი, მისამართი, სათაური…" autocomplete="off">
+      <button id="reAddBtn"><i class="fas fa-plus"></i> განცხადება</button>
+    </div>
+    <div class="re-stat">
+      <strong id="stat-total">—</strong>
+      <span>განცხადება</span>
+    </div>
+  </section>
+
+  <section class="re-body">
+    <aside class="re-aside">
+      <strong>ტიპი</strong>
+      <div id="reCatFilter" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+        <span style="color:#4b5563;font-size:.8rem"><i class="fas fa-circle-notch fa-spin"></i></span>
+      </div>
+      <div id="reCityWrap" style="display:none;margin-top:14px">
+        <strong>ქალაქი</strong>
+        <select id="reCityFilter" class="re-city-select"></select>
+      </div>
+    </aside>
+    <div id="cleanList" style="display:flex;align-items:center;justify-content:center;min-height:200px">
+      <i class="fas fa-circle-notch fa-spin" style="font-size:1.5rem;color:#10b981"></i>
+    </div>
+  </section>
+</main>
+
+<script type="module" src="firebase-config.js"></script>
 <script defer src="account.js"></script>
 <script defer src="nav-cleanup.js"></script>
 <script defer src="mobile-nav.js"></script>
 <script defer src="chat-popup.js"></script>
 <script defer src="gh-calls.js"></script>
-  <script defer src="gh-call-history.js"></script>
-  <script defer src="gh-group-calls.js"></script>
-<script defer src="content-pages.js"></script>
+<script defer src="gh-call-history.js"></script>
+<script defer src="gh-group-calls.js"></script>
+<script defer src="real-estate.js"></script>
 <script defer src="geohub-production-stabilization-v1.js"></script>
-  <script defer src="responsive-polish.js"></script>
-  <script defer src="analytics.js"></script>
+<script defer src="responsive-polish.js"></script>
+<script defer src="analytics.js"></script>
 </body></html>
