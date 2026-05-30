@@ -57,9 +57,9 @@
     if(q('#se-css2'))return;
     var s=document.createElement('style'); s.id='se-css2';
     s.textContent=`
-    .se-ov{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;font-family:Inter,-apple-system,sans-serif;user-select:none;-webkit-user-select:none;background:#000;overflow:hidden}
-    /* Blurred bg behind everything */
-    .se-ov-bg{position:absolute;inset:-30px;z-index:0;background-size:cover;background-position:center}
+    .se-ov{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;font-family:Inter,-apple-system,sans-serif;user-select:none;-webkit-user-select:none;background:rgba(0,0,0,.6);backdrop-filter:blur(18px) saturate(.8);-webkit-backdrop-filter:blur(18px) saturate(.8);overflow:hidden}
+    /* Photo bg (shows on sides when photo added) */
+    .se-ov-bg{position:absolute;inset:-30px;z-index:0;background-size:cover;background-position:center;filter:blur(24px) brightness(.45);display:none}
     /* Top bar */
     .se-top{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(0,0,0,.3);backdrop-filter:blur(10px);flex-shrink:0}
     .se-close{width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,.2);color:#fff;font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
@@ -207,16 +207,14 @@
       if(isV){m.autoplay=true;m.loop=true;m.muted=true;m.playsInline=true;}
       iw.appendChild(m);
       cv.style.background='#000';
-      if(ob&&!isV){ob.style.backgroundImage='url('+S.mediaUrl+')';ob.style.background='';ob.style.filter='blur(24px) brightness(.5)';}
+      // show blurred photo on sides, hide feed
+      if(ob&&!isV){ob.style.backgroundImage='url('+S.mediaUrl+')';ob.style.display='block';}
       updateImgTransform();
       wireImgDrag();
     } else {
       cv.style.background=S.bg;
-      if(ob){
-        ob.style.filter='';
-        if(S.bg.startsWith('linear-gradient')||S.bg.startsWith('radial-gradient')){ob.style.backgroundImage=S.bg;ob.style.backgroundColor='';}
-        else{ob.style.backgroundImage='';ob.style.backgroundColor=S.bg;}
-      }
+      // gradient/solid: hide photo bg, feed shows through backdrop-filter
+      if(ob){ob.style.display='none';ob.style.backgroundImage='';}
     }
   }
 
