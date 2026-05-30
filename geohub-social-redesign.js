@@ -3281,10 +3281,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         });
         groups=buildStoryGroups(_filtered);
         var add=buildCreateCard();
+        var mapCard='<button type="button" class="gh-story-card gh-story-map-card" id="ghStoriesMapBtn" onclick="if(typeof window.ghOpenStoryMap===\'function\')window.ghOpenStoryMap()"><div class="gh-story-map-card-icon"><i class="fas fa-map-location-dot"></i></div><br><strong>Map</strong></button>';
         if(!groups.length){
-          box.innerHTML=add+'<span class="gh-story-empty">No stories yet. Be the first!</span>';
+          box.innerHTML=add+mapCard+'<span class="gh-story-empty">No stories yet. Be the first!</span>';
         } else {
-          box.innerHTML=add+groups.slice(0,16).map(renderStoryCard).join('');
+          box.innerHTML=add+groups.slice(0,15).map(renderStoryCard).join('')+mapCard;
         }
       });
       box.addEventListener('click', function(e){
@@ -12258,6 +12259,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                 '<button class="gh-pill active" data-map-layer="posts"><i class="fas fa-newspaper"></i> '+_mt('profile_posts')+'</button>'+
                 '<button class="gh-pill" data-map-layer="events"><i class="fas fa-calendar"></i> '+_mt('nav_events')+'</button>'+
                 '<button class="gh-pill" data-map-layer="businesses"><i class="fas fa-store"></i> '+_mt('map_biz')+'</button>'+
+                '<button class="gh-pill" data-map-layer="stories"><i class="fas fa-circle-play"></i> სტორიები</button>'+
               '</div>'+
             '</div>'+
           '</div>'+
@@ -12317,12 +12319,44 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           q=fs().query(fs().collection(db(),'posts'),fs().where('status','!=','deleted'),fs().orderBy('status'),fs().orderBy('createdAt','desc'),fs().limit(60));
         } else if(layer==='events'){
           q=fs().query(fs().collection(db(),'events'),fs().where('status','!=','deleted'),fs().orderBy('status'),fs().orderBy('startDate','desc'),fs().limit(20));
+        } else if(layer==='stories'){
+          q=fs().query(fs().collection(db(),'stories'),fs().orderBy('createdAt','desc'),fs().limit(50));
         } else {
           q=fs().query(fs().collection(db(),'businesses'),fs().orderBy('createdAt','desc'),fs().limit(25));
         }
         fs().getDocs(q).then(function(snap){
           var items=[]; snap.forEach(function(d){ items.push(Object.assign({id:d.id},d.data())); });
           var sideHtml='';
+          // Stories layer: only real geotagged, custom avatar pins
+          if(layer==='stories'){
+            var geoStories=items.filter(function(st){ return st.lat!=null&&st.lng!=null; });
+            if(!geoStories.length&&sidebar){ sidebar.innerHTML='<div class="gh-muted" style="padding:8px;font-size:.82rem">No geotagged stories yet.</div>'; return; }
+            geoStories.forEach(function(st){
+              var av=st.authorAvatar||'';
+              var nm=st.authorName||'Story';
+              var iconHtml=av
+                ?'<div style="width:40px;height:40px;border-radius:50%;padding:2px;background:linear-gradient(135deg,#10b981,#3b82f6);box-sizing:border-box"><img src="'+esc(av)+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid #0f172a" onerror="this.style.display=\'none\'"></div>'
+                :'<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#10b981,#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.85rem">'+esc((nm||'S')[0].toUpperCase())+'</div>';
+              var pinIcon=L.divIcon({html:iconHtml,className:'gh-story-map-pin',iconSize:[40,40],iconAnchor:[20,20]});
+              var m=L.marker([st.lat,st.lng],{icon:pinIcon}).addTo(_map);
+              var thumb=st.mediaUrl?'<img src="'+esc(st.mediaUrl)+'" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:6px">':'';
+              m.bindPopup(
+                '<div style="min-width:160px">'+thumb+
+                '<strong>'+esc(nm)+'</strong>'+
+                (st.text?'<p style="font-size:.78rem;margin:4px 0;color:#475569">'+esc(st.text.slice(0,60))+'</p>':'')+
+                '<button onclick="(function(){var win=window;if(win.openStoryViewer&&win.buildStoryGroups){var g=win.buildStoryGroups(['+JSON.stringify({id:st.id,authorId:st.authorId,authorName:nm,authorAvatar:av,mediaUrl:st.mediaUrl||'',text:st.text||'',createdAt:null})+']);if(g.length)win.openStoryViewer(g,0,0);}})();this.closest(\'.leaflet-popup\').remove()" style="width:100%;padding:5px;border-radius:8px;border:none;background:#10b981;color:#fff;font-weight:700;cursor:pointer;font-size:.8rem;margin-top:4px">View Story</button>'+
+                '</div>'
+              );
+              _markers.push(m);
+              sideHtml+='<div class="gh-map-side-item" style="cursor:pointer" onclick="(function(){var m='+JSON.stringify({id:st.id,authorId:st.authorId,authorName:nm,authorAvatar:av,mediaUrl:st.mediaUrl||'',text:st.text||'',createdAt:null})+';if(window.openStoryViewer&&window.buildStoryGroups){var g=window.buildStoryGroups([m]);if(g.length)window.openStoryViewer(g,0,0);}})()">'+
+                '<div style="width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#10b981,#3b82f6);display:flex;align-items:center;justify-content:center">'+(av?'<img src="'+esc(av)+'" style="width:100%;height:100%;object-fit:cover">':'<span style="color:#fff;font-weight:700">'+esc((nm||'S')[0])+'</span>')+'</div>'+
+                '<div><strong>'+esc(nm.slice(0,28))+'</strong>'+
+                (st.text?'<div class="gh-muted" style="font-size:.78rem">'+esc(st.text.slice(0,32))+'</div>':'')+
+                '</div></div>';
+            });
+            if(sidebar) sidebar.innerHTML=sideHtml||'<div class="gh-muted" style="padding:8px;font-size:.82rem">No geotagged stories</div>';
+            return;
+          }
           items.forEach(function(item){
             var lat=null,lng=null;
             if(item.location&&item.location.lat&&item.location.lng){ lat=item.location.lat; lng=item.location.lng; }
@@ -12648,6 +12682,57 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         return;
       }
     });
+  };
+
+  /* ── Story Map Overlay ──────────────────────────────────────── */
+  window.ghOpenStoryMap = function() {
+    var existing = document.getElementById('ghStoryMapOverlay'); if(existing){ existing.remove(); return; }
+    var ov = document.createElement('div');
+    ov.id = 'ghStoryMapOverlay';
+    ov.className = 'gh-story-map-overlay';
+    ov.innerHTML =
+      '<div class="gh-story-map-header">'
+        +'<h3><i class="fas fa-map-location-dot"></i> სტორიების რუქა</h3>'
+        +'<button class="gh-story-map-close" id="ghStoryMapClose">×</button>'
+      +'</div>'
+      +'<div id="ghStoryMapEl" class="gh-story-map-el"></div>'
+      +'<div class="gh-story-map-empty" id="ghStoryMapEmpty" style="display:none"><i class="fas fa-map-pin"></i><p>გეო-ტეგირებული სტორიები არ არის</p></div>';
+    document.body.appendChild(ov);
+    document.getElementById('ghStoryMapClose').onclick = function(){ ov.remove(); };
+    ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
+    function _initSMap(){
+      if(!window.L) return;
+      var mapEl = document.getElementById('ghStoryMapEl');
+      if(!mapEl) return;
+      var _smap = L.map('ghStoryMapEl').setView([41.6941, 44.8337], 10);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OSM' }).addTo(_smap);
+      if(navigator.geolocation){ navigator.geolocation.getCurrentPosition(function(p){ _smap.setView([p.coords.latitude, p.coords.longitude], 12); }, function(){}); }
+      if(!GS()||!GS().listenStories) return;
+      GS().listenStories(function(stories){
+        var geo = (stories||[]).filter(function(s){ return s.lat!=null && s.lng!=null; });
+        var emptyEl = document.getElementById('ghStoryMapEmpty');
+        if(!geo.length){ if(emptyEl) emptyEl.style.display='flex'; return; }
+        if(emptyEl) emptyEl.style.display='none';
+        geo.forEach(function(st){
+          var nm = st.authorName||'Story'; var av = st.authorAvatar||'';
+          var iconHtml = av
+            ?'<div class="gh-smp-pin"><img src="'+esc(av)+'" onerror="this.style.display=\'none\'"></div>'
+            :'<div class="gh-smp-pin gh-smp-pin-init">'+esc((nm||'S')[0].toUpperCase())+'</div>';
+          var pinIcon = L.divIcon({html: iconHtml, className:'', iconSize:[44,44], iconAnchor:[22,22]});
+          var m = L.marker([st.lat, st.lng], {icon: pinIcon}).addTo(_smap);
+          m.on('click', function(){
+            var grps = buildStoryGroups([st]);
+            if(grps.length) openStoryViewer(grps, 0, 0);
+          });
+        });
+        if(geo.length){ var b=L.latLngBounds(geo.map(function(s){return [s.lat,s.lng];})); _smap.fitBounds(b,{padding:[30,30],maxZoom:14}); }
+      });
+    }
+    if(window.L){ _initSMap(); }
+    else {
+      var lcss=document.createElement('link'); lcss.rel='stylesheet'; lcss.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(lcss);
+      var ljs=document.createElement('script'); ljs.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; ljs.onload=_initSMap; document.head.appendChild(ljs);
+    }
   };
 
   /* Patch openStoryModal to inject Music button after story modal opens */
