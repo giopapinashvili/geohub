@@ -1409,8 +1409,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var actorName = isBusinessActor ? (actor.title || 'Business') : (me.name || 'You');
     var actorAvatar = isBusinessActor ? (actor.logoUrl || '') : (me.avatar || '');
     var destination = isBusinessActor
-      ? 'Posting as ' + actorName
-      : (extra._groupName ? 'Posting in ' + extra._groupName : 'Posting to your profile');
+      ? actorName + '-ის სახელით'
+      : (extra._groupName ? extra._groupName + '-ში' : 'შენს გვერდზე');
     var actorAvHtml = actorAvatar
       ? '<img src="'+esc(actorAvatar)+'" alt="" onerror="this.style.display=\'none\'">'
       : esc(initials(actorName));
@@ -1466,35 +1466,35 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-cmp-footer-row">'+
         '<button type="button" class="gh-audience-btn" id="ghAudienceToggle">'+
           '<i class="fas fa-earth-europe gh-aud-icon-i" id="ghAudienceIcon"></i>'+
-          '<span id="ghAudienceLbl">Everyone</span>'+
+          '<span id="ghAudienceLbl">ყველა</span>'+
           '<i class="fas fa-chevron-down gh-aud-caret" id="ghAudienceCaret"></i>'+
         '</button>'+
       '</div>'+
       '<div class="gh-cmp-aud-panel" id="ghAudiencePanel">'+
         '<div class="gh-cmp-aud-section">'+
-          '<div class="gh-cmp-aud-hd"><i class="fas fa-eye"></i> Who can see?</div>'+
+          '<div class="gh-cmp-aud-hd"><i class="fas fa-eye"></i> ვინ ნახოს?</div>'+
           '<div class="gh-cmp-aud-checks">'+
-            '<label class="gh-cmp-aud-check"><input type="checkbox" id="ghAudFriends" value="friends" checked><i class="fas fa-user-group"></i> Friends</label>'+
-            '<label class="gh-cmp-aud-check"><input type="checkbox" id="ghAudFollowers" value="followers" checked><i class="fas fa-rss"></i> Followers</label>'+
-            '<label class="gh-cmp-aud-check"><input type="checkbox" id="ghAudStrangers" value="strangers" checked><i class="fas fa-earth-europe"></i> Everyone</label>'+
-            '<label class="gh-cmp-aud-check"><input type="checkbox" id="ghAudOnlyMe" value="onlyme"><i class="fas fa-lock"></i> Only me</label>'+
+            '<label class="gh-cmp-aud-check"><input type="checkbox" id="ghAudFriends" value="friends" checked><i class="fas fa-user-group"></i> მეგობრები</label>'+
+            '<label class="gh-cmp-aud-check"><input type="checkbox" id="ghAudFollowers" value="followers" checked><i class="fas fa-rss"></i> გამომწერები</label>'+
+            '<label class="gh-cmp-aud-check"><input type="checkbox" id="ghAudStrangers" value="strangers" checked><i class="fas fa-earth-europe"></i> ყველა</label>'+
+            '<label class="gh-cmp-aud-check"><input type="checkbox" id="ghAudOnlyMe" value="onlyme"><i class="fas fa-lock"></i> მხოლოდ მე</label>'+
           '</div>'+
         '</div>'+
         '<div class="gh-cmp-aud-section">'+
-          '<div class="gh-cmp-aud-hd"><i class="fas fa-venus-mars"></i> Gender filter</div>'+
+          '<div class="gh-cmp-aud-hd"><i class="fas fa-venus-mars"></i> სქესის ფილტრი</div>'+
           '<div class="gh-cmp-aud-radios">'+
-            '<label class="gh-cmp-aud-radio"><input type="radio" name="ghAudGender" value="all" checked> All</label>'+
-            '<label class="gh-cmp-aud-radio"><input type="radio" name="ghAudGender" value="male"> Men only</label>'+
-            '<label class="gh-cmp-aud-radio"><input type="radio" name="ghAudGender" value="female"> Women only</label>'+
+            '<label class="gh-cmp-aud-radio"><input type="radio" name="ghAudGender" value="all" checked> ყველა</label>'+
+            '<label class="gh-cmp-aud-radio"><input type="radio" name="ghAudGender" value="male"> მხოლოდ კაცები</label>'+
+            '<label class="gh-cmp-aud-radio"><input type="radio" name="ghAudGender" value="female"> მხოლოდ ქალები</label>'+
           '</div>'+
         '</div>'+
         '<div class="gh-cmp-aud-section">'+
-          '<div class="gh-cmp-aud-hd"><i class="fas fa-calendar-alt"></i> Age filter</div>'+
+          '<div class="gh-cmp-aud-hd"><i class="fas fa-calendar-alt"></i> ასაკის ფილტრი</div>'+
           '<select class="gh-select" id="ghAudAgeMode" style="width:100%;font-size:.82rem">'+
-            '<option value="all">All ages</option>'+
+            '<option value="all">ყველა ასაკი</option>'+
             '<option value="18plus">18+</option>'+
             '<option value="25to45">25–45</option>'+
-            '<option value="custom">Custom range</option>'+
+            '<option value="custom">სხვა</option>'+
           '</select>'+
           '<div class="gh-cmp-aud-custom-age" id="ghAudAgeCustom">'+
             '<input type="number" class="gh-input" id="ghAudAgeMin" placeholder="Min" min="13" max="99">'+
@@ -1691,15 +1691,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var gender = _getAudienceGender();
       var ad = _getAudienceAgeData();
       var label, icon;
-      if (types.indexOf('onlyme') > -1) { label = 'Only me'; icon = 'fas fa-lock'; }
-      else if (types.length >= 3 || types.indexOf('strangers') > -1) { label = 'Everyone'; icon = 'fas fa-earth-europe'; }
-      else if (types.length === 2) { label = types.map(function(t){ return t[0].toUpperCase()+t.slice(1); }).join(' & '); icon = 'fas fa-users'; }
-      else if (types[0] === 'friends') { label = 'Friends'; icon = 'fas fa-user-group'; }
-      else if (types[0] === 'followers') { label = 'Followers'; icon = 'fas fa-rss'; }
-      else { label = 'Everyone'; icon = 'fas fa-earth-europe'; }
+      var _audKa = { friends:'მეგობრები', followers:'გამომწერები', strangers:'ყველა' };
+      if (types.indexOf('onlyme') > -1) { label = 'მხოლოდ მე'; icon = 'fas fa-lock'; }
+      else if (types.length >= 3 || types.indexOf('strangers') > -1) { label = 'ყველა'; icon = 'fas fa-earth-europe'; }
+      else if (types.length === 2) { label = types.map(function(t){ return _audKa[t]||t; }).join(' & '); icon = 'fas fa-users'; }
+      else if (types[0] === 'friends') { label = 'მეგობრები'; icon = 'fas fa-user-group'; }
+      else if (types[0] === 'followers') { label = 'გამომწერები'; icon = 'fas fa-rss'; }
+      else { label = 'ყველა'; icon = 'fas fa-earth-europe'; }
       var extras = [];
-      if (gender === 'male') extras.push('♂');
-      else if (gender === 'female') extras.push('♀');
+      if (gender === 'male') extras.push('♂ კაცი');
+      else if (gender === 'female') extras.push('♀ ქალი');
       if (ad.ageMin && ad.ageMax) extras.push(ad.ageMin+'–'+ad.ageMax);
       else if (ad.ageMin) extras.push(ad.ageMin+'+');
       if (extras.length) label += ' · ' + extras.join(' ');
@@ -4495,6 +4496,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var avatarAttrs = authorActor ? ' data-post-author-avatar data-actor-type="'+esc(authorActor.type)+'" data-actor-id="'+esc(authorActor.id)+'" aria-label="'+esc(name)+'"' : '';
     if(p.targetType && p.targetId) target='<div class="gh-post-target"><i class="fas '+iconFor(p.targetType)+'"></i>'+esc(labelFor(p.targetType))+'</div>';
     var privacyIcon = (p.visibility==='onlyme'||p.visibility==='only_me') ? 'fa-lock' : (p.visibility==='followers' ? 'fa-user-group' : ((p.visibility==='close_friends'||p.visibility==='friends') ? 'fa-star' : 'fa-earth-europe'));
+    var _meUid = (authUser()||{}).uid||'';
+    var _visLabelMap = { onlyme:'მხოლოდ მე', only_me:'მხოლოდ მე', followers:'გამომწერები', friends:'მეგობრები', close_friends:'მეგობრები', public:'ყველა' };
+    var _audLabelTxt = (_meUid && _meUid === authorId && p.visibility && p.visibility !== 'public') ? (' · <span style="font-size:.7rem;color:var(--gh-muted)" title="ვინ ხედავს">' + esc(_visLabelMap[p.visibility] || 'ყველა') + '</span>') : '';
 
     // "posted on BusinessName" for visitor posts inside a biz context
     var bizPostedOnHtml = (bizCtx && biz && p.authorType==='user')
@@ -4708,7 +4712,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       repostBanner+
       followedPageBanner+
       pinBanner+
-      '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+avatarAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><div class="gh-post-name-row"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a>'+verifiedBadge+coAuthorHtml+sponsoredHtml+'</div><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+target+(p.feeling?' · '+esc(p.feeling):'')+(categoryBadge?' · '+categoryBadge:'')+(fmtBadge?' · '+fmtBadge:'')+bizPostedOnHtml+(readTimeBadge?' · '+readTimeBadge:'')+'</div></div>'+moreBtn+'</div>'+
+      '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+avatarAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><div class="gh-post-name-row"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a>'+verifiedBadge+coAuthorHtml+sponsoredHtml+'</div><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+_audLabelTxt+target+(p.feeling?' · '+esc(p.feeling):'')+(categoryBadge?' · '+categoryBadge:'')+(fmtBadge?' · '+fmtBadge:'')+bizPostedOnHtml+(readTimeBadge?' · '+readTimeBadge:'')+'</div></div>'+moreBtn+'</div>'+
       locationHtml+
       fmtDetailHtml+
       postTextHtml+
