@@ -2525,10 +2525,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var uid=(authUser()||{}).uid; if(!uid) return onClose&&onClose();
     if(!fs()||!db()) return onClose&&onClose();
     // Load existing highlights
-    fs().getDocs(fs().query(fs().collection(db(),'users',uid,'storyHighlights'),fs().orderBy('createdAt','desc'),fs().limit(20))).then(function(snap){
+    fs().getDocs(fs().query(fs().collection(db(),'users',uid,'highlights'),fs().orderBy('createdAt','desc'),fs().limit(20))).then(function(snap){
       var hls=[]; snap.forEach(function(d){ hls.push(Object.assign({id:d.id},d.data())); });
       var existHtml=hls.length?hls.map(function(h){
-        return '<button class="gh-hl-pick-btn" data-hl-id="'+esc(h.id)+'" data-hl-name="'+esc(h.name||'Highlight')+'"><i class="fas fa-star"></i> '+esc(h.name||'Highlight')+'</button>';
+        return '<button class="gh-hl-pick-btn" data-hl-id="'+esc(h.id)+'" data-hl-name="'+esc(h.title||h.name||'Highlight')+'"><i class="fas fa-star"></i> '+esc(h.title||h.name||'Highlight')+'</button>';
       }).join(''):'<div class="gh-muted" style="font-size:.82rem;padding:4px 0">No highlights yet</div>';
       var body='<div style="margin-bottom:12px"><div class="gh-bold" style="font-size:.88rem;margin-bottom:6px">Add to existing highlight</div>'+existHtml+'</div>'+
         '<hr style="border-color:var(--gh-border);margin:10px 0">'+
@@ -2540,7 +2540,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         hlModal.querySelectorAll('.gh-hl-pick-btn').forEach(function(btn){
           btn.onclick=function(){
             var hlId=btn.dataset.hlId;
-            fs().updateDoc(fs().doc(db(),'users',uid,'storyHighlights',hlId),{
+            fs().updateDoc(fs().doc(db(),'users',uid,'highlights',hlId),{
               stories:fs().arrayUnion({id:st.id,mediaUrl:st.mediaUrl||'',text:st.text||'',createdAt:st.createdAt||null})
             }).then(function(){ toast(typeof GHt==='function'?GHt('highlight_added'):'Added to highlight!'); hlModal.remove(); onClose&&onClose(); }).catch(function(){ toast('Failed','error'); });
           };
@@ -2550,8 +2550,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           saveBtn.onclick=function(){
             var name=(document.getElementById('ghNewHlName').value||'').trim();
             if(!name) return toast(_srt('enter_name'),'error');
-            fs().addDoc(fs().collection(db(),'users',uid,'storyHighlights'),{
-              name:name, coverUrl:st.mediaUrl||'', createdAt:fs().serverTimestamp(),
+            fs().addDoc(fs().collection(db(),'users',uid,'highlights'),{
+              title:name, coverUrl:st.mediaUrl||'', createdAt:fs().serverTimestamp(),
               stories:[{id:st.id,mediaUrl:st.mediaUrl||'',text:st.text||'',createdAt:st.createdAt||null}]
             }).then(function(){ toast((typeof GHt==='function'?GHt('highlight_created'):'Highlight')+' "'+name+'"'); hlModal.remove(); onClose&&onClose(); }).catch(function(){ toast('Failed','error'); });
           };
@@ -2563,7 +2563,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   /* ── Phase 63: Highlights Strip on profile (injected by profile.js integration) */
   window.ghLoadHighlights=function(uid, container){
     if(!fs()||!db()||!uid||!container) return;
-    fs().getDocs(fs().query(fs().collection(db(),'users',uid,'storyHighlights'),fs().orderBy('createdAt','desc'),fs().limit(15))).then(function(snap){
+    fs().getDocs(fs().query(fs().collection(db(),'users',uid,'highlights'),fs().orderBy('createdAt','desc'),fs().limit(15))).then(function(snap){
       if(snap.empty) return;
       var html='<div class="gh-hl-strip">';
       snap.forEach(function(d){
@@ -2579,7 +2579,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       container.querySelectorAll('[data-hl-open]').forEach(function(el){
         el.onclick=function(){
           var hlId=el.dataset.hlOpen, hlUid=el.dataset.hlUid;
-          fs().getDoc(fs().doc(db(),'users',hlUid,'storyHighlights',hlId)).then(function(snap){
+          fs().getDoc(fs().doc(db(),'users',hlUid,'highlights',hlId)).then(function(snap){
             if(!snap.exists()) return;
             var h=snap.data();
             var stories=(h.stories||[]).map(function(s){ return Object.assign({authorId:hlUid},s); });

@@ -138,6 +138,7 @@
     <div class="ptab" data-tab="videos"><span data-i18n="nav_videos">Videos</span> <span class="tab-count"></span></div>
     <div class="ptab" data-tab="badges"><span data-i18n="profile_badges">Badges</span> <span class="tab-count">0</span></div>
     <div class="ptab" data-tab="saved"><span data-i18n="profile_saved">Saved</span> <span class="tab-count"></span></div>
+    <div class="ptab" data-tab="archive" id="archiveTabBtn" style="display:none"><span>📁 Archive</span> <span class="tab-count" id="archiveTabCount"></span></div>
   </div>
 </div>
 
@@ -295,6 +296,10 @@
       <div id="saved-posts-section"></div>
       <div id="saved-places-section"></div>
       <div id="saved-empty-state" class="empty-profile-state"><i class="fas fa-bookmark"></i><h3>Nothing saved yet</h3><p>Save posts and places to find them here.</p></div>
+    </div>
+
+    <div class="tab-panel" id="tab-archive">
+      <div class="empty-profile-state"><i class="fas fa-archive"></i><h3>Loading...</h3></div>
     </div>
 
       </div><!-- /profile-main -->

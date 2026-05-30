@@ -2236,7 +2236,11 @@
         if (extra && extra.question) storyData.question = extra.question;
         if (extra && extra.bg) storyData.bg = extra.bg;
         if (extra && extra.mediaType) storyData.mediaType = extra.mediaType;
-        addDoc(collection(db, 'stories'), storyData).then(function () {
+        addDoc(collection(db, 'stories'), storyData).then(function (docRef) {
+          // Archive permanently so highlights can reference it after story expires
+          setDoc(doc(db, 'users', user.uid, 'storyArchive', docRef.id),
+            Object.assign({}, storyData, { storyId: docRef.id, archivedAt: serverTimestamp() })
+          ).catch(function() {});
           toast(_gt('story_posted')||'Story posted!');
           if (callback) callback();
         }).catch(function (err) {

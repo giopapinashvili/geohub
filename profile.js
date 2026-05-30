@@ -638,57 +638,169 @@
     }).catch(function() { row.innerHTML = isOwn ? addBtn : ''; });
   }
 
-  function _openHighlightViewer(title, storyUrls) {
+  function _openHighlightViewer(title, stories) {
     var idx = 0;
     var ov = document.createElement('div');
     ov.className = 'gh-hl-viewer';
+    function _url(s) { return typeof s === 'string' ? s : (s && (s.mediaUrl || s.imageUrl || '')); }
     function render() {
-      var url = storyUrls[idx];
+      var s = stories[idx];
+      var url = _url(s);
       ov.innerHTML =
         '<div class="gh-hl-backdrop" data-hl-close></div>'+
         '<div class="gh-hl-card">'+
           '<div class="gh-hl-topbar">'+
-            '<div class="gh-hl-dots">' + storyUrls.map(function(_, i){ return '<span class="gh-hl-dot' + (i===idx?' active':'') + '"></span>'; }).join('') + '</div>'+
+            '<div class="gh-hl-dots">' + stories.map(function(_, i){ return '<span class="gh-hl-dot' + (i===idx?' active':'') + '"></span>'; }).join('') + '</div>'+
             '<div class="gh-hl-title">' + esc(title) + '</div>'+
             '<button class="gh-hl-close" data-hl-close>×</button>'+
           '</div>'+
-          (url.match(/\.(mp4|webm|mov)/i) ? '<video class="gh-hl-media" src="'+esc(url)+'" autoplay muted loop playsinline></video>' : '<img class="gh-hl-media" src="'+esc(url)+'" alt="">') +
-          '<button class="gh-hl-prev"' + (idx===0?'disabled':'') + '><i class="fas fa-chevron-left"></i></button>'+
-          '<button class="gh-hl-next"' + (idx===storyUrls.length-1?'disabled':'') + '><i class="fas fa-chevron-right"></i></button>'+
+          (url && url.match(/\.(mp4|webm|mov)/i)
+            ? '<video class="gh-hl-media" src="'+esc(url)+'" autoplay muted loop playsinline></video>'
+            : '<img class="gh-hl-media" src="'+esc(url||'')+'" alt="">') +
+          (s && s.text ? '<div class="gh-hl-caption">'+esc(s.text)+'</div>' : '') +
+          '<button class="gh-hl-prev"' + (idx===0?' disabled':'') + '><i class="fas fa-chevron-left"></i></button>'+
+          '<button class="gh-hl-next"' + (idx===stories.length-1?' disabled':'') + '><i class="fas fa-chevron-right"></i></button>'+
         '</div>';
       ov.querySelector('[data-hl-close]').onclick = function() { ov.remove(); };
       var prev = ov.querySelector('.gh-hl-prev');
       var next = ov.querySelector('.gh-hl-next');
       if (prev) prev.onclick = function() { if (idx > 0) { idx--; render(); } };
-      if (next) next.onclick = function() { if (idx < storyUrls.length - 1) { idx++; render(); } };
+      if (next) next.onclick = function() { if (idx < stories.length - 1) { idx++; render(); } };
     }
     render();
     document.body.appendChild(ov);
   }
 
-  // Add highlight when "+" clicked: pick story from last 30 days
+  // Add highlight when "+" clicked — queries storyArchive (permanent copies)
   window._createHighlight = function(uid, GF) {
-    var title = prompt('Highlight-ის სახელი:');
-    if (!title) return;
-    GF.fs.getDocs(GF.fs.query(
-      GF.fs.collection(GF.db, 'stories'),
-      GF.fs.where('userId', '==', uid),
-      GF.fs.orderBy('createdAt', 'desc'),
-      GF.fs.limit(20)
+    var fs = GF.fs, db = GF.db;
+    var modal = document.createElement('div');
+    modal.className = 'gh-create-hl-overlay';
+    modal.innerHTML =
+      '<div class="gh-create-hl-backdrop" data-hl-modal-close></div>'+
+      '<div class="gh-create-hl-card">'+
+        '<div class="gh-create-hl-hdr">'+
+          '<span>Highlight-ის შექმნა</span>'+
+          '<button class="gh-create-hl-x" data-hl-modal-close>×</button>'+
+        '</div>'+
+        '<input type="text" id="ghHlNameInput" class="gh-create-hl-input" placeholder="სათაური (მაქს. 30 სიმბ.)" maxlength="30">'+
+        '<div class="gh-create-hl-hint">Story-ების ასარჩევად დააჭირე სურათს</div>'+
+        '<div class="gh-create-hl-grid" id="ghHlStoryGrid"><div style="padding:20px;text-align:center"><i class="fas fa-spinner fa-spin"></i></div></div>'+
+        '<button class="gh-create-hl-save" id="ghHlSaveBtn" disabled>შენახვა</button>'+
+      '</div>';
+    document.body.appendChild(modal);
+
+    modal.querySelectorAll('[data-hl-modal-close]').forEach(function(el) {
+      el.onclick = function() { modal.remove(); };
+    });
+
+    var selected = [];
+    var grid = document.getElementById('ghHlStoryGrid');
+    var saveBtn = document.getElementById('ghHlSaveBtn');
+
+    fs.getDocs(fs.query(
+      fs.collection(db, 'users', uid, 'storyArchive'),
+      fs.orderBy('createdAt', 'desc'),
+      fs.limit(50)
     )).then(function(snap) {
-      var stories = [];
+      if (snap.empty) {
+        grid.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-secondary)">Story-ები ვერ მოიძებნა.<br>ჯერ გამოაქვეყნე Story.</div>';
+        return;
+      }
+      var items = [];
       snap.forEach(function(d) {
         var s = d.data();
-        var url = s.mediaUrl || s.imageUrl || s.videoUrl || '';
-        if (url) stories.push(url);
+        items.push({ id: d.id, mediaUrl: s.mediaUrl||s.imageUrl||'', text: s.text||'', createdAt: s.createdAt||null });
       });
-      if (!stories.length) { toast('Stories ვერ მოიძებნა. ჯერ დაამატე story.', 'error'); return; }
-      GF.fs.addDoc(GF.fs.collection(GF.db, 'users', uid, 'highlights'), {
-        title: title, coverUrl: stories[0], stories: stories,
-        createdAt: GF.fs.serverTimestamp()
-      }).then(function() { location.reload(); }).catch(function(e) { toast((e && e.message) || 'Error', 'error'); });
-    }).catch(function() { toast('Stories ვერ ჩაიტვირთა.', 'error'); });
+      grid.innerHTML = items.map(function(item, i) {
+        var thumb = item.mediaUrl
+          ? (item.mediaUrl.match(/\.(mp4|webm|mov)/i)
+              ? '<video class="gh-hl-thumb-media" src="'+esc(item.mediaUrl)+'" muted playsinline></video>'
+              : '<img class="gh-hl-thumb-media" src="'+esc(item.mediaUrl)+'" alt="">')
+          : '<div class="gh-hl-thumb-text">'+esc((item.text||'…').slice(0,40))+'</div>';
+        return '<div class="gh-hl-story-thumb" data-idx="'+i+'">'+thumb+'<div class="gh-hl-thumb-check"><i class="fas fa-check"></i></div></div>';
+      }).join('');
+      grid.querySelectorAll('.gh-hl-story-thumb').forEach(function(thumb) {
+        thumb.onclick = function() {
+          var item = items[parseInt(thumb.dataset.idx)];
+          var pos = selected.indexOf(item);
+          if (pos === -1) { selected.push(item); thumb.classList.add('selected'); }
+          else { selected.splice(pos, 1); thumb.classList.remove('selected'); }
+          saveBtn.disabled = selected.length === 0;
+        };
+      });
+    }).catch(function() {
+      grid.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-secondary)">Stories ვერ ჩაიტვირთა.</div>';
+    });
+
+    saveBtn.onclick = function() {
+      var name = (document.getElementById('ghHlNameInput').value || '').trim();
+      if (!name) { var inp = document.getElementById('ghHlNameInput'); inp.focus(); inp.style.borderColor = '#ef4444'; return; }
+      if (!selected.length) return;
+      saveBtn.disabled = true; saveBtn.textContent = 'ინახება…';
+      fs.addDoc(fs.collection(db, 'users', uid, 'highlights'), {
+        title: name,
+        coverUrl: selected[0].mediaUrl || '',
+        stories: selected.map(function(s) { return { id: s.id, mediaUrl: s.mediaUrl, text: s.text, createdAt: s.createdAt }; }),
+        createdAt: fs.serverTimestamp()
+      }).then(function() {
+        modal.remove();
+        var GF2 = window.GeoFirebase;
+        if (GF2 && GF2.auth && GF2.auth.currentUser) loadHighlights({ uid: uid }, GF2.auth.currentUser);
+      }).catch(function(e) { saveBtn.disabled = false; saveBtn.textContent = 'შენახვა'; toast((e && e.message)||'Error', 'error'); });
+    };
   };
+
+  function loadArchiveTab(user, fbUser) {
+    var panel = document.getElementById('tab-archive');
+    var tabBtn = document.getElementById('archiveTabBtn');
+    var isOwn = fbUser && user.uid === fbUser.uid;
+    if (!isOwn || !panel) return;
+    if (tabBtn) tabBtn.style.display = '';
+    var GF = window.GeoFirebase;
+    if (!GF || !GF.db || !GF.fs) { panel.innerHTML = '<div class="empty-profile-state"><i class="fas fa-archive"></i><h3>Archive</h3><p>Firebase unavailable.</p></div>'; return; }
+    GF.fs.getDocs(GF.fs.query(
+      GF.fs.collection(GF.db, 'users', user.uid, 'storyArchive'),
+      GF.fs.orderBy('createdAt', 'desc'),
+      GF.fs.limit(100)
+    )).then(function(snap) {
+      var cnt = document.getElementById('archiveTabCount');
+      if (cnt) cnt.textContent = snap.size || '';
+      if (snap.empty) {
+        panel.innerHTML = '<div class="empty-profile-state"><i class="fas fa-archive"></i><h3>Archive ცარიელია</h3><p>გამოქვეყნებული Story-ები ავტომატურად ინახება აქ.</p></div>';
+        return;
+      }
+      var items = [];
+      snap.forEach(function(d) {
+        var s = d.data();
+        items.push({ id: d.id, mediaUrl: s.mediaUrl||s.imageUrl||'', text: s.text||'', duration: s.duration||'24h', createdAt: s.createdAt });
+      });
+      var _durLabel = function(d) { return d==='forever'?'♾️':d==='1y'?'1 წელი':d==='30d'?'30 დღე':d==='7d'?'7 დღე':'24 სთ'; };
+      panel.innerHTML =
+        '<div class="profile-archive-grid">'+
+        items.map(function(item) {
+          var thumb = item.mediaUrl
+            ? (item.mediaUrl.match(/\.(mp4|webm|mov)/i)
+                ? '<video class="pa-thumb-media" src="'+esc(item.mediaUrl)+'" muted playsinline></video>'
+                : '<img class="pa-thumb-media" src="'+esc(item.mediaUrl)+'" alt="">')
+            : '<div class="pa-thumb-text">'+esc((item.text||'…').slice(0,60))+'</div>';
+          return '<div class="pa-thumb" data-archive-id="'+esc(item.id)+'">'+
+            thumb+
+            '<div class="pa-thumb-dur">'+_durLabel(item.duration)+'</div>'+
+            (item.text ? '<div class="pa-thumb-caption">'+esc(item.text.slice(0,30))+'</div>' : '')+
+          '</div>';
+        }).join('')+
+        '</div>';
+      panel.querySelectorAll('[data-archive-id]').forEach(function(thumb) {
+        thumb.onclick = function() {
+          var item = items.filter(function(i) { return i.id === thumb.dataset.archiveId; })[0];
+          if (item) _openHighlightViewer('Story', [item]);
+        };
+      });
+    }).catch(function() {
+      panel.innerHTML = '<div class="empty-profile-state"><i class="fas fa-archive"></i><h3>Archive</h3><p>ჩატვირთვა ვერ მოხდა.</p></div>';
+    });
+  }
 
   function renderTabs(user, fbUser) {
     var _pt=typeof GHt==='function'?GHt:function(k){return k;};
@@ -696,6 +808,7 @@
     emptyTab('#tab-checkins', 'fa-location-dot', _pt('profile_checkins')+': '+_pt('no_results'), _pt('profile_no_checkins'), 'checkin.html', _pt('ci_title'));
     emptyTab('#tab-friends', 'fa-user-group', _pt('profile_friends')+': '+_pt('no_results'), _pt('profile_no_friends_hint'), null, '');
     loadHighlights(user, fbUser);
+    loadArchiveTab(user, fbUser);
     renderAboutTab(user);
     renderBadgeTab(user);
     renderBusinessesTab(user);
