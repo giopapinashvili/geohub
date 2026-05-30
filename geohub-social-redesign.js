@@ -2716,6 +2716,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '</div>'+
       '<div class="gh-cmp-toolbar" style="margin-top:10px">'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryPhotoBtn"><i class="fas fa-image"></i><span> Photo/Video</span></button>'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryCameraBtn"><i class="fas fa-camera"></i><span> Camera</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryPollBtn"><i class="fas fa-check-to-slot"></i><span> Poll</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryLinkBtn"><i class="fas fa-link"></i><span> Link</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryQBtn"><i class="fas fa-question-circle"></i><span> Q</span></button>'+
@@ -3393,6 +3394,68 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(ayPromptInput){ ayPromptInput.value=ayContext.prompt; ayPromptInput.readOnly=true; }
       if(ayChainInput) ayChainInput.value=ayContext.chainId||'';
     }
+
+    // ── Story Camera ──────────────────────────────────────────────
+    function _openStoryCamera(){
+      if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ toast('Camera not supported on this device','error'); return; }
+      var _facingMode='environment';
+      var _stream=null;
+      var _recChunks=[], _mediaRec=null, _recording=false;
+      var ov=document.createElement('div');
+      ov.id='ghStoryCamOverlay';
+      ov.className='gh-cam-overlay';
+      ov.innerHTML=
+        '<video id="ghCamView" class="gh-cam-view" autoplay muted playsinline></video>'+
+        '<canvas id="ghCamCanvas" style="display:none"></canvas>'+
+        '<div class="gh-cam-bar gh-cam-top">'+
+          '<button type="button" class="gh-cam-btn" id="ghCamClose"><i class="fas fa-times"></i></button>'+
+          '<button type="button" class="gh-cam-btn" id="ghCamFlip"><i class="fas fa-camera-rotate"></i></button>'+
+        '</div>'+
+        '<div class="gh-cam-bar gh-cam-bot">'+
+          '<button type="button" class="gh-cam-shutter" id="ghCamSnap" title="Take photo"><span class="gh-cam-shutter-ring"></span></button>'+
+        '</div>';
+      document.body.appendChild(ov);
+
+      var vid=document.getElementById('ghCamView');
+      var canvas=document.getElementById('ghCamCanvas');
+
+      function _startStream(){
+        if(_stream){ _stream.getTracks().forEach(function(t){ t.stop(); }); _stream=null; }
+        navigator.mediaDevices.getUserMedia({video:{facingMode:_facingMode,width:{ideal:1080},height:{ideal:1920}},audio:false})
+          .then(function(s){ _stream=s; if(vid) vid.srcObject=s; })
+          .catch(function(){ toast('Camera access denied','error'); ov.remove(); });
+      }
+      _startStream();
+
+      function _closeCamera(){ if(_stream){ _stream.getTracks().forEach(function(t){ t.stop(); }); _stream=null; } ov.remove(); }
+      document.getElementById('ghCamClose').onclick=_closeCamera;
+      document.getElementById('ghCamFlip').onclick=function(){ _facingMode=_facingMode==='environment'?'user':'environment'; _startStream(); };
+
+      document.getElementById('ghCamSnap').onclick=function(){
+        if(!vid||!canvas) return;
+        canvas.width=vid.videoWidth||720;
+        canvas.height=vid.videoHeight||1280;
+        var ctx=canvas.getContext('2d');
+        ctx.drawImage(vid,0,0,canvas.width,canvas.height);
+        canvas.toBlob(function(blob){
+          var file=new File([blob],'story-cam-'+Date.now()+'.jpg',{type:'image/jpeg'});
+          pickedFile=file;
+          var localUrl=URL.createObjectURL(blob);
+          var prev=$('#ghStoryPreview');
+          if(prev){
+            prev.innerHTML='<div style="position:relative;display:inline-block;width:100%">'+
+              '<img src="'+esc(localUrl)+'" style="width:100%;max-height:260px;object-fit:cover;border-radius:16px;border:1px solid var(--gh-border)">'+
+              '<button type="button" id="ghStoryRemoveMedia" style="position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;background:rgba(15,23,42,.75);border:none;color:#fff;cursor:pointer;font-size:1.1rem;display:grid;place-items:center"><i class="fas fa-times"></i></button></div>';
+            var rmBtn=document.getElementById('ghStoryRemoveMedia');
+            if(rmBtn) rmBtn.onclick=function(){ pickedFile=null; prev.innerHTML=''; updateSubmit(); };
+          }
+          updateSubmit();
+          _closeCamera();
+        },'image/jpeg',0.9);
+      };
+    }
+    var camBtn=$('#ghStoryCameraBtn');
+    if(camBtn) camBtn.onclick=_openStoryCamera;
 
     $('#ghStoryFilePick').onchange=function(){
       var file=this.files&&this.files[0]; if(!file) return;
