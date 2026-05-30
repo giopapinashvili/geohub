@@ -76,6 +76,21 @@
         { "fieldPath": "eventId", "order": "ASCENDING" },
         { "fieldPath": "userId", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "placeCheckins",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "placeId", "order": "ASCENDING" },
+        { "fieldPath": "checkedInAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "follows",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "followerId", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

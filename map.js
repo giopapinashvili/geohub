@@ -2402,7 +2402,114 @@
       }
     }
 
+    // Async-loaded sections
+    h += '<div id="mpdActivityChart" class="mpd-async-section"></div>';
+    h += '<div id="mpdFriendsSection" class="mpd-async-section"></div>';
+
     box.innerHTML = h || '<p class="mpd-empty">No additional info available.</p>';
+
+    const GF = window.GeoFirebase;
+    if (GF && GF.db && GF.fs) {
+      _mpdLoadActivityChart(p.id, GF);
+      _mpdLoadFriendsVisited(p.id, GF);
+    }
+  }
+
+  function _mpdLoadActivityChart(pid, GF) {
+    const el = document.getElementById('mpdActivityChart');
+    if (!el) return;
+    const since7d = new Date(Date.now() - 7 * 86400000);
+    const since = GF.fs.Timestamp ? GF.fs.Timestamp.fromDate(since7d) : since7d;
+    GF.fs.getDocs(GF.fs.query(
+      GF.fs.collection(GF.db, 'placeCheckins'),
+      GF.fs.where('placeId', '==', pid),
+      GF.fs.orderBy('checkedInAt', 'desc'),
+      GF.fs.limit(300)
+    )).then(snap => {
+      if (snap.empty) return;
+      const hourCounts = new Array(24).fill(0);
+      let total = 0;
+      snap.forEach(d => {
+        const c = d.data();
+        const ts = c.checkedInAt;
+        if (!ts) return;
+        const dt = ts.toDate ? ts.toDate() : new Date(ts);
+        if (dt < since7d) return;
+        hourCounts[dt.getHours()]++;
+        total++;
+      });
+      if (total === 0) return;
+      const max = Math.max(...hourCounts, 1);
+      const peakHour = hourCounts.indexOf(Math.max(...hourCounts));
+      const labels = ['12a','','','','','','6a','','','','','','12p','','','','','','6p','','','','',''];
+      let html = '<div class="mpd-section-title"><i class="fas fa-chart-bar"></i> Peak Hours ' +
+        '<span class="mpd-chart-sub">' + total + ' check-in' + (total !== 1 ? 's' : '') + ' (7 days)</span></div>' +
+        '<div class="mpd-chart-wrap"><div class="mpd-chart-bars">';
+      for (let h2 = 0; h2 < 24; h2++) {
+        const pct = Math.round(hourCounts[h2] / max * 100);
+        const isPeak = h2 === peakHour && hourCounts[h2] > 0;
+        html += '<div class="mpd-chart-col">' +
+          '<div class="mpd-chart-bar' + (isPeak ? ' peak' : '') + '" style="height:' + pct + '%"></div>' +
+          '<span class="mpd-chart-lbl">' + (labels[h2] || '') + '</span>' +
+          '</div>';
+      }
+      html += '</div>';
+      if (hourCounts[peakHour] > 0) {
+        const ph = peakHour;
+        const peakStr = ph === 0 ? '12:00am' : ph < 12 ? ph + ':00am' : ph === 12 ? '12:00pm' : (ph - 12) + ':00pm';
+        html += '<div class="mpd-chart-peak">🔥 Busiest around ' + peakStr + '</div>';
+      }
+      html += '</div>';
+      if (el) el.innerHTML = html;
+    }).catch(() => {});
+  }
+
+  function _mpdLoadFriendsVisited(pid, GF) {
+    const el = document.getElementById('mpdFriendsSection');
+    if (!el) return;
+    if (!GF.auth || !GF.auth.currentUser) return;
+    const uid = GF.auth.currentUser.uid;
+    GF.fs.getDocs(GF.fs.query(
+      GF.fs.collection(GF.db, 'follows'),
+      GF.fs.where('followerId', '==', uid),
+      GF.fs.limit(200)
+    )).then(snap => {
+      const followingIds = new Set();
+      snap.forEach(d => followingIds.add(d.data().followingId));
+      if (!followingIds.size) return;
+      return GF.fs.getDocs(GF.fs.query(
+        GF.fs.collection(GF.db, 'placeCheckins'),
+        GF.fs.where('placeId', '==', pid),
+        GF.fs.orderBy('checkedInAt', 'desc'),
+        GF.fs.limit(200)
+      )).then(snap2 => {
+        const seen = new Set();
+        const friends = [];
+        snap2.forEach(d => {
+          const c = d.data();
+          if (followingIds.has(c.userId) && !seen.has(c.userId)) {
+            seen.add(c.userId);
+            friends.push(c);
+          }
+        });
+        if (!friends.length) return;
+        const elNow = document.getElementById('mpdFriendsSection');
+        if (!elNow) return;
+        let html = '<div class="mpd-section-title"><i class="fas fa-user-friends"></i> Friends visited <span class="mpd-chart-sub">' + friends.length + '</span></div>' +
+          '<div class="mpd-friends-row">';
+        friends.slice(0, 9).forEach(c => {
+          const firstName = (c.userName || 'User').split(' ')[0];
+          html += '<div class="mpd-friend-item">' +
+            (c.userAvatar
+              ? '<img src="' + esc(c.userAvatar) + '" class="mpd-friend-av" onerror="this.style.display=\'none\'">'
+              : '<div class="mpd-friend-av mpd-friend-init">' + esc(firstName[0]) + '</div>') +
+            '<span class="mpd-friend-name">' + esc(firstName) + '</span></div>';
+        });
+        if (friends.length > 9) html += '<div class="mpd-friend-more">+' + (friends.length - 9) + '</div>';
+        html += '</div>';
+        elNow.innerHTML = html;
+      });
+    }).catch(() => {});
   }
 
   function _mpdReviews(box, GF) {

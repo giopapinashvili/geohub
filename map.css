@@ -1151,3 +1151,105 @@ body, html { height: 100%; overflow: hidden; }
   .now-fab { bottom: 80px; right: 10px; }
   .now-panel { width: 100vw; border-radius: 20px 20px 0 0; max-height: 85vh; }
 }
+
+/* ── Place Drawer: Activity Chart ─────────────────────── */
+.mpd-async-section { margin-top: 0; }
+.mpd-chart-sub { font-size: 11px; font-weight: 400; color: var(--gh-muted); margin-left: 6px; }
+.mpd-chart-wrap { padding: 0 0 4px; }
+.mpd-chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 60px;
+  padding: 4px 0 0;
+}
+.mpd-chart-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+}
+.mpd-chart-bar {
+  width: 100%;
+  min-height: 2px;
+  background: var(--gh-border-strong);
+  border-radius: 2px 2px 0 0;
+  transition: height 0.4s ease;
+}
+.mpd-chart-bar.peak { background: var(--gh-green); }
+.mpd-chart-lbl {
+  font-size: 9px;
+  color: var(--gh-muted);
+  margin-top: 2px;
+  white-space: nowrap;
+}
+.mpd-chart-peak {
+  font-size: 12px;
+  color: var(--gh-muted);
+  margin-top: 6px;
+  padding: 4px 8px;
+  background: color-mix(in srgb, var(--gh-green) 8%, transparent);
+  border-radius: 6px;
+  display: inline-block;
+}
+
+/* ── Place Drawer: Friends Visited ────────────────────── */
+.mpd-friends-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 6px 0 4px;
+}
+.mpd-friend-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 44px;
+}
+.mpd-friend-av {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--gh-border);
+}
+.mpd-friend-init {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--gh-green);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  border: 2px solid var(--gh-border);
+}
+.mpd-friend-name {
+  font-size: 10px;
+  color: var(--gh-muted);
+  text-align: center;
+  max-width: 44px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mpd-friend-more {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--gh-card-soft);
+  border: 2px solid var(--gh-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gh-muted);
+  align-self: flex-start;
+  margin-top: 0;
+}
