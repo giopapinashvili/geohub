@@ -1,4 +1,4 @@
-// GeoHub Story Editor v2 — Instagram-style
+﻿// GeoHub Story Editor v2 — Instagram-style
 (function () {
   'use strict';
 
@@ -501,19 +501,22 @@
 
     function searchMentions(v){
       var db=window.GeoFirebase&&window.GeoFirebase.db; if(!db)return;
-      var vl=v.toLowerCase(), vEnd=vl+'', res=[];
+      var vl=v.toLowerCase(), vEnd=vl+'ჿ', res=[], seen={};
+      function addU(d,biz){if(seen[d.id])return;seen[d.id]=1;var u=d.data();u.uid=d.id;if(biz)u._biz=true;res.push(u);}
       var done=function(){
         res=res.slice(0,8);
         var el=q('#seMenRes'); if(!el)return;
         if(!res.length){el.innerHTML='<div style="color:#6b7280;font-size:.8rem;padding:4px">ვერ მოიძებნა</div>';return;}
         el.innerHTML=res.map(function(u){
-          var av=u.photoURL?'<img class="se-user-av" src="'+esc(u.photoURL)+'" alt="">':'<div class="se-user-av">'+esc((u.displayName||u.name||'?')[0].toUpperCase())+'</div>';
-          return '<div class="se-user-row" data-uid="'+esc(u.uid||u.id||'')+'" data-handle="'+esc(u.username||u.nickname||u.displayName||u.name||'')+'">'+av+'<div><div class="se-user-name">'+esc(u.displayName||u.name||'')+'</div><div class="se-user-dn">@'+esc(u.username||u.nickname||u.uid||'')+(u._biz?' · ბიზნესი':'')+'</div></div></div>';
+          var nm=u.displayName||u.name||u.username||'';
+          var handle=u.username||u.nickname||u.displayName||u.name||u.uid||'';
+          var av=u.photoURL?'<img class="se-user-av" src="'+esc(u.photoURL)+'" alt="">':'<div class="se-user-av">'+esc((nm||'?')[0].toUpperCase())+'</div>';
+          return '<div class="se-user-row" data-handle="'+esc(handle)+'">'+av+'<div><div class="se-user-name">'+esc(nm)+'</div><div class="se-user-dn">@'+esc(handle)+(u._biz?' · ბიზნესი':'')+'</div></div></div>';
         }).join('');
         el.querySelectorAll('.se-user-row').forEach(function(row){
           row.addEventListener('click',function(){
-            var handle=row.dataset.handle||row.dataset.uid;
-            if(S.mentions.indexOf(handle)<0){
+            var handle=row.dataset.handle;
+            if(handle&&S.mentions.indexOf(handle)<0){
               S.mentions.push(handle);
               addEl({type:'mention',content:'@'+handle,x:50,y:70,fontSize:18,color:'#60a5fa',scale:1});
               q('#seMenPills').innerHTML=rMen(); bMen();
@@ -522,17 +525,14 @@
           });
         });
       };
-      // search users
-      db.collection('users').orderBy('displayNameLower').startAt(vl).endAt(vEnd).limit(5).get()
-        .then(function(s){s.forEach(function(d){var u=d.data();u.uid=d.id;res.push(u);})})
-        .catch(function(){})
-        .finally(function(){
-          // search businesses
-          db.collection('businesses').orderBy('name').startAt(v).endAt(v+'').limit(4).get()
-            .then(function(s){s.forEach(function(d){var u=d.data();u.uid=d.id;u._biz=true;res.push(u);})})
-            .catch(function(){})
-            .finally(done);
-        });
+      var pending=3;
+      function dec(){if(--pending===0)done();}
+      db.collection('users').orderBy('displayName').startAt(v).endAt(v+'ჿ').limit(5).get()
+        .then(function(s){s.forEach(function(d){addU(d);})}).catch(function(){}).finally(dec);
+      db.collection('users').orderBy('username').startAt(vl).endAt(vEnd).limit(5).get()
+        .then(function(s){s.forEach(function(d){addU(d);})}).catch(function(){}).finally(dec);
+      db.collection('businesses').orderBy('name').startAt(v).endAt(v+'ჿ').limit(4).get()
+        .then(function(s){s.forEach(function(d){addU(d,true);})}).catch(function(){}).finally(dec);
     }
 
     function rMen(){return S.mentions.map(function(m){return '<span class="se-pill">@'+esc(m)+'<button data-rm="'+esc(m)+'">×</button></span>';}).join('');}
