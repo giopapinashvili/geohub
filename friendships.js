@@ -464,26 +464,98 @@
     getMutualFriends(otherUserId, function (mutualUids) {
       if (!mutualUids.length) { container.innerHTML = ''; return; }
       var GF = window.GeoFirebase;
-      if (!GF || !GF.db || !GF.fs) { container.innerHTML = mutualUids.length + ' mutual friends'; return; }
-
+      var label = mutualUids.length + ' საერთო მეგობარი';
+      if (!GF || !GF.db || !GF.fs) {
+        container.innerHTML = '<button class="gh-mutual-row" data-mutual-uid="' + esc(otherUserId) + '">' + label + '</button>';
+        _bindMutualBtn(container, otherUserId, mutualUids, []);
+        return;
+      }
       var previewUids = mutualUids.slice(0, 3);
       Promise.all(previewUids.map(function (uid) {
         return GF.fs.getDoc(GF.fs.doc(GF.db, 'users', uid)).then(function (snap) {
-          return snap.exists() ? snap.data() : null;
-        }).catch(function () { return null; });
+          return snap.exists() ? Object.assign({ uid: uid }, snap.data()) : { uid: uid };
+        }).catch(function () { return { uid: uid }; });
       })).then(function (users) {
-        var avatarsHtml = users.filter(Boolean).map(function (u) {
+        var avatarsHtml = users.map(function (u) {
           return u.avatar
-            ? '<img src="' + esc(u.avatar) + '" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:cover;border:2px solid var(--gh-bg,#0d111f);margin-right:-6px">'
-            : '<div style="width:22px;height:22px;border-radius:50%;background:#6d3fd9;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:.55rem;font-weight:700;border:2px solid var(--gh-bg,#0d111f);margin-right:-6px">' + esc((u.fullName || 'U').charAt(0).toUpperCase()) + '</div>';
+            ? '<img src="' + esc(u.avatar) + '" alt="" class="gh-mutual-av">'
+            : '<span class="gh-mutual-av gh-mutual-av-init">' + esc((u.fullName || 'U').charAt(0).toUpperCase()) + '</span>';
         }).join('');
-        container.innerHTML = '<div style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--gh-muted,#64748b)">'
-          + '<div style="display:flex;padding-right:6px">' + avatarsHtml + '</div>'
-          + mutualUids.length + ' mutual friend' + (mutualUids.length !== 1 ? 's' : '')
-          + '</div>';
+        var names = users.map(function(u){ return u.fullName||''; }).filter(Boolean).slice(0,2);
+        var nameStr = names.join(', ') + (mutualUids.length > 2 ? ' და კიდევ ' + (mutualUids.length - 2) : '');
+        container.innerHTML =
+          '<button class="gh-mutual-row" data-mutual-uid="' + esc(otherUserId) + '">' +
+            '<div class="gh-mutual-avs">' + avatarsHtml + '</div>' +
+            '<span class="gh-mutual-text"><strong>' + mutualUids.length + '</strong> საერთო მეგობარი' +
+              (nameStr ? '<span class="gh-mutual-names"> · ' + esc(nameStr) + '</span>' : '') +
+            '</span>' +
+          '</button>';
+        _bindMutualBtn(container, otherUserId, mutualUids, users);
       }).catch(function () {
-        container.innerHTML = '<span style="font-size:.82rem;color:var(--gh-muted,#64748b)">' + mutualUids.length + ' mutual friends</span>';
+        container.innerHTML = '<button class="gh-mutual-row" data-mutual-uid="' + esc(otherUserId) + '">' + label + '</button>';
+        _bindMutualBtn(container, otherUserId, mutualUids, []);
       });
+    });
+  }
+
+  function _bindMutualBtn(container, otherUserId, mutualUids, previewUsers) {
+    var btn = container.querySelector('[data-mutual-uid]');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      _openMutualModal(otherUserId, mutualUids, previewUsers);
+    });
+  }
+
+  function _openMutualModal(otherUserId, mutualUids, previewUsers) {
+    var existing = document.getElementById('ghMutualOverlay');
+    if (existing) existing.remove();
+    var ov = document.createElement('div');
+    ov.id = 'ghMutualOverlay';
+    ov.className = 'pf-modal-overlay';
+    ov.innerHTML =
+      '<div class="pf-modal">' +
+        '<div class="pf-modal-head">' +
+          '<h3>საერთო მეგობრები (' + mutualUids.length + ')</h3>' +
+          '<button class="pf-modal-close" id="ghMutualClose"><i class="fas fa-times"></i></button>' +
+        '</div>' +
+        '<div class="pf-modal-list" id="ghMutualList">' +
+          '<div class="pf-modal-loading"><i class="fas fa-spinner fa-spin"></i></div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(ov);
+    ov.querySelector('#ghMutualClose').onclick = function () { ov.remove(); };
+    ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
+
+    var GF = window.GeoFirebase;
+    if (!GF || !GF.db || !GF.fs) {
+      var list = document.getElementById('ghMutualList');
+      if (list) list.innerHTML = '<div class="pf-modal-empty"><i class="fas fa-users"></i><span>Firestore მიუწვდომელია</span></div>';
+      return;
+    }
+    Promise.all(mutualUids.map(function (uid) {
+      return GF.fs.getDoc(GF.fs.doc(GF.db, 'users', uid)).then(function (snap) {
+        return snap.exists() ? Object.assign({ uid: uid }, snap.data()) : { uid: uid, fullName: 'User' };
+      }).catch(function () { return { uid: uid, fullName: 'User' }; });
+    })).then(function (users) {
+      var list = document.getElementById('ghMutualList');
+      if (!list) return;
+      if (!users.length) { list.innerHTML = '<div class="pf-modal-empty"><i class="fas fa-users"></i><span>საერთო მეგობარი არ არის</span></div>'; return; }
+      list.innerHTML = users.map(function (u) {
+        var href = 'profile.html?uid=' + encodeURIComponent(u.uid);
+        var av = u.avatar
+          ? '<img src="' + esc(u.avatar) + '" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover">'
+          : '<div style="width:44px;height:44px;border-radius:50%;background:#6d3fd9;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.85rem;font-weight:700">' + esc((u.fullName || 'U').charAt(0).toUpperCase()) + '</div>';
+        return '<div class="pf-modal-user">' +
+          '<a href="' + esc(href) + '">' + av + '</a>' +
+          '<div class="pf-modal-user-info">' +
+            '<a class="pf-modal-user-name" href="' + esc(href) + '">' + esc(u.fullName || 'User') + '</a>' +
+            (u.username ? '<span class="pf-modal-user-sub">@' + esc(u.username) + '</span>' : '') +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }).catch(function () {
+      var list = document.getElementById('ghMutualList');
+      if (list) list.innerHTML = '<div class="pf-modal-empty"><i class="fas fa-triangle-exclamation"></i><span>ჩატვირთვა ვერ მოხერხდა</span></div>';
     });
   }
 
