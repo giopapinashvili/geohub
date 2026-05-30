@@ -18,6 +18,22 @@
       sponsored:'სპონსორირებული', trending:'ტრენდული',
       schedulePost:'Post-ის დაგეგმვა', draftSaved:'✏️ Draft შენახულია',
       repost:'Repost', coAuthor:'Co-Author',
+      coinsSent:'💰 გაიგზავნა {amt} GeoCoins {name}-ს!',
+      nowLive:'🔴 ახლა Live ხარ!', goLive:'🔴 Live-ში შესვლა', liveError:'Live ვერ დაიწყო',
+      liveLoadErr:'Live სტატუსი ვერ ჩაიტვირთა',
+      savedCol:'კოლექციაში შენახული ✓', removedCol:'კოლექციიდან ამოიღება',
+      colCreated:'კოლექცია შეიქმნა ✓',
+      postPinned:'📌 პროფილზე დამაგრებული!', postUnpinned:'პოსტი მოხსნილია',
+      pinErr:'დამაგრება ვერ მოხდა',
+      imgUploading:'სურათი იტვირთება…', imgUpdated:'სურათი განახლდა',
+      imgUploadFail:'ატვირთვა ვერ მოხდა',
+      gpsNotAvail:'GPS ამ მოწყობილობაზე მიუწვდომელია',
+      locFilled:'ლოკაცია შეივსო',
+      notLoggedIn:'შესვლა საჭიროა', accessDenied:'წვდომა უარყოფილია',
+      dbUnavail:'მონაცემთა ბაზა მიუწვდომელია',
+      bizNameReq:'ბიზნესის სახელი სავალდებულოა',
+      urlHttps:'URL უნდა იწყებოდეს https://-ით',
+      imgReadErr:'სურათი ვერ წაიკითხა',
     },
     en:{
       writePost:"What's on your mind?", comment:'Write a comment…',
@@ -30,6 +46,22 @@
       sponsored:'Sponsored', trending:'Trending',
       schedulePost:'Schedule post', draftSaved:'✏️ Draft saved',
       repost:'Repost', coAuthor:'Co-Author',
+      coinsSent:'💰 Sent {amt} GeoCoins to {name}!',
+      nowLive:'🔴 You are now LIVE!', goLive:'🔴 Go Live!', liveError:'Could not start live',
+      liveLoadErr:'Could not load live status',
+      savedCol:'Saved to collection ✓', removedCol:'Removed from collection',
+      colCreated:'Collection created ✓',
+      postPinned:'📌 Pinned to your profile!', postUnpinned:'Post unpinned from profile',
+      pinErr:'Could not pin',
+      imgUploading:'Uploading image…', imgUpdated:'Image updated',
+      imgUploadFail:'Upload failed',
+      gpsNotAvail:'GPS not available on this device',
+      locFilled:'Location filled',
+      notLoggedIn:'Not logged in', accessDenied:'Access denied',
+      dbUnavail:'Database unavailable',
+      bizNameReq:'Business name required',
+      urlHttps:'Website should start with https://',
+      imgReadErr:'Image could not be read',
     },
     ru:{
       writePost:'Что у вас нового?', comment:'Написать комментарий…',
@@ -42,6 +74,22 @@
       sponsored:'Реклама', trending:'В тренде',
       schedulePost:'Запланировать', draftSaved:'✏️ Черновик сохранён',
       repost:'Репост', coAuthor:'Соавтор',
+      coinsSent:'💰 Отправлено {amt} GeoCoins для {name}!',
+      nowLive:'🔴 Вы в эфире!', goLive:'🔴 Начать трансляцию', liveError:'Не удалось начать',
+      liveLoadErr:'Не удалось загрузить статус',
+      savedCol:'Сохранено в коллекцию ✓', removedCol:'Удалено из коллекции',
+      colCreated:'Коллекция создана ✓',
+      postPinned:'📌 Закреплено в профиле!', postUnpinned:'Пост откреплён',
+      pinErr:'Не удалось закрепить',
+      imgUploading:'Загрузка изображения…', imgUpdated:'Фото обновлено',
+      imgUploadFail:'Ошибка загрузки',
+      gpsNotAvail:'GPS недоступен на этом устройстве',
+      locFilled:'Местоположение заполнено',
+      notLoggedIn:'Не авторизован', accessDenied:'Доступ запрещён',
+      dbUnavail:'База данных недоступна',
+      bizNameReq:'Название бизнеса обязательно',
+      urlHttps:'Сайт должен начинаться с https://',
+      imgReadErr:'Изображение не удалось прочитать',
     }
   };
   var _ghLang='ka';
@@ -375,7 +423,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
   }
   function readFileAsDataUrl(file){ return new Promise(function(resolve,reject){ if(!file) return resolve(''); if(!/^image\/(png|jpe?g|webp|gif)$/i.test(file.type||'')) return reject(new Error('Use a PNG, JPG, WEBP or GIF image.')); if(file.size > 8 * 1024 * 1024) return reject(new Error('Image must be under 8 MB.')); var r=new FileReader(); r.onload=function(){ resolve(r.result||''); }; r.onerror=reject; r.readAsDataURL(file); }); }
-  function triggerImagePick(cb){ var input=document.createElement('input'); input.type='file'; input.accept='image/png,image/jpeg,image/webp,image/gif'; input.style.display='none'; document.body.appendChild(input); input.onchange=function(){ var f=input.files && input.files[0]; readFileAsDataUrl(f).then(function(url){ cb(url, f); }).catch(function(err){ toast(err.message || 'Image could not be read','error'); }).finally(function(){ input.remove(); }); }; input.click(); }
+  function triggerImagePick(cb){ var input=document.createElement('input'); input.type='file'; input.accept='image/png,image/jpeg,image/webp,image/gif'; input.style.display='none'; document.body.appendChild(input); input.onchange=function(){ var f=input.files && input.files[0]; readFileAsDataUrl(f).then(function(url){ cb(url, f); }).catch(function(err){ toast(err.message || t('imgReadErr'),'error'); }).finally(function(){ input.remove(); }); }; input.click(); }
   function iconFor(type){ return ({post:'fa-newspaper',business:'fa-store',group:'fa-users',place:'fa-map-marker-alt',event:'fa-calendar',service:'fa-briefcase',reward:'fa-gift',challenge:'fa-trophy',learning:'fa-graduation-cap',creator:'fa-user-astronaut'})[type] || 'fa-circle'; }
   function labelFor(type){ return ({post:'Post',business:'Business',group:'Group',place:'Place',event:'Event',service:'Service',reward:'Reward',challenge:'Challenge',learning:'Learning',creator:'Creator'})[type] || text(type,'Item'); }
   function toast(msg, type){ if(window.GeoSocial && window.GeoSocial.toast) return window.GeoSocial.toast(msg,type); var old=$('.gh-toast'); if(old) old.remove(); var el=document.createElement('div'); el.className='gh-toast'+(type==='error'?' error':''); el.textContent=msg; document.body.appendChild(el); requestAnimationFrame(function(){el.classList.add('show');}); setTimeout(function(){el.classList.remove('show'); setTimeout(function(){el.remove();},250);},2300); }
@@ -5758,7 +5806,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               from:u.uid, to:targetUid, amount:amt, type:'tip', createdAt:fs().serverTimestamp()
             });
             batch.commit().then(function(){
-              toast('💰 Sent '+amt+' GeoCoins to '+targetName+'!');
+              toast(t('coinsSent').replace('{amt}',amt).replace('{name}',targetName));
               tipModal.remove();
             }).catch(function(err){ toast(_srt('action_failed','Action failed.'),'error'); stBtn.disabled=false; stBtn.innerHTML=_srt('send_tip','Send Tip'); });
           };
@@ -5902,9 +5950,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           f.updateDoc(f.doc(d,'users',u.uid),{isLive:true,liveUrl:url.trim(),liveTitle:title.trim(),liveStartedAt:f.serverTimestamp()})
             .then(function(){
               if(m) m.remove();
-              toast('🔴 You are now LIVE!');
+              toast(t('nowLive'));
               _updateLiveBadge(true);
-            }).catch(function(e){ toast('Could not start live: '+(e.message||e.code),'error'); startBtn.disabled=false; startBtn.textContent='🔴 Go Live!'; });
+            }).catch(function(e){ toast(t('liveError')+': '+(e.message||e.code),'error'); startBtn.disabled=false; startBtn.textContent=t('goLive'); });
         });
       } else {
         // Phase 66: real-time viewer count
@@ -5951,7 +5999,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             }).catch(function(e){ toast(_srt('action_failed','Action failed.'),'error'); endBtn.disabled=false; endBtn.textContent='🔴 End Live'; });
         });
       }
-    }).catch(function(){ toast('Could not load live status','error'); });
+    }).catch(function(){ toast(t('liveLoadErr'),'error'); });
   }
 
   function _updateLiveBadge(isLive){
@@ -6080,7 +6128,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             var colId=btn.dataset.colId, isSaved=btn.dataset.colSaved==='1';
             var ref=fs().doc(db(),'users',uid,'collections',colId);
             (isSaved?fs().updateDoc(ref,{postIds:fs().arrayRemove(pid)}):fs().updateDoc(ref,{postIds:fs().arrayUnion(pid)}))
-              .then(function(){ loadCols(); toast(isSaved?'Removed from collection':'Saved to collection ✓'); })
+              .then(function(){ loadCols(); toast(isSaved?t('removedCol'):t('savedCol')); })
               .catch(function(){});
           };
         });
@@ -6093,7 +6141,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var name=(nameEl&&nameEl.value||'').trim(); if(!name) return;
       createBtn.disabled=true;
       fs().addDoc(fs().collection(db(),'users',uid,'collections'),{name:name,postIds:[pid],createdAt:fs().serverTimestamp()})
-        .then(function(){ if(nameEl) nameEl.value=''; createBtn.disabled=false; loadCols(); toast('Collection created ✓'); })
+        .then(function(){ if(nameEl) nameEl.value=''; createBtn.disabled=false; loadCols(); toast(t('colCreated')); })
         .catch(function(){ createBtn.disabled=false; toast(typeof GHt==='function'?GHt('error_creating'):'Error creating collection','error'); });
     };
     var nameEl2=document.getElementById('ghNewColName');
@@ -6107,9 +6155,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     fs().getDoc(ref).then(function(snap){
       var d=snap.data()||{}, alreadyPinned=d.pinnedPostId===pid;
       return fs().updateDoc(ref,{pinnedPostId:alreadyPinned?'':pid}).then(function(){
-        toast(alreadyPinned?'Post unpinned from profile':'📌 Pinned to your profile!');
+        toast(alreadyPinned?t('postUnpinned'):t('postPinned'));
       });
-    }).catch(function(err){ toast('Could not pin: '+(err.message||err.code),'error'); });
+    }).catch(function(err){ toast(t('pinErr')+': '+(err.message||err.code),'error'); });
   }
 
   function loadCreatorWidget(uid){
@@ -8061,7 +8109,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(tab){ state.currentBusinessTab=tab.dataset.bizTab; $all('[data-biz-tab]').forEach(function(x){x.classList.toggle('active',x===tab);}); renderBusinessTab(b); return; }
       var fl=e.target.closest('[data-follow-business]'); if(fl){ followBusiness(b.id); return; }
       var sv=e.target.closest('[data-save-item]'); if(sv){ if(!requireLogin())return; GS().toggleSaveItem(sv.dataset.type,sv.dataset.id); return; }
-      var msg=e.target.closest('[data-message-business]'); if(msg){ var bizId=msg.dataset.messageBusiness; var oid=msg.dataset.messageOwner; if(!oid) return toast('Business owner not available','error'); if(!requireLogin()) return; GS().startBusinessConversation(bizId,oid,function(cid){ location.href='messages.html?business='+encodeURIComponent(bizId)+'&cid='+encodeURIComponent(cid); }); return; }
+      var msg=e.target.closest('[data-message-business]'); if(msg){ var bizId=msg.dataset.messageBusiness; var oid=msg.dataset.messageOwner; if(!oid) return toast(t('accessDenied'),'error'); if(!requireLogin()) return; GS().startBusinessConversation(bizId,oid,function(cid){ location.href='messages.html?business='+encodeURIComponent(bizId)+'&cid='+encodeURIComponent(cid); }); return; }
       var edit=e.target.closest('[data-edit-business]'); if(edit) location.href='add-business.html?edit='+encodeURIComponent(b.id);
       var cta=e.target.closest('[data-track-cta]'); if(cta&&state.currentBizId) bizTrack(state.currentBizId,cta.dataset.trackCta);
     };
@@ -8079,7 +8127,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
     function doUpload(file, field, onSuccess) {
       if (!file || !window.GeoSocial) return;
-      toast('Uploading image…');
+      toast(t('imgUploading'));
       var reader = new FileReader();
       reader.onload = function() {
         window.GeoSocial.uploadImageDataUrl(reader.result, 'businesses')
@@ -8088,9 +8136,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             var patch = { updatedAt: fs().serverTimestamp() };
             patch[field] = url;
             return fs().updateDoc(fs().doc(db(), 'businesses', b.id), patch)
-              .then(function() { toast('Image updated'); onSuccess(url); });
+              .then(function() { toast(t('imgUpdated')); onSuccess(url); });
           })
-          .catch(function(err) { toast('Upload failed: ' + (err.message || err), 'error'); });
+          .catch(function(err) { toast(t('imgUploadFail')+': ' + (err.message || err), 'error'); });
       };
       reader.readAsDataURL(file);
     }
@@ -8329,7 +8377,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     $('#dsSaveBtn').onclick=function(){ saveBizSettings(b); };
     var dsLocBtn=$('#dsGetLocBtn');
     if(dsLocBtn) dsLocBtn.onclick=function(){
-      if(!navigator.geolocation){ toast('GPS not available on this device','error'); return; }
+      if(!navigator.geolocation){ toast(t('gpsNotAvail'),'error'); return; }
       var _glbt=typeof GHt==='function'?GHt:function(k){return k;};
       dsLocBtn.disabled=true; dsLocBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> '+_glbt('bd_set_getting_loc');
       navigator.geolocation.getCurrentPosition(function(pos){
@@ -8339,7 +8387,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(latEl) latEl.value=lat;
         if(lngEl) lngEl.value=lng;
         dsLocBtn.disabled=false; dsLocBtn.innerHTML='<i class="fas fa-location-crosshairs"></i> '+_glbt('bd_set_use_loc');
-        toast('Location filled: '+lat+', '+lng);
+        toast(t('locFilled')+': '+lat+', '+lng);
       },function(err){
         dsLocBtn.disabled=false; dsLocBtn.innerHTML='<i class="fas fa-location-crosshairs"></i> '+_glbt('bd_set_use_loc');
         var msgs={1:'Location permission denied.',2:'Signal unavailable.',3:'Request timed out.'};
@@ -8358,18 +8406,18 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function saveBizSettings(b){
     var u=authUser();
-    if(!u||!u.uid) return toast('Not logged in','error');
-    if(b.ownerId!==u.uid&&b.createdBy!==u.uid&&b.userId!==u.uid) return toast('Access denied','error');
-    if(!fs()||!db()) return toast('Database unavailable','error');
+    if(!u||!u.uid) return toast(t('notLoggedIn'),'error');
+    if(b.ownerId!==u.uid&&b.createdBy!==u.uid&&b.userId!==u.uid) return toast(t('accessDenied'),'error');
+    if(!fs()||!db()) return toast(t('dbUnavail'),'error');
     var title=($('#dsTitle').value||'').trim();
-    if(!title) return toast('Business name required','error');
+    if(!title) return toast(t('bizNameReq'),'error');
     // Soft validation — warn but don't hard-block
     var website=($('#dsWebsite').value||'').trim();
     var booking=($('#dsBooking').value||'').trim();
     var email=($('#dsEmail').value||'').trim();
     var li=($('#dsLi').value||'').trim();
-    if(website&&!isValidUrl(website)) return toast('Website should start with https://','error');
-    if(booking&&!isValidUrl(booking)) return toast('Booking URL should start with https://','error');
+    if(website&&!isValidUrl(website)) return toast(t('urlHttps'),'error');
+    if(booking&&!isValidUrl(booking)) return toast(t('urlHttps'),'error');
     if(li&&!isValidUrl(li)) return toast('LinkedIn URL should start with https://','error');
     if(email&&!isValidEmail(email)) return toast('Email address looks invalid','error');
     var wh=readWorkingHoursFromForm();
@@ -10325,8 +10373,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var serviceAreaText=businessType==='online' ? (serviceArea==='worldwide'?'Worldwide / Remote':serviceArea==='regions'?'Selected Georgian regions':serviceArea==='tbilisi'?'Tbilisi only':serviceArea==='batumi'?'Batumi only':'Available across Georgia') : (city?city+', Georgia':'Local business');
         var catEl=document.querySelector('.cat-option.selected');
         var category=catEl && catEl.dataset ? catEl.dataset.cat : '';
-        if(!name){ toast('Business name is required','error'); return; }
-        if(businessType !== 'online' && !city){ toast('City is required for physical businesses','error'); return; }
+        if(!name){ toast(t('bizNameReq'),'error'); return; }
+        if(businessType !== 'online' && !city){ toast(_srt('city_required','City is required'),'error'); return; }
         var data={
           name:name,
           title:name,

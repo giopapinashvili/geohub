@@ -1369,3 +1369,40 @@ body, html { height: 100%; overflow: hidden; }
   border-color: var(--dm-color, #10b981);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--dm-color, #10b981) 18%, transparent);
 }
+
+/* ── Check-in Reward Toast ─────────────────────────── */
+.map-checkin-toast--reward {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px !important;
+  min-width: 220px;
+}
+.map-checkin-reward-link {
+  color: var(--gh-green);
+  font-weight: 700;
+  font-size: 12px;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--gh-green) 15%, transparent);
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--gh-green) 30%, transparent);
+}
+.map-checkin-reward-link:hover { opacity: 0.85; }
+
+/* ── Place Social Proof ────────────────────────────── */
+.mpd-social-proof {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gh-green);
+  background: color-mix(in srgb, var(--gh-green) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--gh-green) 25%, transparent);
+  border-radius: 8px;
+  padding: 5px 10px;
+  margin-bottom: 4px;
+}

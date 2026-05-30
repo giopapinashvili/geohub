@@ -470,7 +470,7 @@
               + (p.rating ? '<div class="map-result-footer"><span class="rating-display">' + renderStars(p.rating) + '</span></div>' : '')
               + '</div></div>';
           }).join('')
-        : '<div style="padding:20px;text-align:center;color:var(--text-muted)"><i class="fas fa-map-marker-alt" style="font-size:1.4rem;margin-bottom:8px;display:block"></i>No real places added yet.</div>';
+        : '<div style="padding:20px;text-align:center;color:var(--text-muted)"><i class="fas fa-map-marker-alt" style="font-size:1.4rem;margin-bottom:8px;display:block"></i>' + (window.GHt ? window.GHt('ci_no_places') : 'No places added yet.') + '</div>';
       results.querySelectorAll('.map-result-card').forEach(card => card.addEventListener('click', () => focusPlace(card.dataset.id)));
     }
 
@@ -1226,16 +1226,18 @@
   }
 
   function _showStreakToast(streak, xpGained) {
+    const _t = window.GHt || (k => k);
     const msg = streak > 1
-      ? '🔥 ' + streak + '-day streak! +' + xpGained + ' XP'
-      : '✅ Checked in! +' + xpGained + ' XP';
-    if (window.GeoSocial && window.GeoSocial.toast) { window.GeoSocial.toast(msg); return; }
+      ? _t('ci_streak_n').replace('{n}', streak).replace('{xp}', xpGained)
+      : _t('ci_streak_1').replace('{xp}', xpGained);
+    const rewardLabel = _t('ci_view_rewards');
     const el = document.createElement('div');
-    el.className = 'map-checkin-toast';
-    el.textContent = msg;
+    el.className = 'map-checkin-toast map-checkin-toast--reward';
+    el.innerHTML = '<span>' + msg + '</span>' +
+      '<a href="rewards.html" class="map-checkin-reward-link">' + rewardLabel + '</a>';
     document.body.appendChild(el);
     setTimeout(() => el.classList.add('map-checkin-toast--show'), 10);
-    setTimeout(() => { el.classList.remove('map-checkin-toast--show'); setTimeout(() => el.remove(), 400); }, 3000);
+    setTimeout(() => { el.classList.remove('map-checkin-toast--show'); setTimeout(() => el.remove(), 400); }, 4000);
   }
 
   function _openReviewModal(placeId, p, GF, user) {
@@ -1246,16 +1248,17 @@
     const modal = document.createElement('div');
     modal.id = 'mapReviewModal';
     modal.className = 'map-review-overlay';
+    const _t = window.GHt || (k => k);
     modal.innerHTML = `
       <div class="map-review-modal">
         <button class="map-review-close" id="reviewClose"><i class="fas fa-times"></i></button>
-        <div class="map-review-title">Rate your visit</div>
+        <div class="map-review-title">${_t('ci_rate_visit')}</div>
         <div class="map-review-place">${esc(p.name)}</div>
         <div class="map-review-stars" id="reviewStars">
           ${[1,2,3,4,5].map(i => `<button class="map-review-star" data-star="${i}">★</button>`).join('')}
         </div>
-        <textarea class="map-review-text" id="reviewText" placeholder="Share your experience… (optional)" rows="3"></textarea>
-        <button class="map-review-submit" id="reviewSubmit" disabled>Skip</button>
+        <textarea class="map-review-text" id="reviewText" placeholder="${_t('ci_share_exp')}" rows="3"></textarea>
+        <button class="map-review-submit" id="reviewSubmit" disabled>${_t('ci_skip')}</button>
       </div>`;
     document.body.appendChild(modal);
     setTimeout(() => modal.classList.add('open'), 10);
@@ -1267,7 +1270,7 @@
       rating = Number(btn.dataset.star);
       stars.forEach(s => s.classList.toggle('active', Number(s.dataset.star) <= rating));
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Submit review';
+      submitBtn.textContent = _t('ci_submit_review');
     }));
 
     function close() { modal.classList.remove('open'); setTimeout(() => modal.remove(), 280); }
@@ -1275,9 +1278,9 @@
     modal.addEventListener('click', e => { if (e.target === modal) close(); });
 
     submitBtn.onclick = () => {
-      if (submitBtn.textContent === 'Skip') { close(); return; }
+      if (!rating) { close(); return; }
       const text = (document.getElementById('reviewText') || {}).value || '';
-      submitBtn.disabled = true; submitBtn.textContent = 'Saving…';
+      submitBtn.disabled = true; submitBtn.textContent = _t('ci_saving');
       const reviewData = {
         userId: user.uid,
         userName: user.displayName || user.email || 'GeoHub User',
@@ -1304,7 +1307,8 @@
   }
 
   function _showReviewThanks() {
-    const msg = '⭐ Review saved — thanks!';
+    const _t = window.GHt || (k => k);
+    const msg = _t('ci_review_thanks');
     if (window.GeoSocial && window.GeoSocial.toast) { window.GeoSocial.toast(msg); return; }
     const el = document.createElement('div');
     el.className = 'map-checkin-toast';
@@ -1331,12 +1335,16 @@
       pos => {
         const dist = _haversineKm(pos.coords.latitude, pos.coords.longitude, p.lat, p.lng);
         if (dist > 0.01) {
-          if (window.GeoSocial && window.GeoSocial.toast) window.GeoSocial.toast('You need to be within 10m of this place to check in. (You are ' + Math.round(dist * 1000) + 'm away)');
+          const _t = window.GHt || (k => k);
+          if (window.GeoSocial && window.GeoSocial.toast) window.GeoSocial.toast(_t('ci_too_far').replace('{m}', Math.round(dist * 1000)));
           return;
         }
         _doCheckin(placeId, p, GF, user);
       },
-      () => { if (window.GeoSocial && window.GeoSocial.toast) window.GeoSocial.toast('Please enable location access to check in.'); },
+      () => {
+        const _t = window.GHt || (k => k);
+        if (window.GeoSocial && window.GeoSocial.toast) window.GeoSocial.toast(_t('ci_enable_loc'));
+      },
       { timeout: 8000, maximumAge: 60000, enableHighAccuracy: false }
     );
   };
@@ -2405,6 +2413,7 @@
     }
 
     // Async-loaded sections
+    h += '<div id="mpdSocialProof" class="mpd-async-section"></div>';
     h += '<div id="mpdActivityChart" class="mpd-async-section"></div>';
     h += '<div id="mpdFriendsSection" class="mpd-async-section"></div>';
 
@@ -2412,9 +2421,29 @@
 
     const GF = window.GeoFirebase;
     if (GF && GF.db && GF.fs) {
+      _mpdLoadSocialProof(p.id, GF);
       _mpdLoadActivityChart(p.id, GF);
       _mpdLoadFriendsVisited(p.id, GF);
     }
+  }
+
+  function _mpdLoadSocialProof(pid, GF) {
+    const el = document.getElementById('mpdSocialProof');
+    if (!el) return;
+    const since7d = new Date(Date.now() - 7 * 86400000);
+    const since = GF.fs.Timestamp ? GF.fs.Timestamp.fromDate(since7d) : since7d;
+    GF.fs.getDocs(GF.fs.query(
+      GF.fs.collection(GF.db, 'placeCheckins'),
+      GF.fs.where('placeId', '==', pid),
+      GF.fs.where('checkedInAt', '>=', since),
+      GF.fs.limit(200)
+    )).then(snap => {
+      if (snap.empty) return;
+      const n = snap.size;
+      const _t = window.GHt || (k => k);
+      const label = n === 1 ? _t('ci_social_week').replace('{n}', n) : _t('ci_social_weeks').replace('{n}', n);
+      if (el) el.innerHTML = '<div class="mpd-social-proof"><i class="fas fa-users"></i> ' + label + '</div>';
+    }).catch(() => {});
   }
 
   function _mpdLoadActivityChart(pid, GF) {

@@ -1373,6 +1373,22 @@
     /* ── Map ────────────────────────────────────────────────── */
     map_search_ph:     { ka: 'ადგილის ძებნა…',                en: 'Search places…',                              ru: 'Поиск мест…'                },
     map_live_title:    { ka: 'ლაივ მეგობრები',                en: 'Live Friends & Location',                     ru: 'Друзья рядом'               },
+
+    ci_streak_1:       { ka: '✅ ჩეკ-ინი! +{xp} XP',          en: '✅ Checked in! +{xp} XP',                     ru: '✅ Отметился! +{xp} XP'      },
+    ci_streak_n:       { ka: '🔥 {n}-დღიანი სერია! +{xp} XP', en: '🔥 {n}-day streak! +{xp} XP',                ru: '🔥 Серия {n} дней! +{xp} XP' },
+    ci_view_rewards:   { ka: 'ჯილდოების ნახვა →',             en: 'View Rewards →',                              ru: 'Смотреть награды →'          },
+    ci_review_thanks:  { ka: '⭐ შეფასება შენახულია!',         en: '⭐ Review saved — thanks!',                   ru: '⭐ Отзыв сохранён!'           },
+    ci_rate_visit:     { ka: 'შეაფასე შენი ვიზიტი',           en: 'Rate your visit',                             ru: 'Оцените визит'               },
+    ci_share_exp:      { ka: 'გაუზიარე გამოცდილება… (სურვ.)', en: 'Share your experience… (optional)',           ru: 'Поделитесь впечатлением…'    },
+    ci_skip:           { ka: 'გამოტოვება',                    en: 'Skip',                                        ru: 'Пропустить'                  },
+    ci_submit_review:  { ka: 'გამოქვეყნება',                  en: 'Submit review',                               ru: 'Опубликовать'                },
+    ci_saving:         { ka: 'ინახება…',                      en: 'Saving…',                                     ru: 'Сохраняется…'                },
+    ci_too_far:        { ka: 'ჩეკ-ინისთვის 10 მ-ის ფარგლებში უნდა იყო. (შენ {m}მ-ში ხარ)', en: 'You need to be within 10m to check in. ({m}m away)', ru: 'Нужно быть в 10м от места. ({m}м)' },
+    ci_enable_loc:     { ka: 'ჩეკ-ინისთვის ჩართე ლოკაცია.',  en: 'Please enable location access to check in.', ru: 'Включите геолокацию для отметки.' },
+    ci_no_places:      { ka: 'ჯერ ვერცერთი ადგილი არ არის.',  en: 'No places added yet.',                       ru: 'Мест пока нет.'              },
+    ci_social_week:    { ka: '{n} ვიზიტი ამ კვირაში',         en: '{n} visit this week',                         ru: '{n} визит на этой неделе'    },
+    ci_social_weeks:   { ka: '{n} ვიზიტი ამ კვირაში',         en: '{n} visits this week',                        ru: '{n} визитов на этой неделе'  },
+    ci_firebase_wait:  { ka: 'Firebase-ი ჯერ მზად არ არის',   en: 'Firebase not ready',                         ru: 'Firebase не готов'           },
   };
 
   /* ── Core t() function ───────────────────────────────────── */
