@@ -1278,6 +1278,16 @@ service cloud.firestore {
     match /collections/{collectionId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
     match /routes/{routeId}            { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
 
+    // ── MARKETPLACE ───────────────────────────────────────────────────────────
+    match /marketplace/{itemId} {
+      allow read: if true;
+      allow create: if newOwnerMatches()
+        && request.resource.data.get('title', '') != ''
+        && request.resource.data.get('status', '') == 'active';
+      allow update: if isAdmin() || existingOwnerMatches();
+      allow delete: if isAdmin() || existingOwnerMatches();
+    }
+
     // ── UI STATE & FLAGS ──────────────────────────────────────────────────────
 
     match /userUiState/{userId} {

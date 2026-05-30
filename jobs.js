@@ -193,11 +193,14 @@ function wireFilters(){
 
 function openPostModal(gf){
   var fs = gf.fs, db = gf.db;
-  var user = (window.GeoFirebaseAuth && window.GeoFirebaseAuth.currentUser)
+  var user = (window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser)
+    || (window.GeoFirebaseAuth && window.GeoFirebaseAuth.currentUser)
     || (window.GeoAuth && typeof window.GeoAuth.currentUser === 'function' && window.GeoAuth.currentUser());
 
   if(!user){
-    alert('ვაკანსიის განთავსებისთვის გთხოვთ გაიაროთ ავტორიზაცია.');
+    if(window.GeoFirebase && window.GeoFirebase.auth){
+      window.GeoFirebase.auth.onAuthStateChanged(function(u){ if(u) openPostModal(gf); });
+    }
     return;
   }
 

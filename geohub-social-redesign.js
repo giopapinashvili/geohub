@@ -8260,7 +8260,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(!newBadges.length) return;
         newBadges.forEach(function(b){
           fs().setDoc(fs().doc(db(),'users',uid,'badges',b.id),{
-            badgeId:b.id, title:b.title, description:b.desc,
+            userId:uid, badgeId:b.id, title:b.title, description:b.desc,
             icon:b.icon, emoji:b.emoji, rarity:b.rarity,
             awardedAt:fs().serverTimestamp()
           },{merge:true}).catch(function(){});
@@ -9371,8 +9371,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function businessListCard(b){
-    var title=b.title||b.name||'Untitled business'; var photo=b.coverUrl||getItemCover(b);
-    return '<article class="gh-card gh-item-card"><div class="gh-item-media">'+itemMediaHtml(photo,title,'fa-store')+'<span class="gh-type-badge"><i class="fas fa-store"></i> Business Page</span></div><div class="gh-item-body"><h3>'+esc(title)+'</h3><p>'+esc(b.description||'Business page on GeoHub')+'</p><div class="gh-item-meta"><span class="gh-chip">'+esc(b.category||'Business')+'</span>'+businessModeChip(b)+'<span class="gh-chip">'+Number(b.followerCount||0)+' followers</span></div><div class="gh-card-actions"><a class="gh-btn sm" href="business.html?id='+encodeURIComponent(b.id)+'">View Page</a><button class="gh-btn sm ghost" data-follow-business="'+esc(b.id)+'"><i class="fas fa-plus"></i> Follow</button><button class="gh-btn sm ghost" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button></div></div></article>';
+    var title=b.title||b.name||'Untitled business';
+    var cover=b.coverUrl||getItemCover(b);
+    var logo=b.logoUrl||b.logo||'';
+    var logoHtml=logo
+      ? '<img src="'+esc(logo)+'" alt="'+esc(title)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
+      : '<i class="fas fa-store" style="font-size:1.1rem"></i>';
+    var coverHtml='<div class="gh-item-media" style="position:relative">'+itemMediaHtml(cover,title,'fa-store')+'<span class="gh-type-badge"><i class="fas fa-store"></i> Business Page</span><div style="position:absolute;bottom:-18px;left:14px;width:36px;height:36px;border-radius:50%;border:2px solid #1a2235;background:#1a2235;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#94a3b8">'+logoHtml+'</div></div>';
+    return '<article class="gh-card gh-item-card">'+coverHtml+'<div class="gh-item-body" style="padding-top:22px"><h3>'+esc(title)+'</h3><p>'+esc(b.description||'Business page on GeoHub')+'</p><div class="gh-item-meta"><span class="gh-chip">'+esc(b.category||'Business')+'</span>'+businessModeChip(b)+'<span class="gh-chip">'+Number(b.followerCount||0)+' followers</span></div><div class="gh-card-actions"><a class="gh-btn sm" href="business.html?id='+encodeURIComponent(b.id)+'">View Page</a><button class="gh-btn sm ghost" data-follow-business="'+esc(b.id)+'"><i class="fas fa-plus"></i> Follow</button><button class="gh-btn sm ghost" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button></div></div></article>';
   }
 
   function renderBusinesses(){
@@ -9736,8 +9742,29 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '</div>'+
         '</div>'+
         '<div class="gh-dash-actions"><button class="gh-btn" id="dsSaveBtn"><i class="fas fa-check"></i> '+_st('bd_set_save')+'</button></div>'+
+        '<div class="gh-card" style="border-color:rgba(239,68,68,.35)">'+
+          '<div class="gh-biz-sec-head"><h3 style="color:#ef4444"><i class="fas fa-triangle-exclamation"></i> Danger Zone</h3></div>'+
+          '<p style="color:#6b7280;font-size:.85rem;margin:0 0 12px">გვერდის წაშლა შეუქცევადია. ყველა პოსტი, ფოტო და მიმდევარი წაიშლება.</p>'+
+          '<button class="gh-btn" id="dsBizDeleteBtn" style="background:rgba(239,68,68,.15);color:#ef4444;border-color:rgba(239,68,68,.35)"><i class="fas fa-trash"></i> გვერდის წაშლა</button>'+
+        '</div>'+
       '</div>';
     $('#dsSaveBtn').onclick=function(){ saveBizSettings(b); };
+    var dsBizDelBtn=$('#dsBizDeleteBtn');
+    if(dsBizDelBtn) dsBizDelBtn.onclick=function(){
+      var u=authUser(); if(!u) return;
+      window.ghConfirm('გვერდი "'+esc(b.title||b.name||'Business')+'" სამუდამოდ წაიშლება. ეს შეუქცევადია!', function(){
+        dsBizDelBtn.disabled=true; dsBizDelBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> იშლება…';
+        fs().updateDoc(fs().doc(db(),'businesses',b.id),{
+          status:'deleted', deleted:true, deletedAt:fs().serverTimestamp(), deletedBy:u.uid
+        }).then(function(){
+          toast('გვერდი წაიშალა');
+          location.href='feed.html';
+        }).catch(function(err){
+          dsBizDelBtn.disabled=false; dsBizDelBtn.innerHTML='<i class="fas fa-trash"></i> გვერდის წაშლა';
+          toast('შეცდომა: '+(err.message||err),'error');
+        });
+      });
+    };
     var dsLocBtn=$('#dsGetLocBtn');
     if(dsLocBtn) dsLocBtn.onclick=function(){
       if(!navigator.geolocation){ toast(t('gpsNotAvail'),'error'); return; }
