@@ -4208,6 +4208,72 @@
       });
     }
 
+    // ── Early Adopter Program ─────────────────────────────────────────────
+    // Grants 3-month free business premium to the first 100 businesses.
+    // Firestore: meta/earlyAdopter { count, limit:100 }
+    function claimEarlyAdopter(businessId, callback) {
+      var user = auth.currentUser;
+      if (!user) { if (callback) callback({ error: 'not-signed-in' }); return; }
+      if (!businessId) { if (callback) callback({ error: 'no-business' }); return; }
+
+      var metaRef = doc(db, 'meta', 'earlyAdopter');
+      var bizRef  = doc(db, 'businesses', businessId);
+
+      runTransaction(db, function (tx) {
+        return Promise.all([tx.get(metaRef), tx.get(bizRef)]).then(function (results) {
+          var metaSnap = results[0];
+          var bizSnap  = results[1];
+
+          var meta  = metaSnap.exists() ? metaSnap.data() : { count: 0, limit: 100 };
+          var count = Number(meta.count || 0);
+          var limit = Number(meta.limit || 100);
+          if (count >= limit) throw new Error('spots-full');
+
+          if (!bizSnap.exists()) throw new Error('business-not-found');
+          var biz = bizSnap.data();
+          if (biz.ownerId !== user.uid && biz.createdBy !== user.uid) throw new Error('not-owner');
+          if (biz.isEarlyAdopter) throw new Error('already-claimed');
+
+          var now   = new Date();
+          var until = new Date(now);
+          until.setMonth(until.getMonth() + 3);
+          var newCount = count + 1;
+
+          if (metaSnap.exists()) {
+            tx.update(metaRef, { count: newCount, updatedAt: serverTimestamp() });
+          } else {
+            tx.set(metaRef, { count: newCount, limit: 100, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+          }
+
+          tx.update(bizRef, {
+            isEarlyAdopter:        true,
+            earlyAdopterNum:       newCount,
+            earlyAdopterClaimedAt: serverTimestamp(),
+            subscriptionStatus:    'active',
+            plan:                  'early_adopter',
+            premiumSince:          now.toISOString(),
+            premiumUntil:          until.toISOString(),
+            verified:              true,
+          });
+
+          return { num: newCount, premiumUntil: until.toISOString() };
+        });
+      }).then(function (result) {
+        toast('🎉 Early Adopter სტატუსი გააქტიურდა! 3 თვე Premium უფასოდ!');
+        if (callback) callback({ success: true, num: result.num, premiumUntil: result.premiumUntil });
+      }).catch(function (e) {
+        var msgs = {
+          'spots-full':        'სამწუხაროდ, ადგილები ამოიწურა.',
+          'business-not-found':'ბიზნეს გვერდი ვერ მოიძებნა.',
+          'not-owner':         'ამ ბიზნესის მფლობელი არ ხარ.',
+          'already-claimed':   'ეს ბიზნესი უკვე Early Adopter-ია.',
+        };
+        var msg = msgs[e.message] || 'შეცდომა — სცადე თავიდან';
+        toast(msg, 'error');
+        if (callback) callback({ error: e.message });
+      });
+    }
+
     // ── Public API ───────────────────────────────────────────────────────
     window.GeoSocial = {
       createPost:              createPost,
@@ -4376,6 +4442,7 @@
       redeemCoupon:            redeemCoupon,
       searchFirestore:         searchFirestore,
       findUserByInput:         findUserByInput,
+      claimEarlyAdopter:       claimEarlyAdopter,
       requireAuth:             requireAuth,
       toast:                   toast
     };
