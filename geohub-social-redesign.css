@@ -5831,3 +5831,26 @@ html[data-gh-motion="reduced"] * { animation-duration:0.001ms !important; transi
   background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);
   color:#fbbf24;padding:5px 12px;border-radius:20px;font-size:.82rem;font-weight:700
 }
+
+/* Session 5: Quiz sticker */
+.gh-story-quiz-sticker{position:absolute;bottom:220px;left:50%;transform:translateX(-50%);background:rgba(124,58,237,.92);border-radius:18px;padding:14px 16px;min-width:220px;max-width:82%;z-index:22;backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,.18)}
+.gh-quiz-st-q{color:#fff;font-size:.9rem;font-weight:700;text-align:center;margin-bottom:10px;line-height:1.3}
+.gh-quiz-st-opt{display:block;width:100%;background:rgba(255,255,255,.15);border:none;border-radius:10px;color:#fff;font-size:.82rem;padding:8px 10px;margin:4px 0;text-align:left;cursor:pointer;position:relative;overflow:hidden;transition:background .15s}
+.gh-quiz-st-opt:not([disabled]):hover{background:rgba(255,255,255,.28)}
+.gh-quiz-st-opt.correct{background:rgba(34,197,94,.45);border:1.5px solid #22c55e}
+.gh-quiz-st-opt.wrong{background:rgba(239,68,68,.35);border:1.5px solid #ef4444}
+.gh-quiz-st-opt.neutral{background:rgba(255,255,255,.08)}
+.gh-quiz-opt-bar{position:absolute;left:0;top:0;height:100%;background:rgba(255,255,255,.18);border-radius:10px;transition:width .4s ease;z-index:0;pointer-events:none}
+.gh-quiz-opt-text{position:relative;z-index:1}
+.gh-quiz-opt-pct{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:.75rem;opacity:.85;z-index:1}
+.gh-quiz-chk{position:absolute;right:28px;top:50%;transform:translateY(-50%);color:#4ade80;font-size:.8rem;z-index:1}
+.gh-quiz-st-total{color:rgba(255,255,255,.65);font-size:.72rem;text-align:center;margin:6px 0 0}
+.gh-quiz-opt-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.gh-quiz-radio{display:none}
+.gh-quiz-radio-lbl{width:20px;height:20px;border-radius:50%;border:2px solid var(--gh-border,#ddd);flex-shrink:0;cursor:pointer;transition:background .15s,border-color .15s;position:relative}
+.gh-quiz-radio:checked+.gh-quiz-radio-lbl{background:#22c55e;border-color:#22c55e}
+.gh-quiz-radio:checked+.gh-quiz-radio-lbl::after{content:"¹3";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:.65rem;font-weight:700}
+.gh-quiz-opt-input{flex:1;min-width:0}
+.gh-quiz-rm-opt{background:none;border:none;color:var(--gh-muted,#94a3b8);font-size:1.1rem;cursor:pointer;padding:0 4px;line-height:1;flex-shrink:0}
+.gh-quiz-add-opt{background:none;border:1.5px dashed var(--gh-border,#ddd);border-radius:10px;color:var(--gh-muted,#64748b);font-size:.82rem;padding:6px 12px;cursor:pointer;width:100%;margin-top:4px;transition:border-color .15s,color .15s}
+.gh-quiz-add-opt:hover{border-color:#7c3aed;color:#7c3aed}

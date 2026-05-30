@@ -2653,6 +2653,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button type="button" class="gh-cmp-tool" id="ghStoryBgBtn"><i class="fas fa-palette"></i><span> BG</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryMentionBtn"><i class="fas fa-at"></i><span> Mention</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryCdBtn"><i class="fas fa-hourglass-half"></i><span> Timer</span></button>'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryQuizBtn"><i class="fas fa-list-check"></i><span> Quiz</span></button>'+
       '</div>'+
       '<div id="ghStoryMentionWrap" style="display:none;margin-top:8px">'+
         '<div style="position:relative">'+
@@ -2665,6 +2666,32 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<input class="gh-input" id="ghStoryCdLabel" placeholder="Countdown-ის სახელი…" maxlength="60">'+
         '<input class="gh-input" id="ghStoryCdDate" type="datetime-local" style="margin-top:6px">'+
         '<div id="ghStoryCdPreview" class="gh-cd-preview-badge" style="margin-top:6px;display:none"></div>'+
+      '</div>'+
+      '<div id="ghStoryQuizWrap" style="display:none;margin-top:8px">'+
+        '<input class="gh-input" id="ghStoryQuizQ" placeholder="Quiz question…" maxlength="120" style="margin-bottom:8px">'+
+        '<div class="gh-quiz-opt-row">'+
+          '<input type="radio" name="ghQuizCorrect" value="0" id="ghQzR0" class="gh-quiz-radio">'+
+          '<label for="ghQzR0" class="gh-quiz-radio-lbl" title="სწორი პასუხი"></label>'+
+          '<input class="gh-input gh-quiz-opt-input" id="ghQzOpt0" placeholder="Option 1…" maxlength="80">'+
+        '</div>'+
+        '<div class="gh-quiz-opt-row">'+
+          '<input type="radio" name="ghQuizCorrect" value="1" id="ghQzR1" class="gh-quiz-radio">'+
+          '<label for="ghQzR1" class="gh-quiz-radio-lbl" title="სწორი პასუხი"></label>'+
+          '<input class="gh-input gh-quiz-opt-input" id="ghQzOpt1" placeholder="Option 2…" maxlength="80">'+
+        '</div>'+
+        '<div class="gh-quiz-opt-row" id="ghQzRow2" style="display:none">'+
+          '<input type="radio" name="ghQuizCorrect" value="2" id="ghQzR2" class="gh-quiz-radio">'+
+          '<label for="ghQzR2" class="gh-quiz-radio-lbl" title="სწორი პასუხი"></label>'+
+          '<input class="gh-input gh-quiz-opt-input" id="ghQzOpt2" placeholder="Option 3…" maxlength="80">'+
+          '<button type="button" class="gh-quiz-rm-opt" id="ghQzRm2">×</button>'+
+        '</div>'+
+        '<div class="gh-quiz-opt-row" id="ghQzRow3" style="display:none">'+
+          '<input type="radio" name="ghQuizCorrect" value="3" id="ghQzR3" class="gh-quiz-radio">'+
+          '<label for="ghQzR3" class="gh-quiz-radio-lbl" title="სწორი პასუხი"></label>'+
+          '<input class="gh-input gh-quiz-opt-input" id="ghQzOpt3" placeholder="Option 4…" maxlength="80">'+
+          '<button type="button" class="gh-quiz-rm-opt" id="ghQzRm3">×</button>'+
+        '</div>'+
+        '<button type="button" class="gh-quiz-add-opt" id="ghQuizAddOpt"><i class="fas fa-plus"></i> Add option</button>'+
       '</div>'+
       '<div id="ghStoryLocBadge" style="margin-top:6px;min-height:18px"></div>';
     var m=modal('Add to your story', body,
@@ -2799,6 +2826,43 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }
     if(cdDateInput) cdDateInput.addEventListener('change',_updateCdPreview);
     if(cdLabelInput) cdLabelInput.addEventListener('input',_updateCdPreview);
+
+    // ── Quiz sticker ─────────────────────────────────────────────
+    var _quizVisible=false, _quizOptCount=2;
+    var quizBtn=$('#ghStoryQuizBtn'), quizWrap=$('#ghStoryQuizWrap');
+    if(quizBtn&&quizWrap){
+      quizBtn.onclick=function(){
+        _quizVisible=!_quizVisible;
+        quizWrap.style.display=_quizVisible?'block':'none';
+        quizBtn.classList.toggle('active',_quizVisible);
+      };
+    }
+    var ghQuizAddOpt=$('#ghQuizAddOpt');
+    if(ghQuizAddOpt) ghQuizAddOpt.onclick=function(){
+      if(_quizOptCount>=4) return;
+      var row=$('#ghQzRow'+_quizOptCount);
+      if(row){ row.style.display='flex'; }
+      _quizOptCount++;
+      if(_quizOptCount>=4) ghQuizAddOpt.style.display='none';
+    };
+    var qzRm2=$('#ghQzRm2');
+    if(qzRm2) qzRm2.onclick=function(){
+      var r2=$('#ghQzR2'),r3=$('#ghQzR3'),row2=$('#ghQzRow2'),row3=$('#ghQzRow3');
+      if(row2) row2.style.display='none';
+      if(row3) row3.style.display='none';
+      if((r2&&r2.checked)||(r3&&r3.checked)){ var r0=$('#ghQzR0'); if(r0) r0.checked=true; }
+      _quizOptCount=2;
+      if(ghQuizAddOpt) ghQuizAddOpt.style.display='';
+    };
+    var qzRm3=$('#ghQzRm3');
+    if(qzRm3) qzRm3.onclick=function(){
+      var r3=$('#ghQzR3'),row3=$('#ghQzRow3');
+      if(row3) row3.style.display='none';
+      if(r3&&r3.checked){ var r0=$('#ghQzR0'); if(r0) r0.checked=true; }
+      _quizOptCount=3;
+      if(ghQuizAddOpt) ghQuizAddOpt.style.display='';
+    };
+
     $('#ghStoryFilePick').onchange=function(){
       var file=this.files&&this.files[0]; if(!file) return;
       pickedFile=file;
@@ -2850,6 +2914,20 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(_storyLat!==null&&_storyLng!==null){ _extra.lat=_storyLat; _extra.lng=_storyLng; }
         if(_mentionData) _extra.mention=_mentionData;
         if(_cdTargetDate){ _extra.countdown={ targetDate:_cdTargetDate, label:(_cdLabel||'Countdown') }; }
+        if(_quizVisible){
+          var _qq=($('#ghStoryQuizQ')||{}).value||'';
+          if(_qq.trim()){
+            var _qOpts=[];
+            for(var _qi=0;_qi<4;_qi++){
+              var _qShown=_qi<2||($('#ghQzRow'+_qi)||{style:{display:'none'}}).style.display!=='none';
+              if(_qShown){
+                var _qOptEl=$('#ghQzOpt'+_qi); var _qOptTxt=_qOptEl?_qOptEl.value.trim():'';
+                if(_qOptTxt){ var _qREl=$('#ghQzR'+_qi); _qOpts.push({text:_qOptTxt,correct:!!(_qREl&&_qREl.checked)}); }
+              }
+            }
+            if(_qOpts.length>=2&&_qOpts.some(function(o){return o.correct;})){ _extra.quiz={question:_qq.trim(),options:_qOpts,answers:{}}; }
+          }
+        }
         GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); },_extra);
       }).catch(function(err){
         console.error('[GeoHub] story upload failed',err);
@@ -3058,6 +3136,30 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         ? '<div class="gh-story-footer">'+(reactHtml||'')+(replyHtml||'')+(seenHtml||'')+'</div>'
         : '';
 
+      // Quiz sticker pre-computed HTML
+      var quizHtml='';
+      if(st.quiz&&st.quiz.question&&Array.isArray(st.quiz.options)&&st.quiz.options.length>=2){
+        var _qa=st.quiz.answers||{};
+        var _quTot=Object.keys(_qa).length;
+        var _quUserAns=(_cu&&_qa[_cu.uid]!==undefined)?_qa[_cu.uid]:-1;
+        var _quAnswered=_quUserAns!==-1;
+        var _quCounts=st.quiz.options.map(function(_,i){return Object.values(_qa).filter(function(v){return v===i;}).length;});
+        quizHtml='<div class="gh-story-quiz-sticker" id="ghQuizSt_'+esc(st.id||'')+'">';
+        quizHtml+='<div class="gh-quiz-st-q">'+esc(st.quiz.question)+'</div>';
+        st.quiz.options.forEach(function(opt,i){
+          var isCorr=!!opt.correct;
+          var isUser=_quAnswered&&_quUserAns===i;
+          var cls='gh-quiz-st-opt'+(_quAnswered?(isCorr?' correct':(isUser?' wrong':' neutral')):'');
+          var pct=_quAnswered&&_quTot>0?Math.round(_quCounts[i]/_quTot*100):0;
+          quizHtml+='<button type="button" class="'+cls+'" data-quiz-opt="'+i+'"'+(_quAnswered?' disabled':'')+'>'+
+            '<span class="gh-quiz-opt-text">'+esc(opt.text)+'</span>'+
+            (_quAnswered?'<div class="gh-quiz-opt-bar" style="width:'+pct+'%"></div><small class="gh-quiz-opt-pct">'+pct+'%</small>'+(isCorr?'<i class="fas fa-check gh-quiz-chk"></i>':''):'')+
+          '</button>';
+        });
+        quizHtml+='<p class="gh-quiz-st-total">'+_quTot+' answer'+(_quTot!==1?'s':'')+'</p>';
+        quizHtml+='</div>';
+      }
+
       // Duration badge
       var _durLabels = {'7d':'7დ','30d':'30დ','1y':'1წ','forever':'♾️'};
       var _durBadge = (st.duration && st.duration !== '24h' && _durLabels[st.duration])
@@ -3131,6 +3233,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               '</div>'
             : ''
           )+
+          quizHtml+
         '</div>'+
         footerHtml+
         '<button type="button" class="gh-story-nav prev" aria-label="Previous story">‹</button>'+
@@ -3148,6 +3251,45 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         }
         _tickCd();
         _cdInterval=setInterval(_tickCd,1000);
+      }
+
+      // Quiz sticker — answer handler
+      if(st.quiz&&st.quiz.question&&Array.isArray(st.quiz.options)){
+        var quizStEl=overlay.querySelector('#ghQuizSt_'+esc(st.id||''));
+        if(quizStEl){
+          quizStEl.querySelectorAll('[data-quiz-opt]').forEach(function(btn){
+            btn.onclick=function(e){
+              e.stopPropagation();
+              if(!isSignedIn){ requireLogin(); return; }
+              if(_quAnswered) return;
+              var optIdx=parseInt(btn.dataset.quizOpt,10);
+              _quAnswered=true;
+              _quUserAns=optIdx;
+              var newTot=_quTot+1;
+              var newCounts=_quCounts.slice();
+              newCounts[optIdx]=(newCounts[optIdx]||0)+1;
+              quizStEl.querySelectorAll('[data-quiz-opt]').forEach(function(b){
+                var bIdx=parseInt(b.dataset.quizOpt,10);
+                var isCorr=!!(st.quiz.options[bIdx]&&st.quiz.options[bIdx].correct);
+                var isUser=bIdx===optIdx;
+                b.disabled=true;
+                b.className='gh-quiz-st-opt'+(isCorr?' correct':(isUser?' wrong':' neutral'));
+                var pct=newTot>0?Math.round((newCounts[bIdx]||0)/newTot*100):0;
+                var bar=b.querySelector('.gh-quiz-opt-bar');
+                if(!bar){bar=document.createElement('div');bar.className='gh-quiz-opt-bar';b.appendChild(bar);}
+                bar.style.width=pct+'%';
+                var pctEl2=b.querySelector('.gh-quiz-opt-pct');
+                if(!pctEl2){pctEl2=document.createElement('small');pctEl2.className='gh-quiz-opt-pct';b.appendChild(pctEl2);}
+                pctEl2.textContent=pct+'%';
+                if(isCorr&&!b.querySelector('.gh-quiz-chk')){var chk=document.createElement('i');chk.className='fas fa-check gh-quiz-chk';b.appendChild(chk);}
+              });
+              var totEl2=quizStEl.querySelector('.gh-quiz-st-total');
+              if(totEl2) totEl2.textContent=newTot+' answer'+(newTot!==1?'s':'');
+              var upd2={}; upd2['quiz.answers.'+_cu.uid]=optIdx;
+              if(fs()&&db()) fs().updateDoc(fs().doc(db(),'stories',st.id),upd2).catch(function(){});
+            };
+          });
+        }
       }
 
       // Non-blocking view tracking — owner excluded; viewCount only increments on first view
