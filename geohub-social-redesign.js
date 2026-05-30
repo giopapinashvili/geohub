@@ -2651,11 +2651,20 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button type="button" class="gh-cmp-tool" id="ghStoryLinkBtn"><i class="fas fa-link"></i><span> Link</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryQBtn"><i class="fas fa-question-circle"></i><span> Question</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryBgBtn"><i class="fas fa-palette"></i><span> Background</span></button>'+
-      '</div>';
+      '</div>'+
+      '<div id="ghStoryLocBadge" style="margin-top:6px;min-height:18px"></div>';
     var m=modal('Add to your story', body,
       '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitStory" disabled>Share story</button>',
       'ghStoryModal');
     var pickedFile=null;
+    var _storyLat=null, _storyLng=null;
+    // Silently capture GPS for map story bubbles
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(function(pos){
+        _storyLat=pos.coords.latitude; _storyLng=pos.coords.longitude;
+        var lb=$('#ghStoryLocBadge'); if(lb) lb.innerHTML='<span class="gh-story-loc-badge"><i class="fas fa-map-marker-alt"></i> Location added</span>';
+      },function(){},{ timeout:8000, maximumAge:60000 });
+    }
     function isDirty(){ return !!(($('#ghStoryText')||{}).value||'').trim()||!!pickedFile; }
     function updateSubmit(){ var btn=$('#ghSubmitStory'); if(btn) btn.disabled=!isDirty(); }
     m.addEventListener('click', function(e){
@@ -2732,6 +2741,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(_bgVisible&&_selectedBg&&!finalUrl) _extra.bg=_selectedBg;
         if(pickedFile&&finalUrl) _extra.mediaType=pickedFile.type.startsWith('video/')?'video':'image';
         _extra.duration=_selectedDur;
+        if(_storyLat!==null&&_storyLng!==null){ _extra.lat=_storyLat; _extra.lng=_storyLng; }
         GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); },_extra);
       }).catch(function(err){
         console.error('[GeoHub] story upload failed',err);

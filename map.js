@@ -2258,6 +2258,7 @@
           loadHeatmapCheckins();
           setTimeout(function() { window.loadNowPanel(false); }, 2000);
           setTimeout(function() { initDiscovery(); }, 1500);
+
         }, { once: true });
       }
 
@@ -2643,6 +2644,163 @@
         box.innerHTML = h + '</div>';
       }).catch(() => { box.innerHTML = '<p class="mpd-empty">Could not load stories</p>'; });
     });
+  }
+
+  /* ── Nearby Stories ─────────────────────────────────── */
+  let _nearbyStoriesActive = false;
+  let _storyMarkers = [];
+
+  window.toggleNearbyStories = function() {
+    _nearbyStoriesActive = !_nearbyStoriesActive;
+    const btn = document.getElementById('mapStoriesBtn');
+    if (btn) btn.classList.toggle('active', _nearbyStoriesActive);
+    if (!_nearbyStoriesActive) { _clearStoryMarkers(); return; }
+    if (_myLatLng) {
+      _loadNearbyStories(_myLatLng[1], _myLatLng[0]);
+    } else if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(pos) {
+        _myLatLng = [pos.coords.longitude, pos.coords.latitude];
+        _loadNearbyStories(pos.coords.latitude, pos.coords.longitude);
+      }, function() {
+        const c = map.getCenter();
+        _loadNearbyStories(c.lat, c.lng);
+      }, { timeout: 8000 });
+    } else {
+      const c = map.getCenter();
+      _loadNearbyStories(c.lat, c.lng);
+    }
+  };
+
+  function _clearStoryMarkers() {
+    _storyMarkers.forEach(function(m) { m.remove(); });
+    _storyMarkers = [];
+  }
+
+  function _groupNearbyStories(stories) {
+    const groups = [];
+    stories.forEach(function(s) {
+      const existing = groups.find(function(g) { return haversine([g.lng, g.lat], [s.lng, s.lat]) < 0.05; });
+      if (existing) existing.stories.push(s);
+      else groups.push({ lat: s.lat, lng: s.lng, stories: [s] });
+    });
+    return groups;
+  }
+
+  function _loadNearbyStories(lat, lng) {
+    const GF = window.GeoFirebase;
+    if (!GF || !GF.db || !GF.fs) return;
+    _clearStoryMarkers();
+    const now = Date.now();
+    const fs = GF.fs, db = GF.db;
+
+    GF.fs.getDocs(GF.fs.query(
+      GF.fs.collection(GF.db, 'stories'),
+      GF.fs.orderBy('createdAt', 'desc'),
+      GF.fs.limit(150)
+    )).then(function(snap) {
+      const nearby = [];
+      snap.forEach(function(d) {
+        const s = Object.assign({ id: d.id }, d.data());
+        if (s.expiresAt) {
+          const exp = s.expiresAt.toMillis ? s.expiresAt.toMillis() : (s.expiresAt.seconds || 0) * 1000;
+          if (exp < now) return;
+        }
+        if (s.lat == null || s.lng == null) return;
+        const km = haversine([lng, lat], [s.lng, s.lat]);
+        if (km <= 2) { s._km = km; nearby.push(s); }
+      });
+
+      const groups = _groupNearbyStories(nearby);
+      if (!groups.length) {
+        if (btn) btn.classList.remove('active');
+        _nearbyStoriesActive = false;
+        _showMapToast('ახლოს Stories ვერ მოიძებნა (2კმ)');
+        return;
+      }
+      groups.forEach(function(g) { _addStoryBubble(g); });
+      _showMapToast(nearby.length + ' story ახლოს');
+    }).catch(function() {
+      const btn = document.getElementById('mapStoriesBtn');
+      if (btn) btn.classList.remove('active');
+      _nearbyStoriesActive = false;
+    });
+  }
+
+  function _addStoryBubble(group) {
+    const first = group.stories[0];
+    const el = document.createElement('div');
+    el.className = 'map-story-bubble' + (group.stories.length > 1 ? ' multi' : '');
+    const av = first.authorAvatar || '';
+    const initl = (first.authorName || '?').charAt(0).toUpperCase();
+    el.innerHTML =
+      '<div class="msb-ring"></div>'+
+      '<div class="msb-inner">'+(av?'<img src="'+esc(av)+'" alt="" class="msb-av">':'<span class="msb-init">'+esc(initl)+'</span>')+'</div>'+
+      (group.stories.length > 1 ? '<span class="msb-count">'+group.stories.length+'</span>' : '');
+    el.onclick = function() { _openMapStoryViewer(group.stories); };
+    const marker = new maplibregl.Marker({ element: el, anchor: 'center' })
+      .setLngLat([group.lng, group.lat])
+      .addTo(map);
+    _storyMarkers.push(marker);
+  }
+
+  function _openMapStoryViewer(stories) {
+    let idx = 0;
+    const ov = document.createElement('div');
+    ov.className = 'map-story-viewer';
+    function _tsAgo(ts) {
+      if (!ts) return '';
+      const ms = ts.toMillis ? ts.toMillis() : (ts.seconds || 0) * 1000;
+      const d = Date.now() - ms;
+      if (d < 3600000) return Math.floor(d / 60000) + 'm ago';
+      if (d < 86400000) return Math.floor(d / 3600000) + 'h ago';
+      return Math.floor(d / 86400000) + 'd ago';
+    }
+    function render() {
+      const s = stories[idx];
+      const url = s.mediaUrl || '';
+      const isVid = url && /\.(mp4|webm|mov)/i.test(url);
+      const dots = stories.map(function(_, i) { return '<span class="msv-dot'+(i===idx?' active':'')+'"></span>'; }).join('');
+      ov.innerHTML =
+        '<div class="msv-backdrop"></div>'+
+        '<div class="msv-card">'+
+          '<div class="msv-prog">'+dots+'</div>'+
+          '<div class="msv-hdr">'+
+            (s.authorAvatar?'<img src="'+esc(s.authorAvatar)+'" class="msv-av" alt="">':'')+
+            '<span class="msv-name">'+esc(s.authorName||'GeoHub User')+'</span>'+
+            '<span class="msv-time">'+_tsAgo(s.createdAt)+'</span>'+
+            '<button class="msv-x" id="msvX">×</button>'+
+          '</div>'+
+          (url
+            ? (isVid?'<video class="msv-media" src="'+esc(url)+'" autoplay muted loop playsinline></video>'
+                    :'<img class="msv-media" src="'+esc(url)+'" alt="">')
+            : '<div class="msv-media msv-text-card"'+(s.bg?' style="background:'+esc(s.bg)+'"':'')+'>'+esc(s.text||'')+'</div>')+
+          (s.text&&url?'<div class="msv-caption">'+esc(s.text)+'</div>':'')+
+          '<button class="msv-nav msv-prev" id="msvP"'+(idx===0?' disabled':'')+'>&#8249;</button>'+
+          '<button class="msv-nav msv-next" id="msvN"'+(idx===stories.length-1?' disabled':'')+'>&#8250;</button>'+
+        '</div>';
+      ov.querySelector('.msv-backdrop').onclick = function() { ov.remove(); };
+      ov.querySelector('#msvX').onclick = function() { ov.remove(); };
+      const pBtn = ov.querySelector('#msvP');
+      const nBtn = ov.querySelector('#msvN');
+      if (pBtn) pBtn.onclick = function() { if (idx > 0) { idx--; render(); } };
+      if (nBtn) nBtn.onclick = function() { if (idx < stories.length-1) { idx++; render(); } };
+    }
+    render();
+    document.body.appendChild(ov);
+  }
+
+  function _showMapToast(msg) {
+    let t = document.getElementById('mapStoryToast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'mapStoryToast';
+      t.className = 'map-story-toast';
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._tmr);
+    t._tmr = setTimeout(function() { t.classList.remove('show'); }, 2500);
   }
 
   /* ── Discovery: "სად წავიდე?" ──────────────────────── */
