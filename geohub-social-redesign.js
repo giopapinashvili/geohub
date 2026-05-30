@@ -12319,6 +12319,136 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
   }
 
+  /* ══════════════════════════════════════════════════════════════
+     PHASE 100 — Creators Hub
+  ══════════════════════════════════════════════════════════════ */
+  function renderCreators(){
+    var _ct=typeof GHt==='function'?GHt:function(k){return k;};
+    var _CREATOR_CATS=['ყველა','ტექნოლოგია','მოგზაურობა','საკვები','ფოტოგრაფია','მუსიკა','სპორტი','ბიზნესი','ხელოვნება','მოდა','ფიტნეს'];
+    var _crState={ all:[], filtered:[], search:'', cat:'ყველა' };
+
+    shell({ active:'creators', right:'', center:
+      '<div class="gh-card" style="padding:16px 16px 12px;margin-bottom:12px">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px">'+
+          '<h2 style="margin:0;font-size:1.05rem"><i class="fas fa-camera-retro" style="color:var(--gh-green)"></i> Creators</h2>'+
+          '<button class="gh-btn" id="ghBecomeCreatorBtn"><i class="fas fa-star"></i> '+(_ct('become_creator')||'კრეატორი გახდი')+'</button>'+
+        '</div>'+
+        '<div class="gh-top-search" style="max-width:100%;margin-bottom:10px"><i class="fas fa-search"></i><input id="ghCreatorsSearch" placeholder="'+esc(_ct('search_creators')||'კრეატორების ძებნა…')+'" autocomplete="off"></div>'+
+        '<div class="gh-pill-row" id="ghCreatorCats" style="flex-wrap:wrap">'+
+          _CREATOR_CATS.map(function(c,i){ return '<button class="gh-pill'+(i===0?' active':'')+'" data-cr-cat="'+esc(c)+'">'+esc(c)+'</button>'; }).join('')+
+        '</div>'+
+      '</div>'+
+      '<div id="ghCreatorsGrid"><div class="gh-card gh-empty" style="min-height:200px"><i class="fas fa-circle-notch fa-spin"></i></div></div>'
+    });
+
+    function _crAv(url,name){
+      var init=((name||'G')[0]||'G').toUpperCase();
+      if(url) return '<img src="'+esc(url)+'" alt="'+esc(name)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'+'<span style="display:none;width:100%;height:100%;border-radius:50%;background:var(--gh-card-soft,rgba(255,255,255,.1));align-items:center;justify-content:center;font-weight:700;font-size:1.1rem">'+esc(init)+'</span>';
+      return '<span style="display:flex;width:100%;height:100%;border-radius:50%;background:var(--gh-card-soft,rgba(255,255,255,.1));align-items:center;justify-content:center;font-weight:700;font-size:1.1rem">'+esc(init)+'</span>';
+    }
+
+    function _crTierBadge(u){
+      var fc=u.followerCount||0;
+      if(fc>=10000) return '<span style="background:#f59e0b;color:#fff;border-radius:999px;padding:2px 8px;font-size:.65rem;font-weight:700"><i class="fas fa-crown"></i> Pro</span>';
+      if(fc>=1000)  return '<span style="background:#8b5cf6;color:#fff;border-radius:999px;padding:2px 8px;font-size:.65rem;font-weight:700"><i class="fas fa-bolt"></i> Rising</span>';
+      return '<span style="background:var(--gh-green,#10b981);color:#fff;border-radius:999px;padding:2px 8px;font-size:.65rem;font-weight:700"><i class="fas fa-star"></i> Micro</span>';
+    }
+
+    function _crCard(u){
+      var name=u.fullName||u.displayName||'Creator';
+      var niche=u.creatorCategory||u.niche||u.interests&&u.interests[0]||'';
+      var fc=u.followerCount||0;
+      var pc=u.postCount||0;
+      var meUid=authUser()&&authUser().uid;
+      var isMe=meUid&&meUid===u.uid;
+      return '<div class="gh-card" style="padding:16px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px">'+
+        '<a href="profile.html?id='+encodeURIComponent(u.uid)+'" style="display:block;width:72px;height:72px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--gh-card-soft)">'+_crAv(u.avatar||u.photoURL,name)+'</a>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">'+
+            '<a href="profile.html?id='+encodeURIComponent(u.uid)+'" style="font-weight:700;color:var(--gh-text);text-decoration:none;font-size:.92rem">'+esc(name)+'</a>'+
+            _crTierBadge(u)+
+          '</div>'+
+          (niche?'<div style="font-size:.75rem;color:var(--gh-green);font-weight:600;margin-bottom:4px">'+esc(niche)+'</div>':'')+
+          (u.bio?'<div style="font-size:.78rem;color:var(--gh-muted);margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+esc(u.bio)+'</div>':'')+
+          '<div style="display:flex;justify-content:center;gap:16px;font-size:.75rem;color:var(--gh-muted);margin-bottom:8px">'+
+            '<span><strong style="color:var(--gh-text)">'+compact(fc)+'</strong> მიმდევარი</span>'+
+            '<span><strong style="color:var(--gh-text)">'+compact(pc)+'</strong> პოსტი</span>'+
+          '</div>'+
+          (!isMe?'<button class="gh-btn sm" style="width:100%" data-follow-user="'+esc(u.uid)+'" data-user-name="'+esc(name)+'"><i class="fas fa-rss"></i> '+(_ct('follow')||'Follow')+'</button>':'')+
+        '</div>'+
+      '</div>';
+    }
+
+    function _crPaint(){
+      var box=document.getElementById('ghCreatorsGrid'); if(!box) return;
+      var q=_crState.search.trim().toLowerCase();
+      var filtered=_crState.all.filter(function(u){
+        var catOk=_crState.cat==='ყველა'||((u.creatorCategory||u.niche||'').toLowerCase()===((_crState.cat||'').toLowerCase()));
+        var qOk=!q||(u.fullName||u.displayName||'').toLowerCase().includes(q)||(u.bio||'').toLowerCase().includes(q)||(u.creatorCategory||u.niche||'').toLowerCase().includes(q);
+        return catOk&&qOk;
+      });
+      if(!filtered.length){
+        box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-camera-retro"></i><h3>'+(_ct('no_creators')||'კრეატორი ვერ მოიძებნა')+'</h3><p>'+(_ct('no_creators_hint')||'ახალი კრეატორები სულ მალე გამოჩნდებიან')+'</p></div>';
+        return;
+      }
+      box.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">'+filtered.map(_crCard).join('')+'</div>';
+      box.querySelectorAll('[data-follow-user]').forEach(function(btn){
+        btn.addEventListener('click',function(e){
+          e.preventDefault();
+          if(!requireLogin()) return;
+          var tuid=btn.dataset.followUser;
+          if(!GS()||!GS().toggleFollow) return;
+          GS().toggleFollow(tuid,function(isNow){ btn.innerHTML=isNow?'<i class="fas fa-check"></i> Following':'<i class="fas fa-rss"></i> '+(_ct('follow')||'Follow'); });
+        });
+      });
+    }
+
+    function _crLoad(){
+      if(!fs()||!db()) return;
+      var q1=fs().query(fs().collection(db(),'users'),fs().where('isCreator','==',true),fs().limit(80));
+      var q2=fs().query(fs().collection(db(),'users'),fs().where('accountType','==','creator'),fs().limit(80));
+      Promise.all([fs().getDocs(q1),fs().getDocs(q2)]).then(function(results){
+        var seen={};
+        results.forEach(function(snap){ snap.forEach(function(d){ if(!seen[d.id]){ seen[d.id]=true; _crState.all.push(Object.assign({uid:d.id},d.data())); } }); });
+        _crState.all.sort(function(a,b){ return (b.followerCount||0)-(a.followerCount||0); });
+        _crPaint();
+      }).catch(function(){ document.getElementById('ghCreatorsGrid').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>ვერ ჩაიტვირთა</h3></div>'; });
+    }
+
+    ready(function(){
+      _crLoad();
+      var srch=document.getElementById('ghCreatorsSearch');
+      if(srch){ var _t=null; srch.oninput=function(){ clearTimeout(_t); _crState.search=this.value; _t=setTimeout(_crPaint,280); }; }
+      var cats=document.getElementById('ghCreatorCats');
+      if(cats) cats.addEventListener('click',function(e){ var b=e.target.closest('[data-cr-cat]'); if(!b) return; _crState.cat=b.dataset.crCat||'ყველა'; cats.querySelectorAll('.gh-pill').forEach(function(p){ p.classList.toggle('active',p===b); }); _crPaint(); });
+      var becomeBtn=document.getElementById('ghBecomeCreatorBtn');
+      if(becomeBtn) becomeBtn.addEventListener('click',function(){
+        if(!requireLogin()) return;
+        var u=authUser(); if(!u||!fs()||!db()) return;
+        if(u.isCreator){ toast(_ct('already_creator')||'უკვე კრეატორი ხარ!'); return; }
+        modal(_ct('become_creator')||'კრეატორი გახდი',
+          '<p style="color:var(--gh-muted);font-size:.9rem;margin:0 0 16px">'+(_ct('creator_modal_desc')||'კრეატორის სტატუსი საშუალებას გაძლევს გამოჩნდე Creators Hub-ში, მიიღო Creator ბეჯი პროფილზე და მიიზიდო მეტი მიმდევარი.')+'</p>'+
+          '<div style="margin-bottom:12px"><label style="font-size:.82rem;color:var(--gh-muted);display:block;margin-bottom:4px">'+(_ct('creator_niche')||'შენი ნიში / კატეგორია')+'</label>'+
+          '<select id="ghCreatorNiche" class="gh-input" style="width:100%">'+
+            '<option value="">— '+(_ct('select_category')||'კატეგორია')+'</option>'+
+            _CREATOR_CATS.slice(1).map(function(c){ return '<option>'+esc(c)+'</option>'; }).join('')+
+          '</select></div>',
+          '<button class="gh-btn ghost" data-close-modal>'+(_ct('cancel')||'გაუქმება')+'</button><button class="gh-btn" id="ghConfirmCreator">'+(_ct('confirm')||'დადასტურება')+'</button>',
+          'ghBecomeCreatorModal'
+        );
+        document.getElementById('ghConfirmCreator').onclick=function(){
+          var niche=(document.getElementById('ghCreatorNiche')||{}).value||'';
+          fs().updateDoc(fs().doc(db(),'users',u.uid),{ isCreator:true, accountType:'creator', creatorCategory:niche||'', updatedAt:fs().serverTimestamp() })
+            .then(function(){
+              var m=document.getElementById('ghBecomeCreatorModal'); if(m) m.remove();
+              toast(_ct('creator_activated')||'კრეატორის სტატუსი გააქტიურდა! 🎉');
+              _crLoad();
+            }).catch(function(err){ toast(err.message,'error'); });
+        };
+      });
+    });
+  }
+
   function renderComingSoon(){
     var _ct=typeof GHt==='function'?GHt:function(k){return k;};
     var title = (PAGE || PATH.replace('.html','') || 'section').replace(/[-_]/g,' ');
@@ -12357,6 +12487,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(PAGE==='gamification'|| PATH==='gamification.html')return renderGamification();
     if(PAGE==='admin'       || PATH==='admin.html')       return renderAdmin();
     if(PAGE==='premium'     || PATH==='premium.html')     return renderPremium();
+    if(PAGE==='creators'    || PATH==='creators.html')    return renderCreators();
     return renderComingSoon();
   }
 
