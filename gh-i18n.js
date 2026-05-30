@@ -33,6 +33,8 @@
     nav_challenges:   { ka: 'გამოწვევები', en: 'Challenges',  ru: 'Испытания'     },
     nav_services:     { ka: 'სერვისები',  en: 'Services',    ru: 'Сервисы'       },
     nav_realestate:   { ka: 'უძრავი ქ.',  en: 'Real Estate', ru: 'Недвижимость'  },
+    nav_jobs:         { ka: 'სამუშაო',   en: 'Jobs',        ru: 'Вакансии'      },
+    nav_invite:       { ka: 'მოიწვიე',   en: 'Invite',      ru: 'Пригласить'    },
     nav_learning:     { ka: 'სწავლა',     en: 'Learning',    ru: 'Обучение'      },
     nav_trust:        { ka: 'უსაფრთხოება',en: 'Trust/Safety',ru: 'Безопасность'  },
     nav_admin:        { ka: 'ადმინ პანელი',en: 'Admin Panel', ru: 'Администратор' },
@@ -524,6 +526,10 @@
     grp_leave_confirm:{ ka: 'დარწმუნებული ხარ?',    en: 'Leave this group?',ru: 'Выйти из группы?' },
 
     /* ── Notifications ──────────────────────────────────────── */
+    notif_empty_title:     { ka: 'შეტყობინება არ არის',                                    en: 'No notifications yet',                                  ru: 'Нет уведомлений'                              },
+    notif_empty_body:      { ka: 'მოწონება, კომენტარი, შეტყობინება და მოთხოვნა აქ გამოჩნდება.', en: 'Likes, comments, messages and requests will appear here.', ru: 'Лайки, комментарии, сообщения появятся здесь.' },
+    notif_page_empty_title:{ ka: 'გვერდის აქტივობა არ არის',                               en: 'No page activity yet',                                  ru: 'Нет активности страницы'                      },
+    notif_page_empty_body: { ka: 'შეტყობინება, შეკვეთა და გვერდის ჩართულობა აქ გამოჩნდება.', en: 'Messages, quotes, redemptions and engagement will appear here.', ru: 'Сообщения и активность страницы появятся здесь.' },
     notif_mark_all:   { ka: 'ყველა წაკითხულია', en: 'Mark all read',ru: 'Всё прочитано' },
     notif_all:        { ka: 'ყველა',             en: 'All',         ru: 'Все'           },
     notif_likes:      { ka: 'მოწონებები',        en: 'Likes',       ru: 'Лайки'         },

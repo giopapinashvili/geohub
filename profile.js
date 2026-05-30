@@ -765,7 +765,7 @@
         modal.remove();
         var GF2 = window.GeoFirebase;
         if (GF2 && GF2.auth && GF2.auth.currentUser) loadHighlights({ uid: uid }, GF2.auth.currentUser);
-      }).catch(function(e) { saveBtn.disabled = false; saveBtn.textContent = 'შენახვა'; toast((e && e.message)||'Error', 'error'); });
+      }).catch(function(e) { saveBtn.disabled = false; saveBtn.textContent = 'შენახვა'; toast((e && e.message)||'შეცდომა', 'error'); });
     };
   };
 
@@ -2392,7 +2392,7 @@
         if (updates.username || updates.city) { const hnd = $('.profile-handle'); if (hnd) hnd.textContent = '@' + (updates.username || (window.GeoCurrentUser && window.GeoCurrentUser.username) || 'user') + (updates.city && updates.city !== 'all_georgia' ? ' · ' + updates.city : ''); }
         toast(_t2('profile_saved_ok'));
       } catch (err) {
-        toast(_t2('save_failed') + ': ' + (err && err.message ? err.message : 'Unknown error'), 'error');
+        toast(_t2('save_failed') + ': ' + (err && err.message ? err.message : 'უცნობი შეცდომა'), 'error');
         saveBtn.disabled = false; saveBtn.innerHTML = '<i class="fas fa-check"></i> Save Changes';
       }
     });

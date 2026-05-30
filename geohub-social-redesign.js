@@ -49,7 +49,7 @@
       coinsSent:'💰 Sent {amt} GeoCoins to {name}!',
       nowLive:'🔴 You are now LIVE!', goLive:'🔴 Go Live!', liveError:'Could not start live',
       liveLoadErr:'Could not load live status',
-      savedCol:'Saved to collection ✓', removedCol:'Removed from collection',
+      savedCol:'კოლექციაში შეინახა ✓', removedCol:'კოლექციიდან წაიშალა',
       colCreated:'Collection created ✓',
       postPinned:'📌 Pinned to your profile!', postUnpinned:'Post unpinned from profile',
       pinErr:'Could not pin',
@@ -449,9 +449,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     return GS() && GS().listenUserNotifications ? GS().listenUserNotifications(actor.targetActorId, cb) : function(){};
   }
   function notificationEmptyCopy(actor){
+    var _nt=typeof GHt==='function'?GHt:function(k,d){return d||k;};
     return actor && actor.type==='business'
-      ? { title:'No page activity yet', body:'Messages, quotes, redemptions and page engagement will appear here.' }
-      : { title:'No notifications yet', body:'Likes, comments, messages and requests will appear here.' };
+      ? { title:_nt('notif_page_empty_title','გვერდის აქტივობა არ არის'), body:_nt('notif_page_empty_body','შეტყობინება და გვერდის ჩართულობა აქ გამოჩნდება.') }
+      : { title:_nt('notif_empty_title','შეტყობინება არ არის'), body:_nt('notif_empty_body','მოწონება, კომენტარი, შეტყობინება და მოთხოვნა აქ გამოჩნდება.') };
   }
   function buildActorExtra(){
     var actor=getActiveActor();
@@ -880,7 +881,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var seAll='<a class="gh-search-see-all" href="search.html?q='+encodeURIComponent(q)+'" data-gs-seeall>'
           +'See all results for “'+esc(q)+'” <i class="fas fa-arrow-right"></i></a>';
         var html=(!items.length
-          ?'<div class="gh-search-empty">No results for <strong>'+esc(q)+'</strong></div>'
+          ?'<div class="gh-search-empty">შედეგი არ მოიძებნა: <strong>'+esc(q)+'</strong></div>'
           :items.map(_gsRowHtml).join(''))+seAll;
         _gsMountDrop(html);
         if(_gsDrop) _gsDrop.querySelectorAll('[data-gs-item],[data-gs-seeall]').forEach(function(a){
@@ -5683,7 +5684,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         }).then(function() {
           if (m && m.remove) m.remove(); else document.getElementById('ghStoryShareModal') && document.getElementById('ghStoryShareModal').remove();
           toast(_srt('story_added'));
-        }).catch(function(e) { toast('Failed: ' + e.message, 'error'); btn.disabled = false; btn.textContent = _srt('story_added','Share story'); });
+        }).catch(function(e) { toast('შეცდომა: ' + e.message, 'error'); btn.disabled = false; btn.textContent = _srt('story_added','სთორიში დამატება'); });
       };
     };
     document.getElementById('ghShareCopyLink').onclick = function() {
@@ -10191,17 +10192,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       },{merge:true}).catch(function(){});
       toast('კომანდაში გსალამობთ!');
       renderBusinessTab(b);
-    }).catch(function(err){toast('Failed: '+(err.code||err.message),'error');});
+    }).catch(function(err){toast('შეცდომა: '+(err.code||err.message),'error');});
   }
   function declineEmpInvite(b, inviteId){
     if(!fs()||!db()) return;
     fs().updateDoc(fs().doc(db(),'businesses',b.id,'invites',inviteId),{status:'declined',respondedAt:fs().serverTimestamp()})
-      .then(function(){toast('მოწვევა უარყოფილია');renderBusinessAbout(b);}).catch(function(e){toast('Failed: '+(e.code||e.message),'error');});
+      .then(function(){toast('მოწვევა უარყოფილია');renderBusinessAbout(b);}).catch(function(e){toast('შეცდომა: '+(e.code||e.message),'error');});
   }
   function updateStaffVisibility(b, staffId, visibility){
     if(!fs()||!db()) return;
     fs().updateDoc(fs().doc(db(),'businesses',b.id,'staff',staffId),{visibility:visibility})
-      .then(function(){toast('ხილვადობა განახლდა');}).catch(function(e){toast('Failed: '+(e.code||e.message),'error');});
+      .then(function(){toast('ხილვადობა განახლდა');}).catch(function(e){toast('შეცდომა: '+(e.code||e.message),'error');});
   }
 
   function renderBizDashEmployees(b){
@@ -11219,14 +11220,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     else{replyObj.createdAt=fs().serverTimestamp();}
     fs().updateDoc(fs().doc(db(),'businessReviews',reviewId),{ownerReply:replyObj})
       .then(function(){var m=document.getElementById('ghOwnerReplyModal');if(m)m.remove();toast(isEdit?'Reply updated':'Reply posted');})
-      .catch(function(err){toast('Failed: '+(err.code||err.message),'error');});
+      .catch(function(err){toast('შეცდომა: '+(err.code||err.message),'error');});
   }
 
   function deleteOwnerReply(reviewId){
     window.ghConfirm(typeof GHt==='function'?GHt('reply_delete_cfm'):'Delete your reply?', function(){
       fs().updateDoc(fs().doc(db(),'businessReviews',reviewId),{ownerReply:null})
         .then(function(){toast(_srt('reply_deleted'));})
-        .catch(function(err){toast('Failed: '+(err.code||err.message),'error');});
+        .catch(function(err){toast('შეცდომა: '+(err.code||err.message),'error');});
     });
   }
 
@@ -11988,7 +11989,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if (!filtered.length) {
         var emptyActor = notificationActor();
         var empty = notificationEmptyCopy(emptyActor);
-        var emptyBody = npFilter === 'all' ? empty.body : 'No ' + npFilter + (emptyActor.type === 'business' ? ' page activity yet.' : ' notifications yet.');
+        var emptyBody = npFilter === 'all' ? empty.body : (emptyActor.type === 'business' ? 'გვერდის '+npFilter+' აქტივობა არ არის.' : npFilter+' შეტყობინება არ არის.');
         box.innerHTML = '<div class="np-empty"><i class="fas fa-bell"></i><h3>'+esc(empty.title)+'</h3><p>' + esc(emptyBody) + '</p></div>';
         return;
       }
@@ -12281,7 +12282,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             return state.friendIds.indexOf(u.id||u.uid)>-1||state.followingIds.indexOf(u.id||u.uid)>-1;
           });
           var all=[]; if(_tab==='all'){ all=users.concat(posts).concat(bizs).concat(groups).concat(events); } else if(_tab==='people') all=users; else if(_tab==='posts') all=posts; else if(_tab==='businesses') all=bizs; else if(_tab==='groups') all=groups; else if(_tab==='events') all=events;
-          if(!all.length){ res.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-search"></i><h3>No results for "'+esc(_q)+'"</h3><p>Try different keywords or broaden your search.</p></div>'; return; }
+          if(!all.length){ res.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-search"></i><h3>შედეგი არ მოიძებნა: "'+esc(_q)+'"</h3><p>სცადე სხვა საძიებო სიტყვა ან გააფართოე ძებნა.</p></div>'; return; }
           var html='<div class="gh-search-results-list">';
           all.forEach(function(x){
             if(x._type==='user'){
@@ -13717,7 +13718,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             (pf.discount?'<span class="gh-fs-disc">-'+pf.discount+'%</span>':'')+
           '</div>':'')+
         (pf.description?'<div class="gh-fs-desc">'+esc(pf.description)+'</div>':'')+
-        (pf.coupon?'<div class="gh-fs-coupon"><span>Code:</span> <strong>'+esc(pf.coupon)+'</strong> <button class="gh-btn sm ghost" onclick="try{navigator.clipboard.writeText(\''+esc(pf.coupon)+'\');}catch(e){} window.toast&&toast(\'Copied!\')"><i class="fas fa-copy"></i></button></div>':'')+
+        (pf.coupon?'<div class="gh-fs-coupon"><span>Code:</span> <strong>'+esc(pf.coupon)+'</strong> <button class="gh-btn sm ghost" onclick="try{navigator.clipboard.writeText(\''+esc(pf.coupon)+'\');}catch(e){} window.toast&&toast(\'კოპირებულია!\')"><i class="fas fa-copy"></i></button></div>':'')+
         (timeStr&&!expired?'<div class="gh-fs-timer"><i class="fas fa-clock"></i> '+esc(timeStr)+'</div>':'')+
       '</div>'+
     '</div>';
@@ -13816,7 +13817,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                 '<span>'+esc(name)+'</span>'+
               '</div>';
             });
-            resultsBox.innerHTML=html||'<div class="gh-coa-item gh-muted">No results</div>';
+            resultsBox.innerHTML=html||'<div class="gh-coa-item gh-muted">შედეგი არ მოიძებნა</div>';
           }).catch(function(){});
         },300);
       };
@@ -14010,7 +14011,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-fr-meta">'+pct+'% funded</div>'+
       '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">'+
         '<button class="gh-btn" style="background:linear-gradient(135deg,#ec4899,#8b5cf6);flex:1" data-donate-post="'+esc(postId||'')+'"><i class="fas fa-heart"></i> Donate</button>'+
-        '<button class="gh-btn ghost sm" onclick="if(navigator.share)navigator.share({url:location.href});else{try{navigator.clipboard.writeText(location.href);}catch(e){} window.toast&&toast(\'Copied!\');}"><i class="fas fa-share"></i></button>'+
+        '<button class="gh-btn ghost sm" onclick="if(navigator.share)navigator.share({url:location.href});else{try{navigator.clipboard.writeText(location.href);}catch(e){} window.toast&&toast(\'კოპირებულია!\');}"><i class="fas fa-share"></i></button>'+
       '</div>'+
     '</div>';
   };
@@ -14205,7 +14206,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               window.ghConfirm('Delete this content? This is irreversible.', function(){
                 var type=btn.dataset.contentType||'post'; var id=btn.dataset.deleteContent;
                 var col=type==='post'?'posts':type==='comment'?'comments':type;
-                fs().updateDoc(fs().doc(db(),col,id),{status:'deleted'}).then(function(){ toast('Content deleted'); _renderReports(); }).catch(function(err){ toast('Failed: '+(err.message||''),'error'); });
+                fs().updateDoc(fs().doc(db(),col,id),{status:'deleted'}).then(function(){ toast('კონტენტი წაიშალა'); _renderReports(); }).catch(function(err){ toast('შეცდომა: '+(err.message||''),'error'); });
               });
             };
           });
@@ -14458,7 +14459,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             },{merge:true});
             return batch.commit();
           })() : Promise.reject(new Error('Batch unavailable'));
-        }).then(function(){ toast('👑 Welcome to GeoHub Premium!'); }).catch(function(err){ toast((err&&err.message)||'Failed','error'); });
+        }).then(function(){ toast('👑 GeoHub Premium-ში მოგესალმებით!'); }).catch(function(err){ toast((err&&err.message)||'შეცდომა','error'); });
       }
       var mb=document.getElementById('ghPremMonthly'); if(mb) mb.onclick=function(){ _startPremium('monthly',99); };
       var yb=document.getElementById('ghPremYearly');  if(yb) yb.onclick=function(){ _startPremium('yearly',790); };
