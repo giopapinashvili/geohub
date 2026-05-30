@@ -149,6 +149,20 @@
         });
         return batch.commit().then(function () {
           try { localStorage.removeItem('geo_ref'); } catch (e) {}
+          // Award 500 GeoPoints to referrer (pending Cloud Function approval)
+          _fs.addDoc(_fs.collection(_db, 'pointEarnRequests'), {
+            userId: d.createdBy, toUserId: d.createdBy, amount: 500,
+            reason: 'Referral reward — friend joined GeoHub',
+            targetType: 'invite', targetId: code,
+            status: 'pending', createdAt: _fs.serverTimestamp()
+          }).catch(function(){});
+          // Award 100 GeoPoints welcome bonus to new user
+          _fs.addDoc(_fs.collection(_db, 'pointEarnRequests'), {
+            userId: uid, toUserId: uid, amount: 100,
+            reason: 'Welcome bonus — joined via friend invite',
+            targetType: 'invite', targetId: code,
+            status: 'pending', createdAt: _fs.serverTimestamp()
+          }).catch(function(){});
           return true;
         });
       });
