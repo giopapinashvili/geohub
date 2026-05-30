@@ -83,6 +83,12 @@ export default {
       if (pathname === '/api/notify-call' && request.method === 'POST') {
         return await handleNotifyCall(request, env, cors);
       }
+      if (pathname === '/create-bog-payment' && request.method === 'POST') {
+        return await handleCreateBogPayment(request, env, cors);
+      }
+      if (pathname.startsWith('/bog-payment-status/') && request.method === 'GET') {
+        return await handleBogPaymentStatus(pathname.slice('/bog-payment-status/'.length), env, cors);
+      }
       return json({ error: 'Not found' }, 404, cors);
     } catch (err) {
       console.error('[GeoHub Worker]', err.message);
@@ -383,6 +389,140 @@ async function handlePaymentStatus(sessionId, env, cors) {
   }
 
   return json(result, 200, cors);
+}
+
+// ── BOG iPay Payment ──────────────────────────────────────────────────────────
+// Required secrets (wrangler secret put):
+//   BOG_CLIENT_ID      — from https://ipay.ge merchant panel
+//   BOG_CLIENT_SECRET  — from https://ipay.ge merchant panel
+
+const BOG_API = 'https://ipay.ge/opay/api/v1';
+
+async function getBogToken(env) {
+  const res = await fetch(`${BOG_API}/oauth2/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `client_id=${encodeURIComponent(env.BOG_CLIENT_ID)}&client_secret=${encodeURIComponent(env.BOG_CLIENT_SECRET)}&grant_type=client_credentials`,
+  });
+  const data = await res.json();
+  if (!data.access_token) throw new Error('BOG auth failed: ' + JSON.stringify(data));
+  return data.access_token;
+}
+
+async function handleCreateBogPayment(request, env, cors) {
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400, cors); }
+
+  const { userId, idToken, plan } = body || {};
+  if (!userId || !idToken || !plan) return json({ error: 'Missing userId, idToken or plan' }, 400, cors);
+  if (plan !== 'monthly' && plan !== 'yearly') return json({ error: 'Invalid plan' }, 400, cors);
+
+  const verifiedUid = await verifyFirebaseToken(idToken, env);
+  if (!verifiedUid || verifiedUid !== userId) return json({ error: 'Unauthorized' }, 401, cors);
+
+  if (!env.BOG_CLIENT_ID || !env.BOG_CLIENT_SECRET) {
+    return json({ error: 'BOG payments not configured on server' }, 503, cors);
+  }
+
+  const amount     = plan === 'yearly' ? '89.99' : '9.99';
+  const planName   = plan === 'yearly' ? 'GeoHub Premium — წლიური' : 'GeoHub Premium — თვიური';
+  const shopOrder  = `GHPREM-${verifiedUid.slice(0, 8)}-${Date.now()}`;
+  const origin     = (env.SITE_URL || 'https://geohub.pages.dev').replace(/\/$/, '');
+
+  const bogToken = await getBogToken(env);
+
+  const orderRes = await fetch(`${BOG_API}/merchant/order`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${bogToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      intent: 'CAPTURE',
+      items: [{
+        unit_amount: { currency_code: 'GEL', value: amount },
+        quantity: '1',
+        description: planName,
+        name: planName,
+      }],
+      redirect_url:   `${origin}/premium.html`,
+      shop_order_id:  shopOrder,
+      purchase_units: [{ amount: { currency_code: 'GEL', value: amount } }],
+    }),
+  });
+
+  const orderData = await orderRes.json();
+  if (!orderData.order_id) {
+    console.error('[BOG] order creation failed:', JSON.stringify(orderData));
+    return json({ error: 'BOG order creation failed' }, 502, cors);
+  }
+
+  const approveLink = (orderData.links || []).find(l => l.rel === 'approve');
+  if (!approveLink) return json({ error: 'No approve URL from BOG' }, 502, cors);
+
+  await firestoreSet(env, `payments/bog_${orderData.order_id}`, {
+    bogOrderId:  orderData.order_id,
+    shopOrderId: shopOrder,
+    userId:      verifiedUid,
+    type:        'premium_subscription',
+    plan,
+    amount:      parseFloat(amount),
+    currency:    'GEL',
+    status:      'pending',
+    createdAt:   new Date().toISOString(),
+  });
+
+  return json({ redirectUrl: approveLink.href, orderId: orderData.order_id }, 200, cors);
+}
+
+async function handleBogPaymentStatus(orderId, env, cors) {
+  if (!orderId) return json({ error: 'Missing orderId' }, 400, cors);
+
+  const payment = await firestoreGet(env, `payments/bog_${orderId}`);
+  if (!payment) return json({ status: 'not_found' }, 404, cors);
+  if (payment.status === 'completed') return json({ status: 'completed', plan: payment.plan }, 200, cors);
+  if (payment.status === 'failed')    return json({ status: 'failed' }, 200, cors);
+
+  if (!env.BOG_CLIENT_ID || !env.BOG_CLIENT_SECRET) {
+    return json({ status: 'pending' }, 200, cors);
+  }
+
+  try {
+    const bogToken = await getBogToken(env);
+    const res = await fetch(`${BOG_API}/merchant/order/${orderId}`, {
+      headers: { 'Authorization': `Bearer ${bogToken}` },
+    });
+    const data = await res.json();
+
+    if (data.status === 'SUCCEEDED') {
+      await activateUserPremium(env, payment.userId, payment.plan);
+      await firestoreUpdate(env, `payments/bog_${orderId}`, {
+        status: 'completed', completedAt: new Date().toISOString(), bogStatus: data.status,
+      });
+      return json({ status: 'completed', plan: payment.plan }, 200, cors);
+    }
+
+    if (data.status === 'FAILED' || data.status === 'REJECTED' || data.status === 'EXPIRED') {
+      await firestoreUpdate(env, `payments/bog_${orderId}`, { status: 'failed', bogStatus: data.status });
+      return json({ status: 'failed' }, 200, cors);
+    }
+
+    return json({ status: 'pending', bogStatus: data.status || '' }, 200, cors);
+  } catch (e) {
+    console.error('[BOG status]', e.message);
+    return json({ status: payment.status }, 200, cors);
+  }
+}
+
+async function activateUserPremium(env, userId, plan) {
+  const now   = new Date();
+  const until = new Date(now);
+  if (plan === 'yearly') until.setFullYear(until.getFullYear() + 1);
+  else                   until.setMonth(until.getMonth() + 1);
+
+  await firestoreUpdate(env, `users/${userId}`, {
+    isPremium:          true,
+    premiumPlan:        plan,
+    premiumUntil:       until.toISOString(),
+    premiumActivatedAt: now.toISOString(),
+  });
 }
 
 // ── Stripe helpers ────────────────────────────────────────────────────────────

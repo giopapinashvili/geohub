@@ -109,6 +109,8 @@
       isPrivate: data.isPrivate === true,
       geoId: data.geoId || null,
       nameVisibility: data.nameVisibility || 'everyone',
+      isPremium: data.isPremium === true && !!data.premiumUntil && new Date(data.premiumUntil) > new Date(),
+      premiumUntil: data.premiumUntil || null,
       initials
     };
   }
@@ -314,7 +316,19 @@
     _renderAchievementStrip(user.uid);
     const own = fbUser && user.uid === fbUser.uid;
     const displayedName = resolveDisplayName(user, own);
-    if (name) name.textContent = displayedName;
+    if (name) {
+      name.textContent = displayedName;
+      var _oldCrown = document.getElementById('gh-prem-crown');
+      if (_oldCrown) _oldCrown.remove();
+      if (user.isPremium) {
+        var _crown = document.createElement('span');
+        _crown.id = 'gh-prem-crown';
+        _crown.title = 'GeoHub Premium';
+        _crown.style.cssText = 'color:#f59e0b;margin-left:6px;font-size:.85em;vertical-align:middle;cursor:default;display:inline-flex;align-items:center';
+        _crown.innerHTML = '<i class="fas fa-crown"></i>';
+        name.insertAdjacentElement('afterend', _crown);
+      }
+    }
     if (handle) {
       var handleParts = '@' + (user.username || 'user') + (user.city ? ' · ' + user.city : '');
       if (own && user.geoId) handleParts += ' · #' + user.geoId;

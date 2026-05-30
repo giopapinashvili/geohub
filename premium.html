@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ka">
 <head>
   <meta charset="UTF-8">
@@ -6,14 +6,14 @@
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="dns-prefetch" href="https://firestore.googleapis.com">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>GeoHub Premium рџ‘‘</title>
-  <meta name="description" content="Unlock premium features on GeoHub. Advanced analytics, boosted posts, exclusive profile themes, and more.">
+  <title>GeoHub Premium 👑</title>
+  <meta name="description" content="GeoHub Premium — განბლოკე სრული შესაძლებლობები. Premium ბეჯი, ბუსტი, ანალიტიკა და მეტი.">
   <link rel="canonical" href="https://geohub.pages.dev/premium.html">
   <meta name="robots" content="index, follow">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GeoHub">
-  <meta property="og:title" content="GeoHub Premium рџ‘‘">
-  <meta property="og:description" content="Unlock the full power of GeoHub with a Premium subscription.">
+  <meta property="og:title" content="GeoHub Premium 👑">
+  <meta property="og:description" content="განბლოკე GeoHub-ის სრული შესაძლებლობები Premium-ით.">
   <meta property="og:url" content="https://geohub.pages.dev/premium.html">
   <meta property="og:image" content="https://geohub.pages.dev/icons/icon-512.png">
   <meta name="twitter:card" content="summary">
@@ -37,11 +37,164 @@
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     body{background:#04050d;color:#f0f4ff;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow-x:hidden;min-height:100vh}
+
+    /* ── Premium page layout ── */
+    #gh-prem-root{padding-top:64px;min-height:100vh}
+
+    /* Hero */
+    .gh-prem-hero{text-align:center;padding:48px 20px 28px}
+    .gh-prem-crown-wrap{font-size:3.5rem;margin-bottom:10px;filter:drop-shadow(0 0 20px rgba(245,158,11,.5))}
+    .gh-prem-hero h1{font-size:2.1rem;font-weight:800;background:linear-gradient(135deg,#f59e0b,#fbbf24,#fde68a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+    .gh-prem-hero p{color:#9ca3af;font-size:.95rem}
+
+    /* Features grid */
+    .gh-prem-features{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:480px;margin:0 auto;padding:0 16px 28px}
+    .gh-prem-feat{display:flex;align-items:center;gap:10px;background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.15);border-radius:10px;padding:11px 12px;font-size:.85rem;color:#d1d5db}
+    .gh-prem-feat i{color:#f59e0b;width:16px;text-align:center;flex-shrink:0;font-size:.9rem}
+
+    /* Plan picker */
+    .gh-prem-plans{display:flex;gap:12px;max-width:480px;margin:0 auto;padding:0 16px 20px}
+    .gh-prem-plan{flex:1;border:2px solid rgba(255,255,255,.1);border-radius:16px;padding:20px 14px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s,transform .15s;position:relative;user-select:none}
+    .gh-prem-plan:hover{border-color:rgba(245,158,11,.5);transform:translateY(-1px)}
+    .gh-prem-plan--sel{border-color:#f59e0b!important;background:rgba(245,158,11,.07)}
+    .gh-prem-plan-badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#f59e0b,#d97706);color:#1a0f00;font-size:.66rem;font-weight:800;padding:3px 10px;border-radius:20px;white-space:nowrap;letter-spacing:.02em}
+    .gh-prem-plan-name{font-size:.78rem;color:#9ca3af;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+    .gh-prem-plan-price{font-size:2.1rem;font-weight:800;color:#f0f4ff;line-height:1}
+    .gh-prem-plan-price sup{font-size:1rem;font-weight:600;vertical-align:super}
+    .gh-prem-plan-sub{font-size:.73rem;color:#6b7280;margin-top:4px}
+    .gh-prem-plan-save{font-size:.75rem;color:#10b981;font-weight:700;margin-top:6px}
+
+    /* CTA */
+    .gh-prem-cta-wrap{max-width:480px;margin:0 auto;padding:4px 16px 40px}
+    .gh-prem-cta-btn{width:100%;padding:15px 20px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:12px;font-size:1.05rem;font-weight:700;cursor:pointer;transition:opacity .2s,transform .15s;display:flex;align-items:center;justify-content:center;gap:10px}
+    .gh-prem-cta-btn:hover{opacity:.92;transform:translateY(-1px)}
+    .gh-prem-cta-btn:active{transform:translateY(0)}
+    .gh-prem-cta-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+    .gh-prem-secure{text-align:center;font-size:.75rem;color:#4b5563;margin-top:10px}
+
+    /* Status screens */
+    .gh-prem-status{text-align:center;padding:64px 24px;max-width:400px;margin:0 auto}
+    .gh-prem-status-icon{font-size:3.5rem;margin-bottom:16px}
+    .gh-prem-status h2{font-size:1.4rem;font-weight:700;margin-bottom:8px}
+    .gh-prem-status p{color:#9ca3af;margin-bottom:28px;font-size:.92rem}
+    .gh-prem-status .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border-radius:10px;font-weight:600;font-size:.95rem;text-decoration:none;border:none;cursor:pointer}
+    .gh-prem-status .btn-prem{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
+    .gh-prem-status .btn-green{background:#10b981;color:#fff}
+    .gh-prem-status .btn-ghost{background:rgba(255,255,255,.07);color:#d1d5db;border:1px solid rgba(255,255,255,.1)}
   </style>
   <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
 </head>
 <body data-gh-page="premium">
   <noscript>GeoHub requires JavaScript.</noscript>
+
+  <main id="gh-prem-root">
+
+    <!-- Loading -->
+    <div id="ghPremLoading" style="display:flex;align-items:center;justify-content:center;height:70vh">
+      <i class="fas fa-spinner fa-spin" style="font-size:2rem;color:#f59e0b"></i>
+    </div>
+
+    <!-- Not signed in -->
+    <div id="ghPremNoAuth" style="display:none">
+      <div class="gh-prem-status">
+        <div class="gh-prem-status-icon">🔒</div>
+        <h2>შედი პირველ რიგში</h2>
+        <p>GeoHub Premium-ის შესაძენად ანგარიში გჭირდება.</p>
+        <a href="index.html" class="btn btn-prem"><i class="fas fa-right-to-bracket"></i> შესვლა / რეგისტრაცია</a>
+      </div>
+    </div>
+
+    <!-- Already premium -->
+    <div id="ghPremActive" style="display:none">
+      <div class="gh-prem-status">
+        <div class="gh-prem-status-icon">👑</div>
+        <h2 style="color:#f59e0b">Premium აქტიურია!</h2>
+        <p id="ghPremActiveUntil">შენი Premium სტატუსი მოქმედებს.</p>
+        <a href="profile.html" class="btn btn-green"><i class="fas fa-user"></i> ჩემი პროფილი</a>
+      </div>
+    </div>
+
+    <!-- Checking payment -->
+    <div id="ghPremChecking" style="display:none">
+      <div class="gh-prem-status">
+        <div class="gh-prem-status-icon">
+          <i class="fas fa-spinner fa-spin" style="color:#f59e0b"></i>
+        </div>
+        <h2>გადახდა მოწმდება</h2>
+        <p>გთხოვ, დაიცადო...</p>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div id="ghPremSuccess" style="display:none">
+      <div class="gh-prem-status">
+        <div class="gh-prem-status-icon">🎉</div>
+        <h2 style="color:#10b981">Premium გააქტიურდა!</h2>
+        <p>გმადლობ! GeoHub Premium ახლა შენია 👑<br>სარგებლობ ექსკლუზიური შესაძლებლობებით.</p>
+        <a href="profile.html" class="btn btn-green" style="margin-right:8px"><i class="fas fa-user"></i> ჩემი პროფილი</a>
+      </div>
+    </div>
+
+    <!-- Fail -->
+    <div id="ghPremFail" style="display:none">
+      <div class="gh-prem-status">
+        <div class="gh-prem-status-icon">❌</div>
+        <h2>გადახდა ვერ მოხდა</h2>
+        <p>სამწუხაროდ, ოპერაცია ვერ დასრულდა. სცადე თავიდან ან დაგვიკავშირდი.</p>
+        <button class="btn btn-prem" onclick="history.replaceState(null,'',location.pathname);location.reload()">
+          <i class="fas fa-rotate-right"></i> სცადე თავიდან
+        </button>
+      </div>
+    </div>
+
+    <!-- Main premium page -->
+    <div id="ghPremMain" style="display:none">
+      <!-- Hero -->
+      <div class="gh-prem-hero">
+        <div class="gh-prem-crown-wrap">👑</div>
+        <h1>GeoHub Premium</h1>
+        <p>განბლოკე სრული შესაძლებლობები</p>
+      </div>
+
+      <!-- Features -->
+      <div class="gh-prem-features">
+        <div class="gh-prem-feat"><i class="fas fa-crown"></i><span>Premium ბეჯი პროფილზე</span></div>
+        <div class="gh-prem-feat"><i class="fas fa-bolt"></i><span>პოსტების ბუსტი</span></div>
+        <div class="gh-prem-feat"><i class="fas fa-chart-bar"></i><span>Advanced ანალიტიკა</span></div>
+        <div class="gh-prem-feat"><i class="fas fa-star"></i><span>Story Highlights (შეუზღუდავი)</span></div>
+        <div class="gh-prem-feat"><i class="fas fa-ban"></i><span>რეკლამის გარეშე</span></div>
+        <div class="gh-prem-feat"><i class="fas fa-headset"></i><span>პრიორიტეტული მხარდაჭერა</span></div>
+      </div>
+
+      <!-- Plan picker -->
+      <div class="gh-prem-plans">
+        <div class="gh-prem-plan" id="planMonthly" data-plan="monthly">
+          <div class="gh-prem-plan-name">თვიური</div>
+          <div class="gh-prem-plan-price">₾9<sup>.99</sup></div>
+          <div class="gh-prem-plan-sub">თვეში</div>
+        </div>
+        <div class="gh-prem-plan gh-prem-plan--sel" id="planYearly" data-plan="yearly">
+          <div class="gh-prem-plan-badge">ყველაზე მომგებიანი 🔥</div>
+          <div class="gh-prem-plan-name">წლიური</div>
+          <div class="gh-prem-plan-price">₾89<sup>.99</sup></div>
+          <div class="gh-prem-plan-sub">წელიწადში</div>
+          <div class="gh-prem-plan-save">₾30 დაზოგვა</div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="gh-prem-cta-wrap">
+        <button class="gh-prem-cta-btn" id="ghPremPayBtn">
+          <i class="fas fa-university"></i> გადახდა BOG-ით
+        </button>
+        <div class="gh-prem-secure">
+          <i class="fas fa-lock"></i> უსაფრთხო გადახდა &middot; Bank of Georgia · ipay.ge
+        </div>
+      </div>
+    </div>
+
+  </main>
+
   <script type="module" src="firebase-config.js"></script>
   <script defer src="gh-i18n.js"></script>
   <script defer src="gh-schema.js"></script>
@@ -50,7 +203,7 @@
   <script defer src="mobile-nav.js"></script>
   <script defer src="firestore-social.js"></script>
   <script defer src="chat-popup.js"></script>
-<script defer src="gh-calls.js"></script>
+  <script defer src="gh-calls.js"></script>
   <script defer src="gh-call-history.js"></script>
   <script defer src="gh-group-calls.js"></script>
   <script defer src="geohub-social-redesign.js"></script>
@@ -58,5 +211,136 @@
   <script defer src="geohub-production-stabilization-v1.js"></script>
   <script defer src="responsive-polish.js"></script>
   <script defer src="analytics.js"></script>
+  <script defer src="config.js"></script>
+
+  <script>
+  (function () {
+    var _plan = 'yearly';
+    var _fbUser = null;
+
+    function _workerUrl() {
+      return ((window.GeoConfig && window.GeoConfig.PAYMENTS && window.GeoConfig.PAYMENTS.WORKER_URL)
+        || 'https://geohub-payments.gio-papinashvili20-bd3.workers.dev').replace(/\/$/, '');
+    }
+
+    var SCREENS = ['ghPremLoading','ghPremNoAuth','ghPremActive','ghPremMain',
+                   'ghPremChecking','ghPremSuccess','ghPremFail'];
+    function show(id) {
+      SCREENS.forEach(function(s) {
+        var el = document.getElementById(s);
+        if (el) el.style.display = (s === id) ? '' : 'none';
+      });
+    }
+
+    function whenFB(cb) {
+      if (window.GeoFirebase) return cb(window.GeoFirebase);
+      window.addEventListener('GeoFirebaseReady', function () { cb(window.GeoFirebase); }, { once: true });
+    }
+
+    // Plan picker
+    document.addEventListener('click', function (e) {
+      var plan = e.target.closest('[data-plan]');
+      if (!plan) return;
+      _plan = plan.dataset.plan;
+      document.querySelectorAll('.gh-prem-plan').forEach(function (p) {
+        p.classList.toggle('gh-prem-plan--sel', p.dataset.plan === _plan);
+      });
+    });
+
+    // Pay button
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('#ghPremPayBtn')) return;
+      if (!_fbUser) { location.href = 'index.html'; return; }
+      var btn = document.getElementById('ghPremPayBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> მიმდინარეობს...';
+
+      _fbUser.getIdToken().then(function (idToken) {
+        return fetch(_workerUrl() + '/create-bog-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: _fbUser.uid, idToken: idToken, plan: _plan }),
+        });
+      }).then(function (res) {
+        return res.json().then(function (d) { return { ok: res.ok, data: d }; });
+      }).then(function (r) {
+        if (!r.ok || !r.data.redirectUrl) throw new Error(r.data.error || 'გადახდის ინიციალიზება ვერ მოხდა');
+        sessionStorage.setItem('gh_bog_order', r.data.orderId);
+        location.href = r.data.redirectUrl;
+      }).catch(function (err) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-university"></i> გადახდა BOG-ით';
+        alert(err.message || 'შეცდომა — სცადე თავიდან');
+      });
+    });
+
+    // Poll BOG payment status after redirect back
+    function checkBogReturn(orderId) {
+      if (!orderId) return;
+      show('ghPremChecking');
+      var attempts = 0;
+      function poll() {
+        attempts++;
+        fetch(_workerUrl() + '/bog-payment-status/' + encodeURIComponent(orderId))
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d.status === 'completed') {
+              sessionStorage.removeItem('gh_bog_order');
+              show('ghPremSuccess');
+            } else if (d.status === 'failed') {
+              sessionStorage.removeItem('gh_bog_order');
+              show('ghPremFail');
+            } else if (attempts < 24) {
+              setTimeout(poll, 2500);
+            } else {
+              sessionStorage.removeItem('gh_bog_order');
+              show('ghPremFail');
+            }
+          })
+          .catch(function () {
+            if (attempts < 10) setTimeout(poll, 3000);
+            else show('ghPremFail');
+          });
+      }
+      poll();
+    }
+
+    // Main init
+    whenFB(function (GF) {
+      GF.auth.onAuthStateChanged(function (fbUser) {
+        _fbUser = fbUser;
+
+        if (!fbUser) { show('ghPremNoAuth'); return; }
+
+        // Check if returning from BOG payment
+        var params = new URLSearchParams(location.search);
+        var orderId = params.get('order_id') || sessionStorage.getItem('gh_bog_order');
+        if (orderId) {
+          checkBogReturn(orderId);
+          return;
+        }
+
+        // Check current premium status
+        GF.fs.getDoc(GF.fs.doc(GF.db, 'users', fbUser.uid))
+          .then(function (snap) {
+            var d = snap.exists() ? snap.data() : {};
+            var active = d.isPremium === true && d.premiumUntil && new Date(d.premiumUntil) > new Date();
+            if (active) {
+              var until = new Date(d.premiumUntil);
+              var el = document.getElementById('ghPremActiveUntil');
+              if (el) {
+                var plan = d.premiumPlan === 'yearly' ? 'წლიური' : 'თვიური';
+                el.textContent = plan + ' სააბონემენტო · ' + until.toLocaleDateString('ka-GE', { year:'numeric', month:'long', day:'numeric' }) + '-მდე';
+              }
+              show('ghPremActive');
+            } else {
+              show('ghPremMain');
+            }
+          })
+          .catch(function () { show('ghPremMain'); });
+      });
+    });
+  })();
+  </script>
 </body>
 </html>
