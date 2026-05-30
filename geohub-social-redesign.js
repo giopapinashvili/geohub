@@ -1141,7 +1141,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(!fbUser){ clearCachedUser(); try{localStorage.removeItem('gh_active_actor');}catch(e){} }
       updateTopUser();
       listenBadges();
-      if(fbUser){ validateActorOnLoad(); maybeUpdateStreak(fbUser.uid); _initWrapped(fbUser.uid); setTimeout(function(){ checkAndAwardBadges(fbUser.uid); }, 3000); setTimeout(function(){ loadOnThisDay(fbUser.uid); }, 1500); setTimeout(function(){ _loadBirthdayFeedCards(fbUser.uid); _loadWeeklyDigest(fbUser.uid); }, 2500); setTimeout(function(){ checkAndPublishScheduledPosts(fbUser.uid); }, 4000); setTimeout(function(){ startPostInsightsListener(fbUser.uid); }, 6000); }
+      if(fbUser){ validateActorOnLoad(); maybeUpdateStreak(fbUser.uid); _initWrapped(fbUser.uid); setTimeout(function(){ checkAndAwardBadges(fbUser.uid); }, 3000); setTimeout(function(){ loadOnThisDay(fbUser.uid); }, 1500); setTimeout(function(){ _loadBirthdayFeedCards(fbUser.uid); _loadWeeklyDigest(fbUser.uid); }, 2500); setTimeout(function(){ checkAndPublishScheduledPosts(fbUser.uid); _refreshScheduledWidget(fbUser.uid); }, 4000); setTimeout(function(){ startPostInsightsListener(fbUser.uid); }, 6000); setInterval(function(){ checkAndPublishScheduledPosts(fbUser.uid); }, 5*60*1000); }
       if(!fbUser){ var sb=document.getElementById('ghStreakBtn'); if(sb) sb.style.display='none'; }
       var bid = new URLSearchParams(location.search).get('id');
       if((state.page === 'business' || PAGE === 'business') && bid) updateBusinessFollowButton(bid);
@@ -6315,6 +6315,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function feedRightSidebar(){
     return '<div id="ghFeedRight">'+
+      '<div class="gh-panel gh-right-widget gh-sched-widget" id="ghSchedWidget" style="display:none">'+
+        '<div class="gh-section-title" style="display:flex;align-items:center;justify-content:space-between">'+
+          '<h3><i class="fas fa-clock" style="color:#10b981;margin-right:5px"></i> დაგეგმილი</h3>'+
+          '<button class="gh-small gh-sched-manage-btn" id="ghSchedManageBtn"><span id="ghSchedWidgetCnt">0</span> პოსტი <i class="fas fa-arrow-right"></i></button>'+
+        '</div>'+
+      '</div>'+
       '<div class="gh-panel gh-right-widget" id="ghOnlineFriendsPanel"><div class="gh-section-title"><h3><i class="fas fa-circle" style="color:#22c55e;font-size:.55rem"></i> Online Friends</h3></div><div id="ghOnlineFriendsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget" id="ghPymkPanel"><div class="gh-section-title"><h3>People You May Know</h3><a class="gh-small" href="search.html">Find people</a></div><div id="ghPymkList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
       '<div class="gh-panel gh-right-widget" id="ghLiveActivityPanel">'+
@@ -6675,6 +6681,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         loadContactsList(u.uid);
         loadPymkWidget(u.uid);
         loadCreatorWidget(u.uid);
+        // Scheduled posts manage button
+        var _smBtn=document.getElementById('ghSchedManageBtn');
+        if(_smBtn){ _smBtn.onclick=function(){ _openScheduledManager(u.uid); }; }
         loadLeaderboardWidget(u.uid);
         loadTrendingHashtags();
         loadTrendingPostsWidget();
@@ -6794,9 +6803,121 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         batch.update(fs().doc(db(),'posts',d.id),{status:'active',publishedAt:fs().serverTimestamp()});
       });
       return batch.commit().then(function(){
-        toast('📅 '+snap.size+' scheduled post'+(snap.size>1?'s':'')+' published!');
+        toast('📅 '+snap.size+' დაგეგმილი პოსტი გამოქვეყნდა!');
+        _refreshScheduledWidget(uid);
       });
     }).catch(function(){});
+  }
+
+  /* ── Scheduled Posts Manager ──────────────────────────── */
+  function _refreshScheduledWidget(uid){
+    if(!uid||!fs()||!db()) return;
+    fs().getDocs(fs().query(
+      fs().collection(db(),'posts'),
+      fs().where('authorId','==',uid),
+      fs().where('status','==','scheduled'),
+      fs().orderBy('scheduledAt','asc'),
+      fs().limit(20)
+    )).then(function(snap){
+      var panel=document.getElementById('ghSchedWidget');
+      if(!panel) return;
+      if(snap.size===0){ panel.style.display='none'; return; }
+      panel.style.display='';
+      var cnt=panel.querySelector('#ghSchedWidgetCnt');
+      if(cnt) cnt.textContent=snap.size;
+      var posts=[];
+      snap.forEach(function(d){ posts.push(Object.assign({id:d.id},d.data())); });
+      panel._schedPosts=posts;
+    }).catch(function(){});
+  }
+
+  function _openScheduledManager(uid){
+    if(!uid||!fs()||!db()) return;
+    var existing=document.getElementById('ghSchedManagerModal');
+    if(existing) existing.remove();
+    var ov=document.createElement('div');
+    ov.id='ghSchedManagerModal';
+    ov.className='gh-modal-backdrop';
+    ov.innerHTML=
+      '<div class="gh-modal" style="max-width:520px">'+
+        '<div class="gh-modal-head">'+
+          '<h3><i class="fas fa-clock" style="color:#10b981;margin-right:6px"></i> დაგეგმილი პოსტები</h3>'+
+          '<button class="gh-modal-close" data-close-modal><i class="fas fa-times"></i></button>'+
+        '</div>'+
+        '<div class="gh-modal-body" id="ghSchedMgrBody">'+
+          '<div class="gh-muted" style="text-align:center;padding:24px"><i class="fas fa-circle-notch fa-spin"></i></div>'+
+        '</div>'+
+      '</div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click',function(e){ if(e.target===ov) ov.remove(); });
+    ov.querySelector('[data-close-modal]').onclick=function(){ ov.remove(); };
+    fs().getDocs(fs().query(
+      fs().collection(db(),'posts'),
+      fs().where('authorId','==',uid),
+      fs().where('status','==','scheduled'),
+      fs().orderBy('scheduledAt','asc'),
+      fs().limit(20)
+    )).then(function(snap){
+      var body=document.getElementById('ghSchedMgrBody');
+      if(!body) return;
+      if(snap.size===0){
+        body.innerHTML='<div class="gh-empty" style="padding:32px 0;text-align:center"><i class="fas fa-calendar-check" style="font-size:2rem;color:#10b981"></i><p style="margin-top:12px;color:#64748b">დაგეგმილი პოსტი არ გაქვს</p></div>';
+        return;
+      }
+      var rows=[];
+      snap.forEach(function(d){
+        var p=Object.assign({id:d.id},d.data());
+        var _st=p.scheduledAt;
+        var _ms=_st&&_st.toMillis?_st.toMillis():(_st&&_st.seconds?_st.seconds*1000:Number(_st)||0);
+        var _dt=new Date(_ms);
+        var _fmt=_dt.toLocaleDateString('ka-GE',{month:'short',day:'numeric'})+' '+_dt.toLocaleTimeString('ka-GE',{hour:'2-digit',minute:'2-digit'});
+        var _txt=(p.text||'').trim().substring(0,100)+(p.text&&p.text.length>100?'…':'');
+        var _hasMedia=!!(p.mediaUrl||(Array.isArray(p.mediaUrls)&&p.mediaUrls.length));
+        rows.push(
+          '<div class="gh-sched-row" data-sched-id="'+esc(p.id)+'">'+
+            '<div class="gh-sched-row-info">'+
+              '<div class="gh-sched-time"><i class="fas fa-clock"></i> '+esc(_fmt)+'</div>'+
+              '<div class="gh-sched-preview">'+(_txt||(_hasMedia?'📷 Media':'(ტექსტი არ არის)'))+'</div>'+
+            '</div>'+
+            '<div class="gh-sched-row-actions">'+
+              '<button class="gh-btn sm" data-sched-publish="'+esc(p.id)+'" title="ახლავე გამოქვეყნება"><i class="fas fa-paper-plane"></i></button>'+
+              '<button class="gh-btn sm ghost" data-sched-cancel="'+esc(p.id)+'" title="გაუქმება" style="color:#f87171"><i class="fas fa-trash-alt"></i></button>'+
+            '</div>'+
+          '</div>'
+        );
+      });
+      body.innerHTML='<div class="gh-sched-list">'+rows.join('')+'</div>';
+      body.querySelectorAll('[data-sched-publish]').forEach(function(btn){
+        btn.onclick=function(){
+          var pid=btn.dataset.schedPublish;
+          btn.disabled=true; btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';
+          fs().updateDoc(fs().doc(db(),'posts',pid),{status:'active',publishedAt:fs().serverTimestamp()}).then(function(){
+            btn.closest('.gh-sched-row').remove();
+            toast('📅 პოსტი გამოქვეყნდა!');
+            _refreshScheduledWidget(uid);
+            var rows2=document.querySelectorAll('.gh-sched-row');
+            if(!rows2.length){ var b2=document.getElementById('ghSchedMgrBody'); if(b2) b2.innerHTML='<div class="gh-empty" style="padding:32px 0;text-align:center"><i class="fas fa-calendar-check" style="font-size:2rem;color:#10b981"></i><p style="margin-top:12px;color:#64748b">დაგეგმილი პოსტი არ გაქვს</p></div>'; }
+          }).catch(function(){ btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i>'; toast('შეცდომა','error'); });
+        };
+      });
+      body.querySelectorAll('[data-sched-cancel]').forEach(function(btn){
+        btn.onclick=function(){
+          var pid=btn.dataset.schedCancel;
+          if(!confirm('დაგეგმილი პოსტი წაიშლება?')) return;
+          btn.disabled=true;
+          fs().deleteDoc(fs().doc(db(),'posts',pid)).then(function(){
+            btn.closest('.gh-sched-row').remove();
+            toast('პოსტი გაუქმდა');
+            _refreshScheduledWidget(uid);
+            var rows2=document.querySelectorAll('.gh-sched-row');
+            if(!rows2.length){ var b2=document.getElementById('ghSchedMgrBody'); if(b2) b2.innerHTML='<div class="gh-empty" style="padding:32px 0;text-align:center"><i class="fas fa-calendar-check" style="font-size:2rem;color:#10b981"></i><p style="margin-top:12px;color:#64748b">დაგეგმილი პოსტი არ გაქვს</p></div>'; }
+          }).catch(function(){ btn.disabled=false; toast('შეცდომა','error'); });
+        };
+      });
+    }).catch(function(){
+      var body=document.getElementById('ghSchedMgrBody');
+      if(body) body.innerHTML='<p class="gh-muted" style="padding:16px">ჩატვირთვა ვერ მოხერხდა</p>';
+    });
   }
 
   /* ── Phase 57: Post Insights Notifications ──────────────── */
