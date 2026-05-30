@@ -72,6 +72,7 @@
       createCheckin: noop,
       createCheckinFull: noop,
       createStory: noop,
+      getStoryChain: function(id, cb) { if(cb) cb(null); },
       listenStories: function () { return function () {}; },
       addStoryReaction: noop,
       removeStoryReaction: noop,
@@ -2237,11 +2238,30 @@
         if (extra && extra.bg) storyData.bg = extra.bg;
         if (extra && extra.mediaType) storyData.mediaType = extra.mediaType;
         if (extra && extra.lat != null && extra.lng != null) { storyData.lat = extra.lat; storyData.lng = extra.lng; }
+        if (extra && extra.mention) storyData.mention = extra.mention;
+        if (extra && extra.countdown) storyData.countdown = extra.countdown;
+        if (extra && extra.quiz) storyData.quiz = extra.quiz;
+        var _ayPrompt = extra && extra.addYours && extra.addYours.prompt ? extra.addYours.prompt : null;
+        var _ayChainId = extra && extra.addYours && extra.addYours.chainId ? extra.addYours.chainId : null;
+        if (_ayPrompt) storyData.addYours = { prompt: _ayPrompt, chainId: _ayChainId || '' };
         addDoc(collection(db, 'stories'), storyData).then(function (docRef) {
           // Archive permanently so highlights can reference it after story expires
           setDoc(doc(db, 'users', user.uid, 'storyArchive', docRef.id),
             Object.assign({}, storyData, { storyId: docRef.id, archivedAt: serverTimestamp() })
           ).catch(function() {});
+          // Add Yours chain handling
+          if (_ayPrompt) {
+            var _me2 = meData() || {};
+            var _participant = { uid: user.uid, storyId: docRef.id, name: _me2.name || user.displayName || 'User', avatar: _me2.avatar || user.photoURL || '' };
+            if (!_ayChainId) {
+              // New chain — use story ID as chain ID
+              setDoc(doc(db, 'storyChains', docRef.id), { prompt: _ayPrompt, creatorId: user.uid, createdAt: serverTimestamp(), participants: [_participant] }).catch(function() {});
+              updateDoc(doc(db, 'stories', docRef.id), { 'addYours.chainId': docRef.id }).catch(function() {});
+            } else {
+              // Join existing chain
+              updateDoc(doc(db, 'storyChains', _ayChainId), { participants: fs.arrayUnion(_participant) }).catch(function() {});
+            }
+          }
           toast(_gt('story_posted')||'Story posted!');
           if (callback) callback();
         }).catch(function (err) {
@@ -2250,6 +2270,13 @@
           if (callback) callback(null, err);
         });
       });
+    }
+
+    function getStoryChain(chainId, callback) {
+      if (!chainId) { if (callback) callback(null); return; }
+      getDoc(doc(db, 'storyChains', chainId)).then(function(snap) {
+        if (callback) callback(snap.exists() ? Object.assign({ id: snap.id }, snap.data()) : null);
+      }).catch(function() { if (callback) callback(null); });
     }
 
     function listenUserNotifications(uid, callback) {
@@ -4059,6 +4086,7 @@
       createCheckin:           createCheckin,
       createCheckinFull:           createCheckinFull,
       createStory:             createStory,
+      getStoryChain:           getStoryChain,
       listenStories:           listenStories,
       addStoryReaction:        addStoryReaction,
       removeStoryReaction:     removeStoryReaction,

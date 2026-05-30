@@ -2590,7 +2590,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }).catch(function(){});
   };
 
-  function openStoryModal(){
+  function openStoryModal(ayContext){
     if(!requireLogin()) return;
     var me=currentUserInfo();
     var av=me.avatar||''; var name=me.name||'You';
@@ -2654,6 +2654,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button type="button" class="gh-cmp-tool" id="ghStoryMentionBtn"><i class="fas fa-at"></i><span> Mention</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryCdBtn"><i class="fas fa-hourglass-half"></i><span> Timer</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryQuizBtn"><i class="fas fa-list-check"></i><span> Quiz</span></button>'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryAyBtn"><i class="fas fa-circle-plus"></i><span> Add Yours</span></button>'+
       '</div>'+
       '<div id="ghStoryMentionWrap" style="display:none;margin-top:8px">'+
         '<div style="position:relative">'+
@@ -2692,6 +2693,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '<button type="button" class="gh-quiz-rm-opt" id="ghQzRm3">×</button>'+
         '</div>'+
         '<button type="button" class="gh-quiz-add-opt" id="ghQuizAddOpt"><i class="fas fa-plus"></i> Add option</button>'+
+      '</div>'+
+      '<div id="ghStoryAyWrap" style="display:none;margin-top:8px">'+
+        '<input class="gh-input" id="ghStoryAyPrompt" placeholder="Add Yours prompt… (e.g. Show your view)" maxlength="80">'+
+        '<input type="hidden" id="ghStoryAyChainId" value="">'+
+        '<p style="font-size:.75rem;color:var(--gh-muted,#94a3b8);margin:4px 0 0">Others can tap and add their own story to this chain</p>'+
       '</div>'+
       '<div id="ghStoryLocBadge" style="margin-top:6px;min-height:18px"></div>';
     var m=modal('Add to your story', body,
@@ -2863,6 +2869,26 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(ghQuizAddOpt) ghQuizAddOpt.style.display='';
     };
 
+    // ── Add Yours sticker ─────────────────────────────────────────
+    var _ayVisible=false;
+    var ayBtn=$('#ghStoryAyBtn'), ayWrap=$('#ghStoryAyWrap');
+    var ayPromptInput=$('#ghStoryAyPrompt'), ayChainInput=$('#ghStoryAyChainId');
+    if(ayBtn&&ayWrap){
+      ayBtn.onclick=function(){
+        _ayVisible=!_ayVisible;
+        ayWrap.style.display=_ayVisible?'block':'none';
+        ayBtn.classList.toggle('active',_ayVisible);
+      };
+    }
+    // Pre-fill if opened from "Add Yours" in viewer
+    if(ayContext&&typeof ayContext==='object'&&ayContext.prompt){
+      _ayVisible=true;
+      if(ayWrap) ayWrap.style.display='block';
+      if(ayBtn) ayBtn.classList.add('active');
+      if(ayPromptInput){ ayPromptInput.value=ayContext.prompt; ayPromptInput.readOnly=true; }
+      if(ayChainInput) ayChainInput.value=ayContext.chainId||'';
+    }
+
     $('#ghStoryFilePick').onchange=function(){
       var file=this.files&&this.files[0]; if(!file) return;
       pickedFile=file;
@@ -2927,6 +2953,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             }
             if(_qOpts.length>=2&&_qOpts.some(function(o){return o.correct;})){ _extra.quiz={question:_qq.trim(),options:_qOpts,answers:{}}; }
           }
+        }
+        if(_ayVisible){
+          var _ayP2=($('#ghStoryAyPrompt')||{}).value||'';
+          var _ayC2=($('#ghStoryAyChainId')||{}).value||'';
+          if(_ayP2.trim()) _extra.addYours={prompt:_ayP2.trim(),chainId:_ayC2||null};
         }
         GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); },_extra);
       }).catch(function(err){
@@ -3160,6 +3191,22 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         quizHtml+='</div>';
       }
 
+      // Add Yours sticker pre-computed HTML
+      var addYoursHtml='';
+      if(st.addYours&&st.addYours.prompt){
+        var _ayCid=st.addYours.chainId||st.id||'';
+        addYoursHtml=
+          '<div class="gh-story-ay-sticker" id="ghAySt_'+esc(st.id||'')+'">'+
+            '<div class="gh-ay-header"><i class="fas fa-circle-plus gh-ay-icon"></i><span>Add Yours</span></div>'+
+            '<div class="gh-ay-prompt">'+esc(st.addYours.prompt)+'</div>'+
+            '<div class="gh-ay-parts" id="ghAyParts_'+esc(_ayCid)+'"><span class="gh-ay-parts-loading">…</span></div>'+
+            (!isOwner&&isSignedIn
+              ? '<button type="button" class="gh-ay-join-btn" data-ay-join data-ay-cid="'+esc(_ayCid)+'" data-ay-prompt="'+esc(st.addYours.prompt)+'">+ Add Yours</button>'
+              : ''
+            )+
+          '</div>';
+      }
+
       // Duration badge
       var _durLabels = {'7d':'7დ','30d':'30დ','1y':'1წ','forever':'♾️'};
       var _durBadge = (st.duration && st.duration !== '24h' && _durLabels[st.duration])
@@ -3234,6 +3281,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             : ''
           )+
           quizHtml+
+          addYoursHtml+
         '</div>'+
         footerHtml+
         '<button type="button" class="gh-story-nav prev" aria-label="Previous story">‹</button>'+
@@ -3289,6 +3337,34 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               if(fs()&&db()) fs().updateDoc(fs().doc(db(),'stories',st.id),upd2).catch(function(){});
             };
           });
+        }
+      }
+
+      // Add Yours sticker — async load participants + join button
+      if(st.addYours&&st.addYours.prompt){
+        var _ayCid2=st.addYours.chainId||st.id||'';
+        var partsEl=overlay.querySelector('#ghAyParts_'+esc(_ayCid2));
+        if(partsEl&&GS().getStoryChain){
+          GS().getStoryChain(_ayCid2,function(chain){
+            if(!partsEl||!partsEl.isConnected) return;
+            var parts=(chain&&chain.participants)||[];
+            if(!parts.length){ partsEl.innerHTML='<span class="gh-ay-parts-empty">Be the first!</span>'; return; }
+            partsEl.innerHTML=parts.slice(0,7).map(function(p){
+              return '<span class="gh-av-bubble" title="'+esc(p.name||'')+'">'+(p.avatar?'<img src="'+esc(p.avatar)+'" alt="" loading="lazy">':esc(initials(p.name||'U')))+'</span>';
+            }).join('')+(parts.length>7?'<span class="gh-ay-more">+'+( parts.length-7)+'</span>':'');
+          });
+        }
+        var ayJoinBtn=overlay.querySelector('[data-ay-join]');
+        if(ayJoinBtn){
+          ayJoinBtn.onclick=function(e){
+            e.stopPropagation();
+            if(!isSignedIn){ requireLogin(); return; }
+            clearTimer();
+            var _prm=ayJoinBtn.dataset.ayPrompt||'';
+            var _cid=ayJoinBtn.dataset.ayCid||'';
+            close();
+            openStoryModal({chainId:_cid,prompt:_prm});
+          };
         }
       }
 
