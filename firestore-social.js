@@ -72,6 +72,10 @@
       createCheckin: noop,
       createCheckinFull: noop,
       createStory: noop,
+      addCloseFriend: noop,
+      removeCloseFriend: noop,
+      listenCloseFriends: function(cb) { cb([]); return function(){}; },
+      getMyCloseFriendIds: function(cb) { if(cb) cb([]); },
       getStoryChain: function(id, cb) { if(cb) cb(null); },
       listenStories: function () { return function () {}; },
       addStoryReaction: noop,
@@ -2241,6 +2245,7 @@
         if (extra && extra.mention) storyData.mention = extra.mention;
         if (extra && extra.countdown) storyData.countdown = extra.countdown;
         if (extra && extra.quiz) storyData.quiz = extra.quiz;
+        if (extra && extra.closeFriends) { storyData.closeFriends = true; storyData.closeFriendsList = Array.isArray(extra.closeFriendsList) ? extra.closeFriendsList : []; }
         var _ayPrompt = extra && extra.addYours && extra.addYours.prompt ? extra.addYours.prompt : null;
         var _ayChainId = extra && extra.addYours && extra.addYours.chainId ? extra.addYours.chainId : null;
         if (_ayPrompt) storyData.addYours = { prompt: _ayPrompt, chainId: _ayChainId || '' };
@@ -2269,6 +2274,36 @@
           toast(_gt('story_fail')||'Failed to post story.', 'error');
           if (callback) callback(null, err);
         });
+      });
+    }
+
+    // ── CLOSE FRIENDS ────────────────────────────────────────────────────
+    function addCloseFriend(friendUid, callback) {
+      requireAuth(function(user) {
+        setDoc(doc(db, 'users', user.uid, 'closeFriends', friendUid), { uid: friendUid, addedAt: serverTimestamp() })
+          .then(function() { if(callback) callback(); })
+          .catch(function(e) { if(callback) callback(e); });
+      });
+    }
+    function removeCloseFriend(friendUid, callback) {
+      requireAuth(function(user) {
+        deleteDoc(doc(db, 'users', user.uid, 'closeFriends', friendUid))
+          .then(function() { if(callback) callback(); })
+          .catch(function(e) { if(callback) callback(e); });
+      });
+    }
+    function listenCloseFriends(callback) {
+      var u = auth && auth.currentUser;
+      if (!u) { callback([]); return function(){}; }
+      return onSnapshot(collection(db, 'users', u.uid, 'closeFriends'), function(snap) {
+        var ids = []; snap.forEach(function(d){ ids.push(d.id); }); callback(ids);
+      }, function() { callback([]); });
+    }
+    function getMyCloseFriendIds(callback) {
+      requireAuth(function(user) {
+        getDocs(collection(db, 'users', user.uid, 'closeFriends'))
+          .then(function(snap) { var ids=[]; snap.forEach(function(d){ids.push(d.id);}); if(callback) callback(ids); })
+          .catch(function() { if(callback) callback([]); });
       });
     }
 
@@ -4086,6 +4121,10 @@
       createCheckin:           createCheckin,
       createCheckinFull:           createCheckinFull,
       createStory:             createStory,
+      addCloseFriend:          addCloseFriend,
+      removeCloseFriend:       removeCloseFriend,
+      listenCloseFriends:      listenCloseFriends,
+      getMyCloseFriendIds:     getMyCloseFriendIds,
       getStoryChain:           getStoryChain,
       listenStories:           listenStories,
       addStoryReaction:        addStoryReaction,

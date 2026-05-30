@@ -392,6 +392,12 @@ service cloud.firestore {
         allow create: if isOwner(userId);
         allow delete: if isOwner(userId) || isAdmin();
       }
+
+      match /closeFriends/{friendUid} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create, update: if isOwner(userId);
+        allow delete: if isOwner(userId) || isAdmin();
+      }
     }
 
     // Admin UIDs are set manually in the Firebase Console.

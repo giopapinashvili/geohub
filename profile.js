@@ -356,7 +356,11 @@
       }
     }
     const actions = $('.profile-actions');
-    if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> '+_t('profile_edit')+'</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="btn btn-ghost btn-sm profile-body-logout" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> '+_t('profile_message')+'</button><button class="btn btn-ghost btn-sm" data-call-user="' + esc(user.uid) + '" data-call-type="audio" data-call-name="' + esc(user.fullName) + '" data-call-avatar="' + esc(user.avatar || '') + '" title="'+_t('call_voice','Voice call')+'"><i class="fas fa-phone"></i></button><button class="btn btn-ghost btn-sm" data-call-user="' + esc(user.uid) + '" data-call-type="video" data-call-name="' + esc(user.fullName) + '" data-call-avatar="' + esc(user.avatar || '') + '" title="'+_t('call_video','Video call')+'"><i class="fas fa-video"></i></button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> '+_t('profile_add_friend')+'</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> '+_t('follow')+'</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-mute-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-volume-mute"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-ban"></i></button>';
+    if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> '+_t('profile_edit')+'</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="btn btn-ghost btn-sm" id="cfManageBtn" style="color:#22c55e" title="Close Friends"><i class="fas fa-star"></i> Close Friends</button><button class="btn btn-ghost btn-sm profile-body-logout" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> '+_t('profile_message')+'</button><button class="btn btn-ghost btn-sm" data-call-user="' + esc(user.uid) + '" data-call-type="audio" data-call-name="' + esc(user.fullName) + '" data-call-avatar="' + esc(user.avatar || '') + '" title="'+_t('call_voice','Voice call')+'"><i class="fas fa-phone"></i></button><button class="btn btn-ghost btn-sm" data-call-user="' + esc(user.uid) + '" data-call-type="video" data-call-name="' + esc(user.fullName) + '" data-call-avatar="' + esc(user.avatar || '') + '" title="'+_t('call_video','Video call')+'"><i class="fas fa-video"></i></button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> '+_t('profile_add_friend')+'</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> '+_t('follow')+'</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-mute-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-volume-mute"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-ban"></i></button>';
+    if (own) {
+      var cfMBtn = document.getElementById('cfManageBtn');
+      if (cfMBtn) cfMBtn.onclick = function(){ _openCFModal(user.uid); };
+    }
     // Profile visibility helpers
     var _privRel = own ? 'own' : 'stranger';
     var _privIsFollower = false;
@@ -799,6 +803,64 @@
       });
     }).catch(function() {
       panel.innerHTML = '<div class="empty-profile-state"><i class="fas fa-archive"></i><h3>Archive</h3><p>ჩატვირთვა ვერ მოხდა.</p></div>';
+    });
+  }
+
+  function _openCFModal(uid) {
+    var GF = window.GeoFirebase;
+    if (!GF || !GF.db || !GF.fs) return;
+    var existing = document.getElementById('ghCFOverlay'); if(existing) existing.remove();
+    var ov = document.createElement('div');
+    ov.id = 'ghCFOverlay';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;display:flex;align-items:flex-end;justify-content:center';
+    ov.innerHTML = '<div class="gh-cf-sheet"><div class="gh-cf-sheet-head"><span><i class="fas fa-star" style="color:#22c55e"></i> Close Friends</span><button class="gh-cf-sheet-close" id="ghCFClose">×</button></div><div class="gh-cf-sheet-body" id="ghCFBody"><div class="gh-cf-loading"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div></div></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click', function(e){ if(e.target===ov){ ov.remove(); } });
+    document.getElementById('ghCFClose').onclick = function(){ ov.remove(); };
+    var body = document.getElementById('ghCFBody');
+    Promise.all([
+      GF.fs.getDocs(GF.fs.query(GF.fs.collection(GF.db,'follows'),GF.fs.where('followerId','==',uid),GF.fs.limit(100))),
+      GF.fs.getDocs(GF.fs.collection(GF.db,'users',uid,'closeFriends'))
+    ]).then(function(results) {
+      var followSnap=results[0], cfSnap=results[1];
+      var followIds=followSnap.docs.map(function(d){return d.data().followingId;}).filter(Boolean);
+      var cfSet={}; cfSnap.docs.forEach(function(d){cfSet[d.id]=true;});
+      if(!followIds.length){
+        body.innerHTML='<p class="gh-cf-empty">You don\'t follow anyone yet.<br>Follow people to add them to Close Friends.</p>';
+        return;
+      }
+      Promise.all(followIds.slice(0,60).map(function(fuid){
+        return GF.fs.getDoc(GF.fs.doc(GF.db,'users',fuid)).then(function(s){ return s.exists()?Object.assign({id:s.id},s.data()):null; }).catch(function(){return null;});
+      })).then(function(profiles){
+        profiles=profiles.filter(Boolean);
+        if(!profiles.length){ body.innerHTML='<p class="gh-cf-empty">No profiles loaded.</p>'; return; }
+        body.innerHTML='<p class="gh-cf-hint">Tap the star to add or remove from Close Friends.</p>'+
+          profiles.map(function(p){
+            var av=p.avatar||p.photoURL||'';
+            var n=p.fullName||p.displayName||p.name||'User';
+            var ini=n.split(' ').map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2)||'U';
+            var isCF=!!cfSet[p.id];
+            return '<div class="gh-cf-row">'+
+              '<span class="gh-cf-av">'+(av?'<img src="'+esc(av)+'" alt="" loading="lazy">':esc(ini))+'</span>'+
+              '<span class="gh-cf-name">'+esc(n)+'</span>'+
+              '<button type="button" class="gh-cf-toggle'+(isCF?' active':'')+'" data-cf-uid="'+esc(p.id)+'" data-cf-on="'+(isCF?'1':'0')+'" aria-label="Toggle Close Friend"><i class="fas fa-star"></i></button>'+
+            '</div>';
+          }).join('');
+        body.addEventListener('click',function(e){
+          var btn=e.target.closest('[data-cf-uid]'); if(!btn) return;
+          var fuid=btn.dataset.cfUid, isOn=btn.dataset.cfOn==='1';
+          btn.dataset.cfOn=isOn?'0':'1';
+          btn.classList.toggle('active',!isOn);
+          if(!isOn){
+            GF.fs.setDoc(GF.fs.doc(GF.db,'users',uid,'closeFriends',fuid),{uid:fuid,addedAt:GF.fs.serverTimestamp()}).catch(function(){});
+          } else {
+            GF.fs.deleteDoc(GF.fs.doc(GF.db,'users',uid,'closeFriends',fuid)).catch(function(){});
+          }
+        });
+      });
+    }).catch(function(err){
+      console.error('[CF]',err);
+      if(body) body.innerHTML='<p class="gh-cf-empty">Failed to load.</p>';
     });
   }
 

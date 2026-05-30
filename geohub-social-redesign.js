@@ -2655,6 +2655,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button type="button" class="gh-cmp-tool" id="ghStoryCdBtn"><i class="fas fa-hourglass-half"></i><span> Timer</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryQuizBtn"><i class="fas fa-list-check"></i><span> Quiz</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryAyBtn"><i class="fas fa-circle-plus"></i><span> Add Yours</span></button>'+
+        '<button type="button" class="gh-cmp-tool gh-cmp-tool-cf" id="ghStoryCfBtn" title="Close Friends only"><i class="fas fa-star"></i><span> CF Only</span></button>'+
       '</div>'+
       '<div id="ghStoryMentionWrap" style="display:none;margin-top:8px">'+
         '<div style="position:relative">'+
@@ -2880,6 +2881,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         ayBtn.classList.toggle('active',_ayVisible);
       };
     }
+    // ── Close Friends toggle ────────────────────────────────────
+    var _cfEnabled=false, _cfList=[];
+    var cfBtn=$('#ghStoryCfBtn');
+    if(cfBtn){
+      cfBtn.onclick=function(){
+        _cfEnabled=!_cfEnabled;
+        cfBtn.classList.toggle('active',_cfEnabled);
+        if(_cfEnabled&&GS().getMyCloseFriendIds) GS().getMyCloseFriendIds(function(ids){ _cfList=ids; });
+      };
+    }
+
     // Pre-fill if opened from "Add Yours" in viewer
     if(ayContext&&typeof ayContext==='object'&&ayContext.prompt){
       _ayVisible=true;
@@ -2959,6 +2971,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           var _ayC2=($('#ghStoryAyChainId')||{}).value||'';
           if(_ayP2.trim()) _extra.addYours={prompt:_ayP2.trim(),chainId:_ayC2||null};
         }
+        if(_cfEnabled){ _extra.closeFriends=true; _extra.closeFriendsList=_cfList.slice(); }
         GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); },_extra);
       }).catch(function(err){
         console.error('[GeoHub] story upload failed',err);
@@ -3013,7 +3026,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       ? '<span class="gh-story-card-dur gh-story-card-dur--'+(first.duration === 'forever' ? 'forever' : 'long')+'">'+_durMap[first.duration]+'</span>'
       : '';
     var _foreverClass = first.duration === 'forever' ? ' gh-story-forever' : '';
-    return '<button type="button" class="gh-story-card gh-story-v2-card'+(allSeen?' gh-story-seen':'')+_foreverClass+'" data-story-group="'+index+'" aria-label="Open '+esc(group.authorName)+' stories">'+
+    var _cfClass = group.stories.some(function(s){ return s.closeFriends; }) ? ' gh-story-cf' : '';
+    return '<button type="button" class="gh-story-card gh-story-v2-card'+(allSeen?' gh-story-seen':'')+_foreverClass+_cfClass+'" data-story-group="'+index+'" aria-label="Open '+esc(group.authorName)+' stories">'+
       '<div class="gh-story-bg">'+(media ? img(media, group.authorName) : '<span>📖</span>')+'</div>'+
       '<span class="gh-story-avatar-mini">'+(av ? img(av, group.authorName) : esc(initials(group.authorName)))+'</span>'+
       (group.stories.length > 1 ? '<span class="gh-story-count">'+group.stories.length+'</span>' : '')+
@@ -3042,7 +3056,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       }
       box.innerHTML=buildCreateCard();
       GS().listenStories(function(items){
-        groups=buildStoryGroups(items||[]);
+        var _fcu=window.GeoFirebase&&window.GeoFirebase.auth&&window.GeoFirebase.auth.currentUser;
+        var _fmyUid=_fcu?_fcu.uid:'';
+        var _filtered=(items||[]).filter(function(st){
+          if(!st.closeFriends) return true;
+          if(!_fmyUid) return false;
+          if(st.authorId===_fmyUid) return true;
+          return Array.isArray(st.closeFriendsList)&&st.closeFriendsList.indexOf(_fmyUid)!==-1;
+        });
+        groups=buildStoryGroups(_filtered);
         var add=buildCreateCard();
         if(!groups.length){
           box.innerHTML=add+'<span class="gh-story-empty">No stories yet. Be the first!</span>';
@@ -3219,7 +3241,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div class="gh-story-head">'+
           '<div class="gh-story-author">'+
             (g.authorAvatar?'<span class="gh-story-author-avatar">'+img(g.authorAvatar,g.authorName)+'</span>':'<span class="gh-story-author-avatar initials">'+esc(initials(g.authorName))+'</span>')+
-            '<div><strong>'+esc(g.authorName)+'</strong><small>'+(storyIndex+1)+'/'+g.stories.length+' · '+timeAgo(st.createdAt)+_durBadge+'</small></div>'+
+            '<div><strong>'+esc(g.authorName)+'</strong>'+(st.closeFriends?'<span class="gh-cf-story-badge"><i class="fas fa-star"></i> Close Friends</span>':'')+
+            '<small>'+(storyIndex+1)+'/'+g.stories.length+' · '+timeAgo(st.createdAt)+_durBadge+'</small></div>'+
           '</div>'+
           '<div class="gh-story-head-actions">'+ownerDeleteHtml+'<button type="button" class="gh-story-close" aria-label="Close story">×</button></div>'+
         '</div>'+
