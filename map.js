@@ -49,6 +49,7 @@
   let activeMarkerEl = null, activePlaceId = null;
   let cameraMode = 'explore';
   let heatmapVisible = false;
+  let _heatmapCheckinData = []; // [{lng,lat,w}] — loaded from Firestore checkins
   let userCheckins = new Set();
   let userMoodVotes = {};
   let currentMoodFilter = '';
@@ -1435,12 +1436,71 @@
   function updateHeatmapData() {
     const src = map && map.getSource('gh-heat-src');
     if (!src) return;
-    const features = allPlaces.map(p => ({
+
+    // Merge: static place ratings baseline + real-time check-in activity
+    const placeFeatures = allPlaces
+      .filter(p => p.lat && p.lng)
+      .map(p => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
+        properties: { w: p.rating ? Math.max(0.3, p.rating * 0.5) : 0.3 }
+      }));
+
+    const checkinFeatures = _heatmapCheckinData.map(c => ({
       type: 'Feature',
-      geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
-      properties: { w: p.rating ? Math.max(0.4, p.rating) : 1 }
+      geometry: { type: 'Point', coordinates: [c.lng, c.lat] },
+      properties: { w: c.w }
     }));
-    src.setData({ type: 'FeatureCollection', features });
+
+    src.setData({ type: 'FeatureCollection', features: [...placeFeatures, ...checkinFeatures] });
+  }
+
+  // Load recent check-ins from Firestore and feed them to the heatmap
+  function loadHeatmapCheckins() {
+    const GF = window.GeoFirebase;
+    if (!GF || !GF.fs || !GF.db) return;
+    const fs = GF.fs, db = GF.db;
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000); // last 24h
+    try {
+      fs.getDocs(
+        fs.query(
+          fs.collection(db, 'checkins'),
+          fs.where('createdAt', '>=', since),
+          fs.orderBy('createdAt', 'desc'),
+          fs.limit(500)
+        )
+      ).then(function(snap) {
+        // Group by place (lat+lng rounded to 3dp) so busy places get higher weight
+        const groups = {};
+        snap.forEach(function(d) {
+          const data = d.data();
+          if (!data.lat || !data.lng) return;
+          const key = data.lat.toFixed(3) + ',' + data.lng.toFixed(3);
+          if (!groups[key]) groups[key] = { lat: data.lat, lng: data.lng, count: 0 };
+          groups[key].count++;
+        });
+        _heatmapCheckinData = Object.values(groups).map(function(g) {
+          return { lat: g.lat, lng: g.lng, w: Math.min(5, 0.5 + g.count * 0.8) };
+        });
+        updateHeatmapData();
+        _updateHeatmapBadge(snap.size);
+        const note = document.getElementById('heatmapLegendNote');
+        if (note) note.textContent = snap.size + ' check-in' + (snap.size !== 1 ? 's' : '') + ' in last 24h';
+      }).catch(function() {
+        // Fallback to static place data only
+        updateHeatmapData();
+      });
+    } catch(e) {
+      updateHeatmapData();
+    }
+  }
+
+  function _updateHeatmapBadge(count) {
+    const badge = document.getElementById('heatmapCheckinBadge');
+    if (badge) {
+      badge.textContent = count > 0 ? (count > 99 ? '99+' : String(count)) : '';
+      badge.style.display = count > 0 ? '' : 'none';
+    }
   }
 
   window.toggleHeatmap = function () {
@@ -1450,7 +1510,39 @@
     }
     const btn = document.getElementById('heatmapBtn');
     if (btn) btn.classList.toggle('active', heatmapVisible);
+    const legend = document.getElementById('heatmapLegend');
+    if (legend) legend.classList.toggle('visible', heatmapVisible);
   };
+
+  function buildHeatmapControl() {
+    const container = document.querySelector('.map-container');
+    if (!container || document.getElementById('heatmapControl')) return;
+
+    // Main button
+    const ctrl = document.createElement('div');
+    ctrl.id = 'heatmapControl';
+    ctrl.className = 'heatmap-control';
+    ctrl.innerHTML =
+      '<button id="heatmapBtn" class="heatmap-btn" onclick="toggleHeatmap()" title="Activity Heatmap">' +
+        '<span class="heatmap-btn-icon">🔥</span>' +
+        '<span class="heatmap-btn-label">Activity</span>' +
+        '<span id="heatmapCheckinBadge" class="heatmap-badge" style="display:none"></span>' +
+      '</button>';
+    container.appendChild(ctrl);
+
+    // Legend (hidden until heatmap is on)
+    const legend = document.createElement('div');
+    legend.id = 'heatmapLegend';
+    legend.className = 'heatmap-legend';
+    legend.innerHTML =
+      '<div class="heatmap-legend-title">🔥 Activity (last 24h)</div>' +
+      '<div class="heatmap-legend-bar">' +
+        '<div class="heatmap-legend-gradient"></div>' +
+        '<div class="heatmap-legend-labels"><span>Quiet</span><span>Busy</span><span>🔥 Hot</span></div>' +
+      '</div>' +
+      '<div class="heatmap-legend-note" id="heatmapLegendNote">Loading…</div>';
+    container.appendChild(legend);
+  }
 
   function applyMapStyle(styleName) {
     const cfg = TILE_LAYERS[styleName] || TILE_LAYERS.dark;
@@ -1901,6 +1993,7 @@
       buildRotationHint();
       buildLiveFriendsUI();
       initHeatmapLayer();
+      buildHeatmapControl();
       buildMobileSidebar();
       renderMap();
 
@@ -1912,11 +2005,13 @@
         loadPlaceCategoriesFromFirestore();
         loadRealPlaces();
         loadUserCheckins();
+        loadHeatmapCheckins();
       } else {
         window.addEventListener('GeoFirebaseReady', () => {
           loadPlaceCategoriesFromFirestore();
           loadRealPlaces();
           loadUserCheckins();
+          loadHeatmapCheckins();
         }, { once: true });
       }
 
