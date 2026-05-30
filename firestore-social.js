@@ -81,6 +81,7 @@
       listenStories: function () { return function () {}; },
       listenGroupStories: function (gid, cb) { cb([]); return function(){}; },
       listenEventStories: function (eid, cb) { cb([]); return function(){}; },
+      listenStoriesByHashtag: function (tag, cb) { cb([]); return function(){}; },
       addStoryReaction: noop,
       removeStoryReaction: noop,
       addStoryReply: noop,
@@ -2253,6 +2254,7 @@
         if (extra && extra.groupId) storyData.groupId = extra.groupId;
         if (extra && extra.eventId) storyData.eventId = extra.eventId;
         if (extra && extra.music && extra.music.label) storyData.music = { label: extra.music.label, url: extra.music.url || '' };
+        if (extra && Array.isArray(extra.hashtags) && extra.hashtags.length) storyData.hashtags = extra.hashtags.slice(0, 8);
         var _ayPrompt = extra && extra.addYours && extra.addYours.prompt ? extra.addYours.prompt : null;
         var _ayChainId = extra && extra.addYours && extra.addYours.chainId ? extra.addYours.chainId : null;
         if (_ayPrompt) storyData.addYours = { prompt: _ayPrompt, chainId: _ayChainId || '' };
@@ -2525,6 +2527,20 @@
         });
         callback(stories);
       }, function(err) { console.warn('[GeoSocial] listenGroupStories', err.message); callback([]); });
+    }
+
+    function listenStoriesByHashtag(tag, callback) {
+      if (!tag) { callback([]); return function(){}; }
+      var q = query(collection(db, 'stories'), where('hashtags', 'array-contains', tag), orderBy('createdAt', 'desc'), limit(30));
+      return onSnapshot(q, function(snap) {
+        var now = Date.now();
+        var stories = [];
+        snap.forEach(function(d) {
+          var data = Object.assign({ id: d.id }, d.data());
+          if (!data.expiresAt || tsToMillis(data.expiresAt) > now) stories.push(data);
+        });
+        callback(stories);
+      }, function(err) { console.warn('[GeoSocial] listenStoriesByHashtag', err.message); callback([]); });
     }
 
     function listenEventStories(eventId, callback) {
@@ -4220,6 +4236,7 @@
       listenStories:           listenStories,
       listenGroupStories:      listenGroupStories,
       listenEventStories:      listenEventStories,
+      listenStoriesByHashtag:  listenStoriesByHashtag,
       addStoryReaction:        addStoryReaction,
       removeStoryReaction:     removeStoryReaction,
       addStoryReply:           addStoryReply,

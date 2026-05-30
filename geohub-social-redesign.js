@@ -2727,6 +2727,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button type="button" class="gh-cmp-tool gh-cmp-tool-cf" id="ghStoryCfBtn" title="Close Friends only"><i class="fas fa-star"></i><span> CF Only</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryDrawBtn"><i class="fas fa-pen-nib"></i><span> Draw</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryGroupBtn"><i class="fas fa-users"></i><span> Group</span></button>'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryHashtagBtn"><i class="fas fa-hashtag"></i><span> Tags</span></button>'+
+      '</div>'+
+      '<div id="ghStoryHashtagWrap" style="display:none;margin-top:8px">'+
+        '<div style="display:flex;align-items:center;gap:6px">'+
+          '<span style="color:#94a3b8;font-size:1rem">#</span>'+
+          '<input class="gh-input" id="ghStoryHashtagInput" placeholder="tag, tag2… (Enter-ით დამატება)" maxlength="40" autocomplete="off" style="flex:1">'+
+        '</div>'+
+        '<div id="ghStoryHashtagPills" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:7px"></div>'+
       '</div>'+
       '<div id="ghStoryGroupWrap" style="display:none;margin-top:8px">'+
         '<div class="gh-story-group-picker" id="ghStoryGroupPicker">'+
@@ -3015,6 +3023,40 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       };
     }
 
+    // ── Hashtags ─────────────────────────────────────────────────
+    var _hashtags=[], _hashtagVisible=false;
+    var hashtagBtn=$('#ghStoryHashtagBtn');
+    var hashtagWrap=$('#ghStoryHashtagWrap');
+    var hashtagInput=$('#ghStoryHashtagInput');
+    var hashtagPills=$('#ghStoryHashtagPills');
+    function _renderHashtagPills(){
+      if(!hashtagPills) return;
+      hashtagPills.innerHTML=_hashtags.map(function(t){
+        return '<span class="gh-hashtag-pill">#'+esc(t)+'<button type="button" class="gh-hashtag-pill-rm" data-ht-rm="'+esc(t)+'">×</button></span>';
+      }).join('');
+      hashtagPills.querySelectorAll('[data-ht-rm]').forEach(function(btn){
+        btn.onclick=function(){ _hashtags=_hashtags.filter(function(h){ return h!==btn.dataset.htRm; }); _renderHashtagPills(); };
+      });
+    }
+    if(hashtagBtn){
+      hashtagBtn.onclick=function(){
+        _hashtagVisible=!_hashtagVisible;
+        if(hashtagWrap) hashtagWrap.style.display=_hashtagVisible?'block':'none';
+        hashtagBtn.classList.toggle('active',_hashtagVisible);
+        if(_hashtagVisible&&hashtagInput) setTimeout(function(){ hashtagInput.focus(); },80);
+      };
+    }
+    if(hashtagInput){
+      hashtagInput.addEventListener('keydown',function(e){
+        if(e.key==='Enter'||e.key===','||e.key===' '){
+          e.preventDefault();
+          var raw=(hashtagInput.value||'').trim().replace(/^#+/,'').replace(/[^a-zA-Z0-9ა-ჰ_]/g,'');
+          if(raw&&_hashtags.indexOf(raw)===-1&&_hashtags.length<8){ _hashtags.push(raw); _renderHashtagPills(); }
+          hashtagInput.value='';
+        }
+      });
+    }
+
     // ── Draw mode ────────────────────────────────────────────────
     function _openDrawMode(){
       var ex=document.getElementById('ghDrawOverlay'); if(ex) ex.remove();
@@ -3185,6 +3227,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         }
         if(_cfEnabled){ _extra.closeFriends=true; _extra.closeFriendsList=_cfList.slice(); }
         if(_selectedGroupId) _extra.groupId=_selectedGroupId;
+        if(_hashtags&&_hashtags.length) _extra.hashtags=_hashtags.slice();
         var _musicTrack=typeof window._getStoryMusic==='function'?window._getStoryMusic():null;
         if(_musicTrack&&_musicTrack.label) _extra.music={label:_musicTrack.label, url:_musicTrack.url||''};
         GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); },_extra);
@@ -3523,6 +3566,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           )+
           quizHtml+
           addYoursHtml+
+          (st.hashtags&&st.hashtags.length
+            ? '<div class="gh-story-hashtag-strip">'+st.hashtags.map(function(t){ return '<button type="button" class="gh-story-ht-pill" data-ht="'+esc(t)+'">#'+esc(t)+'</button>'; }).join('')+'</div>'
+            : ''
+          )+
           (st.music&&st.music.label
             ? '<div class="gh-music-sticker" id="ghMusicSt_'+esc(st.id||'')+'">'
                 +'<div class="gh-music-sticker-disc"><i class="fas fa-compact-disc"></i></div>'
@@ -3628,6 +3675,22 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             openStoryModal({chainId:_cid,prompt:_prm});
           };
         }
+      }
+
+      // Hashtag pills — click opens hashtag story viewer
+      if(st.hashtags&&st.hashtags.length){
+        overlay.querySelectorAll('[data-ht]').forEach(function(btn){
+          btn.onclick=function(e){
+            e.stopPropagation();
+            var tag=btn.dataset.ht; if(!tag) return;
+            clearTimer();
+            GS().listenStoriesByHashtag(tag,function(htStories){
+              if(!htStories.length){ toast('#'+tag+' — სტორი ვერ მოიძებნა'); scheduleAdvance(); return; }
+              var htGroups=buildStoryGroups(htStories);
+              if(htGroups.length) openStoryViewer(htGroups,0,0);
+            });
+          };
+        });
       }
 
       // Non-blocking view tracking — owner excluded; viewCount only increments on first view
