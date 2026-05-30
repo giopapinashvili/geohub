@@ -2215,6 +2215,10 @@
     function createStory(text, mediaUrl, callback, extra) {
       requireAuth(function (user) {
         var me = meData() || {};
+        // Duration: 24h (default) | 7d | 30d | 1y | forever (null = never expires)
+        var _durMs = { '24h': 86400000, '7d': 7*86400000, '30d': 30*86400000, '1y': 365*86400000 };
+        var _dur = (extra && extra.duration) || '24h';
+        var _expiresAt = _dur === 'forever' ? null : new Date(Date.now() + (_durMs[_dur] || 86400000));
         var storyData = {
           text: text || '',
           mediaUrl: mediaUrl || null,
@@ -2223,8 +2227,10 @@
           authorName: me.name || user.displayName || 'GeoHub User',
           authorAvatar: me.avatar || user.photoURL || '',
           createdAt: serverTimestamp(),
-          expiresAt: new Date(Date.now() + 86400000)
+          duration: _dur
         };
+        // Only set expiresAt for finite durations — forever stories have no expiry field
+        if (_expiresAt !== null) storyData.expiresAt = _expiresAt;
         if (extra && extra.poll) storyData.poll = extra.poll;
         if (extra && extra.link) storyData.link = extra.link;
         if (extra && extra.question) storyData.question = extra.question;

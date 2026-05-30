@@ -530,6 +530,10 @@ img { content-visibility: auto; }
 .gh-story-avatar-mini img{width:100%;height:100%;object-fit:cover;opacity:1}
 .gh-story-count{position:absolute;right:9px;top:9px;min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:#10b981;color:#04130c;font-weight:900;font-size:.72rem;display:inline-flex;align-items:center;justify-content:center;z-index:2}
 .gh-story-card small{position:absolute;left:10px;right:10px;bottom:28px;font-size:.65rem;color:rgba(255,255,255,.78);text-shadow:0 2px 8px rgba(0,0,0,.8);z-index:2}
+.gh-story-card-dur{position:absolute;top:8px;right:8px;z-index:3;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:800;pointer-events:none}
+.gh-story-card-dur--long{background:rgba(99,102,241,.7);color:#e0e7ff}
+.gh-story-card-dur--forever{background:rgba(251,191,36,.75);color:#1a1200;font-size:13px}
+.gh-story-forever{border:2px solid #fbbf24!important;box-shadow:0 0 0 2px rgba(251,191,36,.35),0 14px 34px rgba(0,0,0,.28)!important}
 .gh-story-overlay{position:fixed;inset:0;z-index:2147482500;background:rgba(2,6,23,.92);display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(10px);animation:ghStoryFadeIn .18s ease}
 @keyframes ghStoryFadeIn{from{opacity:0}to{opacity:1}}
 body.gh-story-open{overflow:hidden}
@@ -571,6 +575,17 @@ body.gh-story-open{overflow:hidden}
 .gh-sl-btn{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:rgba(255,255,255,.92);color:#0f172a;font-weight:900;font-size:.88rem;border-radius:999px;text-decoration:none;z-index:5;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.3);transition:transform .15s,background .15s}
 .gh-sl-btn:hover{background:#fff;transform:translateX(-50%) scale(1.04)}
 .gh-sl-btn i{font-size:.82rem}
+/* Duration selector */
+.gh-story-dur-row{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.gh-story-dur-label{font-size:12px;color:var(--gh-muted);white-space:nowrap;flex-shrink:0}
+.gh-story-dur-btns{display:flex;gap:6px;flex-wrap:wrap}
+.gh-story-dur-btn{padding:5px 12px;font-size:12px;font-weight:600;border-radius:20px;border:1.5px solid var(--gh-border);background:var(--gh-card-soft);color:var(--gh-muted);cursor:pointer;transition:all .15s ease}
+.gh-story-dur-btn:hover{border-color:var(--gh-green);color:var(--gh-green)}
+.gh-story-dur-btn.active{border-color:var(--gh-green);background:color-mix(in srgb,var(--gh-green) 15%,transparent);color:var(--gh-green);font-weight:700}
+/* Duration badge in story viewer */
+.gh-story-dur-badge{display:inline-flex;align-items:center;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:700;margin-left:6px;vertical-align:middle}
+.gh-story-dur-badge--7d,.gh-story-dur-badge--30d,.gh-story-dur-badge--1y{background:rgba(99,102,241,.25);color:#a5b4fc}
+.gh-story-dur-badge--forever{background:rgba(251,191,36,.2);color:#fbbf24;font-size:13px}
 /* Bg picker */
 .gh-story-bg-picker{display:flex;gap:8px;flex-wrap:wrap;padding:4px 0}
 .gh-story-bg-swatch{width:38px;height:38px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:transform .15s,border-color .15s}

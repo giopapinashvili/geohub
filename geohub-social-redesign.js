@@ -2635,6 +2635,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           }).join('')+
         '</div>'+
       '</div>'+
+      '<div class="gh-story-dur-row">'+
+        '<span class="gh-story-dur-label">⏱ ხანგრძლივობა</span>'+
+        '<div class="gh-story-dur-btns" id="ghStoryDurBtns">'+
+          '<button type="button" class="gh-story-dur-btn active" data-dur="24h">24სთ</button>'+
+          '<button type="button" class="gh-story-dur-btn" data-dur="7d">7 დღე</button>'+
+          '<button type="button" class="gh-story-dur-btn" data-dur="30d">30 დღე</button>'+
+          '<button type="button" class="gh-story-dur-btn" data-dur="1y">1 წელი</button>'+
+          '<button type="button" class="gh-story-dur-btn" data-dur="forever">♾️</button>'+
+        '</div>'+
+      '</div>'+
       '<div class="gh-cmp-toolbar" style="margin-top:10px">'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryPhotoBtn"><i class="fas fa-image"></i><span> Photo/Video</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryPollBtn"><i class="fas fa-check-to-slot"></i><span> Poll</span></button>'+
@@ -2659,7 +2669,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(ta){ ta.addEventListener('input', updateSubmit); setTimeout(function(){ ta.focus(); }, 60); }
     $('#ghStoryPhotoBtn').onclick=function(){ var fp=$('#ghStoryFilePick'); if(fp) fp.click(); };
     var _pollVisible=false, _linkVisible=false, _qVisible=false, _bgVisible=false;
-    var _selectedBg=null;
+    var _selectedBg=null, _selectedDur='24h';
+    var durBtns=$('#ghStoryDurBtns');
+    if(durBtns){ durBtns.addEventListener('click',function(e){ var btn=e.target.closest('[data-dur]'); if(!btn) return; durBtns.querySelectorAll('[data-dur]').forEach(function(b){ b.classList.remove('active'); }); btn.classList.add('active'); _selectedDur=btn.dataset.dur; }); }
     var pollBtn=$('#ghStoryPollBtn'); var pollWrap=$('#ghStoryPollWrap');
     var linkBtn=$('#ghStoryLinkBtn'); var linkWrap=$('#ghStoryLinkWrap');
     var qBtn=$('#ghStoryQBtn'); var qWrap=$('#ghStoryQWrap2');
@@ -2719,6 +2731,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(_qTextVal) _extra.question=_qTextVal;
         if(_bgVisible&&_selectedBg&&!finalUrl) _extra.bg=_selectedBg;
         if(pickedFile&&finalUrl) _extra.mediaType=pickedFile.type.startsWith('video/')?'video':'image';
+        _extra.duration=_selectedDur;
         GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); },_extra);
       }).catch(function(err){
         console.error('[GeoHub] story upload failed',err);
@@ -2767,10 +2780,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var allSeen = !!(_uid && group.stories.length > 0 && group.stories.every(function(s){
       return Array.isArray(s.viewedBy) && s.viewedBy.indexOf(_uid) !== -1;
     }));
-    return '<button type="button" class="gh-story-card gh-story-v2-card'+(allSeen?' gh-story-seen':'')+'" data-story-group="'+index+'" aria-label="Open '+esc(group.authorName)+' stories">'+
+    // Duration badge on card (only for non-default durations)
+    var _durMap = {'7d':'7დ','30d':'30დ','1y':'1წ','forever':'♾️'};
+    var _cardDurBadge = (first.duration && first.duration !== '24h' && _durMap[first.duration])
+      ? '<span class="gh-story-card-dur gh-story-card-dur--'+(first.duration === 'forever' ? 'forever' : 'long')+'">'+_durMap[first.duration]+'</span>'
+      : '';
+    var _foreverClass = first.duration === 'forever' ? ' gh-story-forever' : '';
+    return '<button type="button" class="gh-story-card gh-story-v2-card'+(allSeen?' gh-story-seen':'')+_foreverClass+'" data-story-group="'+index+'" aria-label="Open '+esc(group.authorName)+' stories">'+
       '<div class="gh-story-bg">'+(media ? img(media, group.authorName) : '<span>📖</span>')+'</div>'+
       '<span class="gh-story-avatar-mini">'+(av ? img(av, group.authorName) : esc(initials(group.authorName)))+'</span>'+
       (group.stories.length > 1 ? '<span class="gh-story-count">'+group.stories.length+'</span>' : '')+
+      _cardDurBadge+
       '<strong>'+esc(group.authorName)+'</strong>'+
       '<small>'+timeAgo(first.createdAt)+'</small>'+
     '</button>';
@@ -2919,13 +2939,19 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         ? '<div class="gh-story-footer">'+(reactHtml||'')+(replyHtml||'')+(seenHtml||'')+'</div>'
         : '';
 
+      // Duration badge
+      var _durLabels = {'7d':'7დ','30d':'30დ','1y':'1წ','forever':'♾️'};
+      var _durBadge = (st.duration && st.duration !== '24h' && _durLabels[st.duration])
+        ? ' <span class="gh-story-dur-badge gh-story-dur-badge--'+st.duration+'">'+_durLabels[st.duration]+'</span>'
+        : '';
+
       overlay.innerHTML =
         '<div class="gh-story-shell" role="dialog" aria-modal="true" aria-label="Story viewer">'+
         '<div class="gh-story-progress">'+bars+'</div>'+
         '<div class="gh-story-head">'+
           '<div class="gh-story-author">'+
             (g.authorAvatar?'<span class="gh-story-author-avatar">'+img(g.authorAvatar,g.authorName)+'</span>':'<span class="gh-story-author-avatar initials">'+esc(initials(g.authorName))+'</span>')+
-            '<div><strong>'+esc(g.authorName)+'</strong><small>'+(storyIndex+1)+'/'+g.stories.length+' · '+timeAgo(st.createdAt)+'</small></div>'+
+            '<div><strong>'+esc(g.authorName)+'</strong><small>'+(storyIndex+1)+'/'+g.stories.length+' · '+timeAgo(st.createdAt)+_durBadge+'</small></div>'+
           '</div>'+
           '<div class="gh-story-head-actions">'+ownerDeleteHtml+'<button type="button" class="gh-story-close" aria-label="Close story">×</button></div>'+
         '</div>'+
