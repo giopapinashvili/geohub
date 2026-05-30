@@ -534,7 +534,7 @@
     }
     const fav = $('.fav-cats'); if (fav) fav.innerHTML = user.interests.length ? user.interests.map(i => '<div class="fav-cat-chip">' + esc(i) + '</div>').join('') : '<div style="color:var(--text-muted);font-size:.85rem">' + _t('profile_no_interests') + '</div>';
     ['spCitiesVal','spFriendsVal','spLikesVal','spGroupsVal'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = '0'; });
-    const miniPts = $('.mini-wallet-pts'); if (miniPts) miniPts.textContent = compact(user.pointsBalance || 0) + ' pts';
+    const miniPts = $('.mini-wallet-pts'); if (miniPts) miniPts.textContent = compact(user.pointsBalance || 0) + ' ქ.';
     const miniSub = $('.mini-wallet-sub'); if (miniSub) miniSub.innerHTML = '<strong>' + compact(user.pointsBalance || 0) + ' pts</strong> earned · <a href="rewards.html" style="color:var(--green);text-decoration:none">Open store</a>';
     const review = $('#mostLikedReviewCard'); if (review) review.innerHTML = '<div class="sidebar-card-title">' + _t('trust_most_review') + '</div><div style="color:var(--text-muted);font-size:.85rem">' + _t('profile_no_reviews') + '</div>';
     const activity = $('.activity-feed .activity-feed-list'); if (activity) activity.innerHTML = '<div style="color:var(--text-muted);font-size:.85rem;padding:12px 0">' + _t('profile_no_activity') + '</div>';
@@ -1097,7 +1097,7 @@
     if (GS && GS.listenWallet) {
       var _walletUnsub = GS.listenWallet(uid, function (w) {
         var balEl = document.getElementById('profRwBal');
-        if (balEl) balEl.textContent = compact(w.balance || 0) + ' pts';
+        if (balEl) balEl.textContent = compact(w.balance || 0) + ' ქ.';
         if (_walletUnsub) { _walletUnsub(); _walletUnsub = null; } // one-shot
       });
     } else {
@@ -1106,7 +1106,7 @@
         var w = snap.data() || {};
         var bal = Math.max(0, Number(w.credits || 0) - Math.max(0, Number(w.reservedDebits || 0)));
         var balEl = document.getElementById('profRwBal');
-        if (balEl) balEl.textContent = compact(bal) + ' pts';
+        if (balEl) balEl.textContent = compact(bal) + ' ქ.';
       }).catch(function () {});
     }
 
@@ -1927,7 +1927,7 @@
     window.ghConfirm(typeof window.GHt === 'function' ? window.GHt('creator_activate_cfm') : 'Activate Creator Mode? Your profile will be listed on the Creators page.', function() {
       fb.fs.updateDoc(fb.fs.doc(fb.db, 'users', u.uid), { accountType: 'creator' })
         .then(function () { window.location.reload(); })
-        .catch(function (err) { toast((err && err.message) || 'Could not activate', 'error'); });
+        .catch(function (err) { toast((err && err.message) || 'გააქტიურება ვერ მოხერხდა', 'error'); });
     });
   };
 
@@ -2211,15 +2211,15 @@
         var val = peUnInput.value.trim().toLowerCase().replace(/[^a-z0-9_.]/g, '');
         if (peUnInput.value !== val) peUnInput.value = val;
         if (val === currentUsername) { peUnHint.textContent = ''; _peUnStatus = 'ok'; return; }
-        if (val.length < 3)  { peUnHint.textContent = 'Minimum 3 characters'; peUnHint.style.color = '#f87171'; _peUnStatus = 'invalid'; return; }
-        if (val.length > 20) { peUnHint.textContent = 'Maximum 20 characters'; peUnHint.style.color = '#f87171'; _peUnStatus = 'invalid'; return; }
-        peUnHint.textContent = 'Checking…'; peUnHint.style.color = '#94a3b8'; _peUnStatus = 'checking';
+        if (val.length < 3)  { peUnHint.textContent = 'მინიმუმ 3 სიმბოლო'; peUnHint.style.color = '#f87171'; _peUnStatus = 'invalid'; return; }
+        if (val.length > 20) { peUnHint.textContent = 'მაქსიმუმ 20 სიმბოლო'; peUnHint.style.color = '#f87171'; _peUnStatus = 'invalid'; return; }
+        peUnHint.textContent = 'მოწმდება…'; peUnHint.style.color = '#94a3b8'; _peUnStatus = 'checking';
         _peUnTimer = setTimeout(function() {
           var auth = window.GeoFirebaseAuth;
           if (!auth || !auth.isUsernameAvailable) { peUnHint.textContent = ''; _peUnStatus = 'ok'; return; }
           auth.isUsernameAvailable(val).then(function(avail) {
-            if (avail) { peUnHint.textContent = '✓ @' + val + ' is available'; peUnHint.style.color = '#10b981'; _peUnStatus = 'ok'; }
-            else       { peUnHint.textContent = '✗ @' + val + ' is taken'; peUnHint.style.color = '#f87171'; _peUnStatus = 'taken'; }
+            if (avail) { peUnHint.textContent = '✓ @' + val + ' ხელმისაწვდომია'; peUnHint.style.color = '#10b981'; _peUnStatus = 'ok'; }
+            else       { peUnHint.textContent = '✗ @' + val + ' დაკავებულია'; peUnHint.style.color = '#f87171'; _peUnStatus = 'taken'; }
           }).catch(function() { peUnHint.textContent = ''; _peUnStatus = 'ok'; });
         }, 500);
       });
@@ -2237,20 +2237,20 @@
       const pw = document.getElementById('peUploadProgress');
       const pb = document.getElementById('peUploadBar');
       const st = document.getElementById('peUploadStatus');
-      if (!GS || !GS.uploadFile) { if (st) st.textContent = 'Upload unavailable.'; return; }
+      if (!GS || !GS.uploadFile) { if (st) st.textContent = 'ატვირთვა მიუწვდომელია.'; return; }
       if (pw) pw.style.display = '';
       if (pb) pb.style.width = '0%';
-      if (st) st.textContent = 'Uploading…';
+      if (st) st.textContent = 'იტვირთება…';
       GS.uploadFile(file, folder, function(pct) {
         if (pb) pb.style.width = pct + '%';
         if (st) st.textContent = pct + '%';
       }).then(function(url) {
         if (pw) pw.style.display = 'none';
-        if (url) { if (st) st.textContent = 'Uploaded ✓'; onUrl(url); }
-        else { if (st) st.textContent = 'Upload failed — try again.'; }
+        if (url) { if (st) st.textContent = 'ატვირთულია ✓'; onUrl(url); }
+        else { if (st) st.textContent = 'ატვირთვა ვერ მოხერხდა — სცადე ახლა.'; }
       }).catch(function() {
         if (pw) pw.style.display = 'none';
-        if (st) st.textContent = 'Upload failed — try again.';
+        if (st) st.textContent = 'ატვირთვა ვერ მოხერხდა — სცადე ახლა.';
       });
     }
 

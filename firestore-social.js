@@ -911,7 +911,7 @@
             }, { merge: true });
           });
         }).then(function(){ updateDoc(doc(db, 'users', user.uid), { geoPointsSpentTotal: increment(n), updatedAt: serverTimestamp() }).catch(function(){}); toast(_gt('points_spent')||'GeoPoints spent'); if(callback) callback(true); })
-          .catch(function(err){ toast(err.message === 'insufficient-points' ? 'Not enough GeoPoints' : 'Could not spend GeoPoints', 'error'); if(callback) callback(false, err); });
+          .catch(function(err){ toast(err.message === 'insufficient-points' ? 'Not enough GeoPoints' : 'GeoPoints-ის დახარჯვა ვერ მოხერხდა', 'error'); if(callback) callback(false, err); });
       });
     }
 
@@ -1040,7 +1040,7 @@
           if (businessId && c.businessId && c.businessId !== businessId) throw new Error('wrong-business');
           return updateDoc(doc(db, 'rewardCoupons', d.id), { status:'used', usedAt: serverTimestamp(), usedBy: user.uid, updatedAt: serverTimestamp() });
         }).then(function(){ toast(_gt('coupon_redeemed')||'Coupon redeemed'); if(callback) callback(true); })
-          .catch(function(err){ var msg = err.message === 'not-found' ? 'Coupon not found' : err.message === 'not-active' ? 'Coupon already used/expired' : err.message === 'wrong-business' ? 'This coupon belongs to another business' : 'Could not redeem coupon'; toast(msg, 'error'); if(callback) callback(false, err); });
+          .catch(function(err){ var msg = err.message === 'not-found' ? 'კუპონი ვერ მოიძებნა' : err.message === 'not-active' ? 'კუპონი უკვე გამოყენებულია' : err.message === 'wrong-business' ? 'ეს კუპონი სხვა ბიზნესს ეკუთვნის' : 'კუპონის გამოყენება ვერ მოხერხდა'; toast(msg, 'error'); if(callback) callback(false, err); });
       });
     }
 
@@ -1095,7 +1095,7 @@
           });
         }).then(function(n){
           updateDoc(doc(db, 'users', user.uid), { geoPointsReceivedTotal: increment(n), updatedAt: serverTimestamp() }).catch(function(){});
-          toast(n + ' GeoPoints claimed!');
+          toast(n + ' GeoPoints მოთხოვნილია!');
           if(callback) callback(true, n);
         }).catch(function(err){
           var msg = err.message === 'gift-not-found' ? 'Gift not found' : err.message === 'already-claimed' ? 'Already claimed' : err.message === 'not-recipient' ? 'This gift is not for you' : 'Could not claim gift';
@@ -1159,7 +1159,7 @@
         // For close_friends posts: snapshot the author's closeFriends UIDs onto the post
         var doCreate = function(data) {
           return addDoc(collection(db, 'posts'), data).then(function (ref) {
-            if(data.status === 'scheduled') toast('📅 Post scheduled!');
+            if(data.status === 'scheduled') toast('📅 პოსტი დაიგეგმა!');
             else toast(_gt('post_published')||'Post published!');
             awardPoints(20, 'Create post', 'post', ref.id);
             /* Phase 45: notify co-authors */
@@ -1773,7 +1773,7 @@
           } else {
             return setDoc(ref, { eventId: eventId, eventName: eventName || '', uid: uid, userId: uid, status: status || 'going', joinedAt: serverTimestamp(), createdAt: serverTimestamp() })
               .then(function () {
-                toast((status === 'interested' ? 'Interested in ' : 'Going to ') + (eventName || 'event') + '!');
+                toast((status === 'interested' ? 'დაინტერესებული: ' : 'მივდივარ: ') + (eventName || 'event') + '!');
                 if (callback) callback(true);
               });
           }
@@ -1937,7 +1937,7 @@
             return createNotification(fromId, 'friend_accept', (meData()||{}).name + ' ' + (_gt('notif_fa_action') || 'accepted your friend request'), _gt('notif_fa_body') || 'You are now friends on GeoHub.', 'profile.html?id=' + user.uid, { friendId: user.uid });
           }).then(function(){ return {accepted:true, fromId:fromId}; });
         }).then(function(res){
-          toast(res.accepted ? 'Friend request accepted' : 'Friend request rejected');
+          toast(res.accepted ? 'მეგობრობის მოთხოვნა დამტკიცდა' : 'მეგობრობის მოთხოვნა უარყოფილია');
           if(callback) callback(res);
         }).catch(function(err){
           console.error('[GeoSocial] respondFriendRequest', err);
@@ -3995,7 +3995,7 @@
       requireAuth(function (user) {
         var ref = doc(db, 'groupMembers', groupId + '_' + user.uid);
         updateDoc(ref, { muted: muted, updatedAt: serverTimestamp() })
-          .then(function () { toast(muted ? 'Group muted' : 'Group unmuted'); if (callback) callback(true); })
+          .then(function () { toast(muted ? 'ჯგუფი დადუმდა' : 'ჯგუფი გამჩუმდა'); if (callback) callback(true); })
           .catch(function () { if (callback) callback(false); });
       });
     }
