@@ -1134,6 +1134,8 @@
           status: (extra && extra.status && extra.status !== 'active') ? extra.status : 'active',
           scheduledAt: (extra && extra.scheduledAt) ? extra.scheduledAt : null,
           sharedPostId: extra && extra.sharedPostId ? extra.sharedPostId : null,
+          sharedStoryId: extra && extra.sharedStoryId ? extra.sharedStoryId : null,
+          storySnapshot: extra && extra.storySnapshot ? extra.storySnapshot : null,
           targetType: extra && extra.targetType ? extra.targetType : 'user',
           targetId: extra && extra.targetId ? extra.targetId : user.uid,
           bgGradient: extra && extra.bgGradient ? extra.bgGradient : null,

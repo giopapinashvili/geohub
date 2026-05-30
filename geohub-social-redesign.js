@@ -3769,8 +3769,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '<button type="button" class="gh-story-owner-hl" id="ghStorySaveHL" title="Save to Highlights"><i class="fas fa-star"></i></button>'
         : '';
 
-      var footerHtml = (reactHtml||replyHtml||seenHtml)
-        ? '<div class="gh-story-footer">'+(reactHtml||'')+(replyHtml||'')+(seenHtml||'')+'</div>'
+      // Share to Feed button (all signed-in users)
+      var shareToFeedHtml = isSignedIn
+        ? '<button type="button" class="gh-story-share-feed-btn" id="ghStoryShareFeedBtn"><i class="fas fa-share-nodes"></i> Feed-ზე გაზიარება</button>'
+        : '';
+
+      var footerHtml = (reactHtml||replyHtml||seenHtml||shareToFeedHtml)
+        ? '<div class="gh-story-footer">'+(reactHtml||'')+(replyHtml||'')+(seenHtml||'')+(shareToFeedHtml||'')+'</div>'
         : '';
 
       // Quiz sticker pre-computed HTML
@@ -4130,6 +4135,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             replySend.disabled = false; replySend.innerHTML = origIcon;
           }
         });
+      }
+
+      // Share to Feed button handler
+      var sfBtn = overlay.querySelector('#ghStoryShareFeedBtn');
+      if(sfBtn){
+        sfBtn.onclick = function(e){
+          e.stopPropagation();
+          clearTimer();
+          _openStoryShareCompose(st, g, function(){ scheduleAdvance(); });
+        };
       }
 
       overlay.querySelector('.gh-story-nav.prev').onclick = function(e){
@@ -4653,6 +4668,18 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       fundraiserHtml+
       linkPrevHtml+
       (p.sharedPostId?'<div class="gh-shared-preview" data-shared-post="'+esc(p.sharedPostId)+'"><i class="fas fa-share"></i><div><strong>Shared post</strong><span>Loading original post...</span></div></div>':'')+
+      (p.sharedStoryId&&p.storySnapshot?'<div class="gh-shared-story-embed">'+
+        '<div class="gh-sse-head">'+
+          (p.storySnapshot.authorAvatar?'<img src="'+esc(p.storySnapshot.authorAvatar)+'" class="gh-sse-av" alt="" onerror="this.style.display=\'none\'">':'<span class="gh-sse-av gh-sse-av-init">'+esc(initials(p.storySnapshot.authorName||'U'))+'</span>')+
+          '<div><strong class="gh-sse-name">'+esc(p.storySnapshot.authorName||'User')+'</strong><span class="gh-sse-label"><i class="fas fa-film"></i> Story</span></div>'+
+        '</div>'+
+        (p.storySnapshot.mediaUrl
+          ? '<img src="'+esc(p.storySnapshot.mediaUrl)+'" class="gh-sse-img" alt="" onerror="this.style.display=\'none\'">'
+          : (p.storySnapshot.bg
+              ? '<div class="gh-sse-bg" style="background:'+esc(p.storySnapshot.bg)+'"><span>'+esc(p.storySnapshot.text||'')+'</span></div>'
+              : (p.storySnapshot.text?'<div class="gh-sse-txt">'+esc(p.storySnapshot.text)+'</div>':''))
+        )+
+      '</div>':'')+
       viewCountHtml+
       '<div class="gh-post-stats"><span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'">❤️ <b data-like-count>'+totalRx+'</b>'+(totalRx?' people reacted':'')+'</button></span><span><button class="gh-stats-btn" data-open-comments-btn><b data-comment-count>'+Math.max(0,Number(p.commentCount||0))+'</b> comments</button> · <button class="gh-stats-btn" data-open-shares-btn><b data-share-count>'+Number(p.shareCount||0)+'</b> shares</button>'+(Number(p.viewCount||0)>0?' · <span class="gh-view-count"><i class="fas fa-eye"></i> <span data-view-count>'+Number(p.viewCount||0)+'</span></span>':'')+'</span></div>'+
       '<div class="gh-rx-breakdown" data-rx-pid="'+esc(pid)+'"></div>'+
@@ -5692,6 +5719,62 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if (GS().trackShare) GS().trackShare(pid);
         toast(_srt('shared_to_feed'));
       }, Object.assign({ sharedPostId: pid, visibility: $('#ghShareVisibility').value }, buildActorExtra()));
+    };
+  }
+
+  // Session 22: Share Story to Feed
+  function _openStoryShareCompose(st, g, onDone) {
+    if (!requireLogin()) return;
+    var _cu = authUser();
+    if (!_cu) return;
+    var _av = g.authorAvatar || '';
+    var _name = g.authorName || 'User';
+    var _previewHtml =
+      '<div class="gh-story-share-preview">'+
+        '<div class="gh-ssp-head">'+
+          (_av
+            ? '<img src="'+esc(_av)+'" class="gh-ssp-av" alt="" onerror="this.style.display=\'none\'">'
+            : '<span class="gh-ssp-av gh-ssp-av-init">'+esc(initials(_name))+'</span>')+
+          '<div>'+
+            '<strong class="gh-ssp-name">'+esc(_name)+'</strong>'+
+            '<span class="gh-ssp-label"><i class="fas fa-film"></i> Story</span>'+
+          '</div>'+
+        '</div>'+
+        (st.mediaUrl
+          ? (st.mediaType==='video'
+              ? '<video src="'+esc(st.mediaUrl)+'" class="gh-ssp-media" muted playsinline loop autoplay></video>'
+              : '<img src="'+esc(st.mediaUrl)+'" class="gh-ssp-media" alt="" onerror="this.style.display=\'none\'">')
+          : (st.bg
+              ? '<div class="gh-ssp-bg" style="background:'+esc(st.bg)+'"><span>'+esc(st.text||'Story')+'</span></div>'
+              : (st.text ? '<div class="gh-ssp-txt">'+esc(st.text)+'</div>' : ''))
+        )+
+      '</div>';
+    var body =
+      '<textarea class="gh-textarea" id="ghStStShareText" placeholder="რას ამბობ ამ სტორიზე?" rows="3"></textarea>'+
+      '<div class="gh-form-grid" style="margin-top:8px">'+
+        '<select class="gh-select" id="ghStStShareVis">'+
+          '<option value="public">🌍 Public</option>'+
+          '<option value="close_friends">⭐ Close Friends</option>'+
+          '<option value="onlyme">🔒 Only Me</option>'+
+        '</select>'+
+      '</div>'+
+      '<div style="margin-top:10px">'+_previewHtml+'</div>';
+    modal('სტორის Feed-ზე გაზიარება', body,
+      '<button class="gh-btn ghost" data-close-modal>გაუქმება</button><button class="gh-btn" id="ghSubmitStoryShare">გაზიარება</button>',
+      'ghStoryShareModal');
+    var submitBtn = document.getElementById('ghSubmitStoryShare');
+    if(submitBtn) submitBtn.onclick = function(){
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'იგზავნება…';
+      var caption = (document.getElementById('ghStStShareText')||{}).value || '';
+      var vis = (document.getElementById('ghStStShareVis')||{}).value || 'public';
+      var snap = { storyId: st.id||'', authorId: st.authorId||g.authorId||'', authorName: _name, authorAvatar: _av, text: st.text||'', mediaUrl: st.mediaUrl||'', bg: st.bg||'' };
+      GS().createPost(caption, '', function(){
+        var m = document.getElementById('ghStoryShareModal');
+        if(m) m.remove();
+        toast('სტორი Feed-ზე გაიზიარა ✓');
+        if(onDone) onDone();
+      }, Object.assign({ sharedStoryId: st.id||'', storySnapshot: snap, visibility: vis }, buildActorExtra()));
     };
   }
 
