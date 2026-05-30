@@ -101,23 +101,25 @@
     var _defaultTabCache = {};
 
     var TABS = [
-      { id:'all',        label:'ყველა',      icon:'fas fa-th' },
-      { id:'people',     label:'ადამიანები', icon:'fas fa-user' },
-      { id:'videos',     label:'ვიდეოები',   icon:'fas fa-film' },
-      { id:'businesses', label:'ბიზნესი',    icon:'fas fa-store' },
-      { id:'places',     label:'ადგილები',   icon:'fas fa-map-marker-alt' },
-      { id:'events',     label:'ივენთები',   icon:'fas fa-calendar' },
-      { id:'groups',     label:'ჯგუფები',    icon:'fas fa-users' },
-      { id:'posts',      label:'პოსტები',    icon:'fas fa-newspaper' },
-      { id:'services',   label:'სერვისები',  icon:'fas fa-grip' },
-      { id:'creators',   label:'Creators',   icon:'fas fa-camera-retro' },
-      { id:'learning',   label:'Learning',   icon:'fas fa-graduation-cap' }
+      { id:'all',        label:'ყველა',       icon:'fas fa-th' },
+      { id:'people',     label:'ადამიანები',  icon:'fas fa-user' },
+      { id:'stories',    label:'სტორები',     icon:'fas fa-film' },
+      { id:'hashtags',   label:'#ჰეშთეგები', icon:'fas fa-hashtag' },
+      { id:'videos',     label:'ვიდეოები',    icon:'fas fa-play' },
+      { id:'businesses', label:'ბიზნესი',     icon:'fas fa-store' },
+      { id:'places',     label:'ადგილები',    icon:'fas fa-map-marker-alt' },
+      { id:'events',     label:'ივენთები',    icon:'fas fa-calendar' },
+      { id:'groups',     label:'ჯგუფები',     icon:'fas fa-users' },
+      { id:'posts',      label:'პოსტები',     icon:'fas fa-newspaper' },
+      { id:'services',   label:'სერვისები',   icon:'fas fa-grip' },
+      { id:'creators',   label:'Creators',    icon:'fas fa-camera-retro' },
+      { id:'learning',   label:'Learning',    icon:'fas fa-graduation-cap' }
     ];
 
     var TAB_KEY = {
       all:null, people:'users', videos:'videos', businesses:'businesses', places:'places',
       events:'events', groups:'groups', posts:'posts', services:'services',
-      creators:'creators', learning:'learningItems'
+      creators:'creators', learning:'learningItems', stories:'stories', hashtags:null
     };
 
     function esc(s) {
@@ -394,6 +396,13 @@
         name = item.title || item.name || 'Course';
         sub  = (item.instructor ? item.instructor + ' · ' : '') + (item.category || 'Learning');
         badge = 'Learning'; badgeClass = 'sr-badge-learning';
+      } else if (type === 'story') {
+        href = '#';
+        av   = item.authorAvatar || item.mediaUrl || '';
+        name = item.authorName || 'GeoHub User';
+        sub  = (item.text || '').trim().replace(/\s+/g, ' ').substring(0, 80) || (item.locationName ? '📍 ' + item.locationName : '(სტორი)');
+        extra = item.hashtags && item.hashtags.length ? item.hashtags.map(function(t){ return '#'+t; }).join(' ') : '';
+        badge = 'Story'; badgeClass = 'sr-badge-story';
       }
       var initial = esc((name || '?').charAt(0).toUpperCase());
       var avHtml;
@@ -447,7 +456,8 @@
       var html = '';
       var sections = [
         { tabId:'people',     key:'users',        title:'ადამიანები', icon:'fas fa-user',            type:'user' },
-        { tabId:'videos',     key:'videos',       title:'ვიდეოები',   icon:'fas fa-film',            type:'video' },
+        { tabId:'stories',    key:'stories',      title:'სტორები',    icon:'fas fa-film',            type:'story' },
+        { tabId:'videos',     key:'videos',       title:'ვიდეოები',   icon:'fas fa-play',            type:'video' },
         { tabId:'businesses', key:'businesses',   title:'ბიზნესი',    icon:'fas fa-store',           type:'business' },
         { tabId:'places',     key:'places',       title:'ადგილები',   icon:'fas fa-map-marker-alt',  type:'place' },
         { tabId:'events',     key:'events',       title:'ივენთები',   icon:'fas fa-calendar',        type:'event' },
@@ -505,7 +515,7 @@
     var _DEFAULT_TYPE_MAP = {
       people:'user', videos:'video', businesses:'business', places:'place', events:'event',
       groups:'group', posts:'post', services:'service', creators:'creator',
-      learning:'learning'
+      learning:'learning', stories:'story'
     };
 
     function renderDefaultTabResults(tabId, items) {
@@ -523,6 +533,8 @@
     }
 
     function loadDefaultTab(tabId) {
+      if (tabId === 'hashtags') { _loadTrendingHashtags(); return; }
+      if (tabId === 'stories') { _loadRecentStories(); return; }
       var collKey = TAB_KEY[tabId];
       if (!collKey) { showDiscover(); return; }
 
@@ -563,8 +575,87 @@
       }
     }
 
+    /* ── Recent Stories (default browse) ── */
+    function _loadRecentStories() {
+      var body = document.getElementById('srchBody');
+      if (!body) return;
+      showSkeletons();
+      function _doStories() {
+        var gfb = window.GeoFirebase;
+        if (!gfb || !gfb.db || !gfb.fs) { showDiscover(); return; }
+        gfb.fs.getDocs(gfb.fs.query(
+          gfb.fs.collection(gfb.db, 'stories'),
+          gfb.fs.orderBy('createdAt', 'desc'),
+          gfb.fs.limit(24)
+        )).then(function(snap) {
+          var items = [];
+          snap.forEach(function(d) { items.push(Object.assign({ id: d.id }, d.data())); });
+          if (_tab !== 'stories') return;
+          if (!items.length) {
+            body.innerHTML = '<div class="sr-no-results"><i class="fas fa-film"></i><p>სტორები არ არის</p></div>';
+            return;
+          }
+          body.innerHTML = '<div class="sr-results-list">' +
+            items.map(function(item) { return itemHtml('story', item); }).join('') +
+          '</div>';
+        }).catch(function() { if (_tab === 'stories') showError(); });
+      }
+      if (window.GeoFirebase && window.GeoFirebase.db) _doStories();
+      else window.addEventListener('GeoFirebaseReady', _doStories, { once: true });
+    }
+
+    /* ── Trending Hashtags ── */
+    function _loadTrendingHashtags() {
+      var body = document.getElementById('srchBody');
+      if (!body) return;
+      showSkeletons();
+      var q = (document.getElementById('srchInput') || {}).value || '';
+      var needle = q.replace(/^#/, '').trim().toLowerCase();
+      function _doHt() {
+        var gfb = window.GeoFirebase;
+        if (!gfb || !gfb.db || !gfb.fs) { showDiscover(); return; }
+        var counts = {};
+        Promise.all([
+          gfb.fs.getDocs(gfb.fs.query(gfb.fs.collection(gfb.db, 'posts'), gfb.fs.limit(200))).catch(function(){ return { forEach: function(){} }; }),
+          gfb.fs.getDocs(gfb.fs.query(gfb.fs.collection(gfb.db, 'stories'), gfb.fs.limit(200))).catch(function(){ return { forEach: function(){} }; })
+        ]).then(function(snaps) {
+          snaps.forEach(function(snap) {
+            snap.forEach(function(d) {
+              var data = d.data() || {};
+              var tags = Array.isArray(data.hashtags) ? data.hashtags : [];
+              tags.forEach(function(t) {
+                if (!t) return;
+                var low = t.toLowerCase();
+                if (needle && low.indexOf(needle) === -1) return;
+                counts[low] = (counts[low] || 0) + 1;
+              });
+            });
+          });
+          if (_tab !== 'hashtags') return;
+          var sorted = Object.keys(counts).sort(function(a, b) { return counts[b] - counts[a]; }).slice(0, 40);
+          if (!sorted.length) {
+            body.innerHTML = '<div class="sr-no-results"><i class="fas fa-hashtag"></i><p>' +
+              (needle ? '"#' + esc(needle) + '" ვერ მოიძებნა' : 'ჰეშთეგები არ არის') + '</p></div>';
+            return;
+          }
+          body.innerHTML = '<div class="sr-ht-section"><div class="sr-section-title"><i class="fas fa-fire-flame-curved"></i> ტრენდული ჰეშთეგები</div>' +
+            '<div class="sr-ht-grid">' +
+            sorted.map(function(tag) {
+              return '<a class="sr-ht-pill" href="feed.html?tag=' + encodeURIComponent(tag) + '">' +
+                '<span class="sr-ht-hash">#</span>' + esc(tag) +
+                '<span class="sr-ht-cnt">' + counts[tag] + '</span>' +
+              '</a>';
+            }).join('') +
+            '</div></div>';
+        }).catch(function() { if (_tab === 'hashtags') showError(); });
+      }
+      if (window.GeoFirebase && window.GeoFirebase.db) _doHt();
+      else window.addEventListener('GeoFirebaseReady', _doHt, { once: true });
+    }
+
     /* ── Search trigger ── */
     function doSearch(q) {
+      if (_tab === 'hashtags') { _loadTrendingHashtags(); return; }
       if (!q) { showDiscover(); return; }
       showSkeletons();
       var GS = window.GeoSocial;

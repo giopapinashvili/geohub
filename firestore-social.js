@@ -4161,7 +4161,7 @@
         });
       }
 
-      var r = Object.assign({}, empty);
+      var r = Object.assign({}, empty, { stories: [] });
       var jobs = [
         { key:'users',         col:'users',         fields:['username','fullName','displayName'] },
         { key:'groups',        col:'groups',        fields:['name'] },
@@ -4173,7 +4173,8 @@
         { key:'creators',      col:'creators',      fields:['name','username'] },
         { key:'learningItems', col:'learningItems', fields:['title','name'] },
         { key:'videos',        col:'videos',        fields:['title'] },
-        { key:'posts',         col:'posts',         fields:[] }
+        { key:'posts',         col:'posts',         fields:[] },
+        { key:'stories',       col:'stories',       fields:[] }
       ];
       var pending = jobs.length;
       function done() { if (--pending === 0) callback(r); }
