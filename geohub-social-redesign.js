@@ -687,6 +687,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       ['challenges','challenges.html','fa-flag-checkered','Challenges','nav_challenges'],
       ['services','services.html','fa-grip','Services','nav_services'],
       ['realestate','real-estate.html','fa-house-chimney','Real Estate','nav_realestate'],
+      ['jobs','jobs.html','fa-briefcase','Jobs','nav_jobs'],
       ['learning','learning.html','fa-graduation-cap','Learning','nav_learning'],
       ['trust','trust.html','fa-shield-halved','Trust / Safety','nav_trust'],
       ['settings','settings.html','fa-gear','Settings','settings'],
