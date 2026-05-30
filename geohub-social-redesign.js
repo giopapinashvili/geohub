@@ -2787,7 +2787,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '</div>'+
       '<div id="ghStoryLocBadge" style="margin-top:6px;min-height:18px"></div>';
     var m=modal('Add to your story', body,
-      '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitStory" disabled>Share story</button>',
+      '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn ghost" id="ghSaveStoryDraft" title="Save as draft"><i class="fas fa-floppy-disk"></i></button><button class="gh-btn" id="ghSubmitStory" disabled>Share story</button>',
       'ghStoryModal');
     var pickedFile=null;
     var _storyLat=null, _storyLng=null;
@@ -2800,6 +2800,78 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }
     function isDirty(){ return !!(($('#ghStoryText')||{}).value||'').trim()||!!pickedFile; }
     function updateSubmit(){ var btn=$('#ghSubmitStory'); if(btn) btn.disabled=!isDirty(); }
+
+    // ── Draft helpers ─────────────────────────────────────────────
+    var _DRAFT_KEY='gh_story_drafts';
+    function _readDrafts(){ try{ return JSON.parse(localStorage.getItem(_DRAFT_KEY)||'[]'); }catch(e){ return []; } }
+    function _writeDrafts(arr){ try{ localStorage.setItem(_DRAFT_KEY, JSON.stringify(arr.slice(0,5))); }catch(e){} }
+    function _collectDraftData(){
+      return {
+        id: Date.now(),
+        savedAt: Date.now(),
+        text: ($('#ghStoryText')||{}).value||'',
+        duration: _selectedDur||'24h',
+        bg: _bgVisible?_selectedBg:null,
+        question: _qVisible?(($('#ghStoryQText')||{}).value||''):'',
+        link: _linkVisible?{url:(($('#ghStoryLinkUrl')||{}).value||''),label:(($('#ghStoryLinkLabel')||{}).value||'')}:null,
+        poll: _pollVisible?{question:(($('#ghStoryPollQ')||{}).value||''),optionA:(($('#ghStoryPollA')||{}).value||''),optionB:(($('#ghStoryPollB')||{}).value||'')}:null,
+        hashtags: _hashtags.slice()
+      };
+    }
+    function _applyDraft(d){
+      if(!d) return;
+      var ta=$('#ghStoryText'); if(ta&&d.text){ ta.value=d.text; updateSubmit(); }
+      if(d.duration){ _selectedDur=d.duration; var durBtns2=$('#ghStoryDurBtns'); if(durBtns2){ durBtns2.querySelectorAll('[data-dur]').forEach(function(b){ b.classList.toggle('active',b.dataset.dur===d.duration); }); } }
+      if(d.bg){ _bgVisible=true; _selectedBg=d.bg; var bgWrap2=$('#ghStoryBgWrap'); if(bgWrap2){ bgWrap2.style.display=''; var sw=bgWrap2.querySelector('[data-bg="'+d.bg+'"]'); if(sw) sw.classList.add('selected'); } }
+      if(d.hashtags&&d.hashtags.length){ _hashtags=d.hashtags.slice(); _renderHashtagPills(); _hashtagVisible=true; var hw=$('#ghStoryHashtagWrap'); if(hw) hw.style.display='block'; var hb=$('#ghStoryHashtagBtn'); if(hb) hb.classList.add('active'); }
+    }
+    // Auto-save debounce
+    var _draftTimer=null;
+    function _scheduleDraftSave(){
+      clearTimeout(_draftTimer);
+      _draftTimer=setTimeout(function(){
+        var d=_collectDraftData();
+        if(!d.text&&!d.poll&&!d.question) return;
+        var drafts=_readDrafts();
+        drafts.unshift(d);
+        _writeDrafts(drafts);
+      }, 2000);
+    }
+    // Manual save button
+    var saveDraftBtn=$('#ghSaveStoryDraft');
+    if(saveDraftBtn){
+      saveDraftBtn.onclick=function(){
+        var d=_collectDraftData();
+        if(!d.text&&!d.poll&&!d.question){ toast('სტორი ცარიელია','error'); return; }
+        var drafts=_readDrafts(); drafts.unshift(d); _writeDrafts(drafts);
+        toast('Draft შენახულია ✓');
+        m.remove();
+      };
+    }
+    // Check for existing drafts on open → show restore banner
+    (function(){
+      var drafts=_readDrafts();
+      if(!drafts.length||!drafts[0].text) return;
+      var newest=drafts[0];
+      var ageMs=Date.now()-newest.savedAt;
+      if(ageMs>86400000*7) return; // ignore drafts older than 7 days
+      var ageStr=ageMs<3600000?Math.round(ageMs/60000)+'წ':ageMs<86400000?Math.round(ageMs/3600000)+'სთ':Math.round(ageMs/86400000)+'დ';
+      var banner=document.createElement('div');
+      banner.className='gh-story-draft-banner';
+      banner.innerHTML='<i class="fas fa-floppy-disk"></i> Draft • '+ageStr+' წინ'
+        +'<div style="display:flex;gap:6px;margin-left:auto">'
+        +'<button class="gh-btn sm" id="ghDraftRestore">Restore</button>'
+        +'<button class="gh-btn sm ghost" id="ghDraftDiscard">Discard</button>'
+        +'</div>';
+      var modalBody=m.querySelector('.gh-modal-body');
+      if(modalBody) modalBody.insertBefore(banner, modalBody.firstChild);
+      document.getElementById('ghDraftRestore').onclick=function(){ _applyDraft(newest); banner.remove(); };
+      document.getElementById('ghDraftDiscard').onclick=function(){ _writeDrafts(drafts.slice(1)); banner.remove(); };
+    })();
+    // Hook auto-save to text changes
+    var ta2=$('#ghStoryText');
+    if(ta2) ta2.addEventListener('input', _scheduleDraftSave);
+
     m.addEventListener('click', function(e){
       if(e.target===m||e.target.closest('[data-close-modal]')){
         if(isDirty()){ e.stopPropagation(); e.preventDefault();
@@ -3230,7 +3302,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(_hashtags&&_hashtags.length) _extra.hashtags=_hashtags.slice();
         var _musicTrack=typeof window._getStoryMusic==='function'?window._getStoryMusic():null;
         if(_musicTrack&&_musicTrack.label) _extra.music={label:_musicTrack.label, url:_musicTrack.url||''};
-        GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); },_extra);
+        GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); try{ localStorage.removeItem(_DRAFT_KEY); }catch(_e){} },_extra);
       }).catch(function(err){
         console.error('[GeoHub] story upload failed',err);
         toast(_srt('img_upload_cl_fail'),'error');
@@ -3325,10 +3397,18 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         groups=buildStoryGroups(_filtered);
         var add=buildCreateCard();
         var mapCard='<button type="button" class="gh-story-card gh-story-map-card" id="ghStoriesMapBtn" onclick="if(typeof window.ghOpenStoryMap===\'function\')window.ghOpenStoryMap()"><div class="gh-story-map-card-icon"><i class="fas fa-map-location-dot"></i></div><br><strong>Map</strong></button>';
+        var draftCard='';
+        try{
+          var _sd=JSON.parse(localStorage.getItem('gh_story_drafts')||'[]');
+          if(_sd.length&&_sd[0].text){
+            draftCard='<button type="button" class="gh-story-card gh-story-draft-card" onclick="if(typeof openStoryModal===\'function\')openStoryModal()" title="'+_sd.length+' draft(s)"><div class="gh-story-draft-card-icon"><i class="fas fa-floppy-disk"></i>'
+              +'<span class="gh-story-draft-badge">'+_sd.length+'</span></div><br><strong>Drafts</strong></button>';
+          }
+        }catch(_e){}
         if(!groups.length){
-          box.innerHTML=add+mapCard+'<span class="gh-story-empty">No stories yet. Be the first!</span>';
+          box.innerHTML=add+(draftCard||'')+mapCard+'<span class="gh-story-empty">No stories yet. Be the first!</span>';
         } else {
-          box.innerHTML=add+groups.slice(0,15).map(renderStoryCard).join('')+mapCard;
+          box.innerHTML=add+(draftCard||'')+groups.slice(0,14).map(renderStoryCard).join('')+mapCard;
         }
       });
       box.addEventListener('click', function(e){
