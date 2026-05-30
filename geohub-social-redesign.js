@@ -2725,6 +2725,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button type="button" class="gh-cmp-tool" id="ghStoryQuizBtn"><i class="fas fa-list-check"></i><span> Quiz</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryAyBtn"><i class="fas fa-circle-plus"></i><span> Add Yours</span></button>'+
         '<button type="button" class="gh-cmp-tool gh-cmp-tool-cf" id="ghStoryCfBtn" title="Close Friends only"><i class="fas fa-star"></i><span> CF Only</span></button>'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryDrawBtn"><i class="fas fa-pen-nib"></i><span> Draw</span></button>'+
       '</div>'+
       '<div id="ghStoryMentionWrap" style="display:none;margin-top:8px">'+
         '<div style="position:relative">'+
@@ -2960,6 +2961,95 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(_cfEnabled&&GS().getMyCloseFriendIds) GS().getMyCloseFriendIds(function(ids){ _cfList=ids; });
       };
     }
+
+    // ── Draw mode ────────────────────────────────────────────────
+    function _openDrawMode(){
+      var ex=document.getElementById('ghDrawOverlay'); if(ex) ex.remove();
+      var COLORS=['#ffffff','#000000','#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#8b5cf6','#ec4899'];
+      var _dc='#ffffff', _ds=6, _erasing=false, _drawing=false, _undoStack=[];
+      var ov=document.createElement('div'); ov.id='ghDrawOverlay'; ov.className='gh-draw-overlay';
+      ov.innerHTML=
+        '<div class="gh-draw-header">'+
+          '<button class="gh-draw-hbtn" id="ghDrawCancel"><i class="fas fa-times"></i> Cancel</button>'+
+          '<div style="display:flex;gap:8px">'+
+            '<button class="gh-draw-hbtn" id="ghDrawUndo" disabled><i class="fas fa-rotate-left"></i></button>'+
+            '<button class="gh-draw-hbtn" id="ghDrawClear"><i class="fas fa-trash-alt"></i></button>'+
+          '</div>'+
+          '<button class="gh-draw-done" id="ghDrawDone">Done</button>'+
+        '</div>'+
+        '<div class="gh-draw-canvas-area"><canvas id="ghDrawCanvas" width="360" height="640"></canvas></div>'+
+        '<div class="gh-draw-tools">'+
+          '<div class="gh-draw-pal">'+COLORS.map(function(c){ return '<button class="gh-draw-clr'+(c===_dc?' active':'')+'" data-clr="'+esc(c)+'" style="background:'+c+'"></button>'; }).join('')+'</div>'+
+          '<div class="gh-draw-btm-row">'+
+            '<div class="gh-draw-sizes">'+
+              '<button class="gh-draw-sz active" data-sz="4"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block"></span></button>'+
+              '<button class="gh-draw-sz" data-sz="10"><span style="width:13px;height:13px;border-radius:50%;background:currentColor;display:inline-block"></span></button>'+
+              '<button class="gh-draw-sz" data-sz="22"><span style="width:22px;height:22px;border-radius:50%;background:currentColor;display:inline-block"></span></button>'+
+            '</div>'+
+            '<div class="gh-draw-tool-btns">'+
+              '<button class="gh-draw-tool active" id="ghDTPen" title="Pen"><i class="fas fa-pen"></i></button>'+
+              '<button class="gh-draw-tool" id="ghDTErase" title="Eraser"><i class="fas fa-eraser"></i></button>'+
+            '</div>'+
+          '</div>'+
+        '</div>';
+      document.body.appendChild(ov);
+      var canvas=document.getElementById('ghDrawCanvas'), ctx=canvas.getContext('2d');
+      // Background
+      var bgImg2=($('#ghStoryPreview')||{}).querySelector&&$('#ghStoryPreview').querySelector('img');
+      function _fillBg(){
+        if(bgImg2&&bgImg2.naturalWidth){
+          ctx.drawImage(bgImg2,0,0,360,640);
+        } else {
+          var g=ctx.createLinearGradient(0,0,0,640); g.addColorStop(0,'#0f172a'); g.addColorStop(1,'#1e293b');
+          ctx.fillStyle=g; ctx.fillRect(0,0,360,640);
+        }
+      }
+      if(bgImg2&&bgImg2.src&&!bgImg2.naturalWidth){
+        var tmpImg=new Image(); tmpImg.crossOrigin='anonymous';
+        tmpImg.onload=function(){ ctx.drawImage(tmpImg,0,0,360,640); };
+        tmpImg.src=bgImg2.src;
+      } else { _fillBg(); }
+      function _saveUndo(){ if(_undoStack.length>=20) _undoStack.shift(); _undoStack.push(ctx.getImageData(0,0,360,640)); document.getElementById('ghDrawUndo').disabled=false; }
+      function _getPos(e){ var r=canvas.getBoundingClientRect(),sx=360/r.width,sy=640/r.height; var s=e.touches?e.touches[0]:e; return {x:(s.clientX-r.left)*sx,y:(s.clientY-r.top)*sy}; }
+      function _prep(){ ctx.globalCompositeOperation=_erasing?'destination-out':'source-over'; ctx.strokeStyle=_erasing?'rgba(0,0,0,1)':_dc; ctx.fillStyle=_erasing?'rgba(0,0,0,1)':_dc; ctx.lineWidth=_erasing?_ds*2:_ds; ctx.lineCap='round'; ctx.lineJoin='round'; }
+      canvas.addEventListener('mousedown',function(e){ e.preventDefault(); _drawing=true; _saveUndo(); _prep(); var p=_getPos(e); ctx.beginPath(); ctx.arc(p.x,p.y,(_erasing?_ds:_ds/2),0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.moveTo(p.x,p.y); });
+      canvas.addEventListener('touchstart',function(e){ e.preventDefault(); _drawing=true; _saveUndo(); _prep(); var p=_getPos(e); ctx.beginPath(); ctx.arc(p.x,p.y,(_erasing?_ds:_ds/2),0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.moveTo(p.x,p.y); },{passive:false});
+      canvas.addEventListener('mousemove',function(e){ if(!_drawing) return; _prep(); var p=_getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x,p.y); });
+      canvas.addEventListener('touchmove',function(e){ if(!_drawing) return; e.preventDefault(); _prep(); var p=_getPos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x,p.y); },{passive:false});
+      var _stopDraw=function(){ _drawing=false; ctx.globalCompositeOperation='source-over'; };
+      canvas.addEventListener('mouseup',_stopDraw); canvas.addEventListener('touchend',_stopDraw); document.addEventListener('mouseup',_stopDraw);
+      // Color
+      ov.querySelectorAll('[data-clr]').forEach(function(btn){ btn.onclick=function(){ _dc=btn.dataset.clr; _erasing=false; ov.querySelectorAll('[data-clr]').forEach(function(b){b.classList.remove('active');}); btn.classList.add('active'); document.getElementById('ghDTPen').classList.add('active'); document.getElementById('ghDTErase').classList.remove('active'); }; });
+      // Size
+      ov.querySelectorAll('[data-sz]').forEach(function(btn){ btn.onclick=function(){ _ds=parseInt(btn.dataset.sz,10); ov.querySelectorAll('[data-sz]').forEach(function(b){b.classList.remove('active');}); btn.classList.add('active'); }; });
+      // Tools
+      document.getElementById('ghDTPen').onclick=function(){ _erasing=false; this.classList.add('active'); document.getElementById('ghDTErase').classList.remove('active'); };
+      document.getElementById('ghDTErase').onclick=function(){ _erasing=true; this.classList.add('active'); document.getElementById('ghDTPen').classList.remove('active'); };
+      // Undo
+      document.getElementById('ghDrawUndo').onclick=function(){ if(!_undoStack.length) return; ctx.putImageData(_undoStack.pop(),0,0); if(!_undoStack.length) this.disabled=true; };
+      // Clear
+      document.getElementById('ghDrawClear').onclick=function(){ _saveUndo(); ctx.clearRect(0,0,360,640); _fillBg(); };
+      // Cancel
+      document.getElementById('ghDrawCancel').onclick=function(){ ov.remove(); };
+      // Done
+      document.getElementById('ghDrawDone').onclick=function(){
+        canvas.toBlob(function(blob){
+          pickedFile=new File([blob],'drawing.png',{type:'image/png'});
+          var url=URL.createObjectURL(blob);
+          var preview=$('#ghStoryPreview');
+          if(preview){
+            preview.innerHTML='<div style="position:relative;display:inline-block;width:100%"><img src="'+url+'" style="width:100%;max-height:260px;object-fit:cover;border-radius:16px;border:1px solid var(--gh-border)">'+
+              '<button type="button" id="ghStoryRemoveMedia" style="position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;background:rgba(15,23,42,.75);border:none;color:#fff;cursor:pointer;font-size:1.1rem;display:grid;place-items:center"><i class="fas fa-times"></i></button></div>';
+            var rmBtn=$('#ghStoryRemoveMedia');
+            if(rmBtn) rmBtn.onclick=function(){ pickedFile=null; preview.innerHTML=''; updateSubmit(); };
+          }
+          updateSubmit();
+          ov.remove();
+        },'image/png');
+      };
+    }
+    var drawBtn=$('#ghStoryDrawBtn');
+    if(drawBtn) drawBtn.onclick=function(){ _openDrawMode(); };
 
     // Pre-fill if opened from "Add Yours" in viewer
     if(ayContext&&typeof ayContext==='object'&&ayContext.prompt){
