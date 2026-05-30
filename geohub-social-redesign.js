@@ -2665,6 +2665,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   };
 
   function openStoryModal(ayContext){
+    if(window._ghStoryEditor){ window._ghStoryEditor(ayContext); return; }
     if(!requireLogin()) return;
     var me=currentUserInfo();
     var av=me.avatar||''; var name=me.name||'You';

@@ -777,9 +777,9 @@
     window.addEventListener('resize', sizeCanvas);
   }
 
-  // ─── Patch openStoryModal ─────────────────────────────────
+  // ─── Register override hook ───────────────────────────────
   function patch() {
-    window.openStoryModal = function() { openEditor(); };
+    window._ghStoryEditor = openEditor;
     window.openStoryEditor = openEditor;
   }
 
@@ -788,10 +788,5 @@
   } else {
     patch();
   }
-
-  // Re-patch after geohub-social-redesign.js loads (it defines openStoryModal)
-  window.addEventListener('load', function() {
-    setTimeout(patch, 200);
-  });
 
 })();
