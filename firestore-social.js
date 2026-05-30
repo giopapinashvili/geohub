@@ -91,6 +91,7 @@
       markNotificationRead: function () {},
       listenUserPosts: function (uid, cb) { cb([]); return function () {}; },
       listenUserCheckins: function (uid, cb) { cb([]); return function () {}; },
+      getUserTravelTimeline: function (uid, cb) { if(cb) cb([]); },
       trackShare: noop,
       createGroup: noop,
       listenGroups: function (o, cb) { (cb||o)([]); return function(){}; },
@@ -2456,6 +2457,36 @@
       }, function (err) { console.warn('[GeoSocial] listenUserCheckins', err.message); callback([]); });
     }
 
+    function getUserTravelTimeline(uid, callback) {
+      if (!uid) { if(callback) callback([]); return; }
+      function _ms(v) { if(!v) return 0; if(typeof v.toMillis==='function') return v.toMillis(); if(v.seconds) return v.seconds*1000; return Number(v)||0; }
+      var checkinQ = query(collection(db, 'checkins'), where('userId', '==', uid), orderBy('createdAt', 'desc'), limit(50));
+      var archiveCol = collection(db, 'users', uid, 'storyArchive');
+      Promise.all([
+        getDocs(checkinQ).catch(function(){ return { forEach: function(){} }; }),
+        getDocs(archiveCol).catch(function(){ return { forEach: function(){} }; })
+      ]).then(function(results) {
+        var items = [];
+        results[0].forEach(function(d) {
+          var data = d.data();
+          if (data.city || data.placeName || data.lat != null) {
+            items.push(Object.assign({ id: d.id, _type: 'checkin' }, data));
+          }
+        });
+        results[1].forEach(function(d) {
+          var data = d.data();
+          if (data.lat != null || data.city) {
+            items.push(Object.assign({ id: d.id, _type: 'story' }, data));
+          }
+        });
+        items.sort(function(a, b) { return _ms(b.createdAt) - _ms(a.createdAt); });
+        if(callback) callback(items);
+      }).catch(function(err) {
+        console.warn('[GeoSocial] getUserTravelTimeline', err.message);
+        if(callback) callback([]);
+      });
+    }
+
     function tsToMillis(value) {
       if (!value) return 0;
       if (typeof value.toMillis === 'function') return value.toMillis();
@@ -4201,6 +4232,7 @@
       markNotificationRead:    markNotificationRead,
       listenUserPosts:         listenUserPosts,
       listenUserCheckins:      listenUserCheckins,
+      getUserTravelTimeline:   getUserTravelTimeline,
       startConversation:       startConversation,
       startBusinessConversation: startBusinessConversation,
       listenBusinessConversations: listenBusinessConversations,

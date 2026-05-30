@@ -875,6 +875,7 @@
     renderBadgeTab(user);
     renderBusinessesTab(user);
     loadCheckinsTab(user);
+    loadTravelTab(user);
     loadVideosTab(user);
     if (window.GeoSocial && window.GeoSocial.listenSavedPosts) {
       function updateSavedEmpty() {
@@ -1295,6 +1296,76 @@
         tab.innerHTML = '<div class="gh-friend-grid">'+businesses.map(b => '<a class="gh-friend-card" href="business.html?id='+encodeURIComponent(b.id)+'"><span class="gh-avatar">'+(b.logoUrl||b.coverImageUrl?'<img src="'+esc(b.logoUrl||b.coverImageUrl)+'" alt="" loading="lazy" decoding="async">':esc(initialLetters(b.name||'Business')) )+'</span><div><strong>'+esc(b.name||'Business')+'</strong><span>'+esc(b.businessType==='online'?'Online / Nationwide':(b.city||b.category||'Business'))+'</span></div></a>').join('')+'</div>';
       });
     }
+  }
+
+  function loadTravelTab(user) {
+    var tab = $('#tab-travel');
+    if (!tab) return;
+    var GS = window.GeoSocial;
+    if (!GS || !GS.getUserTravelTimeline) return;
+    GS.getUserTravelTimeline(user.uid, function(items) {
+      var cnt = $('.ptab[data-tab="travel"] .tab-count');
+      if (!items || !items.length) {
+        if (cnt) cnt.textContent = '';
+        tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-plane"></i><h3>არ არის მოგზაურობის ისტორია</h3><p>Check-in-ები და გეო-ტეგირებული სტორიები გამოჩნდება აქ.</p></div>';
+        return;
+      }
+      if (cnt) cnt.textContent = items.length;
+      function _ms(v) { if(!v) return 0; if(typeof v.toMillis==='function') return v.toMillis(); if(v.seconds) return v.seconds*1000; return Number(v)||0; }
+      function _fmt(v) {
+        var d = new Date(_ms(v));
+        if (isNaN(d)) return '';
+        var months = ['იანვ','თებ','მარ','აპრ','მაი','ივნ','ივლ','აგვ','სექ','ოქტ','ნოე','დეკ'];
+        return d.getDate() + ' ' + months[d.getMonth()] + ', ' + d.getFullYear();
+      }
+      function _monthKey(v) {
+        var d = new Date(_ms(v));
+        if (isNaN(d)) return 'Unknown';
+        var months = ['იანვარი','თებერვალი','მარტი','აპრილი','მაისი','ივნისი','ივლისი','აგვისტო','სექტემბერი','ოქტომბერი','ნოემბერი','დეკემბერი'];
+        return months[d.getMonth()] + ' ' + d.getFullYear();
+      }
+      // Group by month
+      var groups = [], curKey = null, curGroup = null;
+      items.forEach(function(item) {
+        var mk = _monthKey(item.createdAt);
+        if (mk !== curKey) { curKey = mk; curGroup = { month: mk, items: [] }; groups.push(curGroup); }
+        curGroup.items.push(item);
+      });
+      // Count unique cities
+      var cities = {};
+      items.forEach(function(it) { var c = it.city || it.country || ''; if(c) cities[c] = true; });
+      var cityCount = Object.keys(cities).length;
+      var html = '<div class="gh-travel-summary">'
+        + '<div class="gh-travel-stat"><div class="gh-travel-stat-val">' + items.length + '</div><div class="gh-travel-stat-lbl">მოქმედება</div></div>'
+        + '<div class="gh-travel-stat"><div class="gh-travel-stat-val">' + cityCount + '</div><div class="gh-travel-stat-lbl">ქალაქი</div></div>'
+        + '</div>'
+        + '<div class="gh-travel-timeline">';
+      groups.forEach(function(grp) {
+        html += '<div class="gh-tl-month-header"><i class="fas fa-calendar-alt"></i> ' + esc(grp.month) + '</div>';
+        grp.items.forEach(function(item) {
+          var isCheckin = item._type === 'checkin';
+          var icon = isCheckin ? 'fa-map-marker-alt' : 'fa-camera';
+          var iconColor = isCheckin ? '#10b981' : '#3b82f6';
+          var locationLine = [item.placeName||'', item.city||'', item.country&&item.country!=='Georgia'?item.country:''].filter(Boolean).join(' · ');
+          var thumb = item.photoUrl || item.mediaUrl || '';
+          var caption = item.caption || item.text || '';
+          var placeHref = isCheckin && item.placeId ? 'places.html?id=' + encodeURIComponent(item.placeId) : '';
+          html += '<div class="gh-tl-item">'
+            + '<div class="gh-tl-dot" style="background:' + iconColor + '"><i class="fas ' + icon + '"></i></div>'
+            + '<div class="gh-tl-card">'
+              + (thumb ? '<div class="gh-tl-thumb"><img src="' + esc(thumb) + '" alt="" loading="lazy" decoding="async" onerror="this.parentElement.style.display=\'none\'"></div>' : '')
+              + '<div class="gh-tl-body">'
+                + '<div class="gh-tl-loc">' + (placeHref ? '<a href="' + esc(placeHref) + '" style="color:inherit;text-decoration:none">' + esc(locationLine||'Unknown location') + '</a>' : esc(locationLine||'Unknown location')) + '</div>'
+                + (caption ? '<div class="gh-tl-caption">' + esc(caption.slice(0,120)) + '</div>' : '')
+                + '<div class="gh-tl-date"><i class="fas fa-' + icon + '" style="color:' + iconColor + ';margin-right:4px;font-size:.7rem"></i>' + esc(_fmt(item.createdAt)) + (isCheckin && item.xpAwarded ? ' · <span class="gh-tl-xp">+' + item.xpAwarded + ' XP</span>' : '') + '</div>'
+              + '</div>'
+            + '</div>'
+          + '</div>';
+        });
+      });
+      html += '</div>';
+      tab.innerHTML = html;
+    });
   }
 
   function loadCheckinsTab(user) {
