@@ -5764,3 +5764,70 @@ html[data-gh-motion="reduced"] * { animation-duration:0.001ms !important; transi
 .pa-thumb-text{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:.78rem;color:var(--text-secondary,#94a3b8);padding:10px;box-sizing:border-box;text-align:center}
 .pa-thumb-dur{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.6);color:#fff;font-size:.65rem;font-weight:800;padding:2px 6px;border-radius:8px}
 .pa-thumb-caption{position:absolute;bottom:0;left:0;right:0;padding:6px 8px;background:linear-gradient(to top,rgba(0,0,0,.7),transparent);color:#fff;font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ══ Session 4: Mention + Countdown Stickers ════════════════════════════ */
+
+/* Mention sticker in story viewer */
+.gh-story-mention-sticker{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(59,130,246,.85);color:#fff;
+  padding:7px 14px 7px 8px;border-radius:30px;
+  font-size:.85rem;font-weight:700;text-decoration:none;
+  backdrop-filter:blur(8px);
+  box-shadow:0 2px 12px rgba(59,130,246,.4);
+  cursor:pointer;border:1.5px solid rgba(255,255,255,.25);
+  position:absolute;bottom:140px;left:50%;transform:translateX(-50%);
+  white-space:nowrap;z-index:4;transition:transform .15s
+}
+.gh-story-mention-sticker:hover{transform:translateX(-50%) scale(1.05)}
+.gh-sticker-av{width:26px;height:26px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.7)}
+
+/* Countdown sticker in story viewer */
+.gh-story-cd-sticker{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(251,191,36,.9);color:#1a1200;
+  padding:8px 16px 8px 12px;border-radius:16px;
+  font-size:.82rem;font-weight:800;
+  backdrop-filter:blur(8px);
+  box-shadow:0 2px 12px rgba(251,191,36,.5);
+  position:absolute;bottom:185px;left:50%;transform:translateX(-50%);
+  white-space:nowrap;z-index:4;
+  border:1.5px solid rgba(255,255,255,.35)
+}
+.gh-cd-icon{font-size:.9rem;animation:cdPulse 1s ease-in-out infinite alternate}
+@keyframes cdPulse{from{opacity:.7}to{opacity:1}}
+.gh-cd-st-inner{display:flex;flex-direction:column;gap:1px}
+.gh-cd-st-label{font-size:.7rem;font-weight:700;opacity:.8;text-transform:uppercase;letter-spacing:.4px}
+.gh-cd-st-time{font-size:1rem;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.5px}
+
+/* Mention search dropdown */
+.gh-mention-dropdown{
+  position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:200;
+  background:var(--bg-card,#1a1f35);border:1px solid var(--border,#2a3050);
+  border-radius:10px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.4)
+}
+.gh-mention-item{
+  display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;
+  transition:background .1s
+}
+.gh-mention-item:hover{background:var(--bg-elevated,#252b45)}
+.gh-sticker-av-sm{width:28px;height:28px;border-radius:50%;object-fit:cover}
+.gh-sticker-init-sm{width:28px;height:28px;border-radius:50%;background:var(--gh-green,#10b981);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0}
+.gh-mention-nm{font-size:.85rem;color:var(--text-primary,#f0f4ff)}
+.gh-mention-handle{font-size:.75rem;color:var(--text-muted,#64748b)}
+.gh-mention-empty{padding:10px 12px;font-size:.8rem;color:var(--text-muted,#64748b)}
+
+/* Mention preview badge in modal */
+.gh-mention-preview-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.4);
+  color:#93c5fd;padding:4px 10px 4px 6px;border-radius:20px;font-size:.82rem;font-weight:700
+}
+.gh-mention-clear{background:none;border:none;color:#93c5fd;cursor:pointer;font-size:1rem;line-height:1;margin-left:4px;padding:0 2px}
+
+/* Countdown preview badge in modal */
+.gh-cd-preview-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.4);
+  color:#fbbf24;padding:5px 12px;border-radius:20px;font-size:.82rem;font-weight:700
+}

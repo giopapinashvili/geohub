@@ -2649,8 +2649,22 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button type="button" class="gh-cmp-tool" id="ghStoryPhotoBtn"><i class="fas fa-image"></i><span> Photo/Video</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryPollBtn"><i class="fas fa-check-to-slot"></i><span> Poll</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryLinkBtn"><i class="fas fa-link"></i><span> Link</span></button>'+
-        '<button type="button" class="gh-cmp-tool" id="ghStoryQBtn"><i class="fas fa-question-circle"></i><span> Question</span></button>'+
-        '<button type="button" class="gh-cmp-tool" id="ghStoryBgBtn"><i class="fas fa-palette"></i><span> Background</span></button>'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryQBtn"><i class="fas fa-question-circle"></i><span> Q</span></button>'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryBgBtn"><i class="fas fa-palette"></i><span> BG</span></button>'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryMentionBtn"><i class="fas fa-at"></i><span> Mention</span></button>'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryCdBtn"><i class="fas fa-hourglass-half"></i><span> Timer</span></button>'+
+      '</div>'+
+      '<div id="ghStoryMentionWrap" style="display:none;margin-top:8px">'+
+        '<div style="position:relative">'+
+          '<input class="gh-input" id="ghStoryMentionInput" placeholder="@username ან სახელი…" maxlength="50" autocomplete="off">'+
+          '<div class="gh-mention-dropdown" id="ghStoryMentionDrop" style="display:none"></div>'+
+        '</div>'+
+        '<div id="ghStoryMentionPreview" style="margin-top:6px"></div>'+
+      '</div>'+
+      '<div id="ghStoryCdWrap" style="display:none;margin-top:8px">'+
+        '<input class="gh-input" id="ghStoryCdLabel" placeholder="Countdown-ის სახელი…" maxlength="60">'+
+        '<input class="gh-input" id="ghStoryCdDate" type="datetime-local" style="margin-top:6px">'+
+        '<div id="ghStoryCdPreview" class="gh-cd-preview-badge" style="margin-top:6px;display:none"></div>'+
       '</div>'+
       '<div id="ghStoryLocBadge" style="margin-top:6px;min-height:18px"></div>';
     var m=modal('Add to your story', body,
@@ -2693,6 +2707,98 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var linkRm=$('#ghStoryLinkRemove'); if(linkRm) linkRm.onclick=function(){ _linkVisible=false; linkWrap.style.display='none'; linkBtn&&linkBtn.classList.remove('active'); };
     var qRm=$('#ghStoryQRemove'); if(qRm) qRm.onclick=function(){ _qVisible=false; qWrap.style.display='none'; qBtn&&qBtn.classList.remove('active'); };
     var bgPicker=$('#ghStoryBgPicker'); if(bgPicker){ bgPicker.addEventListener('click',function(e){ var sw=e.target.closest('[data-bg]'); if(!sw) return; bgPicker.querySelectorAll('[data-bg]').forEach(function(s){ s.classList.remove('selected'); }); sw.classList.add('selected'); _selectedBg=sw.dataset.bg; }); }
+
+    // ── Mention sticker ───────────────────────────────────────────
+    var _mentionData=null, _mentionVisible=false;
+    var mentionBtn=$('#ghStoryMentionBtn'), mentionWrap=$('#ghStoryMentionWrap');
+    var mentionInput=$('#ghStoryMentionInput'), mentionDrop=$('#ghStoryMentionDrop'), mentionPreview=$('#ghStoryMentionPreview');
+    var _mentionTimer=null;
+    if(mentionBtn&&mentionWrap){
+      mentionBtn.onclick=function(){
+        _mentionVisible=!_mentionVisible;
+        mentionWrap.style.display=_mentionVisible?'':'none';
+        mentionBtn.classList.toggle('active',_mentionVisible);
+        if(_mentionVisible&&mentionInput) mentionInput.focus();
+      };
+    }
+    function _setMention(u){
+      _mentionData={uid:u.uid||u.id,name:u.displayName||u.name||'User',username:u.username||'',avatar:u.avatar||u.photoURL||''};
+      if(mentionInput) mentionInput.value='';
+      if(mentionDrop){ mentionDrop.style.display='none'; mentionDrop.innerHTML=''; }
+      if(mentionPreview) mentionPreview.innerHTML=
+        '<span class="gh-mention-preview-badge">'+(
+          _mentionData.avatar?'<img src="'+esc(_mentionData.avatar)+'" class="gh-sticker-av-sm" alt="">':''
+        )+'@'+esc(_mentionData.name)+'<button type="button" class="gh-mention-clear" id="ghMentionClear">×</button></span>';
+      var clr=$('#ghMentionClear'); if(clr) clr.onclick=function(){ _mentionData=null; if(mentionPreview) mentionPreview.innerHTML=''; };
+    }
+    if(mentionInput){
+      mentionInput.addEventListener('input',function(){
+        clearTimeout(_mentionTimer);
+        var q=(mentionInput.value||'').trim();
+        if(!q){ if(mentionDrop){ mentionDrop.style.display='none'; mentionDrop.innerHTML=''; } return; }
+        _mentionTimer=setTimeout(function(){
+          var GF=window.GeoFirebase; if(!GF||!GF.fs||!GF.db) return;
+          GF.fs.getDocs(GF.fs.query(
+            GF.fs.collection(GF.db,'users'),
+            GF.fs.where('username','>=',q.toLowerCase()),
+            GF.fs.where('username','<=',q.toLowerCase()+''),
+            GF.fs.limit(5)
+          )).then(function(snap){
+            var results=[];
+            snap.forEach(function(d){ results.push(Object.assign({uid:d.id},d.data())); });
+            if(!results.length){
+              // Fallback: name prefix
+              return GF.fs.getDocs(GF.fs.query(
+                GF.fs.collection(GF.db,'users'),
+                GF.fs.where('name','>=',q),
+                GF.fs.where('name','<=',q+''),
+                GF.fs.limit(5)
+              )).then(function(s2){ s2.forEach(function(d){ results.push(Object.assign({uid:d.id},d.data())); }); return results; });
+            }
+            return results;
+          }).then(function(results){
+            if(!mentionDrop||!results) return;
+            if(!results.length){ mentionDrop.innerHTML='<div class="gh-mention-empty">ვერ მოიძებნა</div>'; mentionDrop.style.display=''; return; }
+            mentionDrop.innerHTML=results.map(function(u,i){
+              var av=u.avatar||u.photoURL||''; var nm=u.displayName||u.name||'User';
+              return '<div class="gh-mention-item" data-idx="'+i+'">'+(av?'<img src="'+esc(av)+'" class="gh-sticker-av-sm" alt="">':'<span class="gh-sticker-init-sm">'+esc(nm.charAt(0).toUpperCase())+'</span>')+'<span class="gh-mention-nm">'+esc(nm)+(u.username?' <span class="gh-mention-handle">@'+esc(u.username)+'</span>':'')+'</span></div>';
+            }).join('');
+            mentionDrop.style.display='';
+            mentionDrop.querySelectorAll('.gh-mention-item').forEach(function(el,i){ el.onmousedown=function(e){ e.preventDefault(); _setMention(results[i]); }; });
+          }).catch(function(){});
+        },350);
+      });
+      mentionInput.addEventListener('blur',function(){ setTimeout(function(){ if(mentionDrop) mentionDrop.style.display='none'; },200); });
+    }
+
+    // ── Countdown sticker ─────────────────────────────────────────
+    var _cdTargetDate=null, _cdLabel='', _cdVisible=false;
+    var cdBtn=$('#ghStoryCdBtn'), cdWrap=$('#ghStoryCdWrap');
+    var cdLabelInput=$('#ghStoryCdLabel'), cdDateInput=$('#ghStoryCdDate'), cdPreview=$('#ghStoryCdPreview');
+    if(cdBtn&&cdWrap){
+      cdBtn.onclick=function(){
+        _cdVisible=!_cdVisible;
+        cdWrap.style.display=_cdVisible?'':'none';
+        cdBtn.classList.toggle('active',_cdVisible);
+        if(_cdVisible&&cdDateInput&&!cdDateInput.value){
+          var dflt=new Date(Date.now()+7*86400000);
+          dflt.setSeconds(0,0);
+          cdDateInput.value=dflt.toISOString().slice(0,16);
+        }
+        if(_cdVisible&&cdDateInput) _updateCdPreview();
+      };
+    }
+    function _updateCdPreview(){
+      if(!cdPreview||!cdDateInput||!cdDateInput.value) return;
+      _cdTargetDate=cdDateInput.value;
+      _cdLabel=(cdLabelInput&&cdLabelInput.value.trim())||'Countdown';
+      var rem=new Date(_cdTargetDate)-Date.now();
+      var txt=rem>0?(Math.floor(rem/86400000)+'d '+(Math.floor((rem%86400000)/3600000))+'h'):'(expired)';
+      cdPreview.innerHTML='<span class="gh-cd-preview-badge"><i class="fas fa-hourglass-half"></i> '+esc(_cdLabel)+' · '+txt+'</span>';
+      cdPreview.style.display='';
+    }
+    if(cdDateInput) cdDateInput.addEventListener('change',_updateCdPreview);
+    if(cdLabelInput) cdLabelInput.addEventListener('input',_updateCdPreview);
     $('#ghStoryFilePick').onchange=function(){
       var file=this.files&&this.files[0]; if(!file) return;
       pickedFile=file;
@@ -2742,6 +2848,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(pickedFile&&finalUrl) _extra.mediaType=pickedFile.type.startsWith('video/')?'video':'image';
         _extra.duration=_selectedDur;
         if(_storyLat!==null&&_storyLng!==null){ _extra.lat=_storyLat; _extra.lng=_storyLng; }
+        if(_mentionData) _extra.mention=_mentionData;
+        if(_cdTargetDate){ _extra.countdown={ targetDate:_cdTargetDate, label:(_cdLabel||'Countdown') }; }
         GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); },_extra);
       }).catch(function(err){
         console.error('[GeoHub] story upload failed',err);
@@ -2868,13 +2976,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     document.body.classList.add('gh-story-open');
 
     var _autoTimer = null;
+    var _cdInterval = null;
     var _paused = false;
     var _inputFocused = false;
     var _myReactions = {};
     var _rxLoaded = {};
     var STORY_DUR = 5000;
 
-    function clearTimer(){ if(_autoTimer){ clearTimeout(_autoTimer); _autoTimer=null; } }
+    function clearTimer(){ if(_autoTimer){ clearTimeout(_autoTimer); _autoTimer=null; } if(_cdInterval){ clearInterval(_cdInterval); _cdInterval=null; } }
     function scheduleAdvance(){ clearTimer(); if(!_paused && !_inputFocused){ _autoTimer = setTimeout(tryAdvance, STORY_DUR); } }
     function close(){ clearTimer(); overlay.remove(); document.body.classList.remove('gh-story-open'); document.removeEventListener('keydown', onKey); }
 
@@ -3005,11 +3114,41 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               '</div>'
             : ''
           )+
+          (st.mention && st.mention.uid
+            ? '<a href="profile.html?uid='+esc(st.mention.uid)+'" class="gh-story-mention-sticker" onclick="event.stopPropagation()">'+
+                (st.mention.avatar?'<img src="'+esc(st.mention.avatar)+'" class="gh-sticker-av" alt="">':'')+
+                '<span>@'+esc(st.mention.name||st.mention.username||'User')+'</span>'+
+              '</a>'
+            : ''
+          )+
+          (st.countdown && st.countdown.targetDate
+            ? '<div class="gh-story-cd-sticker" id="ghCdSt_'+esc(st.id||'')+'">'+
+                '<i class="fas fa-hourglass-half gh-cd-icon"></i>'+
+                '<div class="gh-cd-st-inner">'+
+                  '<div class="gh-cd-st-label">'+esc(st.countdown.label||'Countdown')+'</div>'+
+                  '<div class="gh-cd-st-time" id="ghCdTime_'+esc(st.id||'')+'">…</div>'+
+                '</div>'+
+              '</div>'
+            : ''
+          )+
         '</div>'+
         footerHtml+
         '<button type="button" class="gh-story-nav prev" aria-label="Previous story">‹</button>'+
         '<button type="button" class="gh-story-nav next" aria-label="Next story">›</button>'+
         '</div>';
+
+      // Countdown sticker — live timer
+      if(st.countdown && st.countdown.targetDate){
+        var _cdEl=overlay.querySelector('#ghCdTime_'+esc(st.id||''));
+        function _tickCd(){
+          var rem=new Date(st.countdown.targetDate)-Date.now();
+          if(!_cdEl||rem<=0){ clearInterval(_cdInterval); _cdInterval=null; if(_cdEl) _cdEl.textContent='Time\'s up! 🎉'; return; }
+          var d=Math.floor(rem/86400000), h=Math.floor((rem%86400000)/3600000), m=Math.floor((rem%3600000)/60000), s=Math.floor((rem%60000)/1000);
+          _cdEl.textContent=(d?d+'d ':'')+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+        }
+        _tickCd();
+        _cdInterval=setInterval(_tickCd,1000);
+      }
 
       // Non-blocking view tracking — owner excluded; viewCount only increments on first view
       var _fsSdk = window.GeoFirebase && window.GeoFirebase.fs;
