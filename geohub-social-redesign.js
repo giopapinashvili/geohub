@@ -4179,15 +4179,26 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           var origIcon = replySend.innerHTML;
           replySend.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
           if(replyInput) replyInput.value = '';
-          if(GS().addStoryReply){
-            GS().addStoryReply(st.id, st.authorId, text, function(err){
-              var btn = overlay.querySelector('#ghStRpSend');
-              if(btn){ btn.disabled = false; btn.innerHTML = origIcon; }
+          var authorId = st.authorId || '';
+          var gs = GS();
+          function _restoreBtn(){ var btn=overlay.querySelector('#ghStRpSend'); if(btn){btn.disabled=false;btn.innerHTML=origIcon;} }
+          if(authorId && gs.startConversation && gs.sendMessage){
+            gs.startConversation(authorId, function(cid){
+              if(!cid){ _restoreBtn(); if(replyInput){replyInput.value=text;replyInput.focus();} return; }
+              gs.sendMessage(cid, text, function(ok){
+                if(gs.addStoryReply) gs.addStoryReply(st.id, authorId, text, function(){});
+                close();
+                location.href = 'messages.html?cid=' + encodeURIComponent(cid);
+              });
+            });
+          } else if(gs.addStoryReply){
+            gs.addStoryReply(st.id, authorId, text, function(err){
+              _restoreBtn();
               if(!err){ toast(_srt('reply_sent')); if(replyInput) replyInput.blur(); }
               else if(replyInput){ replyInput.value = text; replyInput.focus(); }
             });
           } else {
-            replySend.disabled = false; replySend.innerHTML = origIcon;
+            _restoreBtn();
           }
         });
       }
