@@ -2249,6 +2249,7 @@
         if (extra && extra.bg) storyData.bg = extra.bg;
         if (extra && extra.mediaType) storyData.mediaType = extra.mediaType;
         if (extra && extra.lat != null && extra.lng != null) { storyData.lat = extra.lat; storyData.lng = extra.lng; }
+        if (extra && extra.locationName) storyData.locationName = extra.locationName;
         if (extra && extra.mention) storyData.mention = extra.mention;
         if (extra && extra.countdown) storyData.countdown = extra.countdown;
         if (extra && extra.quiz) storyData.quiz = extra.quiz;

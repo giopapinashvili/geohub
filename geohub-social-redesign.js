@@ -2732,6 +2732,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button type="button" class="gh-cmp-tool" id="ghStoryTemplateBtn"><i class="fas fa-layer-group"></i><span> Template</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryEmojiBtn"><i class="fas fa-face-smile"></i><span> Emoji</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryTextStyleBtn"><i class="fas fa-font"></i><span> Text</span></button>'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryLocationBtn"><i class="fas fa-location-dot"></i><span> Location</span></button>'+
       '</div>'+
       '<div id="ghStoryHashtagWrap" style="display:none;margin-top:8px">'+
         '<div style="display:flex;align-items:center;gap:6px">'+
@@ -2830,18 +2831,61 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '</div>'+
         '<div class="gh-story-tpl-grid" id="ghStoryTplGrid"></div>'+
       '</div>'+
-      '<div id="ghStoryLocBadge" style="margin-top:6px;min-height:18px"></div>';
+      '<div id="ghStoryLocWrap" style="display:none;margin-top:8px">'+
+        '<div class="gh-story-loc-badge-row" id="ghStoryLocBadgeRow">'+
+          '<i class="fas fa-location-dot" style="color:#10b981"></i>'+
+          '<span id="ghStoryLocName" style="font-size:.83rem;font-weight:600;color:var(--text-primary,#e2e8f0)">…</span>'+
+          '<button type="button" id="ghStoryLocClear" class="gh-story-tpl-badge-rm">×</button>'+
+        '</div>'+
+      '</div>';
     var m=modal('Add to your story', body,
       '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn ghost" id="ghSaveStoryDraft" title="Save as draft"><i class="fas fa-floppy-disk"></i></button><button class="gh-btn" id="ghSubmitStory" disabled>Share story</button>',
       'ghStoryModal');
     var pickedFile=null;
-    var _storyLat=null, _storyLng=null;
-    // Silently capture GPS for map story bubbles
-    if(navigator.geolocation){
-      navigator.geolocation.getCurrentPosition(function(pos){
-        _storyLat=pos.coords.latitude; _storyLng=pos.coords.longitude;
-        var lb=$('#ghStoryLocBadge'); if(lb) lb.innerHTML='<span class="gh-story-loc-badge"><i class="fas fa-map-marker-alt"></i> Location added</span>';
-      },function(){},{ timeout:8000, maximumAge:60000 });
+    var _storyLat=null, _storyLng=null, _locationName=null;
+    function _resolveLocName(lat, lng, cb){
+      fetch('https://nominatim.openstreetmap.org/reverse?lat='+lat+'&lon='+lng+'&format=json&addressdetails=1', { headers: {'Accept-Language':'ka,en'} })
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          var a=d.address||{};
+          var city=a.city||a.town||a.village||a.county||a.state||d.display_name||'Unknown';
+          var country=a.country_code?a.country_code.toUpperCase():'';
+          cb(null, city+(country?' · '+country:''));
+        })
+        .catch(function(){ cb('error', null); });
+    }
+    var locBtn=$('#ghStoryLocationBtn');
+    var locWrap=$('#ghStoryLocWrap');
+    var locNameEl=$('#ghStoryLocName');
+    var locClearBtn=$('#ghStoryLocClear');
+    if(locBtn){
+      locBtn.onclick=function(){
+        if(_locationName){ return; }
+        if(!navigator.geolocation){ toast('GPS არ არის ხელმისაწვდომი','error'); return; }
+        locBtn.disabled=true;
+        locBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i><span> ...</span>';
+        navigator.geolocation.getCurrentPosition(function(pos){
+          _storyLat=pos.coords.latitude; _storyLng=pos.coords.longitude;
+          _resolveLocName(_storyLat, _storyLng, function(err, name){
+            locBtn.disabled=false; locBtn.innerHTML='<i class="fas fa-location-dot"></i><span> Location</span>';
+            if(err||!name){ toast('Location ვერ მოიძებნა','error'); return; }
+            _locationName=name;
+            if(locNameEl) locNameEl.textContent=name;
+            if(locWrap) locWrap.style.display='';
+            locBtn.classList.add('active');
+          });
+        },function(){
+          locBtn.disabled=false; locBtn.innerHTML='<i class="fas fa-location-dot"></i><span> Location</span>';
+          toast('GPS წვდომა უარყოფილია','error');
+        },{ timeout:10000, maximumAge:60000 });
+      };
+    }
+    if(locClearBtn){
+      locClearBtn.onclick=function(){
+        _locationName=null; _storyLat=null; _storyLng=null;
+        if(locWrap) locWrap.style.display='none';
+        if(locBtn){ locBtn.classList.remove('active'); }
+      };
     }
     function isDirty(){ return !!(($('#ghStoryText')||{}).value||'').trim()||!!pickedFile; }
     function updateSubmit(){ var btn=$('#ghSubmitStory'); if(btn) btn.disabled=!isDirty(); }
@@ -3506,6 +3550,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(pickedFile&&finalUrl) _extra.mediaType=pickedFile.type.startsWith('video/')?'video':'image';
         _extra.duration=_selectedDur;
         if(_storyLat!==null&&_storyLng!==null){ _extra.lat=_storyLat; _extra.lng=_storyLng; }
+        if(_locationName) _extra.locationName=_locationName;
         if(_mentionData) _extra.mention=_mentionData;
         if(_cdTargetDate){ _extra.countdown={ targetDate:_cdTargetDate, label:(_cdLabel||'Countdown') }; }
         if(_quizVisible){
@@ -3896,6 +3941,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           addYoursHtml+
           (st.emoji
             ? '<div class="gh-story-emoji-sticker" id="ghEmSt_'+esc(st.id||'')+'">'+st.emoji+'</div>'
+            : ''
+          )+
+          (st.locationName
+            ? '<div class="gh-story-loc-sticker"><i class="fas fa-location-dot"></i> '+esc(st.locationName)+'</div>'
             : ''
           )+
           (st.hashtags&&st.hashtags.length
