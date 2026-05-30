@@ -2225,9 +2225,11 @@
           createdAt: serverTimestamp(),
           expiresAt: new Date(Date.now() + 86400000)
         };
-        // Phase 62: poll + link stickers
         if (extra && extra.poll) storyData.poll = extra.poll;
         if (extra && extra.link) storyData.link = extra.link;
+        if (extra && extra.question) storyData.question = extra.question;
+        if (extra && extra.bg) storyData.bg = extra.bg;
+        if (extra && extra.mediaType) storyData.mediaType = extra.mediaType;
         addDoc(collection(db, 'stories'), storyData).then(function () {
           toast(_gt('story_posted')||'Story posted!');
           if (callback) callback();
@@ -2443,6 +2445,34 @@
         deleteDoc(doc(db, 'stories', storyId))
           .then(function(){ if(callback) callback(); })
           .catch(function(err){ console.warn('[GeoSocial] deleteStory', err.message); if(callback) callback(null, err); });
+      });
+    }
+
+    function answerStoryQuestion(storyId, ownerId, answerText, callback) {
+      requireAuth(function(user) {
+        if(!storyId || !answerText) { if(callback) callback(null, new Error('Missing params')); return; }
+        var me = meData() || {};
+        var answerDoc = {
+          answer: answerText.slice(0, 200),
+          authorId: user.uid,
+          authorName: me.name || user.displayName || 'GeoHub User',
+          authorAvatar: me.avatar || user.photoURL || '',
+          createdAt: serverTimestamp()
+        };
+        addDoc(collection(db, 'stories', storyId, 'questionAnswers'), answerDoc)
+          .then(function() {
+            if(ownerId && ownerId !== user.uid) {
+              _sendPushNotification(
+                ownerId, 'story_question_answer',
+                (me.name || 'GeoHub User') + ' answered your question',
+                answerText.slice(0, 80),
+                'feed.html?story=' + storyId,
+                { storyId: storyId }
+              ).catch(function(){});
+            }
+            if(callback) callback();
+          })
+          .catch(function(err){ console.warn('[GeoSocial] answerStoryQuestion', err.message); if(callback) callback(null, err); });
       });
     }
 
@@ -4023,6 +4053,7 @@
       removeStoryReaction:     removeStoryReaction,
       addStoryReply:           addStoryReply,
       deleteStory:             deleteStory,
+      answerStoryQuestion:     answerStoryQuestion,
       createNotification:       createNotification,
       createActorNotification:  createActorNotification,
       createSystemNotification: createSystemNotification,

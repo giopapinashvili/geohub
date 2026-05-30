@@ -1517,28 +1517,79 @@
     const panel = document.createElement('div');
     panel.id = 'livePanel';
     panel.className = 'map-live-panel';
+    function _t(k, fb) { return (typeof GHt === 'function' ? GHt(k) : null) || fb; }
     panel.innerHTML =
       '<div class="live-panel-head">' +
-        '<span><i class="fas fa-satellite-dish"></i> Live Friends</span>' +
+        '<span><i class="fas fa-satellite-dish"></i> ' + _t('live_friends', 'Live Friends') + '</span>' +
         '<button onclick="window.closeLivePanel()"><i class="fas fa-times"></i></button>' +
       '</div>' +
       '<div class="live-toggle-row">' +
         '<div class="live-toggle-text">' +
-          '<div class="live-toggle-label">Share my location</div>' +
-          '<div class="live-toggle-sub">Visible to friends only</div>' +
+          '<div class="live-toggle-label">' + _t('loc_share_my', 'Share my location') + '</div>' +
+          '<div class="live-toggle-sub" id="locShareStatus">' + _t('loc_share_sub', 'Visible to friends only') + '</div>' +
         '</div>' +
         '<label class="live-toggle-switch">' +
           '<input type="checkbox" id="locShareToggle">' +
           '<span class="live-toggle-slider"></span>' +
         '</label>' +
       '</div>' +
+      '<div class="live-duration-row" id="liveDurationRow" style="display:none;padding:8px 14px 4px;gap:6px;display:none;flex-wrap:wrap">' +
+        '<span style="font-size:.78rem;color:var(--gh-muted,#94a3b8);flex-basis:100%;margin-bottom:4px">' + _t('loc_share_for', 'Share for:') + '</span>' +
+        '<button class="live-dur-btn active" data-dur="900" onclick="window._setLocDuration(900,this)">15 ' + _t('min', 'min') + '</button>' +
+        '<button class="live-dur-btn" data-dur="3600" onclick="window._setLocDuration(3600,this)">1 ' + _t('hour', 'hour') + '</button>' +
+        '<button class="live-dur-btn" data-dur="28800" onclick="window._setLocDuration(28800,this)">8 ' + _t('hours', 'hours') + '</button>' +
+      '</div>' +
       '<div class="live-friends-list" id="liveFriendsList">' +
-        '<div class="live-friends-empty"><i class="fas fa-user-slash"></i><span>No friends sharing location</span></div>' +
+        '<div class="live-friends-empty"><i class="fas fa-user-slash"></i><span>' + _t('loc_no_friends', 'No friends sharing location') + '</span></div>' +
       '</div>';
     container.appendChild(panel);
 
+    var _locDurationSec = 900;
+    var _locStopTimer = null;
+
+    window._setLocDuration = function(sec, btn) {
+      _locDurationSec = sec;
+      var btns = panel.querySelectorAll('.live-dur-btn');
+      btns.forEach(function(b){ b.classList.remove('active'); });
+      if(btn) btn.classList.add('active');
+      if(_locSharing) {
+        if(_locStopTimer) clearTimeout(_locStopTimer);
+        _locStopTimer = setTimeout(function() {
+          var tog = document.getElementById('locShareToggle');
+          if(tog) tog.checked = false;
+          stopSharingLocation();
+          var status = document.getElementById('locShareStatus');
+          if(status) status.textContent = _t('loc_share_sub', 'Visible to friends only');
+          var dur = document.getElementById('liveDurationRow');
+          if(dur) dur.style.display = 'none';
+        }, sec * 1000);
+      }
+    };
+
     document.getElementById('locShareToggle').addEventListener('change', function () {
-      if (this.checked) startSharingLocation(); else stopSharingLocation();
+      var durRow = document.getElementById('liveDurationRow');
+      var status = document.getElementById('locShareStatus');
+      if (this.checked) {
+        startSharingLocation();
+        if(durRow) durRow.style.display = 'flex';
+        if(_locStopTimer) clearTimeout(_locStopTimer);
+        _locStopTimer = setTimeout(function() {
+          var tog = document.getElementById('locShareToggle');
+          if(tog) tog.checked = false;
+          stopSharingLocation();
+          if(status) status.textContent = _t('loc_share_sub', 'Visible to friends only');
+          if(durRow) durRow.style.display = 'none';
+        }, _locDurationSec * 1000);
+        if(status){
+          var mins = _locDurationSec < 3600 ? (_locDurationSec/60) + ' ' + _t('min','min') : (_locDurationSec/3600) + ' ' + (_locDurationSec===3600?_t('hour','hour'):_t('hours','hours'));
+          status.textContent = _t('loc_sharing_for','Sharing for') + ' ' + mins;
+        }
+      } else {
+        if(_locStopTimer){ clearTimeout(_locStopTimer); _locStopTimer=null; }
+        stopSharingLocation();
+        if(status) status.textContent = _t('loc_share_sub','Visible to friends only');
+        if(durRow) durRow.style.display = 'none';
+      }
     });
   }
 
@@ -1715,12 +1766,17 @@
     if (!f) return;
     const initials = (f.displayName || '?').split(' ').map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase();
     let distText = '', etaStr = '';
+    const _t2 = function(k,fb){ return (typeof GHt==='function'?GHt(k):null)||fb; };
     if (_myLatLng) {
       const dist = haversine(_myLatLng, [f.lng, f.lat]);
-      distText = dist < 1 ? Math.round(dist * 1000) + ' m away' : dist.toFixed(1) + ' km away';
-      etaStr = dist < 0.3 ? 'On foot: ~' + Math.round(dist / 0.08) + ' min'
-             : dist < 5   ? 'On foot: ~' + Math.round(dist / 0.067) + ' min'
-             : 'By car: ~' + Math.round(dist / 0.42) + ' min';
+      distText = dist < 1
+        ? Math.round(dist * 1000) + ' ' + _t2('loc_m_away','m away')
+        : dist.toFixed(1) + ' ' + _t2('loc_km_away','km away');
+      etaStr = dist < 0.3
+        ? _t2('loc_on_foot','On foot') + ': ~' + Math.round(dist / 0.08) + ' min'
+        : dist < 5
+          ? _t2('loc_on_foot','On foot') + ': ~' + Math.round(dist / 0.067) + ' min'
+          : _t2('loc_by_car','By car') + ': ~' + Math.round(dist / 0.42) + ' min';
     }
 
     const imgEl      = document.getElementById('panelImg');
@@ -1732,15 +1788,15 @@
       imgEl.style.display = 'none';
       if (fallbackEl) { fallbackEl.style.display = 'flex'; fallbackEl.textContent = initials; }
     }
-    document.getElementById('panelTitle').textContent = f.displayName || 'Friend';
-    document.getElementById('panelCat').innerHTML   = '<span style="color:#10b981">🟢 Live Now</span>';
+    document.getElementById('panelTitle').textContent = f.displayName || _t2('friend','Friend');
+    document.getElementById('panelCat').innerHTML   = '<span style="color:#10b981">🟢 ' + _t2('live_now','Live Now') + '</span>';
     document.getElementById('panelLoc').textContent  = distText;
     document.getElementById('panelRating').textContent = etaStr;
-    document.getElementById('panelDesc').textContent = 'Live location — updates every 5 seconds';
+    document.getElementById('panelDesc').textContent = _t2('loc_live_desc','Live location — updates every 5 seconds');
 
     const detailBtn = document.getElementById('panelDetailBtn');
     detailBtn.href = 'profile.html?id=' + encodeURIComponent(uid);
-    detailBtn.innerHTML = '<i class="fas fa-user"></i> Profile';
+    detailBtn.innerHTML = '<i class="fas fa-user"></i> ' + _t2('profile','Profile');
     detailBtn.removeAttribute('aria-disabled');
 
     const navBtn = document.getElementById('panelMapBtn');
@@ -1779,8 +1835,9 @@
   function renderFriendsList(friends) {
     const list = document.getElementById('liveFriendsList');
     if (!list) return;
+    const _t3 = function(k,fb){ return (typeof GHt==='function'?GHt(k):null)||fb; };
     if (!friends.length) {
-      list.innerHTML = '<div class="live-friends-empty"><i class="fas fa-user-slash"></i><span>No friends sharing location right now</span></div>';
+      list.innerHTML = '<div class="live-friends-empty"><i class="fas fa-user-slash"></i><span>' + _t3('loc_no_friends','No friends sharing location right now') + '</span></div>';
       return;
     }
     list.innerHTML = friends.map(function (f) {
@@ -1794,9 +1851,9 @@
         '<div class="live-friend-av">' +
         (f.photoURL ? '<img src="' + esc(f.photoURL) + '" alt="' + esc(initials) + '">' : '<span>' + esc(initials) + '</span>') +
         '<div class="live-friend-dot"></div></div>' +
-        '<div class="live-friend-info"><div class="live-friend-name">' + esc(f.displayName || 'Friend') + '</div>' +
-        '<div class="live-friend-dist">' + (distText ? distText + ' away' : '🟢 Live') + '</div></div>' +
-        '<button class="live-friend-nav" onclick="event.stopPropagation();window.goToFriend(\'' + f.uid + '\')" title="Navigate"><i class="fas fa-route"></i></button>' +
+        '<div class="live-friend-info"><div class="live-friend-name">' + esc(f.displayName || _t3('friend','Friend')) + '</div>' +
+        '<div class="live-friend-dist">' + (distText ? distText + ' ' + _t3('loc_away','away') : '🟢 ' + _t3('live_now','Live')) + '</div></div>' +
+        '<button class="live-friend-nav" onclick="event.stopPropagation();window.goToFriend(\'' + f.uid + '\')" title="' + _t3('navigate','Navigate') + '"><i class="fas fa-route"></i></button>' +
         '</div>';
     }).join('');
   }

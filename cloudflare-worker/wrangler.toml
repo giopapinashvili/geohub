@@ -40,6 +40,10 @@ SITE_URL            = "https://geohub-main.pages.dev"
 #   Firebase Console → Project Settings → General → Web API Key
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Cron trigger: purge expired stories every hour
+[triggers]
+crons = ["0 * * * *"]
+
 # Custom domain (after deploying):
 # [[routes]]
 # pattern = "payments.geohub.ge/*"

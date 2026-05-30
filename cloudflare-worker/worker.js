@@ -89,6 +89,11 @@ export default {
       return json({ error: 'Internal server error' }, 500, cors);
     }
   },
+
+  // Runs every hour via cron trigger — delete expired stories from Firestore
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(purgeExpiredStories(env));
+  },
 };
 
 // ── Create checkout session ───────────────────────────────────────────────────
@@ -926,4 +931,69 @@ async function handleGooglePlaceSearch(request, env, cors) {
   const out = { results };
   gplacePutCache(cacheKey, out);
   return json(out, 200, cors);
+}
+
+// ── Story expiry cron ─────────────────────────────────────────────────────────
+// Runs hourly. Queries stories whose expiresAt < now and deletes them.
+// Requires FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY + FIREBASE_PROJECT_ID.
+// Add to wrangler.toml:
+//   [[triggers]]
+//   crons = ["0 * * * *"]
+
+async function purgeExpiredStories(env) {
+  if (!env.FIREBASE_CLIENT_EMAIL || !env.FIREBASE_PRIVATE_KEY || !env.FIREBASE_PROJECT_ID) {
+    console.warn('[purgeExpiredStories] Firebase credentials not set — skipping');
+    return;
+  }
+  try {
+    const token = await getFirestoreToken(env);
+    const project = env.FIREBASE_PROJECT_ID;
+    const baseUrl = `https://firestore.googleapis.com/v1/projects/${project}/databases/(default)/documents`;
+    const nowIso = new Date().toISOString();
+
+    // Firestore REST: query stories where expiresAt < now
+    const queryBody = {
+      structuredQuery: {
+        from: [{ collectionId: 'stories' }],
+        where: {
+          fieldFilter: {
+            field: { fieldPath: 'expiresAt' },
+            op: 'LESS_THAN',
+            value: { timestampValue: nowIso },
+          },
+        },
+        limit: 100,
+      },
+    };
+
+    const qRes = await fetch(`${baseUrl}:runQuery`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(queryBody),
+    });
+
+    if (!qRes.ok) {
+      console.error('[purgeExpiredStories] Query failed', qRes.status, await qRes.text());
+      return;
+    }
+
+    const rows = await qRes.json();
+    const paths = rows
+      .filter(r => r.document && r.document.name)
+      .map(r => r.document.name);
+
+    if (!paths.length) { console.log('[purgeExpiredStories] No expired stories'); return; }
+
+    let deleted = 0;
+    for (const name of paths) {
+      const delRes = await fetch(`https://firestore.googleapis.com/v1/${name}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (delRes.ok) deleted++;
+    }
+    console.log(`[purgeExpiredStories] Deleted ${deleted}/${paths.length} expired stories`);
+  } catch (err) {
+    console.error('[purgeExpiredStories]', err.message);
+  }
 }

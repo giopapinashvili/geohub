@@ -2576,10 +2576,23 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '<button type="button" class="gh-btn ghost sm" id="ghStoryLinkRemove"><i class="fas fa-times"></i></button>'+
         '</div>'+
       '</div>'+
+      '<div id="ghStoryQWrap2" style="display:none;margin-top:8px">'+
+        '<input class="gh-input" id="ghStoryQText" placeholder="Ask your followers a question…" maxlength="120">'+
+        '<button type="button" class="gh-btn ghost sm" id="ghStoryQRemove" style="margin-top:6px"><i class="fas fa-times"></i> Remove</button>'+
+      '</div>'+
+      '<div id="ghStoryBgWrap" style="display:none;margin-top:8px">'+
+        '<div class="gh-story-bg-picker" id="ghStoryBgPicker">'+
+          ['linear-gradient(135deg,#667eea,#764ba2)','linear-gradient(135deg,#f093fb,#f5576c)','linear-gradient(135deg,#4facfe,#00f2fe)','linear-gradient(135deg,#43e97b,#38f9d7)','linear-gradient(135deg,#fa709a,#fee140)','linear-gradient(135deg,#30cfd0,#330867)','linear-gradient(135deg,#ff9a9e,#fecfef)','linear-gradient(135deg,#a18cd1,#fbc2eb)','linear-gradient(135deg,#fda085,#f6d365)'].map(function(g,i){
+            return '<button type="button" class="gh-story-bg-swatch'+(i===0?' selected':'')+'" data-bg="'+g+'" style="background:'+g+'"></button>';
+          }).join('')+
+        '</div>'+
+      '</div>'+
       '<div class="gh-cmp-toolbar" style="margin-top:10px">'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryPhotoBtn"><i class="fas fa-image"></i><span> Photo/Video</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryPollBtn"><i class="fas fa-check-to-slot"></i><span> Poll</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryLinkBtn"><i class="fas fa-link"></i><span> Link</span></button>'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryQBtn"><i class="fas fa-question-circle"></i><span> Question</span></button>'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryBgBtn"><i class="fas fa-palette"></i><span> Background</span></button>'+
       '</div>';
     var m=modal('Add to your story', body,
       '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitStory" disabled>Share story</button>',
@@ -2597,14 +2610,20 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var ta=$('#ghStoryText');
     if(ta){ ta.addEventListener('input', updateSubmit); setTimeout(function(){ ta.focus(); }, 60); }
     $('#ghStoryPhotoBtn').onclick=function(){ var fp=$('#ghStoryFilePick'); if(fp) fp.click(); };
-    // Phase 62: Poll toggle
-    var _pollVisible=false, _linkVisible=false;
+    var _pollVisible=false, _linkVisible=false, _qVisible=false, _bgVisible=false;
+    var _selectedBg=null;
     var pollBtn=$('#ghStoryPollBtn'); var pollWrap=$('#ghStoryPollWrap');
     var linkBtn=$('#ghStoryLinkBtn'); var linkWrap=$('#ghStoryLinkWrap');
+    var qBtn=$('#ghStoryQBtn'); var qWrap=$('#ghStoryQWrap2');
+    var bgBtn=$('#ghStoryBgBtn'); var bgWrap=$('#ghStoryBgWrap');
     if(pollBtn&&pollWrap){ pollBtn.onclick=function(){ _pollVisible=!_pollVisible; pollWrap.style.display=_pollVisible?'':'none'; pollBtn.classList.toggle('active',_pollVisible); }; }
     if(linkBtn&&linkWrap){ linkBtn.onclick=function(){ _linkVisible=!_linkVisible; linkWrap.style.display=_linkVisible?'':'none'; linkBtn.classList.toggle('active',_linkVisible); }; }
+    if(qBtn&&qWrap){ qBtn.onclick=function(){ _qVisible=!_qVisible; qWrap.style.display=_qVisible?'':'none'; qBtn.classList.toggle('active',_qVisible); }; }
+    if(bgBtn&&bgWrap){ bgBtn.onclick=function(){ _bgVisible=!_bgVisible; bgWrap.style.display=_bgVisible?'':'none'; bgBtn.classList.toggle('active',_bgVisible); if(_bgVisible&&!_selectedBg){ var firstSwatch=bgWrap.querySelector('[data-bg]'); if(firstSwatch){ _selectedBg=firstSwatch.dataset.bg; } } }; }
     var pollRm=$('#ghStoryPollRemove'); if(pollRm) pollRm.onclick=function(){ _pollVisible=false; pollWrap.style.display='none'; pollBtn&&pollBtn.classList.remove('active'); };
     var linkRm=$('#ghStoryLinkRemove'); if(linkRm) linkRm.onclick=function(){ _linkVisible=false; linkWrap.style.display='none'; linkBtn&&linkBtn.classList.remove('active'); };
+    var qRm=$('#ghStoryQRemove'); if(qRm) qRm.onclick=function(){ _qVisible=false; qWrap.style.display='none'; qBtn&&qBtn.classList.remove('active'); };
+    var bgPicker=$('#ghStoryBgPicker'); if(bgPicker){ bgPicker.addEventListener('click',function(e){ var sw=e.target.closest('[data-bg]'); if(!sw) return; bgPicker.querySelectorAll('[data-bg]').forEach(function(s){ s.classList.remove('selected'); }); sw.classList.add('selected'); _selectedBg=sw.dataset.bg; }); }
     $('#ghStoryFilePick').onchange=function(){
       var file=this.files&&this.files[0]; if(!file) return;
       pickedFile=file;
@@ -2647,7 +2666,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       }).then(function(finalUrl){
         if(pickedFile&&!finalUrl) throw new Error('Image upload failed');
         if(bar) bar.style.display='none';
+        var _qTextVal=_qVisible?(($('#ghStoryQText')||{}).value||'').trim():'';
         var _extra={}; if(_pollData) _extra.poll=_pollData; if(_linkData) _extra.link=_linkData;
+        if(_qTextVal) _extra.question=_qTextVal;
+        if(_bgVisible&&_selectedBg&&!finalUrl) _extra.bg=_selectedBg;
+        if(pickedFile&&finalUrl) _extra.mediaType=pickedFile.type.startsWith('video/')?'video':'image';
         GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); },_extra);
       }).catch(function(err){
         console.error('[GeoHub] story upload failed',err);
@@ -2805,6 +2828,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var _cu = authUser();
       var isOwner = !!(_cu && st.authorId && _cu.uid === st.authorId);
       var isSignedIn = !!_cu;
+      var _isVid = st.mediaType === 'video';
+      var _pv = (st.poll && st.poll.votes) ? st.poll.votes : {};
+      var _hasVoted = !!(_cu && _pv[_cu.uid]);
+      var _totalV = Object.keys(_pv).length;
+      var _votesA = Object.values(_pv).filter(function(v){return v==='A';}).length;
+      var _pctA = _totalV ? Math.round(_votesA / _totalV * 100) : 50;
+      var _pctB = 100 - _pctA;
 
       // Reactions bar (4 emojis, shown to all signed-in users)
       var rxEmojis = ['❤️','🔥','😂','😮'];
@@ -2851,9 +2881,46 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '</div>'+
           '<div class="gh-story-head-actions">'+ownerDeleteHtml+'<button type="button" class="gh-story-close" aria-label="Close story">×</button></div>'+
         '</div>'+
-        '<div class="gh-story-main">'+
-          (media?'<img src="'+esc(media)+'" alt="Story image" loading="eager" onerror="this.style.display=\'none\'">':'<p>'+esc(st.text||'Story')+'</p>')+
-          (media && st.text?'<div class="gh-story-caption">'+esc(st.text)+'</div>':'')+
+        '<div class="gh-story-main"'+(st.bg&&!media?' style="background:'+esc(st.bg)+'"':'')+'>'+
+          (media && _isVid
+            ? '<video src="'+esc(media)+'" class="gh-story-video" autoplay muted playsinline loop style="width:100%;height:100%;object-fit:cover"></video>'
+            : media
+              ? '<img src="'+esc(media)+'" alt="Story image" loading="eager" onerror="this.style.display=\'none\'">'
+              : '<p style="'+(st.bg?'text-shadow:0 2px 8px rgba(0,0,0,.55)':'')+'">'+(st.text?esc(st.text):'Story')+'</p>'
+          )+
+          (media && st.text ? '<div class="gh-story-caption">'+esc(st.text)+'</div>' : '')+
+          (st.link && st.link.url
+            ? '<a href="'+esc(st.link.url)+'" target="_blank" rel="noopener noreferrer" class="gh-sl-btn" onclick="event.stopPropagation()"><i class="fas fa-link"></i> '+esc(st.link.label||'Visit')+'</a>'
+            : ''
+          )+
+          (st.poll && st.poll.question
+            ? '<div class="gh-sp-wrap" data-story-poll>'+
+                '<div class="gh-sp-q">'+esc(st.poll.question)+'</div>'+
+                '<button type="button" class="gh-sp-opt'+(_hasVoted&&_pv[_cu&&_cu.uid]==='A'?' voted':'')+'" data-poll-opt="A">'+
+                  '<span>'+esc(st.poll.optionA||'Yes')+'</span>'+
+                  (_hasVoted?'<div class="gh-sp-bar" style="width:'+_pctA+'%"></div><small>'+_pctA+'%</small>':'')+
+                '</button>'+
+                '<button type="button" class="gh-sp-opt'+(_hasVoted&&_pv[_cu&&_cu.uid]==='B'?' voted':'')+'" data-poll-opt="B">'+
+                  '<span>'+esc(st.poll.optionB||'No')+'</span>'+
+                  (_hasVoted?'<div class="gh-sp-bar" style="width:'+_pctB+'%"></div><small>'+_pctB+'%</small>':'')+
+                '</button>'+
+                (_hasVoted?'<p class="gh-sp-total">'+_totalV+' vote'+(_totalV!==1?'s':'')+'</p>':'')+
+              '</div>'
+            : ''
+          )+
+          (st.question
+            ? '<div class="gh-sq-wrap" id="ghStoryQWrap">'+
+                '<div class="gh-sq-label"><i class="fas fa-question-circle"></i> '+esc(st.question)+'</div>'+
+                (isSignedIn && !isOwner
+                  ? '<div class="gh-sq-input-row">'+
+                      '<input class="gh-sq-input" id="ghStoryQInput" placeholder="Type your answer…" maxlength="200" autocomplete="off">'+
+                      '<button type="button" class="gh-sq-send" id="ghStoryQSend"><i class="fas fa-paper-plane"></i></button>'+
+                    '</div>'
+                  : (isOwner ? '<p class="gh-sq-owner-note"><i class="fas fa-eye"></i> Your followers can answer this</p>' : '')
+                )+
+              '</div>'
+            : ''
+          )+
         '</div>'+
         footerHtml+
         '<button type="button" class="gh-story-nav prev" aria-label="Previous story">‹</button>'+
@@ -3015,25 +3082,71 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         };
       }
 
-      // Phase 62: Poll voting in story viewer
+      // Poll voting in story viewer
       if(st.poll && st.poll.question){
         var pollEl=overlay.querySelector('[data-story-poll]');
         if(pollEl){
           var _u=authUser();
-          var hasVoted=st.poll.votes&&_u&&st.poll.votes[_u.uid];
           pollEl.querySelectorAll('[data-poll-opt]').forEach(function(btn){
             btn.onclick=function(e){
               e.stopPropagation();
-              if(!requireLogin()) return;
-              if(hasVoted) return toast(_srt('voted_already'));
+              if(!isSignedIn){ requireLogin(); return; }
+              if(_hasVoted) return toast(_srt('voted_already')||'Already voted!');
               var opt=btn.dataset.pollOpt;
-              hasVoted=true;
-              btn.classList.add('voted');
+              _hasVoted=true;
+              // Optimistic update — show percentages immediately
+              var newTotal=_totalV+1;
+              var newA=opt==='A'?_votesA+1:_votesA;
+              var newPctA=Math.round(newA/newTotal*100);
+              var newPctB=100-newPctA;
+              pollEl.querySelectorAll('[data-poll-opt]').forEach(function(b){
+                var o=b.dataset.pollOpt;
+                var pct=o==='A'?newPctA:newPctB;
+                b.classList.toggle('voted', b===btn);
+                var existing=b.querySelector('.gh-sp-bar');
+                if(!existing){
+                  var bar=document.createElement('div'); bar.className='gh-sp-bar';
+                  var lbl=document.createElement('small');
+                  b.appendChild(bar); b.appendChild(lbl);
+                }
+                var bar2=b.querySelector('.gh-sp-bar'); if(bar2) bar2.style.width=pct+'%';
+                var lbl2=b.querySelector('small'); if(lbl2) lbl2.textContent=pct+'%';
+              });
+              var totEl=pollEl.querySelector('.gh-sp-total');
+              if(totEl){ totEl.textContent=newTotal+' vote'+(newTotal!==1?'s':''); }
+              else { var p=document.createElement('p'); p.className='gh-sp-total'; p.textContent=newTotal+' vote'+(newTotal!==1?'s':''); pollEl.appendChild(p); }
               var upd={}; upd['poll.votes.'+_u.uid]=opt;
               if(fs()&&db()) fs().updateDoc(fs().doc(db(),'stories',st.id),upd).catch(function(){});
             };
           });
         }
+      }
+
+      // Question sticker — answer handler
+      var qSend=overlay.querySelector('#ghStoryQSend');
+      var qInput=overlay.querySelector('#ghStoryQInput');
+      if(qSend && qInput){
+        qInput.addEventListener('focus', function(){ _inputFocused=true; clearTimer(); });
+        qInput.addEventListener('blur', function(){ _inputFocused=false; if(!_paused) scheduleAdvance(); });
+        qInput.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); qSend.click(); } });
+        qSend.addEventListener('click', function(e){
+          e.stopPropagation();
+          var ans=qInput.value.trim(); if(!ans) return;
+          qSend.disabled=true;
+          var origHtml=qSend.innerHTML; qSend.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';
+          if(GS().answerStoryQuestion){
+            GS().answerStoryQuestion(st.id, st.authorId, ans, function(err){
+              qSend.disabled=false; qSend.innerHTML=origHtml;
+              if(!err){
+                qInput.value='';
+                var wrap=overlay.querySelector('#ghStoryQWrap');
+                if(wrap){ var note=document.createElement('p'); note.className='gh-sq-sent'; note.innerHTML='<i class="fas fa-check"></i> Sent!'; wrap.appendChild(note); }
+                toast(_srt('answer_sent')||'Answer sent!');
+                qInput.blur();
+              } else { qInput.value=ans; qInput.focus(); }
+            });
+          } else { qSend.disabled=false; qSend.innerHTML=origHtml; }
+        });
       }
 
       scheduleAdvance();
@@ -5584,7 +5697,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       .then(function(r){return r.json();})
       .then(function(data){
         var tr=data.responseData&&data.responseData.translatedText;
-        if(!tr||tr===text){toast('Translation not available','error');btn.innerHTML='🌐 Translate';btn.disabled=false;return;}
+        if(!tr||tr===text){toast(_srt('translate_na','Translation not available'),'error');btn.innerHTML='🌐 Translate';btn.disabled=false;return;}
         resultDiv.dataset.translated='1';
         resultDiv.innerHTML='<div class="gh-translate-box"><span class="gh-translate-lang">'+targetLabel+'</span><p>'+esc(tr)+'</p></div>';
         resultDiv.hidden=false;
@@ -5592,7 +5705,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         btn.classList.add('active');
         btn.disabled=false;
       })
-      .catch(function(){toast('Translation failed','error');btn.innerHTML='🌐 Translate';btn.disabled=false;});
+      .catch(function(){toast(_srt('translate_fail','Translation failed'),'error');btn.innerHTML='🌐 Translate';btn.disabled=false;});
   }
 
   /* ── Phase 64: GeoHub Coins & Creator Tips ──────────────── */
@@ -5600,7 +5713,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function _openTipModal(targetUid, targetName){
     if(!requireLogin()) return;
     var u=authUser(); if(!u) return;
-    if(u.uid===targetUid) return toast('You cannot tip yourself');
+    if(u.uid===targetUid) return toast(_srt('tip_self','You cannot tip yourself'));
     if(!fs()||!db()) return;
     // Load tipper's coin balance
     fs().getDoc(fs().doc(db(),'userCoins',u.uid)).then(function(snap){
@@ -5632,8 +5745,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           stBtn.onclick=function(){
             var ci=document.getElementById('ghTipCustom'); var custom=ci&&Number(ci.value||0);
             var amt=custom||selectedAmt;
-            if(!amt||amt<1) return toast('Pick an amount','error');
-            if(amt>bal) return toast('Not enough GeoCoins','error');
+            if(!amt||amt<1) return toast(_srt('pick_amount','Pick an amount'),'error');
+            if(amt>bal) return toast(_srt('not_enough_coins','Not enough GeoCoins'),'error');
             stBtn.disabled=true; stBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';
             var batch=fs().writeBatch(db());
             // Debit tipper
@@ -5647,11 +5760,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             batch.commit().then(function(){
               toast('💰 Sent '+amt+' GeoCoins to '+targetName+'!');
               tipModal.remove();
-            }).catch(function(err){ toast('Failed: '+(err.message||err.code),'error'); stBtn.disabled=false; stBtn.innerHTML='Send Tip'; });
+            }).catch(function(err){ toast(_srt('action_failed','Action failed.'),'error'); stBtn.disabled=false; stBtn.innerHTML=_srt('send_tip','Send Tip'); });
           };
         }
       }
-    }).catch(function(){ toast('Could not load balance','error'); });
+    }).catch(function(){ toast(_srt('action_failed','Action failed.'),'error'); });
   }
   // Expose so profile pages can use it
   window.ghOpenTip=_openTipModal;
@@ -5829,13 +5942,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               if(liveUrl){
                 window.ghConfirm(typeof GHt==='function'?GHt('live_save_cfm'):'Live ended! Save your stream URL as a video post?', function(){
                   var GeoSoc=window.GeoSocial||GS();
-                  if(GeoSoc&&GeoSoc.createPost) GeoSoc.createPost({text:'🔴 Watch my live recording!',videoUrl:liveUrl,type:'video'},null,function(){toast('Video post created!');});
-                }, function(){ toast('Live ended'); });
+                  if(GeoSoc&&GeoSoc.createPost) GeoSoc.createPost({text:'🔴 Watch my live recording!',videoUrl:liveUrl,type:'video'},null,function(){toast(_srt('post_created','Post created!'));});
+                }, function(){ toast(_srt('live_ended','Live ended')); });
               } else {
-                toast('Live ended');
+                toast(_srt('live_ended','Live ended'));
               }
               _updateLiveBadge(false);
-            }).catch(function(e){ toast('Could not end live','error'); endBtn.disabled=false; endBtn.textContent='🔴 End Live'; });
+            }).catch(function(e){ toast(_srt('action_failed','Action failed.'),'error'); endBtn.disabled=false; endBtn.textContent='🔴 End Live'; });
         });
       }
     }).catch(function(){ toast('Could not load live status','error'); });
@@ -7838,7 +7951,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     $('#ghDiscoverSearch').oninput=paint;
     $('#ghCenter').addEventListener('click', function(e){
       var s=e.target.closest('[data-save-item]'); if(s){ if(!requireLogin())return; GS().toggleSaveItem(s.dataset.type,s.dataset.id); }
-      var sh=e.target.closest('[data-share-item]'); if(sh){ navigator.clipboard && navigator.clipboard.writeText(location.origin+'/'+sh.dataset.url).then(function(){toast('Link copied');}).catch(function(){toast('Copy failed','error');}); }
+      var sh=e.target.closest('[data-share-item]'); if(sh){ navigator.clipboard && navigator.clipboard.writeText(location.origin+'/'+sh.dataset.url).then(function(){toast(_srt('link_copied','Link copied'));}).catch(function(){toast(_srt('copy_fail','Copy failed'),'error');}); }
     });
     ready(function(){
       var collections=[['posts','post'],['businesses','business'],['groups','group'],['places','place'],['events','event'],['services','service'],['rewards','reward'],['challenges','challenge'],['learningItems','learning'],['creators','creator']];

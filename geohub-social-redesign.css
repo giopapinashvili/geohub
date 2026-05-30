@@ -547,6 +547,41 @@ body.gh-story-open{overflow:hidden}
 .gh-story-main{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(135deg,#0f172a,#020617);cursor:pointer}.gh-story-main img{width:100%;height:100%;object-fit:cover}.gh-story-main p{font-size:1.65rem;line-height:1.35;font-weight:900;text-align:center;color:#fff;padding:34px;margin:0}.gh-story-caption{position:absolute;left:16px;right:16px;bottom:18px;background:rgba(0,0,0,.48);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:12px;color:#fff;line-height:1.45;font-weight:800;text-align:center;backdrop-filter:blur(8px)}
 .gh-story-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:6;width:44px;height:44px;border:0;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;font-size:2rem;line-height:1;cursor:pointer;display:grid;place-items:center}.gh-story-nav.prev{left:10px}.gh-story-nav.next{right:10px}.gh-story-nav:hover,.gh-story-close:hover{background:rgba(255,255,255,.22)}
 @media(max-width:620px){.gh-story-overlay{padding:0}.gh-story-shell{width:100vw;height:100svh;border-radius:0;border:0}.gh-story-nav{width:38px;height:38px;background:rgba(0,0,0,.26)}}
+/* Story stickers — poll, question, link */
+.gh-sp-wrap{position:absolute;left:16px;right:16px;bottom:90px;background:rgba(0,0,0,.62);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:14px 16px;z-index:5;display:flex;flex-direction:column;gap:8px}
+.gh-sp-q{color:#fff;font-weight:900;font-size:.95rem;text-align:center;margin-bottom:4px}
+.gh-sp-opt{position:relative;overflow:hidden;border:2px solid rgba(255,255,255,.5);border-radius:14px;background:rgba(255,255,255,.08);color:#fff;padding:10px 14px;font-weight:800;font-size:.88rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;min-height:44px;transition:border-color .18s}
+.gh-sp-opt:hover{border-color:rgba(255,255,255,.85)}
+.gh-sp-opt.voted{border-color:#10b981;background:rgba(16,185,129,.18)}
+.gh-sp-opt span{position:relative;z-index:2}
+.gh-sp-opt small{position:relative;z-index:2;font-size:.78rem;color:rgba(255,255,255,.8)}
+.gh-sp-bar{position:absolute;left:0;top:0;bottom:0;background:rgba(255,255,255,.15);border-radius:12px;transition:width .4s ease;z-index:1}
+.gh-sp-total{color:rgba(255,255,255,.6);font-size:.75rem;text-align:center;margin:0}
+/* Question sticker */
+.gh-sq-wrap{position:absolute;left:16px;right:16px;bottom:90px;background:rgba(17,24,39,.78);backdrop-filter:blur(12px);border:1px solid rgba(59,130,246,.35);border-radius:20px;padding:14px 16px;z-index:5}
+.gh-sq-label{color:#fff;font-weight:900;font-size:.9rem;text-align:center;margin-bottom:10px;display:flex;align-items:center;gap:6px;justify-content:center}
+.gh-sq-label i{color:#3b82f6}
+.gh-sq-input-row{display:flex;gap:8px;align-items:center}
+.gh-sq-input{flex:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:12px;color:#fff;padding:9px 12px;font-size:.88rem;outline:none}
+.gh-sq-input:focus{border-color:#3b82f6}
+.gh-sq-send{width:38px;height:38px;border:0;border-radius:50%;background:#3b82f6;color:#fff;font-size:.9rem;cursor:pointer;display:grid;place-items:center;flex-shrink:0}
+.gh-sq-owner-note{color:rgba(255,255,255,.55);font-size:.78rem;text-align:center;margin:0}
+.gh-sq-sent{color:#10b981;font-size:.82rem;text-align:center;margin:6px 0 0;font-weight:800}
+/* Link sticker */
+.gh-sl-btn{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:rgba(255,255,255,.92);color:#0f172a;font-weight:900;font-size:.88rem;border-radius:999px;text-decoration:none;z-index:5;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.3);transition:transform .15s,background .15s}
+.gh-sl-btn:hover{background:#fff;transform:translateX(-50%) scale(1.04)}
+.gh-sl-btn i{font-size:.82rem}
+/* Bg picker */
+.gh-story-bg-picker{display:flex;gap:8px;flex-wrap:wrap;padding:4px 0}
+.gh-story-bg-swatch{width:38px;height:38px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:transform .15s,border-color .15s}
+.gh-story-bg-swatch:hover{transform:scale(1.12)}
+.gh-story-bg-swatch.selected{border-color:#fff;transform:scale(1.14)}
+/* Story owner controls */
+.gh-story-owner-del,.gh-story-owner-hl{border:0;background:rgba(255,255,255,.12);color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:.9rem;display:grid;place-items:center}
+.gh-story-owner-hl{color:#fbbf24}
+.gh-story-owner-hl:hover,.gh-story-owner-del:hover{background:rgba(255,255,255,.22)}
+.gh-story-seen-row{display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.72);font-size:.8rem}
+.gh-story-seen-row i{color:#10b981}
 
 /* GeoHub feed layout refresh — inspired by the provided social dashboard screenshot.
    Visual-only: all cards use existing Firebase/Firestore data and empty states. */
