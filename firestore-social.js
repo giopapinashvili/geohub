@@ -76,6 +76,7 @@
       removeCloseFriend: noop,
       listenCloseFriends: function(cb) { cb([]); return function(){}; },
       getMyCloseFriendIds: function(cb) { if(cb) cb([]); },
+      getStoryAnalytics: function(id, cb) { if(cb) cb(null); },
       getStoryChain: function(id, cb) { if(cb) cb(null); },
       listenStories: function () { return function () {}; },
       addStoryReaction: noop,
@@ -2307,6 +2308,31 @@
       });
     }
 
+    function getStoryAnalytics(storyId, callback) {
+      if (!storyId) { if(callback) callback(null); return; }
+      Promise.all([
+        getDoc(doc(db, 'stories', storyId)),
+        getDocs(collection(db, 'stories', storyId, 'reactions')),
+        getDocs(query(collection(db, 'stories', storyId, 'replies'), limit(200)))
+      ]).then(function(results) {
+        var stSnap=results[0], rxSnap=results[1], rpSnap=results[2];
+        if (!stSnap.exists()) { if(callback) callback(null); return; }
+        var st = Object.assign({ id: stSnap.id }, stSnap.data());
+        var reactions = {};
+        rxSnap.forEach(function(d) {
+          var rx = d.data().reaction || d.data().emoji;
+          if (rx) reactions[rx] = (reactions[rx]||0) + 1;
+        });
+        var replyCount = rpSnap.size;
+        var viewedBy = Array.isArray(st.viewedBy) ? st.viewedBy.slice(0, 12) : [];
+        Promise.all(viewedBy.map(function(uid) {
+          return getDoc(doc(db, 'users', uid)).then(function(s){ return s.exists()?Object.assign({id:s.id},s.data()):{id:uid}; }).catch(function(){ return {id:uid}; });
+        })).then(function(viewers) {
+          if(callback) callback({ story:st, reactions:reactions, replyCount:replyCount, viewers:viewers, totalViews:Math.max(Number(st.viewCount)||0, Array.isArray(st.viewedBy)?st.viewedBy.length:0) });
+        });
+      }).catch(function(err) { console.error('[analytics]',err); if(callback) callback(null); });
+    }
+
     function getStoryChain(chainId, callback) {
       if (!chainId) { if (callback) callback(null); return; }
       getDoc(doc(db, 'storyChains', chainId)).then(function(snap) {
@@ -4125,6 +4151,7 @@
       removeCloseFriend:       removeCloseFriend,
       listenCloseFriends:      listenCloseFriends,
       getMyCloseFriendIds:     getMyCloseFriendIds,
+      getStoryAnalytics:       getStoryAnalytics,
       getStoryChain:           getStoryChain,
       listenStories:           listenStories,
       addStoryReaction:        addStoryReaction,

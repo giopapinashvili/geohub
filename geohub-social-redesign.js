@@ -2519,6 +2519,75 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     };
   }
 
+  /* ── Story Analytics ────────────────────────────────────── */
+  function _openStoryAnalytics(st, onDone) {
+    if(!st||!st.id){ if(onDone) onDone(); return; }
+    modal('<i class="fas fa-chart-bar"></i> Story Analytics',
+      '<div class="gh-an-loading"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>',
+      '<button class="gh-btn ghost" data-close-modal>Close</button>', 'ghStoryAnalyticsModal');
+    if(onDone) onDone();
+    if(!GS().getStoryAnalytics) return;
+    GS().getStoryAnalytics(st.id, function(data){
+      var el=document.getElementById('ghStoryAnalyticsModal');
+      var body=el&&el.querySelector('.gh-modal-body'); if(!body) return;
+      if(!data){ body.innerHTML='<p style="text-align:center;color:var(--gh-muted)">Could not load analytics.</p>'; return; }
+      var s=data.story, rx=data.reactions, rv=data.viewers;
+      var rxTotal=Object.values(rx).reduce(function(a,b){return a+b;},0);
+      var html='<div class="gh-an-metrics">';
+      html+='<div class="gh-an-metric"><div class="gh-an-num">'+data.totalViews+'</div><div class="gh-an-lbl"><i class="fas fa-eye"></i> Views</div></div>';
+      html+='<div class="gh-an-metric"><div class="gh-an-num">'+rxTotal+'</div><div class="gh-an-lbl"><i class="fas fa-heart"></i> Reactions</div></div>';
+      html+='<div class="gh-an-metric"><div class="gh-an-num">'+data.replyCount+'</div><div class="gh-an-lbl"><i class="fas fa-reply"></i> Replies</div></div>';
+      html+='</div>';
+      // Viewers
+      if(rv.length){
+        html+='<div class="gh-an-section"><div class="gh-an-sec-title">Viewers</div><div class="gh-an-avatars">';
+        rv.forEach(function(v){
+          var av=v.avatar||v.photoURL||''; var n=v.fullName||v.displayName||v.name||'User';
+          html+='<a href="profile.html?uid='+esc(v.id)+'" class="gh-an-av" title="'+esc(n)+'" onclick="event.stopPropagation()">'+(av?'<img src="'+esc(av)+'" alt="" loading="lazy">':esc(initials(n)))+'</a>';
+        });
+        var extra=(Array.isArray(s.viewedBy)?s.viewedBy.length:0)-rv.length;
+        if(extra>0) html+='<span class="gh-an-av gh-an-av-more">+'+extra+'</span>';
+        html+='</div></div>';
+      }
+      // Reactions breakdown
+      var rxKeys=Object.keys(rx);
+      if(rxKeys.length){
+        html+='<div class="gh-an-section"><div class="gh-an-sec-title">Reactions</div><div class="gh-an-rx-row">';
+        rxKeys.forEach(function(em){ html+='<span class="gh-an-rx-chip">'+esc(em)+' <strong>'+rx[em]+'</strong></span>'; });
+        html+='</div></div>';
+      }
+      // Poll
+      if(s.poll&&s.poll.question){
+        var pv=s.poll.votes||{}, ptot=Object.keys(pv).length;
+        var pvA=Object.values(pv).filter(function(v){return v==='A';}).length, pvB=ptot-pvA;
+        var ppA=ptot?Math.round(pvA/ptot*100):50, ppB=100-ppA;
+        html+='<div class="gh-an-section"><div class="gh-an-sec-title"><i class="fas fa-check-to-slot"></i> Poll</div>';
+        html+='<p class="gh-an-q">'+esc(s.poll.question)+'</p>';
+        html+='<div class="gh-an-bar-row"><span>'+esc(s.poll.optionA||'Yes')+'</span><div class="gh-an-bar"><div class="gh-an-bar-fill" style="width:'+ppA+'%"></div></div><b>'+ppA+'%</b></div>';
+        html+='<div class="gh-an-bar-row"><span>'+esc(s.poll.optionB||'No')+'</span><div class="gh-an-bar"><div class="gh-an-bar-fill" style="width:'+ppB+'%"></div></div><b>'+ppB+'%</b></div>';
+        html+='<small class="gh-an-total">'+ptot+' vote'+(ptot!==1?'s':'')+'</small></div>';
+      }
+      // Quiz
+      if(s.quiz&&s.quiz.question&&Array.isArray(s.quiz.options)){
+        var qa=s.quiz.answers||{}, qtot=Object.keys(qa).length;
+        html+='<div class="gh-an-section"><div class="gh-an-sec-title"><i class="fas fa-list-check"></i> Quiz</div>';
+        html+='<p class="gh-an-q">'+esc(s.quiz.question)+'</p>';
+        s.quiz.options.forEach(function(opt,i){
+          var cnt=Object.values(qa).filter(function(v){return v===i;}).length;
+          var pct=qtot?Math.round(cnt/qtot*100):0;
+          html+='<div class="gh-an-bar-row'+(opt.correct?' correct':'')+'"><span>'+esc(opt.text)+(opt.correct?' ✓':'')+'</span><div class="gh-an-bar"><div class="gh-an-bar-fill'+(opt.correct?' correct':'')+'" style="width:'+pct+'%"></div></div><b>'+pct+'%</b></div>';
+        });
+        html+='<small class="gh-an-total">'+qtot+' answer'+(qtot!==1?'s':'')+'</small></div>';
+      }
+      // Add Yours
+      if(s.addYours&&s.addYours.prompt){
+        html+='<div class="gh-an-section"><div class="gh-an-sec-title"><i class="fas fa-circle-plus"></i> Add Yours</div>';
+        html+='<p class="gh-an-q">'+esc(s.addYours.prompt)+'</p></div>';
+      }
+      body.innerHTML=html;
+    });
+  }
+
   /* ── Phase 63: Story Highlights ─────────────────────────── */
   function _openSaveToHighlightModal(st, onClose){
     if(!requireLogin()) return onClose&&onClose();
@@ -3181,7 +3250,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
       // Owner delete button + Phase 63: Save to Highlight
       var ownerDeleteHtml = isOwner
-        ? '<button type="button" class="gh-story-owner-del" id="ghStoryDelete" aria-label="Delete story"><i class="fas fa-trash-alt"></i></button>'+
+        ? '<button type="button" class="gh-story-owner-analytics" id="ghStoryAnalyticsBtn" title="Analytics"><i class="fas fa-chart-bar"></i></button>'+
+          '<button type="button" class="gh-story-owner-del" id="ghStoryDelete" aria-label="Delete story"><i class="fas fa-trash-alt"></i></button>'+
           '<button type="button" class="gh-story-owner-hl" id="ghStorySaveHL" title="Save to Highlights"><i class="fas fa-star"></i></button>'
         : '';
 
@@ -3442,6 +3512,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           e.stopPropagation();
           clearTimer();
           _openSaveToHighlightModal(st, function(){ scheduleAdvance(); });
+        };
+      }
+
+      // Analytics button
+      var anBtn=overlay.querySelector('#ghStoryAnalyticsBtn');
+      if(anBtn && st.id && isOwner){
+        anBtn.onclick=function(e){
+          e.stopPropagation();
+          clearTimer();
+          _openStoryAnalytics(st, function(){ scheduleAdvance(); });
         };
       }
 
