@@ -6016,3 +6016,16 @@ html[data-gh-motion="reduced"] * { animation-duration:0.001ms !important; transi
 .gh-story-emoji-badge{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border-radius:16px;padding:4px 10px;margin-bottom:6px;font-size:.82rem;color:#e2e8f0}
 .gh-story-emoji-sticker{position:absolute;top:22%;left:50%;transform:translateX(-50%);font-size:5rem;line-height:1;filter:drop-shadow(0 4px 12px rgba(0,0,0,.4));animation:gh-emoji-pop .35s cubic-bezier(.34,1.56,.64,1) both;pointer-events:none;z-index:6;user-select:none}
 @keyframes gh-emoji-pop{from{transform:translateX(-50%) scale(.4);opacity:0}to{transform:translateX(-50%) scale(1);opacity:1}}
+/* ── Story Text Style Panel (Session 20) ── */
+.gh-story-ts-row{display:flex;align-items:center;gap:8px}
+.gh-story-ts-label{font-size:.72rem;color:#94a3b8;font-weight:600;min-width:32px;text-transform:uppercase;letter-spacing:.04em}
+.gh-story-ts-colors{display:flex;gap:5px;flex-wrap:wrap}
+.gh-story-ts-clr{width:24px;height:24px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .12s,border-color .12s;flex-shrink:0}
+.gh-story-ts-clr.active{border-color:#10b981;transform:scale(1.15)}
+.gh-story-ts-clr:hover{transform:scale(1.1)}
+.gh-story-ts-sizes{display:flex;gap:4px}
+.gh-story-ts-sz{padding:3px 9px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#94a3b8;cursor:pointer;font-size:.78rem;transition:border-color .12s,color .12s}
+.gh-story-ts-sz.active{border-color:#10b981;color:#10b981;background:rgba(16,185,129,.12)}
+.gh-story-ts-styles{display:flex;gap:4px}
+.gh-story-ts-style{width:28px;height:28px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#94a3b8;cursor:pointer;font-size:.82rem;display:grid;place-items:center;transition:border-color .12s,color .12s}
+.gh-story-ts-style.active{border-color:#10b981;color:#10b981;background:rgba(16,185,129,.12)}

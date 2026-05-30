@@ -2730,6 +2730,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<button type="button" class="gh-cmp-tool" id="ghStoryHashtagBtn"><i class="fas fa-hashtag"></i><span> Tags</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryTemplateBtn"><i class="fas fa-layer-group"></i><span> Template</span></button>'+
         '<button type="button" class="gh-cmp-tool" id="ghStoryEmojiBtn"><i class="fas fa-face-smile"></i><span> Emoji</span></button>'+
+        '<button type="button" class="gh-cmp-tool" id="ghStoryTextStyleBtn"><i class="fas fa-font"></i><span> Text</span></button>'+
       '</div>'+
       '<div id="ghStoryHashtagWrap" style="display:none;margin-top:8px">'+
         '<div style="display:flex;align-items:center;gap:6px">'+
@@ -2786,6 +2787,33 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<input class="gh-input" id="ghStoryAyPrompt" placeholder="Add Yours prompt… (e.g. Show your view)" maxlength="80">'+
         '<input type="hidden" id="ghStoryAyChainId" value="">'+
         '<p style="font-size:.75rem;color:var(--gh-muted,#94a3b8);margin:4px 0 0">Others can tap and add their own story to this chain</p>'+
+      '</div>'+
+      '<div id="ghStoryTextStyleWrap" style="display:none;margin-top:8px">'+
+        '<div class="gh-story-ts-row">'+
+          '<div class="gh-story-ts-label">ფერი</div>'+
+          '<div class="gh-story-ts-colors" id="ghStoryTsColors">'+
+            '<button type="button" class="gh-story-ts-clr active" data-ts-color="#ffffff" style="background:#fff" title="White"></button>'+
+            '<button type="button" class="gh-story-ts-clr" data-ts-color="#000000" style="background:#000" title="Black"></button>'+
+            '<button type="button" class="gh-story-ts-clr" data-ts-color="#fbbf24" style="background:#fbbf24" title="Gold"></button>'+
+            '<button type="button" class="gh-story-ts-clr" data-ts-color="#f472b6" style="background:#f472b6" title="Pink"></button>'+
+            '<button type="button" class="gh-story-ts-clr" data-ts-color="#4ade80" style="background:#4ade80" title="Green"></button>'+
+            '<button type="button" class="gh-story-ts-clr" data-ts-color="#38bdf8" style="background:#38bdf8" title="Sky"></button>'+
+          '</div>'+
+        '</div>'+
+        '<div class="gh-story-ts-row" style="margin-top:8px">'+
+          '<div class="gh-story-ts-label">ზომა</div>'+
+          '<div class="gh-story-ts-sizes" id="ghStoryTsSizes">'+
+            '<button type="button" class="gh-story-ts-sz" data-ts-size="0.85rem">S</button>'+
+            '<button type="button" class="gh-story-ts-sz active" data-ts-size="1.1rem">M</button>'+
+            '<button type="button" class="gh-story-ts-sz" data-ts-size="1.5rem">L</button>'+
+            '<button type="button" class="gh-story-ts-sz" data-ts-size="2rem">XL</button>'+
+          '</div>'+
+          '<div class="gh-story-ts-styles" id="ghStoryTsStyles" style="margin-left:auto">'+
+            '<button type="button" class="gh-story-ts-style active" data-ts-bold="0" data-ts-italic="0">N</button>'+
+            '<button type="button" class="gh-story-ts-style" data-ts-bold="1" data-ts-italic="0" style="font-weight:700">B</button>'+
+            '<button type="button" class="gh-story-ts-style" data-ts-bold="0" data-ts-italic="1" style="font-style:italic">I</button>'+
+          '</div>'+
+        '</div>'+
       '</div>'+
       '<div id="ghStoryEmojiWrap" style="display:none;margin-top:8px">'+
         '<div class="gh-story-emoji-badge" id="ghStoryEmojiBadge" style="display:none">'+
@@ -3207,6 +3235,28 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }
     if(tplBadgeRm){ tplBadgeRm.onclick=function(){ _clearTemplate(); }; }
 
+    // ── Text Style ───────────────────────────────────────────────
+    var _storyTextStyle={color:'#ffffff',size:'1.1rem',bold:false,italic:false};
+    var _tsVisible=false;
+    var tsBtn=$('#ghStoryTextStyleBtn');
+    var tsWrap=$('#ghStoryTextStyleWrap');
+    var tsTA=$('#ghStoryText');
+    function _applyTsPreview(){
+      if(!tsTA) return;
+      tsTA.style.color=_storyTextStyle.color;
+      tsTA.style.fontSize=_storyTextStyle.size;
+      tsTA.style.fontWeight=_storyTextStyle.bold?'700':'';
+      tsTA.style.fontStyle=_storyTextStyle.italic?'italic':'';
+    }
+    _applyTsPreview();
+    var tsColors=$('#ghStoryTsColors');
+    if(tsColors){ tsColors.addEventListener('click',function(e){ var b=e.target.closest('[data-ts-color]'); if(!b) return; tsColors.querySelectorAll('[data-ts-color]').forEach(function(x){ x.classList.remove('active'); }); b.classList.add('active'); _storyTextStyle.color=b.dataset.tsColor; _applyTsPreview(); }); }
+    var tsSizes=$('#ghStoryTsSizes');
+    if(tsSizes){ tsSizes.addEventListener('click',function(e){ var b=e.target.closest('[data-ts-size]'); if(!b) return; tsSizes.querySelectorAll('[data-ts-size]').forEach(function(x){ x.classList.remove('active'); }); b.classList.add('active'); _storyTextStyle.size=b.dataset.tsSize; _applyTsPreview(); }); }
+    var tsStyles=$('#ghStoryTsStyles');
+    if(tsStyles){ tsStyles.addEventListener('click',function(e){ var b=e.target.closest('[data-ts-bold],[data-ts-italic]'); if(!b||b.dataset.tsBold===undefined) return; tsStyles.querySelectorAll('[data-ts-bold]').forEach(function(x){ x.classList.remove('active'); }); b.classList.add('active'); _storyTextStyle.bold=b.dataset.tsBold==='1'; _storyTextStyle.italic=b.dataset.tsItalic==='1'; _applyTsPreview(); }); }
+    if(tsBtn){ tsBtn.onclick=function(){ _tsVisible=!_tsVisible; if(tsWrap) tsWrap.style.display=_tsVisible?'':'none'; tsBtn.classList.toggle('active',_tsVisible); }; }
+
     // ── Emoji sticker ─────────────────────────────────────────────
     var _STORY_EMOJIS=['❤️','🔥','😂','😍','🎉','👏','💯','😮','🙌','✨','💪','😎','🤩','💔','😢','🤔','👀','🎶','🍀','🌟','🇬🇪','⚡','🏆','🌈','💫'];
     var _selectedEmoji=null, _emojiVisible=false;
@@ -3419,6 +3469,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(_hashtags&&_hashtags.length) _extra.hashtags=_hashtags.slice();
         if(_selectedTemplate) _extra.template={id:_selectedTemplate.id, label:_selectedTemplate.label};
         if(_selectedEmoji) _extra.emoji=_selectedEmoji;
+        if(_storyTextStyle&&(_storyTextStyle.color!=='#ffffff'||_storyTextStyle.size!=='1.1rem'||_storyTextStyle.bold||_storyTextStyle.italic)) _extra.textStyle=Object.assign({},_storyTextStyle);
         var _musicTrack=typeof window._getStoryMusic==='function'?window._getStoryMusic():null;
         if(_musicTrack&&_musicTrack.label) _extra.music={label:_musicTrack.label, url:_musicTrack.url||''};
         GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); try{ localStorage.removeItem(_DRAFT_KEY); }catch(_e){} },_extra);
@@ -3537,6 +3588,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(card){ e.preventDefault(); openStoryViewer(groups, Number(card.dataset.storyGroup)||0, 0); }
       });
     });
+  }
+
+  function _buildTsStyle(ts){
+    if(!ts) return '';
+    var s='';
+    if(ts.color) s+='color:'+ts.color+';';
+    if(ts.size) s+='font-size:'+ts.size+';';
+    if(ts.bold) s+='font-weight:700;';
+    if(ts.italic) s+='font-style:italic;';
+    return s;
   }
 
   function openStoryViewer(groupsOrElement, groupIndex, storyIndex){
@@ -3711,9 +3772,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             ? '<video src="'+esc(media)+'" class="gh-story-video" autoplay muted playsinline loop style="width:100%;height:100%;object-fit:cover"></video>'
             : media
               ? '<img src="'+esc(media)+'" alt="Story image" loading="eager" onerror="this.style.display=\'none\'">'
-              : '<p style="'+(st.bg?'text-shadow:0 2px 8px rgba(0,0,0,.55)':'')+'">'+(st.text?esc(st.text):'Story')+'</p>'
+              : '<p style="'+(st.bg?'text-shadow:0 2px 8px rgba(0,0,0,.55);':'')+_buildTsStyle(st.textStyle)+'">'+(st.text?esc(st.text):'Story')+'</p>'
           )+
-          (media && st.text ? '<div class="gh-story-caption">'+esc(st.text)+'</div>' : '')+
+          (media && st.text ? '<div class="gh-story-caption" style="'+_buildTsStyle(st.textStyle)+'">'+esc(st.text)+'</div>' : '')+
           (st.link && st.link.url
             ? '<a href="'+esc(st.link.url)+'" target="_blank" rel="noopener noreferrer" class="gh-sl-btn" onclick="event.stopPropagation()"><i class="fas fa-link"></i> '+esc(st.link.label||'Visit')+'</a>'
             : ''

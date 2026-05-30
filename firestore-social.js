@@ -2257,6 +2257,7 @@
         if (extra && Array.isArray(extra.hashtags) && extra.hashtags.length) storyData.hashtags = extra.hashtags.slice(0, 8);
         if (extra && extra.template && extra.template.id) storyData.template = { id: extra.template.id, label: extra.template.label || '' };
         if (extra && extra.emoji) storyData.emoji = extra.emoji;
+        if (extra && extra.textStyle) storyData.textStyle = { color: extra.textStyle.color || '#ffffff', size: extra.textStyle.size || '1.1rem', bold: !!extra.textStyle.bold, italic: !!extra.textStyle.italic };
         var _ayPrompt = extra && extra.addYours && extra.addYours.prompt ? extra.addYours.prompt : null;
         var _ayChainId = extra && extra.addYours && extra.addYours.chainId ? extra.addYours.chainId : null;
         if (_ayPrompt) storyData.addYours = { prompt: _ayPrompt, chainId: _ayChainId || '' };
