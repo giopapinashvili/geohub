@@ -1338,3 +1338,34 @@ body, html { height: 100%; overflow: hidden; }
   padding: 2px 6px;
   border-radius: 6px;
 }
+
+/* ── Discovery Mood Quick-Filter Row ───────────────── */
+.disc-mood-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.disc-mood-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 20px;
+  border: 1.5px solid color-mix(in srgb, var(--dm-color, #10b981) 40%, transparent);
+  background: color-mix(in srgb, var(--dm-color, #10b981) 8%, var(--gh-card-soft));
+  color: var(--dm-color, #10b981);
+  cursor: pointer;
+  transition: all 0.16s ease;
+  white-space: nowrap;
+}
+.disc-mood-btn:hover {
+  background: color-mix(in srgb, var(--dm-color, #10b981) 18%, var(--gh-card-soft));
+}
+.disc-mood-btn.active {
+  background: color-mix(in srgb, var(--dm-color, #10b981) 25%, transparent);
+  border-color: var(--dm-color, #10b981);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--dm-color, #10b981) 18%, transparent);
+}

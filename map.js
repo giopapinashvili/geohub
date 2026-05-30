@@ -2620,6 +2620,18 @@
   let _discMode = '';   // 'nearme' | 'trending' | 'gems' | ''
 
   function initDiscovery() {
+    // Build mood quick-filter row
+    const moodRow = document.getElementById('discMoodRow');
+    if (moodRow) {
+      const quickMoods = MOOD_TAGS.slice(0, 8);
+      moodRow.innerHTML = quickMoods.map(tag =>
+        '<button class="disc-mood-btn" data-mood-id="' + esc(tag.id) + '"' +
+        ' style="--dm-color:' + (tag.color || '#10b981') + '"' +
+        ' onclick="window.discoverMood(\'' + esc(tag.id) + '\')">' +
+        tag.emoji + ' ' + tag.label + '</button>'
+      ).join('');
+    }
+    // Load today's trending counts
     const GF = window.GeoFirebase;
     if (!GF || !GF.db || !GF.fs) return;
     const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0);
@@ -2638,6 +2650,36 @@
     }).catch(() => {});
   }
 
+  window.discoverMood = function(moodId) {
+    const alreadyActive = _discMode === 'mood_' + moodId;
+    _discReset();
+    document.querySelectorAll('.disc-mood-btn').forEach(b => b.classList.remove('active'));
+    if (alreadyActive) {
+      _discMode = '';
+      renderMap();
+      return;
+    }
+    _discMode = 'mood_' + moodId;
+    const btn = document.querySelector('.disc-mood-btn[data-mood-id="' + moodId + '"]');
+    if (btn) btn.classList.add('active');
+    // Filter places that have this vibe tag voted
+    const tagged = allPlaces.filter(p => {
+      const c = _moodTagCounts[p.id];
+      return c && (c[moodId] || 0) >= 1;
+    }).sort((a, b) => {
+      const ca = (_moodTagCounts[a.id] || {})[moodId] || 0;
+      const cb = (_moodTagCounts[b.id] || {})[moodId] || 0;
+      return cb - ca;
+    });
+    if (tagged.length) {
+      _showDiscoverResults(tagged, 'mood');
+    } else {
+      // Fallback — show all places with mood label hint
+      const results = document.getElementById('mapResults');
+      if (results) results.innerHTML = '<div style="padding:16px;text-align:center;color:var(--gh-muted);font-size:13px">ჯერ ვერცერთ ადგილს არ მიუღია ეს Vibe tag.<br>შეამოწმე check-in-ის შემდეგ!</div>';
+    }
+  };
+
   let _trendCounts = {};
 
   function _discReset() {
@@ -2645,6 +2687,7 @@
       const el = document.getElementById(id);
       if (el) el.classList.remove('active');
     });
+    document.querySelectorAll('.disc-mood-btn').forEach(b => b.classList.remove('active'));
   }
 
   window.discoverNearMe = function() {
