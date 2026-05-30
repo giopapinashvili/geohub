@@ -3185,6 +3185,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         }
         if(_cfEnabled){ _extra.closeFriends=true; _extra.closeFriendsList=_cfList.slice(); }
         if(_selectedGroupId) _extra.groupId=_selectedGroupId;
+        var _musicTrack=typeof window._getStoryMusic==='function'?window._getStoryMusic():null;
+        if(_musicTrack&&_musicTrack.label) _extra.music={label:_musicTrack.label, url:_musicTrack.url||''};
         GS().createStory(t,finalUrl,function(){ var mo=$('#ghStoryModal'); if(mo) mo.remove(); },_extra);
       }).catch(function(err){
         console.error('[GeoHub] story upload failed',err);
@@ -3329,7 +3331,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
     function clearTimer(){ if(_autoTimer){ clearTimeout(_autoTimer); _autoTimer=null; } if(_cdInterval){ clearInterval(_cdInterval); _cdInterval=null; } }
     function scheduleAdvance(){ clearTimer(); if(!_paused && !_inputFocused){ _autoTimer = setTimeout(tryAdvance, STORY_DUR); } }
-    function close(){ clearTimer(); overlay.remove(); document.body.classList.remove('gh-story-open'); document.removeEventListener('keydown', onKey); }
+    function close(){ clearTimer(); if(window._ghStoryAudio){ try{window._ghStoryAudio.pause();}catch(_e){} window._ghStoryAudio=null; } overlay.remove(); document.body.classList.remove('gh-story-open'); document.removeEventListener('keydown', onKey); }
 
     function tryAdvance(){
       var g = groups[groupIndex];
@@ -3342,6 +3344,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
     function draw(){
       clearTimer();
+      if(window._ghStoryAudio){ try{window._ghStoryAudio.pause(); window._ghStoryAudio.currentTime=0;}catch(_e){} window._ghStoryAudio=null; }
       var g = groups[groupIndex];
       var st = g.stories[storyIndex] || {};
 
@@ -3519,11 +3522,32 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           )+
           quizHtml+
           addYoursHtml+
+          (st.music&&st.music.label
+            ? '<div class="gh-music-sticker" id="ghMusicSt_'+esc(st.id||'')+'">'
+                +'<div class="gh-music-sticker-disc"><i class="fas fa-compact-disc"></i></div>'
+                +'<div class="gh-music-sticker-body">'
+                  +'<div class="gh-music-sticker-label">'
+                    +'<i class="fas fa-music"></i> '
+                    +'<span class="gh-music-sticker-scroll">'+esc(st.music.label)+'</span>'
+                  +'</div>'
+                +'</div>'
+              +'</div>'
+            : ''
+          )+
         '</div>'+
         footerHtml+
         '<button type="button" class="gh-story-nav prev" aria-label="Previous story">‹</button>'+
         '<button type="button" class="gh-story-nav next" aria-label="Next story">›</button>'+
         '</div>';
+
+      // Music sticker — autoplay audio (stop previous first)
+      if(window._ghStoryAudio){ try{window._ghStoryAudio.pause(); window._ghStoryAudio.currentTime=0;}catch(_e){} window._ghStoryAudio=null; }
+      if(st.music&&st.music.url){
+        var _msAudio=new Audio(st.music.url);
+        _msAudio.volume=0.35; _msAudio.loop=true;
+        _msAudio.play().catch(function(){});
+        window._ghStoryAudio=_msAudio;
+      }
 
       // Countdown sticker — live timer
       if(st.countdown && st.countdown.targetDate){

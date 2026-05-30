@@ -2252,6 +2252,7 @@
         if (extra && extra.closeFriends) { storyData.closeFriends = true; storyData.closeFriendsList = Array.isArray(extra.closeFriendsList) ? extra.closeFriendsList : []; }
         if (extra && extra.groupId) storyData.groupId = extra.groupId;
         if (extra && extra.eventId) storyData.eventId = extra.eventId;
+        if (extra && extra.music && extra.music.label) storyData.music = { label: extra.music.label, url: extra.music.url || '' };
         var _ayPrompt = extra && extra.addYours && extra.addYours.prompt ? extra.addYours.prompt : null;
         var _ayChainId = extra && extra.addYours && extra.addYours.chainId ? extra.addYours.chainId : null;
         if (_ayPrompt) storyData.addYours = { prompt: _ayPrompt, chainId: _ayChainId || '' };
