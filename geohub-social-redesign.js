@@ -4185,16 +4185,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           function _restoreBtn(){ var btn=overlay.querySelector('#ghStRpSend'); if(btn){btn.disabled=false;btn.innerHTML=origIcon;} }
           if(authorId && gs.startConversation && gs.sendMessage){
             gs.startConversation(authorId, function(cid){
-              if(!cid){ _restoreBtn(); if(replyInput){replyInput.value=text;replyInput.focus();} return; }
+              if(!cid){ _restoreBtn(); if(replyInput){replyInput.value=text;replyInput.focus();} toast(_srt('reply_sent')||'ვერ გაიხსნა საუბარი','error'); return; }
               var storyCtx = {
                 type: 'story',
                 storyId: st.id,
                 text: (st.text||'').slice(0,120),
-                mediaUrl: st.mediaUrl||'',
+                mediaUrl: (st.mediaUrl||'').slice(0,500),
                 mediaType: st.mediaType||'',
                 authorName: g.authorName||''
               };
-              gs.sendMessage(cid, text, function(ok){
+              gs.sendMessage(cid, text, function(ok, err){
+                if(err){ _restoreBtn(); toast(_srt('reply_sent')||'შეცდომა','error'); return; }
                 if(gs.addStoryReply) gs.addStoryReply(st.id, authorId, text, function(){});
                 close();
                 location.href = 'messages.html?cid=' + encodeURIComponent(cid);
@@ -4204,7 +4205,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             gs.addStoryReply(st.id, authorId, text, function(err){
               _restoreBtn();
               if(!err){ toast(_srt('reply_sent')); if(replyInput) replyInput.blur(); }
-              else if(replyInput){ replyInput.value = text; replyInput.focus(); }
+              else { toast(_srt('reply_sent')||'შეცდომა','error'); if(replyInput){ replyInput.value = text; replyInput.focus(); } }
             });
           } else {
             _restoreBtn();
