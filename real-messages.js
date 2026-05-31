@@ -615,16 +615,18 @@
       var sc = m.storyContext;
       var storyId = sc.storyId || '';
       var clickAttr = storyId ? ' onclick="if(window.ghOpenStoryById)ghOpenStoryById(\''+esc(storyId)+'\')" role="button" tabindex="0"' : '';
-      var bgMedia = '';
+      // Use background-image on a div (not <img>) to avoid the .msg-bubble img{width:auto!important} override
+      var bgStyle = '';
+      var bgInner = '';
       if(sc.mediaUrl && sc.mediaType !== 'video'){
-        bgMedia = '<img class="msg-story-card-bg" src="'+esc(sc.mediaUrl)+'" alt="" onerror="this.style.display=\'none\'">';
+        bgStyle = ' style="background-image:url(\''+esc(sc.mediaUrl)+'\')"';
       } else if(sc.mediaUrl && sc.mediaType === 'video'){
-        bgMedia = '<div class="msg-story-card-gradient"><i class="fas fa-play-circle"></i></div>';
+        bgInner = '<div class="msg-story-card-gradient"><i class="fas fa-play-circle"></i></div>';
       } else {
-        bgMedia = '<div class="msg-story-card-gradient"><i class="fas fa-align-left"></i></div>';
+        bgInner = '<div class="msg-story-card-gradient"><i class="fas fa-align-left"></i></div>';
       }
-      return '<div class="msg-story-card"'+clickAttr+'>'
-        + bgMedia
+      return '<div class="msg-story-card"'+bgStyle+clickAttr+'>'
+        + bgInner
         + '<div class="msg-story-card-badge"><i class="fas fa-film"></i> სთორი</div>'
         + (storyId ? '<div class="msg-story-card-tap"><i class="fas fa-external-link-alt"></i></div>' : '')
         + '<div class="msg-story-card-overlay">'
