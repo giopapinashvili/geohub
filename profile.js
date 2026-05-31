@@ -292,6 +292,7 @@
   }
 
   function renderIdentity(user, fbUser) {
+    var _t = function(k){ return typeof window.GHt === 'function' ? window.GHt(k) : k; };
     document.title = user.fullName + ' — GeoHub';
     const cover = $('.profile-cover');
     if (cover) {
@@ -356,7 +357,6 @@
       var _savedPanelEl = document.getElementById('tab-saved');
       if (_savedPanelEl) _savedPanelEl.style.display = 'none';
     }
-    var _t = function(k){ return typeof window.GHt === 'function' ? window.GHt(k) : k; };
     const coverActions = $('.cover-actions');
     if (coverActions) coverActions.innerHTML = own
       ? '<button class="cover-btn" data-edit-cover><i class="fas fa-camera"></i> Edit Cover</button><button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="cover-btn primary" data-edit-profile><i class="fas fa-pen"></i> '+_t('profile_edit')+'</button>'
