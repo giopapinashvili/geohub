@@ -613,17 +613,25 @@
   function renderReplyQuote(m){
     if(m.storyContext){
       var sc = m.storyContext;
-      var thumb = sc.mediaUrl && sc.mediaType !== 'video'
-        ? '<img class="msg-story-thumb" src="'+esc(sc.mediaUrl)+'" alt="" onerror="this.style.display=\'none\'">'
-        : (sc.mediaUrl && sc.mediaType === 'video'
-          ? '<div class="msg-story-thumb msg-story-thumb-vid"><i class="fas fa-play-circle"></i></div>'
-          : '<div class="msg-story-thumb msg-story-thumb-text"><i class="fas fa-align-left"></i></div>');
-      return '<div class="msg-story-quote">'
-        + '<div class="msg-story-quote-label"><i class="fas fa-film"></i> სთორზე პასუხი · '+esc(sc.authorName||'')+'</div>'
-        + '<div class="msg-story-quote-body">'
-        + thumb
-        + (sc.text ? '<span class="msg-story-quote-text">'+esc(sc.text.slice(0,80))+'</span>' : '')
-        + '</div></div>';
+      var storyId = sc.storyId || '';
+      var clickAttr = storyId ? ' onclick="if(window.ghOpenStoryById)ghOpenStoryById(\''+esc(storyId)+'\')" role="button" tabindex="0"' : '';
+      var bgMedia = '';
+      if(sc.mediaUrl && sc.mediaType !== 'video'){
+        bgMedia = '<img class="msg-story-card-bg" src="'+esc(sc.mediaUrl)+'" alt="" onerror="this.style.display=\'none\'">';
+      } else if(sc.mediaUrl && sc.mediaType === 'video'){
+        bgMedia = '<div class="msg-story-card-gradient"><i class="fas fa-play-circle"></i></div>';
+      } else {
+        bgMedia = '<div class="msg-story-card-gradient"><i class="fas fa-align-left"></i></div>';
+      }
+      return '<div class="msg-story-card"'+clickAttr+'>'
+        + bgMedia
+        + '<div class="msg-story-card-badge"><i class="fas fa-film"></i> სთორი</div>'
+        + (storyId ? '<div class="msg-story-card-tap"><i class="fas fa-external-link-alt"></i></div>' : '')
+        + '<div class="msg-story-card-overlay">'
+        + (sc.authorName ? '<div class="msg-story-card-author">'+esc(sc.authorName)+'</div>' : '')
+        + (sc.text ? '<div class="msg-story-card-preview">'+esc(sc.text.slice(0,100))+'</div>' : '')
+        + '</div>'
+        + '</div>';
     }
     if(!m.replyTo) return '';
     return '<div class="msg-reply-quote"><span class="msg-reply-quote-name">'+esc(m.replyTo.senderName||'User')+'</span>'

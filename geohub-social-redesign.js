@@ -13550,6 +13550,33 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
   };
 
+  /* ── Open Story By ID (from DM story card click) ─────────────── */
+  window.ghOpenStoryById = function(storyId){
+    if(!storyId) return;
+    var GF = window.GeoFirebase;
+    if(!GF || !GF.fs || !GF.db){
+      location.href = 'feed.html?story=' + encodeURIComponent(storyId);
+      return;
+    }
+    GF.fs.getDoc(GF.fs.doc(GF.db, 'stories', storyId)).then(function(snap){
+      if(!snap.exists || !snap.exists()){
+        toast(_srt('story_not_found') || 'სთორი ვეღარ მოიძებნა');
+        return;
+      }
+      var data = snap.data() || {};
+      var tsVal = data.createdAt;
+      var ms = tsVal && tsVal.toMillis ? tsVal.toMillis() : (tsVal && tsVal.seconds ? tsVal.seconds*1000 : 0);
+      if(ms && (Date.now() - ms) > 24 * 3600 * 1000){
+        toast(_srt('story_expired') || 'სთორის ვადა გავიდა');
+        return;
+      }
+      var story = normalizeStoryItem(Object.assign({ id: snap.id }, data));
+      openStoryViewer(buildStoryGroups([story]), 0, 0);
+    }).catch(function(){
+      location.href = 'feed.html?story=' + encodeURIComponent(storyId);
+    });
+  };
+
   /* ── Story Map Overlay ──────────────────────────────────────── */
   window.ghOpenStoryMap = function() {
     var existing = document.getElementById('ghStoryMapOverlay'); if(existing){ existing.remove(); return; }

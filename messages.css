@@ -333,13 +333,80 @@ body.page-messages .msg-reaction-picker{z-index:2147483000!important;}
 .msg-reply-quote{background:rgba(255,255,255,.07);border-left:3px solid var(--green,#10b981);border-radius:6px;padding:5px 9px;margin-bottom:6px;max-width:100%;overflow:hidden;}
 .msg-reply-quote-name{display:block;font-size:.7rem;font-weight:700;color:var(--green-light,#34d399);margin-bottom:2px;}
 .msg-reply-quote-text{display:block;font-size:.78rem;color:var(--text-secondary,#94a3b8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;}
-/* Story reply context bubble */
-.msg-story-quote{background:rgba(255,255,255,.07);border-left:3px solid #ec4899;border-radius:8px;padding:6px 10px;margin-bottom:6px;overflow:hidden;}
-.msg-story-quote-label{font-size:.68rem;font-weight:700;color:#ec4899;margin-bottom:5px;display:flex;align-items:center;gap:5px;}
-.msg-story-quote-body{display:flex;align-items:center;gap:8px;}
-.msg-story-thumb{width:38px;height:58px;object-fit:cover;border-radius:6px;flex-shrink:0;background:rgba(255,255,255,.1);}
-.msg-story-thumb-vid,.msg-story-thumb-text{width:38px;height:58px;border-radius:6px;flex-shrink:0;background:rgba(236,72,153,.15);display:flex;align-items:center;justify-content:center;color:#ec4899;font-size:1.1rem;}
-.msg-story-quote-text{font-size:.78rem;color:var(--text-secondary,#94a3b8);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+/* ── Story Card (DM story reply) ────────────────────────────── */
+.msg-story-card{
+  position:relative;
+  display:block;
+  width:100%;
+  max-width:220px;
+  height:160px;
+  border-radius:14px;
+  overflow:hidden;
+  cursor:pointer;
+  margin-bottom:6px;
+  background:#1a0a2e;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+  transition:transform .12s,opacity .12s;
+}
+.msg-story-card:active{transform:scale(.96);opacity:.9;}
+.msg-story-card-bg{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:cover;
+  display:block;
+}
+.msg-story-card-gradient{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,#ec4899 0%,#8b5cf6 100%);
+  display:flex;align-items:center;justify-content:center;
+}
+.msg-story-card-gradient i{font-size:2.4rem;color:rgba(255,255,255,.35);}
+/* dark gradient fade at bottom */
+.msg-story-card-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(0,0,0,.05) 20%,rgba(0,0,0,.78) 100%);
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:10px;
+}
+/* "სთორი" badge top-left */
+.msg-story-card-badge{
+  position:absolute;top:9px;left:9px;
+  background:rgba(0,0,0,.45);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  border-radius:20px;padding:3px 9px;
+  font-size:.6rem;font-weight:700;color:#fff;
+  display:flex;align-items:center;gap:5px;
+  text-transform:uppercase;letter-spacing:.5px;
+}
+.msg-story-card-badge i{color:#ec4899;font-size:.58rem;}
+/* open icon top-right */
+.msg-story-card-tap{
+  position:absolute;top:9px;right:9px;
+  width:22px;height:22px;
+  background:rgba(255,255,255,.18);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,.9);font-size:.58rem;
+}
+.msg-story-card-author{
+  font-size:.76rem;font-weight:600;color:#fff;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  text-shadow:0 1px 4px rgba(0,0,0,.6);
+}
+.msg-story-card-preview{
+  font-size:.7rem;color:rgba(255,255,255,.72);
+  overflow:hidden;display:-webkit-box;
+  -webkit-line-clamp:2;-webkit-box-orient:vertical;
+  margin-top:2px;
+  text-shadow:0 1px 3px rgba(0,0,0,.5);
+}
+/* msg-text below the card gets a small top gap */
+.msg-bubble .msg-story-card + .msg-text{
+  margin-top:2px;
+  padding-top:4px;
+  border-top:1px solid rgba(255,255,255,.07);
+}
 
 /* ===== REPLY PREVIEW BAR ===== */
 .reply-preview-bar{display:flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(16,185,129,.08);border-top:1px solid rgba(16,185,129,.2);flex-shrink:0;}
