@@ -152,7 +152,10 @@
 
     if (uid) {
       const snap = await GF.fs.getDoc(GF.fs.doc(GF.db, 'users', uid));
-      if (!snap.exists()) return null;
+      if (!snap.exists()) {
+        if (fbUser && uid === fbUser.uid) return ensureOwnProfile(GF, fbUser);
+        return null;
+      }
       return normalizeProfile(null, Object.assign({ uid }, snap.data()));
     }
 
