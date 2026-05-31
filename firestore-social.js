@@ -2826,6 +2826,7 @@
         };
       }) : [];
       var replyTo = extra.replyTo && typeof extra.replyTo === 'object' ? extra.replyTo : null;
+      var storyContext = extra.storyContext && typeof extra.storyContext === 'object' ? extra.storyContext : null;
       if (!cleanText && !mediaUrl && !attachments.length) return;
       requireAuth(function (user) {
         var me = meData() || {};
@@ -2863,6 +2864,7 @@
             fileSize: fileSize,
             attachments: attachments,
             replyTo: replyTo,
+            storyContext: storyContext,
             likedBy: [],
             readBy: [user.uid],
             seenBy: [user.uid],

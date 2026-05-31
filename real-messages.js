@@ -611,6 +611,20 @@
   }
 
   function renderReplyQuote(m){
+    if(m.storyContext){
+      var sc = m.storyContext;
+      var thumb = sc.mediaUrl && sc.mediaType !== 'video'
+        ? '<img class="msg-story-thumb" src="'+esc(sc.mediaUrl)+'" alt="" onerror="this.style.display=\'none\'">'
+        : (sc.mediaUrl && sc.mediaType === 'video'
+          ? '<div class="msg-story-thumb msg-story-thumb-vid"><i class="fas fa-play-circle"></i></div>'
+          : '<div class="msg-story-thumb msg-story-thumb-text"><i class="fas fa-align-left"></i></div>');
+      return '<div class="msg-story-quote">'
+        + '<div class="msg-story-quote-label"><i class="fas fa-film"></i> სთორზე პასუხი · '+esc(sc.authorName||'')+'</div>'
+        + '<div class="msg-story-quote-body">'
+        + thumb
+        + (sc.text ? '<span class="msg-story-quote-text">'+esc(sc.text.slice(0,80))+'</span>' : '')
+        + '</div></div>';
+    }
     if(!m.replyTo) return '';
     return '<div class="msg-reply-quote"><span class="msg-reply-quote-name">'+esc(m.replyTo.senderName||'User')+'</span>'
       + '<span class="msg-reply-quote-text">'+esc((m.replyTo.text||'').slice(0,60))+'</span></div>';

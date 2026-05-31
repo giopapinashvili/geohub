@@ -4115,6 +4115,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var delBtn = overlay.querySelector('#ghStoryDelete');
       if(delBtn) delBtn.onclick = function(e){
         e.stopPropagation();
+        clearTimer();
         window.ghConfirm(typeof GHt==='function'?GHt('story_delete_cfm'):'Delete this story?', function() {
           if(GS().deleteStory){
             GS().deleteStory(st.id, function(err){
@@ -4185,11 +4186,19 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           if(authorId && gs.startConversation && gs.sendMessage){
             gs.startConversation(authorId, function(cid){
               if(!cid){ _restoreBtn(); if(replyInput){replyInput.value=text;replyInput.focus();} return; }
+              var storyCtx = {
+                type: 'story',
+                storyId: st.id,
+                text: (st.text||'').slice(0,120),
+                mediaUrl: st.mediaUrl||'',
+                mediaType: st.mediaType||'',
+                authorName: g.authorName||''
+              };
               gs.sendMessage(cid, text, function(ok){
                 if(gs.addStoryReply) gs.addStoryReply(st.id, authorId, text, function(){});
                 close();
                 location.href = 'messages.html?cid=' + encodeURIComponent(cid);
-              });
+              }, { storyContext: storyCtx });
             });
           } else if(gs.addStoryReply){
             gs.addStoryReply(st.id, authorId, text, function(err){

@@ -333,6 +333,13 @@ body.page-messages .msg-reaction-picker{z-index:2147483000!important;}
 .msg-reply-quote{background:rgba(255,255,255,.07);border-left:3px solid var(--green,#10b981);border-radius:6px;padding:5px 9px;margin-bottom:6px;max-width:100%;overflow:hidden;}
 .msg-reply-quote-name{display:block;font-size:.7rem;font-weight:700;color:var(--green-light,#34d399);margin-bottom:2px;}
 .msg-reply-quote-text{display:block;font-size:.78rem;color:var(--text-secondary,#94a3b8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;}
+/* Story reply context bubble */
+.msg-story-quote{background:rgba(255,255,255,.07);border-left:3px solid #ec4899;border-radius:8px;padding:6px 10px;margin-bottom:6px;overflow:hidden;}
+.msg-story-quote-label{font-size:.68rem;font-weight:700;color:#ec4899;margin-bottom:5px;display:flex;align-items:center;gap:5px;}
+.msg-story-quote-body{display:flex;align-items:center;gap:8px;}
+.msg-story-thumb{width:38px;height:58px;object-fit:cover;border-radius:6px;flex-shrink:0;background:rgba(255,255,255,.1);}
+.msg-story-thumb-vid,.msg-story-thumb-text{width:38px;height:58px;border-radius:6px;flex-shrink:0;background:rgba(236,72,153,.15);display:flex;align-items:center;justify-content:center;color:#ec4899;font-size:1.1rem;}
+.msg-story-quote-text{font-size:.78rem;color:var(--text-secondary,#94a3b8);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
 
 /* ===== REPLY PREVIEW BAR ===== */
 .reply-preview-bar{display:flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(16,185,129,.08);border-top:1px solid rgba(16,185,129,.2);flex-shrink:0;}
