@@ -1,6 +1,8 @@
-// Firebase npm package imports (bundled by Vite — replaces CDN gstatic.com URLs)
-import { initializeApp } from 'firebase/app';
-import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
+// Firebase CDN imports — work in browsers directly AND when bundled by Vite.
+// API keys are intentionally public (security via Firestore rules, not key secrecy).
+import { initializeApp }        from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import { getAuth, signOut, onAuthStateChanged }
+                                from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 import {
   getFirestore,
   doc, setDoc, getDoc, getDocs, updateDoc, addDoc,
@@ -8,27 +10,29 @@ import {
   onSnapshot, deleteDoc, serverTimestamp, increment,
   writeBatch, runTransaction, arrayUnion, arrayRemove,
   Timestamp, startAt, endAt, startAfter, endBefore,
-  limitToLast, getCountFromServer, collectionGroup
-} from 'firebase/firestore';
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { getAnalytics, isSupported } from 'firebase/analytics';
-import { getMessaging, isSupported as isMsgSupported } from 'firebase/messaging';
+  limitToLast, getCountFromServer, collectionGroup,
+} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+import { getFunctions, httpsCallable }
+                                from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js';
+import { getAnalytics, isSupported }
+                                from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js';
+import { getMessaging, isSupported as isMsgSupported }
+                                from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js';
 
-// Keys come from .env (local) or Cloudflare Pages environment variables (production).
-// Vite replaces import.meta.env.VITE_* at build time — never exposed to Node.
 const firebaseConfig = {
-  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  apiKey:            'AIzaSyBFjplTgrv7SGLagXzppoUXmSp60PMO_HI',
+  authDomain:        'geohub-main.firebaseapp.com',
+  projectId:         'geohub-main',
+  storageBucket:     'geohub-main.appspot.com',
+  messagingSenderId: '18115935679',
+  appId:             '1:18115935679:web:b17b3f3814256cd97e750a',
+  measurementId:     'G-NCBVQ4J9VF',
 };
 
 try {
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+  const app      = initializeApp(firebaseConfig);
+  const auth     = getAuth(app);
+  const db       = getFirestore(app);
   const functions = getFunctions(app);
   window.GeoFirebase = {
     app, auth, db,
@@ -50,7 +54,7 @@ try {
     .catch(() => {})
     .finally(() => { window.dispatchEvent(new Event('GeoFirebaseReady')); });
 } catch (err) {
-  console.warn('[GeoHub] Firebase init failed — online features disabled.', err.message);
+  console.warn('[GeoHub] Firebase init failed:', err.message);
   window.GeoFirebase = null;
   window.dispatchEvent(new Event('GeoFirebaseReady'));
 }

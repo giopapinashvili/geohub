@@ -25,14 +25,8 @@ export default defineConfig({
     rollupOptions: {
       input: VITE_PAGES,
       output: {
-        // Firebase gets its own cached chunk (changes rarely)
         manualChunks(id) {
-          if (id.includes('node_modules/firebase') || id.includes('node_modules/@firebase')) {
-            return 'firebase';
-          }
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
+          if (id.includes('node_modules')) return 'vendor';
         },
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
