@@ -2,6 +2,10 @@
 *.local
 .DS_Store
 Thumbs.db
+# Environment variables — never commit real keys
+.env
+# Vite build output
+dist/
 # Node / Playwright
 node_modules/
 playwright-report/

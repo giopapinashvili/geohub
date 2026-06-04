@@ -1,5 +1,6 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
-import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+// Firebase npm package imports (bundled by Vite — replaces CDN gstatic.com URLs)
+import { initializeApp } from 'firebase/app';
+import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
 import {
   getFirestore,
   doc, setDoc, getDoc, getDocs, updateDoc, addDoc,
@@ -8,19 +9,20 @@ import {
   writeBatch, runTransaction, arrayUnion, arrayRemove,
   Timestamp, startAt, endAt, startAfter, endBefore,
   limitToLast, getCountFromServer, collectionGroup
-} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-import { getFunctions, httpsCallable } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js';
-import { getAnalytics, isSupported } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js';
-import { getMessaging, isSupported as isMsgSupported } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js';
+} from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { getAnalytics, isSupported } from 'firebase/analytics';
+import { getMessaging, isSupported as isMsgSupported } from 'firebase/messaging';
 
-// IMPORTANT: Restrict this Firebase Web API key in Google Cloud Console → APIs & Services → Credentials → HTTP referrers to your production domains only.
+// Keys come from .env (local) or Cloudflare Pages environment variables (production).
+// Vite replaces import.meta.env.VITE_* at build time — never exposed to Node.
 const firebaseConfig = {
-  apiKey: "AIzaSyBFjplTgrv7SGLagXzppoUXmSp60PMO_HI",
-  authDomain: "geohub-main.firebaseapp.com",
-  projectId: "geohub-main",
-  messagingSenderId: "18115935679",
-  appId: "1:18115935679:web:b17b3f3814256cd97e750a",
-  measurementId: "G-NCBVQ4J9VF"
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 try {
@@ -30,14 +32,19 @@ try {
   const functions = getFunctions(app);
   window.GeoFirebase = {
     app, auth, db,
-    fs: { doc, setDoc, getDoc, getDocs, updateDoc, addDoc, collection, query, orderBy, where, limit, onSnapshot, deleteDoc, serverTimestamp, increment, writeBatch, runTransaction, arrayUnion, arrayRemove, Timestamp, startAt, endAt, startAfter, endBefore, limitToLast, getCountFromServer, collectionGroup },
+    fs: {
+      doc, setDoc, getDoc, getDocs, updateDoc, addDoc,
+      collection, query, orderBy, where, limit,
+      onSnapshot, deleteDoc, serverTimestamp, increment,
+      writeBatch, runTransaction, arrayUnion, arrayRemove,
+      Timestamp, startAt, endAt, startAfter, endBefore,
+      limitToLast, getCountFromServer, collectionGroup,
+    },
     authFns: { signOut, onAuthStateChanged },
     functions,
-    httpsCallable
+    httpsCallable,
   };
   isSupported().then(ok => { if (ok) getAnalytics(app); }).catch(() => {});
-  // Resolve messaging before firing GeoFirebaseReady so push-notifications.js
-  // can safely reuse the instance without a race condition.
   isMsgSupported()
     .then(ok => { if (ok) window.GeoFirebase.messaging = getMessaging(app); })
     .catch(() => {})
