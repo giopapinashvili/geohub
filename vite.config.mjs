@@ -1,16 +1,17 @@
 import { defineConfig } from 'vite';
 import { resolve, basename } from 'path';
-import { readdirSync } from 'fs';
 import { fileURLToPath } from 'url';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
-// Auto-detect all HTML pages for MPA
-const htmlEntries = Object.fromEntries(
-  readdirSync(__dirname)
-    .filter(f => f.endsWith('.html'))
-    .map(f => [basename(f, '.html'), resolve(__dirname, f)])
-);
+// Only pages that have been migrated to src/entries/* get bundled by Vite.
+// Other pages are copied as-is by scripts/copy-static.js along with all JS files.
+const VITE_PAGES = {
+  feed: resolve(__dirname, 'feed.html'),
+  // Add more as you create src/entries/*.js for each page:
+  // messages: resolve(__dirname, 'messages.html'),
+  // profile:  resolve(__dirname, 'profile.html'),
+};
 
 export default defineConfig({
   root: '.',
@@ -20,13 +21,18 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     sourcemap: false,
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
-      input: htmlEntries,
+      input: VITE_PAGES,
       output: {
-        // Shared chunks for code used across multiple pages
+        // Firebase gets its own cached chunk (changes rarely)
         manualChunks(id) {
-          if (id.includes('node_modules/firebase')) return 'firebase';
-          if (id.includes('node_modules')) return 'vendor';
+          if (id.includes('node_modules/firebase') || id.includes('node_modules/@firebase')) {
+            return 'firebase';
+          }
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
         },
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js',
@@ -35,7 +41,7 @@ export default defineConfig({
     },
   },
 
-  // Dev server: serve from root so all existing URLs work
+  // Dev server: serves everything from root so current URLs all work
   server: {
     port: 5173,
     open: '/feed.html',
