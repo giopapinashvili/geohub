@@ -2512,6 +2512,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             finalPayload.mediaUrls=validUrls; submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
             GS().createPost(txt, validUrls[0]||'', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); window._composerLocation=null; try{localStorage.removeItem('gh_draft');}catch(_e){} var _u=authUser(); if(_u) setTimeout(function(){ checkAndAwardBadges(_u.uid); },2000); }, finalPayload);
           }).catch(function(err){ console.error('[GeoHub] upload',err); toast(_srt('upload_failed'),'error'); if(bar) bar.style.display='none'; submitBtn.disabled=false; submitBtn.innerHTML='<i class="fas fa-paper-plane"></i> Post'; });
+        } else if (!navigator.onLine) {
+          // Offline: queue text-only post for later
+          try {
+            var _q=JSON.parse(localStorage.getItem('gh_post_queue')||'[]');
+            _q.push({ text:txt, payload:finalPayload, queuedAt:Date.now() });
+            if(_q.length>10) _q=_q.slice(-10);
+            localStorage.setItem('gh_post_queue',JSON.stringify(_q));
+          } catch(_qe){}
+          try{ localStorage.removeItem('gh_draft'); }catch(_e){}
+          var modal=$('#ghPostModal'); if(modal) modal.remove();
+          toast('პოსტი გაიგზავნება ინტერნეტთან დაკავშირებისთანავე','info');
         } else {
           submitBtn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Posting…';
           GS().createPost(txt, '', function(){ var modal=$('#ghPostModal'); if(modal) modal.remove(); window._composerLocation=null; try{localStorage.removeItem('gh_draft');}catch(_e){} var _u=authUser(); if(_u) setTimeout(function(){ checkAndAwardBadges(_u.uid); },2000); }, finalPayload);
@@ -14916,6 +14927,18 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     renderCommentsForPid: renderCommentsForPid
   };
   window.GeoHubPostInteractions = { bind: bindPostInteractions };
+
+  // Offline post queue: drain when connection is restored
+  window.addEventListener('online', function() {
+    if(!window.GeoSocial || !window.GeoSocial.createPost) return;
+    var _q; try{ _q=JSON.parse(localStorage.getItem('gh_post_queue')||'[]'); }catch(e){ _q=[]; }
+    if(!_q.length) return;
+    localStorage.removeItem('gh_post_queue');
+    toast('ინტერნეტი აღდგა. '+_q.length+' პოსტი იგზავნება…','info');
+    _q.forEach(function(item){
+      window.GeoSocial.createPost(item.text||'', '', function(){}, item.payload||{});
+    });
+  });
 
   // Clean up all Firestore listeners when navigating away to avoid runaway billing
   window.addEventListener('pagehide', function() {
