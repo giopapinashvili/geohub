@@ -705,7 +705,7 @@
         var time = r.createdAt && r.createdAt.toDate ? new Intl.DateTimeFormat('en',{month:'short',day:'numeric',year:'numeric'}).format(r.createdAt.toDate()) : '';
         var initials = (r.userName||'U').charAt(0).toUpperCase();
         var avInner = r.userPhoto
-          ? '<img src="'+esc(r.userPhoto)+'" alt="" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.onerror=null;this.style.display=\'none\'">'
+          ? '<img src="'+esc(r.userPhoto)+'" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.onerror=null;this.style.display=\'none\'">'
           : esc(initials);
         var canDelete = curUid && r.userId === curUid;
         return '<div class="pl-review-item">'+
@@ -761,7 +761,7 @@
         var initials=(name[0]||'U').toUpperCase();
         var avHref=uid?'profile.html?id='+encodeURIComponent(uid):'#';
         var avInner=c.authorAvatar
-          ? '<img src="'+esc(c.authorAvatar)+'" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.onerror=null;this.style.display=\'none\'">'
+          ? '<img src="'+esc(c.authorAvatar)+'" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.onerror=null;this.style.display=\'none\'">'
           : esc(initials);
         var verBadge=c.verified?'<span style="color:#10b981;font-size:.65rem;margin-left:4px">✓</span>':'';
         return '<div class="pl-checkin-item">'+

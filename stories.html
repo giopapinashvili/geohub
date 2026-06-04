@@ -50,7 +50,7 @@ window.addEventListener('GeoFirebaseReady', async function(){
     function draw(){
       if(idx<0) idx=stories.length-1; if(idx>=stories.length) idx=0;
       const s=stories[idx];
-      modal.innerHTML='<div class="story-modal-box"><div class="story-modal-head"><div><strong>'+esc(s.authorName)+'</strong><br><small>'+timeAgo(s.createdAt)+'</small></div><button type="button" data-close>×</button></div><div class="story-modal-main">'+(s.mediaUrl?'<img src="'+esc(s.mediaUrl)+'" alt="Story">':'<p>'+esc(s.text||'Story')+'</p>')+(s.mediaUrl&&s.text?'<div class="story-modal-caption">'+esc(s.text)+'</div>':'')+'</div><button class="story-modal-nav prev" type="button">‹</button><button class="story-modal-nav next" type="button">›</button></div>';
+      modal.innerHTML='<div class="story-modal-box"><div class="story-modal-head"><div><strong>'+esc(s.authorName)+'</strong><br><small>'+timeAgo(s.createdAt)+'</small></div><button type="button" data-close>×</button></div><div class="story-modal-main">'+(s.mediaUrl?'<img src="'+esc(s.mediaUrl)+'" alt="Story" loading="lazy">':'<p>'+esc(s.text||'Story')+'</p>')+(s.mediaUrl&&s.text?'<div class="story-modal-caption">'+esc(s.text)+'</div>':'')+'</div><button class="story-modal-nav prev" type="button">‹</button><button class="story-modal-nav next" type="button">›</button></div>';
       modal.querySelector('[data-close]').onclick=()=>modal.remove();
       modal.querySelector('.prev').onclick=()=>{idx--;draw();};
       modal.querySelector('.next').onclick=()=>{idx++;draw();};

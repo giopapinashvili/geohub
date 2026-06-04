@@ -245,7 +245,7 @@
     function avatarHTML(user) {
       var initials = (user.name || user.fullName || 'U').split(' ').map(function(w){ return w[0]||''; }).slice(0,2).join('').toUpperCase();
       if (user.avatar) {
-        return '<div class="safety-user-av"><img src="' + esc(user.avatar) + '" alt="" onerror="this.parentNode.textContent=\'' + esc(initials) + '\'"></div>';
+        return '<div class="safety-user-av"><img src="' + esc(user.avatar) + '" alt="" loading="lazy" onerror="this.parentNode.textContent=\'' + esc(initials) + '\'"></div>';
       }
       return '<div class="safety-user-av">' + esc(initials) + '</div>';
     }
