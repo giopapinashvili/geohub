@@ -7,7 +7,7 @@
     }
     .messages-layout {
       display: grid;
-      grid-template-columns: 260px minmax(0,1fr) 300px;
+      grid-template-columns: 340px minmax(0,1fr) 300px;
       width: 100%;
       max-width: 100%;
       flex: 1;
@@ -299,10 +299,9 @@ body.page-messages .messages-page{
   overflow:hidden!important;
   display:flex!important;flex-direction:column!important;
 }
-/* Account for injected left nav */
-body.gh-has-injected-nav.page-messages .messages-page{left:252px!important;}
-@media(max-width:1120px){body.gh-has-injected-nav.page-messages .messages-page{left:86px!important;}}
-@media(max-width:920px){body.gh-has-injected-nav.page-messages .messages-page{left:0!important;}}
+/* Hide global left nav on messages — sidebar fills the full left edge */
+body.page-messages .gh-left{display:none!important;}
+body.page-messages.gh-has-injected-nav{padding-left:0!important;}
 body.page-messages .messages-layout{
   flex:1 1 0%!important;width:100%!important;max-width:100%!important;min-height:0!important;
   height:100%!important;overflow:hidden!important;

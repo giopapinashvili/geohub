@@ -1848,21 +1848,9 @@ body.page-messages .messages-page {
 }
 
 body.gh-has-injected-nav.page-messages .messages-page {
-  left: 252px !important;
+  left: 0 !important;
   right: 0 !important;
-  width: auto !important;
-}
-@media (max-width: 1120px) {
-  body.gh-has-injected-nav.page-messages .messages-page {
-    left: 86px !important;
-    width: auto !important;
-  }
-}
-@media (max-width: 920px) {
-  body.gh-has-injected-nav.page-messages .messages-page {
-    left: 0 !important;
-    width: 100vw !important;
-  }
+  width: 100vw !important;
 }
 
 body.page-messages .messages-layout {
@@ -1917,7 +1905,7 @@ body.page-messages .messages-layout {
 @media (min-width: 1025px) {
   body.page-messages .messages-layout,
   body.page-messages .messages-layout.chat-open {
-    grid-template-columns: 260px minmax(0, 1fr) 300px !important;
+    grid-template-columns: 340px minmax(0, 1fr) 300px !important;
     grid-template-rows: minmax(0, 1fr) !important;
   }
 
@@ -2014,7 +2002,7 @@ body.page-messages .messages-layout {
   body.page-messages .messages-layout,
   body.page-messages .messages-layout.chat-open {
     display: grid !important;
-    grid-template-columns: 260px minmax(0, 1fr) 300px !important;
+    grid-template-columns: 340px minmax(0, 1fr) 300px !important;
     grid-template-rows: minmax(0, 1fr) !important;
   }
   body.page-messages .msg-sidebar,
