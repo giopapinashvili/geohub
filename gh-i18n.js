@@ -1396,6 +1396,57 @@
     ci_social_week:    { ka: '{n} ვიზიტი ამ კვირაში',         en: '{n} visit this week',                         ru: '{n} визит на этой неделе'    },
     ci_social_weeks:   { ka: '{n} ვიზიტი ამ კვირაში',         en: '{n} visits this week',                        ru: '{n} визитов на этой неделе'  },
     ci_firebase_wait:  { ka: 'Firebase-ი ჯერ მზად არ არის',   en: 'Firebase not ready',                         ru: 'Firebase не готов'           },
+
+    /* ── Safety / Privacy page ─────────────────────────────── */
+    safety_title:         { ka: 'კონფიდ. & უსაფრთხოება',      en: 'Privacy & Safety',                            ru: 'Конфиденциальность'           },
+    safety_subtitle:      { ka: 'მართე ვის შეუძლია ურთ. შენთან', en: 'Control who can interact with you',        ru: 'Управляйте взаимодействиями'  },
+    safety_save_btn:      { ka: 'პარამეტრების შენახვა',        en: 'Save Settings',                               ru: 'Сохранить настройки'          },
+    safety_saving:        { ka: 'ინახება…',                    en: 'Saving…',                                     ru: 'Сохраняется…'                 },
+    safety_none:          { ka: 'არცერთი',                     en: 'None',                                        ru: 'Нет'                          },
+    safety_unblock:       { ka: 'განბლოკვა',                  en: 'Unblock',                                     ru: 'Разблокировать'               },
+    safety_unmute:        { ka: 'ჩუმების მოხსნა',             en: 'Unmute',                                      ru: 'Снять тишину'                 },
+
+    safety_privacy_title: { ka: 'კონფიდ. პარამეტრები',        en: 'Privacy Controls',                            ru: 'Настройки приватности'        },
+    safety_privacy_desc:  { ka: 'მართე ვის შ. ანგ-თან ურთ.',  en: 'Manage who can interact with your account',   ru: 'Управление взаимодействиями'  },
+
+    safety_msg_label:     { ka: 'ვის შეუძლია შეგიწეროს',      en: 'Who can message you',                         ru: 'Кто может писать вам'         },
+    safety_msg_desc:      { ka: 'პირდაპირი შეტყობინებები',    en: 'Direct messages from other users',             ru: 'Личные сообщения'             },
+    safety_follow_label:  { ka: 'ვის შეუძლია გამოგწეროს',     en: 'Who can follow you',                          ru: 'Кто может подписаться'        },
+    safety_follow_desc:   { ka: 'შენი საჯარო პოსტები',        en: 'Follow your public activity and posts',        ru: 'Публичная активность'         },
+    safety_fr_label:      { ka: 'ვის შ. მეგ. მოთხ. გაგზ.',   en: 'Who can send friend requests',                ru: 'Кто может отправлять запросы' },
+    safety_fr_desc:       { ka: 'GeoHub-ზე მეგობრად დამ.',    en: 'Add you as a friend on GeoHub',               ru: 'Добавление в друзья'          },
+    safety_profile_label: { ka: 'პროფილის ხილვადობა',         en: 'Profile visibility',                          ru: 'Видимость профиля'            },
+    safety_profile_desc:  { ka: 'ვის შ. სრ. პროფ. ნახვა',    en: 'Who can view your full profile page',          ru: 'Кто видит ваш профиль'        },
+    safety_post_label:    { ka: 'ახ. პოსტის ნაგ. ხილვ.',      en: 'Default post visibility',                     ru: 'Видимость постов по умолч.'   },
+    safety_post_desc:     { ka: 'ვინ ნახავს შენს ახ. პოსტებს', en: 'Who sees your new posts by default',         ru: 'Кто видит ваши новые посты'   },
+    safety_fullname_label:{ ka: 'ვინ ნახავს სრულ სახელს',     en: 'Who can see your full name',                  ru: 'Кто видит ваше полное имя'    },
+    safety_fullname_desc: { ka: 'სახ./გვ. პროფ. გვ-ზე',       en: 'Display name on your profile page',            ru: 'Имя на странице профиля'      },
+    safety_bio_label:     { ka: 'ვინ ნახავს ბიოს',            en: 'Who can see your bio',                        ru: 'Кто видит вашу биографию'     },
+    safety_bio_desc:      { ka: 'მოკ. აღწ. პროფილზე',         en: 'Short description on your profile',            ru: 'Краткое описание профиля'     },
+    safety_stories_label: { ka: 'ვინ ნახავს სთორებს',         en: 'Who can see your stories',                    ru: 'Кто видит ваши истории'       },
+    safety_stories_desc:  { ka: '24-სთ. სთ. კონტ. პროფ.',     en: '24-hour story content on your profile',        ru: '24-часовые истории'           },
+    safety_hl_label:      { ka: 'ვინ ნახავს ჰაილაითებს',      en: 'Who can see your highlights',                 ru: 'Кто видит ваши хайлайты'      },
+    safety_hl_desc:       { ka: 'შენახ. სთ. ჰ-ები პროფ.',      en: 'Saved story highlights on your profile',      ru: 'Сохранённые хайлайты'         },
+
+    safety_blocked_title: { ka: 'დაბლოკილი მომხმარებლები',    en: 'Blocked Users',                               ru: 'Заблокированные'              },
+    safety_blocked_desc:  { ka: 'ამ მომხ-ებს შ. კ. ვ. ეჩვ.',  en: 'These users cannot see your content or contact you', ru: 'Не видят ваш контент'    },
+    safety_muted_title:   { ka: 'ჩადუმებული მომხმარებლები',   en: 'Muted Users',                                 ru: 'Пользователи в тишине'        },
+    safety_muted_desc:    { ka: 'მათი პ. შ. ფ. ჩ. არ ჩანს',   en: 'Their posts are hidden from your feed',        ru: 'Их посты скрыты из ленты'     },
+
+    safety_account_title: { ka: 'ანგარიში',                    en: 'Account',                                     ru: 'Аккаунт'                      },
+    safety_account_desc:  { ka: 'მონაც. და ანგ. მართვა',       en: 'Data and account management',                 ru: 'Управление данными'           },
+    safety_download_label:{ ka: 'ჩამოტვ. შ. მონაცემები',       en: 'Download your data',                          ru: 'Скачать ваши данные'          },
+    safety_download_desc: { ka: 'GeoHub-ის ყველა ჩანაწ. ასლი', en: 'Get a copy of everything GeoHub has stored',  ru: 'Копия всех данных GeoHub'     },
+    safety_deact_label:   { ka: 'ანგ. დეაქტივაცია',            en: 'Deactivate account',                          ru: 'Деактивация аккаунта'         },
+    safety_deact_desc:    { ka: 'დ. პ. და კ. დ. ჩ.',           en: 'Temporarily hide your profile and content',   ru: 'Временно скрыть профиль'      },
+
+    /* ── Shared option values ──────────────────────────────── */
+    opt_everyone:         { ka: 'ყველა',                       en: 'Everyone',                                    ru: 'Все'                          },
+    opt_followers:        { ka: 'გამომწერები',                 en: 'Followers',                                   ru: 'Подписчики'                   },
+    opt_friends_only:     { ka: 'მხოლოდ მეგობრები',           en: 'Friends only',                                ru: 'Только друзья'                },
+    opt_nobody:           { ka: 'არავინ',                      en: 'Nobody',                                      ru: 'Никто'                        },
+    opt_nobody_username:  { ka: 'არავინ (@username)',           en: 'Nobody (show @username)',                     ru: 'Никто (показ @username)'      },
+    opt_public:           { ka: 'საჯარო',                      en: 'Public',                                      ru: 'Публично'                     },
   };
 
   /* ── Core t() function ───────────────────────────────────── */

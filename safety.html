@@ -31,14 +31,14 @@
     <div class="safety-header">
       <a href="feed.html" class="safety-back" title="Back"><i class="fas fa-arrow-left"></i></a>
       <div>
-        <div class="safety-title">Privacy &amp; Safety</div>
-        <div class="safety-subtitle">Control who can interact with you</div>
+        <div class="safety-title" data-i18n="safety_title">Privacy &amp; Safety</div>
+        <div class="safety-subtitle" data-i18n="safety_subtitle">Control who can interact with you</div>
       </div>
     </div>
 
     <!-- Save bar -->
     <div class="safety-save-bar">
-      <button class="safety-save-btn" id="savePrivacyBtn" disabled>Save Settings</button>
+      <button class="safety-save-btn" id="savePrivacyBtn" disabled data-i18n="safety_save_btn">Save Settings</button>
     </div>
 
     <!-- Privacy Controls -->
@@ -46,116 +46,116 @@
       <div class="safety-section-head">
         <div class="safety-section-icon" style="background:rgba(16,185,129,.15);color:#10b981"><i class="fas fa-lock"></i></div>
         <div>
-          <div class="safety-section-title">Privacy Controls</div>
-          <div class="safety-section-desc">Manage who can interact with your account</div>
+          <div class="safety-section-title" data-i18n="safety_privacy_title">Privacy Controls</div>
+          <div class="safety-section-desc" data-i18n="safety_privacy_desc">Manage who can interact with your account</div>
         </div>
       </div>
 
       <div class="safety-row">
         <div class="safety-row-label">
-          <strong>Who can message you</strong>
-          <span>Direct messages from other users</span>
+          <strong data-i18n="safety_msg_label">Who can message you</strong>
+          <span data-i18n="safety_msg_desc">Direct messages from other users</span>
         </div>
         <select class="safety-select" data-privacy="messagingPref" id="pref-messagingPref">
-          <option value="everyone">Everyone</option>
-          <option value="friends">Friends only</option>
-          <option value="nobody">Nobody</option>
+          <option value="everyone" data-i18n="opt_everyone">Everyone</option>
+          <option value="friends" data-i18n="opt_friends_only">Friends only</option>
+          <option value="nobody" data-i18n="opt_nobody">Nobody</option>
         </select>
       </div>
 
       <div class="safety-row">
         <div class="safety-row-label">
-          <strong>Who can follow you</strong>
-          <span>Follow your public activity and posts</span>
+          <strong data-i18n="safety_follow_label">Who can follow you</strong>
+          <span data-i18n="safety_follow_desc">Follow your public activity and posts</span>
         </div>
         <select class="safety-select" data-privacy="followPref" id="pref-followPref">
-          <option value="everyone">Everyone</option>
-          <option value="nobody">Nobody</option>
+          <option value="everyone" data-i18n="opt_everyone">Everyone</option>
+          <option value="nobody" data-i18n="opt_nobody">Nobody</option>
         </select>
       </div>
 
       <div class="safety-row">
         <div class="safety-row-label">
-          <strong>Who can send friend requests</strong>
-          <span>Add you as a friend on GeoHub</span>
+          <strong data-i18n="safety_fr_label">Who can send friend requests</strong>
+          <span data-i18n="safety_fr_desc">Add you as a friend on GeoHub</span>
         </div>
         <select class="safety-select" data-privacy="friendRequestPref" id="pref-friendRequestPref">
-          <option value="everyone">Everyone</option>
-          <option value="nobody">Nobody</option>
+          <option value="everyone" data-i18n="opt_everyone">Everyone</option>
+          <option value="nobody" data-i18n="opt_nobody">Nobody</option>
         </select>
       </div>
 
       <div class="safety-row">
         <div class="safety-row-label">
-          <strong>Profile visibility</strong>
-          <span>Who can view your full profile page</span>
+          <strong data-i18n="safety_profile_label">Profile visibility</strong>
+          <span data-i18n="safety_profile_desc">Who can view your full profile page</span>
         </div>
         <select class="safety-select" data-privacy="profilePref" id="pref-profilePref">
-          <option value="public">Public</option>
-          <option value="friends">Friends only</option>
+          <option value="public" data-i18n="opt_public">Public</option>
+          <option value="friends" data-i18n="opt_friends_only">Friends only</option>
         </select>
       </div>
 
       <div class="safety-row">
         <div class="safety-row-label">
-          <strong>Default post visibility</strong>
-          <span>Who sees your new posts by default</span>
+          <strong data-i18n="safety_post_label">Default post visibility</strong>
+          <span data-i18n="safety_post_desc">Who sees your new posts by default</span>
         </div>
         <select class="safety-select" data-privacy="postsPref" id="pref-postsPref">
-          <option value="public">Public</option>
-          <option value="friends">Friends only</option>
+          <option value="public" data-i18n="opt_public">Public</option>
+          <option value="friends" data-i18n="opt_friends_only">Friends only</option>
         </select>
       </div>
 
       <div class="safety-row">
         <div class="safety-row-label">
-          <strong>Who can see your full name</strong>
-          <span>Display name on your profile page</span>
+          <strong data-i18n="safety_fullname_label">Who can see your full name</strong>
+          <span data-i18n="safety_fullname_desc">Display name on your profile page</span>
         </div>
         <select class="safety-select" data-privacy="showFullName" id="pref-showFullName">
-          <option value="everyone">Everyone</option>
-          <option value="followers">Followers</option>
-          <option value="friends">Friends only</option>
-          <option value="nobody">Nobody (show @username)</option>
+          <option value="everyone" data-i18n="opt_everyone">Everyone</option>
+          <option value="followers" data-i18n="opt_followers">Followers</option>
+          <option value="friends" data-i18n="opt_friends_only">Friends only</option>
+          <option value="nobody" data-i18n="opt_nobody_username">Nobody (show @username)</option>
         </select>
       </div>
 
       <div class="safety-row">
         <div class="safety-row-label">
-          <strong>Who can see your bio</strong>
-          <span>Short description on your profile</span>
+          <strong data-i18n="safety_bio_label">Who can see your bio</strong>
+          <span data-i18n="safety_bio_desc">Short description on your profile</span>
         </div>
         <select class="safety-select" data-privacy="showBio" id="pref-showBio">
-          <option value="everyone">Everyone</option>
-          <option value="followers">Followers</option>
-          <option value="friends">Friends only</option>
-          <option value="nobody">Nobody</option>
+          <option value="everyone" data-i18n="opt_everyone">Everyone</option>
+          <option value="followers" data-i18n="opt_followers">Followers</option>
+          <option value="friends" data-i18n="opt_friends_only">Friends only</option>
+          <option value="nobody" data-i18n="opt_nobody">Nobody</option>
         </select>
       </div>
 
       <div class="safety-row">
         <div class="safety-row-label">
-          <strong>Who can see your stories</strong>
-          <span>24-hour story content on your profile</span>
+          <strong data-i18n="safety_stories_label">Who can see your stories</strong>
+          <span data-i18n="safety_stories_desc">24-hour story content on your profile</span>
         </div>
         <select class="safety-select" data-privacy="showStories" id="pref-showStories">
-          <option value="everyone">Everyone</option>
-          <option value="followers">Followers</option>
-          <option value="friends">Friends only</option>
-          <option value="nobody">Nobody</option>
+          <option value="everyone" data-i18n="opt_everyone">Everyone</option>
+          <option value="followers" data-i18n="opt_followers">Followers</option>
+          <option value="friends" data-i18n="opt_friends_only">Friends only</option>
+          <option value="nobody" data-i18n="opt_nobody">Nobody</option>
         </select>
       </div>
 
       <div class="safety-row">
         <div class="safety-row-label">
-          <strong>Who can see your highlights</strong>
-          <span>Saved story highlights on your profile</span>
+          <strong data-i18n="safety_hl_label">Who can see your highlights</strong>
+          <span data-i18n="safety_hl_desc">Saved story highlights on your profile</span>
         </div>
         <select class="safety-select" data-privacy="showHighlights" id="pref-showHighlights">
-          <option value="everyone">Everyone</option>
-          <option value="followers">Followers</option>
-          <option value="friends">Friends only</option>
-          <option value="nobody">Nobody</option>
+          <option value="everyone" data-i18n="opt_everyone">Everyone</option>
+          <option value="followers" data-i18n="opt_followers">Followers</option>
+          <option value="friends" data-i18n="opt_friends_only">Friends only</option>
+          <option value="nobody" data-i18n="opt_nobody">Nobody</option>
         </select>
       </div>
     </div>
@@ -165,8 +165,8 @@
       <div class="safety-section-head">
         <div class="safety-section-icon" style="background:rgba(239,68,68,.12);color:#f87171"><i class="fas fa-ban"></i></div>
         <div>
-          <div class="safety-section-title">Blocked Users</div>
-          <div class="safety-section-desc">These users cannot see your content or contact you</div>
+          <div class="safety-section-title" data-i18n="safety_blocked_title">Blocked Users</div>
+          <div class="safety-section-desc" data-i18n="safety_blocked_desc">These users cannot see your content or contact you</div>
         </div>
       </div>
       <div class="safety-user-list" id="blockedUsersList">
@@ -179,8 +179,8 @@
       <div class="safety-section-head">
         <div class="safety-section-icon" style="background:rgba(245,158,11,.12);color:#f59e0b"><i class="fas fa-volume-mute"></i></div>
         <div>
-          <div class="safety-section-title">Muted Users</div>
-          <div class="safety-section-desc">Their posts are hidden from your feed</div>
+          <div class="safety-section-title" data-i18n="safety_muted_title">Muted Users</div>
+          <div class="safety-section-desc" data-i18n="safety_muted_desc">Their posts are hidden from your feed</div>
         </div>
       </div>
       <div class="safety-user-list" id="mutedUsersList">
@@ -193,21 +193,21 @@
       <div class="safety-section-head">
         <div class="safety-section-icon" style="background:rgba(255,255,255,.06);color:var(--text-muted,#6b7280)"><i class="fas fa-user-cog"></i></div>
         <div>
-          <div class="safety-section-title">Account</div>
-          <div class="safety-section-desc">Data and account management</div>
+          <div class="safety-section-title" data-i18n="safety_account_title">Account</div>
+          <div class="safety-section-desc" data-i18n="safety_account_desc">Data and account management</div>
         </div>
       </div>
       <div class="safety-danger-row">
         <div class="safety-danger-label">
-          <strong>Download your data</strong>
-          <span>Get a copy of everything GeoHub has stored</span>
+          <strong data-i18n="safety_download_label">Download your data</strong>
+          <span data-i18n="safety_download_desc">Get a copy of everything GeoHub has stored</span>
         </div>
         <button class="safety-danger-btn ghost" disabled title="Coming soon">Download</button>
       </div>
       <div class="safety-danger-row">
         <div class="safety-danger-label">
-          <strong>Deactivate account</strong>
-          <span>Temporarily hide your profile and content</span>
+          <strong data-i18n="safety_deact_label">Deactivate account</strong>
+          <span data-i18n="safety_deact_desc">Temporarily hide your profile and content</span>
         </div>
         <button class="safety-danger-btn danger" disabled title="Coming soon">Deactivate</button>
       </div>
@@ -217,6 +217,7 @@
 
   <script>
   (function() {
+    function _t(k, fb) { return window.GHt ? window.GHt(k) : (fb || k); }
     var DEFAULTS = { messagingPref: 'everyone', followPref: 'everyone', profilePref: 'public', postsPref: 'public', friendRequestPref: 'everyone', showFullName: 'everyone', showBio: 'everyone', showStories: 'everyone', showHighlights: 'everyone' };
     var _savedSettings = Object.assign({}, DEFAULTS);
     var _dirty = false;
@@ -274,16 +275,16 @@
     document.getElementById('savePrivacyBtn').addEventListener('click', function() {
       var btn = this;
       btn.disabled = true;
-      btn.textContent = 'Saving…';
+      btn.textContent = _t('safety_saving', 'Saving…');
       var settings = collectSettings();
       whenSocial(function(S) {
         if (!S.updatePrivacySettings) {
-          btn.textContent = 'Save Settings';
+          btn.textContent = _t('safety_save_btn', 'Save Settings');
           setDirty(false);
           return;
         }
         S.updatePrivacySettings(settings, function(ok) {
-          btn.textContent = 'Save Settings';
+          btn.textContent = _t('safety_save_btn', 'Save Settings');
           if (ok !== false) {
             _savedSettings = Object.assign({}, settings);
             setDirty(false);
@@ -306,7 +307,7 @@
       var list = document.getElementById(containerId);
       if (!list) return;
       if (!users || !users.length) {
-        list.innerHTML = '<div class="safety-empty"><i class="fas fa-check-circle"></i>None</div>';
+        list.innerHTML = '<div class="safety-empty"><i class="fas fa-check-circle"></i>' + _t('safety_none', 'None') + '</div>';
         return;
       }
       list.innerHTML = users.map(function(u) {
@@ -331,11 +332,11 @@
       whenSocial(function(S) {
         var list = document.getElementById('blockedUsersList');
         if (!S.getBlockedUsersList) {
-          if (list) list.innerHTML = '<div class="safety-empty"><i class="fas fa-check-circle"></i>None</div>';
+          if (list) list.innerHTML = '<div class="safety-empty"><i class="fas fa-check-circle"></i>' + _t('safety_none', 'None') + '</div>';
           return;
         }
         S.getBlockedUsersList(function(users) {
-          renderUserList('blockedUsersList', users, 'safety-action-unblock', 'Unblock', 'unblock-uid', function(uid, btn) {
+          renderUserList('blockedUsersList', users, 'safety-action-unblock', _t('safety_unblock', 'Unblock'), 'unblock-uid', function(uid, btn) {
             btn.disabled = true;
             btn.textContent = '…';
             S.unblockUser(uid, function() {
@@ -343,7 +344,7 @@
               if (row) row.remove();
               var remaining = document.querySelectorAll('#blockedUsersList .safety-user-row');
               if (!remaining.length) {
-                document.getElementById('blockedUsersList').innerHTML = '<div class="safety-empty"><i class="fas fa-check-circle"></i>None</div>';
+                document.getElementById('blockedUsersList').innerHTML = '<div class="safety-empty"><i class="fas fa-check-circle"></i>' + _t('safety_none', 'None') + '</div>';
               }
             });
           });
@@ -355,11 +356,11 @@
       whenSocial(function(S) {
         var list = document.getElementById('mutedUsersList');
         if (!S.getMutedUsersList) {
-          if (list) list.innerHTML = '<div class="safety-empty"><i class="fas fa-check-circle"></i>None</div>';
+          if (list) list.innerHTML = '<div class="safety-empty"><i class="fas fa-check-circle"></i>' + _t('safety_none', 'None') + '</div>';
           return;
         }
         S.getMutedUsersList(function(users) {
-          renderUserList('mutedUsersList', users, 'safety-action-unmute', 'Unmute', 'unmute-uid', function(uid, btn) {
+          renderUserList('mutedUsersList', users, 'safety-action-unmute', _t('safety_unmute', 'Unmute'), 'unmute-uid', function(uid, btn) {
             btn.disabled = true;
             btn.textContent = '…';
             S.unmuteUser(uid, function() {
@@ -367,7 +368,7 @@
               if (row) row.remove();
               var remaining = document.querySelectorAll('#mutedUsersList .safety-user-row');
               if (!remaining.length) {
-                document.getElementById('mutedUsersList').innerHTML = '<div class="safety-empty"><i class="fas fa-check-circle"></i>None</div>';
+                document.getElementById('mutedUsersList').innerHTML = '<div class="safety-empty"><i class="fas fa-check-circle"></i>' + _t('safety_none', 'None') + '</div>';
               }
             });
           });
