@@ -252,6 +252,13 @@
   function getItemCover(x){ return x.coverImage||x.coverImageUrl||x.coverUrl||x.imageUrl||x.image||x.photoUrl||x.thumbnail||(x.photos&&x.photos[0])||(x.images&&x.images[0])||''; }
   function itemMediaHtml(photo,title,icon){ return '<div class="gh-item-no-img"><i class="fas '+icon+'"></i></div>'+(photo?'<img src="'+esc(photo)+'" alt="'+esc(title||'')+'" loading="lazy" onerror="this.remove()">':''); }
   
+  function cloudinarySrcset(url, widths) {
+    if (!url || url.indexOf('res.cloudinary.com') === -1) return '';
+    var ws = widths || [480, 800, 1200];
+    return ws.map(function(w) {
+      return url.replace('/upload/', '/upload/w_' + w + ',c_limit,q_auto:eco/') + ' ' + w + 'w';
+    }).join(', ');
+  }
   function isOnlineBusiness(b){ return !!(b && (b.businessType === 'online' || b.isOnline === true)); }
   function businessAreaLabel(b){
     if(!isOnlineBusiness(b)) return b && b.city ? b.city : 'Local';
@@ -4623,10 +4630,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       mediaHtml = '<div class="gh-post-media-grid gh-post-grid-'+gridN+'">' +
         multiUrls.slice(0,4).map(function(u,i){
           var moreOv = (i===3 && multiUrls.length>4) ? '<div class="gh-post-grid-more">+'+(multiUrls.length-4)+'</div>' : '';
-          return '<div class="gh-post-grid-item" data-open-photo="'+esc(u)+'"><img src="'+esc(u)+'" loading="lazy" alt="" onerror="this.style.display=\'none\'">'+moreOv+'</div>';
+          var _gss=cloudinarySrcset(u,[480,800]); return '<div class="gh-post-grid-item" data-open-photo="'+esc(u)+'"><img src="'+esc(u)+'"'+(_gss?' srcset="'+_gss+'" sizes="(max-width:600px) 240px, 400px"':'')+' loading="lazy" alt="" onerror="this.style.display=\'none\'">'+moreOv+'</div>';
         }).join('')+'</div>';
     } else if (singleImgUrl) {
-      mediaHtml = '<div class="gh-post-img-wrap" data-open-photo="'+esc(singleImgUrl)+'"><img class="gh-post-img" src="'+esc(singleImgUrl)+'" alt="post image" loading="lazy" onerror="this.parentElement.style.display=\'none\'"></div>';
+      var _sss=cloudinarySrcset(singleImgUrl);
+      mediaHtml = '<div class="gh-post-img-wrap" data-open-photo="'+esc(singleImgUrl)+'"><img class="gh-post-img" src="'+esc(singleImgUrl)+'"'+(_sss?' srcset="'+_sss+'" sizes="(max-width:600px) 100vw, (max-width:1200px) 800px, 1200px"':'')+' alt="post image" loading="lazy" onerror="this.parentElement.style.display=\'none\'"></div>';
     }
     // Phase 52: Voice Note player
     var voiceHtml = p.voiceUrl ? '<div class="gh-voice-note-card"><div class="gh-vnc-icon"><i class="fas fa-microphone"></i></div><div class="gh-vnc-player"><button class="gh-vnc-play" data-voice-play data-voice-src="'+esc(p.voiceUrl)+'"><i class="fas fa-play"></i></button><div class="gh-vnc-bar"><div class="gh-vnc-fill" data-voice-fill></div></div><span class="gh-vnc-dur" data-voice-dur>🎙️ Voice Note</span></div></div>' : '';
