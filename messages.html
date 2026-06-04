@@ -160,32 +160,7 @@
 
   <div id="msgToast" class="msg-toast"></div>
 
-  <!-- Phase 65M: removed visualViewport bottom script; mobile spacing is handled with CSS padding to avoid viewport-size jumps. -->
-  <script defer src="geohub-social-redesign.js"></script>
-  <script defer src="messages-page.js"></script>
-
-  <script defer src="mode.js"></script>
-  <script type="module" src="firebase-config.js"></script>
-  <script defer src="gh-i18n.js"></script>
-  <script defer src="gh-schema.js"></script>
-  <script defer src="firestore-social.js"></script>
-  <script defer src="config.js"></script>
-  <script defer src="api-client.js"></script>
-  <script defer src="main.js"></script>
-  <script defer src="account.js"></script>
-  <script defer src="messages.js"></script>
-  <script defer src="geo-actors.js"></script>
-  <script defer src="account-switcher.js"></script>
-  <script defer src="real-messages.js"></script>
-  <script defer src="nav-cleanup.js"></script>
-  <script defer src="mobile-nav.js"></script>
-  <script defer src="geohub-production-v6.js"></script>
-  <script defer src="geohub-production-stabilization-v1.js"></script>
-  <script defer src="responsive-polish.js"></script>
-  <script defer src="push-notifications.js"></script>
-  <script defer src="analytics.js"></script>
-  <script defer src="gh-calls.js"></script>
-  <script defer src="gh-call-history.js"></script>
-  <script defer src="gh-group-calls.js"></script>
+  <!-- Vite: 25 scripts bundled → 1 optimised chunk. See src/entries/messages.js -->
+  <script type="module" src="/src/entries/messages.js"></script>
 </body>
 </html>

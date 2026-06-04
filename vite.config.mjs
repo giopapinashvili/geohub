@@ -7,10 +7,10 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url));
 // Only pages that have been migrated to src/entries/* get bundled by Vite.
 // Other pages are copied as-is by scripts/copy-static.js along with all JS files.
 const VITE_PAGES = {
-  feed: resolve(__dirname, 'feed.html'),
+  feed:     resolve(__dirname, 'feed.html'),
+  messages: resolve(__dirname, 'messages.html'),
   // Add more as you create src/entries/*.js for each page:
-  // messages: resolve(__dirname, 'messages.html'),
-  // profile:  resolve(__dirname, 'profile.html'),
+  // profile: resolve(__dirname, 'profile.html'),
 };
 
 export default defineConfig({

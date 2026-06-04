@@ -1,5 +1,5 @@
 // Post-build static asset copy.
-// Vite bundles only VITE_PAGES (currently: feed.html).
+// Vite bundles only VITE_PAGES (currently: feed.html, messages.html).
 // Everything else — HTML pages, JS, CSS, icons — is copied to dist/ as-is
 // so non-migrated pages still work exactly like before.
 const { cpSync, readdirSync, mkdirSync, existsSync } = require('fs');
@@ -9,7 +9,7 @@ const ROOT = join(__dirname, '..');
 const DIST = join(ROOT, 'dist');
 
 // Files/dirs Vite already handled (don't overwrite)
-const VITE_OUTPUTS = new Set(['feed.html']); // add more as you migrate pages
+const VITE_OUTPUTS = new Set(['feed.html', 'messages.html']); // add more as you migrate pages
 
 function copy(src, dest) {
   const from = join(ROOT, src);
