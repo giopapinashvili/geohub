@@ -1670,6 +1670,23 @@ service cloud.firestore {
       }
     }
 
+    // ── META (read-only counters + earlyAdopter) ─────────────────────────────
+    match /meta/{docId} {
+      // Anyone can read meta docs (counts, limits, public config).
+      allow read: if true;
+      // earlyAdopter counter: signed-in users may increment count by exactly 1
+      // or create the initial doc (when it doesn't exist yet).
+      allow create: if signedIn()
+        && docId == 'earlyAdopter'
+        && request.resource.data.count == 1
+        && request.resource.data.limit == 100;
+      allow update: if signedIn()
+        && docId == 'earlyAdopter'
+        && request.resource.data.count == resource.data.count + 1
+        && request.resource.data.limit == resource.data.limit
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['count', 'updatedAt']);
+    }
+
     // ── DENY-ALL FALLBACK ─────────────────────────────────────────────────────
     // Any collection not explicitly listed above is blocked.
     // This prevents accidental exposure when new collections are added without
