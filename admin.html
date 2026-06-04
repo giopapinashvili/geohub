@@ -1207,13 +1207,7 @@
   <i class="fas fa-check-circle"></i><span id="adminToastMsg">Done</span>
 </div>
 
-<script type="module" src="firebase-config.js"></script>
-<script defer src="gh-i18n.js"></script>
-  <script defer src="gh-schema.js"></script>
-<script defer src="place-categories.js"></script>
-<script defer src="admin.js"></script>
-<script defer src="admin-step4-production.js"></script>
-<script>
+  <script>
 function toggleAdminSidebar() {
   var sidebar = document.getElementById('adminSidebar');
   var overlay = document.getElementById('adminSidebarOverlay');
@@ -1232,11 +1226,7 @@ document.addEventListener('click', function(e) {
   }
 });
 </script>
-<script defer src="chat-popup.js"></script>
-<script defer src="gh-calls.js"></script>
-  <script defer src="gh-call-history.js"></script>
-  <script defer src="gh-group-calls.js"></script>
-<script defer src="geohub-production-stabilization-v1.js"></script>
-  <script defer src="responsive-polish.js"></script>
+        <!-- Vite: 12 scripts → 1 chunk. See src/entries/admin.js -->
+  <script type="module" src="/src/entries/admin.js"></script>
 </body>
 </html>

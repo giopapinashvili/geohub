@@ -28,26 +28,7 @@
 <body data-gh-page="reels">
   <noscript>GeoHub requires JavaScript.</noscript>
 
-  <script type="module" src="firebase-config.js"></script>
-  <script defer src="gh-i18n.js"></script>
-  <script defer src="gh-schema.js"></script>
-  <script defer src="account.js"></script>
-  <script defer src="nav-cleanup.js"></script>
-  <script defer src="mobile-nav.js"></script>
-  <script defer src="firestore-social.js"></script>
-  <script defer src="chat-popup.js"></script>
-<script defer src="gh-calls.js"></script>
-  <script defer src="gh-call-history.js"></script>
-  <script defer src="gh-group-calls.js"></script>
-  <script defer src="geohub-social-redesign.js"></script>
-  <script defer src="story-editor.js"></script>
-  <script defer src="account-switcher.js"></script>
-  <script defer src="geohub-production-stabilization-v1.js"></script>
-  <script defer src="responsive-polish.js"></script>
-  <script defer src="analytics.js"></script>
-  <script defer src="videos.js"></script>
-  <script defer src="reels.js"></script>
-
+                                    
   <!-- Desktop nav arrows (outside the scroll wrap) -->
   <div class="reels-nav-arrows" id="reelsNavArrows">
     <button class="reel-nav-btn" id="reelNavUp" title="წინა"><i class="fas fa-chevron-up"></i></button>
@@ -62,5 +43,7 @@
       </div>
     </div>
   </div>
+  <!-- Vite: 19 scripts → 1 chunk. See src/entries/reels.js -->
+  <script type="module" src="/src/entries/reels.js"></script>
 </body>
 </html>

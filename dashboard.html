@@ -25,18 +25,6 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}.clean-
 <div class="mobile-menu"></div><main class="clean-page"><section class="clean-hero"><div class="clean-badge"><i class="fas fa-circle"></i><span data-i18n="dash_badge">Business Dashboard</span></div><h1 class="clean-title"><span data-i18n="dash_title">Manage Your</span> <span data-i18n="dash_title_span">Business</span></h1><p class="clean-desc" data-i18n="dash_desc">Bookings, reviews and analytics — real data only.</p><div class="clean-search"><input data-i18n-placeholder="dash_search_ph" placeholder="Search businesses…"><button><i class="fas fa-search"></i> <span data-i18n="search">Search</span></button></div><div class="clean-stats"><div class="clean-stat"><strong id="stat-total">0</strong><span data-i18n="dash_stat_real">Real items</span></div><div class="clean-stat"><strong>0</strong><span data-i18n="dash_stat_today">Added today</span></div><div class="clean-stat"><strong>0</strong><span data-i18n="dash_stat_verified">Verified</span></div><div class="clean-stat"><strong>0</strong><span data-i18n="dash_stat_pending">Pending review</span></div></div></section><div class="clean-tabs"><button class="clean-tab active" data-i18n="dash_tab_overview">Overview</button><button class="clean-tab " data-i18n="dash_tab_bookings">Bookings</button><button class="clean-tab " data-i18n="dash_tab_reviews">Reviews</button><button class="clean-tab " data-i18n="dash_tab_analytics">Analytics</button></div><section class="clean-content"><aside class="clean-card"><strong data-i18n="dash_filters">Filters</strong><p style="color:#64748b;line-height:1.6" data-i18n="dash_no_biz_hint">Add content from the Admin Panel.</p><span class="clean-admin"><i class="fas fa-clock"></i> <span data-i18n="dash_admin_ctrl">Admin-controlled</span></span><div id="premiumUpgradeSection" style="margin-top:18px"></div></aside><div class="clean-empty" id="cleanList"><div><i class="fas fa-database"></i><h3 data-i18n="dash_no_biz">No businesses yet</h3><p data-i18n="dash_no_biz_hint">Add content from the Admin Panel.</p></div></div></section></main><script type="module">
 window.addEventListener('GeoFirebaseReady', async function(){try{const gf=window.GeoFirebase,fs=gf.fs,db=gf.db;const snap=await fs.getDocs(fs.query(fs.collection(db,'businesses'),fs.limit(50)));const total=document.getElementById('stat-total');if(total)total.textContent=snap.size;if(snap.size>0){function esc(v){return String(v||'Untitled').replace(/[<>&]/g,function(s){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[s]})}document.getElementById('cleanList').innerHTML='<div style="width:100%">'+snap.docs.map(function(d){const x=d.data();return '<div class="clean-card" style="margin-bottom:12px"><strong>'+esc(x.name||x.title||x.text)+'</strong><p style="color:#94a3b8;margin:.5rem 0 0">Real Firestore item</p></div>'}).join('')+'</div>';}}catch(e){console.warn('clean page load',e.message);}});
 </script>
-<script type="module" src="firebase-config.js"></script>
-<script defer src="gh-i18n.js"></script>
-<script defer src="account.js"></script>
-<script defer src="nav-cleanup.js"></script>
-<script defer src="mobile-nav.js"></script>
-<script defer src="chat-popup.js"></script>
-<script defer src="gh-calls.js"></script>
-  <script defer src="gh-call-history.js"></script>
-  <script defer src="gh-group-calls.js"></script>
-<script defer src="stripe-checkout.js"></script>
-<script defer src="dashboard.js"></script>
-<script defer src="geohub-production-stabilization-v1.js"></script>
-  <script defer src="responsive-polish.js"></script>
-  <script defer src="analytics.js"></script>
+          <!-- Vite: 14 scripts → 1 chunk. See src/entries/dashboard.js -->
+  <script type="module" src="/src/entries/dashboard.js"></script>
 </body></html>

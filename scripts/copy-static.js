@@ -1,15 +1,14 @@
 // Post-build static asset copy.
-// Vite bundles only VITE_PAGES (currently: feed.html, messages.html).
-// Everything else — HTML pages, JS, CSS, icons — is copied to dist/ as-is
-// so non-migrated pages still work exactly like before.
+// Vite bundles all HTML pages via src/entries/*.js entry points.
+// copy-static.js copies everything else — JS, CSS, icons, SW, manifests.
 const { cpSync, readdirSync, mkdirSync, existsSync } = require('fs');
 const { join, extname, basename } = require('path');
 
 const ROOT = join(__dirname, '..');
 const DIST = join(ROOT, 'dist');
 
-// Files/dirs Vite already handled (don't overwrite)
-const VITE_OUTPUTS = new Set(['feed.html', 'messages.html']); // add more as you migrate pages
+// All HTML pages are now Vite outputs — none need to be copied
+const VITE_OUTPUTS = new Set(['feed.html', 'messages.html', 'add-business.html', 'admin-videos.html', 'admin.html', 'assistant.html', 'auth.html', 'business-suite.html', 'business.html', 'camera.html', 'challenges.html', 'channel.html', 'checkin.html', 'creators.html', 'dashboard.html', 'demo.html', 'early-adopter.html', 'events.html', 'explore.html', 'gamification.html', 'groups.html', 'index.html', 'invite.html', 'jobs.html', 'learning.html', 'lifegraph.html', 'live.html', 'map.html', 'marketplace.html', 'notifications.html', 'onboarding.html', 'patriot.html', 'place-feed.html', 'places.html', 'premium.html', 'pricing.html', 'products.html', 'profile.html', 'real-estate.html', 'reels.html', 'reviews.html', 'rewards.html', 'safety.html', 'scan.html', 'search.html', 'services.html', 'settings.html', 'stories.html', 'trust.html', 'videos.html', 'watch.html', 'world.html']);
 
 function copy(src, dest) {
   const from = join(ROOT, src);

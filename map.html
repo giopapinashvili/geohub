@@ -268,22 +268,7 @@
 
 <script defer src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script defer src="https://unpkg.com/supercluster@8.0.1/dist/supercluster.min.js"></script>
-<script type="module" src="firebase-config.js"></script>
-<script defer src="config.js"></script>
-  <script defer src="api-client.js"></script>
-  <script defer src="main.js"></script>
-  <script defer src="gh-i18n.js"></script>
-  <script defer src="account.js"></script>
-  <script defer src="map.js"></script>
-  <script defer src="video-map.js"></script>
-<script defer src="nav-cleanup.js"></script>
-<script defer src="mobile-nav.js"></script>
-<script defer src="chat-popup.js"></script>
-<script defer src="gh-calls.js"></script>
-  <script defer src="gh-call-history.js"></script>
-  <script defer src="gh-group-calls.js"></script>
-<script defer src="geohub-production-stabilization-v1.js"></script>
-  <script defer src="responsive-polish.js"></script>
-  <script defer src="analytics.js"></script>
+                      <!-- Vite: 17 scripts → 1 chunk. See src/entries/map.js -->
+  <script type="module" src="/src/entries/map.js"></script>
 </body>
 </html>

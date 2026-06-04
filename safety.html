@@ -24,18 +24,7 @@
 </head>
 <body data-gh-page="safety">
   <noscript>GeoHub requires JavaScript.</noscript>
-  <script type="module" src="firebase-config.js"></script>
-  <script defer src="gh-schema.js"></script>
-  <script defer src="account.js"></script>
-  <script defer src="nav-cleanup.js"></script>
-  <script defer src="mobile-nav.js"></script>
-  <script defer src="firestore-social.js"></script>
-  <script defer src="chat-popup.js"></script>
-  <script defer src="geohub-social-redesign.js"></script>
-  <script defer src="geohub-production-stabilization-v1.js"></script>
-  <script defer src="responsive-polish.js"></script>
-  <script defer src="analytics.js"></script>
-
+                      
   <div class="safety-page" id="safetyPage" style="display:none">
 
     <!-- Header -->
@@ -341,5 +330,7 @@
     });
   })();
   </script>
+  <!-- Vite: 11 scripts → 1 chunk. See src/entries/safety.js -->
+  <script type="module" src="/src/entries/safety.js"></script>
 </body>
 </html>

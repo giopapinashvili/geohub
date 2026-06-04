@@ -1,0 +1,9 @@
+import '/firebase-config.js';
+import '/gh-i18n.js';
+import '/firebase-auth.js';
+import '/config.js';
+import '/api-client.js';
+import '/main.js';
+import '/auth.js';
+import '/geohub-production-stabilization-v1.js';
+import '/responsive-polish.js';

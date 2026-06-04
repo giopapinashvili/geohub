@@ -58,11 +58,7 @@
 <body data-gh-page="admin-videos">
   <noscript>GeoHub requires JavaScript.</noscript>
 
-  <script type="module" src="firebase-config.js"></script>
-  <script defer src="gh-i18n.js"></script>
-  <script defer src="account.js"></script>
-  <script defer src="admin-videos.js"></script>
-
+        
   <div class="adm-wrap" id="admWrap">
     <div class="adm-header">
       <h1><i class="fas fa-shield-halved"></i>ვიდეო საჩივრები</h1>
@@ -104,5 +100,7 @@
       </table>
     </div>
   </div>
+  <!-- Vite: 4 scripts → 1 chunk. See src/entries/admin-videos.js -->
+  <script type="module" src="/src/entries/admin-videos.js"></script>
 </body>
 </html>

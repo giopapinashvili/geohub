@@ -116,16 +116,6 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}
   </section>
 </main>
 
-<script type="module" src="firebase-config.js"></script>
-<script defer src="account.js"></script>
-<script defer src="nav-cleanup.js"></script>
-<script defer src="mobile-nav.js"></script>
-<script defer src="chat-popup.js"></script>
-<script defer src="gh-calls.js"></script>
-<script defer src="gh-call-history.js"></script>
-<script defer src="gh-group-calls.js"></script>
-<script defer src="real-estate.js"></script>
-<script defer src="geohub-production-stabilization-v1.js"></script>
-<script defer src="responsive-polish.js"></script>
-<script defer src="analytics.js"></script>
+  <!-- Vite: 12 scripts → 1 chunk. See src/entries/real-estate.js -->
+  <script type="module" src="/src/entries/real-estate.js"></script>
 </body></html>

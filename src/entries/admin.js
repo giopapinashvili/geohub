@@ -1,0 +1,12 @@
+import '/firebase-config.js';
+import '/gh-i18n.js';
+import '/gh-schema.js';
+import '/place-categories.js';
+import '/admin.js';
+import '/admin-step4-production.js';
+import '/chat-popup.js';
+import '/gh-calls.js';
+import '/gh-call-history.js';
+import '/gh-group-calls.js';
+import '/geohub-production-stabilization-v1.js';
+import '/responsive-polish.js';

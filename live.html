@@ -58,19 +58,6 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}.clean-
     <p class="glive-loading"><i class="fas fa-spinner fa-spin"></i> Loading…</p>
   </div>
 </section>
-</main><script type="module" src="firebase-config.js"></script>
-<script defer src="account.js"></script>
-<script defer src="nav-cleanup.js"></script>
-<script defer src="mobile-nav.js"></script>
-<script defer src="chat-popup.js"></script>
-<script defer src="gh-calls.js"></script>
-  <script defer src="gh-call-history.js"></script>
-  <script defer src="gh-group-calls.js"></script>
-  <script defer src="gh-livestream.js"></script>
-<script defer src="content-pages.js"></script>
-<script defer src="geo-actors.js"></script>
-<script defer src="account-switcher.js"></script>
-<script defer src="geohub-production-stabilization-v1.js"></script>
-  <script defer src="responsive-polish.js"></script>
-  <script defer src="analytics.js"></script>
+</main>            <!-- Vite: 15 scripts → 1 chunk. See src/entries/live.js -->
+  <script type="module" src="/src/entries/live.js"></script>
 </body></html>

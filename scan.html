@@ -394,12 +394,7 @@
     <a href="checkin.html" class="sc-no-cam-home"><i class="fas fa-location-dot"></i> Manual Check-in</a>
   </div>
 
-  <script type="module" src="firebase-config.js"></script>
-  <script defer src="gh-schema.js"></script>
-  <script defer src="firestore-social.js"></script>
-  <script defer src="account.js"></script>
-  <script defer src="qr-engine.js"></script>
-
+          
   <!-- jsQR — lightweight QR decoder (30 KB) -->
   <script>
   (function () {
@@ -669,6 +664,7 @@
     }
   }());
   </script>
-  <script defer src="analytics.js"></script>
+    <!-- Vite: 6 scripts → 1 chunk. See src/entries/scan.js -->
+  <script type="module" src="/src/entries/scan.js"></script>
 </body>
 </html>

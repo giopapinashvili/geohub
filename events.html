@@ -48,21 +48,6 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}.clean-
   <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
 </nav>
 <div class="mobile-menu"></div><main class="clean-page"><section class="clean-hero"><div class="clean-badge"><i class="fas fa-circle"></i>Events</div><h1 class="clean-title">Real <span>Events</span> in Georgia</h1><p class="clean-desc">Events appear only after admins or users create them. Fake event cards are removed.</p><div class="clean-search"><input placeholder="Search real events..."><button><i class="fas fa-search"></i> Search</button></div><div class="clean-stats"><div class="clean-stat"><strong id="stat-total">0</strong><span>Total events</span></div><div class="clean-stat"><strong id="stat-upcoming">0</strong><span>Upcoming</span></div><div class="clean-stat"><strong id="stat-mine">0</strong><span>My RSVPs</span></div></div></section><div class="clean-tabs"><button class="clean-tab active">All</button><button class="clean-tab">Upcoming</button><button class="clean-tab">Past</button><button class="clean-tab">My Events</button></div><section class="clean-content"><aside class="clean-card"><strong>Filters</strong></aside><div class="clean-empty" id="cleanList"><div><i class="fas fa-database"></i><h3>No real events yet</h3><p>Add real content from the Admin Panel. Demo data has been removed.</p></div></div></section></main><div id="evDetailOverlay" class="ev-detail-overlay"><div class="ev-detail" id="evDetailBox"></div></div>
-<script type="module" src="firebase-config.js"></script>
-<script defer src="gh-i18n.js"></script>
-  <script defer src="account.js"></script>
-<script defer src="nav-cleanup.js"></script>
-<script defer src="mobile-nav.js"></script>
-<script defer src="chat-popup.js"></script>
-<script defer src="gh-calls.js"></script>
-  <script defer src="gh-call-history.js"></script>
-  <script defer src="gh-group-calls.js"></script>
-<script defer src="stripe-checkout.js"></script>
-<script defer src="events.js"></script>
-<script defer src="content-pages.js"></script>
-<script defer src="geo-actors.js"></script>
-<script defer src="account-switcher.js"></script>
-<script defer src="geohub-production-stabilization-v1.js"></script>
-  <script defer src="responsive-polish.js"></script>
-  <script defer src="analytics.js"></script>
+            <!-- Vite: 17 scripts → 1 chunk. See src/entries/events.js -->
+  <script type="module" src="/src/entries/events.js"></script>
 </body></html>

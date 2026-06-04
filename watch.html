@@ -29,24 +29,7 @@
   <!-- Cinematic blurred background (set dynamically from video thumbnail) -->
   <div id="watchCinBg" class="watch-cin-bg"></div>
 
-  <script type="module" src="firebase-config.js"></script>
-  <script defer src="gh-i18n.js"></script>
-  <script defer src="gh-schema.js"></script>
-  <script defer src="account.js"></script>
-  <script defer src="nav-cleanup.js"></script>
-  <script defer src="mobile-nav.js"></script>
-  <script defer src="firestore-social.js"></script>
-  <script defer src="chat-popup.js"></script>
-<script defer src="gh-calls.js"></script>
-  <script defer src="gh-call-history.js"></script>
-  <script defer src="gh-group-calls.js"></script>
-  <script defer src="geohub-social-redesign.js"></script>
-  <script defer src="account-switcher.js"></script>
-  <script defer src="geohub-production-stabilization-v1.js"></script>
-  <script defer src="responsive-polish.js"></script>
-  <script defer src="analytics.js"></script>
-  <script defer src="videos.js"></script>
-
+                                
   <div class="watch-page" id="watchPage">
     <div id="watchMain">
       <div class="watch-layout">
@@ -128,5 +111,7 @@
       </div>
     </div>
   </div>
+  <!-- Vite: 17 scripts → 1 chunk. See src/entries/watch.js -->
+  <script type="module" src="/src/entries/watch.js"></script>
 </body>
 </html>
