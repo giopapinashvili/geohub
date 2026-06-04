@@ -7,7 +7,9 @@
     }
     .messages-layout {
       display: grid;
-      grid-template-columns: 288px 1fr 264px;
+      grid-template-columns: 288px minmax(0,1fr) 264px;
+      width: 100%;
+      max-width: 100%;
       flex: 1;
       min-height: 0;
       overflow: hidden;
@@ -301,7 +303,7 @@ body.gh-has-injected-nav.page-messages .messages-page{left:252px!important;}
 @media(max-width:1120px){body.gh-has-injected-nav.page-messages .messages-page{left:86px!important;}}
 @media(max-width:920px){body.gh-has-injected-nav.page-messages .messages-page{left:0!important;}}
 body.page-messages .messages-layout{
-  flex:1 1 auto!important;min-height:0!important;
+  flex:1 1 0%!important;width:100%!important;max-width:100%!important;min-height:0!important;
   height:100%!important;overflow:hidden!important;
 }
 body.page-messages .chat-window{

@@ -57,7 +57,7 @@ body.page-profile.gh-has-injected-nav { padding-left: 0 !important; }
   max-width: 100%;
 }
 .profile-identity-inner {
-  max-width: 1180px; margin: 0 auto;
+  max-width: 1280px; margin: 0 auto;
   padding: 0 24px;
   display: flex; align-items: flex-end; justify-content: space-between;
   gap: 20px;
@@ -125,7 +125,7 @@ body.page-profile.gh-has-injected-nav { padding-left: 0 !important; }
 
 /* ── XP Progress ── */
 .xp-progress-section {
-  max-width: 1180px; margin: 0 auto;
+  max-width: 1280px; margin: 0 auto;
   padding: 12px 24px 14px;
   display: flex; align-items: center; gap: 16px;
   border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.04));
@@ -156,7 +156,7 @@ body.page-profile.gh-has-injected-nav { padding-left: 0 !important; }
 
 /* ── Profile Tabs ── */
 .profile-tabs {
-  max-width: 1180px; margin: 0 auto;
+  max-width: 1280px; margin: 0 auto;
   padding: 0 24px;
   display: flex; gap: 2px;
   border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.04));
@@ -184,8 +184,8 @@ body.page-profile.gh-has-injected-nav { padding-left: 0 !important; }
 
 /* ── Main Layout ── */
 .profile-layout {
-  max-width: 1180px; margin: 0 auto; padding: 20px 24px 80px;
-  display: grid; grid-template-columns: 300px minmax(0,1fr); gap: 20px;
+  max-width: 1280px; margin: 0 auto; padding: 20px 24px 80px;
+  display: grid; grid-template-columns: 240px minmax(0,1fr); gap: 20px;
 }
 
 /* ── Sidebar Cards ── */
