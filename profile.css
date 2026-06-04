@@ -1,3 +1,10 @@
+/* ── Hide global left nav + reset injected padding ── */
+body.page-profile .gh-left { display: none !important; }
+body.page-profile.gh-has-injected-nav { padding-left: 0 !important; }
+@media (max-width: 1120px) {
+  body.page-profile.gh-has-injected-nav { padding-left: 0 !important; }
+}
+
 /* ── Profile Cover ── */
 .profile-cover {
   height: clamp(260px, 32vw, 380px);

@@ -180,8 +180,9 @@
       background: var(--bg-0);
       overflow: hidden;
       border-left: 1px solid var(--border-subtle);
+      min-width: 0;
     }
-    .info-scroll { overflow-y: auto; flex: 1; padding: 20px 16px 32px; scrollbar-width: thin; }
+    .info-scroll { overflow-y: auto; overflow-x: hidden; flex: 1; padding: 20px 16px 32px; scrollbar-width: thin; }
     .info-scroll::-webkit-scrollbar { width: 3px; }
     .info-top { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border-subtle); }
     .info-big-av { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-subtle); margin-bottom: 10px; }
@@ -202,7 +203,8 @@
     .info-members { display: flex; gap: 4px; flex-wrap: wrap; }
     .member-av { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-subtle); }
     .info-actions { display: flex; flex-direction: column; gap: 7px; padding-top: 16px; border-top: 1px solid var(--border-subtle); }
-    .info-action-btn { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); font-size: 0.8rem; color: var(--text-secondary); cursor: pointer; transition: var(--transition); text-decoration: none; }
+    .info-action-btn { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); font-size: 0.8rem; color: var(--text-secondary); cursor: pointer; transition: var(--transition); text-decoration: none; overflow: hidden; min-width: 0; white-space: nowrap; }
+    .info-action-btn i { flex-shrink: 0; }
     .info-action-btn:hover { border-color: var(--green); color: var(--green-light); }
     .info-action-btn i { width: 14px; text-align: center; color: var(--text-muted); }
 
@@ -294,6 +296,10 @@ body.page-messages .messages-page{
   overflow:hidden!important;
   display:flex!important;flex-direction:column!important;
 }
+/* Account for injected left nav */
+body.gh-has-injected-nav.page-messages .messages-page{left:252px!important;}
+@media(max-width:1120px){body.gh-has-injected-nav.page-messages .messages-page{left:86px!important;}}
+@media(max-width:920px){body.gh-has-injected-nav.page-messages .messages-page{left:0!important;}}
 body.page-messages .messages-layout{
   flex:1 1 auto!important;min-height:0!important;
   height:100%!important;overflow:hidden!important;
