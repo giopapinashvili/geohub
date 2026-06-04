@@ -1848,9 +1848,21 @@ body.page-messages .messages-page {
 }
 
 body.gh-has-injected-nav.page-messages .messages-page {
-  left: 0 !important;
+  left: 252px !important;
   right: 0 !important;
-  width: 100vw !important;
+  width: auto !important;
+}
+@media (max-width: 1120px) {
+  body.gh-has-injected-nav.page-messages .messages-page {
+    left: 86px !important;
+    width: auto !important;
+  }
+}
+@media (max-width: 920px) {
+  body.gh-has-injected-nav.page-messages .messages-page {
+    left: 0 !important;
+    width: 100vw !important;
+  }
 }
 
 body.page-messages .messages-layout {
