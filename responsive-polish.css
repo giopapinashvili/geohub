@@ -2677,3 +2677,7 @@ body.gh-mobile-menu-open #gh-mobile-menu-overlay {
     z-index: -1 !important;
   }
 }
+
+/* ── Messages: hide injected left nav so sidebar fills full left edge ── */
+body.page-messages .gh-left,
+body.page-messages.gh-has-injected-nav .gh-left { display: none !important; }

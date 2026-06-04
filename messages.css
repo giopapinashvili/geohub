@@ -299,8 +299,7 @@ body.page-messages .messages-page{
   overflow:hidden!important;
   display:flex!important;flex-direction:column!important;
 }
-/* Hide global left nav on messages — sidebar fills the full left edge */
-body.page-messages .gh-left{display:none!important;}
+/* messages-page already fixed at left:0; padding-left reset for safety */
 body.page-messages.gh-has-injected-nav{padding-left:0!important;}
 body.page-messages .messages-layout{
   flex:1 1 0%!important;width:100%!important;max-width:100%!important;min-height:0!important;
