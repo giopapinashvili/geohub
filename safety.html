@@ -106,6 +106,58 @@
           <option value="friends">Friends only</option>
         </select>
       </div>
+
+      <div class="safety-row">
+        <div class="safety-row-label">
+          <strong>Who can see your full name</strong>
+          <span>Display name on your profile page</span>
+        </div>
+        <select class="safety-select" data-privacy="showFullName" id="pref-showFullName">
+          <option value="everyone">Everyone</option>
+          <option value="followers">Followers</option>
+          <option value="friends">Friends only</option>
+          <option value="nobody">Nobody (show @username)</option>
+        </select>
+      </div>
+
+      <div class="safety-row">
+        <div class="safety-row-label">
+          <strong>Who can see your bio</strong>
+          <span>Short description on your profile</span>
+        </div>
+        <select class="safety-select" data-privacy="showBio" id="pref-showBio">
+          <option value="everyone">Everyone</option>
+          <option value="followers">Followers</option>
+          <option value="friends">Friends only</option>
+          <option value="nobody">Nobody</option>
+        </select>
+      </div>
+
+      <div class="safety-row">
+        <div class="safety-row-label">
+          <strong>Who can see your stories</strong>
+          <span>24-hour story content on your profile</span>
+        </div>
+        <select class="safety-select" data-privacy="showStories" id="pref-showStories">
+          <option value="everyone">Everyone</option>
+          <option value="followers">Followers</option>
+          <option value="friends">Friends only</option>
+          <option value="nobody">Nobody</option>
+        </select>
+      </div>
+
+      <div class="safety-row">
+        <div class="safety-row-label">
+          <strong>Who can see your highlights</strong>
+          <span>Saved story highlights on your profile</span>
+        </div>
+        <select class="safety-select" data-privacy="showHighlights" id="pref-showHighlights">
+          <option value="everyone">Everyone</option>
+          <option value="followers">Followers</option>
+          <option value="friends">Friends only</option>
+          <option value="nobody">Nobody</option>
+        </select>
+      </div>
     </div>
 
     <!-- Blocked Users -->
@@ -165,7 +217,7 @@
 
   <script>
   (function() {
-    var DEFAULTS = { messagingPref: 'everyone', followPref: 'everyone', profilePref: 'public', postsPref: 'public', friendRequestPref: 'everyone' };
+    var DEFAULTS = { messagingPref: 'everyone', followPref: 'everyone', profilePref: 'public', postsPref: 'public', friendRequestPref: 'everyone', showFullName: 'everyone', showBio: 'everyone', showStories: 'everyone', showHighlights: 'everyone' };
     var _savedSettings = Object.assign({}, DEFAULTS);
     var _dirty = false;
 

@@ -393,6 +393,7 @@
       var priv = user.privacy || {};
       var nameEl = document.querySelector('.profile-name');
       var bioEl = document.querySelector('.profile-bio');
+      var hlEl = document.querySelector('.profile-highlights');
       if (nameEl) {
         var showName = _ppAllowed(priv.showFullName, rel);
         nameEl.textContent = showName ? user.fullName : ('@' + (user.username || 'user'));
@@ -400,6 +401,10 @@
       if (bioEl) {
         var showBio = _ppAllowed(priv.showBio, rel);
         bioEl.textContent = showBio ? (user.bio || _t('profile_no_bio')) : _t('profile_bio_private');
+      }
+      if (hlEl) {
+        var showHl = _ppAllowed(priv.showHighlights, rel);
+        hlEl.style.display = showHl ? '' : 'none';
       }
     }
     if (!own) _applyProfileVisibility('stranger');

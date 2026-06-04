@@ -1749,7 +1749,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     // Apply user's default post audience from privacy settings
     (function _applyComposerDefaults(){
       var defs = window._userPrivacyDefaults || {};
-      var dAud = defs.defaultPostAudience || 'everyone';
+      var dAud = defs.defaultPostAudience || (defs.postsPref === 'friends' ? 'friends' : 'everyone');
       var dGen = defs.defaultPostGender || 'all';
       var dAge = defs.defaultPostAgeMode || 'all';
       var onlyMe = document.getElementById('ghAudOnlyMe');
