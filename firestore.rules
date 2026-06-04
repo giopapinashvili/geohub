@@ -1670,6 +1670,19 @@ service cloud.firestore {
       }
     }
 
+    // ── REFERRALS ─────────────────────────────────────────────────────────────
+    match /referrals/{referralId} {
+      // Owner (referrer or referred) can read their referral; signed-in can query by referrerCode for stats.
+      allow read: if signedIn()
+        && (resource.data.get('referrerId','') == uid()
+            || resource.data.get('referredId','') == uid()
+            || true); // allow any signed-in user to read (needed for referrerCode stats query)
+      allow create: if signedIn()
+        && request.resource.data.get('referredId','') == uid()
+        && request.resource.data.referrerId != uid(); // no self-referral
+      allow update, delete: if false;
+    }
+
     // ── META (read-only counters + earlyAdopter) ─────────────────────────────
     match /meta/{docId} {
       // Anyone can read meta docs (counts, limits, public config).
