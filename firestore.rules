@@ -80,14 +80,27 @@ service cloud.firestore {
     // ── COUNTER HELPERS ───────────────────────────────────────────────────────
 
     // Social engagement counters updated client-side for MVP.
-    // TODO: Move to Cloud Function Firestore triggers for true integrity.
-    //       A modified client can currently send arbitrary counter values.
+    // Each counter is bounded to ±1 per write to prevent inflation attacks
+    // (e.g. a malicious client setting likeCount=1000000 directly).
+    // Full integrity requires Cloud Function triggers (TODO).
+    function counterDelta(field) {
+      let cur = resource.data.get(field, 0);
+      let nxt = request.resource.data.get(field, 0);
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny([field])
+             || nxt in [cur - 1, cur, cur + 1];
+    }
     function onlyCountersChanged() {
       return signedIn()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'likeCount', 'commentCount', 'shareCount',
           'reactionCount', 'saveCount', 'viewCount', 'updatedAt'
-        ]);
+        ])
+        && counterDelta('likeCount')
+        && counterDelta('commentCount')
+        && counterDelta('shareCount')
+        && counterDelta('reactionCount')
+        && counterDelta('saveCount')
+        && counterDelta('viewCount');
     }
 
     // Any signed-in user may update story view fields only (no other fields).
@@ -525,7 +538,8 @@ service cloud.firestore {
     match /storyChains/{chainId} {
       allow read: if true;
       allow create: if newOwnerMatches();
-      allow update: if signedIn();
+      // Only the chain owner (or admin) may modify; previously any signed-in user could.
+      allow update: if isAdmin() || existingOwnerMatches();
       allow delete: if isAdmin() || existingOwnerMatches();
     }
     match /checkins/{checkinId} { allow read: if true; allow create: if newOwnerMatches(); allow update, delete: if isAdmin() || existingOwnerMatches(); }
@@ -914,10 +928,13 @@ service cloud.firestore {
     }
 
     // ── LIVE LOCATION (GPS sharing between friends) ───────────────────────────
-    // Users write only their own doc; friends can read if sharing='friends'.
-    // Sharing 'off' docs are readable by owner only to allow cleanup.
+    // Users write only their own doc.
+    // Read: owner always; others only when sharing='friends' (opt-in GPS share).
+    // Previously any signed-in user could read any user's location.
     match /userLocations/{userId} {
-      allow read: if isOwner(userId) || signedIn();
+      allow read: if isOwner(userId)
+        || isAdmin()
+        || (signedIn() && resource.data.get('sharing', 'off') == 'friends');
       allow create, update: if isOwner(userId)
         && request.resource.data.get('uid', '') == userId;
       allow delete: if isOwner(userId) || isAdmin();
