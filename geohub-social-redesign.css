@@ -1715,14 +1715,11 @@ body.gh-has-injected-nav .sr-page{padding-top:0}
   body.gh-has-injected-nav .sr-cats-bar{top:70px}
 }
 
-/* ── Messages page: offset fixed panel for shell sidebar ── */
-body.gh-has-injected-nav.page-messages{padding-top:0!important}
-body.gh-has-injected-nav.page-messages .messages-page{left:252px!important}
-@media(max-width:1120px){
-  body.gh-has-injected-nav.page-messages .messages-page{left:86px!important}
-}
+/* ── Messages page: gh-left hidden; panel fills full viewport ── */
+body.gh-has-injected-nav.page-messages{padding-top:0!important;padding-left:0!important}
+body.gh-has-injected-nav.page-messages .messages-page{left:0!important;right:0!important;width:100vw!important}
 @media(max-width:920px){
-  body.gh-has-injected-nav.page-messages .messages-page{left:0!important;top:70px!important}
+  body.gh-has-injected-nav.page-messages .messages-page{top:70px!important}
 }
 
 /* ── Shared post card extras (biz context + multi-image grid) ─── */
