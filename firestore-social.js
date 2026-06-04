@@ -1222,12 +1222,17 @@
           for (var i = 0; i < (s || '').length; i++) { h ^= s.charCodeAt(i) * 2654435761; h = ((h << 5) | (h >>> 27)) ^ h; }
           return (h >>> 0) / 4294967295; // 0..1
         }
-        // Sort posts with ±3h jitter so nearby posts don't stay strictly chronological
-        var ps = postsArr.slice().sort(function (a, b) {
-          var sa = ts(a.createdAt) + idHash(a.id||'') * 10800000 - 5400000;
-          var sb = ts(b.createdAt) + idHash(b.id||'') * 10800000 - 5400000;
-          return sb - sa;
-        });
+        // Score = recency + engagement boost (up to +12h for popular posts) + ±3h jitter
+        var _now = Date.now();
+        function postScore(p) {
+          var t = ts(p.createdAt);
+          var ageMs = Math.max(0, _now - t);
+          var likes = Number(p.likeCount || p.reactionCount || 0);
+          var comments = Number(p.commentCount || 0);
+          var engBoost = (likes * 2 + comments * 3) * Math.max(0, 1 - ageMs / (7 * 86400000));
+          return t + engBoost * 3600000 + idHash(p.id || '') * 10800000 - 5400000;
+        }
+        var ps = postsArr.slice().sort(function (a, b) { return postScore(b) - postScore(a); });
         var vs = videosArr.slice().sort(function (a, b) { return ts(b.createdAt) - ts(a.createdAt); });
         // Interleave: 1 video every 3-5 posts; never consecutive same-channel videos or same-user posts
         var result = [], pi = 0, vi = 0, postSince = 0, lastChId = null, lastUid = null;
