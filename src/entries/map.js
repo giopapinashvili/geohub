@@ -1,7 +1,4 @@
-import maplibregl from 'maplibre-gl';
-import Supercluster from 'supercluster';
-window.maplibregl = maplibregl;
-window.Supercluster = Supercluster;
+import '/maplibre-global.js';
 import '/firebase-config.js';
 import '/config.js';
 import '/api-client.js';
