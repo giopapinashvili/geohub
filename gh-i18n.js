@@ -1447,6 +1447,35 @@
     opt_nobody:           { ka: 'არავინ',                      en: 'Nobody',                                      ru: 'Никто'                        },
     opt_nobody_username:  { ka: 'არავინ (@username)',           en: 'Nobody (show @username)',                     ru: 'Никто (показ @username)'      },
     opt_public:           { ka: 'საჯარო',                      en: 'Public',                                      ru: 'Публично'                     },
+
+    /* ── Early Adopter page ─────────────────────────────────── */
+    ea_sign_in_first:    { ka: 'შედი პირველ რიგში',           en: 'Sign in first',                               ru: 'Войдите сначала'               },
+    ea_sign_in_desc:     { ka: 'Early Adopter სტ-ის მოსაპ. GeoHub-ში შ. გჭ.', en: 'You need to sign in to GeoHub to claim Early Adopter status.', ru: 'Войдите в GeoHub для получения статуса.' },
+    ea_sign_in_btn:      { ka: 'შესვლა / რეგისტრაცია',       en: 'Sign In / Register',                          ru: 'Войти / Зарегистрироваться'   },
+    ea_no_biz:           { ka: 'ბიზნესი ჯერ არ გაქვს',       en: 'No business yet',                             ru: 'Нет бизнес-страницы'          },
+    ea_no_biz_page_desc: { ka: 'ბ. გ. გჭ. Early Adopter სტ. მ.',  en: 'You need a business page to claim Early Adopter status.', ru: 'Создайте бизнес-страницу для получения статуса.' },
+    ea_no_biz_desc:      { ka: 'შ. ბ. გ. GeoHub-ზე და EA სტ. მ.', en: 'Create a business page on GeoHub and claim your Early Adopter status.', ru: 'Создайте бизнес и получите статус Early Adopter.' },
+    ea_create_biz:       { ka: 'ბიზნეს გვ. შეიქმნება',       en: 'Create business page',                        ru: 'Создать страницу'             },
+    ea_go_home:          { ka: 'მთავარ გვ.',                  en: 'Go home',                                     ru: 'На главную'                   },
+    ea_spots_full_title: { ka: 'ადგილები ამოიწურა',           en: 'All spots taken',                             ru: 'Все места заняты'             },
+    ea_spots_full_desc:  { ka: 'სამ., EA 100 ადგ. შ. Premium-ი ჩვ. გ. შ.', en: 'Unfortunately all 100 spots are taken. Purchase Premium normally.', ru: 'К сожалению, все 100 мест заняты. Купите Premium обычно.' },
+    ea_buy_premium:      { ka: 'Premium-ის შეძენა',           en: 'Buy Premium',                                 ru: 'Купить Premium'               },
+    ea_success_title:    { ka: 'Early Adopter გახდი!',        en: 'You\'re an Early Adopter!',                   ru: 'Вы стали Early Adopter!'      },
+    ea_hero_desc:        { ka: 'პირ. 100 ბ. 3 თვე Premium უფ.! შ.!', en: 'The first 100 businesses get 3 months Premium free. Join us!', ru: 'Первые 100 бизнесов получают 3 мес. Premium бесплатно!' },
+    ea_spots_left:       { ka: 'დარჩენილი ადგილი',            en: 'spots remaining',                             ru: 'мест осталось'                },
+    ea_your_biz:         { ka: 'შენი ბიზნესები',              en: 'Your Businesses',                             ru: 'Ваши бизнесы'                 },
+    ea_claim:            { ka: 'Claim',                        en: 'Claim',                                       ru: 'Получить'                     },
+    ea_feat_premium:     { ka: '3 თვე Premium უფასოდ',        en: '3 months Premium free',                       ru: '3 месяца Premium бесплатно'   },
+    ea_feat_verified:    { ka: 'Verified ბეჯი',               en: 'Verified badge',                              ru: 'Значок Verified'              },
+    ea_feat_boost:       { ka: 'პოსტების ბუსტი',              en: 'Post boost',                                  ru: 'Буст постов'                  },
+    ea_feat_analytics:   { ka: 'ანალიტიკა',                   en: 'Analytics',                                   ru: 'Аналитика'                    },
+    ea_feat_badge:       { ka: 'Early Adopter ბეჯი',          en: 'Early Adopter badge',                         ru: 'Значок Early Adopter'         },
+    ea_feat_support:     { ka: 'პრიორიტეტული მხარდ.',          en: 'Priority support',                            ru: 'Приоритетная поддержка'       },
+
+    /* ── Onboarding ────────────────────────────────────────── */
+    ob_back:             { ka: 'უკან',                         en: 'Back',                                        ru: 'Назад'                        },
+    ob_skip:             { ka: 'გამოტოვება',                   en: 'Skip',                                        ru: 'Пропустить'                   },
+    ob_continue:         { ka: 'გაგრძელება',                   en: 'Continue',                                    ru: 'Продолжить'                   },
   };
 
   /* ── Core t() function ───────────────────────────────────── */

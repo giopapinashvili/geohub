@@ -102,9 +102,9 @@
     <div id="eaNoAuth" style="display:none">
       <div class="ea-status">
         <div class="ea-status-icon">🔒</div>
-        <h2>შედი პირველ რიგში</h2>
-        <p>Early Adopter სტატუსის მოსაპოვებლად GeoHub-ში შესვლა გჭირდება.</p>
-        <a href="index.html" class="ea-btn ea-btn-green"><i class="fas fa-right-to-bracket"></i> შესვლა / რეგისტრაცია</a>
+        <h2 data-i18n="ea_sign_in_first">შედი პირველ რიგში</h2>
+        <p data-i18n="ea_sign_in_desc">Early Adopter სტატუსის მოსაპოვებლად GeoHub-ში შესვლა გჭირდება.</p>
+        <a href="index.html" class="ea-btn ea-btn-green"><i class="fas fa-right-to-bracket"></i> <span data-i18n="ea_sign_in_btn">შესვლა / რეგისტრაცია</span></a>
       </div>
     </div>
 
@@ -113,17 +113,17 @@
       <div class="ea-hero">
         <div class="ea-hero-icon">🌱</div>
         <h1>Early Adopter Program</h1>
-        <p>ბიზნეს გვერდი გჭირდება Early Adopter სტატუსის მოსაპოვებლად.</p>
+        <p data-i18n="ea_no_biz_page_desc">ბიზნეს გვერდი გჭირდება Early Adopter სტატუსის მოსაპოვებლად.</p>
       </div>
       <div class="ea-status">
         <div class="ea-status-icon">🏢</div>
-        <h2>ბიზნესი ჯერ არ გაქვს</h2>
-        <p>შექმენი ბიზნეს გვერდი GeoHub-ზე და დაიბრუნე Early Adopter სტატუსი.</p>
+        <h2 data-i18n="ea_no_biz">ბიზნესი ჯერ არ გაქვს</h2>
+        <p data-i18n="ea_no_biz_desc">შექმენი ბიზნეს გვერდი GeoHub-ზე და დაიბრუნე Early Adopter სტატუსი.</p>
         <a href="index.html" class="ea-btn ea-btn-green" style="margin-bottom:10px;display:block;text-align:center">
-          <i class="fas fa-plus"></i> ბიზნეს გვერდის შექმნა
+          <i class="fas fa-plus"></i> <span data-i18n="ea_create_biz">ბიზნეს გვერდის შექმნა</span>
         </a>
         <a href="index.html" class="ea-btn ea-btn-ghost" style="display:block;text-align:center">
-          <i class="fas fa-arrow-left"></i> მთავარ გვერდზე
+          <i class="fas fa-arrow-left"></i> <span data-i18n="ea_go_home">მთავარ გვერდზე</span>
         </a>
       </div>
     </div>
@@ -132,10 +132,10 @@
     <div id="eaFull" style="display:none">
       <div class="ea-status">
         <div class="ea-status-icon">😔</div>
-        <h2>ადგილები ამოიწურა</h2>
-        <p>სამწუხაროდ, Early Adopter-ის 100 ადგილი უკვე შევსებულია. Premium-ი ჩვეულებრივი გზით შეგიძლია შეიძინო.</p>
+        <h2 data-i18n="ea_spots_full_title">ადგილები ამოიწურა</h2>
+        <p data-i18n="ea_spots_full_desc">სამწუხაროდ, Early Adopter-ის 100 ადგილი უკვე შევსებულია. Premium-ი ჩვეულებრივი გზით შეგიძლია შეიძინო.</p>
         <a href="premium.html" class="ea-btn ea-btn-green" style="margin-bottom:10px;display:block;text-align:center">
-          <i class="fas fa-crown"></i> Premium-ის შეძენა
+          <i class="fas fa-crown"></i> <span data-i18n="ea_buy_premium">Premium-ის შეძენა</span>
         </a>
       </div>
     </div>
@@ -144,13 +144,13 @@
     <div id="eaSuccess" style="display:none">
       <div class="ea-status">
         <div class="ea-status-icon">🎉</div>
-        <h2 style="color:#10b981">Early Adopter გახდი!</h2>
-        <p>
+        <h2 style="color:#10b981" data-i18n="ea_success_title">Early Adopter გახდი!</h2>
+        <p id="eaSuccessMsg">
           შენ ხარ ჩვენი Early Adopter #<strong id="eaSuccessNum">?</strong>!<br>
           შენი ბიზნესი ახლა 3 თვით Premium-ზეა. გმადლობ, GeoHub-ის პირველ მხარდამჭერო! 🌱
         </p>
         <a href="index.html" class="ea-btn ea-btn-green" style="display:block;text-align:center;margin-bottom:10px">
-          <i class="fas fa-home"></i> მთავარ გვერდზე
+          <i class="fas fa-home"></i> <span data-i18n="ea_go_home">მთავარ გვერდზე</span>
         </a>
       </div>
     </div>
@@ -161,7 +161,7 @@
       <div class="ea-hero">
         <div class="ea-hero-icon">🌱</div>
         <h1>Early Adopter Program</h1>
-        <p>პირველი 100 ბიზნესი GeoHub-ზე იღებს <strong style="color:#10b981">3 თვე Premium-ს უფასოდ</strong>. შემოგვიერთდი!</p>
+        <p data-i18n="ea_hero_desc">პირველი 100 ბიზნესი GeoHub-ზე იღებს <strong style="color:#10b981">3 თვე Premium-ს უფასოდ</strong>. შემოგვიერთდი!</p>
       </div>
 
       <!-- Counter -->
@@ -171,7 +171,7 @@
           <span class="ea-counter-slash">/</span>
           <span class="ea-counter-total">100</span>
         </div>
-        <div class="ea-counter-label">დარჩენილი ადგილი</div>
+        <div class="ea-counter-label" data-i18n="ea_spots_left">დარჩენილი ადგილი</div>
         <div class="ea-progress-bar">
           <div class="ea-progress-fill" id="eaProgress" style="width:0%"></div>
         </div>
@@ -179,16 +179,16 @@
 
       <!-- Features -->
       <div class="ea-features">
-        <div class="ea-feat"><i class="fas fa-crown"></i><span>3 თვე Premium უფასოდ</span></div>
-        <div class="ea-feat"><i class="fas fa-circle-check"></i><span>Verified ბეჯი</span></div>
-        <div class="ea-feat"><i class="fas fa-bolt"></i><span>პოსტების ბუსტი</span></div>
-        <div class="ea-feat"><i class="fas fa-chart-bar"></i><span>ანალიტიკა</span></div>
-        <div class="ea-feat"><i class="fas fa-star"></i><span>Early Adopter ბეჯი</span></div>
-        <div class="ea-feat"><i class="fas fa-headset"></i><span>პრიორიტეტული მხარდაჭერა</span></div>
+        <div class="ea-feat"><i class="fas fa-crown"></i><span data-i18n="ea_feat_premium">3 თვე Premium უფასოდ</span></div>
+        <div class="ea-feat"><i class="fas fa-circle-check"></i><span data-i18n="ea_feat_verified">Verified ბეჯი</span></div>
+        <div class="ea-feat"><i class="fas fa-bolt"></i><span data-i18n="ea_feat_boost">პოსტების ბუსტი</span></div>
+        <div class="ea-feat"><i class="fas fa-chart-bar"></i><span data-i18n="ea_feat_analytics">ანალიტიკა</span></div>
+        <div class="ea-feat"><i class="fas fa-star"></i><span data-i18n="ea_feat_badge">Early Adopter ბეჯი</span></div>
+        <div class="ea-feat"><i class="fas fa-headset"></i><span data-i18n="ea_feat_support">პრიორიტეტული მხარდაჭერა</span></div>
       </div>
 
       <!-- Business list -->
-      <div class="ea-section-title">შენი ბიზნესები</div>
+      <div class="ea-section-title" data-i18n="ea_your_biz">შენი ბიზნესები</div>
       <div id="eaBizList"></div>
     </div>
 
@@ -197,6 +197,7 @@
                               
   <script>
   (function () {
+    function _t(k, fb) { return window.GHt ? window.GHt(k) : (fb || k); }
     var _uid  = null;
     var _meta = { count: 0, limit: 100 };
     var _businesses = [];
@@ -251,7 +252,7 @@
           '</div>' +
           (claimed
             ? '<span class="ea-biz-badge ea-biz-badge--done"><i class="fas fa-check"></i> Early Adopter</span>'
-            : '<button class="ea-biz-claim-btn" data-claim="' + esc(b.id) + '"><i class="fas fa-bolt"></i> Claim</button>') +
+            : '<button class="ea-biz-claim-btn" data-claim="' + esc(b.id) + '"><i class="fas fa-bolt"></i> ' + _t('ea_claim', 'Claim') + '</button>') +
         '</div>';
       }).join('');
     }
@@ -271,7 +272,7 @@
             show('eaSuccess');
           } else {
             btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-bolt"></i> Claim';
+            btn.innerHTML = '<i class="fas fa-bolt"></i> ' + _t('ea_claim', 'Claim');
             if (result.error === 'spots-full') show('eaFull');
             else if (result.error === 'already-claimed') {
               var biz = _businesses.find(function (b) { return b.id === bizId; });
