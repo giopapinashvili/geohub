@@ -16,6 +16,7 @@
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="components.css">
   <link rel="stylesheet" href="navbar.css">
   <link rel="stylesheet" href="geohub-social-redesign.css">
   <link rel="stylesheet" href="add-business.css">
@@ -298,7 +299,7 @@
         <div class="form-group">
           <label class="form-label">Tags</label>
           <div class="tag-input-container" id="tagContainer">
-            <input type="text" class="tag-input" placeholder="ტეგი და Enter (მაგ: მთა, ღვინო, ფუფუნება)" id="tagInput" autocomplete="off" autocorrect="off" autocapitalize="off">
+            <input type="text" class="tag-input" placeholder="ტეგი და Enter (მაგ: მთა, ღვინო, ფუფუნება)" id="tagInput" autocomplete="new-password" autocorrect="off" autocapitalize="off" name="biz-tags">
           </div>
           <div class="form-hint">Add up to 8 tags to improve searchability</div>
         </div>
@@ -493,12 +494,12 @@
           </div>
           <div class="form-group">
             <label class="form-label required">Email</label>
-            <input type="email" class="form-input" placeholder="your@email.com">
+            <input type="email" class="form-input" placeholder="your@email.com" autocomplete="off">
           </div>
         </div>
         <div class="form-group">
           <label class="form-label required">Password</label>
-          <input type="password" class="form-input" placeholder="Create a password">
+          <input type="password" class="form-input" placeholder="Create a password" autocomplete="new-password">
         </div>
         <div style="display:flex;align-items:flex-start;gap:10px;margin-top:8px;font-size:0.8rem;color:var(--text-secondary)">
           <input type="checkbox" style="margin-top:2px;accent-color:var(--green)">

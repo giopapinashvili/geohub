@@ -275,16 +275,18 @@ let currentStep = 1;
     var cat  = document.querySelector('.cat-option.selected');
     var type = getBusinessType();
     var ok = true;
-    if (!name) { markFieldError(document.getElementById('bizNameInput'), 'Business name is required.'); ok = false; }
+    if (!name) { markFieldError(document.getElementById('bizNameInput'), 'ბიზნესის სახელი სავალდებულოა.'); ok = false; }
     if (!cat)  {
       var catErr = document.createElement('div');
       catErr.className = 'biz-field-err';
       catErr.style.cssText = 'color:#ef4444;font-size:0.77rem;margin-top:5px;font-weight:500';
-      catErr.textContent = 'Please select a category.';
-      document.getElementById('catSelector').parentNode.appendChild(catErr);
+      catErr.textContent = 'კატეგორია სავალდებულოა — აირჩიეთ ერთ-ერთი.';
+      var catParent = document.getElementById('catSelector').parentNode;
+      catParent.appendChild(catErr);
+      catParent.scrollIntoView({ behavior: 'smooth', block: 'center' });
       ok = false;
     }
-    if (type !== 'online' && !city) { markFieldError(document.getElementById('citySelect'), 'Please select a city for a physical business.'); ok = false; }
+    if (type !== 'online' && !city) { markFieldError(document.getElementById('citySelect'), 'ქალაქი სავალდებულოა ფიზიკური ბიზნესისთვის.'); ok = false; }
     return ok;
   }
 
