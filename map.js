@@ -31,14 +31,29 @@
     default:       { color: '#6c757d', icon: '📍',  label: 'სხვა' }
   };
 
-  // CARTO GL basemaps — free, no API key, reliable CDN
+  // Inline raster tile styles — no external style JSON, sprite, or glyph fetches needed
+  const _RASTER_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
   const TILE_LAYERS = {
     dark: {
-      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+      style: {
+        version: 8,
+        sources: { carto: { type: 'raster', tileSize: 256, maxzoom: 20, attribution: _RASTER_ATTR,
+          tiles: ['https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+                  'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+                  'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'] } },
+        layers: [{ id: 'carto', type: 'raster', source: 'carto' }]
+      },
       label: '🌑 Dark'
     },
     streets: {
-      style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+      style: {
+        version: 8,
+        sources: { carto: { type: 'raster', tileSize: 256, maxzoom: 20, attribution: _RASTER_ATTR,
+          tiles: ['https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
+                  'https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
+                  'https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png'] } },
+        layers: [{ id: 'carto', type: 'raster', source: 'carto' }]
+      },
       label: '🗺️ Streets'
     }
   };
