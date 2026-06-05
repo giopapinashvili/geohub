@@ -95,19 +95,19 @@
     <!-- Stats + Actions -->
     <div class="profile-hero-right">
       <div class="profile-stats-bar">
-        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label">Places</div></div>
-        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label" style="color:var(--green)">Friends</div></div>
-        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label">Followers</div></div>
-        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label">Following</div></div>
+        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label" data-i18n="profile_stat_places">Places</div></div>
+        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label" style="color:var(--green)" data-i18n="profile_friends">Friends</div></div>
+        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label" data-i18n="profile_stat_follow">Followers</div></div>
+        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label" data-i18n="profile_stat_fwing">Following</div></div>
         <div class="pstat"><div class="pstat-value" style="color:var(--green)">0</div><div class="pstat-label">GeoPoints</div></div>
-        <div class="pstat"><div class="pstat-value" style="color:var(--gold)">0</div><div class="pstat-label">Trust Score</div></div>
+        <div class="pstat"><div class="pstat-value" style="color:var(--gold)">0</div><div class="pstat-label" data-i18n="profile_stat_trust">Trust Score</div></div>
       </div>
       <div class="profile-actions">
         <button class="btn btn-ghost btn-sm"><i class="fas fa-envelope"></i></button>
         <button class="btn btn-ghost btn-sm"><i class="fas fa-share-alt"></i></button>
         <button class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Follow</button>
-        <button class="btn btn-ghost btn-sm" id="cfManageBtn" style="display:none;color:#22c55e" title="Close Friends"><i class="fas fa-star"></i> Close Friends</button>
-        <a href="lifegraph.html" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none"><i class="fas fa-chart-line"></i> Life Graph</a>
+        <button class="btn btn-ghost btn-sm" id="cfManageBtn" style="display:none;color:#22c55e" title="Close Friends"><i class="fas fa-star"></i> <span data-i18n="profile_close_fr">Close Friends</span></button>
+        <a href="lifegraph.html" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none"><i class="fas fa-chart-line"></i> <span data-i18n="profile_life_graph">Life Graph</span></a>
       </div>
     </div>
   </div>
@@ -139,9 +139,9 @@
     <div class="ptab" data-tab="businesses"><span data-i18n="nav_business">Businesses</span> <span class="tab-count">0</span></div>
     <div class="ptab" data-tab="videos"><span data-i18n="nav_videos">Videos</span> <span class="tab-count"></span></div>
     <div class="ptab" data-tab="badges"><span data-i18n="profile_badges">Badges</span> <span class="tab-count">0</span></div>
-    <div class="ptab" data-tab="travel"><span>✈️ Travel</span> <span class="tab-count"></span></div>
+    <div class="ptab" data-tab="travel"><span data-i18n="profile_travel">✈️ Travel</span> <span class="tab-count"></span></div>
     <div class="ptab" data-tab="saved"><span data-i18n="profile_saved">Saved</span> <span class="tab-count"></span></div>
-    <div class="ptab" data-tab="archive" id="archiveTabBtn" style="display:none"><span>📁 Archive</span> <span class="tab-count" id="archiveTabCount"></span></div>
+    <div class="ptab" data-tab="archive" id="archiveTabBtn" style="display:none"><span data-i18n="profile_archive_tab">📁 Archive</span> <span class="tab-count" id="archiveTabCount"></span></div>
   </div>
 </div>
 
@@ -153,7 +153,7 @@
 
     <!-- Intro Card -->
     <div class="sidebar-card">
-      <div class="sidebar-card-title">Intro</div>
+      <div class="sidebar-card-title" data-i18n="profile_intro_title">Intro</div>
       <div class="intro-item"><i class="fas fa-map-marker-alt"></i> No location set</div>
       <div class="intro-item"><i class="fas fa-hiking"></i> Explorer</div>
       <div class="intro-item"><i class="fas fa-calendar-alt"></i> Join date not set</div>
@@ -167,7 +167,7 @@
 
     <!-- Activity Identity -->
     <div class="sidebar-card">
-      <div class="sidebar-card-title">Activity Identity</div>
+      <div class="sidebar-card-title" data-i18n="profile_activity_id">Activity Identity</div>
       <div class="explorer-type">🏔️ Explorer</div>
       <div class="lifestyle-scores"></div>
       <div class="fav-cats"></div>
@@ -175,23 +175,23 @@
 
     <!-- Social Proof Mini Stats -->
     <div class="sidebar-card">
-      <div class="sidebar-card-title">Social Proof</div>
+      <div class="sidebar-card-title" data-i18n="profile_social_proof">Social Proof</div>
       <div class="social-proof-grid">
         <div class="sp-card">
           <div class="sp-icon green">🏙️</div>
-          <div><div id="spCitiesVal" class="sp-value">0</div><div class="sp-label">Cities</div></div>
+          <div><div id="spCitiesVal" class="sp-value">0</div><div class="sp-label" data-i18n="profile_sp_cities">Cities</div></div>
         </div>
         <div class="sp-card">
           <div class="sp-icon blue">👥</div>
-          <div><div id="spFriendsVal" class="sp-value">0</div><div class="sp-label">Invited</div></div>
+          <div><div id="spFriendsVal" class="sp-value">0</div><div class="sp-label" data-i18n="profile_sp_invited">Invited</div></div>
         </div>
         <div class="sp-card">
           <div class="sp-icon gold">👍</div>
-          <div><div id="spLikesVal" class="sp-value">0</div><div class="sp-label">Likes</div></div>
+          <div><div id="spLikesVal" class="sp-value">0</div><div class="sp-label" data-i18n="profile_sp_likes">Likes</div></div>
         </div>
         <div class="sp-card">
           <div class="sp-icon purple">🎉</div>
-          <div><div id="spGroupsVal" class="sp-value">0</div><div class="sp-label">Groups</div></div>
+          <div><div id="spGroupsVal" class="sp-value">0</div><div class="sp-label" data-i18n="profile_sp_groups">Groups</div></div>
         </div>
       </div>
     </div>
@@ -206,7 +206,7 @@
           <div class="mini-wallet-pts">0 pts</div>
           <div class="mini-wallet-label">GeoPoints · New Tier</div>
         </div>
-        <a href="#" class="btn btn-primary btn-xs" onclick="switchTab('rewards');return false">Wallet</a>
+        <a href="#" class="btn btn-primary btn-xs" onclick="switchTab('rewards');return false" data-i18n="profile_wallet_btn">Wallet</a>
       </div>
       <div class="mini-wallet-progress"><div class="mini-wallet-fill"></div></div>
       <div class="mini-wallet-sub"><strong>0 pts</strong> earned · no active coupons</div>
@@ -214,7 +214,7 @@
 
     <!-- Trust Score -->
     <div class="sidebar-card">
-      <div class="sidebar-card-title">Trust &amp; Verification</div>
+      <div class="sidebar-card-title" data-i18n="profile_trust_title">Trust &amp; Verification</div>
       <div class="trust-circle-wrap">
         <div class="trust-circle">
           <div class="trust-circle-inner">
@@ -238,28 +238,28 @@
 
     <!-- Georgia Discovery Map -->
     <div class="sidebar-card geo-map-widget">
-      <div class="geo-map-widget-title">Discovery Map <span style="color:var(--green);font-weight:700" id="citiesVisited">0 cities</span></div>
+      <div class="geo-map-widget-title"><span data-i18n="profile_disc_map">Discovery Map</span> <span style="color:var(--green);font-weight:700" id="citiesVisited">0 cities</span></div>
       <div class="geo-map-container">
         <div class="geo-shape"></div>
         <div class="city-pin" style="left:55%;top:62%"><div class="city-pin-dot"></div><div class="city-pin-label">Tbilisi</div></div>
         <div class="city-pin" style="left:43%;top:74%"><div class="city-pin-dot"></div><div class="city-pin-label">Borjomi</div></div>
       </div>
       <div class="geo-map-legend">
-        <span class="leg-visited">Visited</span>
-        <span class="leg-current">Current</span>
-        <span class="leg-notvisited">Not yet</span>
+        <span class="leg-visited" data-i18n="profile_leg_visited">Visited</span>
+        <span class="leg-current" data-i18n="profile_leg_current">Current</span>
+        <span class="leg-notvisited" data-i18n="profile_leg_notyet">Not yet</span>
       </div>
     </div>
 
     <!-- Activity Feed (mini) -->
     <div class="sidebar-card activity-feed">
-      <div class="activity-feed-title">Recent Activity</div>
+      <div class="activity-feed-title" data-i18n="profile_recent_act">Recent Activity</div>
       <div class="activity-feed-list"><div style="color:var(--text-muted);font-size:0.85rem;padding:12px 0">No real activity yet</div></div>
     </div>
 
     <!-- Suggested People -->
     <div class="following-card sidebar-card">
-      <div class="following-header">People You May Know</div>
+      <div class="following-header" data-i18n="profile_people_know">People You May Know</div>
       <div style="padding:16px 0;text-align:center;color:var(--text-muted);font-size:0.85rem">No suggestions yet</div>
     </div>
 
@@ -272,7 +272,7 @@
     <div class="profile-highlights">
       <div class="highlight-item highlight-add" data-add-highlight>
         <div class="highlight-ring add-ring"><i class="fas fa-plus"></i></div>
-        <div class="highlight-label">New</div>
+        <div class="highlight-label" data-i18n="profile_new_hl">New</div>
       </div>
     </div>
 
