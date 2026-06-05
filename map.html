@@ -155,24 +155,34 @@
       <button class="map-camera-btn" data-mode="cinematic" onclick="setCameraMode('cinematic')">🎬 კინო</button>
     </div>
 
-    <!-- Floating buttons -->
-    <div style="position:absolute;top:14px;left:14px;z-index:1001;display:flex;gap:6px;flex-wrap:wrap">
-      <button class="map-toggle-btn" id="legendBtn" onclick="document.getElementById('legend').classList.toggle('open')">
-        <i class="fas fa-layer-group"></i> ლეგენდა
-      </button>
-      <button class="map-toggle-btn" id="heatmapBtn" onclick="toggleHeatmap()">
-        <i class="fas fa-fire"></i> სიმჭ.
-      </button>
-      <button class="map-toggle-btn" id="eventsToggleBtn" onclick="toggleEventsLayer()">
-        🎉 ივენთ.
-      </button>
-      <button class="map-toggle-btn" id="weekendToggleBtn" onclick="toggleThisWeekend()" style="display:none">
-        📅 შ-კ.
-      </button>
-      <button class="map-toggle-btn" id="vidMapToggle">
-        🎬 ვიდეო
-      </button>
+    <!-- Single filter button → bottom sheet -->
+    <button class="map-toggle-btn map-filter-fab" id="mapFilterBtn" onclick="window.toggleMapFilterSheet()">
+      <i class="fas fa-sliders"></i> ფილტრი
+    </button>
+
+    <!-- Filter bottom sheet -->
+    <div class="map-filter-sheet" id="mapFilterSheet" aria-hidden="true">
+      <div class="map-filter-sheet-handle"></div>
+      <div class="map-filter-sheet-title">ფილტრები</div>
+      <div class="map-filter-sheet-grid">
+        <button class="map-fs-btn" id="legendBtn" onclick="document.getElementById('legend').classList.toggle('open')">
+          <i class="fas fa-layer-group"></i><span>ლეგენდა</span>
+        </button>
+        <button class="map-fs-btn" id="heatmapBtn" onclick="toggleHeatmap()">
+          <i class="fas fa-fire"></i><span>სიმჭიდ.</span>
+        </button>
+        <button class="map-fs-btn" id="eventsToggleBtn" onclick="toggleEventsLayer()">
+          <span>🎉</span><span>ღონ.</span>
+        </button>
+        <button class="map-fs-btn" id="weekendToggleBtn" onclick="toggleThisWeekend()" style="display:none">
+          <span>📅</span><span>შ-კ.</span>
+        </button>
+        <button class="map-fs-btn" id="vidMapToggle">
+          <span>🎬</span><span>ვიდეო</span>
+        </button>
+      </div>
     </div>
+    <div class="map-filter-sheet-backdrop" id="mapFilterBackdrop" onclick="window.toggleMapFilterSheet()"></div>
 
     <!-- Video map popup card -->
     <div class="vid-map-card" id="vidMapCard"></div>

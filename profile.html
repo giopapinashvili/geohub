@@ -131,17 +131,19 @@
 
   <!-- Profile Tabs -->
   <div class="profile-tabs" id="profileTabs">
-    <div class="ptab active" data-tab="posts"><span data-i18n="profile_posts">Posts</span> <span class="tab-count">0</span></div>
-    <div class="ptab" data-tab="about"><span data-i18n="profile_about">About</span></div>
-    <div class="ptab" data-tab="gallery"><span data-i18n="profile_gallery">Gallery</span> <span class="tab-count"></span></div>
-    <div class="ptab" data-tab="friends"><span data-i18n="profile_friends">Friends</span> <span class="tab-count">0</span></div>
-    <div class="ptab" data-tab="checkins"><span data-i18n="profile_checkins">Check-ins</span> <span class="tab-count">0</span></div>
-    <div class="ptab" data-tab="businesses"><span data-i18n="nav_business">Businesses</span> <span class="tab-count">0</span></div>
-    <div class="ptab" data-tab="videos"><span data-i18n="nav_videos">Videos</span> <span class="tab-count"></span></div>
-    <div class="ptab" data-tab="badges"><span data-i18n="profile_badges">Badges</span> <span class="tab-count">0</span></div>
-    <div class="ptab" data-tab="travel"><span data-i18n="profile_travel">✈️ Travel</span> <span class="tab-count"></span></div>
-    <div class="ptab" data-tab="saved"><span data-i18n="profile_saved">Saved</span> <span class="tab-count"></span></div>
-    <div class="ptab" data-tab="archive" id="archiveTabBtn" style="display:none"><span data-i18n="profile_archive_tab">📁 Archive</span> <span class="tab-count" id="archiveTabCount"></span></div>
+    <div class="ptab active" data-tab="posts"><span data-i18n="profile_posts">პოსტები</span> <span class="tab-count">0</span></div>
+    <div class="ptab" data-tab="gallery"><span data-i18n="profile_gallery">ფოტო</span> <span class="tab-count"></span></div>
+    <div class="ptab" data-tab="friends"><span data-i18n="profile_friends">მეგობრები</span> <span class="tab-count">0</span></div>
+    <div class="ptab" data-tab="about"><span data-i18n="profile_about">ინფო</span></div>
+    <!-- hidden tabs — shown via "მეტი" -->
+    <div class="ptab ptab-extra" data-tab="checkins" style="display:none"><span data-i18n="profile_checkins">Check-ins</span> <span class="tab-count">0</span></div>
+    <div class="ptab ptab-extra" data-tab="businesses" style="display:none"><span data-i18n="nav_business">ბიზნესები</span> <span class="tab-count">0</span></div>
+    <div class="ptab ptab-extra" data-tab="videos" style="display:none"><span data-i18n="nav_videos">ვიდეო</span> <span class="tab-count"></span></div>
+    <div class="ptab ptab-extra" data-tab="badges" style="display:none"><span data-i18n="profile_badges">ბეჯები</span> <span class="tab-count">0</span></div>
+    <div class="ptab ptab-extra" data-tab="travel" style="display:none"><span data-i18n="profile_travel">✈️ Travel</span> <span class="tab-count"></span></div>
+    <div class="ptab ptab-extra" data-tab="saved" style="display:none"><span data-i18n="profile_saved">შენახული</span> <span class="tab-count"></span></div>
+    <div class="ptab ptab-extra" data-tab="archive" id="archiveTabBtn" style="display:none"><span data-i18n="profile_archive_tab">📁 Archive</span> <span class="tab-count" id="archiveTabCount"></span></div>
+    <div class="ptab ptab-more-btn" id="ptabMoreBtn" onclick="window.toggleExtraTabs()">მეტი ▾</div>
   </div>
 </div>
 

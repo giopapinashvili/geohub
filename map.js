@@ -2006,6 +2006,15 @@
   let _nowPanelOpen = false;
   let _nowLastLoad = 0;
 
+  window.toggleMapFilterSheet = function() {
+    var sheet = document.getElementById('mapFilterSheet');
+    var backdrop = document.getElementById('mapFilterBackdrop');
+    if (!sheet) return;
+    var open = sheet.classList.toggle('open');
+    sheet.setAttribute('aria-hidden', String(!open));
+    if (backdrop) backdrop.classList.toggle('open', open);
+  };
+
   window.toggleNowPanel = function() {
     _nowPanelOpen = !_nowPanelOpen;
     const panel = document.getElementById('nowPanel');

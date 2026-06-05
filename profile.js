@@ -898,6 +898,17 @@
     });
   }
 
+  window.toggleExtraTabs = function() {
+    var extras = document.querySelectorAll('.ptab-extra');
+    var btn = document.getElementById('ptabMoreBtn');
+    var open = btn && btn.getAttribute('data-open') === '1';
+    extras.forEach(function(el) {
+      if (el.id === 'archiveTabBtn') return; // archive shown only by its own logic
+      el.style.display = open ? 'none' : '';
+    });
+    if (btn) { btn.setAttribute('data-open', open ? '0' : '1'); btn.textContent = open ? 'მეტი ▾' : 'ნაკლები ▴'; }
+  };
+
   function renderTabs(user, fbUser) {
     var _pt=typeof GHt==='function'?GHt:function(k){return k;};
     emptyTab('#tab-posts', 'fa-seedling', _pt('profile_posts')+': '+_pt('no_results'), _pt('profile_no_posts_hint'), 'feed.html?compose=1', _pt('create_post'));

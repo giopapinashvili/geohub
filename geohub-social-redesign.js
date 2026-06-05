@@ -593,9 +593,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function bottomNav(active){
     var tabs=[
-      {k:'feed',   href:'feed.html',          icon:'fa-house',     lbl:'Feed',          i18n:'nav_feed'},
-      {k:'search', href:'search.html',         icon:'fa-search',    lbl:'ძებნა',         i18n:'nav_search'},
-      {k:'_post',  href:'#',                   icon:'fa-plus',      lbl:'პოსტი',         i18n:'nav_post',  isPost:true},
+      {k:'feed',   href:'feed.html',          icon:'fa-house',     lbl:'მთავარი',       i18n:'nav_feed'},
+      {k:'map',    href:'map.html',            icon:'fa-map',       lbl:'რუკა',          i18n:'nav_map'},
+      {k:'_post',  href:'#',                   icon:'fa-plus',      lbl:'',              i18n:'nav_post',  isPost:true},
       {k:'notifs', href:'notifications.html',  icon:'fa-bell',      lbl:'შეტყობინება',   i18n:'nav_notifications', badge:true},
       {k:'profile',href:'profile.html',        icon:'fa-user',      lbl:'პროფილი',       i18n:'nav_profile'}
     ];
@@ -685,28 +685,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       ['places','places.html','fa-location-dot','Places','nav_places']
     ];
     var SECONDARY=[
-      ['my-channel','#','fa-tv','ჩემი არხი','nav_my_channel'],
-      ['reels','reels.html','fa-bolt','Reels','nav_reels'],
-      ['business','business.html','fa-store','Businesses','nav_business'],
-      ['marketplace','marketplace.html','fa-store-alt','Marketplace','nav_marketplace'],
-      ['events','events.html','fa-calendar-xmark','Events','nav_events'],
       ['messages','messages.html','fa-comment-dots','Messages','nav_messages'],
-      ['notifications','notifications.html','fa-bell','Notifications','nav_notifications'],
+      ['events','events.html','fa-calendar-xmark','ღონისძიებები','nav_events'],
+      ['business','business.html','fa-store','ბიზნესები','nav_business'],
+      ['rewards','rewards.html','fa-gift','რევორდები','nav_rewards'],
+      ['challenges','challenges.html','fa-flag-checkered','გამოწვევები','nav_challenges'],
       ['creators','creators.html','fa-camera-retro','Creators','nav_creators'],
-      ['rewards','rewards.html','fa-gift','Rewards','nav_rewards'],
-      ['gamification','gamification.html','fa-trophy','XP & Badges','nav_gamification'],
-      ['assistant','assistant.html','fa-robot','GeoAI','nav_assistant'],
       ['premium','premium.html','fa-crown','Premium 👑','nav_premium'],
-      ['challenges','challenges.html','fa-flag-checkered','Challenges','nav_challenges'],
-      ['services','services.html','fa-grip','Services','nav_services'],
-      ['realestate','real-estate.html','fa-house-chimney','Real Estate','nav_realestate'],
-      ['jobs','jobs.html','fa-briefcase','Jobs','nav_jobs'],
-      ['learning','learning.html','fa-graduation-cap','Learning','nav_learning'],
-      ['invite','invite.html','fa-user-plus','მოიწვიე','nav_invite'],
-      ['early-adopter','early-adopter.html','fa-seedling','Early Adopter','nav_early_adopter'],
-      ['trust','trust.html','fa-shield-halved','Trust / Safety','nav_trust'],
-      ['settings','settings.html','fa-gear','Settings','settings'],
-      ['admin','admin.html','fa-user-shield','Admin Panel','nav_admin']
+      ['invite','invite.html','fa-user-plus','მეგობრის მოწვევა','nav_invite'],
+      ['settings','settings.html','fa-gear','პარამეტრები','settings']
     ];
     var exp=false; try{ exp=localStorage.getItem('gh_nav_exp')==='1'; }catch(e){}
     function navItem(it,sec){
@@ -745,13 +732,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function createMenu(){
-    return '<div class="gh-create-menu" id="ghCreateMenu">'+
-      '<button data-create-post><i class="fas fa-pen"></i>Create post</button>'+
-      '<button data-create-story><i class="fas fa-bolt"></i>Add story</button>'+
-      '<a href="add-business.html"><i class="fas fa-store"></i>Add business/page</a>'+
-      '<a href="groups.html#create"><i class="fas fa-users"></i>Create group</a>'+
-      '<a href="events.html"><i class="fas fa-calendar-plus"></i>Create event</a>'+
-      '<a href="places.html"><i class="fas fa-map-marker-alt"></i>Add place</a>'+
+    return '<div class="gh-create-menu gh-create-menu-simple" id="ghCreateMenu">'+
+      '<button data-create-post class="gh-create-opt"><span class="gh-create-opt-icon">📝</span><span class="gh-create-opt-lbl">პოსტი</span></button>'+
+      '<button data-create-story class="gh-create-opt"><span class="gh-create-opt-icon">📸</span><span class="gh-create-opt-lbl">სტორი</span></button>'+
+      '<button data-checkin class="gh-create-opt" onclick="window.location.href=\'map.html\'"><span class="gh-create-opt-icon">📍</span><span class="gh-create-opt-lbl">Check-in</span></button>'+
     '</div>';
   }
 
