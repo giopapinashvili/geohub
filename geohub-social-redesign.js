@@ -5177,18 +5177,35 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function setReaction(postId, type, card){
     var u=authUser(); if(!u) return requireLogin();
     var f=fs(), reactionRef=f.doc(db(),'posts',postId,'reactions',u.uid), postRef=f.doc(db(),'posts',postId);
-    f.getDoc(reactionRef).then(function(snap){
-      var exists=snap.exists(), prev=exists ? (snap.data().type||'like') : '';
-      if(exists && prev===type){
-        // Same reaction clicked again → remove it (delta = -1)
-        return f.deleteDoc(reactionRef).then(function(){ return f.updateDoc(postRef,{likeCount:f.increment(-1), reactionCount:f.increment(-1)}).catch(function(){}); }).then(function(){ updateReactionUi(card,'',-1); });
-      }
-      var write=f.setDoc(reactionRef,{userId:u.uid,type:type,createdAt:f.serverTimestamp(),updatedAt:f.serverTimestamp()},{merge:true});
-      // New reaction → +1; changing type → 0 (count unchanged)
-      var delta=exists?0:1;
-      if(!exists) write=write.then(function(){ return f.updateDoc(postRef,{likeCount:f.increment(1), reactionCount:f.increment(1)}).catch(function(){}); });
-      return write.then(function(){ updateReactionUi(card,type,delta); });
-    }).catch(function(err){ console.error('setReaction',err); toast(_srt('soc_reaction_fail'),'error'); });
+
+    // Read current state from DOM instantly — no Firestore round-trip before UI update
+    var activeRxBtn = card && card.querySelector('[data-reaction].active');
+    var likeBtn     = card && card.querySelector('[data-like]');
+    var prevType    = activeRxBtn ? (activeRxBtn.dataset.reaction || '') :
+                      (likeBtn && likeBtn.classList.contains('active') ? 'like' : '');
+    var wasLiked    = !!prevType;
+    var removing    = wasLiked && prevType === type;
+    var newType     = removing ? '' : type;
+    var delta       = removing ? -1 : (wasLiked ? 0 : 1);
+
+    // Optimistic UI — instant feedback
+    updateReactionUi(card, newType, delta);
+
+    // Firestore write in background
+    var write;
+    if(removing){
+      write = f.deleteDoc(reactionRef)
+        .then(function(){ return f.updateDoc(postRef,{likeCount:f.increment(-1),reactionCount:f.increment(-1)}).catch(function(){}); });
+    } else {
+      write = f.setDoc(reactionRef,{userId:u.uid,type:type,createdAt:f.serverTimestamp(),updatedAt:f.serverTimestamp()},{merge:true});
+      if(!wasLiked) write = write.then(function(){ return f.updateDoc(postRef,{likeCount:f.increment(1),reactionCount:f.increment(1)}).catch(function(){}); });
+    }
+    write.catch(function(err){
+      // Revert optimistic change on failure
+      updateReactionUi(card, prevType, -delta);
+      toast(_srt('soc_reaction_fail'),'error');
+      console.error('setReaction',err);
+    });
   }
 
   function updateReactionUi(card,type,delta){
@@ -5438,21 +5455,35 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var u=authUser(); if(!u) return requireLogin();
     var f=fs(), rxRef=f.doc(db(),'posts',pid,'comments',cid,'reactions',u.uid);
     var commentRef=f.doc(db(),'posts',pid,'comments',cid);
-    f.getDoc(rxRef).then(function(snap){
-      var exists=snap.exists(), prev=exists?(snap.data()||{}).type||'like':'';
-      if(exists && prev===type){
-        return f.deleteDoc(rxRef).then(function(){
-          return f.updateDoc(commentRef,{reactionCount:f.increment(-1)}).catch(function(){});
-        }).then(function(){
-          if(btn){ btn.classList.remove('active'); btn.dataset.commentReaction='love'; btn.textContent='❤️ Like'; }
-        });
+
+    // Read current state from DOM instantly — no Firestore round-trip before UI update
+    var wasActive = btn && btn.classList.contains('active');
+    var prevType  = btn ? (btn.dataset.commentReaction || 'like') : 'like';
+    var prevLabel = btn ? btn.textContent : '❤️ Like';
+    var removing  = wasActive && prevType === type;
+
+    // Optimistic UI — instant feedback
+    if(btn){
+      if(removing){
+        btn.classList.remove('active'); btn.dataset.commentReaction='like'; btn.textContent='❤️ Like';
+      } else {
+        btn.classList.add('active'); btn.dataset.commentReaction=type; btn.textContent=(RX_EMOJIS[type]||'❤️');
       }
-      var write=f.setDoc(rxRef,{userId:u.uid,type:type,createdAt:f.serverTimestamp()},{merge:true});
-      if(!exists) write=write.then(function(){ return f.updateDoc(commentRef,{reactionCount:f.increment(1)}).catch(function(){}); });
-      return write.then(function(){
-        if(btn){ btn.classList.add('active'); btn.dataset.commentReaction=type; btn.textContent=RX_EMOJIS[type]+' 1'; }
-      });
-    }).catch(function(err){ toast(_srt('soc_reaction_fail'),'error'); });
+    }
+
+    // Firestore write in background
+    var write;
+    if(removing){
+      write = f.deleteDoc(rxRef).then(function(){ return f.updateDoc(commentRef,{reactionCount:f.increment(-1)}).catch(function(){}); });
+    } else {
+      write = f.setDoc(rxRef,{userId:u.uid,type:type,createdAt:f.serverTimestamp()},{merge:true});
+      if(!wasActive) write = write.then(function(){ return f.updateDoc(commentRef,{reactionCount:f.increment(1)}).catch(function(){}); });
+    }
+    write.catch(function(err){
+      // Revert optimistic change on failure
+      if(btn){ btn.classList.toggle('active',wasActive); btn.dataset.commentReaction=prevType; btn.textContent=prevLabel; }
+      toast(_srt('soc_reaction_fail'),'error');
+    });
   }
 
   // Voice comment recording state machine
