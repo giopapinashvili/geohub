@@ -2649,7 +2649,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           };
         }
       }
-    }).catch(function(){ onClose&&onClose(); });
+    }).catch(function(){ toast(typeof GHt==='function'?GHt('action_failed'):'Could not load highlights','error'); onClose&&onClose(); });
   }
 
   /* ── Phase 63: Highlights Strip on profile (injected by profile.js integration) */
