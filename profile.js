@@ -381,9 +381,10 @@
     // Profile visibility helpers
     var _privRel = own ? 'own' : 'stranger';
     var _privIsFollower = false;
+    var _profileLastPosts = null;
     function _ppAllowed(setting, rel) {
       if (!setting || setting === 'everyone') return true;
-      if (setting === 'nobody') return false;
+      if (setting === 'nobody' || setting === 'me') return false;
       if (setting === 'friends') return rel === 'friend';
       if (setting === 'followers') return rel === 'follower' || rel === 'friend';
       return true;
@@ -395,16 +396,27 @@
       var bioEl = document.querySelector('.profile-bio');
       var hlEl = document.querySelector('.profile-highlights');
       if (nameEl) {
-        var showName = _ppAllowed(priv.showFullName, rel);
+        var showName = _ppAllowed(priv.showFullName || user.nameVisibility || 'everyone', rel);
         nameEl.textContent = showName ? user.fullName : ('@' + (user.username || 'user'));
       }
       if (bioEl) {
-        var showBio = _ppAllowed(priv.showBio, rel);
-        bioEl.textContent = showBio ? (user.bio || _t('profile_no_bio')) : _t('profile_bio_private');
+        var showBio = _ppAllowed(priv.showBio || 'everyone', rel);
+        bioEl.textContent = showBio ? (user.bio || _t('profile_no_bio')) : (_t('profile_bio_private') || '🔒 ბიო კონფიდენციალურია');
       }
       if (hlEl) {
-        var showHl = _ppAllowed(priv.showHighlights, rel);
+        var showHl = _ppAllowed(priv.showHighlights || 'everyone', rel);
         hlEl.style.display = showHl ? '' : 'none';
+      }
+      if (_profileLastPosts !== null) {
+        var _postsPref = priv.postsPref || 'public';
+        var _canSee = _postsPref === 'public' || rel === 'friend' || (_postsPref === 'followers' && (rel === 'follower' || rel === 'friend'));
+        if (!_canSee) {
+          var _postsTab = document.getElementById('tab-posts');
+          if (_postsTab) {
+            _postsTab.innerHTML = '<div style="padding:48px 24px;text-align:center;color:var(--gh-muted)"><i class="fas fa-lock" style="font-size:2rem;margin-bottom:12px;display:block;opacity:.5"></i><div style="font-weight:600;margin-bottom:4px">პოსტები კონფიდენციალურია</div><div style="font-size:.82rem">მხოლოდ მეგობრები ხედავენ</div></div>';
+            var _ptCnt = document.querySelector('.ptab[data-tab="posts"] .tab-count'); if (_ptCnt) _ptCnt.textContent = '🔒';
+          }
+        }
       }
     }
     if (!own) _applyProfileVisibility('stranger');
@@ -1027,6 +1039,7 @@
       var _lastProfilePostsKey = '';
       var _profilePostsTimer = null;
       window.GeoSocial.listenUserPosts(user.uid, function(posts) {
+        _profileLastPosts = posts;
         // Debounce: rapid Firestore updates collapse into one render
         if (_profilePostsTimer) clearTimeout(_profilePostsTimer);
         _profilePostsTimer = setTimeout(function() {
@@ -2208,7 +2221,35 @@
       + '</div></div>'
       + '</div>'
 
-      + '<div class="profile-edit-section">'+ '<div class="profile-edit-section-title"><i class="fas fa-shield-alt"></i> კონფიდენციალურობა</div>'+ '<div class="profile-edit-field"><label>მესიჯები — ვინ შეიძლება მოგწეროს?</label><select class="profile-edit-input" id="pePrivMsg">'+ '<option value="everyone"'+(cp.messagingPref!=='friends'&&cp.messagingPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="friends"'+(cp.messagingPref==='friends'?' selected':'')+'>მხოლოდ მეგობრები</option>'+ '<option value="nobody"'+(cp.messagingPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>ფოლოუ — ვინ შეიძლება გამოგყვეს?</label><select class="profile-edit-input" id="pePrivFollow">'+ '<option value="everyone"'+(cp.followPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="nobody"'+(cp.followPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>მეგობრობა — ვინ გამოგიგზავნოს მოთხოვნა?</label><select class="profile-edit-input" id="pePrivFriend">'+ '<option value="everyone"'+(cp.friendRequestPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="nobody"'+(cp.friendRequestPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>პოსტები — ვინ ხედავს შენს პოსტებს?</label><select class="profile-edit-input" id="pePrivPosts">'+ '<option value="public"'+(cp.postsPref!=='friends'?' selected':'')+'>ყველა (Public)</option>'+ '<option value="friends"'+(cp.postsPref==='friends'?' selected':'')+'>მხოლოდ მეგობრები</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>სტორები — ვინ ხედავს?</label><select class="profile-edit-input" id="pePrivStory">'+ '<option value="everyone"'+(cp.storyPref!=='close_friends'&&cp.storyPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="close_friends"'+(cp.storyPref==='close_friends'?' selected':'')+'>Close Friends</option>'+ '<option value="nobody"'+(cp.storyPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'+ '</div>'
+      + '<div class="profile-edit-section">'+ '<div class="profile-edit-section-title"><i class="fas fa-shield-alt"></i> კონფიდენციალურობა</div>'+ '<div class="profile-edit-field"><label>მესიჯები — ვინ შეიძლება მოგწეროს?</label><select class="profile-edit-input" id="pePrivMsg">'+ '<option value="everyone"'+(cp.messagingPref!=='friends'&&cp.messagingPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="friends"'+(cp.messagingPref==='friends'?' selected':'')+'>მხოლოდ მეგობრები</option>'+ '<option value="nobody"'+(cp.messagingPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>ფოლოუ — ვინ შეიძლება გამოგყვეს?</label><select class="profile-edit-input" id="pePrivFollow">'+ '<option value="everyone"'+(cp.followPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="nobody"'+(cp.followPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>მეგობრობა — ვინ გამოგიგზავნოს მოთხოვნა?</label><select class="profile-edit-input" id="pePrivFriend">'+ '<option value="everyone"'+(cp.friendRequestPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="nobody"'+(cp.friendRequestPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>პოსტები — ვინ ხედავს შენს პოსტებს?</label><select class="profile-edit-input" id="pePrivPosts">'+ '<option value="public"'+(cp.postsPref!=='friends'?' selected':'')+'>ყველა (Public)</option>'+ '<option value="friends"'+(cp.postsPref==='friends'?' selected':'')+'>მხოლოდ მეგობრები</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>სტორები — ვინ ხედავს?</label><select class="profile-edit-input" id="pePrivStory">'+ '<option value="everyone"'+(cp.storyPref!=='close_friends'&&cp.storyPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="close_friends"'+(cp.storyPref==='close_friends'?' selected':'')+'>Close Friends</option>'+ '<option value="nobody"'+(cp.storyPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'
+      + '<div class="profile-edit-field"><label>ბიო — ვინ ხედავს?</label><select class="profile-edit-input" id="pePrivBio">'
+      + '<option value="everyone"'+(cp.showBio!=='followers'&&cp.showBio!=='friends'&&cp.showBio!=='nobody'?' selected':'')+'>ყველა</option>'
+      + '<option value="followers"'+(cp.showBio==='followers'?' selected':'')+'>ფოლოუერები</option>'
+      + '<option value="friends"'+(cp.showBio==='friends'?' selected':'')+'>მხოლოდ მეგობრები</option>'
+      + '<option value="nobody"'+(cp.showBio==='nobody'?' selected':'')+'>არავინ</option>'
+      + '</select></div>'
+      + '<div class="profile-edit-field"><label>ჰაილაითები — ვინ ხედავს?</label><select class="profile-edit-input" id="pePrivHl">'
+      + '<option value="everyone"'+(cp.showHighlights!=='followers'&&cp.showHighlights!=='friends'&&cp.showHighlights!=='nobody'?' selected':'')+'>ყველა</option>'
+      + '<option value="followers"'+(cp.showHighlights==='followers'?' selected':'')+'>ფოლოუერები</option>'
+      + '<option value="friends"'+(cp.showHighlights==='friends'?' selected':'')+'>მხოლოდ მეგობრები</option>'
+      + '<option value="nobody"'+(cp.showHighlights==='nobody'?' selected':'')+'>არავინ</option>'
+      + '</select></div>'
+      + '<div class="profile-edit-field"><label>სტანდარტული პოსტის აუდიტორია</label><select class="profile-edit-input" id="pePrivDPA">'
+      + '<option value="public"'+(cp.defaultPostAudience!=='followers'&&cp.defaultPostAudience!=='friends'?' selected':'')+'>ყველა</option>'
+      + '<option value="followers"'+(cp.defaultPostAudience==='followers'?' selected':'')+'>ფოლოუერები</option>'
+      + '<option value="friends"'+(cp.defaultPostAudience==='friends'?' selected':'')+'>მხოლოდ მეგობრები</option>'
+      + '</select></div>'
+      + '<div class="profile-edit-field"><label>სქესის ფილტრი <span style="font-size:.73rem;color:var(--gh-muted)">— ვის ჩაუჩნდება შენი პოსტები</span></label><select class="profile-edit-input" id="pePrivGender">'
+      + '<option value="all"'+(cp.postGenderFilter!=='male'&&cp.postGenderFilter!=='female'?' selected':'')+'>ყველა სქესი</option>'
+      + '<option value="male"'+(cp.postGenderFilter==='male'?' selected':'')+'>კაცი</option>'
+      + '<option value="female"'+(cp.postGenderFilter==='female'?' selected':'')+'>ქალი</option>'
+      + '</select></div>'
+      + '<div class="profile-edit-field"><label>ასაკის ფილტრი <span style="font-size:.73rem;color:var(--gh-muted)">— ვის ჩაუჩნდება შენი პოსტები</span></label><select class="profile-edit-input" id="pePrivAge">'
+      + '<option value="all"'+(cp.postAgeFilter!=='18plus'&&cp.postAgeFilter!=='25_45'?' selected':'')+'>ყველა ასაკი</option>'
+      + '<option value="18plus"'+(cp.postAgeFilter==='18plus'?' selected':'')+'>18+</option>'
+      + '<option value="25_45"'+(cp.postAgeFilter==='25_45'?' selected':'')+'>25–45</option>'
+      + '</select></div>'
+      + '</div>'
       + '</div>'/* end body */
       + '<div class="profile-edit-footer"><button class="btn btn-ghost btn-sm" id="peCancel">Cancel</button><button class="btn btn-primary btn-sm" id="peSaveBtn"><i class="fas fa-check"></i> Save Changes</button></div>'
       + '</div>';/* end sheet */
@@ -2363,8 +2404,13 @@
           messagingPref:     (document.getElementById('pePrivMsg')    || {}).value || 'everyone',
           followPref:        (document.getElementById('pePrivFollow') || {}).value || 'everyone',
           friendRequestPref: (document.getElementById('pePrivFriend') || {}).value || 'everyone',
-          postsPref:         (document.getElementById('pePrivPosts')  || {}).value || 'public',
-          storyPref:         (document.getElementById('pePrivStory')  || {}).value || 'everyone'
+          postsPref:         (document.getElementById('pePrivPosts')    || {}).value || 'public',
+          storyPref:         (document.getElementById('pePrivStory')    || {}).value || 'everyone',
+          showBio:           (document.getElementById('pePrivBio')      || {}).value || 'everyone',
+          showHighlights:    (document.getElementById('pePrivHl')       || {}).value || 'everyone',
+          defaultPostAudience: (document.getElementById('pePrivDPA')    || {}).value || 'public',
+          postGenderFilter:  (document.getElementById('pePrivGender')   || {}).value || 'all',
+          postAgeFilter:     (document.getElementById('pePrivAge')      || {}).value || 'all'
         },
         updatedAt:   GF.fs.serverTimestamp()
       };
