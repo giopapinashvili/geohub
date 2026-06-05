@@ -111,73 +111,73 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}
 <!-- Dashboard (logged-in) -->
 <main id="invDashboard" class="inv-page" style="display:none">
   <div class="inv-wrap">
-    <div class="inv-badge"><i class="fas fa-user-plus"></i> Referral Program</div>
-    <h1 class="inv-title">მოიწვიე <span>მეგობრები</span><br>მიიღე GeoPoints</h1>
-    <p class="inv-sub">ყოველი მეგობარი, ვინც შენი ბმულით დარეგისტრირდება, გაძლევს <strong style="color:#10e0a0">500 GeoPoint</strong>. მეგობარიც მიიღებს 100 GeoPoint-ს მისასალმებლად.</p>
+    <div class="inv-badge"><i class="fas fa-user-plus"></i> <span data-i18n="inv_referral_prog">Referral Program</span></div>
+    <h1 class="inv-title"><span data-i18n="inv_title">მოიწვიე მეგობრები</span><br><span data-i18n="inv_title_earn">მიიღე GeoPoints</span></h1>
+    <p class="inv-sub" data-i18n="inv_sub">ყოველი მეგობარი, ვინც შენი ბმულით დარეგისტრირდება, გაძლევს <strong style="color:#10e0a0">500 GeoPoint</strong>. მეგობარიც მიიღებს 100 GeoPoint-ს მისასალმებლად.</p>
 
     <div class="inv-link-card">
-      <div class="inv-link-label"><i class="fas fa-link"></i> შენი პირადი ბმული</div>
+      <div class="inv-link-label"><i class="fas fa-link"></i> <span data-i18n="inv_link_label">შენი პირადი ბმული</span></div>
       <div class="inv-link-row">
         <input id="invLinkInput" class="inv-link-input" readonly value="" onclick="this.select()" aria-label="Invite link">
-        <button class="inv-copy-btn" id="invCopyBtn"><i class="fas fa-copy"></i> კოპირება</button>
+        <button class="inv-copy-btn" id="invCopyBtn"><i class="fas fa-copy"></i> <span data-i18n="inv_copy_btn">კოპირება</span></button>
       </div>
       <button class="inv-share-btn" id="invShareBtn">
-        <i class="fas fa-share-nodes"></i> გაუზიარე მეგობრებს
+        <i class="fas fa-share-nodes"></i> <span data-i18n="inv_share_btn">გაუზიარე მეგობრებს</span>
       </button>
     </div>
 
     <div class="inv-stats-grid">
       <div class="inv-stat-card">
         <div class="inv-stat-num" id="invStatJoined">—</div>
-        <div class="inv-stat-label">მეგობარი შემოვიდა</div>
+        <div class="inv-stat-label" data-i18n="inv_stat_joined">მეგობარი შემოვიდა</div>
       </div>
       <div class="inv-stat-card">
         <div class="inv-stat-num" id="invStatPoints">—</div>
-        <div class="inv-stat-label">GeoPoints გამომუშავდა</div>
+        <div class="inv-stat-label" data-i18n="inv_stat_points">GeoPoints გამომუშავდა</div>
       </div>
     </div>
 
     <div class="inv-milestones">
-      <div class="inv-milestones-title"><i class="fas fa-trophy" style="color:#f59e0b"></i> მიღწევები</div>
+      <div class="inv-milestones-title"><i class="fas fa-trophy" style="color:#f59e0b"></i> <span data-i18n="inv_milestones">მიღწევები</span></div>
       <div class="inv-milestone">
         <div class="inv-milestone-icon" id="ms1Icon"><i class="fas fa-star"></i></div>
         <div class="inv-milestone-info">
-          <div class="inv-milestone-name">პირველი მოწვევა</div>
-          <div class="inv-milestone-sub">1 მეგობარი შემოვიდა → 500 GeoPoint</div>
+          <div class="inv-milestone-name" data-i18n="inv_ms1_name">პირველი მოწვევა</div>
+          <div class="inv-milestone-sub" data-i18n="inv_ms1_sub">1 მეგობარი შემოვიდა → 500 GeoPoint</div>
         </div>
-        <span class="inv-milestone-badge" id="ms1Badge">დასრულება</span>
+        <span class="inv-milestone-badge" id="ms1Badge"></span>
       </div>
       <div class="inv-milestone">
         <div class="inv-milestone-icon" id="ms3Icon"><i class="fas fa-fire"></i></div>
         <div class="inv-milestone-info">
-          <div class="inv-milestone-name">3 მეგობარი</div>
-          <div class="inv-milestone-sub">3 მეგობარი → 1500 GeoPoint სულ</div>
+          <div class="inv-milestone-name" data-i18n="inv_ms3_name">3 მეგობარი</div>
+          <div class="inv-milestone-sub" data-i18n="inv_ms3_sub">3 მეგობარი → 1500 GeoPoint სულ</div>
         </div>
-        <span class="inv-milestone-badge" id="ms3Badge">დასრულება</span>
+        <span class="inv-milestone-badge" id="ms3Badge"></span>
       </div>
       <div class="inv-milestone">
         <div class="inv-milestone-icon" id="ms5Icon"><i class="fas fa-crown"></i></div>
         <div class="inv-milestone-info">
-          <div class="inv-milestone-name">5 მეგობარი — Premium!</div>
-          <div class="inv-milestone-sub">5 მეგობარი → 1 თვე Premium ბეჯი</div>
+          <div class="inv-milestone-name" data-i18n="inv_ms5_name">5 მეგობარი — Premium!</div>
+          <div class="inv-milestone-sub" data-i18n="inv_ms5_sub">5 მეგობარი → 1 თვე Premium ბეჯი</div>
         </div>
-        <span class="inv-milestone-badge" id="ms5Badge">დასრულება</span>
+        <span class="inv-milestone-badge" id="ms5Badge"></span>
       </div>
     </div>
 
     <div class="inv-how">
-      <div class="inv-how-title">როგორ მუშაობს</div>
+      <div class="inv-how-title" data-i18n="inv_how_title">როგორ მუშაობს</div>
       <div class="inv-how-step">
         <div class="inv-how-num">1</div>
-        <div class="inv-how-text"><strong>გაუზიარე ბმული</strong> — გადაუგზავნე მეგობარს WhatsApp-ზე, Telegram-ზე ან სხვა სოციალური ქსელით.</div>
+        <div class="inv-how-text"><strong data-i18n="inv_how1_title">გაუზიარე ბმული</strong> <span data-i18n="inv_how1_desc">— გადაუგზავნე მეგობარს WhatsApp-ზე, Telegram-ზე ან სხვა სოციალური ქსელით.</span></div>
       </div>
       <div class="inv-how-step">
         <div class="inv-how-num">2</div>
-        <div class="inv-how-text"><strong>მეგობარი დარეგისტრირდება</strong> — ბმულით შემოსულმა მეგობარმა შექმნა GeoHub ანგარიში.</div>
+        <div class="inv-how-text"><strong data-i18n="inv_how2_title">მეგობარი დარეგისტრირდება</strong> <span data-i18n="inv_how2_desc">— ბმულით შემოსულმა მეგობარმა შექმნა GeoHub ანგარიში.</span></div>
       </div>
       <div class="inv-how-step">
         <div class="inv-how-num">3</div>
-        <div class="inv-how-text"><strong>ორივე იღებთ GeoPoints</strong> — შენ იღებ 500 GeoPoint-ს, მეგობარი კი 100 GeoPoint-ს მისასალმებლად.</div>
+        <div class="inv-how-text"><strong data-i18n="inv_how3_title">ორივე იღებთ GeoPoints</strong> <span data-i18n="inv_how3_desc">— შენ იღებ 500 GeoPoint-ს, მეგობარი კი 100 GeoPoint-ს მისასალმებლად.</span></div>
       </div>
     </div>
   </div>
@@ -188,27 +188,27 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}
   <div class="inv-landing">
     <div class="inv-card">
       <div class="inv-card-logo">🌍</div>
-      <div class="inv-card-badge"><i class="fas fa-user-plus"></i> პირადი მოწვევა</div>
-      <h1 id="invLandTitle">მეგობარმა GeoHub-ზე მოგიწვია</h1>
-      <p class="inv-card-sub">საქართველოს ლოკალური სოციალური პლათფორმა — გამოიძიე ადგილები, გამოიმუშავე ჯილდოები და დაუკავშირდი ქალაქს.</p>
+      <div class="inv-card-badge"><i class="fas fa-user-plus"></i> <span data-i18n="inv_land_badge">პირადი მოწვევა</span></div>
+      <h1 id="invLandTitle" data-i18n="inv_land_title">მეგობარმა GeoHub-ზე მოგიწვია</h1>
+      <p class="inv-card-sub" data-i18n="inv_land_sub">საქართველოს ლოკალური სოციალური პლათფორმა — გამოიძიე ადგილები, გამოიმუშავე ჯილდოები და დაუკავშირდი ქალაქს.</p>
       <div class="inv-perks">
         <div class="inv-perk">
           <div class="perk-icon" style="background:rgba(16,185,129,.15);color:#34d399"><i class="fas fa-compass"></i></div>
-          <span>აღმოაჩინე ფარული ადგილები შენს გარშემო</span>
+          <span data-i18n="inv_perk1">აღმოაჩინე ფარული ადგილები შენს გარშემო</span>
         </div>
         <div class="inv-perk">
           <div class="perk-icon" style="background:rgba(245,158,11,.15);color:#fbbf24"><i class="fas fa-gift"></i></div>
-          <span>100 GeoPoint სასაჩუქრო ბონუსი — მოწვევის სახელობით</span>
+          <span data-i18n="inv_perk2">100 GeoPoint სასაჩუქრო ბონუსი — მოწვევის სახელობით</span>
         </div>
         <div class="inv-perk">
           <div class="perk-icon" style="background:rgba(59,130,246,.15);color:#60a5fa"><i class="fas fa-users"></i></div>
-          <span>შეუერთდი ჯგუფებს და გაიცანი ახალი ადამიანები</span>
+          <span data-i18n="inv_perk3">შეუერთდი ჯგუფებს და გაიცანი ახალი ადამიანები</span>
         </div>
       </div>
       <a id="invJoinBtn" href="auth.html?tab=signup" class="inv-join-btn">
-        <i class="fas fa-user-plus"></i> უფასო ანგარიშის შექმნა
+        <i class="fas fa-user-plus"></i> <span data-i18n="inv_join_btn">უფასო ანგარიშის შექმნა</span>
       </a>
-      <p class="inv-login-link">უკვე გაქვს ანგარიში? <a href="auth.html">შეხვიდე</a></p>
+      <p class="inv-login-link"><span data-i18n="inv_have_acct">უკვე გაქვს ანგარიში?</span> <a href="auth.html" data-i18n="inv_sign_in">შეხვიდე</a></p>
     </div>
   </div>
 </div>
@@ -217,6 +217,8 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}
 <script>
 (function(){
   'use strict';
+
+  function _t(k, fb) { return window.GHt ? window.GHt(k) : (fb || k); }
 
   var _ref = null;
   try {
@@ -247,7 +249,7 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}
 
   function copyText(text){
     if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).then(function(){ toast('ბმული კოპირებულია!'); }).catch(function(){
+      navigator.clipboard.writeText(text).then(function(){ toast(_t('inv_copied', 'ბმული კოპირებულია!')); }).catch(function(){
         fallback(text);
       });
     } else { fallback(text); }
@@ -256,7 +258,7 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}
     var ta = document.createElement('textarea'); ta.value=text;
     ta.style.cssText='position:fixed;opacity:0;top:0;left:0'; document.body.appendChild(ta);
     ta.focus(); ta.select(); try{ document.execCommand('copy'); } catch(e){}
-    document.body.removeChild(ta); toast('ბმული კოპირებულია!');
+    document.body.removeChild(ta); toast(_t('inv_copied', 'ბმული კოპირებულია!'));
   }
   function toast(msg){
     var t = document.getElementById('invToast');
@@ -277,7 +279,7 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}
       var done  = count >= m.req;
       if(icon)  icon.className  = 'inv-milestone-icon ' + (done ? 'done' : 'pending');
       if(badge) badge.className = 'inv-milestone-badge ' + (done ? 'done' : 'locked');
-      if(badge) badge.textContent = done ? '✓ შესრულდა' : m.req + ' საჭიროა';
+      if(badge) badge.textContent = done ? _t('inv_ms_done', '✓ შესრულდა') : m.req + ' ' + _t('inv_ms_needed', 'საჭიროა');
     });
   }
 
@@ -297,7 +299,7 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}
       if(copyBtn) copyBtn.onclick = function(){ copyText(link); };
       if(shareBtn) shareBtn.onclick = function(){
         if(navigator.share){
-          navigator.share({ title:'GeoHub-ზე შემოდი!', text:'მოწვიე ჩემი ბმულით და მიიღე 100 GeoPoint ბონუსი!', url:link })
+          navigator.share({ title: _t('inv_share_title', 'GeoHub-ზე შემოდი!'), text: _t('inv_share_text', 'მოწვიე ჩემი ბმულით და მიიღე 100 GeoPoint ბონუსი!'), url:link })
             .catch(function(){ copyText(link); });
         } else { copyText(link); }
       };
