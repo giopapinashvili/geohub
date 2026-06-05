@@ -31,29 +31,14 @@
     default:       { color: '#6c757d', icon: '📍',  label: 'სხვა' }
   };
 
-  // Inline raster tile styles — no external style JSON, sprite, or glyph fetches needed
-  const _RASTER_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+  // Vector tile styles (GL) — text labels stay upright at any rotation angle
   const TILE_LAYERS = {
     dark: {
-      style: {
-        version: 8,
-        sources: { carto: { type: 'raster', tileSize: 256, maxzoom: 20, attribution: _RASTER_ATTR,
-          tiles: ['https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-                  'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-                  'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'] } },
-        layers: [{ id: 'carto', type: 'raster', source: 'carto' }]
-      },
+      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
       label: '🌑 ბნელი'
     },
     streets: {
-      style: {
-        version: 8,
-        sources: { carto: { type: 'raster', tileSize: 256, maxzoom: 20, attribution: _RASTER_ATTR,
-          tiles: ['https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-                  'https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png',
-                  'https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png'] } },
-        layers: [{ id: 'carto', type: 'raster', source: 'carto' }]
-      },
+      style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
       label: '🗺️ ქუჩები'
     }
   };
@@ -2241,18 +2226,13 @@
     map.fitBounds([[40.0, 41.0], [46.7, 43.5]], { padding: 40, duration: 0 });
     window._ghMap = map;
 
-    // Clamp bearing to ±90° so raster tile text never appears upside-down
-    map.on('rotate', function() {
-      var b = map.getBearing();
-      if (b > 90)  map.jumpTo({ bearing: 90 });
-      else if (b < -90) map.jumpTo({ bearing: -90 });
-    });
+    // Vector tiles keep labels upright — no bearing clamp needed
 
-    // Fallback: if style fails within 8s, switch to OSM raster
+    // Fallback: if GL vector style fails within 15s, switch to OSM raster
     const _stFbTimer = setTimeout(function(){
       try { if (map.isStyleLoaded()) return; } catch(e) {}
       map.setStyle({version:8,sources:{osm:{type:'raster',tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],tileSize:256,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxzoom:19}},layers:[{id:'osm',type:'raster',source:'osm'}]});
-    }, 8000);
+    }, 15000);
     map.once('load', function(){ clearTimeout(_stFbTimer); });
 
     // Navigation control (zoom + compass + pitch visualizer)
