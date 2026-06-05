@@ -3559,12 +3559,13 @@
           if (callback) callback(null);
           return;
         }
-        var fd = new FormData();
-        fd.append('file', file);
-        fd.append('upload_preset', cfg.uploadPreset);
-        fd.append('folder', 'group_covers');
-        fetch('https://api.cloudinary.com/v1_1/' + cfg.cloudName + '/image/upload', { method: 'POST', body: fd })
-          .then(function (r) { return r.json(); })
+        compressImageBlob(file).then(function(compressed) {
+          var fd = new FormData();
+          fd.append('file', compressed || file);
+          fd.append('upload_preset', cfg.uploadPreset);
+          fd.append('folder', 'group_covers');
+          return fetch('https://api.cloudinary.com/v1_1/' + cfg.cloudName + '/image/upload', { method: 'POST', body: fd });
+        }).then(function (r) { return r.json(); })
           .then(function (data) {
             if (!data.secure_url) throw new Error('No URL from Cloudinary');
             return updateDoc(doc(db, 'groups', groupId), { coverUrl: data.secure_url, updatedAt: serverTimestamp() })
@@ -3901,12 +3902,15 @@
           if (callback) callback(null);
           return;
         }
-        var fd = new FormData();
-        fd.append('file', file);
-        fd.append('upload_preset', cfg.uploadPreset);
-        fd.append('folder', 'group_files');
         var resourceType = file.type && file.type.startsWith('image') ? 'image' : 'raw';
-        fetch('https://api.cloudinary.com/v1_1/' + cfg.cloudName + '/' + resourceType + '/upload', { method: 'POST', body: fd })
+        var uploadReady = (resourceType === 'image') ? compressImageBlob(file) : Promise.resolve(file);
+        uploadReady.catch(function(){ return file; }).then(function(compressed) {
+          var fd = new FormData();
+          fd.append('file', compressed || file);
+          fd.append('upload_preset', cfg.uploadPreset);
+          fd.append('folder', 'group_files');
+          return fetch('https://api.cloudinary.com/v1_1/' + cfg.cloudName + '/' + resourceType + '/upload', { method: 'POST', body: fd });
+        })
           .then(function (r) { return r.json(); })
           .then(function (data) {
             if (!data.secure_url) throw new Error('No URL');
