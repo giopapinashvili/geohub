@@ -418,6 +418,30 @@
           }
         }
       }
+      // Friends list visibility
+      var _canSeeFriends = _ppAllowed(priv.showFriendsList || 'everyone', rel);
+      if (!_canSeeFriends) {
+        window._ghFriendsListBlocked = true;
+        var _ftEl = document.getElementById('tab-friends');
+        if (_ftEl) _ftEl.innerHTML = '<div style="padding:48px 24px;text-align:center;color:var(--gh-muted)"><i class="fas fa-lock" style="font-size:2rem;margin-bottom:12px;display:block;opacity:.5"></i><div style="font-weight:600;margin-bottom:4px">მეგობრების სია კონფიდენციალურია</div><div style="font-size:.82rem">მხოლოდ საერთო მეგობრები ჩანს</div></div>';
+      } else {
+        window._ghFriendsListBlocked = false;
+      }
+      // Followers/following list visibility — count stays, click is blocked
+      var _canSeeFollowers = _ppAllowed(priv.showFollowersList || 'everyone', rel);
+      if (!_canSeeFollowers) {
+        window._ghFollowersListBlocked = true;
+        $$('.profile-stats-bar .pstat').forEach(function(pst) {
+          var lbl = (pst.querySelector('.pstat-label') || {}).textContent || '';
+          if (lbl === 'Followers' || lbl === 'Following') {
+            pst.style.cursor = 'default';
+            delete pst.dataset.pfModal;
+            pst.title = '🔒 სია კონფიდენციალურია';
+          }
+        });
+      } else {
+        window._ghFollowersListBlocked = false;
+      }
     }
     if (!own) _applyProfileVisibility('stranger');
 
@@ -977,6 +1001,7 @@
       }
       function rebuildFriendsTab() {
         if (!friendsTab) return;
+        if (window._ghFriendsListBlocked) return; // privacy: list hidden, already showing locked state
         const incomingHtml = friendsTab.dataset.incomingHtml || '';
         const sentHtml = friendsTab.dataset.sentHtml || '';
         const friendsListHtml = friendsTab.dataset.friendsListHtml || '';
@@ -2260,9 +2285,19 @@
       + '<option value="18plus"'+(cp.postAgeFilter==='18plus'?' selected':'')+'>18+</option>'
       + '<option value="25_45"'+(cp.postAgeFilter==='25_45'?' selected':'')+'>25–45</option>'
       + '</select></div>'
+      + '<div class="profile-edit-field"><label>მეგობრების სია — ვინ ხედავს? <span style="font-size:.73rem;color:var(--gh-muted)">(რაოდენობა ყველას ეჩვენება)</span></label><select class="profile-edit-input" id="pePrivFriendsList">'
+      + '<option value="everyone"'+(cp.showFriendsList!=='friends'&&cp.showFriendsList!=='nobody'?' selected':'')+'>ყველა</option>'
+      + '<option value="friends"'+(cp.showFriendsList==='friends'?' selected':'')+'>მხოლოდ მეგობრები</option>'
+      + '<option value="nobody"'+(cp.showFriendsList==='nobody'?' selected':'')+'>არავინ</option>'
+      + '</select></div>'
+      + '<div class="profile-edit-field"><label>გამომწერების სია — ვინ ხედავს? <span style="font-size:.73rem;color:var(--gh-muted)">(რაოდენობა ყველას ეჩვენება)</span></label><select class="profile-edit-input" id="pePrivFollowersList">'
+      + '<option value="everyone"'+(cp.showFollowersList!=='friends'&&cp.showFollowersList!=='nobody'?' selected':'')+'>ყველა</option>'
+      + '<option value="friends"'+(cp.showFollowersList==='friends'?' selected':'')+'>მხოლოდ მეგობრები</option>'
+      + '<option value="nobody"'+(cp.showFollowersList==='nobody'?' selected':'')+'>არავინ</option>'
+      + '</select></div>'
       + '</div>'
       + '</div>'/* end body */
-      + '<div class="profile-edit-footer"><button class="btn btn-ghost btn-sm" id="peCancel">Cancel</button><button class="btn btn-primary btn-sm" id="peSaveBtn"><i class="fas fa-check"></i> Save Changes</button></div>'
+      + '<div class="profile-edit-footer"><button class="btn btn-ghost btn-sm" id="peCancel">გაუქმება</button><button class="btn btn-primary btn-sm" id="peSaveBtn"><i class="fas fa-check"></i> შენახვა</button></div>'
       + '</div>';/* end sheet */
 
     document.body.appendChild(overlay);
@@ -2421,7 +2456,9 @@
           showHighlights:    (document.getElementById('pePrivHl')       || {}).value || 'everyone',
           defaultPostAudience: (document.getElementById('pePrivDPA')    || {}).value || 'public',
           postGenderFilter:  (document.getElementById('pePrivGender')   || {}).value || 'all',
-          postAgeFilter:     (document.getElementById('pePrivAge')      || {}).value || 'all'
+          postAgeFilter:     (document.getElementById('pePrivAge')      || {}).value || 'all',
+          showFriendsList:   (document.getElementById('pePrivFriendsList') || {}).value || 'everyone',
+          showFollowersList: (document.getElementById('pePrivFollowersList') || {}).value || 'everyone'
         },
         updatedAt:   GF.fs.serverTimestamp()
       };

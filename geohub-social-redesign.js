@@ -685,12 +685,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       ['places','places.html','fa-location-dot','Places','nav_places']
     ];
     var SECONDARY=[
-      ['messages','messages.html','fa-comment-dots','Messages','nav_messages'],
+      ['place-updates','place-updates.html','fa-bullhorn','ადგილის სიახლეები','nav_place_updates'],
+      ['messages','messages.html','fa-comment-dots','ჩატი','nav_messages'],
       ['events','events.html','fa-calendar-xmark','ღონისძიებები','nav_events'],
       ['business','business.html','fa-store','ბიზნესები','nav_business'],
       ['rewards','rewards.html','fa-gift','რევორდები','nav_rewards'],
       ['challenges','challenges.html','fa-flag-checkered','გამოწვევები','nav_challenges'],
-      ['creators','creators.html','fa-camera-retro','Creators','nav_creators'],
+      ['creators','creators.html','fa-camera-retro','შემქმნელები','nav_creators'],
       ['premium','premium.html','fa-crown','Premium 👑','nav_premium'],
       ['invite','invite.html','fa-user-plus','მეგობრის მოწვევა','nav_invite'],
       ['settings','settings.html','fa-gear','პარამეტრები','settings']
