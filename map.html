@@ -127,13 +127,13 @@
         </button>
         <button class="disc-card" id="discTrending" onclick="window.discoverTrending()">
           <span class="disc-card-icon">🔥</span>
-          <span class="disc-card-title">Trending</span>
+          <span class="disc-card-title">ტრენდული</span>
           <span class="disc-card-sub" id="discTrendSub">დღეს</span>
         </button>
         <button class="disc-card" id="discGems" onclick="window.discoverGems()">
           <span class="disc-card-icon">💎</span>
-          <span class="disc-card-title">Hidden</span>
-          <span class="disc-card-sub">Gems</span>
+          <span class="disc-card-title">ფარული</span>
+          <span class="disc-card-sub">ადგილები</span>
         </button>
       </div>
       <!-- Mood quick-filters -->
@@ -150,27 +150,27 @@
 
     <!-- Camera mode buttons -->
     <div class="map-camera-wrap">
-      <button class="map-camera-btn active" data-mode="explore" onclick="setCameraMode('explore')">🔍 Explore</button>
-      <button class="map-camera-btn" data-mode="navigation" onclick="setCameraMode('navigation')">🧭 Navigate</button>
-      <button class="map-camera-btn" data-mode="cinematic" onclick="setCameraMode('cinematic')">🎬 Cinematic</button>
+      <button class="map-camera-btn active" data-mode="explore" onclick="setCameraMode('explore')">🔍 გამოიკვლიე</button>
+      <button class="map-camera-btn" data-mode="navigation" onclick="setCameraMode('navigation')">🧭 ნავიგაცია</button>
+      <button class="map-camera-btn" data-mode="cinematic" onclick="setCameraMode('cinematic')">🎬 კინო</button>
     </div>
 
     <!-- Floating buttons -->
     <div style="position:absolute;top:14px;left:14px;z-index:1001;display:flex;gap:6px;flex-wrap:wrap">
       <button class="map-toggle-btn" id="legendBtn" onclick="document.getElementById('legend').classList.toggle('open')">
-        <i class="fas fa-layer-group"></i> Legend
+        <i class="fas fa-layer-group"></i> ლეგენდა
       </button>
       <button class="map-toggle-btn" id="heatmapBtn" onclick="toggleHeatmap()">
-        <i class="fas fa-fire"></i> Heatmap
+        <i class="fas fa-fire"></i> სიმჭ.
       </button>
       <button class="map-toggle-btn" id="eventsToggleBtn" onclick="toggleEventsLayer()">
-        🎉 Events
+        🎉 ივენთ.
       </button>
       <button class="map-toggle-btn" id="weekendToggleBtn" onclick="toggleThisWeekend()" style="display:none">
-        📅 This Weekend
+        📅 შ-კ.
       </button>
       <button class="map-toggle-btn" id="vidMapToggle">
-        🎬 Videos
+        🎬 ვიდეო
       </button>
     </div>
 

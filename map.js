@@ -43,7 +43,7 @@
                   'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'] } },
         layers: [{ id: 'carto', type: 'raster', source: 'carto' }]
       },
-      label: '🌑 Dark'
+      label: '🌑 ბნელი'
     },
     streets: {
       style: {
@@ -54,7 +54,7 @@
                   'https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}@2x.png'] } },
         layers: [{ id: 'carto', type: 'raster', source: 'carto' }]
       },
-      label: '🗺️ Streets'
+      label: '🗺️ ქუჩები'
     }
   };
 
@@ -1578,9 +1578,9 @@
     ctrl.id = 'heatmapControl';
     ctrl.className = 'heatmap-control';
     ctrl.innerHTML =
-      '<button id="heatmapBtn" class="heatmap-btn" onclick="toggleHeatmap()" title="Activity Heatmap">' +
+      '<button id="heatmapBtn" class="heatmap-btn" onclick="toggleHeatmap()" title="სიმჭიდროვე">' +
         '<span class="heatmap-btn-icon">🔥</span>' +
-        '<span class="heatmap-btn-label">Activity</span>' +
+        '<span class="heatmap-btn-label">სიმჭ.</span>' +
         '<span id="heatmapCheckinBadge" class="heatmap-badge" style="display:none"></span>' +
       '</button>';
     container.appendChild(ctrl);
@@ -1590,12 +1590,12 @@
     legend.id = 'heatmapLegend';
     legend.className = 'heatmap-legend';
     legend.innerHTML =
-      '<div class="heatmap-legend-title">🔥 Activity (last 24h)</div>' +
+      '<div class="heatmap-legend-title">🔥 სიმჭიდროვე (24 სთ)</div>' +
       '<div class="heatmap-legend-bar">' +
         '<div class="heatmap-legend-gradient"></div>' +
-        '<div class="heatmap-legend-labels"><span>Quiet</span><span>Busy</span><span>🔥 Hot</span></div>' +
+        '<div class="heatmap-legend-labels"><span>წყნარი</span><span>გადატვ.</span><span>🔥 ცხელი</span></div>' +
       '</div>' +
-      '<div class="heatmap-legend-note" id="heatmapLegendNote">Loading…</div>';
+      '<div class="heatmap-legend-note" id="heatmapLegendNote">იტვირთება…</div>';
     container.appendChild(legend);
   }
 
@@ -1639,7 +1639,7 @@
     const hint = document.createElement('div');
     hint.id = 'rotationHint';
     hint.className = 'rotation-hint';
-    hint.innerHTML = '<span>🖱️ Right-drag: rotate &nbsp;|&nbsp; Ctrl+drag: tilt &nbsp;|&nbsp; Two-finger twist on mobile</span>';
+    hint.innerHTML = '<span>🖱️ მარჯვენა ღილი: ბრუნვა &nbsp;|&nbsp; Ctrl+ეწევი: დახრა &nbsp;|&nbsp; ორი თითი: მობილურზე</span>';
     container.appendChild(hint);
     setTimeout(() => hint.classList.add('fade-out'), 5000);
     setTimeout(() => hint.remove(), 6200);
