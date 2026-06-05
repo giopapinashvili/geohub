@@ -1,5 +1,8 @@
 import '/firebase-config.js';
+import '/gh-i18n.js';
 import '/account.js';
+import '/firestore-social.js';
+import '/geohub-social-redesign.js';
 import '/nav-cleanup.js';
 import '/mobile-nav.js';
 import '/chat-popup.js';

@@ -6025,4 +6025,11 @@ html[data-gh-motion="reduced"] * { animation-duration:0.001ms !important; transi
 .gh-story-ts-sz.active{border-color:#10b981;color:#10b981;background:rgba(16,185,129,.12)}
 .gh-story-ts-styles{display:flex;gap:4px}
 .gh-story-ts-style{width:28px;height:28px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#94a3b8;cursor:pointer;font-size:.82rem;display:grid;place-items:center;transition:border-color .12s,color .12s}
+
+/* ── No-left nav layout (profile, business detail, groups) ── */
+body.gh-no-left .gh-left{display:none!important}
+body.gh-no-left .gh-layout{grid-template-columns:minmax(0,900px) 320px!important;max-width:1260px}
+@media(max-width:920px){body.gh-no-left .gh-layout{grid-template-columns:1fr!important}}
+body.gh-has-injected-nav.gh-no-left{padding-left:0!important}
+@media(max-width:1120px){body.gh-has-injected-nav.gh-no-left{padding-left:0!important}}
 .gh-story-ts-style.active{border-color:#10b981;color:#10b981;background:rgba(16,185,129,.12)}

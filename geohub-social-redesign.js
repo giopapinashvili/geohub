@@ -616,11 +616,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function shell(opts){
     opts = opts || {};
     document.body.classList.add('gh-social-body','gh-fb-inspired');
+    if(opts.noLeft) document.body.classList.add('gh-no-left');
     initTheme();
     var _ctMap={feed:'feed',groups:'groups',messages:'messages',notifications:'notifications'};
     var bnavKey = opts.active==='notifications'?'notifs':(opts.active||'');
     document.body.innerHTML = '<div class="gh-shell">'+topbar(_ctMap[opts.active]||'')+
-      '<div class="gh-layout">'+leftNav(opts.active||'')+'<main class="gh-center" id="ghCenter"></main>'+rightRail(opts.right||'')+'</div></div>'+
+      '<div class="gh-layout">'+(opts.noLeft?'':leftNav(opts.active||''))+'<main class="gh-center" id="ghCenter"></main>'+rightRail(opts.right||'')+'</div></div>'+
       bottomNav(bnavKey);
     $('#ghCenter').innerHTML = opts.center || '';
     initLangPicker();
@@ -630,16 +631,20 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     listenBadges();
   }
 
-  function injectShellNav(activePage){
+  function injectShellNav(activePage, opts){
+    opts = opts || {};
     if(document.querySelector('.gh-topbar')) return;
     document.body.classList.add('gh-social-body','gh-fb-inspired','gh-has-injected-nav');
+    if(opts.noLeft) document.body.classList.add('gh-no-left');
     initTheme();
     var tbDiv=document.createElement('div');
     tbDiv.innerHTML=topbar();
     document.body.insertBefore(tbDiv.firstChild, document.body.firstChild);
-    var lvDiv=document.createElement('div');
-    lvDiv.innerHTML=leftNav(activePage);
-    document.body.insertBefore(lvDiv.firstChild, document.body.children[1]||null);
+    if(!opts.noLeft){
+      var lvDiv=document.createElement('div');
+      lvDiv.innerHTML=leftNav(activePage);
+      document.body.insertBefore(lvDiv.firstChild, document.body.children[1]||null);
+    }
     var bnDiv=document.createElement('div');
     var bnavKey=activePage==='notifications'?'notifs':activePage;
     bnDiv.innerHTML=bottomNav(bnavKey);
@@ -11452,7 +11457,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(id) return renderGroupDetail(id);
     if(inviteToken) return renderGroupInvitePage(inviteToken);
     var _gt=typeof GHt==='function'?GHt:function(k){return k;};
-    shell({ active:'groups', center:'<div class="gh-card"><div class="gh-section-title"><div><h1 data-i18n="nav_groups">Groups</h1><p class="gh-muted" style="margin:.25rem 0 0">'+_gt('grp_subtitle')+'</p></div><button class="gh-btn" id="ghOpenGroupCreate"><i class="fas fa-plus"></i>'+_gt('create_group')+'</button></div><input class="gh-input" id="ghGroupSearch" data-i18n-placeholder="search" placeholder="Search groups…"><div style="height:12px"></div><div class="gh-pill-row"><button class="gh-pill active" data-group-tab="discover">'+_gt('groups_discover')+'</button><button class="gh-pill" data-group-tab="mine">'+_gt('groups_mine')+'</button><button class="gh-pill" data-group-tab="requests">'+_gt('groups_requests')+'</button></div></div><div id="ghGroupsList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>' });
+    shell({ active:'groups', noLeft:true, center:'<div class="gh-card"><div class="gh-section-title"><div><h1 data-i18n="nav_groups">Groups</h1><p class="gh-muted" style="margin:.25rem 0 0">'+_gt('grp_subtitle')+'</p></div><button class="gh-btn" id="ghOpenGroupCreate"><i class="fas fa-plus"></i>'+_gt('create_group')+'</button></div><input class="gh-input" id="ghGroupSearch" data-i18n-placeholder="search" placeholder="Search groups…"><div style="height:12px"></div><div class="gh-pill-row"><button class="gh-pill active" data-group-tab="discover">'+_gt('groups_discover')+'</button><button class="gh-pill" data-group-tab="mine">'+_gt('groups_mine')+'</button><button class="gh-pill" data-group-tab="requests">'+_gt('groups_requests')+'</button></div></div><div id="ghGroupsList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i></div></div>' });
     var groups=[], myGroups=[], requests={}; state.groupTab='discover';
     function paint(){ var _gpt=typeof GHt==='function'?GHt:function(k){return k;}; var q=($('#ghGroupSearch').value||'').toLowerCase(); var arr=state.groupTab==='mine'?myGroups:groups; if(state.groupTab==='discover') arr=arr.filter(function(g){return (g.privacy||'public')!=='secret';}); if(state.groupTab==='requests'){ var ids=Object.keys(requests||{}); arr=groups.filter(function(g){return ids.indexOf(g.id)>-1;}); } arr=arr.filter(function(g){return !q||JSON.stringify(g).toLowerCase().includes(q);}); var list=$('#ghGroupsList'); if(!arr.length){ list.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-users"></i><h3>'+_gpt('grp_no_groups')+'</h3><p>'+_gpt('grp_no_groups_hint')+'</p><button class="gh-btn" id="ghEmptyCreateGroup">'+_gpt('create_group')+'</button></div>'; return; } list.innerHTML='<div class="gh-grid">'+arr.map(groupCard).join('')+'</div>'; }
     $('#ghOpenGroupCreate').onclick=openGroupCreate;
@@ -11487,12 +11492,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function renderGroupInvitePage(token){
     var _git=typeof GHt==='function'?GHt:function(k){return k;};
-    shell({ active:'groups', center:'<div id="ghGroupInviteWrap"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>'+_git('grp_loading_invite')+'</h3></div></div>' });
+    shell({ active:'groups', noLeft:true, center:'<div id="ghGroupInviteWrap"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>'+_git('grp_loading_invite')+'</h3></div></div>' });
     ready(function(){ GS().getGroupByInviteToken(token, function(g){ var _gi2=typeof GHt==='function'?GHt:function(k){return k;}; var wrap=$('#ghGroupInviteWrap'); if(!g){ wrap.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-link-slash"></i><h3>'+_gi2('grp_invite_invalid')+'</h3><a class="gh-btn" href="groups.html">'+_gi2('grp_browse')+'</a></div>'; return; } var cover=getItemCover(g); wrap.innerHTML='<div class="gh-card" style="text-align:center;padding:32px 24px">'+(cover?'<img src="'+esc(cover)+'" style="width:100%;max-height:200px;object-fit:cover;border-radius:12px;margin-bottom:20px">':'<div style="font-size:3rem;margin-bottom:16px"><i class="fas fa-users" style="color:var(--gh-green)"></i></div>')+'<h2 style="margin-bottom:8px">'+_gi2('grp_invited_to')+'</h2><h1 style="margin-bottom:12px">'+esc(g.name||'Group')+'</h1><p class="gh-muted" style="margin-bottom:20px">'+esc(g.description||'')+'</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="gh-btn" id="ghInviteJoin"><i class="fas fa-user-plus"></i> '+_gi2('grp_join_btn')+'</button><a class="gh-btn ghost" href="groups.html?id='+encodeURIComponent(g.id)+'">'+_gi2('grp_view')+'</a></div></div>'; $('#ghInviteJoin').onclick=function(){ if(!requireLogin())return; GS().joinGroupViaInvite(g.id,g.name,function(ok){ if(ok) location.href='groups.html?id='+encodeURIComponent(g.id); }); }; }); });
   }
 
   function renderGroupDetail(id){
-    shell({ active:'groups', center:'<div id="ghGroupDetail"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>'+(typeof GHt==='function'?GHt('grp_loading'):'Loading group…')+'</h3></div></div>' });
+    shell({ active:'groups', noLeft:true, center:'<div id="ghGroupDetail"><div class="gh-card gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>'+(typeof GHt==='function'?GHt('grp_loading'):'Loading group…')+'</h3></div></div>' });
     state.currentGroupId=id; state.currentGroupRole=null; state.currentGroupData=null; state.currentGroupMuted=false; state.currentGroupJoinRequested=false; state.grTabUnsubs=[];
     ready(function(){
       GS().getGroupMemberRole(id, function(role){
@@ -12572,7 +12577,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(PAGE==='feed' || PATH==='feed.html' || PATH==='index.html') return renderFeed();
     if(PAGE==='discover' || PATH==='explore.html') return renderDiscover();
     if(PAGE==='business' || PATH==='business.html') {
-      if(new URLSearchParams(location.search).get('id')){ injectShellNav('business'); return; } // business-page.js renders detail
+      if(new URLSearchParams(location.search).get('id')){ injectShellNav('business',{noLeft:true}); return; } // business-page.js renders detail
       return renderBusinesses();
     }
     if(PAGE==='groups' || PATH==='groups.html') return renderGroups();
@@ -12581,7 +12586,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(PAGE==='search' || PATH==='search.html') return renderSearch();
     if(PAGE==='marketplace' || PATH==='marketplace.html') return renderMarketplace();
     if(PAGE==='messages' || PATH==='messages.html'){ injectShellNav('messages'); return; }
-    if(PAGE==='profile' || PATH==='profile.html'){ injectShellNav('profile'); return; } // profile.js renders profile content
+    if(PAGE==='profile' || PATH==='profile.html'){ injectShellNav('profile',{noLeft:true}); return; } // profile.js renders profile content
+    if(PAGE==='services' || PATH==='services.html'){ injectShellNav('services'); return; }
     if(PAGE==='videos'  || PATH==='videos.html')  { injectShellNav('videos');  return; }
     if(PAGE==='watch'   || PATH==='watch.html')   { injectShellNav('watch');   return; }
     if(PAGE==='places'  || PATH==='places.html')  { injectShellNav('places');  return; }

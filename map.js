@@ -2206,6 +2206,12 @@
 
   /* ── Init ───────────────────────────────────────── */
   function init() {
+    if (!window.maplibregl) {
+      const mapEl = document.getElementById('map');
+      if (mapEl) mapEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#0b1120;color:#94a3b8;font-size:.9rem;flex-direction:column;gap:12px"><i class="fas fa-triangle-exclamation" style="font-size:2rem;color:#f59e0b"></i><p>Map library not loaded. Please refresh.</p></div>';
+      window.addEventListener('load', function(){ if(window.maplibregl && !map) init(); }, {once:true});
+      return;
+    }
     const currentStyle = getMapStyle();
     map = new maplibregl.Map({
       container:       'map',
@@ -2219,6 +2225,14 @@
 
     map.fitBounds([[40.0, 41.0], [46.7, 43.5]], { padding: 40, duration: 0 });
     window._ghMap = map;
+
+    // Fallback: if vector style fails within 7s, switch to OSM raster
+    const _stFbTimer = setTimeout(function(){
+      if (!map.isStyleLoaded()) {
+        map.setStyle({version:8,sources:{osm:{type:'raster',tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],tileSize:256,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxzoom:19}},layers:[{id:'osm',type:'raster',source:'osm'}]});
+      }
+    }, 7000);
+    map.once('load', function(){ clearTimeout(_stFbTimer); });
 
     // Navigation control (zoom + compass + pitch visualizer)
     map.addControl(new maplibregl.NavigationControl({
