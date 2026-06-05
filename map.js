@@ -2013,6 +2013,8 @@
     var open = sheet.classList.toggle('open');
     sheet.setAttribute('aria-hidden', String(!open));
     if (backdrop) backdrop.classList.toggle('open', open);
+    var nowBtn = document.getElementById('nowBtn');
+    if (nowBtn) nowBtn.style.visibility = open ? 'hidden' : '';
   };
 
   window.toggleNowPanel = function() {
