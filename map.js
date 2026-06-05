@@ -31,14 +31,14 @@
     default:       { color: '#6c757d', icon: '📍',  label: 'სხვა' }
   };
 
-  // OpenFreeMap vector tiles — includes building fills + house numbers at zoom 17+
+  // CARTO GL basemaps — free, no API key, reliable CDN
   const TILE_LAYERS = {
     dark: {
-      style: 'https://tiles.openfreemap.org/styles/dark',
+      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
       label: '🌑 Dark'
     },
     streets: {
-      style: 'https://tiles.openfreemap.org/styles/bright',
+      style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
       label: '🗺️ Streets'
     }
   };
@@ -2226,12 +2226,11 @@
     map.fitBounds([[40.0, 41.0], [46.7, 43.5]], { padding: 40, duration: 0 });
     window._ghMap = map;
 
-    // Fallback: if vector style fails within 7s, switch to OSM raster
+    // Fallback: if style fails within 8s, switch to OSM raster
     const _stFbTimer = setTimeout(function(){
-      if (!map.isStyleLoaded()) {
-        map.setStyle({version:8,sources:{osm:{type:'raster',tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],tileSize:256,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxzoom:19}},layers:[{id:'osm',type:'raster',source:'osm'}]});
-      }
-    }, 7000);
+      try { if (map.isStyleLoaded()) return; } catch(e) {}
+      map.setStyle({version:8,sources:{osm:{type:'raster',tiles:['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],tileSize:256,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxzoom:19}},layers:[{id:'osm',type:'raster',source:'osm'}]});
+    }, 8000);
     map.once('load', function(){ clearTimeout(_stFbTimer); });
 
     // Navigation control (zoom + compass + pitch visualizer)
