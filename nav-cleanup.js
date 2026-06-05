@@ -10,7 +10,7 @@
     'Home':'მთავარი','Discover':'აღმოაჩინე','Map':'რუქა','Live':'პირდაპირი',
     'Places':'ადგილები','Events':'ღონისძიებები','Groups':'ჯგუფები',
     'Dashboard':'დაფა','Add Business':'ბიზნესის დამატება','Creators':'შემქმნელები',
-    'Profile':'პროფილი','Messages':'შეტყობინებები','Rewards':'ჯილდოები',
+    'Profile':'პროფილი','Messages':'ჩატი','Rewards':'ჯილდოები',
     'Challenges':'გამოწვევები','Trust':'ნდობა',
     // ── common UI (text-node walker)
     'Sign Up':'რეგისტრაცია','Sign In':'შესვლა','Login':'შესვლა','Log in':'შესვლა',

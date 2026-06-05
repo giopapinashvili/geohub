@@ -2227,14 +2227,12 @@
     map = new maplibregl.Map({
       container:       'map',
       style:           TILE_LAYERS[currentStyle].style,
-      center:          [43.5, 42.0],
-      zoom:            7,
+      center:          [44.793, 41.694],
+      zoom:            12,
       maxPitch:        85,
       pitchWithRotate: true,
       attributionControl: false,
     });
-
-    map.fitBounds([[40.0, 41.0], [46.7, 43.5]], { padding: 40, duration: 0 });
     window._ghMap = map;
 
     // Vector tiles keep labels upright — no bearing clamp needed

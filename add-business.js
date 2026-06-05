@@ -218,6 +218,7 @@ let currentStep = 1;
     });
   }
   function removeTag(i) { tags.splice(i, 1); renderTags(); }
+  window.removeTag = removeTag;
 
   // Preview sync
   document.getElementById('bizNameInput').addEventListener('input', e => {
@@ -300,6 +301,8 @@ let currentStep = 1;
     clearFieldErrors();
     nextStep(n);
   }
+  window.nextStep = nextStep;
+  window.prevStep = prevStep;
 
   function updateStepUI() {
     const pct = (currentStep / 4) * 100;
@@ -338,6 +341,7 @@ let currentStep = 1;
     return img ? img.src : '';
   }
 
+  window.addServiceRow = addServiceRow;
   function fillMyLocation() {
     var btn = document.getElementById('useMyLocBtn');
     if (!navigator.geolocation) {
@@ -360,6 +364,8 @@ let currentStep = 1;
     }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
   }
 
+  window.fillMyLocation = fillMyLocation;
+  window.submitForm = submitForm;
   function submitForm() {
     if (!validateStep1()) return;
 

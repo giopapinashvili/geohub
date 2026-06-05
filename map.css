@@ -1411,7 +1411,8 @@ body, html { height: 100%; overflow: hidden; }
 
 /* Stories FAB button */
 .map-stories-fab{
-  position:fixed;bottom:210px;right:16px;z-index:1200;
+  position:fixed;bottom:160px;left:16px;z-index:1200;
+  /* desktop: camera-wrap is at bottom-left, move stories higher */
   display:flex;flex-direction:column;align-items:center;gap:3px;
   background:linear-gradient(135deg,#7c3aed,#ec4899);
   color:#fff;border:none;border-radius:16px;padding:10px 14px;
@@ -1422,6 +1423,7 @@ body, html { height: 100%; overflow: hidden; }
 .map-stories-fab.active{background:linear-gradient(135deg,#ec4899,#f59e0b);box-shadow:0 4px 16px rgba(236,72,153,.5)}
 .map-stories-fab i{font-size:1.2rem}
 .map-stories-fab-label{font-size:.65rem;font-weight:700;letter-spacing:.3px}
+@media(min-width:769px){.map-stories-fab{bottom:280px}}
 
 /* Story bubble marker */
 .map-story-bubble{
