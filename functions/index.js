@@ -3,6 +3,7 @@
 const { initializeApp }     = require('firebase-admin/app');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { onDocumentCreated, onDocumentDeleted } = require('firebase-functions/v2/firestore');
 
 initializeApp();
 const db = getFirestore();
@@ -315,3 +316,56 @@ exports.adminAdjustPoints = onCall(async (request) => {
 
   return result;
 });
+
+/* ─────────────────────────────────────────────────────────────────
+   Counter triggers — server-authoritative likeCount / commentCount
+   Client writes are best-effort (optimistic UI); these functions
+   keep the counts accurate and prevent client-side forgery.
+───────────────────────────────────────────────────────────────── */
+
+// Reaction created → likeCount +1
+exports.onReactionCreated = onDocumentCreated(
+  'posts/{postId}/reactions/{uid}',
+  async (event) => {
+    const postRef = db.collection('posts').doc(event.params.postId);
+    await postRef.update({
+      likeCount:     FieldValue.increment(1),
+      reactionCount: FieldValue.increment(1),
+    }).catch(() => {});
+  }
+);
+
+// Reaction deleted → likeCount -1
+exports.onReactionDeleted = onDocumentDeleted(
+  'posts/{postId}/reactions/{uid}',
+  async (event) => {
+    const postRef = db.collection('posts').doc(event.params.postId);
+    await postRef.update({
+      likeCount:     FieldValue.increment(-1),
+      reactionCount: FieldValue.increment(-1),
+    }).catch(() => {});
+  }
+);
+
+// Comment created → commentCount +1
+exports.onCommentCreated = onDocumentCreated(
+  'posts/{postId}/comments/{commentId}',
+  async (event) => {
+    const data = event.data && event.data.data ? event.data.data() : null;
+    // Only count top-level comments; replies have a parentId field
+    if (data && data.parentId) return;
+    const postRef = db.collection('posts').doc(event.params.postId);
+    await postRef.update({ commentCount: FieldValue.increment(1) }).catch(() => {});
+  }
+);
+
+// Comment deleted → commentCount -1
+exports.onCommentDeleted = onDocumentDeleted(
+  'posts/{postId}/comments/{commentId}',
+  async (event) => {
+    const data = event.data && event.data.data ? event.data.data() : null;
+    if (data && data.parentId) return;
+    const postRef = db.collection('posts').doc(event.params.postId);
+    await postRef.update({ commentCount: FieldValue.increment(-1) }).catch(() => {});
+  }
+);
