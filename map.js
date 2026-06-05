@@ -2241,6 +2241,13 @@
     map.fitBounds([[40.0, 41.0], [46.7, 43.5]], { padding: 40, duration: 0 });
     window._ghMap = map;
 
+    // Clamp bearing to ±90° so raster tile text never appears upside-down
+    map.on('rotate', function() {
+      var b = map.getBearing();
+      if (b > 90)  map.jumpTo({ bearing: 90 });
+      else if (b < -90) map.jumpTo({ bearing: -90 });
+    });
+
     // Fallback: if style fails within 8s, switch to OSM raster
     const _stFbTimer = setTimeout(function(){
       try { if (map.isStyleLoaded()) return; } catch(e) {}
