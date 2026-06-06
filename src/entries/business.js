@@ -1,5 +1,4 @@
 import '/firebase-config.js';
-import '/main.js';
 import '/gh-i18n.js';
 import '/gh-schema.js';
 import '/account.js';
