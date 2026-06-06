@@ -138,7 +138,6 @@
   };
 
   let map, allPlaces = [];
-  let markerMap = new Map(); // placeId → { marker, el }
   let currentFilter = '', currentSearch = '', currentSubFilter = '';
   let disabledCategories = new Set();
   let activeMarkerEl = null, activePlaceId = null;
@@ -374,64 +373,91 @@
     return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
   }
 
-  function buildPlaceMarkerElement(place, isActive) {
-    const brand      = resolveBrand(place.name, place.brand);
-    const style      = brand
-      ? (PLACE_MARKER_STYLES[brand.categoryId] || PLACE_MARKER_STYLES.default)
-      : getPlaceMarkerStyle(place);
-    const markerColor = (brand && brand.color) || style.color || '#22c55e';
-    const markerIcon  = place.icon || (brand && brand.emoji) || style.icon || '📍';
-    const logoUrl     = place.logoUrl || '';
-    const glow        = hexToRgba(markerColor, 0.45);
-    const boxShadow   = isActive
-      ? '0 0 0 5px rgba(255,255,255,.14),0 0 32px ' + hexToRgba(markerColor, 0.7)
-      : '0 0 0 4px rgba(255,255,255,.08),0 10px 24px rgba(0,0,0,.35),0 0 20px ' + glow;
-    const wrap = document.createElement('div');
-    wrap.className = 'gh-map-marker-wrap';
-    const inner = document.createElement('div');
-    inner.className = 'gh-map-emoji-marker' + (isActive ? ' is-selected' : '') + (logoUrl ? ' gh-map-logo-marker' : '');
-    inner.style.cssText = '--marker-color:' + markerColor + ';box-shadow:' + boxShadow;
-    if (logoUrl) {
-      const img = document.createElement('img');
-      img.src = logoUrl;
-      img.className = 'gh-map-logo-img';
-      img.alt = place.name;
-      img.onerror = function() {
-        this.remove();
-        const fb = document.createElement('span');
-        fb.className = 'gh-map-marker-emoji';
-        fb.textContent = markerIcon;
-        inner.appendChild(fb);
-      };
-      inner.appendChild(img);
-    } else {
-      const span = document.createElement('span');
-      span.className = 'gh-map-marker-emoji';
-      span.textContent = markerIcon;
-      inner.appendChild(span);
-    }
-    const tooltip = document.createElement('div');
-    tooltip.className = 'gh-map-tooltip';
-    tooltip.textContent = place.name;
-    wrap.appendChild(inner);
-    wrap.appendChild(tooltip);
+  /* ── GL marker image generator ─────────────────── */
+  function _createMarkerImage(color, emoji) {
+    const size = 64;
+    const canvas = document.createElement('canvas');
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const r = size / 2 - 3;
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, r, 0, Math.PI * 2);
+    ctx.fillStyle = color || '#6c757d';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.font = Math.floor(size * 0.46) + 'px "Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(emoji || '📍', size / 2, size / 2 + 1);
+    const d = ctx.getImageData(0, 0, size, size);
+    return { width: size, height: size, data: new Uint8Array(d.data.buffer) };
+  }
 
-    // Top vibe badge — show most-voted vibe directly on the marker
-    const counts = _moodTagCounts[place.id];
-    if (counts) {
-      const top = MOOD_TAGS
-        .filter(t => (counts[t.id] || 0) >= 1)
-        .sort((a, b) => (counts[b.id] || 0) - (counts[a.id] || 0))[0];
-      if (top) {
-        const badge = document.createElement('div');
-        badge.className = 'gh-marker-vibe-badge';
-        badge.style.cssText = '--vibe-color:' + (top.color || '#10b981');
-        badge.textContent = top.emoji + ' ' + top.label;
-        wrap.appendChild(badge);
+  /* ── Init WebGL place layers (call after map load) ─ */
+  function initGLLayers() {
+    for (const [catId, style] of Object.entries(PLACE_MARKER_STYLES)) {
+      if (!map.hasImage('cat-' + catId)) {
+        map.addImage('cat-' + catId, _createMarkerImage(style.color, style.icon));
+      }
+    }
+    for (const [key, brand] of Object.entries(KNOWN_BRANDS)) {
+      if (!map.hasImage('brand-' + key)) {
+        map.addImage('brand-' + key, _createMarkerImage(brand.color, brand.emoji));
       }
     }
 
-    return wrap;
+    map.addSource('places-src', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+
+    // Active glow ring (rendered behind icon)
+    map.addLayer({
+      id: 'places-active-ring',
+      type: 'circle',
+      source: 'places-src',
+      filter: ['==', ['get', 'id'], ''],
+      paint: {
+        'circle-radius': 28,
+        'circle-color': ['get', 'color'],
+        'circle-opacity': 0.22,
+        'circle-stroke-color': ['get', 'color'],
+        'circle-stroke-width': 3,
+        'circle-stroke-opacity': 0.85
+      }
+    });
+
+    // Icon images (circle + emoji, WebGL sprite)
+    map.addLayer({
+      id: 'places-icons',
+      type: 'symbol',
+      source: 'places-src',
+      layout: {
+        'icon-image': ['get', 'imageId'],
+        'icon-size': 0.5,
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true
+      }
+    });
+
+    // Invisible hit-area for click/hover
+    map.addLayer({
+      id: 'places-hit',
+      type: 'circle',
+      source: 'places-src',
+      paint: { 'circle-radius': 20, 'circle-opacity': 0, 'circle-stroke-width': 0 }
+    });
+
+    map.on('click', 'places-hit', function(e) {
+      if (!e.features.length) return;
+      focusPlace(e.features[0].properties.id);
+      e.originalEvent.stopPropagation();
+    });
+    map.on('mouseenter', 'places-hit', function() { map.getCanvas().style.cursor = 'pointer'; });
+    map.on('mouseleave', 'places-hit', function() { map.getCanvas().style.cursor = ''; });
+    map.on('click', function(e) {
+      const hits = map.queryRenderedFeatures(e.point, { layers: ['places-hit'] });
+      if (!hits.length) clearActiveMarker();
+    });
   }
 
   /* ── Normalize Firestore doc ────────────────────── */
@@ -518,28 +544,22 @@
 
   function renderStars(r) { return r ? '⭐'.repeat(Math.max(1, Math.min(5, Math.round(r)))) : ''; }
 
-  /* ── Sync marker DOM → current filtered set ────── */
-  function updateMarkerVisibility() {
-    if (!map) return;
-    const visible = new Set(filtered().map(p => p.id));
-    markerMap.forEach(({ marker, el }, id) => {
-      const show = visible.has(id);
-      el.style.display = show ? '' : 'none';
+  /* ── Sync GeoJSON source → filtered places ──────── */
+  function syncPlacesSource() {
+    if (!map || !map.getSource('places-src')) return;
+    const features = filtered().map(function(p) {
+      const brand    = resolveBrand(p.name, p.brand);
+      const style    = brand ? (PLACE_MARKER_STYLES[brand.categoryId] || PLACE_MARKER_STYLES.default) : getPlaceMarkerStyle(p);
+      const color    = (brand && brand.color) || style.color || '#6c757d';
+      const brandKey = brand ? Object.keys(KNOWN_BRANDS).find(function(k) { return KNOWN_BRANDS[k] === brand; }) : null;
+      const imageId  = brandKey ? 'brand-' + brandKey : 'cat-' + (p.categoryId || 'default');
+      return {
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
+        properties: { id: p.id, name: p.name, catId: p.categoryId || 'default', color: color, imageId: imageId }
+      };
     });
-  }
-
-  /* ── Add new places to map (called on data load) ─ */
-  function addPlaceMarkers(places) {
-    if (!map) return;
-    places.forEach(p => {
-      if (!p.lat || !p.lng) return;
-      if (markerMap.has(p.id)) return; // already added
-      const el = buildPlaceMarkerElement(p, false);
-      const m = new maplibregl.Marker({ element: el, anchor: 'center' })
-        .setLngLat([p.lng, p.lat]).addTo(map);
-      el.querySelector('.gh-map-emoji-marker').addEventListener('click', () => focusPlace(p.id, el));
-      markerMap.set(p.id, { marker: m, el });
-    });
+    map.getSource('places-src').setData({ type: 'FeatureCollection', features: features });
   }
 
   /* ── Map render ─────────────────────────────────── */
@@ -571,38 +591,24 @@
       results.querySelectorAll('.map-result-card').forEach(card => card.addEventListener('click', () => focusPlace(card.dataset.id)));
     }
 
-    addPlaceMarkers(allPlaces);
-    updateMarkerVisibility();
+    syncPlacesSource();
     updateHeatmapData();
   }
 
   /* ── Active marker clear helper ─────────────────── */
   function clearActiveMarker() {
-    if (activeMarkerEl) {
-      const inner = activeMarkerEl.querySelector('.gh-map-emoji-marker');
-      if (inner) inner.classList.remove('is-selected');
-    }
     activeMarkerEl = null; activePlaceId = null;
+    if (map && map.getLayer('places-active-ring')) {
+      map.setFilter('places-active-ring', ['==', ['get', 'id'], '']);
+    }
   }
 
   /* ── Focus place ────────────────────────────────── */
   function focusPlace(id, clickedEl) {
-    if (activeMarkerEl) {
-      const inner = activeMarkerEl.querySelector('.gh-map-emoji-marker');
-      if (inner) { inner.classList.remove('is-selected'); inner.classList.remove('just-selected'); }
-    }
     activePlaceId = id;
-    activeMarkerEl = clickedEl || (markerMap.has(id) ? markerMap.get(id).el : null);
-    if (activeMarkerEl) {
-      const inner = activeMarkerEl.querySelector('.gh-map-emoji-marker');
-      if (inner) {
-        inner.classList.add('is-selected');
-        inner.classList.remove('just-selected');
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => { inner.classList.add('just-selected'); });
-        });
-        setTimeout(() => inner.classList.remove('just-selected'), 650);
-      }
+    activeMarkerEl = clickedEl || null;
+    if (map && map.getLayer('places-active-ring')) {
+      map.setFilter('places-active-ring', ['==', ['get', 'id'], id || '']);
     }
 
     const p = allPlaces.find(x => x.id === id); if (!p) return;
@@ -1677,11 +1683,9 @@
 
   function applyMapStyle(styleName) {
     const cfg = TILE_LAYERS[styleName] || TILE_LAYERS.dark;
-    // Remove HTML markers before style change (they'd be dangling otherwise)
-    clusterMarkers.forEach(m => m.remove());
-    clusterMarkers = [];
     map.setStyle(cfg.style);
-    map.once('style.load', () => { initHeatmapLayer(); updateHeatmapData(); updateClusters(); });
+    // After style change all custom sources/layers are wiped — reinitialize them
+    map.once('style.load', () => { initHeatmapLayer(); initGLLayers(); syncPlacesSource(); updateHeatmapData(); });
     localStorage.setItem('gh_map_style', styleName);
     const mapEl = document.getElementById('map');
     if (mapEl) mapEl.setAttribute('data-map-style', styleName);
@@ -2350,6 +2354,7 @@
       buildRotationHint();
       buildLiveFriendsUI();
       initHeatmapLayer();
+      initGLLayers();
       buildHeatmapControl();
       buildMobileSidebar();
       renderMap();
@@ -3215,8 +3220,7 @@
       const newPlace = normalize(ref.id, doc, 'places');
       if (newPlace) {
         allPlaces.push(newPlace);
-        addPlaceMarkers([newPlace]);
-        updateMarkerVisibility();
+        syncPlacesSource();
       }
       window.closeAddPlaceSheet();
       // Reset form
