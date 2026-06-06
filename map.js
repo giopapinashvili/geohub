@@ -43,7 +43,8 @@
     }
   };
 
-  let map, superclusterInst, clusterMarkers = [], allPlaces = [];
+  let map, allPlaces = [];
+  let markerMap = new Map(); // placeId → { marker, el }
   let currentFilter = '', currentSearch = '', currentSubFilter = '';
   let disabledCategories = new Set();
   let activeMarkerEl = null, activePlaceId = null;
@@ -397,51 +398,27 @@
 
   function renderStars(r) { return r ? '⭐'.repeat(Math.max(1, Math.min(5, Math.round(r)))) : ''; }
 
-  /* ── Cluster rendering ──────────────────────────── */
-  function updateClusters() {
-    if (!map || !superclusterInst) return;
-    clusterMarkers.forEach(m => m.remove());
-    clusterMarkers = [];
+  /* ── Sync marker DOM → current filtered set ────── */
+  function updateMarkerVisibility() {
+    if (!map) return;
+    const visible = new Set(filtered().map(p => p.id));
+    markerMap.forEach(({ marker, el }, id) => {
+      const show = visible.has(id);
+      el.style.display = show ? '' : 'none';
+    });
+  }
 
-    const bounds = map.getBounds();
-    const zoom   = Math.floor(map.getZoom());
-    let clusters;
-    try {
-      clusters = superclusterInst.getClusters(
-        [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()],
-        zoom
-      );
-    } catch (e) { return; }
-
-    clusters.forEach(feature => {
-      const [lng, lat] = feature.geometry.coordinates;
-
-      if (feature.properties.cluster) {
-        const count = feature.properties.point_count;
-        const size  = count < 10 ? 38 : count < 50 ? 46 : 54;
-        const el = document.createElement('div');
-        el.className = 'gh-cluster-icon';
-        el.style.cssText = 'width:' + size + 'px;height:' + size + 'px;font-size:' + (count > 99 ? '0.72rem' : '0.9rem');
-        el.textContent = count;
-        const m = new maplibregl.Marker({ element: el, anchor: 'center' })
-          .setLngLat([lng, lat]).addTo(map);
-        el.addEventListener('click', () => {
-          try {
-            const z = superclusterInst.getClusterExpansionZoom(feature.properties.cluster_id);
-            map.flyTo({ center: [lng, lat], zoom: Math.min(z + 0.5, 20), duration: 500 });
-          } catch (e) {}
-        });
-        clusterMarkers.push(m);
-      } else {
-        const place = feature.properties.place;
-        const isActive = place.id === activePlaceId;
-        const el = buildPlaceMarkerElement(place, isActive);
-        if (isActive) activeMarkerEl = el;
-        const m = new maplibregl.Marker({ element: el, anchor: 'center' })
-          .setLngLat([lng, lat]).addTo(map);
-        el.querySelector('.gh-map-emoji-marker').addEventListener('click', () => focusPlace(place.id, el));
-        clusterMarkers.push(m);
-      }
+  /* ── Add new places to map (called on data load) ─ */
+  function addPlaceMarkers(places) {
+    if (!map) return;
+    places.forEach(p => {
+      if (!p.lat || !p.lng) return;
+      if (markerMap.has(p.id)) return; // already added
+      const el = buildPlaceMarkerElement(p, false);
+      const m = new maplibregl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([p.lng, p.lat]).addTo(map);
+      el.querySelector('.gh-map-emoji-marker').addEventListener('click', () => focusPlace(p.id, el));
+      markerMap.set(p.id, { marker: m, el });
     });
   }
 
@@ -474,14 +451,8 @@
       results.querySelectorAll('.map-result-card').forEach(card => card.addEventListener('click', () => focusPlace(card.dataset.id)));
     }
 
-    const features = list.map(p => ({
-      type: 'Feature',
-      geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
-      properties: { place: p }
-    }));
-    superclusterInst = new Supercluster({ radius: 60, maxZoom: 15, minPoints: 2 });
-    superclusterInst.load(features);
-    updateClusters();
+    addPlaceMarkers(allPlaces);
+    updateMarkerVisibility();
     updateHeatmapData();
   }
 
@@ -501,7 +472,7 @@
       if (inner) { inner.classList.remove('is-selected'); inner.classList.remove('just-selected'); }
     }
     activePlaceId = id;
-    activeMarkerEl = clickedEl || null;
+    activeMarkerEl = clickedEl || (markerMap.has(id) ? markerMap.get(id).el : null);
     if (activeMarkerEl) {
       const inner = activeMarkerEl.querySelector('.gh-map-emoji-marker');
       if (inner) {
@@ -2263,9 +2234,7 @@
       buildMobileSidebar();
       renderMap();
 
-      // Re-cluster on viewport change
-      map.on('moveend', updateClusters);
-      map.on('zoomend', updateClusters);
+      // markers are persistent — no rebuild needed on pan/zoom
 
       if (window.GeoFirebase) {
         loadPlaceCategoriesFromFirestore();
