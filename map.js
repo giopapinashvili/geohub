@@ -3234,4 +3234,85 @@
     });
   };
 
+  /* ── Draggable Stories FAB ──────────────────────── */
+  (function() {
+    var PAD = 12;
+    var btn, dragging = false, moved = false;
+    var startCX, startCY, startLeft, startTop;
+
+    function setup() {
+      btn = document.getElementById('mapStoriesBtn');
+      if (!btn) return;
+
+      function anchorToTop() {
+        if (btn.style.top) return;
+        var r = btn.getBoundingClientRect();
+        btn.style.top    = r.top + 'px';
+        btn.style.left   = r.left + 'px';
+        btn.style.bottom = 'auto';
+      }
+
+      try {
+        var saved = JSON.parse(localStorage.getItem('gh_stories_pos') || 'null');
+        if (saved && typeof saved.top === 'number') {
+          anchorToTop();
+          btn.style.top  = Math.min(saved.top,  window.innerHeight - btn.offsetHeight - PAD) + 'px';
+          btn.style.left = saved.left + 'px';
+        }
+      } catch(e) {}
+
+      function onDown(e) {
+        if (e.button && e.button !== 0) return;
+        anchorToTop();
+        var cx = e.touches ? e.touches[0].clientX : e.clientX;
+        var cy = e.touches ? e.touches[0].clientY : e.clientY;
+        startCX = cx; startCY = cy;
+        startLeft = parseFloat(btn.style.left) || 0;
+        startTop  = parseFloat(btn.style.top)  || 0;
+        dragging = true; moved = false;
+        btn.classList.add('gh-dragging');
+        e.preventDefault();
+      }
+
+      function onMove(e) {
+        if (!dragging) return;
+        var cx = e.touches ? e.touches[0].clientX : e.clientX;
+        var cy = e.touches ? e.touches[0].clientY : e.clientY;
+        var dx = cx - startCX, dy = cy - startCY;
+        if (Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
+        btn.style.left = (startLeft + dx) + 'px';
+        btn.style.top  = (startTop  + dy) + 'px';
+        e.preventDefault();
+      }
+
+      function onUp() {
+        if (!dragging) return;
+        dragging = false;
+        btn.classList.remove('gh-dragging');
+        if (!moved) return;
+        var r = btn.getBoundingClientRect();
+        var sw = window.innerWidth, sh = window.innerHeight;
+        var snappedLeft = (r.left + r.width / 2) < sw / 2 ? PAD : sw - r.width - PAD;
+        var snappedTop  = Math.max(PAD, Math.min(r.top, sh - r.height - PAD));
+        btn.style.left = snappedLeft + 'px';
+        btn.style.top  = snappedTop  + 'px';
+        try { localStorage.setItem('gh_stories_pos', JSON.stringify({ left: snappedLeft, top: snappedTop })); } catch(e) {}
+      }
+
+      btn.addEventListener('mousedown',  onDown, { passive: false });
+      btn.addEventListener('touchstart', onDown, { passive: false });
+      document.addEventListener('mousemove',  onMove, { passive: false });
+      document.addEventListener('touchmove',  onMove, { passive: false });
+      document.addEventListener('mouseup',  onUp);
+      document.addEventListener('touchend', onUp);
+
+      btn.addEventListener('click', function(e) {
+        if (moved) { e.stopImmediatePropagation(); e.preventDefault(); moved = false; }
+      }, true);
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup);
+    else setup();
+  })();
+
 })();

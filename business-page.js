@@ -123,7 +123,7 @@
   }
 
   function isAdminOrOwner() {
-    return _isActingAsPage;
+    return _isOwner || _isPageAdmin || _isActingAsPage;
   }
 
   function isOpenNow(wh) {

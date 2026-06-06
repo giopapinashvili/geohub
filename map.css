@@ -1412,17 +1412,18 @@ body, html { height: 100%; overflow: hidden; }
 /* Stories FAB button */
 .map-stories-fab{
   position:fixed;bottom:160px;left:16px;z-index:1200;
-  /* desktop: camera-wrap is at bottom-left, move stories higher */
   display:flex;flex-direction:column;align-items:center;gap:3px;
   background:linear-gradient(135deg,#7c3aed,#ec4899);
   color:#fff;border:none;border-radius:16px;padding:10px 14px;
-  cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,.45);
-  font-family:inherit;transition:transform .15s,box-shadow .15s
+  cursor:grab;box-shadow:0 4px 16px rgba(124,58,237,.45);
+  font-family:inherit;user-select:none;touch-action:none;
+  transition:left .28s cubic-bezier(.22,1,.36,1),top .28s cubic-bezier(.22,1,.36,1),box-shadow .15s,transform .15s
 }
 .map-stories-fab:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,58,237,.55)}
 .map-stories-fab.active{background:linear-gradient(135deg,#ec4899,#f59e0b);box-shadow:0 4px 16px rgba(236,72,153,.5)}
-.map-stories-fab i{font-size:1.2rem}
-.map-stories-fab-label{font-size:.65rem;font-weight:700;letter-spacing:.3px}
+.map-stories-fab.gh-dragging{cursor:grabbing;transition:box-shadow .15s;transform:scale(1.08);box-shadow:0 12px 32px rgba(124,58,237,.65)}
+.map-stories-fab i{font-size:1.2rem;pointer-events:none}
+.map-stories-fab-label{font-size:.65rem;font-weight:700;letter-spacing:.3px;pointer-events:none}
 @media(min-width:769px){.map-stories-fab{bottom:280px}}
 
 /* Story bubble marker */
