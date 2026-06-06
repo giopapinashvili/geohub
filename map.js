@@ -2,33 +2,127 @@
   'use strict';
 
   const PLACE_MARKER_STYLES = {
-    food:          { color: '#e74c3c', icon: '🍔',  label: 'საკვები / რესტორნები' },
-    cafe:          { color: '#8e5a3c', icon: '☕',  label: 'კაფე / ყავა / დესერტი' },
-    nightlife:     { color: '#8e44ad', icon: '🍸',  label: 'ბარები / ღამის ცხოვრება' },
-    shopping:      { color: '#3498db', icon: '🛍️', label: 'მაღაზიები / მოლები' },
-    fitness:       { color: '#f39c12', icon: '🏋️', label: 'სპორტი / ფიტნესი' },
-    sports:        { color: '#f39c12', icon: '🏃',  label: 'სპორტული ობიექტი' },
-    park:          { color: '#27ae60', icon: '🌳',  label: 'პარკები' },
-    nature:        { color: '#2ecc71', icon: '🏞️', label: 'ბუნება / ტბები' },
-    transport:     { color: '#1f5fbf', icon: '🚇',  label: 'ტრანსპორტი' },
-    health:        { color: '#ff5a6e', icon: '🏥',  label: 'ჯანმრთელობა' },
+    // ── საკვები & სასმელი ──────────────────────────────────────────
+    food:          { color: '#e74c3c', icon: '🍔',  label: 'რესტორანი / საკვები' },
+    cafe:          { color: '#8e5a3c', icon: '☕',  label: 'კაფე / ყავა' },
+    bakery:        { color: '#c0873f', icon: '🥐',  label: 'პური / საკონდიტრო' },
+    pizza:         { color: '#d63031', icon: '🍕',  label: 'პიცა' },
+    sushi:         { color: '#00b894', icon: '🍣',  label: 'სუში / იაპონური' },
+    fastfood:      { color: '#e17055', icon: '🍟',  label: 'ფასტფუდი' },
+    ice_cream:     { color: '#fd79a8', icon: '🍦',  label: 'ნაყინი / დესერტი' },
+    khinkali:      { color: '#fdcb6e', icon: '🥟',  label: 'ხინკალი / ქართული' },
+    bbq:           { color: '#d35400', icon: '🍖',  label: 'შემწვარი / მანგალი' },
+    vegetarian:    { color: '#00b894', icon: '🥗',  label: 'ვეგეტარიანული' },
+    wine_bar:      { color: '#6c3483', icon: '🍷',  label: 'ღვინის ბარი / ქვევრი' },
+    brewery:       { color: '#d4a017', icon: '🍺',  label: 'ლუდხანა / Craft Beer' },
+    hookah:        { color: '#a29bfe', icon: '💨',  label: 'კალიანი' },
+    nightlife:     { color: '#8e44ad', icon: '🍸',  label: 'კოქტეილ-ბარი / ღამის ცხოვრება' },
+    club:          { color: '#6c3483', icon: '🎉',  label: 'ნაითქლაბი' },
+    // ── შოპინგი ──────────────────────────────────────────────────
+    grocery:       { color: '#27ae60', icon: '🛒',  label: 'სუპერმარკეტი / პროდუქტები' },
+    shopping:      { color: '#3498db', icon: '🛍️', label: 'მაღაზია / ბუტიკი' },
+    mall:          { color: '#2980b9', icon: '🏬',  label: 'სავაჭრო ცენტრი' },
+    market:        { color: '#e67e22', icon: '🏪',  label: 'ბაზარი / ბაზრობა' },
+    clothing:      { color: '#e84393', icon: '👗',  label: 'ტანსაცმელი / მოდა' },
+    shoes:         { color: '#795548', icon: '👟',  label: 'ფეხსაცმელი' },
+    electronics:   { color: '#0984e3', icon: '📱',  label: 'ელექტრონიკა / ტექნიკა' },
+    home_decor:    { color: '#b8860b', icon: '🛋️', label: 'სახლი / ავეჯი / დეკორი' },
+    books:         { color: '#6d4c41', icon: '📚',  label: 'წიგნის მაღაზია' },
+    flowers:       { color: '#e91e63', icon: '💐',  label: 'ყვავილები / საჩუქრები' },
+    jewelry:       { color: '#f0c040', icon: '💍',  label: 'სამკაული / სახელოვნებო' },
     pharmacy:      { color: '#06b6d4', icon: '💊',  label: 'აფთიაქი' },
-    finance:       { color: '#16a085', icon: '🏦',  label: 'ფინანსები' },
+    // ── სპორტი & ფიტნესი ─────────────────────────────────────────
+    fitness:       { color: '#f39c12', icon: '🏋️', label: 'სპორტდარბაზი / ფიტნესი' },
+    yoga:          { color: '#9b59b6', icon: '🧘',  label: 'იოგა / მედიტაცია' },
+    pool:          { color: '#00cec9', icon: '🏊',  label: 'აუზი / სპა-ცენტრი' },
+    sports:        { color: '#f39c12', icon: '🏃',  label: 'სპორტული ობიექტი / სტადიონი' },
+    bowling:       { color: '#e67e22', icon: '🎳',  label: 'ბოულინგი / Billiard' },
+    climbing:      { color: '#795548', icon: '🧗',  label: 'სამთო / კლდეზე ცოცვა' },
+    // ── გართობა & კულტურა ────────────────────────────────────────
+    entertainment: { color: '#f1c40f', icon: '🎬',  label: 'გართობა / კინო' },
+    cinema:        { color: '#e74c3c', icon: '🎦',  label: 'კინოთეატრი' },
+    escape_room:   { color: '#2d3436', icon: '🔐',  label: 'Escape Room / Quest' },
+    karaoke:       { color: '#e056fd', icon: '🎤',  label: 'კარაოკე' },
+    casino:        { color: '#00b894', icon: '🎰',  label: 'კაზინო' },
+    kids:          { color: '#00cec9', icon: '🎠',  label: 'ბავშვთა გართობა / თამაშების მოედანი' },
+    culture:       { color: '#a67c52', icon: '🎭',  label: 'კულტურა / თეატრი' },
+    museum:        { color: '#6d4c41', icon: '🏛️', label: 'მუზეუმი / ისტორიული' },
+    gallery:       { color: '#8e44ad', icon: '🖼️', label: 'გალერეა / ხელოვნება' },
+    // ── ბუნება & ადგილები ─────────────────────────────────────────
+    park:          { color: '#27ae60', icon: '🌳',  label: 'პარკი / სკვერი' },
+    nature:        { color: '#2ecc71', icon: '🏞️', label: 'ბუნება / ტბა / ჩანჩქერი' },
+    mountain:      { color: '#636e72', icon: '⛰️', label: 'მთა / ტრეკინგი' },
+    beach:         { color: '#00b894', icon: '🏖️', label: 'სანაპირო / აბანო' },
+    photo_spot:    { color: '#db2777', icon: '📸',  label: 'ფოტო-ლოკაცია / სელფი-სპოტი' },
+    rooftop:       { color: '#4f46e5', icon: '🌃',  label: 'Rooftop / პანორამული ხედი' },
+    landmark:      { color: '#b45309', icon: '🗿',  label: 'ღირსშესანიშნაობა / ძეგლი' },
+    // ── სერვისები ─────────────────────────────────────────────────
+    health:        { color: '#ff5a6e', icon: '🏥',  label: 'კლინიკა / ჯანმრთელობა' },
+    dental:        { color: '#74b9ff', icon: '🦷',  label: 'სტომატოლოგი' },
+    spa:           { color: '#fd79a8', icon: '💆',  label: 'სპა / მასაჟი / სილამაზე' },
+    beauty:        { color: '#ff66b3', icon: '✂️',  label: 'სალონი / ბარბერი' },
+    finance:       { color: '#16a085', icon: '🏦',  label: 'ბანკი / ფინანსები' },
+    atm:           { color: '#00b894', icon: '💳',  label: 'ბანკომატი' },
+    exchange:      { color: '#55efc4', icon: '💱',  label: 'ვალუტის გაცვლა' },
+    auto:          { color: '#64748b', icon: '⛽',  label: 'ბენზინგასამართი / ავტო' },
+    car_wash:      { color: '#0984e3', icon: '🚿',  label: 'ავტომობილის რეცხვა' },
+    car_repair:    { color: '#b2bec3', icon: '🔧',  label: 'ავტო-სერვისი / ტექ-გასინჯვა' },
     hotel:         { color: '#0891b2', icon: '🏨',  label: 'სასტუმრო' },
-    education:     { color: '#059669', icon: '🎓',  label: 'განათლება' },
-    beauty:        { color: '#ff66b3', icon: '✂️',  label: 'სილამაზე / სალონი' },
-    auto:          { color: '#64748b', icon: '⛽',  label: 'ავტო / ბენზინი' },
-    government:    { color: '#7f8c8d', icon: '🏛️', label: 'სახელმწიფო' },
-    religion:      { color: '#7d3c98', icon: '⛪',  label: 'რელიგიური ადგილები' },
-    animals:       { color: '#92400e', icon: '🐾',  label: 'ცხოველები / ვეტერინარი' },
-    culture:       { color: '#a67c52', icon: '🎭',  label: 'კულტურა / თეატრი / მუზეუმი' },
-    entertainment: { color: '#f1c40f', icon: '🎬',  label: 'გართობა' },
-    work:          { color: '#475569', icon: '💼',  label: 'სამუშაო / Coworking' },
-    photo_spot:    { color: '#db2777', icon: '📸',  label: 'ფოტო ლოკაციები' },
-    rooftop:       { color: '#4f46e5', icon: '🌃',  label: 'Rooftop / ხედები' },
-    service:       { color: '#9ca3af', icon: '🛠️', label: 'სერვისები' },
-    landmark:      { color: '#b45309', icon: '📍',  label: 'ღირსშესანიშნაობა' },
+    hostel:        { color: '#00b894', icon: '🛏️', label: 'ჰოსტელი / Airbnb' },
+    education:     { color: '#059669', icon: '🎓',  label: 'სკოლა / უნივერსიტეტი / კურსი' },
+    work:          { color: '#475569', icon: '💼',  label: 'Coworking / ოფისი' },
+    service:       { color: '#9ca3af', icon: '🛠️', label: 'სერვის-ცენტრი' },
+    pets:          { color: '#92400e', icon: '🐾',  label: 'ვეტ-კლინიკა / Pet Shop' },
+    animals:       { color: '#92400e', icon: '🐶',  label: 'ცხოველების ბაღი / სათავსო' },
+    // ── ინფრასტრუქტურა ────────────────────────────────────────────
+    transport:     { color: '#1f5fbf', icon: '🚇',  label: 'მეტრო / ავტობუსის გაჩერება' },
+    parking:       { color: '#636e72', icon: '🅿️', label: 'პარკინგი' },
+    airport:       { color: '#2d3436', icon: '✈️',  label: 'აეროპორტი / ვოგზალი' },
+    government:    { color: '#7f8c8d', icon: '🏛️', label: 'სახელმწიფო / საჯარო სერვისი' },
+    religion:      { color: '#7d3c98', icon: '⛪',  label: 'ეკლესია / მეჩეთი / სინაგოგა' },
+    toilet:        { color: '#b2bec3', icon: '🚻',  label: 'საზოგადოებრივი ტუალეტი' },
     default:       { color: '#6c757d', icon: '📍',  label: 'სხვა' }
+  };
+
+  // ── ცნობილი ბრენდები (Georgian & international chains) ────────────
+  const KNOWN_BRANDS = {
+    'nikora':        { color: '#e00000', label: 'Nikora',        categoryId: 'grocery',   emoji: '🛒' },
+    'spar':          { color: '#007a33', label: 'Spar',          categoryId: 'grocery',   emoji: '🛒' },
+    'ori nabiji':    { color: '#ff6b00', label: 'Ori Nabiji',    categoryId: 'grocery',   emoji: '🛒' },
+    'gvirila':       { color: '#2e7d32', label: 'Gvirila',       categoryId: 'grocery',   emoji: '🛒' },
+    'carrefour':     { color: '#004a97', label: 'Carrefour',     categoryId: 'grocery',   emoji: '🛒' },
+    'agrohub':       { color: '#388e3c', label: 'Agrohub',       categoryId: 'grocery',   emoji: '🛒' },
+    'fresco':        { color: '#e53935', label: 'Fresco',        categoryId: 'grocery',   emoji: '🛒' },
+    'goodwill':      { color: '#c62828', label: 'Goodwill',      categoryId: 'grocery',   emoji: '🛒' },
+    'bank of georgia': { color: '#f4a42a', label: 'Bank of Georgia', categoryId: 'finance', emoji: '🏦' },
+    'tbc bank':      { color: '#003882', label: 'TBC Bank',      categoryId: 'finance',   emoji: '🏦' },
+    'liberty bank':  { color: '#1565c0', label: 'Liberty Bank',  categoryId: 'finance',   emoji: '🏦' },
+    'credo bank':    { color: '#2e7d32', label: 'Credo Bank',    categoryId: 'finance',   emoji: '🏦' },
+    'tbisi':         { color: '#5c3d2e', label: 'Tbisi',         categoryId: 'cafe',      emoji: '☕' },
+    'costa coffee':  { color: '#6f2c20', label: 'Costa Coffee',  categoryId: 'cafe',      emoji: '☕' },
+    'dunkin':        { color: '#ff671f', label: "Dunkin'",       categoryId: 'cafe',      emoji: '☕' },
+    'starbucks':     { color: '#00704a', label: 'Starbucks',     categoryId: 'cafe',      emoji: '☕' },
+    'mcdonald\'s':   { color: '#da291c', label: "McDonald's",    categoryId: 'fastfood',  emoji: '🍟' },
+    'mcdonalds':     { color: '#da291c', label: "McDonald's",    categoryId: 'fastfood',  emoji: '🍟' },
+    'kfc':           { color: '#c8102e', label: 'KFC',           categoryId: 'fastfood',  emoji: '🍗' },
+    'subway':        { color: '#009b3a', label: 'Subway',        categoryId: 'fastfood',  emoji: '🥖' },
+    'burger king':   { color: '#d62300', label: 'Burger King',   categoryId: 'fastfood',  emoji: '🍔' },
+    'wendy\'s':      { color: '#e2231a', label: "Wendy's",       categoryId: 'fastfood',  emoji: '🍔' },
+    'pizza hut':     { color: '#e31837', label: 'Pizza Hut',     categoryId: 'pizza',     emoji: '🍕' },
+    'domino\'s':     { color: '#006491', label: "Domino's",      categoryId: 'pizza',     emoji: '🍕' },
+    'wissol':        { color: '#00843d', label: 'Wissol',        categoryId: 'auto',      emoji: '⛽' },
+    'gulf':          { color: '#ff6200', label: 'Gulf',          categoryId: 'auto',      emoji: '⛽' },
+    'lukoil':        { color: '#e2231a', label: 'Lukoil',        categoryId: 'auto',      emoji: '⛽' },
+    'rompetrol':     { color: '#ffe000', label: 'Rompetrol',     categoryId: 'auto',      emoji: '⛽' },
+    'socar':         { color: '#009f6b', label: 'SOCAR',         categoryId: 'auto',      emoji: '⛽' },
+    'aversi':        { color: '#1b5e20', label: 'Aversi Pharma', categoryId: 'pharmacy',  emoji: '💊' },
+    'gpc':           { color: '#1565c0', label: 'GPC Pharmacy',  categoryId: 'pharmacy',  emoji: '💊' },
+    'psp':           { color: '#b71c1c', label: 'PSP Pharmacy',  categoryId: 'pharmacy',  emoji: '💊' },
+    'synevo':        { color: '#0277bd', label: 'Synevo',        categoryId: 'health',    emoji: '🏥' },
+    'magticom':      { color: '#1b5e20', label: 'Magticom',      categoryId: 'electronics', emoji: '📱' },
+    'silknet':       { color: '#0d47a1', label: 'Silknet',       categoryId: 'electronics', emoji: '📱' },
+    'beeline':       { color: '#f9a825', label: 'Beeline Georgia', categoryId: 'electronics', emoji: '📱' },
+    'geocell':       { color: '#1565c0', label: 'Geocell',       categoryId: 'electronics', emoji: '📱' },
   };
 
   // Vector tile styles (GL) — text labels stay upright at any rotation angle
@@ -281,9 +375,13 @@
   }
 
   function buildPlaceMarkerElement(place, isActive) {
-    const style       = getPlaceMarkerStyle(place);
-    const markerIcon  = place.icon || style.icon || '📍';
-    const markerColor = style.color || '#22c55e';
+    const brand      = resolveBrand(place.name, place.brand);
+    const style      = brand
+      ? (PLACE_MARKER_STYLES[brand.categoryId] || PLACE_MARKER_STYLES.default)
+      : getPlaceMarkerStyle(place);
+    const markerColor = (brand && brand.color) || style.color || '#22c55e';
+    const markerIcon  = place.icon || (brand && brand.emoji) || style.icon || '📍';
+    const logoUrl     = place.logoUrl || '';
     const glow        = hexToRgba(markerColor, 0.45);
     const boxShadow   = isActive
       ? '0 0 0 5px rgba(255,255,255,.14),0 0 32px ' + hexToRgba(markerColor, 0.7)
@@ -291,12 +389,27 @@
     const wrap = document.createElement('div');
     wrap.className = 'gh-map-marker-wrap';
     const inner = document.createElement('div');
-    inner.className = 'gh-map-emoji-marker' + (isActive ? ' is-selected' : '');
+    inner.className = 'gh-map-emoji-marker' + (isActive ? ' is-selected' : '') + (logoUrl ? ' gh-map-logo-marker' : '');
     inner.style.cssText = '--marker-color:' + markerColor + ';box-shadow:' + boxShadow;
-    const span = document.createElement('span');
-    span.className = 'gh-map-marker-emoji';
-    span.textContent = markerIcon;
-    inner.appendChild(span);
+    if (logoUrl) {
+      const img = document.createElement('img');
+      img.src = logoUrl;
+      img.className = 'gh-map-logo-img';
+      img.alt = place.name;
+      img.onerror = function() {
+        this.remove();
+        const fb = document.createElement('span');
+        fb.className = 'gh-map-marker-emoji';
+        fb.textContent = markerIcon;
+        inner.appendChild(fb);
+      };
+      inner.appendChild(img);
+    } else {
+      const span = document.createElement('span');
+      span.className = 'gh-map-marker-emoji';
+      span.textContent = markerIcon;
+      inner.appendChild(span);
+    }
     const tooltip = document.createElement('div');
     tooltip.className = 'gh-map-tooltip';
     tooltip.textContent = place.name;
@@ -364,8 +477,15 @@
       currency:         data.currency || '',
       googlePlaceId:    data.googlePlaceId || '',
       icon:             data.icon || '',
+      logoUrl:          data.logoUrl || data.logo || data.coverUrl || '',
+      brand:            data.brand || '',
       workingHours:     data.workingHours || null
     };
+  }
+
+  function resolveBrand(name, brand) {
+    const key = (brand || name || '').toLowerCase().trim();
+    return KNOWN_BRANDS[key] || Object.values(KNOWN_BRANDS).find(b => key.includes(b.label.toLowerCase())) || null;
   }
 
   function stripLeadingIcon(icon, label) {
@@ -2945,5 +3065,168 @@
     }).join('');
     results.querySelectorAll('.map-result-card').forEach(card => card.addEventListener('click', () => focusPlace(card.dataset.id)));
   }
+
+  /* ══════════════════════════════════════════════════════
+     ADD PLACE SHEET
+  ══════════════════════════════════════════════════════ */
+  let _apsPinLng = null, _apsPinLat = null;
+  let _apsPinMarker = null;
+
+  function _buildBrandDatalist() {
+    const dl = document.getElementById('apsBrandList');
+    if (!dl) return;
+    dl.innerHTML = Object.values(KNOWN_BRANDS).map(b => '<option value="' + b.label + '">').join('');
+  }
+
+  function _buildCategorySelect() {
+    const sel = document.getElementById('apsCategory');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— აირჩიე —</option>'
+      + Object.entries(PLACE_MARKER_STYLES)
+          .filter(([k]) => k !== 'default')
+          .map(([k, v]) => '<option value="' + k + '">' + v.icon + ' ' + v.label + '</option>')
+          .join('');
+  }
+
+  function _apsUpdatePreview() {
+    const preview = document.getElementById('apsMarkerPreview');
+    if (!preview) return;
+    const name     = (document.getElementById('apsName') || {}).value || 'სახელი';
+    const brandVal = (document.getElementById('apsBrand') || {}).value || '';
+    const catId    = (document.getElementById('apsCategory') || {}).value || 'default';
+    const logoUrl  = (document.getElementById('apsLogoUrl') || {}).value || '';
+    const brand    = resolveBrand(name, brandVal);
+    const style    = brand ? (PLACE_MARKER_STYLES[brand.categoryId] || PLACE_MARKER_STYLES.default)
+                           : (PLACE_MARKER_STYLES[catId] || PLACE_MARKER_STYLES.default);
+    const color    = (brand && brand.color) || style.color;
+    const icon     = (brand && brand.emoji) || style.icon || '📍';
+    const glow     = hexToRgba(color, 0.4);
+    let inner;
+    if (logoUrl) {
+      inner = '<div style="width:44px;height:44px;border-radius:50%;border:2px solid ' + color + ';box-shadow:0 0 0 4px rgba(255,255,255,.08),0 0 16px ' + glow + ';overflow:hidden;flex-shrink:0">'
+            + '<img src="' + logoUrl + '" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.parentNode.innerHTML=\'<span style=line-height:44px;font-size:22px;display:block;text-align:center>' + icon + '</span>\'">'
+            + '</div>';
+    } else {
+      inner = '<div style="width:44px;height:44px;border-radius:50%;background:rgba(15,23,42,.92);border:2px solid ' + color + ';box-shadow:0 0 0 4px rgba(255,255,255,.08),0 0 16px ' + glow + ';display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">' + icon + '</div>';
+    }
+    preview.innerHTML = inner + '<div style="font-size:.82rem;font-weight:700;color:#f1f5f9">' + name + '<br><span style="font-size:.72rem;font-weight:400;color:#64748b">' + style.label + '</span></div>';
+  }
+
+  window.openAddPlaceSheet = function() {
+    const sheet    = document.getElementById('addPlaceSheet');
+    const backdrop = document.getElementById('addPlaceBackdrop');
+    const step1    = document.getElementById('apsStep1');
+    const step2    = document.getElementById('apsStep2');
+    if (!sheet) return;
+    _buildBrandDatalist();
+    _buildCategorySelect();
+    if (step1) step1.style.display = '';
+    if (step2) step2.style.display = 'none';
+    sheet.classList.add('open');
+    sheet.setAttribute('aria-hidden', 'false');
+    if (backdrop) backdrop.classList.add('open');
+    // Enter pin placement mode
+    document.querySelector('.map-container')?.classList.add('map-pin-mode');
+    if (map) map.once('click', _onMapClickForPin);
+  };
+
+  window.closeAddPlaceSheet = function() {
+    const sheet    = document.getElementById('addPlaceSheet');
+    const backdrop = document.getElementById('addPlaceBackdrop');
+    if (!sheet) return;
+    sheet.classList.remove('open');
+    sheet.setAttribute('aria-hidden', 'true');
+    if (backdrop) backdrop.classList.remove('open');
+    document.querySelector('.map-container')?.classList.remove('map-pin-mode');
+    if (_apsPinMarker) { _apsPinMarker.remove(); _apsPinMarker = null; }
+    _apsPinLng = null; _apsPinLat = null;
+  };
+
+  function _onMapClickForPin(e) {
+    _apsPinLng = e.lngLat.lng;
+    _apsPinLat = e.lngLat.lat;
+    document.querySelector('.map-container')?.classList.remove('map-pin-mode');
+    // Drop pin marker on map
+    if (_apsPinMarker) _apsPinMarker.remove();
+    const pinEl = document.createElement('div');
+    pinEl.style.cssText = 'width:32px;height:32px;border-radius:50% 50% 50% 0;background:linear-gradient(135deg,#10b981,#3b82f6);transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.5)';
+    _apsPinMarker = new maplibregl.Marker({ element: pinEl, anchor: 'bottom-left' })
+      .setLngLat([_apsPinLng, _apsPinLat]).addTo(map);
+    // Show coords
+    const coords = document.getElementById('apsPinCoords');
+    if (coords) {
+      coords.style.display = '';
+      coords.textContent = '📍 ' + _apsPinLat.toFixed(5) + ', ' + _apsPinLng.toFixed(5);
+    }
+    const nextBtn = document.getElementById('apsNextBtn');
+    if (nextBtn) nextBtn.disabled = false;
+  }
+
+  window.apsGoToForm = function() {
+    document.getElementById('apsStep1').style.display = 'none';
+    document.getElementById('apsStep2').style.display = '';
+    _apsUpdatePreview();
+    // Live preview update
+    ['apsName','apsBrand','apsCategory','apsLogoUrl'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', _apsUpdatePreview);
+    });
+  };
+
+  window.apsBack = function() {
+    document.getElementById('apsStep1').style.display = '';
+    document.getElementById('apsStep2').style.display = 'none';
+    document.querySelector('.map-container')?.classList.add('map-pin-mode');
+    if (map) map.once('click', _onMapClickForPin);
+  };
+
+  window.apsSubmit = function() {
+    const GF = window.GeoFirebase;
+    if (!GF || !GF.db || !GF.fs) { alert('Firebase not loaded'); return; }
+    const name = (document.getElementById('apsName') || {}).value.trim();
+    if (!name) { document.getElementById('apsName').focus(); return; }
+    if (!_apsPinLat || !_apsPinLng) { alert('ჯერ რუკაზე შეეხე'); return; }
+    const brandVal = (document.getElementById('apsBrand') || {}).value.trim();
+    const catId    = (document.getElementById('apsCategory') || {}).value || 'default';
+    const logoUrl  = (document.getElementById('apsLogoUrl') || {}).value.trim();
+    const desc     = (document.getElementById('apsDesc') || {}).value.trim();
+    const phone    = (document.getElementById('apsPhone') || {}).value.trim();
+    const website  = (document.getElementById('apsWebsite') || {}).value.trim();
+    const brand    = resolveBrand(name, brandVal);
+    const style    = PLACE_MARKER_STYLES[catId] || PLACE_MARKER_STYLES.default;
+    const btn      = document.getElementById('apsSubmitBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ემატება…'; }
+    const user = (window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser) || null;
+    const doc = {
+      name, lat: _apsPinLat, lng: _apsPinLng,
+      categoryId: (brand && brand.categoryId) || catId,
+      category: (brand && brand.categoryId) || catId,
+      brand: brandVal || '',
+      logoUrl: logoUrl || '',
+      shortDescription: desc,
+      phone, website,
+      status: 'active',
+      createdAt: GF.fs.serverTimestamp(),
+      addedBy: user ? user.uid : 'anon'
+    };
+    GF.fs.addDoc(GF.fs.collection(GF.db, 'places'), doc).then(ref => {
+      // Add to local state immediately
+      const newPlace = normalize(ref.id, doc, 'places');
+      if (newPlace) {
+        allPlaces.push(newPlace);
+        addPlaceMarkers([newPlace]);
+        updateMarkerVisibility();
+      }
+      window.closeAddPlaceSheet();
+      // Reset form
+      ['apsName','apsBrand','apsCategory','apsLogoUrl','apsDesc','apsPhone','apsWebsite'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+      });
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> რუკაზე დამატება'; }
+    }).catch(err => {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> რუკაზე დამატება'; }
+      alert('შეცდომა: ' + (err.code || err.message));
+    });
+  };
 
 })();

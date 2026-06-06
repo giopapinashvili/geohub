@@ -1526,3 +1526,53 @@ body, html { height: 100%; overflow: hidden; }
 .map-fs-btn:hover,.map-fs-btn.active{background:rgba(16,185,129,.18);border-color:#10b981;color:#10b981}
 .map-filter-sheet-backdrop{display:none;position:absolute;inset:0;z-index:1001;background:transparent}
 .map-filter-sheet-backdrop.open{display:block}
+
+/* ── Logo markers ──────────────────────────────────── */
+.gh-map-logo-marker { padding:0 !important; overflow:hidden !important; }
+.gh-map-logo-img { width:100%;height:100%;object-fit:cover;border-radius:999px;display:block;pointer-events:none; }
+
+/* ── Add Place FAB ──────────────────────────────────── */
+.map-add-place-fab{
+  position:fixed;bottom:88px;right:16px;z-index:1200;
+  width:50px;height:50px;border-radius:50%;
+  background:linear-gradient(135deg,#10b981,#3b82f6);
+  border:none;color:#fff;font-size:1.3rem;
+  box-shadow:0 4px 18px rgba(16,185,129,.5);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:transform .15s,box-shadow .15s;
+}
+.map-add-place-fab:hover{transform:scale(1.08);box-shadow:0 6px 24px rgba(16,185,129,.65);}
+@media(max-width:768px){.map-add-place-fab{bottom:130px;right:14px;}}
+
+/* ── Add Place Sheet ─────────────────────────────────── */
+.map-add-place-backdrop{
+  display:none;position:fixed;inset:0;z-index:1299;
+  background:rgba(0,0,0,.55);backdrop-filter:blur(4px);
+}
+.map-add-place-backdrop.open{display:block;}
+.map-add-place-sheet{
+  position:fixed;bottom:0;left:50%;transform:translate(-50%,100%);
+  z-index:1300;width:100%;max-width:520px;
+  background:var(--bg-card,#0f172a);
+  border-radius:24px 24px 0 0;
+  border-top:1px solid rgba(255,255,255,.1);
+  padding:12px 20px 32px;
+  max-height:88vh;overflow-y:auto;
+  transition:transform .32s cubic-bezier(.22,.68,0,1.2);
+  box-shadow:0 -12px 48px rgba(0,0,0,.7);
+}
+.map-add-place-sheet.open{transform:translate(-50%,0);}
+.map-aps-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.map-aps-title{font-weight:800;font-size:1rem;color:#f1f5f9;display:flex;align-items:center;gap:8px;}
+.map-aps-title i{color:var(--green,#10b981);}
+.map-aps-close{background:rgba(255,255,255,.07);border:none;color:#94a3b8;width:30px;height:30px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;}
+.map-aps-step{}
+.map-aps-hint{text-align:center;padding:20px 0 8px;color:#f1f5f9;}
+.map-aps-coords{text-align:center;font-size:.78rem;color:var(--green,#10b981);padding:6px 12px;border-radius:8px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);margin-top:8px;}
+.map-aps-preview{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;margin:12px 0;display:flex;align-items:center;gap:12px;}
+.map-aps-marker-preview{display:flex;align-items:center;gap:8px;flex:1;}
+
+/* ── Add place pin mode cursor ───────────────────────── */
+.map-pin-mode #map{cursor:crosshair !important;}
+.map-pin-mode .map-add-place-fab{background:linear-gradient(135deg,#f97316,#ef4444);animation:apsFabPulse 1.2s ease-in-out infinite;}
+@keyframes apsFabPulse{0%,100%{box-shadow:0 4px 18px rgba(249,115,22,.5);}50%{box-shadow:0 4px 28px rgba(249,115,22,.85);}}

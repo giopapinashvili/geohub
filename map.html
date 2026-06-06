@@ -214,6 +214,91 @@
       <div class="mpd-tab-content" id="mpdTabContent"></div>
     </div>
 
+    <!-- Add Place button -->
+    <button id="addPlaceBtn" class="map-add-place-fab" onclick="window.openAddPlaceSheet()" aria-label="Add Place">
+      <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Add Place Sheet -->
+    <div class="map-add-place-backdrop" id="addPlaceBackdrop" onclick="window.closeAddPlaceSheet()"></div>
+    <div class="map-add-place-sheet" id="addPlaceSheet" aria-hidden="true">
+      <div class="map-filter-sheet-handle"></div>
+      <div class="map-aps-header">
+        <div class="map-aps-title"><i class="fas fa-map-pin"></i> ადგილის დამატება</div>
+        <button class="map-aps-close" onclick="window.closeAddPlaceSheet()"><i class="fas fa-times"></i></button>
+      </div>
+
+      <!-- Step 1: tap on map to place pin -->
+      <div id="apsStep1" class="map-aps-step">
+        <div class="map-aps-hint">
+          <i class="fas fa-hand-pointer" style="font-size:1.6rem;color:var(--green);margin-bottom:8px;display:block"></i>
+          <div style="font-weight:700;margin-bottom:4px">რუკაზე ნებისმიერ წერტილს შეეხე</div>
+          <div style="color:var(--text-secondary);font-size:.85rem">მარკერი ჩადგება – შემდეგ ფორმს შეავსებ</div>
+        </div>
+        <div id="apsPinCoords" class="map-aps-coords" style="display:none"></div>
+        <button class="btn btn-primary btn-full" id="apsNextBtn" onclick="window.apsGoToForm()" disabled style="margin-top:16px">
+          <i class="fas fa-arrow-right"></i> გაგრძელება
+        </button>
+      </div>
+
+      <!-- Step 2: Fill form -->
+      <div id="apsStep2" class="map-aps-step" style="display:none">
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label required" style="font-size:.8rem">სახელი</label>
+          <input type="text" class="form-input" id="apsName" placeholder="მაგ: ნიკორა ვაკე">
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label" style="font-size:.8rem">ბრენდი / ქსელი (სურვილისამებრ)</label>
+          <input type="text" class="form-input" id="apsBrand" placeholder="მაგ: Nikora, Spar, Tbisi…" list="apsBrandList" autocomplete="off">
+          <datalist id="apsBrandList"></datalist>
+          <div class="form-hint" style="font-size:.73rem">ჩაწერე ბრენდი — ფერი ავტომატურად შეიცვლება</div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label required" style="font-size:.8rem">კატეგორია</label>
+          <select class="form-input" id="apsCategory" style="height:42px">
+            <option value="">— აირჩიე —</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label" style="font-size:.8rem">ლოგოს URL (სურვილისამებრ)</label>
+          <input type="url" class="form-input" id="apsLogoUrl" placeholder="https://example.com/logo.png">
+          <div class="form-hint" style="font-size:.73rem">ან ატვირთე ლოგო ბიზნეს-გვერდიდან</div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label" style="font-size:.8rem">მოკლე აღწერა</label>
+          <textarea class="form-input" id="apsDesc" rows="2" placeholder="ერთი-ორი წინადადება…" style="resize:none"></textarea>
+        </div>
+
+        <div class="form-row" style="gap:8px;margin-bottom:12px">
+          <div class="form-group" style="flex:1;margin:0">
+            <label class="form-label" style="font-size:.8rem">ტელეფონი</label>
+            <input type="tel" class="form-input" id="apsPhone" placeholder="+995 555…">
+          </div>
+          <div class="form-group" style="flex:1;margin:0">
+            <label class="form-label" style="font-size:.8rem">ვებ-გვერდი</label>
+            <input type="url" class="form-input" id="apsWebsite" placeholder="https://…">
+          </div>
+        </div>
+
+        <!-- Marker preview -->
+        <div class="map-aps-preview">
+          <div style="font-size:.72rem;color:var(--text-secondary);margin-bottom:6px;font-weight:700">MARKER PREVIEW</div>
+          <div id="apsMarkerPreview" class="map-aps-marker-preview"></div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="btn btn-ghost btn-sm" onclick="window.apsBack()"><i class="fas fa-arrow-left"></i> უკან</button>
+          <button class="btn btn-primary btn-full" id="apsSubmitBtn" onclick="window.apsSubmit()">
+            <i class="fas fa-check"></i> რუკაზე დამატება
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Nearby Stories button -->
     <button id="mapStoriesBtn" class="map-stories-fab" onclick="window.toggleNearbyStories()" aria-label="Nearby Stories">
       <i class="fas fa-circle-play"></i>
