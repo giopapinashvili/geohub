@@ -302,7 +302,7 @@
     if (_isActingAsPage) {
       // ── Page identity mode: show admin controls ───────────────────
       actions =
-        '<a href="add-business.html?edit='+esc(BIZ_ID)+'" class="biz-action-btn owner-edit"><i class="fas fa-pen"></i> Edit Page</a>'+
+        '<button class="biz-action-btn owner-edit" onclick="window._bizEditOverlay.open()"><i class="fas fa-pen"></i> Edit Page</button>'+
         '<button class="biz-action-btn" type="button" data-biz-open-compose><i class="fas fa-plus"></i> Create Post</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
@@ -565,7 +565,7 @@
       '<div class="biz-admin-toolbar-inner">'+
         '<span class="biz-admin-badge"><i class="fas fa-crown"></i> Admin Mode</span>'+
         '<div class="biz-admin-toolbar-btns">'+
-          '<a href="add-business.html?edit='+esc(BIZ_ID)+'" class="biz-admin-btn"><i class="fas fa-pen"></i> Edit Page</a>'+
+          '<button class="biz-admin-btn" onclick="window._bizEditOverlay.open()"><i class="fas fa-pen"></i> Edit Page</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.openBlockManager()"><i class="fas fa-plus-circle"></i> Add Block</button>'+
           '<button class="biz-admin-btn" type="button" data-biz-open-compose><i class="fas fa-pen-to-square"></i> New Post</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
@@ -1545,7 +1545,7 @@
         }).join('')+
       '</div>'+
       '<div class="biz-dash-actions">'+
-        '<a href="add-business.html?edit='+esc(BIZ_ID)+'" class="biz-owner-action-btn edit"><i class="fas fa-pen"></i> Edit Page Info</a>'+
+        '<button class="biz-owner-action-btn edit" onclick="window._bizEditOverlay.open()"><i class="fas fa-pen"></i> Edit Page Info</button>'+
         '<button class="biz-owner-action-btn photo" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-owner-action-btn quotes" onclick="window._bizActions.loadOwnerQuotes()"><i class="fas fa-inbox"></i> View Quote Requests</button>'+
         '<button class="biz-owner-action-btn" onclick="window._bizActions.switchTab(\'insights\')" style="background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.3);color:#60a5fa"><i class="fas fa-chart-line"></i> View Insights</button>'+
@@ -5643,6 +5643,45 @@
   document.addEventListener('click', function(e) {
     var a = e.target.closest('a[href^="tel:"]');
     if (a && BIZ_ID) _trackBizAnalytics(BIZ_ID, 'phone');
+  });
+
+  // ── INLINE EDIT OVERLAY ───────────────────────────────────────
+
+  window._bizEditOverlay = {
+    open: function() {
+      if (!BIZ_ID) return;
+      var existing = document.getElementById('biz-edit-overlay');
+      if (existing) { existing.style.display = 'flex'; return; }
+
+      var overlay = document.createElement('div');
+      overlay.id = 'biz-edit-overlay';
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#0a0a12;display:flex;flex-direction:column';
+
+      var header = document.createElement('div');
+      header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#111122;border-bottom:1px solid #2e2e42;flex-shrink:0';
+      header.innerHTML = '<span style="font-weight:700;font-size:1rem;color:#e0e0f0"><i class="fas fa-pen" style="color:#10b981;margin-right:8px"></i>Edit Page</span>'+
+        '<button onclick="window._bizEditOverlay.close()" style="background:none;border:1px solid #3e3e52;border-radius:8px;color:#aaa;padding:6px 14px;cursor:pointer;font-size:.85rem"><i class="fas fa-times"></i> Close</button>';
+
+      var iframe = document.createElement('iframe');
+      iframe.id = 'biz-edit-iframe';
+      iframe.src = 'add-business.html?edit=' + encodeURIComponent(BIZ_ID);
+      iframe.style.cssText = 'flex:1;border:none;width:100%;height:100%';
+
+      overlay.appendChild(header);
+      overlay.appendChild(iframe);
+      document.body.appendChild(overlay);
+    },
+    close: function() {
+      var ov = document.getElementById('biz-edit-overlay');
+      if (ov) ov.remove();
+    }
+  };
+
+  window.addEventListener('message', function(e) {
+    if (e.data && e.data.type === 'biz-edit-saved') {
+      window._bizEditOverlay.close();
+      window.location.reload();
+    }
   });
 
   if(window.GeoFirebase&&window.GeoFirebase.db) init(window.GeoFirebase);
