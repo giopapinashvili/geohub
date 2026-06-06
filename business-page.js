@@ -1288,7 +1288,7 @@
       return '<div class="biz-gallery-item" onclick="window._bizActions.openPhoto(\''+esc(p.url)+'\')">'+
         '<img src="'+esc(p.url)+'" alt="'+esc(p.caption||'')+'" loading="lazy" onerror="this.onerror=null;this.style.display=\'none\'">'+
         (p.caption?'<div class="biz-gallery-caption">'+esc(p.caption)+'</div>':'')+
-        (owner ? '<div class="biz-gallery-del-wrap" onclick="event.stopPropagation()"><button class="biz-gallery-del-btn" title="Delete photo" onclick="window._bizActions.deleteGalleryPhoto(\''+esc(p.id||'')+'\')"><i class="fas fa-trash"></i></button></div>' : '')+
+        (owner ? '<div class="biz-gallery-del-wrap"><button class="biz-gallery-del-btn" title="Delete photo" onclick="event.stopPropagation();window._bizActions.deleteGalleryPhoto(\''+esc(p.id||'')+'\')"><i class="fas fa-trash"></i></button></div>' : '')+
       '</div>';
     }).join('');
     return '<div class="biz-section">'+
@@ -1521,6 +1521,7 @@
         '<button class="biz-owner-action-btn photo" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-owner-action-btn quotes" onclick="window._bizActions.loadOwnerQuotes()"><i class="fas fa-inbox"></i> View Quote Requests</button>'+
         '<button class="biz-owner-action-btn" onclick="window._bizActions.switchTab(\'insights\')" style="background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.3);color:#60a5fa"><i class="fas fa-chart-line"></i> View Insights</button>'+
+        '<button id="biz-add-to-map-btn" class="biz-owner-action-btn" onclick="window._bizActions.addToMap()" style="background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.3);color:#10b981"><i class="fas fa-map-marker-alt"></i> Add to Map</button>'+
       '</div>'+
       '<div id="biz-owner-quotes-panel" style="display:none;padding:0 16px 14px"></div>'+
       '<div id="biz-analytics-panel" class="biz-analytics-wrap">'+
@@ -5230,6 +5231,53 @@
           showToast(_bpt('photo_deleted'));
           reloadGalleryTab();
         }).catch(function(err){ showToast(_bpt('post_del_fail')+': '+(err.code||err.message), false); });
+      });
+    },
+
+    addToMap: function() {
+      if (!isAdminOrOwner()) return;
+      if (!_biz || !_biz.lat || !_biz.lng) {
+        showToast('ბიზნესს კოორდინატები არ აქვს — Edit Page Info-ში დაამატე მისამართი', false);
+        return;
+      }
+      var btn = document.getElementById('biz-add-to-map-btn');
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ემატება…'; }
+      var fs = _fs; var db = _db;
+      var q = fs.query(fs.collection(db,'places'), fs.where('businessId','==',BIZ_ID));
+      fs.getDocs(q).then(function(snap) {
+        if (!snap.empty) {
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Add to Map'; }
+          showToast('ეს ბიზნესი რუკაზე უკვე დამატებულია!', false);
+          return;
+        }
+        var user = _auth && _auth.currentUser;
+        var doc = {
+          name: _biz.title || _biz.name || '',
+          lat: _biz.lat,
+          lng: _biz.lng,
+          categoryId: _biz.category || _biz.categoryId || 'default',
+          category: _biz.category || _biz.categoryId || 'default',
+          brand: '',
+          logoUrl: _biz.logoUrl || '',
+          shortDescription: _biz.description || _biz.shortDescription || '',
+          phone: _biz.phone || '',
+          website: _biz.website || '',
+          status: 'active',
+          businessId: BIZ_ID,
+          createdAt: fs.serverTimestamp(),
+          userId: user ? user.uid : '',
+          addedBy: user ? user.uid : 'anon'
+        };
+        fs.addDoc(fs.collection(db,'places'), doc).then(function() {
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> რუკაზე დამატებულია'; }
+          showToast('ბიზნესი წარმატებით დაემატა რუკაზე!');
+        }).catch(function(err) {
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Add to Map'; }
+          showToast('შეცდომა: ' + (err.code || err.message), false);
+        });
+      }).catch(function(err) {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Add to Map'; }
+        showToast('შეცდომა: ' + (err.code || err.message), false);
       });
     },
 
