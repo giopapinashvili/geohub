@@ -4116,6 +4116,7 @@
         '</div>';
       overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
       document.body.appendChild(overlay);
+      requestAnimationFrame(function() { overlay.classList.add('open'); });
       var inp = document.getElementById('biz-delete-confirm-input');
       if (inp) inp.focus();
     },
