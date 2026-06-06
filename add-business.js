@@ -492,13 +492,7 @@ let currentStep = 1;
       document.getElementById('stepSuccess').classList.add('active');
       document.getElementById('progressFill').style.width = '100%';
       window.GeoLastCreatedBusinessId = ref.id;
-      setTimeout(function(){
-        if (window.parent && window.parent !== window) {
-          window.parent.postMessage({ type: 'biz-edit-saved', bizId: ref.id }, '*');
-        } else {
-          window.location.href = 'business.html?id=' + encodeURIComponent(ref.id);
-        }
-      }, 900);
+      setTimeout(function(){ window.location.href = 'business.html?id=' + encodeURIComponent(ref.id); }, 900);
     }).catch(function(err) {
       console.error('[AddBusiness] Firestore create failed', err);
       _bizToast('Business could not be created: ' + (err.code || err.message), true);

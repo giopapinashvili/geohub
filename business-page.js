@@ -302,7 +302,7 @@
     if (_isActingAsPage) {
       // ── Page identity mode: show admin controls ───────────────────
       actions =
-        '<button class="biz-action-btn owner-edit" onclick="window._bizEditOverlay.open()"><i class="fas fa-pen"></i> Edit Page</button>'+
+        '<button class="biz-action-btn owner-edit" onclick="ghOpenBizEdit()"><i class="fas fa-pen"></i> Edit Page</button>'+
         '<button class="biz-action-btn" type="button" data-biz-open-compose><i class="fas fa-plus"></i> Create Post</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
@@ -565,7 +565,7 @@
       '<div class="biz-admin-toolbar-inner">'+
         '<span class="biz-admin-badge"><i class="fas fa-crown"></i> Admin Mode</span>'+
         '<div class="biz-admin-toolbar-btns">'+
-          '<button class="biz-admin-btn" onclick="window._bizEditOverlay.open()"><i class="fas fa-pen"></i> Edit Page</button>'+
+          '<button class="biz-admin-btn" onclick="ghOpenBizEdit()"><i class="fas fa-pen"></i> Edit Page</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.openBlockManager()"><i class="fas fa-plus-circle"></i> Add Block</button>'+
           '<button class="biz-admin-btn" type="button" data-biz-open-compose><i class="fas fa-pen-to-square"></i> New Post</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
@@ -1545,7 +1545,7 @@
         }).join('')+
       '</div>'+
       '<div class="biz-dash-actions">'+
-        '<button class="biz-owner-action-btn edit" onclick="window._bizEditOverlay.open()"><i class="fas fa-pen"></i> Edit Page Info</button>'+
+        '<button class="biz-owner-action-btn edit" onclick="ghOpenBizEdit()"><i class="fas fa-pen"></i> Edit Page Info</button>'+
         '<button class="biz-owner-action-btn photo" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-owner-action-btn quotes" onclick="window._bizActions.loadOwnerQuotes()"><i class="fas fa-inbox"></i> View Quote Requests</button>'+
         '<button class="biz-owner-action-btn" onclick="window._bizActions.switchTab(\'insights\')" style="background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.3);color:#60a5fa"><i class="fas fa-chart-line"></i> View Insights</button>'+
@@ -5645,44 +5645,195 @@
     if (a && BIZ_ID) _trackBizAnalytics(BIZ_ID, 'phone');
   });
 
-  // ── INLINE EDIT OVERLAY ───────────────────────────────────────
+  // ── INLINE EDIT DRAWER ───────────────────────────────────────
 
-  window._bizEditOverlay = {
-    open: function() {
-      if (!BIZ_ID) return;
-      var existing = document.getElementById('biz-edit-overlay');
-      if (existing) { existing.style.display = 'flex'; return; }
+  var BEDIT_CATS = [
+    ['cafes','☕ Café'],['restaurants','🍽️ Restaurant'],['bars','🍺 Bar'],['wine-bar','🍷 Wine Bar'],
+    ['bakery','🥐 Bakery'],['fast-food','🍔 Fast Food'],['pizza','🍕 Pizza'],['sushi','🍱 Sushi'],
+    ['ice-cream','🍦 Ice Cream'],['khinkali','🥟 Khinkali House'],['food-delivery','🛵 Food Delivery'],
+    ['catering','🍱 Catering'],['hotels','🏨 Hotel'],['guesthouses','🏡 Guesthouse'],
+    ['hostel','🛏️ Hostel'],['apartments','🏢 Apartments'],['resort','🌴 Resort'],
+    ['villa','🏖️ Villa'],['camping','⛺ Camping'],['tours','🗺️ Tours'],
+    ['travel-agency','✈️ Travel Agency'],['hiking','🥾 Hiking'],['attractions','🏛️ Attraction'],
+    ['adventure','🪂 Adventure'],['rafting','🚣 Rafting'],['ski','⛷️ Ski Resort'],
+    ['horse-riding','🐴 Horse Riding'],['wine-tour','🍇 Wine Tour'],
+    ['gym','💪 Gym'],['yoga','🧘 Yoga'],['spa','💆 Spa'],['dental','🦷 Dental'],
+    ['clinic','🏥 Clinic'],['pharmacy','💊 Pharmacy'],['massage','💆 Massage'],
+    ['beauty','💅 Beauty'],['hair-salon','💇 Hair Salon'],['barbershop','💈 Barbershop'],
+    ['nail-salon','💅 Nail Salon'],['tattoo','🎨 Tattoo'],['lashes','👁️ Lashes'],
+    ['cinema','🎬 Cinema'],['nightclub','🎵 Nightclub'],['karaoke','🎤 Karaoke'],
+    ['escape-room','🔐 Escape Room'],['bowling','🎳 Bowling'],['gaming','🎮 Gaming'],
+    ['clothing','👗 Clothing'],['electronics','📱 Electronics'],['jewelry','💍 Jewelry'],
+    ['books','📚 Books'],['gifts','🎁 Gifts'],['supermarket','🛒 Supermarket'],
+    ['furniture','🛋️ Furniture'],['florist','🌸 Florist'],['sports-shop','⚽ Sports Shop'],
+    ['online-education','📖 Education'],['language-school','🗣️ Language School'],
+    ['web-studio','💻 Web Studio'],['consulting','📊 Consulting'],['accounting','🧾 Accounting'],
+    ['legal','⚖️ Legal'],['real-estate','🏠 Real Estate'],['photography','📸 Photography'],
+    ['car-rental','🚗 Car Rental'],['car-repair','🔧 Car Repair'],['car-wash','🚿 Car Wash'],
+    ['it-services','🖥️ IT Services'],['phone-repair','📱 Phone Repair'],
+    ['event-venue','🎉 Event Venue'],['wedding','💍 Wedding'],['vet','🐾 Vet'],
+    ['pet-shop','🐕 Pet Shop'],['kids-cafe','🧸 Kids Café'],['bank','🏦 Bank'],
+    ['exchange','💱 Exchange'],['museum','🏛️ Museum'],['gallery','🖼️ Gallery'],
+    ['laundry','👕 Laundry'],['cleaning','🧹 Cleaning'],['other','📍 Other']
+  ];
+  var BEDIT_CITIES = ['Tbilisi','Batumi','Kazbegi','Kutaisi','Gudauri','Sighnaghi','Mestia','Borjomi','Telavi','Gori','Mtskheta','Zugdidi','Other'];
 
-      var overlay = document.createElement('div');
-      overlay.id = 'biz-edit-overlay';
-      overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#0a0a12;display:flex;flex-direction:column';
+  function _beditInjectStyles() {
+    if (document.getElementById('biz-edit-drawer-css')) return;
+    var s = document.createElement('style');
+    s.id = 'biz-edit-drawer-css';
+    s.textContent = [
+      '#biz-edit-drawer{position:fixed;inset:0;z-index:99999;background:#0d0d1a;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}',
+      '#biz-edit-drawer.open{transform:translateX(0)}',
+      '#biz-edit-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#111126;border-bottom:1px solid #2a2a3e;flex-shrink:0}',
+      '#biz-edit-drawer-head h2{margin:0;font-size:1rem;font-weight:700;color:#e0e0f0}',
+      '#biz-edit-drawer-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:20px}',
+      '.bedit-section{background:#131325;border:1px solid #2a2a3e;border-radius:12px;padding:16px}',
+      '.bedit-section-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#10b981;margin:0 0 14px}',
+      '.bedit-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}',
+      '.bedit-group{display:flex;flex-direction:column;gap:5px}',
+      '.bedit-group label{font-size:.78rem;color:#9090b0;font-weight:600}',
+      '.bedit-group input,.bedit-group select,.bedit-group textarea{background:#0a0a18;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;padding:9px 12px;font-size:.88rem;outline:none;width:100%;box-sizing:border-box}',
+      '.bedit-group input:focus,.bedit-group select:focus,.bedit-group textarea:focus{border-color:#10b981}',
+      '.bedit-group textarea{resize:vertical;min-height:80px}',
+      '.bedit-group select option{background:#1a1a2e}',
+      '#bedit-save-btn{margin:4px 0 20px;padding:13px;background:#10b981;color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}',
+      '#bedit-save-btn:disabled{opacity:.6;cursor:not-allowed}',
+      '.bedit-close-btn{background:none;border:1px solid #3e3e56;border-radius:8px;color:#aaa;padding:6px 14px;cursor:pointer;font-size:.85rem}'
+    ].join('');
+    document.head.appendChild(s);
+  }
 
-      var header = document.createElement('div');
-      header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#111122;border-bottom:1px solid #2e2e42;flex-shrink:0';
-      header.innerHTML = '<span style="font-weight:700;font-size:1rem;color:#e0e0f0"><i class="fas fa-pen" style="color:#10b981;margin-right:8px"></i>Edit Page</span>'+
-        '<button onclick="window._bizEditOverlay.close()" style="background:none;border:1px solid #3e3e52;border-radius:8px;color:#aaa;padding:6px 14px;cursor:pointer;font-size:.85rem"><i class="fas fa-times"></i> Close</button>';
+  function _beditVal(id) {
+    var el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+  }
 
-      var iframe = document.createElement('iframe');
-      iframe.id = 'biz-edit-iframe';
-      iframe.src = 'add-business.html?edit=' + encodeURIComponent(BIZ_ID);
-      iframe.style.cssText = 'flex:1;border:none;width:100%;height:100%';
+  function ghOpenBizEdit() {
+    if (!BIZ_ID || !_biz) return;
+    _beditInjectStyles();
+    var existing = document.getElementById('biz-edit-drawer');
+    if (existing) { existing.classList.add('open'); return; }
 
-      overlay.appendChild(header);
-      overlay.appendChild(iframe);
-      document.body.appendChild(overlay);
-    },
-    close: function() {
-      var ov = document.getElementById('biz-edit-overlay');
-      if (ov) ov.remove();
-    }
+    var b = _biz;
+    var catOpts = BEDIT_CATS.map(function(c){
+      return '<option value="'+c[0]+'"'+(((b.category||b.categoryId||'')===c[0])?' selected':'')+'>'+c[1]+'</option>';
+    }).join('');
+    var cityOpts = BEDIT_CITIES.map(function(c){
+      return '<option'+(c===b.city?' selected':'')+'>'+c+'</option>';
+    }).join('');
+
+    var drawer = document.createElement('div');
+    drawer.id = 'biz-edit-drawer';
+    drawer.innerHTML =
+      '<div id="biz-edit-drawer-head">'+
+        '<h2><i class="fas fa-pen" style="color:#10b981;margin-right:8px"></i>Edit Business Page</h2>'+
+        '<button class="bedit-close-btn" onclick="ghCloseBizEdit()"><i class="fas fa-times"></i> Close</button>'+
+      '</div>'+
+      '<div id="biz-edit-drawer-body">'+
+
+        '<div class="bedit-section">'+
+          '<div class="bedit-section-title">Basic Info</div>'+
+          '<div style="display:flex;flex-direction:column;gap:12px">'+
+            '<div class="bedit-group"><label>Business Name</label><input id="bedit-name" value="'+esc(b.name||b.title||'')+'" placeholder="Business name"></div>'+
+            '<div class="bedit-group"><label>Description</label><textarea id="bedit-desc">'+esc(b.description||b.desc||'')+'</textarea></div>'+
+            '<div class="bedit-row">'+
+              '<div class="bedit-group"><label>Category</label><select id="bedit-cat"><option value="">Select...</option>'+catOpts+'</select></div>'+
+              '<div class="bedit-group"><label>Type</label><select id="bedit-type"><option value="physical"'+((!b.isOnline)?' selected':'')+'>Physical</option><option value="online"'+((b.isOnline)?' selected':'')+'>Online</option></select></div>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+
+        '<div class="bedit-section">'+
+          '<div class="bedit-section-title">Location</div>'+
+          '<div style="display:flex;flex-direction:column;gap:12px">'+
+            '<div class="bedit-row">'+
+              '<div class="bedit-group"><label>City</label><select id="bedit-city"><option value="">Select city...</option>'+cityOpts+'</select></div>'+
+              '<div class="bedit-group"><label>Address</label><input id="bedit-address" value="'+esc(b.address||'')+'" placeholder="Street address"></div>'+
+            '</div>'+
+            '<div class="bedit-row">'+
+              '<div class="bedit-group"><label>Latitude</label><input id="bedit-lat" type="number" step="any" value="'+esc(b.lat||'')+'" placeholder="41.6938"></div>'+
+              '<div class="bedit-group"><label>Longitude</label><input id="bedit-lng" type="number" step="any" value="'+esc(b.lng||'')+'" placeholder="44.8015"></div>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+
+        '<div class="bedit-section">'+
+          '<div class="bedit-section-title">Contact</div>'+
+          '<div style="display:flex;flex-direction:column;gap:12px">'+
+            '<div class="bedit-row">'+
+              '<div class="bedit-group"><label>Phone</label><input id="bedit-phone" value="'+esc(b.phone||'')+'" placeholder="+995 555 ..."></div>'+
+              '<div class="bedit-group"><label>WhatsApp</label><input id="bedit-whatsapp" value="'+esc(b.whatsapp||'')+'" placeholder="+995 555 ..."></div>'+
+            '</div>'+
+            '<div class="bedit-row">'+
+              '<div class="bedit-group"><label>Email</label><input id="bedit-email" type="email" value="'+esc(b.email||'')+'" placeholder="contact@..."></div>'+
+              '<div class="bedit-group"><label>Website</label><input id="bedit-website" type="url" value="'+esc(b.website||'')+'" placeholder="https://..."></div>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+
+        '<div class="bedit-section">'+
+          '<div class="bedit-section-title">Social Media</div>'+
+          '<div class="bedit-row">'+
+            '<div class="bedit-group"><label><i class="fab fa-instagram" style="color:#e1306c"></i> Instagram</label><input id="bedit-instagram" value="'+esc(b.instagram||(b.socialLinks&&b.socialLinks.instagram)||'')+'" placeholder="username"></div>'+
+            '<div class="bedit-group"><label><i class="fab fa-facebook" style="color:#1877f2"></i> Facebook</label><input id="bedit-facebook" value="'+esc(b.facebook||(b.socialLinks&&b.socialLinks.facebook)||'')+'" placeholder="facebook.com/page"></div>'+
+          '</div>'+
+        '</div>'+
+
+        '<button id="bedit-save-btn" onclick="ghSaveBizEdit()"><i class="fas fa-save"></i> Save Changes</button>'+
+      '</div>';
+
+    document.body.appendChild(drawer);
+    requestAnimationFrame(function(){ drawer.classList.add('open'); });
+  }
+  window.ghOpenBizEdit = ghOpenBizEdit;
+
+  window.ghCloseBizEdit = function() {
+    var d = document.getElementById('biz-edit-drawer');
+    if (!d) return;
+    d.classList.remove('open');
+    setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); }, 310);
   };
 
-  window.addEventListener('message', function(e) {
-    if (e.data && e.data.type === 'biz-edit-saved') {
-      window._bizEditOverlay.close();
-      window.location.reload();
-    }
-  });
+  window.ghSaveBizEdit = function() {
+    var btn = document.getElementById('bedit-save-btn');
+    if (!btn || !_db || !_fs) return;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
+
+    var isOnline = _beditVal('bedit-type') === 'online';
+    var lat = parseFloat(_beditVal('bedit-lat')) || null;
+    var lng = parseFloat(_beditVal('bedit-lng')) || null;
+    var payload = {
+      name:        _beditVal('bedit-name'),
+      title:       _beditVal('bedit-name'),
+      description: _beditVal('bedit-desc'),
+      category:    _beditVal('bedit-cat'),
+      categoryId:  _beditVal('bedit-cat'),
+      isOnline:    isOnline,
+      city:        _beditVal('bedit-city'),
+      address:     _beditVal('bedit-address'),
+      phone:       _beditVal('bedit-phone'),
+      whatsapp:    _beditVal('bedit-whatsapp'),
+      email:       _beditVal('bedit-email'),
+      website:     _beditVal('bedit-website'),
+      instagram:   _beditVal('bedit-instagram'),
+      facebook:    _beditVal('bedit-facebook'),
+      updatedAt:   _fs.serverTimestamp()
+    };
+    if (lat && lng) { payload.lat = lat; payload.lng = lng; }
+
+    _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID), payload).then(function() {
+      Object.assign(_biz, payload);
+      showToast('ცვლილებები შენახულია!');
+      window.ghCloseBizEdit();
+      setTimeout(function(){ window.location.reload(); }, 600);
+    }).catch(function(err) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+      showToast('შეცდომა: '+(err.code||err.message), false);
+    });
+  };
 
   if(window.GeoFirebase&&window.GeoFirebase.db) init(window.GeoFirebase);
   else window.addEventListener('GeoFirebaseReady',function(){ init(window.GeoFirebase); },{once:true});
