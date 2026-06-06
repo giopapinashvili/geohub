@@ -710,7 +710,9 @@ service cloud.firestore {
             && request.resource.data.get('businessId', '') is string
             && request.resource.data.get('businessId', '') != ''
             && get(/databases/$(database)/documents/businesses/$(request.resource.data.get('businessId',''))).data.get('ownerId','') == uid());
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin() || resource.data.get('userId', '') == uid()
+        || (signedIn() && get(/databases/$(database)/documents/businesses/$(resource.data.get('businessId',''))).data.get('ownerId','') == uid());
     }
     match /businessFollowers/{followId} {
       allow read: if true;

@@ -630,8 +630,18 @@ let currentStep = 1;
           }
         } else {
           img.src = url;
-          img.style.cssText = 'width:80px;height:64px;object-fit:cover;border-radius:6px';
-          document.getElementById('uploadedPhotos').appendChild(img);
+          img.style.cssText = 'width:80px;height:64px;object-fit:cover;border-radius:6px;display:block';
+          var wrap = document.createElement('div');
+          wrap.style.cssText = 'position:relative;display:inline-block;flex-shrink:0';
+          var delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.title = 'Remove photo';
+          delBtn.style.cssText = 'position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#ef4444;border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;line-height:1;padding:0;z-index:1';
+          delBtn.innerHTML = '<i class="fas fa-times"></i>';
+          delBtn.onclick = function() { wrap.remove(); };
+          wrap.appendChild(img);
+          wrap.appendChild(delBtn);
+          document.getElementById('uploadedPhotos').appendChild(wrap);
         }
       }).finally(function() {
         _pendingUploads--;

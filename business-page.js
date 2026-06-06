@@ -2657,7 +2657,7 @@
 
     _fs.getDoc(_fs.doc(_db,'businesses',BIZ_ID)).then(function(bizSnap) {
       if (!bizSnap.exists()) {
-        root.innerHTML = '<div class="biz-error-state"><i class="fas fa-store-slash"></i><h3>Business not found</h3><p>This page doesn\'t exist or was removed.</p><a href="index.html" style="color:#10b981;text-decoration:none">← Back to GeoHub</a></div>';
+        root.innerHTML = '<div class="biz-error-state"><i class="fas fa-store-slash"></i><h3>Business not found</h3><p>This page doesn\'t exist or was removed.</p><a href="business.html" style="color:#10b981;text-decoration:none">← Back to Businesses</a></div>';
         return;
       }
 
@@ -4135,7 +4135,7 @@
         showToast(_bpt('biz_deleted'));
         try { localStorage.removeItem('gh_active_actor'); } catch(e) {}
         try { window.dispatchEvent(new CustomEvent('GeoActorChanged', { detail: { type: 'user' } })); } catch(e) {}
-        setTimeout(function() { window.location.href = 'businesses.html'; }, 1000);
+        setTimeout(function() { window.location.href = 'business.html'; }, 1000);
       }).catch(function(err) {
         if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.innerHTML = '<i class="fas fa-trash"></i> Delete Forever'; }
         showToast(_bpt('post_del_fail')+': '+(err.code||err.message), false);
