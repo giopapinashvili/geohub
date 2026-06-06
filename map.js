@@ -3207,6 +3207,7 @@
       phone, website,
       status: 'active',
       createdAt: GF.fs.serverTimestamp(),
+      userId: user ? user.uid : '',
       addedBy: user ? user.uid : 'anon'
     };
     GF.fs.addDoc(GF.fs.collection(GF.db, 'places'), doc).then(ref => {
