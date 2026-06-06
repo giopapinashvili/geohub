@@ -280,6 +280,7 @@
         '<button class="biz-action-btn" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
         '<input type="file" id="biz-owner-photo-input" accept="image/*" style="display:none" onchange="window._bizActions.handleOwnerPhoto(this)">'+
+        '<button class="biz-action-btn" onclick="window._bizActions.addToMap()" id="biz-add-to-map-btn"><i class="fas fa-map-marker-alt"></i> Add to Map</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.switchToPersonal()"><i class="fas fa-user"></i> Switch to Personal</button>';
     } else {
       // ── Personal/visitor mode: show visitor controls ──────────────
