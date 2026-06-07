@@ -302,7 +302,6 @@
     if (_isActingAsPage) {
       // ── Page identity mode: show admin controls ───────────────────
       actions =
-        '<button class="biz-action-btn owner-edit" onclick="window._bizActions.openBizEdit()"><i class="fas fa-pen"></i> Edit Page</button>'+
         '<button class="biz-action-btn" type="button" data-biz-open-compose><i class="fas fa-plus"></i> Create Post</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
@@ -313,8 +312,7 @@
       // ── Personal/visitor mode: show visitor controls ──────────────
       // Owners and admins get a "Switch to Page" button
       var switchPageBtn = (_isOwner || _isPageAdmin)
-        ? '<button class="biz-action-btn owner-edit" onclick="window._bizActions.openBizEdit()"><i class="fas fa-pen"></i> Edit Page</button>'+
-          '<button class="biz-action-btn" onclick="window._bizActions.switchToPage()"><i class="fas fa-store"></i> Switch to Page</button>'
+        ? '<button class="biz-action-btn" onclick="window._bizActions.switchToPage()"><i class="fas fa-store"></i> Switch to Page</button>'
         : '';
       var followCls  = _isFollowing ? 'following' : 'primary';
       var followIcon = _isFollowing ? 'fa-check' : 'fa-plus';
@@ -566,7 +564,7 @@
       '<div class="biz-admin-toolbar-inner">'+
         '<span class="biz-admin-badge"><i class="fas fa-crown"></i> Admin Mode</span>'+
         '<div class="biz-admin-toolbar-btns">'+
-          '<button class="biz-admin-btn" onclick="window._bizActions.openBizEdit()"><i class="fas fa-pen"></i> Edit Page</button>'+
+          ''+
           '<button class="biz-admin-btn" onclick="window._bizActions.openBlockManager()"><i class="fas fa-plus-circle"></i> Add Block</button>'+
           '<button class="biz-admin-btn" type="button" data-biz-open-compose><i class="fas fa-pen-to-square"></i> New Post</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
@@ -1546,7 +1544,7 @@
         }).join('')+
       '</div>'+
       '<div class="biz-dash-actions">'+
-        '<button class="biz-owner-action-btn edit" onclick="window._bizActions.openBizEdit()"><i class="fas fa-pen"></i> Edit Page Info</button>'+
+        ''+
         '<button class="biz-owner-action-btn photo" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-owner-action-btn quotes" onclick="window._bizActions.loadOwnerQuotes()"><i class="fas fa-inbox"></i> View Quote Requests</button>'+
         '<button class="biz-owner-action-btn" onclick="window._bizActions.switchTab(\'insights\')" style="background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.3);color:#60a5fa"><i class="fas fa-chart-line"></i> View Insights</button>'+
@@ -1900,7 +1898,6 @@
       if (_isActingAsPage) window._bizActions.refreshAdminList();
     }
 
-    /* edit buttons now use inline onclick="window._bizActions.openBizEdit()" */
   }
 
   // ── LOAD POSTS ────────────────────────────────────────────────
@@ -3373,8 +3370,6 @@
   // ── ACTIONS ───────────────────────────────────────────────────
 
   window._bizActions = {
-
-    openBizEdit: function() { openBizEdit(); },
 
     switchTab: function(id) {
       document.querySelectorAll('.biz-tab').forEach(function(b){ b.classList.remove('active'); });
@@ -5650,212 +5645,8 @@
     if (a && BIZ_ID) _trackBizAnalytics(BIZ_ID, 'phone');
   });
 
-  // ── BUSINESS PAGE EDITOR ─────────────────────────────────────────
+  // ── INIT TRIGGER ─────────────────────────────────────────────────
 
-  var BIZ_EDIT_CATS = [
-    ['cafes','☕ Café'],['restaurants','🍽️ Restaurant'],['bars','🍺 Bar'],['wine-bar','🍷 Wine Bar'],
-    ['bakery','🥐 Bakery'],['fast-food','🍔 Fast Food'],['pizza','🍕 Pizza'],['sushi','🍱 Sushi'],
-    ['ice-cream','🍦 Ice Cream'],['khinkali','🥟 Khinkali House'],['food-delivery','🛵 Food Delivery'],
-    ['catering','🍱 Catering'],['hotels','🏨 Hotel'],['guesthouses','🏡 Guesthouse'],
-    ['hostel','🛏️ Hostel'],['apartments','🏢 Apartments'],['resort','🌴 Resort'],
-    ['villa','🏖️ Villa'],['camping','⛺ Camping'],['tours','🗺️ Tours'],
-    ['travel-agency','✈️ Travel Agency'],['hiking','🥾 Hiking'],['attractions','🏛️ Attraction'],
-    ['adventure','🪂 Adventure'],['rafting','🚣 Rafting'],['ski','⛷️ Ski Resort'],
-    ['horse-riding','🐴 Horse Riding'],['wine-tour','🍇 Wine Tour'],
-    ['gym','💪 Gym'],['yoga','🧘 Yoga'],['spa','💆 Spa'],['dental','🦷 Dental'],
-    ['clinic','🏥 Clinic'],['pharmacy','💊 Pharmacy'],['massage','💆 Massage'],
-    ['beauty','💅 Beauty'],['hair-salon','💇 Hair Salon'],['barbershop','💈 Barbershop'],
-    ['nail-salon','💅 Nail Salon'],['tattoo','🎨 Tattoo'],['lashes','👁️ Lashes'],
-    ['cinema','🎬 Cinema'],['nightclub','🎵 Nightclub'],['karaoke','🎤 Karaoke'],
-    ['escape-room','🔐 Escape Room'],['bowling','🎳 Bowling'],['gaming','🎮 Gaming'],
-    ['clothing','👗 Clothing'],['electronics','📱 Electronics'],['jewelry','💍 Jewelry'],
-    ['books','📚 Books'],['gifts','🎁 Gifts'],['supermarket','🛒 Supermarket'],
-    ['furniture','🛋️ Furniture'],['florist','🌸 Florist'],['sports-shop','⚽ Sports Shop'],
-    ['online-education','📖 Education'],['language-school','🗣️ Language School'],
-    ['web-studio','💻 Web Studio'],['consulting','📊 Consulting'],['accounting','🧾 Accounting'],
-    ['legal','⚖️ Legal'],['real-estate','🏠 Real Estate'],['photography','📸 Photography'],
-    ['car-rental','🚗 Car Rental'],['car-repair','🔧 Car Repair'],['car-wash','🚿 Car Wash'],
-    ['it-services','🖥️ IT Services'],['phone-repair','📱 Phone Repair'],
-    ['event-venue','🎉 Event Venue'],['wedding','💍 Wedding'],['vet','🐾 Vet'],
-    ['pet-shop','🐕 Pet Shop'],['kids-cafe','🧸 Kids Café'],['bank','🏦 Bank'],
-    ['exchange','💱 Exchange'],['museum','🏛️ Museum'],['gallery','🖼️ Gallery'],
-    ['laundry','👕 Laundry'],['cleaning','🧹 Cleaning'],['other','📍 Other']
-  ];
-  var BIZ_EDIT_CITIES = ['Tbilisi','Batumi','Kazbegi','Kutaisi','Gudauri','Sighnaghi','Mestia','Borjomi','Telavi','Gori','Mtskheta','Zugdidi','Other'];
-
-  function openBizEdit() {
-    try {
-      if (!BIZ_ID) { showToast('No business ID', false); return; }
-      if (!_biz)   { showToast('Business not loaded yet — try again', false); return; }
-
-      var old = document.getElementById('biz-edit-overlay');
-      if (old) old.remove();
-
-      var b = _biz;
-      var catVal  = b.category || b.categoryId || '';
-      var catOpts = BIZ_EDIT_CATS.map(function(c) {
-        return '<option value="'+c[0]+'"'+(catVal===c[0]?' selected':'')+'>'+c[1]+'</option>';
-      }).join('');
-      var cityOpts = BIZ_EDIT_CITIES.map(function(c) {
-        return '<option value="'+esc(c)+'"'+(c===b.city?' selected':'')+'>'+esc(c)+'</option>';
-      }).join('');
-
-      /* All styles inline — no stylesheet dependency */
-      var SS  = 'style="background:#131325;border:1px solid #2a2a3e;border-radius:12px;padding:16px;margin-bottom:16px"';
-      var ST  = 'style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#10b981;margin:0 0 12px"';
-      var SR  = 'style="display:grid;grid-template-columns:1fr 1fr;gap:12px"';
-      var SC  = 'style="display:flex;flex-direction:column;gap:12px"';
-      var SG  = 'style="display:flex;flex-direction:column;gap:5px"';
-      var SL  = 'style="font-size:.78rem;color:#9090b0;font-weight:600"';
-      var SI  = 'style="background:#0a0a18;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;padding:9px 12px;font-size:.88rem;width:100%;box-sizing:border-box;outline:none"';
-      var STA = 'style="background:#0a0a18;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;padding:9px 12px;font-size:.88rem;width:100%;box-sizing:border-box;outline:none;resize:vertical;min-height:90px"';
-
-      /* Overlay — explicit top/left/right/bottom for max compat */
-      var overlay = document.createElement('div');
-      overlay.id  = 'biz-edit-overlay';
-      overlay.setAttribute('style',
-        'position:fixed;top:0;left:0;right:0;bottom:0;'+
-        'z-index:2147483647;background:rgba(0,0,0,.8);'+
-        'display:flex;align-items:center;justify-content:center;'+
-        'padding:16px;box-sizing:border-box;pointer-events:auto');
-
-      var box = document.createElement('div');
-      box.setAttribute('style',
-        'background:#0d0d1a;border-radius:16px;'+
-        'width:620px;max-width:96vw;max-height:92vh;'+
-        'overflow:hidden;display:flex;flex-direction:column;'+
-        'color:#e0e0f0;flex-shrink:0;pointer-events:auto');
-
-      box.innerHTML =
-        '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#111126;border-bottom:1px solid #2a2a3e;flex-shrink:0">'+
-          '<h2 style="margin:0;font-size:1rem;font-weight:700;color:#e0e0f0"><i class="fas fa-pen" style="color:#10b981;margin-right:8px"></i>Edit Business Page</h2>'+
-          '<button id="biz-edit-close" style="background:none;border:1px solid #3e3e56;border-radius:8px;color:#aaa;padding:6px 14px;cursor:pointer;font-size:.85rem;line-height:1"><i class="fas fa-times"></i></button>'+
-        '</div>'+
-        '<div style="flex:1;overflow-y:auto;padding:20px">'+
-
-          '<div '+SS+'>'+
-            '<p '+ST+'>Basic Info</p>'+
-            '<div '+SC+'>'+
-              '<div '+SG+'><label '+SL+'>Business Name</label><input '+SI+' id="bedit-name" value="'+esc(b.name||b.title||'')+'" placeholder="Business name"></div>'+
-              '<div '+SG+'><label '+SL+'>Description</label><textarea '+STA+' id="bedit-desc">'+esc(b.description||b.desc||'')+'</textarea></div>'+
-              '<div '+SR+'>'+
-                '<div '+SG+'><label '+SL+'>Category</label><select '+SI+' id="bedit-cat"><option value="">Select…</option>'+catOpts+'</select></div>'+
-                '<div '+SG+'><label '+SL+'>Type</label><select '+SI+' id="bedit-type"><option value="physical"'+(!b.isOnline?' selected':'')+'>Physical</option><option value="online"'+(b.isOnline?' selected':'')+'>Online</option></select></div>'+
-              '</div>'+
-            '</div>'+
-          '</div>'+
-
-          '<div '+SS+'>'+
-            '<p '+ST+'>Location</p>'+
-            '<div '+SC+'>'+
-              '<div '+SR+'>'+
-                '<div '+SG+'><label '+SL+'>City</label><select '+SI+' id="bedit-city"><option value="">Select city…</option>'+cityOpts+'</select></div>'+
-                '<div '+SG+'><label '+SL+'>Address</label><input '+SI+' id="bedit-address" value="'+esc(b.address||'')+'" placeholder="Street address"></div>'+
-              '</div>'+
-              '<div '+SR+'>'+
-                '<div '+SG+'><label '+SL+'>Latitude</label><input '+SI+' id="bedit-lat" type="number" step="any" value="'+esc(String(b.lat||''))+'" placeholder="41.6938"></div>'+
-                '<div '+SG+'><label '+SL+'>Longitude</label><input '+SI+' id="bedit-lng" type="number" step="any" value="'+esc(String(b.lng||''))+'" placeholder="44.8015"></div>'+
-              '</div>'+
-            '</div>'+
-          '</div>'+
-
-          '<div '+SS+'>'+
-            '<p '+ST+'>Contact</p>'+
-            '<div '+SC+'>'+
-              '<div '+SR+'>'+
-                '<div '+SG+'><label '+SL+'>Phone</label><input '+SI+' id="bedit-phone" value="'+esc(b.phone||'')+'" placeholder="+995 555 …"></div>'+
-                '<div '+SG+'><label '+SL+'>WhatsApp</label><input '+SI+' id="bedit-whatsapp" value="'+esc(b.whatsapp||'')+'" placeholder="+995 555 …"></div>'+
-              '</div>'+
-              '<div '+SR+'>'+
-                '<div '+SG+'><label '+SL+'>Email</label><input '+SI+' id="bedit-email" type="email" value="'+esc(b.email||'')+'" placeholder="contact@…"></div>'+
-                '<div '+SG+'><label '+SL+'>Website</label><input '+SI+' id="bedit-website" type="url" value="'+esc(b.website||'')+'" placeholder="https://…"></div>'+
-              '</div>'+
-            '</div>'+
-          '</div>'+
-
-          '<div '+SS+'>'+
-            '<p '+ST+'>Social Media</p>'+
-            '<div '+SR+'>'+
-              '<div '+SG+'><label '+SL+'><i class="fab fa-instagram" style="color:#e1306c"></i> Instagram</label><input '+SI+' id="bedit-instagram" value="'+esc(b.instagram||(b.socialLinks&&b.socialLinks.instagram)||'')+'" placeholder="username"></div>'+
-              '<div '+SG+'><label '+SL+'><i class="fab fa-facebook" style="color:#1877f2"></i> Facebook</label><input '+SI+' id="bedit-facebook" value="'+esc(b.facebook||(b.socialLinks&&b.socialLinks.facebook)||'')+'" placeholder="facebook.com/page"></div>'+
-            '</div>'+
-          '</div>'+
-
-          '<button id="bedit-save" style="width:100%;padding:13px;background:#10b981;color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;margin-bottom:4px">'+
-            '<i class="fas fa-save"></i> Save Changes'+
-          '</button>'+
-        '</div>';
-
-      overlay.appendChild(box);
-      document.body.appendChild(overlay);
-
-      function closeEdit() {
-        var el = document.getElementById('biz-edit-overlay');
-        if (el) el.remove();
-        document.removeEventListener('keydown', onKey);
-      }
-
-      overlay.addEventListener('click', function(e) {
-        if (e.target === overlay) closeEdit();
-      });
-      box.addEventListener('click', function(e) { e.stopPropagation(); });
-
-      var closeBtn = document.getElementById('biz-edit-close');
-      if (closeBtn) closeBtn.addEventListener('click', closeEdit);
-
-      var saveBtn = document.getElementById('bedit-save');
-      if (saveBtn) saveBtn.addEventListener('click', function() { saveBizEdit(closeEdit); });
-
-      function onKey(e) { if (e.key === 'Escape') closeEdit(); }
-      document.addEventListener('keydown', onKey);
-
-    } catch(err) {
-      showToast('Edit error: ' + (err.message || err), false);
-      console.error('[BizEdit]', err);
-    }
-  }
-
-  function saveBizEdit(closeEdit) {
-    var btn = document.getElementById('bedit-save');
-    if (!btn || !_db || !_fs) return;
-    var gv = function(id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; };
-
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
-
-    var isOnline = gv('bedit-type') === 'online';
-    var lat = parseFloat(gv('bedit-lat')) || null;
-    var lng = parseFloat(gv('bedit-lng')) || null;
-    var payload = {
-      name:        gv('bedit-name'),
-      title:       gv('bedit-name'),
-      description: gv('bedit-desc'),
-      category:    gv('bedit-cat'),
-      categoryId:  gv('bedit-cat'),
-      isOnline:    isOnline,
-      city:        gv('bedit-city'),
-      address:     gv('bedit-address'),
-      phone:       gv('bedit-phone'),
-      whatsapp:    gv('bedit-whatsapp'),
-      email:       gv('bedit-email'),
-      website:     gv('bedit-website'),
-      instagram:   gv('bedit-instagram'),
-      facebook:    gv('bedit-facebook'),
-      updatedAt:   _fs.serverTimestamp()
-    };
-    if (lat && lng) { payload.lat = lat; payload.lng = lng; }
-
-    _fs.updateDoc(_fs.doc(_db, 'businesses', BIZ_ID), payload).then(function() {
-      Object.assign(_biz, payload);
-      showToast('ცვლილებები შენახულია!');
-      closeEdit();
-      setTimeout(function() { window.location.reload(); }, 500);
-    }).catch(function(err) {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
-      showToast('შეცდომა: ' + (err.code || err.message), false);
-    });
-  }
 
   if(window.GeoFirebase&&window.GeoFirebase.db) init(window.GeoFirebase);
   else window.addEventListener('GeoFirebaseReady',function(){ init(window.GeoFirebase); },{once:true});
