@@ -5253,7 +5253,9 @@
     },
 
     deleteGalleryPhoto: function(id) {
-      if (!isAdminOrOwner() || !id) return;
+      console.log('[BizEdit] deleteGalleryPhoto called — id:', id, 'isAdminOrOwner:', isAdminOrOwner(), '_isOwner:', _isOwner, '_isActingAsPage:', _isActingAsPage);
+      if (!isAdminOrOwner()) { showToast('No permission to delete', false); return; }
+      if (!id) { showToast('No photo id', false); return; }
       window.ghConfirm('Delete this photo?', function() {
         _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'gallery',id)).then(function(){
           showToast(_bpt('photo_deleted'));
@@ -5710,7 +5712,9 @@
   }
 
   function ghOpenBizEdit() {
-    if (!BIZ_ID || !_biz) return;
+    console.log('[BizEdit] ghOpenBizEdit called — BIZ_ID:', BIZ_ID, '_biz:', _biz ? 'loaded' : 'null');
+    if (!BIZ_ID) { showToast('BIZ_ID missing', false); return; }
+    if (!_biz)   { showToast('Business not loaded yet — try again in a moment', false); return; }
     _beditInjectStyles();
     var existing = document.getElementById('biz-edit-drawer');
     if (existing) { existing.classList.add('open'); return; }
