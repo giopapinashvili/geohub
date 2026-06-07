@@ -1,4 +1,4 @@
-/* GeoHub Service Worker — v11
+/* GeoHub Service Worker — v12
    Cache strategy matrix:
    ┌─────────────────────────────────────────────┬────────────────────────────┐
    │ Request type                                │ Strategy                   │
@@ -90,7 +90,7 @@ self.addEventListener('pushsubscriptionchange', function(event) {
 });
 
 /* ── Cache names ────────────────────────────────────────────────────────── */
-var VER   = 'v11';
+var VER   = 'v12';
 var SHELL = 'gh-shell-' + VER;
 var IMG   = 'gh-img-'   + VER;
 var CDN   = 'gh-cdn-'   + VER;
@@ -146,9 +146,9 @@ self.addEventListener('activate', function(event) {
     }).then(function() {
       return clients.claim();
     }).then(function() {
-      return self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(tabs) {
+      return self.clients.matchAll({ type: 'window' }).then(function(tabs) {
         tabs.forEach(function(tab) {
-          try { tab.navigate(tab.url); } catch(e) {}
+          tab.postMessage({ type: 'SW_UPDATED', version: VER });
         });
       });
     })

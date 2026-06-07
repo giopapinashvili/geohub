@@ -58,3 +58,12 @@ try {
   window.GeoFirebase = null;
   window.dispatchEvent(new Event('GeoFirebaseReady'));
 }
+
+// SW update listener — reloads page when new SW activates (gets fresh JS)
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', function(e) {
+    if (e.data && e.data.type === 'SW_UPDATED') {
+      window.location.reload();
+    }
+  });
+}
