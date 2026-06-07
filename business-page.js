@@ -313,7 +313,8 @@
       // ── Personal/visitor mode: show visitor controls ──────────────
       // Owners and admins get a "Switch to Page" button
       var switchPageBtn = (_isOwner || _isPageAdmin)
-        ? '<button class="biz-action-btn" onclick="window._bizActions.switchToPage()"><i class="fas fa-store"></i> Switch to Page</button>'
+        ? '<button class="biz-action-btn owner-edit" data-open-biz-edit><i class="fas fa-pen"></i> Edit Page</button>'+
+          '<button class="biz-action-btn" onclick="window._bizActions.switchToPage()"><i class="fas fa-store"></i> Switch to Page</button>'
         : '';
       var followCls  = _isFollowing ? 'following' : 'primary';
       var followIcon = _isFollowing ? 'fa-check' : 'fa-plus';
@@ -5714,9 +5715,10 @@
 
     var dlg = document.createElement('dialog');
     dlg.id = 'biz-edit-dlg';
-    dlg.style.cssText = 'padding:0;border:none;border-radius:16px;background:#0d0d1a;color:#e0e0f0;width:min(620px,96vw);max-height:92vh;overflow:hidden;display:flex;flex-direction:column';
+    dlg.style.cssText = 'padding:0;border:none;border-radius:16px;background:#0d0d1a;color:#e0e0f0;width:min(620px,96vw);max-height:92vh;overflow:hidden';
     dlg.innerHTML =
       '<style>'+
+        '#biz-edit-dlg[open]{display:flex;flex-direction:column}'+
         '#biz-edit-dlg::backdrop{background:rgba(0,0,0,.75)}'+
         '#biz-edit-dlg input:focus,#biz-edit-dlg select:focus,#biz-edit-dlg textarea:focus{border-color:#10b981!important;outline:none}'+
         '#biz-edit-dlg select option{background:#1a1a2e}'+
