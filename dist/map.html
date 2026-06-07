@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+  <link rel="dns-prefetch" href="https://firebase.googleapis.com">
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#10b981">
+  <title>Map — GeoHub</title>
+  <!-- SEO ─────────────────────────────────────────────── -->
+  <meta name="description" content="Explore an interactive map of check-ins, events, and hidden gems across Georgia in real time.">
+  <link rel="canonical" href="https://geohub.ge/map.html">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="GeoHub">
+  <meta property="og:title" content="Map — GeoHub">
+  <meta property="og:description" content="Explore an interactive map of check-ins, events, and hidden gems across Georgia in real time.">
+  <meta property="og:url" content="https://geohub.ge/map.html">
+  <meta property="og:image" content="https://geohub.ge/icons/icon-512.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="GeoHub — Discover Georgia">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Map — GeoHub">
+  <meta name="twitter:description" content="Explore an interactive map of check-ins, events, and hidden gems across Georgia in real time.">
+  <meta name="twitter:image" content="https://geohub.ge/icons/icon-512.png">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+  <style>
+    :root {
+      --navbar-height: var(--gh-topbar-h, 78px);
+      --green: var(--gh-green);
+      --gold: var(--gh-yellow);
+      --blue: var(--gh-blue);
+      --bg-0: var(--gh-bg);
+      --bg-1: var(--gh-bg);
+      --bg-card: var(--gh-card);
+      --bg-elevated: var(--gh-card-soft);
+      --text-primary: var(--gh-text);
+      --text-secondary: var(--gh-muted);
+      --text-muted: var(--gh-muted);
+      --border: var(--gh-border);
+      --border-subtle: var(--gh-border);
+      --border-emphasis: var(--gh-border-strong);
+      --transition: var(--gh-dur-fast) var(--gh-ease);
+    }
+  </style>
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <script type="module" crossorigin src="/assets/map-ZqBPG6Mf.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/responsive-polish-BO79aqv7.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-B7QD4isq.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase-config-CGKVrgHh.js">
+  <link rel="modulepreload" crossorigin href="/assets/config-DSeD8I2H.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-client-DV25UnBD.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-CYAfAwpP.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-i18n-BbqPU8Gy.js">
+  <link rel="modulepreload" crossorigin href="/assets/account-BJSGhbLy.js">
+  <link rel="modulepreload" crossorigin href="/assets/mobile-nav-DsKLv3RI.js">
+  <link rel="modulepreload" crossorigin href="/assets/chat-popup-MADaMnFN.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-calls-DqDOBgOW.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-group-calls-Ck1zIhcT.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-production-stabilization-v1-D9brtDwk.js">
+  <link rel="modulepreload" crossorigin href="/assets/analytics-DyGaP85h.js">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
+  <link rel="stylesheet" crossorigin href="/assets/vendor-PhPnDjd-.css">
+  <link rel="stylesheet" crossorigin href="/assets/map-BjsGi-7d.css">
+  <link rel="stylesheet" crossorigin href="/assets/styles-DkNdvQG3.css">
+  <link rel="stylesheet" crossorigin href="/assets/navbar-D8jKRRC5.css">
+  <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-DJnMDTGu.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar" style="position:fixed;top:0;left:0;right:0;z-index:1100">
+  <a href="index.html" class="navbar-brand">
+    <div class="logo-icon">🌍</div>
+    <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
+  </a>
+  <ul class="navbar-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="feed.html">Discover</a></li>
+    <li><a href="places.html">Places</a></li>
+    <li><a href="place-feed.html">Place Updates</a></li>
+    <li><a href="rewards.html">Rewards</a></li>
+    <li><a href="challenges.html">Challenges</a></li>
+    <li><a href="map.html" class="active">Map</a></li>
+    <li><a href="add-business.html">Add Business</a></li>
+    <li><a href="creators.html">Creators</a></li>
+    <li><a href="dashboard.html">Dashboard</a></li>
+  </ul>
+  <div class="navbar-actions">
+    <a href="profile.html" class="btn-ghost-nav"><i class="fas fa-user-circle"></i> Profile</a>
+    <a href="auth.html?tab=signup" class="btn btn-primary btn-sm">Sign Up</a>
+  </div>
+  <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html">Home</a><a href="feed.html">Discover</a><a href="places.html">Places</a><a href="rewards.html">Rewards</a><a href="challenges.html">Challenges</a><a href="map.html">Map</a><a href="add-business.html">Add Business</a><a href="creators.html">Creators</a><a href="dashboard.html">Dashboard</a>
+</div>
+
+<div class="map-page-layout">
+
+  <!-- Sidebar -->
+  <div class="map-sidebar" id="mapSidebar">
+    <div class="map-sidebar-pull" id="sidebarPull"><span></span><span></span><span></span></div>
+    <div class="map-sidebar-header">
+      <div class="map-sidebar-toprow">
+        <h3>🗺️ Explore on Map</h3>
+        <!-- Mobile location sharing toggle (desktop uses the floating button) -->
+        <button class="map-loc-share-btn" id="sidebarLocBtn" onclick="window.openLivePanel()" title="Live Friends & Location" data-i18n-title="map_live_title">
+          <i class="fas fa-satellite-dish"></i>
+        </button>
+      </div>
+      <div class="map-search" style="position:relative">
+        <input type="text" id="mapSearchInput" placeholder="Search places…" data-i18n-placeholder="map_search_ph" autocomplete="off">
+        <button><i class="fas fa-search"></i></button>
+        <div id="mapSearchDropdown" class="map-search-dropdown"></div>
+      </div>
+    </div>
+
+    <!-- Category filter chips -->
+    <div class="map-filter-chips" id="mapChips">
+      <div class="map-chip active" data-cat="">ყველა</div>
+    </div>
+
+    <!-- Discovery section -->
+    <div id="discoverSection" class="discover-section">
+      <div class="discover-heading">სად წავიდე? <span class="discover-heading-sub">აირჩიე კატეგორია</span></div>
+      <div class="discover-cards-row" id="discoverCardsRow">
+        <button class="disc-card" id="discNearMe" onclick="window.discoverNearMe()">
+          <span class="disc-card-icon">📍</span>
+          <span class="disc-card-title">ახლოს</span>
+          <span class="disc-card-sub" id="discNearSub">მიმდებარე</span>
+        </button>
+        <button class="disc-card" id="discTrending" onclick="window.discoverTrending()">
+          <span class="disc-card-icon">🔥</span>
+          <span class="disc-card-title">ტრენდული</span>
+          <span class="disc-card-sub" id="discTrendSub">დღეს</span>
+        </button>
+        <button class="disc-card" id="discGems" onclick="window.discoverGems()">
+          <span class="disc-card-icon">💎</span>
+          <span class="disc-card-title">ფარული</span>
+          <span class="disc-card-sub">ადგილები</span>
+        </button>
+      </div>
+      <!-- Mood quick-filters -->
+      <div class="disc-mood-row" id="discMoodRow"></div>
+    </div>
+
+    <!-- Results list -->
+    <div class="map-results" id="mapResults"></div>
+  </div>
+
+  <!-- Map Container -->
+  <div class="map-container" style="position:relative">
+    <div id="map"></div>
+
+    <!-- Camera mode buttons -->
+    <div class="map-camera-wrap">
+      <button class="map-camera-btn active" data-mode="explore" onclick="setCameraMode('explore')">🔍 გამოიკვლიე</button>
+      <button class="map-camera-btn" data-mode="navigation" onclick="setCameraMode('navigation')">🧭 ნავიგაცია</button>
+      <button class="map-camera-btn" data-mode="cinematic" onclick="setCameraMode('cinematic')">🎬 კინო</button>
+    </div>
+
+    <!-- Single filter button → bottom sheet -->
+    <button class="map-toggle-btn map-filter-fab" id="mapFilterBtn" onclick="window.toggleMapFilterSheet()">
+      <i class="fas fa-sliders"></i> ფილტრი
+    </button>
+
+    <!-- Filter bottom sheet -->
+    <div class="map-filter-sheet" id="mapFilterSheet" aria-hidden="true">
+      <div class="map-filter-sheet-handle"></div>
+      <div class="map-filter-sheet-title">ფილტრები</div>
+      <div class="map-filter-sheet-grid">
+        <button class="map-fs-btn" id="legendBtn" onclick="document.getElementById('legend').classList.toggle('open')">
+          <i class="fas fa-layer-group"></i><span>ლეგენდა</span>
+        </button>
+        <button class="map-fs-btn" id="eventsToggleBtn" onclick="toggleEventsLayer()">
+          <span>🎉</span><span>ივენთები</span>
+        </button>
+        <button class="map-fs-btn" id="weekendToggleBtn" onclick="toggleThisWeekend()" style="display:none">
+          <span>📅</span><span>ამ კვირას</span>
+        </button>
+        <button class="map-fs-btn" id="vidMapToggle">
+          <span>🎬</span><span>ვიდეო</span>
+        </button>
+      </div>
+    </div>
+    <div class="map-filter-sheet-backdrop" id="mapFilterBackdrop" onclick="window.toggleMapFilterSheet()"></div>
+
+    <!-- Video map popup card -->
+    <div class="vid-map-card" id="vidMapCard"></div>
+
+    <!-- Legend — populated dynamically by map.js -->
+    <div class="map-legend" id="legend"></div>
+
+    <!-- Count badge -->
+    <div class="search-count-badge" id="countBadge">
+      <strong id="mapCount">0</strong> ადგილი
+    </div>
+
+    <!-- Place Detail Drawer -->
+    <div class="mpd-backdrop" id="mpdBackdrop" onclick="window.closePlaceDrawer()"></div>
+    <div class="map-place-drawer" id="placeDrawer">
+      <button class="mpd-close-btn" onclick="window.closePlaceDrawer()"><i class="fas fa-times"></i></button>
+      <div class="mpd-cover-wrap" id="mpdCoverWrap">
+        <img class="mpd-cover-img" id="mpdCoverImg" src="" alt="" loading="lazy">
+        <div class="mpd-cover-fallback" id="mpdCoverFallback"></div>
+        <div class="mpd-cover-overlay">
+          <h2 class="mpd-title" id="mpdTitle"></h2>
+          <div class="mpd-subtitle" id="mpdSubtitle"></div>
+        </div>
+      </div>
+      <div class="mpd-quick-actions" id="mpdQuickActions"></div>
+      <div class="mpd-tabs" id="mpdTabs">
+        <button class="mpd-tab active" data-mpd-tab="info">ℹ️ Info</button>
+        <button class="mpd-tab" data-mpd-tab="reviews">⭐ Reviews</button>
+        <button class="mpd-tab" data-mpd-tab="photos">📸 Photos</button>
+        <button class="mpd-tab" data-mpd-tab="stories">🔥 Stories 24h</button>
+      </div>
+      <div class="mpd-tab-content" id="mpdTabContent"></div>
+    </div>
+
+    <!-- Add Place button -->
+    <button id="addPlaceBtn" class="map-add-place-fab" onclick="window.openAddPlaceSheet()" aria-label="Add Place">
+      <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Add Place Sheet -->
+    <div class="map-add-place-backdrop" id="addPlaceBackdrop" onclick="window.closeAddPlaceSheet()"></div>
+    <div class="map-add-place-sheet" id="addPlaceSheet" aria-hidden="true">
+      <div class="map-filter-sheet-handle"></div>
+      <div class="map-aps-header">
+        <div class="map-aps-title"><i class="fas fa-map-pin"></i> ადგილის დამატება</div>
+        <button class="map-aps-close" onclick="window.closeAddPlaceSheet()"><i class="fas fa-times"></i></button>
+      </div>
+
+      <!-- Step 1: tap on map to place pin -->
+      <div id="apsStep1" class="map-aps-step">
+        <div class="map-aps-hint">
+          <i class="fas fa-hand-pointer" style="font-size:1.6rem;color:var(--green);margin-bottom:8px;display:block"></i>
+          <div style="font-weight:700;margin-bottom:4px">რუკაზე ნებისმიერ წერტილს შეეხე</div>
+          <div style="color:var(--text-secondary);font-size:.85rem">მარკერი ჩადგება – შემდეგ ფორმს შეავსებ</div>
+        </div>
+        <div id="apsPinCoords" class="map-aps-coords" style="display:none"></div>
+        <button class="btn btn-primary btn-full" id="apsNextBtn" onclick="window.apsGoToForm()" disabled style="margin-top:16px">
+          <i class="fas fa-arrow-right"></i> გაგრძელება
+        </button>
+      </div>
+
+      <!-- Step 2: Fill form -->
+      <div id="apsStep2" class="map-aps-step" style="display:none">
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label required" style="font-size:.8rem">სახელი</label>
+          <input type="text" class="form-input" id="apsName" placeholder="მაგ: ნიკორა ვაკე">
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label" style="font-size:.8rem">ბრენდი / ქსელი (სურვილისამებრ)</label>
+          <input type="text" class="form-input" id="apsBrand" placeholder="მაგ: Nikora, Spar, Tbisi…" list="apsBrandList" autocomplete="off">
+          <datalist id="apsBrandList"></datalist>
+          <div class="form-hint" style="font-size:.73rem">ჩაწერე ბრენდი — ფერი ავტომატურად შეიცვლება</div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label required" style="font-size:.8rem">კატეგორია</label>
+          <select class="form-input" id="apsCategory" style="height:42px">
+            <option value="">— აირჩიე —</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label" style="font-size:.8rem">ლოგოს URL (სურვილისამებრ)</label>
+          <input type="url" class="form-input" id="apsLogoUrl" placeholder="https://example.com/logo.png">
+          <div class="form-hint" style="font-size:.73rem">ან ატვირთე ლოგო ბიზნეს-გვერდიდან</div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label" style="font-size:.8rem">მოკლე აღწერა</label>
+          <textarea class="form-input" id="apsDesc" rows="2" placeholder="ერთი-ორი წინადადება…" style="resize:none"></textarea>
+        </div>
+
+        <div class="form-row" style="gap:8px;margin-bottom:12px">
+          <div class="form-group" style="flex:1;margin:0">
+            <label class="form-label" style="font-size:.8rem">ტელეფონი</label>
+            <input type="tel" class="form-input" id="apsPhone" placeholder="+995 555…">
+          </div>
+          <div class="form-group" style="flex:1;margin:0">
+            <label class="form-label" style="font-size:.8rem">ვებ-გვერდი</label>
+            <input type="url" class="form-input" id="apsWebsite" placeholder="https://…">
+          </div>
+        </div>
+
+        <!-- Marker preview -->
+        <div class="map-aps-preview">
+          <div style="font-size:.72rem;color:var(--text-secondary);margin-bottom:6px;font-weight:700">MARKER PREVIEW</div>
+          <div id="apsMarkerPreview" class="map-aps-marker-preview"></div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="btn btn-ghost btn-sm" onclick="window.apsBack()"><i class="fas fa-arrow-left"></i> უკან</button>
+          <button class="btn btn-primary btn-full" id="apsSubmitBtn" onclick="window.apsSubmit()">
+            <i class="fas fa-check"></i> რუკაზე დამატება
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nearby Stories button -->
+    <button id="mapStoriesBtn" class="map-stories-fab" onclick="window.toggleNearbyStories()" aria-label="Nearby Stories">
+      <i class="fas fa-circle-play"></i>
+      <span class="map-stories-fab-label">Stories</span>
+    </button>
+
+    <!-- "What's happening NOW" button + panel -->
+    <button id="nowBtn" class="now-fab" onclick="window.toggleNowPanel()" aria-label="What's happening now">
+      <span class="now-fab-pulse"></span>
+      <i class="fas fa-bolt"></i>
+      <span class="now-fab-label">Now</span>
+      <span id="nowBadge" class="now-fab-badge" style="display:none"></span>
+    </button>
+    <div id="nowPanel" class="now-panel" aria-hidden="true">
+      <div class="now-panel-head">
+        <div class="now-panel-title"><i class="fas fa-bolt"></i> What's happening now</div>
+        <button class="now-panel-close" onclick="window.toggleNowPanel()"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="nowPanelBody" class="now-panel-body">
+        <div class="now-loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div>
+      </div>
+      <div class="now-panel-footer">
+        <button class="now-refresh-btn" onclick="window.loadNowPanel(true)"><i class="fas fa-sync-alt"></i> Refresh</button>
+        <span id="nowLastUpdated" class="now-last-updated"></span>
+      </div>
+    </div>
+
+    <!-- Place Info Panel -->
+    <div class="map-info-panel" id="infoPanel">
+      <div class="panel-close" onclick="closePanel()"><i class="fas fa-times"></i></div>
+      <img class="panel-img" id="panelImg" src="" alt="" loading="lazy" decoding="async">
+      <div class="panel-img-fallback" id="panelImgFallback" style="display:none"></div>
+      <div class="panel-body">
+        <div class="panel-title" id="panelTitle"></div>
+        <div class="panel-meta">
+          <span id="panelCat"></span>
+          <span id="panelLoc"></span>
+          <span id="panelRating"></span>
+        </div>
+        <div id="panelDesc" class="panel-desc"></div>
+        <div id="panelMoodTags" class="panel-mood-tags"></div>
+        <div id="panelGoogleSection" style="display:none"></div>
+        <div style="display:flex;gap:8px">
+          <a id="panelDetailBtn" href="javascript:void(0)" aria-disabled="true" class="btn btn-primary btn-sm" style="flex:1;justify-content:center">
+            <i class="fas fa-info-circle"></i> Details
+          </a>
+          <a id="panelMapBtn" href="javascript:void(0)" aria-disabled="true" class="btn btn-ghost btn-sm" target="_blank">
+            <i class="fas fa-directions"></i>
+          </a>
+        </div>
+        <button id="panelCheckinBtn" class="map-checkin-btn" style="display:none" onclick="checkInToPlace()">
+          <i class="fas fa-map-pin"></i> Check In
+        </button>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+                      <!-- Vite: 17 scripts → 1 chunk (incl. maplibre-gl bundled). See src/entries/map.js -->
+</body>
+</html>

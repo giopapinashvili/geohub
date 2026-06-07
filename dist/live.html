@@ -1,0 +1,77 @@
+<!DOCTYPE html><html lang="ka"><head><meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+  <link rel="dns-prefetch" href="https://firebase.googleapis.com">
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"><title>Live City — GeoHub</title>
+  <!-- SEO ─────────────────────────────────────────────── -->
+  <meta name="description" content="See what's happening right now — live check-ins, city activity, trending spots, and real-time stories from around Georgia.">
+  <link rel="canonical" href="https://geohub.ge/live.html">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="GeoHub">
+  <meta property="og:title" content="Live City — GeoHub">
+  <meta property="og:description" content="See what's happening right now — live check-ins, city activity, trending spots, and real-time stories from around Georgia.">
+  <meta property="og:url" content="https://geohub.ge/live.html">
+  <meta property="og:image" content="https://geohub.ge/icons/icon-512.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="GeoHub — Discover Georgia">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Live City — GeoHub">
+  <meta name="twitter:description" content="See what's happening right now — live check-ins, city activity, trending spots, and real-time stories from around Georgia.">
+  <meta name="twitter:image" content="https://geohub.ge/icons/icon-512.png">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
+
+<style>
+body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}.clean-page{padding-top:90px;min-height:100vh;background:radial-gradient(circle at top left,rgba(16,185,129,.16),transparent 35%),#05070f}.clean-hero{max-width:1180px;margin:0 auto;padding:70px 24px 42px}.clean-badge{display:inline-flex;gap:8px;align-items:center;padding:8px 14px;border:1px solid rgba(16,185,129,.3);border-radius:999px;color:#10e0a0;background:rgba(16,185,129,.08);font-weight:800;text-transform:uppercase;font-size:.72rem;letter-spacing:.04em}.clean-title{font-size:clamp(2.4rem,5vw,4.8rem);line-height:1.05;margin:22px 0 16px;font-weight:950;max-width:760px}.clean-title span{background:linear-gradient(135deg,#10e0a0,#3b82f6);-webkit-background-clip:text;color:transparent}.clean-desc{max-width:640px;color:#9aa6bd;font-size:1.05rem;line-height:1.7}.clean-search{margin-top:30px;display:flex;gap:12px;max-width:620px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:10px}.clean-search input{flex:1;background:transparent;border:0;color:#fff;outline:0;padding:8px 10px;font-size:1rem}.clean-search button,.clean-admin{border:0;border-radius:14px;padding:12px 20px;background:linear-gradient(135deg,#10b981,#3b82f6);color:white;font-weight:800;text-decoration:none;display:inline-flex;align-items:center;gap:8px}.clean-stats{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:14px;max-width:740px;margin-top:28px}.clean-stat{padding:18px;border:1px solid rgba(255,255,255,.07);border-radius:18px;background:rgba(255,255,255,.035)}.clean-stat strong{display:block;font-size:1.7rem}.clean-stat span{color:#64748b;font-size:.78rem}.clean-tabs{border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);padding:0 24px;display:flex;gap:24px;max-width:100%;overflow-x:auto;background:rgba(255,255,255,.03)}.clean-tab{background:transparent;border:0;color:#94a3b8;padding:18px 0;font-weight:800}.clean-tab.active{color:#10e0a0;border-bottom:2px solid #10e0a0}.clean-content{max-width:1180px;margin:0 auto;padding:34px 24px 90px;display:grid;grid-template-columns:280px 1fr;gap:24px}.clean-card{border:1px solid rgba(255,255,255,.07);border-radius:20px;background:rgba(255,255,255,.045);padding:22px}.clean-empty{min-height:260px;display:flex;align-items:center;justify-content:center;text-align:center;color:#94a3b8;border:1px dashed rgba(255,255,255,.14);border-radius:22px;background:rgba(255,255,255,.02)}.clean-empty i{font-size:2rem;color:#10e0a0;margin-bottom:12px}.clean-empty h3{color:#f8fafc;margin:0 0 8px}@media(max-width:900px){.clean-page{padding-top:72px}.clean-hero{padding:42px 18px 28px}.clean-content{grid-template-columns:1fr;padding:22px 18px 120px}.clean-stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+  <script type="module" crossorigin src="/assets/live-BCHTZsJg.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/responsive-polish-BO79aqv7.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase-config-CGKVrgHh.js">
+  <link rel="modulepreload" crossorigin href="/assets/account-BJSGhbLy.js">
+  <link rel="modulepreload" crossorigin href="/assets/mobile-nav-DsKLv3RI.js">
+  <link rel="modulepreload" crossorigin href="/assets/chat-popup-MADaMnFN.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-calls-DqDOBgOW.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-group-calls-Ck1zIhcT.js">
+  <link rel="modulepreload" crossorigin href="/assets/content-pages-BIvaohrA.js">
+  <link rel="modulepreload" crossorigin href="/assets/geo-actors-DCdcg0VE.js">
+  <link rel="modulepreload" crossorigin href="/assets/account-switcher-Bs0W5qNE.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-production-stabilization-v1-D9brtDwk.js">
+  <link rel="modulepreload" crossorigin href="/assets/analytics-DyGaP85h.js">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
+  <link rel="stylesheet" crossorigin href="/assets/navbar-D8jKRRC5.css">
+  <link rel="stylesheet" crossorigin href="/assets/account-switcher-B6z_cLE_.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+</head><body class="clean-body page-live"><nav class="navbar" id="navbar">
+  <a href="index.html" class="navbar-brand"><div class="logo-icon">🌍</div><span class="logo-text">Geo<span class="logo-geo">Hub</span></span></a>
+  <ul class="navbar-links"></ul>
+  <div class="navbar-actions"></div>
+  <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu"></div><main class="clean-page" id="glive-container">
+<section class="clean-hero">
+  <div class="clean-badge"><i class="fas fa-broadcast-tower"></i> Live</div>
+  <h1 class="clean-title">GeoHub <span>Live Streams</span></h1>
+  <p class="clean-desc" data-i18n="live_no_streams">Watch real-time broadcasts from people around Georgia. Start your own live stream directly from your browser.</p>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:20px">
+    <button class="glive-golive-btn" onclick="GhLivestream.openGoLiveModal()">
+      <i class="fas fa-broadcast-tower"></i> <span data-i18n="live_go_live">Go Live</span>
+    </button>
+    <button class="clean-admin" onclick="GhLivestream.reload()" style="background:rgba(255,255,255,.08);color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+      <i class="fas fa-sync-alt"></i> <span data-i18n="refresh">Refresh</span>
+    </button>
+  </div>
+</section>
+<section class="clean-content" style="grid-template-columns:1fr;padding-top:24px">
+  <div class="glive-list" id="glive-list">
+    <p class="glive-loading"><i class="fas fa-spinner fa-spin"></i> Loading…</p>
+  </div>
+</section>
+</main>            <!-- Vite: 15 scripts → 1 chunk. See src/entries/live.js -->
+</body></html>

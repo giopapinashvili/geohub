@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+  <link rel="dns-prefetch" href="https://firebase.googleapis.com">
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy &amp; Safety — GeoHub</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
+  <meta name="theme-color" content="#10b981">
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
+  <script type="module" crossorigin src="/assets/responsive-polish-BO79aqv7.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js"></script>
+  <script type="module" crossorigin src="/assets/firebase-config-CGKVrgHh.js"></script>
+  <script type="module" crossorigin src="/assets/gh-schema-kY2sMGH-.js"></script>
+  <script type="module" crossorigin src="/assets/account-BJSGhbLy.js"></script>
+  <script type="module" crossorigin src="/assets/mobile-nav-DsKLv3RI.js"></script>
+  <script type="module" crossorigin src="/assets/firestore-social-lVyxRoWc.js"></script>
+  <script type="module" crossorigin src="/assets/chat-popup-MADaMnFN.js"></script>
+  <script type="module" crossorigin src="/assets/geohub-social-redesign-ChTko2Gc.js"></script>
+  <script type="module" crossorigin src="/assets/geohub-production-stabilization-v1-D9brtDwk.js"></script>
+  <script type="module" crossorigin src="/assets/analytics-DyGaP85h.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
+  <link rel="stylesheet" crossorigin href="/assets/safety-DVa8HPDN.css">
+  <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-DJnMDTGu.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+</head>
+<body data-gh-page="safety">
+  <noscript>GeoHub requires JavaScript.</noscript>
+                      
+  <div class="safety-page" id="safetyPage" style="display:none">
+
+    <!-- Header -->
+    <div class="safety-header">
+      <a href="feed.html" class="safety-back" title="Back"><i class="fas fa-arrow-left"></i></a>
+      <div>
+        <div class="safety-title" data-i18n="safety_title">Privacy &amp; Safety</div>
+        <div class="safety-subtitle" data-i18n="safety_subtitle">Control who can interact with you</div>
+      </div>
+    </div>
+
+    <!-- Save bar -->
+    <div class="safety-save-bar">
+      <button class="safety-save-btn" id="savePrivacyBtn" disabled data-i18n="safety_save_btn">Save Settings</button>
+    </div>
+
+    <!-- Privacy Controls -->
+    <div class="safety-section">
+      <div class="safety-section-head">
+        <div class="safety-section-icon" style="background:rgba(16,185,129,.15);color:#10b981"><i class="fas fa-lock"></i></div>
+        <div>
+          <div class="safety-section-title" data-i18n="safety_privacy_title">Privacy Controls</div>
+          <div class="safety-section-desc" data-i18n="safety_privacy_desc">Manage who can interact with your account</div>
+        </div>
+      </div>
+
+      <div class="safety-row">
+        <div class="safety-row-label">
+          <strong data-i18n="safety_msg_label">Who can message you</strong>
+          <span data-i18n="safety_msg_desc">Direct messages from other users</span>
+        </div>
+        <select class="safety-select" data-privacy="messagingPref" id="pref-messagingPref">
+          <option value="everyone" data-i18n="opt_everyone">Everyone</option>
+          <option value="friends" data-i18n="opt_friends_only">Friends only</option>
+          <option value="nobody" data-i18n="opt_nobody">Nobody</option>
+        </select>
+      </div>
+
+      <div class="safety-row">
+        <div class="safety-row-label">
+          <strong data-i18n="safety_follow_label">Who can follow you</strong>
+          <span data-i18n="safety_follow_desc">Follow your public activity and posts</span>
+        </div>
+        <select class="safety-select" data-privacy="followPref" id="pref-followPref">
+          <option value="everyone" data-i18n="opt_everyone">Everyone</option>
+          <option value="nobody" data-i18n="opt_nobody">Nobody</option>
+        </select>
+      </div>
+
+      <div class="safety-row">
+        <div class="safety-row-label">
+          <strong data-i18n="safety_fr_label">Who can send friend requests</strong>
+          <span data-i18n="safety_fr_desc">Add you as a friend on GeoHub</span>
+        </div>
+        <select class="safety-select" data-privacy="friendRequestPref" id="pref-friendRequestPref">
+          <option value="everyone" data-i18n="opt_everyone">Everyone</option>
+          <option value="nobody" data-i18n="opt_nobody">Nobody</option>
+        </select>
+      </div>
+
+      <div class="safety-row">
+        <div class="safety-row-label">
+          <strong data-i18n="safety_profile_label">Profile visibility</strong>
+          <span data-i18n="safety_profile_desc">Who can view your full profile page</span>
+        </div>
+        <select class="safety-select" data-privacy="profilePref" id="pref-profilePref">
+          <option value="public" data-i18n="opt_public">Public</option>
+          <option value="friends" data-i18n="opt_friends_only">Friends only</option>
+        </select>
+      </div>
+
+      <div class="safety-row">
+        <div class="safety-row-label">
+          <strong data-i18n="safety_post_label">Default post visibility</strong>
+          <span data-i18n="safety_post_desc">Who sees your new posts by default</span>
+        </div>
+        <select class="safety-select" data-privacy="postsPref" id="pref-postsPref">
+          <option value="public" data-i18n="opt_public">Public</option>
+          <option value="friends" data-i18n="opt_friends_only">Friends only</option>
+        </select>
+      </div>
+
+      <div class="safety-row">
+        <div class="safety-row-label">
+          <strong data-i18n="safety_fullname_label">Who can see your full name</strong>
+          <span data-i18n="safety_fullname_desc">Display name on your profile page</span>
+        </div>
+        <select class="safety-select" data-privacy="showFullName" id="pref-showFullName">
+          <option value="everyone" data-i18n="opt_everyone">Everyone</option>
+          <option value="followers" data-i18n="opt_followers">Followers</option>
+          <option value="friends" data-i18n="opt_friends_only">Friends only</option>
+          <option value="nobody" data-i18n="opt_nobody_username">Nobody (show @username)</option>
+        </select>
+      </div>
+
+      <div class="safety-row">
+        <div class="safety-row-label">
+          <strong data-i18n="safety_bio_label">Who can see your bio</strong>
+          <span data-i18n="safety_bio_desc">Short description on your profile</span>
+        </div>
+        <select class="safety-select" data-privacy="showBio" id="pref-showBio">
+          <option value="everyone" data-i18n="opt_everyone">Everyone</option>
+          <option value="followers" data-i18n="opt_followers">Followers</option>
+          <option value="friends" data-i18n="opt_friends_only">Friends only</option>
+          <option value="nobody" data-i18n="opt_nobody">Nobody</option>
+        </select>
+      </div>
+
+      <div class="safety-row">
+        <div class="safety-row-label">
+          <strong data-i18n="safety_stories_label">Who can see your stories</strong>
+          <span data-i18n="safety_stories_desc">24-hour story content on your profile</span>
+        </div>
+        <select class="safety-select" data-privacy="showStories" id="pref-showStories">
+          <option value="everyone" data-i18n="opt_everyone">Everyone</option>
+          <option value="followers" data-i18n="opt_followers">Followers</option>
+          <option value="friends" data-i18n="opt_friends_only">Friends only</option>
+          <option value="nobody" data-i18n="opt_nobody">Nobody</option>
+        </select>
+      </div>
+
+      <div class="safety-row">
+        <div class="safety-row-label">
+          <strong data-i18n="safety_hl_label">Who can see your highlights</strong>
+          <span data-i18n="safety_hl_desc">Saved story highlights on your profile</span>
+        </div>
+        <select class="safety-select" data-privacy="showHighlights" id="pref-showHighlights">
+          <option value="everyone" data-i18n="opt_everyone">Everyone</option>
+          <option value="followers" data-i18n="opt_followers">Followers</option>
+          <option value="friends" data-i18n="opt_friends_only">Friends only</option>
+          <option value="nobody" data-i18n="opt_nobody">Nobody</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Blocked Users -->
+    <div class="safety-section">
+      <div class="safety-section-head">
+        <div class="safety-section-icon" style="background:rgba(239,68,68,.12);color:#f87171"><i class="fas fa-ban"></i></div>
+        <div>
+          <div class="safety-section-title" data-i18n="safety_blocked_title">Blocked Users</div>
+          <div class="safety-section-desc" data-i18n="safety_blocked_desc">These users cannot see your content or contact you</div>
+        </div>
+      </div>
+      <div class="safety-user-list" id="blockedUsersList">
+        <div class="safety-skel-row"><div class="safety-skel-av"></div><div style="flex:1"><div class="safety-skel-line" style="width:55%;margin-bottom:6px"></div><div class="safety-skel-line" style="width:35%"></div></div></div>
+      </div>
+    </div>
+
+    <!-- Muted Users -->
+    <div class="safety-section">
+      <div class="safety-section-head">
+        <div class="safety-section-icon" style="background:rgba(245,158,11,.12);color:#f59e0b"><i class="fas fa-volume-mute"></i></div>
+        <div>
+          <div class="safety-section-title" data-i18n="safety_muted_title">Muted Users</div>
+          <div class="safety-section-desc" data-i18n="safety_muted_desc">Their posts are hidden from your feed</div>
+        </div>
+      </div>
+      <div class="safety-user-list" id="mutedUsersList">
+        <div class="safety-skel-row"><div class="safety-skel-av"></div><div style="flex:1"><div class="safety-skel-line" style="width:55%;margin-bottom:6px"></div><div class="safety-skel-line" style="width:35%"></div></div></div>
+      </div>
+    </div>
+
+    <!-- Account / Danger Zone -->
+    <div class="safety-section">
+      <div class="safety-section-head">
+        <div class="safety-section-icon" style="background:rgba(255,255,255,.06);color:var(--text-muted,#6b7280)"><i class="fas fa-user-cog"></i></div>
+        <div>
+          <div class="safety-section-title" data-i18n="safety_account_title">Account</div>
+          <div class="safety-section-desc" data-i18n="safety_account_desc">Data and account management</div>
+        </div>
+      </div>
+      <div class="safety-danger-row">
+        <div class="safety-danger-label">
+          <strong data-i18n="safety_download_label">Download your data</strong>
+          <span data-i18n="safety_download_desc">Get a copy of everything GeoHub has stored</span>
+        </div>
+        <button class="safety-danger-btn ghost" disabled title="Coming soon">Download</button>
+      </div>
+      <div class="safety-danger-row">
+        <div class="safety-danger-label">
+          <strong data-i18n="safety_deact_label">Deactivate account</strong>
+          <span data-i18n="safety_deact_desc">Temporarily hide your profile and content</span>
+        </div>
+        <button class="safety-danger-btn danger" disabled title="Coming soon">Deactivate</button>
+      </div>
+    </div>
+
+  </div><!-- /safety-page -->
+
+  <script>
+  (function() {
+    function _t(k, fb) { return window.GHt ? window.GHt(k) : (fb || k); }
+    var DEFAULTS = { messagingPref: 'everyone', followPref: 'everyone', profilePref: 'public', postsPref: 'public', friendRequestPref: 'everyone', showFullName: 'everyone', showBio: 'everyone', showStories: 'everyone', showHighlights: 'everyone' };
+    var _savedSettings = Object.assign({}, DEFAULTS);
+    var _dirty = false;
+
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    function whenSocial(cb) {
+      if (window.GeoSocial) { cb(window.GeoSocial); return; }
+      window.addEventListener('GeoSocialReady', function(){ cb(window.GeoSocial); }, { once: true });
+    }
+
+    function showPage() {
+      var page = document.getElementById('safetyPage');
+      if (page) page.style.display = '';
+    }
+
+    function setDirty(val) {
+      _dirty = val;
+      var btn = document.getElementById('savePrivacyBtn');
+      if (btn) { btn.disabled = !val; }
+    }
+
+    function loadSettings() {
+      whenSocial(function(S) {
+        if (!S.getPrivacySettings) { applySettings(DEFAULTS); showPage(); return; }
+        S.getPrivacySettings(null, function(settings) {
+          _savedSettings = Object.assign({}, DEFAULTS, settings || {});
+          applySettings(_savedSettings);
+          showPage();
+          setDirty(false);
+        });
+      });
+    }
+
+    function applySettings(s) {
+      Object.keys(DEFAULTS).forEach(function(key) {
+        var el = document.getElementById('pref-' + key);
+        if (el) el.value = s[key] || DEFAULTS[key];
+      });
+    }
+
+    function collectSettings() {
+      var s = {};
+      Object.keys(DEFAULTS).forEach(function(key) {
+        var el = document.getElementById('pref-' + key);
+        s[key] = el ? el.value : DEFAULTS[key];
+      });
+      return s;
+    }
+
+    document.querySelectorAll('.safety-select[data-privacy]').forEach(function(sel) {
+      sel.addEventListener('change', function() { setDirty(true); });
+    });
+
+    document.getElementById('savePrivacyBtn').addEventListener('click', function() {
+      var btn = this;
+      btn.disabled = true;
+      btn.textContent = _t('safety_saving', 'Saving…');
+      var settings = collectSettings();
+      whenSocial(function(S) {
+        if (!S.updatePrivacySettings) {
+          btn.textContent = _t('safety_save_btn', 'Save Settings');
+          setDirty(false);
+          return;
+        }
+        S.updatePrivacySettings(settings, function(ok) {
+          btn.textContent = _t('safety_save_btn', 'Save Settings');
+          if (ok !== false) {
+            _savedSettings = Object.assign({}, settings);
+            setDirty(false);
+          } else {
+            setDirty(true);
+          }
+        });
+      });
+    });
+
+    function avatarHTML(user) {
+      var initials = (user.name || user.fullName || 'U').split(' ').map(function(w){ return w[0]||''; }).slice(0,2).join('').toUpperCase();
+      if (user.avatar) {
+        return '<div class="safety-user-av"><img src="' + esc(user.avatar) + '" alt="" loading="lazy" onerror="this.parentNode.textContent=\'' + esc(initials) + '\'"></div>';
+      }
+      return '<div class="safety-user-av">' + esc(initials) + '</div>';
+    }
+
+    function renderUserList(containerId, users, actionClass, actionLabel, actionAttr, onAction) {
+      var list = document.getElementById(containerId);
+      if (!list) return;
+      if (!users || !users.length) {
+        list.innerHTML = '<div class="safety-empty"><i class="fas fa-check-circle"></i>' + _t('safety_none', 'None') + '</div>';
+        return;
+      }
+      list.innerHTML = users.map(function(u) {
+        return '<div class="safety-user-row">' +
+          avatarHTML(u) +
+          '<div class="safety-user-info">' +
+            '<div class="safety-user-name">' + esc(u.name || u.fullName || 'Unknown') + '</div>' +
+            '<div class="safety-user-sub">@' + esc(u.username || u.id || '') + '</div>' +
+          '</div>' +
+          '<button class="safety-user-action ' + actionClass + '" data-' + actionAttr + '="' + esc(u.id) + '">' + actionLabel + '</button>' +
+        '</div>';
+      }).join('');
+      list.querySelectorAll('[data-' + actionAttr + ']').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var uid = this.getAttribute('data-' + actionAttr);
+          onAction(uid, this);
+        });
+      });
+    }
+
+    function loadBlockedList() {
+      whenSocial(function(S) {
+        var list = document.getElementById('blockedUsersList');
+        if (!S.getBlockedUsersList) {
+          if (list) list.innerHTML = '<div class="safety-empty"><i class="fas fa-check-circle"></i>' + _t('safety_none', 'None') + '</div>';
+          return;
+        }
+        S.getBlockedUsersList(function(users) {
+          renderUserList('blockedUsersList', users, 'safety-action-unblock', _t('safety_unblock', 'Unblock'), 'unblock-uid', function(uid, btn) {
+            btn.disabled = true;
+            btn.textContent = '…';
+            S.unblockUser(uid, function() {
+              var row = btn.closest('.safety-user-row');
+              if (row) row.remove();
+              var remaining = document.querySelectorAll('#blockedUsersList .safety-user-row');
+              if (!remaining.length) {
+                document.getElementById('blockedUsersList').innerHTML = '<div class="safety-empty"><i class="fas fa-check-circle"></i>' + _t('safety_none', 'None') + '</div>';
+              }
+            });
+          });
+        });
+      });
+    }
+
+    function loadMutedList() {
+      whenSocial(function(S) {
+        var list = document.getElementById('mutedUsersList');
+        if (!S.getMutedUsersList) {
+          if (list) list.innerHTML = '<div class="safety-empty"><i class="fas fa-check-circle"></i>' + _t('safety_none', 'None') + '</div>';
+          return;
+        }
+        S.getMutedUsersList(function(users) {
+          renderUserList('mutedUsersList', users, 'safety-action-unmute', _t('safety_unmute', 'Unmute'), 'unmute-uid', function(uid, btn) {
+            btn.disabled = true;
+            btn.textContent = '…';
+            S.unmuteUser(uid, function() {
+              var row = btn.closest('.safety-user-row');
+              if (row) row.remove();
+              var remaining = document.querySelectorAll('#mutedUsersList .safety-user-row');
+              if (!remaining.length) {
+                document.getElementById('mutedUsersList').innerHTML = '<div class="safety-empty"><i class="fas fa-check-circle"></i>' + _t('safety_none', 'None') + '</div>';
+              }
+            });
+          });
+        });
+      });
+    }
+
+    whenSocial(function() {
+      loadSettings();
+      loadBlockedList();
+      loadMutedList();
+    });
+  })();
+  </script>
+  <!-- Vite: 11 scripts → 1 chunk. See src/entries/safety.js -->
+</body>
+</html>

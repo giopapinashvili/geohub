@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+  <link rel="dns-prefetch" href="https://firebase.googleapis.com">
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patriot Missions — GeoHub</title>
+  <!-- SEO ─────────────────────────────────────────────── -->
+  <meta name="description" content="Complete civic missions and patriot challenges across Georgia. Contribute to your community, earn Patriot XP, and make a real difference.">
+  <link rel="canonical" href="https://geohub.ge/patriot.html">
+  <meta name="robots" content="noindex, nofollow">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="GeoHub">
+  <meta property="og:title" content="Patriot Missions — GeoHub">
+  <meta property="og:description" content="Complete civic missions and patriot challenges across Georgia. Contribute to your community, earn Patriot XP, and make a real difference.">
+  <meta property="og:url" content="https://geohub.ge/patriot.html">
+  <meta property="og:image" content="https://geohub.ge/icons/icon-512.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="GeoHub — Discover Georgia">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Patriot Missions — GeoHub">
+  <meta name="twitter:description" content="Complete civic missions and patriot challenges across Georgia. Contribute to your community, earn Patriot XP, and make a real difference.">
+  <meta name="twitter:image" content="https://geohub.ge/icons/icon-512.png">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/assets/patriot-Dw__46h4.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/responsive-polish-BO79aqv7.js">
+  <link rel="modulepreload" crossorigin href="/assets/chat-popup-MADaMnFN.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-production-stabilization-v1-D9brtDwk.js">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
+  <link rel="stylesheet" crossorigin href="/assets/patriot-D9f-dSb4.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+</head>
+<body>
+
+<div id="ptToast"><i class="fas fa-check-circle"></i> <span id="ptToastMsg">Done!</span></div>
+
+<!-- ── REPORT PROBLEM MODAL ── -->
+<div class="pt-modal-overlay" id="reportModal">
+  <div class="pt-modal">
+    <div class="pt-modal-handle"></div>
+    <div class="pt-modal-header">
+      <div style="font-size:1.3rem">🚨</div>
+      <div class="pt-modal-title">Report a Problem</div>
+      <button class="pt-modal-close" onclick="closeReport()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="pt-modal-body">
+      <div>
+        <div class="pt-field-label">Problem Type</div>
+        <div class="pt-type-grid" id="reportTypeGrid">
+          <button class="pt-type-btn" data-type="trash" onclick="selectType(this)"><span>🗑️</span>Trash</button>
+          <button class="pt-type-btn" data-type="bench" onclick="selectType(this)"><span>🪑</span>Broken Bench</button>
+          <button class="pt-type-btn" data-type="light" onclick="selectType(this)"><span>💡</span>Broken Light</button>
+          <button class="pt-type-btn" data-type="unsafe" onclick="selectType(this)"><span>⚠️</span>Unsafe Area</button>
+          <button class="pt-type-btn" data-type="road" onclick="selectType(this)"><span>🛣️</span>Road Issue</button>
+          <button class="pt-type-btn" data-type="other" onclick="selectType(this)"><span>📌</span>Other</button>
+        </div>
+      </div>
+      <div>
+        <div class="pt-field-label">Title</div>
+        <input type="text" class="pt-input" id="reportTitle" placeholder="Brief description of the problem">
+      </div>
+      <div>
+        <div class="pt-field-label">Location</div>
+        <input type="text" class="pt-input" id="reportLocation" placeholder="Street or neighborhood">
+      </div>
+      <div>
+        <div class="pt-field-label">Description</div>
+        <textarea class="pt-input" id="reportDesc" rows="3" placeholder="Describe the issue in detail..."></textarea>
+      </div>
+      <div>
+        <div class="pt-field-label">Urgency</div>
+        <div class="pt-urgency-row">
+          <button class="pt-urg-btn low" onclick="selectUrgency(this,'low')">Low</button>
+          <button class="pt-urg-btn medium selected" onclick="selectUrgency(this,'medium')">Medium</button>
+          <button class="pt-urg-btn high" onclick="selectUrgency(this,'high')">High</button>
+        </div>
+      </div>
+      <div>
+        <div class="pt-field-label">Photo Proof</div>
+        <div class="pt-photo-box" onclick="photoAttach(this)">
+          <i class="fas fa-camera"></i>
+          <span id="photoPlaceholderLabel">Tap to attach photo</span>
+        </div>
+      </div>
+      <button class="pt-submit-btn" onclick="submitReport()"><i class="fas fa-exclamation-triangle"></i> Submit Report</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOP BAR ── -->
+<div class="pt-topbar">
+  <a href="challenges.html" class="pt-back"><i class="fas fa-arrow-left"></i></a>
+  <div class="pt-topbar-logo">
+    <div class="pt-logo-icon">🇬🇪</div>
+    <div class="pt-logo-text">Geo<span>Hub</span> Patriot</div>
+  </div>
+  <div class="pt-topbar-actions">
+    <button class="pt-icon-btn" title="Filter" onclick="toggleFilter()"><i class="fas fa-filter"></i></button>
+    <button class="pt-icon-btn" title="Share" onclick="ptToast('Link copied!')"><i class="fas fa-share-alt"></i></button>
+    <button class="pt-report-btn" onclick="openReport()"><i class="fas fa-plus"></i> Report</button>
+  </div>
+</div>
+
+<div class="pt-page">
+
+  <!-- ── HERO ── -->
+  <section class="pt-hero">
+    <div class="pt-hero-orb o1"></div>
+    <div class="pt-hero-orb o2"></div>
+    <div class="container">
+      <div class="pt-hero-inner">
+        <div>
+          <div class="pt-hero-badge"><i class="fas fa-shield-alt"></i> Civic Mission System</div>
+          <h1 class="pt-hero-title">Make <span class="hl">Georgia</span> Better,<br>One Mission at a Time</h1>
+          <p class="pt-hero-sub">Earn Patriot XP by cleaning parks, reporting problems, helping communities. Your actions improve the city — and your GeoHub Trust Score.</p>
+          <div class="pt-hero-stats">
+            <div class="pt-hstat"><span class="pt-hstat-val green">2,840</span><span class="pt-hstat-label">Patriot XP</span></div>
+            <div class="pt-hstat"><span class="pt-hstat-val orange">23</span><span class="pt-hstat-label">Missions Done</span></div>
+            <div class="pt-hstat"><span class="pt-hstat-val blue">+14</span><span class="pt-hstat-label">Trust from Civic</span></div>
+          </div>
+          <div class="pt-hero-actions" style="margin-top:18px">
+            <a href="camera.html?mode=patriot" class="pt-btn-primary"><i class="fas fa-camera"></i> Start Mission</a>
+            <button class="pt-btn-ghost" onclick="openReport()"><i class="fas fa-exclamation-triangle"></i> Report Problem</button>
+          </div>
+
+          <!-- AI Suggestions -->
+          <div class="ai-strip" id="aiStrip" onclick="cycleAI()">
+            <div class="ai-strip-icon">🤖</div>
+            <div class="ai-strip-content">
+              <div class="ai-strip-label">AI City Insight</div>
+              <div class="ai-strip-msg" id="aiMsg">Vake Park has 3 reports this week — clean-up mission active nearby</div>
+            </div>
+            <div class="ai-strip-nav" id="aiDots"></div>
+          </div>
+        </div>
+        <div class="pt-score-wrap">
+          <div class="pt-ring">
+            <svg class="pt-ring-svg" viewBox="0 0 110 110">
+              <defs>
+                <linearGradient id="ptGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#10b981"/>
+                  <stop offset="100%" stop-color="#3b82f6"/>
+                </linearGradient>
+              </defs>
+              <circle class="pt-ring-track" cx="55" cy="55" r="46"/>
+              <circle class="pt-ring-fill" cx="55" cy="55" r="46" id="ptRingFill"/>
+            </svg>
+            <div class="pt-ring-inner">
+              <div class="pt-ring-score">74</div>
+              <div class="pt-ring-lbl">Patriot</div>
+            </div>
+          </div>
+          <div class="pt-score-tag"><i class="fas fa-arrow-up"></i> +6 this week</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container" style="padding-top: 0;">
+
+    <!-- ── CITY MAP ── -->
+    <div class="pt-map-section">
+      <div class="pt-section-title"><i class="fas fa-map"></i> City Mission Map</div>
+      <div class="pt-map-wrap">
+        <div class="pt-map-grid"></div>
+        <!-- Roads -->
+        <div class="pt-map-road-h" style="top:33%"></div>
+        <div class="pt-map-road-h" style="top:65%"></div>
+        <div class="pt-map-road-v" style="left:28%"></div>
+        <div class="pt-map-road-v" style="left:62%"></div>
+        <!-- User position -->
+        <div class="pt-map-user"></div>
+        <!-- Mission pins -->
+        <div class="pt-map-pin" style="left:22%;top:45%" onclick="ptToast('🌿 Vake Park Clean-up')">
+          <div class="pt-map-pin-dot green"><span class="pt-map-pin-icon">🌿</span></div>
+          <div class="pt-map-pin-label">Clean-up</div>
+        </div>
+        <div class="pt-map-pin" style="left:55%;top:28%" onclick="ptToast('💡 Broken Street Light')">
+          <div class="pt-map-pin-dot orange"><span class="pt-map-pin-icon">💡</span></div>
+          <div class="pt-map-pin-label">Infra</div>
+        </div>
+        <div class="pt-map-pin" style="left:74%;top:58%" onclick="ptToast('🐾 Animal Care Mission')">
+          <div class="pt-map-pin-dot blue"><span class="pt-map-pin-icon">🐾</span></div>
+          <div class="pt-map-pin-label">Animal</div>
+        </div>
+        <div class="pt-map-pin" style="left:38%;top:72%" onclick="ptToast('🚨 Unsafe Alley Reported')">
+          <div class="pt-map-pin-dot red"><span class="pt-map-pin-icon">⚠️</span></div>
+          <div class="pt-map-pin-label">Safety</div>
+        </div>
+        <div class="pt-map-pin" style="left:82%;top:35%" onclick="ptToast('♻️ Eco Recycling Drive')">
+          <div class="pt-map-pin-dot green"><span class="pt-map-pin-icon">♻️</span></div>
+          <div class="pt-map-pin-label">Eco</div>
+        </div>
+        <div class="pt-map-pin" style="left:14%;top:70%" onclick="ptToast('🤝 Community Helper')">
+          <div class="pt-map-pin-dot blue"><span class="pt-map-pin-icon">🤝</span></div>
+          <div class="pt-map-pin-label">Community</div>
+        </div>
+        <!-- Legend -->
+        <div class="pt-map-legend">
+          <div class="pt-map-leg-item"><div class="pt-map-leg-dot" style="background:#10b981"></div>Clean-up</div>
+          <div class="pt-map-leg-item"><div class="pt-map-leg-dot" style="background:#f97316"></div>Infra</div>
+          <div class="pt-map-leg-item"><div class="pt-map-leg-dot" style="background:#3b82f6"></div>Civic</div>
+          <div class="pt-map-leg-item"><div class="pt-map-leg-dot" style="background:#ef4444"></div>Alert</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TABS ── -->
+    <div class="pt-tabs" id="ptTabs">
+      <button class="pt-tab active" data-tab="active" onclick="switchTab(this,'active')"><i class="fas fa-bolt"></i> Active <span class="tc" id="tcActive">8</span></button>
+      <button class="pt-tab" data-tab="nearby" onclick="switchTab(this,'nearby')"><i class="fas fa-map-marker-alt"></i> Nearby <span class="tc">5</span></button>
+      <button class="pt-tab" data-tab="done" onclick="switchTab(this,'done')"><i class="fas fa-check-circle"></i> Completed <span class="tc">23</span></button>
+      <button class="pt-tab" data-tab="leaderboard" onclick="switchTab(this,'leaderboard')"><i class="fas fa-trophy"></i> Leaderboard</button>
+      <button class="pt-tab" data-tab="rewards" onclick="switchTab(this,'rewards')"><i class="fas fa-gift"></i> Rewards</button>
+    </div>
+
+    <!-- ── ACTIVE MISSIONS PANEL ── -->
+    <div id="panel-active" class="pt-section">
+      <div class="pt-section-title"><i class="fas fa-fire"></i> Active Missions</div>
+      <div class="pt-mission-grid" id="missionGrid"></div>
+    </div>
+
+    <!-- ── NEARBY PROBLEMS PANEL ── -->
+    <div id="panel-nearby" class="pt-section" style="display:none">
+      <div class="pt-section-title"><i class="fas fa-exclamation-triangle"></i> Nearby Problems</div>
+      <div class="pt-prob-list" id="probList"></div>
+    </div>
+
+    <!-- ── COMPLETED PANEL ── -->
+    <div id="panel-done" class="pt-section" style="display:none">
+      <div class="pt-section-title"><i class="fas fa-check-double"></i> Your Completed Actions</div>
+      <div class="pt-done-grid" id="doneGrid"></div>
+    </div>
+
+    <!-- ── LEADERBOARD PANEL ── -->
+    <div id="panel-leaderboard" class="pt-section" style="display:none">
+      <div class="pt-section-title"><i class="fas fa-crown"></i> Patriot Leaderboard — Georgia</div>
+      <div class="pt-lb-list" id="lbList"></div>
+    </div>
+
+    <!-- ── REWARDS PANEL ── -->
+    <div id="panel-rewards" class="pt-section" style="display:none">
+      <div class="pt-section-title"><i class="fas fa-gift"></i> Civic Rewards</div>
+      <div class="pt-rewards-grid" id="rewardsGrid"></div>
+    </div>
+
+    <!-- ── QUICK LINKS ── -->
+    <div class="pt-divider"></div>
+    <div class="pt-section-title"><i class="fas fa-link"></i> Connected Systems</div>
+    <div class="pt-link-grid">
+      <a href="challenges.html" class="pt-link-card">
+        <div class="pt-link-icon" style="background:rgba(59,130,246,0.12);color:var(--blue)"><i class="fas fa-bolt"></i></div>
+        <div><div class="pt-link-label">Challenges</div><div class="pt-link-sub">View all missions</div></div>
+      </a>
+      <a href="trust.html" class="pt-link-card">
+        <div class="pt-link-icon" style="background:rgba(16,185,129,0.12);color:var(--green)"><i class="fas fa-shield-alt"></i></div>
+        <div><div class="pt-link-label">Trust Score</div><div class="pt-link-sub">Patriot boosts trust</div></div>
+      </a>
+      <a href="camera.html?mode=patriot" class="pt-link-card">
+        <div class="pt-link-icon" style="background:rgba(249,115,22,0.12);color:#f97316"><i class="fas fa-camera"></i></div>
+        <div><div class="pt-link-label">Camera Proof</div><div class="pt-link-sub">Before/after capture</div></div>
+      </a>
+    </div>
+    <div style="height:20px"></div>
+
+  </div><!-- /container -->
+</div><!-- /pt-page -->
+
+<!-- Mobile Nav (same as other pages) -->
+<nav class="app-bottom-nav">
+  <a href="feed.html" class="app-nav-item"><i class="fas fa-home"></i><span>Feed</span></a>
+  <a href="explore.html" class="app-nav-item"><i class="fas fa-compass"></i><span>Explore</span></a>
+  <a href="checkin.html" class="app-nav-item app-nav-fab"><i class="fas fa-plus"></i></a>
+  <a href="challenges.html" class="app-nav-item active"><i class="fas fa-bolt"></i><span>Missions</span></a>
+  <a href="profile.html" class="app-nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+</nav>
+
+    <!-- Vite: 4 scripts → 1 chunk. See src/entries/patriot.js -->
+</body>
+</html>

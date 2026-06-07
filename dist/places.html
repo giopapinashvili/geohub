@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+  <link rel="dns-prefetch" href="https://firebase.googleapis.com">
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#10b981">
+  <title>Places — GeoHub</title>
+  <!-- SEO ─────────────────────────────────────────────── -->
+  <meta name="description" content="Find top-rated restaurants, cafes, attractions, and hidden gems across Georgia. Discover places with real reviews and verified check-ins.">
+  <link rel="canonical" href="https://geohub.ge/places.html">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="GeoHub">
+  <meta property="og:title" content="Places — GeoHub">
+  <meta property="og:description" content="Find top-rated restaurants, cafes, attractions, and hidden gems across Georgia. Discover places with real reviews and verified check-ins.">
+  <meta property="og:url" content="https://geohub.ge/places.html">
+  <meta property="og:image" content="https://geohub.ge/icons/icon-512.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="GeoHub — Discover Georgia">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Places — GeoHub">
+  <meta name="twitter:description" content="Find top-rated restaurants, cafes, attractions, and hidden gems across Georgia. Discover places with real reviews and verified check-ins.">
+  <meta name="twitter:image" content="https://geohub.ge/icons/icon-512.png">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
+  <style>
+  *{box-sizing:border-box}
+  body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden;margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+
+  /* ── PLACES TOOLBAR (search + controls, sits below standard navbar) ── */
+  .pl-toolbar{margin-top:var(--navbar-height,68px);position:sticky;top:var(--navbar-height,68px);left:0;right:0;background:rgba(5,7,15,.97);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;padding:8px 20px;z-index:150;backdrop-filter:blur(20px)}
+  .pl-search-wrap{flex:1;max-width:420px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:8px 14px}
+  .pl-search-wrap i{color:#64748b;font-size:.85rem}
+  .pl-search-wrap input{background:none;border:none;outline:none;color:#f8fafc;font-size:.88rem;width:100%}
+  .pl-search-wrap input::placeholder{color:#4b5563}
+  .pl-add-btn{display:flex;align-items:center;gap:7px;padding:9px 16px;background:linear-gradient(135deg,#10b981,#3b82f6);border:none;border-radius:20px;color:#fff;font-weight:700;font-size:.84rem;cursor:pointer;white-space:nowrap;transition:opacity .2s}
+  .pl-add-btn:hover{opacity:.88}
+
+  /* ── CATEGORY TABS ── */
+  .pl-cats{background:rgba(255,255,255,.025);border-bottom:1px solid rgba(255,255,255,.07);padding:0 20px;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;position:sticky;top:calc(var(--navbar-height,68px) + 52px);z-index:100;backdrop-filter:blur(10px)}
+  .pl-cats::-webkit-scrollbar{display:none}
+  .pl-cat-btn{display:flex;align-items:center;gap:6px;padding:14px 16px;background:none;border:none;color:#64748b;font-weight:700;font-size:.82rem;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;font-family:inherit}
+  .pl-cat-btn:hover{color:#e2e8f0}
+  .pl-cat-btn.active{color:#10b981;border-bottom-color:#10b981}
+
+  /* ── MAIN CONTENT ── */
+  .pl-main{max-width:1280px;margin:0 auto;padding:24px 20px 100px}
+  .pl-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+  .pl-section-head h2{font-size:1.15rem;font-weight:800;margin:0}
+  .pl-count{font-size:.78rem;color:#64748b}
+
+  /* ── GRID ── */
+  .pl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
+
+  /* ── PLACE CARD ── */
+  .pl-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:18px;overflow:hidden;cursor:pointer;transition:transform .2s,border-color .2s}
+  .pl-card:hover{transform:translateY(-3px);border-color:rgba(16,185,129,.3)}
+  .pl-card-img{height:160px;background:linear-gradient(135deg,#10b981,#3b82f6);position:relative;overflow:hidden}
+  .pl-card-img img{width:100%;height:100%;object-fit:cover}
+  .pl-card-cat-badge{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.6);border-radius:8px;padding:4px 10px;font-size:.68rem;font-weight:700;color:#fff;backdrop-filter:blur(6px)}
+  .pl-card-save{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.5);border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:.85rem;backdrop-filter:blur(6px);transition:background .2s}
+  .pl-card-save:hover{background:rgba(16,185,129,.7)}
+  .pl-card-save.saved{background:rgba(16,185,129,.8);color:#fff}
+  .pl-card-body{padding:14px}
+  .pl-card-name{font-size:.98rem;font-weight:800;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pl-card-addr{font-size:.76rem;color:#64748b;margin-bottom:10px;display:flex;align-items:center;gap:4px}
+  .pl-card-addr i{color:#10b981;font-size:.68rem}
+  .pl-card-foot{display:flex;align-items:center;justify-content:space-between;font-size:.76rem}
+  .pl-card-rating{display:flex;align-items:center;gap:4px;color:#f59e0b}
+  .pl-card-reviews{color:#64748b}
+
+  /* ── EMPTY STATE ── */
+  .pl-empty{min-height:340px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#64748b;border:1px dashed rgba(255,255,255,.1);border-radius:20px;padding:40px;grid-column:1/-1}
+  .pl-empty i{font-size:2.5rem;color:#10b981;margin-bottom:16px;opacity:.7}
+  .pl-empty h3{color:#f0f4ff;font-size:1.1rem;margin:0 0 8px}
+  .pl-empty-cta{margin-top:18px;padding:10px 20px;background:linear-gradient(135deg,#10b981,#3b82f6);border:none;border-radius:12px;color:#fff;font-weight:700;cursor:pointer;font-size:.88rem}
+
+  /* ── LOADING ── */
+  .pl-loading{display:flex;align-items:center;justify-content:center;padding:60px;color:#64748b;gap:10px;grid-column:1/-1}
+
+  /* ── ADD PLACE MODAL ── */
+  .pl-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99998;display:none;align-items:center;justify-content:center;padding:16px}
+  .pl-modal-overlay.open{display:flex}
+  .pl-modal{background:#111827;border:1px solid rgba(255,255,255,.1);border-radius:20px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:plModalIn .25s ease;will-change:transform,opacity}
+  @keyframes plModalIn{from{transform:scale(.94) translateY(-12px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+  .pl-modal-head{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 16px;border-bottom:1px solid rgba(255,255,255,.07)}
+  .pl-modal-head h3{font-size:1.05rem;font-weight:800;margin:0}
+  .pl-modal-close{background:rgba(255,255,255,.08);border:none;color:#f0f4ff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:.95rem}
+  .pl-modal-body{padding:22px}
+  .pl-field{margin-bottom:16px}
+  .pl-field label{display:block;font-size:.8rem;font-weight:700;color:#94a3b8;margin-bottom:6px}
+  .pl-field input,.pl-field textarea,.pl-field select{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;color:#f8fafc;font-size:.9rem;outline:none;font-family:inherit;transition:border-color .2s}
+  .pl-field input:focus,.pl-field textarea:focus,.pl-field select:focus{border-color:#10b981}
+  .pl-field select option{background:#111827}
+  .pl-field textarea{resize:vertical;min-height:80px}
+  .pl-coords-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .pl-photo-preview{margin-top:8px;max-width:100%;border-radius:10px;display:none;max-height:180px;object-fit:cover}
+  .pl-modal-submit{width:100%;padding:12px;border-radius:12px;background:linear-gradient(135deg,#10b981,#3b82f6);border:none;color:#fff;font-weight:800;font-size:.92rem;cursor:pointer;margin-top:6px;transition:opacity .2s}
+  .pl-modal-submit:hover{opacity:.88}
+  .pl-modal-submit:disabled{opacity:.5;cursor:not-allowed}
+
+  /* ── PLACE DETAIL OVERLAY ── */
+  .pl-detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99997;display:none;align-items:center;justify-content:center;padding:16px}
+  .pl-detail-overlay.open{display:flex}
+  .pl-detail{background:#0e1120;border:1px solid rgba(255,255,255,.09);border-radius:22px;width:100%;max-width:620px;max-height:92vh;overflow-y:auto;animation:plModalIn .25s ease;will-change:transform,opacity}
+  .pl-detail-img{height:220px;background:linear-gradient(135deg,#10b981,#3b82f6);position:relative;overflow:hidden;border-radius:22px 22px 0 0}
+  .pl-detail-img img{width:100%;height:100%;object-fit:cover}
+  .pl-detail-close{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.55);border:none;color:#fff;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:.9rem;backdrop-filter:blur(4px)}
+  .pl-detail-body{padding:22px}
+  .pl-detail-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .pl-detail-top h2{font-size:1.3rem;font-weight:900;margin:0 0 6px}
+  .pl-detail-cat{font-size:.78rem;color:#64748b;display:flex;align-items:center;gap:5px}
+  .pl-detail-actions{display:flex;gap:8px;flex-shrink:0}
+  .pl-det-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:#e2e8f0;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s;text-decoration:none}
+  .pl-det-btn:hover{background:rgba(255,255,255,.1)}
+  .pl-det-btn.active{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.4);color:#10b981}
+  .pl-detail-addr{display:flex;align-items:center;gap:6px;font-size:.84rem;color:#94a3b8;margin-bottom:14px}
+  .pl-detail-addr i{color:#10b981}
+  .pl-detail-desc{font-size:.88rem;color:#94a3b8;line-height:1.65;margin-bottom:16px}
+  .pl-detail-meta{display:flex;gap:20px;font-size:.8rem;color:#94a3b8;margin-bottom:16px}
+  .pl-detail-meta strong{display:block;font-size:1.05rem;font-weight:800;color:#f0f4ff}
+
+  /* ── REVIEWS ── */
+  .pl-reviews-section{margin-top:16px}
+  .pl-reviews-head{font-size:.8rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
+  .pl-review-form{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;padding:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px}
+  .pl-stars-row{display:flex;gap:6px;cursor:pointer}
+  .pl-star{font-size:1.2rem;color:#4b5563;transition:color .15s;cursor:pointer}
+  .pl-star.active,.pl-star:hover,.pl-star.hover{color:#f59e0b}
+  .pl-review-input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:#f8fafc;font-size:.84rem;font-family:inherit;resize:none;outline:none}
+  .pl-review-input::placeholder{color:#4b5563}
+  .pl-review-submit{align-self:flex-end;padding:8px 18px;background:linear-gradient(135deg,#10b981,#3b82f6);border:none;border-radius:10px;color:#fff;font-weight:700;font-size:.82rem;cursor:pointer}
+  .pl-review-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+  .pl-review-item:last-child{border-bottom:none}
+  .pl-review-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#10b981,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;flex-shrink:0}
+  .pl-review-body{flex:1;min-width:0}
+  .pl-review-name{font-size:.82rem;font-weight:700;color:#e2e8f0}
+  .pl-review-stars{color:#f59e0b;font-size:.72rem;margin:2px 0}
+  .pl-review-text{font-size:.8rem;color:#94a3b8;line-height:1.5}
+  .pl-review-time{font-size:.7rem;color:#4b5563;margin-top:2px}
+
+  /* ── PLACE CHECK-INS ── */
+  .pl-checkins-section{margin-top:16px}
+  .pl-checkins-head{font-size:.78rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+  .pl-checkin-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);align-items:flex-start}
+  .pl-checkin-item:last-child{border-bottom:none}
+  .pl-checkin-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#10b981,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;flex-shrink:0;text-decoration:none;overflow:hidden}
+  .pl-checkin-body{flex:1;min-width:0}
+  .pl-checkin-name{font-size:.8rem;font-weight:700;color:#e2e8f0;text-decoration:none}
+  .pl-checkin-name:hover{color:#10b981}
+  .pl-checkin-meta{font-size:.7rem;color:#64748b;margin-top:2px}
+  .pl-checkin-caption{font-size:.78rem;color:#94a3b8;margin-top:3px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .pl-checkin-photo{width:54px;height:46px;border-radius:8px;object-fit:cover;flex-shrink:0}
+
+  /* ── MAP VIEW ── */
+  .pl-view-toggle{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:3px;flex-shrink:0}
+  .pl-view-btn{padding:6px 12px;border-radius:16px;border:none;background:none;color:#64748b;font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;font-family:inherit}
+  .pl-view-btn.active{background:rgba(16,185,129,.15);color:#10b981}
+
+  /* ── PHOTO GALLERY (check-in photos) ── */
+  .pl-gallery-section{margin-top:16px}
+  .pl-gallery-head{font-size:.78rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+  .pl-gallery{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}
+  .pl-gallery::-webkit-scrollbar{display:none}
+  .pl-gallery-img{width:100px;height:72px;border-radius:10px;object-fit:cover;cursor:pointer;flex-shrink:0;border:1px solid rgba(255,255,255,.08);transition:transform .15s;display:block}
+  .pl-gallery-img:hover{transform:scale(1.05)}
+
+  /* ── LIGHTBOX ── */
+  .pl-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:999999;display:none;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
+  .pl-lightbox.open{display:flex}
+  .pl-lightbox-img{max-width:100%;max-height:90vh;border-radius:12px;object-fit:contain;cursor:default}
+
+  /* ── REVIEW CONTROLS ── */
+  .pl-review-av{overflow:hidden}
+  .pl-review-header{display:flex;align-items:center;gap:6px;margin-bottom:2px}
+  .pl-review-del{margin-left:auto;background:none;border:none;color:#4b5563;font-size:.68rem;cursor:pointer;padding:2px 5px;border-radius:5px;line-height:1;flex-shrink:0}
+  .pl-review-del:hover{color:#ef4444;background:rgba(239,68,68,.08)}
+
+  /* ── MOBILE ── */
+  @media(max-width:768px){
+    .pl-toolbar{padding:8px 12px;gap:6px}
+    .pl-search-wrap{max-width:none;flex:1}
+    .pl-main{padding:16px 12px 100px}
+    .pl-grid{grid-template-columns:1fr 1fr}
+    .pl-detail,.pl-modal{border-radius:0;max-height:100vh}
+    .pl-cats{padding:0 12px}
+.pl-detail-actions{flex-wrap:wrap;gap:6px}
+    .pl-det-btn{font-size:.76rem;padding:7px 11px}
+  }
+  @media(max-width:480px){
+    .pl-grid{grid-template-columns:1fr}
+  }
+  </style>
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
+  <script type="module" crossorigin src="/assets/responsive-polish-BO79aqv7.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js"></script>
+  <script type="module" crossorigin src="/assets/firebase-config-CGKVrgHh.js"></script>
+  <script type="module" crossorigin src="/assets/firestore-social-lVyxRoWc.js"></script>
+  <script type="module" crossorigin src="/assets/chat-popup-MADaMnFN.js"></script>
+  <script type="module" crossorigin src="/assets/gh-calls-DqDOBgOW.js"></script>
+  <script type="module" crossorigin src="/assets/gh-group-calls-Ck1zIhcT.js"></script>
+  <script type="module" crossorigin src="/assets/gh-i18n-BbqPU8Gy.js"></script>
+  <script type="module" crossorigin src="/assets/account-BJSGhbLy.js"></script>
+  <script type="module" crossorigin src="/assets/mobile-nav-DsKLv3RI.js"></script>
+  <script type="module" crossorigin src="/assets/geohub-production-stabilization-v1-D9brtDwk.js"></script>
+  <script type="module" crossorigin src="/assets/analytics-DyGaP85h.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
+  <link rel="stylesheet" crossorigin href="/assets/styles-DkNdvQG3.css">
+  <link rel="stylesheet" crossorigin href="/assets/navbar-D8jKRRC5.css">
+  <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-DJnMDTGu.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+</head>
+<body>
+
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="navbar-brand"><div class="logo-icon">🌍</div><span class="logo-text">Geo<span class="logo-geo">Hub</span></span></a>
+  <ul class="navbar-links"></ul>
+  <div class="navbar-actions"></div>
+  <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu"></div>
+<!-- PLACES TOOLBAR -->
+<div class="pl-toolbar">
+  <div class="pl-search-wrap">
+    <i class="fas fa-search"></i>
+    <input type="text" id="plSearchInput" placeholder="Search places…">
+  </div>
+  <div class="pl-view-toggle">
+    <button class="pl-view-btn active" id="viewBtnGrid" onclick="setView('grid')"><i class="fas fa-th"></i> Grid</button>
+    <a class="pl-view-btn" href="map.html"><i class="fas fa-map"></i> Map</a>
+  </div>
+  <button class="pl-add-btn" id="plAddBtn"><i class="fas fa-plus"></i> Add Place</button>
+</div>
+
+<!-- CATEGORY TABS -->
+<div class="pl-cats" id="plCats">
+  <button class="pl-cat-btn active" data-cat="all" onclick="setCat('all',this)"><i class="fas fa-th"></i> All</button>
+  <button class="pl-cat-btn" data-cat="cafe" onclick="setCat('cafe',this)"><i class="fas fa-coffee"></i> Cafés</button>
+  <button class="pl-cat-btn" data-cat="restaurant" onclick="setCat('restaurant',this)"><i class="fas fa-utensils"></i> Restaurants</button>
+  <button class="pl-cat-btn" data-cat="nature" onclick="setCat('nature',this)"><i class="fas fa-leaf"></i> Nature</button>
+  <button class="pl-cat-btn" data-cat="hotel" onclick="setCat('hotel',this)"><i class="fas fa-hotel"></i> Hotels</button>
+  <button class="pl-cat-btn" data-cat="museum" onclick="setCat('museum',this)"><i class="fas fa-landmark"></i> Museums</button>
+  <button class="pl-cat-btn" data-cat="shopping" onclick="setCat('shopping',this)"><i class="fas fa-shopping-bag"></i> Shopping</button>
+  <button class="pl-cat-btn" data-cat="nightlife" onclick="setCat('nightlife',this)"><i class="fas fa-moon"></i> Nightlife</button>
+  <button class="pl-cat-btn" data-cat="sports" onclick="setCat('sports',this)"><i class="fas fa-running"></i> Sports</button>
+  <button class="pl-cat-btn" data-cat="other" onclick="setCat('other',this)"><i class="fas fa-map-pin"></i> Other</button>
+</div>
+
+
+<!-- MAIN -->
+<main class="pl-main">
+  <div class="pl-section-head">
+    <h2 data-i18n="pl_discover">Discover Places</h2>
+    <span class="pl-count" id="plCount"></span>
+  </div>
+  <div class="pl-grid" id="plGrid">
+    <div class="pl-loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div>
+  </div>
+</main>
+
+<!-- ADD PLACE MODAL -->
+<div class="pl-modal-overlay" id="plAddModal">
+  <div class="pl-modal">
+    <div class="pl-modal-head">
+      <h3 data-i18n="pl_add">Add a Place</h3>
+      <button class="pl-modal-close" onclick="closeAddModal()">✕</button>
+    </div>
+    <div class="pl-modal-body">
+      <div class="pl-field">
+        <label data-i18n="pl_name">Place Name *</label>
+        <input type="text" id="plName" data-i18n-placeholder="pl_name" placeholder="e.g. Fabrika Tbilisi">
+      </div>
+      <div class="pl-field">
+        <label data-i18n="pl_category">Category</label>
+        <select id="plCatSel">
+          <option value="other">Other</option>
+          <option value="cafe">Café</option>
+          <option value="restaurant">Restaurant</option>
+          <option value="nature">Nature</option>
+          <option value="hotel">Hotel</option>
+          <option value="museum">Museum</option>
+          <option value="shopping">Shopping</option>
+          <option value="nightlife">Nightlife</option>
+          <option value="sports">Sports</option>
+        </select>
+      </div>
+      <div class="pl-field">
+        <label data-i18n="pl_description">Description</label>
+        <textarea id="plDesc" data-i18n-placeholder="pl_description" placeholder="Describe this place…"></textarea>
+      </div>
+      <div class="pl-field">
+        <label data-i18n="pl_address">Address</label>
+        <input type="text" id="plAddress" data-i18n-placeholder="pl_address" placeholder="Street, City, Country">
+      </div>
+      <div class="pl-field">
+        <label data-i18n="pl_coords">Coordinates (optional)</label>
+        <div class="pl-coords-row">
+          <input type="number" id="plLat" placeholder="Latitude" step="any">
+          <input type="number" id="plLng" placeholder="Longitude" step="any">
+        </div>
+      </div>
+      <div class="pl-field">
+        <label data-i18n="pl_photo">Photo (optional)</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="url" id="plPhoto" placeholder="https://… or upload below" oninput="previewPhoto(this.value)" style="flex:1">
+          <button type="button" id="plPhotoUploadBtn" onclick="plPickPhoto()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#f0f4ff;border-radius:10px;padding:9px 12px;cursor:pointer;font-size:.82rem;white-space:nowrap;flex-shrink:0"><i class="fas fa-upload"></i> Upload</button>
+        </div>
+        <div id="plPhotoUploadStatus" style="font-size:.73rem;color:#64748b;margin-top:4px;display:none"></div>
+        <img id="plPhotoPreview" class="pl-photo-preview" alt="" loading="lazy" decoding="async">
+      </div>
+      <button class="pl-modal-submit" id="plSubmitBtn" onclick="submitAddPlace()">
+        <i class="fas fa-map-pin"></i> <span data-i18n="pl_add_btn">Add Place</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PLACE DETAIL OVERLAY -->
+<div class="pl-detail-overlay" id="plDetailOverlay">
+  <div class="pl-detail" id="plDetailBox"></div>
+</div>
+
+      
+<script>
+  var _currentCat = 'all';
+  var _searchQ = '';
+  var _allPlaces = [];
+  var _savedIds = {};
+  var _unsubPlaces = null;
+  var _unsubReviews = null;
+
+  function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  var CAT_COVERS = {
+    cafe:'linear-gradient(135deg,#92400e,#b45309)',
+    restaurant:'linear-gradient(135deg,#7f1d1d,#b91c1c)',
+    nature:'linear-gradient(135deg,#14532d,#15803d)',
+    hotel:'linear-gradient(135deg,#1e3a5f,#2563eb)',
+    museum:'linear-gradient(135deg,#4c1d95,#6d28d9)',
+    shopping:'linear-gradient(135deg,#831843,#be185d)',
+    nightlife:'linear-gradient(135deg,#1e1b4b,#4338ca)',
+    sports:'linear-gradient(135deg,#164e63,#0891b2)',
+    other:'linear-gradient(135deg,#10b981,#3b82f6)',
+  };
+
+  function getPlaceImage(p){ return p.imageUrl||p.image||p.coverImage||p.coverImageUrl||p.coverUrl||p.photoUrl||p.thumbnail||''; }
+  function coverBg(p){
+    // Always show category gradient — it shows through if the image fails to load
+    return 'background:'+(CAT_COVERS[p.category]||CAT_COVERS.other);
+  }
+
+  function starRating(r){
+    r = parseFloat(r)||0;
+    var full = Math.floor(r), half = (r-full)>=.5?1:0, empty = 5-full-half;
+    return Array(full).fill('<i class="fas fa-star"></i>').join('')+
+           Array(half).fill('<i class="fas fa-star-half-alt"></i>').join('')+
+           Array(empty).fill('<i class="far fa-star"></i>').join('');
+  }
+
+  function renderCard(p, saved){
+    var _pimg=getPlaceImage(p);
+    return '<div class="pl-card" data-id="'+esc(p.id)+'" onclick="openPlaceDetail(\''+esc(p.id)+'\')">'+
+      '<div class="pl-card-img" style="'+coverBg(p)+'">'+(_pimg?'<img loading="lazy" decoding="async" src="'+esc(_pimg)+'" alt="" onerror="this.style.display=\'none\'">':'')+
+        '<span class="pl-card-cat-badge">'+esc(p.category||'Place')+'</span>'+
+        '<button class="pl-card-save'+(saved?' saved':'')+'" data-id="'+esc(p.id)+'" onclick="handleSave(event,\''+esc(p.id)+'\')" title="'+(saved?'Unsave':'Save')+'">'+
+          '<i class="'+(saved?'fas':'far')+' fa-bookmark"></i>'+
+        '</button>'+
+      '</div>'+
+      '<div class="pl-card-body">'+
+        '<div class="pl-card-name">'+esc(p.name)+'</div>'+
+        '<div class="pl-card-addr"><i class="fas fa-map-marker-alt"></i>'+esc(p.address||'Georgia')+'</div>'+
+        '<div class="pl-card-foot">'+
+          '<span class="pl-card-rating">'+(p.rating?starRating(p.rating):'<span style="color:#64748b;font-size:.75rem">No ratings yet</span>')+'</span>'+
+          '<span class="pl-card-reviews">'+(p.reviewCount?p.reviewCount+' reviews':'')+'</span>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function renderGrid(places){
+    var grid = document.getElementById('plGrid');
+    var q = _searchQ.toLowerCase();
+    var filtered = q ? places.filter(function(p){ return (p.name||'').toLowerCase().includes(q)||(p.address||'').toLowerCase().includes(q)||(p.description||'').toLowerCase().includes(q); }) : places;
+    document.getElementById('plCount').textContent = filtered.length + ' place' + (filtered.length!==1?'s':'');
+    if(!filtered.length){
+      grid.innerHTML = '<div class="pl-empty"><i class="fas fa-map-marked-alt"></i><h3>No places found</h3><p>Be the first to add a real place in Georgia!</p><button class="pl-empty-cta" onclick="openAddModal()"><i class="fas fa-plus"></i> Add Place</button></div>';
+    } else {
+      grid.innerHTML = filtered.map(function(p){ return renderCard(p, !!_savedIds[p.id]); }).join('');
+    }
+  }
+
+  function setCat(cat, el){
+    _currentCat = cat;
+    document.querySelectorAll('.pl-cat-btn').forEach(function(b){ b.classList.remove('active'); });
+    if(el) el.classList.add('active');
+    loadPlaces();
+  }
+
+  function loadPlaces(){
+    var grid = document.getElementById('plGrid');
+    grid.innerHTML = '<div class="pl-loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
+    if(_unsubPlaces){ _unsubPlaces(); _unsubPlaces=null; }
+    function run(){
+      var GS = window.GeoSocial;
+      var gf = window.GeoFirebase;
+      if(!GS || !gf || !gf.db){ setTimeout(run,200); return; }
+      _unsubPlaces = GS.listenPlaces({ category: _currentCat }, function(places){
+        _allPlaces = places;
+        loadSavedIds(function(){ renderGrid(places); });
+      });
+    }
+    run();
+  }
+
+  function loadSavedIds(cb){
+    var gf = window.GeoFirebase;
+    if(!gf||!gf.auth||!gf.auth.currentUser){ if(cb) cb(); return; }
+    var uid = gf.auth.currentUser.uid;
+    if(!gf.fs){ if(cb) cb(); return; }
+    gf.fs.getDocs(gf.fs.query(
+      gf.fs.collection(gf.db,'savedItems'),
+      gf.fs.where('userId','==',uid),
+      gf.fs.where('type','==','place'),
+      gf.fs.limit(200)
+    )).then(function(snap){
+      _savedIds = {};
+      snap.forEach(function(d){ var s=d.data(); if(s.itemId) _savedIds[s.itemId]=true; });
+      if(cb) cb();
+    }).catch(function(){ if(cb) cb(); });
+  }
+
+  function handleSave(e, placeId){
+    e.stopPropagation();
+    var GS = window.GeoSocial;
+    if(!GS) return;
+    var btn = e.currentTarget;
+    var isSaved = btn.classList.contains('saved');
+    GS.requireAuth(function(){
+      GS.toggleSaveItem('place', placeId, function(nowSaved){
+        _savedIds[placeId] = nowSaved;
+        btn.classList.toggle('saved', nowSaved);
+        btn.querySelector('i').className = nowSaved ? 'fas fa-bookmark' : 'far fa-bookmark';
+        btn.title = nowSaved ? 'Unsave' : 'Save';
+        var detSave = document.getElementById('detailSaveBtn');
+        if(detSave && detSave.dataset.id===placeId){
+          detSave.classList.toggle('active',nowSaved);
+          detSave.innerHTML='<i class="'+(nowSaved?'fas':'far')+' fa-bookmark"></i> '+(nowSaved?'Saved':'Save');
+        }
+      });
+    });
+  }
+
+  // ── ADD PLACE MODAL ──────────────────────────────────────────────────────
+  function previewPhoto(url){
+    var img = document.getElementById('plPhotoPreview');
+    if(!img) return;
+    if(url && url.startsWith('http')){ img.src=url; img.style.display='block'; img.onerror=function(){ img.style.display='none'; }; }
+    else img.style.display='none';
+  }
+
+  function plPickPhoto(){
+    var GS = window.GeoSocial;
+    if(!GS || !GS.uploadFile){ alert('Image upload is not available yet. Please paste a URL.'); return; }
+    var inp = document.createElement('input');
+    inp.type='file'; inp.accept='image/png,image/jpeg,image/webp,image/gif'; inp.style.display='none';
+    document.body.appendChild(inp);
+    inp.onchange = function(){
+      var file = inp.files && inp.files[0]; inp.remove();
+      if(!file) return;
+      var btn = document.getElementById('plPhotoUploadBtn');
+      var status = document.getElementById('plPhotoUploadStatus');
+      if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>'; }
+      if(status){ status.textContent='Uploading…'; status.style.display='block'; }
+      GS.uploadFile(file, 'places', function(pct){ if(status) status.textContent = pct + '%'; }).then(function(url){
+        if(url){
+          document.getElementById('plPhoto').value = url;
+          previewPhoto(url);
+          if(status){ status.textContent='Uploaded'; setTimeout(function(){ status.style.display='none'; }, 2000); }
+        } else {
+          if(status){ status.textContent='Upload failed. Try again.'; }
+        }
+      }).finally(function(){
+        if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-upload"></i> Upload'; }
+      });
+    };
+    inp.click();
+  }
+
+  function openAddModal(){
+    var GS = window.GeoSocial;
+    if(GS) GS.requireAuth(function(){ document.getElementById('plAddModal').classList.add('open'); });
+    else document.getElementById('plAddModal').classList.add('open');
+  }
+  function closeAddModal(){ document.getElementById('plAddModal').classList.remove('open'); }
+
+  function submitAddPlace(){
+    var GS = window.GeoSocial;
+    if(!GS) return;
+    var name = document.getElementById('plName').value.trim();
+    if(!name){ alert('Place name required'); return; }
+    var btn = document.getElementById('plSubmitBtn');
+    btn.disabled=true; btn.textContent='Adding…';
+    GS.createPlace({
+      name: name,
+      category: document.getElementById('plCatSel').value,
+      description: document.getElementById('plDesc').value.trim(),
+      address: document.getElementById('plAddress').value.trim(),
+      lat: parseFloat(document.getElementById('plLat').value)||null,
+      lng: parseFloat(document.getElementById('plLng').value)||null,
+      photoUrl: document.getElementById('plPhoto').value.trim()
+    }, function(id){
+      btn.disabled=false; btn.innerHTML='<i class="fas fa-map-pin"></i> Add Place';
+      closeAddModal();
+      ['plName','plDesc','plAddress','plLat','plLng','plPhoto'].forEach(function(i){ var el=document.getElementById(i); if(el) el.value=''; });
+      document.getElementById('plPhotoPreview').style.display='none';
+    });
+  }
+
+  document.getElementById('plAddBtn').onclick = openAddModal;
+  document.getElementById('plAddModal').addEventListener('click', function(e){ if(e.target===this) closeAddModal(); });
+
+  // ── PLACE DETAIL ─────────────────────────────────────────────────────────
+  function _renderPlaceDetail(p){
+    var box = document.getElementById('plDetailBox');
+    var saved = !!_savedIds[p.id]; var _dimg=getPlaceImage(p);
+    var _ciUrl = 'checkin.html?placeId='+encodeURIComponent(p.id||'')+'&placeName='+encodeURIComponent(p.name||'')+'&city='+encodeURIComponent(p.city||'')+'&category='+encodeURIComponent(p.category||'')+(p.lat&&p.lng?'&lat='+encodeURIComponent(p.lat)+'&lng='+encodeURIComponent(p.lng):'');
+    box.innerHTML =
+      '<div class="pl-detail-img" style="'+coverBg(p)+'">'+
+        (_dimg?'<img loading="lazy" decoding="async" src="'+esc(_dimg)+'" alt="" onerror="this.style.display=\'none\'">':'')+
+        '<button class="pl-detail-close" onclick="closePlaceDetail()">✕</button>'+
+      '</div>'+
+      '<div class="pl-detail-body">'+
+        '<div class="pl-detail-top">'+
+          '<div>'+
+            '<h2>'+esc(p.name)+'</h2>'+
+            '<div class="pl-detail-cat"><i class="fas fa-tag"></i> '+esc(p.category||'Place')+(p.city?' &nbsp;·&nbsp; <i class="fas fa-map-marker-alt"></i> '+esc(p.city):'')+' </div>'+
+          '</div>'+
+          '<div class="pl-detail-actions">'+
+            '<a class="pl-det-btn" href="'+esc(_ciUrl)+'"><i class="fas fa-location-dot"></i> Check In</a>'+
+            '<button class="pl-det-btn'+(saved?' active':'')+'" id="detailSaveBtn" data-id="'+esc(p.id)+'" onclick="handleSaveDetail(\''+esc(p.id)+'\')">'+
+              '<i class="'+(saved?'fas':'far')+' fa-bookmark"></i> '+(saved?'Saved':'Save')+
+            '</button>'+
+            '<button class="pl-det-btn" onclick="sharePlaceDetail(\''+esc(p.id)+'\',\''+esc(p.name)+'\')"><i class="fas fa-share-alt"></i> Share</button>'+
+            (p.lat&&p.lng?'<a class="pl-det-btn" href="https://maps.google.com/?q='+p.lat+','+p.lng+'" target="_blank" rel="noreferrer"><i class="fas fa-directions"></i> Directions</a>':(p.address?'<a class="pl-det-btn" href="https://maps.google.com/?q='+encodeURIComponent(p.address)+'" target="_blank" rel="noreferrer"><i class="fas fa-directions"></i> Directions</a>':''))+
+          '</div>'+
+        '</div>'+
+        (p.address?'<div class="pl-detail-addr"><i class="fas fa-map-marker-alt"></i> '+esc(p.address)+'</div>':'')+
+        '<div class="pl-detail-meta">'+
+          '<div><strong id="detRating">'+(p.rating||'—')+'</strong> Rating</div>'+
+          '<div><strong id="detReviewCount">'+(p.reviewCount||0)+'</strong> Reviews</div>'+
+          '<div><strong>'+(p.saveCount||0)+'</strong> Saves</div>'+
+        '</div>'+
+        (p.description?'<div class="pl-detail-desc">'+esc(p.description)+'</div>':'')+
+        '<p style="font-size:.78rem;color:#4b5563">Added by '+esc(p.creatorName||'User')+'</p>'+
+        '<div class="pl-gallery-section" id="plGallerySection" style="display:none">'+
+          '<div class="pl-gallery-head"><i class="fas fa-images"></i> Photos</div>'+
+          '<div class="pl-gallery" id="plGallery"></div>'+
+        '</div>'+
+        '<div class="pl-reviews-section" id="plReviewsSection">'+
+          '<div class="pl-reviews-head">Reviews</div>'+
+          '<div class="pl-review-form" id="plReviewForm">'+
+            '<div class="pl-stars-row" id="plStarsRow">'+
+              '<span class="pl-star" data-v="1">&#9733;</span>'+
+              '<span class="pl-star" data-v="2">&#9733;</span>'+
+              '<span class="pl-star" data-v="3">&#9733;</span>'+
+              '<span class="pl-star" data-v="4">&#9733;</span>'+
+              '<span class="pl-star" data-v="5">&#9733;</span>'+
+            '</div>'+
+            '<textarea class="pl-review-input" id="plReviewText" placeholder="Share your experience…" rows="3"></textarea>'+
+            '<button class="pl-review-submit" onclick="submitReview(\''+esc(p.id)+'\')"><i class="fas fa-paper-plane"></i> Post Review</button>'+
+          '</div>'+
+          '<div id="plReviewsList"><div style="padding:12px;color:#4b5563;font-size:.82rem">Loading reviews…</div></div>'+
+        '</div>'+
+        '<div class="pl-checkins-section">'+
+          '<div class="pl-checkins-head"><i class="fas fa-map-pin"></i> Recent Check-ins</div>'+
+          '<div id="plCheckinsList"><div style="padding:8px 0;color:#4b5563;font-size:.8rem"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div></div>'+
+        '</div>'+
+        '<div id="plVideosSection" style="margin-top:18px">'+
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'+
+            '<div style="font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b"><i class="fas fa-film" style="margin-right:5px"></i>Videos</div>'+
+            '<a href="map.html?mode=videos&place='+esc(p.id)+'" style="font-size:.72rem;color:#10b981;text-decoration:none;display:flex;align-items:center;gap:4px"><i class="fas fa-map"></i>View on Map</a>'+
+          '</div>'+
+          '<div id="plVideosList" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none"><div style="color:#64748b;font-size:.8rem;padding:8px 0"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div></div>'+
+        '</div>'+
+      '</div>';
+    initReviewStars();
+    loadReviews(p.id);
+    loadPlaceCheckins(p.id);
+    loadPlaceVideos(p.id);
+  }
+
+  function loadPlaceVideos(placeId){
+    var list = document.getElementById('plVideosList');
+    if(!list) return;
+    var gf = window.GeoFirebase;
+    if(!gf||!gf.fs||!gf.db){ list.innerHTML=''; return; }
+    var q = gf.fs.query(
+      gf.fs.collection(gf.db,'videos'),
+      gf.fs.where('placeId','==',placeId),
+      gf.fs.where('status','==','active'),
+      gf.fs.orderBy('createdAt','desc'),
+      gf.fs.limit(8)
+    );
+    gf.fs.getDocs(q).then(function(snap){
+      if(!list) return;
+      if(snap.empty){
+        document.getElementById('plVideosSection').style.display='none';
+        return;
+      }
+      var html='';
+      snap.forEach(function(d){
+        var v=Object.assign({id:d.id},d.data());
+        var tid=v.youtubeId||'';
+        var thumb=v.thumbnail||('https://i.ytimg.com/vi/'+tid+'/hqdefault.jpg');
+        html+='<a href="watch.html?v='+esc(v.id)+'" style="flex-shrink:0;width:150px;display:block;border-radius:8px;overflow:hidden;background:rgba(0,0,0,.08);border:1px solid rgba(0,0,0,.1);text-decoration:none">'+
+          '<div style="position:relative;padding-top:56.25%;background:#000"><img src="'+esc(thumb)+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" loading="lazy">'+
+          '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.65rem"><i class="fas fa-play"></i></div></div></div>'+
+          '<div style="padding:5px 7px;font-size:.72rem;font-weight:600;color:var(--gh-text,#eefcf6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(v.title||'Video')+'</div>'+
+          '</a>';
+      });
+      list.innerHTML=html;
+    }).catch(function(){
+      document.getElementById('plVideosSection').style.display='none';
+    });
+  }
+
+  function openPlaceDetail(placeId){
+    var overlay = document.getElementById('plDetailOverlay');
+    var box = document.getElementById('plDetailBox');
+    overlay.classList.add('open');
+    var p = _allPlaces.find(function(x){return x.id===placeId;});
+    if(p){ _renderPlaceDetail(p); return; }
+    box.innerHTML='<div style="padding:40px;text-align:center;color:#64748b"><i class="fas fa-circle-notch fa-spin" style="font-size:1.5rem"></i></div>';
+    var gf = window.GeoFirebase;
+    if(!gf||!gf.fs||!gf.db){ box.innerHTML='<p style="padding:24px;color:#94a3b8">Place not found.</p>'; return; }
+    gf.fs.getDoc(gf.fs.doc(gf.db,'places',placeId)).then(function(snap){
+      if(!snap.exists()){ box.innerHTML='<p style="padding:24px;color:#94a3b8">Place not found.</p>'; return; }
+      _renderPlaceDetail(Object.assign({id:snap.id},snap.data()));
+    }).catch(function(){ box.innerHTML='<p style="padding:24px;color:#94a3b8">Could not load place.</p>'; });
+  }
+
+  function initReviewStars(){
+    var stars = document.querySelectorAll('#plStarsRow .pl-star');
+    var _selectedRating = 0;
+    stars.forEach(function(star){
+      star.addEventListener('mouseover', function(){
+        var v = parseInt(this.dataset.v);
+        stars.forEach(function(s){ s.classList.toggle('hover', parseInt(s.dataset.v) <= v); });
+      });
+      star.addEventListener('mouseout', function(){
+        stars.forEach(function(s){ s.classList.remove('hover'); s.classList.toggle('active', parseInt(s.dataset.v) <= _selectedRating); });
+      });
+      star.addEventListener('click', function(){
+        _selectedRating = parseInt(this.dataset.v);
+        stars.forEach(function(s){ s.classList.toggle('active', parseInt(s.dataset.v) <= _selectedRating); });
+        document.getElementById('plStarsRow').dataset.rating = _selectedRating;
+      });
+    });
+  }
+
+  function submitReview(placeId){
+    var GS = window.GeoSocial;
+    if(!GS) return;
+    GS.requireAuth(function(){
+      var rating = parseInt(document.getElementById('plStarsRow').dataset.rating || 0);
+      if(!rating){ GS.toast('Please select a star rating', 'error'); return; }
+      var comment = document.getElementById('plReviewText').value.trim();
+      if(!comment){ GS.toast('Please write your experience', 'error'); return; }
+      var btn = document.querySelector('#plReviewForm .pl-review-submit');
+      if(btn){ btn.disabled=true; btn.textContent='Posting…'; }
+      GS.createPlaceReview(placeId, rating, comment, function(ok){
+        if(btn){ btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i> Post Review'; }
+        if(ok){
+          document.getElementById('plReviewText').value='';
+          document.getElementById('plStarsRow').dataset.rating='0';
+          document.querySelectorAll('#plStarsRow .pl-star').forEach(function(s){ s.classList.remove('active'); });
+        }
+      });
+    });
+  }
+
+  function loadReviews(placeId){
+    if(_unsubReviews){ _unsubReviews(); _unsubReviews=null; }
+    var GS = window.GeoSocial;
+    if(!GS) return;
+    _unsubReviews = GS.listenPlaceReviews(placeId, function(reviews){
+      var list = document.getElementById('plReviewsList');
+      if(!list) return;
+      var detRating = document.getElementById('detRating');
+      var detCount = document.getElementById('detReviewCount');
+      if(reviews.length){
+        var total = reviews.reduce(function(sum,r){ return sum+(Number(r.rating)||0); },0);
+        var avg = Math.round((total/reviews.length)*10)/10;
+        if(detRating) detRating.textContent = avg;
+        if(detCount) detCount.textContent = reviews.length;
+      } else {
+        if(detRating) detRating.textContent = '—';
+        if(detCount) detCount.textContent = '0';
+      }
+      if(!reviews.length){
+        list.innerHTML = '<p style="font-size:.8rem;color:#4b5563;padding:8px 0">No reviews yet. Be the first!</p>';
+        return;
+      }
+      var curUid = (window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser) ? window.GeoFirebase.auth.currentUser.uid : '';
+      list.innerHTML = reviews.map(function(r){
+        var stars = Array(5).fill(0).map(function(_,i){ return '<span style="color:'+(i<r.rating?'#f59e0b':'#374151')+'">&#9733;</span>'; }).join('');
+        var time = r.createdAt && r.createdAt.toDate ? new Intl.DateTimeFormat('en',{month:'short',day:'numeric',year:'numeric'}).format(r.createdAt.toDate()) : '';
+        var initials = (r.userName||'U').charAt(0).toUpperCase();
+        var avInner = r.userPhoto
+          ? '<img src="'+esc(r.userPhoto)+'" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.onerror=null;this.style.display=\'none\'">'
+          : esc(initials);
+        var canDelete = curUid && r.userId === curUid;
+        return '<div class="pl-review-item">'+
+          '<div class="pl-review-av">'+avInner+'</div>'+
+          '<div class="pl-review-body">'+
+            '<div class="pl-review-header">'+
+              '<span class="pl-review-name">'+esc(r.userName||'User')+'</span>'+
+              (canDelete?'<button class="pl-review-del" onclick="deleteReview(\''+esc(r.id)+'\')" title="Delete my review"><i class="fas fa-trash-alt"></i></button>':'')+
+            '</div>'+
+            '<div class="pl-review-stars">'+stars+'</div>'+
+            (r.comment?'<div class="pl-review-text">'+esc(r.comment)+'</div>':'')+
+            (time?'<div class="pl-review-time">'+time+'</div>':'')+
+          '</div>'+
+        '</div>';
+      }).join('');
+    });
+  }
+
+  function _relTime(v){
+    if(!v) return '';
+    var ms = typeof v.toMillis==='function' ? v.toMillis() : (v.seconds ? v.seconds*1000 : (typeof v==='number' ? v : Date.parse(v)||0));
+    var diff = Math.floor((Date.now()-ms)/1000);
+    if(diff<60) return 'just now';
+    if(diff<3600) return Math.floor(diff/60)+'m ago';
+    if(diff<86400) return Math.floor(diff/3600)+'h ago';
+    if(diff<604800) return Math.floor(diff/86400)+'d ago';
+    return new Date(ms).toLocaleDateString('en',{month:'short',day:'numeric'});
+  }
+
+  function loadPlaceCheckins(placeId){
+    var list = document.getElementById('plCheckinsList');
+    if(!list) return;
+    var gf = window.GeoFirebase;
+    if(!gf||!gf.fs||!gf.db){ list.innerHTML=''; return; }
+    gf.fs.getDocs(gf.fs.query(
+      gf.fs.collection(gf.db,'checkins'),
+      gf.fs.where('placeId','==',placeId),
+      gf.fs.limit(10)
+    )).then(function(snap){
+      if(snap.empty){
+        list.innerHTML='<p style="font-size:.8rem;color:#4b5563;padding:8px 0">No check-ins yet. <a href="checkin.html?placeId='+encodeURIComponent(placeId)+'" style="color:#10b981">Be the first!</a></p>';
+        return;
+      }
+      var items=[];
+      snap.forEach(function(d){ items.push(Object.assign({id:d.id},d.data())); });
+      items.sort(function(a,b){
+        function ms(v){ return v&&typeof v.toMillis==='function'?v.toMillis():(v&&v.seconds?v.seconds*1000:0); }
+        return ms(b.createdAt)-ms(a.createdAt);
+      });
+      list.innerHTML=items.slice(0,5).map(function(c){
+        var name=c.authorName||c.userName||c.displayName||'User';
+        var uid=c.userId||c.authorId||'';
+        var initials=(name[0]||'U').toUpperCase();
+        var avHref=uid?'profile.html?id='+encodeURIComponent(uid):'#';
+        var avInner=c.authorAvatar
+          ? '<img src="'+esc(c.authorAvatar)+'" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.onerror=null;this.style.display=\'none\'">'
+          : esc(initials);
+        var verBadge=c.verified?'<span style="color:#10b981;font-size:.65rem;margin-left:4px">✓</span>':'';
+        return '<div class="pl-checkin-item">'+
+          '<a href="'+esc(avHref)+'" class="pl-checkin-av">'+avInner+'</a>'+
+          '<div class="pl-checkin-body">'+
+            '<a href="'+esc(avHref)+'" class="pl-checkin-name">'+esc(name)+'</a>'+verBadge+
+            '<div class="pl-checkin-meta">'+_relTime(c.createdAt)+(c.checkinType&&c.checkinType!=='normal'?' · '+esc(c.checkinType):'')+'</div>'+
+            (c.caption?'<div class="pl-checkin-caption">'+esc(c.caption)+'</div>':'')+
+          '</div>'+
+          (c.photoUrl?'<img src="'+esc(c.photoUrl)+'" alt="" class="pl-checkin-photo" loading="lazy" onerror="this.onerror=null;this.style.display=\'none\'">':'')+
+        '</div>';
+      }).join('');
+      var photos = items.filter(function(c){ return c.photoUrl; }).map(function(c){ return c.photoUrl; });
+      renderPhotosGallery(photos);
+    }).catch(function(){ list.innerHTML=''; });
+  }
+
+  function sharePlaceDetail(placeId, placeName){
+    var url = location.origin + location.pathname + '?id=' + encodeURIComponent(placeId);
+    if(navigator.share){
+      navigator.share({ title: (placeName||'GeoHub Place'), url: url }).catch(function(){});
+    } else if(navigator.clipboard){
+      navigator.clipboard.writeText(url).then(function(){
+        var GS = window.GeoSocial;
+        if(GS && GS.toast) GS.toast('Link copied!');
+      }).catch(function(){ prompt('Copy this link:', url); });
+    } else {
+      prompt('Copy this link:', url);
+    }
+  }
+
+  function handleSaveDetail(placeId){
+    var GS = window.GeoSocial;
+    if(!GS) return;
+    GS.requireAuth(function(){
+      GS.toggleSaveItem('place', placeId, function(nowSaved){
+        _savedIds[placeId]=nowSaved;
+        var btn = document.getElementById('detailSaveBtn');
+        if(btn){ btn.classList.toggle('active',nowSaved); btn.innerHTML='<i class="'+(nowSaved?'fas':'far')+' fa-bookmark"></i> '+(nowSaved?'Saved':'Save'); }
+        var cardBtn = document.querySelector('.pl-card-save[data-id="'+placeId+'"]');
+        if(cardBtn){ cardBtn.classList.toggle('saved',nowSaved); cardBtn.querySelector('i').className=nowSaved?'fas fa-bookmark':'far fa-bookmark'; }
+      });
+    });
+  }
+
+  function closePlaceDetail(){
+    document.getElementById('plDetailOverlay').classList.remove('open');
+    if(_unsubReviews){ _unsubReviews(); _unsubReviews=null; }
+    var cl=document.getElementById('plCheckinsList'); if(cl) cl.innerHTML='';
+  }
+  document.getElementById('plDetailOverlay').addEventListener('click', function(e){ if(e.target===this) closePlaceDetail(); });
+
+  // ── SEARCH ───────────────────────────────────────────────────────────────
+  document.getElementById('plSearchInput').addEventListener('input', function(){
+    _searchQ = this.value;
+    renderGrid(_allPlaces);
+  });
+
+  // ── REVIEW DELETE ────────────────────────────────────────────────────────
+  function deleteReview(reviewId){
+    if(!confirm('Delete your review?')) return;
+    var gf = window.GeoFirebase;
+    if(!gf||!gf.fs||!gf.db) return;
+    gf.fs.deleteDoc(gf.fs.doc(gf.db,'placeReviews',reviewId)).catch(function(){
+      var GS = window.GeoSocial;
+      if(GS&&GS.toast) GS.toast('Could not delete review','error');
+    });
+  }
+
+  // ── PHOTO GALLERY ─────────────────────────────────────────────────────────
+  function renderPhotosGallery(photos){
+    var section = document.getElementById('plGallerySection');
+    var gallery = document.getElementById('plGallery');
+    if(!section||!gallery) return;
+    if(!photos||!photos.length){ section.style.display='none'; return; }
+    section.style.display='';
+    gallery.innerHTML = photos.map(function(url){
+      return '<img src="'+esc(url)+'" alt="" class="pl-gallery-img" loading="lazy"'+
+        ' onerror="this.onerror=null;this.remove()"'+
+        ' onclick="openLightbox(\''+esc(url)+'\')">';
+    }).join('');
+  }
+
+  // ── LIGHTBOX ──────────────────────────────────────────────────────────────
+  function openLightbox(url){
+    var lb = document.getElementById('plLightbox');
+    var img = document.getElementById('plLightboxImg');
+    if(!lb||!img) return;
+    img.src = url;
+    lb.classList.add('open');
+  }
+  function closeLightbox(){
+    var lb = document.getElementById('plLightbox');
+    if(lb){ lb.classList.remove('open'); document.getElementById('plLightboxImg').src=''; }
+  }
+
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape'){
+      closeLightbox();
+      closePlaceDetail();
+      closeAddModal();
+    }
+  });
+
+  // ── INIT ─────────────────────────────────────────────────────────────────
+  // GeoSocialReady fires twice: once for the stub, once for the real implementation.
+  // We only run the full init when Firebase DB is genuinely available.
+  var _initDone = false;
+  function tryInit(){
+    if(_initDone) return;
+    var gf = window.GeoFirebase;
+    if(!gf || !gf.db) return; // stub phase — skip
+    _initDone = true;
+    loadPlaces();
+    var urlId = new URLSearchParams(location.search).get('id');
+    if(urlId) openPlaceDetail(urlId);
+    if(gf.auth && gf.auth.onAuthStateChanged){
+      gf.auth.onAuthStateChanged(function(user){ if(user) loadSavedIds(function(){ renderGrid(_allPlaces); }); });
+    }
+  }
+
+  window.addEventListener('GeoSocialReady', tryInit);
+  tryInit(); // in case GeoSocial+Firebase are already ready
+
+  window.addEventListener('pagehide', function(){
+    if(_unsubPlaces){ try{ _unsubPlaces(); }catch(e){} _unsubPlaces=null; }
+    if(_unsubReviews){ try{ _unsubReviews(); }catch(e){} _unsubReviews=null; }
+  });
+</script>
+<!-- PHOTO LIGHTBOX -->
+<div class="pl-lightbox" id="plLightbox" onclick="closeLightbox()">
+  <img id="plLightboxImg" class="pl-lightbox-img" src="" alt="" onclick="event.stopPropagation()">
+</div>
+      <!-- Vite: 13 scripts → 1 chunk. See src/entries/places.js -->
+</body>
+</html>

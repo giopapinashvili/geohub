@@ -1,0 +1,47 @@
+
+/* ── Story Camera Overlay (Session 21) ── */
+.gh-cam-overlay{position:fixed;inset:0;z-index:99999;background:#000;display:flex;flex-direction:column}
+.gh-cam-view{flex:1;width:100%;object-fit:cover}
+.gh-cam-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;position:absolute;left:0;right:0}
+.gh-cam-top{top:0;background:linear-gradient(to bottom,rgba(0,0,0,.6),transparent)}
+.gh-cam-bot{bottom:0;justify-content:center;background:linear-gradient(to top,rgba(0,0,0,.6),transparent)}
+.gh-cam-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.2);border:none;color:#fff;font-size:1.1rem;cursor:pointer;display:grid;place-items:center;backdrop-filter:blur(4px)}
+.gh-cam-btn:hover{background:rgba(255,255,255,.35)}
+.gh-cam-shutter{width:72px;height:72px;border-radius:50%;background:#fff;border:4px solid rgba(255,255,255,.5);cursor:pointer;position:relative;display:grid;place-items:center;transition:transform .1s}
+.gh-cam-shutter:active{transform:scale(.92)}
+.gh-cam-shutter-ring{width:56px;height:56px;border-radius:50%;background:#fff;border:3px solid #e2e8f0;display:block}
+/* ── Session 22: Story Share to Feed ── */
+.gh-story-share-feed-btn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:20px;color:#fff;font-size:.82rem;font-weight:600;padding:6px 14px;cursor:pointer;transition:background .15s;margin:4px auto 0}
+.gh-story-share-feed-btn:hover{background:rgba(255,255,255,.22)}
+.gh-story-share-preview{border:1px solid var(--gh-border,rgba(255,255,255,.12));border-radius:14px;overflow:hidden;background:var(--gh-surface,#1e293b)}
+.gh-ssp-head{display:flex;align-items:center;gap:8px;padding:10px 12px}
+.gh-ssp-av{width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--gh-border);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#94a3b8}
+.gh-ssp-av-init{background:rgba(99,102,241,.2);color:#818cf8}
+.gh-ssp-name{font-size:.85rem;font-weight:700;display:block;color:var(--text-primary,#e2e8f0)}
+.gh-ssp-label{font-size:.72rem;color:#64748b;display:flex;align-items:center;gap:4px}
+.gh-ssp-media{width:100%;max-height:180px;object-fit:cover;display:block}
+.gh-ssp-bg{min-height:80px;display:flex;align-items:center;justify-content:center;padding:16px;font-weight:700;font-size:1rem;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4)}
+.gh-ssp-txt{padding:10px 12px;font-size:.85rem;color:var(--text-secondary,#94a3b8)}
+.gh-shared-story-embed{border:1px solid var(--gh-border);border-radius:14px;overflow:hidden;margin-bottom:8px;background:var(--gh-surface)}
+.gh-sse-head{display:flex;align-items:center;gap:8px;padding:10px 12px}
+.gh-sse-av{width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--gh-border)}
+.gh-sse-av-init{background:rgba(99,102,241,.2);color:#818cf8;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700}
+.gh-sse-name{font-size:.82rem;font-weight:700;display:block}
+.gh-sse-label{font-size:.7rem;color:#64748b;display:flex;align-items:center;gap:3px}
+.gh-sse-img{width:100%;max-height:160px;object-fit:cover;display:block}
+.gh-sse-bg{min-height:70px;display:flex;align-items:center;justify-content:center;padding:12px;font-weight:700;font-size:.9rem;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4)}
+.gh-sse-txt{padding:8px 12px;font-size:.82rem;color:var(--text-secondary,#94a3b8)}
+/* ── Session 23: Story Location Sticker ── */
+.gh-story-loc-badge-row{display:flex;align-items:center;gap:6px;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);border-radius:20px;padding:5px 12px}
+.gh-story-loc-sticker{position:absolute;bottom:18%;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:20px;padding:6px 16px;color:#fff;font-size:.85rem;font-weight:700;display:flex;align-items:center;gap:6px;pointer-events:none;z-index:6;white-space:nowrap;animation:gh-emoji-pop .3s cubic-bezier(.34,1.56,.64,1) both}
+.gh-story-loc-sticker i{color:#10b981}
+/* ── Session 27: Scheduled Posts Manager ── */
+.gh-sched-widget .gh-section-title{gap:0}
+.gh-sched-manage-btn{background:none;border:none;color:#10b981;font-size:.8rem;cursor:pointer;display:flex;align-items:center;gap:4px;padding:2px 4px;border-radius:6px;transition:background .15s}
+.gh-sched-manage-btn:hover{background:rgba(16,185,129,.1)}
+.gh-sched-list{display:flex;flex-direction:column;gap:8px}
+.gh-sched-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:var(--gh-surface,#1e293b);border-radius:12px;border:1px solid var(--gh-border)}
+.gh-sched-row-info{flex:1;min-width:0}
+.gh-sched-time{font-size:.72rem;color:#10b981;font-weight:600;display:flex;align-items:center;gap:4px;margin-bottom:3px}
+.gh-sched-preview{font-size:.82rem;color:var(--text-secondary,#94a3b8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gh-sched-row-actions{display:flex;gap:6px;flex-shrink:0}

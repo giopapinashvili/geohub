@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+  <link rel="dns-prefetch" href="https://firebase.googleapis.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#10b981">
+  <title>Rewards — GeoHub</title>
+  <!-- SEO ─────────────────────────────────────────────── -->
+  <meta name="description" content="Earn GeoPoints for every check-in, post, and activity. Unlock rewards, badges, and exclusive partner offers on GeoHub.">
+  <link rel="canonical" href="https://geohub.ge/rewards.html">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="GeoHub">
+  <meta property="og:title" content="Rewards — GeoHub">
+  <meta property="og:description" content="Earn GeoPoints for every check-in, post, and activity. Unlock rewards, badges, and exclusive partner offers on GeoHub.">
+  <meta property="og:url" content="https://geohub.ge/rewards.html">
+  <meta property="og:image" content="https://geohub.ge/icons/icon-512.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="GeoHub — Discover Georgia">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Rewards — GeoHub">
+  <meta name="twitter:description" content="Earn GeoPoints for every check-in, post, and activity. Unlock rewards, badges, and exclusive partner offers on GeoHub.">
+  <meta name="twitter:image" content="https://geohub.ge/icons/icon-512.png">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"></noscript>
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <script type="module" crossorigin src="/assets/rewards-DxIovwvt.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/responsive-polish-BO79aqv7.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase-config-CGKVrgHh.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-i18n-BbqPU8Gy.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-schema-kY2sMGH-.js">
+  <link rel="modulepreload" crossorigin href="/assets/config-DSeD8I2H.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-CYAfAwpP.js">
+  <link rel="modulepreload" crossorigin href="/assets/account-BJSGhbLy.js">
+  <link rel="modulepreload" crossorigin href="/assets/firestore-social-lVyxRoWc.js">
+  <link rel="modulepreload" crossorigin href="/assets/mobile-nav-DsKLv3RI.js">
+  <link rel="modulepreload" crossorigin href="/assets/analytics-DyGaP85h.js">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
+  <link rel="stylesheet" crossorigin href="/assets/rewards-CAfJ9jVb.css">
+  <link rel="stylesheet" crossorigin href="/assets/styles-DkNdvQG3.css">
+  <link rel="stylesheet" crossorigin href="/assets/navbar-D8jKRRC5.css">
+  <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-DJnMDTGu.css">
+  <link rel="stylesheet" crossorigin href="/assets/mobile-nav-DC9Hwftv.css">
+</head>
+<body class="rw-page" data-gh-page="rewards">
+
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="navbar-brand"><div class="logo-icon">🌍</div><span class="logo-text">Geo<span class="logo-geo">Hub</span></span></a>
+  <ul class="navbar-links"></ul>
+  <div class="navbar-actions"></div>
+  <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu"></div>
+
+<div class="rw-inner">
+
+  <!-- Balance Hero -->
+  <div class="rw-hero">
+    <div class="rw-hero-left">
+      <div class="rw-hero-label"><i class="fas fa-coins" style="margin-right:5px;color:#10b981"></i><span data-i18n="rw_balance">GeoPoints Balance</span></div>
+      <div class="rw-hero-balance" id="rwBalance">— pts</div>
+      <div class="rw-hero-sub" id="rwBalanceSub" data-i18n="loading">Loading your balance…</div>
+    </div>
+    <div class="rw-hero-actions">
+      <button class="rw-btn-primary" data-send-points>
+        <i class="fas fa-paper-plane"></i> <span data-i18n="rw_send">Send Points</span>
+      </button>
+      <a href="profile.html#tab-rewards" class="rw-btn-ghost">
+        <i class="fas fa-history"></i> <span data-i18n="rw_history">History</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Info strip -->
+  <div style="font-size:.75rem;color:#64748b;margin-bottom:20px;display:flex;align-items:center;gap:6px">
+    <i class="fas fa-info-circle" style="color:#3b82f6"></i>
+    <span data-i18n="rw_info">GeoPoints are non-cash loyalty rewards. They cannot be withdrawn or exchanged for real money.</span>
+  </div>
+
+  <!-- Category Filters -->
+  <div class="rw-filters">
+    <button class="rw-filter-btn active" data-rw-filter="all" data-i18n="rw_all">All Rewards</button>
+    <button class="rw-filter-btn" data-rw-filter="food_drink" data-i18n="rw_food">Food &amp; Drink</button>
+    <button class="rw-filter-btn" data-rw-filter="experience" data-i18n="rw_experience">Experience</button>
+    <button class="rw-filter-btn" data-rw-filter="shopping" data-i18n="rw_shopping">Shopping</button>
+    <button class="rw-filter-btn" data-rw-filter="entertainment" data-i18n="rw_entertainment">Entertainment</button>
+    <button class="rw-filter-btn" data-rw-filter="travel" data-i18n="rw_travel">Travel</button>
+  </div>
+
+  <!-- Rewards Grid -->
+  <div class="rw-section-title"><i class="fas fa-gift" style="margin-right:5px"></i><span data-i18n="rw_available">Available Rewards</span></div>
+  <div class="rw-grid" id="rwGrid">
+    <div class="rw-empty">
+      <i class="fas fa-spinner fa-spin"></i>
+      <h3 data-i18n="rw_loading">Loading rewards…</h3>
+      <p data-i18n="loading">Fetching the latest rewards from GeoHub.</p>
+    </div>
+  </div>
+
+
+  <!-- Pending Gifts -->
+  <div id="rwGiftsPanel" style="display:none;margin-top:32px">
+    <div class="rw-section-title"><i class="fas fa-envelope-open-text" style="margin-right:5px;color:#10b981"></i><span data-i18n="rw_pending_gifts">Pending Gifts</span></div>
+    <div class="rw-gift-list" id="rwGiftsList"></div>
+  </div>
+
+  <!-- My Coupons -->
+  <div id="rwCouponsPanel" style="display:none;margin-top:32px">
+    <div class="rw-section-title"><i class="fas fa-ticket-alt" style="margin-right:5px;color:#3b82f6"></i><span data-i18n="rw_my_coupons">My Coupons</span></div>
+    <div class="rw-coupon-list" id="rwCouponsList"></div>
+  </div>
+
+  <!-- Business Coupons (visible only to business owners) -->
+  <div id="rwBizCouponsPanel" style="display:none;margin-top:32px">
+    <div class="rw-section-title"><i class="fas fa-store" style="margin-right:5px;color:#f59e0b"></i><span data-i18n="rw_biz_coupons">Coupons at My Business</span></div>
+    <div id="rwBizCouponsList"></div>
+  </div>
+
+</div><!-- /rw-inner -->
+
+<!-- Toast -->
+<div class="rw-toast" id="rwToast"></div>
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <!-- Vite: 12 scripts → 1 chunk. See src/entries/rewards.js -->
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Video Reports</title>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <meta name="theme-color" content="#10b981">
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <style>
+    body { padding: 0; margin: 0; }
+    .adm-wrap { max-width: 1100px; margin: 0 auto; padding: 32px 16px 80px; }
+    .adm-header { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; flex-wrap: wrap; }
+    .adm-header h1 { font-size: 1.4rem; font-weight: 800; margin: 0; color: var(--text-primary, #f1f5f9); }
+    .adm-header h1 i { color: #ef4444; margin-right: 8px; }
+    .adm-badge { background: rgba(239,68,68,.15); color: #ef4444; border: 1px solid rgba(239,68,68,.25); border-radius: 20px; padding: 2px 10px; font-size: .75rem; font-weight: 700; }
+    .adm-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+    .adm-tab { padding: 7px 16px; border-radius: 20px; border: 1px solid var(--gh-border, rgba(255,255,255,.12)); background: transparent; color: var(--text-secondary, #cbd5e1); font-size: .83rem; cursor: pointer; transition: all .15s; }
+    .adm-tab.active, .adm-tab:hover { background: var(--green, #10b981); color: #000; border-color: transparent; }
+    .adm-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--gh-border, rgba(255,255,255,.1)); }
+    .adm-table { width: 100%; border-collapse: collapse; font-size: .83rem; }
+    .adm-table th { background: var(--gh-card, #1e2535); color: var(--text-muted, #94a3b8); font-weight: 600; font-size: .73rem; text-transform: uppercase; letter-spacing: .04em; padding: 10px 14px; text-align: left; white-space: nowrap; }
+    .adm-table td { padding: 11px 14px; border-top: 1px solid var(--gh-border, rgba(255,255,255,.07)); color: var(--text-primary, #f1f5f9); vertical-align: middle; }
+    .adm-table tr:hover td { background: rgba(255,255,255,.03); }
+    .adm-vid-thumb { width: 64px; height: 36px; object-fit: cover; border-radius: 5px; display: block; }
+    .adm-reason-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: .7rem; font-weight: 600; background: rgba(239,68,68,.12); color: #ef4444; border: 1px solid rgba(239,68,68,.2); }
+    .adm-status-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: .7rem; font-weight: 600; }
+    .adm-status-badge.pending  { background: rgba(251,191,36,.12); color: #fbbf24; border: 1px solid rgba(251,191,36,.25); }
+    .adm-status-badge.resolved { background: rgba(16,185,129,.12); color: #10b981; border: 1px solid rgba(16,185,129,.25); }
+    .adm-status-badge.dismissed { background: rgba(148,163,184,.1); color: #94a3b8; border: 1px solid rgba(148,163,184,.2); }
+    .adm-actions { display: flex; gap: 5px; flex-wrap: nowrap; }
+    .adm-btn { padding: 5px 10px; border-radius: 6px; border: none; font-size: .75rem; font-weight: 600; cursor: pointer; transition: opacity .15s; white-space: nowrap; }
+    .adm-btn:hover { opacity: .8; }
+    .adm-btn.hide   { background: rgba(251,191,36,.2); color: #fbbf24; }
+    .adm-btn.remove { background: rgba(239,68,68,.2); color: #ef4444; }
+    .adm-btn.restore{ background: rgba(16,185,129,.15); color: #10b981; }
+    .adm-btn.dismiss{ background: rgba(148,163,184,.1); color: #94a3b8; }
+    .adm-empty { text-align: center; padding: 48px 16px; color: var(--text-muted, #94a3b8); font-size: .9rem; }
+    .adm-empty i { display: block; font-size: 2.5rem; margin-bottom: 12px; }
+    .adm-note-col { max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted, #94a3b8); font-size: .75rem; }
+    .adm-access-denied { text-align: center; padding: 80px 16px; color: var(--text-muted, #94a3b8); }
+    .adm-access-denied i { display: block; font-size: 3rem; margin-bottom: 16px; color: #ef4444; }
+    .adm-search-row { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+    .adm-search-input { flex: 1; min-width: 180px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--gh-border, rgba(255,255,255,.12)); background: var(--gh-card, #1e2535); color: var(--text-primary, #f1f5f9); font-size: .84rem; }
+    .adm-search-input::placeholder { color: var(--text-muted, #94a3b8); }
+    .adm-filter-select { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--gh-border, rgba(255,255,255,.12)); background: var(--gh-card, #1e2535); color: var(--text-secondary, #cbd5e1); font-size: .82rem; cursor: pointer; }
+    .adm-creator-link { color: var(--green, #10b981); text-decoration: none; font-size: .75rem; }
+    .adm-creator-link:hover { text-decoration: underline; }
+    .adm-action-link { color: var(--green, #10b981); text-decoration: none; font-size: .72rem; display: inline-flex; align-items: center; gap: 3px; }
+    .adm-action-link:hover { text-decoration: underline; }
+  </style>
+  <script type="module" crossorigin src="/assets/admin-videos-BNKNloBA.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase-config-CGKVrgHh.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-i18n-BbqPU8Gy.js">
+  <link rel="modulepreload" crossorigin href="/assets/account-BJSGhbLy.js">
+  <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-DJnMDTGu.css">
+  <link rel="stylesheet" crossorigin href="/assets/videos-p31SHBvW.css">
+</head>
+<body data-gh-page="admin-videos">
+  <noscript>GeoHub requires JavaScript.</noscript>
+
+        
+  <div class="adm-wrap" id="admWrap">
+    <div class="adm-header">
+      <h1><i class="fas fa-shield-halved"></i>ვიდეო საჩივრები</h1>
+      <span class="adm-badge" id="admPendingCount">—</span>
+    </div>
+    <div class="adm-search-row">
+      <input class="adm-search-input" id="admSearch" type="search" placeholder="ძიება სათაური, კრეატორი…">
+      <select class="adm-filter-select" id="admReasonFilter">
+        <option value="">ყველა მიზეზი</option>
+        <option value="spam">სპამი</option>
+        <option value="inappropriate">შეუფერებელი</option>
+        <option value="misleading">შეცდომაში შემყვანი</option>
+        <option value="copyright">საავტ. უფლება</option>
+        <option value="other">სხვა</option>
+      </select>
+    </div>
+    <div class="adm-tabs" id="admTabs">
+      <button class="adm-tab active" data-adm-tab="pending">განხილვაში</button>
+      <button class="adm-tab" data-adm-tab="resolved">გადაწყვეტილი</button>
+      <button class="adm-tab" data-adm-tab="dismissed">უარყოფილი</button>
+      <button class="adm-tab" data-adm-tab="all">ყველა</button>
+    </div>
+    <div class="adm-table-wrap">
+      <table class="adm-table">
+        <thead>
+          <tr>
+            <th>ვიდეო</th>
+            <th>კრეატორი</th>
+            <th>მიზეზი / მომხმარებელი</th>
+            <th>შენიშვნა</th>
+            <th>ბმულები</th>
+            <th>სტატუსი</th>
+            <th>მოქმედება</th>
+          </tr>
+        </thead>
+        <tbody id="admTableBody">
+          <tr><td colspan="7"><div class="adm-empty"><i class="fas fa-spinner fa-spin"></i>იტვირთება...</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <!-- Vite: 4 scripts → 1 chunk. See src/entries/admin-videos.js -->
+</body>
+</html>

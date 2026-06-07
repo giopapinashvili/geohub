@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+  <link rel="dns-prefetch" href="https://firebase.googleapis.com">
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#10b981">
+  <title>Profile — GeoHub</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
+  <style>
+    /* Bridge: map legacy CSS variables → GH design tokens */
+    :root {
+      --navbar-height: var(--gh-topbar-h, 78px);
+      --green: var(--gh-green);
+      --gold: var(--gh-yellow);
+      --blue: var(--gh-blue);
+      --bg-0: var(--gh-bg);
+      --bg-1: var(--gh-bg);
+      --bg-card: var(--gh-card);
+      --bg-elevated: var(--gh-card-soft);
+      --text-primary: var(--gh-text);
+      --text-secondary: var(--gh-muted);
+      --text-muted: var(--gh-muted);
+      --border: var(--gh-border);
+      --border-subtle: var(--gh-border);
+      --border-emphasis: var(--gh-border-strong);
+      --radius-md: var(--gh-radius-md);
+      --radius-full: var(--gh-radius-full);
+      --radius-lg: var(--gh-radius-lg);
+      --radius-xl: var(--gh-radius-xl);
+      --transition: var(--gh-dur-fast) var(--gh-ease);
+    }
+  </style>
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <script type="module" crossorigin src="/assets/profile-CEpd9Z3O.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/responsive-polish-BO79aqv7.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase-config-CGKVrgHh.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-i18n-BbqPU8Gy.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-schema-kY2sMGH-.js">
+  <link rel="modulepreload" crossorigin href="/assets/config-DSeD8I2H.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-CYAfAwpP.js">
+  <link rel="modulepreload" crossorigin href="/assets/account-BJSGhbLy.js">
+  <link rel="modulepreload" crossorigin href="/assets/firestore-social-lVyxRoWc.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-social-redesign-ChTko2Gc.js">
+  <link rel="modulepreload" crossorigin href="/assets/story-editor-yJAiz1Ls.js">
+  <link rel="modulepreload" crossorigin href="/assets/moderation-C9mkHVWf.js">
+  <link rel="modulepreload" crossorigin href="/assets/chat-popup-MADaMnFN.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-calls-DqDOBgOW.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-group-calls-Ck1zIhcT.js">
+  <link rel="modulepreload" crossorigin href="/assets/mobile-nav-DsKLv3RI.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-production-v6-C2WXOOR-.js">
+  <link rel="modulepreload" crossorigin href="/assets/geo-actors-DCdcg0VE.js">
+  <link rel="modulepreload" crossorigin href="/assets/account-switcher-Bs0W5qNE.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-production-stabilization-v1-D9brtDwk.js">
+  <link rel="modulepreload" crossorigin href="/assets/push-notifications-wdsLxQpN.js">
+  <link rel="modulepreload" crossorigin href="/assets/analytics-DyGaP85h.js">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
+  <link rel="stylesheet" crossorigin href="/assets/profile-Ops0FP62.css">
+  <link rel="stylesheet" crossorigin href="/assets/styles-DkNdvQG3.css">
+  <link rel="stylesheet" crossorigin href="/assets/components-Bjyn1ntR.css">
+  <link rel="stylesheet" crossorigin href="/assets/navbar-D8jKRRC5.css">
+  <link rel="stylesheet" crossorigin href="/assets/account-switcher-B6z_cLE_.css">
+  <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-DJnMDTGu.css">
+  <link rel="stylesheet" crossorigin href="/assets/moderation-CB6dVgQ2.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+</head>
+<body class="page-profile" data-gh-page="profile" data-profile-mode="user">
+
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="navbar-brand"><div class="logo-icon">🌍</div><span class="logo-text">Geo<span class="logo-geo">Hub</span></span></a>
+  <ul class="navbar-links"></ul>
+  <div class="navbar-actions"></div>
+  <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu"></div>
+
+<!-- COVER -->
+<div class="profile-cover" style="margin-top:var(--navbar-height,68px)">
+  <div class="cover-grid"></div>
+  <div class="cover-actions">
+    <button class="cover-btn"><i class="fas fa-share-alt"></i> Share</button>
+    <button class="cover-btn primary"><i class="fas fa-user-plus"></i> Follow</button>
+  </div>
+</div>
+
+<!-- IDENTITY HEADER -->
+<div class="profile-identity-section">
+  <div class="profile-identity-inner">
+
+    <!-- Avatar + Name Block -->
+    <div class="profile-hero-left">
+      <div class="profile-avatar-wrap">
+        <img class="profile-avatar" src="https://api.dicebear.com/7.x/initials/svg?seed=GeoHub" alt="Profile" loading="lazy" decoding="async">
+        <div class="avatar-level">1</div>
+      </div>
+      <div class="profile-name-block">
+        <div class="profile-name">Loading profile…</div>
+        <div class="profile-handle"></div>
+        <div class="profile-bio"></div>
+        <div class="trust-badges"></div>
+      </div>
+    </div>
+
+    <!-- Stats + Actions -->
+    <div class="profile-hero-right">
+      <div class="profile-stats-bar">
+        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label" data-i18n="profile_stat_places">Places</div></div>
+        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label" style="color:var(--green)" data-i18n="profile_friends">Friends</div></div>
+        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label" data-i18n="profile_stat_follow">Followers</div></div>
+        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label" data-i18n="profile_stat_fwing">Following</div></div>
+        <div class="pstat"><div class="pstat-value" style="color:var(--green)">0</div><div class="pstat-label">GeoPoints</div></div>
+        <div class="pstat"><div class="pstat-value" style="color:var(--gold)">0</div><div class="pstat-label" data-i18n="profile_stat_trust">Trust Score</div></div>
+      </div>
+      <div class="profile-actions">
+        <button class="btn btn-ghost btn-sm"><i class="fas fa-envelope"></i></button>
+        <button class="btn btn-ghost btn-sm"><i class="fas fa-share-alt"></i></button>
+        <button class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Follow</button>
+        <button class="btn btn-ghost btn-sm" id="cfManageBtn" style="display:none;color:#22c55e" title="Close Friends"><i class="fas fa-star"></i> <span data-i18n="profile_close_fr">Close Friends</span></button>
+        <a href="lifegraph.html" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none"><i class="fas fa-chart-line"></i> <span data-i18n="profile_life_graph">Life Graph</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- XP Progress -->
+  <div class="xp-progress-section">
+    <div class="xp-left">
+      <div class="xp-level-pill"><i class="fas fa-bolt"></i> Level 1</div>
+      <span class="xp-title-text">New Explorer</span>
+    </div>
+    <div class="xp-bar-wrap">
+      <div class="xp-bar-track">
+        <div class="xp-bar-fill" style="width:0%"></div>
+      </div>
+      <div class="xp-bar-numbers">0 / 1000 XP</div>
+    </div>
+    <div class="xp-right">
+      <span class="xp-to-next">1000 XP to Level 2</span>
+    </div>
+  </div>
+
+  <!-- Profile Tabs -->
+  <div class="profile-tabs" id="profileTabs">
+    <div class="ptab active" data-tab="posts"><span data-i18n="profile_posts">პოსტები</span> <span class="tab-count">0</span></div>
+    <div class="ptab" data-tab="gallery"><span data-i18n="profile_gallery">ფოტო</span> <span class="tab-count"></span></div>
+    <div class="ptab" data-tab="friends"><span data-i18n="profile_friends">მეგობრები</span> <span class="tab-count">0</span></div>
+    <div class="ptab" data-tab="about"><span data-i18n="profile_about">ინფო</span></div>
+    <!-- hidden tabs — shown via "მეტი" -->
+    <div class="ptab ptab-extra" data-tab="checkins" style="display:none"><span data-i18n="profile_checkins">Check-ins</span> <span class="tab-count">0</span></div>
+    <div class="ptab ptab-extra" data-tab="businesses" style="display:none"><span data-i18n="nav_business">ბიზნესები</span> <span class="tab-count">0</span></div>
+    <div class="ptab ptab-extra" data-tab="videos" style="display:none"><span data-i18n="nav_videos">ვიდეო</span> <span class="tab-count"></span></div>
+    <div class="ptab ptab-extra" data-tab="badges" style="display:none"><span data-i18n="profile_badges">ბეჯები</span> <span class="tab-count">0</span></div>
+    <div class="ptab ptab-extra" data-tab="travel" style="display:none"><span data-i18n="profile_travel">✈️ Travel</span> <span class="tab-count"></span></div>
+    <div class="ptab ptab-extra" data-tab="saved" style="display:none"><span data-i18n="profile_saved">შენახული</span> <span class="tab-count"></span></div>
+    <div class="ptab ptab-extra" data-tab="archive" id="archiveTabBtn" style="display:none"><span data-i18n="profile_archive_tab">📁 Archive</span> <span class="tab-count" id="archiveTabCount"></span></div>
+    <div class="ptab ptab-more-btn" id="ptabMoreBtn" onclick="window.toggleExtraTabs()">მეტი ▾</div>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT: sidebar-left + main-right -->
+<div class="profile-layout">
+
+  <!-- ── LEFT SIDEBAR ── -->
+  <div class="profile-sidebar">
+
+    <!-- Intro Card -->
+    <div class="sidebar-card">
+      <div class="sidebar-card-title" data-i18n="profile_intro_title">Intro</div>
+      <div class="intro-item"><i class="fas fa-map-marker-alt"></i> No location set</div>
+      <div class="intro-item"><i class="fas fa-hiking"></i> Explorer</div>
+      <div class="intro-item"><i class="fas fa-calendar-alt"></i> Join date not set</div>
+      <div class="intro-item"><i class="fas fa-globe"></i> No public username set</div>
+      <div class="intro-divider"></div>
+      <div class="followers-preview-row">
+        <div class="followers-thumbs"></div>
+        <div class="followers-preview-text">No followers yet</div>
+      </div>
+    </div>
+
+    <!-- Activity Identity -->
+    <div class="sidebar-card">
+      <div class="sidebar-card-title" data-i18n="profile_activity_id">Activity Identity</div>
+      <div class="explorer-type">🏔️ Explorer</div>
+      <div class="lifestyle-scores"></div>
+      <div class="fav-cats"></div>
+    </div>
+
+    <!-- Social Proof Mini Stats -->
+    <div class="sidebar-card">
+      <div class="sidebar-card-title" data-i18n="profile_social_proof">Social Proof</div>
+      <div class="social-proof-grid">
+        <div class="sp-card">
+          <div class="sp-icon green">🏙️</div>
+          <div><div id="spCitiesVal" class="sp-value">0</div><div class="sp-label" data-i18n="profile_sp_cities">Cities</div></div>
+        </div>
+        <div class="sp-card">
+          <div class="sp-icon blue">👥</div>
+          <div><div id="spFriendsVal" class="sp-value">0</div><div class="sp-label" data-i18n="profile_sp_invited">Invited</div></div>
+        </div>
+        <div class="sp-card">
+          <div class="sp-icon gold">👍</div>
+          <div><div id="spLikesVal" class="sp-value">0</div><div class="sp-label" data-i18n="profile_sp_likes">Likes</div></div>
+        </div>
+        <div class="sp-card">
+          <div class="sp-icon purple">🎉</div>
+          <div><div id="spGroupsVal" class="sp-value">0</div><div class="sp-label" data-i18n="profile_sp_groups">Groups</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Most Liked Review -->
+    <div id="mostLikedReviewCard" class="sidebar-card liked-review-card"></div>
+
+    <!-- Mini Wallet -->
+    <div class="sidebar-card">
+      <div class="mini-wallet-header">
+        <div>
+          <div class="mini-wallet-pts">0 pts</div>
+          <div class="mini-wallet-label">GeoPoints · New Tier</div>
+        </div>
+        <a href="#" class="btn btn-primary btn-xs" onclick="switchTab('rewards');return false" data-i18n="profile_wallet_btn">Wallet</a>
+      </div>
+      <div class="mini-wallet-progress"><div class="mini-wallet-fill"></div></div>
+      <div class="mini-wallet-sub"><strong>0 pts</strong> earned · no active coupons</div>
+    </div>
+
+    <!-- Trust Score -->
+    <div class="sidebar-card">
+      <div class="sidebar-card-title" data-i18n="profile_trust_title">Trust &amp; Verification</div>
+      <div class="trust-circle-wrap">
+        <div class="trust-circle">
+          <div class="trust-circle-inner">
+            <div class="trust-number">0</div>
+            <div class="trust-max">/100</div>
+          </div>
+        </div>
+        <div>
+          <div class="trust-info-label">New account</div>
+          <div class="trust-info-sub">Trust score appears after real activity</div>
+        </div>
+      </div>
+      <div class="trust-items" id="trustItemsList">
+        <div class="trust-item ok"><i class="fas fa-check-circle"></i> Profile created</div>
+        <div class="trust-item warn"><i class="fas fa-camera"></i> No camera proofs yet</div>
+        <div class="trust-item warn"><i class="fas fa-map-marker-alt"></i> No real check-ins yet</div>
+        <div class="trust-item warn"><i class="fas fa-phone"></i> Phone not verified</div>
+        <div class="trust-item warn"><i class="fas fa-id-card"></i> ID not verified yet</div>
+      </div>
+    </div>
+
+    <!-- Georgia Discovery Map -->
+    <div class="sidebar-card geo-map-widget">
+      <div class="geo-map-widget-title"><span data-i18n="profile_disc_map">Discovery Map</span> <span style="color:var(--green);font-weight:700" id="citiesVisited">0 cities</span></div>
+      <div class="geo-map-container">
+        <div class="geo-shape"></div>
+        <div class="city-pin" style="left:55%;top:62%"><div class="city-pin-dot"></div><div class="city-pin-label">Tbilisi</div></div>
+        <div class="city-pin" style="left:43%;top:74%"><div class="city-pin-dot"></div><div class="city-pin-label">Borjomi</div></div>
+      </div>
+      <div class="geo-map-legend">
+        <span class="leg-visited" data-i18n="profile_leg_visited">Visited</span>
+        <span class="leg-current" data-i18n="profile_leg_current">Current</span>
+        <span class="leg-notvisited" data-i18n="profile_leg_notyet">Not yet</span>
+      </div>
+    </div>
+
+    <!-- Activity Feed (mini) -->
+    <div class="sidebar-card activity-feed">
+      <div class="activity-feed-title" data-i18n="profile_recent_act">Recent Activity</div>
+      <div class="activity-feed-list"><div style="color:var(--text-muted);font-size:0.85rem;padding:12px 0">No real activity yet</div></div>
+    </div>
+
+    <!-- Suggested People -->
+    <div class="following-card sidebar-card">
+      <div class="following-header" data-i18n="profile_people_know">People You May Know</div>
+      <div style="padding:16px 0;text-align:center;color:var(--text-muted);font-size:0.85rem">No suggestions yet</div>
+    </div>
+
+  </div><!-- /profile-sidebar -->
+
+  <!-- ── MAIN CONTENT ── -->
+  <div class="profile-main">
+
+    <!-- Highlights / Stories Row -->
+    <div class="profile-highlights">
+      <div class="highlight-item highlight-add" data-add-highlight>
+        <div class="highlight-ring add-ring"><i class="fas fa-plus"></i></div>
+        <div class="highlight-label" data-i18n="profile_new_hl">New</div>
+      </div>
+    </div>
+
+    <!-- ── POSTS TAB ── -->
+    <div class="tab-panel active" id="tab-posts"><div class="empty-profile-state"><i class="fas fa-spinner fa-spin"></i><p>Loading real posts…</p></div></div>
+
+    <!-- ── ABOUT TAB ── -->
+    <div class="tab-panel" id="tab-about"><div class="empty-profile-state"><i class="fas fa-user"></i><h3>Loading…</h3></div></div>
+
+    <!-- ── GALLERY TAB ── -->
+    <div class="tab-panel" id="tab-gallery"><div class="empty-profile-state"><i class="fas fa-images"></i><h3>No photos yet</h3><p>Posts with photos will appear here.</p></div></div>
+
+    <div class="tab-panel" id="tab-friends"><div class="empty-profile-state"><i class="fas fa-user-group"></i><h3>No friends yet</h3><p>Friends and incoming requests will appear here.</p></div></div>
+
+    <div class="tab-panel" id="tab-checkins"><div class="empty-profile-state"><i class="fas fa-location-dot"></i><h3>No check-ins yet</h3><p>Real Firestore check-ins will appear here.</p></div></div>
+
+    <div class="tab-panel" id="tab-businesses"><div class="empty-profile-state"><i class="fas fa-store"></i><h3>No businesses yet</h3><p>Managed business pages will appear here.</p></div></div>
+
+    <div class="tab-panel" id="tab-videos"><div class="empty-profile-state"><i class="fas fa-film"></i><h3>No videos yet</h3><p>GeoHub-ზე ატვირთული ვიდეოები გამოჩნდება აქ.</p></div></div>
+
+    <div class="tab-panel" id="tab-badges"><div class="empty-profile-state"><i class="fas fa-medal"></i><h3>No badges yet</h3><p>Badges appear after check-ins, posts and community actions.</p></div></div>
+
+    <div class="tab-panel" id="tab-travel"><div class="empty-profile-state"><i class="fas fa-plane"></i><h3>Loading travel history…</h3></div></div>
+
+    <div class="tab-panel" id="tab-saved">
+      <div id="saved-posts-section"></div>
+      <div id="saved-places-section"></div>
+      <div id="saved-empty-state" class="empty-profile-state"><i class="fas fa-bookmark"></i><h3>Nothing saved yet</h3><p>Save posts and places to find them here.</p></div>
+    </div>
+
+    <div class="tab-panel" id="tab-archive">
+      <div class="empty-profile-state"><i class="fas fa-archive"></i><h3>Loading...</h3></div>
+    </div>
+
+      </div><!-- /profile-main -->
+
+</div><!-- /profile-layout -->
+
+              <!-- Vite: 27 scripts → 1 chunk. See src/entries/profile.js -->
+</body>
+</html>

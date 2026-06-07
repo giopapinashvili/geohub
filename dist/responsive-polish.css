@@ -1,0 +1,2683 @@
+/* GeoHub Step 6 — production responsive / overlay polish
+   This file is intentionally loaded last so it can normalize old page-specific CSS. */
+:root{
+  --gh-mobile-nav-h: 68px;
+  --gh-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --gh-safe-top: env(safe-area-inset-top, 0px);
+  --gh-overlay-z: 9000;
+  --gh-chat-z: 2147483000;
+}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{min-width:0;overflow-x:hidden;}
+body{margin:0;}
+img,video,canvas,svg{max-width:100%;height:auto;}
+button,a,input,textarea,select{touch-action:manipulation;}
+*{box-sizing:border-box;}
+
+/* Shared responsive containers */
+.container,.page-container,.main-container,.content-container,.feed-shell,.profile-shell,.admin-main,.dashboard-main,.section-inner{
+  max-width: min(1180px, calc(100vw - 32px));
+  margin-left:auto;
+  margin-right:auto;
+}
+.card,.panel,.widget,.glass-card,.post-card,.story-card,.group-card,.event-card,.place-card,.business-card,.reward-card,.creator-card{
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+
+/* Header / nav stability */
+.site-header,.navbar,.topbar,.main-header,.feed-topbar,.social-header{
+  max-width:100vw;
+}
+.navbar,.nav-inner,.site-nav,.header-inner,.feed-topbar,.social-header{
+  min-width:0;
+}
+.navbar a,.site-nav a,.header-actions a,.header-actions button{
+  white-space:nowrap;
+}
+
+/* Generic overlays/modals: keep inside viewport and above page chrome */
+.modal-overlay,.auth-modal-overlay,.cm-overlay,.gh-modal-overlay,.app-action-overlay,.story-viewer-overlay,.stories-viewer-overlay,.admin-sidebar-overlay,.notification-panel-overlay{
+  z-index:var(--gh-overlay-z)!important;
+}
+.modal-card,.auth-modal-card,.cm-modal,.gh-modal,.chal-modal,.create-event-modal,.ev-detail-modal,.admin-drawer,.notification-panel,.notif-panel{
+  max-width:min(94vw, 760px)!important;
+  max-height:calc(100dvh - 32px)!important;
+  overflow:auto!important;
+  -webkit-overflow-scrolling:touch;
+}
+body.gh-overlay-open{overflow:hidden!important;}
+body.gh-overlay-open .app-bottom-nav{pointer-events:none;}
+
+/* Messenger should not cover mobile bottom navigation and should not appear on full messages page. */
+body.messages-page #ghChatPopRoot,
+body.page-messages #ghChatPopRoot,
+body[data-page="messages"] #ghChatPopRoot,
+body[data-gh-page="messages"] #ghChatPopRoot{display:none!important;}
+#ghChatPopRoot.gh-chat-pop-root{
+  right:18px!important;
+  bottom:calc(18px + var(--gh-safe-bottom))!important;
+  z-index:var(--gh-chat-z)!important;
+}
+.gh-chat-pop{
+  width:min(370px, calc(100vw - 24px))!important;
+  height:min(560px, calc(100dvh - 96px - var(--gh-safe-bottom)))!important;
+}
+.gh-chat-body,.messages-list,.chat-messages{
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.gh-chat-bubble,.msg-bubble,.message-bubble{
+  max-width:100%;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+.gh-chat-img,.msg-image,.message-image,.msg-bubble img,.gh-chat-bubble img{
+  max-width:min(300px, 70vw)!important;
+  max-height:260px!important;
+  border-radius:14px!important;
+  object-fit:cover!important;
+}
+
+/* Floating panels cannot escape screen */
+.emoji-picker-wrap,.gh-chat-emoji-panel,.msg-reaction-picker,.gh-chat-reaction-panel,.dropdown-menu,.user-menu,.lang-menu,.notification-panel,.notif-panel{
+  max-width:calc(100vw - 24px)!important;
+}
+.notification-panel,.notif-panel{
+  right:12px!important;
+  left:auto!important;
+  width:min(380px, calc(100vw - 24px))!important;
+  max-height:calc(100dvh - 96px)!important;
+  overflow:auto!important;
+}
+
+/* Stories viewer: stable full-screen overlay */
+.gh-story-viewer,.stories-viewer,.story-viewer{
+  position:fixed!important;
+  inset:0!important;
+  z-index:calc(var(--gh-overlay-z) + 50)!important;
+  max-width:none!important;
+  max-height:none!important;
+}
+.gh-story-viewer img,.stories-viewer img,.story-viewer img{
+  max-height:82dvh!important;
+  object-fit:contain!important;
+}
+
+@media (max-width: 900px){
+  .container,.page-container,.main-container,.content-container,.feed-shell,.profile-shell,.admin-main,.dashboard-main,.section-inner{
+    max-width:calc(100vw - 24px)!important;
+    padding-left:0!important;
+    padding-right:0!important;
+  }
+  .grid,.cards-grid,.stats-grid,.features-grid,.places-grid,.groups-grid,.events-grid,.business-grid,.rewards-grid,.creators-grid,.dashboard-grid{
+    grid-template-columns:1fr!important;
+  }
+  .two-col,.split-layout,.profile-layout,.feed-layout,.admin-layout,.messages-layout{
+    display:block!important;
+  }
+  body.page-messages .messages-layout{
+    display:grid!important;
+  }
+  .sidebar,.left-sidebar,.right-sidebar,.feed-sidebar,.profile-sidebar{
+    width:100%!important;
+    max-width:none!important;
+    position:static!important;
+  }
+}
+
+@media (max-width: 768px){
+  html,body{max-width:100vw;overflow-x:hidden!important;}
+  .navbar{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:10px!important;
+    width:100%!important;
+    padding:0 12px!important;
+  }
+  .navbar .navbar-links,
+  .navbar .navbar-actions,
+  .navbar .btn:not(.nav-profile-icon){
+    display:none!important;
+  }
+  .navbar-brand{min-width:0!important;flex:1 1 auto!important;}
+  .navbar-brand .logo-text{font-size:1rem!important;white-space:nowrap!important;}
+  .hamburger{display:inline-flex!important;flex:0 0 auto!important;}
+  .mobile-account-panel {
+    display: block !important;
+    padding: 8px 0 12px !important;
+    border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.06)) !important;
+  }
+  .mobile-account-panel:empty {
+    display: none !important;
+  }
+  .mobile-menu {
+    position: fixed !important;
+    top: calc(64px + env(safe-area-inset-top, 0px)) !important;
+    left: 10px !important;
+    right: 10px !important;
+    bottom: calc(var(--gh-mobile-nav-h) + var(--gh-safe-bottom) + 10px) !important;
+    width: auto !important;
+    max-height: calc(100dvh - 84px - var(--gh-mobile-nav-h) - var(--gh-safe-bottom)) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    z-index: 99990 !important;
+    border-radius: 18px !important;
+    border: 1px solid var(--border, rgba(255,255,255,0.08)) !important;
+    box-shadow: 0 22px 60px rgba(0,0,0,0.45) !important;
+    pointer-events: auto !important;
+  }
+  .mobile-account-panel .geo-sw-wrap {
+    display: block !important;
+    width: 100% !important;
+  }
+  .mobile-account-panel .geo-sw-btn {
+    width: 100% !important;
+    min-height: 52px !important;
+    justify-content: flex-start !important;
+    border-radius: 14px !important;
+  }
+  .mobile-account-panel .geo-sw-dropdown {
+    position: static !important;
+    width: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin-top: 8px !important;
+    transform: none !important;
+  }
+  .gh-topbar{
+    grid-template-columns:minmax(0, 1fr) auto!important;
+    width:100vw!important;
+    max-width:100vw!important;
+    padding:0 10px!important;
+    gap:8px!important;
+    overflow:hidden!important;
+  }
+  .gh-brand{min-width:0!important;width:auto!important;}
+  .gh-brand span{display:inline!important;font-size:1rem!important;white-space:nowrap!important;}
+  .gh-center-tabs,
+  .gh-top-search,
+  .gh-top-actions #ghActorBtnSlot,
+  .gh-top-actions .geo-sw-wrap,
+  .gh-top-actions a[title="Home"],
+  .gh-top-actions a[title="Discover"],
+  .gh-top-actions a[title="Messages"],
+  .gh-top-actions .gh-create-btn,
+  .gh-top-actions .gh-theme-toggle{
+    display:none!important;
+  }
+  .gh-sidebar-toggle {
+    display:inline-flex!important;
+  }
+  .gh-top-actions{gap:6px!important;min-width:0!important;}
+  .gh-icon-btn,.gh-user-btn{width:42px!important;min-width:42px!important;padding:0!important;}
+  .gh-user-btn span:not(.gh-avatar){display:none!important;}
+  body{
+    padding-bottom:calc(var(--gh-mobile-nav-h) + var(--gh-safe-bottom) + 12px)!important;
+  }
+  .hide-mobile{display:none!important;}
+  .show-mobile{display:block!important;}
+  .hero,.page-hero,.section{padding-left:14px!important;padding-right:14px!important;}
+  h1{font-size:clamp(1.75rem, 8vw, 2.55rem)!important;line-height:1.08!important;}
+  h2{font-size:clamp(1.35rem, 6vw, 2rem)!important;line-height:1.14!important;}
+  .btn,button,.button,[role="button"]{min-height:42px;}
+  input,select,textarea{font-size:16px!important;max-width:100%;}
+  .table-wrap,table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .app-bottom-nav{z-index:1200!important;}
+  #ghChatPopRoot.gh-chat-pop-root{
+    right:12px!important;
+    bottom:calc(var(--gh-mobile-nav-h) + var(--gh-safe-bottom) + 14px)!important;
+  }
+  #ghChatPopRoot .gh-chat-pop-btn{
+    width:54px!important;height:54px!important;min-width:54px!important;min-height:54px!important;padding:0!important;
+  }
+  #ghChatPopRoot .gh-chat-pop-btn span:not(.dot){display:none!important;}
+  .gh-chat-pop{
+    position:fixed!important;
+    left:10px!important;
+    right:10px!important;
+    bottom:calc(var(--gh-mobile-nav-h) + var(--gh-safe-bottom) + 10px)!important;
+    width:calc(100vw - 20px)!important;
+    height:min(72dvh, 560px)!important;
+    border-radius:18px!important;
+  }
+  .gh-chat-toast{
+    left:10px!important;
+    right:10px!important;
+    bottom:calc(var(--gh-mobile-nav-h) + var(--gh-safe-bottom) + 76px)!important;
+    width:auto!important;
+  }
+  .notification-panel,.notif-panel{
+    top:calc(60px + var(--gh-safe-top))!important;
+    left:10px!important;
+    right:10px!important;
+    width:auto!important;
+    max-height:calc(100dvh - 92px - var(--gh-mobile-nav-h))!important;
+  }
+  .modal-overlay,.auth-modal-overlay,.cm-overlay,.gh-modal-overlay,.app-action-overlay{
+    padding:10px!important;
+    align-items:flex-end!important;
+  }
+  .modal-card,.auth-modal-card,.cm-modal,.gh-modal,.chal-modal,.create-event-modal,.ev-detail-modal{
+    width:100%!important;
+    max-width:100%!important;
+    max-height:calc(100dvh - 24px - var(--gh-safe-bottom))!important;
+    border-radius:18px 18px 0 0!important;
+  }
+  .emoji-picker-wrap,.gh-chat-emoji-panel{
+    left:8px!important;right:8px!important;max-width:none!important;
+    bottom:56px!important;
+  }
+  .msg-reaction-picker,.gh-chat-reaction-panel{
+    right:auto!important;left:0!important;transform:none!important;
+  }
+  .gh-chat-img,.msg-image,.message-image,.msg-bubble img,.gh-chat-bubble img{
+    max-width:68vw!important;
+    max-height:220px!important;
+  }
+}
+
+@media (max-width: 420px){
+  .card,.panel,.widget,.post-card,.story-card,.group-card,.event-card,.place-card,.business-card{border-radius:16px!important;}
+  .hero,.page-hero,.section{padding-left:10px!important;padding-right:10px!important;}
+  .gh-chat-pop{left:6px!important;right:6px!important;width:calc(100vw - 12px)!important;height:min(76dvh, 560px)!important;}
+  .gh-chat-msg-wrap{max-width:86%!important;}
+  .msg-bubble-wrap{max-width:86%!important;}
+}
+
+/* 360px — iPhone SE / small-phone safety net */
+@media (max-width: 360px){
+  .hero,.page-hero,.section,.clean-hero{padding-left:8px!important;padding-right:8px!important;}
+  h1,.clean-title{font-size:clamp(1.55rem, 9vw, 1.9rem)!important;}
+  .profile-cover{min-height:120px!important;}
+  /* Creator cards: tighten avatar so card body never overflows */
+  .cr-card{gap:10px!important;padding:14px!important;}
+  .cr-avatar-wrap{width:46px!important;height:46px!important;flex-shrink:0!important;}
+  .cr-avatar-initials{font-size:1.1rem!important;}
+  /* Stat grids: force 2-column even at 360px (avoids 3+ col overflow) */
+  .clean-stats{grid-template-columns:1fr 1fr!important;}
+  /* Stack action rows that might still overflow */
+  .profile-actions,.biz-actions,.ev-actions{flex-wrap:wrap!important;gap:6px!important;}
+}
+
+/* ─── Item card image placeholder ────────────────────────── */
+.gh-item-no-img {
+  width: 100%;
+  height: 100%;
+  min-height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(16,185,129,.12), rgba(59,130,246,.10));
+  color: rgba(255,255,255,.28);
+  font-size: 2rem;
+}
+html[data-gh-theme="light"] .gh-item-no-img {
+  background: linear-gradient(135deg, rgba(16,185,129,.09), rgba(59,130,246,.07));
+  color: rgba(0,0,0,.18);
+}
+
+/* ─── Light Theme: body + nav + clean pages ───────────────── */
+html[data-gh-theme="light"] body {
+  background: var(--bg-0);
+  color: var(--text-primary);
+}
+html[data-gh-theme="light"] .navbar,
+html[data-gh-theme="light"] .topbar,
+html[data-gh-theme="light"] .main-header {
+  background: rgba(248,250,249,0.93)!important;
+  border-bottom: 1px solid var(--border)!important;
+  backdrop-filter: var(--glass-blur-sm);
+}
+html[data-gh-theme="light"] .navbar-brand .logo-text,
+html[data-gh-theme="light"] .navbar a,
+html[data-gh-theme="light"] .hamburger span {
+  color: var(--text-primary)!important;
+  background-color: var(--text-primary)!important;
+}
+html[data-gh-theme="light"] .navbar-brand .logo-text {
+  background: none!important;
+  color: var(--text-primary)!important;
+}
+html[data-gh-theme="light"] .app-bottom-nav {
+  background: rgba(248,250,249,0.95)!important;
+  border-top: 1px solid var(--border)!important;
+}
+html[data-gh-theme="light"] .app-nav-item {
+  color: var(--text-secondary)!important;
+}
+html[data-gh-theme="light"] .app-nav-item.active,
+html[data-gh-theme="light"] .app-nav-item:hover {
+  color: var(--green)!important;
+}
+html[data-gh-theme="light"] .clean-page {
+  background: var(--bg-0)!important;
+}
+html[data-gh-theme="light"] .clean-hero {
+  background: transparent!important;
+}
+html[data-gh-theme="light"] .clean-card,
+html[data-gh-theme="light"] .clean-stat {
+  background: var(--bg-card)!important;
+  border-color: var(--border)!important;
+  color: var(--text-primary)!important;
+}
+html[data-gh-theme="light"] .clean-stat strong {
+  color: var(--text-primary)!important;
+}
+html[data-gh-theme="light"] .clean-stat span {
+  color: var(--text-secondary)!important;
+}
+html[data-gh-theme="light"] .clean-title,
+html[data-gh-theme="light"] .clean-card strong {
+  color: var(--text-primary)!important;
+}
+html[data-gh-theme="light"] .clean-desc,
+html[data-gh-theme="light"] .clean-tab {
+  color: var(--text-secondary)!important;
+}
+html[data-gh-theme="light"] .clean-tab.active {
+  color: var(--green)!important;
+  border-bottom-color: var(--green)!important;
+}
+html[data-gh-theme="light"] .clean-tabs {
+  background: var(--bg-elevated)!important;
+  border-color: var(--border)!important;
+}
+html[data-gh-theme="light"] .clean-empty {
+  background: var(--bg-elevated)!important;
+  border-color: var(--border-emphasis)!important;
+}
+html[data-gh-theme="light"] .clean-empty h3 {
+  color: var(--text-primary)!important;
+}
+html[data-gh-theme="light"] .clean-search {
+  background: var(--bg-card)!important;
+  border-color: var(--border)!important;
+}
+html[data-gh-theme="light"] .clean-search input {
+  color: var(--text-primary)!important;
+}
+html[data-gh-theme="light"] .panel,
+html[data-gh-theme="light"] .card,
+html[data-gh-theme="light"] .gh-card,
+html[data-gh-theme="light"] .geo-event-card,
+html[data-gh-theme="light"] .geo-place-card,
+html[data-gh-theme="light"] .group-card,
+html[data-gh-theme="light"] .business-card {
+  background: var(--bg-card)!important;
+  border-color: var(--border)!important;
+}
+html[data-gh-theme="light"] .mobile-menu {
+  background: rgba(248,250,249,0.98)!important;
+  border-bottom: 1px solid var(--border)!important;
+}
+
+/* Phase 65B: real phone usability polish */
+body.page-messages .app-bottom-nav {
+  display: none !important;
+}
+
+.mobile-info-btn {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  body.page-messages .messages-page {
+    padding-bottom: 0 !important;
+  }
+
+  body.page-messages .chat-input-bar {
+    overflow: visible !important;
+  }
+
+  body.page-messages .input-btn,
+  body.page-messages .send-btn,
+  body.page-messages .sidebar-icon-btn,
+  body.page-messages .header-action-btn,
+  body.page-messages .back-btn,
+  body.page-messages .msg-dots-btn {
+    min-width: 44px !important;
+    width: 44px !important;
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  body.page-messages .msg-input {
+    min-height: 44px !important;
+    flex: 1 1 auto !important;
+  }
+
+  body.page-messages .msg-attach-sheet {
+    position: absolute !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: calc(100% + 8px) !important;
+    display: none !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    padding: 10px !important;
+    border: 1px solid var(--border, rgba(148, 163, 184, 0.18)) !important;
+    border-radius: 16px !important;
+    background: var(--bg-card, #111827) !important;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.3) !important;
+    z-index: 40 !important;
+  }
+
+  body.page-messages .msg-attach-sheet.open {
+    display: grid !important;
+  }
+
+  body.page-messages .msg-attach-sheet button {
+    min-width: 0 !important;
+    min-height: 52px !important;
+    border: 1px solid var(--border, rgba(148, 163, 184, 0.18)) !important;
+    border-radius: 12px !important;
+    background: var(--bg-elevated, rgba(15, 23, 42, 0.92)) !important;
+    color: var(--text-primary, #f8fafc) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    font: inherit !important;
+    font-size: 0.78rem !important;
+  }
+
+  body.page-messages .mobile-info-btn {
+    display: inline-flex !important;
+  }
+
+  body.page-messages .info-panel {
+    display: block !important;
+    position: fixed !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
+    width: auto !important;
+    max-width: calc(100vw - 16px) !important;
+    max-height: 72dvh !important;
+    transform: translateY(calc(100% + 20px)) !important;
+    transition: transform 180ms ease !important;
+    pointer-events: none !important;
+    z-index: 2147483000 !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+  }
+
+  body.page-messages .info-panel.open {
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
+  }
+
+  body.page-messages .info-panel .info-scroll {
+    max-height: 72dvh !important;
+    overflow: auto !important;
+  }
+
+  .profile-tabs {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-right: max(28px, env(safe-area-inset-right, 0px)) !important;
+    scrollbar-width: none !important;
+  }
+
+  .profile-tabs::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .profile-tabs .ptab {
+    flex: 0 0 auto !important;
+    min-height: 44px !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+
+  .profile-tabs .tab-count {
+    flex: 0 0 auto !important;
+    margin-left: 6px !important;
+    position: static !important;
+  }
+
+  .rw-filters {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 4px !important;
+  }
+
+  .rw-filter-btn {
+    flex: 0 0 auto !important;
+    min-height: 44px !important;
+    white-space: nowrap !important;
+  }
+
+  .discovery-search-wrap {
+    flex-wrap: wrap !important;
+    width: 100% !important;
+  }
+
+  .discovery-search {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+  }
+
+  .filter-chips-row {
+    width: 100% !important;
+    padding: 0 12px 4px !important;
+    scroll-padding-inline: 12px !important;
+  }
+
+  .fchip {
+    flex: 0 0 auto !important;
+    min-height: 44px !important;
+    white-space: nowrap !important;
+  }
+
+  .pl-cats {
+    padding: 0 12px 4px !important;
+    scroll-padding-inline: 12px !important;
+  }
+
+  .pl-cat-btn {
+    flex: 0 0 auto !important;
+    min-height: 44px !important;
+    min-width: 44px !important;
+    white-space: nowrap !important;
+  }
+
+  .auth-password-toggle,
+  .password-toggle,
+  .toggle-password,
+  .eye-btn {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  label:has(input[type="checkbox"]),
+  .checkbox-row,
+  .remember-row {
+    min-height: 44px !important;
+  }
+}
+
+/* Phase 58: mobile launch QA polish */
+html,
+body,
+.gh-shell,
+.gh-layout,
+.rw-page,
+.chal-page,
+.profile-page,
+.biz-page-wrap,
+.sv-page,
+.clean-page {
+  min-width: 0;
+}
+
+body,
+.gh-shell,
+.clean-page,
+.rw-page,
+.chal-page,
+.profile-page,
+.biz-page-wrap,
+.sv-page {
+  overflow-x: clip;
+}
+
+.gh-layout,
+.gh-center,
+.gh-left,
+.gh-right,
+.gh-card,
+.gh-panel,
+.gh-item-card,
+.gh-item-body,
+.gh-post-meta,
+.gh-comment-bubble,
+.clean-card,
+.clean-empty,
+.profile-shell,
+.profile-layout,
+.profile-main,
+.profile-sidebar,
+.profile-name-block,
+.about-card,
+.post-feed-card,
+.pfc-header > div,
+.biz-overview-3col,
+.biz-left-sidebar,
+.biz-center-col,
+.biz-right-sidebar,
+.biz-page-block,
+.biz-block-body,
+.biz-info,
+.biz-name-row,
+.biz-contact-strip,
+.biz-tab-panels,
+.gh-biz-page,
+.gh-biz-name-area,
+.gh-biz-sec,
+.gh-biz-info-card,
+.gh-svc-card,
+.gh-svc-info,
+.rw-inner,
+.rw-card,
+.rw-card-body,
+.rw-history-info,
+.rw-coupon-body,
+.chal-page,
+.challenge-card,
+.challenge-card-body,
+.sv-layout,
+.sv-card,
+.sv-modal,
+.svd-hero-info,
+.svd-main,
+.svd-side {
+  min-width: 0!important;
+}
+
+.gh-card *,
+.clean-card *,
+.profile-card *,
+.post-feed-card *,
+.biz-page-wrap *,
+.rw-page *,
+.chal-page *,
+.sv-page *,
+.gh-modal *,
+.biz-modal-sheet *,
+.rw-modal *,
+.sv-modal * {
+  overflow-wrap: anywhere;
+}
+
+.gh-post-text,
+.gh-comment-bubble span,
+.gh-item-body h3,
+.gh-item-body p,
+.clean-title,
+.clean-desc,
+.profile-name,
+.profile-bio,
+.about-bio,
+.pfc-text,
+.biz-name,
+.biz-block-title,
+.biz-block-body,
+.gh-biz-title-row h1,
+.gh-biz-short-desc,
+.gh-biz-ic-value,
+.rw-card-title,
+.rw-card-desc,
+.rw-coupon-code,
+.chal-card-title,
+.challenge-card h3,
+.sv-card h3,
+.svd-hero-info h1 {
+  word-break: normal;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
+.gh-card-actions,
+.gh-post-actions,
+.gh-composer-actions,
+.gh-page-actions,
+.gh-biz-actions,
+.biz-actions,
+.biz-header-actions,
+.biz-compose-footer,
+.rw-hero-actions,
+.rw-modal-actions,
+.chal-actions,
+.challenge-actions,
+.sv-card-actions,
+.svd-actions {
+  min-width: 0;
+}
+
+.clean-search {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.clean-search input {
+  min-width: 0;
+}
+
+.gh-btn,
+.gh-act,
+.gh-pill,
+.gh-tab,
+.gh-biz-tab,
+.biz-action-btn,
+.biz-admin-btn,
+.rw-filter-btn,
+.rw-btn-primary,
+.rw-btn-ghost,
+.rw-btn-redeem,
+.rw-btn-claim,
+.chal-btn,
+.challenge-tabs button,
+.sv-btn,
+.clean-tab {
+  min-height: 44px;
+  max-width: 100%;
+}
+
+.gh-item-media,
+.gh-post-img,
+.pfc-media,
+.pfc-media img,
+.biz-cover,
+.biz-gallery-masonry img,
+.biz-product-card img,
+.biz-service-card img,
+.gh-biz-cover,
+.gh-svc-card-img,
+.rw-card-img,
+.sv-card img,
+.svd-portfolio img {
+  max-width: 100%;
+}
+
+.gh-tabbar,
+.gh-biz-tabs,
+.biz-tabs,
+.profile-tabs,
+.clean-tabs,
+.rw-filters,
+.challenge-tabs,
+.filter-chips-row,
+.sv-cats-inner,
+.sv-tabs-inner,
+.events-tabs-bar,
+.category-chips,
+.quick-filters {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.gh-tabbar::-webkit-scrollbar,
+.gh-biz-tabs::-webkit-scrollbar,
+.biz-tabs::-webkit-scrollbar,
+.profile-tabs::-webkit-scrollbar,
+.clean-tabs::-webkit-scrollbar,
+.rw-filters::-webkit-scrollbar,
+.challenge-tabs::-webkit-scrollbar,
+.filter-chips-row::-webkit-scrollbar,
+.sv-cats-inner::-webkit-scrollbar,
+.sv-tabs-inner::-webkit-scrollbar,
+.events-tabs-bar::-webkit-scrollbar,
+.category-chips::-webkit-scrollbar,
+.quick-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.biz-modal-sheet,
+.rw-modal,
+.sv-modal,
+.gh-modal,
+.gh-modal-backdrop .gh-modal,
+.ev-detail-modal,
+.create-event-modal,
+.ticket-modal,
+.invite-modal,
+.promo-modal,
+.chal-modal {
+  width: min(100%, calc(100vw - 24px))!important;
+  max-height: calc(100dvh - 32px - var(--gh-safe-bottom))!important;
+  overflow: auto!important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.biz-modal-overlay,
+.rw-modal-overlay,
+.sv-modal-overlay,
+.gh-modal-backdrop {
+  padding: 12px;
+}
+
+@media (max-width: 900px) {
+  .gh-layout {
+    width: 100%!important;
+    grid-template-columns: 1fr!important;
+    padding-left: 12px!important;
+    padding-right: 12px!important;
+    padding-bottom: calc(var(--gh-mobile-nav-h) + var(--gh-safe-bottom) + 28px)!important;
+  }
+
+  .gh-left,
+  .gh-right {
+    position: static!important;
+    max-height: none!important;
+    overflow: visible!important;
+  }
+
+  .gh-center {
+    width: 100%!important;
+  }
+
+  .clean-page,
+  .rw-page,
+  .chal-page,
+  .profile-page,
+  .biz-page-wrap,
+  .sv-page {
+    padding-bottom: calc(var(--gh-mobile-nav-h) + var(--gh-safe-bottom) + 24px)!important;
+  }
+
+  .profile-layout,
+  .biz-tab-panels,
+  .rw-inner,
+  .chal-page,
+  .sv-body,
+  .sv-layout {
+    padding-bottom: calc(var(--gh-mobile-nav-h) + var(--gh-safe-bottom) + 28px)!important;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden!important;
+  }
+
+  .gh-topbar {
+    left: 0!important;
+    right: 0!important;
+    width: 100%!important;
+  }
+
+  .gh-brand span,
+  .gh-user-btn span:not(.gh-avatar) {
+    min-width: 0!important;
+  }
+
+  .gh-composer-actions,
+  .gh-post-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr))!important;
+  }
+
+  .gh-act,
+  .gh-composer-action {
+    padding-left: 6px!important;
+    padding-right: 6px!important;
+    font-size: .78rem!important;
+  }
+
+  .gh-card-actions .gh-btn,
+  .gh-page-actions .gh-btn,
+  .gh-biz-actions .gh-btn,
+  .biz-header-actions .biz-action-btn,
+  .biz-actions .biz-action-btn,
+  .rw-hero-actions > *,
+  .chal-actions > *,
+  .challenge-actions > *,
+  .sv-card-actions > *,
+  .svd-actions > * {
+    flex: 1 1 150px;
+  }
+
+  .profile-identity-section .profile-tabs {
+    top: 0;
+  }
+
+  .profile-name-block,
+  .profile-hero-right,
+  .profile-actions {
+    width: 100%;
+  }
+
+  .profile-actions > *,
+  .gh-modal-actions > *,
+  .rw-modal-actions > *,
+  .biz-compose-footer > * {
+    flex: 1 1 140px;
+  }
+
+  .biz-admin-toolbar {
+    top: 0;
+  }
+
+  .biz-admin-toolbar-inner {
+    padding-left: 12px!important;
+    padding-right: 12px!important;
+  }
+
+  .biz-admin-btn.biz-preview-toggle {
+    margin-left: 0;
+  }
+
+  .biz-product-cards-grid,
+  .biz-dash-stats,
+  .gh-biz-info-grid,
+  .gh-svc-grid {
+    grid-template-columns: 1fr!important;
+  }
+
+  .biz-compose-media-bar,
+  .rw-modal-actions {
+    flex-wrap: wrap;
+  }
+
+  .rw-hero {
+    align-items: stretch;
+  }
+
+  .rw-hero > *,
+  .rw-hero-actions {
+    width: 100%;
+  }
+
+  .rw-modal-actions {
+    justify-content: stretch;
+  }
+
+  .rw-btn-primary,
+  .rw-btn-ghost {
+    justify-content: center;
+  }
+
+  .rw-history-item,
+  .rw-coupon-item {
+    align-items: flex-start;
+  }
+
+  .rw-coupon-status {
+    white-space: normal;
+    text-align: center;
+  }
+
+  .sv-search-bar,
+  .svd-hero,
+  .svd-price-box {
+    width: 100%;
+  }
+
+  .discovery-search-wrap,
+  .ev-search-row,
+  .sv-search-bar,
+  .clean-search {
+    min-width: 0;
+  }
+
+  .discovery-search,
+  .ev-search-input-wrap,
+  .sv-search-wrap {
+    min-width: 0!important;
+  }
+
+  .ds-map-toggle,
+  .sv-search-btn,
+  .clean-search button {
+    max-width: 100%;
+  }
+
+  body.page-challenges .challenges-toolbar {
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 340px)!important;
+  }
+
+  .svd-price-box {
+    min-width: 0!important;
+  }
+}
+
+@media (max-width: 520px) {
+  .clean-tabs,
+  .rw-filters,
+  .challenge-tabs,
+  .filter-chips-row,
+  .sv-cats-inner,
+  .sv-tabs-inner,
+  .events-tabs-bar,
+  .category-chips,
+  .quick-filters {
+    flex-wrap: nowrap!important;
+  }
+
+  .ev-search-row,
+  .sv-search-bar,
+  .discovery-search-wrap,
+  .clean-search {
+    align-items: stretch!important;
+  }
+
+  .ev-search-city,
+  .ev-search-select,
+  .sv-search-btn,
+  .ds-map-toggle,
+  .clean-search button {
+    width: 100%!important;
+  }
+
+  .clean-search {
+    flex-wrap: wrap!important;
+  }
+
+  .clean-search input {
+    flex: 1 1 100%!important;
+  }
+
+  body.page-challenges .challenges-toolbar {
+    grid-template-columns: 1fr!important;
+  }
+
+  body.page-challenges .challenge-tabs {
+    width: 100%!important;
+  }
+
+  .gh-card,
+  .gh-panel,
+  .clean-card,
+  .profile-card,
+  .about-card,
+  .post-feed-card,
+  .biz-page-block,
+  .rw-card,
+  .challenge-card,
+  .sv-card {
+    border-radius: 16px!important;
+  }
+
+  .gh-page-info,
+  .gh-biz-header-inner,
+  .biz-header-body,
+  .profile-identity-inner,
+  .rw-history-item,
+  .rw-coupon-item {
+    gap: 10px!important;
+  }
+
+  .gh-page-info,
+  .biz-header-body,
+  .rw-coupon-item {
+    flex-direction: column!important;
+    align-items: stretch!important;
+  }
+
+  .gh-page-actions,
+  .gh-biz-actions,
+  .biz-actions,
+  .biz-header-actions,
+  .profile-actions,
+  .rw-hero-actions,
+  .sv-card-actions,
+  .svd-actions {
+    width: 100%;
+  }
+
+  .gh-page-actions .gh-btn,
+  .gh-biz-actions .gh-btn,
+  .biz-actions .biz-action-btn,
+  .biz-header-actions .biz-action-btn,
+  .profile-actions > *,
+  .rw-hero-actions > *,
+  .sv-card-actions > *,
+  .svd-actions > * {
+    flex: 1 1 100%;
+  }
+
+  .biz-modal-sheet,
+  .rw-modal,
+  .sv-modal,
+  .gh-modal,
+  .ev-detail-modal,
+  .create-event-modal,
+  .ticket-modal,
+  .invite-modal,
+  .promo-modal,
+  .chal-modal {
+    width: 100%!important;
+    max-height: calc(100dvh - 18px - var(--gh-safe-bottom))!important;
+    border-radius: 18px 18px 0 0!important;
+  }
+}
+
+@media (max-width: 380px) {
+  .gh-layout,
+  .rw-inner,
+  .profile-layout,
+  .biz-tab-panels,
+  .chal-page {
+    padding-left: 10px!important;
+    padding-right: 10px!important;
+  }
+
+  .gh-card,
+  .gh-panel,
+  .rw-hero,
+  .rw-card-body,
+  .about-card {
+    padding-left: 12px!important;
+    padding-right: 12px!important;
+  }
+
+  .gh-post-actions,
+  .gh-composer-actions {
+    gap: 4px!important;
+  }
+
+  .gh-act span,
+  .gh-composer-action span {
+    display: none!important;
+  }
+
+  .rw-hero-balance {
+    font-size: 2rem!important;
+  }
+}
+
+/* Phase 65 — full phone usability repair */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+}
+
+body,
+main,
+.page,
+.app,
+.shell,
+.layout,
+.content,
+.main-content,
+.page-content,
+.feed-layout,
+.messages-layout,
+.biz-page,
+.profile-layout,
+.gh-layout {
+  min-width: 0 !important;
+}
+
+body * {
+  min-width: 0;
+}
+
+p,
+span,
+strong,
+small,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+a,
+button,
+label,
+.card,
+.panel,
+.post-card,
+.msg-bubble,
+.conv-name,
+.conv-preview,
+.profile-name,
+.biz-page-name {
+  overflow-wrap: anywhere;
+}
+
+img,
+video,
+iframe,
+canvas {
+  max-width: 100% !important;
+}
+
+.modal-card,
+.modal-content,
+.auth-modal-card,
+.gh-modal,
+.gh-modal-card,
+.biz-modal-sheet,
+.biz-share-sheet,
+.rw-modal,
+.sv-modal,
+.ev-detail-modal,
+.create-event-modal,
+.ticket-modal,
+.invite-modal,
+.promo-modal,
+.chal-modal,
+.chalm-sheet,
+.notification-panel,
+.notif-panel {
+  max-width: min(760px, calc(100vw - 24px)) !important;
+  max-height: calc(100dvh - 28px - env(safe-area-inset-bottom, 0px)) !important;
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  body {
+    width: 100% !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding-bottom: calc(var(--gh-mobile-nav-h, 68px) + env(safe-area-inset-bottom, 0px) + 10px) !important;
+  }
+
+  .navbar,
+  .feed-topbar,
+  .gh-topbar,
+  .topbar,
+  .site-header {
+    max-width: 100vw !important;
+    overflow: hidden !important;
+  }
+
+  .navbar {
+    padding-left: max(10px, env(safe-area-inset-left, 0px)) !important;
+    padding-right: max(10px, env(safe-area-inset-right, 0px)) !important;
+  }
+
+  .navbar-brand,
+  .ftb-brand,
+  .gh-brand,
+  .chat-header-left,
+  .conv-info,
+  .profile-name-block,
+  .biz-title-block {
+    min-width: 0 !important;
+  }
+
+  .container,
+  .page-container,
+  .main-container,
+  .content-container,
+  .feed-shell,
+  .feed-center,
+  .profile-layout,
+  .profile-identity-inner,
+  .xp-progress-section,
+  .profile-tabs,
+  .biz-page-shell,
+  .biz-main,
+  .biz-tab-panels,
+  .gh-layout,
+  .rw-inner,
+  .chal-page {
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .feed-layout,
+  .gh-layout,
+  .profile-layout,
+  .biz-overview-3col,
+  .events-layout,
+  .places-layout,
+  .groups-layout,
+  .rewards-layout,
+  .products-layout,
+  .notifications-layout,
+  .world-layout,
+  .dashboard-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .feed-left-sidebar,
+  .feed-right-sidebar,
+  .right-sidebar,
+  .left-sidebar,
+  .profile-sidebar,
+  .biz-right-sidebar,
+  .info-panel,
+  .desktop-only {
+    display: none !important;
+  }
+
+  .feed-scroll-area,
+  .chat-messages,
+  .conv-list,
+  .notification-list,
+  .modal-body,
+  .sheet-body {
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+  }
+
+  .stories-row,
+  .fd-stories-wrap,
+  .story-strip,
+  .tabs,
+  .profile-tabs,
+  .biz-tabs,
+  .filter-tabs,
+  .filters-row,
+  .chip-row,
+  .gh-tabs,
+  .clean-tabs {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none;
+  }
+
+  .stories-row::-webkit-scrollbar,
+  .fd-stories-wrap::-webkit-scrollbar,
+  .profile-tabs::-webkit-scrollbar,
+  .biz-tabs::-webkit-scrollbar,
+  .filter-tabs::-webkit-scrollbar,
+  .filters-row::-webkit-scrollbar,
+  .chip-row::-webkit-scrollbar,
+  .gh-tabs::-webkit-scrollbar,
+  .clean-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cards-grid,
+  .posts-grid,
+  .post-grid,
+  .feed-grid,
+  .business-grid,
+  .biz-service-cards-grid,
+  .biz-product-cards-grid,
+  .events-grid,
+  .places-grid,
+  .groups-grid,
+  .rewards-grid,
+  .products-grid,
+  .notifications-grid,
+  .challenge-grid,
+  .challenges-grid,
+  .services-grid,
+  .profile-posts-grid,
+  .friends-grid,
+  .media-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .post-card,
+  .composer-card,
+  .gh-composer,
+  .comment-box,
+  .comment-input-row,
+  .share-sheet,
+  .business-card,
+  .event-card,
+  .place-card,
+  .group-card,
+  .reward-card,
+  .product-card,
+  .notification-card,
+  .profile-card,
+  .about-card,
+  .sidebar-card,
+  .clean-card,
+  .gh-card,
+  .gh-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .btn-row,
+  .actions-row,
+  .profile-actions,
+  .biz-header-actions,
+  .biz-actions,
+  .gh-page-actions,
+  .rw-hero-actions,
+  .card-actions,
+  .modal-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .btn-row > *,
+  .actions-row > *,
+  .profile-actions > *,
+  .biz-header-actions > *,
+  .biz-actions > *,
+  .gh-page-actions > *,
+  .rw-hero-actions > *,
+  .card-actions > *,
+  .modal-actions > * {
+    min-width: 0 !important;
+  }
+
+  .modal-overlay,
+  .auth-modal-overlay,
+  .gh-modal-overlay,
+  .biz-modal-overlay,
+  .biz-share-overlay,
+  .chalm-overlay,
+  .app-action-overlay {
+    padding: 10px !important;
+    align-items: flex-end !important;
+  }
+
+  .modal-card,
+  .modal-content,
+  .auth-modal-card,
+  .gh-modal,
+  .gh-modal-card,
+  .biz-modal-sheet,
+  .biz-share-sheet,
+  .rw-modal,
+  .sv-modal,
+  .ev-detail-modal,
+  .create-event-modal,
+  .ticket-modal,
+  .invite-modal,
+  .promo-modal,
+  .chal-modal,
+  .chalm-sheet {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: calc(92dvh - env(safe-area-inset-bottom, 0px)) !important;
+    border-radius: 18px 18px 0 0 !important;
+  }
+
+  body.page-messages {
+    padding-bottom: 0 !important;
+  }
+
+  body.page-messages .messages-page {
+    top: var(--navbar-height, 68px) !important;
+    bottom: 0 !important;
+  }
+
+  body.page-messages .messages-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(160px, 34dvh) minmax(0, 1fr) !important;
+  }
+
+  body.page-messages .messages-layout.chat-open {
+    grid-template-rows: 0 minmax(0, 1fr) !important;
+  }
+
+  body.page-messages .msg-sidebar,
+  body.page-messages .chat-window,
+  body.page-messages .chat-messages,
+  body.page-messages .chat-input-bar {
+    max-width: 100vw !important;
+  }
+
+  body.page-messages .chat-header {
+    min-height: 54px !important;
+    padding: 8px 10px !important;
+    gap: 8px !important;
+  }
+
+  body.page-messages .chat-header-name {
+    max-width: 44vw !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  body.page-messages .chat-header-actions {
+    gap: 4px !important;
+  }
+
+  body.page-messages .header-action-btn,
+  body.page-messages .back-btn,
+  body.page-messages .input-btn,
+  body.page-messages .send-btn {
+    flex: 0 0 auto !important;
+  }
+
+  body.page-messages .chat-input-bar {
+    position: sticky !important;
+    bottom: 0 !important;
+    padding: 8px 8px max(8px, env(safe-area-inset-bottom, 0px)) !important;
+    gap: 5px !important;
+  }
+
+  body.page-messages .msg-input {
+    min-width: 0 !important;
+  }
+
+  body.page-messages .msg-row {
+    max-width: 100% !important;
+  }
+
+  body.page-messages .msg-col {
+    max-width: 86% !important;
+  }
+
+  body.page-messages .msg-bubble,
+  body.page-messages .msg-bubble-wrap {
+    max-width: 100% !important;
+  }
+
+  body.page-messages .msg-image,
+  body.page-messages .msg-media-link img,
+  body.page-messages .msg-bubble img {
+    max-width: min(68vw, 280px) !important;
+    max-height: 220px !important;
+  }
+
+  body.page-messages .msg-file-card {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  body.page-messages .msg-file-name {
+    max-width: 48vw !important;
+  }
+
+  body.page-messages .msg-reaction-picker,
+  body.page-messages .emoji-picker-wrap {
+    max-width: calc(100vw - 20px) !important;
+  }
+
+  .profile-cover {
+    height: 180px !important;
+  }
+
+  .profile-identity-inner {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .profile-hero-left {
+    align-items: center !important;
+    gap: 12px !important;
+    margin-top: -44px !important;
+  }
+
+  .profile-avatar {
+    width: 86px !important;
+    height: 86px !important;
+  }
+
+  .profile-hero-right {
+    align-items: stretch !important;
+    width: 100% !important;
+  }
+
+  .profile-stats-bar {
+    width: 100% !important;
+    overflow-x: auto !important;
+  }
+
+  .pstat {
+    min-width: 68px !important;
+  }
+
+  .xp-progress-section {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  .biz-cover {
+    height: 180px !important;
+  }
+
+  .biz-header-body {
+    margin-top: -48px !important;
+  }
+
+  .biz-logo {
+    width: 86px !important;
+    height: 86px !important;
+  }
+
+  .biz-contact-strip,
+  .biz-admin-toolbar-inner {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .biz-admin-toolbar {
+    top: var(--navbar-height, 68px) !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .container,
+  .page-container,
+  .main-container,
+  .content-container,
+  .feed-center,
+  .profile-layout,
+  .profile-identity-inner,
+  .xp-progress-section,
+  .profile-tabs,
+  .biz-tab-panels,
+  .gh-layout,
+  .rw-inner,
+  .chal-page {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .feed-scroll-area {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  .post-card,
+  .composer-card,
+  .gh-composer,
+  .business-card,
+  .event-card,
+  .place-card,
+  .group-card,
+  .reward-card,
+  .product-card,
+  .notification-card,
+  .profile-card,
+  .about-card,
+  .sidebar-card,
+  .clean-card,
+  .gh-card,
+  .gh-panel {
+    border-radius: 14px !important;
+  }
+
+  .profile-name,
+  .biz-page-name {
+    font-size: clamp(1.25rem, 7vw, 1.55rem) !important;
+  }
+
+  body.page-messages .chat-header-av,
+  body.page-messages .chat-header-av img,
+  body.page-messages .chat-header-av .av-placeholder {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  body.page-messages .header-action-btn {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
+
+/* Phase 65B final mobile interaction overrides (loaded after earlier phone rules). */
+body.page-messages .app-bottom-nav {
+  display: none !important;
+}
+
+body.page-messages .chat-input-bar {
+  position: relative;
+}
+
+body.page-messages .msg-attach-sheet {
+  position: absolute;
+  left: 8px;
+  bottom: calc(100% + 8px);
+  display: none;
+  grid-template-columns: repeat(3, minmax(74px, 1fr));
+  gap: 8px;
+  width: min(320px, calc(100vw - 16px));
+  padding: 10px;
+  border: 1px solid var(--border, rgba(148, 163, 184, 0.18));
+  border-radius: 16px;
+  background: var(--bg-card, #111827);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.3);
+  z-index: 40;
+}
+
+body.page-messages .msg-attach-sheet.open {
+  display: grid;
+}
+
+body.page-messages .msg-attach-sheet button {
+  min-width: 0;
+  min-height: 48px;
+  border: 1px solid var(--border, rgba(148, 163, 184, 0.18));
+  border-radius: 12px;
+  background: var(--bg-elevated, rgba(15, 23, 42, 0.92));
+  color: var(--text-primary, #f8fafc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font: inherit;
+  font-size: 0.84rem;
+}
+
+@media (max-width: 768px) {
+  body.page-messages .input-btn,
+  body.page-messages .send-btn,
+  body.page-messages .sidebar-icon-btn,
+  body.page-messages .header-action-btn,
+  body.page-messages .back-btn,
+  body.page-messages .msg-dots-btn {
+    min-width: 44px !important;
+    width: 44px !important;
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  body.page-messages .info-panel {
+    display: block !important;
+    position: fixed !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: max(8px, env(safe-area-inset-bottom, 0px)) !important;
+    width: auto !important;
+    max-width: calc(100vw - 16px) !important;
+    max-height: 72dvh !important;
+    transform: translateY(calc(100% + 20px)) !important;
+    pointer-events: none !important;
+  }
+
+  body.page-messages .info-panel.open {
+    transform: translateY(0) !important;
+    pointer-events: auto !important;
+  }
+
+  body.page-messages .mobile-info-btn {
+    display: inline-flex !important;
+  }
+}
+
+/* Phase 65E targeted mobile fixes. Keep these late so they beat older phone rules. */
+@media (max-width: 768px) {
+  .profile-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .profile-actions > .btn,
+  .profile-actions > a,
+  .profile-actions > button {
+    min-height: 44px !important;
+    justify-content: center !important;
+    border-radius: 12px !important;
+    white-space: nowrap !important;
+  }
+
+  .profile-actions .profile-body-logout {
+    display: none !important;
+  }
+
+  .profile-identity-inner {
+    gap: 10px !important;
+  }
+
+  .pl-main,
+  .map-shell,
+  .map-page,
+  .places-page {
+    padding-bottom: calc(var(--gh-mobile-nav-h, 68px) + env(safe-area-inset-bottom, 0px) + 28px) !important;
+  }
+
+  #map,
+  .leaflet-container {
+    scroll-margin-bottom: calc(var(--gh-mobile-nav-h, 68px) + env(safe-area-inset-bottom, 0px) + 18px) !important;
+  }
+
+  .leaflet-popup-content-wrapper,
+  .pl-detail,
+  .pl-modal {
+    max-height: calc(82dvh - var(--gh-mobile-nav-h, 68px)) !important;
+    overflow: auto !important;
+  }
+
+  #ghChatPopRoot .gh-chat-pop-btn .gh-cpb-badge:not(:empty) {
+    display: inline-flex !important;
+  }
+
+  body.gh-install-visible #ghChatPopRoot .gh-chat-pop-btn {
+    display: none !important;
+  }
+}
+
+body.page-messages .messages-page {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100vw !important;
+}
+
+body.gh-has-injected-nav.page-messages .messages-page {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100vw !important;
+}
+
+body.page-messages .messages-layout {
+  display: grid !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+@media (max-width: 768px) {
+  body.page-messages .messages-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(160px, 34dvh) minmax(0, 1fr) !important;
+  }
+
+  body.page-messages .messages-layout.chat-open {
+    grid-template-rows: 0 minmax(0, 1fr) !important;
+  }
+
+  body.page-messages .messages-layout.chat-open .msg-sidebar {
+    display: none !important;
+  }
+
+  body.page-messages .messages-layout:not(.chat-open) .msg-sidebar,
+  body.page-messages .messages-layout.chat-open .chat-window,
+  body.page-messages .chat-window.empty {
+    display: flex !important;
+  }
+
+  body.page-messages .messages-layout:not(.chat-open) .chat-window:not(.empty) {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  body.page-messages .messages-layout,
+  body.page-messages .messages-layout.chat-open {
+    grid-template-columns: minmax(250px, 32vw) minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+
+  body.page-messages .msg-sidebar,
+  body.page-messages .chat-window {
+    display: flex !important;
+    min-width: 0 !important;
+  }
+
+  body.page-messages .info-panel {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  body.page-messages .messages-layout,
+  body.page-messages .messages-layout.chat-open {
+    grid-template-columns: 340px minmax(0, 1fr) 300px !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+
+  body.page-messages .msg-sidebar,
+  body.page-messages .chat-window {
+    display: flex !important;
+    min-width: 0 !important;
+  }
+
+  body.page-messages .info-panel {
+    display: flex !important;
+    min-width: 0 !important;
+  }
+}
+
+/* ─── Phase 65F: final conflict resolution (loaded last among static CSS) ── */
+
+/* Mobile drawer open state — scoped to mobile viewport only */
+@media (max-width: 768px) {
+  body.gh-mobile-menu-open .mobile-menu {
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    z-index: 99991 !important;
+    pointer-events: auto !important;
+  }
+  body.gh-mobile-menu-open .gh-mobile-menu-overlay {
+    display: block !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 99980 !important;
+    background: rgba(0, 0, 0, 0.48) !important;
+  }
+}
+/* Desktop safety: gh-mobile-menu-open must never dim or lock desktop */
+@media (min-width: 769px) {
+  body.gh-mobile-menu-open { overflow: auto !important; }
+  body.gh-mobile-menu-open .gh-mobile-menu-overlay { display: none !important; }
+  body.gh-mobile-menu-open .mobile-menu { display: none !important; }
+}
+
+/* Messenger: true staged mode — inbox first, chat second (Facebook Messenger style) */
+@media (max-width: 768px) {
+  body.page-messages .messages-layout {
+    display: block !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+  /* Default: show inbox, hide chat window */
+  body.page-messages .msg-sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+  body.page-messages .chat-window {
+    display: none !important;
+  }
+  /* Chat open: hide inbox, show chat full-height */
+  body.page-messages.chat-open .msg-sidebar {
+    display: none !important;
+  }
+  body.page-messages.chat-open .chat-window {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  body.page-messages .messages-layout,
+  body.page-messages .messages-layout.chat-open {
+    display: grid !important;
+    grid-template-columns: 280px minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+  /* Both sidebar and chat-window always visible on tablet */
+  body.page-messages .msg-sidebar,
+  body.page-messages .messages-layout.chat-open .msg-sidebar,
+  body.page-messages .chat-window {
+    display: flex !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+  body.page-messages .info-panel {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  body.page-messages .messages-layout,
+  body.page-messages .messages-layout.chat-open {
+    display: grid !important;
+    grid-template-columns: 340px minmax(0, 1fr) 300px !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+  body.page-messages .msg-sidebar,
+  body.page-messages .chat-window {
+    display: flex !important;
+    min-width: 0 !important;
+  }
+  body.page-messages .info-panel {
+    display: flex !important;
+    min-width: 0 !important;
+  }
+}
+
+/* Phase 65G: PWA / standalone safe-area (iOS Dynamic Island / notch) */
+@media (display-mode: standalone) {
+  .navbar, nav.navbar, #navbar, .gh-topbar, .feed-topbar, .topbar, .site-header {
+    padding-top: env(safe-area-inset-top, 0px) !important;
+  }
+  body:not(.page-messages) {
+    padding-top: calc(68px + env(safe-area-inset-top, 0px)) !important;
+  }
+  body.page-messages {
+    padding-top: 0 !important;
+  }
+  body.page-messages .messages-page {
+    top: calc(72px + env(safe-area-inset-top, 0px)) !important;
+  }
+}
+
+/* ── Phase 65H: Search / Notifications / Places / Profile / Menu fixes ── */
+
+/* Search — hide injected GH sidebar (it blocks content on mobile) and GH topbar
+   (page has its own sr-topbar); also add scroll clearance for bottom nav */
+@media (max-width: 900px) {
+  body[data-gh-page="search"] > .gh-left { display: none !important; }
+}
+@media (max-width: 768px) {
+  body[data-gh-page="search"] .gh-topbar { display: none !important; }
+  body[data-gh-page="search"] .sr-page {
+    padding-bottom: calc(var(--gh-mobile-nav-h, 68px) + env(safe-area-inset-bottom, 0px) + 20px) !important;
+  }
+}
+
+/* Notifications — hide GH sidebar and right rail on mobile so list is not buried below them */
+@media (max-width: 900px) {
+  body[data-gh-page="notifications"] .gh-left,
+  body[data-gh-page="notifications"] .gh-right { display: none !important; }
+  body[data-gh-page="notifications"] .np-page {
+    padding-bottom: calc(var(--gh-mobile-nav-h, 68px) + env(safe-area-inset-bottom, 0px) + 16px) !important;
+  }
+}
+
+/* Profile — hide lower duplicate Edit Profile / Share / Logout on mobile
+   (cover area already has the primary action buttons) */
+@media (max-width: 768px) {
+  .profile-actions [data-edit-profile],
+  .profile-actions [data-share-profile],
+  .profile-actions [data-logout],
+  .profile-actions .profile-body-logout { display: none !important; }
+}
+
+/* Places — full-width bottom sheet on mobile; fix vertical-letter title bug */
+@media (max-width: 768px) {
+  .pl-detail-overlay { padding: 0 !important; align-items: flex-end !important; }
+  .pl-detail {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: calc(92dvh - env(safe-area-inset-bottom, 0px)) !important;
+    border-radius: 20px 20px 0 0 !important;
+    overflow-y: auto !important;
+  }
+  .pl-detail-top {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+  .pl-detail-top > * { min-width: 0 !important; width: 100% !important; }
+  .pl-detail-top h2 { white-space: normal !important; word-break: normal !important; }
+  .pl-detail-actions {
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    gap: 6px !important;
+  }
+}
+
+/* ── PHASE 65I: Critical Mobile UX Fixes ───────────────────────── */
+
+/* 1. Map/Places — account for mobile bottom nav in map height */
+@media (max-width: 768px) {
+  #plMapContainer {
+    height: calc(100dvh - var(--navbar-height, 68px) - 68px - env(safe-area-inset-bottom, 0px) - 50px) !important;
+    min-height: 200px !important;
+  }
+  /* List view bottom clearance so bottom nav doesn't cover last card */
+  .pl-main {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px) + 20px) !important;
+  }
+}
+
+/* 2. Search — restore sr-topbar on mobile (hidden by gh-has-injected-nav rule) */
+@media (max-width: 768px) {
+  body[data-gh-page="search"] .sr-topbar {
+    display: flex !important;
+    top: 0 !important;
+    z-index: 300 !important;
+  }
+  body[data-gh-page="search"] .sr-cats-bar {
+    top: 60px !important;
+  }
+  body[data-gh-page="search"] .sr-page {
+    padding-top: 104px !important;
+  }
+}
+
+/* 3. Messenger — hide bottom nav inside chat, remove conflicting body padding */
+@media (max-width: 768px) {
+  body.page-messages #app-bottom-nav {
+    display: none !important;
+  }
+  body.page-messages {
+    padding-bottom: 0 !important;
+  }
+}
+
+/* ── Phase 65K: Mobile group tabs, map mode, notifications overlay ── */
+
+/* 1. Group detail tabs — prevent vertical text compression on mobile */
+@media (max-width: 768px) {
+  .gh-tabbar {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .gh-tab {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    flex: 0 0 auto !important;
+    max-width: none !important;
+  }
+}
+
+/* 2. Places map mode — full-screen map with floating toolbar overlay */
+@media (max-width: 768px) {
+  body.pl-map-mode #plMapContainer {
+    position: fixed !important;
+    top: var(--navbar-height, 68px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: calc(68px + env(safe-area-inset-bottom, 0px)) !important;
+    height: auto !important;
+    width: 100% !important;
+    z-index: 50 !important;
+    border-radius: 0 !important;
+    min-height: 0 !important;
+  }
+  body.pl-map-mode .pl-toolbar {
+    position: fixed !important;
+    top: var(--navbar-height, 68px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 200 !important;
+    background: rgba(4, 5, 13, 0.92) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+  body.pl-map-mode .pl-cats {
+    position: fixed !important;
+    top: calc(var(--navbar-height, 68px) + 54px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 200 !important;
+    background: rgba(4, 5, 13, 0.85) !important;
+  }
+}
+
+/* 3. Notifications overlay safety — overlay must never block content when menu is closed */
+.gh-mobile-menu-overlay,
+#gh-mobile-menu-overlay {
+  pointer-events: none !important;
+}
+body.gh-mobile-menu-open .gh-mobile-menu-overlay,
+body.gh-mobile-menu-open #gh-mobile-menu-overlay {
+  pointer-events: auto !important;
+}
+
+/* ── Phase 65L: Definitive mobile messenger composer visibility ── */
+/*
+ * Root issues resolved:
+ *   1. position:sticky on .chat-input-bar has no effect inside overflow:hidden — use relative.
+ *   2. bottom:0 on .messages-page doesn't clear env(safe-area-inset-bottom) in PWA mode.
+ *   3. Multiple earlier phases left conflicting flex/display rules — this block wins last.
+ */
+@media (max-width: 768px) {
+  /* Body: full dynamic viewport, zero padding bleed */
+  body.page-messages {
+    height: 100dvh !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Fixed shell: from navbar bottom to visual viewport bottom, cleared by safe-area */
+  body.page-messages .messages-page {
+    position: fixed !important;
+    top: var(--navbar-height, 72px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: env(safe-area-inset-bottom, 0px) !important;
+    height: auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+  }
+
+  /* Messages layout: single-column block filling flex parent */
+  body.page-messages .messages-layout {
+    display: block !important;
+    flex: 1 1 auto !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Inbox: full-height column when chat is not open */
+  body.page-messages .msg-sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Chat window: hidden by default on mobile */
+  body.page-messages .chat-window {
+    display: none !important;
+  }
+
+  /* Chat open: hide inbox, show chat full-height */
+  body.page-messages.chat-open .msg-sidebar,
+  body.page-messages .messages-layout.chat-open .msg-sidebar {
+    display: none !important;
+  }
+  body.page-messages.chat-open .chat-window,
+  body.page-messages .messages-layout.chat-open .chat-window {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Flex children — header, status bars: shrink to content, never grow */
+  body.page-messages .chat-header {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    z-index: 5 !important;
+  }
+  body.page-messages .typing-row,
+  body.page-messages .msg-search-wrap,
+  body.page-messages .reply-preview-bar,
+  body.page-messages .quick-replies-bar {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+  }
+
+  /* Messages list: fills remaining space, only scrollable region */
+  body.page-messages .chat-messages {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+  }
+
+  /* Composer: always visible at bottom of flex column.
+   * position:sticky requires overflow:auto/scroll on ancestor — not overflow:hidden.
+   * Use position:relative so it flows naturally as the last flex child. */
+  body.page-messages .chat-input-bar {
+    flex: 0 0 auto !important;
+    position: relative !important;
+    bottom: auto !important;
+    padding: 8px 10px !important;
+    padding-bottom: max(10px, env(safe-area-inset-bottom, 0px)) !important;
+    background: var(--bg-0, #04050d) !important;
+    border-top: 1px solid var(--gh-border, rgba(255, 255, 255, 0.08)) !important;
+    z-index: 10 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  /* Input and buttons inside composer must be fully visible */
+  body.page-messages .msg-input {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    min-height: 36px !important;
+  }
+  body.page-messages .input-btn,
+  body.page-messages .send-btn {
+    flex: 0 0 auto !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+}
+
+/* ── Phase 65M: iPhone Messenger padding-only composer lift ──
+ * Keep the real composer. Remove the useless bottom hiding by reserving
+ * a small browser-toolbar pad inside the chat column instead of changing
+ * viewport height with JS. Scoped to mobile messages only.
+ */
+@media (max-width: 768px) {
+  body.page-messages {
+    overflow: hidden !important;
+    padding-bottom: 0 !important;
+    --msg-mobile-bottom-pad: clamp(56px, 8.5vh, 78px);
+  }
+
+  /* If GeoHub is installed as PWA, there is no browser toolbar to clear. */
+  @media (display-mode: standalone) {
+    body.page-messages {
+      --msg-mobile-bottom-pad: max(12px, env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  body.page-messages #app-bottom-nav,
+  body.page-messages .app-bottom-nav,
+  body.page-messages .bottom-nav {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  /* The chat column itself reserves room for Safari/Chrome bottom toolbar.
+     This lifts the composer without changing width/height calculations for other pages. */
+  body.page-messages.chat-open .chat-window,
+  body.page-messages .messages-layout.chat-open .chat-window {
+    box-sizing: border-box !important;
+    padding-bottom: var(--msg-mobile-bottom-pad) !important;
+  }
+
+  body.page-messages .chat-input-bar {
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: 8px 10px max(10px, env(safe-area-inset-bottom, 0px)) !important;
+    min-height: 60px !important;
+    max-height: 76px !important;
+  }
+
+  body.page-messages .msg-input {
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+  }
+
+  body.page-messages .input-btn,
+  body.page-messages .send-btn {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+
+  body.page-messages .chat-messages {
+    padding-bottom: 10px !important;
+  }
+}
+
+/* Phase 65M5: remove the empty mobile Messenger composer blanket. */
+@media (max-width: 768px) {
+  body.page-messages #app-bottom-nav,
+  body.page-messages .app-bottom-nav,
+  body.page-messages .bottom-nav {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  body.page-messages .chat-window,
+  body.page-messages.chat-open .chat-window,
+  body.page-messages .messages-layout.chat-open .chat-window {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    padding-bottom: 0 !important;
+  }
+
+  body.page-messages .chat-messages {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    padding-bottom: 8px !important;
+  }
+
+  body.page-messages .chat-input-bar {
+    flex: 0 0 62px !important;
+    height: 62px !important;
+    min-height: 62px !important;
+    max-height: 62px !important;
+    overflow: visible !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 8px 10px !important;
+    border-radius: 0 !important;
+    background: rgba(2, 24, 28, 0.96) !important;
+    box-shadow: none !important;
+    transform: none !important;
+    position: relative !important;
+    z-index: 80 !important;
+  }
+
+  body.page-messages .msg-input {
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    flex: 1 1 auto !important;
+    overflow-y: hidden !important;
+    margin: 0 !important;
+  }
+
+  body.page-messages .chat-input-bar button,
+  body.page-messages .chat-input-bar .btn,
+  body.page-messages .chat-input-bar .send-btn {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    max-width: 44px !important;
+    max-height: 44px !important;
+    flex: 0 0 44px !important;
+    margin: 0 !important;
+  }
+
+  body.page-messages .typing-row:has(#typingIndicator:not([style*="block"])),
+  body.page-messages .typing-row:has(#typingIndicator[style*="display: none"]),
+  body.page-messages .typing-row:has(#typingIndicator:empty),
+  body.page-messages .quick-replies:empty,
+  body.page-messages .quick-replies-bar:empty,
+  body.page-messages .reply-preview:empty,
+  body.page-messages .reply-preview-bar:empty,
+  body.page-messages .attachment-preview:empty,
+  body.page-messages .upload-preview:empty,
+  body.page-messages .voice-preview:empty,
+  body.page-messages .composer-extra:empty,
+  body.page-messages .msg-extra:empty,
+  body.page-messages .message-extra:empty {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    overflow: hidden !important;
+  }
+}
+
+/* Phase 65M6: desktop Messenger info panel must not exist in mobile layout. */
+@media (max-width: 768px) {
+  body.page-messages #infoPanel,
+  body.page-messages .info-panel,
+  body.page-messages.chat-open #infoPanel,
+  body.page-messages.chat-open .info-panel {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    inset: auto !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    flex: 0 0 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    overflow: hidden !important;
+    transform: none !important;
+    z-index: -1 !important;
+  }
+
+  body.page-messages.chat-open .messages-layout {
+    grid-template-columns: 1fr !important;
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  body.page-messages.chat-open .chat-window {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  body.page-messages.chat-open .chat-input-bar {
+    flex: 0 0 62px !important;
+    height: 62px !important;
+    min-height: 62px !important;
+    max-height: 62px !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: visible !important;
+    z-index: 100 !important;
+  }
+}
+
+/* Phase 70B: hide .mobile-menu by default — only shown via body class */
+.mobile-menu { display: none !important; }
+
+/* Phase 70B: desktop hamburger safety — prevent mobile drawer leak, show compact dropdown */
+@media (min-width: 769px) {
+  body.gh-mobile-menu-open { overflow: auto !important; }
+  body.gh-mobile-menu-open .gh-mobile-menu-overlay { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }
+  body.gh-mobile-menu-open .mobile-menu { display: none !important; visibility: hidden !important; pointer-events: none !important; }
+  body.gh-desktop-menu-open .gh-mobile-menu-overlay { display: none !important; pointer-events: none !important; }
+}
+
+/* ── Phase 69: Followed page banner in personal feed ── */
+.gh-followed-page-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gh-accent, #38bdf8);
+  padding: 6px 16px 4px;
+  border-bottom: 1px solid var(--gh-border, rgba(255,255,255,0.06));
+  text-decoration: none;
+  letter-spacing: .02em;
+}
+.gh-followed-page-banner:hover { text-decoration: underline; }
+
+/* Phase 70B2: desktop must never reuse the mobile drawer. */
+.gh-desktop-menu-dropdown {
+  display: none;
+}
+@media (min-width: 769px) {
+  body .mobile-menu,
+  body.gh-mobile-menu-open .mobile-menu,
+  body.gh-desktop-menu-open .mobile-menu,
+  body.page-messages .mobile-menu,
+  body.page-messages.gh-mobile-menu-open .mobile-menu,
+  body.page-messages.gh-desktop-menu-open .mobile-menu {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: fixed !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    width: 0 !important;
+    height: 0 !important;
+    max-width: 0 !important;
+    max-height: 0 !important;
+    transform: none !important;
+    z-index: -1 !important;
+  }
+
+  body .gh-mobile-menu-overlay,
+  body.gh-mobile-menu-open .gh-mobile-menu-overlay,
+  body.gh-desktop-menu-open .gh-mobile-menu-overlay {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  body.gh-desktop-menu-open .gh-desktop-menu-dropdown {
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    top: 68px !important;
+    right: 16px !important;
+    width: 300px !important;
+    max-width: calc(100vw - 32px) !important;
+    max-height: calc(100vh - 90px) !important;
+    overflow-y: auto !important;
+    z-index: 10000 !important;
+    border-radius: 18px !important;
+    background: rgba(8, 12, 22, 0.98) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35) !important;
+    padding: 10px !important;
+  }
+}
+@media (max-width: 768px) {
+  .gh-desktop-menu-dropdown {
+    display: none !important;
+  }
+}
+
+/* Phase 70B3: Messenger owns its own inbox/sidebar; hide injected app sidebar on desktop. */
+@media (min-width: 769px) {
+  body.page-messages.gh-has-injected-nav {
+    padding-left: 0 !important;
+  }
+
+  body.page-messages .gh-left {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+  }
+
+  body.page-messages .messages-page,
+  body.page-messages .messages-layout {
+    margin-left: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* Phase 71: desktop Messenger details sidebar; mobile uses separate fixed sheet. */
+@media (min-width: 1025px) {
+  body.page-messages .messages-layout,
+  body.page-messages .messages-layout.chat-open {
+    grid-template-columns: 288px minmax(0, 1fr) minmax(320px, 340px) !important;
+  }
+
+  body.page-messages #infoPanel,
+  body.page-messages .info-panel {
+    display: flex !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 360px !important;
+    height: auto !important;
+    overflow: hidden !important;
+  }
+}
+
+@media (max-width: 768px) {
+  body.page-messages #infoPanel,
+  body.page-messages .info-panel,
+  body.page-messages.chat-open #infoPanel,
+  body.page-messages.chat-open .info-panel {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: 0 !important;
+    flex: 0 0 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    overflow: hidden !important;
+    z-index: -1 !important;
+  }
+}
+
+/* ── Messages: hide injected left nav so sidebar fills full left edge ── */
+body.page-messages .gh-left,
+body.page-messages.gh-has-injected-nav .gh-left { display: none !important; }

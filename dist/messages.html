@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+  <link rel="dns-prefetch" href="https://firebase.googleapis.com">
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+  <title>Messages — GeoHub</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
+  <style>
+    /* Bridge: map legacy CSS variables → GH design tokens */
+    body.page-messages { padding-top: 0 !important; height: 100dvh !important; overflow: hidden !important; }
+    :root {
+      --navbar-height: 72px;
+      --bg-0: var(--gh-bg);
+      --bg-1: var(--gh-bg);
+      --bg-card: var(--gh-card);
+      --bg-elevated: var(--gh-card-soft);
+      --text-primary: var(--gh-text);
+      --text-secondary: var(--gh-muted);
+      --text-muted: var(--gh-muted);
+      --border: var(--gh-border);
+      --border-subtle: var(--gh-border);
+      --border-emphasis: var(--gh-border-strong);
+      --radius-full: var(--gh-radius-full);
+      --transition: var(--gh-dur-fast) var(--gh-ease);
+    }
+  </style>
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <style>body.page-messages:not(.gh-has-injected-nav){opacity:0}body.page-messages{transition:opacity .12s}</style>
+  <script type="module" crossorigin src="/assets/messages-Bb1y24rG.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/responsive-polish-BO79aqv7.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase-config-CGKVrgHh.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-i18n-BbqPU8Gy.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-schema-kY2sMGH-.js">
+  <link rel="modulepreload" crossorigin href="/assets/mode-CyBXZbtG.js">
+  <link rel="modulepreload" crossorigin href="/assets/config-DSeD8I2H.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-client-DV25UnBD.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-CYAfAwpP.js">
+  <link rel="modulepreload" crossorigin href="/assets/account-BJSGhbLy.js">
+  <link rel="modulepreload" crossorigin href="/assets/mobile-nav-DsKLv3RI.js">
+  <link rel="modulepreload" crossorigin href="/assets/firestore-social-lVyxRoWc.js">
+  <link rel="modulepreload" crossorigin href="/assets/geo-actors-DCdcg0VE.js">
+  <link rel="modulepreload" crossorigin href="/assets/account-switcher-Bs0W5qNE.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-social-redesign-ChTko2Gc.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-production-v6-C2WXOOR-.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-production-stabilization-v1-D9brtDwk.js">
+  <link rel="modulepreload" crossorigin href="/assets/push-notifications-wdsLxQpN.js">
+  <link rel="modulepreload" crossorigin href="/assets/analytics-DyGaP85h.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-calls-DqDOBgOW.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-group-calls-Ck1zIhcT.js">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
+  <link rel="stylesheet" crossorigin href="/assets/messages-aHsScV8C.css">
+  <link rel="stylesheet" crossorigin href="/assets/styles-DkNdvQG3.css">
+  <link rel="stylesheet" crossorigin href="/assets/navbar-D8jKRRC5.css">
+  <link rel="stylesheet" crossorigin href="/assets/account-switcher-B6z_cLE_.css">
+  <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-DJnMDTGu.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+</head>
+<body class="page-messages" data-gh-page="messages">
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="logo-icon">🌍</div>
+      <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
+    </a>
+    <ul class="navbar-links"></ul>
+    <div class="navbar-actions">
+      <a href="profile.html" class="btn btn-ghost btn-sm"><i class="fas fa-user"></i> Profile</a>
+    </div>
+    <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+  <div class="mobile-menu"></div>
+
+  <div class="messages-page">
+    <div class="messages-layout">
+
+      <!-- ===== LEFT SIDEBAR ===== -->
+      <div class="msg-sidebar">
+        <div class="sidebar-top">
+          <div class="sidebar-title">
+            <span data-i18n="msg_title">Messages</span>
+            <div class="sidebar-title-actions">
+              <button class="sidebar-icon-btn" data-i18n-title="msg_new" title="New message" onclick="openNewConversationSearch()"><i class="fas fa-edit"></i></button>
+              <button class="sidebar-icon-btn" title="Call History" data-i18n-title="call_history" onclick="GhCallHistory.open()"><i class="fas fa-phone-alt"></i></button>
+              <button class="sidebar-icon-btn" title="Group Call" data-i18n-title="group_call_btn" onclick="GhGroupCalls.openInviteModal()"><i class="fas fa-users"></i></button>
+              <button class="sidebar-icon-btn" title="Join Group Call" data-i18n-title="group_call_join" onclick="GhGroupCalls.openJoinDialog()"><i class="fas fa-sign-in-alt"></i></button>
+              <button class="sidebar-icon-btn" title="Filter" data-i18n-title="msg_filter"><i class="fas fa-sliders-h"></i></button>
+            </div>
+          </div>
+          <div class="conv-search-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" class="conv-search" data-i18n-placeholder="msg_search_convs" placeholder="Search conversations…" oninput="searchConvs(this.value)">
+          </div>
+          <div class="filter-tabs">
+            <button class="filter-tab active" onclick="setFilter('all',this)" data-i18n="msg_all">All</button>
+            <button class="filter-tab" onclick="setFilter('unread',this)" data-i18n="msg_unread">Unread</button>
+          </div>
+        </div>
+        <div class="conv-list" id="convList"></div>
+      </div>
+
+      <!-- ===== CHAT WINDOW ===== -->
+      <div class="chat-window">
+        <div class="chat-header" id="chatHeader">
+          <div style="color:var(--text-muted);font-size:0.85rem;padding:0 16px" data-i18n="msg_select_conv">Select a conversation</div>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+
+        <!-- Typing indicator -->
+        <div class="typing-row" style="padding:0 16px 4px">
+          <div class="msg-av-col"></div>
+          <div id="typingIndicator">
+            <div class="typing-bubble">
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message search bar -->
+        <div class="msg-search-wrap" id="msgSearchWrap" style="display:none">
+          <i class="fas fa-search"></i>
+          <input type="text" id="msgSearchInput" class="msg-search-input" data-i18n-placeholder="msg_search_msgs" placeholder="Search messages…">
+          <button class="msg-search-close" type="button" onclick="window.__ghToggleSearch()"><i class="fas fa-times"></i></button>
+        </div>
+
+        <!-- Reply preview bar -->
+        <div class="reply-preview-bar" id="replyPreviewBar" style="display:none"></div>
+
+        <!-- Quick replies -->
+        <div class="quick-replies-bar" id="quickRepliesBar" style="display:none"></div>
+
+        <!-- Input bar -->
+        <div class="chat-input-bar">
+          <button class="input-btn attach-menu-btn" id="attachmentMenuBtn" title="Attachments" data-i18n-title="msg_attachments" aria-label="Attachments" aria-expanded="false" onclick="window.__ghToggleAttachSheet&&window.__ghToggleAttachSheet(event)"><i class="fas fa-plus"></i></button>
+          <input type="text" id="msgInput" class="msg-input" data-i18n-placeholder="msg_type_msg" placeholder="Type a message…">
+          <button class="input-btn" id="emojiBtn" title="Emoji" data-i18n-title="msg_emoji" onclick="toggleEmojiPicker()"><i class="fas fa-smile"></i></button>
+          <button class="send-btn" onclick="sendMsg()" title="Send" data-i18n-title="msg_send"><i class="fas fa-paper-plane"></i></button>
+          <div class="msg-attach-sheet" id="msgAttachSheet" aria-hidden="true">
+            <button type="button" data-pick-image><i class="fas fa-image"></i><span data-i18n="msg_photo">Photo</span></button>
+            <button type="button" id="fileAttachBtn"><i class="fas fa-file-alt"></i><span data-i18n="msg_file">File</span></button>
+            <button type="button" id="voiceBtn"><i class="fas fa-microphone"></i><span data-i18n="msg_voice">Voice</span></button>
+          </div>
+          <div class="emoji-picker-wrap" id="emojiPicker"></div>
+          <input id="messageImageInput" type="file" accept="image/*" hidden>
+          <input id="messageFileInput" type="file" accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.csv" hidden>
+        </div>
+      </div>
+
+      <!-- ===== INFO PANEL ===== -->
+      <div class="info-panel" id="infoPanel">
+        <div class="info-scroll">
+          <div style="color:var(--text-muted);text-align:center;padding:40px 16px;font-size:0.85rem" data-i18n="msg_conv_details">Select a conversation to see details</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <div id="newConversationModal" class="msg-modal" hidden>
+    <div class="msg-modal-card">
+      <button class="msg-modal-close" type="button" onclick="closeNewConversationSearch()">×</button>
+      <h3 data-i18n="msg_start_conv">Start a conversation</h3>
+      <p data-i18n="msg_start_sub">Search real users and open a chat.</p>
+      <input id="newConversationSearch" class="msg-input" data-i18n-placeholder="msg_search_user" placeholder="Search by name or email…" oninput="searchNewConversationUsers(this.value)">
+      <div id="newConversationResults" class="new-conversation-results"></div>
+    </div>
+  </div>
+
+  <div id="msgToast" class="msg-toast"></div>
+
+  <!-- Vite: 25 scripts bundled → 1 optimised chunk. See src/entries/messages.js -->
+</body>
+</html>

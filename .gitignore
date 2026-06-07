@@ -4,8 +4,8 @@
 Thumbs.db
 # Environment variables — never commit real keys
 .env
-# Vite build output
-dist/
+# Vite build output — tracked so Cloudflare Pages serves pre-built files directly
+# dist/
 # Node / Playwright
 node_modules/
 playwright-report/

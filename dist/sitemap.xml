@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Core -->
+  <url><loc>https://geohub.ge/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://geohub.ge/feed.html</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://geohub.ge/explore.html</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://geohub.ge/map.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://geohub.ge/search.html</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+
+  <!-- Social -->
+  <url><loc>https://geohub.ge/groups.html</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://geohub.ge/events.html</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://geohub.ge/reels.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://geohub.ge/live.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+
+  <!-- Business -->
+  <url><loc>https://geohub.ge/marketplace.html</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://geohub.ge/places.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://geohub.ge/reviews.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://geohub.ge/rewards.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://geohub.ge/services.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://geohub.ge/real-estate.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+
+  <!-- Features -->
+  <url><loc>https://geohub.ge/assistant.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://geohub.ge/challenges.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://geohub.ge/gamification.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://geohub.ge/learning.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://geohub.ge/creators.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://geohub.ge/world.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+
+  <!-- Premium & Growth -->
+  <url><loc>https://geohub.ge/premium.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://geohub.ge/early-adopter.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://geohub.ge/pricing.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
+  <!-- Legal -->
+  <url><loc>https://geohub.ge/privacy.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://geohub.ge/terms.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://geohub.ge/trust.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+
+</urlset>

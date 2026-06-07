@@ -1,0 +1,314 @@
+/* ================================================================
+   GeoHub — Account Switcher Dropdown
+   ================================================================ */
+
+.geo-sw-wrap { position: relative; display: inline-flex; align-items: center; }
+
+.geo-sw-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px 6px 8px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 999px;
+  color: #f1f5f9; font-size: .84rem; font-weight: 700;
+  cursor: pointer; transition: all .18s; white-space: nowrap;
+}
+.geo-sw-btn:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.18); }
+
+.geo-sw-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  object-fit: cover; flex-shrink: 0;
+  background: linear-gradient(135deg,#10b981,#3b82f6);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: .7rem; font-weight: 900; color: #fff;
+}
+
+.geo-sw-chevron { font-size: .6rem; color: #64748b; transition: transform .18s; }
+.geo-sw-btn.open .geo-sw-chevron { transform: rotate(180deg); }
+
+/* ── Dropdown ─────────────────────────────────────────────── */
+.geo-sw-dropdown {
+  position: fixed; /* fixed so it's never clipped by overflow:hidden ancestors */
+  width: 296px; background: #0f172a;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 18px; padding: 8px;
+  z-index: 100000; /* above navbar z-index */
+  box-shadow: 0 20px 60px rgba(0,0,0,.7);
+  transform: scale(.95) translateY(-6px); opacity: 0; pointer-events: none;
+  transition: all .18s cubic-bezier(.22,1,.36,1);
+  /* top/right set dynamically by JS */
+  top: 60px; right: 16px;
+}
+.geo-sw-dropdown.open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
+
+/* ── Profile block ───────────────────────────────────────── */
+.geo-sw-profile {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px; border-radius: 12px;
+  text-decoration: none; color: inherit;
+  transition: background .14s; cursor: pointer;
+}
+.geo-sw-profile:hover { background: rgba(255,255,255,.05); }
+.geo-sw-profile-avatar {
+  width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg,#10b981,#3b82f6);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; font-weight: 900; color: #fff;
+  border: 2px solid rgba(255,255,255,.1); overflow: hidden;
+}
+.geo-sw-profile-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.geo-sw-profile-name { font-weight: 800; font-size: .92rem; color: #f1f5f9; }
+.geo-sw-profile-email { font-size: .73rem; color: #64748b; margin-top: 2px; }
+
+/* ── Divider + labels ────────────────────────────────────── */
+.geo-sw-divider { height: 1px; background: rgba(255,255,255,.07); margin: 6px 4px; }
+.geo-sw-section-label {
+  padding: 5px 12px 6px;
+  font-size: .67rem; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .08em; color: #475569;
+}
+
+/* ── Items ───────────────────────────────────────────────── */
+.geo-sw-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 10px;
+  text-decoration: none; color: #cbd5e1;
+  font-size: .84rem; font-weight: 600;
+  cursor: pointer; transition: background .14s;
+  background: none; border: none; width: 100%; text-align: left;
+}
+.geo-sw-item:hover { background: rgba(255,255,255,.05); color: #f1f5f9; }
+
+.geo-sw-item-icon {
+  width: 32px; height: 32px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .78rem; flex-shrink: 0;
+}
+.geo-sw-item-icon img { width: 32px; height: 32px; border-radius: 9px; object-fit: cover; }
+.geo-sw-item-icon.biz     { background: rgba(16,185,129,.15);  color: #10b981; }
+.geo-sw-item-icon.create  { background: rgba(139,92,246,.15);  color: #a78bfa; }
+.geo-sw-item-icon.settings{ background: rgba(100,116,139,.15); color: #94a3b8; }
+.geo-sw-item-icon.signout { background: rgba(239,68,68,.1);    color: #ef4444; }
+
+.geo-sw-item-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.geo-sw-owner-pill {
+  font-size: .62rem; font-weight: 800;
+  padding: 2px 7px; border-radius: 999px;
+  background: rgba(16,185,129,.15); color: #10b981; flex-shrink: 0;
+}
+
+/* ── Active identity card (Facebook-style) ───────────────── */
+.geo-sw-active-card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 14px 12px; border-radius: 14px;
+  text-decoration: none; color: inherit;
+  background: rgba(255,255,255,.04);
+  transition: background .14s;
+}
+.geo-sw-active-card:hover { background: rgba(255,255,255,.08); }
+
+.geo-sw-active-avatar {
+  width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg,#10b981,#3b82f6);
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid rgba(255,255,255,.15); overflow: hidden;
+}
+
+.geo-sw-active-name { font-weight: 800; font-size: .97rem; color: #f1f5f9; }
+.geo-sw-active-sub  { font-size: .72rem; color: #64748b; margin-top: 2px; }
+
+.geo-sw-active-badge {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  background: #10b981; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .72rem;
+}
+
+/* ── Quick-action chips below active card ────────────────── */
+.geo-sw-quick-links {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 0 14px 10px;
+}
+.geo-sw-quick-link {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 7px;
+  background: rgba(255,255,255,.07); color: #94a3b8;
+  font-size: .71rem; font-weight: 700; text-decoration: none;
+  transition: background .14s, color .14s;
+}
+.geo-sw-quick-link:hover { background: rgba(59,130,246,.18); color: #93c5fd; }
+
+/* ── Account switch rows ─────────────────────────────────── */
+.geo-sw-account-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 10px;
+  cursor: pointer; transition: background .14s;
+}
+.geo-sw-account-row:hover { background: rgba(255,255,255,.05); }
+
+.geo-sw-account-avatar {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg,#10b981,#3b82f6);
+  display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid rgba(255,255,255,.1); overflow: hidden;
+}
+.geo-sw-account-avatar.biz {
+  border-radius: 10px;
+  background: rgba(16,185,129,.12);
+  border-color: rgba(16,185,129,.2);
+}
+
+.geo-sw-account-info { flex: 1; min-width: 0; }
+.geo-sw-account-name { font-weight: 700; font-size: .88rem; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.geo-sw-account-type { font-size: .7rem; color: #64748b; margin-top: 1px; }
+
+.geo-sw-switch-btn {
+  padding: 5px 11px; border-radius: 7px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.1);
+  color: #94a3b8; font-size: .72rem; font-weight: 700;
+  cursor: pointer; flex-shrink: 0;
+  transition: background .14s, color .14s, border-color .14s;
+  font-family: inherit;
+}
+.geo-sw-switch-btn:hover { background: rgba(16,185,129,.15); color: #10b981; border-color: rgba(16,185,129,.3); }
+
+/* ── Unread badges ───────────────────────────────────────── */
+.geo-sw-unread-badge {
+  background: #ef4444; color: #fff; border-radius: 999px;
+  min-width: 18px; height: 18px; padding: 0 5px;
+  font-size: .65rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.geo-sw-unread-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: #ef4444; flex-shrink: 0;
+  border: 2px solid #0f172a;
+}
+
+/* ── View all profiles link ──────────────────────────────── */
+.geo-sw-view-all {
+  display: block; text-align: center; padding: 7px 12px;
+  font-size: .78rem; font-weight: 700; color: #3b82f6;
+  text-decoration: none; border-radius: 8px;
+  transition: background .14s;
+}
+.geo-sw-view-all:hover { background: rgba(59,130,246,.08); }
+
+/* ── Social redesign (gh-fb-inspired) integration ────────── */
+.gh-actor-btn-slot { display: inline-flex; align-items: center; }
+
+body.gh-fb-inspired .geo-sw-btn {
+  height: 44px;
+  border-radius: 11px;
+  background: rgba(17,30,49,.85);
+  border: 1px solid rgba(148,163,184,.12);
+  color: #eaf2ff;
+  padding: 0 14px 0 10px;
+}
+body.gh-fb-inspired .geo-sw-btn:hover {
+  background: rgba(16,185,129,.11);
+  border-color: rgba(148,163,184,.25);
+}
+
+/* ── Light mode button ───────────────────────────────────── */
+html[data-gh-theme="light"] body.gh-fb-inspired .geo-sw-btn {
+  background: #f8fafc;
+  border: 1px solid rgba(15,23,42,.08);
+  color: #0f172a;
+  box-shadow: 0 8px 22px rgba(15,23,42,.05);
+}
+html[data-gh-theme="light"] body.gh-fb-inspired .geo-sw-btn:hover {
+  background: rgba(15,23,42,.04);
+  border-color: rgba(15,23,42,.15);
+}
+
+/* ── Light mode dropdown ─────────────────────────────────── */
+html[data-gh-theme="light"] .geo-sw-dropdown {
+  background: #fff;
+  border-color: rgba(15,23,42,.1);
+  box-shadow: 0 20px 60px rgba(15,23,42,.15);
+}
+html[data-gh-theme="light"] .geo-sw-profile { color: #0f172a; }
+html[data-gh-theme="light"] .geo-sw-profile:hover { background: rgba(15,23,42,.04); }
+html[data-gh-theme="light"] .geo-sw-profile-name { color: #0f172a; }
+html[data-gh-theme="light"] .geo-sw-profile-email { color: #64748b; }
+html[data-gh-theme="light"] .geo-sw-item { color: #334155; }
+html[data-gh-theme="light"] .geo-sw-item:hover { background: rgba(15,23,42,.04); color: #0f172a; }
+html[data-gh-theme="light"] .geo-sw-divider { background: rgba(15,23,42,.07); }
+html[data-gh-theme="light"] .geo-sw-section-label { color: #94a3b8; }
+html[data-gh-theme="light"] .geo-sw-active-card { background: rgba(15,23,42,.04); }
+html[data-gh-theme="light"] .geo-sw-active-card:hover { background: rgba(15,23,42,.07); }
+html[data-gh-theme="light"] .geo-sw-active-name { color: #0f172a; }
+html[data-gh-theme="light"] .geo-sw-active-sub { color: #64748b; }
+html[data-gh-theme="light"] .geo-sw-quick-link { background: rgba(15,23,42,.06); color: #64748b; }
+html[data-gh-theme="light"] .geo-sw-quick-link:hover { background: rgba(59,130,246,.1); color: #2563eb; }
+html[data-gh-theme="light"] .geo-sw-account-row:hover { background: rgba(15,23,42,.04); }
+html[data-gh-theme="light"] .geo-sw-account-name { color: #1e293b; }
+html[data-gh-theme="light"] .geo-sw-account-type { color: #64748b; }
+html[data-gh-theme="light"] .geo-sw-switch-btn { background: rgba(15,23,42,.06); border-color: rgba(15,23,42,.12); color: #64748b; }
+html[data-gh-theme="light"] .geo-sw-switch-btn:hover { background: rgba(16,185,129,.1); color: #059669; border-color: rgba(16,185,129,.25); }
+html[data-gh-theme="light"] .geo-sw-unread-dot { border-color: #fff; }
+
+/* ── Preferences section (theme + language) ─────────────────── */
+.geo-sw-pref-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px;
+  min-height: 40px;
+}
+.geo-sw-pref-left {
+  display: flex; align-items: center; gap: 10px;
+}
+.geo-sw-pref-icon {
+  width: 18px; text-align: center;
+  color: var(--gh-muted, #94a3b8); font-size: .85rem;
+}
+.geo-sw-pref-label {
+  font-size: .84rem; color: var(--gh-text, #f1f5f9); font-weight: 500;
+}
+
+/* ── Theme toggle switch ─────────────────────────────────────── */
+.geo-sw-theme-toggle {
+  position: relative; width: 40px; height: 22px;
+  border-radius: 999px; border: none; cursor: pointer;
+  transition: background .22s;
+  background: #334155;
+  flex-shrink: 0;
+}
+.geo-sw-theme-toggle.dark  { background: #10b981; }
+.geo-sw-theme-toggle.light { background: #f59e0b; }
+.geo-sw-toggle-thumb {
+  position: absolute; top: 3px; left: 3px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #fff;
+  transition: transform .22s;
+  display: block;
+}
+.geo-sw-theme-toggle.dark  .geo-sw-toggle-thumb { transform: translateX(18px); }
+.geo-sw-theme-toggle.light .geo-sw-toggle-thumb { transform: translateX(0); }
+
+/* ── Language buttons ───────────────────────────────────────── */
+.geo-sw-lang-btns {
+  display: flex; gap: 4px;
+}
+.geo-sw-lang-btn {
+  padding: 3px 9px; border-radius: 6px; border: 1px solid rgba(255,255,255,.12);
+  background: transparent; color: var(--gh-muted, #94a3b8);
+  font-size: .75rem; font-weight: 700; cursor: pointer;
+  transition: all .15s; letter-spacing: .04em;
+}
+.geo-sw-lang-btn:hover { background: rgba(255,255,255,.08); color: #f1f5f9; }
+.geo-sw-lang-btn.active {
+  background: #10b981; color: #fff;
+  border-color: #10b981;
+}
+
+/* Light theme overrides */
+html[data-gh-theme="light"] .geo-sw-theme-toggle { background: #e2e8f0; }
+html[data-gh-theme="light"] .geo-sw-theme-toggle.light { background: #f59e0b; }
+html[data-gh-theme="light"] .geo-sw-lang-btn {
+  border-color: rgba(0,0,0,.15); color: #475569;
+}
+html[data-gh-theme="light"] .geo-sw-lang-btn:hover { background: rgba(0,0,0,.06); }

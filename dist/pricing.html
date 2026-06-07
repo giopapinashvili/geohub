@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+  <link rel="dns-prefetch" href="https://firebase.googleapis.com">
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pricing — GeoHub</title>
+  <!-- SEO ─────────────────────────────────────────────── -->
+  <meta name="description" content="Explore GeoHub's pricing plans for individuals and businesses. Start free and upgrade when you're ready.">
+  <link rel="canonical" href="https://geohub.ge/pricing.html">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="GeoHub">
+  <meta property="og:title" content="Pricing — GeoHub">
+  <meta property="og:description" content="Explore GeoHub's pricing plans for individuals and businesses. Start free and upgrade when you're ready.">
+  <meta property="og:url" content="https://geohub.ge/pricing.html">
+  <meta property="og:image" content="https://geohub.ge/icons/icon-512.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="GeoHub — Discover Georgia">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Pricing — GeoHub">
+  <meta name="twitter:description" content="Explore GeoHub's pricing plans for individuals and businesses. Start free and upgrade when you're ready.">
+  <meta name="twitter:image" content="https://geohub.ge/icons/icon-512.png">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/assets/pricing-BUXouNL8.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/responsive-polish-BO79aqv7.js">
+  <link rel="modulepreload" crossorigin href="/assets/chat-popup-MADaMnFN.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-production-stabilization-v1-D9brtDwk.js">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
+  <link rel="stylesheet" crossorigin href="/assets/pricing-BehhsefY.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav class="pnav">
+  <a href="index.html" class="pnav-logo">
+    <div class="pnav-logo-ic">G</div>
+    <span class="pnav-logo-name">GeoHub</span>
+  </a>
+  <div class="pnav-right">
+    <a href="index.html" class="pnav-link">Home</a>
+    <a href="search.html" class="pnav-link">Search</a>
+    <a href="index.html" class="pnav-btn">Get Started Free</a>
+  </div>
+</nav>
+
+<!-- ── CURRENT PLAN BANNER ── -->
+<div id="cpBanner">
+  <div class="cpb-inner">
+    <div class="cpb-icon">✨</div>
+    <div class="cpb-text">You're on <strong id="cpName">Plus Explorer</strong> · Next billing: <span id="cpBilling">Jun 10, 2026</span></div>
+    <button class="cpb-manage" onclick="scrollToSubDash()">Manage Plan</button>
+  </div>
+</div>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-tag"><i class="fas fa-bolt"></i> Unlock Full GeoHub Power</div>
+  <h1 class="hero-title">Simple Pricing for<br><span>Every Georgian</span></h1>
+  <p class="hero-sub">Free to start. Upgrade when you're ready. Plans for explorers, businesses, creators, organizers, teachers, and service providers.</p>
+  <div class="hero-badges">
+    <div class="hero-badge"><i class="fas fa-check-circle"></i> No contracts</div>
+    <div class="hero-badge"><i class="fas fa-check-circle"></i> Cancel anytime</div>
+    <div class="hero-badge"><i class="fas fa-check-circle"></i> Free tier always available</div>
+    <div class="hero-badge"><i class="fas fa-check-circle"></i> GEL pricing</div>
+  </div>
+</section>
+
+<!-- ── CONTROLS BAR ── -->
+<div class="controls-bar">
+  <div class="controls-inner">
+    <!-- Billing toggle -->
+    <div class="billing-wrap">
+      <div class="billing-toggle">
+        <div class="bt-opt active" id="btMonthly" onclick="setBilling('monthly')">Monthly</div>
+        <div class="bt-opt" id="btYearly" onclick="setBilling('yearly')">Yearly</div>
+      </div>
+      <div class="save-badge" id="saveBadge" style="display:none"><i class="fas fa-tag"></i> Save up to 25%</div>
+    </div>
+    <!-- Audience tabs -->
+    <div class="aud-tabs" id="audTabs">
+      <button class="aud-tab active" data-aud="users"      onclick="switchAud('users')"><span class="tab-ic">👤</span> Users</button>
+      <button class="aud-tab"        data-aud="businesses" onclick="switchAud('businesses')"><span class="tab-ic">🏢</span> Businesses</button>
+      <button class="aud-tab"        data-aud="creators"   onclick="switchAud('creators')"><span class="tab-ic">🌟</span> Creators</button>
+      <button class="aud-tab"        data-aud="organizers" onclick="switchAud('organizers')"><span class="tab-ic">📅</span> Organizers</button>
+      <button class="aud-tab"        data-aud="teachers"   onclick="switchAud('teachers')"><span class="tab-ic">🎓</span> Teachers</button>
+      <button class="aud-tab"        data-aud="services"   onclick="switchAud('services')"><span class="tab-ic">🔧</span> Services</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── PLANS SECTION ── -->
+<div class="plans-section">
+  <div class="plans-headline">
+    <h2 id="plansTitle">Plans for Explorers</h2>
+    <p id="plansSub">Start free, upgrade when GeoHub becomes essential to your city life</p>
+  </div>
+  <div class="plans-grid" id="plansGrid"><!-- JS rendered --></div>
+</div>
+
+<!-- ── COMPARISON TABLE ── -->
+<div class="comp-section">
+  <div class="section-divider"></div>
+  <div class="comp-toggle" onclick="toggleCompTable()">
+    <span id="compToggleLabel">Show full feature comparison</span>
+    <i class="fas fa-chevron-down" id="compToggleIcon"></i>
+  </div>
+  <div class="comp-table-wrap" id="compTableWrap">
+    <table class="comp-table" id="compTable"><!-- JS rendered --></table>
+  </div>
+</div>
+
+<!-- ── SUBSCRIPTION DASHBOARD ── -->
+<div id="subDash">
+  <div class="section-divider" style="margin-bottom:32px"></div>
+  <div class="sd-header">
+    <div class="sd-title">Your Subscription</div>
+    <span class="badge" style="background:var(--gd);color:var(--green);border:1px solid rgba(16,185,129,0.3);padding:4px 10px;border-radius:999px;font-size:0.68rem;font-weight:700">Active</span>
+  </div>
+  <div class="sd-card" id="sdCard"><!-- JS rendered --></div>
+</div>
+
+<!-- ── FAQ ── -->
+<section class="faq-section">
+  <div class="section-divider" style="margin-bottom:48px"></div>
+  <div class="faq-title">Frequently Asked Questions</div>
+  <div class="faq-sub">Everything you need to know about GeoHub plans</div>
+
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">Can I switch plans at any time? <i class="fas fa-chevron-down"></i></div>
+    <div class="faq-a"><div class="faq-a-inner">Yes, you can upgrade or downgrade your plan at any time. When you upgrade, you'll be charged a prorated amount for the remainder of the billing period. Downgrading takes effect at the next billing cycle.</div></div>
+  </div>
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">Is the Free plan truly free forever? <i class="fas fa-chevron-down"></i></div>
+    <div class="faq-a"><div class="faq-a-inner">Absolutely. The Free plan is always available with no time limits. We believe everyone should be able to explore GeoHub's city network. Paid plans unlock advanced features when you need them.</div></div>
+  </div>
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">What payment methods do you accept? <i class="fas fa-chevron-down"></i></div>
+    <div class="faq-a"><div class="faq-a-inner">GeoHub accepts all major credit and debit cards (Visa, Mastercard, Amex), as well as TBC Pay, Bank of Georgia Pay, and popular Georgian mobile wallets. Apple Pay and Google Pay will be added after payment provider approval.</div></div>
+  </div>
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">How does the yearly discount work? <i class="fas fa-chevron-down"></i></div>
+    <div class="faq-a"><div class="faq-a-inner">When you choose yearly billing, you pay upfront for 12 months at a discounted rate — typically saving 17–25% compared to monthly billing. The full year is charged on your start date and renews annually.</div></div>
+  </div>
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">Can businesses have multiple locations on one plan? <i class="fas fa-chevron-down"></i></div>
+    <div class="faq-a"><div class="faq-a-inner">The Growth and Premium Business plans cover a single location. For chains or multi-location businesses, contact our partnerships team for a custom enterprise plan with bulk pricing and centralized analytics.</div></div>
+  </div>
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">What happens to my data if I cancel? <i class="fas fa-chevron-down"></i></div>
+    <div class="faq-a"><div class="faq-a-inner">Your profile, reviews, check-ins, and earned trust score are never deleted. If you cancel a paid plan, you'll revert to the Free tier and lose access to paid features — but all your content remains intact.</div></div>
+  </div>
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">Do Creator plans share revenue with GeoHub? <i class="fas fa-chevron-down"></i></div>
+    <div class="faq-a"><div class="faq-a-inner">Creator Pro and Studio plans give you full access to the brand deals marketplace. GeoHub takes a 12% platform fee on completed brand deals. Direct tip/donation features have a 5% fee. Subscription revenue from fans is 0% fee for Studio members.</div></div>
+  </div>
+  <div class="faq-item" onclick="toggleFaq(this)">
+    <div class="faq-q">Is there a student or NGO discount? <i class="fas fa-chevron-down"></i></div>
+    <div class="faq-a"><div class="faq-a-inner">Yes! Students with a valid Georgian university email get 50% off any personal plan. Registered NGOs and civic organizations get Creator Pro free of charge as part of GeoHub's Patriot civic initiative. Contact support to apply.</div></div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-section">
+  <div class="cta-title">Ready to level up your GeoHub?</div>
+  <div class="cta-sub">Join thousands of Georgians getting more from their city every day.</div>
+  <div class="cta-btns">
+    <button class="cta-btn-primary" onclick="switchAud('users');window.scrollTo({top:0,behavior:'smooth'})"><i class="fas fa-bolt"></i> See Explorer Plans</button>
+    <a href="index.html" class="cta-btn-ghost"><i class="fas fa-home"></i> Back to GeoHub</a>
+  </div>
+</section>
+
+<!-- ── UPGRADE MODAL ── -->
+<div class="modal-ov" id="upgradeModal">
+  <div class="modal-backdrop" onclick="closeUpgrade()"></div>
+  <div class="modal-panel">
+    <div class="modal-header">
+      <div class="modal-header-title">Upgrade to <span id="modalPlanName">—</span></div>
+      <button class="modal-close" onclick="closeUpgrade()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <!-- Plan summary -->
+      <div class="plan-summary">
+        <div class="ps-icon" id="modalIcon">⚡</div>
+        <div>
+          <div class="ps-name" id="modalSummaryName">Plan</div>
+          <div class="ps-desc" id="modalSummaryDesc">Description</div>
+        </div>
+        <div class="ps-price">
+          <div class="ps-price-val" id="modalPrice">₾0</div>
+          <div class="ps-price-period" id="modalPricePeriod">/month</div>
+        </div>
+      </div>
+
+      <!-- Billing cycle -->
+      <div class="modal-field-label">Billing Cycle</div>
+      <div class="modal-billing-row" id="modalBillingRow">
+        <div class="mbc active" onclick="setModalBilling('monthly')" id="mbcMonthly">
+          <div class="mbc-label">Monthly</div>
+          <div class="mbc-price" id="mbcMonthlyPrice">₾0/mo</div>
+        </div>
+        <div class="mbc" onclick="setModalBilling('yearly')" id="mbcYearly">
+          <div class="mbc-label">Yearly</div>
+          <div class="mbc-price" id="mbcYearlyPrice">₾0/mo</div>
+          <div class="mbc-save" id="mbcSave">Save ₾0/year</div>
+        </div>
+      </div>
+
+      <!-- Payment -->
+      <div class="modal-field-label">Payment Details</div>
+      <div class="checkout-card">
+        <div class="checkout-card-header">
+          <span>Card details — demo mode</span>
+          <div class="checkout-card-icons">
+            <i class="fab fa-cc-visa"></i>
+            <i class="fab fa-cc-mastercard"></i>
+          </div>
+        </div>
+        <input class="checkout-input" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" oninput="fmtCard(this)">
+        <div class="checkout-row">
+          <input class="checkout-input" id="cardExpiry" placeholder="MM / YY" maxlength="7" oninput="fmtExpiry(this)">
+          <input class="checkout-input" id="cardCvv" placeholder="CVV" maxlength="3" type="password">
+        </div>
+        <input class="checkout-input" id="cardName" placeholder="Cardholder name" style="margin-bottom:0">
+      </div>
+
+      <!-- Coupon -->
+      <div class="modal-field-label">Promo Code</div>
+      <div class="coupon-row">
+        <input class="coupon-inp" id="couponInp" placeholder="GEOHUB25" oninput="this.value=this.value.toUpperCase()">
+        <button class="coupon-btn" onclick="applyCoupon()">Apply</button>
+      </div>
+      <div class="coupon-result" id="couponResult"></div>
+
+      <!-- Order summary -->
+      <div class="order-summary" id="orderSummary">
+        <div class="os-row"><span class="os-label" id="osPlanLabel">Plan</span><span class="os-val" id="osPlanPrice">₾0</span></div>
+        <div class="os-row" id="osDiscountRow" style="display:none"><span class="os-label">Promo discount</span><span class="os-val discount" id="osDiscount">-₾0</span></div>
+        <div class="os-row" id="osYearlyRow" style="display:none"><span class="os-label">Yearly savings</span><span class="os-val discount" id="osYearlySave">-₾0</span></div>
+        <div class="os-row"><span class="os-label">Total today</span><span class="os-val" id="osTotal">₾0</span></div>
+      </div>
+
+      <!-- Pay button -->
+      <button class="pay-btn" id="payBtn" onclick="processPayment()">
+        <i class="fas fa-lock"></i> <span id="payBtnLabel">Pay ₾0</span>
+      </button>
+      <div class="pay-note"><i class="fas fa-shield-alt"></i> Secure checkout placeholder · No real charges until payment provider is connected</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SUCCESS OVERLAY ── -->
+<div class="success-ov" id="successOv">
+  <div class="success-panel">
+    <div class="success-ring"><i class="fas fa-check"></i></div>
+    <div class="success-title" id="successTitle">You're all set! 🎉</div>
+    <div class="success-sub" id="successSub">Welcome to your new plan. Your features are active immediately.</div>
+    <div class="success-features" id="successFeatures"></div>
+    <button class="success-btn" onclick="closeSuccess()">Start Exploring <i class="fas fa-arrow-right"></i></button>
+  </div>
+</div>
+
+    <!-- Vite: 4 scripts → 1 chunk. See src/entries/pricing.js -->
+</body>
+</html>

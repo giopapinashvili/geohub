@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Videos — GeoHub</title>
+  <meta name="description" content="აღმოაჩინე საუკეთესო ვიდეოები საქართველოდან — Travel, Hiking, Food, Culture და სხვა.">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css">
+  </noscript>
+  <meta name="theme-color" content="#10b981">
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
+  <script type="module" crossorigin src="/assets/responsive-polish-BO79aqv7.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js"></script>
+  <script type="module" crossorigin src="/assets/firebase-config-CGKVrgHh.js"></script>
+  <script type="module" crossorigin src="/assets/gh-i18n-BbqPU8Gy.js"></script>
+  <script type="module" crossorigin src="/assets/gh-schema-kY2sMGH-.js"></script>
+  <script type="module" crossorigin src="/assets/account-BJSGhbLy.js"></script>
+  <script type="module" crossorigin src="/assets/mobile-nav-DsKLv3RI.js"></script>
+  <script type="module" crossorigin src="/assets/firestore-social-lVyxRoWc.js"></script>
+  <script type="module" crossorigin src="/assets/chat-popup-MADaMnFN.js"></script>
+  <script type="module" crossorigin src="/assets/geohub-social-redesign-ChTko2Gc.js"></script>
+  <script type="module" crossorigin src="/assets/account-switcher-Bs0W5qNE.js"></script>
+  <script type="module" crossorigin src="/assets/geohub-production-stabilization-v1-D9brtDwk.js"></script>
+  <script type="module" crossorigin src="/assets/videos-CEGiKYAV.js"></script>
+  <script type="module" crossorigin src="/assets/push-notifications-wdsLxQpN.js"></script>
+  <script type="module" crossorigin src="/assets/analytics-DyGaP85h.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
+  <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-DJnMDTGu.css">
+  <link rel="stylesheet" crossorigin href="/assets/account-switcher-B6z_cLE_.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+  <link rel="stylesheet" crossorigin href="/assets/videos-p31SHBvW.css">
+</head>
+<body data-gh-page="videos">
+  <noscript>GeoHub requires JavaScript.</noscript>
+
+                          
+  <div class="vid-page" id="vidPage">
+
+    <!-- Hero -->
+    <div class="vid-hero">
+      <div class="vid-hero-badge"><i class="fas fa-film"></i> VIDEO PLATFORM</div>
+      <h1>GeoHub Videos</h1>
+      <p>აღმოაჩინე საქართველოს ყველაზე ლამაზი ადგილები — Travel, Hiking, Food, Culture და სხვა</p>
+      <div class="vid-hero-actions">
+        <button class="vid-add-btn" id="vidAddBtn"><i class="fas fa-plus"></i> ვიდეოს დამატება</button>
+        <div class="vid-search-wrap">
+          <i class="fas fa-search"></i>
+          <input class="vid-search" id="vidSearch" type="search" placeholder="მოძებნე ვიდეოები...">
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Activity Feed (Phase 8) -->
+    <div class="vid-activity-wrap" id="vidActivityWrap" style="display:none">
+      <div class="vid-activity-label"><i class="fas fa-circle-dot"></i> LIVE</div>
+      <div class="vid-activity-ticker" id="vidActivityTicker"></div>
+    </div>
+
+    <!-- Top Creators -->
+    <div id="vidTopCreators" style="display:none"></div>
+
+    <!-- Continue Watching (Phase 7) -->
+    <section class="vid-continue-section" id="vidContinueSection" style="display:none">
+      <div class="vid-section-head">
+        <h2><i class="fas fa-clock-rotate-left" style="color:var(--green)"></i> Continue Watching</h2>
+      </div>
+      <div class="vid-tv-row" id="vidContinueStrip"></div>
+    </section>
+
+    <!-- Saved Videos (Phase 7) -->
+    <section class="vid-saved-section" id="vidSavedSection" style="display:none">
+      <div class="vid-section-head">
+        <h2><i class="fas fa-bookmark" style="color:var(--green)"></i> შენახული ვიდეოები</h2>
+      </div>
+      <div class="vid-tv-row" id="vidSavedStrip"></div>
+    </section>
+
+    <!-- GeoHub TV sections -->
+    <div class="vid-tv-wrap" id="vidTVSections"></div>
+
+    <!-- Channel sections (one row per channel with 2+ videos) -->
+    <div class="vid-tv-wrap" id="vidChannelSections"></div>
+
+    <!-- Toolbar -->
+    <div class="vid-toolbar">
+      <!-- Category pills -->
+      <div class="vid-pill-row" id="vidCatRow">
+        <!-- Rendered by videos.js -->
+      </div>
+      <!-- Sort + City row -->
+      <div class="vid-sort-row">
+        <span>ვიდეოების ჩვენება</span>
+        <div style="display:flex;gap:10px;align-items:center">
+          <select class="vid-sort-select" id="vidCityFilter">
+            <option value="">ყველა ქალაქი</option>
+            <option value="თბილისი">თბილისი</option>
+            <option value="ბათუმი">ბათუმი</option>
+            <option value="ქუთაისი">ქუთაისი</option>
+            <option value="სვანეთი">სვანეთი</option>
+            <option value="სიღნაღი">სიღნაღი</option>
+            <option value="ბაკურიანი">ბაკურიანი</option>
+            <option value="გუდაური">გუდაური</option>
+            <option value="ბორჯომი">ბორჯომი</option>
+            <option value="გორი">გორი</option>
+            <option value="ანაკლია">ანაკლია</option>
+            <option value="თელავი">თელავი</option>
+            <option value="მარტვილი">მარტვილი</option>
+          </select>
+          <select class="vid-sort-select" id="vidSort">
+            <option value="newest">უახლესი</option>
+            <option value="trending">🔥 Trending</option>
+            <option value="popular">პოპულარული</option>
+          </select>
+          <button class="vid-pill" id="vidNearbyBtn" style="flex-shrink:0"><i class="fas fa-location-dot"></i> Near Me</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nearby Section (shown after geolocation) -->
+    <section class="vid-shorts-section" id="vidNearbySection" style="display:none">
+      <div class="vid-section-head">
+        <h2><i class="fas fa-location-dot" style="color:var(--green)"></i> Near Me</h2>
+        <a href="map.html?mode=videos" style="font-size:.8rem;color:var(--green);text-decoration:none"><i class="fas fa-map"></i> Open on Map</a>
+      </div>
+      <div class="vid-tv-row" id="vidNearbyStrip"></div>
+    </section>
+
+    <!-- My Channel bar — rendered by videos.js -->
+    <div id="vidMyChannelBar"></div>
+
+    <!-- Shorts Section -->
+    <section class="vid-shorts-section" id="vidShortsSection" style="display:none">
+      <div class="vid-section-head">
+        <h2><i class="fas fa-bolt" style="color:var(--green)"></i> Shorts</h2>
+      </div>
+      <div class="vid-shorts-strip" id="vidShortsStrip">
+        <!-- Rendered by videos.js -->
+      </div>
+    </section>
+
+    <!-- Main Grid Section -->
+    <section class="vid-grid-section">
+      <div class="vid-section-head">
+        <h2><i class="fas fa-film" style="color:var(--green)"></i> ვიდეოები</h2>
+        <button class="vid-add-btn" id="vidAddBtn2" style="font-size:.8rem;padding:8px 16px">
+          <i class="fas fa-plus"></i> დამატება
+        </button>
+      </div>
+      <div class="vid-grid" id="vidGrid">
+        <!-- Skeleton rendered immediately by videos.js -->
+        <div class="vid-skel"><div class="vid-skel-thumb"></div><div class="vid-skel-body"><div class="vid-skel-line"></div><div class="vid-skel-line short"></div></div></div>
+        <div class="vid-skel"><div class="vid-skel-thumb"></div><div class="vid-skel-body"><div class="vid-skel-line"></div><div class="vid-skel-line short"></div></div></div>
+        <div class="vid-skel"><div class="vid-skel-thumb"></div><div class="vid-skel-body"><div class="vid-skel-line"></div><div class="vid-skel-line short"></div></div></div>
+        <div class="vid-skel"><div class="vid-skel-thumb"></div><div class="vid-skel-body"><div class="vid-skel-line"></div><div class="vid-skel-line short"></div></div></div>
+        <div class="vid-skel"><div class="vid-skel-thumb"></div><div class="vid-skel-body"><div class="vid-skel-line"></div><div class="vid-skel-line short"></div></div></div>
+        <div class="vid-skel"><div class="vid-skel-thumb"></div><div class="vid-skel-body"><div class="vid-skel-line"></div><div class="vid-skel-line short"></div></div></div>
+      </div>
+    </section>
+
+  </div>
+      <!-- Vite: 15 scripts → 1 chunk. See src/entries/videos.js -->
+</body>
+</html>

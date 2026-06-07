@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+  <link rel="dns-prefetch" href="https://firebase.googleapis.com">
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Add Your Business — GeoHub</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <script type="module" crossorigin src="/assets/add-business-CCJ9Wyyx.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/responsive-polish-BO79aqv7.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase-config-CGKVrgHh.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-i18n-BbqPU8Gy.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-schema-kY2sMGH-.js">
+  <link rel="modulepreload" crossorigin href="/assets/firestore-social-lVyxRoWc.js">
+  <link rel="modulepreload" crossorigin href="/assets/chat-popup-MADaMnFN.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-calls-DqDOBgOW.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-group-calls-Ck1zIhcT.js">
+  <link rel="modulepreload" crossorigin href="/assets/config-DSeD8I2H.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-client-DV25UnBD.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-CYAfAwpP.js">
+  <link rel="modulepreload" crossorigin href="/assets/account-BJSGhbLy.js">
+  <link rel="modulepreload" crossorigin href="/assets/mode-CyBXZbtG.js">
+  <link rel="modulepreload" crossorigin href="/assets/mobile-nav-DsKLv3RI.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-social-redesign-ChTko2Gc.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-production-stabilization-v1-D9brtDwk.js">
+  <link rel="modulepreload" crossorigin href="/assets/analytics-DyGaP85h.js">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
+  <link rel="stylesheet" crossorigin href="/assets/add-business-B0V85sHb.css">
+  <link rel="stylesheet" crossorigin href="/assets/styles-DkNdvQG3.css">
+  <link rel="stylesheet" crossorigin href="/assets/components-Bjyn1ntR.css">
+  <link rel="stylesheet" crossorigin href="/assets/navbar-D8jKRRC5.css">
+  <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-DJnMDTGu.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+</head>
+<body data-gh-page="add-business">
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="navbar-brand">
+    <div class="logo-icon">🌍</div>
+    <span class="logo-text">Geo<span class="logo-geo">Hub</span></span>
+  </a>
+  <ul class="navbar-links"></ul>
+  <div class="navbar-actions"></div>
+  <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu"></div>
+
+<div class="form-page">
+  <div class="form-container">
+
+    <!-- Header -->
+    <div class="form-header">
+      <div class="hero-badge" style="margin:0 auto 16px;">
+        <i class="fas fa-store"></i> For Business Owners
+      </div>
+      <h1>List Your <span class="gradient-text">Business</span></h1>
+      <p>Join 1,800+ Georgian businesses on GeoHub. Free to start — takes 5 minutes.</p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:25%"></div></div>
+
+    <!-- Step Indicator -->
+    <div class="step-indicator" id="stepIndicator">
+      <div class="step-item">
+        <div class="step-dot active" id="dot1">1</div>
+        <span class="step-label">Basic Info</span>
+      </div>
+      <div class="step-line" id="line1"></div>
+      <div class="step-item">
+        <div class="step-dot" id="dot2">2</div>
+        <span class="step-label">Details</span>
+      </div>
+      <div class="step-line" id="line2"></div>
+      <div class="step-item">
+        <div class="step-dot" id="dot3">3</div>
+        <span class="step-label">Photos</span>
+      </div>
+      <div class="step-line" id="line3"></div>
+      <div class="step-item">
+        <div class="step-dot" id="dot4">4</div>
+        <span class="step-label">Plan</span>
+      </div>
+    </div>
+
+    <!-- ===== STEP 1: Basic Info ===== -->
+    <div class="form-step-panel active" id="step1">
+      <div class="form-card">
+        <div class="form-section-title"><i class="fas fa-info-circle" style="color:var(--green);margin-right:8px"></i>Basic Information</div>
+
+        <div class="form-group">
+          <label class="form-label required">Business / Place Name</label>
+          <input type="text" class="form-input" placeholder="e.g. Green Café Tbilisi" id="bizNameInput">
+          <div class="form-hint">This will be your public name on GeoHub</div>
+        </div>
+
+
+
+        <div class="form-group">
+          <label class="form-label required">Business Type</label>
+          <div class="business-type-selector" id="businessTypeSelector">
+            <button type="button" class="business-type-option selected" data-business-type="physical">
+              <span class="business-type-icon">📍</span>
+              <strong>Physical Location</strong>
+              <small>Customers can visit a real address. Good for cafés, hotels, shops, restaurants.</small>
+            </button>
+            <button type="button" class="business-type-option" data-business-type="online">
+              <span class="business-type-icon">🌐</span>
+              <strong>Online / Nationwide</strong>
+              <small>No office required. Works across Georgia, online, or by remote service.</small>
+            </button>
+          </div>
+          <div class="form-hint" id="businessTypeHint">Physical businesses appear on the map and nearby discovery.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required">Category</label>
+          <div class="category-selector" id="catSelector">
+            <!-- Food & Drink -->
+            <div class="cat-option" data-cat="cafes"><span class="cat-icon">☕</span>Café</div>
+            <div class="cat-option" data-cat="restaurants"><span class="cat-icon">🍽️</span>Restaurant</div>
+            <div class="cat-option" data-cat="bars"><span class="cat-icon">🍺</span>Bar</div>
+            <div class="cat-option" data-cat="wine-bar"><span class="cat-icon">🍷</span>Wine Bar</div>
+            <div class="cat-option" data-cat="bakery"><span class="cat-icon">🥐</span>Bakery</div>
+            <div class="cat-option" data-cat="fast-food"><span class="cat-icon">🍔</span>Fast Food</div>
+            <div class="cat-option" data-cat="pizza"><span class="cat-icon">🍕</span>Pizza</div>
+            <div class="cat-option" data-cat="sushi"><span class="cat-icon">🍱</span>Sushi</div>
+            <div class="cat-option" data-cat="ice-cream"><span class="cat-icon">🍦</span>Ice Cream</div>
+            <div class="cat-option" data-cat="khinkali"><span class="cat-icon">🥟</span>Khinkali House</div>
+            <div class="cat-option" data-cat="food-delivery"><span class="cat-icon">🛵</span>Food Delivery</div>
+            <div class="cat-option" data-cat="catering"><span class="cat-icon">🍱</span>Catering</div>
+            <!-- Accommodation -->
+            <div class="cat-option" data-cat="hotels"><span class="cat-icon">🏨</span>Hotel</div>
+            <div class="cat-option" data-cat="guesthouses"><span class="cat-icon">🏡</span>Guesthouse</div>
+            <div class="cat-option" data-cat="hostel"><span class="cat-icon">🛏️</span>Hostel</div>
+            <div class="cat-option" data-cat="apartments"><span class="cat-icon">🏢</span>Apartments</div>
+            <div class="cat-option" data-cat="resort"><span class="cat-icon">🌴</span>Resort</div>
+            <div class="cat-option" data-cat="villa"><span class="cat-icon">🏖️</span>Villa</div>
+            <div class="cat-option" data-cat="camping"><span class="cat-icon">⛺</span>Camping</div>
+            <!-- Travel & Activities -->
+            <div class="cat-option" data-cat="tours"><span class="cat-icon">🗺️</span>Tours</div>
+            <div class="cat-option" data-cat="travel-agency"><span class="cat-icon">✈️</span>Travel Agency</div>
+            <div class="cat-option" data-cat="hiking"><span class="cat-icon">🥾</span>Hiking</div>
+            <div class="cat-option" data-cat="attractions"><span class="cat-icon">🏛️</span>Attraction</div>
+            <div class="cat-option" data-cat="adventure"><span class="cat-icon">🪂</span>Adventure Sports</div>
+            <div class="cat-option" data-cat="rafting"><span class="cat-icon">🚣</span>Rafting</div>
+            <div class="cat-option" data-cat="ski"><span class="cat-icon">⛷️</span>Ski Resort</div>
+            <div class="cat-option" data-cat="horse-riding"><span class="cat-icon">🐴</span>Horse Riding</div>
+            <div class="cat-option" data-cat="wine-tour"><span class="cat-icon">🍇</span>Wine Tour</div>
+            <!-- Health & Wellness -->
+            <div class="cat-option" data-cat="gym"><span class="cat-icon">💪</span>Gym / Fitness</div>
+            <div class="cat-option" data-cat="yoga"><span class="cat-icon">🧘</span>Yoga Studio</div>
+            <div class="cat-option" data-cat="spa"><span class="cat-icon">🛁</span>Spa & Wellness</div>
+            <div class="cat-option" data-cat="dental"><span class="cat-icon">🦷</span>Dental</div>
+            <div class="cat-option" data-cat="clinic"><span class="cat-icon">🏥</span>Clinic</div>
+            <div class="cat-option" data-cat="pharmacy"><span class="cat-icon">💊</span>Pharmacy</div>
+            <div class="cat-option" data-cat="optician"><span class="cat-icon">👓</span>Optician</div>
+            <div class="cat-option" data-cat="massage"><span class="cat-icon">💆</span>Massage</div>
+            <div class="cat-option" data-cat="psychologist"><span class="cat-icon">🧠</span>Psychologist</div>
+            <!-- Beauty -->
+            <div class="cat-option" data-cat="beauty"><span class="cat-icon">💄</span>Beauty Salon</div>
+            <div class="cat-option" data-cat="hair-salon"><span class="cat-icon">💇</span>Hair Salon</div>
+            <div class="cat-option" data-cat="barbershop"><span class="cat-icon">✂️</span>Barbershop</div>
+            <div class="cat-option" data-cat="nail-salon"><span class="cat-icon">💅</span>Nail Salon</div>
+            <div class="cat-option" data-cat="tattoo"><span class="cat-icon">🎨</span>Tattoo & Piercing</div>
+            <div class="cat-option" data-cat="lashes"><span class="cat-icon">👁️</span>Lash & Brow</div>
+            <!-- Entertainment -->
+            <div class="cat-option" data-cat="cinema"><span class="cat-icon">🎬</span>Cinema</div>
+            <div class="cat-option" data-cat="nightclub"><span class="cat-icon">🎵</span>Nightclub</div>
+            <div class="cat-option" data-cat="karaoke"><span class="cat-icon">🎤</span>Karaoke</div>
+            <div class="cat-option" data-cat="escape-room"><span class="cat-icon">🔐</span>Escape Room</div>
+            <div class="cat-option" data-cat="bowling"><span class="cat-icon">🎳</span>Bowling</div>
+            <div class="cat-option" data-cat="billiards"><span class="cat-icon">🎱</span>Billiards</div>
+            <div class="cat-option" data-cat="gaming"><span class="cat-icon">🎮</span>Gaming Center</div>
+            <div class="cat-option" data-cat="theater"><span class="cat-icon">🎭</span>Theater</div>
+            <!-- Shopping -->
+            <div class="cat-option" data-cat="clothing"><span class="cat-icon">👗</span>Clothing Store</div>
+            <div class="cat-option" data-cat="electronics"><span class="cat-icon">📱</span>Electronics</div>
+            <div class="cat-option" data-cat="jewelry"><span class="cat-icon">💍</span>Jewelry</div>
+            <div class="cat-option" data-cat="books"><span class="cat-icon">📚</span>Bookstore</div>
+            <div class="cat-option" data-cat="gifts"><span class="cat-icon">🎁</span>Gifts & Souvenirs</div>
+            <div class="cat-option" data-cat="supermarket"><span class="cat-icon">🛒</span>Supermarket</div>
+            <div class="cat-option" data-cat="market"><span class="cat-icon">🏪</span>Market / Bazaar</div>
+            <div class="cat-option" data-cat="furniture"><span class="cat-icon">🛋️</span>Furniture</div>
+            <div class="cat-option" data-cat="florist"><span class="cat-icon">💐</span>Florist</div>
+            <div class="cat-option" data-cat="sports-shop"><span class="cat-icon">⚽</span>Sports Shop</div>
+            <!-- Education -->
+            <div class="cat-option" data-cat="online-education"><span class="cat-icon">🎓</span>Online Education</div>
+            <div class="cat-option" data-cat="language-school"><span class="cat-icon">🗣️</span>Language School</div>
+            <div class="cat-option" data-cat="music-school"><span class="cat-icon">🎵</span>Music School</div>
+            <div class="cat-option" data-cat="driving-school"><span class="cat-icon">🚗</span>Driving School</div>
+            <div class="cat-option" data-cat="art-school"><span class="cat-icon">🖌️</span>Art School</div>
+            <div class="cat-option" data-cat="tutoring"><span class="cat-icon">📝</span>Tutoring</div>
+            <div class="cat-option" data-cat="coding-school"><span class="cat-icon">💻</span>Coding School</div>
+            <div class="cat-option" data-cat="dance-school"><span class="cat-icon">💃</span>Dance School</div>
+            <!-- Professional Services -->
+            <div class="cat-option" data-cat="web-studio"><span class="cat-icon">🌐</span>Web Studio</div>
+            <div class="cat-option" data-cat="consulting"><span class="cat-icon">📞</span>Consulting</div>
+            <div class="cat-option" data-cat="accounting"><span class="cat-icon">🧾</span>Accounting</div>
+            <div class="cat-option" data-cat="legal"><span class="cat-icon">⚖️</span>Legal / Lawyer</div>
+            <div class="cat-option" data-cat="real-estate"><span class="cat-icon">🏠</span>Real Estate</div>
+            <div class="cat-option" data-cat="photography"><span class="cat-icon">📷</span>Photography</div>
+            <div class="cat-option" data-cat="printing"><span class="cat-icon">🖨️</span>Printing</div>
+            <div class="cat-option" data-cat="marketing"><span class="cat-icon">📣</span>Marketing</div>
+            <div class="cat-option" data-cat="hr-recruitment"><span class="cat-icon">🤝</span>HR & Recruitment</div>
+            <div class="cat-option" data-cat="translation"><span class="cat-icon">🌍</span>Translation</div>
+            <div class="cat-option" data-cat="security"><span class="cat-icon">🔒</span>Security</div>
+            <!-- Auto -->
+            <div class="cat-option" data-cat="car-rental"><span class="cat-icon">🚗</span>Car Rental</div>
+            <div class="cat-option" data-cat="car-repair"><span class="cat-icon">🔧</span>Car Repair</div>
+            <div class="cat-option" data-cat="car-wash"><span class="cat-icon">🚿</span>Car Wash</div>
+            <div class="cat-option" data-cat="car-dealer"><span class="cat-icon">🏎️</span>Car Dealer</div>
+            <div class="cat-option" data-cat="tire-service"><span class="cat-icon">🛞</span>Tire Service</div>
+            <!-- Tech -->
+            <div class="cat-option" data-cat="it-services"><span class="cat-icon">🖥️</span>IT Services</div>
+            <div class="cat-option" data-cat="phone-repair"><span class="cat-icon">📲</span>Phone Repair</div>
+            <!-- Events & Venues -->
+            <div class="cat-option" data-cat="event-venue"><span class="cat-icon">🎪</span>Event Venue</div>
+            <div class="cat-option" data-cat="wedding"><span class="cat-icon">💒</span>Wedding Services</div>
+            <div class="cat-option" data-cat="photo-studio"><span class="cat-icon">🎞️</span>Photo Studio</div>
+            <!-- Pets -->
+            <div class="cat-option" data-cat="vet"><span class="cat-icon">🐾</span>Veterinary</div>
+            <div class="cat-option" data-cat="pet-shop"><span class="cat-icon">🐶</span>Pet Shop</div>
+            <div class="cat-option" data-cat="pet-grooming"><span class="cat-icon">✂️</span>Pet Grooming</div>
+            <!-- Kids -->
+            <div class="cat-option" data-cat="kids-cafe"><span class="cat-icon">🎠</span>Kids Café</div>
+            <div class="cat-option" data-cat="playground"><span class="cat-icon">🛝</span>Playground</div>
+            <div class="cat-option" data-cat="kids-school"><span class="cat-icon">🧒</span>Kids School</div>
+            <!-- Finance -->
+            <div class="cat-option" data-cat="bank"><span class="cat-icon">🏦</span>Bank</div>
+            <div class="cat-option" data-cat="exchange"><span class="cat-icon">💱</span>Currency Exchange</div>
+            <div class="cat-option" data-cat="insurance"><span class="cat-icon">🛡️</span>Insurance</div>
+            <!-- Arts & Culture -->
+            <div class="cat-option" data-cat="museum"><span class="cat-icon">🏛️</span>Museum</div>
+            <div class="cat-option" data-cat="gallery"><span class="cat-icon">🖼️</span>Art Gallery</div>
+            <div class="cat-option" data-cat="art-studio"><span class="cat-icon">🎨</span>Art Studio</div>
+            <!-- Other -->
+            <div class="cat-option" data-cat="laundry"><span class="cat-icon">👕</span>Laundry</div>
+            <div class="cat-option" data-cat="construction"><span class="cat-icon">🏗️</span>Construction</div>
+            <div class="cat-option" data-cat="cleaning"><span class="cat-icon">🧹</span>Cleaning</div>
+            <div class="cat-option" data-cat="logistics"><span class="cat-icon">📦</span>Logistics</div>
+            <div class="cat-option" data-cat="other"><span class="cat-icon">🏪</span>Other</div>
+          </div>
+        </div>
+
+        <div id="physicalLocationFields">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label required" id="cityLabel">City</label>
+              <select class="form-select" id="citySelect">
+                <option value="">Select city...</option>
+                <option>Tbilisi</option>
+                <option>Batumi</option>
+                <option>Kazbegi</option>
+                <option>Kutaisi</option>
+                <option>Gudauri</option>
+                <option>Sighnaghi</option>
+                <option>Mestia</option>
+                <option>Borjomi</option>
+                <option>Telavi</option>
+                <option>Gori</option>
+                <option>Mtskheta</option>
+                <option>Zugdidi</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" id="addressLabel">Address</label>
+              <input type="text" class="form-input" placeholder="Street address or area" id="addressInput">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Latitude <span style="color:var(--text-muted);font-size:0.7rem">(for GPS check-in)</span></label>
+              <input type="number" class="form-input" placeholder="e.g. 41.6938" id="bizLatInput" step="any" min="-90" max="90">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Longitude <span style="color:var(--text-muted);font-size:0.7rem">(for GPS check-in)</span></label>
+              <input type="number" class="form-input" placeholder="e.g. 44.8015" id="bizLngInput" step="any" min="-180" max="180">
+            </div>
+          </div>
+          <div class="form-group">
+            <button type="button" class="btn-outline" onclick="fillMyLocation()" id="useMyLocBtn" style="padding:8px 16px;font-size:0.85rem"><i class="fas fa-location-crosshairs"></i> Use My Current Location</button>
+            <div class="form-hint">Fills latitude &amp; longitude automatically from your device. Required for customers to GPS-verify check-ins at your business.</div>
+          </div>
+        </div>
+
+        <div class="form-group" id="onlineServiceAreaFields" style="display:none">
+          <label class="form-label required">Service Area</label>
+          <select class="form-select" id="serviceAreaSelect">
+            <option value="georgia">All Georgia</option>
+            <option value="worldwide">Worldwide / Remote</option>
+            <option value="tbilisi">Tbilisi only</option>
+            <option value="batumi">Batumi only</option>
+            <option value="regions">Selected Georgian regions</option>
+          </select>
+          <div class="form-hint">Online businesses do not need an exact address or map pin. Example: travel agency, web studio, online store.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label required">Short Description</label>
+          <textarea class="form-textarea" placeholder="Describe your business in a few sentences... What makes it special?" id="descInput"></textarea>
+          <div class="form-hint">Minimum 50 characters. This helps customers find you.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tags</label>
+          <div class="tag-input-container" id="tagContainer">
+            <input type="text" class="tag-input" placeholder="ტეგი და Enter (მაგ: მთა, ღვინო, ფუფუნება)" id="tagInput" autocomplete="new-password" autocorrect="off" autocapitalize="off" name="biz-tags">
+          </div>
+          <div class="form-hint">Add up to 8 tags to improve searchability</div>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <div></div>
+        <button class="btn btn-primary btn-lg" onclick="nextStep(2)">
+          Continue <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 2: Contact & Hours ===== -->
+    <div class="form-step-panel" id="step2">
+      <div class="form-card">
+        <div class="form-section-title"><i class="fas fa-phone" style="color:var(--green);margin-right:8px"></i>Contact Information</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label required">Phone Number</label>
+            <input type="tel" class="form-input" placeholder="+995 555 123 456" id="phoneInput">
+          </div>
+          <div class="form-group">
+            <label class="form-label">WhatsApp</label>
+            <input type="tel" class="form-input" placeholder="+995 555 123 456" id="whatsappInput">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" placeholder="contact@yourbusiness.com" id="emailInput">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Website (if any)</label>
+          <input type="url" class="form-input" placeholder="https://yourwebsite.com" id="websiteInput">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Instagram</label>
+            <div class="social-input-row">
+              <div class="social-prefix">@</div>
+              <input type="text" class="form-input" placeholder="username" id="instagramInput" style="border-radius:0 var(--radius-sm) var(--radius-sm) 0">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Facebook Page</label>
+            <input type="text" class="form-input" placeholder="facebook.com/yourpage" id="facebookInput">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-section-title"><i class="fas fa-clock" style="color:var(--green);margin-right:8px"></i>Working Hours</div>
+
+        <div style="display:flex;flex-direction:column;gap:10px" id="hoursInputs">
+          <!-- Dynamically rendered -->
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-section-title"><i class="fas fa-tag" style="color:var(--green);margin-right:8px"></i>Pricing</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Starting Price (GEL)</label>
+            <input type="number" class="form-input" placeholder="e.g. 50" id="startingPriceInput">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Price Range</label>
+            <select class="form-select" id="priceRangeSelect">
+              <option value="$">$ — Budget friendly</option>
+              <option value="$$">$$ — Mid-range</option>
+              <option value="$$$">$$$ — Upscale</option>
+              <option value="$$$$">$$$$ — Luxury</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Services / Menu Items</label>
+          <div id="servicesInputs" style="display:flex;flex-direction:column;gap:8px">
+            <div class="form-row" style="align-items:flex-end">
+              <input type="text" class="form-input" placeholder="Service name (e.g. Guided Hike)">
+              <input type="text" class="form-input" placeholder="Price (e.g. 80 GEL)">
+              <button class="btn btn-ghost btn-sm" onclick="addServiceRow()" style="white-space:nowrap"><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+          <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="addServiceRow()"><i class="fas fa-plus"></i> Add Service</button>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <button class="btn btn-ghost btn-lg" onclick="prevStep(1)"><i class="fas fa-arrow-left"></i> Back</button>
+        <button class="btn btn-primary btn-lg" onclick="nextStep(3)">Continue <i class="fas fa-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 3: Photos ===== -->
+    <div class="form-step-panel" id="step3">
+      <div class="form-card">
+        <div class="form-section-title"><i class="fas fa-images" style="color:var(--green);margin-right:8px"></i>Photos & Media</div>
+
+        <div class="form-group">
+          <label class="form-label">Cover Photo <span style="color:var(--text-muted);font-size:0.7rem">(shown in listings)</span></label>
+          <div class="upload-zone" id="coverUpload">
+            <div class="upload-zone-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+            <p><span>Click to upload</span> or drag & drop</p>
+            <p style="font-size:0.75rem;margin-top:6px;color:var(--text-muted)">JPG, PNG up to 10MB. Recommended: 16:9 ratio</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Gallery Photos <span style="color:var(--text-muted);font-size:0.7rem">(up to 10)</span></label>
+          <div class="upload-zone" id="galleryUpload">
+            <div class="upload-zone-icon"><i class="fas fa-images"></i></div>
+            <p><span>Upload multiple photos</span> of your business</p>
+            <p style="font-size:0.75rem;margin-top:6px;color:var(--text-muted)">Show your interior, products, team, and atmosphere</p>
+          </div>
+          <div id="uploadedPhotos" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px"></div>
+        </div>
+
+        <div class="form-group" id="mapsLinkGroup">
+          <label class="form-label">Google Maps Link <span style="color:var(--text-muted);font-size:0.7rem">(optional)</span></label>
+          <input type="url" class="form-input" placeholder="https://maps.google.com/..." id="mapsLink">
+          <div class="form-hint">Paste your Google Maps location link for accurate placement on our map</div>
+        </div>
+      </div>
+
+      <!-- Preview Card -->
+      <div class="form-card">
+        <div class="form-section-title"><i class="fas fa-eye" style="color:var(--green);margin-right:8px"></i>Preview</div>
+        <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:16px">How your listing will appear in search results:</p>
+        <div class="preview-card">
+          <div class="preview-img-ph">📍</div>
+          <div class="preview-content">
+            <div style="font-size:1rem;font-weight:700;margin-bottom:6px" id="previewName">Your Business Name</div>
+            <div style="font-size:0.8rem;color:var(--text-secondary)" id="previewCity">City, Georgia</div>
+            <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+              <span class="badge badge-green" id="previewCat">Category</span>
+              <span style="font-size:0.8rem;color:var(--text-secondary)">★ New Listing</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <button class="btn btn-ghost btn-lg" onclick="prevStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
+        <button class="btn btn-primary btn-lg" onclick="nextStep(4)">Continue <i class="fas fa-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 4: Choose Plan ===== -->
+    <div class="form-step-panel" id="step4">
+      <div class="form-card">
+        <div class="form-section-title"><i class="fas fa-rocket" style="color:var(--green);margin-right:8px"></i>Choose Your Plan</div>
+        <p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:24px">Start free and upgrade anytime. No contracts.</p>
+
+        <div class="plan-selector">
+          <div class="plan-option selected" data-plan="free">
+            <div class="plan-name">Free</div>
+            <div class="plan-price">0 GEL</div>
+            <div class="plan-desc">Basic listing with contact info and optional map location</div>
+          </div>
+          <div class="plan-option" data-plan="premium">
+            <div class="plan-name">Premium ✨</div>
+            <div class="plan-price">40 GEL/mo</div>
+            <div class="plan-desc">Priority placement, analytics, featured badge</div>
+          </div>
+          <div class="plan-option" data-plan="mini">
+            <div class="plan-name">Mini Website 🌐</div>
+            <div class="plan-price">199 GEL</div>
+            <div class="plan-desc">Custom URL: geohub.ge/your-name</div>
+          </div>
+          <div class="plan-option" data-plan="featured">
+            <div class="plan-name">Featured ⭐</div>
+            <div class="plan-price">70 GEL/mo</div>
+            <div class="plan-desc">Homepage & category top placement</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-section-title"><i class="fas fa-user" style="color:var(--green);margin-right:8px"></i>Create Account</div>
+        <p id="accountAlreadyIn" style="display:none;color:var(--green);font-size:0.85rem;margin-bottom:12px"><i class="fas fa-check-circle"></i> You're already logged in — no account needed.</p>
+        <div id="accountFormFields">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label required">Full Name</label>
+            <input type="text" class="form-input" placeholder="Your name">
+          </div>
+          <div class="form-group">
+            <label class="form-label required">Email</label>
+            <input type="email" class="form-input" placeholder="your@email.com" autocomplete="off">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Password</label>
+          <input type="password" class="form-input" placeholder="Create a password" autocomplete="new-password">
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-top:8px;font-size:0.8rem;color:var(--text-secondary)">
+          <input type="checkbox" style="margin-top:2px;accent-color:var(--green)">
+          <span>I agree to GeoHub's <a href="javascript:void(0)" style="color:var(--green)">Terms of Service</a> and <a href="javascript:void(0)" style="color:var(--green)">Privacy Policy</a></span>
+        </div>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <button class="btn btn-ghost btn-lg" onclick="prevStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
+        <button class="btn btn-primary btn-lg" onclick="submitForm()">
+          <i class="fas fa-check-circle"></i> Submit Listing
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== SUCCESS ===== -->
+    <div class="form-step-panel" id="stepSuccess">
+      <div class="success-screen">
+        <div class="success-icon">🎉</div>
+        <h2 class="gradient-text" style="font-size:2rem;font-weight:800;margin-bottom:12px">You're on GeoHub!</h2>
+        <p style="color:var(--text-secondary);max-width:400px;margin:0 auto 32px;font-size:0.95rem">Your listing has been submitted and is under review. We'll activate it within 24 hours and notify you by email.</p>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <a href="dashboard.html" class="btn btn-primary btn-lg"><i class="fas fa-tachometer-alt"></i> Go to Dashboard</a>
+          <a href="index.html" class="btn btn-ghost btn-lg"><i class="fas fa-home"></i> Back to Home</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+              
+      <!-- Vite: 20 scripts → 1 chunk. See src/entries/add-business.js -->
+</body>
+</html>

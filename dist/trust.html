@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+  <link rel="dns-prefetch" href="https://firebase.googleapis.com">
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trust & Safety — GeoHub</title>
+  <!-- SEO ─────────────────────────────────────────────── -->
+  <meta name="description" content="Learn how GeoHub keeps the community safe, fair, and trustworthy. Our commitment to safety and content moderation.">
+  <link rel="canonical" href="https://geohub.ge/trust.html">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="GeoHub">
+  <meta property="og:title" content="Trust & Safety — GeoHub">
+  <meta property="og:description" content="Learn how GeoHub keeps the community safe, fair, and trustworthy. Our commitment to safety and content moderation.">
+  <meta property="og:url" content="https://geohub.ge/trust.html">
+  <meta property="og:image" content="https://geohub.ge/icons/icon-512.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="GeoHub — Discover Georgia">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Trust & Safety — GeoHub">
+  <meta name="twitter:description" content="Learn how GeoHub keeps the community safe, fair, and trustworthy. Our commitment to safety and content moderation.">
+  <meta name="twitter:image" content="https://geohub.ge/icons/icon-512.png">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
+  <style>
+    :root {
+      --navbar-height: var(--gh-topbar-h, 78px);
+      --green: var(--gh-green);
+      --gold: var(--gh-yellow);
+      --blue: var(--gh-blue);
+      --bg-0: var(--gh-bg);
+      --bg-1: var(--gh-bg);
+      --bg-card: var(--gh-card);
+      --bg-elevated: var(--gh-card-soft);
+      --text-primary: var(--gh-text);
+      --text-secondary: var(--gh-muted);
+      --text-muted: var(--gh-muted);
+      --border: var(--gh-border);
+      --border-subtle: var(--gh-border);
+      --border-emphasis: var(--gh-border-strong);
+      --radius-md: var(--gh-radius-md);
+      --radius-full: var(--gh-radius-full);
+      --radius-lg: var(--gh-radius-lg);
+      --transition: var(--gh-dur-fast) var(--gh-ease);
+    }
+  </style>
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <script type="module" crossorigin src="/assets/trust-BKxRXFNE.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/responsive-polish-BO79aqv7.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase-config-CGKVrgHh.js">
+  <link rel="modulepreload" crossorigin href="/assets/config-DSeD8I2H.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-client-DV25UnBD.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-CYAfAwpP.js">
+  <link rel="modulepreload" crossorigin href="/assets/account-BJSGhbLy.js">
+  <link rel="modulepreload" crossorigin href="/assets/mobile-nav-DsKLv3RI.js">
+  <link rel="modulepreload" crossorigin href="/assets/chat-popup-MADaMnFN.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-production-stabilization-v1-D9brtDwk.js">
+  <link rel="modulepreload" crossorigin href="/assets/analytics-DyGaP85h.js">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
+  <link rel="stylesheet" crossorigin href="/assets/trust-KmrJwoiM.css">
+  <link rel="stylesheet" crossorigin href="/assets/styles-DkNdvQG3.css">
+  <link rel="stylesheet" crossorigin href="/assets/navbar-D8jKRRC5.css">
+  <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-DJnMDTGu.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+</head>
+<body>
+
+<nav class="navbar" id="navbar">
+  <a href="index.html" class="navbar-brand"><div class="logo-icon">🌍</div><span class="logo-text">Geo<span class="logo-geo">Hub</span></span></a>
+  <ul class="navbar-links"></ul>
+  <div class="navbar-actions"></div>
+  <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+</nav>
+<div class="mobile-menu"></div>
+
+<div class="trust-page">
+
+  <!-- ======================== HERO ======================== -->
+  <section class="trust-hero">
+    <div class="container">
+      <div class="trust-hero-inner">
+        <div class="trust-hero-text">
+          <div class="hero-badge"><i class="fas fa-shield-alt"></i> Trust Center</div>
+          <h1>Your <span class="grad-text">Trust Score</span></h1>
+          <p>Earn credibility through real check-ins, quality reviews, and camera-verified visits. A higher trust score means more visibility, more access, and a stronger community presence.</p>
+          <div class="next-level-section">
+            <div class="next-level-label">
+              <span>Progress to <strong>Community Trusted</strong></span>
+              <span>0 / 900</span>
+            </div>
+            <div class="next-level-track">
+              <div id="nextLevelBar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="trust-ring-wrap">
+          <div id="trustRing">
+            <div class="trust-ring-inner">
+              <div class="trust-ring-score">0</div>
+              <div class="trust-ring-max">/ 1000 pts</div>
+              <div class="trust-ring-level">New Explorer</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== TABS BAR ======================== -->
+  <div class="trust-tabs-bar">
+    <div class="container">
+      <div class="trust-tabs-inner">
+        <button class="trust-tab active" data-tab="overview"    onclick="switchTrustTab('overview',   this)"><i class="fas fa-chart-pie"></i>   Overview</button>
+        <button class="trust-tab"        data-tab="levels"      onclick="switchTrustTab('levels',     this)"><i class="fas fa-layer-group"></i>  Verification</button>
+        <button class="trust-tab"        data-tab="camera"      onclick="switchTrustTab('camera',     this)"><i class="fas fa-camera"></i>        Camera Proof</button>
+        <button class="trust-tab"        data-tab="report"      onclick="switchTrustTab('report',     this)"><i class="fas fa-flag"></i>          Report</button>
+        <button class="trust-tab"        data-tab="safety"      onclick="switchTrustTab('safety',     this)"><i class="fas fa-shield-alt"></i>    Safety Dashboard</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== PANEL: OVERVIEW ======================== -->
+  <div class="trust-tab-panel active" id="tp-overview">
+    <div class="container">
+      <div class="overview-grid">
+
+        <!-- Left: Score Breakdown -->
+        <div>
+          <div class="ts-section-title">Score Breakdown</div>
+          <div id="trustBreakdown"></div>
+        </div>
+
+        <!-- Right: Badges + Credibility -->
+        <div class="overview-right">
+          <div class="ts-section-title" style="margin-bottom:12px">Your Trust Badges</div>
+          <div id="trustBadges"></div>
+
+          <div class="ts-section-title" style="margin-top:28px;margin-bottom:12px">Review Credibility Indicators</div>
+          <div id="credibilityList"></div>
+          <a href="reviews.html" style="display:inline-flex;align-items:center;gap:7px;margin-top:14px;padding:9px 18px;border-radius:9999px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:var(--green);font-size:0.78rem;font-weight:800;text-decoration:none;transition:opacity 0.2s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'"><i class="fas fa-star"></i> View Reviews Hub</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== PANEL: VERIFICATION LEVELS ======================== -->
+  <div class="trust-tab-panel" id="tp-levels">
+    <div class="container">
+      <div class="ts-section-title" style="margin-bottom:20px">Verification Levels</div>
+      <div id="levelsGrid"></div>
+    </div>
+  </div>
+
+  <!-- ======================== PANEL: CAMERA PROOF ======================== -->
+  <div class="trust-tab-panel" id="tp-camera">
+    <div class="container">
+
+      <div class="camera-hero">
+        <div class="camera-hero-icon"><i class="fas fa-camera"></i></div>
+        <h2>Camera <span class="grad-text">Proof</span> System</h2>
+        <p>The most reliable way to prove you actually visited a place. GPS coordinates, timestamps and AI analysis combined into a single trust signal.</p>
+      </div>
+
+      <div class="ts-section-title" style="margin-bottom:16px">How It Works</div>
+      <div class="camera-steps">
+        <div class="cam-step">
+          <div class="cam-step-num">1</div>
+          <div class="cam-step-title">Open GeoHub at the location</div>
+          <div class="cam-step-desc">The app captures your GPS coordinates and compares them to the business address within a 50m radius.</div>
+        </div>
+        <div class="cam-step">
+          <div class="cam-step-num">2</div>
+          <div class="cam-step-title">Take a photo in-app</div>
+          <div class="cam-step-desc">Use the built-in camera — screenshots and imported photos are rejected. The shutter embeds GPS and a trusted timestamp.</div>
+        </div>
+        <div class="cam-step">
+          <div class="cam-step-num">3</div>
+          <div class="cam-step-title">AI image analysis</div>
+          <div class="cam-step-desc">Our model checks that the scene matches the venue category and that no duplicate or stock image was used.</div>
+        </div>
+        <div class="cam-step">
+          <div class="cam-step-num">4</div>
+          <div class="cam-step-title">Before & After comparison</div>
+          <div class="cam-step-desc">Returning visitors can submit comparison shots over time — improving both your score and the business listing quality.</div>
+        </div>
+        <div class="cam-step">
+          <div class="cam-step-num">5</div>
+          <div class="cam-step-title">Anti-fake detection</div>
+          <div class="cam-step-desc">Metadata is stripped and re-signed by GeoHub servers. Edited EXIF data, VPN GPS spoofing, and emulator environments are flagged.</div>
+        </div>
+      </div>
+
+      <div class="ts-section-title" style="margin-bottom:16px">Who Benefits</div>
+      <div class="camera-trust-grid">
+        <div class="cam-trust-card">
+          <h4><i class="fas fa-store" style="color:var(--green-light)"></i> For Businesses</h4>
+          <ul>
+            <li><i class="fas fa-check"></i> Reviews rank higher in search if backed by Camera Proof</li>
+            <li><i class="fas fa-check"></i> Fake competitor reviews are easier to flag and remove</li>
+            <li><i class="fas fa-check"></i> Real visitor photos auto-populate your listing gallery</li>
+            <li><i class="fas fa-check"></i> Trust score feeds into GeoHub algorithm ranking</li>
+          </ul>
+        </div>
+        <div class="cam-trust-card">
+          <h4><i class="fas fa-user-check" style="color:#3b82f6"></i> For Creators</h4>
+          <ul>
+            <li><i class="fas fa-check"></i> Camera Proof badge appears on all your reviews</li>
+            <li><i class="fas fa-check"></i> Unlocks Camera Proof verification level (300+ pts)</li>
+            <li><i class="fas fa-check"></i> Brands prefer creators with verified visit history</li>
+            <li><i class="fas fa-check"></i> Each proof photo earns +8 XP to your explorer score</li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="text-align:center;margin-top:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a href="camera.html?mode=proof" style="display:inline-flex;align-items:center;gap:10px;padding:14px 28px;border-radius:9999px;background:linear-gradient(135deg,#10b981,#3b82f6);color:#fff;font-size:0.9rem;font-weight:800;text-decoration:none;box-shadow:0 0 24px rgba(16,185,129,0.3);transition:opacity 0.2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+          <i class="fas fa-camera"></i> Launch Camera Proof
+        </a>
+        <a href="patriot.html" style="display:inline-flex;align-items:center;gap:10px;padding:14px 28px;border-radius:9999px;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.35);color:#f97316;font-size:0.9rem;font-weight:800;text-decoration:none;transition:opacity 0.2s" onmouseover="this.style.opacity='.8'" onmouseout="this.style.opacity='1'">
+          🇬🇪 Patriot Missions
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================== PANEL: REPORT ======================== -->
+  <div class="trust-tab-panel" id="tp-report">
+    <div class="container" style="max-width:680px">
+
+      <div class="report-intro">
+        <div class="ts-section-title" style="margin-bottom:8px">Report a Problem</div>
+        <p>Select what you want to report. All reports are reviewed by the GeoHub Trust team within 4–6 hours. Anonymous reporting is available.</p>
+      </div>
+
+      <div id="reportTypeError" class="hidden">
+        Please select a report type before continuing.
+      </div>
+
+      <div id="reportTypes"></div>
+
+      <div id="reportFormSection" class="hidden">
+        <div id="reportFormWrap" class="report-form-card">
+          <div class="rf-group">
+            <label class="rf-label" for="reportTarget">Who or what are you reporting? <span style="color:var(--text-muted);font-weight:400">(optional)</span></label>
+            <input class="rf-input" id="reportTarget" type="text" placeholder="e.g. Rooms Hotel Tbilisi, @username, Event name…">
+          </div>
+          <div class="rf-group">
+            <label class="rf-label" for="reportDesc">Describe the issue <span style="color:#ef4444">*</span></label>
+            <textarea class="rf-textarea" id="reportDesc" placeholder="Explain what happened in as much detail as possible…"></textarea>
+            <div class="rf-error hidden" id="reportDescError"></div>
+          </div>
+          <div class="rf-anon">
+            <input type="checkbox" id="anonCheck" checked>
+            <label for="anonCheck">Submit anonymously — your identity will not be shared with the reported party</label>
+          </div>
+          <div class="rf-actions">
+            <button class="rf-submit-btn" onclick="submitReport()">
+              <i class="fas fa-flag"></i> Submit Report
+            </button>
+            <button class="rf-cancel-btn" onclick="resetReport()">Cancel</button>
+          </div>
+        </div>
+
+        <div id="reportSuccess" class="hidden">
+          <div class="rs-icon"><i class="fas fa-check"></i></div>
+          <h3>Report Submitted</h3>
+          <p>Thank you for helping keep GeoHub safe. Our Trust team will review your report within 4–6 hours and take appropriate action.</p>
+          <button class="rs-btn" onclick="resetReport()"><i class="fas fa-redo"></i> Submit Another Report</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================== PANEL: SAFETY DASHBOARD ======================== -->
+  <div class="trust-tab-panel" id="tp-safety">
+    <div class="container">
+
+      <div class="ts-section-title" style="margin-bottom:16px">Platform Safety Stats</div>
+      <div id="safetyStats"></div>
+
+      <div class="safety-feed-title">Recent Reports Activity</div>
+      <div id="safetyFeed"></div>
+
+    </div>
+  </div>
+
+</div><!-- end .trust-page -->
+
+
+        
+      <!-- Vite: 12 scripts → 1 chunk. See src/entries/trust.js -->
+</body>
+</html>

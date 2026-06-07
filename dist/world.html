@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GeoHub World — Smart City Simulation</title>
+  <!-- SEO ─────────────────────────────────────────────── -->
+  <meta name="description" content="Explore the GeoHub World — a smart city simulation built around Georgia's culture, geography, and communities.">
+  <link rel="canonical" href="https://geohub.ge/world.html">
+  <meta name="robots" content="noindex, nofollow">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="GeoHub">
+  <meta property="og:title" content="GeoHub World — Smart City Simulation">
+  <meta property="og:description" content="Explore the GeoHub World — a smart city simulation built around Georgia's culture, geography, and communities.">
+  <meta property="og:url" content="https://geohub.ge/world.html">
+  <meta property="og:image" content="https://geohub.ge/icons/icon-512.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="GeoHub — Discover Georgia">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="GeoHub World — Smart City Simulation">
+  <meta name="twitter:description" content="Explore the GeoHub World — a smart city simulation built around Georgia's culture, geography, and communities.">
+  <meta name="twitter:image" content="https://geohub.ge/icons/icon-512.png">
+  <script type="module" crossorigin src="/assets/world-CEmNYT9o.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/responsive-polish-BO79aqv7.js">
+  <link rel="modulepreload" crossorigin href="/assets/chat-popup-MADaMnFN.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-production-stabilization-v1-D9brtDwk.js">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
+  <link rel="stylesheet" crossorigin href="/assets/world-D7AFr0GY.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- TOPBAR -->
+  <div class="topbar" style="grid-column:1/-1;grid-row:1">
+    <span class="tb-logo">🌍 GeoHub World</span>
+    <span class="tb-sub">Smart City Simulation</span>
+    <div class="tb-sep"></div>
+    <div class="time-btns">
+      <button class="time-btn" onclick="setTimeOfDay('morning')">🌅 Morning</button>
+      <button class="time-btn active" onclick="setTimeOfDay('afternoon')">☀️ Day</button>
+      <button class="time-btn" onclick="setTimeOfDay('evening')">🌆 Evening</button>
+      <button class="time-btn" onclick="setTimeOfDay('night')">🌙 Night</button>
+    </div>
+    <div class="tb-time" style="margin-left:10px">
+      <span class="tb-time-label">Sim Time</span>
+      <span class="tb-time-val" id="simClock">14:32</span>
+    </div>
+    <div class="tb-live"><div class="live-dot"></div>LIVE</div>
+    <a href="index.html" class="tb-back">← Home</a>
+  </div>
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+
+    <!-- Live Counters -->
+    <div class="ps">
+      <div class="ps-title">📡 Live Now</div>
+      <div class="counter-grid">
+        <div class="ctr">
+          <div class="ctr-val" id="ctr-users">0</div>
+          <div class="ctr-label">Active Users</div>
+          <div class="ctr-delta" id="delta-users">Real data</div>
+        </div>
+        <div class="ctr">
+          <div class="ctr-val green" id="ctr-checkins">0</div>
+          <div class="ctr-label">Check-ins</div>
+          <div class="ctr-delta" id="delta-checkins">Real data</div>
+        </div>
+        <div class="ctr">
+          <div class="ctr-val gold" id="ctr-rewards">0</div>
+          <div class="ctr-label">Rewards Claimed</div>
+          <div class="ctr-delta" id="delta-rewards">Real data</div>
+        </div>
+        <div class="ctr">
+          <div class="ctr-val purple" id="ctr-missions">0</div>
+          <div class="ctr-label">Missions Done</div>
+          <div class="ctr-delta" id="delta-missions">Real data</div>
+        </div>
+        <div class="ctr">
+          <div class="ctr-val" id="ctr-tickets">0</div>
+          <div class="ctr-label">Tickets Booked</div>
+          <div class="ctr-delta" id="delta-tickets">Real data</div>
+        </div>
+        <div class="ctr">
+          <div class="ctr-val green" id="ctr-stories">0</div>
+          <div class="ctr-label">Live Stories</div>
+          <div class="ctr-delta" id="delta-stories">Real data</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- City Activity -->
+    <div class="ps">
+      <div class="ps-title">🏙️ City Activity</div>
+      <div class="city-list" id="cityList"></div>
+    </div>
+
+    <!-- Trend Bars -->
+    <div class="ps">
+      <div class="ps-title">📊 Zone Trends</div>
+      <div id="trendBars"></div>
+    </div>
+
+  </div>
+
+  <!-- MAP AREA -->
+  <div class="map-area">
+    <canvas id="worldCanvas"></canvas>
+    <div class="time-overlay afternoon" id="timeOverlay"></div>
+    <div class="social-layer" id="socialLayer"></div>
+    <div class="map-overlay" id="mapOverlay"></div>
+    <div class="city-tip" id="cityTip" style="opacity:0;display:none"></div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+
+    <!-- Filters -->
+    <div class="ps">
+      <div class="ps-title">⚙️ Filters</div>
+      <div class="filter-grid" id="filterGrid"></div>
+    </div>
+
+    <!-- Heatmaps -->
+    <div class="ps">
+      <div class="ps-title">🔥 Heatmap Layer</div>
+      <div class="heatmap-btns" id="heatmapBtns"></div>
+    </div>
+
+    <!-- AI Feed -->
+    <div class="ps">
+      <div class="ps-title">🤖 AI World Feed <span class="notif-badge" id="feedBadge">3</span></div>
+      <div class="feed-list" id="aiFeed"></div>
+    </div>
+
+    <!-- AI Predictions -->
+    <div class="ps">
+      <div class="ps-title">🔮 AI Predictions</div>
+      <div class="pred-list" id="predList"></div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <div class="bottom-bar">
+    <div class="bc">
+      <div class="bc-icon">👥</div>
+      <div>
+        <div class="bc-val" id="bc-users">0</div>
+        <div class="bc-label">Users Online</div>
+        <div class="bc-trend" id="bc-users-trend">0</div>
+      </div>
+    </div>
+    <div class="bc">
+      <div class="bc-icon">📍</div>
+      <div>
+        <div class="bc-val" id="bc-checkins">0</div>
+        <div class="bc-label">Check-ins Today</div>
+        <div class="bc-trend">Real data</div>
+      </div>
+    </div>
+    <div class="bc">
+      <div class="bc-icon">🎟️</div>
+      <div>
+        <div class="bc-val" id="bc-tickets">0</div>
+        <div class="bc-label">Tickets Booked</div>
+        <div class="bc-trend">Real data</div>
+      </div>
+    </div>
+    <div class="bc">
+      <div class="bc-icon">🏆</div>
+      <div>
+        <div class="bc-val" id="bc-rewards">0</div>
+        <div class="bc-label">Rewards Claimed</div>
+        <div class="bc-trend" style="color:var(--gold)">Real data</div>
+      </div>
+    </div>
+    <div class="bc">
+      <div class="bc-icon">🛡️</div>
+      <div>
+        <div class="bc-val" id="bc-missions">0</div>
+        <div class="bc-label">Missions Complete</div>
+        <div class="bc-trend" style="color:var(--green)">Real data</div>
+      </div>
+    </div>
+    <div class="bc">
+      <div class="bc-icon">🎬</div>
+      <div>
+        <div class="bc-val" id="bc-stories">0</div>
+        <div class="bc-label">Live Stories</div>
+        <div class="bc-trend" style="color:var(--purple)">Real data</div>
+      </div>
+    </div>
+    <div class="bc" style="border-right:none">
+      <div class="bc-icon">💎</div>
+      <div>
+        <div class="bc-val" style="color:var(--gold)" id="bc-xp">0</div>
+        <div class="bc-label">XP Earned Today</div>
+        <div class="bc-trend" style="color:var(--gold)">Real data</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+    <!-- Vite: 4 scripts → 1 chunk. See src/entries/world.js -->
+</body>
+</html>

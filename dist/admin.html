@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+  <link rel="dns-prefetch" href="https://firebase.googleapis.com">
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoHub OS — Admin Control Center</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/assets/admin-CsyvuNu7.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/responsive-polish-BO79aqv7.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase-config-CGKVrgHh.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-i18n-BbqPU8Gy.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-schema-kY2sMGH-.js">
+  <link rel="modulepreload" crossorigin href="/assets/chat-popup-MADaMnFN.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-calls-DqDOBgOW.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-group-calls-Ck1zIhcT.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-production-stabilization-v1-D9brtDwk.js">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
+  <link rel="stylesheet" crossorigin href="/assets/admin-t2fQQcyn.css">
+  <link rel="stylesheet" crossorigin href="/assets/moderation-CB6dVgQ2.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+</head>
+<body>
+<div class="shell">
+
+  <!-- ═══ TOPBAR ═══ -->
+  <header class="topbar">
+    <button class="tb-mobile-menu" onclick="toggleAdminSidebar()" title="Menu"><i class="fas fa-bars"></i></button>
+    <div class="tb-logo">
+      <div class="tb-logo-icon">G</div>
+      <div>
+        <div class="tb-logo-name">GeoHub OS</div>
+        <div class="tb-logo-sub" data-i18n="adm_console">Admin Console</div>
+      </div>
+    </div>
+    <div class="tb-search-wrap">
+      <i class="fas fa-search tb-search-ic"></i>
+      <input class="tb-search" id="globalSearch" placeholder="Search users, businesses, content…" autocomplete="off" oninput="handleGlobalSearch(this.value)">
+    </div>
+    <div class="tb-live"><span class="tb-live-dot"></span> <span data-i18n="adm_live">Live</span></div>
+    <div class="tb-right">
+      <button class="tb-btn" title="Alerts" onclick="adminNav('notifications')">
+        <i class="fas fa-bell"></i>
+        <span class="tb-badge" id="notifBadge" style="display:none">0</span>
+      </button>
+      <button class="tb-btn" title="Moderation" onclick="adminNav('moderation')">
+        <i class="fas fa-shield-alt"></i>
+      </button>
+      <a href="index.html" class="tb-btn" title="Back to GeoHub"><i class="fas fa-home"></i></a>
+      <div class="tb-admin">
+        <div class="tb-admin-av">A</div>
+        <div>
+          <div class="tb-admin-name">Admin</div>
+          <div class="tb-admin-role">Super Admin</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile sidebar overlay -->
+  <div class="admin-sidebar-overlay" id="adminSidebarOverlay" onclick="toggleAdminSidebar()"></div>
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar" id="adminSidebar">
+    <div class="sb-lbl" data-i18n="adm_lbl_platform">Platform</div>
+    <div class="sb-item active" onclick="adminNav('overview')"><span class="sb-ic"><i class="fas fa-th-large"></i></span> <span data-i18n="adm_nav_overview">Overview</span></div>
+    <div class="sb-item" onclick="adminNav('live')"><span class="sb-ic"><i class="fas fa-circle" style="color:var(--green);font-size:0.55rem"></i></span> <span data-i18n="adm_nav_live">Live Monitor</span> <span class="sb-cnt" id="sb-live">0</span></div>
+    <div class="sb-item" onclick="adminNav('notifications')"><span class="sb-ic"><i class="fas fa-bell"></i></span> <span data-i18n="adm_nav_notifs">Notifications</span> <span class="sb-cnt danger" id="sb-notif">0</span></div>
+    <div class="sb-lbl" data-i18n="adm_lbl_management">Management</div>
+    <div class="sb-item" onclick="adminNav('users')"><span class="sb-ic"><i class="fas fa-users"></i></span> <span data-i18n="adm_nav_users">Users</span> <span class="sb-cnt" id="sb-users">—</span></div>
+    <div class="sb-item" onclick="adminNav('activity')"><span class="sb-ic"><i class="fas fa-stream"></i></span> <span data-i18n="adm_nav_activity">Activity</span> <span class="sb-cnt" id="sb-activity">0</span></div>
+    <div class="sb-item" onclick="adminNav('businesses')"><span class="sb-ic"><i class="fas fa-store"></i></span> <span data-i18n="adm_nav_biz">Businesses</span> <span class="sb-cnt" id="sb-biz-side">0</span></div>
+    <div class="sb-item" onclick="adminNav('creators')"><span class="sb-ic"><i class="fas fa-star"></i></span> <span data-i18n="adm_nav_creators">Creators</span> <span class="sb-cnt" id="sb-creators">0</span></div>
+    <div class="sb-item" onclick="adminNav('content')"><span class="sb-ic"><i class="fas fa-plus-square"></i></span> <span data-i18n="adm_nav_content">Content Studio</span></div>
+    <div class="sb-item" onclick="adminNav('placeedit')"><span class="sb-ic"><i class="fas fa-pencil-alt"></i></span> <span data-i18n="adm_nav_placeedit">Place Editing</span></div>
+    <div class="sb-item" onclick="adminNav('placecat')"><span class="sb-ic"><i class="fas fa-tags"></i></span> <span data-i18n="adm_nav_placecat">Place Categories</span></div>
+    <div class="sb-item" onclick="adminNav('ownership')"><span class="sb-ic"><i class="fas fa-handshake"></i></span> <span data-i18n="adm_nav_ownership">Transfer Ownership</span></div>
+    <div class="sb-item" onclick="adminNav('challenges')"><span class="sb-ic"><i class="fas fa-bolt"></i></span> <span data-i18n="adm_nav_challenges">Challenge Studio</span> <span class="sb-cnt" id="sb-challenges">0</span></div>
+    <div class="sb-item" onclick="adminNav('rewards')"><span class="sb-ic"><i class="fas fa-gift"></i></span> <span data-i18n="adm_nav_rewards">Rewards</span> <span class="sb-cnt" id="sb-rewards">0</span></div>
+    <div class="sb-lbl" data-i18n="adm_lbl_safety">Safety</div>
+    <div class="sb-item" onclick="adminNav('moderation')"><span class="sb-ic"><i class="fas fa-flag"></i></span> <span data-i18n="adm_nav_moderation">Moderation</span> <span class="sb-cnt danger" id="sb-mod">0</span></div>
+    <div class="sb-item" onclick="adminNav('trust')"><span class="sb-ic"><i class="fas fa-check-circle"></i></span> <span data-i18n="adm_nav_trust">Trust &amp; Safety</span></div>
+    <div class="sb-lbl" data-i18n="adm_lbl_analytics">Analytics</div>
+    <div class="sb-item" onclick="adminNav('revenue')"><span class="sb-ic"><i class="fas fa-chart-line"></i></span> <span data-i18n="adm_nav_revenue">Revenue</span></div>
+    <div class="sb-item" onclick="adminNav('city')"><span class="sb-ic"><i class="fas fa-map"></i></span> <span data-i18n="adm_nav_city">City Analytics</span></div>
+    <div class="sb-item" onclick="adminNav('analytics')"><span class="sb-ic"><i class="fas fa-chart-bar"></i></span> <span data-i18n="adm_nav_site">Site Analytics</span> <span class="sb-cnt" id="sb-analytics">—</span></div>
+    <div class="sb-item" onclick="adminNav('errors')"><span class="sb-ic"><i class="fas fa-exclamation-triangle"></i></span> <span data-i18n="adm_nav_errors">Error Monitor</span> <span class="sb-cnt danger" id="sb-errors">0</span></div>
+    <div class="sb-lbl" data-i18n="adm_lbl_system">System</div>
+    <div class="sb-item" onclick="adminNav('controls')"><span class="sb-ic"><i class="fas fa-sliders-h"></i></span> <span data-i18n="adm_nav_controls">Platform Controls</span></div>
+    <div class="sb-div"></div>
+    <div class="sb-item" onclick="location.href='index.html'"><span class="sb-ic"><i class="fas fa-arrow-left"></i></span> <span data-i18n="adm_nav_back">Back to GeoHub</span></div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main">
+
+    <!-- ─── OVERVIEW ─── -->
+    <section class="sec active" id="sec-overview">
+      <div class="ph">
+        <div><div class="ph-title" data-i18n="adm_ov_title">Platform Overview</div><div class="ph-sub">GeoHub OS · Real-time snapshot</div></div>
+        <div class="ph-actions">
+          <button class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> Export</button>
+          <button class="btn btn-primary btn-sm" onclick="animateBars()"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+      </div>
+
+      <div class="g4 mb12">
+        <div class="sc green">
+          <div class="sc-ico">👥</div><div class="sc-val" id="stat-users">—</div><div class="sc-lbl" data-i18n="adm_ov_users">Total Users</div>
+          <div class="sc-delta" id="delta-users" style="color:var(--ts);font-size:0.72rem">Firebase · live count</div>
+          <div class="sparkrow" id="sp-users"></div>
+          <div class="sc-glow" style="background:radial-gradient(#10b981,transparent)"></div>
+        </div>
+        <div class="sc blue">
+          <div class="sc-ico">🏢</div><div class="sc-val" id="stat-biz">0</div><div class="sc-lbl" data-i18n="adm_ov_biz">Businesses</div>
+          <div class="sc-delta" id="delta-biz" style="color:var(--ts);font-size:0.72rem">registered via dashboard</div>
+          <div class="sparkrow" id="sp-biz"></div>
+          <div class="sc-glow" style="background:radial-gradient(#3b82f6,transparent)"></div>
+        </div>
+        <div class="sc gold">
+          <div class="sc-ico">📅</div><div class="sc-val" id="stat-events">0</div><div class="sc-lbl" data-i18n="adm_ov_events">Active Events</div>
+          <div class="sc-delta" style="color:var(--ts);font-size:0.72rem">Firestore · live count</div>
+          <div class="sparkrow" id="sp-ev"></div>
+          <div class="sc-glow" style="background:radial-gradient(#f59e0b,transparent)"></div>
+        </div>
+        <div class="sc purple">
+          <div class="sc-ico">💰</div><div class="sc-val" id="stat-rev">₾0</div><div class="sc-lbl" data-i18n="adm_ov_revenue">Monthly Revenue</div>
+          <div class="sc-delta" style="color:var(--ts);font-size:0.72rem">Beta — no payments yet</div>
+          <div class="sparkrow" id="sp-rev"></div>
+          <div class="sc-glow" style="background:radial-gradient(#a855f7,transparent)"></div>
+        </div>
+      </div>
+
+      <div class="g6 mb20">
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">📍</div><div class="sc-val" id="stat-checkins" style="font-size:1.1rem;color:var(--green)">0</div><div class="sc-lbl" data-i18n="adm_ov_checkins">Check-ins</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">⭐</div><div class="sc-val" id="stat-reviews" style="font-size:1.1rem;color:var(--gold)">0</div><div class="sc-lbl" data-i18n="adm_ov_reviews">Reviews</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">🎁</div><div class="sc-val" id="stat-rewards" style="font-size:1.1rem;color:var(--blue)">0</div><div class="sc-lbl" data-i18n="adm_ov_rewards">Rewards Claimed</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">🛡️</div><div class="sc-val" id="stat-missions" style="font-size:1.1rem;color:var(--orange)">0</div><div class="sc-lbl" data-i18n="adm_ov_missions">Patriot Missions</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">🚩</div><div class="sc-val" id="stat-reports" style="font-size:1.1rem;color:var(--red)">0</div><div class="sc-lbl" data-i18n="adm_ov_reports">Open Reports</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">🏆</div><div class="sc-val" id="stat-trust" style="font-size:1.1rem;color:var(--purple)">—</div><div class="sc-lbl" data-i18n="adm_ov_trust">Avg Trust Score</div></div>
+      </div>
+
+      <div class="g2 mb12">
+        <div class="panel">
+          <div class="panel-hdr"><div><div class="panel-title">Platform Growth</div><div class="panel-sub">Users &amp; check-ins — 30 days</div></div></div>
+          <canvas id="growthChart" height="130" style="width:100%"></canvas>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><div><div class="panel-title">Daily Active Users</div><div class="panel-sub">Last 14 days</div></div></div>
+          <canvas id="dauChart" height="130" style="width:100%"></canvas>
+        </div>
+      </div>
+
+      <div class="g2">
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">Top Active Districts</div></div>
+          <div class="bl" id="districtsPanel">
+            <div style="text-align:center;padding:24px;color:var(--ts);font-size:0.82rem">No check-in data yet — districts will populate as users check in</div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">Activity Mix</div></div>
+          <div class="bl" id="activityMixPanel">
+            <div style="text-align:center;padding:24px;color:var(--ts);font-size:0.82rem">No activity data yet — stats will populate as users engage</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── LIVE MONITOR ─── -->
+    <section class="sec" id="sec-live">
+      <div class="ph">
+        <div><div class="ph-title">Live Monitor</div><div class="ph-sub"><span id="liveCountLabel">0</span> users active now · Updates every 3s</div></div>
+        <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="toggleLive()" id="livePauseBtn"><i class="fas fa-pause"></i> Pause</button></div>
+      </div>
+      <div class="g3 mb16">
+        <div class="sc green" style="padding:13px"><div style="font-size:0.65rem;color:var(--ts);font-weight:700;margin-bottom:3px">ACTIVE NOW</div><div style="font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--green)" id="liveActiveNow">0</div><div style="font-size:0.68rem;color:var(--ts)">users online</div></div>
+        <div class="sc blue" style="padding:13px"><div style="font-size:0.65rem;color:var(--ts);font-weight:700;margin-bottom:3px">LIVE EVENTS</div><div style="font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--blue)">0</div><div style="font-size:0.68rem;color:var(--ts)">events running</div></div>
+        <div class="sc gold" style="padding:13px"><div style="font-size:0.65rem;color:var(--ts);font-weight:700;margin-bottom:3px">CHECK-INS TODAY</div><div style="font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--gold)" id="liveTodayCI">0</div><div style="font-size:0.68rem;color:var(--ts)">no data yet</div></div>
+      </div>
+      <div class="g2">
+        <div class="live-wrap">
+          <div class="live-hdr"><div class="live-dot"></div><div class="live-title">Live Activity Feed</div><div class="live-cnt" id="liveFeedCnt">0 events</div></div>
+          <div class="live-list" id="liveFeedList"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="panel">
+            <div class="panel-hdr"><div class="panel-title">Trending Places Now</div></div>
+            <div class="bl">
+              <div style="text-align:center;padding:24px;color:var(--ts);font-size:0.8rem;opacity:0.6">No active places yet</div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-hdr"><div class="panel-title">Active City Zones</div></div>
+            <div id="cityZonesPanel" style="text-align:center;padding:20px;color:var(--ts);font-size:0.8rem;opacity:0.6">No active zones yet</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── USERS ─── -->
+    <section class="sec" id="sec-users">
+      <div class="ph">
+        <div><div class="ph-title" data-i18n="adm_sec_users">User Management</div><div class="ph-sub" id="usersSubtitle">Registered users</div></div>
+      </div>
+      <div class="asearch">
+        <input class="asearch-inp" id="userSearch" placeholder="Search by name, handle, email…" oninput="filterUsers(this.value)">
+        <select class="asearch-sel" onchange="filterUsers(document.getElementById('userSearch').value, this.value)">
+          <option value="">All Status</option>
+          <option value="verified">Verified</option>
+          <option value="suspended">Suspended</option>
+          <option value="flagged">Flagged</option>
+        </select>
+        <select class="asearch-sel" id="trustFilter" onchange="filterUsers(document.getElementById('userSearch').value, document.querySelector('.asearch-sel').value, this.value)">
+          <option value="">All Trust</option>
+          <option value="high">High (80+)</option>
+          <option value="low">Low (&lt;40)</option>
+        </select>
+      </div>
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead><tr><th>User</th><th>Trust</th><th>Status</th><th>Check-ins</th><th>Reviews</th><th>Joined</th><th>Actions</th></tr></thead>
+          <tbody id="usersBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── BUSINESSES ─── -->
+    <section class="sec" id="sec-businesses">
+      <div class="ph">
+        <div><div class="ph-title" data-i18n="adm_sec_biz">Business Management</div><div class="ph-sub" id="bizSubtitle">Verify, feature, approve</div></div>
+        <div class="ph-actions"><button class="btn btn-ghost btn-sm"><i class="fas fa-filter"></i> Filter</button></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px" id="bizList"></div>
+    </section>
+
+    <!-- ─── CREATORS ─── -->
+    <section class="sec" id="sec-creators">
+      <div class="ph">
+        <div><div class="ph-title">Creator Management</div><div class="ph-sub">0 creators · Feature, verify, track performance</div></div>
+      </div>
+      <div class="g4 mb20">
+        <div class="sc purple"><div class="sc-ico" style="font-size:1rem">🌟</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_tr_total">Total Creators</div></div>
+        <div class="sc green"><div class="sc-ico" style="font-size:1rem">✅</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_tr_verified">Verified</div></div>
+        <div class="sc gold"><div class="sc-ico" style="font-size:1rem">📈</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_tr_followers">Total Followers</div></div>
+        <div class="sc blue"><div class="sc-ico" style="font-size:1rem">🤝</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_tr_collabs">Active Collabs</div></div>
+      </div>
+      <div class="g3" id="creatorGrid"></div>
+    </section>
+
+    <!-- ─── MODERATION ─── -->
+    <section class="sec" id="sec-moderation">
+      <div class="ph">
+        <div><div class="ph-title" data-i18n="adm_sec_moderation">Content Moderation</div><div class="ph-sub" id="modSub">0 items in queue</div></div>
+      </div>
+      <!-- Status filter -->
+      <div class="mod-filters-bar" id="modStatusBar">
+        <button class="mod-filter-btn active" onclick="filterModStatus('pending')">Pending</button>
+        <button class="mod-filter-btn" onclick="filterModStatus('resolved')">Resolved</button>
+        <button class="mod-filter-btn" onclick="filterModStatus('dismissed')">Dismissed</button>
+        <button class="mod-filter-btn" onclick="filterModStatus('all')">All</button>
+      </div>
+      <!-- Type filter -->
+      <div class="mod-filters-bar" id="modTypeBar">
+        <button class="mod-filter-btn active" onclick="filterMod('all')">All Types</button>
+        <button class="mod-filter-btn" onclick="filterMod('post')">Posts</button>
+        <button class="mod-filter-btn" onclick="filterMod('comment')">Comments</button>
+        <button class="mod-filter-btn" onclick="filterMod('user')">Users</button>
+        <button class="mod-filter-btn" onclick="filterMod('place')">Places</button>
+        <button class="mod-filter-btn" onclick="filterMod('business')">Businesses</button>
+        <button class="mod-filter-btn" onclick="filterMod('event')">Events</button>
+        <button class="mod-filter-btn" onclick="filterMod('group')">Groups</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px" id="modQueue"></div>
+
+      <!-- Audit log -->
+      <div class="ph" style="margin-top:28px">
+        <div><div class="ph-title">Moderation Audit Log</div><div class="ph-sub">Recent admin actions</div></div>
+      </div>
+      <div id="modAuditLog" style="display:flex;flex-direction:column"></div>
+    </section>
+
+    <!-- ─── TRUST & SAFETY ─── -->
+    <section class="sec" id="sec-trust">
+      <div class="ph"><div><div class="ph-title" data-i18n="adm_sec_trust">Trust &amp; Safety Center</div><div class="ph-sub">Platform integrity monitoring and AI moderation</div></div></div>
+      <div class="g4 mb20">
+        <div class="sc green"><div class="sc-ico" style="font-size:1rem">🏆</div><div class="sc-val" style="font-size:1.1rem">—</div><div class="sc-lbl" data-i18n="adm_ts_avg">Avg Trust Score</div><div class="sc-delta" style="color:var(--ts);font-size:0.72rem">no data yet</div></div>
+        <div class="sc blue"><div class="sc-ico" style="font-size:1rem">📸</div><div class="sc-val" style="font-size:1.1rem">—</div><div class="sc-lbl" data-i18n="adm_ts_camera">Camera Proof Rate</div></div>
+        <div class="sc red"><div class="sc-ico" style="font-size:1rem">🚨</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_ts_suspicious">Suspicious Accounts</div></div>
+        <div class="sc gold"><div class="sc-ico" style="font-size:1rem">✅</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_ts_verified">Verified Users</div></div>
+      </div>
+      <div class="g2 mb16">
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">Trust Score Distribution</div></div>
+          <div class="bl">
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">90–100 Elite</span><span class="bi-val" style="color:var(--green)">0 users</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">70–89 High</span><span class="bi-val" style="color:var(--blue)">0 users</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">50–69 Medium</span><span class="bi-val" style="color:var(--gold)">0 users</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">30–49 Low</span><span class="bi-val" style="color:var(--orange)">0 users</span></div><div class="bt"><div class="bf orange" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">0–29 Risk</span><span class="bi-val" style="color:var(--red)">0 users</span></div><div class="bt"><div class="bf red" style="width:0%"></div></div></div>
+          </div>
+        </div>
+        <div>
+          <div id="aiAlertsPanel" style="text-align:center;padding:24px;color:var(--ts);font-size:0.82rem;opacity:0.7"><i class="fas fa-robot" style="font-size:1.2rem;display:block;margin-bottom:8px;opacity:0.3"></i>No AI alerts — system is monitoring</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr"><div class="panel-title">Top Trusted Users</div></div>
+        <table class="tbl" style="background:transparent">
+          <thead><tr><th>User</th><th>Trust</th><th>Reviews</th><th>Check-ins</th><th>Camera%</th><th>Verified</th></tr></thead>
+          <tbody>
+            <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--ts);font-size:0.82rem"><i class="fas fa-shield-alt" style="font-size:1.3rem;display:block;margin-bottom:8px;opacity:0.3"></i>No verified users yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ─── REVENUE ─── -->
+    <section class="sec" id="sec-revenue">
+      <div class="ph"><div><div class="ph-title" data-i18n="adm_sec_revenue">Revenue Dashboard</div><div class="ph-sub">Platform monetization · Beta — no payments yet</div></div></div>
+      <div class="g4 mb20">
+        <div class="rev-card"><div class="rev-lbl">Monthly Revenue</div><div class="rev-val" style="color:var(--green)">₾0</div><div class="rev-delta" style="color:var(--ts);font-size:0.72rem">Beta — no payments yet</div></div>
+        <div class="rev-card"><div class="rev-lbl">ARR Projection</div><div class="rev-val" style="color:var(--blue)">—</div><div class="rev-delta" style="color:var(--ts);font-size:0.72rem">no data</div></div>
+        <div class="rev-card"><div class="rev-lbl">Premium Subscribers</div><div class="rev-val" id="stat-premium" style="color:var(--purple)">0</div><div class="rev-delta" style="color:var(--ts);font-size:0.72rem">Admin-controlled</div></div>
+        <div class="rev-card"><div class="rev-lbl">Avg Revenue / User</div><div class="rev-val" style="color:var(--gold)">—</div><div class="rev-delta" style="color:var(--ts);font-size:0.72rem">no data</div></div>
+      </div>
+      <div class="g2 mb16">
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">Revenue by Category</div></div>
+          <canvas id="revChart" height="160" style="width:100%"></canvas>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">Revenue Breakdown</div></div>
+          <div class="bl">
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">💎 Premium Subs</span><span class="bi-val" style="color:var(--purple)">₾0</span></div><div class="bt"><div class="bf purple" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🏢 Biz Campaigns</span><span class="bi-val" style="color:var(--blue)">₾0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🎟 Ticket Sales</span><span class="bi-val" style="color:var(--green)">₾0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🎁 QR Campaigns</span><span class="bi-val" style="color:var(--gold)">₾0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🛍 Marketplace</span><span class="bi-val" style="color:var(--orange)">₾0</span></div><div class="bt"><div class="bf orange" style="width:0%"></div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr"><div class="panel-title">Revenue Trend — Last 30 Days</div></div>
+        <canvas id="revTrendChart" height="110" style="width:100%"></canvas>
+      </div>
+    </section>
+
+    <!-- ─── CITY ANALYTICS ─── -->
+    <section class="sec" id="sec-city">
+      <div class="ph"><div><div class="ph-title" data-i18n="adm_sec_city">City Analytics</div><div class="ph-sub">Geographic activity, density, and engagement by city</div></div></div>
+      <div class="g3 mb16">
+        <div class="zone"><div class="zone-name">🏙 Tbilisi</div><span class="zone-badge" style="background:var(--gd);color:var(--green);border:1px solid rgba(16,185,129,0.25)">🟢 Active</span><div class="bl"><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Check-ins</span><span class="bi-val">0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Reviews</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Events</span><span class="bi-val">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div></div></div>
+        <div class="zone"><div class="zone-name">🌊 Batumi</div><span class="zone-badge" style="background:var(--bd);color:var(--blue);border:1px solid rgba(59,130,246,0.25)">No live data</span><div class="bl"><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Check-ins</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Reviews</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Events</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div></div></div>
+        <div class="zone"><div class="zone-name">🍇 Kakheti</div><span class="zone-badge" style="background:var(--yd);color:var(--gold);border:1px solid rgba(245,158,11,0.25)">No live data</span><div class="bl"><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Check-ins</span><span class="bi-val">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Reviews</span><span class="bi-val">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Events</span><span class="bi-val">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div></div></div>
+      </div>
+      <div class="g2">
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">Activity by Hour (Today)</div></div>
+          <div class="hbars" id="hourBars"></div>
+          <div class="hlbls" id="hourLabels"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">Patriot Mission Activity</div></div>
+          <div class="bl">
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🧹 Cleanup</span><span class="bi-val" style="color:var(--green)">0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🌳 Park Improvement</span><span class="bi-val" style="color:var(--green)">0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🛣 Infrastructure</span><span class="bi-val" style="color:var(--blue)">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🐾 Animal Safety</span><span class="bi-val" style="color:var(--gold)">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🌿 Eco Actions</span><span class="bi-val" style="color:var(--green)">0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── PLATFORM CONTROLS ─── -->
+    <section class="sec" id="sec-controls">
+      <div class="ph"><div><div class="ph-title" data-i18n="adm_sec_controls">Platform Controls</div><div class="ph-sub">Feature flags · Changes apply immediately to all users</div></div></div>
+      <div class="alert warn mb20"><i class="fas fa-exclamation-triangle"></i> Changes here affect all users in real-time. Use with caution.</div>
+      <div class="g2 mb20">
+        <div>
+          <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--td);margin-bottom:9px">Core Features</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div class="tog-wrap"><div><div class="tog-label">Live City Mode</div><div class="tog-sub">Real-time activity feed and city dashboard</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('live',this.checked)"><span class="tog-slider"></span></label></div>
+            <div class="tog-wrap"><div><div class="tog-label">Rewards System</div><div class="tog-sub">QR rewards, campaigns, and GeoPoints</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('rewards',this.checked)"><span class="tog-slider"></span></label></div>
+            <div class="tog-wrap"><div><div class="tog-label">Events &amp; Ticketing</div><div class="tog-sub">Event discovery and ticket purchases</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('events',this.checked)"><span class="tog-slider"></span></label></div>
+            <div class="tog-wrap"><div><div class="tog-label">Creator Marketplace</div><div class="tog-sub">Creator profiles, collaborations, storefronts</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('creators',this.checked)"><span class="tog-slider"></span></label></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--td);margin-bottom:9px">Advanced Features</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div class="tog-wrap"><div><div class="tog-label">Patriot Missions</div><div class="tog-sub">Civic mission system and patriot scoring</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('patriot',this.checked)"><span class="tog-slider"></span></label></div>
+            <div class="tog-wrap"><div><div class="tog-label">AI Assistant</div><div class="tog-sub">GeoBot city assistant and smart recommendations</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('ai',this.checked)"><span class="tog-slider"></span></label></div>
+            <div class="tog-wrap"><div><div class="tog-label">Camera Proof System</div><div class="tog-sub">Camera-based check-ins and trust proof</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('camera',this.checked)"><span class="tog-slider"></span></label></div>
+            <div class="tog-wrap" style="border-color:rgba(239,68,68,0.35)"><div><div class="tog-label" style="color:var(--red)">Maintenance Mode</div><div class="tog-sub">Take platform offline for all users</div></div><label class="tog-sw"><input type="checkbox" onchange="handleToggle('maintenance',this.checked)"><span class="tog-slider"></span></label></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr"><div class="panel-title">Quick Links — Open Any Page</div></div>
+        <div style="display:flex;flex-wrap:wrap;gap:7px">
+          <a href="profile.html" class="btn btn-ghost btn-sm"><i class="fas fa-user"></i> Profile</a>
+          <a href="business.html" class="btn btn-ghost btn-sm"><i class="fas fa-store"></i> Business</a>
+          <a href="creators.html" class="btn btn-ghost btn-sm"><i class="fas fa-star"></i> Creators</a>
+          <a href="trust.html" class="btn btn-ghost btn-sm"><i class="fas fa-shield-alt"></i> Trust Center</a>
+          <a href="reviews.html" class="btn btn-ghost btn-sm"><i class="fas fa-star-half-alt"></i> Reviews</a>
+          <a href="patriot.html" class="btn btn-ghost btn-sm"><i class="fas fa-flag"></i> Patriot</a>
+          <a href="events.html" class="btn btn-ghost btn-sm"><i class="fas fa-calendar"></i> Events</a>
+          <a href="search.html" class="btn btn-ghost btn-sm"><i class="fas fa-search"></i> Search</a>
+          <a href="rewards.html" class="btn btn-ghost btn-sm"><i class="fas fa-gift"></i> Rewards</a>
+          <a href="challenges.html" class="btn btn-ghost btn-sm"><i class="fas fa-bolt"></i> Challenges</a>
+          <a href="camera.html" class="btn btn-ghost btn-sm"><i class="fas fa-camera"></i> Camera</a>
+          <a href="index.html" class="btn btn-ghost btn-sm"><i class="fas fa-home"></i> Home</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── ACTIVITY ─── -->
+    <section class="sec" id="sec-activity">
+      <div class="ph">
+        <div>
+          <div class="ph-title" data-i18n="adm_sec_activity">Platform Activity</div>
+          <div class="ph-sub" id="activitySub">Loading…</div>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn-ghost btn-sm" id="act-tab-all"    onclick="loadActivity('all')">All</button>
+          <button class="btn btn-ghost btn-sm" id="act-tab-posts"   onclick="loadActivity('posts')"><i class="fas fa-file-alt"></i> Posts</button>
+          <button class="btn btn-ghost btn-sm" id="act-tab-stories" onclick="loadActivity('stories')"><i class="fas fa-book-open"></i> Stories</button>
+          <button class="btn btn-ghost btn-sm" id="act-tab-checkins" onclick="loadActivity('checkins')"><i class="fas fa-map-marker-alt"></i> Check-ins</button>
+          <button class="btn btn-ghost btn-sm" onclick="loadActivity(_activityFilter)"><i class="fas fa-sync-alt"></i></button>
+        </div>
+      </div>
+      <div id="activityList" style="display:flex;flex-direction:column;gap:10px">
+        <div style="text-align:center;padding:48px;color:var(--ts);font-size:0.85rem">
+          <i class="fas fa-stream" style="font-size:1.8rem;display:block;margin-bottom:12px;opacity:0.2"></i>
+          Click a filter tab to load content
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── NOTIFICATIONS ─── -->
+    <section class="sec" id="sec-notifications">
+      <div class="ph">
+        <div><div class="ph-title" data-i18n="adm_sec_notifs">Admin Notifications</div><div class="ph-sub" id="notifSub">0 alerts</div></div>
+        <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark all read</button></div>
+      </div>
+      <div id="notifList">
+        <div style="text-align:center;padding:48px 24px;color:var(--ts);font-size:0.85rem">
+          <i class="fas fa-bell" style="font-size:1.8rem;display:block;margin-bottom:12px;opacity:0.2"></i>
+          No notifications yet
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── CONTENT STUDIO ─── -->
+    <section class="sec" id="sec-content">
+      <div class="ph">
+        <div><div class="ph-title" data-i18n="adm_sec_content">Content Studio</div><div class="ph-sub">Add real places, groups, events, rewards, challenges and marketplace items. No demo data.</div></div>
+      </div>
+      <div class="panel" style="max-width:860px">
+        <div class="panel-hdr"><div class="panel-title">Create Real Firestore Content</div></div>
+        <form id="adminContentForm" style="display:grid;gap:14px;padding:8px 0 4px">
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Collection
+            <select id="adminContentCollection" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+              <option value="places">Places / Map locations</option>
+              <option value="businesses">Businesses</option>
+              <option value="groups">Groups</option>
+              <option value="events">Events</option>
+              <option value="services">Services</option>
+              <option value="realEstateListings">Real Estate Listings</option>
+              <option value="learningItems">Learning / Courses</option>
+              <option value="liveActivity">Live Activity / Hotspots</option>
+              <option value="rewards">Rewards / Coupons</option>
+              <option value="challenges">Challenges</option>
+              <option value="creators">Creators</option>
+            </select>
+          </label>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Title / Name
+            <input id="adminContentTitle" required placeholder="Example: Tbilisi Photography Group" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+          </label>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Description
+            <textarea id="adminContentDesc" rows="4" placeholder="Short real description..." style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);resize:vertical"></textarea>
+          </label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <input id="adminContentCity" placeholder="City / location optional" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <input id="adminContentCategory" placeholder="Category optional" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <select id="adminPlaceCategory" style="display:none;grid-column:2;grid-row:1;padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+              <option value="">აირჩიე კატეგორია</option>
+            </select>
+          </div>
+          <select id="adminPlaceSubcategory" disabled style="display:none;padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <option value="">აირჩიე ქვეკატეგორია</option>
+          </select>
+          <div id="adminPlaceIconWrap" style="display:none;align-items:center;gap:10px;padding:6px 0">
+            <span id="adminPlaceIconPreview" style="font-size:1.5rem;min-width:2rem;text-align:center;line-height:1"></span>
+            <input id="adminPlaceIcon" type="text" placeholder="Icon emoji" oninput="this.dataset.userEdited='1';var p=document.getElementById('adminPlaceIconPreview');if(p)p.textContent=this.value.trim()" style="width:72px;text-align:center;font-size:1.1rem;padding:7px 8px;border-radius:8px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <span style="font-size:.73rem;color:#64748b">auto-filled · override if needed</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="adminContentImage" placeholder="Image URL (optional)" style="flex:1;padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="adminTestImageUrl()" title="Test image URL" style="white-space:nowrap;padding:11px 14px"><i class="fas fa-eye"></i> Test</button>
+            <label id="adminCsUploadLabel" for="adminCsImageFile" class="btn btn-ghost btn-sm" style="cursor:pointer;white-space:nowrap;padding:11px 14px"><i class="fas fa-upload"></i> Upload</label>
+            <input type="file" id="adminCsImageFile" accept="image/*" style="display:none">
+          </div>
+          <div id="adminImgPreviewWrap" style="display:none">
+            <div class="admin-img-ph" style="display:none;width:80px;height:56px;border-radius:8px;background:#1e293b;align-items:center;justify-content:center;font-size:1.5rem">📍</div>
+            <img style="max-height:80px;max-width:100%;border-radius:8px;object-fit:cover;display:block">
+          </div>
+          <!-- Google Place ID — places only -->
+          <div id="adminGooglePlaceWrap" style="display:none;border-top:1px solid rgba(99,102,241,.18);margin-top:4px;padding-top:12px">
+            <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#818cf8;margin-bottom:8px"><i class="fab fa-google"></i> Google Places</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+              <input id="adminGooglePlaceIdInput" type="text" placeholder="Google Place ID (e.g. ChIJx…)" style="flex:1;padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.82rem">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="adminFetchGooglePreview()" style="white-space:nowrap"><i class="fas fa-cloud-download-alt"></i> Preview</button>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+              <input id="adminGoogleSearchInput" type="text" placeholder="Search Google (e.g. Fabrika Tbilisi)" style="flex:1;padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.82rem">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="adminSearchGooglePlace()" style="white-space:nowrap"><i class="fas fa-search"></i> Search</button>
+            </div>
+            <div id="adminGooglePreviewPanel" style="display:none;padding:10px 14px;border:1px solid rgba(99,102,241,.3);border-radius:10px;background:rgba(99,102,241,.06);font-size:.82rem;line-height:1.6"></div>
+            <div id="adminGoogleSearchResults" style="display:none;border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;margin-top:4px"></div>
+          </div>
+          <!-- Extended fields — shown per collection type via JS -->
+          <div id="adminExtFields" style="display:grid;gap:12px"></div>
+          <button class="btn btn-primary btn-sm" type="submit" style="justify-self:start"><i class="fas fa-plus"></i> Create real item</button>
+        </form>
+        <!-- Live preview after create -->
+        <div id="adminContentPreview" style="display:none;margin-top:18px;padding:16px;border-radius:14px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25)">
+          <div style="font-weight:800;color:#10e0a0;margin-bottom:6px"><i class="fas fa-check-circle"></i> Created successfully</div>
+          <div id="adminContentPreviewBody" style="font-size:.85rem;color:var(--ts,#94a3b8);line-height:1.6"></div>
+        </div>
+      </div>
+      <!-- JSON Bulk Import -->
+      <div class="panel" style="max-width:860px;margin-top:18px">
+        <div class="panel-hdr"><div class="panel-title">JSON Bulk Import</div><div class="panel-sub">Paste a JSON array of objects to batch-create items in a collection.</div></div>
+        <div style="display:grid;gap:12px;padding:8px 0 4px">
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Collection
+            <select id="adminBulkCollection" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+              <option value="places">Places / Map locations</option>
+              <option value="businesses">Businesses</option>
+              <option value="groups">Groups</option>
+              <option value="events">Events</option>
+              <option value="services">Services</option>
+              <option value="realEstateListings">Real Estate Listings</option>
+              <option value="learningItems">Learning / Courses</option>
+              <option value="liveActivity">Live Activity / Hotspots</option>
+              <option value="rewards">Rewards / Coupons</option>
+              <option value="challenges">Challenges</option>
+              <option value="creators">Creators</option>
+            </select>
+          </label>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">JSON Array
+            <textarea id="adminBulkJson" rows="6" placeholder='[{"name":"Tbilisi Garden","city":"Tbilisi","category":"park"},...]' style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);resize:vertical;font-family:monospace;font-size:.8rem"></textarea>
+          </label>
+          <div id="adminBulkValidation" style="font-size:.8rem;color:#94a3b8;min-height:1.4em"></div>
+          <button class="btn btn-primary btn-sm" onclick="adminBulkImport()" style="justify-self:start"><i class="fas fa-upload"></i> Import items</button>
+          <div id="adminBulkResult" style="display:none;padding:12px;border-radius:10px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);font-size:.85rem;color:#10e0a0"></div>
+          <div id="adminDeletePlacesWrap" style="display:none;padding-top:10px;border-top:1px solid rgba(239,68,68,0.2)">
+            <button id="adminDeletePlacesBtn" class="btn btn-sm" onclick="deleteAllPlaces()" style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.35)"><i class="fas fa-trash-alt"></i> ყველა ადგილის წაშლა</button>
+            <div id="adminDeletePlacesProgress" style="font-size:.8rem;color:#94a3b8;margin-top:6px;min-height:1.2em"></div>
+          </div>
+          <div id="adminCheckImagesWrap" style="display:none;padding-top:10px;border-top:1px solid rgba(99,102,241,0.2);margin-top:8px">
+            <button id="adminCheckImagesBtn" class="btn btn-sm" onclick="checkBrokenPlaceImages()" style="background:rgba(99,102,241,0.12);color:#818cf8;border:1px solid rgba(99,102,241,0.35)"><i class="fas fa-image"></i> ფოტოების შემოწმება</button>
+            <div id="adminCheckImagesProgress" style="font-size:.8rem;color:#94a3b8;margin-top:6px;min-height:1.2em"></div>
+            <div id="adminBrokenImagesPanel" style="display:none;margin-top:10px;max-height:420px;overflow-y:auto"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Manager: list, activate/deactivate, delete -->
+      <div class="panel" style="max-width:860px;margin-top:18px">
+        <div class="panel-hdr">
+          <div><div class="panel-title">Content Manager</div><div class="panel-sub">View, activate/deactivate, and delete items in any collection</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="loadContentList()"><i class="fas fa-sync-alt"></i> Refresh</button>
+        </div>
+        <div style="display:flex;gap:10px;padding:8px 0 12px;align-items:center">
+          <select id="manageContentCol" style="flex:1;padding:10px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <option value="places">Places</option>
+            <option value="businesses">Businesses</option>
+            <option value="groups">Groups</option>
+            <option value="events">Events</option>
+            <option value="services">Services</option>
+            <option value="realEstateListings">Real Estate Listings</option>
+            <option value="learningItems">Learning / Courses</option>
+            <option value="liveActivity">Live Activity</option>
+            <option value="creators">Creators</option>
+            <option value="challenges">Challenges</option>
+            <option value="rewards">Rewards</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="loadContentList()"><i class="fas fa-search"></i> Load</button>
+        </div>
+        <div id="manageContentList" style="min-height:60px">
+          <div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">Select a collection and click Load.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── PLACE EDITING ─── -->
+    <section class="sec" id="sec-placeedit">
+      <div class="ph">
+        <div><div class="ph-title" data-i18n="adm_sec_placeedit">Place Editing</div><div class="ph-sub">Browse, filter and edit all uploaded map places.</div></div>
+      </div>
+      <div class="panel" style="max-width:960px">
+        <div class="panel-hdr">
+          <div><div class="panel-title">Filters</div></div>
+          <button class="btn btn-primary btn-sm" onclick="loadPlacesForEdit()"><i class="fas fa-sync-alt"></i> Load / Refresh</button>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;padding:8px 0 4px;align-items:center">
+          <select id="peFilterCity" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);min-width:140px">
+            <option value="">All Cities</option>
+            <option value="Tbilisi">Tbilisi</option>
+            <option value="Batumi">Batumi</option>
+            <option value="Kutaisi">Kutaisi</option>
+            <option value="Mestia">Mestia</option>
+            <option value="Sighnaghi">Sighnaghi</option>
+            <option value="Kazbegi">Kazbegi</option>
+            <option value="Borjomi">Borjomi</option>
+            <option value="Telavi">Telavi</option>
+          </select>
+          <select id="peFilterCat" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);min-width:160px">
+            <option value="">All Categories</option>
+          </select>
+          <input id="peFilterSearch" type="text" placeholder="Search by name…" style="flex:1;min-width:160px;padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)" onkeydown="if(event.key==='Enter')loadPlacesForEdit()">
+          <button class="btn btn-primary btn-sm" onclick="loadPlacesForEdit()"><i class="fas fa-search"></i> Load</button>
+        </div>
+        <div id="peStatus" style="font-size:.8rem;color:#64748b;padding:4px 0 8px;min-height:1.4em"></div>
+        <div id="pePlacesList" style="min-height:80px">
+          <div style="text-align:center;padding:32px;color:#64748b;font-size:.85rem">Set filters and click Load.</div>
+        </div>
+      </div>
+      <!-- Inline edit panel -->
+      <div id="pePlaceEditPanel" style="display:none;max-width:960px;margin-top:14px" class="panel">
+        <div class="panel-hdr">
+          <div><div class="panel-title" id="pePanelTitle">Edit Place</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="closePlaceEditPanel()"><i class="fas fa-times"></i> Close</button>
+        </div>
+        <div style="display:grid;gap:14px;padding:4px 0 8px">
+          <input type="hidden" id="peEditId">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Name
+              <input id="peEditName" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">City
+              <select id="peEditCity" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+                <option value="">— select —</option>
+                <option value="Tbilisi">Tbilisi</option>
+                <option value="Batumi">Batumi</option>
+                <option value="Kutaisi">Kutaisi</option>
+                <option value="Mestia">Mestia</option>
+                <option value="Sighnaghi">Sighnaghi</option>
+                <option value="Kazbegi">Kazbegi</option>
+                <option value="Borjomi">Borjomi</option>
+                <option value="Telavi">Telavi</option>
+              </select>
+            </label>
+          </div>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Description
+            <textarea id="peEditDesc" rows="3" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);resize:vertical"></textarea>
+          </label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Category
+              <select id="peEditCat" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)" onchange="peLoadSubcats()">
+                <option value="">— select —</option>
+              </select>
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Subcategory
+              <select id="peEditSubcat" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+                <option value="">— none —</option>
+              </select>
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;align-items:start">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Image
+              <div style="display:flex;gap:7px;align-items:center">
+                <input id="peEditImage" placeholder="https://… ან ატვირთეთ →" oninput="peUpdateImagePreview()" style="flex:1;padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+                <label id="peUploadLabel" for="peImageFile" class="btn btn-ghost btn-sm" style="cursor:pointer;white-space:nowrap;padding:10px 13px;flex-shrink:0"><i class="fas fa-upload"></i> ატვირთვა</label>
+                <input type="file" id="peImageFile" accept="image/*" style="display:none">
+              </div>
+              <div id="peImagePreviewWrap" style="display:none;margin-top:6px">
+                <img id="peImagePreview" style="max-height:90px;max-width:100%;border-radius:8px;object-fit:cover;display:block">
+              </div>
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Icon Emoji
+              <input id="peEditIcon" placeholder="🏛️" maxlength="8" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);text-align:center;font-size:1.3rem">
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Latitude
+              <input id="peEditLat" type="number" step="any" placeholder="41.693…" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Longitude
+              <input id="peEditLng" type="number" step="any" placeholder="44.801…" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Website
+              <input id="peEditWebsite" placeholder="https://…" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Address
+              <input id="peEditAddress" placeholder="Street, City" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+          </div>
+          <div id="peHoursWidget"></div>
+          <div style="display:flex;gap:10px;padding-top:4px;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-primary btn-sm" onclick="savePlaceEditPanel()"><i class="fas fa-save"></i> Save Changes</button>
+            <button class="btn btn-ghost btn-sm" onclick="closePlaceEditPanel()"><i class="fas fa-times"></i> Cancel</button>
+            <button class="btn btn-sm" onclick="deletePlaceFromEditPanel()" style="margin-left:auto;background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.35)"><i class="fas fa-trash-alt"></i> Delete Place</button>
+          </div>
+          <div id="peEditStatus" style="font-size:.82rem;min-height:1.2em"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── PLACE CATEGORIES ─── -->
+    <section class="sec" id="sec-placecat">
+      <div class="ph">
+        <div><div class="ph-title" data-i18n="adm_sec_placecat">Place Categories</div><div class="ph-sub">Manage map place categories — icons, colours, labels. Changes apply to map markers immediately.</div></div>
+        <button class="btn-primary" onclick="seedDefaultPlaceCategories()" style="font-size:.78rem;padding:8px 16px;white-space:nowrap"><i class="fas fa-seedling" style="margin-right:6px"></i>Seed 25 Defaults</button>
+      </div>
+      <div style="display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start;max-width:1100px">
+        <!-- FORM -->
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title" id="pcatFormTitle">Add Category</div></div>
+          <form id="pcatForm" onsubmit="savePlaceCategory(event)" style="display:grid;gap:12px;padding:6px 0 2px">
+            <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">ID / Slug
+              <input id="pcatId" required placeholder="e.g. cafe" maxlength="40" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.85rem">
+            </label>
+            <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">Label (Georgian)
+              <input id="pcatLabelKa" required placeholder="e.g. კაფე / ყავა" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.85rem">
+            </label>
+            <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">Label (English)
+              <input id="pcatLabelEn" placeholder="e.g. Cafe / Coffee" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.85rem">
+            </label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">Icon (emoji)
+                <div style="display:flex;gap:8px;align-items:center">
+                  <div id="pcatIconPreview" style="font-size:2rem;width:52px;height:44px;display:flex;align-items:center;justify-content:center;background:#0f172a;border-radius:9px;border:1px solid rgba(255,255,255,.15);flex-shrink:0">📍</div>
+                  <input id="pcatIcon" placeholder="emoji ჩასვით…" maxlength="20" oninput="var p=document.getElementById('pcatIconPreview');p.textContent=this.value.trim()||'📍'" style="flex:1;padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:1.3rem;text-align:center">
+                </div>
+                <span style="font-size:.7rem;color:#64748b">Google-ზე მოძებნეთ emoji → დააკოპირეთ → ჩასვით</span>
+              </label>
+              <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">Colour
+                <input id="pcatColor" type="color" value="#3498db" style="padding:4px 6px;height:44px;border-radius:9px;background:#111827;border:1px solid rgba(255,255,255,.12);cursor:pointer;width:100%">
+              </label>
+            </div>
+            <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">Sort Order
+              <input id="pcatSort" type="number" value="100" min="0" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.85rem">
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;color:var(--ts);font-size:.8rem;font-weight:700;cursor:pointer">
+              <input id="pcatActive" type="checkbox" checked style="width:16px;height:16px"> Active (visible on map)
+            </label>
+            <div style="display:flex;gap:10px;margin-top:4px">
+              <button type="submit" class="btn-primary" style="flex:1;padding:10px">Save Category</button>
+              <button type="button" id="pcatCancelBtn" onclick="resetPcatForm()" style="display:none;padding:10px 16px;border-radius:9px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#f8fafc;cursor:pointer;font-size:.82rem">Cancel</button>
+            </div>
+          </form>
+        </div>
+        <!-- LIST -->
+        <div class="panel">
+          <div class="panel-hdr" style="display:flex;justify-content:space-between;align-items:center">
+            <div class="panel-title">Categories <span id="pcatCount" style="color:var(--ts);font-weight:400;font-size:.82rem"></span></div>
+          </div>
+          <div id="pcatList" style="min-height:80px">
+            <div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">Loading…</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── TRANSFER OWNERSHIP ─── -->
+    <section class="sec" id="sec-ownership">
+      <div class="ph">
+        <div><div class="ph-title" data-i18n="adm_sec_ownership">Transfer Ownership</div><div class="ph-sub">Assign a business or place to a user so they can manage posts, description, logo, photos, and story moderation.</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;max-width:1100px">
+
+        <!-- LEFT: Find entity -->
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">1. Select Business or Place</div></div>
+          <div style="display:grid;gap:10px;padding:4px 0">
+            <div style="display:grid;grid-template-columns:1fr auto;gap:8px">
+              <input id="ownershipSearchInput" placeholder="Search by name…" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.85rem" oninput="ownershipSearchEntity(this.value)">
+              <select id="ownershipEntityType" onchange="ownershipSearchEntity(document.getElementById('ownershipSearchInput').value)" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.82rem">
+                <option value="business">Businesses</option>
+                <option value="place">Places</option>
+              </select>
+            </div>
+            <div id="ownershipEntityResults" style="display:grid;gap:6px;max-height:360px;overflow-y:auto">
+              <div style="text-align:center;padding:20px;color:#64748b;font-size:.82rem">Type a name to search…</div>
+            </div>
+            <div id="ownershipSelectedEntity" style="display:none;padding:10px;border-radius:9px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3)">
+              <div style="font-size:.72rem;color:#10b981;font-weight:700;margin-bottom:4px">SELECTED</div>
+              <div id="ownershipSelectedEntityName" style="font-weight:700;color:#f8fafc;font-size:.88rem"></div>
+              <div id="ownershipSelectedEntityMeta" style="font-size:.72rem;color:#94a3b8;margin-top:2px"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Find user + transfer -->
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">2. Select New Owner</div></div>
+          <div style="display:grid;gap:10px;padding:4px 0">
+            <input id="ownershipUserSearch" placeholder="Search user by name or email…" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.85rem" oninput="ownershipSearchUser(this.value)">
+            <div id="ownershipUserResults" style="display:grid;gap:6px;max-height:280px;overflow-y:auto">
+              <div style="text-align:center;padding:20px;color:#64748b;font-size:.82rem">Type a name or email to search…</div>
+            </div>
+            <div id="ownershipSelectedUser" style="display:none;padding:10px;border-radius:9px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3)">
+              <div style="font-size:.72rem;color:#3b82f6;font-weight:700;margin-bottom:4px">SELECTED USER</div>
+              <div id="ownershipSelectedUserName" style="font-weight:700;color:#f8fafc;font-size:.88rem"></div>
+              <div id="ownershipSelectedUserEmail" style="font-size:.72rem;color:#94a3b8;margin-top:2px"></div>
+            </div>
+            <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:12px;margin-top:4px">
+              <div id="ownershipSummary" style="font-size:.78rem;color:#64748b;margin-bottom:10px">Select a business/place and a user to continue.</div>
+              <button class="btn-primary" id="ownershipTransferBtn" onclick="executeOwnershipTransfer()" disabled style="width:100%;padding:11px;opacity:.5;cursor:not-allowed">
+                <i class="fas fa-handshake" style="margin-right:8px"></i> Transfer Ownership
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Transfer log -->
+      <div class="panel" style="max-width:1100px;margin-top:16px">
+        <div class="panel-hdr"><div class="panel-title">Recent Transfers</div></div>
+        <div id="ownershipLog" style="padding:4px 0">
+          <div style="text-align:center;padding:20px;color:#64748b;font-size:.82rem">No transfers yet this session.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── CHALLENGE STUDIO ─── -->
+    <section class="sec" id="sec-challenges">
+      <div class="ph">
+        <div><div class="ph-title" data-i18n="adm_sec_challenges">Challenge &amp; Badge Studio</div><div class="ph-sub" id="chalStudioSub">Loading challenges…</div></div>
+        <div class="ph-actions">
+          <button class="btn btn-primary btn-sm" onclick="chalFormMode('create')"><i class="fas fa-plus"></i> New Challenge</button>
+        </div>
+      </div>
+
+      <!-- Live challenge list -->
+      <div id="chalList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px"></div>
+
+      <!-- Create / Edit form -->
+      <div class="panel" style="max-width:860px" id="chalFormPanel">
+        <div class="panel-hdr">
+          <div><div class="panel-title" id="chalFormTitle">New Challenge</div><div class="panel-sub">Fill required fields then save</div></div>
+          <button class="btn btn-ghost btn-sm" id="chalFormCancel" style="display:none" onclick="chalFormMode('none')"><i class="fas fa-times"></i> Cancel</button>
+        </div>
+        <form id="chalForm" style="display:grid;gap:14px;padding:8px 0 4px">
+          <input type="hidden" id="chalEditId">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Title *
+              <input id="cfTitle" required placeholder="e.g. Tbilisi Explorer" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Type *
+              <select id="cfType" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+                <option value="checkin_count">checkin_count — any check-in</option>
+                <option value="city_checkin">city_checkin — must match city field</option>
+                <option value="place_checkin">place_checkin — must match place ID</option>
+                <option value="business_checkin">business_checkin — must match business ID</option>
+                <option value="date_limited_checkin">date_limited_checkin — within start/end dates</option>
+              </select>
+            </label>
+          </div>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Category
+            <select id="cfCategory" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+              <option value="exploration">Exploration</option>
+              <option value="travel">Travel</option>
+              <option value="food">Food</option>
+              <option value="events">Events</option>
+              <option value="patriot">Patriot</option>
+              <option value="fitness">Fitness</option>
+              <option value="community">Community</option>
+            </select>
+          </label>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Description
+            <textarea id="cfDesc" rows="3" placeholder="Short description shown on the challenge card" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);resize:vertical"></textarea>
+          </label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Target count *
+              <input id="cfTarget" type="number" min="1" value="1" required style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">XP reward
+              <input id="cfXp" type="number" min="0" value="100" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">City (optional)
+              <input id="cfCity" placeholder="Tbilisi" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Start date (optional)
+              <input id="cfStart" type="date" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">End date (optional)
+              <input id="cfEnd" type="date" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Place ID (optional)
+              <input id="cfPlaceId" placeholder="Firestore place doc ID" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Business ID (optional)
+              <input id="cfBusinessId" placeholder="Firestore business doc ID" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+          </div>
+          <div class="tog-wrap" style="max-width:420px">
+            <div><div class="tog-label">Active</div><div class="tog-sub">Visible and accepting progress from users</div></div>
+            <label class="tog-sw"><input type="checkbox" id="cfActive" checked><span class="tog-slider"></span></label>
+          </div>
+          <!-- Badge section -->
+          <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:16px">
+            <div style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--td);margin-bottom:12px">
+              <i class="fas fa-medal" style="color:var(--gold);margin-right:6px"></i>Badge Reward (optional)
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Badge ID (slug)
+                <input id="cfBadgeId" placeholder="e.g. first_checkin" oninput="chalBadgePreview()" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+              </label>
+              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Badge title
+                <input id="cfBadgeTitle" placeholder="e.g. First Check-in" oninput="chalBadgePreview()" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+              </label>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Badge icon (FA class)
+                <input id="cfBadgeIcon" placeholder="fa-medal" oninput="chalBadgePreview()" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+              </label>
+              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Rarity
+                <select id="cfBadgeRarity" onchange="chalBadgePreview()" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+                  <option value="common">common</option>
+                  <option value="rare">rare</option>
+                  <option value="epic">epic</option>
+                  <option value="legendary">legendary</option>
+                </select>
+              </label>
+              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Sort order
+                <input id="cfSort" type="number" value="0" min="0" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+              </label>
+            </div>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800;margin-bottom:12px">Badge description
+              <input id="cfBadgeDesc" placeholder="Short text shown on badge card" oninput="chalBadgePreview()" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <!-- Live badge preview -->
+            <div id="chalBadgePreviewWrap" style="display:none;padding:14px;border:1px solid rgba(168,85,247,.25);border-radius:12px;background:rgba(168,85,247,.06);margin-bottom:4px">
+              <div style="font-size:.66rem;font-weight:700;color:var(--td);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Badge Preview</div>
+              <div style="display:flex;align-items:center;gap:12px">
+                <div id="chalBadgePreviewIcon" style="width:44px;height:44px;border-radius:12px;background:rgba(16,185,129,.1);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0"></div>
+                <div>
+                  <div id="chalBadgePreviewTitle" style="font-weight:800;font-size:.9rem"></div>
+                  <div id="chalBadgePreviewDesc" style="font-size:.72rem;color:var(--ts)"></div>
+                  <div id="chalBadgePreviewRarity" style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:2px"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;padding-top:4px">
+            <button class="btn btn-primary btn-sm" type="submit" id="chalSaveBtn"><i class="fas fa-save"></i> Save challenge</button>
+            <button class="btn btn-ghost btn-sm" type="button" id="chalCancelBtn" style="display:none" onclick="chalFormMode('none')"><i class="fas fa-times"></i> Cancel</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ─── REWARDS ─── -->
+    <section class="sec" id="sec-rewards">
+      <div class="ph">
+        <div><div class="ph-title" data-i18n="adm_sec_rewards">Rewards Management</div><div class="ph-sub" id="rewardsSubtitle">Manage the GeoPoints rewards store</div></div>
+        <div class="ph-actions">
+          <button class="btn btn-primary btn-sm" onclick="rwFormMode('create')"><i class="fas fa-plus"></i> New Reward</button>
+        </div>
+      </div>
+
+      <!-- Create / Edit Form -->
+      <div class="panel mb16" id="rwForm" style="display:none">
+        <div class="panel-hdr"><div class="panel-title" id="rwFormTitle">Create Reward</div></div>
+        <form id="rwFormEl" onsubmit="rwSave(event)" style="display:grid;gap:14px;padding:18px 0 4px">
+          <input type="hidden" id="rwEditId">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Title *
+              <input id="rwTitle" placeholder="e.g. Free Coffee at Café X" required style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Category
+              <select id="rwCategory" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+                <option value="food_drink">Food &amp; Drink</option>
+                <option value="experience">Experience</option>
+                <option value="shopping">Shopping</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="travel">Travel</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+          </div>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Description
+            <textarea id="rwDesc" rows="2" placeholder="Short description shown to users" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);resize:vertical;font-family:inherit"></textarea>
+          </label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Points Cost *
+              <input id="rwCost" type="number" min="1" placeholder="e.g. 500" required style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Stock (blank = unlimited)
+              <input id="rwStock" type="number" min="0" placeholder="e.g. 100" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Sort Order
+              <input id="rwSort" type="number" value="0" min="0" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+          </div>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Image URL (optional)
+            <input id="rwImage" placeholder="https://…" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+          </label>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Terms / Redemption note (optional)
+            <input id="rwTerms" placeholder="e.g. Valid at all Tbilisi branches. Show QR at checkout." style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+          </label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Expires At (optional)
+              <input id="rwExpiresAt" type="date" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Business ID (optional)
+              <input id="rwBusinessId" placeholder="Firestore business doc ID" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Business Name (display)
+              <input id="rwBusinessName" placeholder="e.g. Café X (shown on reward card)" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Business Owner UID
+              <input id="rwOwnerId" placeholder="Firebase UID of business owner" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            </label>
+          </div>
+          <div class="tog-wrap" style="max-width:420px">
+            <div><div class="tog-label">Active</div><div class="tog-sub">Visible to users in the rewards store</div></div>
+            <label class="tog-sw"><input type="checkbox" id="rwActive" checked><span class="tog-slider"></span></label>
+          </div>
+          <div style="display:flex;gap:8px;padding-top:4px">
+            <button class="btn btn-primary btn-sm" type="submit" id="rwSaveBtn"><i class="fas fa-save"></i> Save reward</button>
+            <button class="btn btn-ghost btn-sm" type="button" onclick="rwFormMode('none')"><i class="fas fa-times"></i> Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Rewards List -->
+      <div class="panel mb16">
+        <div class="panel-hdr"><div class="panel-title">All Rewards</div></div>
+        <div id="rwList" style="padding:4px 0"><div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">Loading rewards…</div></div>
+      </div>
+
+      <!-- Manual Balance Adjustment -->
+      <div class="panel">
+        <div class="panel-hdr">
+          <div><div class="panel-title">Manual Balance Adjustment</div><div class="panel-sub">Award or deduct points for a specific user (admin only)</div></div>
+        </div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+          <label style="font-size:.78rem;font-weight:600;color:var(--ts)">User ID
+            <input id="adjUserId" class="rw-input" style="margin-top:4px;width:100%;box-sizing:border-box" placeholder="Firebase UID of the user" autocomplete="off">
+          </label>
+          <label style="font-size:.78rem;font-weight:600;color:var(--ts)">Amount (positive = award, negative = deduct)
+            <input id="adjAmount" type="number" class="rw-input" style="margin-top:4px;width:100%;box-sizing:border-box" placeholder="e.g. 200 or -50">
+          </label>
+          <label style="font-size:.78rem;font-weight:600;color:var(--ts)">Reason
+            <input id="adjReason" class="rw-input" style="margin-top:4px;width:100%;box-sizing:border-box" placeholder="Brief reason for audit trail" maxlength="200">
+          </label>
+          <button id="adjBtn" class="btn btn-primary btn-sm" style="align-self:flex-start" onclick="doAdminAdjust()"><i class="fas fa-sliders-h"></i> Apply Adjustment</button>
+        </div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="panel">
+        <div class="panel-hdr">
+          <div><div class="panel-title">Recent Point Transactions</div><div class="panel-sub">Last 50 transfers and redemptions</div></div>
+        </div>
+        <div id="rwTxList" style="padding:4px 0"><div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">Loading transactions…</div></div>
+      </div>
+    </section>
+
+    <!-- ─── SITE ANALYTICS ─── -->
+    <section class="sec" id="sec-analytics">
+      <div class="ph">
+        <div><div class="ph-title" data-i18n="adm_sec_site">Site Analytics</div><div class="ph-sub" id="analyticsSub">Loading…</div></div>
+        <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="loadAdminAnalytics()"><i class="fas fa-sync-alt"></i> Refresh</button></div>
+      </div>
+      <div class="g4 mb12">
+        <div class="sc green">
+          <div class="sc-ico">👁</div><div class="sc-val" id="an-pv">—</div><div class="sc-lbl" data-i18n="adm_an_pv">Page Views Today</div>
+          <div class="sc-glow" style="background:radial-gradient(#10b981,transparent)"></div>
+        </div>
+        <div class="sc blue">
+          <div class="sc-ico">🟢</div><div class="sc-val" id="an-online">—</div><div class="sc-lbl" data-i18n="adm_an_online">Online Now</div>
+          <div class="sc-glow" style="background:radial-gradient(#3b82f6,transparent)"></div>
+        </div>
+        <div class="sc gold">
+          <div class="sc-ico">🔍</div><div class="sc-val" id="an-searches">—</div><div class="sc-lbl" data-i18n="adm_an_searches">Searches Today</div>
+          <div class="sc-glow" style="background:radial-gradient(#f59e0b,transparent)"></div>
+        </div>
+        <div class="sc purple">
+          <div class="sc-ico">⚡</div><div class="sc-val" id="an-events">—</div><div class="sc-lbl" data-i18n="adm_an_events">Events Today</div>
+          <div class="sc-glow" style="background:radial-gradient(#a855f7,transparent)"></div>
+        </div>
+      </div>
+      <div class="g2 mb12">
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">Top Pages Today</div></div>
+          <div id="an-top-pages" style="padding:8px 0;min-height:80px;color:var(--ts);font-size:0.82rem">Loading…</div>
+        </div>
+        <div class="panel">
+          <div class="panel-hdr"><div class="panel-title">Top Searches</div></div>
+          <div id="an-top-searches" style="padding:8px 0;min-height:80px;color:var(--ts);font-size:0.82rem">Loading…</div>
+        </div>
+      </div>
+      <div class="panel mb12">
+        <div class="panel-hdr"><div class="panel-title">7-Day Page Views</div></div>
+        <div id="an-trend" style="display:flex;align-items:flex-end;gap:6px;height:80px;padding:8px 4px">
+          <div style="color:var(--ts);font-size:0.78rem;padding-top:20px">Loading…</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr"><div class="panel-title">Avg Performance (ms)</div></div>
+        <div id="an-perf" style="padding:8px 0;min-height:60px;color:var(--ts);font-size:0.82rem">Loading…</div>
+      </div>
+    </section>
+
+    <!-- ─── ERROR MONITOR ─── -->
+    <section class="sec" id="sec-errors">
+      <div class="ph">
+        <div><div class="ph-title" data-i18n="adm_sec_errors">Error Monitor</div><div class="ph-sub" id="errorsSub">Loading…</div></div>
+        <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="loadAdminErrors()"><i class="fas fa-sync-alt"></i> Refresh</button></div>
+      </div>
+      <div class="g3 mb12">
+        <div class="sc" style="border-color:rgba(239,68,68,.3)">
+          <div class="sc-ico">🔴</div><div class="sc-val" id="err-today">—</div><div class="sc-lbl" data-i18n="adm_err_today">JS Errors Today</div>
+        </div>
+        <div class="sc" style="border-color:rgba(245,158,11,.3)">
+          <div class="sc-ico">📤</div><div class="sc-val" id="err-uploads">—</div><div class="sc-lbl" data-i18n="adm_err_uploads">Failed Uploads</div>
+        </div>
+        <div class="sc" style="border-color:rgba(59,130,246,.3)">
+          <div class="sc-ico">📄</div><div class="sc-val" id="err-pages">—</div><div class="sc-lbl" data-i18n="adm_err_pages">Pages Affected</div>
+        </div>
+      </div>
+      <div class="panel mb12">
+        <div class="panel-hdr"><div class="panel-title">Recent JS Errors</div></div>
+        <div id="err-log" style="display:flex;flex-direction:column;gap:8px;padding:4px 0;min-height:80px">
+          <div style="text-align:center;padding:32px;color:var(--ts);font-size:0.82rem">Loading…</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-hdr"><div class="panel-title">Upload Failures</div></div>
+        <div id="err-uploads-log" style="display:flex;flex-direction:column;gap:8px;padding:4px 0;min-height:60px">
+          <div style="text-align:center;padding:24px;color:var(--ts);font-size:0.82rem">Loading…</div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- end .main -->
+</div><!-- end .shell -->
+
+<!-- User Detail Overlay -->
+<div class="udp-ov" id="udpOv">
+  <div class="udp-backdrop" onclick="closeUserDetail()"></div>
+  <div class="udp" id="udpPanel">
+    <div class="udp-hdr">
+      <button class="udp-close" onclick="closeUserDetail()"><i class="fas fa-times"></i></button>
+      <div class="uav" style="width:38px;height:38px;font-size:0.95rem" id="udpAv">U</div>
+      <div>
+        <div style="font-weight:800;font-size:0.92rem" id="udpName">—</div>
+        <div style="font-size:0.7rem;color:var(--ts)" id="udpHandle">—</div>
+      </div>
+      <div style="margin-left:auto" id="udpStatus"></div>
+    </div>
+    <div class="udp-body">
+      <div class="udp-stats" id="udpStats"></div>
+      <div class="bl mb12">
+        <div class="bi">
+          <div class="bi-hdr"><span class="bi-lbl">Trust Score</span><span class="bi-val" id="udpTrustNum">—</span></div>
+          <div class="bt"><div class="bf green" id="udpTrustBar" style="width:0%;transition:width 0.9s ease"></div></div>
+        </div>
+      </div>
+      <div style="font-size:0.64rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--td);margin-bottom:7px">Admin Actions</div>
+      <div class="udp-acts" id="udpActs"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Delete Content Modal -->
+<div id="deleteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9997;align-items:center;justify-content:center">
+  <div style="background:#0d111e;border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:28px 24px;max-width:460px;width:90%;position:relative">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div style="width:34px;height:34px;border-radius:8px;background:rgba(239,68,68,0.15);display:flex;align-items:center;justify-content:center;color:#ef4444;font-size:1rem"><i class="fas fa-trash"></i></div>
+      <div>
+        <div style="font-weight:800;font-size:0.98rem">Delete Content</div>
+        <div style="color:var(--ts);font-size:0.76rem" id="deleteModalDesc">Remove this content from GeoHub</div>
+      </div>
+      <button onclick="closeDeleteModal()" style="margin-left:auto;background:none;border:none;color:var(--ts);cursor:pointer;font-size:1rem;padding:4px"><i class="fas fa-times"></i></button>
+    </div>
+    <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--td);margin-bottom:6px">Message to user</div>
+    <textarea id="deleteModalMsg" rows="4" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:#f0f4ff;padding:10px 12px;font-size:0.85rem;resize:vertical;outline:none;font-family:inherit;line-height:1.5"></textarea>
+    <div style="font-size:0.74rem;color:var(--ts);margin-top:6px;margin-bottom:16px"><i class="fas fa-info-circle" style="margin-right:4px"></i>This message will be sent to the user as a notification.</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost btn-sm" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn btn-red btn-sm" onclick="executeDelete()" id="deleteConfirmBtn"><i class="fas fa-trash"></i> Delete &amp; Notify User</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="adminToast" style="position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(60px);z-index:9999;background:rgba(16,185,129,0.95);color:#000;padding:10px 20px;border-radius:999px;font-size:0.8rem;font-weight:800;display:flex;align-items:center;gap:8px;opacity:0;pointer-events:none;transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1),opacity 0.28s;white-space:nowrap">
+  <i class="fas fa-check-circle"></i><span id="adminToastMsg">Done</span>
+</div>
+
+  <script>
+function toggleAdminSidebar() {
+  var sidebar = document.getElementById('adminSidebar');
+  var overlay = document.getElementById('adminSidebarOverlay');
+  if (!sidebar) return;
+  var open = sidebar.classList.toggle('mobile-open');
+  if (overlay) overlay.classList.toggle('active', open);
+}
+// Close sidebar when nav item clicked on mobile
+document.addEventListener('click', function(e) {
+  var item = e.target.closest('.sb-item');
+  if (item && window.innerWidth <= 640) {
+    var sidebar = document.getElementById('adminSidebar');
+    var overlay = document.getElementById('adminSidebarOverlay');
+    if (sidebar) sidebar.classList.remove('mobile-open');
+    if (overlay) overlay.classList.remove('active');
+  }
+});
+</script>
+        <!-- Vite: 12 scripts → 1 chunk. See src/entries/admin.js -->
+</body>
+</html>

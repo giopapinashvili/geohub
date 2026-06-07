@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+  <link rel="dns-prefetch" href="https://firebase.googleapis.com">
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Social Feed — GeoHub</title>
+  <!-- SEO ─────────────────────────────────────────────── -->
+  <meta name="description" content="Explore live check-ins, posts, events, and stories from Georgia's most active communities. Join the conversation on GeoHub.">
+  <link rel="canonical" href="https://geohub.ge/feed.html">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="GeoHub">
+  <meta property="og:title" content="Social Feed — GeoHub">
+  <meta property="og:description" content="Explore live check-ins, posts, events, and stories from Georgia's most active communities. Join the conversation on GeoHub.">
+  <meta property="og:url" content="https://geohub.ge/feed.html">
+  <meta property="og:image" content="https://geohub.ge/icons/icon-512.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="GeoHub — Discover Georgia">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Social Feed — GeoHub">
+  <meta name="twitter:description" content="Explore live check-ins, posts, events, and stories from Georgia's most active communities. Join the conversation on GeoHub.">
+  <meta name="twitter:image" content="https://geohub.ge/icons/icon-512.png">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
+  <meta name="theme-color" content="#10b981">
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
+  <script type="module" crossorigin src="/assets/responsive-polish-BO79aqv7.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js"></script>
+  <script type="module" crossorigin src="/assets/firebase-config-CGKVrgHh.js"></script>
+  <script type="module" crossorigin src="/assets/gh-i18n-BbqPU8Gy.js"></script>
+  <script type="module" crossorigin src="/assets/gh-schema-kY2sMGH-.js"></script>
+  <script type="module" crossorigin src="/assets/main-CYAfAwpP.js"></script>
+  <script type="module" crossorigin src="/assets/account-BJSGhbLy.js"></script>
+  <script type="module" crossorigin src="/assets/mobile-nav-DsKLv3RI.js"></script>
+  <script type="module" crossorigin src="/assets/firestore-social-lVyxRoWc.js"></script>
+  <script type="module" crossorigin src="/assets/moderation-C9mkHVWf.js"></script>
+  <script type="module" crossorigin src="/assets/chat-popup-MADaMnFN.js"></script>
+  <script type="module" crossorigin src="/assets/gh-calls-DqDOBgOW.js"></script>
+  <script type="module" crossorigin src="/assets/gh-group-calls-Ck1zIhcT.js"></script>
+  <script type="module" crossorigin src="/assets/geohub-social-redesign-ChTko2Gc.js"></script>
+  <script type="module" crossorigin src="/assets/story-editor-yJAiz1Ls.js"></script>
+  <script type="module" crossorigin src="/assets/geo-actors-DCdcg0VE.js"></script>
+  <script type="module" crossorigin src="/assets/account-switcher-Bs0W5qNE.js"></script>
+  <script type="module" crossorigin src="/assets/geohub-production-stabilization-v1-D9brtDwk.js"></script>
+  <script type="module" crossorigin src="/assets/push-notifications-wdsLxQpN.js"></script>
+  <script type="module" crossorigin src="/assets/analytics-DyGaP85h.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js"></script>
+  <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
+  <link rel="stylesheet" crossorigin href="/assets/navbar-D8jKRRC5.css">
+  <link rel="stylesheet" crossorigin href="/assets/account-switcher-B6z_cLE_.css">
+  <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-DJnMDTGu.css">
+  <link rel="stylesheet" crossorigin href="/assets/moderation-CB6dVgQ2.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+</head>
+<body data-gh-page="feed">
+  <noscript>GeoHub requires JavaScript.</noscript>
+  <!-- Vite: 23 scripts bundled → 1 optimised chunk (firebase + app). See src/entries/feed.js -->
+</body>
+</html>

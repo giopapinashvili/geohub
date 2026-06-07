@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+  <link rel="dns-prefetch" href="https://firebase.googleapis.com">
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoHub — Get Started</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css"></noscript>
+  <script type="module" crossorigin src="/assets/onboarding-DQxtnlC4.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/responsive-polish-BO79aqv7.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase-config-CGKVrgHh.js">
+  <link rel="modulepreload" crossorigin href="/assets/config-DSeD8I2H.js">
+  <link rel="modulepreload" crossorigin href="/assets/api-client-DV25UnBD.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-CYAfAwpP.js">
+  <link rel="modulepreload" crossorigin href="/assets/account-BJSGhbLy.js">
+  <link rel="modulepreload" crossorigin href="/assets/chat-popup-MADaMnFN.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-production-stabilization-v1-D9brtDwk.js">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
+  <link rel="stylesheet" crossorigin href="/assets/onboarding-B5ff3lef.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+</head>
+<body class="ob-page">
+
+  <!-- ── HEADER ── -->
+  <header class="ob-header">
+    <a href="index.html" class="ob-logo">
+      <img src="/assets/icon-96-s2GtXjxZ.png" alt="GeoHub" style="width:34px;height:34px;border-radius:10px;object-fit:cover">
+      <span class="ob-logo-text">Geo<span>Hub</span></span>
+    </a>
+    <div class="ob-progress-track">
+      <div class="ob-progress-fill" id="ob-progress-fill"></div>
+    </div>
+    <div class="ob-step-label" id="ob-step-label"></div>
+    <div class="ob-lang-switcher">
+      <button class="ob-lang-btn" data-lang="ka" onclick="obLang('ka')">KA</button>
+      <button class="ob-lang-btn" data-lang="en" onclick="obLang('en')">EN</button>
+      <button class="ob-lang-btn" data-lang="ru" onclick="obLang('ru')">RU</button>
+    </div>
+  </header>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main class="ob-main">
+    <div class="ob-container">
+      <div class="ob-step-content" id="ob-step-content"></div>
+    </div>
+  </main>
+
+  <!-- ── BOTTOM NAV ── -->
+  <div class="ob-nav" id="ob-nav">
+    <div class="ob-nav-left">
+      <button class="btn btn-ghost" id="ob-back-btn" onclick="obBack()">
+        <i class="fas fa-arrow-left"></i> <span data-i18n="ob_back">Back</span>
+      </button>
+      <button class="ob-skip" id="ob-skip-btn" onclick="obSkip()" data-i18n="ob_skip">Skip</button>
+    </div>
+    <button class="btn btn-primary btn-lg" id="ob-next-btn" onclick="obNext()">
+      <span data-i18n="ob_continue">Continue</span> <i class="fas fa-arrow-right"></i>
+    </button>
+  </div>
+
+  <!-- ── VALIDATION TOAST ── -->
+  <div class="ob-toast" id="ob-toast"></div>
+
+  
+              <!-- Vite: 9 scripts → 1 chunk. See src/entries/onboarding.js -->
+</body>
+</html>

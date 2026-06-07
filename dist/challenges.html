@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+  <link rel="dns-prefetch" href="https://firebase.googleapis.com">
+  <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Challenges — GeoHub</title>
+  <!-- SEO ─────────────────────────────────────────────── -->
+  <meta name="description" content="Complete real-world city missions and challenges. Earn XP, collect achievement badges, and climb the city leaderboard on GeoHub.">
+  <link rel="canonical" href="https://geohub.ge/challenges.html">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="GeoHub">
+  <meta property="og:title" content="Challenges — GeoHub">
+  <meta property="og:description" content="Complete real-world city missions and challenges. Earn XP, collect achievement badges, and climb the city leaderboard on GeoHub.">
+  <meta property="og:url" content="https://geohub.ge/challenges.html">
+  <meta property="og:image" content="https://geohub.ge/icons/icon-512.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:alt" content="GeoHub — Discover Georgia">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Challenges — GeoHub">
+  <meta name="twitter:description" content="Complete real-world city missions and challenges. Earn XP, collect achievement badges, and climb the city leaderboard on GeoHub.">
+  <meta name="twitter:image" content="https://geohub.ge/icons/icon-512.png">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css"></noscript>
+  <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <script type="module" crossorigin src="/assets/challenges-dRP2m0dD.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/responsive-polish-BO79aqv7.js">
+  <link rel="modulepreload" crossorigin href="/assets/firebase-config-CGKVrgHh.js">
+  <link rel="modulepreload" crossorigin href="/assets/account-BJSGhbLy.js">
+  <link rel="modulepreload" crossorigin href="/assets/mobile-nav-DsKLv3RI.js">
+  <link rel="modulepreload" crossorigin href="/assets/firestore-social-lVyxRoWc.js">
+  <link rel="modulepreload" crossorigin href="/assets/challenge-engine-CKpZweL9.js">
+  <link rel="modulepreload" crossorigin href="/assets/chat-popup-MADaMnFN.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-calls-DqDOBgOW.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-group-calls-Ck1zIhcT.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-production-stabilization-v1-D9brtDwk.js">
+  <link rel="modulepreload" crossorigin href="/assets/analytics-DyGaP85h.js">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
+  <link rel="stylesheet" crossorigin href="/assets/challenges-DNbbT9nA.css">
+  <link rel="stylesheet" crossorigin href="/assets/styles-DkNdvQG3.css">
+  <link rel="stylesheet" crossorigin href="/assets/navbar-D8jKRRC5.css">
+  <link rel="stylesheet" crossorigin href="/assets/mobile-nav-DC9Hwftv.css">
+  <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-DJnMDTGu.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+</head>
+<body class="page-challenges">
+  <nav class="navbar" id="navbar">
+    <a href="index.html" class="navbar-brand"><div class="logo-icon">GH</div><span class="logo-text">Geo<span class="logo-geo">Hub</span></span></a>
+    <ul class="navbar-links"></ul>
+    <div class="navbar-actions"></div>
+    <button class="hamburger" id="geoHamburger" onclick="geoToggleMenu()" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="mobile-menu"></div>
+
+  <main class="challenges-app">
+    <div class="challenges-shell">
+      <section class="challenges-hero">
+        <div class="challenges-kicker"><i class="fas fa-trophy"></i> Missions</div>
+        <h1>Complete real GeoHub challenges</h1>
+        <p>Challenges update from verified activity only: check-ins, photo proof, QR scans and event attendance. No demo completions or fake leaderboards are shown.</p>
+      </section>
+
+      <section class="challenges-toolbar" aria-label="Challenge controls">
+        <label class="challenge-search">
+          <i class="fas fa-search"></i>
+          <input id="challengeSearch" type="search" placeholder="Search active challenges">
+        </label>
+        <div class="challenge-tabs">
+          <button class="active" type="button" data-challenge-tab="active">Active</button>
+          <button type="button" data-challenge-tab="completed">Completed</button>
+        </div>
+      </section>
+
+      <section class="challenge-stats" aria-label="Challenge stats">
+        <div class="challenge-stat"><strong id="challengeActiveCount">0</strong><span>Active</span></div>
+        <div class="challenge-stat"><strong id="challengeCompletedCount">0</strong><span>Completed</span></div>
+        <div class="challenge-stat"><strong id="challengeTotalCount">0</strong><span>Total visible</span></div>
+      </section>
+
+      <section class="challenge-category-tabs" id="challengeCategoryTabs" aria-label="Challenge categories"></section>
+
+      <section class="challenge-grid" id="challengeGrid" aria-live="polite">
+        <div class="challenge-empty">
+          <div>
+            <i class="fas fa-spinner fa-spin"></i>
+            <h2>Loading challenges</h2>
+            <p>Reading active Firestore missions.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+                            <!-- Vite: 14 scripts → 1 chunk. See src/entries/challenges.js -->
+</body>
+</html>

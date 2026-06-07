@@ -1,0 +1,141 @@
+/* GeoHub Social Interaction Layer */
+
+.gh-bell-wrap { position: relative; }
+.gh-bell-btn {
+  width: 38px; height: 38px; border-radius: var(--radius-sm);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--text-secondary); background: transparent; border: 1px solid transparent;
+  transition: var(--transition);
+}
+.gh-bell-btn:hover { color: var(--text-primary); background: var(--bg-elevated); border-color: var(--border); }
+.gh-bell-count {
+  position: absolute; top: -3px; right: -3px; min-width: 18px; height: 18px;
+  padding: 0 5px; border-radius: 999px; background: var(--red); color: white;
+  font-size: 0.62rem; font-weight: 900; display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--bg-0);
+}
+.gh-notifications-panel {
+  position: absolute; top: 46px; right: 0; width: min(360px, calc(100vw - 24px));
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl); overflow: hidden; z-index: 1200; display: none;
+}
+.gh-notifications-panel.open { display: block; animation: gh-pop 0.18s ease; }
+.gh-panel-head, .gh-modal-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 16px; border-bottom: 1px solid var(--border);
+}
+.gh-panel-title, .gh-modal-title { font-size: 0.95rem; font-weight: 900; }
+.gh-link-btn { color: var(--green); font-size: 0.74rem; font-weight: 700; cursor: pointer; }
+.gh-notification-item {
+  display: flex; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border-subtle);
+  transition: background 0.2s; cursor: pointer;
+}
+.gh-notification-item:hover { background: var(--bg-elevated); }
+.gh-notification-item.unread { background: rgba(16,185,129,0.045); }
+.gh-notification-icon {
+  width: 34px; height: 34px; border-radius: var(--radius-md); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--green-muted); color: var(--green-light);
+}
+.gh-notification-title { font-size: 0.82rem; font-weight: 800; }
+.gh-notification-body { font-size: 0.76rem; color: var(--text-secondary); line-height: 1.4; margin-top: 2px; }
+.gh-notification-time { font-size: 0.68rem; color: var(--text-muted); margin-top: 4px; }
+
+.gh-reaction-row {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  padding: 0 16px 10px;
+}
+.gh-react-btn {
+  display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px;
+  border-radius: var(--radius-full); border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03); color: var(--text-secondary);
+  font-size: 0.72rem; font-weight: 700; transition: transform 0.18s, border-color 0.18s, background 0.18s;
+}
+.gh-react-btn:hover { transform: translateY(-1px); border-color: rgba(16,185,129,0.35); color: var(--text-primary); }
+.gh-react-btn.active { background: rgba(16,185,129,0.14); border-color: rgba(16,185,129,0.42); color: var(--green-light); }
+.gh-react-btn.pulse { animation: gh-pulse 0.3s ease; }
+.gh-comment-trigger, .gh-share-trigger { cursor: pointer; }
+.gh-social-action.active { color: var(--green-light) !important; }
+
+.gh-modal-backdrop {
+  position: fixed; inset: 0; z-index: 2000; background: rgba(0,0,0,0.62);
+  backdrop-filter: blur(8px); display: none; align-items: flex-end; justify-content: center;
+}
+.gh-modal-backdrop.open { display: flex; animation: gh-fade 0.16s ease; }
+.gh-modal {
+  width: min(560px, 100%); max-height: min(760px, calc(100vh - 32px));
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0; box-shadow: var(--shadow-xl);
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.gh-modal-close {
+  width: 34px; height: 34px; border-radius: var(--radius-sm);
+  color: var(--text-secondary); background: var(--bg-elevated);
+}
+.gh-modal-close:hover { color: var(--text-primary); }
+.gh-comments-list { padding: 14px 16px; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
+.gh-comment-item { display: grid; grid-template-columns: 34px 1fr; gap: 10px; }
+.gh-comment-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
+.gh-comment-bubble { background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 9px 10px; }
+.gh-comment-name { font-size: 0.78rem; font-weight: 800; margin-bottom: 2px; }
+.gh-comment-name a { color: var(--text-primary); }
+.gh-comment-text { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45; }
+.gh-comment-actions { display: flex; gap: 12px; margin-top: 6px; font-size: 0.7rem; color: var(--text-muted); }
+.gh-comment-actions button { color: inherit; font-size: inherit; }
+.gh-comment-actions button:hover { color: var(--green-light); }
+.gh-replies { grid-column: 2; display: flex; flex-direction: column; gap: 8px; margin-left: 12px; }
+.gh-comment-form { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); }
+.gh-comment-form input {
+  flex: 1; padding: 10px 12px; border-radius: var(--radius-md);
+  background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-primary); outline: none;
+}
+.gh-comment-form button { padding: 10px 14px; border-radius: var(--radius-md); background: var(--green); color: #000; font-weight: 900; }
+
+.gh-share-options { padding: 14px 16px; display: grid; gap: 10px; }
+.gh-share-option {
+  display: flex; align-items: center; gap: 10px; padding: 12px;
+  border: 1px solid var(--border); border-radius: var(--radius-md);
+  background: var(--bg-elevated); color: var(--text-primary); cursor: pointer;
+}
+.gh-share-option:hover { border-color: rgba(16,185,129,0.4); }
+.gh-friend-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
+.gh-friend-chip {
+  display: flex; align-items: center; gap: 8px; padding: 8px;
+  border-radius: var(--radius-md); background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle);
+  font-size: 0.75rem;
+}
+.gh-friend-chip img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; }
+
+.gh-activity-widget {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-xl); padding: 16px; margin-bottom: 16px;
+}
+.gh-activity-title { font-size: 0.82rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.gh-activity-item { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid var(--border-subtle); }
+.gh-activity-item:first-of-type { border-top: 0; padding-top: 0; }
+.gh-activity-icon { width: 30px; height: 30px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; background: rgba(16,185,129,0.1); }
+.gh-activity-text { font-size: 0.76rem; color: var(--text-secondary); line-height: 1.4; }
+.gh-activity-text strong { color: var(--text-primary); }
+
+.gh-toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(16px);
+  background: var(--bg-card); border: 1px solid rgba(16,185,129,0.35);
+  color: var(--text-primary); padding: 10px 14px; border-radius: var(--radius-full);
+  box-shadow: var(--shadow-lg); z-index: 3000; opacity: 0; transition: 0.22s ease;
+  font-size: 0.82rem; font-weight: 700;
+}
+.gh-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.gh-toast-error { border-color: rgba(239,68,68,0.5); background: rgba(30,10,10,0.98); color: #fca5a5; }
+
+@keyframes gh-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes gh-pop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes gh-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+
+@media (min-width: 700px) {
+  .gh-modal-backdrop { align-items: center; }
+  .gh-modal { border-radius: var(--radius-xl); }
+}
+@media (max-width: 520px) {
+  .gh-friend-list { grid-template-columns: 1fr; }
+  .gh-modal { max-height: calc(100vh - 12px); }
+}

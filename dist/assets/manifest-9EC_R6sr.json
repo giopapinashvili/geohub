@@ -1,0 +1,54 @@
+{
+  "id": "/",
+  "name": "GeoHub — Discover Georgia",
+  "short_name": "GeoHub",
+  "description": "Discover Georgia, Earn XP, Connect with people, Grow your business.",
+  "start_url": "/feed.html?utm_source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#05080F",
+  "theme_color": "#3B82F6",
+  "orientation": "portrait-primary",
+  "lang": "ka",
+  "prefer_related_applications": false,
+  "categories": ["lifestyle", "social", "travel"],
+  "icons": [
+    { "src": "icons/icon-72.png",   "sizes": "72x72",   "type": "image/png" },
+    { "src": "icons/icon-96.png",   "sizes": "96x96",   "type": "image/png" },
+    { "src": "icons/icon-128.png",  "sizes": "128x128", "type": "image/png" },
+    { "src": "icons/icon-192.png",  "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png",  "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png",  "sizes": "512x512", "type": "image/png", "purpose": "maskable any" }
+  ],
+  "shortcuts": [
+    {
+      "name": "ფიდი",
+      "short_name": "ფიდი",
+      "description": "ადგილები, ღონისძიებები, პოსტები",
+      "url": "/feed.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "ჯილდოები",
+      "short_name": "ჯილდოები",
+      "description": "XP ქულები და ჯილდოების მაღაზია",
+      "url": "/rewards.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "შეტყობინებები",
+      "short_name": "შეტყობ.",
+      "description": "შეტყობინებები და DM",
+      "url": "/messages.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "პროფილი",
+      "short_name": "პროფილი",
+      "description": "ჩემი GeoHub პროფილი",
+      "url": "/profile.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ]
+}
