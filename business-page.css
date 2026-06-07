@@ -27,7 +27,7 @@
 }
 
 /* ── BODY / ROOT ─────────────────────────────────────────────── */
-body.biz-detail-active > *:not(#biz-detail-root):not(.navbar):not(.mobile-menu):not(.biz-modal-overlay):not(.biz-lightbox):not(#biz-toast):not(#geo-sw-wrap):not(#geo-sw-dropdown):not(#app-bottom-nav):not(#app-action-overlay):not(#app-action-sheet):not(.app-notif-container):not(#geo-cmd-overlay):not(#app-install-prompt):not(#gh-offline-banner):not(#gh-update-banner):not(script):not(noscript):not(.gh-topbar):not(.gh-left):not(#gh-biz-edit-modal) {
+body.biz-detail-active > *:not(#biz-detail-root):not(.navbar):not(.mobile-menu):not(.biz-modal-overlay):not(.biz-lightbox):not(#biz-toast):not(#geo-sw-wrap):not(#geo-sw-dropdown):not(#app-bottom-nav):not(#app-action-overlay):not(#app-action-sheet):not(.app-notif-container):not(#geo-cmd-overlay):not(#app-install-prompt):not(#gh-offline-banner):not(#gh-update-banner):not(script):not(noscript):not(.gh-topbar):not(.gh-left):not(#gh-biz-edit-modal):not(#gh-map-card-modal) {
   display: none !important;
 }
 
