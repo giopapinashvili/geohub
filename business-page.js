@@ -302,6 +302,7 @@
     if (_isActingAsPage) {
       // ── Page identity mode: show admin controls ───────────────────
       actions =
+        '<button class="biz-action-btn owner-edit" onclick="window._bizActions.openBizEdit()"><i class="fas fa-pen"></i> Edit Page</button>'+
         '<button class="biz-action-btn" type="button" data-biz-open-compose><i class="fas fa-plus"></i> Create Post</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
@@ -312,7 +313,8 @@
       // ── Personal/visitor mode: show visitor controls ──────────────
       // Owners and admins get a "Switch to Page" button
       var switchPageBtn = (_isOwner || _isPageAdmin)
-        ? '<button class="biz-action-btn" onclick="window._bizActions.switchToPage()"><i class="fas fa-store"></i> Switch to Page</button>'
+        ? '<button class="biz-action-btn owner-edit" onclick="window._bizActions.openBizEdit()"><i class="fas fa-pen"></i> Edit Page</button>'+
+          '<button class="biz-action-btn" onclick="window._bizActions.switchToPage()"><i class="fas fa-store"></i> Switch to Page</button>'
         : '';
       var followCls  = _isFollowing ? 'following' : 'primary';
       var followIcon = _isFollowing ? 'fa-check' : 'fa-plus';
@@ -564,7 +566,7 @@
       '<div class="biz-admin-toolbar-inner">'+
         '<span class="biz-admin-badge"><i class="fas fa-crown"></i> Admin Mode</span>'+
         '<div class="biz-admin-toolbar-btns">'+
-          ''+
+          '<button class="biz-admin-btn" onclick="window._bizActions.openBizEdit()"><i class="fas fa-pen"></i> Edit Page</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.openBlockManager()"><i class="fas fa-plus-circle"></i> Add Block</button>'+
           '<button class="biz-admin-btn" type="button" data-biz-open-compose><i class="fas fa-pen-to-square"></i> New Post</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
@@ -1544,7 +1546,7 @@
         }).join('')+
       '</div>'+
       '<div class="biz-dash-actions">'+
-        ''+
+        '<button class="biz-owner-action-btn edit" onclick="window._bizActions.openBizEdit()"><i class="fas fa-pen"></i> Edit Page Info</button>'+
         '<button class="biz-owner-action-btn photo" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-owner-action-btn quotes" onclick="window._bizActions.loadOwnerQuotes()"><i class="fas fa-inbox"></i> View Quote Requests</button>'+
         '<button class="biz-owner-action-btn" onclick="window._bizActions.switchTab(\'insights\')" style="background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.3);color:#60a5fa"><i class="fas fa-chart-line"></i> View Insights</button>'+
@@ -3370,6 +3372,8 @@
   // ── ACTIONS ───────────────────────────────────────────────────
 
   window._bizActions = {
+
+    openBizEdit: function() { ghBizEdit(); },
 
     switchTab: function(id) {
       document.querySelectorAll('.biz-tab').forEach(function(b){ b.classList.remove('active'); });
@@ -5644,6 +5648,199 @@
     var a = e.target.closest('a[href^="tel:"]');
     if (a && BIZ_ID) _trackBizAnalytics(BIZ_ID, 'phone');
   });
+
+  // ── BUSINESS PAGE EDITOR ──────────────────────────────────────────
+
+  function ghBizEdit() {
+    if (!BIZ_ID || !_biz) { showToast('გვერდი ჯერ არ ჩაიტვირთა, სცადე კიდე', false); return; }
+
+    var existing = document.getElementById('gh-biz-edit-modal');
+    if (existing) { existing.remove(); return; }
+
+    var b = _biz;
+
+    var cats = [
+      ['cafes','☕ Café'],['restaurants','🍽️ Restaurant'],['bars','🍺 Bar'],['wine-bar','🍷 Wine Bar'],
+      ['bakery','🥐 Bakery'],['fast-food','🍔 Fast Food'],['pizza','🍕 Pizza'],['sushi','🍱 Sushi'],
+      ['ice-cream','🍦 Ice Cream'],['khinkali','🥟 Khinkali House'],['food-delivery','🛵 Food Delivery'],
+      ['catering','🍱 Catering'],['hotels','🏨 Hotel'],['guesthouses','🏡 Guesthouse'],
+      ['hostel','🛏️ Hostel'],['apartments','🏢 Apartments'],['resort','🌴 Resort'],
+      ['tours','🗺️ Tours'],['travel-agency','✈️ Travel Agency'],['hiking','🥾 Hiking'],
+      ['attractions','🏛️ Attraction'],['adventure','🪂 Adventure'],['rafting','🚣 Rafting'],
+      ['ski','⛷️ Ski Resort'],['gym','💪 Gym'],['yoga','🧘 Yoga'],['spa','💆 Spa'],
+      ['dental','🦷 Dental'],['clinic','🏥 Clinic'],['pharmacy','💊 Pharmacy'],
+      ['beauty','💅 Beauty'],['hair-salon','💇 Hair Salon'],['barbershop','💈 Barbershop'],
+      ['nail-salon','💅 Nail Salon'],['tattoo','🎨 Tattoo'],
+      ['cinema','🎬 Cinema'],['nightclub','🎵 Nightclub'],['karaoke','🎤 Karaoke'],
+      ['escape-room','🔐 Escape Room'],['bowling','🎳 Bowling'],['gaming','🎮 Gaming'],
+      ['clothing','👗 Clothing'],['electronics','📱 Electronics'],['jewelry','💍 Jewelry'],
+      ['books','📚 Books'],['gifts','🎁 Gifts'],['supermarket','🛒 Supermarket'],
+      ['furniture','🛋️ Furniture'],['florist','🌸 Florist'],['sports-shop','⚽ Sports Shop'],
+      ['web-studio','💻 Web Studio'],['consulting','📊 Consulting'],['accounting','🧾 Accounting'],
+      ['legal','⚖️ Legal'],['real-estate','🏠 Real Estate'],['photography','📸 Photography'],
+      ['car-rental','🚗 Car Rental'],['car-repair','🔧 Car Repair'],['car-wash','🚿 Car Wash'],
+      ['it-services','🖥️ IT Services'],['event-venue','🎉 Event Venue'],['wedding','💍 Wedding'],
+      ['vet','🐾 Vet'],['pet-shop','🐕 Pet Shop'],['kids-cafe','🧸 Kids Café'],
+      ['bank','🏦 Bank'],['exchange','💱 Exchange'],['museum','🏛️ Museum'],
+      ['laundry','👕 Laundry'],['cleaning','🧹 Cleaning'],['other','📍 Other']
+    ];
+    var cities = ['Tbilisi','Batumi','Kazbegi','Kutaisi','Gudauri','Sighnaghi','Mestia','Borjomi','Telavi','Gori','Mtskheta','Zugdidi','Other'];
+    var catVal  = b.category || b.categoryId || '';
+    var cityVal = b.city || '';
+
+    var catOpts  = cats.map(function(c){ return '<option value="'+c[0]+'"'+(catVal===c[0]?' selected':'')+'>'+c[1]+'</option>'; }).join('');
+    var cityOpts = cities.map(function(c){ return '<option value="'+esc(c)+'"'+(cityVal===c?' selected':'')+'>'+esc(c)+'</option>'; }).join('');
+
+    /* ── DOM build ─────────────────────────────────────── */
+    var modal = document.createElement('div');
+    modal.id = 'gh-biz-edit-modal';
+    modal.style.cssText = [
+      'position:fixed','top:0','left:0','width:100%','height:100%',
+      'background:rgba(0,0,0,0.78)','z-index:999999',
+      'display:flex','align-items:center','justify-content:center',
+      'padding:12px','box-sizing:border-box'
+    ].join(';');
+
+    var sheet = document.createElement('div');
+    sheet.style.cssText = [
+      'background:#0d0d1a','border-radius:16px',
+      'width:100%','max-width:600px','max-height:90vh',
+      'display:flex','flex-direction:column',
+      'overflow:hidden','color:#e0e0f0',
+      'box-shadow:0 24px 80px rgba(0,0,0,.7)'
+    ].join(';');
+
+    var inp = 'style="width:100%;background:#0a0a18;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;padding:9px 12px;font-size:.88rem;box-sizing:border-box;outline:none;font-family:inherit"';
+    var ta  = 'style="width:100%;background:#0a0a18;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;padding:9px 12px;font-size:.88rem;box-sizing:border-box;outline:none;resize:vertical;min-height:80px;font-family:inherit"';
+    var lbl = 'style="display:block;font-size:.75rem;color:#9090b0;font-weight:600;margin-bottom:5px"';
+    var fld = 'style="margin-bottom:14px"';
+    var row = 'style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px"';
+    var sec = 'style="background:#131325;border:1px solid #1e1e36;border-radius:12px;padding:16px;margin-bottom:14px"';
+    var sh  = 'style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#10b981;margin:0 0 12px"';
+
+    sheet.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #1e1e36;flex-shrink:0">'+
+        '<span style="font-weight:700;font-size:.95rem"><i class="fas fa-pen" style="color:#10b981;margin-right:8px"></i>Edit Business Page</span>'+
+        '<button id="gh-biz-edit-close" style="background:none;border:1px solid #2e2e48;border-radius:8px;color:#aaa;padding:5px 13px;cursor:pointer;font-size:.82rem">✕ Close</button>'+
+      '</div>'+
+      '<div style="flex:1;overflow-y:auto;padding:18px">'+
+
+        '<div '+sec+'>'+
+          '<p '+sh+'>Basic Info</p>'+
+          '<div '+fld+'><label '+lbl+'>Business Name</label><input '+inp+' id="gbe-name" value="'+esc(b.name||b.title||'')+'" placeholder="Business name"></div>'+
+          '<div '+fld+'><label '+lbl+'>Short Description</label><textarea '+ta+' id="gbe-desc">'+esc(b.description||b.desc||'')+'</textarea></div>'+
+          '<div '+row+'>'+
+            '<div><label '+lbl+'>Category</label><select '+inp+' id="gbe-cat"><option value="">Choose…</option>'+catOpts+'</select></div>'+
+            '<div><label '+lbl+'>Type</label><select '+inp+' id="gbe-type"><option value="physical"'+(!b.isOnline?' selected':'')+'>Physical</option><option value="online"'+(b.isOnline?' selected':'')+'>Online Only</option></select></div>'+
+          '</div>'+
+        '</div>'+
+
+        '<div '+sec+'>'+
+          '<p '+sh+'>Location</p>'+
+          '<div '+row+'>'+
+            '<div><label '+lbl+'>City</label><select '+inp+' id="gbe-city"><option value="">Select city…</option>'+cityOpts+'</select></div>'+
+            '<div><label '+lbl+'>Street Address</label><input '+inp+' id="gbe-address" value="'+esc(b.address||'')+'" placeholder="Street address"></div>'+
+          '</div>'+
+          '<div '+row+'>'+
+            '<div><label '+lbl+'>Latitude</label><input '+inp+' id="gbe-lat" type="number" step="any" value="'+esc(String(b.lat||''))+'" placeholder="41.6938"></div>'+
+            '<div><label '+lbl+'>Longitude</label><input '+inp+' id="gbe-lng" type="number" step="any" value="'+esc(String(b.lng||''))+'" placeholder="44.8015"></div>'+
+          '</div>'+
+        '</div>'+
+
+        '<div '+sec+'>'+
+          '<p '+sh+'>Contact</p>'+
+          '<div '+row+'>'+
+            '<div><label '+lbl+'>Phone</label><input '+inp+' id="gbe-phone" value="'+esc(b.phone||'')+'" placeholder="+995 555 …"></div>'+
+            '<div><label '+lbl+'>WhatsApp</label><input '+inp+' id="gbe-whatsapp" value="'+esc(b.whatsapp||'')+'" placeholder="+995 555 …"></div>'+
+          '</div>'+
+          '<div '+row+'>'+
+            '<div><label '+lbl+'>Email</label><input '+inp+' id="gbe-email" type="email" value="'+esc(b.email||'')+'" placeholder="contact@…"></div>'+
+            '<div><label '+lbl+'>Website</label><input '+inp+' id="gbe-website" value="'+esc(b.website||'')+'" placeholder="https://…"></div>'+
+          '</div>'+
+        '</div>'+
+
+        '<div '+sec+'>'+
+          '<p '+sh+'>Social Media</p>'+
+          '<div '+row+'>'+
+            '<div><label '+lbl+'><i class="fab fa-instagram" style="color:#e1306c"></i> Instagram</label><input '+inp+' id="gbe-instagram" value="'+esc(b.instagram||(b.socialLinks&&b.socialLinks.instagram)||'')+'" placeholder="username"></div>'+
+            '<div><label '+lbl+'><i class="fab fa-facebook" style="color:#1877f2"></i> Facebook</label><input '+inp+' id="gbe-facebook" value="'+esc(b.facebook||(b.socialLinks&&b.socialLinks.facebook)||'')+'" placeholder="page url or name"></div>'+
+          '</div>'+
+        '</div>'+
+
+        '<button id="gbe-save" style="width:100%;padding:14px;background:#10b981;color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;letter-spacing:.02em">'+
+          '<i class="fas fa-save"></i> Save Changes'+
+        '</button>'+
+
+      '</div>';
+
+    modal.appendChild(sheet);
+    document.body.appendChild(modal);
+
+    /* close helpers */
+    function closeModal() {
+      var m = document.getElementById('gh-biz-edit-modal');
+      if (m) m.remove();
+    }
+
+    document.getElementById('gh-biz-edit-close').onclick = closeModal;
+
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) closeModal();
+    });
+
+    function onEsc(e) {
+      if (e.key === 'Escape') { closeModal(); document.removeEventListener('keydown', onEsc); }
+    }
+    document.addEventListener('keydown', onEsc);
+
+    /* save */
+    document.getElementById('gbe-save').onclick = function() {
+      ghBizSave(closeModal);
+    };
+  }
+
+  function ghBizSave(closeModal) {
+    var saveBtn = document.getElementById('gbe-save');
+    if (!saveBtn || !_db || !_fs) { showToast('Firebase not ready', false); return; }
+    var g = function(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
+
+    var lat = parseFloat(g('gbe-lat')) || null;
+    var lng = parseFloat(g('gbe-lng')) || null;
+    var payload = {
+      name:        g('gbe-name'),
+      title:       g('gbe-name'),
+      description: g('gbe-desc'),
+      category:    g('gbe-cat'),
+      categoryId:  g('gbe-cat'),
+      isOnline:    g('gbe-type') === 'online',
+      city:        g('gbe-city'),
+      address:     g('gbe-address'),
+      phone:       g('gbe-phone'),
+      whatsapp:    g('gbe-whatsapp'),
+      email:       g('gbe-email'),
+      website:     g('gbe-website'),
+      instagram:   g('gbe-instagram'),
+      facebook:    g('gbe-facebook'),
+      updatedAt:   _fs.serverTimestamp()
+    };
+    if (lat && lng) { payload.lat = lat; payload.lng = lng; }
+
+    _fs.updateDoc(_fs.doc(_db, 'businesses', BIZ_ID), payload)
+      .then(function() {
+        Object.assign(_biz, payload);
+        showToast('ცვლილებები შენახულია ✓');
+        closeModal();
+        setTimeout(function() { location.reload(); }, 600);
+      })
+      .catch(function(err) {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+        showToast('შეცდომა: ' + (err.code || err.message), false);
+      });
+  }
 
   // ── INIT TRIGGER ─────────────────────────────────────────────────
 
