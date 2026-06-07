@@ -302,7 +302,7 @@
     if (_isActingAsPage) {
       // ── Page identity mode: show admin controls ───────────────────
       actions =
-        '<button class="biz-action-btn owner-edit" onclick="window.ghOpenBizEdit ? window.ghOpenBizEdit() : alert(\'ghOpenBizEdit not found!\')"><i class="fas fa-pen"></i> Edit Page</button>'+
+        '<button class="biz-action-btn owner-edit" data-open-biz-edit><i class="fas fa-pen"></i> Edit Page</button>'+
         '<button class="biz-action-btn" type="button" data-biz-open-compose><i class="fas fa-plus"></i> Create Post</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
@@ -565,7 +565,7 @@
       '<div class="biz-admin-toolbar-inner">'+
         '<span class="biz-admin-badge"><i class="fas fa-crown"></i> Admin Mode</span>'+
         '<div class="biz-admin-toolbar-btns">'+
-          '<button class="biz-admin-btn" onclick="ghOpenBizEdit()"><i class="fas fa-pen"></i> Edit Page</button>'+
+          '<button class="biz-admin-btn" data-open-biz-edit><i class="fas fa-pen"></i> Edit Page</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.openBlockManager()"><i class="fas fa-plus-circle"></i> Add Block</button>'+
           '<button class="biz-admin-btn" type="button" data-biz-open-compose><i class="fas fa-pen-to-square"></i> New Post</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
@@ -1545,7 +1545,7 @@
         }).join('')+
       '</div>'+
       '<div class="biz-dash-actions">'+
-        '<button class="biz-owner-action-btn edit" onclick="ghOpenBizEdit()"><i class="fas fa-pen"></i> Edit Page Info</button>'+
+        '<button class="biz-owner-action-btn edit" data-open-biz-edit><i class="fas fa-pen"></i> Edit Page Info</button>'+
         '<button class="biz-owner-action-btn photo" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-owner-action-btn quotes" onclick="window._bizActions.loadOwnerQuotes()"><i class="fas fa-inbox"></i> View Quote Requests</button>'+
         '<button class="biz-owner-action-btn" onclick="window._bizActions.switchTab(\'insights\')" style="background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.3);color:#60a5fa"><i class="fas fa-chart-line"></i> View Insights</button>'+
@@ -1899,13 +1899,11 @@
       if (_isActingAsPage) window._bizActions.refreshAdminList();
     }
 
-    // Wire edit-page button via closure so it works even before window.ghOpenBizEdit is reachable
     if (_isActingAsPage) {
-      document.querySelectorAll('.biz-action-btn.owner-edit').forEach(function(btn) {
+      document.querySelectorAll('[data-open-biz-edit]').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
-          e.stopPropagation();
-          console.log('[BizEdit] addEventListener fired, _biz:', _biz ? 'ok' : 'null');
-          ghOpenBizEdit();
+          e.stopImmediatePropagation();
+          openBizEdit();
         });
       });
     }
@@ -5264,9 +5262,7 @@
     },
 
     deleteGalleryPhoto: function(id) {
-      console.log('[BizEdit] deleteGalleryPhoto called — id:', id, 'isAdminOrOwner:', isAdminOrOwner(), '_isOwner:', _isOwner, '_isActingAsPage:', _isActingAsPage);
-      if (!isAdminOrOwner()) { showToast('No permission to delete', false); return; }
-      if (!id) { showToast('No photo id', false); return; }
+      if (!isAdminOrOwner() || !id) return;
       window.ghConfirm('Delete this photo?', function() {
         _fs.deleteDoc(_fs.doc(_db,'businesses',BIZ_ID,'gallery',id)).then(function(){
           showToast(_bpt('photo_deleted'));
@@ -5658,9 +5654,9 @@
     if (a && BIZ_ID) _trackBizAnalytics(BIZ_ID, 'phone');
   });
 
-  // ── INLINE EDIT DRAWER ───────────────────────────────────────
+  // ── BUSINESS PAGE EDITOR ─────────────────────────────────────────
 
-  var BEDIT_CATS = [
+  var BIZ_EDIT_CATS = [
     ['cafes','☕ Café'],['restaurants','🍽️ Restaurant'],['bars','🍺 Bar'],['wine-bar','🍷 Wine Bar'],
     ['bakery','🥐 Bakery'],['fast-food','🍔 Fast Food'],['pizza','🍕 Pizza'],['sushi','🍱 Sushi'],
     ['ice-cream','🍦 Ice Cream'],['khinkali','🥟 Khinkali House'],['food-delivery','🛵 Food Delivery'],
@@ -5689,172 +5685,157 @@
     ['exchange','💱 Exchange'],['museum','🏛️ Museum'],['gallery','🖼️ Gallery'],
     ['laundry','👕 Laundry'],['cleaning','🧹 Cleaning'],['other','📍 Other']
   ];
-  var BEDIT_CITIES = ['Tbilisi','Batumi','Kazbegi','Kutaisi','Gudauri','Sighnaghi','Mestia','Borjomi','Telavi','Gori','Mtskheta','Zugdidi','Other'];
+  var BIZ_EDIT_CITIES = ['Tbilisi','Batumi','Kazbegi','Kutaisi','Gudauri','Sighnaghi','Mestia','Borjomi','Telavi','Gori','Mtskheta','Zugdidi','Other'];
 
-  function _beditInjectStyles() {
-    if (document.getElementById('biz-edit-drawer-css')) return;
-    var s = document.createElement('style');
-    s.id = 'biz-edit-drawer-css';
-    s.textContent = [
-      '#biz-edit-drawer{position:fixed;inset:0;z-index:99999;background:#0d0d1a;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}',
-      '#biz-edit-drawer.open{transform:translateX(0)}',
-      '#biz-edit-drawer-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#111126;border-bottom:1px solid #2a2a3e;flex-shrink:0}',
-      '#biz-edit-drawer-head h2{margin:0;font-size:1rem;font-weight:700;color:#e0e0f0}',
-      '#biz-edit-drawer-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:20px}',
-      '.bedit-section{background:#131325;border:1px solid #2a2a3e;border-radius:12px;padding:16px}',
-      '.bedit-section-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#10b981;margin:0 0 14px}',
-      '.bedit-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}',
-      '.bedit-group{display:flex;flex-direction:column;gap:5px}',
-      '.bedit-group label{font-size:.78rem;color:#9090b0;font-weight:600}',
-      '.bedit-group input,.bedit-group select,.bedit-group textarea{background:#0a0a18;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;padding:9px 12px;font-size:.88rem;outline:none;width:100%;box-sizing:border-box}',
-      '.bedit-group input:focus,.bedit-group select:focus,.bedit-group textarea:focus{border-color:#10b981}',
-      '.bedit-group textarea{resize:vertical;min-height:80px}',
-      '.bedit-group select option{background:#1a1a2e}',
-      '#bedit-save-btn{margin:4px 0 20px;padding:13px;background:#10b981;color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}',
-      '#bedit-save-btn:disabled{opacity:.6;cursor:not-allowed}',
-      '.bedit-close-btn{background:none;border:1px solid #3e3e56;border-radius:8px;color:#aaa;padding:6px 14px;cursor:pointer;font-size:.85rem}'
-    ].join('');
-    document.head.appendChild(s);
-  }
-
-  function _beditVal(id) {
-    var el = document.getElementById(id);
-    return el ? el.value.trim() : '';
-  }
-
-  function ghOpenBizEdit() {
+  function openBizEdit() {
     if (!BIZ_ID) return;
-    if (!_biz)   { showToast('Business not loaded yet — try again', false); return; }
-    var existing = document.getElementById('biz-edit-drawer');
-    if (existing) { existing.style.display = 'flex'; return; }
+    if (!_biz) { showToast('Business not loaded yet — try again', false); return; }
+
+    var existing = document.getElementById('biz-edit-dlg');
+    if (existing) { existing.showModal(); return; }
 
     var b = _biz;
-    var catOpts = BEDIT_CATS.map(function(c){
-      return '<option value="'+c[0]+'"'+(((b.category||b.categoryId||'')===c[0])?' selected':'')+'>'+c[1]+'</option>';
+    var catVal = b.category || b.categoryId || '';
+    var catOpts = BIZ_EDIT_CATS.map(function(c) {
+      return '<option value="'+c[0]+'"'+(catVal===c[0]?' selected':'')+'>'+c[1]+'</option>';
     }).join('');
-    var cityOpts = BEDIT_CITIES.map(function(c){
-      return '<option'+(c===b.city?' selected':'')+'>'+c+'</option>';
+    var cityOpts = BIZ_EDIT_CITIES.map(function(c) {
+      return '<option value="'+esc(c)+'"'+(c===b.city?' selected':'')+'>'+esc(c)+'</option>';
     }).join('');
 
-    var drawer = document.createElement('div');
-    drawer.id = 'biz-edit-drawer';
-    drawer.innerHTML =
-      '<div id="biz-edit-drawer-head">'+
-        '<h2><i class="fas fa-pen" style="color:#10b981;margin-right:8px"></i>Edit Business Page</h2>'+
-        '<button class="bedit-close-btn" onclick="ghCloseBizEdit()"><i class="fas fa-times"></i> Close</button>'+
+    var SS = 'style="background:#131325;border:1px solid #2a2a3e;border-radius:12px;padding:16px;margin-bottom:16px"';
+    var ST = 'style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#10b981;margin:0 0 12px"';
+    var SR = 'style="display:grid;grid-template-columns:1fr 1fr;gap:12px"';
+    var SC = 'style="display:flex;flex-direction:column;gap:12px"';
+    var SG = 'style="display:flex;flex-direction:column;gap:5px"';
+    var SL = 'style="font-size:.78rem;color:#9090b0;font-weight:600"';
+    var SI = 'style="background:#0a0a18;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;padding:9px 12px;font-size:.88rem;width:100%;box-sizing:border-box;outline:none"';
+    var STA= 'style="background:#0a0a18;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;padding:9px 12px;font-size:.88rem;width:100%;box-sizing:border-box;outline:none;resize:vertical;min-height:90px"';
+
+    var dlg = document.createElement('dialog');
+    dlg.id = 'biz-edit-dlg';
+    dlg.style.cssText = 'padding:0;border:none;border-radius:16px;background:#0d0d1a;color:#e0e0f0;width:min(620px,96vw);max-height:92vh;overflow:hidden;display:flex;flex-direction:column';
+    dlg.innerHTML =
+      '<style>'+
+        '#biz-edit-dlg::backdrop{background:rgba(0,0,0,.75)}'+
+        '#biz-edit-dlg input:focus,#biz-edit-dlg select:focus,#biz-edit-dlg textarea:focus{border-color:#10b981!important;outline:none}'+
+        '#biz-edit-dlg select option{background:#1a1a2e}'+
+      '</style>'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#111126;border-bottom:1px solid #2a2a3e;flex-shrink:0">'+
+        '<h2 style="margin:0;font-size:1rem;font-weight:700;color:#e0e0f0"><i class="fas fa-pen" style="color:#10b981;margin-right:8px"></i>Edit Business Page</h2>'+
+        '<button id="biz-edit-close" style="background:none;border:1px solid #3e3e56;border-radius:8px;color:#aaa;padding:6px 14px;cursor:pointer;font-size:.85rem"><i class="fas fa-times"></i></button>'+
       '</div>'+
-      '<div id="biz-edit-drawer-body">'+
+      '<div style="flex:1;overflow-y:auto;padding:20px">'+
 
-        '<div class="bedit-section">'+
-          '<div class="bedit-section-title">Basic Info</div>'+
-          '<div style="display:flex;flex-direction:column;gap:12px">'+
-            '<div class="bedit-group"><label>Business Name</label><input id="bedit-name" value="'+esc(b.name||b.title||'')+'" placeholder="Business name"></div>'+
-            '<div class="bedit-group"><label>Description</label><textarea id="bedit-desc">'+esc(b.description||b.desc||'')+'</textarea></div>'+
-            '<div class="bedit-row">'+
-              '<div class="bedit-group"><label>Category</label><select id="bedit-cat"><option value="">Select...</option>'+catOpts+'</select></div>'+
-              '<div class="bedit-group"><label>Type</label><select id="bedit-type"><option value="physical"'+((!b.isOnline)?' selected':'')+'>Physical</option><option value="online"'+((b.isOnline)?' selected':'')+'>Online</option></select></div>'+
+        '<div '+SS+'>'+
+          '<p '+ST+'>Basic Info</p>'+
+          '<div '+SC+'>'+
+            '<div '+SG+'><label '+SL+'>Business Name</label><input '+SI+' id="bedit-name" value="'+esc(b.name||b.title||'')+'" placeholder="Business name"></div>'+
+            '<div '+SG+'><label '+SL+'>Description</label><textarea '+STA+' id="bedit-desc">'+esc(b.description||b.desc||'')+'</textarea></div>'+
+            '<div '+SR+'>'+
+              '<div '+SG+'><label '+SL+'>Category</label><select '+SI+' id="bedit-cat"><option value="">Select…</option>'+catOpts+'</select></div>'+
+              '<div '+SG+'><label '+SL+'>Type</label><select '+SI+' id="bedit-type"><option value="physical"'+(!b.isOnline?' selected':'')+'>Physical</option><option value="online"'+(b.isOnline?' selected':'')+'>Online</option></select></div>'+
             '</div>'+
           '</div>'+
         '</div>'+
 
-        '<div class="bedit-section">'+
-          '<div class="bedit-section-title">Location</div>'+
-          '<div style="display:flex;flex-direction:column;gap:12px">'+
-            '<div class="bedit-row">'+
-              '<div class="bedit-group"><label>City</label><select id="bedit-city"><option value="">Select city...</option>'+cityOpts+'</select></div>'+
-              '<div class="bedit-group"><label>Address</label><input id="bedit-address" value="'+esc(b.address||'')+'" placeholder="Street address"></div>'+
+        '<div '+SS+'>'+
+          '<p '+ST+'>Location</p>'+
+          '<div '+SC+'>'+
+            '<div '+SR+'>'+
+              '<div '+SG+'><label '+SL+'>City</label><select '+SI+' id="bedit-city"><option value="">Select city…</option>'+cityOpts+'</select></div>'+
+              '<div '+SG+'><label '+SL+'>Address</label><input '+SI+' id="bedit-address" value="'+esc(b.address||'')+'" placeholder="Street address"></div>'+
             '</div>'+
-            '<div class="bedit-row">'+
-              '<div class="bedit-group"><label>Latitude</label><input id="bedit-lat" type="number" step="any" value="'+esc(b.lat||'')+'" placeholder="41.6938"></div>'+
-              '<div class="bedit-group"><label>Longitude</label><input id="bedit-lng" type="number" step="any" value="'+esc(b.lng||'')+'" placeholder="44.8015"></div>'+
-            '</div>'+
-          '</div>'+
-        '</div>'+
-
-        '<div class="bedit-section">'+
-          '<div class="bedit-section-title">Contact</div>'+
-          '<div style="display:flex;flex-direction:column;gap:12px">'+
-            '<div class="bedit-row">'+
-              '<div class="bedit-group"><label>Phone</label><input id="bedit-phone" value="'+esc(b.phone||'')+'" placeholder="+995 555 ..."></div>'+
-              '<div class="bedit-group"><label>WhatsApp</label><input id="bedit-whatsapp" value="'+esc(b.whatsapp||'')+'" placeholder="+995 555 ..."></div>'+
-            '</div>'+
-            '<div class="bedit-row">'+
-              '<div class="bedit-group"><label>Email</label><input id="bedit-email" type="email" value="'+esc(b.email||'')+'" placeholder="contact@..."></div>'+
-              '<div class="bedit-group"><label>Website</label><input id="bedit-website" type="url" value="'+esc(b.website||'')+'" placeholder="https://..."></div>'+
+            '<div '+SR+'>'+
+              '<div '+SG+'><label '+SL+'>Latitude</label><input '+SI+' id="bedit-lat" type="number" step="any" value="'+esc(String(b.lat||''))+'" placeholder="41.6938"></div>'+
+              '<div '+SG+'><label '+SL+'>Longitude</label><input '+SI+' id="bedit-lng" type="number" step="any" value="'+esc(String(b.lng||''))+'" placeholder="44.8015"></div>'+
             '</div>'+
           '</div>'+
         '</div>'+
 
-        '<div class="bedit-section">'+
-          '<div class="bedit-section-title">Social Media</div>'+
-          '<div class="bedit-row">'+
-            '<div class="bedit-group"><label><i class="fab fa-instagram" style="color:#e1306c"></i> Instagram</label><input id="bedit-instagram" value="'+esc(b.instagram||(b.socialLinks&&b.socialLinks.instagram)||'')+'" placeholder="username"></div>'+
-            '<div class="bedit-group"><label><i class="fab fa-facebook" style="color:#1877f2"></i> Facebook</label><input id="bedit-facebook" value="'+esc(b.facebook||(b.socialLinks&&b.socialLinks.facebook)||'')+'" placeholder="facebook.com/page"></div>'+
+        '<div '+SS+'>'+
+          '<p '+ST+'>Contact</p>'+
+          '<div '+SC+'>'+
+            '<div '+SR+'>'+
+              '<div '+SG+'><label '+SL+'>Phone</label><input '+SI+' id="bedit-phone" value="'+esc(b.phone||'')+'" placeholder="+995 555 …"></div>'+
+              '<div '+SG+'><label '+SL+'>WhatsApp</label><input '+SI+' id="bedit-whatsapp" value="'+esc(b.whatsapp||'')+'" placeholder="+995 555 …"></div>'+
+            '</div>'+
+            '<div '+SR+'>'+
+              '<div '+SG+'><label '+SL+'>Email</label><input '+SI+' id="bedit-email" type="email" value="'+esc(b.email||'')+'" placeholder="contact@…"></div>'+
+              '<div '+SG+'><label '+SL+'>Website</label><input '+SI+' id="bedit-website" type="url" value="'+esc(b.website||'')+'" placeholder="https://…"></div>'+
+            '</div>'+
           '</div>'+
         '</div>'+
 
-        '<button id="bedit-save-btn" onclick="ghSaveBizEdit()"><i class="fas fa-save"></i> Save Changes</button>'+
+        '<div '+SS+'>'+
+          '<p '+ST+'>Social Media</p>'+
+          '<div '+SR+'>'+
+            '<div '+SG+'><label '+SL+'><i class="fab fa-instagram" style="color:#e1306c"></i> Instagram</label><input '+SI+' id="bedit-instagram" value="'+esc(b.instagram||(b.socialLinks&&b.socialLinks.instagram)||'')+'" placeholder="username"></div>'+
+            '<div '+SG+'><label '+SL+'><i class="fab fa-facebook" style="color:#1877f2"></i> Facebook</label><input '+SI+' id="bedit-facebook" value="'+esc(b.facebook||(b.socialLinks&&b.socialLinks.facebook)||'')+'" placeholder="facebook.com/page"></div>'+
+          '</div>'+
+        '</div>'+
+
+        '<button id="bedit-save" style="width:100%;padding:13px;background:#10b981;color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;margin-bottom:4px">'+
+          '<i class="fas fa-save"></i> Save Changes'+
+        '</button>'+
       '</div>';
 
-    // Inline styles — bypasses any CSS cascade/transform issues
-    drawer.style.cssText = [
-      'position:fixed',
-      'top:0', 'left:0', 'right:0', 'bottom:0',
-      'z-index:2147483646',
-      'background:#0d0d1a',
-      'display:flex',
-      'flex-direction:column',
-      'overflow:hidden'
-    ].join(';');
-    _beditInjectStyles(); // still inject helper styles for inner elements
-    document.documentElement.appendChild(drawer);
+    document.body.appendChild(dlg);
+
+    dlg.addEventListener('click', function(e) {
+      if (e.target === dlg) dlg.close();
+    });
+    document.getElementById('biz-edit-close').addEventListener('click', function() {
+      dlg.close();
+    });
+    document.getElementById('bedit-save').addEventListener('click', function() {
+      saveBizEdit(dlg);
+    });
+
+    dlg.showModal();
   }
-  window.ghOpenBizEdit = ghOpenBizEdit;
 
-  window.ghCloseBizEdit = function() {
-    var d = document.getElementById('biz-edit-drawer');
-    if (d) d.style.display = 'none';
-  };
-
-  window.ghSaveBizEdit = function() {
-    var btn = document.getElementById('bedit-save-btn');
+  function saveBizEdit(dlg) {
+    var btn = document.getElementById('bedit-save');
     if (!btn || !_db || !_fs) return;
+    var gv = function(id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; };
+
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
 
-    var isOnline = _beditVal('bedit-type') === 'online';
-    var lat = parseFloat(_beditVal('bedit-lat')) || null;
-    var lng = parseFloat(_beditVal('bedit-lng')) || null;
+    var isOnline = gv('bedit-type') === 'online';
+    var lat = parseFloat(gv('bedit-lat')) || null;
+    var lng = parseFloat(gv('bedit-lng')) || null;
     var payload = {
-      name:        _beditVal('bedit-name'),
-      title:       _beditVal('bedit-name'),
-      description: _beditVal('bedit-desc'),
-      category:    _beditVal('bedit-cat'),
-      categoryId:  _beditVal('bedit-cat'),
+      name:        gv('bedit-name'),
+      title:       gv('bedit-name'),
+      description: gv('bedit-desc'),
+      category:    gv('bedit-cat'),
+      categoryId:  gv('bedit-cat'),
       isOnline:    isOnline,
-      city:        _beditVal('bedit-city'),
-      address:     _beditVal('bedit-address'),
-      phone:       _beditVal('bedit-phone'),
-      whatsapp:    _beditVal('bedit-whatsapp'),
-      email:       _beditVal('bedit-email'),
-      website:     _beditVal('bedit-website'),
-      instagram:   _beditVal('bedit-instagram'),
-      facebook:    _beditVal('bedit-facebook'),
+      city:        gv('bedit-city'),
+      address:     gv('bedit-address'),
+      phone:       gv('bedit-phone'),
+      whatsapp:    gv('bedit-whatsapp'),
+      email:       gv('bedit-email'),
+      website:     gv('bedit-website'),
+      instagram:   gv('bedit-instagram'),
+      facebook:    gv('bedit-facebook'),
       updatedAt:   _fs.serverTimestamp()
     };
     if (lat && lng) { payload.lat = lat; payload.lng = lng; }
 
-    _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID), payload).then(function() {
+    _fs.updateDoc(_fs.doc(_db, 'businesses', BIZ_ID), payload).then(function() {
       Object.assign(_biz, payload);
       showToast('ცვლილებები შენახულია!');
-      window.ghCloseBizEdit();
-      setTimeout(function(){ window.location.reload(); }, 600);
+      dlg.close();
+      setTimeout(function() { window.location.reload(); }, 500);
     }).catch(function(err) {
       btn.disabled = false;
       btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
-      showToast('შეცდომა: '+(err.code||err.message), false);
+      showToast('შეცდომა: ' + (err.code || err.message), false);
     });
-  };
+  }
 
   if(window.GeoFirebase&&window.GeoFirebase.db) init(window.GeoFirebase);
   else window.addEventListener('GeoFirebaseReady',function(){ init(window.GeoFirebase); },{once:true});
