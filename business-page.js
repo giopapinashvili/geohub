@@ -5692,8 +5692,8 @@
     if (!BIZ_ID) return;
     if (!_biz) { showToast('Business not loaded yet — try again', false); return; }
 
-    var existing = document.getElementById('biz-edit-dlg');
-    if (existing) { existing.showModal(); return; }
+    var old = document.getElementById('biz-edit-overlay');
+    if (old) { old.remove(); }
 
     var b = _biz;
     var catVal = b.category || b.categoryId || '';
@@ -5713,19 +5713,16 @@
     var SI = 'style="background:#0a0a18;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;padding:9px 12px;font-size:.88rem;width:100%;box-sizing:border-box;outline:none"';
     var STA= 'style="background:#0a0a18;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;padding:9px 12px;font-size:.88rem;width:100%;box-sizing:border-box;outline:none;resize:vertical;min-height:90px"';
 
-    var dlg = document.createElement('dialog');
-    dlg.id = 'biz-edit-dlg';
-    dlg.style.cssText = 'padding:0;border:none;border-radius:16px;background:#0d0d1a;color:#e0e0f0;width:min(620px,96vw);max-height:92vh;overflow:hidden';
-    dlg.innerHTML =
-      '<style>'+
-        '#biz-edit-dlg[open]{display:flex;flex-direction:column}'+
-        '#biz-edit-dlg::backdrop{background:rgba(0,0,0,.75)}'+
-        '#biz-edit-dlg input:focus,#biz-edit-dlg select:focus,#biz-edit-dlg textarea:focus{border-color:#10b981!important;outline:none}'+
-        '#biz-edit-dlg select option{background:#1a1a2e}'+
-      '</style>'+
+    var overlay = document.createElement('div');
+    overlay.id = 'biz-edit-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box';
+
+    var box = document.createElement('div');
+    box.style.cssText = 'background:#0d0d1a;border-radius:16px;width:min(620px,96vw);max-height:92vh;overflow:hidden;display:flex;flex-direction:column;color:#e0e0f0;flex-shrink:0';
+    box.innerHTML =
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#111126;border-bottom:1px solid #2a2a3e;flex-shrink:0">'+
         '<h2 style="margin:0;font-size:1rem;font-weight:700;color:#e0e0f0"><i class="fas fa-pen" style="color:#10b981;margin-right:8px"></i>Edit Business Page</h2>'+
-        '<button id="biz-edit-close" style="background:none;border:1px solid #3e3e56;border-radius:8px;color:#aaa;padding:6px 14px;cursor:pointer;font-size:.85rem"><i class="fas fa-times"></i></button>'+
+        '<button id="biz-edit-close" style="background:none;border:1px solid #3e3e56;border-radius:8px;color:#aaa;padding:6px 14px;cursor:pointer;font-size:.85rem;line-height:1"><i class="fas fa-times"></i></button>'+
       '</div>'+
       '<div style="flex:1;overflow-y:auto;padding:20px">'+
 
@@ -5782,22 +5779,26 @@
         '</button>'+
       '</div>';
 
-    document.body.appendChild(dlg);
+    overlay.appendChild(box);
+    document.documentElement.appendChild(overlay);
 
-    dlg.addEventListener('click', function(e) {
-      if (e.target === dlg) dlg.close();
+    function closeEdit() { overlay.remove(); }
+
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) closeEdit();
     });
-    document.getElementById('biz-edit-close').addEventListener('click', function() {
-      dlg.close();
-    });
+    box.addEventListener('click', function(e) { e.stopPropagation(); });
+
+    document.getElementById('biz-edit-close').addEventListener('click', closeEdit);
     document.getElementById('bedit-save').addEventListener('click', function() {
-      saveBizEdit(dlg);
+      saveBizEdit(closeEdit);
     });
 
-    dlg.showModal();
+    function onKey(e) { if (e.key === 'Escape') { closeEdit(); document.removeEventListener('keydown', onKey); } }
+    document.addEventListener('keydown', onKey);
   }
 
-  function saveBizEdit(dlg) {
+  function saveBizEdit(closeEdit) {
     var btn = document.getElementById('bedit-save');
     if (!btn || !_db || !_fs) return;
     var gv = function(id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; };
@@ -5830,7 +5831,7 @@
     _fs.updateDoc(_fs.doc(_db, 'businesses', BIZ_ID), payload).then(function() {
       Object.assign(_biz, payload);
       showToast('ცვლილებები შენახულია!');
-      dlg.close();
+      closeEdit();
       setTimeout(function() { window.location.reload(); }, 500);
     }).catch(function(err) {
       btn.disabled = false;
