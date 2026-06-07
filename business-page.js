@@ -170,7 +170,8 @@
 
     modal.appendChild(sheet);
     document.body.appendChild(modal);
-    console.error('[GEO4] modal appended, in DOM='+!!document.getElementById('gh-biz-edit-modal'));
+    var _cs = window.getComputedStyle(modal);
+    console.error('[GEO4] modal appended in DOM='+!!document.getElementById('gh-biz-edit-modal')+' display='+_cs.display+' opacity='+_cs.opacity+' vis='+_cs.visibility+' z='+_cs.zIndex+' h='+_cs.height);
 
     function closeModal() {
       var m = document.getElementById('gh-biz-edit-modal');
