@@ -1,4 +1,4 @@
-/* GeoHub Service Worker — v12
+/* GeoHub Service Worker — v13
    Cache strategy matrix:
    ┌─────────────────────────────────────────────┬────────────────────────────┐
    │ Request type                                │ Strategy                   │
@@ -90,7 +90,7 @@ self.addEventListener('pushsubscriptionchange', function(event) {
 });
 
 /* ── Cache names ────────────────────────────────────────────────────────── */
-var VER   = 'v12';
+var VER   = 'v13';
 var SHELL = 'gh-shell-' + VER;
 var IMG   = 'gh-img-'   + VER;
 var CDN   = 'gh-cdn-'   + VER;
@@ -187,9 +187,12 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  /* 5. Local CSS & JS → Stale-while-revalidate */
-  if (/\.(css|js)(\?|$)/i.test(url.pathname) && url.origin === self.location.origin) {
+  /* 5. Local CSS → Stale-while-revalidate; Local JS → pass through (SW-free) */
+  if (/\.css(\?|$)/i.test(url.pathname) && url.origin === self.location.origin) {
     event.respondWith(staleWhileRevalidate(req, SHELL));
+    return;
+  }
+  if (/\.js(\?|$)/i.test(url.pathname) && url.origin === self.location.origin) {
     return;
   }
 
