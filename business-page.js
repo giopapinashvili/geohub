@@ -255,6 +255,173 @@
     };
   };
 
+  // ── MAP CARD EDITOR ───────────────────────────────────────────
+  window.ghBizMapCardEdit = function() {
+    if (!BIZ_ID || !_biz) { alert('გვერდი ჯერ არ ჩაიტვირთა, სცადე კიდე'); return; }
+    if (!_isOwner && !_isPageAdmin && !_isActingAsPage) { alert('მხოლოდ გვერდის ადმინს შეუძლია ედიტირება'); return; }
+
+    var existing = document.getElementById('gh-map-card-modal');
+    if (existing) { existing.remove(); return; }
+
+    var b = _biz;
+
+    var overlay = document.createElement('div');
+    overlay.id = 'gh-map-card-modal';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.78);z-index:999999;display:flex;align-items:center;justify-content:center;padding:12px;box-sizing:border-box';
+
+    var sheet = document.createElement('div');
+    sheet.style.cssText = 'background:#0d0d1a;border-radius:16px;width:100%;max-width:680px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;color:#e0e0f0;box-shadow:0 24px 80px rgba(0,0,0,.7)';
+
+    var inp = 'style="width:100%;background:#0a0a18;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;padding:9px 12px;font-size:.88rem;box-sizing:border-box;outline:none;font-family:inherit"';
+    var lbl = 'style="display:block;font-size:.75rem;color:#9090b0;font-weight:600;margin-bottom:5px"';
+    var sec = 'style="background:#131325;border:1px solid #1e1e36;border-radius:12px;padding:16px;margin-bottom:14px"';
+    var sh  = 'style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#10b981;margin:0 0 12px"';
+
+    var coverBg = b.coverUrl ? 'url('+esc(b.coverUrl)+') center/cover' : 'linear-gradient(135deg,#0d2137,#0a1628)';
+    var logoHtml = b.logoUrl
+      ? '<img src="'+esc(b.logoUrl)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
+      : '<span style="font-size:1.4rem;font-weight:700;color:#fff">'+esc((b.title||'B')[0])+'</span>';
+    var catIcon = '📍';
+
+    sheet.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #1e1e36;flex-shrink:0">'+
+        '<span style="font-weight:700;font-size:.95rem"><i class="fas fa-map-location-dot" style="color:#10b981;margin-right:8px"></i>Edit Map Card</span>'+
+        '<button id="gh-mc-close" style="background:none;border:1px solid #2e2e48;border-radius:8px;color:#aaa;padding:5px 13px;cursor:pointer;font-size:.82rem">✕ Close</button>'+
+      '</div>'+
+      '<div style="flex:1;overflow-y:auto;padding:18px">'+
+
+        /* ── LIVE PREVIEW ── */
+        '<div '+sec+'>'+
+          '<p '+sh+'>Live Preview — map card</p>'+
+          '<div id="gh-mc-preview" style="background:#11151c;border-radius:12px;overflow:hidden;border:1px solid #2e2e48;max-width:320px;margin:0 auto">'+
+            '<div id="gh-mc-prev-cover" style="height:80px;background:'+coverBg+';position:relative;display:flex;align-items:flex-end;padding:0 12px 0">'+
+              '<div id="gh-mc-prev-logo" style="width:48px;height:48px;border-radius:50%;background:#1a1a2e;border:2px solid #0d0d1a;display:flex;align-items:center;justify-content:center;overflow:hidden;position:absolute;bottom:-20px;left:12px">'+logoHtml+'</div>'+
+            '</div>'+
+            '<div style="padding:28px 12px 12px">'+
+              '<div id="gh-mc-prev-name" style="font-weight:700;font-size:.95rem;color:#fff;margin-bottom:3px">'+esc(b.title||b.name||'')+'</div>'+
+              '<div id="gh-mc-prev-cat" style="font-size:.78rem;color:#94a3b8;margin-bottom:8px">'+esc(b.category||'')+(b.city?' · '+esc(b.city):'')+'</div>'+
+              '<div id="gh-mc-prev-desc" style="font-size:.8rem;color:#b0b8c8;margin-bottom:10px;line-height:1.4">'+esc((b.description||b.desc||'').slice(0,80))+'</div>'+
+              '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">'+
+                '<div style="background:#10b981;border-radius:8px;padding:7px 4px;text-align:center;font-size:.7rem;font-weight:600;color:#fff">ბიზნეს გვერდი</div>'+
+                '<div style="background:#1e2a3a;border-radius:8px;padding:7px 4px;text-align:center;font-size:.7rem;color:#94a3b8">Directions</div>'+
+                '<div style="background:#1e2a3a;border-radius:8px;padding:7px 4px;text-align:center;font-size:.7rem;color:#94a3b8">ჩაწერა</div>'+
+              '</div>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+
+        /* ── COVER PHOTO ── */
+        '<div '+sec+'>'+
+          '<p '+sh+'>Cover Photo</p>'+
+          '<div id="gh-mc-cover-preview" style="width:100%;height:70px;border-radius:8px;border:1px solid #2e2e48;background:'+coverBg+';margin-bottom:8px"></div>'+
+          '<button id="gh-mc-cover-btn" style="width:100%;padding:8px;background:#1e1e36;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;font-size:.82rem;cursor:pointer"><i class="fas fa-camera"></i> Upload Cover Photo</button>'+
+        '</div>'+
+
+        /* ── LOGO ── */
+        '<div '+sec+'>'+
+          '<p '+sh+'>Logo</p>'+
+          '<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px">'+
+            '<div id="gh-mc-logo-preview" style="width:64px;height:64px;border-radius:50%;background:#0a0a18;border:2px solid #2e2e48;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.5rem;font-weight:700;color:#10b981;flex-shrink:0">'+
+              (b.logoUrl?'<img src="'+esc(b.logoUrl)+'" style="width:100%;height:100%;object-fit:cover">':esc((b.title||'B')[0]))+
+            '</div>'+
+            '<button id="gh-mc-logo-btn" style="flex:1;padding:8px;background:#1e1e36;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;font-size:.82rem;cursor:pointer"><i class="fas fa-camera"></i> Upload Logo</button>'+
+          '</div>'+
+        '</div>'+
+
+        /* ── NAME & DESC ── */
+        '<div '+sec+'>'+
+          '<p '+sh+'>Card Text</p>'+
+          '<div style="margin-bottom:12px"><label '+lbl+'>Business Name</label><input '+inp+' id="gh-mc-name" value="'+esc(b.title||b.name||'')+'" placeholder="Business name"></div>'+
+          '<div><label '+lbl+'>Short Description (shown on card)</label><input '+inp+' id="gh-mc-desc" value="'+esc(b.description||b.desc||'')+'" placeholder="Short description…"></div>'+
+        '</div>'+
+
+        '<button id="gh-mc-save" style="width:100%;padding:13px;background:#10b981;color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer"><i class="fas fa-save"></i> Save Card</button>'+
+      '</div>';
+
+    overlay.appendChild(sheet);
+    document.body.appendChild(overlay);
+
+    function closeMapCard() { var m = document.getElementById('gh-map-card-modal'); if (m) m.remove(); }
+    document.getElementById('gh-mc-close').onclick = closeMapCard;
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) closeMapCard(); });
+    function onEsc2(e) { if (e.key === 'Escape') { closeMapCard(); document.removeEventListener('keydown', onEsc2); } }
+    document.addEventListener('keydown', onEsc2);
+
+    /* live preview updaters */
+    function liveUpdate() {
+      var nm = document.getElementById('gh-mc-name');
+      var ds = document.getElementById('gh-mc-desc');
+      if (nm) document.getElementById('gh-mc-prev-name').textContent = nm.value;
+      if (ds) document.getElementById('gh-mc-prev-desc').textContent = ds.value.slice(0,80);
+    }
+    document.getElementById('gh-mc-name').oninput = liveUpdate;
+    document.getElementById('gh-mc-desc').oninput = liveUpdate;
+
+    /* upload helpers */
+    function mcUpload(folder, field, coverPreviewId, logoPreviewId, btnId) {
+      var inp2 = document.createElement('input');
+      inp2.type = 'file'; inp2.accept = 'image/*';
+      inp2.onchange = function() {
+        var file = inp2.files && inp2.files[0]; if (!file) return;
+        var btn = document.getElementById(btnId);
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Uploading…'; }
+        function uploaded(url) {
+          if (!url) { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> Retry'; } return; }
+          _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID), JSON.parse('{"'+field+'":"'+url.replace(/"/g,'\\"')+'"}'))
+            .then(function() {
+              _biz[field] = url;
+              if (field === 'coverUrl') {
+                var cp = document.getElementById(coverPreviewId);
+                if (cp) cp.style.background = 'url('+url+') center/cover';
+                var pp = document.getElementById('gh-mc-prev-cover');
+                if (pp) pp.style.background = 'url('+url+') center/cover';
+                var pg = document.querySelector('.biz-cover');
+                if (pg) { pg.style.backgroundImage='url('+url+')'; pg.style.backgroundSize='cover'; pg.style.backgroundPosition='center'; }
+              } else {
+                var logoHtml2 = '<img src="'+url+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+                var lp = document.getElementById(logoPreviewId);
+                if (lp) lp.innerHTML = logoHtml2;
+                var pl = document.getElementById('gh-mc-prev-logo');
+                if (pl) pl.innerHTML = logoHtml2;
+                var pgLogo = document.querySelector('.biz-logo');
+                if (pgLogo) pgLogo.innerHTML = '<img src="'+url+'" alt="logo">';
+              }
+              if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check" style="color:#10b981"></i> Updated'; }
+            }).catch(function() { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> Retry'; } });
+        }
+        if (window.GeoSocial && window.GeoSocial.uploadFile) {
+          window.GeoSocial.uploadFile(file, folder, function(){}).then(uploaded).catch(function(){ uploaded(null); });
+        } else {
+          directCloudinaryUpload(file, uploaded, function(){});
+        }
+      };
+      inp2.click();
+    }
+
+    document.getElementById('gh-mc-cover-btn').onclick = function() {
+      mcUpload('business-covers', 'coverUrl', 'gh-mc-cover-preview', null, 'gh-mc-cover-btn');
+    };
+    document.getElementById('gh-mc-logo-btn').onclick = function() {
+      mcUpload('business-logos', 'logoUrl', null, 'gh-mc-logo-preview', 'gh-mc-logo-btn');
+    };
+
+    /* save text fields */
+    document.getElementById('gh-mc-save').onclick = function() {
+      var nameVal = (document.getElementById('gh-mc-name').value || '').trim();
+      var descVal = (document.getElementById('gh-mc-desc').value || '').trim();
+      if (!nameVal) { alert('სახელი სავალდებულოა'); return; }
+      var btn = document.getElementById('gh-mc-save');
+      btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Saving…';
+      _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID), { title: nameVal, name: nameVal, description: descVal })
+        .then(function() {
+          _biz.title = nameVal; _biz.name = nameVal; _biz.description = descVal;
+          btn.disabled = false; btn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+          setTimeout(function(){ closeMapCard(); location.reload(); }, 800);
+        })
+        .catch(function() { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Save Card'; alert('შეცდომა, სცადე კიდე'); });
+    };
+  };
+
   // delegation: only fires if no modal already open (prevents double-fire with inline onclick)
   document.addEventListener('click', function(e) {
     if (e.target.closest && e.target.closest('.owner-edit')) {
@@ -785,6 +952,7 @@
         '<span class="biz-admin-badge"><i class="fas fa-crown"></i> Admin Mode</span>'+
         '<div class="biz-admin-toolbar-btns">'+
           '<button class="biz-admin-btn" onclick="if(window.ghBizEditOpen)window.ghBizEditOpen()"><i class="fas fa-pen"></i> Edit Page</button>'+
+          '<button class="biz-admin-btn" onclick="if(window.ghBizMapCardEdit)window.ghBizMapCardEdit()"><i class="fas fa-map-location-dot"></i> Edit Map Card</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.openBlockManager()"><i class="fas fa-plus-circle"></i> Add Block</button>'+
           '<button class="biz-admin-btn" type="button" data-biz-open-compose><i class="fas fa-pen-to-square"></i> New Post</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
