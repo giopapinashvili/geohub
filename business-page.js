@@ -302,7 +302,7 @@
     if (_isActingAsPage) {
       // ── Page identity mode: show admin controls ───────────────────
       actions =
-        '<button class="biz-action-btn owner-edit" data-open-biz-edit><i class="fas fa-pen"></i> Edit Page</button>'+
+        '<button class="biz-action-btn owner-edit" onclick="window._bizActions.openBizEdit()"><i class="fas fa-pen"></i> Edit Page</button>'+
         '<button class="biz-action-btn" type="button" data-biz-open-compose><i class="fas fa-plus"></i> Create Post</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
@@ -313,7 +313,7 @@
       // ── Personal/visitor mode: show visitor controls ──────────────
       // Owners and admins get a "Switch to Page" button
       var switchPageBtn = (_isOwner || _isPageAdmin)
-        ? '<button class="biz-action-btn owner-edit" data-open-biz-edit><i class="fas fa-pen"></i> Edit Page</button>'+
+        ? '<button class="biz-action-btn owner-edit" onclick="window._bizActions.openBizEdit()"><i class="fas fa-pen"></i> Edit Page</button>'+
           '<button class="biz-action-btn" onclick="window._bizActions.switchToPage()"><i class="fas fa-store"></i> Switch to Page</button>'
         : '';
       var followCls  = _isFollowing ? 'following' : 'primary';
@@ -566,7 +566,7 @@
       '<div class="biz-admin-toolbar-inner">'+
         '<span class="biz-admin-badge"><i class="fas fa-crown"></i> Admin Mode</span>'+
         '<div class="biz-admin-toolbar-btns">'+
-          '<button class="biz-admin-btn" data-open-biz-edit><i class="fas fa-pen"></i> Edit Page</button>'+
+          '<button class="biz-admin-btn" onclick="window._bizActions.openBizEdit()"><i class="fas fa-pen"></i> Edit Page</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.openBlockManager()"><i class="fas fa-plus-circle"></i> Add Block</button>'+
           '<button class="biz-admin-btn" type="button" data-biz-open-compose><i class="fas fa-pen-to-square"></i> New Post</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
@@ -1546,7 +1546,7 @@
         }).join('')+
       '</div>'+
       '<div class="biz-dash-actions">'+
-        '<button class="biz-owner-action-btn edit" data-open-biz-edit><i class="fas fa-pen"></i> Edit Page Info</button>'+
+        '<button class="biz-owner-action-btn edit" onclick="window._bizActions.openBizEdit()"><i class="fas fa-pen"></i> Edit Page Info</button>'+
         '<button class="biz-owner-action-btn photo" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-owner-action-btn quotes" onclick="window._bizActions.loadOwnerQuotes()"><i class="fas fa-inbox"></i> View Quote Requests</button>'+
         '<button class="biz-owner-action-btn" onclick="window._bizActions.switchTab(\'insights\')" style="background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.3);color:#60a5fa"><i class="fas fa-chart-line"></i> View Insights</button>'+
@@ -1900,14 +1900,7 @@
       if (_isActingAsPage) window._bizActions.refreshAdminList();
     }
 
-    if (_isOwner || _isPageAdmin || _isActingAsPage) {
-      document.querySelectorAll('[data-open-biz-edit]').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-          e.stopImmediatePropagation();
-          openBizEdit();
-        });
-      });
-    }
+    /* edit buttons now use inline onclick="window._bizActions.openBizEdit()" */
   }
 
   // ── LOAD POSTS ────────────────────────────────────────────────
@@ -3380,6 +3373,8 @@
   // ── ACTIONS ───────────────────────────────────────────────────
 
   window._bizActions = {
+
+    openBizEdit: function() { openBizEdit(); },
 
     switchTab: function(id) {
       document.querySelectorAll('.biz-tab').forEach(function(b){ b.classList.remove('active'); });
