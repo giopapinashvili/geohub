@@ -46,7 +46,6 @@
 
   // ── BUSINESS PAGE EDITOR — defined early so runtime errors later don't block it ──
   window.ghBizEditOpen = function() {
-    console.log('[GeoHub] ghBizEditOpen called, BIZ_ID='+BIZ_ID+', _biz='+!!_biz);
     if (!BIZ_ID || !_biz) { alert('გვერდი ჯერ არ ჩაიტვირთა, სცადე კიდე'); return; }
 
     var existing = document.getElementById('gh-biz-edit-modal');
@@ -170,8 +169,6 @@
 
     modal.appendChild(sheet);
     document.body.appendChild(modal);
-    var _cs = window.getComputedStyle(modal);
-    console.error('[GEO4] modal appended in DOM='+!!document.getElementById('gh-biz-edit-modal')+' display='+_cs.display+' opacity='+_cs.opacity+' vis='+_cs.visibility+' z='+_cs.zIndex+' h='+_cs.height);
 
     function closeModal() {
       var m = document.getElementById('gh-biz-edit-modal');
@@ -723,7 +720,7 @@
       '<div class="biz-admin-toolbar-inner">'+
         '<span class="biz-admin-badge"><i class="fas fa-crown"></i> Admin Mode</span>'+
         '<div class="biz-admin-toolbar-btns">'+
-          '<button class="biz-admin-btn" onclick="console.error(\'[GEO]click,fn=\'+typeof window.ghBizEditOpen);if(window.ghBizEditOpen)window.ghBizEditOpen()"><i class="fas fa-pen"></i> Edit Page</button>'+
+          '<button class="biz-admin-btn" onclick="if(window.ghBizEditOpen)window.ghBizEditOpen()"><i class="fas fa-pen"></i> Edit Page</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.openBlockManager()"><i class="fas fa-plus-circle"></i> Add Block</button>'+
           '<button class="biz-admin-btn" type="button" data-biz-open-compose><i class="fas fa-pen-to-square"></i> New Post</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
