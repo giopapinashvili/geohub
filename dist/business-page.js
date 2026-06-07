@@ -721,7 +721,7 @@
       '<div class="biz-admin-toolbar-inner">'+
         '<span class="biz-admin-badge"><i class="fas fa-crown"></i> Admin Mode</span>'+
         '<div class="biz-admin-toolbar-btns">'+
-          '<button class="biz-admin-btn" onclick="if(window.ghBizEditOpen)window.ghBizEditOpen()"><i class="fas fa-pen"></i> Edit Page</button>'+
+          '<button class="biz-admin-btn" onclick="console.error(\'[GEO]click,fn=\'+typeof window.ghBizEditOpen);if(window.ghBizEditOpen)window.ghBizEditOpen()"><i class="fas fa-pen"></i> Edit Page</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.openBlockManager()"><i class="fas fa-plus-circle"></i> Add Block</button>'+
           '<button class="biz-admin-btn" type="button" data-biz-open-compose><i class="fas fa-pen-to-square"></i> New Post</button>'+
           '<button class="biz-admin-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
