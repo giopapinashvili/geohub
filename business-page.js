@@ -1899,7 +1899,7 @@
       if (_isActingAsPage) window._bizActions.refreshAdminList();
     }
 
-    if (_isActingAsPage) {
+    if (_isOwner || _isPageAdmin || _isActingAsPage) {
       document.querySelectorAll('[data-open-biz-edit]').forEach(function(btn) {
         btn.addEventListener('click', function(e) {
           e.stopImmediatePropagation();
