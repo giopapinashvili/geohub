@@ -302,7 +302,7 @@
     if (_isActingAsPage) {
       // ── Page identity mode: show admin controls ───────────────────
       actions =
-        '<button class="biz-action-btn owner-edit" onclick="ghOpenBizEdit()"><i class="fas fa-pen"></i> Edit Page</button>'+
+        '<button class="biz-action-btn owner-edit" onclick="window.ghOpenBizEdit ? window.ghOpenBizEdit() : alert(\'ghOpenBizEdit not found!\')"><i class="fas fa-pen"></i> Edit Page</button>'+
         '<button class="biz-action-btn" type="button" data-biz-open-compose><i class="fas fa-plus"></i> Create Post</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-action-btn" onclick="window._bizActions.goToQuotes()"><i class="fas fa-inbox"></i> Quotes</button>'+
@@ -1897,6 +1897,17 @@
       loadInsights(BIZ_ID);
       loadDashboardAnalytics();
       if (_isActingAsPage) window._bizActions.refreshAdminList();
+    }
+
+    // Wire edit-page button via closure so it works even before window.ghOpenBizEdit is reachable
+    if (_isActingAsPage) {
+      document.querySelectorAll('.biz-action-btn.owner-edit').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          console.log('[BizEdit] addEventListener fired, _biz:', _biz ? 'ok' : 'null');
+          ghOpenBizEdit();
+        });
+      });
     }
   }
 
