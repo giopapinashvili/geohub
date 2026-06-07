@@ -1,4 +1,4 @@
-/* GeoHub Service Worker — v13
+/* GeoHub Service Worker — v14
    Cache strategy matrix:
    ┌─────────────────────────────────────────────┬────────────────────────────┐
    │ Request type                                │ Strategy                   │
@@ -90,7 +90,7 @@ self.addEventListener('pushsubscriptionchange', function(event) {
 });
 
 /* ── Cache names ────────────────────────────────────────────────────────── */
-var VER   = 'v13';
+var VER   = 'v14';
 var SHELL = 'gh-shell-' + VER;
 var IMG   = 'gh-img-'   + VER;
 var CDN   = 'gh-cdn-'   + VER;
@@ -288,7 +288,8 @@ function staleWhileRevalidate(req, cacheName) {
 function networkFirst(req, cacheName) {
   return fetch(req).then(function(res) {
     if (res && res.status === 200) {
-      caches.open(cacheName).then(function(c) { c.put(req, res.clone()).catch(function() {}); });
+      var clone = res.clone();
+      caches.open(cacheName).then(function(c) { c.put(req, clone).catch(function() {}); });
     }
     return res;
   }).catch(function() {
@@ -302,7 +303,8 @@ function networkFirst(req, cacheName) {
 function networkFirstHTML(req) {
   return fetch(req).then(function(res) {
     if (res && res.status === 200) {
-      caches.open(SHELL).then(function(c) { c.put(req, res.clone()).catch(function() {}); });
+      var clone = res.clone();
+      caches.open(SHELL).then(function(c) { c.put(req, clone).catch(function() {}); });
     }
     return res;
   }).catch(function() {
