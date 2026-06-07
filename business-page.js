@@ -191,10 +191,12 @@
     };
   };
 
-  // delegation backup — catches .owner-edit clicks even if onclick attr fails
+  // delegation: only fires if no modal already open (prevents double-fire with inline onclick)
   document.addEventListener('click', function(e) {
     if (e.target.closest && e.target.closest('.owner-edit')) {
-      if (window.ghBizEditOpen) window.ghBizEditOpen();
+      if (!document.getElementById('gh-biz-edit-modal') && window.ghBizEditOpen) {
+        window.ghBizEditOpen();
+      }
     }
   });
 
