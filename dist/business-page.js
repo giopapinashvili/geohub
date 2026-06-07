@@ -47,6 +47,7 @@
   // ── BUSINESS PAGE EDITOR — defined early so runtime errors later don't block it ──
   window.ghBizEditOpen = function() {
     if (!BIZ_ID || !_biz) { alert('გვერდი ჯერ არ ჩაიტვირთა, სცადე კიდე'); return; }
+    if (!_isOwner && !_isPageAdmin && !_isActingAsPage) { alert('მხოლოდ გვერდის ადმინს შეუძლია ედიტირება'); return; }
 
     var existing = document.getElementById('gh-biz-edit-modal');
     if (existing) { existing.remove(); return; }
@@ -120,6 +121,26 @@
       '<div style="flex:1;overflow-y:auto;padding:18px">'+
 
         '<div '+sec+'>'+
+          '<p '+sh+'>Photos & Media</p>'+
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px">'+
+            '<div>'+
+              '<label '+lbl+'>Cover Photo</label>'+
+              '<div id="gbe-cover-preview" style="width:100%;height:80px;border-radius:8px;border:1px solid #2e2e48;background:'+(b.coverUrl?'url('+esc(b.coverUrl)+') center/cover':'#0a0a18')+';display:flex;align-items:center;justify-content:center;margin-bottom:8px;overflow:hidden">'+
+                (!b.coverUrl?'<i class="fas fa-image" style="color:#444;font-size:1.4rem"></i>':'')+
+              '</div>'+
+              '<button id="gbe-cover-btn" style="width:100%;padding:7px;background:#1e1e36;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;font-size:.8rem;cursor:pointer"><i class="fas fa-camera"></i> Upload Cover</button>'+
+            '</div>'+
+            '<div>'+
+              '<label '+lbl+'>Logo</label>'+
+              '<div id="gbe-logo-preview" style="width:72px;height:72px;border-radius:50%;border:1px solid #2e2e48;background:#0a0a18;display:flex;align-items:center;justify-content:center;margin-bottom:8px;overflow:hidden;font-size:1.5rem;font-weight:700;color:#10b981">'+
+                (b.logoUrl?'<img src="'+esc(b.logoUrl)+'" style="width:100%;height:100%;object-fit:cover">':esc((b.title||'B')[0]))+
+              '</div>'+
+              '<button id="gbe-logo-btn" style="width:100%;padding:7px;background:#1e1e36;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;font-size:.8rem;cursor:pointer"><i class="fas fa-camera"></i> Upload Logo</button>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+
+        '<div '+sec+'>'+
           '<p '+sh+'>Basic Info</p>'+
           '<div '+fld+'><label '+lbl+'>Business Name</label><input '+inp+' id="gbe-name" value="'+esc(b.name||b.title||'')+'" placeholder="Business name"></div>'+
           '<div '+fld+'><label '+lbl+'>Short Description</label><textarea '+ta+' id="gbe-desc">'+esc(b.description||b.desc||'')+'</textarea></div>'+
@@ -176,6 +197,49 @@
     }
 
     document.getElementById('gh-biz-edit-close').onclick = closeModal;
+
+    function doUpload(folder, previewEl, field, onDone) {
+      var inp = document.createElement('input');
+      inp.type = 'file'; inp.accept = 'image/*';
+      inp.onchange = function() {
+        var file = inp.files && inp.files[0]; if (!file) return;
+        var btn = document.getElementById(field === 'coverUrl' ? 'gbe-cover-btn' : 'gbe-logo-btn');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Uploading…'; }
+        function uploaded(url) {
+          if (!url) { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> '+(field==='coverUrl'?'Upload Cover':'Upload Logo'); } return; }
+          _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID), JSON.parse('{"'+field+'":"'+url.replace(/"/g,'\\"')+'"}'))
+            .then(function() {
+              _biz[field] = url;
+              if (field === 'coverUrl') {
+                previewEl.style.background = 'url('+url+') center/cover';
+                previewEl.innerHTML = '';
+                var cover = document.querySelector('.biz-cover');
+                if (cover) { cover.style.backgroundImage='url('+url+')'; cover.style.backgroundSize='cover'; cover.style.backgroundPosition='center'; }
+              } else {
+                previewEl.innerHTML = '<img src="'+url+'" style="width:100%;height:100%;object-fit:cover">';
+                var logoEl = document.querySelector('.biz-logo');
+                if (logoEl) logoEl.innerHTML = '<img src="'+url+'" alt="logo">';
+              }
+              if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check" style="color:#10b981"></i> Updated'; }
+            }).catch(function() {
+              if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> Retry'; }
+            });
+        }
+        if (window.GeoSocial && window.GeoSocial.uploadFile) {
+          window.GeoSocial.uploadFile(file, folder, function(){}).then(uploaded).catch(function(){ uploaded(null); });
+        } else {
+          directCloudinaryUpload(file, uploaded, function(){});
+        }
+      };
+      inp.click();
+    }
+
+    document.getElementById('gbe-cover-btn').onclick = function() {
+      doUpload('business-covers', document.getElementById('gbe-cover-preview'), 'coverUrl');
+    };
+    document.getElementById('gbe-logo-btn').onclick = function() {
+      doUpload('business-logos', document.getElementById('gbe-logo-preview'), 'logoUrl');
+    };
 
     modal.addEventListener('click', function(e) {
       if (e.target === modal) closeModal();
