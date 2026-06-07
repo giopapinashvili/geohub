@@ -496,7 +496,7 @@
       subcategory:      data.subcategoryId || data.subcategory || '',
       categoryLabel:    catText || style.label,
       shortDescription: data.shortDescription || data.description || '',
-      image:            data.image || data.imageUrl || data.mediaUrl || '',
+      image:            data.image || data.imageUrl || data.mediaUrl || data.coverUrl || '',
       rating:           Number(data.rating || 0),
       reviewCount:      Number(data.reviewCount || 0),
       priceFrom:        data.priceFrom || '',
