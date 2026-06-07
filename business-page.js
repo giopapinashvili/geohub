@@ -5723,12 +5723,10 @@
   }
 
   function ghOpenBizEdit() {
-    console.log('[BizEdit] ghOpenBizEdit called — BIZ_ID:', BIZ_ID, '_biz:', _biz ? 'loaded' : 'null');
-    if (!BIZ_ID) { showToast('BIZ_ID missing', false); return; }
-    if (!_biz)   { showToast('Business not loaded yet — try again in a moment', false); return; }
-    _beditInjectStyles();
+    if (!BIZ_ID) return;
+    if (!_biz)   { showToast('Business not loaded yet — try again', false); return; }
     var existing = document.getElementById('biz-edit-drawer');
-    if (existing) { existing.classList.add('open'); return; }
+    if (existing) { existing.style.display = 'flex'; return; }
 
     var b = _biz;
     var catOpts = BEDIT_CATS.map(function(c){
@@ -5798,16 +5796,24 @@
         '<button id="bedit-save-btn" onclick="ghSaveBizEdit()"><i class="fas fa-save"></i> Save Changes</button>'+
       '</div>';
 
-    document.body.appendChild(drawer);
-    requestAnimationFrame(function(){ drawer.classList.add('open'); });
+    // Inline styles — bypasses any CSS cascade/transform issues
+    drawer.style.cssText = [
+      'position:fixed',
+      'top:0', 'left:0', 'right:0', 'bottom:0',
+      'z-index:2147483646',
+      'background:#0d0d1a',
+      'display:flex',
+      'flex-direction:column',
+      'overflow:hidden'
+    ].join(';');
+    _beditInjectStyles(); // still inject helper styles for inner elements
+    document.documentElement.appendChild(drawer);
   }
   window.ghOpenBizEdit = ghOpenBizEdit;
 
   window.ghCloseBizEdit = function() {
     var d = document.getElementById('biz-edit-drawer');
-    if (!d) return;
-    d.classList.remove('open');
-    setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); }, 310);
+    if (d) d.style.display = 'none';
   };
 
   window.ghSaveBizEdit = function() {
