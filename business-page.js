@@ -354,8 +354,10 @@
       if (nm) document.getElementById('gh-mc-prev-name').textContent = nm.value;
       if (ds) document.getElementById('gh-mc-prev-desc').textContent = ds.value.slice(0,80);
     }
-    document.getElementById('gh-mc-name').oninput = liveUpdate;
-    document.getElementById('gh-mc-desc').oninput = liveUpdate;
+    var _mcName = document.getElementById('gh-mc-name');
+    var _mcDesc = document.getElementById('gh-mc-desc');
+    if (_mcName) _mcName.oninput = liveUpdate;
+    if (_mcDesc) _mcDesc.oninput = liveUpdate;
 
     /* upload helpers */
     function mcUpload(folder, field, coverPreviewId, logoPreviewId, btnId) {
@@ -367,24 +369,27 @@
         if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Uploading…'; }
         function uploaded(url) {
           if (!url) { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> Retry'; } return; }
-          _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID), JSON.parse('{"'+field+'":"'+url.replace(/"/g,'\\"')+'"}'))
+          var upd = {}; upd[field] = url;
+          _fs.updateDoc(_fs.doc(_db,'businesses',BIZ_ID), upd)
             .then(function() {
               _biz[field] = url;
+              var safeUrl = url.replace(/"/g, '%22');
               if (field === 'coverUrl') {
                 var cp = document.getElementById(coverPreviewId);
-                if (cp) cp.style.background = 'url('+url+') center/cover';
+                if (cp) cp.style.background = 'url("'+safeUrl+'") center/cover';
                 var pp = document.getElementById('gh-mc-prev-cover');
-                if (pp) pp.style.background = 'url('+url+') center/cover';
+                if (pp) pp.style.background = 'url("'+safeUrl+'") center/cover';
                 var pg = document.querySelector('.biz-cover');
-                if (pg) { pg.style.backgroundImage='url('+url+')'; pg.style.backgroundSize='cover'; pg.style.backgroundPosition='center'; }
+                if (pg) { pg.style.backgroundImage='url("'+safeUrl+'")'; pg.style.backgroundSize='cover'; pg.style.backgroundPosition='center'; }
               } else {
-                var logoHtml2 = '<img src="'+url+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+                var safeEsc = esc(url);
+                var logoHtml2 = '<img src="'+safeEsc+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
                 var lp = document.getElementById(logoPreviewId);
                 if (lp) lp.innerHTML = logoHtml2;
                 var pl = document.getElementById('gh-mc-prev-logo');
                 if (pl) pl.innerHTML = logoHtml2;
                 var pgLogo = document.querySelector('.biz-logo');
-                if (pgLogo) pgLogo.innerHTML = '<img src="'+url+'" alt="logo">';
+                if (pgLogo) pgLogo.innerHTML = '<img src="'+safeEsc+'" alt="logo">';
               }
               if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check" style="color:#10b981"></i> Updated'; }
             }).catch(function() { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> Retry'; } });
