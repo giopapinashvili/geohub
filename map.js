@@ -409,93 +409,91 @@
       });
     } catch(e) {}
 
-    // 3D building extrusion (OSM data via CartoDB carto source, OpenMapTiles schema)
+    // 3D building extrusion — auto-detect source/source-layer from style
     try {
-      // Sky layer (adds atmospheric gradient above horizon when pitched)
+      // Sky layer
       if (!map.getLayer('gh-sky')) {
-        map.addLayer({ id: 'gh-sky', type: 'sky', paint: {
-          'sky-type': 'atmosphere',
-          'sky-atmosphere-sun': [0, 90],
-          'sky-atmosphere-sun-intensity': 3,
-          'sky-atmosphere-color': 'rgba(8,18,38,1)',
-          'sky-atmosphere-halo-color': 'rgba(16,185,129,0.08)'
-        }});
+        try {
+          map.addLayer({ id: 'gh-sky', type: 'sky', paint: {
+            'sky-type': 'atmosphere',
+            'sky-atmosphere-sun': [0, 90],
+            'sky-atmosphere-sun-intensity': 3,
+            'sky-atmosphere-color': 'rgba(8,18,38,1)',
+            'sky-atmosphere-halo-color': 'rgba(16,185,129,0.08)'
+          }});
+        } catch(e) {}
       }
 
       if (!map.getLayer('gh-buildings-3d')) {
-        // Height expression: height → render_height → building:levels*3.5 → 11m
+        // Auto-detect building source from existing style layers
+        var bldSource = null, bldSourceLayer = 'building';
+        var styleLayers = (map.getStyle() || {}).layers || [];
+        for (var si = 0; si < styleLayers.length; si++) {
+          var sl = styleLayers[si];
+          if (sl.source && sl['source-layer'] &&
+              (sl['source-layer'] === 'building' || (sl.id && sl.id.indexOf('building') !== -1))) {
+            bldSource = sl.source;
+            bldSourceLayer = sl['source-layer'] || 'building';
+            break;
+          }
+        }
+        if (!bldSource) {
+          // Fallback: use first vector source
+          var srcs = (map.getStyle() || {}).sources || {};
+          var srcKeys = Object.keys(srcs);
+          for (var ki = 0; ki < srcKeys.length; ki++) {
+            if (srcs[srcKeys[ki]].type === 'vector') { bldSource = srcKeys[ki]; break; }
+          }
+        }
+        if (!bldSource) { console.warn('[GeoHub] 3D buildings: no vector source found'); return; }
+        console.info('[GeoHub] 3D buildings source:', bldSource, '/', bldSourceLayer);
+
+        // Height: prefer explicit height → render_height → levels*3.5 → 11m default
         const heightExpr = [
-          'coalesce',
-          ['get', 'height'],
-          ['get', 'render_height'],
-          ['*', ['coalesce', ['get', 'building:levels'], 0], 3.5],
+          'case',
+          ['has', 'height'],       ['to-number', ['get', 'height']],
+          ['has', 'render_height'],['to-number', ['get', 'render_height']],
+          ['has', 'building:levels'], ['*', ['to-number', ['get', 'building:levels']], 3.5],
           11
         ];
         const baseExpr = [
-          'coalesce',
-          ['get', 'min_height'],
-          ['get', 'render_min_height'],
+          'case',
+          ['has', 'min_height'],       ['to-number', ['get', 'min_height']],
+          ['has', 'render_min_height'],['to-number', ['get', 'render_min_height']],
           0
         ];
 
         // Procedural color by building type; honour OSM building:colour when present
         const colorExpr = [
           'case',
-          // OSM explicit colour overrides everything
           ['!=', ['coalesce', ['get', 'building:colour'], ''], ''],
           ['get', 'building:colour'],
-          // apartments / residential
           ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['apartments', 'residential', 'house', 'detached', 'semidetached_house', 'terrace']]],
           '#c8b89a',
-          // commercial / retail / supermarket
           ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['commercial', 'retail', 'supermarket', 'shop', 'kiosk']]],
           '#b0bec5',
-          // office
           ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['office', 'offices', 'government']]],
           '#90a4ae',
-          // industrial / warehouse / storage
           ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['industrial', 'warehouse', 'storage', 'factory', 'garage', 'garages']]],
           '#9e9e9e',
-          // education
           ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['school', 'university', 'college', 'kindergarten']]],
           '#e6d59a',
-          // hospital / healthcare
           ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['hospital', 'clinic', 'pharmacy']]],
           '#dde8e0',
-          // religion / church
           ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['church', 'cathedral', 'mosque', 'synagogue', 'temple', 'chapel', 'religious']]],
           '#d7c9b0',
-          // hotel
           ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['hotel', 'hostel', 'guest_house']]],
           '#a5c4d4',
-          // default — neutral blue-gray, slightly varied by height for visual variety
-          ['interpolate', ['linear'], ['coalesce', ['get', 'height'], ['get', 'render_height'], 8],
-            0,  '#8d9aaa',
-            15, '#8a9aa8',
-            40, '#8898a6',
-            100,'#8596a4'
-          ]
+          '#8d9aaa'
         ];
 
         const buildingPaint = {
           'fill-extrusion-color': colorExpr,
-          'fill-extrusion-height': [
-            'interpolate', ['linear'], ['zoom'],
-            15, 0,
-            15.05, heightExpr
-          ],
-          'fill-extrusion-base': [
-            'interpolate', ['linear'], ['zoom'],
-            15, 0,
-            15.05, baseExpr
-          ],
-          'fill-extrusion-opacity': [
-            'interpolate', ['linear'], ['zoom'],
-            15, 0, 15.5, 0.9
-          ]
+          'fill-extrusion-height': heightExpr,
+          'fill-extrusion-base': baseExpr,
+          'fill-extrusion-opacity': 0.85
         };
 
-        // Ambient occlusion (MapLibre 4.x)
         try {
           buildingPaint['fill-extrusion-ambient-occlusion-intensity'] = 0.35;
           buildingPaint['fill-extrusion-ambient-occlusion-radius']    = 3;
@@ -503,14 +501,14 @@
 
         map.addLayer({
           id: 'gh-buildings-3d',
-          source: 'carto',
-          'source-layer': 'building',
+          source: bldSource,
+          'source-layer': bldSourceLayer,
           type: 'fill-extrusion',
-          minzoom: 15,
+          minzoom: 0,
           paint: buildingPaint
         });
       }
-    } catch(e) { console.warn('[GeoHub] 3D buildings:', e.message); }
+    } catch(e) { console.warn('[GeoHub] 3D buildings error:', e); }
   }
 
   /* ── Init WebGL place layers (call after map load) ─ */
@@ -1803,9 +1801,13 @@
 
   function applyMapStyle(styleName) {
     const cfg = TILE_LAYERS[styleName] || TILE_LAYERS.dark;
+    var _pitchBefore = map.getPitch();
     map.setStyle(cfg.style);
     // After style change all custom sources/layers are wiped — reinitialize them
-    map.once('style.load', () => { initHeatmapLayer(); initGLLayers(); syncPlacesSource(); updateHeatmapData(); });
+    map.once('style.load', () => {
+      map.setPitch(Math.max(_pitchBefore, 30));
+      initHeatmapLayer(); initGLLayers(); syncPlacesSource(); updateHeatmapData();
+    });
     localStorage.setItem('gh_map_style', styleName);
     const mapEl = document.getElementById('map');
     if (mapEl) mapEl.setAttribute('data-map-style', styleName);
@@ -2445,6 +2447,7 @@
       center:           [44.793, 41.694],
       zoom:             12,
       pitch:            45,
+      minPitch:         30,
       maxPitch:         85,
       pitchWithRotate:  true,
       attributionControl: false,
