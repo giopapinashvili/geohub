@@ -423,36 +423,91 @@
       }
 
       if (!map.getLayer('gh-buildings-3d')) {
+        // Height expression: height → render_height → building:levels*3.5 → 11m
+        const heightExpr = [
+          'coalesce',
+          ['get', 'height'],
+          ['get', 'render_height'],
+          ['*', ['coalesce', ['get', 'building:levels'], 0], 3.5],
+          11
+        ];
+        const baseExpr = [
+          'coalesce',
+          ['get', 'min_height'],
+          ['get', 'render_min_height'],
+          0
+        ];
+
+        // Procedural color by building type; honour OSM building:colour when present
+        const colorExpr = [
+          'case',
+          // OSM explicit colour overrides everything
+          ['!=', ['coalesce', ['get', 'building:colour'], ''], ''],
+          ['get', 'building:colour'],
+          // apartments / residential
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['apartments', 'residential', 'house', 'detached', 'semidetached_house', 'terrace']]],
+          '#c8b89a',
+          // commercial / retail / supermarket
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['commercial', 'retail', 'supermarket', 'shop', 'kiosk']]],
+          '#b0bec5',
+          // office
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['office', 'offices', 'government']]],
+          '#90a4ae',
+          // industrial / warehouse / storage
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['industrial', 'warehouse', 'storage', 'factory', 'garage', 'garages']]],
+          '#9e9e9e',
+          // education
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['school', 'university', 'college', 'kindergarten']]],
+          '#e6d59a',
+          // hospital / healthcare
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['hospital', 'clinic', 'pharmacy']]],
+          '#dde8e0',
+          // religion / church
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['church', 'cathedral', 'mosque', 'synagogue', 'temple', 'chapel', 'religious']]],
+          '#d7c9b0',
+          // hotel
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['hotel', 'hostel', 'guest_house']]],
+          '#a5c4d4',
+          // default — neutral blue-gray, slightly varied by height for visual variety
+          ['interpolate', ['linear'], ['coalesce', ['get', 'height'], ['get', 'render_height'], 8],
+            0,  '#8d9aaa',
+            15, '#8a9aa8',
+            40, '#8898a6',
+            100,'#8596a4'
+          ]
+        ];
+
+        const buildingPaint = {
+          'fill-extrusion-color': colorExpr,
+          'fill-extrusion-height': [
+            'interpolate', ['linear'], ['zoom'],
+            15, 0,
+            15.05, heightExpr
+          ],
+          'fill-extrusion-base': [
+            'interpolate', ['linear'], ['zoom'],
+            15, 0,
+            15.05, baseExpr
+          ],
+          'fill-extrusion-opacity': [
+            'interpolate', ['linear'], ['zoom'],
+            15, 0, 15.5, 0.9
+          ]
+        };
+
+        // Ambient occlusion (MapLibre 4.x)
+        try {
+          buildingPaint['fill-extrusion-ambient-occlusion-intensity'] = 0.35;
+          buildingPaint['fill-extrusion-ambient-occlusion-radius']    = 3;
+        } catch(e) {}
+
         map.addLayer({
           id: 'gh-buildings-3d',
           source: 'carto',
           'source-layer': 'building',
           type: 'fill-extrusion',
-          minzoom: 14,
-          paint: {
-            'fill-extrusion-color': [
-              'interpolate', ['linear'], ['coalesce', ['get', 'render_height'], 0],
-              0,   '#0e1825',
-              10,  '#111e2e',
-              30,  '#152538',
-              80,  '#1a2d42',
-              200, '#1e3350'
-            ],
-            'fill-extrusion-height': [
-              'interpolate', ['linear'], ['zoom'],
-              14, 0,
-              14.05, ['coalesce', ['get', 'render_height'], 4]
-            ],
-            'fill-extrusion-base': [
-              'interpolate', ['linear'], ['zoom'],
-              14, 0,
-              14.05, ['coalesce', ['get', 'render_min_height'], 0]
-            ],
-            'fill-extrusion-opacity': [
-              'interpolate', ['linear'], ['zoom'],
-              14, 0, 15, 0.88
-            ]
-          }
+          minzoom: 15,
+          paint: buildingPaint
         });
       }
     } catch(e) { console.warn('[GeoHub] 3D buildings:', e.message); }
@@ -2385,14 +2440,15 @@
     }
     const currentStyle = getMapStyle();
     map = new maplibregl.Map({
-      container:       'map',
-      style:           TILE_LAYERS[currentStyle].style,
-      center:          [44.793, 41.694],
-      zoom:            12,
-      pitch:           45,
-      maxPitch:        85,
-      pitchWithRotate: true,
+      container:        'map',
+      style:            TILE_LAYERS[currentStyle].style,
+      center:           [44.793, 41.694],
+      zoom:             12,
+      pitch:            45,
+      maxPitch:         85,
+      pitchWithRotate:  true,
       attributionControl: false,
+      antialias:        true,
     });
     window._ghMap = map;
 
