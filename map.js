@@ -169,9 +169,9 @@
   ];
 
   const CAMERA_MODES = {
-    explore:    { label: '🔍 Explore',   pitch: 0,  bearing: 0 },
-    cinematic:  { label: '🎬 Cinematic', pitch: 55, bearing: null },
-    navigation: { label: '🧭 Navigate',  pitch: 30, bearing: null }
+    explore:    { label: '🔍 Explore',   pitch: 45, bearing: 0 },
+    cinematic:  { label: '🎬 Cinematic', pitch: 60, bearing: null },
+    navigation: { label: '🧭 Navigate',  pitch: 35, bearing: null }
   };
   const _googleDetailsCache = {};
 
@@ -395,8 +395,73 @@
     return { width: size, height: size, data: new Uint8Array(d.data.buffer) };
   }
 
+  /* ── 3D buildings + atmosphere ─────────────────────── */
+  function init3DScene() {
+    // Fog / atmosphere for depth
+    try {
+      map.setFog({
+        range:           [1, 12],
+        color:           'rgb(5, 8, 14)',
+        'high-color':    'rgb(10, 17, 32)',
+        'horizon-blend': 0.06,
+        'space-color':   'rgb(2, 3, 8)',
+        'star-intensity': 0.35
+      });
+    } catch(e) {}
+
+    // 3D building extrusion (OSM data via CartoDB carto source, OpenMapTiles schema)
+    try {
+      // Sky layer (adds atmospheric gradient above horizon when pitched)
+      if (!map.getLayer('gh-sky')) {
+        map.addLayer({ id: 'gh-sky', type: 'sky', paint: {
+          'sky-type': 'atmosphere',
+          'sky-atmosphere-sun': [0, 90],
+          'sky-atmosphere-sun-intensity': 3,
+          'sky-atmosphere-color': 'rgba(8,18,38,1)',
+          'sky-atmosphere-halo-color': 'rgba(16,185,129,0.08)'
+        }});
+      }
+
+      if (!map.getLayer('gh-buildings-3d')) {
+        map.addLayer({
+          id: 'gh-buildings-3d',
+          source: 'carto',
+          'source-layer': 'building',
+          type: 'fill-extrusion',
+          minzoom: 14,
+          paint: {
+            'fill-extrusion-color': [
+              'interpolate', ['linear'], ['coalesce', ['get', 'render_height'], 0],
+              0,   '#0e1825',
+              10,  '#111e2e',
+              30,  '#152538',
+              80,  '#1a2d42',
+              200, '#1e3350'
+            ],
+            'fill-extrusion-height': [
+              'interpolate', ['linear'], ['zoom'],
+              14, 0,
+              14.05, ['coalesce', ['get', 'render_height'], 4]
+            ],
+            'fill-extrusion-base': [
+              'interpolate', ['linear'], ['zoom'],
+              14, 0,
+              14.05, ['coalesce', ['get', 'render_min_height'], 0]
+            ],
+            'fill-extrusion-opacity': [
+              'interpolate', ['linear'], ['zoom'],
+              14, 0, 15, 0.88
+            ]
+          }
+        });
+      }
+    } catch(e) { console.warn('[GeoHub] 3D buildings:', e.message); }
+  }
+
   /* ── Init WebGL place layers (call after map load) ─ */
   function initGLLayers() {
+    init3DScene();
+
     for (const [catId, style] of Object.entries(PLACE_MARKER_STYLES)) {
       if (!map.hasImage('cat-' + catId)) {
         map.addImage('cat-' + catId, _createMarkerImage(style.color, style.icon));
@@ -2324,6 +2389,7 @@
       style:           TILE_LAYERS[currentStyle].style,
       center:          [44.793, 41.694],
       zoom:            12,
+      pitch:           45,
       maxPitch:        85,
       pitchWithRotate: true,
       attributionControl: false,
