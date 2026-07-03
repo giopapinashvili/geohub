@@ -14977,3 +14977,79 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     state.pageUnsubs=[];
   });
 })();
+
+/* ── Navigation speed: hover prefetch + top progress bar ─────── */
+(function(){
+  var _pf = {};
+  var _barTimer;
+
+  function isNavHref(href) {
+    if (!href) return false;
+    if (href.charAt(0) === '#') return false;
+    if (/^(https?:\/\/|\/\/|mailto:|tel:|javascript:)/i.test(href)) return false;
+    return true;
+  }
+
+  function prefetch(href) {
+    if (_pf[href]) return;
+    _pf[href] = true;
+    var l = document.createElement('link');
+    l.rel = 'prefetch'; l.href = href; l.as = 'document';
+    document.head.appendChild(l);
+  }
+
+  function getBar() {
+    var b = document.getElementById('gh-nav-bar');
+    if (!b) {
+      b = document.createElement('div');
+      b.id = 'gh-nav-bar';
+      document.body.appendChild(b);
+    }
+    return b;
+  }
+
+  function startBar() {
+    var b = getBar();
+    b.style.transition = 'none';
+    b.style.width = '0%';
+    b.style.opacity = '1';
+    clearTimeout(_barTimer);
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        b.style.transition = 'width .42s ease, opacity .3s ease';
+        b.style.width = '82%';
+      });
+    });
+  }
+
+  function finishBar() {
+    var b = document.getElementById('gh-nav-bar');
+    if (!b) return;
+    b.style.transition = 'width .15s ease, opacity .4s ease .1s';
+    b.style.width = '100%';
+    b.style.opacity = '0';
+  }
+
+  document.addEventListener('mouseover', function(e) {
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (a && isNavHref(a.getAttribute('href'))) prefetch(a.getAttribute('href'));
+  });
+
+  document.addEventListener('touchstart', function(e) {
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (a && isNavHref(a.getAttribute('href'))) prefetch(a.getAttribute('href'));
+  }, { passive: true });
+
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (!a) return;
+    var href = a.getAttribute('href');
+    if (!isNavHref(href)) return;
+    if (a.target === '_blank' || a.hasAttribute('download')) return;
+    if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+    startBar();
+  });
+
+  window.addEventListener('pagehide', finishBar);
+  window.addEventListener('beforeunload', finishBar);
+})();

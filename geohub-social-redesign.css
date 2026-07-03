@@ -6027,6 +6027,30 @@ html[data-gh-motion="reduced"] * { animation-duration:0.001ms !important; transi
 .gh-story-ts-styles{display:flex;gap:4px}
 .gh-story-ts-style{width:28px;height:28px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#94a3b8;cursor:pointer;font-size:.82rem;display:grid;place-items:center;transition:border-color .12s,color .12s}
 
+/* ── Page Navigation — transitions, prefetch bar ────────────── */
+/* View Transitions API: auto cross-fade on every page navigation (Chrome 111+, Edge 111+) */
+@view-transition { navigation: auto; }
+@keyframes gh-vt-out { to   { opacity:0; transform:scale(.98); } }
+@keyframes gh-vt-in  { from { opacity:0; transform:scale(.99); } }
+::view-transition-old(root) { animation:180ms ease gh-vt-out; }
+::view-transition-new(root) { animation:220ms ease gh-vt-in; }
+
+/* Fallback page-enter fade for browsers without View Transitions */
+@supports not (view-transition-name: root) {
+  .gh-shell, .biz-detail-wrap { animation: gh-page-in .24s ease both; }
+  @keyframes gh-page-in { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+}
+
+/* Top navigation progress bar */
+#gh-nav-bar {
+  position:fixed;top:0;left:0;height:2px;width:0%;
+  background:linear-gradient(90deg,#10b981,#3b82f6 60%,#10b981);
+  z-index:9999999;border-radius:0 2px 2px 0;pointer-events:none;
+  box-shadow:0 0 10px rgba(16,185,129,.7);
+  transition:width .4s ease,opacity .35s ease;
+  opacity:0;
+}
+
 /* ── No-left nav layout (profile, business detail, groups) ── */
 body.gh-no-left .gh-left{display:none!important}
 body.gh-no-left .gh-layout{grid-template-columns:minmax(0,900px) 320px!important;max-width:1260px}
