@@ -397,22 +397,27 @@
 
   /* ── 3D buildings + atmosphere ─────────────────────── */
   function init3DScene() {
-    // Fog / atmosphere for depth
+    // Fog / atmosphere — only on dark style (looks wrong on light voyager)
+    var _isDark = (localStorage.getItem('gh_map_style') || 'dark') === 'dark';
     try {
-      map.setFog({
-        range:           [1, 12],
-        color:           'rgb(5, 8, 14)',
-        'high-color':    'rgb(10, 17, 32)',
-        'horizon-blend': 0.06,
-        'space-color':   'rgb(2, 3, 8)',
-        'star-intensity': 0.35
-      });
+      if (_isDark) {
+        map.setFog({
+          range:           [1, 12],
+          color:           'rgb(5, 8, 14)',
+          'high-color':    'rgb(10, 17, 32)',
+          'horizon-blend': 0.06,
+          'space-color':   'rgb(2, 3, 8)',
+          'star-intensity': 0.35
+        });
+      } else {
+        map.setFog(null);
+      }
     } catch(e) {}
 
     // 3D building extrusion — auto-detect source/source-layer from style
     try {
-      // Sky layer
-      if (!map.getLayer('gh-sky')) {
+      // Sky layer — only on dark style
+      if (_isDark && !map.getLayer('gh-sky')) {
         try {
           map.addLayer({ id: 'gh-sky', type: 'sky', paint: {
             'sky-type': 'atmosphere',
@@ -448,18 +453,18 @@
         if (!bldSource) { console.warn('[GeoHub] 3D buildings: no vector source found'); return; }
         console.info('[GeoHub] 3D buildings source:', bldSource, '/', bldSourceLayer);
 
-        // Height: prefer explicit height → render_height → levels*3.5 → 11m default
+        // Height: only use property if > 0, otherwise fall through to 11m default
         const heightExpr = [
           'case',
-          ['has', 'height'],       ['to-number', ['get', 'height']],
-          ['has', 'render_height'],['to-number', ['get', 'render_height']],
-          ['has', 'building:levels'], ['*', ['to-number', ['get', 'building:levels']], 3.5],
+          ['>', ['to-number', ['get', 'height'], 0], 0],        ['to-number', ['get', 'height']],
+          ['>', ['to-number', ['get', 'render_height'], 0], 0], ['to-number', ['get', 'render_height']],
+          ['>', ['to-number', ['get', 'building:levels'], 0], 0], ['*', ['to-number', ['get', 'building:levels']], 3.5],
           11
         ];
         const baseExpr = [
           'case',
-          ['has', 'min_height'],       ['to-number', ['get', 'min_height']],
-          ['has', 'render_min_height'],['to-number', ['get', 'render_min_height']],
+          ['>', ['to-number', ['get', 'min_height'], 0], 0],        ['to-number', ['get', 'min_height']],
+          ['>', ['to-number', ['get', 'render_min_height'], 0], 0], ['to-number', ['get', 'render_min_height']],
           0
         ];
 
