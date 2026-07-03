@@ -416,18 +416,7 @@
 
     // 3D building extrusion — auto-detect source/source-layer from style
     try {
-      // Sky layer — only on dark style
-      if (_isDark && !map.getLayer('gh-sky')) {
-        try {
-          map.addLayer({ id: 'gh-sky', type: 'sky', paint: {
-            'sky-type': 'atmosphere',
-            'sky-atmosphere-sun': [0, 90],
-            'sky-atmosphere-sun-intensity': 3,
-            'sky-atmosphere-color': 'rgba(8,18,38,1)',
-            'sky-atmosphere-halo-color': 'rgba(16,185,129,0.08)'
-          }});
-        } catch(e) {}
-      }
+      // Sky layer removed — caused black horizon on voyager style
 
       if (!map.getLayer('gh-buildings-3d')) {
         // Auto-detect building source from existing style layers
