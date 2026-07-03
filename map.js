@@ -435,6 +435,28 @@
         }
         if (!bldSrc) return;
 
+        var colorExpr = [
+          'case',
+          ['!=', ['coalesce', ['get', 'building:colour'], ''], ''], ['get', 'building:colour'],
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['apartments','residential','house','detached','semidetached_house','terrace']]], '#c8b89a',
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['commercial','retail','supermarket','shop','kiosk']]], '#b0bec5',
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['office','offices','government']]], '#90a4ae',
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['industrial','warehouse','storage','factory','garage','garages']]], '#9e9e9e',
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['school','university','college','kindergarten']]], '#e6d59a',
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['hospital','clinic','pharmacy']]], '#dde8e0',
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['church','cathedral','mosque','synagogue','temple','chapel','religious']]], '#d7c9b0',
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['hotel','hostel','guest_house']]], '#a5c4d4',
+          '#c8b89a'
+        ];
+
+        var heightExpr = [
+          'case',
+          ['>', ['to-number', ['get', 'height'], 0], 0], ['to-number', ['get', 'height']],
+          ['>', ['to-number', ['get', 'render_height'], 0], 0], ['to-number', ['get', 'render_height']],
+          ['>', ['to-number', ['get', 'building:levels'], 0], 0], ['*', ['to-number', ['get', 'building:levels']], 3.5],
+          20
+        ];
+
         map.addLayer({
           id: 'gh-buildings-3d',
           type: 'fill-extrusion',
@@ -442,8 +464,8 @@
           'source-layer': 'building',
           minzoom: 13,
           paint: {
-            'fill-extrusion-color': '#c8b89a',
-            'fill-extrusion-height': 20,
+            'fill-extrusion-color': colorExpr,
+            'fill-extrusion-height': heightExpr,
             'fill-extrusion-base': 0,
             'fill-extrusion-opacity': 0.85
           }
