@@ -446,7 +446,13 @@
           ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['hospital','clinic','pharmacy']]], '#dde8e0',
           ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['church','cathedral','mosque','synagogue','temple','chapel','religious']]], '#d7c9b0',
           ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['hotel','hostel','guest_house']]], '#a5c4d4',
-          '#c8b89a'
+          ['interpolate', ['linear'], ['to-number', ['get', 'height'], 20],
+            0,  '#cfc0aa',
+            15, '#c8b89a',
+            30, '#bfad90',
+            60, '#b5a285',
+            120,'#a89578'
+          ]
         ];
 
         var heightExpr = [
