@@ -442,10 +442,14 @@
         }
         if (!bldSrc) return;
 
-        // Insert before first symbol/label layer so labels render on top
+        // Insert AFTER the last building layer (so it renders above roads/fills but keeps labels on top)
         var _beforeId = null;
+        var _lastBldIdx = -1;
         for (var _s = 0; _s < _layers.length; _s++) {
-          if (_layers[_s].type === 'symbol') { _beforeId = _layers[_s].id; break; }
+          if (_layers[_s]['source-layer'] === 'building') { _lastBldIdx = _s; }
+        }
+        if (_lastBldIdx >= 0 && _lastBldIdx + 1 < _layers.length) {
+          _beforeId = _layers[_lastBldIdx + 1].id;
         }
 
         var colorExpr = ['match',
