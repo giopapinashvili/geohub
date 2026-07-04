@@ -433,23 +433,23 @@
         }
         if (!bldSrc) return;
 
-        var bld = ['downcase', ['coalesce', ['get', 'building'], '']];
+        // match evaluates the input expression once — no shared array references
         var colorExpr = [
           'case',
           ['!=', ['coalesce', ['get', 'building:colour'], ''], ''], ['get', 'building:colour'],
-          ['in', bld, ['literal', ['hotel','hostel','guest_house','motel']]], '#a5c4d4',
-          ['in', bld, ['literal', ['museum','theatre','theater','cinema','stadium','arena','sports_centre']]], '#c4a8d4',
-          ['in', bld, ['literal', ['mall','shopping_centre','shopping_center']]], '#b8d4c8',
-          ['in', bld, ['literal', ['church','cathedral','mosque','synagogue','temple','chapel','religious','monastery']]], '#d4c4a0',
-          ['in', bld, ['literal', ['hospital','clinic','pharmacy','healthcare']]], '#d8e8dc',
-          ['in', bld, ['literal', ['school','university','college','kindergarten','library']]], '#e8d89a',
-          ['in', bld, ['literal', ['government','civic','public','courthouse','townhall','fire_station','police']]], '#b8c8d8',
-          ['in', bld, ['literal', ['office','offices']]], '#90a4ae',
-          ['in', bld, ['literal', ['commercial','retail','supermarket','shop','kiosk']]], '#b0bec5',
-          ['in', bld, ['literal', ['industrial','warehouse','storage','factory','garage','garages','hangar']]], '#9e9e9e',
-          ['in', bld, ['literal', ['apartments','residential','house','detached','semidetached_house','terrace','dormitory','bungalow']]], '#c8b89a',
-          ['interpolate', ['linear'], ['to-number', ['get', 'height'], 20],
-            0, '#d2c2ac', 20, '#c8b89a', 50, '#bfad90', 100, '#b5a285'
+          ['match', ['downcase', ['coalesce', ['get', 'building'], '']],
+            ['hotel','hostel','guest_house','motel'],                                                       '#a5c4d4',
+            ['museum','theatre','theater','cinema','stadium','arena','sports_centre'],                      '#c4a8d4',
+            ['mall','shopping_centre','shopping_center'],                                                   '#b8d4c8',
+            ['church','cathedral','mosque','synagogue','temple','chapel','religious','monastery'],           '#d4c4a0',
+            ['hospital','clinic','pharmacy','healthcare'],                                                  '#d8e8dc',
+            ['school','university','college','kindergarten','library'],                                     '#e8d89a',
+            ['government','civic','public','courthouse','townhall','fire_station','police'],                '#b8c8d8',
+            ['office','offices'],                                                                           '#90a4ae',
+            ['commercial','retail','supermarket','shop','kiosk'],                                          '#b0bec5',
+            ['industrial','warehouse','storage','factory','garage','garages','hangar'],                    '#9e9e9e',
+            ['apartments','residential','house','detached','semidetached_house','terrace','dormitory','bungalow'], '#c8b89a',
+            '#c8b89a'
           ]
         ];
 
