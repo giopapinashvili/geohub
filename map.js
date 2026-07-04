@@ -433,37 +433,25 @@
         }
         if (!bldSrc) return;
 
-        // match evaluates the input expression once — no shared array references
-        var colorExpr = [
-          'case',
-          ['!=', ['coalesce', ['get', 'building:colour'], ''], ''], ['get', 'building:colour'],
-          ['match', ['downcase', ['coalesce', ['get', 'building'], '']],
-            ['hotel','hostel','guest_house','motel'],                                                       '#a5c4d4',
-            ['museum','theatre','theater','cinema','stadium','arena','sports_centre'],                      '#c4a8d4',
-            ['mall','shopping_centre','shopping_center'],                                                   '#b8d4c8',
-            ['church','cathedral','mosque','synagogue','temple','chapel','religious','monastery'],           '#d4c4a0',
-            ['hospital','clinic','pharmacy','healthcare'],                                                  '#d8e8dc',
-            ['school','university','college','kindergarten','library'],                                     '#e8d89a',
-            ['government','civic','public','courthouse','townhall','fire_station','police'],                '#b8c8d8',
-            ['office','offices'],                                                                           '#90a4ae',
-            ['commercial','retail','supermarket','shop','kiosk'],                                          '#b0bec5',
-            ['industrial','warehouse','storage','factory','garage','garages','hangar'],                    '#9e9e9e',
-            ['apartments','residential','house','detached','semidetached_house','terrace','dormitory','bungalow'], '#c8b89a',
-            '#c8b89a'
-          ]
-        ];
-
-        var heightExpr = [
-          'case',
-          ['>', ['to-number', ['get', 'height'], 0], 0],        ['to-number', ['get', 'height']],
-          ['>', ['to-number', ['get', 'render_height'], 0], 0], ['to-number', ['get', 'render_height']],
-          ['>', ['to-number', ['get', 'building:levels'], 0], 0], ['*', ['to-number', ['get', 'building:levels']], 3.5],
-          20
+        var colorExpr = ['match',
+          ['downcase', ['coalesce', ['get', 'building'], '']],
+          ['hotel','hostel','guest_house','motel'],                                                                '#a5c4d4',
+          ['museum','theatre','theater','cinema','stadium','arena','sports_centre'],                             '#c4a8d4',
+          ['mall','shopping_centre','shopping_center'],                                                          '#b8d4c8',
+          ['church','cathedral','mosque','synagogue','temple','chapel','religious','monastery'],                  '#d4c4a0',
+          ['hospital','clinic','pharmacy','healthcare'],                                                         '#d8e8dc',
+          ['school','university','college','kindergarten','library'],                                            '#e8d89a',
+          ['government','civic','public','courthouse','townhall','fire_station','police'],                       '#b8c8d8',
+          ['office','offices'],                                                                                  '#90a4ae',
+          ['commercial','retail','supermarket','shop','kiosk'],                                                  '#b0bec5',
+          ['industrial','warehouse','storage','factory','garage','garages','hangar'],                            '#9e9e9e',
+          ['apartments','residential','house','detached','semidetached_house','terrace','dormitory','bungalow'],  '#c8b89a',
+          '#c8b89a'
         ];
 
         var bldPaint = {
           'fill-extrusion-color':   colorExpr,
-          'fill-extrusion-height':  heightExpr,
+          'fill-extrusion-height':  20,
           'fill-extrusion-base':    0,
           'fill-extrusion-opacity': 0.88
         };
