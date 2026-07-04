@@ -433,77 +433,24 @@
         }
         if (!bldSrc) return;
 
-        // ID-based shade index (0-4) for within-category variation
-        var _sid = ['%', ['to-number', ['id'], 0], 5];
-        var _sid3 = ['%', ['to-number', ['id'], 0], 3];
-
-        // Helper: 5-shade residential palette
-        var _resShade = [
-          'case',
-          ['==', _sid, 0], '#d4c4a8',
-          ['==', _sid, 1], '#c8b89a',
-          ['==', _sid, 2], '#c2b292',
-          ['==', _sid, 3], '#bead8c',
-          '#cabb9c'
-        ];
-        // Helper: 3-shade cool-gray palette (commercial/office)
-        var _comShade = [
-          'case',
-          ['==', _sid3, 0], '#b8c4cc',
-          ['==', _sid3, 1], '#aebbc4',
-          '#b0bec5'
-        ];
-        var _offShade = [
-          'case',
-          ['==', _sid3, 0], '#9db0bc',
-          ['==', _sid3, 1], '#90a4ae',
-          '#8a9fac'
-        ];
-        // Helper: 3-shade warm-stone palette (religious/historic)
-        var _stoShade = [
-          'case',
-          ['==', _sid3, 0], '#d8c8a8',
-          ['==', _sid3, 1], '#d0bea0',
-          '#cbb89a'
-        ];
-        // Default: 5 natural beige-stone shades for untagged buildings
-        var _defShade = [
-          'case',
-          ['==', _sid, 0], '#d2c2ac',
-          ['==', _sid, 1], '#c8b89a',
-          ['==', _sid, 2], '#c4b294',
-          ['==', _sid, 3], '#bfac8e',
-          '#cabb9e'
-        ];
-
+        var bld = ['downcase', ['coalesce', ['get', 'building'], '']];
         var colorExpr = [
           'case',
-          // OSM explicit colour wins
           ['!=', ['coalesce', ['get', 'building:colour'], ''], ''], ['get', 'building:colour'],
-          // Landmark: hotel/hospitality — teal-blue
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['hotel','hostel','guest_house','motel']]], '#a5c4d4',
-          // Landmark: museum/theatre/stadium — soft purple
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['museum','theatre','theater','cinema','stadium','arena','sports_centre']]], '#c4a8d4',
-          // Landmark: shopping mall
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['mall','shopping_centre','shopping_center']]], '#b8d4c8',
-          // Religious — warm stone shades
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['church','cathedral','mosque','synagogue','temple','chapel','religious','monastery']]], _stoShade,
-          // Healthcare — soft green-white
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['hospital','clinic','pharmacy','healthcare']]], '#d8e8dc',
-          // Education — warm yellow
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['school','university','college','kindergarten','library']]], '#e8d89a',
-          // Government/civic — cool blue-gray
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['government','civic','public','courthouse','townhall','fire_station','police']]], '#b8c8d8',
-          // Office — blue-gray shades
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['office','offices']]], _offShade,
-          // Commercial/retail — cool gray-blue shades
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['commercial','retail','supermarket','shop','kiosk']]], _comShade,
-          // Industrial — concrete gray
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['industrial','warehouse','storage','factory','garage','garages','hangar']]], ['case', ['==', ['%', ['to-number', ['id'], 0], 2], 0], '#a8a8a8', '#9e9e9e'],
-          // Residential (typed) — warm beige shades
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['apartments','residential','house','detached','semidetached_house','terrace','dormitory','bungalow']]], _resShade,
-          // Default (building=yes — most of Tbilisi) — 5 natural shades
-          _defShade
+          ['in', bld, ['literal', ['hotel','hostel','guest_house','motel']]], '#a5c4d4',
+          ['in', bld, ['literal', ['museum','theatre','theater','cinema','stadium','arena','sports_centre']]], '#c4a8d4',
+          ['in', bld, ['literal', ['mall','shopping_centre','shopping_center']]], '#b8d4c8',
+          ['in', bld, ['literal', ['church','cathedral','mosque','synagogue','temple','chapel','religious','monastery']]], '#d4c4a0',
+          ['in', bld, ['literal', ['hospital','clinic','pharmacy','healthcare']]], '#d8e8dc',
+          ['in', bld, ['literal', ['school','university','college','kindergarten','library']]], '#e8d89a',
+          ['in', bld, ['literal', ['government','civic','public','courthouse','townhall','fire_station','police']]], '#b8c8d8',
+          ['in', bld, ['literal', ['office','offices']]], '#90a4ae',
+          ['in', bld, ['literal', ['commercial','retail','supermarket','shop','kiosk']]], '#b0bec5',
+          ['in', bld, ['literal', ['industrial','warehouse','storage','factory','garage','garages','hangar']]], '#9e9e9e',
+          ['in', bld, ['literal', ['apartments','residential','house','detached','semidetached_house','terrace','dormitory','bungalow']]], '#c8b89a',
+          ['interpolate', ['linear'], ['to-number', ['get', 'height'], 20],
+            0, '#d2c2ac', 20, '#c8b89a', 50, '#bfad90', 100, '#b5a285'
+          ]
         ];
 
         var heightExpr = [
