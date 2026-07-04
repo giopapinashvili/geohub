@@ -417,13 +417,11 @@
     // 3D building extrusion
     try {
       if (!map.getLayer('gh-buildings-3d')) {
-        // Find building source-layer from style
         var bldSrc = null;
         var _layers = (map.getStyle() || {}).layers || [];
         for (var _i = 0; _i < _layers.length; _i++) {
           if (_layers[_i]['source-layer'] === 'building' && _layers[_i].source) {
-            bldSrc = _layers[_i].source;
-            break;
+            bldSrc = _layers[_i].source; break;
           }
         }
         if (!bldSrc) {
@@ -435,33 +433,97 @@
         }
         if (!bldSrc) return;
 
+        // ID-based shade index (0-4) for within-category variation
+        var _sid = ['%', ['to-number', ['id'], 0], 5];
+        var _sid3 = ['%', ['to-number', ['id'], 0], 3];
+
+        // Helper: 5-shade residential palette
+        var _resShade = [
+          'case',
+          ['==', _sid, 0], '#d4c4a8',
+          ['==', _sid, 1], '#c8b89a',
+          ['==', _sid, 2], '#c2b292',
+          ['==', _sid, 3], '#bead8c',
+          '#cabb9c'
+        ];
+        // Helper: 3-shade cool-gray palette (commercial/office)
+        var _comShade = [
+          'case',
+          ['==', _sid3, 0], '#b8c4cc',
+          ['==', _sid3, 1], '#aebbc4',
+          '#b0bec5'
+        ];
+        var _offShade = [
+          'case',
+          ['==', _sid3, 0], '#9db0bc',
+          ['==', _sid3, 1], '#90a4ae',
+          '#8a9fac'
+        ];
+        // Helper: 3-shade warm-stone palette (religious/historic)
+        var _stoShade = [
+          'case',
+          ['==', _sid3, 0], '#d8c8a8',
+          ['==', _sid3, 1], '#d0bea0',
+          '#cbb89a'
+        ];
+        // Default: 5 natural beige-stone shades for untagged buildings
+        var _defShade = [
+          'case',
+          ['==', _sid, 0], '#d2c2ac',
+          ['==', _sid, 1], '#c8b89a',
+          ['==', _sid, 2], '#c4b294',
+          ['==', _sid, 3], '#bfac8e',
+          '#cabb9e'
+        ];
+
         var colorExpr = [
           'case',
+          // OSM explicit colour wins
           ['!=', ['coalesce', ['get', 'building:colour'], ''], ''], ['get', 'building:colour'],
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['apartments','residential','house','detached','semidetached_house','terrace']]], '#c8b89a',
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['commercial','retail','supermarket','shop','kiosk']]], '#b0bec5',
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['office','offices','government']]], '#90a4ae',
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['industrial','warehouse','storage','factory','garage','garages']]], '#9e9e9e',
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['school','university','college','kindergarten']]], '#e6d59a',
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['hospital','clinic','pharmacy']]], '#dde8e0',
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['church','cathedral','mosque','synagogue','temple','chapel','religious']]], '#d7c9b0',
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['hotel','hostel','guest_house']]], '#a5c4d4',
-          ['interpolate', ['linear'], ['to-number', ['get', 'height'], 20],
-            0,  '#cfc0aa',
-            15, '#c8b89a',
-            30, '#bfad90',
-            60, '#b5a285',
-            120,'#a89578'
-          ]
+          // Landmark: hotel/hospitality — teal-blue
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['hotel','hostel','guest_house','motel']]], '#a5c4d4',
+          // Landmark: museum/theatre/stadium — soft purple
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['museum','theatre','theater','cinema','stadium','arena','sports_centre']]], '#c4a8d4',
+          // Landmark: shopping mall
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['mall','shopping_centre','shopping_center']]], '#b8d4c8',
+          // Religious — warm stone shades
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['church','cathedral','mosque','synagogue','temple','chapel','religious','monastery']]], _stoShade,
+          // Healthcare — soft green-white
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['hospital','clinic','pharmacy','healthcare']]], '#d8e8dc',
+          // Education — warm yellow
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['school','university','college','kindergarten','library']]], '#e8d89a',
+          // Government/civic — cool blue-gray
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['government','civic','public','courthouse','townhall','fire_station','police']]], '#b8c8d8',
+          // Office — blue-gray shades
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['office','offices']]], _offShade,
+          // Commercial/retail — cool gray-blue shades
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['commercial','retail','supermarket','shop','kiosk']]], _comShade,
+          // Industrial — concrete gray
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['industrial','warehouse','storage','factory','garage','garages','hangar']]], ['case', ['==', ['%', ['to-number', ['id'], 0], 2], 0], '#a8a8a8', '#9e9e9e'],
+          // Residential (typed) — warm beige shades
+          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['apartments','residential','house','detached','semidetached_house','terrace','dormitory','bungalow']]], _resShade,
+          // Default (building=yes — most of Tbilisi) — 5 natural shades
+          _defShade
         ];
 
         var heightExpr = [
           'case',
-          ['>', ['to-number', ['get', 'height'], 0], 0], ['to-number', ['get', 'height']],
+          ['>', ['to-number', ['get', 'height'], 0], 0],        ['to-number', ['get', 'height']],
           ['>', ['to-number', ['get', 'render_height'], 0], 0], ['to-number', ['get', 'render_height']],
           ['>', ['to-number', ['get', 'building:levels'], 0], 0], ['*', ['to-number', ['get', 'building:levels']], 3.5],
           20
         ];
+
+        var bldPaint = {
+          'fill-extrusion-color':   colorExpr,
+          'fill-extrusion-height':  heightExpr,
+          'fill-extrusion-base':    0,
+          'fill-extrusion-opacity': 0.88
+        };
+        try {
+          bldPaint['fill-extrusion-ambient-occlusion-intensity'] = 0.45;
+          bldPaint['fill-extrusion-ambient-occlusion-radius']    = 3;
+        } catch(e) {}
 
         map.addLayer({
           id: 'gh-buildings-3d',
@@ -469,20 +531,60 @@
           source: bldSrc,
           'source-layer': 'building',
           minzoom: 13,
-          paint: {
-            'fill-extrusion-color': colorExpr,
-            'fill-extrusion-height': heightExpr,
-            'fill-extrusion-base': 0,
-            'fill-extrusion-opacity': 0.85
-          }
+          paint: bldPaint
         });
       }
     } catch(e) { console.error('[GeoHub] 3D buildings error:', e); }
   }
 
+  // Improve water, parks and road colors in the base CartoDB style
+  function improveStyleLayers() {
+    try {
+      var layers = (map.getStyle() || {}).layers || [];
+      for (var i = 0; i < layers.length; i++) {
+        var l = layers[i];
+        var sl = l['source-layer'] || '';
+        var id = l.id || '';
+        try {
+          // Water — deeper, more saturated blue
+          if (l.type === 'fill' && sl === 'water') {
+            map.setPaintProperty(id, 'fill-color', '#4a8fc4');
+          }
+          // Waterways (rivers as lines)
+          if (l.type === 'line' && sl === 'waterway') {
+            map.setPaintProperty(id, 'line-color', '#4a8fc4');
+          }
+          // Parks
+          if (l.type === 'fill' && sl === 'park') {
+            map.setPaintProperty(id, 'fill-color', '#7ecf6e');
+          }
+          // Landcover: grass/scrub/meadow → rich green
+          if (l.type === 'fill' && sl === 'landcover') {
+            var lid = id.toLowerCase();
+            if (lid.indexOf('grass') > -1 || lid.indexOf('scrub') > -1 || lid.indexOf('meadow') > -1 || lid.indexOf('crop') > -1) {
+              map.setPaintProperty(id, 'fill-color', '#8dd47a');
+            }
+            if (lid.indexOf('wood') > -1 || lid.indexOf('forest') > -1) {
+              map.setPaintProperty(id, 'fill-color', '#6aaa58');
+            }
+          }
+          // Road primary — slightly warmer/brighter
+          if (l.type === 'line' && sl === 'transportation') {
+            var filter = l.filter;
+            var fstr = JSON.stringify(filter || []);
+            if (fstr.indexOf('primary') > -1 || fstr.indexOf('trunk') > -1 || fstr.indexOf('motorway') > -1) {
+              map.setPaintProperty(id, 'line-color', '#f5e6c0');
+            }
+          }
+        } catch(e) {}
+      }
+    } catch(e) {}
+  }
+
   /* ── Init WebGL place layers (call after map load) ─ */
   function initGLLayers() {
     init3DScene();
+    improveStyleLayers();
 
     for (const [catId, style] of Object.entries(PLACE_MARKER_STYLES)) {
       if (!map.hasImage('cat-' + catId)) {
