@@ -417,76 +417,19 @@
     // 3D building extrusion
     try {
       if (!map.getLayer('gh-buildings-3d')) {
-        var _layers = (map.getStyle() || {}).layers || [];
-
-        // Hide existing 2D building fill layers so they don't cover 3D extrusion
-        for (var _h = 0; _h < _layers.length; _h++) {
-          if (_layers[_h]['source-layer'] === 'building' && _layers[_h].type === 'fill') {
-            try { map.setLayoutProperty(_layers[_h].id, 'visibility', 'none'); } catch(e) {}
-          }
-        }
-
-        // Find the source that has building data
-        var bldSrc = null;
-        for (var _i = 0; _i < _layers.length; _i++) {
-          if (_layers[_i]['source-layer'] === 'building' && _layers[_i].source) {
-            bldSrc = _layers[_i].source; break;
-          }
-        }
-        if (!bldSrc) {
-          var _srcs = (map.getStyle() || {}).sources || {};
-          var _keys = Object.keys(_srcs);
-          for (var _k = 0; _k < _keys.length; _k++) {
-            if (_srcs[_keys[_k]].type === 'vector') { bldSrc = _keys[_k]; break; }
-          }
-        }
-        if (!bldSrc) return;
-
-        // Insert AFTER the last building layer (so it renders above roads/fills but keeps labels on top)
-        var _beforeId = null;
-        var _lastBldIdx = -1;
-        for (var _s = 0; _s < _layers.length; _s++) {
-          if (_layers[_s]['source-layer'] === 'building') { _lastBldIdx = _s; }
-        }
-        if (_lastBldIdx >= 0 && _lastBldIdx + 1 < _layers.length) {
-          _beforeId = _layers[_lastBldIdx + 1].id;
-        }
-
-        var colorExpr = ['match',
-          ['downcase', ['coalesce', ['get', 'building'], '']],
-          ['hotel','hostel','guest_house','motel'],                                                                '#a5c4d4',
-          ['museum','theatre','theater','cinema','stadium','arena','sports_centre'],                             '#c4a8d4',
-          ['mall','shopping_centre','shopping_center'],                                                          '#b8d4c8',
-          ['church','cathedral','mosque','synagogue','temple','chapel','religious','monastery'],                  '#d4c4a0',
-          ['hospital','clinic','pharmacy','healthcare'],                                                         '#d8e8dc',
-          ['school','university','college','kindergarten','library'],                                            '#e8d89a',
-          ['government','civic','public','courthouse','townhall','fire_station','police'],                       '#b8c8d8',
-          ['office','offices'],                                                                                  '#90a4ae',
-          ['commercial','retail','supermarket','shop','kiosk'],                                                  '#b0bec5',
-          ['industrial','warehouse','storage','factory','garage','garages','hangar'],                            '#9e9e9e',
-          ['apartments','residential','house','detached','semidetached_house','terrace','dormitory','bungalow'],  '#c8b89a',
-          '#c8b89a'
-        ];
-
-        var bldPaint = {
-          'fill-extrusion-color':   colorExpr,
-          'fill-extrusion-height':  20,
-          'fill-extrusion-base':    0,
-          'fill-extrusion-opacity': 0.88
-        };
-        try {
-          bldPaint['fill-extrusion-ambient-occlusion-intensity'] = 0.45;
-          bldPaint['fill-extrusion-ambient-occlusion-radius']    = 3;
-        } catch(e) {}
-
         map.addLayer({
           id: 'gh-buildings-3d',
           type: 'fill-extrusion',
-          source: bldSrc,
+          source: 'carto',
           'source-layer': 'building',
           minzoom: 13,
-          paint: bldPaint
-        }, _beforeId || undefined);
+          paint: {
+            'fill-extrusion-color':   '#c8b89a',
+            'fill-extrusion-height':  20,
+            'fill-extrusion-base':    0,
+            'fill-extrusion-opacity': 0.9
+          }
+        });
       }
     } catch(e) { console.error('[GeoHub] 3D buildings error:', e); }
   }
