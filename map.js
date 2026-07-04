@@ -417,8 +417,17 @@
     // 3D building extrusion
     try {
       if (!map.getLayer('gh-buildings-3d')) {
-        var bldSrc = null;
         var _layers = (map.getStyle() || {}).layers || [];
+
+        // Hide existing 2D building fill layers so they don't cover 3D extrusion
+        for (var _h = 0; _h < _layers.length; _h++) {
+          if (_layers[_h]['source-layer'] === 'building' && _layers[_h].type === 'fill') {
+            try { map.setLayoutProperty(_layers[_h].id, 'visibility', 'none'); } catch(e) {}
+          }
+        }
+
+        // Find the source that has building data
+        var bldSrc = null;
         for (var _i = 0; _i < _layers.length; _i++) {
           if (_layers[_i]['source-layer'] === 'building' && _layers[_i].source) {
             bldSrc = _layers[_i].source; break;
@@ -432,6 +441,12 @@
           }
         }
         if (!bldSrc) return;
+
+        // Insert before first symbol/label layer so labels render on top
+        var _beforeId = null;
+        for (var _s = 0; _s < _layers.length; _s++) {
+          if (_layers[_s].type === 'symbol') { _beforeId = _layers[_s].id; break; }
+        }
 
         var colorExpr = ['match',
           ['downcase', ['coalesce', ['get', 'building'], '']],
@@ -451,8 +466,8 @@
 
         var bldPaint = {
           'fill-extrusion-color':   colorExpr,
-          'fill-extrusion-height': ['max', ['to-number', ['coalesce', ['get', 'render_height'], ['get', 'height'], 0]], 10],
-          'fill-extrusion-base':   0,
+          'fill-extrusion-height':  20,
+          'fill-extrusion-base':    0,
           'fill-extrusion-opacity': 0.88
         };
         try {
@@ -467,7 +482,7 @@
           'source-layer': 'building',
           minzoom: 13,
           paint: bldPaint
-        });
+        }, _beforeId || undefined);
       }
     } catch(e) { console.error('[GeoHub] 3D buildings error:', e); }
   }
