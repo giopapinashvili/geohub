@@ -451,8 +451,8 @@
 
         var bldPaint = {
           'fill-extrusion-color':   colorExpr,
-          'fill-extrusion-height':  20,
-          'fill-extrusion-base':    0,
+          'fill-extrusion-height': ['case', ['>', ['to-number', ['coalesce', ['get', 'render_height'], 0]], 0], ['to-number', ['get', 'render_height']], ['case', ['>', ['to-number', ['coalesce', ['get', 'height'], 0]], 0], ['to-number', ['get', 'height']], 12]],
+          'fill-extrusion-base':   ['case', ['>', ['to-number', ['coalesce', ['get', 'render_min_height'], 0]], 0], ['to-number', ['get', 'render_min_height']], 0],
           'fill-extrusion-opacity': 0.88
         };
         try {
