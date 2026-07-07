@@ -671,6 +671,9 @@ body.gh-fb-inspired .gh-composer-fake{height:48px;border-radius:24px;background:
 body.gh-fb-inspired .gh-composer-actions{border-top:1px solid rgba(148,163,184,.10);padding-top:10px;margin-top:12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 body.gh-fb-inspired .gh-composer-action{height:42px;border-radius:10px;background:transparent;color:#c6d2e3;border:1px solid transparent}
 body.gh-fb-inspired .gh-composer-action:hover{background:rgba(45,125,255,.10);border-color:rgba(45,125,255,.18)}
+/* ── #28 content-visibility: auto for off-screen feed cards ── */
+.gh-post { content-visibility: auto; contain-intrinsic-size: 0 400px; }
+
 /* ── Facebook-style post cards ────────────────────────────── */
 body.gh-fb-inspired .gh-post{
   padding:0;border-radius:10px;margin-bottom:10px;overflow:hidden;
