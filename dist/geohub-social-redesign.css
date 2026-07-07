@@ -6105,6 +6105,17 @@ body.gh-has-injected-nav.gh-no-left{padding-left:0!important}
 /* ── #45 Comment char count ────────────────────────────────── */
 .gh-cmt-char-count { font-size: .68rem; color: var(--gh-muted); align-self: center; margin-left: auto; flex-shrink: 0; }
 
+/* ── #47 Load more comments ────────────────────────────────── */
+.gh-cmt-load-more {
+  display: flex; align-items: center; gap: 6px;
+  width: 100%; padding: 7px 12px;
+  background: none; border: none; cursor: pointer;
+  color: var(--gh-green); font-size: .8rem; font-weight: 600;
+  border-radius: var(--gh-radius-sm);
+  transition: background .15s;
+}
+.gh-cmt-load-more:hover { background: rgba(16,185,129,.08); }
+
 /* ── #39 Post edited indicator ─────────────────────────────── */
 .gh-edited-badge { font-size: .7rem; color: var(--gh-muted); font-style: italic; }
 

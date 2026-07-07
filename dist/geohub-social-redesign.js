@@ -5142,6 +5142,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     root.addEventListener('touchend', function(){ clearTimeout(_cmtLpTimer); _cmtLpTimer = null; }, { passive: true });
     root.addEventListener('touchmove', function(){ clearTimeout(_cmtLpTimer); _cmtLpTimer = null; }, { passive: true });
 
+    // #47 Load more comments
+    root.addEventListener('click', function(e){
+      var moreBtn = e.target.closest('[data-load-more-cmts]');
+      if(!moreBtn) return;
+      var pid = moreBtn.dataset.loadMoreCmts;
+      _cmtShowAll[pid] = true;
+      moreBtn.remove();
+      if(state.cachedComments[pid]) renderCommentsForPid(pid, state.cachedComments[pid]);
+    });
+
     // #46 Collapse/expand reply thread
     root.addEventListener('click', function(e){
       var colBtn = e.target.closest('[data-collapse-replies]');
@@ -5398,6 +5408,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   /* Phase 20: track rendered comment IDs per-pid for diff render */
   var _cmtRendered={};
 
+  var _cmtShowAll = {}; // pid => true if user clicked "load more"
+  var CMT_INITIAL = 5;
+
   function renderCommentsForPid(pid, items){
     var cards=document.querySelectorAll('[data-post-id="'+CSS.escape(pid)+'"]');
     if(!cards.length) return;
@@ -5411,10 +5424,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     cards.forEach(function(card){
       var cb=card.querySelector('[data-comment-count]'); if(cb) cb.textContent=cnt;
     });
+    /* #47 Paginate: show first CMT_INITIAL unless user expanded */
+    var showAll = !!_cmtShowAll[pid];
+    var toRender = showAll ? visible : visible.slice(0, CMT_INITIAL);
+    var remaining = visible.length - toRender.length;
     /* Diff: find new IDs not yet in DOM */
     var prev=_cmtRendered[pid]||{};
     var newIds={};
-    visible.forEach(function(c){ newIds[c.id]=true; });
+    toRender.forEach(function(c){ newIds[c.id]=true; });
     /* Full re-render if list was empty before, else diff */
     var wasEmpty=!Object.keys(prev).length;
     cards.forEach(function(card){
@@ -5426,7 +5443,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         return;
       }
       if(wasEmpty){
-        list.innerHTML=visible.map(function(c){ return commentCard(pid,c); }).join('');
+        list.innerHTML=toRender.map(function(c){ return commentCard(pid,c); }).join('');
+        /* #47 Load more button */
+        var existMore = list.querySelector('[data-load-more-cmts]');
+        if(existMore) existMore.remove();
+        if(remaining > 0){
+          var moreBtn = document.createElement('button');
+          moreBtn.className = 'gh-cmt-load-more';
+          moreBtn.dataset.loadMoreCmts = pid;
+          moreBtn.innerHTML = '<i class="fas fa-chevron-down"></i> Show ' + remaining + ' more comment' + (remaining>1?'s':'');
+          list.appendChild(moreBtn);
+        }
         return;
       }
       /* Remove deleted */
@@ -5434,19 +5461,34 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(!newIds[el.dataset.commentId]){ el.classList.add('gh-cmt-exit'); setTimeout(function(){ el.remove(); },300); }
       });
       /* Add new */
-      visible.forEach(function(c){
+      toRender.forEach(function(c){
         if(prev[c.id]) return; /* already in DOM */
         var tmp=document.createElement('div');
         tmp.innerHTML=commentCard(pid,c);
         var newEl=tmp.firstElementChild;
         newEl.classList.add('gh-cmt-enter');
-        list.appendChild(newEl);
+        var moreBtn2 = list.querySelector('[data-load-more-cmts]');
+        if(moreBtn2) list.insertBefore(newEl, moreBtn2);
+        else list.appendChild(newEl);
         loadReplies(pid,c.id);
         requestAnimationFrame(function(){ requestAnimationFrame(function(){ newEl.classList.remove('gh-cmt-enter'); }); });
       });
+      /* Update load-more button count */
+      var moreBtnUpd = list.querySelector('[data-load-more-cmts]');
+      if(remaining > 0){
+        if(!moreBtnUpd){
+          moreBtnUpd = document.createElement('button');
+          moreBtnUpd.className = 'gh-cmt-load-more';
+          moreBtnUpd.dataset.loadMoreCmts = pid;
+          list.appendChild(moreBtnUpd);
+        }
+        moreBtnUpd.innerHTML = '<i class="fas fa-chevron-down"></i> Show ' + remaining + ' more comment' + (remaining>1?'s':'');
+      } else if(moreBtnUpd){
+        moreBtnUpd.remove();
+      }
     });
     _cmtRendered[pid]=newIds;
-    if(wasEmpty) visible.forEach(function(c){ loadReplies(pid,c.id); });
+    if(wasEmpty) toRender.forEach(function(c){ loadReplies(pid,c.id); });
   }
 
   function toggleComments(card,pid){
