@@ -5062,6 +5062,19 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             }).catch(function(err){db2.disabled=false;toast(_srt('comment_del_fail')+': '+(err.code||err.message),'error');});
         });
       }
+      // #49 Pin/unpin comment
+      var pinBtn=e.target.closest('[data-pin-comment]'); if(pinBtn){ e.preventDefault();
+        var pcid=pinBtn.dataset.commentId, ppid=pinBtn.dataset.postId||pid;
+        var isPinned=pinBtn.dataset.pinned==='1';
+        fs().updateDoc(fs().doc(db(),'posts',ppid,'comments',pcid),{pinned:!isPinned})
+          .then(function(){
+            pinBtn.dataset.pinned=isPinned?'0':'1';
+            pinBtn.textContent=isPinned?'Pin':'Unpin';
+            pinBtn.classList.toggle('gh-cmt-pinned',!isPinned);
+            toast(isPinned?'Comment unpinned':'Comment pinned');
+            if(state.cachedComments[ppid]) renderCommentsForPid(ppid, state.cachedComments[ppid]);
+          }).catch(function(err){ toast('Error: '+(err.code||err.message),'error'); });
+      }
       var drBtn=e.target.closest('[data-delete-reply]'); if(drBtn){ e.preventDefault();
         window.ghConfirm(typeof GHt==='function'?GHt('reply_delete_cfm'):'Delete this reply?', function() {
           var rid=drBtn.dataset.replyId, rcid=drBtn.dataset.commentId;
@@ -5437,11 +5450,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     cards.forEach(function(card){
       var cb=card.querySelector('[data-comment-count]'); if(cb) cb.textContent=cnt;
     });
-    /* #48 Sort: 'new' = chronological (default), 'top' = by like count */
+    /* #48 Sort: 'new' = chronological (default), 'top' = by like count. #49 pinned always first */
     var sortMode = _cmtSort[pid] || 'new';
-    if(sortMode === 'top'){
-      visible = visible.slice().sort(function(a,b){ return ((b.likeCount||b.reactionCount||0)-(a.likeCount||a.reactionCount||0)); });
-    }
+    visible = visible.slice().sort(function(a,b){
+      if(a.pinned && !b.pinned) return -1;
+      if(!a.pinned && b.pinned) return 1;
+      if(sortMode === 'top') return ((b.likeCount||b.reactionCount||0)-(a.likeCount||a.reactionCount||0));
+      return 0; // keep Firestore order for 'new'
+    });
     /* #47 Paginate: show first CMT_INITIAL unless user expanded */
     var showAll = !!_cmtShowAll[pid];
     var toRender = showAll ? visible : visible.slice(0, CMT_INITIAL);
@@ -5619,16 +5635,19 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var cAuthorHref=isBizComment?('business.html?id='+encodeURIComponent(c.businessId||c.authorId)):profileLink(uid);
     var avAnchor='<a class="gh-avatar gh-profile-avatar-link" href="'+esc(cAuthorHref)+'" style="width:32px;height:32px" title="'+esc('Open '+name+' profile')+'">'+avHtml+'</a>';
     var nameAnchor='<a class="gh-profile-name-link" href="'+esc(cAuthorHref)+'" title="'+esc('Open '+name+' profile')+'">'+esc(name)+'</a>';
+    var isPostOwner = !!(u && postCard0 && postCard0.dataset.authorId === u.uid);
     var ownerBtns =
       (isOwn ? ' · <button type="button" class="gh-cmt-act" data-edit-comment data-comment-id="'+esc(c.id)+'" data-post-id="'+esc(pid)+'">Edit</button>' : '')+
-      (canDelete ? ' · <button type="button" class="gh-cmt-act" data-delete-comment data-comment-id="'+esc(c.id)+'" data-post-id="'+esc(pid)+'">Delete</button>' : '');
+      (canDelete ? ' · <button type="button" class="gh-cmt-act" data-delete-comment data-comment-id="'+esc(c.id)+'" data-post-id="'+esc(pid)+'">Delete</button>' : '')+
+      (isPostOwner ? ' · <button type="button" class="gh-cmt-act gh-cmt-pin-btn'+(c.pinned?' gh-cmt-pinned':'')+'" data-pin-comment data-comment-id="'+esc(c.id)+'" data-post-id="'+esc(pid)+'" data-pinned="'+(c.pinned?'1':'0')+'">'+(c.pinned?'Unpin':'Pin')+'</button>' : '');
     var rxCount = Number(c.reactionCount||0);
     var rxType = c._myRxType||'';
     var rxLabel = rxType ? (RX_EMOJIS[rxType]+' '+(rxCount||1)) : '❤️ '+(rxCount||'Like');
     var cmtVoiceHtml = c.voiceUrl ? '<div class="gh-cmt-voice-note"><audio controls src="'+esc(c.voiceUrl)+'" preload="none" style="height:32px;max-width:220px;border-radius:20px;margin-top:4px"></audio></div>' : '';
-    return '<div class="gh-comment-row" data-comment-id="'+esc(c.id)+'">'+
+    var pinnedBadge = c.pinned ? '<span class="gh-cmt-pin-badge"><i class="fas fa-thumbtack"></i> Pinned</span>' : '';
+    return '<div class="gh-comment-row'+(c.pinned?' gh-cmt-pinned-row':'')+'" data-comment-id="'+esc(c.id)+'">'+
       avAnchor+
-      '<div class="gh-comment-main"><div class="gh-comment-bubble"><strong>'+nameAnchor+'</strong>'+(c.text?'<span class="gh-cmt-text" data-cmt-text>'+esc(c.text)+'</span>':'')+cmtVoiceHtml+'</div>'+
+      '<div class="gh-comment-main">'+pinnedBadge+'<div class="gh-comment-bubble"><strong>'+nameAnchor+'</strong>'+(c.text?'<span class="gh-cmt-text" data-cmt-text>'+esc(c.text)+'</span>':'')+cmtVoiceHtml+'</div>'+
       '<div class="gh-small gh-comment-actions"><span data-cmt-time="'+(c.createdAt&&c.createdAt.toMillis?c.createdAt.toMillis():0)+'">'+timeAgo(c.createdAt)+'</span> · <button type="button" data-comment-reply data-comment-id="'+esc(c.id)+'">Reply</button>'+
       ' · <span class="gh-cmt-rx-wrap"><button type="button" class="gh-cmt-act gh-cmt-rx-btn'+(rxType?' active':'')+'" data-comment-like data-comment-id="'+esc(c.id)+'" data-comment-reaction="'+esc(rxType||'like')+'">'+rxLabel+'</button>'+
       '<span class="gh-cmt-rx-picker" data-rx-picker="'+esc(c.id)+'">'+Object.keys(RX_EMOJIS).map(function(t){ return '<button type="button" class="gh-cmt-rx-pick" data-comment-like data-comment-id="'+esc(c.id)+'" data-comment-reaction="'+t+'">'+RX_EMOJIS[t]+'</button>'; }).join('')+'</span></span>'+

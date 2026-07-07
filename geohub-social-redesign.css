@@ -6105,6 +6105,15 @@ body.gh-has-injected-nav.gh-no-left{padding-left:0!important}
 /* ── #45 Comment char count ────────────────────────────────── */
 .gh-cmt-char-count { font-size: .68rem; color: var(--gh-muted); align-self: center; margin-left: auto; flex-shrink: 0; }
 
+/* ── #49 Pinned comment ────────────────────────────────────── */
+.gh-cmt-pinned-row { background: rgba(16,185,129,.05); border-radius: var(--gh-radius-sm); }
+.gh-cmt-pin-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: .65rem; color: var(--gh-green); font-weight: 600;
+  padding: 1px 6px; margin-bottom: 2px;
+}
+.gh-cmt-pin-btn.gh-cmt-pinned { color: var(--gh-green); }
+
 /* ── #48 Comment sort bar ──────────────────────────────────── */
 .gh-cmt-sort-bar {
   display: flex; gap: 4px; padding: 6px 8px 2px;
