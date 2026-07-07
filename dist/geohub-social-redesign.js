@@ -5127,16 +5127,20 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     root.addEventListener('submit', function(e){
       var form=e.target.closest('[data-comment-form]');
       if(form){ e.preventDefault(); var card=form.closest('[data-post-id]'), pid=card.dataset.postId; var input=form.querySelector('.gh-cmt-text-input'); var val=input?input.value.trim():''; var cmtVBlob=form._cmt_voice_blob||null; if(!val && !cmtVBlob) return; if(!requireLogin()) return; state.openCommentPids[pid]=true;
+        // #18 loading state on submit button
+        var _subBtn18=form.querySelector('button[type="submit"],button.gh-btn');
+        if(_subBtn18){ _subBtn18.setAttribute('data-loading','1'); _subBtn18.disabled=true; }
+        function _clearLoad18(){ if(_subBtn18){ _subBtn18.removeAttribute('data-loading'); _subBtn18.disabled=false; } }
         if(cmtVBlob){
           var _previewEl=form.querySelector('.gh-cmt-voice-preview');
           var _micBtn2=form.querySelector('.gh-comment-mic');
           if(_micBtn2){_micBtn2.disabled=true;_micBtn2.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';}
           GS().uploadAudioBlob(cmtVBlob, authUser()&&authUser().uid, function(uploadedUrl){
             var extra2=Object.assign(buildActorExtra(),{voiceUrl:uploadedUrl||''});
-            GS().addComment(pid, val, function(){ if(input) input.value=''; form._cmt_voice_blob=null; if(_previewEl) _previewEl.style.display='none'; if(_micBtn2){_micBtn2.disabled=false;_micBtn2.innerHTML='<i class="fas fa-microphone"></i>';} if(window.ghPwaEngage) window.ghPwaEngage(2); }, extra2);
+            GS().addComment(pid, val, function(){ if(input) input.value=''; form._cmt_voice_blob=null; if(_previewEl) _previewEl.style.display='none'; if(_micBtn2){_micBtn2.disabled=false;_micBtn2.innerHTML='<i class="fas fa-microphone"></i>';} _clearLoad18(); if(window.ghPwaEngage) window.ghPwaEngage(2); }, extra2);
           });
         } else {
-          GS().addComment(pid, val, function(){ if(input) input.value=''; try{localStorage.removeItem('gh_cmt_draft_'+pid);}catch(e){} if(window.ghPwaEngage) window.ghPwaEngage(2); }, buildActorExtra());
+          GS().addComment(pid, val, function(){ if(input) input.value=''; try{localStorage.removeItem('gh_cmt_draft_'+pid);}catch(e){} _clearLoad18(); if(window.ghPwaEngage) window.ghPwaEngage(2); }, buildActorExtra());
         }
         return; }
       var rform=e.target.closest('[data-reply-form]');
