@@ -5152,6 +5152,18 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(state.cachedComments[pid]) renderCommentsForPid(pid, state.cachedComments[pid]);
     });
 
+    // #48 Comment sort
+    root.addEventListener('click', function(e){
+      var sortBtn = e.target.closest('[data-cmt-sort-val]');
+      if(!sortBtn) return;
+      var pid = sortBtn.dataset.cmtSortPid;
+      var val = sortBtn.dataset.cmtSortVal;
+      if(!pid || _cmtSort[pid] === val) return;
+      _cmtSort[pid] = val;
+      delete _cmtRendered[pid]; // force full re-render
+      if(state.cachedComments[pid]) renderCommentsForPid(pid, state.cachedComments[pid]);
+    });
+
     // #46 Collapse/expand reply thread
     root.addEventListener('click', function(e){
       var colBtn = e.target.closest('[data-collapse-replies]');
@@ -5410,6 +5422,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   var _cmtShowAll = {}; // pid => true if user clicked "load more"
   var CMT_INITIAL = 5;
+  var _cmtSort = {}; // pid => 'new' | 'top' (default: 'new')
 
   function renderCommentsForPid(pid, items){
     var cards=document.querySelectorAll('[data-post-id="'+CSS.escape(pid)+'"]');
@@ -5424,6 +5437,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     cards.forEach(function(card){
       var cb=card.querySelector('[data-comment-count]'); if(cb) cb.textContent=cnt;
     });
+    /* #48 Sort: 'new' = chronological (default), 'top' = by like count */
+    var sortMode = _cmtSort[pid] || 'new';
+    if(sortMode === 'top'){
+      visible = visible.slice().sort(function(a,b){ return ((b.likeCount||b.reactionCount||0)-(a.likeCount||a.reactionCount||0)); });
+    }
     /* #47 Paginate: show first CMT_INITIAL unless user expanded */
     var showAll = !!_cmtShowAll[pid];
     var toRender = showAll ? visible : visible.slice(0, CMT_INITIAL);
@@ -5438,12 +5456,17 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var list=card.querySelector('[data-comments-list]'); if(!list) return;
       var box=card.querySelector('[data-comments]');
       if(box && state.openCommentPids[pid]) box.hidden=false;
+      /* #48 Sort bar HTML */
+      var sortBarHtml = '<div class="gh-cmt-sort-bar" data-cmt-sort-bar="'+pid+'">'+
+        '<button class="gh-cmt-sort-btn'+(sortMode==='new'?' active':'')+'" data-cmt-sort-pid="'+pid+'" data-cmt-sort-val="new">New</button>'+
+        '<button class="gh-cmt-sort-btn'+(sortMode==='top'?' active':'')+'" data-cmt-sort-pid="'+pid+'" data-cmt-sort-val="top">Top</button>'+
+        '</div>';
       if(!visible.length){
-        list.innerHTML='<div class="gh-small" style="padding:10px 6px">No comments yet.</div>';
+        list.innerHTML = sortBarHtml + '<div class="gh-small" style="padding:10px 6px">No comments yet.</div>';
         return;
       }
       if(wasEmpty){
-        list.innerHTML=toRender.map(function(c){ return commentCard(pid,c); }).join('');
+        list.innerHTML = sortBarHtml + toRender.map(function(c){ return commentCard(pid,c); }).join('');
         /* #47 Load more button */
         var existMore = list.querySelector('[data-load-more-cmts]');
         if(existMore) existMore.remove();
@@ -5456,6 +5479,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         }
         return;
       }
+      /* #48 Update sort bar active state */
+      list.querySelectorAll('[data-cmt-sort-val]').forEach(function(b){
+        b.classList.toggle('active', b.dataset.cmtSortVal === sortMode);
+      });
       /* Remove deleted */
       list.querySelectorAll('[data-comment-id]').forEach(function(el){
         if(!newIds[el.dataset.commentId]){ el.classList.add('gh-cmt-exit'); setTimeout(function(){ el.remove(); },300); }
