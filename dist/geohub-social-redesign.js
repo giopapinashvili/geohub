@@ -5075,6 +5075,39 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             if(state.cachedComments[ppid]) renderCommentsForPid(ppid, state.cachedComments[ppid]);
           }).catch(function(err){ toast('Error: '+(err.code||err.message),'error'); });
       }
+      // #50 Upvote / downvote comment
+      var uvBtn=e.target.closest('[data-cmt-upvote],[data-cmt-downvote]'); if(uvBtn){
+        if(!requireLogin()) return;
+        var isUp=!!uvBtn.dataset.cmtUpvote; var vcid=uvBtn.dataset.commentId; var vpid=uvBtn.dataset.postId||pid;
+        var u2=authUser(); if(!u2) return;
+        var voteRef=fs().doc(db(),'posts',vpid,'comments',vcid,'votes',u2.uid);
+        var cmtRef=fs().doc(db(),'posts',vpid,'comments',vcid);
+        var row2=card.querySelector('[data-comment-id="'+CSS.escape(vcid)+'"]'); if(!row2) return;
+        var scoreEl=row2.querySelector('.gh-cmt-vote-score');
+        var upBtn=row2.querySelector('[data-cmt-upvote]');
+        var dnBtn=row2.querySelector('[data-cmt-downvote]');
+        var curScore=parseInt(scoreEl&&scoreEl.textContent)||0;
+        var wasUp=upBtn&&upBtn.classList.contains('active');
+        var wasDn=dnBtn&&dnBtn.classList.contains('active');
+        var newVal=isUp?1:-1;
+        var remove=(isUp&&wasUp)||(!isUp&&wasDn);
+        // Optimistic
+        var delta=remove?-newVal:(wasDn||wasUp?(newVal*2):newVal);
+        if(scoreEl){ scoreEl.textContent=curScore+delta; scoreEl.className='gh-cmt-vote-score'+(curScore+delta>0?' pos':curScore+delta<0?' neg':''); }
+        if(upBtn) upBtn.classList.toggle('active',!remove&&isUp);
+        if(dnBtn) dnBtn.classList.toggle('active',!remove&&!isUp);
+        // Firestore
+        var write2;
+        if(remove){
+          write2=fs().deleteDoc(voteRef).then(function(){ return fs().updateDoc(cmtRef,{voteScore:fs().increment(-newVal)}).catch(function(){}); });
+        } else {
+          var prevDelta=wasUp?-1:wasDn?1:0;
+          write2=fs().setDoc(voteRef,{value:newVal},{merge:true})
+            .then(function(){ return fs().updateDoc(cmtRef,{voteScore:fs().increment(newVal+prevDelta)}).catch(function(){}); });
+        }
+        write2.catch(function(){ /* revert */ if(scoreEl) scoreEl.textContent=curScore; if(upBtn) upBtn.classList.toggle('active',wasUp); if(dnBtn) dnBtn.classList.toggle('active',wasDn); });
+        return;
+      }
       var drBtn=e.target.closest('[data-delete-reply]'); if(drBtn){ e.preventDefault();
         window.ghConfirm(typeof GHt==='function'?GHt('reply_delete_cfm'):'Delete this reply?', function() {
           var rid=drBtn.dataset.replyId, rcid=drBtn.dataset.commentId;
@@ -5645,12 +5678,22 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var rxLabel = rxType ? (RX_EMOJIS[rxType]+' '+(rxCount||1)) : '❤️ '+(rxCount||'Like');
     var cmtVoiceHtml = c.voiceUrl ? '<div class="gh-cmt-voice-note"><audio controls src="'+esc(c.voiceUrl)+'" preload="none" style="height:32px;max-width:220px;border-radius:20px;margin-top:4px"></audio></div>' : '';
     var pinnedBadge = c.pinned ? '<span class="gh-cmt-pin-badge"><i class="fas fa-thumbtack"></i> Pinned</span>' : '';
+    // #50 Vote score
+    var voteScore = Number(c.voteScore||0);
+    var myVote = c._myVote||0; // 1, -1, or 0
+    var voteHtml =
+      '<span class="gh-cmt-vote">'+
+        '<button type="button" class="gh-cmt-vote-btn'+(myVote===1?' active':'')+'" data-cmt-upvote data-comment-id="'+esc(c.id)+'" data-post-id="'+esc(pid)+'" title="Upvote"><i class="fas fa-chevron-up"></i></button>'+
+        '<span class="gh-cmt-vote-score'+(voteScore>0?' pos':voteScore<0?' neg':'')+'">'+voteScore+'</span>'+
+        '<button type="button" class="gh-cmt-vote-btn'+(myVote===-1?' active':'')+'" data-cmt-downvote data-comment-id="'+esc(c.id)+'" data-post-id="'+esc(pid)+'" title="Downvote"><i class="fas fa-chevron-down"></i></button>'+
+      '</span>';
     return '<div class="gh-comment-row'+(c.pinned?' gh-cmt-pinned-row':'')+'" data-comment-id="'+esc(c.id)+'">'+
       avAnchor+
       '<div class="gh-comment-main">'+pinnedBadge+'<div class="gh-comment-bubble"><strong>'+nameAnchor+'</strong>'+(c.text?'<span class="gh-cmt-text" data-cmt-text>'+esc(c.text)+'</span>':'')+cmtVoiceHtml+'</div>'+
       '<div class="gh-small gh-comment-actions"><span data-cmt-time="'+(c.createdAt&&c.createdAt.toMillis?c.createdAt.toMillis():0)+'">'+timeAgo(c.createdAt)+'</span> · <button type="button" data-comment-reply data-comment-id="'+esc(c.id)+'">Reply</button>'+
       ' · <span class="gh-cmt-rx-wrap"><button type="button" class="gh-cmt-act gh-cmt-rx-btn'+(rxType?' active':'')+'" data-comment-like data-comment-id="'+esc(c.id)+'" data-comment-reaction="'+esc(rxType||'like')+'">'+rxLabel+'</button>'+
       '<span class="gh-cmt-rx-picker" data-rx-picker="'+esc(c.id)+'">'+Object.keys(RX_EMOJIS).map(function(t){ return '<button type="button" class="gh-cmt-rx-pick" data-comment-like data-comment-id="'+esc(c.id)+'" data-comment-reaction="'+t+'">'+RX_EMOJIS[t]+'</button>'; }).join('')+'</span></span>'+
+      ' · '+voteHtml+
       ownerBtns+'</div>'+
       '<form class="gh-reply-form" data-reply-form data-comment-id="'+esc(c.id)+'" hidden><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" placeholder="Write a reply…"><button class="gh-btn sm"><i class="fas fa-paper-plane"></i></button></form>'+
       '<div class="gh-replies" data-replies-for="'+esc(c.id)+'"></div>'+
