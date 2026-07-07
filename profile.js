@@ -58,13 +58,20 @@
 
   function onAuthReady(GF, cb) {
     if (!GF || !GF.auth) return cb(null);
-    if (typeof GF.auth.onAuthStateChanged === 'function') {
-      return GF.auth.onAuthStateChanged(cb);
+    // Firebase v10 modular: onAuthStateChanged is in authFns, not on auth instance
+    var _oas = (GF.authFns && GF.authFns.onAuthStateChanged) || GF.auth.onAuthStateChanged;
+    if (typeof _oas === 'function') {
+      var _unsub = _oas(GF.auth, function(user) {
+        _unsub && _unsub();
+        cb(user);
+      });
+      return;
     }
+    // Fallback: poll up to 6s
     let waited = 0;
     const timer = setInterval(() => {
       waited += 100;
-      if (GF.auth.currentUser || waited >= 3500) {
+      if (GF.auth.currentUser || waited >= 6000) {
         clearInterval(timer);
         cb(GF.auth.currentUser || null);
       }
