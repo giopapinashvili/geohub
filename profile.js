@@ -270,11 +270,11 @@
     };
     try {
       const [postDocs, friendsDocs, friendshipsDocs, followerDocs, followingDocs] = await Promise.all([
-        getDocs(GF.fs.query(GF.fs.collection(GF.db, 'posts'), GF.fs.where('authorId', '==', user.uid), GF.fs.limit(200))).catch(() => []),
-        getDocs(GF.fs.query(GF.fs.collection(GF.db, 'friends'), GF.fs.where('users', 'array-contains', user.uid), GF.fs.limit(200))).catch(() => []),
-        getDocs(GF.fs.query(GF.fs.collection(GF.db, 'friendships'), GF.fs.where('users', 'array-contains', user.uid), GF.fs.limit(200))).catch(() => []),
-        getDocs(GF.fs.query(GF.fs.collection(GF.db, 'follows'), GF.fs.where('followingId', '==', user.uid), GF.fs.limit(200))).catch(() => []),
-        getDocs(GF.fs.query(GF.fs.collection(GF.db, 'follows'), GF.fs.where('followerId', '==', user.uid), GF.fs.limit(200))).catch(() => [])
+        getDocs(GF.fs.query(GF.fs.collection(GF.db, 'posts'), GF.fs.where('authorId', '==', user.uid), GF.fs.limit(30))).catch(() => []),
+        getDocs(GF.fs.query(GF.fs.collection(GF.db, 'friends'), GF.fs.where('users', 'array-contains', user.uid), GF.fs.limit(30))).catch(() => []),
+        getDocs(GF.fs.query(GF.fs.collection(GF.db, 'friendships'), GF.fs.where('users', 'array-contains', user.uid), GF.fs.limit(30))).catch(() => []),
+        getDocs(GF.fs.query(GF.fs.collection(GF.db, 'follows'), GF.fs.where('followingId', '==', user.uid), GF.fs.limit(30))).catch(() => []),
+        getDocs(GF.fs.query(GF.fs.collection(GF.db, 'follows'), GF.fs.where('followerId', '==', user.uid), GF.fs.limit(30))).catch(() => [])
       ]);
       // Deduplicate friends across both collections by doc ID (same sorted pair ID used in both).
       const friendIds = new Set([...friendsDocs.map(d => d.id), ...friendshipsDocs.map(d => d.id)]);

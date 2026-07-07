@@ -159,7 +159,7 @@
     if (!state.fbUser) return;
     var uid = state.fbUser.uid;
     GF.fs.getDocs(
-      GF.fs.query(GF.fs.collection(GF.db, 'userRewards'), GF.fs.where('userId', '==', uid), GF.fs.limit(500))
+      GF.fs.query(GF.fs.collection(GF.db, 'userRewards'), GF.fs.where('userId', '==', uid), GF.fs.limit(50))
     ).then(function (snap) {
       var map = {};
       snap.forEach(function (d) {
@@ -517,7 +517,7 @@
     var q = GF.fs.query(
       GF.fs.collection(GF.db, 'rewardCoupons'),
       GF.fs.where('businessOwnerId', '==', uid),
-      GF.fs.limit(200)
+      GF.fs.limit(30)
     );
     _unsubBizCoupons = GF.fs.onSnapshot(q, function (snap) {
       var rows = [];

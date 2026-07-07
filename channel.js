@@ -134,7 +134,7 @@
     return fs().getDocs(fs().query(
       fs().collection(db(),'videos'),
       fs().where('channelId','==',channelId),
-      fs().limit(500)
+      fs().limit(50)
     )).then(function(snap){
       var vids=[];
       snap.forEach(function(d){
@@ -704,7 +704,7 @@
     window.ghConfirm('ყველა ვიდეო წაიშლება. გააგრძელო?', function(){
       var btn=document.getElementById('chDeleteAllVideosBtn');
       if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>'; }
-      fs().getDocs(fs().query(fs().collection(db(),'videos'),fs().where('channelId','==',ch._id),fs().limit(500)))
+      fs().getDocs(fs().query(fs().collection(db(),'videos'),fs().where('channelId','==',ch._id),fs().limit(50)))
         .then(function(snap){
           return Promise.all(snap.docs.map(function(d){ return fs().deleteDoc(d.ref); }))
             .then(function(){ return fs().updateDoc(fs().doc(db(),'channels',ch._id),{videoCount:0}); });
@@ -723,7 +723,7 @@
     window.ghConfirm('"'+ch.name+'" წაიშლება საბოლოოდ. გააგრძელო?', function(){
       var btn=document.getElementById('chDeleteChannelBtn');
       if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i>'; }
-      fs().getDocs(fs().query(fs().collection(db(),'videos'),fs().where('channelId','==',ch._id),fs().limit(500)))
+      fs().getDocs(fs().query(fs().collection(db(),'videos'),fs().where('channelId','==',ch._id),fs().limit(50)))
         .then(function(snap){ return Promise.all(snap.docs.map(function(d){ return fs().deleteDoc(d.ref); })); })
         .then(function(){ return fs().deleteDoc(fs().doc(db(),'channels',ch._id)); })
         .then(function(){ window.location.href='videos.html'; })

@@ -278,12 +278,12 @@
       GF.fs.getDocs(GF.fs.query(
         GF.fs.collection(GF.db, 'friendships'),
         GF.fs.where('users', 'array-contains', userId),
-        GF.fs.limit(200)
+        GF.fs.limit(30)
       )).catch(function () { return { docs: [] }; }),
       GF.fs.getDocs(GF.fs.query(
         GF.fs.collection(GF.db, 'friends'),
         GF.fs.where('users', 'array-contains', userId),
-        GF.fs.limit(200)
+        GF.fs.limit(30)
       )).catch(function () { return { docs: [] }; })
     ]).then(function (results) {
       var seen = {};

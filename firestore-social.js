@@ -569,13 +569,13 @@
       if (!uid) { callback({ hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [] }); return function(){}; }
       var state = { hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [] };
       function emit(){ callback({ hiddenPostIds: state.hiddenPostIds.slice(), blockedUserIds: state.blockedUserIds.slice(), mutedUserIds: state.mutedUserIds.slice() }); }
-      var uh = onSnapshot(query(collection(db, 'hiddenPosts'), where('userId', '==', uid), limit(200)), function(snap){
+      var uh = onSnapshot(query(collection(db, 'hiddenPosts'), where('userId', '==', uid), limit(30)), function(snap){
         var ids=[]; snap.forEach(function(d){ var x=d.data()||{}; if(x.postId) ids.push(x.postId); }); state.hiddenPostIds=ids; emit();
       }, function(err){ console.warn('[GeoSocial] hiddenPosts', err.message); emit(); });
-      var ub = onSnapshot(query(collection(db, 'blockedUsers'), where('blockerId', '==', uid), limit(200)), function(snap){
+      var ub = onSnapshot(query(collection(db, 'blockedUsers'), where('blockerId', '==', uid), limit(30)), function(snap){
         var ids=[]; snap.forEach(function(d){ var x=d.data()||{}; if(x.blockedId) ids.push(x.blockedId); }); state.blockedUserIds=ids; emit();
       }, function(err){ console.warn('[GeoSocial] blockedUsers', err.message); emit(); });
-      var um = onSnapshot(query(collection(db, 'mutedUsers'), where('muterId', '==', uid), limit(200)), function(snap){
+      var um = onSnapshot(query(collection(db, 'mutedUsers'), where('muterId', '==', uid), limit(30)), function(snap){
         var ids=[]; snap.forEach(function(d){ var x=d.data()||{}; if(x.mutedId) ids.push(x.mutedId); }); state.mutedUserIds=ids; emit();
       }, function(err){ console.warn('[GeoSocial] mutedUsers', err.message); emit(); });
       return function(){ try{uh();}catch(e){} try{ub();}catch(e){} try{um();}catch(e){} };
@@ -602,7 +602,7 @@
 
     function getBlockedUsersList(callback) {
       requireAuth(function(user) {
-        getDocs(query(collection(db, 'blockedUsers'), where('blockerId', '==', user.uid), limit(200))).then(function(snap) {
+        getDocs(query(collection(db, 'blockedUsers'), where('blockerId', '==', user.uid), limit(30))).then(function(snap) {
           var ids = [];
           snap.forEach(function(d) { var x = d.data() || {}; if (x.blockedId) ids.push(x.blockedId); });
           if (!ids.length) { callback([]); return; }
@@ -622,7 +622,7 @@
 
     function getMutedUsersList(callback) {
       requireAuth(function(user) {
-        getDocs(query(collection(db, 'mutedUsers'), where('muterId', '==', user.uid), limit(200))).then(function(snap) {
+        getDocs(query(collection(db, 'mutedUsers'), where('muterId', '==', user.uid), limit(30))).then(function(snap) {
           var ids = [];
           snap.forEach(function(d) { var x = d.data() || {}; if (x.mutedId) ids.push(x.mutedId); });
           if (!ids.length) { callback([]); return; }
@@ -652,7 +652,7 @@
 
     // ── Admin: listen to reports with optional status/type filter ─────────
     function listenReports(opts, callback) {
-      var conditions = [orderBy('createdAt', 'desc'), limit(100)];
+      var conditions = [orderBy('createdAt', 'desc'), limit(25)];
       if (opts && opts.status && opts.status !== 'all') conditions.unshift(where('status', '==', opts.status));
       if (opts && opts.targetType && opts.targetType !== 'all') conditions.unshift(where('targetType', '==', opts.targetType));
       var q = query.apply(null, [collection(db, 'reports')].concat(conditions));
@@ -721,9 +721,9 @@
 
     function getBusinessDashboard(businessId, callback) {
       Promise.all([
-        getDocs(query(collection(db,'businessFollowers'), where('businessId','==',businessId), limit(500))).catch(function(){return null;}),
-        getDocs(query(collection(db,'posts'), where('targetType','==','business'), where('targetId','==',businessId), limit(100))).catch(function(){return null;}),
-        getDocs(query(collection(db,'businessReviews'), where('businessId','==',businessId), limit(100))).catch(function(){return null;}),
+        getDocs(query(collection(db,'businessFollowers'), where('businessId','==',businessId), limit(50))).catch(function(){return null;}),
+        getDocs(query(collection(db,'posts'), where('targetType','==','business'), where('targetId','==',businessId), limit(25))).catch(function(){return null;}),
+        getDocs(query(collection(db,'businessReviews'), where('businessId','==',businessId), limit(25))).catch(function(){return null;}),
         getDocs(query(collection(db,'businessOffers'), where('businessId','==',businessId), limit(50))).catch(function(){return null;}),
         getDocs(query(collection(db,'rewards'), where('businessId','==',businessId), limit(50))).catch(function(){return null;})
       ]).then(function(res){
@@ -1021,7 +1021,7 @@
     function listenMyCoupons(uid, callback) {
       uid = uid || currentUid();
       if (!uid) { callback([]); return function(){}; }
-      var q = query(collection(db, 'rewardCoupons'), where('userId', '==', uid), limit(100));
+      var q = query(collection(db, 'rewardCoupons'), where('userId', '==', uid), limit(25));
       return onSnapshot(q, function(snap){
         var rows=[]; snap.forEach(function(d){ rows.push(Object.assign({ id:d.id }, d.data())); });
         rows.sort(function(a,b){ return tsToMillis(b.createdAt)-tsToMillis(a.createdAt); });
@@ -1193,7 +1193,7 @@
         };
         if (vis === 'close_friends') {
           // close_friends = your friends list (friends collection)
-          getDocs(query(collection(db, 'friends'), where('users', 'array-contains', user.uid), limit(200)))
+          getDocs(query(collection(db, 'friends'), where('users', 'array-contains', user.uid), limit(30)))
             .then(function(snap) {
               var cfUids = [user.uid];
               snap.forEach(function(d) {
@@ -1708,7 +1708,7 @@
 
     function listenGroupMembers(groupId, callback) {
       if (!groupId) { callback([]); return function(){}; }
-      var q = query(collection(db, 'groupMembers'), where('groupId', '==', groupId), limit(100));
+      var q = query(collection(db, 'groupMembers'), where('groupId', '==', groupId), limit(25));
       return onSnapshot(q, function(snap){
         var members=[];
         snap.forEach(function(d){ members.push(Object.assign({id:d.id}, d.data())); });
@@ -2011,12 +2011,12 @@
           .then(function(users){ callback(users.filter(Boolean)); });
       }
       var unsubs = [];
-      unsubs.push(onSnapshot(query(collection(db, 'friends'), where('users', 'array-contains', uid), limit(100)), function(snap){
+      unsubs.push(onSnapshot(query(collection(db, 'friends'), where('users', 'array-contains', uid), limit(25)), function(snap){
         byCollection.friends = collectOtherIds(snap);
         settled.friends = true;
         emit();
       }, function(err){ console.warn('[GeoSocial] listenFriends friends', err.message); byCollection.friends = []; settled.friends = true; emit(); }));
-      unsubs.push(onSnapshot(query(collection(db, 'friendships'), where('users', 'array-contains', uid), limit(100)), function(snap){
+      unsubs.push(onSnapshot(query(collection(db, 'friendships'), where('users', 'array-contains', uid), limit(25)), function(snap){
         byCollection.friendships = collectOtherIds(snap);
         settled.friendships = true;
         emit();
@@ -2332,7 +2332,7 @@
       Promise.all([
         getDoc(doc(db, 'stories', storyId)),
         getDocs(collection(db, 'stories', storyId, 'reactions')),
-        getDocs(query(collection(db, 'stories', storyId, 'replies'), limit(200)))
+        getDocs(query(collection(db, 'stories', storyId, 'replies'), limit(30)))
       ]).then(function(results) {
         var stSnap=results[0], rxSnap=results[1], rpSnap=results[2];
         if (!stSnap.exists()) { if(callback) callback(null); return; }
@@ -3235,7 +3235,7 @@
     function listenMessageReactions(conversationId, callback) {
       var uid = currentUid();
       if (!uid || !conversationId) { callback && callback([]); return function(){}; }
-      var q = query(collection(db, 'messageReactions'), where('conversationId', '==', conversationId), limit(500));
+      var q = query(collection(db, 'messageReactions'), where('conversationId', '==', conversationId), limit(50));
       return onSnapshot(q, function(snap){
         var rows = [];
         snap.forEach(function(d){ rows.push(Object.assign({ id:d.id }, d.data())); });
@@ -3984,8 +3984,8 @@
       var tsFrom30 = { seconds: Math.floor(thirtyDaysAgo.getTime() / 1000), nanoseconds: 0 };
       var tsFrom7 = { seconds: Math.floor(sevenDaysAgo.getTime() / 1000), nanoseconds: 0 };
       Promise.all([
-        getDocs(query(collection(db, 'posts'), where('targetId', '==', groupId), where('targetType', '==', 'group'), where('createdAt', '>=', tsFrom30), limit(100))),
-        getDocs(query(collection(db, 'groupMembers'), where('groupId', '==', groupId), limit(200)))
+        getDocs(query(collection(db, 'posts'), where('targetId', '==', groupId), where('targetType', '==', 'group'), where('createdAt', '>=', tsFrom30), limit(25))),
+        getDocs(query(collection(db, 'groupMembers'), where('groupId', '==', groupId), limit(30)))
       ]).then(function (res) {
         var recentPosts = res[0];
         var members = res[1];
@@ -4071,7 +4071,7 @@
     function getMyJoinRequests(callback) {
       var user = auth.currentUser;
       if (!user) { callback({}); return; }
-      getDocs(query(collection(db, 'groupJoinRequests'), where('userId', '==', user.uid), limit(100)))
+      getDocs(query(collection(db, 'groupJoinRequests'), where('userId', '==', user.uid), limit(25)))
         .then(function (snap) {
           var map = {};
           snap.forEach(function (d) { var r = d.data(); if (r.groupId) map[r.groupId] = 'pending'; });
@@ -4141,7 +4141,7 @@
       }
 
       function scanFallback(col) {
-        return getDocs(query(collection(db, col), limit(100))).then(function(snap) {
+        return getDocs(query(collection(db, col), limit(25))).then(function(snap) {
           var items = [];
           snap.forEach(function(d) {
             var x = Object.assign({ id: d.id }, d.data());
@@ -4203,7 +4203,7 @@
     function findUserByInput(input) {
       if (!input || !input.trim()) return Promise.resolve(null);
       var q = input.trim().toLowerCase();
-      return getDocs(query(collection(db, 'users'), limit(200))).then(function (snap) {
+      return getDocs(query(collection(db, 'users'), limit(30))).then(function (snap) {
         var found = null;
         snap.forEach(function (d) {
           if (found) return;

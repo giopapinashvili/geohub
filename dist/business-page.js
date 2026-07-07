@@ -3451,7 +3451,7 @@
       _fs.getDocs(_fs.query(
         _fs.collection(_db,'businessFollowers'),
         _fs.where('businessId','==',bizId),
-        _fs.limit(500)
+        _fs.limit(50)
       )).catch(function(){ return {docs:[]}; })
     ]).then(function(results) {
       var bizData = results[0].exists() ? results[0].data() : {};

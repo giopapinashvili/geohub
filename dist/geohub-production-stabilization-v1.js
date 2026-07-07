@@ -65,6 +65,7 @@
     $$('img:not([loading])').forEach(img => { img.loading = 'lazy'; img.decoding = 'async'; });
   }
 
+  var _notifUnsub = null, _msgUnsub = null;
   function stabilizeNotificationBadges(){
     waitFirebase(GF => {
       const user = GF.auth && GF.auth.currentUser;
@@ -73,7 +74,7 @@
       const mb = $('#ghMsgBadge') || $('#feedMsgBadge') || $('#msgBadge');
       try{
         const qn = GF.fs.query(GF.fs.collection(GF.db,'userNotifications'), GF.fs.where('userId','==',user.uid), GF.fs.limit(50));
-        GF.fs.onSnapshot(qn, snap => {
+        _notifUnsub = GF.fs.onSnapshot(qn, snap => {
           let n = 0;
           snap.forEach(d => { const x = d.data() || {}; if (!x.read && !x.seen) n++; });
           if (nb) nb.textContent = n ? String(n) : '';
@@ -81,7 +82,7 @@
       }catch(e){}
       try{
         const qm = GF.fs.query(GF.fs.collection(GF.db,'conversations'), GF.fs.where('participants','array-contains',user.uid), GF.fs.limit(60));
-        GF.fs.onSnapshot(qm, snap => {
+        _msgUnsub = GF.fs.onSnapshot(qm, snap => {
           let n = 0;
           snap.forEach(d => {
             const x = d.data() || {};
@@ -95,6 +96,10 @@
       }catch(e){}
     });
   }
+  window.addEventListener('pagehide', function() {
+    if (_notifUnsub) { _notifUnsub(); _notifUnsub = null; }
+    if (_msgUnsub) { _msgUnsub(); _msgUnsub = null; }
+  });
 
   function realCountPage(){
     const map = {

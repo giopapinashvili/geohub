@@ -546,11 +546,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var ids=[]; snap.forEach(function(d){ var arr=(d.data()||{}).users||[]; var other=arr.find(function(id){ return id !== u.uid; }); if(other) ids.push(other); });
         state.friendIds = ids;
       }).catch(function(){ state.friendIds=[]; }),
-      fs().getDocs(fs().query(fs().collection(db(),'follows'), fs().where('followerId','==',u.uid), fs().limit(500))).then(function(snap){
+      fs().getDocs(fs().query(fs().collection(db(),'follows'), fs().where('followerId','==',u.uid), fs().limit(50))).then(function(snap){
         var ids=[]; snap.forEach(function(d){ var following=(d.data()||{}).followingId; if(following) ids.push(following); });
         state.followingIds = ids;
       }).catch(function(){ state.followingIds=[]; }),
-      fs().getDocs(fs().query(fs().collection(db(),'businessFollowers'), fs().where('userId','==',u.uid), fs().limit(200))).then(function(snap){
+      fs().getDocs(fs().query(fs().collection(db(),'businessFollowers'), fs().where('userId','==',u.uid), fs().limit(30))).then(function(snap){
         var ids=[]; snap.forEach(function(d){ var biz=(d.data()||{}).businessId; if(biz) ids.push(biz); });
         state.followedBusinessIds = ids;
       }).catch(function(){ state.followedBusinessIds=[]; }),
@@ -4819,7 +4819,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div id="ghWhoRxList"><i class="fas fa-circle-notch fa-spin gh-muted"></i></div>';
     modal('Reactions', body, '<button class="gh-btn ghost" data-close-modal>Close</button>', 'ghWhoRxModal');
     var allReactions = [];
-    fs().getDocs(fs().query(fs().collection(db(),'posts',pid,'reactions'), fs().limit(100))).then(function(snap){
+    fs().getDocs(fs().query(fs().collection(db(),'posts',pid,'reactions'), fs().limit(25))).then(function(snap){
       snap.forEach(function(d){ allReactions.push(Object.assign({id:d.id}, d.data())); });
       // Render analytics bar chart immediately from counts
       _renderRxAnalytics(allReactions);
@@ -7245,7 +7245,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     // Fetch post doc + reactions subcollection in parallel
     Promise.all([
       fs().getDoc(fs().doc(db(),'posts',pid)),
-      fs().getDocs(fs().query(fs().collection(db(),'posts',pid,'reactions'),fs().limit(200)))
+      fs().getDocs(fs().query(fs().collection(db(),'posts',pid,'reactions'),fs().limit(30)))
     ]).then(function(results){
       var postSnap=results[0], rxSnap=results[1];
       var p=postSnap.data()||{};
@@ -7952,7 +7952,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var dismissKey='gh_bday_'+todayStr;
     try{ if(localStorage.getItem(dismissKey)) return; }catch(e){}
     // Get following list
-    fs().getDocs(fs().query(fs().collection(db(),'follows'),fs().where('followerId','==',uid),fs().limit(100))).then(function(snap){
+    fs().getDocs(fs().query(fs().collection(db(),'follows'),fs().where('followerId','==',uid),fs().limit(25))).then(function(snap){
       var followingIds=[];
       snap.forEach(function(d){ followingIds.push(d.data().followedId||d.id); });
       if(!followingIds.length) return;
@@ -8327,7 +8327,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         fs().getDocs(fs().query(
           fs().collection(db(),'checkins'),
           fs().where('userId','==',uid),
-          fs().limit(100)
+          fs().limit(25)
         )).then(function(s){ _run(s.size); }).catch(function(){ _run(0); });
       }
     }).catch(function(){});
@@ -14890,7 +14890,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var target=document.querySelector(step.target);
       tooltip.innerHTML=
         '<div class="gh-tour-step-count">'+(i+1)+' / '+_TOUR_STEPS.length+'</div>'+
-        '<div class="gh-tour-title">'+step.title+'</div>'+
+        '<div class="gh-tour-title">'+esc(step.title)+'</div>'+
         '<div class="gh-tour-body">'+esc(step.body)+'</div>'+
         '<div class="gh-tour-btns">'+
           '<button class="gh-btn ghost sm" id="ghTourSkip">Skip tour</button>'+
@@ -15052,6 +15052,104 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   window.addEventListener('pagehide', finishBar);
   window.addEventListener('beforeunload', finishBar);
+
+  /* ── Live timestamp refresh (#34) ───────────────────────── */
+  setInterval(function() {
+    document.querySelectorAll('[data-ts],[data-time],[data-created]').forEach(function(el) {
+      var ts = el.dataset.ts || el.dataset.time || el.dataset.created;
+      if (!ts) return;
+      var d = new Date(isNaN(ts) ? ts : Number(ts));
+      if (isNaN(d)) return;
+      var diff = Math.floor((Date.now() - d) / 1000);
+      var txt = diff < 60 ? 'ახლახანს'
+              : diff < 3600 ? Math.floor(diff/60) + ' წთ წინ'
+              : diff < 86400 ? Math.floor(diff/3600) + ' სთ წინ'
+              : Math.floor(diff/86400) + ' დღის წინ';
+      if (el.textContent !== txt) el.textContent = txt;
+    });
+  }, 60000);
+
+  /* ── Video viewport auto-play / pause (#56 #57) ─────────── */
+  (function() {
+    if (!('IntersectionObserver' in window)) return;
+    var _muteState = sessionStorage.getItem('gh_video_muted') !== 'false';
+    var _obs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        var v = e.target;
+        if (e.isIntersecting && e.intersectionRatio >= 0.5) {
+          v.muted = _muteState;
+          v.play && v.play().catch(function(){});
+        } else {
+          v.pause && v.pause();
+        }
+      });
+    }, { threshold: 0.5 });
+    function _observeVideos() {
+      document.querySelectorAll('video[data-autoplay], video.gh-video').forEach(function(v) {
+        if (!v._ghObserved) { v._ghObserved = true; _obs.observe(v); }
+      });
+    }
+    document.addEventListener('DOMContentLoaded', _observeVideos);
+    var _mutObs = new MutationObserver(_observeVideos);
+    _mutObs.observe(document.body || document.documentElement, { childList: true, subtree: true });
+    document.addEventListener('click', function(e) {
+      var v = e.target.closest('video');
+      if (v) { _muteState = v.muted; sessionStorage.setItem('gh_video_muted', String(_muteState)); }
+    });
+  })();
+
+  /* ── Page title notification badge (#81) ────────────────── */
+  window.GH = window.GH || {};
+  window.GH.setBadge = function(n) {
+    var base = document.title.replace(/^\(\d+\)\s*/, '');
+    document.title = n > 0 ? '(' + n + ') ' + base : base;
+  };
+
+  /* ── Offline / online banner (#98) ──────────────────────── */
+  (function() {
+    var _banner = null;
+    function _showBanner(msg, color) {
+      if (!_banner) {
+        _banner = document.createElement('div');
+        _banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;padding:8px 16px;text-align:center;font-size:.85rem;font-weight:600;transition:transform .3s ease';
+        document.body ? document.body.prepend(_banner) : document.addEventListener('DOMContentLoaded', function(){ document.body.prepend(_banner); });
+      }
+      _banner.textContent = msg;
+      _banner.style.background = color;
+      _banner.style.color = '#fff';
+      _banner.style.transform = 'translateY(0)';
+    }
+    function _hideBanner() { if (_banner) _banner.style.transform = 'translateY(-100%)'; }
+    window.addEventListener('offline', function() { _showBanner('⚡ ინტერნეტი გათიშულია', '#ef4444'); });
+    window.addEventListener('online',  function() { _showBanner('✓ ინტერნეტი აღდგა', '#10b981'); setTimeout(_hideBanner, 2500); });
+    if (!navigator.onLine) _showBanner('⚡ ინტერნეტი გათიშულია', '#ef4444');
+  })();
+
+  /* ── Button rate limiting / double-submit (#99) ─────────── */
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('button[type="submit"], .gh-btn-primary, .gh-submit, [data-ratelimit]');
+    if (!btn) return;
+    if (btn._ghRateLocked) { e.stopImmediatePropagation(); e.preventDefault(); return; }
+    btn._ghRateLocked = true;
+    btn.style.opacity = '0.65';
+    btn.style.pointerEvents = 'none';
+    setTimeout(function() {
+      btn._ghRateLocked = false;
+      btn.style.opacity = '';
+      btn.style.pointerEvents = '';
+    }, 2000);
+  }, true);
+
+  /* ── Touch detection (#20) ──────────────────────────────── */
+  (function() {
+    if (window.matchMedia('(hover: none), (pointer: coarse)').matches) {
+      document.documentElement.classList.add('gh-touch');
+      document.body && document.body.classList.add('gh-touch');
+      document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('gh-touch');
+      });
+    }
+  })();
 
   /* ── Scroll Restoration (#25) ───────────────────────────── */
   (function() {

@@ -2964,7 +2964,7 @@
     var m = catMeta(v.category);
     if (metaEl) {
       metaEl.innerHTML =
-        (v.category ? '<span class="watch-badge cat"><i class="fas ' + m.icon + '"></i>' + m.label + '</span>' : '') +
+        (v.category ? '<span class="watch-badge cat"><i class="fas ' + m.icon + '"></i>' + esc(m.label) + '</span>' : '') +
         (v.city ? '<span class="watch-badge city"><i class="fas fa-location-dot"></i>' + esc(v.city) + '</span>' : '') +
         (v.youtubeId ? '<a href="https://www.youtube.com/watch?v=' + esc(v.youtubeId) + '" target="_blank" rel="noopener" class="watch-badge yt"><i class="fab fa-youtube"></i>YouTube-ზე ნახვა</a>' : '') +
         (v.videoUrl && !v.youtubeId ? '<span class="watch-badge yt" style="background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.3);color:var(--green)"><i class="fas fa-cloud"></i>GeoHub Upload</span>' : '') +

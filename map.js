@@ -1186,7 +1186,7 @@
   function loadEvents() {
     const GF = window.GeoFirebase;
     if (!GF || !GF.db || !GF.fs) return;
-    GF.fs.getDocs(GF.fs.query(GF.fs.collection(GF.db, 'events'), GF.fs.limit(200))).then(snap => {
+    GF.fs.getDocs(GF.fs.query(GF.fs.collection(GF.db, 'events'), GF.fs.limit(30))).then(snap => {
       allEvents = [];
       snap.forEach(d => {
         const ev = Object.assign({ id: d.id }, d.data());
@@ -1690,7 +1690,7 @@
           fs.collection(db, 'checkins'),
           fs.where('createdAt', '>=', since),
           fs.orderBy('createdAt', 'desc'),
-          fs.limit(500)
+          fs.limit(50)
         )
       ).then(function(snap) {
         // Group by place (lat+lng rounded to 3dp) so busy places get higher weight
@@ -2236,7 +2236,7 @@
     const now = new Date();
 
     const pTrending = fs.getDocs(
-      fs.query(fs.collection(db, 'checkins'), fs.where('createdAt','>=',since2h), fs.orderBy('createdAt','desc'), fs.limit(200))
+      fs.query(fs.collection(db, 'checkins'), fs.where('createdAt','>=',since2h), fs.orderBy('createdAt','desc'), fs.limit(30))
     ).then(function(snap) {
       const counts = {};
       const names  = {};
@@ -2648,7 +2648,7 @@
       GF.fs.collection(GF.db, 'placeCheckins'),
       GF.fs.where('placeId', '==', pid),
       GF.fs.where('checkedInAt', '>=', since),
-      GF.fs.limit(200)
+      GF.fs.limit(30)
     )).then(snap => {
       if (snap.empty) return;
       const n = snap.size;
@@ -2715,7 +2715,7 @@
     GF.fs.getDocs(GF.fs.query(
       GF.fs.collection(GF.db, 'follows'),
       GF.fs.where('followerId', '==', uid),
-      GF.fs.limit(200)
+      GF.fs.limit(30)
     )).then(snap => {
       const followingIds = new Set();
       snap.forEach(d => followingIds.add(d.data().followingId));
@@ -2724,7 +2724,7 @@
         GF.fs.collection(GF.db, 'placeCheckins'),
         GF.fs.where('placeId', '==', pid),
         GF.fs.orderBy('checkedInAt', 'desc'),
-        GF.fs.limit(200)
+        GF.fs.limit(30)
       )).then(snap2 => {
         const seen = new Set();
         const friends = [];
@@ -3037,7 +3037,7 @@
     GF.fs.getDocs(GF.fs.query(
       GF.fs.collection(GF.db, 'placeCheckins'),
       GF.fs.where('checkedInAt', '>=', since),
-      GF.fs.limit(200)
+      GF.fs.limit(30)
     )).then(snap => {
       const counts = {};
       snap.forEach(d => { const pid = d.data().placeId; counts[pid] = (counts[pid] || 0) + 1; });
