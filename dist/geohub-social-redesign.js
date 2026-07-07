@@ -15140,6 +15140,49 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }, 2000);
   }, true);
 
+  /* ── Ripple effect on buttons (#14) ─────────────────────── */
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('button, .gh-btn, .btn, [role="button"], .nav-item');
+    if (!btn || btn.disabled) return;
+    btn.classList.add('gh-ripple-container');
+    var r = btn.getBoundingClientRect();
+    var size = Math.max(r.width, r.height) * 2;
+    var sp = document.createElement('span');
+    sp.className = 'gh-ripple';
+    sp.style.cssText = 'width:'+size+'px;height:'+size+'px;left:'+(e.clientX-r.left-size/2)+'px;top:'+(e.clientY-r.top-size/2)+'px';
+    btn.appendChild(sp);
+    setTimeout(function() { sp.remove(); }, 600);
+  });
+
+  /* ── Like spring animation + vibration (#15 #17) ─────────── */
+  document.addEventListener('click', function(e) {
+    var likeBtn = e.target.closest('[data-action="like"], .like-btn, .gh-like-btn, [class*="like"][class*="btn"], button[aria-label*="like"], button[aria-label*="ლაიქ"]');
+    if (!likeBtn) return;
+    var icon = likeBtn.querySelector('i, svg, .icon') || likeBtn;
+    icon.classList.remove('gh-like-pop');
+    void icon.offsetWidth;
+    icon.classList.add('gh-like-pop');
+    icon.addEventListener('animationend', function() { icon.classList.remove('gh-like-pop'); }, { once: true });
+    if (navigator.vibrate) navigator.vibrate(10);
+  });
+
+  /* ── Tab indicator slide (#23) ───────────────────────────── */
+  document.addEventListener('click', function(e) {
+    var tab = e.target.closest('[role="tab"], .tab-btn, .gh-tab');
+    if (!tab) return;
+    var list = tab.closest('[role="tablist"], .gh-tabs, .tab-list');
+    if (!list) return;
+    var ind = list.querySelector('.gh-tab-indicator');
+    if (!ind) {
+      ind = document.createElement('div');
+      ind.className = 'gh-tab-indicator';
+      list.appendChild(ind);
+    }
+    var lr = list.getBoundingClientRect(), tr = tab.getBoundingClientRect();
+    ind.style.left = (tr.left - lr.left) + 'px';
+    ind.style.width = tr.width + 'px';
+  });
+
   /* ── Touch detection (#20) ──────────────────────────────── */
   (function() {
     if (window.matchMedia('(hover: none), (pointer: coarse)').matches) {
@@ -15176,4 +15219,79 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     window.addEventListener('scroll', _saveScroll, { passive: true });
     window.addEventListener('pagehide', _saveScroll);
   })();
+
+  /* ── Prefetch on touchstart/mouseover (#8) ───────────────── */
+  (function() {
+    var _prefetched = new Set();
+    function _prefetch(url) {
+      if (!url || _prefetched.has(url) || url.startsWith('#') || url.startsWith('javascript')) return;
+      _prefetched.add(url);
+      var link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = url;
+      document.head.appendChild(link);
+    }
+    document.addEventListener('touchstart', function(e) {
+      var a = e.target.closest('a[href]');
+      if (a && a.origin === location.origin) _prefetch(a.href);
+    }, { passive: true });
+    document.addEventListener('mouseover', function(e) {
+      var a = e.target.closest('a[href]');
+      if (a && a.origin === location.origin) _prefetch(a.href);
+    });
+  })();
+
+  /* ── Cloudinary w_80 for avatar images (#9) ─────────────── */
+  (function() {
+    function _resizeCloudinaryAvatar(img) {
+      var src = img.src || img.getAttribute('src') || '';
+      if (!src.includes('res.cloudinary.com')) return;
+      if (src.includes('/w_80') || src.includes('/c_fill,w_80') || src.includes('w_80,')) return;
+      var smallW = img.closest('.gh-avatar, .user-avatar, .avatar-sm, .avatar-xs') ? 80 : 0;
+      if (!smallW) return;
+      var newSrc = src.replace('/upload/', '/upload/w_80,h_80,c_fill,f_auto,q_auto/');
+      img.src = newSrc;
+    }
+    function _processAvatars() {
+      document.querySelectorAll('.gh-avatar img, .user-avatar img, .avatar-sm img, .avatar-xs img, img.gh-av').forEach(_resizeCloudinaryAvatar);
+    }
+    document.addEventListener('DOMContentLoaded', _processAvatars);
+    var _avObs = new MutationObserver(function(muts) {
+      muts.forEach(function(m) {
+        m.addedNodes.forEach(function(n) {
+          if (n.nodeType !== 1) return;
+          if (n.matches && n.matches('img')) _resizeCloudinaryAvatar(n);
+          n.querySelectorAll && n.querySelectorAll('.gh-avatar img, img.gh-av').forEach(_resizeCloudinaryAvatar);
+        });
+      });
+    });
+    _avObs.observe(document.body || document.documentElement, { childList: true, subtree: true });
+  })();
+
+  /* ── Georgian error toast system (#97) ──────────────────── */
+  window.GH = window.GH || {};
+  window.GH.toast = function(msg, type) {
+    var t = document.createElement('div');
+    t.textContent = msg;
+    var colors = { error: '#ef4444', success: '#10b981', info: '#3b82f6', warn: '#f59e0b' };
+    t.style.cssText = [
+      'position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);',
+      'background:' + (colors[type] || colors.info) + ';color:#fff;padding:10px 20px;',
+      'border-radius:10px;font-size:.88rem;font-weight:600;z-index:99998;',
+      'box-shadow:0 4px 16px rgba(0,0,0,.35);transition:transform .2s ease,opacity .2s ease;',
+      'max-width:90vw;text-align:center;pointer-events:none;opacity:0'
+    ].join('');
+    document.body.appendChild(t);
+    requestAnimationFrame(function() {
+      t.style.opacity = '1';
+      t.style.transform = 'translateX(-50%) translateY(0)';
+    });
+    setTimeout(function() {
+      t.style.opacity = '0';
+      t.style.transform = 'translateX(-50%) translateY(20px)';
+      setTimeout(function() { t.remove(); }, 250);
+    }, 3000);
+  };
+  window.GH.error = function(msg) { window.GH.toast(msg || 'შეცდომა მოხდა', 'error'); };
+  window.GH.success = function(msg) { window.GH.toast(msg || 'წარმატება!', 'success'); };
 })();

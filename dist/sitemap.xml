@@ -12,15 +12,23 @@
   <url><loc>https://geohub.ge/groups.html</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://geohub.ge/events.html</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://geohub.ge/reels.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://geohub.ge/videos.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://geohub.ge/live.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://geohub.ge/stories.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://geohub.ge/place-feed.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://geohub.ge/place-updates.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://geohub.ge/channel.html</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
 
   <!-- Business -->
   <url><loc>https://geohub.ge/marketplace.html</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://geohub.ge/places.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://geohub.ge/business.html</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://geohub.ge/reviews.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://geohub.ge/rewards.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://geohub.ge/services.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://geohub.ge/real-estate.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://geohub.ge/jobs.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://geohub.ge/products.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
 
   <!-- Features -->
   <url><loc>https://geohub.ge/assistant.html</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
@@ -29,6 +37,10 @@
   <url><loc>https://geohub.ge/learning.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://geohub.ge/creators.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://geohub.ge/world.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://geohub.ge/lifegraph.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://geohub.ge/checkin.html</loc><changefreq>daily</changefreq><priority>0.6</priority></url>
+  <url><loc>https://geohub.ge/invite.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://geohub.ge/safety.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 
   <!-- Premium & Growth -->
   <url><loc>https://geohub.ge/premium.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
