@@ -60,6 +60,12 @@
       --radius-xl: var(--gh-radius-xl);
       --transition: var(--gh-dur-fast) var(--gh-ease);
     }
+    /* #4 Critical CSS — first paint */
+    body { margin: 0; background: #050807; color: #eefcf6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .profile-cover { position: relative; height: 280px; background: linear-gradient(135deg, #0a1a14, #0d2318); margin-top: 68px; overflow: hidden; }
+    .cover-grid { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(16,185,129,.04) 40px, rgba(16,185,129,.04) 41px), repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(16,185,129,.04) 40px, rgba(16,185,129,.04) 41px); }
+    .avatar-container { position: relative; width: 110px; height: 110px; }
+    .profile-layout { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
   </style>
   <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
 </head>

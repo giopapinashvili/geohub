@@ -112,6 +112,29 @@
   var PAGE = document.body && document.body.dataset ? document.body.dataset.ghPage : '';
   var state = { page: PAGE, filter: 'all', postsUnsubs: {}, replyUnsubs: {}, currentBusinessTab: 'posts', bizDashSection: 'overview', currentGroupTab: 'discussion', starRating: 5, theme: 'light', authUnsub: null, badgeUnsubs: [], sidebarCollapsed: false, hiddenPostIds: [], blockedUserIds: [], mutedUserIds: [], safetyUnsub: null, sharedPostCache: {}, friendIds: [], followingIds: [], followedBusinessIds: [], closeFriendIds: [], bizFeedPosts: [], bizFeedUnsub: null, audienceLoaded: false, pageUnsubs: [], currentBizId: null, currentBizOwner: null, openCommentPids: {}, cachedComments: {}, cachedReplies: {}, feedTab: 'foryou', feedTag: '', feedUnsub: null, feedRenderId: 0, userCity: null };
 
+  /* ── #7 IndexedDB feed cache ─────────────────────────────── */
+  var _idb = (function() {
+    var db = null, DB_NAME = 'gh_feed_v1', STORE = 'posts';
+    function open(cb) {
+      if (db) { cb(db); return; }
+      var req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = function(e) {
+        var d = e.target.result;
+        if (!d.objectStoreNames.contains(STORE)) d.createObjectStore(STORE, { keyPath: 'key' });
+      };
+      req.onsuccess = function(e) { db = e.target.result; cb(db); };
+      req.onerror = function() { cb(null); };
+    }
+    return {
+      get: function(key, cb) {
+        try { open(function(d) { if(!d) return cb(null); var tx=d.transaction(STORE,'readonly'); tx.objectStore(STORE).get(key).onsuccess=function(e){cb(e.target.result?e.target.result.val:null);}; }); } catch(e){ cb(null); }
+      },
+      set: function(key, val) {
+        try { open(function(d) { if(!d) return; var tx=d.transaction(STORE,'readwrite'); tx.objectStore(STORE).put({key:key,val:val,ts:Date.now()}); }); } catch(e){}
+      }
+    };
+  })();
+
   /* ── User cache (instant topbar, no flash) ──────────────── */
   var USER_CACHE_KEY = 'gh_uc1';
   function getCachedUser(){
@@ -9492,9 +9515,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           if(state.feedUnsub){ try{state.feedUnsub();}catch(e){} state.feedUnsub=null; }
           _disconnectLmObs();
           if(lmBtn) lmBtn.innerHTML='<div class="gh-feed-dots"><span></span><span></span><span></span></div>';
+          // #7 Show cached posts instantly before Firestore loads
+          _idb.get('feed_posts', function(cached) {
+            if(cached && cached.length && Object.keys(_renderedIds).length === 0) {
+              lastPosts = cached; paint();
+            }
+          });
           state.feedUnsub=GS().listenFeed(function(posts){
             if(renderId!==state.feedRenderId) return;
             lastPosts=posts;
+            _idb.set('feed_posts', posts.slice(0, 20).map(function(p){ return { id:p.id, text:p.text, authorName:p.authorName, authorAvatar:p.authorAvatar, createdAt:p.createdAt instanceof Object ? null : p.createdAt, likeCount:p.likeCount, commentCount:p.commentCount }; }));
             paint();
             _disconnectLmObs();
             if(lmBtn){
