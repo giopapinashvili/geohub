@@ -3954,12 +3954,40 @@ img {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Prevent layout shift from avatar images */
+/* Prevent layout shift from avatar images (#11) */
 .gh-avatar,
 .reviewer-avatar,
-.app-nav-item img {
+.app-nav-item img,
+.pu-card-av,
+.profile-avatar,
+.ea-biz-logo {
   aspect-ratio: 1;
   object-fit: cover;
+}
+/* Cover / banner images */
+.mpd-cover-img,
+.panel-img,
+.pu-card-img,
+.pl-photo-preview,
+.pl-gallery-img {
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  width: 100%;
+}
+/* Story images */
+img[alt="Story"] {
+  aspect-ratio: 9/16;
+  object-fit: cover;
+  width: 100%;
+}
+/* Lightbox — natural size but won't shift layout */
+.pl-lightbox-img {
+  max-width: 100%;
+  height: auto;
+}
+/* Safe default: all images without explicit width/height don't shift */
+img {
+  height: auto;
 }
 
 /* ── prefers-reduced-motion (#109) ──────────────────────── */
@@ -3971,6 +3999,58 @@ img {
     scroll-behavior: auto !important;
   }
 }
+
+/* ── Empty state illustration (#40) ─────────────────────── */
+.gh-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-muted, #6b7280);
+  gap: 12px;
+  animation: gh-empty-in 0.4s ease both;
+}
+@keyframes gh-empty-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.gh-empty i {
+  font-size: 2.4rem;
+  color: var(--border, #2a3050);
+  background: linear-gradient(135deg, var(--gh-green, #10b981), #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 2px 8px rgba(16,185,129,.2));
+}
+.gh-empty h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary, #f0f4ff);
+  margin: 0;
+}
+.gh-empty p {
+  font-size: .875rem;
+  color: var(--text-muted, #6b7280);
+  margin: 0;
+  max-width: 240px;
+  line-height: 1.5;
+}
+.gh-empty .gh-btn {
+  margin-top: 8px;
+}
+.gh-empty.mini {
+  padding: 24px 16px;
+  gap: 6px;
+}
+.gh-empty.mini i { font-size: 1.4rem; }
+.gh-empty.mini h3 { font-size: .85rem; }
+.gh-empty.mini p { font-size: .8rem; }
+
+/* ── Pull-to-refresh spinner animation ───────────────────── */
+#ghPullInd i { transition: transform .15s ease; }
 
 /* ── View transitions (#101) ─────────────────────────────
    One rule = smooth cross-page fade in Chrome 111+        */

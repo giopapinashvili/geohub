@@ -15105,6 +15105,52 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     document.title = n > 0 ? '(' + n + ') ' + base : base;
   };
 
+  /* ── In-app toast for new notifications (#85) ───────────── */
+  (function() {
+    window.GH = window.GH || {};
+    var _orig = window.GH.setBadge;
+    var _lastN = 0;
+    window.GH.setBadge = function(n) {
+      if (_orig) _orig(n);
+      var base = document.title.replace(/^\(\d+\)\s*/, '');
+      document.title = n > 0 ? '(' + n + ') ' + base : base;
+      if (n > _lastN && _lastN >= 0 && document.hidden === false) {
+        var diff = n - _lastN;
+        window.GH.toast && window.GH.toast(
+          (diff === 1 ? 'ახალი შეტყობინება' : diff + ' ახალი შეტყობინება'), 'info'
+        );
+      }
+      _lastN = n;
+    };
+  })();
+
+  /* ── Auto-mark notifications read on scroll (#83) ────────── */
+  (function() {
+    if (!location.pathname.includes('notifications')) return;
+    var _io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (!e.isIntersecting) return;
+        var el = e.target;
+        var nid = el.dataset.notifId || el.dataset.id;
+        if (!nid || el._ghRead) return;
+        el._ghRead = true;
+        el.classList.remove('gh-notif-unread', 'unread');
+        var GS = window.GeoSocial || window.GS;
+        if (GS && typeof GS === 'function') {
+          try { var gs = GS(); if (gs && gs.markNotificationRead) gs.markNotificationRead(nid); } catch(e) {}
+        }
+      });
+    }, { threshold: 0.7 });
+    function _observe() {
+      document.querySelectorAll('[data-notif-id],[data-id].gh-notif-unread').forEach(function(el) {
+        if (!el._ghReadObs) { el._ghReadObs = true; _io.observe(el); }
+      });
+    }
+    document.addEventListener('DOMContentLoaded', _observe);
+    var _mo = new MutationObserver(_observe);
+    _mo.observe(document.body || document.documentElement, { childList: true, subtree: true });
+  })();
+
   /* ── Offline / online banner (#98) ──────────────────────── */
   (function() {
     var _banner = null;
@@ -15218,6 +15264,91 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     };
     window.addEventListener('scroll', _saveScroll, { passive: true });
     window.addEventListener('pagehide', _saveScroll);
+  })();
+
+  /* ── "ახალი პოსტები" button (#26) ──────────────────────── */
+  (function() {
+    if (!location.pathname.includes('feed') && !location.pathname.endsWith('/')) return;
+    var _btn = null, _hidden = true;
+    function _showNewPosts() {
+      if (!_hidden) return;
+      _hidden = false;
+      if (!_btn) {
+        _btn = document.createElement('button');
+        _btn.id = 'ghNewPostsBtn';
+        _btn.innerHTML = '<i class="fas fa-arrow-up"></i> ახალი პოსტები';
+        _btn.style.cssText = [
+          'position:fixed;top:68px;left:50%;transform:translateX(-50%) translateY(-60px);',
+          'background:var(--gh-green,#10b981);color:#fff;border:none;border-radius:20px;',
+          'padding:8px 18px;font-size:.85rem;font-weight:700;cursor:pointer;z-index:1000;',
+          'box-shadow:0 4px 14px rgba(0,0,0,.3);transition:transform .3s cubic-bezier(0.34,1.4,0.64,1);',
+          'display:flex;align-items:center;gap:6px;'
+        ].join('');
+        document.body.appendChild(_btn);
+        requestAnimationFrame(function() {
+          _btn.style.transform = 'translateX(-50%) translateY(0)';
+        });
+        _btn.addEventListener('click', function() {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          _hide();
+          setTimeout(function() { location.reload(); }, 400);
+        });
+      } else {
+        _btn.style.transform = 'translateX(-50%) translateY(0)';
+      }
+    }
+    function _hide() {
+      _hidden = true;
+      if (_btn) _btn.style.transform = 'translateX(-50%) translateY(-60px)';
+    }
+    window.addEventListener('scroll', function() {
+      if (window.scrollY < 80 && !_hidden) _hide();
+    }, { passive: true });
+    window.GH = window.GH || {};
+    window.GH.showNewPosts = _showNewPosts;
+  })();
+
+  /* ── Pull-to-refresh (#27) ───────────────────────────────── */
+  (function() {
+    if (!('ontouchstart' in window)) return;
+    var _startY = 0, _pulling = false, _ind = null;
+    function _getInd() {
+      if (!_ind) {
+        _ind = document.createElement('div');
+        _ind.id = 'ghPullInd';
+        _ind.innerHTML = '<i class="fas fa-sync-alt"></i>';
+        _ind.style.cssText = [
+          'position:fixed;top:-50px;left:50%;transform:translateX(-50%);',
+          'width:40px;height:40px;border-radius:50%;',
+          'background:var(--bg-card,#1a1f35);color:var(--gh-green,#10b981);',
+          'display:flex;align-items:center;justify-content:center;font-size:1.1rem;',
+          'box-shadow:0 2px 12px rgba(0,0,0,.3);transition:top .15s ease;z-index:9999;'
+        ].join('');
+        document.body.appendChild(_ind);
+      }
+      return _ind;
+    }
+    document.addEventListener('touchstart', function(e) {
+      if (window.scrollY === 0) { _startY = e.touches[0].clientY; _pulling = true; }
+    }, { passive: true });
+    document.addEventListener('touchmove', function(e) {
+      if (!_pulling) return;
+      var dy = e.touches[0].clientY - _startY;
+      if (dy > 20) {
+        var ind = _getInd();
+        var prog = Math.min(dy / 80, 1);
+        ind.style.top = (prog * 60 - 50) + 'px';
+        ind.querySelector('i').style.transform = 'rotate(' + (prog * 360) + 'deg)';
+      }
+    }, { passive: true });
+    document.addEventListener('touchend', function(e) {
+      if (!_pulling) return;
+      _pulling = false;
+      var dy = (e.changedTouches[0] ? e.changedTouches[0].clientY : _startY) - _startY;
+      var ind = _ind;
+      if (ind) ind.style.top = '-50px';
+      if (dy > 70) { setTimeout(function() { location.reload(); }, 150); }
+    }, { passive: true });
   })();
 
   /* ── Prefetch on touchstart/mouseover (#8) ───────────────── */
