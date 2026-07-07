@@ -64,6 +64,10 @@ export default defineConfig({
   root: '.',
   publicDir: false, // static assets handled by scripts/copy-static.js
 
+  esbuild: {
+    drop: ['console', 'debugger'],
+  },
+
   build: {
     outDir: 'dist',
     emptyOutDir: true,

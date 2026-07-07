@@ -3,6 +3,25 @@
    Dark Theme Stylesheet
    ================================================================ */
 
+/* ── Global interaction polish ─────────────────────────────── */
+* { -webkit-tap-highlight-color: transparent; }
+
+button, [role="button"], .btn, .gh-btn,
+.action-btn, .icon-btn, .nav-item, .tab-btn,
+a.btn, label[for] {
+  touch-action: manipulation;
+}
+
+@media (hover: hover) {
+  button:hover, [role="button"]:hover { transition: opacity .15s; }
+}
+
+button:active, [role="button"]:active, .btn:active, .gh-btn:active,
+.action-btn:active, .icon-btn:active, .nav-item:active, .tab-btn:active {
+  transform: scale(0.96);
+  transition: transform .08s ease;
+}
+
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap");
 
 /* ================================================================

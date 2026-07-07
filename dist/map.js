@@ -397,125 +397,91 @@
 
   /* ── 3D buildings + atmosphere ─────────────────────── */
   function init3DScene() {
-    // Fog / atmosphere for depth
+    // Fog / atmosphere — only on dark style (looks wrong on light voyager)
+    var _isDark = (localStorage.getItem('gh_map_style') || 'dark') === 'dark';
     try {
-      map.setFog({
-        range:           [1, 12],
-        color:           'rgb(5, 8, 14)',
-        'high-color':    'rgb(10, 17, 32)',
-        'horizon-blend': 0.06,
-        'space-color':   'rgb(2, 3, 8)',
-        'star-intensity': 0.35
-      });
+      if (_isDark) {
+        map.setFog({
+          range:           [1, 12],
+          color:           'rgb(5, 8, 14)',
+          'high-color':    'rgb(10, 17, 32)',
+          'horizon-blend': 0.06,
+          'space-color':   'rgb(2, 3, 8)',
+          'star-intensity': 0.35
+        });
+      } else {
+        map.setFog(null);
+      }
     } catch(e) {}
 
-    // 3D building extrusion (OSM data via CartoDB carto source, OpenMapTiles schema)
+    // 3D building extrusion
     try {
-      // Sky layer (adds atmospheric gradient above horizon when pitched)
-      if (!map.getLayer('gh-sky')) {
-        map.addLayer({ id: 'gh-sky', type: 'sky', paint: {
-          'sky-type': 'atmosphere',
-          'sky-atmosphere-sun': [0, 90],
-          'sky-atmosphere-sun-intensity': 3,
-          'sky-atmosphere-color': 'rgba(8,18,38,1)',
-          'sky-atmosphere-halo-color': 'rgba(16,185,129,0.08)'
-        }});
-      }
-
       if (!map.getLayer('gh-buildings-3d')) {
-        // Height expression: height → render_height → building:levels*3.5 → 11m
-        const heightExpr = [
-          'coalesce',
-          ['get', 'height'],
-          ['get', 'render_height'],
-          ['*', ['coalesce', ['get', 'building:levels'], 0], 3.5],
-          11
-        ];
-        const baseExpr = [
-          'coalesce',
-          ['get', 'min_height'],
-          ['get', 'render_min_height'],
-          0
-        ];
-
-        // Procedural color by building type; honour OSM building:colour when present
-        const colorExpr = [
-          'case',
-          // OSM explicit colour overrides everything
-          ['!=', ['coalesce', ['get', 'building:colour'], ''], ''],
-          ['get', 'building:colour'],
-          // apartments / residential
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['apartments', 'residential', 'house', 'detached', 'semidetached_house', 'terrace']]],
-          '#c8b89a',
-          // commercial / retail / supermarket
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['commercial', 'retail', 'supermarket', 'shop', 'kiosk']]],
-          '#b0bec5',
-          // office
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['office', 'offices', 'government']]],
-          '#90a4ae',
-          // industrial / warehouse / storage
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['industrial', 'warehouse', 'storage', 'factory', 'garage', 'garages']]],
-          '#9e9e9e',
-          // education
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['school', 'university', 'college', 'kindergarten']]],
-          '#e6d59a',
-          // hospital / healthcare
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['hospital', 'clinic', 'pharmacy']]],
-          '#dde8e0',
-          // religion / church
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['church', 'cathedral', 'mosque', 'synagogue', 'temple', 'chapel', 'religious']]],
-          '#d7c9b0',
-          // hotel
-          ['in', ['downcase', ['coalesce', ['get', 'building'], '']], ['literal', ['hotel', 'hostel', 'guest_house']]],
-          '#a5c4d4',
-          // default — neutral blue-gray, slightly varied by height for visual variety
-          ['interpolate', ['linear'], ['coalesce', ['get', 'height'], ['get', 'render_height'], 8],
-            0,  '#8d9aaa',
-            15, '#8a9aa8',
-            40, '#8898a6',
-            100,'#8596a4'
-          ]
-        ];
-
-        const buildingPaint = {
-          'fill-extrusion-color': colorExpr,
-          'fill-extrusion-height': [
-            'interpolate', ['linear'], ['zoom'],
-            15, 0,
-            15.05, heightExpr
-          ],
-          'fill-extrusion-base': [
-            'interpolate', ['linear'], ['zoom'],
-            15, 0,
-            15.05, baseExpr
-          ],
-          'fill-extrusion-opacity': [
-            'interpolate', ['linear'], ['zoom'],
-            15, 0, 15.5, 0.9
-          ]
-        };
-
-        // Ambient occlusion (MapLibre 4.x)
-        try {
-          buildingPaint['fill-extrusion-ambient-occlusion-intensity'] = 0.35;
-          buildingPaint['fill-extrusion-ambient-occlusion-radius']    = 3;
-        } catch(e) {}
-
         map.addLayer({
           id: 'gh-buildings-3d',
+          type: 'fill-extrusion',
           source: 'carto',
           'source-layer': 'building',
-          type: 'fill-extrusion',
-          minzoom: 15,
-          paint: buildingPaint
+          minzoom: 13,
+          paint: {
+            'fill-extrusion-color':   '#c8b89a',
+            'fill-extrusion-height':  20,
+            'fill-extrusion-base':    0,
+            'fill-extrusion-opacity': 0.9
+          }
         });
       }
-    } catch(e) { console.warn('[GeoHub] 3D buildings:', e.message); }
+    } catch(e) { console.error('[GeoHub] 3D buildings error:', e); }
+  }
+
+  // Improve water, parks and road colors in the base CartoDB style
+  function improveStyleLayers() {
+    try {
+      var layers = (map.getStyle() || {}).layers || [];
+      for (var i = 0; i < layers.length; i++) {
+        var l = layers[i];
+        var sl = l['source-layer'] || '';
+        var id = l.id || '';
+        try {
+          // Water — deeper, more saturated blue
+          if (l.type === 'fill' && sl === 'water') {
+            map.setPaintProperty(id, 'fill-color', '#4a8fc4');
+          }
+          // Waterways (rivers as lines)
+          if (l.type === 'line' && sl === 'waterway') {
+            map.setPaintProperty(id, 'line-color', '#4a8fc4');
+          }
+          // Parks
+          if (l.type === 'fill' && sl === 'park') {
+            map.setPaintProperty(id, 'fill-color', '#7ecf6e');
+          }
+          // Landcover: grass/scrub/meadow → rich green
+          if (l.type === 'fill' && sl === 'landcover') {
+            var lid = id.toLowerCase();
+            if (lid.indexOf('grass') > -1 || lid.indexOf('scrub') > -1 || lid.indexOf('meadow') > -1 || lid.indexOf('crop') > -1) {
+              map.setPaintProperty(id, 'fill-color', '#8dd47a');
+            }
+            if (lid.indexOf('wood') > -1 || lid.indexOf('forest') > -1) {
+              map.setPaintProperty(id, 'fill-color', '#6aaa58');
+            }
+          }
+          // Road primary — slightly warmer/brighter
+          if (l.type === 'line' && sl === 'transportation') {
+            var filter = l.filter;
+            var fstr = JSON.stringify(filter || []);
+            if (fstr.indexOf('primary') > -1 || fstr.indexOf('trunk') > -1 || fstr.indexOf('motorway') > -1) {
+              map.setPaintProperty(id, 'line-color', '#f5e6c0');
+            }
+          }
+        } catch(e) {}
+      }
+    } catch(e) {}
   }
 
   /* ── Init WebGL place layers (call after map load) ─ */
   function initGLLayers() {
     init3DScene();
+    improveStyleLayers();
 
     for (const [catId, style] of Object.entries(PLACE_MARKER_STYLES)) {
       if (!map.hasImage('cat-' + catId)) {
@@ -1803,9 +1769,13 @@
 
   function applyMapStyle(styleName) {
     const cfg = TILE_LAYERS[styleName] || TILE_LAYERS.dark;
+    var _pitchBefore = map.getPitch();
     map.setStyle(cfg.style);
     // After style change all custom sources/layers are wiped — reinitialize them
-    map.once('style.load', () => { initHeatmapLayer(); initGLLayers(); syncPlacesSource(); updateHeatmapData(); });
+    map.once('style.load', () => {
+      map.setPitch(Math.max(_pitchBefore, 30));
+      initHeatmapLayer(); initGLLayers(); syncPlacesSource(); updateHeatmapData();
+    });
     localStorage.setItem('gh_map_style', styleName);
     const mapEl = document.getElementById('map');
     if (mapEl) mapEl.setAttribute('data-map-style', styleName);
@@ -2445,6 +2415,7 @@
       center:           [44.793, 41.694],
       zoom:             12,
       pitch:            45,
+      minPitch:         30,
       maxPitch:         85,
       pitchWithRotate:  true,
       attributionControl: false,

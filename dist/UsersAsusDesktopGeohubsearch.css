@@ -1,9 +1,0 @@
-
-/* ── Session 26: Stories + Hashtags Search ── */
-.sr-badge-story { background: rgba(239,68,68,.15); color: #f87171; }
-.sr-ht-section { padding: 0 4px; }
-.sr-ht-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
-.sr-ht-pill { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 20px; padding: 6px 14px; color: var(--text-primary,#f0f4ff); text-decoration: none; font-size: .85rem; font-weight: 600; transition: background .15s, border-color .15s; }
-.sr-ht-pill:hover { background: rgba(16,185,129,.12); border-color: #10b981; color: #10b981; }
-.sr-ht-hash { color: #10b981; font-weight: 700; }
-.sr-ht-cnt { font-size: .72rem; background: rgba(16,185,129,.15); color: #34d399; border-radius: 10px; padding: 1px 6px; margin-left: 2px; }
