@@ -15266,6 +15266,63 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     window.addEventListener('pagehide', _saveScroll);
   })();
 
+  /* ── Search live debounce (#87) + search history (#88) ─── */
+  (function() {
+    var HISTORY_KEY = 'gh_search_history';
+    function _getHistory() { try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch(e) { return []; } }
+    function _addHistory(q) {
+      if (!q || q.length < 2) return;
+      var h = _getHistory().filter(function(x) { return x !== q; });
+      h.unshift(q);
+      h = h.slice(0, 10);
+      try { localStorage.setItem(HISTORY_KEY, JSON.stringify(h)); } catch(e) {}
+    }
+    window.GH = window.GH || {};
+    window.GH.addSearchHistory = _addHistory;
+    window.GH.getSearchHistory = _getHistory;
+    window.GH.clearSearchHistory = function() { try { localStorage.removeItem(HISTORY_KEY); } catch(e) {} };
+
+    // Global debounce for all search inputs
+    var _timers = new WeakMap();
+    document.addEventListener('input', function(e) {
+      var inp = e.target;
+      if (!inp.matches('input[type="search"], input[data-search], #ghSearch, .gh-search-input, [data-live-search]')) return;
+      clearTimeout(_timers.get(inp));
+      _timers.set(inp, setTimeout(function() {
+        var ev = new CustomEvent('gh:search', { bubbles: true, detail: { value: inp.value.trim() } });
+        inp.dispatchEvent(ev);
+      }, 280));
+    }, { passive: true });
+
+    // Save search on form submit
+    document.addEventListener('submit', function(e) {
+      var form = e.target;
+      var inp = form.querySelector('input[type="search"], input[data-search], #ghSearch');
+      if (inp && inp.value.trim()) _addHistory(inp.value.trim());
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key !== 'Enter') return;
+      var inp = e.target;
+      if (inp.matches('input[type="search"], .gh-search-input, #ghSearch') && inp.value.trim()) {
+        _addHistory(inp.value.trim());
+      }
+    });
+  })();
+
+  /* ── Optimistic follow (#76) ─────────────────────────────── */
+  document.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-follow-uid], [data-follow-id], .follow-btn, .gh-follow-btn');
+    if (!btn) return;
+    var isFollowing = btn.dataset.followState === 'following' || btn.classList.contains('following');
+    if (isFollowing) {
+      btn.dataset.followState = '';
+      btn.classList.remove('following');
+    } else {
+      btn.dataset.followState = 'following';
+      btn.classList.add('following');
+    }
+  });
+
   /* ── "ახალი პოსტები" button (#26) ──────────────────────── */
   (function() {
     if (!location.pathname.includes('feed') && !location.pathname.endsWith('/')) return;

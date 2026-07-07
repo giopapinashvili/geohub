@@ -4000,6 +4000,41 @@ img {
   }
 }
 
+/* ── Story unread ring on avatar (#80) ──────────────────── */
+.gh-avatar[data-has-story],
+.gh-avatar.has-story {
+  padding: 2px;
+  background: linear-gradient(135deg, #f97316, #ec4899, #a855f7) border-box;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background-clip: padding-box, border-box;
+  background-origin: padding-box, border-box;
+  position: relative;
+}
+.gh-avatar[data-story-seen],
+.gh-avatar.story-seen {
+  background: linear-gradient(135deg, #374151, #4b5563) border-box;
+}
+
+/* ── Optimistic follow button states (#76) ───────────────── */
+.gh-btn[data-follow-state="following"],
+button[data-follow-state="following"] {
+  background: transparent !important;
+  border: 1px solid var(--border, #2a3050) !important;
+  color: var(--text-secondary, #94a3b8) !important;
+}
+.gh-btn[data-follow-state="following"]::before { content: '✓ '; }
+
+/* ── Notification grouping (#82) — grouped header style ─── */
+.gh-notif-group-header {
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--text-muted, #6b7280);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 12px 16px 4px;
+}
+
 /* ── Empty state illustration (#40) ─────────────────────── */
 .gh-empty {
   display: flex;
