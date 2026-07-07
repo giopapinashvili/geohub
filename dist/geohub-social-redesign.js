@@ -4744,7 +4744,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       repostBanner+
       followedPageBanner+
       pinBanner+
-      '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+avatarAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><div class="gh-post-name-row"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a>'+verifiedBadge+coAuthorHtml+sponsoredHtml+'</div><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+_audLabelTxt+target+(p.feeling?' · '+esc(p.feeling):'')+(categoryBadge?' · '+categoryBadge:'')+(fmtBadge?' · '+fmtBadge:'')+bizPostedOnHtml+(readTimeBadge?' · '+readTimeBadge:'')+'</div></div>'+moreBtn+'</div>'+
+      '<div class="gh-post-head"><a class="gh-avatar gh-profile-avatar-link" href="'+esc(authorHref)+'"'+authorAttrs+avatarAttrs+'>'+(avatarHtml)+'</a><div class="gh-post-meta"><div class="gh-post-name-row"><a class="gh-post-name gh-profile-name-link" href="'+esc(authorHref)+'"'+authorAttrs+'>'+esc(name)+'</a>'+verifiedBadge+coAuthorHtml+sponsoredHtml+'</div><div class="gh-post-time">'+timeAgo(p.createdAt)+' · <i class="fas '+privacyIcon+'"></i>'+_audLabelTxt+target+(p.feeling?' · '+esc(p.feeling):'')+(categoryBadge?' · '+categoryBadge:'')+(fmtBadge?' · '+fmtBadge:'')+bizPostedOnHtml+(readTimeBadge?' · '+readTimeBadge:'')+(p.editedAt?'<span class="gh-edited-badge"> · edited</span>':'')+'</div></div>'+moreBtn+'</div>'+
       locationHtml+
       fmtDetailHtml+
       postTextHtml+
@@ -5067,12 +5067,57 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             GS().addComment(pid, val, function(){ if(input) input.value=''; form._cmt_voice_blob=null; if(_previewEl) _previewEl.style.display='none'; if(_micBtn2){_micBtn2.disabled=false;_micBtn2.innerHTML='<i class="fas fa-microphone"></i>';} if(window.ghPwaEngage) window.ghPwaEngage(2); }, extra2);
           });
         } else {
-          GS().addComment(pid, val, function(){ if(input) input.value=''; if(window.ghPwaEngage) window.ghPwaEngage(2); }, buildActorExtra());
+          GS().addComment(pid, val, function(){ if(input) input.value=''; try{localStorage.removeItem('gh_cmt_draft_'+pid);}catch(e){} if(window.ghPwaEngage) window.ghPwaEngage(2); }, buildActorExtra());
         }
         return; }
       var rform=e.target.closest('[data-reply-form]');
       if(rform){ e.preventDefault(); var card2=rform.closest('[data-post-id]'), pid2=card2.dataset.postId, cid=rform.dataset.commentId; var rin=rform.querySelector('input'); var rv=rin.value.trim(); if(!rv) return; if(!requireLogin()) return; if(GS().addCommentReply) GS().addCommentReply(pid2,cid,rv,function(){ rin.value=''; rform.hidden=true; },buildActorExtra()); else toast(_srt('reply_unavail'),'error'); }
     });
+
+    // #42 Long-press comment menu (mobile)
+    var _cmtLpTimer = null;
+    root.addEventListener('touchstart', function(e){
+      var bubble = e.target.closest('.gh-comment-bubble');
+      if(!bubble) return;
+      _cmtLpTimer = setTimeout(function(){
+        _cmtLpTimer = null;
+        var row = bubble.closest('.gh-comment-row, .gh-reply-row');
+        if(!row) return;
+        var cid = row.dataset.commentId || (row.querySelector('[data-comment-id]') && row.querySelector('[data-comment-id]').dataset.commentId);
+        var pid = (row.closest('[data-post-id]') || {}).dataset && row.closest('[data-post-id]').dataset.postId;
+        var u = authUser();
+        var authorId = row.dataset.authorId || '';
+        var isOwn = u && (u.uid === authorId);
+        var items = '<button class="gh-pmenu-item" data-cmt-copy><i class="fas fa-copy"></i> Copy</button>';
+        if(isOwn) items += '<button class="gh-pmenu-item" data-cmt-delete data-cid="'+(cid||'')+'" data-pid="'+(pid||'')+'"><i class="fas fa-trash"></i> Delete</button>';
+        items += '<button class="gh-pmenu-item" data-cmt-report><i class="fas fa-flag"></i> Report</button>';
+        var drop = document.createElement('div');
+        drop.className = 'gh-post-menu-drop';
+        drop.innerHTML = items;
+        var rect = bubble.getBoundingClientRect();
+        drop.style.cssText = 'position:fixed;top:'+(rect.bottom+6)+'px;left:'+Math.max(8,rect.left)+'px;z-index:100001';
+        document.body.appendChild(drop);
+        function closeDrop(){ drop.remove(); document.removeEventListener('click', closeDrop); }
+        setTimeout(function(){ document.addEventListener('click', closeDrop); }, 30);
+        drop.addEventListener('click', function(ev){
+          if(ev.target.closest('[data-cmt-copy]')){
+            var txt = bubble.querySelector('span'); if(txt) navigator.clipboard && navigator.clipboard.writeText(txt.textContent);
+            toast('Copied'); closeDrop(); return;
+          }
+          if(ev.target.closest('[data-cmt-report]')){ toast('Reported'); closeDrop(); return; }
+          if(ev.target.closest('[data-cmt-delete]')){
+            var btn2 = ev.target.closest('[data-cmt-delete]');
+            if(fs() && btn2.dataset.cid && btn2.dataset.pid){
+              fs().deleteDoc(fs().doc(db(),'posts',btn2.dataset.pid,'comments',btn2.dataset.cid))
+                .then(function(){ row.remove(); }).catch(function(){});
+            }
+            closeDrop(); return;
+          }
+        });
+      }, 500);
+    }, { passive: true });
+    root.addEventListener('touchend', function(){ clearTimeout(_cmtLpTimer); _cmtLpTimer = null; }, { passive: true });
+    root.addEventListener('touchmove', function(){ clearTimeout(_cmtLpTimer); _cmtLpTimer = null; }, { passive: true });
 
     // Reaction strip: show on Like hover, hide after 1.5s delay
     // Comment reaction picker: show on hover, 1.5s minimum stay
@@ -5130,6 +5175,37 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     root.addEventListener('focusin', function(e){
       var inp = e.target.closest('.gh-comment-form .gh-input, .gh-reply-form .gh-input');
       if(inp) _bindMentionAutocomplete(inp);
+    });
+    // #44 Comment draft saving
+    root.addEventListener('input', function(e){
+      var inp = e.target.closest('.gh-cmt-text-input');
+      if(!inp) return;
+      var card = inp.closest('[data-post-id]');
+      if(!card) return;
+      var pid = card.dataset.postId;
+      if(!pid) return;
+      var val = inp.value;
+      try {
+        if(val) localStorage.setItem('gh_cmt_draft_'+pid, val);
+        else localStorage.removeItem('gh_cmt_draft_'+pid);
+      } catch(err){}
+    });
+    // Restore drafts when comment section opens
+    root.addEventListener('click', function(e){
+      if(!e.target.closest('[data-comment-toggle]')) return;
+      setTimeout(function(){
+        var forms = root.querySelectorAll('.gh-comment-form');
+        forms.forEach(function(form){
+          var card = form.closest('[data-post-id]');
+          if(!card) return;
+          var pid = card.dataset.postId;
+          var draft = pid && localStorage.getItem('gh_cmt_draft_'+pid);
+          if(draft){
+            var inp = form.querySelector('.gh-cmt-text-input');
+            if(inp && !inp.value) inp.value = draft;
+          }
+        });
+      }, 80);
     });
   }
 
@@ -6242,6 +6318,54 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var nextBtn = lb.querySelector('.gh-media-lb-next');
       if (prevBtn) prevBtn.addEventListener('click', function(e) { e.stopPropagation(); navigate(-1); });
       if (nextBtn) nextBtn.addEventListener('click', function(e) { e.stopPropagation(); navigate(1); });
+
+      // #52/#53/#54/#55 Touch gestures: swipe-left/right, swipe-down close, double-tap zoom, pinch-zoom
+      var img = lb.querySelector('.gh-media-lb-img');
+      if (!img) return;
+      var _t0x, _t0y, _t0time, _scale = 1, _pinchDist0 = 0;
+      function dist2(t){ return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); }
+      var _lastTap = 0;
+
+      img.addEventListener('touchstart', function(e){
+        if (e.touches.length === 2) {
+          _pinchDist0 = dist2(e.touches); return;
+        }
+        _t0x = e.touches[0].clientX; _t0y = e.touches[0].clientY;
+        _t0time = Date.now();
+        // double-tap zoom
+        var now = Date.now();
+        if (now - _lastTap < 300) {
+          _scale = _scale > 1 ? 1 : 2.5;
+          img.style.transform = _scale > 1 ? 'scale('+_scale+')' : '';
+          img.style.transition = 'transform .25s';
+          e.preventDefault();
+        }
+        _lastTap = now;
+      }, { passive: false });
+
+      img.addEventListener('touchmove', function(e){
+        if (e.touches.length === 2) {
+          e.preventDefault();
+          var d = dist2(e.touches);
+          _scale = Math.min(4, Math.max(1, _scale * d / (_pinchDist0 || d)));
+          _pinchDist0 = d;
+          img.style.transform = 'scale('+_scale+')';
+          img.style.transition = 'none';
+        }
+      }, { passive: false });
+
+      lb.addEventListener('touchend', function(e){
+        if (_scale > 1) return; // zoomed in — don't swipe
+        if (e.changedTouches.length !== 1 || !_t0x) return;
+        var dx = e.changedTouches[0].clientX - _t0x;
+        var dy = e.changedTouches[0].clientY - _t0y;
+        var dt = Date.now() - _t0time;
+        if (dt > 500) return;
+        if (Math.abs(dy) > Math.abs(dx) && dy > 60) { closeLb(); return; } // swipe-down close
+        if (Math.abs(dx) > 50 && Math.abs(dy) < 60 && urls.length > 1) {
+          navigate(dx < 0 ? 1 : -1); // swipe-left = next, swipe-right = prev
+        }
+      }, { passive: true });
     }
     bindLbEvents();
   }
@@ -6299,13 +6423,19 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var newText = document.getElementById('ghEditPostText').value.trim();
         var newVis  = document.getElementById('ghEditPostVis').value;
         if(!newText) return;
-        fs().updateDoc(fs().doc(db(),'posts',pid), { text:newText, visibility:newVis, updatedAt:fs().serverTimestamp() })
+        fs().updateDoc(fs().doc(db(),'posts',pid), { text:newText, visibility:newVis, editedAt:fs().serverTimestamp(), updatedAt:fs().serverTimestamp() })
           .then(function(){
             var m = document.getElementById('ghEditPostModal'); if(m) m.remove();
-            // Update text in card without full reload
             if(card){
               var textEl = card.querySelector('.gh-post-text');
               if(textEl) textEl.textContent = newText;
+              var timeEl = card.querySelector('.gh-post-time');
+              if(timeEl && !timeEl.querySelector('.gh-edited-badge')){
+                var badge = document.createElement('span');
+                badge.className = 'gh-edited-badge';
+                badge.textContent = ' · edited';
+                timeEl.appendChild(badge);
+              }
             }
             toast(_srt('post_updated'));
           })
@@ -15482,4 +15612,34 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   };
   window.GH.error = function(msg) { window.GH.toast(msg || 'შეცდომა მოხდა', 'error'); };
   window.GH.success = function(msg) { window.GH.toast(msg || 'წარმატება!', 'success'); };
+  window.GH.openMediaLightbox = openMediaLightbox;
+
+  /* ── #73 Avatar zoom on click ──────────────────────────────── */
+  document.addEventListener('click', function(e) {
+    var av = e.target.closest('[data-zoom-avatar]');
+    if (!av) return;
+    var src = av.dataset.zoomAvatar || (av.tagName === 'IMG' ? av.src : null) || (av.querySelector('img') && av.querySelector('img').src);
+    if (!src || src.startsWith('data:')) return;
+    openMediaLightbox(src);
+  });
+
+  /* ── #84 Notification click → exact post with highlight ────── */
+  (function() {
+    var hash = location.hash;
+    if (!hash) return;
+    var m = hash.match(/^#post-(.+)/);
+    if (!m) return;
+    var pid = m[1];
+    var tryHighlight = function() {
+      var el = document.querySelector('[data-post-id="'+CSS.escape(pid)+'"]');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('gh-highlight-post');
+        setTimeout(function() { el.classList.remove('gh-highlight-post'); }, 2500);
+      }
+    };
+    if (document.readyState === 'complete') tryHighlight();
+    else window.addEventListener('load', function() { setTimeout(tryHighlight, 600); });
+  })();
+
 })();

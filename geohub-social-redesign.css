@@ -2574,6 +2574,13 @@ html[data-gh-theme="dark"] .gh-live-stats { border-color: rgba(59,130,246,.18) !
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.gh-bnav-item.active .gh-bnav-icon {
+  transform: scale(1.18) translateY(-2px);
+}
+.gh-bnav-item.active .gh-bnav-lbl {
+  font-weight: 700;
 }
 .gh-bnav-lbl {
   font-size: .57rem;
@@ -6057,4 +6064,89 @@ body.gh-no-left .gh-layout{grid-template-columns:minmax(0,900px) 320px!important
 @media(max-width:920px){body.gh-no-left .gh-layout{grid-template-columns:1fr!important}}
 body.gh-has-injected-nav.gh-no-left{padding-left:0!important}
 @media(max-width:1120px){body.gh-has-injected-nav.gh-no-left{padding-left:0!important}}
+
+/* ── #18 Button loading state ─────────────────────────────── */
+@keyframes gh-spin {
+  to { transform: rotate(360deg); }
+}
+.gh-btn[data-loading],
+.gh-btn.gh-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: .7;
+  color: transparent !important;
+}
+.gh-btn[data-loading]::after,
+.gh-btn.gh-loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 18px; height: 18px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: gh-spin .7s linear infinite;
+  color: #fff;
+}
+
+/* ── #102 Navbar active tab spring ───────────────────────── */
+.gh-bnav-item { transition: color var(--gh-dur-fast, .15s); }
+
+/* ── #105 Consistent border-radius via tokens ─────────────── */
+.gh-modal, .gh-modal-box, .gh-panel,
+.gh-card, .gh-post-card, .gh-story-card { border-radius: var(--gh-radius, 18px); }
+.gh-btn { border-radius: var(--gh-radius-full, 999px); }
+.gh-input, .gh-textarea, .gh-select { border-radius: var(--gh-radius-md, 12px); }
+.gh-avatar { border-radius: 50%; }
+.gh-tag, .gh-badge, .gh-chip { border-radius: var(--gh-radius-full, 999px); }
 .gh-story-ts-style.active{border-color:#10b981;color:#10b981;background:rgba(16,185,129,.12)}
+
+/* ── #39 Post edited indicator ─────────────────────────────── */
+.gh-edited-badge { font-size: .7rem; color: var(--gh-muted); font-style: italic; }
+
+/* ── #84 Notification deep-link post highlight ─────────────── */
+@keyframes gh-highlight-post {
+  0%   { box-shadow: 0 0 0 3px rgba(16,185,129,.6); }
+  50%  { box-shadow: 0 0 0 6px rgba(16,185,129,.3); }
+  100% { box-shadow: 0 0 0 3px rgba(16,185,129,.0); }
+}
+.gh-highlight-post {
+  animation: gh-highlight-post 2.5s ease forwards;
+}
+
+/* ── #41 Comment slide-in animation ───────────────────────── */
+@keyframes gh-comment-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.gh-comment-row {
+  animation: gh-comment-in .22s ease both;
+}
+.gh-reply-row {
+  animation: gh-comment-in .18s ease both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gh-comment-row, .gh-reply-row { animation: none; }
+}
+
+/* ── #40 Animated empty state ──────────────────────────────── */
+@keyframes gh-empty-float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-6px) scale(1.08); }
+}
+@keyframes gh-empty-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.gh-empty {
+  animation: gh-empty-fade-in .4s ease both;
+}
+.gh-empty i {
+  background: linear-gradient(135deg, var(--gh-green, #10b981), var(--gh-blue, #38bdf8));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gh-empty-float 3s ease-in-out infinite;
+  display: inline-block;
+}
