@@ -6072,11 +6072,29 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if (e.target.closest('[data-menu-edit-post]') && isOwn) { closeDrop(); openFeedPostEditor(pid, card); return; }
       if (e.target.closest('[data-menu-delete-post]') && isOwn) {
         closeDrop();
-        window.ghConfirm(typeof GHt==='function'?GHt('post_delete_cfm'):'Delete this post? This cannot be undone.', function() {
+        // #30 Undo delete — 5s window
+        if(card){ card.style.transition='opacity .25s'; card.style.opacity='0.35'; }
+        var _undoDone = false;
+        var _undoT = document.createElement('div');
+        _undoT.className = 'gh-undo-toast';
+        _undoT.innerHTML = 'Post deleted <button class="gh-undo-btn">Undo</button>';
+        _undoT.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:100002;background:#1e293b;color:#f1f5f9;padding:12px 18px;border-radius:12px;display:flex;gap:12px;align-items:center;font-size:.88rem;box-shadow:0 4px 20px rgba(0,0,0,.4)';
+        document.body.appendChild(_undoT);
+        var _progress = document.createElement('div');
+        _progress.style.cssText = 'position:absolute;bottom:0;left:0;height:3px;background:#10b981;border-radius:0 0 12px 12px;width:100%;transition:width 5s linear';
+        _undoT.appendChild(_progress);
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){ _progress.style.width = '0%'; }); });
+        _undoT.querySelector('.gh-undo-btn').onclick = function() {
+          _undoDone = true; _undoT.remove();
+          if(card){ card.style.opacity='1'; }
+        };
+        setTimeout(function() {
+          _undoT.remove();
+          if(_undoDone) return;
+          if(card){ card.style.transition='opacity .25s'; card.style.opacity='0'; setTimeout(function(){ card.remove(); },260); }
           fs().updateDoc(fs().doc(db(),'posts',pid), { status:'deleted', updatedAt:fs().serverTimestamp() })
-            .then(function(){ if(card){ card.style.transition='opacity .25s'; card.style.opacity='0'; setTimeout(function(){ card.remove(); },260); } toast(_srt('post_deleted')); })
             .catch(function(err){ toast(_srt('post_del_fail')+': '+(err.code||err.message),'error'); });
-        });
+        }, 5000);
         return;
       }
       if (e.target.closest('[data-copy-post-link]')) { navigator.clipboard && navigator.clipboard.writeText(location.origin+location.pathname+'#post-'+pid).then(function(){toast(_srt('link_copied'));}); closeDrop(); return; }

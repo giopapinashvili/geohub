@@ -1594,6 +1594,18 @@
         window.GeoSocial?.setTyping && window.GeoSocial.setTyping(activeConversation, false, meta);
       }
 
+      // #65 offline queue — if offline, stash and retry on reconnect
+      if (!navigator.onLine) {
+        try {
+          var _q = JSON.parse(localStorage.getItem('gh_msg_queue') || '[]');
+          _q.push({ convId: activeConversation, text: text, ts: Date.now() });
+          localStorage.setItem('gh_msg_queue', JSON.stringify(_q.slice(-20)));
+        } catch(e) {}
+        if(input) input.value = '';
+        window.showToast && window.showToast('Offline. Message will send when connected.', 'warn');
+        setTimeout(function(){ sendingMessage = false; }, 500);
+        return;
+      }
       const _sendConvId = activeConversation;
       window.GeoSocial.sendMessage(activeConversation, text, ok=>{
         if(ok && input) input.value='';
@@ -2187,6 +2199,20 @@
       box.innerHTML=rows.slice(0,12).map(u=>'<button type="button" class="new-conversation-user" data-start-user="'+esc(u.id)+'"><span>'+(u.avatar||u.photoURL?'<img src="'+esc(u.avatar||u.photoURL)+'" alt="" loading="lazy">':esc(((u.fullName||u.name||u.email||'?')[0]||'?').toUpperCase()))+'</span><strong>'+esc(u.fullName||u.name||u.username||u.email||'User')+'</strong><small>'+esc(u.email||('@'+(u.username||'')))+'</small></button>').join('');
     }catch(err){ box.innerHTML='<div style="color:var(--text-muted);font-size:.85rem">Search failed: '+esc(err.message)+'</div>'; }
   };
+  // #65 Offline queue flush on reconnect
+  window.addEventListener('online', function() {
+    try {
+      var _q = JSON.parse(localStorage.getItem('gh_msg_queue') || '[]');
+      if (!_q.length) return;
+      localStorage.removeItem('gh_msg_queue');
+      _q.forEach(function(item) {
+        if (!item.convId || !item.text) return;
+        window.GeoSocial && window.GeoSocial.sendMessage && window.GeoSocial.sendMessage(item.convId, item.text, function(){});
+      });
+      if (_q.length) window.showToast && window.showToast(_q.length + ' queued message(s) sent');
+    } catch(e) {}
+  });
+
   document.addEventListener('click', async function(e){
     const btn=e.target.closest('[data-start-user]');
     if(!btn) return;
