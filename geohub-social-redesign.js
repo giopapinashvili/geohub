@@ -15052,4 +15052,30 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   window.addEventListener('pagehide', finishBar);
   window.addEventListener('beforeunload', finishBar);
+
+  /* ── Scroll Restoration (#25) ───────────────────────────── */
+  (function() {
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    var _key = 'gh_scroll_' + location.pathname;
+    var _saved = sessionStorage.getItem(_key);
+    if (_saved) {
+      var _pos = parseInt(_saved, 10);
+      // Wait for content to render before restoring
+      var _attempts = 0;
+      var _try = function() {
+        if (document.body.scrollHeight > _pos || _attempts++ > 20) {
+          window.scrollTo(0, _pos);
+        } else {
+          setTimeout(_try, 150);
+        }
+      };
+      if (document.readyState === 'complete') { _try(); }
+      else { window.addEventListener('load', _try, { once: true }); }
+    }
+    var _saveScroll = function() {
+      sessionStorage.setItem(_key, String(window.scrollY));
+    };
+    window.addEventListener('scroll', _saveScroll, { passive: true });
+    window.addEventListener('pagehide', _saveScroll);
+  })();
 })();
