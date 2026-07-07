@@ -6102,6 +6102,9 @@ body.gh-has-injected-nav.gh-no-left{padding-left:0!important}
 .gh-tag, .gh-badge, .gh-chip { border-radius: var(--gh-radius-full, 999px); }
 .gh-story-ts-style.active{border-color:#10b981;color:#10b981;background:rgba(16,185,129,.12)}
 
+/* ── #45 Comment char count ────────────────────────────────── */
+.gh-cmt-char-count { font-size: .68rem; color: var(--gh-muted); align-self: center; margin-left: auto; flex-shrink: 0; }
+
 /* ── #39 Post edited indicator ─────────────────────────────── */
 .gh-edited-badge { font-size: .7rem; color: var(--gh-muted); font-style: italic; }
 

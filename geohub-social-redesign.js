@@ -5142,6 +5142,20 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     root.addEventListener('touchend', function(){ clearTimeout(_cmtLpTimer); _cmtLpTimer = null; }, { passive: true });
     root.addEventListener('touchmove', function(){ clearTimeout(_cmtLpTimer); _cmtLpTimer = null; }, { passive: true });
 
+    // #46 Collapse/expand reply thread
+    root.addEventListener('click', function(e){
+      var colBtn = e.target.closest('[data-collapse-replies]');
+      if(!colBtn) return;
+      var cid = colBtn.dataset.collapseReplies;
+      var repliesDiv = root.querySelector('.gh-replies[data-replies-for="'+cid+'"]');
+      if(!repliesDiv) return;
+      var collapsed = repliesDiv.style.display === 'none';
+      repliesDiv.style.display = collapsed ? '' : 'none';
+      colBtn.innerHTML = collapsed
+        ? '<i class="fas fa-chevron-up"></i> Hide replies'
+        : '<i class="fas fa-chevron-down"></i> Show replies';
+    });
+
     // Reaction strip: show on Like hover, hide after 1.5s delay
     // Comment reaction picker: show on hover, 1.5s minimum stay
     root.addEventListener('mouseover', function(e){
@@ -5199,15 +5213,29 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var inp = e.target.closest('.gh-comment-form .gh-input, .gh-reply-form .gh-input');
       if(inp) _bindMentionAutocomplete(inp);
     });
-    // #44 Comment draft saving
+    // #44 Comment draft saving + #45 char count
     root.addEventListener('input', function(e){
       var inp = e.target.closest('.gh-cmt-text-input');
       if(!inp) return;
+      var val = inp.value;
+      // #45 char count — show near 500 char limit
+      var MAX = 1000;
+      if(val.length > MAX - 150){
+        var form = inp.closest('.gh-comment-form');
+        if(form){
+          var cc = form.querySelector('.gh-cmt-char-count');
+          if(!cc){ cc = document.createElement('span'); cc.className='gh-cmt-char-count'; form.appendChild(cc); }
+          cc.textContent = val.length + '/' + MAX;
+          cc.style.color = val.length > MAX ? 'var(--gh-red)' : 'var(--gh-muted)';
+        }
+      } else {
+        var form2 = inp.closest('.gh-comment-form');
+        if(form2){ var cc2 = form2.querySelector('.gh-cmt-char-count'); if(cc2) cc2.textContent = ''; }
+      }
       var card = inp.closest('[data-post-id]');
       if(!card) return;
       var pid = card.dataset.postId;
       if(!pid) return;
-      var val = inp.value;
       try {
         if(val) localStorage.setItem('gh_cmt_draft_'+pid, val);
         else localStorage.removeItem('gh_cmt_draft_'+pid);
@@ -5537,7 +5565,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<span class="gh-cmt-rx-picker" data-rx-picker="'+esc(c.id)+'">'+Object.keys(RX_EMOJIS).map(function(t){ return '<button type="button" class="gh-cmt-rx-pick" data-comment-like data-comment-id="'+esc(c.id)+'" data-comment-reaction="'+t+'">'+RX_EMOJIS[t]+'</button>'; }).join('')+'</span></span>'+
       ownerBtns+'</div>'+
       '<form class="gh-reply-form" data-reply-form data-comment-id="'+esc(c.id)+'" hidden><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" placeholder="Write a reply…"><button class="gh-btn sm"><i class="fas fa-paper-plane"></i></button></form>'+
-      '<div class="gh-replies" data-replies-for="'+esc(c.id)+'"></div></div></div>';
+      '<div class="gh-replies" data-replies-for="'+esc(c.id)+'"></div>'+
+      (c.replyCount>0 ? '<button class="gh-cmt-act gh-collapse-thread" data-collapse-replies="'+esc(c.id)+'"><i class="fas fa-chevron-up"></i> Hide replies</button>' : '')+
+      '</div></div>';
   }
 
   function toggleCommentReaction(pid, cid, type, btn) {
