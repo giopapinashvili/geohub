@@ -58,24 +58,44 @@
 
   function onAuthReady(GF, cb) {
     if (!GF || !GF.auth) return cb(null);
-    // Firebase v10 modular: onAuthStateChanged is in authFns, not on auth instance
-    var _oas = (GF.authFns && GF.authFns.onAuthStateChanged) || GF.auth.onAuthStateChanged;
-    if (typeof _oas === 'function') {
-      var _unsub = _oas(GF.auth, function(user) {
-        _unsub && _unsub();
-        cb(user);
-      });
-      return;
+    var _called = false;
+    function _done(user) {
+      if (_called) return;
+      _called = true;
+      cb(user);
     }
-    // Fallback: poll up to 6s
-    let waited = 0;
-    const timer = setInterval(() => {
-      waited += 100;
-      if (GF.auth.currentUser || waited >= 6000) {
-        clearInterval(timer);
-        cb(GF.auth.currentUser || null);
-      }
-    }, 100);
+
+    // Fast path: GeoCurrentUser already set by firebase-auth.js
+    if (window.GeoCurrentUser) return _done(window.GeoCurrentUser);
+
+    // Primary: listen for GeoAuthReady dispatched by firebase-auth.js (has full profile)
+    var _geoHandler = function(e) {
+      window.removeEventListener('GeoAuthReady', _geoHandler);
+      _done(e && e.detail ? e.detail : null);
+    };
+    window.addEventListener('GeoAuthReady', _geoHandler);
+
+    // Secondary: raw Firebase onAuthStateChanged — ignore null (session may still be restoring)
+    var _oas = (GF.authFns && GF.authFns.onAuthStateChanged) || null;
+    var _unsub = null;
+    if (typeof _oas === 'function') {
+      _unsub = _oas(GF.auth, function(user) {
+        if (user) {
+          // Got real user from Firebase auth
+          window.removeEventListener('GeoAuthReady', _geoHandler);
+          if (_unsub) { try { _unsub(); } catch(e) {} }
+          _done(user);
+        }
+        // null = auth state still resolving — wait for GeoAuthReady or timeout
+      });
+    }
+
+    // Safety timeout: 7s — conclude not logged in
+    setTimeout(function() {
+      window.removeEventListener('GeoAuthReady', _geoHandler);
+      if (_unsub) { try { _unsub(); } catch(e) {} }
+      _done(GF.auth.currentUser || null);
+    }, 7000);
   }
 
   function normalizeProfile(fbUser, data) {
@@ -131,8 +151,21 @@
   }
 
   async function ensureOwnProfile(GF, fbUser) {
-    const ref = GF.fs.doc(GF.db, 'users', fbUser.uid);
-    const snap = await GF.fs.getDoc(ref);
+    // Use cached GeoCurrentUser to avoid Firestore read if possible
+    var _cached = window.GeoCurrentUser;
+    if (_cached && (_cached.uid === fbUser.uid || _cached.id === fbUser.uid)) {
+      // geoUser from firebase-auth.js already has fullName, avatar, etc.
+      return normalizeProfile(null, Object.assign({ uid: fbUser.uid || _cached.uid }, _cached));
+    }
+    var snap;
+    try {
+      const ref = GF.fs.doc(GF.db, 'users', fbUser.uid);
+      snap = await GF.fs.getDoc(ref);
+    } catch (e) {
+      // Firestore unavailable (quota, offline) — build profile from Firebase auth only
+      console.warn('[Profile] Firestore read failed, using auth data:', e && e.code);
+      return normalizeProfile(fbUser, {});
+    }
     const profile = normalizeProfile(fbUser, snap.exists() ? snap.data() : {});
     if (!snap.exists()) {
       await GF.fs.setDoc(ref, {
