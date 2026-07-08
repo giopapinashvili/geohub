@@ -6471,6 +6471,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     });
   }
 
+  window.GH = window.GH || {};
+  window.GH.openMediaLightbox = openMediaLightbox;
   function openMediaLightbox(url, allUrls, idx) {
     if (!url) return;
     var existing = document.getElementById('ghMediaLightbox');
@@ -15825,7 +15827,6 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   };
   window.GH.error = function(msg) { window.GH.toast(msg || 'შეცდომა მოხდა', 'error'); };
   window.GH.success = function(msg) { window.GH.toast(msg || 'წარმატება!', 'success'); };
-  window.GH.openMediaLightbox = openMediaLightbox;
 
   /* ── #73 Avatar zoom on click ──────────────────────────────── */
   document.addEventListener('click', function(e) {
@@ -15833,7 +15834,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if (!av) return;
     var src = av.dataset.zoomAvatar || (av.tagName === 'IMG' ? av.src : null) || (av.querySelector('img') && av.querySelector('img').src);
     if (!src || src.startsWith('data:')) return;
-    openMediaLightbox(src);
+    if (window.GH && window.GH.openMediaLightbox) window.GH.openMediaLightbox(src);
   });
 
   /* ── #84 Notification click → exact post with highlight ────── */

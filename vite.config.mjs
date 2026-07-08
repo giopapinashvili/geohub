@@ -65,7 +65,10 @@ export default defineConfig({
   publicDir: false, // static assets handled by scripts/copy-static.js
 
   esbuild: {
-    drop: ['console', 'debugger'],
+    // Keep console.error/warn in production — needed to see real failures.
+    // Only strip noisy debug logging.
+    pure: ['console.log', 'console.debug', 'console.info'],
+    drop: ['debugger'],
   },
 
   build: {

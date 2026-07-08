@@ -1,1 +1,4 @@
-/*    /index.html   200
+# No SPA catch-all: GeoHub is a multi-page app.
+# Cloudflare Pages serves /404.html automatically for missing paths,
+# and missing hashed assets must return 404 (not index.html) so stale
+# tabs fail fast instead of white-screening on an HTML-as-JS response.

@@ -4,6 +4,8 @@
 Thumbs.db
 # Environment variables — never commit real keys
 .env
+# Firebase Admin private key — NEVER commit (seed scripts read it locally)
+serviceAccountKey.json
 # Vite build output — tracked so Cloudflare Pages serves pre-built files directly
 # dist/
 # Node / Playwright
