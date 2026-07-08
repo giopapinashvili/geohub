@@ -139,7 +139,7 @@ function renderUpdates() {
       imgHtml +
       '<div class="pu-card-body">' +
         '<div class="pu-card-meta">' +
-          '<a class="pu-card-place" href="place.html?id=' + esc(u.placeId || '') + '">' + esc(u.placeName || 'ადგილი') + '</a>' +
+          '<a class="pu-card-place" href="business.html?id=' + esc(u.placeId || '') + '">' + esc(u.placeName || 'ადგილი') + '</a>' +
           '<span class="pu-card-cat">' + catLabel + '</span>' +
           '<span class="pu-card-time">' + timeAgo + '</span>' +
         '</div>' +
@@ -148,7 +148,7 @@ function renderUpdates() {
         '<div class="pu-card-footer">' +
           avHtml +
           '<span class="pu-card-author">' + esc(u.placeName || '') + '</span>' +
-          (u.placeId ? '<a class="pu-card-btn" href="place.html?id=' + esc(u.placeId) + '"><i class="fas fa-arrow-right"></i> ადგილი</a>' : '') +
+          (u.placeId ? '<a class="pu-card-btn" href="business.html?id=' + esc(u.placeId) + '"><i class="fas fa-arrow-right"></i> ადგილი</a>' : '') +
         '</div>' +
       '</div>' +
     '</div>';

@@ -11,8 +11,7 @@
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#10b981">
-  <title>Profile — GeoHub</title>
-  <meta name="robots" content="index, follow">
+  <title>პროფილი — GeoHub</title>
   <meta name="description" content="GeoHub-ის მომხმარებლის პროფილი — პოსტები, მეგობრები, ადგილები.">
   <link rel="canonical" href="https://geohub.ge/profile.html">
   <meta property="og:type" content="website">
@@ -83,8 +82,8 @@
 <div class="profile-cover" style="margin-top:var(--navbar-height,68px)">
   <div class="cover-grid"></div>
   <div class="cover-actions">
-    <button class="cover-btn"><i class="fas fa-share-alt"></i> Share</button>
-    <button class="cover-btn primary"><i class="fas fa-user-plus"></i> Follow</button>
+    <button class="cover-btn"><i class="fas fa-share-alt"></i> გაზიარება</button>
+    <button class="cover-btn primary"><i class="fas fa-user-plus"></i> გამოწერა</button>
   </div>
 </div>
 
@@ -99,7 +98,7 @@
         <div class="avatar-level">1</div>
       </div>
       <div class="profile-name-block">
-        <div class="profile-name">Loading profile…</div>
+        <div class="profile-name">იტვირთება პროფილი…</div>
         <div class="profile-handle"></div>
         <div class="profile-bio"></div>
         <div class="trust-badges"></div>
@@ -109,18 +108,18 @@
     <!-- Stats + Actions -->
     <div class="profile-hero-right">
       <div class="profile-stats-bar">
-        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label" data-i18n="profile_stat_places">Places</div></div>
-        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label" style="color:var(--green)" data-i18n="profile_friends">Friends</div></div>
-        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label" data-i18n="profile_stat_follow">Followers</div></div>
-        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label" data-i18n="profile_stat_fwing">Following</div></div>
+        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label" data-i18n="profile_stat_places">ადგილები</div></div>
+        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label" style="color:var(--green)" data-i18n="profile_friends">მეგობრები</div></div>
+        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label" data-i18n="profile_stat_follow">გამომწერები</div></div>
+        <div class="pstat"><div class="pstat-value">0</div><div class="pstat-label" data-i18n="profile_stat_fwing">გამოწერები</div></div>
         <div class="pstat"><div class="pstat-value" style="color:var(--green)">0</div><div class="pstat-label">GeoPoints</div></div>
-        <div class="pstat"><div class="pstat-value" style="color:var(--gold)">0</div><div class="pstat-label" data-i18n="profile_stat_trust">Trust Score</div></div>
+        <div class="pstat"><div class="pstat-value" style="color:var(--gold)">0</div><div class="pstat-label" data-i18n="profile_stat_trust">ნდობის ქულა</div></div>
       </div>
       <div class="profile-actions">
         <button class="btn btn-ghost btn-sm"><i class="fas fa-envelope"></i></button>
         <button class="btn btn-ghost btn-sm"><i class="fas fa-share-alt"></i></button>
-        <button class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> Follow</button>
-        <button class="btn btn-ghost btn-sm" id="cfManageBtn" style="display:none;color:#22c55e" title="Close Friends"><i class="fas fa-star"></i> <span data-i18n="profile_close_fr">Close Friends</span></button>
+        <button class="btn btn-primary btn-sm"><i class="fas fa-user-plus"></i> გამოწერა</button>
+        <button class="btn btn-ghost btn-sm" id="cfManageBtn" style="display:none;color:#22c55e" title="ახლო მეგობრები"><i class="fas fa-star"></i> <span data-i18n="profile_close_fr">ახლო მეგობრები</span></button>
         <a href="lifegraph.html" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none"><i class="fas fa-chart-line"></i> <span data-i18n="profile_life_graph">Life Graph</span></a>
       </div>
     </div>
@@ -129,8 +128,8 @@
   <!-- XP Progress -->
   <div class="xp-progress-section">
     <div class="xp-left">
-      <div class="xp-level-pill"><i class="fas fa-bolt"></i> Level 1</div>
-      <span class="xp-title-text">New Explorer</span>
+      <div class="xp-level-pill"><i class="fas fa-bolt"></i> დონე 1</div>
+      <span class="xp-title-text">ახალი აღმომჩენი</span>
     </div>
     <div class="xp-bar-wrap">
       <div class="xp-bar-track">
@@ -139,7 +138,7 @@
       <div class="xp-bar-numbers">0 / 1000 XP</div>
     </div>
     <div class="xp-right">
-      <span class="xp-to-next">1000 XP to Level 2</span>
+      <span class="xp-to-next">1000 XP დონე 2-მდე</span>
     </div>
   </div>
 
@@ -154,9 +153,9 @@
     <div class="ptab ptab-extra" data-tab="businesses" style="display:none"><span data-i18n="nav_business">ბიზნესები</span> <span class="tab-count">0</span></div>
     <div class="ptab ptab-extra" data-tab="videos" style="display:none"><span data-i18n="nav_videos">ვიდეო</span> <span class="tab-count"></span></div>
     <div class="ptab ptab-extra" data-tab="badges" style="display:none"><span data-i18n="profile_badges">ბეჯები</span> <span class="tab-count">0</span></div>
-    <div class="ptab ptab-extra" data-tab="travel" style="display:none"><span data-i18n="profile_travel">✈️ Travel</span> <span class="tab-count"></span></div>
+    <div class="ptab ptab-extra" data-tab="travel" style="display:none"><span data-i18n="profile_travel">✈️ მოგზაურობა</span> <span class="tab-count"></span></div>
     <div class="ptab ptab-extra" data-tab="saved" style="display:none"><span data-i18n="profile_saved">შენახული</span> <span class="tab-count"></span></div>
-    <div class="ptab ptab-extra" data-tab="archive" id="archiveTabBtn" style="display:none"><span data-i18n="profile_archive_tab">📁 Archive</span> <span class="tab-count" id="archiveTabCount"></span></div>
+    <div class="ptab ptab-extra" data-tab="archive" id="archiveTabBtn" style="display:none"><span data-i18n="profile_archive_tab">📁 არქივი</span> <span class="tab-count" id="archiveTabCount"></span></div>
     <div class="ptab ptab-more-btn" id="ptabMoreBtn" onclick="window.toggleExtraTabs()">მეტი ▾</div>
   </div>
 </div>
@@ -169,45 +168,45 @@
 
     <!-- Intro Card -->
     <div class="sidebar-card">
-      <div class="sidebar-card-title" data-i18n="profile_intro_title">Intro</div>
-      <div class="intro-item"><i class="fas fa-map-marker-alt"></i> No location set</div>
-      <div class="intro-item"><i class="fas fa-hiking"></i> Explorer</div>
-      <div class="intro-item"><i class="fas fa-calendar-alt"></i> Join date not set</div>
-      <div class="intro-item"><i class="fas fa-globe"></i> No public username set</div>
+      <div class="sidebar-card-title" data-i18n="profile_intro_title">შესახებ</div>
+      <div class="intro-item"><i class="fas fa-map-marker-alt"></i> მდებარეობა არ არის მითითებული</div>
+      <div class="intro-item"><i class="fas fa-hiking"></i> აღმომჩენი</div>
+      <div class="intro-item"><i class="fas fa-calendar-alt"></i> შემოერთების თარიღი უცნობია</div>
+      <div class="intro-item"><i class="fas fa-globe"></i> საჯარო username არ არის</div>
       <div class="intro-divider"></div>
       <div class="followers-preview-row">
         <div class="followers-thumbs"></div>
-        <div class="followers-preview-text">No followers yet</div>
+        <div class="followers-preview-text">გამომწერები ჯერ არ არის</div>
       </div>
     </div>
 
     <!-- Activity Identity -->
     <div class="sidebar-card">
-      <div class="sidebar-card-title" data-i18n="profile_activity_id">Activity Identity</div>
-      <div class="explorer-type">🏔️ Explorer</div>
+      <div class="sidebar-card-title" data-i18n="profile_activity_id">აქტივობის პროფილი</div>
+      <div class="explorer-type">🏔️ აღმომჩენი</div>
       <div class="lifestyle-scores"></div>
       <div class="fav-cats"></div>
     </div>
 
     <!-- Social Proof Mini Stats -->
     <div class="sidebar-card">
-      <div class="sidebar-card-title" data-i18n="profile_social_proof">Social Proof</div>
+      <div class="sidebar-card-title" data-i18n="profile_social_proof">სოციალური სტატისტიკა</div>
       <div class="social-proof-grid">
         <div class="sp-card">
           <div class="sp-icon green">🏙️</div>
-          <div><div id="spCitiesVal" class="sp-value">0</div><div class="sp-label" data-i18n="profile_sp_cities">Cities</div></div>
+          <div><div id="spCitiesVal" class="sp-value">0</div><div class="sp-label" data-i18n="profile_sp_cities">ქალაქები</div></div>
         </div>
         <div class="sp-card">
           <div class="sp-icon blue">👥</div>
-          <div><div id="spFriendsVal" class="sp-value">0</div><div class="sp-label" data-i18n="profile_sp_invited">Invited</div></div>
+          <div><div id="spFriendsVal" class="sp-value">0</div><div class="sp-label" data-i18n="profile_sp_invited">მოწვეული</div></div>
         </div>
         <div class="sp-card">
           <div class="sp-icon gold">👍</div>
-          <div><div id="spLikesVal" class="sp-value">0</div><div class="sp-label" data-i18n="profile_sp_likes">Likes</div></div>
+          <div><div id="spLikesVal" class="sp-value">0</div><div class="sp-label" data-i18n="profile_sp_likes">მოწონებები</div></div>
         </div>
         <div class="sp-card">
           <div class="sp-icon purple">🎉</div>
-          <div><div id="spGroupsVal" class="sp-value">0</div><div class="sp-label" data-i18n="profile_sp_groups">Groups</div></div>
+          <div><div id="spGroupsVal" class="sp-value">0</div><div class="sp-label" data-i18n="profile_sp_groups">ჯგუფები</div></div>
         </div>
       </div>
     </div>
@@ -220,17 +219,17 @@
       <div class="mini-wallet-header">
         <div>
           <div class="mini-wallet-pts">0 pts</div>
-          <div class="mini-wallet-label">GeoPoints · New Tier</div>
+          <div class="mini-wallet-label">GeoPoints · ახალი დონე</div>
         </div>
-        <a href="#" class="btn btn-primary btn-xs" onclick="switchTab('rewards');return false" data-i18n="profile_wallet_btn">Wallet</a>
+        <a href="#" class="btn btn-primary btn-xs" onclick="switchTab('rewards');return false" data-i18n="profile_wallet_btn">საფულე</a>
       </div>
       <div class="mini-wallet-progress"><div class="mini-wallet-fill"></div></div>
-      <div class="mini-wallet-sub"><strong>0 pts</strong> earned · no active coupons</div>
+      <div class="mini-wallet-sub">დაგროვილი: <strong>0 ქულა</strong> · აქტიური კუპონი არ არის</div>
     </div>
 
     <!-- Trust Score -->
     <div class="sidebar-card">
-      <div class="sidebar-card-title" data-i18n="profile_trust_title">Trust &amp; Verification</div>
+      <div class="sidebar-card-title" data-i18n="profile_trust_title">ნდობა და ვერიფიკაცია</div>
       <div class="trust-circle-wrap">
         <div class="trust-circle">
           <div class="trust-circle-inner">
@@ -239,44 +238,44 @@
           </div>
         </div>
         <div>
-          <div class="trust-info-label">New account</div>
-          <div class="trust-info-sub">Trust score appears after real activity</div>
+          <div class="trust-info-label">ახალი ანგარიში</div>
+          <div class="trust-info-sub">ნდობის ქულა რეალური აქტივობის შემდეგ გამოჩნდება</div>
         </div>
       </div>
       <div class="trust-items" id="trustItemsList">
-        <div class="trust-item ok"><i class="fas fa-check-circle"></i> Profile created</div>
-        <div class="trust-item warn"><i class="fas fa-camera"></i> No camera proofs yet</div>
-        <div class="trust-item warn"><i class="fas fa-map-marker-alt"></i> No real check-ins yet</div>
-        <div class="trust-item warn"><i class="fas fa-phone"></i> Phone not verified</div>
-        <div class="trust-item warn"><i class="fas fa-id-card"></i> ID not verified yet</div>
+        <div class="trust-item ok"><i class="fas fa-check-circle"></i> პროფილი შექმნილია</div>
+        <div class="trust-item warn"><i class="fas fa-camera"></i> კამერით დადასტურება ჯერ არ არის</div>
+        <div class="trust-item warn"><i class="fas fa-map-marker-alt"></i> Check-in ჯერ არ არის</div>
+        <div class="trust-item warn"><i class="fas fa-phone"></i> ტელეფონი არ არის დადასტურებული</div>
+        <div class="trust-item warn"><i class="fas fa-id-card"></i> პირადობა არ არის დადასტურებული</div>
       </div>
     </div>
 
     <!-- Georgia Discovery Map -->
     <div class="sidebar-card geo-map-widget">
-      <div class="geo-map-widget-title"><span data-i18n="profile_disc_map">Discovery Map</span> <span style="color:var(--green);font-weight:700" id="citiesVisited">0 cities</span></div>
+      <div class="geo-map-widget-title"><span data-i18n="profile_disc_map">აღმოჩენის რუქა</span> <span style="color:var(--green);font-weight:700" id="citiesVisited">0 ქალაქი</span></div>
       <div class="geo-map-container">
         <div class="geo-shape"></div>
         <div class="city-pin" style="left:55%;top:62%"><div class="city-pin-dot"></div><div class="city-pin-label">Tbilisi</div></div>
         <div class="city-pin" style="left:43%;top:74%"><div class="city-pin-dot"></div><div class="city-pin-label">Borjomi</div></div>
       </div>
       <div class="geo-map-legend">
-        <span class="leg-visited" data-i18n="profile_leg_visited">Visited</span>
-        <span class="leg-current" data-i18n="profile_leg_current">Current</span>
-        <span class="leg-notvisited" data-i18n="profile_leg_notyet">Not yet</span>
+        <span class="leg-visited" data-i18n="profile_leg_visited">ნანახი</span>
+        <span class="leg-current" data-i18n="profile_leg_current">ახლანდელი</span>
+        <span class="leg-notvisited" data-i18n="profile_leg_notyet">ჯერ არა</span>
       </div>
     </div>
 
     <!-- Activity Feed (mini) -->
     <div class="sidebar-card activity-feed">
-      <div class="activity-feed-title" data-i18n="profile_recent_act">Recent Activity</div>
-      <div class="activity-feed-list"><div style="color:var(--text-muted);font-size:0.85rem;padding:12px 0">No real activity yet</div></div>
+      <div class="activity-feed-title" data-i18n="profile_recent_act">ბოლო აქტივობა</div>
+      <div class="activity-feed-list"><div style="color:var(--text-muted);font-size:0.85rem;padding:12px 0">აქტივობა ჯერ არ არის</div></div>
     </div>
 
     <!-- Suggested People -->
     <div class="following-card sidebar-card">
-      <div class="following-header" data-i18n="profile_people_know">People You May Know</div>
-      <div style="padding:16px 0;text-align:center;color:var(--text-muted);font-size:0.85rem">No suggestions yet</div>
+      <div class="following-header" data-i18n="profile_people_know">შესაძლოა იცნობდე</div>
+      <div style="padding:16px 0;text-align:center;color:var(--text-muted);font-size:0.85rem">შემოთავაზებები ჯერ არ არის</div>
     </div>
 
   </div><!-- /profile-sidebar -->
@@ -288,39 +287,39 @@
     <div class="profile-highlights">
       <div class="highlight-item highlight-add" data-add-highlight>
         <div class="highlight-ring add-ring"><i class="fas fa-plus"></i></div>
-        <div class="highlight-label" data-i18n="profile_new_hl">New</div>
+        <div class="highlight-label" data-i18n="profile_new_hl">ახალი</div>
       </div>
     </div>
 
     <!-- ── POSTS TAB ── -->
-    <div class="tab-panel active" id="tab-posts"><div class="empty-profile-state"><i class="fas fa-spinner fa-spin"></i><p>Loading real posts…</p></div></div>
+    <div class="tab-panel active" id="tab-posts"><div class="empty-profile-state"><i class="fas fa-spinner fa-spin"></i><p>პოსტები იტვირთება…</p></div></div>
 
     <!-- ── ABOUT TAB ── -->
-    <div class="tab-panel" id="tab-about"><div class="empty-profile-state"><i class="fas fa-user"></i><h3>Loading…</h3></div></div>
+    <div class="tab-panel" id="tab-about"><div class="empty-profile-state"><i class="fas fa-user"></i><h3>იტვირთება…</h3></div></div>
 
     <!-- ── GALLERY TAB ── -->
-    <div class="tab-panel" id="tab-gallery"><div class="empty-profile-state"><i class="fas fa-images"></i><h3>No photos yet</h3><p>Posts with photos will appear here.</p></div></div>
+    <div class="tab-panel" id="tab-gallery"><div class="empty-profile-state"><i class="fas fa-images"></i><h3>ფოტოები ჯერ არ არის</h3><p>ფოტოიანი პოსტები აქ გამოჩნდება.</p></div></div>
 
-    <div class="tab-panel" id="tab-friends"><div class="empty-profile-state"><i class="fas fa-user-group"></i><h3>No friends yet</h3><p>Friends and incoming requests will appear here.</p></div></div>
+    <div class="tab-panel" id="tab-friends"><div class="empty-profile-state"><i class="fas fa-user-group"></i><h3>მეგობრები ჯერ არ არიან</h3><p>მეგობრები და მოთხოვნები აქ გამოჩნდება.</p></div></div>
 
-    <div class="tab-panel" id="tab-checkins"><div class="empty-profile-state"><i class="fas fa-location-dot"></i><h3>No check-ins yet</h3><p>Real Firestore check-ins will appear here.</p></div></div>
+    <div class="tab-panel" id="tab-checkins"><div class="empty-profile-state"><i class="fas fa-location-dot"></i><h3>Check-in ჯერ არ არის</h3><p>შენი check-in-ები აქ გამოჩნდება.</p></div></div>
 
-    <div class="tab-panel" id="tab-businesses"><div class="empty-profile-state"><i class="fas fa-store"></i><h3>No businesses yet</h3><p>Managed business pages will appear here.</p></div></div>
+    <div class="tab-panel" id="tab-businesses"><div class="empty-profile-state"><i class="fas fa-store"></i><h3>ბიზნესები ჯერ არ არის</h3><p>შენი ბიზნეს-გვერდები აქ გამოჩნდება.</p></div></div>
 
-    <div class="tab-panel" id="tab-videos"><div class="empty-profile-state"><i class="fas fa-film"></i><h3>No videos yet</h3><p>GeoHub-ზე ატვირთული ვიდეოები გამოჩნდება აქ.</p></div></div>
+    <div class="tab-panel" id="tab-videos"><div class="empty-profile-state"><i class="fas fa-film"></i><h3>ვიდეოები ჯერ არ არის</h3><p>GeoHub-ზე ატვირთული ვიდეოები გამოჩნდება აქ.</p></div></div>
 
-    <div class="tab-panel" id="tab-badges"><div class="empty-profile-state"><i class="fas fa-medal"></i><h3>No badges yet</h3><p>Badges appear after check-ins, posts and community actions.</p></div></div>
+    <div class="tab-panel" id="tab-badges"><div class="empty-profile-state"><i class="fas fa-medal"></i><h3>ბეჯები ჯერ არ არის</h3><p>ბეჯები check-in-ების, პოსტების და აქტივობის შემდეგ გამოჩნდება.</p></div></div>
 
-    <div class="tab-panel" id="tab-travel"><div class="empty-profile-state"><i class="fas fa-plane"></i><h3>Loading travel history…</h3></div></div>
+    <div class="tab-panel" id="tab-travel"><div class="empty-profile-state"><i class="fas fa-plane"></i><h3>მოგზაურობის ისტორია იტვირთება…</h3></div></div>
 
     <div class="tab-panel" id="tab-saved">
       <div id="saved-posts-section"></div>
       <div id="saved-places-section"></div>
-      <div id="saved-empty-state" class="empty-profile-state"><i class="fas fa-bookmark"></i><h3>Nothing saved yet</h3><p>Save posts and places to find them here.</p></div>
+      <div id="saved-empty-state" class="empty-profile-state"><i class="fas fa-bookmark"></i><h3>შენახული არაფერია</h3><p>შეინახე პოსტები და ადგილები — აქ იპოვი.</p></div>
     </div>
 
     <div class="tab-panel" id="tab-archive">
-      <div class="empty-profile-state"><i class="fas fa-archive"></i><h3>Loading...</h3></div>
+      <div class="empty-profile-state"><i class="fas fa-archive"></i><h3>იტვირთება...</h3></div>
     </div>
 
       </div><!-- /profile-main -->
