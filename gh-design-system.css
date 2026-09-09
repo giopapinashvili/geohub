@@ -862,6 +862,101 @@ body.gh-sidebar-collapsed .gh-nav-collapse i { transform: rotate(180deg); }
   .gh-card, .gh-post { transition: none !important; }
 }
 
+/* ── Comments and replies ────────────────────────────────────────────────
+   Facebook's anatomy, which is the one people already know how to read:
+     avatar · grey bubble holding the name and the text · a bare actions row
+     under the bubble · replies indented with a rail back to the parent.       */
+
+.gh-comments { padding: 0 16px 14px !important; }
+.gh-comment-row { display: flex; gap: 8px; margin: 10px 0 !important; align-items: flex-start; }
+.gh-comment-main { flex: 1; min-width: 0; }
+
+/* The bubble is a fill, not a bordered box — the border made every comment
+   look like a card of its own. */
+.gh-comment-bubble {
+  background: var(--ds-surface-2) !important;
+  border: 0 !important;
+  border-radius: 18px !important;
+  padding: 8px 12px !important;
+  display: inline-block;
+  max-width: 100%;
+  line-height: 1.45;
+}
+.gh-comment-bubble .gh-comment-name,
+.gh-comment-bubble b, .gh-comment-bubble strong {
+  display: block;
+  font-size: .8rem; font-weight: 700; color: var(--ds-text);
+  margin-bottom: 1px;
+}
+.gh-comment-bubble span, .gh-comment-text {
+  font-size: .875rem !important; color: var(--ds-text) !important;
+}
+.gh-comment-bubble:hover { background: var(--ds-surface-3) !important; }
+
+/* Actions sit under the bubble as plain words, the way Facebook does it. */
+.gh-comment-actions {
+  display: flex; gap: 14px; align-items: center;
+  margin: 3px 0 0 12px !important;
+  font-size: .74rem !important; font-weight: 700;
+  color: var(--ds-text-3) !important;
+}
+.gh-comment-actions button, .gh-comment-actions a {
+  background: none; border: 0; padding: 0; font: inherit; cursor: pointer;
+  color: var(--ds-text-3); text-decoration: none;
+}
+.gh-comment-actions button:hover, .gh-comment-actions a:hover {
+  color: var(--ds-text); text-decoration: underline;
+}
+.gh-comment-actions [data-cmt-like].active { color: var(--ds-h-live-ink); }
+
+/* A reply is the same object, one step in, with a rail back to its parent. */
+.gh-reply-row {
+  position: relative;
+  margin-left: 42px !important;
+  padding-left: 14px;
+}
+.gh-reply-row::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0; top: -6px; bottom: 50%;
+  width: 12px;
+  border-inline-start: 2px solid var(--ds-line);
+  border-bottom: 2px solid var(--ds-line);
+  border-end-start-radius: 10px;
+  pointer-events: none;
+}
+.gh-reply-avatar { width: 28px !important; height: 28px !important; }
+.gh-reply-row .gh-comment-bubble { border-radius: 16px !important; }
+
+/* Composer: one pill, avatar outside it, actions inside on the right. */
+.gh-comment-form, .gh-reply-form {
+  display: flex; gap: 8px; align-items: center;
+  margin-top: 10px !important; border-top: 0 !important; padding: 0 !important;
+}
+.gh-reply-form { margin-left: 42px !important; }
+.gh-comment-form .gh-input, .gh-reply-form .gh-input {
+  flex: 1; min-width: 0;
+  background: var(--ds-surface-2) !important;
+  border: 1px solid transparent !important;
+  border-radius: 999px !important;
+  padding: 9px 14px !important;
+  color: var(--ds-text) !important;
+  font: inherit; font-size: .875rem;
+}
+.gh-comment-form .gh-input:focus, .gh-reply-form .gh-input:focus {
+  outline: none;
+  border-color: var(--ds-accent-line) !important;
+  background: var(--ds-surface) !important;
+}
+.gh-comment-emoji, .gh-comment-mic {
+  background: none !important; border: 0 !important;
+  color: var(--ds-text-3) !important; cursor: pointer; padding: 4px 6px;
+  border-radius: 50%;
+}
+.gh-comment-emoji:hover, .gh-comment-mic:hover {
+  color: var(--ds-accent) !important; background: var(--ds-surface-2) !important;
+}
+
 /* ── Profile header ──────────────────────────────────────────────────────
    The identity row is one line: avatar, then the name column taking whatever
    is left, then the stats and actions sized to their content. Before this the

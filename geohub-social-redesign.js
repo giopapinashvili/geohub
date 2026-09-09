@@ -5518,11 +5518,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if(box && state.openCommentPids[pid]) box.hidden=false;
       /* #48 Sort bar HTML */
       var sortBarHtml = '<div class="gh-cmt-sort-bar" data-cmt-sort-bar="'+pid+'">'+
-        '<button class="gh-cmt-sort-btn'+(sortMode==='new'?' active':'')+'" data-cmt-sort-pid="'+pid+'" data-cmt-sort-val="new">New</button>'+
-        '<button class="gh-cmt-sort-btn'+(sortMode==='top'?' active':'')+'" data-cmt-sort-pid="'+pid+'" data-cmt-sort-val="top">Top</button>'+
+        '<button class="gh-cmt-sort-btn'+(sortMode==='new'?' active':'')+'" data-cmt-sort-pid="'+pid+'" data-cmt-sort-val="new" data-i18n="cmt_sort_new">ახალი</button>'+
+        '<button class="gh-cmt-sort-btn'+(sortMode==='top'?' active':'')+'" data-cmt-sort-pid="'+pid+'" data-cmt-sort-val="top" data-i18n="cmt_sort_top">პოპულარული</button>'+
         '</div>';
       if(!visible.length){
-        list.innerHTML = sortBarHtml + '<div class="gh-small" style="padding:10px 6px">No comments yet.</div>';
+        list.innerHTML = sortBarHtml + '<div class="gh-small" style="padding:10px 6px">'+_srt('cmt_none','კომენტარი ჯერ არ არის.')+'</div>';
         return;
       }
       if(wasEmpty){
@@ -5686,7 +5686,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       (isPostOwner ? ' · <button type="button" class="gh-cmt-act gh-cmt-pin-btn'+(c.pinned?' gh-cmt-pinned':'')+'" data-pin-comment data-comment-id="'+esc(c.id)+'" data-post-id="'+esc(pid)+'" data-pinned="'+(c.pinned?'1':'0')+'">'+(c.pinned?'Unpin':'Pin')+'</button>' : '');
     var rxCount = Number(c.reactionCount||0);
     var rxType = c._myRxType||'';
-    var rxLabel = rxType ? (RX_EMOJIS[rxType]+' '+(rxCount||1)) : '❤️ '+(rxCount||'Like');
+    var rxLabel = rxType ? (RX_EMOJIS[rxType]+' '+(rxCount||1)) : '❤️ '+(rxCount||_srt('post_action_like','მოწონება'));
     var cmtVoiceHtml = c.voiceUrl ? '<div class="gh-cmt-voice-note"><audio controls src="'+esc(c.voiceUrl)+'" preload="none" style="height:32px;max-width:220px;border-radius:20px;margin-top:4px"></audio></div>' : '';
     var pinnedBadge = c.pinned ? '<span class="gh-cmt-pin-badge"><i class="fas fa-thumbtack"></i> Pinned</span>' : '';
     // #50 Vote score
@@ -5701,14 +5701,16 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     return '<div class="gh-comment-row'+(c.pinned?' gh-cmt-pinned-row':'')+'" data-comment-id="'+esc(c.id)+'">'+
       avAnchor+
       '<div class="gh-comment-main">'+pinnedBadge+'<div class="gh-comment-bubble"><strong>'+nameAnchor+'</strong>'+(c.text?'<span class="gh-cmt-text" data-cmt-text>'+esc(c.text)+'</span>':'')+cmtVoiceHtml+'</div>'+
-      '<div class="gh-small gh-comment-actions"><span data-cmt-time="'+(c.createdAt&&c.createdAt.toMillis?c.createdAt.toMillis():0)+'">'+timeAgo(c.createdAt)+'</span> · <button type="button" data-comment-reply data-comment-id="'+esc(c.id)+'">Reply</button>'+
-      ' · <span class="gh-cmt-rx-wrap"><button type="button" class="gh-cmt-act gh-cmt-rx-btn'+(rxType?' active':'')+'" data-comment-like data-comment-id="'+esc(c.id)+'" data-comment-reaction="'+esc(rxType||'like')+'">'+rxLabel+'</button>'+
+      '<div class="gh-small gh-comment-actions">'+
+      '<span class="gh-cmt-rx-wrap"><button type="button" class="gh-cmt-act gh-cmt-rx-btn'+(rxType?' active':'')+'" data-comment-like data-comment-id="'+esc(c.id)+'" data-comment-reaction="'+esc(rxType||'like')+'">'+rxLabel+'</button>'+
       '<span class="gh-cmt-rx-picker" data-rx-picker="'+esc(c.id)+'">'+Object.keys(RX_EMOJIS).map(function(t){ return '<button type="button" class="gh-cmt-rx-pick" data-comment-like data-comment-id="'+esc(c.id)+'" data-comment-reaction="'+t+'">'+RX_EMOJIS[t]+'</button>'; }).join('')+'</span></span>'+
+      ' · <button type="button" data-comment-reply data-comment-id="'+esc(c.id)+'" data-i18n="cmt_reply">პასუხი</button>'+
+      ' · <span data-cmt-time="'+(c.createdAt&&c.createdAt.toMillis?c.createdAt.toMillis():0)+'">'+timeAgo(c.createdAt)+'</span>'+
       ' · '+voteHtml+
       ownerBtns+'</div>'+
-      '<form class="gh-reply-form" data-reply-form data-comment-id="'+esc(c.id)+'" hidden><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" placeholder="Write a reply…"><button class="gh-btn sm"><i class="fas fa-paper-plane"></i></button></form>'+
+      '<form class="gh-reply-form" data-reply-form data-comment-id="'+esc(c.id)+'" hidden><button class="gh-comment-emoji" type="button" title="Emoji"><i class="fas fa-face-smile"></i></button><input class="gh-input" data-i18n-placeholder="cmt_reply_ph" placeholder="დაწერე პასუხი…"><button class="gh-btn sm"><i class="fas fa-paper-plane"></i></button></form>'+
       '<div class="gh-replies" data-replies-for="'+esc(c.id)+'"></div>'+
-      (c.replyCount>0 ? '<button class="gh-cmt-act gh-collapse-thread" data-collapse-replies="'+esc(c.id)+'"><i class="fas fa-chevron-up"></i> Hide replies</button>' : '')+
+      (c.replyCount>0 ? '<button class="gh-cmt-act gh-collapse-thread" data-collapse-replies="'+esc(c.id)+'"><i class="fas fa-chevron-up"></i> <span data-i18n="cmt_hide_replies">პასუხების დამალვა</span></button>' : '')+
       '</div></div>';
   }
 
@@ -6423,14 +6425,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     document.getElementById('ghFpmClose').addEventListener('click', closeFpm);
 
     fs().getDoc(fs().doc(db(), 'posts', pid)).then(function(snap) {
-      if (!snap.exists()) { document.getElementById('ghFpmBody').innerHTML = '<p class="gh-fpm-empty">Post not found.</p>'; return; }
+      if (!snap.exists()) { document.getElementById('ghFpmBody').innerHTML = '<p class="gh-fpm-empty">'+_srt('post_not_found','პოსტი ვერ მოიძებნა')+'</p>'; return; }
       var p = Object.assign({ id: pid }, snap.data());
-      if (p.status === 'deleted') { document.getElementById('ghFpmBody').innerHTML = '<p class="gh-fpm-empty">This post was deleted.</p>'; return; }
+      if (p.status === 'deleted') { document.getElementById('ghFpmBody').innerHTML = '<p class="gh-fpm-empty">'+_srt('post_deleted','ეს პოსტი წაშლილია')+'</p>'; return; }
 
       var titleEl = overlay.querySelector('.gh-fpm-title');
       if (titleEl) {
         var pName = p.authorName || p.userName || p.businessName || '';
-        titleEl.textContent = pName ? pName + "’s post" : 'Post';
+        // Georgian marks possession with a suffix, not an apostrophe: "X-ის პოსტი".
+        titleEl.textContent = pName ? pName + '-ის ' + _srt('cmt_modal_post', 'პოსტი') : _srt('cmt_modal_post', 'პოსტი');
       }
       var cardHtml = postCard(p, {});
       var body = document.getElementById('ghFpmBody');
@@ -6473,7 +6476,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       if (typeof hydrateSharedPreviews === 'function') hydrateSharedPreviews(body);
     }).catch(function(err) {
       var b = document.getElementById('ghFpmBody');
-      if (b) b.innerHTML = '<p class="gh-fpm-empty">Could not load post.</p>';
+      if (b) b.innerHTML = '<p class="gh-fpm-empty">'+_srt('post_load_fail','პოსტი ვერ ჩაიტვირთა')+'</p>';
       console.error('[GeoHub] openFocusedPost', err);
     });
   }
