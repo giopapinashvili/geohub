@@ -302,7 +302,7 @@
         var el = document.getElementById('ghCallQuality');
         if (!el) return;
         if (rtt === null)  { el.title = ''; el.style.color = 'rgba(255,255,255,.4)'; return; }
-        if (rtt < 120)     { el.title = 'კარგი'; el.style.color = '#22c55e'; }
+        if (rtt < 120)     { el.title = 'კარგი'; el.style.color = 'var(--ds-accent)'; }
         else if (rtt < 280){ el.title = 'საშუალო'; el.style.color = '#f59e0b'; }
         else               { el.title = 'ცუდი';  el.style.color = '#ef4444'; }
       } catch (e) {}

@@ -24,14 +24,14 @@ html[data-gh-theme="dark"] {
   color-scheme: dark;
 
   /* Ground — near-black, biased green so it belongs to the brand */
-  --ds-bg:            #060a09;
-  --ds-bg-deep:       #030605;
+  --ds-bg:            #0d0f13;
+  --ds-bg-deep:       #08090c;
 
   /* Surfaces lift off the ground in even steps */
-  --ds-surface:       #0e1614;   /* resting card                       */
-  --ds-surface-2:     #141e1b;   /* inset: inputs, wells, table stripes */
-  --ds-surface-3:     #1b2723;   /* hover / raised                     */
-  --ds-surface-over:  #101a17;   /* modals, popovers, dropdowns        */
+  --ds-surface:       #1b1e24;   /* resting card                       */
+  --ds-surface-2:     #23272e;   /* inset: inputs, wells, table stripes */
+  --ds-surface-3:     #2a2f37;   /* hover / raised                     */
+  --ds-surface-over:  #1e2128;   /* modals, popovers, dropdowns        */
 
   /* Hairlines */
   --ds-line:          rgba(255,255,255,.075);
@@ -39,18 +39,18 @@ html[data-gh-theme="dark"] {
   --ds-line-strong:   rgba(255,255,255,.14);
 
   /* Ink */
-  --ds-text:          #e9f3ef;
-  --ds-text-2:        #a9c1b8;
-  --ds-text-3:        #75908a;
+  --ds-text:          #e8eaed;
+  --ds-text-2:        #b7bdc7;
+  --ds-text-3:        #8e96a3;
   --ds-text-inverse:  #04100c;
 
   /* Brand */
-  --ds-accent:        #16dc95;
-  --ds-accent-hi:     #4df0b6;
-  --ds-accent-lo:     #06b87a;
-  --ds-accent-rgb:    22,220,149;   /* for rgba() call sites in legacy CSS */
-  --ds-accent-wash:   rgba(22,220,149,.16);
-  --ds-accent-line:   rgba(22,220,149,.40);
+  --ds-accent:        #4a9bff;   /* 7.04:1 on the dark ground        */
+  --ds-accent-hi:     #7ab8ff;
+  --ds-accent-lo:     #2d82ff;
+  --ds-accent-rgb:    74,155,255;   /* for rgba() call sites in legacy CSS */
+  --ds-accent-wash:   rgba(74,155,255,.16);
+  --ds-accent-line:   rgba(74,155,255,.42);
 
   /* Detail hues — one per content type. On a near-black ground chroma is free,
      so these run bright; every one clears 5.4:1 against the card surface. */
@@ -72,7 +72,7 @@ html[data-gh-theme="dark"] {
   --ds-h-event-on:    #1a0c00;
   --ds-h-market-on:   #041518;
   --ds-h-job-on:      #0a0a20;
-  --ds-accent-on:     #04120c;
+  --ds-accent-on:     #04121f;   /* white on this blue is 2.8:1     */
 
   /* Ink tiers — a hue that works as a fill rarely works as small text.
      In dark mode the hues are already light enough to read, so ink == hue. */
@@ -108,11 +108,11 @@ html[data-gh-theme="dark"] {
   --ds-e1: 0 1px 2px rgba(0,0,0,.5), 0 6px 18px -12px rgba(0,0,0,.9), var(--ds-lift);
   --ds-e2: 0 2px 6px rgba(0,0,0,.55), 0 16px 34px -18px rgba(0,0,0,.95), var(--ds-lift);
   --ds-e3: 0 8px 20px rgba(0,0,0,.6), 0 40px 80px -32px rgba(0,0,0,1), var(--ds-lift);
-  --ds-glow:          0 0 0 1px var(--ds-accent-line), 0 8px 32px -8px rgba(22,220,149,.45);
+  --ds-glow:          0 0 0 1px var(--ds-accent-line), 0 8px 32px -8px rgba(74,155,255,.45);
 
   /* The ambient depth layer painted behind every page */
   --ds-ambient:
-    radial-gradient(1100px 620px at 12% -8%,  rgba(22,220,149,.14), transparent 62%),
+    radial-gradient(1100px 620px at 12% -8%,  rgba(74,155,255,.16), transparent 62%),
     radial-gradient(980px 560px at 96% 4%,    rgba(71,190,245,.11), transparent 60%),
     radial-gradient(820px 700px at 50% 108%,  rgba(166,116,251,.085), transparent 64%);
 }
@@ -122,21 +122,21 @@ html[data-gh-theme="light"] {
 
   /* Ground is never pure white — the white belongs to the cards, and the
      contrast between the two is what creates depth. */
-  --ds-bg:            #eef3f1;
-  --ds-bg-deep:       #e4ebe8;
+  --ds-bg:            #f0f2f5;
+  --ds-bg-deep:       #e4e6eb;
 
   --ds-surface:       #ffffff;
-  --ds-surface-2:     #f3f7f5;
+  --ds-surface-2:     #f7f8fa;
   --ds-surface-3:     #ffffff;
   --ds-surface-over:  #ffffff;
 
-  --ds-line:          rgba(9,38,29,.10);
-  --ds-line-soft:     rgba(9,38,29,.06);
-  --ds-line-strong:   rgba(9,38,29,.18);
+  --ds-line:          rgba(15,23,42,.11);
+  --ds-line-soft:     rgba(15,23,42,.06);
+  --ds-line-strong:   rgba(15,23,42,.20);
 
-  --ds-text:          #0a1512;
-  --ds-text-2:        #44574f;
-  --ds-text-3:        #4e6058;   /* 6.69:1 on white, 5.53:1 on the deepest ground */
+  --ds-text:          #0f172a;
+  --ds-text-2:        #3f4a57;
+  --ds-text-3:        #5a6472;   /* 6.00:1 on white, 4.80:1 on the deepest ground */
   --ds-text-inverse:  #ffffff;
 
   /* Two tiers, because one value cannot be both vivid and readable as 12px text.
@@ -144,13 +144,13 @@ html[data-gh-theme="light"] {
        --ds-h-X-on   the ink that sits on that fill (white or near-black)
        --ds-h-X-ink  a deeper cut of the same hue, for small text on light
      Every pair below was measured, not eyeballed. */
-  --ds-accent:        #00734a;   /* 5.91:1 on white — and white on it     */
-  --ds-accent-hi:     #00522f;   /* emphasis = darker here, not lighter    */
-  --ds-accent-lo:     #00653f;   /* hover / pressed                        */
-  --ds-accent-rgb:    0,115,74;
-  --ds-accent-vivid:  #00996b;   /* decoration only — 3.6:1, never as text */
-  --ds-accent-wash:   rgba(0,153,107,.12);
-  --ds-accent-line:   rgba(0,153,107,.34);
+  --ds-accent:        #0d5fd0;   /* 5.89:1 on white — and white on it     */
+  --ds-accent-hi:     #0a4fb0;   /* emphasis = darker in light, not lighter */
+  --ds-accent-lo:     #0b57c9;   /* hover / pressed                        */
+  --ds-accent-rgb:    13,95,208;
+  --ds-accent-vivid:  #1877f2;   /* decoration only — 4.2:1, never as small text */
+  --ds-accent-wash:   rgba(13,95,208,.11);
+  --ds-accent-line:   rgba(13,95,208,.32);
 
   --ds-h-place:       #00996b;
   --ds-h-video:       #0284d8;
@@ -171,7 +171,7 @@ html[data-gh-theme="light"] {
   --ds-h-job-on:      #ffffff;
   --ds-accent-on:     #ffffff;   /* the accent is a dark fill here — 5.91:1 */
 
-  --ds-accent-ink:    #00653f;   /* 5.91:1 even on --ds-bg-deep */
+  --ds-accent-ink:    #0a4fb0;   /* 5.91:1 even on --ds-bg-deep */
   --ds-h-place-ink:   #007a4d;
   --ds-h-video-ink:   #0070b8;
   --ds-h-group-ink:   #6420d4;
@@ -180,7 +180,7 @@ html[data-gh-theme="light"] {
   --ds-h-event-ink:   #ad4a00;
   --ds-h-market-ink:  #00758f;
   --ds-h-job-ink:     #3730d6;
-  --ds-accent-fill:   #007a4d;
+  --ds-accent-fill:   #0d5fd0;
 
   --ds-h-place-wash:  rgba(0,153,107,.12);
   --ds-h-video-wash:  rgba(2,132,216,.12);
@@ -202,7 +202,7 @@ html[data-gh-theme="light"] {
   --ds-e1: 0 1px 2px rgba(9,38,29,.05),  0 6px 16px -10px rgba(9,38,29,.16);
   --ds-e2: 0 2px 4px rgba(9,38,29,.06),  0 14px 30px -14px rgba(9,38,29,.24);
   --ds-e3: 0 8px 16px rgba(9,38,29,.08), 0 36px 70px -28px rgba(9,38,29,.30);
-  --ds-glow:          0 0 0 1px var(--ds-accent-line), 0 8px 26px -8px rgba(0,153,107,.38);
+  --ds-glow:          0 0 0 1px var(--ds-accent-line), 0 8px 26px -8px rgba(13,95,208,.34);
 
   --ds-ambient:
     radial-gradient(1100px 620px at 12% -8%,  rgba(0,153,107,.14), transparent 62%),
@@ -788,6 +788,198 @@ a.gh-card:hover, .gh-card.gh-clickable:hover, a.vid-card:hover, a.biz-card:hover
   transform: translateY(-2px);
   box-shadow: var(--ds-e2) !important;
   border-color: var(--ds-accent-line) !important;
+}
+
+/* ── Top bar: three zones ────────────────────────────────────────────────
+   The bar was a four-track grid with no slack, so the nav sat 158px right of
+   centre at 1440 and every control added squeezed the search field. Two side
+   zones of equal weight and a fixed centre is what actually centres a nav. */
+
+.gh-topbar,
+body.gh-fb-inspired .gh-topbar {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  background: color-mix(in srgb, var(--ds-surface) 86%, transparent) !important;
+  border-bottom: 1px solid var(--ds-line) !important;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 1px 0 var(--ds-line-soft), 0 8px 24px -18px rgba(0,0,0,.55) !important;
+}
+.gh-top-left {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.gh-top-left .gh-top-search { flex: 1 1 auto; min-width: 0; max-width: 420px; }
+.gh-topbar .gh-center-tabs,
+body.gh-fb-inspired .gh-center-tabs { flex: 0 0 auto; }
+.gh-topbar .gh-top-actions,
+body.gh-fb-inspired .gh-top-actions {
+  flex: 1 1 0;
+  min-width: 0;
+  justify-content: flex-end;
+  gap: 8px;
+}
+/* Below the width where a centred nav still fits, the brand mark carries the
+   identity and the wordmark and search step aside rather than compressing. */
+@media (max-width: 1080px) {
+  .gh-top-left .gh-top-search { max-width: 260px; }
+}
+@media (max-width: 860px) {
+  .gh-top-left .gh-top-search { display: none; }
+  .gh-brand span { display: none; }
+}
+
+/* The rail-collapse control, now that it lives in the rail */
+.gh-nav-collapse {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  margin-top: 6px; padding: 11px 13px;
+  background: transparent; border: 0; border-radius: var(--ds-r-md);
+  color: var(--ds-text-3); font: inherit; font-size: .86rem; font-weight: 650;
+  cursor: pointer; text-align: start;
+  transition: background var(--ds-base), color var(--ds-base);
+}
+.gh-nav-collapse:hover { background: var(--ds-surface-2); color: var(--ds-text); }
+body.gh-sidebar-collapsed .gh-nav-collapse i { transform: rotate(180deg); }
+
+/* ── Depth: cards sit above the page, they do not sit in it ──────────────
+   A card reads as floating when three things agree: the surface is lighter
+   than the ground it sits on, a soft shadow spreads well past its edge, and a
+   one-pixel highlight catches the top edge. Flat panels have none of these. */
+
+.gh-card, .gh-panel, .gh-post, .dash-card, .clean-card, .bs-card, .biz-card,
+.vid-card, .sidebar-card, .profile-stats-bar, .gh-right-widget {
+  box-shadow: var(--ds-e2) !important;
+}
+.gh-card:hover, .gh-post:hover, .vid-card:hover, .biz-card:hover, .sidebar-card:hover {
+  box-shadow: var(--ds-e3) !important;
+  border-color: var(--ds-line-strong) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gh-card, .gh-post { transition: none !important; }
+}
+
+/* ── Profile header ──────────────────────────────────────────────────────
+   The identity row is one line: avatar, then the name column taking whatever
+   is left, then the stats and actions sized to their content. Before this the
+   name column was pinned narrow and the stats column ate the slack. */
+
+.profile-identity-inner { align-items: flex-end; gap: 24px; }
+.profile-hero-left  { flex: 1 1 auto; min-width: 0; }
+.profile-name-block { flex: 1 1 auto; min-width: 0; max-width: none !important; }
+.profile-hero-right { flex: 0 0 auto; }
+
+/* A person's name does not hyphenate and does not break mid-word. */
+.profile-name {
+  hyphens: none !important;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+.profile-bio { max-width: 62ch; }
+
+/* The stats strip is a card like everything else, and its cells share one
+   rhythm instead of each sizing to its own label. */
+.profile-stats-bar {
+  background: var(--ds-surface) !important;
+  border: 1px solid var(--ds-line) !important;
+  border-radius: var(--ds-r-lg) !important;
+}
+.profile-stats-bar .pstat { min-width: 84px; border-right-color: var(--ds-line-soft) !important; }
+.profile-stats-bar .pstat:last-child { border-right: 0 !important; }
+
+/* Actions wrap onto their own line rather than colliding with the name column */
+.profile-actions { justify-content: flex-end; row-gap: 8px; }
+
+@media (max-width: 1100px) {
+  .profile-identity-inner { flex-direction: column; align-items: stretch; }
+  .profile-hero-right { align-items: stretch; }
+  .profile-stats-bar { overflow-x: auto; }
+  .profile-actions { justify-content: flex-start; }
+}
+
+/* ── The feed: one card per post, not a card inside a card ───────────────
+   Two designs had been layered here. An early one made each post its own
+   card; a later "remove the blue bleed between posts" fix instead made
+   #ghFeedList one big card and stripped the posts back to rows inside it.
+   Neither was removed, so the list painted its own surface and radius AND
+   every post painted a second card on top of it — visibly nested, with the
+   post's rounded corners floating inside the list's rounded corners.
+
+   The post is the card. The list is a stack.                              */
+
+#ghFeedList,
+.gh-feed-list,
+body.gh-fb-inspired #ghFeedList {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* The post card itself. Several older rules painted it translucent
+   (rgba(255,255,255,.97), rgba(10,22,38,.9)) which, against a ground only a
+   shade away, made it read as a tint rather than as a card. An opaque surface
+   plus the elevation ramp is what makes it sit above the page. */
+.gh-post,
+body.gh-fb-inspired .gh-post,
+html[data-gh-theme="light"] body.gh-fb-inspired .gh-post,
+html[data-gh-theme="dark"] body.gh-fb-inspired .gh-post {
+  background: var(--ds-surface) !important;
+  background-image: none !important;
+  border-color: var(--ds-line) !important;
+}
+/* The action row is part of the card, not a strip under it. */
+.gh-post-actions,
+body.gh-fb-inspired .gh-post-actions {
+  background: transparent !important;
+  padding: 4px 8px 6px !important;
+}
+.gh-act, body.gh-fb-inspired .gh-act {
+  color: var(--ds-text-2) !important;
+  font-weight: 700 !important;
+  letter-spacing: -.005em;
+}
+.gh-act:hover, body.gh-fb-inspired .gh-act:hover {
+  background: var(--ds-surface-2) !important;
+  color: var(--ds-text) !important;
+}
+/* Each verb keeps its own colour when it is the active state */
+.gh-act[data-like].active,  body.gh-fb-inspired .gh-act[data-like].active  { color: var(--ds-h-live-ink) !important; }
+.gh-act[data-save].active,  body.gh-fb-inspired .gh-act[data-save].active  { color: var(--ds-h-reward-ink) !important; }
+.gh-act[data-share].active, body.gh-fb-inspired .gh-act[data-share].active { color: var(--ds-h-group-ink) !important; }
+
+/* Spacing comes from the stack's gap, so the post carries none of its own —
+   otherwise the two add up and the feed drifts apart. */
+#ghFeedList > .gh-post,
+.gh-feed-list > .gh-post,
+body.gh-fb-inspired #ghFeedList > .gh-post {
+  margin: 0 !important;
+  border-radius: var(--ds-r-lg) !important;
+  border: 1px solid var(--ds-line) !important;
+}
+
+/* One divider above the action row, not two.
+   .gh-post-stats drew a border-bottom and .gh-post-actions drew a border-top
+   2px below it — two hairlines with a gap between them, which reads as the
+   seam between two stacked cards rather than as one rule. Keep the stats
+   line; the actions row sits directly under it. */
+.gh-post-actions,
+body.gh-fb-inspired .gh-post-actions {
+  border-top: 0 !important;
+  margin-top: 0 !important;
+}
+.gh-post-stats,
+body.gh-fb-inspired .gh-post .gh-post-stats {
+  border-bottom: 1px solid var(--ds-line) !important;
 }
 
 /* Right-rail widgets were four different objects; make them one */

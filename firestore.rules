@@ -14,6 +14,22 @@ service cloud.firestore {
     function isOwner(userId) {
       return signedIn() && uid() == userId;
     }
+    // friendships/{id} where id = sorted([uidA, uidB]).join('_')
+    function friendPairId(a, b) {
+      return a < b ? a + '_' + b : b + '_' + a;
+    }
+    function areFriends(a, b) {
+      return exists(/databases/$(database)/documents/friendships/$(friendPairId(a, b)));
+    }
+    // A friend request is stored at friendRequests/{fromUid}_{toUid}, so an
+    // accepted request in either direction is checkable without a query.
+    function friendRequestAccepted(a, b) {
+      return (exists(/databases/$(database)/documents/friendRequests/$(a + '_' + b))
+              && get(/databases/$(database)/documents/friendRequests/$(a + '_' + b)).data.get('status','') == 'accepted')
+          || (exists(/databases/$(database)/documents/friendRequests/$(b + '_' + a))
+              && get(/databases/$(database)/documents/friendRequests/$(b + '_' + a)).data.get('status','') == 'accepted');
+    }
+
     function isAdmin() {
       return signedIn()
         && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
@@ -372,7 +388,16 @@ service cloud.firestore {
         allow create, update: if isOwner(userId);
         allow delete: if isAdmin();
       }
-      match /private/{docId}   { allow read, write: if isOwner(userId) || isAdmin(); }
+      // The wallet holds the GeoPoints balance. It used to fall under the
+      // generic /private rule below, which let its owner write it — so a user
+      // could set their own credits from the console, defeating the careful
+      // pointsBalance lock on the parent user document. It is now read-only to
+      // its owner; only the Admin SDK (a Cloud Function) may write it.
+      match /private/wallet    { allow read: if isOwner(userId) || isAdmin(); }
+      match /private/{docId}   {
+        allow read:  if isOwner(userId) || isAdmin();
+        allow write: if (isOwner(userId) && docId != 'wallet') || isAdmin();
+      }
       match /preferences/{prefId} { allow read, write: if isOwner(userId) || isAdmin(); }
       match /fcmTokens/{token} {
         allow read:  if isOwner(userId) || isAdmin();
@@ -563,13 +588,30 @@ service cloud.firestore {
       allow create: if signedIn() && request.resource.data.get('uid', '') == uid();
       allow update, delete: if isAdmin();
     }
+    // Both of these are aggregate documents the client merges into. They were
+    // fully writable by any signed-in user, so one setDoc could zero or inflate
+    // any place's totals. Writes are now merge-shaped and monotonic.
     match /placeCheckins/{placeId} {
       allow read: if true;
-      allow write: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['count', 'lastCheckin'])
+        && request.resource.data.get('count', 0) is number
+        && request.resource.data.get('count', 0) >= 0;
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['count', 'lastCheckin'])
+        && request.resource.data.get('count', 0) is number
+        // may only go up, and by at most one per write
+        && request.resource.data.get('count', 0) >= resource.data.get('count', 0)
+        && request.resource.data.get('count', 0) <= resource.data.get('count', 0) + 1;
+      allow delete: if isAdmin();
     }
     match /placeMoodTags/{placeId} {
       allow read: if true;
-      allow write: if signedIn();
+      allow create: if signedIn();
+      // A merge may add or change tags but never drop the document's contents.
+      allow update: if signedIn()
+        && request.resource.data.keys().size() >= resource.data.keys().size();
+      allow delete: if isAdmin();
     }
 
     // ── BUSINESSES ────────────────────────────────────────────────────────────
@@ -675,7 +717,12 @@ service cloud.firestore {
 
       match /analytics/{dateDoc} {
         allow read: if canManageBiz(businessId);
-        allow create, update: if signedIn();
+        // View/click counters are written by visitors, so this stays open to
+        // signed-in users — but only for the counter fields.
+        allow create: if signedIn();
+        allow update: if signedIn()
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['views', 'clicks', 'calls', 'directions', 'saves', 'shares', 'updatedAt']);
         allow delete: if isAdmin();
       }
 
@@ -924,7 +971,14 @@ service cloud.firestore {
     }
     match /friends/{friendId} {
       allow read: if true;
-      allow create: if signedIn() && uid() in request.resource.data.users;
+      // Being in the users array was the only requirement, so anyone could
+      // declare themselves a friend of anyone. The relationship now has to come
+      // from a friendRequests document both sides agreed on.
+      allow create: if signedIn()
+        && uid() in request.resource.data.users
+        && request.resource.data.users.size() == 2
+        && friendRequestAccepted(request.resource.data.users[0],
+                                 request.resource.data.users[1]);
       allow update: if false;
       allow delete: if isAdmin() || (signedIn() && uid() in resource.data.users);
     }
@@ -934,9 +988,14 @@ service cloud.firestore {
     // Read: owner always; others only when sharing='friends' (opt-in GPS share).
     // Previously any signed-in user could read any user's location.
     match /userLocations/{userId} {
+      // 'friends' is the owner's opt-in, not a public flag: the reader has to
+      // be a friend as well. Without the second half of this condition every
+      // signed-in user could read the live GPS of anyone who opted in.
       allow read: if isOwner(userId)
         || isAdmin()
-        || (signedIn() && resource.data.get('sharing', 'off') == 'friends');
+        || (signedIn()
+            && resource.data.get('sharing', 'off') == 'friends'
+            && areFriends(uid(), userId));
       allow create, update: if isOwner(userId)
         && request.resource.data.get('uid', '') == userId;
       allow delete: if isOwner(userId) || isAdmin();
@@ -950,7 +1009,11 @@ service cloud.firestore {
         && request.resource.data.keys().hasAll(['users', 'user1', 'user2', 'createdAt'])
         && uid() in request.resource.data.users
         // Cannot friend yourself
-        && request.resource.data.user1 != request.resource.data.user2;
+        && request.resource.data.user1 != request.resource.data.user2
+        // The document ID is the canonical sorted pair, and the pair must have
+        // an accepted request behind it — otherwise this is a unilateral claim.
+        && friendshipId == friendPairId(request.resource.data.user1, request.resource.data.user2)
+        && friendRequestAccepted(request.resource.data.user1, request.resource.data.user2);
       allow update: if false;
       allow delete: if isAdmin()
         || (signedIn() && uid() in resource.data.users);
@@ -992,7 +1055,12 @@ service cloud.firestore {
     // Message reactions: broad read (needed before the reaction doc exists)
     // but tightly validated on write.
     match /messageReactions/{reactionId} {
-      allow read: if signedIn();
+      // Was readable by every signed-in user, which exposed who reacted to what
+      // inside private conversations.
+      allow read: if isAdmin()
+        || (signedIn()
+            && (resource == null
+                || isConversationParticipant(resource.data.get('conversationId', ''))));
       allow create: if signedIn()
         && request.resource.data.get('userId', '') == uid()
         && request.resource.data.get('conversationId', '') is string
@@ -1152,15 +1220,12 @@ service cloud.firestore {
       // the Spark plan without Cloud Functions.
       // Both field names are supported because the admin UI writes `stock` while
       // the original schema used `quantityRemaining`.
-      allow update: if isAdmin()
-        || (signedIn()
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['quantityRemaining', 'updatedAt'])
-            && resource.data.get('quantityRemaining', 0) > 0
-            && request.resource.data.get('quantityRemaining', 0) == resource.data.get('quantityRemaining', 0) - 1)
-        || (signedIn()
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock', 'updatedAt'])
-            && resource.data.get('stock', 0) > 0
-            && request.resource.data.get('stock', 0) == resource.data.get('stock', 0) - 1);
+      // Stock may only be decremented as part of an actual redemption. Rules
+      // cannot see the other half of a transaction, so the decrement is now
+      // admin-only (the redeem flow belongs in a Cloud Function); leaving it
+      // open let any signed-in user drain a reward in a loop without ever
+      // producing a coupon.
+      allow update: if isAdmin();
     }
     match /rewardCoupons/{couponId} {
       allow read: if signedIn()
@@ -1328,7 +1393,13 @@ service cloud.firestore {
     // analytics/{subcol}/daily/{YYYY-MM-DD}).
     match /analytics/{subcol}/daily/{dateDoc} {
       allow read: if isAdmin();
-      allow create, update: if signedIn();
+      // Counters only, and only upward: an unvalidated write let any user
+      // replace a day's analytics with anything.
+      allow create: if signedIn();
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['count', 'total', 'updatedAt', 'items', 'byPage', 'byTerm']);
+      allow delete: if isAdmin();
     }
 
     // Presence heartbeats: owner-only with mandatory field validation.
@@ -1428,7 +1499,12 @@ service cloud.firestore {
     function onlyVideoCountersChanged() {
       return signedIn()
         && request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['likeCount', 'viewCount', 'commentCount', 'updatedAt']);
+             .hasOnly(['likeCount', 'viewCount', 'commentCount', 'updatedAt'])
+        // Posts already clamp each counter to +/-1 per write; videos did not,
+        // so a single write could set likeCount to any number.
+        && counterDelta('likeCount')
+        && counterDelta('viewCount')
+        && counterDelta('commentCount');
     }
 
     // Fields a creator may safely edit after publishing.
@@ -1675,10 +1751,13 @@ service cloud.firestore {
     // ── REFERRALS ─────────────────────────────────────────────────────────────
     match /referrals/{referralId} {
       // Owner (referrer or referred) can read their referral; signed-in can query by referrerCode for stats.
+      // Was `|| true`, which collapsed the whole condition to signedIn() and
+      // published the entire referral graph. Aggregate stats belong in a
+      // counter document (meta/referralStats), not in a blanket read.
       allow read: if signedIn()
         && (resource.data.get('referrerId','') == uid()
             || resource.data.get('referredId','') == uid()
-            || true); // allow any signed-in user to read (needed for referrerCode stats query)
+            || isAdmin());
       allow create: if signedIn()
         && request.resource.data.get('referredId','') == uid()
         && request.resource.data.referrerId != uid(); // no self-referral

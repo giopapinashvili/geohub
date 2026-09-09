@@ -19,7 +19,7 @@ const MY_TRUST = {
     { label: 'Review Quality',  icon: 'fas fa-star',           color: '#f59e0b', score: 0, max: 250, desc: 'No reviews yet' },
     { label: 'Camera Proofs',   icon: 'fas fa-camera',         color: '#3b82f6', score: 0, max: 250, desc: 'No camera proofs yet' },
     { label: 'Community Trust', icon: 'fas fa-users',          color: '#a78bfa', score: 0, max: 150, desc: 'No community votes yet' },
-    { label: 'Safety Record',   icon: 'fas fa-shield-alt',     color: '#22c55e', score: 0, max: 50,  desc: 'Clean record' },
+    { label: 'Safety Record',   icon: 'fas fa-shield-alt',     color: 'var(--ds-accent)', score: 0, max: 50,  desc: 'Clean record' },
   ],
   badges: [
     { label: 'Email Verified', icon: 'fas fa-envelope', color: '#3b82f6' },
@@ -40,7 +40,7 @@ const VERIFICATION_LEVELS = [
     done: true, current: false, locked: false,
   },
   {
-    index: 2, name: 'Camera Proof', icon: 'fas fa-camera', color: '#22c55e', range: '301–500',
+    index: 2, name: 'Camera Proof', icon: 'fas fa-camera', color: 'var(--ds-accent)', range: '301–500',
     requirements: ['5+ camera-verified check-ins', 'GPS + timestamp embedded', 'AI image match passed'],
     benefits: ['Camera Proof badge on reviews', 'Higher review weight in rankings', 'Creator eligibility'],
     done: true, current: false, locked: false,
@@ -84,7 +84,7 @@ const CREDIBILITY_INDICATORS = [
   { icon: 'fas fa-redo',         color: 'var(--ds-accent)', label: 'Repeat Customer',   desc: 'Reviewer has visited this place 3+ times' },
   { icon: 'fas fa-shield-alt',   color: '#a78bfa', label: 'Trusted Reviewer',  desc: 'Account has Trusted Explorer level or above' },
   { icon: 'fas fa-qrcode',       color: '#f59e0b', label: 'QR Check-in',       desc: 'Physically scanned the business QR on location' },
-  { icon: 'fas fa-map-marker-alt', color: '#22c55e', label: 'Verified Visit',  desc: 'GPS coordinates match business location within 50m' },
+  { icon: 'fas fa-map-marker-alt', color: 'var(--ds-accent)', label: 'Verified Visit',  desc: 'GPS coordinates match business location within 50m' },
   { icon: 'fas fa-exclamation-triangle', color: '#ef4444', label: 'Suspicious Pattern', desc: 'Unusual posting frequency or location mismatch detected' },
 ];
 

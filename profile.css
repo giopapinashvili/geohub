@@ -629,7 +629,7 @@ body.page-profile.gh-has-injected-nav { padding-left: 0 !important; }
 .account-label.student { color: var(--ds-h-video-ink); background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.22); }
 .account-label.business-owner { color: var(--ds-h-reward-ink); background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.22); }
 .account-label.teacher { color: #f9a8d4; background: rgba(236,72,153,0.12); border-color: rgba(236,72,153,0.22); }
-.account-label.patriot { color: var(--ds-accent-ink); background: rgba(34,197,94,0.12); border-color: rgba(34,197,94,0.22); }
+.account-label.patriot { color: var(--ds-accent-ink); background: rgba(var(--ds-accent-rgb),0.12); border-color: rgba(var(--ds-accent-rgb),0.22); }
 .account-label.new-user { color: var(--ds-text-2); background: rgba(148,163,184,0.1); border-color: rgba(148,163,184,0.2); }
 
 /* ── Responsive ── */

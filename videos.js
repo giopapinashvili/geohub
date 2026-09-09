@@ -527,7 +527,7 @@
       filter: function(v) { return !v.isShort && v.city === 'ბათუმი'; }, n: 8 },
     { id: 'food',      icon: 'fa-utensils',        color: '#fb923c', label: 'Food & Nightlife',
       filter: function(v) { return !v.isShort && (videoMatchesCat(v, 'food') || videoMatchesCat(v, 'nightlife')); }, n: 8 },
-    { id: 'nature',    icon: 'fa-mountain',        color: '#4ade80', label: 'Nature & Hiking',
+    { id: 'nature',    icon: 'fa-mountain',        color: 'var(--ds-accent-hi)', label: 'Nature & Hiking',
       filter: function(v) { return !v.isShort && (videoMatchesCat(v, 'nature') || videoMatchesCat(v, 'hiking') || videoMatchesCat(v, 'winter') || videoMatchesCat(v, 'beach')); }, n: 8 },
     { id: 'culture',   icon: 'fa-landmark',        color: '#facc15', label: 'Culture & History',
       filter: function(v) { return !v.isShort && (videoMatchesCat(v, 'culture') || videoMatchesCat(v, 'events')); }, n: 8 }

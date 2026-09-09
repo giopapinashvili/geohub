@@ -29,7 +29,7 @@
     { label:'Default', v:'var(--ds-accent),#3b82f6' },
     { label:'Sunset',  v:'#f97316,#ec4899' },
     { label:'Ocean',   v:'#06b6d4,#6366f1' },
-    { label:'Forest',  v:'#22c55e,#15803d' },
+    { label:'Forest',  v:'var(--ds-accent),var(--ds-accent-hi)' },
     { label:'Candy',   v:'#f472b6,#a855f7' },
     { label:'Fire',    v:'#ef4444,#f97316' },
     { label:'Night',   v:'#6366f1,#1e1b4b' },

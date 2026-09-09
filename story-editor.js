@@ -3,7 +3,7 @@
   'use strict';
 
   var GRADIENTS = [
-    'linear-gradient(135deg,var(--ds-accent),#064e3b)',
+    'linear-gradient(135deg,var(--ds-accent),var(--ds-accent-hi))',
     'linear-gradient(135deg,#3b82f6,#1e40af)',
     'linear-gradient(135deg,#8b5cf6,#4c1d95)',
     'linear-gradient(135deg,#f59e0b,#92400e)',

@@ -197,7 +197,7 @@
     .pm-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
     .pm-card.cleanup::before { background: linear-gradient(90deg, var(--ds-accent), var(--ds-accent-hi)); }
     .pm-card.infra::before { background: linear-gradient(90deg, var(--ds-h-event-ink), #fb923c); }
-    .pm-card.park::before { background: linear-gradient(90deg, #22c55e, #86efac); }
+    .pm-card.park::before { background: linear-gradient(90deg, var(--ds-accent), #86efac); }
     .pm-card.community::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
     .pm-card.animal::before { background: linear-gradient(90deg, #a855f7, #c084fc); }
     .pm-card.safety::before { background: linear-gradient(90deg, #ef4444, #f87171); }
@@ -212,7 +212,7 @@
     }
     .pm-type-badge.cleanup { background: rgba(var(--ds-accent-rgb),0.12); color: var(--green); }
     .pm-type-badge.infra   { background: rgba(249,115,22,0.12); color: var(--ds-h-event-ink); }
-    .pm-type-badge.park    { background: rgba(34,197,94,0.12);  color: #22c55e; }
+    .pm-type-badge.park    { background: rgba(var(--ds-accent-rgb),0.12);  color: var(--ds-accent); }
     .pm-type-badge.community{ background: rgba(59,130,246,0.12); color: var(--blue); }
     .pm-type-badge.animal  { background: rgba(168,85,247,0.12); color: #a855f7; }
     .pm-type-badge.safety  { background: rgba(239,68,68,0.12);  color: var(--red); }
@@ -270,7 +270,7 @@
     .pm-prog-fill { height: 100%; border-radius: 2px; transition: width 1s ease; }
     .pm-prog-fill.cleanup { background: linear-gradient(90deg, var(--ds-accent), var(--ds-accent-hi)); }
     .pm-prog-fill.infra   { background: linear-gradient(90deg, var(--ds-h-event-ink), #fb923c); }
-    .pm-prog-fill.park    { background: linear-gradient(90deg, #22c55e, #86efac); }
+    .pm-prog-fill.park    { background: linear-gradient(90deg, var(--ds-accent), #86efac); }
     .pm-prog-fill.community{ background: linear-gradient(90deg, #3b82f6, #60a5fa); }
     .pm-prog-fill.animal  { background: linear-gradient(90deg, #a855f7, #c084fc); }
     .pm-prog-fill.safety  { background: linear-gradient(90deg, #ef4444, #f87171); }

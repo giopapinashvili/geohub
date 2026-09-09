@@ -70,7 +70,7 @@ body.business-suite-page #app-bottom-nav {
 }
 
 .bs-brand-mark {
-  background: linear-gradient(135deg, #22c55e, #009444);
+  background: linear-gradient(135deg, var(--ds-accent), var(--ds-accent-lo));
   color: #fff;
 }
 

@@ -20,7 +20,7 @@
   --red:              #ef4444;
   --radius-sm:        8px;
   --transition:       0.15s ease;
-  --gradient-brand:   linear-gradient(135deg, var(--ds-accent), #064e3b);
+  --gradient-brand:   linear-gradient(135deg, var(--ds-accent), var(--ds-accent-hi));
   --shadow-green:     0 0 20px rgba(var(--ds-accent-rgb),.2);
   --glass-blur:       blur(20px);
   --border-focus:     rgba(var(--ds-accent-rgb),.5);
@@ -1246,7 +1246,7 @@ body.gh-has-injected-nav #biz-detail-root {
 .biz-review-card:last-child { margin-bottom: 0; }
 .biz-review-header        { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
 .biz-rv-author-row        { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.biz-rv-av                { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg,var(--ds-accent),#064e3b); display: grid; place-items: center; overflow: hidden; flex-shrink: 0; }
+.biz-rv-av                { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg,var(--ds-accent),var(--ds-accent-hi)); display: grid; place-items: center; overflow: hidden; flex-shrink: 0; }
 .biz-rv-av img            { width: 100%; height: 100%; object-fit: cover; }
 .biz-rv-initials          { font-size: .68rem; font-weight: 800; color: #fff; }
 .biz-rv-author-info       { display: flex; flex-direction: column; min-width: 0; }

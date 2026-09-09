@@ -157,14 +157,14 @@
     { id: 'cozy',     label: 'Cozy',             emoji: '🛋️', color: '#f59e0b' },
     { id: 'work',     label: 'Good for work',    emoji: '💻', color: '#3b82f6' },
     { id: 'family',   label: 'Family friendly',  emoji: '👨‍👩‍👧', color: '#10b981' },
-    { id: 'cheap',    label: 'Budget friendly',  emoji: '💸', color: '#22c55e' },
+    { id: 'cheap',    label: 'Budget friendly',  emoji: '💸', color: 'var(--ds-accent)' },
     { id: 'romantic', label: 'Romantic',         emoji: '🌹', color: '#ec4899' },
     { id: 'crowded',  label: 'Lively & busy',    emoji: '👥', color: '#8b5cf6' },
     { id: 'quiet',    label: 'Quiet & calm',     emoji: '🔇', color: '#64748b' },
     { id: 'night',    label: 'Night vibe',        emoji: '🌃', color: '#6366f1' },
     { id: 'loud',     label: 'Loud music',        emoji: '🎵', color: '#f43f5e' },
     { id: 'instagrammable', label: 'Instagram spot', emoji: '📸', color: '#e879f9' },
-    { id: 'outdoor',  label: 'Outdoor seating',  emoji: '🌿', color: '#16a34a' },
+    { id: 'outdoor',  label: 'Outdoor seating',  emoji: '🌿', color: 'var(--ds-accent-lo)' },
     { id: 'trending', label: 'Trending now',      emoji: '🔥', color: '#ef4444' },
   ];
 
@@ -671,7 +671,7 @@
             const st = getPlaceMarkerStyle(p);
             const badge = openBadgeHtml(p.workingHours);
             return '<div class="map-result-card" data-id="' + esc(p.id) + '">'
-              + '<div class="map-result-icon" style="background:' + (st.color || '#22c55e') + '22;border-color:' + (st.color || '#22c55e') + '44">' + (p.icon || st.icon || '📍') + '</div>'
+              + '<div class="map-result-icon" style="background:' + (st.color || 'var(--ds-accent)') + '22;border-color:' + (st.color || 'var(--ds-accent)') + '44">' + (p.icon || st.icon || '📍') + '</div>'
               + '<div class="map-result-info">'
               + '<div class="map-result-name">' + esc(p.name) + (badge ? ' ' + badge : '') + '</div>'
               + '<div class="map-result-cat">' + esc(p.categoryLabel) + (p.city ? ' · ' + esc(p.city) : '') + '</div>'
@@ -3160,7 +3160,7 @@
       else if (mode === 'trending' && _trendCounts[p.id]) meta = '<span class="disc-hot">🔥 ' + _trendCounts[p.id] + ' დღეს</span>';
       else if (mode === 'gems') meta = '<span class="disc-gem">💎 Hidden gem</span>';
       return '<div class="map-result-card" data-id="' + esc(p.id) + '">'
-        + '<div class="map-result-icon" style="background:' + (st.color||'#22c55e') + '22;border-color:' + (st.color||'#22c55e') + '44">' + (p.icon||st.icon||'📍') + '</div>'
+        + '<div class="map-result-icon" style="background:' + (st.color||'var(--ds-accent)') + '22;border-color:' + (st.color||'var(--ds-accent)') + '44">' + (p.icon||st.icon||'📍') + '</div>'
         + '<div class="map-result-info">'
         + '<div class="map-result-name">' + esc(p.name) + (badge ? ' ' + badge : '') + '</div>'
         + '<div class="map-result-cat">' + esc(p.categoryLabel) + (p.city ? ' · ' + esc(p.city) : '') + '</div>'

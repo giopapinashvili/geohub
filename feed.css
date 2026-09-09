@@ -141,7 +141,7 @@
   position: absolute;
   bottom: 0; right: 0;
   width: 10px; height: 10px;
-  background: #22c55e;
+  background: var(--ds-accent);
   border-radius: 50%;
   border: 2px solid #08090f;
 }
@@ -1067,7 +1067,7 @@
   position: absolute;
   bottom: 1px; right: 1px;
   width: 10px; height: 10px;
-  background: #22c55e;
+  background: var(--ds-accent);
   border-radius: 50%;
   border: 2px solid #0f1117;
 }

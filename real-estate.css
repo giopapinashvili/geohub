@@ -229,7 +229,7 @@
     .agent-online {
       position: absolute; bottom: 3px; right: 3px;
       width: 13px; height: 13px; border-radius: 50%;
-      background: #22c55e; border: 2px solid var(--bg-card);
+      background: var(--ds-accent); border: 2px solid var(--bg-card);
     }
     .agent-name  { font-size: 0.92rem; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; display: flex; align-items: center; justify-content: center; gap: 5px; }
     .agent-spec  { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; }

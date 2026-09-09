@@ -73,8 +73,8 @@ body, html { height: 100%; overflow: hidden; }
       width: 44px; height: 44px; border-radius: 999px;
       display: flex; align-items: center; justify-content: center;
       background: var(--ds-surface);
-      border: 2px solid var(--marker-color, #22c55e);
-      box-shadow: 0 0 0 4px rgba(255,255,255,.08), 0 10px 24px rgba(0,0,0,.35), 0 0 20px rgba(34,197,94,.45);
+      border: 2px solid var(--marker-color, var(--ds-accent));
+      box-shadow: 0 0 0 4px rgba(255,255,255,.08), 0 10px 24px rgba(0,0,0,.35), 0 0 20px rgba(var(--ds-accent-rgb),.45);
       overflow: visible;
       position: relative;
       transform-origin: center;
@@ -92,7 +92,7 @@ body, html { height: 100%; overflow: hidden; }
       top: 50%; left: 50%;
       width: 44px; height: 44px;
       border-radius: 50%;
-      border: 2px solid var(--marker-color, #22c55e);
+      border: 2px solid var(--marker-color, var(--ds-accent));
       background: transparent;
       animation: markerRing 0.55s ease-out forwards;
       pointer-events: none;
@@ -1042,7 +1042,7 @@ body, html { height: 100%; overflow: hidden; }
   box-shadow: 0 0 0 0 rgba(99,102,241,.7);
   animation: nowPulse 2s infinite;
 }
-.now-fab.active .now-fab-pulse { animation: none; background: #4ade80; }
+.now-fab.active .now-fab-pulse { animation: none; background: var(--ds-accent-hi); }
 @keyframes nowPulse {
   0%   { box-shadow: 0 0 0 0 rgba(99,102,241,.7); }
   70%  { box-shadow: 0 0 0 8px rgba(99,102,241,0); }
@@ -1135,7 +1135,7 @@ body, html { height: 100%; overflow: hidden; }
 .now-row-count { font-size: 0.72rem; font-weight: 900; color: #6366f1; flex-shrink: 0; display: flex; align-items: center; gap: 3px; }
 .now-row--hot .now-row-count { color: #ef4444; }
 
-.now-row-event-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; flex-shrink: 0; box-shadow: 0 0 6px #4ade80; animation: nowPulse 2s infinite; }
+.now-row-event-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ds-accent-hi); flex-shrink: 0; box-shadow: 0 0 6px var(--ds-accent-hi); animation: nowPulse 2s infinite; }
 .now-row-live-badge { font-size: 0.58rem; font-weight: 900; background: rgba(239,68,68,.18); border: 1px solid rgba(239,68,68,.4); color: var(--ds-danger); border-radius: 6px; padding: 2px 6px; letter-spacing: .06em; flex-shrink: 0; }
 
 .now-friend-av { width: 32px; height: 32px; border-radius: 50%; background: rgba(99,102,241,.2); overflow: hidden; flex-shrink: 0; display: grid; place-items: center; font-size: 0.7rem; font-weight: 900; color: #a5b4fc; border: 1px solid rgba(99,102,241,.3); }
