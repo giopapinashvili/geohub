@@ -1,69 +1,102 @@
 # GeoHub — URL map
 #
-# Cloudflare Pages serves /404.html automatically for missing paths, and a
-# missing hashed asset must 404 (not fall through to HTML) so a stale tab fails
-# fast instead of white-screening on an HTML-as-JS response. So: no SPA
-# catch-all.
+# IMPORTANT — how Cloudflare Pages already behaves, before any rule here runs:
+#   · a file foo.html is served at BOTH /foo and /foo.html
+#   · a request for /foo.html is automatically 301'd to /foo
+#   · a request for /index.html is automatically 301'd to /
 #
-# The rules below retire duplicate surfaces. GeoHub had six video pages, six
+# That second line is what matters. A rule like
+#       /feed        /feed.html      301
+# creates an infinite loop: /feed → /feed.html → (Cloudflare) → /feed → …
+# ERR_TOO_MANY_REDIRECTS. Cloudflare already serves /feed from feed.html, so
+# rules of that shape are not just harmful, they are unnecessary.
+#
+# Two rules follow from this:
+#   1. never point a rule at a .html target — write the extensionless path,
+#      so the visitor takes one hop instead of two
+#   2. list both /x and /x.html as sources, because Cloudflare serves the
+#      extensionless form directly and our rule would otherwise miss it
+#
+# Cloudflare Pages serves /404.html for anything unmatched, and a missing
+# hashed asset must 404 rather than fall through to HTML — so no SPA catch-all.
+#
+# The rules retire duplicate surfaces. GeoHub had six video pages, six
 # discovery pages, four business pages and three payment pages; each retired
 # URL now 301s to the one canonical page for that job, carrying a ?tab= hint
-# so the target can open on the right section (gh-tabs.js reads it).
+# so the target opens on the right section (gh-tabs.js reads it).
 
-# ── Video: videos · reels · watch · live · channel · admin-videos → videos ──
-/reels.html          /videos.html?tab=reels     301
-/watch.html          /videos.html?tab=watch     301
-/live.html           /videos.html?tab=live      301
-/channel.html        /videos.html?tab=channel   301
+# ── Video: reels · watch · live · channel → videos ──
+/reels               /videos?tab=reels          301
+/reels.html          /videos?tab=reels          301
+/watch               /videos?tab=watch          301
+/watch.html          /videos?tab=watch          301
+/live                /videos?tab=live           301
+/live.html           /videos?tab=live           301
+/channel             /videos?tab=channel        301
+/channel.html        /videos?tab=channel        301
 
 # ── Discovery: explore · place-feed · place-updates · reviews → places ──
-/explore.html        /places.html               301
-/place-feed.html     /places.html?tab=updates   301
-/place-updates.html  /places.html?tab=updates   301
-/reviews.html        /places.html?tab=reviews   301
+/explore             /places                    301
+/explore.html        /places                    301
+/place-feed          /places?tab=updates        301
+/place-feed.html     /places?tab=updates        301
+/place-updates       /places?tab=updates        301
+/place-updates.html  /places?tab=updates        301
+/reviews             /places?tab=reviews        301
+/reviews.html        /places?tab=reviews        301
 
 # ── Marketplace: products · services → marketplace ──
-/products.html       /marketplace.html?tab=products 301
-/services.html       /marketplace.html?tab=services 301
+/products            /marketplace?tab=products  301
+/products.html       /marketplace?tab=products  301
+/services            /marketplace?tab=services  301
+/services.html       /marketplace?tab=services  301
 
 # ── Business: business · dashboard → business-suite ──
-/business.html       /business-suite.html       301
-/dashboard.html      /business-suite.html       301
+/business            /business-suite            301
+/business.html       /business-suite            301
+/dashboard           /business-suite            301
+/dashboard.html      /business-suite            301
 
-# ── Payment / plans: pricing · early-adopter → premium ──
-/pricing.html        /premium.html              301
-/early-adopter.html  /premium.html?tab=early    301
+# ── Plans: pricing · early-adopter → premium ──
+/pricing             /premium                   301
+/pricing.html        /premium                   301
+/early-adopter       /premium?tab=early         301
+/early-adopter.html  /premium?tab=early         301
 
-# ── Gamification: gamification → rewards ──
-/gamification.html   /rewards.html              301
+# ── Gamification → rewards ──
+/gamification        /rewards                   301
+/gamification.html   /rewards                   301
 
 # ── Capture: camera · scan → checkin ──
-/camera.html         /checkin.html?tab=camera   301
-/scan.html           /checkin.html?tab=scan     301
+/camera              /checkin?tab=camera        301
+/camera.html         /checkin?tab=camera        301
+/scan                /checkin?tab=scan          301
+/scan.html           /checkin?tab=scan          301
 
 # ── Creators are a discovery surface, not their own destination ──
-/creators.html       /search.html?tab=creators  301
+/creators            /search?tab=creators       301
+/creators.html       /search?tab=creators       301
 
 # ── Stories live inside the feed ──
-/stories.html        /feed.html?tab=stories     301
+/stories             /feed?tab=stories          301
+/stories.html        /feed?tab=stories          301
 
 # ── Safety consolidates trust ──
-/trust.html          /safety.html               301
+/trust               /safety                    301
+/trust.html          /safety                    301
 
 # ── Retired experiments — kept as redirects so old links never 404 ──
-/patriot.html        /challenges.html           301
-/world.html          /map.html                  301
-/lifegraph.html      /profile.html              301
-/learning.html       /index.html                301
-/demo.html           /index.html                301
+/patriot             /challenges                301
+/patriot.html        /challenges                301
+/world               /map                       301
+/world.html          /map                       301
+/lifegraph           /profile                   301
+/lifegraph.html      /profile                   301
+/learning            /                          301
+/learning.html       /                          301
+/demo                /                          301
+/demo.html           /                          301
 
 # ── Admin video moderation is a tab of the admin panel ──
-/admin-videos.html   /admin.html?tab=videos     301
-
-# ── Friendly short URLs ──
-/feed                /feed.html                 301
-/map                 /map.html                  301
-/videos              /videos.html               301
-/places              /places.html               301
-/profile             /profile.html              301
-/messages            /messages.html             301
+/admin-videos        /admin?tab=videos          301
+/admin-videos.html   /admin?tab=videos          301
