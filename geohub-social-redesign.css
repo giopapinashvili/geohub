@@ -4200,13 +4200,15 @@ a.gh-trending-chip:hover {
    in the browser's default grey instead of matching the links beside them. */
 .gh-nav-item { background: transparent; border: 0; width: 100%; text-align: start; font: inherit; cursor: pointer; }
 .gh-live-nav-btn {
-  color: var(--ds-h-live-ink) !important;
-  background: var(--ds-h-live-wash) !important;
-  box-shadow: inset 2px 0 0 var(--ds-h-live);
+  color: var(--ds-text-2) !important;
+  background: transparent !important;
+  box-shadow: none;
 }
-.gh-live-nav-btn:hover { background: color-mix(in srgb, var(--ds-h-live) 18%, transparent) !important; }
-.gh-live-nav-btn i { color: var(--ds-h-live-ink); }
-.gh-live-nav-btn.active { background: color-mix(in srgb, var(--ds-h-live) 22%, transparent) !important; }
+.gh-live-nav-btn:hover { background: var(--ds-surface-2) !important; color: var(--ds-text) !important; }
+/* The colour lives in the icon — a red row outshouted whichever row was
+   actually active. */
+.gh-live-nav-btn i { color: var(--ds-h-live) !important; }
+.gh-live-nav-btn.active { background: var(--ds-h-live-wash) !important; color: var(--ds-h-live-ink) !important; }
 .gh-nav-tour-btn {
   background: transparent; border: 0; width: 100%; text-align: start;
   font: inherit; cursor: pointer; color: var(--ds-text-3);

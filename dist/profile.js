@@ -115,7 +115,7 @@
       avatar,
       coverImage: data.coverImage || '',
       bio: data.bio || '',
-      city: data.cityScope === 'all_georgia' ? 'All Georgia' : (data.city || ''),
+      city: data.cityScope === 'all_georgia' ? 'მთელი საქართველო' : (data.city || ''),
       cities: Array.isArray(data.cities) ? data.cities : (data.city ? [data.city] : ['all_georgia']),
       cityScope: data.cityScope || (data.city === 'all_georgia' ? 'all_georgia' : ''),
       accountType: data.accountType || 'Explorer',
