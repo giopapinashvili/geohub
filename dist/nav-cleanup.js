@@ -226,43 +226,37 @@
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   var groups = [
     {
-      label: 'Main',
+      // The same five the shell's rail shows, in the same order.
+      label: 'nav_main',
       kind: 'primary',
       items: [
-        { label: t('nav_feed'),   href: 'feed.html',   icon: 'fa-house' },
-        { label: t('nav_places'), href: 'places.html', icon: 'fa-location-dot' },
-        { label: t('nav_map'),    href: 'map.html',    icon: 'fa-map' },
-        { label: t('nav_videos'), href: 'videos.html', icon: 'fa-film' }
+        { label: t('nav_feed'),        href: 'feed.html',        icon: 'fa-house' },
+        { label: t('nav_map'),         href: 'map.html',         icon: 'fa-map' },
+        { label: t('nav_videos'),      href: 'videos.html',      icon: 'fa-film' },
+        { label: t('nav_marketplace'), href: 'marketplace.html', icon: 'fa-bag-shopping' },
+        { label: t('nav_groups'),      href: 'groups.html',      icon: 'fa-users' }
       ]
     },
     {
-      label: 'Explore',
+      // Everything else keeps a home rather than disappearing.
+      label: 'nav_more',
       items: [
-        { label: t('nav_events'), href: 'events.html', icon: 'fa-calendar-days' },
-        { label: t('nav_groups'), href: 'groups.html', icon: 'fa-users' },
-        { label: t('nav_marketplace'), href: 'marketplace.html', icon: 'fa-bag-shopping' }
-      ]
-    },
-    {
-      label: 'Growth',
-      items: [
-        { label: t('nav_business'), href: 'business-suite.html', icon: 'fa-chart-line' },
-        { label: t('nav_add_business'), href: 'add-business.html', icon: 'fa-store' },
-        { label: t('nav_jobs'), href: 'jobs.html', icon: 'fa-briefcase' }
-      ]
-    },
-    {
-      label: 'Personal',
-      items: [
-        { label: t('nav_profile'),    href: 'profile.html',    icon: 'fa-user' },
-        { label: t('nav_messages'),   href: 'messages.html',   icon: 'fa-message' },
-        { label: t('nav_rewards'),    href: 'rewards.html',    icon: 'fa-gift' },
-        { label: t('nav_challenges'), href: 'challenges.html', icon: 'fa-trophy' },
-        { label: t('settings'),       href: 'settings.html',   icon: 'fa-gear' },
-        { label: t('nav_trust'),      href: 'safety.html',     icon: 'fa-shield-halved' }
+        { label: t('nav_profile'),      href: 'profile.html',        icon: 'fa-user' },
+        { label: t('nav_messages'),     href: 'messages.html',       icon: 'fa-message' },
+        { label: t('nav_places'),       href: 'places.html',         icon: 'fa-location-dot' },
+        { label: t('nav_events'),       href: 'events.html',         icon: 'fa-calendar-days' },
+        { label: t('nav_rewards'),      href: 'rewards.html',        icon: 'fa-gift' },
+        { label: t('nav_challenges'),   href: 'challenges.html',     icon: 'fa-trophy' },
+        { label: t('nav_business'),     href: 'business-suite.html', icon: 'fa-chart-line' },
+        { label: t('nav_add_business'), href: 'add-business.html',   icon: 'fa-store' },
+        { label: t('nav_jobs'),         href: 'jobs.html',           icon: 'fa-briefcase' },
+        { label: t('nav_realestate'),   href: 'real-estate.html',    icon: 'fa-building' },
+        { label: t('settings'),         href: 'settings.html',       icon: 'fa-gear' },
+        { label: t('nav_trust'),        href: 'safety.html',         icon: 'fa-shield-halved' }
       ]
     }
   ];
+
 
   function currentFile() {
     var p = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();

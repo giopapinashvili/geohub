@@ -862,6 +862,82 @@ body.gh-sidebar-collapsed .gh-nav-collapse i { transform: rotate(180deg); }
   .gh-card, .gh-post { transition: none !important; }
 }
 
+/* ── The standalone .navbar, made to match .gh-topbar ────────────────────
+   Same object, two markups. Until every page loads the shell, they at least
+   look like one header instead of two.                                      */
+
+.navbar {
+  height: 64px !important;
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px !important;
+  background: color-mix(in srgb, var(--ds-surface) 88%, transparent) !important;
+  border-bottom: 1px solid var(--ds-line) !important;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 1px 0 var(--ds-line-soft), 0 8px 24px -18px rgba(0,0,0,.55) !important;
+}
+.navbar .navbar-brand {
+  flex: 0 0 auto;
+  display: flex; align-items: center; gap: 10px;
+  color: var(--ds-text) !important; text-decoration: none;
+  font-weight: 800; font-size: 1.12rem; letter-spacing: -.02em;
+  white-space: nowrap;
+}
+.navbar .logo-text, .navbar .logo-geo { color: var(--ds-text) !important; white-space: nowrap; }
+.navbar .navbar-links {
+  flex: 1 1 auto; min-width: 0;
+  display: flex !important; align-items: center; justify-content: center;
+  gap: 4px; margin: 0; padding: 0; list-style: none;
+}
+.navbar .navbar-links > li { list-style: none; }
+.navbar .navbar-links a,
+.navbar .nav-menu-trigger {
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 40px; padding: 0 13px;
+  border-radius: var(--ds-r-md);
+  background: transparent; border: 0;
+  color: var(--ds-text-2) !important;
+  font: inherit; font-size: .88rem; font-weight: 650;
+  text-decoration: none; white-space: nowrap; cursor: pointer;
+  transition: background var(--ds-base), color var(--ds-base);
+}
+.navbar .navbar-links a:hover,
+.navbar .nav-menu-trigger:hover {
+  background: var(--ds-surface-2) !important;
+  color: var(--ds-text) !important;
+}
+.navbar .navbar-links a.active,
+.navbar .nav-dropdown.active .nav-menu-trigger {
+  color: var(--ds-accent) !important;
+  background: var(--ds-accent-wash) !important;
+}
+.navbar .navbar-actions {
+  flex: 0 0 auto;
+  display: flex; align-items: center; gap: 8px;
+}
+.navbar .nav-dropdown-panel {
+  background: var(--ds-surface-over) !important;
+  border: 1px solid var(--ds-line) !important;
+  border-radius: var(--ds-r-lg) !important;
+  box-shadow: var(--ds-e3) !important;
+  padding: 6px !important;
+}
+.navbar .nav-dropdown-title {
+  font-size: .68rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ds-text-3) !important; padding: 8px 10px 4px;
+}
+.navbar .nav-dropdown-panel a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: var(--ds-r-md);
+  color: var(--ds-text) !important; text-decoration: none; font-size: .88rem;
+}
+.navbar .nav-dropdown-panel a:hover { background: var(--ds-surface-2) !important; }
+
+@media (max-width: 900px) {
+  .navbar .navbar-links { display: none !important; }
+}
+
 /* ── Nothing gets clipped, nothing breaks mid-word ───────────────────────
    Three separate reports, one family of cause: a box sized smaller than what
    it holds, or a word allowed to break where words do not break.            */
