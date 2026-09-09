@@ -217,7 +217,7 @@
       (d.description ? '<div class="cp-card-desc">' + snippet(d.description, 80) + '</div>' : '') +
       '<div class="cp-card-meta">' +
         (loc ? '<span><i class="fa fa-map-marker"></i>' + loc + '</span>' : '') +
-        (bizId ? '<span class="cp-biz-link-chip"><i class="fa fa-store"></i>View Business</span>' : '') +
+        (bizId ? '<span class="cp-biz-link-chip"><i class="fa fa-store"></i>ბიზნესის ნახვა</span>' : '') +
       '</div>' +
     cardClose;
   }

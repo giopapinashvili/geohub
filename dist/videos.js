@@ -881,7 +881,7 @@
       ? (v.createdAt.toMillis ? v.createdAt.toMillis() : (typeof v.createdAt === 'number' ? v.createdAt : 0))
       : 0;
     if (created && now - created < 86400000) {
-      html += '<span class="vid-status-badge new"><i class="fas fa-sparkles"></i>New</span>';
+      html += '<span class="vid-status-badge new"><i class="fas fa-sparkles"></i>ახალი</span>';
     }
     return html ? '<div class="vid-badge-row">' + html + '</div>' : '';
   }
@@ -1169,7 +1169,7 @@
     menu.id = 'vidCtxMenu';
     menu.innerHTML =
       '<div class="vid-card-ctx-item" id="vctx-ni"><i class="fas fa-ban"></i>Not interested</div>' +
-      '<div class="vid-card-ctx-item danger" id="vctx-rep"><i class="fas fa-flag"></i>Report</div>';
+      '<div class="vid-card-ctx-item danger" id="vctx-rep"><i class="fas fa-flag"></i>საჩივარი</div>';
     var rect = anchorEl.getBoundingClientRect();
     menu.style.top = (rect.bottom + window.scrollY + 4) + 'px';
     menu.style.left = Math.max(8, rect.right + window.scrollX - 170) + 'px';
@@ -2988,7 +2988,7 @@
           '<i class="fas fa-arrow-left"></i>უკან</button>' +
         (v.placeId ? '<a href="map.html?mode=videos&place=' + esc(v.placeId) + '" class="watch-action-btn ghost">' +
           '<i class="fas fa-map"></i>Map</a>' : '') +
-        '<button class="watch-action-btn ghost" id="watchReportBtn" style="color:#ef4444"><i class="fas fa-flag"></i>Report</button>';
+        '<button class="watch-action-btn ghost" id="watchReportBtn" style="color:#ef4444"><i class="fas fa-flag"></i>საჩივარი</button>';
       bindWatchLike(v);
       bindWatchSave(v);
       bindWatchShare(v);

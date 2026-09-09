@@ -24,33 +24,33 @@ html[data-gh-theme="dark"] {
   color-scheme: dark;
 
   /* Ground — near-black, biased green so it belongs to the brand */
-  --ds-bg:            #0d0f13;
-  --ds-bg-deep:       #08090c;
+  --ds-bg:            #0b1729;   /* navy, not neutral            */
+  --ds-bg-deep:       #071120;
 
   /* Surfaces lift off the ground in even steps */
-  --ds-surface:       #1b1e24;   /* resting card                       */
-  --ds-surface-2:     #23272e;   /* inset: inputs, wells, table stripes */
-  --ds-surface-3:     #2a2f37;   /* hover / raised                     */
-  --ds-surface-over:  #1e2128;   /* modals, popovers, dropdowns        */
+  --ds-surface:       #132440;   /* resting card                       */
+  --ds-surface-2:     #1a2f52;   /* inset: inputs, wells, table stripes */
+  --ds-surface-3:     #213a63;   /* hover / raised                     */
+  --ds-surface-over:  #16294a;   /* modals, popovers, dropdowns        */
 
   /* Hairlines */
-  --ds-line:          rgba(255,255,255,.075);
-  --ds-line-soft:     rgba(255,255,255,.045);
-  --ds-line-strong:   rgba(255,255,255,.14);
+  --ds-line:          rgba(140,190,255,.14);
+  --ds-line-soft:     rgba(140,190,255,.08);
+  --ds-line-strong:   rgba(140,190,255,.24);
 
   /* Ink */
-  --ds-text:          #e8eaed;
-  --ds-text-2:        #b7bdc7;
-  --ds-text-3:        #8e96a3;
+  --ds-text:          #eaf1fb;
+  --ds-text-2:        #b6c6dd;
+  --ds-text-3:        #96abc8;
   --ds-text-inverse:  #04100c;
 
   /* Brand */
-  --ds-accent:        #4a9bff;   /* 7.04:1 on the dark ground        */
-  --ds-accent-hi:     #7ab8ff;
-  --ds-accent-lo:     #2d82ff;
-  --ds-accent-rgb:    74,155,255;   /* for rgba() call sites in legacy CSS */
-  --ds-accent-wash:   rgba(74,155,255,.16);
-  --ds-accent-line:   rgba(74,155,255,.42);
+  --ds-accent:        #5aa9ff;   /* 7.04:1 on the dark ground        */
+  --ds-accent-hi:     #8cc4ff;
+  --ds-accent-lo:     #3b90f5;
+  --ds-accent-rgb:    90,169,255;   /* for rgba() call sites in legacy CSS */
+  --ds-accent-wash:   rgba(90,169,255,.15);
+  --ds-accent-line:   rgba(90,169,255,.40);
 
   /* Detail hues — one per content type. On a near-black ground chroma is free,
      so these run bright; every one clears 5.4:1 against the card surface. */
@@ -122,21 +122,21 @@ html[data-gh-theme="light"] {
 
   /* Ground is never pure white — the white belongs to the cards, and the
      contrast between the two is what creates depth. */
-  --ds-bg:            #f0f2f5;
-  --ds-bg-deep:       #e4e6eb;
+  --ds-bg:            #eaf1fc;   /* blue paper, so a white card shows */
+  --ds-bg-deep:       #dce8fa;
 
   --ds-surface:       #ffffff;
-  --ds-surface-2:     #f7f8fa;
+  --ds-surface-2:     #f4f8ff;
   --ds-surface-3:     #ffffff;
   --ds-surface-over:  #ffffff;
 
-  --ds-line:          rgba(15,23,42,.11);
-  --ds-line-soft:     rgba(15,23,42,.06);
-  --ds-line-strong:   rgba(15,23,42,.20);
+  --ds-line:          rgba(13,44,92,.13);
+  --ds-line-soft:     rgba(13,44,92,.07);
+  --ds-line-strong:   rgba(13,44,92,.22);
 
-  --ds-text:          #0f172a;
-  --ds-text-2:        #3f4a57;
-  --ds-text-3:        #5a6472;   /* 6.00:1 on white, 4.80:1 on the deepest ground */
+  --ds-text:          #0e1b2e;
+  --ds-text-2:        #3a4d66;
+  --ds-text-3:        #55677f;   /* 5.78:1 on white, 4.67:1 on the deepest ground */
   --ds-text-inverse:  #ffffff;
 
   /* Two tiers, because one value cannot be both vivid and readable as 12px text.
@@ -860,6 +860,52 @@ body.gh-sidebar-collapsed .gh-nav-collapse i { transform: rotate(180deg); }
 }
 @media (prefers-reduced-motion: reduce) {
   .gh-card, .gh-post { transition: none !important; }
+}
+
+/* ── Nothing gets clipped, nothing breaks mid-word ───────────────────────
+   Three separate reports, one family of cause: a box sized smaller than what
+   it holds, or a word allowed to break where words do not break.            */
+
+/* The wordmark was wrapping to "GeoHu / b" whenever the left zone tightened. */
+.gh-brand { flex-shrink: 0; }
+.gh-brand span { white-space: nowrap; }
+
+/* Comment actions are short words in a row — they wrap as a row or scroll,
+   never inside a word. "პასუხი" must not become "პასუხ / ი". */
+.gh-comment-actions,
+.gh-post-actions,
+.gh-act,
+.gh-comment-actions button,
+.gh-comment-actions a,
+.gh-cmt-sort-btn {
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow-wrap: normal;
+  hyphens: none;
+}
+.gh-comment-actions { flex-wrap: wrap; row-gap: 2px; }
+
+/* Sidebar cards were cut off at the bottom — business hours ended mid-week and
+   the contact card lost WhatsApp. A card is as tall as what is in it. */
+.sidebar-card, .biz-side-card, .gh-right-widget, .gh-panel,
+.about-card, .hours-card, .connect-card {
+  max-height: none !important;
+  overflow: visible !important;
+}
+/* A list inside a card may scroll on its own rather than be cut by the card. */
+.biz-hours-list, .hours-list, .gh-mini-list {
+  max-height: min(60vh, 420px);
+  overflow-y: auto;
+}
+
+/* Left rail: labels wrap to a second line rather than being abbreviated.
+   The admin sidebar's "მიმოხ." / "ლაივ მ." came from a width that could not
+   hold the word, not from the translation. */
+.gh-nav-item span, .adm-nav-item span, .admin-nav-item span {
+  white-space: normal;
+  overflow-wrap: break-word;
+  hyphens: none;
+  line-height: 1.25;
 }
 
 /* ── Comments and replies ────────────────────────────────────────────────

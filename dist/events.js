@@ -76,7 +76,7 @@
   function ticketButton(event) {
     var price = Number(event.ticketPrice || event.price || 0);
     if (!price || price <= 0) {
-      return '<span style="color:var(--ds-text-3);font-size:.8rem"><i class="fas fa-ticket"></i> Free entry</span>';
+      return '<span style="color:var(--ds-text-3);font-size:.8rem"><i class="fas fa-ticket"></i> შესვლა უფასოა</span>';
     }
     var paymentsEnabled = window.GeoConfig && window.GeoConfig.FEATURE_FLAGS && window.GeoConfig.FEATURE_FLAGS.realPayments;
     if (!paymentsEnabled) {
@@ -133,7 +133,7 @@
             event.status === 'cancelled'
               ? '<span style="color:#ef4444;font-size:.7rem;font-weight:700;background:rgba(239,68,68,.12);padding:2px 8px;border-radius:6px">CANCELLED</span>'
               : future
-                ? '<span style="color:var(--ds-accent-ink);font-size:.7rem;font-weight:700;background:rgba(var(--ds-accent-rgb),.1);padding:2px 8px;border-radius:6px">UPCOMING</span>'
+                ? '<span style="color:var(--ds-accent-ink);font-size:.7rem;font-weight:700;background:rgba(var(--ds-accent-rgb),.1);padding:2px 8px;border-radius:6px">მოახლოებული</span>'
                 : '<span style="color:var(--ds-text-3);font-size:.7rem;background:rgba(255,255,255,.05);padding:2px 8px;border-radius:6px">PAST</span>',
           '</div>',
 
@@ -197,7 +197,7 @@
     state.all.forEach(function (e) { var c = e.category; if (c) cats[c] = (cats[c] || 0) + 1; });
     var catKeys = Object.keys(cats).sort();
 
-    var html = '<strong style="font-size:.9rem;color:var(--ds-text)">Filters</strong>';
+    var html = '<strong style="font-size:.9rem;color:var(--ds-text)">ფილტრები</strong>';
 
     if (catKeys.length) {
       var btnStyle = function(active) {
@@ -215,13 +215,13 @@
           }).join('')
         + '</div>';
     } else {
-      html += '<p style="color:var(--ds-text-3);font-size:.82rem;margin-top:10px;line-height:1.6">Categories appear once events are added.</p>';
+      html += '<p style="color:var(--ds-text-3);font-size:.82rem;margin-top:10px;line-height:1.6">კატეგორიები გამოჩნდება, როცა ღონისძიებები დაემატება.</p>';
     }
 
     if (user()) {
       var rsvpCount = Object.keys(state.myRsvpIds).length;
       html += '<div style="margin-top:16px;border-top:1px solid rgba(255,255,255,.06);padding-top:14px">'
-        + '<div style="font-size:.72rem;color:var(--ds-text-3);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Your Activity</div>'
+        + '<div style="font-size:.72rem;color:var(--ds-text-3);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">შენი აქტივობა</div>'
         + '<button onclick="_setEvFilter(\'mine\')" style="text-align:left;width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);color:var(--ds-text-3);border-radius:8px;padding:7px 12px;cursor:pointer;font-size:.82rem;font-weight:600">'
         + '<i class="fas fa-calendar-check" style="color:var(--ds-accent-ink);margin-right:6px"></i>My RSVPs (' + rsvpCount + ')</button>'
         + '</div>';

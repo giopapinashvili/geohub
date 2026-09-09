@@ -122,8 +122,8 @@
         '<button class="reel-action reel-comment-btn" data-vid-id="' + v.id + '" data-idx="' + idx + '" title="Comments"><i class="fas fa-comment-dots"></i><span class="reel-comment-cnt">' + fmtNum(v.commentCount) + '</span></button>' +
         '<button class="reel-action reel-share-btn" data-vid-id="' + v.id + '" data-title="' + esc(v.title || '') + '" title="Share"><i class="fas fa-share-nodes"></i><span>Share</span></button>' +
         '<button class="reel-action reel-save-btn" data-save-reel="' + esc(v.id) + '" title="Save"><i class="far fa-bookmark"></i><span>Save</span></button>' +
-        '<button class="reel-action reel-ni-btn" data-ni-reel="' + esc(v.id) + '" title="Not interested"><i class="fas fa-ban"></i><span>Skip</span></button>' +
-        '<button class="reel-action reel-report-btn" data-report-reel="' + esc(v.id) + '" title="Report"><i class="fas fa-flag"></i><span>Report</span></button>' +
+        '<button class="reel-action reel-ni-btn" data-ni-reel="' + esc(v.id) + '" title="Not interested"><i class="fas fa-ban"></i><span>გამოტოვება</span></button>' +
+        '<button class="reel-action reel-report-btn" data-report-reel="' + esc(v.id) + '" title="საჩივარი"><i class="fas fa-flag"></i><span>საჩივარი</span></button>' +
         '<a class="reel-action" href="watch.html?v=' + v.id + '" title="Watch full"><i class="fas fa-expand"></i><span>Watch</span></a>' +
       '</div>' +
       /* Bottom info */

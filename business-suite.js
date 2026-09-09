@@ -197,7 +197,7 @@
   function renderShell(){
     var b = state.selected;
     app.innerHTML = '<div class="bs-shell">'+
-      '<aside class="bs-sidebar"><div class="bs-brand"><div class="bs-brand-mark"><i class="fas fa-briefcase"></i></div><div><strong>Business Suite</strong><span>'+esc(tr('GeoHub page management'))+'</span></div></div><nav class="bs-nav">'+navHtml(false)+'</nav></aside>'+
+      '<aside class="bs-sidebar"><div class="bs-brand"><div class="bs-brand-mark"><i class="fas fa-briefcase"></i></div><div><strong>ბიზნეს კაბინეტი</strong><span>'+esc(tr('GeoHub page management'))+'</span></div></div><nav class="bs-nav">'+navHtml(false)+'</nav></aside>'+
       '<main class="bs-main">'+
         '<header class="bs-header">'+
           '<div class="bs-selected"><div class="bs-page-logo">'+(b.logoUrl?'<img src="'+esc(b.logoUrl)+'" alt="">':esc(initials(title(b))))+'</div><div><div class="bs-selected-title">'+esc(title(b))+'</div><div class="bs-selected-meta">'+esc(b.category || tr('Business page'))+'</div></div></div>'+

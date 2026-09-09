@@ -93,7 +93,7 @@ var OB_DICT = {
     ob_int_min: 'Pick at least 1', ob_int_none: 'Nothing selected yet — pick at least 1',
     ob_int_n: ' interest(s) selected ✓',
     ob_city_kicker: 'Step 7 — Areas', ob_city_title: 'Which parts of Georgia interest you?',
-    ob_city_sub: 'Georgia is small. Choose <strong>All Georgia</strong> for a nationwide feed, or select several cities.',
+    ob_city_sub: 'Georgia is small. Choose <strong>მთელი საქართველო</strong> for a nationwide feed, or select several cities.',
     ob_goal_kicker: 'Step 8 — Goals', ob_goal_title: 'What do you want to achieve?',
     ob_goal_sub: 'Your challenges, rewards, and recommendations will be optimized for your goals.',
     ob_goal_min: 'Pick at least 2',
@@ -531,7 +531,7 @@ function updateHeader(step) {
 function renderWelcome() {
   return '<div class="ob-welcome">' +
     '<img src="icons/icon-192.png" alt="GeoHub" style="width:80px;height:80px;border-radius:22px;object-fit:cover;box-shadow:0 8px 32px rgba(var(--ds-accent-rgb),.3);margin-bottom:16px">' +
-    '<h1>Welcome to <span class="hl">GeoHub</span></h1>' +
+    '<h1>კეთილი იყოს მობრძანება <span class="hl">GeoHub</span></h1>' +
     '<p>' + obT('ob_welcome_sub') + '</p>' +
     '<div class="ob-feature-chips">' +
       '<span class="ob-feature-chip"><i class="fas fa-bolt"></i> ' + obT('ob_chip_xp') + '</span>' +

@@ -48,7 +48,7 @@
     <div class="pt-modal-handle"></div>
     <div class="pt-modal-header">
       <div style="font-size:1.3rem">🚨</div>
-      <div class="pt-modal-title">Report a Problem</div>
+      <div class="pt-modal-title">პრობლემის შეტყობინება</div>
       <button class="pt-modal-close" onclick="closeReport()"><i class="fas fa-times"></i></button>
     </div>
     <div class="pt-modal-body">
@@ -105,7 +105,7 @@
   <div class="pt-topbar-actions">
     <button class="pt-icon-btn" title="Filter" onclick="toggleFilter()"><i class="fas fa-filter"></i></button>
     <button class="pt-icon-btn" title="Share" onclick="ptToast('Link copied!')"><i class="fas fa-share-alt"></i></button>
-    <button class="pt-report-btn" onclick="openReport()"><i class="fas fa-plus"></i> Report</button>
+    <button class="pt-report-btn" onclick="openReport()"><i class="fas fa-plus"></i> საჩივარი</button>
   </div>
 </div>
 
@@ -201,7 +201,7 @@
         </div>
         <div class="pt-map-pin" style="left:14%;top:70%" onclick="ptToast('🤝 Community Helper')">
           <div class="pt-map-pin-dot blue"><span class="pt-map-pin-icon">🤝</span></div>
-          <div class="pt-map-pin-label">Community</div>
+          <div class="pt-map-pin-label">საზოგადოება</div>
         </div>
         <!-- Legend -->
         <div class="pt-map-legend">
@@ -217,7 +217,7 @@
     <div class="pt-tabs" id="ptTabs">
       <button class="pt-tab active" data-tab="active" onclick="switchTab(this,'active')"><i class="fas fa-bolt"></i> Active <span class="tc" id="tcActive">8</span></button>
       <button class="pt-tab" data-tab="nearby" onclick="switchTab(this,'nearby')"><i class="fas fa-map-marker-alt"></i> Nearby <span class="tc">5</span></button>
-      <button class="pt-tab" data-tab="done" onclick="switchTab(this,'done')"><i class="fas fa-check-circle"></i> Completed <span class="tc">23</span></button>
+      <button class="pt-tab" data-tab="done" onclick="switchTab(this,'done')"><i class="fas fa-check-circle"></i> დასრულებული <span class="tc">23</span></button>
       <button class="pt-tab" data-tab="leaderboard" onclick="switchTab(this,'leaderboard')"><i class="fas fa-trophy"></i> Leaderboard</button>
       <button class="pt-tab" data-tab="rewards" onclick="switchTab(this,'rewards')"><i class="fas fa-gift"></i> Rewards</button>
     </div>
@@ -262,11 +262,11 @@
       </a>
       <a href="trust.html" class="pt-link-card">
         <div class="pt-link-icon" style="background:rgba(var(--ds-accent-rgb),0.12);color:var(--green)"><i class="fas fa-shield-alt"></i></div>
-        <div><div class="pt-link-label">Trust Score</div><div class="pt-link-sub">Patriot boosts trust</div></div>
+        <div><div class="pt-link-label">ნდობის ქულა</div><div class="pt-link-sub">Patriot boosts trust</div></div>
       </a>
       <a href="camera.html?mode=patriot" class="pt-link-card">
         <div class="pt-link-icon" style="background:rgba(249,115,22,0.12);color:var(--ds-h-event-ink)"><i class="fas fa-camera"></i></div>
-        <div><div class="pt-link-label">Camera Proof</div><div class="pt-link-sub">Before/after capture</div></div>
+        <div><div class="pt-link-label">კამერით დადასტურება</div><div class="pt-link-sub">Before/after capture</div></div>
       </a>
     </div>
     <div style="height:20px"></div>
@@ -279,7 +279,7 @@
   <a href="feed.html" class="app-nav-item"><i class="fas fa-home"></i><span>Feed</span></a>
   <a href="explore.html" class="app-nav-item"><i class="fas fa-compass"></i><span>Explore</span></a>
   <a href="checkin.html" class="app-nav-item app-nav-fab"><i class="fas fa-plus"></i></a>
-  <a href="challenges.html" class="app-nav-item active"><i class="fas fa-bolt"></i><span>Missions</span></a>
+  <a href="challenges.html" class="app-nav-item active"><i class="fas fa-bolt"></i><span>მისიები</span></a>
   <a href="profile.html" class="app-nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
 </nav>
 

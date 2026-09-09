@@ -153,7 +153,7 @@
         '<div '+sec+'>'+
           '<p '+sh+'>Location</p>'+
           '<div '+row+'>'+
-            '<div><label '+lbl+'>City</label><select '+inp+' id="gbe-city"><option value="">Select city…</option>'+cityOpts+'</select></div>'+
+            '<div><label '+lbl+'>ქალაქი</label><select '+inp+' id="gbe-city"><option value="">Select city…</option>'+cityOpts+'</select></div>'+
             '<div><label '+lbl+'>Street Address</label><input '+inp+' id="gbe-address" value="'+esc(b.address||'')+'" placeholder="Street address"></div>'+
           '</div>'+
           '<div '+row+'>'+
@@ -738,7 +738,7 @@
 
     return '<div class="biz-cover" style="'+coverStyle+'">' +
         (!biz.coverUrl?'<i class="fas fa-store biz-cover-placeholder-icon"></i>':'')+
-        (_isActingAsPage ? '<button class="biz-cover-edit-btn" onclick="window._bizActions.editCover()" title="Change cover photo"><i class="fas fa-camera"></i> Edit Cover</button>' : '') +
+        (_isActingAsPage ? '<button class="biz-cover-edit-btn" onclick="window._bizActions.editCover()" title="Change cover photo"><i class="fas fa-camera"></i> გარეკანის შეცვლა</button>' : '') +
       '</div>'+
       '<div class="biz-header-body">'+
         '<div class="biz-logo-row">'+
@@ -836,7 +836,7 @@
       var rows=dayNames.map(function(day){
         var h=biz.workingHours[day]; if(!h) return '';
         var isToday=day===todayName;
-        var timeStr=h.closed?'<span class="biz-hours-closed-tag">Closed</span>':'<span class="biz-hours-time">'+esc(h.open||'')+' – '+esc(h.close||'')+'</span>';
+        var timeStr=h.closed?'<span class="biz-hours-closed-tag">დაკეტილია</span>':'<span class="biz-hours-time">'+esc(h.open||'')+' – '+esc(h.close||'')+'</span>';
         return '<div class="biz-hours-row'+(isToday?' today':'')+'"><div class="biz-hours-day">'+day.slice(0,3)+(isToday?' ·':'')+'</div>'+timeStr+'</div>';
       }).filter(Boolean).join('');
       if (rows) {
@@ -1066,7 +1066,7 @@
           '<button class="biz-submit-btn" id="biz-add-block-btn" onclick="window._bizActions.saveNewBlock()"><i class="fas fa-plus"></i> Add Block</button>'+
         '</div>'+
         '<div class="biz-block-manager-list-header">Existing Blocks</div>'+
-        '<div id="biz-block-manager-list"><div style="color:var(--ds-text-3);font-size:.82rem;padding:8px 0"><i class="fas fa-spinner fa-spin"></i> Loading…</div></div>'+
+        '<div id="biz-block-manager-list"><div style="color:var(--ds-text-3);font-size:.82rem;padding:8px 0"><i class="fas fa-spinner fa-spin"></i> იტვირთება…</div></div>'+
       '</div>'+
     '</div>';
   }
@@ -1691,7 +1691,7 @@
   function renderGallery(photos) {
     var owner = isAdminOrOwner();
     var addBtn = owner
-      ? '<button class="biz-section-add-btn" onclick="window._bizActions.openOwnerPhotoInGallery()"><i class="fas fa-plus"></i> Add Photo</button>'
+      ? '<button class="biz-section-add-btn" onclick="window._bizActions.openOwnerPhotoInGallery()"><i class="fas fa-plus"></i> ფოტოს დამატება</button>'
       : '';
     var fileInput = owner
       ? '<input type="file" id="biz-gallery-file-input" accept="image/*" style="display:none" onchange="window._bizActions.handleGalleryPhoto(this)">'
@@ -1905,7 +1905,7 @@
       var rs=dn.map(function(day){
         var h=biz.workingHours[day]; if(!h) return '';
         var it=day===tn;
-        var ts=h.closed?'<span class="biz-hours-closed-tag">Closed</span>':'<span class="biz-hours-time">'+esc(h.open||'')+' – '+esc(h.close||'')+'</span>';
+        var ts=h.closed?'<span class="biz-hours-closed-tag">დაკეტილია</span>':'<span class="biz-hours-time">'+esc(h.open||'')+' – '+esc(h.close||'')+'</span>';
         return '<div class="biz-hours-row'+(it?' today':'')+'"><div class="biz-hours-day">'+day+(it?' ·':'')+'</div>'+ts+'</div>';
       }).filter(Boolean).join('');
       if (rs) sections.push('<div class="biz-section"><div class="biz-section-header"><div class="biz-section-title"><i class="fas fa-clock"></i> Hours</div></div>'+rs+'<div style="height:8px"></div></div>');
@@ -1958,7 +1958,7 @@
           '</select>'+
           '<button class="biz-submit-btn" style="padding:9px 16px" onclick="window._bizActions.addPageAdmin(document.getElementById(\'biz-new-admin-uid\').value.trim(),document.getElementById(\'biz-new-admin-role\').value)"><i class="fas fa-plus"></i> Add</button>'+
         '</div>'+
-        '<div id="biz-admin-list"><div style="color:var(--ds-text-3);font-size:.82rem"><i class="fas fa-spinner fa-spin"></i> Loading…</div></div>'+
+        '<div id="biz-admin-list"><div style="color:var(--ds-text-3);font-size:.82rem"><i class="fas fa-spinner fa-spin"></i> იტვირთება…</div></div>'+
       '</div>'+
     '</div>';
   }
@@ -2043,7 +2043,7 @@
         '<textarea class="biz-compose-textarea" id="biz-compose-text" placeholder="What\'s happening?"></textarea>'+
         '<div id="biz-compose-photos" class="biz-compose-photos"></div>'+
         '<div class="biz-compose-media-bar">'+
-          '<button type="button" class="biz-compose-media-btn" data-biz-compose-photo><i class="fas fa-image"></i> Add Photo</button>'+
+          '<button type="button" class="biz-compose-media-btn" data-biz-compose-photo><i class="fas fa-image"></i> ფოტოს დამატება</button>'+
           '<input type="file" id="biz-compose-photo-input" data-biz-compose-photo-input accept="image/*" multiple style="display:none">'+
         '</div>'+
         '<div class="biz-compose-footer">'+
@@ -2230,7 +2230,7 @@
           '</div>'+
 
           '<div class="biz-tab-panel" data-panel="events">'+
-            '<div id="biz-events-panel"><div class="biz-loading-inline"><i class="fas fa-spinner fa-spin"></i> Loading events…</div></div>'+
+            '<div id="biz-events-panel"><div class="biz-loading-inline"><i class="fas fa-spinner fa-spin"></i> ღონისძიებები იტვირთება…</div></div>'+
           '</div>'+
 
           '<div class="biz-tab-panel" data-panel="faq">'+
@@ -3074,7 +3074,7 @@
   function load() {
     var root = document.getElementById('biz-detail-root');
     if (!root) return;
-    root.innerHTML = '<div class="biz-loading"><i class="fas fa-spinner fa-spin"></i><span>Loading…</span></div>';
+    root.innerHTML = '<div class="biz-loading"><i class="fas fa-spinner fa-spin"></i><span>იტვირთება…</span></div>';
     document.body.classList.add('biz-detail-active');
 
     _fs.getDoc(_fs.doc(_db,'businesses',BIZ_ID)).then(function(bizSnap) {
@@ -3559,7 +3559,7 @@
         });
       });
       quotes.forEach(function(q){
-        var badge = q.status === 'new' ? ' <span class="biz-activity-badge">New</span>' : '';
+        var badge = q.status === 'new' ? ' <span class="biz-activity-badge">ახალი</span>' : '';
         activity.push({
           icon: 'fa-paper-plane', color: '#8b5cf6',
           text: 'Quote request' + (q.name ? ' from ' + esc(q.name) : '') + badge,
@@ -5097,7 +5097,7 @@
     refreshBlockManagerList: function() {
       var list = document.getElementById('biz-block-manager-list');
       if (!list) return;
-      list.innerHTML = '<div style="color:var(--ds-text-3);font-size:.82rem;padding:8px 0"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
+      list.innerHTML = '<div style="color:var(--ds-text-3);font-size:.82rem;padding:8px 0"><i class="fas fa-spinner fa-spin"></i> იტვირთება…</div>';
       safeSnap(
         _fs.getDocs(_fs.query(
           _fs.collection(_db,'businesses',BIZ_ID,'pageBlocks'),
@@ -5835,7 +5835,7 @@
           '</div>' +
           '<div class="biz-qi-search-row"><input class="biz-qi-search" id="biz-qi-search-inp" placeholder="Search name, email, message…" oninput="window._bizActions.qSearch(this.value)"></div>' +
           '<div id="biz-qi-filter-zone"></div>' +
-          '<div class="biz-qi-loading" id="biz-qi-list"><i class="fas fa-spinner fa-spin"></i> Loading…</div>' +
+          '<div class="biz-qi-loading" id="biz-qi-list"><i class="fas fa-spinner fa-spin"></i> იტვირთება…</div>' +
         '</div>';
       _fs.getDocs(_fs.query(
         _fs.collection(_db, 'businesses', BIZ_ID, 'quoteRequests'),

@@ -57,16 +57,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700;800&family=Noto+Serif+Georgian:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
-  <script type="module" crossorigin src="/assets/map-DxAFQvub.js"></script>
+  <script type="module" crossorigin src="/assets/map-adO5i6wq.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/vendor-_dE3vzj_.js">
   <link rel="modulepreload" crossorigin href="/assets/firebase-config-CGKVrgHh.js">
   <link rel="modulepreload" crossorigin href="/assets/config-DSeD8I2H.js">
   <link rel="modulepreload" crossorigin href="/assets/api-client-DV25UnBD.js">
   <link rel="modulepreload" crossorigin href="/assets/main-DZ7-Y9ov.js">
-  <link rel="modulepreload" crossorigin href="/assets/gh-admin-bridge-DBB1DqWz.js">
-  <link rel="modulepreload" crossorigin href="/assets/account-Dl1_viTm.js">
-  <link rel="modulepreload" crossorigin href="/assets/mobile-nav-CEPM5beY.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-admin-bridge-D8kQ6Xb1.js">
+  <link rel="modulepreload" crossorigin href="/assets/account-CgowKiSO.js">
+  <link rel="modulepreload" crossorigin href="/assets/mobile-nav-BTmnL6IV.js">
   <link rel="modulepreload" crossorigin href="/assets/chat-popup-BHzNMiBZ.js">
   <link rel="modulepreload" crossorigin href="/assets/gh-calls-8Hq61GhG.js">
   <link rel="modulepreload" crossorigin href="/assets/gh-group-calls-CA5vOXuG.js">
@@ -80,7 +80,7 @@
   <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-CK4mvkco.css">
   <link rel="stylesheet" crossorigin href="/assets/chat-popup-DzoItt1C.css">
   <link rel="stylesheet" crossorigin href="/assets/responsive-polish-BHWfKQLh.css">
-  <link rel="stylesheet" crossorigin href="/assets/gh-design-system-x93rfHn_.css">
+  <link rel="stylesheet" crossorigin href="/assets/gh-design-system-BCFqqWoI.css">
 </head>
 <body>
 
@@ -119,7 +119,7 @@
     <div class="map-sidebar-pull" id="sidebarPull"><span></span><span></span><span></span></div>
     <div class="map-sidebar-header">
       <div class="map-sidebar-toprow">
-        <h3>🗺️ Explore on Map</h3>
+        <h3>🗺️ აღმოაჩინე რუკაზე</h3>
         <!-- Mobile location sharing toggle (desktop uses the floating button) -->
         <button class="map-loc-share-btn" id="sidebarLocBtn" onclick="window.openLivePanel()" title="Live Friends & Location" data-i18n-title="map_live_title">
           <i class="fas fa-satellite-dish"></i>
@@ -227,16 +227,16 @@
       </div>
       <div class="mpd-quick-actions" id="mpdQuickActions"></div>
       <div class="mpd-tabs" id="mpdTabs">
-        <button class="mpd-tab active" data-mpd-tab="info">ℹ️ Info</button>
-        <button class="mpd-tab" data-mpd-tab="reviews">⭐ Reviews</button>
-        <button class="mpd-tab" data-mpd-tab="photos">📸 Photos</button>
-        <button class="mpd-tab" data-mpd-tab="stories">🔥 Stories 24h</button>
+        <button class="mpd-tab active" data-mpd-tab="info">ℹ️ ინფო</button>
+        <button class="mpd-tab" data-mpd-tab="reviews">⭐ შეფასებები</button>
+        <button class="mpd-tab" data-mpd-tab="photos">📸 ფოტოები</button>
+        <button class="mpd-tab" data-mpd-tab="stories">🔥 სთორები 24სთ</button>
       </div>
       <div class="mpd-tab-content" id="mpdTabContent"></div>
     </div>
 
     <!-- Add Place button -->
-    <button id="addPlaceBtn" class="map-add-place-fab" onclick="window.openAddPlaceSheet()" aria-label="Add Place">
+    <button id="addPlaceBtn" class="map-add-place-fab" onclick="window.openAddPlaceSheet()" aria-label="ადგილის დამატება">
       <i class="fas fa-plus"></i>
     </button>
 
@@ -323,26 +323,26 @@
     <!-- Nearby Stories button -->
     <button id="mapStoriesBtn" class="map-stories-fab" onclick="window.toggleNearbyStories()" aria-label="Nearby Stories">
       <i class="fas fa-circle-play"></i>
-      <span class="map-stories-fab-label">Stories</span>
+      <span class="map-stories-fab-label">სთორები</span>
     </button>
 
     <!-- "What's happening NOW" button + panel -->
-    <button id="nowBtn" class="now-fab" onclick="window.toggleNowPanel()" aria-label="What's happening now">
+    <button id="nowBtn" class="now-fab" onclick="window.toggleNowPanel()" aria-label="რა ხდება ახლა">
       <span class="now-fab-pulse"></span>
       <i class="fas fa-bolt"></i>
-      <span class="now-fab-label">Now</span>
+      <span class="now-fab-label">ახლა</span>
       <span id="nowBadge" class="now-fab-badge" style="display:none"></span>
     </button>
     <div id="nowPanel" class="now-panel" aria-hidden="true">
       <div class="now-panel-head">
-        <div class="now-panel-title"><i class="fas fa-bolt"></i> What's happening now</div>
+        <div class="now-panel-title"><i class="fas fa-bolt"></i> რა ხდება ახლა</div>
         <button class="now-panel-close" onclick="window.toggleNowPanel()"><i class="fas fa-times"></i></button>
       </div>
       <div id="nowPanelBody" class="now-panel-body">
-        <div class="now-loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div>
+        <div class="now-loading"><i class="fas fa-spinner fa-spin"></i> იტვირთება…</div>
       </div>
       <div class="now-panel-footer">
-        <button class="now-refresh-btn" onclick="window.loadNowPanel(true)"><i class="fas fa-sync-alt"></i> Refresh</button>
+        <button class="now-refresh-btn" onclick="window.loadNowPanel(true)"><i class="fas fa-sync-alt"></i> განახლება</button>
         <span id="nowLastUpdated" class="now-last-updated"></span>
       </div>
     </div>
@@ -364,17 +364,16 @@
         <div id="panelGoogleSection" style="display:none"></div>
         <div style="display:flex;gap:8px">
           <a id="panelDetailBtn" href="javascript:void(0)" aria-disabled="true" class="btn btn-primary btn-sm" style="flex:1;justify-content:center">
-            <i class="fas fa-info-circle"></i> Details
+            <i class="fas fa-info-circle"></i> დეტალები
           </a>
           <a id="panelMapBtn" href="javascript:void(0)" aria-disabled="true" class="btn btn-ghost btn-sm" target="_blank">
             <i class="fas fa-directions"></i>
           </a>
         </div>
         <button id="panelCheckinBtn" class="map-checkin-btn" style="display:none" onclick="checkInToPlace()">
-          <i class="fas fa-map-pin"></i> Check In
+          <i class="fas fa-map-pin"></i> <span data-i18n="checkin">ჩექ-ინი</span>
         </button>
       </div>
-    </div>
     </div>
   </div>
 </div>

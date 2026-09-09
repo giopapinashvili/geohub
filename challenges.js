@@ -12,7 +12,7 @@
   }
   function typeLabel(type) {
     var labels = (window.GeoChallenges && window.GeoChallenges.TYPE_LABELS) || {};
-    return labels[type] || 'Challenge';
+    return labels[type] || 'გამოწვევა';
   }
   function categoryLabel(category) {
     var labels = (window.GeoChallenges && window.GeoChallenges.CATEGORY_LABELS) || {};
@@ -55,7 +55,7 @@
     if (state.tab === 'completed') {
       return '<div class="challenge-empty"><i class="fas fa-lock"></i><h2>No completed challenges yet</h2><p>Completed missions will appear here after real activity reaches its target.</p></div>';
     }
-    return '<div class="challenge-empty"><i class="fas fa-route"></i><h2>No active challenges</h2><p>Admins can create active challenge documents in Firestore. This page does not show demo missions.</p></div>';
+    return '<div class="challenge-empty"><i class="fas fa-route"></i><h2>აქტიური გამოწვევა არ არის</h2><p>Admins can create active challenge documents in Firestore. This page does not show demo missions.</p></div>';
   }
   function cardHtml(c) {
     var p = state.progress[c.id] || {};
@@ -84,7 +84,7 @@
         '<span><i class="fas fa-layer-group"></i>' + esc(categoryLabel(c.category || 'exploration')) + '</span>' +
         (c.city ? '<span><i class="fas fa-location-dot"></i>' + esc(c.city) + '</span>' : '') +
         (end ? '<span><i class="fas fa-calendar"></i>Ends ' + esc(end) + '</span>' : '') +
-        (completed ? '<span><i class="fas fa-check"></i>Completed</span>' : '<span>' + remaining + ' remaining</span>') +
+        (completed ? '<span><i class="fas fa-check"></i>დასრულებული</span>' : '<span>' + remaining + ' remaining</span>') +
       '</div>' +
       (badgeId ? '<div class="ch-badge-pill' + (completed ? ' is-earned' : '') + '"><i class="fas ' + esc(c.badgeIcon || c.icon || 'fa-medal') + '"></i> ' + esc(badgeTitle) + ' · ' + esc(rarityLabel(rarity)) + (completed ? ' <i class="fas fa-check" style="font-size:.6rem"></i>' : '') + '</div>' : '') +
       '<div class="challenge-progress-row"><span>' + progress + ' / ' + target + '</span><span>' + pct + '%</span></div>' +
@@ -184,9 +184,9 @@
       '<span class="chalm-type-badge chalm-type-' + esc(c.type || 'default') + '">' +
         esc(typeLabel(c.type)) +
       '</span>' +
-      (completed ? '<span class="chalm-done-badge"><i class="fas fa-check"></i> Completed</span>' : '');
+      (completed ? '<span class="chalm-done-badge"><i class="fas fa-check"></i> დასრულებული</span>' : '');
 
-    document.getElementById('chalDetailTitle').textContent = c.title || c.name || 'Challenge';
+    document.getElementById('chalDetailTitle').textContent = c.title || c.name || 'გამოწვევა';
     document.getElementById('chalDetailDesc').textContent = c.description || 'Complete real activity to make progress on this challenge.';
 
     var xpModal = Number(p.xpReward || c.xpReward || 0);

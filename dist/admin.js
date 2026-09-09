@@ -489,7 +489,7 @@
     var fb = window.GeoFirebase;
     if (!fb || !fb.db) return;
     var el = document.getElementById('bizList');
-    if (el) el.innerHTML = '<div style="color:var(--ds-text-3);font-size:.85rem;padding:20px"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
+    if (el) el.innerHTML = '<div style="color:var(--ds-text-3);font-size:.85rem;padding:20px"><i class="fas fa-spinner fa-spin"></i> იტვირთება…</div>';
 
     fb.fs.getDocs(fb.fs.query(fb.fs.collection(fb.db, 'businesses'), fb.fs.orderBy('createdAt', 'desc'), fb.fs.limit(100)))
       .then(function (snap) {
@@ -905,7 +905,7 @@
 
     var listEl = document.getElementById('activityList');
     var subEl  = document.getElementById('activitySub');
-    if (listEl) listEl.innerHTML = '<div style="text-align:center;padding:32px;color:var(--ts)"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
+    if (listEl) listEl.innerHTML = '<div style="text-align:center;padding:32px;color:var(--ts)"><i class="fas fa-spinner fa-spin"></i> იტვირთება…</div>';
 
     var fb = window.GeoFirebase;
     if (!fb || !fb.db || !fb.fs) {
@@ -2607,7 +2607,7 @@
     var col = ((document.getElementById('manageContentCol') || {}).value || '').trim();
     if (!col) return;
     var list = document.getElementById('manageContentList');
-    if (list) list.innerHTML = '<div style="text-align:center;padding:28px;color:var(--ts)"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
+    if (list) list.innerHTML = '<div style="text-align:center;padding:28px;color:var(--ts)"><i class="fas fa-spinner fa-spin"></i> იტვირთება…</div>';
 
     fb.fs.getDocs(fb.fs.query(fb.fs.collection(fb.db, col), fb.fs.limit(60)))
       .then(function (snap) {

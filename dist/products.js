@@ -20,9 +20,9 @@
     var catRow = document.getElementById('pdCatFilterRow');
     if (catRow) {
       if (!cats.length) {
-        catRow.innerHTML = '<span style="color:var(--ds-text-3);font-size:.8rem">No categories yet</span>';
+        catRow.innerHTML = '<span style="color:var(--ds-text-3);font-size:.8rem">კატეგორია ჯერ არ არის</span>';
       } else {
-        var html = '<button class="pd-filter-btn active" data-cat="all">All</button>';
+        var html = '<button class="pd-filter-btn active" data-cat="all">ყველა</button>';
         cats.forEach(function (cat) {
           html += '<button class="pd-filter-btn" data-cat="' + esc(cat) + '">' + esc(cat) + '</button>';
         });
@@ -97,7 +97,7 @@
         (city    ? '<div class="pd-card-city"><i class="fas fa-map-marker-alt"></i>' + city + '</div>' : '') +
         (desc    ? '<div class="pd-card-desc">' + desc + '</div>' : '') +
         '<div class="pd-card-actions">' +
-          '<a href="' + esc(bizUrl) + '" class="pd-btn pd-btn-ghost"><i class="fas fa-store"></i> View Business</a>' +
+          '<a href="' + esc(bizUrl) + '" class="pd-btn pd-btn-ghost"><i class="fas fa-store"></i> ბიზნესის ნახვა</a>' +
           '<a href="' + esc(askUrl) + '" class="pd-btn pd-btn-primary"><i class="fas fa-comment-dots"></i> Ask about It</a>' +
         '</div>' +
       '</div>' +

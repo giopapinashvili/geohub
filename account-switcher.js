@@ -173,7 +173,7 @@
       activeLink = 'business.html?id=' + esc(actingBiz.id);
       activeQuickLinks =
         '<div class="geo-sw-quick-links">'+
-          '<a href="business.html?id='+esc(actingBiz.id)+'" onclick="event.stopPropagation()" class="geo-sw-quick-link"><i class="fas fa-arrow-up-right-from-square"></i> View Page</a>'+
+          '<a href="business.html?id='+esc(actingBiz.id)+'" onclick="event.stopPropagation()" class="geo-sw-quick-link"><i class="fas fa-arrow-up-right-from-square"></i> გვერდის ნახვა</a>'+
           '<a href="messages.html?business='+esc(actingBiz.id)+'" onclick="event.stopPropagation()" class="geo-sw-quick-link"><i class="fas fa-comment-dots"></i> Inbox</a>'+
           '<a href="business.html?id='+esc(actingBiz.id)+'&tab=manage" onclick="event.stopPropagation()" class="geo-sw-quick-link"><i class="fas fa-gear"></i> Manage</a>'+
         '</div>';
@@ -287,7 +287,19 @@
     }
 
     // ── Bottom actions ──────────────────────────────────────────
-    var profileHref = _user && _user.uid ? 'profile.html?id='+encodeURIComponent(_user.uid) : 'profile.html';
+    // Follow the active actor, not the signed-in user: while acting as a
+    // business page this row used to open the personal profile.
+    var _act = getActiveActor();
+    var profileHref;
+    var profileKey = 'profile';
+    if (_act && _act.type === 'business' && (_act.id || _act.businessId)) {
+      profileHref = 'business.html?id=' + encodeURIComponent(_act.id || _act.businessId);
+      profileKey = 'sw_view_page';
+    } else if (_user && _user.uid) {
+      profileHref = 'profile.html?id=' + encodeURIComponent(_user.uid);
+    } else {
+      profileHref = 'profile.html';
+    }
 
     // ── Preferences: Theme + Language ──────────────────────────
     var _curTheme = 'dark'; try { _curTheme = localStorage.getItem('gh_theme') || 'dark'; } catch(e) {}
@@ -322,7 +334,8 @@
       '<div class="geo-sw-divider"></div>'+
       '<a class="geo-sw-item" href="'+profileHref+'">'+
         '<div class="geo-sw-item-icon user"><i class="fas fa-user"></i></div>'+
-        '<span class="geo-sw-item-name geo-sw-i18n" data-i18n="profile">Profile</span>'+
+        '<span class="geo-sw-item-name geo-sw-i18n" data-i18n="'+profileKey+'">'+
+          (profileKey==='sw_view_page' ? 'გვერდის ნახვა' : 'პროფილი')+'</span>'+
       '</a>'+
       '<a class="geo-sw-item" href="settings.html">'+
         '<div class="geo-sw-item-icon settings"><i class="fas fa-gear"></i></div>'+

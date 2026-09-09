@@ -18,14 +18,14 @@ let currentStep = 1;
   }
 
   // Hours inputs
-  const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const days = ['ორშაბათი', 'სამშაბათი', 'ოთხშაბათი', 'ხუთშაბათი', 'პარასკევი', 'შაბათი', 'კვირა'];
   document.getElementById('hoursInputs').innerHTML = days.map(d => `
     <div class="hours-grid">
       <div class="day-label">${d}</div>
       <input type="time" value="09:00" id="open_${d}">
       <input type="time" value="18:00" id="close_${d}">
       <label class="closed-toggle">
-        <input type="checkbox" style="accent-color:var(--red)" id="closed_${d}"> Closed
+        <input type="checkbox" style="accent-color:var(--red)" id="closed_${d}"> დაკეტილია
       </label>
     </div>`).join('');
 

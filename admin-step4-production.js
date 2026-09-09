@@ -206,7 +206,7 @@
     var col = select.value || 'places';
     var cfg = COLLECTIONS[col] || COLLECTIONS.places;
     if (sub) sub.textContent = 'Latest ' + cfg.label + ' from Firestore';
-    list.innerHTML = '<div class="admin-step4-empty"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>';
+    list.innerHTML = '<div class="admin-step4-empty"><i class="fas fa-circle-notch fa-spin"></i> იტვირთება…</div>';
     gfReady(function(fb){
       var fs = fb.fs, db = fb.db;
       var q;

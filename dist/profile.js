@@ -400,7 +400,7 @@
     }
     const coverActions = $('.cover-actions');
     if (coverActions) coverActions.innerHTML = own
-      ? '<button class="cover-btn" data-edit-cover><i class="fas fa-camera"></i> Edit Cover</button><button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="cover-btn primary" data-edit-profile><i class="fas fa-pen"></i> '+_t('profile_edit')+'</button>'
+      ? '<button class="cover-btn" data-edit-cover><i class="fas fa-camera"></i> გარეკანის შეცვლა</button><button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="cover-btn primary" data-edit-profile><i class="fas fa-pen"></i> '+_t('profile_edit')+'</button>'
       : '<button class="cover-btn" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="cover-btn primary" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> '+_t('profile_add_friend')+'</button>';
     if (own) {
       const avatarWrap = $('.profile-avatar-wrap');
@@ -414,7 +414,7 @@
       }
     }
     const actions = $('.profile-actions');
-    if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> '+_t('profile_edit')+'</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="btn btn-ghost btn-sm" data-qr-profile="'+esc(user.uid)+'" title="QR Code"><i class="fas fa-qrcode"></i></button><button class="btn btn-ghost btn-sm" id="cfManageBtn" style="color:var(--ds-accent)" title="Close Friends"><i class="fas fa-star"></i> Close Friends</button><button class="btn btn-ghost btn-sm" onclick="window.ghOpenInviteModal&&window.ghOpenInviteModal()" title="მეგობრების მოწვევა" style="color:var(--ds-h-reward-ink)"><i class="fas fa-gift"></i></button><button class="btn btn-ghost btn-sm profile-body-logout" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> '+_t('profile_message')+'</button><button class="btn btn-ghost btn-sm" data-call-user="' + esc(user.uid) + '" data-call-type="audio" data-call-name="' + esc(user.fullName) + '" data-call-avatar="' + esc(user.avatar || '') + '" title="'+_t('call_voice','Voice call')+'"><i class="fas fa-phone"></i></button><button class="btn btn-ghost btn-sm" data-call-user="' + esc(user.uid) + '" data-call-type="video" data-call-name="' + esc(user.fullName) + '" data-call-avatar="' + esc(user.avatar || '') + '" title="'+_t('call_video','Video call')+'"><i class="fas fa-video"></i></button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> '+_t('profile_add_friend')+'</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> '+_t('follow')+'</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-mute-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-volume-mute"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-ban"></i></button><button class="btn btn-ghost btn-sm" data-qr-profile="' + esc(user.uid) + '" title="QR Code"><i class="fas fa-qrcode"></i></button>';
+    if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> '+_t('profile_edit')+'</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="btn btn-ghost btn-sm" data-qr-profile="'+esc(user.uid)+'" title="QR Code"><i class="fas fa-qrcode"></i></button><button class="btn btn-ghost btn-sm" id="cfManageBtn" style="color:var(--ds-accent)" title="ახლო მეგობრები"><i class="fas fa-star"></i> ახლო მეგობრები</button><button class="btn btn-ghost btn-sm" onclick="window.ghOpenInviteModal&&window.ghOpenInviteModal()" title="მეგობრების მოწვევა" style="color:var(--ds-h-reward-ink)"><i class="fas fa-gift"></i></button><button class="btn btn-ghost btn-sm profile-body-logout" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> '+_t('profile_message')+'</button><button class="btn btn-ghost btn-sm" data-call-user="' + esc(user.uid) + '" data-call-type="audio" data-call-name="' + esc(user.fullName) + '" data-call-avatar="' + esc(user.avatar || '') + '" title="'+_t('call_voice','Voice call')+'"><i class="fas fa-phone"></i></button><button class="btn btn-ghost btn-sm" data-call-user="' + esc(user.uid) + '" data-call-type="video" data-call-name="' + esc(user.fullName) + '" data-call-avatar="' + esc(user.avatar || '') + '" title="'+_t('call_video','Video call')+'"><i class="fas fa-video"></i></button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> '+_t('profile_add_friend')+'</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> '+_t('follow')+'</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-mute-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-volume-mute"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-ban"></i></button><button class="btn btn-ghost btn-sm" data-qr-profile="' + esc(user.uid) + '" title="QR Code"><i class="fas fa-qrcode"></i></button>';
     if (own) {
       var cfMBtn = document.getElementById('cfManageBtn');
       if (cfMBtn) cfMBtn.onclick = function(){ _openCFModal(user.uid); };
@@ -638,7 +638,7 @@
     const activity = $('.activity-feed .activity-feed-list'); if (activity) activity.innerHTML = '<div style="color:var(--text-muted);font-size:.85rem;padding:12px 0">' + _t('profile_no_activity') + '</div>';
     const thumbs = $('.followers-thumbs'); if (thumbs) thumbs.innerHTML = '';
     const ftxt = $('.followers-preview-text'); if (ftxt) ftxt.textContent = _t('profile_no_followers');
-    const highlights = $('.profile-highlights'); if (highlights) highlights.innerHTML = '<div class="highlight-item highlight-add" data-add-highlight><div class="highlight-ring add-ring"><i class="fas fa-plus"></i></div><div class="highlight-label">New</div></div>';
+    const highlights = $('.profile-highlights'); if (highlights) highlights.innerHTML = '<div class="highlight-item highlight-add" data-add-highlight><div class="highlight-ring add-ring"><i class="fas fa-plus"></i></div><div class="highlight-label">ახალი</div></div>';
   }
 
   function updateFriendButtons(uid, status) {
@@ -695,7 +695,7 @@
     if (!row) return;
     var GF = window.GeoFirebase;
     var isOwn = fbUser && user.uid === fbUser.uid;
-    var addBtn = '<div class="highlight-item highlight-add" data-add-highlight><div class="highlight-ring add-ring"><i class="fas fa-plus"></i></div><div class="highlight-label">New</div></div>';
+    var addBtn = '<div class="highlight-item highlight-add" data-add-highlight><div class="highlight-ring add-ring"><i class="fas fa-plus"></i></div><div class="highlight-label">ახალი</div></div>';
     if (!GF || !GF.db || !GF.fs) { row.innerHTML = isOwn ? addBtn : ''; return; }
     GF.fs.getDocs(
       GF.fs.query(GF.fs.collection(GF.db, 'users', user.uid, 'highlights'), GF.fs.orderBy('createdAt', 'desc'), GF.fs.limit(10))
@@ -911,7 +911,7 @@
     var ov = document.createElement('div');
     ov.id = 'ghCFOverlay';
     ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:9999;display:flex;align-items:flex-end;justify-content:center';
-    ov.innerHTML = '<div class="gh-cf-sheet"><div class="gh-cf-sheet-head"><span><i class="fas fa-star" style="color:var(--ds-accent)"></i> Close Friends</span><button class="gh-cf-sheet-close" id="ghCFClose">×</button></div><div class="gh-cf-sheet-body" id="ghCFBody"><div class="gh-cf-loading"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div></div></div>';
+    ov.innerHTML = '<div class="gh-cf-sheet"><div class="gh-cf-sheet-head"><span><i class="fas fa-star" style="color:var(--ds-accent)"></i> ახლო მეგობრები</span><button class="gh-cf-sheet-close" id="ghCFClose">×</button></div><div class="gh-cf-sheet-body" id="ghCFBody"><div class="gh-cf-loading"><i class="fas fa-circle-notch fa-spin"></i> იტვირთება…</div></div></div>';
     document.body.appendChild(ov);
     ov.addEventListener('click', function(e){ if(e.target===ov){ ov.remove(); } });
     document.getElementById('ghCFClose').onclick = function(){ ov.remove(); };
@@ -1415,7 +1415,7 @@
     if (window.GeoSocial && window.GeoSocial.listenManagedBusinesses) {
       window.GeoSocial.listenManagedBusinesses(user.uid, businesses => {
         const cnt = $('.ptab[data-tab="businesses"] .tab-count'); if(cnt) cnt.textContent = businesses.length || '0';
-        if(!businesses.length){ tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-store"></i><h3>No business pages yet</h3><p>Business pages you manage will appear here.</p><a class="btn btn-primary btn-sm" href="add-business.html">Add Business</a></div>'; return; }
+        if(!businesses.length){ tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-store"></i><h3>ბიზნეს გვერდი ჯერ არ არის</h3><p>Business pages you manage will appear here.</p><a class="btn btn-primary btn-sm" href="add-business.html">Add Business</a></div>'; return; }
         tab.innerHTML = '<div class="gh-friend-grid">'+businesses.map(b => '<a class="gh-friend-card" href="business.html?id='+encodeURIComponent(b.id)+'"><span class="gh-avatar">'+(b.logoUrl||b.coverImageUrl?'<img src="'+esc(b.logoUrl||b.coverImageUrl)+'" alt="" loading="lazy" decoding="async">':esc(initialLetters(b.name||'Business')) )+'</span><div><strong>'+esc(b.name||'Business')+'</strong><span>'+esc(b.businessType==='online'?'Online / Nationwide':(b.city||b.category||'Business'))+'</span></div></a>').join('')+'</div>';
       });
     }
@@ -1598,7 +1598,7 @@
     var tab = $('#tab-gallery'); if (!tab) return;
     var media = (posts || []).filter(function(p) { return !!p.mediaUrl; });
     var cnt = $('.ptab[data-tab="gallery"] .tab-count'); if (cnt) cnt.textContent = media.length || '';
-    if (!media.length) { tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-images"></i><h3>No photos yet</h3><p>Posts with photos will appear in the gallery.</p></div>'; return; }
+    if (!media.length) { tab.innerHTML = '<div class="empty-profile-state"><i class="fas fa-images"></i><h3>ფოტო ჯერ არ არის</h3><p>ფოტოიანი პოსტები გალერეაში გამოჩნდება.</p></div>'; return; }
     tab.innerHTML = '<div class="gallery-grid">' + media.map(function(p) {
       return '<div class="gallery-item"><img src="' + esc(p.mediaUrl) + '" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.closest(\'.gallery-item\').style.display=\'none\'"><div class="gallery-overlay"><span><i class="fas fa-heart"></i> ' + (p.likeCount || 0) + '</span></div></div>';
     }).join('') + '</div>';
@@ -1633,7 +1633,7 @@
     if (joinYear) html += '<div class="about-item"><i class="fas fa-calendar-alt"></i> ' + _t('profile_member_since') + joinYear + '</div>';
 
     // ── Work History ──
-    html += '<div class="about-section-title">' + _t('about_work') + (isOwn ? '<button class="about-add-btn" data-work-add>+ Add</button>' : '') + '</div>';
+    html += '<div class="about-section-title">' + _t('about_work') + (isOwn ? '<button class="about-add-btn" data-work-add>+ დამატება</button>' : '') + '</div>';
     var work = Array.isArray(user.work) ? user.work : [];
     if (work.length) {
       work.forEach(function(w, idx) {
@@ -1650,7 +1650,7 @@
     }
 
     // ── Education ──
-    html += '<div class="about-section-title">' + _t('about_edu') + (isOwn ? '<button class="about-add-btn" data-edu-add>+ Add</button>' : '') + '</div>';
+    html += '<div class="about-section-title">' + _t('about_edu') + (isOwn ? '<button class="about-add-btn" data-edu-add>+ დამატება</button>' : '') + '</div>';
     var edu = Array.isArray(user.education) ? user.education : [];
     if (edu.length) {
       edu.forEach(function(e, idx) {
@@ -1755,9 +1755,9 @@
 
   function paintLifeEvents(container, events, user, isOwn) {
     if (!events.length && !isOwn) { container.innerHTML = ''; return; }
-    var html = '<div class="about-section-title">Life Events' + (isOwn ? '<button class="about-add-btn" data-life-event-add>+ Add</button>' : '') + '</div>';
+    var html = '<div class="about-section-title">Life Events' + (isOwn ? '<button class="about-add-btn" data-life-event-add>+ დამატება</button>' : '') + '</div>';
     if (!events.length) {
-      html += '<div class="about-item" style="color:var(--gh-muted,#64748b)"><i class="fas fa-star"></i> Add your first life event</div>';
+      html += '<div class="about-item" style="color:var(--gh-muted,#64748b)"><i class="fas fa-star"></i> დაამატე პირველი მოვლენა</div>';
     } else {
       html += '<div class="life-events-timeline">';
       events.forEach(function(ev) {
@@ -2061,7 +2061,7 @@
     var isOpen = isOpenNow(biz.workingHours);
     var openBadge = isOpen === null ? '' : (isOpen
       ? '<span class="biz-open-badge open"><i class="fas fa-circle" style="font-size:.45rem"></i> Open Now</span>'
-      : '<span class="biz-open-badge closed"><i class="fas fa-circle" style="font-size:.45rem"></i> Closed</span>');
+      : '<span class="biz-open-badge closed"><i class="fas fa-circle" style="font-size:.45rem"></i> დაკეტილია</span>');
     var cover = $('.profile-cover');
     if (cover && biz.coverUrl) cover.style.backgroundImage = 'linear-gradient(180deg,rgba(4,5,13,0.08),rgba(4,5,13,0.72)),url(\'' + esc(biz.coverUrl) + '\')';
     var identity = $('.profile-identity-section');
@@ -2130,7 +2130,7 @@
       + '<div class="sidebar-card"><div class="sidebar-card-title">Hours</div>'
       + days.map(function(d) {
           var h = hours[d]; var isToday = d === todayKey;
-          var t = (h && !h.closed) ? esc(h.open || '') + ' – ' + esc(h.close || '') : '<span class="biz-hours-closed">Closed</span>';
+          var t = (h && !h.closed) ? esc(h.open || '') + ' – ' + esc(h.close || '') : '<span class="biz-hours-closed">დაკეტილია</span>';
           return '<div class="biz-hours-row' + (isToday ? ' today' : '') + '"><span>' + dayLabels[d] + '</span><span>' + t + '</span></div>';
         }).join('')
       + '</div>'
@@ -2190,7 +2190,7 @@
     var tab = $('#tab-biz-about'); if (!tab) return;
     var html = '<div class="about-card">';
     if (biz.description) html += '<div class="about-bio">' + esc(biz.description) + '</div>';
-    html += '<div class="about-section-title">Details</div>';
+    html += '<div class="about-section-title">დეტალები</div>';
     if (biz.category) html += '<div class="about-item"><i class="fas fa-tag"></i> ' + esc(biz.category) + '</div>';
     if (biz.address || biz.city) html += '<div class="about-item"><i class="fas fa-map-marker-alt"></i> ' + esc(biz.address || biz.city) + '</div>';
     if (biz.phone) html += '<div class="about-item"><i class="fas fa-phone"></i> ' + esc(biz.phone) + '</div>';
@@ -2247,14 +2247,14 @@
       + '<div class="profile-edit-photos-row">'
       + '<div class="profile-edit-cover-wrap" id="peCoverWrap">'
       + (currentCover ? '<img id="peCoverImg" src="' + esc(currentCover) + '" alt="Cover">' : '')
-      + '<div class="profile-edit-cover-overlay" id="peCoverOverlay"><i class="fas fa-camera"></i><span>Edit Cover</span></div>'
+      + '<div class="profile-edit-cover-overlay" id="peCoverOverlay"><i class="fas fa-camera"></i><span>გარეკანის შეცვლა</span></div>'
       + '</div>'
       + '<div class="profile-edit-avatar-col">'
       + '<div class="profile-edit-avatar-preview" id="peAvatarWrap">'
       + '<img id="peAvatarImg" src="' + esc(currentAvatar) + '" alt="Avatar">'
       + '<div class="profile-edit-avatar-badge"><i class="fas fa-camera"></i></div>'
       + '</div>'
-      + '<span class="profile-edit-avatar-label">Photo</span>'
+      + '<span class="profile-edit-avatar-label">ფოტო</span>'
       + '</div>'
       + '</div>'
       + '<div class="upload-progress-bar-wrap" id="peUploadProgress" style="display:none"><div class="upload-progress-bar" id="peUploadBar"></div></div>'
@@ -2298,7 +2298,7 @@
       + '</div></div>'
       + '</div>'
 
-      + '<div class="profile-edit-section">'+ '<div class="profile-edit-section-title"><i class="fas fa-shield-alt"></i> კონფიდენციალურობა</div>'+ '<div class="profile-edit-field"><label>მესიჯები — ვინ შეიძლება მოგწეროს?</label><select class="profile-edit-input" id="pePrivMsg">'+ '<option value="everyone"'+(cp.messagingPref!=='friends'&&cp.messagingPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="friends"'+(cp.messagingPref==='friends'?' selected':'')+'>მხოლოდ მეგობრები</option>'+ '<option value="nobody"'+(cp.messagingPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>ფოლოუ — ვინ შეიძლება გამოგყვეს?</label><select class="profile-edit-input" id="pePrivFollow">'+ '<option value="everyone"'+(cp.followPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="nobody"'+(cp.followPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>მეგობრობა — ვინ გამოგიგზავნოს მოთხოვნა?</label><select class="profile-edit-input" id="pePrivFriend">'+ '<option value="everyone"'+(cp.friendRequestPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="nobody"'+(cp.friendRequestPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>პოსტები — ვინ ხედავს შენს პოსტებს?</label><select class="profile-edit-input" id="pePrivPosts">'+ '<option value="public"'+(cp.postsPref!=='friends'?' selected':'')+'>ყველა (Public)</option>'+ '<option value="friends"'+(cp.postsPref==='friends'?' selected':'')+'>მხოლოდ მეგობრები</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>სტორები — ვინ ხედავს?</label><select class="profile-edit-input" id="pePrivStory">'+ '<option value="everyone"'+(cp.storyPref!=='close_friends'&&cp.storyPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="close_friends"'+(cp.storyPref==='close_friends'?' selected':'')+'>Close Friends</option>'+ '<option value="nobody"'+(cp.storyPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'
+      + '<div class="profile-edit-section">'+ '<div class="profile-edit-section-title"><i class="fas fa-shield-alt"></i> კონფიდენციალურობა</div>'+ '<div class="profile-edit-field"><label>მესიჯები — ვინ შეიძლება მოგწეროს?</label><select class="profile-edit-input" id="pePrivMsg">'+ '<option value="everyone"'+(cp.messagingPref!=='friends'&&cp.messagingPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="friends"'+(cp.messagingPref==='friends'?' selected':'')+'>მხოლოდ მეგობრები</option>'+ '<option value="nobody"'+(cp.messagingPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>ფოლოუ — ვინ შეიძლება გამოგყვეს?</label><select class="profile-edit-input" id="pePrivFollow">'+ '<option value="everyone"'+(cp.followPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="nobody"'+(cp.followPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>მეგობრობა — ვინ გამოგიგზავნოს მოთხოვნა?</label><select class="profile-edit-input" id="pePrivFriend">'+ '<option value="everyone"'+(cp.friendRequestPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="nobody"'+(cp.friendRequestPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>პოსტები — ვინ ხედავს შენს პოსტებს?</label><select class="profile-edit-input" id="pePrivPosts">'+ '<option value="public"'+(cp.postsPref!=='friends'?' selected':'')+'>ყველა (Public)</option>'+ '<option value="friends"'+(cp.postsPref==='friends'?' selected':'')+'>მხოლოდ მეგობრები</option>'+ '</select></div>'+ '<div class="profile-edit-field"><label>სტორები — ვინ ხედავს?</label><select class="profile-edit-input" id="pePrivStory">'+ '<option value="everyone"'+(cp.storyPref!=='close_friends'&&cp.storyPref!=='nobody'?' selected':'')+'>ყველა</option>'+ '<option value="close_friends"'+(cp.storyPref==='close_friends'?' selected':'')+'>ახლო მეგობრები</option>'+ '<option value="nobody"'+(cp.storyPref==='nobody'?' selected':'')+'>არავინ</option>'+ '</select></div>'
       + '<div class="profile-edit-field"><label>ბიო — ვინ ხედავს?</label><select class="profile-edit-input" id="pePrivBio">'
       + '<option value="everyone"'+(cp.showBio!=='followers'&&cp.showBio!=='friends'&&cp.showBio!=='nobody'?' selected':'')+'>ყველა</option>'
       + '<option value="followers"'+(cp.showBio==='followers'?' selected':'')+'>ფოლოუერები</option>'
@@ -2605,7 +2605,7 @@
                 + 'display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(var(--ds-accent-rgb),.1);'
                 + 'border:1px solid rgba(var(--ds-accent-rgb),.25);border-radius:999px;color:#10e0a0;font-size:.78rem;'
                 + 'font-weight:700;cursor:pointer">'
-                + '<i class="fas fa-star"></i> Activate Creator Mode</button>'
+                + '<i class="fas fa-star"></i> შემქმნელის რეჟიმის ჩართვა</button>'
                 + '</div>');
             }
           }

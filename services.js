@@ -20,9 +20,9 @@
     var catRow = document.getElementById('svCatFilterRow');
     if (catRow) {
       if (!cats.length) {
-        catRow.innerHTML = '<span style="color:var(--ds-text-3);font-size:.8rem">No categories yet</span>';
+        catRow.innerHTML = '<span style="color:var(--ds-text-3);font-size:.8rem">კატეგორია ჯერ არ არის</span>';
       } else {
-        var html = '<button class="sv-filter-btn active" data-cat="all">All</button>';
+        var html = '<button class="sv-filter-btn active" data-cat="all">ყველა</button>';
         cats.forEach(function (cat) {
           html += '<button class="sv-filter-btn" data-cat="' + esc(cat) + '">' + esc(cat) + '</button>';
         });
@@ -95,8 +95,8 @@
         (city    ? '<div class="sv-card-city"><i class="fas fa-map-marker-alt"></i>' + city + '</div>' : '') +
         (desc    ? '<div class="sv-card-desc">' + desc + '</div>' : '') +
         '<div class="sv-card-actions">' +
-          '<a href="' + esc(bizUrl) + '" class="sv-btn sv-btn-ghost"><i class="fas fa-store"></i> View Business</a>' +
-          '<a href="' + esc(reqUrl) + '" class="sv-btn sv-btn-primary"><i class="fas fa-paper-plane"></i> Request</a>' +
+          '<a href="' + esc(bizUrl) + '" class="sv-btn sv-btn-ghost"><i class="fas fa-store"></i> ბიზნესის ნახვა</a>' +
+          '<a href="' + esc(reqUrl) + '" class="sv-btn sv-btn-primary"><i class="fas fa-paper-plane"></i> მოთხოვნა</a>' +
         '</div>' +
       '</div>' +
     '</div>';

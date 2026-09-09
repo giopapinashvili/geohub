@@ -209,7 +209,7 @@
     if (s === null) return '';
     return s
       ? '<span class="map-open-badge open">Open</span>'
-      : '<span class="map-open-badge closed">Closed</span>';
+      : '<span class="map-open-badge closed">დაკეტილია</span>';
   }
 
   function categorySortValue(id, data) {
@@ -832,7 +832,7 @@
       + '<div id="mpcMoodTags" class="panel-mood-tags"></div>'
       + '<div id="mpcGoogleSection" style="display:none"></div>'
       + '<div class="mpc-btns">'
-      + '<a id="mpcDetail" href="#" class="btn btn-primary btn-sm" style="flex:1;justify-content:center"><i class="fas fa-info-circle"></i> Details</a>'
+      + '<a id="mpcDetail" href="#" class="btn btn-primary btn-sm" style="flex:1;justify-content:center"><i class="fas fa-info-circle"></i> დეტალები</a>'
       + '<a id="mpcDirections" href="#" target="_blank" rel="noopener" class="btn btn-ghost btn-sm"><i class="fas fa-directions"></i></a>'
       + '<button id="mpcCheckinBtn" class="map-checkin-btn map-checkin-btn--sm" onclick="checkInToPlace()"><i class="fas fa-map-pin"></i></button>'
       + '</div></div>';
@@ -2232,7 +2232,7 @@
     }
     if (!force && Date.now() - _nowLastLoad < 60000) return;
     _nowLastLoad = Date.now();
-    body.innerHTML = '<div class="now-loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
+    body.innerHTML = '<div class="now-loading"><i class="fas fa-spinner fa-spin"></i> იტვირთება…</div>';
     if (lastUpdated) lastUpdated.textContent = '';
 
     const fs = GF.fs, db = GF.db;

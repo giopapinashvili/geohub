@@ -228,23 +228,23 @@
     <input type="text" id="plSearchInput" placeholder="Search places…">
   </div>
   <div class="pl-view-toggle">
-    <button class="pl-view-btn active" id="viewBtnGrid" onclick="setView('grid')"><i class="fas fa-th"></i> Grid</button>
+    <button class="pl-view-btn active" id="viewBtnGrid" onclick="setView('grid')"><i class="fas fa-th"></i> ბადე</button>
     <a class="pl-view-btn" href="map.html"><i class="fas fa-map"></i> Map</a>
   </div>
-  <button class="pl-add-btn" id="plAddBtn"><i class="fas fa-plus"></i> Add Place</button>
+  <button class="pl-add-btn" id="plAddBtn"><i class="fas fa-plus"></i> ადგილის დამატება</button>
 </div>
 
 <!-- CATEGORY TABS -->
 <div class="pl-cats" id="plCats">
-  <button class="pl-cat-btn active" data-cat="all" onclick="setCat('all',this)"><i class="fas fa-th"></i> All</button>
-  <button class="pl-cat-btn" data-cat="cafe" onclick="setCat('cafe',this)"><i class="fas fa-coffee"></i> Cafés</button>
-  <button class="pl-cat-btn" data-cat="restaurant" onclick="setCat('restaurant',this)"><i class="fas fa-utensils"></i> Restaurants</button>
-  <button class="pl-cat-btn" data-cat="nature" onclick="setCat('nature',this)"><i class="fas fa-leaf"></i> Nature</button>
-  <button class="pl-cat-btn" data-cat="hotel" onclick="setCat('hotel',this)"><i class="fas fa-hotel"></i> Hotels</button>
-  <button class="pl-cat-btn" data-cat="museum" onclick="setCat('museum',this)"><i class="fas fa-landmark"></i> Museums</button>
-  <button class="pl-cat-btn" data-cat="shopping" onclick="setCat('shopping',this)"><i class="fas fa-shopping-bag"></i> Shopping</button>
-  <button class="pl-cat-btn" data-cat="nightlife" onclick="setCat('nightlife',this)"><i class="fas fa-moon"></i> Nightlife</button>
-  <button class="pl-cat-btn" data-cat="sports" onclick="setCat('sports',this)"><i class="fas fa-running"></i> Sports</button>
+  <button class="pl-cat-btn active" data-cat="all" onclick="setCat('all',this)"><i class="fas fa-th"></i> ყველა</button>
+  <button class="pl-cat-btn" data-cat="cafe" onclick="setCat('cafe',this)"><i class="fas fa-coffee"></i> კაფეები</button>
+  <button class="pl-cat-btn" data-cat="restaurant" onclick="setCat('restaurant',this)"><i class="fas fa-utensils"></i> რესტორნები</button>
+  <button class="pl-cat-btn" data-cat="nature" onclick="setCat('nature',this)"><i class="fas fa-leaf"></i> ბუნება</button>
+  <button class="pl-cat-btn" data-cat="hotel" onclick="setCat('hotel',this)"><i class="fas fa-hotel"></i> სასტუმროები</button>
+  <button class="pl-cat-btn" data-cat="museum" onclick="setCat('museum',this)"><i class="fas fa-landmark"></i> მუზეუმები</button>
+  <button class="pl-cat-btn" data-cat="shopping" onclick="setCat('shopping',this)"><i class="fas fa-shopping-bag"></i> შოპინგი</button>
+  <button class="pl-cat-btn" data-cat="nightlife" onclick="setCat('nightlife',this)"><i class="fas fa-moon"></i> ღამის ცხოვრება</button>
+  <button class="pl-cat-btn" data-cat="sports" onclick="setCat('sports',this)"><i class="fas fa-running"></i> სპორტი</button>
   <button class="pl-cat-btn" data-cat="other" onclick="setCat('other',this)"><i class="fas fa-map-pin"></i> Other</button>
 </div>
 
@@ -256,7 +256,7 @@
     <span class="pl-count" id="plCount"></span>
   </div>
   <div class="pl-grid" id="plGrid">
-    <div class="pl-loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div>
+    <div class="pl-loading"><i class="fas fa-spinner fa-spin"></i> იტვირთება…</div>
   </div>
 </main>
 
@@ -276,14 +276,14 @@
         <label data-i18n="pl_category">Category</label>
         <select id="plCatSel">
           <option value="other">Other</option>
-          <option value="cafe">Café</option>
-          <option value="restaurant">Restaurant</option>
-          <option value="nature">Nature</option>
-          <option value="hotel">Hotel</option>
-          <option value="museum">Museum</option>
-          <option value="shopping">Shopping</option>
-          <option value="nightlife">Nightlife</option>
-          <option value="sports">Sports</option>
+          <option value="cafe">კაფე</option>
+          <option value="restaurant">რესტორანი</option>
+          <option value="nature">ბუნება</option>
+          <option value="hotel">სასტუმრო</option>
+          <option value="museum">მუზეუმი</option>
+          <option value="shopping">შოპინგი</option>
+          <option value="nightlife">ღამის ცხოვრება</option>
+          <option value="sports">სპორტი</option>
         </select>
       </div>
       <div class="pl-field">
@@ -311,7 +311,7 @@
         <img id="plPhotoPreview" class="pl-photo-preview" alt="" loading="lazy" decoding="async">
       </div>
       <button class="pl-modal-submit" id="plSubmitBtn" onclick="submitAddPlace()">
-        <i class="fas fa-map-pin"></i> <span data-i18n="pl_add_btn">Add Place</span>
+        <i class="fas fa-map-pin"></i> <span data-i18n="pl_add_btn">ადგილის დამატება</span>
       </button>
     </div>
   </div>

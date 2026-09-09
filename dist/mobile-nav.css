@@ -596,6 +596,10 @@
   .app-action-overlay,
   .app-action-sheet,
   .app-install-prompt,
+  /* The drawer is a mobile object. It was still reachable on desktop, where it
+     slid in over the right rail as a third, English, parallel navigation. */
+  .mobile-menu,
+  .gh-mobile-menu-overlay,
   .app-fab-wrap { display: none !important; }
   /* Notifications still show on desktop */
   .app-notif-toast { top: 20px; left: auto; right: 20px; width: 340px; }

@@ -177,7 +177,7 @@
         var list = document.getElementById('navNotifList');
         if (!list) return;
         if (!items.length) {
-          list.innerHTML = '<div class="nav-notif-empty"><i class="fas fa-bell"></i><p>No notifications yet</p></div>';
+          list.innerHTML = '<div class="nav-notif-empty"><i class="fas fa-bell"></i><p>შეტყობინება ჯერ არ არის</p></div>';
           return;
         }
         list.innerHTML = items.map(function(n) {
@@ -200,12 +200,12 @@
         if (badge) { badge.textContent = unreadCount > 99 ? '99+' : unreadCount > 0 ? String(unreadCount) : ''; badge.style.display = unreadCount > 0 ? '' : 'none'; }
       }, function() {
         var list = document.getElementById('navNotifList');
-        if (list) list.innerHTML = '<div class="nav-notif-empty"><i class="fas fa-bell"></i><p>No notifications yet</p></div>';
+        if (list) list.innerHTML = '<div class="nav-notif-empty"><i class="fas fa-bell"></i><p>შეტყობინება ჯერ არ არის</p></div>';
       });
       panel._unsub = unsub;
     } catch(e) {
       var list = document.getElementById('navNotifList');
-      if (list) list.innerHTML = '<div class="nav-notif-empty"><i class="fas fa-bell"></i><p>No notifications yet</p></div>';
+      if (list) list.innerHTML = '<div class="nav-notif-empty"><i class="fas fa-bell"></i><p>შეტყობინება ჯერ არ არის</p></div>';
     }
     var markAllBtn = document.getElementById('navNotifMarkAll');
     if (markAllBtn) {
@@ -331,7 +331,7 @@
       + '<div id="asAvatarStatus" style="font-size:.75rem;color:var(--ds-text-3);margin-top:4px"></div>'
       + '</div></div>'
       + '<input id="asName" class="form-input" style="margin:8px 0" value="' + esc(user.fullName || '') + '" placeholder="Name">'
-      + '<input id="asCity" class="form-input" style="margin:8px 0" value="' + esc(user.city || '') + '" placeholder="City">'
+      + '<input id="asCity" class="form-input" style="margin:8px 0" value="' + esc(user.city || '') + '" placeholder="ქალაქი">'
       + '<textarea id="asBio" class="form-input" style="margin:8px 0;min-height:90px" placeholder="Bio">' + esc(user.bio || '') + '</textarea>'
       + '<button class="btn-primary auth-modal-btn" id="asSave">Save</button>'
       + notifHTML

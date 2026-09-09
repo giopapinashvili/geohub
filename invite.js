@@ -188,7 +188,7 @@
 
   function renderInviteWidget(el, uid) {
     if (!el) return;
-    el.innerHTML = '<div style="color:var(--ds-text-3);font-size:.85rem;padding:8px 0"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
+    el.innerHTML = '<div style="color:var(--ds-text-3);font-size:.85rem;padding:8px 0"><i class="fas fa-spinner fa-spin"></i> იტვირთება…</div>';
 
     getOrCreateInviteCode(uid).then(function (code) {
       var link = getInviteLink(code);

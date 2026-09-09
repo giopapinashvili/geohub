@@ -268,7 +268,7 @@
       const profileHref = isBiz ? 'business.html?id='+esc(c.businessId) : 'profile.html?id='+esc(oid);
       const bizBadge = isBiz ? '<span style="font-size:.65rem;color:var(--ds-accent-ink);vertical-align:middle;margin-right:3px"><i class="fas fa-store"></i></span>' : '';
       const isPinnedConv = Array.isArray(c.pinnedForActors)&&c.pinnedForActors.includes(_pinActorKey);
-      const pinBadge = isPinnedConv ? '<i class="fas fa-thumbtack" style="font-size:.55rem;color:var(--gh-muted,#94a3b8);margin-left:4px;opacity:.65;transform:rotate(45deg);display:inline-block" title="Pinned"></i>' : '';
+      const pinBadge = isPinnedConv ? '<i class="fas fa-thumbtack" style="font-size:.55rem;color:var(--gh-muted,#94a3b8);margin-left:4px;opacity:.65;transform:rotate(45deg);display:inline-block" title="დამაგრებული"></i>' : '';
       return '<div class="conv-item '+(c.id===activeConversation?'active':'')+' '+(unread?'has-unread':'')+' '+(isPinnedConv?'is-pinned':'')+'" data-conv-id="'+esc(c.id)+'" oncontextmenu="return window.__ghConvCtxMenu(event,\''+esc(c.id)+'\')">'
         + '<a class="conv-av-wrap" href="'+profileHref+'" data-open-user-profile="'+esc(oid)+'" onclick="event.stopPropagation()">'
         + (u.avatar ? '<img class="conv-avatar-img" src="'+esc(u.avatar)+'" alt="" onerror="this.style.display=\'none\'">' : '<div class="av-placeholder">'+esc(initials(name))+'</div>')
@@ -459,16 +459,16 @@
   function renderDetailMedia(att){
     const images = att.media.length
       ? '<div class="msg-details-grid">'+att.media.slice(0,12).map(a=>'<button type="button" class="msg-detail-thumb" data-detail-image="'+esc(a.url)+'"><img src="'+esc(a.url)+'" alt="" loading="lazy" onerror="this.remove()"></button>').join('')+'</div>'
-      : '<div class="msg-detail-empty">No media shared yet</div>';
+      : '<div class="msg-detail-empty">გაზიარებული მედია არ არის</div>';
     const files = att.files.length
       ? '<div class="msg-detail-list">'+att.files.slice(0,10).map(a=>'<a class="msg-detail-file" href="'+esc(a.url)+'" target="_blank" rel="noopener"><i class="fas fa-file-alt"></i><span><strong>'+esc(a.name||'File')+'</strong><small>'+esc(a.size?formatFileSize(a.size):'Open file')+'</small></span><i class="fas fa-arrow-up-right-from-square"></i></a>').join('')+'</div>'
-      : '<div class="msg-detail-empty">No files shared yet</div>';
+      : '<div class="msg-detail-empty">გაზიარებული ფაილი არ არის</div>';
     const audio = att.audio.length
       ? '<div class="msg-detail-list">'+att.audio.slice(0,10).map(a=>'<div class="msg-detail-audio"><i class="fas fa-microphone"></i><span>'+esc(a.name||'Voice message')+'</span><audio controls src="'+esc(a.url)+'"></audio></div>').join('')+'</div>'
-      : '<div class="msg-detail-empty">No voice messages yet</div>';
-    return '<div class="msg-details-section"><div class="msg-details-title"><i class="fas fa-image"></i> Media</div>'+images+'</div>'+
-      '<div class="msg-details-section"><div class="msg-details-title"><i class="fas fa-file"></i> Files</div>'+files+'</div>'+
-      '<div class="msg-details-section"><div class="msg-details-title"><i class="fas fa-microphone"></i> Voice messages</div>'+audio+'</div>';
+      : '<div class="msg-detail-empty">ხმოვანი შეტყობინება არ არის</div>';
+    return '<div class="msg-details-section"><div class="msg-details-title"><i class="fas fa-image"></i> მედია</div>'+images+'</div>'+
+      '<div class="msg-details-section"><div class="msg-details-title"><i class="fas fa-file"></i> ფაილები</div>'+files+'</div>'+
+      '<div class="msg-details-section"><div class="msg-details-title"><i class="fas fa-microphone"></i> ხმოვანი შეტყობინებები</div>'+audio+'</div>';
   }
 
   function renderDetailsHtml(mobile){
@@ -495,17 +495,17 @@
       '</div>'+
       '<div class="msg-details-actions">'+
         '<a class="info-action-btn" href="'+esc(href)+'"><i class="fas '+(isBizPeer?'fa-store':'fa-user')+'"></i> '+(isBizPeer?'View Page':'View Profile')+'</a>'+
-        '<button type="button" class="info-action-btn" onclick="window.__ghToggleSearch();window.__ghCloseMobileInfoSheet&&window.__ghCloseMobileInfoSheet();"><i class="fas fa-search"></i> Search in conversation</button>'+
+        '<button type="button" class="info-action-btn" onclick="window.__ghToggleSearch();window.__ghCloseMobileInfoSheet&&window.__ghCloseMobileInfoSheet();"><i class="fas fa-search"></i> ძებნა მიმოწერაში</button>'+
         '<button type="button" class="info-action-btn" onclick="window.__ghToggleActiveMute()"><i class="fas '+(muted?'fa-bell':'fa-bell-slash')+'"></i> '+(muted?'Unmute':'Mute')+'</button>'+
       '</div>'+
-      '<div class="msg-details-section"><div class="msg-details-title"><i class="fas fa-palette"></i> Customize chat</div>'+
-        '<button type="button" class="msg-details-row" onclick="window.__ghShowThemePicker(this)"><span>Theme/color <small class="msg-theme-current"><span class="msg-theme-dot" style="background:linear-gradient(135deg,'+themeColors+')"></span>'+esc(currentTheme.label)+'</small></span><i class="fas fa-chevron-right"></i></button>'+
-        '<button type="button" class="msg-details-row" onclick="window.__ghShowNicknames()"><span>Nicknames</span><i class="fas fa-chevron-right"></i></button>'+
+      '<div class="msg-details-section"><div class="msg-details-title"><i class="fas fa-palette"></i> ჩატის გაფორმება</div>'+
+        '<button type="button" class="msg-details-row" onclick="window.__ghShowThemePicker(this)"><span>თემა და ფერი <small class="msg-theme-current"><span class="msg-theme-dot" style="background:linear-gradient(135deg,'+themeColors+')"></span>'+esc(currentTheme.label)+'</small></span><i class="fas fa-chevron-right"></i></button>'+
+        '<button type="button" class="msg-details-row" onclick="window.__ghShowNicknames()"><span>მეტსახელები</span><i class="fas fa-chevron-right"></i></button>'+
       '</div>'+
       renderDetailMedia(att)+
-      '<div class="msg-details-section"><div class="msg-details-title"><i class="fas fa-ellipsis-h"></i> Conversation actions</div>'+
-        '<button type="button" class="msg-details-row" onclick="window.__ghArchiveActiveConversation()"><span>Archive / Hide</span><i class="fas fa-box-archive"></i></button>'+
-        '<button type="button" class="msg-details-row danger" onclick="window.__ghDeleteActiveConversation()"><span>Delete for me</span><i class="fas fa-trash"></i></button>'+
+      '<div class="msg-details-section"><div class="msg-details-title"><i class="fas fa-ellipsis-h"></i> მიმოწერის მოქმედებები</div>'+
+        '<button type="button" class="msg-details-row" onclick="window.__ghArchiveActiveConversation()"><span>არქივში / დამალვა</span><i class="fas fa-box-archive"></i></button>'+
+        '<button type="button" class="msg-details-row danger" onclick="window.__ghDeleteActiveConversation()"><span>წაშლა ჩემთვის</span><i class="fas fa-trash"></i></button>'+
       '</div>';
   }
 
@@ -663,7 +663,7 @@
     const isMine = isMineMsg(m);
     if(!isMine) return '';
     const seenBy = Array.isArray(m.seenBy) ? m.seenBy.filter(id=>id!==uid) : [];
-    if(seenBy.length) return '<span class="msg-receipt seen" title="Seen">✓✓</span>';
+    if(seenBy.length) return '<span class="msg-receipt seen" title="ნანახია">✓✓</span>';
     if(m.delivered) return '<span class="msg-receipt delivered" title="Delivered">✓✓</span>';
     return '<span class="msg-receipt sent" title="Sent">✓</span>';
   }
@@ -674,7 +674,7 @@
     if(!isMine) return '';
     const seenByActors = Array.isArray(m.seenByActors) ? m.seenByActors.filter(id=>id!==actorId) : [];
     const legacySeen = !seenByActors.length && Array.isArray(m.seenBy) ? m.seenBy.filter(id=>id!==currentUid()) : [];
-    if(seenByActors.length || legacySeen.length) return '<span class="msg-receipt seen" title="Seen">Seen</span>';
+    if(seenByActors.length || legacySeen.length) return '<span class="msg-receipt seen" title="ნანახია">ნანახია</span>';
     return '<span class="msg-receipt delivered" title="'+(m.delivered?'Delivered':'Sent')+'">✓</span>';
   }
 
@@ -1195,7 +1195,7 @@
     }).join('');
     const modal=document.createElement('div');
     modal.className='gh-nick-modal';
-    modal.innerHTML='<div class="gh-nick-card"><button class="gh-nick-close" type="button">×</button><h3>Nicknames</h3>'+items
+    modal.innerHTML='<div class="gh-nick-card"><button class="gh-nick-close" type="button">×</button><h3>მეტსახელები</h3>'+items
       +'<button class="gh-nick-save btn" type="button">Save</button></div>';
     modal.querySelector('.gh-nick-close').onclick=()=>modal.remove();
     modal.querySelector('.gh-nick-save').onclick=()=>{
@@ -1227,7 +1227,7 @@
         : '')
       +'<button class="header-action-btn" title="Search" id="msgSearchBtn" onclick="window.__ghToggleSearch()"><i class="fas fa-search"></i></button>'
       +'<button class="header-action-btn" title="Theme" onclick="window.__ghShowThemePicker(this)"><i class="fas fa-palette"></i></button>'
-      +'<button class="header-action-btn" title="Nicknames" onclick="window.__ghShowNicknames()"><i class="fas fa-user-tag"></i></button>'
+      +'<button class="header-action-btn" title="მეტსახელები" onclick="window.__ghShowNicknames()"><i class="fas fa-user-tag"></i></button>'
       +'<button class="header-action-btn mobile-info-btn" title="Info" onclick="window.__ghToggleInfoPanel()"><i class="fas fa-info-circle"></i></button>'
       +'</div>';
   }
@@ -1782,7 +1782,7 @@
 
   function showConvLoading(){
     const list=$('#convList');
-    if(list) list.innerHTML='<div class="conv-empty"><i class="fas fa-circle-notch fa-spin"></i><p>Loading…</p></div>';
+    if(list) list.innerHTML='<div class="conv-empty"><i class="fas fa-circle-notch fa-spin"></i><p>იტვირთება…</p></div>';
   }
 
   async function setBizInboxHeader(bizId){
@@ -1792,7 +1792,7 @@
     titleEl.innerHTML =
       '<div style="display:flex;align-items:center;gap:7px;min-width:0;flex:1;overflow:hidden">' +
         '<i class="fas fa-store biz-inbox-icon" style="color:var(--ds-accent-ink);flex-shrink:0;font-size:.95rem"></i>' +
-        '<span id="bizInboxTitle" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:1.05rem;font-weight:800">Business Inbox</span>' +
+        '<span id="bizInboxTitle" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:1.05rem;font-weight:800">ბიზნესის ფოსტა</span>' +
       '</div>' +
       '<div style="display:flex;gap:5px;align-items:center;flex-shrink:0">' +
         '<a href="messages.html" class="sidebar-icon-btn" title="Personal inbox" style="text-decoration:none;display:flex;align-items:center;justify-content:center"><i class="fas fa-user" style="font-size:.78rem"></i></a>' +
@@ -1921,7 +1921,7 @@
 
       const chatBox = document.querySelector('#chatMessages');
       const chatHdr = document.querySelector('#chatHeader');
-      if(chatHdr) chatHdr.innerHTML = '<div style="padding:16px;color:var(--text-muted);font-size:.9rem"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>';
+      if(chatHdr) chatHdr.innerHTML = '<div style="padding:16px;color:var(--text-muted);font-size:.9rem"><i class="fas fa-circle-notch fa-spin"></i> იტვირთება…</div>';
 
       // Fetch business info then ensure conversation exists
       GF.fs.getDoc(GF.fs.doc(GF.db, 'businesses', withBizParam)).then(function(snap){

@@ -14,7 +14,7 @@
     checkin:  'Check-in',
     photo:    'Photo Proof',
     qr:       'QR Check-in',
-    event:    'Event',
+    event:    'ღონისძიება',
     distance: 'Distance'
   };
 

@@ -377,7 +377,7 @@
         var h=n[k];
         return '<div class="gh-hours-editor-row">'+
           '<span class="gh-hours-editor-day">'+DAYS_LABELS[i].slice(0,3)+'</span>'+
-          '<label class="gh-hours-closed-toggle"><input type="checkbox" data-day="'+k+'" data-type="closed" id="hDay_'+k+'_closed"'+(h.closed?' checked':'')+'> <span>Closed</span></label>'+
+          '<label class="gh-hours-closed-toggle"><input type="checkbox" data-day="'+k+'" data-type="closed" id="hDay_'+k+'_closed"'+(h.closed?' checked':'')+'> <span>დაკეტილია</span></label>'+
           '<div class="gh-hours-times'+(h.closed?' gh-hours-times-hidden':'')+'" id="hDay_'+k+'_times">'+
             '<input type="time" class="gh-input gh-time-input" id="hDay_'+k+'_open" value="'+esc(h.open)+'" data-day="'+k+'" data-type="open">'+
             '<span class="gh-hours-dash">–</span>'+
@@ -747,7 +747,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '</div>'+
       '<button class="gh-nav-item gh-live-nav-btn" data-go-live onclick="if(window.ghOpenGoLive)ghOpenGoLive()"><i class="fas fa-video"></i><span data-i18n="nav_go_live">პირდაპირ ეთერში</span></button>'+
       '<button class="gh-nav-tour-btn" data-start-tour><i class="fas fa-question-circle"></i><span data-i18n="nav_how_works">როგორ მუშაობს GeoHub</span></button>'+
-      '<button class="gh-nav-collapse" id="ghSidebarToggle" data-i18n-title="nav_collapse" title="მენიუს დაკეცვა"><i class="fas fa-angles-left"></i><span data-i18n="nav_collapse">მენიუს დაკეცვა</span></button>'+
+      '<button class="gh-nav-collapse" id="ghRailCollapse" data-i18n-title="nav_collapse" title="მენიუს დაკეცვა"><i class="fas fa-angles-left"></i><span data-i18n="nav_collapse">მენიუს დაკეცვა</span></button>'+
     '</nav></aside>';
   }
 
@@ -756,8 +756,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function defaultRight(){
-    return '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3 data-i18n="sidebar_nearby">ახლომდებარე ადგილები</h3><a class="gh-small" href="places.html">ყველა</a></div><div class="gh-mini-list" id="ghRightPlaces"><div class="gh-mini-item"><span class="gh-mini-thumb"><i class="fas fa-spinner fa-spin"></i></span><div><strong>Loading places…</strong><span>Firestore</span></div></div></div></div>'+
-      '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3 data-i18n="sidebar_upcoming">მოახლოებული ღონისძიებები</h3><a class="gh-small" href="events.html">ყველა</a></div><div class="gh-mini-list" id="ghRightEvents"><div class="gh-mini-item"><span class="gh-mini-thumb"><i class="fas fa-spinner fa-spin"></i></span><div><strong>Loading events…</strong><span>Firestore</span></div></div></div></div>'+
+    return '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3 data-i18n="sidebar_nearby">ახლომდებარე ადგილები</h3><a class="gh-small" href="places.html">ყველა</a></div><div class="gh-mini-list" id="ghRightPlaces"><div class="gh-mini-item"><span class="gh-mini-thumb"><i class="fas fa-spinner fa-spin"></i></span><div><strong>ადგილები იტვირთება…</strong><span>Firestore</span></div></div></div></div>'+
+      '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3 data-i18n="sidebar_upcoming">მოახლოებული ღონისძიებები</h3><a class="gh-small" href="events.html">ყველა</a></div><div class="gh-mini-list" id="ghRightEvents"><div class="gh-mini-item"><span class="gh-mini-thumb"><i class="fas fa-spinner fa-spin"></i></span><div><strong>ღონისძიებები იტვირთება…</strong><span>Firestore</span></div></div></div></div>'+
       '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>'+(typeof GHt==='function'?GHt('sidebar_suggested_groups'):'შემოთავაზებული ჯგუფები')+'</h3><a class="gh-small" href="groups.html">ყველა</a></div><div class="gh-mini-list" id="ghSuggestions"><div class="gh-mini-item"><span class="gh-mini-thumb"><i class="fas fa-spinner fa-spin"></i></span><div><strong>'+(typeof GHt==='function'?GHt('loading'):'იტვირთება…')+'</strong><span></span></div></div></div></div>'+
       '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>'+(typeof GHt==='function'?GHt('sidebar_rewards'):'ჯილდოები და კუპონები')+'</h3><a class="gh-small" href="rewards.html">ყველა</a></div><div class="gh-mini-list" id="ghRightRewards"><div class="gh-empty mini"><i class="fas fa-gift"></i><h3>'+(typeof GHt==='function'?GHt('sidebar_no_rewards'):'ჯილდოები ჯერ არ არის')+'</h3><p>'+(typeof GHt==='function'?GHt('sidebar_no_rewards_hint'):'ახალი ჯილდოები მალე გამოჩნდება.')+'</p></div></div></div>';
   }
@@ -773,7 +773,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function bindShell(){
     var themeBtn=$('#ghThemeToggle');
     if(themeBtn){ themeBtn.onclick=function(e){ e.preventDefault(); e.stopPropagation(); var effective=document.documentElement.getAttribute('data-gh-theme')||'dark'; applyTheme(effective==='dark' ? 'light' : 'dark'); }; applyTheme(state.theme); }
-    var sideBtn=$('#ghSidebarToggle');
+    var sideBtn=$('#ghRailCollapse');
     if(sideBtn){ sideBtn.onclick=function(e){ e.preventDefault(); e.stopPropagation(); state.sidebarCollapsed=!state.sidebarCollapsed; document.body.classList.toggle('gh-sidebar-collapsed', state.sidebarCollapsed); sideBtn.setAttribute('aria-pressed', state.sidebarCollapsed ? 'true' : 'false'); sideBtn.title = state.sidebarCollapsed ? 'Expand sidebars' : 'Collapse sidebars'; }; }
     /* ── Phase 20: Auto-updating timestamps (60s tick) ───── */
     if(!state._tsTickerBound){
@@ -1121,8 +1121,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       banner.innerHTML='<div class="gh-pmb-inner">'+
         '<i class="fas fa-store"></i> Using GeoHub as <strong>'+esc(topName||'Business')+'</strong>'+
         '<div class="gh-pmb-actions">'+
-          '<a class="gh-pmb-action" href="business.html?id='+encodeURIComponent(_actor.businessId)+'" title="View Page"><i class="fas fa-arrow-up-right-from-square"></i> View Page</a>'+
-          '<a class="gh-pmb-action" href="messages.html?business='+encodeURIComponent(_actor.businessId)+'" title="Business Inbox"><i class="fas fa-comment-dots"></i> Inbox</a>'+
+          '<a class="gh-pmb-action" href="business.html?id='+encodeURIComponent(_actor.businessId)+'" title="გვერდის ნახვა"><i class="fas fa-arrow-up-right-from-square"></i> გვერდის ნახვა</a>'+
+          '<a class="gh-pmb-action" href="messages.html?business='+encodeURIComponent(_actor.businessId)+'" title="ბიზნესის ფოსტა"><i class="fas fa-comment-dots"></i> Inbox</a>'+
           '<button class="gh-pmb-switch" onclick="if(window._geoSW&&window._geoSW.switchToUser){window._geoSW.switchToUser();}else{try{localStorage.removeItem(\'gh_active_actor\');}catch(e){}window.dispatchEvent(new CustomEvent(\'GeoActorChanged\',{detail:{type:\'user\'}}));}">Switch Back</button>'+
         '</div>'+
       '</div>';
@@ -1275,8 +1275,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           }
           var ev=$('#ghRightEvents');
           if(ev){
-            var evPanel=ev.closest('.gh-panel'); if(evPanel){ var evH3=evPanel.querySelector('h3'); if(evH3) evH3.textContent='Upcoming Events'+(cityLabel||''); }
-            ev.innerHTML = events.length ? events.map(function(x){ var title=x.name||x.title||'Untitled'; var when=x.startDate||x.date; var whenStr=when?timeAgo(when):''; return '<a class="gh-mini-item" href="events.html?id='+esc(x.id)+'"><span class="gh-mini-thumb event"><i class="fas fa-calendar"></i></span><div><strong>'+esc(title)+'</strong><span>'+esc(x.city||x.location||whenStr)+'</span></div></a>'; }).join('') : '<div class="gh-empty mini"><i class="fas fa-calendar"></i><h3>No upcoming events</h3><p>'+esc(city?'No upcoming events in '+city+' yet.':'Create the first event!')+'</p></div>';
+            var evPanel=ev.closest('.gh-panel'); if(evPanel){ var evH3=evPanel.querySelector('h3'); if(evH3) evH3.textContent='მოახლოებული ღონისძიებები'+(cityLabel||''); }
+            ev.innerHTML = events.length ? events.map(function(x){ var title=x.name||x.title||'Untitled'; var when=x.startDate||x.date; var whenStr=when?timeAgo(when):''; return '<a class="gh-mini-item" href="events.html?id='+esc(x.id)+'"><span class="gh-mini-thumb event"><i class="fas fa-calendar"></i></span><div><strong>'+esc(title)+'</strong><span>'+esc(x.city||x.location||whenStr)+'</span></div></a>'; }).join('') : '<div class="gh-empty mini"><i class="fas fa-calendar"></i><h3>მოახლოებული ღონისძიება არ არის</h3><p>'+esc(city?'No upcoming events in '+city+' yet.':'შექმენი პირველი ღონისძიება!')+'</p></div>';
           }
           var rw=$('#ghRightRewards'); if(rw){ rw.innerHTML = rewards.length ? rewards.map(function(x){ var title=x.name||x.title||'Untitled'; var pts=x.points||x.cost||x.price||''; return '<a class="gh-mini-item" href="rewards.html"><span class="gh-mini-thumb reward"><i class="fas fa-gift"></i></span><div><strong>'+esc(title)+'</strong><span>'+esc(pts?pts+' points':'Reward')+'</span></div></a>'; }).join('') : '<div class="gh-empty mini"><i class="fas fa-gift"></i><h3>'+(typeof GHt==='function'?GHt('sidebar_no_rewards'):'ჯილდოები ჯერ არ არის')+'</h3><p>'+(typeof GHt==='function'?GHt('sidebar_no_rewards_hint'):'ახალი ჯილდოები მალე გამოჩნდება.')+'</p></div>'; }
         });
@@ -1344,7 +1344,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var existing=$('#ghNotifModal'); if(existing){existing.remove();return;}
     var notifActor = notificationActor();
     var notifTitle = notifActor.type === 'business' ? (notifActor.title + ' Activity') : 'Notifications';
-    modal(notifTitle,'<div id="ghNotifList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>Loading…</h3></div></div>','<button class="gh-btn ghost" id="ghMarkAllRead">Mark all read</button><a class="gh-btn ghost" href="notifications.html">View all</a><button class="gh-btn ghost" data-close-modal>Close</button>','ghNotifModal');
+    modal(notifTitle,'<div id="ghNotifList"><div class="gh-empty"><i class="fas fa-circle-notch fa-spin"></i><h3>იტვირთება…</h3></div></div>','<button class="gh-btn ghost" id="ghMarkAllRead">Mark all read</button><a class="gh-btn ghost" href="notifications.html">View all</a><button class="gh-btn ghost" data-close-modal>Close</button>','ghNotifModal');
     ready(function(){
       $('#ghMarkAllRead').onclick=function(){ markVisibleNotificationsRead(); };
       var unsub = listenCurrentActorNotifications(function(items){
@@ -1532,7 +1532,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '</div>'+
       '</div>'+
       '<div class="gh-cmp-toolbar">'+
-        '<button class="gh-cmp-tool" id="ghPickPostImage" type="button" title="Add photos"><i class="fas fa-image"></i><span>Photo</span></button>'+
+        '<button class="gh-cmp-tool" id="ghPickPostImage" type="button" title="Add photos"><i class="fas fa-image"></i><span>ფოტო</span></button>'+
         '<button class="gh-cmp-tool" id="ghTogglePoll" type="button" title="Create poll"><i class="fas fa-chart-bar"></i><span>Poll</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleFeeling" type="button" title="Feeling or activity"><i class="fas fa-face-smile"></i><span>Feeling</span></button>'+
         '<button class="gh-cmp-tool" id="ghToggleBg" type="button" title="Background color"><i class="fas fa-palette"></i><span>Background</span></button>'+
@@ -2566,7 +2566,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function _openStoryAnalytics(st, onDone) {
     if(!st||!st.id){ if(onDone) onDone(); return; }
     modal('<i class="fas fa-chart-bar"></i> Story Analytics',
-      '<div class="gh-an-loading"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>',
+      '<div class="gh-an-loading"><i class="fas fa-circle-notch fa-spin"></i> იტვირთება…</div>',
       '<button class="gh-btn ghost" data-close-modal>Close</button>', 'ghStoryAnalyticsModal');
     if(onDone) onDone();
     if(!GS().getStoryAnalytics) return;
@@ -3728,7 +3728,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           }
         }catch(_e){}
         if(!groups.length){
-          box.innerHTML=add+(draftCard||'')+mapCard+'<span class="gh-story-empty">No stories yet. Be the first!</span>';
+          box.innerHTML=add+(draftCard||'')+mapCard+'<span class="gh-story-empty">სთორი ჯერ არ არის — იყავი პირველი!</span>';
         } else {
           box.innerHTML=add+(draftCard||'')+groups.slice(0,14).map(renderStoryCard).join('')+mapCard;
         }
@@ -3919,7 +3919,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div class="gh-story-head">'+
           '<div class="gh-story-author">'+
             (g.authorAvatar?'<span class="gh-story-author-avatar">'+img(g.authorAvatar,g.authorName)+'</span>':'<span class="gh-story-author-avatar initials">'+esc(initials(g.authorName))+'</span>')+
-            '<div><strong>'+esc(g.authorName)+'</strong>'+(st.closeFriends?'<span class="gh-cf-story-badge"><i class="fas fa-star"></i> Close Friends</span>':'')+
+            '<div><strong>'+esc(g.authorName)+'</strong>'+(st.closeFriends?'<span class="gh-cf-story-badge"><i class="fas fa-star"></i> ახლო მეგობრები</span>':'')+
             '<small>'+(storyIndex+1)+'/'+g.stories.length+' · '+timeAgo(st.createdAt)+_durBadge+'</small></div>'+
           '</div>'+
           '<div class="gh-story-head-actions">'+ownerDeleteHtml+'<button type="button" class="gh-story-close" aria-label="Close story">×</button></div>'+
@@ -4845,7 +4845,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var body=
       '<div class="gh-rx-analytics" id="ghRxAnalytics"><div class="gh-muted" style="text-align:center;padding:8px"><i class="fas fa-circle-notch fa-spin"></i></div></div>'+
       '<div class="gh-who-rx-divider"></div>'+
-      '<div class="gh-who-rx-tabs" id="ghWhoRxTabs"><button class="gh-who-rx-tab active" data-rx-tab="all">All</button>'+Object.keys(RX_EMOJIS).map(function(t){ return '<button class="gh-who-rx-tab" data-rx-tab="'+t+'">'+RX_EMOJIS[t]+'</button>'; }).join('')+'</div>'+
+      '<div class="gh-who-rx-tabs" id="ghWhoRxTabs"><button class="gh-who-rx-tab active" data-rx-tab="all">ყველა</button>'+Object.keys(RX_EMOJIS).map(function(t){ return '<button class="gh-who-rx-tab" data-rx-tab="'+t+'">'+RX_EMOJIS[t]+'</button>'; }).join('')+'</div>'+
       '<div id="ghWhoRxList"><i class="fas fa-circle-notch fa-spin gh-muted"></i></div>';
     modal('Reactions', body, '<button class="gh-btn ghost" data-close-modal>Close</button>', 'ghWhoRxModal');
     var allReactions = [];
@@ -5170,7 +5170,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var isOwn = u && (u.uid === authorId);
         var items = '<button class="gh-pmenu-item" data-cmt-copy><i class="fas fa-copy"></i> Copy</button>';
         if(isOwn) items += '<button class="gh-pmenu-item" data-cmt-delete data-cid="'+(cid||'')+'" data-pid="'+(pid||'')+'"><i class="fas fa-trash"></i> Delete</button>';
-        items += '<button class="gh-pmenu-item" data-cmt-report><i class="fas fa-flag"></i> Report</button>';
+        items += '<button class="gh-pmenu-item" data-cmt-report><i class="fas fa-flag"></i> საჩივარი</button>';
         var drop = document.createElement('div');
         drop.className = 'gh-post-menu-drop';
         drop.innerHTML = items;
@@ -5688,7 +5688,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var rxType = c._myRxType||'';
     var rxLabel = rxType ? (RX_EMOJIS[rxType]+' '+(rxCount||1)) : '❤️ '+(rxCount||_srt('post_action_like','მოწონება'));
     var cmtVoiceHtml = c.voiceUrl ? '<div class="gh-cmt-voice-note"><audio controls src="'+esc(c.voiceUrl)+'" preload="none" style="height:32px;max-width:220px;border-radius:20px;margin-top:4px"></audio></div>' : '';
-    var pinnedBadge = c.pinned ? '<span class="gh-cmt-pin-badge"><i class="fas fa-thumbtack"></i> Pinned</span>' : '';
+    var pinnedBadge = c.pinned ? '<span class="gh-cmt-pin-badge"><i class="fas fa-thumbtack"></i> დამაგრებული</span>' : '';
     // #50 Vote score
     var voteScore = Number(c.voteScore||0);
     var myVote = c._myVote||0; // 1, -1, or 0
@@ -6745,13 +6745,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div class="gh-section-title"><h3><span class="gh-live-dot"></span> '+(typeof GHt==="function"?GHt('rail_live_activity'):'ცოცხალი აქტივობა')+'</h3></div>'+
         '<div id="ghLiveActivityList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div>'+
       '</div>'+
-      '<div class="gh-panel gh-right-widget" id="ghCreatorPanel"><div class="gh-section-title"><h3>Featured Creators</h3><a class="gh-small" href="creators.html">All</a></div><div id="ghCreatorList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghCreatorPanel"><div class="gh-section-title"><h3>გამორჩეული შემქმნელები</h3><a class="gh-small" href="creators.html">ყველა</a></div><div id="ghCreatorList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
       '<div class="gh-panel gh-right-widget" id="ghTrendingPanel">'+
-        '<div class="gh-section-title"><h3>🔥 Trending Hashtags</h3></div>'+
+        '<div class="gh-section-title"><h3>🔥 პოპულარული ჰეშთეგები</h3></div>'+
         '<div id="ghTrendingList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div>'+
       '</div>'+
       '<div class="gh-panel gh-right-widget" id="ghTrendingPostsPanel">'+
-        '<div class="gh-section-title"><h3>⚡ Trending Posts</h3></div>'+
+        '<div class="gh-section-title"><h3>⚡ პოპულარული პოსტები</h3></div>'+
         '<div id="ghTrendingPostsList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div>'+
       '</div>'+
       '<div class="gh-panel gh-right-widget" id="ghLeaderPanel">'+
@@ -6776,10 +6776,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '</div>'+
       '</div>'+
       '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>'+(typeof GHt==="function"?GHt('rail_suggested_pages'):'შემოთავაზებული გვერდები')+'</h3><a class="gh-small" href="business.html">'+(typeof GHt==="function"?GHt('all'):'ყველა')+'</a></div><div id="ghSuggestedPages"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
-      '<div class="gh-panel gh-right-widget" id="ghFeedGroupsPanel"><div class="gh-section-title"><h3>'+(typeof GHt==='function'?GHt('sidebar_suggested_groups'):'შემოთავაზებული ჯგუფები')+'</h3><a class="gh-small" href="groups.html">All</a></div><div id="ghFeedGroupsList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
-      '<div class="gh-panel gh-right-widget" id="ghFeedEventsPanel"><div class="gh-section-title"><h3 data-i18n="sidebar_upcoming">მოახლოებული ღონისძიებები</h3><a class="gh-small" href="events.html">All</a></div><div id="ghFeedEventsList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
-      '<div class="gh-panel gh-right-widget" id="ghFeedCheckinsPanel"><div class="gh-section-title"><h3>Recent Check-ins</h3><a class="gh-small" href="checkin.html">Check in</a></div><div id="ghFeedCheckinsList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
-      '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Contacts</h3></div><input class="gh-input" id="ghContactsSearch" placeholder="Search contacts…" style="margin-bottom:8px"><div id="ghContactsList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghFeedGroupsPanel"><div class="gh-section-title"><h3>'+(typeof GHt==='function'?GHt('sidebar_suggested_groups'):'შემოთავაზებული ჯგუფები')+'</h3><a class="gh-small" href="groups.html">ყველა</a></div><div id="ghFeedGroupsList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghFeedEventsPanel"><div class="gh-section-title"><h3 data-i18n="sidebar_upcoming">მოახლოებული ღონისძიებები</h3><a class="gh-small" href="events.html">ყველა</a></div><div id="ghFeedEventsList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghFeedCheckinsPanel"><div class="gh-section-title"><h3>ბოლო ჩექ-ინები</h3><a class="gh-small" href="checkin.html">ჩექ-ინი</a></div><div id="ghFeedCheckinsList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
+      '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>კონტაქტები</h3></div><input class="gh-input" id="ghContactsSearch" placeholder="Search contacts…" style="margin-bottom:8px"><div id="ghContactsList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
     '</div>';
   }
 
@@ -6797,7 +6797,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '</div>'+
       '</div>'+
       '<div class="gh-page-home-actions">'+
-        '<a class="gh-btn ghost" href="business.html?id='+encodeURIComponent(bizId)+'"><i class="fas fa-arrow-up-right-from-square"></i> View Page</a>'+
+        '<a class="gh-btn ghost" href="business.html?id='+encodeURIComponent(bizId)+'"><i class="fas fa-arrow-up-right-from-square"></i> გვერდის ნახვა</a>'+
         '<button class="gh-btn" data-create-post><i class="fas fa-plus"></i> Create Page Post</button>'+
         '<a class="gh-btn ghost" href="'+inbox+'"><i class="fas fa-comment-dots"></i> Page Inbox</a>'+
         '<a class="gh-btn ghost" href="notifications.html"><i class="fas fa-bell"></i> Page Activity</a>'+
@@ -6814,7 +6814,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-panel gh-right-widget">'+
         '<div class="gh-section-title"><h3>Page Shortcuts</h3></div>'+
         '<div class="gh-page-shortcuts">'+
-          '<a class="gh-page-shortcut" href="business.html?id='+encodeURIComponent(bizId)+'"><i class="fas fa-store"></i><span><strong>View Page</strong><small>'+esc(name)+'</small></span></a>'+
+          '<a class="gh-page-shortcut" href="business.html?id='+encodeURIComponent(bizId)+'"><i class="fas fa-store"></i><span><strong>გვერდის ნახვა</strong><small>'+esc(name)+'</small></span></a>'+
           '<a class="gh-page-shortcut" href="'+inbox+'"><i class="fas fa-comment-dots"></i><span><strong>Page Inbox</strong><small>Business conversations</small></span></a>'+
           '<a class="gh-page-shortcut" href="notifications.html"><i class="fas fa-bell"></i><span><strong>Page Activity</strong><small>Notifications for this page</small></span></a>'+
           '<a class="gh-page-shortcut" href="business.html?id='+encodeURIComponent(bizId)+'#quotes"><i class="fas fa-file-signature"></i><span><strong>Quotes</strong><small>Customer quote requests</small></span></a>'+
@@ -6984,7 +6984,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(!bizId) return;
     var slot=document.getElementById('gh-page-audience-slot');
     if(!slot) return;
-    slot.innerHTML='<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Page Audience</h3></div><div style="padding:12px;color:var(--gh-muted);text-align:center;font-size:13px;">Loading...</div></div>';
+    slot.innerHTML='<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>გვერდის აუდიტორია</h3></div><div style="padding:12px;color:var(--gh-muted);text-align:center;font-size:13px;">Loading...</div></div>';
 
     var PREVIEW = 8;
     Promise.all([
@@ -7000,12 +7000,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var rowsHtml = followers.map(function(f){ return _audienceRowHtml(f); }).join('');
       var hasFollowers = followers.length > 0;
       var viewAllBtn = hasFollowers
-        ? '<button class="gh-btn sm ghost gh-aud-view-all" data-biz-id="'+esc(bizId)+'" data-biz-count="'+count+'" style="width:100%;margin-top:8px"><i class="fas fa-users"></i> View All</button>'
+        ? '<button class="gh-btn sm ghost gh-aud-view-all" data-biz-id="'+esc(bizId)+'" data-biz-count="'+count+'" style="width:100%;margin-top:8px"><i class="fas fa-users"></i> ყველას ნახვა</button>'
         : '';
 
       slot.innerHTML='<div class="gh-panel gh-right-widget">'+
         '<div class="gh-section-title">'+
-          '<h3>Page Audience</h3>'+
+          '<h3>გვერდის აუდიტორია</h3>'+
           '<div class="gh-aud-stat"><span class="gh-aud-count">'+count+'</span><span class="gh-aud-label"> followers</span></div>'+
         '</div>'+
         '<div class="gh-aud-preview">'+
@@ -7030,7 +7030,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       }
     }).catch(function(err){
       console.warn('[GeoHub] page audience widget failed', err && err.message);
-      slot.innerHTML='<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Page Audience</h3></div><div class="gh-aud-preview"><div class="gh-aud-empty"><p>No followers yet</p></div></div></div>';
+      slot.innerHTML='<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>გვერდის აუდიტორია</h3></div><div class="gh-aud-preview"><div class="gh-aud-empty"><p>No followers yet</p></div></div></div>';
     });
   }
 
@@ -7089,7 +7089,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             seen[key]=true;
             return true;
           });
-          if(!visible.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">No business pages yet</div>'; return; }
+          if(!visible.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">ბიზნეს გვერდი ჯერ არ არის</div>'; return; }
           box.innerHTML='<div class="gh-mini-list">'+visible.slice(0,3).map(function(b){
             var title=b.title||b.name||'Business'; var logo=b.logoUrl||'';
             return '<div class="gh-mini-item"><span class="gh-mini-thumb">'+(logo?img(logo,title):'<i class="fas fa-store"></i>')+'</span><div style="flex:1"><strong>'+esc(title)+'</strong><span>'+esc(b.category||(typeof GHt==="function"?GHt('nav_business'):'ბიზნესი'))+'</span></div><button class="gh-btn sm ghost" onclick="location.href=\'business.html?id='+esc(b.id)+'\'">'+(typeof GHt==="function"?GHt('view'):'ნახვა')+'</button></div>';
@@ -7583,7 +7583,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(!fs()||!db()) return;
     var m=modal('📊 Post Analytics',
       '<div class="gh-analytics-wrap" id="ghAnalyticsWrap">'+
-        '<div class="gh-analytics-loading"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>'+
+        '<div class="gh-analytics-loading"><i class="fas fa-circle-notch fa-spin"></i> იტვირთება…</div>'+
       '</div>',
       '<button class="gh-btn ghost" data-close-modal>Close</button>',
       'ghPostAnalyticsModal'
@@ -8097,7 +8097,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         return ids;
       }).catch(function(){ return []; })
     ]).then(function(res){
-      var ids=res[0]; if(!ids.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">No contacts yet</div>'; return; }
+      var ids=res[0]; if(!ids.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">კონტაქტი ჯერ არ არის</div>'; return; }
       return Promise.all(ids.slice(0,20).map(function(id){ return fs().getDoc(fs().doc(db(),'users',id)).then(function(d){ return d.exists()?Object.assign({id:d.id},d.data()):null; }).catch(function(){ return null; }); }));
     }).then(function(profiles){
       if(!profiles) return;
@@ -8949,10 +8949,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function _obStepWelcome(){
     return '<div class="gh-ob-panel">'+
       '<div class="gh-ob-icon-hero">🌍</div>'+
-      '<h2 class="gh-ob-heading">Welcome to GeoHub!</h2>'+
+      '<h2 class="gh-ob-heading">კეთილი იყოს შენი მობრძანება GeoHub-ზე!</h2>'+
       '<p class="gh-ob-subheading">საქართველოს რეალური კომიუნიტი — ადგილები, ადამიანები და ისტორიები.</p>'+
       '<button class="gh-ob-start-btn gh-ob-btn-primary">დაწყება <i class="fas fa-arrow-right"></i></button>'+
-      '<button class="gh-ob-skip-link">Skip</button>'+
+      '<button class="gh-ob-skip-link">გამოტოვება</button>'+
     '</div>';
   }
 
@@ -9058,7 +9058,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-tour-btns">'+
         (s>0?'<button class="gh-tbtn" data-tbk>‹ Back</button>':'<span></span>')+
         '<div class="gh-tour-right">'+
-          '<button class="gh-tbtn" data-tsk>Skip</button>'+
+          '<button class="gh-tbtn" data-tsk>გამოტოვება</button>'+
           (last?'<button class="gh-tbtn gh-tbtn-p" data-tfn>Finish ✓</button>':'<button class="gh-tbtn gh-tbtn-p" data-tnx>Next ›</button>')+
         '</div>'+
       '</div>';
@@ -9126,15 +9126,15 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var compAvContent=c?(c.avatar?'<img src="'+esc(c.avatar)+'" alt="" loading="eager" onerror="this.remove()">':esc(initials(c.name||''))):'';
     var composerText=pageMode ? 'Post as '+(actor.title||'Business') : '';
     var composerActions=pageMode
-      ? '<button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:var(--ds-accent)"></i> Photo</button><button class="gh-composer-action" data-create-post><i class="fas fa-pen-to-square" style="color:var(--ds-h-video-ink)"></i> Page Post</button><button class="gh-composer-action" onclick="location.href=\''+actorMessagesHref(actor)+'\'"><i class="fas fa-comment-dots" style="color:var(--ds-h-reward-ink)"></i> Inbox</button><button class="gh-composer-action" onclick="location.href=\'notifications.html\'"><i class="fas fa-bell" style="color:#ef4444"></i> Activity</button>'
-      : '<button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:var(--ds-accent)"></i> Photo</button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Place</button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:var(--ds-h-video-ink)"></i> Business</button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:var(--ds-h-reward-ink)"></i> Event</button>';
+      ? '<button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:var(--ds-accent)"></i> ფოტო</button><button class="gh-composer-action" data-create-post><i class="fas fa-pen-to-square" style="color:var(--ds-h-video-ink)"></i> Page Post</button><button class="gh-composer-action" onclick="location.href=\''+actorMessagesHref(actor)+'\'"><i class="fas fa-comment-dots" style="color:var(--ds-h-reward-ink)"></i> Inbox</button><button class="gh-composer-action" onclick="location.href=\'notifications.html\'"><i class="fas fa-bell" style="color:#ef4444"></i> Activity</button>'
+      : '<button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:var(--ds-accent)"></i> ფოტო</button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Place</button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:var(--ds-h-video-ink)"></i> Business</button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:var(--ds-h-reward-ink)"></i> Event</button>';
     shell({ active:'feed',
       right: pageMode ? pageFeedRightSidebar(actor) : feedRightSidebar(),
       center:
         (pageMode ? pageHomeContext(actor) : '<section class="gh-card gh-story-strip-card"><div class="gh-stories" id="ghStories"></div></section>')+
-        '<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="'+compAvClass+'" id="ghComposerAvatar">'+compAvContent+'</span><button class="gh-composer-fake" data-create-post data-i18n="composer_placeholder">რას აზიარებ დღეს?</button></div><div class="gh-composer-actions"><button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:var(--ds-accent)"></i> <span data-i18n="photo">Photo</span></button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> <span data-i18n="place">Place</span></button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:var(--ds-h-video-ink)"></i> <span data-i18n="business">Business</span></button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:var(--ds-h-reward-ink)"></i> <span data-i18n="event">Event</span></button></div></section>'+
+        '<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="'+compAvClass+'" id="ghComposerAvatar">'+compAvContent+'</span><button class="gh-composer-fake" data-create-post data-i18n="composer_placeholder">რას აზიარებ დღეს?</button></div><div class="gh-composer-actions"><button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:var(--ds-accent)"></i> <span data-i18n="photo">ფოტო</span></button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> <span data-i18n="place">Place</span></button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:var(--ds-h-video-ink)"></i> <span data-i18n="business">Business</span></button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:var(--ds-h-reward-ink)"></i> <span data-i18n="event">Event</span></button></div></section>'+
         (pageMode ? '' : '<div id="ghWelcomeSlot"></div>')+
-        (pageMode ? '<div class="gh-pill-row gh-page-feed-tabs" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="page"><i class="fas fa-store" style="font-size:.75rem"></i> Page Activity</button></div>' : '<div class="gh-pill-row" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="foryou"><i class="fas fa-house" style="font-size:.75rem"></i> <span data-i18n="feed_foryou">For You</span></button><button class="gh-pill" data-feed-tab="following"><i class="fas fa-user-group" style="font-size:.75rem"></i> <span data-i18n="feed_following">Following</span></button><button class="gh-pill" data-feed-tab="local"><i class="fas fa-city" style="font-size:.75rem"></i> <span data-i18n="feed_local">Local</span></button><button class="gh-pill" data-feed-tab="nearme"><i class="fas fa-location-dot" style="font-size:.75rem"></i> <span data-i18n="feed_nearme">Near Me</span></button></div>')+
+        (pageMode ? '<div class="gh-pill-row gh-page-feed-tabs" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="page"><i class="fas fa-store" style="font-size:.75rem"></i> Page Activity</button></div>' : '<div class="gh-pill-row" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="foryou"><i class="fas fa-house" style="font-size:.75rem"></i> <span data-i18n="feed_foryou">For You</span></button><button class="gh-pill" data-feed-tab="following"><i class="fas fa-user-group" style="font-size:.75rem"></i> <span data-i18n="feed_following">Following</span></button><button class="gh-pill" data-feed-tab="local"><i class="fas fa-city" style="font-size:.75rem"></i> <span data-i18n="feed_local">ადგილობრივი</span></button><button class="gh-pill" data-feed-tab="nearme"><i class="fas fa-location-dot" style="font-size:.75rem"></i> <span data-i18n="feed_nearme">Near Me</span></button></div>')+
         '<div id="ghFeedList">'+skelPostCard()+skelVideoCard()+skelPostCard()+skelVideoCard()+skelPostCard()+'</div>'+
         '<div id="ghFeedLoadMore" style="text-align:center;padding:16px 0 8px"></div>'
     });
@@ -9172,7 +9172,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       openDeepLinkedStory();
       var list=$('#ghFeedList'); bindPostInteractions(list); var lastPosts=[]; var pageFeedLoaded=false;
       function pageFeedEmptyHtml(){
-        return '<div class="gh-card gh-empty gh-page-feed-empty"><i class="fas fa-store"></i><h3>No page posts yet</h3><p>Create a post as '+esc(actor.title||'your page')+' to start building your audience.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="gh-btn" data-create-post><i class="fas fa-plus"></i>Create Page Post</button><a class="gh-btn ghost" href="business.html?id='+encodeURIComponent(actor.businessId)+'"><i class="fas fa-arrow-up-right-from-square"></i>View Page</a><a class="gh-btn ghost" href="'+actorMessagesHref(actor)+'"><i class="fas fa-comment-dots"></i>Page Inbox</a></div></div>';
+        return '<div class="gh-card gh-empty gh-page-feed-empty"><i class="fas fa-store"></i><h3>No page posts yet</h3><p>Create a post as '+esc(actor.title||'your page')+' to start building your audience.</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="gh-btn" data-create-post><i class="fas fa-plus"></i>Create Page Post</button><a class="gh-btn ghost" href="business.html?id='+encodeURIComponent(actor.businessId)+'"><i class="fas fa-arrow-up-right-from-square"></i>გვერდის ნახვა</a><a class="gh-btn ghost" href="'+actorMessagesHref(actor)+'"><i class="fas fa-comment-dots"></i>Page Inbox</a></div></div>';
       }
       /* ── "New posts available" pill (Phase 11) ─────────────── */
       var _renderedIds={};
@@ -9784,7 +9784,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       ? '<img src="'+esc(logo)+'" alt="'+esc(title)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
       : '<i class="fas fa-store" style="font-size:1.1rem"></i>';
     var coverHtml='<div class="gh-item-media" style="position:relative">'+itemMediaHtml(cover,title,'fa-store')+'<span class="gh-type-badge"><i class="fas fa-store"></i> Business Page</span><div style="position:absolute;bottom:-18px;left:14px;width:36px;height:36px;border-radius:50%;border:2px solid #1a2235;background:#1a2235;display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--ds-text-3)">'+logoHtml+'</div></div>';
-    return '<article class="gh-card gh-item-card">'+coverHtml+'<div class="gh-item-body" style="padding-top:22px"><h3>'+esc(title)+'</h3><p>'+esc(b.description||'Business page on GeoHub')+'</p><div class="gh-item-meta"><span class="gh-chip">'+esc(b.category||(typeof GHt==="function"?GHt('nav_business'):'ბიზნესი'))+'</span>'+businessModeChip(b)+'<span class="gh-chip">'+Number(b.followerCount||0)+' followers</span></div><div class="gh-card-actions"><a class="gh-btn sm" href="business.html?id='+encodeURIComponent(b.id)+'">View Page</a><button class="gh-btn sm ghost" data-follow-business="'+esc(b.id)+'"><i class="fas fa-plus"></i> Follow</button><button class="gh-btn sm ghost" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button></div></div></article>';
+    return '<article class="gh-card gh-item-card">'+coverHtml+'<div class="gh-item-body" style="padding-top:22px"><h3>'+esc(title)+'</h3><p>'+esc(b.description||'Business page on GeoHub')+'</p><div class="gh-item-meta"><span class="gh-chip">'+esc(b.category||(typeof GHt==="function"?GHt('nav_business'):'ბიზნესი'))+'</span>'+businessModeChip(b)+'<span class="gh-chip">'+Number(b.followerCount||0)+' followers</span></div><div class="gh-card-actions"><a class="gh-btn sm" href="business.html?id='+encodeURIComponent(b.id)+'">გვერდის ნახვა</a><button class="gh-btn sm ghost" data-follow-business="'+esc(b.id)+'"><i class="fas fa-plus"></i> Follow</button><button class="gh-btn sm ghost" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button></div></div></article>';
   }
 
   function renderBusinesses(){
@@ -11030,7 +11030,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     loadGalleryPhotos(b.id,function(photos){
       var grid=$('#ghGalleryGrid'); if(!grid) return;
       if(!photos.length){
-        grid.innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>No photos yet</h3>'+(isOwner?'<p>Add photos to showcase your business.</p><button class="gh-btn" data-pub-add-photo>Add first photo</button>':'<p>No photos have been added yet.</p>')+'</div>';
+        grid.innerHTML='<div class="gh-empty"><i class="fas fa-images"></i><h3>ფოტო ჯერ არ არის</h3>'+(isOwner?'<p>Add photos to showcase your business.</p><button class="gh-btn" data-pub-add-photo>Add first photo</button>':'<p>No photos have been added yet.</p>')+'</div>';
         return;
       }
       grid.innerHTML='<div class="gh-gallery-grid">'+photos.map(function(p,i){
@@ -11488,7 +11488,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var ownerReplyBtn=(isOwner&&!isAuthor&&!r.ownerReply)?
       '<button class="gh-btn xs ghost" data-reply-review="'+esc(r.id)+'" title="Reply"><i class="fas fa-reply"></i> Reply</button>':'';
     var reportBtn=(!isAuthor&&currentUid)?
-      '<button class="gh-btn xs ghost" data-report-review="'+esc(r.id)+'" title="Report"><i class="fas fa-flag"></i></button>':'';
+      '<button class="gh-btn xs ghost" data-report-review="'+esc(r.id)+'" title="საჩივარი"><i class="fas fa-flag"></i></button>':'';
     return '<div class="gh-rv-card'+(r.hidden?' gh-rv-hidden':'')+(r.moderationStatus==='flagged'?' gh-rv-flagged':'')+'" data-review-id="'+esc(r.id)+'">'+
       '<div class="gh-rv-head">'+
         userProfileAnchor(r.userId,'gh-avatar gh-profile-avatar-link',avHtml,'Open '+name)+
@@ -11686,7 +11686,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var body='<p class="gh-muted" style="margin:0 0 12px;font-size:.87rem">Why are you reporting this review?</p>'+
       '<div style="display:grid;gap:6px">'+reasons.map(function(r,i){return '<label class="gh-rv-report-option"><input type="radio" name="ghRvReportReason" value="'+r+'"'+(i===0?' checked':'')+'>'+r.charAt(0).toUpperCase()+r.slice(1)+'</label>';}).join('')+'</div>'+
       '<textarea class="gh-textarea" id="ghReportDetails" placeholder="Additional details (optional)" style="margin-top:12px" rows="2"></textarea>';
-    modal('Report Review',body,'<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn danger" id="ghSubmitRvReport">Report</button>','ghReportReviewModal');
+    modal('Report Review',body,'<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn danger" id="ghSubmitRvReport">საჩივარი</button>','ghReportReviewModal');
     setTimeout(function(){
       var submit=$('#ghSubmitRvReport'); if(!submit)return;
       submit.onclick=function(){
@@ -11813,7 +11813,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function openGroupCreate(){
     if(!requireLogin()) return;
     var _gct=typeof GHt==='function'?GHt:function(k){return k;};
-    var body='<input class="gh-input" id="ghGroupName" placeholder="'+_gct('grp_name_ph')+'"><div style="height:8px"></div><textarea class="gh-textarea" id="ghGroupDesc" placeholder="'+_gct('grp_desc_ph')+'" rows="3"></textarea><div style="height:8px"></div><select class="gh-select" id="ghGroupCat"><option value="general">General</option><option value="hiking">Hiking</option><option value="travel">Travel</option><option value="photography">Photography</option><option value="business">Business</option><option value="learning">Learning</option><option value="fitness">Fitness</option><option value="nightlife">Nightlife</option></select><div style="height:8px"></div><select class="gh-select" id="ghGroupPrivacy"><option value="public">'+_gct('grp_privacy_pub')+'</option><option value="private">'+_gct('grp_privacy_priv')+'</option><option value="secret">'+_gct('grp_privacy_sec')+'</option></select><div style="height:8px"></div><div style="display:flex;gap:8px;align-items:center"><input class="gh-input" id="ghGroupCover" placeholder="'+_gct('grp_cover_ph')+'" style="flex:1"><label for="ghGroupCoverFile" class="gh-btn ghost sm" id="ghGrCoverUploadLbl" style="cursor:pointer;white-space:nowrap;flex-shrink:0;padding:10px 13px"><i class="fas fa-upload"></i></label><input type="file" id="ghGroupCoverFile" accept="image/*" style="display:none"></div>';
+    var body='<input class="gh-input" id="ghGroupName" placeholder="'+_gct('grp_name_ph')+'"><div style="height:8px"></div><textarea class="gh-textarea" id="ghGroupDesc" placeholder="'+_gct('grp_desc_ph')+'" rows="3"></textarea><div style="height:8px"></div><select class="gh-select" id="ghGroupCat"><option value="general">General</option><option value="hiking">ლაშქრობა</option><option value="travel">მოგზაურობა</option><option value="photography">Photography</option><option value="business">Business</option><option value="learning">Learning</option><option value="fitness">ფიტნესი</option><option value="nightlife">ღამის ცხოვრება</option></select><div style="height:8px"></div><select class="gh-select" id="ghGroupPrivacy"><option value="public">'+_gct('grp_privacy_pub')+'</option><option value="private">'+_gct('grp_privacy_priv')+'</option><option value="secret">'+_gct('grp_privacy_sec')+'</option></select><div style="height:8px"></div><div style="display:flex;gap:8px;align-items:center"><input class="gh-input" id="ghGroupCover" placeholder="'+_gct('grp_cover_ph')+'" style="flex:1"><label for="ghGroupCoverFile" class="gh-btn ghost sm" id="ghGrCoverUploadLbl" style="cursor:pointer;white-space:nowrap;flex-shrink:0;padding:10px 13px"><i class="fas fa-upload"></i></label><input type="file" id="ghGroupCoverFile" accept="image/*" style="display:none"></div>';
     modal('Create Group', body, '<button class="gh-btn ghost" data-close-modal>Cancel</button><button class="gh-btn" id="ghSubmitGroup">Create</button>', 'ghGroupCreateModal');
     (function(){
       var fi=$('#ghGroupCoverFile'); if(!fi) return;
@@ -12026,7 +12026,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function renderGroupFilesTab(g,box,isAdmin,isMember){
-    box.innerHTML='<div class="gh-card"><div class="gh-section-title"><h2>Files</h2>'+(isMember?'<button class="gh-btn sm" id="ghUploadGroupFile"><i class="fas fa-upload"></i> Upload</button>':'')+'</div><div id="ghGroupFilesList"><div class="gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
+    box.innerHTML='<div class="gh-card"><div class="gh-section-title"><h2>ფაილები</h2>'+(isMember?'<button class="gh-btn sm" id="ghUploadGroupFile"><i class="fas fa-upload"></i> Upload</button>':'')+'</div><div id="ghGroupFilesList"><div class="gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
     if(isMember){var ub=$('#ghUploadGroupFile');if(ub)ub.onclick=function(){var inp=document.createElement('input');inp.type='file';inp.onchange=function(){var file=inp.files&&inp.files[0];if(!file)return;GS().uploadGroupFile(g.id,file,function(){});};inp.click();};}
     var myUid=authUser()&&authUser().uid;
     var _u=GS().listenGroupFiles(g.id,function(items){var list=$('#ghGroupFilesList');if(!list)return;if(!items.length){list.innerHTML='<div class="gh-empty" style="min-height:80px"><i class="fas fa-folder-open"></i><h3>No files yet</h3></div>';return;}list.innerHTML=items.map(function(f){var canDelete=isAdmin||(f.uploaderId===myUid);return '<div class="gr-file-card"><div class="gr-file-icon"><i class="fas fa-file'+(f.type&&f.type.startsWith('image')?'-image':(f.type&&f.type.includes('pdf')?'-pdf':''))+'"></i></div><div class="gr-file-body"><strong>'+esc(f.name||'File')+'</strong><span class="gh-muted" style="font-size:.8rem">'+esc(grFormatBytes(f.size))+(f.uploaderName?' · '+esc(f.uploaderName):'')+' · '+grTimeAgo(f.createdAt)+'</span></div><div class="gr-file-actions"><a class="gh-btn sm" href="'+esc(f.url||'#')+'" target="_blank" rel="noopener"><i class="fas fa-download"></i></a>'+(canDelete?'<button class="gh-btn sm ghost danger" data-delete-file="'+esc(f.id)+'"><i class="fas fa-trash"></i></button>':'')+'</div></div>';}).join('');list.querySelectorAll('[data-delete-file]').forEach(function(btn){btn.onclick=function(){var fid=btn.dataset.deleteFile;window.ghConfirm(typeof GHt==='function'?GHt('file_delete_cfm'):'Delete this file?',function(){GS().deleteGroupFile(g.id,fid,function(){});});};});});
@@ -12043,7 +12043,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function renderGroupMediaTab(g,box){
-    box.innerHTML='<div class="gh-card"><div class="gh-section-title"><h2>Media</h2></div><div id="ghGroupMediaGrid"><div class="gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
+    box.innerHTML='<div class="gh-card"><div class="gh-section-title"><h2>მედია</h2></div><div id="ghGroupMediaGrid"><div class="gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
     var _uMedia=listenTargetPosts('group',g.id,function(items){var media=items.filter(function(p){return p.imageUrl||p.mediaUrl||p.photoUrl;});var grid=$('#ghGroupMediaGrid');if(!grid)return;if(!media.length){grid.innerHTML='<div class="gh-empty" style="min-height:80px"><i class="fas fa-images"></i><h3>No media yet</h3></div>';return;}grid.innerHTML='<div class="gh-grid">'+media.map(function(p){var url=p.imageUrl||p.mediaUrl||p.photoUrl;return '<a class="gh-card" href="feed.html#post-'+esc(p.id)+'" style="padding:0;overflow:hidden"><img src="'+esc(url)+'" alt="media" loading="lazy" decoding="async" style="width:100%;height:180px;object-fit:cover"><div style="padding:10px;font-size:.85rem;color:var(--gh-muted)">'+esc((p.text||'').slice(0,80))+'</div></a>';}).join('')+'</div>';});
     if(_uMedia) state.grTabUnsubs.push(_uMedia);
   }
@@ -12091,7 +12091,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div id="ghGroupMediaGrid" class="gh-cmp-media-grid"></div>'+
       '<input type="file" id="ghGroupPostFile" accept="image/*" style="display:none">'+
       '<div class="gh-cmp-toolbar">'+
-        '<button class="gh-cmp-tool" id="ghGroupPickPhoto" type="button" title="Add photo"><i class="fas fa-image"></i><span>Photo</span></button>'+
+        '<button class="gh-cmp-tool" id="ghGroupPickPhoto" type="button" title="Add photo"><i class="fas fa-image"></i><span>ფოტო</span></button>'+
       '</div>'+
       '<div class="gh-upload-progress" id="ghGroupUploadBar" style="display:none"><div class="gh-upload-track"><div class="gh-upload-bar" id="ghGroupUploadFill"></div></div><span id="ghGroupUploadPct">0%</span></div>';
 
@@ -12608,7 +12608,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           box.querySelectorAll('[data-mkt-contact]').forEach(function(btn){
             btn.addEventListener('click',function(){ if(!requireLogin()) return; var sid=btn.dataset.mktContact; if(sid) location.href='messages.html?with='+encodeURIComponent(sid)+'&ref=marketplace&item='+encodeURIComponent(btn.dataset.mktTitle||''); });
           });
-        }).catch(function(err){ box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>'+_mlt('mkt_load_fail')+'</h3><p>'+esc(err.message||'')+'</p></div>'; });
+        }).catch(function(err){
+          console.warn('[GeoHub] marketplace query failed:', err && err.message);
+          var _idx = /requires an index/i.test((err && err.message) || '');
+          box.innerHTML='<div class="gh-card gh-empty"><i class="fas fa-triangle-exclamation"></i><h3>'+_mlt('mkt_load_fail')+'</h3><p>'+
+            (_idx ? _srt('err_index','ეს სია ჯერ ემზადება. სცადე ცოტა ხანში.')
+                  : _srt('err_retry','სცადე თავიდან ცოტა ხანში.'))+'</p></div>'; });
       }
       _loadMkt();
     });
@@ -13575,7 +13580,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(!_map||!fs()||!db()) return;
         _markers.forEach(function(m){ _map.removeLayer(m); }); _markers=[];
         var sidebar=document.getElementById('ghMapSidebar');
-        if(sidebar) sidebar.innerHTML='<div class="gh-muted" style="font-size:.82rem;padding:8px"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>';
+        if(sidebar) sidebar.innerHTML='<div class="gh-muted" style="font-size:.82rem;padding:8px"><i class="fas fa-circle-notch fa-spin"></i> იტვირთება…</div>';
         var col,q;
         if(layer==='posts'){
           // Only ONE inequality filter allowed per Firestore query — filter location client-side
@@ -14032,7 +14037,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(!toolbar||toolbar.querySelector('#ghStoryMusicBtn')) return;
     var musicBtn=document.createElement('button');
     musicBtn.type='button'; musicBtn.id='ghStoryMusicBtn'; musicBtn.className='gh-cmp-tool';
-    musicBtn.innerHTML='<i class="fas fa-music"></i><span> Music</span>';
+    musicBtn.innerHTML='<i class="fas fa-music"></i><span> მუსიკა</span>';
     toolbar.appendChild(musicBtn);
     var _selectedMusic=null;
     var indicator=document.createElement('div');
@@ -14442,7 +14447,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<select class="gh-select" id="ghFrCategory" style="flex:1">'+
           '<option value="personal">Personal emergency</option>'+
           '<option value="medical">Medical</option>'+
-          '<option value="education">Education</option>'+
+          '<option value="education">განათლება</option>'+
           '<option value="community">Community project</option>'+
           '<option value="animal">Animal rescue</option>'+
           '<option value="environment">Environment</option>'+
@@ -14535,7 +14540,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             '<p class="gh-muted" style="font-size:.82rem;margin:0">Platform management & moderation</p>'+
           '</div>'+
           '<div class="gh-admin-tabs gh-pill-row" id="ghAdminTabs" hidden>'+
-            '<button class="gh-pill active" data-atab="overview">Overview</button>'+
+            '<button class="gh-pill active" data-atab="overview">მიმოხილვა</button>'+
             '<button class="gh-pill" data-atab="users">Users</button>'+
             '<button class="gh-pill" data-atab="reports">Reports</button>'+
             '<button class="gh-pill" data-atab="verifications">Verifications</button>'+
@@ -15009,7 +15014,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   ══════════════════════════════════════════════════════════════ */
   window.ghLoadTrendingHashtags=function(container){
     if(!container) return;
-    container.innerHTML='<div class="gh-muted" style="font-size:.82rem"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div>';
+    container.innerHTML='<div class="gh-muted" style="font-size:.82rem"><i class="fas fa-circle-notch fa-spin"></i> იტვირთება…</div>';
     if(!fs()||!db()){ container.innerHTML=''; return; }
     fs().getDocs(fs().query(
       fs().collection(db(),'posts'),

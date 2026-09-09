@@ -56,15 +56,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700;800&family=Noto+Serif+Georgian:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
-  <script type="module" crossorigin src="/assets/trust-BNghOSCF.js"></script>
+  <script type="module" crossorigin src="/assets/trust-BpdeYdbU.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
   <link rel="modulepreload" crossorigin href="/assets/firebase-config-CGKVrgHh.js">
-  <link rel="modulepreload" crossorigin href="/assets/gh-admin-bridge-DBB1DqWz.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-admin-bridge-D8kQ6Xb1.js">
   <link rel="modulepreload" crossorigin href="/assets/config-DSeD8I2H.js">
   <link rel="modulepreload" crossorigin href="/assets/api-client-DV25UnBD.js">
   <link rel="modulepreload" crossorigin href="/assets/main-DZ7-Y9ov.js">
-  <link rel="modulepreload" crossorigin href="/assets/account-Dl1_viTm.js">
-  <link rel="modulepreload" crossorigin href="/assets/mobile-nav-CEPM5beY.js">
+  <link rel="modulepreload" crossorigin href="/assets/account-CgowKiSO.js">
+  <link rel="modulepreload" crossorigin href="/assets/mobile-nav-BTmnL6IV.js">
   <link rel="modulepreload" crossorigin href="/assets/chat-popup-BHzNMiBZ.js">
   <link rel="modulepreload" crossorigin href="/assets/geohub-production-stabilization-v1-kYTMrx4r.js">
   <link rel="modulepreload" crossorigin href="/assets/responsive-polish-Cni6BeF_.js">
@@ -75,7 +75,7 @@
   <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-CK4mvkco.css">
   <link rel="stylesheet" crossorigin href="/assets/chat-popup-DzoItt1C.css">
   <link rel="stylesheet" crossorigin href="/assets/responsive-polish-BHWfKQLh.css">
-  <link rel="stylesheet" crossorigin href="/assets/gh-design-system-x93rfHn_.css">
+  <link rel="stylesheet" crossorigin href="/assets/gh-design-system-BCFqqWoI.css">
 </head>
 <body>
 
@@ -94,12 +94,12 @@
     <div class="container">
       <div class="trust-hero-inner">
         <div class="trust-hero-text">
-          <div class="hero-badge"><i class="fas fa-shield-alt"></i> Trust Center</div>
-          <h1>Your <span class="grad-text">Trust Score</span></h1>
+          <div class="hero-badge"><i class="fas fa-shield-alt"></i> ნდობის ცენტრი</div>
+          <h1>Your <span class="grad-text">ნდობის ქულა</span></h1>
           <p>Earn credibility through real check-ins, quality reviews, and camera-verified visits. A higher trust score means more visibility, more access, and a stronger community presence.</p>
           <div class="next-level-section">
             <div class="next-level-label">
-              <span>Progress to <strong>Community Trusted</strong></span>
+              <span>Progress to <strong>საზოგადოების ნდობით</strong></span>
               <span>0 / 900</span>
             </div>
             <div class="next-level-track">
@@ -113,7 +113,7 @@
             <div class="trust-ring-inner">
               <div class="trust-ring-score">0</div>
               <div class="trust-ring-max">/ 1000 pts</div>
-              <div class="trust-ring-level">New Explorer</div>
+              <div class="trust-ring-level">ახალი აღმომჩენი</div>
             </div>
           </div>
         </div>
@@ -125,11 +125,11 @@
   <div class="trust-tabs-bar">
     <div class="container">
       <div class="trust-tabs-inner">
-        <button class="trust-tab active" data-tab="overview"    onclick="switchTrustTab('overview',   this)"><i class="fas fa-chart-pie"></i>   Overview</button>
-        <button class="trust-tab"        data-tab="levels"      onclick="switchTrustTab('levels',     this)"><i class="fas fa-layer-group"></i>  Verification</button>
-        <button class="trust-tab"        data-tab="camera"      onclick="switchTrustTab('camera',     this)"><i class="fas fa-camera"></i>        Camera Proof</button>
-        <button class="trust-tab"        data-tab="report"      onclick="switchTrustTab('report',     this)"><i class="fas fa-flag"></i>          Report</button>
-        <button class="trust-tab"        data-tab="safety"      onclick="switchTrustTab('safety',     this)"><i class="fas fa-shield-alt"></i>    Safety Dashboard</button>
+        <button class="trust-tab active" data-tab="overview"    onclick="switchTrustTab('overview',   this)"><i class="fas fa-chart-pie"></i>   მიმოხილვა</button>
+        <button class="trust-tab"        data-tab="levels"      onclick="switchTrustTab('levels',     this)"><i class="fas fa-layer-group"></i>  ვერიფიკაცია</button>
+        <button class="trust-tab"        data-tab="camera"      onclick="switchTrustTab('camera',     this)"><i class="fas fa-camera"></i>        კამერით დადასტურება</button>
+        <button class="trust-tab"        data-tab="report"      onclick="switchTrustTab('report',     this)"><i class="fas fa-flag"></i>          საჩივარი</button>
+        <button class="trust-tab"        data-tab="safety"      onclick="switchTrustTab('safety',     this)"><i class="fas fa-shield-alt"></i>    უსაფრთხოების პანელი</button>
       </div>
     </div>
   </div>
@@ -141,7 +141,7 @@
 
         <!-- Left: Score Breakdown -->
         <div>
-          <div class="ts-section-title">Score Breakdown</div>
+          <div class="ts-section-title">ქულის სტრუქტურა</div>
           <div id="trustBreakdown"></div>
         </div>
 
@@ -245,7 +245,7 @@
     <div class="container" style="max-width:680px">
 
       <div class="report-intro">
-        <div class="ts-section-title" style="margin-bottom:8px">Report a Problem</div>
+        <div class="ts-section-title" style="margin-bottom:8px">პრობლემის შეტყობინება</div>
         <p>Select what you want to report. All reports are reviewed by the GeoHub Trust team within 4–6 hours. Anonymous reporting is available.</p>
       </div>
 

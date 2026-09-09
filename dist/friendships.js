@@ -108,7 +108,7 @@
     banner.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9000;background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;padding:14px 20px;border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.4);font-size:.9rem;font-weight:700;display:flex;align-items:center;gap:12px;max-width:420px;width:calc(100vw - 40px)';
     banner.innerHTML = '<span style="font-size:1.4rem">🎂</span>'
       + '<div style="flex:1"><div>' + esc(name) + '\'s birthday is today!</div><div style="font-size:.76rem;font-weight:400;opacity:.85;margin-top:2px">Send them a message</div></div>'
-      + '<a href="profile.html?id=' + encodeURIComponent(uid) + '" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:6px 12px;color:#fff;text-decoration:none;font-size:.78rem;white-space:nowrap">View Profile</a>'
+      + '<a href="profile.html?id=' + encodeURIComponent(uid) + '" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:6px 12px;color:#fff;text-decoration:none;font-size:.78rem;white-space:nowrap">პროფილის ნახვა</a>'
       + '<button onclick="this.closest(\'#gh-birthday-banner\').remove()" style="background:none;border:none;color:#fff;cursor:pointer;padding:4px;font-size:1rem;opacity:.7">✕</button>';
     document.body.appendChild(banner);
     setTimeout(function () { if (banner.parentNode) banner.remove(); }, 10000);

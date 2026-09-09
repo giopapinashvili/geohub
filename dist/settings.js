@@ -397,7 +397,7 @@
       ppRow('showBio','ppShowBio')+
       ppRow('showStories','ppShowStories')+
       ppRow('showHighlights','ppShowHighlights')+
-      '<div class="settings-section-label"><i class="fas fa-users"></i> Default Post Audience</div>'+
+      '<div class="settings-section-label"><i class="fas fa-users"></i> პოსტის ნაგულისხმევი აუდიტორია</div>'+
       '<div class="settings-row settings-pp-row"><span><strong>'+esc(tr('defaultPostAud'))+'</strong><span>'+esc(tr('defaultPostAudSub'))+'</span></span>'+ppAudSelect('defaultPostAudience', _ppPrivacy.defaultPostAudience||'everyone')+'</div>'+
       '<div class="settings-row settings-pp-row"><span><strong>'+esc(tr('defaultPostGenderLbl'))+'</strong></span>'+ppGenderSelect(_ppPrivacy.defaultPostGender||'all')+'</div>'+
       '<div class="settings-row settings-pp-row"><span><strong>'+esc(tr('defaultPostAgeLbl'))+'</strong></span>'+ppAgeSelect(_ppPrivacy.defaultPostAgeMode||'all')+'</div>'+

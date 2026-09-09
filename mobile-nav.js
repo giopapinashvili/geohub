@@ -118,26 +118,29 @@
   }
 
   function mobileMenuHtml() {
+    // Same six destinations as the shell's rail — one list, one language.
+    var T = (typeof window.GHt === 'function') ? window.GHt : function (k, f) { return f || k; };
+    function row(href, icon, key, fallback, attrs) {
+      return '<a class="gh-mobile-menu-row" href="' + href + '"' + (attrs || '') + '>' +
+        '<i class="fas ' + icon + '"></i><span data-i18n="' + key + '">' +
+        _mesc(T(key) !== key ? T(key) : fallback) + '</span></a>';
+    }
     return '<div class="mobile-account-panel" id="ghMobileAccountSlot"></div>' +
-      '<div class="mobile-menu-group"><div class="mobile-menu-title">Main</div>' +
-        '<a class="gh-mobile-menu-row" href="feed.html"><i class="fas fa-house"></i><span>Feed</span></a>' +
-        '<a class="gh-mobile-menu-row" href="search.html"><i class="fas fa-magnifying-glass"></i><span>Explore / Search</span></a>' +
-        '<a class="gh-mobile-menu-row" data-gh-actor-messages href="' + mobileMessagesHref() + '"><i class="fas fa-comment-dots"></i><span>Messages</span></a>' +
-        '<a class="gh-mobile-menu-row" href="notifications.html"><i class="fas fa-bell"></i><span>Notifications</span></a>' +
-        '<a class="gh-mobile-menu-row" href="places.html"><i class="fas fa-location-dot"></i><span>Places</span></a>' +
-        '<a class="gh-mobile-menu-row" href="map.html"><i class="fas fa-map"></i><span>Map</span></a>' +
-        '<a class="gh-mobile-menu-row" href="place-feed.html"><i class="fas fa-store"></i><span>Place Updates</span></a>' +
-        '<a class="gh-mobile-menu-row" href="groups.html"><i class="fas fa-users"></i><span>Groups</span></a>' +
-        '<a class="gh-mobile-menu-row" href="events.html"><i class="fas fa-calendar"></i><span>Events</span></a>' +
-        '<a class="gh-mobile-menu-row" href="rewards.html"><i class="fas fa-gift"></i><span>Rewards</span></a>' +
+      '<div class="mobile-menu-group"><div class="mobile-menu-title" data-i18n="nav_main">მთავარი</div>' +
+        row('feed.html',        'fa-house',        'nav_feed',        'მთავარი') +
+        row('map.html',         'fa-map',          'nav_map',         'რუკა') +
+        row('videos.html',      'fa-film',         'nav_videos',      'ვიდეო') +
+        row('marketplace.html', 'fa-bag-shopping', 'nav_marketplace', 'ბაზარი') +
+        row('groups.html',      'fa-users',        'nav_groups',      'ჯგუფები') +
       '</div>' +
-      '<div class="mobile-menu-group"><div class="mobile-menu-title">Account</div>' +
-        '<a class="gh-mobile-menu-row" href="business.html"><i class="fas fa-store"></i><span>Businesses</span></a>' +
-        '<a class="gh-mobile-menu-row" href="add-business.html"><i class="fas fa-plus-circle"></i><span>Add Page</span></a>' +
-        '<a class="gh-mobile-menu-row" href="settings.html"><i class="fas fa-gear"></i><span>Settings</span></a>' +
+      '<div class="mobile-menu-group"><div class="mobile-menu-title" data-i18n="nav_account">ანგარიში</div>' +
+        row(mobileMessagesHref(), 'fa-comment-dots', 'nav_messages', 'ჩატი', ' data-gh-actor-messages') +
+        row('notifications.html', 'fa-bell',         'nav_notifications', 'შეტყობინებები') +
+        row('add-business.html',  'fa-plus-circle',  'nav_add_business',  'ბიზნესის დამატება') +
         '<div id="ghMobileAuthActions"></div>' +
       '</div>';
   }
+
 
   function updateMobileAuthActions(user) {
     var slot = document.getElementById('ghMobileAuthActions');
@@ -151,10 +154,10 @@
           '<i class="fas fa-user"></i><span>' + name + '</span>' +
         '</a>' +
         '<a class="gh-mobile-menu-row" href="settings.html">' +
-          '<i class="fas fa-gear"></i><span>Settings</span>' +
+          '<i class="fas fa-gear"></i><span data-i18n="settings">პარამეტრები</span>' +
         '</a>' +
         '<button type="button" class="gh-mobile-menu-row mobile-menu-danger gh-mobile-menu-danger" data-gh-mobile-logout>' +
-          '<i class="fas fa-right-from-bracket"></i><span>Logout</span>' +
+          '<i class="fas fa-right-from-bracket"></i><span data-i18n="signout">გასვლა</span>' +
         '</button>';
     } else {
       slot.innerHTML =
@@ -198,7 +201,11 @@
     menu.setAttribute('role', 'dialog');
     menu.setAttribute('aria-label', 'GeoHub mobile menu');
 
-    var socialMenu = document.getElementById('ghSidebarToggle');
+    // Only at mobile widths: on desktop this id belongs to the rail's own
+    // collapse control, and claiming it turned that button into a drawer toggle.
+    var socialMenu = window.matchMedia('(max-width: 768px)').matches
+      ? document.getElementById('ghSidebarToggle')
+      : null;
     if (socialMenu && !socialMenu._ghMenuBound) {
       socialMenu._ghMenuBound = true;
       socialMenu.type = 'button';
