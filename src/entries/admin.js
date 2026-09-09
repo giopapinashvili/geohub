@@ -10,3 +10,6 @@ import '/gh-call-history.js';
 import '/gh-group-calls.js';
 import '/geohub-production-stabilization-v1.js';
 import '/responsive-polish.js';
+
+import '/gh-tabs.js';
+import '/gh-admin-bridge.js';

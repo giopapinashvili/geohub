@@ -259,6 +259,7 @@
   function $(s, root){ return (root || document).querySelector(s); }
   function $all(s, root){ return Array.prototype.slice.call((root || document).querySelectorAll(s)); }
   function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function compact(v){ var n = Number(v || 0); return n >= 1000 ? (n/1000).toFixed(n >= 10000 ? 0 : 1) + 'k' : String(n); }
   /* Phase 21: linkify hashtags in post text */
   function linkifyText(v){
     return esc(v)
@@ -506,7 +507,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     state.bizFeedPosts=[];
   }
   function requireLogin(){ if(authUser()) return true; if(GS()) GS().requireAuth(); else toast('შესვლა აუცილებელია', 'error'); return false; }
-  function currentUserInfo(){ var u=authUser(); return { uid:u && u.uid, name:u ? (u.displayName || (u.email||'').split('@')[0] || 'GeoHub User') : 'Guest', avatar:u ? (u.photoURL || '') : ''}; }
+  function currentUserInfo(){ var u=authUser(); return { uid:u && u.uid, name:u ? (u.displayName || (u.email||'').split('@')[0] || ((typeof GHt==="function"?GHt('default_user'):'GeoHub-ის მომხმარებელი'))) : ((typeof GHt==="function"?GHt('guest'):'სტუმარი')), avatar:u ? (u.photoURL || '') : ''}; }
   function canSeePost(p){
     if(!p) return false;
     if(p.status && p.status !== 'active') return false;
@@ -700,23 +701,28 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   function leftNav(active){
+    /* One navigation, one destination per job. The retired duplicates
+       (reels/watch/live/channel, explore/place-feed/place-updates,
+       business/dashboard, pricing/early-adopter, products/services) now
+       redirect into a tab of the canonical page — see _redirects. */
     var PRIMARY=[
       ['feed','feed.html','fa-house','მთავარი','nav_feed'],
-      ['videos','videos.html','fa-film','Videos','nav_videos'],
-      ['map','map.html','fa-map','Map','nav_map'],
-      ['groups','groups.html','fa-users','Groups','nav_groups'],
-      ['places','places.html','fa-location-dot','Places','nav_places']
+      ['places','places.html','fa-location-dot','ადგილები','nav_places'],
+      ['map','map.html','fa-map','რუკა','nav_map'],
+      ['videos','videos.html','fa-film','ვიდეო','nav_videos'],
+      ['messages','messages.html','fa-comment-dots','ჩატი','nav_messages']
     ];
     var SECONDARY=[
-      ['place-updates','place-updates.html','fa-bullhorn','ადგილის სიახლეები','nav_place_updates'],
-      ['messages','messages.html','fa-comment-dots','ჩატი','nav_messages'],
-      ['events','events.html','fa-calendar-xmark','ღონისძიებები','nav_events'],
-      ['business','business.html','fa-store','ბიზნესები','nav_business'],
-      ['rewards','rewards.html','fa-gift','რევორდები','nav_rewards'],
+      ['groups','groups.html','fa-users','ჯგუფები','nav_groups'],
+      ['events','events.html','fa-calendar-days','ღონისძიებები','nav_events'],
+      ['business-suite','business-suite.html','fa-store','ბიზნესები','nav_business'],
+      ['marketplace','marketplace.html','fa-bag-shopping','ბაზარი','nav_marketplace'],
+      ['jobs','jobs.html','fa-briefcase','ვაკანსიები','nav_jobs'],
+      ['real-estate','real-estate.html','fa-building','უძრავი ქონება','nav_realestate'],
+      ['rewards','rewards.html','fa-gift','ჯილდოები','nav_rewards'],
       ['challenges','challenges.html','fa-flag-checkered','გამოწვევები','nav_challenges'],
-      ['creators','creators.html','fa-camera-retro','შემქმნელები','nav_creators'],
-      ['premium','premium.html','fa-crown','Premium 👑','nav_premium'],
-      ['invite','invite.html','fa-user-plus','მეგობრის მოწვევა','nav_invite'],
+      ['premium','premium.html','fa-crown','Premium','nav_premium'],
+      ['invite','invite.html','fa-user-plus','მოწვევა','nav_invite'],
       ['settings','settings.html','fa-gear','პარამეტრები','settings']
     ];
     var exp=false; try{ exp=localStorage.getItem('gh_nav_exp')==='1'; }catch(e){}
@@ -751,8 +757,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function defaultRight(){
     return '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Nearby Places</h3><a class="gh-small" href="places.html">ყველა</a></div><div class="gh-mini-list" id="ghRightPlaces"><div class="gh-mini-item"><span class="gh-mini-thumb"><i class="fas fa-spinner fa-spin"></i></span><div><strong>Loading places…</strong><span>Firestore</span></div></div></div></div>'+
       '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Upcoming Events</h3><a class="gh-small" href="events.html">ყველა</a></div><div class="gh-mini-list" id="ghRightEvents"><div class="gh-mini-item"><span class="gh-mini-thumb"><i class="fas fa-spinner fa-spin"></i></span><div><strong>Loading events…</strong><span>Firestore</span></div></div></div></div>'+
-      '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Suggested Groups</h3><a class="gh-small" href="groups.html">ყველა</a></div><div class="gh-mini-list" id="ghSuggestions"><div class="gh-mini-item"><span class="gh-mini-thumb"><i class="fas fa-spinner fa-spin"></i></span><div><strong>Loading groups…</strong><span>Firestore</span></div></div></div></div>'+
-      '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Rewards & Coupons</h3><a class="gh-small" href="rewards.html">ყველა</a></div><div class="gh-mini-list" id="ghRightRewards"><div class="gh-empty mini"><i class="fas fa-gift"></i><h3>No rewards yet</h3><p>Real rewards appear after admin adds them.</p></div></div></div>';
+      '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>'+(typeof GHt==='function'?GHt('sidebar_suggested_groups'):'შემოთავაზებული ჯგუფები')+'</h3><a class="gh-small" href="groups.html">ყველა</a></div><div class="gh-mini-list" id="ghSuggestions"><div class="gh-mini-item"><span class="gh-mini-thumb"><i class="fas fa-spinner fa-spin"></i></span><div><strong>'+(typeof GHt==='function'?GHt('loading'):'იტვირთება…')+'</strong><span></span></div></div></div></div>'+
+      '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>'+(typeof GHt==='function'?GHt('sidebar_rewards'):'ჯილდოები და კუპონები')+'</h3><a class="gh-small" href="rewards.html">ყველა</a></div><div class="gh-mini-list" id="ghRightRewards"><div class="gh-empty mini"><i class="fas fa-gift"></i><h3>'+(typeof GHt==='function'?GHt('sidebar_no_rewards'):'ჯილდოები ჯერ არ არის')+'</h3><p>'+(typeof GHt==='function'?GHt('sidebar_no_rewards_hint'):'ახალი ჯილდოები მალე გამოჩნდება.')+'</p></div></div></div>';
   }
 
   function createMenu(){
@@ -1007,28 +1013,28 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       pk.style.top=(r.top)+'px';
       pk.style.left=(r.right+8)+'px';
     } else { pk.style.top='200px'; pk.style.left='260px'; }
-    pk.innerHTML='<div style="padding:6px 10px 10px;font-size:.78rem;color:#94a3b8;font-weight:700;text-transform:uppercase;letter-spacing:.06em">ჩემი არხები</div><div id="ghChPickerList"><i class="fas fa-spinner fa-spin" style="margin:10px 14px;color:#94a3b8"></i></div>'+
+    pk.innerHTML='<div style="padding:6px 10px 10px;font-size:.78rem;color:var(--ds-text-3);font-weight:700;text-transform:uppercase;letter-spacing:.06em">ჩემი არხები</div><div id="ghChPickerList"><i class="fas fa-spinner fa-spin" style="margin:10px 14px;color:var(--ds-text-3)"></i></div>'+
       '<div style="border-top:1px solid rgba(255,255,255,.08);margin-top:6px;padding-top:6px;">'+
-        '<a href="videos.html?action=createCh" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;color:#10b981;font-size:.84rem;font-weight:600;text-decoration:none;transition:background .15s" onmouseover="this.style.background=\'rgba(16,185,129,.1)\'" onmouseout="this.style.background=\'\'">'+
+        '<a href="videos.html?action=createCh" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;color:var(--ds-accent-ink);font-size:.84rem;font-weight:600;text-decoration:none;transition:background .15s" onmouseover="this.style.background=\'rgba(var(--ds-accent-rgb),.1)\'" onmouseout="this.style.background=\'\'">'+
           '<i class="fas fa-plus-circle"></i> ახალი არხი</a>'+
       '</div>';
     document.body.appendChild(pk);
-    if(!fs()||!db()){ document.getElementById('ghChPickerList').innerHTML='<div style="padding:10px 14px;font-size:.82rem;color:#94a3b8">Firebase არ არის მზად</div>'; return; }
+    if(!fs()||!db()){ document.getElementById('ghChPickerList').innerHTML='<div style="padding:10px 14px;font-size:.82rem;color:var(--ds-text-3)">Firebase არ არის მზად</div>'; return; }
     fs().getDocs(fs().query(fs().collection(db(),'channels'),fs().where('ownerId','==',u.uid)))
       .then(function(snap){
         var list=document.getElementById('ghChPickerList');
         if(!list) return;
         if(snap.empty){
-          list.innerHTML='<div style="padding:10px 14px;font-size:.82rem;color:#94a3b8"><i class="fas fa-tv" style="margin-right:6px"></i>არხი ჯერ არ გაქვს</div>';
+          list.innerHTML='<div style="padding:10px 14px;font-size:.82rem;color:var(--ds-text-3)"><i class="fas fa-tv" style="margin-right:6px"></i>არხი ჯერ არ გაქვს</div>';
           return;
         }
         list.innerHTML=snap.docs.map(function(d){
           var ch=d.data();
           var av=ch.avatar?'<img src="'+ch.avatar+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.style.display=\'none\'">'
-            :'<div style="width:32px;height:32px;border-radius:50%;background:rgba(16,185,129,.15);color:#10b981;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0"><i class="fas fa-tv"></i></div>';
+            :'<div style="width:32px;height:32px;border-radius:50%;background:rgba(var(--ds-accent-rgb),.15);color:var(--ds-accent-ink);display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0"><i class="fas fa-tv"></i></div>';
           return '<a href="channel.html?id='+d.id+'" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;color:var(--gh-text,#f1f5f9);font-size:.84rem;text-decoration:none;transition:background .15s" onmouseover="this.style.background=\'rgba(255,255,255,.06)\'" onmouseout="this.style.background=\'\'">'+
             av+'<div style="min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px">'+(ch.name||'არხი')+'</div>'+
-            '<div style="font-size:.72rem;color:#94a3b8">'+(ch.videoCount||0)+' ვიდეო</div></div></a>';
+            '<div style="font-size:.72rem;color:var(--ds-text-3)">'+(ch.videoCount||0)+' ვიდეო</div></div></a>';
         }).join('');
       })
       .catch(function(){ var l=document.getElementById('ghChPickerList'); if(l) l.innerHTML='<div style="padding:10px 14px;font-size:.82rem;color:#ef4444">ვერ ჩაიტვირთა</div>'; });
@@ -1175,7 +1181,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   /* ── Phase 38: Smart Notifications Badge ────────────────── */
   function _showNotifPreviewToast(n){
     if(!n) return;
-    var ic=GH_NOTIF_ICONS[n.type]||{icon:'fa-bell',color:'#10b981'};
+    var ic=GH_NOTIF_ICONS[n.type]||{icon:'fa-bell',color:'var(--ds-accent)'};
     var bodyText=n.body||n.message||n.text||'New notification';
     var existing=document.getElementById('ghNotifPreviewToast');
     if(existing) existing.remove();
@@ -1271,7 +1277,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             var evPanel=ev.closest('.gh-panel'); if(evPanel){ var evH3=evPanel.querySelector('h3'); if(evH3) evH3.textContent='Upcoming Events'+(cityLabel||''); }
             ev.innerHTML = events.length ? events.map(function(x){ var title=x.name||x.title||'Untitled'; var when=x.startDate||x.date; var whenStr=when?timeAgo(when):''; return '<a class="gh-mini-item" href="events.html?id='+esc(x.id)+'"><span class="gh-mini-thumb event"><i class="fas fa-calendar"></i></span><div><strong>'+esc(title)+'</strong><span>'+esc(x.city||x.location||whenStr)+'</span></div></a>'; }).join('') : '<div class="gh-empty mini"><i class="fas fa-calendar"></i><h3>No upcoming events</h3><p>'+esc(city?'No upcoming events in '+city+' yet.':'Create the first event!')+'</p></div>';
           }
-          var rw=$('#ghRightRewards'); if(rw){ rw.innerHTML = rewards.length ? rewards.map(function(x){ var title=x.name||x.title||'Untitled'; var pts=x.points||x.cost||x.price||''; return '<a class="gh-mini-item" href="rewards.html"><span class="gh-mini-thumb reward"><i class="fas fa-gift"></i></span><div><strong>'+esc(title)+'</strong><span>'+esc(pts?pts+' points':'Reward')+'</span></div></a>'; }).join('') : '<div class="gh-empty mini"><i class="fas fa-gift"></i><h3>No rewards yet</h3><p>Real rewards appear after admin adds them.</p></div>'; }
+          var rw=$('#ghRightRewards'); if(rw){ rw.innerHTML = rewards.length ? rewards.map(function(x){ var title=x.name||x.title||'Untitled'; var pts=x.points||x.cost||x.price||''; return '<a class="gh-mini-item" href="rewards.html"><span class="gh-mini-thumb reward"><i class="fas fa-gift"></i></span><div><strong>'+esc(title)+'</strong><span>'+esc(pts?pts+' points':'Reward')+'</span></div></a>'; }).join('') : '<div class="gh-empty mini"><i class="fas fa-gift"></i><h3>'+(typeof GHt==='function'?GHt('sidebar_no_rewards'):'ჯილდოები ჯერ არ არის')+'</h3><p>'+(typeof GHt==='function'?GHt('sidebar_no_rewards_hint'):'ახალი ჯილდოები მალე გამოჩნდება.')+'</p></div>'; }
         });
       });
     });
@@ -1311,23 +1317,23 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     like:            { icon: 'fa-heart',       color: '#ef4444' },
     comment:         { icon: 'fa-comment',     color: '#3b82f6' },
     reply:           { icon: 'fa-reply',       color: '#8b5cf6' },
-    follow:          { icon: 'fa-user-plus',   color: '#10b981' },
+    follow:          { icon: 'fa-user-plus',   color: 'var(--ds-accent)' },
     message:         { icon: 'fa-envelope',    color: '#06b6d4' },
     reward:          { icon: 'fa-gift',        color: '#f59e0b' },
     badge:           { icon: 'fa-medal',       color: '#f59e0b' },
     challenge:       { icon: 'fa-trophy',      color: '#f59e0b' },
     story_reply:     { icon: 'fa-film',        color: '#ec4899' },
     story_reaction:  { icon: 'fa-star',        color: '#f97316' },
-    friend_request:  { icon: 'fa-user-clock',  color: '#10b981' },
+    friend_request:  { icon: 'fa-user-clock',  color: 'var(--ds-accent)' },
     friend_accept:   { icon: 'fa-handshake',   color: '#22d3ee' },
     points_received: { icon: 'fa-coins',       color: '#eab308' },
     quote:           { icon: 'fa-file-invoice',color: '#6366f1' },
     quote_request:   { icon: 'fa-file-invoice',color: '#6366f1' },
     business_review: { icon: 'fa-star',        color: '#f59e0b' },
-    business_follow: { icon: 'fa-store',       color: '#10b981' },
-    coupon_redeemed:     { icon: 'fa-ticket-alt',  color: '#10b981' },
+    business_follow: { icon: 'fa-store',       color: 'var(--ds-accent)' },
+    coupon_redeemed:     { icon: 'fa-ticket-alt',  color: 'var(--ds-accent)' },
     group_join_request:  { icon: 'fa-user-clock',  color: '#a855f7' },
-    group_approved:      { icon: 'fa-user-check',  color: '#10b981' },
+    group_approved:      { icon: 'fa-user-check',  color: 'var(--ds-accent)' },
     group_declined:      { icon: 'fa-user-times',  color: '#ef4444' },
     missed_call:         { icon: 'fa-phone-missed', color: '#ef4444' }
   };
@@ -1345,7 +1351,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var visibleNotifs=items.filter(function(n){ var actor=n.actorId||n.fromUserId||n.senderId||n.authorId||''; return !actor||state.blockedUserIds.indexOf(actor)===-1; });
         if(!visibleNotifs.length){ var empty=notificationEmptyCopy(notificationActor()); box.innerHTML='<div class="gh-empty"><i class="fas fa-bell"></i><h3>'+esc(empty.title)+'</h3><p>'+esc(empty.body)+'</p></div>'; return; }
         box.innerHTML='<div class="gh-mini-list">'+visibleNotifs.slice(0,30).map(function(n){
-          var ic=GH_NOTIF_ICONS[n.type]||{icon:'fa-bell',color:'#10b981'};
+          var ic=GH_NOTIF_ICONS[n.type]||{icon:'fa-bell',color:'var(--ds-accent)'};
           var bAv=n.fromAvatar||''; var bInit=((n.fromName||'G')[0]||'G').toUpperCase();
           var bAvHtml=bAv
             ?'<img class="gh-notif-av-img" src="'+esc(bAv)+'" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">'
@@ -1402,7 +1408,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   }
 
   var BG_GRADIENTS = [
-    'linear-gradient(135deg,#10b981,#064e3b)',
+    'linear-gradient(135deg,var(--ds-accent),#064e3b)',
     'linear-gradient(135deg,#3b82f6,#1e40af)',
     'linear-gradient(135deg,#8b5cf6,#4c1d95)',
     'linear-gradient(135deg,#f59e0b,#92400e)',
@@ -1458,7 +1464,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div class="gh-char-count"><span id="ghCharUsed">0</span>/2000</div>'+
         '<div id="ghLinkPreviewCard" style="display:none" class="gh-lp-composer-preview"></div>'+
         '<div class="gh-feeling-row" id="ghFeelingRow">'+FEELINGS.map(function(f){ return '<button type="button" class="gh-feeling-chip" data-feeling="'+esc(f)+'">'+esc(f)+'</button>'; }).join('')+'</div>'+
-        '<div id="ghSelectedFeeling" style="display:none;font-size:.84rem;color:var(--gh-green);margin:4px 0 8px;padding:4px 10px;background:rgba(16,185,129,.08);border-radius:10px"></div>'+
+        '<div id="ghSelectedFeeling" style="display:none;font-size:.84rem;color:var(--gh-green);margin:4px 0 8px;padding:4px 10px;background:rgba(var(--ds-accent-rgb),.08);border-radius:10px"></div>'+
         '<div class="gh-bg-picker" id="ghBgPicker" style="display:none">'+BG_GRADIENTS.map(function(g,i){ return '<button type="button" class="gh-bg-swatch" data-bg-gradient="'+esc(g)+'" style="background:'+esc(g)+'"'+(i===0?' title="No color"':'')+' aria-label="Color '+i+'"></button>'; }).join('')+'<button type="button" class="gh-bg-swatch gh-bg-none" data-bg-gradient="" title="No color"><i class="fas fa-times"></i></button></div>'+
         '<div id="ghBgTextStyle" style="display:none;margin:8px 0;padding:8px 10px;background:rgba(255,255,255,.04);border:1px solid var(--gh-border);border-radius:10px;display:none">'+
           '<div style="font-size:.75rem;font-weight:700;color:var(--gh-muted);margin-bottom:6px">Text style</div>'+
@@ -1471,12 +1477,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '</div>'+
           '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">'+
             '<button type="button" class="gh-bgts-size" data-text-size="0.85rem" style="font-size:.75rem;padding:2px 8px;border-radius:8px;border:1px solid var(--gh-border);background:transparent;color:var(--gh-muted);cursor:pointer">S</button>'+
-            '<button type="button" class="gh-bgts-size active" data-text-size="1.1rem" style="font-size:.85rem;padding:2px 8px;border-radius:8px;border:1px solid var(--gh-green);background:rgba(16,185,129,.1);color:var(--gh-green);cursor:pointer">M</button>'+
+            '<button type="button" class="gh-bgts-size active" data-text-size="1.1rem" style="font-size:.85rem;padding:2px 8px;border-radius:8px;border:1px solid var(--gh-green);background:rgba(var(--ds-accent-rgb),.1);color:var(--gh-green);cursor:pointer">M</button>'+
             '<button type="button" class="gh-bgts-size" data-text-size="1.4rem" style="font-size:.95rem;padding:2px 8px;border-radius:8px;border:1px solid var(--gh-border);background:transparent;color:var(--gh-muted);cursor:pointer">L</button>'+
             '<button type="button" class="gh-bgts-size" data-text-size="1.8rem" style="font-size:1rem;padding:2px 8px;border-radius:8px;border:1px solid var(--gh-border);background:transparent;color:var(--gh-muted);cursor:pointer">XL</button>'+
           '</div>'+
           '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
-            '<button type="button" class="gh-bgts-style active" data-text-bold="0" data-text-italic="0" style="padding:2px 8px;border-radius:8px;border:1px solid var(--gh-green);background:rgba(16,185,129,.1);color:var(--gh-green);cursor:pointer;font-size:.78rem">Normal</button>'+
+            '<button type="button" class="gh-bgts-style active" data-text-bold="0" data-text-italic="0" style="padding:2px 8px;border-radius:8px;border:1px solid var(--gh-green);background:rgba(var(--ds-accent-rgb),.1);color:var(--gh-green);cursor:pointer;font-size:.78rem">Normal</button>'+
             '<button type="button" class="gh-bgts-style" data-text-bold="1" data-text-italic="0" style="padding:2px 8px;border-radius:8px;border:1px solid var(--gh-border);background:transparent;color:var(--gh-muted);cursor:pointer;font-size:.78rem;font-weight:700">Bold</button>'+
             '<button type="button" class="gh-bgts-style" data-text-bold="0" data-text-italic="1" style="padding:2px 8px;border-radius:8px;border:1px solid var(--gh-border);background:transparent;color:var(--gh-muted);cursor:pointer;font-size:.78rem;font-style:italic">Italic</button>'+
             '<button type="button" class="gh-bgts-style" data-text-bold="1" data-text-italic="1" style="padding:2px 8px;border-radius:8px;border:1px solid var(--gh-border);background:transparent;color:var(--gh-muted);cursor:pointer;font-size:.78rem;font-weight:700;font-style:italic">Bold Italic</button>'+
@@ -1617,7 +1623,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div class="gh-gif-grid" id="ghGifGrid"><div class="gh-gif-loading"><i class="fas fa-circle-notch fa-spin"></i> Loading trending…</div></div>'+
       '</div>'+
       '<div class="gh-gif-selected-preview" id="ghGifPreview" style="display:none">'+
-        '<img id="ghGifPreviewImg" src="" alt="Selected GIF" style="max-height:180px;border-radius:10px;max-width:100%">'+
+        '<img id="ghGifPreviewImg" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Selected GIF" style="max-height:180px;border-radius:10px;max-width:100%">'+
         '<button type="button" class="gh-gif-remove-btn" id="ghGifRemoveBtn" title="Remove GIF"><i class="fas fa-times"></i></button>'+
       '</div>'+
       '<div class="gh-ai-panel" id="ghAiPanel" style="display:none">'+
@@ -1643,7 +1649,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div id="ghCoAuthorChips" class="gh-coa-chips"></div>'+
       '</div>'+
       '<div class="gh-schedule-panel" id="ghSchedulePanel" style="display:none">'+
-        '<i class="fas fa-calendar-alt" style="color:#f59e0b;flex-shrink:0"></i>'+
+        '<i class="fas fa-calendar-alt" style="color:var(--ds-h-reward-ink);flex-shrink:0"></i>'+
         '<input type="datetime-local" class="gh-input" id="ghScheduleAt" style="flex:1;font-size:.82rem">'+
         '<button type="button" class="gh-btn sm ghost" id="ghClearSchedule" title="Clear"><i class="fas fa-times"></i></button>'+
       '</div>'+
@@ -2233,7 +2239,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           var _db=document.createElement('div');
           _db.className='gh-draft-banner';
           _db.innerHTML=
-            '<i class="fas fa-floppy-disk" style="color:#10b981"></i>'+
+            '<i class="fas fa-floppy-disk" style="color:var(--ds-accent-ink)"></i>'+
             '<span>Draft from '+esc(_draftAgeStr)+'</span>'+
             '<button class="gh-btn sm" id="ghRestoreDraft">Restore</button>'+
             '<button class="gh-draft-discard" id="ghDiscardDraft" title="Discard draft"><i class="fas fa-times"></i></button>';
@@ -2395,9 +2401,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var cb=e.target.closest('.gh-bgts-color');
         if(cb){ bgTextStyle.color=cb.dataset.textColor||'#fff'; _bgtsPanel.querySelectorAll('.gh-bgts-color').forEach(function(b){b.style.border=b===cb?'2px solid var(--gh-green)':'2px solid transparent';}); _applyBgPreview(selectedBg); }
         var sb=e.target.closest('.gh-bgts-size');
-        if(sb){ bgTextStyle.size=sb.dataset.textSize||'1.1rem'; _bgtsPanel.querySelectorAll('.gh-bgts-size').forEach(function(b){b.style.border=b===sb?'1px solid var(--gh-green)':'1px solid var(--gh-border)';b.style.color=b===sb?'var(--gh-green)':'var(--gh-muted)';b.style.background=b===sb?'rgba(16,185,129,.1)':'transparent';}); _applyBgPreview(selectedBg); }
+        if(sb){ bgTextStyle.size=sb.dataset.textSize||'1.1rem'; _bgtsPanel.querySelectorAll('.gh-bgts-size').forEach(function(b){b.style.border=b===sb?'1px solid var(--gh-green)':'1px solid var(--gh-border)';b.style.color=b===sb?'var(--gh-green)':'var(--gh-muted)';b.style.background=b===sb?'rgba(var(--ds-accent-rgb),.1)':'transparent';}); _applyBgPreview(selectedBg); }
         var stb=e.target.closest('.gh-bgts-style');
-        if(stb){ bgTextStyle.bold=stb.dataset.textBold==='1'; bgTextStyle.italic=stb.dataset.textItalic==='1'; _bgtsPanel.querySelectorAll('.gh-bgts-style').forEach(function(b){b.style.border=b===stb?'1px solid var(--gh-green)':'1px solid var(--gh-border)';b.style.color=b===stb?'var(--gh-green)':'var(--gh-muted)';b.style.background=b===stb?'rgba(16,185,129,.1)':'transparent';}); _applyBgPreview(selectedBg); }
+        if(stb){ bgTextStyle.bold=stb.dataset.textBold==='1'; bgTextStyle.italic=stb.dataset.textItalic==='1'; _bgtsPanel.querySelectorAll('.gh-bgts-style').forEach(function(b){b.style.border=b===stb?'1px solid var(--gh-green)':'1px solid var(--gh-border)';b.style.color=b===stb?'var(--gh-green)':'var(--gh-muted)';b.style.background=b===stb?'rgba(var(--ds-accent-rgb),.1)':'transparent';}); _applyBgPreview(selectedBg); }
       });
     }
 
@@ -2773,7 +2779,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '</div>'+
       '<div id="ghStoryHashtagWrap" style="display:none;margin-top:8px">'+
         '<div style="display:flex;align-items:center;gap:6px">'+
-          '<span style="color:#94a3b8;font-size:1rem">#</span>'+
+          '<span style="color:var(--ds-text-3);font-size:1rem">#</span>'+
           '<input class="gh-input" id="ghStoryHashtagInput" placeholder="tag, tag2… (Enter-ით დამატება)" maxlength="40" autocomplete="off" style="flex:1">'+
         '</div>'+
         '<div id="ghStoryHashtagPills" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:7px"></div>'+
@@ -2870,7 +2876,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '</div>'+
       '<div id="ghStoryLocWrap" style="display:none;margin-top:8px">'+
         '<div class="gh-story-loc-badge-row" id="ghStoryLocBadgeRow">'+
-          '<i class="fas fa-location-dot" style="color:#10b981"></i>'+
+          '<i class="fas fa-location-dot" style="color:var(--ds-accent-ink)"></i>'+
           '<span id="ghStoryLocName" style="font-size:.83rem;font-weight:600;color:var(--text-primary,#e2e8f0)">…</span>'+
           '<button type="button" id="ghStoryLocClear" class="gh-story-tpl-badge-rm">×</button>'+
         '</div>'+
@@ -3266,7 +3272,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       {id:'nature',    emoji:'🌿', label:'Nature',       bg:'linear-gradient(135deg,#16a34a,#4ade80)', ph:'Into the wild 🌿'},
       {id:'night',     emoji:'🌙', label:'Night',        bg:'linear-gradient(135deg,#0f172a,#1e293b)', ph:'Good night, world 🌙'},
       {id:'love',      emoji:'❤️',  label:'Love',        bg:'linear-gradient(135deg,#f43f5e,#fb7185)', ph:'Spread the love ❤️'},
-      {id:'sports',    emoji:'⚽',        label:'Sports',      bg:'linear-gradient(135deg,#059669,#10b981)', ph:'Game on! ⚽'},
+      {id:'sports',    emoji:'⚽',        label:'Sports',      bg:'linear-gradient(135deg,var(--ds-accent-lo),var(--ds-accent))', ph:'Game on! ⚽'},
       {id:'georgia',   emoji:'🇬🇪', label:'Georgia', bg:'linear-gradient(135deg,#dc2626,#b91c1c)', ph:'საქართველო 🇬🇪'},
       {id:'minimal',   emoji:'⬜',        label:'Minimal',     bg:'linear-gradient(135deg,#f8fafc,#e2e8f0)', ph:'Simple and clean ⬜'}
     ];
@@ -3631,7 +3637,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     return Object.assign({}, s, {
       id: s.id || s.storyId || '',
       authorId: s.authorId || s.userId || s.uid || '',
-      authorName: s.authorName || s.userName || s.name || 'GeoHub User',
+      authorName: s.authorName || s.userName || s.name || ((typeof GHt==="function"?GHt('default_user'):'GeoHub-ის მომხმარებელი')),
       authorAvatar: s.authorAvatar || s.userPhotoURL || s.photoURL || '',
       mediaUrl: s.mediaUrl || s.imageUrl || s.photoUrl || '',
       text: s.text || s.caption || '',
@@ -3696,7 +3702,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         return '<button type="button" class="gh-story-card gh-story-add" data-create-story>'+
           (av?'<span class="gh-story-add-avatar"><img src="'+esc(av)+'" alt="'+esc(name)+'"></span>':
               '<div class="gh-story-add-icon"><i class="fas fa-plus-circle"></i></div>')+
-          '<br><strong>Create</strong>'+
+          '<br><strong>'+(typeof GHt==="function"?GHt('story_create'):'შექმენი')+'</strong>'+
         '</button>';
       }
       box.innerHTML=buildCreateCard();
@@ -4424,8 +4430,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         (desc ? '<div class="gh-video-post-desc">'+esc(desc)+(p.description && p.description.length>160 ? '…' : '')+'</div>' : '') +
       '</div>' +
       '<div class="gh-post-stats">'+
-        '<span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'">❤️ <b data-like-count>'+(p.likeCount||0)+'</b>'+(p.likeCount?' people reacted':'')+'</button></span>'+
-        '<span><button class="gh-stats-btn" data-open-comments-btn><b data-comment-count>'+(p.commentCount||0)+'</b> comments</button></span>'+
+        '<span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'">❤️ <b data-like-count>'+(p.likeCount||0)+'</b>'+(p.likeCount?' '+(typeof GHt==="function"?GHt('post_reacted'):'მოწონება'):'')+'</button></span>'+
+        '<span><button class="gh-stats-btn" data-open-comments-btn><b data-comment-count>'+(p.commentCount||0)+'</b> '+(typeof GHt==="function"?GHt('post_comments'):'კომენტარი')+'</button></span>'+
       '</div>'+
       '<div class="gh-rx-breakdown" data-rx-pid="'+esc(pid)+'"></div>' +
       '<div class="gh-post-actions">'+
@@ -4460,7 +4466,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       (p.text?'<div class="gh-post-body" style="white-space:pre-wrap">'+esc((p.text||'').slice(0,500))+((p.text||'').length>500?'…':'')+'</div>':'') +
       (p.imageUrl?'<div class="gh-ch-post-img"><img src="'+esc(p.imageUrl)+'" alt="" loading="lazy" style="width:100%;border-radius:12px;margin-top:10px;max-height:400px;object-fit:cover"></div>':'') +
       '<div class="gh-post-stats" style="margin-top:8px">'+
-        '<span><button class="gh-rx-who-btn" data-who-reacted="'+esc(p.id||'')+'">❤️ <b data-like-count>'+(p.likeCount||0)+'</b>'+(p.likeCount?' people reacted':'')+'</button></span>'+
+        '<span><button class="gh-rx-who-btn" data-who-reacted="'+esc(p.id||'')+'">❤️ <b data-like-count>'+(p.likeCount||0)+'</b>'+(p.likeCount?' '+(typeof GHt==="function"?GHt('post_reacted'):'მოწონება'):'')+'</button></span>'+
         '<span><b data-comment-count>'+(p.commentCount||0)+'</b> comments</span>'+
       '</div>'+
       '<div class="gh-post-actions">'+
@@ -4478,7 +4484,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   /* ── Phase 17: Check-in post card ─────────────────────────────────────── */
   function checkinPostCard(p){
-    var name=p.authorName||'GeoHub User';
+    var name=p.authorName||((typeof GHt==="function"?GHt('default_user'):'GeoHub-ის მომხმარებელი'));
     var av=p.authorAvatar||'';
     var ts=p.createdAt&&p.createdAt.toMillis?timeAgo2(p.createdAt.toMillis()):'';
     var pid=p.id||'';
@@ -4539,7 +4545,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var canManage = options.canManage; // boolean when biz, undefined for feed
     var isAdmin = !!options.isAdmin;
 
-    var name=p.authorName||p.userName||p.businessName||'GeoHub User';
+    var name=p.authorName||p.userName||p.businessName||((typeof GHt==="function"?GHt('default_user'):'GeoHub-ის მომხმარებელი'));
     var av=p.authorAvatar||p.userPhotoURL||p.logoUrl||'';
     var pid=p.id; var target='';
     var authorHref = authorLinkFor(p);
@@ -4739,9 +4745,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '<div class="biz-pmenu-sep"></div>'+
           '<button class="biz-pmenu-item" data-biz-action="toggleComments" data-pid="'+esc(pid)+'" data-cmt-off="'+(cmtOff?'1':'0')+'"><i class="fas fa-comment-slash"></i> '+(cmtOff?'Enable':'Disable')+' comments</button>'+
           '<div class="biz-pmenu-sep"></div>'+
-          '<button class="biz-pmenu-item" data-biz-action="setVis" data-pid="'+esc(pid)+'" data-vis="public"><i class="fas fa-globe"></i> Public'+(vis==='public'?' <i class="fas fa-check" style="color:#10b981;font-size:.65rem"></i>':'')+' </button>'+
-          '<button class="biz-pmenu-item" data-biz-action="setVis" data-pid="'+esc(pid)+'" data-vis="followers"><i class="fas fa-user-group"></i> Followers'+(vis==='followers'?' <i class="fas fa-check" style="color:#10b981;font-size:.65rem"></i>':'')+' </button>'+
-          '<button class="biz-pmenu-item" data-biz-action="setVis" data-pid="'+esc(pid)+'" data-vis="private"><i class="fas fa-lock"></i> Private'+(vis==='private'?' <i class="fas fa-check" style="color:#10b981;font-size:.65rem"></i>':'')+' </button>'+
+          '<button class="biz-pmenu-item" data-biz-action="setVis" data-pid="'+esc(pid)+'" data-vis="public"><i class="fas fa-globe"></i> Public'+(vis==='public'?' <i class="fas fa-check" style="color:var(--ds-accent-ink);font-size:.65rem"></i>':'')+' </button>'+
+          '<button class="biz-pmenu-item" data-biz-action="setVis" data-pid="'+esc(pid)+'" data-vis="followers"><i class="fas fa-user-group"></i> Followers'+(vis==='followers'?' <i class="fas fa-check" style="color:var(--ds-accent-ink);font-size:.65rem"></i>':'')+' </button>'+
+          '<button class="biz-pmenu-item" data-biz-action="setVis" data-pid="'+esc(pid)+'" data-vis="private"><i class="fas fa-lock"></i> Private'+(vis==='private'?' <i class="fas fa-check" style="color:var(--ds-accent-ink);font-size:.65rem"></i>':'')+' </button>'+
           '<div class="biz-pmenu-sep"></div>'+
           '<button class="biz-pmenu-item danger" data-biz-action="delete" data-pid="'+esc(pid)+'"><i class="fas fa-trash"></i> Delete post</button>'+
         '</div>'+
@@ -4792,7 +4798,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         )+
       '</div>':'')+
       viewCountHtml+
-      '<div class="gh-post-stats"><span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'">❤️ <b data-like-count>'+totalRx+'</b>'+(totalRx?' people reacted':'')+'</button></span><span><button class="gh-stats-btn" data-open-comments-btn><b data-comment-count>'+Math.max(0,Number(p.commentCount||0))+'</b> comments</button> · <button class="gh-stats-btn" data-open-shares-btn><b data-share-count>'+Number(p.shareCount||0)+'</b> shares</button>'+(Number(p.viewCount||0)>0?' · <span class="gh-view-count"><i class="fas fa-eye"></i> <span data-view-count>'+Number(p.viewCount||0)+'</span></span>':'')+'</span></div>'+
+      '<div class="gh-post-stats"><span><button class="gh-rx-who-btn" data-who-reacted="'+esc(pid)+'">❤️ <b data-like-count>'+totalRx+'</b>'+(totalRx?' '+(typeof GHt==="function"?GHt('post_reacted'):'მოწონება'):'')+'</button></span><span><button class="gh-stats-btn" data-open-comments-btn><b data-comment-count>'+Math.max(0,Number(p.commentCount||0))+'</b> '+(typeof GHt==="function"?GHt('post_comments'):'კომენტარი')+'</button> · <button class="gh-stats-btn" data-open-shares-btn><b data-share-count>'+Number(p.shareCount||0)+'</b> '+(typeof GHt==="function"?GHt('post_shares'):'გაზიარება')+'</button>'+(Number(p.viewCount||0)>0?' · <span class="gh-view-count"><i class="fas fa-eye"></i> <span data-view-count>'+Number(p.viewCount||0)+'</span></span>':'')+'</span></div>'+
       '<div class="gh-rx-breakdown" data-rx-pid="'+esc(pid)+'"></div>'+
       '<div class="gh-post-actions"><span class="gh-like-wrap"><button class="gh-act" data-like>❤️ <span data-i18n="post_action_like">Like</span></button><div class="gh-reaction-strip"><button data-reaction="love">❤️</button><button data-reaction="haha">😂</button><button data-reaction="wow">😮</button><button data-reaction="sad">😢</button><button data-reaction="angry">😡</button><button data-reaction="clap">👏</button></div></span><button class="gh-act" data-comment-toggle><i class="fas fa-comment"></i> <span data-i18n="post_action_comment">Comment</span></button><button class="gh-act" data-share><i class="fas fa-share"></i> <span data-i18n="post_action_share">Share</span></button><button class="gh-act" data-save><i class="fas fa-bookmark"></i> <span data-i18n="post_action_save">Save</span></button></div>'+
       '<div class="gh-comments" data-comments hidden><div data-comments-list></div>'+cmtFormHtml+'</div>'+
@@ -4853,7 +4859,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         return fs().getDoc(fs().doc(db(),'users',uid)).then(function(uSnap){
           if(uSnap.exists()){
             var u = uSnap.data();
-            r.displayName = u.fullName || u.displayName || u.username || r.displayName || 'GeoHub User';
+            r.displayName = u.fullName || u.displayName || u.username || r.displayName || ((typeof GHt==="function"?GHt('default_user'):'GeoHub-ის მომხმარებელი'));
             r.photoURL = u.avatar || u.photoURL || r.photoURL || '';
           }
         }).catch(function(){});
@@ -4866,7 +4872,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var items = tab==='all' ? allReactions : allReactions.filter(function(r){ return r.type===tab; });
       if(!items.length){ box.innerHTML='<div class="gh-muted" style="padding:10px 0">No reactions yet.</div>'; return; }
       box.innerHTML = '<div class="gh-mini-list">'+items.map(function(r){
-        var name = r.displayName || 'GeoHub User';
+        var name = r.displayName || ((typeof GHt==="function"?GHt('default_user'):'GeoHub-ის მომხმარებელი'));
         var av = r.photoURL ? img(r.photoURL, name) : esc(initials(name));
         return '<a class="gh-mini-item" href="'+profileLink(r.userId||r.id||'')+'"><span class="gh-avatar" style="width:36px;height:36px">'+av+'</span><div><strong>'+esc(name)+'</strong><span>'+(RX_EMOJIS[r.type||'love']||'❤️')+'</span></div></a>';
       }).join('')+'</div>';
@@ -5415,7 +5421,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           // Update sibling text node "X people reacted"
           var btn=countEl.parentElement;
           if(btn && btn.lastChild && btn.lastChild.nodeType===3){
-            btn.lastChild.textContent=n?' people reacted':'';
+            btn.lastChild.textContent=n?' '+(typeof GHt==="function"?GHt('post_reacted'):'მოწონება'):'';
           }
         }
       }
@@ -5426,7 +5432,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(!p || p.status==='deleted') {
       return '<div class="gh-shared-unavail"><i class="fas fa-ban"></i><span>Original post unavailable</span></div>';
     }
-    var name = p.authorName || p.userName || p.businessName || 'GeoHub User';
+    var name = p.authorName || p.userName || p.businessName || ((typeof GHt==="function"?GHt('default_user'):'GeoHub-ის მომხმარებელი'));
     var av = p.authorAvatar || p.userPhotoURL || p.logoUrl || '';
     var authorId = p.authorId || p.userId || '';
     var avHtml = av
@@ -5991,7 +5997,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var url = location.origin + location.pathname + '#post-' + pid;
       var body =
         '<textarea class="gh-cmp-textarea" id="ghStoryTextShare" placeholder="What\'s your story?…" rows="3"></textarea>'+
-        '<p style="font-size:.75rem;color:#94a3b8;margin:6px 0 0"><i class="fas fa-link"></i> ' + url + '</p>';
+        '<p style="font-size:.75rem;color:var(--ds-text-3);margin:6px 0 0"><i class="fas fa-link"></i> ' + url + '</p>';
       var m = modal((typeof GHt==='function'?GHt('story_share_modal'):'Add to your story'), body,
         '<button class="gh-btn ghost" data-close-modal>'+(typeof GHt==='function'?GHt('cancel'):'Cancel')+'</button><button class="gh-btn" id="ghSubmitStoryShare">'+(typeof GHt==='function'?GHt('story_share_btn'):'Share story')+'</button>',
         'ghStoryShareModal');
@@ -6004,7 +6010,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var f = fs(), d = db();
         f.addDoc(f.collection(d, 'stories'), {
           authorId: u2.uid,
-          authorName: u2.displayName || u2.email || 'GeoHub User',
+          authorName: u2.displayName || u2.email || ((typeof GHt==="function"?GHt('default_user'):'GeoHub-ის მომხმარებელი')),
           authorAvatar: u2.photoURL || '',
           text: text,
           sharedPostId: pid,
@@ -6062,7 +6068,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         text:'',
         authorId:u.uid,
         userId:u.uid,
-        authorName:me.displayName||u.displayName||'GeoHub User',
+        authorName:me.displayName||u.displayName||((typeof GHt==="function"?GHt('default_user'):'GeoHub-ის მომხმარებელი')),
         authorAvatar:me.photoURL||u.photoURL||'',
         authorType:'user',
         isRepost:true,
@@ -6177,7 +6183,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var rows = [];
       snap.forEach(function(d) {
         var p = Object.assign({ id: d.id }, d.data());
-        var name = p.authorName || p.userName || 'GeoHub User';
+        var name = p.authorName || p.userName || ((typeof GHt==="function"?GHt('default_user'):'GeoHub-ის მომხმარებელი'));
         var av = p.authorAvatar || p.userPhotoURL || '';
         var authorId = p.authorId || p.userId || '';
         var avHtml = av
@@ -6229,7 +6235,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }
     items += '<button class="gh-pmenu-item" data-copy-post-link><i class="fas fa-link"></i> Copy link</button>';
     items += '<button class="gh-pmenu-item" data-menu-save><i class="fas fa-bookmark"></i> Save post</button>';
-    if(!isOwn && authorId){ items += '<button class="gh-pmenu-item" data-menu-tip><i class="fas fa-coins" style="color:#f59e0b"></i> Send tip</button>'; }
+    if(!isOwn && authorId){ items += '<button class="gh-pmenu-item" data-menu-tip><i class="fas fa-coins" style="color:var(--ds-h-reward-ink)"></i> Send tip</button>'; }
     items += '<button class="gh-pmenu-item" data-menu-save-col><i class="fas fa-folder-plus"></i> Save to Collection</button>';
     if (!isOwn) {
       items += '<div class="gh-pmenu-sep"></div>';
@@ -6266,10 +6272,10 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var _undoT = document.createElement('div');
         _undoT.className = 'gh-undo-toast';
         _undoT.innerHTML = 'Post deleted <button class="gh-undo-btn">Undo</button>';
-        _undoT.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:100002;background:#1e293b;color:#f1f5f9;padding:12px 18px;border-radius:12px;display:flex;gap:12px;align-items:center;font-size:.88rem;box-shadow:0 4px 20px rgba(0,0,0,.4)';
+        _undoT.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:100002;background:var(--ds-surface-2);color:var(--ds-text);padding:12px 18px;border-radius:12px;display:flex;gap:12px;align-items:center;font-size:.88rem;box-shadow:0 4px 20px rgba(0,0,0,.4)';
         document.body.appendChild(_undoT);
         var _progress = document.createElement('div');
-        _progress.style.cssText = 'position:absolute;bottom:0;left:0;height:3px;background:#10b981;border-radius:0 0 12px 12px;width:100%;transition:width 5s linear';
+        _progress.style.cssText = 'position:absolute;bottom:0;left:0;height:3px;background:var(--ds-accent);border-radius:0 0 12px 12px;width:100%;transition:width 5s linear';
         _undoT.appendChild(_progress);
         requestAnimationFrame(function(){ requestAnimationFrame(function(){ _progress.style.width = '0%'; }); });
         _undoT.querySelector('.gh-undo-btn').onclick = function() {
@@ -6586,13 +6592,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var current = textEl.textContent || '';
     var ta = document.createElement('textarea');
     ta.className = 'gh-input'; ta.rows = 2;
-    ta.style.cssText = 'width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#f1f5f9;padding:6px 10px;resize:none;font-size:.87rem;font-family:inherit;outline:none;display:block;margin-top:4px';
+    ta.style.cssText = 'width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:var(--ds-text);padding:6px 10px;resize:none;font-size:.87rem;font-family:inherit;outline:none;display:block;margin-top:4px';
     ta.value = current;
     var saveBtn = document.createElement('button');
-    saveBtn.style.cssText = 'margin-top:4px;background:#10b981;color:#fff;border:none;border-radius:10px;padding:4px 14px;font-size:.8rem;cursor:pointer;font-family:inherit';
+    saveBtn.style.cssText = 'margin-top:4px;background:var(--ds-accent);#fffvar(--ds-accent-on);border:none;border-radius:10px;padding:4px 14px;font-size:.8rem;cursor:pointer;font-family:inherit';
     saveBtn.textContent = (typeof GHt==='function'?GHt('save'):'Save');
     var cancelBtn = document.createElement('button');
-    cancelBtn.style.cssText = 'margin-top:4px;margin-left:6px;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:.8rem;padding:4px 8px;font-family:inherit';
+    cancelBtn.style.cssText = 'margin-top:4px;margin-left:6px;background:none;border:none;color:var(--ds-text-3);cursor:pointer;font-size:.8rem;padding:4px 8px;font-family:inherit';
     cancelBtn.textContent = (typeof GHt==='function'?GHt('cancel'):'Cancel');
     textEl.innerHTML = '';
     textEl.appendChild(ta);
@@ -6725,34 +6731,34 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     return '<div id="ghFeedRight">'+
       '<div class="gh-panel gh-right-widget gh-sched-widget" id="ghSchedWidget" style="display:none">'+
         '<div class="gh-section-title" style="display:flex;align-items:center;justify-content:space-between">'+
-          '<h3><i class="fas fa-clock" style="color:#10b981;margin-right:5px"></i> დაგეგმილი</h3>'+
+          '<h3><i class="fas fa-clock" style="color:var(--ds-accent-ink);margin-right:5px"></i> დაგეგმილი</h3>'+
           '<button class="gh-small gh-sched-manage-btn" id="ghSchedManageBtn"><span id="ghSchedWidgetCnt">0</span> პოსტი <i class="fas fa-arrow-right"></i></button>'+
         '</div>'+
       '</div>'+
-      '<div class="gh-panel gh-right-widget" id="ghOnlineFriendsPanel"><div class="gh-section-title"><h3><i class="fas fa-circle" style="color:#22c55e;font-size:.55rem"></i> Online Friends</h3></div><div id="ghOnlineFriendsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
-      '<div class="gh-panel gh-right-widget" id="ghPymkPanel"><div class="gh-section-title"><h3>People You May Know</h3><a class="gh-small" href="search.html">Find people</a></div><div id="ghPymkList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghOnlineFriendsPanel"><div class="gh-section-title"><h3><i class="fas fa-circle" style="color:var(--ds-accent);font-size:.55rem"></i> '+(typeof GHt==="function"?GHt('rail_online_friends'):'ონლაინ მეგობრები')+'</h3></div><div id="ghOnlineFriendsList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghPymkPanel"><div class="gh-section-title"><h3>'+(typeof GHt==="function"?GHt('rail_pymk'):'შეიძლება იცნობდე')+'</h3><a class="gh-small" href="search.html">'+(typeof GHt==="function"?GHt('rail_find_people'):'მოძებნე ხალხი')+'</a></div><div id="ghPymkList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
       '<div class="gh-panel gh-right-widget" id="ghLiveActivityPanel">'+
-        '<div class="gh-section-title"><h3><span class="gh-live-dot"></span> Live Activity</h3></div>'+
-        '<div id="ghLiveActivityList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div>'+
+        '<div class="gh-section-title"><h3><span class="gh-live-dot"></span> '+(typeof GHt==="function"?GHt('rail_live_activity'):'ცოცხალი აქტივობა')+'</h3></div>'+
+        '<div id="ghLiveActivityList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div>'+
       '</div>'+
-      '<div class="gh-panel gh-right-widget" id="ghCreatorPanel"><div class="gh-section-title"><h3>Featured Creators</h3><a class="gh-small" href="creators.html">All</a></div><div id="ghCreatorList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghCreatorPanel"><div class="gh-section-title"><h3>Featured Creators</h3><a class="gh-small" href="creators.html">All</a></div><div id="ghCreatorList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
       '<div class="gh-panel gh-right-widget" id="ghTrendingPanel">'+
         '<div class="gh-section-title"><h3>🔥 Trending Hashtags</h3></div>'+
-        '<div id="ghTrendingList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div>'+
+        '<div id="ghTrendingList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div>'+
       '</div>'+
       '<div class="gh-panel gh-right-widget" id="ghTrendingPostsPanel">'+
         '<div class="gh-section-title"><h3>⚡ Trending Posts</h3></div>'+
-        '<div id="ghTrendingPostsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div>'+
+        '<div id="ghTrendingPostsList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div>'+
       '</div>'+
       '<div class="gh-panel gh-right-widget" id="ghLeaderPanel">'+
-        '<div class="gh-section-title"><h3>🏆 Top Creators</h3><a class="gh-small" href="creators.html">ყველა</a></div>'+
+        '<div class="gh-section-title"><h3>🏆 '+(typeof GHt==="function"?GHt('rail_top_creators'):'საუკეთესო შემქმნელები')+'</h3><a class="gh-small" href="creators.html">ყველა</a></div>'+
         '<div class="gh-ldr-cities" id="ghLdrCities">'+
           '<button class="gh-ldr-city active" data-ldr-city="">🌍 Georgia</button>'+
           '<button class="gh-ldr-city" data-ldr-city="თბილისი">🏙️ თბილისი</button>'+
           '<button class="gh-ldr-city" data-ldr-city="ბათუმი">🌊 ბათუმი</button>'+
           '<button class="gh-ldr-city" data-ldr-city="ქუთაისი">🏔️ ქუთაისი</button>'+
         '</div>'+
-        '<div id="ghLeaderList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div>'+
+        '<div id="ghLeaderList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div>'+
       '</div>'+
       '<div class="gh-panel gh-wrapped-teaser" id="ghWrappedTeaser" style="display:none">'+
         '<div class="gh-wt-glow"></div>'+
@@ -6765,11 +6771,11 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '<button class="gh-btn sm gh-wt-open-btn" id="ghWrappedOpenBtn"><i class="fas fa-play"></i></button>'+
         '</div>'+
       '</div>'+
-      '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Suggested Pages</h3><a class="gh-small" href="business.html">All</a></div><div id="ghSuggestedPages"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
-      '<div class="gh-panel gh-right-widget" id="ghFeedGroupsPanel"><div class="gh-section-title"><h3>Suggested Groups</h3><a class="gh-small" href="groups.html">All</a></div><div id="ghFeedGroupsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
-      '<div class="gh-panel gh-right-widget" id="ghFeedEventsPanel"><div class="gh-section-title"><h3>Upcoming Events</h3><a class="gh-small" href="events.html">All</a></div><div id="ghFeedEventsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
-      '<div class="gh-panel gh-right-widget" id="ghFeedCheckinsPanel"><div class="gh-section-title"><h3>Recent Check-ins</h3><a class="gh-small" href="checkin.html">Check in</a></div><div id="ghFeedCheckinsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
-      '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Contacts</h3></div><input class="gh-input" id="ghContactsSearch" placeholder="Search contacts…" style="margin-bottom:8px"><div id="ghContactsList"><div class="gh-muted" style="font-size:.82rem">Loading…</div></div></div>'+
+      '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>'+(typeof GHt==="function"?GHt('rail_suggested_pages'):'შემოთავაზებული გვერდები')+'</h3><a class="gh-small" href="business.html">'+(typeof GHt==="function"?GHt('all'):'ყველა')+'</a></div><div id="ghSuggestedPages"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghFeedGroupsPanel"><div class="gh-section-title"><h3>'+(typeof GHt==='function'?GHt('sidebar_suggested_groups'):'შემოთავაზებული ჯგუფები')+'</h3><a class="gh-small" href="groups.html">All</a></div><div id="ghFeedGroupsList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghFeedEventsPanel"><div class="gh-section-title"><h3>Upcoming Events</h3><a class="gh-small" href="events.html">All</a></div><div id="ghFeedEventsList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
+      '<div class="gh-panel gh-right-widget" id="ghFeedCheckinsPanel"><div class="gh-section-title"><h3>Recent Check-ins</h3><a class="gh-small" href="checkin.html">Check in</a></div><div id="ghFeedCheckinsList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
+      '<div class="gh-panel gh-right-widget"><div class="gh-section-title"><h3>Contacts</h3></div><input class="gh-input" id="ghContactsSearch" placeholder="Search contacts…" style="margin-bottom:8px"><div id="ghContactsList"><div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div></div></div>'+
     '</div>';
   }
 
@@ -6831,7 +6837,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   function _audienceRowHtml(f) {
     var href = 'profile.html?uid='+encodeURIComponent(f.userId||f.uid||'');
-    var name = esc(f.userName || f.displayName || 'GeoHub User');
+    var name = esc(f.userName || f.displayName || ((typeof GHt==="function"?GHt('default_user'):'GeoHub-ის მომხმარებელი')));
     var dateStr = f.createdAt ? '<span class="gh-aud-date">'+timeAgo(f.createdAt)+'</span>' : '';
     return '<a href="'+href+'" class="gh-aud-row">'+
       '<div class="gh-aud-av">'+_audienceAvatarHtml(f)+'</div>'+
@@ -6851,7 +6857,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     fs().getDoc(fs().doc(db(),'users',uid)).then(function(snap){
       if (!snap.exists()) return;
       var d = snap.data() || {};
-      var uName = d.fullName || d.displayName || d.name || 'GeoHub User';
+      var uName = d.fullName || d.displayName || d.name || ((typeof GHt==="function"?GHt('default_user'):'GeoHub-ის მომხმარებელი'));
       var uAv   = d.avatar || d.photoURL || '';
       _audienceUserCache[uid] = { userName: uName, userAvatar: uAv };
       if (uAv && row.isConnected) row.querySelector('.gh-aud-av').innerHTML = img(uAv, uName);
@@ -7061,7 +7067,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         fs().getDocs(fs().query(fs().collection(db(),'users'), fs().where('lastSeen','>',fiveMinsAgo), fs().limit(15))).then(function(snap){
           var box=$('#ghOnlineFriendsList'); if(!box) return;
           var items=[]; snap.forEach(function(d){ if(d.id!==u.uid) items.push(Object.assign({id:d.id},d.data())); });
-          if(!items.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">No friends online</div>'; return; }
+          if(!items.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('rail_no_friends_online'):'ონლაინ მეგობრები არ არიან')+'</div>'; return; }
           box.innerHTML='<div class="gh-contacts-list">'+items.slice(0,8).map(function(p){
             var name=p.fullName||p.displayName||p.name||'User';
             var av=p.avatar||p.photoURL||'';
@@ -7082,7 +7088,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           if(!visible.length){ box.innerHTML='<div class="gh-muted" style="font-size:.82rem">No business pages yet</div>'; return; }
           box.innerHTML='<div class="gh-mini-list">'+visible.slice(0,3).map(function(b){
             var title=b.title||b.name||'Business'; var logo=b.logoUrl||'';
-            return '<div class="gh-mini-item"><span class="gh-mini-thumb">'+(logo?img(logo,title):'<i class="fas fa-store"></i>')+'</span><div style="flex:1"><strong>'+esc(title)+'</strong><span>'+esc(b.category||'Business')+'</span></div><button class="gh-btn sm ghost" onclick="location.href=\'business.html?id='+esc(b.id)+'\'">View</button></div>';
+            return '<div class="gh-mini-item"><span class="gh-mini-thumb">'+(logo?img(logo,title):'<i class="fas fa-store"></i>')+'</span><div style="flex:1"><strong>'+esc(title)+'</strong><span>'+esc(b.category||(typeof GHt==="function"?GHt('nav_business'):'ბიზნესი'))+'</span></div><button class="gh-btn sm ghost" onclick="location.href=\'business.html?id='+esc(b.id)+'\'">'+(typeof GHt==="function"?GHt('view'):'ნახვა')+'</button></div>';
           }).join('')+'</div>';
         }).catch(function(){ var box=$('#ghSuggestedPages'); if(box) box.innerHTML='<div class="gh-muted" style="font-size:.82rem">Suggested pages unavailable</div>'; });
 
@@ -7162,7 +7168,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           // Fallback: if still empty, get top followers
           if(!merged.length){
             return fs().getDocs(fs().query(fs().collection(db(),'users'),fs().orderBy('followerCount','desc'),fs().limit(10))).then(function(snap){
-              var arr=[]; snap.forEach(function(d){ if(!alreadyFollowing.has(d.id)){ var x=d.data(); arr.push({id:d.id,fullName:x.fullName||x.displayName||'User',avatar:x.avatar||x.photoURL||'',city:x.city||'',accountType:x.accountType||'',followerCount:Number(x.followerCount||0),_reason:'⭐ Popular on GeoHub'}); } }); _renderPymk(box,arr.slice(0,5));
+              var arr=[]; snap.forEach(function(d){ if(!alreadyFollowing.has(d.id)){ var x=d.data(); arr.push({id:d.id,fullName:x.fullName||x.displayName||'User',avatar:x.avatar||x.photoURL||'',city:x.city||'',accountType:x.accountType||'',followerCount:Number(x.followerCount||0),_reason:'⭐ '+(typeof GHt==="function"?GHt('rail_popular'):'პოპულარული GeoHub-ზე')}); } }); _renderPymk(box,arr.slice(0,5));
             }).catch(function(){ var p=$('#ghPymkPanel'); if(p) p.style.display='none'; });
           }
           _renderPymk(box, merged.slice(0,5));
@@ -7174,9 +7180,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function _renderPymk(box, people){
     if(!people.length){ var p=$('#ghPymkPanel'); if(p) p.style.display='none'; return; }
     box.innerHTML='<div class="gh-mini-list">'+people.map(function(p){
-      var avHtml=p.avatar?'<img src="'+esc(p.avatar)+'" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.onerror=null;this.parentNode.innerHTML=\'<span style=&quot;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6d3fd9,#10b981);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:700;flex-shrink:0&quot;>'+esc(initials(p.fullName))+'</span>\'">':'<span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6d3fd9,#10b981);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:700;flex-shrink:0">'+esc(initials(p.fullName))+'</span>';
-      var creatorChip=p.accountType==='creator'?'<span style="font-size:.62rem;color:#10b981;font-weight:700;margin-left:2px">✦Creator</span>':'';
-      var followerStr=p.followerCount?_fmtCount(p.followerCount)+' followers':'';
+      var avHtml=p.avatar?'<img src="'+esc(p.avatar)+'" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.onerror=null;this.parentNode.innerHTML=\'<span style=&quot;width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6d3fd9,var(--ds-accent));display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:700;flex-shrink:0&quot;>'+esc(initials(p.fullName))+'</span>\'">':'<span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6d3fd9,var(--ds-accent));display:flex;align-items:center;justify-content:center;color:#fff;font-size:.75rem;font-weight:700;flex-shrink:0">'+esc(initials(p.fullName))+'</span>';
+      var creatorChip=p.accountType==='creator'?'<span style="font-size:.62rem;color:var(--ds-accent-ink);font-weight:700;margin-left:2px">✦Creator</span>':'';
+      var followerStr=p.followerCount?_fmtCount(p.followerCount)+' '+(typeof GHt==="function"?GHt('followers'):'გამომწერი'):'';
       var reason=p._reason||'';
       return '<div class="gh-mini-item" style="gap:8px">'+
         '<a href="profile.html?id='+esc(p.id)+'" style="flex-shrink:0;line-height:0">'+avHtml+'</a>'+
@@ -7256,7 +7262,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     ov.innerHTML=
       '<div class="gh-modal" style="max-width:520px">'+
         '<div class="gh-modal-head">'+
-          '<h3><i class="fas fa-clock" style="color:#10b981;margin-right:6px"></i> დაგეგმილი პოსტები</h3>'+
+          '<h3><i class="fas fa-clock" style="color:var(--ds-accent-ink);margin-right:6px"></i> დაგეგმილი პოსტები</h3>'+
           '<button class="gh-modal-close" data-close-modal><i class="fas fa-times"></i></button>'+
         '</div>'+
         '<div class="gh-modal-body" id="ghSchedMgrBody">'+
@@ -7276,7 +7282,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var body=document.getElementById('ghSchedMgrBody');
       if(!body) return;
       if(snap.size===0){
-        body.innerHTML='<div class="gh-empty" style="padding:32px 0;text-align:center"><i class="fas fa-calendar-check" style="font-size:2rem;color:#10b981"></i><p style="margin-top:12px;color:#64748b">დაგეგმილი პოსტი არ გაქვს</p></div>';
+        body.innerHTML='<div class="gh-empty" style="padding:32px 0;text-align:center"><i class="fas fa-calendar-check" style="font-size:2rem;color:var(--ds-accent-ink)"></i><p style="margin-top:12px;color:var(--ds-text-3)">დაგეგმილი პოსტი არ გაქვს</p></div>';
         return;
       }
       var rows=[];
@@ -7311,7 +7317,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             toast('📅 პოსტი გამოქვეყნდა!');
             _refreshScheduledWidget(uid);
             var rows2=document.querySelectorAll('.gh-sched-row');
-            if(!rows2.length){ var b2=document.getElementById('ghSchedMgrBody'); if(b2) b2.innerHTML='<div class="gh-empty" style="padding:32px 0;text-align:center"><i class="fas fa-calendar-check" style="font-size:2rem;color:#10b981"></i><p style="margin-top:12px;color:#64748b">დაგეგმილი პოსტი არ გაქვს</p></div>'; }
+            if(!rows2.length){ var b2=document.getElementById('ghSchedMgrBody'); if(b2) b2.innerHTML='<div class="gh-empty" style="padding:32px 0;text-align:center"><i class="fas fa-calendar-check" style="font-size:2rem;color:var(--ds-accent-ink)"></i><p style="margin-top:12px;color:var(--ds-text-3)">დაგეგმილი პოსტი არ გაქვს</p></div>'; }
           }).catch(function(){ btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i>'; toast('შეცდომა','error'); });
         };
       });
@@ -7325,7 +7331,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             toast('პოსტი გაუქმდა');
             _refreshScheduledWidget(uid);
             var rows2=document.querySelectorAll('.gh-sched-row');
-            if(!rows2.length){ var b2=document.getElementById('ghSchedMgrBody'); if(b2) b2.innerHTML='<div class="gh-empty" style="padding:32px 0;text-align:center"><i class="fas fa-calendar-check" style="font-size:2rem;color:#10b981"></i><p style="margin-top:12px;color:#64748b">დაგეგმილი პოსტი არ გაქვს</p></div>'; }
+            if(!rows2.length){ var b2=document.getElementById('ghSchedMgrBody'); if(b2) b2.innerHTML='<div class="gh-empty" style="padding:32px 0;text-align:center"><i class="fas fa-calendar-check" style="font-size:2rem;color:var(--ds-accent-ink)"></i><p style="margin-top:12px;color:var(--ds-text-3)">დაგეგმილი პოსტი არ გაქვს</p></div>'; }
           }).catch(function(){ btn.disabled=false; toast('შეცდომა','error'); });
         };
       });
@@ -7518,7 +7524,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     fs().getDoc(fs().doc(db(),'userCoins',u.uid)).then(function(snap){
       var bal=snap.exists()?(snap.data().balance||0):0;
       var body='<div class="gh-tip-modal">'+
-        '<div class="gh-tip-balance"><i class="fas fa-coins" style="color:#f59e0b"></i> Your balance: <strong>'+bal+' GeoCoins</strong></div>'+
+        '<div class="gh-tip-balance"><i class="fas fa-coins" style="color:var(--ds-h-reward-ink)"></i> Your balance: <strong>'+bal+' GeoCoins</strong></div>'+
         '<div style="margin:12px 0 6px;font-size:.88rem;font-weight:600">Select amount</div>'+
         '<div class="gh-tip-amounts">'+
           _COIN_AMOUNTS.map(function(a){ return '<button class="gh-tip-amt'+(bal<a?' disabled':'')+'" data-tip-amt="'+a+'" '+(bal<a?'disabled':'')+'>'+a+' 🪙</button>'; }).join('')+
@@ -7632,7 +7638,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div class="gh-anl-stats">'+
           statRow('fa-eye','Views',views,'#60a5fa')+
           statRow('fa-heart','Reactions',likes,'#f87171')+
-          statRow('fa-comment','Comments',comments,'#34d399')+
+          statRow('fa-comment','Comments',comments,'var(--ds-accent-hi)')+
           statRow('fa-share','Shares',shares,'#a78bfa')+
           (reshares?statRow('fa-retweet','Reposts',reshares,'#fb923c'):'')+
           (saves?statRow('fa-bookmark','Saves',saves,'#fbbf24'):'')+
@@ -7925,7 +7931,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         return '<div class="gh-mini-item" style="gap:8px">'+
           '<a href="profile.html?id='+esc(c.id)+'" style="flex-shrink:0;line-height:0">'+avHtml+'</a>'+
           '<div style="flex:1;min-width:0;overflow:hidden"><div style="font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+name+'</div><div style="font-size:.72rem;color:var(--gh-muted)">'+esc(c.niche||c.city||'Creator')+'</div></div>'+
-          '<a href="profile.html?id='+esc(c.id)+'" class="gh-btn sm ghost" style="flex-shrink:0;padding:4px 8px;font-size:.72rem">View</a>'+
+          '<a href="profile.html?id='+esc(c.id)+'" class="gh-btn sm ghost" style="flex-shrink:0;padding:4px 8px;font-size:.72rem">'+(typeof GHt==="function"?GHt('view'):'ნახვა')+'</a>'+
           '</div>';
       }).join('')+'</div>';
     }).catch(function(){ var p=$('#ghCreatorPanel'); if(p) p.style.display='none'; });
@@ -7965,7 +7971,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           '<div class="gh-ldr-medal">'+rank+'</div>'+
           '<span class="gh-avatar gh-ldr-av">'+av+'</span>'+
           '<div class="gh-ldr-info">'+
-            '<div class="gh-ldr-name">'+esc(u.fullName||'GeoHub User')+lvBadge+'</div>'+
+            '<div class="gh-ldr-name">'+esc(u.fullName||((typeof GHt==="function"?GHt('default_user'):'GeoHub-ის მომხმარებელი')))+lvBadge+'</div>'+
             '<div class="gh-ldr-sub">'+(u.city?esc(u.city)+' · ':'')+fLabel+' followers</div>'+
           '</div>'+
         '</a>';
@@ -7975,7 +7981,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     function _xpLvl(xp){ if(xp<100)return 1;if(xp<300)return 2;if(xp<700)return 3;if(xp<1500)return 4;return 5; }
 
     /* Firestore: top 40 users by followerCount */
-    box.innerHTML='<div class="gh-muted" style="font-size:.82rem">Loading…</div>';
+    box.innerHTML='<div class="gh-muted" style="font-size:.82rem">'+(typeof GHt==="function"?GHt('loading'):'იტვირთება…')+'</div>';
     fs().getDocs(fs().query(
       fs().collection(db(),'users'),
       fs().orderBy('followerCount','desc'),
@@ -7987,7 +7993,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var u=d.data()||{};
         _allCreators.push({
           id:d.id,
-          fullName:u.fullName||u.displayName||u.name||'GeoHub User',
+          fullName:u.fullName||u.displayName||u.name||((typeof GHt==="function"?GHt('default_user'):'GeoHub-ის მომხმარებელი')),
           avatar:u.avatar||u.photoURL||'',
           city:u.city||'',
           followerCount:u.followerCount||0,
@@ -8069,7 +8075,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var placeId=c.placeId||c.place||'';
         var href=placeId?'places.html?id='+esc(placeId):'checkin.html';
         return '<a class="gh-mini-item" href="'+href+'" style="text-decoration:none;color:inherit">'+
-          '<span class="gh-mini-thumb" style="background:linear-gradient(135deg,#10b981,#06b6d4)"><i class="fas fa-map-pin"></i></span>'+
+          '<span class="gh-mini-thumb" style="background:linear-gradient(135deg,var(--ds-accent),#06b6d4)"><i class="fas fa-map-pin"></i></span>'+
           '<div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(placeName)+'</div>'+
           '<div style="font-size:.72rem;color:var(--gh-muted)">'+esc(city||whenStr||'Check-in')+'</div></div>'+
           '</a>';
@@ -8765,7 +8771,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       /* Build slides */
       var slides=[
         {
-          gradient:'linear-gradient(135deg,#1a1f35 0%,#10b981 100%)',
+          gradient:'linear-gradient(135deg,#1a1f35 0%,var(--ds-accent) 100%)',
           emoji:'🇬🇪',
           label:'GeoHub Wrapped',
           value:String(WRAPPED_YEAR),
@@ -9016,13 +9022,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
   // ── Guided Tour ──────────────────────────────────────────────────────────
 
+  var _ht=function(k,f){ try{ return (typeof GHt==='function' && GHt(k)!==k) ? GHt(k) : f; }catch(e){ return f; } };
   var TOUR_STEPS=[
-    {icon:'fa-house',title:'Your Feed',desc:'Create posts, share photos, add stories, and react to real content from people across Georgia.',sel:'#ghFeedList, .gh-composer'},
-    {icon:'fa-search',title:'Search Everything',desc:'Find people, businesses, places, groups, and events instantly using the search bar at the top.',sel:'#ghGlobalSearch'},
-    {icon:'fa-store',title:'Business Pages',desc:'Discover verified Georgian businesses, leave reviews, request quotes, and follow your favorites.',sel:'a[href="business.html"]'},
-    {icon:'fa-location-dot',title:'Places, Events & Groups',desc:'Explore real places on the map, find upcoming events, and join communities that share your interests.',sel:'a[href="places.html"]'},
-    {icon:'fa-comment-dots',title:'Messages & Notifications',desc:'Stay connected — chat with friends and get notified about reactions, comments, and friend requests.',sel:'a[href="messages.html"]'},
-    {icon:'fa-user',title:'Your Profile',desc:'Add your photo, fill in your bio, earn badges, and build your reputation in the GeoHub community.',sel:'a[href="profile.html"], .gh-user-btn'}
+    {icon:'fa-house',title:_ht('tour_feed_t','შენი ლენტა'),desc:_ht('tour2_feed','დაწერე პოსტი, გააზიარე ფოტო, დაამატე სთორი და გამოეხმაურე სხვების კონტენტს.'),sel:'#ghFeedList, .gh-composer'},
+    {icon:'fa-search',title:_ht('tour2_search_t','ძებნა'),desc:_ht('tour2_search','იპოვე ადამიანები, ბიზნესები, ადგილები, ჯგუფები და ღონისძიებები ერთი საძიებო ველიდან.'),sel:'#ghGlobalSearch'},
+    {icon:'fa-store',title:_ht('tour2_biz_t','ბიზნეს გვერდები'),desc:_ht('tour2_biz','აღმოაჩინე ვერიფიცირებული ქართული ბიზნესები, დაწერე შეფასება და მოითხოვე შეთავაზება.'),sel:'a[href="business-suite.html"]'},
+    {icon:'fa-location-dot',title:_ht('tour2_places_t','ადგილები და ჯგუფები'),desc:_ht('tour2_places','დაათვალიერე ადგილები რუკაზე, იპოვე ღონისძიებები და შემოუერთდი ჯგუფებს.'),sel:'a[href="places.html"]'},
+    {icon:'fa-comment-dots',title:_ht('tour2_msg_t','ჩატი და შეტყობინებები'),desc:_ht('tour2_msg','ესაუბრე მეგობრებს და მიიღე შეტყობინება რეაქციებზე, კომენტარებსა და მოთხოვნებზე.'),sel:'a[href="messages.html"]'},
+    {icon:'fa-user',title:_ht('tour2_profile_t','შენი პროფილი'),desc:_ht('tour2_profile','დაამატე ფოტო, შეავსე ბიო, დააგროვე ბეჯები და ააშენე რეპუტაცია GeoHub-ზე.'),sel:'a[href="profile.html"], .gh-user-btn'}
   ];
   var _tourSt={step:0,uid:null};
 
@@ -9115,13 +9122,13 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var compAvContent=c?(c.avatar?'<img src="'+esc(c.avatar)+'" alt="" loading="eager" onerror="this.remove()">':esc(initials(c.name||''))):'';
     var composerText=pageMode ? 'Post as '+(actor.title||'Business') : '';
     var composerActions=pageMode
-      ? '<button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" data-create-post><i class="fas fa-pen-to-square" style="color:#38bdf8"></i> Page Post</button><button class="gh-composer-action" onclick="location.href=\''+actorMessagesHref(actor)+'\'"><i class="fas fa-comment-dots" style="color:#f59e0b"></i> Inbox</button><button class="gh-composer-action" onclick="location.href=\'notifications.html\'"><i class="fas fa-bell" style="color:#ef4444"></i> Activity</button>'
-      : '<button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Place</button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:#38bdf8"></i> Business</button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:#f59e0b"></i> Event</button>';
+      ? '<button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" data-create-post><i class="fas fa-pen-to-square" style="color:var(--ds-h-video-ink)"></i> Page Post</button><button class="gh-composer-action" onclick="location.href=\''+actorMessagesHref(actor)+'\'"><i class="fas fa-comment-dots" style="color:var(--ds-h-reward-ink)"></i> Inbox</button><button class="gh-composer-action" onclick="location.href=\'notifications.html\'"><i class="fas fa-bell" style="color:#ef4444"></i> Activity</button>'
+      : '<button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> Photo</button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> Place</button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:var(--ds-h-video-ink)"></i> Business</button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:var(--ds-h-reward-ink)"></i> Event</button>';
     shell({ active:'feed',
       right: pageMode ? pageFeedRightSidebar(actor) : feedRightSidebar(),
       center:
         (pageMode ? pageHomeContext(actor) : '<section class="gh-card gh-story-strip-card"><div class="gh-stories" id="ghStories"></div></section>')+
-        '<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="'+compAvClass+'" id="ghComposerAvatar">'+compAvContent+'</span><button class="gh-composer-fake" data-create-post data-i18n="composer_placeholder">რას აზიარებ დღეს?</button></div><div class="gh-composer-actions"><button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> <span data-i18n="photo">Photo</span></button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> <span data-i18n="place">Place</span></button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:#38bdf8"></i> <span data-i18n="business">Business</span></button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:#f59e0b"></i> <span data-i18n="event">Event</span></button></div></section>'+
+        '<section class="gh-card gh-composer"><div class="gh-composer-top"><span class="'+compAvClass+'" id="ghComposerAvatar">'+compAvContent+'</span><button class="gh-composer-fake" data-create-post data-i18n="composer_placeholder">რას აზიარებ დღეს?</button></div><div class="gh-composer-actions"><button class="gh-composer-action" data-create-post><i class="fas fa-image" style="color:#22c55e"></i> <span data-i18n="photo">Photo</span></button><button class="gh-composer-action" onclick="location.href=\'places.html\'"><i class="fas fa-map-marker-alt" style="color:#ef4444"></i> <span data-i18n="place">Place</span></button><button class="gh-composer-action" onclick="location.href=\'add-business.html\'"><i class="fas fa-store" style="color:var(--ds-h-video-ink)"></i> <span data-i18n="business">Business</span></button><button class="gh-composer-action" onclick="location.href=\'events.html\'"><i class="fas fa-calendar" style="color:var(--ds-h-reward-ink)"></i> <span data-i18n="event">Event</span></button></div></section>'+
         (pageMode ? '' : '<div id="ghWelcomeSlot"></div>')+
         (pageMode ? '<div class="gh-pill-row gh-page-feed-tabs" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="page"><i class="fas fa-store" style="font-size:.75rem"></i> Page Activity</button></div>' : '<div class="gh-pill-row" id="ghFeedTabs" style="padding:0 4px 4px"><button class="gh-pill active" data-feed-tab="foryou"><i class="fas fa-house" style="font-size:.75rem"></i> <span data-i18n="feed_foryou">For You</span></button><button class="gh-pill" data-feed-tab="following"><i class="fas fa-user-group" style="font-size:.75rem"></i> <span data-i18n="feed_following">Following</span></button><button class="gh-pill" data-feed-tab="local"><i class="fas fa-city" style="font-size:.75rem"></i> <span data-i18n="feed_local">Local</span></button><button class="gh-pill" data-feed-tab="nearme"><i class="fas fa-location-dot" style="font-size:.75rem"></i> <span data-i18n="feed_nearme">Near Me</span></button></div>')+
         '<div id="ghFeedList">'+skelPostCard()+skelVideoCard()+skelPostCard()+skelVideoCard()+skelPostCard()+'</div>'+
@@ -9188,8 +9195,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var name=ev.name||ev.title||'Event';
         var loc=ev.location||ev.locationName||'';
         var cat=ev.category||'';
-        var catColors={music:'#a855f7',sports:'#3b82f6',tech:'#06b6d4',food:'#f59e0b',art:'#ec4899',outdoor:'#10b981',gaming:'#8b5cf6',business:'#64748b'};
-        var cc=catColors[(cat||'').toLowerCase()]||'#10b981';
+        var catColors={music:'#a855f7',sports:'#3b82f6',tech:'#06b6d4',food:'#f59e0b',art:'#ec4899',outdoor:'var(--ds-accent)',gaming:'#8b5cf6',business:'#64748b'};
+        var cc=catColors[(cat||'').toLowerCase()]||'var(--ds-accent)';
         var catBadge=cat?'<span class="gh-efc-category" style="color:'+cc+'">'+esc(cat.charAt(0).toUpperCase()+cat.slice(1))+'</span>':'';
         var countdown=_efcCountdown(ev);
         var target=ts(ev.startDate||ev.date||ev.dateTime||ev.startAt);
@@ -9737,7 +9744,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function discoverItem(x){
     var type=x._type; var title=x.title||x.name||x.text||'Untitled'; var desc=x.description||x.desc||x.text||x.category||''; var photo=getItemImage(x);
     if(type==='post') title=x.authorName ? x.authorName+' posted' : 'Post';
-    return '<article class="gh-card gh-item-card" data-discover-card data-type="'+esc(type)+'"><div class="gh-item-media">'+itemMediaHtml(photo,title,iconFor(type))+'<span class="gh-type-badge"><i class="fas '+iconFor(type)+'"></i> '+labelFor(type)+'</span></div><div class="gh-item-body"><h3>'+esc(title)+'</h3><p>'+esc(desc||'Real GeoHub item')+'</p><div class="gh-item-meta">'+(type==='business'?businessModeChip(x):(x.city?'<span class="gh-chip"><i class="fas fa-location-dot"></i> '+esc(x.city)+'</span>':''))+(x.category?'<span class="gh-chip">'+esc(x.category)+'</span>':'')+'<span class="gh-chip">'+timeAgo(x.createdAt)+'</span></div><div class="gh-card-actions"><a class="gh-btn sm" href="'+docLink(type,x.id)+'">View</a><button class="gh-btn sm ghost" data-save-item data-type="'+esc(type)+'" data-id="'+esc(x.id)+'"><i class="fas fa-bookmark"></i></button><button class="gh-btn sm ghost" data-share-item data-url="'+docLink(type,x.id)+'"><i class="fas fa-share"></i></button></div></div></article>';
+    return '<article class="gh-card gh-item-card" data-discover-card data-type="'+esc(type)+'"><div class="gh-item-media">'+itemMediaHtml(photo,title,iconFor(type))+'<span class="gh-type-badge"><i class="fas '+iconFor(type)+'"></i> '+labelFor(type)+'</span></div><div class="gh-item-body"><h3>'+esc(title)+'</h3><p>'+esc(desc||'')+'</p><div class="gh-item-meta">'+(type==='business'?businessModeChip(x):(x.city?'<span class="gh-chip"><i class="fas fa-location-dot"></i> '+esc(x.city)+'</span>':''))+(x.category?'<span class="gh-chip">'+esc(x.category)+'</span>':'')+'<span class="gh-chip">'+timeAgo(x.createdAt)+'</span></div><div class="gh-card-actions"><a class="gh-btn sm" href="'+docLink(type,x.id)+'">'+(typeof GHt==="function"?GHt('view'):'ნახვა')+'</a><button class="gh-btn sm ghost" data-save-item data-type="'+esc(type)+'" data-id="'+esc(x.id)+'"><i class="fas fa-bookmark"></i></button><button class="gh-btn sm ghost" data-share-item data-url="'+docLink(type,x.id)+'"><i class="fas fa-share"></i></button></div></div></article>';
   }
 
   function renderDiscover(){
@@ -9772,8 +9779,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var logoHtml=logo
       ? '<img src="'+esc(logo)+'" alt="'+esc(title)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">'
       : '<i class="fas fa-store" style="font-size:1.1rem"></i>';
-    var coverHtml='<div class="gh-item-media" style="position:relative">'+itemMediaHtml(cover,title,'fa-store')+'<span class="gh-type-badge"><i class="fas fa-store"></i> Business Page</span><div style="position:absolute;bottom:-18px;left:14px;width:36px;height:36px;border-radius:50%;border:2px solid #1a2235;background:#1a2235;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#94a3b8">'+logoHtml+'</div></div>';
-    return '<article class="gh-card gh-item-card">'+coverHtml+'<div class="gh-item-body" style="padding-top:22px"><h3>'+esc(title)+'</h3><p>'+esc(b.description||'Business page on GeoHub')+'</p><div class="gh-item-meta"><span class="gh-chip">'+esc(b.category||'Business')+'</span>'+businessModeChip(b)+'<span class="gh-chip">'+Number(b.followerCount||0)+' followers</span></div><div class="gh-card-actions"><a class="gh-btn sm" href="business.html?id='+encodeURIComponent(b.id)+'">View Page</a><button class="gh-btn sm ghost" data-follow-business="'+esc(b.id)+'"><i class="fas fa-plus"></i> Follow</button><button class="gh-btn sm ghost" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button></div></div></article>';
+    var coverHtml='<div class="gh-item-media" style="position:relative">'+itemMediaHtml(cover,title,'fa-store')+'<span class="gh-type-badge"><i class="fas fa-store"></i> Business Page</span><div style="position:absolute;bottom:-18px;left:14px;width:36px;height:36px;border-radius:50%;border:2px solid #1a2235;background:#1a2235;display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--ds-text-3)">'+logoHtml+'</div></div>';
+    return '<article class="gh-card gh-item-card">'+coverHtml+'<div class="gh-item-body" style="padding-top:22px"><h3>'+esc(title)+'</h3><p>'+esc(b.description||'Business page on GeoHub')+'</p><div class="gh-item-meta"><span class="gh-chip">'+esc(b.category||(typeof GHt==="function"?GHt('nav_business'):'ბიზნესი'))+'</span>'+businessModeChip(b)+'<span class="gh-chip">'+Number(b.followerCount||0)+' followers</span></div><div class="gh-card-actions"><a class="gh-btn sm" href="business.html?id='+encodeURIComponent(b.id)+'">View Page</a><button class="gh-btn sm ghost" data-follow-business="'+esc(b.id)+'"><i class="fas fa-plus"></i> Follow</button><button class="gh-btn sm ghost" data-save-item data-type="business" data-id="'+esc(b.id)+'"><i class="fas fa-bookmark"></i></button></div></div></article>';
   }
 
   function renderBusinesses(){
@@ -9843,7 +9850,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               '<div class="gh-biz-chips">'+
                 (b.category?'<span class="gh-chip">'+esc(b.category)+'</span>':'')+
                 (isOnlineBusiness(b)?'<span class="gh-chip"><i class="fas fa-globe"></i> '+esc(businessAreaLabel(b))+'</span>':'<span class="gh-chip"><i class="fas fa-location-dot"></i> '+esc(businessAreaLabel(b))+'</span>')+
-                (b.plan&&b.plan!=='free'?'<span class="gh-chip" style="background:rgba(250,204,21,.12);color:#facc15;border-color:rgba(250,204,21,.25)"><i class="fas fa-crown"></i> Pro</span>':'')+
+                (b.plan&&b.plan!=='free'?'<span class="gh-chip" style="background:rgba(250,204,21,.12);color:var(--ds-h-reward-ink);border-color:rgba(250,204,21,.25)"><i class="fas fa-crown"></i> Pro</span>':'')+
               '</div>'+
               shortDesc+
             '</div>'+
@@ -10040,14 +10047,14 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     var cont=$('#ghDashContent'); if(!cont) return;
     var _ovdt=typeof GHt==='function'?GHt:function(k){return k;};
     var ratingAvg=b.ratingCount>0?(b.ratingTotal/b.ratingCount).toFixed(1):(b.ratingAverage>0?Number(b.ratingAverage).toFixed(1):null);
-    var statusColor=b.status==='active'?'#10b981':b.status==='suspended'?'#ef4444':'#f59e0b';
+    var statusColor=b.status==='active'?'var(--ds-accent)':b.status==='suspended'?'#ef4444':'#f59e0b';
     cont.innerHTML=
       '<div class="gh-dash-section">'+
         '<h2 class="gh-dash-section-title">'+_ovdt('bd_nav_overview')+'</h2>'+
         '<div class="gh-dash-stats-grid">'+
           '<div class="gh-dash-stat-card"><i class="fas fa-users"></i><strong>'+Number(b.followerCount||0)+'</strong><span>'+_ovdt('bd_ov_followers')+'</span></div>'+
           '<div class="gh-dash-stat-card"><i class="fas fa-newspaper"></i><strong>'+Number(b.postCount||0)+'</strong><span>'+_ovdt('bd_nav_posts')+'</span></div>'+
-          '<div class="gh-dash-stat-card"><i class="fas fa-star" style="color:#facc15"></i><strong>'+(ratingAvg||'—')+'</strong><span>'+_ovdt('biz_ov_rating')+'</span></div>'+
+          '<div class="gh-dash-stat-card"><i class="fas fa-star" style="color:var(--ds-h-reward-ink)"></i><strong>'+(ratingAvg||'—')+'</strong><span>'+_ovdt('biz_ov_rating')+'</span></div>'+
           '<div class="gh-dash-stat-card"><i class="fas fa-comments"></i><strong>'+Number(b.reviewCount||0)+'</strong><span>'+_ovdt('bd_nav_reviews')+'</span></div>'+
         '</div>'+
         '<div class="gh-dash-info-grid">'+
@@ -10121,7 +10128,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div class="gh-card">'+
           '<div class="gh-biz-sec-head"><h3>'+_st('bd_set_loc')+'</h3><span class="gh-form-hint">'+_st('bd_set_loc_hint')+'</span></div>'+
           '<div class="gh-form-rows">'+
-            (!getPlaceCoords(b)?'<div style="padding:6px 0 10px;color:#f59e0b;font-size:.82rem"><i class="fas fa-triangle-exclamation"></i> '+_st('bd_set_no_coords')+'</div>':'')+
+            (!getPlaceCoords(b)?'<div style="padding:6px 0 10px;color:var(--ds-h-reward-ink);font-size:.82rem"><i class="fas fa-triangle-exclamation"></i> '+_st('bd_set_no_coords')+'</div>':'')+
             '<div class="gh-form-grid">'+
               '<label class="gh-form-label" for="dsLat">Latitude<input class="gh-input" id="dsLat" type="number" step="any" min="-90" max="90" value="'+(getPlaceCoords(b)?getPlaceCoords(b).lat:esc(b.lat||b.latitude||''))+'" placeholder="e.g. 41.6938"></label>'+
               '<label class="gh-form-label" for="dsLng">Longitude<input class="gh-input" id="dsLng" type="number" step="any" min="-180" max="180" value="'+(getPlaceCoords(b)?getPlaceCoords(b).lng:esc(b.lng||b.longitude||''))+'" placeholder="e.g. 44.8015"></label>'+
@@ -10139,7 +10146,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div class="gh-dash-actions"><button class="gh-btn" id="dsSaveBtn"><i class="fas fa-check"></i> '+_st('bd_set_save')+'</button></div>'+
         '<div class="gh-card" style="border-color:rgba(239,68,68,.35)">'+
           '<div class="gh-biz-sec-head"><h3 style="color:#ef4444"><i class="fas fa-triangle-exclamation"></i> Danger Zone</h3></div>'+
-          '<p style="color:#6b7280;font-size:.85rem;margin:0 0 12px">გვერდის წაშლა შეუქცევადია. ყველა პოსტი, ფოტო და მიმდევარი წაიშლება.</p>'+
+          '<p style="color:var(--ds-text-3);font-size:.85rem;margin:0 0 12px">გვერდის წაშლა შეუქცევადია. ყველა პოსტი, ფოტო და მიმდევარი წაიშლება.</p>'+
           '<button class="gh-btn" id="dsBizDeleteBtn" style="background:rgba(239,68,68,.15);color:#ef4444;border-color:rgba(239,68,68,.35)"><i class="fas fa-trash"></i> გვერდის წაშლა</button>'+
         '</div>'+
       '</div>';
@@ -10307,8 +10314,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             '<button class="gh-btn sm" id="ghQrDownload"><i class="fas fa-download"></i> '+_qrt('bd_qr_download')+'</button>'+
           '</div>'+
           '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:0.8rem;margin-bottom:16px">'+
-            '<i class="fas fa-qrcode" style="color:#10b981;flex-shrink:0"></i>'+
-            '<code style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;color:#94a3b8" title="'+esc(res.qrCode)+'">'+esc(res.qrCode)+'</code>'+
+            '<i class="fas fa-qrcode" style="color:var(--ds-accent-ink);flex-shrink:0"></i>'+
+            '<code style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:monospace;color:var(--ds-text-3)" title="'+esc(res.qrCode)+'">'+esc(res.qrCode)+'</code>'+
           '</div>'+
           '<div style="font-size:0.78rem;color:var(--gh-muted,#64748b)">'+_qrt('bd_qr_scan_count')+' <strong id="ghQrScanCount">…</strong></div>'+
         '</div>'+
@@ -10414,7 +10421,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             (s.description?'<p>'+esc(s.description.slice(0,80))+(s.description.length>80?'…':'')+'</p>':'')+
           '</div>'+
           '<div class="gh-svc-mgmt-row">'+
-            '<button class="gh-gallery-feat-btn" data-toggle-svc-feat="'+esc(s.id)+'" data-is-svc-feat="'+!!s.featured+'" title="'+(s.featured?_lsvt('bd_svc_feat_unmark'):_lsvt('bd_svc_feat_mark'))+'">'+(s.featured?'<i class="fas fa-star" style="color:#facc15"></i>':'<i class="far fa-star"></i>')+'</button>'+
+            '<button class="gh-gallery-feat-btn" data-toggle-svc-feat="'+esc(s.id)+'" data-is-svc-feat="'+!!s.featured+'" title="'+(s.featured?_lsvt('bd_svc_feat_unmark'):_lsvt('bd_svc_feat_mark'))+'">'+(s.featured?'<i class="fas fa-star" style="color:var(--ds-h-reward-ink)"></i>':'<i class="far fa-star"></i>')+'</button>'+
             '<button class="gh-btn sm ghost" data-toggle-svc-active="'+esc(s.id)+'" data-is-svc-active="'+!!s.active+'" title="'+(s.active?_lsvt('bd_svc_deactivate'):_lsvt('bd_svc_activate'))+'">'+(s.active?'<i class="fas fa-eye"></i>':'<i class="fas fa-eye-slash"></i>')+'</button>'+
             '<button class="gh-btn sm ghost" data-edit-service="'+esc(s.id)+'"><i class="fas fa-pencil"></i></button>'+
             '<button class="gh-btn sm ghost" data-delete-service="'+esc(s.id)+'"><i class="fas fa-trash"></i></button>'+
@@ -10465,7 +10472,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
           (p.featured?'<span class="gh-gallery-featured-badge"><i class="fas fa-star"></i></span>':'')+
           (p.caption?'<div class="gh-gallery-caption">'+esc(p.caption)+'</div>':'')+
           '<div class="gh-gallery-mgmt-bar">'+
-            '<button class="gh-gallery-feat-btn" data-toggle-featured="'+esc(p.id)+'" data-is-featured="'+!!p.featured+'" title="'+(p.featured?_lgalt('bd_gal_feat_unmark'):_lgalt('bd_gal_feat_mark'))+'">'+(p.featured?'<i class="fas fa-star" style="color:#facc15"></i>':'<i class="far fa-star"></i>')+'</button>'+
+            '<button class="gh-gallery-feat-btn" data-toggle-featured="'+esc(p.id)+'" data-is-featured="'+!!p.featured+'" title="'+(p.featured?_lgalt('bd_gal_feat_unmark'):_lgalt('bd_gal_feat_mark'))+'">'+(p.featured?'<i class="fas fa-star" style="color:var(--ds-h-reward-ink)"></i>':'<i class="far fa-star"></i>')+'</button>'+
             '<button class="gh-gallery-delete-btn" data-delete-photo="'+esc(p.id)+'"><i class="fas fa-trash"></i></button>'+
           '</div>'+
         '</div>';
@@ -10581,7 +10588,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       var _isbt=typeof GHt==='function'?GHt:function(k){return k;};
       var btn=$('#ghSendInvite');btn.disabled=true;btn.textContent=_isbt('bd_inv_sending');
       sendEmpInvite(b,{email:email,roleTitle:role,employmentType:type,message:msg},function(ok){
-        if(ok){closeModal('ghInviteModal');renderBizDashEmployees(b);}
+        if(ok){ var _im=document.getElementById('ghInviteModal'); if(_im) _im.remove(); renderBizDashEmployees(b); }
         else{btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i> '+_isbt('bd_inv_send');errEl.textContent='შეცდომა. სცადე ახლა.';errEl.style.display='';}
       });
     };
@@ -11072,12 +11079,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-gm-dialog">'+
         '<button class="gh-gm-close" aria-label="Close"><i class="fas fa-times"></i></button>'+
         '<div class="gh-gm-img-wrap">'+
-          '<img class="gh-gm-img" src="" alt="" loading="lazy" onerror="this.src=\'\'">'+
+          '<img class="gh-gm-img" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="" loading="lazy" onerror="this.src=\'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==\'">'+
           '<button class="gh-gm-prev" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>'+
           '<button class="gh-gm-next" aria-label="Next"><i class="fas fa-chevron-right"></i></button>'+
         '</div>'+
         '<div class="gh-gm-footer">'+
-          '<span class="gh-gm-featured"><i class="fas fa-star" style="color:#facc15"></i> Featured</span>'+
+          '<span class="gh-gm-featured"><i class="fas fa-star" style="color:var(--ds-h-reward-ink)"></i> Featured</span>'+
           '<span class="gh-gm-caption"></span>'+
           '<span class="gh-gm-counter"></span>'+
         '</div>'+
@@ -11105,7 +11112,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             '<span class="gh-gallery-pick-or">or</span>'+
             '<input class="gh-input" id="gpmUrl" placeholder="Paste image URL https://…">'+
           '</div>'+
-          '<div id="gpmPreview" style="display:none;margin-top:10px;text-align:center"><img id="gpmPreviewImg" src="" alt="" style="max-width:100%;max-height:180px;border-radius:10px;object-fit:contain;background:rgba(0,0,0,.1)"></div>'+
+          '<div id="gpmPreview" style="display:none;margin-top:10px;text-align:center"><img id="gpmPreviewImg" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="" style="max-width:100%;max-height:180px;border-radius:10px;object-fit:contain;background:rgba(0,0,0,.1)"></div>'+
         '</div>'+
         '<label class="gh-form-label">Caption (optional)<input class="gh-input" id="gpmCaption" placeholder="Describe this photo…"></label>'+
         '<label class="gh-form-label">Category (optional)<input class="gh-input" id="gpmCategory" placeholder="e.g. Interior, Team, Products"></label>'+
@@ -11348,7 +11355,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             '<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>'+_abt('biz_ov_location')+'</h3></div><div class="gh-about-list">'+
               aboutRow('fa-location-dot',b.address?b.address+', '+b.city:b.city)+
               (_mapsUrl?'<a href="'+esc(_mapsUrl)+'" target="_blank" rel="noopener" class="gh-btn sm ghost" style="margin-top:8px"><i class="fas fa-map-location-dot"></i> '+_abt('biz_ab_directions')+'</a>':'')+
-              (!_placeCoords&&!isOnlineBusiness(b)?'<p style="margin:8px 0 0;font-size:.78rem;color:#f59e0b"><i class="fas fa-triangle-exclamation"></i> '+_abt('biz_ab_no_gps')+'</p>':'')+
+              (!_placeCoords&&!isOnlineBusiness(b)?'<p style="margin:8px 0 0;font-size:.78rem;color:var(--ds-h-reward-ink)"><i class="fas fa-triangle-exclamation"></i> '+_abt('biz_ab_no_gps')+'</p>':'')+
             '</div></div>':'')+
           (isOnlineBusiness(b)?'<div class="gh-card" style="margin-bottom:0"><div class="gh-biz-sec-head"><h3>'+_abt('biz_ab_service_area')+'</h3></div>'+aboutRow('fa-globe',b.serviceAreaText||businessAreaLabel(b))+'</div>':'')+
         '</div>'+
@@ -11988,7 +11995,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   function renderGroupMembersTab(g,box,isAdmin){
     box.innerHTML='<div class="gh-card"><div class="gh-section-title"><h2>Members <span class="gh-chip">'+Number(g.memberCount||0)+'</span></h2></div><input class="gh-input" id="ghMemberSearch" placeholder="Search members…" style="margin-bottom:12px"><div id="ghGroupMembersList"><div class="gh-empty" style="min-height:80px"><i class="fas fa-circle-notch fa-spin"></i></div></div></div>';
     var allMembers=[]; var myUid=authUser()&&authUser().uid;
-    function paintMembers(){ var q=($('#ghMemberSearch').value||'').toLowerCase(); var list=$('#ghGroupMembersList'); if(!list)return; var filtered=allMembers.filter(function(m){var u=m.profile||{};var name=u.fullName||u.displayName||u.name||m.userName||'';return !q||name.toLowerCase().includes(q);}); if(!filtered.length){list.innerHTML='<div class="gh-empty" style="min-height:80px"><i class="fas fa-users"></i><h3>No members found</h3></div>';return;} list.innerHTML=filtered.map(function(m){var u=m.profile||{};var name=u.fullName||u.displayName||u.name||m.userName||'GeoHub User';var avatar=u.avatar||u.photoURL||'';var muid=u.uid||u.id||m.userId||m.uid||'';var role=m.role||'member';var isSelf=muid===myUid;var adminControls=isAdmin&&!isSelf?'<div class="gr-member-controls"><select class="gh-select sm gr-role-select" data-member-role-uid="'+esc(muid)+'">'+['owner','admin','moderator','member'].map(function(r){return '<option value="'+r+'"'+(r===role?' selected':'')+'>'+r+'</option>';}).join('')+'</select><button class="gh-btn sm ghost danger" data-remove-member="'+esc(muid)+'">Remove</button><button class="gh-btn sm ghost danger" data-ban-member="'+esc(muid)+'" data-ban-name="'+esc(name)+'">Ban</button></div>':'';return '<div class="gh-friend-card gr-member-row"><a href="'+profileLink(muid)+'" style="text-decoration:none;display:flex;gap:10px;align-items:center;min-width:0"><span class="gh-avatar">'+(avatar?img(avatar,name):esc(initials(name)))+'</span><div style="min-width:0"><strong>'+esc(name)+'</strong><span class="gr-role-label">'+grRoleBadge(role)+' '+esc(role)+'</span></div></a>'+adminControls+'</div>';}).join('');
+    function paintMembers(){ var q=($('#ghMemberSearch').value||'').toLowerCase(); var list=$('#ghGroupMembersList'); if(!list)return; var filtered=allMembers.filter(function(m){var u=m.profile||{};var name=u.fullName||u.displayName||u.name||m.userName||'';return !q||name.toLowerCase().includes(q);}); if(!filtered.length){list.innerHTML='<div class="gh-empty" style="min-height:80px"><i class="fas fa-users"></i><h3>No members found</h3></div>';return;} list.innerHTML=filtered.map(function(m){var u=m.profile||{};var name=u.fullName||u.displayName||u.name||m.userName||((typeof GHt==="function"?GHt('default_user'):'GeoHub-ის მომხმარებელი'));var avatar=u.avatar||u.photoURL||'';var muid=u.uid||u.id||m.userId||m.uid||'';var role=m.role||'member';var isSelf=muid===myUid;var adminControls=isAdmin&&!isSelf?'<div class="gr-member-controls"><select class="gh-select sm gr-role-select" data-member-role-uid="'+esc(muid)+'">'+['owner','admin','moderator','member'].map(function(r){return '<option value="'+r+'"'+(r===role?' selected':'')+'>'+r+'</option>';}).join('')+'</select><button class="gh-btn sm ghost danger" data-remove-member="'+esc(muid)+'">Remove</button><button class="gh-btn sm ghost danger" data-ban-member="'+esc(muid)+'" data-ban-name="'+esc(name)+'">Ban</button></div>':'';return '<div class="gh-friend-card gr-member-row"><a href="'+profileLink(muid)+'" style="text-decoration:none;display:flex;gap:10px;align-items:center;min-width:0"><span class="gh-avatar">'+(avatar?img(avatar,name):esc(initials(name)))+'</span><div style="min-width:0"><strong>'+esc(name)+'</strong><span class="gr-role-label">'+grRoleBadge(role)+' '+esc(role)+'</span></div></a>'+adminControls+'</div>';}).join('');
     if(isAdmin){list.querySelectorAll('[data-remove-member]').forEach(function(btn){btn.onclick=function(){window.ghConfirm('Remove this member?',function(){GS().removeGroupMember(g.id,btn.dataset.removeMember,function(){});});};});list.querySelectorAll('[data-ban-member]').forEach(function(btn){btn.onclick=function(){openBanMemberModal(g,btn.dataset.banMember,btn.dataset.banName);};});list.querySelectorAll('[data-member-role-uid]').forEach(function(sel){sel.onchange=function(){GS().setGroupMemberRole(g.id,sel.dataset.memberRoleUid,sel.value,function(){});};});} }
     var ms=$('#ghMemberSearch'); if(ms)ms.oninput=paintMembers;
     var _um=GS().listenGroupMembers(g.id,function(items){allMembers=items;paintMembers();});
@@ -12260,23 +12267,23 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     like:            { icon: 'fa-heart',       color: '#ef4444' },
     comment:         { icon: 'fa-comment',     color: '#3b82f6' },
     reply:           { icon: 'fa-reply',       color: '#8b5cf6' },
-    follow:          { icon: 'fa-user-plus',   color: '#10b981' },
+    follow:          { icon: 'fa-user-plus',   color: 'var(--ds-accent)' },
     message:         { icon: 'fa-envelope',    color: '#06b6d4' },
     reward:          { icon: 'fa-gift',        color: '#f59e0b' },
     badge:           { icon: 'fa-medal',       color: '#f59e0b' },
     challenge:       { icon: 'fa-trophy',      color: '#f59e0b' },
     story_reply:     { icon: 'fa-film',        color: '#ec4899' },
     story_reaction:  { icon: 'fa-star',        color: '#f97316' },
-    friend_request:  { icon: 'fa-user-clock',  color: '#10b981' },
+    friend_request:  { icon: 'fa-user-clock',  color: 'var(--ds-accent)' },
     friend_accept:   { icon: 'fa-handshake',   color: '#22d3ee' },
     points_received: { icon: 'fa-coins',       color: '#eab308' },
     quote:           { icon: 'fa-file-invoice',color: '#6366f1' },
     quote_request:   { icon: 'fa-file-invoice',color: '#6366f1' },
     business_review: { icon: 'fa-star',        color: '#f59e0b' },
-    business_follow: { icon: 'fa-store',       color: '#10b981' },
-    coupon_redeemed:     { icon: 'fa-ticket-alt',  color: '#10b981' },
+    business_follow: { icon: 'fa-store',       color: 'var(--ds-accent)' },
+    coupon_redeemed:     { icon: 'fa-ticket-alt',  color: 'var(--ds-accent)' },
     group_join_request:  { icon: 'fa-user-clock',  color: '#a855f7' },
-    group_approved:      { icon: 'fa-user-check',  color: '#10b981' },
+    group_approved:      { icon: 'fa-user-check',  color: 'var(--ds-accent)' },
     group_declined:      { icon: 'fa-user-times',  color: '#ef4444' },
     missed_call:         { icon: 'fa-phone-missed', color: '#ef4444' }
   };
@@ -12442,7 +12449,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         return '<div class="np-group">' +
           '<div class="np-group-label">' + esc(label) + '</div>' +
           groups[label].map(function(n) {
-            var ic = NP_ICONS[n.type] || { icon: 'fa-bell', color: '#10b981' };
+            var ic = NP_ICONS[n.type] || { icon: 'fa-bell', color: 'var(--ds-accent)' };
             var pageBadge = n.targetActorType === 'business' ? '<span class="np-page-badge"><i class="fas fa-store"></i> Page</span>' : '';
             var npAv = n.fromAvatar || '';
             var npInit = ((n.fromName || 'G')[0] || 'G').toUpperCase();
@@ -12735,19 +12742,19 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               var _srFriend=state.friendIds.indexOf(x.id||x.uid)>-1;
               var _srFollowLabel=_srFollowing?'<i class="fas fa-user-check"></i> Following':'<i class="fas fa-rss"></i> Follow';
               var _srFollowCls='gh-btn sm'+(_srFollowing?' ghost':'');
-              html+='<div class="gh-sr-item"><a href="profile.html?id='+esc(x.id||'')+'" class="gh-sr-main"><span class="gh-avatar" style="width:40px;height:40px">'+(uav?'<img src="'+esc(uav)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':esc(initials(_dispName)))+'</span><div class="gh-sr-info"><strong>'+esc(_dispName)+_privBadge+'</strong><span>'+esc(x.city||x.tagline||'GeoHub User')+(ufc&&_isKnown?' · '+_fmtCount(ufc)+' followers':'')+'</span></div></a><button class="'+_srFollowCls+'" data-follow-user="'+esc(x.id||'')+'" data-following="'+(_srFollowing?'1':'0')+'">'+_srFollowLabel+'</button></div>';
+              html+='<div class="gh-sr-item"><a href="profile.html?id='+esc(x.id||'')+'" class="gh-sr-main"><span class="gh-avatar" style="width:40px;height:40px">'+(uav?'<img src="'+esc(uav)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':esc(initials(_dispName)))+'</span><div class="gh-sr-info"><strong>'+esc(_dispName)+_privBadge+'</strong><span>'+esc(x.city||x.tagline||((typeof GHt==="function"?GHt('default_user'):'GeoHub-ის მომხმარებელი')))+(ufc&&_isKnown?' · '+_fmtCount(ufc)+' followers':'')+'</span></div></a><button class="'+_srFollowCls+'" data-follow-user="'+esc(x.id||'')+'" data-following="'+(_srFollowing?'1':'0')+'">'+_srFollowLabel+'</button></div>';
             } else if(x._type==='post'){
               var pname=x.authorName||'User'; var ptxt=(x.text||'').slice(0,100);
               html+='<div class="gh-sr-item"><div class="gh-sr-main" style="cursor:pointer" onclick="location.href=\'feed.html#post-'+esc(x.id)+'\'"><span class="gh-sr-icon"><i class="fas fa-newspaper"></i></span><div class="gh-sr-info"><strong>'+esc(pname)+'</strong><span>'+esc(ptxt)+'</span></div></div></div>';
             } else if(x._type==='business'){
               var btitle=x.title||x.name||'Business'; var bcat=x.category||'';
-              html+='<div class="gh-sr-item"><a href="business.html?id='+esc(x.id||'')+'" class="gh-sr-main"><span class="gh-avatar" style="width:40px;height:40px;border-radius:10px">'+(x.logoUrl?'<img src="'+esc(x.logoUrl)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:10px">':'<i class="fas fa-store"></i>')+'</span><div class="gh-sr-info"><strong>'+esc(btitle)+'</strong><span>'+esc(bcat||'Business')+'</span></div></a><a class="gh-btn sm ghost" href="business.html?id='+esc(x.id||'')+'">View</a></div>';
+              html+='<div class="gh-sr-item"><a href="business.html?id='+esc(x.id||'')+'" class="gh-sr-main"><span class="gh-avatar" style="width:40px;height:40px;border-radius:10px">'+(x.logoUrl?'<img src="'+esc(x.logoUrl)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:10px">':'<i class="fas fa-store"></i>')+'</span><div class="gh-sr-info"><strong>'+esc(btitle)+'</strong><span>'+esc(bcat||'Business')+'</span></div></a><a class="gh-btn sm ghost" href="business.html?id='+esc(x.id||'')+'">'+(typeof GHt==="function"?GHt('view'):'ნახვა')+'</a></div>';
             } else if(x._type==='group'){
               var gname=x.name||'Group'; var gmc=x.memberCount||0;
               html+='<div class="gh-sr-item"><a href="groups.html?id='+esc(x.id||'')+'" class="gh-sr-main"><span class="gh-sr-icon"><i class="fas fa-users"></i></span><div class="gh-sr-info"><strong>'+esc(gname)+'</strong><span>'+esc(x.privacy||'Public')+' · '+gmc+' members</span></div></a><a class="gh-btn sm ghost" href="groups.html?id='+esc(x.id||'')+'">Join</a></div>';
             } else if(x._type==='event'){
               var ename=x.name||x.title||'Event';
-              html+='<div class="gh-sr-item"><a href="events.html?id='+esc(x.id||'')+'" class="gh-sr-main"><span class="gh-sr-icon"><i class="fas fa-calendar"></i></span><div class="gh-sr-info"><strong>'+esc(ename)+'</strong><span>'+esc(x.location||x.category||'Event')+'</span></div></a><a class="gh-btn sm ghost" href="events.html?id='+esc(x.id||'')+'">View</a></div>';
+              html+='<div class="gh-sr-item"><a href="events.html?id='+esc(x.id||'')+'" class="gh-sr-main"><span class="gh-sr-icon"><i class="fas fa-calendar"></i></span><div class="gh-sr-info"><strong>'+esc(ename)+'</strong><span>'+esc(x.location||x.category||'Event')+'</span></div></a><a class="gh-btn sm ghost" href="events.html?id='+esc(x.id||'')+'">'+(typeof GHt==="function"?GHt('view'):'ნახვა')+'</a></div>';
             }
           });
           html+='</div>';
@@ -12791,9 +12798,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
 
     function _crTierBadge(u){
       var fc=u.followerCount||0;
-      if(fc>=10000) return '<span style="background:#f59e0b;color:#fff;border-radius:999px;padding:2px 8px;font-size:.65rem;font-weight:700"><i class="fas fa-crown"></i> Pro</span>';
-      if(fc>=1000)  return '<span style="background:#8b5cf6;color:#fff;border-radius:999px;padding:2px 8px;font-size:.65rem;font-weight:700"><i class="fas fa-bolt"></i> Rising</span>';
-      return '<span style="background:var(--gh-green,#10b981);color:#fff;border-radius:999px;padding:2px 8px;font-size:.65rem;font-weight:700"><i class="fas fa-star"></i> Micro</span>';
+      if(fc>=10000) return '<span style="background:#f59e0b;color:var(--ds-accent-on);border-radius:999px;padding:2px 8px;font-size:.65rem;font-weight:700"><i class="fas fa-crown"></i> Pro</span>';
+      if(fc>=1000)  return '<span style="background:#8b5cf6;color:var(--ds-accent-on);border-radius:999px;padding:2px 8px;font-size:.65rem;font-weight:700"><i class="fas fa-bolt"></i> Rising</span>';
+      return '<span style="background:var(--gh-green,var(--ds-accent));color:var(--ds-accent-on);border-radius:999px;padding:2px 8px;font-size:.65rem;font-weight:700"><i class="fas fa-star"></i> Micro</span>';
     }
 
     function _crCard(u){
@@ -13530,7 +13537,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         var ljs=document.createElement('script');
         ljs.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
         ljs.onload=function(){ _initLeafletMap(); };
-        ljs.onerror=function(){ if(mapEl) mapEl.innerHTML='<div class="gh-card gh-empty" style="height:100%;display:flex;align-items:center;justify-content:center"><div><i class="fas fa-triangle-exclamation" style="font-size:2rem;color:#f59e0b"></i><p style="margin-top:8px">Map library failed to load. Check your connection.</p></div></div>'; };
+        ljs.onerror=function(){ if(mapEl) mapEl.innerHTML='<div class="gh-card gh-empty" style="height:100%;display:flex;align-items:center;justify-content:center"><div><i class="fas fa-triangle-exclamation" style="font-size:2rem;color:var(--ds-h-reward-ink)"></i><p style="margin-top:8px">Map library failed to load. Check your connection.</p></div></div>'; };
         document.head.appendChild(ljs);
       } else { _initLeafletMap(); }
 
@@ -13587,8 +13594,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               var av=st.authorAvatar||'';
               var nm=st.authorName||'Story';
               var iconHtml=av
-                ?'<div style="width:40px;height:40px;border-radius:50%;padding:2px;background:linear-gradient(135deg,#10b981,#3b82f6);box-sizing:border-box"><img src="'+esc(av)+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid #0f172a" onerror="this.style.display=\'none\'"></div>'
-                :'<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#10b981,#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.85rem">'+esc((nm||'S')[0].toUpperCase())+'</div>';
+                ?'<div style="width:40px;height:40px;border-radius:50%;padding:2px;background:linear-gradient(135deg,var(--ds-accent),#3b82f6);box-sizing:border-box"><img src="'+esc(av)+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover;border:2px solid #0f172a" onerror="this.style.display=\'none\'"></div>'
+                :'<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--ds-accent),#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:.85rem">'+esc((nm||'S')[0].toUpperCase())+'</div>';
               var pinIcon=L.divIcon({html:iconHtml,className:'gh-story-map-pin',iconSize:[40,40],iconAnchor:[20,20]});
               var m=L.marker([st.lat,st.lng],{icon:pinIcon}).addTo(_map);
               var thumb=st.mediaUrl?'<img src="'+esc(st.mediaUrl)+'" style="width:100%;height:80px;object-fit:cover;border-radius:6px;margin-bottom:6px">':'';
@@ -13596,12 +13603,12 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                 '<div style="min-width:160px">'+thumb+
                 '<strong>'+esc(nm)+'</strong>'+
                 (st.text?'<p style="font-size:.78rem;margin:4px 0;color:#475569">'+esc(st.text.slice(0,60))+'</p>':'')+
-                '<button onclick="(function(){var win=window;if(win.openStoryViewer&&win.buildStoryGroups){var g=win.buildStoryGroups(['+JSON.stringify({id:st.id,authorId:st.authorId,authorName:nm,authorAvatar:av,mediaUrl:st.mediaUrl||'',text:st.text||'',createdAt:null})+']);if(g.length)win.openStoryViewer(g,0,0);}})();this.closest(\'.leaflet-popup\').remove()" style="width:100%;padding:5px;border-radius:8px;border:none;background:#10b981;color:#fff;font-weight:700;cursor:pointer;font-size:.8rem;margin-top:4px">View Story</button>'+
+                '<button onclick="(function(){var win=window;if(win.openStoryViewer&&win.buildStoryGroups){var g=win.buildStoryGroups(['+JSON.stringify({id:st.id,authorId:st.authorId,authorName:nm,authorAvatar:av,mediaUrl:st.mediaUrl||'',text:st.text||'',createdAt:null})+']);if(g.length)win.openStoryViewer(g,0,0);}})();this.closest(\'.leaflet-popup\').remove()" style="width:100%;padding:5px;border-radius:8px;border:none;background:var(--ds-accent);#fffvar(--ds-accent-on);font-weight:700;cursor:pointer;font-size:.8rem;margin-top:4px">View Story</button>'+
                 '</div>'
               );
               _markers.push(m);
               sideHtml+='<div class="gh-map-side-item" style="cursor:pointer" onclick="(function(){var m='+JSON.stringify({id:st.id,authorId:st.authorId,authorName:nm,authorAvatar:av,mediaUrl:st.mediaUrl||'',text:st.text||'',createdAt:null})+';if(window.openStoryViewer&&window.buildStoryGroups){var g=window.buildStoryGroups([m]);if(g.length)window.openStoryViewer(g,0,0);}})()">'+
-                '<div style="width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,#10b981,#3b82f6);display:flex;align-items:center;justify-content:center">'+(av?'<img src="'+esc(av)+'" style="width:100%;height:100%;object-fit:cover">':'<span style="color:#fff;font-weight:700">'+esc((nm||'S')[0])+'</span>')+'</div>'+
+                '<div style="width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;background:linear-gradient(135deg,var(--ds-accent),#3b82f6);display:flex;align-items:center;justify-content:center">'+(av?'<img src="'+esc(av)+'" style="width:100%;height:100%;object-fit:cover">':'<span style="color:#fff;font-weight:700">'+esc((nm||'S')[0])+'</span>')+'</div>'+
                 '<div><strong>'+esc(nm.slice(0,28))+'</strong>'+
                 (st.text?'<div class="gh-muted" style="font-size:.78rem">'+esc(st.text.slice(0,32))+'</div>':'')+
                 '</div></div>';
@@ -13621,7 +13628,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
             var m=L.marker([lat,lng]).addTo(_map);
             m.bindPopup('<strong>'+esc(label.slice(0,50))+'</strong>'+
               (layer==='events'&&item.startDate?'<br><small>'+new Date(ts(item.startDate)).toLocaleDateString()+'</small>':'')+
-              '<br><a href="'+(layer==='businesses'?'business.html?id=':layer==='events'?'events.html?id=':'feed.html#post-')+esc(item.id)+'" style="color:#10b981">View →</a>');
+              '<br><a href="'+(layer==='businesses'?'business.html?id=':layer==='events'?'events.html?id=':'feed.html#post-')+esc(item.id)+'" style="color:var(--ds-accent-ink)">View →</a>');
             _markers.push(m);
             sideHtml+='<div class="gh-map-side-item" onclick="location.href=\''+(layer==='businesses'?'business.html?id=':layer==='events'?'events.html?id=':'feed.html#post-')+esc(item.id)+'\'">'+
               '<span style="font-size:1.2rem">'+icon+'</span>'+
@@ -14546,7 +14553,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         if(tabsEl) tabsEl.removeAttribute('hidden');
         _startAdmin();
       }).catch(function(){
-        document.getElementById('ghAdminContent').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i><p>Could not verify admin role.</p></div>';
+        document.getElementById('ghAdminContent').innerHTML='<div class="gh-card gh-empty"><i class="fas fa-exclamation-triangle" style="color:var(--ds-h-reward-ink)"></i><p>Could not verify admin role.</p></div>';
       });
       function _startAdmin(){
       var tabs=document.getElementById('ghAdminTabs');
@@ -14585,7 +14592,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
               '<div class="gh-admin-stat'+(openReports?' urgent':'')+'"><div class="gh-analytics-val" style="color:'+(openReports?'#ef4444':'var(--gh-green)')+'">'+openReports+'</div><div class="gh-analytics-lbl"><i class="fas fa-flag"></i> Open Reports</div></div>'+
             '</div>'+
             '<div class="gh-card" style="margin-top:10px">'+
-              '<h3 style="font-size:.9rem;margin:0 0 10px"><i class="fas fa-bolt-lightning" style="color:#f59e0b"></i> Quick Actions</h3>'+
+              '<h3 style="font-size:.9rem;margin:0 0 10px"><i class="fas fa-bolt-lightning" style="color:var(--ds-h-reward-ink)"></i> Quick Actions</h3>'+
               '<div style="display:flex;flex-wrap:wrap;gap:8px">'+
                 '<button class="gh-btn ghost sm" onclick="document.querySelector(\'[data-atab=reports]\').click()"><i class="fas fa-flag"></i> Review Reports</button>'+
                 '<button class="gh-btn ghost sm" onclick="document.querySelector(\'[data-atab=verifications]\').click()"><i class="fas fa-circle-check"></i> Verifications</button>'+
@@ -14656,8 +14663,8 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                   (r.reporterNote?'<div style="font-size:.8rem;margin-top:2px">'+esc(r.reporterNote.slice(0,80))+'</div>':'')+
                 '</div>'+
                 '<div style="display:flex;gap:6px;flex-shrink:0">'+
-                  '<a class="gh-btn sm ghost" href="feed.html#post-'+esc(r.contentId||'')+'" target="_blank">View</a>'+
-                  '<button class="gh-btn sm" data-resolve-report="'+esc(r.id)+'" style="background:#10b981">Resolve</button>'+
+                  '<a class="gh-btn sm ghost" href="feed.html#post-'+esc(r.contentId||'')+'" target="_blank">'+(typeof GHt==="function"?GHt('view'):'ნახვა')+'</a>'+
+                  '<button class="gh-btn sm" data-resolve-report="'+esc(r.id)+'" style="background:var(--ds-accent)">Resolve</button>'+
                   '<button class="gh-btn sm ghost" data-delete-content="'+esc(r.contentId||'')+'" data-content-type="'+esc(r.contentType||'post')+'" style="color:#ef4444">Delete</button>'+
                 '</div>'+
               '</div>';
@@ -14694,7 +14701,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                   (r.links?'<div style="font-size:.78rem"><a href="'+esc(r.links)+'" target="_blank" rel="noopener" style="color:var(--gh-green)">'+esc(r.links.slice(0,40))+'</a></div>':'')+
                 '</div>'+
                 '<div style="display:flex;gap:6px;flex-shrink:0">'+
-                  '<button class="gh-btn sm" data-approve-vr="'+esc(r.id)+'" data-vr-uid="'+esc(r.uid||'')+'" style="background:#10b981"><i class="fas fa-check"></i> Approve</button>'+
+                  '<button class="gh-btn sm" data-approve-vr="'+esc(r.id)+'" data-vr-uid="'+esc(r.uid||'')+'" style="background:var(--ds-accent)"><i class="fas fa-check"></i> Approve</button>'+
                   '<button class="gh-btn sm ghost" data-reject-vr="'+esc(r.id)+'" style="color:#ef4444">Reject</button>'+
                 '</div>'+
               '</div>';
@@ -14731,7 +14738,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
                   '<div style="font-size:.82rem;margin-top:2px;color:var(--gh-muted)">'+esc(txt||'[media post]')+'</div>'+
                 '</div>'+
                 '<div style="display:flex;gap:6px;flex-shrink:0">'+
-                  '<a class="gh-btn sm ghost" href="feed.html#post-'+esc(p.id)+'" target="_blank">View</a>'+
+                  '<a class="gh-btn sm ghost" href="feed.html#post-'+esc(p.id)+'" target="_blank">'+(typeof GHt==="function"?GHt('view'):'ნახვა')+'</a>'+
                   '<button class="gh-btn sm ghost" data-admin-del-post="'+esc(p.id)+'" style="color:#ef4444">Delete</button>'+
                 '</div>'+
               '</div>';
@@ -15035,7 +15042,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     if(!mktId&&!price) return '';
     return '<div class="gh-shop-now-bar">'+
       (price?'<span class="gh-shop-price">'+Number(price).toLocaleString()+' ₾</span>':'')+
-      '<a class="gh-btn sm" href="'+(mktId?'marketplace.html#listing-'+esc(mktId):'marketplace.html')+'" style="background:linear-gradient(135deg,#10b981,#3b82f6)"><i class="fas fa-bag-shopping"></i> Shop Now</a>'+
+      '<a class="gh-btn sm" href="'+(mktId?'marketplace.html#listing-'+esc(mktId):'marketplace.html')+'" style="background:linear-gradient(135deg,var(--ds-accent),#3b82f6)"><i class="fas fa-bag-shopping"></i> Shop Now</a>'+
       '<button class="gh-btn sm ghost" data-wishlist="'+esc(post.id)+'" title="Save to wishlist"><i class="fas fa-bookmark"></i></button>'+
     '</div>';
   };
@@ -15159,7 +15166,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
       '<div class="gh-invite-panel">'+
         '<div class="gh-invite-hero">🎁</div>'+
         '<h3 style="text-align:center;margin-bottom:6px">Invite your friends to GeoHub</h3>'+
-        '<p class="gh-muted" style="text-align:center;font-size:.85rem;margin-bottom:16px">თითოეული მოწვეული მეგობრისთვის იღებ <strong style="color:var(--gh-green)">+500 XP</strong> + <strong style="color:#f59e0b">1 თვე Premium</strong> უფასოდ!</p>'+
+        '<p class="gh-muted" style="text-align:center;font-size:.85rem;margin-bottom:16px">თითოეული მოწვეული მეგობრისთვის იღებ <strong style="color:var(--gh-green)">+500 XP</strong> + <strong style="color:var(--ds-h-reward-ink)">1 თვე Premium</strong> უფასოდ!</p>'+
         '<div class="gh-invite-link-row">'+
           '<input class="gh-input" id="ghInviteLinkInp" value="'+esc(inviteUrl)+'" readonly>'+
           '<button class="gh-btn" id="ghCopyInvite"><i class="fas fa-copy"></i></button>'+
@@ -15215,14 +15222,29 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   /* ══════════════════════════════════════════════════════════════
      PHASE 100 — Onboarding Tour (New User Walkthrough)
   ══════════════════════════════════════════════════════════════ */
+  var _tt=function(k,f){ try{ return (typeof GHt==='function' && GHt(k)!==k) ? GHt(k) : f; }catch(e){ return f; } };
   var _TOUR_STEPS=[
-    {target:'[data-nav-item="feed"],[href="feed.html"]',title:'🏠 Your Feed',body:'This is your home feed. See posts from people you follow and trending content from Georgia.'},
-    {target:'[data-create-post],.gh-composer-trigger',title:'✍️ Create Posts',body:'Tap here to share photos, videos, polls, and more with your followers.'},
-    {target:'[data-nav-item="explore"],[href="explore.html"]',title:'🔍 Discover',body:'Find new people, businesses, places and events across Georgia.'},
-    {target:'[data-nav-item="events"],[href="events.html"]',title:'🎉 Events',body:'Discover what\'s happening near you and RSVP to events.'},
-    {target:'[data-nav-item="marketplace"],[href="marketplace.html"]',title:'🛍️ Marketplace',body:'Buy and sell items locally. Georgia\'s trusted classifieds platform.'},
-    {target:'#ghNotifBadge,[data-nav-item="notifications"]',title:'🔔 Notifications',body:'Stay updated on likes, comments, follows, and messages in real-time.'},
-    {target:'[data-nav-item="assistant"],[href="assistant.html"]',title:'🤖 GeoAI',body:'Your AI travel and lifestyle assistant. Ask anything about Georgia!'},
+    {target:'[data-nav-item="feed"],[href="feed.html"]',
+     title:'🏠 '+_tt('tour_feed_t','შენი ლენტა'),
+     body:_tt('tour_feed_b','აქ ჩანს იმ ადამიანების პოსტები, ვისაც მიჰყვები, და საქართველოს ყველაზე აქტუალური კონტენტი.')},
+    {target:'[data-create-post],.gh-composer-trigger',
+     title:'✍️ '+_tt('tour_post_t','დაწერე პოსტი'),
+     body:_tt('tour_post_b','გააზიარე ფოტო, ვიდეო, გამოკითხვა ან უბრალოდ აზრი — ერთი შეხებით.')},
+    {target:'[data-nav-item="places"],[href="places.html"]',
+     title:'🔍 '+_tt('tour_discover_t','აღმოაჩინე'),
+     body:_tt('tour_discover_b','იპოვე ახალი ადგილები, ბიზნესები და ადამიანები მთელი საქართველოდან.')},
+    {target:'[data-nav-item="events"],[href="events.html"]',
+     title:'🎉 '+_tt('tour_events_t','ღონისძიებები'),
+     body:_tt('tour_events_b','ნახე რა ხდება შენს ახლოს და დაარეგისტრირდი ერთი ღილაკით.')},
+    {target:'[data-nav-item="marketplace"],[href="marketplace.html"]',
+     title:'🛍️ '+_tt('tour_market_t','ბაზარი'),
+     body:_tt('tour_market_b','იყიდე და გაყიდე ნივთები ადგილობრივად — სანდო ქართული პლატფორმა.')},
+    {target:'#ghNotifBadge,[data-nav-item="notifications"]',
+     title:'🔔 '+_tt('tour_notif_t','შეტყობინებები'),
+     body:_tt('tour_notif_b','მოწონებები, კომენტარები, გამოწერები და მესიჯები — ყველაფერი რეალურ დროში.')},
+    {target:'[data-nav-item="assistant"],[href="assistant.html"]',
+     title:'🤖 '+_tt('tour_ai_t','GeoAI'),
+     body:_tt('tour_ai_b','შენი AI ასისტენტი მოგზაურობისთვის — ჰკითხე ნებისმიერი რამ საქართველოზე.')},
   ];
   window.ghStartOnboardingTour=function(){
     try{ if(localStorage.getItem('gh_tour_done')) return; }catch(e){}
@@ -15238,9 +15260,9 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         '<div class="gh-tour-title">'+esc(step.title)+'</div>'+
         '<div class="gh-tour-body">'+esc(step.body)+'</div>'+
         '<div class="gh-tour-btns">'+
-          '<button class="gh-btn ghost sm" id="ghTourSkip">Skip tour</button>'+
+          '<button class="gh-btn ghost sm" id="ghTourSkip">'+_tt('tour_skip','გამოტოვება')+'</button>'+
           (i>0?'<button class="gh-btn sm ghost" id="ghTourPrev">Back</button>':'')+
-          '<button class="gh-btn sm" id="ghTourNext">'+(i===_TOUR_STEPS.length-1?'Finish 🎉':'Next →')+'</button>'+
+          '<button class="gh-btn sm" id="ghTourNext">'+(i===_TOUR_STEPS.length-1?_tt('tour_finish','დასრულება')+' 🎉':_tt('tour_next','შემდეგი')+' →')+'</button>'+
         '</div>';
       if(target){
         var rect=target.getBoundingClientRect();
@@ -15512,7 +15534,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
     }
     function _hideBanner() { if (_banner) _banner.style.transform = 'translateY(-100%)'; }
     window.addEventListener('offline', function() { _showBanner('⚡ ინტერნეტი გათიშულია', '#ef4444'); });
-    window.addEventListener('online',  function() { _showBanner('✓ ინტერნეტი აღდგა', '#10b981'); setTimeout(_hideBanner, 2500); });
+    window.addEventListener('online',  function() { _showBanner('✓ ინტერნეტი აღდგა', 'var(--ds-accent)'); setTimeout(_hideBanner, 2500); });
     if (!navigator.onLine) _showBanner('⚡ ინტერნეტი გათიშულია', '#ef4444');
   })();
 
@@ -15681,7 +15703,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         _btn.innerHTML = '<i class="fas fa-arrow-up"></i> ახალი პოსტები';
         _btn.style.cssText = [
           'position:fixed;top:68px;left:50%;transform:translateX(-50%) translateY(-60px);',
-          'background:var(--gh-green,#10b981);color:#fff;border:none;border-radius:20px;',
+          'background:var(--gh-green,var(--ds-accent));color:#fff;border:none;border-radius:20px;',
           'padding:8px 18px;font-size:.85rem;font-weight:700;cursor:pointer;z-index:1000;',
           'box-shadow:0 4px 14px rgba(0,0,0,.3);transition:transform .3s cubic-bezier(0.34,1.4,0.64,1);',
           'display:flex;align-items:center;gap:6px;'
@@ -15722,7 +15744,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
         _ind.style.cssText = [
           'position:fixed;top:-50px;left:50%;transform:translateX(-50%);',
           'width:40px;height:40px;border-radius:50%;',
-          'background:var(--bg-card,#1a1f35);color:var(--gh-green,#10b981);',
+          'background:var(--bg-card,#1a1f35);color:var(--gh-green,var(--ds-accent));',
           'display:flex;align-items:center;justify-content:center;font-size:1.1rem;',
           'box-shadow:0 2px 12px rgba(0,0,0,.3);transition:top .15s ease;z-index:9999;'
         ].join('');
@@ -15806,7 +15828,7 @@ function timeAgo(v){ var t=ts(v); if(!t) return 'ახლახან'; var s=M
   window.GH.toast = function(msg, type) {
     var t = document.createElement('div');
     t.textContent = msg;
-    var colors = { error: '#ef4444', success: '#10b981', info: '#3b82f6', warn: '#f59e0b' };
+    var colors = { error: '#ef4444', success: 'var(--ds-accent)', info: '#3b82f6', warn: '#f59e0b' };
     t.style.cssText = [
       'position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);',
       'background:' + (colors[type] || colors.info) + ';color:#fff;padding:10px 20px;',

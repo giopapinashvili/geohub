@@ -208,7 +208,7 @@
               '</div>'+
             '</div>'+
             '<div style="display:flex;gap:6px;padding-left:46px">'+
-              '<button class="geo-sw-req-accept" data-req-id="'+esc(req.id)+'" data-from-uid="'+esc(req.fromUserId)+'" style="background:linear-gradient(135deg,#10b981,#3b82f6);color:#fff;border:none;border-radius:7px;padding:5px 12px;font-size:.74rem;font-weight:700;cursor:pointer">Accept</button>'+
+              '<button class="geo-sw-req-accept" data-req-id="'+esc(req.id)+'" data-from-uid="'+esc(req.fromUserId)+'" style="background:linear-gradient(135deg,var(--ds-accent),#3b82f6);color:#fff;border:none;border-radius:7px;padding:5px 12px;font-size:.74rem;font-weight:700;cursor:pointer">Accept</button>'+
               '<button class="geo-sw-req-decline" data-req-id="'+esc(req.id)+'" style="background:rgba(255,255,255,.07);color:var(--gh-text,#f0f4ff);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 12px;font-size:.74rem;cursor:pointer">Decline</button>'+
             '</div>'+
           '</div>';
@@ -244,7 +244,7 @@
       if (isActive) return;
       var bizAv = biz.logoUrl
         ? '<img src="'+esc(biz.logoUrl)+'" alt="" style="width:100%;height:100%;border-radius:10px;object-fit:cover">'
-        : '<i class="fas fa-store" style="font-size:.82rem;color:#10b981"></i>';
+        : '<i class="fas fa-store" style="font-size:.82rem;color:var(--ds-accent-ink)"></i>';
       var unreadCount = _bizUnread[biz.id] || 0;
       var unreadBadge = unreadCount > 0
         ? '<span class="geo-sw-unread-badge">'+Math.min(unreadCount, 9)+'</span>'

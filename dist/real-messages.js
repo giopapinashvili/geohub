@@ -26,7 +26,7 @@
   const REACTIONS = ['👍','❤️','😂','😮','😢','😡'];
   const EMOJIS = ['😀','😁','😂','🤣','😊','😍','😘','😎','😢','😭','😡','👍','👎','👏','🙏','💪','🔥','❤️','💚','💯','🎉','✨','🇬🇪'];
   const THEMES = [
-    { label:'Default', v:'#10b981,#3b82f6' },
+    { label:'Default', v:'var(--ds-accent),#3b82f6' },
     { label:'Sunset',  v:'#f97316,#ec4899' },
     { label:'Ocean',   v:'#06b6d4,#6366f1' },
     { label:'Forest',  v:'#22c55e,#15803d' },
@@ -266,7 +266,7 @@
       const name = isBiz ? (u.name || 'Business') : (convNicknames[oid] || u.name);
       const ts = convTime(c.updatedAt || c.lastMessageAt || c.createdAt || null);
       const profileHref = isBiz ? 'business.html?id='+esc(c.businessId) : 'profile.html?id='+esc(oid);
-      const bizBadge = isBiz ? '<span style="font-size:.65rem;color:#10b981;vertical-align:middle;margin-right:3px"><i class="fas fa-store"></i></span>' : '';
+      const bizBadge = isBiz ? '<span style="font-size:.65rem;color:var(--ds-accent-ink);vertical-align:middle;margin-right:3px"><i class="fas fa-store"></i></span>' : '';
       const isPinnedConv = Array.isArray(c.pinnedForActors)&&c.pinnedForActors.includes(_pinActorKey);
       const pinBadge = isPinnedConv ? '<i class="fas fa-thumbtack" style="font-size:.55rem;color:var(--gh-muted,#94a3b8);margin-left:4px;opacity:.65;transform:rotate(45deg);display:inline-block" title="Pinned"></i>' : '';
       return '<div class="conv-item '+(c.id===activeConversation?'active':'')+' '+(unread?'has-unread':'')+' '+(isPinnedConv?'is-pinned':'')+'" data-conv-id="'+esc(c.id)+'" oncontextmenu="return window.__ghConvCtxMenu(event,\''+esc(c.id)+'\')">'
@@ -682,7 +682,7 @@
     convTheme = theme || '';
     const effective = convTheme || DEFAULT_THEME;
     const parts = effective.split(',').map(c => c.trim()).filter(Boolean);
-    const c1 = parts[0] || '#10b981';
+    const c1 = parts[0] || 'var(--ds-accent)';
     const c2 = parts[1] || c1;
     document.body.style.setProperty('--msg-theme-1', c1);
     document.body.style.setProperty('--msg-theme-2', c2);
@@ -1791,7 +1791,7 @@
     // Render immediately with placeholder; update with real name when Firestore responds
     titleEl.innerHTML =
       '<div style="display:flex;align-items:center;gap:7px;min-width:0;flex:1;overflow:hidden">' +
-        '<i class="fas fa-store biz-inbox-icon" style="color:#10b981;flex-shrink:0;font-size:.95rem"></i>' +
+        '<i class="fas fa-store biz-inbox-icon" style="color:var(--ds-accent-ink);flex-shrink:0;font-size:.95rem"></i>' +
         '<span id="bizInboxTitle" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:1.05rem;font-weight:800">Business Inbox</span>' +
       '</div>' +
       '<div style="display:flex;gap:5px;align-items:center;flex-shrink:0">' +
@@ -1939,11 +1939,11 @@
           '<div class="chat-header-left">' +
             '<button class="back-btn" onclick="ghChatBack()" title="Back"><i class="fas fa-arrow-left"></i></button>' +
             '<div class="chat-header-av">' +
-              (_withBizLogo ? '<img src="'+esc(_withBizLogo)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">' : '<div class="av-placeholder" style="background:rgba(16,185,129,.2)"><i class="fas fa-store" style="font-size:.9rem;color:#10b981"></i></div>') +
+              (_withBizLogo ? '<img src="'+esc(_withBizLogo)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">' : '<div class="av-placeholder" style="background:rgba(var(--ds-accent-rgb),.2)"><i class="fas fa-store" style="font-size:.9rem;color:var(--ds-accent-ink)"></i></div>') +
             '</div>' +
             '<div>' +
               '<div class="chat-header-name">'+esc(_withBizTitle)+'</div>' +
-              '<div style="font-size:.68rem;color:#10b981"><i class="fas fa-store"></i> Business Page</div>' +
+              '<div style="font-size:.68rem;color:var(--ds-accent-ink)"><i class="fas fa-store"></i> Business Page</div>' +
             '</div>' +
           '</div>' +
           '<div class="chat-header-actions">' +
@@ -2060,7 +2060,7 @@
       document.querySelectorAll('.conv-item.active').forEach(function(el){ el.classList.remove('active'); });
       const chatBox=$('#chatMessages'), chatHdr=$('#chatHeader');
       if(chatBox) chatBox.innerHTML='<div class="chat-empty"><i class="fas fa-store"></i><p>Select a conversation</p></div>';
-      if(chatHdr) chatHdr.innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:16px;color:var(--text-muted);font-size:.9rem"><i class="fas fa-store" style="color:#10b981;font-size:1.1rem"></i><span>Select a conversation</span></div>';
+      if(chatHdr) chatHdr.innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:16px;color:var(--text-muted);font-size:.9rem"><i class="fas fa-store" style="color:var(--ds-accent-ink);font-size:1.1rem"></i><span>Select a conversation</span></div>';
       renderConversationDetails();
       setBizInboxHeader(bizParam);
       syncBizActor(bizParam); // async — validates owner/admin, fires GeoActorChanged

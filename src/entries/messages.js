@@ -25,3 +25,7 @@ import '/analytics.js';
 import '/gh-calls.js';
 import '/gh-call-history.js';
 import '/gh-group-calls.js';
+
+import '/gh-tabs.js';
+import '/place-categories.js';
+import '/gh-admin-bridge.js';

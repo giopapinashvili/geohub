@@ -6,6 +6,9 @@
 
 (function () {
   'use strict';
+
+  // Shared shell strings go through the global i18n dictionary (Georgian by default).
+  function T(key, fallback) { try { return (typeof window.GHt === 'function' && window.GHt(key) !== key) ? window.GHt(key) : fallback; } catch (e) { return fallback; } }
   if (window.__ghMobileNavInit) return;
   window.__ghMobileNavInit = true;
 
@@ -75,7 +78,7 @@
       navItem('search.html',        'fas fa-magnifying-glass', 'Explore', active === 'explore' || currentPage === 'search.html', '') +
       navItem(mobileMessagesHref(), 'fas fa-comment-dots', 'Messages', active === 'messages', '', 'data-gh-actor-messages') +
       navItem('notifications.html', 'fas fa-bell', 'Notifications', currentPage === 'notifications.html', '') +
-      navButton('fas fa-bars', 'Menu');
+      navButton('fas fa-bars', T('menu_label','Menu'));
 
     document.body.appendChild(nav);
     setupBottomNavAutoHide(nav);
@@ -201,8 +204,8 @@
       socialMenu.type = 'button';
       socialMenu.classList.add('gh-mobile-menu-btn');
       socialMenu.setAttribute('data-gh-mobile-menu-toggle', '');
-      socialMenu.setAttribute('aria-label', 'Menu');
-      socialMenu.title = 'Menu';
+      socialMenu.setAttribute('aria-label', T('menu_label','Menu'));
+      socialMenu.title = T('menu_label','Menu');
       socialMenu.innerHTML = '<i class="fas fa-bars"></i>';
       socialMenu.addEventListener('click', function(e) {
         e.preventDefault();
@@ -386,17 +389,17 @@
     sheet.id = 'app-action-sheet';
     sheet.className = 'app-action-sheet';
     sheet.setAttribute('role', 'dialog');
-    sheet.setAttribute('aria-label', 'Quick actions');
+    sheet.setAttribute('aria-label', T('qa_sheet_label', 'Quick actions'));
     sheet.innerHTML =
       '<div class="app-action-sheet-handle" aria-hidden="true"></div>' +
-      '<div class="app-action-sheet-title">Quick Actions</div>' +
-      actionItem('map.html',     'fas fa-location-dot',   'rgba(16,185,129,0.15)', '#34d399', 'Quick Check-in', 'Tag your location and earn XP') +
-      actionItem('feed.html',    'fas fa-pen-to-square',  'rgba(59,130,246,0.15)', '#60a5fa', 'Create Post',    'Share a place, tip, or update') +
-      actionItem('events.html',  'fas fa-calendar-plus',  'rgba(245,158,11,0.15)', '#fbbf24', 'Create Event',   'Organize a meetup or city event') +
-      actionItem('places.html',  'fas fa-location-dot',   'rgba(16,185,129,0.12)', '#6ee7b7', 'Find a Place',   'Search for restaurants, cafes and more') +
+      '<div class="app-action-sheet-title">'+T('cmd_quick_actions','Quick Actions')+'</div>' +
+      actionItem('map.html',     'fas fa-location-dot',   'rgba(var(--ds-accent-rgb),0.15)', 'var(--ds-accent-hi)', T('qa_checkin','Quick Check-in'), T('qa_checkin_sub','Tag your location and earn XP')) +
+      actionItem('feed.html',    'fas fa-pen-to-square',  'rgba(59,130,246,0.15)', '#60a5fa', T('qa_post','Create Post'), T('qa_post_sub','Share a place, tip, or update')) +
+      actionItem('events.html',  'fas fa-calendar-plus',  'rgba(245,158,11,0.15)', '#fbbf24', T('qa_event','Create Event'), T('qa_event_sub','Organize a meetup or city event')) +
+      actionItem('places.html',  'fas fa-location-dot',   'rgba(var(--ds-accent-rgb),0.12)', '#6ee7b7', T('qa_place','Find a Place'), T('qa_place_sub','Search for restaurants, cafes and more')) +
       '<div class="app-action-item" onclick="showStoryToast();closeActionSheet();" style="cursor:pointer">' +
         '<div class="app-action-icon" style="background:rgba(236,72,153,0.15);color:#f472b6"><i class="fas fa-circle-plus" aria-hidden="true"></i></div>' +
-        '<div class="app-action-text"><h4>Add Story</h4><p>Share a 24h city moment</p></div>' +
+        '<div class="app-action-text"><h4>'+T('qa_story','Add Story')+'</h4><p>'+T('qa_story_sub','Share a 24h city moment')+'</p></div>' +
         '<i class="fas fa-chevron-right app-action-chevron" aria-hidden="true"></i>' +
       '</div>';
     document.body.appendChild(sheet);
@@ -503,11 +506,11 @@
     el.id = 'app-install-prompt';
     el.className = 'app-install-prompt gh-smart-install';
     el.setAttribute('role', 'complementary');
-    el.setAttribute('aria-label', 'Install GeoHub');
+    el.setAttribute('aria-label', T('install_geohub','Install GeoHub'));
     el.innerHTML =
       '<button class="gh-sip-close" aria-label="Close" onclick="window.ghDismissInstall()">×</button>'+
       '<div class="gh-sip-left">'+
-        '<div class="gh-sip-logo"><img src="icons/icon-192.png" alt="GeoHub" onerror="this.outerHTML=\'<span style=&quot;font-size:1.6rem;font-weight:900;color:#10b981&quot;>GH</span>\'"></div>'+
+        '<div class="gh-sip-logo"><img src="icons/icon-192.png" alt="GeoHub" onerror="this.outerHTML=\'<span style=&quot;font-size:1.6rem;font-weight:900;color:var(--ds-accent-ink)&quot;>GH</span>\'"></div>'+
       '</div>'+
       '<div class="gh-sip-body">'+
         '<div class="gh-sip-title">GeoHub დააინსტალირე</div>'+
@@ -717,7 +720,14 @@
       'apple-mobile-web-app-capable': 'yes',
       'apple-mobile-web-app-status-bar-style': 'black-translucent',
       'apple-mobile-web-app-title': 'GeoHub',
-      'theme-color': '#10b981',
+      // Matches the page, not the brand: a bright green browser bar over a
+      // near-black shell looked like a rendering fault on mobile.
+      'theme-color': (function () {
+        var t = '';
+        try { t = localStorage.getItem('gh_theme') || ''; } catch (e) {}
+        if (!t) t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
+        return t === 'light' ? '#ffffff' : '#060a09';
+      })(),
     };
     Object.keys(metas).forEach(function(name) {
       if (!document.querySelector('meta[name="' + name + '"]')) {
@@ -734,12 +744,12 @@
     if (document.getElementById('gh-offline-banner')) return;
     var style = document.createElement('style');
     style.textContent = [
-      '#gh-offline-banner{position:fixed;top:0;left:0;right:0;z-index:99999;background:#ef4444;color:#fff;text-align:center;padding:10px 16px;font-size:0.83rem;font-weight:600;transform:translateY(-100%);transition:transform 0.28s ease;pointer-events:none;letter-spacing:.01em}',
+      '#gh-offline-banner{position:fixed;top:0;left:0;right:0;z-index:99999;background:var(--ds-danger-solid,#b91c1c);color:#fff;text-align:center;padding:10px 16px;font-size:0.83rem;font-weight:600;transform:translateY(-100%);transition:transform 0.28s ease;pointer-events:none;letter-spacing:.01em}',
       '#gh-offline-banner.visible{transform:translateY(0);pointer-events:auto}',
-      '#gh-update-banner{position:fixed;bottom:0;left:0;right:0;z-index:99998;background:#0c0e1c;border-top:2px solid rgba(16,185,129,.5);color:#f1f5f9;display:flex;align-items:center;justify-content:center;gap:14px;padding:13px 16px;font-size:0.83rem;transform:translateY(100%);transition:transform 0.28s ease;pointer-events:none}',
+      '#gh-update-banner{position:fixed;bottom:0;left:0;right:0;z-index:99998;background:var(--ds-surface);border-top:2px solid rgba(var(--ds-accent-rgb),.5);color:var(--ds-text);display:flex;align-items:center;justify-content:center;gap:14px;padding:13px 16px;font-size:0.83rem;transform:translateY(100%);transition:transform 0.28s ease;pointer-events:none}',
       '#gh-update-banner.visible{transform:translateY(0);pointer-events:auto}',
-      '#gh-update-banner strong{color:#34d399}',
-      '#gh-update-banner button{background:#10b981;color:#fff;border:none;border-radius:8px;padding:7px 18px;font-size:0.78rem;font-weight:700;cursor:pointer;flex-shrink:0}',
+      '#gh-update-banner strong{color:var(--ds-accent-ink)}',
+      '#gh-update-banner button{background:var(--ds-accent-fill);color:var(--ds-accent-on);border:none;border-radius:8px;padding:7px 18px;font-size:0.78rem;font-weight:700;cursor:pointer;flex-shrink:0}',
       '#gh-update-banner button:hover{background:#0d9268}',
     ].join('');
     document.head.appendChild(style);
@@ -747,13 +757,13 @@
     var ob = document.createElement('div');
     ob.id = 'gh-offline-banner';
     ob.setAttribute('role', 'alert');
-    ob.textContent = '📡 You\'re offline — some features may not work';
+    ob.textContent = T('banner_offline', '\uD83D\uDCE1 You\'re offline — some features may not work');
     document.body.appendChild(ob);
 
     var ub = document.createElement('div');
     ub.id = 'gh-update-banner';
     ub.setAttribute('role', 'status');
-    ub.innerHTML = '<span>🎉 <strong>New version available</strong></span><button onclick="window.location.reload()">Reload</button>';
+    ub.innerHTML = '<span>\uD83C\uDF89 <strong>'+T('banner_update','New version available')+'</strong></span><button onclick="window.location.reload()">'+T('banner_reload','Reload')+'</button>';
     document.body.appendChild(ub);
   }
 
@@ -842,27 +852,27 @@
     style.textContent = [
       '#geo-cmd-overlay{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;padding:10vh 16px 0}',
       '#geo-cmd-overlay.open{display:flex}',
-      '#geo-cmd-box{width:100%;max-width:620px;background:#0c0e1c;border:1px solid rgba(255,255,255,0.12);border-radius:18px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.05);animation:cmdIn 0.22s cubic-bezier(.34,1.56,.64,1)}',
+      '#geo-cmd-box{width:100%;max-width:620px;background:var(--ds-surface);border:1px solid rgba(255,255,255,0.12);border-radius:18px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.05);animation:cmdIn 0.22s cubic-bezier(.34,1.56,.64,1)}',
       '@keyframes cmdIn{from{transform:scale(0.94) translateY(-12px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}',
       '#geo-cmd-input-row{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.07)}',
-      '#geo-cmd-search-icon{color:#4b5563;font-size:0.92rem;flex-shrink:0}',
-      '#geo-cmd-input{flex:1;background:none;border:none;outline:none;color:#f1f5f9;font-size:1rem;font-family:Inter,system-ui,sans-serif}',
-      '#geo-cmd-input::placeholder{color:#4b5563}',
-      '#geo-cmd-kbd{font-size:0.62rem;color:#4b5563;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:4px;padding:2px 6px;white-space:nowrap}',
+      '#geo-cmd-search-icon{color:var(--ds-text-3);font-size:0.92rem;flex-shrink:0}',
+      '#geo-cmd-input{flex:1;background:none;border:none;outline:none;color:var(--ds-text);font-size:1rem;font-family:Inter,system-ui,sans-serif}',
+      '#geo-cmd-input::placeholder{color:var(--ds-text-3)}',
+      '#geo-cmd-kbd{font-size:0.62rem;color:var(--ds-text-3);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:4px;padding:2px 6px;white-space:nowrap}',
       '#geo-cmd-sections{max-height:60vh;overflow-y:auto;scrollbar-width:none}',
       '#geo-cmd-sections::-webkit-scrollbar{display:none}',
-      '.cmd-section-title{font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:#4b5563;padding:10px 16px 4px}',
+      '.cmd-section-title{font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--ds-text-3);padding:10px 16px 4px}',
       '.cmd-item{display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;transition:background 0.15s}',
-      '.cmd-item:hover,.cmd-item.focused{background:rgba(16,185,129,0.08)}',
+      '.cmd-item:hover,.cmd-item.focused{background:rgba(var(--ds-accent-rgb),0.08)}',
       '.cmd-item-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0}',
       '.cmd-item-text{flex:1}',
-      '.cmd-item-title{font-size:0.85rem;font-weight:700;color:#f1f5f9}',
-      '.cmd-item-sub{font-size:0.68rem;color:#64748b}',
-      '.cmd-item-shortcut{font-size:0.6rem;color:#4b5563;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:4px;padding:1px 5px}',
+      '.cmd-item-title{font-size:0.85rem;font-weight:700;color:var(--ds-text)}',
+      '.cmd-item-sub{font-size:0.68rem;color:var(--ds-text-3)}',
+      '.cmd-item-shortcut{font-size:0.6rem;color:var(--ds-text-3);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:4px;padding:1px 5px}',
       '.cmd-divider{height:1px;background:rgba(255,255,255,0.06);margin:4px 0}',
       '.cmd-result-type{margin-left:auto;flex-shrink:0;padding:2px 6px;border-radius:4px;font-size:0.58rem;font-weight:800}',
       '#geo-cmd-footer{padding:8px 16px;border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:10px}',
-      '.cmd-footer-hint{font-size:0.62rem;color:#4b5563;display:flex;align-items:center;gap:4px}',
+      '.cmd-footer-hint{font-size:0.62rem;color:var(--ds-text-3);display:flex;align-items:center;gap:4px}',
     ].join('');
     document.head.appendChild(style);
 
@@ -871,14 +881,14 @@
     overlay.innerHTML = '<div id="geo-cmd-box">' +
       '<div id="geo-cmd-input-row">' +
         '<i class="fas fa-search" id="geo-cmd-search-icon"></i>' +
-        '<input id="geo-cmd-input" placeholder="Search GeoHub or run a command…" autocomplete="off" spellcheck="false">' +
+        '<input id="geo-cmd-input" placeholder="'+T('cmd_placeholder','Search GeoHub or run a command…')+'" autocomplete="off" spellcheck="false">' +
         '<span id="geo-cmd-kbd">ESC</span>' +
       '</div>' +
       '<div id="geo-cmd-sections"></div>' +
       '<div id="geo-cmd-footer">' +
-        '<span class="cmd-footer-hint"><kbd style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:3px;padding:1px 4px;font-size:0.6rem">↑↓</kbd> navigate</span>' +
-        '<span class="cmd-footer-hint"><kbd style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:3px;padding:1px 4px;font-size:0.6rem">↵</kbd> open</span>' +
-        '<span class="cmd-footer-hint" style="margin-left:auto"><a href="search.html" style="color:#10b981;text-decoration:none;font-weight:700;font-size:0.68rem">Full Search →</a></span>' +
+        '<span class="cmd-footer-hint"><kbd style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:3px;padding:1px 4px;font-size:0.6rem">↑↓</kbd> '+T('cmd_navigate','navigate')+'</span>' +
+        '<span class="cmd-footer-hint"><kbd style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:3px;padding:1px 4px;font-size:0.6rem">↵</kbd> '+T('cmd_open','open')+'</span>' +
+        '<span class="cmd-footer-hint" style="margin-left:auto"><a href="search.html" style="color:var(--ds-accent-ink);text-decoration:none;font-weight:700;font-size:0.68rem">'+T('cmd_full_search','Full Search →')+'</a></span>' +
       '</div>' +
     '</div>';
     overlay.addEventListener('click', function (e) { if (e.target === overlay) closeCmdPalette(); });
@@ -902,14 +912,14 @@
   }
 
   var QUICK_ACTIONS = [
-    { icon:'📍', bg:'rgba(16,185,129,0.15)', color:'#34d399', title:'Create Check-in',    sub:'Tag your location + camera proof', url:'checkin.html',    shortcut:'' },
+    { icon:'📍', bg:'rgba(var(--ds-accent-rgb),0.15)', color:'var(--ds-accent-hi)', title:'Create Check-in',    sub:'Tag your location + camera proof', url:'checkin.html',    shortcut:'' },
     { icon:'🤖', bg:'rgba(168,85,247,0.15)', color:'#c084fc', title:'Open AI Assistant',  sub:'Get a smart city day plan',        url:'assistant.html',  shortcut:'' },
     { icon:'🎁', bg:'rgba(245,158,11,0.15)', color:'#fbbf24', title:'View Rewards',        sub:'Claim GeoPoints & partner offers',  url:'rewards.html',    shortcut:'' },
     { icon:'⚡', bg:'rgba(59,130,246,0.15)',  color:'#60a5fa', title:'Start Challenge',     sub:'Missions, XP, and badges',         url:'challenges.html', shortcut:'' },
     { icon:'📡', bg:'rgba(239,68,68,0.15)',   color:'#f87171', title:'Open Live City',      sub:'Live check-ins and city pulse',     url:'live.html',       shortcut:'' },
     { icon:'💬', bg:'rgba(236,72,153,0.15)',  color:'#f472b6', title:'Messages',            sub:'Chat with people you follow',       url:'messages.html',   shortcut:'' },
     { icon:'🇬🇪', bg:'rgba(249,115,22,0.15)',  color:'#fb923c', title:'Patriot Missions',   sub:'Civic tasks + Patriot XP',          url:'patriot.html',    shortcut:'' },
-    { icon:'⭐', bg:'rgba(16,185,129,0.15)',  color:'#34d399', title:'Reviews Hub',         sub:'Write or browse trusted reviews',   url:'reviews.html',    shortcut:'' },
+    { icon:'⭐', bg:'rgba(var(--ds-accent-rgb),0.15)',  color:'var(--ds-accent-hi)', title:'Reviews Hub',         sub:'Write or browse trusted reviews',   url:'reviews.html',    shortcut:'' },
   ];
 
   function renderCmdResults(q) {
@@ -921,17 +931,17 @@
       if (typeof GeoSearch !== 'undefined') {
         var recent = GeoSearch.getRecent().slice(0, 4);
         if (recent.length) {
-          recentHtml = '<div class="cmd-section-title">Recent Searches</div>' +
+          recentHtml = '<div class="cmd-section-title">'+T('cmd_recent','Recent Searches')+'</div>' +
             recent.map(function (r) {
               return '<div class="cmd-item" onclick="location.href=\'search.html?q=' + encodeURIComponent(r) + '\'">' +
-                '<div class="cmd-item-icon" style="background:rgba(255,255,255,0.04);color:#64748b"><i class="fas fa-clock"></i></div>' +
+                '<div class="cmd-item-icon" style="background:rgba(255,255,255,0.04);color:var(--ds-text-3)"><i class="fas fa-clock"></i></div>' +
                 '<div class="cmd-item-text"><div class="cmd-item-title">' + r + '</div></div></div>';
             }).join('') + '<div class="cmd-divider"></div>';
         }
       }
 
       sections.innerHTML = recentHtml +
-        '<div class="cmd-section-title">Quick Actions</div>' +
+        '<div class="cmd-section-title">'+T('cmd_quick_actions','Quick Actions')+'</div>' +
         QUICK_ACTIONS.map(function (a) {
           return '<div class="cmd-item" onclick="closeCmdPalette();location.href=\'' + a.url + '\'">' +
             '<div class="cmd-item-icon" style="background:' + a.bg + ';color:' + a.color + '">' + a.icon + '</div>' +
@@ -943,7 +953,7 @@
 
     if (typeof GeoSearch === 'undefined') {
       sections.innerHTML = '<div class="cmd-item" onclick="location.href=\'search.html?q=' + encodeURIComponent(q) + '\'">' +
-        '<div class="cmd-item-icon" style="background:rgba(16,185,129,0.1);color:#10b981"><i class="fas fa-search"></i></div>' +
+        '<div class="cmd-item-icon" style="background:rgba(var(--ds-accent-rgb),0.1);color:var(--ds-accent-ink)"><i class="fas fa-search"></i></div>' +
         '<div class="cmd-item-text"><div class="cmd-item-title">Search for "' + q + '"</div><div class="cmd-item-sub">Open full search</div></div>' +
         '</div>';
       return;
@@ -954,8 +964,8 @@
 
     var html = '<div class="cmd-section-title">' + results.length + ' results</div>';
     if (!results.length) {
-      html = '<div class="cmd-item"><div class="cmd-item-icon" style="background:rgba(255,255,255,0.04);color:#4b5563"><i class="fas fa-search"></i></div>' +
-        '<div class="cmd-item-text"><div class="cmd-item-title" style="color:#64748b">No results for "' + q + '"</div></div></div>';
+      html = '<div class="cmd-item"><div class="cmd-item-icon" style="background:rgba(255,255,255,0.04);color:var(--ds-text-3)"><i class="fas fa-search"></i></div>' +
+        '<div class="cmd-item-text"><div class="cmd-item-title" style="color:var(--ds-text-3)">No results for "' + q + '"</div></div></div>';
     } else {
       html += results.map(function (r) {
         var t = tm[r.type] || tm.people;
@@ -969,8 +979,8 @@
         '</div>';
       }).join('');
       html += '<div class="cmd-divider"></div><div class="cmd-item" onclick="closeCmdPalette();location.href=\'search.html?q=' + encodeURIComponent(q) + '\'">' +
-        '<div class="cmd-item-icon" style="background:rgba(16,185,129,0.1);color:#10b981"><i class="fas fa-external-link-alt"></i></div>' +
-        '<div class="cmd-item-text"><div class="cmd-item-title" style="color:#10b981">See all results for "' + q + '"</div></div></div>';
+        '<div class="cmd-item-icon" style="background:rgba(var(--ds-accent-rgb),0.1);color:var(--ds-accent-ink)"><i class="fas fa-external-link-alt"></i></div>' +
+        '<div class="cmd-item-text"><div class="cmd-item-title" style="color:var(--ds-accent-ink)">See all results for "' + q + '"</div></div></div>';
     }
     sections.innerHTML = html;
   }

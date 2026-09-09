@@ -19,29 +19,15 @@
       <div class="chart-col-label">${days[i]}</div>
     </div>`).join('');
 
-  // Reviews
+  // Reviews — real data comes from the business page; show a proper empty state here
   var _dashRevEl = document.getElementById('dashReviews');
-  if (_dashRevEl && typeof REVIEWS !== 'undefined') _dashRevEl.innerHTML = REVIEWS.filter(r => r.businessId === 2).concat([
-    { id: 10, author: 'Emily W.', avatar: 'E', rating: 5, date: '2024-12-01', text: 'Best tour in Georgia! Giorgi was an incredible guide. The 4x4 route was breathtaking.' },
-    { id: 11, author: 'David L.', avatar: 'D', rating: 5, date: '2024-11-20', text: 'Excellent experience, highly professional team. Booked for 4 people and everyone loved it.' },
-  ]).map(r => `
-    <div class="dash-card" style="margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div class="reviewer-avatar">${r.avatar}</div>
-          <div>
-            <div style="font-weight:600;font-size:0.875rem">${r.author}</div>
-            <div style="font-size:0.72rem;color:var(--text-muted)">${r.date}</div>
-          </div>
-        </div>
-        ${renderStars(r.rating)}
-      </div>
-      <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:12px">${r.text}</p>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-ghost btn-sm"><i class="fas fa-reply"></i> ${typeof GHt==='function'?GHt('dash_reply'):'Reply'}</button>
-        <button class="btn btn-ghost btn-sm"><i class="fas fa-flag"></i> ${typeof GHt==='function'?GHt('dash_report'):'Report'}</button>
-      </div>
-    </div>`).join('');
+  if (_dashRevEl && !_dashRevEl.dataset.filled) {
+    var _drt = function(k, f){ return typeof GHt === 'function' ? GHt(k) : f; };
+    _dashRevEl.innerHTML = '<div class="dash-card" style="text-align:center;padding:32px 20px;color:var(--text-muted)">' +
+      '<i class="fas fa-star" style="font-size:1.8rem;opacity:.4;display:block;margin-bottom:10px"></i>' +
+      '<div style="font-weight:600;margin-bottom:4px">' + _drt('dash_no_reviews', 'შეფასებები ჯერ არ არის') + '</div>' +
+      '<div style="font-size:.82rem">' + _drt('dash_no_reviews_hint', 'კლიენტების შეფასებები აქ გამოჩნდება.') + '</div></div>';
+  }
 
   if (typeof initScrollAnimations === 'function') initScrollAnimations();
 
@@ -417,10 +403,10 @@ function saveDashProfile() {
 
     var _pt = typeof GHt === 'function' ? GHt : function(k){return k;};
     if (currentStatus === 'active') {
-      container.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:16px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:14px">'
+      container.innerHTML = '<div style="display:flex;align-items:center;gap:10px;padding:16px;background:rgba(var(--ds-accent-rgb),.1);border:1px solid rgba(var(--ds-accent-rgb),.25);border-radius:14px">'
         + '<i class="fas fa-crown" style="color:#10e0a0;font-size:1.3rem"></i>'
         + '<div><div style="font-weight:700;color:#10e0a0">' + _pt('dash_prem_active') + '</div>'
-        + '<div style="font-size:0.78rem;color:#64748b;margin-top:2px">' + _pt('dash_prem_benefits') + '</div></div></div>';
+        + '<div style="font-size:0.78rem;color:var(--ds-text-3);margin-top:2px">' + _pt('dash_prem_benefits') + '</div></div></div>';
       return;
     }
 
@@ -429,22 +415,22 @@ function saveDashProfile() {
     if (!paymentsEnabled) {
       container.innerHTML = '<div style="padding:16px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.18);border-radius:14px">'
         + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
-        + '<i class="fas fa-crown" style="color:#f59e0b"></i>'
+        + '<i class="fas fa-crown" style="color:var(--ds-h-reward-ink)"></i>'
         + '<span style="font-weight:700;font-size:.9rem">GeoHub Premium</span></div>'
-        + '<p style="font-size:.75rem;color:#64748b;margin:0">' + _pt('dash_prem_soon') + '</p></div>';
+        + '<p style="font-size:.75rem;color:var(--ds-text-3);margin:0">' + _pt('dash_prem_soon') + '</p></div>';
       return;
     }
 
     container.innerHTML = '<div style="padding:20px;background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.2);border-radius:16px">'
       + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
-      + '<i class="fas fa-crown" style="color:#f59e0b;font-size:1.4rem"></i>'
+      + '<i class="fas fa-crown" style="color:var(--ds-h-reward-ink);font-size:1.4rem"></i>'
       + '<div><div style="font-weight:800;font-size:1rem">' + _pt('dash_upgrade') + '</div>'
-      + '<div style="font-size:0.78rem;color:#64748b">' + _pt('dash_prem_benefits') + '</div></div></div>'
+      + '<div style="font-size:0.78rem;color:var(--ds-text-3)">' + _pt('dash_prem_benefits') + '</div></div></div>'
       + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-      + '<button class="geo-premium-btn" data-plan="monthly" style="padding:12px;border:1px solid rgba(59,130,246,.35);border-radius:12px;background:rgba(59,130,246,.1);color:#f8fafc;font-weight:700;cursor:pointer">'
-      + '<div style="font-size:1.1rem;color:#3b82f6">29 ₾</div><div style="font-size:0.72rem;color:#94a3b8">' + _pt('dash_per_month') + '</div></button>'
-      + '<button class="geo-premium-btn" data-plan="yearly" style="padding:12px;border:1px solid rgba(16,185,129,.35);border-radius:12px;background:rgba(16,185,129,.1);color:#f8fafc;font-weight:700;cursor:pointer">'
-      + '<div style="font-size:1.1rem;color:#10e0a0">249 ₾</div><div style="font-size:0.72rem;color:#94a3b8">' + _pt('dash_per_year_save') + '</div></button>'
+      + '<button class="geo-premium-btn" data-plan="monthly" style="padding:12px;border:1px solid rgba(59,130,246,.35);border-radius:12px;background:rgba(59,130,246,.1);color:var(--ds-text);font-weight:700;cursor:pointer">'
+      + '<div style="font-size:1.1rem;color:#3b82f6">29 ₾</div><div style="font-size:0.72rem;color:var(--ds-text-3)">' + _pt('dash_per_month') + '</div></button>'
+      + '<button class="geo-premium-btn" data-plan="yearly" style="padding:12px;border:1px solid rgba(var(--ds-accent-rgb),.35);border-radius:12px;background:rgba(var(--ds-accent-rgb),.1);color:var(--ds-text);font-weight:700;cursor:pointer">'
+      + '<div style="font-size:1.1rem;color:#10e0a0">249 ₾</div><div style="font-size:0.72rem;color:var(--ds-text-3)">' + _pt('dash_per_year_save') + '</div></button>'
       + '</div></div>';
 
     container.querySelectorAll('.geo-premium-btn').forEach(function (btn) {

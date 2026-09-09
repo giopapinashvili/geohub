@@ -10,7 +10,7 @@
       'auth/invalid-email':        _t('auth_invalid_email','Enter a valid email address.'),
       'auth/wrong-password':       _t('auth_wrong_pwd',    'Incorrect email or password.'),
       'auth/invalid-credential':   _t('auth_wrong_pwd',    'Incorrect email or password.'),
-      'auth/user-not-found':       _t('auth_no_account',   'No account found with this email.'),
+      'auth/user-not-found':       _t('auth_no_account_found', 'No account found with this email.'),
       'auth/weak-password':        _t('auth_weak_pwd',     'Password must be at least 6 characters.'),
       'auth/popup-closed-by-user': _t('auth_popup_closed', 'Google sign-in cancelled.'),
       'auth/network-request-failed': _t('auth_network_err','Network error. Check your connection.'),
@@ -36,7 +36,7 @@
 
   function renderDemoPicks() {
     var el = document.getElementById('demoPicks');
-    if (el) el.innerHTML = '<div style="color:#94a3b8;font-size:.85rem;line-height:1.5">' + _t('auth_demo_off', 'Demo accounts are disabled. Use email/password or Google sign-in.') + '</div>';
+    if (el) el.innerHTML = '<div style="color:var(--ds-text-3);font-size:.85rem;line-height:1.5">' + _t('auth_demo_off', 'Demo accounts are disabled. Use email/password or Google sign-in.') + '</div>';
   }
 
   function renderSignupInterests() {
@@ -76,16 +76,16 @@
       if (!window.GeoFirebaseAuth) { errEl.textContent = _t('auth_not_ready', 'Firebase not ready. Refresh and try again.'); return; }
       btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + _t('auth_logging_in', 'Logging in…');
       window.GeoFirebaseAuth.signIn(email, pwd).then(function () {
-        btn.innerHTML = '<i class="fas fa-check"></i> ' + _t('auth_welcome_back', 'Welcome back!'); btn.style.background = '#10b981'; setTimeout(goAfterAuth, 500);
+        btn.innerHTML = '<i class="fas fa-check"></i> ' + _t('auth_welcome_back', 'Welcome back!'); btn.style.background = 'var(--ds-accent)'; setTimeout(goAfterAuth, 500);
       }).catch(function (err) {
         btn.disabled = false; btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login';
         if (err && err.code === 'auth/email-not-verified') {
-          errEl.innerHTML = fbErrMsg(err) + ' <button type="button" id="resendVerBtn" style="background:none;border:none;color:#10b981;cursor:pointer;text-decoration:underline;font-size:inherit">' + _t('auth_resend', 'Resend email') + '</button>';
+          errEl.innerHTML = fbErrMsg(err) + ' <button type="button" id="resendVerBtn" style="background:none;border:none;color:var(--ds-accent-ink);cursor:pointer;text-decoration:underline;font-size:inherit">' + _t('auth_resend', 'Resend email') + '</button>';
           var resendBtn = document.getElementById('resendVerBtn');
           if (resendBtn) resendBtn.addEventListener('click', function () {
             resendBtn.disabled = true; resendBtn.textContent = _t('auth_sending', 'Sending…');
             window.GeoFirebaseAuth.resendVerification(email, pwd)
-              .then(function (r) { errEl.innerHTML = r && r.alreadyVerified ? '<span style="color:#10b981">' + _t('auth_already_ver', 'Email already verified — try logging in!') + '</span>' : '<span style="color:#10b981">' + _t('auth_ver_sent', 'Verification email sent! Check your inbox.') + '</span>'; })
+              .then(function (r) { errEl.innerHTML = r && r.alreadyVerified ? '<span style="color:var(--ds-accent-ink)">' + _t('auth_already_ver', 'Email already verified — try logging in!') + '</span>' : '<span style="color:var(--ds-accent-ink)">' + _t('auth_ver_sent', 'Verification email sent! Check your inbox.') + '</span>'; })
               .catch(function () { resendBtn.disabled = false; resendBtn.textContent = _t('auth_resend', 'Resend email'); });
           });
         } else {
@@ -102,8 +102,8 @@
     if (!container) return;
     container.innerHTML = '<div style="text-align:center;padding:2rem 1rem">'
       + '<div style="font-size:3rem;margin-bottom:1rem">📧</div>'
-      + '<h2 style="color:#10b981;margin-bottom:.75rem">' + _t('auth_ver_title', 'Verify your email') + '</h2>'
-      + '<p style="color:#94a3b8;margin-bottom:1.5rem">' + _t('auth_ver_msg', 'We sent a verification link to') + ' <strong style="color:#e2e8f0">' + email + '</strong>.<br>' + _t('auth_ver_click', 'Click the link, then come back to log in.') + '</p>'
+      + '<h2 style="color:var(--ds-accent-ink);margin-bottom:.75rem">' + _t('auth_ver_title', 'Verify your email') + '</h2>'
+      + '<p style="color:var(--ds-text-3);margin-bottom:1.5rem">' + _t('auth_ver_msg', 'We sent a verification link to') + ' <strong style="color:var(--ds-text-2)">' + email + '</strong>.<br>' + _t('auth_ver_click', 'Click the link, then come back to log in.') + '</p>'
       + '<a href="auth.html" class="auth-submit" style="display:inline-block;text-decoration:none;padding:.75rem 2rem"><i class="fas fa-sign-in-alt"></i> ' + _t('auth_go_login', 'Go to Login') + '</a>'
       + '</div>';
   }
@@ -128,7 +128,7 @@
           setHint('', ''); _unStatus = 'ok'; return;
         }
         window.GeoFirebaseAuth.isUsernameAvailable(val).then(function(avail) {
-          if (avail) { setHint('✓ @' + val + ' ' + _t('auth_un_avail_sfx', 'is available'), '#10b981'); _unStatus = 'ok'; }
+          if (avail) { setHint('✓ @' + val + ' ' + _t('auth_un_avail_sfx', 'is available'), 'var(--ds-accent)'); _unStatus = 'ok'; }
           else       { setHint('✗ @' + val + ' ' + _t('auth_un_taken_sfx', 'is taken'), '#f87171'); _unStatus = 'taken'; }
         }).catch(function() { setHint('', ''); _unStatus = 'ok'; });
       }, 500);

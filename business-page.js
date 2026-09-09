@@ -101,21 +101,21 @@
       'background:#0d0d1a','border-radius:16px',
       'width:100%','max-width:600px','max-height:90vh',
       'display:flex','flex-direction:column',
-      'overflow:hidden','color:#e0e0f0',
+      'overflow:hidden','color:var(--ds-text-2)',
       'box-shadow:0 24px 80px rgba(0,0,0,.7)'
     ].join(';');
 
-    var inp = 'style="width:100%;background:#0a0a18;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;padding:9px 12px;font-size:.88rem;box-sizing:border-box;outline:none;font-family:inherit"';
-    var ta  = 'style="width:100%;background:#0a0a18;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;padding:9px 12px;font-size:.88rem;box-sizing:border-box;outline:none;resize:vertical;min-height:80px;font-family:inherit"';
+    var inp = 'style="width:100%;background:var(--ds-bg);border:1px solid #2e2e48;border-radius:8px;color:var(--ds-text-2);padding:9px 12px;font-size:.88rem;box-sizing:border-box;outline:none;font-family:inherit"';
+    var ta  = 'style="width:100%;background:var(--ds-bg);border:1px solid #2e2e48;border-radius:8px;color:var(--ds-text-2);padding:9px 12px;font-size:.88rem;box-sizing:border-box;outline:none;resize:vertical;min-height:80px;font-family:inherit"';
     var lbl = 'style="display:block;font-size:.75rem;color:#9090b0;font-weight:600;margin-bottom:5px"';
     var fld = 'style="margin-bottom:14px"';
     var row = 'style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px"';
-    var sec = 'style="background:#131325;border:1px solid #1e1e36;border-radius:12px;padding:16px;margin-bottom:14px"';
-    var sh  = 'style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#10b981;margin:0 0 12px"';
+    var sec = 'style="background:var(--ds-surface);border:1px solid #1e1e36;border-radius:12px;padding:16px;margin-bottom:14px"';
+    var sh  = 'style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ds-accent-ink);margin:0 0 12px"';
 
     sheet.innerHTML =
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #1e1e36;flex-shrink:0">'+
-        '<span style="font-weight:700;font-size:.95rem"><i class="fas fa-pen" style="color:#10b981;margin-right:8px"></i>Edit Business Page</span>'+
+        '<span style="font-weight:700;font-size:.95rem"><i class="fas fa-pen" style="color:var(--ds-accent-ink);margin-right:8px"></i>Edit Business Page</span>'+
         '<button id="gh-biz-edit-close" style="background:none;border:1px solid #2e2e48;border-radius:8px;color:#aaa;padding:5px 13px;cursor:pointer;font-size:.82rem">✕ Close</button>'+
       '</div>'+
       '<div style="flex:1;overflow-y:auto;padding:18px">'+
@@ -128,14 +128,14 @@
               '<div id="gbe-cover-preview" style="width:100%;height:80px;border-radius:8px;border:1px solid #2e2e48;background:'+(b.coverUrl?'url('+esc(b.coverUrl)+') center/cover':'#0a0a18')+';display:flex;align-items:center;justify-content:center;margin-bottom:8px;overflow:hidden">'+
                 (!b.coverUrl?'<i class="fas fa-image" style="color:#444;font-size:1.4rem"></i>':'')+
               '</div>'+
-              '<button id="gbe-cover-btn" style="width:100%;padding:7px;background:#1e1e36;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;font-size:.8rem;cursor:pointer"><i class="fas fa-camera"></i> Upload Cover</button>'+
+              '<button id="gbe-cover-btn" style="width:100%;padding:7px;background:var(--ds-surface);border:1px solid #2e2e48;border-radius:8px;color:var(--ds-text-2);font-size:.8rem;cursor:pointer"><i class="fas fa-camera"></i> Upload Cover</button>'+
             '</div>'+
             '<div>'+
               '<label '+lbl+'>Logo</label>'+
-              '<div id="gbe-logo-preview" style="width:72px;height:72px;border-radius:50%;border:1px solid #2e2e48;background:#0a0a18;display:flex;align-items:center;justify-content:center;margin-bottom:8px;overflow:hidden;font-size:1.5rem;font-weight:700;color:#10b981">'+
+              '<div id="gbe-logo-preview" style="width:72px;height:72px;border-radius:50%;border:1px solid #2e2e48;background:var(--ds-bg);display:flex;align-items:center;justify-content:center;margin-bottom:8px;overflow:hidden;font-size:1.5rem;font-weight:700;color:var(--ds-accent-ink)">'+
                 (b.logoUrl?'<img src="'+esc(b.logoUrl)+'" style="width:100%;height:100%;object-fit:cover">':esc((b.title||'B')[0]))+
               '</div>'+
-              '<button id="gbe-logo-btn" style="width:100%;padding:7px;background:#1e1e36;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;font-size:.8rem;cursor:pointer"><i class="fas fa-camera"></i> Upload Logo</button>'+
+              '<button id="gbe-logo-btn" style="width:100%;padding:7px;background:var(--ds-surface);border:1px solid #2e2e48;border-radius:8px;color:var(--ds-text-2);font-size:.8rem;cursor:pointer"><i class="fas fa-camera"></i> Upload Logo</button>'+
             '</div>'+
           '</div>'+
         '</div>'+
@@ -182,7 +182,7 @@
           '</div>'+
         '</div>'+
 
-        '<button id="gbe-save" style="width:100%;padding:14px;background:#10b981;color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;letter-spacing:.02em">'+
+        '<button id="gbe-save" style="width:100%;padding:14px;background:var(--ds-accent);#fffvar(--ds-accent-on);border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;letter-spacing:.02em">'+
           '<i class="fas fa-save"></i> Save Changes'+
         '</button>'+
 
@@ -220,7 +220,7 @@
                 var logoEl = document.querySelector('.biz-logo');
                 if (logoEl) logoEl.innerHTML = '<img src="'+url+'" alt="logo">';
               }
-              if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check" style="color:#10b981"></i> Updated'; }
+              if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check" style="color:var(--ds-accent-ink)"></i> Updated'; }
             }).catch(function() {
               if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> Retry'; }
             });
@@ -270,12 +270,12 @@
     overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.78);z-index:999999;display:flex;align-items:center;justify-content:center;padding:12px;box-sizing:border-box';
 
     var sheet = document.createElement('div');
-    sheet.style.cssText = 'background:#0d0d1a;border-radius:16px;width:100%;max-width:680px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;color:#e0e0f0;box-shadow:0 24px 80px rgba(0,0,0,.7)';
+    sheet.style.cssText = 'background:#0d0d1a;border-radius:16px;width:100%;max-width:680px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;color:var(--ds-text-2);box-shadow:0 24px 80px rgba(0,0,0,.7)';
 
-    var inp = 'style="width:100%;background:#0a0a18;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;padding:9px 12px;font-size:.88rem;box-sizing:border-box;outline:none;font-family:inherit"';
+    var inp = 'style="width:100%;background:var(--ds-bg);border:1px solid #2e2e48;border-radius:8px;color:var(--ds-text-2);padding:9px 12px;font-size:.88rem;box-sizing:border-box;outline:none;font-family:inherit"';
     var lbl = 'style="display:block;font-size:.75rem;color:#9090b0;font-weight:600;margin-bottom:5px"';
-    var sec = 'style="background:#131325;border:1px solid #1e1e36;border-radius:12px;padding:16px;margin-bottom:14px"';
-    var sh  = 'style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#10b981;margin:0 0 12px"';
+    var sec = 'style="background:var(--ds-surface);border:1px solid #1e1e36;border-radius:12px;padding:16px;margin-bottom:14px"';
+    var sh  = 'style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ds-accent-ink);margin:0 0 12px"';
 
     var coverBg = b.coverUrl ? 'url('+esc(b.coverUrl)+') center/cover' : 'linear-gradient(135deg,#0d2137,#0a1628)';
     var logoHtml = b.logoUrl
@@ -285,7 +285,7 @@
 
     sheet.innerHTML =
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #1e1e36;flex-shrink:0">'+
-        '<span style="font-weight:700;font-size:.95rem"><i class="fas fa-map-location-dot" style="color:#10b981;margin-right:8px"></i>Edit Map Card</span>'+
+        '<span style="font-weight:700;font-size:.95rem"><i class="fas fa-map-location-dot" style="color:var(--ds-accent-ink);margin-right:8px"></i>Edit Map Card</span>'+
         '<button id="gh-mc-close" style="background:none;border:1px solid #2e2e48;border-radius:8px;color:#aaa;padding:5px 13px;cursor:pointer;font-size:.82rem">✕ Close</button>'+
       '</div>'+
       '<div style="flex:1;overflow-y:auto;padding:18px">'+
@@ -299,12 +299,12 @@
             '</div>'+
             '<div style="padding:28px 12px 12px">'+
               '<div id="gh-mc-prev-name" style="font-weight:700;font-size:.95rem;color:#fff;margin-bottom:3px">'+esc(b.title||b.name||'')+'</div>'+
-              '<div id="gh-mc-prev-cat" style="font-size:.78rem;color:#94a3b8;margin-bottom:8px">'+esc(b.category||'')+(b.city?' · '+esc(b.city):'')+'</div>'+
+              '<div id="gh-mc-prev-cat" style="font-size:.78rem;color:var(--ds-text-3);margin-bottom:8px">'+esc(b.category||'')+(b.city?' · '+esc(b.city):'')+'</div>'+
               '<div id="gh-mc-prev-desc" style="font-size:.8rem;color:#b0b8c8;margin-bottom:10px;line-height:1.4">'+esc((b.description||b.desc||'').slice(0,80))+'</div>'+
               '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">'+
-                '<div style="background:#10b981;border-radius:8px;padding:7px 4px;text-align:center;font-size:.7rem;font-weight:600;color:#fff">ბიზნეს გვერდი</div>'+
-                '<div style="background:#1e2a3a;border-radius:8px;padding:7px 4px;text-align:center;font-size:.7rem;color:#94a3b8">Directions</div>'+
-                '<div style="background:#1e2a3a;border-radius:8px;padding:7px 4px;text-align:center;font-size:.7rem;color:#94a3b8">ჩაწერა</div>'+
+                '<div style="background:var(--ds-accent);border-radius:8px;padding:7px 4px;text-align:center;font-size:.7rem;font-weight:600;color:#fff">ბიზნეს გვერდი</div>'+
+                '<div style="background:var(--ds-surface);border-radius:8px;padding:7px 4px;text-align:center;font-size:.7rem;color:var(--ds-text-3)">Directions</div>'+
+                '<div style="background:var(--ds-surface);border-radius:8px;padding:7px 4px;text-align:center;font-size:.7rem;color:var(--ds-text-3)">ჩაწერა</div>'+
               '</div>'+
             '</div>'+
           '</div>'+
@@ -314,17 +314,17 @@
         '<div '+sec+'>'+
           '<p '+sh+'>Cover Photo</p>'+
           '<div id="gh-mc-cover-preview" style="width:100%;height:70px;border-radius:8px;border:1px solid #2e2e48;background:'+coverBg+';margin-bottom:8px"></div>'+
-          '<button id="gh-mc-cover-btn" style="width:100%;padding:8px;background:#1e1e36;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;font-size:.82rem;cursor:pointer"><i class="fas fa-camera"></i> Upload Cover Photo</button>'+
+          '<button id="gh-mc-cover-btn" style="width:100%;padding:8px;background:var(--ds-surface);border:1px solid #2e2e48;border-radius:8px;color:var(--ds-text-2);font-size:.82rem;cursor:pointer"><i class="fas fa-camera"></i> Upload Cover Photo</button>'+
         '</div>'+
 
         /* ── LOGO ── */
         '<div '+sec+'>'+
           '<p '+sh+'>Logo</p>'+
           '<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px">'+
-            '<div id="gh-mc-logo-preview" style="width:64px;height:64px;border-radius:50%;background:#0a0a18;border:2px solid #2e2e48;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.5rem;font-weight:700;color:#10b981;flex-shrink:0">'+
+            '<div id="gh-mc-logo-preview" style="width:64px;height:64px;border-radius:50%;background:var(--ds-bg);border:2px solid #2e2e48;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.5rem;font-weight:700;color:var(--ds-accent-ink);flex-shrink:0">'+
               (b.logoUrl?'<img src="'+esc(b.logoUrl)+'" style="width:100%;height:100%;object-fit:cover">':esc((b.title||'B')[0]))+
             '</div>'+
-            '<button id="gh-mc-logo-btn" style="flex:1;padding:8px;background:#1e1e36;border:1px solid #2e2e48;border-radius:8px;color:#e0e0f0;font-size:.82rem;cursor:pointer"><i class="fas fa-camera"></i> Upload Logo</button>'+
+            '<button id="gh-mc-logo-btn" style="flex:1;padding:8px;background:var(--ds-surface);border:1px solid #2e2e48;border-radius:8px;color:var(--ds-text-2);font-size:.82rem;cursor:pointer"><i class="fas fa-camera"></i> Upload Logo</button>'+
           '</div>'+
         '</div>'+
 
@@ -335,7 +335,7 @@
           '<div><label '+lbl+'>Short Description (shown on card)</label><input '+inp+' id="gh-mc-desc" value="'+esc(b.description||b.desc||'')+'" placeholder="Short description…"></div>'+
         '</div>'+
 
-        '<button id="gh-mc-save" style="width:100%;padding:13px;background:#10b981;color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer"><i class="fas fa-save"></i> Save Card</button>'+
+        '<button id="gh-mc-save" style="width:100%;padding:13px;background:var(--ds-accent);#fffvar(--ds-accent-on);border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer"><i class="fas fa-save"></i> Save Card</button>'+
       '</div>';
 
     overlay.appendChild(sheet);
@@ -391,7 +391,7 @@
                 var pgLogo = document.querySelector('.biz-logo');
                 if (pgLogo) pgLogo.innerHTML = '<img src="'+safeEsc+'" alt="logo">';
               }
-              if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check" style="color:#10b981"></i> Updated'; }
+              if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check" style="color:var(--ds-accent-ink)"></i> Updated'; }
             }).catch(function() { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> Retry'; } });
         }
         if (window.GeoSocial && window.GeoSocial.uploadFile) {
@@ -463,11 +463,11 @@
   var _qFilter = 'all';
   var _qSearch = '';
   var BIZ_QUOTE_STATUS_COLORS = {
-    new:      { text: '#10b981', bg: 'rgba(16,185,129,.12)',  border: 'rgba(16,185,129,.25)' },
+    new:      { text: 'var(--ds-accent)', bg: 'rgba(var(--ds-accent-rgb),.12)',  border: 'rgba(var(--ds-accent-rgb),.25)' },
     read:     { text: '#94a3b8', bg: 'rgba(148,163,184,.1)', border: 'rgba(148,163,184,.2)' },
     replied:  { text: '#3b82f6', bg: 'rgba(59,130,246,.12)',  border: 'rgba(59,130,246,.25)' },
     closed:   { text: '#f59e0b', bg: 'rgba(245,158,11,.12)',  border: 'rgba(245,158,11,.25)' },
-    archived: { text: '#6b7280', bg: 'rgba(107,114,128,.1)', border: 'rgba(107,114,128,.2)' }
+    archived: { text: 'var(--ds-text-3)', bg: 'rgba(107,114,128,.1)', border: 'rgba(107,114,128,.2)' }
   };
 
   var _svcMap  = {};
@@ -558,7 +558,7 @@
   function showToast(msg, ok) {
     if (window.pushNotif) { window.pushNotif({emoji:ok!==false?'✅':'⚠️',title:ok!==false?'Done':'Note',text:msg,link:null}); return; }
     var t = document.getElementById('biz-toast');
-    if (!t) { t=document.createElement('div'); t.id='biz-toast'; t.style.cssText='position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(16px);background:#1e293b;color:#f1f5f9;border:1px solid rgba(255,255,255,.1);padding:9px 20px;border-radius:24px;font-size:.85rem;font-weight:600;z-index:99999;transition:all .25s;opacity:0;pointer-events:none;white-space:nowrap'; document.body.appendChild(t); }
+    if (!t) { t=document.createElement('div'); t.id='biz-toast'; t.style.cssText='position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ds-surface-2);color:var(--ds-text);border:1px solid rgba(255,255,255,.1);padding:9px 20px;border-radius:24px;font-size:.85rem;font-weight:600;z-index:99999;transition:all .25s;opacity:0;pointer-events:none;white-space:nowrap'; document.body.appendChild(t); }
     t.textContent=msg; t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)';
     clearTimeout(t._t); t._t=setTimeout(function(){ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(16px)'; },2500);
   }
@@ -825,7 +825,7 @@
     if (biz.phone)       items.push('<div class="biz-info-item"><i class="fas fa-phone"></i><a href="tel:'+esc(biz.phone)+'">'+esc(biz.phone)+'</a></div>');
     if (biz.email)       items.push('<div class="biz-info-item"><i class="fas fa-envelope"></i><a href="mailto:'+esc(biz.email)+'">'+esc(biz.email)+'</a></div>');
     if (biz.website) { var ws=biz.website.startsWith('http')?biz.website:'https://'+biz.website; items.push('<div class="biz-info-item"><i class="fas fa-globe"></i><a href="'+esc(ws)+'" target="_blank" rel="noopener noreferrer">'+esc(biz.website.replace(/^https?:\/\//,'').split('/')[0])+'</a></div>'); }
-    if (biz.startingPrice) items.push('<div class="biz-info-item"><i class="fas fa-circle-dollar-to-slot"></i><span>From <strong style="color:#10b981">'+esc(String(biz.startingPrice))+' ₾</strong></span></div>');
+    if (biz.startingPrice) items.push('<div class="biz-info-item"><i class="fas fa-circle-dollar-to-slot"></i><span>From <strong style="color:var(--ds-accent-ink)">'+esc(String(biz.startingPrice))+' ₾</strong></span></div>');
     if (items.length) html+='<div class="biz-info-card"><div class="biz-info-card-title"><i class="fas fa-building"></i> About</div>'+items.join('')+'</div>';
 
     // Hours card
@@ -850,7 +850,7 @@
     if (biz.instagram||sl.instagram) { var ig2=biz.instagram||sl.instagram; var iu=ig2.startsWith('http')?ig2:'https://instagram.com/'+ig2.replace('@',''); socialLinks.push('<a href="'+esc(iu)+'" target="_blank" rel="noopener noreferrer" class="biz-social-chip"><i class="fab fa-instagram" style="color:#e1306c"></i> Instagram</a>'); }
     if (biz.facebook||sl.facebook)   { var fb2=biz.facebook||sl.facebook; var fu=fb2.startsWith('http')?fb2:'https://facebook.com/'+fb2.replace('@',''); socialLinks.push('<a href="'+esc(fu)+'" target="_blank" rel="noopener noreferrer" class="biz-social-chip"><i class="fab fa-facebook" style="color:#4267B2"></i> Facebook</a>'); }
     if (biz.whatsapp||sl.whatsapp)   { var wa2=(biz.whatsapp||sl.whatsapp).replace(/\D/g,''); socialLinks.push('<a href="https://wa.me/'+esc(wa2)+'" target="_blank" rel="noopener noreferrer" class="biz-social-chip"><i class="fab fa-whatsapp" style="color:#25D366"></i> WhatsApp</a>'); }
-    if (biz.mapsLink) socialLinks.push('<a href="'+esc(biz.mapsLink)+'" target="_blank" rel="noopener noreferrer" class="biz-social-chip"><i class="fas fa-map-location-dot" style="color:#fbbf24"></i> Maps</a>');
+    if (biz.mapsLink) socialLinks.push('<a href="'+esc(biz.mapsLink)+'" target="_blank" rel="noopener noreferrer" class="biz-social-chip"><i class="fas fa-map-location-dot" style="color:var(--ds-h-reward-ink)"></i> Maps</a>');
     if (socialLinks.length) html+='<div class="biz-info-card"><div class="biz-info-card-title"><i class="fas fa-share-nodes"></i> Connect</div><div class="biz-social-chips">'+socialLinks.join('')+'</div></div>';
 
     return html || '';
@@ -916,7 +916,7 @@
           '<div class="biz-preview-big-num">'+(biz.ratingAverage||0).toFixed(1)+'</div>'+
           '<div>'+
             starsHtml(biz.ratingAverage,'biz-preview-stars')+
-            '<div style="color:#64748b;font-size:.74rem;margin-top:3px">'+
+            '<div style="color:var(--ds-text-3);font-size:.74rem;margin-top:3px">'+
               biz.ratingCount+' review'+(biz.ratingCount===1?'':'s')+
             '</div>'+
           '</div>'+
@@ -1056,7 +1056,7 @@
             '<input type="hidden" id="biz-block-type-val" value="text">'+
           '</div>'+
           '<div class="biz-form-group">'+
-            '<label class="biz-form-label">Title <span style="color:#64748b;font-weight:400">(optional)</span></label>'+
+            '<label class="biz-form-label">Title <span style="color:var(--ds-text-3);font-weight:400">(optional)</span></label>'+
             '<input class="biz-form-input" id="biz-block-title-inp" placeholder="Block heading…">'+
           '</div>'+
           '<div class="biz-form-group">'+
@@ -1066,7 +1066,7 @@
           '<button class="biz-submit-btn" id="biz-add-block-btn" onclick="window._bizActions.saveNewBlock()"><i class="fas fa-plus"></i> Add Block</button>'+
         '</div>'+
         '<div class="biz-block-manager-list-header">Existing Blocks</div>'+
-        '<div id="biz-block-manager-list"><div style="color:#64748b;font-size:.82rem;padding:8px 0"><i class="fas fa-spinner fa-spin"></i> Loading…</div></div>'+
+        '<div id="biz-block-manager-list"><div style="color:var(--ds-text-3);font-size:.82rem;padding:8px 0"><i class="fas fa-spinner fa-spin"></i> Loading…</div></div>'+
       '</div>'+
     '</div>';
   }
@@ -1274,7 +1274,7 @@
     return '<a href="'+esc(href)+'" class="biz-post-logo-link"><div class="biz-post-logo'+(isUserPost?' biz-post-logo-user':'')+'">'+avInner+'</div></a>'+
       '<div class="biz-post-meta">'+
         '<a href="'+esc(href)+'" class="biz-post-name-link">'+esc(name)+
-          (!isUserPost && (biz.verified || biz.status === 'verified') ? ' <i class="fas fa-check-circle" style="color:#34d399;font-size:.72rem"></i>' : '')+
+          (!isUserPost && (biz.verified || biz.status === 'verified') ? ' <i class="fas fa-check-circle" style="color:var(--ds-accent-ink);font-size:.72rem"></i>' : '')+
         '</a>'+
         '<div class="biz-post-time">'+timeAgo(post.createdAt)+context+' · <i class="fas fa-earth-americas" style="font-size:.7rem;opacity:.6"></i></div>'+
       '</div>';
@@ -1346,7 +1346,7 @@
       '<div class="biz-clean-edit-panel" data-biz-edit-panel hidden>'+
         '<textarea class="biz-edit-textarea" data-biz-edit-text rows="4">'+esc(post.text || '')+'</textarea>'+
         '<div class="biz-edit-vis-row">'+
-          '<i class="fas fa-globe" style="color:#64748b"></i>'+
+          '<i class="fas fa-globe" style="color:var(--ds-text-3)"></i>'+
           '<span>Visibility:</span>'+
           '<select data-biz-edit-vis>'+
             '<option value="public"'+(cleanVis === 'public' ? ' selected' : '')+'>Public</option>'+
@@ -1522,7 +1522,7 @@
         '<div class="biz-post-meta">'+
           '<a href="'+esc(uLink)+'" class="biz-post-name-link">'+esc(uName)+'</a>'+
           '<div class="biz-post-time">'+timeAgo(post.createdAt)+
-            (biz.title ? ' · <a href="'+bizLink+'" style="color:#10b981;text-decoration:none;font-size:.75rem">on '+esc(biz.title)+'</a>' : '')+
+            (biz.title ? ' · <a href="'+bizLink+'" style="color:var(--ds-accent-ink);text-decoration:none;font-size:.75rem">on '+esc(biz.title)+'</a>' : '')+
             ' · <i class="fas fa-earth-americas" style="font-size:.7rem;opacity:.6"></i>'+
           '</div>'+
         '</div>';
@@ -1531,7 +1531,7 @@
         '<a href="'+bizLink+'" class="biz-post-logo-link"><div class="biz-post-logo">'+logo+'</div></a>'+
         '<div class="biz-post-meta">'+
           '<a href="'+bizLink+'" class="biz-post-name-link">'+esc(biz.title||'Business')+
-            ((biz.verified||biz.status==='verified')?' <i class="fas fa-check-circle" style="color:#34d399;font-size:.72rem"></i>':'')+
+            ((biz.verified||biz.status==='verified')?' <i class="fas fa-check-circle" style="color:var(--ds-accent-ink);font-size:.72rem"></i>':'')+
             visBadge+
           '</a>'+
           '<div class="biz-post-time">'+timeAgo(post.createdAt)+' · <i class="fas fa-earth-americas" style="font-size:.7rem;opacity:.6"></i></div>'+
@@ -1724,11 +1724,11 @@
   function _sortedReviews(reviews) {
     var arr = reviews ? reviews.slice() : [];
     if (_reviewSort === 'high')
-      arr.sort(function(a,b){ return (b.rating||0)-(a.rating||0) || tsOf(b.createdAt)-tsOf(a.createdAt); });
+      arr.sort(function(a,b){ return (b.rating||0)-(a.rating||0) || toMsBiz(b.createdAt)-toMsBiz(a.createdAt); });
     else if (_reviewSort === 'low')
-      arr.sort(function(a,b){ return (a.rating||0)-(b.rating||0) || tsOf(b.createdAt)-tsOf(a.createdAt); });
+      arr.sort(function(a,b){ return (a.rating||0)-(b.rating||0) || toMsBiz(b.createdAt)-toMsBiz(a.createdAt); });
     else
-      arr.sort(function(a,b){ return tsOf(b.createdAt)-tsOf(a.createdAt); });
+      arr.sort(function(a,b){ return toMsBiz(b.createdAt)-toMsBiz(a.createdAt); });
     return arr;
   }
 
@@ -1881,8 +1881,8 @@
 
     if (biz.description) sections.push('<div class="biz-section"><div class="biz-section-header"><div class="biz-section-title"><i class="fas fa-info-circle"></i> About</div></div>'+
       '<div class="biz-section-body"><p class="biz-about-text">'+esc(biz.description)+'</p>'+
-      (biz.tagline?'<p style="font-style:italic;color:#64748b;margin-top:8px;font-size:.84rem">\''+esc(biz.tagline)+'\'</p>':'')+
-      (biz.startingPrice?'<p style="margin-top:10px;font-size:.82rem;color:#94a3b8">From <strong style="color:#10b981">'+esc(String(biz.startingPrice))+' ₾</strong></p>':'')+
+      (biz.tagline?'<p style="font-style:italic;color:var(--ds-text-3);margin-top:8px;font-size:.84rem">\''+esc(biz.tagline)+'\'</p>':'')+
+      (biz.startingPrice?'<p style="margin-top:10px;font-size:.82rem;color:var(--ds-text-3)">From <strong style="color:var(--ds-accent-ink)">'+esc(String(biz.startingPrice))+' ₾</strong></p>':'')+
       '</div></div>');
 
     var ci = [];
@@ -1919,7 +1919,7 @@
   function renderOwnerDashboard(biz) {
     var stats = [
       {val: compact(biz.viewCount||0),     label: 'Page Views',    icon: 'fa-eye',              color: '#3b82f6'},
-      {val: compact(biz.followerCount||0), label: 'Followers',     icon: 'fa-users',             color: '#10b981'},
+      {val: compact(biz.followerCount||0), label: 'Followers',     icon: 'fa-users',             color: 'var(--ds-accent)'},
       {val: compact(biz.saveCount||0),     label: 'Saves',         icon: 'fa-bookmark',          color: '#f59e0b'},
       {val: compact(biz.quoteCount||0),    label: 'Quote Requests',icon: 'fa-paper-plane',       color: '#8b5cf6'},
       {val: compact(biz.reviewCount||biz.ratingCount||0), label: 'Reviews', icon: 'fa-star',     color: '#f43f5e'},
@@ -1940,8 +1940,8 @@
         '<button class="biz-owner-action-btn edit" onclick="if(window.ghBizEditOpen)window.ghBizEditOpen()"><i class="fas fa-pen"></i> Edit Page Info</button>'+
         '<button class="biz-owner-action-btn photo" onclick="window._bizActions.ownerAddPhoto()"><i class="fas fa-camera"></i> Add to Gallery</button>'+
         '<button class="biz-owner-action-btn quotes" onclick="window._bizActions.loadOwnerQuotes()"><i class="fas fa-inbox"></i> View Quote Requests</button>'+
-        '<button class="biz-owner-action-btn" onclick="window._bizActions.switchTab(\'insights\')" style="background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.3);color:#60a5fa"><i class="fas fa-chart-line"></i> View Insights</button>'+
-        '<button id="biz-add-to-map-btn" class="biz-owner-action-btn" onclick="window._bizActions.addToMap()" style="background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.3);color:#10b981"><i class="fas fa-map-marker-alt"></i> Add to Map</button>'+
+        '<button class="biz-owner-action-btn" onclick="window._bizActions.switchTab(\'insights\')" style="background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.3);color:var(--ds-h-video-ink)"><i class="fas fa-chart-line"></i> View Insights</button>'+
+        '<button id="biz-add-to-map-btn" class="biz-owner-action-btn" onclick="window._bizActions.addToMap()" style="background:rgba(var(--ds-accent-rgb),.12);border-color:rgba(var(--ds-accent-rgb),.3);color:var(--ds-accent-ink)"><i class="fas fa-map-marker-alt"></i> Add to Map</button>'+
       '</div>'+
       '<div id="biz-owner-quotes-panel" style="display:none;padding:0 16px 14px"></div>'+
       '<div id="biz-analytics-panel" class="biz-analytics-wrap">'+
@@ -1958,7 +1958,7 @@
           '</select>'+
           '<button class="biz-submit-btn" style="padding:9px 16px" onclick="window._bizActions.addPageAdmin(document.getElementById(\'biz-new-admin-uid\').value.trim(),document.getElementById(\'biz-new-admin-role\').value)"><i class="fas fa-plus"></i> Add</button>'+
         '</div>'+
-        '<div id="biz-admin-list"><div style="color:#64748b;font-size:.82rem"><i class="fas fa-spinner fa-spin"></i> Loading…</div></div>'+
+        '<div id="biz-admin-list"><div style="color:var(--ds-text-3);font-size:.82rem"><i class="fas fa-spinner fa-spin"></i> Loading…</div></div>'+
       '</div>'+
     '</div>';
   }
@@ -1989,7 +1989,7 @@
         '<div class="biz-modal-handle"></div>'+
         '<button class="biz-modal-close" onclick="window._bizActions.closeProdDetail()"><i class="fas fa-times"></i></button>'+
         '<div class="biz-detail-product-img-wrap" id="biz-prod-d-img-wrap" style="display:none">'+
-          '<img id="biz-prod-d-img" src="" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'">'+
+          '<img id="biz-prod-d-img" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'">'+
         '</div>'+
         '<div class="biz-modal-title" id="biz-prod-d-name" style="margin-top:12px"></div>'+
         '<div class="biz-detail-biz-name" id="biz-prod-d-biz"></div>'+
@@ -2025,7 +2025,7 @@
       // Page identity: can choose to post as the business or as themselves
       identityHtml =
         '<div class="biz-compose-identity-row">'+
-          '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.84rem;color:#94a3b8">'+
+          '<label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:.84rem;color:var(--ds-text-3)">'+
             '<input type="checkbox" id="biz-identity-as-biz" data-biz-identity-as-biz checked>'+
             '<span id="biz-identity-label">Posting as <strong>'+esc(biz.title||'your business')+'</strong></span>'+
           '</label>'+
@@ -2057,7 +2057,7 @@
   function renderLightbox() {
     return '<div class="biz-lightbox" id="biz-lightbox" onclick="window._bizActions.closePhoto()">'+
       '<button class="biz-lightbox-close" onclick="window._bizActions.closePhoto()"><i class="fas fa-times"></i></button>'+
-      '<img id="biz-lightbox-img" src="" alt="">'+
+      '<img id="biz-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="">'+
     '</div>';
   }
 
@@ -2074,7 +2074,7 @@
         '<div class="biz-modal-sub" style="margin-bottom:16px">Changes are visible immediately</div>'+
         '<textarea class="biz-edit-textarea" id="biz-edit-textarea" placeholder="What\'s on your mind?" rows="4"></textarea>'+
         '<div class="biz-edit-vis-row">'+
-          '<i class="fas fa-globe" style="color:#64748b"></i>'+
+          '<i class="fas fa-globe" style="color:var(--ds-text-3)"></i>'+
           '<span>Visibility:</span>'+
           '<select id="biz-edit-vis">'+
             '<option value="public">Public</option>'+
@@ -2135,10 +2135,10 @@
     var authNavHtml = user
       ? '<div id="authNavUser" style="display:flex;align-items:center;gap:6px">' +
           (user.photoURL
-            ? '<img src="' + esc(user.photoURL) + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid rgba(16,185,129,.4)" alt="" onerror="this.style.display=\'none\'">'
-            : '<span style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#10b981,#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.8rem;flex-shrink:0">' + esc(((user.displayName||user.email||'U')[0]).toUpperCase()) + '</span>') +
+            ? '<img src="' + esc(user.photoURL) + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid rgba(var(--ds-accent-rgb),.4)" alt="" onerror="this.style.display=\'none\'">'
+            : '<span style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--ds-accent),#3b82f6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.8rem;flex-shrink:0">' + esc(((user.displayName||user.email||'U')[0]).toUpperCase()) + '</span>') +
         '</div>'
-      : '<a href="auth.html" style="background:#10b981;color:#fff;padding:6px 14px;border-radius:20px;text-decoration:none;font-size:.82rem;font-weight:600">Sign In</a>';
+      : '<a href="auth.html" style="background:var(--ds-accent);#fffvar(--ds-accent-on);padding:6px 14px;border-radius:20px;text-decoration:none;font-size:.82rem;font-weight:600">Sign In</a>';
 
     var nav = document.createElement('nav');
     nav.className = 'navbar';
@@ -3079,13 +3079,13 @@
 
     _fs.getDoc(_fs.doc(_db,'businesses',BIZ_ID)).then(function(bizSnap) {
       if (!bizSnap.exists()) {
-        root.innerHTML = '<div class="biz-error-state"><i class="fas fa-store-slash"></i><h3>Business not found</h3><p>This page doesn\'t exist or was removed.</p><a href="business.html" style="color:#10b981;text-decoration:none">← Back to Businesses</a></div>';
+        root.innerHTML = '<div class="biz-error-state"><i class="fas fa-store-slash"></i><h3>Business not found</h3><p>This page doesn\'t exist or was removed.</p><a href="business.html" style="color:var(--ds-accent-ink);text-decoration:none">← Back to Businesses</a></div>';
         return;
       }
 
       _biz     = Object.assign({id:BIZ_ID}, bizSnap.data());
       if (_biz.status === 'deleted' || _biz.deleted === true) {
-        root.innerHTML = '<div class="biz-error-state"><i class="fas fa-store-slash"></i><h3>Page not found</h3><p>This business page has been deleted or is no longer available.</p><a href="business.html" style="color:#10b981;text-decoration:none">← Back to Businesses</a></div>';
+        root.innerHTML = '<div class="biz-error-state"><i class="fas fa-store-slash"></i><h3>Page not found</h3><p>This business page has been deleted or is no longer available.</p><a href="business.html" style="color:var(--ds-accent-ink);text-decoration:none">← Back to Businesses</a></div>';
         return;
       }
       _isOwner = !!(_currentUser && _biz.ownerId === _currentUser.uid);
@@ -3233,7 +3233,7 @@
         '</div>'
       : '';
     var questionsList = isAdminOrOwner()
-      ? '<div id="biz-faq-questions-section"><div style="color:#64748b;font-size:.82rem;margin-bottom:6px">Visitor Questions:</div>'+
+      ? '<div id="biz-faq-questions-section"><div style="color:var(--ds-text-3);font-size:.82rem;margin-bottom:6px">Visitor Questions:</div>'+
           '<div id="biz-faq-questions-list"><i class="fas fa-spinner fa-spin"></i></div></div>'
       : '';
     safeSnap(_fs.getDocs(_fs.collection(_db,'businesses',bizId,'faq'))).then(function(items) {
@@ -3265,7 +3265,7 @@
       _fs.orderBy('createdAt','desc'),
       _fs.limit(20)
     ))).then(function(questions) {
-      if (!questions.length) { el.innerHTML = '<div style="color:#64748b;font-size:.82rem">No visitor questions yet.</div>'; return; }
+      if (!questions.length) { el.innerHTML = '<div style="color:var(--ds-text-3);font-size:.82rem">No visitor questions yet.</div>'; return; }
       el.innerHTML = questions.map(function(q) {
         return '<div class="biz-faq-question-item">'+
           '<div class="biz-faq-q">'+esc(q.question||'')+'</div>'+
@@ -3318,7 +3318,7 @@
         panelEl.innerHTML =
           '<div class="biz-empty-state"><i class="fas fa-gift"></i>' +
           (_isActingAsPage
-            ? '<p>No active rewards linked to this business. Create one in the <a href="admin.html" style="color:#10b981">admin panel</a> and set the Business ID to <code>' + esc(bizId) + '</code>.</p>'
+            ? '<p>No active rewards linked to this business. Create one in the <a href="admin.html" style="color:var(--ds-accent-ink)">admin panel</a> and set the Business ID to <code>' + esc(bizId) + '</code>.</p>'
             : '<p>No active rewards available right now. Check back soon!</p>') +
           '</div>';
         return;
@@ -3466,7 +3466,7 @@
       var statsHtml =
         '<div class="biz-insights-stats">'+
           insightStat('fa-eye','Page Views', bizData.viewCount||0, '#3b82f6')+
-          insightStat('fa-users','Followers', bizData.followerCount||0, '#10b981')+
+          insightStat('fa-users','Followers', bizData.followerCount||0, 'var(--ds-accent)')+
           insightStat('fa-newspaper','Posts', posts.length, '#8b5cf6')+
           insightStat('fa-thumbs-up','Total Reactions', totalReactions, '#f59e0b')+
           insightStat('fa-comment','Total Comments', totalComments, '#06b6d4')+
@@ -3544,7 +3544,7 @@
       var activity = [];
       followers.forEach(function(f){
         activity.push({
-          icon: 'fa-user-plus', color: '#10b981',
+          icon: 'fa-user-plus', color: 'var(--ds-accent)',
           text: 'New follower' + (f.displayName || f.userName ? ': ' + esc(f.displayName || f.userName) : ''),
           time: f.createdAt || f.followedAt
         });
@@ -3928,13 +3928,13 @@
       ta.className = 'biz-cmt-edit-ta';
       ta.value = current;
       ta.rows = 2;
-      ta.style.cssText = 'width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#f1f5f9;padding:6px 10px;resize:none;font-size:.87rem;font-family:inherit;outline:none';
+      ta.style.cssText = 'width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:var(--ds-text);padding:6px 10px;resize:none;font-size:.87rem;font-family:inherit;outline:none';
       var saveBtn = document.createElement('button');
       saveBtn.className = 'biz-cmt-send-btn';
       saveBtn.style.cssText = 'margin-top:4px;font-size:.78rem;padding:4px 12px;border-radius:12px';
       saveBtn.innerHTML = 'Save';
       var cancel = document.createElement('button');
-      cancel.style.cssText = 'margin-top:4px;margin-left:6px;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:.78rem;padding:4px 8px';
+      cancel.style.cssText = 'margin-top:4px;margin-left:6px;background:none;border:none;color:var(--ds-text-3);cursor:pointer;font-size:.78rem;padding:4px 8px';
       cancel.textContent = 'Cancel';
       textEl.innerHTML = '';
       textEl.appendChild(ta);
@@ -4049,7 +4049,7 @@
       // If getDocs already loaded and not forcing refresh, done
       if (section.dataset.loaded && !forceOpen) return;
       section.dataset.loaded = '1';
-      if (!isVisible) section.innerHTML = '<div style="color:#64748b;font-size:.78rem;padding:4px 0"><i class="fas fa-spinner fa-spin"></i></div>';
+      if (!isVisible) section.innerHTML = '<div style="color:var(--ds-text-3);font-size:.78rem;padding:4px 0"><i class="fas fa-spinner fa-spin"></i></div>';
       var render = function(replies) {
         if (!section.isConnected) return;
         var active = (replies||[]).filter(function(r){ return r.status !== 'deleted'; });
@@ -4084,12 +4084,12 @@
       var current = textEl.textContent || '';
       var ta = document.createElement('textarea');
       ta.value = current; ta.rows = 2;
-      ta.style.cssText = 'width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#f1f5f9;padding:6px 10px;resize:none;font-size:.87rem;font-family:inherit;outline:none';
+      ta.style.cssText = 'width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:var(--ds-text);padding:6px 10px;resize:none;font-size:.87rem;font-family:inherit;outline:none';
       var saveBtn = document.createElement('button');
-      saveBtn.style.cssText = 'margin-top:4px;font-size:.78rem;padding:4px 12px;border-radius:12px;background:#10b981;color:#fff;border:none;cursor:pointer;font-family:inherit';
+      saveBtn.style.cssText = 'margin-top:4px;font-size:.78rem;padding:4px 12px;border-radius:12px;background:var(--ds-accent);#fffvar(--ds-accent-on);border:none;cursor:pointer;font-family:inherit';
       saveBtn.textContent = 'Save';
       var cancel = document.createElement('button');
-      cancel.style.cssText = 'margin-top:4px;margin-left:6px;background:none;border:none;color:#94a3b8;cursor:pointer;font-size:.78rem;padding:4px 8px;font-family:inherit';
+      cancel.style.cssText = 'margin-top:4px;margin-left:6px;background:none;border:none;color:var(--ds-text-3);cursor:pointer;font-size:.78rem;padding:4px 8px;font-family:inherit';
       cancel.textContent = 'Cancel';
       textEl.innerHTML = '';
       textEl.appendChild(ta); textEl.appendChild(document.createElement('br'));
@@ -4328,7 +4328,6 @@
     },
 
     // kept for backward compat with any cached cards
-    likePost: function(postId) { window._bizActions.toggleReaction(postId); },
 
     // ── Post owner menu ───────────────────────────────────────────
     openPostMenu: function(postId, btnEl) {
@@ -4534,7 +4533,7 @@
           '<p style="color:rgba(255,255,255,.5);font-size:.82rem;margin-bottom:14px">Type <strong style="color:#fff">DELETE</strong> to confirm:</p>' +
           '<input id="biz-delete-confirm-input" type="text" class="biz-input" placeholder="Type DELETE" autocomplete="off" style="margin-bottom:14px;border-color:rgba(239,68,68,.4)">' +
           '<div style="display:flex;gap:8px">' +
-            '<button class="biz-admin-btn" style="flex:1;background:rgba(107,114,128,.12);border-color:rgba(107,114,128,.3);color:#9ca3af" onclick="document.getElementById(\'biz-delete-confirm-modal\').remove()">Cancel</button>' +
+            '<button class="biz-admin-btn" style="flex:1;background:rgba(107,114,128,.12);border-color:rgba(107,114,128,.3);color:var(--ds-text-3)" onclick="document.getElementById(\'biz-delete-confirm-modal\').remove()">Cancel</button>' +
             '<button id="biz-delete-confirm-btn" class="biz-admin-btn" style="flex:1;background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:#f87171" onclick="window._bizActions._confirmHardDelete()"><i class="fas fa-trash"></i> Delete Forever</button>' +
           '</div>' +
         '</div>';
@@ -4621,11 +4620,11 @@
       var bizName = (_biz && _biz.title) || 'this business';
       if (mode === 'service') {
         if (titleEl) titleEl.textContent = 'Request this Service';
-        if (subEl)   subEl.innerHTML = '<i class="fas fa-briefcase" style="color:#10b981;margin-right:4px"></i>'+
+        if (subEl)   subEl.innerHTML = '<i class="fas fa-briefcase" style="color:var(--ds-accent-ink);margin-right:4px"></i>'+
           esc(serviceTitle||'service')+' &middot; '+esc(bizName);
       } else if (mode === 'product') {
         if (titleEl) titleEl.textContent = 'Ask about this Product';
-        if (subEl)   subEl.innerHTML = '<i class="fas fa-box" style="color:#60a5fa;margin-right:4px"></i>'+
+        if (subEl)   subEl.innerHTML = '<i class="fas fa-box" style="color:var(--ds-h-video-ink);margin-right:4px"></i>'+
           esc(serviceTitle||'product')+' &middot; '+esc(bizName);
       } else {
         if (titleEl) titleEl.textContent = 'Request a Quote';
@@ -5098,7 +5097,7 @@
     refreshBlockManagerList: function() {
       var list = document.getElementById('biz-block-manager-list');
       if (!list) return;
-      list.innerHTML = '<div style="color:#64748b;font-size:.82rem;padding:8px 0"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
+      list.innerHTML = '<div style="color:var(--ds-text-3);font-size:.82rem;padding:8px 0"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
       safeSnap(
         _fs.getDocs(_fs.query(
           _fs.collection(_db,'businesses',BIZ_ID,'pageBlocks'),
@@ -5106,7 +5105,7 @@
         ))
       ).then(function(blocks) {
         if (!blocks.length) {
-          list.innerHTML = '<div style="color:#64748b;font-size:.82rem;padding:8px 0">No blocks yet. Add one above!</div>';
+          list.innerHTML = '<div style="color:var(--ds-text-3);font-size:.82rem;padding:8px 0">No blocks yet. Add one above!</div>';
           return;
         }
         list.innerHTML = blocks.map(function(b) {
@@ -5303,7 +5302,7 @@
       ta.className = 'biz-cmt-edit-ta';
       ta.placeholder = 'Write your answer…';
       ta.rows = 3;
-      ta.style.cssText = 'width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#f1f5f9;padding:8px 12px;resize:none;font-size:.87rem;font-family:inherit;outline:none;margin-top:8px;box-sizing:border-box';
+      ta.style.cssText = 'width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:var(--ds-text);padding:8px 12px;resize:none;font-size:.87rem;font-family:inherit;outline:none;margin-top:8px;box-sizing:border-box';
       var saveBtn = document.createElement('button');
       saveBtn.className = 'biz-submit-btn';
       saveBtn.style.cssText = 'margin-top:6px;font-size:.8rem;padding:6px 14px';
@@ -5437,7 +5436,7 @@
       var el = document.getElementById('biz-admin-list');
       if (!el) return;
       safeSnap(_fs.getDocs(_fs.collection(_db,'businesses',BIZ_ID,'admins'))).then(function(admins) {
-        if (!admins.length) { el.innerHTML = '<div style="color:#64748b;font-size:.82rem">No additional admins.</div>'; return; }
+        if (!admins.length) { el.innerHTML = '<div style="color:var(--ds-text-3);font-size:.82rem">No additional admins.</div>'; return; }
         el.innerHTML = admins.map(function(a) {
           return '<div class="biz-admin-role-item">'+
             '<span class="biz-admin-role-badge">'+esc(a.role||'admin')+'</span>'+

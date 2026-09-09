@@ -217,7 +217,7 @@ function obLang(l) {
 
 const OB_DATA = {
   accountTypes: [
-    { id: 'user',       icon: 'fas fa-compass',             color: '#10b981' },
+    { id: 'user',       icon: 'fas fa-compass',             color: 'var(--ds-accent)' },
     { id: 'influencer', icon: 'fas fa-wand-magic-sparkles', color: '#a855f7' },
   ],
 
@@ -530,7 +530,7 @@ function updateHeader(step) {
 
 function renderWelcome() {
   return '<div class="ob-welcome">' +
-    '<img src="icons/icon-192.png" alt="GeoHub" style="width:80px;height:80px;border-radius:22px;object-fit:cover;box-shadow:0 8px 32px rgba(16,185,129,.3);margin-bottom:16px">' +
+    '<img src="icons/icon-192.png" alt="GeoHub" style="width:80px;height:80px;border-radius:22px;object-fit:cover;box-shadow:0 8px 32px rgba(var(--ds-accent-rgb),.3);margin-bottom:16px">' +
     '<h1>Welcome to <span class="hl">GeoHub</span></h1>' +
     '<p>' + obT('ob_welcome_sub') + '</p>' +
     '<div class="ob-feature-chips">' +
@@ -559,16 +559,16 @@ function renderPhoto() {
     '<p>' + obT('ob_photo_sub') + '</p>' +
   '</div>' +
   '<div style="display:flex;flex-direction:column;align-items:center;gap:20px;padding:20px 0">' +
-    '<div id="ob-photo-preview" style="width:110px;height:110px;border-radius:50%;background:rgba(16,185,129,.12);border:3px dashed rgba(16,185,129,.4);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer" onclick="document.getElementById(\'ob-photo-input\').click()">' +
+    '<div id="ob-photo-preview" style="width:110px;height:110px;border-radius:50%;background:rgba(var(--ds-accent-rgb),.12);border:3px dashed rgba(var(--ds-accent-rgb),.4);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer" onclick="document.getElementById(\'ob-photo-input\').click()">' +
       (preview
         ? '<img src="' + preview + '" style="width:100%;height:100%;object-fit:cover">'
-        : '<i class="fas fa-camera" style="font-size:2rem;color:rgba(16,185,129,.6)"></i>') +
+        : '<i class="fas fa-camera" style="font-size:2rem;color:rgba(var(--ds-accent-rgb),.6)"></i>') +
     '</div>' +
     '<input type="file" id="ob-photo-input" accept="image/*" style="display:none" onchange="obHandlePhoto(this)">' +
-    '<button type="button" onclick="document.getElementById(\'ob-photo-input\').click()" style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:#10e0a0;border-radius:12px;padding:10px 24px;font-weight:700;cursor:pointer;font-size:.9rem">' +
+    '<button type="button" onclick="document.getElementById(\'ob-photo-input\').click()" style="background:rgba(var(--ds-accent-rgb),.1);border:1px solid rgba(var(--ds-accent-rgb),.3);color:#10e0a0;border-radius:12px;padding:10px 24px;font-weight:700;cursor:pointer;font-size:.9rem">' +
       '<i class="fas fa-upload" style="margin-right:8px"></i>' + (preview ? obT('ob_change_photo') : obT('ob_choose_photo')) +
     '</button>' +
-    (preview ? '<p style="color:#10b981;font-size:.85rem"><i class="fas fa-check-circle"></i> ' + obT('ob_photo_ok') + '</p>' : '') +
+    (preview ? '<p style="color:var(--ds-accent-ink);font-size:.85rem"><i class="fas fa-check-circle"></i> ' + obT('ob_photo_ok') + '</p>' : '') +
   '</div>';
 }
 
@@ -612,12 +612,12 @@ function obCheckUsername(val) {
     return;
   }
   obState.usernameStatus = 'checking';
-  status.innerHTML = '<span style="color:#94a3b8"><i class="fas fa-circle-notch fa-spin"></i> Checking…</span>';
+  status.innerHTML = '<span style="color:var(--ds-text-3)"><i class="fas fa-circle-notch fa-spin"></i> Checking…</span>';
   _unCheckTimer = setTimeout(function () {
     var geo = window.GeoFirebase, f = geo && geo.fs;
     if (!geo || !f) {
       obState.usernameStatus = 'available';
-      status.innerHTML = '<span style="color:#10b981"><i class="fas fa-check-circle"></i> @' + clean + ' looks good</span>';
+      status.innerHTML = '<span style="color:var(--ds-accent-ink)"><i class="fas fa-check-circle"></i> @' + clean + ' looks good</span>';
       return;
     }
     var q = f.query(f.collection(geo.db, 'users'), f.where('username', '==', clean), f.limit(2));
@@ -630,11 +630,11 @@ function obCheckUsername(val) {
         status.innerHTML = '<span style="color:#ef4444"><i class="fas fa-times-circle"></i> This username is taken — try another</span>';
       } else {
         obState.usernameStatus = 'available';
-        status.innerHTML = '<span style="color:#10b981"><i class="fas fa-check-circle"></i> @' + clean + ' is available</span>';
+        status.innerHTML = '<span style="color:var(--ds-accent-ink)"><i class="fas fa-check-circle"></i> @' + clean + ' is available</span>';
       }
     }).catch(function () {
       obState.usernameStatus = 'available';
-      status.innerHTML = '<span style="color:#10b981"><i class="fas fa-check-circle"></i> @' + clean + ' looks good</span>';
+      status.innerHTML = '<span style="color:var(--ds-accent-ink)"><i class="fas fa-check-circle"></i> @' + clean + ' looks good</span>';
     });
   }, 600);
 }
@@ -645,9 +645,9 @@ function obCheckPasswords() {
   var st  = document.getElementById('ob-pw-status');
   if (!pw1 || !pw2 || !st) return;
   if (!pw1.value && !pw2.value) { st.innerHTML = ''; return; }
-  if (pw1.value.length < 8) { st.innerHTML = '<span style="color:#f59e0b">At least 8 characters</span>'; return; }
+  if (pw1.value.length < 8) { st.innerHTML = '<span style="color:var(--ds-h-reward-ink)">At least 8 characters</span>'; return; }
   if (pw1.value !== pw2.value) { st.innerHTML = '<span style="color:#ef4444">Passwords do not match</span>'; return; }
-  st.innerHTML = '<span style="color:#10b981"><i class="fas fa-check-circle"></i> Passwords match</span>';
+  st.innerHTML = '<span style="color:var(--ds-accent-ink)"><i class="fas fa-check-circle"></i> Passwords match</span>';
 }
 
 function renderIdentity() {
@@ -662,22 +662,22 @@ function renderIdentity() {
   '<div style="display:flex;flex-direction:column;gap:14px;max-width:440px;margin:0 auto">' +
     '<div style="display:flex;gap:12px">' +
       '<div style="flex:1">' +
-        '<label style="display:block;font-size:.78rem;color:#94a3b8;margin-bottom:5px">' + obT('ob_firstname') + '</label>' +
+        '<label style="display:block;font-size:.78rem;color:var(--ds-text-3);margin-bottom:5px">' + obT('ob_firstname') + '</label>' +
         '<input type="text" id="ob-firstname" class="form-input" placeholder="' + obT('ob_fn_ph') + '" value="' + fn + '" oninput="obState.firstName=this.value.trim()">' +
       '</div>' +
       '<div style="flex:1">' +
-        '<label style="display:block;font-size:.78rem;color:#94a3b8;margin-bottom:5px">' + obT('ob_lastname') + '</label>' +
+        '<label style="display:block;font-size:.78rem;color:var(--ds-text-3);margin-bottom:5px">' + obT('ob_lastname') + '</label>' +
         '<input type="text" id="ob-lastname" class="form-input" placeholder="' + obT('ob_ln_ph') + '" value="' + ln + '" oninput="obState.lastName=this.value.trim()">' +
       '</div>' +
     '</div>' +
     '<div>' +
-      '<label style="display:block;font-size:.78rem;color:#94a3b8;margin-bottom:5px">' + obT('ob_username_lbl') + ' <span style="color:#64748b;font-weight:400;font-size:.75rem">' + obT('ob_username_hint') + '</span></label>' +
+      '<label style="display:block;font-size:.78rem;color:var(--ds-text-3);margin-bottom:5px">' + obT('ob_username_lbl') + ' <span style="color:var(--ds-text-3);font-weight:400;font-size:.75rem">' + obT('ob_username_hint') + '</span></label>' +
       '<div style="position:relative">' +
-        '<span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#64748b;pointer-events:none">@</span>' +
+        '<span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--ds-text-3);pointer-events:none">@</span>' +
         '<input type="text" id="ob-username" class="form-input" style="padding-left:28px" placeholder="' + obT('ob_un_ph') + '" value="' + un + '" oninput="obCheckUsername(this.value)" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false">' +
       '</div>' +
       '<div id="ob-username-status" style="margin-top:5px;font-size:.78rem;min-height:18px">' +
-        (un.length >= 3 ? '<span style="color:#10b981"><i class="fas fa-check-circle"></i> @' + un + ' is available</span>' : '') +
+        (un.length >= 3 ? '<span style="color:var(--ds-accent-ink)"><i class="fas fa-check-circle"></i> @' + un + ' is available</span>' : '') +
       '</div>' +
     '</div>' +
   '</div>';
@@ -730,7 +730,7 @@ function renderAboutYou() {
 
     // City card
     '<div class="ob-about-card">' +
-      '<div class="ob-about-icon" style="background:rgba(59,130,246,.12);color:#60a5fa">' +
+      '<div class="ob-about-icon" style="background:rgba(59,130,246,.12);color:var(--ds-h-video-ink)">' +
         '<i class="fas fa-location-dot"></i>' +
       '</div>' +
       '<div class="ob-about-field">' +
@@ -758,20 +758,20 @@ function renderAccountInfo() {
   '</div>' +
   '<div style="display:flex;flex-direction:column;gap:14px;max-width:440px;margin:0 auto">' +
     '<div>' +
-      '<label style="display:block;font-size:.78rem;color:#94a3b8;margin-bottom:5px">' + obT('ob_email_lbl') + '</label>' +
+      '<label style="display:block;font-size:.78rem;color:var(--ds-text-3);margin-bottom:5px">' + obT('ob_email_lbl') + '</label>' +
       '<input type="email" class="form-input" value="' + email + '" readonly style="opacity:.7;cursor:default;background:rgba(255,255,255,.06);color:var(--text-primary)">' +
     '</div>' +
     (hasPwd
-      ? '<div style="background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px">' +
-          '<i class="fas fa-lock" style="color:#10b981"></i>' +
-          '<span style="font-size:.85rem;color:#94a3b8">' + obT('ob_pwd_set') + '</span>' +
+      ? '<div style="background:rgba(var(--ds-accent-rgb),.07);border:1px solid rgba(var(--ds-accent-rgb),.2);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px">' +
+          '<i class="fas fa-lock" style="color:var(--ds-accent-ink)"></i>' +
+          '<span style="font-size:.85rem;color:var(--ds-text-3)">' + obT('ob_pwd_set') + '</span>' +
         '</div>'
       : '<div>' +
-          '<label style="display:block;font-size:.78rem;color:#94a3b8;margin-bottom:5px">' + obT('ob_pwd_lbl') + ' <span style="color:#64748b;font-weight:400;font-size:.75rem">' + obT('ob_pwd_hint') + '</span></label>' +
+          '<label style="display:block;font-size:.78rem;color:var(--ds-text-3);margin-bottom:5px">' + obT('ob_pwd_lbl') + ' <span style="color:var(--ds-text-3);font-weight:400;font-size:.75rem">' + obT('ob_pwd_hint') + '</span></label>' +
           '<input type="password" id="ob-password" class="form-input" placeholder="' + obT('ob_pwd_ph') + '" oninput="obCheckPasswords()">' +
         '</div>' +
         '<div>' +
-          '<label style="display:block;font-size:.78rem;color:#94a3b8;margin-bottom:5px">' + obT('ob_cpwd_lbl') + '</label>' +
+          '<label style="display:block;font-size:.78rem;color:var(--ds-text-3);margin-bottom:5px">' + obT('ob_cpwd_lbl') + '</label>' +
           '<input type="password" id="ob-password2" class="form-input" placeholder="' + obT('ob_cpwd_ph') + '" oninput="obCheckPasswords()">' +
           '<div id="ob-pw-status" style="margin-top:5px;font-size:.78rem;min-height:18px"></div>' +
         '</div>') +
@@ -784,7 +784,7 @@ function renderAccountType() {
   var sel = obState.accountType;
   var types = [
     {
-      id: 'user', color: '#10b981', icon: 'fas fa-compass',
+      id: 'user', color: 'var(--ds-accent)', icon: 'fas fa-compass',
       lbl: obT('ob_type_user'), desc: obT('ob_type_user_desc'),
       features: [obT('ob_type_user_f1'), obT('ob_type_user_f2'), obT('ob_type_user_f3')]
     },
@@ -955,15 +955,15 @@ function renderNotifPermission() {
         '<i class="fas fa-heart" style="color:#f43f5e;width:20px"></i><span style="font-size:.88rem">' + obT('ob_notif_follows') + '</span>' +
       '</div>' +
       '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,255,255,.04);border-radius:14px;border:1px solid rgba(255,255,255,.07)">' +
-        '<i class="fas fa-tag" style="color:#f59e0b;width:20px"></i><span style="font-size:.88rem">' + obT('ob_notif_deals') + '</span>' +
+        '<i class="fas fa-tag" style="color:var(--ds-h-reward-ink);width:20px"></i><span style="font-size:.88rem">' + obT('ob_notif_deals') + '</span>' +
       '</div>' +
       '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,255,255,.04);border-radius:14px;border:1px solid rgba(255,255,255,.07)">' +
-        '<i class="fas fa-trophy" style="color:#10b981;width:20px"></i><span style="font-size:.88rem">' + obT('ob_notif_xp') + '</span>' +
+        '<i class="fas fa-trophy" style="color:var(--ds-accent-ink);width:20px"></i><span style="font-size:.88rem">' + obT('ob_notif_xp') + '</span>' +
       '</div>' +
     '</div>' +
     (granted
-      ? '<div style="color:#10b981;font-weight:700;font-size:.95rem"><i class="fas fa-check-circle"></i> ' + obT('ob_notif_enabled') + '</div>'
-      : '<button type="button" id="ob-notif-btn" onclick="obRequestNotif()" style="background:linear-gradient(135deg,#10b981,#3b82f6);border:none;color:#fff;border-radius:14px;padding:14px 32px;font-weight:800;font-size:1rem;cursor:pointer;width:100%;max-width:360px"><i class="fas fa-bell" style="margin-right:8px"></i> ' + obT('ob_notif_enable') + '</button>') +
+      ? '<div style="color:var(--ds-accent-ink);font-weight:700;font-size:.95rem"><i class="fas fa-check-circle"></i> ' + obT('ob_notif_enabled') + '</div>'
+      : '<button type="button" id="ob-notif-btn" onclick="obRequestNotif()" style="background:linear-gradient(135deg,var(--ds-accent),#3b82f6);border:none;color:#fff;border-radius:14px;padding:14px 32px;font-weight:800;font-size:1rem;cursor:pointer;width:100%;max-width:360px"><i class="fas fa-bell" style="margin-right:8px"></i> ' + obT('ob_notif_enable') + '</button>') +
   '</div>';
 }
 

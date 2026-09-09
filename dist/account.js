@@ -70,7 +70,7 @@
     b.setAttribute('aria-label', 'Switch language');
     b.textContent = appLang === 'ka' ? 'EN' : 'ქარ';
     b.style.cssText = 'background:transparent;border:1px solid rgba(255,255,255,.18);color:#aaa;border-radius:6px;padding:3px 9px;font-size:.75rem;font-weight:700;letter-spacing:.5px;cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:inherit;transition:border-color .2s,color .2s';
-    b.onmouseenter = function() { b.style.borderColor = '#10b981'; b.style.color = '#10b981'; };
+    b.onmouseenter = function() { b.style.borderColor = 'var(--ds-accent)'; b.style.color = 'var(--ds-accent)'; };
     b.onmouseleave = function() { b.style.borderColor = 'rgba(255,255,255,.18)'; b.style.color = '#aaa'; };
     b.onclick = function() { appLang = appLang === 'ka' ? 'en' : 'ka'; window.GeoLang = appLang; window.dispatchEvent(new CustomEvent('GeoLangChange', { detail: appLang })); window.location.reload(); };
     if (actionsEl) actionsEl.insertBefore(b, actionsEl.firstChild);
@@ -107,14 +107,14 @@
     like:      { icon: 'fa-heart',    color: '#ef4444' },
     comment:   { icon: 'fa-comment',  color: '#3b82f6' },
     reply:     { icon: 'fa-reply',    color: '#8b5cf6' },
-    follow:    { icon: 'fa-user-plus',color: '#10b981' },
+    follow:    { icon: 'fa-user-plus',color: 'var(--ds-accent)' },
     message:   { icon: 'fa-envelope', color: '#06b6d4' },
     reward:          { icon: 'fa-gift',       color: '#f59e0b' },
     badge:           { icon: 'fa-medal',      color: '#f59e0b' },
     challenge:       { icon: 'fa-trophy',     color: '#f59e0b' },
-    coupon_redeemed:    { icon: 'fa-ticket-alt', color: '#10b981' },
+    coupon_redeemed:    { icon: 'fa-ticket-alt', color: 'var(--ds-accent)' },
     group_join_request: { icon: 'fa-user-clock', color: '#a855f7' },
-    group_approved:     { icon: 'fa-user-check', color: '#10b981' },
+    group_approved:     { icon: 'fa-user-check', color: 'var(--ds-accent)' },
     group_declined:     { icon: 'fa-user-times', color: '#ef4444' }
   };
 
@@ -181,7 +181,7 @@
           return;
         }
         list.innerHTML = items.map(function(n) {
-          var ic = NOTIF_ICONS[n.type] || { icon: 'fa-bell', color: '#10b981' };
+          var ic = NOTIF_ICONS[n.type] || { icon: 'fa-bell', color: 'var(--ds-accent)' };
           return '<a class="nav-notif-item' + (!n.read ? ' unread' : '') + '" href="' + esc(n.href || '#') + '" data-notif-id="' + esc(n.id) + '">' +
             '<div class="nav-notif-icon" style="color:' + ic.color + '"><i class="fas ' + ic.icon + '"></i></div>' +
             '<div class="nav-notif-text"><strong>' + esc(n.title || 'GeoHub') + '</strong>' +
@@ -245,11 +245,11 @@
         '<a href="dashboard.html" class="auth-dd-item"><i class="fas fa-chart-bar"></i> Dashboard</a>' +
         '<a href="safety.html" class="auth-dd-item"><i class="fas fa-shield-alt"></i> Privacy &amp; Safety</a>' +
         '<a href="settings.html" class="auth-dd-item" id="authSettingsBtn"><i class="fas fa-cog"></i> Settings</a>' +
-        (isAdmin ? '<a href="admin.html" class="auth-dd-item auth-admin-link" style="color:#10b981"><i class="fas fa-shield-alt"></i> Admin Panel</a>' : '') +
+        (isAdmin ? '<a href="admin.html" class="auth-dd-item auth-admin-link" style="color:var(--ds-accent-ink)"><i class="fas fa-shield-alt"></i> '+(typeof GHt==="function"?GHt("nav_admin"):"ადმინ პანელი")+'</a>' : '') +
         '<div class="auth-dd-sep"></div><button class="auth-dd-item auth-dd-logout" id="authLogoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button></div></div>';
       var navUser = document.getElementById('authNavUser');
       var navDrop = document.getElementById('authNavDropdown');
-      checkAdminDoc(user.uid || user.id, function(ok){ if(ok && navDrop && !navDrop.querySelector('.auth-admin-link')){ var a=document.createElement('a'); a.href='admin.html'; a.className='auth-dd-item auth-admin-link'; a.style.color='#10b981'; a.innerHTML='<i class="fas fa-shield-alt"></i> Admin Panel'; var sep=navDrop.querySelector('.auth-dd-sep'); navDrop.insertBefore(a, sep || navDrop.lastChild); } });
+      checkAdminDoc(user.uid || user.id, function(ok){ if(ok && navDrop && !navDrop.querySelector('.auth-admin-link')){ var a=document.createElement('a'); a.href='admin.html'; a.className='auth-dd-item auth-admin-link'; a.style.color='var(--ds-accent)'; a.innerHTML='<i class="fas fa-shield-alt"></i> '+(typeof GHt==='function'?GHt('nav_admin'):'ადმინ პანელი'); var sep=navDrop.querySelector('.auth-dd-sep'); navDrop.insertBefore(a, sep || navDrop.lastChild); } });
       if (navUser) navUser.addEventListener('click', function (e) { e.stopPropagation(); if(navDrop) navDrop.classList.toggle('open'); });
       document.addEventListener('click', function () { if (navDrop) navDrop.classList.remove('open'); });
       var out = document.getElementById('authLogoutBtn'); if (out) out.addEventListener('click', doLogout);
@@ -328,7 +328,7 @@
       + '</div>'
       + '<div style="flex:1">'
       + '<button type="button" class="btn-ghost" id="asChangeAvatar" style="font-size:.82rem;padding:6px 12px"><i class="fas fa-camera"></i> Change avatar</button>'
-      + '<div id="asAvatarStatus" style="font-size:.75rem;color:#64748b;margin-top:4px"></div>'
+      + '<div id="asAvatarStatus" style="font-size:.75rem;color:var(--ds-text-3);margin-top:4px"></div>'
       + '</div></div>'
       + '<input id="asName" class="form-input" style="margin:8px 0" value="' + esc(user.fullName || '') + '" placeholder="Name">'
       + '<input id="asCity" class="form-input" style="margin:8px 0" value="' + esc(user.city || '') + '" placeholder="City">'

@@ -16,3 +16,7 @@ import '/responsive-polish.js';
 import '/analytics.js';
 import '/videos.js';
 import '/channel.js';
+
+import '/gh-tabs.js';
+import '/place-categories.js';
+import '/gh-admin-bridge.js';

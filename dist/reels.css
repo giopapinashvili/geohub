@@ -178,7 +178,7 @@ body[data-gh-page="reels"] .gh-center {
   z-index: 5;
   background: rgba(0,0,0,.5);
   backdrop-filter: blur(6px);
-  color: #6ee7b7;
+  color: var(--ds-accent-ink);
   font-size: .68rem;
   font-weight: 700;
   padding: 4px 10px;
@@ -351,7 +351,7 @@ body[data-gh-page="reels"] .gh-center {
 }
 .reel-comments-sheet {
   position: relative;
-  background: var(--bg-card, #1a1f35);
+  background: var(--bg-card, var(--ds-surface));
   border-radius: 22px 22px 0 0;
   max-height: 78vh;
   display: flex;
@@ -371,7 +371,7 @@ body[data-gh-page="reels"] .gh-center {
 .reel-comments-handle h4 {
   font-size: .92rem;
   font-weight: 700;
-  color: var(--text-primary, #f0f4ff);
+  color: var(--text-primary, var(--ds-text));
   margin: 0;
   display: flex;
   align-items: center;
@@ -380,7 +380,7 @@ body[data-gh-page="reels"] .gh-center {
 .reel-comments-close {
   background: none;
   border: none;
-  color: var(--text-muted, #6b7280);
+  color: var(--text-muted, var(--ds-text-3));
   font-size: 1.1rem;
   cursor: pointer;
   width: 32px;
@@ -408,11 +408,11 @@ body[data-gh-page="reels"] .gh-center {
   width: 33px;
   height: 33px;
   border-radius: 50%;
-  background: var(--green-muted, rgba(16,185,129,.12));
+  background: var(--green-muted, rgba(var(--ds-accent-rgb),.12));
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--green, #10b981);
+  color: var(--green, var(--ds-accent));
   font-size: .7rem;
   font-weight: 700;
   flex-shrink: 0;
@@ -422,15 +422,15 @@ body[data-gh-page="reels"] .gh-center {
 .reel-comment-name {
   font-size: .78rem;
   font-weight: 600;
-  color: var(--text-primary, #f0f4ff);
+  color: var(--text-primary, var(--ds-text));
   margin-bottom: 2px;
 }
-.reel-comment-time { font-size: .68rem; color: var(--text-muted, #6b7280); margin-left: 6px; font-weight: 400; }
-.reel-comment-text { font-size: .82rem; color: var(--text-secondary, #94a3b8); line-height: 1.5; }
+.reel-comment-time { font-size: .68rem; color: var(--text-muted, var(--ds-text-3)); margin-left: 6px; font-weight: 400; }
+.reel-comment-text { font-size: .82rem; color: var(--text-secondary, var(--ds-text-3)); line-height: 1.5; }
 .reel-comments-empty {
   text-align: center;
   padding: 28px 0;
-  color: var(--text-muted, #6b7280);
+  color: var(--text-muted, var(--ds-text-3));
   font-size: .85rem;
 }
 .reel-comment-input-row {
@@ -445,11 +445,11 @@ body[data-gh-page="reels"] .gh-center {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: var(--green-muted, rgba(16,185,129,.12));
+  background: var(--green-muted, rgba(var(--ds-accent-rgb),.12));
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--green, #10b981);
+  color: var(--green, var(--ds-accent));
   font-size: .65rem;
   font-weight: 700;
   flex-shrink: 0;
@@ -461,17 +461,17 @@ body[data-gh-page="reels"] .gh-center {
   background: var(--bg-elevated, rgba(255,255,255,.06));
   border: 1px solid var(--border, rgba(255,255,255,.08));
   border-radius: 22px;
-  color: var(--text-primary, #f0f4ff);
+  color: var(--text-primary, var(--ds-text));
   font-size: .85rem;
   padding: 9px 16px;
   outline: none;
   font-family: inherit;
   transition: border-color .15s;
 }
-.reel-comment-text-inp:focus { border-color: var(--green, #10b981); }
-.reel-comment-text-inp::placeholder { color: var(--text-muted, #6b7280); }
+.reel-comment-text-inp:focus { border-color: var(--green, var(--ds-accent)); }
+.reel-comment-text-inp::placeholder { color: var(--text-muted, var(--ds-text-3)); }
 .reel-send-btn {
-  background: var(--green, #10b981);
+  background: var(--green, var(--ds-accent));
   border: none;
   border-radius: 50%;
   width: 36px;
@@ -485,7 +485,7 @@ body[data-gh-page="reels"] .gh-center {
   flex-shrink: 0;
   transition: background .15s, transform .1s;
 }
-.reel-send-btn:hover { background: var(--green-hover, #059669); }
+.reel-send-btn:hover { background: var(--green-hover, var(--ds-accent-lo)); }
 .reel-send-btn:active { transform: scale(.9); }
 
 /* ── Loading / empty states ──────────────────────────────── */
@@ -510,7 +510,7 @@ body[data-gh-page="reels"] .gh-center {
 .reels-empty i { font-size: 3rem; }
 .reels-empty h3 { color: rgba(255,255,255,.65); font-size: 1.1rem; margin: 0; font-weight: 700; }
 .reels-empty p { font-size: .85rem; margin: 0; }
-.reels-empty a { color: #10b981; text-decoration: none; font-weight: 600; }
+.reels-empty a { color: var(--ds-accent-ink); text-decoration: none; font-weight: 600; }
 
 /* ── Mobile: full width ──────────────────────────────────── */
 @media (max-width: 599px) {
@@ -534,7 +534,7 @@ body[data-gh-page="reels"] .gh-center {
 .reel-progress-fill {
   height: 100%;
   width: 0%;
-  background: #10b981;
+  background: var(--ds-accent);
   border-radius: 0 2px 2px 0;
 }
 .reel-progress-fill.animate {

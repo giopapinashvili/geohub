@@ -6,7 +6,8 @@
   <link rel="dns-prefetch" href="https://firebase.googleapis.com">
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#10b981">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#060a09" media="(prefers-color-scheme: dark)">
   <title>ადგილის სიახლეები — GeoHub</title>
   <meta name="robots" content="index, follow">
   <meta name="description" content="ახალი პოსტები და განახლებები კაფეების, რესტორნებისა და ადგილების შესახებ.">
@@ -23,45 +24,50 @@
 .pu-page{max-width:760px;margin:0 auto;padding:24px 16px 120px}
 .pu-header{margin-bottom:24px}
 .pu-title{font-size:1.5rem;font-weight:900;color:var(--gh-text,#f9fafb);margin-bottom:4px}
-.pu-sub{color:var(--gh-muted,#64748b);font-size:.88rem}
+.pu-sub{color:var(--gh-muted,var(--ds-text-3));font-size:.88rem}
 .pu-filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:20px;scrollbar-width:none}
 .pu-filters::-webkit-scrollbar{display:none}
-.pu-filter-btn{flex-shrink:0;padding:8px 16px;border-radius:999px;border:1px solid var(--gh-border,#374151);background:var(--gh-card,rgba(13,22,19,.92));color:var(--gh-text,#f9fafb);font-size:.82rem;font-weight:700;cursor:pointer;transition:.15s}
-.pu-filter-btn.active{background:var(--gh-green,#10b981);border-color:var(--gh-green,#10b981);color:#fff}
+.pu-filter-btn{flex-shrink:0;padding:8px 16px;border-radius:999px;border:1px solid var(--gh-border,var(--ds-text-2));background:var(--gh-card,rgba(13,22,19,.92));color:var(--gh-text,#f9fafb);font-size:.82rem;font-weight:700;cursor:pointer;transition:.15s}
+.pu-filter-btn.active{background:var(--gh-green,var(--ds-accent));border-color:var(--gh-green,var(--ds-accent));color:var(--ds-accent-on)}
 .pu-list{display:grid;gap:14px}
-.pu-card{background:var(--gh-card,rgba(13,22,19,.92));border:1px solid var(--gh-border,#374151);border-radius:18px;overflow:hidden;transition:border-color .15s}
-.pu-card:hover{border-color:rgba(16,185,129,.4)}
+.pu-card{background:var(--gh-card,rgba(13,22,19,.92));border:1px solid var(--gh-border,var(--ds-text-2));border-radius:18px;overflow:hidden;transition:border-color .15s}
+.pu-card:hover{border-color:rgba(var(--ds-accent-rgb),.4)}
 .pu-card-img{width:100%;height:180px;object-fit:cover;display:block;background:var(--gh-bg,#050807)}
-.pu-card-img-placeholder{width:100%;height:180px;background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(59,130,246,.1));display:flex;align-items:center;justify-content:center;color:var(--gh-muted,#64748b);font-size:2rem}
+.pu-card-img-placeholder{width:100%;height:180px;background:linear-gradient(135deg,rgba(var(--ds-accent-rgb),.1),rgba(59,130,246,.1));display:flex;align-items:center;justify-content:center;color:var(--gh-muted,var(--ds-text-3));font-size:2rem}
 .pu-card-body{padding:16px}
 .pu-card-meta{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.pu-card-place{font-weight:800;font-size:.82rem;color:var(--gh-green,#10b981);text-decoration:none}
+.pu-card-place{font-weight:800;font-size:.82rem;color:var(--gh-green,var(--ds-accent));text-decoration:none}
 .pu-card-place:hover{text-decoration:underline}
-.pu-card-cat{padding:3px 10px;border-radius:999px;font-size:.7rem;font-weight:700;background:rgba(16,185,129,.12);color:var(--gh-green,#10b981);border:1px solid rgba(16,185,129,.2)}
-.pu-card-time{font-size:.72rem;color:var(--gh-muted,#64748b);margin-left:auto}
+.pu-card-cat{padding:3px 10px;border-radius:999px;font-size:.7rem;font-weight:700;background:rgba(var(--ds-accent-rgb),.12);color:var(--gh-green,var(--ds-accent));border:1px solid rgba(var(--ds-accent-rgb),.2)}
+.pu-card-time{font-size:.72rem;color:var(--gh-muted,var(--ds-text-3));margin-left:auto}
 .pu-card-title{font-weight:800;font-size:1rem;color:var(--gh-text,#f9fafb);margin-bottom:6px;line-height:1.3}
 .pu-card-desc{font-size:.84rem;color:var(--gh-muted,#94a3b8);line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.pu-card-footer{display:flex;align-items:center;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--gh-border,#374151)}
-.pu-card-av{width:28px;height:28px;border-radius:50%;object-fit:cover;background:var(--gh-green,#10b981);flex-shrink:0}
-.pu-card-av-fb{width:28px;height:28px;border-radius:50%;background:var(--gh-green,#10b981);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.78rem;color:#fff;flex-shrink:0}
+.pu-card-footer{display:flex;align-items:center;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--gh-border,var(--ds-text-2))}
+.pu-card-av{width:28px;height:28px;border-radius:50%;object-fit:cover;background:var(--gh-green,var(--ds-accent));flex-shrink:0}
+.pu-card-av-fb{width:28px;height:28px;border-radius:50%;background:var(--gh-green,var(--ds-accent));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.78rem;color:var(--ds-accent-on);flex-shrink:0}
 .pu-card-author{font-size:.78rem;color:var(--gh-muted,#94a3b8)}
-.pu-card-btn{margin-left:auto;padding:6px 14px;border-radius:10px;border:1px solid var(--gh-border,#374151);background:transparent;color:var(--gh-text,#f9fafb);font-size:.78rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:.15s}
-.pu-card-btn:hover{border-color:var(--gh-green,#10b981);color:var(--gh-green,#10b981)}
-.pu-empty{padding:64px 24px;text-align:center;color:var(--gh-muted,#64748b);border:1px dashed var(--gh-border,#374151);border-radius:22px}
-.pu-empty i{font-size:2.5rem;color:var(--gh-green,#10b981);margin-bottom:14px;display:block;opacity:.5}
+.pu-card-btn{margin-left:auto;padding:6px 14px;border-radius:10px;border:1px solid var(--gh-border,var(--ds-text-2));background:transparent;color:var(--gh-text,#f9fafb);font-size:.78rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:.15s}
+.pu-card-btn:hover{border-color:var(--gh-green,var(--ds-accent));color:var(--gh-green,var(--ds-accent))}
+.pu-empty{padding:64px 24px;text-align:center;color:var(--gh-muted,var(--ds-text-3));border:1px dashed var(--gh-border,var(--ds-text-2));border-radius:22px}
+.pu-empty i{font-size:2.5rem;color:var(--gh-green,var(--ds-accent));margin-bottom:14px;display:block;opacity:.5}
 .pu-empty h3{color:var(--gh-text,#f9fafb);margin-bottom:6px}
-.pu-skeleton{background:linear-gradient(90deg,var(--gh-border,#374151) 25%,rgba(148,163,184,.08) 50%,var(--gh-border,#374151) 75%);background-size:200% 100%;animation:pusk 1.4s infinite;border-radius:10px}
+.pu-skeleton{background:linear-gradient(90deg,var(--gh-border,var(--ds-text-2)) 25%,rgba(148,163,184,.08) 50%,var(--gh-border,var(--ds-text-2)) 75%);background-size:200% 100%;animation:pusk 1.4s infinite;border-radius:10px}
 @keyframes pusk{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.pu-skel-card{background:var(--gh-card,rgba(13,22,19,.92));border:1px solid var(--gh-border,#374151);border-radius:18px;overflow:hidden;margin-bottom:14px}
+.pu-skel-card{background:var(--gh-card,rgba(13,22,19,.92));border:1px solid var(--gh-border,var(--ds-text-2));border-radius:18px;overflow:hidden;margin-bottom:14px}
 </style>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="geohub-social-redesign.css">
   <link rel="stylesheet" href="chat-popup.css">
   <link rel="stylesheet" href="responsive-polish.css">
   <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700;800&family=Noto+Serif+Georgian:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="gh-design-system.css">
 </head><body class="page-place-updates">
 
-<script src="firebase-init.js" defer></script>
+<script type="module" src="firebase-config.js"></script>
+<script src="gh-i18n.js" defer></script>
 <script src="geohub-social-redesign.js" defer></script>
 <script src="chat-popup.js" defer></script>
 <script>
@@ -89,18 +95,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Load updates after shell is ready
-  setTimeout(loadPlaceUpdates, 300);
+  // Load once Firebase has initialised (fires immediately if it already has)
+  if (window.GeoFirebase !== undefined) setTimeout(loadPlaceUpdates, 300);
+  else window.addEventListener('GeoFirebaseReady', function(){ setTimeout(loadPlaceUpdates, 100); }, { once: true });
 });
 
 var _puCat = 'all';
 var _puAllUpdates = [];
 
+function _puSetList(html) {
+  var el = document.getElementById('puList');
+  if (el) el.innerHTML = html;
+}
 function loadPlaceUpdates() {
   var GF = window.GeoFirebase;
   if (!GF || !GF.fs || !GF.db) {
-    document.getElementById('puList').innerHTML =
-      '<div class="pu-empty"><i class="fas fa-bullhorn"></i><h3>სიახლეები ჯერ არ არის</h3><p>ბიზნესები და ადგილები სიახლეებს აქ გამოაქვეყნებენ.</p></div>';
+    _puSetList(
+      '<div class="pu-empty"><i class="fas fa-bullhorn"></i><h3>სიახლეები ჯერ არ არის</h3><p>ბიზნესები და ადგილები სიახლეებს აქ გამოაქვეყნებენ.</p></div>');
     return;
   }
   GF.fs.getDocs(GF.fs.query(
@@ -113,8 +124,7 @@ function loadPlaceUpdates() {
     renderUpdates();
     setupFilters();
   }).catch(function() {
-    document.getElementById('puList').innerHTML =
-      '<div class="pu-empty"><i class="fas fa-bullhorn"></i><h3>სიახლეები ჯერ არ არის</h3><p>ბიზნესები და ადგილები სიახლეებს აქ გამოაქვეყნებენ.</p></div>';
+    _puSetList('<div class="pu-empty"><i class="fas fa-bullhorn"></i><h3>სიახლეები ჯერ არ არის</h3><p>ბიზნესები და ადგილები სიახლეებს აქ გამოაქვეყნებენ.</p></div>');
   });
 }
 

@@ -121,7 +121,7 @@
           list.innerHTML = '<div style="width:100%">' + rows.slice(0,30).map(x => {
             const title = x.name || x.title || x.text || x.displayName || 'Untitled';
             const sub = x.category || x.city || x.status || 'Real Firestore item';
-            return '<div class="clean-card" style="margin-bottom:12px"><strong>'+esc(title)+'</strong><p style="color:#94a3b8;margin:.5rem 0 0">'+esc(sub)+'</p></div>';
+            return '<div class="clean-card" style="margin-bottom:12px"><strong>'+esc(title)+'</strong><p style="color:var(--ds-text-3);margin:.5rem 0 0">'+esc(sub)+'</p></div>';
           }).join('') + '</div>';
         }
       }catch(e){ console.warn('[GeoHub Stable] real count failed', collection, e.message); }

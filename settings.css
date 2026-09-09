@@ -3,9 +3,9 @@ body.settings-page {
   min-height: 100dvh;
   overflow-x: hidden;
   background:
-    radial-gradient(circle at 18% 0%, rgba(16, 185, 129, .10), transparent 32%),
+    radial-gradient(circle at 18% 0%, rgba(var(--ds-accent-rgb), .10), transparent 32%),
     var(--gh-bg, #050807);
-  color: var(--gh-text, #eefcf6);
+  color: var(--gh-text, var(--ds-text));
 }
 
 .settings-shell {
@@ -57,7 +57,7 @@ body.settings-page {
 }
 
 .settings-card {
-  background: var(--gh-card, rgba(13, 22, 19, .92));
+  background: var(--gh-card, var(--ds-surface));
   border: 1px solid var(--gh-border, rgba(148, 163, 184, .14));
   border-radius: 8px;
   padding: 18px;
@@ -68,7 +68,7 @@ body.settings-page {
 .settings-card h2,
 .settings-card h3 {
   margin: 0;
-  color: var(--gh-text, #eefcf6);
+  color: var(--gh-text, var(--ds-text));
   letter-spacing: 0;
 }
 
@@ -85,7 +85,7 @@ body.settings-page {
 }
 
 .settings-card-head i {
-  color: var(--gh-green, #10b981);
+  color: var(--gh-green, var(--ds-accent));
 }
 
 .settings-options,
@@ -105,7 +105,7 @@ body.settings-page {
   border: 1px solid var(--gh-border, rgba(148, 163, 184, .14));
   border-radius: 8px;
   background: color-mix(in srgb, var(--gh-card-soft, rgba(17, 30, 25, .72)) 78%, transparent);
-  color: var(--gh-text, #eefcf6);
+  color: var(--gh-text, var(--ds-text));
   font: inherit;
   text-align: left;
   cursor: pointer;
@@ -113,8 +113,8 @@ body.settings-page {
 
 .settings-option:hover,
 .settings-option.active {
-  border-color: var(--gh-border-strong, rgba(16, 185, 129, .32));
-  background: rgba(16, 185, 129, .10);
+  border-color: var(--gh-border-strong, rgba(var(--ds-accent-rgb), .32));
+  background: rgba(var(--ds-accent-rgb), .10);
 }
 
 .settings-option strong,
@@ -142,9 +142,9 @@ body.settings-page {
 }
 
 .settings-option.active .settings-check {
-  background: var(--gh-green, #10b981);
-  border-color: var(--gh-green, #10b981);
-  color: white;
+  background: var(--gh-green, var(--ds-accent));
+  border-color: var(--gh-green, var(--ds-accent));
+  color: var(--ds-accent-on);
 }
 
 .settings-row {
@@ -157,7 +157,7 @@ body.settings-page {
   border-radius: 8px;
   background: color-mix(in srgb, var(--gh-card-soft, rgba(17, 30, 25, .72)) 72%, transparent);
   text-decoration: none;
-  color: var(--gh-text, #eefcf6);
+  color: var(--gh-text, var(--ds-text));
 }
 
 .settings-row i {
@@ -199,7 +199,7 @@ body.settings-page {
 }
 
 .settings-switch input:checked + .settings-slider {
-  background: var(--gh-green, #10b981);
+  background: var(--gh-green, var(--ds-accent));
 }
 
 .settings-switch input:checked + .settings-slider::after {
@@ -219,8 +219,8 @@ body.settings-page {
   border-radius: 8px;
   display: grid;
   place-items: center;
-  background: rgba(16, 185, 129, .12);
-  color: var(--gh-green, #10b981);
+  background: rgba(var(--ds-accent-rgb), .12);
+  color: var(--gh-green, var(--ds-accent));
   font-weight: 900;
   overflow: hidden;
 }
@@ -256,9 +256,9 @@ body.settings-page {
   transform: translate(-50%, 18px);
   opacity: 0;
   z-index: 100000;
-  background: var(--gh-card, #0d1613);
-  border: 1px solid var(--gh-border-strong, rgba(16, 185, 129, .32));
-  color: var(--gh-text, #eefcf6);
+  background: var(--gh-card, var(--ds-surface));
+  border: 1px solid var(--gh-border-strong, rgba(var(--ds-accent-rgb), .32));
+  color: var(--gh-text, var(--ds-text));
   border-radius: 8px;
   padding: 12px 15px;
   font-weight: 900;
@@ -306,13 +306,13 @@ body.settings-page {
   background: rgba(255,255,255,.06);
   border: 1px solid var(--gh-border, rgba(148,163,184,.14));
   border-radius: 8px;
-  color: var(--gh-text, #eefcf6);
+  color: var(--gh-text, var(--ds-text));
   font-size: .8rem;
   cursor: pointer;
   max-width: 140px;
 }
-.settings-pp-select:focus { outline: none; border-color: var(--gh-green, #10b981); }
-.settings-section-label { padding: 10px 16px 4px; font-size: .74rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--gh-green, #10b981); opacity: .75; }
+.settings-pp-select:focus { outline: none; border-color: var(--gh-green, var(--ds-accent)); }
+.settings-section-label { padding: 10px 16px 4px; font-size: .74rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--gh-green, var(--ds-accent)); opacity: .75; }
 @media (max-width: 420px) {
   .settings-pp-select { max-width: 100%; width: 100%; }
 }

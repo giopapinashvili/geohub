@@ -38,10 +38,9 @@
     'You do not have access':'წვდომა არ გაქვთ','You do not have access to a Business Suite yet.':'Business Suite-ზე წვდომა ჯერ არ გაქვთ.',
     'Only business owners, admins, and page managers can use this page.':'ამ გვერდის გამოყენება შეუძლიათ მხოლოდ ბიზნესის მფლობელებს, ადმინებს და გვერდის მენეჯერებს.',
     'Business Suite could not load your managed pages.':'Business Suite-მა თქვენი მართვადი გვერდები ვერ ჩატვირთა.',
-    'Only business owners, admins, and page managers can use this page.':'ამ გვერდის გამოყენება შეუძლიათ მხოლოდ ბიზნესის მფლობელებს, ადმინებს და გვერდის მენეჯერებს.',
     'Firebase is unavailable.':'Firebase მიუწვდომელია.','View public businesses':'საჯარო ბიზნესების ნახვა','Add business':'ბიზნესის დამატება',
     'Live page management summary from GeoHub data.':'GeoHub-ის რეალური მონაცემებით გვერდის მართვის მოკლე შეჯამება.',
-    'Followers':'გამომწერები','Reviews':'შეფასებები','Unread page messages':'წაუკითხავი გვერდის მესიჯები',
+    'Followers':'გამომწერები','Unread page messages':'წაუკითხავი გვერდის მესიჯები',
     'New quote requests':'ახალი მოთხოვნები','Recent post engagement':'ბოლო პოსტების ჩართულობა','Recent activity':'ბოლო აქტივობა',
     'Recent posts':'ბოლო პოსტები','Post':'პოსტი','No posts yet':'პოსტები ჯერ არ არის','Posts for this business page will appear here.':'ამ ბიზნეს გვერდის პოსტები აქ გამოჩნდება.',
     'reactions':'რეაქცია','comments':'კომენტარი','shares':'გაზიარება','View':'ნახვა','Boost':'დაბუსტვა',
@@ -94,7 +93,7 @@
   function date(v){ var t = ts(v); return t ? new Date(t).toLocaleDateString() : ''; }
   function title(b){ return (b && (b.title || b.name || b.businessName)) || tr('Business'); }
   function initials(v){ return String(v || 'B').trim().split(/\s+/).slice(0,2).map(function(x){return x[0] || '';}).join('').toUpperCase() || 'B'; }
-  function lang(){ try{ return localStorage.getItem('gh_lang') === 'ka' ? 'ka' : 'en'; }catch(e){ return 'en'; } }
+  function lang(){ try{ return localStorage.getItem('gh_lang') === 'en' ? 'en' : 'ka'; }catch(e){ return 'ka'; } }
   function tr(v){ return lang() === 'ka' && KA[v] ? KA[v] : v; }
   function iconEmpty(icon, head, body){ return '<div class="bs-empty"><i class="fas '+icon+'"></i><h3>'+esc(tr(head))+'</h3><p>'+esc(tr(body||''))+'</p></div>'; }
   function button(href, label, icon, ghost){ return '<a class="gh-btn '+(ghost?'ghost ':'')+'sm" href="'+esc(href)+'"><i class="fas '+icon+'"></i> '+esc(tr(label))+'</a>'; }
@@ -483,7 +482,7 @@
     var total = reviews.length || 1;
     return [5,4,3,2,1].map(function(s){
       var pct = Math.round(counts[s] / total * 100);
-      return '<div class="bs-rating-row"><span>'+s+' <i class="fas fa-star" style="color:#fbbf24;font-size:.7rem"></i></span>'+
+      return '<div class="bs-rating-row"><span>'+s+' <i class="fas fa-star" style="color:var(--ds-h-reward-ink);font-size:.7rem"></i></span>'+
         '<div class="bs-rating-track"><div class="bs-rating-fill" style="width:'+pct+'%"></div></div>'+
         '<span class="bs-small">'+counts[s]+'</span></div>';
     }).join('');
@@ -540,7 +539,7 @@
         '</div>'+
 
         '<div class="bs-card"><div class="bs-chart-head"><h3><i class="fas fa-eye" style="color:var(--gh-green)"></i> '+esc(tr('Views'))+'</h3></div>'+
-          '<div class="bs-chart-wrap">'+svgBarChart(dayArr,'views','#10b981')+'</div>'+
+          '<div class="bs-chart-wrap">'+svgBarChart(dayArr,'views','var(--ds-accent)')+'</div>'+
           '<div class="bs-chart-labels">'+buildChartLabels(dayArr)+'</div>'+
         '</div>'+
 

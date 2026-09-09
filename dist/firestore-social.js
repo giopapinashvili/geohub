@@ -33,8 +33,8 @@
         '<div style="font-size:2rem;margin-bottom:12px">🔐</div>' +
         '<h3 style="font-size:1.1rem;font-weight:800;color:var(--text-primary,#f0f4ff);margin-bottom:8px">Sign in to GeoHub</h3>' +
         '<p style="color:var(--text-secondary,#94a3b8);font-size:0.875rem;margin-bottom:24px;line-height:1.55">Like, comment, follow, post — all require a free account.</p>' +
-        '<a href="auth.html" style="display:block;padding:12px;border-radius:10px;background:linear-gradient(135deg,#10b981,#3b82f6);color:#fff;font-weight:700;text-decoration:none;margin-bottom:10px;font-size:0.9rem">Log In / Sign Up</a>' +
-        '<button id="ghAuthModalClose" style="background:none;border:none;color:var(--text-muted,#6b7280);cursor:pointer;font-size:0.875rem;padding:6px">Maybe later</button>' +
+        '<a href="auth.html" style="display:block;padding:12px;border-radius:10px;background:linear-gradient(135deg,var(--ds-accent),#3b82f6);color:#fff;font-weight:700;text-decoration:none;margin-bottom:10px;font-size:0.9rem">Log In / Sign Up</a>' +
+        '<button id="ghAuthModalClose" style="background:none;border:none;color:var(--text-muted,var(--ds-text-3));cursor:pointer;font-size:0.875rem;padding:6px">Maybe later</button>' +
       '</div>';
     document.body.appendChild(ov);
     ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
@@ -2652,7 +2652,7 @@
         addDoc(collection(db, 'stories', storyId, 'questionAnswers'), answerDoc)
           .then(function() {
             if(ownerId && ownerId !== user.uid) {
-              _sendPushNotification(
+              createNotification(
                 ownerId, 'story_question_answer',
                 (me.name || 'GeoHub User') + ' answered your question',
                 answerText.slice(0, 80),

@@ -444,7 +444,7 @@
     el.innerHTML =
       '<div class="vid-tv-section">' +
         '<div class="vid-tv-head">' +
-          '<span class="vid-tv-icon" style="color:#f59e0b"><i class="fas fa-crown"></i></span>' +
+          '<span class="vid-tv-icon" style="color:var(--ds-h-reward-ink)"><i class="fas fa-crown"></i></span>' +
           '<h3>Top Creators</h3>' +
         '</div>' +
         '<div class="vid-creator-row">' +
@@ -523,7 +523,7 @@
       filter: function(v) { return !v.isShort && videoMatchesCat(v, 'travel'); }, n: 8 },
     { id: 'tbilisi',   icon: 'fa-city',            color: '#60a5fa', label: 'Trending in Tbilisi',
       filter: function(v) { return !v.isShort && v.city === 'თბილისი'; }, n: 8 },
-    { id: 'batumi',    icon: 'fa-umbrella-beach',  color: '#34d399', label: 'Batumi Vibes',
+    { id: 'batumi',    icon: 'fa-umbrella-beach',  color: 'var(--ds-accent-hi)', label: 'Batumi Vibes',
       filter: function(v) { return !v.isShort && v.city === 'ბათუმი'; }, n: 8 },
     { id: 'food',      icon: 'fa-utensils',        color: '#fb923c', label: 'Food & Nightlife',
       filter: function(v) { return !v.isShort && (videoMatchesCat(v, 'food') || videoMatchesCat(v, 'nightlife')); }, n: 8 },
@@ -2122,13 +2122,13 @@
               '<div class="vid-search-selected" id="vidPlaceSelected"><i class="fas fa-map-pin"></i><span class="vid-search-selected-name" id="vidPlaceSelectedName"></span><button class="vid-search-selected-remove" id="vidPlaceRemove" type="button"><i class="fas fa-times"></i></button></div>' +
             '</div>' +
             '<div class="vid-form-group">' +
-              '<label class="vid-form-label"><i class="fas fa-store" style="color:#60a5fa;margin-right:4px"></i>ბიზნესი (არასავალდებულო)</label>' +
+              '<label class="vid-form-label"><i class="fas fa-store" style="color:var(--ds-h-video-ink);margin-right:4px"></i>ბიზნესი (არასავალდებულო)</label>' +
               '<div class="vid-field-wrap">' +
                 '<input id="vidBizSearch" class="vid-form-input" type="text" placeholder="ბიზნესის ძიება..." autocomplete="off">' +
                 '<button class="vid-search-clear" id="vidBizClear" type="button"><i class="fas fa-times"></i></button>' +
                 '<div class="vid-search-dropdown" id="vidBizDd"></div>' +
               '</div>' +
-              '<div class="vid-search-selected" id="vidBizSelected" style="border-color:rgba(59,130,246,.2);background:rgba(59,130,246,.08)"><i class="fas fa-store" style="color:#60a5fa"></i><span class="vid-search-selected-name" id="vidBizSelectedName" style="color:#60a5fa"></span><button class="vid-search-selected-remove" id="vidBizRemove" type="button"><i class="fas fa-times"></i></button></div>' +
+              '<div class="vid-search-selected" id="vidBizSelected" style="border-color:rgba(59,130,246,.2);background:rgba(59,130,246,.08)"><i class="fas fa-store" style="color:var(--ds-h-video-ink)"></i><span class="vid-search-selected-name" id="vidBizSelectedName" style="color:var(--ds-h-video-ink)"></span><button class="vid-search-selected-remove" id="vidBizRemove" type="button"><i class="fas fa-times"></i></button></div>' +
             '</div>' +
           '</div>' +
           '<div class="vid-form-group">' +
@@ -2435,7 +2435,7 @@
           videos.map(function (v, i) {
             return '<label class="vid-import-item">' +
               '<input type="checkbox" class="vid-import-cb" data-i="' + i + '" checked>' +
-              '<img class="vid-import-thumb" src="' + esc(v.thumbnail) + '" alt="" onerror="this.src=\'\';">' +
+              '<img class="vid-import-thumb" src="' + esc(v.thumbnail) + '" alt="" onerror="this.src=\'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==\';">' +
               '<div class="vid-import-title">' + esc(v.title) + '</div>' +
             '</label>';
           }).join('') +
@@ -2967,7 +2967,7 @@
         (v.category ? '<span class="watch-badge cat"><i class="fas ' + m.icon + '"></i>' + esc(m.label) + '</span>' : '') +
         (v.city ? '<span class="watch-badge city"><i class="fas fa-location-dot"></i>' + esc(v.city) + '</span>' : '') +
         (v.youtubeId ? '<a href="https://www.youtube.com/watch?v=' + esc(v.youtubeId) + '" target="_blank" rel="noopener" class="watch-badge yt"><i class="fab fa-youtube"></i>YouTube-ზე ნახვა</a>' : '') +
-        (v.videoUrl && !v.youtubeId ? '<span class="watch-badge yt" style="background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.3);color:var(--green)"><i class="fas fa-cloud"></i>GeoHub Upload</span>' : '') +
+        (v.videoUrl && !v.youtubeId ? '<span class="watch-badge yt" style="background:rgba(var(--ds-accent-rgb),.15);border-color:rgba(var(--ds-accent-rgb),.3);color:var(--green)"><i class="fas fa-cloud"></i>GeoHub Upload</span>' : '') +
         '<span style="font-size:.8rem;color:var(--text-muted)">' + timeAgo(v.createdAt) + '</span>';
     }
 

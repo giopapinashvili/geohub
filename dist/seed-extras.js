@@ -21,7 +21,7 @@ const db = getFirestore();
 function svgAvatar(name) {
   const n = (name || 'GH').trim();
   const initials = n.split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || 'GH';
-  const palette = ['#10b981','#6d3fd9','#f59e0b','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6'];
+  const palette = ['var(--ds-accent)','#6d3fd9','#f59e0b','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6'];
   const color = palette[Math.abs(n.split('').reduce((a, c) => a + c.charCodeAt(0), 0)) % palette.length];
   const s = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><rect width="120" height="120" rx="60" fill="${color}"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Arial,sans-serif" font-size="44" fill="white" font-weight="700">${initials}</text></svg>`;
   return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(s);
@@ -108,7 +108,7 @@ const STORY_CAPTIONS = [
 const STORY_BG = [
   '#1a1a2e','#16213e','#0f3460','#533483',
   '#065f46','#7c3aed','#dc2626','#d97706',
-  '#059669','#0284c7','#db2777','#92400e',
+  'var(--ds-accent-lo)','#0284c7','#db2777','#92400e',
 ];
 
 // ─── MAIN ─────────────────────────────────────────────────────────

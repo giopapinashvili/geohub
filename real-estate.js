@@ -31,11 +31,11 @@
     var map = { rent:'გაქირავება', buy:'გაყიდვა', commercial:'კომერციული' };
     var colors = {
       rent:'rgba(59,130,246,.2);color:#93c5fd',
-      buy:'rgba(16,185,129,.2);color:#6ee7b7',
-      commercial:'rgba(245,158,11,.2);color:#fcd34d'
+      buy:'rgba(var(--ds-accent-rgb),.2);color:var(--ds-accent-ink)',
+      commercial:'rgba(245,158,11,.2);color:var(--ds-h-reward-ink)'
     };
     var label = map[type] || esc(type || '');
-    var style = colors[type] || 'rgba(100,116,139,.2);color:#94a3b8';
+    var style = colors[type] || 'rgba(100,116,139,.2);color:var(--ds-text-3)';
     return label ? '<span style="padding:3px 9px;border-radius:99px;font-size:.66rem;font-weight:800;text-transform:uppercase;background:'+style+'">'+label+'</span>' : '';
   }
 
@@ -53,7 +53,7 @@
     var imgHtml = img
       ? '<div style="width:100%;height:160px;overflow:hidden;border-radius:12px 12px 0 0"><img src="'+esc(img)+'" alt="'+title+'" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.closest(\'div\').style.display=\'none\'"></div>'
       : '';
-    var verBadge = item.verified ? '<span style="background:rgba(16,185,129,.15);color:#6ee7b7;padding:2px 7px;border-radius:99px;font-size:.62rem;font-weight:800"><i class="fas fa-check-circle"></i> Verified</span>' : '';
+    var verBadge = item.verified ? '<span style="background:rgba(var(--ds-accent-rgb),.15);color:var(--ds-accent-ink);padding:2px 7px;border-radius:99px;font-size:.62rem;font-weight:800"><i class="fas fa-check-circle"></i> Verified</span>' : '';
     var soldBadge = (item.status === 'sold' || item.status === 'rented')
       ? '<span style="background:rgba(239,68,68,.15);color:#fca5a5;padding:2px 7px;border-radius:99px;font-size:.62rem;font-weight:800">'+esc(item.status === 'rented' ? 'გაქირავებულია' : 'გაყიდულია')+'</span>'
       : '';
@@ -70,12 +70,12 @@
           typeBadge(item.type)+verBadge+soldBadge+
         '</div>'+
         '<div class="sv-card-title">'+title+'</div>'+
-        (price ? '<div style="font-size:1.05rem;font-weight:800;color:var(--gh-green,#10b981);margin-bottom:6px">'+price+esc(perMonth)+'</div>' : '')+
+        (price ? '<div style="font-size:1.05rem;font-weight:800;color:var(--gh-green,var(--ds-accent));margin-bottom:6px">'+price+esc(perMonth)+'</div>' : '')+
         (city ? '<div class="sv-card-city"><i class="fas fa-map-marker-alt"></i>'+city+(addr?', '+addr:'')+'</div>' : '')+
         '<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:.75rem;color:var(--gh-muted,#9ca3af);margin:6px 0 8px">'+
-          (rooms?'<span><i class="fas fa-bed" style="color:var(--gh-green,#10b981)"></i> '+esc(rooms)+'</span>':'')+
-          (area ?'<span><i class="fas fa-ruler-combined" style="color:var(--gh-green,#10b981)"></i> '+esc(area)+'</span>':'')+
-          (floor?'<span><i class="fas fa-building" style="color:var(--gh-green,#10b981)"></i> '+esc(floor)+'</span>':'')+
+          (rooms?'<span><i class="fas fa-bed" style="color:var(--gh-green,var(--ds-accent))"></i> '+esc(rooms)+'</span>':'')+
+          (area ?'<span><i class="fas fa-ruler-combined" style="color:var(--gh-green,var(--ds-accent))"></i> '+esc(area)+'</span>':'')+
+          (floor?'<span><i class="fas fa-building" style="color:var(--gh-green,var(--ds-accent))"></i> '+esc(floor)+'</span>':'')+
         '</div>'+
         (desc ? '<div class="sv-card-desc">'+desc+'</div>' : '')+
         '<div class="sv-card-actions" style="margin-top:auto">'+contactBtn+'</div>'+
@@ -92,8 +92,8 @@
         ? 'ფილტრის შედეგი ცარიელია.'
         : 'განცხადება ჯერ არ არის. პირველი განცხადება ახლავე გამოაქვეყნე!';
       list.innerHTML = '<div class="clean-empty" style="width:100%;min-height:240px"><div>'+
-        '<i class="fas fa-home" style="font-size:2rem;color:#374151;display:block;margin-bottom:12px"></i>'+
-        '<h3 style="color:#f8fafc;margin:0 0 8px">'+esc(msg)+'</h3></div></div>';
+        '<i class="fas fa-home" style="font-size:2rem;color:var(--ds-text-2);display:block;margin-bottom:12px"></i>'+
+        '<h3 style="color:var(--ds-text);margin:0 0 8px">'+esc(msg)+'</h3></div></div>';
       return;
     }
     list.innerHTML = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">'+
@@ -171,35 +171,35 @@
     var overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:16px';
     overlay.innerHTML =
-      '<div style="background:#111827;border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:24px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto">'+
+      '<div style="background:var(--ds-surface);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:24px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto">'+
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">'+
-          '<h3 style="margin:0;font-size:1.05rem;color:#f8fafc"><i class="fas fa-home" style="color:#10b981"></i> განცხადების დამატება</h3>'+
-          '<button id="reCloseModal" style="background:none;border:none;color:#9ca3af;font-size:1.2rem;cursor:pointer;padding:0"><i class="fas fa-times"></i></button>'+
+          '<h3 style="margin:0;font-size:1.05rem;color:var(--ds-text)"><i class="fas fa-home" style="color:var(--ds-accent-ink)"></i> განცხადების დამატება</h3>'+
+          '<button id="reCloseModal" style="background:none;border:none;color:var(--ds-text-3);font-size:1.2rem;cursor:pointer;padding:0"><i class="fas fa-times"></i></button>'+
         '</div>'+
         '<div style="display:flex;flex-direction:column;gap:12px">'+
-          '<input id="reTitle" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:#f8fafc;font-size:.9rem;outline:none;width:100%;box-sizing:border-box" placeholder="სათაური (მაგ: 3-ოთახიანი ბინა ვაკეში)">'+
-          '<select id="reType" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:#f8fafc;font-size:.9rem;outline:none;width:100%;box-sizing:border-box">'+
+          '<input id="reTitle" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:var(--ds-text);font-size:.9rem;outline:none;width:100%;box-sizing:border-box" placeholder="სათაური (მაგ: 3-ოთახიანი ბინა ვაკეში)">'+
+          '<select id="reType" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:var(--ds-text);font-size:.9rem;outline:none;width:100%;box-sizing:border-box">'+
             '<option value="rent">გაქირავება</option><option value="buy">გაყიდვა</option><option value="commercial">კომერციული</option>'+
           '</select>'+
           '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+
-            '<input id="rePrice" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:#f8fafc;font-size:.9rem;outline:none;width:100%;box-sizing:border-box" type="number" placeholder="ფასი" min="0">'+
-            '<select id="reCurrency" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:#f8fafc;font-size:.9rem;outline:none;width:100%;box-sizing:border-box">'+
+            '<input id="rePrice" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:var(--ds-text);font-size:.9rem;outline:none;width:100%;box-sizing:border-box" type="number" placeholder="ფასი" min="0">'+
+            '<select id="reCurrency" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:var(--ds-text);font-size:.9rem;outline:none;width:100%;box-sizing:border-box">'+
               '<option value="GEL">GEL ₾</option><option value="USD">USD $</option>'+
             '</select>'+
           '</div>'+
-          '<select id="reCity" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:#f8fafc;font-size:.9rem;outline:none;width:100%;box-sizing:border-box">'+
+          '<select id="reCity" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:var(--ds-text);font-size:.9rem;outline:none;width:100%;box-sizing:border-box">'+
             '<option value="">ქალაქი...</option>'+cityOpts+
           '</select>'+
-          '<input id="reAddress" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:#f8fafc;font-size:.9rem;outline:none;width:100%;box-sizing:border-box" placeholder="მისამართი (სურვილისამებრ)">'+
+          '<input id="reAddress" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:var(--ds-text);font-size:.9rem;outline:none;width:100%;box-sizing:border-box" placeholder="მისამართი (სურვილისამებრ)">'+
           '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'+
-            '<input id="reRooms" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:#f8fafc;font-size:.9rem;outline:none;width:100%;box-sizing:border-box" type="number" placeholder="ოთახი" min="1">'+
-            '<input id="reArea"  style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:#f8fafc;font-size:.9rem;outline:none;width:100%;box-sizing:border-box" type="number" placeholder="მ²" min="1">'+
-            '<input id="reFloor" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:#f8fafc;font-size:.9rem;outline:none;width:100%;box-sizing:border-box" type="number" placeholder="სართული" min="0">'+
+            '<input id="reRooms" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:var(--ds-text);font-size:.9rem;outline:none;width:100%;box-sizing:border-box" type="number" placeholder="ოთახი" min="1">'+
+            '<input id="reArea"  style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:var(--ds-text);font-size:.9rem;outline:none;width:100%;box-sizing:border-box" type="number" placeholder="მ²" min="1">'+
+            '<input id="reFloor" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:var(--ds-text);font-size:.9rem;outline:none;width:100%;box-sizing:border-box" type="number" placeholder="სართული" min="0">'+
           '</div>'+
-          '<textarea id="reDesc" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:#f8fafc;font-size:.9rem;outline:none;width:100%;box-sizing:border-box;resize:vertical" placeholder="აღწერა..." rows="3"></textarea>'+
-          '<input id="rePhone" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:#f8fafc;font-size:.9rem;outline:none;width:100%;box-sizing:border-box" placeholder="საკონტაქტო ნომერი (სურვილისამებრ)">'+
-          '<input id="reImage" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:#f8fafc;font-size:.9rem;outline:none;width:100%;box-sizing:border-box" placeholder="სურათის URL (სურვილისამებრ)">'+
-          '<button id="reSubmitBtn" style="background:linear-gradient(135deg,#10b981,#3b82f6);border:none;border-radius:12px;padding:12px;color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;margin-top:4px"><i class="fas fa-paper-plane"></i> გამოქვეყნება</button>'+
+          '<textarea id="reDesc" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:var(--ds-text);font-size:.9rem;outline:none;width:100%;box-sizing:border-box;resize:vertical" placeholder="აღწერა..." rows="3"></textarea>'+
+          '<input id="rePhone" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:var(--ds-text);font-size:.9rem;outline:none;width:100%;box-sizing:border-box" placeholder="საკონტაქტო ნომერი (სურვილისამებრ)">'+
+          '<input id="reImage" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;color:var(--ds-text);font-size:.9rem;outline:none;width:100%;box-sizing:border-box" placeholder="სურათის URL (სურვილისამებრ)">'+
+          '<button id="reSubmitBtn" style="background:linear-gradient(135deg,var(--ds-accent),#3b82f6);border:none;border-radius:12px;padding:12px;color:#fff;font-size:.9rem;font-weight:700;cursor:pointer;margin-top:4px"><i class="fas fa-paper-plane"></i> გამოქვეყნება</button>'+
         '</div>'+
       '</div>';
     document.body.appendChild(overlay);
@@ -251,7 +251,7 @@
   /* ── load data ───────────────────────────────────────────────────── */
   function loadData(gf) {
     var list = document.getElementById('cleanList');
-    if (list) list.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:200px"><i class="fas fa-circle-notch fa-spin" style="font-size:1.5rem;color:#10b981"></i></div>';
+    if (list) list.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:200px"><i class="fas fa-circle-notch fa-spin" style="font-size:1.5rem;color:var(--ds-accent-ink)"></i></div>';
 
     var q = gf.fs.query(
       gf.fs.collection(gf.db, 'realEstateListings'),

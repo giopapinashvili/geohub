@@ -15,7 +15,7 @@ const MY_TRUST = {
   level: 'Unverified', levelIndex: 0,
   nextLevel: 'Basic Verified', nextLevelMin: 0, nextLevelMax: 300,
   breakdown: [
-    { label: 'Real Check-ins',  icon: 'fas fa-map-marker-alt', color: '#10b981', score: 0, max: 300, desc: 'No check-ins yet' },
+    { label: 'Real Check-ins',  icon: 'fas fa-map-marker-alt', color: 'var(--ds-accent)', score: 0, max: 300, desc: 'No check-ins yet' },
     { label: 'Review Quality',  icon: 'fas fa-star',           color: '#f59e0b', score: 0, max: 250, desc: 'No reviews yet' },
     { label: 'Camera Proofs',   icon: 'fas fa-camera',         color: '#3b82f6', score: 0, max: 250, desc: 'No camera proofs yet' },
     { label: 'Community Trust', icon: 'fas fa-users',          color: '#a78bfa', score: 0, max: 150, desc: 'No community votes yet' },
@@ -46,7 +46,7 @@ const VERIFICATION_LEVELS = [
     done: true, current: false, locked: false,
   },
   {
-    index: 3, name: 'Trusted Explorer', icon: 'fas fa-shield-alt', color: '#10b981', range: '501–800',
+    index: 3, name: 'Trusted Explorer', icon: 'fas fa-shield-alt', color: 'var(--ds-accent)', range: '501–800',
     requirements: ['30+ real check-ins', '10+ quality reviews', '3+ camera proofs', 'No active warnings'],
     benefits: ['Trusted badge on profile', 'Priority in search results', 'Full business contact access', 'Event organizer tools'],
     done: false, current: true, locked: false,
@@ -67,7 +67,7 @@ const VERIFICATION_LEVELS = [
 
 const REPORT_TYPES = [
   { id: 'fake_review',  label: 'Fake Review',        icon: 'fas fa-star',               color: '#f59e0b', desc: 'Fabricated, paid or incentivised review' },
-  { id: 'fake_checkin', label: 'Fake Check-in',       icon: 'fas fa-map-marker-alt',     color: '#10b981', desc: 'Check-in submitted without physical presence' },
+  { id: 'fake_checkin', label: 'Fake Check-in',       icon: 'fas fa-map-marker-alt',     color: 'var(--ds-accent)', desc: 'Check-in submitted without physical presence' },
   { id: 'scam_biz',     label: 'Scam Business',       icon: 'fas fa-store-slash',        color: '#ef4444', desc: 'Business that deceives or defrauds customers' },
   { id: 'bad_behavior', label: 'Bad Behavior',         icon: 'fas fa-exclamation-circle', color: '#f97316', desc: 'Harassment, hate speech or unsafe conduct' },
   { id: 'unsafe_event', label: 'Unsafe Event',         icon: 'fas fa-calendar-times',    color: '#ef4444', desc: 'Event with safety risks or misleading info' },
@@ -81,7 +81,7 @@ const REPORT_FEED = [];
 
 const CREDIBILITY_INDICATORS = [
   { icon: 'fas fa-camera',       color: '#3b82f6', label: 'Camera Proof',      desc: 'Photo taken in-app with GPS + timestamp during visit' },
-  { icon: 'fas fa-redo',         color: '#10b981', label: 'Repeat Customer',   desc: 'Reviewer has visited this place 3+ times' },
+  { icon: 'fas fa-redo',         color: 'var(--ds-accent)', label: 'Repeat Customer',   desc: 'Reviewer has visited this place 3+ times' },
   { icon: 'fas fa-shield-alt',   color: '#a78bfa', label: 'Trusted Reviewer',  desc: 'Account has Trusted Explorer level or above' },
   { icon: 'fas fa-qrcode',       color: '#f59e0b', label: 'QR Check-in',       desc: 'Physically scanned the business QR on location' },
   { icon: 'fas fa-map-marker-alt', color: '#22c55e', label: 'Verified Visit',  desc: 'GPS coordinates match business location within 50m' },
@@ -107,7 +107,7 @@ function renderOverview() {
   const deg = (pct * 360).toFixed(1);
 
   const ringEl = document.getElementById('trustRing');
-  if (ringEl) ringEl.style.background = `conic-gradient(#10b981 0deg ${deg}deg, #0d1525 ${deg}deg)`;
+  if (ringEl) ringEl.style.background = `conic-gradient(var(--ds-accent) 0deg ${deg}deg, #0d1525 ${deg}deg)`;
 
   const nextPct = Math.min(100, Math.round(
     (MY_TRUST.score - MY_TRUST.nextLevelMin) / (MY_TRUST.nextLevelMax - MY_TRUST.nextLevelMin) * 100

@@ -1,4 +1,69 @@
-# No SPA catch-all: GeoHub is a multi-page app.
-# Cloudflare Pages serves /404.html automatically for missing paths,
-# and missing hashed assets must return 404 (not index.html) so stale
-# tabs fail fast instead of white-screening on an HTML-as-JS response.
+# GeoHub — URL map
+#
+# Cloudflare Pages serves /404.html automatically for missing paths, and a
+# missing hashed asset must 404 (not fall through to HTML) so a stale tab fails
+# fast instead of white-screening on an HTML-as-JS response. So: no SPA
+# catch-all.
+#
+# The rules below retire duplicate surfaces. GeoHub had six video pages, six
+# discovery pages, four business pages and three payment pages; each retired
+# URL now 301s to the one canonical page for that job, carrying a ?tab= hint
+# so the target can open on the right section (gh-tabs.js reads it).
+
+# ── Video: videos · reels · watch · live · channel · admin-videos → videos ──
+/reels.html          /videos.html?tab=reels     301
+/watch.html          /videos.html?tab=watch     301
+/live.html           /videos.html?tab=live      301
+/channel.html        /videos.html?tab=channel   301
+
+# ── Discovery: explore · place-feed · place-updates · reviews → places ──
+/explore.html        /places.html               301
+/place-feed.html     /places.html?tab=updates   301
+/place-updates.html  /places.html?tab=updates   301
+/reviews.html        /places.html?tab=reviews   301
+
+# ── Marketplace: products · services → marketplace ──
+/products.html       /marketplace.html?tab=products 301
+/services.html       /marketplace.html?tab=services 301
+
+# ── Business: business · dashboard → business-suite ──
+/business.html       /business-suite.html       301
+/dashboard.html      /business-suite.html       301
+
+# ── Payment / plans: pricing · early-adopter → premium ──
+/pricing.html        /premium.html              301
+/early-adopter.html  /premium.html?tab=early    301
+
+# ── Gamification: gamification → rewards ──
+/gamification.html   /rewards.html              301
+
+# ── Capture: camera · scan → checkin ──
+/camera.html         /checkin.html?tab=camera   301
+/scan.html           /checkin.html?tab=scan     301
+
+# ── Creators are a discovery surface, not their own destination ──
+/creators.html       /search.html?tab=creators  301
+
+# ── Stories live inside the feed ──
+/stories.html        /feed.html?tab=stories     301
+
+# ── Safety consolidates trust ──
+/trust.html          /safety.html               301
+
+# ── Retired experiments — kept as redirects so old links never 404 ──
+/patriot.html        /challenges.html           301
+/world.html          /map.html                  301
+/lifegraph.html      /profile.html              301
+/learning.html       /index.html                301
+/demo.html           /index.html                301
+
+# ── Admin video moderation is a tab of the admin panel ──
+/admin-videos.html   /admin.html?tab=videos     301
+
+# ── Friendly short URLs ──
+/feed                /feed.html                 301
+/map                 /map.html                  301
+/videos              /videos.html               301
+/places              /places.html               301
+/profile             /profile.html              301
+/messages            /messages.html             301

@@ -20,7 +20,7 @@
     var catRow = document.getElementById('pdCatFilterRow');
     if (catRow) {
       if (!cats.length) {
-        catRow.innerHTML = '<span style="color:#4b5563;font-size:.8rem">No categories yet</span>';
+        catRow.innerHTML = '<span style="color:var(--ds-text-3);font-size:.8rem">No categories yet</span>';
       } else {
         var html = '<button class="pd-filter-btn active" data-cat="all">All</button>';
         cats.forEach(function (cat) {
@@ -116,8 +116,8 @@
       list.style.display = 'flex';
       list.innerHTML =
         '<div class="clean-empty" style="width:100%"><div>' +
-          '<i class="fas fa-box" style="font-size:2rem;color:#374151;display:block;margin-bottom:12px"></i>' +
-          '<h3 style="color:#f8fafc;margin:0 0 8px">' + esc(msg) + '</h3>' +
+          '<i class="fas fa-box" style="font-size:2rem;color:var(--ds-text-2);display:block;margin-bottom:12px"></i>' +
+          '<h3 style="color:var(--ds-text);margin:0 0 8px">' + esc(msg) + '</h3>' +
         '</div></div>';
       return;
     }

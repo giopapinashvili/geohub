@@ -5,7 +5,7 @@
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   var KA = {
     // ── nav groups
-    'Main':'მთავარი','Explore':'გამოიკვლიე','Growth':'ზრდა','Personal':'პირადი',
+    'Main':'მთავარი','Explore':'აღმოაჩინე','Growth':'ბიზნესი','Personal':'პირადი',
     // ── nav items
     'Home':'მთავარი','Discover':'აღმოაჩინე','Map':'რუქა','Live':'პირდაპირი',
     'Places':'ადგილები','Events':'ღონისძიებები','Groups':'ჯგუფები',
@@ -121,13 +121,22 @@
   // LANG ENGINE
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   var _lang = (function(){
-    try { return localStorage.getItem('gh_lang') === 'ka' ? 'ka' : 'en'; }
-    catch(e) { return 'en'; }
+    // Georgian is the product default; only an explicit stored choice switches away from it.
+    try { return localStorage.getItem('gh_lang') === 'en' ? 'en' : 'ka'; }
+    catch(e) { return 'ka'; }
   })();
   var _translating = false;
   var _translationTimer = null;
 
   function t(key) {
+    // One dictionary for the whole app: prefer the global i18n table, fall back
+    // to this file's local KA map, and only then to the raw key.
+    try {
+      if (typeof window.GHt === 'function') {
+        var v = window.GHt(key);
+        if (v && v !== key) return v;
+      }
+    } catch (e) {}
     return (_lang === 'ka' && KA[key]) ? KA[key] : key;
   }
 
@@ -220,37 +229,37 @@
       label: 'Main',
       kind: 'primary',
       items: [
-        { label: 'Home',     href: 'index.html', icon: 'fa-house' },
-        { label: 'Discover', href: 'feed.html',  icon: 'fa-compass' },
-        { label: 'Map',      href: 'map.html',   icon: 'fa-map' },
-        { label: 'Live',     href: 'live.html',  icon: 'fa-signal' }
+        { label: t('nav_feed'),   href: 'feed.html',   icon: 'fa-house' },
+        { label: t('nav_places'), href: 'places.html', icon: 'fa-location-dot' },
+        { label: t('nav_map'),    href: 'map.html',    icon: 'fa-map' },
+        { label: t('nav_videos'), href: 'videos.html', icon: 'fa-film' }
       ]
     },
     {
       label: 'Explore',
       items: [
-        { label: 'Places',  href: 'places.html', icon: 'fa-location-dot' },
-        { label: 'Events',  href: 'events.html', icon: 'fa-ticket' },
-        { label: 'Groups',  href: 'groups.html', icon: 'fa-users' }
+        { label: t('nav_events'), href: 'events.html', icon: 'fa-calendar-days' },
+        { label: t('nav_groups'), href: 'groups.html', icon: 'fa-users' },
+        { label: t('nav_marketplace'), href: 'marketplace.html', icon: 'fa-bag-shopping' }
       ]
     },
     {
       label: 'Growth',
       items: [
-        { label: 'Dashboard',     href: 'dashboard.html',    icon: 'fa-chart-line' },
-        { label: 'Add Business',  href: 'add-business.html', icon: 'fa-store' },
-        { label: 'Creators',      href: 'creators.html',     icon: 'fa-wand-magic-sparkles' }
+        { label: t('nav_business'), href: 'business-suite.html', icon: 'fa-chart-line' },
+        { label: t('nav_add_business'), href: 'add-business.html', icon: 'fa-store' },
+        { label: t('nav_jobs'), href: 'jobs.html', icon: 'fa-briefcase' }
       ]
     },
     {
       label: 'Personal',
       items: [
-        { label: 'Profile',    href: 'profile.html',    icon: 'fa-user' },
-        { label: 'Messages',   href: 'messages.html',   icon: 'fa-message' },
-        { label: 'Rewards',    href: 'rewards.html',    icon: 'fa-gift' },
-        { label: 'Challenges', href: 'challenges.html', icon: 'fa-trophy' },
-        { label: 'Settings',   href: 'settings.html',   icon: 'fa-gear' },
-        { label: 'Trust',      href: 'trust.html',      icon: 'fa-shield-halved' }
+        { label: t('nav_profile'),    href: 'profile.html',    icon: 'fa-user' },
+        { label: t('nav_messages'),   href: 'messages.html',   icon: 'fa-message' },
+        { label: t('nav_rewards'),    href: 'rewards.html',    icon: 'fa-gift' },
+        { label: t('nav_challenges'), href: 'challenges.html', icon: 'fa-trophy' },
+        { label: t('settings'),       href: 'settings.html',   icon: 'fa-gear' },
+        { label: t('nav_trust'),      href: 'safety.html',     icon: 'fa-shield-halved' }
       ]
     }
   ];
@@ -349,7 +358,7 @@
         'flex-shrink:0;',
         'font-family:inherit;',
       '}',
-      '#geoLangToggle:hover{border-color:var(--green,#10b981);color:var(--green,#10b981);}',
+      '#geoLangToggle:hover{border-color:var(--green,var(--ds-accent));color:var(--green,var(--ds-accent));}',
     ].join('');
     document.head.appendChild(s);
   }

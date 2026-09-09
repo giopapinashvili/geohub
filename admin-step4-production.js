@@ -34,7 +34,7 @@
     var el = $('adminToast'), text = $('adminToastMsg');
     if (!el || !text) return console.log('[Admin]', msg);
     text.textContent = msg;
-    el.style.background = bad ? 'rgba(239,68,68,.95)' : 'rgba(16,185,129,.95)';
+    el.style.background = bad ? 'rgba(239,68,68,.95)' : 'rgba(var(--ds-accent-rgb),.95)';
     el.style.color = bad ? '#fff' : '#000';
     el.style.transform = 'translateX(-50%) translateY(0)';
     el.style.opacity = '1';

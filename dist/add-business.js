@@ -77,13 +77,56 @@ let currentStep = 1;
     if (city) city.required = !isOnline;
     if (address) address.required = false;
 
+    var _abt = function(k, f){ try { return (typeof GHt === 'function' && GHt(k) !== k) ? GHt(k) : f; } catch (e) { return f; } };
     if (hint) hint.textContent = isOnline
-      ? 'Online businesses can serve all Georgia without a physical address or map pin.'
-      : 'Physical businesses appear on the map and nearby discovery.';
+      ? _abt('ab_hint_online', 'ონლაინ ბიზნესი ემსახურება მთელ საქართველოს — ფიზიკური მისამართის გარეშე.')
+      : _abt('ab_hint_physical', 'ფიზიკური მისამართის მქონე ბიზნესები ჩნდება რუკაზე და „ახლოს" ძებნაში.');
 
     if (isOnline && previewCity) previewCity.textContent = serviceAreaLabel(getServiceArea());
-    if (!isOnline && previewCity) previewCity.textContent = city && city.value ? city.value + ', Georgia' : 'City, Georgia';
+    if (!isOnline && previewCity) previewCity.textContent = city && city.value ? city.value + ', საქართველო' : 'ქალაქი, საქართველო';
   }
+
+  /* ── Admin-managed categories ────────────────────────────────────────
+     The 123 categories below the fold are the bundled defaults. When an admin
+     has curated the placeCategories collection, gh-admin-bridge.js exposes
+     that list and it replaces them here — so adding a category in the admin
+     panel actually shows up on the business signup form, not only on the map. */
+  function applyAdminCategories() {
+    var cats = (window.GeoCatalog && window.GeoCatalog.placeCategories) || [];
+    var sel = document.getElementById('catSelector');
+    if (!sel || !cats.length) return;
+    // Re-render when the list itself changes, not just once — the bridge paints
+    // from cache first and only then from Firestore.
+    var sig = cats.map(function (c) { return c.id; }).join('|');
+    if (sel.getAttribute('data-cat-sig') === sig) return;
+
+    var lang = 'ka';
+    try { lang = localStorage.getItem('gh_lang') === 'en' ? 'en' : 'ka'; } catch (e) {}
+
+    var current = sel.querySelector('.cat-option.active');
+    var keep = current ? current.getAttribute('data-cat') : '';
+
+    var esc = function (v) {
+      return String(v == null ? '' : v).replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+      });
+    };
+    // The bundled list bakes the icon into the label ("🍔 საკვები"); the admin
+    // list keeps them apart. Strip a leading emoji so it is never shown twice.
+    var stripIcon = function (v) {
+      return String(v || '').replace(/^\s*[\p{Extended_Pictographic}\uFE0F\u200D]+\s*/u, '').trim();
+    };
+    sel.innerHTML = cats.map(function (c) {
+      var raw = (lang === 'en' ? (c.labelEn || c.label) : (c.labelKa || c.label)) || c.id;
+      var label = stripIcon(raw) || c.id;
+      return '<div class="cat-option' + (c.id === keep ? ' active selected' : '') + '" data-cat="' + esc(c.id) + '">' +
+             '<span class="cat-icon">' + esc(c.icon || '📍') + '</span>' + esc(label) + '</div>';
+    }).join('');
+    sel.setAttribute('data-source', 'admin');
+    sel.setAttribute('data-cat-sig', sig);
+  }
+  window.addEventListener('GeoFlagsReady', applyAdminCategories);
+  if (window.GeoCatalog) applyAdminCategories();
 
   document.querySelectorAll('.business-type-option').forEach(function(opt) {
     opt.addEventListener('click', function() {
@@ -183,14 +226,19 @@ let currentStep = 1;
   }
   applyBusinessTypeUI();
 
-  // Category selector
-  document.querySelectorAll('.cat-option').forEach(opt => {
-    opt.addEventListener('click', () => {
-      document.querySelectorAll('.cat-option').forEach(o => o.classList.remove('selected'));
-      opt.classList.add('selected');
-      selectedCategory = opt.dataset.cat;
-      document.getElementById('previewCat').textContent = opt.querySelector('.cat-icon').textContent + ' ' + opt.textContent.replace(/[^\w\s]/g,'').trim();
-    });
+  // Category selector — delegated, so the grid can be rebuilt from the
+  // admin-managed category list without losing its click behaviour.
+  document.addEventListener('click', (e) => {
+    const opt = e.target && e.target.closest && e.target.closest('.cat-option');
+    if (!opt) return;
+    document.querySelectorAll('.cat-option').forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    selectedCategory = opt.dataset.cat;
+    const prev = document.getElementById('previewCat');
+    if (prev) {
+      const ic = opt.querySelector('.cat-icon');
+      prev.textContent = (ic ? ic.textContent + ' ' : '') + opt.textContent.replace(/[^\p{L}\p{N}\s]/gu, '').trim();
+    }
   });
 
   // Tag input
@@ -539,7 +587,7 @@ let currentStep = 1;
     if (!bar) {
       bar = document.createElement('div');
       bar.className = 'biz-upload-bar';
-      bar.style.cssText = 'position:absolute;bottom:0;left:0;height:3px;background:linear-gradient(90deg,#10b981,#3b82f6);transition:width .2s;border-radius:0 0 var(--radius-sm,6px) var(--radius-sm,6px)';
+      bar.style.cssText = 'position:absolute;bottom:0;left:0;height:3px;background:linear-gradient(90deg,var(--ds-accent),#3b82f6);transition:width .2s;border-radius:0 0 var(--radius-sm,6px) var(--radius-sm,6px)';
       zone.style.position = 'relative';
       zone.appendChild(bar);
     }
@@ -593,13 +641,13 @@ let currentStep = 1;
       zone.dataset.uploading = '1';
 
       var placeholder = document.createElement('div');
-      placeholder.style.cssText = 'width:80px;height:64px;border-radius:6px;background:rgba(255,255,255,.07);display:inline-flex;align-items:center;justify-content:center;color:#64748b;font-size:.7rem;flex-shrink:0';
+      placeholder.style.cssText = 'width:80px;height:64px;border-radius:6px;background:rgba(255,255,255,.07);display:inline-flex;align-items:center;justify-content:center;color:var(--ds-text-3);font-size:.7rem;flex-shrink:0';
       placeholder.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
 
       if (id === 'coverUpload') {
         zone.innerHTML = '';
         zone.appendChild(placeholder);
-        placeholder.style.cssText = 'width:100%;height:120px;border-radius:var(--radius-sm);background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;color:#64748b';
+        placeholder.style.cssText = 'width:100%;height:120px;border-radius:var(--radius-sm);background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;color:var(--ds-text-3)';
       } else {
         document.getElementById('uploadedPhotos').appendChild(placeholder);
       }

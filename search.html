@@ -9,23 +9,23 @@
   <link rel="dns-prefetch" href="https://firebase.googleapis.com">
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Search — GeoHub</title>
+  <title>ძებნა — GeoHub</title>
   <!-- SEO ─────────────────────────────────────────────── -->
-  <meta name="description" content="Search GeoHub for places, events, groups, creators, and people across Georgia. Find what matters to you.">
+  <meta name="description" content="მოძებნე ადგილები, ადამიანები, ჯგუფები და ბიზნესები GeoHub-ზე.">
   <link rel="canonical" href="https://geohub.ge/search.html">
   <meta name="robots" content="index, follow">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GeoHub">
-  <meta property="og:title" content="Search — GeoHub">
-  <meta property="og:description" content="Search GeoHub for places, events, groups, creators, and people across Georgia. Find what matters to you.">
+  <meta property="og:title" content="ძებნა — GeoHub">
+  <meta property="og:description" content="მოძებნე ადგილები, ადამიანები, ჯგუფები და ბიზნესები GeoHub-ზე.">
   <meta property="og:url" content="https://geohub.ge/search.html">
   <meta property="og:image" content="https://geohub.ge/icons/icon-512.png">
   <meta property="og:image:width" content="512">
   <meta property="og:image:height" content="512">
   <meta property="og:image:alt" content="GeoHub — Discover Georgia">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Search — GeoHub">
-  <meta name="twitter:description" content="Search GeoHub for places, events, groups, creators, and people across Georgia. Find what matters to you.">
+  <meta name="twitter:title" content="ძებნა — GeoHub">
+  <meta name="twitter:description" content="მოძებნე ადგილები, ადამიანები, ჯგუფები და ბიზნესები GeoHub-ზე.">
   <meta name="twitter:image" content="https://geohub.ge/icons/icon-512.png">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
@@ -37,13 +37,18 @@
   <link rel="stylesheet" href="search.css">
   <link rel="stylesheet" href="chat-popup.css">
   <link rel="stylesheet" href="responsive-polish.css">
-  <meta name="theme-color" content="#10b981">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#060a09" media="(prefers-color-scheme: dark)">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{background:#04050d;color:#f0f4ff;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow-x:hidden;min-height:100vh}
-    :root{--green:#10b981;--green-light:#34d399;--bg-0:#04050d;--bg-elevated:#0d1021;--text-primary:#f0f4ff;--text-secondary:#94a3b8;--text-muted:#6b7280;--border:rgba(255,255,255,.1);}
+    body{background:var(--ds-bg);color:var(--ds-text);font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow-x:hidden;min-height:100vh}
+    :root{--green:var(--ds-accent);--green-light:var(--ds-accent-hi);--bg-0:var(--ds-bg-deep);--bg-elevated:#0d1021;--text-primary:#f0f4ff;--text-secondary:#94a3b8;--text-muted:var(--ds-text-3);--border:rgba(255,255,255,.1);}
   </style>
   <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700;800&family=Noto+Serif+Georgian:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="gh-design-system.css">
 </head>
 <body data-gh-page="search">
   <noscript>GeoHub requires JavaScript.</noscript>
@@ -208,12 +213,12 @@
     ];
 
     var QUICK_LINKS = [
-      { label:'ადამიანები',  icon:'fas fa-user',           tab:'people',     color:'#60a5fa' },
-      { label:'ვიდეოები',    icon:'fas fa-film',           tab:'videos',     color:'#10b981' },
-      { label:'ბიზნესი',     icon:'fas fa-store',          tab:'businesses', color:'#34d399' },
-      { label:'ადგილები',    icon:'fas fa-map-marker-alt', tab:'places',     color:'#fbbf24' },
-      { label:'ივენთები',    icon:'fas fa-calendar',       tab:'events',     color:'#f87171' },
-      { label:'ჯგუფები',     icon:'fas fa-users',          tab:'groups',     color:'#c084fc' }
+      { label:'ადამიანები',  icon:'fas fa-user',           tab:'people',     color:'var(--ds-h-job)' },
+      { label:'ვიდეოები',    icon:'fas fa-film',           tab:'videos',     color:'var(--ds-h-video)' },
+      { label:'ბიზნესი',     icon:'fas fa-store',          tab:'businesses', color:'var(--ds-h-place)' },
+      { label:'ადგილები',    icon:'fas fa-map-marker-alt', tab:'places',     color:'var(--ds-h-reward)' },
+      { label:'ივენთები',    icon:'fas fa-calendar',       tab:'events',     color:'var(--ds-h-event)' },
+      { label:'ჯგუფები',     icon:'fas fa-users',          tab:'groups',     color:'var(--ds-h-group)' }
     ];
 
     function showDiscover() {
@@ -419,7 +424,7 @@
         : '';
       return '<div class="sr-section">' +
         '<div class="sr-section-head">' +
-          '<span class="sr-section-title"><i class="' + icon + '" style="color:#10b981"></i> ' + title + ' <span class="sr-cnt-badge">' + items.length + '</span></span>' +
+          '<span class="sr-section-title"><i class="' + icon + '" style="color:var(--ds-accent-ink)"></i> ' + title + ' <span class="sr-cnt-badge">' + items.length + '</span></span>' +
           seeMore +
         '</div>' +
         '<div class="sr-results-list">' + displayed.map(function(item) { return itemHtml(type, item); }).join('') + '</div>' +

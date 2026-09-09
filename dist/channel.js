@@ -80,7 +80,7 @@
           '<button class="vid-btn ghost ch-owner-btn" id="chEditBtn"><i class="fas fa-pen"></i> რედაქტირება</button>' +
           '<button class="vid-btn ghost ch-owner-btn" id="chManageBtn"><i class="fas fa-sliders"></i> ვიდეოების მართვა</button>' +
           '<button class="vid-btn ghost ch-owner-btn" id="chImportBtn" style="color:#3b82f6;border-color:rgba(59,130,246,.3)"><i class="fab fa-youtube"></i> Re-Import</button>' +
-          '<button class="vid-btn ghost ch-owner-btn" id="chDeleteAllVideosBtn" style="color:#f59e0b;border-color:rgba(245,158,11,.3)"><i class="fas fa-trash"></i> ყველა ვიდეო</button>' +
+          '<button class="vid-btn ghost ch-owner-btn" id="chDeleteAllVideosBtn" style="color:var(--ds-h-reward-ink);border-color:rgba(245,158,11,.3)"><i class="fas fa-trash"></i> ყველა ვიდეო</button>' +
           '<button class="vid-btn ghost ch-owner-btn" id="chDeleteChannelBtn" style="color:#ef4444;border-color:rgba(239,68,68,.3)"><i class="fas fa-ban"></i> არხის წაშლა</button>' +
         '</div>' +
       '</div>' +
@@ -436,7 +436,7 @@
     var thumb = pl.thumbnail||'';
     return '<div class="ch-playlist-card" data-playlist-id="'+esc(pl._id)+'" data-playlist-name="'+esc(pl.title||'Playlist')+'" style="cursor:pointer">' +
       '<div class="ch-pl-thumb" style="'+(thumb?'background-image:url('+esc(thumb)+');background-size:cover;background-position:center':'background:#1a2133')+'">' +
-        (!thumb?'<i class="fas fa-list" style="font-size:2rem;color:#94a3b8"></i>':'') +
+        (!thumb?'<i class="fas fa-list" style="font-size:2rem;color:var(--ds-text-3)"></i>':'') +
         '<div class="ch-pl-count"><i class="fas fa-film"></i> '+(pl.videoCount||0)+'</div>' +
       '</div>' +
       '<div class="ch-pl-info">' +
@@ -591,14 +591,14 @@
           '<input id="cheAvatar" class="vid-form-input" type="url" value="'+esc(ch.avatar||'')+'">' +
         '</div>' +
         '<div class="vid-form-group">' +
-          '<label class="vid-form-label"><i class="fas fa-image" style="color:#60a5fa;margin-right:4px"></i>Banner URL' +
-            '<span style="font-size:.75rem;color:#94a3b8;font-weight:400;margin-left:6px">(YouTube Studio → Customization → Branding → Banner image → copy URL)</span>' +
+          '<label class="vid-form-label"><i class="fas fa-image" style="color:var(--ds-h-video-ink);margin-right:4px"></i>Banner URL' +
+            '<span style="font-size:.75rem;color:var(--ds-text-3);font-weight:400;margin-left:6px">(YouTube Studio → Customization → Branding → Banner image → copy URL)</span>' +
           '</label>' +
           '<input id="cheBanner" class="vid-form-input" type="url" placeholder="https://yt3.googleusercontent.com/..." value="'+esc(ch.banner||'')+'">' +
           (ch.banner?'<div style="margin-top:6px"><img src="'+esc(ch.banner)+'" style="width:100%;height:60px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,.1)" alt="Banner preview" onerror="this.remove()"></div>':'') +
         '</div>' +
         '<div class="vid-form-group">' +
-          '<label class="vid-form-label"><i class="fas fa-star" style="color:#f59e0b;margin-right:4px"></i>Featured Video ID (Firestore ID)</label>' +
+          '<label class="vid-form-label"><i class="fas fa-star" style="color:var(--ds-h-reward-ink);margin-right:4px"></i>Featured Video ID (Firestore ID)</label>' +
           '<input id="cheFeatured" class="vid-form-input" type="text" placeholder="ვიდეოს ID (სურვილისამებრ)" value="'+esc(ch.featuredVideoId||'')+'">' +
         '</div>' +
         '<div class="vid-modal-footer">' +

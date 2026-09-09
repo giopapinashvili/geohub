@@ -9,31 +9,34 @@
   <link rel="dns-prefetch" href="https://firebase.googleapis.com">
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Groups — GeoHub</title>
+  <title>ჯგუფები — GeoHub</title>
   <!-- SEO ─────────────────────────────────────────────── -->
-  <meta name="description" content="Join community groups built around your interests, neighborhood, and passions. Connect with like-minded people across Georgia on GeoHub.">
+  <meta name="description" content="შემოუერთდი ჯგუფებს ინტერესების მიხედვით და გაიცანი ახალი ადამიანები.">
   <link rel="canonical" href="https://geohub.ge/groups.html">
   <meta name="robots" content="index, follow">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GeoHub">
-  <meta property="og:title" content="Groups — GeoHub">
-  <meta property="og:description" content="Join community groups built around your interests, neighborhood, and passions. Connect with like-minded people across Georgia on GeoHub.">
+  <meta property="og:title" content="ჯგუფები — GeoHub">
+  <meta property="og:description" content="შემოუერთდი ჯგუფებს ინტერესების მიხედვით და გაიცანი ახალი ადამიანები.">
   <meta property="og:url" content="https://geohub.ge/groups.html">
   <meta property="og:image" content="https://geohub.ge/icons/icon-512.png">
   <meta property="og:image:width" content="512">
   <meta property="og:image:height" content="512">
   <meta property="og:image:alt" content="GeoHub — Discover Georgia">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Groups — GeoHub">
-  <meta name="twitter:description" content="Join community groups built around your interests, neighborhood, and passions. Connect with like-minded people across Georgia on GeoHub.">
+  <meta name="twitter:title" content="ჯგუფები — GeoHub">
+  <meta name="twitter:description" content="შემოუერთდი ჯგუფებს ინტერესების მიხედვით და გაიცანი ახალი ადამიანები.">
   <meta name="twitter:image" content="https://geohub.ge/icons/icon-512.png">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
-  <meta name="theme-color" content="#10b981">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#060a09" media="(prefers-color-scheme: dark)">
   <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700;800&family=Noto+Serif+Georgian:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
   <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
-  <script type="module" crossorigin src="/assets/responsive-polish-BO79aqv7.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
@@ -41,20 +44,21 @@
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js"></script>
   <script type="module" crossorigin src="/assets/firebase-config-CGKVrgHh.js"></script>
-  <script type="module" crossorigin src="/assets/gh-i18n-BbqPU8Gy.js"></script>
+  <script type="module" crossorigin src="/assets/gh-admin-bridge-h-7zgsq_.js"></script>
   <script type="module" crossorigin src="/assets/gh-schema-kY2sMGH-.js"></script>
-  <script type="module" crossorigin src="/assets/account-BJSGhbLy.js"></script>
-  <script type="module" crossorigin src="/assets/mobile-nav-DsKLv3RI.js"></script>
-  <script type="module" crossorigin src="/assets/firestore-social-BXEW-BZV.js"></script>
-  <script type="module" crossorigin src="/assets/chat-popup-MADaMnFN.js"></script>
+  <script type="module" crossorigin src="/assets/account-Dl1_viTm.js"></script>
+  <script type="module" crossorigin src="/assets/mobile-nav-CEPM5beY.js"></script>
+  <script type="module" crossorigin src="/assets/firestore-social-CedOtedd.js"></script>
+  <script type="module" crossorigin src="/assets/chat-popup-BHzNMiBZ.js"></script>
   <script type="module" crossorigin src="/assets/gh-calls-DqDOBgOW.js"></script>
-  <script type="module" crossorigin src="/assets/gh-group-calls-Ck1zIhcT.js"></script>
-  <script type="module" crossorigin src="/assets/geohub-social-redesign-BWKSXRSM.js"></script>
-  <script type="module" crossorigin src="/assets/story-editor-yJAiz1Ls.js"></script>
+  <script type="module" crossorigin src="/assets/gh-group-calls-CA5vOXuG.js"></script>
+  <script type="module" crossorigin src="/assets/geohub-social-redesign-CEvWO0HF.js"></script>
+  <script type="module" crossorigin src="/assets/story-editor-B9vcbSj4.js"></script>
   <script type="module" crossorigin src="/assets/geo-actors-Cei0uKLL.js"></script>
-  <script type="module" crossorigin src="/assets/account-switcher-CXzCMss9.js"></script>
-  <script type="module" crossorigin src="/assets/geohub-production-stabilization-v1-D4HPXa7T.js"></script>
-  <script type="module" crossorigin src="/assets/push-notifications-wdsLxQpN.js"></script>
+  <script type="module" crossorigin src="/assets/account-switcher-CyZuJiLi.js"></script>
+  <script type="module" crossorigin src="/assets/geohub-production-stabilization-v1-kYTMrx4r.js"></script>
+  <script type="module" crossorigin src="/assets/responsive-polish-Cni6BeF_.js"></script>
+  <script type="module" crossorigin src="/assets/push-notifications-BAgBkbfW.js"></script>
   <script type="module" crossorigin src="/assets/analytics-DyGaP85h.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
@@ -62,10 +66,11 @@
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
-  <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-MLyQcxDm.css">
-  <link rel="stylesheet" crossorigin href="/assets/account-switcher-B6z_cLE_.css">
-  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+  <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-SGulRuY0.css">
+  <link rel="stylesheet" crossorigin href="/assets/account-switcher-CWJxisto.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-DzoItt1C.css">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-OO1pxCG1.css">
+  <link rel="stylesheet" crossorigin href="/assets/gh-design-system-Eii08DGH.css">
 </head>
 <body data-gh-page="groups">
   <noscript>GeoHub requires JavaScript.</noscript>

@@ -21,10 +21,10 @@
   function categoryBadge(cat) {
     var colors = {
       music: '#a855f7', sports: '#3b82f6', tech: '#06b6d4',
-      food: '#f59e0b', art: '#ec4899', outdoor: '#10b981',
+      food: '#f59e0b', art: '#ec4899', outdoor: 'var(--ds-accent)',
       gaming: '#8b5cf6', business: '#64748b'
     };
-    var c = colors[String(cat || '').toLowerCase()] || '#10b981';
+    var c = colors[String(cat || '').toLowerCase()] || 'var(--ds-accent)';
     return '<span style="background:' + c + '1a;color:' + c + ';border:1px solid ' + c + '33;'
       + 'border-radius:6px;padding:2px 8px;font-size:.7rem;font-weight:700;text-transform:uppercase">'
       + esc(cat || 'Event') + '</span>';
@@ -76,15 +76,15 @@
   function ticketButton(event) {
     var price = Number(event.ticketPrice || event.price || 0);
     if (!price || price <= 0) {
-      return '<span style="color:#94a3b8;font-size:.8rem"><i class="fas fa-ticket"></i> Free entry</span>';
+      return '<span style="color:var(--ds-text-3);font-size:.8rem"><i class="fas fa-ticket"></i> Free entry</span>';
     }
     var paymentsEnabled = window.GeoConfig && window.GeoConfig.FEATURE_FLAGS && window.GeoConfig.FEATURE_FLAGS.realPayments;
     if (!paymentsEnabled) {
-      return '<span style="color:#64748b;font-size:.78rem;background:rgba(255,255,255,.05);padding:4px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.08)">'
+      return '<span style="color:var(--ds-text-3);font-size:.78rem;background:rgba(255,255,255,.05);padding:4px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.08)">'
         + '<i class="fas fa-ticket"></i> ' + price.toFixed(0) + ' &#x20BE; &middot; Tickets coming soon</span>';
     }
     return '<button class="geo-ticket-btn" data-event-id="' + esc(event.id) + '" style="'
-      + 'background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;'
+      + 'background:linear-gradient(135deg,var(--ds-accent),var(--ds-accent-lo));color:#fff;border:none;'
       + 'border-radius:10px;padding:9px 18px;font-weight:700;cursor:pointer;font-size:.83rem;'
       + 'display:inline-flex;align-items:center;gap:7px;transition:opacity .2s'
       + '" onmouseover="this.style.opacity=\'.85\'" onmouseout="this.style.opacity=\'1\'">'
@@ -98,8 +98,8 @@
     return '<button class="geo-rsvp-btn" data-event-id="' + esc(eventId) + '"'
       + (isGoing ? ' data-going="1"' : '')
       + ' style="background:rgba(255,255,255,.07);border:1px solid '
-      + (isGoing ? 'rgba(16,185,129,.3)' : 'rgba(255,255,255,.1)') + ';color:'
-      + (isGoing ? '#10b981' : '#94a3b8')
+      + (isGoing ? 'rgba(var(--ds-accent-rgb),.3)' : 'rgba(255,255,255,.1)') + ';color:'
+      + (isGoing ? 'var(--ds-accent)' : '#94a3b8')
       + ';border-radius:8px;padding:' + pad + ';cursor:pointer;font-size:' + fs + ';font-weight:600">'
       + (isGoing ? '<i class="fas fa-check"></i> Going!' : '<i class="fas fa-calendar-check"></i> RSVP')
       + '</button>';
@@ -120,12 +120,12 @@
         'border-radius:18px;overflow:hidden;display:flex;flex-direction:column;',
         'cursor:pointer;transition:border-color .25s,transform .25s" ',
         'onclick="openEventDetail(\'' + esc(event.id) + '\')"',
-        'onmouseover="this.style.borderColor=\'rgba(16,185,129,.35)\';this.style.transform=\'translateY(-2px)\'"',
+        'onmouseover="this.style.borderColor=\'rgba(var(--ds-accent-rgb),.35)\';this.style.transform=\'translateY(-2px)\'"',
         'onmouseout="this.style.borderColor=\'rgba(255,255,255,.08)\';this.style.transform=\'\'">',
 
         img
           ? '<div style="height:170px;overflow:hidden"><img src="' + esc(img) + '" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.style.display=\'none\'"></div>'
-          : '<div style="height:90px;background:linear-gradient(135deg,rgba(16,185,129,.2),rgba(59,130,246,.15));display:flex;align-items:center;justify-content:center;font-size:2.2rem">🎉</div>',
+          : '<div style="height:90px;background:linear-gradient(135deg,rgba(var(--ds-accent-rgb),.2),rgba(59,130,246,.15));display:flex;align-items:center;justify-content:center;font-size:2.2rem">🎉</div>',
 
         '<div style="padding:16px;flex:1;display:flex;flex-direction:column;gap:9px">',
           '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">',
@@ -133,22 +133,22 @@
             event.status === 'cancelled'
               ? '<span style="color:#ef4444;font-size:.7rem;font-weight:700;background:rgba(239,68,68,.12);padding:2px 8px;border-radius:6px">CANCELLED</span>'
               : future
-                ? '<span style="color:#10b981;font-size:.7rem;font-weight:700;background:rgba(16,185,129,.1);padding:2px 8px;border-radius:6px">UPCOMING</span>'
-                : '<span style="color:#64748b;font-size:.7rem;background:rgba(255,255,255,.05);padding:2px 8px;border-radius:6px">PAST</span>',
+                ? '<span style="color:var(--ds-accent-ink);font-size:.7rem;font-weight:700;background:rgba(var(--ds-accent-rgb),.1);padding:2px 8px;border-radius:6px">UPCOMING</span>'
+                : '<span style="color:var(--ds-text-3);font-size:.7rem;background:rgba(255,255,255,.05);padding:2px 8px;border-radius:6px">PAST</span>',
           '</div>',
 
-          '<h3 style="font-size:.95rem;font-weight:700;color:#f1f5f9;line-height:1.35;margin:0">' + esc(event.title || event.name || 'Event') + '</h3>',
+          '<h3 style="font-size:.95rem;font-weight:700;color:var(--ds-text);line-height:1.35;margin:0">' + esc(event.title || event.name || 'Event') + '</h3>',
 
           event.description
-            ? '<p style="color:#94a3b8;font-size:.8rem;line-height:1.5;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + esc(event.description) + '</p>'
+            ? '<p style="color:var(--ds-text-3);font-size:.8rem;line-height:1.5;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">' + esc(event.description) + '</p>'
             : '',
 
-          '<div style="display:flex;flex-direction:column;gap:3px;font-size:.78rem;color:#94a3b8">',
-            dateVal ? '<span><i class="fas fa-calendar" style="width:14px;text-align:center;color:#10b981;margin-right:6px"></i>' + formatDate(dateVal) + (formatTime(dateVal) ? ' &middot; ' + formatTime(dateVal) : '') + '</span>' : '',
+          '<div style="display:flex;flex-direction:column;gap:3px;font-size:.78rem;color:var(--ds-text-3)">',
+            dateVal ? '<span><i class="fas fa-calendar" style="width:14px;text-align:center;color:var(--ds-accent-ink);margin-right:6px"></i>' + formatDate(dateVal) + (formatTime(dateVal) ? ' &middot; ' + formatTime(dateVal) : '') + '</span>' : '',
             (event.location || event.venue) ? '<span><i class="fas fa-map-marker-alt" style="width:14px;text-align:center;color:#3b82f6;margin-right:6px"></i>' + esc(event.location || event.venue) + '</span>' : '',
             cap > 0
-              ? '<span><i class="fas fa-users" style="width:14px;text-align:center;color:#f59e0b;margin-right:6px"></i>' + going + ' / ' + cap + ' attendees</span>'
-              : (going > 0 ? '<span><i class="fas fa-users" style="width:14px;text-align:center;color:#f59e0b;margin-right:6px"></i>' + going + ' going</span>' : ''),
+              ? '<span><i class="fas fa-users" style="width:14px;text-align:center;color:var(--ds-h-reward-ink);margin-right:6px"></i>' + going + ' / ' + cap + ' attendees</span>'
+              : (going > 0 ? '<span><i class="fas fa-users" style="width:14px;text-align:center;color:var(--ds-h-reward-ink);margin-right:6px"></i>' + going + ' going</span>' : ''),
           '</div>',
 
           '<div style="margin-top:auto;padding-top:6px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px" onclick="event.stopPropagation()">',
@@ -164,9 +164,9 @@
 
   function renderEmpty(msg) {
     return '<div style="grid-column:1/-1;min-height:260px;display:flex;align-items:center;justify-content:center;'
-      + 'text-align:center;color:#94a3b8;border:1px dashed rgba(255,255,255,.12);border-radius:22px;background:rgba(255,255,255,.02)">'
+      + 'text-align:center;color:var(--ds-text-3);border:1px dashed rgba(255,255,255,.12);border-radius:22px;background:rgba(255,255,255,.02)">'
       + '<div><div style="font-size:2rem;margin-bottom:10px">🎉</div>'
-      + '<h3 style="color:#f8fafc;margin:0 0 6px">No events</h3>'
+      + '<h3 style="color:var(--ds-text);margin:0 0 6px">No events</h3>'
       + '<p style="margin:0;font-size:.83rem">' + (msg || 'Events appear here once created in the Admin Panel.') + '</p></div></div>';
   }
 
@@ -197,17 +197,17 @@
     state.all.forEach(function (e) { var c = e.category; if (c) cats[c] = (cats[c] || 0) + 1; });
     var catKeys = Object.keys(cats).sort();
 
-    var html = '<strong style="font-size:.9rem;color:#f1f5f9">Filters</strong>';
+    var html = '<strong style="font-size:.9rem;color:var(--ds-text)">Filters</strong>';
 
     if (catKeys.length) {
       var btnStyle = function(active) {
-        return 'text-align:left;width:100%;background:' + (active ? 'rgba(16,185,129,.12)' : 'rgba(255,255,255,.04)')
-          + ';border:1px solid ' + (active ? 'rgba(16,185,129,.3)' : 'rgba(255,255,255,.06)')
+        return 'text-align:left;width:100%;background:' + (active ? 'rgba(var(--ds-accent-rgb),.12)' : 'rgba(255,255,255,.04)')
+          + ';border:1px solid ' + (active ? 'rgba(var(--ds-accent-rgb),.3)' : 'rgba(255,255,255,.06)')
           + ';color:' + (active ? '#10e0a0' : '#94a3b8')
           + ';border-radius:8px;padding:7px 12px;cursor:pointer;font-size:.82rem;font-weight:600';
       };
       html += '<div style="margin-top:14px;display:flex;flex-direction:column;gap:5px">'
-        + '<div style="font-size:.72rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Category</div>'
+        + '<div style="font-size:.72rem;color:var(--ds-text-3);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Category</div>'
         + '<button onclick="_setEvCat(\'\')" style="' + btnStyle(!state.catFilter) + '">All (' + state.all.length + ')</button>'
         + catKeys.map(function (c) {
             return '<button onclick="_setEvCat(\'' + esc(c) + '\')" style="' + btnStyle(state.catFilter === c) + '">'
@@ -215,15 +215,15 @@
           }).join('')
         + '</div>';
     } else {
-      html += '<p style="color:#64748b;font-size:.82rem;margin-top:10px;line-height:1.6">Categories appear once events are added.</p>';
+      html += '<p style="color:var(--ds-text-3);font-size:.82rem;margin-top:10px;line-height:1.6">Categories appear once events are added.</p>';
     }
 
     if (user()) {
       var rsvpCount = Object.keys(state.myRsvpIds).length;
       html += '<div style="margin-top:16px;border-top:1px solid rgba(255,255,255,.06);padding-top:14px">'
-        + '<div style="font-size:.72rem;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Your Activity</div>'
-        + '<button onclick="_setEvFilter(\'mine\')" style="text-align:left;width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);color:#94a3b8;border-radius:8px;padding:7px 12px;cursor:pointer;font-size:.82rem;font-weight:600">'
-        + '<i class="fas fa-calendar-check" style="color:#10b981;margin-right:6px"></i>My RSVPs (' + rsvpCount + ')</button>'
+        + '<div style="font-size:.72rem;color:var(--ds-text-3);font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Your Activity</div>'
+        + '<button onclick="_setEvFilter(\'mine\')" style="text-align:left;width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);color:var(--ds-text-3);border-radius:8px;padding:7px 12px;cursor:pointer;font-size:.82rem;font-weight:600">'
+        + '<i class="fas fa-calendar-check" style="color:var(--ds-accent-ink);margin-right:6px"></i>My RSVPs (' + rsvpCount + ')</button>'
         + '</div>';
     }
 
@@ -352,8 +352,8 @@
         if (!eid) return;
         var going = !!state.myRsvpIds[eid];
         btn.dataset.going = going ? '1' : '';
-        btn.style.color = going ? '#10b981' : '#94a3b8';
-        btn.style.borderColor = going ? 'rgba(16,185,129,.3)' : 'rgba(255,255,255,.1)';
+        btn.style.color = going ? 'var(--ds-accent)' : '#94a3b8';
+        btn.style.borderColor = going ? 'rgba(var(--ds-accent-rgb),.3)' : 'rgba(255,255,255,.1)';
         btn.innerHTML = going ? '<i class="fas fa-check"></i> Going!' : '<i class="fas fa-calendar-check"></i> RSVP';
       });
       var statMine = $('stat-mine');
@@ -418,8 +418,8 @@
           if (result === true) {
             state.myRsvpIds[eid] = true;
             rBtn.dataset.going = '1';
-            rBtn.style.color = '#10b981';
-            rBtn.style.borderColor = 'rgba(16,185,129,.3)';
+            rBtn.style.color = 'var(--ds-accent)';
+            rBtn.style.borderColor = 'rgba(var(--ds-accent-rgb),.3)';
             rBtn.innerHTML = '<i class="fas fa-check"></i> Going!';
           } else if (result === 'removed') {
             delete state.myRsvpIds[eid];
@@ -433,8 +433,8 @@
             if (b === rBtn) return;
             var g = !!state.myRsvpIds[eid];
             b.dataset.going = g ? '1' : '';
-            b.style.color = g ? '#10b981' : '#94a3b8';
-            b.style.borderColor = g ? 'rgba(16,185,129,.3)' : 'rgba(255,255,255,.1)';
+            b.style.color = g ? 'var(--ds-accent)' : '#94a3b8';
+            b.style.borderColor = g ? 'rgba(var(--ds-accent-rgb),.3)' : 'rgba(255,255,255,.1)';
             b.innerHTML = g ? '<i class="fas fa-check"></i> Going!' : '<i class="fas fa-calendar-check"></i> RSVP';
           });
           var statMine = $('stat-mine');
@@ -473,20 +473,20 @@
     var loc     = ev.location || ev.venue || '';
     var mapsUrl = loc ? 'https://maps.google.com/?q=' + encodeURIComponent(loc) : '';
     var detBtn  = 'display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:9px;'
-      + 'border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:#e2e8f0;'
+      + 'border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:var(--ds-text-2);'
       + 'font-size:.8rem;font-weight:600;cursor:pointer;text-decoration:none';
 
     box.innerHTML =
       '<div style="position:relative">'
         + (img
             ? '<div style="height:220px;overflow:hidden;border-radius:22px 22px 0 0"><img src="' + esc(img) + '" alt="" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.style.display=\'none\'"></div>'
-            : '<div style="height:110px;background:linear-gradient(135deg,rgba(16,185,129,.2),rgba(59,130,246,.15));border-radius:22px 22px 0 0;display:flex;align-items:center;justify-content:center;font-size:3rem">🎉</div>')
+            : '<div style="height:110px;background:linear-gradient(135deg,rgba(var(--ds-accent-rgb),.2),rgba(59,130,246,.15));border-radius:22px 22px 0 0;display:flex;align-items:center;justify-content:center;font-size:3rem">🎉</div>')
         + '<button onclick="closeEventDetail()" style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,.55);border:none;color:#fff;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:.95rem;line-height:1">✕</button>'
       + '</div>'
       + '<div style="padding:22px">'
         + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap">'
           + '<div>'
-            + '<h2 style="font-size:1.25rem;font-weight:900;margin:0 0 8px;color:#f8fafc">' + esc(ev.title || ev.name || 'Event') + '</h2>'
+            + '<h2 style="font-size:1.25rem;font-weight:900;margin:0 0 8px;color:var(--ds-text)">' + esc(ev.title || ev.name || 'Event') + '</h2>'
             + categoryBadge(ev.category)
           + '</div>'
           + (ev.status === 'cancelled'
@@ -495,19 +495,19 @@
                 + 'background:rgba(' + (isFuture(dateVal) ? '16,185,129' : '255,255,255') + ',.08);padding:3px 10px;border-radius:6px;white-space:nowrap;align-self:flex-start">'
                 + (isFuture(dateVal) ? 'UPCOMING' : 'PAST') + '</span>')
         + '</div>'
-        + '<div style="display:flex;flex-direction:column;gap:7px;font-size:.84rem;color:#94a3b8;margin:14px 0">'
-          + (dateVal ? '<span><i class="fas fa-calendar" style="width:16px;text-align:center;color:#10b981;margin-right:7px"></i>' + formatDate(dateVal) + (formatTime(dateVal) ? ' &middot; ' + formatTime(dateVal) : '') + '</span>' : '')
+        + '<div style="display:flex;flex-direction:column;gap:7px;font-size:.84rem;color:var(--ds-text-3);margin:14px 0">'
+          + (dateVal ? '<span><i class="fas fa-calendar" style="width:16px;text-align:center;color:var(--ds-accent-ink);margin-right:7px"></i>' + formatDate(dateVal) + (formatTime(dateVal) ? ' &middot; ' + formatTime(dateVal) : '') + '</span>' : '')
           + (loc ? '<span><i class="fas fa-map-marker-alt" style="width:16px;text-align:center;color:#3b82f6;margin-right:7px"></i>' + esc(loc) + '</span>' : '')
           + ((ev.hostName || ev.organizerName) ? '<span><i class="fas fa-user" style="width:16px;text-align:center;color:#a855f7;margin-right:7px"></i>' + esc(ev.hostName || ev.organizerName) + '</span>' : '')
           + (cap > 0
-              ? '<span><i class="fas fa-users" style="width:16px;text-align:center;color:#f59e0b;margin-right:7px"></i>' + going + ' / ' + cap + ' attendees</span>'
-              : (going > 0 ? '<span><i class="fas fa-users" style="width:16px;text-align:center;color:#f59e0b;margin-right:7px"></i>' + going + ' going</span>' : ''))
-          + (ev.businessId ? '<span><i class="fas fa-store" style="width:16px;text-align:center;color:#10b981;margin-right:7px"></i><a href="business.html?id=' + esc(ev.businessId) + '" style="color:#10b981;text-decoration:none">View Business Page</a></span>' : '')
+              ? '<span><i class="fas fa-users" style="width:16px;text-align:center;color:var(--ds-h-reward-ink);margin-right:7px"></i>' + going + ' / ' + cap + ' attendees</span>'
+              : (going > 0 ? '<span><i class="fas fa-users" style="width:16px;text-align:center;color:var(--ds-h-reward-ink);margin-right:7px"></i>' + going + ' going</span>' : ''))
+          + (ev.businessId ? '<span><i class="fas fa-store" style="width:16px;text-align:center;color:var(--ds-accent-ink);margin-right:7px"></i><a href="business.html?id=' + esc(ev.businessId) + '" style="color:var(--ds-accent-ink);text-decoration:none">View Business Page</a></span>' : '')
           + (ev.groupId ? '<span><i class="fas fa-users-cog" style="width:16px;text-align:center;color:#a855f7;margin-right:7px"></i><a href="groups.html?id=' + esc(ev.groupId) + '" style="color:#a855f7;text-decoration:none">View Group</a></span>' : '')
         + '</div>'
-        + (ev.description ? '<p style="font-size:.88rem;color:#94a3b8;line-height:1.65;margin:0 0 16px">' + esc(ev.description) + '</p>' : '')
+        + (ev.description ? '<p style="font-size:.88rem;color:var(--ds-text-3);line-height:1.65;margin:0 0 16px">' + esc(ev.description) + '</p>' : '')
         + '<div id="evStoriesStrip" style="margin-bottom:14px;display:none">'
-          + '<div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px"><i class="fas fa-circle-play" style="color:#10b981;margin-right:5px"></i>ღონისძიების სტორიები</div>'
+          + '<div style="font-size:.75rem;font-weight:700;color:var(--ds-text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px"><i class="fas fa-circle-play" style="color:var(--ds-accent-ink);margin-right:5px"></i>ღონისძიების სტორიები</div>'
           + '<div class="gh-stories-bar" id="evStoriesBar">'
             + '<div id="evStoriesItems" style="display:contents"></div>'
           + '</div>'
@@ -545,11 +545,11 @@
           itemsEl.innerHTML = sts.map(function(s) {
             var av = s.authorAvatar || '';
             return '<div class="gh-story-card" style="flex-shrink:0;width:56px;text-align:center;cursor:pointer">'
-              + '<div class="gh-story-ring" style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#10b981,#3b82f6);padding:2px;margin:0 auto">'
-              + '<div style="width:100%;height:100%;border-radius:50%;overflow:hidden;background:#1a1f35;display:flex;align-items:center;justify-content:center">'
-              + (av ? '<img src="' + s.authorAvatar + '" style="width:100%;height:100%;object-fit:cover" alt="">' : '<i class="fas fa-user" style="color:#94a3b8;font-size:.9rem"></i>')
+              + '<div class="gh-story-ring" style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--ds-accent),#3b82f6);padding:2px;margin:0 auto">'
+              + '<div style="width:100%;height:100%;border-radius:50%;overflow:hidden;background:var(--ds-surface);display:flex;align-items:center;justify-content:center">'
+              + (av ? '<img src="' + s.authorAvatar + '" style="width:100%;height:100%;object-fit:cover" alt="">' : '<i class="fas fa-user" style="color:var(--ds-text-3);font-size:.9rem"></i>')
               + '</div></div>'
-              + '<span style="font-size:.65rem;color:#94a3b8;display:block;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:56px">' + (s.authorName || '').substring(0, 8) + '</span>'
+              + '<span style="font-size:.65rem;color:var(--ds-text-3);display:block;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:56px">' + (s.authorName || '').substring(0, 8) + '</span>'
               + '</div>';
           }).join('');
           return;
@@ -572,8 +572,8 @@
         state.myRsvpIds[ev.id] = true;
         box.querySelectorAll('.geo-rsvp-btn[data-event-id="' + ev.id + '"]').forEach(function (btn) {
           btn.dataset.going = '1';
-          btn.style.color = '#10b981';
-          btn.style.borderColor = 'rgba(16,185,129,.3)';
+          btn.style.color = 'var(--ds-accent)';
+          btn.style.borderColor = 'rgba(var(--ds-accent-rgb),.3)';
           btn.innerHTML = '<i class="fas fa-check"></i> Going!';
         });
       });
@@ -588,9 +588,9 @@
         var listEl = document.getElementById('evRsvpAdminList');
         if (!listEl) return;
         listEl.innerHTML = '<div style="margin-top:16px;border-top:1px solid rgba(255,255,255,.08);padding-top:14px">'
-          + '<div style="font-size:.75rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">'
-          + '<i class="fas fa-shield-alt" style="color:#10b981;margin-right:5px"></i>Admin · RSVP List</div>'
-          + '<div id="evRsvpAdminListInner" style="font-size:.8rem;color:#94a3b8"><i class="fas fa-circle-notch fa-spin"></i></div>'
+          + '<div style="font-size:.75rem;font-weight:700;color:var(--ds-text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">'
+          + '<i class="fas fa-shield-alt" style="color:var(--ds-accent-ink);margin-right:5px"></i>Admin · RSVP List</div>'
+          + '<div id="evRsvpAdminListInner" style="font-size:.8rem;color:var(--ds-text-3)"><i class="fas fa-circle-notch fa-spin"></i></div>'
           + '</div>';
         fb.fs.getDocs(fb.fs.query(
           fb.fs.collection(fb.db, 'eventParticipants'),
@@ -604,11 +604,11 @@
           pSnap.forEach(function (d) {
             var p = d.data();
             rows.push('<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
-              + '<i class="fas fa-user-check" style="color:#10b981;font-size:.75rem"></i>'
+              + '<i class="fas fa-user-check" style="color:var(--ds-accent-ink);font-size:.75rem"></i>'
               + '<span>' + esc(p.userName || p.userId || d.id) + '</span>'
               + '</div>');
           });
-          inner.innerHTML = '<div style="color:#e2e8f0;font-weight:700;margin-bottom:6px">'
+          inner.innerHTML = '<div style="color:var(--ds-text-2);font-weight:700;margin-bottom:6px">'
             + pSnap.size + ' attendee' + (pSnap.size !== 1 ? 's' : '') + '</div>'
             + rows.join('');
         }).catch(function () {
@@ -626,13 +626,13 @@
     overlay.classList.add('open');
     var ev = state.all.find(function (e) { return e.id === eventId; });
     if (ev) { _renderEventDetail(ev); return; }
-    box.innerHTML = '<div style="padding:40px;text-align:center;color:#64748b"><i class="fas fa-circle-notch fa-spin" style="font-size:1.5rem"></i></div>';
+    box.innerHTML = '<div style="padding:40px;text-align:center;color:var(--ds-text-3)"><i class="fas fa-circle-notch fa-spin" style="font-size:1.5rem"></i></div>';
     var fb = window.GeoFirebase;
-    if (!fb || !fb.fs || !fb.db) { box.innerHTML = '<p style="padding:24px;color:#94a3b8">Event not found.</p>'; return; }
+    if (!fb || !fb.fs || !fb.db) { box.innerHTML = '<p style="padding:24px;color:var(--ds-text-3)">Event not found.</p>'; return; }
     fb.fs.getDoc(fb.fs.doc(fb.db, 'events', eventId)).then(function (snap) {
-      if (!snap.exists()) { box.innerHTML = '<p style="padding:24px;color:#94a3b8">Event not found.</p>'; return; }
+      if (!snap.exists()) { box.innerHTML = '<p style="padding:24px;color:var(--ds-text-3)">Event not found.</p>'; return; }
       _renderEventDetail(Object.assign({ id: snap.id }, snap.data()));
-    }).catch(function () { box.innerHTML = '<p style="padding:24px;color:#94a3b8">Could not load event.</p>'; });
+    }).catch(function () { box.innerHTML = '<p style="padding:24px;color:var(--ds-text-3)">Could not load event.</p>'; });
   }
 
   function closeEventDetail() {

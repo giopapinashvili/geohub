@@ -102,7 +102,7 @@
     var el = document.getElementById('adminToast');
     var msgEl = document.getElementById('adminToastMsg');
     msgEl.textContent = msg;
-    el.style.background = color || 'rgba(16,185,129,0.95)';
+    el.style.background = color || 'rgba(var(--ds-accent-rgb),0.95)';
     el.style.color = color ? '#fff' : '#000';
     el.style.transform = 'translateX(-50%) translateY(0)';
     el.style.opacity = '1';
@@ -151,7 +151,7 @@
           var letter = (name[0] || '?').toUpperCase();
           var created = u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—';
           return '<tr>' +
-            '<td><div class="uinfo"><div class="uav" style="background:linear-gradient(135deg,#10b981,#3b82f6)">' + letter + '</div>' +
+            '<td><div class="uinfo"><div class="uav" style="background:linear-gradient(135deg,var(--ds-accent),#3b82f6)">' + letter + '</div>' +
             '<div><div class="uname">' + name + '</div><div class="uhandle">@' + (u.username || '—') + '</div></div></div></td>' +
             '<td>' + email + '</td>' +
             '<td><span class="badge bg-blue">' + type + '</span></td>' +
@@ -193,7 +193,7 @@
   function buildSparklines() {
     // Flat sparklines — no fake growth data
     var configs = [
-      { id:'sp-users', color:'#10b981' },
+      { id:'sp-users', color:'var(--ds-accent)' },
       { id:'sp-biz',   color:'#3b82f6' },
       { id:'sp-ev',    color:'#f59e0b' },
       { id:'sp-rev',   color:'#a855f7' }
@@ -267,7 +267,7 @@
     gctx.clearRect(0, 0, gc.width, gc.height);
     dctx.clearRect(0, 0, dc.width, dc.height);
 
-    drawLine(gctx, growthData, '#10b981', 'rgba(16,185,129,0.08)', gc.width, gc.height);
+    drawLine(gctx, growthData, 'var(--ds-accent)', 'rgba(var(--ds-accent-rgb),0.08)', gc.width, gc.height);
     drawLine(dctx, dauData,    '#3b82f6', 'rgba(59,130,246,0.08)', dc.width, dc.height);
   }
 
@@ -282,7 +282,7 @@
 
     var cats = ['Premium', 'Campaigns', 'Tickets', 'QR', 'Market'];
     var vals = [0, 0, 0, 0, 0];
-    var colors = ['#a855f7', '#3b82f6', '#10b981', '#f59e0b', '#f97316'];
+    var colors = ['#a855f7', '#3b82f6', 'var(--ds-accent)', '#f59e0b', '#f97316'];
     var max = Math.max.apply(null, vals);
     var bw = (w - 40) / cats.length;
     var pad = 10;
@@ -489,12 +489,12 @@
     var fb = window.GeoFirebase;
     if (!fb || !fb.db) return;
     var el = document.getElementById('bizList');
-    if (el) el.innerHTML = '<div style="color:#94a3b8;font-size:.85rem;padding:20px"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
+    if (el) el.innerHTML = '<div style="color:var(--ds-text-3);font-size:.85rem;padding:20px"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
 
     fb.fs.getDocs(fb.fs.query(fb.fs.collection(fb.db, 'businesses'), fb.fs.orderBy('createdAt', 'desc'), fb.fs.limit(100)))
       .then(function (snap) {
         if (!snap.size) {
-          if (el) el.innerHTML = '<div style="color:#64748b;font-size:.85rem;text-align:center;padding:40px">No businesses yet.</div>';
+          if (el) el.innerHTML = '<div style="color:var(--ds-text-3);font-size:.85rem;text-align:center;padding:40px">No businesses yet.</div>';
           return;
         }
         var html = '';
@@ -505,7 +505,7 @@
             active:   '<span class="badge bg-blue">Active</span>',
             pending:  '<span class="badge bg-gold">Pending</span>',
             rejected: '<span class="badge bg-red">Rejected</span>',
-            inactive: '<span class="badge" style="background:rgba(100,116,139,.2);color:#94a3b8">Inactive</span>',
+            inactive: '<span class="badge" style="background:rgba(100,116,139,.2);color:var(--ds-text-3)">Inactive</span>',
           }[b.status || 'active'] || '<span class="badge bg-blue">Active</span>';
 
           var loc = b.isOnline ? '<i class="fas fa-globe"></i> Online' : ('<i class="fas fa-location-dot"></i> ' + (b.city || 'Unknown'));
@@ -514,7 +514,7 @@
           var quotes = b.quoteCount || 0;
 
           html += '<div class="biz-card">' +
-            '<div class="biz-ico" style="background:rgba(16,185,129,.12);color:#10b981;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">' +
+            '<div class="biz-ico" style="background:rgba(var(--ds-accent-rgb),.12);color:var(--ds-accent-ink);width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">' +
               '<i class="fas fa-store"></i>' +
             '</div>' +
             '<div style="flex:1;min-width:0">' +
@@ -523,8 +523,8 @@
                 statusBadge +
                 (b.featured ? '<span class="badge bg-purple"><i class="fas fa-star"></i> Featured</span>' : '') +
               '</div>' +
-              '<div class="biz-meta" style="font-size:.75rem;color:#64748b;margin-bottom:4px">' + esc(b.category || '—') + ' · ' + loc + '</div>' +
-              '<div class="biz-stats" style="font-size:.72rem;color:#94a3b8">' +
+              '<div class="biz-meta" style="font-size:.75rem;color:var(--ds-text-3);margin-bottom:4px">' + esc(b.category || '—') + ' · ' + loc + '</div>' +
+              '<div class="biz-stats" style="font-size:.72rem;color:var(--ds-text-3)">' +
                 'Views <strong>' + views + '</strong> · ' +
                 'Saves <strong>' + saves + '</strong> · ' +
                 'Quotes <strong>' + quotes + '</strong> · ' +
@@ -542,7 +542,7 @@
                 '<a href="business.html?id=' + d.id + '" target="_blank" class="btn btn-ghost btn-sm"><i class="fas fa-external-link-alt"></i> View</a>' +
                 '<button class="btn btn-ghost btn-sm" onclick="adminViewQuotes(\'' + d.id + '\', this)"><i class="fas fa-inbox"></i> Quotes</button>' +
               '</div>' +
-              '<div id="admin-quotes-' + d.id + '" style="display:none;margin-top:8px;font-size:.8rem;color:#94a3b8"></div>' +
+              '<div id="admin-quotes-' + d.id + '" style="display:none;margin-top:8px;font-size:.8rem;color:var(--ds-text-3)"></div>' +
             '</div>' +
           '</div>';
         });
@@ -606,11 +606,11 @@
         var q = d.data();
         var ts = q.createdAt ? (q.createdAt.toDate ? q.createdAt.toDate().toLocaleDateString() : '') : '';
         html += '<div style="background:rgba(255,255,255,.04);border-radius:8px;padding:8px 10px;margin-bottom:6px">' +
-          '<strong style="color:#f1f5f9">' + esc(q.name || 'Anonymous') + '</strong>' +
-          (q.status === 'new' ? ' <span style="background:rgba(16,185,129,.15);color:#34d399;border-radius:4px;font-size:.65rem;padding:1px 6px;font-weight:700">NEW</span>' : '') +
-          ' <span style="color:#64748b;font-size:.72rem">' + ts + '</span><br>' +
-          '<span style="color:#94a3b8">' + esc(q.email || '') + (q.phone ? ' · ' + esc(q.phone) : '') + '</span><br>' +
-          '<span style="color:#94a3b8">' + esc((q.message || '').slice(0, 120)) + '</span>' +
+          '<strong style="color:var(--ds-text)">' + esc(q.name || 'Anonymous') + '</strong>' +
+          (q.status === 'new' ? ' <span style="background:rgba(var(--ds-accent-rgb),.15);color:var(--ds-accent-ink);border-radius:4px;font-size:.65rem;padding:1px 6px;font-weight:700">NEW</span>' : '') +
+          ' <span style="color:var(--ds-text-3);font-size:.72rem">' + ts + '</span><br>' +
+          '<span style="color:var(--ds-text-3)">' + esc(q.email || '') + (q.phone ? ' · ' + esc(q.phone) : '') + '</span><br>' +
+          '<span style="color:var(--ds-text-3)">' + esc((q.message || '').slice(0, 120)) + '</span>' +
           '</div>';
       });
       panel.innerHTML = html;
@@ -717,7 +717,7 @@
     var el = document.getElementById('modQueue');
     if (!el) return;
     if (!modReports.length) {
-      el.innerHTML = '<div class="mod-empty"><i class="fas fa-check-circle" style="color:#10b981"></i><p>No reports match these filters.</p></div>';
+      el.innerHTML = '<div class="mod-empty"><i class="fas fa-check-circle" style="color:var(--ds-accent-ink)"></i><p>No reports match these filters.</p></div>';
       return;
     }
     el.innerHTML = modReports.map(function (r) {
@@ -849,14 +849,14 @@
         }
         var iconMap = {
           content_removed: '<i class="fas fa-trash" style="color:#f87171"></i>',
-          user_warned:     '<i class="fas fa-exclamation-triangle" style="color:#f59e0b"></i>',
+          user_warned:     '<i class="fas fa-exclamation-triangle" style="color:var(--ds-h-reward-ink)"></i>',
           user_suspended:  '<i class="fas fa-ban" style="color:#f87171"></i>'
         };
         el.innerHTML = snap.docs.map(function (d) {
           var a = d.data();
           return '<div class="mod-audit-item">' +
             '<div class="mod-audit-icon" style="background:rgba(255,255,255,.05)">' +
-              (iconMap[a.action] || '<i class="fas fa-shield-alt" style="color:#64748b"></i>') +
+              (iconMap[a.action] || '<i class="fas fa-shield-alt" style="color:var(--ds-text-3)"></i>') +
             '</div>' +
             '<div class="mod-audit-body">' +
               '<div class="mod-audit-action">' + esc(a.action || 'action') + '</div>' +
@@ -969,8 +969,8 @@
       if (preview.length > 140) preview = preview.substring(0, 140) + '…';
 
       var avatarHtml = item.authorAvatar
-        ? '<img src="' + escHtmlAdmin(item.authorAvatar) + '" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.outerHTML=\'<div class=uav style=width:38px;height:38px;font-size:.9rem;background:linear-gradient(135deg,#10b981,#3b82f6);flex-shrink:0>' + initLetter + '</div>\'">'
-        : '<div class="uav" style="width:38px;height:38px;font-size:0.9rem;background:linear-gradient(135deg,#10b981,#3b82f6);flex-shrink:0">' + initLetter + '</div>';
+        ? '<img src="' + escHtmlAdmin(item.authorAvatar) + '" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0" onerror="this.outerHTML=\'<div class=uav style=width:38px;height:38px;font-size:.9rem;background:linear-gradient(135deg,var(--ds-accent),#3b82f6);flex-shrink:0>' + initLetter + '</div>\'">'
+        : '<div class="uav" style="width:38px;height:38px;font-size:0.9rem;background:linear-gradient(135deg,var(--ds-accent),#3b82f6);flex-shrink:0">' + initLetter + '</div>';
 
       var mediaHtml = (item.mediaUrl && item._col !== 'checkins')
         ? '<img src="' + escHtmlAdmin(item.mediaUrl) + '" loading="lazy" decoding="async" style="max-height:130px;border-radius:8px;margin-top:8px;object-fit:cover;max-width:100%">'
@@ -1129,10 +1129,85 @@
       window.__geoAdminFlags = window.__geoAdminFlags || {};
       window.__geoAdminFlags[feature] = enabled;
       if (window.GeoFirebase && window.GeoFirebase.db && window.GeoFirebase.fs) {
-        window.GeoFirebase.fs.setDoc(window.GeoFirebase.fs.doc(window.GeoFirebase.db, 'adminFlags', feature), { feature: feature, enabled: enabled, updatedAt: Date.now() }, { merge:true }).catch(function(){});
+        window.GeoFirebase.fs.setDoc(window.GeoFirebase.fs.doc(window.GeoFirebase.db, 'adminFlags', feature), { feature: feature, enabled: enabled, updatedAt: Date.now() }, { merge:true })
+          .then(function(){ try { localStorage.removeItem('gh_admin_bridge_v1'); } catch(e){} })
+          .catch(function(){});
       }
     } catch (_) {}
   };
+
+  /* ── SITE SETTINGS ─────────────────────────────────────────
+     Writes siteSettings/global, which gh-admin-bridge.js reads on every page.
+     This is the path that makes an admin change visible on the live site. */
+  function _ssFields() {
+    return {
+      announcement:       (document.getElementById('ssAnnouncement') || {}).value || '',
+      announcementLevel:  (document.getElementById('ssAnnouncementLevel') || {}).value || 'info',
+      maintenanceMessage: (document.getElementById('ssMaintenanceMessage') || {}).value || '',
+      featuredCity:       (document.getElementById('ssFeaturedCity') || {}).value || ''
+    };
+  }
+  function _ssStatus(msg, ok) {
+    var el = document.getElementById('ssStatus');
+    if (!el) return;
+    el.textContent = msg;
+    el.style.color = ok === false ? 'var(--red)' : (ok ? 'var(--green)' : 'var(--td)');
+  }
+  function loadSiteSettings() {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs || !document.getElementById('ssAnnouncement')) return;
+    fb.fs.getDoc(fb.fs.doc(fb.db, 'siteSettings', 'global')).then(function (snap) {
+      if (!snap || !snap.exists()) return;
+      var d = snap.data() || {};
+      var set = function (id, v) { var el = document.getElementById(id); if (el && v != null) el.value = v; };
+      set('ssAnnouncement', d.announcement);
+      set('ssAnnouncementLevel', d.announcementLevel || 'info');
+      set('ssMaintenanceMessage', d.maintenanceMessage);
+      set('ssFeaturedCity', d.featuredCity);
+    }).catch(function () {});
+  }
+  function saveSiteSettings() {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) { _ssStatus('Firebase მიუწვდომელია', false); return; }
+    var data = _ssFields();
+    data.updatedAt = fb.fs.serverTimestamp();
+    _ssStatus('ინახება…');
+    fb.fs.setDoc(fb.fs.doc(fb.db, 'siteSettings', 'global'), data, { merge: true })
+      .then(function () {
+        _ssStatus('შენახულია — ცვლილება ჩანს საიტზე', true);
+        // Drop the bridge's cache so this tab picks the change up immediately.
+        try { localStorage.removeItem('gh_admin_bridge_v1'); } catch (e) {}
+      })
+      .catch(function (err) { _ssStatus('ვერ შეინახა: ' + (err && err.message || '?'), false); });
+  }
+
+  /* Reflect the stored feature flags in the switches instead of showing every
+     toggle as "on" regardless of what is actually saved. */
+  function loadFeatureFlags() {
+    var fb = window.GeoFirebase;
+    if (!fb || !fb.db || !fb.fs) return;
+    fb.fs.getDocs(fb.fs.collection(fb.db, 'adminFlags')).then(function (snap) {
+      var state = {};
+      snap.forEach(function (d) { var x = d.data() || {}; state[d.id] = x.enabled !== false; });
+      document.querySelectorAll('input[type=checkbox][onchange*="handleToggle"]').forEach(function (cb) {
+        var m = /handleToggle\('([a-z]+)'/.exec(cb.getAttribute('onchange') || '');
+        if (!m) return;
+        var f = m[1];
+        if (f in state) cb.checked = state[f];
+        else if (f === 'maintenance') cb.checked = false;
+      });
+    }).catch(function () {});
+  }
+
+  document.addEventListener('click', function (e) {
+    var b = e.target && e.target.closest && e.target.closest('#ssSave');
+    if (b) { e.preventDefault(); saveSiteSettings(); }
+  });
+  window.addEventListener('GeoFirebaseReady', function () {
+    loadSiteSettings();
+    loadFeatureFlags();
+  });
+  if (window.GeoFirebase) { loadSiteSettings(); loadFeatureFlags(); }
 
   /* ── NOTIFICATIONS ────────────────────────────────────────── */
   window.markAllRead = function () {
@@ -1230,7 +1305,7 @@
         + (f.min !== undefined ? 'min="' + f.min + '" ' : '')
         + (f.step ? 'step="' + f.step + '" ' : '')
         + (f.placeholder ? 'data-ph="' + f.placeholder + '" ' : '')
-        + 'style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">';
+        + 'style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">';
     }).join('');
   }
 
@@ -1761,7 +1836,7 @@
       var url  = escHtmlAdmin(b.url || '');
       var urlShort = escHtmlAdmin((b.url||'').slice(0, 60) + ((b.url||'').length > 60 ? '…' : ''));
       var reason = escHtmlAdmin(b.reason || '');
-      var imgStyle = 'width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;background:#1e293b';
+      var imgStyle = 'width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;background:var(--ds-surface-2)';
       var thumb = b.url
         ? '<img src="' + url + '" style="' + imgStyle + '" onerror="this.outerHTML=\'<div style=\\\'' + imgStyle + ';display:flex;align-items:center;justify-content:center;font-size:1.2rem\\\'>📍</div>\'">'
         : '<div style="' + imgStyle + ';display:flex;align-items:center;justify-content:center;font-size:1.2rem">📍</div>';
@@ -1772,16 +1847,16 @@
         '<i class="fas fa-pen"></i> Edit</button>';
       var replaceBtn = '<button class="btn btn-ghost btn-sm" style="font-size:.72rem;color:#818cf8;border-color:rgba(99,102,241,.35)" ' +
         'onclick="adminReplaceImageUrl(\'' + id + '\')"><i class="fas fa-link"></i> Replace URL</button>';
-      var clearBtn = '<button class="btn btn-ghost btn-sm" style="font-size:.72rem;color:#f59e0b;border-color:rgba(245,158,11,.35)" ' +
+      var clearBtn = '<button class="btn btn-ghost btn-sm" style="font-size:.72rem;color:var(--ds-h-reward-ink);border-color:rgba(245,158,11,.35)" ' +
         'onclick="adminClearImageUrl(\'' + id + '\',this)"><i class="fas fa-eraser"></i> Clear</button>';
       var delBtn = '<button class="btn btn-ghost btn-sm" style="font-size:.72rem;color:#ef4444;border-color:rgba(239,68,68,.35)" ' +
         'onclick="adminDeleteBrokenPlace(\'' + id + '\',\'' + name + '\',this)"><i class="fas fa-trash"></i> Delete</button>';
       return '<div class="bi" style="gap:8px;padding:8px 6px;flex-wrap:wrap;align-items:flex-start">' +
         thumb +
         '<div style="flex:1;min-width:140px">' +
-          '<div style="font-size:.8rem;font-weight:700;color:#f0f4ff">' + name + '</div>' +
-          '<div style="font-size:.7rem;color:#94a3b8">' + cat + '</div>' +
-          '<div style="font-size:.68rem;color:#64748b;word-break:break-all">' + urlShort + '</div>' +
+          '<div style="font-size:.8rem;font-weight:700;color:var(--ds-text)">' + name + '</div>' +
+          '<div style="font-size:.7rem;color:var(--ds-text-3)">' + cat + '</div>' +
+          '<div style="font-size:.68rem;color:var(--ds-text-3);word-break:break-all">' + urlShort + '</div>' +
           '<div style="font-size:.68rem;color:#f87171">' + reason + '</div>' +
         '</div>' +
         '<div style="display:flex;flex-wrap:wrap;gap:4px">' +
@@ -1991,7 +2066,7 @@
           var tEsc = t.replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; });
           if (r.status === 'fulfilled') {
             var docId = r.value && r.value.id ? r.value.id : '—';
-            return '<li style="color:#10e0a0;padding:3px 0"><i class="fas fa-check" style="width:14px"></i> <strong>' + tEsc + '</strong> <span style="color:#64748b;font-size:.78em">' + col + '/' + docId + '</span></li>';
+            return '<li style="color:#10e0a0;padding:3px 0"><i class="fas fa-check" style="width:14px"></i> <strong>' + tEsc + '</strong> <span style="color:var(--ds-text-3);font-size:.78em">' + col + '/' + docId + '</span></li>';
           }
           var errMsg = (r.reason && r.reason.message) || 'failed';
           var errEsc = errMsg.replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; });
@@ -2082,7 +2157,7 @@
       var xp = Number(c.xpReward || 0);
       var target = Number(c.targetCount || 1);
       return '<div class="admin-step4-row" id="chal-row-' + escHtmlAdmin(c.id) + '">' +
-        '<div class="admin-step4-thumb" style="background:' + (c.active ? 'rgba(16,185,129,.1)' : 'rgba(255,255,255,.04)') + '">' +
+        '<div class="admin-step4-thumb" style="background:' + (c.active ? 'rgba(var(--ds-accent-rgb),.1)' : 'rgba(255,255,255,.04)') + '">' +
           '<i class="fas fa-bolt" style="color:' + (c.active ? 'var(--green)' : 'var(--ts)') + ';font-size:1.2rem"></i>' +
         '</div>' +
         '<div class="admin-step4-main">' +
@@ -2549,7 +2624,7 @@
           var imgUrl = col === 'places' ? escHtmlAdmin(getPlaceImageUrl(data)) : '';
           var thumb = imgUrl
             ? '<img src="' + imgUrl + '" style="width:36px;height:36px;border-radius:6px;object-fit:cover;flex-shrink:0" ' +
-                'onerror="this.outerHTML=\'<div style=\\\'width:36px;height:36px;border-radius:6px;background:#1e293b;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0\\\'>📍</div>\'">'
+                'onerror="this.outerHTML=\'<div style=\\\'width:36px;height:36px;border-radius:6px;background:var(--ds-surface-2);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0\\\'>📍</div>\'">'
             : '';
           var editBtn = col === 'places'
             ? '<button class="btn btn-ghost btn-sm" style="font-size:.72rem" ' +
@@ -2560,9 +2635,9 @@
             '<div class="bi" style="display:flex;align-items:center;gap:8px">' +
               thumb +
               '<div style="flex:1;min-width:0">' +
-                '<div style="font-size:.82rem;font-weight:700;color:#f0f4ff">' + label + '</div>' +
+                '<div style="font-size:.82rem;font-weight:700;color:var(--ds-text)">' + label + '</div>' +
                 '<div style="font-size:.68rem;color:var(--ts)">' + escHtmlAdmin(d.id) + ' &nbsp;·&nbsp; ' +
-                  (active ? '<span style="color:#10e0a0">active</span>' : '<span style="color:#f59e0b">inactive</span>') +
+                  (active ? '<span style="color:#10e0a0">active</span>' : '<span style="color:var(--ds-h-reward-ink)">inactive</span>') +
                 '</div>' +
               '</div>' +
               editBtn +
@@ -2659,7 +2734,7 @@
     }
     editBar.innerHTML =
       '<span><i class="fas fa-pen"></i> რედაქტირება: <strong>' + escHtmlAdmin(data.name || data.title || placeId) + '</strong></span>' +
-      '<button type="button" class="btn btn-ghost btn-sm" style="font-size:.75rem;color:#94a3b8" onclick="adminCancelEditPlace()">გაუქმება</button>';
+      '<button type="button" class="btn btn-ghost btn-sm" style="font-size:.75rem;color:var(--ds-text-3)" onclick="adminCancelEditPlace()">გაუქმება</button>';
     editBar.style.display = 'flex';
 
     // Image preview in form
@@ -2731,23 +2806,23 @@
           return;
         }
         var html = '<strong>' + escHtmlAdmin(data.name) + '</strong>';
-        if (data.address) html += '<br><span style="color:#94a3b8">' + escHtmlAdmin(data.address) + '</span>';
+        if (data.address) html += '<br><span style="color:var(--ds-text-3)">' + escHtmlAdmin(data.address) + '</span>';
         if (data.rating) {
-          html += '<br>⭐ ' + data.rating + ' <span style="color:#64748b;font-size:.75rem">(' + (data.userRatingCount || 0) + ' reviews)</span>';
+          html += '<br>⭐ ' + data.rating + ' <span style="color:var(--ds-text-3);font-size:.75rem">(' + (data.userRatingCount || 0) + ' reviews)</span>';
         }
         if (data.isOpen !== null && data.isOpen !== undefined) {
-          html += ' &nbsp;<span style="color:' + (data.isOpen ? '#10b981' : '#f87171') + ';font-weight:700">' + (data.isOpen ? 'Open' : 'Closed') + '</span>';
+          html += ' &nbsp;<span style="color:' + (data.isOpen ? 'var(--ds-accent)' : '#f87171') + ';font-weight:700">' + (data.isOpen ? 'Open' : 'Closed') + '</span>';
         }
-        if (data.todayHours) html += '<br><span style="color:#64748b;font-size:.75rem">' + escHtmlAdmin(data.todayHours) + '</span>';
-        if (data.phone) html += '<br><i class="fas fa-phone" style="color:#64748b;width:12px"></i> ' + escHtmlAdmin(data.phone);
+        if (data.todayHours) html += '<br><span style="color:var(--ds-text-3);font-size:.75rem">' + escHtmlAdmin(data.todayHours) + '</span>';
+        if (data.phone) html += '<br><i class="fas fa-phone" style="color:var(--ds-text-3);width:12px"></i> ' + escHtmlAdmin(data.phone);
         if (data.website) {
-          html += '<br><i class="fas fa-globe" style="color:#64748b;width:12px"></i> <a href="' + escHtmlAdmin(data.website) + '" target="_blank" rel="noopener" style="color:#818cf8">' + escHtmlAdmin(data.website.replace(/^https?:\/\//, '').slice(0, 50)) + '</a>';
+          html += '<br><i class="fas fa-globe" style="color:var(--ds-text-3);width:12px"></i> <a href="' + escHtmlAdmin(data.website) + '" target="_blank" rel="noopener" style="color:#818cf8">' + escHtmlAdmin(data.website.replace(/^https?:\/\//, '').slice(0, 50)) + '</a>';
         }
         if (data.photos && data.photos.length) {
           var proxyUrl = workerUrl + '/api/google-place-photo?maxWidth=300&name=' + encodeURIComponent(data.photos[0]);
           html += '<br><img src="' + escHtmlAdmin(proxyUrl) + '" style="max-height:100px;border-radius:6px;margin-top:6px;display:block" onerror="this.style.display=\'none\'">';
         }
-        html += '<br><span style="color:#4b5563;font-size:.72rem">Powered by Google</span>';
+        html += '<br><span style="color:var(--ds-text-3);font-size:.72rem">Powered by Google</span>';
         panel.innerHTML = html;
         panel.style.display = 'block';
       })
@@ -2780,9 +2855,9 @@
           return '<div style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:8px">'
             + '<div style="flex:1;min-width:0;font-size:.82rem">'
             + '<div style="font-weight:700">' + escHtmlAdmin(r.name) + '</div>'
-            + '<div style="color:#94a3b8;font-size:.75rem">' + escHtmlAdmin(r.address) + '</div>'
-            + (r.rating ? '<div style="color:#f59e0b;font-size:.75rem">⭐ ' + r.rating + '</div>' : '')
-            + '<div style="color:#4b5563;font-size:.72rem;margin-top:2px">' + escHtmlAdmin(r.id) + '</div>'
+            + '<div style="color:var(--ds-text-3);font-size:.75rem">' + escHtmlAdmin(r.address) + '</div>'
+            + (r.rating ? '<div style="color:var(--ds-h-reward-ink);font-size:.75rem">⭐ ' + r.rating + '</div>' : '')
+            + '<div style="color:var(--ds-text-3);font-size:.72rem;margin-top:2px">' + escHtmlAdmin(r.id) + '</div>'
             + '</div>'
             + '<button type="button" class="btn btn-ghost btn-sm" style="font-size:.75rem;white-space:nowrap" onclick="adminUseGooglePlaceId(' + JSON.stringify(r.id) + ')">Use</button>'
             + '</div>';
@@ -2872,7 +2947,7 @@
           '<span style="color:var(--green);font-weight:700">' + e.count + '</span>' +
         '</div>' +
         '<div style="height:5px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden">' +
-          '<div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,#10b981,#3b82f6);border-radius:3px;transition:width 0.6s ease"></div>' +
+          '<div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,var(--ds-accent),#3b82f6);border-radius:3px;transition:width 0.6s ease"></div>' +
         '</div></div>';
     }).join('');
   }
@@ -2902,7 +2977,7 @@
       var label = getDateStr(6 - i).slice(5);
       return '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1">' +
         '<div style="font-size:0.65rem;color:var(--ts)">' + (d._total || 0) + '</div>' +
-        '<div style="width:100%;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#10b981,#3b82f6);height:' + h + 'px"></div>' +
+        '<div style="width:100%;border-radius:3px 3px 0 0;background:linear-gradient(180deg,var(--ds-accent),#3b82f6);height:' + h + 'px"></div>' +
         '<div style="font-size:0.62rem;color:var(--ts)">' + label + '</div>' +
       '</div>';
     }).join('');
@@ -2995,7 +3070,7 @@
     var el = document.getElementById('err-log');
     if (!el) return;
     if (!docs.length) {
-      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--ts);font-size:0.8rem"><i class="fas fa-check-circle" style="color:#10b981;margin-right:6px"></i>No JS errors logged</div>';
+      el.innerHTML = '<div style="text-align:center;padding:24px;color:var(--ts);font-size:0.8rem"><i class="fas fa-check-circle" style="color:var(--ds-accent-ink);margin-right:6px"></i>No JS errors logged</div>';
       return;
     }
     el.innerHTML = docs.map(function (d) {
@@ -3015,13 +3090,13 @@
     var el = document.getElementById('err-uploads-log');
     if (!el) return;
     if (!docs.length) {
-      el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--ts);font-size:0.8rem"><i class="fas fa-check-circle" style="color:#10b981;margin-right:6px"></i>No upload failures</div>';
+      el.innerHTML = '<div style="text-align:center;padding:16px;color:var(--ts);font-size:0.8rem"><i class="fas fa-check-circle" style="color:var(--ds-accent-ink);margin-right:6px"></i>No upload failures</div>';
       return;
     }
     el.innerHTML = docs.map(function (d) {
       var ts = d.timestamp ? (d.timestamp.toDate ? d.timestamp.toDate().toLocaleString() : new Date(d.timestamp.seconds * 1000).toLocaleString()) : '—';
       return '<div style="padding:9px 12px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.15);border-radius:8px">' +
-        '<div style="font-size:0.76rem;font-weight:700;color:#f59e0b">' + escA(d.type || 'unknown') + '</div>' +
+        '<div style="font-size:0.76rem;font-weight:700;color:var(--ds-h-reward-ink)">' + escA(d.type || 'unknown') + '</div>' +
         '<div style="font-size:0.68rem;color:var(--ts)">' + escA(String(d.reason || '').slice(0, 100)) + ' &nbsp;·&nbsp; ' + escA(d.page || '—') + ' &nbsp;·&nbsp; ' + ts + '</div>' +
       '</div>';
     }).join('');
@@ -3137,7 +3212,7 @@
     { id: 'pharmacy', labelKa: '💊 აფთიაქი', labelEn: 'Pharmacy', icon: '💊', color: '#06b6d4', sortOrder: 100 },
     { id: 'finance', labelKa: '🏦 ფინანსები', labelEn: 'Finance / Banking', icon: '🏦', color: '#16a085', sortOrder: 110 },
     { id: 'hotel', labelKa: '🏨 სასტუმრო', labelEn: 'Hotels', icon: '🏨', color: '#0891b2', sortOrder: 120 },
-    { id: 'education', labelKa: '🎓 განათლება', labelEn: 'Education', icon: '🎓', color: '#059669', sortOrder: 130,
+    { id: 'education', labelKa: '🎓 განათლება', labelEn: 'Education', icon: '🎓', color: 'var(--ds-accent-lo)', sortOrder: 130,
       subcategories: [
         { id: 'university', labelKa: 'უნივერსიტეტი', labelEn: 'University', icon: '🎓', active: true },
         { id: 'school', labelKa: 'სკოლა', labelEn: 'School', icon: '🏫', active: true },
@@ -3210,15 +3285,15 @@
           + '<span style="font-size:1.4rem;min-width:2rem;text-align:center">' + escHtmlAdmin(d.icon || '📍') + '</span>'
           + '<span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:' + escHtmlAdmin(d.color || '#666') + ';flex-shrink:0"></span>'
           + '<div style="flex:1;min-width:0">'
-          + '<div style="font-weight:700;font-size:.85rem;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escHtmlAdmin(d.labelKa || row.id) + '</div>'
-          + '<div style="font-size:.72rem;color:#64748b;display:flex;gap:8px">'
+          + '<div style="font-weight:700;font-size:.85rem;color:var(--ds-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escHtmlAdmin(d.labelKa || row.id) + '</div>'
+          + '<div style="font-size:.72rem;color:var(--ds-text-3);display:flex;gap:8px">'
           + (d.labelEn ? '<span>' + escHtmlAdmin(d.labelEn) + '</span>' : '')
-          + '<code style="font-size:.7rem;color:#94a3b8">' + escHtmlAdmin(row.id) + '</code>'
-          + (d.subcategories && d.subcategories.length ? '<span style="color:#10b981">' + d.subcategories.length + ' subs</span>' : '')
+          + '<code style="font-size:.7rem;color:var(--ds-text-3)">' + escHtmlAdmin(row.id) + '</code>'
+          + (d.subcategories && d.subcategories.length ? '<span style="color:var(--ds-accent-ink)">' + d.subcategories.length + ' subs</span>' : '')
           + '</div>'
           + '</div>'
-          + '<button type="button" onclick=\'togglePlaceCatActive(' + JSON.stringify(row.id) + ',' + JSON.stringify(d.active !== false) + ')\' style="padding:3px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#94a3b8;cursor:pointer;font-size:.72rem" title="' + (inactive ? 'Enable' : 'Disable') + '">' + (inactive ? 'Off' : 'On') + '</button>'
-          + '<button type="button" onclick=\'editPlaceCatRow(' + JSON.stringify(row.id) + ')\' style="padding:3px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#94a3b8;cursor:pointer;font-size:.72rem">Edit</button>'
+          + '<button type="button" onclick=\'togglePlaceCatActive(' + JSON.stringify(row.id) + ',' + JSON.stringify(d.active !== false) + ')\' style="padding:3px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:var(--ds-text-3);cursor:pointer;font-size:.72rem" title="' + (inactive ? 'Enable' : 'Disable') + '">' + (inactive ? 'Off' : 'On') + '</button>'
+          + '<button type="button" onclick=\'editPlaceCatRow(' + JSON.stringify(row.id) + ')\' style="padding:3px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:var(--ds-text-3);cursor:pointer;font-size:.72rem">Edit</button>'
           + '<button type="button" onclick=\'deletePlaceCat(' + JSON.stringify(row.id) + ')\' style="padding:3px 10px;border-radius:6px;border:none;background:rgba(239,68,68,.15);color:#f87171;cursor:pointer;font-size:.72rem">Del</button>'
           + '</div>';
       });
@@ -3375,32 +3450,32 @@
         html += '<div style="display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:8px;background:rgba(255,255,255,.04);opacity:' + (inactive ? '0.5' : '1') + '">'
           + '<span style="font-size:1.1rem;min-width:1.5rem;text-align:center">' + escHtmlAdmin(sub.icon || '') + '</span>'
           + '<div style="flex:1;min-width:0">'
-          + '<div style="font-size:.8rem;color:#f8fafc;font-weight:600">' + escHtmlAdmin(sub.labelKa || sub.id) + '</div>'
-          + '<div style="font-size:.7rem;color:#64748b"><code>' + escHtmlAdmin(sub.id) + '</code>' + (sub.labelEn ? ' · ' + escHtmlAdmin(sub.labelEn) : '') + '</div>'
+          + '<div style="font-size:.8rem;color:var(--ds-text);font-weight:600">' + escHtmlAdmin(sub.labelKa || sub.id) + '</div>'
+          + '<div style="font-size:.7rem;color:var(--ds-text-3)"><code>' + escHtmlAdmin(sub.id) + '</code>' + (sub.labelEn ? ' · ' + escHtmlAdmin(sub.labelEn) : '') + '</div>'
           + '</div>'
-          + '<button type="button" onclick=\'editPcatSubcatItem(' + JSON.stringify(catId) + ',' + idx + ')\' style="padding:2px 8px;border-radius:5px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#94a3b8;cursor:pointer;font-size:.7rem">Edit</button>'
-          + '<button type="button" onclick=\'togglePcatSubcatActive(' + JSON.stringify(catId) + ',' + idx + ',' + JSON.stringify(sub.active !== false) + ')\' style="padding:2px 8px;border-radius:5px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#94a3b8;cursor:pointer;font-size:.7rem">' + (inactive ? 'Off' : 'On') + '</button>'
+          + '<button type="button" onclick=\'editPcatSubcatItem(' + JSON.stringify(catId) + ',' + idx + ')\' style="padding:2px 8px;border-radius:5px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--ds-text-3);cursor:pointer;font-size:.7rem">Edit</button>'
+          + '<button type="button" onclick=\'togglePcatSubcatActive(' + JSON.stringify(catId) + ',' + idx + ',' + JSON.stringify(sub.active !== false) + ')\' style="padding:2px 8px;border-radius:5px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--ds-text-3);cursor:pointer;font-size:.7rem">' + (inactive ? 'Off' : 'On') + '</button>'
           + '<button type="button" onclick=\'removePcatSubcat(' + JSON.stringify(catId) + ',' + idx + ')\' style="padding:2px 8px;border-radius:5px;border:none;background:rgba(239,68,68,.12);color:#f87171;cursor:pointer;font-size:.7rem">✕</button>'
           + '</div>';
       });
       html += '</div>';
     } else {
-      html += '<div style="font-size:.78rem;color:#64748b;margin-bottom:10px">No subcategories yet.</div>';
+      html += '<div style="font-size:.78rem;color:var(--ds-text-3);margin-bottom:10px">No subcategories yet.</div>';
     }
     html += '<div id="pcatSubcatFormTitle" style="font-size:.78rem;font-weight:700;color:var(--ts);margin-bottom:6px">Add Subcategory</div>'
       + '<div style="display:grid;gap:6px">'
-      + '<input id="pcatSubId" placeholder="ID (e.g. restaurant)" style="padding:8px;border-radius:8px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.8rem">'
-      + '<input id="pcatSubLabelKa" placeholder="Georgian label" style="padding:8px;border-radius:8px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.8rem">'
-      + '<input id="pcatSubLabelEn" placeholder="English label (optional)" style="padding:8px;border-radius:8px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.8rem">'
+      + '<input id="pcatSubId" placeholder="ID (e.g. restaurant)" style="padding:8px;border-radius:8px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);font-size:.8rem">'
+      + '<input id="pcatSubLabelKa" placeholder="Georgian label" style="padding:8px;border-radius:8px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);font-size:.8rem">'
+      + '<input id="pcatSubLabelEn" placeholder="English label (optional)" style="padding:8px;border-radius:8px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);font-size:.8rem">'
       + '<div style="display:flex;gap:7px;align-items:center">'
-      + '<div id="pcatSubIconPreview" style="font-size:1.5rem;width:40px;height:36px;display:flex;align-items:center;justify-content:center;background:#0f172a;border-radius:8px;border:1px solid rgba(255,255,255,.12);flex-shrink:0">📍</div>'
-      + '<input id="pcatSubIcon" placeholder="emoji ჩასვით" maxlength="20" oninput="var p=document.getElementById(\'pcatSubIconPreview\');p.textContent=this.value.trim()||\'📍\'" style="flex:1;padding:8px;border-radius:8px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:1.1rem;text-align:center">'
-      + '<button type="button" onclick=\'savePcatSubcatItem(' + JSON.stringify(catId) + ')\' style="padding:8px 14px;border-radius:8px;background:#10b981;border:none;color:#fff;cursor:pointer;font-size:.8rem;font-weight:700;white-space:nowrap">Save</button>'
+      + '<div id="pcatSubIconPreview" style="font-size:1.5rem;width:40px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--ds-surface);border-radius:8px;border:1px solid rgba(255,255,255,.12);flex-shrink:0">📍</div>'
+      + '<input id="pcatSubIcon" placeholder="emoji ჩასვით" maxlength="20" oninput="var p=document.getElementById(\'pcatSubIconPreview\');p.textContent=this.value.trim()||\'📍\'" style="flex:1;padding:8px;border-radius:8px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);font-size:1.1rem;text-align:center">'
+      + '<button type="button" onclick=\'savePcatSubcatItem(' + JSON.stringify(catId) + ')\' style="padding:8px 14px;border-radius:8px;background:var(--ds-accent);border:none;color:#fff;cursor:pointer;font-size:.8rem;font-weight:700;white-space:nowrap">Save</button>'
       + '</div>'
       + '<div style="display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--ts)">'
       + '<input type="checkbox" id="pcatSubActive" checked style="width:14px;height:14px"> Active'
       + '<input type="hidden" id="pcatSubEditIdx" value="">'
-      + '<button type="button" id="pcatSubCancelBtn" onclick="cancelPcatSubcatEdit()" style="display:none;margin-left:auto;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:#94a3b8;cursor:pointer;font-size:.72rem">Cancel</button>'
+      + '<button type="button" id="pcatSubCancelBtn" onclick="cancelPcatSubcatEdit()" style="display:none;margin-left:auto;padding:4px 10px;border-radius:6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:var(--ds-text-3);cursor:pointer;font-size:.72rem">Cancel</button>'
       + '</div>'
       + '</div>';
     wrap.innerHTML = html;
@@ -3509,18 +3584,18 @@
     var type = (document.getElementById('ownershipEntityType') || {}).value || 'business';
     var resultEl = document.getElementById('ownershipEntityResults');
     if (!query || query.length < 2) {
-      if (resultEl) resultEl.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;font-size:.82rem">Type a name to search…</div>';
+      if (resultEl) resultEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ds-text-3);font-size:.82rem">Type a name to search…</div>';
       return;
     }
     _ownershipTimer = setTimeout(function() {
       var fb = window.GeoFirebase, f = fb && fb.fs;
       if (!fb || !f) return;
-      if (resultEl) resultEl.innerHTML = '<div style="text-align:center;padding:16px;color:#64748b;font-size:.82rem"><i class="fas fa-spinner fa-spin"></i></div>';
+      if (resultEl) resultEl.innerHTML = '<div style="text-align:center;padding:16px;color:var(--ds-text-3);font-size:.82rem"><i class="fas fa-spinner fa-spin"></i></div>';
       var col = type === 'business' ? 'businesses' : 'places';
       var q = f.query(f.collection(fb.db, col), f.orderBy('name'), f.startAt(query), f.endAt(query + ''), f.limit(20));
       f.getDocs(q).then(function(snap) {
         if (!snap.size) {
-          if (resultEl) resultEl.innerHTML = '<div style="text-align:center;padding:16px;color:#64748b;font-size:.82rem">No results found.</div>';
+          if (resultEl) resultEl.innerHTML = '<div style="text-align:center;padding:16px;color:var(--ds-text-3);font-size:.82rem">No results found.</div>';
           return;
         }
         var html = '';
@@ -3532,10 +3607,10 @@
             + 'onmouseover="this.style.borderColor=\'rgba(255,255,255,.12)\'" onmouseout="this.style.borderColor=\'transparent\'" '
             + 'onclick=\'ownershipSelectEntity(' + JSON.stringify(d.id) + ',' + JSON.stringify(data.name || d.id) + ',' + JSON.stringify(type) + ',' + JSON.stringify(data.ownerId || '') + ')\'>'
             + '<div style="flex:1;min-width:0">'
-            + '<div style="font-weight:700;font-size:.84rem;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + name + '</div>'
-            + '<div style="font-size:.71rem;color:#64748b">' + meta + '</div>'
+            + '<div style="font-weight:700;font-size:.84rem;color:var(--ds-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + name + '</div>'
+            + '<div style="font-size:.71rem;color:var(--ds-text-3)">' + meta + '</div>'
             + '</div>'
-            + '<span style="font-size:.7rem;padding:2px 8px;border-radius:5px;background:rgba(255,255,255,.07);color:#94a3b8">' + escHtmlAdmin(type) + '</span>'
+            + '<span style="font-size:.7rem;padding:2px 8px;border-radius:5px;background:rgba(255,255,255,.07);color:var(--ds-text-3)">' + escHtmlAdmin(type) + '</span>'
             + '</div>';
         });
         if (resultEl) resultEl.innerHTML = html;
@@ -3560,19 +3635,19 @@
     clearTimeout(_ownershipUserTimer);
     var resultEl = document.getElementById('ownershipUserResults');
     if (!query || query.length < 2) {
-      if (resultEl) resultEl.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;font-size:.82rem">Type a name or email to search…</div>';
+      if (resultEl) resultEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ds-text-3);font-size:.82rem">Type a name or email to search…</div>';
       return;
     }
     _ownershipUserTimer = setTimeout(function() {
       var fb = window.GeoFirebase, f = fb && fb.fs;
       if (!fb || !f) return;
-      if (resultEl) resultEl.innerHTML = '<div style="text-align:center;padding:16px;color:#64748b;font-size:.82rem"><i class="fas fa-spinner fa-spin"></i></div>';
+      if (resultEl) resultEl.innerHTML = '<div style="text-align:center;padding:16px;color:var(--ds-text-3);font-size:.82rem"><i class="fas fa-spinner fa-spin"></i></div>';
       var q = f.query(f.collection(fb.db, 'users'), f.orderBy('displayName'), f.startAt(query), f.endAt(query + ''), f.limit(15));
       f.getDocs(q).then(function(snap) {
         var rows = [];
         snap.forEach(function(d) { rows.push({ uid: d.id, data: d.data() }); });
         if (!rows.length) {
-          if (resultEl) resultEl.innerHTML = '<div style="text-align:center;padding:16px;color:#64748b;font-size:.82rem">No users found. Try a different name.</div>';
+          if (resultEl) resultEl.innerHTML = '<div style="text-align:center;padding:16px;color:var(--ds-text-3);font-size:.82rem">No users found. Try a different name.</div>';
           return;
         }
         var html = '';
@@ -3586,8 +3661,8 @@
             + 'onclick=\'ownershipSelectUser(' + JSON.stringify(r.uid) + ',' + JSON.stringify(d.displayName || d.name || r.uid) + ',' + JSON.stringify(d.email || '') + ')\'>'
             + '<div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0">' + av + '</div>'
             + '<div style="flex:1;min-width:0">'
-            + '<div style="font-weight:700;font-size:.84rem;color:#f8fafc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + nameStr + '</div>'
-            + '<div style="font-size:.71rem;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + emailStr + '</div>'
+            + '<div style="font-weight:700;font-size:.84rem;color:var(--ds-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + nameStr + '</div>'
+            + '<div style="font-size:.71rem;color:var(--ds-text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + emailStr + '</div>'
             + '</div>'
             + '</div>';
         });
@@ -3654,7 +3729,7 @@
       ['ownershipSelectedEntity','ownershipSelectedUser'].forEach(function(id) { var el = document.getElementById(id); if (el) el.style.display = 'none'; });
       ['ownershipEntityResults','ownershipUserResults'].forEach(function(id) {
         var el = document.getElementById(id);
-        if (el) el.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;font-size:.82rem">Type to search…</div>';
+        if (el) el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ds-text-3);font-size:.82rem">Type to search…</div>';
       });
       _updateOwnershipSummary();
       if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-handshake" style="margin-right:8px"></i> Transfer Ownership'; }
@@ -3671,11 +3746,11 @@
     if (existingEmpty) logEl.innerHTML = '';
     var now = new Date().toLocaleTimeString();
     var row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:9px;background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2);margin-bottom:8px';
-    row.innerHTML = '<i class="fas fa-check-circle" style="color:#10b981;font-size:1rem;flex-shrink:0"></i>'
+    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:9px;background:rgba(var(--ds-accent-rgb),.07);border:1px solid rgba(var(--ds-accent-rgb),.2);margin-bottom:8px';
+    row.innerHTML = '<i class="fas fa-check-circle" style="color:var(--ds-accent-ink);font-size:1rem;flex-shrink:0"></i>'
       + '<div style="flex:1;min-width:0">'
-      + '<div style="font-size:.83rem;color:#f8fafc;font-weight:600">' + escHtmlAdmin(entity.name) + ' <span style="color:#64748b;font-weight:400">→</span> ' + escHtmlAdmin(user.displayName) + '</div>'
-      + '<div style="font-size:.71rem;color:#64748b">' + escHtmlAdmin(entity.type) + ' · ' + escHtmlAdmin(user.email || user.uid) + ' · ' + now + '</div>'
+      + '<div style="font-size:.83rem;color:var(--ds-text);font-weight:600">' + escHtmlAdmin(entity.name) + ' <span style="color:var(--ds-text-3);font-weight:400">→</span> ' + escHtmlAdmin(user.displayName) + '</div>'
+      + '<div style="font-size:.71rem;color:var(--ds-text-3)">' + escHtmlAdmin(entity.type) + ' · ' + escHtmlAdmin(user.email || user.uid) + ' · ' + now + '</div>'
       + '</div>';
     logEl.insertBefore(row, logEl.firstChild);
   }
@@ -3733,21 +3808,21 @@
     var el = document.getElementById('pePlacesList');
     if (!el) return;
     if (!places.length) {
-      el.innerHTML = '<div style="text-align:center;padding:32px;color:#64748b;font-size:.85rem">No places found. Try different filters.</div>';
+      el.innerHTML = '<div style="text-align:center;padding:32px;color:var(--ds-text-3);font-size:.85rem">No places found. Try different filters.</div>';
       return;
     }
     el.innerHTML = places.map(function(p) {
       var img = p.imageUrl || p.image || '';
       var thumb = img
         ? '<img src="' + escHtmlAdmin(img) + '" style="width:52px;height:38px;object-fit:cover;border-radius:6px;flex-shrink:0" onerror="this.style.display=\'none\'">'
-        : '<div style="width:52px;height:38px;border-radius:6px;background:#1e293b;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">' + escHtmlAdmin(p.icon || '📍') + '</div>';
+        : '<div style="width:52px;height:38px;border-radius:6px;background:var(--ds-surface-2);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">' + escHtmlAdmin(p.icon || '📍') + '</div>';
       var catLabel  = p.category  || p.categoryId || '—';
       var cityLabel = p.city || '—';
       return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)">'
         + thumb
         + '<div style="flex:1;min-width:0">'
         + '<div style="font-weight:700;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escHtmlAdmin(p.name || '(no name)') + '</div>'
-        + '<div style="font-size:.74rem;color:#64748b">' + escHtmlAdmin(cityLabel) + ' · ' + escHtmlAdmin(catLabel) + (p.subcategory ? ' · ' + escHtmlAdmin(p.subcategory) : '') + '</div>'
+        + '<div style="font-size:.74rem;color:var(--ds-text-3)">' + escHtmlAdmin(cityLabel) + ' · ' + escHtmlAdmin(catLabel) + (p.subcategory ? ' · ' + escHtmlAdmin(p.subcategory) : '') + '</div>'
         + '</div>'
         + '<button class="btn btn-ghost btn-sm" onclick=\'openPlaceEditPanel(' + JSON.stringify(p._id) + ')\' style="white-space:nowrap"><i class="fas fa-pen"></i> Edit</button>'
         + '</div>';
@@ -3863,7 +3938,7 @@
     if (statusEl) statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving…';
     f.setDoc(f.doc(fb.db, 'places', id), doc, { merge: true })
       .then(function() {
-        if (statusEl) statusEl.innerHTML = '<span style="color:#10b981"><i class="fas fa-check"></i> Saved!</span>';
+        if (statusEl) statusEl.innerHTML = '<span style="color:var(--ds-accent-ink)"><i class="fas fa-check"></i> Saved!</span>';
         toast('Place updated');
         var idx = _pePlaces.findIndex(function(p) { return p._id === id; });
         if (idx !== -1) Object.assign(_pePlaces[idx], doc);
@@ -3888,14 +3963,14 @@
   function peInitHoursUI() {
     var wrap = document.getElementById('peHoursWidget');
     if (!wrap) return;
-    var S  = 'padding:5px 9px;border-radius:7px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.82rem';
+    var S  = 'padding:5px 9px;border-radius:7px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);font-size:.82rem';
     var ST = S + ';width:72px;text-align:center';
-    var html = '<div style="font-size:.82rem;font-weight:700;color:var(--ts);margin-bottom:8px">სამუშაო საათები <span style="font-size:.7rem;color:#64748b;font-weight:400">(ფორმატი HH:MM, მაგ. 09:00 – 00:00)</span></div>'
+    var html = '<div style="font-size:.82rem;font-weight:700;color:var(--ts);margin-bottom:8px">სამუშაო საათები <span style="font-size:.7rem;color:var(--ds-text-3);font-weight:400">(ფორმატი HH:MM, მაგ. 09:00 – 00:00)</span></div>'
       // Quick-fill bar
       + '<div style="display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:10px;padding:8px 10px;background:rgba(255,255,255,.04);border-radius:9px">'
-      + '<span style="font-size:.75rem;color:#94a3b8;white-space:nowrap">სწრაფი შევსება:</span>'
+      + '<span style="font-size:.75rem;color:var(--ds-text-3);white-space:nowrap">სწრაფი შევსება:</span>'
       + '<input id="peHoursQFrom" type="text" value="09:00" placeholder="09:00" maxlength="5" style="' + ST + '">'
-      + '<span style="color:#64748b">—</span>'
+      + '<span style="color:var(--ds-text-3)">—</span>'
       + '<input id="peHoursQTo" type="text" value="22:00" placeholder="22:00" maxlength="5" style="' + ST + '">'
       + '<button type="button" onclick="peApplyOpenHours()" style="padding:5px 12px;border-radius:7px;background:#3b82f6;border:none;color:#fff;font-size:.74rem;cursor:pointer;white-space:nowrap;font-weight:600" title="მხოლოდ ✓ მონიშნულ დღეებზე">გამოყენება</button>'
       + '<button type="button" onclick="peOpenAllAndApply()" style="padding:5px 10px;border-radius:7px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.35);color:#93c5fd;font-size:.72rem;cursor:pointer;white-space:nowrap">ყველა დღე გახსნა</button>'
@@ -3905,14 +3980,14 @@
     PE_DAYS.forEach(function(d) {
       html += '<div id="peRow_' + d.key + '" style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;background:rgba(255,255,255,.03)">'
         + '<input type="checkbox" id="peDay_' + d.key + '" checked onchange="peDayToggle(\'' + d.key + '\')" style="width:15px;height:15px;cursor:pointer;flex-shrink:0">'
-        + '<span style="font-size:.8rem;font-weight:600;min-width:90px;color:#e2e8f0">' + d.ka + '</span>'
+        + '<span style="font-size:.8rem;font-weight:600;min-width:90px;color:var(--ds-text-2)">' + d.ka + '</span>'
         + '<div id="peCtrl_' + d.key + '" style="display:flex;align-items:center;gap:6px;flex:1">'
         +   '<input type="text" id="peFrom_' + d.key + '" value="09:00" placeholder="09:00" maxlength="5" style="' + ST + '">'
-        +   '<span style="color:#64748b">—</span>'
+        +   '<span style="color:var(--ds-text-3)">—</span>'
         +   '<input type="text" id="peTo_' + d.key + '" value="22:00" placeholder="22:00" maxlength="5" style="' + ST + '">'
         +   '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;margin-left:6px;white-space:nowrap">'
         +     '<input type="checkbox" id="pe24h_' + d.key + '" onchange="peToggle24h(\'' + d.key + '\')" style="width:13px;height:13px">'
-        +     '<span style="font-size:.72rem;color:#94a3b8">24 სთ</span>'
+        +     '<span style="font-size:.72rem;color:var(--ds-text-3)">24 სთ</span>'
         +   '</label>'
         + '</div>'
         + '<span id="peDaySt_' + d.key + '" style="font-size:.72rem;color:#f87171;display:none">დაკეტილია</span>'

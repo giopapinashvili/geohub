@@ -20,7 +20,7 @@
     if (!t) {
       t = document.createElement('div');
       t.id = 'geo-share-toast';
-      t.style.cssText = 'position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(16px);background:#1e293b;color:#f1f5f9;border:1px solid rgba(255,255,255,.1);padding:9px 20px;border-radius:24px;font-size:.85rem;font-weight:600;z-index:99999;transition:all .25s;opacity:0;pointer-events:none;white-space:nowrap';
+      t.style.cssText = 'position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ds-surface-2);color:var(--ds-text);border:1px solid rgba(255,255,255,.1);padding:9px 20px;border-radius:24px;font-size:.85rem;font-weight:600;z-index:99999;transition:all .25s;opacity:0;pointer-events:none;white-space:nowrap';
       document.body.appendChild(t);
     }
     t.textContent = msg;

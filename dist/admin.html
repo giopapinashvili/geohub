@@ -9,7 +9,7 @@
   <link rel="dns-prefetch" href="https://firebase.googleapis.com">
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GeoHub OS — Admin Control Center</title>
+  <title>ადმინ პანელი — GeoHub</title>
   <meta name="robots" content="noindex, nofollow">
   <meta name="description" content="GeoHub-ის ადმინისტრატორის მართვის პანელი.">
   <link rel="canonical" href="https://geohub.ge/admin.html">
@@ -23,21 +23,24 @@
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/assets/admin-zPlVKyuo.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700;800&family=Noto+Serif+Georgian:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+  <script type="module" crossorigin src="/assets/admin-BeHH868P.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/responsive-polish-BO79aqv7.js">
   <link rel="modulepreload" crossorigin href="/assets/firebase-config-CGKVrgHh.js">
-  <link rel="modulepreload" crossorigin href="/assets/gh-i18n-BbqPU8Gy.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-admin-bridge-h-7zgsq_.js">
   <link rel="modulepreload" crossorigin href="/assets/gh-schema-kY2sMGH-.js">
-  <link rel="modulepreload" crossorigin href="/assets/chat-popup-MADaMnFN.js">
+  <link rel="modulepreload" crossorigin href="/assets/chat-popup-BHzNMiBZ.js">
   <link rel="modulepreload" crossorigin href="/assets/gh-calls-DqDOBgOW.js">
-  <link rel="modulepreload" crossorigin href="/assets/gh-group-calls-Ck1zIhcT.js">
-  <link rel="modulepreload" crossorigin href="/assets/geohub-production-stabilization-v1-D4HPXa7T.js">
-  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
-  <link rel="stylesheet" crossorigin href="/assets/admin-t2fQQcyn.css">
-  <link rel="stylesheet" crossorigin href="/assets/moderation-CB6dVgQ2.css">
-  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+  <link rel="modulepreload" crossorigin href="/assets/gh-group-calls-CA5vOXuG.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-production-stabilization-v1-kYTMrx4r.js">
+  <link rel="modulepreload" crossorigin href="/assets/responsive-polish-Cni6BeF_.js">
+  <link rel="stylesheet" crossorigin href="/assets/admin-dFW4caPw.css">
+  <link rel="stylesheet" crossorigin href="/assets/moderation-DZrRdtBj.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-DzoItt1C.css">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-OO1pxCG1.css">
+  <link rel="stylesheet" crossorigin href="/assets/gh-design-system-Eii08DGH.css">
 </head>
 <body>
 <div class="shell">
@@ -49,14 +52,14 @@
       <div class="tb-logo-icon">G</div>
       <div>
         <div class="tb-logo-name">GeoHub OS</div>
-        <div class="tb-logo-sub" data-i18n="adm_console">Admin Console</div>
+        <div class="tb-logo-sub" data-i18n="adm_console">ადმინ კონსოლი</div>
       </div>
     </div>
     <div class="tb-search-wrap">
       <i class="fas fa-search tb-search-ic"></i>
-      <input class="tb-search" id="globalSearch" placeholder="Search users, businesses, content…" autocomplete="off" oninput="handleGlobalSearch(this.value)">
+      <input class="tb-search" id="globalSearch" placeholder="მოძებნე მომხმარებელი, ბიზნესი, კონტენტი…" autocomplete="off" oninput="handleGlobalSearch(this.value)">
     </div>
-    <div class="tb-live"><span class="tb-live-dot"></span> <span data-i18n="adm_live">Live</span></div>
+    <div class="tb-live"><span class="tb-live-dot"></span> <span data-i18n="adm_live">ცოცხალი</span></div>
     <div class="tb-right">
       <button class="tb-btn" title="Alerts" onclick="adminNav('notifications')">
         <i class="fas fa-bell"></i>
@@ -69,8 +72,8 @@
       <div class="tb-admin">
         <div class="tb-admin-av">A</div>
         <div>
-          <div class="tb-admin-name">Admin</div>
-          <div class="tb-admin-role">Super Admin</div>
+          <div class="tb-admin-name">ადმინი</div>
+          <div class="tb-admin-role">მთავარი ადმინი</div>
         </div>
       </div>
     </div>
@@ -81,33 +84,33 @@
 
   <!-- ═══ SIDEBAR ═══ -->
   <aside class="sidebar" id="adminSidebar">
-    <div class="sb-lbl" data-i18n="adm_lbl_platform">Platform</div>
-    <div class="sb-item active" onclick="adminNav('overview')"><span class="sb-ic"><i class="fas fa-th-large"></i></span> <span data-i18n="adm_nav_overview">Overview</span></div>
-    <div class="sb-item" onclick="adminNav('live')"><span class="sb-ic"><i class="fas fa-circle" style="color:var(--green);font-size:0.55rem"></i></span> <span data-i18n="adm_nav_live">Live Monitor</span> <span class="sb-cnt" id="sb-live">0</span></div>
-    <div class="sb-item" onclick="adminNav('notifications')"><span class="sb-ic"><i class="fas fa-bell"></i></span> <span data-i18n="adm_nav_notifs">Notifications</span> <span class="sb-cnt danger" id="sb-notif">0</span></div>
-    <div class="sb-lbl" data-i18n="adm_lbl_management">Management</div>
-    <div class="sb-item" onclick="adminNav('users')"><span class="sb-ic"><i class="fas fa-users"></i></span> <span data-i18n="adm_nav_users">Users</span> <span class="sb-cnt" id="sb-users">—</span></div>
-    <div class="sb-item" onclick="adminNav('activity')"><span class="sb-ic"><i class="fas fa-stream"></i></span> <span data-i18n="adm_nav_activity">Activity</span> <span class="sb-cnt" id="sb-activity">0</span></div>
-    <div class="sb-item" onclick="adminNav('businesses')"><span class="sb-ic"><i class="fas fa-store"></i></span> <span data-i18n="adm_nav_biz">Businesses</span> <span class="sb-cnt" id="sb-biz-side">0</span></div>
-    <div class="sb-item" onclick="adminNav('creators')"><span class="sb-ic"><i class="fas fa-star"></i></span> <span data-i18n="adm_nav_creators">Creators</span> <span class="sb-cnt" id="sb-creators">0</span></div>
-    <div class="sb-item" onclick="adminNav('content')"><span class="sb-ic"><i class="fas fa-plus-square"></i></span> <span data-i18n="adm_nav_content">Content Studio</span></div>
-    <div class="sb-item" onclick="adminNav('placeedit')"><span class="sb-ic"><i class="fas fa-pencil-alt"></i></span> <span data-i18n="adm_nav_placeedit">Place Editing</span></div>
-    <div class="sb-item" onclick="adminNav('placecat')"><span class="sb-ic"><i class="fas fa-tags"></i></span> <span data-i18n="adm_nav_placecat">Place Categories</span></div>
-    <div class="sb-item" onclick="adminNav('ownership')"><span class="sb-ic"><i class="fas fa-handshake"></i></span> <span data-i18n="adm_nav_ownership">Transfer Ownership</span></div>
-    <div class="sb-item" onclick="adminNav('challenges')"><span class="sb-ic"><i class="fas fa-bolt"></i></span> <span data-i18n="adm_nav_challenges">Challenge Studio</span> <span class="sb-cnt" id="sb-challenges">0</span></div>
-    <div class="sb-item" onclick="adminNav('rewards')"><span class="sb-ic"><i class="fas fa-gift"></i></span> <span data-i18n="adm_nav_rewards">Rewards</span> <span class="sb-cnt" id="sb-rewards">0</span></div>
-    <div class="sb-lbl" data-i18n="adm_lbl_safety">Safety</div>
-    <div class="sb-item" onclick="adminNav('moderation')"><span class="sb-ic"><i class="fas fa-flag"></i></span> <span data-i18n="adm_nav_moderation">Moderation</span> <span class="sb-cnt danger" id="sb-mod">0</span></div>
-    <div class="sb-item" onclick="adminNav('trust')"><span class="sb-ic"><i class="fas fa-check-circle"></i></span> <span data-i18n="adm_nav_trust">Trust &amp; Safety</span></div>
-    <div class="sb-lbl" data-i18n="adm_lbl_analytics">Analytics</div>
-    <div class="sb-item" onclick="adminNav('revenue')"><span class="sb-ic"><i class="fas fa-chart-line"></i></span> <span data-i18n="adm_nav_revenue">Revenue</span></div>
-    <div class="sb-item" onclick="adminNav('city')"><span class="sb-ic"><i class="fas fa-map"></i></span> <span data-i18n="adm_nav_city">City Analytics</span></div>
-    <div class="sb-item" onclick="adminNav('analytics')"><span class="sb-ic"><i class="fas fa-chart-bar"></i></span> <span data-i18n="adm_nav_site">Site Analytics</span> <span class="sb-cnt" id="sb-analytics">—</span></div>
-    <div class="sb-item" onclick="adminNav('errors')"><span class="sb-ic"><i class="fas fa-exclamation-triangle"></i></span> <span data-i18n="adm_nav_errors">Error Monitor</span> <span class="sb-cnt danger" id="sb-errors">0</span></div>
-    <div class="sb-lbl" data-i18n="adm_lbl_system">System</div>
-    <div class="sb-item" onclick="adminNav('controls')"><span class="sb-ic"><i class="fas fa-sliders-h"></i></span> <span data-i18n="adm_nav_controls">Platform Controls</span></div>
+    <div class="sb-lbl" data-i18n="adm_lbl_platform">პლატფორმა</div>
+    <div class="sb-item active" onclick="adminNav('overview')"><span class="sb-ic"><i class="fas fa-th-large"></i></span> <span data-i18n="adm_nav_overview">მიმოხილვა</span></div>
+    <div class="sb-item" onclick="adminNav('live')"><span class="sb-ic"><i class="fas fa-circle" style="color:var(--green);font-size:0.55rem"></i></span> <span data-i18n="adm_nav_live">ცოცხალი მონიტორი</span> <span class="sb-cnt" id="sb-live">0</span></div>
+    <div class="sb-item" onclick="adminNav('notifications')"><span class="sb-ic"><i class="fas fa-bell"></i></span> <span data-i18n="adm_nav_notifs">შეტყობინებები</span> <span class="sb-cnt danger" id="sb-notif">0</span></div>
+    <div class="sb-lbl" data-i18n="adm_lbl_management">მართვა</div>
+    <div class="sb-item" onclick="adminNav('users')"><span class="sb-ic"><i class="fas fa-users"></i></span> <span data-i18n="adm_nav_users">მომხმარებლები</span> <span class="sb-cnt" id="sb-users">—</span></div>
+    <div class="sb-item" onclick="adminNav('activity')"><span class="sb-ic"><i class="fas fa-stream"></i></span> <span data-i18n="adm_nav_activity">აქტივობა</span> <span class="sb-cnt" id="sb-activity">0</span></div>
+    <div class="sb-item" onclick="adminNav('businesses')"><span class="sb-ic"><i class="fas fa-store"></i></span> <span data-i18n="adm_nav_biz">ბიზნესები</span> <span class="sb-cnt" id="sb-biz-side">0</span></div>
+    <div class="sb-item" onclick="adminNav('creators')"><span class="sb-ic"><i class="fas fa-star"></i></span> <span data-i18n="adm_nav_creators">შემქმნელები</span> <span class="sb-cnt" id="sb-creators">0</span></div>
+    <div class="sb-item" onclick="adminNav('content')"><span class="sb-ic"><i class="fas fa-plus-square"></i></span> <span data-i18n="adm_nav_content">კონტენტ სტუდია</span></div>
+    <div class="sb-item" onclick="adminNav('placeedit')"><span class="sb-ic"><i class="fas fa-pencil-alt"></i></span> <span data-i18n="adm_nav_placeedit">ადგილების რედაქტირება</span></div>
+    <div class="sb-item" onclick="adminNav('placecat')"><span class="sb-ic"><i class="fas fa-tags"></i></span> <span data-i18n="adm_nav_placecat">ადგილის კატეგორიები</span></div>
+    <div class="sb-item" onclick="adminNav('ownership')"><span class="sb-ic"><i class="fas fa-handshake"></i></span> <span data-i18n="adm_nav_ownership">მფლობელობის გადაცემა</span></div>
+    <div class="sb-item" onclick="adminNav('challenges')"><span class="sb-ic"><i class="fas fa-bolt"></i></span> <span data-i18n="adm_nav_challenges">გამოწვევების სტუდია</span> <span class="sb-cnt" id="sb-challenges">0</span></div>
+    <div class="sb-item" onclick="adminNav('rewards')"><span class="sb-ic"><i class="fas fa-gift"></i></span> <span data-i18n="adm_nav_rewards">ჯილდოები</span> <span class="sb-cnt" id="sb-rewards">0</span></div>
+    <div class="sb-lbl" data-i18n="adm_lbl_safety">უსაფრთხოება</div>
+    <div class="sb-item" onclick="adminNav('moderation')"><span class="sb-ic"><i class="fas fa-flag"></i></span> <span data-i18n="adm_nav_moderation">მოდერაცია</span> <span class="sb-cnt danger" id="sb-mod">0</span></div>
+    <div class="sb-item" onclick="adminNav('trust')"><span class="sb-ic"><i class="fas fa-check-circle"></i></span> <span data-i18n="adm_nav_trust">ნდობა და უსაფრთხოება</span></div>
+    <div class="sb-lbl" data-i18n="adm_lbl_analytics">ანალიტიკა</div>
+    <div class="sb-item" onclick="adminNav('revenue')"><span class="sb-ic"><i class="fas fa-chart-line"></i></span> <span data-i18n="adm_nav_revenue">შემოსავალი</span></div>
+    <div class="sb-item" onclick="adminNav('city')"><span class="sb-ic"><i class="fas fa-map"></i></span> <span data-i18n="adm_nav_city">ქალაქების ანალიტიკა</span></div>
+    <div class="sb-item" onclick="adminNav('analytics')"><span class="sb-ic"><i class="fas fa-chart-bar"></i></span> <span data-i18n="adm_nav_site">საიტის ანალიტიკა</span> <span class="sb-cnt" id="sb-analytics">—</span></div>
+    <div class="sb-item" onclick="adminNav('errors')"><span class="sb-ic"><i class="fas fa-exclamation-triangle"></i></span> <span data-i18n="adm_nav_errors">შეცდომების მონიტორი</span> <span class="sb-cnt danger" id="sb-errors">0</span></div>
+    <div class="sb-lbl" data-i18n="adm_lbl_system">სისტემა</div>
+    <div class="sb-item" onclick="adminNav('controls')"><span class="sb-ic"><i class="fas fa-sliders-h"></i></span> <span data-i18n="adm_nav_controls">პლატფორმის კონტროლი</span></div>
     <div class="sb-div"></div>
-    <div class="sb-item" onclick="location.href='index.html'"><span class="sb-ic"><i class="fas fa-arrow-left"></i></span> <span data-i18n="adm_nav_back">Back to GeoHub</span></div>
+    <div class="sb-item" onclick="location.href='index.html'"><span class="sb-ic"><i class="fas fa-arrow-left"></i></span> <span data-i18n="adm_nav_back">← GeoHub-ზე დაბრუნება</span></div>
   </aside>
 
   <!-- ═══ MAIN ═══ -->
@@ -116,71 +119,71 @@
     <!-- ─── OVERVIEW ─── -->
     <section class="sec active" id="sec-overview">
       <div class="ph">
-        <div><div class="ph-title" data-i18n="adm_ov_title">Platform Overview</div><div class="ph-sub">GeoHub OS · Real-time snapshot</div></div>
+        <div><div class="ph-title" data-i18n="adm_ov_title">პლატფორმის მიმოხილვა</div><div class="ph-sub">GeoHub OS · რეალურ დროში</div></div>
         <div class="ph-actions">
-          <button class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> Export</button>
-          <button class="btn btn-primary btn-sm" onclick="animateBars()"><i class="fas fa-sync-alt"></i> Refresh</button>
+          <button class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> ექსპორტი</button>
+          <button class="btn btn-primary btn-sm" onclick="animateBars()"><i class="fas fa-sync-alt"></i> განახლება</button>
         </div>
       </div>
 
       <div class="g4 mb12">
         <div class="sc green">
-          <div class="sc-ico">👥</div><div class="sc-val" id="stat-users">—</div><div class="sc-lbl" data-i18n="adm_ov_users">Total Users</div>
-          <div class="sc-delta" id="delta-users" style="color:var(--ts);font-size:0.72rem">Firebase · live count</div>
+          <div class="sc-ico">👥</div><div class="sc-val" id="stat-users">—</div><div class="sc-lbl" data-i18n="adm_ov_users">სულ მომხმარებელი</div>
+          <div class="sc-delta" id="delta-users" style="color:var(--ts);font-size:0.72rem">Firebase · ცოცხალი რაოდენობა</div>
           <div class="sparkrow" id="sp-users"></div>
-          <div class="sc-glow" style="background:radial-gradient(#10b981,transparent)"></div>
+          <div class="sc-glow" style="background:radial-gradient(var(--ds-accent),transparent)"></div>
         </div>
         <div class="sc blue">
-          <div class="sc-ico">🏢</div><div class="sc-val" id="stat-biz">0</div><div class="sc-lbl" data-i18n="adm_ov_biz">Businesses</div>
-          <div class="sc-delta" id="delta-biz" style="color:var(--ts);font-size:0.72rem">registered via dashboard</div>
+          <div class="sc-ico">🏢</div><div class="sc-val" id="stat-biz">0</div><div class="sc-lbl" data-i18n="adm_ov_biz">ბიზნესები</div>
+          <div class="sc-delta" id="delta-biz" style="color:var(--ts);font-size:0.72rem">დაშბორდიდან რეგისტრირებული</div>
           <div class="sparkrow" id="sp-biz"></div>
           <div class="sc-glow" style="background:radial-gradient(#3b82f6,transparent)"></div>
         </div>
         <div class="sc gold">
-          <div class="sc-ico">📅</div><div class="sc-val" id="stat-events">0</div><div class="sc-lbl" data-i18n="adm_ov_events">Active Events</div>
-          <div class="sc-delta" style="color:var(--ts);font-size:0.72rem">Firestore · live count</div>
+          <div class="sc-ico">📅</div><div class="sc-val" id="stat-events">0</div><div class="sc-lbl" data-i18n="adm_ov_events">აქტიური ღონისძიება</div>
+          <div class="sc-delta" style="color:var(--ts);font-size:0.72rem">Firestore · ცოცხალი რაოდენობა</div>
           <div class="sparkrow" id="sp-ev"></div>
           <div class="sc-glow" style="background:radial-gradient(#f59e0b,transparent)"></div>
         </div>
         <div class="sc purple">
-          <div class="sc-ico">💰</div><div class="sc-val" id="stat-rev">₾0</div><div class="sc-lbl" data-i18n="adm_ov_revenue">Monthly Revenue</div>
-          <div class="sc-delta" style="color:var(--ts);font-size:0.72rem">Beta — no payments yet</div>
+          <div class="sc-ico">💰</div><div class="sc-val" id="stat-rev">₾0</div><div class="sc-lbl" data-i18n="adm_ov_revenue">თვიური შემოსავალი</div>
+          <div class="sc-delta" style="color:var(--ts);font-size:0.72rem">ბეტა — გადახდები ჯერ არ არის</div>
           <div class="sparkrow" id="sp-rev"></div>
           <div class="sc-glow" style="background:radial-gradient(#a855f7,transparent)"></div>
         </div>
       </div>
 
       <div class="g6 mb20">
-        <div class="sc"><div class="sc-ico" style="font-size:1rem">📍</div><div class="sc-val" id="stat-checkins" style="font-size:1.1rem;color:var(--green)">0</div><div class="sc-lbl" data-i18n="adm_ov_checkins">Check-ins</div></div>
-        <div class="sc"><div class="sc-ico" style="font-size:1rem">⭐</div><div class="sc-val" id="stat-reviews" style="font-size:1.1rem;color:var(--gold)">0</div><div class="sc-lbl" data-i18n="adm_ov_reviews">Reviews</div></div>
-        <div class="sc"><div class="sc-ico" style="font-size:1rem">🎁</div><div class="sc-val" id="stat-rewards" style="font-size:1.1rem;color:var(--blue)">0</div><div class="sc-lbl" data-i18n="adm_ov_rewards">Rewards Claimed</div></div>
-        <div class="sc"><div class="sc-ico" style="font-size:1rem">🛡️</div><div class="sc-val" id="stat-missions" style="font-size:1.1rem;color:var(--orange)">0</div><div class="sc-lbl" data-i18n="adm_ov_missions">Patriot Missions</div></div>
-        <div class="sc"><div class="sc-ico" style="font-size:1rem">🚩</div><div class="sc-val" id="stat-reports" style="font-size:1.1rem;color:var(--red)">0</div><div class="sc-lbl" data-i18n="adm_ov_reports">Open Reports</div></div>
-        <div class="sc"><div class="sc-ico" style="font-size:1rem">🏆</div><div class="sc-val" id="stat-trust" style="font-size:1.1rem;color:var(--purple)">—</div><div class="sc-lbl" data-i18n="adm_ov_trust">Avg Trust Score</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">📍</div><div class="sc-val" id="stat-checkins" style="font-size:1.1rem;color:var(--green)">0</div><div class="sc-lbl" data-i18n="adm_ov_checkins">ჩექ-ინები</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">⭐</div><div class="sc-val" id="stat-reviews" style="font-size:1.1rem;color:var(--gold)">0</div><div class="sc-lbl" data-i18n="adm_ov_reviews">შეფასებები</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">🎁</div><div class="sc-val" id="stat-rewards" style="font-size:1.1rem;color:var(--blue)">0</div><div class="sc-lbl" data-i18n="adm_ov_rewards">გატანილი ჯილდო</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">🛡️</div><div class="sc-val" id="stat-missions" style="font-size:1.1rem;color:var(--orange)">0</div><div class="sc-lbl" data-i18n="adm_ov_missions">პატრიოტული მისიები</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">🚩</div><div class="sc-val" id="stat-reports" style="font-size:1.1rem;color:var(--red)">0</div><div class="sc-lbl" data-i18n="adm_ov_reports">ღია საჩივრები</div></div>
+        <div class="sc"><div class="sc-ico" style="font-size:1rem">🏆</div><div class="sc-val" id="stat-trust" style="font-size:1.1rem;color:var(--purple)">—</div><div class="sc-lbl" data-i18n="adm_ov_trust">საშუალო ნდობის ქულა</div></div>
       </div>
 
       <div class="g2 mb12">
         <div class="panel">
-          <div class="panel-hdr"><div><div class="panel-title">Platform Growth</div><div class="panel-sub">Users &amp; check-ins — 30 days</div></div></div>
+          <div class="panel-hdr"><div><div class="panel-title">პლატფორმის ზრდა</div><div class="panel-sub">მომხმარებლები და ჩექ-ინები — 30 დღე</div></div></div>
           <canvas id="growthChart" height="130" style="width:100%"></canvas>
         </div>
         <div class="panel">
-          <div class="panel-hdr"><div><div class="panel-title">Daily Active Users</div><div class="panel-sub">Last 14 days</div></div></div>
+          <div class="panel-hdr"><div><div class="panel-title">დღიური აქტიური მომხმარებლები</div><div class="panel-sub">ბოლო 14 დღე</div></div></div>
           <canvas id="dauChart" height="130" style="width:100%"></canvas>
         </div>
       </div>
 
       <div class="g2">
         <div class="panel">
-          <div class="panel-hdr"><div class="panel-title">Top Active Districts</div></div>
+          <div class="panel-hdr"><div class="panel-title">ყველაზე აქტიური უბნები</div></div>
           <div class="bl" id="districtsPanel">
-            <div style="text-align:center;padding:24px;color:var(--ts);font-size:0.82rem">No check-in data yet — districts will populate as users check in</div>
+            <div style="text-align:center;padding:24px;color:var(--ts);font-size:0.82rem">ჩექ-ინის მონაცემები ჯერ არ არის — უბნები შეივსება, როგორც კი მომხმარებლები დაიწყებენ ჩექ-ინს</div>
           </div>
         </div>
         <div class="panel">
-          <div class="panel-hdr"><div class="panel-title">Activity Mix</div></div>
+          <div class="panel-hdr"><div class="panel-title">აქტივობის სტრუქტურა</div></div>
           <div class="bl" id="activityMixPanel">
-            <div style="text-align:center;padding:24px;color:var(--ts);font-size:0.82rem">No activity data yet — stats will populate as users engage</div>
+            <div style="text-align:center;padding:24px;color:var(--ts);font-size:0.82rem">აქტივობის მონაცემები ჯერ არ არის — სტატისტიკა შეივსება მომხმარებლების აქტივობასთან ერთად</div>
           </div>
         </div>
       </div>
@@ -189,29 +192,29 @@
     <!-- ─── LIVE MONITOR ─── -->
     <section class="sec" id="sec-live">
       <div class="ph">
-        <div><div class="ph-title">Live Monitor</div><div class="ph-sub"><span id="liveCountLabel">0</span> users active now · Updates every 3s</div></div>
-        <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="toggleLive()" id="livePauseBtn"><i class="fas fa-pause"></i> Pause</button></div>
+        <div><div class="ph-title">ცოცხალი მონიტორი</div><div class="ph-sub"><span id="liveCountLabel">0</span> აქტიური მომხმარებელი · განახლდება 3 წამში</div></div>
+        <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="toggleLive()" id="livePauseBtn"><i class="fas fa-pause"></i> პაუზა</button></div>
       </div>
       <div class="g3 mb16">
-        <div class="sc green" style="padding:13px"><div style="font-size:0.65rem;color:var(--ts);font-weight:700;margin-bottom:3px">ACTIVE NOW</div><div style="font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--green)" id="liveActiveNow">0</div><div style="font-size:0.68rem;color:var(--ts)">users online</div></div>
-        <div class="sc blue" style="padding:13px"><div style="font-size:0.65rem;color:var(--ts);font-weight:700;margin-bottom:3px">LIVE EVENTS</div><div style="font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--blue)">0</div><div style="font-size:0.68rem;color:var(--ts)">events running</div></div>
-        <div class="sc gold" style="padding:13px"><div style="font-size:0.65rem;color:var(--ts);font-weight:700;margin-bottom:3px">CHECK-INS TODAY</div><div style="font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--gold)" id="liveTodayCI">0</div><div style="font-size:0.68rem;color:var(--ts)">no data yet</div></div>
+        <div class="sc green" style="padding:13px"><div style="font-size:0.65rem;color:var(--ts);font-weight:700;margin-bottom:3px">ახლა აქტიური</div><div style="font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--green)" id="liveActiveNow">0</div><div style="font-size:0.68rem;color:var(--ts)">მომხმარებელი ონლაინ</div></div>
+        <div class="sc blue" style="padding:13px"><div style="font-size:0.65rem;color:var(--ts);font-weight:700;margin-bottom:3px">ცოცხალი ღონისძიებები</div><div style="font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--blue)">0</div><div style="font-size:0.68rem;color:var(--ts)">მიმდინარე ღონისძიება</div></div>
+        <div class="sc gold" style="padding:13px"><div style="font-size:0.65rem;color:var(--ts);font-weight:700;margin-bottom:3px">ჩექ-ინი დღეს</div><div style="font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--gold)" id="liveTodayCI">0</div><div style="font-size:0.68rem;color:var(--ts)">მონაცემები ჯერ არ არის</div></div>
       </div>
       <div class="g2">
         <div class="live-wrap">
-          <div class="live-hdr"><div class="live-dot"></div><div class="live-title">Live Activity Feed</div><div class="live-cnt" id="liveFeedCnt">0 events</div></div>
+          <div class="live-hdr"><div class="live-dot"></div><div class="live-title">ცოცხალი აქტივობის ლენტა</div><div class="live-cnt" id="liveFeedCnt">0 ღონისძიება</div></div>
           <div class="live-list" id="liveFeedList"></div>
         </div>
         <div style="display:flex;flex-direction:column;gap:12px">
           <div class="panel">
-            <div class="panel-hdr"><div class="panel-title">Trending Places Now</div></div>
+            <div class="panel-hdr"><div class="panel-title">პოპულარული ადგილები ახლა</div></div>
             <div class="bl">
-              <div style="text-align:center;padding:24px;color:var(--ts);font-size:0.8rem;opacity:0.6">No active places yet</div>
+              <div style="text-align:center;padding:24px;color:var(--ts);font-size:0.8rem;opacity:0.6">აქტიური ადგილი ჯერ არ არის</div>
             </div>
           </div>
           <div class="panel">
-            <div class="panel-hdr"><div class="panel-title">Active City Zones</div></div>
-            <div id="cityZonesPanel" style="text-align:center;padding:20px;color:var(--ts);font-size:0.8rem;opacity:0.6">No active zones yet</div>
+            <div class="panel-hdr"><div class="panel-title">აქტიური ქალაქის ზონები</div></div>
+            <div id="cityZonesPanel" style="text-align:center;padding:20px;color:var(--ts);font-size:0.8rem;opacity:0.6">აქტიური ზონა ჯერ არ არის</div>
           </div>
         </div>
       </div>
@@ -220,25 +223,25 @@
     <!-- ─── USERS ─── -->
     <section class="sec" id="sec-users">
       <div class="ph">
-        <div><div class="ph-title" data-i18n="adm_sec_users">User Management</div><div class="ph-sub" id="usersSubtitle">Registered users</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_users">მომხმარებლების მართვა</div><div class="ph-sub" id="usersSubtitle">რეგისტრირებული მომხმარებლები</div></div>
       </div>
       <div class="asearch">
-        <input class="asearch-inp" id="userSearch" placeholder="Search by name, handle, email…" oninput="filterUsers(this.value)">
+        <input class="asearch-inp" id="userSearch" placeholder="ძებნა სახელით, მეტსახელით, ელფოსტით…" oninput="filterUsers(this.value)">
         <select class="asearch-sel" onchange="filterUsers(document.getElementById('userSearch').value, this.value)">
-          <option value="">All Status</option>
-          <option value="verified">Verified</option>
-          <option value="suspended">Suspended</option>
-          <option value="flagged">Flagged</option>
+          <option value="">ყველა სტატუსი</option>
+          <option value="verified">ვერიფიცირებული</option>
+          <option value="suspended">შეჩერებული</option>
+          <option value="flagged">მონიშნული</option>
         </select>
         <select class="asearch-sel" id="trustFilter" onchange="filterUsers(document.getElementById('userSearch').value, document.querySelector('.asearch-sel').value, this.value)">
-          <option value="">All Trust</option>
-          <option value="high">High (80+)</option>
-          <option value="low">Low (&lt;40)</option>
+          <option value="">ყველა ნდობა</option>
+          <option value="high">მაღალი (80+)</option>
+          <option value="low">დაბალი (&lt;40)</option>
         </select>
       </div>
       <div class="tbl-wrap">
         <table class="tbl">
-          <thead><tr><th>User</th><th>Trust</th><th>Status</th><th>Check-ins</th><th>Reviews</th><th>Joined</th><th>Actions</th></tr></thead>
+          <thead><tr><th>მომხმარებელი</th><th>ნდობა</th><th>სტატუსი</th><th>ჩექ-ინები</th><th>შეფასებები</th><th>რეგისტრაცია</th><th>მოქმედებები</th></tr></thead>
           <tbody id="usersBody"></tbody>
         </table>
       </div>
@@ -247,8 +250,8 @@
     <!-- ─── BUSINESSES ─── -->
     <section class="sec" id="sec-businesses">
       <div class="ph">
-        <div><div class="ph-title" data-i18n="adm_sec_biz">Business Management</div><div class="ph-sub" id="bizSubtitle">Verify, feature, approve</div></div>
-        <div class="ph-actions"><button class="btn btn-ghost btn-sm"><i class="fas fa-filter"></i> Filter</button></div>
+        <div><div class="ph-title" data-i18n="adm_sec_biz">ბიზნესების მართვა</div><div class="ph-sub" id="bizSubtitle">ვერიფიკაცია, გამორჩევა, დამტკიცება</div></div>
+        <div class="ph-actions"><button class="btn btn-ghost btn-sm"><i class="fas fa-filter"></i> ფილტრი</button></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px" id="bizList"></div>
     </section>
@@ -256,13 +259,13 @@
     <!-- ─── CREATORS ─── -->
     <section class="sec" id="sec-creators">
       <div class="ph">
-        <div><div class="ph-title">Creator Management</div><div class="ph-sub">0 creators · Feature, verify, track performance</div></div>
+        <div><div class="ph-title">შემქმნელების მართვა</div><div class="ph-sub">0 შემქმნელი · გამორჩევა, ვერიფიკაცია, შედეგების თვალყური</div></div>
       </div>
       <div class="g4 mb20">
-        <div class="sc purple"><div class="sc-ico" style="font-size:1rem">🌟</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_tr_total">Total Creators</div></div>
-        <div class="sc green"><div class="sc-ico" style="font-size:1rem">✅</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_tr_verified">Verified</div></div>
-        <div class="sc gold"><div class="sc-ico" style="font-size:1rem">📈</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_tr_followers">Total Followers</div></div>
-        <div class="sc blue"><div class="sc-ico" style="font-size:1rem">🤝</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_tr_collabs">Active Collabs</div></div>
+        <div class="sc purple"><div class="sc-ico" style="font-size:1rem">🌟</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_tr_total">სულ შემქმნელი</div></div>
+        <div class="sc green"><div class="sc-ico" style="font-size:1rem">✅</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_tr_verified">ვერიფიცირებული</div></div>
+        <div class="sc gold"><div class="sc-ico" style="font-size:1rem">📈</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_tr_followers">სულ გამომწერი</div></div>
+        <div class="sc blue"><div class="sc-ico" style="font-size:1rem">🤝</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_tr_collabs">აქტიური თანამშრომლობა</div></div>
       </div>
       <div class="g3" id="creatorGrid"></div>
     </section>
@@ -270,65 +273,65 @@
     <!-- ─── MODERATION ─── -->
     <section class="sec" id="sec-moderation">
       <div class="ph">
-        <div><div class="ph-title" data-i18n="adm_sec_moderation">Content Moderation</div><div class="ph-sub" id="modSub">0 items in queue</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_moderation">კონტენტის მოდერაცია</div><div class="ph-sub" id="modSub">რიგში 0 ერთეული</div></div>
       </div>
       <!-- Status filter -->
       <div class="mod-filters-bar" id="modStatusBar">
-        <button class="mod-filter-btn active" onclick="filterModStatus('pending')">Pending</button>
-        <button class="mod-filter-btn" onclick="filterModStatus('resolved')">Resolved</button>
-        <button class="mod-filter-btn" onclick="filterModStatus('dismissed')">Dismissed</button>
-        <button class="mod-filter-btn" onclick="filterModStatus('all')">All</button>
+        <button class="mod-filter-btn active" onclick="filterModStatus('pending')">მოლოდინში</button>
+        <button class="mod-filter-btn" onclick="filterModStatus('resolved')">დახურული</button>
+        <button class="mod-filter-btn" onclick="filterModStatus('dismissed')">უარყოფილი</button>
+        <button class="mod-filter-btn" onclick="filterModStatus('all')">ყველა</button>
       </div>
       <!-- Type filter -->
       <div class="mod-filters-bar" id="modTypeBar">
-        <button class="mod-filter-btn active" onclick="filterMod('all')">All Types</button>
-        <button class="mod-filter-btn" onclick="filterMod('post')">Posts</button>
-        <button class="mod-filter-btn" onclick="filterMod('comment')">Comments</button>
-        <button class="mod-filter-btn" onclick="filterMod('user')">Users</button>
-        <button class="mod-filter-btn" onclick="filterMod('place')">Places</button>
-        <button class="mod-filter-btn" onclick="filterMod('business')">Businesses</button>
-        <button class="mod-filter-btn" onclick="filterMod('event')">Events</button>
-        <button class="mod-filter-btn" onclick="filterMod('group')">Groups</button>
+        <button class="mod-filter-btn active" onclick="filterMod('all')">ყველა ტიპი</button>
+        <button class="mod-filter-btn" onclick="filterMod('post')">პოსტები</button>
+        <button class="mod-filter-btn" onclick="filterMod('comment')">კომენტარები</button>
+        <button class="mod-filter-btn" onclick="filterMod('user')">მომხმარებლები</button>
+        <button class="mod-filter-btn" onclick="filterMod('place')">ადგილები</button>
+        <button class="mod-filter-btn" onclick="filterMod('business')">ბიზნესები</button>
+        <button class="mod-filter-btn" onclick="filterMod('event')">ღონისძიებები</button>
+        <button class="mod-filter-btn" onclick="filterMod('group')">ჯგუფები</button>
       </div>
       <div style="display:flex;flex-direction:column;gap:9px" id="modQueue"></div>
 
       <!-- Audit log -->
       <div class="ph" style="margin-top:28px">
-        <div><div class="ph-title">Moderation Audit Log</div><div class="ph-sub">Recent admin actions</div></div>
+        <div><div class="ph-title">მოდერაციის ჟურნალი</div><div class="ph-sub">ადმინის ბოლო მოქმედებები</div></div>
       </div>
       <div id="modAuditLog" style="display:flex;flex-direction:column"></div>
     </section>
 
     <!-- ─── TRUST & SAFETY ─── -->
     <section class="sec" id="sec-trust">
-      <div class="ph"><div><div class="ph-title" data-i18n="adm_sec_trust">Trust &amp; Safety Center</div><div class="ph-sub">Platform integrity monitoring and AI moderation</div></div></div>
+      <div class="ph"><div><div class="ph-title" data-i18n="adm_sec_trust">ნდობისა და უსაფრთხოების ცენტრი</div><div class="ph-sub">პლატფორმის მთლიანობის მონიტორინგი და AI მოდერაცია</div></div></div>
       <div class="g4 mb20">
-        <div class="sc green"><div class="sc-ico" style="font-size:1rem">🏆</div><div class="sc-val" style="font-size:1.1rem">—</div><div class="sc-lbl" data-i18n="adm_ts_avg">Avg Trust Score</div><div class="sc-delta" style="color:var(--ts);font-size:0.72rem">no data yet</div></div>
-        <div class="sc blue"><div class="sc-ico" style="font-size:1rem">📸</div><div class="sc-val" style="font-size:1.1rem">—</div><div class="sc-lbl" data-i18n="adm_ts_camera">Camera Proof Rate</div></div>
-        <div class="sc red"><div class="sc-ico" style="font-size:1rem">🚨</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_ts_suspicious">Suspicious Accounts</div></div>
-        <div class="sc gold"><div class="sc-ico" style="font-size:1rem">✅</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_ts_verified">Verified Users</div></div>
+        <div class="sc green"><div class="sc-ico" style="font-size:1rem">🏆</div><div class="sc-val" style="font-size:1.1rem">—</div><div class="sc-lbl" data-i18n="adm_ts_avg">საშუალო ნდობის ქულა</div><div class="sc-delta" style="color:var(--ts);font-size:0.72rem">მონაცემები ჯერ არ არის</div></div>
+        <div class="sc blue"><div class="sc-ico" style="font-size:1rem">📸</div><div class="sc-val" style="font-size:1.1rem">—</div><div class="sc-lbl" data-i18n="adm_ts_camera">კამერით დადასტურების წილი</div></div>
+        <div class="sc red"><div class="sc-ico" style="font-size:1rem">🚨</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_ts_suspicious">ეჭვქვეშ მყოფი ანგარიშები</div></div>
+        <div class="sc gold"><div class="sc-ico" style="font-size:1rem">✅</div><div class="sc-val" style="font-size:1.1rem">0</div><div class="sc-lbl" data-i18n="adm_ts_verified">ვერიფიცირებული მომხმარებლები</div></div>
       </div>
       <div class="g2 mb16">
         <div class="panel">
-          <div class="panel-hdr"><div class="panel-title">Trust Score Distribution</div></div>
+          <div class="panel-hdr"><div class="panel-title">ნდობის ქულის განაწილება</div></div>
           <div class="bl">
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">90–100 Elite</span><span class="bi-val" style="color:var(--green)">0 users</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">70–89 High</span><span class="bi-val" style="color:var(--blue)">0 users</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">50–69 Medium</span><span class="bi-val" style="color:var(--gold)">0 users</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">30–49 Low</span><span class="bi-val" style="color:var(--orange)">0 users</span></div><div class="bt"><div class="bf orange" style="width:0%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">0–29 Risk</span><span class="bi-val" style="color:var(--red)">0 users</span></div><div class="bt"><div class="bf red" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">90–100 ელიტა</span><span class="bi-val" style="color:var(--green)">0 მომხმარებელი</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">70–89 მაღალი</span><span class="bi-val" style="color:var(--blue)">0 მომხმარებელი</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">50–69 საშუალო</span><span class="bi-val" style="color:var(--gold)">0 მომხმარებელი</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">30–49 დაბალი</span><span class="bi-val" style="color:var(--orange)">0 მომხმარებელი</span></div><div class="bt"><div class="bf orange" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">0–29 რისკი</span><span class="bi-val" style="color:var(--red)">0 მომხმარებელი</span></div><div class="bt"><div class="bf red" style="width:0%"></div></div></div>
           </div>
         </div>
         <div>
-          <div id="aiAlertsPanel" style="text-align:center;padding:24px;color:var(--ts);font-size:0.82rem;opacity:0.7"><i class="fas fa-robot" style="font-size:1.2rem;display:block;margin-bottom:8px;opacity:0.3"></i>No AI alerts — system is monitoring</div>
+          <div id="aiAlertsPanel" style="text-align:center;padding:24px;color:var(--ts);font-size:0.82rem;opacity:0.7"><i class="fas fa-robot" style="font-size:1.2rem;display:block;margin-bottom:8px;opacity:0.3"></i>AI შეტყობინება არ არის — სისტემა აკვირდება</div>
         </div>
       </div>
       <div class="panel">
-        <div class="panel-hdr"><div class="panel-title">Top Trusted Users</div></div>
+        <div class="panel-hdr"><div class="panel-title">ყველაზე სანდო მომხმარებლები</div></div>
         <table class="tbl" style="background:transparent">
-          <thead><tr><th>User</th><th>Trust</th><th>Reviews</th><th>Check-ins</th><th>Camera%</th><th>Verified</th></tr></thead>
+          <thead><tr><th>მომხმარებელი</th><th>ნდობა</th><th>შეფასებები</th><th>ჩექ-ინები</th><th>კამერა %</th><th>ვერიფიცირებული</th></tr></thead>
           <tbody>
-            <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--ts);font-size:0.82rem"><i class="fas fa-shield-alt" style="font-size:1.3rem;display:block;margin-bottom:8px;opacity:0.3"></i>No verified users yet</td></tr>
+            <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--ts);font-size:0.82rem"><i class="fas fa-shield-alt" style="font-size:1.3rem;display:block;margin-bottom:8px;opacity:0.3"></i>ვერიფიცირებული მომხმარებელი ჯერ არ არის</td></tr>
           </tbody>
         </table>
       </div>
@@ -336,57 +339,57 @@
 
     <!-- ─── REVENUE ─── -->
     <section class="sec" id="sec-revenue">
-      <div class="ph"><div><div class="ph-title" data-i18n="adm_sec_revenue">Revenue Dashboard</div><div class="ph-sub">Platform monetization · Beta — no payments yet</div></div></div>
+      <div class="ph"><div><div class="ph-title" data-i18n="adm_sec_revenue">შემოსავლის პანელი</div><div class="ph-sub">პლატფორმის მონეტიზაცია · ბეტა — გადახდები ჯერ არ არის</div></div></div>
       <div class="g4 mb20">
-        <div class="rev-card"><div class="rev-lbl">Monthly Revenue</div><div class="rev-val" style="color:var(--green)">₾0</div><div class="rev-delta" style="color:var(--ts);font-size:0.72rem">Beta — no payments yet</div></div>
-        <div class="rev-card"><div class="rev-lbl">ARR Projection</div><div class="rev-val" style="color:var(--blue)">—</div><div class="rev-delta" style="color:var(--ts);font-size:0.72rem">no data</div></div>
-        <div class="rev-card"><div class="rev-lbl">Premium Subscribers</div><div class="rev-val" id="stat-premium" style="color:var(--purple)">0</div><div class="rev-delta" style="color:var(--ts);font-size:0.72rem">Admin-controlled</div></div>
-        <div class="rev-card"><div class="rev-lbl">Avg Revenue / User</div><div class="rev-val" style="color:var(--gold)">—</div><div class="rev-delta" style="color:var(--ts);font-size:0.72rem">no data</div></div>
+        <div class="rev-card"><div class="rev-lbl">თვიური შემოსავალი</div><div class="rev-val" style="color:var(--green)">₾0</div><div class="rev-delta" style="color:var(--ts);font-size:0.72rem">ბეტა — გადახდები ჯერ არ არის</div></div>
+        <div class="rev-card"><div class="rev-lbl">ARR პროგნოზი</div><div class="rev-val" style="color:var(--blue)">—</div><div class="rev-delta" style="color:var(--ts);font-size:0.72rem">მონაცემები არ არის</div></div>
+        <div class="rev-card"><div class="rev-lbl">Premium გამომწერები</div><div class="rev-val" id="stat-premium" style="color:var(--purple)">0</div><div class="rev-delta" style="color:var(--ts);font-size:0.72rem">ადმინის კონტროლით</div></div>
+        <div class="rev-card"><div class="rev-lbl">საშუალო შემოსავალი მომხმარებელზე</div><div class="rev-val" style="color:var(--gold)">—</div><div class="rev-delta" style="color:var(--ts);font-size:0.72rem">მონაცემები არ არის</div></div>
       </div>
       <div class="g2 mb16">
         <div class="panel">
-          <div class="panel-hdr"><div class="panel-title">Revenue by Category</div></div>
+          <div class="panel-hdr"><div class="panel-title">შემოსავალი კატეგორიით</div></div>
           <canvas id="revChart" height="160" style="width:100%"></canvas>
         </div>
         <div class="panel">
-          <div class="panel-hdr"><div class="panel-title">Revenue Breakdown</div></div>
+          <div class="panel-hdr"><div class="panel-title">შემოსავლის სტრუქტურა</div></div>
           <div class="bl">
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">💎 Premium Subs</span><span class="bi-val" style="color:var(--purple)">₾0</span></div><div class="bt"><div class="bf purple" style="width:0%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🏢 Biz Campaigns</span><span class="bi-val" style="color:var(--blue)">₾0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🎟 Ticket Sales</span><span class="bi-val" style="color:var(--green)">₾0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🎁 QR Campaigns</span><span class="bi-val" style="color:var(--gold)">₾0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🛍 Marketplace</span><span class="bi-val" style="color:var(--orange)">₾0</span></div><div class="bt"><div class="bf orange" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">💎 Premium გამოწერები</span><span class="bi-val" style="color:var(--purple)">₾0</span></div><div class="bt"><div class="bf purple" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🏢 ბიზნეს კამპანიები</span><span class="bi-val" style="color:var(--blue)">₾0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🎟 ბილეთების გაყიდვა</span><span class="bi-val" style="color:var(--green)">₾0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🎁 QR კამპანიები</span><span class="bi-val" style="color:var(--gold)">₾0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🛍 ბაზარი</span><span class="bi-val" style="color:var(--orange)">₾0</span></div><div class="bt"><div class="bf orange" style="width:0%"></div></div></div>
           </div>
         </div>
       </div>
       <div class="panel">
-        <div class="panel-hdr"><div class="panel-title">Revenue Trend — Last 30 Days</div></div>
+        <div class="panel-hdr"><div class="panel-title">შემოსავლის დინამიკა — ბოლო 30 დღე</div></div>
         <canvas id="revTrendChart" height="110" style="width:100%"></canvas>
       </div>
     </section>
 
     <!-- ─── CITY ANALYTICS ─── -->
     <section class="sec" id="sec-city">
-      <div class="ph"><div><div class="ph-title" data-i18n="adm_sec_city">City Analytics</div><div class="ph-sub">Geographic activity, density, and engagement by city</div></div></div>
+      <div class="ph"><div><div class="ph-title" data-i18n="adm_sec_city">ქალაქების ანალიტიკა</div><div class="ph-sub">გეოგრაფიული აქტივობა, სიმჭიდროვე და ჩართულობა ქალაქების მიხედვით</div></div></div>
       <div class="g3 mb16">
-        <div class="zone"><div class="zone-name">🏙 Tbilisi</div><span class="zone-badge" style="background:var(--gd);color:var(--green);border:1px solid rgba(16,185,129,0.25)">🟢 Active</span><div class="bl"><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Check-ins</span><span class="bi-val">0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Reviews</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Events</span><span class="bi-val">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div></div></div>
-        <div class="zone"><div class="zone-name">🌊 Batumi</div><span class="zone-badge" style="background:var(--bd);color:var(--blue);border:1px solid rgba(59,130,246,0.25)">No live data</span><div class="bl"><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Check-ins</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Reviews</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Events</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div></div></div>
-        <div class="zone"><div class="zone-name">🍇 Kakheti</div><span class="zone-badge" style="background:var(--yd);color:var(--gold);border:1px solid rgba(245,158,11,0.25)">No live data</span><div class="bl"><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Check-ins</span><span class="bi-val">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Reviews</span><span class="bi-val">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">Events</span><span class="bi-val">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div></div></div>
+        <div class="zone"><div class="zone-name">🏙 თბილისი</div><span class="zone-badge" style="background:var(--gd);color:var(--green);border:1px solid rgba(var(--ds-accent-rgb),0.25)">🟢 აქტიური</span><div class="bl"><div class="bi"><div class="bi-hdr"><span class="bi-lbl">ჩექ-ინები</span><span class="bi-val">0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">შეფასებები</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">ღონისძიებები</span><span class="bi-val">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div></div></div>
+        <div class="zone"><div class="zone-name">🌊 ბათუმი</div><span class="zone-badge" style="background:var(--bd);color:var(--blue);border:1px solid rgba(59,130,246,0.25)">ცოცხალი მონაცემები არ არის</span><div class="bl"><div class="bi"><div class="bi-hdr"><span class="bi-lbl">ჩექ-ინები</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">შეფასებები</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">ღონისძიებები</span><span class="bi-val">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div></div></div>
+        <div class="zone"><div class="zone-name">🍇 კახეთი</div><span class="zone-badge" style="background:var(--yd);color:var(--gold);border:1px solid rgba(245,158,11,0.25)">ცოცხალი მონაცემები არ არის</span><div class="bl"><div class="bi"><div class="bi-hdr"><span class="bi-lbl">ჩექ-ინები</span><span class="bi-val">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">შეფასებები</span><span class="bi-val">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div><div class="bi"><div class="bi-hdr"><span class="bi-lbl">ღონისძიებები</span><span class="bi-val">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div></div></div>
       </div>
       <div class="g2">
         <div class="panel">
-          <div class="panel-hdr"><div class="panel-title">Activity by Hour (Today)</div></div>
+          <div class="panel-hdr"><div class="panel-title">აქტივობა საათობრივად (დღეს)</div></div>
           <div class="hbars" id="hourBars"></div>
           <div class="hlbls" id="hourLabels"></div>
         </div>
         <div class="panel">
-          <div class="panel-hdr"><div class="panel-title">Patriot Mission Activity</div></div>
+          <div class="panel-hdr"><div class="panel-title">პატრიოტული მისიების აქტივობა</div></div>
           <div class="bl">
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🧹 Cleanup</span><span class="bi-val" style="color:var(--green)">0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🌳 Park Improvement</span><span class="bi-val" style="color:var(--green)">0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🛣 Infrastructure</span><span class="bi-val" style="color:var(--blue)">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🐾 Animal Safety</span><span class="bi-val" style="color:var(--gold)">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div>
-            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🌿 Eco Actions</span><span class="bi-val" style="color:var(--green)">0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🧹 დასუფთავება</span><span class="bi-val" style="color:var(--green)">0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🌳 პარკის კეთილმოწყობა</span><span class="bi-val" style="color:var(--green)">0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🛣 ინფრასტრუქტურა</span><span class="bi-val" style="color:var(--blue)">0</span></div><div class="bt"><div class="bf blue" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🐾 ცხოველთა დაცვა</span><span class="bi-val" style="color:var(--gold)">0</span></div><div class="bt"><div class="bf gold" style="width:0%"></div></div></div>
+            <div class="bi"><div class="bi-hdr"><span class="bi-lbl">🌿 ეკო აქციები</span><span class="bi-val" style="color:var(--green)">0</span></div><div class="bt"><div class="bf green" style="width:0%"></div></div></div>
           </div>
         </div>
       </div>
@@ -394,43 +397,78 @@
 
     <!-- ─── PLATFORM CONTROLS ─── -->
     <section class="sec" id="sec-controls">
-      <div class="ph"><div><div class="ph-title" data-i18n="adm_sec_controls">Platform Controls</div><div class="ph-sub">Feature flags · Changes apply immediately to all users</div></div></div>
-      <div class="alert warn mb20"><i class="fas fa-exclamation-triangle"></i> Changes here affect all users in real-time. Use with caution.</div>
+      <div class="ph"><div><div class="ph-title" data-i18n="adm_sec_controls">პლატფორმის კონტროლი</div><div class="ph-sub">ფუნქციების ჩამრთველები · ცვლილება მაშინვე მოქმედებს ყველა მომხმარებელზე</div></div></div>
+      <div class="alert warn mb20"><i class="fas fa-exclamation-triangle"></i> აქაური ცვლილებები რეალურ დროში მოქმედებს ყველა მომხმარებელზე. ფრთხილად.</div>
       <div class="g2 mb20">
         <div>
-          <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--td);margin-bottom:9px">Core Features</div>
+          <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--td);margin-bottom:9px">ძირითადი ფუნქციები</div>
           <div style="display:flex;flex-direction:column;gap:7px">
-            <div class="tog-wrap"><div><div class="tog-label">Live City Mode</div><div class="tog-sub">Real-time activity feed and city dashboard</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('live',this.checked)"><span class="tog-slider"></span></label></div>
-            <div class="tog-wrap"><div><div class="tog-label">Rewards System</div><div class="tog-sub">QR rewards, campaigns, and GeoPoints</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('rewards',this.checked)"><span class="tog-slider"></span></label></div>
-            <div class="tog-wrap"><div><div class="tog-label">Events &amp; Ticketing</div><div class="tog-sub">Event discovery and ticket purchases</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('events',this.checked)"><span class="tog-slider"></span></label></div>
-            <div class="tog-wrap"><div><div class="tog-label">Creator Marketplace</div><div class="tog-sub">Creator profiles, collaborations, storefronts</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('creators',this.checked)"><span class="tog-slider"></span></label></div>
+            <div class="tog-wrap"><div><div class="tog-label">ცოცხალი ქალაქი</div><div class="tog-sub">რეალურ დროში აქტივობა და ქალაქის დაშბორდი</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('live',this.checked)"><span class="tog-slider"></span></label></div>
+            <div class="tog-wrap"><div><div class="tog-label">ჯილდოების სისტემა</div><div class="tog-sub">QR ჯილდოები, კამპანიები და GeoPoints</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('rewards',this.checked)"><span class="tog-slider"></span></label></div>
+            <div class="tog-wrap"><div><div class="tog-label">ღონისძიებები და ბილეთები</div><div class="tog-sub">ღონისძიებების აღმოჩენა და ბილეთის შეძენა</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('events',this.checked)"><span class="tog-slider"></span></label></div>
+            <div class="tog-wrap"><div><div class="tog-label">შემქმნელების ბაზარი</div><div class="tog-sub">შემქმნელების პროფილები, თანამშრომლობა, ვიტრინები</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('creators',this.checked)"><span class="tog-slider"></span></label></div>
           </div>
         </div>
         <div>
-          <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--td);margin-bottom:9px">Advanced Features</div>
+          <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--td);margin-bottom:9px">დამატებითი ფუნქციები</div>
           <div style="display:flex;flex-direction:column;gap:7px">
-            <div class="tog-wrap"><div><div class="tog-label">Patriot Missions</div><div class="tog-sub">Civic mission system and patriot scoring</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('patriot',this.checked)"><span class="tog-slider"></span></label></div>
-            <div class="tog-wrap"><div><div class="tog-label">AI Assistant</div><div class="tog-sub">GeoBot city assistant and smart recommendations</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('ai',this.checked)"><span class="tog-slider"></span></label></div>
-            <div class="tog-wrap"><div><div class="tog-label">Camera Proof System</div><div class="tog-sub">Camera-based check-ins and trust proof</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('camera',this.checked)"><span class="tog-slider"></span></label></div>
-            <div class="tog-wrap" style="border-color:rgba(239,68,68,0.35)"><div><div class="tog-label" style="color:var(--red)">Maintenance Mode</div><div class="tog-sub">Take platform offline for all users</div></div><label class="tog-sw"><input type="checkbox" onchange="handleToggle('maintenance',this.checked)"><span class="tog-slider"></span></label></div>
+            <div class="tog-wrap"><div><div class="tog-label">პატრიოტული მისიები</div><div class="tog-sub">სამოქალაქო მისიების სისტემა და პატრიოტული ქულები</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('patriot',this.checked)"><span class="tog-slider"></span></label></div>
+            <div class="tog-wrap"><div><div class="tog-label">AI ასისტენტი</div><div class="tog-sub">GeoBot ასისტენტი და ჭკვიანი რეკომენდაციები</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('ai',this.checked)"><span class="tog-slider"></span></label></div>
+            <div class="tog-wrap"><div><div class="tog-label">კამერით დადასტურების სისტემა</div><div class="tog-sub">კამერით ჩექ-ინი და ნდობის დადასტურება</div></div><label class="tog-sw"><input type="checkbox" checked onchange="handleToggle('camera',this.checked)"><span class="tog-slider"></span></label></div>
+            <div class="tog-wrap" style="border-color:rgba(239,68,68,0.35)"><div><div class="tog-label" style="color:var(--red)">ტექნიკური რეჟიმი</div><div class="tog-sub">პლატფორმის დროებით გათიშვა ყველა მომხმარებლისთვის</div></div><label class="tog-sw"><input type="checkbox" onchange="handleToggle('maintenance',this.checked)"><span class="tog-slider"></span></label></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel mb20" id="siteSettingsPanel">
+        <div class="panel-hdr">
+          <div class="panel-title">საიტის პარამეტრები</div>
+          <div class="panel-sub" style="font-size:.74rem;color:var(--td)">ეს პარამეტრები პირდაპირ ჩანს ცოცხალ საიტზე</div>
+        </div>
+        <div style="display:grid;gap:14px;max-width:640px">
+          <label style="display:grid;gap:6px">
+            <span style="font-size:.78rem;font-weight:700">გამოცხადება (ბანერი ყველა გვერდზე)</span>
+            <input id="ssAnnouncement" type="text" maxlength="160"
+                   placeholder="მაგ. შაბათს 20:00-ზე ტექნიკური სამუშაოები">
+            <span style="font-size:.72rem;color:var(--td)">ცარიელი ველი — ბანერი არ ჩანს</span>
+          </label>
+          <label style="display:grid;gap:6px">
+            <span style="font-size:.78rem;font-weight:700">ბანერის ტიპი</span>
+            <select id="ssAnnouncementLevel">
+              <option value="info">ინფორმაცია (მწვანე)</option>
+              <option value="warn">გაფრთხილება (ყვითელი)</option>
+              <option value="alert">მნიშვნელოვანი (წითელი)</option>
+            </select>
+          </label>
+          <label style="display:grid;gap:6px">
+            <span style="font-size:.78rem;font-weight:700">ტექნიკური რეჟიმის ტექსტი</span>
+            <input id="ssMaintenanceMessage" type="text" maxlength="200"
+                   placeholder="GeoHub დროებით მიუწვდომელია. მალე დავბრუნდებით.">
+          </label>
+          <label style="display:grid;gap:6px">
+            <span style="font-size:.78rem;font-weight:700">გამორჩეული ქალაქი</span>
+            <input id="ssFeaturedCity" type="text" maxlength="40" placeholder="თბილისი">
+          </label>
+          <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" id="ssSave"><i class="fas fa-floppy-disk"></i> შენახვა</button>
+            <span id="ssStatus" style="font-size:.78rem;color:var(--td)"></span>
           </div>
         </div>
       </div>
       <div class="panel">
-        <div class="panel-hdr"><div class="panel-title">Quick Links — Open Any Page</div></div>
+        <div class="panel-hdr"><div class="panel-title">სწრაფი ბმულები — გახსენი ნებისმიერი გვერდი</div></div>
         <div style="display:flex;flex-wrap:wrap;gap:7px">
-          <a href="profile.html" class="btn btn-ghost btn-sm"><i class="fas fa-user"></i> Profile</a>
-          <a href="business.html" class="btn btn-ghost btn-sm"><i class="fas fa-store"></i> Business</a>
-          <a href="creators.html" class="btn btn-ghost btn-sm"><i class="fas fa-star"></i> Creators</a>
-          <a href="trust.html" class="btn btn-ghost btn-sm"><i class="fas fa-shield-alt"></i> Trust Center</a>
-          <a href="reviews.html" class="btn btn-ghost btn-sm"><i class="fas fa-star-half-alt"></i> Reviews</a>
-          <a href="patriot.html" class="btn btn-ghost btn-sm"><i class="fas fa-flag"></i> Patriot</a>
-          <a href="events.html" class="btn btn-ghost btn-sm"><i class="fas fa-calendar"></i> Events</a>
-          <a href="search.html" class="btn btn-ghost btn-sm"><i class="fas fa-search"></i> Search</a>
-          <a href="rewards.html" class="btn btn-ghost btn-sm"><i class="fas fa-gift"></i> Rewards</a>
-          <a href="challenges.html" class="btn btn-ghost btn-sm"><i class="fas fa-bolt"></i> Challenges</a>
-          <a href="camera.html" class="btn btn-ghost btn-sm"><i class="fas fa-camera"></i> Camera</a>
-          <a href="index.html" class="btn btn-ghost btn-sm"><i class="fas fa-home"></i> Home</a>
+          <a href="profile.html" class="btn btn-ghost btn-sm"><i class="fas fa-user"></i> პროფილი</a>
+          <a href="business.html" class="btn btn-ghost btn-sm"><i class="fas fa-store"></i> ბიზნესი</a>
+          <a href="creators.html" class="btn btn-ghost btn-sm"><i class="fas fa-star"></i> შემქმნელები</a>
+          <a href="trust.html" class="btn btn-ghost btn-sm"><i class="fas fa-shield-alt"></i> ნდობის ცენტრი</a>
+          <a href="reviews.html" class="btn btn-ghost btn-sm"><i class="fas fa-star-half-alt"></i> შეფასებები</a>
+          <a href="patriot.html" class="btn btn-ghost btn-sm"><i class="fas fa-flag"></i> პატრიოტი</a>
+          <a href="events.html" class="btn btn-ghost btn-sm"><i class="fas fa-calendar"></i> ღონისძიებები</a>
+          <a href="search.html" class="btn btn-ghost btn-sm"><i class="fas fa-search"></i> ძებნა</a>
+          <a href="rewards.html" class="btn btn-ghost btn-sm"><i class="fas fa-gift"></i> ჯილდოები</a>
+          <a href="challenges.html" class="btn btn-ghost btn-sm"><i class="fas fa-bolt"></i> გამოწვევები</a>
+          <a href="camera.html" class="btn btn-ghost btn-sm"><i class="fas fa-camera"></i> კამერა</a>
+          <a href="index.html" class="btn btn-ghost btn-sm"><i class="fas fa-home"></i> მთავარი</a>
         </div>
       </div>
     </section>
@@ -439,21 +477,21 @@
     <section class="sec" id="sec-activity">
       <div class="ph">
         <div>
-          <div class="ph-title" data-i18n="adm_sec_activity">Platform Activity</div>
-          <div class="ph-sub" id="activitySub">Loading…</div>
+          <div class="ph-title" data-i18n="adm_sec_activity">პლატფორმის აქტივობა</div>
+          <div class="ph-sub" id="activitySub">იტვირთება…</div>
         </div>
         <div class="ph-actions">
-          <button class="btn btn-ghost btn-sm" id="act-tab-all"    onclick="loadActivity('all')">All</button>
-          <button class="btn btn-ghost btn-sm" id="act-tab-posts"   onclick="loadActivity('posts')"><i class="fas fa-file-alt"></i> Posts</button>
-          <button class="btn btn-ghost btn-sm" id="act-tab-stories" onclick="loadActivity('stories')"><i class="fas fa-book-open"></i> Stories</button>
-          <button class="btn btn-ghost btn-sm" id="act-tab-checkins" onclick="loadActivity('checkins')"><i class="fas fa-map-marker-alt"></i> Check-ins</button>
+          <button class="btn btn-ghost btn-sm" id="act-tab-all"    onclick="loadActivity('all')">ყველა</button>
+          <button class="btn btn-ghost btn-sm" id="act-tab-posts"   onclick="loadActivity('posts')"><i class="fas fa-file-alt"></i> პოსტები</button>
+          <button class="btn btn-ghost btn-sm" id="act-tab-stories" onclick="loadActivity('stories')"><i class="fas fa-book-open"></i> სთორები</button>
+          <button class="btn btn-ghost btn-sm" id="act-tab-checkins" onclick="loadActivity('checkins')"><i class="fas fa-map-marker-alt"></i> ჩექ-ინები</button>
           <button class="btn btn-ghost btn-sm" onclick="loadActivity(_activityFilter)"><i class="fas fa-sync-alt"></i></button>
         </div>
       </div>
       <div id="activityList" style="display:flex;flex-direction:column;gap:10px">
         <div style="text-align:center;padding:48px;color:var(--ts);font-size:0.85rem">
           <i class="fas fa-stream" style="font-size:1.8rem;display:block;margin-bottom:12px;opacity:0.2"></i>
-          Click a filter tab to load content
+          აირჩიე ფილტრი კონტენტის ჩასატვირთად
         </div>
       </div>
     </section>
@@ -461,13 +499,13 @@
     <!-- ─── NOTIFICATIONS ─── -->
     <section class="sec" id="sec-notifications">
       <div class="ph">
-        <div><div class="ph-title" data-i18n="adm_sec_notifs">Admin Notifications</div><div class="ph-sub" id="notifSub">0 alerts</div></div>
-        <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark all read</button></div>
+        <div><div class="ph-title" data-i18n="adm_sec_notifs">ადმინის შეტყობინებები</div><div class="ph-sub" id="notifSub">0 შეტყობინება</div></div>
+        <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="markAllRead()">ყველას წაკითხულად მონიშვნა</button></div>
       </div>
       <div id="notifList">
         <div style="text-align:center;padding:48px 24px;color:var(--ts);font-size:0.85rem">
           <i class="fas fa-bell" style="font-size:1.8rem;display:block;margin-bottom:12px;opacity:0.2"></i>
-          No notifications yet
+          შეტყობინება ჯერ არ არის
         </div>
       </div>
     </section>
@@ -475,113 +513,113 @@
     <!-- ─── CONTENT STUDIO ─── -->
     <section class="sec" id="sec-content">
       <div class="ph">
-        <div><div class="ph-title" data-i18n="adm_sec_content">Content Studio</div><div class="ph-sub">Add real places, groups, events, rewards, challenges and marketplace items. No demo data.</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_content">კონტენტ სტუდია</div><div class="ph-sub">დაამატე რეალური ადგილები, ჯგუფები, ღონისძიებები, ჯილდოები, გამოწვევები და ბაზრის ერთეულები. სადემონსტრაციო მონაცემების გარეშე.</div></div>
       </div>
       <div class="panel" style="max-width:860px">
-        <div class="panel-hdr"><div class="panel-title">Create Real Firestore Content</div></div>
+        <div class="panel-hdr"><div class="panel-title">რეალური Firestore კონტენტის შექმნა</div></div>
         <form id="adminContentForm" style="display:grid;gap:14px;padding:8px 0 4px">
-          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Collection
-            <select id="adminContentCollection" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-              <option value="places">Places / Map locations</option>
-              <option value="businesses">Businesses</option>
-              <option value="groups">Groups</option>
-              <option value="events">Events</option>
-              <option value="services">Services</option>
-              <option value="realEstateListings">Real Estate Listings</option>
-              <option value="learningItems">Learning / Courses</option>
-              <option value="liveActivity">Live Activity / Hotspots</option>
-              <option value="rewards">Rewards / Coupons</option>
-              <option value="challenges">Challenges</option>
-              <option value="creators">Creators</option>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">კოლექცია
+            <select id="adminContentCollection" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+              <option value="places">ადგილები / რუკის წერტილები</option>
+              <option value="businesses">ბიზნესები</option>
+              <option value="groups">ჯგუფები</option>
+              <option value="events">ღონისძიებები</option>
+              <option value="services">სერვისები</option>
+              <option value="realEstateListings">უძრავი ქონების განცხადებები</option>
+              <option value="learningItems">სწავლა / კურსები</option>
+              <option value="liveActivity">ცოცხალი აქტივობა / ცხელი წერტილები</option>
+              <option value="rewards">ჯილდოები / კუპონები</option>
+              <option value="challenges">გამოწვევები</option>
+              <option value="creators">შემქმნელები</option>
             </select>
           </label>
-          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Title / Name
-            <input id="adminContentTitle" required placeholder="Example: Tbilisi Photography Group" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">სათაური / დასახელება
+            <input id="adminContentTitle" required placeholder="მაგ.: თბილისის ფოტოგრაფიის ჯგუფი" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
           </label>
-          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Description
-            <textarea id="adminContentDesc" rows="4" placeholder="Short real description..." style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);resize:vertical"></textarea>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">აღწერა
+            <textarea id="adminContentDesc" rows="4" placeholder="მოკლე რეალური აღწერა…" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);resize:vertical"></textarea>
           </label>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <input id="adminContentCity" placeholder="City / location optional" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-            <input id="adminContentCategory" placeholder="Category optional" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-            <select id="adminPlaceCategory" style="display:none;grid-column:2;grid-row:1;padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <input id="adminContentCity" placeholder="ქალაქი / ლოკაცია (არასავალდებულო)" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+            <input id="adminContentCategory" placeholder="კატეგორია (არასავალდებულო)" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+            <select id="adminPlaceCategory" style="display:none;grid-column:2;grid-row:1;padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
               <option value="">აირჩიე კატეგორია</option>
             </select>
           </div>
-          <select id="adminPlaceSubcategory" disabled style="display:none;padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+          <select id="adminPlaceSubcategory" disabled style="display:none;padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             <option value="">აირჩიე ქვეკატეგორია</option>
           </select>
           <div id="adminPlaceIconWrap" style="display:none;align-items:center;gap:10px;padding:6px 0">
             <span id="adminPlaceIconPreview" style="font-size:1.5rem;min-width:2rem;text-align:center;line-height:1"></span>
-            <input id="adminPlaceIcon" type="text" placeholder="Icon emoji" oninput="this.dataset.userEdited='1';var p=document.getElementById('adminPlaceIconPreview');if(p)p.textContent=this.value.trim()" style="width:72px;text-align:center;font-size:1.1rem;padding:7px 8px;border-radius:8px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-            <span style="font-size:.73rem;color:#64748b">auto-filled · override if needed</span>
+            <input id="adminPlaceIcon" type="text" placeholder="აიქონი (ემოჯი)" oninput="this.dataset.userEdited='1';var p=document.getElementById('adminPlaceIconPreview');if(p)p.textContent=this.value.trim()" style="width:72px;text-align:center;font-size:1.1rem;padding:7px 8px;border-radius:8px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+            <span style="font-size:.73rem;color:var(--ds-text-3)">ავტომატურად ივსება · საჭიროებისას შეცვალე</span>
           </div>
           <div style="display:flex;gap:8px;align-items:center">
-            <input id="adminContentImage" placeholder="Image URL (optional)" style="flex:1;padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-            <button type="button" class="btn btn-ghost btn-sm" onclick="adminTestImageUrl()" title="Test image URL" style="white-space:nowrap;padding:11px 14px"><i class="fas fa-eye"></i> Test</button>
-            <label id="adminCsUploadLabel" for="adminCsImageFile" class="btn btn-ghost btn-sm" style="cursor:pointer;white-space:nowrap;padding:11px 14px"><i class="fas fa-upload"></i> Upload</label>
+            <input id="adminContentImage" placeholder="სურათის URL (არასავალდებულო)" style="flex:1;padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+            <button type="button" class="btn btn-ghost btn-sm" onclick="adminTestImageUrl()" title="Test image URL" style="white-space:nowrap;padding:11px 14px"><i class="fas fa-eye"></i> ტესტი</button>
+            <label id="adminCsUploadLabel" for="adminCsImageFile" class="btn btn-ghost btn-sm" style="cursor:pointer;white-space:nowrap;padding:11px 14px"><i class="fas fa-upload"></i> ატვირთვა</label>
             <input type="file" id="adminCsImageFile" accept="image/*" style="display:none">
           </div>
           <div id="adminImgPreviewWrap" style="display:none">
-            <div class="admin-img-ph" style="display:none;width:80px;height:56px;border-radius:8px;background:#1e293b;align-items:center;justify-content:center;font-size:1.5rem">📍</div>
+            <div class="admin-img-ph" style="display:none;width:80px;height:56px;border-radius:8px;background:var(--ds-surface-2);align-items:center;justify-content:center;font-size:1.5rem">📍</div>
             <img style="max-height:80px;max-width:100%;border-radius:8px;object-fit:cover;display:block">
           </div>
           <!-- Google Place ID — places only -->
           <div id="adminGooglePlaceWrap" style="display:none;border-top:1px solid rgba(99,102,241,.18);margin-top:4px;padding-top:12px">
             <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#818cf8;margin-bottom:8px"><i class="fab fa-google"></i> Google Places</div>
             <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-              <input id="adminGooglePlaceIdInput" type="text" placeholder="Google Place ID (e.g. ChIJx…)" style="flex:1;padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.82rem">
-              <button type="button" class="btn btn-ghost btn-sm" onclick="adminFetchGooglePreview()" style="white-space:nowrap"><i class="fas fa-cloud-download-alt"></i> Preview</button>
+              <input id="adminGooglePlaceIdInput" type="text" placeholder="Google Place ID (მაგ. ChIJx…)" style="flex:1;padding:10px 12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);font-size:.82rem">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="adminFetchGooglePreview()" style="white-space:nowrap"><i class="fas fa-cloud-download-alt"></i> გადახედვა</button>
             </div>
             <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-              <input id="adminGoogleSearchInput" type="text" placeholder="Search Google (e.g. Fabrika Tbilisi)" style="flex:1;padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.82rem">
-              <button type="button" class="btn btn-ghost btn-sm" onclick="adminSearchGooglePlace()" style="white-space:nowrap"><i class="fas fa-search"></i> Search</button>
+              <input id="adminGoogleSearchInput" type="text" placeholder="ძებნა Google-ში (მაგ. Fabrika Tbilisi)" style="flex:1;padding:10px 12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);font-size:.82rem">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="adminSearchGooglePlace()" style="white-space:nowrap"><i class="fas fa-search"></i> ძებნა</button>
             </div>
             <div id="adminGooglePreviewPanel" style="display:none;padding:10px 14px;border:1px solid rgba(99,102,241,.3);border-radius:10px;background:rgba(99,102,241,.06);font-size:.82rem;line-height:1.6"></div>
             <div id="adminGoogleSearchResults" style="display:none;border:1px solid rgba(255,255,255,.08);border-radius:10px;overflow:hidden;margin-top:4px"></div>
           </div>
           <!-- Extended fields — shown per collection type via JS -->
           <div id="adminExtFields" style="display:grid;gap:12px"></div>
-          <button class="btn btn-primary btn-sm" type="submit" style="justify-self:start"><i class="fas fa-plus"></i> Create real item</button>
+          <button class="btn btn-primary btn-sm" type="submit" style="justify-self:start"><i class="fas fa-plus"></i> რეალური ერთეულის შექმნა</button>
         </form>
         <!-- Live preview after create -->
-        <div id="adminContentPreview" style="display:none;margin-top:18px;padding:16px;border-radius:14px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25)">
-          <div style="font-weight:800;color:#10e0a0;margin-bottom:6px"><i class="fas fa-check-circle"></i> Created successfully</div>
+        <div id="adminContentPreview" style="display:none;margin-top:18px;padding:16px;border-radius:14px;background:rgba(var(--ds-accent-rgb),0.08);border:1px solid rgba(var(--ds-accent-rgb),0.25)">
+          <div style="font-weight:800;color:var(--ds-accent);margin-bottom:6px"><i class="fas fa-check-circle"></i> წარმატებით შეიქმნა</div>
           <div id="adminContentPreviewBody" style="font-size:.85rem;color:var(--ts,#94a3b8);line-height:1.6"></div>
         </div>
       </div>
       <!-- JSON Bulk Import -->
       <div class="panel" style="max-width:860px;margin-top:18px">
-        <div class="panel-hdr"><div class="panel-title">JSON Bulk Import</div><div class="panel-sub">Paste a JSON array of objects to batch-create items in a collection.</div></div>
+        <div class="panel-hdr"><div class="panel-title">JSON მასობრივი იმპორტი</div><div class="panel-sub">ჩასვი JSON მასივი ობიექტებით, რომ კოლექციაში ერთდროულად რამდენიმე ერთეული შეიქმნას.</div></div>
         <div style="display:grid;gap:12px;padding:8px 0 4px">
-          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Collection
-            <select id="adminBulkCollection" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-              <option value="places">Places / Map locations</option>
-              <option value="businesses">Businesses</option>
-              <option value="groups">Groups</option>
-              <option value="events">Events</option>
-              <option value="services">Services</option>
-              <option value="realEstateListings">Real Estate Listings</option>
-              <option value="learningItems">Learning / Courses</option>
-              <option value="liveActivity">Live Activity / Hotspots</option>
-              <option value="rewards">Rewards / Coupons</option>
-              <option value="challenges">Challenges</option>
-              <option value="creators">Creators</option>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">კოლექცია
+            <select id="adminBulkCollection" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+              <option value="places">ადგილები / რუკის წერტილები</option>
+              <option value="businesses">ბიზნესები</option>
+              <option value="groups">ჯგუფები</option>
+              <option value="events">ღონისძიებები</option>
+              <option value="services">სერვისები</option>
+              <option value="realEstateListings">უძრავი ქონების განცხადებები</option>
+              <option value="learningItems">სწავლა / კურსები</option>
+              <option value="liveActivity">ცოცხალი აქტივობა / ცხელი წერტილები</option>
+              <option value="rewards">ჯილდოები / კუპონები</option>
+              <option value="challenges">გამოწვევები</option>
+              <option value="creators">შემქმნელები</option>
             </select>
           </label>
-          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">JSON Array
-            <textarea id="adminBulkJson" rows="6" placeholder='[{"name":"Tbilisi Garden","city":"Tbilisi","category":"park"},...]' style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);resize:vertical;font-family:monospace;font-size:.8rem"></textarea>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">JSON მასივი
+            <textarea id="adminBulkJson" rows="6" placeholder='[{"name":"Tbilisi Garden","city":"Tbilisi","category":"park"},...]' style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);resize:vertical;font-family:monospace;font-size:.8rem"></textarea>
           </label>
-          <div id="adminBulkValidation" style="font-size:.8rem;color:#94a3b8;min-height:1.4em"></div>
-          <button class="btn btn-primary btn-sm" onclick="adminBulkImport()" style="justify-self:start"><i class="fas fa-upload"></i> Import items</button>
-          <div id="adminBulkResult" style="display:none;padding:12px;border-radius:10px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);font-size:.85rem;color:#10e0a0"></div>
+          <div id="adminBulkValidation" style="font-size:.8rem;color:var(--ds-text-3);min-height:1.4em"></div>
+          <button class="btn btn-primary btn-sm" onclick="adminBulkImport()" style="justify-self:start"><i class="fas fa-upload"></i> ერთეულების იმპორტი</button>
+          <div id="adminBulkResult" style="display:none;padding:12px;border-radius:10px;background:rgba(var(--ds-accent-rgb),0.08);border:1px solid rgba(var(--ds-accent-rgb),0.2);font-size:.85rem;color:var(--ds-accent)"></div>
           <div id="adminDeletePlacesWrap" style="display:none;padding-top:10px;border-top:1px solid rgba(239,68,68,0.2)">
             <button id="adminDeletePlacesBtn" class="btn btn-sm" onclick="deleteAllPlaces()" style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.35)"><i class="fas fa-trash-alt"></i> ყველა ადგილის წაშლა</button>
-            <div id="adminDeletePlacesProgress" style="font-size:.8rem;color:#94a3b8;margin-top:6px;min-height:1.2em"></div>
+            <div id="adminDeletePlacesProgress" style="font-size:.8rem;color:var(--ds-text-3);margin-top:6px;min-height:1.2em"></div>
           </div>
           <div id="adminCheckImagesWrap" style="display:none;padding-top:10px;border-top:1px solid rgba(99,102,241,0.2);margin-top:8px">
             <button id="adminCheckImagesBtn" class="btn btn-sm" onclick="checkBrokenPlaceImages()" style="background:rgba(99,102,241,0.12);color:#818cf8;border:1px solid rgba(99,102,241,0.35)"><i class="fas fa-image"></i> ფოტოების შემოწმება</button>
-            <div id="adminCheckImagesProgress" style="font-size:.8rem;color:#94a3b8;margin-top:6px;min-height:1.2em"></div>
+            <div id="adminCheckImagesProgress" style="font-size:.8rem;color:var(--ds-text-3);margin-top:6px;min-height:1.2em"></div>
             <div id="adminBrokenImagesPanel" style="display:none;margin-top:10px;max-height:420px;overflow-y:auto"></div>
           </div>
         </div>
@@ -590,27 +628,27 @@
       <!-- Content Manager: list, activate/deactivate, delete -->
       <div class="panel" style="max-width:860px;margin-top:18px">
         <div class="panel-hdr">
-          <div><div class="panel-title">Content Manager</div><div class="panel-sub">View, activate/deactivate, and delete items in any collection</div></div>
-          <button class="btn btn-ghost btn-sm" onclick="loadContentList()"><i class="fas fa-sync-alt"></i> Refresh</button>
+          <div><div class="panel-title">კონტენტის მენეჯერი</div><div class="panel-sub">ნახე, ჩართე/გამორთე და წაშალე ერთეულები ნებისმიერ კოლექციაში</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="loadContentList()"><i class="fas fa-sync-alt"></i> განახლება</button>
         </div>
         <div style="display:flex;gap:10px;padding:8px 0 12px;align-items:center">
-          <select id="manageContentCol" style="flex:1;padding:10px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-            <option value="places">Places</option>
-            <option value="businesses">Businesses</option>
-            <option value="groups">Groups</option>
-            <option value="events">Events</option>
-            <option value="services">Services</option>
-            <option value="realEstateListings">Real Estate Listings</option>
-            <option value="learningItems">Learning / Courses</option>
-            <option value="liveActivity">Live Activity</option>
-            <option value="creators">Creators</option>
-            <option value="challenges">Challenges</option>
-            <option value="rewards">Rewards</option>
+          <select id="manageContentCol" style="flex:1;padding:10px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+            <option value="places">ადგილები</option>
+            <option value="businesses">ბიზნესები</option>
+            <option value="groups">ჯგუფები</option>
+            <option value="events">ღონისძიებები</option>
+            <option value="services">სერვისები</option>
+            <option value="realEstateListings">უძრავი ქონების განცხადებები</option>
+            <option value="learningItems">სწავლა / კურსები</option>
+            <option value="liveActivity">ცოცხალი აქტივობა</option>
+            <option value="creators">შემქმნელები</option>
+            <option value="challenges">გამოწვევები</option>
+            <option value="rewards">ჯილდოები</option>
           </select>
-          <button class="btn btn-primary btn-sm" onclick="loadContentList()"><i class="fas fa-search"></i> Load</button>
+          <button class="btn btn-primary btn-sm" onclick="loadContentList()"><i class="fas fa-search"></i> ჩატვირთვა</button>
         </div>
         <div id="manageContentList" style="min-height:60px">
-          <div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">Select a collection and click Load.</div>
+          <div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">აირჩიე კოლექცია და დააჭირე „ჩატვირთვას".</div>
         </div>
       </div>
     </section>
@@ -618,81 +656,81 @@
     <!-- ─── PLACE EDITING ─── -->
     <section class="sec" id="sec-placeedit">
       <div class="ph">
-        <div><div class="ph-title" data-i18n="adm_sec_placeedit">Place Editing</div><div class="ph-sub">Browse, filter and edit all uploaded map places.</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_placeedit">ადგილების რედაქტირება</div><div class="ph-sub">დაათვალიერე, გაფილტრე და დაარედაქტირე რუკაზე ატვირთული ყველა ადგილი.</div></div>
       </div>
       <div class="panel" style="max-width:960px">
         <div class="panel-hdr">
-          <div><div class="panel-title">Filters</div></div>
-          <button class="btn btn-primary btn-sm" onclick="loadPlacesForEdit()"><i class="fas fa-sync-alt"></i> Load / Refresh</button>
+          <div><div class="panel-title">ფილტრები</div></div>
+          <button class="btn btn-primary btn-sm" onclick="loadPlacesForEdit()"><i class="fas fa-sync-alt"></i> ჩატვირთვა / განახლება</button>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;padding:8px 0 4px;align-items:center">
-          <select id="peFilterCity" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);min-width:140px">
-            <option value="">All Cities</option>
-            <option value="Tbilisi">Tbilisi</option>
-            <option value="Batumi">Batumi</option>
-            <option value="Kutaisi">Kutaisi</option>
-            <option value="Mestia">Mestia</option>
-            <option value="Sighnaghi">Sighnaghi</option>
-            <option value="Kazbegi">Kazbegi</option>
-            <option value="Borjomi">Borjomi</option>
-            <option value="Telavi">Telavi</option>
+          <select id="peFilterCity" style="padding:10px 12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);min-width:140px">
+            <option value="">ყველა ქალაქი</option>
+            <option value="Tbilisi">თბილისი</option>
+            <option value="Batumi">ბათუმი</option>
+            <option value="Kutaisi">ქუთაისი</option>
+            <option value="Mestia">მესტია</option>
+            <option value="Sighnaghi">სიღნაღი</option>
+            <option value="Kazbegi">ყაზბეგი</option>
+            <option value="Borjomi">ბორჯომი</option>
+            <option value="Telavi">თელავი</option>
           </select>
-          <select id="peFilterCat" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);min-width:160px">
-            <option value="">All Categories</option>
+          <select id="peFilterCat" style="padding:10px 12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);min-width:160px">
+            <option value="">ყველა კატეგორია</option>
           </select>
-          <input id="peFilterSearch" type="text" placeholder="Search by name…" style="flex:1;min-width:160px;padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)" onkeydown="if(event.key==='Enter')loadPlacesForEdit()">
-          <button class="btn btn-primary btn-sm" onclick="loadPlacesForEdit()"><i class="fas fa-search"></i> Load</button>
+          <input id="peFilterSearch" type="text" placeholder="ძებნა დასახელებით…" style="flex:1;min-width:160px;padding:10px 12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)" onkeydown="if(event.key==='Enter')loadPlacesForEdit()">
+          <button class="btn btn-primary btn-sm" onclick="loadPlacesForEdit()"><i class="fas fa-search"></i> ჩატვირთვა</button>
         </div>
-        <div id="peStatus" style="font-size:.8rem;color:#64748b;padding:4px 0 8px;min-height:1.4em"></div>
+        <div id="peStatus" style="font-size:.8rem;color:var(--ds-text-3);padding:4px 0 8px;min-height:1.4em"></div>
         <div id="pePlacesList" style="min-height:80px">
-          <div style="text-align:center;padding:32px;color:#64748b;font-size:.85rem">Set filters and click Load.</div>
+          <div style="text-align:center;padding:32px;color:var(--ds-text-3);font-size:.85rem">დააყენე ფილტრები და დააჭირე „ჩატვირთვას".</div>
         </div>
       </div>
       <!-- Inline edit panel -->
       <div id="pePlaceEditPanel" style="display:none;max-width:960px;margin-top:14px" class="panel">
         <div class="panel-hdr">
-          <div><div class="panel-title" id="pePanelTitle">Edit Place</div></div>
-          <button class="btn btn-ghost btn-sm" onclick="closePlaceEditPanel()"><i class="fas fa-times"></i> Close</button>
+          <div><div class="panel-title" id="pePanelTitle">ადგილის რედაქტირება</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="closePlaceEditPanel()"><i class="fas fa-times"></i> დახურვა</button>
         </div>
         <div style="display:grid;gap:14px;padding:4px 0 8px">
           <input type="hidden" id="peEditId">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Name
-              <input id="peEditName" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">დასახელება
+              <input id="peEditName" style="padding:10px 12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             </label>
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">City
-              <select id="peEditCity" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-                <option value="">— select —</option>
-                <option value="Tbilisi">Tbilisi</option>
-                <option value="Batumi">Batumi</option>
-                <option value="Kutaisi">Kutaisi</option>
-                <option value="Mestia">Mestia</option>
-                <option value="Sighnaghi">Sighnaghi</option>
-                <option value="Kazbegi">Kazbegi</option>
-                <option value="Borjomi">Borjomi</option>
-                <option value="Telavi">Telavi</option>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">ქალაქი
+              <select id="peEditCity" style="padding:10px 12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+                <option value="">— აირჩიე —</option>
+                <option value="Tbilisi">თბილისი</option>
+                <option value="Batumi">ბათუმი</option>
+                <option value="Kutaisi">ქუთაისი</option>
+                <option value="Mestia">მესტია</option>
+                <option value="Sighnaghi">სიღნაღი</option>
+                <option value="Kazbegi">ყაზბეგი</option>
+                <option value="Borjomi">ბორჯომი</option>
+                <option value="Telavi">თელავი</option>
               </select>
             </label>
           </div>
-          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Description
-            <textarea id="peEditDesc" rows="3" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);resize:vertical"></textarea>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">აღწერა
+            <textarea id="peEditDesc" rows="3" style="padding:10px 12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);resize:vertical"></textarea>
           </label>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Category
-              <select id="peEditCat" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)" onchange="peLoadSubcats()">
-                <option value="">— select —</option>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">კატეგორია
+              <select id="peEditCat" style="padding:10px 12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)" onchange="peLoadSubcats()">
+                <option value="">— აირჩიე —</option>
               </select>
             </label>
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Subcategory
-              <select id="peEditSubcat" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-                <option value="">— none —</option>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">ქვეკატეგორია
+              <select id="peEditSubcat" style="padding:10px 12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+                <option value="">— არცერთი —</option>
               </select>
             </label>
           </div>
           <div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;align-items:start">
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Image
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">სურათი
               <div style="display:flex;gap:7px;align-items:center">
-                <input id="peEditImage" placeholder="https://… ან ატვირთეთ →" oninput="peUpdateImagePreview()" style="flex:1;padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+                <input id="peEditImage" placeholder="https://… ან ატვირთეთ →" oninput="peUpdateImagePreview()" style="flex:1;padding:10px 12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
                 <label id="peUploadLabel" for="peImageFile" class="btn btn-ghost btn-sm" style="cursor:pointer;white-space:nowrap;padding:10px 13px;flex-shrink:0"><i class="fas fa-upload"></i> ატვირთვა</label>
                 <input type="file" id="peImageFile" accept="image/*" style="display:none">
               </div>
@@ -700,31 +738,31 @@
                 <img id="peImagePreview" style="max-height:90px;max-width:100%;border-radius:8px;object-fit:cover;display:block">
               </div>
             </label>
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Icon Emoji
-              <input id="peEditIcon" placeholder="🏛️" maxlength="8" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);text-align:center;font-size:1.3rem">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">აიქონი (ემოჯი)
+              <input id="peEditIcon" placeholder="🏛️" maxlength="8" style="padding:10px 12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);text-align:center;font-size:1.3rem">
             </label>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Latitude
-              <input id="peEditLat" type="number" step="any" placeholder="41.693…" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">განედი
+              <input id="peEditLat" type="number" step="any" placeholder="41.693…" style="padding:10px 12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             </label>
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Longitude
-              <input id="peEditLng" type="number" step="any" placeholder="44.801…" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">გრძედი
+              <input id="peEditLng" type="number" step="any" placeholder="44.801…" style="padding:10px 12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             </label>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Website
-              <input id="peEditWebsite" placeholder="https://…" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">ვებგვერდი
+              <input id="peEditWebsite" placeholder="https://…" style="padding:10px 12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             </label>
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">Address
-              <input id="peEditAddress" placeholder="Street, City" style="padding:10px 12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:700">მისამართი
+              <input id="peEditAddress" placeholder="ქუჩა, ქალაქი" style="padding:10px 12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             </label>
           </div>
           <div id="peHoursWidget"></div>
           <div style="display:flex;gap:10px;padding-top:4px;flex-wrap:wrap;align-items:center">
-            <button class="btn btn-primary btn-sm" onclick="savePlaceEditPanel()"><i class="fas fa-save"></i> Save Changes</button>
-            <button class="btn btn-ghost btn-sm" onclick="closePlaceEditPanel()"><i class="fas fa-times"></i> Cancel</button>
-            <button class="btn btn-sm" onclick="deletePlaceFromEditPanel()" style="margin-left:auto;background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.35)"><i class="fas fa-trash-alt"></i> Delete Place</button>
+            <button class="btn btn-primary btn-sm" onclick="savePlaceEditPanel()"><i class="fas fa-save"></i> ცვლილებების შენახვა</button>
+            <button class="btn btn-ghost btn-sm" onclick="closePlaceEditPanel()"><i class="fas fa-times"></i> გაუქმება</button>
+            <button class="btn btn-sm" onclick="deletePlaceFromEditPanel()" style="margin-left:auto;background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.35)"><i class="fas fa-trash-alt"></i> ადგილის წაშლა</button>
           </div>
           <div id="peEditStatus" style="font-size:.82rem;min-height:1.2em"></div>
         </div>
@@ -734,54 +772,54 @@
     <!-- ─── PLACE CATEGORIES ─── -->
     <section class="sec" id="sec-placecat">
       <div class="ph">
-        <div><div class="ph-title" data-i18n="adm_sec_placecat">Place Categories</div><div class="ph-sub">Manage map place categories — icons, colours, labels. Changes apply to map markers immediately.</div></div>
-        <button class="btn-primary" onclick="seedDefaultPlaceCategories()" style="font-size:.78rem;padding:8px 16px;white-space:nowrap"><i class="fas fa-seedling" style="margin-right:6px"></i>Seed 25 Defaults</button>
+        <div><div class="ph-title" data-i18n="adm_sec_placecat">ადგილის კატეგორიები</div><div class="ph-sub">მართე რუკის ადგილების კატეგორიები — აიქონები, ფერები, წარწერები. ცვლილებები მაშინვე აისახება რუკის მარკერებზე.</div></div>
+        <button class="btn-primary" onclick="seedDefaultPlaceCategories()" style="font-size:.78rem;padding:8px 16px;white-space:nowrap"><i class="fas fa-seedling" style="margin-right:6px"></i>25 ნაგულისხმევის ჩატვირთვა</button>
       </div>
       <div style="display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start;max-width:1100px">
         <!-- FORM -->
         <div class="panel">
-          <div class="panel-hdr"><div class="panel-title" id="pcatFormTitle">Add Category</div></div>
+          <div class="panel-hdr"><div class="panel-title" id="pcatFormTitle">კატეგორიის დამატება</div></div>
           <form id="pcatForm" onsubmit="savePlaceCategory(event)" style="display:grid;gap:12px;padding:6px 0 2px">
-            <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">ID / Slug
-              <input id="pcatId" required placeholder="e.g. cafe" maxlength="40" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.85rem">
+            <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">ID / slug
+              <input id="pcatId" required placeholder="მაგ. cafe" maxlength="40" style="padding:10px;border-radius:9px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);font-size:.85rem">
             </label>
-            <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">Label (Georgian)
-              <input id="pcatLabelKa" required placeholder="e.g. კაფე / ყავა" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.85rem">
+            <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">წარწერა (ქართული)
+              <input id="pcatLabelKa" required placeholder="e.g. კაფე / ყავა" style="padding:10px;border-radius:9px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);font-size:.85rem">
             </label>
-            <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">Label (English)
-              <input id="pcatLabelEn" placeholder="e.g. Cafe / Coffee" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.85rem">
+            <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">წარწერა (ინგლისური)
+              <input id="pcatLabelEn" placeholder="მაგ. კაფე / ყავა" style="padding:10px;border-radius:9px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);font-size:.85rem">
             </label>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-              <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">Icon (emoji)
+              <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">აიქონი (ემოჯი)
                 <div style="display:flex;gap:8px;align-items:center">
-                  <div id="pcatIconPreview" style="font-size:2rem;width:52px;height:44px;display:flex;align-items:center;justify-content:center;background:#0f172a;border-radius:9px;border:1px solid rgba(255,255,255,.15);flex-shrink:0">📍</div>
-                  <input id="pcatIcon" placeholder="emoji ჩასვით…" maxlength="20" oninput="var p=document.getElementById('pcatIconPreview');p.textContent=this.value.trim()||'📍'" style="flex:1;padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:1.3rem;text-align:center">
+                  <div id="pcatIconPreview" style="font-size:2rem;width:52px;height:44px;display:flex;align-items:center;justify-content:center;background:var(--ds-surface);border-radius:9px;border:1px solid rgba(255,255,255,.15);flex-shrink:0">📍</div>
+                  <input id="pcatIcon" placeholder="emoji ჩასვით…" maxlength="20" oninput="var p=document.getElementById('pcatIconPreview');p.textContent=this.value.trim()||'📍'" style="flex:1;padding:10px;border-radius:9px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);font-size:1.3rem;text-align:center">
                 </div>
-                <span style="font-size:.7rem;color:#64748b">Google-ზე მოძებნეთ emoji → დააკოპირეთ → ჩასვით</span>
+                <span style="font-size:.7rem;color:var(--ds-text-3)">Google-ზე მოძებნეთ emoji → დააკოპირეთ → ჩასვით</span>
               </label>
-              <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">Colour
-                <input id="pcatColor" type="color" value="#3498db" style="padding:4px 6px;height:44px;border-radius:9px;background:#111827;border:1px solid rgba(255,255,255,.12);cursor:pointer;width:100%">
+              <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">ფერი
+                <input id="pcatColor" type="color" value="#3498db" style="padding:4px 6px;height:44px;border-radius:9px;background:var(--ds-surface);border:1px solid rgba(255,255,255,.12);cursor:pointer;width:100%">
               </label>
             </div>
-            <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">Sort Order
-              <input id="pcatSort" type="number" value="100" min="0" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.85rem">
+            <label style="display:grid;gap:5px;color:var(--ts);font-size:.8rem;font-weight:700">დალაგების რიგი
+              <input id="pcatSort" type="number" value="100" min="0" style="padding:10px;border-radius:9px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);font-size:.85rem">
             </label>
             <label style="display:flex;align-items:center;gap:10px;color:var(--ts);font-size:.8rem;font-weight:700;cursor:pointer">
-              <input id="pcatActive" type="checkbox" checked style="width:16px;height:16px"> Active (visible on map)
+              <input id="pcatActive" type="checkbox" checked style="width:16px;height:16px"> აქტიური (ჩანს რუკაზე)
             </label>
             <div style="display:flex;gap:10px;margin-top:4px">
-              <button type="submit" class="btn-primary" style="flex:1;padding:10px">Save Category</button>
-              <button type="button" id="pcatCancelBtn" onclick="resetPcatForm()" style="display:none;padding:10px 16px;border-radius:9px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#f8fafc;cursor:pointer;font-size:.82rem">Cancel</button>
+              <button type="submit" class="btn-primary" style="flex:1;padding:10px">კატეგორიის შენახვა</button>
+              <button type="button" id="pcatCancelBtn" onclick="resetPcatForm()" style="display:none;padding:10px 16px;border-radius:9px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:var(--ds-text);cursor:pointer;font-size:.82rem">გაუქმება</button>
             </div>
           </form>
         </div>
         <!-- LIST -->
         <div class="panel">
           <div class="panel-hdr" style="display:flex;justify-content:space-between;align-items:center">
-            <div class="panel-title">Categories <span id="pcatCount" style="color:var(--ts);font-weight:400;font-size:.82rem"></span></div>
+            <div class="panel-title">კატეგორიები <span id="pcatCount" style="color:var(--ts);font-weight:400;font-size:.82rem"></span></div>
           </div>
           <div id="pcatList" style="min-height:80px">
-            <div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">Loading…</div>
+            <div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">იტვირთება…</div>
           </div>
         </div>
       </div>
@@ -790,49 +828,49 @@
     <!-- ─── TRANSFER OWNERSHIP ─── -->
     <section class="sec" id="sec-ownership">
       <div class="ph">
-        <div><div class="ph-title" data-i18n="adm_sec_ownership">Transfer Ownership</div><div class="ph-sub">Assign a business or place to a user so they can manage posts, description, logo, photos, and story moderation.</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_ownership">მფლობელობის გადაცემა</div><div class="ph-sub">მიაკუთვნე ბიზნესი ან ადგილი მომხმარებელს, რომ მან შეძლოს პოსტების, აღწერის, ლოგოს, ფოტოებისა და სთორების მართვა.</div></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;max-width:1100px">
 
         <!-- LEFT: Find entity -->
         <div class="panel">
-          <div class="panel-hdr"><div class="panel-title">1. Select Business or Place</div></div>
+          <div class="panel-hdr"><div class="panel-title">1. აირჩიე ბიზნესი ან ადგილი</div></div>
           <div style="display:grid;gap:10px;padding:4px 0">
             <div style="display:grid;grid-template-columns:1fr auto;gap:8px">
-              <input id="ownershipSearchInput" placeholder="Search by name…" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.85rem" oninput="ownershipSearchEntity(this.value)">
-              <select id="ownershipEntityType" onchange="ownershipSearchEntity(document.getElementById('ownershipSearchInput').value)" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.82rem">
-                <option value="business">Businesses</option>
-                <option value="place">Places</option>
+              <input id="ownershipSearchInput" placeholder="ძებნა დასახელებით…" style="padding:10px;border-radius:9px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);font-size:.85rem" oninput="ownershipSearchEntity(this.value)">
+              <select id="ownershipEntityType" onchange="ownershipSearchEntity(document.getElementById('ownershipSearchInput').value)" style="padding:10px;border-radius:9px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);font-size:.82rem">
+                <option value="business">ბიზნესები</option>
+                <option value="place">ადგილები</option>
               </select>
             </div>
             <div id="ownershipEntityResults" style="display:grid;gap:6px;max-height:360px;overflow-y:auto">
-              <div style="text-align:center;padding:20px;color:#64748b;font-size:.82rem">Type a name to search…</div>
+              <div style="text-align:center;padding:20px;color:var(--ds-text-3);font-size:.82rem">აკრიფე დასახელება ძებნისთვის…</div>
             </div>
-            <div id="ownershipSelectedEntity" style="display:none;padding:10px;border-radius:9px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3)">
-              <div style="font-size:.72rem;color:#10b981;font-weight:700;margin-bottom:4px">SELECTED</div>
-              <div id="ownershipSelectedEntityName" style="font-weight:700;color:#f8fafc;font-size:.88rem"></div>
-              <div id="ownershipSelectedEntityMeta" style="font-size:.72rem;color:#94a3b8;margin-top:2px"></div>
+            <div id="ownershipSelectedEntity" style="display:none;padding:10px;border-radius:9px;background:rgba(var(--ds-accent-rgb),.1);border:1px solid rgba(var(--ds-accent-rgb),.3)">
+              <div style="font-size:.72rem;color:var(--ds-accent-ink);font-weight:700;margin-bottom:4px">არჩეული</div>
+              <div id="ownershipSelectedEntityName" style="font-weight:700;color:var(--ds-text);font-size:.88rem"></div>
+              <div id="ownershipSelectedEntityMeta" style="font-size:.72rem;color:var(--ds-text-3);margin-top:2px"></div>
             </div>
           </div>
         </div>
 
         <!-- RIGHT: Find user + transfer -->
         <div class="panel">
-          <div class="panel-hdr"><div class="panel-title">2. Select New Owner</div></div>
+          <div class="panel-hdr"><div class="panel-title">2. აირჩიე ახალი მფლობელი</div></div>
           <div style="display:grid;gap:10px;padding:4px 0">
-            <input id="ownershipUserSearch" placeholder="Search user by name or email…" style="padding:10px;border-radius:9px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);font-size:.85rem" oninput="ownershipSearchUser(this.value)">
+            <input id="ownershipUserSearch" placeholder="მოძებნე მომხმარებელი სახელით ან ელფოსტით…" style="padding:10px;border-radius:9px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);font-size:.85rem" oninput="ownershipSearchUser(this.value)">
             <div id="ownershipUserResults" style="display:grid;gap:6px;max-height:280px;overflow-y:auto">
-              <div style="text-align:center;padding:20px;color:#64748b;font-size:.82rem">Type a name or email to search…</div>
+              <div style="text-align:center;padding:20px;color:var(--ds-text-3);font-size:.82rem">აკრიფე სახელი ან ელფოსტა ძებნისთვის…</div>
             </div>
             <div id="ownershipSelectedUser" style="display:none;padding:10px;border-radius:9px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3)">
-              <div style="font-size:.72rem;color:#3b82f6;font-weight:700;margin-bottom:4px">SELECTED USER</div>
-              <div id="ownershipSelectedUserName" style="font-weight:700;color:#f8fafc;font-size:.88rem"></div>
-              <div id="ownershipSelectedUserEmail" style="font-size:.72rem;color:#94a3b8;margin-top:2px"></div>
+              <div style="font-size:.72rem;color:#3b82f6;font-weight:700;margin-bottom:4px">არჩეული მომხმარებელი</div>
+              <div id="ownershipSelectedUserName" style="font-weight:700;color:var(--ds-text);font-size:.88rem"></div>
+              <div id="ownershipSelectedUserEmail" style="font-size:.72rem;color:var(--ds-text-3);margin-top:2px"></div>
             </div>
             <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:12px;margin-top:4px">
-              <div id="ownershipSummary" style="font-size:.78rem;color:#64748b;margin-bottom:10px">Select a business/place and a user to continue.</div>
+              <div id="ownershipSummary" style="font-size:.78rem;color:var(--ds-text-3);margin-bottom:10px">გასაგრძელებლად აირჩიე ბიზნესი/ადგილი და მომხმარებელი.</div>
               <button class="btn-primary" id="ownershipTransferBtn" onclick="executeOwnershipTransfer()" disabled style="width:100%;padding:11px;opacity:.5;cursor:not-allowed">
-                <i class="fas fa-handshake" style="margin-right:8px"></i> Transfer Ownership
+                <i class="fas fa-handshake" style="margin-right:8px"></i> მფლობელობის გადაცემა
               </button>
             </div>
           </div>
@@ -842,9 +880,9 @@
 
       <!-- Transfer log -->
       <div class="panel" style="max-width:1100px;margin-top:16px">
-        <div class="panel-hdr"><div class="panel-title">Recent Transfers</div></div>
+        <div class="panel-hdr"><div class="panel-title">ბოლო გადაცემები</div></div>
         <div id="ownershipLog" style="padding:4px 0">
-          <div style="text-align:center;padding:20px;color:#64748b;font-size:.82rem">No transfers yet this session.</div>
+          <div style="text-align:center;padding:20px;color:var(--ds-text-3);font-size:.82rem">ამ სესიაზე გადაცემა ჯერ არ ყოფილა.</div>
         </div>
       </div>
     </section>
@@ -852,9 +890,9 @@
     <!-- ─── CHALLENGE STUDIO ─── -->
     <section class="sec" id="sec-challenges">
       <div class="ph">
-        <div><div class="ph-title" data-i18n="adm_sec_challenges">Challenge &amp; Badge Studio</div><div class="ph-sub" id="chalStudioSub">Loading challenges…</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_challenges">გამოწვევებისა და ბეჯების სტუდია</div><div class="ph-sub" id="chalStudioSub">გამოწვევები იტვირთება…</div></div>
         <div class="ph-actions">
-          <button class="btn btn-primary btn-sm" onclick="chalFormMode('create')"><i class="fas fa-plus"></i> New Challenge</button>
+          <button class="btn btn-primary btn-sm" onclick="chalFormMode('create')"><i class="fas fa-plus"></i> ახალი გამოწვევა</button>
         </div>
       </div>
 
@@ -864,107 +902,107 @@
       <!-- Create / Edit form -->
       <div class="panel" style="max-width:860px" id="chalFormPanel">
         <div class="panel-hdr">
-          <div><div class="panel-title" id="chalFormTitle">New Challenge</div><div class="panel-sub">Fill required fields then save</div></div>
-          <button class="btn btn-ghost btn-sm" id="chalFormCancel" style="display:none" onclick="chalFormMode('none')"><i class="fas fa-times"></i> Cancel</button>
+          <div><div class="panel-title" id="chalFormTitle">ახალი გამოწვევა</div><div class="panel-sub">შეავსე სავალდებულო ველები და შეინახე</div></div>
+          <button class="btn btn-ghost btn-sm" id="chalFormCancel" style="display:none" onclick="chalFormMode('none')"><i class="fas fa-times"></i> გაუქმება</button>
         </div>
         <form id="chalForm" style="display:grid;gap:14px;padding:8px 0 4px">
           <input type="hidden" id="chalEditId">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Title *
-              <input id="cfTitle" required placeholder="e.g. Tbilisi Explorer" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">სათაური *
+              <input id="cfTitle" required placeholder="მაგ. თბილისის მკვლევარი" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             </label>
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Type *
-              <select id="cfType" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-                <option value="checkin_count">checkin_count — any check-in</option>
-                <option value="city_checkin">city_checkin — must match city field</option>
-                <option value="place_checkin">place_checkin — must match place ID</option>
-                <option value="business_checkin">business_checkin — must match business ID</option>
-                <option value="date_limited_checkin">date_limited_checkin — within start/end dates</option>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">ტიპი *
+              <select id="cfType" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+                <option value="checkin_count">checkin_count — ნებისმიერი ჩექ-ინი</option>
+                <option value="city_checkin">city_checkin — უნდა დაემთხვეს ქალაქის ველს</option>
+                <option value="place_checkin">place_checkin — უნდა დაემთხვეს ადგილის ID-ს</option>
+                <option value="business_checkin">business_checkin — უნდა დაემთხვეს ბიზნესის ID-ს</option>
+                <option value="date_limited_checkin">date_limited_checkin — დაწყების/დასრულების თარიღებში</option>
               </select>
             </label>
           </div>
-          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Category
-            <select id="cfCategory" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-              <option value="exploration">Exploration</option>
-              <option value="travel">Travel</option>
-              <option value="food">Food</option>
-              <option value="events">Events</option>
-              <option value="patriot">Patriot</option>
-              <option value="fitness">Fitness</option>
-              <option value="community">Community</option>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">კატეგორია
+            <select id="cfCategory" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+              <option value="exploration">აღმოჩენა</option>
+              <option value="travel">მოგზაურობა</option>
+              <option value="food">კვება</option>
+              <option value="events">ღონისძიებები</option>
+              <option value="patriot">პატრიოტი</option>
+              <option value="fitness">ფიტნესი</option>
+              <option value="community">საზოგადოება</option>
             </select>
           </label>
-          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Description
-            <textarea id="cfDesc" rows="3" placeholder="Short description shown on the challenge card" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);resize:vertical"></textarea>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">აღწერა
+            <textarea id="cfDesc" rows="3" placeholder="მოკლე აღწერა, რომელიც გამოწვევის ქარდზე ჩანს" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);resize:vertical"></textarea>
           </label>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Target count *
-              <input id="cfTarget" type="number" min="1" value="1" required style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">სამიზნე რაოდენობა *
+              <input id="cfTarget" type="number" min="1" value="1" required style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             </label>
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">XP reward
-              <input id="cfXp" type="number" min="0" value="100" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">XP ჯილდო
+              <input id="cfXp" type="number" min="0" value="100" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             </label>
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">City (optional)
-              <input id="cfCity" placeholder="Tbilisi" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-            </label>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Start date (optional)
-              <input id="cfStart" type="date" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-            </label>
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">End date (optional)
-              <input id="cfEnd" type="date" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">ქალაქი (არასავალდებულო)
+              <input id="cfCity" placeholder="თბილისი" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             </label>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Place ID (optional)
-              <input id="cfPlaceId" placeholder="Firestore place doc ID" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">დაწყების თარიღი (არასავალდებულო)
+              <input id="cfStart" type="date" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             </label>
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Business ID (optional)
-              <input id="cfBusinessId" placeholder="Firestore business doc ID" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">დასრულების თარიღი (არასავალდებულო)
+              <input id="cfEnd" type="date" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">ადგილის ID (არასავალდებულო)
+              <input id="cfPlaceId" placeholder="Firestore-ის ადგილის დოკუმენტის ID" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">ბიზნესის ID (არასავალდებულო)
+              <input id="cfBusinessId" placeholder="Firestore-ის ბიზნესის დოკუმენტის ID" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             </label>
           </div>
           <div class="tog-wrap" style="max-width:420px">
-            <div><div class="tog-label">Active</div><div class="tog-sub">Visible and accepting progress from users</div></div>
+            <div><div class="tog-label">აქტიური</div><div class="tog-sub">ჩანს და აღრიცხავს მომხმარებლების პროგრესს</div></div>
             <label class="tog-sw"><input type="checkbox" id="cfActive" checked><span class="tog-slider"></span></label>
           </div>
           <!-- Badge section -->
           <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:16px">
             <div style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--td);margin-bottom:12px">
-              <i class="fas fa-medal" style="color:var(--gold);margin-right:6px"></i>Badge Reward (optional)
+              <i class="fas fa-medal" style="color:var(--gold);margin-right:6px"></i>ბეჯი-ჯილდო (არასავალდებულო)
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
-              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Badge ID (slug)
-                <input id="cfBadgeId" placeholder="e.g. first_checkin" oninput="chalBadgePreview()" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">ბეჯის ID (slug)
+                <input id="cfBadgeId" placeholder="მაგ. first_checkin" oninput="chalBadgePreview()" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
               </label>
-              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Badge title
-                <input id="cfBadgeTitle" placeholder="e.g. First Check-in" oninput="chalBadgePreview()" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">ბეჯის სათაური
+                <input id="cfBadgeTitle" placeholder="მაგ. პირველი ჩექ-ინი" oninput="chalBadgePreview()" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
               </label>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
-              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Badge icon (FA class)
-                <input id="cfBadgeIcon" placeholder="fa-medal" oninput="chalBadgePreview()" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">ბეჯის აიქონი (FA კლასი)
+                <input id="cfBadgeIcon" placeholder="fa-medal" oninput="chalBadgePreview()" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
               </label>
-              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Rarity
-                <select id="cfBadgeRarity" onchange="chalBadgePreview()" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-                  <option value="common">common</option>
-                  <option value="rare">rare</option>
-                  <option value="epic">epic</option>
-                  <option value="legendary">legendary</option>
+              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">იშვიათობა
+                <select id="cfBadgeRarity" onchange="chalBadgePreview()" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+                  <option value="common">ჩვეულებრივი</option>
+                  <option value="rare">იშვიათი</option>
+                  <option value="epic">ეპიკური</option>
+                  <option value="legendary">ლეგენდარული</option>
                 </select>
               </label>
-              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Sort order
-                <input id="cfSort" type="number" value="0" min="0" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+              <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">დალაგების რიგი
+                <input id="cfSort" type="number" value="0" min="0" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
               </label>
             </div>
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800;margin-bottom:12px">Badge description
-              <input id="cfBadgeDesc" placeholder="Short text shown on badge card" oninput="chalBadgePreview()" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800;margin-bottom:12px">ბეჯის აღწერა
+              <input id="cfBadgeDesc" placeholder="მოკლე ტექსტი, რომელიც ბეჯის ქარდზე ჩანს" oninput="chalBadgePreview()" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             </label>
             <!-- Live badge preview -->
             <div id="chalBadgePreviewWrap" style="display:none;padding:14px;border:1px solid rgba(168,85,247,.25);border-radius:12px;background:rgba(168,85,247,.06);margin-bottom:4px">
-              <div style="font-size:.66rem;font-weight:700;color:var(--td);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Badge Preview</div>
+              <div style="font-size:.66rem;font-weight:700;color:var(--td);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">ბეჯის გადახედვა</div>
               <div style="display:flex;align-items:center;gap:12px">
-                <div id="chalBadgePreviewIcon" style="width:44px;height:44px;border-radius:12px;background:rgba(16,185,129,.1);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0"></div>
+                <div id="chalBadgePreviewIcon" style="width:44px;height:44px;border-radius:12px;background:rgba(var(--ds-accent-rgb),.1);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0"></div>
                 <div>
                   <div id="chalBadgePreviewTitle" style="font-weight:800;font-size:.9rem"></div>
                   <div id="chalBadgePreviewDesc" style="font-size:.72rem;color:var(--ts)"></div>
@@ -974,8 +1012,8 @@
             </div>
           </div>
           <div style="display:flex;gap:8px;padding-top:4px">
-            <button class="btn btn-primary btn-sm" type="submit" id="chalSaveBtn"><i class="fas fa-save"></i> Save challenge</button>
-            <button class="btn btn-ghost btn-sm" type="button" id="chalCancelBtn" style="display:none" onclick="chalFormMode('none')"><i class="fas fa-times"></i> Cancel</button>
+            <button class="btn btn-primary btn-sm" type="submit" id="chalSaveBtn"><i class="fas fa-save"></i> გამოწვევის შენახვა</button>
+            <button class="btn btn-ghost btn-sm" type="button" id="chalCancelBtn" style="display:none" onclick="chalFormMode('none')"><i class="fas fa-times"></i> გაუქმება</button>
           </div>
         </form>
       </div>
@@ -984,186 +1022,186 @@
     <!-- ─── REWARDS ─── -->
     <section class="sec" id="sec-rewards">
       <div class="ph">
-        <div><div class="ph-title" data-i18n="adm_sec_rewards">Rewards Management</div><div class="ph-sub" id="rewardsSubtitle">Manage the GeoPoints rewards store</div></div>
+        <div><div class="ph-title" data-i18n="adm_sec_rewards">ჯილდოების მართვა</div><div class="ph-sub" id="rewardsSubtitle">მართე GeoPoints-ის ჯილდოების მაღაზია</div></div>
         <div class="ph-actions">
-          <button class="btn btn-primary btn-sm" onclick="rwFormMode('create')"><i class="fas fa-plus"></i> New Reward</button>
+          <button class="btn btn-primary btn-sm" onclick="rwFormMode('create')"><i class="fas fa-plus"></i> ახალი ჯილდო</button>
         </div>
       </div>
 
       <!-- Create / Edit Form -->
       <div class="panel mb16" id="rwForm" style="display:none">
-        <div class="panel-hdr"><div class="panel-title" id="rwFormTitle">Create Reward</div></div>
+        <div class="panel-hdr"><div class="panel-title" id="rwFormTitle">ჯილდოს შექმნა</div></div>
         <form id="rwFormEl" onsubmit="rwSave(event)" style="display:grid;gap:14px;padding:18px 0 4px">
           <input type="hidden" id="rwEditId">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Title *
-              <input id="rwTitle" placeholder="e.g. Free Coffee at Café X" required style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">სათაური *
+              <input id="rwTitle" placeholder="მაგ. უფასო ყავა Café X-ში" required style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             </label>
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Category
-              <select id="rwCategory" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-                <option value="food_drink">Food &amp; Drink</option>
-                <option value="experience">Experience</option>
-                <option value="shopping">Shopping</option>
-                <option value="entertainment">Entertainment</option>
-                <option value="travel">Travel</option>
-                <option value="other">Other</option>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">კატეგორია
+              <select id="rwCategory" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+                <option value="food_drink">საკვები და სასმელი</option>
+                <option value="experience">გამოცდილება</option>
+                <option value="shopping">შოპინგი</option>
+                <option value="entertainment">გართობა</option>
+                <option value="travel">მოგზაურობა</option>
+                <option value="other">სხვა</option>
               </select>
             </label>
           </div>
-          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Description
-            <textarea id="rwDesc" rows="2" placeholder="Short description shown to users" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12);resize:vertical;font-family:inherit"></textarea>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">აღწერა
+            <textarea id="rwDesc" rows="2" placeholder="მოკლე აღწერა მომხმარებლებისთვის" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12);resize:vertical;font-family:inherit"></textarea>
           </label>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Points Cost *
-              <input id="rwCost" type="number" min="1" placeholder="e.g. 500" required style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">ღირებულება ქულებში *
+              <input id="rwCost" type="number" min="1" placeholder="e.g. 500" required style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             </label>
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Stock (blank = unlimited)
-              <input id="rwStock" type="number" min="0" placeholder="e.g. 100" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">მარაგი (ცარიელი = შეუზღუდავი)
+              <input id="rwStock" type="number" min="0" placeholder="e.g. 100" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             </label>
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Sort Order
-              <input id="rwSort" type="number" value="0" min="0" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-            </label>
-          </div>
-          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Image URL (optional)
-            <input id="rwImage" placeholder="https://…" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-          </label>
-          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Terms / Redemption note (optional)
-            <input id="rwTerms" placeholder="e.g. Valid at all Tbilisi branches. Show QR at checkout." style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-          </label>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Expires At (optional)
-              <input id="rwExpiresAt" type="date" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
-            </label>
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Business ID (optional)
-              <input id="rwBusinessId" placeholder="Firestore business doc ID" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">დალაგების რიგი
+              <input id="rwSort" type="number" value="0" min="0" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             </label>
           </div>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">სურათის URL (არასავალდებულო)
+            <input id="rwImage" placeholder="https://…" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+          </label>
+          <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">პირობები / გამოყენების შენიშვნა (არასავალდებულო)
+            <input id="rwTerms" placeholder="მაგ. მოქმედებს თბილისის ყველა ფილიალში. აჩვენე QR სალაროსთან." style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+          </label>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Business Name (display)
-              <input id="rwBusinessName" placeholder="e.g. Café X (shown on reward card)" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">ვადა (არასავალდებულო)
+              <input id="rwExpiresAt" type="date" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             </label>
-            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">Business Owner UID
-              <input id="rwOwnerId" placeholder="Firebase UID of business owner" style="padding:12px;border-radius:10px;background:#111827;color:#f8fafc;border:1px solid rgba(255,255,255,.12)">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">ბიზნესის ID (არასავალდებულო)
+              <input id="rwBusinessId" placeholder="Firestore-ის ბიზნესის დოკუმენტის ID" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">ბიზნესის დასახელება (საჩვენებელი)
+              <input id="rwBusinessName" placeholder="მაგ. Café X (ჩანს ჯილდოს ქარდზე)" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
+            </label>
+            <label style="display:grid;gap:6px;color:var(--ts);font-size:.82rem;font-weight:800">ბიზნესის მფლობელის UID
+              <input id="rwOwnerId" placeholder="ბიზნესის მფლობელის Firebase UID" style="padding:12px;border-radius:10px;background:var(--ds-surface);color:var(--ds-text);border:1px solid rgba(255,255,255,.12)">
             </label>
           </div>
           <div class="tog-wrap" style="max-width:420px">
-            <div><div class="tog-label">Active</div><div class="tog-sub">Visible to users in the rewards store</div></div>
+            <div><div class="tog-label">აქტიური</div><div class="tog-sub">ჩანს მომხმარებლებისთვის ჯილდოების მაღაზიაში</div></div>
             <label class="tog-sw"><input type="checkbox" id="rwActive" checked><span class="tog-slider"></span></label>
           </div>
           <div style="display:flex;gap:8px;padding-top:4px">
-            <button class="btn btn-primary btn-sm" type="submit" id="rwSaveBtn"><i class="fas fa-save"></i> Save reward</button>
-            <button class="btn btn-ghost btn-sm" type="button" onclick="rwFormMode('none')"><i class="fas fa-times"></i> Cancel</button>
+            <button class="btn btn-primary btn-sm" type="submit" id="rwSaveBtn"><i class="fas fa-save"></i> ჯილდოს შენახვა</button>
+            <button class="btn btn-ghost btn-sm" type="button" onclick="rwFormMode('none')"><i class="fas fa-times"></i> გაუქმება</button>
           </div>
         </form>
       </div>
 
       <!-- Rewards List -->
       <div class="panel mb16">
-        <div class="panel-hdr"><div class="panel-title">All Rewards</div></div>
-        <div id="rwList" style="padding:4px 0"><div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">Loading rewards…</div></div>
+        <div class="panel-hdr"><div class="panel-title">ყველა ჯილდო</div></div>
+        <div id="rwList" style="padding:4px 0"><div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">ჯილდოები იტვირთება…</div></div>
       </div>
 
       <!-- Manual Balance Adjustment -->
       <div class="panel">
         <div class="panel-hdr">
-          <div><div class="panel-title">Manual Balance Adjustment</div><div class="panel-sub">Award or deduct points for a specific user (admin only)</div></div>
+          <div><div class="panel-title">ბალანსის ხელით კორექტირება</div><div class="panel-sub">დაარიცხე ან ჩამოაჭერი ქულები კონკრეტულ მომხმარებელს (მხოლოდ ადმინი)</div></div>
         </div>
         <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
-          <label style="font-size:.78rem;font-weight:600;color:var(--ts)">User ID
-            <input id="adjUserId" class="rw-input" style="margin-top:4px;width:100%;box-sizing:border-box" placeholder="Firebase UID of the user" autocomplete="off">
+          <label style="font-size:.78rem;font-weight:600;color:var(--ts)">მომხმარებლის ID
+            <input id="adjUserId" class="rw-input" style="margin-top:4px;width:100%;box-sizing:border-box" placeholder="მომხმარებლის Firebase UID" autocomplete="off">
           </label>
-          <label style="font-size:.78rem;font-weight:600;color:var(--ts)">Amount (positive = award, negative = deduct)
+          <label style="font-size:.78rem;font-weight:600;color:var(--ts)">რაოდენობა (დადებითი = დარიცხვა, უარყოფითი = ჩამოჭრა)
             <input id="adjAmount" type="number" class="rw-input" style="margin-top:4px;width:100%;box-sizing:border-box" placeholder="e.g. 200 or -50">
           </label>
-          <label style="font-size:.78rem;font-weight:600;color:var(--ts)">Reason
-            <input id="adjReason" class="rw-input" style="margin-top:4px;width:100%;box-sizing:border-box" placeholder="Brief reason for audit trail" maxlength="200">
+          <label style="font-size:.78rem;font-weight:600;color:var(--ts)">მიზეზი
+            <input id="adjReason" class="rw-input" style="margin-top:4px;width:100%;box-sizing:border-box" placeholder="მოკლე მიზეზი ჟურნალისთვის" maxlength="200">
           </label>
-          <button id="adjBtn" class="btn btn-primary btn-sm" style="align-self:flex-start" onclick="doAdminAdjust()"><i class="fas fa-sliders-h"></i> Apply Adjustment</button>
+          <button id="adjBtn" class="btn btn-primary btn-sm" style="align-self:flex-start" onclick="doAdminAdjust()"><i class="fas fa-sliders-h"></i> კორექტირების გატარება</button>
         </div>
       </div>
 
       <!-- Recent Transactions -->
       <div class="panel">
         <div class="panel-hdr">
-          <div><div class="panel-title">Recent Point Transactions</div><div class="panel-sub">Last 50 transfers and redemptions</div></div>
+          <div><div class="panel-title">ბოლო ქულების ტრანზაქციები</div><div class="panel-sub">ბოლო 50 გადარიცხვა და გამოყენება</div></div>
         </div>
-        <div id="rwTxList" style="padding:4px 0"><div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">Loading transactions…</div></div>
+        <div id="rwTxList" style="padding:4px 0"><div style="text-align:center;padding:28px;color:var(--ts);font-size:.82rem">ტრანზაქციები იტვირთება…</div></div>
       </div>
     </section>
 
     <!-- ─── SITE ANALYTICS ─── -->
     <section class="sec" id="sec-analytics">
       <div class="ph">
-        <div><div class="ph-title" data-i18n="adm_sec_site">Site Analytics</div><div class="ph-sub" id="analyticsSub">Loading…</div></div>
-        <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="loadAdminAnalytics()"><i class="fas fa-sync-alt"></i> Refresh</button></div>
+        <div><div class="ph-title" data-i18n="adm_sec_site">საიტის ანალიტიკა</div><div class="ph-sub" id="analyticsSub">იტვირთება…</div></div>
+        <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="loadAdminAnalytics()"><i class="fas fa-sync-alt"></i> განახლება</button></div>
       </div>
       <div class="g4 mb12">
         <div class="sc green">
-          <div class="sc-ico">👁</div><div class="sc-val" id="an-pv">—</div><div class="sc-lbl" data-i18n="adm_an_pv">Page Views Today</div>
-          <div class="sc-glow" style="background:radial-gradient(#10b981,transparent)"></div>
+          <div class="sc-ico">👁</div><div class="sc-val" id="an-pv">—</div><div class="sc-lbl" data-i18n="adm_an_pv">ნახვა დღეს</div>
+          <div class="sc-glow" style="background:radial-gradient(var(--ds-accent),transparent)"></div>
         </div>
         <div class="sc blue">
-          <div class="sc-ico">🟢</div><div class="sc-val" id="an-online">—</div><div class="sc-lbl" data-i18n="adm_an_online">Online Now</div>
+          <div class="sc-ico">🟢</div><div class="sc-val" id="an-online">—</div><div class="sc-lbl" data-i18n="adm_an_online">ონლაინ ახლა</div>
           <div class="sc-glow" style="background:radial-gradient(#3b82f6,transparent)"></div>
         </div>
         <div class="sc gold">
-          <div class="sc-ico">🔍</div><div class="sc-val" id="an-searches">—</div><div class="sc-lbl" data-i18n="adm_an_searches">Searches Today</div>
+          <div class="sc-ico">🔍</div><div class="sc-val" id="an-searches">—</div><div class="sc-lbl" data-i18n="adm_an_searches">ძებნა დღეს</div>
           <div class="sc-glow" style="background:radial-gradient(#f59e0b,transparent)"></div>
         </div>
         <div class="sc purple">
-          <div class="sc-ico">⚡</div><div class="sc-val" id="an-events">—</div><div class="sc-lbl" data-i18n="adm_an_events">Events Today</div>
+          <div class="sc-ico">⚡</div><div class="sc-val" id="an-events">—</div><div class="sc-lbl" data-i18n="adm_an_events">ღონისძიება დღეს</div>
           <div class="sc-glow" style="background:radial-gradient(#a855f7,transparent)"></div>
         </div>
       </div>
       <div class="g2 mb12">
         <div class="panel">
-          <div class="panel-hdr"><div class="panel-title">Top Pages Today</div></div>
-          <div id="an-top-pages" style="padding:8px 0;min-height:80px;color:var(--ts);font-size:0.82rem">Loading…</div>
+          <div class="panel-hdr"><div class="panel-title">ტოპ გვერდები დღეს</div></div>
+          <div id="an-top-pages" style="padding:8px 0;min-height:80px;color:var(--ts);font-size:0.82rem">იტვირთება…</div>
         </div>
         <div class="panel">
-          <div class="panel-hdr"><div class="panel-title">Top Searches</div></div>
-          <div id="an-top-searches" style="padding:8px 0;min-height:80px;color:var(--ts);font-size:0.82rem">Loading…</div>
+          <div class="panel-hdr"><div class="panel-title">ტოპ ძებნები</div></div>
+          <div id="an-top-searches" style="padding:8px 0;min-height:80px;color:var(--ts);font-size:0.82rem">იტვირთება…</div>
         </div>
       </div>
       <div class="panel mb12">
-        <div class="panel-hdr"><div class="panel-title">7-Day Page Views</div></div>
+        <div class="panel-hdr"><div class="panel-title">ნახვები 7 დღეში</div></div>
         <div id="an-trend" style="display:flex;align-items:flex-end;gap:6px;height:80px;padding:8px 4px">
-          <div style="color:var(--ts);font-size:0.78rem;padding-top:20px">Loading…</div>
+          <div style="color:var(--ts);font-size:0.78rem;padding-top:20px">იტვირთება…</div>
         </div>
       </div>
       <div class="panel">
-        <div class="panel-hdr"><div class="panel-title">Avg Performance (ms)</div></div>
-        <div id="an-perf" style="padding:8px 0;min-height:60px;color:var(--ts);font-size:0.82rem">Loading…</div>
+        <div class="panel-hdr"><div class="panel-title">საშუალო წარმადობა (ms)</div></div>
+        <div id="an-perf" style="padding:8px 0;min-height:60px;color:var(--ts);font-size:0.82rem">იტვირთება…</div>
       </div>
     </section>
 
     <!-- ─── ERROR MONITOR ─── -->
     <section class="sec" id="sec-errors">
       <div class="ph">
-        <div><div class="ph-title" data-i18n="adm_sec_errors">Error Monitor</div><div class="ph-sub" id="errorsSub">Loading…</div></div>
-        <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="loadAdminErrors()"><i class="fas fa-sync-alt"></i> Refresh</button></div>
+        <div><div class="ph-title" data-i18n="adm_sec_errors">შეცდომების მონიტორი</div><div class="ph-sub" id="errorsSub">იტვირთება…</div></div>
+        <div class="ph-actions"><button class="btn btn-ghost btn-sm" onclick="loadAdminErrors()"><i class="fas fa-sync-alt"></i> განახლება</button></div>
       </div>
       <div class="g3 mb12">
         <div class="sc" style="border-color:rgba(239,68,68,.3)">
-          <div class="sc-ico">🔴</div><div class="sc-val" id="err-today">—</div><div class="sc-lbl" data-i18n="adm_err_today">JS Errors Today</div>
+          <div class="sc-ico">🔴</div><div class="sc-val" id="err-today">—</div><div class="sc-lbl" data-i18n="adm_err_today">JS შეცდომა დღეს</div>
         </div>
         <div class="sc" style="border-color:rgba(245,158,11,.3)">
-          <div class="sc-ico">📤</div><div class="sc-val" id="err-uploads">—</div><div class="sc-lbl" data-i18n="adm_err_uploads">Failed Uploads</div>
+          <div class="sc-ico">📤</div><div class="sc-val" id="err-uploads">—</div><div class="sc-lbl" data-i18n="adm_err_uploads">ვერ ატვირთული</div>
         </div>
         <div class="sc" style="border-color:rgba(59,130,246,.3)">
-          <div class="sc-ico">📄</div><div class="sc-val" id="err-pages">—</div><div class="sc-lbl" data-i18n="adm_err_pages">Pages Affected</div>
+          <div class="sc-ico">📄</div><div class="sc-val" id="err-pages">—</div><div class="sc-lbl" data-i18n="adm_err_pages">დაზარალებული გვერდი</div>
         </div>
       </div>
       <div class="panel mb12">
-        <div class="panel-hdr"><div class="panel-title">Recent JS Errors</div></div>
+        <div class="panel-hdr"><div class="panel-title">ბოლო JS შეცდომები</div></div>
         <div id="err-log" style="display:flex;flex-direction:column;gap:8px;padding:4px 0;min-height:80px">
-          <div style="text-align:center;padding:32px;color:var(--ts);font-size:0.82rem">Loading…</div>
+          <div style="text-align:center;padding:32px;color:var(--ts);font-size:0.82rem">იტვირთება…</div>
         </div>
       </div>
       <div class="panel">
-        <div class="panel-hdr"><div class="panel-title">Upload Failures</div></div>
+        <div class="panel-hdr"><div class="panel-title">ატვირთვის შეცდომები</div></div>
         <div id="err-uploads-log" style="display:flex;flex-direction:column;gap:8px;padding:4px 0;min-height:60px">
-          <div style="text-align:center;padding:24px;color:var(--ts);font-size:0.82rem">Loading…</div>
+          <div style="text-align:center;padding:24px;color:var(--ts);font-size:0.82rem">იტვირთება…</div>
         </div>
       </div>
     </section>
@@ -1188,11 +1226,11 @@
       <div class="udp-stats" id="udpStats"></div>
       <div class="bl mb12">
         <div class="bi">
-          <div class="bi-hdr"><span class="bi-lbl">Trust Score</span><span class="bi-val" id="udpTrustNum">—</span></div>
+          <div class="bi-hdr"><span class="bi-lbl">ნდობის ქულა</span><span class="bi-val" id="udpTrustNum">—</span></div>
           <div class="bt"><div class="bf green" id="udpTrustBar" style="width:0%;transition:width 0.9s ease"></div></div>
         </div>
       </div>
-      <div style="font-size:0.64rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--td);margin-bottom:7px">Admin Actions</div>
+      <div style="font-size:0.64rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--td);margin-bottom:7px">ადმინის მოქმედებები</div>
       <div class="udp-acts" id="udpActs"></div>
     </div>
   </div>
@@ -1205,24 +1243,24 @@
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
       <div style="width:34px;height:34px;border-radius:8px;background:rgba(239,68,68,0.15);display:flex;align-items:center;justify-content:center;color:#ef4444;font-size:1rem"><i class="fas fa-trash"></i></div>
       <div>
-        <div style="font-weight:800;font-size:0.98rem">Delete Content</div>
-        <div style="color:var(--ts);font-size:0.76rem" id="deleteModalDesc">Remove this content from GeoHub</div>
+        <div style="font-weight:800;font-size:0.98rem">კონტენტის წაშლა</div>
+        <div style="color:var(--ts);font-size:0.76rem" id="deleteModalDesc">წაშალე ეს კონტენტი GeoHub-იდან</div>
       </div>
       <button onclick="closeDeleteModal()" style="margin-left:auto;background:none;border:none;color:var(--ts);cursor:pointer;font-size:1rem;padding:4px"><i class="fas fa-times"></i></button>
     </div>
-    <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--td);margin-bottom:6px">Message to user</div>
-    <textarea id="deleteModalMsg" rows="4" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:#f0f4ff;padding:10px 12px;font-size:0.85rem;resize:vertical;outline:none;font-family:inherit;line-height:1.5"></textarea>
-    <div style="font-size:0.74rem;color:var(--ts);margin-top:6px;margin-bottom:16px"><i class="fas fa-info-circle" style="margin-right:4px"></i>This message will be sent to the user as a notification.</div>
+    <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--td);margin-bottom:6px">შეტყობინება მომხმარებელს</div>
+    <textarea id="deleteModalMsg" rows="4" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:var(--ds-text);padding:10px 12px;font-size:0.85rem;resize:vertical;outline:none;font-family:inherit;line-height:1.5"></textarea>
+    <div style="font-size:0.74rem;color:var(--ts);margin-top:6px;margin-bottom:16px"><i class="fas fa-info-circle" style="margin-right:4px"></i>ეს შეტყობინება მომხმარებელს შეტყობინების სახით გაეგზავნება.</div>
     <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn btn-ghost btn-sm" onclick="closeDeleteModal()">Cancel</button>
-      <button class="btn btn-red btn-sm" onclick="executeDelete()" id="deleteConfirmBtn"><i class="fas fa-trash"></i> Delete &amp; Notify User</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeDeleteModal()">გაუქმება</button>
+      <button class="btn btn-red btn-sm" onclick="executeDelete()" id="deleteConfirmBtn"><i class="fas fa-trash"></i> წაშლა და შეტყობინება</button>
     </div>
   </div>
 </div>
 
 <!-- Toast -->
-<div id="adminToast" style="position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(60px);z-index:9999;background:rgba(16,185,129,0.95);color:#000;padding:10px 20px;border-radius:999px;font-size:0.8rem;font-weight:800;display:flex;align-items:center;gap:8px;opacity:0;pointer-events:none;transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1),opacity 0.28s;white-space:nowrap">
-  <i class="fas fa-check-circle"></i><span id="adminToastMsg">Done</span>
+<div id="adminToast" style="position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(60px);z-index:9999;background:rgba(var(--ds-accent-rgb),0.95);color:#000;padding:10px 20px;border-radius:999px;font-size:0.8rem;font-weight:800;display:flex;align-items:center;gap:8px;opacity:0;pointer-events:none;transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1),opacity 0.28s;white-space:nowrap">
+  <i class="fas fa-check-circle"></i><span id="adminToastMsg">დასრულდა</span>
 </div>
 
   <script>

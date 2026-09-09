@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <link rel="icon" type="image/png" href="icons/icon-96.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin — Video Reports</title>
+  <title>ვიდეო-საჩივრები — GeoHub ადმინი</title>
   <meta name="robots" content="noindex, nofollow">
   <meta name="description" content="GeoHub-ის ვიდეო მართვის პანელი.">
   <link rel="canonical" href="https://geohub.ge/admin-videos.html">
@@ -22,7 +22,8 @@
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="stylesheet" href="geohub-social-redesign.css">
   <link rel="stylesheet" href="videos.css">
-  <meta name="theme-color" content="#10b981">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#060a09" media="(prefers-color-scheme: dark)">
   <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
   <style>
     body { padding: 0; margin: 0; }
@@ -33,7 +34,7 @@
     .adm-badge { background: rgba(239,68,68,.15); color: #ef4444; border: 1px solid rgba(239,68,68,.25); border-radius: 20px; padding: 2px 10px; font-size: .75rem; font-weight: 700; }
     .adm-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
     .adm-tab { padding: 7px 16px; border-radius: 20px; border: 1px solid var(--gh-border, rgba(255,255,255,.12)); background: transparent; color: var(--text-secondary, #cbd5e1); font-size: .83rem; cursor: pointer; transition: all .15s; }
-    .adm-tab.active, .adm-tab:hover { background: var(--green, #10b981); color: #000; border-color: transparent; }
+    .adm-tab.active, .adm-tab:hover { background: var(--green, var(--ds-accent)); color: #000; border-color: transparent; }
     .adm-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--gh-border, rgba(255,255,255,.1)); }
     .adm-table { width: 100%; border-collapse: collapse; font-size: .83rem; }
     .adm-table th { background: var(--gh-card, #1e2535); color: var(--text-muted, #94a3b8); font-weight: 600; font-size: .73rem; text-transform: uppercase; letter-spacing: .04em; padding: 10px 14px; text-align: left; white-space: nowrap; }
@@ -42,16 +43,16 @@
     .adm-vid-thumb { width: 64px; height: 36px; object-fit: cover; border-radius: 5px; display: block; }
     .adm-reason-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: .7rem; font-weight: 600; background: rgba(239,68,68,.12); color: #ef4444; border: 1px solid rgba(239,68,68,.2); }
     .adm-status-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: .7rem; font-weight: 600; }
-    .adm-status-badge.pending  { background: rgba(251,191,36,.12); color: #fbbf24; border: 1px solid rgba(251,191,36,.25); }
-    .adm-status-badge.resolved { background: rgba(16,185,129,.12); color: #10b981; border: 1px solid rgba(16,185,129,.25); }
-    .adm-status-badge.dismissed { background: rgba(148,163,184,.1); color: #94a3b8; border: 1px solid rgba(148,163,184,.2); }
+    .adm-status-badge.pending  { background: rgba(251,191,36,.12); color: var(--ds-h-reward-ink); border: 1px solid rgba(251,191,36,.25); }
+    .adm-status-badge.resolved { background: rgba(var(--ds-accent-rgb),.12); color: var(--ds-accent-ink); border: 1px solid rgba(var(--ds-accent-rgb),.25); }
+    .adm-status-badge.dismissed { background: rgba(148,163,184,.1); color: var(--ds-text-3); border: 1px solid rgba(148,163,184,.2); }
     .adm-actions { display: flex; gap: 5px; flex-wrap: nowrap; }
     .adm-btn { padding: 5px 10px; border-radius: 6px; border: none; font-size: .75rem; font-weight: 600; cursor: pointer; transition: opacity .15s; white-space: nowrap; }
     .adm-btn:hover { opacity: .8; }
-    .adm-btn.hide   { background: rgba(251,191,36,.2); color: #fbbf24; }
+    .adm-btn.hide   { background: rgba(251,191,36,.2); color: var(--ds-h-reward-ink); }
     .adm-btn.remove { background: rgba(239,68,68,.2); color: #ef4444; }
-    .adm-btn.restore{ background: rgba(16,185,129,.15); color: #10b981; }
-    .adm-btn.dismiss{ background: rgba(148,163,184,.1); color: #94a3b8; }
+    .adm-btn.restore{ background: rgba(var(--ds-accent-rgb),.15); color: var(--ds-accent-ink); }
+    .adm-btn.dismiss{ background: rgba(148,163,184,.1); color: var(--ds-text-3); }
     .adm-empty { text-align: center; padding: 48px 16px; color: var(--text-muted, #94a3b8); font-size: .9rem; }
     .adm-empty i { display: block; font-size: 2.5rem; margin-bottom: 12px; }
     .adm-note-col { max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted, #94a3b8); font-size: .75rem; }
@@ -61,11 +62,15 @@
     .adm-search-input { flex: 1; min-width: 180px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--gh-border, rgba(255,255,255,.12)); background: var(--gh-card, #1e2535); color: var(--text-primary, #f1f5f9); font-size: .84rem; }
     .adm-search-input::placeholder { color: var(--text-muted, #94a3b8); }
     .adm-filter-select { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--gh-border, rgba(255,255,255,.12)); background: var(--gh-card, #1e2535); color: var(--text-secondary, #cbd5e1); font-size: .82rem; cursor: pointer; }
-    .adm-creator-link { color: var(--green, #10b981); text-decoration: none; font-size: .75rem; }
+    .adm-creator-link { color: var(--green, var(--ds-accent)); text-decoration: none; font-size: .75rem; }
     .adm-creator-link:hover { text-decoration: underline; }
-    .adm-action-link { color: var(--green, #10b981); text-decoration: none; font-size: .72rem; display: inline-flex; align-items: center; gap: 3px; }
+    .adm-action-link { color: var(--green, var(--ds-accent)); text-decoration: none; font-size: .72rem; display: inline-flex; align-items: center; gap: 3px; }
     .adm-action-link:hover { text-decoration: underline; }
   </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700;800&family=Noto+Serif+Georgian:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="gh-design-system.css">
 </head>
 <body data-gh-page="admin-videos">
   <noscript>GeoHub requires JavaScript.</noscript>

@@ -10,165 +10,166 @@
   <link rel="dns-prefetch" href="https://firebase.googleapis.com">
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#10b981">
-  <title>Places — GeoHub</title>
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#060a09" media="(prefers-color-scheme: dark)">
+  <title>ადგილები — GeoHub</title>
   <!-- SEO ─────────────────────────────────────────────── -->
-  <meta name="description" content="Find top-rated restaurants, cafes, attractions, and hidden gems across Georgia. Discover places with real reviews and verified check-ins.">
+  <meta name="description" content="აღმოაჩინე საუკეთესო ადგილები საქართველოში: კაფეები, პარკები, ღირსშესანიშნაობები.">
   <link rel="canonical" href="https://geohub.ge/places.html">
   <meta name="robots" content="index, follow">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GeoHub">
-  <meta property="og:title" content="Places — GeoHub">
-  <meta property="og:description" content="Find top-rated restaurants, cafes, attractions, and hidden gems across Georgia. Discover places with real reviews and verified check-ins.">
+  <meta property="og:title" content="ადგილები — GeoHub">
+  <meta property="og:description" content="აღმოაჩინე საუკეთესო ადგილები საქართველოში: კაფეები, პარკები, ღირსშესანიშნაობები.">
   <meta property="og:url" content="https://geohub.ge/places.html">
   <meta property="og:image" content="https://geohub.ge/icons/icon-512.png">
   <meta property="og:image:width" content="512">
   <meta property="og:image:height" content="512">
   <meta property="og:image:alt" content="GeoHub — Discover Georgia">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Places — GeoHub">
-  <meta name="twitter:description" content="Find top-rated restaurants, cafes, attractions, and hidden gems across Georgia. Discover places with real reviews and verified check-ins.">
+  <meta name="twitter:title" content="ადგილები — GeoHub">
+  <meta name="twitter:description" content="აღმოაჩინე საუკეთესო ადგილები საქართველოში: კაფეები, პარკები, ღირსშესანიშნაობები.">
   <meta name="twitter:image" content="https://geohub.ge/icons/icon-512.png">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" onload="this.onload=null;this.rel='stylesheet'">
   <style>
   *{box-sizing:border-box}
-  body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden;margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+  body{background:var(--ds-bg);color:var(--ds-text);min-height:100vh;overflow-x:hidden;margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 
   /* ── PLACES TOOLBAR (search + controls, sits below standard navbar) ── */
-  .pl-toolbar{margin-top:var(--navbar-height,68px);position:sticky;top:var(--navbar-height,68px);left:0;right:0;background:rgba(5,7,15,.97);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;padding:8px 20px;z-index:150;backdrop-filter:blur(20px)}
+  .pl-toolbar{margin-top:var(--navbar-height,68px);position:sticky;top:var(--navbar-height,68px);left:0;right:0;background:var(--ds-surface-over);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;padding:8px 20px;z-index:150;backdrop-filter:blur(20px)}
   .pl-search-wrap{flex:1;max-width:420px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:8px 14px}
-  .pl-search-wrap i{color:#64748b;font-size:.85rem}
-  .pl-search-wrap input{background:none;border:none;outline:none;color:#f8fafc;font-size:.88rem;width:100%}
-  .pl-search-wrap input::placeholder{color:#4b5563}
-  .pl-add-btn{display:flex;align-items:center;gap:7px;padding:9px 16px;background:linear-gradient(135deg,#10b981,#3b82f6);border:none;border-radius:20px;color:#fff;font-weight:700;font-size:.84rem;cursor:pointer;white-space:nowrap;transition:opacity .2s}
+  .pl-search-wrap i{color:var(--ds-text-3);font-size:.85rem}
+  .pl-search-wrap input{background:none;border:none;outline:none;color:var(--ds-text);font-size:.88rem;width:100%}
+  .pl-search-wrap input::placeholder{color:var(--ds-text-2)}
+  .pl-add-btn{display:flex;align-items:center;gap:7px;padding:9px 16px;background:linear-gradient(135deg,var(--ds-accent),#3b82f6);border:none;border-radius:20px;color:#fff;font-weight:700;font-size:.84rem;cursor:pointer;white-space:nowrap;transition:opacity .2s}
   .pl-add-btn:hover{opacity:.88}
 
   /* ── CATEGORY TABS ── */
   .pl-cats{background:rgba(255,255,255,.025);border-bottom:1px solid rgba(255,255,255,.07);padding:0 20px;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;position:sticky;top:calc(var(--navbar-height,68px) + 52px);z-index:100;backdrop-filter:blur(10px)}
   .pl-cats::-webkit-scrollbar{display:none}
-  .pl-cat-btn{display:flex;align-items:center;gap:6px;padding:14px 16px;background:none;border:none;color:#64748b;font-weight:700;font-size:.82rem;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;font-family:inherit}
-  .pl-cat-btn:hover{color:#e2e8f0}
-  .pl-cat-btn.active{color:#10b981;border-bottom-color:#10b981}
+  .pl-cat-btn{display:flex;align-items:center;gap:6px;padding:14px 16px;background:none;border:none;color:var(--ds-text-3);font-weight:700;font-size:.82rem;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;font-family:inherit}
+  .pl-cat-btn:hover{color:var(--ds-text-2)}
+  .pl-cat-btn.active{color:var(--ds-accent-ink);border-bottom-color:var(--ds-accent)}
 
   /* ── MAIN CONTENT ── */
   .pl-main{max-width:1280px;margin:0 auto;padding:24px 20px 100px}
   .pl-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
   .pl-section-head h2{font-size:1.15rem;font-weight:800;margin:0}
-  .pl-count{font-size:.78rem;color:#64748b}
+  .pl-count{font-size:.78rem;color:var(--ds-text-3)}
 
   /* ── GRID ── */
   .pl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
 
   /* ── PLACE CARD ── */
   .pl-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:18px;overflow:hidden;cursor:pointer;transition:transform .2s,border-color .2s}
-  .pl-card:hover{transform:translateY(-3px);border-color:rgba(16,185,129,.3)}
-  .pl-card-img{height:160px;background:linear-gradient(135deg,#10b981,#3b82f6);position:relative;overflow:hidden}
+  .pl-card:hover{transform:translateY(-3px);border-color:rgba(var(--ds-accent-rgb),.3)}
+  .pl-card-img{height:160px;background:linear-gradient(135deg,var(--ds-accent),#3b82f6);position:relative;overflow:hidden}
   .pl-card-img img{width:100%;height:100%;object-fit:cover}
   .pl-card-cat-badge{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.6);border-radius:8px;padding:4px 10px;font-size:.68rem;font-weight:700;color:#fff;backdrop-filter:blur(6px)}
   .pl-card-save{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.5);border:none;border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:.85rem;backdrop-filter:blur(6px);transition:background .2s}
-  .pl-card-save:hover{background:rgba(16,185,129,.7)}
-  .pl-card-save.saved{background:rgba(16,185,129,.8);color:#fff}
+  .pl-card-save:hover{background:rgba(var(--ds-accent-rgb),.7)}
+  .pl-card-save.saved{background:rgba(var(--ds-accent-rgb),.8);color:#fff}
   .pl-card-body{padding:14px}
   .pl-card-name{font-size:.98rem;font-weight:800;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .pl-card-addr{font-size:.76rem;color:#64748b;margin-bottom:10px;display:flex;align-items:center;gap:4px}
-  .pl-card-addr i{color:#10b981;font-size:.68rem}
+  .pl-card-addr{font-size:.76rem;color:var(--ds-text-3);margin-bottom:10px;display:flex;align-items:center;gap:4px}
+  .pl-card-addr i{color:var(--ds-accent-ink);font-size:.68rem}
   .pl-card-foot{display:flex;align-items:center;justify-content:space-between;font-size:.76rem}
-  .pl-card-rating{display:flex;align-items:center;gap:4px;color:#f59e0b}
-  .pl-card-reviews{color:#64748b}
+  .pl-card-rating{display:flex;align-items:center;gap:4px;color:var(--ds-h-reward-ink)}
+  .pl-card-reviews{color:var(--ds-text-3)}
 
   /* ── EMPTY STATE ── */
-  .pl-empty{min-height:340px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#64748b;border:1px dashed rgba(255,255,255,.1);border-radius:20px;padding:40px;grid-column:1/-1}
-  .pl-empty i{font-size:2.5rem;color:#10b981;margin-bottom:16px;opacity:.7}
-  .pl-empty h3{color:#f0f4ff;font-size:1.1rem;margin:0 0 8px}
-  .pl-empty-cta{margin-top:18px;padding:10px 20px;background:linear-gradient(135deg,#10b981,#3b82f6);border:none;border-radius:12px;color:#fff;font-weight:700;cursor:pointer;font-size:.88rem}
+  .pl-empty{min-height:340px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--ds-text-3);border:1px dashed rgba(255,255,255,.1);border-radius:20px;padding:40px;grid-column:1/-1}
+  .pl-empty i{font-size:2.5rem;color:var(--ds-accent-ink);margin-bottom:16px;opacity:.7}
+  .pl-empty h3{color:var(--ds-text);font-size:1.1rem;margin:0 0 8px}
+  .pl-empty-cta{margin-top:18px;padding:10px 20px;background:linear-gradient(135deg,var(--ds-accent),#3b82f6);border:none;border-radius:12px;color:#fff;font-weight:700;cursor:pointer;font-size:.88rem}
 
   /* ── LOADING ── */
-  .pl-loading{display:flex;align-items:center;justify-content:center;padding:60px;color:#64748b;gap:10px;grid-column:1/-1}
+  .pl-loading{display:flex;align-items:center;justify-content:center;padding:60px;color:var(--ds-text-3);gap:10px;grid-column:1/-1}
 
   /* ── ADD PLACE MODAL ── */
   .pl-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:99998;display:none;align-items:center;justify-content:center;padding:16px}
   .pl-modal-overlay.open{display:flex}
-  .pl-modal{background:#111827;border:1px solid rgba(255,255,255,.1);border-radius:20px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:plModalIn .25s ease;will-change:transform,opacity}
+  .pl-modal{background:var(--ds-surface);border:1px solid rgba(255,255,255,.1);border-radius:20px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:plModalIn .25s ease;will-change:transform,opacity}
   @keyframes plModalIn{from{transform:scale(.94) translateY(-12px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
   .pl-modal-head{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 16px;border-bottom:1px solid rgba(255,255,255,.07)}
   .pl-modal-head h3{font-size:1.05rem;font-weight:800;margin:0}
-  .pl-modal-close{background:rgba(255,255,255,.08);border:none;color:#f0f4ff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:.95rem}
+  .pl-modal-close{background:rgba(255,255,255,.08);border:none;color:var(--ds-text);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:.95rem}
   .pl-modal-body{padding:22px}
   .pl-field{margin-bottom:16px}
-  .pl-field label{display:block;font-size:.8rem;font-weight:700;color:#94a3b8;margin-bottom:6px}
-  .pl-field input,.pl-field textarea,.pl-field select{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;color:#f8fafc;font-size:.9rem;outline:none;font-family:inherit;transition:border-color .2s}
-  .pl-field input:focus,.pl-field textarea:focus,.pl-field select:focus{border-color:#10b981}
-  .pl-field select option{background:#111827}
+  .pl-field label{display:block;font-size:.8rem;font-weight:700;color:var(--ds-text-3);margin-bottom:6px}
+  .pl-field input,.pl-field textarea,.pl-field select{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 12px;color:var(--ds-text);font-size:.9rem;outline:none;font-family:inherit;transition:border-color .2s}
+  .pl-field input:focus,.pl-field textarea:focus,.pl-field select:focus{border-color:var(--ds-accent)}
+  .pl-field select option{background:var(--ds-surface)}
   .pl-field textarea{resize:vertical;min-height:80px}
   .pl-coords-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .pl-photo-preview{margin-top:8px;max-width:100%;border-radius:10px;display:none;max-height:180px;object-fit:cover}
-  .pl-modal-submit{width:100%;padding:12px;border-radius:12px;background:linear-gradient(135deg,#10b981,#3b82f6);border:none;color:#fff;font-weight:800;font-size:.92rem;cursor:pointer;margin-top:6px;transition:opacity .2s}
+  .pl-modal-submit{width:100%;padding:12px;border-radius:12px;background:linear-gradient(135deg,var(--ds-accent),#3b82f6);border:none;color:#fff;font-weight:800;font-size:.92rem;cursor:pointer;margin-top:6px;transition:opacity .2s}
   .pl-modal-submit:hover{opacity:.88}
   .pl-modal-submit:disabled{opacity:.5;cursor:not-allowed}
 
   /* ── PLACE DETAIL OVERLAY ── */
-  .pl-detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99997;display:none;align-items:center;justify-content:center;padding:16px}
+  .pl-detail-overlay{position:fixed;inset:0;background:var(--ds-surface-over);z-index:99997;display:none;align-items:center;justify-content:center;padding:16px}
   .pl-detail-overlay.open{display:flex}
   .pl-detail{background:#0e1120;border:1px solid rgba(255,255,255,.09);border-radius:22px;width:100%;max-width:620px;max-height:92vh;overflow-y:auto;animation:plModalIn .25s ease;will-change:transform,opacity}
-  .pl-detail-img{height:220px;background:linear-gradient(135deg,#10b981,#3b82f6);position:relative;overflow:hidden;border-radius:22px 22px 0 0}
+  .pl-detail-img{height:220px;background:linear-gradient(135deg,var(--ds-accent),#3b82f6);position:relative;overflow:hidden;border-radius:22px 22px 0 0}
   .pl-detail-img img{width:100%;height:100%;object-fit:cover}
   .pl-detail-close{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.55);border:none;color:#fff;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:.9rem;backdrop-filter:blur(4px)}
   .pl-detail-body{padding:22px}
   .pl-detail-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
   .pl-detail-top h2{font-size:1.3rem;font-weight:900;margin:0 0 6px}
-  .pl-detail-cat{font-size:.78rem;color:#64748b;display:flex;align-items:center;gap:5px}
+  .pl-detail-cat{font-size:.78rem;color:var(--ds-text-3);display:flex;align-items:center;gap:5px}
   .pl-detail-actions{display:flex;gap:8px;flex-shrink:0}
-  .pl-det-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:#e2e8f0;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s;text-decoration:none}
+  .pl-det-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:var(--ds-text-2);font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s;text-decoration:none}
   .pl-det-btn:hover{background:rgba(255,255,255,.1)}
-  .pl-det-btn.active{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.4);color:#10b981}
-  .pl-detail-addr{display:flex;align-items:center;gap:6px;font-size:.84rem;color:#94a3b8;margin-bottom:14px}
-  .pl-detail-addr i{color:#10b981}
-  .pl-detail-desc{font-size:.88rem;color:#94a3b8;line-height:1.65;margin-bottom:16px}
-  .pl-detail-meta{display:flex;gap:20px;font-size:.8rem;color:#94a3b8;margin-bottom:16px}
-  .pl-detail-meta strong{display:block;font-size:1.05rem;font-weight:800;color:#f0f4ff}
+  .pl-det-btn.active{background:rgba(var(--ds-accent-rgb),.15);border-color:rgba(var(--ds-accent-rgb),.4);color:var(--ds-accent-ink)}
+  .pl-detail-addr{display:flex;align-items:center;gap:6px;font-size:.84rem;color:var(--ds-text-3);margin-bottom:14px}
+  .pl-detail-addr i{color:var(--ds-accent-ink)}
+  .pl-detail-desc{font-size:.88rem;color:var(--ds-text-3);line-height:1.65;margin-bottom:16px}
+  .pl-detail-meta{display:flex;gap:20px;font-size:.8rem;color:var(--ds-text-3);margin-bottom:16px}
+  .pl-detail-meta strong{display:block;font-size:1.05rem;font-weight:800;color:var(--ds-text)}
 
   /* ── REVIEWS ── */
   .pl-reviews-section{margin-top:16px}
-  .pl-reviews-head{font-size:.8rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
+  .pl-reviews-head{font-size:.8rem;font-weight:800;color:var(--ds-text-3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
   .pl-review-form{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;padding:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px}
   .pl-stars-row{display:flex;gap:6px;cursor:pointer}
-  .pl-star{font-size:1.2rem;color:#4b5563;transition:color .15s;cursor:pointer}
-  .pl-star.active,.pl-star:hover,.pl-star.hover{color:#f59e0b}
-  .pl-review-input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:#f8fafc;font-size:.84rem;font-family:inherit;resize:none;outline:none}
-  .pl-review-input::placeholder{color:#4b5563}
-  .pl-review-submit{align-self:flex-end;padding:8px 18px;background:linear-gradient(135deg,#10b981,#3b82f6);border:none;border-radius:10px;color:#fff;font-weight:700;font-size:.82rem;cursor:pointer}
+  .pl-star{font-size:1.2rem;color:var(--ds-text-2);transition:color .15s;cursor:pointer}
+  .pl-star.active,.pl-star:hover,.pl-star.hover{color:var(--ds-h-reward-ink)}
+  .pl-review-input{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:9px 12px;color:var(--ds-text);font-size:.84rem;font-family:inherit;resize:none;outline:none}
+  .pl-review-input::placeholder{color:var(--ds-text-2)}
+  .pl-review-submit{align-self:flex-end;padding:8px 18px;background:linear-gradient(135deg,var(--ds-accent),#3b82f6);border:none;border-radius:10px;color:#fff;font-weight:700;font-size:.82rem;cursor:pointer}
   .pl-review-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05)}
   .pl-review-item:last-child{border-bottom:none}
-  .pl-review-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#10b981,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;flex-shrink:0}
+  .pl-review-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--ds-accent),#3b82f6);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;flex-shrink:0}
   .pl-review-body{flex:1;min-width:0}
-  .pl-review-name{font-size:.82rem;font-weight:700;color:#e2e8f0}
-  .pl-review-stars{color:#f59e0b;font-size:.72rem;margin:2px 0}
-  .pl-review-text{font-size:.8rem;color:#94a3b8;line-height:1.5}
-  .pl-review-time{font-size:.7rem;color:#4b5563;margin-top:2px}
+  .pl-review-name{font-size:.82rem;font-weight:700;color:var(--ds-text-2)}
+  .pl-review-stars{color:var(--ds-h-reward-ink);font-size:.72rem;margin:2px 0}
+  .pl-review-text{font-size:.8rem;color:var(--ds-text-3);line-height:1.5}
+  .pl-review-time{font-size:.7rem;color:var(--ds-text-2);margin-top:2px}
 
   /* ── PLACE CHECK-INS ── */
   .pl-checkins-section{margin-top:16px}
-  .pl-checkins-head{font-size:.78rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+  .pl-checkins-head{font-size:.78rem;font-weight:800;color:var(--ds-text-3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
   .pl-checkin-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);align-items:flex-start}
   .pl-checkin-item:last-child{border-bottom:none}
-  .pl-checkin-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#10b981,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;flex-shrink:0;text-decoration:none;overflow:hidden}
+  .pl-checkin-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--ds-accent),#06b6d4);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;flex-shrink:0;text-decoration:none;overflow:hidden}
   .pl-checkin-body{flex:1;min-width:0}
-  .pl-checkin-name{font-size:.8rem;font-weight:700;color:#e2e8f0;text-decoration:none}
-  .pl-checkin-name:hover{color:#10b981}
-  .pl-checkin-meta{font-size:.7rem;color:#64748b;margin-top:2px}
-  .pl-checkin-caption{font-size:.78rem;color:#94a3b8;margin-top:3px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .pl-checkin-name{font-size:.8rem;font-weight:700;color:var(--ds-text-2);text-decoration:none}
+  .pl-checkin-name:hover{color:var(--ds-accent-ink)}
+  .pl-checkin-meta{font-size:.7rem;color:var(--ds-text-3);margin-top:2px}
+  .pl-checkin-caption{font-size:.78rem;color:var(--ds-text-3);margin-top:3px;line-height:1.4;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
   .pl-checkin-photo{width:54px;height:46px;border-radius:8px;object-fit:cover;flex-shrink:0}
 
   /* ── MAP VIEW ── */
   .pl-view-toggle{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:3px;flex-shrink:0}
-  .pl-view-btn{padding:6px 12px;border-radius:16px;border:none;background:none;color:#64748b;font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;font-family:inherit}
-  .pl-view-btn.active{background:rgba(16,185,129,.15);color:#10b981}
+  .pl-view-btn{padding:6px 12px;border-radius:16px;border:none;background:none;color:var(--ds-text-3);font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s;font-family:inherit}
+  .pl-view-btn.active{background:rgba(var(--ds-accent-rgb),.15);color:var(--ds-accent-ink)}
 
   /* ── PHOTO GALLERY (check-in photos) ── */
   .pl-gallery-section{margin-top:16px}
-  .pl-gallery-head{font-size:.78rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+  .pl-gallery-head{font-size:.78rem;font-weight:800;color:var(--ds-text-3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;gap:5px}
   .pl-gallery{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}
   .pl-gallery::-webkit-scrollbar{display:none}
   .pl-gallery-img{width:100px;height:72px;border-radius:10px;object-fit:cover;cursor:pointer;flex-shrink:0;border:1px solid rgba(255,255,255,.08);transition:transform .15s;display:block}
@@ -182,7 +183,7 @@
   /* ── REVIEW CONTROLS ── */
   .pl-review-av{overflow:hidden}
   .pl-review-header{display:flex;align-items:center;gap:6px;margin-bottom:2px}
-  .pl-review-del{margin-left:auto;background:none;border:none;color:#4b5563;font-size:.68rem;cursor:pointer;padding:2px 5px;border-radius:5px;line-height:1;flex-shrink:0}
+  .pl-review-del{margin-left:auto;background:none;border:none;color:var(--ds-text-2);font-size:.68rem;cursor:pointer;padding:2px 5px;border-radius:5px;line-height:1;flex-shrink:0}
   .pl-review-del:hover{color:#ef4444;background:rgba(239,68,68,.08)}
 
   /* ── MOBILE ── */
@@ -201,8 +202,10 @@
   }
   </style>
   <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700;800&family=Noto+Serif+Georgian:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
   <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
-  <script type="module" crossorigin src="/assets/responsive-polish-BO79aqv7.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
@@ -210,14 +213,15 @@
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js"></script>
   <script type="module" crossorigin src="/assets/firebase-config-CGKVrgHh.js"></script>
-  <script type="module" crossorigin src="/assets/firestore-social-BXEW-BZV.js"></script>
-  <script type="module" crossorigin src="/assets/chat-popup-MADaMnFN.js"></script>
+  <script type="module" crossorigin src="/assets/firestore-social-CedOtedd.js"></script>
+  <script type="module" crossorigin src="/assets/chat-popup-BHzNMiBZ.js"></script>
   <script type="module" crossorigin src="/assets/gh-calls-DqDOBgOW.js"></script>
-  <script type="module" crossorigin src="/assets/gh-group-calls-Ck1zIhcT.js"></script>
-  <script type="module" crossorigin src="/assets/gh-i18n-BbqPU8Gy.js"></script>
-  <script type="module" crossorigin src="/assets/account-BJSGhbLy.js"></script>
-  <script type="module" crossorigin src="/assets/mobile-nav-DsKLv3RI.js"></script>
-  <script type="module" crossorigin src="/assets/geohub-production-stabilization-v1-D4HPXa7T.js"></script>
+  <script type="module" crossorigin src="/assets/gh-group-calls-CA5vOXuG.js"></script>
+  <script type="module" crossorigin src="/assets/gh-admin-bridge-h-7zgsq_.js"></script>
+  <script type="module" crossorigin src="/assets/account-Dl1_viTm.js"></script>
+  <script type="module" crossorigin src="/assets/mobile-nav-CEPM5beY.js"></script>
+  <script type="module" crossorigin src="/assets/geohub-production-stabilization-v1-kYTMrx4r.js"></script>
+  <script type="module" crossorigin src="/assets/responsive-polish-Cni6BeF_.js"></script>
   <script type="module" crossorigin src="/assets/analytics-DyGaP85h.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
@@ -225,11 +229,12 @@
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
-  <link rel="stylesheet" crossorigin href="/assets/styles-DiOMSwr8.css">
-  <link rel="stylesheet" crossorigin href="/assets/navbar-D8jKRRC5.css">
-  <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-MLyQcxDm.css">
-  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+  <link rel="stylesheet" crossorigin href="/assets/styles-B48usZYl.css">
+  <link rel="stylesheet" crossorigin href="/assets/navbar-Ck0zE8aV.css">
+  <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-SGulRuY0.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-DzoItt1C.css">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-OO1pxCG1.css">
+  <link rel="stylesheet" crossorigin href="/assets/gh-design-system-Eii08DGH.css">
 </head>
 <body>
 
@@ -324,9 +329,9 @@
         <label data-i18n="pl_photo">Photo (optional)</label>
         <div style="display:flex;gap:8px;align-items:center">
           <input type="url" id="plPhoto" placeholder="https://… or upload below" oninput="previewPhoto(this.value)" style="flex:1">
-          <button type="button" id="plPhotoUploadBtn" onclick="plPickPhoto()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#f0f4ff;border-radius:10px;padding:9px 12px;cursor:pointer;font-size:.82rem;white-space:nowrap;flex-shrink:0"><i class="fas fa-upload"></i> Upload</button>
+          <button type="button" id="plPhotoUploadBtn" onclick="plPickPhoto()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:var(--ds-text);border-radius:10px;padding:9px 12px;cursor:pointer;font-size:.82rem;white-space:nowrap;flex-shrink:0"><i class="fas fa-upload"></i> Upload</button>
         </div>
-        <div id="plPhotoUploadStatus" style="font-size:.73rem;color:#64748b;margin-top:4px;display:none"></div>
+        <div id="plPhotoUploadStatus" style="font-size:.73rem;color:var(--ds-text-3);margin-top:4px;display:none"></div>
         <img id="plPhotoPreview" class="pl-photo-preview" alt="" loading="lazy" decoding="async">
       </div>
       <button class="pl-modal-submit" id="plSubmitBtn" onclick="submitAddPlace()">
@@ -361,7 +366,7 @@
     shopping:'linear-gradient(135deg,#831843,#be185d)',
     nightlife:'linear-gradient(135deg,#1e1b4b,#4338ca)',
     sports:'linear-gradient(135deg,#164e63,#0891b2)',
-    other:'linear-gradient(135deg,#10b981,#3b82f6)',
+    other:'linear-gradient(135deg,var(--ds-h-place),var(--ds-h-video))',
   };
 
   function getPlaceImage(p){ return p.imageUrl||p.image||p.coverImage||p.coverImageUrl||p.coverUrl||p.photoUrl||p.thumbnail||''; }
@@ -391,7 +396,7 @@
         '<div class="pl-card-name">'+esc(p.name)+'</div>'+
         '<div class="pl-card-addr"><i class="fas fa-map-marker-alt"></i>'+esc(p.address||'Georgia')+'</div>'+
         '<div class="pl-card-foot">'+
-          '<span class="pl-card-rating">'+(p.rating?starRating(p.rating):'<span style="color:#64748b;font-size:.75rem">No ratings yet</span>')+'</span>'+
+          '<span class="pl-card-rating">'+(p.rating?starRating(p.rating):'<span style="color:var(--ds-text-3);font-size:.75rem">No ratings yet</span>')+'</span>'+
           '<span class="pl-card-reviews">'+(p.reviewCount?p.reviewCount+' reviews':'')+'</span>'+
         '</div>'+
       '</div>'+
@@ -572,7 +577,7 @@
           '<div><strong>'+(p.saveCount||0)+'</strong> Saves</div>'+
         '</div>'+
         (p.description?'<div class="pl-detail-desc">'+esc(p.description)+'</div>':'')+
-        '<p style="font-size:.78rem;color:#4b5563">Added by '+esc(p.creatorName||'User')+'</p>'+
+        '<p style="font-size:.78rem;color:var(--ds-text-2)">Added by '+esc(p.creatorName||'User')+'</p>'+
         '<div class="pl-gallery-section" id="plGallerySection" style="display:none">'+
           '<div class="pl-gallery-head"><i class="fas fa-images"></i> Photos</div>'+
           '<div class="pl-gallery" id="plGallery"></div>'+
@@ -590,18 +595,18 @@
             '<textarea class="pl-review-input" id="plReviewText" placeholder="Share your experience…" rows="3"></textarea>'+
             '<button class="pl-review-submit" onclick="submitReview(\''+esc(p.id)+'\')"><i class="fas fa-paper-plane"></i> Post Review</button>'+
           '</div>'+
-          '<div id="plReviewsList"><div style="padding:12px;color:#4b5563;font-size:.82rem">Loading reviews…</div></div>'+
+          '<div id="plReviewsList"><div style="padding:12px;color:var(--ds-text-2);font-size:.82rem">Loading reviews…</div></div>'+
         '</div>'+
         '<div class="pl-checkins-section">'+
           '<div class="pl-checkins-head"><i class="fas fa-map-pin"></i> Recent Check-ins</div>'+
-          '<div id="plCheckinsList"><div style="padding:8px 0;color:#4b5563;font-size:.8rem"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div></div>'+
+          '<div id="plCheckinsList"><div style="padding:8px 0;color:var(--ds-text-2);font-size:.8rem"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div></div>'+
         '</div>'+
         '<div id="plVideosSection" style="margin-top:18px">'+
           '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'+
-            '<div style="font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#64748b"><i class="fas fa-film" style="margin-right:5px"></i>Videos</div>'+
-            '<a href="map.html?mode=videos&place='+esc(p.id)+'" style="font-size:.72rem;color:#10b981;text-decoration:none;display:flex;align-items:center;gap:4px"><i class="fas fa-map"></i>View on Map</a>'+
+            '<div style="font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ds-text-3)"><i class="fas fa-film" style="margin-right:5px"></i>Videos</div>'+
+            '<a href="map.html?mode=videos&place='+esc(p.id)+'" style="font-size:.72rem;color:var(--ds-accent-ink);text-decoration:none;display:flex;align-items:center;gap:4px"><i class="fas fa-map"></i>View on Map</a>'+
           '</div>'+
-          '<div id="plVideosList" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none"><div style="color:#64748b;font-size:.8rem;padding:8px 0"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div></div>'+
+          '<div id="plVideosList" style="display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none"><div style="color:var(--ds-text-3);font-size:.8rem;padding:8px 0"><i class="fas fa-circle-notch fa-spin"></i> Loading…</div></div>'+
         '</div>'+
       '</div>';
     initReviewStars();
@@ -651,13 +656,13 @@
     overlay.classList.add('open');
     var p = _allPlaces.find(function(x){return x.id===placeId;});
     if(p){ _renderPlaceDetail(p); return; }
-    box.innerHTML='<div style="padding:40px;text-align:center;color:#64748b"><i class="fas fa-circle-notch fa-spin" style="font-size:1.5rem"></i></div>';
+    box.innerHTML='<div style="padding:40px;text-align:center;color:var(--ds-text-3)"><i class="fas fa-circle-notch fa-spin" style="font-size:1.5rem"></i></div>';
     var gf = window.GeoFirebase;
-    if(!gf||!gf.fs||!gf.db){ box.innerHTML='<p style="padding:24px;color:#94a3b8">Place not found.</p>'; return; }
+    if(!gf||!gf.fs||!gf.db){ box.innerHTML='<p style="padding:24px;color:var(--ds-text-3)">Place not found.</p>'; return; }
     gf.fs.getDoc(gf.fs.doc(gf.db,'places',placeId)).then(function(snap){
-      if(!snap.exists()){ box.innerHTML='<p style="padding:24px;color:#94a3b8">Place not found.</p>'; return; }
+      if(!snap.exists()){ box.innerHTML='<p style="padding:24px;color:var(--ds-text-3)">Place not found.</p>'; return; }
       _renderPlaceDetail(Object.assign({id:snap.id},snap.data()));
-    }).catch(function(){ box.innerHTML='<p style="padding:24px;color:#94a3b8">Could not load place.</p>'; });
+    }).catch(function(){ box.innerHTML='<p style="padding:24px;color:var(--ds-text-3)">Could not load place.</p>'; });
   }
 
   function initReviewStars(){
@@ -719,12 +724,12 @@
         if(detCount) detCount.textContent = '0';
       }
       if(!reviews.length){
-        list.innerHTML = '<p style="font-size:.8rem;color:#4b5563;padding:8px 0">No reviews yet. Be the first!</p>';
+        list.innerHTML = '<p style="font-size:.8rem;color:var(--ds-text-2);padding:8px 0">No reviews yet. Be the first!</p>';
         return;
       }
       var curUid = (window.GeoFirebase && window.GeoFirebase.auth && window.GeoFirebase.auth.currentUser) ? window.GeoFirebase.auth.currentUser.uid : '';
       list.innerHTML = reviews.map(function(r){
-        var stars = Array(5).fill(0).map(function(_,i){ return '<span style="color:'+(i<r.rating?'#f59e0b':'#374151')+'">&#9733;</span>'; }).join('');
+        var stars = Array(5).fill(0).map(function(_,i){ return '<span style="color:'+(i<r.rating?'#f59e0b':'var(--ds-text-2)')+'">&#9733;</span>'; }).join('');
         var time = r.createdAt && r.createdAt.toDate ? new Intl.DateTimeFormat('en',{month:'short',day:'numeric',year:'numeric'}).format(r.createdAt.toDate()) : '';
         var initials = (r.userName||'U').charAt(0).toUpperCase();
         var avInner = r.userPhoto
@@ -769,7 +774,7 @@
       gf.fs.limit(10)
     )).then(function(snap){
       if(snap.empty){
-        list.innerHTML='<p style="font-size:.8rem;color:#4b5563;padding:8px 0">No check-ins yet. <a href="checkin.html?placeId='+encodeURIComponent(placeId)+'" style="color:#10b981">Be the first!</a></p>';
+        list.innerHTML='<p style="font-size:.8rem;color:var(--ds-text-2);padding:8px 0">No check-ins yet. <a href="checkin.html?placeId='+encodeURIComponent(placeId)+'" style="color:var(--ds-accent-ink)">Be the first!</a></p>';
         return;
       }
       var items=[];
@@ -786,7 +791,7 @@
         var avInner=c.authorAvatar
           ? '<img src="'+esc(c.authorAvatar)+'" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.onerror=null;this.style.display=\'none\'">'
           : esc(initials);
-        var verBadge=c.verified?'<span style="color:#10b981;font-size:.65rem;margin-left:4px">✓</span>':'';
+        var verBadge=c.verified?'<span style="color:var(--ds-accent-ink);font-size:.65rem;margin-left:4px">✓</span>':'';
         return '<div class="pl-checkin-item">'+
           '<a href="'+esc(avHref)+'" class="pl-checkin-av">'+avInner+'</a>'+
           '<div class="pl-checkin-body">'+
@@ -916,7 +921,7 @@
 </script>
 <!-- PHOTO LIGHTBOX -->
 <div class="pl-lightbox" id="plLightbox" onclick="closeLightbox()">
-  <img id="plLightboxImg" class="pl-lightbox-img" src="" alt="" onclick="event.stopPropagation()">
+  <img id="plLightboxImg" class="pl-lightbox-img" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="" onclick="event.stopPropagation()">
 </div>
       <!-- Vite: 13 scripts → 1 chunk. See src/entries/places.js -->
 </body>

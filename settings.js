@@ -162,7 +162,7 @@
   function db(){ return GF && GF.db; }
   function auth(){ return GF && GF.auth; }
   function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
-  function getLang(){ var v = localStorage.getItem('gh_lang'); return v === 'ka' ? 'ka' : 'en'; }
+  function getLang(){ try { return localStorage.getItem('gh_lang') === 'en' ? 'en' : 'ka'; } catch(e) { return 'ka'; } }
   function tr(k){ return (dict[getLang()] && dict[getLang()][k]) || dict.en[k] || k; }
   function getThemePref(){ var v = localStorage.getItem('gh_theme'); return v === 'system' || v === 'light' || v === 'dark' ? v : 'dark'; }
   function effectiveTheme(pref){

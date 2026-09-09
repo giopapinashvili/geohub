@@ -34,7 +34,7 @@
 .btn-primary:hover {
   background: var(--gradient-brand-r);
   transform: translateY(-1px);
-  box-shadow: 0 6px 24px rgba(16,185,129,0.35);
+  box-shadow: 0 6px 24px rgba(var(--ds-accent-rgb),0.35);
 }
 .btn-secondary {
   background: transparent;
@@ -238,7 +238,7 @@
 .form-textarea:focus {
   border-color: var(--border-focus);
   background: rgba(255,255,255,0.08);
-  box-shadow: 0 0 0 3px rgba(16,185,129,0.12);
+  box-shadow: 0 0 0 3px rgba(var(--ds-accent-rgb),0.12);
 }
 .form-textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
 .form-select {
@@ -459,7 +459,7 @@
   gap: 5px;
   padding: 5px 12px;
   background: var(--green-muted);
-  border: 1px solid rgba(16,185,129,0.2);
+  border: 1px solid rgba(var(--ds-accent-rgb),0.2);
   border-radius: var(--radius-full);
   font-size: 0.8rem;
   font-weight: var(--fw-bold);
@@ -540,7 +540,7 @@
 .toast-icon { flex-shrink: 0; margin-top: 1px; }
 .toast-body { flex: 1; }
 .toast-title { font-weight: var(--fw-bold); color: var(--text-primary); margin-bottom: 2px; }
-.toast-green { border-color: rgba(16,185,129,0.3); }
+.toast-green { border-color: rgba(var(--ds-accent-rgb),0.3); }
 .toast-red   { border-color: rgba(239,68,68,0.3); }
 
 /* ── LIST ITEMS ───────────────────────────────────────────────── */
@@ -745,7 +745,7 @@
 }
 .auth-form-group input:focus,
 .auth-form-group select:focus,
-.auth-form-group textarea:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(16,185,129,0.12); }
+.auth-form-group textarea:focus { border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(var(--ds-accent-rgb),0.12); }
 .auth-form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); margin-bottom: var(--sp-4); }
 @media (max-width: 480px) { .auth-form-row-2 { grid-template-columns: 1fr; } }
 .auth-submit {
@@ -762,7 +762,7 @@
   transition: var(--transition);
   box-shadow: var(--shadow-green);
 }
-.auth-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(16,185,129,0.35); }
+.auth-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(var(--ds-accent-rgb),0.35); }
 .settings-save-row { display: flex; align-items: center; gap: var(--sp-3); margin-top: var(--sp-4); }
 .settings-success { display: flex; align-items: center; gap: 6px; color: var(--green-light); font-size: var(--text-sm); font-weight: var(--fw-semibold); }
 .ob-interest-grid { display: flex; flex-wrap: wrap; gap: var(--sp-2); }

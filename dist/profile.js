@@ -6,6 +6,7 @@
   const esc = (v) => String(v == null ? '' : v).replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
   const compact = (v) => Number(v || 0) >= 1000 ? (Number(v) / 1000).toFixed(Number(v) >= 10000 ? 0 : 1) + 'k' : String(Number(v || 0));
   const safeUrl = (s) => { var u = String(s || '').trim(); return /^https?:\/\//i.test(u) ? u : ''; };
+  var _profileLastPosts = null;   // shared: renderTabs writes, renderIdentity reads
 
   function timeAgo(ts) {
     if (!ts) return '';
@@ -41,7 +42,7 @@
 
   function initialsSvg(initials) {
     const text = encodeURIComponent(initials || 'GH');
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240"><rect width="240" height="240" rx="120" fill="#6d3fd9"/><circle cx="120" cy="120" r="114" fill="none" stroke="#10b981" stroke-width="8"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="86" fill="white" font-weight="700">${text}</text></svg>`;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240"><rect width="240" height="240" rx="120" fill="#6d3fd9"/><circle cx="120" cy="120" r="114" fill="none" stroke="var(--ds-accent)" stroke-width="8"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="86" fill="white" font-weight="700">${text}</text></svg>`;
     return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
   }
 
@@ -158,8 +159,8 @@
       return normalizeProfile(null, Object.assign({ uid: fbUser.uid || _cached.uid }, _cached));
     }
     var snap;
+    const ref = GF.fs.doc(GF.db, 'users', fbUser.uid);
     try {
-      const ref = GF.fs.doc(GF.db, 'users', fbUser.uid);
       snap = await GF.fs.getDoc(ref);
     } catch (e) {
       // Firestore unavailable (quota, offline) — build profile from Firebase auth only
@@ -341,7 +342,7 @@
         cover.style.backgroundImage = `url('${user.coverImage}')`;
       } else {
         cover.classList.remove('dynamic-cover');
-        cover.style.backgroundImage = 'linear-gradient(135deg, rgba(16,185,129,0.20), rgba(77,166,255,0.12), rgba(123,97,255,0.12))';
+        cover.style.backgroundImage = 'linear-gradient(135deg, rgba(var(--ds-accent-rgb),0.20), rgba(77,166,255,0.12), rgba(123,97,255,0.12))';
       }
     }
     const av = $('.profile-avatar'); if (av) { av.src = user.avatar; av.alt = user.fullName; av.onerror = function(){ this.onerror=null; this.src=initialsSvg(user.initials||'GH'); }; }
@@ -368,7 +369,7 @@
         var _crown = document.createElement('span');
         _crown.id = 'gh-prem-crown';
         _crown.title = 'GeoHub Premium';
-        _crown.style.cssText = 'color:#f59e0b;margin-left:6px;font-size:.85em;vertical-align:middle;cursor:default;display:inline-flex;align-items:center';
+        _crown.style.cssText = 'color:var(--ds-h-reward-ink);margin-left:6px;font-size:.85em;vertical-align:middle;cursor:default;display:inline-flex;align-items:center';
         _crown.innerHTML = '<i class="fas fa-crown"></i>';
         name.insertAdjacentElement('afterend', _crown);
       }
@@ -413,7 +414,7 @@
       }
     }
     const actions = $('.profile-actions');
-    if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> '+_t('profile_edit')+'</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="btn btn-ghost btn-sm" data-qr-profile="'+esc(user.uid)+'" title="QR Code"><i class="fas fa-qrcode"></i></button><button class="btn btn-ghost btn-sm" id="cfManageBtn" style="color:#22c55e" title="Close Friends"><i class="fas fa-star"></i> Close Friends</button><button class="btn btn-ghost btn-sm" onclick="window.ghOpenInviteModal&&window.ghOpenInviteModal()" title="მეგობრების მოწვევა" style="color:#f59e0b"><i class="fas fa-gift"></i></button><button class="btn btn-ghost btn-sm profile-body-logout" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> '+_t('profile_message')+'</button><button class="btn btn-ghost btn-sm" data-call-user="' + esc(user.uid) + '" data-call-type="audio" data-call-name="' + esc(user.fullName) + '" data-call-avatar="' + esc(user.avatar || '') + '" title="'+_t('call_voice','Voice call')+'"><i class="fas fa-phone"></i></button><button class="btn btn-ghost btn-sm" data-call-user="' + esc(user.uid) + '" data-call-type="video" data-call-name="' + esc(user.fullName) + '" data-call-avatar="' + esc(user.avatar || '') + '" title="'+_t('call_video','Video call')+'"><i class="fas fa-video"></i></button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> '+_t('profile_add_friend')+'</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> '+_t('follow')+'</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-mute-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-volume-mute"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-ban"></i></button><button class="btn btn-ghost btn-sm" data-qr-profile="' + esc(user.uid) + '" title="QR Code"><i class="fas fa-qrcode"></i></button>';
+    if (actions) actions.innerHTML = own ? '<button class="btn btn-primary btn-sm" data-edit-profile><i class="fas fa-pen"></i> '+_t('profile_edit')+'</button><button class="btn btn-ghost btn-sm" data-share-profile><i class="fas fa-share-alt"></i> '+_t('post_action_share')+'</button><button class="btn btn-ghost btn-sm" data-qr-profile="'+esc(user.uid)+'" title="QR Code"><i class="fas fa-qrcode"></i></button><button class="btn btn-ghost btn-sm" id="cfManageBtn" style="color:#22c55e" title="Close Friends"><i class="fas fa-star"></i> Close Friends</button><button class="btn btn-ghost btn-sm" onclick="window.ghOpenInviteModal&&window.ghOpenInviteModal()" title="მეგობრების მოწვევა" style="color:var(--ds-h-reward-ink)"><i class="fas fa-gift"></i></button><button class="btn btn-ghost btn-sm profile-body-logout" data-logout><i class="fas fa-right-from-bracket"></i> Logout</button>' : '<button class="btn btn-ghost btn-sm" data-message-user="' + esc(user.uid) + '"><i class="fas fa-envelope"></i> '+_t('profile_message')+'</button><button class="btn btn-ghost btn-sm" data-call-user="' + esc(user.uid) + '" data-call-type="audio" data-call-name="' + esc(user.fullName) + '" data-call-avatar="' + esc(user.avatar || '') + '" title="'+_t('call_voice','Voice call')+'"><i class="fas fa-phone"></i></button><button class="btn btn-ghost btn-sm" data-call-user="' + esc(user.uid) + '" data-call-type="video" data-call-name="' + esc(user.fullName) + '" data-call-avatar="' + esc(user.avatar || '') + '" title="'+_t('call_video','Video call')+'"><i class="fas fa-video"></i></button><button class="btn btn-primary btn-sm" data-friend-user="' + esc(user.uid) + '"><i class="fas fa-user-plus"></i> '+_t('profile_add_friend')+'</button><button class="btn btn-ghost btn-sm" data-follow-user="' + esc(user.uid) + '"><i class="fas fa-rss"></i> '+_t('follow')+'</button><button class="btn btn-ghost btn-sm" data-report-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-flag"></i></button><button class="btn btn-ghost btn-sm" data-mute-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-volume-mute"></i></button><button class="btn btn-ghost btn-sm" data-block-user="' + esc(user.uid) + '" data-user-name="' + esc(user.fullName) + '"><i class="fas fa-ban"></i></button><button class="btn btn-ghost btn-sm" data-qr-profile="' + esc(user.uid) + '" title="QR Code"><i class="fas fa-qrcode"></i></button>';
     if (own) {
       var cfMBtn = document.getElementById('cfManageBtn');
       if (cfMBtn) cfMBtn.onclick = function(){ _openCFModal(user.uid); };
@@ -421,7 +422,6 @@
     // Profile visibility helpers
     var _privRel = own ? 'own' : 'stranger';
     var _privIsFollower = false;
-    var _profileLastPosts = null;
     function _ppAllowed(setting, rel) {
       if (!setting || setting === 'everyone') return true;
       if (setting === 'nobody' || setting === 'me') return false;
@@ -561,7 +561,7 @@
           if (!btn || !amMuting) return;
           btn.setAttribute('data-unmute-user', user.uid);
           btn.removeAttribute('data-mute-user');
-          btn.innerHTML = '<i class="fas fa-volume-up" style="color:#f59e0b"></i>';
+          btn.innerHTML = '<i class="fas fa-volume-up" style="color:var(--ds-h-reward-ink)"></i>';
           btn.title = 'Unmute';
         });
       }
@@ -660,7 +660,7 @@
           var badge = document.createElement('span');
           badge.id = 'cf-badge-star';
           badge.title = 'Close Friend';
-          badge.style.cssText = 'display:inline-flex;align-items:center;gap:3px;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.35);color:#fbbf24;border-radius:999px;font-size:.7rem;font-weight:700;padding:2px 8px;margin-left:8px;vertical-align:middle';
+          badge.style.cssText = 'display:inline-flex;align-items:center;gap:3px;background:rgba(251,191,36,.15);border:1px solid rgba(251,191,36,.35);color:var(--ds-h-reward-ink);border-radius:999px;font-size:.7rem;font-weight:700;padding:2px 8px;margin-left:8px;vertical-align:middle';
           badge.innerHTML = '⭐ Close Friend';
           nameEl.appendChild(badge);
         }
@@ -704,7 +704,7 @@
       if (snap.empty && !isOwn) { row.innerHTML = ''; return; }
       snap.forEach(function(d) {
         var h = Object.assign({ id: d.id }, d.data());
-        var coverStyle = h.coverUrl ? 'background-image:url("' + esc(h.coverUrl) + '");background-size:cover;background-position:center' : 'background:linear-gradient(135deg,#10b981,#3b82f6)';
+        var coverStyle = h.coverUrl ? 'background-image:url("' + esc(h.coverUrl) + '");background-size:cover;background-position:center' : 'background:linear-gradient(135deg,var(--ds-accent),#3b82f6)';
         html += '<div class="highlight-item" data-open-highlight="' + esc(d.id) + '" data-highlight-uid="' + esc(user.uid) + '">' +
           '<div class="highlight-ring" style="' + coverStyle + '"></div>' +
           '<div class="highlight-label">' + esc(h.title || 'Highlight') + '</div>' +
@@ -974,6 +974,7 @@
   };
 
   function renderTabs(user, fbUser) {
+    var _t = function(k, f){ return typeof window.GHt === 'function' ? window.GHt(k) : (f || k); };
     var _pt=typeof GHt==='function'?GHt:function(k){return k;};
     emptyTab('#tab-posts', 'fa-seedling', _pt('profile_posts')+': '+_pt('no_results'), _pt('profile_no_posts_hint'), 'feed.html?compose=1', _pt('create_post'));
     emptyTab('#tab-checkins', 'fa-location-dot', _pt('profile_checkins')+': '+_pt('no_results'), _pt('profile_no_checkins'), 'checkin.html', _pt('ci_title'));
@@ -998,7 +999,7 @@
       window.GeoSocial.listenSavedPosts(user.uid, function (posts) {
         var sec = $('#saved-posts-section'); if (!sec) return;
         if (!posts.length) { sec.innerHTML = ''; updateSavedEmpty(); updateSavedCount(0); return; }
-        sec.innerHTML = '<div style="font-size:.75rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px"><i class="fas fa-file-alt" style="margin-right:6px"></i>Saved Posts</div>'
+        sec.innerHTML = '<div style="font-size:.75rem;font-weight:800;color:var(--ds-text-3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px"><i class="fas fa-file-alt" style="margin-right:6px"></i>Saved Posts</div>'
           + '<div class="posts-grid">' + posts.map(function (post) {
             return '<div class="post-thumb">'
               + (post.mediaUrl ? '<img src="' + esc(post.mediaUrl) + '" alt="Post" loading="lazy" decoding="async" onerror="this.onerror=null;this.style.display=\'none\'">'
@@ -1011,16 +1012,16 @@
       window.GeoSocial.listenSavedPlaces(user.uid, function (places) {
         var sec = $('#saved-places-section'); if (!sec) return;
         if (!places.length) { sec.innerHTML = ''; updateSavedEmpty(); return; }
-        sec.innerHTML = '<div style="font-size:.75rem;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:.6px;margin:20px 0 12px"><i class="fas fa-map-marker-alt" style="margin-right:6px"></i>Saved Places</div>'
+        sec.innerHTML = '<div style="font-size:.75rem;font-weight:800;color:var(--ds-text-3);text-transform:uppercase;letter-spacing:.6px;margin:20px 0 12px"><i class="fas fa-map-marker-alt" style="margin-right:6px"></i>Saved Places</div>'
           + '<div style="display:flex;flex-direction:column;gap:10px">'
           + places.map(function (p) {
-            var grad = 'linear-gradient(135deg,#10b981,#3b82f6)';
+            var grad = 'linear-gradient(135deg,var(--ds-accent),#3b82f6)';
             var cover = p.photoUrl ? '<img src="' + esc(p.photoUrl) + '" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;border-radius:10px">' : '<div style="width:100%;height:100%;background:' + grad + ';border-radius:10px;display:flex;align-items:center;justify-content:center"><i class="fas fa-map-marker-alt" style="color:#fff;font-size:1.1rem"></i></div>';
             return '<a href="places.html" style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;text-decoration:none;color:inherit;transition:border-color .15s">'
               + '<div style="width:52px;height:52px;border-radius:10px;overflow:hidden;flex-shrink:0">' + cover + '</div>'
-              + '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:.88rem;color:#f0f4ff;margin-bottom:3px">' + esc(p.name || 'Unknown Place') + '</div>'
-              + '<div style="font-size:.74rem;color:#64748b">' + esc(p.category || '') + (p.address ? ' · ' + esc(p.address) : '') + '</div></div>'
-              + '<i class="fas fa-bookmark" style="color:#10b981;font-size:.88rem;flex-shrink:0"></i></a>';
+              + '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:.88rem;color:var(--ds-text);margin-bottom:3px">' + esc(p.name || 'Unknown Place') + '</div>'
+              + '<div style="font-size:.74rem;color:var(--ds-text-3)">' + esc(p.category || '') + (p.address ? ' · ' + esc(p.address) : '') + '</div></div>'
+              + '<i class="fas fa-bookmark" style="color:var(--ds-accent-ink);font-size:.88rem;flex-shrink:0"></i></a>';
           }).join('') + '</div>';
         updateSavedEmpty();
       });
@@ -1178,7 +1179,7 @@
     function buildHeader(balPts) {
       return '<div class="rw-profile-bal">' +
         '<div>' +
-          '<div class="rw-profile-bal-label"><i class="fas fa-coins" style="margin-right:5px;color:#10b981"></i>GeoPoints Balance</div>' +
+          '<div class="rw-profile-bal-label"><i class="fas fa-coins" style="margin-right:5px;color:var(--ds-accent-ink)"></i>GeoPoints Balance</div>' +
           '<div class="rw-profile-bal-pts" id="profRwBal">' + esc(compact(balPts)) + ' pts</div>' +
         '</div>' +
         '<div style="display:flex;gap:8px">' +
@@ -1261,14 +1262,14 @@
 
       const rows = items.map(item => {
         if (item.type === 'gift_sent') {
-          const label = 'Sent to ' + esc(item.toName || 'user') + (item.msg ? ' · ' + esc(item.msg.slice(0, 40)) : '') + (item.status === 'pending' ? ' <span style="font-size:.65rem;color:#f59e0b">(pending)</span>' : '');
+          const label = 'Sent to ' + esc(item.toName || 'user') + (item.msg ? ' · ' + esc(item.msg.slice(0, 40)) : '') + (item.status === 'pending' ? ' <span style="font-size:.65rem;color:var(--ds-h-reward-ink)">(pending)</span>' : '');
           return '<div class="rw-history-item">' +
             '<div class="rw-history-icon sent"><i class="fas fa-paper-plane"></i></div>' +
             '<div class="rw-history-info"><div class="rw-history-title">' + label + '</div><div class="rw-history-meta">Points transfer</div></div>' +
             '<div class="rw-history-amount neg">−' + compact(item.amount) + '</div></div>';
         }
         if (item.type === 'gift_recv') {
-          const label = 'Received from ' + esc(item.fromName || 'user') + (item.msg ? ' · ' + esc(item.msg.slice(0, 40)) : '') + (item.status === 'pending' ? ' <span style="font-size:.65rem;color:#f59e0b">(unclaimed)</span>' : '');
+          const label = 'Received from ' + esc(item.fromName || 'user') + (item.msg ? ' · ' + esc(item.msg.slice(0, 40)) : '') + (item.status === 'pending' ? ' <span style="font-size:.65rem;color:var(--ds-h-reward-ink)">(unclaimed)</span>' : '');
           return '<div class="rw-history-item">' +
             '<div class="rw-history-icon gift"><i class="fas fa-gift"></i></div>' +
             '<div class="rw-history-info"><div class="rw-history-title">' + label + '</div><div class="rw-history-meta">Points gift</div></div>' +
@@ -1372,7 +1373,7 @@
     tab.innerHTML = '<div class="gh-friend-grid">' + badges.map(function (b) {
       const rc = BADGE_RARITY_COLOR[b.rarity] || '#94a3b8';
       return '<div class="gh-friend-card">' +
-        '<span class="gh-avatar" style="background:rgba(16,185,129,.1);color:' + rc + '">' +
+        '<span class="gh-avatar" style="background:rgba(var(--ds-accent-rgb),.1);color:' + rc + '">' +
           '<i class="fas ' + esc(b.icon || 'fa-medal') + '"></i>' +
         '</span>' +
         '<div>' +
@@ -1467,7 +1468,7 @@
         grp.items.forEach(function(item) {
           var isCheckin = item._type === 'checkin';
           var icon = isCheckin ? 'fa-map-marker-alt' : 'fa-camera';
-          var iconColor = isCheckin ? '#10b981' : '#3b82f6';
+          var iconColor = isCheckin ? 'var(--ds-accent)' : '#3b82f6';
           var locationLine = [item.placeName||'', item.city||'', item.country&&item.country!=='Georgia'?item.country:''].filter(Boolean).join(' · ');
           var thumb = item.photoUrl || item.mediaUrl || '';
           var caption = item.caption || item.text || '';
@@ -1509,10 +1510,10 @@
       items.sort(function(a, b) { return _ciTs(b.createdAt) - _ciTs(a.createdAt); });
       tab.innerHTML = '<div class="gh-friend-grid">' + items.map(function(c) {
         var placeHref = c.placeId ? 'places.html?id=' + encodeURIComponent(c.placeId) : '';
-        var placeLink = placeHref ? '<a href="' + esc(placeHref) + '" style="color:#10b981;text-decoration:none">' + esc(c.city || c.location || c.placeName || '') + '</a>' : esc(c.city || c.location || '');
+        var placeLink = placeHref ? '<a href="' + esc(placeHref) + '" style="color:var(--ds-accent-ink);text-decoration:none">' + esc(c.city || c.location || c.placeName || '') + '</a>' : esc(c.city || c.location || '');
         var av = c.photoUrl
-          ? '<img src="' + esc(c.photoUrl) + '" alt="" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0" onerror="this.onerror=null;this.style.background=\'rgba(16,185,129,.1)\';this.outerHTML=\'<span class=&quot;gh-avatar&quot; style=&quot;background:rgba(16,185,129,.1)&quot;><i class=&quot;fas fa-map-marker-alt&quot; style=&quot;color:#10b981&quot;></i></span>\'">'
-          : '<span class="gh-avatar" style="background:rgba(16,185,129,.1)"><i class="fas fa-map-marker-alt" style="color:#10b981"></i></span>';
+          ? '<img src="' + esc(c.photoUrl) + '" alt="" style="width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0" onerror="this.onerror=null;this.style.background=\'rgba(var(--ds-accent-rgb),.1)\';this.outerHTML=\'<span class=&quot;gh-avatar&quot; style=&quot;background:rgba(var(--ds-accent-rgb),.1)&quot;><i class=&quot;fas fa-map-marker-alt&quot; style=&quot;color:var(--ds-accent-ink)&quot;></i></span>\'">'
+          : '<span class="gh-avatar" style="background:rgba(var(--ds-accent-rgb),.1)"><i class="fas fa-map-marker-alt" style="color:var(--ds-accent-ink)"></i></span>';
         return '<div class="gh-friend-card">'
           + av
           + '<div style="min-width:0">'
@@ -1520,8 +1521,8 @@
                 ? '<strong><a href="' + esc(placeHref) + '" style="color:inherit;text-decoration:none">' + esc(c.placeName || c.name || 'Check-in') + '</a></strong>'
                 : '<strong>' + esc(c.placeName || c.name || 'Check-in') + '</strong>')
             + '<span>' + placeLink + '</span>'
-            + (c.caption ? '<span style="font-size:.74rem;color:#94a3b8;display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(c.caption) + '</span>' : '')
-            + (c.createdAt ? '<span style="font-size:.7rem;color:#64748b;display:block;margin-top:2px">' + timeAgo(c.createdAt) + '</span>' : '')
+            + (c.caption ? '<span style="font-size:.74rem;color:var(--ds-text-3);display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(c.caption) + '</span>' : '')
+            + (c.createdAt ? '<span style="font-size:.7rem;color:var(--ds-text-3);display:block;margin-top:2px">' + timeAgo(c.createdAt) + '</span>' : '')
           + '</div>'
         + '</div>';
       }).join('') + '</div>';
@@ -1637,7 +1638,7 @@
     if (work.length) {
       work.forEach(function(w, idx) {
         html += '<div class="about-item about-work-item" data-work-idx="' + idx + '">'
-          + '<i class="fas fa-briefcase" style="color:#10b981"></i> '
+          + '<i class="fas fa-briefcase" style="color:var(--ds-accent-ink)"></i> '
           + '<div style="flex:1"><strong>' + esc(w.position || 'Employee') + '</strong> at <strong>' + esc(w.company || '') + '</strong>'
           + (w.from ? '<div style="font-size:.75rem;color:var(--gh-muted,#64748b);margin-top:2px">' + esc(w.from) + ' – ' + (w.current ? _t('about_work_present') : esc(w.to || '')) + '</div>' : '')
           + '</div>'
@@ -1728,7 +1729,7 @@
     // Auto-generate events from work/education
     var events = [];
     (Array.isArray(user.work) ? user.work : []).forEach(function(w) {
-      if (w.from && w.company) events.push({ type: 'work', year: w.from, label: (_t('about_work_started') || 'Started working at ') + w.company, icon: 'fa-briefcase', color: '#10b981' });
+      if (w.from && w.company) events.push({ type: 'work', year: w.from, label: (_t('about_work_started') || 'Started working at ') + w.company, icon: 'fa-briefcase', color: 'var(--ds-accent)' });
     });
     (Array.isArray(user.education) ? user.education : []).forEach(function(e) {
       if (e.to && e.school) events.push({ type: 'edu', year: e.to, label: (_t('about_edu_graduated') || 'Graduated from ') + e.school, icon: 'fa-graduation-cap', color: '#3b82f6' });
@@ -1982,7 +1983,7 @@
     if (niche && nameBlock && !nameBlock.querySelector('.creator-niche-chip')) {
       nameBlock.insertAdjacentHTML('beforeend',
         '<span class="creator-niche-chip" style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;'
-        + 'background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.25);border-radius:999px;'
+        + 'background:rgba(var(--ds-accent-rgb),.12);border:1px solid rgba(var(--ds-accent-rgb),.25);border-radius:999px;'
         + 'font-size:.75rem;font-weight:700;color:#10e0a0;margin-top:6px">'
         + '<i class="fas fa-hashtag"></i>' + esc(niche) + '</span>');
     }
@@ -1998,7 +1999,7 @@
     if (hasLinks && nameBlock && !nameBlock.querySelector('.creator-social-links')) {
       var linksHtml = '<div class="creator-social-links" style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;align-items:center">';
       if (igHandle) linksHtml += '<a href="https://instagram.com/' + encodeURIComponent(igHandle) + '" target="_blank" rel="noopener noreferrer" style="color:#cd486b;font-size:.85rem;text-decoration:none"><i class="fab fa-instagram"></i> ' + esc(igHandle) + '</a>';
-      if (ttHandle) linksHtml += '<a href="https://tiktok.com/@' + encodeURIComponent(ttHandle) + '" target="_blank" rel="noopener noreferrer" style="color:#94a3b8;font-size:.85rem;text-decoration:none"><i class="fab fa-tiktok"></i> ' + esc(ttHandle) + '</a>';
+      if (ttHandle) linksHtml += '<a href="https://tiktok.com/@' + encodeURIComponent(ttHandle) + '" target="_blank" rel="noopener noreferrer" style="color:var(--ds-text-3);font-size:.85rem;text-decoration:none"><i class="fab fa-tiktok"></i> ' + esc(ttHandle) + '</a>';
       if (fbUrl) linksHtml += '<a href="' + esc(fbUrl) + '" target="_blank" rel="noopener noreferrer" style="color:#4267b2;font-size:.85rem;text-decoration:none"><i class="fab fa-facebook"></i> Facebook</a>';
       if (liUrl) linksHtml += '<a href="' + esc(liUrl) + '" target="_blank" rel="noopener noreferrer" style="color:#0077b5;font-size:.85rem;text-decoration:none"><i class="fab fa-linkedin"></i> LinkedIn</a>';
       if (website) linksHtml += '<a href="' + esc(website) + '" target="_blank" rel="noopener noreferrer" style="color:#10e0a0;font-size:.85rem;text-decoration:none"><i class="fas fa-globe"></i> Website</a>';
@@ -2264,9 +2265,9 @@
       + '<div class="profile-edit-section">'
       + '<div class="profile-edit-section-title"><i class="fas fa-user"></i> Basic Info</div>'
       + '<div class="profile-edit-field"><label>Full Name</label><input class="profile-edit-input" id="peName" placeholder="Your full name" value="' + esc(currentName) + '"></div>'
-      + '<div class="profile-edit-field"><label>Username <span style="font-weight:400;font-size:.75rem;color:#64748b">(unique · only a-z 0-9 . _)</span></label><input class="profile-edit-input" id="peUsername" placeholder="your_username" maxlength="20" value="' + esc(currentUsername) + '"><div id="peUsernameHint" style="font-size:.73rem;margin-top:3px;min-height:1.1em"></div></div>'
-      + (currentGeoId ? '<div class="profile-edit-field"><label>GeoHub ID <span style="font-weight:400;font-size:.75rem;color:#64748b">(cannot be changed)</span></label><input class="profile-edit-input" value="#' + esc(String(currentGeoId)) + '" readonly style="color:#4da6ff;letter-spacing:.06em;cursor:default"></div>' : '')
-      + '<div class="profile-edit-field"><label>Name Visibility <span style="font-weight:400;font-size:.75rem;color:#64748b">(who sees your full name)</span></label>'
+      + '<div class="profile-edit-field"><label>Username <span style="font-weight:400;font-size:.75rem;color:var(--ds-text-3)">(unique · only a-z 0-9 . _)</span></label><input class="profile-edit-input" id="peUsername" placeholder="your_username" maxlength="20" value="' + esc(currentUsername) + '"><div id="peUsernameHint" style="font-size:.73rem;margin-top:3px;min-height:1.1em"></div></div>'
+      + (currentGeoId ? '<div class="profile-edit-field"><label>GeoHub ID <span style="font-weight:400;font-size:.75rem;color:var(--ds-text-3)">(cannot be changed)</span></label><input class="profile-edit-input" value="#' + esc(String(currentGeoId)) + '" readonly style="color:#4da6ff;letter-spacing:.06em;cursor:default"></div>' : '')
+      + '<div class="profile-edit-field"><label>Name Visibility <span style="font-weight:400;font-size:.75rem;color:var(--ds-text-3)">(who sees your full name)</span></label>'
       + '<select class="profile-edit-input" id="peNameVis">'
       + '<option value="everyone"' + (currentNameVis === 'everyone' ? ' selected' : '') + '>Everyone — ყველა ხედავს</option>'
       + '<option value="friends"'  + (currentNameVis === 'friends'  ? ' selected' : '') + '>Friends only — მხოლოდ მეგობრები</option>'
@@ -2369,7 +2370,7 @@
           var auth = window.GeoFirebaseAuth;
           if (!auth || !auth.isUsernameAvailable) { peUnHint.textContent = ''; _peUnStatus = 'ok'; return; }
           auth.isUsernameAvailable(val).then(function(avail) {
-            if (avail) { peUnHint.textContent = '✓ @' + val + ' ხელმისაწვდომია'; peUnHint.style.color = '#10b981'; _peUnStatus = 'ok'; }
+            if (avail) { peUnHint.textContent = '✓ @' + val + ' ხელმისაწვდომია'; peUnHint.style.color = 'var(--ds-accent)'; _peUnStatus = 'ok'; }
             else       { peUnHint.textContent = '✗ @' + val + ' დაკავებულია'; peUnHint.style.color = '#f87171'; _peUnStatus = 'taken'; }
           }).catch(function() { peUnHint.textContent = ''; _peUnStatus = 'ok'; });
         }, 500);
@@ -2601,8 +2602,8 @@
               nameBlock.insertAdjacentHTML('beforeend',
                 '<div style="margin-top:10px">'
                 + '<button class="creator-cta-btn" onclick="window._activateCreatorMode()" style="'
-                + 'display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(16,185,129,.1);'
-                + 'border:1px solid rgba(16,185,129,.25);border-radius:999px;color:#10e0a0;font-size:.78rem;'
+                + 'display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(var(--ds-accent-rgb),.1);'
+                + 'border:1px solid rgba(var(--ds-accent-rgb),.25);border-radius:999px;color:#10e0a0;font-size:.78rem;'
                 + 'font-weight:700;cursor:pointer">'
                 + '<i class="fas fa-star"></i> Activate Creator Mode</button>'
                 + '</div>');

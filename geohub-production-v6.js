@@ -94,7 +94,7 @@
     if(!preview){
       preview=document.createElement('div');
       preview.id='ghV6Preview';
-      preview.style.cssText='margin:12px 18px;border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden;display:none;padding:10px;color:#94a3b8';
+      preview.style.cssText='margin:12px 18px;border:1px solid rgba(255,255,255,.08);border-radius:12px;overflow:hidden;display:none;padding:10px;color:var(--ds-text-3)';
       composer.appendChild(preview);
     }
 

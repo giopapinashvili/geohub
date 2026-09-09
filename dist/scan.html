@@ -8,7 +8,7 @@
   <link rel="dns-prefetch" href="https://firebase.googleapis.com">
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Scan QR — GeoHub</title>
+  <title>QR სკანერი — GeoHub</title>
   <meta name="robots" content="noindex, nofollow">
   <meta name="description" content="სკანირე QR კოდი GeoHub-ის ადგილის ან ბიზნესის სანახავად.">
   <link rel="canonical" href="https://geohub.ge/scan.html">
@@ -29,8 +29,8 @@
     html, body {
       height: 100%;
       height: 100dvh;
-      background: #04050d;
-      color: #f0f4ff;
+      background: var(--ds-bg);
+      color: var(--ds-text);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       overflow: hidden;
     }
@@ -44,7 +44,7 @@
       align-items: center;
       gap: 12px;
       padding: 0 16px;
-      background: rgba(4,5,13,0.85);
+      background: var(--ds-surface-over);
       backdrop-filter: blur(16px);
       border-bottom: 1px solid rgba(255,255,255,0.06);
       z-index: 100;
@@ -55,7 +55,7 @@
       border-radius: 50%;
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.1);
-      color: #f0f4ff;
+      color: var(--ds-text);
       font-size: 0.9rem;
       display: flex; align-items: center; justify-content: center;
       cursor: pointer;
@@ -65,7 +65,7 @@
     }
     .sc-back-btn:hover { background: rgba(255,255,255,0.12); }
     .sc-title { font-size: 1rem; font-weight: 800; flex: 1; }
-    .sc-logo { font-size: 1.1rem; font-weight: 900; color: #10b981; }
+    .sc-logo { font-size: 1.1rem; font-weight: 900; color: var(--ds-accent-ink); }
 
     /* ── Screens ──────────────────────────────────────────────── */
     .sc-screen {
@@ -107,7 +107,7 @@
     .sc-qr-corner {
       position: absolute;
       width: 34px; height: 34px;
-      border-color: #10b981;
+      border-color: var(--ds-accent);
       border-style: solid;
     }
     .sc-qr-corner.tl { top:0; left:0; border-width:3px 0 0 3px; border-radius:8px 0 0 0; }
@@ -118,8 +118,8 @@
       position: absolute;
       left: 4px; right: 4px;
       height: 2px;
-      background: linear-gradient(90deg, transparent, #10b981, transparent);
-      box-shadow: 0 0 12px rgba(16,185,129,0.8);
+      background: linear-gradient(90deg, transparent, var(--ds-accent), transparent);
+      box-shadow: 0 0 12px rgba(var(--ds-accent-rgb),0.8);
       animation: qrScan 2s linear infinite;
       top: 4px;
     }
@@ -166,13 +166,13 @@
       flex-direction: column;
       gap: 16px;
     }
-    .sc-no-cam-icon { font-size: 3rem; color: #64748b; }
+    .sc-no-cam-icon { font-size: 3rem; color: var(--ds-text-3); }
     .sc-no-cam-title { font-size: 1.2rem; font-weight: 800; }
-    .sc-no-cam-text { font-size: 0.88rem; color: #94a3b8; line-height: 1.6; max-width: 300px; }
+    .sc-no-cam-text { font-size: 0.88rem; color: var(--ds-text-3); line-height: 1.6; max-width: 300px; }
     .sc-no-cam-home {
       padding: 14px 28px;
       border-radius: 14px;
-      background: linear-gradient(135deg,#10b981,#3b82f6);
+      background: linear-gradient(135deg,var(--ds-accent),#3b82f6);
       border: none;
       color: #fff;
       font-size: 0.95rem;
@@ -215,15 +215,15 @@
     .sc-biz-avatar {
       width: 56px; height: 56px;
       border-radius: 16px;
-      background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(59,130,246,0.2));
-      border: 1px solid rgba(16,185,129,0.3);
+      background: linear-gradient(135deg, rgba(var(--ds-accent-rgb),0.2), rgba(59,130,246,0.2));
+      border: 1px solid rgba(var(--ds-accent-rgb),0.3);
       display: flex; align-items: center; justify-content: center;
       font-size: 1.6rem;
       flex-shrink: 0;
     }
     .sc-biz-info { flex: 1; min-width: 0; }
     .sc-biz-name { font-size: 1.1rem; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sc-biz-meta { font-size: 0.8rem; color: #94a3b8; margin-top: 3px; }
+    .sc-biz-meta { font-size: 0.8rem; color: var(--ds-text-3); margin-top: 3px; }
     .sc-qr-badge {
       display: inline-flex;
       align-items: center;
@@ -243,20 +243,20 @@
       justify-content: center;
       gap: 8px;
       padding: 12px 16px;
-      background: rgba(16,185,129,0.07);
-      border: 1px solid rgba(16,185,129,0.18);
+      background: rgba(var(--ds-accent-rgb),0.07);
+      border: 1px solid rgba(var(--ds-accent-rgb),0.18);
       border-radius: 14px;
       margin-bottom: 20px;
       font-size: 0.95rem;
       font-weight: 700;
-      color: #34d399;
+      color: var(--ds-accent-ink);
     }
     .sc-xp-row i { font-size: 0.85rem; }
     .sc-checkin-btn {
       width: 100%;
       padding: 15px;
       border-radius: 16px;
-      background: linear-gradient(135deg, #10b981, #3b82f6);
+      background: linear-gradient(135deg, var(--ds-accent), #3b82f6);
       border: none;
       color: #fff;
       font-size: 1rem;
@@ -266,18 +266,18 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      box-shadow: 0 4px 20px rgba(16,185,129,0.4);
+      box-shadow: 0 4px 20px rgba(var(--ds-accent-rgb),0.4);
       margin-bottom: 12px;
       transition: all 0.25s;
     }
-    .sc-checkin-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(16,185,129,0.5); }
+    .sc-checkin-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(var(--ds-accent-rgb),0.5); }
     .sc-cancel-btn {
       width: 100%;
       padding: 13px;
       border-radius: 16px;
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.1);
-      color: #94a3b8;
+      color: var(--ds-text-3);
       font-size: 0.9rem;
       font-weight: 700;
       cursor: pointer;
@@ -295,13 +295,13 @@
     }
     .sc-err-icon { font-size: 2.8rem; color: #ef4444; }
     .sc-err-title { font-size: 1.1rem; font-weight: 800; }
-    .sc-err-msg { font-size: 0.88rem; color: #94a3b8; line-height: 1.6; max-width: 300px; }
+    .sc-err-msg { font-size: 0.88rem; color: var(--ds-text-3); line-height: 1.6; max-width: 300px; }
     .sc-err-retry {
       padding: 13px 28px;
       border-radius: 14px;
       background: rgba(255,255,255,0.07);
       border: 1px solid rgba(255,255,255,0.12);
-      color: #f0f4ff;
+      color: var(--ds-text);
       font-size: 0.9rem;
       font-weight: 700;
       cursor: pointer;
@@ -316,10 +316,13 @@
       flex-direction: column;
       gap: 14px;
     }
-    .sc-loading-spinner { font-size: 2rem; color: #10b981; }
-    .sc-loading-text { font-size: 0.9rem; color: #94a3b8; }
+    .sc-loading-spinner { font-size: 2rem; color: var(--ds-accent-ink); }
+    .sc-loading-text { font-size: 0.9rem; color: var(--ds-text-3); }
   </style>
   <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700;800&family=Noto+Serif+Georgian:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
   <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
@@ -328,9 +331,10 @@
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js"></script>
   <script type="module" crossorigin src="/assets/firebase-config-CGKVrgHh.js"></script>
+  <script type="module" crossorigin src="/assets/gh-admin-bridge-h-7zgsq_.js"></script>
   <script type="module" crossorigin src="/assets/gh-schema-kY2sMGH-.js"></script>
-  <script type="module" crossorigin src="/assets/firestore-social-BXEW-BZV.js"></script>
-  <script type="module" crossorigin src="/assets/account-BJSGhbLy.js"></script>
+  <script type="module" crossorigin src="/assets/firestore-social-CedOtedd.js"></script>
+  <script type="module" crossorigin src="/assets/account-Dl1_viTm.js"></script>
   <script type="module" crossorigin src="/assets/qr-engine-BrZU5qUJ.js"></script>
   <script type="module" crossorigin src="/assets/analytics-DyGaP85h.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
@@ -339,21 +343,22 @@
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/styles-DiOMSwr8.css">
+  <link rel="stylesheet" crossorigin href="/assets/styles-B48usZYl.css">
+  <link rel="stylesheet" crossorigin href="/assets/gh-design-system-Eii08DGH.css">
 </head>
 <body>
 
   <!-- Top bar -->
   <div class="sc-topbar">
     <a href="javascript:history.back()" class="sc-back-btn"><i class="fas fa-arrow-left"></i></a>
-    <div class="sc-title">Scan QR Code</div>
+    <div class="sc-title">QR კოდის სკანირება</div>
     <div class="sc-logo">GeoHub</div>
   </div>
 
   <!-- Loading screen -->
   <div class="sc-screen active" id="scLoading" style="padding-top:56px">
     <div class="sc-loading-spinner"><i class="fas fa-circle-notch fa-spin"></i></div>
-    <div class="sc-loading-text">Loading…</div>
+    <div class="sc-loading-text">იტვირთება…</div>
   </div>
 
   <!-- Camera scanner screen -->
@@ -368,7 +373,7 @@
         <div class="sc-qr-corner br"></div>
         <div class="sc-scan-line"></div>
       </div>
-      <div class="sc-qr-hint">Point at a GeoHub QR code</div>
+      <div class="sc-qr-hint">მიმართე კამერა GeoHub-ის QR კოდზე</div>
     </div>
     <div class="sc-cam-controls">
       <button class="sc-cam-btn" id="scFlipBtn" title="Flip camera"><i class="fas fa-camera-rotate"></i></button>
@@ -382,21 +387,21 @@
       <div class="sc-biz-row">
         <div class="sc-biz-avatar" id="scBizEmoji">📍</div>
         <div class="sc-biz-info">
-          <div class="sc-biz-name" id="scBizName">Loading…</div>
+          <div class="sc-biz-name" id="scBizName">იტვირთება…</div>
           <div class="sc-biz-meta" id="scBizMeta"></div>
         </div>
       </div>
-      <div class="sc-qr-badge"><i class="fas fa-qrcode"></i> QR Code Verified</div>
+      <div class="sc-qr-badge"><i class="fas fa-qrcode"></i> QR კოდი დადასტურდა</div>
       <div class="sc-xp-row">
         <i class="fas fa-bolt"></i>
-        <span>60 XP for QR check-in</span>
+        <span>60 XP QR ჩექ-ინისთვის</span>
       </div>
       <button class="sc-checkin-btn" id="scCheckinBtn">
         <i class="fas fa-location-dot"></i>
-        Check In Now
+        ჩექ-ინი ახლავე
       </button>
       <button class="sc-cancel-btn" onclick="goBack()">
-        <i class="fas fa-times"></i> Cancel
+        <i class="fas fa-times"></i> გაუქმება
       </button>
     </div>
   </div>
@@ -404,23 +409,23 @@
   <!-- Error screen -->
   <div class="sc-screen" id="scError" style="padding-top:56px">
     <div class="sc-err-icon"><i class="fas fa-triangle-exclamation"></i></div>
-    <div class="sc-err-title" id="scErrTitle">Invalid QR Code</div>
-    <div class="sc-err-msg" id="scErrMsg">This QR code is not a valid GeoHub check-in code.</div>
+    <div class="sc-err-title" id="scErrTitle">არასწორი QR კოდი</div>
+    <div class="sc-err-msg" id="scErrMsg">ეს QR კოდი GeoHub-ის ჩექ-ინის კოდი არ არის.</div>
     <button class="sc-err-retry" id="scErrRetry" onclick="restartScanner()">
-      <i class="fas fa-rotate-right"></i> Try Again
+      <i class="fas fa-rotate-right"></i> თავიდან ცდა
     </button>
-    <a href="index.html" style="margin-top:8px;font-size:0.85rem;color:#94a3b8;text-decoration:none">← Back to Home</a>
+    <a href="index.html" style="margin-top:8px;font-size:0.85rem;color:var(--ds-text-3);text-decoration:none">← მთავარზე დაბრუნება</a>
   </div>
 
   <!-- No-camera fallback -->
   <div class="sc-screen" id="scNoCam" style="padding-top:56px">
     <div class="sc-no-cam-icon"><i class="fas fa-video-slash"></i></div>
-    <div class="sc-no-cam-title">Camera not available</div>
+    <div class="sc-no-cam-title">კამერა მიუწვდომელია</div>
     <div class="sc-no-cam-text">
-      This device doesn't support camera access, or permission was denied.
-      Ask the business owner for the QR code ID to check in manually.
+      ამ მოწყობილობას კამერაზე წვდომა არ აქვს, ან ნებართვა უარყოფილია.
+      ხელით ჩექ-ინისთვის ბიზნესის მფლობელს QR კოდის ID სთხოვე.
     </div>
-    <a href="checkin.html" class="sc-no-cam-home"><i class="fas fa-location-dot"></i> Manual Check-in</a>
+    <a href="checkin.html" class="sc-no-cam-home"><i class="fas fa-location-dot"></i> ხელით ჩექ-ინი</a>
   </div>
 
           

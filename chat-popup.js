@@ -1,5 +1,7 @@
 (function(){
   'use strict';
+
+  function T(k, f){ try { return (typeof window.GHt === 'function' && window.GHt(k) !== k) ? window.GHt(k) : f; } catch(e) { return f; } }
   if (/messages\.html$/i.test(location.pathname)) return;
   if (window.__GeoHubChatPopupLoaded) return;
   window.__GeoHubChatPopupLoaded = true;
@@ -49,10 +51,10 @@
       <section class="gh-chat-pop" aria-label="GeoHub chat">
         <header class="gh-chat-head">
           <div class="gh-chat-avatar" id="ghChatAvatar">G</div>
-          <div class="gh-chat-title"><div class="gh-chat-name" id="ghChatName">Messages</div><div class="gh-chat-status" id="ghChatStatus">Choose a conversation</div></div>
+          <div class="gh-chat-title"><div class="gh-chat-name" id="ghChatName">${T('nav_messages','Messages')}</div><div class="gh-chat-status" id="ghChatStatus">${T('chat_choose','Choose a conversation')}</div></div>
           <div class="gh-chat-actions"><button class="gh-chat-icon" type="button" data-gh-min title="Minimize">−</button><button class="gh-chat-icon" type="button" data-gh-close title="Close">×</button></div>
         </header>
-        <div class="gh-chat-body" id="ghChatBody"><div class="gh-chat-empty">No messages yet</div></div>
+        <div class="gh-chat-body" id="ghChatBody"><div class="gh-chat-empty">${T('chat_no_messages','No messages yet')}</div></div>
         <form class="gh-chat-compose" id="ghChatForm">
           <button class="gh-chat-icon" type="button" data-gh-emoji>😊</button>
           <button class="gh-chat-icon" type="button" data-gh-image>📷</button>
@@ -110,7 +112,7 @@
     const box=document.getElementById('ghChatBody'); if(!box) return;
     const me=uid();
     const visible=state.messages.filter(m=>!(Array.isArray(m.deletedFor)&&m.deletedFor.includes(me)));
-    if(!visible.length){ box.innerHTML='<div class="gh-chat-empty">No messages yet</div>'; return; }
+    if(!visible.length){ box.innerHTML='<div class="gh-chat-empty">'+T('chat_no_messages','No messages yet')+'</div>'; return; }
     box.innerHTML=visible.map(m=>{
       const mine=m.senderId===me || m.authorId===me;
       const sum=reactionSummary(m.id);

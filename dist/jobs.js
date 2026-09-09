@@ -217,7 +217,7 @@ function openPostModal(gf){
     '<div style="background:#0f1520;border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:28px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto">',
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">',
         '<h2 style="margin:0;font-size:1.2rem">ვაკანსიის განთავსება</h2>',
-        '<button id="jbModalClose" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:32px;height:32px;color:#9ca3af;cursor:pointer;font-size:1.1rem">×</button>',
+        '<button id="jbModalClose" style="background:rgba(255,255,255,.08);border:none;border-radius:50%;width:32px;height:32px;color:var(--ds-text-3);cursor:pointer;font-size:1.1rem">×</button>',
       '</div>',
       '<div style="display:flex;flex-direction:column;gap:14px">',
         inp('jbFTitle','სათაური (ვაკანსია)','text','სად: პროგრამისტი, დიზაინერი…'),
@@ -229,9 +229,9 @@ function openPostModal(gf){
         inp('jbFEmail','საკონტაქტო Email','email',''),
         inp('jbFPhone','საკონტაქტო ტელეფონი','tel',''),
         inp('jbFLogo','კომპანიის ლოგოს URL (სურვილისამებრ)','url',''),
-        '<div><label style="font-size:.8rem;color:#9ca3af;display:block;margin-bottom:4px">აღწერა</label><textarea id="jbFDesc" rows="4" placeholder="ვაკანსიის დეტალური აღწერა…" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#f0f4ff;border-radius:10px;padding:10px;font-size:.88rem;outline:none;resize:vertical;box-sizing:border-box"></textarea></div>',
-        '<div><label style="font-size:.8rem;color:#9ca3af;display:block;margin-bottom:4px">მოთხოვნები (სურვილისამებრ)</label><textarea id="jbFReq" rows="3" placeholder="გამოცდილება, უნარ-ჩვევები…" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#f0f4ff;border-radius:10px;padding:10px;font-size:.88rem;outline:none;resize:vertical;box-sizing:border-box"></textarea></div>',
-        '<button id="jbSubmitBtn" style="background:linear-gradient(135deg,#10b981,#3b82f6);border:none;border-radius:12px;padding:13px;color:#fff;font-weight:800;font-size:.9rem;cursor:pointer;margin-top:4px">განათავსე ვაკანსია</button>',
+        '<div><label style="font-size:.8rem;color:var(--ds-text-3);display:block;margin-bottom:4px">აღწერა</label><textarea id="jbFDesc" rows="4" placeholder="ვაკანსიის დეტალური აღწერა…" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--ds-text);border-radius:10px;padding:10px;font-size:.88rem;outline:none;resize:vertical;box-sizing:border-box"></textarea></div>',
+        '<div><label style="font-size:.8rem;color:var(--ds-text-3);display:block;margin-bottom:4px">მოთხოვნები (სურვილისამებრ)</label><textarea id="jbFReq" rows="3" placeholder="გამოცდილება, უნარ-ჩვევები…" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--ds-text);border-radius:10px;padding:10px;font-size:.88rem;outline:none;resize:vertical;box-sizing:border-box"></textarea></div>',
+        '<button id="jbSubmitBtn" style="background:linear-gradient(135deg,var(--ds-accent),#3b82f6);border:none;border-radius:12px;padding:13px;color:#fff;font-weight:800;font-size:.9rem;cursor:pointer;margin-top:4px">განათავსე ვაკანსია</button>',
       '</div>',
     '</div>'
   ].join('');
@@ -292,8 +292,8 @@ function openPostModal(gf){
 }
 
 function inp(id, label, type, placeholder){
-  return '<div><label style="font-size:.8rem;color:#9ca3af;display:block;margin-bottom:4px">'+label+'</label>'
-    +'<input id="'+id+'" type="'+type+'" placeholder="'+placeholder+'" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#f0f4ff;border-radius:10px;padding:10px 12px;font-size:.88rem;outline:none;box-sizing:border-box"></div>';
+  return '<div><label style="font-size:.8rem;color:var(--ds-text-3);display:block;margin-bottom:4px">'+label+'</label>'
+    +'<input id="'+id+'" type="'+type+'" placeholder="'+placeholder+'" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--ds-text);border-radius:10px;padding:10px 12px;font-size:.88rem;outline:none;box-sizing:border-box"></div>';
 }
 
 function sel(id, label, options, labelMap){
@@ -301,8 +301,8 @@ function sel(id, label, options, labelMap){
     var l = labelMap ? (labelMap[v]||v) : v;
     return '<option value="'+esc(v)+'">'+esc(l)+'</option>';
   }).join('');
-  return '<div><label style="font-size:.8rem;color:#9ca3af;display:block;margin-bottom:4px">'+label+'</label>'
-    +'<select id="'+id+'" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#f0f4ff;border-radius:10px;padding:10px 12px;font-size:.88rem;outline:none;box-sizing:border-box">'+opts+'</select></div>';
+  return '<div><label style="font-size:.8rem;color:var(--ds-text-3);display:block;margin-bottom:4px">'+label+'</label>'
+    +'<select id="'+id+'" style="width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--ds-text);border-radius:10px;padding:10px 12px;font-size:.88rem;outline:none;box-sizing:border-box">'+opts+'</select></div>';
 }
 
 function sel2(id, label, options, labelMap){

@@ -268,7 +268,7 @@
 
     m.innerHTML = [
       '<div style="display:flex;align-items:flex-start;gap:12px">',
-        '<div style="background:linear-gradient(135deg,#10b981,#059669);border-radius:10px;',
+        '<div style="background:linear-gradient(135deg,var(--ds-accent),var(--ds-accent-lo));border-radius:10px;',
              'padding:9px 10px;flex-shrink:0;margin-top:2px">',
           '<i class="fas fa-bell" style="color:#fff;font-size:1rem"></i>',
         '</div>',
@@ -280,7 +280,7 @@
             'Get notified about new messages, likes, comments and events.',
           '</p>',
           '<div style="display:flex;gap:8px">',
-            '<button id="ghPushAllow" style="flex:1;padding:7px 12px;background:linear-gradient(135deg,#10b981,#059669);',
+            '<button id="ghPushAllow" style="flex:1;padding:7px 12px;background:linear-gradient(135deg,var(--ds-accent),var(--ds-accent-lo));',
                 'color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:.82rem">',
               'Enable',
             '</button>',
@@ -376,14 +376,14 @@
         '<div style="display:flex;align-items:center;justify-content:space-between;',
              'padding:10px 0;border-top:1px solid var(--border,rgba(255,255,255,.08))">',
           '<div style="display:flex;align-items:center;gap:8px">',
-            '<i class="fas fa-bell" style="color:#10b981;font-size:.9rem"></i>',
+            '<i class="fas fa-bell" style="color:var(--ds-accent-ink);font-size:.9rem"></i>',
             '<strong style="font-size:.9rem">Push Notifications</strong>',
           '</div>',
           denied
             ? '<span style="color:#ef4444;font-size:.78rem">Blocked in browser settings</span>'
             : '<label style="position:relative;display:inline-block;width:42px;height:22px;cursor:pointer">',
                 '<input type="checkbox" id="ghNotifToggle" style="opacity:0;width:0;height:0" ' + (enabled ? 'checked' : '') + '>',
-                '<span id="ghNotifSlider" style="position:absolute;inset:0;background:' + (enabled ? '#10b981' : 'rgba(255,255,255,.15)') + ';',
+                '<span id="ghNotifSlider" style="position:absolute;inset:0;background:' + (enabled ? 'var(--ds-accent)' : 'rgba(255,255,255,.15)') + ';',
                      'border-radius:22px;transition:background .25s">',
                   '<span style="position:absolute;top:3px;left:' + (enabled ? '22px' : '3px') + ';',
                        'width:16px;height:16px;background:#fff;border-radius:50%;',
@@ -403,7 +403,7 @@
                       c.label,
                     '</span>',
                     '<input type="checkbox" data-notif-cat="' + c.key + '"',
-                           ' style="width:15px;height:15px;accent-color:#10b981;cursor:pointer"',
+                           ' style="width:15px;height:15px;accent-color:var(--ds-accent);cursor:pointer"',
                            (on ? ' checked' : '') + '>',
                   '</label>'
                 ].join('');
@@ -424,7 +424,7 @@
       var cats   = document.getElementById('ghNotifCats');
 
       if (toggle.checked) {
-        if (slider) slider.style.background = '#10b981';
+        if (slider) slider.style.background = 'var(--ds-accent)';
         if (thumb)  thumb.style.left        = '22px';
         subscribeToPushNotifications().then(function (result) {
           if (!result || result.error) {

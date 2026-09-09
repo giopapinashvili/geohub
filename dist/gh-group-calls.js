@@ -93,7 +93,7 @@
             '<button class="ggc-type-btn" data-type="audio" onclick="GhGroupCalls._selectType(this,\'audio\')">' +
               '<i class="fas fa-phone"></i> ' + _t('call_voice_label', 'Voice') + '</button>' +
           '</div>' +
-          '<p style="font-size:.83rem;color:#94a3b8;margin:8px 0 4px">' +
+          '<p style="font-size:.83rem;color:var(--ds-text-3);margin:8px 0 4px">' +
             _t('group_call_share', 'Share this call ID with participants:') +
           '</p>' +
           '<div style="display:flex;gap:8px">' +

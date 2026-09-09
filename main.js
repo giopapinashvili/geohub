@@ -134,7 +134,7 @@
       srBtn.innerHTML = '<i class="fas fa-search"></i>';
       srBtn.style.cssText = 'background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);border-radius:9999px;padding:6px 12px 6px 10px;display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;cursor:pointer;transition:all 0.2s;margin-right:8px;font-family:inherit';
       srBtn.innerHTML += '<span style="font-size:0.72rem;font-weight:600">Search</span><kbd style="font-size:0.55rem;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:3px;padding:1px 4px;color:rgba(255,255,255,0.4)">⌘K</kbd>';
-      srBtn.addEventListener('mouseover', function () { this.style.borderColor = 'rgba(16,185,129,0.4)'; this.style.color = '#10b981'; });
+      srBtn.addEventListener('mouseover', function () { this.style.borderColor = 'rgba(var(--ds-accent-rgb),0.4)'; this.style.color = 'var(--ds-accent)'; });
       srBtn.addEventListener('mouseout',  function () { this.style.borderColor = 'rgba(255,255,255,0.1)'; this.style.color = 'rgba(255,255,255,0.6)'; });
       srBtn.addEventListener('click', function () { if (typeof openCmdPalette === 'function') openCmdPalette(); else location.href = 'search.html'; });
       const navActions = navbar.querySelector('.navbar-actions') || navbar.querySelector('.navbar-cta') || navbar;

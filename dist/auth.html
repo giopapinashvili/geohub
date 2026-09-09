@@ -8,7 +8,7 @@
   <link rel="dns-prefetch" href="https://firebase.googleapis.com">
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login / Sign Up — GeoHub</title>
+  <title>შესვლა / რეგისტრაცია — GeoHub</title>
   <meta name="robots" content="index, follow">
   <meta name="description" content="შედი GeoHub-ში ან შექმენი ახალი ანგარიში. დაკავშირდი ქართველ ხალხთან.">
   <link rel="canonical" href="https://geohub.ge/auth.html">
@@ -30,10 +30,10 @@
       display: flex;
       flex-direction: column;
       background:
-        radial-gradient(ellipse at 15% 20%, rgba(16,185,129,0.18), transparent 38%),
+        radial-gradient(ellipse at 15% 20%, rgba(var(--ds-accent-rgb),0.18), transparent 38%),
         radial-gradient(ellipse at 85% 75%, rgba(59,130,246,0.14), transparent 38%),
         radial-gradient(ellipse at 55% 50%, rgba(245,158,11,0.05), transparent 30%),
-        #04050d;
+        var(--ds-bg-deep);
       position: relative;
       overflow: hidden;
     }
@@ -44,7 +44,7 @@
     .auth-glow.one {
       width: 500px; height: 500px;
       left: -120px; top: -100px;
-      background: rgba(16,185,129,0.12);
+      background: rgba(var(--ds-accent-rgb),0.12);
       animation: authDrift 12s ease-in-out infinite alternate;
     }
     .auth-glow.two {
@@ -112,7 +112,7 @@
       border-radius: 20px;
       width: 100%;
       max-width: 460px;
-      box-shadow: 0 24px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(16,185,129,0.04);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(var(--ds-accent-rgb),0.04);
       overflow: hidden;
     }
 
@@ -261,17 +261,21 @@
       .auth-body { padding: 20px; }
     }
   </style>
-  <script type="module" crossorigin src="/assets/auth-CGv0Fr_f.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700;800&family=Noto+Serif+Georgian:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+  <script type="module" crossorigin src="/assets/auth-DB94SuEy.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/responsive-polish-BO79aqv7.js">
   <link rel="modulepreload" crossorigin href="/assets/firebase-config-CGKVrgHh.js">
-  <link rel="modulepreload" crossorigin href="/assets/gh-i18n-BbqPU8Gy.js">
+  <link rel="modulepreload" crossorigin href="/assets/gh-admin-bridge-h-7zgsq_.js">
   <link rel="modulepreload" crossorigin href="/assets/config-DSeD8I2H.js">
   <link rel="modulepreload" crossorigin href="/assets/api-client-DV25UnBD.js">
-  <link rel="modulepreload" crossorigin href="/assets/main-CYAfAwpP.js">
-  <link rel="modulepreload" crossorigin href="/assets/geohub-production-stabilization-v1-D4HPXa7T.js">
-  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
-  <link rel="stylesheet" crossorigin href="/assets/styles-DiOMSwr8.css">
+  <link rel="modulepreload" crossorigin href="/assets/main-DZ7-Y9ov.js">
+  <link rel="modulepreload" crossorigin href="/assets/geohub-production-stabilization-v1-kYTMrx4r.js">
+  <link rel="modulepreload" crossorigin href="/assets/responsive-polish-Cni6BeF_.js">
+  <link rel="stylesheet" crossorigin href="/assets/styles-B48usZYl.css">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-OO1pxCG1.css">
+  <link rel="stylesheet" crossorigin href="/assets/gh-design-system-Eii08DGH.css">
 </head>
 <body>
   <div class="auth-page">
@@ -356,7 +360,7 @@
                 <input type="text" id="signupFullName" data-i18n-placeholder="auth_full_name" placeholder="Your full name" autocomplete="name" />
               </div>
               <div class="auth-form-group">
-                <label data-i18n="auth_username_lbl">Username <span style="font-weight:400;color:#64748b">(unique nickname)</span></label>
+                <label data-i18n="auth_username_lbl">Username <span style="font-weight:400;color:var(--ds-text-3)">(unique nickname)</span></label>
                 <input type="text" id="signupUsername" placeholder="your.username" autocomplete="username" maxlength="20" />
                 <div id="signupUsernameHint" style="font-size:.73rem;margin-top:3px;min-height:1.1em"></div>
               </div>

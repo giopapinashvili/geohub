@@ -595,6 +595,8 @@
   };
 
   /* ── HELPERS ─────────────────────────────────────────────────── */
+  // DO NOT tokenise the colour literals in this file: they are parsed here
+  // with parseInt() and fed to a canvas gradient, where var() is not a colour.
   function hexToRgb(hex) {
     var r = parseInt(hex.slice(1,3),16);
     var g = parseInt(hex.slice(3,5),16);

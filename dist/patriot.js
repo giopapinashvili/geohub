@@ -261,7 +261,7 @@
             id: d.id,
             name: u.fullName || u.displayName || u.username || u.email || 'GeoHub User',
             av: ((u.fullName || u.displayName || u.username || 'GH').match(/\b\w/g) || ['G','H']).slice(0,2).join('').toUpperCase(),
-            color: '#10b981', xp: Number(u.xp || 0), trust: Number(u.trustScore || 0),
+            color: 'var(--ds-accent)', xp: Number(u.xp || 0), trust: Number(u.trustScore || 0),
             impact: u.explorerLevel || 'Explorer', badges: Array.isArray(u.badges) && u.badges.length ? u.badges.slice(0,2) : ['🌍 GeoHub']
           });
         });
@@ -352,7 +352,7 @@
 
   function joinProblem(btn) {
     btn.textContent = 'Joined!';
-    btn.style.background = 'rgba(16,185,129,0.2)';
+    btn.style.background = 'rgba(var(--ds-accent-rgb),0.2)';
     btn.disabled = true;
     ptToast('Problem mission joined! +20 XP on completion');
   }
@@ -384,8 +384,8 @@
   }
   function photoAttach(el) {
     document.getElementById('photoPlaceholderLabel').textContent = '✓ Photo attached';
-    el.style.borderColor = 'rgba(16,185,129,0.5)';
-    el.style.background = 'rgba(16,185,129,0.08)';
+    el.style.borderColor = 'rgba(var(--ds-accent-rgb),0.5)';
+    el.style.background = 'rgba(var(--ds-accent-rgb),0.08)';
     el.querySelector('i').style.color = 'var(--green)';
   }
   function submitReport() {

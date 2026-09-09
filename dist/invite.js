@@ -44,7 +44,7 @@
     if (!t) {
       t = document.createElement('div');
       t.id = 'geo-invite-toast';
-      t.style.cssText = 'position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(16px);background:#10b981;color:#fff;padding:9px 20px;border-radius:24px;font-size:.85rem;font-weight:600;z-index:99999;transition:all .25s;opacity:0;pointer-events:none;white-space:nowrap';
+      t.style.cssText = 'position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ds-accent);color:var(--ds-accent-on);padding:9px 20px;border-radius:24px;font-size:.85rem;font-weight:600;z-index:99999;transition:all .25s;opacity:0;pointer-events:none;white-space:nowrap';
       document.body.appendChild(t);
     }
     t.textContent = msg;
@@ -188,7 +188,7 @@
 
   function renderInviteWidget(el, uid) {
     if (!el) return;
-    el.innerHTML = '<div style="color:#64748b;font-size:.85rem;padding:8px 0"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
+    el.innerHTML = '<div style="color:var(--ds-text-3);font-size:.85rem;padding:8px 0"><i class="fas fa-spinner fa-spin"></i> Loading…</div>';
 
     getOrCreateInviteCode(uid).then(function (code) {
       var link = getInviteLink(code);
@@ -218,8 +218,8 @@
         var statsEl = document.getElementById('geo-invite-stats');
         if (statsEl) {
           statsEl.innerHTML = stats.inviteAccepted
-            ? '<i class="fas fa-check-circle" style="color:#10b981"></i> <strong>' + stats.inviteAccepted + '</strong> friend' + (stats.inviteAccepted === 1 ? '' : 's') + ' joined via your link'
-            : '<i class="fas fa-link" style="color:#64748b"></i> Share your link to invite friends';
+            ? '<i class="fas fa-check-circle" style="color:var(--ds-accent-ink)"></i> <strong>' + stats.inviteAccepted + '</strong> friend' + (stats.inviteAccepted === 1 ? '' : 's') + ' joined via your link'
+            : '<i class="fas fa-link" style="color:var(--ds-text-3)"></i> Share your link to invite friends';
         }
       }).catch(function () {});
 

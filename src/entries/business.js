@@ -17,3 +17,7 @@ import '/analytics.js';
 import '/geo-actors.js';
 import '/account-switcher.js';
 import '/business-page.js';
+
+import '/gh-tabs.js';
+import '/place-categories.js';
+import '/gh-admin-bridge.js';

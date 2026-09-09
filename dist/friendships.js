@@ -425,14 +425,14 @@
         var initial = esc((p.fullName || 'U').charAt(0).toUpperCase());
         var avatarHtml = p.avatar
           ? '<img src="' + esc(p.avatar) + '" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:cover" onerror="this.onerror=null;this.src=\'data:image/svg+xml,<svg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'40\\\' height=\\\'40\\\'><circle cx=\\\'20\\\' cy=\\\'20\\\' r=\\\'20\\\' fill=\\\'%236d3fd9\\\'/><text x=\\\'50%25\\\' y=\\\'50%25\\\' dy=\\\'.35em\\\' text-anchor=\\\'middle\\\' fill=\\\'%23fff\\\' font-family=\\\'sans-serif\\\' font-weight=\\\'bold\\\' font-size=\\\'16\\\'>'+initial+'</text></svg>\'">'
-          : '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#6d3fd9,#10b981);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.85rem">' + initial + '</div>';
+          : '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#6d3fd9,var(--ds-accent));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.85rem">' + initial + '</div>';
         return '<div class="pymk-card" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--gh-border,rgba(255,255,255,.07))">'
           + '<a href="profile.html?id=' + encodeURIComponent(p.uid) + '" style="flex-shrink:0">' + avatarHtml + '</a>'
           + '<div style="flex:1;min-width:0">'
           + '<div style="font-weight:700;font-size:.85rem;color:var(--gh-text,#f0f4ff);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><a href="profile.html?id=' + encodeURIComponent(p.uid) + '" style="color:inherit;text-decoration:none">' + esc(p.fullName) + '</a></div>'
           + '<div style="font-size:.72rem;color:var(--gh-muted,#64748b)">' + p.mutualCount + ' mutual friend' + (p.mutualCount !== 1 ? 's' : '') + '</div>'
           + '</div>'
-          + '<button class="pymk-add-btn" data-pymk-uid="' + esc(p.uid) + '" style="background:linear-gradient(135deg,#10b981,#3b82f6);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap">Add Friend</button>'
+          + '<button class="pymk-add-btn" data-pymk-uid="' + esc(p.uid) + '" style="background:linear-gradient(135deg,var(--ds-accent),#3b82f6);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:.75rem;font-weight:700;cursor:pointer;white-space:nowrap">Add Friend</button>'
           + '</div>';
       }).join('');
 
@@ -569,7 +569,7 @@
       if (!snap.exists()) return;
       var d = snap.data();
       if (d.online) {
-        container.innerHTML = '<span style="display:inline-flex;align-items:center;gap:5px;font-size:.78rem;color:#10b981"><span style="width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block"></span>Active now</span>';
+        container.innerHTML = '<span style="display:inline-flex;align-items:center;gap:5px;font-size:.78rem;color:var(--ds-accent-ink)"><span style="width:8px;height:8px;border-radius:50%;background:var(--ds-accent);display:inline-block"></span>Active now</span>';
       } else if (d.lastSeen) {
         var ms = typeof d.lastSeen === 'object' && d.lastSeen.toMillis ? d.lastSeen.toMillis() : (d.lastSeen.seconds || 0) * 1000;
         var diff = Date.now() - ms;

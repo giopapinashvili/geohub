@@ -6,13 +6,13 @@
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="dns-prefetch" href="https://firestore.googleapis.com">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>GeoHub Premium 👑</title>
+  <title>GeoHub Premium</title>
   <meta name="description" content="GeoHub Premium — განბლოკე სრული შესაძლებლობები. Premium ბეჯი, ბუსტი, ანალიტიკა და მეტი.">
   <link rel="canonical" href="https://geohub.ge/premium.html">
   <meta name="robots" content="index, follow">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="GeoHub">
-  <meta property="og:title" content="GeoHub Premium 👑">
+  <meta property="og:title" content="GeoHub Premium">
   <meta property="og:description" content="განბლოკე GeoHub-ის სრული შესაძლებლობები Premium-ით.">
   <meta property="og:url" content="https://geohub.ge/premium.html">
   <meta property="og:image" content="https://geohub.ge/icons/icon-512.png">
@@ -29,7 +29,7 @@
   <link rel="icon" type="image/png" href="/assets/icon-96-s2GtXjxZ.png">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    body{background:#04050d;color:#f0f4ff;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow-x:hidden;min-height:100vh}
+    body{background:var(--ds-bg);color:var(--ds-text);font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow-x:hidden;min-height:100vh}
 
     /* ── Premium page layout ── */
     #gh-prem-root{padding-top:64px;min-height:100vh}
@@ -43,7 +43,7 @@
     /* Features grid */
     .gh-prem-features{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:480px;margin:0 auto;padding:0 16px 28px}
     .gh-prem-feat{display:flex;align-items:center;gap:10px;background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.15);border-radius:10px;padding:11px 12px;font-size:.85rem;color:#d1d5db}
-    .gh-prem-feat i{color:#f59e0b;width:16px;text-align:center;flex-shrink:0;font-size:.9rem}
+    .gh-prem-feat i{color:var(--ds-h-reward-ink);width:16px;text-align:center;flex-shrink:0;font-size:.9rem}
 
     /* Plan picker */
     .gh-prem-plans{display:flex;gap:12px;max-width:480px;margin:0 auto;padding:0 16px 20px}
@@ -52,10 +52,10 @@
     .gh-prem-plan--sel{border-color:#f59e0b!important;background:rgba(245,158,11,.07)}
     .gh-prem-plan-badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#f59e0b,#d97706);color:#1a0f00;font-size:.66rem;font-weight:800;padding:3px 10px;border-radius:20px;white-space:nowrap;letter-spacing:.02em}
     .gh-prem-plan-name{font-size:.78rem;color:#9ca3af;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
-    .gh-prem-plan-price{font-size:2.1rem;font-weight:800;color:#f0f4ff;line-height:1}
+    .gh-prem-plan-price{font-size:2.1rem;font-weight:800;color:var(--ds-text);line-height:1}
     .gh-prem-plan-price sup{font-size:1rem;font-weight:600;vertical-align:super}
-    .gh-prem-plan-sub{font-size:.73rem;color:#6b7280;margin-top:4px}
-    .gh-prem-plan-save{font-size:.75rem;color:#10b981;font-weight:700;margin-top:6px}
+    .gh-prem-plan-sub{font-size:.73rem;color:var(--ds-text-3);margin-top:4px}
+    .gh-prem-plan-save{font-size:.75rem;color:var(--ds-accent-ink);font-weight:700;margin-top:6px}
 
     /* CTA */
     .gh-prem-cta-wrap{max-width:480px;margin:0 auto;padding:4px 16px 40px}
@@ -63,7 +63,7 @@
     .gh-prem-cta-btn:hover{opacity:.92;transform:translateY(-1px)}
     .gh-prem-cta-btn:active{transform:translateY(0)}
     .gh-prem-cta-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
-    .gh-prem-secure{text-align:center;font-size:.75rem;color:#4b5563;margin-top:10px}
+    .gh-prem-secure{text-align:center;font-size:.75rem;color:var(--ds-text-2);margin-top:10px}
 
     /* Status screens */
     .gh-prem-status{text-align:center;padding:64px 24px;max-width:400px;margin:0 auto}
@@ -72,12 +72,14 @@
     .gh-prem-status p{color:#9ca3af;margin-bottom:28px;font-size:.92rem}
     .gh-prem-status .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;border-radius:10px;font-weight:600;font-size:.95rem;text-decoration:none;border:none;cursor:pointer}
     .gh-prem-status .btn-prem{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
-    .gh-prem-status .btn-green{background:#10b981;color:#fff}
+    .gh-prem-status .btn-green{background:var(--ds-accent);color:var(--ds-accent-on)}
     .gh-prem-status .btn-ghost{background:rgba(255,255,255,.07);color:#d1d5db;border:1px solid rgba(255,255,255,.1)}
   </style>
   <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700;800&family=Noto+Serif+Georgian:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
   <script type="module" crossorigin src="/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
-  <script type="module" crossorigin src="/assets/responsive-polish-BO79aqv7.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
@@ -85,17 +87,18 @@
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js"></script>
   <script type="module" crossorigin src="/assets/firebase-config-CGKVrgHh.js"></script>
-  <script type="module" crossorigin src="/assets/gh-i18n-BbqPU8Gy.js"></script>
+  <script type="module" crossorigin src="/assets/gh-admin-bridge-h-7zgsq_.js"></script>
   <script type="module" crossorigin src="/assets/gh-schema-kY2sMGH-.js"></script>
-  <script type="module" crossorigin src="/assets/account-BJSGhbLy.js"></script>
-  <script type="module" crossorigin src="/assets/mobile-nav-DsKLv3RI.js"></script>
-  <script type="module" crossorigin src="/assets/firestore-social-BXEW-BZV.js"></script>
-  <script type="module" crossorigin src="/assets/chat-popup-MADaMnFN.js"></script>
+  <script type="module" crossorigin src="/assets/account-Dl1_viTm.js"></script>
+  <script type="module" crossorigin src="/assets/mobile-nav-CEPM5beY.js"></script>
+  <script type="module" crossorigin src="/assets/firestore-social-CedOtedd.js"></script>
+  <script type="module" crossorigin src="/assets/chat-popup-BHzNMiBZ.js"></script>
   <script type="module" crossorigin src="/assets/gh-calls-DqDOBgOW.js"></script>
-  <script type="module" crossorigin src="/assets/gh-group-calls-Ck1zIhcT.js"></script>
-  <script type="module" crossorigin src="/assets/geohub-social-redesign-BWKSXRSM.js"></script>
-  <script type="module" crossorigin src="/assets/account-switcher-CXzCMss9.js"></script>
-  <script type="module" crossorigin src="/assets/geohub-production-stabilization-v1-D4HPXa7T.js"></script>
+  <script type="module" crossorigin src="/assets/gh-group-calls-CA5vOXuG.js"></script>
+  <script type="module" crossorigin src="/assets/geohub-social-redesign-CEvWO0HF.js"></script>
+  <script type="module" crossorigin src="/assets/account-switcher-CyZuJiLi.js"></script>
+  <script type="module" crossorigin src="/assets/geohub-production-stabilization-v1-kYTMrx4r.js"></script>
+  <script type="module" crossorigin src="/assets/responsive-polish-Cni6BeF_.js"></script>
   <script type="module" crossorigin src="/assets/analytics-DyGaP85h.js"></script>
   <script type="module" crossorigin src="/assets/config-DSeD8I2H.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
@@ -104,10 +107,11 @@
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js"></script>
   <script type="module" crossorigin src="https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-DLA2t97l.css">
-  <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-MLyQcxDm.css">
-  <link rel="stylesheet" crossorigin href="/assets/account-switcher-B6z_cLE_.css">
-  <link rel="stylesheet" crossorigin href="/assets/chat-popup-BZyPBkEp.css">
+  <link rel="stylesheet" crossorigin href="/assets/geohub-social-redesign-SGulRuY0.css">
+  <link rel="stylesheet" crossorigin href="/assets/account-switcher-CWJxisto.css">
+  <link rel="stylesheet" crossorigin href="/assets/chat-popup-DzoItt1C.css">
+  <link rel="stylesheet" crossorigin href="/assets/responsive-polish-OO1pxCG1.css">
+  <link rel="stylesheet" crossorigin href="/assets/gh-design-system-Eii08DGH.css">
 </head>
 <body data-gh-page="premium">
   <noscript>GeoHub requires JavaScript.</noscript>
@@ -116,7 +120,7 @@
 
     <!-- Loading -->
     <div id="ghPremLoading" style="display:flex;align-items:center;justify-content:center;height:70vh">
-      <i class="fas fa-spinner fa-spin" style="font-size:2rem;color:#f59e0b"></i>
+      <i class="fas fa-spinner fa-spin" style="font-size:2rem;color:var(--ds-h-reward-ink)"></i>
     </div>
 
     <!-- Not signed in -->
@@ -133,7 +137,7 @@
     <div id="ghPremActive" style="display:none">
       <div class="gh-prem-status">
         <div class="gh-prem-status-icon">👑</div>
-        <h2 style="color:#f59e0b">Premium აქტიურია!</h2>
+        <h2 style="color:var(--ds-h-reward-ink)">Premium აქტიურია!</h2>
         <p id="ghPremActiveUntil">შენი Premium სტატუსი მოქმედებს.</p>
         <a href="profile.html" class="btn btn-green"><i class="fas fa-user"></i> ჩემი პროფილი</a>
       </div>
@@ -143,7 +147,7 @@
     <div id="ghPremChecking" style="display:none">
       <div class="gh-prem-status">
         <div class="gh-prem-status-icon">
-          <i class="fas fa-spinner fa-spin" style="color:#f59e0b"></i>
+          <i class="fas fa-spinner fa-spin" style="color:var(--ds-h-reward-ink)"></i>
         </div>
         <h2>გადახდა მოწმდება</h2>
         <p>გთხოვ, დაიცადო...</p>
@@ -154,7 +158,7 @@
     <div id="ghPremSuccess" style="display:none">
       <div class="gh-prem-status">
         <div class="gh-prem-status-icon">🎉</div>
-        <h2 style="color:#10b981">Premium გააქტიურდა!</h2>
+        <h2 style="color:var(--ds-accent-ink)">Premium გააქტიურდა!</h2>
         <p>გმადლობ! GeoHub Premium ახლა შენია 👑<br>სარგებლობ ექსკლუზიური შესაძლებლობებით.</p>
         <a href="profile.html" class="btn btn-green" style="margin-right:8px"><i class="fas fa-user"></i> ჩემი პროფილი</a>
       </div>

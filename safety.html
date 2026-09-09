@@ -9,7 +9,7 @@
   <link rel="dns-prefetch" href="https://firebase.googleapis.com">
   <link rel="dns-prefetch" href="https://identitytoolkit.googleapis.com">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privacy &amp; Safety — GeoHub</title>
+  <title>კონფიდენციალურობა და უსაფრთხოება — GeoHub</title>
   <meta name="robots" content="index, follow">
   <meta name="description" content="GeoHub-ის უსაფრთხოების ცენტრი — დაიცავი ანგარიში, შეატყობინე პრობლემა.">
   <link rel="canonical" href="https://geohub.ge/safety.html">
@@ -27,8 +27,13 @@
   <link rel="stylesheet" href="safety.css">
   <link rel="stylesheet" href="chat-popup.css">
   <link rel="stylesheet" href="responsive-polish.css">
-  <meta name="theme-color" content="#10b981">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#060a09" media="(prefers-color-scheme: dark)">
   <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700;800&family=Noto+Serif+Georgian:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="gh-design-system.css">
 </head>
 <body data-gh-page="safety">
   <noscript>GeoHub requires JavaScript.</noscript>
@@ -52,7 +57,7 @@
     <!-- Privacy Controls -->
     <div class="safety-section">
       <div class="safety-section-head">
-        <div class="safety-section-icon" style="background:rgba(16,185,129,.15);color:#10b981"><i class="fas fa-lock"></i></div>
+        <div class="safety-section-icon" style="background:rgba(var(--ds-accent-rgb),.15);color:var(--ds-accent-ink)"><i class="fas fa-lock"></i></div>
         <div>
           <div class="safety-section-title" data-i18n="safety_privacy_title">Privacy Controls</div>
           <div class="safety-section-desc" data-i18n="safety_privacy_desc">Manage who can interact with your account</div>
@@ -185,7 +190,7 @@
     <!-- Muted Users -->
     <div class="safety-section">
       <div class="safety-section-head">
-        <div class="safety-section-icon" style="background:rgba(245,158,11,.12);color:#f59e0b"><i class="fas fa-volume-mute"></i></div>
+        <div class="safety-section-icon" style="background:rgba(245,158,11,.12);color:var(--ds-h-reward-ink)"><i class="fas fa-volume-mute"></i></div>
         <div>
           <div class="safety-section-title" data-i18n="safety_muted_title">Muted Users</div>
           <div class="safety-section-desc" data-i18n="safety_muted_desc">Their posts are hidden from your feed</div>
@@ -199,7 +204,7 @@
     <!-- Account / Danger Zone -->
     <div class="safety-section">
       <div class="safety-section-head">
-        <div class="safety-section-icon" style="background:rgba(255,255,255,.06);color:var(--text-muted,#6b7280)"><i class="fas fa-user-cog"></i></div>
+        <div class="safety-section-icon" style="background:rgba(255,255,255,.06);color:var(--text-muted,var(--ds-text-3))"><i class="fas fa-user-cog"></i></div>
         <div>
           <div class="safety-section-title" data-i18n="safety_account_title">Account</div>
           <div class="safety-section-desc" data-i18n="safety_account_desc">Data and account management</div>

@@ -36,3 +36,7 @@ CLOUDINARY_*.md
 CHAT_*.md
 BUSINESS_*.md
 ADMIN_*.md
+
+# Cowork temp: superseded build output and archives — safe to delete
+_to_delete/
+_dist_manifest.txt

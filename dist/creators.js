@@ -114,7 +114,7 @@
     _catList = getNiches();
     // Category buttons use numeric index in onclick to avoid injecting
     // user-controlled strings (e.g. niche names with quotes) into JS context.
-    var html = '<strong style="font-size:.9rem;color:#f8fafc">Filter by Category</strong>'
+    var html = '<strong style="font-size:.9rem;color:var(--ds-text)">Filter by Category</strong>'
       + '<div class="cr-cat-list">'
       + '<button class="cr-cat-btn' + (!state.catFilter ? ' active' : '') + '" onclick="window._crSetCat(\'\')">All Creators</button>';
     _catList.forEach(function (n, i) {

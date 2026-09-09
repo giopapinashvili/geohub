@@ -366,7 +366,12 @@
   }
 
   function hexToRgba(hex, alpha) {
-    const h = hex.replace('#', '');
+    const v = String(hex || '');
+    // A token or any non-hex colour cannot be split into bytes; mixing keeps
+    // the caller's alpha without producing rgba(NaN,NaN,NaN,·).
+    if (v.charAt(0) !== '#' || !/^#[0-9a-f]{6}$/i.test(v))
+      return 'color-mix(in srgb, ' + (v || 'currentColor') + ' ' + Math.round(alpha * 100) + '%, transparent)';
+    const h = v.slice(1);
     const r = parseInt(h.slice(0, 2), 16);
     const g = parseInt(h.slice(2, 4), 16);
     const b = parseInt(h.slice(4, 6), 16);
@@ -814,7 +819,7 @@
     div.innerHTML =
       '<div class="mpc-drag-handle" id="mpcDragHandle"></div>'
       + '<button class="mpc-close" onclick="window.closeMobileCard()"><i class="fas fa-times"></i></button>'
-      + '<div id="mpcImgWrap" class="mpc-img-wrap"><img id="mpcImg" src="" alt=""></div>'
+      + '<div id="mpcImgWrap" class="mpc-img-wrap"><img id="mpcImg" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt=""></div>'
       + '<div id="mpcFallback" class="mpc-fallback" style="display:none"></div>'
       + '<div class="mpc-body">'
       + '<div id="mpcName" class="mpc-name"></div>'
@@ -1048,7 +1053,7 @@
     MOOD_TAGS.forEach(tag => {
       html += '<div class="map-chip map-chip--mood' + (currentMoodFilter === tag.id ? ' active' : '') + '"' +
         ' data-mood="' + esc(tag.id) + '"' +
-        ' style="--mood-chip-color:' + (tag.color || '#10b981') + '">' +
+        ' style="--mood-chip-color:' + (tag.color || 'var(--ds-accent)') + '">' +
         esc(tag.emoji + ' ' + tag.label) + '</div>';
     });
     wrap.innerHTML = html;
@@ -1568,7 +1573,7 @@
         const c = counts[t.id] || 0;
         const v = votes[t.id] === true;
         return '<button class="mood-tag' + (v ? ' voted' : '') + (c === 0 && !v ? ' zero' : '') + '"' +
-          ' style="--tag-color:' + (t.color || '#10b981') + '"' +
+          ' style="--tag-color:' + (t.color || 'var(--ds-accent)') + '"' +
           ' onclick="toggleMoodTag(\'' + placeId + '\',\'' + t.id + '\',this)">' +
           t.emoji + ' ' + t.label +
           (c > 0 ? ' <span class="mood-tag-count">' + c + '</span>' : '') +
@@ -2106,7 +2111,7 @@
       if (fallbackEl) { fallbackEl.style.display = 'flex'; fallbackEl.textContent = initials; }
     }
     document.getElementById('panelTitle').textContent = f.displayName || _t2('friend','Friend');
-    document.getElementById('panelCat').innerHTML   = '<span style="color:#10b981">🟢 ' + _t2('live_now','Live Now') + '</span>';
+    document.getElementById('panelCat').innerHTML   = '<span style="color:var(--ds-accent-ink)">🟢 ' + _t2('live_now','Live Now') + '</span>';
     document.getElementById('panelLoc').textContent  = distText;
     document.getElementById('panelRating').textContent = etaStr;
     document.getElementById('panelDesc').textContent = _t2('loc_live_desc','Live location — updates every 5 seconds');
@@ -2404,7 +2409,7 @@
   function init() {
     if (!window.maplibregl) {
       const mapEl = document.getElementById('map');
-      if (mapEl) mapEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#0b1120;color:#94a3b8;font-size:.9rem;flex-direction:column;gap:12px"><i class="fas fa-triangle-exclamation" style="font-size:2rem;color:#f59e0b"></i><p>Map library not loaded. Please refresh.</p></div>';
+      if (mapEl) mapEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#0b1120;color:var(--ds-text-3);font-size:.9rem;flex-direction:column;gap:12px"><i class="fas fa-triangle-exclamation" style="font-size:2rem;color:var(--ds-h-reward-ink)"></i><p>Map library not loaded. Please refresh.</p></div>';
       window.addEventListener('load', function(){ if(window.maplibregl && !map) init(); }, {once:true});
       return;
     }
@@ -2923,6 +2928,7 @@
 
       const groups = _groupNearbyStories(nearby);
       if (!groups.length) {
+        const btn = document.getElementById('mapStoriesBtn');
         if (btn) btn.classList.remove('active');
         _nearbyStoriesActive = false;
         _showMapToast('ახლოს Stories ვერ მოიძებნა (2კმ)');
@@ -3024,7 +3030,7 @@
       const quickMoods = MOOD_TAGS.slice(0, 8);
       moodRow.innerHTML = quickMoods.map(tag =>
         '<button class="disc-mood-btn" data-mood-id="' + esc(tag.id) + '"' +
-        ' style="--dm-color:' + (tag.color || '#10b981') + '"' +
+        ' style="--dm-color:' + (tag.color || 'var(--ds-accent)') + '"' +
         ' onclick="window.discoverMood(\'' + esc(tag.id) + '\')">' +
         tag.emoji + ' ' + tag.label + '</button>'
       ).join('');
@@ -3207,7 +3213,7 @@
     } else {
       inner = '<div style="width:44px;height:44px;border-radius:50%;background:rgba(15,23,42,.92);border:2px solid ' + color + ';box-shadow:0 0 0 4px rgba(255,255,255,.08),0 0 16px ' + glow + ';display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">' + icon + '</div>';
     }
-    preview.innerHTML = inner + '<div style="font-size:.82rem;font-weight:700;color:#f1f5f9">' + name + '<br><span style="font-size:.72rem;font-weight:400;color:#64748b">' + style.label + '</span></div>';
+    preview.innerHTML = inner + '<div style="font-size:.82rem;font-weight:700;color:var(--ds-text)">' + name + '<br><span style="font-size:.72rem;font-weight:400;color:var(--ds-text-3)">' + style.label + '</span></div>';
   }
 
   window.openAddPlaceSheet = function() {
@@ -3247,7 +3253,7 @@
     // Drop pin marker on map
     if (_apsPinMarker) _apsPinMarker.remove();
     const pinEl = document.createElement('div');
-    pinEl.style.cssText = 'width:32px;height:32px;border-radius:50% 50% 50% 0;background:linear-gradient(135deg,#10b981,#3b82f6);transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.5)';
+    pinEl.style.cssText = 'width:32px;height:32px;border-radius:50% 50% 50% 0;background:linear-gradient(135deg,var(--ds-accent),#3b82f6);transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.5)';
     _apsPinMarker = new maplibregl.Marker({ element: pinEl, anchor: 'bottom-left' })
       .setLngLat([_apsPinLng, _apsPinLat]).addTo(map);
     // Show coords

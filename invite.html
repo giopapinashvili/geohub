@@ -24,66 +24,66 @@
   <link rel="canonical" href="https://geohub.ge/invite.html">
   <meta name="robots" content="noindex, nofollow">
 <style>
-body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}
+body{background:var(--ds-bg);color:var(--ds-text);min-height:100vh;overflow-x:hidden}
 
 /* ── Dashboard (logged-in) ── */
-.inv-page{padding-top:80px;min-height:100vh;background:radial-gradient(circle at top right,rgba(16,185,129,.12),transparent 35%),#05070f}
+.inv-page{padding-top:80px;min-height:100vh;background:radial-gradient(circle at top right,rgba(var(--ds-accent-rgb),.12),transparent 35%),var(--ds-bg-deep)}
 .inv-wrap{max-width:680px;margin:0 auto;padding:40px 20px 100px}
-.inv-badge{display:inline-flex;gap:8px;align-items:center;padding:7px 14px;border:1px solid rgba(16,185,129,.3);border-radius:999px;color:#10e0a0;background:rgba(16,185,129,.08);font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:20px}
+.inv-badge{display:inline-flex;gap:8px;align-items:center;padding:7px 14px;border:1px solid rgba(var(--ds-accent-rgb),.3);border-radius:999px;color:var(--ds-accent);background:rgba(var(--ds-accent-rgb),.08);font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:20px}
 .inv-title{font-size:clamp(1.7rem,5vw,2.8rem);font-weight:950;line-height:1.1;margin-bottom:10px}
-.inv-title span{background:linear-gradient(135deg,#10e0a0,#3b82f6);-webkit-background-clip:text;color:transparent}
+.inv-title span{background:linear-gradient(135deg,var(--ds-accent),#3b82f6);-webkit-background-clip:text;color:transparent}
 .inv-sub{color:#9aa6bd;font-size:.95rem;line-height:1.65;max-width:520px;margin-bottom:32px}
 
 .inv-link-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:22px}
-.inv-link-label{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin-bottom:10px}
+.inv-link-label{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--ds-text-3);margin-bottom:10px}
 .inv-link-row{display:flex;gap:8px;margin-bottom:10px}
-.inv-link-input{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#10e0a0;border-radius:10px;padding:10px 14px;font-size:.82rem;font-family:monospace;outline:none;cursor:text;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.inv-copy-btn{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:#10e0a0;border-radius:10px;padding:10px 16px;font-size:.82rem;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:6px}
-.inv-copy-btn:hover{background:rgba(16,185,129,.25)}
-.inv-share-btn{width:100%;background:linear-gradient(135deg,#10b981,#3b82f6);border:none;border-radius:12px;padding:12px;color:#fff;font-weight:800;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px}
+.inv-link-input{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--ds-accent);border-radius:10px;padding:10px 14px;font-size:.82rem;font-family:monospace;outline:none;cursor:text;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inv-copy-btn{background:rgba(var(--ds-accent-rgb),.15);border:1px solid rgba(var(--ds-accent-rgb),.3);color:var(--ds-accent);border-radius:10px;padding:10px 16px;font-size:.82rem;font-weight:800;cursor:pointer;white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:6px}
+.inv-copy-btn:hover{background:rgba(var(--ds-accent-rgb),.25)}
+.inv-share-btn{width:100%;background:linear-gradient(135deg,var(--ds-accent),#3b82f6);border:none;border-radius:12px;padding:12px;color:#fff;font-weight:800;font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px}
 .inv-share-btn:hover{opacity:.9}
 
 .inv-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px}
 .inv-stat-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:16px;text-align:center}
-.inv-stat-num{font-size:2rem;font-weight:900;color:#10e0a0;line-height:1}
-.inv-stat-label{font-size:.75rem;color:#6b7280;margin-top:4px}
+.inv-stat-num{font-size:2rem;font-weight:900;color:var(--ds-accent);line-height:1}
+.inv-stat-label{font-size:.75rem;color:var(--ds-text-3);margin-top:4px}
 
 .inv-milestones{margin-top:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:18px}
-.inv-milestones-title{font-size:.82rem;font-weight:700;color:#f8fafc;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.inv-milestones-title{font-size:.82rem;font-weight:700;color:var(--ds-text);margin-bottom:14px;display:flex;align-items:center;gap:6px}
 .inv-milestone{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}
 .inv-milestone:last-child{border-bottom:none;padding-bottom:0}
 .inv-milestone-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.9rem}
-.inv-milestone-icon.done{background:rgba(16,185,129,.2);color:#10b981}
-.inv-milestone-icon.pending{background:rgba(255,255,255,.06);color:#6b7280}
+.inv-milestone-icon.done{background:rgba(var(--ds-accent-rgb),.2);color:var(--ds-accent-ink)}
+.inv-milestone-icon.pending{background:rgba(255,255,255,.06);color:var(--ds-text-3)}
 .inv-milestone-info{flex:1}
-.inv-milestone-name{font-size:.85rem;font-weight:700;color:#f0f4ff}
-.inv-milestone-sub{font-size:.75rem;color:#6b7280}
+.inv-milestone-name{font-size:.85rem;font-weight:700;color:var(--ds-text)}
+.inv-milestone-sub{font-size:.75rem;color:var(--ds-text-3)}
 .inv-milestone-badge{font-size:.7rem;font-weight:800;padding:3px 9px;border-radius:99px}
-.inv-milestone-badge.done{background:rgba(16,185,129,.2);color:#10b981}
-.inv-milestone-badge.locked{background:rgba(255,255,255,.07);color:#6b7280}
+.inv-milestone-badge.done{background:rgba(var(--ds-accent-rgb),.2);color:var(--ds-accent-ink)}
+.inv-milestone-badge.locked{background:rgba(255,255,255,.07);color:var(--ds-text-3)}
 
 .inv-how{margin-top:20px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:18px}
 .inv-how-title{font-size:.82rem;font-weight:700;color:#9ca3af;margin-bottom:14px;text-transform:uppercase;letter-spacing:.05em}
 .inv-how-step{display:flex;align-items:flex-start;gap:12px;padding:8px 0}
-.inv-how-num{width:26px;height:26px;border-radius:50%;background:rgba(16,185,129,.15);color:#10b981;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;flex-shrink:0;margin-top:1px}
+.inv-how-num{width:26px;height:26px;border-radius:50%;background:rgba(var(--ds-accent-rgb),.15);color:var(--ds-accent-ink);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;flex-shrink:0;margin-top:1px}
 .inv-how-text{font-size:.84rem;color:#9ca3af;line-height:1.5}
-.inv-how-text strong{color:#f0f4ff}
+.inv-how-text strong{color:var(--ds-text)}
 
 /* ── Landing page (logged-out) ── */
-.inv-landing{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;background:radial-gradient(ellipse at 15% 20%,rgba(16,185,129,.22),transparent 40%),radial-gradient(ellipse at 85% 75%,rgba(59,130,246,.16),transparent 40%),#04050d}
+.inv-landing{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;background:radial-gradient(ellipse at 15% 20%,rgba(var(--ds-accent-rgb),.22),transparent 40%),radial-gradient(ellipse at 85% 75%,rgba(59,130,246,.16),transparent 40%),var(--ds-bg-deep)}
 .inv-card{width:100%;max-width:420px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:24px;padding:40px 32px;text-align:center;animation:fadeUp .4s cubic-bezier(.34,1.56,.64,1)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.inv-card-logo{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 20px;box-shadow:0 8px 32px rgba(16,185,129,.35)}
-.inv-card-badge{display:inline-block;background:rgba(16,185,129,.12);color:#34d399;border:1px solid rgba(16,185,129,.25);border-radius:20px;font-size:.75rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:4px 14px;margin-bottom:16px}
+.inv-card-logo{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,var(--ds-accent),var(--ds-accent-lo));display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 20px;box-shadow:0 8px 32px rgba(var(--ds-accent-rgb),.35)}
+.inv-card-badge{display:inline-block;background:rgba(var(--ds-accent-rgb),.12);color:var(--ds-accent-ink);border:1px solid rgba(var(--ds-accent-rgb),.25);border-radius:20px;font-size:.75rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:4px 14px;margin-bottom:16px}
 .inv-card h1{font-size:1.65rem;font-weight:800;line-height:1.25;margin-bottom:10px;background:linear-gradient(135deg,#f1f5f9,#94a3b8);-webkit-background-clip:text;color:transparent;background-clip:text}
-.inv-card-sub{color:#94a3b8;font-size:.92rem;line-height:1.55;margin-bottom:28px}
+.inv-card-sub{color:var(--ds-text-3);font-size:.92rem;line-height:1.55;margin-bottom:28px}
 .inv-perks{display:flex;flex-direction:column;gap:10px;margin-bottom:28px;text-align:left}
-.inv-perk{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border-radius:12px;padding:10px 14px;font-size:.85rem;color:#cbd5e1}
+.inv-perk{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.04);border-radius:12px;padding:10px 14px;font-size:.85rem;color:var(--ds-text-2)}
 .perk-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
-.inv-join-btn{display:block;width:100%;padding:14px;background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:1rem;font-weight:700;border:none;border-radius:14px;cursor:pointer;text-decoration:none;box-shadow:0 4px 20px rgba(16,185,129,.35);transition:transform .15s,box-shadow .15s;letter-spacing:.01em}
-.inv-join-btn:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(16,185,129,.45)}
-.inv-login-link{margin-top:16px;font-size:.82rem;color:#64748b}
-.inv-login-link a{color:#10b981;text-decoration:none;font-weight:600}
+.inv-join-btn{display:block;width:100%;padding:14px;background:linear-gradient(135deg,var(--ds-accent),var(--ds-accent-lo));color:#fff;font-size:1rem;font-weight:700;border:none;border-radius:14px;cursor:pointer;text-decoration:none;box-shadow:0 4px 20px rgba(var(--ds-accent-rgb),.35);transition:transform .15s,box-shadow .15s;letter-spacing:.01em}
+.inv-join-btn:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(var(--ds-accent-rgb),.45)}
+.inv-login-link{margin-top:16px;font-size:.82rem;color:var(--ds-text-3)}
+.inv-login-link a{color:var(--ds-accent-ink);text-decoration:none;font-weight:600}
 
 .inv-loading{display:flex;align-items:center;justify-content:center;min-height:60vh}
 
@@ -98,6 +98,10 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}
   <link rel="stylesheet" href="chat-popup.css">
   <link rel="stylesheet" href="responsive-polish.css">
   <script>(function(){try{var t=localStorage.getItem('gh_theme')||'dark';document.documentElement.setAttribute('data-gh-theme',t);}catch(e){document.documentElement.setAttribute('data-gh-theme','dark');}})();</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700;800&family=Noto+Serif+Georgian:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+  <link rel="stylesheet" href="gh-design-system.css">
 </head>
 <body class="clean-body page-invite">
 
@@ -112,7 +116,7 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}
 
 <!-- Loading -->
 <div id="invLoading" class="inv-loading">
-  <i class="fas fa-circle-notch fa-spin" style="font-size:2rem;color:#10b981"></i>
+  <i class="fas fa-circle-notch fa-spin" style="font-size:2rem;color:var(--ds-accent-ink)"></i>
 </div>
 
 <!-- Dashboard (logged-in) -->
@@ -120,7 +124,7 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}
   <div class="inv-wrap">
     <div class="inv-badge"><i class="fas fa-user-plus"></i> <span data-i18n="inv_referral_prog">Referral Program</span></div>
     <h1 class="inv-title"><span data-i18n="inv_title">მოიწვიე მეგობრები</span><br><span data-i18n="inv_title_earn">მიიღე GeoPoints</span></h1>
-    <p class="inv-sub" data-i18n="inv_sub">ყოველი მეგობარი, ვინც შენი ბმულით დარეგისტრირდება, გაძლევს <strong style="color:#10e0a0">500 GeoPoint</strong>. მეგობარიც მიიღებს 100 GeoPoint-ს მისასალმებლად.</p>
+    <p class="inv-sub" data-i18n="inv_sub">ყოველი მეგობარი, ვინც შენი ბმულით დარეგისტრირდება, გაძლევს <strong style="color:var(--ds-accent)">500 GeoPoint</strong>. მეგობარიც მიიღებს 100 GeoPoint-ს მისასალმებლად.</p>
 
     <div class="inv-link-card">
       <div class="inv-link-label"><i class="fas fa-link"></i> <span data-i18n="inv_link_label">შენი პირადი ბმული</span></div>
@@ -145,7 +149,7 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}
     </div>
 
     <div class="inv-milestones">
-      <div class="inv-milestones-title"><i class="fas fa-trophy" style="color:#f59e0b"></i> <span data-i18n="inv_milestones">მიღწევები</span></div>
+      <div class="inv-milestones-title"><i class="fas fa-trophy" style="color:var(--ds-h-reward-ink)"></i> <span data-i18n="inv_milestones">მიღწევები</span></div>
       <div class="inv-milestone">
         <div class="inv-milestone-icon" id="ms1Icon"><i class="fas fa-star"></i></div>
         <div class="inv-milestone-info">
@@ -200,15 +204,15 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}
       <p class="inv-card-sub" data-i18n="inv_land_sub">საქართველოს ლოკალური სოციალური პლათფორმა — გამოიძიე ადგილები, გამოიმუშავე ჯილდოები და დაუკავშირდი ქალაქს.</p>
       <div class="inv-perks">
         <div class="inv-perk">
-          <div class="perk-icon" style="background:rgba(16,185,129,.15);color:#34d399"><i class="fas fa-compass"></i></div>
+          <div class="perk-icon" style="background:rgba(var(--ds-accent-rgb),.15);color:var(--ds-accent-ink)"><i class="fas fa-compass"></i></div>
           <span data-i18n="inv_perk1">აღმოაჩინე ფარული ადგილები შენს გარშემო</span>
         </div>
         <div class="inv-perk">
-          <div class="perk-icon" style="background:rgba(245,158,11,.15);color:#fbbf24"><i class="fas fa-gift"></i></div>
+          <div class="perk-icon" style="background:rgba(245,158,11,.15);color:var(--ds-h-reward-ink)"><i class="fas fa-gift"></i></div>
           <span data-i18n="inv_perk2">100 GeoPoint სასაჩუქრო ბონუსი — მოწვევის სახელობით</span>
         </div>
         <div class="inv-perk">
-          <div class="perk-icon" style="background:rgba(59,130,246,.15);color:#60a5fa"><i class="fas fa-users"></i></div>
+          <div class="perk-icon" style="background:rgba(59,130,246,.15);color:var(--ds-h-video-ink)"><i class="fas fa-users"></i></div>
           <span data-i18n="inv_perk3">შეუერთდი ჯგუფებს და გაიცანი ახალი ადამიანები</span>
         </div>
       </div>
@@ -271,7 +275,7 @@ body{background:#05070f;color:#f8fafc;min-height:100vh;overflow-x:hidden}
     var t = document.getElementById('invToast');
     if(!t){
       t = document.createElement('div'); t.id='invToast';
-      t.style.cssText='position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(16px);background:#10b981;color:#fff;padding:9px 20px;border-radius:24px;font-size:.85rem;font-weight:700;z-index:99999;transition:all .25s;opacity:0;pointer-events:none;white-space:nowrap';
+      t.style.cssText='position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ds-accent);color:var(--ds-accent-on);padding:9px 20px;border-radius:24px;font-size:.85rem;font-weight:700;z-index:99999;transition:all .25s;opacity:0;pointer-events:none;white-space:nowrap';
       document.body.appendChild(t);
     }
     t.textContent = msg; t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)';

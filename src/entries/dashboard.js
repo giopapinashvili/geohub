@@ -12,3 +12,7 @@ import '/dashboard.js';
 import '/geohub-production-stabilization-v1.js';
 import '/responsive-polish.js';
 import '/analytics.js';
+
+import '/gh-tabs.js';
+import '/place-categories.js';
+import '/gh-admin-bridge.js';

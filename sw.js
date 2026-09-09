@@ -118,7 +118,7 @@ var SHELL_URLS = [
 /* ── Offline image placeholder ──────────────────────────────────────────── */
 var IMG_PLACEHOLDER = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">' +
   '<rect width="200" height="200" fill="#1a1f35"/>' +
-  '<text x="100" y="115" text-anchor="middle" fill="#374151" font-size="52">📷</text></svg>';
+  '<text x="100" y="115" text-anchor="middle" fill="var(--ds-text-2)" font-size="52">📷</text></svg>';
 
 /* ── INSTALL ─────────────────────────────────────────────────────────────── */
 self.addEventListener('install', function(event) {
@@ -313,11 +313,11 @@ function networkFirstHTML(req) {
       return caches.match('/offline.html').then(function(offlinePage) {
         return offlinePage || new Response(
           '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GeoHub — Offline</title></head>' +
-          '<body style="background:#04050d;color:#94a3b8;font-family:Inter,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center;padding:24px">' +
+          '<body style="background:var(--ds-bg);color:var(--ds-text-3);font-family:Inter,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center;padding:24px">' +
           '<div><div style="font-size:3rem;margin-bottom:16px">📡</div>' +
-          '<h2 style="color:#f0f4ff;margin:0 0 8px">You\'re offline</h2>' +
+          '<h2 style="color:var(--ds-text);margin:0 0 8px">You\'re offline</h2>' +
           '<p style="margin:0 0 24px">Check your connection and try again.</p>' +
-          '<button onclick="location.reload()" style="background:#10b981;color:#fff;border:none;padding:12px 28px;border-radius:10px;font-size:0.95rem;font-weight:700;cursor:pointer">Try again</button>' +
+          '<button onclick="location.reload()" style="background:var(--ds-accent);#fffvar(--ds-accent-on);border:none;padding:12px 28px;border-radius:10px;font-size:0.95rem;font-weight:700;cursor:pointer">Try again</button>' +
           '</div></body></html>',
           { headers: { 'Content-Type': 'text/html' } }
         );
