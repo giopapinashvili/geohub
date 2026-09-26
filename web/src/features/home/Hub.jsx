@@ -46,7 +46,7 @@ function initialCity() {
 
 function loadOffers() {
   return cachedList('offers', 15, 10 * 60000, async (k) => {
-    const snap = await getDocs(query(collection(db, 'businessOffers'), where('status', '==', 'active'), limit(k))).catch(() => ({ docs: [] }));
+    const snap = await getDocs(query(collection(db, 'businessOffers'), where('status', '==', 'active'), limit(k)));
     const today = new Date().toISOString().slice(0, 10);
     return snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((o) => !o.endsAt || o.endsAt >= today);
   });

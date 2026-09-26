@@ -33,7 +33,7 @@ export const needOf = (p) => p.raw?.need || {};
 
 export function listNeeds(n = 40) {
   return cachedList('needs', 40, 3 * 60000, async (k) => {
-    const snap = await getDocs(query(collection(db, 'posts'), where('type', '==', 'need'), limit(k))).catch(() => ({ docs: [] }));
+    const snap = await getDocs(query(collection(db, 'posts'), where('type', '==', 'need'), limit(k)));
     return snap.docs.filter((d) => !isCorruptSeed(d.data())).map((d) => normPost(d.id, d.data()))
       .filter((p) => p.status === 'active').sort((a, b) => b.createdAt - a.createdAt);
   }, n);

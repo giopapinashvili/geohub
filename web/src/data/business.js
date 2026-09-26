@@ -45,11 +45,14 @@ export async function myBusinesses() {
   const u = myUid.value;
   if (!u) return [];
   return cachedList(`businesses:mine:${u}`, 30, 5 * 60000, async (k) => {
+    const docs = (q) => getDocs(q).then((s) => s.docs, () => null);
     const [admins, owned] = await Promise.all([
-      getDocs(query(collection(db, 'businessAdmins'), where('userId', '==', u), limit(k))).catch(() => ({ docs: [] })),
-      getDocs(query(collection(db, 'businesses'), where('ownerId', '==', u), limit(k))).catch(() => ({ docs: [] })),
+      docs(query(collection(db, 'businessAdmins'), where('userId', '==', u), limit(k))),
+      docs(query(collection(db, 'businesses'), where('ownerId', '==', u), limit(k))),
     ]);
-    const ids = new Set([...admins.docs.map((d) => d.data().businessId), ...owned.docs.map((d) => d.id)].filter(Boolean));
+    // Both failing (offline, quota) must not be remembered as "no pages".
+    if (!admins && !owned) throw new Error('my pages unavailable');
+    const ids = new Set([...(admins || []).map((d) => d.data().businessId), ...(owned || []).map((d) => d.id)].filter(Boolean));
     const list = await Promise.all([...ids].map(getBusiness));
     return list.filter(live);
   });
