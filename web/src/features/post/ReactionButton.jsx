@@ -42,8 +42,8 @@ export function ReactionButton({ value, onChange, compact }) {
         onContextMenu={(e) => { if (longPressed.current) e.preventDefault(); }}
         onKeyDown={(e) => { if (e.key === 'ArrowUp') { e.preventDefault(); setPicker(true); } if (e.key === 'Escape') setPicker(false); }}
       >
-        {value ? <span class="react-current" aria-hidden="true">{REACTION_EMOJI[value] || '👍'}</span> : <Icon name="thumbs-up" size={20} />}
-        <span>{t(value ? LABEL[value] : 'react.like')}</span>
+        {value ? <span class="react-current" aria-hidden="true">{REACTION_EMOJI[value] || '❤️'}</span> : <Icon name={compact ? 'heart' : 'thumbs-up'} size={compact ? 24 : 20} />}
+        {compact ? <span class="sr-only">{t(value ? LABEL[value] : 'react.like')}</span> : <span>{t(value ? LABEL[value] : 'react.like')}</span>}
       </button>
     </div>
   );

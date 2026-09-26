@@ -1,6 +1,7 @@
 import { SECTIONS } from './nav.js';
 import { Icon } from '../ui/Icon.jsx';
 import { t } from '../lib/i18n.js';
+import { createMenu, requireLogin } from '../lib/store.js';
 
 const RAIL = ['home', 'needs', 'explore', 'business', 'marketplace', 'map', 'events', 'groups'];
 
@@ -17,6 +18,10 @@ export function LeftNav({ active }) {
             <span class="rail-label">{t(s.label)}</span>
           </a>
         ))}
+        <button type="button" class="rail-item rail-create" onClick={() => { if (requireLogin('post')) createMenu.value = true; }}>
+          <span class="rail-icon"><Icon name="plus" size={24} /></span>
+          <span class="rail-label">{t('nav.create')}</span>
+        </button>
         <a href="/menu" class={`rail-item${!inRail && active && active !== 'profile' ? ' is-active' : ''}`}>
           <span class="rail-icon"><Icon name="squares-four" size={24} /></span>
           <span class="rail-label">{t('nav.more')}</span>

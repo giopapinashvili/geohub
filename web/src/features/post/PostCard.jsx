@@ -157,61 +157,61 @@ export function PostCard({ post: initial, openComments = false, highlightComment
   return (
     <article ref={ref} class="card post" aria-labelledby={`post-${post.id}-author`}>
       <header class="post-head">
-        <Avatar src={post.authorAvatar} name={post.authorName} size={42} href={authorHref} square={post.authorType === 'business'} />
+        <Avatar src={post.authorAvatar} name={post.authorName} size={40} href={authorHref} square={post.authorType === 'business'} ring={post.authorType === 'business' ? undefined : 'story'} />
         <div class="post-head-text">
           <div class="post-author">
             <a id={`post-${post.id}-author`} href={authorHref} class="post-author-name">{post.authorName}</a>
-            {(post.authorVerified) && <Verified />}
-            {post.feeling && <span class="post-feeling"> — {t('post.feeling', { feeling: post.feeling })}</span>}
-            {post.location?.name && (
-              <span class="post-feeling"> — {t('post.at')} <a href={post.location.placeId ? `/place/${post.location.placeId}` : `/search?q=${encodeURIComponent(post.location.name)}`} class="post-author-name">{post.location.name}</a></span>
-            )}
-          </div>
-          <div class="post-meta">
-            <a href={`/post/${post.id}`} class="post-time" title={formatDate(post.createdAt, { withTime: true })}>{timeAgo(post.createdAt)}</a>
-            <span aria-hidden="true">·</span>
-            <span title={t(aud.label)}><Icon name={aud.icon} size={13} label={t(aud.label)} /></span>
+            {post.authorVerified && <Verified />}
             {post.status === 'pending' && <span class="tag tag-accent">{t('post.pending')}</span>}
           </div>
+          {(post.location?.name || post.feeling) && (
+            <div class="post-meta">
+              {post.location?.name
+                ? <a href={post.location.placeId ? `/place/${post.location.placeId}` : `/search?q=${encodeURIComponent(post.location.name)}`} class="post-place"><Icon name="map-pin-fill" size={12} />{post.location.name}</a>
+                : <span>{t('post.feeling', { feeling: post.feeling })}</span>}
+            </div>
+          )}
         </div>
         <Menu label={t('post.options')} items={menuItems} width={320}
           trigger={(p) => <IconButton {...p} icon="dots-three" label={t('post.options')} size={36} />} />
       </header>
 
-      {bg ? (
+      {!post.media.length && (bg ? (
         <div class={`post-bg${bg.dark ? ' is-dark' : ''}`} style={{ background: bg.css }}><PostText text={post.text} big /></div>
       ) : (
-        <div class="post-body"><PostText text={post.poll && post.text === post.poll.question ? post.poll.question : post.text} /></div>
-      )}
+        <div class="post-body post-body-lead"><PostText text={post.poll && post.text === post.poll.question ? post.poll.question : post.text} /></div>
+      ))}
       {post.poll && <div class="post-body"><Poll post={post} /></div>}
-      {post.media.length > 0 && <MediaGrid media={post.media} mediaType={post.mediaType} alt={post.text.slice(0, 80)} />}
+      {post.media.length > 0 && <div class="post-media"><MediaGrid media={post.media} mediaType={post.mediaType} alt={post.text.slice(0, 80)} /></div>}
       {post.sharedPostId && <div class="post-body"><SharedPost id={post.sharedPostId} /></div>}
 
-      {(likes > 0 || post.commentCount > 0 || post.shareCount > 0) && (
-        <div class="post-stats">
-          {likes > 0 ? (
-            <button type="button" class="post-stat-rx" onClick={() => setDialog('reactions')}>
-              <span class="rx-stack" aria-hidden="true">
-                {[...new Set([mine, 'like', 'love'].filter(Boolean))].slice(0, 3).map((k) => <span key={k} class="rx-stack-item">{REACTION_EMOJI[k]}</span>)}
-              </span>
-              <span>{formatCount(likes)}</span>
-            </button>
-          ) : <span />}
-          <span class="post-stat-right">
-            {post.commentCount > 0 && <button type="button" class="post-stat-link" onClick={() => setShowComments((s) => !s)}>{tn('post.comments', post.commentCount)}</button>}
-            {post.shareCount > 0 && <span>{tn('post.shares', post.shareCount)}</span>}
-          </span>
-        </div>
-      )}
-
       <div class="post-actions">
-        <ReactionButton value={mine} onChange={react} />
-        <button type="button" class="post-action" onClick={() => { setShowComments(true); setFocusComment(true); }} disabled={post.commentsDisabled && !showComments}>
-          <Icon name="chat-circle" size={20} /><span>{t('post.comment')}</span>
+        <ReactionButton value={mine} onChange={react} compact />
+        <button type="button" class="post-icon-btn" aria-label={t('post.comment')} onClick={() => { setShowComments(true); setFocusComment(true); }} disabled={post.commentsDisabled && !showComments}>
+          <Icon name="chat-circle" size={24} />
         </button>
-        <button type="button" class="post-action" onClick={() => { if (requireLogin('share')) setDialog('share'); }}>
-          <Icon name="share-fat" size={20} /><span>{t('common.share')}</span>
+        <button type="button" class="post-icon-btn" aria-label={t('common.share')} onClick={() => { if (requireLogin('share')) setDialog('share'); }}>
+          <Icon name="paper-plane-tilt" size={24} />
         </button>
+        <span class="grow" />
+        <button type="button" class={`post-icon-btn${saved ? ' is-on' : ''}`} aria-label={t('post.save')} aria-pressed={!!saved} onClick={toggleSave}>
+          <Icon name={saved ? 'bookmark-simple-fill' : 'bookmark-simple'} size={24} />
+        </button>
+      </div>
+      <div class="post-foot">
+        {likes > 0 && (
+          <button type="button" class="post-likes" onClick={() => setDialog('reactions')}>
+            <span class="rx-stack" aria-hidden="true">{[...new Set([mine, 'like', 'love'].filter(Boolean))].slice(0, 3).map((k) => <span key={k} class="rx-stack-item">{REACTION_EMOJI[k]}</span>)}</span>
+            {tn('post.likesCount', likes)}
+          </button>
+        )}
+        {post.media.length > 0 && post.text && (
+          <div class="post-caption"><a href={authorHref} class="post-caption-name">{post.authorName}</a> <PostText text={post.text} /></div>
+        )}
+        {post.commentCount > 0 && !showComments && (
+          <button type="button" class="post-view-comments" onClick={() => setShowComments(true)}>{t('post.viewComments', { n: formatCount(post.commentCount) })}</button>
+        )}
+        <a href={`/post/${post.id}`} class="post-time" title={formatDate(post.createdAt, { withTime: true })}>{timeAgo(post.createdAt)}<span aria-hidden="true"> · </span><Icon name={aud.icon} size={12} label={t(aud.label)} /></a>
       </div>
 
       {showComments && <Comments post={post} highlightId={highlightComment} focusInput={focusComment} preview={openComments ? 20 : 3} />}

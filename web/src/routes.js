@@ -23,7 +23,7 @@ function page(loader) {
  * auth: true — signed-out visitors are sent to /login
  */
 export const ROUTES = [
-  { path: '/', component: page(() => import('./pages/Home.jsx')), layout: 'page', nav: 'home' },
+  { path: '/', component: page(() => import('./pages/Home.jsx')), layout: 'feed', nav: 'home' },
   { path: '/post/:id', component: page(() => import('./pages/PostPage.jsx')), layout: 'feed', nav: 'home' },
   { path: '/reels/:id?', component: page(() => import('./pages/Reels.jsx')), layout: 'full', nav: 'reels', immersive: true },
   { path: '/video', component: page(() => import('./pages/Video.jsx')), layout: 'page', nav: 'video' },

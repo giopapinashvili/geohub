@@ -1037,4 +1037,7 @@ export default {
   'needs.cat.repair': 'ხელოსანი', 'needs.cat.beauty': 'სილამაზე', 'needs.cat.food': 'კვება', 'needs.cat.events': 'ღონისძიება/ფოტო', 'needs.cat.transport': 'ტრანსპორტი',
   'needs.cat.education': 'მასწავლებელი', 'needs.cat.it': 'IT და დიზაინი', 'needs.cat.cleaning': 'დასუფთავება', 'needs.cat.property': 'ბინა', 'needs.cat.health': 'ჯანმრთელობა',
   'needs.cat.buy': 'ვყიდულობ', 'needs.cat.other': 'სხვა',
+  'post.likesCount': '{n} მოწონება',
+  'post.viewComments': 'ყველა კომენტარის ნახვა ({n})',
+  'profile.postsWord': 'პოსტი',
 };

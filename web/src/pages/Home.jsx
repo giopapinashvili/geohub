@@ -10,13 +10,18 @@ import { query } from '../lib/router.js';
 import { fetchFeedPage, listenNewest, canSee } from '../data/posts.js';
 import { isCorruptSeed } from '../data/normalize.js';
 import { StoryTray } from '../features/story/StoryTray.jsx';
-import { Hub } from '../features/home/Hub.jsx';
-import { PostTile } from '../features/post/PostTile.jsx';
+import { HubTop, useHubModules, initialHubCity, saveHubCity } from '../features/home/Hub.jsx';
+import { PostCard } from '../features/post/PostCard.jsx';
 import { ReelsStrip } from '../features/video/ReelsStrip.jsx';
 import { PeopleStrip } from '../features/user/PeopleStrip.jsx';
 
-function TileSkeleton({ h }) {
-  return <div class="post-tile"><Skeleton h={h} r={14} /></div>;
+function PostSkeleton() {
+  return (
+    <Card class="post-skel">
+      <div class="row gap-12"><Skeleton w={40} h={40} r={20} /><div class="col gap-6 grow"><Skeleton w="40%" h={14} /><Skeleton w="22%" h={12} /></div></div>
+      <Skeleton h={360} r={0} style={{ marginTop: 12 }} />
+    </Card>
+  );
 }
 
 /** Home: search hub and discovery sections, then community posts as a grid. */
@@ -25,6 +30,9 @@ export default function Home() {
   const [posts, setPosts] = useState([]);
   const [state, setState] = useState({ loading: true, done: false, error: false });
   const [fresh, setFresh] = useState(null);
+  const [city, setCityState] = useState(initialHubCity);
+  const setCity = (c) => { setCityState(c); saveHubCity(c); };
+  const modules = useHubModules(city);
   const cursor = useRef(null);
   const loadingRef = useRef(false);
   const ctx = viewerCtx.value;
@@ -75,33 +83,34 @@ export default function Home() {
     if (compose && signedIn.value) { openComposer({}); history.replaceState(history.state, '', '/'); }
   }, [compose, signedIn.value]);
 
+  // City sections are placed between posts: after the 2nd, 5th, 8th…
+  const items = [];
+  posts.forEach((p, i) => {
+    items.push(<PostCard key={p.id} post={p} onRemoved={(id) => setPosts((l) => l.filter((x) => x.id !== id))} />);
+    const slot = (i - 1) / 3;
+    if (Number.isInteger(slot) && modules[slot]) items.push(modules[slot]);
+    if (i === 6) items.push(<ReelsStrip key="reels" />);
+    if (i === 12 && signedIn.value) items.push(<PeopleStrip key="people" />);
+  });
+  if (!state.loading && posts.length < 2) modules.slice(posts.length ? 1 : 0).forEach((m) => items.push(m));
+
   return (
-    <div class="home">
-      <Hub />
-      <ReelsStrip />
-      <section class="community">
-        <div class="section-head">
-          <h2 class="section-title"><Icon name="users-three" size={20} class="tone-brand" />{t('home.community')}</h2>
-          <Button variant="primary" size="sm" icon="plus" onClick={() => openComposer({})}>{t('home.share')}</Button>
-        </div>
-        <StoryTray />
-        {fresh && (
-          <button type="button" class="new-posts-pill" onClick={() => { setFresh(null); load(true); }}>
-            <Icon name="arrow-up-right" size={16} style={{ transform: 'rotate(-45deg)' }} />{t('feed.newPosts')}
-          </button>
-        )}
-        <div class="post-grid">
-          {posts.map((p) => <PostTile key={p.id} post={p} />)}
-          {state.loading && [220, 300, 180, 260].map((h, i) => <TileSkeleton key={i} h={h} />)}
-        </div>
-        {state.error && <Card><Empty compact icon="warning" title={t('feed.errorTitle')} text={t('feed.errorText')} action={<Button variant="primary" onClick={() => load(!posts.length)}>{t('common.retry')}</Button>} /></Card>}
-        {!state.loading && !state.error && !posts.length && (
-          <Card><Empty icon="newspaper" title={t('feed.emptyTitle')} text={t('feed.emptyText')} action={<><Button variant="primary" href="/friends">{t('feed.findFriends')}</Button><Button variant="secondary" href="/explore">{t('nav.explore')}</Button></>} /></Card>
-        )}
-        <div ref={sentinel} class="feed-sentinel" aria-hidden="true" />
-        {state.done && posts.length > 0 && <div class="feed-end"><span class="feed-end-icon"><Icon name="check-circle-fill" size={28} /></span><p>{t('feed.caughtUp')}</p></div>}
-      </section>
-      {signedIn.value && <PeopleStrip />}
+    <div class="feed home-feed">
+      <HubTop city={city} setCity={setCity} />
+      <StoryTray />
+      {fresh && (
+        <button type="button" class="new-posts-pill" onClick={() => { setFresh(null); window.scrollTo({ top: 0, behavior: 'smooth' }); load(true); }}>
+          <Icon name="arrow-up-right" size={16} style={{ transform: 'rotate(-45deg)' }} />{t('feed.newPosts')}
+        </button>
+      )}
+      {items}
+      {state.loading && (posts.length ? <PostSkeleton /> : <><PostSkeleton /><PostSkeleton /></>)}
+      {state.error && <Card><Empty compact icon="warning" title={t('feed.errorTitle')} text={t('feed.errorText')} action={<Button variant="primary" onClick={() => load(!posts.length)}>{t('common.retry')}</Button>} /></Card>}
+      {!state.loading && !state.error && !posts.length && (
+        <Card><Empty icon="newspaper" title={t('feed.emptyTitle')} text={t('feed.emptyText')} action={<><Button variant="primary" onClick={() => openComposer({})}>{t('home.share')}</Button><Button variant="secondary" href="/explore">{t('nav.explore')}</Button></>} /></Card>
+      )}
+      <div ref={sentinel} class="feed-sentinel" aria-hidden="true" />
+      {state.done && posts.length > 0 && <div class="feed-end"><span class="feed-end-icon"><Icon name="check-circle-fill" size={28} /></span><p>{t('feed.caughtUp')}</p></div>}
     </div>
   );
 }

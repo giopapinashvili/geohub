@@ -208,3 +208,6 @@
 .rail-item.is-active .rail-icon { color: #fff; background: var(--gradient-brand); box-shadow: 0 6px 16px rgb(37 99 235 / 0.32); }
 .rail-label { font-size: 11px; font-weight: 600; line-height: 1.15; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .is-desktop .shell-body.has-left { gap: 28px; }
+.rail-create { border: 0; background: none; cursor: pointer; font: inherit; }
+.rail-create .rail-icon { box-shadow: inset 0 0 0 2px var(--text-2); border-radius: 10px; width: 30px; height: 30px; }
+.rail-create:hover .rail-icon { box-shadow: inset 0 0 0 2px var(--brand); color: var(--brand-text); }

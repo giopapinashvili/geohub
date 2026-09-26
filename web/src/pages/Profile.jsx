@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { Avatar } from '../ui/Avatar.jsx';
 import { Icon } from '../ui/Icon.jsx';
 import { Button, IconButton } from '../ui/Button.jsx';
@@ -18,12 +18,13 @@ import { listenUserPosts } from '../data/posts.js';
 import { followCounts, listenFriendIds, blockUser, isBlockedBy, listFollowers, listFollowing } from '../data/social.js';
 import { openDirect } from '../data/messages.js';
 import { userCheckins } from '../data/places.js';
-import { PostCard, ReportDialog } from '../features/post/PostCard.jsx';
+import { ReportDialog } from '../features/post/PostCard.jsx';
+import { safeBackground } from '../features/post/backgrounds.js';
+import { isVideoUrl } from '../data/normalize.js';
 import { FriendButton, FollowButton } from '../features/user/FriendButton.jsx';
 import { EditProfileDialog } from '../features/user/EditProfileDialog.jsx';
 import { messageError } from '../features/messages/errors.js';
 import { copyLink } from '../features/post/ShareDialog.jsx';
-import { Lightbox } from '../features/post/Lightbox.jsx';
 import { Modal } from '../ui/Modal.jsx';
 
 function PeopleGrid({ users, limit = 9 }) {
@@ -102,7 +103,6 @@ export default function Profile({ params }) {
   const own = !!uid.value && userId === uid.value;
   const tab = query.value.get('tab') || 'posts';
   const [dialog, setDialog] = useState(null);
-  const [lightbox, setLightbox] = useState(-1);
   const [counts, setCounts] = useState({ followers: null, following: null });
   const [friends, setFriends] = useState([]);
   const [friendCount, setFriendCount] = useState(0);
@@ -120,7 +120,6 @@ export default function Profile({ params }) {
   }, [userId]);
 
   const posts = postsLive.data || [];
-  const photos = useMemo(() => posts.flatMap((p) => p.media.filter((m) => !/\.(mp4|webm|mov)|\/video\/upload\//i.test(m))), [posts]);
   const isFriend = friendIds.value.has(userId);
   const restricted = !own && user && (user.privacy?.profilePref === 'friends' || user.privacy?.profilePref === 'private') && !isFriend;
   const visiblePosts = posts.filter((p) => own || p.visibility === 'public' || !p.visibility || (isFriend && ['friends', 'followers', 'close_friends'].includes(p.visibility)));
@@ -135,51 +134,49 @@ export default function Profile({ params }) {
   };
 
   const tabs = [
-    { value: 'posts', label: t('profile.posts') },
-    { value: 'about', label: t('profile.about') },
-    { value: 'friends', label: t('nav.friends'), count: friendCount },
-    { value: 'photos', label: t('profile.photos'), count: photos.length },
-    { value: 'checkins', label: t('profile.checkins') },
+    { value: 'posts', label: t('profile.posts'), icon: 'squares-four', count: visiblePosts.length },
+    { value: 'about', label: t('profile.about'), icon: 'user-circle' },
+    { value: 'friends', label: t('nav.friends'), icon: 'users', count: friendCount },
+    { value: 'checkins', label: t('profile.checkins'), icon: 'map-pin' },
   ];
 
   return (
     <div class="profile">
-      <Card pad={false} class="profile-header">
-        <div class="profile-cover">
-          {user.cover ? <Img src={user.cover} width={1100} alt="" eager /> : <div class="profile-cover-empty" />}
-          {own && <Button size="sm" variant="secondary" icon="camera" class="profile-cover-btn" onClick={() => setDialog('edit')}>{t('profile.editCover')}</Button>}
+      <section class="pf-head">
+        <div class="pf-avatar">
+          <Avatar src={user.avatar} name={user.name} size={150} ring="story" />
+          {own && <IconButton icon="camera" label={t('profile.changePhoto')} variant="soft" size={36} class="pf-avatar-btn" onClick={() => setDialog('edit')} />}
         </div>
-        <div class="profile-id">
-          <div class="profile-avatar">
-            <Avatar src={user.avatar} name={user.name} size={168} ring={undefined} />
-            {own && <IconButton icon="camera" label={t('profile.changePhoto')} variant="soft" size={40} class="profile-avatar-btn" onClick={() => setDialog('edit')} />}
+        <div class="pf-info">
+          <div class="pf-name-row">
+            <h1 class="pf-name">{user.name}{user.verified && <Verified size={20} />}</h1>
+            {user.premium && <span class="tag tag-accent"><Icon name="crown-fill" size={12} />{t('nav.premium')}</span>}
           </div>
-          <div class="profile-names">
-            <h1 class="profile-name">{user.name}{user.verified && <Verified size={22} />}</h1>
-            <div class="profile-sub">
-              {user.username && <span>@{user.username}</span>}
-              {user.premium && <span class="tag tag-accent"><Icon name="crown-fill" size={12} />{t('nav.premium')}</span>}
-            </div>
-            <div class="profile-stats">
-              <button type="button" onClick={() => setQuery({ tab: 'friends' })}><strong>{formatCount(friendCount)}</strong> {t('profile.friendsWord')}</button>
-              <button type="button" onClick={() => setDialog('followers')}><strong>{counts.followers == null ? '–' : formatCount(counts.followers)}</strong> {t('profile.followersWord')}</button>
-              <button type="button" onClick={() => setDialog('following')}><strong>{counts.following == null ? '–' : formatCount(counts.following)}</strong> {t('profile.followingWord')}</button>
-            </div>
-            {friends.length > 0 && (
-              <div class="profile-friend-faces">{friends.slice(0, 8).map((f) => <Avatar key={f.id} src={f.avatar} name={f.name} size={32} href={`/u/${f.id}`} />)}</div>
-            )}
+          {user.username && <p class="pf-username">@{user.username}</p>}
+          <div class="pf-stats">
+            <span><strong>{formatCount(visiblePosts.length)}</strong>{t('profile.postsWord')}</span>
+            <button type="button" onClick={() => setDialog('followers')}><strong>{counts.followers == null ? '–' : formatCount(counts.followers)}</strong>{t('profile.followersWord')}</button>
+            <button type="button" onClick={() => setQuery({ tab: 'friends' })}><strong>{formatCount(friendCount)}</strong>{t('profile.friendsWord')}</button>
+            <button type="button" onClick={() => setDialog('following')}><strong>{counts.following == null ? '–' : formatCount(counts.following)}</strong>{t('profile.followingWord')}</button>
           </div>
-          <div class="profile-actions">
+          {user.bio && <p class="pf-bio">{user.bio}</p>}
+          {(user.city || user.website) && (
+            <p class="pf-meta">
+              {user.city && <span><Icon name="map-pin" size={14} />{cityLabel(user.city)}</span>}
+              {user.website && <a href={/^https?:/.test(user.website) ? user.website : `https://${user.website}`} target="_blank" rel="noopener" class="link"><Icon name="link" size={14} />{user.website.replace(/^https?:\/\//, '')}</a>}
+            </p>
+          )}
+          <div class="pf-actions">
             {own ? (
               <>
-                <Button variant="primary" icon="plus" onClick={() => { storyCreator.value = true; }}>{t('stories.create')}</Button>
                 <Button variant="secondary" icon="pencil-simple" onClick={() => setDialog('edit')}>{t('profile.edit')}</Button>
+                <Button variant="secondary" icon="plus-circle" onClick={() => { storyCreator.value = true; }}>{t('stories.create')}</Button>
               </>
             ) : (
               <>
-                <FriendButton userId={userId} />
-                <Button variant="primary" icon="chat-circle-dots" onClick={message}>{t('profile.message')}</Button>
                 <FollowButton userId={userId} />
+                <Button variant="secondary" icon="chat-circle-dots" onClick={message}>{t('profile.message')}</Button>
+                <FriendButton userId={userId} />
               </>
             )}
             <Menu label={t('common.more')} width={260} items={[
@@ -190,41 +187,26 @@ export default function Profile({ params }) {
             ]} trigger={(p) => <IconButton {...p} icon="dots-three" label={t('common.more')} variant="soft" size={40} />} />
           </div>
         </div>
-        <Tabs items={tabs} value={tab} onChange={(v) => setQuery({ tab: v === 'posts' ? null : v })} label={t('nav.profile')} class="profile-tabs" />
-      </Card>
+      </section>
+      {friends.length > 0 && (
+        <div class="pf-friends" aria-label={t('nav.friends')}>
+          {friends.slice(0, 12).map((f) => (
+            <a key={f.id} href={`/u/${f.id}`} class="pf-friend"><Avatar src={f.avatar} name={f.name} size={60} ring="seen" /><span>{f.name.split(' ')[0]}</span></a>
+          ))}
+        </div>
+      )}
+      <Tabs items={tabs} value={tab} onChange={(v) => setQuery({ tab: v === 'posts' ? null : v })} label={t('nav.profile')} class="pf-tabs" />
 
       {restricted ? (
         <Card><Empty icon="lock" title={t('profile.privateTitle')} text={t('profile.privateText', { name: user.name.split(' ')[0] })} /></Card>
       ) : (
         <>
-          {tab === 'posts' && (
-            <div class="profile-grid">
-              <div class="profile-side">
-                <Intro user={user} own={own} onEdit={() => setDialog('edit')} />
-                <Card>
-                  <CardHeader title={t('profile.photos')} action={photos.length > 0 && <button type="button" class="link" onClick={() => setQuery({ tab: 'photos' })}>{t('common.seeAll')}</button>} />
-                  <PhotosGrid photos={photos} onOpen={setLightbox} />
-                </Card>
-                <Card>
-                  <CardHeader title={t('nav.friends')} sub={tn('friends.count', friendCount)} action={friendCount > 0 && <button type="button" class="link" onClick={() => setQuery({ tab: 'friends' })}>{t('common.seeAll')}</button>} />
-                  {friends.length ? <PeopleGrid users={friends} /> : <p class="muted small">{t('friends.noFriends')}</p>}
-                </Card>
-              </div>
-              <div class="profile-main feed">
-                {own && (
-                  <Card class="composer-card">
-                    <div class="composer-card-top" style={{ borderBottom: 0, paddingBottom: 0 }}>
-                      <Avatar src={user.avatar} name={user.name} size={40} />
-                      <button type="button" class="composer-card-input" onClick={() => openComposer({})}>{t('composer.placeholder', { name: user.name.split(' ')[0] })}</button>
-                    </div>
-                  </Card>
-                )}
-                {postsLive.loading && <PageSpinner />}
-                {!postsLive.loading && !visiblePosts.length && <Card><Empty compact icon="note-pencil" title={t('profile.noPosts')} text={own ? t('profile.noPostsOwn') : ''} /></Card>}
-                {visiblePosts.map((p) => <PostCard key={p.id} post={p} />)}
-              </div>
+          {tab === 'posts' && (postsLive.loading ? <PageSpinner /> : visiblePosts.length ? (
+            <div class="pf-grid">
+              {own && <button type="button" class="pf-grid-add" onClick={() => openComposer({})}><Icon name="plus" size={30} /><span>{t('home.share')}</span></button>}
+              {visiblePosts.map((p) => <PostThumb key={p.id} post={p} />)}
             </div>
-          )}
+          ) : <Card><Empty compact icon="camera" title={t('profile.noPosts')} text={own ? t('profile.noPostsOwn') : ''} action={own && <Button variant="primary" icon="plus" onClick={() => openComposer({})}>{t('home.share')}</Button>} /></Card>)}
           {tab === 'about' && <div class="profile-narrow"><Intro user={user} own={own} onEdit={() => setDialog('edit')} /></div>}
           {tab === 'friends' && (
             <Card>
@@ -234,22 +216,31 @@ export default function Profile({ params }) {
               ))}</div> : <Empty compact icon="users" title={t('friends.noFriends')} />}
             </Card>
           )}
-          {tab === 'photos' && (
-            <Card>
-              <CardHeader title={t('profile.photos')} />
-              <PhotosGrid photos={photos} limit={200} onOpen={setLightbox} />
-            </Card>
-          )}
           {tab === 'checkins' && <CheckinsTab userId={userId} />}
         </>
       )}
 
-      {lightbox >= 0 && <Lightbox media={photos} index={lightbox} onClose={() => setLightbox(-1)} />}
       {dialog === 'edit' && <EditProfileDialog user={user} onClose={() => setDialog(null)} />}
       {dialog === 'report' && <ReportDialog target={{ type: 'user', id: userId }} onClose={() => setDialog(null)} />}
       {dialog === 'followers' && <PeopleList title={t('follow.followers')} load={() => listFollowers(userId)} onClose={() => setDialog(null)} />}
       {dialog === 'following' && <PeopleList title={t('follow.followingTab')} load={() => listFollowing(userId)} onClose={() => setDialog(null)} />}
     </div>
+  );
+}
+
+/** Square grid tile: first photo, or the text on its background. */
+function PostThumb({ post }) {
+  const media = post.media[0];
+  const video = media && isVideoUrl(media, post.mediaType);
+  const bg = safeBackground(post.bgGradient);
+  return (
+    <a href={`/post/${post.id}`} class="pf-thumb" aria-label={post.text.slice(0, 80) || t('profile.posts')}>
+      {media && !video && <Img src={media} width={420} alt="" />}
+      {video && <span class="pf-thumb-text is-video"><Icon name="play-fill" size={32} /></span>}
+      {!media && <span class="pf-thumb-text" style={bg ? { background: bg.css, color: bg.dark ? '#fff' : '#0b1220' } : undefined}>{(post.poll?.question || post.text).slice(0, 90)}</span>}
+      {post.media.length > 1 && <span class="pf-thumb-multi"><Icon name="images" size={16} /></span>}
+      <span class="pf-thumb-hover"><span><Icon name="heart-fill" size={18} />{formatCount(post.likeCount)}</span><span><Icon name="chat-circle-fill" size={18} />{formatCount(post.commentCount)}</span></span>
+    </a>
   );
 }
 
