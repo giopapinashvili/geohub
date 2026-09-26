@@ -3,7 +3,7 @@ import { Icon } from '../ui/Icon.jsx';
 import { Button } from '../ui/Button.jsx';
 import { Card, Empty, Skeleton } from '../ui/misc.jsx';
 import { t } from '../lib/i18n.js';
-import { useInView, useTitle, useAsync } from '../lib/hooks.js';
+import { useInView, useTitle } from '../lib/hooks.js';
 import { signedIn, authReady } from '../lib/auth.js';
 import { openComposer, viewerCtx } from '../lib/store.js';
 import { query } from '../lib/router.js';
@@ -12,8 +12,6 @@ import { isCorruptSeed } from '../data/normalize.js';
 import { StoryTray } from '../features/story/StoryTray.jsx';
 import { Hub } from '../features/home/Hub.jsx';
 import { PostTile } from '../features/post/PostTile.jsx';
-import { EventCard } from '../features/events/EventCard.jsx';
-import { upcomingEvents } from '../data/events.js';
 import { ReelsStrip } from '../features/video/ReelsStrip.jsx';
 import { PeopleStrip } from '../features/user/PeopleStrip.jsx';
 
@@ -27,7 +25,6 @@ export default function Home() {
   const [posts, setPosts] = useState([]);
   const [state, setState] = useState({ loading: true, done: false, error: false });
   const [fresh, setFresh] = useState(null);
-  const events = useAsync(() => upcomingEvents(8).catch(() => []), []);
   const cursor = useRef(null);
   const loadingRef = useRef(false);
   const ctx = viewerCtx.value;
@@ -82,12 +79,6 @@ export default function Home() {
     <div class="home">
       <Hub />
       <ReelsStrip />
-      {events.data?.length > 0 && (
-        <section class="hub-block">
-          <div class="section-head"><h2 class="section-title"><Icon name="calendar-blank" size={20} class="tone-brand" />{t('events.upcoming')}</h2><a href="/events" class="link">{t('common.seeAll')}</a></div>
-          <div class="h-scroll">{events.data.map((e) => <EventCard key={e.id} event={e} />)}</div>
-        </section>
-      )}
       <section class="community">
         <div class="section-head">
           <h2 class="section-title"><Icon name="users-three" size={20} class="tone-brand" />{t('home.community')}</h2>

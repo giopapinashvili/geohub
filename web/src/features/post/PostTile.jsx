@@ -1,7 +1,7 @@
 import { Avatar } from '../../ui/Avatar.jsx';
 import { Icon } from '../../ui/Icon.jsx';
 import { Img } from '../../ui/misc.jsx';
-import { formatCount } from '../../lib/i18n.js';
+import { t, formatCount } from '../../lib/i18n.js';
 import { timeAgo } from '../../lib/format.js';
 import { isVideoUrl } from '../../data/normalize.js';
 import { safeBackground } from './backgrounds.js';
@@ -13,7 +13,8 @@ export function PostTile({ post }) {
   const bg = !media && safeBackground(post.bgGradient);
   const text = post.poll?.question || post.text;
   return (
-    <a href={`/post/${post.id}`} class={`post-tile${media ? ' has-media' : ''}`}>
+    <a href={`/post/${post.id}`} class={`post-tile${media ? ' has-media' : ''}${post.type === 'need' ? ' is-need' : ''}`}>
+      {post.type === 'need' && <span class="post-tile-need"><Icon name="megaphone" size={14} />{t('needs.badge')}</span>}
       {media && (
         <span class="post-tile-media">
           {video ? <span class="post-tile-video"><Icon name="play-fill" size={28} /></span> : <Img src={media} width={520} alt="" />}

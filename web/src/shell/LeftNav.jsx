@@ -2,7 +2,7 @@ import { SECTIONS } from './nav.js';
 import { Icon } from '../ui/Icon.jsx';
 import { t } from '../lib/i18n.js';
 
-const RAIL = ['home', 'explore', 'business', 'marketplace', 'map', 'events', 'groups', 'video'];
+const RAIL = ['home', 'needs', 'explore', 'business', 'marketplace', 'map', 'events', 'groups'];
 
 /** Slim desktop rail: icon plus a short label; everything else lives under "more". */
 export function LeftNav({ active }) {
@@ -13,7 +13,7 @@ export function LeftNav({ active }) {
       <nav class="rail">
         {items.map((s) => (
           <a key={s.key} href={s.href} class={`rail-item${active === s.key ? ' is-active' : ''}`} aria-current={active === s.key ? 'page' : undefined}>
-            <span class="rail-icon"><Icon name={active === s.key && s.key !== 'business' && s.key !== 'video' ? `${s.icon}-fill` : s.icon} size={24} /></span>
+            <span class="rail-icon"><Icon name={active === s.key && s.key !== 'business' && s.key !== 'needs' ? `${s.icon}-fill` : s.icon} size={24} /></span>
             <span class="rail-label">{t(s.label)}</span>
           </a>
         ))}

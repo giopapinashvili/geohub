@@ -289,6 +289,26 @@ async function seedVideos() {
   await db.doc('videos/v1/comments/vc1').set({ text: 'ძალიან კარგი მარშრუტია!', authorId: 'u_nino', authorName: U.u_nino.name, authorAvatar: U.u_nino.avatar, createdAt: ts(2 * D) });
 }
 
+async function seedNeeds() {
+  const needs = [
+    ['n1', 'u_giorgi', 'მჭირდება ელექტრიკოსი საბურთალოზე, შაბათს. სამზარეულოში როზეტები უნდა გამოიცვალოს.', 'repair', 'თბილისი', 80, 'week'],
+    ['n2', 'u_ana', 'ვეძებ ფოტოგრაფს ნათლობისთვის, 2 საათით. სასურველია პორტფოლიოს ნახვა.', 'events', 'თბილისი', 300, 'week'],
+    ['n3', 'u_levan', 'მჭირდება ინგლისურის მასწავლებელი ბავშვისთვის, კვირაში 2-ჯერ, ონლაინ ან ვაკეში.', 'education', 'თბილისი', 0, 'flexible'],
+    ['n4', 'u_mariam', 'ტრანსფერი ქუთაისის აეროპორტიდან ბათუმში, პარასკევს 23:00-ზე, 3 ადამიანი.', 'transport', 'ბათუმი', 150, 'asap'],
+  ];
+  let i = 0;
+  for (const [id, by, text, category, city, budget, when] of needs) {
+    await db.doc(`posts/${id}`).set({
+      type: 'need', text, need: { category, city, budget, when, status: 'open' }, authorId: by, userId: by, createdByUid: by,
+      authorName: U[by].name, authorAvatar: U[by].avatar || '', authorType: 'user', city, likeCount: 0, commentCount: i, shareCount: 0,
+      visibility: 'public', status: 'active', targetType: 'user', targetId: by, createdAt: ts((2 + i * 5) * H),
+    });
+    i++;
+  }
+  await db.doc('businessOffers/o1').set({ businessId: 'b_cafe', title: '−20% ყველა ყავაზე სამშაბათს', description: 'მხოლოდ ადგილზე.', startsAt: '', endsAt: '', createdBy: 'u_nino', ownerId: 'u_nino', status: 'active', createdAt: ts(D) });
+  await db.doc('businessOffers/o2').set({ businessId: 'b_winery', title: 'დეგუსტაცია ორისთვის — 1+1', description: '', startsAt: '', endsAt: '', createdBy: 'u_mariam', ownerId: 'u_mariam', status: 'active', createdAt: ts(D) });
+}
+
 async function seedMarket() {
   const items = [
     ['m1', 'Canon EOS R6 კამერა', 'item', 3800, 'თბილისი', 'u_nino', 'კარგ მდგომარეობაში, 2 ობიექტივით.'],
@@ -379,6 +399,7 @@ await seedBusinesses();
 await seedEvents();
 await seedVideos();
 await seedMarket();
+await seedNeeds();
 await seedRewards();
 await seedMessages();
 await seedNotifications();

@@ -5,6 +5,7 @@ import { useLive, useTitle } from '../lib/hooks.js';
 import { query } from '../lib/router.js';
 import { listenPost, canSee } from '../data/posts.js';
 import { viewerCtx } from '../lib/store.js';
+import { NeedCard } from '../features/needs/NeedCard.jsx';
 import { PostCard } from '../features/post/PostCard.jsx';
 
 /** Single post with its comments open (notification and share target). */
@@ -15,5 +16,10 @@ export default function PostPage({ params }) {
   if (!post || !canSee(post, viewerCtx.value)) {
     return <Card><Empty icon="note-pencil" title={t('post.notFound')} text={t('post.notFoundText')} action={<Button variant="primary" href="/">{t('nav.home')}</Button>} /></Card>;
   }
-  return <div class="feed"><PostCard post={post} openComments highlightComment={query.value.get('comment')} /></div>;
+  return (
+    <div class="feed">
+      {post.type === 'need' && <NeedCard post={post} />}
+      <PostCard post={post} openComments highlightComment={query.value.get('comment')} />
+    </div>
+  );
 }

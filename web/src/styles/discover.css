@@ -239,3 +239,5 @@
 .visitor:hover { background: var(--surface-3); }
 @keyframes map-card-in { from { opacity: 0; transform: translate(-50%, 10px); } }
 .map-me { width: 18px; height: 18px; border-radius: 50%; background: #2f7fd0; border: 3px solid #fff; box-shadow: 0 0 0 6px rgb(47 127 208 / 0.25), 0 1px 4px rgb(0 0 0 / 0.3); }
+.event-card-img { overflow: hidden; }
+.event-card-img .img, .event-card-img .img-fallback { position: absolute; inset: 0; }

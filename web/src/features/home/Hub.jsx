@@ -1,17 +1,27 @@
-import { useState } from 'preact/hooks';
+import { useMemo, useState } from 'preact/hooks';
 import { collection, query, where, limit, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase.js';
 import { Icon } from '../../ui/Icon.jsx';
 import { Avatar } from '../../ui/Avatar.jsx';
-import { t } from '../../lib/i18n.js';
+import { Button } from '../../ui/Button.jsx';
+import { t, lang } from '../../lib/i18n.js';
 import { useAsync } from '../../lib/hooks.js';
 import { navigate } from '../../lib/router.js';
 import { formatDate } from '../../lib/format.js';
-import { getBusiness } from '../../data/business.js';
+import { CITIES, cityLabel } from '../../lib/geo.js';
+import { profile } from '../../lib/auth.js';
+import { requireLogin } from '../../lib/store.js';
+import { listBusinesses } from '../../data/business.js';
 import { listItems } from '../../data/market.js';
+import { upcomingEvents } from '../../data/events.js';
+import { listNeeds, needOf } from '../../data/needs.js';
 import { ItemCard } from '../../pages/Marketplace.jsx';
+import { EventCard } from '../events/EventCard.jsx';
+import { NeedCard } from '../needs/NeedCard.jsx';
+import { NeedDialog } from '../needs/NeedDialog.jsx';
+import { openState } from '../business/hours.js';
+import { bizCategoryLabel } from '../business/categories.js';
 
-// Everyday needs first: each tile opens the matching business or listing search.
 const TILES = [
   { key: 'food', icon: 'fork-knife', tone: '#f97316', href: '/business?group=food' },
   { key: 'beauty', icon: 'sparkle', tone: '#ec4899', href: '/business?group=beauty' },
@@ -26,30 +36,79 @@ const TILES = [
   { key: 'events', icon: 'calendar-blank', tone: '#db2777', href: '/events' },
   { key: 'map', icon: 'map-trifold', tone: '#059669', href: '/map' },
 ];
+const CITY_KEY = 'gh_city';
+const inCity = (c, city) => !city || cityLabel(c) === cityLabel(city);
+// Georgian locative: თბილისი → თბილისში, ბათუმი → ბათუმში.
+const inPlace = (name) => (lang.value === 'ka' ? `${name.replace(/ი$/, '')}ში` : name);
 
-async function todaysOffers() {
-  const snap = await getDocs(query(collection(db, 'businessOffers'), where('status', '==', 'active'), limit(20))).catch(() => ({ docs: [] }));
-  const today = new Date().toISOString().slice(0, 10);
-  const offers = snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((o) => !o.endsAt || o.endsAt >= today).slice(0, 10);
-  const withBiz = await Promise.all(offers.map(async (o) => ({ ...o, biz: await getBusiness(o.businessId) })));
-  return withBiz.filter((o) => o.biz);
+function initialCity() {
+  try { const v = localStorage.getItem(CITY_KEY); if (v !== null) return v; } catch { /* ignore */ }
+  return profile.value?.city || 'თბილისი';
 }
 
-/** Top of the home page: search, everyday categories, today's offers, new listings. */
+async function loadOffers() {
+  const snap = await getDocs(query(collection(db, 'businessOffers'), where('status', '==', 'active'), limit(30))).catch(() => ({ docs: [] }));
+  const today = new Date().toISOString().slice(0, 10);
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((o) => !o.endsAt || o.endsAt >= today);
+}
+
+function Section({ icon, title, href, linkLabel, children }) {
+  return (
+    <section class="hub-block">
+      <div class="section-head"><h2 class="section-title"><Icon name={icon} size={20} class="tone-brand" />{title}</h2>{href && <a href={href} class="link">{linkLabel || t('common.seeAll')}</a>}</div>
+      {children}
+    </section>
+  );
+}
+
+/** "Now in your city": search, what is open, today's offers, this week's events, requests, listings. */
 export function Hub() {
+  const [city, setCityState] = useState(initialCity);
   const [q, setQ] = useState('');
-  const offers = useAsync(todaysOffers, []);
-  const items = useAsync(() => listItems(40).then((l) => l.slice(0, 8)), []);
+  const [need, setNeed] = useState(false);
+  const setCity = (c) => { setCityState(c); try { localStorage.setItem(CITY_KEY, c); } catch { /* ignore */ } };
+  const bizAll = useAsync(() => listBusinesses(300), []);
+  const offersAll = useAsync(loadOffers, []);
+  const itemsAll = useAsync(() => listItems(80), []);
+  const eventsAll = useAsync(() => upcomingEvents(40), []);
+  const needsAll = useAsync(() => listNeeds(80), []);
+
+  const view = useMemo(() => {
+    const biz = (bizAll.data || []).filter((b) => inCity(b.city, city));
+    const open = biz.map((b) => ({ b, s: openState(b.workingHours) })).filter((x) => x.s?.open).slice(0, 12);
+    const popular = open.length ? [] : [...biz].sort((a, b) => b.followerCount - a.followerCount).slice(0, 12).map((b) => ({ b, s: openState(b.workingHours) }));
+    const byId = Object.fromEntries((bizAll.data || []).map((b) => [b.id, b]));
+    const offers = (offersAll.data || []).map((o) => ({ ...o, biz: byId[o.businessId] })).filter((o) => o.biz && inCity(o.biz.city, city)).slice(0, 10);
+    const week = Date.now() + 7 * 86400000;
+    const events = (eventsAll.data || []).filter((e) => inCity(e.city, city) && e.date <= week);
+    const needs = (needsAll.data || []).filter((p) => inCity(needOf(p).city, city)).slice(0, 6);
+    const itemsCity = (itemsAll.data || []).filter((i) => inCity(i.city, city));
+    return { open, popular, offers, events, needs, items: (itemsCity.length ? itemsCity : itemsAll.data || []).slice(0, 10) };
+  }, [bizAll.data, offersAll.data, itemsAll.data, eventsAll.data, needsAll.data, city]);
+
+  const cityName = city ? cityLabel(city) : t('hub.allGeorgia');
+  const bizRow = view.open.length ? view.open : view.popular;
   return (
     <>
       <div class="hub-hero">
-        <h1 class="hub-title">{t('hub.title')}</h1>
-        <p class="hub-sub">{t('hub.sub')}</p>
+        <div class="hub-city">
+          <span class="hub-live"><span class="hub-live-dot" />{t('hub.now')}</span>
+          <div class="hub-city-chips">
+            {CITIES.slice(0, 8).map((c) => <button key={c.ka} type="button" class={`hub-city-chip${cityLabel(city) === cityLabel(c.ka) ? ' is-active' : ''}`} onClick={() => setCity(c.ka)}>{cityLabel(c.ka)}</button>)}
+            <button type="button" class={`hub-city-chip${!city ? ' is-active' : ''}`} onClick={() => setCity('')}>{t('hub.allGeorgia')}</button>
+          </div>
+        </div>
+        <h1 class="hub-title">{t('hub.titleCity', { city: city ? inPlace(cityName) : t('hub.inGeorgia') })}</h1>
         <form class="hub-search" role="search" onSubmit={(e) => { e.preventDefault(); if (q.trim()) navigate(`/search?q=${encodeURIComponent(q.trim())}`); }}>
           <Icon name="magnifying-glass" size={22} />
           <input type="search" value={q} onInput={(e) => setQ(e.currentTarget.value)} placeholder={t('hub.searchPh')} aria-label={t('common.search')} enterKeyHint="search" />
           <button type="submit" class="hub-search-btn" aria-label={t('common.search')}><Icon name="arrow-right" size={20} /></button>
         </form>
+        <button type="button" class="hub-need" onClick={() => { if (requireLogin('need')) setNeed(true); }}>
+          <span class="hub-need-ico"><Icon name="megaphone" size={20} /></span>
+          <span class="grow"><strong>{t('hub.needTitle')}</strong><span class="small">{t('hub.needText')}</span></span>
+          <Icon name="arrow-right" size={18} />
+        </button>
         <div class="hub-tiles">
           {TILES.map((x) => (
             <a key={x.key} href={x.href} class="hub-tile" style={{ '--tone': x.tone }}>
@@ -59,11 +118,28 @@ export function Hub() {
           ))}
         </div>
       </div>
-      {offers.data?.length > 0 && (
-        <div class="hub-block">
-          <div class="section-head"><h2 class="section-title"><Icon name="seal-percent" size={20} class="tone-brand" />{t('hub.offers')}</h2><a href="/business" class="link">{t('common.seeAll')}</a></div>
+
+      {bizRow.length > 0 && (
+        <Section icon={view.open.length ? 'storefront' : 'fire'} title={view.open.length ? t('hub.openNow', { city: cityName }) : t('hub.popularBiz', { city: cityName })} href="/business">
           <div class="hub-scroll">
-            {offers.data.map((o) => (
+            {bizRow.map(({ b, s }) => (
+              <a key={b.id} href={`/business/${b.id}`} class="open-card">
+                <Avatar src={b.logo} name={b.name} size={44} square />
+                <span class="open-card-text">
+                  <strong class="ellipsis">{b.name}</strong>
+                  <span class="muted xs ellipsis">{bizCategoryLabel(b.category)}</span>
+                  {s && <span class={`open-card-state${s.open ? ' is-open' : ''}`}>{s.open ? (s.until ? t('hub.openUntil', { time: s.until }) : t('biz.openNow')) : t('biz.closedNow')}</span>}
+                </span>
+              </a>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {view.offers.length > 0 && (
+        <Section icon="seal-percent" title={t('hub.offers')} href="/business">
+          <div class="hub-scroll">
+            {view.offers.map((o) => (
               <a key={o.id} href={`/business/${o.businessId}`} class="offer-card">
                 <span class="offer-card-top"><Avatar src={o.biz.logo} name={o.biz.name} size={32} square /><span class="ellipsis small bold">{o.biz.name}</span></span>
                 <strong class="offer-card-title">{o.title}</strong>
@@ -71,14 +147,30 @@ export function Hub() {
               </a>
             ))}
           </div>
-        </div>
+        </Section>
       )}
-      {items.data?.length > 0 && (
-        <div class="hub-block">
-          <div class="section-head"><h2 class="section-title"><Icon name="tag" size={20} class="tone-brand" />{t('hub.newListings')}</h2><a href="/marketplace" class="link">{t('common.seeAll')}</a></div>
-          <div class="hub-scroll hub-items">{items.data.map((i) => <ItemCard key={i.id} item={i} />)}</div>
-        </div>
+
+      {view.events.length > 0 && (
+        <Section icon="calendar-blank" title={t('hub.thisWeek')} href="/events">
+          <div class="h-scroll">{view.events.map((e) => <EventCard key={e.id} event={e} />)}</div>
+        </Section>
       )}
+
+      <Section icon="megaphone" title={t('hub.needs', { city: cityName })} href="/needs" linkLabel={t('hub.allNeeds')}>
+        {view.needs.length ? <div class="hub-needs">{view.needs.map((p) => <NeedCard key={p.id} post={p} compact />)}</div> : (
+          <div class="hub-needs-empty">
+            <span>{t('hub.needsEmpty')}</span>
+            <Button size="sm" variant="primary" icon="megaphone" onClick={() => { if (requireLogin('need')) setNeed(true); }}>{t('needs.cta')}</Button>
+          </div>
+        )}
+      </Section>
+
+      {view.items.length > 0 && (
+        <Section icon="tag" title={t('hub.newListings')} href="/marketplace">
+          <div class="hub-scroll hub-items">{view.items.map((i) => <ItemCard key={i.id} item={i} />)}</div>
+        </Section>
+      )}
+      {need && <NeedDialog onClose={() => setNeed(false)} onCreated={(id) => navigate(`/post/${id}`)} />}
     </>
   );
 }

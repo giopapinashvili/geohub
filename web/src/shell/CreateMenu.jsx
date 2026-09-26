@@ -5,6 +5,7 @@ import { createMenu, openComposer, storyCreator } from '../lib/store.js';
 import { navigate } from '../lib/router.js';
 
 const OPTIONS = [
+  { key: 'need', icon: 'megaphone', tone: '#2563eb', title: 'create.need', sub: 'create.needSub', run: () => navigate('/needs?new=1') },
   { key: 'post', icon: 'note-pencil', tone: '#2563eb', title: 'create.post', sub: 'create.postSub', run: () => openComposer({}) },
   { key: 'photo', icon: 'images', tone: '#16803c', title: 'create.photo', sub: 'create.photoSub', run: () => openComposer({ pick: 'media' }) },
   { key: 'story', icon: 'plus-circle', tone: '#b3207a', title: 'create.story', sub: 'create.storySub', run: () => { storyCreator.value = true; } },

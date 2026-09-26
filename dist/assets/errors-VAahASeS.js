@@ -1,0 +1,1 @@
+import{t as s}from"./app-DsImY32Z.js";function n(e){return s({blocking:"messages.err.blocking",blocked:"messages.err.blocked","messages-disabled":"messages.err.disabled","friends-only":"messages.err.friendsOnly","own-business":"messages.err.ownBusiness",auth:"auth.required"}[e?.code]||"common.error")}export{n as m};

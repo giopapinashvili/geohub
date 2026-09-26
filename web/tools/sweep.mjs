@@ -28,7 +28,7 @@ for (const w of widths) {
     await page.waitForTimeout(1300);
     const info = await page.evaluate(() => {
       const over = document.documentElement.scrollWidth - innerWidth;
-      const wide = [...document.querySelectorAll('main *')].filter((el) => { const b = el.getBoundingClientRect(); return b.width > 0 && b.right > innerWidth + 1 && getComputedStyle(el).position !== 'fixed' && !el.closest('[class*="scroll"],.chip-row,.tabs-scroll,.steps,.place-actions,.biz-actions,.watch-actions,.map-chips,.market-thumbs,.settings-nav,.h-scroll,.segmented'); }).slice(0, 3).map((el) => el.className && String(el.className).slice(0, 60));
+      const wide = [...document.querySelectorAll('main *')].filter((el) => { const b = el.getBoundingClientRect(); return b.width > 0 && b.right > innerWidth + 1 && getComputedStyle(el).position !== 'fixed' && !el.closest('[class*="scroll"],.chip-row,.tabs-scroll,.steps,.place-actions,.biz-actions,.watch-actions,.map-chips,.market-thumbs,.settings-nav,.h-scroll,.segmented,.hub-city-chips,.hub-scroll'); }).slice(0, 3).map((el) => el.className && String(el.className).slice(0, 60));
       const missing = document.body.innerText.match(/\b[a-z]+\.[a-zA-Z]+(\.[a-zA-Z]+)?\b/g)?.filter((k) => /^(common|nav|biz|place|events|groups|market|rewards|premium|settings|admin|about|legal|video|reels|search|explore|map|checkin|profile|post|saved|friends|messages|notif)\./.test(k)).slice(0, 3) || [];
       return { over, wide, missing };
     });

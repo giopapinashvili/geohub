@@ -29,6 +29,7 @@ export const ROUTES = [
   { path: '/video', component: page(() => import('./pages/Video.jsx')), layout: 'page', nav: 'video' },
   { path: '/video/channel/:id', component: page(() => import('./pages/Channel.jsx')), layout: 'page', nav: 'video' },
   { path: '/watch/:id', component: page(() => import('./pages/Watch.jsx')), layout: 'full', nav: 'video' },
+  { path: '/needs', component: page(() => import('./pages/Needs.jsx')), layout: 'page', nav: 'needs' },
   { path: '/explore', component: page(() => import('./pages/Explore.jsx')), layout: 'page', nav: 'explore' },
   { path: '/search', component: page(() => import('./pages/Search.jsx')), layout: 'page', nav: 'explore' },
   { path: '/map', component: page(() => import('./pages/MapPage.jsx')), layout: 'full', nav: 'map' },

@@ -12,6 +12,7 @@ export const PRIMARY = [
 /** Left column / menu shortcuts, in display order. */
 export const SECTIONS = [
   { key: 'home', href: '/', icon: 'house', tone: '#2563eb', label: 'nav.home' },
+  { key: 'needs', href: '/needs', icon: 'megaphone', tone: '#2563eb', label: 'nav.needs' },
   { key: 'explore', href: '/explore', icon: 'compass', tone: '#0891b2', label: 'nav.explore' },
   { key: 'business', href: '/business', icon: 'briefcase', tone: '#2563eb', label: 'nav.business' },
   { key: 'marketplace', href: '/marketplace', icon: 'storefront', tone: '#0e7490', label: 'nav.marketplace' },
