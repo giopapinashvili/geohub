@@ -261,4 +261,4 @@ export function authErrorKey(e) {
 }
 
 // Test hook for the local emulator build only (never in production).
-if (EMULATOR) window.__gh = { signIn, signOut, authUser, profile };
+if (EMULATOR) window.__gh = { signIn, signOut, authUser, profile, api: () => import('./testapi.js') };
