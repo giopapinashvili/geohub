@@ -3,15 +3,19 @@ import {
   serverTimestamp, increment,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
+import { cachedList, dropCached } from './cache.js';
 import { me } from '../lib/auth.js';
 import { normPlace, normPost, isCorruptSeed } from './normalize.js';
 import { tsToMillis } from '../lib/format.js';
 
 const cache = new Map();
 
-export async function listPlaces(n = 300) {
-  const snap = await getDocs(query(collection(db, 'places'), limit(n)));
-  return snap.docs.filter((d) => !isCorruptSeed(d.data())).map((d) => normPlace(d.id, d.data())).filter((p) => p.status !== 'inactive' && p.status !== 'deleted');
+/** Places for the map, explore and check-in, fetched once and shared. */
+export function listPlaces(n = 250) {
+  return cachedList('places', 250, 10 * 60000, async (k) => {
+    const snap = await getDocs(query(collection(db, 'places'), limit(k)));
+    return snap.docs.filter((d) => !isCorruptSeed(d.data())).map((d) => normPlace(d.id, d.data())).filter((p) => p.status !== 'inactive' && p.status !== 'deleted');
+  }, n);
 }
 
 export function getPlace(id) {
@@ -35,6 +39,7 @@ export async function createPlace({ name, description = '', category = 'other', 
     lat, lng, photoUrl, imageUrl: photoUrl || null, tags: [], creatorId: m.uid, userId: m.uid, createdBy: m.uid, ownerId: m.uid,
     creatorName: m.name, rating: 0, reviewCount: 0, saveCount: 0, status: 'active', dataSource: 'manual', createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
   });
+  dropCached('places');
   return ref.id;
 }
 
@@ -62,7 +67,7 @@ export function reviewStats(reviews, place) {
   return { avg: valid.reduce((a, r) => a + Number(r.rating), 0) / valid.length, count: valid.length, dist };
 }
 
-export async function deletePlace(id) { await deleteDoc(doc(db, 'places', id)); }
+export async function deletePlace(id) { await deleteDoc(doc(db, 'places', id)); dropCached('places'); }
 
 /** Owner/admin edits to the descriptive fields. */
 export async function updatePlace(id, patch) {

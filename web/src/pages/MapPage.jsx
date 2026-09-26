@@ -65,7 +65,7 @@ export default function MapPage() {
   const [checkin, setCheckin] = useState(() => (query.value.get('checkin') === '1' ? { place: null } : null));
   const [adding, setAdding] = useState(() => query.value.get('add') === '1');
 
-  useEffect(() => { listPlaces(500).then(setPlaces).catch(() => setPlaces([])); }, []);
+  useEffect(() => { listPlaces().then(setPlaces).catch(() => setPlaces([])); }, []);
 
   const filtered = useMemo(() => {
     if (!places) return [];

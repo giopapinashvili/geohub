@@ -44,7 +44,7 @@ export const searchItems = async (t, n) => (await prefixSearch('marketplace', ['
 export async function searchPosts(term, n = 20) {
   const needle = term.trim().toLowerCase().replace(/^#/, '');
   if (!needle) return [];
-  const snap = await getDocs(query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(300))).catch(() => ({ docs: [] }));
+  const snap = await getDocs(query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(100))).catch(() => ({ docs: [] }));
   const out = [];
   for (const d of snap.docs) {
     const data = d.data();

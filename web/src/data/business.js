@@ -7,6 +7,7 @@ import {
   serverTimestamp, increment, runTransaction,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
+import { cachedList, dropCached } from './cache.js';
 import { me, uid as myUid, isAdmin, authUser } from '../lib/auth.js';
 import { normBiz, isCorruptSeed } from './normalize.js';
 import { tsToMillis } from '../lib/format.js';
@@ -31,22 +32,27 @@ export function listenBusiness(id, onData, onError) {
   }, onError);
 }
 
-export async function listBusinesses(n = 200) {
-  const snap = await getDocs(query(collection(db, 'businesses'), limit(n)));
-  return snap.docs.filter((d) => !isCorruptSeed(d.data())).map((d) => normBiz(d.id, d.data())).filter(live);
+/** Public pages. Shared by the hub, the business list and need matching. */
+export function listBusinesses(n = 120) {
+  return cachedList('businesses', 120, 10 * 60000, async (k) => {
+    const snap = await getDocs(query(collection(db, 'businesses'), limit(k)));
+    return snap.docs.filter((d) => !isCorruptSeed(d.data())).map((d) => normBiz(d.id, d.data())).filter(live);
+  }, n);
 }
 
 /** Pages the signed-in user owns or administers. */
 export async function myBusinesses() {
   const u = myUid.value;
   if (!u) return [];
-  const [admins, owned] = await Promise.all([
-    getDocs(query(collection(db, 'businessAdmins'), where('userId', '==', u), limit(30))).catch(() => ({ docs: [] })),
-    getDocs(query(collection(db, 'businesses'), where('ownerId', '==', u), limit(30))).catch(() => ({ docs: [] })),
-  ]);
-  const ids = new Set([...admins.docs.map((d) => d.data().businessId), ...owned.docs.map((d) => d.id)].filter(Boolean));
-  const list = await Promise.all([...ids].map(getBusiness));
-  return list.filter(live);
+  return cachedList(`businesses:mine:${u}`, 30, 5 * 60000, async (k) => {
+    const [admins, owned] = await Promise.all([
+      getDocs(query(collection(db, 'businessAdmins'), where('userId', '==', u), limit(k))).catch(() => ({ docs: [] })),
+      getDocs(query(collection(db, 'businesses'), where('ownerId', '==', u), limit(k))).catch(() => ({ docs: [] })),
+    ]);
+    const ids = new Set([...admins.docs.map((d) => d.data().businessId), ...owned.docs.map((d) => d.id)].filter(Boolean));
+    const list = await Promise.all([...ids].map(getBusiness));
+    return list.filter(live);
+  });
 }
 
 /** Whether the signed-in user may manage the page (same checks as the rules). */
@@ -82,6 +88,7 @@ export async function createBusiness(f) {
     createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
   };
   const ref = await addDoc(collection(db, 'businesses'), data);
+  dropCached('businesses');
   // The owner record lets rules (isBizOwner) recognise the creator.
   await setDoc(doc(db, 'businessAdmins', `${ref.id}_${m.uid}`), { businessId: ref.id, userId: m.uid, role: 'owner', createdAt: serverTimestamp() }).catch((e) => console.warn('[businessAdmins]', e.code));
   return ref.id;
@@ -98,11 +105,13 @@ export async function updateBusiness(id, patch) {
   data.updatedAt = serverTimestamp();
   await updateDoc(doc(db, 'businesses', id), data);
   cache.delete(id);
+  dropCached('businesses');
 }
 
 export async function deleteBusiness(id) {
   await updateDoc(doc(db, 'businesses', id), { status: 'deleted', deleted: true, updatedAt: serverTimestamp() });
   cache.delete(id);
+  dropCached('businesses');
 }
 
 /* ── Followers ─────────────────────────────────────────────── */
@@ -227,8 +236,9 @@ export async function createOffer(bizId, { title, description = '', startsAt = '
     businessId: bizId, title: title.trim(), description: description.trim(), startsAt, endsAt, createdBy: u, ownerId: u,
     status: 'active', createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
   });
+  dropCached('offers');
 }
-export async function deleteOffer(id) { await deleteDoc(doc(db, 'businessOffers', id)); }
+export async function deleteOffer(id) { await deleteDoc(doc(db, 'businessOffers', id)); dropCached('offers'); }
 
 /* ── Quote requests ────────────────────────────────────────── */
 

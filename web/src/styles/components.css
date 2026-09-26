@@ -72,7 +72,7 @@
 .card-pad { padding: var(--s-4); }
 .card + .card { margin-top: var(--s-4); }
 /* Grid and flex containers space their cards with gap instead. */
-:is(.place-grid, .video-grid, .channel-grid, .h-scroll, .place-page, .place-body, .channel-page, .explore, .search-body, .search-page, .map-panel, .biz-grid, .group-grid, .item-grid, .events-page, .biz-hub, .settings-body, .page-grid, .page-col) > .card + .card { margin-top: 0; }
+:is(.menu-grid, .place-grid, .video-grid, .channel-grid, .h-scroll, .place-page, .place-body, .channel-page, .explore, .search-body, .search-page, .map-panel, .biz-grid, .group-grid, .item-grid, .events-page, .biz-hub, .settings-body, .page-grid, .page-col) > .card + .card { margin-top: 0; }
 .card-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); margin-bottom: var(--s-3); }
 .card-head-text { min-width: 0; }
 .card-title { font-size: var(--fs-lg); font-weight: 700; }

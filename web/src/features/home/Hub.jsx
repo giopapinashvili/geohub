@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'preact/hooks';
 import { collection, query, where, limit, getDocs } from 'firebase/firestore';
 import { db } from '../../lib/firebase.js';
+import { cachedList } from '../../data/cache.js';
 import { Icon } from '../../ui/Icon.jsx';
 import { Avatar } from '../../ui/Avatar.jsx';
 import { t } from '../../lib/i18n.js';
@@ -43,10 +44,12 @@ function initialCity() {
   return profile.value?.city || 'თბილისი';
 }
 
-async function loadOffers() {
-  const snap = await getDocs(query(collection(db, 'businessOffers'), where('status', '==', 'active'), limit(30))).catch(() => ({ docs: [] }));
-  const today = new Date().toISOString().slice(0, 10);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((o) => !o.endsAt || o.endsAt >= today);
+function loadOffers() {
+  return cachedList('offers', 15, 10 * 60000, async (k) => {
+    const snap = await getDocs(query(collection(db, 'businessOffers'), where('status', '==', 'active'), limit(k))).catch(() => ({ docs: [] }));
+    const today = new Date().toISOString().slice(0, 10);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((o) => !o.endsAt || o.endsAt >= today);
+  });
 }
 
 function Section({ icon, title, href, linkLabel, children }) {
@@ -96,11 +99,11 @@ export function HubTop({ city, setCity }) {
 
 /** City sections (open now, offers, events, requests, listings) to place between posts. */
 export function useHubModules(city) {
-  const bizAll = useAsync(() => listBusinesses(300), []);
+  const bizAll = useAsync(() => listBusinesses(), []);
   const offersAll = useAsync(loadOffers, []);
-  const itemsAll = useAsync(() => listItems(80), []);
-  const eventsAll = useAsync(() => upcomingEvents(40), []);
-  const needsAll = useAsync(() => listNeeds(80), []);
+  const itemsAll = useAsync(() => listItems(30), []);
+  const eventsAll = useAsync(() => upcomingEvents(12), []);
+  const needsAll = useAsync(() => listNeeds(30), []);
   return useMemo(() => {
     const cityName = city ? cityLabel(city) : t('hub.allGeorgia');
     const biz = (bizAll.data || []).filter((b) => inCity(b.city, city));

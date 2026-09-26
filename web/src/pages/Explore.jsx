@@ -34,7 +34,7 @@ export default function Explore() {
   const [adding, setAdding] = useState(false);
   const events = useAsync(() => upcomingEvents(6), []);
 
-  useEffect(() => { listPlaces(500).then(setPlaces).catch(() => setPlaces([])); }, []);
+  useEffect(() => { listPlaces().then(setPlaces).catch(() => setPlaces([])); }, []);
   useEffect(() => { setShown(PAGE); }, [cat, city, me]);
 
   const list = useMemo(() => {

@@ -6,6 +6,7 @@ import {
   serverTimestamp, increment,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
+import { cachedList, dropCached } from './cache.js';
 import { me, uid as myUid } from '../lib/auth.js';
 import { normGroup, isCorruptSeed } from './normalize.js';
 import { tsToMillis } from '../lib/format.js';
@@ -14,10 +15,12 @@ import { notify } from './notify.js';
 const MANAGER_ROLES = ['owner', 'admin', 'moderator'];
 export const isManagerRole = (role) => MANAGER_ROLES.includes(role);
 
-export async function listGroups(n = 200) {
-  const snap = await getDocs(query(collection(db, 'groups'), limit(n)));
-  return snap.docs.filter((d) => !isCorruptSeed(d.data())).map((d) => normGroup(d.id, d.data()))
-    .filter((g) => g.privacy !== 'secret' && g.raw.status !== 'deleted');
+export function listGroups(n = 60) {
+  return cachedList('groups', 60, 5 * 60000, async (k) => {
+    const snap = await getDocs(query(collection(db, 'groups'), limit(k)));
+    return snap.docs.filter((d) => !isCorruptSeed(d.data())).map((d) => normGroup(d.id, d.data()))
+      .filter((g) => g.privacy !== 'secret' && g.raw.status !== 'deleted');
+  }, n);
 }
 
 export function listenGroup(id, onData, onError) {
@@ -114,6 +117,7 @@ export async function createGroup({ name, description = '', category = 'general'
     postApproval, inviteToken: null, inviteEnabled: false, creatorId: m.uid, userId: m.uid, creatorName: m.name, creatorAvatar: m.avatar || '',
     memberCount: 1, postCount: 0, createdAt: serverTimestamp(),
   });
+  dropCached('groups');
   await setDoc(doc(db, 'groupMembers', `${ref.id}_${m.uid}`), {
     groupId: ref.id, groupName: name.trim(), uid: m.uid, userId: m.uid, role: 'admin', status: 'joined', joinedAt: serverTimestamp(), createdAt: serverTimestamp(),
   });
@@ -125,9 +129,10 @@ export async function updateGroup(id, patch) {
   for (const k of ['name', 'description', 'category', 'privacy', 'coverUrl', 'location', 'rules', 'postApproval']) if (patch[k] !== undefined) data[k] = typeof patch[k] === 'string' ? patch[k].trim() : patch[k];
   data.updatedAt = serverTimestamp();
   await updateDoc(doc(db, 'groups', id), data);
+  dropCached('groups');
 }
 
-export async function deleteGroup(id) { await deleteDoc(doc(db, 'groups', id)); }
+export async function deleteGroup(id) { await deleteDoc(doc(db, 'groups', id)); dropCached('groups'); }
 
 export async function listMembers(groupId, n = 200) {
   const snap = await getDocs(query(collection(db, 'groupMembers'), where('groupId', '==', groupId), limit(n))).catch(() => ({ docs: [] }));
