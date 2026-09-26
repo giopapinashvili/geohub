@@ -103,3 +103,14 @@ export function Stat({ value, label, href }) {
   const inner = <><strong class="stat-value">{value}</strong><span class="stat-label">{label}</span></>;
   return href ? <a class="stat" href={href}>{inner}</a> : <div class="stat">{inner}</div>;
 }
+
+/** Dashboard tile: icon, big number, label. */
+export function StatCard({ icon, value, label, tone = 'var(--brand)', href }) {
+  const inner = (
+    <>
+      <span class="stat-card-ico" style={{ '--tone': tone }}><Icon name={icon} size={22} /></span>
+      <span class="stat-card-text"><strong class="stat-card-value">{value}</strong><span class="stat-card-label">{label}</span></span>
+    </>
+  );
+  return href ? <a class="card stat-card" href={href}>{inner}</a> : <div class="card stat-card">{inner}</div>;
+}

@@ -1,5 +1,5 @@
 import {
-  doc, getDoc, getDocs, addDoc, setDoc, updateDoc, collection, query, where, limit, onSnapshot,
+  doc, getDoc, getDocs, addDoc, setDoc, updateDoc, deleteDoc, collection, query, where, limit, onSnapshot,
   serverTimestamp, increment,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
@@ -49,6 +49,29 @@ export async function addPlaceReview(placeId, rating, comment) {
   await addDoc(collection(db, 'placeReviews'), {
     placeId, userId: m.uid, userName: m.name, userPhoto: m.avatar, rating: Number(rating), comment: comment.trim(), createdAt: serverTimestamp(),
   });
+}
+
+export async function deletePlaceReview(id) { await deleteDoc(doc(db, 'placeReviews', id)); }
+
+/** Average and per-star counts from review documents. */
+export function reviewStats(reviews, place) {
+  const valid = reviews.filter((r) => Number(r.rating) >= 1 && Number(r.rating) <= 5);
+  const dist = [0, 0, 0, 0, 0];
+  for (const r of valid) dist[Math.round(r.rating) - 1]++;
+  if (!valid.length) return { avg: place?.rating || 0, count: place?.reviewCount || 0, dist };
+  return { avg: valid.reduce((a, r) => a + Number(r.rating), 0) / valid.length, count: valid.length, dist };
+}
+
+export async function deletePlace(id) { await deleteDoc(doc(db, 'places', id)); }
+
+/** Owner/admin edits to the descriptive fields. */
+export async function updatePlace(id, patch) {
+  const allowed = {};
+  for (const k of ['name', 'description', 'category', 'address', 'city']) if (patch[k] !== undefined) allowed[k] = String(patch[k]).trim();
+  if (allowed.name) allowed.title = allowed.name;
+  if (allowed.category) allowed.categoryId = allowed.category;
+  if (patch.photoUrl) { allowed.photoUrl = patch.photoUrl; allowed.imageUrl = patch.photoUrl; allowed.coverImage = patch.photoUrl; }
+  await updateDoc(doc(db, 'places', id), { ...allowed, updatedAt: serverTimestamp() });
 }
 
 /** Check in: a checkins record, the place's aggregate counter and a feed post. */

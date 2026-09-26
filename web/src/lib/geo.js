@@ -36,3 +36,39 @@ export function cityLabel(value) {
   const c = CITIES.find((x) => x.ka === value || x.en.toLowerCase() === v || x.ru.toLowerCase() === v);
   return c ? (c[lang.value] || c.ka) : value;
 }
+
+/** Great-circle distance in km. */
+export function distanceKm(a, b) {
+  if (a?.lat == null || b?.lat == null) return Infinity;
+  const R = 6371;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+  const s = Math.sin(dLat / 2) ** 2 + Math.cos((a.lat * Math.PI) / 180) * Math.cos((b.lat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+
+export function formatDistance(km) {
+  if (!Number.isFinite(km)) return '';
+  if (km < 1) return `${Math.max(10, Math.round((km * 1000) / 10) * 10)} ${lang.value === 'en' ? 'm' : lang.value === 'ru' ? 'м' : 'მ'}`;
+  const v = km < 10 ? km.toFixed(1) : String(Math.round(km));
+  return `${lang.value === 'en' ? v : v.replace('.', ',')} ${lang.value === 'en' ? 'km' : lang.value === 'ru' ? 'км' : 'კმ'}`;
+}
+
+/** Browser location as {lat, lng, accuracy}; rejects with a code string. */
+export function getPosition({ timeout = 10000 } = {}) {
+  return new Promise((resolve, reject) => {
+    if (!('geolocation' in navigator)) { reject(new Error('unsupported')); return; }
+    navigator.geolocation.getCurrentPosition(
+      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude, accuracy: p.coords.accuracy }),
+      (e) => reject(new Error(e.code === 1 ? 'denied' : 'unavailable')),
+      { enableHighAccuracy: true, timeout, maximumAge: 60000 },
+    );
+  });
+}
+
+/** Coordinates of a stored city name, if known. */
+export function cityCoords(value) {
+  const v = String(value || '').toLowerCase();
+  const c = CITIES.find((x) => x.ka === value || x.en.toLowerCase() === v || x.ru.toLowerCase() === v);
+  return c ? { lat: c.lat, lng: c.lng } : null;
+}

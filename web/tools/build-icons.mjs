@@ -34,13 +34,14 @@ const REGULAR = `
   thumbs-down mask-happy globe-simple lock-key key bell-ringing envelope-simple phone-call map-pin-simple
   play-pause skip-forward stop plus-square minus trend-up trend-down sign-out clock-countdown pencil-line
   arrow-line-up-right user-list users-four calendar-plus ticket tag-simple percent seal-percent storefront
+  fork-knife castle-turret martini umbrella waves gps-fix map-pin-area signpost clock-counter-clockwise church binoculars tent boat
 `;
 const FILLED = `
   house heart bookmark-simple bell chat-circle-dots play-circle star user-circle users-three
   map-trifold storefront film-strip compass gift thumbs-up seal-check crown lightning fire
   check-circle map-pin push-pin smiley calendar-blank shopping-bag trophy video-camera
   television-simple monitor-play squares-four play pause chat-circle share-fat eye lock tag coins
-  buildings briefcase ticket
+  buildings briefcase ticket star-half navigation-arrow map-pin-area
 `;
 
 const base = 'node_modules/@phosphor-icons/core/assets';
