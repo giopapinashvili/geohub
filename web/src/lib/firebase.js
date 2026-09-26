@@ -7,7 +7,7 @@
 
 import { initializeApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
-import { initializeFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { initializeFirestore, connectFirestoreEmulator, persistentLocalCache, persistentMultipleTabManager, memoryLocalCache } from 'firebase/firestore';
 
 export const EMULATOR = import.meta.env.MODE === 'emulator';
 
@@ -25,7 +25,12 @@ const config = EMULATOR
 
 export const app = initializeApp(config);
 export const auth = getAuth(app);
-export const db = initializeFirestore(app, { ignoreUndefinedProperties: true });
+// The on-device cache lets live queries resume after a reload by fetching only
+// what changed, which keeps Firestore's billed reads down.
+function localCache() {
+  try { return persistentLocalCache({ tabManager: persistentMultipleTabManager() }); } catch { return memoryLocalCache(); }
+}
+export const db = initializeFirestore(app, { ignoreUndefinedProperties: true, localCache: localCache() });
 
 if (EMULATOR) {
   const host = location.hostname || '127.0.0.1';

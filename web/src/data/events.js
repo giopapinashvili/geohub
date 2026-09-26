@@ -5,22 +5,27 @@ import {
   collection, query, where, orderBy, limit, getDocs, getDoc, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
+import { cachedList, dropCached } from './cache.js';
 import { me, uid as myUid } from '../lib/auth.js';
 import { normEvent, isCorruptSeed } from './normalize.js';
 import { tsToMillis } from '../lib/format.js';
 
 const visible = (e) => e.status === 'active' && !isCorruptSeed(e.raw);
 
-export async function upcomingEvents(n = 10) {
-  const now = new Date().toISOString().slice(0, 16);
-  const snap = await getDocs(query(collection(db, 'events'), where('date', '>=', now), orderBy('date', 'asc'), limit(n)));
-  return snap.docs.map((d) => normEvent(d.id, d.data())).filter(visible);
+export function upcomingEvents(n = 10) {
+  return cachedList('events:upcoming', 12, 5 * 60000, async (k) => {
+    const now = new Date().toISOString().slice(0, 16);
+    const snap = await getDocs(query(collection(db, 'events'), where('date', '>=', now), orderBy('date', 'asc'), limit(k)));
+    return snap.docs.map((d) => normEvent(d.id, d.data())).filter(visible);
+  }, n);
 }
 
 /** All events, split client-side into upcoming (soonest first) and past. */
-export async function listEvents(n = 300) {
-  const snap = await getDocs(query(collection(db, 'events'), limit(n)));
-  const all = snap.docs.map((d) => normEvent(d.id, d.data())).filter(visible);
+export async function listEvents(n = 80) {
+  const all = await cachedList('events:all', 80, 5 * 60000, async (k) => {
+    const snap = await getDocs(query(collection(db, 'events'), limit(k)));
+    return snap.docs.map((d) => normEvent(d.id, d.data())).filter(visible);
+  }, n);
   const now = Date.now() - 3 * 3600000;
   return {
     upcoming: all.filter((e) => (e.endDate || e.date) >= now).sort((a, b) => a.date - b.date),
@@ -80,9 +85,10 @@ export async function saveEvent(ev) {
     city: ev.city || '', venue: (ev.venue || '').trim(), date: ev.date, endDate: ev.endDate || '', ticketPrice: Number(ev.price) || 0,
     capacity: Number(ev.capacity) || 0, imageUrl: ev.image || '', lat: ev.lat ?? null, lng: ev.lng ?? null, status: 'active', updatedAt: serverTimestamp(),
   };
-  if (ev.id) { await updateDoc(doc(db, 'events', ev.id), data); return ev.id; }
+  if (ev.id) { await updateDoc(doc(db, 'events', ev.id), data); dropCached('events'); return ev.id; }
   const ref = await addDoc(collection(db, 'events'), { ...data, ownerId: m.uid, userId: m.uid, createdBy: m.uid, createdAt: serverTimestamp() });
+  dropCached('events');
   return ref.id;
 }
 
-export async function deleteEvent(id) { await deleteDoc(doc(db, 'events', id)); }
+export async function deleteEvent(id) { await deleteDoc(doc(db, 'events', id)); dropCached('events'); }

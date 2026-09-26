@@ -42,7 +42,7 @@ function Directory() {
   const [q, setQ] = useState('');
   const group = query.value.get('group') || '';
   const city = query.value.get('city') || '';
-  useEffect(() => { listBusinesses(300).then(setAll).catch(() => setAll([])); }, []);
+  useEffect(() => { listBusinesses().then(setAll).catch(() => setAll([])); }, []);
   const list = useMemo(() => {
     if (!all) return [];
     const needle = q.trim().toLowerCase();

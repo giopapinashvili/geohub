@@ -7,7 +7,7 @@ import { useTitle } from '../lib/hooks.js';
 import { profile, signedIn, isAdmin, signOut } from '../lib/auth.js';
 import { navigate } from '../lib/router.js';
 import { SECTIONS, FOOTER_LINKS } from '../shell/nav.js';
-import { ThemeLangControls } from '../shell/AccountMenu.jsx';
+import { ThemeLangControls, Switcher } from '../shell/AccountMenu.jsx';
 
 /** Mobile "Menu" tab: every section, account and preferences. */
 export default function MenuPage() {
@@ -30,6 +30,7 @@ export default function MenuPage() {
           <div class="row gap-8"><Button variant="primary" href="/signup">{t('auth.signUp')}</Button><Button variant="secondary" href="/login">{t('auth.signIn')}</Button></div>
         </Card>
       )}
+      {signedIn.value && <Card class="menu-switcher"><Switcher /></Card>}
       <div class="menu-grid">
         {items.map((s) => (
           <a key={s.key} href={s.href} class="card menu-tile">

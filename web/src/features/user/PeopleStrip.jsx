@@ -12,7 +12,7 @@ export function useSuggestions(n = 12) {
   const me = uid.value;
   const key = friendIds.value.size;
   useEffect(() => {
-    recentUsers(60).then((users) => {
+    recentUsers(20).then((users) => {
       const pending = new Set(incomingRequests.value.map((r) => r.fromId));
       setList(users.filter((u) => u.id !== me && !friendIds.value.has(u.id) && !pending.has(u.id)).slice(0, n));
     }).catch(() => setList([]));

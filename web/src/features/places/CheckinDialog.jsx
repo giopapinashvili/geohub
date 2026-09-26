@@ -19,7 +19,7 @@ function PickPlace({ onPick, onAdd }) {
   const [places, setPlaces] = useState(null);
   const [pos, setPos] = useState(null);
   const [q, setQ] = useState('');
-  useEffect(() => { listPlaces(300).then(setPlaces).catch(() => setPlaces([])); getPosition({ timeout: 8000 }).then(setPos).catch(() => {}); }, []);
+  useEffect(() => { listPlaces().then(setPlaces).catch(() => setPlaces([])); getPosition({ timeout: 8000 }).then(setPos).catch(() => {}); }, []);
   const list = useMemo(() => {
     if (!places) return [];
     const needle = q.trim().toLowerCase();

@@ -180,6 +180,9 @@
 .menu-page { display: flex; flex-direction: column; gap: 12px; }
 .menu-page > .card + .card { margin-top: 0; }
 .menu-profile { display: flex; align-items: center; gap: 12px; padding: 12px; }
+.menu-switcher:empty { display: none; }
+.menu-switcher { padding: 8px; }
+.menu-switcher .switcher { border-bottom: 0; margin: 0; padding: 0; }
 .menu-profile-text { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .menu-guest { display: flex; flex-direction: column; gap: 8px; }
 .menu-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }

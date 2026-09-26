@@ -32,7 +32,8 @@ export function ThemeLangControls() {
 }
 
 /** Switch between your own profile and the business pages you manage. */
-function Switcher({ close }) {
+/** Lets a page owner act as one of their pages; hidden when they have none. */
+export function Switcher({ close = () => {} }) {
   const pages = useAsync(() => myBusinesses(), [uid.value]).data || [];
   const p = profile.value;
   if (!pages.length) return null;

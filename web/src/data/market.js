@@ -1,6 +1,7 @@
 // Marketplace listings: items, services, jobs, property (collection "marketplace").
 import { doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, collection, query, limit, where, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
+import { cachedList, dropCached } from './cache.js';
 import { me, uid as myUid } from '../lib/auth.js';
 import { normItem, isCorruptSeed } from './normalize.js';
 
@@ -8,9 +9,11 @@ export const MARKET_CATS = [
   { id: 'item', icon: 'package' }, { id: 'service', icon: 'wrench' }, { id: 'job', icon: 'briefcase' }, { id: 'property', icon: 'house-line' },
 ];
 
-export async function listItems(n = 300) {
-  const snap = await getDocs(query(collection(db, 'marketplace'), limit(n)));
-  return snap.docs.filter((d) => !isCorruptSeed(d.data())).map((d) => normItem(d.id, d.data())).filter((i) => i.status === 'active').sort((a, b) => b.createdAt - a.createdAt);
+export function listItems(n = 60) {
+  return cachedList('items', 60, 5 * 60000, async (k) => {
+    const snap = await getDocs(query(collection(db, 'marketplace'), limit(k)));
+    return snap.docs.filter((d) => !isCorruptSeed(d.data())).map((d) => normItem(d.id, d.data())).filter((i) => i.status === 'active').sort((a, b) => b.createdAt - a.createdAt);
+  }, n);
 }
 
 export async function myItems() {
@@ -32,8 +35,9 @@ export async function createItem({ title, description, price, category, conditio
     city, images, imageUrl: images[0] || '', sellerId: m.uid, userId: m.uid, ownerId: m.uid, sellerName: m.name, sellerAvatar: m.avatar || '',
     status: 'active', viewCount: 0, createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
   });
+  dropCached('items');
   return ref.id;
 }
 
-export async function setItemStatus(id, status) { await updateDoc(doc(db, 'marketplace', id), { status, updatedAt: serverTimestamp() }); }
-export async function deleteItem(id) { await deleteDoc(doc(db, 'marketplace', id)); }
+export async function setItemStatus(id, status) { await updateDoc(doc(db, 'marketplace', id), { status, updatedAt: serverTimestamp() }); dropCached('items'); }
+export async function deleteItem(id) { await deleteDoc(doc(db, 'marketplace', id)); dropCached('items'); }

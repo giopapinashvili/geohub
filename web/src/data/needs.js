@@ -4,6 +4,7 @@
 
 import { collection, query, where, limit, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
+import { cachedList, dropCached } from './cache.js';
 import { me } from '../lib/auth.js';
 import { normPost, isCorruptSeed } from './normalize.js';
 import { listBusinesses } from './business.js';
@@ -30,10 +31,12 @@ export const WHEN = ['asap', 'today', 'week', 'flexible'];
 
 export const needOf = (p) => p.raw?.need || {};
 
-export async function listNeeds(n = 150) {
-  const snap = await getDocs(query(collection(db, 'posts'), where('type', '==', 'need'), limit(n))).catch(() => ({ docs: [] }));
-  return snap.docs.filter((d) => !isCorruptSeed(d.data())).map((d) => normPost(d.id, d.data()))
-    .filter((p) => p.status === 'active').sort((a, b) => b.createdAt - a.createdAt);
+export function listNeeds(n = 40) {
+  return cachedList('needs', 40, 3 * 60000, async (k) => {
+    const snap = await getDocs(query(collection(db, 'posts'), where('type', '==', 'need'), limit(k))).catch(() => ({ docs: [] }));
+    return snap.docs.filter((d) => !isCorruptSeed(d.data())).map((d) => normPost(d.id, d.data()))
+      .filter((p) => p.status === 'active').sort((a, b) => b.createdAt - a.createdAt);
+  }, n);
 }
 
 export async function createNeed({ text, category, city, budget, when }) {
@@ -45,10 +48,11 @@ export async function createNeed({ text, category, city, budget, when }) {
     authorVerified: !!m.verified, businessId: null, groupId: null, city, mediaUrl: null, mediaUrls: [], likeCount: 0, commentCount: 0, shareCount: 0,
     visibility: 'public', status: 'active', targetType: 'user', targetId: m.uid, createdAt: serverTimestamp(),
   });
+  dropCached('needs');
   // Tell up to 15 matching businesses in the same city (or online ones).
   const groups = NEED_CATS.find((c) => c.id === category)?.groups || [];
   if (groups.length) {
-    listBusinesses(300).then((list) => {
+    listBusinesses().then((list) => {
       const match = list.filter((b) => b.ownerId !== m.uid && groups.includes(bizCategory(b.category)?.group) && (b.isOnline || cityLabel(b.city) === cityLabel(city))).slice(0, 15);
       for (const b of match) notifyBusiness(b.id, { type: 'need', title: `ახალი მოთხოვნა: ${clean.slice(0, 60)}`, body: cityLabel(city), href: `feed.html?post=${ref.id}` });
     }).catch(() => {});
@@ -56,4 +60,4 @@ export async function createNeed({ text, category, city, budget, when }) {
   return ref.id;
 }
 
-export const closeNeed = (id) => editPost(id, { status: 'closed' });
+export const closeNeed = (id) => editPost(id, { status: 'closed' }).then(() => dropCached('needs'));

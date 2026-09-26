@@ -14,7 +14,7 @@ const DURATIONS = { '24h': 86400000, '7d': 7 * 86400000, '30d': 30 * 86400000 };
  * Close-friends stories are shown only to people on the author's list.
  */
 export function listenStoryTray(onData) {
-  return onSnapshot(query(collection(db, 'stories'), orderBy('createdAt', 'desc'), limit(80)), (snap) => {
+  return onSnapshot(query(collection(db, 'stories'), orderBy('createdAt', 'desc'), limit(40)), (snap) => {
     const now = Date.now();
     const viewer = myUid.value;
     const groups = new Map();

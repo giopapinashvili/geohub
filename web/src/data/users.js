@@ -3,6 +3,7 @@ import {
   updateDoc, setDoc, deleteDoc, serverTimestamp, orderBy,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
+import { cachedList } from './cache.js';
 import { normUser, isCorruptSeed } from './normalize.js';
 import { uid as myUid } from '../lib/auth.js';
 
@@ -126,7 +127,10 @@ export async function searchUsers(term, n = 12) {
 }
 
 /** Recently active people, for "people you may know" when there is no graph yet. */
-export async function recentUsers(n = 30) {
+export function recentUsers(n = 20) {
+  return cachedList('users:recent', 20, 5 * 60000, loadRecentUsers, n);
+}
+async function loadRecentUsers(n) {
   let docs = [];
   try {
     docs = (await getDocs(query(collection(db, 'users'), orderBy('lastSeen', 'desc'), limit(n)))).docs;
