@@ -39,11 +39,11 @@ export function TopBar({ active, hidden }) {
     <header class={`topbar${autoHidden ? ' is-hidden' : ''}`}>
       <Logo size={32} />
       <div class="topbar-actions">
-        <IconButton icon="magnifying-glass" label={t('nav.search')} href="/search" variant="soft" size={38} active={active === 'explore'} />
+        <IconButton icon="magnifying-glass" label={t('nav.search')} href="/search" variant="soft" size={38} class="hdr-search" active={active === 'explore'} />
         {signedIn.value ? (
           <>
-            <IconButton icon="bell" label={t('nav.notifications')} href="/notifications" variant="soft" size={38} badge={unreadNotifications.value} active={active === 'notifications'} />
-            <IconButton icon="chat-circle-dots" label={t('nav.messages')} href="/messages" variant="soft" size={38} badge={unreadMessages.value} active={active === 'messages'} />
+            <IconButton icon="bell" label={t('nav.notifications')} href="/notifications" variant="soft" size={38} class="hdr-bell" badge={unreadNotifications.value} active={active === 'notifications'} />
+            <IconButton icon="chat-circle-dots" label={t('nav.messages')} href="/messages" variant="soft" size={38} class="hdr-msg" badge={unreadMessages.value} active={active === 'messages'} />
           </>
         ) : authReady.value && (
           <a href="/login" class="btn btn-primary btn-sm">{t('auth.signIn')}</a>
@@ -68,7 +68,7 @@ export function BottomNav({ active, immersive }) {
         }
         const on = active === it.key || (it.key === 'menu' && ['menu', 'profile', 'settings', 'friends', 'saved'].includes(active));
         return (
-          <a key={it.key} href={it.href} class={`bottomnav-tab${on ? ' is-active' : ''}`} aria-current={on ? 'page' : undefined}>
+          <a key={it.key} href={it.href} class={`bottomnav-tab${on ? ' is-active' : ''}`} style={{ '--tone': it.tone }} aria-current={on ? 'page' : undefined}>
             {it.key === 'menu' && p
               ? <span class="bottomnav-avatar"><Avatar src={p.avatar} name={p.name} size={26} /></span>
               : <Icon name={on && it.iconActive ? it.iconActive : it.icon} size={26} />}

@@ -25,12 +25,12 @@ export function Header({ active }) {
         )}
         {signedIn.value && (
           <>
-            <IconButton icon="plus" label={t('nav.create')} variant="soft" size={40} onClick={() => { createMenu.value = true; }} />
+            <IconButton icon="plus" label={t('nav.create')} variant="soft" size={40} class="hdr-create" onClick={() => { createMenu.value = true; }} />
             <MessagesPopover trigger={(p, open) => (
-              <IconButton {...p} icon="chat-circle-dots" label={t('nav.messages')} variant="soft" size={40} badge={unreadMessages.value} active={open || active === 'messages'} />
+              <IconButton {...p} icon="chat-circle-dots" label={t('nav.messages')} variant="soft" size={40} class="hdr-msg" badge={unreadMessages.value} active={open || active === 'messages'} />
             )} />
             <NotificationsPopover trigger={(p, open) => (
-              <IconButton {...p} icon="bell" label={t('nav.notifications')} variant="soft" size={40} badge={unreadNotifications.value} active={open || active === 'notifications'} />
+              <IconButton {...p} icon="bell" label={t('nav.notifications')} variant="soft" size={40} class="hdr-bell" badge={unreadNotifications.value} active={open || active === 'notifications'} />
             )} />
             <AccountMenu />
           </>

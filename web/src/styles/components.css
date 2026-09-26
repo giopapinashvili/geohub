@@ -292,3 +292,13 @@
 .stat-value { font-size: var(--fs-lg); font-weight: 700; line-height: 1.2; }
 .stat-label { color: var(--text-3); font-size: var(--fs-sm); }
 a.stat:hover .stat-label { color: var(--text); text-decoration: underline; }
+
+/* ── Colour pass: tinted chips, gradient active states, coloured icons ── */
+.chip { background: var(--surface); }
+.chip.is-active { background: var(--gradient-brand); color: #fff; border-color: transparent; box-shadow: 0 4px 12px rgb(37 99 235 / 0.28); }
+.tabs-pill .tab.is-active { background: var(--gradient-brand); border-color: transparent; color: #fff; box-shadow: 0 4px 12px rgb(37 99 235 / 0.28); }
+.tabs-pill .tab.is-active .tab-count { background: rgb(255 255 255 / 0.25); color: #fff; }
+.tabs-line .tab.is-active::after { background: var(--gradient-brand); }
+.empty-icon { color: #fff; background: var(--gradient-brand); box-shadow: 0 8px 20px rgb(37 99 235 / 0.28); }
+.page-title { background: linear-gradient(90deg, var(--text) 0%, var(--text) 45%, var(--brand-text) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.card-title .icon, .section-title .icon { filter: saturate(1.2); }

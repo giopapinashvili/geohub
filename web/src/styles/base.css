@@ -71,3 +71,6 @@ hr { border: 0; border-top: 1px solid var(--divider); margin: var(--s-4) 0; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
+
+/* Soft colour glow behind everything (tokens: --bg-art). */
+body { background: var(--bg-art), var(--bg); background-attachment: fixed; }

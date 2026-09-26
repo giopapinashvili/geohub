@@ -13,16 +13,16 @@ export function LeftNav({ active }) {
     <aside class="leftnav" aria-label={t('nav.sections')}>
       <nav class="rail">
         {items.map((s) => (
-          <a key={s.key} href={s.href} class={`rail-item${active === s.key ? ' is-active' : ''}`} aria-current={active === s.key ? 'page' : undefined}>
+          <a key={s.key} href={s.href} class={`rail-item${active === s.key ? ' is-active' : ''}`} style={{ '--tone': s.tone }} aria-current={active === s.key ? 'page' : undefined}>
             <span class="rail-icon"><Icon name={active === s.key && s.key !== 'business' && s.key !== 'needs' ? `${s.icon}-fill` : s.icon} size={24} /></span>
             <span class="rail-label">{t(s.label)}</span>
           </a>
         ))}
-        <button type="button" class="rail-item rail-create" onClick={() => { if (requireLogin('post')) createMenu.value = true; }}>
+        <button type="button" class="rail-item rail-create" style={{ '--tone': '#2563eb' }} onClick={() => { if (requireLogin('post')) createMenu.value = true; }}>
           <span class="rail-icon"><Icon name="plus" size={24} /></span>
           <span class="rail-label">{t('nav.create')}</span>
         </button>
-        <a href="/menu" class={`rail-item${!inRail && active && active !== 'profile' ? ' is-active' : ''}`}>
+        <a href="/menu" style={{ '--tone': '#64748b' }} class={`rail-item${!inRail && active && active !== 'profile' ? ' is-active' : ''}`}>
           <span class="rail-icon"><Icon name="squares-four" size={24} /></span>
           <span class="rail-label">{t('nav.more')}</span>
         </a>

@@ -10,7 +10,12 @@
   --bg: #eef2f8;
   --surface: #ffffff;
   --surface-2: #f5f7fb;
-  --surface-3: #e9eef5;
+  --surface-3: #e6ecf7;
+  --bg-art:
+    radial-gradient(900px 520px at 0% -8%, rgb(37 99 235 / 0.16), transparent 62%),
+    radial-gradient(760px 480px at 100% 0%, rgb(6 182 212 / 0.16), transparent 60%),
+    radial-gradient(820px 560px at 85% 100%, rgb(139 92 246 / 0.12), transparent 62%),
+    radial-gradient(700px 520px at 5% 100%, rgb(16 185 129 / 0.10), transparent 60%);
   --surface-sunken: #e7ecf4;
   --overlay: rgb(8 12 24 / 0.55);
   --glass: rgb(255 255 255 / 0.82);
@@ -124,6 +129,10 @@
   --surface: #0d0f13;
   --surface-2: #14171d;
   --surface-3: #1b1f27;
+  --bg-art:
+    radial-gradient(900px 520px at 0% -8%, rgb(37 99 235 / 0.20), transparent 62%),
+    radial-gradient(760px 480px at 100% 0%, rgb(6 182 212 / 0.12), transparent 60%),
+    radial-gradient(820px 560px at 85% 100%, rgb(139 92 246 / 0.12), transparent 62%);
   --surface-sunken: #08090c;
   --overlay: rgb(0 0 0 / 0.7);
   --glass: rgb(13 15 19 / 0.82);
