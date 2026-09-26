@@ -57,9 +57,11 @@
   --online: #22c55e;
 
   /* ── Elevation ────────────────────────────────────────── */
-  --shadow-1: 0 0 0 1px rgb(15 23 42 / 0.07), 0 1px 2px rgb(15 23 42 / 0.04);
-  --shadow-2: 0 0 0 1px rgb(15 23 42 / 0.06), 0 8px 24px rgb(15 23 42 / 0.08);
-  --shadow-3: 0 16px 48px rgb(15 23 42 / 0.18), 0 2px 8px rgb(15 23 42 / 0.08);
+  /* Layered: rim light on top, a tight contact shadow, a soft blue-tinted drop. */
+  --shadow-1: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 0 0 1px rgb(15 23 42 / 0.06), 0 1px 2px rgb(15 23 42 / 0.06), 0 6px 16px -6px rgb(15 23 42 / 0.10), 0 18px 36px -18px rgb(37 99 235 / 0.22);
+  --shadow-2: inset 0 1px 0 rgb(255 255 255 / 0.9), 0 0 0 1px rgb(15 23 42 / 0.05), 0 2px 4px rgb(15 23 42 / 0.06), 0 12px 28px -8px rgb(15 23 42 / 0.16), 0 28px 56px -24px rgb(37 99 235 / 0.30);
+  --shadow-3: 0 24px 64px -12px rgb(15 23 42 / 0.30), 0 4px 12px rgb(15 23 42 / 0.10);
+  --card-bg: linear-gradient(180deg, #ffffff 0%, #fbfcff 60%, #f6f9ff 100%);
   --focus-ring: 0 0 0 3px rgb(37 99 235 / 0.35);
 
   /* ── Shape ────────────────────────────────────────────── */
@@ -168,9 +170,10 @@
   --info-soft: #0b2a33;
   --online: #4ade80;
 
-  --shadow-1: 0 0 0 1px rgb(255 255 255 / 0.06);
-  --shadow-2: 0 0 0 1px rgb(255 255 255 / 0.07), 0 10px 30px rgb(0 0 0 / 0.6);
-  --shadow-3: 0 0 0 1px rgb(255 255 255 / 0.08), 0 20px 60px rgb(0 0 0 / 0.75);
+  --shadow-1: inset 0 1px 0 rgb(255 255 255 / 0.07), 0 0 0 1px rgb(255 255 255 / 0.06), 0 8px 20px -8px rgb(0 0 0 / 0.8), 0 20px 40px -20px rgb(59 130 246 / 0.25);
+  --shadow-2: inset 0 1px 0 rgb(255 255 255 / 0.09), 0 0 0 1px rgb(255 255 255 / 0.08), 0 16px 36px -10px rgb(0 0 0 / 0.85), 0 30px 60px -24px rgb(59 130 246 / 0.35);
+  --shadow-3: 0 0 0 1px rgb(255 255 255 / 0.08), 0 24px 64px rgb(0 0 0 / 0.8);
+  --card-bg: linear-gradient(180deg, #151922 0%, #0f1218 55%, #0c0e13 100%);
   --focus-ring: 0 0 0 3px rgb(96 165 250 / 0.45);
 }
 

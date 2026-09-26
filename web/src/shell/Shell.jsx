@@ -3,6 +3,7 @@ import { bp } from '../lib/hooks.js';
 import { Header } from './Header.jsx';
 import { TopBar, BottomNav } from './MobileBars.jsx';
 import { LeftNav } from './LeftNav.jsx';
+import { RightRail } from './RightRail.jsx';
 import { composer, storyCreator, createMenu, loginPrompt, chatPopups } from '../lib/store.js';
 import { CreateMenu } from './CreateMenu.jsx';
 import { LoginPrompt } from './LoginPrompt.jsx';
@@ -27,13 +28,14 @@ export function Shell({ layout = 'page', nav, immersive, children }) {
     );
   }
   const showLeft = desktop && (layout === 'feed' || layout === 'page');
-  const showRight = false;
+  const showRight = desktop && layout === 'feed' && bp.value === 'xl';
   return (
     <div class={`shell shell-${layout}${desktop ? ' is-desktop' : ' is-mobile'}${immersive ? ' is-immersive' : ''}`}>
       {desktop ? <Header active={nav} /> : <TopBar active={nav} hidden={immersive} />}
       <div class={`shell-body layout-${layout}${showRight ? ' has-right' : ''}${showLeft ? ' has-left' : ''}`}>
         {showLeft && <LeftNav active={nav} />}
         <main id="main" class="shell-main" tabIndex={-1}>{children}</main>
+        {showRight && <RightRail />}
       </div>
       {!desktop && <BottomNav active={nav} immersive={immersive} />}
       {desktop && chatPopups.value.length > 0 && <Suspense fallback={null}><ChatDock /></Suspense>}

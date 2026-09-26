@@ -1040,4 +1040,5 @@ export default {
   'post.likesCount': '{n} მოწონება',
   'post.viewComments': 'ყველა კომენტარის ნახვა ({n})',
   'profile.postsWord': 'პოსტი',
+  'rail.online': 'ონლაინ მეგობრები',
 };
