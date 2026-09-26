@@ -6,6 +6,7 @@ import './styles/components.css';
 import './styles/shell.css';
 import './styles/content.css';
 import './styles/pages.css';
+import './styles/video.css';
 import { resolveLegacy } from './legacy.js';
 
 // Old bookmarks and shared links ("/profile.html?id=…") land here because

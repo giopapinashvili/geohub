@@ -1,0 +1,1 @@
+import{u as t}from"./preact-bQZoU-T-.js";import{E as o}from"./app-Dk0kqujR.js";import"./legacy-BnM3fQDh.js";import"./firebase-auth-BG1ktOTd.js";import"./firebase-core-Cm7yCis0.js";import"./firestore-CdHXZrZl.js";import"./theme-BGm8kNDb.js";function n(){return t(o,{icon:"hourglass",title:"BusinessHub",text:"…"})}export{n as default};

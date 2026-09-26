@@ -76,6 +76,13 @@ export async function createChannel({ name, description = '', avatar = '', banne
   return ref.id;
 }
 
+/** Owner edits: name, description, avatar, banner. */
+export async function updateChannel(id, patch) {
+  const allowed = {};
+  for (const k of ['name', 'description', 'avatar', 'banner']) if (patch[k] !== undefined) allowed[k] = typeof patch[k] === 'string' ? patch[k].trim() : patch[k];
+  await updateDoc(doc(db, 'channels', id), allowed);
+}
+
 /**
  * Publish a video: a YouTube link or an uploaded file URL.
  * Rules: authorId == caller, status 'active'.

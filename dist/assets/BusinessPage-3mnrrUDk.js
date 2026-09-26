@@ -1,1 +1,0 @@
-import{u as t}from"./preact-bQZoU-T-.js";import{E as o}from"./app-CBDFA8c9.js";import"./legacy-BnM3fQDh.js";import"./firebase-auth-BG1ktOTd.js";import"./firebase-core-Cm7yCis0.js";import"./firestore-CdHXZrZl.js";import"./theme-BGm8kNDb.js";function a(){return t(o,{icon:"hourglass",title:"BusinessPage",text:"…"})}export{a as default};

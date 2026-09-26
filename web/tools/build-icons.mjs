@@ -29,12 +29,18 @@ const REGULAR = `
   text-aa smiley-meh megaphone rocket-launch target stack
   note-pencil newspaper broadcast television-simple monitor-play
   magic-wand arrow-bend-up-left arrow-u-up-left
+  star-half package truck house-simple car-simple first-aid-kit shopping-cart money handbag t-shirt laptop couch
+  baby dog soccer-ball list-checks arrow-down arrow-up chart-pie gauge database image-square map-pin-plus path
+  thumbs-down mask-happy globe-simple lock-key key bell-ringing envelope-simple phone-call map-pin-simple
+  play-pause skip-forward stop plus-square minus trend-up trend-down sign-out clock-countdown pencil-line
+  arrow-line-up-right user-list users-four calendar-plus ticket tag-simple percent seal-percent storefront
 `;
 const FILLED = `
   house heart bookmark-simple bell chat-circle-dots play-circle star user-circle users-three
   map-trifold storefront film-strip compass gift thumbs-up seal-check crown lightning fire
   check-circle map-pin push-pin smiley calendar-blank shopping-bag trophy video-camera
-  television-simple monitor-play squares-four
+  television-simple monitor-play squares-four play pause chat-circle share-fat eye lock tag coins
+  buildings briefcase ticket
 `;
 
 const base = 'node_modules/@phosphor-icons/core/assets';

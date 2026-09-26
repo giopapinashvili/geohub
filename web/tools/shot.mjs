@@ -11,7 +11,8 @@ const base = args.base || 'http://127.0.0.1:5173';
 const out = args.out || '/tmp/claude-0/-home-user-geohub/2877b89a-9f7d-52ce-bf45-56e5a986c362/scratchpad/shots';
 mkdirSync(out, { recursive: true });
 
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' }).catch(() => chromium.launch());
+const proxy = process.env.HTTPS_PROXY ? { server: process.env.HTTPS_PROXY, bypass: '127.0.0.1,localhost' } : undefined;
+const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', proxy, args: ['--disable-http2'] });
 for (const theme of themes) {
   for (const w of widths) {
     const ctx = await browser.newContext({ viewport: { width: w, height: w < 768 ? 844 : 900 }, colorScheme: theme, deviceScaleFactor: 1, ignoreHTTPSErrors: true });
