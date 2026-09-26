@@ -1,0 +1,169 @@
+/* GeoHub design tokens.
+   Identity: pomegranate (the fruit of Georgia) over warm stone neutrals,
+   with an amber accent borrowed from qvevri wine. Every colour used by a
+   component comes from here; themes only redefine these variables. */
+
+:root {
+  color-scheme: light;
+
+  /* ── Surfaces ─────────────────────────────────────────── */
+  --bg: #f3f0ec;
+  --surface: #ffffff;
+  --surface-2: #f6f3ef;
+  --surface-3: #ece7e1;
+  --surface-sunken: #efebe6;
+  --overlay: rgb(24 18 16 / 0.56);
+  --glass: rgb(255 255 255 / 0.86);
+
+  /* ── Lines ────────────────────────────────────────────── */
+  --border: #e6dfd8;
+  --border-strong: #d3c9c0;
+  --divider: #eee8e2;
+
+  /* ── Text ─────────────────────────────────────────────── */
+  --text: #1e1817;
+  --text-2: #5b524e;
+  --text-3: #877d77;
+  --text-inverse: #ffffff;
+
+  /* ── Brand ────────────────────────────────────────────── */
+  --brand: #d42a58;
+  --brand-hover: #bb1f4b;
+  --brand-press: #a51a41;
+  --brand-text: #c0214f;
+  --brand-soft: #fbe7ed;
+  --brand-soft-2: #f7d3de;
+  --on-brand: #ffffff;
+  --accent: #de8f1f;
+  --accent-text: #9a5a06;
+  --accent-soft: #fcf0dc;
+  --gradient-brand: linear-gradient(135deg, #e3325f 0%, #f07a3a 100%);
+  --gradient-ring: conic-gradient(from 210deg, #f59e3a, #e3325f, #b3207a, #f59e3a);
+
+  /* ── Status ───────────────────────────────────────────── */
+  --success: #16803c;
+  --success-soft: #e5f4e9;
+  --danger: #cf2d24;
+  --danger-soft: #fdeceb;
+  --warning: #b45309;
+  --warning-soft: #fdf1df;
+  --info: #0e7490;
+  --info-soft: #e1f3f7;
+  --online: #22a35a;
+
+  /* ── Elevation ────────────────────────────────────────── */
+  --shadow-1: 0 1px 2px rgb(40 24 20 / 0.06), 0 0 0 1px rgb(40 24 20 / 0.03);
+  --shadow-2: 0 2px 6px rgb(40 24 20 / 0.06), 0 8px 24px rgb(40 24 20 / 0.06);
+  --shadow-3: 0 12px 40px rgb(40 24 20 / 0.18), 0 2px 8px rgb(40 24 20 / 0.08);
+  --focus-ring: 0 0 0 3px rgb(212 42 88 / 0.32);
+
+  /* ── Shape ────────────────────────────────────────────── */
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --r-full: 999px;
+
+  /* ── Spacing (4px grid) ──────────────────────────────── */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+
+  /* ── Type ─────────────────────────────────────────────── */
+  --font: 'FiraGO', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 15px;
+  --fs-lg: 17px;
+  --fs-xl: 20px;
+  --fs-2xl: 24px;
+  --fs-3xl: 30px;
+  --fs-4xl: 38px;
+  --lh-tight: 1.25;
+  --lh: 1.5;
+
+  /* ── Layout ───────────────────────────────────────────── */
+  --header-h: 60px;
+  --topbar-h: 56px;
+  --bottombar-h: 62px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --col-left: 280px;
+  --col-right: 320px;
+  --col-main: 680px;
+  --page-max: 1320px;
+  --gutter: 16px;
+
+  /* ── Motion ───────────────────────────────────────────── */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --t-fast: 120ms;
+  --t: 200ms;
+
+  /* ── Layers ───────────────────────────────────────────── */
+  --z-sticky: 50;
+  --z-bars: 100;
+  --z-dock: 150;
+  --z-popover: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+}
+
+/* Dark theme — warm charcoal, never navy. Applied when the user picks dark,
+   or picks "system" and the OS is dark (theme.js sets data-theme). */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #0f0c0d;
+  --surface: #1a1617;
+  --surface-2: #221d1f;
+  --surface-3: #2c2628;
+  --surface-sunken: #141112;
+  --overlay: rgb(0 0 0 / 0.66);
+  --glass: rgb(26 22 23 / 0.86);
+
+  --border: #2e282a;
+  --border-strong: #463d40;
+  --divider: #262123;
+
+  --text: #f6f1ef;
+  --text-2: #c7bdb9;
+  --text-3: #958b87;
+  --text-inverse: #1e1817;
+
+  --brand: #d62f60;
+  --brand-hover: #e2426f;
+  --brand-press: #c1284f;
+  --brand-text: #ff7ba3;
+  --brand-soft: #3a1823;
+  --brand-soft-2: #4f1f2f;
+  --on-brand: #ffffff;
+  --accent: #f0a53a;
+  --accent-text: #f6bd6a;
+  --accent-soft: #3a2a14;
+
+  --success: #4ccb7a;
+  --success-soft: #16301f;
+  --danger: #ff6b61;
+  --danger-soft: #3b1917;
+  --warning: #f2b04f;
+  --warning-soft: #3a2a14;
+  --info: #4cc4dc;
+  --info-soft: #11303a;
+  --online: #3ad273;
+
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4), 0 0 0 1px rgb(255 255 255 / 0.03);
+  --shadow-2: 0 4px 16px rgb(0 0 0 / 0.45);
+  --shadow-3: 0 16px 48px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.05);
+  --focus-ring: 0 0 0 3px rgb(255 123 163 / 0.4);
+}
+
+@media (min-width: 1024px) {
+  :root { --gutter: 20px; }
+}

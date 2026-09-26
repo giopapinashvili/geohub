@@ -1,100 +1,62 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'path';
-import { fileURLToPath } from 'url';
+import preact from '@preact/preset-vite';
+import { fileURLToPath } from 'node:url';
+import { cpSync, existsSync, createReadStream } from 'node:fs';
+import { join, normalize } from 'node:path';
 
-const __dirname = fileURLToPath(new URL('.', import.meta.url));
+const root = fileURLToPath(new URL('./web', import.meta.url));
+const fixtures = join(root, 'e2e/fixtures');
 
-// All pages bundled by Vite. copy-static.js copies everything else (CSS, icons, SW…).
-const VITE_PAGES = {
-  feed:            resolve(__dirname, 'feed.html'),
-  messages:        resolve(__dirname, 'messages.html'),
-  'add-business':  resolve(__dirname, 'add-business.html'),
-  'admin-videos':  resolve(__dirname, 'admin-videos.html'),
-  admin:           resolve(__dirname, 'admin.html'),
-  assistant:       resolve(__dirname, 'assistant.html'),
-  auth:            resolve(__dirname, 'auth.html'),
-  'business-suite':resolve(__dirname, 'business-suite.html'),
-  business:        resolve(__dirname, 'business.html'),
-  camera:          resolve(__dirname, 'camera.html'),
-  challenges:      resolve(__dirname, 'challenges.html'),
-  channel:         resolve(__dirname, 'channel.html'),
-  checkin:         resolve(__dirname, 'checkin.html'),
-  creators:        resolve(__dirname, 'creators.html'),
-  dashboard:       resolve(__dirname, 'dashboard.html'),
-  demo:            resolve(__dirname, 'demo.html'),
-  'early-adopter': resolve(__dirname, 'early-adopter.html'),
-  events:          resolve(__dirname, 'events.html'),
-  explore:         resolve(__dirname, 'explore.html'),
-  gamification:    resolve(__dirname, 'gamification.html'),
-  groups:          resolve(__dirname, 'groups.html'),
-  index:           resolve(__dirname, 'index.html'),
-  invite:          resolve(__dirname, 'invite.html'),
-  jobs:            resolve(__dirname, 'jobs.html'),
-  learning:        resolve(__dirname, 'learning.html'),
-  lifegraph:       resolve(__dirname, 'lifegraph.html'),
-  live:            resolve(__dirname, 'live.html'),
-  map:             resolve(__dirname, 'map.html'),
-  marketplace:     resolve(__dirname, 'marketplace.html'),
-  notifications:   resolve(__dirname, 'notifications.html'),
-  onboarding:      resolve(__dirname, 'onboarding.html'),
-  patriot:         resolve(__dirname, 'patriot.html'),
-  'payment-success': resolve(__dirname, 'payment-success.html'),
-  'payment-cancel':  resolve(__dirname, 'payment-cancel.html'),
-  'place-updates':   resolve(__dirname, 'place-updates.html'),
-  'place-feed':    resolve(__dirname, 'place-feed.html'),
-  places:          resolve(__dirname, 'places.html'),
-  premium:         resolve(__dirname, 'premium.html'),
-  pricing:         resolve(__dirname, 'pricing.html'),
-  products:        resolve(__dirname, 'products.html'),
-  profile:         resolve(__dirname, 'profile.html'),
-  'real-estate':   resolve(__dirname, 'real-estate.html'),
-  reels:           resolve(__dirname, 'reels.html'),
-  reviews:         resolve(__dirname, 'reviews.html'),
-  rewards:         resolve(__dirname, 'rewards.html'),
-  safety:          resolve(__dirname, 'safety.html'),
-  scan:            resolve(__dirname, 'scan.html'),
-  search:          resolve(__dirname, 'search.html'),
-  services:        resolve(__dirname, 'services.html'),
-  settings:        resolve(__dirname, 'settings.html'),
-  stories:         resolve(__dirname, 'stories.html'),
-  trust:           resolve(__dirname, 'trust.html'),
-  videos:          resolve(__dirname, 'videos.html'),
-  watch:           resolve(__dirname, 'watch.html'),
-  world:           resolve(__dirname, 'world.html'),
-};
+// Emulator builds serve the generated test photos at /fixtures/*.
+function fixturesPlugin() {
+  const serve = (server) => {
+    server.middlewares.use('/fixtures', (req, res, next) => {
+      const file = normalize(join(fixtures, decodeURIComponent(req.url.split('?')[0])));
+      if (!file.startsWith(fixtures) || !existsSync(file)) return next();
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', 'max-age=3600');
+      createReadStream(file).pipe(res);
+    });
+  };
+  return {
+    name: 'geohub-fixtures',
+    configureServer: serve,
+    configurePreviewServer: serve,
+    writeBundle(opts) { if (existsSync(fixtures)) cpSync(fixtures, join(opts.dir, 'fixtures'), { recursive: true }); },
+  };
+}
 
-export default defineConfig({
-  root: '.',
-  publicDir: false, // static assets handled by scripts/copy-static.js
-
-  esbuild: {
-    // Keep console.error/warn in production — needed to see real failures.
-    // Only strip noisy debug logging.
-    pure: ['console.log', 'console.debug', 'console.info'],
-    drop: ['debugger'],
-  },
-
+// The app lives in web/. `npm run build` writes dist/, which is committed:
+// Cloudflare Pages serves it as-is.
+export default defineConfig(({ mode }) => ({
+  root,
+  publicDir: 'public',
+  plugins: [preact(), mode === 'emulator' && fixturesPlugin()].filter(Boolean),
   build: {
-    outDir: 'dist',
+    outDir: fileURLToPath(new URL(mode === 'emulator' ? './.dist-emulator' : './dist', import.meta.url)),
     emptyOutDir: true,
+    target: 'es2022',
     sourcemap: false,
-    chunkSizeWarningLimit: 2000,
+    assetsInlineLimit: 0,
+    chunkSizeWarningLimit: 900,
     rollupOptions: {
-      input: VITE_PAGES,
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules')) return 'vendor';
+          if (id.includes('node_modules/firebase/') || id.includes('node_modules/@firebase/')) {
+            if (id.includes('firestore')) return 'firestore';
+            if (id.includes('auth')) return 'firebase-auth';
+            if (id.includes('messaging') || id.includes('functions') || id.includes('installations')) return undefined;
+            return 'firebase-core';
+          }
+          if (id.includes('node_modules/preact') || id.includes('node_modules/@preact/signals')) return 'preact';
+          return undefined;
         },
-        chunkFileNames: 'assets/[name]-[hash].js',
-        entryFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash][extname]',
       },
     },
   },
-
-  // Dev server: serves everything from root so current URLs all work
-  server: {
-    port: 5173,
-    open: '/feed.html',
+  esbuild: {
+    pure: mode === 'production' ? ['console.log', 'console.debug', 'console.info'] : [],
   },
-});
+  server: { port: 5173, strictPort: true, host: '127.0.0.1' },
+  preview: { port: 4173, strictPort: true, host: '127.0.0.1' },
+}));
