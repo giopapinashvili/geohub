@@ -77,3 +77,25 @@
 .about-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 16px; }
 .about-grid > .card + .card { margin-top: 0; }
 .legal { display: flex; flex-direction: column; gap: 14px; line-height: var(--lh); }
+
+/* ── Calls ─────────────────────────────────────────────── */
+.call-layer { position: fixed; inset: 0; z-index: calc(var(--z-modal) + 5); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: calc(48px + var(--safe-top)) 20px calc(36px + var(--safe-bottom)); color: #fff;
+  background: radial-gradient(120% 80% at 50% 0%, rgb(37 99 235 / 0.55), transparent 60%), radial-gradient(90% 70% at 50% 100%, rgb(6 182 212 / 0.35), transparent 60%), #05070d; animation: call-in 260ms var(--ease); }
+@keyframes call-in { from { opacity: 0; transform: scale(1.02); } }
+.call-layer.has-video { background: #000; }
+.call-remote { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #000; }
+.call-audio-sink { display: none; }
+.call-local { position: absolute; right: 16px; top: calc(16px + var(--safe-top)); width: min(30vw, 180px); aspect-ratio: 3 / 4; object-fit: cover; border-radius: 16px; box-shadow: 0 10px 30px rgb(0 0 0 / 0.5); transform: scaleX(-1); z-index: 2; background: #111; }
+.call-info { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; margin-top: 6vh; }
+.call-layer.has-video .call-info { margin-top: 0; text-shadow: 0 1px 6px rgb(0 0 0 / 0.6); }
+.call-avatar { border-radius: 50%; padding: 6px; box-shadow: 0 0 0 2px rgb(255 255 255 / 0.25); }
+.call-avatar.is-ringing { animation: call-pulse 1.6s ease-out infinite; }
+@keyframes call-pulse { 0% { box-shadow: 0 0 0 0 rgb(96 165 250 / 0.6); } 100% { box-shadow: 0 0 0 36px rgb(96 165 250 / 0); } }
+.call-name { font-size: var(--fs-2xl); font-weight: 800; }
+.call-status { font-size: var(--fs-md); opacity: 0.85; font-variant-numeric: tabular-nums; }
+.call-controls { position: relative; z-index: 1; display: flex; gap: clamp(18px, 6vw, 40px); align-items: flex-start; }
+.call-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; border: 0; background: none; color: #fff; cursor: pointer; font-size: var(--fs-sm); font-weight: 600; }
+.call-btn-ico { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; background: var(--tone, rgb(255 255 255 / 0.16)); backdrop-filter: blur(10px); box-shadow: 0 8px 24px rgb(0 0 0 / 0.35); transition: transform var(--t-fast); }
+.call-btn:active .call-btn-ico { transform: scale(0.92); }
+.call-btn.is-on .call-btn-ico { background: #fff; color: #0b1220; }
+.thread-call { color: var(--brand-text); }

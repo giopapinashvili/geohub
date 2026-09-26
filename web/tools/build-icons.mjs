@@ -35,6 +35,7 @@ const REGULAR = `
   play-pause skip-forward stop plus-square minus trend-up trend-down sign-out clock-countdown pencil-line
   arrow-line-up-right user-list users-four calendar-plus ticket tag-simple percent seal-percent storefront
   fork-knife castle-turret martini umbrella waves gps-fix map-pin-area signpost clock-counter-clockwise church binoculars tent boat
+  microphone-slash video-camera-slash
 `;
 const FILLED = `
   house heart bookmark-simple bell chat-circle-dots play-circle star user-circle users-three

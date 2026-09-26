@@ -13,6 +13,7 @@ import { toast } from '../lib/toast.js';
 import { openDirect, openBusinessConversation, hideConversation } from '../data/messages.js';
 import { searchUsers } from '../data/users.js';
 import { getBusiness } from '../data/business.js';
+import { startCall } from '../data/calls.js';
 import { blockUser } from '../data/social.js';
 import { ConversationRow, useConversationPeer } from '../features/messages/ConversationRow.jsx';
 import { Thread, PeerStatus } from '../features/messages/Thread.jsx';
@@ -56,6 +57,12 @@ function ThreadHeader({ conv, onBack }) {
         <Avatar src={peer.avatar} name={peer.name} size={40} square={peer.square} status={peer.online ? 'online' : undefined} />
         <span class="thread-peer-text"><strong>{peer.name}</strong><PeerStatus peer={peer} /></span>
       </a>
+      {peer.user && !conv.isBusiness && (
+        <>
+          <IconButton icon="phone" label={t('call.voice')} size={40} class="thread-call" onClick={() => startCall({ uid: peer.user.id, name: peer.user.name, avatar: peer.user.avatar }, 'audio').catch(() => toast.error(t('call.noDevice')))} />
+          <IconButton icon="video-camera" label={t('call.video')} size={40} class="thread-call" onClick={() => startCall({ uid: peer.user.id, name: peer.user.name, avatar: peer.user.avatar }, 'video').catch(() => toast.error(t('call.noDevice')))} />
+        </>
+      )}
       <Menu label={t('common.more')} width={260} items={[
         { icon: 'user-circle', label: t('messages.viewProfile'), href: peer.href, hidden: !peer.href },
         { icon: 'archive', label: t('messages.hide'), onClick: () => hideConversation(conv.id).then(() => { toast(t('messages.hidden')); navigate('/messages'); }).catch(() => toast.error(t('common.error'))) },

@@ -1041,4 +1041,11 @@ export default {
   'post.viewComments': 'ყველა კომენტარის ნახვა ({n})',
   'profile.postsWord': 'პოსტი',
   'rail.online': 'ონლაინ მეგობრები',
+  // ── ზარები ──
+  'call.title': 'ზარი', 'call.voice': 'ხმოვანი ზარი', 'call.video': 'ვიდეოზარი',
+  'call.incoming': 'შემოსული ზარი…', 'call.incomingVideo': 'შემოსული ვიდეოზარი…', 'call.ringing': 'რეკავს…', 'call.connecting': 'უკავშირდება…',
+  'call.answer': 'პასუხი', 'call.decline': 'უარყოფა', 'call.hangUp': 'გათიშვა', 'call.mute': 'მიკროფონი', 'call.unmute': 'ჩართვა',
+  'call.cameraOff': 'კამერა', 'call.cameraOn': 'ჩართვა',
+  'call.end.ended': 'ზარი დასრულდა', 'call.end.declined': 'ზარი უარყოფილია', 'call.end.missed': 'არ უპასუხა', 'call.end.failed': 'დაკავშირება ვერ მოხერხდა',
+  'call.noDevice': 'მიკროფონზე ან კამერაზე წვდომა არ არის. დაუშვი ბრაუზერის პარამეტრებში.',
 };

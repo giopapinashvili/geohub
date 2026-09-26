@@ -7,6 +7,7 @@ import { RightRail } from './RightRail.jsx';
 import { composer, storyCreator, createMenu, loginPrompt, chatPopups } from '../lib/store.js';
 import { CreateMenu } from './CreateMenu.jsx';
 import { LoginPrompt } from './LoginPrompt.jsx';
+import { CallLayer } from '../features/calls/CallLayer.jsx';
 
 const Composer = lazy(() => import('../features/post/Composer.jsx'));
 const StoryCreator = lazy(() => import('../features/story/StoryCreator.jsx'));
@@ -51,6 +52,7 @@ function Dialogs() {
       {storyCreator.value && <Suspense fallback={null}><StoryCreator /></Suspense>}
       {createMenu.value && <CreateMenu />}
       {loginPrompt.value && <LoginPrompt />}
+      <CallLayer />
     </>
   );
 }
