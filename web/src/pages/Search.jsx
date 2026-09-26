@@ -90,7 +90,7 @@ function Recent({ onPick }) {
           {[
             ['/explore', 'compass', 'nav.explore', '#2f9e5b'], ['/map', 'map-trifold', 'nav.map', '#1f8fbf'], ['/events', 'calendar-blank', 'nav.events', '#d4468a'],
             ['/groups', 'users-three', 'nav.groups', '#4b6bd6'], ['/marketplace', 'storefront', 'nav.marketplace', '#e0662b'], ['/business', 'briefcase', 'nav.business', '#9a6b2f'],
-            ['/video', 'monitor-play', 'nav.video', '#d42a58'], ['/friends?tab=suggestions', 'user-plus', 'friends.suggestions', '#7a5bc4'],
+            ['/video', 'monitor-play', 'nav.video', '#e11d48'], ['/friends?tab=suggestions', 'user-plus', 'friends.suggestions', '#7a5bc4'],
           ].map(([href, icon, key, tone]) => (
             <a key={href} href={href} class="browse-tile" style={{ '--tone': tone }}><span class="browse-ico"><Icon name={icon} size={22} /></span>{t(key)}</a>
           ))}

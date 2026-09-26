@@ -30,7 +30,7 @@ function Overview() {
       <StatCard icon="storefront" label={t('search.businesses')} value={formatCount(b)} tone="#e0662b" />
       <StatCard icon="map-pin" label={t('search.places')} value={formatCount(pl)} tone="#1f8fbf" />
       <StatCard icon="users-three" label={t('search.groups')} value={formatCount(g)} tone="#7a5bc4" />
-      <StatCard icon="flag" label={t('admin.reports')} value={formatCount(r)} tone="#d42a58" href="/admin/reports" />
+      <StatCard icon="flag" label={t('admin.reports')} value={formatCount(r)} tone="#e11d48" href="/admin/reports" />
     </div>
   );
 }

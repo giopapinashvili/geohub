@@ -11,6 +11,7 @@ import { query } from '../lib/router.js';
 import { fetchFeedPage, listenNewest, canSee } from '../data/posts.js';
 import { isCorruptSeed } from '../data/normalize.js';
 import { StoryTray } from '../features/story/StoryTray.jsx';
+import { Hub } from '../features/home/Hub.jsx';
 import { PostCard } from '../features/post/PostCard.jsx';
 import { ReelsStrip } from '../features/video/ReelsStrip.jsx';
 import { PeopleStrip } from '../features/user/PeopleStrip.jsx';
@@ -111,6 +112,7 @@ export default function Home() {
 
   return (
     <div class="feed">
+      <Hub />
       <StoryTray />
       <ComposerCard />
       {fresh && (

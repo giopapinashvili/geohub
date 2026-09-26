@@ -49,12 +49,12 @@
 .market-title { font-size: var(--fs-2xl); font-weight: 800; line-height: 1.2; margin-top: 8px; word-break: break-word; }
 .market-price { font-size: var(--fs-2xl); font-weight: 800; color: var(--brand-text); margin: 4px 0; }
 .market-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-.points-hero { display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; align-items: center; padding: clamp(20px, 4vw, 32px); border-radius: var(--r-xl); color: #fff; background: linear-gradient(135deg, #e3a21a, var(--brand)); box-shadow: var(--shadow-2); }
+.points-hero { display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; align-items: center; padding: clamp(20px, 4vw, 32px); border-radius: var(--r-xl); color: #fff; background: radial-gradient(120% 100% at 100% 0%, rgb(34 211 238 / 0.5), transparent 60%), linear-gradient(135deg, #1e3a8a, var(--brand)); box-shadow: var(--shadow-2); }
 .points-label { font-weight: 600; opacity: 0.9; }
 .points-value { display: flex; align-items: center; gap: 10px; font-size: 40px; font-weight: 800; line-height: 1.1; margin: 4px 0; }
 .invite-box { background: rgb(255 255 255 / 0.16); padding: 14px 16px; border-radius: var(--r-lg); max-width: 340px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
 .coupon-code { padding: 4px 10px; border-radius: var(--r-sm); background: var(--surface-3); font-weight: 700; letter-spacing: 0.05em; }
-.premium-hero { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: clamp(24px, 5vw, 40px) 16px; border-radius: var(--r-xl); color: #fff; background: radial-gradient(120% 90% at 100% 0%, rgb(255 190 90 / 0.5), transparent 55%), var(--gradient-brand); box-shadow: var(--shadow-2); }
+.premium-hero { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: clamp(24px, 5vw, 40px) 16px; border-radius: var(--r-xl); color: #fff; background: radial-gradient(120% 90% at 100% 0%, rgb(34 211 238 / 0.5), transparent 55%), radial-gradient(80% 80% at 0% 100%, rgb(124 58 237 / 0.45), transparent 60%), var(--gradient-brand); box-shadow: var(--shadow-2); }
 .plan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
 .plan-grid > .card + .card { margin-top: 0; }
 .plan { position: relative; display: flex; flex-direction: column; gap: 12px; }

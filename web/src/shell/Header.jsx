@@ -1,7 +1,5 @@
 import { Logo } from './Logo.jsx';
 import { SearchBox } from './SearchBox.jsx';
-import { PRIMARY } from './nav.js';
-import { Icon } from '../ui/Icon.jsx';
 import { IconButton, Button } from '../ui/Button.jsx';
 import { t } from '../lib/i18n.js';
 import { signedIn, authReady } from '../lib/auth.js';
@@ -13,20 +11,11 @@ export function Header({ active }) {
   return (
     <header class="header">
       <div class="header-left">
-        <Logo size={40} word={false} />
+        <Logo size={36} />
+      </div>
+      <div class="header-center">
         <SearchBox />
       </div>
-      <nav class="header-center" aria-label={t('nav.primary')}>
-        {PRIMARY.map((it) => {
-          const on = active === it.key;
-          return (
-            <a key={it.key} href={it.href} class={`header-tab${on ? ' is-active' : ''}`} aria-current={on ? 'page' : undefined} title={t(it.label)}>
-              <Icon name={on ? it.iconActive : it.icon} size={26} />
-              <span class="sr-only">{t(it.label)}</span>
-            </a>
-          );
-        })}
-      </nav>
       <div class="header-right">
         {authReady.value && !signedIn.value && (
           <>

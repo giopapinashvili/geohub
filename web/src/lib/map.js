@@ -46,12 +46,12 @@ export function addPlaceLayers(map, data, dark) {
   if (!map.getSource('gh-places')) {
     map.addSource('gh-places', { type: 'geojson', data, cluster: true, clusterRadius: 44, clusterMaxZoom: 13, promoteId: 'id' });
   }
-  const brand = dark ? '#d62f60' : '#d42a58';
-  const halo = dark ? '#1a1617' : '#ffffff';
+  const brand = dark ? '#3b82f6' : '#2563eb';
+  const halo = dark ? '#0d0f13' : '#ffffff';
   map.addLayer({
     id: 'gh-clusters', type: 'circle', source: 'gh-places', filter: ['has', 'point_count'],
     paint: {
-      'circle-color': brand, 'circle-opacity': 0.92, 'circle-stroke-width': 4, 'circle-stroke-color': dark ? 'rgba(214,47,96,0.35)' : 'rgba(212,42,88,0.25)',
+      'circle-color': brand, 'circle-opacity': 0.92, 'circle-stroke-width': 4, 'circle-stroke-color': dark ? 'rgba(59,130,246,0.35)' : 'rgba(37,99,235,0.25)',
       'circle-radius': ['step', ['get', 'point_count'], 16, 10, 20, 50, 26],
     },
   });

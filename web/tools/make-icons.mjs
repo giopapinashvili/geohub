@@ -25,9 +25,9 @@ for (const s of [32, 72, 96, 128, 192, 512]) {
   await render(s, `<div style="width:${s}px;height:${s}px">${svg.replace('<svg ', `<svg width="${s}" height="${s}" `)}</div>`, `icon-${s}.png`);
 }
 // Maskable: full-bleed gradient with the mark inside the safe zone.
-await render(512, `<div style="width:512px;height:512px;background:linear-gradient(135deg,#e3325f,#f07a3a);display:grid;place-items:center">${svg.replace('<svg ', '<svg width="300" height="300" ').replace(/<rect[^>]*\/>/, '')}</div>`, 'icon-maskable-512.png');
+await render(512, `<div style="width:512px;height:512px;background:linear-gradient(135deg,#1d4ed8,#06b6d4);display:grid;place-items:center">${svg.replace('<svg ', '<svg width="300" height="300" ').replace(/<rect[^>]*\/>/, '')}</div>`, 'icon-maskable-512.png');
 // Social preview 1200×630.
-await render(0, `<div style="width:1200px;height:630px;background:linear-gradient(150deg,#2a0f1a 0%,#6d1a36 38%,#d42a58 72%,#f07a3a 100%);display:flex;align-items:center;gap:48px;padding:0 96px;box-sizing:border-box;font-family:F,sans-serif;color:#fff">
+await render(0, `<div style="width:1200px;height:630px;background:linear-gradient(150deg,#020617 0%,#0b1f4d 38%,#1d4ed8 72%,#06b6d4 100%);display:flex;align-items:center;gap:48px;padding:0 96px;box-sizing:border-box;font-family:F,sans-serif;color:#fff">
   ${svg.replace('<svg ', '<svg width="220" height="220" ')}
   <div><div style="font-size:100px;font-weight:700;letter-spacing:-3px">GeoHub</div><div style="font-size:44px;font-weight:500;opacity:.92;margin-top:10px">აღმოაჩინე საქართველო</div></div></div>`, 'og-image.png', 1200, 630);
 await browser.close();

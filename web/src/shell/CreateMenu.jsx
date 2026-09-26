@@ -5,7 +5,7 @@ import { createMenu, openComposer, storyCreator } from '../lib/store.js';
 import { navigate } from '../lib/router.js';
 
 const OPTIONS = [
-  { key: 'post', icon: 'note-pencil', tone: '#d42a58', title: 'create.post', sub: 'create.postSub', run: () => openComposer({}) },
+  { key: 'post', icon: 'note-pencil', tone: '#2563eb', title: 'create.post', sub: 'create.postSub', run: () => openComposer({}) },
   { key: 'photo', icon: 'images', tone: '#16803c', title: 'create.photo', sub: 'create.photoSub', run: () => openComposer({ pick: 'media' }) },
   { key: 'story', icon: 'plus-circle', tone: '#b3207a', title: 'create.story', sub: 'create.storySub', run: () => { storyCreator.value = true; } },
   { key: 'reel', icon: 'film-strip', tone: '#c2410c', title: 'create.reel', sub: 'create.reelSub', run: () => navigate('/reels?upload=1') },

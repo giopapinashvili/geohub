@@ -2,7 +2,7 @@
 
 /* ── Auth ──────────────────────────────────────────────── */
 .auth { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); min-height: 100dvh; background: var(--surface); }
-.auth-hero { position: relative; overflow: hidden; background: linear-gradient(150deg, #2a0f1a 0%, #6d1a36 38%, #d42a58 72%, #f07a3a 100%); color: #fff; display: flex; align-items: center; padding: 48px clamp(32px, 6vw, 88px); }
+.auth-hero { position: relative; overflow: hidden; background: linear-gradient(150deg, #020617 0%, #0b1f4d 38%, #1d4ed8 72%, #06b6d4 100%); color: #fff; display: flex; align-items: center; padding: 48px clamp(32px, 6vw, 88px); }
 .auth-hero-inner { position: relative; z-index: 1; max-width: 520px; display: flex; flex-direction: column; gap: 18px; }
 .auth-hero-title { font-size: clamp(32px, 3.6vw, 46px); line-height: 1.12; letter-spacing: -0.02em; }
 .auth-hero-text { font-size: var(--fs-lg); color: rgb(255 255 255 / 0.86); max-width: 440px; }
@@ -11,7 +11,7 @@
 .auth-feats span { width: 40px; height: 40px; border-radius: 12px; background: rgb(255 255 255 / 0.16); display: grid; place-items: center; flex: none; backdrop-filter: blur(4px); }
 .auth-orbs i { position: absolute; border-radius: 50%; filter: blur(2px); opacity: 0.35; background: radial-gradient(circle at 30% 30%, #ffd1a1, transparent 60%); }
 .auth-orbs i:nth-child(1) { width: 420px; height: 420px; right: -120px; top: -100px; }
-.auth-orbs i:nth-child(2) { width: 300px; height: 300px; left: -80px; bottom: -60px; background: radial-gradient(circle at 60% 40%, #ff7ba3, transparent 62%); }
+.auth-orbs i:nth-child(2) { width: 300px; height: 300px; left: -80px; bottom: -60px; background: radial-gradient(circle at 60% 40%, #60a5fa, transparent 62%); }
 .auth-orbs i:nth-child(3) { width: 180px; height: 180px; right: 18%; bottom: 14%; background: radial-gradient(circle, #ffe08a, transparent 65%); }
 .auth-main { display: flex; flex-direction: column; align-items: center; padding: 20px 24px 24px; min-width: 0; }
 .auth-top { width: 100%; max-width: 440px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }

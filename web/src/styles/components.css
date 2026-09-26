@@ -33,7 +33,7 @@
 .btn-outline:hover:not(:disabled) { background: var(--surface-2); }
 .btn-danger { background: var(--danger); color: #fff; }
 .btn-danger:hover:not(:disabled) { filter: brightness(0.94); }
-.btn-gradient { background: var(--gradient-brand); color: #fff; box-shadow: 0 6px 18px rgb(227 50 95 / 0.28); }
+.btn-gradient { background: var(--gradient-brand); color: #fff; box-shadow: 0 6px 18px rgb(37 99 235 / 0.3); }
 .btn-gradient:hover:not(:disabled) { filter: brightness(1.05); }
 
 .icon-btn {
