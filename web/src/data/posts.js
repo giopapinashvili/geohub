@@ -9,6 +9,7 @@ import {
   orderBy, limit, limitToLast, startAfter, onSnapshot, serverTimestamp, increment, runTransaction,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
+import { actor } from '../lib/actor.js';
 import { me, uid as myUid } from '../lib/auth.js';
 import { normPost, normComment, isCorruptSeed } from './normalize.js';
 import { notify } from './notify.js';
@@ -320,10 +321,10 @@ export async function addComment(post, text, { voiceUrl = '' } = {}) {
     authorId: m.uid,
     userId: m.uid,
     createdByUid: m.uid,
-    authorType: 'user',
-    authorName: m.name,
-    authorAvatar: m.avatar,
-    businessId: null,
+    authorType: actor.value ? 'business' : 'user',
+    authorName: actor.value ? actor.value.name : m.name,
+    authorAvatar: actor.value ? actor.value.logo : m.avatar,
+    businessId: actor.value ? actor.value.id : null,
     likes: 0,
     reactionCount: 0,
     replyCount: 0,
@@ -399,10 +400,10 @@ export async function addReply(postId, comment, text) {
     authorId: m.uid,
     userId: m.uid,
     createdByUid: m.uid,
-    authorType: 'user',
-    authorName: m.name,
-    authorAvatar: m.avatar,
-    businessId: null,
+    authorType: actor.value ? 'business' : 'user',
+    authorName: actor.value ? actor.value.name : m.name,
+    authorAvatar: actor.value ? actor.value.logo : m.avatar,
+    businessId: actor.value ? actor.value.id : null,
     likeCount: 0,
     status: 'active',
     createdAt: serverTimestamp(),

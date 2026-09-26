@@ -252,3 +252,20 @@
 .rail-head h3 { flex: 1; min-width: 0; line-height: 1.25; }
 .rail-head .link { flex: none; white-space: nowrap; font-size: var(--fs-sm); }
 .rail-suggest .btn { font-size: 0; gap: 0; width: 36px; min-width: 36px; padding: 0; justify-content: center; border-radius: 50%; }
+
+/* Page switcher */
+.switcher { display: flex; flex-direction: column; gap: 2px; padding: 6px 0 8px; border-bottom: 1px solid var(--divider); margin-bottom: 6px; }
+.switcher-title { font-size: var(--fs-xs); font-weight: 700; color: var(--text-3); padding: 4px 10px; }
+.switcher-row { display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 10px; border: 0; border-radius: var(--r-md); background: none; color: var(--text); font-weight: 600; cursor: pointer; text-align: left; min-width: 0; }
+.switcher-row:hover { background: var(--surface-2); }
+.switcher-row.is-active { background: var(--brand-soft); }
+.acct-trigger { position: relative; }
+.acct-me-mini { position: absolute; right: -4px; bottom: -4px; border-radius: 50%; box-shadow: 0 0 0 2px var(--surface); display: inline-flex; }
+.actor-bar { position: sticky; top: var(--header-h); z-index: calc(var(--z-bars) - 1); display: flex; align-items: center; gap: 8px; padding: 6px 16px; color: #fff; font-size: var(--fs-sm); font-weight: 600; background: linear-gradient(90deg, #7c3aed, var(--brand)); box-shadow: 0 4px 12px rgb(37 99 235 / 0.25); }
+.is-mobile .actor-bar { top: calc(var(--topbar-h) + var(--safe-top)); padding: 6px 12px; font-size: var(--fs-xs); }
+.actor-bar .ellipsis { flex: 1; }
+.actor-bar-back { flex: none; border: 0; border-radius: var(--r-full); padding: 4px 12px; background: #fff; color: #5b21b6; font-weight: 700; font-size: var(--fs-xs); cursor: pointer; }
+.actor-bar { height: 32px; }
+.has-actor .messenger, .has-actor .map-page, .has-actor .reels { height: calc(100dvh - var(--header-h) - 32px); }
+.is-mobile.has-actor .map-page { height: calc(100dvh - var(--topbar-h) - var(--safe-top) - var(--bottombar-h) - var(--safe-bottom) - 32px); }
+.is-mobile.has-actor .reels { height: calc(100dvh - var(--bottombar-h) - var(--safe-bottom) - 32px); }

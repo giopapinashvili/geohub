@@ -3,6 +3,7 @@ import { Logo } from './Logo.jsx';
 import { MOBILE_TABS } from './nav.js';
 import { Icon } from '../ui/Icon.jsx';
 import { IconButton } from '../ui/Button.jsx';
+import { actor } from '../lib/actor.js';
 import { Avatar } from '../ui/Avatar.jsx';
 import { t } from '../lib/i18n.js';
 import { signedIn, profile, authReady } from '../lib/auth.js';
@@ -70,7 +71,7 @@ export function BottomNav({ active, immersive }) {
         return (
           <a key={it.key} href={it.href} class={`bottomnav-tab${on ? ' is-active' : ''}`} style={{ '--tone': it.tone }} aria-current={on ? 'page' : undefined}>
             {it.key === 'menu' && p
-              ? <span class="bottomnav-avatar"><Avatar src={p.avatar} name={p.name} size={26} /></span>
+              ? <span class="bottomnav-avatar">{actor.value ? <Avatar src={actor.value.logo} name={actor.value.name} size={26} square /> : <Avatar src={p.avatar} name={p.name} size={26} />}</span>
               : <Icon name={on && it.iconActive ? it.iconActive : it.icon} size={26} />}
             <span class="bottomnav-label">{t(it.label)}</span>
           </a>

@@ -2,6 +2,7 @@
 // counters and the viewer's social graph. Session listeners start when a
 // user signs in and are torn down on sign-out.
 
+import { actor } from './actor.js';
 import { signal, effect, computed } from '@preact/signals';
 import { collection, query, where, limit, onSnapshot } from 'firebase/firestore';
 import { db } from './firebase.js';
@@ -21,7 +22,8 @@ export const loginPrompt = signal(null);
 
 export function openComposer(opts = {}) {
   if (!uid.value) { loginPrompt.value = { reason: 'post' }; return; }
-  composer.value = opts;
+  const page = actor.value;
+  composer.value = page && !opts.groupId && !opts.asBusiness ? { ...opts, asBusiness: page } : opts;
 }
 
 export function requireLogin(reason) {

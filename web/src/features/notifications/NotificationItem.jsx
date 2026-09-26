@@ -7,6 +7,11 @@ import { navigate } from '../../lib/router.js';
 import { markRead } from '../../data/notify.js';
 
 const KIND = {
+  missed_call: { icon: 'phone-disconnect', tone: 'danger' },
+  need: { icon: 'megaphone', tone: 'brand' },
+  quote_request: { icon: 'envelope-simple', tone: 'info' },
+  business_review: { icon: 'star-fill', tone: 'accent' },
+  business_follow: { icon: 'storefront-fill', tone: 'brand' },
   like: { icon: 'heart-fill', tone: 'brand', key: 'notif.like' },
   comment: { icon: 'chat-circle-dots-fill', tone: 'info', key: 'notif.comment' },
   reply: { icon: 'chat-circle-dots-fill', tone: 'info', key: 'notif.reply' },

@@ -132,7 +132,7 @@ function CommentItem({ post, comment, isReply, parent, highlight }) {
         ) : (
           <div class="cmt-row">
             <div class="cmt-bubble">
-              <a class="cmt-name" href={`/u/${comment.authorId}`}>{comment.authorName}</a>
+              <a class="cmt-name" href={comment.authorType === 'business' && comment.businessId ? `/business/${comment.businessId}` : `/u/${comment.authorId}`}>{comment.authorName}</a>
               <div class="cmt-text"><RichText text={comment.text} /></div>
               {comment.voiceUrl && <audio class="cmt-audio" src={comment.voiceUrl} controls preload="none" />}
             </div>

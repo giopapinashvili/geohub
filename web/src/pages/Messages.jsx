@@ -10,7 +10,8 @@ import { useTitle, useDebounced, bp } from '../lib/hooks.js';
 import { navigate, query, back } from '../lib/router.js';
 import { conversations } from '../lib/store.js';
 import { toast } from '../lib/toast.js';
-import { openDirect, openBusinessConversation, hideConversation } from '../data/messages.js';
+import { openDirect, openBusinessConversation, hideConversation, listenConversations } from '../data/messages.js';
+import { actor, actorId } from '../lib/actor.js';
 import { searchUsers } from '../data/users.js';
 import { getBusiness } from '../data/business.js';
 import { startCall } from '../data/calls.js';
@@ -48,8 +49,8 @@ function NewMessage({ onClose }) {
   );
 }
 
-function ThreadHeader({ conv, onBack }) {
-  const peer = useConversationPeer(conv);
+function ThreadHeader({ conv, onBack, actorId: asPage }) {
+  const peer = useConversationPeer(conv, asPage);
   return (
     <header class="thread-head">
       {onBack && <IconButton icon="arrow-left" label={t('common.back')} onClick={onBack} size={40} />}
@@ -57,7 +58,7 @@ function ThreadHeader({ conv, onBack }) {
         <Avatar src={peer.avatar} name={peer.name} size={40} square={peer.square} status={peer.online ? 'online' : undefined} />
         <span class="thread-peer-text"><strong>{peer.name}</strong><PeerStatus peer={peer} /></span>
       </a>
-      {peer.user && !conv.isBusiness && (
+      {peer.user && !conv.isBusiness && !asPage && (
         <>
           <IconButton icon="phone" label={t('call.voice')} size={40} class="thread-call" onClick={() => startCall({ uid: peer.user.id, name: peer.user.name, avatar: peer.user.avatar }, 'audio').catch(() => toast.error(t('call.noDevice')))} />
           <IconButton icon="video-camera" label={t('call.video')} size={40} class="thread-call" onClick={() => startCall({ uid: peer.user.id, name: peer.user.name, avatar: peer.user.avatar }, 'video').catch(() => toast.error(t('call.noDevice')))} />
@@ -94,7 +95,10 @@ export default function Messages({ params }) {
       .finally(() => setOpening(false));
   }, [withUser, withBiz]);
 
-  const list = conversations.value;
+  const asPage = actorId();
+  const [pageConvs, setPageConvs] = useState([]);
+  useEffect(() => (asPage ? listenConversations(setPageConvs, asPage) : undefined), [asPage]);
+  const list = asPage ? pageConvs : conversations.value;
   // Desktop opens the most recent conversation, like Messenger.
   useEffect(() => {
     if (desktop && !cid && !withUser && !withBiz && list.length) navigate(`/messages/${list[0].id}`, { replace: true });
@@ -109,14 +113,14 @@ export default function Messages({ params }) {
       {showList && (
         <aside class="messenger-list">
           <div class="messenger-list-head">
-            <h1>{t('messages.title')}</h1>
+            <h1>{asPage ? actor.value.name : t('messages.title')}</h1>
             <IconButton icon="note-pencil" label={t('messages.new')} variant="soft" size={38} onClick={() => setCompose(true)} />
           </div>
           <div class="messenger-search"><SearchInput value={q} onInput={(e) => setQ(e.currentTarget.value)} placeholder={t('messages.search')} /></div>
           <div class="messenger-rows">
             {list.length === 0 && <Empty compact icon="chat-circle-dots" title={t('messages.emptyTitle')} text={t('messages.emptyText')} />}
             {list.filter((c) => !needle || (c.lastMessage || '').toLowerCase().includes(needle) || c.id.toLowerCase().includes(needle)).map((c) => (
-              <ConversationRow key={c.id} conv={c} active={c.id === cid} />
+              <ConversationRow key={c.id} conv={c} active={c.id === cid} actorId={asPage} />
             ))}
           </div>
         </aside>
@@ -125,7 +129,7 @@ export default function Messages({ params }) {
         <section class={`messenger-thread${!desktop ? ' is-overlay' : ''}`}>
           {opening && <div class="center-pad"><Spinner /></div>}
           {!opening && cid && (
-            <Thread key={cid} cid={cid} header={<ThreadHeader conv={conv || { id: cid, participants: [] }} onBack={desktop ? null : () => back('/messages')} />} />
+            <Thread key={cid} cid={cid} actorId={asPage} header={<ThreadHeader conv={conv || { id: cid, participants: [] }} actorId={asPage} onBack={desktop ? null : () => back('/messages')} />} />
           )}
           {!opening && !cid && <Empty icon="chat-circle-dots" title={t('messages.selectTitle')} text={t('messages.selectText')} />}
         </section>

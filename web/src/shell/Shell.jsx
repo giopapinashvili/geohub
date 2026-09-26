@@ -8,6 +8,10 @@ import { composer, storyCreator, createMenu, loginPrompt, chatPopups } from '../
 import { CreateMenu } from './CreateMenu.jsx';
 import { LoginPrompt } from './LoginPrompt.jsx';
 import { CallLayer } from '../features/calls/CallLayer.jsx';
+import { actor, setActor } from '../lib/actor.js';
+import { Avatar } from '../ui/Avatar.jsx';
+import { t } from '../lib/i18n.js';
+import { navigate } from '../lib/router.js';
 
 const Composer = lazy(() => import('../features/post/Composer.jsx'));
 const StoryCreator = lazy(() => import('../features/story/StoryCreator.jsx'));
@@ -31,8 +35,15 @@ export function Shell({ layout = 'page', nav, immersive, children }) {
   const showLeft = desktop && (layout === 'feed' || layout === 'page');
   const showRight = desktop && layout === 'feed' && bp.value === 'xl';
   return (
-    <div class={`shell shell-${layout}${desktop ? ' is-desktop' : ' is-mobile'}${immersive ? ' is-immersive' : ''}`}>
+    <div class={`shell shell-${layout}${desktop ? ' is-desktop' : ' is-mobile'}${immersive ? ' is-immersive' : ''}${actor.value ? ' has-actor' : ''}`}>
       {desktop ? <Header active={nav} /> : <TopBar active={nav} hidden={immersive} />}
+      {actor.value && (
+        <div class="actor-bar">
+          <Avatar src={actor.value.logo} name={actor.value.name} size={22} square />
+          <span class="ellipsis">{t('switch.actingAs', { name: actor.value.name })}</span>
+          <button type="button" class="actor-bar-back" onClick={() => { setActor(null); navigate('/'); }}>{t('switch.back')}</button>
+        </div>
+      )}
       <div class={`shell-body layout-${layout}${showRight ? ' has-right' : ''}${showLeft ? ' has-left' : ''}`}>
         {showLeft && <LeftNav active={nav} />}
         <main id="main" class="shell-main" tabIndex={-1}>{children}</main>

@@ -3,9 +3,13 @@ import { Popover } from '../ui/Menu.jsx';
 import { Avatar } from '../ui/Avatar.jsx';
 import { Icon } from '../ui/Icon.jsx';
 import { Segmented } from '../ui/Field.jsx';
+import { useAsync } from '../lib/hooks.js';
+import { actor, setActor } from '../lib/actor.js';
+import { myBusinesses } from '../data/business.js';
+import { toast } from '../lib/toast.js';
 import { t, lang, setLang, LANGS } from '../lib/i18n.js';
 import { themePref, setTheme } from '../lib/theme.js';
-import { profile, authUser, isAdmin, signOut } from '../lib/auth.js';
+import { profile, authUser, isAdmin, signOut, uid } from '../lib/auth.js';
 import { navigate } from '../lib/router.js';
 
 export function ThemeLangControls() {
@@ -27,6 +31,32 @@ export function ThemeLangControls() {
   );
 }
 
+/** Switch between your own profile and the business pages you manage. */
+function Switcher({ close }) {
+  const pages = useAsync(() => myBusinesses(), [uid.value]).data || [];
+  const p = profile.value;
+  if (!pages.length) return null;
+  const pick = (page) => {
+    setActor(page);
+    close();
+    toast(page ? t('switch.nowPage', { name: page.name }) : t('switch.nowYou'));
+    navigate(page ? `/business/${page.id}` : '/');
+  };
+  return (
+    <div class="switcher">
+      <span class="switcher-title">{t('switch.title')}</span>
+      <button type="button" class={`switcher-row${!actor.value ? ' is-active' : ''}`} onClick={() => pick(null)}>
+        <Avatar src={p?.avatar} name={p?.name || ''} size={36} /><span class="grow ellipsis">{p?.name}</span>{!actor.value && <Icon name="check-circle-fill" size={20} class="tone-brand" />}
+      </button>
+      {pages.map((b) => (
+        <button key={b.id} type="button" class={`switcher-row${actor.value?.id === b.id ? ' is-active' : ''}`} onClick={() => pick(b)}>
+          <Avatar src={b.logo} name={b.name} size={36} square /><span class="grow ellipsis">{b.name}</span>{actor.value?.id === b.id && <Icon name="check-circle-fill" size={20} class="tone-brand" />}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function AccountMenu() {
   const p = profile.value;
   const u = authUser.value;
@@ -35,7 +65,8 @@ export function AccountMenu() {
   return (
     <Popover width={340} label={t('nav.account')} trigger={(props, open) => (
       <button type="button" {...props} class={`acct-trigger${open ? ' is-open' : ''}`} aria-label={t('nav.account')}>
-        <Avatar src={p?.avatar || u?.photoURL} name={name} size={40} />
+        {actor.value ? <Avatar src={actor.value.logo} name={actor.value.name} size={40} square /> : <Avatar src={p?.avatar || u?.photoURL} name={name} size={40} />}
+        {actor.value && <span class="acct-me-mini"><Avatar src={p?.avatar} name={name} size={18} /></span>}
       </button>
     )}>
       {(close) => (
@@ -47,6 +78,7 @@ export function AccountMenu() {
               <span>{t('nav.viewProfile')}</span>
             </span>
           </a>
+          <Switcher close={close} />
           <div class="menu">
             <a class="menu-item" href="/settings" onClick={close}><span class="menu-icon"><Icon name="gear" size={20} /></span><span class="menu-label">{t('nav.settings')}</span></a>
             <a class="menu-item" href="/business" onClick={close}><span class="menu-icon"><Icon name="briefcase" size={20} /></span><span class="menu-label">{t('nav.myPages')}</span></a>

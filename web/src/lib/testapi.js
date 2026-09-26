@@ -14,3 +14,4 @@ export * as places from '../data/places.js';
 export * as users from '../data/users.js';
 export * as auth from './auth.js';
 export * as calls from '../data/calls.js';
+export * as actor from './actor.js';

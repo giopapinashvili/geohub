@@ -548,3 +548,4 @@
   .home-feed > .card { border-radius: 0; box-shadow: none; border-bottom: 1px solid var(--divider); margin: 0; }
 }
 .post-media .media-grid { margin-top: 0; }
+.tone-danger.notif-kind { background: #ef4444; }

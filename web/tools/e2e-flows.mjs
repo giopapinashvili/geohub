@@ -146,6 +146,21 @@ await step('A (page owner) sees the quote, replies to the review, answers as the
 await step('C goes to an event (RSVP) and cancels', C, `const e = await api.events.getEvent('e_jazz'); await api.events.setRsvp(e, 'going'); ${expect("(await api.events.myRsvp('e_jazz')) === 'going'", 'rsvp missing')} await api.events.setRsvp(e, null);`);
 await step('C reviews a place and checks in', C, `await api.places.addPlaceReview('pl_gergeti', 5, 'QA: ულამაზესი'); const p = await api.places.getPlace('pl_gergeti'); await api.places.checkIn(p, { caption: 'აქ ვარ!', share: true });`);
 
+console.log('Page switcher');
+await step('A switches to the page and posts, comments and replies as the page', A, `
+  api.actor.setActor({ id: 'b_cafe', name: 'კაფე ვერა', logo: '' });
+  const p = await api.posts.createPost({ text: 'სიახლე გვერდიდან', asBusiness: { id: 'b_cafe', name: 'კაფე ვერა', logo: '' } });
+  ${expect("p.authorType === 'business'", 'post not as page')}
+  const post = await api.posts.getPost(ctx.postId);
+  await api.posts.addComment(post, 'კომენტარი გვერდისგან');
+  const list = await once((cb) => api.posts.listenComments(ctx.postId, cb), (d) => d && d.some((c) => c.authorType === 'business' && c.businessId === 'b_cafe'));
+  ${expect('list', 'comment not as page')}
+  await api.posts.addReply(ctx.postId, list.find((c) => c.authorId === ctx.B), 'პასუხი გვერდისგან');`);
+await step('A sees the page inbox and page notifications', A, `
+  const inbox = await once((cb) => api.messages.listenConversations(cb, 'business_b_cafe'), (d) => d && d.some((c) => c.id === ctx.bizCid)); ${expect('inbox', 'page inbox empty')}
+  const n = await once((cb) => api.notify.listenBusinessNotifications('b_cafe', cb)); ${expect('n && n.length', 'no page notifications')}
+  api.actor.setActor(null);`);
+
 console.log('Cleanup');
 await step('A deletes the photo post', A, `await api.posts.deletePost(ctx.photoPost);`);
 
