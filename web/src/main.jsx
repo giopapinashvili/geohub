@@ -9,6 +9,7 @@ import './styles/pages.css';
 import './styles/video.css';
 import './styles/discover.css';
 import './styles/business.css';
+import './styles/more.css';
 import { resolveLegacy } from './legacy.js';
 
 // Old bookmarks and shared links ("/profile.html?id=…") land here because

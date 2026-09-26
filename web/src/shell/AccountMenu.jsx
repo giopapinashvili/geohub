@@ -21,7 +21,7 @@ export function ThemeLangControls() {
       </div>
       <div class="acct-pref">
         <span class="acct-pref-label"><Icon name="translate" size={18} />{t('settings.language')}</span>
-        <Segmented size="sm" label={t('settings.language')} value={lang.value} onChange={setLang} options={LANGS.map((l) => ({ value: l.code, label: l.label }))} />
+        {LANGS.length > 1 && <Segmented size="sm" label={t('settings.language')} value={lang.value} onChange={setLang} options={LANGS.map((l) => ({ value: l.code, label: l.label }))} />}
       </div>
     </div>
   );

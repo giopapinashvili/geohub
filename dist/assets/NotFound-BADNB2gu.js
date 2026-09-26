@@ -1,1 +1,0 @@
-import{u as t}from"./preact-bQZoU-T-.js";import{E as o}from"./app-DOMPByDs.js";import"./legacy-BnM3fQDh.js";import"./firebase-auth-BG1ktOTd.js";import"./firebase-core-Cm7yCis0.js";import"./firestore-C9n7ydJ8.js";import"./theme-BGm8kNDb.js";function a(){return t(o,{icon:"hourglass",title:"NotFound",text:"…"})}export{a as default};

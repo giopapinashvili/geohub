@@ -1,1 +1,0 @@
-import{u as t}from"./preact-bQZoU-T-.js";import{E as r}from"./app-DOMPByDs.js";import"./legacy-BnM3fQDh.js";import"./firebase-auth-BG1ktOTd.js";import"./firebase-core-Cm7yCis0.js";import"./firestore-C9n7ydJ8.js";import"./theme-BGm8kNDb.js";function f(){return t(r,{icon:"hourglass",title:"MarketItem",text:"…"})}export{f as default};

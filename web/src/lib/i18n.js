@@ -3,12 +3,14 @@ import ka from '../i18n/ka.js';
 import en from '../i18n/en.js';
 import ru from '../i18n/ru.js';
 
-const DICTS = { ka, en, ru };
+// A language is offered only once its dictionary has been filled in
+// (en.js / ru.js are empty for now; check with web/tools/check-i18n.mjs).
+const DICTS = Object.fromEntries(Object.entries({ ka, en, ru }).filter(([code, d]) => code === 'ka' || Object.keys(d).length > 0));
 export const LANGS = [
   { code: 'ka', label: 'ქართული' },
   { code: 'en', label: 'English' },
   { code: 'ru', label: 'Русский' },
-];
+].filter((l) => DICTS[l.code]);
 const LOCALES = { ka: 'ka-GE', en: 'en-GB', ru: 'ru-RU' };
 
 function initial() {
