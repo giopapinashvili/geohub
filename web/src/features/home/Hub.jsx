@@ -41,7 +41,7 @@ export function Hub() {
   const offers = useAsync(todaysOffers, []);
   const items = useAsync(() => listItems(40).then((l) => l.slice(0, 8)), []);
   return (
-    <section class="hub">
+    <>
       <div class="hub-hero">
         <h1 class="hub-title">{t('hub.title')}</h1>
         <p class="hub-sub">{t('hub.sub')}</p>
@@ -79,7 +79,6 @@ export function Hub() {
           <div class="hub-scroll hub-items">{items.data.map((i) => <ItemCard key={i.id} item={i} />)}</div>
         </div>
       )}
-      <div class="hub-divider"><span>{t('hub.feed')}</span></div>
-    </section>
+    </>
   );
 }

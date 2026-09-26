@@ -1,58 +1,33 @@
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
-import { Avatar } from '../ui/Avatar.jsx';
 import { Icon } from '../ui/Icon.jsx';
 import { Button } from '../ui/Button.jsx';
 import { Card, Empty, Skeleton } from '../ui/misc.jsx';
 import { t } from '../lib/i18n.js';
-import { useInView, useTitle } from '../lib/hooks.js';
-import { profile, signedIn, authReady } from '../lib/auth.js';
-import { openComposer, viewerCtx, requireLogin, storyCreator } from '../lib/store.js';
+import { useInView, useTitle, useAsync } from '../lib/hooks.js';
+import { signedIn, authReady } from '../lib/auth.js';
+import { openComposer, viewerCtx } from '../lib/store.js';
 import { query } from '../lib/router.js';
 import { fetchFeedPage, listenNewest, canSee } from '../data/posts.js';
 import { isCorruptSeed } from '../data/normalize.js';
 import { StoryTray } from '../features/story/StoryTray.jsx';
 import { Hub } from '../features/home/Hub.jsx';
-import { PostCard } from '../features/post/PostCard.jsx';
+import { PostTile } from '../features/post/PostTile.jsx';
+import { EventCard } from '../features/events/EventCard.jsx';
+import { upcomingEvents } from '../data/events.js';
 import { ReelsStrip } from '../features/video/ReelsStrip.jsx';
 import { PeopleStrip } from '../features/user/PeopleStrip.jsx';
 
-function ComposerCard() {
-  const p = profile.value;
-  const first = (p?.name || '').split(' ')[0];
-  return (
-    <Card class="composer-card">
-      <div class="composer-card-top">
-        <Avatar src={p?.avatar} name={p?.name || ''} size={40} href={signedIn.value ? '/u/me' : undefined} />
-        <button type="button" class="composer-card-input" onClick={() => openComposer({})}>
-          {signedIn.value ? t('composer.placeholder', { name: first }) : t('composer.placeholderGuest')}
-        </button>
-      </div>
-      <div class="composer-card-actions">
-        <button type="button" class="composer-card-btn" onClick={() => openComposer({ pick: 'media' })}><Icon name="images" size={22} class="tone-green" /><span>{t('composer.photoShort')}</span></button>
-        <button type="button" class="composer-card-btn" onClick={() => { if (requireLogin('story')) storyCreator.value = true; }}><Icon name="plus-circle" size={22} class="tone-brand" /><span>{t('create.story')}</span></button>
-        <a href="/map?checkin=1" class="composer-card-btn"><Icon name="map-pin" size={22} class="tone-red" /><span>{t('create.checkin')}</span></a>
-      </div>
-    </Card>
-  );
+function TileSkeleton({ h }) {
+  return <div class="post-tile"><Skeleton h={h} r={14} /></div>;
 }
 
-function PostSkeleton() {
-  return (
-    <Card class="post-skel">
-      <div class="row gap-12"><Skeleton w={42} h={42} r={21} /><div class="col gap-6 grow"><Skeleton w="40%" h={14} /><Skeleton w="22%" h={12} /></div></div>
-      <Skeleton w="92%" h={14} style={{ marginTop: 16 }} />
-      <Skeleton w="70%" h={14} style={{ marginTop: 8 }} />
-      <Skeleton h={260} r={12} style={{ marginTop: 16 }} />
-    </Card>
-  );
-}
-
-/** Home: stories, composer and the feed with inline discovery modules. */
+/** Home: search hub and discovery sections, then community posts as a grid. */
 export default function Home() {
   useTitle(t('nav.home'));
   const [posts, setPosts] = useState([]);
   const [state, setState] = useState({ loading: true, done: false, error: false });
   const [fresh, setFresh] = useState(null);
+  const events = useAsync(() => upcomingEvents(8).catch(() => []), []);
   const cursor = useRef(null);
   const loadingRef = useRef(false);
   const ctx = viewerCtx.value;
@@ -103,38 +78,39 @@ export default function Home() {
     if (compose && signedIn.value) { openComposer({}); history.replaceState(history.state, '', '/'); }
   }, [compose, signedIn.value]);
 
-  const items = [];
-  posts.forEach((p, i) => {
-    items.push(<PostCard key={p.id} post={p} onRemoved={(id) => setPosts((l) => l.filter((x) => x.id !== id))} />);
-    if (i === 2) items.push(<ReelsStrip key="reels" />);
-    if (i === 5 && signedIn.value) items.push(<PeopleStrip key="people" />);
-  });
-
   return (
-    <div class="feed">
+    <div class="home">
       <Hub />
-      <StoryTray />
-      <ComposerCard />
-      {fresh && (
-        <button type="button" class="new-posts-pill" onClick={() => { setFresh(null); window.scrollTo({ top: 0, behavior: 'smooth' }); load(true); }}>
-          <Icon name="arrow-up-right" size={16} style={{ transform: 'rotate(-45deg)' }} />{t('feed.newPosts')}
-        </button>
+      <ReelsStrip />
+      {events.data?.length > 0 && (
+        <section class="hub-block">
+          <div class="section-head"><h2 class="section-title"><Icon name="calendar-blank" size={20} class="tone-brand" />{t('events.upcoming')}</h2><a href="/events" class="link">{t('common.seeAll')}</a></div>
+          <div class="h-scroll">{events.data.map((e) => <EventCard key={e.id} event={e} />)}</div>
+        </section>
       )}
-      {items}
-      {state.loading && (posts.length ? <PostSkeleton /> : <><PostSkeleton /><PostSkeleton /></>)}
-      {state.error && (
-        <Card><Empty compact icon="warning" title={t('feed.errorTitle')} text={t('feed.errorText')} action={<Button variant="primary" onClick={() => load(!posts.length)}>{t('common.retry')}</Button>} /></Card>
-      )}
-      {!state.loading && !state.error && !posts.length && (
-        <Card><Empty icon="newspaper" title={t('feed.emptyTitle')} text={t('feed.emptyText')} action={<><Button variant="primary" href="/friends">{t('feed.findFriends')}</Button><Button variant="secondary" href="/explore">{t('nav.explore')}</Button></>} /></Card>
-      )}
-      <div ref={sentinel} class="feed-sentinel" aria-hidden="true" />
-      {state.done && posts.length > 0 && (
-        <div class="feed-end">
-          <span class="feed-end-icon"><Icon name="check-circle-fill" size={28} /></span>
-          <p>{t('feed.caughtUp')}</p>
+      <section class="community">
+        <div class="section-head">
+          <h2 class="section-title"><Icon name="users-three" size={20} class="tone-brand" />{t('home.community')}</h2>
+          <Button variant="primary" size="sm" icon="plus" onClick={() => openComposer({})}>{t('home.share')}</Button>
         </div>
-      )}
+        <StoryTray />
+        {fresh && (
+          <button type="button" class="new-posts-pill" onClick={() => { setFresh(null); load(true); }}>
+            <Icon name="arrow-up-right" size={16} style={{ transform: 'rotate(-45deg)' }} />{t('feed.newPosts')}
+          </button>
+        )}
+        <div class="post-grid">
+          {posts.map((p) => <PostTile key={p.id} post={p} />)}
+          {state.loading && [220, 300, 180, 260].map((h, i) => <TileSkeleton key={i} h={h} />)}
+        </div>
+        {state.error && <Card><Empty compact icon="warning" title={t('feed.errorTitle')} text={t('feed.errorText')} action={<Button variant="primary" onClick={() => load(!posts.length)}>{t('common.retry')}</Button>} /></Card>}
+        {!state.loading && !state.error && !posts.length && (
+          <Card><Empty icon="newspaper" title={t('feed.emptyTitle')} text={t('feed.emptyText')} action={<><Button variant="primary" href="/friends">{t('feed.findFriends')}</Button><Button variant="secondary" href="/explore">{t('nav.explore')}</Button></>} /></Card>
+        )}
+        <div ref={sentinel} class="feed-sentinel" aria-hidden="true" />
+        {state.done && posts.length > 0 && <div class="feed-end"><span class="feed-end-icon"><Icon name="check-circle-fill" size={28} /></span><p>{t('feed.caughtUp')}</p></div>}
+      </section>
+      {signedIn.value && <PeopleStrip />}
     </div>
   );
 }

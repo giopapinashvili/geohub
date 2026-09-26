@@ -1006,5 +1006,7 @@ export default {
   'hub.tile.health': 'კლინიკები', 'hub.tile.fun': 'გართობა', 'hub.tile.events': 'ივენთები', 'hub.tile.map': 'რუკა',
   'hub.offers': 'დღის შეთავაზებები',
   'hub.newListings': 'ახალი განცხადებები',
-  'hub.feed': 'სიახლეები ხალხისგან და ბიზნესებისგან',
+  'home.community': 'საზოგადოება',
+  'home.share': 'გაზიარება',
+  'nav.more': 'მეტი',
 };

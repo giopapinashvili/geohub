@@ -7,11 +7,11 @@
   color-scheme: light;
 
   /* ── Surfaces ─────────────────────────────────────────── */
-  --bg: #ffffff;
+  --bg: #eef2f8;
   --surface: #ffffff;
-  --surface-2: #f6f8fb;
-  --surface-3: #eef2f7;
-  --surface-sunken: #f3f6fa;
+  --surface-2: #f5f7fb;
+  --surface-3: #e9eef5;
+  --surface-sunken: #e7ecf4;
   --overlay: rgb(8 12 24 / 0.55);
   --glass: rgb(255 255 255 / 0.82);
 
@@ -95,7 +95,7 @@
   --bottombar-h: 62px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --col-left: 280px;
+  --col-left: 88px;
   --col-right: 320px;
   --col-main: 680px;
   --page-max: 1320px;

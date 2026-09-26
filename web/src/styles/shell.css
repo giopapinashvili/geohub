@@ -106,11 +106,9 @@
 }
 .is-desktop .layout-feed.has-left .shell-main { width: 100%; max-width: var(--col-main); justify-self: center; }
 .is-desktop .layout-feed.has-left.has-right { grid-template-columns: var(--col-left) minmax(0, 1fr) var(--col-right); }
-.is-desktop .layout-page.has-left .shell-main { width: 100%; max-width: 1040px; }
+.is-desktop .layout-page.has-left .shell-main { width: 100%; max-width: 1180px; justify-self: center; }
 .is-desktop .layout-full { padding: 0; }
-@media (min-width: 1024px) and (max-width: 1279px) {
-  :root { --col-left: 240px; }
-}
+
 
 /* ── Left navigation ───────────────────────────────────── */
 .leftnav { position: relative; }
@@ -197,3 +195,16 @@
 .chatpop-peer strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: var(--fs-md); }
 .chatpop-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 @media (max-width: 1279px) { .chatpop:nth-child(n+3) { display: none; } }
+
+/* ── Desktop rail (replaces the long side list) ────────── */
+.rail {
+  position: sticky; top: calc(var(--header-h) + 16px); display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 6px; margin-left: 10px; border-radius: 22px; background: var(--surface); box-shadow: var(--shadow-1);
+}
+.rail-item { width: 70px; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 2px; border-radius: 16px; color: var(--text-2); text-align: center; transition: background var(--t-fast), color var(--t-fast); }
+.rail-item:hover { background: var(--surface-2); color: var(--text); }
+.rail-icon { width: 44px; height: 32px; border-radius: 12px; display: grid; place-items: center; transition: background var(--t-fast), color var(--t-fast); }
+.rail-item.is-active { color: var(--brand-text); }
+.rail-item.is-active .rail-icon { color: #fff; background: var(--gradient-brand); box-shadow: 0 6px 16px rgb(37 99 235 / 0.32); }
+.rail-label { font-size: 11px; font-weight: 600; line-height: 1.15; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.is-desktop .shell-body.has-left { gap: 28px; }
