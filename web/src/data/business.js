@@ -8,7 +8,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 import { cachedList, dropCached } from './cache.js';
-import { me, uid as myUid, isAdmin, authUser } from '../lib/auth.js';
+import { me, uid as myUid, isAdmin } from '../lib/auth.js';
 import { normBiz, isCorruptSeed } from './normalize.js';
 import { tsToMillis } from '../lib/format.js';
 import { notifyBusiness } from './notify.js';
@@ -78,7 +78,8 @@ export async function createBusiness(f) {
   const data = {
     title: f.title.trim(), name: f.title.trim(), description: (f.description || '').trim(), category: f.category || 'other',
     tags: (f.tags || []).slice(0, 8), plan: 'free', status: 'active', verified: false,
-    ownerId: m.uid, ownerName: m.name, ownerEmail: authUser.value?.email || '',
+    // The owner's login email is private; the page has its own public email field.
+    ownerId: m.uid, ownerName: m.name,
     businessType: online ? 'online' : 'physical', isOnline: online,
     city: online ? '' : (f.city || ''), address: online ? '' : (f.address || '').trim(), mapsLink: online ? '' : (f.mapsLink || '').trim(),
     serviceArea: f.serviceArea || (online ? 'georgia' : ''), serviceAreaText: '',

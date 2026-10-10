@@ -52,37 +52,76 @@ export function canSee(p, ctx) {
   return true;
 }
 
-/**
- * Home feed page. Fetches newest posts in batches, skipping ones the viewer
- * may not see, garbled demo posts and group posts (those live in groups).
- * Returns { posts, cursor, done }.
+/*
+ * The security rules decide who can read a post (public, friends, followers,
+ * close friends, only me, group members). Rules are not filters, so every
+ * query below carries the constraint that proves the viewer may read all of
+ * its results; a query the rules cannot prove is rejected as a whole.
  */
-export async function fetchFeedPage({ cursor = null, want = 12, ctx }) {
-  const out = [];
-  let last = cursor;
-  let done = false;
-  for (let round = 0; round < 6 && out.length < want; round++) {
-    const parts = [collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(24)];
-    if (last) parts.splice(2, 0, startAfter(last));
-    const snap = await getDocs(query(...parts));
-    if (snap.empty) { done = true; break; }
-    last = snap.docs[snap.docs.length - 1];
-    for (const d of snap.docs) {
-      const data = d.data();
-      if (isCorruptSeed(data)) continue;
-      const p = normPost(d.id, data);
-      if (p.targetType === 'group' || p.groupId) continue;
-      if (!canSee(p, ctx)) continue;
-      out.push(p);
-    }
-    if (snap.docs.length < 24) { done = true; break; }
-  }
-  return { posts: out, cursor: last, done };
+const PUBLIC = where('visibility', '==', 'public');
+
+function keepForFeed(d, ctx) {
+  const data = d.data();
+  if (isCorruptSeed(data)) return null;
+  const p = normPost(d.id, data);
+  if (p.targetType === 'group' || p.groupId) return null;
+  return canSee(p, ctx) ? p : null;
 }
 
-/** Fires when a post newer than `sinceMs` appears (for the "new posts" pill). */
+/**
+ * Posts the viewer may see beyond the public stream, created inside the
+ * window [lower, upper): their own posts, posts shared with them through an
+ * audience list (friends / close friends). Each query is provable by the rules.
+ */
+async function circlePosts(viewer, lower, upper, ctx) {
+  const range = [];
+  if (upper) range.push(where('createdAt', '<', upper));
+  if (lower) range.push(where('createdAt', '>=', lower));
+  const n = lower ? 40 : 60;
+  const run = (constraint) => getDocs(query(collection(db, 'posts'), constraint, ...range, orderBy('createdAt', 'desc'), limit(n)))
+    .then((s) => s.docs, () => []);
+  const lists = await Promise.all([
+    run(where('authorId', '==', viewer)),
+    run(where('audienceIds', 'array-contains', viewer)),
+    run(where('closeFriendIds', 'array-contains', viewer)),
+  ]);
+  const out = [];
+  for (const docs of lists) for (const d of docs) { const p = keepForFeed(d, ctx); if (p) out.push(p); }
+  return out;
+}
+
+/**
+ * Home feed page: the public stream, merged with the viewer's own and
+ * shared-with-them posts from the same time window. Skips garbled demo posts
+ * and group posts (those live in groups). Returns { posts, cursor, done }.
+ */
+export async function fetchFeedPage({ cursor = null, want = 12, ctx }) {
+  const st = cursor || { last: null, upper: null, done: false };
+  const byId = new Map();
+  let last = st.last;
+  let pubDone = st.done;
+  for (let round = 0; round < 6 && byId.size < want && !pubDone; round++) {
+    const parts = [collection(db, 'posts'), PUBLIC, orderBy('createdAt', 'desc')];
+    if (last) parts.push(startAfter(last));
+    parts.push(limit(24));
+    const snap = await getDocs(query(...parts));
+    if (snap.empty) { pubDone = true; break; }
+    last = snap.docs[snap.docs.length - 1];
+    for (const d of snap.docs) { const p = keepForFeed(d, ctx); if (p) byId.set(p.id, p); }
+    if (snap.docs.length < 24) pubDone = true;
+  }
+  // The public page ends at `last`; everything else is fetched for the same window.
+  const lower = pubDone ? null : (last?.get('createdAt') || null);
+  if (ctx.uid) {
+    for (const p of await circlePosts(ctx.uid, lower, st.upper, ctx)) if (!byId.has(p.id)) byId.set(p.id, p);
+  }
+  const posts = [...byId.values()].sort((a, b) => b.createdAt - a.createdAt);
+  return { posts, cursor: { last, upper: lower, done: pubDone }, done: pubDone };
+}
+
+/** Fires when a newer public post appears (for the "new posts" pill). */
 export function listenNewest(onData) {
-  return onSnapshot(query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(1)),
+  return onSnapshot(query(collection(db, 'posts'), PUBLIC, orderBy('createdAt', 'desc'), limit(1)),
     (s) => { const d = s.docs[0]; onData(d ? normPost(d.id, d.data()) : null); }, () => {});
 }
 
@@ -95,36 +134,72 @@ export function listenPost(id, onData, onError) {
   return onSnapshot(doc(db, 'posts', id), (s) => onData(s.exists() ? normPost(s.id, s.data()) : null), onError);
 }
 
-/** Posts on a profile: authored by the user (authorId or legacy userId). */
-export function listenUserPosts(userId, onData, n = 40) {
-  const byId = new Map();
-  const ready = { a: false, b: false };
-  const emit = () => {
-    if (!ready.a || !ready.b) return;
-    onData([...byId.values()].filter((p) => p.status === 'active' && !(p.targetType === 'group' || p.groupId) && !isCorruptSeed(p.raw)).sort((a, b) => b.createdAt - a.createdAt));
-  };
-  const h = (slot) => (snap) => {
+/**
+ * Merge several live queries into one list. A query the rules reject just
+ * contributes nothing, so a stricter audience never breaks the page.
+ */
+function listenMerged(queries, onData, finish) {
+  const byKey = new Map();
+  const ready = new Array(queries.length).fill(false);
+  const emit = () => { if (ready.every(Boolean)) onData(finish([...byKey.values()])); };
+  const unsubs = queries.map((q, i) => onSnapshot(q, (snap) => {
     snap.docChanges().forEach((ch) => {
-      if (ch.type === 'removed') byId.delete(ch.doc.id);
-      else byId.set(ch.doc.id, normPost(ch.doc.id, ch.doc.data()));
+      const key = `${i}:${ch.doc.id}`;
+      if (ch.type === 'removed') byKey.delete(key);
+      else byKey.set(key, normPost(ch.doc.id, ch.doc.data()));
     });
-    ready[slot] = true; emit();
-  };
-  const f = (slot) => () => { ready[slot] = true; emit(); };
-  const u1 = onSnapshot(query(collection(db, 'posts'), where('authorId', '==', userId), limit(n)), h('a'), f('a'));
-  const u2 = onSnapshot(query(collection(db, 'posts'), where('userId', '==', userId), limit(n)), h('b'), f('b'));
-  return () => { u1(); u2(); };
+    ready[i] = true; emit();
+  }, () => { ready[i] = true; emit(); }));
+  return () => unsubs.forEach((u) => u());
 }
 
-/** Posts published on a business page or a group wall. */
-export function listenTargetPosts(targetType, targetId, onData, n = 40) {
+function uniqueById(list) {
+  const m = new Map();
+  for (const p of list) m.set(p.id, p);
+  return [...m.values()];
+}
+
+/**
+ * Posts on a profile: authored by the user (authorId or legacy userId).
+ * The owner sees everything; others get exactly what the rules allow them.
+ * rel: { friend, following } — the viewer's relation to the profile owner.
+ */
+export function listenUserPosts(userId, onData, n = 40, rel = {}) {
+  const posts = collection(db, 'posts');
+  const viewer = myUid.value;
+  const qs = [];
+  if (viewer && viewer === userId) {
+    qs.push(query(posts, where('authorId', '==', userId), limit(n)));
+    qs.push(query(posts, where('userId', '==', userId), limit(n)));
+  } else {
+    qs.push(query(posts, where('authorId', '==', userId), PUBLIC, limit(n)));
+    qs.push(query(posts, where('userId', '==', userId), PUBLIC, limit(n)));
+    if (viewer) {
+      qs.push(query(posts, where('authorId', '==', userId), where('audienceIds', 'array-contains', viewer), limit(n)));
+      qs.push(query(posts, where('authorId', '==', userId), where('closeFriendIds', 'array-contains', viewer), limit(n)));
+      if (rel.friend) qs.push(query(posts, where('authorId', '==', userId), where('visibility', 'in', ['friends', 'followers']), limit(n)));
+      else if (rel.following) qs.push(query(posts, where('authorId', '==', userId), where('visibility', '==', 'followers'), limit(n)));
+    }
+  }
+  return listenMerged(qs, onData, (list) => uniqueById(list)
+    .filter((p) => p.status === 'active' && !(p.targetType === 'group' || p.groupId) && !isCorruptSeed(p.raw))
+    .sort((a, b) => b.createdAt - a.createdAt));
+}
+
+/**
+ * Posts published on a business page or a group wall. Private-group posts
+ * are stored with visibility 'group' and only members may load them.
+ */
+export function listenTargetPosts(targetType, targetId, onData, n = 40, { member = false } = {}) {
   const field = targetType === 'business' ? 'businessId' : 'groupId';
-  return onSnapshot(query(collection(db, 'posts'), where(field, '==', targetId), limit(n)), (snap) => {
-    const list = snap.docs.map((d) => normPost(d.id, d.data()))
-      .filter((p) => p.status === 'active' || p.status === 'pending')
-      .sort((a, b) => (b.pinned - a.pinned) || (b.createdAt - a.createdAt));
-    onData(list);
-  }, () => onData([]));
+  const posts = collection(db, 'posts');
+  const qs = [query(posts, where(field, '==', targetId), PUBLIC, limit(n))];
+  if (targetType === 'group' && member) qs.push(query(posts, where(field, '==', targetId), where('visibility', '==', 'group'), limit(n)));
+  const viewer = myUid.value;
+  if (viewer) qs.push(query(posts, where(field, '==', targetId), where('authorId', '==', viewer), limit(n)));
+  return listenMerged(qs, onData, (list) => uniqueById(list)
+    .filter((p) => p.status === 'active' || p.status === 'pending')
+    .sort((a, b) => (b.pinned - a.pinned) || (b.createdAt - a.createdAt)));
 }
 
 /* ── Writing posts ─────────────────────────────────────────── */
@@ -136,7 +211,7 @@ export function listenTargetPosts(targetType, targetId, onData, n = 40) {
 export async function createPost({
   text = '', media = [], mediaType = '', visibility = 'public', feeling = '', location = null,
   bgGradient = null, poll = null, taggedUsers = [], groupId = null, groupPrivacy, asBusiness = null,
-  onBusinessId = null, sharedPostId = null, status = 'active', type = null, closeFriendIds,
+  onBusinessId = null, sharedPostId = null, status = 'active', type = null, closeFriendIds, friendIds,
 }) {
   const m = requireMe();
   const clean = String(text || '').trim();
@@ -175,8 +250,12 @@ export async function createPost({
     poll: poll ? { question: poll.question, options: poll.options.map((o, i) => ({ id: String(i), text: o, votes: 0 })), endsAt: poll.endsAt || null, totalVotes: 0 } : null,
     createdAt: serverTimestamp(),
   };
-  if (groupId) data.groupPrivacy = groupPrivacy || 'public';
-  if (visibility === 'close_friends' && closeFriendIds) data.closeFriendIds = [m.uid, ...closeFriendIds];
+  if (groupId) {
+    data.groupPrivacy = groupPrivacy || 'public';
+    // Posts in private/secret groups are for members only (rules: 'group').
+    data.visibility = data.groupPrivacy === 'public' ? 'public' : 'group';
+  }
+  Object.assign(data, audienceFields(data.visibility, m.uid, { closeFriendIds, friendIds }));
   const ref = await addDoc(collection(db, 'posts'), data);
   if (sharedPostId) updateDoc(doc(db, 'posts', sharedPostId), { shareCount: increment(1) }).catch(() => {});
   for (const u of taggedUsers) {
@@ -185,9 +264,22 @@ export async function createPost({
   return normPost(ref.id, { ...data, createdAt: Date.now() });
 }
 
-export async function editPost(id, patch) {
+/**
+ * Audience lists stored on a post. Friends-only posts carry the author's
+ * friend list at posting time, so friends can find them in their feed with a
+ * query the rules can prove; other audiences clear the lists.
+ */
+export function audienceFields(visibility, authorId, { closeFriendIds, friendIds } = {}) {
+  const ids = (list) => [...new Set([authorId, ...(list || [])])].slice(0, 2000);
+  if (visibility === 'close_friends') return { closeFriendIds: ids(closeFriendIds), audienceIds: [] };
+  if (visibility === 'friends' || visibility === 'followers') return { audienceIds: ids(friendIds), closeFriendIds: [] };
+  return { audienceIds: [], closeFriendIds: [] };
+}
+
+export async function editPost(id, patch, { authorId, friendIds, closeFriendIds } = {}) {
   const allowed = {};
   for (const k of ['text', 'visibility', 'commentsDisabled', 'pinned', 'status']) if (k in patch) allowed[k] = patch[k];
+  if ('visibility' in patch && authorId) Object.assign(allowed, audienceFields(patch.visibility, authorId, { friendIds, closeFriendIds }));
   allowed.updatedAt = serverTimestamp();
   await updateDoc(doc(db, 'posts', id), allowed);
 }

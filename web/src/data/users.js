@@ -5,7 +5,7 @@ import {
 import { db } from '../lib/firebase.js';
 import { cachedList } from './cache.js';
 import { normUser, isCorruptSeed } from './normalize.js';
-import { uid as myUid } from '../lib/auth.js';
+import { uid as myUid, accountRef } from '../lib/auth.js';
 
 /* ── Profile cache ─────────────────────────────────────────── */
 // Many cards show the same authors; fetch each profile once per session.
@@ -70,14 +70,20 @@ export async function resolveUserKey(key) {
 // Only fields the owner may write (rules: userAdminOnlyFields).
 const EDITABLE = ['fullName', 'displayName', 'bio', 'city', 'website', 'avatar', 'coverImage', 'socialLinks', 'interests', 'accountType', 'privacy', 'nameVisibility', 'birthday', 'work', 'education', 'relationship', 'hometown', 'gender', 'phone', 'cityScope', 'cities', 'notificationPrefs', 'onboardingDone', 'referredBy', 'language'];
 
+// Personal details that go to the owner-only account document instead of
+// the public profile (rules reject them in users/{uid}).
+const PRIVATE_EDITABLE = ['phone', 'birthday'];
+
 export async function updateMyProfile(patch) {
   const id = myUid.value;
   if (!id) throw new Error('auth');
   const clean = {};
-  for (const k of EDITABLE) if (k in patch) clean[k] = patch[k];
+  const priv = {};
+  for (const k of EDITABLE) if (k in patch) (PRIVATE_EDITABLE.includes(k) ? priv : clean)[k] = patch[k];
   if ('fullName' in clean) clean.displayName = clean.fullName;
   clean.updatedAt = Date.now();
   await updateDoc(doc(db, 'users', id), clean);
+  if (Object.keys(priv).length) await setDoc(accountRef(id), { ...priv, updatedAt: Date.now() }, { merge: true });
   cache.delete(id);
 }
 

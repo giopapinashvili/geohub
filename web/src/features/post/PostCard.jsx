@@ -9,7 +9,7 @@ import { TextArea, Segmented } from '../../ui/Field.jsx';
 import { t, tn, formatCount } from '../../lib/i18n.js';
 import { timeAgo, formatDate } from '../../lib/format.js';
 import { uid, isAdmin } from '../../lib/auth.js';
-import { requireLogin } from '../../lib/store.js';
+import { requireLogin, friendIds } from '../../lib/store.js';
 import { toast } from '../../lib/toast.js';
 import {
   getMyReaction, setReaction, isSaved, setSaved, deletePost, editPost, getPost, trackView, REACTION_EMOJI,
@@ -63,7 +63,9 @@ function EditDialog({ post, onClose }) {
   const [busy, setBusy] = useState(false);
   const save = async () => {
     setBusy(true);
-    try { await editPost(post.id, { text: text.trim(), visibility: aud }); toast.success(t('common.saved')); onClose(true, { text: text.trim(), visibility: aud }); }
+    // Audience lists are rebuilt only when the audience really changed.
+    const patch = { text: text.trim(), ...(aud !== (post.visibility || 'public') ? { visibility: aud } : {}) };
+    try { await editPost(post.id, patch, { authorId: post.authorId, friendIds: [...friendIds.value] }); toast.success(t('common.saved')); onClose(true, { text: text.trim(), visibility: aud }); }
     catch { toast.error(t('common.error')); }
     setBusy(false);
   };

@@ -120,7 +120,7 @@ export async function placeCheckins(placeId, n = 30) {
 }
 
 export async function placePosts(placeId, n = 30) {
-  const snap = await getDocs(query(collection(db, 'posts'), where('placeId', '==', placeId), limit(n))).catch(() => ({ docs: [] }));
-  return snap.docs.map((d) => normPost(d.id, d.data())).filter((p) => p.status === 'active' && (p.visibility === 'public' || !p.visibility)).sort((a, b) => b.createdAt - a.createdAt);
+  const snap = await getDocs(query(collection(db, 'posts'), where('placeId', '==', placeId), where('visibility', '==', 'public'), limit(n))).catch(() => ({ docs: [] }));
+  return snap.docs.map((d) => normPost(d.id, d.data())).filter((p) => p.status === 'active').sort((a, b) => b.createdAt - a.createdAt);
 }
 

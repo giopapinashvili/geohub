@@ -35,6 +35,40 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
+    // ── VISIBILITY HELPERS ───────────────────────────────────────────────────
+    // A friendship can live in either collection the app has written.
+    function areFriendsAny(a, b) {
+      return exists(/databases/$(database)/documents/friendships/$(friendPairId(a, b)))
+          || exists(/databases/$(database)/documents/friends/$(friendPairId(a, b)));
+    }
+    // follows/{followerId}_{followingId}
+    function isFollowing(a, b) {
+      return exists(/databases/$(database)/documents/follows/$(a + '_' + b));
+    }
+    // Who may read a post (d = the post's data). Rules are not filters: every
+    // query on posts must carry a constraint that proves one of these branches
+    // (visibility == 'public', authorId == me, audienceIds/closeFriendIds
+    // array-contains me, …). The audience lists are written by the author.
+    function canReadPostData(d) {
+      return d.get('visibility', 'public') == 'public'
+        || (d.get('visibility', 'public') == 'group' && isGroupMember(d.get('groupId', '')))
+        || (signedIn() && (
+             d.get('authorId', '') == uid()
+          || d.get('userId', '') == uid()
+          || uid() in d.get('audienceIds', [])
+          || uid() in d.get('closeFriendIds', [])
+          || (d.get('visibility', 'public') == 'friends'
+              && areFriendsAny(uid(), d.get('authorId', d.get('userId', ''))))
+          || (d.get('visibility', 'public') == 'followers'
+              && (isFollowing(uid(), d.get('authorId', d.get('userId', '')))
+                  || areFriendsAny(uid(), d.get('authorId', d.get('userId', '')))))
+          || isAdmin()
+        ));
+    }
+    function canReadPostId(postId) {
+      return canReadPostData(get(/databases/$(database)/documents/posts/$(postId)).data);
+    }
+
     // Caller's UID appears in at least one standard ownership field of the
     // document being created. Used for create-only guards.
     function newOwnerMatches() {
@@ -77,6 +111,8 @@ service cloud.firestore {
     // Must be a list of at most 10 items. Does not fire when searchHistory is untouched.
     function searchHistoryValid() {
       return !request.resource.data.diff(resource.data).affectedKeys().hasAny(['searchHistory'])
+        // removing it (it moved to users/{uid}/private/account) is fine
+        || !request.resource.data.keys().hasAny(['searchHistory'])
         || (request.resource.data.searchHistory is list
             && request.resource.data.searchHistory.size() <= 10);
     }
@@ -132,6 +168,26 @@ service cloud.firestore {
         'text', 'status', 'visibility', 'commentsDisabled',
         'pinned', 'approvedAt', 'declinedAt', 'updatedAt'
       ]);
+    }
+    // The author may also change who the post is shared with.
+    function onlyPostOwnerFields() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        'text', 'status', 'visibility', 'commentsDisabled',
+        'pinned', 'approvedAt', 'declinedAt', 'updatedAt',
+        'audienceIds', 'closeFriendIds'
+      ]);
+    }
+
+    // Account data that must never sit in the world-readable users/{uid}
+    // document; it lives in users/{uid}/private/account (owner + admin only).
+    function privateUserFields() {
+      return ['email', 'phone', 'birthday', 'searchHistory'];
+    }
+    // A write may leave legacy private fields untouched, or remove them all,
+    // but never add or change one.
+    function privateUserFieldsNotWritten() {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(privateUserFields())
+        || !request.resource.data.keys().hasAny(privateUserFields());
     }
 
     function onlyBusinessCountersChanged() {
@@ -305,11 +361,14 @@ service cloud.firestore {
 
       // Create: must be own document; must not pre-set economy or admin fields
       // (those are initialised by Cloud Functions on first sign-in).
-      allow create: if isOwner(userId) && userCreateFieldsSafe();
+      allow create: if isOwner(userId) && userCreateFieldsSafe()
+        && !request.resource.data.keys().hasAny(privateUserFields());
 
       // Update: owner may edit display/bio fields but never economy or admin
       // fields.  Admin may change anything.  searchHistory must be a list ≤10.
-      allow update: if (isOwner(userId) && userAdminOnlyFields() && searchHistoryValid()) || isAdmin();
+      allow update: if (isOwner(userId) && userAdminOnlyFields() && searchHistoryValid()
+                         && privateUserFieldsNotWritten())
+        || isAdmin();
 
       allow delete: if isAdmin();
 
@@ -448,7 +507,9 @@ service cloud.firestore {
     // ── SOCIAL CONTENT ────────────────────────────────────────────────────────
 
     match /posts/{postId} {
-      allow read: if true;
+      // Private, friends-only and close-friends posts are enforced here, not
+      // only in the app (see canReadPostData).
+      allow read: if canReadPostData(resource.data);
       // Require either text or a media URL so an empty document cannot be used
       // as a fake engagement anchor.
       allow create: if newOwnerMatches()
@@ -468,7 +529,7 @@ service cloud.firestore {
       allow update: if isAdmin()
         || onlyCountersChanged()
         || onlyPollChanged()
-        || (existingOwnerMatches() && onlyPostManagementFields())
+        || (existingOwnerMatches() && onlyPostOwnerFields())
         // Business owner/page admin may manage any post on their page.
         || (canManageBiz(resource.data.get('businessId', ''))
             && resource.data.get('businessId', '') != ''
@@ -482,7 +543,7 @@ service cloud.firestore {
         || isGroupManagerOfPost();
 
       match /comments/{commentId} {
-        allow read: if true;
+        allow read: if canReadPostId(postId);
         allow create: if newOwnerMatches()
           && request.resource.data.get('text', '') is string
           && request.resource.data.get('text', '').size() > 0;
@@ -494,14 +555,14 @@ service cloud.firestore {
         allow delete: if isAdmin() || existingOwnerMatches() || isBizOwnerOfPost(postId) || isPostOwner(postId);
 
         match /reactions/{rxUserId} {
-          allow read: if true;
+          allow read: if canReadPostId(postId);
           allow create, update: if isOwner(rxUserId)
             && request.resource.data.get('userId', rxUserId) == uid();
           allow delete: if isAdmin() || isOwner(rxUserId);
         }
 
         match /replies/{replyId} {
-          allow read: if true;
+          allow read: if canReadPostId(postId);
           allow create: if newOwnerMatches()
             && request.resource.data.get('text', '') is string
             && request.resource.data.get('text', '').size() > 0;
@@ -510,10 +571,10 @@ service cloud.firestore {
       }
 
       // Each like/reaction/poll/view doc ID is the user's own UID — self-only write.
-      match /likes/{likeUserId}     { allow read: if true; allow create, update, delete: if isOwner(likeUserId); }
-      match /reactions/{rxUserId}   { allow read: if true; allow create, update, delete: if isOwner(rxUserId); }
+      match /likes/{likeUserId}     { allow read: if canReadPostId(postId); allow create, update, delete: if isOwner(likeUserId); }
+      match /reactions/{rxUserId}   { allow read: if canReadPostId(postId); allow create, update, delete: if isOwner(rxUserId); }
       match /pollVotes/{voteUserId} {
-        allow read: if true;
+        allow read: if canReadPostId(postId);
         allow create: if isOwner(voteUserId)
           && request.resource.data.get('userId', voteUserId) == uid()
           && request.resource.data.get('optionId', '') is string;
@@ -533,7 +594,14 @@ service cloud.firestore {
     }
 
     match /stories/{storyId} {
-      allow read: if true;
+      // Close-friends stories are readable by the author and the people on
+      // the list. Public stories carry closeFriends == false explicitly.
+      allow read: if !resource.data.get('closeFriends', false)
+        || (signedIn()
+            && (resource.data.get('authorId', '') == uid()
+                || resource.data.get('userId', '') == uid()
+                || uid() in resource.data.get('closeFriendsList', [])
+                || isAdmin()));
       allow create: if newOwnerMatches();
       allow update: if isAdmin() || existingOwnerMatches() || onlyStoryViewFields();
       allow delete: if isAdmin() || existingOwnerMatches();
@@ -899,16 +967,59 @@ service cloud.firestore {
           || (signedIn() && resource.data.get('senderId', '') == uid());
       }
     }
+    // groupMembers/{groupId}_{uid}. Joining is self-service only as a plain
+    // member: open groups directly, private/secret groups only after a
+    // manager approved the join request. Only the group's creator may give
+    // themselves a managing role; roles of others are changed by the group's
+    // owner/admins, never by the member, and the creator cannot be demoted.
     match /groupMembers/{memberId} {
       allow read: if true;
-      allow create: if signedIn()
-        && (request.resource.data.get('userId', '') == uid()
-            || request.resource.data.get('uid', '') == uid());
-      allow update, delete: if isAdmin()
+      allow create: if isAdmin()
         || (signedIn()
-            && (resource.data.get('userId', '') == uid()
-                || resource.data.get('uid', '') == uid()))
-        || isGroupManager(resource.data.get('groupId', ''));
+            && request.resource.data.get('uid', '') == uid()
+            && request.resource.data.get('userId', uid()) == uid()
+            && memberId == request.resource.data.get('groupId', '') + '_' + uid()
+            && ((request.resource.data.get('role', 'member') == 'member'
+                 && (isGroupPublic(request.resource.data.get('groupId', ''))
+                     || joinRequestApproved(request.resource.data.get('groupId', ''), uid())))
+                || (request.resource.data.get('role', '') in ['admin', 'owner']
+                    && isGroupCreator(request.resource.data.get('groupId', '')))));
+      allow update: if isAdmin()
+        || (signedIn() && memberIdsUnchanged()
+            && ((isOwnMembership()
+                 && !request.resource.data.diff(resource.data).affectedKeys()
+                      .hasAny(['role', 'status', 'groupId', 'uid', 'userId']))
+                || (isGroupOwnerOrAdmin(resource.data.get('groupId', ''))
+                    && !isOwnMembership()
+                    && !memberIsGroupCreator()
+                    && request.resource.data.get('role', 'member') in ['member', 'moderator', 'admin'])));
+      allow delete: if isAdmin()
+        || (signedIn() && isOwnMembership())
+        || (isGroupManager(resource.data.get('groupId', '')) && !memberIsGroupCreator());
+
+      function isOwnMembership() {
+        return resource.data.get('uid', '') == uid() || resource.data.get('userId', '') == uid();
+      }
+      function memberIdsUnchanged() {
+        return request.resource.data.get('groupId', '') == resource.data.get('groupId', '')
+          && request.resource.data.get('uid', '') == resource.data.get('uid', '')
+          && request.resource.data.get('userId', '') == resource.data.get('userId', '');
+      }
+      function memberIsGroupCreator() {
+        let g = get(/databases/$(database)/documents/groups/$(resource.data.get('groupId', ''))).data;
+        let member = resource.data.get('uid', resource.data.get('userId', ''));
+        return g.get('creatorId', g.get('userId', '')) == member;
+      }
+    }
+    function isGroupCreator(groupId) {
+      let g = get(/databases/$(database)/documents/groups/$(groupId)).data;
+      return signedIn()
+        && (g.get('creatorId', '') == uid() || g.get('userId', '') == uid() || g.get('ownerId', '') == uid());
+    }
+    // groupJoinRequests/{groupId}__{uid}
+    function joinRequestApproved(groupId, userId) {
+      return exists(/databases/$(database)/documents/groupJoinRequests/$(groupId + '__' + userId))
+        && get(/databases/$(database)/documents/groupJoinRequests/$(groupId + '__' + userId)).data.get('status', '') == 'approved';
     }
     match /groupPosts/{postId} {
       // Public-group posts are readable by everyone; private/secret group posts
@@ -926,8 +1037,17 @@ service cloud.firestore {
             || resource.data.get('toUserId', '') == uid()
             || isGroupManager(resource.data.get('groupId', ''))
             || isAdmin());
-      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
-      allow update: if isAdmin() || isGroupManager(resource.data.get('groupId', ''));
+      allow create: if signedIn()
+        && request.resource.data.get('userId', '') == uid()
+        && request.resource.data.get('status', '') == 'pending'
+        && requestId == request.resource.data.get('groupId', '') + '__' + uid();
+      allow update: if isAdmin()
+        || ((isGroupManager(resource.data.get('groupId', ''))
+             // the requester may re-send a declined request, nothing more
+             || (signedIn() && resource.data.get('userId', '') == uid()
+                 && request.resource.data.get('status', '') == 'pending'))
+            && request.resource.data.get('groupId', '') == resource.data.get('groupId', '')
+            && request.resource.data.get('userId', '') == resource.data.get('userId', ''));
       allow delete: if isAdmin()
         || isGroupManager(resource.data.get('groupId', ''))
         || (signedIn() && resource.data.get('userId', '') == uid());
@@ -963,8 +1083,23 @@ service cloud.firestore {
         && request.resource.data.get('fromUserId', '') == uid()
         // Cannot send a request to yourself
         && request.resource.data.get('toUserId', '') != uid()
-        && request.resource.data.get('status', '') == 'pending';
-      allow update, delete: if isAdmin()
+        && request.resource.data.get('status', '') == 'pending'
+        && requestId == uid() + '_' + request.resource.data.get('toUserId', '');
+      // Only the recipient answers a pending request. The sender may re-send
+      // (status back to 'pending') but can never mark it accepted — an
+      // accepted request is what lets a friendship document be created.
+      allow update: if isAdmin()
+        || (signedIn()
+            && request.resource.data.get('fromUserId', '') == resource.data.get('fromUserId', '')
+            && request.resource.data.get('toUserId', '') == resource.data.get('toUserId', '')
+            && ((resource.data.get('toUserId', '') == uid()
+                 && resource.data.get('status', '') == 'pending'
+                 && request.resource.data.get('status', '') in ['accepted', 'rejected', 'declined']
+                 && request.resource.data.diff(resource.data).affectedKeys()
+                      .hasOnly(['status', 'reviewedAt', 'respondedAt', 'updatedAt']))
+                || (resource.data.get('fromUserId', '') == uid()
+                    && request.resource.data.get('status', '') == 'pending')));
+      allow delete: if isAdmin()
         || (signedIn()
             && (resource.data.get('fromUserId', '') == uid()
                 || resource.data.get('toUserId', '') == uid()));
@@ -1232,7 +1367,9 @@ service cloud.firestore {
         && (resource.data.get('userId',          '') == uid()
             || resource.data.get('businessOwnerId','') == uid()
             || isAdmin());
-      allow create: if signedIn() && request.resource.data.get('userId', '') == uid();
+      // Coupons are issued by the redeemReward Cloud Function after it charged
+      // the points; a client must never mint one for itself.
+      allow create: if isAdmin();
       // Only the business owner of the reward may mark a coupon used (active → used).
       // Customers cannot self-mark — prevents fraudulent "I already used it" claims.
       // Immutable fields (userId, businessOwnerId, rewardId, code, pointPrice) cannot change.
@@ -1443,7 +1580,25 @@ service cloud.firestore {
 
     // ── PAYMENTS & MARKETPLACE ────────────────────────────────────────────────
 
-    match /tickets/{docId}         { allow create: if newOwnerMatches(); allow read, update, delete: if isAdmin() || existingOwnerMatches(); }
+    // Support requests from the in-app form. Guests may write too (people who
+    // cannot sign in still need help), but only this exact shape.
+    match /tickets/{docId} {
+      allow create: if (newOwnerMatches() || (!signedIn() && request.resource.data.get('userId', '') == ''))
+        && request.resource.data.keys().hasOnly(['userId', 'name', 'email', 'category', 'subject', 'message', 'status', 'page', 'lang', 'createdAt'])
+        && request.resource.data.get('status', '') == 'open'
+        && request.resource.data.get('createdAt', null) == request.time
+        && request.resource.data.get('message', '') is string
+        && request.resource.data.get('message', '').size() >= 10
+        && request.resource.data.get('message', '').size() <= 4000
+        && request.resource.data.get('subject', '') is string
+        && request.resource.data.get('subject', '').size() <= 200
+        && request.resource.data.get('email', '') is string
+        && request.resource.data.get('email', '').size() <= 200
+        && request.resource.data.get('name', '') is string
+        && request.resource.data.get('name', '').size() <= 120
+        && request.resource.data.get('category', '') in ['help', 'bug', 'account', 'account_deletion', 'business', 'report', 'other'];
+      allow read, update, delete: if isAdmin() || existingOwnerMatches();
+    }
     // Payments are written by the Cloudflare Worker (runs as admin); users
     // may read their own payment records only.
     match /payments/{paymentId}    { allow read: if isAdmin() || existingOwnerMatches(); allow create, update, delete: if isAdmin(); }

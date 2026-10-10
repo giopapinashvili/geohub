@@ -27,7 +27,7 @@ import { groupCatLabel } from './Groups.jsx';
 
 function Posts({ group, member, manager }) {
   const [posts, setPosts] = useState(null);
-  useEffect(() => listenTargetPosts('group', group.id, setPosts), [group.id]);
+  useEffect(() => listenTargetPosts('group', group.id, setPosts, 40, { member: !!member }), [group.id, !!member]);
   const p = profile.value;
   const visible = (posts || []).filter((x) => x.status === 'active' || manager || x.authorId === uid.value);
   return (

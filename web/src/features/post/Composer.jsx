@@ -153,6 +153,7 @@ export default function Composer() {
         onBusinessId: opts.onBusinessId || null,
         sharedPostId: opts.sharedPost?.id || null,
         closeFriendIds: audience === 'close_friends' ? [...friendIds.value] : undefined,
+        friendIds: audience === 'friends' ? [...friendIds.value] : undefined,
       });
       try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
       toast.success(t(opts.needsApproval ? 'composer.pendingApproval' : 'composer.published'));

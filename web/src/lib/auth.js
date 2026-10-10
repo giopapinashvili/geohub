@@ -9,7 +9,7 @@ import {
   getRedirectResult, signOut as fbSignOut, updateProfile, sendPasswordResetEmail,
   sendEmailVerification,
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, deleteField } from 'firebase/firestore';
 import { auth, db, EMULATOR } from './firebase.js';
 import { normUser } from '../data/normalize.js';
 
@@ -18,6 +18,14 @@ export const authUser = signal(undefined);
 /** Normalised users/{uid} document of the signed-in user. */
 export const profile = signal(null);
 export const isAdmin = signal(false);
+/**
+ * The signed-in user's private account data — users/{uid}/private/account
+ * (email, phone, birthday, recent searches). Only the owner and admins can
+ * read it; the users/{uid} document itself is public.
+ */
+export const account = signal(null);
+export const PRIVATE_FIELDS = ['email', 'phone', 'birthday', 'searchHistory'];
+export const accountRef = (userId) => doc(db, 'users', userId, 'private', 'account');
 export const authReady = computed(() => authUser.value !== undefined);
 export const signedIn = computed(() => !!authUser.value);
 export const uid = computed(() => authUser.value?.uid || null);
@@ -52,7 +60,6 @@ function newUserDoc(u, extra = {}) {
     fullName: extra.fullName || u.displayName || (u.email ? u.email.split('@')[0] : 'GeoHub'),
     displayName: extra.fullName || u.displayName || '',
     username: extra.username || baseUsername(u),
-    email: u.email || '',
     avatar: u.photoURL || '',
     coverImage: '',
     bio: '',
@@ -97,6 +104,26 @@ async function reserveUsername(name, userId) {
   catch (e) { console.warn('[auth] username reservation failed', e.code); }
 }
 
+/**
+ * Older profiles kept email/phone/birthday/searches in the public users/{uid}
+ * document. Move them into the owner-only account document on sign-in.
+ */
+async function movePrivateFields(u, data) {
+  const present = PRIVATE_FIELDS.filter((k) => k in data);
+  const priv = {};
+  for (const k of present) priv[k] = data[k];
+  try {
+    const cur = await getDoc(accountRef(u.uid));
+    if (!cur.exists() || !cur.data().email || present.length) {
+      if (!priv.email) priv.email = u.email || (cur.exists() ? cur.data().email || '' : '');
+      await setDoc(accountRef(u.uid), { ...priv, updatedAt: serverTimestamp() }, { merge: true });
+    }
+    if (present.length) {
+      await updateDoc(doc(db, 'users', u.uid), Object.fromEntries(present.map((k) => [k, deleteField()])));
+    }
+  } catch (e) { console.warn('[auth] private fields move failed', e.code); }
+}
+
 /** Make sure users/{uid} exists (first social sign-in) and has a GeoHub ID. */
 async function ensureProfile(u) {
   const ref = doc(db, 'users', u.uid);
@@ -108,10 +135,12 @@ async function ensureProfile(u) {
     if (geoId) data.geoId = geoId;
     try {
       await setDoc(ref, data, { merge: true });
+      await setDoc(accountRef(u.uid), { email: u.email || '', createdAt: serverTimestamp() }, { merge: true });
       await reserveUsername(data.username, u.uid);
     } catch (e) { console.warn('[auth] profile create failed', e.code); }
     return;
   }
+  await movePrivateFields(u, snap.data());
   const patch = { lastSeen: serverTimestamp(), online: true };
   if (!snap.data().geoId) {
     const geoId = await claimGeoId(u.uid);
@@ -121,14 +150,17 @@ async function ensureProfile(u) {
 }
 
 let profileUnsub = null;
+let accountUnsub = null;
 // While sign-up or a verification resend runs, Firebase briefly signs in an
 // unverified user; the guard below must not race those flows.
 let flowInProgress = false;
 onAuthStateChanged(auth, async (u) => {
   if (profileUnsub) { profileUnsub(); profileUnsub = null; }
+  if (accountUnsub) { accountUnsub(); accountUnsub = null; }
   if (!u) {
     authUser.value = null;
     profile.value = null;
+    account.value = null;
     isAdmin.value = false;
     return;
   }
@@ -142,6 +174,7 @@ onAuthStateChanged(auth, async (u) => {
   profileUnsub = onSnapshot(doc(db, 'users', u.uid),
     (snap) => { profile.value = snap.exists() ? normUser(snap.id, snap.data()) : normUser(u.uid, newUserDoc(u)); },
     () => { profile.value = normUser(u.uid, newUserDoc(u)); });
+  accountUnsub = onSnapshot(accountRef(u.uid), (snap) => { account.value = snap.exists() ? snap.data() : {}; }, () => { account.value = {}; });
   ensureProfile(u);
   getDoc(doc(db, 'admins', u.uid)).then((s) => { isAdmin.value = s.exists(); }).catch(() => { isAdmin.value = false; });
 });
@@ -183,10 +216,18 @@ async function createAccount({ email, password, fullName, uname, city, accountTy
   const geoId = await claimGeoId(u.uid);
   if (geoId) data.geoId = geoId;
   await setDoc(doc(db, 'users', u.uid), data, { merge: true });
+  await setDoc(accountRef(u.uid), { email: u.email || '', createdAt: serverTimestamp() }, { merge: true });
   await reserveUsername(data.username, u.uid);
-  try { await sendEmailVerification(u); } catch (e) { console.warn('[auth] verification mail', e.code); }
+  // The account exists either way; tell the person whether the mail left.
+  let verificationSent = true;
+  let verificationError = null;
+  try { await sendEmailVerification(u); } catch (e) {
+    verificationSent = false;
+    verificationError = e.code || 'unknown';
+    console.warn('[auth] verification mail', e.code);
+  }
   await fbSignOut(auth);
-  return { email: u.email };
+  return { email: u.email, verificationSent, verificationError };
 }
 
 async function socialLogin(provider) {

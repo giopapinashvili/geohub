@@ -1,5 +1,5 @@
 import {
-  doc, addDoc, setDoc, updateDoc, deleteDoc, collection, query, orderBy, limit, onSnapshot,
+  doc, addDoc, setDoc, updateDoc, deleteDoc, collection, query, where, orderBy, limit, onSnapshot,
   serverTimestamp, arrayUnion, increment, getDocs,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
@@ -14,11 +14,24 @@ const DURATIONS = { '24h': 86400000, '7d': 7 * 86400000, '30d': 30 * 86400000 };
  * Close-friends stories are shown only to people on the author's list.
  */
 export function listenStoryTray(onData) {
-  return onSnapshot(query(collection(db, 'stories'), orderBy('createdAt', 'desc'), limit(40)), (snap) => {
+  // The rules only let close-friends stories reach the people on the list, so
+  // the tray is three provable queries: public, shared with me, my own.
+  const viewer = myUid.value;
+  const stories = collection(db, 'stories');
+  const qs = [query(stories, where('closeFriends', '==', false), orderBy('createdAt', 'desc'), limit(40))];
+  if (viewer) {
+    qs.push(query(stories, where('closeFriendsList', 'array-contains', viewer), orderBy('createdAt', 'desc'), limit(40)));
+    qs.push(query(stories, where('authorId', '==', viewer), orderBy('createdAt', 'desc'), limit(20)));
+  }
+  const parts = qs.map(() => null);
+  const unsubs = qs.map((q, i) => onSnapshot(q, (snap) => { parts[i] = snap.docs; build(); }, () => { parts[i] = []; build(); }));
+  function build() {
+    if (parts.some((p) => p === null)) return;
+    const seenIds = new Set();
+    const docs = parts.flat().filter((d) => (seenIds.has(d.id) ? false : seenIds.add(d.id)));
     const now = Date.now();
-    const viewer = myUid.value;
     const groups = new Map();
-    for (const d of snap.docs) {
+    for (const d of docs) {
       const s = normStory(d.id, d.data());
       if (s.expiresAt && s.expiresAt < now) continue;
       if (!s.expiresAt && s.raw.duration !== 'forever' && s.createdAt && now - s.createdAt > DURATIONS['24h']) continue;
@@ -35,7 +48,8 @@ export function listenStoryTray(onData) {
     });
     list.sort((a, b) => (b.authorId === viewer) - (a.authorId === viewer) || (a.seen - b.seen) || (b.latest - a.latest));
     onData(list);
-  }, () => onData([]));
+  }
+  return () => unsubs.forEach((u) => u());
 }
 
 export async function createStory({ text = '', mediaUrl = null, mediaType = '', bg = null, textStyle = null, duration = '24h', closeFriends = false, closeFriendsList = [], link = null, locationName = '' }) {
@@ -57,7 +71,9 @@ export async function createStory({ text = '', mediaUrl = null, mediaType = '', 
   if (textStyle) data.textStyle = textStyle;
   if (link) data.link = link;
   if (locationName) data.locationName = locationName;
-  if (closeFriends) { data.closeFriends = true; data.closeFriendsList = closeFriendsList; }
+  // Always explicit: the public tray query asks for closeFriends == false.
+  data.closeFriends = !!closeFriends;
+  if (closeFriends) data.closeFriendsList = closeFriendsList;
   const ref = await addDoc(collection(db, 'stories'), data);
   // Archive so highlights can reference the story after it expires.
   setDoc(doc(db, 'users', m.uid, 'storyArchive', ref.id), { ...data, storyId: ref.id, archivedAt: serverTimestamp() }).catch(() => {});

@@ -2,11 +2,11 @@
 // (as typed, lower-case and capitalised), plus a recent-content scan for
 // post text. Garbled demo documents are skipped.
 
-import { collection, query, where, limit, getDocs, orderBy, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, limit, getDocs, orderBy, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase.js';
 import { normBiz, normPlace, normGroup, normEvent, normVideo, normItem, normPost, isCorruptSeed } from './normalize.js';
 import { searchUsers } from './users.js';
-import { uid as myUid, profile } from '../lib/auth.js';
+import { uid as myUid, account, accountRef } from '../lib/auth.js';
 
 function variants(term) {
   const t = term.trim();
@@ -44,7 +44,8 @@ export const searchItems = async (t, n) => (await prefixSearch('marketplace', ['
 export async function searchPosts(term, n = 20) {
   const needle = term.trim().toLowerCase().replace(/^#/, '');
   if (!needle) return [];
-  const snap = await getDocs(query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(100))).catch(() => ({ docs: [] }));
+  // Only public posts are searchable (and the rules only allow that query).
+  const snap = await getDocs(query(collection(db, 'posts'), where('visibility', '==', 'public'), orderBy('createdAt', 'desc'), limit(100))).catch(() => ({ docs: [] }));
   const out = [];
   for (const d of snap.docs) {
     const data = d.data();
@@ -76,12 +77,12 @@ export async function searchAll(term) {
   return { people, places, businesses, groups, events, videos, items, posts };
 }
 
-/* ── Recent searches (users.searchHistory, max 10 by rule) ─── */
+/* ── Recent searches (users/{uid}/private/account.searchHistory) ─── */
 const LOCAL_KEY = 'gh_recent_searches';
 
 export function recentSearches() {
-  const fromProfile = profile.value?.raw?.searchHistory;
-  if (Array.isArray(fromProfile) && myUid.value) return fromProfile.filter((x) => typeof x === 'string').slice(0, 10);
+  const saved = account.value?.searchHistory;
+  if (Array.isArray(saved) && myUid.value) return saved.filter((x) => typeof x === 'string').slice(0, 10);
   try { return JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]').slice(0, 10); } catch { return []; }
 }
 
@@ -90,10 +91,10 @@ export function rememberSearch(term) {
   if (!t) return;
   const next = [t, ...recentSearches().filter((x) => x !== t)].slice(0, 10);
   try { localStorage.setItem(LOCAL_KEY, JSON.stringify(next)); } catch { /* ignore */ }
-  if (myUid.value) updateDoc(doc(db, 'users', myUid.value), { searchHistory: next }).catch(() => {});
+  if (myUid.value) setDoc(accountRef(myUid.value), { searchHistory: next }, { merge: true }).catch(() => {});
 }
 
 export function clearSearches() {
   try { localStorage.removeItem(LOCAL_KEY); } catch { /* ignore */ }
-  if (myUid.value) updateDoc(doc(db, 'users', myUid.value), { searchHistory: [] }).catch(() => {});
+  if (myUid.value) setDoc(accountRef(myUid.value), { searchHistory: [] }, { merge: true }).catch(() => {});
 }

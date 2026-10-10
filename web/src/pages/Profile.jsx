@@ -11,7 +11,7 @@ import { navigate, query, setQuery } from '../lib/router.js';
 import { formatDate } from '../lib/format.js';
 import { cityLabel } from '../lib/geo.js';
 import { uid, signedIn } from '../lib/auth.js';
-import { openComposer, storyCreator, friendIds } from '../lib/store.js';
+import { openComposer, storyCreator, friendIds, followingIds } from '../lib/store.js';
 import { toast } from '../lib/toast.js';
 import { resolveUserKey, listenUser, getUsers } from '../data/users.js';
 import { listenUserPosts } from '../data/posts.js';
@@ -106,7 +106,9 @@ export default function Profile({ params }) {
   const [counts, setCounts] = useState({ followers: null, following: null });
   const [friends, setFriends] = useState([]);
   const [friendCount, setFriendCount] = useState(0);
-  const postsLive = useLive(userId ? (ok) => listenUserPosts(userId, ok) : null, [userId]);
+  const relFriend = !!userId && friendIds.value.has(userId);
+  const relFollowing = !!userId && followingIds.value.has(userId);
+  const postsLive = useLive(userId ? (ok) => listenUserPosts(userId, ok, 40, { friend: relFriend, following: relFollowing }) : null, [userId, relFriend, relFollowing]);
   const blocked = useAsync(() => (userId && !own ? isBlockedBy(userId) : Promise.resolve(false)), [userId, own]);
   useTitle(user?.name || t('nav.profile'));
 
