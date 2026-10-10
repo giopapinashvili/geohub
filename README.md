@@ -73,11 +73,15 @@ all of its results, or Firestore rejects the whole query.
 
 ## Deploy order for rules changes
 
-New queries need their indexes, and new rules reject old clients' queries, so:
+New queries need their indexes, the new site calls the new `redeemReward`,
+and the new rules reject old clients' queries, so:
 
-1. `npx firebase deploy --only firestore:indexes` — wait until all are built
-   (Firebase console → Firestore → Indexes).
+1. `npx firebase deploy --only firestore:indexes,functions` — then wait until
+   every index shows "Enabled" (Firebase console → Firestore → Indexes).
 2. `node web/tools/migrate-privacy.mjs` (dry run) → check the summary →
    `node web/tools/migrate-privacy.mjs --apply` (needs `serviceAccountKey.json`).
 3. Publish the site (merge to `master`; Cloudflare Pages serves `dist/`).
-4. `npx firebase deploy --only firestore:rules,functions`.
+4. `npx firebase deploy --only firestore:rules`.
+5. Cloudinary console → Settings → Upload → preset `geohub_unsigned`: allow only
+   image/video/audio/pdf formats, set a max file size (e.g. 100 MB) and keep the
+   `geohub/` folder — the browser checks alone cannot stop direct uploads.

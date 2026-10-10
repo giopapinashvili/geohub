@@ -65,9 +65,9 @@ function MemberRow({ m, group, manager, onChange }) {
       {isManagerRole(m.role) && <span class="tag tag-brand">{t(isOwner ? 'groups.owner' : `groups.role.${m.role}`)}</span>}
       {manager && !isOwner && m.userId !== uid.value && (
         <Menu label={t('common.more')} width={220} items={[
-          { icon: 'shield-check', label: t('groups.makeAdmin'), hidden: m.role === 'admin', onClick: () => setMemberRole(group.id, m.userId, 'admin').then(onChange) },
-          { icon: 'user', label: t('groups.makeMember'), hidden: m.role === 'member', onClick: () => setMemberRole(group.id, m.userId, 'member').then(onChange) },
-          { icon: 'user-minus', label: t('groups.remove'), danger: true, onClick: () => removeMember(group, m.userId).then(onChange) },
+          { icon: 'shield-check', label: t('groups.makeAdmin'), hidden: m.role === 'admin', onClick: () => setMemberRole(group.id, m.userId, 'admin').then(onChange).catch(() => toast.error(t('error.permission'))) },
+          { icon: 'user', label: t('groups.makeMember'), hidden: m.role === 'member', onClick: () => setMemberRole(group.id, m.userId, 'member').then(onChange).catch(() => toast.error(t('error.permission'))) },
+          { icon: 'user-minus', label: t('groups.remove'), danger: true, onClick: () => removeMember(group, m.userId).then(onChange).catch(() => toast.error(t('error.permission'))) },
         ]} trigger={(p) => <IconButton {...p} icon="dots-three" label={t('common.more')} size={34} />} />
       )}
     </div>
@@ -175,13 +175,15 @@ export default function GroupPage({ params }) {
   if (!group) return <Card><Empty icon="users-three" title={t('groups.notFound')} action={<Button variant="primary" href="/groups">{t('nav.groups')}</Button>} /></Card>;
   const manager = isAdmin.value || isManagerRole(member?.role) || group.ownerId === uid.value;
   const isMember = !!member;
-  const locked = group.privacy === 'private' && !isMember && !isAdmin.value;
+  // Anything that is not an open group (private or secret) needs approval.
+  const closed = !!group.privacy && group.privacy !== 'public';
+  const locked = closed && !isMember && !isAdmin.value;
 
   const join = async () => {
     if (!requireLogin('group')) return;
     setBusy(true);
     try {
-      if (group.privacy === 'private') { if (request) await cancelJoinRequest(group.id); else { await requestToJoin(group); toast.success(t('groups.requestSent')); } }
+      if (closed) { if (request) await cancelJoinRequest(group.id); else { await requestToJoin(group); toast.success(t('groups.requestSent')); } }
       else { await joinGroup(group); toast.success(t('groups.welcome')); }
     } catch { toast.error(t('common.error')); }
     setBusy(false);
@@ -204,7 +206,7 @@ export default function GroupPage({ params }) {
               </>
             ) : (
               <Button variant={request ? 'secondary' : 'primary'} icon={request ? 'hourglass' : 'user-plus'} loading={busy} onClick={join}>
-                {t(request ? 'groups.cancelRequest' : group.privacy === 'private' ? 'groups.requestJoin' : 'groups.join')}
+                {t(request ? 'groups.cancelRequest' : closed ? 'groups.requestJoin' : 'groups.join')}
               </Button>
             )}
             <Menu label={t('common.more')} width={220} items={[
