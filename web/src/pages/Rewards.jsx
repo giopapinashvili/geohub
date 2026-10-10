@@ -46,8 +46,8 @@ function RedeemDialog({ reward, onClose, onDone }) {
       {done ? (
         <div class="stack center">
           <p>{t('rewards.doneText', { title: st.res.rewardTitle, business: st.res.businessName || t('rewards.partner') })}</p>
-          <code class="coupon-code coupon-code-lg">{st.res.code}</code>
-          <p class="muted small">{t('rewards.newBalance', { n: formatNumber(st.res.newBalance) })}</p>
+          {st.res.code ? <code class="coupon-code coupon-code-lg">{st.res.code}</code> : <p class="small">{t('rewards.doneToast')}</p>}
+          {st.res.newBalance != null && <p class="muted small">{t('rewards.newBalance', { n: formatNumber(st.res.newBalance) })}</p>}
         </div>
       ) : (
         <div class="stack">
