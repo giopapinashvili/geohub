@@ -60,6 +60,7 @@ export const ROUTES = [
   { path: '/invite/:code?', component: page(() => import('./pages/Invite.jsx')), layout: 'bare' },
   { path: '/admin/:section?', component: page(() => import('./pages/Admin.jsx')), layout: 'full', nav: 'admin', auth: true },
   { path: '/about', component: page(() => import('./pages/About.jsx')), layout: 'page', nav: 'about' },
+  { path: '/support', component: page(() => import('./pages/Support.jsx')), layout: 'page', nav: 'support' },
   { path: '/privacy', component: page(() => import('./pages/Legal.jsx')), layout: 'page', props: { doc: 'privacy' } },
   { path: '/terms', component: page(() => import('./pages/Legal.jsx')), layout: 'page', props: { doc: 'terms' } },
 ];

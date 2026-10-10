@@ -4,15 +4,17 @@ import { Button } from '../ui/Button.jsx';
 import { Icon } from '../ui/Icon.jsx';
 import { Select, Switch } from '../ui/Field.jsx';
 import { Card, Empty } from '../ui/misc.jsx';
+import { Confirm } from '../ui/Modal.jsx';
 import { t } from '../lib/i18n.js';
-import { useTitle } from '../lib/hooks.js';
+import { useTitle, useAsync } from '../lib/hooks.js';
 import { navigate } from '../lib/router.js';
-import { profile, authUser, resetPassword, signOut } from '../lib/auth.js';
+import { profile, authUser, uid, resetPassword, signOut } from '../lib/auth.js';
 import { safety } from '../lib/store.js';
 import { toast } from '../lib/toast.js';
 import { updatePrivacy, unblockUser, unmuteUser } from '../data/social.js';
 import { pushSupported, pushState, enablePush } from '../data/push.js';
 import { useUser } from '../features/user/useUser.js';
+import { myDeletionRequest, requestAccountDeletion } from '../data/support.js';
 import { EditProfileDialog } from '../features/user/EditProfileDialog.jsx';
 import { ThemeLangControls } from '../shell/AccountMenu.jsx';
 
@@ -59,15 +61,42 @@ function Notifications() {
   );
 }
 
+/** Ask for the account to be deleted; an admin finishes it within 30 days. */
+function DeleteAccount() {
+  const pending = useAsync(() => myDeletionRequest().catch(() => null), [uid.value]);
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const send = async () => {
+    setBusy(true);
+    try { await requestAccountDeletion(); toast.success(t('settings.deleteSent')); setOpen(false); pending.reload(); }
+    catch { toast.error(t('common.error')); }
+    setBusy(false);
+  };
+  return (
+    <div class="stack">
+      <h2 class="card-title">{t('settings.deleteTitle')}</h2>
+      {pending.data
+        ? <p class="small">{t('settings.deletePending')}</p>
+        : <><p class="muted small">{t('settings.deleteText')}</p>
+            <Button variant="danger" icon="trash" onClick={() => setOpen(true)}>{t('settings.deleteRequest')}</Button></>}
+      <Confirm open={open} onClose={() => setOpen(false)} onConfirm={send} loading={busy} danger
+        title={t('settings.deleteConfirmTitle')} text={t('settings.deleteConfirmText')} confirmLabel={t('settings.deleteRequest')} />
+    </div>
+  );
+}
+
 function Account() {
   const email = authUser.value?.email;
   return (
-    <Card><div class="stack">
-      {email && <div><span class="field-label">{t('biz.email')}</span><p>{email}</p></div>}
-      {email && <Button variant="secondary" icon="key" onClick={() => resetPassword(email).then(() => toast.success(t('settings.resetSent'))).catch(() => toast.error(t('common.error')))}>{t('settings.resetPassword')}</Button>}
-      <Button variant="danger" icon="sign-out" onClick={() => signOut().then(() => navigate('/'))}>{t('settings.signOut')}</Button>
-      <p class="muted small">{t('settings.deleteHint')}</p>
-    </div></Card>
+    <>
+      <Card><div class="stack">
+        {email && <div><span class="field-label">{t('biz.email')}</span><p>{email}</p></div>}
+        {email && <Button variant="secondary" icon="key" onClick={() => resetPassword(email).then(() => toast.success(t('settings.resetSent'))).catch(() => toast.error(t('common.error')))}>{t('settings.resetPassword')}</Button>}
+        <Button variant="secondary" icon="chat-circle-dots" href="/support">{t('nav.support')}</Button>
+        <Button variant="danger" icon="sign-out" onClick={() => signOut().then(() => navigate('/'))}>{t('settings.signOut')}</Button>
+      </div></Card>
+      <Card><DeleteAccount /></Card>
+    </>
   );
 }
 

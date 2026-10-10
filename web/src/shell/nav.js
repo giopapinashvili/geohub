@@ -37,6 +37,7 @@ export const MOBILE_TABS = [
 
 export const FOOTER_LINKS = [
   { href: '/about', label: 'nav.about' },
+  { href: '/support', label: 'nav.support' },
   { href: '/privacy', label: 'nav.privacy' },
   { href: '/terms', label: 'nav.terms' },
   { href: '/about?tab=safety', label: 'nav.safety' },

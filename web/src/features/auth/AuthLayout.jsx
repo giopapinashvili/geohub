@@ -33,7 +33,7 @@ export function AuthLayout({ children }) {
         </div>
         <div class="auth-card">{children}</div>
         <footer class="auth-foot">
-          <a href="/about">{t('nav.about')}</a> · <a href="/privacy">{t('nav.privacy')}</a> · <a href="/terms">{t('nav.terms')}</a> · <a href="/">{t('auth.browse')}</a>
+          <a href="/about">{t('nav.about')}</a> · <a href="/support">{t('nav.support')}</a> · <a href="/privacy">{t('nav.privacy')}</a> · <a href="/terms">{t('nav.terms')}</a> · <a href="/">{t('auth.browse')}</a>
         </footer>
       </section>
     </div>

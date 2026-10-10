@@ -14,6 +14,7 @@ import { navigate } from '../lib/router.js';
 import { toast } from '../lib/toast.js';
 import { searchUsers } from '../data/users.js';
 import { tsToMillis } from '../lib/format.js';
+import { listTickets, setTicketStatus } from '../data/support.js';
 
 const count = (name) => getCountFromServer(collection(db, name)).then((s) => s.data().count).catch(() => 0);
 const TARGET = { post: 'posts', business: 'businesses', marketplace: 'marketplace', user: 'users', comment: null, place: 'places', video: 'videos', group: 'groups' };
@@ -89,7 +90,37 @@ function Flags() {
   );
 }
 
-/** Admin panel: overview, reports, users, flags. Rules enforce admin rights. */
+/** Support requests from the in-app form; account deletions come here too. */
+function Support() {
+  const { data, reload } = useAsync(() => listTickets(), []);
+  const mark = async (tk, status) => {
+    try { await setTicketStatus(tk.id, status); reload(); } catch { toast.error(t('common.error')); }
+  };
+  if (!data) return <Spinner />;
+  if (!data.length) return <Card><Empty compact icon="chat-circle-dots" title={t('admin.noTickets')} /></Card>;
+  return (
+    <Card><div class="ticket-list">{data.map((tk) => (
+      <article key={tk.id} class={`ticket${tk.status === 'done' ? ' is-done' : ''}`}>
+        <div class="row gap-8 wrap">
+          <span class={`tag ${tk.category === 'account_deletion' ? 'tag-danger' : 'tag-accent'}`}>{t(`support.cat.${tk.category}`)}</span>
+          <strong class="grow">{tk.subject || t('support.noSubject')}</strong>
+          <span class="muted xs">{timeAgo(tk.createdAt)}</span>
+        </div>
+        <p class="small ticket-msg">{tk.message}</p>
+        <p class="muted xs">{tk.name || '—'} · {tk.email || '—'}{tk.userId ? ` · ${tk.userId}` : ` · ${t('support.guest')}`}</p>
+        <div class="row gap-8 wrap">
+          {tk.email && <Button size="sm" variant="secondary" icon="envelope-simple" href={`mailto:${tk.email}?subject=${encodeURIComponent(`GeoHub: ${tk.subject || t('support.title')}`)}`}>{t('admin.reply')}</Button>}
+          {tk.userId && <Button size="sm" variant="ghost" href={`/u/${tk.userId}`}>{t('common.open')}</Button>}
+          {tk.status !== 'done'
+            ? <Button size="sm" variant="primary" icon="check" onClick={() => mark(tk, 'done')}>{t('admin.markDone')}</Button>
+            : <Button size="sm" variant="ghost" onClick={() => mark(tk, 'open')}>{t('admin.reopen')}</Button>}
+        </div>
+      </article>
+    ))}</div></Card>
+  );
+}
+
+/** Admin panel: overview, reports, support, users, flags. Rules enforce admin rights. */
 export default function Admin({ params }) {
   useTitle(t('nav.admin'));
   const section = params.section || 'overview';
@@ -99,10 +130,12 @@ export default function Admin({ params }) {
       <h1 class="page-title">{t('nav.admin')}</h1>
       <Tabs variant="pill" value={section} onChange={(v) => navigate(v === 'overview' ? '/admin' : `/admin/${v}`)} label={t('nav.admin')} items={[
         { value: 'overview', label: t('biz.overview'), icon: 'chart-bar' }, { value: 'reports', label: t('admin.reports'), icon: 'flag' },
+        { value: 'support', label: t('admin.support'), icon: 'chat-circle-dots' },
         { value: 'users', label: t('admin.users'), icon: 'users' }, { value: 'flags', label: t('admin.flags'), icon: 'sliders-horizontal' },
       ]} />
       {section === 'overview' && <Overview />}
       {section === 'reports' && <Reports />}
+      {section === 'support' && <Support />}
       {section === 'users' && <Users />}
       {section === 'flags' && <Flags />}
     </div>
