@@ -1119,4 +1119,6 @@ export default {
   'settings.deleteConfirmText': 'ანგარიში და მისი ყველა მონაცემი 30 დღეში სამუდამოდ წაიშლება. ამის შემდეგ აღდგენა შეუძლებელია.',
   'legal.updated': 'ბოლო განახლება: {date}',
   'legal.questions': 'კითხვები გაქვს?',
+  'admin.errors': 'შეცდომები',
+  'admin.noErrors': 'ბოლო დროს შეცდომები არ დაფიქსირებულა',
 };

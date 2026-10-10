@@ -21,6 +21,7 @@ import('./lib/theme.js');
 
 const { App } = await import('./app.jsx');
 render(<App />, document.getElementById('app'));
+import('./lib/errors.js').then((m) => m.initErrorLog()).catch(() => {});
 
 if ('serviceWorker' in navigator && import.meta.env.PROD && import.meta.env.MODE !== 'emulator') {
   window.addEventListener('load', () => {

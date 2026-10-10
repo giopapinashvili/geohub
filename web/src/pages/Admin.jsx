@@ -120,6 +120,22 @@ function Support() {
   );
 }
 
+/** Front-end errors reported from signed-in sessions (lib/errors.js). */
+function Errors() {
+  const { data } = useAsync(() => getDocs(query(collection(db, 'analytics', 'errors', 'log'), limit(200)))
+    .then((s) => s.docs.map((d) => ({ id: d.id, ...d.data(), createdAt: tsToMillis(d.data().createdAt) })).sort((a, b) => b.createdAt - a.createdAt).slice(0, 80)), []);
+  if (!data) return <Spinner />;
+  if (!data.length) return <Card><Empty compact icon="check-circle" title={t('admin.noErrors')} /></Card>;
+  return (
+    <Card><div class="ticket-list">{data.map((e) => (
+      <article key={e.id} class="ticket">
+        <div class="row gap-8 wrap"><code class="grow ticket-msg">{e.message}</code><span class="muted xs">{timeAgo(e.createdAt)}</span></div>
+        <p class="muted xs">{e.page} · {e.ua}</p>
+      </article>
+    ))}</div></Card>
+  );
+}
+
 /** Admin panel: overview, reports, support, users, flags. Rules enforce admin rights. */
 export default function Admin({ params }) {
   useTitle(t('nav.admin'));
@@ -132,12 +148,14 @@ export default function Admin({ params }) {
         { value: 'overview', label: t('biz.overview'), icon: 'chart-bar' }, { value: 'reports', label: t('admin.reports'), icon: 'flag' },
         { value: 'support', label: t('admin.support'), icon: 'chat-circle-dots' },
         { value: 'users', label: t('admin.users'), icon: 'users' }, { value: 'flags', label: t('admin.flags'), icon: 'sliders-horizontal' },
+        { value: 'errors', label: t('admin.errors'), icon: 'warning' },
       ]} />
       {section === 'overview' && <Overview />}
       {section === 'reports' && <Reports />}
       {section === 'support' && <Support />}
       {section === 'users' && <Users />}
       {section === 'flags' && <Flags />}
+      {section === 'errors' && <Errors />}
     </div>
   );
 }

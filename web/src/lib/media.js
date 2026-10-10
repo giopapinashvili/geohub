@@ -6,6 +6,9 @@ import { auth } from './firebase.js';
 
 export const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 export const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
+export const MAX_FILE_BYTES = 20 * 1024 * 1024;
+const RAW_TYPES = /^(application\/(pdf|zip|x-zip-compressed|msword|rtf|vnd\.openxmlformats-officedocument\.[a-z.]+|vnd\.ms-(excel|powerpoint)|vnd\.oasis\.opendocument\.[a-z.]+)|text\/(plain|csv)|audio\/[a-z0-9.+-]+)$/i;
+const RAW_EXT = /\.(pdf|docx?|xlsx?|pptx?|odt|ods|odp|rtf|txt|csv|zip|mp3|m4a|ogg|wav|webm)$/i;
 
 /** Resize a Cloudinary URL on the fly; other URLs pass through untouched. */
 export function img(url, width) {
@@ -61,8 +64,13 @@ export async function upload(file, { folder = 'uploads', onProgress, kind } = {}
     if (!/^image\/(png|jpe?g|webp|gif|heic|heif)$/i.test(file.type)) throw new UploadError('bad-type');
     if (file.size > MAX_IMAGE_BYTES) throw new UploadError('too-large');
     file = await compressImage(file);
-  } else if (type === 'video' && file.size > MAX_VIDEO_BYTES) {
-    throw new UploadError('too-large');
+  } else if (type === 'video') {
+    if (file.type && !/^(video|audio)\//i.test(file.type)) throw new UploadError('bad-type');
+    if (file.size > MAX_VIDEO_BYTES) throw new UploadError('too-large');
+  } else {
+    // Documents sent in chats: common office/PDF/archive/audio types only.
+    if (!RAW_TYPES.test(file.type || '') && !RAW_EXT.test(file.name || '')) throw new UploadError('bad-type');
+    if (file.size > MAX_FILE_BYTES) throw new UploadError('too-large');
   }
   const form = new FormData();
   form.append('file', file);
