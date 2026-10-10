@@ -1121,4 +1121,5 @@ export default {
   'legal.questions': 'კითხვები გაქვს?',
   'admin.errors': 'შეცდომები',
   'admin.noErrors': 'ბოლო დროს შეცდომები არ დაფიქსირებულა',
+  'audience.group': 'ჯგუფის წევრები',
 };

@@ -29,6 +29,7 @@ export const AUDIENCE = {
   friends: { icon: 'users', label: 'audience.friends' },
   followers: { icon: 'user-check', label: 'audience.followers' },
   close_friends: { icon: 'star', label: 'audience.closeFriends' },
+  group: { icon: 'users-three', label: 'audience.group' },
   onlyme: { icon: 'lock', label: 'audience.onlyMe' },
   only_me: { icon: 'lock', label: 'audience.onlyMe' },
   private: { icon: 'lock', label: 'audience.onlyMe' },
