@@ -29,6 +29,7 @@
 .pass-toggle:hover { background: var(--surface-3); color: var(--text); }
 .auth-error { display: flex; align-items: flex-start; gap: 8px; color: var(--danger); background: var(--danger-soft); padding: 10px 12px; border-radius: var(--r-md); font-weight: 500; font-size: var(--fs-sm); }
 .auth-error .icon { margin-top: 1px; }
+.auth-ok { display: flex; align-items: flex-start; gap: 8px; color: var(--success, #15803d); background: var(--success-soft, rgb(34 197 94 / 0.12)); padding: 10px 12px; border-radius: var(--r-md); font-weight: 500; font-size: var(--fs-sm); margin-bottom: 12px; }
 .auth-divider { display: flex; align-items: center; gap: 12px; color: var(--text-3); font-size: var(--fs-sm); }
 .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--divider); }
 .auth-social { display: flex; flex-direction: column; gap: 10px; }

@@ -150,24 +150,28 @@ exports.redeemReward = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Sign in required');
 
   const userId = request.auth.uid;
-  const { rewardId, requestId } = request.data;
+  const { rewardId, requestId } = request.data || {};
 
   if (!rewardId || typeof rewardId !== 'string') {
     throw new HttpsError('invalid-argument', 'rewardId is required');
   }
-
-  // ── Idempotency check ────────────────────────────────────────
-  const cached = await checkIdempotency(userId, requestId);
-  if (cached) return cached;
+  if (requestId != null && (typeof requestId !== 'string' || requestId.length > 100)) {
+    throw new HttpsError('invalid-argument', 'requestId must be a short string');
+  }
 
   const rewardRef = db.collection('rewards').doc(rewardId);
   const userRef   = db.collection('users').doc(userId);
+  // The idempotency marker is read and written inside the same transaction,
+  // so a double click (same requestId) can never charge twice.
+  const doneRef   = requestId ? db.collection('processedRequests').doc(`${userId}_redeem_${requestId}`) : null;
 
-  const result = await db.runTransaction(async (tx) => {
-    const [rewardSnap, userSnap] = await Promise.all([
+  return db.runTransaction(async (tx) => {
+    const [rewardSnap, userSnap, doneSnap] = await Promise.all([
       tx.get(rewardRef),
       tx.get(userRef),
+      doneRef ? tx.get(doneRef) : Promise.resolve(null),
     ]);
+    if (doneSnap && doneSnap.exists) return doneSnap.data().result;
 
     if (!rewardSnap.exists) throw new HttpsError('not-found', 'Reward not found');
 
@@ -178,22 +182,41 @@ exports.redeemReward = onCall(async (request) => {
       throw new HttpsError('failed-precondition', 'This reward is no longer available');
     }
 
-    const stock = rd.stock != null ? Number(rd.stock) : null;
+    // Rewards created by different admin tools name these fields differently.
+    const cost = Number(rd.pointPrice ?? rd.cost ?? rd.pointsCost ?? 0);
+    if (!Number.isFinite(cost) || cost <= 0) {
+      throw new HttpsError('failed-precondition', 'This reward has no price set');
+    }
+    const stockField = rd.quantityRemaining != null ? 'quantityRemaining' : (rd.stock != null ? 'stock' : null);
+    const stock = stockField ? Number(rd[stockField]) : null;
     if (stock !== null && stock <= 0) {
       throw new HttpsError('resource-exhausted', 'This reward is out of stock');
     }
 
-    const cost    = Number(rd.cost || rd.pointsCost || 0);
     const balance = Number(ud.pointsBalance || 0);
-
     if (balance < cost) {
       throw new HttpsError('failed-precondition',
         `Insufficient balance — you have ${balance} pts, need ${cost} pts`);
     }
 
+    // The business owner verifies the coupon at the counter.
+    let businessOwnerId = rd.businessOwnerId || '';
+    let businessName = rd.businessName || '';
+    if (rd.businessId && (!businessOwnerId || !businessName)) {
+      const bizSnap = await tx.get(db.collection('businesses').doc(rd.businessId));
+      if (bizSnap.exists) {
+        const b = bizSnap.data();
+        businessOwnerId = businessOwnerId || b.ownerId || b.createdBy || '';
+        businessName = businessName || b.title || b.name || '';
+      }
+    }
+
     const userRewardRef = db.collection('userRewards').doc();
+    const couponRef     = db.collection('rewardCoupons').doc();
     const txRef         = db.collection('pointTransactions').doc();
     const now           = FieldValue.serverTimestamp();
+    const code          = couponCode();
+    const title         = rd.title || rd.name || 'Reward';
 
     tx.update(userRef, {
       pointsBalance:    FieldValue.increment(-cost),
@@ -201,20 +224,36 @@ exports.redeemReward = onCall(async (request) => {
       updatedAt:        now,
     });
 
-    if (stock !== null) {
-      tx.update(rewardRef, { stock: FieldValue.increment(-1), updatedAt: now });
+    if (stockField) {
+      tx.update(rewardRef, { [stockField]: FieldValue.increment(-1), updatedAt: now });
     }
 
     tx.set(userRewardRef, {
       userId,
       rewardId,
-      rewardTitle: rd.title || 'Reward',
+      rewardTitle: title,
       cost,
+      couponId:    couponRef.id,
+      code,
       status:      'active',
       source:      'redeemReward',
       redeemedAt:  now,
       createdAt:   now,
       createdBy:   userId,
+    });
+
+    tx.set(couponRef, {
+      userId,
+      rewardId,
+      rewardTitle:     title,
+      businessId:      rd.businessId || '',
+      businessName,
+      businessOwnerId,
+      code,
+      pointPrice:      cost,
+      status:          'active',
+      userRewardId:    userRewardRef.id,
+      createdAt:       now,
     });
 
     tx.set(txRef, {
@@ -223,7 +262,7 @@ exports.redeemReward = onCall(async (request) => {
       toUserId:       null,
       amount:         cost,
       rewardId,
-      rewardTitle:    rd.title || 'Reward',
+      rewardTitle:    title,
       source:         'redeemReward',
       status:         'completed',
       participantIds: [userId],
@@ -231,12 +270,23 @@ exports.redeemReward = onCall(async (request) => {
       createdBy:      userId,
     });
 
-    return { success: true, rewardTitle: rd.title || 'Reward', cost, newBalance: balance - cost };
+    const result = {
+      success: true, rewardTitle: title, cost, newBalance: balance - cost,
+      code, couponId: couponRef.id, businessName,
+    };
+    if (doneRef) tx.set(doneRef, { result, createdAt: now });
+    return result;
   });
-
-  saveIdempotencyResult(userId, requestId, result);
-  return result;
 });
+
+/* Readable coupon code: no 0/O/1/I so it can be read out at a counter. */
+function couponCode() {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const bytes = require('crypto').randomBytes(8);
+  let out = 'GH-';
+  for (let i = 0; i < 8; i++) out += alphabet[bytes[i] % alphabet.length];
+  return out;
+}
 
 /* ─────────────────────────────────────────────────────────────────
    adminAdjustPoints

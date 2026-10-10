@@ -24,6 +24,7 @@ import { Stars } from '../features/places/Stars.jsx';
 import { ConversationRow } from '../features/messages/ConversationRow.jsx';
 import { Thread } from '../features/messages/Thread.jsx';
 import { useUser } from '../features/user/useUser.js';
+import { findCouponForMe, markCouponUsed } from '../data/rewards.js';
 
 function FollowerRow({ f }) {
   const u = useUser(f.userId);
@@ -241,6 +242,49 @@ function Offers({ biz }) {
   );
 }
 
+/** At the counter: check a GeoPoints coupon code and mark it used. */
+function CouponCheck() {
+  const [code, setCode] = useState('');
+  const [st, setSt] = useState({ step: 'idle' });
+  const check = async (e) => {
+    e?.preventDefault();
+    if (!code.trim()) return;
+    setSt({ step: 'busy' });
+    try {
+      const c = await findCouponForMe(code);
+      setSt(c ? { step: 'found', coupon: c } : { step: 'none' });
+    } catch { setSt({ step: 'error' }); }
+  };
+  const use = async () => {
+    setSt((x) => ({ ...x, using: true }));
+    try {
+      await markCouponUsed(st.coupon);
+      setSt({ step: 'found', coupon: { ...st.coupon, status: 'used' } });
+      toast.success(t('coupon.markedUsed'));
+    } catch { setSt((x) => ({ ...x, using: false })); toast.error(t('common.error')); }
+  };
+  const c = st.coupon;
+  return (
+    <Card>
+      <h2 class="card-title">{t('coupon.checkTitle')}</h2>
+      <p class="muted small">{t('coupon.checkText')}</p>
+      <form class="row gap-8 wrap" onSubmit={check}>
+        <div class="grow"><TextField label={t('coupon.code')} value={code} onInput={(e) => setCode(e.currentTarget.value.toUpperCase())} maxLength={20} placeholder="GH-XXXXXXXX" /></div>
+        <Button type="submit" variant="primary" icon="magnifying-glass" loading={st.step === 'busy'}>{t('coupon.check')}</Button>
+      </form>
+      {st.step === 'none' && <p class="field-error" role="alert">{t('coupon.notFound')}</p>}
+      {st.step === 'error' && <p class="field-error" role="alert">{t('common.error')}</p>}
+      {st.step === 'found' && (
+        <div class="service-row">
+          <span class="offer-ico"><Icon name="ticket" size={24} /></span>
+          <div class="grow"><strong>{c.rewardTitle}</strong><p class="muted small">{c.code} · {t(c.status === 'active' ? 'coupon.active' : 'coupon.used')}</p></div>
+          {c.status === 'active' && <Button variant="primary" icon="check" loading={!!st.using} onClick={use}>{t('coupon.markUsed')}</Button>}
+        </div>
+      )}
+    </Card>
+  );
+}
+
 function Reviews({ biz }) {
   const [list, setList] = useState(null);
   const [replying, setReplying] = useState(null);
@@ -360,7 +404,7 @@ export default function BusinessManage({ params }) {
         {tab === 'edit' && <><Edit biz={biz} /><Danger biz={biz} /></>}
         {tab === 'services' && <Services biz={biz} />}
         {tab === 'photos' && <Photos biz={biz} />}
-        {tab === 'offers' && <Offers biz={biz} />}
+        {tab === 'offers' && <><Offers biz={biz} /><CouponCheck /></>}
         {tab === 'reviews' && <Reviews biz={biz} />}
         {tab === 'quotes' && <Quotes biz={biz} />}
       </div>

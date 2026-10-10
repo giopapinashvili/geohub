@@ -180,6 +180,10 @@ export async function unfriend(target) {
   await Promise.all([
     deleteDoc(doc(db, 'friends', fid)).catch(() => {}),
     deleteDoc(doc(db, 'friendships', fid)).catch(() => {}),
+    // An accepted request is what allows a friendship document; remove both
+    // directions so the friendship cannot be re-created without a new "yes".
+    deleteDoc(doc(db, 'friendRequests', `${id}_${target}`)).catch(() => {}),
+    deleteDoc(doc(db, 'friendRequests', `${target}_${id}`)).catch(() => {}),
   ]);
   updateDoc(doc(db, 'users', id), { friendsCount: increment(-1) }).catch(() => {});
 }

@@ -196,18 +196,35 @@ export async function signIn(email, password) {
   return cred.user;
 }
 
-export async function signUp({ email, password, fullName, username, city, accountType, interests }) {
+/**
+ * The verification mail's "continue" button brings the person back to sign
+ * in, keeping the page they were heading to. Falls back to Firebase's own
+ * page if this domain is not on the project's authorised list.
+ */
+function verifySettings(next) {
+  const safe = next && next.startsWith('/') && !next.startsWith('//') ? next : '';
+  return { url: `${location.origin}/login?verified=1${safe ? `&next=${encodeURIComponent(safe)}` : ''}` };
+}
+async function sendVerification(user, next) {
+  try { await sendEmailVerification(user, verifySettings(next)); }
+  catch (e) {
+    if (e.code === 'auth/unauthorized-continue-uri' || e.code === 'auth/invalid-continue-uri') await sendEmailVerification(user);
+    else throw e;
+  }
+}
+
+export async function signUp({ email, password, fullName, username, city, accountType, interests, next }) {
   const uname = (username || '').trim().toLowerCase();
   if (uname && !(await isUsernameAvailable(uname))) throw new AuthError('username-taken');
   flowInProgress = true;
   try {
-    return await createAccount({ email, password, fullName, uname, city, accountType, interests });
+    return await createAccount({ email, password, fullName, uname, city, accountType, interests, next });
   } finally {
     flowInProgress = false;
   }
 }
 
-async function createAccount({ email, password, fullName, uname, city, accountType, interests }) {
+async function createAccount({ email, password, fullName, uname, city, accountType, interests, next }) {
   const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
   const u = cred.user;
   if (fullName) await updateProfile(u, { displayName: fullName });
@@ -221,7 +238,7 @@ async function createAccount({ email, password, fullName, uname, city, accountTy
   // The account exists either way; tell the person whether the mail left.
   let verificationSent = true;
   let verificationError = null;
-  try { await sendEmailVerification(u); } catch (e) {
+  try { await sendVerification(u, next); } catch (e) {
     verificationSent = false;
     verificationError = e.code || 'unknown';
     console.warn('[auth] verification mail', e.code);
@@ -256,13 +273,12 @@ export function signInWithFacebook() {
   return socialLogin(p);
 }
 
-export async function resendVerification(email, password) {
+export async function resendVerification(email, password, next) {
   flowInProgress = true;
   try {
     const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
     if (cred.user.emailVerified) return { alreadyVerified: true };
-    await sendEmailVerification(cred.user);
-    await fbSignOut(auth);
+    try { await sendVerification(cred.user, next); } finally { await fbSignOut(auth).catch(() => {}); }
     return { sent: true };
   } finally {
     flowInProgress = false;

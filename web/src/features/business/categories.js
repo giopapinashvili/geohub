@@ -144,9 +144,27 @@ export const BIZ_CATEGORIES = Object.entries(RAW).flatMap(([group, list]) => lis
 const BY_ID = Object.fromEntries(BIZ_CATEGORIES.map((c) => [c.id, c]));
 const BY_KA = Object.fromEntries(BIZ_CATEGORIES.map((c) => [c.ka, c]));
 
+// Values older pages and seed scripts stored (singular ids, free-text
+// English labels). Matching them keeps those businesses in their category.
+const LEGACY = {
+  cafe: 'cafes', coffee: 'cafes', 'coffee-shop': 'cafes', 'coffee-house': 'cafes',
+  restaurant: 'restaurants', food: 'restaurants', bar: 'bars', pub: 'bars', wine: 'wine-bar', winery: 'wine-tour',
+  hotel: 'hotels', 'hotels-accommodation': 'hotels', accommodation: 'hotels', guesthouse: 'guesthouses', 'guest-house': 'guesthouses',
+  apartment: 'apartments', tour: 'tours', 'tours-travel': 'tours', travel: 'tours', 'winery-tours': 'wine-tour',
+  'wine-bar-1': 'wine-bar', 'wine-and-bar': 'wine-bar', 'food-delivery': 'food-delivery',
+  fitness: 'gym', 'fitness-health': 'gym', 'health-pharmacy': 'pharmacy', health: 'clinic', dentist: 'dental',
+  salon: 'beauty', 'beauty-salon': 'beauty', 'it-technology': 'it-services', technology: 'it-services', it: 'it-services',
+  'design-creative': 'marketing', design: 'marketing', 'co-working-events': 'event-venue', coworking: 'event-venue',
+  shop: 'clothing', store: 'clothing', school: 'tutoring', education: 'tutoring',
+};
+const slug = (v) => String(v).trim().toLowerCase().replace(/&/g, ' ').replace(/[\s_/]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+
 export function bizCategory(value) {
   if (!value) return null;
-  return BY_ID[value] || BY_KA[value] || BIZ_CATEGORIES.find((c) => c.en.toLowerCase() === String(value).toLowerCase()) || null;
+  const direct = BY_ID[value] || BY_KA[value] || BIZ_CATEGORIES.find((c) => c.en.toLowerCase() === String(value).toLowerCase());
+  if (direct) return direct;
+  const k = slug(value);
+  return BY_ID[k] || BY_ID[LEGACY[k]] || BY_ID[`${k}s`] || BY_ID[k.replace(/ies$/, 'y')] || BY_ID[k.replace(/s$/, '')] || BY_ID[k.replace(/es$/, '')] || null;
 }
 
 /** Display label for a stored category (an id, or free text from older pages). */

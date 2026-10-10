@@ -4,14 +4,47 @@ import { TextField, Select } from '../ui/Field.jsx';
 import { Icon } from '../ui/Icon.jsx';
 import { t } from '../lib/i18n.js';
 import { useTitle, useDebounced } from '../lib/hooks.js';
-import { navigate } from '../lib/router.js';
+import { navigate, query } from '../lib/router.js';
 import { toast } from '../lib/toast.js';
 import { cityOptions } from '../lib/geo.js';
-import { signUp, signInWithGoogle, signInWithFacebook, isUsernameAvailable, authErrorKey, signedIn, profile } from '../lib/auth.js';
+import { signUp, signInWithGoogle, signInWithFacebook, isUsernameAvailable, authErrorKey, signedIn, profile, resendVerification } from '../lib/auth.js';
 import { AuthLayout, SocialButtons } from '../features/auth/AuthLayout.jsx';
 import { afterAuthTarget } from './Login.jsx';
 
 const USERNAME = /^[a-z0-9_.]{3,24}$/;
+
+/**
+ * After sign-up: say plainly whether the confirmation mail left, and let the
+ * person send it again (the account already exists either way).
+ */
+function SignupDone({ result, email, password }) {
+  const [sent, setSent] = useState(result.verificationSent);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState(result.verificationSent ? '' : t(authErrorKey({ code: result.verificationError })));
+  const next = query.value.get('next') || '';
+  const resend = async () => {
+    setBusy(true); setErr('');
+    try {
+      const r = await resendVerification(email, password, next);
+      setSent(true);
+      toast.success(t(r.alreadyVerified ? 'auth.alreadyVerified' : 'auth.resent'));
+    } catch (e) { setErr(t(authErrorKey(e))); }
+    setBusy(false);
+  };
+  return (
+    <AuthLayout>
+      <div class="auth-sent">
+        <span class="auth-sent-icon"><Icon name={sent ? 'envelope' : 'warning'} size={40} /></span>
+        <h1 class="auth-title">{t(sent ? 'auth.verifyTitle' : 'auth.verifyFailedTitle')}</h1>
+        <p class="muted">{t(sent ? 'auth.verifyText' : 'auth.verifyFailedText', { email: result.email })}</p>
+        {err && <p class="auth-error" role="alert"><Icon name="warning" size={18} />{err}</p>}
+        <Button variant="primary" size="lg" block href={`/login${next ? `?next=${encodeURIComponent(next)}` : ''}`}>{t('auth.signIn')}</Button>
+        <Button variant="secondary" size="lg" block loading={busy} onClick={resend}>{t(sent ? 'auth.resend' : 'auth.sendAgain')}</Button>
+        {sent && <p class="muted small">{t('auth.checkSpam')}</p>}
+      </div>
+    </AuthLayout>
+  );
+}
 
 export default function Signup() {
   useTitle(t('auth.signUp'));
@@ -40,7 +73,7 @@ export default function Signup() {
     if (form.username && !USERNAME.test(form.username)) { setError(t('auth.usernameHint')); return; }
     if (avail === 'taken') { setError(t('auth.err.usernameTaken')); return; }
     setBusy('email');
-    try { const r = await signUp({ ...form, fullName: form.fullName.trim() }); setDone(r.email); }
+    try { const r = await signUp({ ...form, fullName: form.fullName.trim(), next: query.value.get('next') || '' }); setDone(r); }
     catch (err) { setError(t(authErrorKey(err))); }
     setBusy('');
   };
@@ -50,19 +83,7 @@ export default function Signup() {
     setBusy('');
   };
 
-  if (done) {
-    return (
-      <AuthLayout>
-        <div class="auth-sent">
-          <span class="auth-sent-icon"><Icon name="envelope" size={40} /></span>
-          <h1 class="auth-title">{t('auth.verifyTitle')}</h1>
-          <p class="muted">{t('auth.verifyText', { email: done })}</p>
-          <Button variant="primary" size="lg" block href="/login">{t('auth.signIn')}</Button>
-          <button type="button" class="link" onClick={() => toast(t('auth.resendHint'))}>{t('auth.noEmail')}</button>
-        </div>
-      </AuthLayout>
-    );
-  }
+  if (done) return <SignupDone result={done} email={form.email} password={form.password} />;
 
   const unameHint = avail === 'free' ? <span class="ok-text">✓ {t('auth.usernameFree')}</span> : avail === 'taken' ? null : t('auth.usernameHint');
   return (

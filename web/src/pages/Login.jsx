@@ -73,7 +73,7 @@ export default function Login() {
     setBusy('');
   };
   const resend = async () => {
-    try { const r = await resendVerification(email, password); toast.success(t(r.alreadyVerified ? 'auth.alreadyVerified' : 'auth.resent')); }
+    try { const r = await resendVerification(email, password, query.value.get('next') || ''); toast.success(t(r.alreadyVerified ? 'auth.alreadyVerified' : 'auth.resent')); }
     catch (err) { toast.error(t(authErrorKey(err))); }
   };
 
@@ -81,6 +81,7 @@ export default function Login() {
     <AuthLayout>
       <h1 class="auth-title">{t('auth.welcomeBack')}</h1>
       <p class="auth-sub">{t('auth.signInSub')}</p>
+      {query.value.get('verified') === '1' && <p class="auth-ok" role="status"><Icon name="check-circle" size={18} />{t('auth.verifiedNow')}</p>}
       <form class="auth-form" onSubmit={submit} noValidate>
         <TextField label={t('auth.email')} type="email" autoComplete="email" icon="envelope" value={email} onInput={(e) => setEmail(e.currentTarget.value)} required autoFocus />
         <div class="field">

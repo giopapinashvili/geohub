@@ -99,3 +99,6 @@
 .call-btn:active .call-btn-ico { transform: scale(0.92); }
 .call-btn.is-on .call-btn-ico { background: #fff; color: #0b1220; }
 .thread-call { color: var(--brand-text); }
+.coupon-code-lg { display: inline-block; font-size: var(--fs-2xl); padding: 10px 18px; letter-spacing: 0.12em; user-select: all; }
+.service-row.is-used { opacity: 0.55; }
+.stack.center { align-items: center; text-align: center; }

@@ -51,6 +51,12 @@ function Directory() {
       && (!needle || `${b.name} ${b.description} ${bizCategoryLabel(b.category)} ${b.tags.join(' ')}`.toLowerCase().includes(needle)))
       .sort((a, b) => (b.verified - a.verified) || (b.rating * 20 + b.followerCount) - (a.rating * 20 + a.followerCount));
   }, [all, q, group, city]);
+  // Only offer categories that actually have pages (an empty chip is a dead end).
+  const groups = useMemo(() => {
+    if (!all) return BIZ_GROUPS;
+    const used = new Set(all.map((b) => bizCategory(b.category)?.group).filter(Boolean));
+    return BIZ_GROUPS.filter((g) => used.has(g) || g === group);
+  }, [all, group]);
   return (
     <div class="stack">
       <div class="biz-filters">
@@ -59,7 +65,7 @@ function Directory() {
       </div>
       <div class="chip-row" role="toolbar" aria-label={t('biz.category')}>
         <button type="button" class={`chip${!group ? ' is-active' : ''}`} onClick={() => setQuery({ group: null })}>{t('common.all')}</button>
-        {BIZ_GROUPS.map((g) => (
+        {groups.map((g) => (
           <button key={g} type="button" class={`chip${group === g ? ' is-active' : ''}`} onClick={() => setQuery({ group: group === g ? null : g })}><span aria-hidden="true">{GROUP_ICON[g]}</span>{bizGroupLabel(g)}</button>
         ))}
       </div>
