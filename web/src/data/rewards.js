@@ -2,7 +2,7 @@
 // it charges the points, issues the coupon and refuses a second charge for
 // the same request id. Clients can never mint coupons (rules: admin only).
 
-import { collection, query, where, limit, getDocs, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, limit, getDocs, getDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db, app, EMULATOR } from '../lib/firebase.js';
 import { uid as myUid } from '../lib/auth.js';
 import { tsToMillis } from '../lib/format.js';
@@ -15,6 +15,20 @@ async function callable(name) {
     if (EMULATOR) connectFunctionsEmulator(functions, location.hostname || '127.0.0.1', 5001);
   }
   return httpsCallable(functions, name);
+}
+
+/**
+ * Redeeming needs the redeemReward Cloud Function, and Cloud Functions need
+ * the Firebase Blaze plan. Until the function is deployed, meta/features has
+ * no `redeem: true` and the page says redemption opens soon (set it with
+ * `node web/tools/admin-deploy.mjs enable-redeem` after deploying).
+ */
+let redeemLive = null;
+export async function redeemEnabled() {
+  if (redeemLive === null) {
+    redeemLive = getDoc(doc(db, 'meta', 'features')).then((s) => !!(s.exists() && s.data().redeem === true)).catch(() => false);
+  }
+  return redeemLive;
 }
 
 /** Rewards created by different admin tools name these fields differently. */

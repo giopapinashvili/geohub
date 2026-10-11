@@ -76,12 +76,24 @@ all of its results, or Firestore rejects the whole query.
 New queries need their indexes, the new site calls the new `redeemReward`,
 and the new rules reject old clients' queries, so:
 
-1. `npx firebase deploy --only firestore:indexes,functions` — then wait until
-   every index shows "Enabled" (Firebase console → Firestore → Indexes).
+1. `npx firebase deploy --only firestore:indexes` — then wait until every
+   index is READY (`node web/tools/admin-deploy.mjs list-indexes`, or Firebase
+   console → Firestore → Indexes).
 2. `node web/tools/migrate-privacy.mjs` (dry run) → check the summary →
    `node web/tools/migrate-privacy.mjs --apply` (needs `serviceAccountKey.json`).
 3. Publish the site (merge to `master`; Cloudflare Pages serves `dist/`).
-4. `npx firebase deploy --only firestore:rules`.
-5. Cloudinary console → Settings → Upload → preset `geohub_unsigned`: allow only
+4. `node web/tools/admin-deploy.mjs release-rules` (saves the live rules to
+   `firestore.rules.production-<time>` first; `rollback-rules <file>` undoes it)
+   or `npx firebase deploy --only firestore:rules`.
+5. Run the migration once more (`--apply`): it is idempotent and fixes posts,
+   stories and profiles that old browser tabs wrote during the switch.
+6. Cloudinary console → Settings → Upload → preset `geohub_unsigned`: allow only
    image/video/audio/pdf formats, set a max file size (e.g. 100 MB) and keep the
    `geohub/` folder — the browser checks alone cannot stop direct uploads.
+
+Cloud Functions (`functions/`: redeemReward, transferPoints, …) need the
+Firebase **Blaze** plan; the project is on Spark, so none are deployed. Until
+then reward redemption stays off: the Rewards page offers it only when
+`meta/features.redeem` is true. After upgrading, run
+`npx firebase deploy --only functions:redeemReward` and then
+`node web/tools/admin-deploy.mjs enable-redeem`.

@@ -1069,6 +1069,7 @@ export default {
   'rewards.newBalance': 'დარჩენილი ბალანსი: {n} ქულა',
   'rewards.doneToast': 'კუპონი შენახულია „ჩემ კუპონებში“',
   'rewards.soldOut': 'ამოიწურა',
+  'rewards.redeemSoon': 'ქულების გაცვლა მალე ჩაირთვება. ქულები შენთან ინახება.',
   'rewards.used': 'გამოყენებული',
   'rewards.err.login': 'ჯილდოს გამოსაყენებლად შედი ანგარიშზე.',
   'rewards.err.soldOut': 'ეს ჯილდო ამოიწურა.',

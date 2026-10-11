@@ -9,6 +9,8 @@
 //   node web/tools/admin-deploy.mjs backup-rules    save the live rules to firestore.rules.production-<time>
 //   node web/tools/admin-deploy.mjs release-rules   save the live rules, then compile and release firestore.rules
 //   node web/tools/admin-deploy.mjs rollback-rules <file>   release an earlier saved rules file
+//   node web/tools/admin-deploy.mjs enable-redeem   turn on reward redemption (after redeemReward is deployed)
+//   node web/tools/admin-deploy.mjs disable-redeem  turn it off again
 //   node web/tools/admin-deploy.mjs fix-reward-prices   copy pointPrice → cost on rewards (for the old function)
 
 import { initializeApp, cert } from 'firebase-admin/app';
@@ -122,6 +124,14 @@ async function main() {
     return;
   }
   if (cmd === 'indexes') { await indexes(); return; }
+  if (cmd === 'enable-redeem' || cmd === 'disable-redeem') {
+    // The Rewards page offers redemption only when meta/features.redeem is true
+    // (the redeemReward Cloud Function must be deployed — Blaze plan).
+    const on = cmd === 'enable-redeem';
+    await getFirestore().doc('meta/features').set({ redeem: on, updatedAt: new Date() }, { merge: true });
+    console.log(`meta/features.redeem = ${on}`);
+    return;
+  }
   if (cmd === 'fix-reward-prices') {
     const db = getFirestore();
     const snap = await db.collection('rewards').get();
@@ -133,7 +143,7 @@ async function main() {
     console.log(`rewards updated with cost: ${n}`);
     return;
   }
-  console.error('Usage: node web/tools/admin-deploy.mjs list-indexes | backup-rules | check-rules | indexes | release-rules | rollback-rules <file> | fix-reward-prices');
+  console.error('Usage: node web/tools/admin-deploy.mjs list-indexes | backup-rules | check-rules | indexes | release-rules | rollback-rules <file> | enable-redeem | disable-redeem | fix-reward-prices');
   process.exitCode = 2;
 }
 

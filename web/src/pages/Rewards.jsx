@@ -10,7 +10,7 @@ import { t, formatNumber } from '../lib/i18n.js';
 import { useTitle, useAsync } from '../lib/hooks.js';
 import { query as q, setQuery } from '../lib/router.js';
 import { requireLogin } from '../lib/store.js';
-import { rewardCost, rewardStock, newRequestId, redeemReward, redeemErrorKey, myCoupons } from '../data/rewards.js';
+import { rewardCost, rewardStock, newRequestId, redeemReward, redeemErrorKey, myCoupons, redeemEnabled } from '../data/rewards.js';
 import { uid, profile } from '../lib/auth.js';
 import { toast } from '../lib/toast.js';
 import { codeFor } from '../data/referrals.js';
@@ -68,6 +68,7 @@ export default function Rewards() {
   const coupons = useAsync(() => (tab === 'coupons' && uid.value ? loadCoupons() : Promise.resolve(null)), [tab, uid.value]);
   const [code, setCode] = useState('');
   const [redeeming, setRedeeming] = useState(null);
+  const live = useAsync(redeemEnabled, []);
   useEffect(() => { if (uid.value) setCode(codeFor(uid.value)); }, [uid.value]);
   const points = profile.value?.points || 0;
   return (
@@ -100,7 +101,7 @@ export default function Rewards() {
                 {r.businessName && <a href={r.businessId ? `/business/${r.businessId}` : '#'} class="muted small">{r.businessName}</a>}
                 <span class="row gap-8 wrap small"><span class="tag tag-accent"><Icon name="coins" size={12} />{formatNumber(cost)}</span>{left != null && <span class="muted">{t('rewards.left', { n: left })}</span>}</span>
                 <Button size="sm" variant={points >= cost && !soldOut ? 'primary' : 'secondary'} disabled={soldOut || (uid.value && points < cost)}
-                  onClick={() => { if (requireLogin('rewards')) setRedeeming(r); }}>
+                  onClick={() => { if (!requireLogin('rewards')) return; if (live.data) setRedeeming(r); else toast(t('rewards.redeemSoon')); }}>
                   {t(soldOut ? 'rewards.soldOut' : !uid.value || points >= cost ? 'rewards.redeem' : 'rewards.needMore')}
                 </Button>
               </span>
