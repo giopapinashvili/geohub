@@ -59,7 +59,9 @@ async function listIndexes() {
 }
 
 async function indexes() {
-  const wanted = JSON.parse(readFileSync('firestore.indexes.json', 'utf8')).indexes;
+  // Compare without __name__ on both sides (some entries in the file list it explicitly).
+  const wanted = JSON.parse(readFileSync('firestore.indexes.json', 'utf8')).indexes
+    .map((w) => ({ ...w, fields: w.fields.filter((f) => f.fieldPath !== '__name__') }));
   let have = await listIndexes();
   const find = (w) => have.find((h) => h.cg === w.collectionGroup && h.scope === (w.queryScope || 'COLLECTION') && sameFields(h.fields, w.fields));
   let created = 0;
