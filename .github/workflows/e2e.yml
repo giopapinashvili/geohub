@@ -2,9 +2,10 @@ name: Checks
 
 on:
   push:
-    branches: [master]
+    branches: [master, geohub-fixes]
   pull_request:
     branches: [master]
+  workflow_dispatch:
 
 jobs:
   checks:
