@@ -4,10 +4,14 @@
 // signs up, verifies its email and signs in.
 //   npm run dev:emulator & node web/tools/e2e-flows.mjs
 import { chromium } from 'playwright';
+import { existsSync } from 'node:fs';
+
+// CI installs Playwright's own Chromium; locally a preinstalled one may be used.
+const CHROME = process.env.CHROME_PATH || ['/opt/pw-browsers/chromium-1194/chrome-linux/chrome'].find((f) => existsSync(f));
 
 const BASE = 'http://127.0.0.1:5173';
 const AUTH = 'http://127.0.0.1:9099';
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const browser = await chromium.launch({ ...(CHROME ? { executablePath: CHROME } : {}) });
 const ctx = {};
 let pass = 0; let fail = 0;
 
@@ -161,8 +165,18 @@ await step('A sees the page inbox and page notifications', A, `
   const n = await once((cb) => api.notify.listenBusinessNotifications('b_cafe', cb)); ${expect('n && n.length', 'no page notifications')}
   api.actor.setActor(null);`);
 
+console.log('Privacy and support');
+await step('A picks close friends and posts to them', A, `await api.users.saveCloseFriends([ctx.B]); const p = await api.posts.createPost({ text: 'QA ახლო მეგობრებს', visibility: 'close_friends', closeFriendIds: [ctx.B] }); return { closePost: p.id };`);
+await step('B (on the list) sees the close-friends post', B, `const p = await api.posts.getPost(ctx.closePost); ${expect('p && p.id === ctx.closePost', 'B cannot see it')}`);
+await step('C (not on the list) cannot see it', C, `let seen = false; try { seen = !!(await api.posts.getPost(ctx.closePost)); } catch { seen = false; } ${expect('!seen', 'C could see a close-friends post')}`);
+await step('A sees own posts newest first on the profile', A, `const l = await once((cb) => api.posts.listenUserPosts(ctx.A, cb, 40, {}), (d) => d && d.length > 1); ${expect('l && l.every((p, i) => i === 0 || l[i - 1].createdAt >= p.createdAt)', 'profile not newest first')}`);
+await step('C sends a support request', C, `await api.support.sendTicket({ category: 'help', subject: 'QA', message: 'QA support request from the e2e test' });`);
+await step('C asks to delete the account and sees it pending', C, `await api.support.requestAccountDeletion('QA'); const r = await api.support.myDeletionRequest(); ${expect('r && r.category === \'account_deletion\'', 'deletion request not found')}`);
+
 console.log('Cleanup');
 await step('A deletes the photo post', A, `await api.posts.deletePost(ctx.photoPost);`);
+await step('A deletes the close-friends post', A, `await api.posts.deletePost(ctx.closePost);`);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 await browser.close();
+process.exit(fail ? 1 : 0);

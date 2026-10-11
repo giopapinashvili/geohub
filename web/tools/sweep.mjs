@@ -2,12 +2,16 @@
 // horizontal overflow, page errors and console errors.
 //   node web/tools/sweep.mjs [--as=nino] [--theme=dark]
 import { chromium } from 'playwright';
+import { existsSync } from 'node:fs';
+
+// CI installs Playwright's own Chromium; locally a preinstalled one may be used.
+const CHROME = process.env.CHROME_PATH || ['/opt/pw-browsers/chromium-1194/chrome-linux/chrome'].find((f) => existsSync(f));
 
 const args = Object.fromEntries(process.argv.slice(2).map((a) => { const [k, v] = a.replace(/^--/, '').split('='); return [k, v ?? '1']; }));
 const base = args.base || 'http://127.0.0.1:5173';
 const widths = (args.w || '360,768,1024,1440').split(',').map(Number);
 const routes = (args.routes || '/,/post/p1,/reels,/video,/watch/v1,/video/channel/ch_travel,/explore,/search?q=თბ,/map,/place/pl_gergeti,/u/u_nino,/messages,/notifications,/friends,/saved,/business,/business/new,/business/b_cafe,/business/b_cafe/manage,/events,/events/e_jazz,/groups,/groups/g_hikers,/marketplace,/marketplace/new,/marketplace/m1,/rewards,/premium,/settings/privacy,/menu,/admin,/about,/privacy,/terms,/nope,/login,/signup,/profile.html?id=u_nino').split(',');
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const browser = await chromium.launch({ ...(CHROME ? { executablePath: CHROME } : {}) });
 let problems = 0;
 for (const w of widths) {
   const ctx = await browser.newContext({ viewport: { width: w, height: 860 }, colorScheme: args.theme || 'light' });
@@ -41,3 +45,4 @@ for (const w of widths) {
 }
 console.log(problems ? `${problems} problem(s)` : 'clean');
 await browser.close();
+process.exit(problems ? 1 : 0);

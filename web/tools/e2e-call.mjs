@@ -2,9 +2,13 @@
 // nino calls giorgi, giorgi answers, media flows both ways, mute, hang up;
 // then a second call that giorgi declines.
 import { chromium } from 'playwright';
+import { existsSync } from 'node:fs';
+
+// CI installs Playwright's own Chromium; locally a preinstalled one may be used.
+const CHROME = process.env.CHROME_PATH || ['/opt/pw-browsers/chromium-1194/chrome-linux/chrome'].find((f) => existsSync(f));
 
 const browser = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  ...(CHROME ? { executablePath: CHROME } : {}),
   args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'],
 });
 async function open(email) {
@@ -52,3 +56,4 @@ check('nino is told the call was declined', sa?.reason === 'declined' || !sa, sa
 
 console.log(`\n${ok} passed, ${bad} failed`);
 await browser.close();
+process.exit(bad ? 1 : 0);

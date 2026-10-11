@@ -170,6 +170,9 @@ export function listenMessages(cid, onData, n = 80) {
         mediaUrl: x.mediaUrl || x.imageUrl || '',
         mediaType: x.mediaType || '',
         attachments: Array.isArray(x.attachments) ? x.attachments : [],
+        // Older voice messages kept the recording outside attachments.
+        audioUrl: x.audioUrl || x.voiceUrl || (x.mediaType === 'audio' ? x.mediaUrl || '' : ''),
+        audioDuration: Number(x.duration || x.audioDuration) || 0,
         replyTo: x.replyTo || null,
         reactions: x.reactions && typeof x.reactions === 'object' && !Array.isArray(x.reactions) ? x.reactions : {},
         deletedForEveryone: !!(x.deletedForEveryone || x.deleted),

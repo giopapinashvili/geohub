@@ -45,3 +45,23 @@ jobs:
       - run: npm ci
       - name: Allowed and refused reads/writes against firestore.rules
         run: npm run test:rules
+
+  e2e:
+    name: End-to-end flows (emulators, production rules)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - run: npm ci
+      - name: Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Feature flows, page sweep and calls (three test accounts)
+        run: npm run test:e2e:ci

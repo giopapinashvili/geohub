@@ -160,6 +160,7 @@ async function seedStories() {
     await db.doc(`stories/${s.id}`).set({
       text: s.text, mediaUrl: s.mediaUrl, authorId: s.by, userId: s.by, authorName: a.name, authorAvatar: a.avatar || '',
       createdAt: ts(s.ago), expiresAt: Timestamp.fromMillis(NOW - s.ago + D), duration: '24h', viewedBy: s.viewedBy || [], viewCount: (s.viewedBy || []).length,
+      closeFriends: false, // public stories carry it explicitly (rules + tray query)
       ...(s.bg ? { bg: s.bg } : {}),
     });
   }

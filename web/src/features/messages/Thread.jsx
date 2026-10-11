@@ -17,10 +17,19 @@ import {
 import { RichText } from '../post/PostText.jsx';
 import { Lightbox } from '../post/Lightbox.jsx';
 import { useConversationPeer } from './ConversationRow.jsx';
+import { VoiceNote, useVoiceRecorder, canRecordVoice, clock, VOICE_MAX_SECONDS } from './voice.jsx';
 
 const QUICK = ['❤️', '😂', '😮', '😢', '😡', '👍'];
 
 function dayKey(ms) { const d = new Date(ms); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }
+
+/** What a reply quotes when the original has no text. */
+function quoteText(m) {
+  if (m.text) return m.text;
+  if (m.audioUrl || m.attachments.some((a) => a.type === 'audio')) return '🎤';
+  if (m.mediaUrl || m.attachments.some((a) => a.type === 'image')) return '📷';
+  return '📎';
+}
 
 function Bubble({ m, mine, first, last, peer, onReply, onReact, onEdit, onDelete, actorId, onOpenImage }) {
   const reactions = Object.values(m.reactions || {});
@@ -28,6 +37,7 @@ function Bubble({ m, mine, first, last, peer, onReply, onReact, onEdit, onDelete
   const images = [m.mediaType === 'image' && m.mediaUrl, ...m.attachments.filter((a) => a.type === 'image').map((a) => a.url)].filter(Boolean);
   const uniqueImages = [...new Set(images)];
   const files = m.attachments.filter((a) => a.type !== 'image');
+  if (m.audioUrl && !files.some((f) => f.url === m.audioUrl)) files.push({ type: 'audio', url: m.audioUrl, duration: m.audioDuration });
   return (
     <div class={`msg${mine ? ' is-mine' : ''}${first ? ' is-first' : ''}${last ? ' is-last' : ''}`}>
       {!mine && <span class="msg-avatar">{last ? <Avatar src={m.senderAvatar || peer.avatar} name={m.senderName || peer.name} size={28} /> : null}</span>}
@@ -41,7 +51,7 @@ function Bubble({ m, mine, first, last, peer, onReply, onReact, onEdit, onDelete
               <>
                 {uniqueImages.map((u) => <button key={u} type="button" class="msg-img" onClick={() => onOpenImage(uniqueImages, uniqueImages.indexOf(u))}><img src={img(u, 480)} alt="" loading="lazy" referrerpolicy="no-referrer" /></button>)}
                 {files.map((f) => f.type === 'audio'
-                  ? <audio key={f.url} src={f.url} controls preload="none" class="msg-audio" />
+                  ? <VoiceNote key={f.url} url={f.url} duration={f.duration} mine={mine} />
                   : <a key={f.url} href={f.url} target="_blank" rel="noopener noreferrer" class="msg-file"><Icon name="download-simple" size={18} />{f.name || t('messages.attach')}</a>)}
                 {m.storyContext && <span class="msg-story"><Icon name="plus-circle" size={14} />{t('messages.storyReply')}</span>}
                 {m.text && <span class="msg-text"><RichText text={m.text} /></span>}
@@ -85,6 +95,7 @@ export function Thread({ cid, actorId, compact, header }) {
   const [sending, setSending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [viewer, setViewer] = useState(null);
+  const voice = useVoiceRecorder();
   const list = useRef(null);
   const input = useRef(null);
   const fileRef = useRef(null);
@@ -124,7 +135,7 @@ export function Thread({ cid, actorId, compact, header }) {
     setSending(true);
     try {
       if (editing) { await editMessage(cid, editing.id, value); setEditing(null); }
-      else await sendMessage(cid, { text: value, replyTo: replyTo ? { id: replyTo.id, text: replyTo.text, senderId: replyTo.senderId } : null, asBusiness });
+      else await sendMessage(cid, { text: value, replyTo: replyTo ? { id: replyTo.id, text: quoteText(replyTo), senderId: replyTo.senderId } : null, asBusiness });
       if (override === undefined) setText('');
       setReplyTo(null);
       atBottom.current = true;
@@ -146,6 +157,34 @@ export function Thread({ cid, actorId, compact, header }) {
     } catch (e) { toast.error(t(e.code === 'too-large' ? 'upload.tooLarge' : 'upload.failed')); }
     setUploading(false);
   };
+
+  const startVoice = async () => {
+    if (!canRecordVoice()) { toast.error(t('messages.micUnsupported')); return; }
+    try { await voice.start(); setTyping(cid, false, myActor); }
+    catch (e) { toast.error(t(e?.name === 'NotAllowedError' || e?.name === 'SecurityError' ? 'messages.micDenied' : 'messages.micUnsupported')); }
+  };
+  const sendVoice = async () => {
+    const res = await voice.stop();
+    if (!res) return;
+    if (res.duration < 1 || res.blob.size < 800) { toast(t('messages.voiceTooShort')); return; }
+    setUploading(true);
+    try {
+      const mime = res.type.split(';')[0] || 'audio/webm';
+      const ext = mime.includes('mp4') ? 'm4a' : mime.includes('ogg') ? 'ogg' : 'webm';
+      const file = new File([res.blob], `voice-${Date.now()}.${ext}`, { type: mime });
+      const url = await upload(file, { folder: 'messages', kind: 'video' });
+      await sendMessage(cid, {
+        attachments: [{ type: 'audio', url, name: t('messages.voice'), size: file.size, mime, duration: Math.round(res.duration) }],
+        replyTo: replyTo ? { id: replyTo.id, text: quoteText(replyTo), senderId: replyTo.senderId } : null,
+        asBusiness,
+      });
+      setReplyTo(null);
+      atBottom.current = true;
+    } catch (e) { toast.error(t(e.code === 'too-large' ? 'upload.tooLarge' : 'upload.failed')); }
+    setUploading(false);
+  };
+  // A recording stops and sends itself at the limit.
+  useEffect(() => { if (voice.recording && voice.seconds >= VOICE_MAX_SECONDS) sendVoice(); }, [voice.seconds]);
 
   if (conv === null) return <Empty icon="chat-circle-dots" title={t('messages.notFound')} text={t('messages.notFoundText')} />;
   const typingNames = Object.entries(conv?.typing || {}).filter(([k, v]) => k !== myActor && v && (!v.at || Date.now() - (v.at?.toMillis?.() || 0) < 15000)).map(([, v]) => v.name);
@@ -193,12 +232,24 @@ export function Thread({ cid, actorId, compact, header }) {
       {(replyTo || editing) && (
         <div class="thread-context">
           <Icon name={editing ? 'pencil-simple' : 'arrow-bend-up-left'} size={16} />
-          <span class="ellipsis">{editing ? t('messages.editing') : t('messages.replyingTo', { name: replyTo.senderId === me ? t('messages.you') : peer.name })}: {(editing || replyTo).text}</span>
+          <span class="ellipsis">{editing ? t('messages.editing') : t('messages.replyingTo', { name: replyTo.senderId === me ? t('messages.you') : peer.name })}: {editing ? editing.text : quoteText(replyTo)}</span>
           <IconButton icon="x" label={t('common.cancel')} size={28} onClick={() => { setReplyTo(null); if (editing) { setEditing(null); setText(''); } }} />
         </div>
       )}
+      {voice.recording ? (
+        <div class="thread-composer voice-rec" role="status" aria-live="polite">
+          <IconButton icon="trash" label={t('messages.voiceCancel')} size={36} class="tone-red" onClick={voice.cancel} />
+          <div class="voice-rec-bar">
+            <span class="voice-rec-dot" aria-hidden="true" />
+            <span class="voice-rec-time">{clock(voice.seconds)}</span>
+            <span class="voice-rec-label">{t('messages.recording')}</span>
+          </div>
+          <IconButton icon="paper-plane-right" label={t('messages.sendVoice')} size={36} class="tone-brand" onClick={sendVoice} />
+        </div>
+      ) : (
       <div class="thread-composer">
         <IconButton icon="image" label={t('messages.photo')} size={36} class="tone-brand" onClick={() => fileRef.current?.click()} disabled={uploading || !!editing} />
+        {!text.trim() && !editing && <IconButton icon="microphone" label={t('messages.voice')} size={36} class="tone-brand" onClick={startVoice} disabled={uploading} />}
         <div class="thread-input">
           <textarea
             ref={input}
@@ -216,6 +267,7 @@ export function Thread({ cid, actorId, compact, header }) {
           : <IconButton icon="thumbs-up" label="👍" size={36} class="tone-brand" onClick={() => send('👍')} disabled={sending} />}
         <input ref={fileRef} type="file" accept="image/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" hidden onChange={(e) => { attach(e.currentTarget.files); e.currentTarget.value = ''; }} />
       </div>
+      )}
       {viewer && <Lightbox media={viewer.media} index={viewer.idx} onClose={() => setViewer(null)} />}
     </div>
   );
