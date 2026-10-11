@@ -1,7 +1,7 @@
 {
   "name": "geohub-functions",
   "description": "GeoHub Cloud Functions — points economy, rewards, admin actions",
-  "engines": { "node": "20" },
+  "engines": { "node": "22" },
   "main": "index.js",
   "scripts": {
     "logs": "firebase functions:log"
